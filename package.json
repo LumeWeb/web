@@ -1,0 +1,30 @@
+{
+  "name": "@lumeweb/libs5",
+  "version": "0.1.0",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "gitea@git.lumeweb.com:LumeWeb/libs5.git"
+  },
+  "devDependencies": {
+    "@lumeweb/node-library-preset": "^0.2.7",
+    "presetter": "*"
+  },
+  "readme": "ERROR: No README data found!",
+  "_id": "@lumeweb/libs5@0.1.0",
+  "scripts": {
+    "prepare": "presetter bootstrap",
+    "build": "run build",
+    "semantic-release": "semantic-release"
+  },
+  "dependencies": {
+    "@noble/curves": "^1.1.0",
+    "@noble/hashes": "^1.3.1",
+    "level": "^8.0.0",
+    "multiformats": "^12.0.1",
+    "p-defer": "^4.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
