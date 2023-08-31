@@ -319,10 +319,10 @@ export class P2PService {
       this.logger.verbose(`[connect] ${connectionUri}`);
 
       const socket = await createTransportSocket(protocol, connectionUri);
-      await this.onNewPeer(
-        createTransportPeer(protocol, socket, [connectionUri]),
-        true,
-      );
+      const peer = createTransportPeer(protocol, socket, [connectionUri]);
+
+      peer.id = id;
+      await this.onNewPeer(peer, true);
     } catch (e) {
       if (retried) {
         return;
