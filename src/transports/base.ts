@@ -11,7 +11,9 @@ export abstract class BasePeer implements Peer {
   constructor({ socket, uris = [] }: PeerConstructorOptions) {
     this.connectionUris = uris.map((uri) => new URL(uri.toString()));
     this.challenge = new Uint8Array();
-    this._socket = socket;
+    if (socket) {
+      this._socket = socket;
+    }
   }
 
   private _id?: NodeId;
