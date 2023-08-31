@@ -36,6 +36,11 @@ export interface Logger {
   catched(e: any, context?: string | null): void;
 }
 
+export interface S5Services {
+  p2p: P2PService;
+  registry: RegistryService;
+}
+
 export interface S5Config {
   p2p?: {
     network: string;
@@ -47,10 +52,7 @@ export interface S5Config {
   logger: Logger;
   db: AbstractLevel<Uint8Array, string, Uint8Array>;
   cacheDb: AbstractLevel<Uint8Array, string, Uint8Array>;
-  services: {
-    p2p: P2PService;
-    registry: RegistryService;
-  };
+  services: S5Services;
 }
 export interface SignedMessage {
   nodeId: NodeId;

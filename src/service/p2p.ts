@@ -22,23 +22,18 @@ import Unpacker from "#serialization/unpack.js";
 import { ed25519 } from "@noble/curves/ed25519";
 import { AbstractLevel, AbstractSublevel } from "abstract-level";
 import StorageLocation from "#storage.js";
-import { addStorageLocation, stringifyNode } from "#node.js";
+import { addStorageLocation, S5Node, stringifyNode } from "#node.js";
 import { URL } from "url";
 import { Buffer } from "buffer";
 import { connect as tcpConnect, TcpPeer } from "../peer/tcp.js";
 import { connect as wsConnect, WebSocketPeer } from "../peer/webSocket.js";
 
 export class P2PService {
-  get peers(): Map<string, Peer> {
-    return this._peers;
-  }
-
-  private config: S5Config;
+  private node: S5Node;
   private logger: Logger;
   private nodeKeyPair: KeyPairEd25519;
   private localNodeId?: NodeId;
   private networkId?: string;
-  private _peers: Map<string, Peer> = new Map();
   private reconnectDelay: Map<string, number> = new Map();
   private selfConnectionUris: Array<URL> = [];
   private nodesDb?: AbstractSublevel<
@@ -47,25 +42,30 @@ export class P2PService {
     string,
     Uint8Array
   >;
-
   private hashQueryRoutingTable: Map<Multihash, Set<NodeId>> = new Map();
 
-  constructor(config: S5Config) {
-    this.config = config;
-    this.networkId = config?.p2p?.network;
-    this.nodeKeyPair = config.keyPair;
-    this.logger = config.logger;
+  constructor(node: S5Node) {
+    this.node = node;
+    this.networkId = node.config.p2p?.network;
+    this.nodeKeyPair = node.config.keyPair;
+    this.logger = node.logger;
 
-    config.services.p2p = this;
+    node.config.services.p2p = this;
+  }
+
+  private _peers: Map<string, Peer> = new Map();
+
+  get peers(): Map<string, Peer> {
+    return this._peers;
   }
 
   async init(): Promise<void> {
     this.localNodeId = new NodeId(this.nodeKeyPair.publicKey); // Define the NodeId constructor
-    this.nodesDb = this.config.db.sublevel<string, Uint8Array>("s5-nodes", {});
+    this.nodesDb = this.node.db.sublevel<string, Uint8Array>("s5-nodes", {});
   }
 
   async start(): Promise<void> {
-    const initialPeers = this.config?.p2p?.peers?.initial || [];
+    const initialPeers = this.node.config?.p2p?.peers?.initial || [];
 
     for (const p of initialPeers) {
       this.connectToNode([new URL(p)]);
@@ -114,8 +114,8 @@ export class P2PService {
           return;
         } else if (method === recordTypeRegistryEntry) {
           const sre =
-            this.config.services.registry.deserializeRegistryEntry(event);
-          await this.config.services.registry.set(sre, false, peer);
+            this.node.services.registry.deserializeRegistryEntry(event);
+          await this.node.services.registry.set(sre, false, peer);
           return;
         } else if (method === recordTypeStorageLocation) {
           const hash = new Multihash(event.subarray(1, 34));
@@ -157,7 +157,7 @@ export class P2PService {
             nodeId,
             location: new StorageLocation(type, parts, expiry),
             message: event,
-            config: this.config,
+            config: this.node.config,
           });
 
           const list =
@@ -361,26 +361,6 @@ export class P2PService {
     return calculateScore(map.get(1), map.get(2));
   }
 
-  private async _vote(nodeId: NodeId, upvote: boolean): Promise<void> {
-    const node = await this.nodesDb?.get(stringifyNode(nodeId));
-    const map = node
-      ? Unpacker.fromPacked(node).unpackMap()
-      : new Map<number, number>(
-          Object.entries({ 1: 0, 2: 0 }).map(([k, v]) => [+k, v]),
-        );
-
-    if (upvote) {
-      map.set(1, (map.get(1) ?? 0) + 1);
-    } else {
-      map.set(2, (map.get(2) ?? 0) + 1);
-    }
-
-    await this.nodesDb?.put(
-      stringifyNode(nodeId),
-      new Packer().pack(map).takeBytes(),
-    );
-  }
-
   async upvote(nodeId: NodeId): Promise<void> {
     await this._vote(nodeId, true);
   }
@@ -524,5 +504,25 @@ export class P2PService {
 
       await this.connectToNode(connectionUris, retried);
     }
+  }
+
+  private async _vote(nodeId: NodeId, upvote: boolean): Promise<void> {
+    const node = await this.nodesDb?.get(stringifyNode(nodeId));
+    const map = node
+      ? Unpacker.fromPacked(node).unpackMap()
+      : new Map<number, number>(
+          Object.entries({ 1: 0, 2: 0 }).map(([k, v]) => [+k, v]),
+        );
+
+    if (upvote) {
+      map.set(1, (map.get(1) ?? 0) + 1);
+    } else {
+      map.set(2, (map.get(2) ?? 0) + 1);
+    }
+
+    await this.nodesDb?.put(
+      stringifyNode(nodeId),
+      new Packer().pack(map).takeBytes(),
+    );
   }
 }

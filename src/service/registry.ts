@@ -14,7 +14,7 @@ import Packer from "#serialization/pack.js";
 import { Buffer } from "buffer";
 import { EventEmitter } from "events";
 import KeyPairEd25519 from "#ed25519.js";
-import { stringifyBytes } from "#node.js";
+import { S5Node, stringifyBytes } from "#node.js";
 
 interface SignedRegistryEntry {
   pk: Uint8Array; // public key with multicodec prefix
@@ -30,17 +30,17 @@ export class RegistryService {
     string,
     Uint8Array
   >;
-  private config: S5Config;
+  private node: S5Node;
   private logger: Logger;
   private streams: Map<string, EventEmitter> = new Map<string, EventEmitter>();
 
-  constructor(config: S5Config) {
-    this.config = config;
-    this.logger = this.config.logger;
+  constructor(node: S5Node) {
+    this.node = node;
+    this.logger = this.node.logger;
   }
 
   async init(): Promise<void> {
-    this.db = this.config.db.sublevel<string, Uint8Array>("s5-registry-db", {});
+    this.db = this.node.db.sublevel<string, Uint8Array>("s5-registry-db", {});
   }
 
   async set(
@@ -106,7 +106,7 @@ export class RegistryService {
     this.logger.verbose("[registry] broadcastEntry");
     const updateMessage = serializeRegistryEntry(sre);
 
-    for (const p of Object.values(this.config.services.p2p.peers)) {
+    for (const p of Object.values(this.node.services.p2p.peers)) {
       if (receivedFrom == null || p.id !== receivedFrom.id) {
         p.sendMessage(updateMessage);
       }
@@ -122,7 +122,7 @@ export class RegistryService {
     const req = p.takeBytes();
 
     // TODO: Use shard system if there are more than X peers
-    for (const peer of Object.values(this.config.services.p2p.peers)) {
+    for (const peer of Object.values(this.node.services.p2p.peers)) {
       peer.sendMessage(req);
     }
   }
