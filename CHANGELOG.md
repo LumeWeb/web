@@ -1,3 +1,10 @@
+# [0.1.0-develop.13](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.12...v0.1.0-develop.13) (2023-08-31)
+
+
+### Bug Fixes
+
+* only set socket if passed ([a7b3129](https://git.lumeweb.com/LumeWeb/libs5/commit/a7b31294263cb2631824fd3b643e8b9e5e75bac3))
+
 # [0.1.0-develop.12](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.11...v0.1.0-develop.12) (2023-08-31)
 
 # [0.1.0-develop.11](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.10...v0.1.0-develop.11) (2023-08-31)
