@@ -1,6 +1,6 @@
 import { Multihash } from "./multihash.js";
 import NodeId from "./nodeId.js";
-import { Logger, S5Config, S5Services } from "./types.js";
+import { Logger, S5Config, S5NodeConfig, S5Services } from "./types.js";
 import Unpacker from "./serialization/unpack.js";
 import Packer from "./serialization/pack.js";
 import StorageLocation from "./storage.js";
@@ -25,18 +25,6 @@ const DEFAULT_LOGGER = {
     console.error(e, context);
   },
 };
-
-export interface S5NodeConfig {
-  p2p?: {
-    network: string;
-    peers?: {
-      initial?: string[];
-    };
-  };
-  keyPair: KeyPairEd25519;
-  db: AbstractLevel<Uint8Array, string, Uint8Array>;
-  logger?: Logger;
-}
 
 export class S5Node {
   private _nodeConfig: S5NodeConfig;

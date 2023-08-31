@@ -51,7 +51,7 @@ export interface S5Services {
 
 export interface S5Config {
   p2p?: {
-    network: string;
+    network?: string;
     peers?: {
       initial?: string[];
     };
@@ -62,6 +62,19 @@ export interface S5Config {
   cacheDb: AbstractLevel<Uint8Array, string, Uint8Array>;
   services: S5Services;
 }
+
+export interface S5NodeConfig {
+  p2p?: {
+    network?: string;
+    peers?: {
+      initial?: string[];
+    };
+  };
+  keyPair: KeyPairEd25519;
+  db: AbstractLevel<Uint8Array, string, Uint8Array>;
+  logger?: Logger;
+}
+
 export interface SignedMessage {
   nodeId: NodeId;
   message: Uint8Array;
