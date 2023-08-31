@@ -10,6 +10,7 @@ export default async function (
   data: Unpacker,
   rawData: Uint8Array,
 ) {
+  const p2p = node.services.p2p;
   const p = new Packer();
   p.packInt(protocolMethodHandshakeDone);
   p.packBinary(data.unpackBinary());
@@ -18,16 +19,16 @@ export default async function (
     peerNetworkId = data.unpackString();
   } catch {}
 
-  if (this.networkId && peerNetworkId !== this.networkId) {
+  if (node.services.p2p.networkId && peerNetworkId !== p2p.networkId) {
     throw `Peer is in different network: ${peerNetworkId}`;
   }
 
   p.packInt(supportedFeatures);
-  p.packInt(node.services.p2p.selfConnectionUris.length);
-  for (const uri of this.selfConnectionUris) {
+  p.packInt(p2p.selfConnectionUris.length);
+  for (const uri of p2p.selfConnectionUris) {
     p.packString(uri.toString());
   }
   // TODO Protocol version
   // p.packInt(protocolVersion);
-  peer.sendMessage(await this.signMessageSimple(p.takeBytes()));
+  peer.sendMessage(await p2p.signMessageSimple(p.takeBytes()));
 }

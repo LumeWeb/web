@@ -14,6 +14,7 @@ export default async function (
   data: Unpacker,
   rawData: Uint8Array,
 ) {
+  const p2p = node.services.p2p;
   const hash = new Multihash(rawData.subarray(1, 34));
   const type = rawData[34];
   const expiry = decodeEndian(rawData.subarray(35, 39));
@@ -53,10 +54,10 @@ export default async function (
     nodeId,
     location: new StorageLocation(type, parts, expiry),
     message: rawData,
-    config: this.node.config,
+    config: node.config,
   });
 
-  const list = this.hashQueryRoutingTable.get(hash) || new Set<NodeId>();
+  const list = p2p.hashQueryRoutingTable.get(hash) || new Set<NodeId>();
   for (const peerId of list) {
     if (peerId.equals(nodeId)) {
       continue;
@@ -65,11 +66,11 @@ export default async function (
       continue;
     }
 
-    if (this._peers.has(peerId.toString())) {
+    if (p2p.peers.has(peerId.toString())) {
       try {
-        this._peers.get(peerId.toString())?.sendMessage(event);
+        p2p.peers.get(peerId.toString())?.sendMessage(rawData);
       } catch (e) {
-        this.logger.catched(e);
+        node.logger.catched(e);
       }
     }
   }

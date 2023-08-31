@@ -11,6 +11,7 @@ export default async function (
   message: SignedMessage,
   verifyId: boolean,
 ) {
+  const p2p = node.services.p2p;
   const challenge = data.unpackBinary();
 
   if (!equalBytes(peer.challenge, challenge)) {
@@ -35,8 +36,8 @@ export default async function (
     throw "Remote node does not support required features";
   }
 
-  node.services.p2p.peers.set(peer.id.toString(), peer);
-  node.services.p2p.reconnectDelay.set(peer.id.toString(), 1);
+  p2p.peers.set(peer.id.toString(), peer);
+  p2p.reconnectDelay.set(peer.id.toString(), 1);
 
   const connectionUrisCount = data.unpackInt() as number;
 
@@ -45,21 +46,18 @@ export default async function (
     peer.connectionUris.push(new URL(data.unpackString() as string));
   }
 
-  this.logger.info(
+  node.logger.info(
     `[+] ${peer.id.toString()} (${peer.renderLocationUri().toString()})`,
   );
 
-  node.services.p2p.sendPublicPeersToPeer(
-    peer,
-    Array.from(node.services.p2p.peers.values()),
-  );
-  for (const p of this._peers.values()) {
+  p2p.sendPublicPeersToPeer(peer, Array.from(p2p.peers.values()));
+  for (const p of p2p.peers.values()) {
     if (p.id.equals(peer.id)) {
       continue;
     }
 
     if (p.isConnected) {
-      this.sendPublicPeersToPeer(p, [peer]);
+      p2p.sendPublicPeersToPeer(p, [peer]);
     }
   }
 }

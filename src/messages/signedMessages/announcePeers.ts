@@ -14,6 +14,7 @@ export default async function (
 ) {
   const length = data.unpackInt() as number;
   for (let i = 0; i < length; i++) {
+    const p2p = node.services.p2p;
     const peerIdBinary = data.unpackBinary();
     const id = new NodeId(peerIdBinary);
 
@@ -31,8 +32,8 @@ export default async function (
       // TODO Fully support multiple connection uris
       const uri = new URL(connectionUris[0].toString());
       uri.username = id.toBase58();
-      if (!this.reconnectDelay.has(NodeId.decode(uri.username).toString())) {
-        node.services.p2p.connectToNode([uri]);
+      if (!p2p.reconnectDelay.has(NodeId.decode(uri.username).toString())) {
+        p2p.connectToNode([uri]);
       }
     }
   }
