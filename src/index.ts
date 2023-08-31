@@ -10,6 +10,7 @@ export {
   createTransportSocket,
   isTransport,
   createTransportPeer,
+  BasePeer,
 } from "./transports/index.js";
 export type { SignedRegistryEntry };
 export { NodeId };

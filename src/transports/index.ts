@@ -3,6 +3,7 @@ import { TcpPeer } from "#transports/tcp.js";
 import { WebSocketPeer } from "#transports/webSocket.js";
 import { PeerStatic } from "#types.js";
 import isNode from "detect-node";
+import { BasePeer } from "#transports/base.js";
 const transports = new Map<string, PeerStatic>();
 
 export function registerTransport(type: string, transport: PeerStatic) {
@@ -36,6 +37,8 @@ export function createTransportPeer(
 
   return new transport(socket, connectionUris);
 }
+
+export { BasePeer };
 
 if (isNode) {
   registerTransport("tcp", TcpPeer);

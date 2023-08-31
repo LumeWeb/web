@@ -1,32 +1,11 @@
 import { Logger, Peer } from "../types.js";
-import NodeId from "../nodeId.js";
 import * as net from "net";
 import { URL } from "url";
 import { decodeEndian } from "../util.js";
 import * as console from "console";
+import { BasePeer } from "#transports/base.js";
 
-export class TcpPeer implements Peer {
-  connectionUris: Array<URL>;
-  isConnected: boolean = false;
-  challenge: Uint8Array;
-  private _socket: net.Socket;
-
-  constructor(_socket: net.Socket, connectionUris: URL[]) {
-    this.connectionUris = connectionUris.map((uri) => new URL(uri.toString()));
-    this.challenge = new Uint8Array();
-    this._socket = _socket;
-  }
-
-  private _id?: NodeId;
-
-  get id(): NodeId {
-    return this._id as NodeId;
-  }
-
-  set id(value: NodeId) {
-    this._id = value;
-  }
-
+export class TcpPeer extends BasePeer implements Peer {
   sendMessage(message: Uint8Array): void {
     this._socket.write(message);
   }
