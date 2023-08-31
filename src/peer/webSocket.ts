@@ -1,6 +1,7 @@
 import { Logger, Peer } from "../types.js";
 import NodeId from "../nodeId.js";
 import { URL } from "url";
+import { WebSocket } from "ws";
 
 export class WebSocketPeer implements Peer {
   connectionUris: Array<URL>;
