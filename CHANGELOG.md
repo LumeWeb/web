@@ -1,3 +1,10 @@
+# [0.1.0-develop.2](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.1...v0.1.0-develop.2) (2023-08-31)
+
+
+### Bug Fixes
+
+* add main to package.json ([4672112](https://git.lumeweb.com/LumeWeb/libs5/commit/46721129f3a9b6c03511e4c4e5404ff9da7d2b77))
+
 # [0.1.0-develop.1](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.0.1...v0.1.0-develop.1) (2023-08-31)
 
 
