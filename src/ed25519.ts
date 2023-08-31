@@ -1,6 +1,6 @@
 import { ed25519 } from "@noble/curves/ed25519";
 import { concatBytes } from "@noble/curves/abstract/utils";
-import { mkeyEd25519 } from "#constants.js";
+import { mkeyEd25519 } from "./constants.js";
 
 export default class KeyPairEd25519 {
   private _bytes: Uint8Array;
