@@ -32,7 +32,7 @@ export interface Peer {
 
 // Define the static side of the class
 export interface PeerStatic {
-  new (_socket: any, uri: URL[]): Peer;
+  new ({ socket, uri }: { socket: any; uri: URL[] }): Peer;
   connect(uri: URL): Promise<any>;
 }
 

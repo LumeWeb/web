@@ -3,15 +3,15 @@ import { URL } from "url";
 import NodeId from "#nodeId.js";
 
 export abstract class BasePeer implements Peer {
-  connectionUris: Array<URL>;
+  connectionUris: URL[];
   isConnected: boolean = false;
   challenge: Uint8Array;
   protected _socket: any;
 
-  constructor(_socket: any, connectionUris: URL[]) {
-    this.connectionUris = connectionUris.map((uri) => new URL(uri.toString()));
+  constructor({ socket, uri }: { socket: any; uri: URL[] }) {
+    this.connectionUris = uri.map((uri) => new URL(uri.toString()));
     this.challenge = new Uint8Array();
-    this._socket = _socket;
+    this._socket = socket;
   }
 
   private _id?: NodeId;
