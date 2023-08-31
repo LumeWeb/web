@@ -12,7 +12,7 @@ export default async function (
 ) {
   const sm = await node.services.p2p.unpackAndVerifySignature(data);
   const u = Unpacker.fromPacked(sm.message);
-  const method = data.unpackInt();
+  const method = u.unpackInt();
 
   if (method !== null && messages.has(method)) {
     await messages.get(method)?.(node, peer, u, sm, verifyId);
