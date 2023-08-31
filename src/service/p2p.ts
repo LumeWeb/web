@@ -19,7 +19,7 @@ import { calculateScore, decodeEndian, encodeEndian } from "#util.js";
 import Packer from "#serialization/pack.js";
 import Unpacker from "#serialization/unpack.js";
 import { ed25519 } from "@noble/curves/ed25519";
-import { AbstractLevel } from "abstract-level";
+import { AbstractLevel, AbstractSublevel } from "abstract-level";
 import StorageLocation from "#storage.js";
 import { addStorageLocation, stringifyNode } from "#node.js";
 import { URL } from "url";
