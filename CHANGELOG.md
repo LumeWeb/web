@@ -1,3 +1,10 @@
+# [0.1.0-develop.6](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.5...v0.1.0-develop.6) (2023-08-31)
+
+
+### Bug Fixes
+
+* add createKeyPair factory that defaults to a random key ([42ef635](https://git.lumeweb.com/LumeWeb/libs5/commit/42ef635fb590e554e2c11565ce3255ed7ce3e2a6))
+
 # [0.1.0-develop.5](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.4...v0.1.0-develop.5) (2023-08-31)
 
 # [0.1.0-develop.4](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.3...v0.1.0-develop.4) (2023-08-31)
