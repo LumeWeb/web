@@ -201,10 +201,20 @@ export class RegistryService {
     const val = await this.db?.get(stringifyBytes(pk));
 
     if (val) {
-      return deserializeRegistryEntry(val);
+      return this.deserializeRegistryEntry(val);
     }
 
     return null;
+  }
+
+  public deserializeRegistryEntry(event: Uint8Array): SignedRegistryEntry {
+    const dataLength = event[42];
+    return {
+      pk: event.slice(1, 34),
+      revision: decodeEndian(event.slice(34, 42)),
+      data: event.slice(43, 43 + dataLength),
+      signature: event.slice(43 + dataLength),
+    };
   }
 }
 
@@ -227,14 +237,4 @@ function serializeRegistryEntry(sre: SignedRegistryEntry): Uint8Array {
     ...sre.data,
     ...sre.signature,
   ]);
-}
-
-function deserializeRegistryEntry(event: Uint8Array): SignedRegistryEntry {
-  const dataLength = event[42];
-  return {
-    pk: event.slice(1, 34),
-    revision: decodeEndian(event.slice(34, 42)),
-    data: event.slice(43, 43 + dataLength),
-    signature: event.slice(43 + dataLength),
-  };
 }
