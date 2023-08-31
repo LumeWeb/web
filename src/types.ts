@@ -1,8 +1,8 @@
 import NodeId from "./nodeId.js";
 import KeyPairEd25519 from "#ed25519.js";
-import { Level } from "level";
 import { AbstractLevel } from "abstract-level";
-import { P2PService } from "#service/p2p.js";
+import { P2PService } from "./service/p2p.js";
+import { RegistryService } from "./service/registry.js";
 
 export interface Peer {
   id: NodeId;
@@ -49,6 +49,7 @@ export interface S5Config {
   cacheDb: AbstractLevel<Uint8Array, string, Uint8Array>;
   services: {
     p2p: P2PService;
+    registry: RegistryService;
   };
 }
 export interface SignedMessage {
