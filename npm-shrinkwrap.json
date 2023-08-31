@@ -1,12 +1,12 @@
 {
   "name": "@lumeweb/libs5",
-  "version": "0.1.0-develop.13",
+  "version": "0.1.0-develop.14",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
       "name": "@lumeweb/libs5",
-      "version": "0.1.0-develop.13",
+      "version": "0.1.0-develop.14",
       "dependencies": {
         "@noble/curves": "^1.1.0",
         "@noble/hashes": "^1.3.1",

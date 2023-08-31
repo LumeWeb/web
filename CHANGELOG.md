@@ -1,3 +1,10 @@
+# [0.1.0-develop.14](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.13...v0.1.0-develop.14) (2023-08-31)
+
+
+### Bug Fixes
+
+* make uris optional ([a4c5dd5](https://git.lumeweb.com/LumeWeb/libs5/commit/a4c5dd5b5b1c7bef14eccafbb2e3f4c93290726c))
+
 # [0.1.0-develop.13](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.12...v0.1.0-develop.13) (2023-08-31)
 
 
