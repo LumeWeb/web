@@ -1,3 +1,16 @@
+# [0.1.0-develop.4](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.3...v0.1.0-develop.4) (2023-08-31)
+
+
+### Bug Fixes
+
+* add getter for networkId and hashQueryRoutingTable ([6ebc477](https://git.lumeweb.com/LumeWeb/libs5/commit/6ebc477449ca8893a2e5e37310575e0c5e7dc444))
+* ed25519.sign arguments are wrong order ([5585907](https://git.lumeweb.com/LumeWeb/libs5/commit/5585907591c0275de5a229db99584c6ea3eb12d2))
+* fix object references ([e342982](https://git.lumeweb.com/LumeWeb/libs5/commit/e342982163fe957be516f9fc07afdedd440a76f9))
+* missing p2p object on S5Config ([b5e491b](https://git.lumeweb.com/LumeWeb/libs5/commit/b5e491b01a7a91fa2dd518e0ea260ac0b50c3a60))
+* need to store peer, set the id the pass it to onNewPeer ([7afc759](https://git.lumeweb.com/LumeWeb/libs5/commit/7afc759ece228b148f56d0e3203f0406f4820ffa))
+* need to use unpacked data from signed message ([35ebf74](https://git.lumeweb.com/LumeWeb/libs5/commit/35ebf74f4ca55281c1a402d058aad79b7ca86199))
+* update registered messages ([87d1e6b](https://git.lumeweb.com/LumeWeb/libs5/commit/87d1e6b0b4f4b7ec7ae9af85b9afae5c4eaa8630))
+
 # [0.1.0-develop.3](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.2...v0.1.0-develop.3) (2023-08-31)
 
 # [0.1.0-develop.2](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.1...v0.1.0-develop.2) (2023-08-31)
