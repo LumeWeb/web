@@ -11,6 +11,7 @@ import {
   protocolMethodHandshakeOpen,
   protocolMethodHashQuery,
   protocolMethodSignedMessage,
+  recordTypeRegistryEntry,
   recordTypeStorageLocation,
   storageLocationTypeFull,
 } from "../constants.js";
@@ -111,11 +112,12 @@ export class P2PService {
           // p.packInt(protocolVersion);
           peer.sendMessage(await this.signMessageSimple(p.takeBytes()));
           return;
-        } /*else if (method === recordTypeRegistryEntry) {
-          const sre = node.registry.deserializeRegistryEntry(event);
-          await node.registry.set(sre, { receivedFrom: peer });
+        } else if (method === recordTypeRegistryEntry) {
+          const sre =
+            this.config.services.registry.deserializeRegistryEntry(event);
+          await this.config.services.registry.set(sre, false, peer);
           return;
-        }*/ else if (method === recordTypeStorageLocation) {
+        } else if (method === recordTypeStorageLocation) {
           const hash = new Multihash(event.subarray(1, 34));
           const type = event[34];
           const expiry = decodeEndian(event.subarray(35, 39));
