@@ -466,8 +466,8 @@ export class P2PService {
     unsupported.protocol = "unsupported";
 
     const connectionUri =
-      connectionUris.find((uri) => ["ws", "wss"].includes(uri.protocol)) ||
-      connectionUris.find((uri) => uri.protocol === "tcp") ||
+      connectionUris.find((uri) => ["ws:", "wss:"].includes(uri.protocol)) ||
+      connectionUris.find((uri) => uri.protocol === "tcp:") ||
       unsupported;
 
     if (connectionUri.protocol === "unsupported") {
@@ -497,8 +497,8 @@ export class P2PService {
 
     try {
       this.logger.verbose(`[connect] ${connectionUri}`);
-      if (protocol === "tcp") {
-        const ip = connectionUri.host;
+      if (protocol === "tcp:") {
+        const ip = connectionUri.hostname;
         const port = parseInt(connectionUri.port);
         const socket = await tcpConnect(port, ip);
 
