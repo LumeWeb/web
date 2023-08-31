@@ -1,3 +1,10 @@
+# [0.1.0-develop.7](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.6...v0.1.0-develop.7) (2023-08-31)
+
+
+### Bug Fixes
+
+* use URL type from url package not global URL ([0af8bb3](https://git.lumeweb.com/LumeWeb/libs5/commit/0af8bb3469b363caa85a62d3ec6e27f23f261fab))
+
 # [0.1.0-develop.6](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.5...v0.1.0-develop.6) (2023-08-31)
 
 
