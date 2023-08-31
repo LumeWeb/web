@@ -3,6 +3,7 @@ import type { SignedRegistryEntry } from "#service/registry.js";
 import { ed25519 } from "@noble/curves/ed25519";
 import KeyPairEd25519 from "#ed25519.js";
 import { S5NodeConfig } from "./types.js";
+import NodeId from "#nodeId.js";
 
 export * from "./types.js";
 export {
@@ -11,6 +12,7 @@ export {
   createTransportPeer,
 } from "./transports/index.js";
 export type { SignedRegistryEntry };
+export { NodeId };
 
 export function createNode(config: S5NodeConfig) {
   return new S5Node(config);
