@@ -98,7 +98,7 @@ export class P2PService {
             peerNetworkId = u.unpackString();
           } catch {}
 
-          if (peerNetworkId !== this.networkId) {
+          if (this.networkId && peerNetworkId !== this.networkId) {
             throw `Peer is in different network: ${peerNetworkId}`;
           }
 
