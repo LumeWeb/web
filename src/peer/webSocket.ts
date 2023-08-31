@@ -44,7 +44,7 @@ export class WebSocketPeer implements Peer {
     this._socket.addEventListener(
       "message",
       async (event: MessageEvent<any>) => {
-        await callback(event);
+        await callback(event.data);
       },
     );
 
