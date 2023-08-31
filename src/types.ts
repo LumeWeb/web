@@ -9,7 +9,6 @@ export interface Peer {
   connectionUris: Array<URL>;
   isConnected: boolean;
   challenge: Uint8Array;
-
   sendMessage(message: Uint8Array): void;
 
   listenForMessages(
@@ -26,6 +25,12 @@ export interface Peer {
   ): void;
 
   renderLocationUri(): string;
+}
+
+// Define the static side of the class
+export interface PeerStatic {
+  new (_socket: any, uri: URL[]): Peer;
+  connect(uri: URL): Promise<any>;
 }
 
 export interface Logger {

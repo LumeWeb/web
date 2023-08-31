@@ -25,9 +25,11 @@ import StorageLocation from "#storage.js";
 import { addStorageLocation, S5Node, stringifyNode } from "#node.js";
 import { URL } from "url";
 import { Buffer } from "buffer";
-import { connect as tcpConnect, TcpPeer } from "../peer/tcp.js";
-import { connect as wsConnect, WebSocketPeer } from "../peer/webSocket.js";
-
+import {
+  createTransportPeer,
+  createTransportSocket,
+  isTransport,
+} from "#transports/index.js";
 export class P2PService {
   private node: S5Node;
   private logger: Logger;
@@ -199,7 +201,7 @@ export class P2PService {
               peer.id = pId;
             } else {
               if (!peer.id.equals(pId)) {
-                throw "Invalid peer id on initial list";
+                throw "Invalid transports id on initial list";
               }
             }
 
@@ -271,7 +273,7 @@ export class P2PService {
           const pk = u.unpackBinary();
           const sre = node.registry.getFromDB(pk);
           if (sre !== null) {
-            peer.sendMessage(node.registry.serializeRegistryEntry(sre));
+            transports.sendMessage(node.registry.serializeRegistryEntry(sre));
           }
         }*/
       },
@@ -456,7 +458,7 @@ export class P2PService {
       );
     }
 
-    const protocol = connectionUri.protocol;
+    const protocol = connectionUri.protocol.replace(":", "");
 
     if (!connectionUri.username) {
       throw new Error("Connection URI does not contain node id");
@@ -475,21 +477,12 @@ export class P2PService {
 
     try {
       this.logger.verbose(`[connect] ${connectionUri}`);
-      if (protocol === "tcp:") {
-        const ip = connectionUri.hostname;
-        const port = parseInt(connectionUri.port);
-        const socket = await tcpConnect(port, ip);
 
-        const peer = new TcpPeer(socket, [connectionUri]);
-        peer.id = id;
-
-        await this.onNewPeer(peer, true);
-      } else {
-        const channel = await wsConnect(connectionUri.toString());
-        const peer = new WebSocketPeer(channel, [connectionUri]);
-        peer.id = id;
-        await this.onNewPeer(peer, true);
-      }
+      const socket = await createTransportSocket(protocol, connectionUri);
+      await this.onNewPeer(
+        createTransportPeer(protocol, socket, [connectionUri]),
+        true,
+      );
     } catch (e) {
       if (retried) {
         return;

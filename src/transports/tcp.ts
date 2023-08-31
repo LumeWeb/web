@@ -3,6 +3,7 @@ import NodeId from "../nodeId.js";
 import * as net from "net";
 import { URL } from "url";
 import { decodeEndian } from "../util.js";
+import * as console from "console";
 
 export class TcpPeer implements Peer {
   connectionUris: Array<URL>;
@@ -79,15 +80,17 @@ export class TcpPeer implements Peer {
       this._socket.on("error", onError);
     }
   }
-}
 
-export async function connect(port: number, host: string): Promise<net.Socket> {
-  return new Promise((resolve, reject) => {
-    const socket = net.connect(port, host, () => {
-      resolve(socket);
+  public static async connect(uri: URL): Promise<net.Socket> {
+    const host = uri.hostname;
+    const port = parseInt(uri.port);
+    return new Promise((resolve, reject) => {
+      const socket = net.connect(port, host, () => {
+        resolve(socket);
+      });
+      socket.on("error", (err) => {
+        reject(err);
+      });
     });
-    socket.on("error", (err) => {
-      reject(err);
-    });
-  });
+  }
 }

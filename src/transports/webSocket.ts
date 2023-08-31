@@ -56,15 +56,16 @@ export class WebSocketPeer implements Peer {
       this._socket.addEventListener("error", onError);
     }
   }
-}
-export async function connect(uri: string): Promise<WebSocket> {
-  return new Promise((resolve, reject) => {
-    const socket = new WebSocket(uri);
-    socket.addEventListener("open", () => {
-      resolve(socket);
+
+  public static async connect(uri: URL): Promise<WebSocket> {
+    return new Promise((resolve, reject) => {
+      const socket = new WebSocket(uri);
+      socket.addEventListener("open", () => {
+        resolve(socket);
+      });
+      socket.addEventListener("error", (err) => {
+        reject(err);
+      });
     });
-    socket.addEventListener("error", (err) => {
-      reject(err);
-    });
-  });
+  }
 }
