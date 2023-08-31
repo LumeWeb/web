@@ -10,8 +10,6 @@ export default class KeyPairEd25519 {
   }
 
   public get publicKey(): Uint8Array {
-    ed25519.getPublicKey(this._bytes);
-
     return concatBytes(
       Uint8Array.from([mkeyEd25519]),
       ed25519.getPublicKey(this._bytes),
