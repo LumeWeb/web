@@ -1,7 +1,7 @@
 import { URL } from "url";
 import { TcpPeer } from "#transports/tcp.js";
 import { WebSocketPeer } from "#transports/webSocket.js";
-import { PeerStatic } from "#types.js";
+import { PeerConstructorOptions, PeerStatic } from "#types.js";
 import isNode from "detect-node";
 import { BasePeer } from "#transports/base.js";
 const transports = new Map<string, PeerStatic>();
@@ -26,8 +26,7 @@ export function createTransportSocket(type: string, uri: URL) {
 
 export function createTransportPeer(
   type: string,
-  socket: any,
-  connectionUris: URL[] = [],
+  params: PeerConstructorOptions,
 ) {
   if (!isTransport(type)) {
     throw new Error(`transport ${type} does not exist`);
@@ -35,7 +34,7 @@ export function createTransportPeer(
 
   const transport = transports.get(type) as PeerStatic;
 
-  return new transport(socket, connectionUris);
+  return new transport(params);
 }
 
 export { BasePeer };
