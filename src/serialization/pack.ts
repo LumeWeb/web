@@ -18,6 +18,7 @@ export default class Packer {
   private _newBuf(size: number) {
     this._buf = Buffer.alloc(size);
     this._d = new DataView(this._buf.buffer, this._buf.byteOffset);
+    this._offset = 0;
   }
 
   private _nextBuf() {
