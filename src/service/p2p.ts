@@ -462,7 +462,7 @@ export class P2PService {
   }
 
   async connectToNode(connectionUris: URL[]): Promise<void> {
-    const unsupported = new URL("");
+    const unsupported = new URL("http://0.0.0.0");
     unsupported.protocol = "unsupported";
 
     const connectionUri =
