@@ -507,10 +507,7 @@ export class P2PService {
 
         await this.onNewPeer(peer, true);
       } else {
-        const locationUri = new URL(connectionUri.toString());
-        locationUri.username = "";
-
-        const channel = await wsConnect(locationUri.toString());
+        const channel = await wsConnect(connectionUri.toString());
         const peer = new WebSocketPeer(channel, [connectionUri]);
         peer.id = id;
         await this.onNewPeer(peer, true);
