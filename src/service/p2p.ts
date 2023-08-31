@@ -170,9 +170,9 @@ export class P2PService {
               continue;
             }
 
-            if (this._peers.has(peerId)) {
+            if (this._peers.has(peerId.toString())) {
               try {
-                this._peers.get(peerId)?.sendMessage(event);
+                this._peers.get(peerId.toString())?.sendMessage(event);
               } catch (e) {
                 this.logger.catched(e);
               }
@@ -211,8 +211,8 @@ export class P2PService {
               throw "Remote node does not support required features";
             }
 
-            this._peers.set(peer.id, peer);
-            this.reconnectDelay.set(peer.id, 1);
+            this._peers.set(peer.id.toString(), peer);
+            this.reconnectDelay.set(peer.id.toString(), 1);
 
             const connectionUrisCount = u.unpackInt() as number;
 
@@ -257,7 +257,11 @@ export class P2PService {
                 // TODO Fully support multiple connection uris
                 const uri = new URL(connectionUris[0].toString());
                 uri.username = id.toBase58();
-                if (!this.reconnectDelay.has(NodeId.decode(uri.username))) {
+                if (
+                  !this.reconnectDelay.has(
+                    NodeId.decode(uri.username).toString(),
+                  )
+                ) {
                   this.connectToNode([uri]);
                 }
               }
@@ -274,8 +278,8 @@ export class P2PService {
       {
         onDone: async () => {
           try {
-            if (this._peers.has(peer.id)) {
-              this._peers.delete(peer.id);
+            if (this._peers.has(peer.id.toString())) {
+              this._peers.delete(peer.id.toString());
               this.logger.info(
                 `[-] ${peer.id.toString()} (${peer
                   .renderLocationUri()
@@ -480,7 +484,10 @@ export class P2PService {
 
     const id = NodeId.decode(connectionUri.username);
 
-    this.reconnectDelay.set(id, this.reconnectDelay.get(id) || 1);
+    this.reconnectDelay.set(
+      id.toString(),
+      this.reconnectDelay.get(id.toString()) || 1,
+    );
 
     if (id.equals(this.localNodeId)) {
       return;
