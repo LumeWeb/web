@@ -68,7 +68,7 @@ export class RegistryService {
         throw new Error("Data too long");
       }
 
-      const isValid = verifyRegistryEntry(sre);
+      const isValid = this.verifyRegistryEntry(sre);
       if (!isValid) {
         throw new Error("Invalid signature found");
       }
@@ -81,7 +81,7 @@ export class RegistryService {
         if (existingEntry.revision === sre.revision) {
           return;
         } else if (existingEntry.revision > sre.revision) {
-          const updateMessage = serializeRegistryEntry(existingEntry);
+          const updateMessage = this.serializeRegistryEntry(existingEntry);
           receivedFrom.sendMessage(updateMessage);
           return;
         }
@@ -95,7 +95,7 @@ export class RegistryService {
     const key = new Multihash(sre.pk);
     this.streams.get(key.toString())?.emit("event", sre);
 
-    this.db?.put(stringifyBytes(sre.pk), serializeRegistryEntry(sre));
+    this.db?.put(stringifyBytes(sre.pk), this.serializeRegistryEntry(sre));
 
     this.broadcastEntry(sre, receivedFrom);
   }
@@ -104,7 +104,7 @@ export class RegistryService {
   // TODO: If there are more than X peers, only broadcast to subscribed nodes (routing table) and shard-nodes (256)
   broadcastEntry(sre: SignedRegistryEntry, receivedFrom?: Peer): void {
     this.logger.verbose("[registry] broadcastEntry");
-    const updateMessage = serializeRegistryEntry(sre);
+    const updateMessage = this.serializeRegistryEntry(sre);
 
     for (const p of Object.values(this.node.services.p2p.peers)) {
       if (receivedFrom == null || p.id !== receivedFrom.id) {
@@ -216,25 +216,25 @@ export class RegistryService {
       signature: event.slice(43 + dataLength),
     };
   }
-}
 
-function verifyRegistryEntry(sre: SignedRegistryEntry): boolean {
-  const list: Uint8Array = Uint8Array.from([
-    recordTypeRegistryEntry,
-    ...encodeEndian(sre.revision, 8),
-    sre.data.length, // 1 byte
-    ...sre.data,
-  ]);
+  public verifyRegistryEntry(sre: SignedRegistryEntry): boolean {
+    const list: Uint8Array = Uint8Array.from([
+      recordTypeRegistryEntry,
+      ...encodeEndian(sre.revision, 8),
+      sre.data.length, // 1 byte
+      ...sre.data,
+    ]);
 
-  return ed25519.verify(list, sre.signature, sre.pk.slice(1));
-}
-function serializeRegistryEntry(sre: SignedRegistryEntry): Uint8Array {
-  return Uint8Array.from([
-    recordTypeRegistryEntry,
-    ...sre.pk,
-    ...encodeEndian(sre.revision, 8),
-    sre.data.length,
-    ...sre.data,
-    ...sre.signature,
-  ]);
+    return ed25519.verify(list, sre.signature, sre.pk.slice(1));
+  }
+  public serializeRegistryEntry(sre: SignedRegistryEntry): Uint8Array {
+    return Uint8Array.from([
+      recordTypeRegistryEntry,
+      ...sre.pk,
+      ...encodeEndian(sre.revision, 8),
+      sre.data.length,
+      ...sre.data,
+      ...sre.signature,
+    ]);
+  }
 }

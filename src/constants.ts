@@ -133,3 +133,4 @@ export const storageLocationTypeArchive = 0;
 export const storageLocationTypeFile = 3;
 export const storageLocationTypeFull = 5;
 export const storageLocationTypeBridge = 7;
+export const supportedFeatures = 3;

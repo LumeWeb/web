@@ -3,6 +3,8 @@ import KeyPairEd25519 from "#ed25519.js";
 import { AbstractLevel } from "abstract-level";
 import { P2PService } from "./service/p2p.js";
 import { RegistryService } from "./service/registry.js";
+import { S5Node } from "#node.js";
+import Unpacker from "#serialization/unpack.js";
 
 export interface Peer {
   id: NodeId;
@@ -63,3 +65,19 @@ export interface SignedMessage {
   nodeId: NodeId;
   message: Uint8Array;
 }
+
+export type P2PMessageHandler = (
+  node: S5Node,
+  peer: Peer,
+  data: Unpacker,
+  rawData: Uint8Array,
+  verifyId: boolean,
+) => Promise<void>;
+
+export type P2PSignedMessageHandler = (
+  node: S5Node,
+  peer: Peer,
+  data: Unpacker,
+  message: SignedMessage,
+  verifyId: boolean,
+) => Promise<void>;

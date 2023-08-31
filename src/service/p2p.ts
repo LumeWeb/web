@@ -1,43 +1,37 @@
 import { Multihash } from "../multihash.js";
 import NodeId from "../nodeId.js";
-import { equalBytes } from "@noble/curves/abstract/utils";
-import { Logger, Peer, S5Config, SignedMessage } from "../types.js";
+import { Logger, Peer, SignedMessage } from "../types.js";
 import KeyPairEd25519 from "../ed25519.js";
 import * as crypto from "crypto";
 import {
-  mkeyEd25519,
   protocolMethodAnnouncePeers,
-  protocolMethodHandshakeDone,
   protocolMethodHandshakeOpen,
   protocolMethodHashQuery,
   protocolMethodSignedMessage,
-  recordTypeRegistryEntry,
   recordTypeStorageLocation,
   storageLocationTypeFull,
 } from "../constants.js";
 import defer from "p-defer";
-import { calculateScore, decodeEndian, encodeEndian } from "#util.js";
+import { calculateScore, encodeEndian } from "#util.js";
 import Packer from "#serialization/pack.js";
 import Unpacker from "#serialization/unpack.js";
 import { ed25519 } from "@noble/curves/ed25519";
 import { AbstractLevel, AbstractSublevel } from "abstract-level";
 import StorageLocation from "#storage.js";
-import { addStorageLocation, S5Node, stringifyNode } from "#node.js";
+import { S5Node, stringifyNode } from "#node.js";
 import { URL } from "url";
 import { Buffer } from "buffer";
 import {
   createTransportPeer,
   createTransportSocket,
-  isTransport,
 } from "#transports/index.js";
+import messages from "#messages/index.js";
+
 export class P2PService {
-  private node: S5Node;
   private logger: Logger;
   private nodeKeyPair: KeyPairEd25519;
   private localNodeId?: NodeId;
   private networkId?: string;
-  private reconnectDelay: Map<string, number> = new Map();
-  private selfConnectionUris: Array<URL> = [];
   private nodesDb?: AbstractSublevel<
     AbstractLevel<Uint8Array, string, Uint8Array>,
     Uint8Array,
@@ -47,12 +41,30 @@ export class P2PService {
   private hashQueryRoutingTable: Map<Multihash, Set<NodeId>> = new Map();
 
   constructor(node: S5Node) {
-    this.node = node;
+    this._node = node;
     this.networkId = node.config.p2p?.network;
     this.nodeKeyPair = node.config.keyPair;
     this.logger = node.logger;
 
     node.config.services.p2p = this;
+  }
+
+  private _node: S5Node;
+
+  get node(): S5Node {
+    return this._node;
+  }
+
+  private _reconnectDelay: Map<string, number> = new Map();
+
+  get reconnectDelay(): Map<string, number> {
+    return this._reconnectDelay;
+  }
+
+  private _selfConnectionUris: Array<URL> = [];
+
+  get selfConnectionUris(): Array<URL> {
+    return this._selfConnectionUris;
   }
 
   private _peers: Map<string, Peer> = new Map();
@@ -63,11 +75,11 @@ export class P2PService {
 
   async init(): Promise<void> {
     this.localNodeId = new NodeId(this.nodeKeyPair.publicKey); // Define the NodeId constructor
-    this.nodesDb = this.node.db.sublevel<string, Uint8Array>("s5-nodes", {});
+    this.nodesDb = this._node.db.sublevel<string, Uint8Array>("s5-nodes", {});
   }
 
   async start(): Promise<void> {
-    const initialPeers = this.node.config?.p2p?.peers?.initial || [];
+    const initialPeers = this._node.config?.p2p?.peers?.initial || [];
 
     for (const p of initialPeers) {
       this.connectToNode([new URL(p)]);
@@ -86,196 +98,14 @@ export class P2PService {
 
     const completer = defer<void>();
 
-    const supportedFeatures = 3; // 0b00000011
-
     peer.listenForMessages(
       async (event: Uint8Array) => {
         let u = Unpacker.fromPacked(event);
         const method = u.unpackInt();
-        if (method === protocolMethodHandshakeOpen) {
-          const p = new Packer();
-          p.packInt(protocolMethodHandshakeDone);
-          p.packBinary(u.unpackBinary());
-          let peerNetworkId: string | null = null;
-          try {
-            peerNetworkId = u.unpackString();
-          } catch {}
 
-          if (this.networkId && peerNetworkId !== this.networkId) {
-            throw `Peer is in different network: ${peerNetworkId}`;
-          }
-
-          p.packInt(supportedFeatures);
-          p.packInt(this.selfConnectionUris.length);
-          for (const uri of this.selfConnectionUris) {
-            p.packString(uri.toString());
-          }
-          // TODO Protocol version
-          // p.packInt(protocolVersion);
-          peer.sendMessage(await this.signMessageSimple(p.takeBytes()));
-          return;
-        } else if (method === recordTypeRegistryEntry) {
-          const sre =
-            this.node.services.registry.deserializeRegistryEntry(event);
-          await this.node.services.registry.set(sre, false, peer);
-          return;
-        } else if (method === recordTypeStorageLocation) {
-          const hash = new Multihash(event.subarray(1, 34));
-          const type = event[34];
-          const expiry = decodeEndian(event.subarray(35, 39));
-          const partCount = event[39];
-          const parts: string[] = [];
-          let cursor = 40;
-          for (let i = 0; i < partCount; i++) {
-            const length = decodeEndian(event.subarray(cursor, cursor + 2));
-            cursor += 2;
-            parts.push(
-              new TextDecoder().decode(event.subarray(cursor, cursor + length)),
-            );
-            cursor += length;
-          }
-          cursor++;
-
-          const publicKey = event.subarray(cursor, cursor + 33);
-          const signature = event.subarray(cursor + 33);
-
-          if (publicKey[0] !== mkeyEd25519) {
-            throw `Unsupported public key type ${mkeyEd25519}`;
-          }
-
-          if (
-            !ed25519.verify(
-              signature,
-              event.subarray(0, cursor),
-              publicKey.subarray(1),
-            )
-          ) {
-            return;
-          }
-
-          const nodeId = new NodeId(publicKey);
-          await addStorageLocation({
-            hash,
-            nodeId,
-            location: new StorageLocation(type, parts, expiry),
-            message: event,
-            config: this.node.config,
-          });
-
-          const list =
-            this.hashQueryRoutingTable.get(hash) || new Set<NodeId>();
-          for (const peerId of list) {
-            if (peerId.equals(nodeId)) {
-              continue;
-            }
-            if (peerId.equals(peer.id)) {
-              continue;
-            }
-
-            if (this._peers.has(peerId.toString())) {
-              try {
-                this._peers.get(peerId.toString())?.sendMessage(event);
-              } catch (e) {
-                this.logger.catched(e);
-              }
-            }
-          }
-          this.hashQueryRoutingTable.delete(hash);
+        if (method !== null && messages.has(method)) {
+          await messages.get(method)?.(this.node, peer, u, event, verifyId);
         }
-
-        if (method === protocolMethodSignedMessage) {
-          const sm = await this.unpackAndVerifySignature(u);
-          u = Unpacker.fromPacked(sm.message);
-          const method2 = u.unpackInt();
-
-          if (method2 === protocolMethodHandshakeDone) {
-            const challenge = u.unpackBinary();
-
-            if (!equalBytes(peer.challenge, challenge)) {
-              throw "Invalid challenge";
-            }
-
-            const pId = sm.nodeId;
-
-            if (!verifyId) {
-              peer.id = pId;
-            } else {
-              if (!peer.id.equals(pId)) {
-                throw "Invalid transports id on initial list";
-              }
-            }
-
-            peer.isConnected = true;
-
-            const supportedFeatures = u.unpackInt();
-
-            if (supportedFeatures !== 3) {
-              throw "Remote node does not support required features";
-            }
-
-            this._peers.set(peer.id.toString(), peer);
-            this.reconnectDelay.set(peer.id.toString(), 1);
-
-            const connectionUrisCount = u.unpackInt() as number;
-
-            peer.connectionUris = [];
-            for (let i = 0; i < connectionUrisCount; i++) {
-              peer.connectionUris.push(new URL(u.unpackString() as string));
-            }
-
-            this.logger.info(
-              `[+] ${peer.id.toString()} (${peer
-                .renderLocationUri()
-                .toString()})`,
-            );
-
-            this.sendPublicPeersToPeer(peer, Array.from(this._peers.values()));
-            for (const p of this._peers.values()) {
-              if (p.id.equals(peer.id)) continue;
-
-              if (p.isConnected) {
-                this.sendPublicPeersToPeer(p, [peer]);
-              }
-            }
-
-            return;
-          } else if (method2 === protocolMethodAnnouncePeers) {
-            const length = u.unpackInt() as number;
-            for (let i = 0; i < length; i++) {
-              const peerIdBinary = u.unpackBinary();
-              const id = new NodeId(peerIdBinary);
-
-              const isConnected = u.unpackBool() as boolean;
-
-              const connectionUrisCount = u.unpackInt() as number;
-
-              const connectionUris: URL[] = [];
-
-              for (let i = 0; i < connectionUrisCount; i++) {
-                connectionUris.push(new URL(u.unpackString() as string));
-              }
-
-              if (connectionUris.length > 0) {
-                // TODO Fully support multiple connection uris
-                const uri = new URL(connectionUris[0].toString());
-                uri.username = id.toBase58();
-                if (
-                  !this.reconnectDelay.has(
-                    NodeId.decode(uri.username).toString(),
-                  )
-                ) {
-                  this.connectToNode([uri]);
-                }
-              }
-            }
-          }
-        } /* else if (method === protocolMethodRegistryQuery) {
-          const pk = u.unpackBinary();
-          const sre = node.registry.getFromDB(pk);
-          if (sre !== null) {
-            transports.sendMessage(node.registry.serializeRegistryEntry(sre));
-          }
-        }*/
       },
       {
         onDone: async () => {
@@ -466,9 +296,9 @@ export class P2PService {
 
     const id = NodeId.decode(connectionUri.username);
 
-    this.reconnectDelay.set(
+    this._reconnectDelay.set(
       id.toString(),
-      this.reconnectDelay.get(id.toString()) || 1,
+      this._reconnectDelay.get(id.toString()) || 1,
     );
 
     if (id.equals(this.localNodeId)) {
@@ -491,8 +321,8 @@ export class P2PService {
 
       this.logger.catched(e);
 
-      const delay = this.reconnectDelay.get(id.toString())!;
-      this.reconnectDelay.set(id.toString(), delay * 2);
+      const delay = this._reconnectDelay.get(id.toString())!;
+      this._reconnectDelay.set(id.toString(), delay * 2);
       await new Promise((resolve) => setTimeout(resolve, delay * 1000));
 
       await this.connectToNode(connectionUris, retried);
