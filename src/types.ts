@@ -47,7 +47,6 @@ export interface S5Config {
   logger: Logger;
   db: AbstractLevel<Uint8Array, string, Uint8Array>;
   cacheDb: AbstractLevel<Uint8Array, string, Uint8Array>;
-  nodesDb: AbstractLevel<Uint8Array, string, Uint8Array>;
   services: {
     p2p: P2PService;
   };

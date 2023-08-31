@@ -28,7 +28,7 @@ import { connect as tcpConnect, TcpPeer } from "../peer/tcp.js";
 import { connect as wsConnect, WebSocketPeer } from "../peer/webSocket.js";
 
 export class P2PService {
-  get peers(): Map<NodeId, Peer> {
+  get peers(): Map<string, Peer> {
     return this._peers;
   }
 
@@ -37,10 +37,15 @@ export class P2PService {
   private nodeKeyPair: KeyPairEd25519;
   private localNodeId?: NodeId;
   private networkId?: string;
-  private _peers: Map<NodeId, Peer> = new Map();
-  private reconnectDelay: Map<NodeId, number> = new Map();
+  private _peers: Map<string, Peer> = new Map();
+  private reconnectDelay: Map<string, number> = new Map();
   private selfConnectionUris: Array<URL> = [];
-  private nodesDb: AbstractLevel<Uint8Array, string, Uint8Array>;
+  private nodesDb?: AbstractSublevel<
+    AbstractLevel<Uint8Array, string, Uint8Array>,
+    Uint8Array,
+    string,
+    Uint8Array
+  >;
 
   private hashQueryRoutingTable: Map<Multihash, Set<NodeId>> = new Map();
 
@@ -49,13 +54,13 @@ export class P2PService {
     this.networkId = config?.p2p?.network;
     this.nodeKeyPair = config.keyPair;
     this.logger = config.logger;
-    this.nodesDb = this.config.nodesDb;
 
     config.services.p2p = this;
   }
 
   async init(): Promise<void> {
     this.localNodeId = new NodeId(this.nodeKeyPair.publicKey); // Define the NodeId constructor
+    this.nodesDb = this.config.db.sublevel<string, Uint8Array>("s5-nodes", {});
   }
 
   async start(): Promise<void> {
