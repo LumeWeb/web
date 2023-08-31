@@ -31,22 +31,32 @@ export class P2PService {
   private logger: Logger;
   private nodeKeyPair: KeyPairEd25519;
   private localNodeId?: NodeId;
-  private networkId?: string;
   private nodesDb?: AbstractSublevel<
     AbstractLevel<Uint8Array, string, Uint8Array>,
     Uint8Array,
     string,
     Uint8Array
   >;
-  private hashQueryRoutingTable: Map<Multihash, Set<NodeId>> = new Map();
 
   constructor(node: S5Node) {
     this._node = node;
-    this.networkId = node.config.p2p?.network;
+    this._networkId = node.config.p2p?.network;
     this.nodeKeyPair = node.config.keyPair;
     this.logger = node.logger;
 
     node.config.services.p2p = this;
+  }
+
+  private _hashQueryRoutingTable: Map<Multihash, Set<NodeId>> = new Map();
+
+  get hashQueryRoutingTable(): Map<Multihash, Set<NodeId>> {
+    return this._hashQueryRoutingTable;
+  }
+
+  private _networkId?: string;
+
+  get networkId(): string {
+    return this._networkId as string;
   }
 
   private _node: S5Node;
@@ -92,8 +102,8 @@ export class P2PService {
     const initialAuthPayloadPacker = new Packer();
     initialAuthPayloadPacker.packInt(protocolMethodHandshakeOpen);
     initialAuthPayloadPacker.packBinary(Buffer.from(peer.challenge));
-    if (this.networkId) {
-      initialAuthPayloadPacker.packString(this.networkId);
+    if (this._networkId) {
+      initialAuthPayloadPacker.packString(this._networkId);
     }
 
     const completer = defer<void>();
