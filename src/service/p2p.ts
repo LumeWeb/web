@@ -234,7 +234,7 @@ export class P2PService {
   async signMessageSimple(message: Uint8Array): Promise<Uint8Array> {
     const packer = new Packer();
 
-    const signature = ed25519.sign(this.nodeKeyPair.extractBytes(), message);
+    const signature = ed25519.sign(message, this.nodeKeyPair.extractBytes());
 
     packer.packInt(protocolMethodSignedMessage);
     packer.packBinary(Buffer.from(this.localNodeId!.bytes));
