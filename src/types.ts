@@ -30,7 +30,7 @@ export interface Peer {
   renderLocationUri(): string;
 }
 
-export type PeerConstructorOptions = { socket: any; uris: URL[] };
+export type PeerConstructorOptions = { socket: any; uris?: URL[] };
 
 // Define the static side of the class
 export interface PeerStatic {
