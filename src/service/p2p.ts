@@ -461,7 +461,7 @@ export class P2PService {
     }
   }
 
-  async connectToNode(connectionUris: URL[]): Promise<void> {
+  async connectToNode(connectionUris: URL[], retried = false): Promise<void> {
     const unsupported = new URL("http://0.0.0.0");
     unsupported.protocol = "unsupported";
 
@@ -493,8 +493,6 @@ export class P2PService {
       return;
     }
 
-    let retried = false;
-
     try {
       this.logger.verbose(`[connect] ${connectionUri}`);
       if (protocol === "tcp:") {
@@ -513,26 +511,18 @@ export class P2PService {
         await this.onNewPeer(peer, true);
       }
     } catch (e) {
-      if (retried) return;
+      if (retried) {
+        return;
+      }
       retried = true;
 
       this.logger.catched(e);
 
-      /*      if (e instanceof SocketException) {
-              if (e.message === "Connection refused") {
-                this.logger.warn(`[!] ${id}: ${e}`);
-              } else {
-                this.logger.catched(e);
-              }
-            } else {
-              this.logger.catched(e);
-            }*/
-
-      const delay = this.reconnectDelay.get(id)!;
-      this.reconnectDelay.set(id, delay * 2);
+      const delay = this.reconnectDelay.get(id.toString())!;
+      this.reconnectDelay.set(id.toString(), delay * 2);
       await new Promise((resolve) => setTimeout(resolve, delay * 1000));
 
-      await this.connectToNode(connectionUris);
+      await this.connectToNode(connectionUris, retried);
     }
   }
 }
