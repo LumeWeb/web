@@ -5,6 +5,7 @@ import { P2PService } from "./service/p2p.js";
 import { RegistryService } from "./service/registry.js";
 import { S5Node } from "#node.js";
 import Unpacker from "#serialization/unpack.js";
+import type { URL } from "url";
 
 export interface Peer {
   id: NodeId;
