@@ -26,7 +26,7 @@ const DEFAULT_LOGGER = {
   },
 };
 
-interface S5NodeConfig {
+export interface S5NodeConfig {
   p2p?: {
     network: string;
     peers?: {
