@@ -18,6 +18,10 @@ export class TcpPeer implements Peer {
 
   private _id?: NodeId;
 
+  get id(): NodeId {
+    return this._id as NodeId;
+  }
+
   set id(value: NodeId) {
     this._id = value;
   }
