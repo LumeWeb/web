@@ -8,7 +8,7 @@ export abstract class BasePeer implements Peer {
   challenge: Uint8Array;
   protected _socket: any;
 
-  constructor({ socket, uris }: PeerConstructorOptions) {
+  constructor({ socket, uris = [] }: PeerConstructorOptions) {
     this.connectionUris = uris.map((uri) => new URL(uri.toString()));
     this.challenge = new Uint8Array();
     this._socket = socket;
