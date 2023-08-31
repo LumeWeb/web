@@ -353,7 +353,7 @@ export class P2PService {
     if (nodeId.equals(this.localNodeId)) {
       return 1;
     }
-    const node = await this.nodesDb.get(stringifyNode(nodeId));
+    const node = await this.nodesDb?.get(stringifyNode(nodeId));
     if (!node) {
       return 0.5;
     }
@@ -362,7 +362,7 @@ export class P2PService {
   }
 
   private async _vote(nodeId: NodeId, upvote: boolean): Promise<void> {
-    const node = await this.nodesDb.get(stringifyNode(nodeId));
+    const node = await this.nodesDb?.get(stringifyNode(nodeId));
     const map = node
       ? Unpacker.fromPacked(node).unpackMap()
       : new Map<number, number>(
@@ -375,7 +375,7 @@ export class P2PService {
       map.set(2, (map.get(2) ?? 0) + 1);
     }
 
-    await this.nodesDb.put(
+    await this.nodesDb?.put(
       stringifyNode(nodeId),
       new Packer().pack(map).takeBytes(),
     );
