@@ -164,7 +164,7 @@ export class RegistryService {
   ): Promise<void> {
     const revision = Math.round(Date.now() / 1000);
 
-    const sre: SignedRegistryEntry = await this.signRegistryEntry({
+    const sre: SignedRegistryEntry = this.signRegistryEntry({
       kp: keyPair,
       data,
       revision,
