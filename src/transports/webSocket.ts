@@ -24,7 +24,13 @@ export class WebSocketPeer extends BasePeer implements Peer {
     this._socket.addEventListener(
       "message",
       async (event: MessageEvent<any>) => {
-        await callback(event.data);
+        let data = event.data;
+
+        if (data instanceof Blob) {
+          data = Buffer.from(await data.arrayBuffer());
+        }
+
+        await callback(data);
       },
     );
 
