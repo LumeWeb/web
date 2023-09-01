@@ -39,7 +39,7 @@ export class WebSocketPeer extends BasePeer implements Peer {
 
   public static async connect(uri: URL): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
-      const socket = isNode ? new WS.WebSocket() : new WebSocket(uri);
+      const socket = isNode ? new WS.WebSocket(uri) : new WebSocket(uri);
       socket.addEventListener("open", () => {
         resolve(socket);
       });
