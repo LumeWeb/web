@@ -209,6 +209,15 @@ export class RegistryService {
     return null;
   }
 
+  public listen(pk: Uint8Array): EventEmitter {
+    const key = new Multihash(pk).toString();
+    if (!this.streams[key]) {
+      this.streams[key] = new EventEmitter();
+      this.sendRegistryRequest(pk);
+    }
+    return this.streams[key];
+  }
+
   public deserializeRegistryEntry(event: Uint8Array): SignedRegistryEntry {
     const dataLength = event[42];
     return {
