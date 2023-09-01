@@ -1,3 +1,10 @@
+# [0.1.0-develop.21](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.20...v0.1.0-develop.21) (2023-09-01)
+
+
+### Bug Fixes
+
+* await not needed ([9645105](https://git.lumeweb.com/LumeWeb/libs5/commit/9645105ec322e7e7cf24b809829eb4a0d622578f))
+
 # [0.1.0-develop.20](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.19...v0.1.0-develop.20) (2023-09-01)
 
 # [0.1.0-develop.19](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.18...v0.1.0-develop.19) (2023-09-01)
