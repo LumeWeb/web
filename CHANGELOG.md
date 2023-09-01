@@ -1,3 +1,10 @@
+# [0.1.0-develop.18](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.17...v0.1.0-develop.18) (2023-09-01)
+
+
+### Bug Fixes
+
+* export S5Node type ([1c1ec97](https://git.lumeweb.com/LumeWeb/libs5/commit/1c1ec9703a1694f59708c548c023f71f31f588b6))
+
 # [0.1.0-develop.17](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.16...v0.1.0-develop.17) (2023-09-01)
 
 
