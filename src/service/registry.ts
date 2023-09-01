@@ -173,7 +173,7 @@ export class RegistryService {
     await this.set(sre);
   }
 
-  async signRegistryEntry({
+  signRegistryEntry({
     kp,
     data,
     revision,
@@ -181,7 +181,7 @@ export class RegistryService {
     kp: KeyPairEd25519;
     data: Uint8Array;
     revision: number;
-  }): Promise<SignedRegistryEntry> {
+  }): SignedRegistryEntry {
     const list = new Uint8Array([
       recordTypeRegistryEntry,
       ...encodeEndian(revision, 8),
