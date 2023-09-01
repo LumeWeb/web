@@ -6,6 +6,7 @@ import { S5NodeConfig } from "./types.js";
 import NodeId from "#nodeId.js";
 
 export * from "./types.js";
+export * from "./constants.js";
 export {
   createTransportSocket,
   isTransport,
