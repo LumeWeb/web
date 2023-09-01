@@ -1,3 +1,10 @@
+# [0.1.0-develop.26](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.25...v0.1.0-develop.26) (2023-09-01)
+
+
+### Features
+
+* add BOOTSTRAP_NODES constant ([2061f63](https://git.lumeweb.com/LumeWeb/libs5/commit/2061f6330d1da40df84c649c3e492b77bd10e2ae))
+
 # [0.1.0-develop.25](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.24...v0.1.0-develop.25) (2023-09-01)
 
 
