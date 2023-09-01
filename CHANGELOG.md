@@ -1,3 +1,11 @@
+# [0.1.0-develop.17](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.16...v0.1.0-develop.17) (2023-09-01)
+
+
+### Bug Fixes
+
+* browser returns a Blob, so convert to a buffer if we have a blob ([80dd92d](https://git.lumeweb.com/LumeWeb/libs5/commit/80dd92ddb13da043f6f41d34941c81eaf2608e33))
+* missing uri argument for node WS ([8b7ffa8](https://git.lumeweb.com/LumeWeb/libs5/commit/8b7ffa8821779c769ed2f5772854537675ab5da6))
+
 # [0.1.0-develop.16](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.15...v0.1.0-develop.16) (2023-09-01)
 
 
