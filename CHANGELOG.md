@@ -1,3 +1,10 @@
+# [0.1.0-develop.27](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.26...v0.1.0-develop.27) (2023-09-01)
+
+
+### Features
+
+* add eventemitter support on p2p service and have the handshakedone message emit peerConnected ([b34b7a3](https://git.lumeweb.com/LumeWeb/libs5/commit/b34b7a3a0172adf0b0ce1476f6c68912dcd05576))
+
 # [0.1.0-develop.26](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.25...v0.1.0-develop.26) (2023-09-01)
 
 
