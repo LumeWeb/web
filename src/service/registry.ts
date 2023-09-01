@@ -212,7 +212,7 @@ export class RegistryService {
   public listen(
     pk: Uint8Array,
     cb: (sre: SignedRegistryEntry) => void,
-  ): ((() => void) | EventEmitter)[] {
+  ): () => void {
     const key = new Multihash(pk).toString();
     if (!this.streams[key]) {
       this.streams[key] = new EventEmitter();
@@ -226,7 +226,7 @@ export class RegistryService {
 
     stream.on("event", cb);
 
-    return [done, stream];
+    return done;
   }
 
   public deserializeRegistryEntry(event: Uint8Array): SignedRegistryEntry {
