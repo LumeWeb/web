@@ -134,3 +134,8 @@ export const storageLocationTypeFile = 3;
 export const storageLocationTypeFull = 5;
 export const storageLocationTypeBridge = 7;
 export const supportedFeatures = 3;
+
+export const BOOTSTRAP_NODES: string[] = [
+  "wss://z2DWuWNZcdSyZLpXFK2uCU3haaWMXrDAgxzv17sDEMHstZb@s5.garden/s5/p2p",
+  "wss://z2DWuPbL5pweybXnEB618pMnV58ECj2VPDNfVGm3tFqBvjF@s5.ninja/s5/p2p",
+];
