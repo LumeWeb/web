@@ -146,7 +146,9 @@ export class RegistryService {
         this.logger.verbose(`[registry] get (clean) ${key}`);
         for (let i = 0; i < 200; i++) {
           await new Promise((resolve) => setTimeout(resolve, 10));
-          if ((await this.getFromDB(pk)) !== null) break;
+          if ((await this.getFromDB(pk)) !== null) {
+            break;
+          }
         }
       } else {
         this.logger.verbose(`[registry] get (cached) ${key}`);
