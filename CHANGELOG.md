@@ -1,3 +1,10 @@
+# [0.1.0-develop.25](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.24...v0.1.0-develop.25) (2023-09-01)
+
+
+### Bug Fixes
+
+* fix import ([ca1a3dd](https://git.lumeweb.com/LumeWeb/libs5/commit/ca1a3dd5e7b42cad30bea1b03be17a10182cb8d2))
+
 # [0.1.0-develop.24](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.23...v0.1.0-develop.24) (2023-09-01)
 
 # [0.1.0-develop.23](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.22...v0.1.0-develop.23) (2023-09-01)
