@@ -1,6 +1,6 @@
 {
   "name": "@lumeweb/libs5",
-  "version": "0.1.0-develop.22",
+  "version": "0.1.0-develop.23",
   "type": "module",
   "main": "lib/index.js",
   "repository": {
