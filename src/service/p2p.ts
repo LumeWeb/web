@@ -26,8 +26,9 @@ import {
   createTransportSocket,
 } from "#transports/index.js";
 import messages from "#messages/index.js";
+import { EventEmitter } from "events";
 
-export class P2PService {
+export class P2PService extends EventEmitter {
   private logger: Logger;
   private nodeKeyPair: KeyPairEd25519;
   private localNodeId?: NodeId;
@@ -39,6 +40,7 @@ export class P2PService {
   >;
 
   constructor(node: S5Node) {
+    super();
     this._node = node;
     this._networkId = node.config.p2p?.network;
     this.nodeKeyPair = node.config.keyPair;

@@ -60,4 +60,5 @@ export default async function (
       p2p.sendPublicPeersToPeer(p, [peer]);
     }
   }
+  p2p.emit("peerConnected", peer);
 }
