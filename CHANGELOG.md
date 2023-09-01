@@ -1,3 +1,10 @@
+# [0.1.0-develop.16](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.15...v0.1.0-develop.16) (2023-09-01)
+
+
+### Bug Fixes
+
+* add support for browser WS by checking if we are in node ([0a15337](https://git.lumeweb.com/LumeWeb/libs5/commit/0a153379c87ebbee8c7d7b3015fe4c1b77f379ca))
+
 # [0.1.0-develop.15](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.14...v0.1.0-develop.15) (2023-09-01)
 
 # [0.1.0-develop.14](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.13...v0.1.0-develop.14) (2023-08-31)
