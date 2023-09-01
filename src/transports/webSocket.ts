@@ -1,8 +1,8 @@
 import { Logger, Peer } from "../types.js";
-import NodeId from "../nodeId.js";
 import { URL } from "url";
-import { WebSocket } from "ws";
+import * as WS from "ws";
 import { BasePeer } from "#transports/base.js";
+import isNode from "detect-node";
 
 export class WebSocketPeer extends BasePeer implements Peer {
   sendMessage(message: Uint8Array): void {
@@ -39,7 +39,7 @@ export class WebSocketPeer extends BasePeer implements Peer {
 
   public static async connect(uri: URL): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
-      const socket = new WebSocket(uri);
+      const socket = isNode ? new WS.WebSocket() : new WebSocket(uri);
       socket.addEventListener("open", () => {
         resolve(socket);
       });
