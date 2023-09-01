@@ -136,7 +136,7 @@ export class RegistryService {
         return res;
       }
       this.sendRegistryRequest(pk);
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await pTimeout(200);
       return this.getFromDB(pk);
     } else {
       this.sendRegistryRequest(pk);
@@ -145,14 +145,14 @@ export class RegistryService {
       if (res === null) {
         this.logger.verbose(`[registry] get (clean) ${key}`);
         for (let i = 0; i < 200; i++) {
-          await new Promise((resolve) => setTimeout(resolve, 10));
+          await pTimeout(10);
           if ((await this.getFromDB(pk)) !== null) {
             break;
           }
         }
       } else {
         this.logger.verbose(`[registry] get (cached) ${key}`);
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        await pTimeout(200);
       }
       return this.getFromDB(pk);
     }
@@ -239,4 +239,8 @@ export class RegistryService {
       ...sre.signature,
     ]);
   }
+}
+
+async function pTimeout(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
