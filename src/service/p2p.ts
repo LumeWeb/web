@@ -46,7 +46,7 @@ export class P2PService extends EventEmitter {
     this.nodeKeyPair = node.config.keyPair;
     this.logger = node.logger;
 
-    node.config.services.p2p = this;
+    node.services.p2p = this;
   }
 
   private _hashQueryRoutingTable: Map<Multihash, Set<NodeId>> = new Map();
