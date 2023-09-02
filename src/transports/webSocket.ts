@@ -3,8 +3,10 @@ import { URL } from "url";
 import * as WS from "ws";
 import { BasePeer } from "#transports/base.js";
 import isNode from "detect-node";
+import net from "net";
 
 export class WebSocketPeer extends BasePeer implements Peer {
+  declare _socket: WebSocket;
   sendMessage(message: Uint8Array): void {
     this._socket.send(message);
   }
@@ -43,7 +45,7 @@ export class WebSocketPeer extends BasePeer implements Peer {
     }
   }
   end(): void {
-    this._socket.end();
+    this._socket.close();
   }
 
   public static async connect(uri: URL): Promise<WebSocket> {
