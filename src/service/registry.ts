@@ -15,6 +15,7 @@ import { Buffer } from "buffer";
 import { EventEmitter } from "events";
 import KeyPairEd25519 from "#ed25519.js";
 import { S5Node, stringifyBytes } from "#node.js";
+import { utf8ToBytes } from "@noble/hashes/utils";
 
 export class RegistryService {
   private db?: AbstractSublevel<
@@ -200,7 +201,7 @@ export class RegistryService {
     } catch {}
 
     if (val) {
-      return this.deserializeRegistryEntry(val);
+      return this.deserializeRegistryEntry(utf8ToBytes(val));
     }
 
     return null;
