@@ -63,7 +63,9 @@ export class S5Node {
       keyPair: this._nodeConfig.keyPair,
       db: this._nodeConfig.db,
       logger: this._nodeConfig.logger ?? DEFAULT_LOGGER,
-      cacheDb: this._nodeConfig.db.sublevel("s5-object-cache", {}),
+      cacheDb: this._nodeConfig.db.sublevel("s5-object-cache", {
+        valueEncoding: "buffer",
+      }),
       services: {} as any,
       p2p: this._nodeConfig.p2p,
     };
