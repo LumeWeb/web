@@ -1,3 +1,10 @@
+# [0.1.0-develop.29](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.28...v0.1.0-develop.29) (2023-09-02)
+
+
+### Bug Fixes
+
+* add try/catch on db.get ([1a32416](https://git.lumeweb.com/LumeWeb/libs5/commit/1a3241688c2b92a8c685a6da15ead30c117582ff))
+
 # [0.1.0-develop.28](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.27...v0.1.0-develop.28) (2023-09-02)
 
 
