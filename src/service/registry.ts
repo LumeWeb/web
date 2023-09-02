@@ -100,7 +100,7 @@ export class RegistryService {
     this.logger.verbose("[registry] broadcastEntry");
     const updateMessage = this.serializeRegistryEntry(sre);
 
-    for (const p of Object.values(this.node.services.p2p.peers)) {
+    for (const p of [...this.node.services.p2p.peers.values()]) {
       if (receivedFrom == null || p.id !== receivedFrom.id) {
         p.sendMessage(updateMessage);
       }
@@ -116,7 +116,7 @@ export class RegistryService {
     const req = p.takeBytes();
 
     // TODO: Use shard system if there are more than X peers
-    for (const peer of Object.values(this.node.services.p2p.peers)) {
+    for (const peer of [...this.node.services.p2p.peers.values()]) {
       peer.sendMessage(req);
     }
   }
