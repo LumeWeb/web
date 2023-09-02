@@ -30,6 +30,7 @@ export class RegistryService {
   constructor(node: S5Node) {
     this.node = node;
     this.logger = this.node.logger;
+    node.services.registry = this;
   }
 
   async init(): Promise<void> {
