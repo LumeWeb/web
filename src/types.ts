@@ -28,6 +28,7 @@ export interface Peer {
   ): void;
 
   renderLocationUri(): string;
+  end(): void;
 }
 
 export type PeerConstructorOptions = { socket: any; uris?: URL[] };

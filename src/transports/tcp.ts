@@ -6,6 +6,8 @@ import * as console from "console";
 import { BasePeer } from "#transports/base.js";
 
 export class TcpPeer extends BasePeer implements Peer {
+  declare _socket: net.Socket;
+
   sendMessage(message: Uint8Array): void {
     this._socket.write(message);
   }
@@ -58,6 +60,9 @@ export class TcpPeer extends BasePeer implements Peer {
     if (onError) {
       this._socket.on("error", onError);
     }
+  }
+  end(): void {
+    this._socket.end();
   }
 
   public static async connect(uri: URL): Promise<net.Socket> {

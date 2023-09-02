@@ -38,4 +38,6 @@ export abstract class BasePeer implements Peer {
       logger,
     }: { onDone?: any; onError?: (...args: any[]) => void; logger: Logger },
   ): void;
+
+  abstract end(): void;
 }

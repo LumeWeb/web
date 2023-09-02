@@ -42,6 +42,9 @@ export class WebSocketPeer extends BasePeer implements Peer {
       this._socket.addEventListener("error", onError);
     }
   }
+  end(): void {
+    this._socket.end();
+  }
 
   public static async connect(uri: URL): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
