@@ -1,3 +1,10 @@
+# [0.1.0-develop.38](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.37...v0.1.0-develop.38) (2023-09-02)
+
+
+### Bug Fixes
+
+* utf8ToBytes no longer needed ([8373114](https://git.lumeweb.com/LumeWeb/libs5/commit/8373114d5cf98452024b55220228ddbd47756954))
+
 # [0.1.0-develop.37](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.36...v0.1.0-develop.37) (2023-09-02)
 
 
