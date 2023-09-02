@@ -1,3 +1,10 @@
+# [0.1.0-develop.34](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.33...v0.1.0-develop.34) (2023-09-02)
+
+
+### Bug Fixes
+
+* add started state on node and check it on connectToNode ([deebe15](https://git.lumeweb.com/LumeWeb/libs5/commit/deebe15c6fcb514a58a5dbaec04d61dca8f99c14))
+
 # [0.1.0-develop.33](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.32...v0.1.0-develop.33) (2023-09-02)
 
 
