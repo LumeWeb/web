@@ -1,3 +1,10 @@
+# [0.1.0-develop.40](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.39...v0.1.0-develop.40) (2023-09-02)
+
+
+### Features
+
+* add const groups of the different set of types ([cc66a0d](https://git.lumeweb.com/LumeWeb/libs5/commit/cc66a0d839fe14a89f13256c0763cffdf2bdc29c))
+
 # [0.1.0-develop.39](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.38...v0.1.0-develop.39) (2023-09-02)
 
 
