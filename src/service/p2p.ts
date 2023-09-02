@@ -97,6 +97,9 @@ export class P2PService extends EventEmitter {
       this.connectToNode([new URL(p)]);
     }
   }
+  async stop() {
+    [...this.node.services.p2p.peers.values()].forEach((peer) => peer.end());
+  }
 
   async onNewPeer(peer: Peer, verifyId: boolean): Promise<void> {
     peer.challenge = crypto.randomBytes(32);

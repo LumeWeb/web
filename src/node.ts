@@ -69,6 +69,10 @@ export class S5Node {
     await p2p.start();
   }
 
+  public async stop() {
+    await this.services.p2p.stop();
+  }
+
   async readStorageLocationsFromDB(
     hash: Multihash,
   ): Promise<Map<number, Map<string, Map<number, any>>>> {
