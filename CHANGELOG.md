@@ -1,3 +1,10 @@
+# [0.1.0-develop.36](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.35...v0.1.0-develop.36) (2023-09-02)
+
+
+### Bug Fixes
+
+* set sublevel valueEncoding to buffer ([a6c02bc](https://git.lumeweb.com/LumeWeb/libs5/commit/a6c02bc772d84068b2529a656cd2490d3da66ea1))
+
 # [0.1.0-develop.35](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.34...v0.1.0-develop.35) (2023-09-02)
 
 
