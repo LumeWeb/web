@@ -1,3 +1,10 @@
+# [0.1.0-develop.35](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.34...v0.1.0-develop.35) (2023-09-02)
+
+
+### Bug Fixes
+
+* convert binary string to uint8array ([419c7f8](https://git.lumeweb.com/LumeWeb/libs5/commit/419c7f85a8bd22e8ee10839bc30ea1248e2b6f3a))
+
 # [0.1.0-develop.34](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.33...v0.1.0-develop.34) (2023-09-02)
 
 
