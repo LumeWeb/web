@@ -1,3 +1,10 @@
+# [0.1.0-develop.31](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.30...v0.1.0-develop.31) (2023-09-02)
+
+
+### Bug Fixes
+
+* fix iteration of peers ([fabda02](https://git.lumeweb.com/LumeWeb/libs5/commit/fabda024ad788fcb00e398e73f75afb3e944db30))
+
 # [0.1.0-develop.30](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.29...v0.1.0-develop.30) (2023-09-02)
 
 
