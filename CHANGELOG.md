@@ -1,3 +1,10 @@
+# [0.1.0-develop.42](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.41...v0.1.0-develop.42) (2023-09-02)
+
+
+### Bug Fixes
+
+* freeze REGISTRY_TYPES ([6d575a1](https://git.lumeweb.com/LumeWeb/libs5/commit/6d575a1cecad580360c7af3ea28611977c520619))
+
 # [0.1.0-develop.41](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.40...v0.1.0-develop.41) (2023-09-02)
 
 # [0.1.0-develop.40](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.39...v0.1.0-develop.40) (2023-09-02)
