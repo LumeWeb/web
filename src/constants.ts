@@ -24,6 +24,7 @@ export const REGISTRY_TYPES = {
   /// can point to resolver CID, Stream CID, Directory Metadata or Media Metadata object
   ENCRYPTED_CID: 0x5e,
 };
+Object.freeze(REGISTRY_TYPES);
 
 // ! some multicodec bytes
 // BLAKE3 with default output size of 256 bits
