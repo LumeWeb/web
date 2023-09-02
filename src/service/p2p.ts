@@ -289,6 +289,10 @@ export class P2PService extends EventEmitter {
   }
 
   async connectToNode(connectionUris: URL[], retried = false): Promise<void> {
+    if (!this.node.started) {
+      return;
+    }
+
     const unsupported = new URL("http://0.0.0.0");
     unsupported.protocol = "unsupported";
 

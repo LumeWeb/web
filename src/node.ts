@@ -8,6 +8,7 @@ import KeyPairEd25519 from "#ed25519.js";
 import { AbstractLevel } from "abstract-level";
 import { P2PService } from "#service/p2p.js";
 import { RegistryService } from "#service/registry.js";
+import { hash } from "@noble/hashes/_assert";
 const DEFAULT_LOGGER = {
   info(s: any) {
     console.info(s);
@@ -31,6 +32,12 @@ export class S5Node {
 
   constructor(config: S5NodeConfig) {
     this._nodeConfig = config;
+  }
+
+  private _started = false;
+
+  get started(): boolean {
+    return this._started;
   }
 
   private _config?: S5Config;
@@ -61,6 +68,8 @@ export class S5Node {
       p2p: this._nodeConfig.p2p,
     };
 
+    this._started = true;
+
     const p2p = new P2PService(this);
     const registry = new RegistryService(this);
 
@@ -70,6 +79,7 @@ export class S5Node {
   }
 
   public async stop() {
+    this._started = false;
     await this.services.p2p.stop();
   }
 
