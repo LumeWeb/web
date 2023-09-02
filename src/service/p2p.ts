@@ -87,7 +87,9 @@ export class P2PService extends EventEmitter {
 
   async init(): Promise<void> {
     this.localNodeId = new NodeId(this.nodeKeyPair.publicKey); // Define the NodeId constructor
-    this.nodesDb = this._node.db.sublevel<string, Uint8Array>("s5-nodes", {});
+    this.nodesDb = this._node.db.sublevel<string, Uint8Array>("s5-nodes", {
+      valueEncoding: "buffer",
+    });
   }
 
   async start(): Promise<void> {

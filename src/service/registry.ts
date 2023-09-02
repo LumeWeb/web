@@ -35,7 +35,9 @@ export class RegistryService {
   }
 
   async init(): Promise<void> {
-    this.db = this.node.db.sublevel<string, Uint8Array>("s5-registry-db", {});
+    this.db = this.node.db.sublevel<string, Uint8Array>("s5-registry-db", {
+      valueEncoding: "buffer",
+    });
   }
 
   async set(
