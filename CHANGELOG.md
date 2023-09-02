@@ -1,3 +1,10 @@
+# [0.1.0-develop.28](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.27...v0.1.0-develop.28) (2023-09-02)
+
+
+### Bug Fixes
+
+* set node registry service in service constructor ([d9af5bd](https://git.lumeweb.com/LumeWeb/libs5/commit/d9af5bd0151c40fab1385e966f87e59bef6fd5a3))
+
 # [0.1.0-develop.27](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.26...v0.1.0-develop.27) (2023-09-01)
 
 
