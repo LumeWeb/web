@@ -22,6 +22,17 @@ export const cidTypeEncryptedStatic = 0xae;
 /// can point to resolver CID, Stream CID, Directory Metadata or Media Metadata object
 export const cidTypeEncryptedDynamic = 0xad;
 
+export const CID_TYPES = [
+  cidTypeRaw,
+  cidTypeMetadataMedia,
+  cidTypeMetadataWebApp,
+  cidTypeResolver,
+  cidTypeUserIdentity,
+  cidTypeBridge,
+  cidTypeEncryptedStatic,
+  cidTypeEncryptedDynamic,
+];
+
 export const registryS5CIDByte = 0x5a;
 export const registryS5EncryptedByte = 0x5e;
 
@@ -48,9 +59,23 @@ export const metadataTypeDirectory = 0x04;
 export const metadataTypeProofs = 0x05;
 export const metadataTypeUserIdentity = 0x07;
 
+export const METADATA_TYPES = [
+  metadataTypeMedia,
+  metadataTypeWebApp,
+  metadataTypeDirectory,
+  metadataTypeProofs,
+  metadataTypeUserIdentity,
+];
+
 export const parentLinkTypeUserIdentity = 1;
 export const parentLinkTypeBoard = 5;
 export const parentLinkTypeBridgeUser = 10;
+
+export const PARENT_LINK_TYPES = [
+  parentLinkTypeUserIdentity,
+  parentLinkTypeBoard,
+  parentLinkTypeBridgeUser,
+];
 
 export const registryMaxDataSize = 64;
 
