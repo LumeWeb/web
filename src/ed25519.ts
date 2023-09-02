@@ -1,6 +1,6 @@
 import { ed25519 } from "@noble/curves/ed25519";
 import { concatBytes } from "@noble/curves/abstract/utils";
-import { mkeyEd25519 } from "./constants.js";
+import { CID_HASH_TYPES } from "./constants.js";
 
 export default class KeyPairEd25519 {
   private _bytes: Uint8Array;
@@ -11,7 +11,7 @@ export default class KeyPairEd25519 {
 
   public get publicKey(): Uint8Array {
     return concatBytes(
-      Uint8Array.from([mkeyEd25519]),
+      Uint8Array.from([CID_HASH_TYPES.ED25519]),
       ed25519.getPublicKey(this._bytes),
     );
   }

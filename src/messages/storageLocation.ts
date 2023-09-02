@@ -3,10 +3,10 @@ import { Peer } from "#types.js";
 import Unpacker from "#serialization/unpack.js";
 import { Multihash } from "#multihash.js";
 import { decodeEndian } from "#util.js";
-import { mkeyEd25519 } from "#constants.js";
 import { ed25519 } from "@noble/curves/ed25519";
 import NodeId from "#nodeId.js";
 import StorageLocation from "#storage.js";
+import { CID_HASH_TYPES } from "#constants.js";
 
 export default async function (
   node: S5Node,
@@ -34,8 +34,8 @@ export default async function (
   const publicKey = rawData.subarray(cursor, cursor + 33);
   const signature = rawData.subarray(cursor + 33);
 
-  if (publicKey[0] !== mkeyEd25519) {
-    throw `Unsupported public key type ${mkeyEd25519}`;
+  if (publicKey[0] !== CID_HASH_TYPES.ED25519) {
+    throw `Unsupported public key type ${publicKey[0]}`;
   }
 
   if (

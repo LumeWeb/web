@@ -28,9 +28,12 @@ Object.freeze(REGISTRY_TYPES);
 
 // ! some multicodec bytes
 // BLAKE3 with default output size of 256 bits
-export const mhashBlake3Default = 0x1f;
 
-export const mkeyEd25519 = 0xed;
+export const CID_HASH_TYPES = {
+  BLAKE3: 0x1f,
+  ED25519: 0xed,
+};
+Object.freeze(CID_HASH_TYPES);
 
 export const encryptionAlgorithmXChaCha20Poly1305 = 0xa6;
 export const encryptionAlgorithmXChaCha20Poly1305NonceSize = 24;
@@ -42,13 +45,6 @@ export const contentPackFileHeader = Uint8Array.from([0x5f, 0x26, 0x73, 0x35]);
 // used as the first byte of metadata files
 export const metadataMagicByte = 0x5f;
 
-// types for metadata files
-export const metadataTypeMedia = 0x02;
-export const metadataTypeWebApp = 0x03;
-export const metadataTypeDirectory = 0x04;
-export const metadataTypeProofs = 0x05;
-export const metadataTypeUserIdentity = 0x07;
-
 export const METADATA_TYPES = {
   MEDIA: 0x02,
   WEBAPP: 0x03,
@@ -57,10 +53,6 @@ export const METADATA_TYPES = {
   USER_IDENTITY: 0x07,
 };
 Object.freeze(METADATA_TYPES);
-
-export const parentLinkTypeUserIdentity = 1;
-export const parentLinkTypeBoard = 5;
-export const parentLinkTypeBridgeUser = 10;
 
 export const PARENT_LINK_TYPES = {
   USER_IDENTITY: 1,

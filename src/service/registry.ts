@@ -1,7 +1,7 @@
 import { Logger, Peer, SignedRegistryEntry } from "#types.js";
 import { AbstractLevel, AbstractSublevel } from "abstract-level";
 import {
-  mkeyEd25519,
+  CID_HASH_TYPES,
   protocolMethodRegistryQuery,
   recordTypeRegistryEntry,
   registryMaxDataSize,
@@ -54,7 +54,7 @@ export class RegistryService {
       if (sre.pk.length !== 33) {
         throw new Error("Invalid pubkey");
       }
-      if (sre.pk[0] !== mkeyEd25519) {
+      if (sre.pk[0] !== CID_HASH_TYPES.ED25519) {
         throw new Error("Only ed25519 keys are supported");
       }
       if (sre.revision < 0 || sre.revision > 281474976710656) {
