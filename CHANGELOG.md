@@ -1,3 +1,10 @@
+# [0.1.0-develop.39](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.38...v0.1.0-develop.39) (2023-09-02)
+
+
+### Bug Fixes
+
+* if a peer completed the handshake, but our node is stopped, end the peer and abort ([6cc0bd6](https://git.lumeweb.com/LumeWeb/libs5/commit/6cc0bd650016e9c5f7a7a4aba720696558f47e79))
+
 # [0.1.0-develop.38](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.37...v0.1.0-develop.38) (2023-09-02)
 
 
