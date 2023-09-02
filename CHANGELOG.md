@@ -1,3 +1,10 @@
+# [0.1.0-develop.30](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.29...v0.1.0-develop.30) (2023-09-02)
+
+
+### Bug Fixes
+
+* correct argument order on ed25519.verify ([daf357c](https://git.lumeweb.com/LumeWeb/libs5/commit/daf357cd639cb69ee5957e6628aad1b62a6bfc34))
+
 # [0.1.0-develop.29](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.28...v0.1.0-develop.29) (2023-09-02)
 
 
