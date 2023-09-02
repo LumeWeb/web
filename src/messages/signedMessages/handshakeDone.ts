@@ -11,6 +11,10 @@ export default async function (
   message: SignedMessage,
   verifyId: boolean,
 ) {
+  if (!node.started) {
+    peer.end();
+    return;
+  }
   const p2p = node.services.p2p;
   const challenge = data.unpackBinary();
 
