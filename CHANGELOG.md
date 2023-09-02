@@ -1,3 +1,10 @@
+# [0.1.0-develop.33](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.32...v0.1.0-develop.33) (2023-09-02)
+
+
+### Bug Fixes
+
+* need to use close not end on WS transport ([e3b7760](https://git.lumeweb.com/LumeWeb/libs5/commit/e3b77600500289acca4aca96d418f25d1d1780b8))
+
 # [0.1.0-develop.32](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.31...v0.1.0-develop.32) (2023-09-02)
 
 # [0.1.0-develop.31](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.30...v0.1.0-develop.31) (2023-09-02)
