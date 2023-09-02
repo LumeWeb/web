@@ -244,7 +244,7 @@ export class RegistryService {
       ...sre.data,
     ]);
 
-    return ed25519.verify(list, sre.signature, sre.pk.slice(1));
+    return ed25519.verify(sre.signature, list, sre.pk.slice(1));
   }
   public serializeRegistryEntry(sre: SignedRegistryEntry): Uint8Array {
     return Uint8Array.from([
