@@ -194,7 +194,10 @@ export class RegistryService {
   }
 
   async getFromDB(pk: Uint8Array): Promise<SignedRegistryEntry | null> {
-    const val = await this.db?.get(stringifyBytes(pk));
+    let val;
+    try {
+      val = await this.db?.get(stringifyBytes(pk));
+    } catch {}
 
     if (val) {
       return this.deserializeRegistryEntry(val);
