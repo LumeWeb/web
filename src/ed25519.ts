@@ -12,8 +12,12 @@ export default class KeyPairEd25519 {
   public get publicKey(): Uint8Array {
     return concatBytes(
       Uint8Array.from([CID_HASH_TYPES.ED25519]),
-      ed25519.getPublicKey(this._bytes),
+      this.publicKeyRaw,
     );
+  }
+
+  public get publicKeyRaw(): Uint8Array {
+    return ed25519.getPublicKey(this._bytes);
   }
 
   public extractBytes(): Uint8Array {
