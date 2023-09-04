@@ -1,3 +1,10 @@
+# [0.1.0-develop.47](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.46...v0.1.0-develop.47) (2023-09-04)
+
+
+### Bug Fixes
+
+* export util functions ([8b87a61](https://git.lumeweb.com/LumeWeb/libs5/commit/8b87a619258a00a45e2eac81e5846c5f9ab2551d))
+
 # [0.1.0-develop.46](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.45...v0.1.0-develop.46) (2023-09-04)
 
 # [0.1.0-develop.45](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.44...v0.1.0-develop.45) (2023-09-04)
