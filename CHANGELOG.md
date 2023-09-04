@@ -1,3 +1,10 @@
+# [0.1.0-develop.45](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.44...v0.1.0-develop.45) (2023-09-04)
+
+
+### Bug Fixes
+
+* fix outdated reads. port of s5 08c4bda5c1109673fba907ba119c9855fc3fcf68 0d2bf39845b37dd0b2ebe06be34c5d51e7060280 ([9c471e6](https://git.lumeweb.com/LumeWeb/libs5/commit/9c471e694913771a06e05088041a9893dda3aed7))
+
 # [0.1.0-develop.44](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.43...v0.1.0-develop.44) (2023-09-03)
 
 # [0.1.0-develop.43](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.42...v0.1.0-develop.43) (2023-09-02)
