@@ -234,37 +234,50 @@ export class RegistryService {
   }
 
   public deserializeRegistryEntry(event: Uint8Array): SignedRegistryEntry {
-    const dataLength = event[42];
-    return {
-      pk: event.slice(1, 34),
-      revision: decodeEndian(event.slice(34, 42)),
-      data: event.slice(43, 43 + dataLength),
-      signature: event.slice(43 + dataLength),
-    };
+    return deserializeRegistryEntry(event);
   }
 
   public verifyRegistryEntry(sre: SignedRegistryEntry): boolean {
-    const list: Uint8Array = Uint8Array.from([
-      recordTypeRegistryEntry,
-      ...encodeEndian(sre.revision, 8),
-      sre.data.length, // 1 byte
-      ...sre.data,
-    ]);
-
-    return ed25519.verify(sre.signature, list, sre.pk.slice(1));
+    return verifyRegistryEntry(sre);
   }
   public serializeRegistryEntry(sre: SignedRegistryEntry): Uint8Array {
-    return Uint8Array.from([
-      recordTypeRegistryEntry,
-      ...sre.pk,
-      ...encodeEndian(sre.revision, 8),
-      sre.data.length,
-      ...sre.data,
-      ...sre.signature,
-    ]);
+    return serializeRegistryEntry(sre);
   }
 }
 
 async function pTimeout(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function deserializeRegistryEntry(
+  event: Uint8Array,
+): SignedRegistryEntry {
+  const dataLength = event[42];
+  return {
+    pk: event.slice(1, 34),
+    revision: decodeEndian(event.slice(34, 42)),
+    data: event.slice(43, 43 + dataLength),
+    signature: event.slice(43 + dataLength),
+  };
+}
+
+export function verifyRegistryEntry(sre: SignedRegistryEntry): boolean {
+  const list: Uint8Array = Uint8Array.from([
+    recordTypeRegistryEntry,
+    ...encodeEndian(sre.revision, 8),
+    sre.data.length, // 1 byte
+    ...sre.data,
+  ]);
+
+  return ed25519.verify(sre.signature, list, sre.pk.slice(1));
+}
+export function serializeRegistryEntry(sre: SignedRegistryEntry): Uint8Array {
+  return Uint8Array.from([
+    recordTypeRegistryEntry,
+    ...sre.pk,
+    ...encodeEndian(sre.revision, 8),
+    sre.data.length,
+    ...sre.data,
+    ...sre.signature,
+  ]);
 }
