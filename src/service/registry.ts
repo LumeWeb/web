@@ -26,6 +26,7 @@ export class RegistryService {
   private node: S5Node;
   private logger: Logger;
   private streams: Map<string, EventEmitter> = new Map<string, EventEmitter>();
+  private subs: Map<string, Multihash> = new Map<string, Multihash>();
 
   constructor(node: S5Node) {
     this.node = node;
@@ -125,7 +126,8 @@ export class RegistryService {
 
   async get(pk: Uint8Array): Promise<SignedRegistryEntry | null> {
     const key = new Multihash(pk);
-    if (this.streams.has(key.toString())) {
+    const keyString = key.toString();
+    if (this.subs.has(keyString)) {
       this.logger.verbose(`[registry] get (subbed) ${key}`);
       let res = await this.getFromDB(pk);
       if (res !== null) {
@@ -136,7 +138,10 @@ export class RegistryService {
       return this.getFromDB(pk);
     } else {
       this.sendRegistryRequest(pk);
-      this.streams.set(key.toString(), new EventEmitter());
+      this.subs.set(keyString, key);
+      if (!this.streams.has(keyString)) {
+        this.streams.set(keyString, new EventEmitter());
+      }
       let res = await this.getFromDB(pk);
       if (res === null) {
         this.logger.verbose(`[registry] get (clean) ${key}`);
