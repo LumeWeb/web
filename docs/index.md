@@ -1,5 +1,6 @@
 ---
 route: /
+id: index
 title: Welcome
 ---
 
