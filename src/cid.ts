@@ -3,6 +3,7 @@ import { Multihash } from "#multihash.js";
 import { CID_TYPES, REGISTRY_TYPES } from "#constants.js";
 import { decodeEndian, encodeEndian } from "#util.js";
 import { concatBytes, equalBytes } from "@noble/curves/abstract/utils";
+import { hexToBytes } from "@noble/hashes/utils";
 
 export default class CID extends Multibase {
   type: number;
@@ -23,6 +24,22 @@ export default class CID extends Multibase {
 
   static fromBytes(bytes: Uint8Array): CID {
     return CID._init(bytes);
+  }
+
+  static fromHash(
+    bytes: string | Uint8Array,
+    size: number,
+    type = CID_TYPES.RAW,
+  ): CID {
+    if (typeof bytes === "string") {
+      bytes = hexToBytes(bytes);
+    }
+
+    if (!Object.values(CID_TYPES).includes(type)) {
+      throw new Error(`invalid cid type ${type}`);
+    }
+
+    return new CID(type, new Multihash(bytes), size);
   }
 
   private static _init(bytes: Uint8Array): CID {
