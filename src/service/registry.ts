@@ -183,21 +183,7 @@ export class RegistryService {
     data: Uint8Array;
     revision: number;
   }): SignedRegistryEntry {
-    const list = new Uint8Array([
-      recordTypeRegistryEntry,
-      ...encodeEndian(revision, 8),
-      data.length,
-      ...data,
-    ]);
-
-    const signature = ed25519.sign(list, kp.extractBytes());
-
-    return {
-      pk: kp.publicKey,
-      revision,
-      data,
-      signature: new Uint8Array(signature),
-    };
+    return this.signRegistryEntry({ kp, data, revision });
   }
 
   async getFromDB(pk: Uint8Array): Promise<SignedRegistryEntry | null> {
@@ -280,4 +266,30 @@ export function serializeRegistryEntry(sre: SignedRegistryEntry): Uint8Array {
     ...sre.data,
     ...sre.signature,
   ]);
+}
+
+export function signRegistryEntry({
+  kp,
+  data,
+  revision,
+}: {
+  kp: KeyPairEd25519;
+  data: Uint8Array;
+  revision: number;
+}): SignedRegistryEntry {
+  const list = new Uint8Array([
+    recordTypeRegistryEntry,
+    ...encodeEndian(revision, 8),
+    data.length,
+    ...data,
+  ]);
+
+  const signature = ed25519.sign(list, kp.extractBytes());
+
+  return {
+    pk: kp.publicKey,
+    revision,
+    data,
+    signature: new Uint8Array(signature),
+  };
 }
