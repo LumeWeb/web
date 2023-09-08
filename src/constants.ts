@@ -144,6 +144,15 @@ export const storageLocationTypeFull = 5;
 export const storageLocationTypeBridge = 7;
 export const supportedFeatures = 3;
 
+export const hiddenDBTweak = 66;
+
+export const pathKeyDerivationTweak = 1;
+export const writeKeyDerivationTweak = 2;
+export const encryptionKeyDerivationTweak = 3;
+export const encryptionKeyLength = 32;
+export const encryptionNonceLength = 24;
+export const encryptionOverheadLength = 16;
+
 export const BOOTSTRAP_NODES: string[] = [
   "wss://z2DWuWNZcdSyZLpXFK2uCU3haaWMXrDAgxzv17sDEMHstZb@s5.garden/s5/p2p",
   "wss://z2DWuPbL5pweybXnEB618pMnV58ECj2VPDNfVGm3tFqBvjF@s5.ninja/s5/p2p",
