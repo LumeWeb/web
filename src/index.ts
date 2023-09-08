@@ -16,7 +16,7 @@ export {
   createTransportPeer,
   BasePeer,
 } from "./transports/index.js";
-export type { SignedRegistryEntry };
+export type { SignedRegistryEntry, KeyPairEd25519 };
 export { NodeId, CID };
 
 export function createNode(config: S5NodeConfig) {
