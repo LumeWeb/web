@@ -22,6 +22,16 @@ export default class CID extends Multibase {
     return CID._init(decodedBytes);
   }
 
+  static fromRegistry(bytes: Uint8Array): CID {
+    if (!Object.values(REGISTRY_TYPES).includes(bytes[0])) {
+      throw new Error(`invalid registry type ${bytes[0]}`);
+    }
+
+    bytes = bytes.slice(1);
+
+    return CID._init(bytes);
+  }
+
   static fromBytes(bytes: Uint8Array): CID {
     return CID._init(bytes);
   }
