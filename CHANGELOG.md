@@ -1,3 +1,10 @@
+# [0.1.0-develop.51](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.50...v0.1.0-develop.51) (2023-09-08)
+
+
+### Features
+
+* add more s5 constants ([b74fa99](https://git.lumeweb.com/LumeWeb/libs5/commit/b74fa99783c7ef13e93f5efa0498a76da0d7ab2f))
+
 # [0.1.0-develop.50](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.49...v0.1.0-develop.50) (2023-09-07)
 
 
