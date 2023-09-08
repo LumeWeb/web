@@ -1,3 +1,10 @@
+# [0.1.0-develop.54](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.53...v0.1.0-develop.54) (2023-09-08)
+
+
+### Features
+
+* add valid to CID ([565bed4](https://git.lumeweb.com/LumeWeb/libs5/commit/565bed46d511340854c443013c2be000c1e9302d))
+
 # [0.1.0-develop.53](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.52...v0.1.0-develop.53) (2023-09-08)
 
 
