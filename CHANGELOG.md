@@ -1,3 +1,10 @@
+# [0.1.0-develop.52](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.51...v0.1.0-develop.52) (2023-09-08)
+
+
+### Bug Fixes
+
+* export KeyPairEd25519 as a type ([0c060fd](https://git.lumeweb.com/LumeWeb/libs5/commit/0c060fde558c4755028b53360d9c805960c22b12))
+
 # [0.1.0-develop.51](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.50...v0.1.0-develop.51) (2023-09-08)
 
 
