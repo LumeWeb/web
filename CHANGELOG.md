@@ -1,3 +1,10 @@
+# [0.1.0-develop.50](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.49...v0.1.0-develop.50) (2023-09-07)
+
+
+### Features
+
+* add CID.fromHash ([4a157d9](https://git.lumeweb.com/LumeWeb/libs5/commit/4a157d9ecaa74eb9ff17d33398aa06ecf2b07607))
+
 # [0.1.0-develop.49](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.48...v0.1.0-develop.49) (2023-09-07)
 
 
