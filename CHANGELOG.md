@@ -1,3 +1,10 @@
+# [0.1.0-develop.53](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.52...v0.1.0-develop.53) (2023-09-08)
+
+
+### Features
+
+* add fromRegistry to CID ([bf52142](https://git.lumeweb.com/LumeWeb/libs5/commit/bf521425b3b2f161cf073db9caa4c3653587b7f9))
+
 # [0.1.0-develop.52](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.51...v0.1.0-develop.52) (2023-09-08)
 
 
