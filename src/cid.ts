@@ -52,6 +52,16 @@ export default class CID extends Multibase {
     return new CID(type, new Multihash(bytes), size);
   }
 
+  static valid(bytes: Uint8Array): boolean {
+    try {
+      CID._init(bytes);
+    } catch {
+      return false;
+    }
+
+    return true;
+  }
+
   private static _init(bytes: Uint8Array): CID {
     const type = bytes[0];
     if (type === CID_TYPES.BRIDGE) {
