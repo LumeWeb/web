@@ -52,7 +52,11 @@ export default class CID extends Multibase {
     return new CID(type, new Multihash(bytes), size);
   }
 
-  static valid(bytes: Uint8Array): boolean {
+  static verify(bytes: string | Uint8Array): boolean {
+    if (typeof bytes === "string") {
+      bytes = Multibase.decodeString(bytes);
+    }
+
     try {
       CID._init(bytes);
     } catch {
