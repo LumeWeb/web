@@ -1,6 +1,6 @@
 import Multibase from "#multibase.js";
 import { Multihash } from "#multihash.js";
-import { CID_TYPES, REGISTRY_TYPES } from "#constants.js";
+import { CID_HASH_TYPES, CID_TYPES, REGISTRY_TYPES } from "#constants.js";
 import { decodeEndian, encodeEndian } from "#util.js";
 import { concatBytes, equalBytes } from "@noble/curves/abstract/utils";
 import { hexToBytes } from "@noble/hashes/utils";
@@ -29,7 +29,13 @@ export default class CID extends Multibase {
 
     bytes = bytes.slice(1);
 
-    return CID._init(bytes);
+    const cid = CID._init(bytes);
+
+    if (cid.hash.functionType !== CID_HASH_TYPES.ED25519) {
+      return cid.copyWith({ type: CID_TYPES.RAW });
+    }
+
+    return cid;
   }
 
   static fromBytes(bytes: Uint8Array): CID {
