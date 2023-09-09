@@ -1,3 +1,10 @@
+# [0.1.0-develop.56](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.55...v0.1.0-develop.56) (2023-09-09)
+
+
+### Bug Fixes
+
+* don't prefix base58 since encoder already does it ([17151d2](https://git.lumeweb.com/LumeWeb/libs5/commit/17151d25d04d9de83ecf1d58dd78adadbd05bf07))
+
 # [0.1.0-develop.55](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.54...v0.1.0-develop.55) (2023-09-08)
 
 # [0.1.0-develop.54](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.53...v0.1.0-develop.54) (2023-09-08)
