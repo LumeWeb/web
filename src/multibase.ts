@@ -46,7 +46,7 @@ export default abstract class Multibase {
   }
 
   toBase58(): string {
-    return `z${base58btc.encode(this.toBytes())}`;
+    return base58btc.encode(this.toBytes());
   }
 
   toString(): string {
