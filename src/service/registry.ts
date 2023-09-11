@@ -183,7 +183,7 @@ export class RegistryService {
     data: Uint8Array;
     revision: number;
   }): SignedRegistryEntry {
-    return this.signRegistryEntry({ kp, data, revision });
+    return signRegistryEntry({ kp, data, revision });
   }
 
   async getFromDB(pk: Uint8Array): Promise<SignedRegistryEntry | null> {
