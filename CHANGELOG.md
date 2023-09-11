@@ -1,3 +1,10 @@
+# [0.1.0-develop.58](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.57...v0.1.0-develop.58) (2023-09-11)
+
+
+### Bug Fixes
+
+* signRegistryEntry accidentally recursive ([e03eb41](https://git.lumeweb.com/LumeWeb/libs5/commit/e03eb41e967ff95d27f41572e4e905f08ce2ba07))
+
 # [0.1.0-develop.57](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.56...v0.1.0-develop.57) (2023-09-09)
 
 
