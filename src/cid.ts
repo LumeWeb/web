@@ -42,6 +42,10 @@ export default class CID extends Multibase {
     return CID._init(bytes);
   }
 
+  static fromRegistryPublicKey(pubkey: string | Uint8Array): CID {
+    return CID.fromHash(pubkey, 0, CID_TYPES.RESOLVER);
+  }
+
   static fromHash(
     bytes: string | Uint8Array,
     size: number,
