@@ -1,3 +1,10 @@
+# [0.1.0-develop.60](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.59...v0.1.0-develop.60) (2023-09-19)
+
+
+### Bug Fixes
+
+* bad base32 encoding, multiformats handles the prefix ([155e0b4](https://git.lumeweb.com/LumeWeb/libs5/commit/155e0b4c0c9e04a97ca88e9b1cbec72ade0225bf))
+
 # [0.1.0-develop.59](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.58...v0.1.0-develop.59) (2023-09-11)
 
 
