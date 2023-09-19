@@ -1,3 +1,10 @@
+# [0.1.0-develop.59](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.58...v0.1.0-develop.59) (2023-09-11)
+
+
+### Features
+
+* add fromRegistryPublicKey helper ([e250878](https://git.lumeweb.com/LumeWeb/libs5/commit/e25087890f1d19139da5152e0d18b6001911baff))
+
 # [0.1.0-develop.58](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.57...v0.1.0-develop.58) (2023-09-11)
 
 
