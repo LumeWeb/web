@@ -13,7 +13,7 @@ export default abstract class Multibase {
     } else if (data[0] === "f") {
       bytes = Uint8Array.from(hexToBytes(data.substring(1)));
     } else if (data[0] === "b") {
-      let str = data.substring(1).toUpperCase();
+      let str = data;
       while (str.length % 4 !== 0) {
         str += "=";
       }
@@ -38,7 +38,7 @@ export default abstract class Multibase {
   }
 
   toBase32(): string {
-    return `b${base32.encode(this.toBytes()).replace(/=/g, "").toLowerCase()}`;
+    return `${base32.encode(this.toBytes()).replace(/=/g, "").toLowerCase()}`;
   }
 
   toBase64Url(): string {
