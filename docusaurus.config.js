@@ -98,7 +98,7 @@ const config = {
         darkTheme: darkCodeTheme,
       },
       matomo: {
-        matomoUrl: "https://piwiki.lumeweb.com",
+        matomoUrl: "https://piwiki.lumeweb.com/",
         siteId: "3",
         phpLoader: "matomo.php",
         jsLoader: "matomo.js",
