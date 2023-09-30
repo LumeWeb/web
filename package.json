@@ -1,6 +1,6 @@
 {
     "name": "@lumeweb/docs.lumeweb.com",
-    "version": "0.0.0",
+    "version": "0.1.0-develop.1",
     "private": true,
     "repository": {
         "type": "git",
