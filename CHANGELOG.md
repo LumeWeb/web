@@ -1,3 +1,10 @@
+## [0.1.1](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.1.0...v0.1.1) (2023-09-30)
+
+
+### Bug Fixes
+
+* add forward slash ([d6d5f08](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/commit/d6d5f08660ef422a8f8af234e601d2bc47bdf68a))
+
 # [0.1.0](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.0.1...v0.1.0) (2023-09-30)
 
 
