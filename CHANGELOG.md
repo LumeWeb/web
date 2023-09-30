@@ -1,3 +1,10 @@
+# [0.1.0-develop.2](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.1.0-develop.1...v0.1.0-develop.2) (2023-09-30)
+
+
+### Features
+
+* add matomo ([5a6eb31](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/commit/5a6eb31444a3b1b9e89c52530dd1d542d721ed74))
+
 # [0.1.0-develop.1](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.0.1...v0.1.0-develop.1) (2023-09-30)
 
 
