@@ -2,6 +2,10 @@
   "name": "@lumeweb/docs.lumeweb.com",
   "version": "0.0.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "gitea@git.lumeweb.com:LumeWeb/docs.lumeweb.com.git"
+  },
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
@@ -26,7 +30,12 @@
   "devDependencies": {
     "@docusaurus/module-type-aliases": "2.4.1",
     "@tsconfig/docusaurus": "^1.0.5",
-    "typescript": "^4.7.4"
+    "typescript": "^4.7.4",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/npm": "^10.0.4",
+    "@semantic-release/release-notes-generator": "^11.0.4",
+    "semantic-release": "^21.0.7"
   },
   "browserslist": {
     "production": [

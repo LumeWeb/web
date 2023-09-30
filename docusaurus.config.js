@@ -56,14 +56,6 @@ const config = {
           src: "img/logo.svg",
           srcDark: "img/logo_dark.svg",
         },
-        items: [
-          {
-            type: "docSidebar",
-            sidebarId: "main",
-            position: "left",
-            label: "Start",
-          },
-        ],
       },
       footer: {
         style: "dark",
