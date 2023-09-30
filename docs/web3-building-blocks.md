@@ -25,7 +25,7 @@ So instead of trying to explain what Web3 involves, lets explain what we have in
 - `Virtual Private Server (VPS) -> Compute Networks` - A few of these exist, but there are blockchain networks that specialize in the brokering of compute services like you may expect from AWS, which can run pretty much anything else in Web3 if needed. Both Web2 and Web3 have P2P networks, and the best known are probably BitTorrent and IPFS. These can be viewed as the content networks (not blockchains) and are extremely important for Web3.
   - `Serverless Functions and CDNs -> Edge Networks` - These are a specialization of compute networks that were born from AWS with lambada (and cloudfront) but has since rapidly evolved. There are projects that are experimenting with blockchain based edge compute and CDNs.
 
-- `NAS Backups, Archiving, Object Storage -> Storage Neworks` - If the currency of the world is currently oil, the currency of the web is data. No matter what you do, you eventually need secure, private, encrypted data storage, and a lot of it. This comes in many forms, but broadly these are where all of Web3's (and Web2) data will end up in sooner or later.
+- `NAS Backups, Archiving, Object Storage -> Storage Networks` - If the currency of the world is currently oil, the currency of the web is data. No matter what you do, you eventually need secure, private, encrypted data storage, and a lot of it. This comes in many forms, but broadly these are where all of Web3's (and Web2) data will end up in sooner or later.
 
 Web3 is also fundamentally built on P2P networks in many forms and designs. Every blockchain alone is a P2P network, tracking its databases changes. That's very different from Web2, that is mostly using `server -> client` model.
 
