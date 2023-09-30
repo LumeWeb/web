@@ -97,7 +97,14 @@ const config = {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
       },
+      matomo: {
+        matomoUrl: "https://piwiki.lumeweb.com",
+        siteId: "3",
+        phpLoader: "matomo.php",
+        jsLoader: "matomo.js",
+      },
     }),
+  plugins: ["docusaurus-plugin-matomo"],
 };
 
 module.exports = config;
