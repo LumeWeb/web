@@ -1,3 +1,5 @@
+## [0.1.3](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.1.2...v0.1.3) (2023-09-30)
+
 ## [0.1.2](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.1.1...v0.1.2) (2023-09-30)
 
 
