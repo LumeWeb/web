@@ -1,3 +1,10 @@
+## [0.1.2](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.1.1...v0.1.2) (2023-09-30)
+
+
+### Bug Fixes
+
+* typo ([4818fc4](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/commit/4818fc42346c2eed02d7191a2b7c3faee2603805))
+
 ## [0.1.1](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.1.0...v0.1.1) (2023-09-30)
 
 
