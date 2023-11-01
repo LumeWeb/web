@@ -86,7 +86,11 @@ const config = {
               },
               {
                 label: "GitHub",
-                href: "https://github.com/lumeweb3",
+                href: "https://github.com/LumeWeb",
+              },
+              {
+                label: "Git",
+                href: "https://git.lumeweb.com",
               },
             ],
           },
