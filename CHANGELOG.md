@@ -1,3 +1,10 @@
+## [0.1.5](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.1.4...v0.1.5) (2023-11-01)
+
+
+### Bug Fixes
+
+* grammar ([b2912ae](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/commit/b2912aee2649cf69ea7593ce5c8dd21876276838))
+
 ## [0.1.4-develop.2](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.1.4-develop.1...v0.1.4-develop.2) (2023-11-01)
 
 
