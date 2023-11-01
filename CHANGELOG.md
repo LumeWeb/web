@@ -1,3 +1,10 @@
+## [0.1.4](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.1.3...v0.1.4) (2023-11-01)
+
+
+### Bug Fixes
+
+* update footer menu ([3e6d4e6](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/commit/3e6d4e61e5f174b732701d861ac4860c509d0ba2))
+
 ## [0.1.4-develop.1](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.1.3...v0.1.4-develop.1) (2023-11-01)
 
 
