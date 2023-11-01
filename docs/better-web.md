@@ -52,7 +52,7 @@ Most of the world would roll over and comply anyway since its what people always
 
 The whole trajectory of Web3 needs to go past short-term casino games, centralization of its infrastructure, and a Microsoft EEE mentality in the DeFi space. Only then can we start to get real value for users to care.
 
-Our view is that, if you use Web3, and you don't notice it is any different to Web 2.0, it is boring and *"just is"*, only then the Web3 is can be considered a success. An open web needs to be the `standard`, not the exception.
+Our view is that, if you use Web3, and you don't notice it is any different to Web 2.0, it is boring and *"just is"*, only then the Web3 can be considered a success. An open web needs to be the `standard`, not the exception.
 
 And that starts with `access`. Your network can be the most decentralized ever, but if no one can easily access it, does it matter? This is the last mile issue of Web3. We have all this infrastructure, centralized or decentralized, but access is still a barrier, and frankly... it's a joke.
 
