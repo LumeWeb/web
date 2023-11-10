@@ -2,6 +2,8 @@
 title: Web3 Browser Web App
 ---
 
+Link: https://web3browser.io
+
 ![image](/web3-browser-webapp.png)
 
 This is an experimental tech demo to enable HNS and ENS browsing via IPFS.
