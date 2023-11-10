@@ -1,3 +1,10 @@
+## [0.2.1](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.2.0...v0.2.1) (2023-11-10)
+
+
+### Bug Fixes
+
+* add missing link ([0c70d1a](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/commit/0c70d1a48132ffda481f78c992ecb47cb2113c62))
+
 # [0.2.0](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.1.5...v0.2.0) (2023-11-10)
 
 
