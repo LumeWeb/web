@@ -1,3 +1,10 @@
+# [0.2.0](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.1.5...v0.2.0) (2023-11-10)
+
+
+### Features
+
+* add page for webapp ([5971294](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/commit/59712949916c5b2335c57f395516dd13d5e5234c))
+
 # [0.2.0-develop.1](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.1.4-develop.2...v0.2.0-develop.1) (2023-11-10)
 
 
