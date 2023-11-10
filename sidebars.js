@@ -13,7 +13,14 @@
 
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 const sidebars = {
-  main: ["index", "better-web", "web2-limits", "web3-building-blocks", "lume"],
+  main: [
+    "index",
+    "better-web",
+    "web2-limits",
+    "web3-building-blocks",
+    "lume",
+    "browser-webapp",
+  ],
 };
 
 module.exports = sidebars;
