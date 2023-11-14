@@ -7,45 +7,54 @@ const newsItems = [
 
 export default function Home() {
   return (
-    <main className="flex w-full min-h-screen flex-col md:px-40 items-center space-y-10 py-16 mx-auto">
+    <>
       <SearchBar />
-      
+
       <div className="flex flex-row flex-wrap justify-between w-full">
         <Feed />
         <Feed />
         <Feed />
       </div>
-
-    </main>
+    </>
   )
 }
 
 const Feed = () => {
-  return <section className="flex flex-col space-y-6 w-[calc(33%-24px)] max-w-md">
-  <header className="flex flex-row space-x-3 items-start">
-    <PaperIcon className="text-primary mt-1"/> 
-    <nav>
-      <h3 className="text-primary text-xl">Latest community posts</h3>
-      <ul className="text-gray-400 text-sm list-none [&>li:hover]:cursor-pointer [&>li:hover]:text-white">
-        <li className="text-white inline after:content-['/'] after:mx-1 after:text-gray-400">latest</li>
-        <li className="text-current inline after:content-['/'] after:mx-1 after:text-gray-400">day</li>
-        <li className="text-current inline after:content-['/'] after:mx-1 after:text-gray-400">week</li>
-        <li className="text-current inline">month</li>
-      </ul>
-    </nav>
-  </header>
-  <div className="@container space-y-4 w-full">
-    <article className="flex bg-gray-800 flex-col @md:flex-row justify-between w-full py-4 px-6 rounded">
-      <span className="inline-block text-gray-500 w-full flex-1">1h ago</span>
-      <p className="inline-block text-white w-[25ch] flex-auto">
-      Bitcoin (BTC) Price Prediction: When Will Bitcoin Reach $100,000?
-      </p>
-    </article>
-  </div>
-</section>
+  return (
+    <section className="flex flex-col space-y-6 w-[calc(33%-24px)] max-w-md">
+      <header className="flex flex-row space-x-3 items-start">
+        <PaperIcon className="text-primary mt-1" />
+        <nav>
+          <h3 className="text-primary text-xl">Latest community posts</h3>
+          <ul className="text-gray-400 text-sm list-none [&>li:hover]:cursor-pointer [&>li:hover]:text-white">
+            <li className="text-white inline after:content-['/'] after:mx-1 after:text-gray-400">
+              latest
+            </li>
+            <li className="text-current inline after:content-['/'] after:mx-1 after:text-gray-400">
+              day
+            </li>
+            <li className="text-current inline after:content-['/'] after:mx-1 after:text-gray-400">
+              week
+            </li>
+            <li className="text-current inline">month</li>
+          </ul>
+        </nav>
+      </header>
+      <div className="@container space-y-4 w-full">
+        <article className="flex bg-gray-800 flex-col @md:flex-row justify-between w-full py-4 px-6 rounded">
+          <span className="inline-block text-gray-500 w-full flex-1">
+            1h ago
+          </span>
+          <p className="inline-block text-white w-[25ch] flex-auto">
+            Bitcoin (BTC) Price Prediction: When Will Bitcoin Reach $100,000?
+          </p>
+        </article>
+      </div>
+    </section>
+  )
 }
 
-const PaperIcon = ({className}: {className: string}) => {
+const PaperIcon = ({ className }: { className: string }) => {
   return (
     <svg
       width="24"

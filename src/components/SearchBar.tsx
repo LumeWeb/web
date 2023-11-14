@@ -1,44 +1,44 @@
 "use client"
 
-import React, { FormEvent, useRef, useState } from "react"
+import React, { FormEvent, useCallback, useEffect, useRef, useState } from "react"
 import {
-  MagnifyingGlassIcon as SearchIcon,
-  FunnelIcon as FilterIcon,
   ChevronDownIcon,
   ChevronRightIcon
 } from "@heroicons/react/24/outline" // Assuming usage of Heroicons for icons
-import { formatDistanceToNow } from "date-fns" // date-fns library used for date formatting
 import { flushSync } from "react-dom"
+import Link from "next/link"
+import { usePathname, useSearchParams, useRouter } from "next/navigation"
+import { formatDate } from "@/utils"
 
-// Utility function to format dates
-const formatDate = (date: string | Date) => {
-  const distance = formatDistanceToNow(new Date(date), { addSuffix: true })
-  return distance
-    .replace(/less than a minute?/, "<1m")
-    .replace(/ seconds?/, "s")
-    .replace(/ minutes?/, "m")
-    .replace(/ hours?/, "h")
-    .replace(/ days?/, "d")
-    .replace(/ weeks?/, "w")
+type Props = {
+  variant: "default" | "simplified"
 }
 
-const SearchBar = () => {
+const SearchBar = ({variant}: Props) => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const inputRef = useRef<HTMLInputElement>()
-  const [query, setQuery] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [activeInput, setActiveInput] = useState(true)
   const [results, setResults] = useState<
-    {
-      id: number
-      timestamp: Date
-      title: string
-      description: string
-    }[]
+    SearchResult[]
   >([])
 
-  const handleSearch = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const handleSearch = useCallback(async (event?: FormEvent<HTMLFormElement>) => {
+    event?.preventDefault()
     setIsLoading(true)
+    const newSearchParams = new URLSearchParams(searchParams)
+
+    if(query) {
+      newSearchParams.set('q', query)
+    } else {
+      newSearchParams.delete('q')
+    }
+
+    router.push(`${pathname}?${newSearchParams}`)
+
     // Perform search and update results state
     // Assume fetchResults is a function that fetches search results
     // const searchResults = await fetchResults(query);
@@ -60,7 +60,13 @@ const SearchBar = () => {
     setResults(searchResults)
     setIsLoading(false)
     setActiveInput(false)
-  }
+  }, [query, setResults, setIsLoading, setActiveInput, searchParams, router, pathname])
+
+  useEffect(() => {
+    if(searchParams.get("q") && searchParams.get("q") !== "") {
+      handleSearch();
+    }
+  }, [searchParams, handleSearch])
 
   return (
     <div
@@ -166,12 +172,12 @@ const SearchBar = () => {
               <h3 className="text-md font-semibold text-white">{item.title}</h3>
             </div>
           ))}
-          <div className="mt-4 flex justify-center">
-            <button className="bg-secondary w-full py-7 text-white hover:bg-teal-800 transition-colors">
-              {results.length}+ search results for <span className="text-blue-300">{query}</span>
-              <ChevronRightIcon className="w-5 h-5 inline ml-2 -mt-[2px]" />
+          <Link href={`/search?q=${encodeURIComponent(query)}`}>
+            <button className="mt-4 flex justify-center items-center bg-secondary w-full py-7 text-white hover:bg-teal-800 transition-colors">
+              {results.length}+ search results for <span className="text-blue-300 ml-1">{query}</span>
+              <ChevronRightIcon className="w-5 h-5 inline ml-2 mt-[1px]" />
             </button>
-          </div>
+          </Link>
         </>
       )}
     </div>
@@ -182,15 +188,6 @@ const SearchBar = () => {
 const LoadingComponent = () => {
   // Replace with actual Shadcn Loading component
   return <div>Loading...</div>
-}
-
-const FilterComponent = () => {
-  // Replace with actual Shadcn Filter component
-  return (
-    <button>
-      <FilterIcon className="h-5 w-5 text-white" />
-    </button>
-  )
 }
 
 export default SearchBar

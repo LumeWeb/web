@@ -16,6 +16,10 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        main: "var(--font-inter)",
+        secondary: "var(--font-jaldi)",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -72,7 +76,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [require('@tailwindcss/container-queries'), require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate")],
 }
 
 export default config
