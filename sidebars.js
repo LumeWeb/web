@@ -37,6 +37,7 @@ const sidebars = {
       link: null,
       items: ["apps/browser-webapp"],
     },
+    "roadmap",
   ],
 };
 
