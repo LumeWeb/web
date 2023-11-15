@@ -3,4 +3,5 @@ type SearchResult = {
     timestamp: Date
     title: string
     description: string
+    slug: string
   }

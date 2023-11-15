@@ -1,70 +1,70 @@
 "use client"
 
-import React, { FormEvent, useCallback, useEffect, useRef, useState } from "react"
-import {
-  ChevronDownIcon,
-  ChevronRightIcon
-} from "@heroicons/react/24/outline" // Assuming usage of Heroicons for icons
+import React, {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from "react"
+import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline" // Assuming usage of Heroicons for icons
 import { flushSync } from "react-dom"
 import Link from "next/link"
 import { usePathname, useSearchParams, useRouter } from "next/navigation"
-import { formatDate } from "@/utils"
+import { formatDate, getResults } from "@/utils"
 
 type Props = {
   variant: "default" | "simplified"
 }
 
-const SearchBar = ({variant}: Props) => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-  const [query, setQuery] = useState(searchParams.get("q") ?? "");
+const SearchBar = ({ variant }: Props) => {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const [query, setQuery] = useState(searchParams.get("q") ?? "")
   const inputRef = useRef<HTMLInputElement>()
   const [isLoading, setIsLoading] = useState(false)
   const [activeInput, setActiveInput] = useState(true)
-  const [results, setResults] = useState<
-    SearchResult[]
-  >([])
+  const [results, setResults] = useState<SearchResult[]>([])
 
-  const handleSearch = useCallback(async (event?: FormEvent<HTMLFormElement>) => {
-    event?.preventDefault()
-    setIsLoading(true)
-    const newSearchParams = new URLSearchParams(searchParams)
+  const handleSearch = useCallback(
+    async (event?: FormEvent<HTMLFormElement>) => {
+      event?.preventDefault()
+      setIsLoading(true)
+      const newSearchParams = new URLSearchParams(searchParams)
 
-    if(query) {
-      newSearchParams.set('q', query)
-    } else {
-      newSearchParams.delete('q')
-    }
-
-    router.push(`${pathname}?${newSearchParams}`)
-
-    // Perform search and update results state
-    // Assume fetchResults is a function that fetches search results
-    // const searchResults = await fetchResults(query);
-    // Mock the search results
-    const searchResults = [
-      {
-        id: 1,
-        timestamp: new Date(),
-        title: "Mock Title 1",
-        description: "Mock Description 1"
-      },
-      {
-        id: 2,
-        timestamp: new Date(),
-        title: "Mock Title 2",
-        description: "Mock Description 2"
+      if (query) {
+        newSearchParams.set("q", query)
+      } else {
+        newSearchParams.delete("q")
       }
+
+      router.push(`${pathname}?${newSearchParams}`)
+
+      // Perform search and update results state
+      // Assume fetchResults is a function that fetches search results
+      // const searchResults = await fetchResults(query);
+      // Mock the search results
+      const searchResults = await getResults({ query })
+
+      setResults(searchResults)
+      setIsLoading(false)
+      setActiveInput(false)
+    },
+    [
+      query,
+      setResults,
+      setIsLoading,
+      setActiveInput,
+      searchParams,
+      router,
+      pathname
     ]
-    setResults(searchResults)
-    setIsLoading(false)
-    setActiveInput(false)
-  }, [query, setResults, setIsLoading, setActiveInput, searchParams, router, pathname])
+  )
 
   useEffect(() => {
-    if(searchParams.get("q") && searchParams.get("q") !== "") {
-      handleSearch();
+    if (searchParams.get("q") && searchParams.get("q") !== "") {
+      handleSearch()
     }
   }, [searchParams, handleSearch])
 
@@ -128,10 +128,10 @@ const SearchBar = ({variant}: Props) => {
           <span
             className="block w-full flex-1 text-blue-300"
             onClick={() => {
-                flushSync(() => {
-                    setActiveInput(true)
-                })
-                inputRef.current?.focus()
+              flushSync(() => {
+                setActiveInput(true)
+              })
+              inputRef.current?.focus()
             }}
           >
             {'"'}
@@ -162,7 +162,8 @@ const SearchBar = ({variant}: Props) => {
         <>
           <hr className="my-4 border-1" />
           {results.map((item) => (
-            <div
+            <Link
+              href={`/article/${item.slug}`}
               key={item.id}
               className="flex cursor-pointer flex-row items-center space-x-5 my-2 py-2 px-4 hover:bg-gray-800 rounded-md"
             >
@@ -170,11 +171,12 @@ const SearchBar = ({variant}: Props) => {
                 {formatDate(item.timestamp)}
               </span>
               <h3 className="text-md font-semibold text-white">{item.title}</h3>
-            </div>
+            </Link>
           ))}
           <Link href={`/search?q=${encodeURIComponent(query)}`}>
             <button className="mt-4 flex justify-center items-center bg-secondary w-full py-7 text-white hover:bg-teal-800 transition-colors">
-              {results.length}+ search results for <span className="text-blue-300 ml-1">{query}</span>
+              {results.length}+ search results for{" "}
+              <span className="text-blue-300 ml-1">{query}</span>
               <ChevronRightIcon className="w-5 h-5 inline ml-2 mt-[1px]" />
             </button>
           </Link>
