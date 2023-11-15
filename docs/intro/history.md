@@ -4,7 +4,7 @@ title: History
 
 Lume started (before we even decided it was a project or the name) while we were trying to create a web3 cloud drive on Nextcloud based on Skynet. We realized that we were going down the wrong path and needed to solve accessing content before doing anything with the content itself.
 
-Skynet in the process had a very rough year, as since 2020, Skynet tried to solve distribution with network of Skynet Portals, but experienced number of obstacles from all levels of internet infrastructure (see [Limitations of Web2](web2-limits.md)) and eventually was shut down.
+Skynet in the process had a very rough year, as since 2020, Skynet tried to solve distribution with network of Skynet Portals, but experienced number of obstacles from all levels of internet infrastructure (see [Limitations of Web2](/problems/web2-limits.md)) and eventually was shut down.
 
 Sia in the background was trying to support both innovating and Skynets efforts, and things came to a head with Skynet going bankrupt.
 
