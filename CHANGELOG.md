@@ -1,3 +1,15 @@
+# [0.3.0-develop.1](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.2.1...v0.3.0-develop.1) (2023-11-15)
+
+
+### Bug Fixes
+
+* broken link ([bc56dfa](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/commit/bc56dfa573a44438bd7bebdb1e4c22b7c0563544))
+
+
+### Features
+
+* add AI generated summary to the homepage ([e232fcc](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/commit/e232fccaf844604b1f6b0a1af2b12628bb6a69ac))
+
 ## [0.2.1](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.2.0...v0.2.1) (2023-11-10)
 
 
