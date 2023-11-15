@@ -4,11 +4,11 @@ title: Web3 Browser Web App
 
 ![image](/web3-browser-webapp.png)
 
-Link: https://web3browser.io
+**Link**: https://web3browser.io
 
 This is an experimental tech demo to enable HNS and ENS browsing via IPFS.
 
-This demo uses the following technologies:
+**This demo uses the following technologies**:
 
 * Hypercore: https://docs.holepunch.to/
 * The kernel, forked from Skynet: https://git.lumeweb.com/LumeWeb/libkernel/src/branch/develop
@@ -18,7 +18,7 @@ This demo uses the following technologies:
 * IPFS: https://github.com/ipfs/helia
 * HNS: https://github.com/handshake-org/hsd
 
-Some notes about current issues and limitations:
+**Some notes about current issues and limitations**:
 
 * IP addresses are not supported. So you cannot access "normal" servers.
 * Pages may render twice, as in refresh, before loading.

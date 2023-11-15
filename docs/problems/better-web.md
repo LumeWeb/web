@@ -4,7 +4,7 @@ title: Making a Better Web
 
 Want to hear a joke?
 
-## Web3.
+#### Web3.
 
 Probably not the start you expected, but let's be honest with ourselves for a moment - the current state of web3 is a joke, at least to the majority of the world.
 
@@ -14,16 +14,16 @@ On the other side there is the Bitcoin, it doesn't care, it just works as it's m
 
 So, what's next? Maybe to better understand this all, let's rewind a bit and learn from our past first.
 
-### Web 1.0
+#### Web 1.0
 
 This era started in early 90s and marks a first generation of the world wide web, aka internet. It was `open` and had an `unlimited potential`. Number of users was growing exponentially, as was the number of companies building in the space and it didn't take too long for few big ones to emerge and people just happily handing control of own data over to them.
 
-### Web 2.0
+#### Web 2.0
 
 By 2005, the internet was becoming increasingly centralized and this transition was complete with arrival of massive social networks connecting billions of people around the globe and monetizing their voluntarily entered and frequently updated personal data. On Web 2.0, the user is the real `product` and your data are no longer yours, same as your money on a bank account are not yours, you only trust a third party to manage it for you.
 
 
-### Web3?
+#### Web3?
 
 Web3 as an ideal is supposed to be about you, `the user`, not you, `the builder`. I have seen various ideas suggesting Web3 is `read + write + own`, and I can largely agree, though many builders don't agree with the route to achieve that.
 

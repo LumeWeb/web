@@ -10,7 +10,7 @@ You can actually translate a lot of the Web2 technologies and components to thei
 
 When you look at the marketing for the hundreds of Web3/DeFi projects, it's all full of strong claims and promises, every single project sounds like re-definition of the internet, while it actually is just begging for attention and your money.
 
-So instead of trying to explain what Web3 involves, lets explain what we have in Web2, and what its counterparts can look like in web3.
+So instead of trying to explain what Web3 involves, **lets explain what we have in Web2, and what its counterparts can look like in web3**.
 
 | Web2 Concept                           | Web3 Concept          | Description                                                                                                                                                                                                                                                                     |
 |----------------------------------------|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
