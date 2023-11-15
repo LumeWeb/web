@@ -1,3 +1,10 @@
+# [0.3.0-develop.3](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.3.0-develop.2...v0.3.0-develop.3) (2023-11-15)
+
+
+### Bug Fixes
+
+* ensure trailing slashes get a redirect ([d4018c2](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/commit/d4018c2b2d51616102cadbf5633b0d722769b997))
+
 # [0.3.0-develop.2](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.3.0-develop.1...v0.3.0-develop.2) (2023-11-15)
 
 
