@@ -1,3 +1,10 @@
+# [0.3.0-develop.2](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.3.0-develop.1...v0.3.0-develop.2) (2023-11-15)
+
+
+### Bug Fixes
+
+* bad redirect ([d1a052c](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/commit/d1a052c2bce749426e817291e75b23461e24dbf9))
+
 # [0.3.0-develop.1](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.2.1...v0.3.0-develop.1) (2023-11-15)
 
 
