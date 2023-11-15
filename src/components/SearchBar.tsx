@@ -14,10 +14,9 @@ import { usePathname, useSearchParams, useRouter } from "next/navigation"
 import { formatDate, getResults } from "@/utils"
 
 type Props = {
-  variant: "default" | "simplified"
 }
 
-const SearchBar = ({ variant }: Props) => {
+const SearchBar = ({ }: Props) => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -70,7 +69,7 @@ const SearchBar = ({ variant }: Props) => {
 
   return (
     <div
-      className={`w-full p-4 border-2 ${
+      className={`w-full mt-8  p-4 border-2 ${
         results.length > 0 ? "border-sky-300 bg-gray-950" : "border-primary"
       }`}
     >
