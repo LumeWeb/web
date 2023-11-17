@@ -85,6 +85,40 @@ export class S5Node {
     await this.services.p2p.stop();
   }
 
+  async getCachedStorageLocations(
+    hash: Multihash,
+    types: number[],
+  ): Promise<Map<NodeId, StorageLocation>> {
+    const locations = new Map<NodeId, StorageLocation>();
+
+    const map = await this.readStorageLocationsFromDB(hash); // Assuming this method exists and returns a Map or similar structure
+    if (map.size === 0) {
+      return new Map();
+    }
+
+    const ts = Math.floor(Date.now() / 1000);
+
+    types.forEach((type) => {
+      if (!map.has(type)) return;
+
+      map.get(type)!.forEach((value, key) => {
+        if (value[3] >= ts) {
+          const storageLocation = new StorageLocation(
+            type,
+            value[1].map((v: string) => v), // Assuming value[1] is an array of strings
+            value[3],
+          );
+
+          // Assuming providerMessage is a property of StorageLocation
+          storageLocation.providerMessage = value[4];
+          locations.set(key, storageLocation);
+        }
+      });
+    });
+
+    return locations;
+  }
+
   async readStorageLocationsFromDB(
     hash: Multihash,
   ): Promise<Map<number, Map<NodeId, Map<number, any>>>> {
