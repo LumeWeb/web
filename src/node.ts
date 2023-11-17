@@ -87,8 +87,8 @@ export class S5Node {
 
   async readStorageLocationsFromDB(
     hash: Multihash,
-  ): Promise<Map<number, Map<string, Map<number, any>>>> {
-    const map = new Map<number, Map<string, Map<number, any>>>();
+  ): Promise<Map<number, Map<NodeId, Map<number, any>>>> {
+    const map = new Map<number, Map<NodeId, Map<number, any>>>();
     const bytes = await this.db.get(stringifyHash(hash));
     if (bytes === null) {
       return map;
@@ -97,15 +97,12 @@ export class S5Node {
     const mapLength = unpacker.unpackMapLength();
     for (let i = 0; i < mapLength; i++) {
       const type = unpacker.unpackInt() as number;
-      const innerMap = new Map<string, Map<number, any>>();
+      const innerMap = new Map<NodeId, Map<number, any>>();
       map.set(type, innerMap);
       const innerMapLength = unpacker.unpackMapLength();
       for (let j = 0; j < innerMapLength; j++) {
         const nodeId = new NodeId(unpacker.unpackBinary());
-        innerMap.set(
-          nodeId.toString(),
-          new Map(unpacker.unpackMap() as [number, any][]),
-        );
+        innerMap.set(nodeId, new Map(unpacker.unpackMap() as [number, any][]));
       }
     }
     return map;
@@ -126,7 +123,7 @@ export class S5Node {
   }) {
     const map = await this.readStorageLocationsFromDB(hash);
     const innerMap =
-      map.get(location.type) || new Map<string, Map<number, any>>();
+      map.get(location.type) || new Map<NodeId, Map<number, any>>();
     map.set(location.type, innerMap);
 
     const locationMap = new Map<number, any>([
@@ -136,7 +133,7 @@ export class S5Node {
       [4, message],
     ]);
 
-    innerMap.set(nodeId.toString(), locationMap);
+    innerMap.set(nodeId, locationMap);
     await config.cacheDb.put(
       stringifyHash(hash),
       new Packer().pack(map).takeBytes(),
