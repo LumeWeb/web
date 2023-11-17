@@ -63,6 +63,10 @@ Object.freeze(PARENT_LINK_TYPES);
 
 export const registryMaxDataSize = 64;
 
+export const parentLinkTypeUserIdentity = 1;
+export const parentLinkTypeBoard = 5;
+export const parentLinkTypeBridgeUser = 10;
+
 // ! user identity
 
 export const authPayloadVersion1 = 0x01;
