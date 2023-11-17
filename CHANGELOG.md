@@ -1,3 +1,10 @@
+# [0.1.0-develop.62](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.61...v0.1.0-develop.62) (2023-11-17)
+
+
+### Bug Fixes
+
+* convert paths to an object ([1c63497](https://git.lumeweb.com/LumeWeb/libs5/commit/1c63497d2e9e5d7a72969df83876991074b26673))
+
 # [0.1.0-develop.61](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.60...v0.1.0-develop.61) (2023-11-17)
 
 
