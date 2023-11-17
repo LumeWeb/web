@@ -39,7 +39,9 @@ export default class WebAppMetadata extends Metadata {
         },
         {} as { [key: string]: string },
       ),
-      paths: this.paths,
+      paths: Object.fromEntries(
+        Object.entries(this.paths).map(([key, ref]) => [key, ref.toJson()]),
+      ),
       extraMetadata: this.extraMetadata,
     };
   }
