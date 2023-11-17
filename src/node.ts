@@ -3,12 +3,22 @@ import NodeId from "./nodeId.js";
 import { Logger, S5Config, S5NodeConfig, S5Services } from "./types.js";
 import Unpacker from "./serialization/unpack.js";
 import Packer from "./serialization/pack.js";
-import StorageLocation from "./storage.js";
-import KeyPairEd25519 from "#ed25519.js";
+import StorageLocation, { StorageLocationProvider } from "./storage.js";
 import { AbstractLevel } from "abstract-level";
 import { P2PService } from "#service/p2p.js";
 import { RegistryService } from "#service/registry.js";
-import { hash } from "@noble/hashes/_assert";
+import {
+  CID_TYPES,
+  storageLocationTypeFile,
+  storageLocationTypeFull,
+} from "#constants.js";
+import axios from "axios";
+import { equalBytes } from "@noble/curves/abstract/utils";
+import { blake3 } from "@noble/hashes/blake3";
+import CID from "#cid.js";
+import type Metadata from "#serialization/metadata/base.js";
+import { deserialize as deserializeMediaMetadata } from "#serialization/metadata/media.js";
+import { deserialize as deserializeWebAppMetadata } from "#serialization/metadata/webapp.js";
 const DEFAULT_LOGGER = {
   info(s: any) {
     console.info(s);
@@ -29,6 +39,10 @@ const DEFAULT_LOGGER = {
 
 export class S5Node {
   private _nodeConfig: S5NodeConfig;
+  private metadataCache: Map<Multihash, Metadata> = new Map<
+    Multihash,
+    Metadata
+  >();
 
   constructor(config: S5NodeConfig) {
     this._nodeConfig = config;
@@ -172,6 +186,75 @@ export class S5Node {
       stringifyHash(hash),
       new Packer().pack(map).takeBytes(),
     );
+  }
+
+  async downloadBytesByHash(hash: Multihash): Promise<Uint8Array> {
+    const dlUriProvider = new StorageLocationProvider(this, hash, [
+      storageLocationTypeFull,
+      storageLocationTypeFile,
+    ]);
+
+    dlUriProvider.start();
+
+    let retryCount = 0;
+    while (true) {
+      const dlUri = await dlUriProvider.next();
+
+      this.logger.verbose(`[try] ${dlUri.location.bytesUrl}`);
+
+      try {
+        const res = await axios.get(dlUri.location.bytesUrl, {
+          timeout: 30000, // Adjust timeout as needed
+        });
+
+        // Assuming rust.hashBlake3 and areBytesEqual are available functions
+        const resHash = blake3(res.data);
+
+        if (!equalBytes(hash.hashBytes, resHash)) {
+          throw new Error("Integrity verification failed");
+        }
+
+        dlUriProvider.upvote(dlUri);
+        return res.data;
+      } catch (error) {
+        this.logger.catched(error);
+
+        dlUriProvider.downvote(dlUri);
+      }
+
+      retryCount++;
+      if (retryCount > 32) {
+        throw new Error("Too many retries");
+      }
+    }
+  }
+  async getMetadataByCID(cid: CID): Promise<Metadata> {
+    const hash = cid.hash;
+
+    let metadata: Metadata;
+
+    if (this.metadataCache.has(hash)) {
+      metadata = this.metadataCache.get(hash)!;
+    } else {
+      const bytes = await this.downloadBytesByHash(hash);
+
+      switch (cid.type) {
+        case CID_TYPES.METADATA_MEDIA:
+          metadata = await deserializeMediaMetadata(bytes);
+          break;
+        case CID_TYPES.METADATA_WEBAPP:
+          metadata = await deserializeWebAppMetadata(bytes);
+          break;
+        case CID_TYPES.BRIDGE:
+          metadata = await deserializeMediaMetadata(bytes);
+          break;
+        default:
+          throw new Error("Unsupported metadata format");
+      }
+
+      this.metadataCache.set(hash, metadata);
+    }
+    return metadata;
   }
 }
 
