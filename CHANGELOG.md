@@ -1,3 +1,21 @@
+# [0.1.0-develop.61](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.60...v0.1.0-develop.61) (2023-11-17)
+
+
+### Bug Fixes
+
+* bad import ([23b8c01](https://git.lumeweb.com/LumeWeb/libs5/commit/23b8c01d1c3ade99fe4a1ff7c8a781f3fe4c3bb8))
+* export StorageLocationProvider ([828741f](https://git.lumeweb.com/LumeWeb/libs5/commit/828741f569c3ce5dbf2932651c4ee7435adcc4bf))
+* need to store NodeId not the string form of it ([3ad41c7](https://git.lumeweb.com/LumeWeb/libs5/commit/3ad41c75c174f80b0f18bf527959110f1af03448))
+
+
+### Features
+
+* add encrypted_cid.ts ([6ff8a84](https://git.lumeweb.com/LumeWeb/libs5/commit/6ff8a84ed8fb062dd7e08149d7b5a2a7d5cd7e36))
+* add getCachedStorageLocations method ([86522e1](https://git.lumeweb.com/LumeWeb/libs5/commit/86522e1ffea743afe3c336d41eb5e633f2b5d809))
+* add getMetadataByCID and downloadBytesByHash ([ec81583](https://git.lumeweb.com/LumeWeb/libs5/commit/ec815833ef9c3f703e03b731afdc67f3f4e8cc7c))
+* add metadata structures and ser/der functions ([4693117](https://git.lumeweb.com/LumeWeb/libs5/commit/4693117c76f3a8f2ace49dd8ba987169e7145e62))
+* add StorageLocationProvider ([6d19fdb](https://git.lumeweb.com/LumeWeb/libs5/commit/6d19fdb66e782b2a18edfb94541e08dd5ce6158f))
+
 # [0.1.0-develop.60](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.59...v0.1.0-develop.60) (2023-09-19)
 
 
