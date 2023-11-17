@@ -1,7 +1,6 @@
 import Metadata from "#serialization/metadata/base.js";
 import Packer from "#serialization/pack.js";
-import { metadataMagicByte } from "lib/index.js";
-import { METADATA_TYPES } from "#constants.js";
+import { METADATA_TYPES, metadataMagicByte } from "#constants.js";
 import Unpacker from "#serialization/unpack.js";
 import ExtraMetadata from "#serialization/metadata/extra.js";
 import { Buffer } from "buffer";
