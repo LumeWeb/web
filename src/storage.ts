@@ -34,7 +34,7 @@ export default class StorageLocation {
   }
 }
 
-class StorageLocationProvider {
+export class StorageLocationProvider {
   private node: S5Node;
   private hash: Multihash;
   private types: number[];
