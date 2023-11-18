@@ -161,7 +161,15 @@ export class S5Node {
       const innerMapLength = unpacker.unpackMapLength();
       for (let j = 0; j < innerMapLength; j++) {
         const nodeId = new NodeId(unpacker.unpackBinary());
-        innerMap.set(nodeId, new Map(unpacker.unpackMap() as [number, any][]));
+        innerMap.set(
+          nodeId,
+          new Map(
+            Object.entries(unpacker.unpackMap()).map(([key, value]) => [
+              Number(key),
+              value,
+            ]),
+          ),
+        );
       }
     }
     return map;
