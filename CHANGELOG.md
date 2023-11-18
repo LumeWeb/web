@@ -1,3 +1,10 @@
+# [0.1.0-develop.73](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.72...v0.1.0-develop.73) (2023-11-18)
+
+
+### Bug Fixes
+
+* don't strip u ([b3174ca](https://git.lumeweb.com/LumeWeb/libs5/commit/b3174cacf725fb24a73d5188bc123a6d88bff055))
+
 # [0.1.0-develop.72](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.71...v0.1.0-develop.72) (2023-11-18)
 
 
