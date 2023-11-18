@@ -1,3 +1,10 @@
+# [0.1.0-develop.67](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.66...v0.1.0-develop.67) (2023-11-18)
+
+
+### Bug Fixes
+
+* storage locations are in cacheDb ([a418410](https://git.lumeweb.com/LumeWeb/libs5/commit/a418410bd99ee61cddb4fbebe36d54c9cb4ce2d3))
+
 # [0.1.0-develop.66](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.65...v0.1.0-develop.66) (2023-11-18)
 
 
