@@ -1,3 +1,10 @@
+# [0.1.0-develop.64](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.63...v0.1.0-develop.64) (2023-11-18)
+
+
+### Bug Fixes
+
+* hashQueryRoutingTable is on the p2p service ([88f748c](https://git.lumeweb.com/LumeWeb/libs5/commit/88f748c817e3cefa8eb8f0500601636fda364001))
+
 # [0.1.0-develop.63](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.62...v0.1.0-develop.63) (2023-11-18)
 
 
