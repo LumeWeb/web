@@ -1,3 +1,10 @@
+# [0.1.0-develop.65](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.64...v0.1.0-develop.65) (2023-11-18)
+
+
+### Features
+
+* add hashQuery protocol method ([5391666](https://git.lumeweb.com/LumeWeb/libs5/commit/53916663886b54f4adf5192f17f79e72c457d4be))
+
 # [0.1.0-develop.64](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.63...v0.1.0-develop.64) (2023-11-18)
 
 
