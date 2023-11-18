@@ -1,3 +1,10 @@
+# [0.1.0-develop.74](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.73...v0.1.0-develop.74) (2023-11-18)
+
+
+### Bug Fixes
+
+* use base64urlpad ([19426b7](https://git.lumeweb.com/LumeWeb/libs5/commit/19426b7fdb05517c437f7bfb7aa78876647fa470))
+
 # [0.1.0-develop.73](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.72...v0.1.0-develop.73) (2023-11-18)
 
 
