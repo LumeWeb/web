@@ -1,3 +1,10 @@
+# [0.1.0-develop.70](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.69...v0.1.0-develop.70) (2023-11-18)
+
+
+### Bug Fixes
+
+* need to use Object.entries ([c1f471e](https://git.lumeweb.com/LumeWeb/libs5/commit/c1f471e921930e5f1a1ab9a087b8ea894f985345))
+
 # [0.1.0-develop.69](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.68...v0.1.0-develop.69) (2023-11-18)
 
 
