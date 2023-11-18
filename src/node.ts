@@ -122,11 +122,11 @@ export class S5Node {
       if (!map.has(type)) return;
 
       map.get(type)!.forEach((value, key) => {
-        if (value[3] >= ts) {
+        if (value.get(3) >= ts) {
           const storageLocation = new StorageLocation(
             type,
-            value[1].map((v: string) => v), // Assuming value[1] is an array of strings
-            value[3],
+            value.get(1).map((v: string) => v), // Assuming value[1] is an array of strings
+            value.get(3),
           );
 
           // Assuming providerMessage is a property of StorageLocation
