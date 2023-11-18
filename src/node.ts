@@ -145,7 +145,7 @@ export class S5Node {
     const map = new Map<number, Map<NodeId, Map<number, any>>>();
     let bytes;
     try {
-      bytes = await this.db.get(stringifyHash(hash));
+      bytes = await this.config.cacheDb.get(stringifyHash(hash));
     } catch {
       return map;
     }
