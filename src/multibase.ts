@@ -19,7 +19,7 @@ export default abstract class Multibase {
       }
       bytes = base32.decode(str);
     } else if (data[0] === "u") {
-      let str = data;
+      let str = data[0].toUpperCase() + data.substring(1);
       while (str.length % 4 !== 0) {
         str += "=";
       }
