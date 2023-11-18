@@ -166,7 +166,18 @@ export default class Unpacker {
 
   private _unpack(): any {
     const b = this._d.getUint8(this._offset);
-    if (b <= 0x7f || (b >= 0xe0 && b <= 0xff)) {
+    if (
+      b <= 0x7f ||
+      b >= 0xe0 ||
+      b === 0xcc ||
+      b === 0xcd ||
+      b === 0xce ||
+      b === 0xcf ||
+      b === 0xd0 ||
+      b === 0xd1 ||
+      b === 0xd2 ||
+      b === 0xd3
+    ) {
       return this.unpackInt();
     } else if (b === 0xc2 || b === 0xc3 || b === 0xc0) {
       return this.unpackBool();
