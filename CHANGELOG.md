@@ -1,3 +1,10 @@
+# [0.1.0-develop.77](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.76...v0.1.0-develop.77) (2023-11-18)
+
+
+### Bug Fixes
+
+* replace u with U in decodeString, and strip U in toBase64Url ([01d29f0](https://git.lumeweb.com/LumeWeb/libs5/commit/01d29f0b59cdadfb23c826d9649ed635745fa45e))
+
 # [0.1.0-develop.76](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.75...v0.1.0-develop.76) (2023-11-18)
 
 
