@@ -1,3 +1,10 @@
+# [0.1.0-develop.69](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.68...v0.1.0-develop.69) (2023-11-18)
+
+
+### Bug Fixes
+
+* unpack int checks missing possible types ([cac24c9](https://git.lumeweb.com/LumeWeb/libs5/commit/cac24c9caa59896a9731dd1ec0af2ab93ad124da))
+
 # [0.1.0-develop.68](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.67...v0.1.0-develop.68) (2023-11-18)
 
 
