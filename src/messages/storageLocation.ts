@@ -74,5 +74,5 @@ export default async function (
       }
     }
   }
-  this.hashQueryRoutingTable.delete(hash);
+  p2p.hashQueryRoutingTable.delete(hash);
 }
