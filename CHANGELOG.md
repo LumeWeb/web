@@ -1,3 +1,10 @@
+# [0.1.0-develop.75](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.74...v0.1.0-develop.75) (2023-11-18)
+
+
+### Bug Fixes
+
+* base64urlpad requires a "U" prefix ([e760149](https://git.lumeweb.com/LumeWeb/libs5/commit/e76014969923fdbceb2c63a90351d3e8d2521d1c))
+
 # [0.1.0-develop.74](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.73...v0.1.0-develop.74) (2023-11-18)
 
 
