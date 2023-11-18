@@ -1,4 +1,13 @@
 import NodeId from "../nodeId.js";
+import CID from "#cid.js";
+import { MediaFormat } from "#serialization/metadata/media.js";
+import {
+  DirectoryReference,
+  FileReference,
+  FileVersion,
+  FileVersionThumbnail,
+} from "#serialization/metadata/directory.js";
+import { Buffer } from "buffer";
 
 export default class Packer {
   private _bufSize: number;
@@ -236,7 +245,7 @@ export default class Packer {
     return Buffer.concat(this._builder);
   }
 
-  public pack(v: any) {
+  public pack(v: any): this {
     if (v === null) {
       this.packNull();
     } else if (typeof v === "number") {
@@ -258,14 +267,24 @@ export default class Packer {
       }
     } else if (v instanceof Map) {
       this.packMapLength(v.size);
-      for (const [key, value] of v.entries()) {
+      v.forEach((value, key) => {
         this.pack(key);
         this.pack(value);
-      }
+      });
+    } else if (
+      v instanceof MediaFormat ||
+      v instanceof DirectoryReference ||
+      v instanceof FileReference ||
+      v instanceof FileVersion ||
+      v instanceof FileVersionThumbnail
+    ) {
+      this.pack(v.encode());
+    } else if (v instanceof CID) {
+      this.pack(v.toBytes());
     } else if (v instanceof NodeId) {
       this.pack(v.bytes);
     } else {
-      throw new Error(`Could not pack ${v.constructor.name}`);
+      throw new Error(`Could not pack type: ${typeof v}`);
     }
 
     return this;

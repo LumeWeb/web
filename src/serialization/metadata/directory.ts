@@ -141,7 +141,7 @@ class DirectoryMetadataDetails {
   }
 }
 
-class DirectoryReference {
+export class DirectoryReference {
   created: number;
   name: string;
   encryptedWriteKey: Uint8Array;
@@ -214,7 +214,7 @@ class DirectoryReference {
     return map;
   }
 }
-class FileReference {
+export class FileReference {
   created: number;
   file: FileVersion;
   history: Map<number, FileVersion> | null;
@@ -315,7 +315,7 @@ class FileReference {
   }
 }
 
-class FileVersion {
+export class FileVersion {
   ts: number;
   encryptedCID?: EncryptedCID;
   plaintextCID?: CID;
@@ -382,7 +382,7 @@ class FileVersion {
     };
   }
 }
-class FileVersionThumbnail {
+export class FileVersionThumbnail {
   imageType: string | null;
   aspectRatio: number;
   cid: EncryptedCID;

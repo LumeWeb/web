@@ -153,7 +153,7 @@ class MediaMetadataDetails {
   }
 }
 
-class MediaFormat {
+export class MediaFormat {
   subtype: string;
   role: string | null;
   ext: string | null;
