@@ -137,7 +137,12 @@ export class S5Node {
     hash: Multihash,
   ): Promise<Map<number, Map<NodeId, Map<number, any>>>> {
     const map = new Map<number, Map<NodeId, Map<number, any>>>();
-    const bytes = await this.db.get(stringifyHash(hash));
+    let bytes;
+    try {
+      bytes = await this.db.get(stringifyHash(hash));
+    } catch {
+      return map;
+    }
     if (bytes === null) {
       return map;
     }
