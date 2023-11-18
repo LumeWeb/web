@@ -1,3 +1,10 @@
+# [0.1.0-develop.68](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.67...v0.1.0-develop.68) (2023-11-18)
+
+
+### Bug Fixes
+
+* update how maps are packed and add missing serialization for media, directory, and files ([3fa96aa](https://git.lumeweb.com/LumeWeb/libs5/commit/3fa96aa05acf292311faa5fbbc83f1f1bd120f68))
+
 # [0.1.0-develop.67](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.66...v0.1.0-develop.67) (2023-11-18)
 
 
