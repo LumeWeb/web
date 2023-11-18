@@ -1,3 +1,10 @@
+# [0.1.0-develop.66](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.65...v0.1.0-develop.66) (2023-11-18)
+
+
+### Bug Fixes
+
+* hashQueryRoutingTable is a map not object ([4848236](https://git.lumeweb.com/LumeWeb/libs5/commit/4848236882cf643b05172b1d49893a18f3649e50))
+
 # [0.1.0-develop.65](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.64...v0.1.0-develop.65) (2023-11-18)
 
 
