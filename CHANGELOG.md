@@ -1,3 +1,10 @@
+# [0.1.0-develop.71](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.70...v0.1.0-develop.71) (2023-11-18)
+
+
+### Bug Fixes
+
+* value is a map ([9c5d417](https://git.lumeweb.com/LumeWeb/libs5/commit/9c5d417857376eef0fc7655c9abfc94485b3c6b3))
+
 # [0.1.0-develop.70](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.69...v0.1.0-develop.70) (2023-11-18)
 
 
