@@ -1,3 +1,10 @@
+# [0.1.0-develop.63](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.62...v0.1.0-develop.63) (2023-11-18)
+
+
+### Bug Fixes
+
+* wrap db.get in a try/catch ([b578a32](https://git.lumeweb.com/LumeWeb/libs5/commit/b578a32a4460c0f26e3d027df038936b4ca818a4))
+
 # [0.1.0-develop.62](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.61...v0.1.0-develop.62) (2023-11-17)
 
 
