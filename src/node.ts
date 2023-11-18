@@ -224,10 +224,11 @@ export class S5Node {
       try {
         const res = await axios.get(dlUri.location.bytesUrl, {
           timeout: 30000, // Adjust timeout as needed
+          responseType: "arraybuffer",
         });
 
         // Assuming rust.hashBlake3 and areBytesEqual are available functions
-        const resHash = blake3(res.data);
+        const resHash = blake3(Buffer.from(res.data));
 
         if (!equalBytes(hash.hashBytes, resHash)) {
           throw new Error("Integrity verification failed");
