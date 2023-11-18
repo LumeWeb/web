@@ -48,13 +48,6 @@ export class P2PService extends EventEmitter {
 
     node.services.p2p = this;
   }
-
-  private _hashQueryRoutingTable: Map<Multihash, Set<NodeId>> = new Map();
-
-  get hashQueryRoutingTable(): Map<Multihash, Set<NodeId>> {
-    return this._hashQueryRoutingTable;
-  }
-
   private _networkId?: string;
 
   get networkId(): string {

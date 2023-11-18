@@ -57,7 +57,8 @@ export default async function (
     config: node.config,
   });
 
-  const list = p2p.hashQueryRoutingTable.get(hash) || new Set<NodeId>();
+  const list =
+    node.hashQueryRoutingTable.get(hash.hashCode) || new Set<NodeId>();
   for (const peerId of list) {
     if (peerId.equals(nodeId)) {
       continue;
@@ -74,5 +75,5 @@ export default async function (
       }
     }
   }
-  p2p.hashQueryRoutingTable.delete(hash);
+  node.hashQueryRoutingTable.delete(hash.hashCode);
 }

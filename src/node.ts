@@ -50,6 +50,12 @@ export class S5Node {
 
   private _started = false;
 
+  private _hashQueryRoutingTable: Map<number, Set<NodeId>> = new Map();
+
+  get hashQueryRoutingTable(): Map<number, Set<NodeId>> {
+    return this._hashQueryRoutingTable;
+  }
+
   get started(): boolean {
     return this._started;
   }
