@@ -1,3 +1,10 @@
+# [0.1.0-develop.72](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.71...v0.1.0-develop.72) (2023-11-18)
+
+
+### Bug Fixes
+
+* ensure axios returns binary data ([518bbcd](https://git.lumeweb.com/LumeWeb/libs5/commit/518bbcdd946ef92f8a5195f6684d11fdce7bbd50))
+
 # [0.1.0-develop.71](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.70...v0.1.0-develop.71) (2023-11-18)
 
 
