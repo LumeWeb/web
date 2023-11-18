@@ -31,8 +31,8 @@ export default async function (
   const hashCode = hash.hashCode;
 
   if (node.hashQueryRoutingTable.has(hashCode)) {
-    if (!node.hashQueryRoutingTable[hashCode].includes(peer.id)) {
-      node.hashQueryRoutingTable[hashCode].push(peer.id);
+    if (!node.hashQueryRoutingTable.get(hashCode)?.has(peer.id)) {
+      node.hashQueryRoutingTable.get(hashCode)?.add(peer.id);
     }
     return;
   }
