@@ -1,7 +1,22 @@
+import {redirect} from "next/navigation"
+import { headers } from 'next/headers'
 import Feed from "@/components/Feed"
 import SearchBar from "@/components/SearchBar"
 
-export default function Home() {
+type Props = {
+    searchParams?: { 
+      q?: string | undefined
+     };
+}
+
+export default function Home({searchParams}: Props) {
+  const headerList = headers()
+  const referer = headerList.get("referer")
+
+  if(!referer && searchParams?.q) {
+    redirect(`/search?q=${searchParams.q}`)
+  }
+  
   return (
     <>
       <SearchBar />
@@ -10,17 +25,17 @@ export default function Home() {
           <Feed
             title="Latest from the community"
             icon={'paper-icon'}
-            className="w-[calc(33%-16px)] max-w-md"
+            className="w-[calc(33%-20px)] max-w-md"
           />
           <Feed
             title="Rising Posts"
             icon={'trend-up-icon'}
-            className="w-[calc(33%-16px)] max-w-md"
+            className="w-[calc(33%-20px)] max-w-md"
           />
           <Feed
             title="Top Posts"
             icon={'top-arrow-icon'}
-            className="w-[calc(33%-16px)] max-w-md"
+            className="w-[calc(33%-20px)] max-w-md"
           />
         </div>
         <Feed

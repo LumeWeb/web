@@ -64,13 +64,6 @@ const SearchBar = ({ }: Props) => {
 
   const isActive = results.length > 0 || dirtyInput
 
-  useEffect(() => {
-    if (!dirtyInput && searchParams.get("q") && searchParams.get("q") !== "") {
-      handleSearch()
-    }
-  }, [])
-
-
   return (
     <div
       className={`w-full mt-8  p-4 border-2 ${
@@ -104,7 +97,7 @@ const SearchBar = ({ }: Props) => {
                   : "w-full p-2"
               }`}
               placeholder={
-                isActive
+                !isActive
                   ? "Search for web3 news from the community"
                   : undefined
               }
