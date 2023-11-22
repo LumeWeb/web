@@ -2,7 +2,8 @@ import { formatDistanceToNow } from "date-fns"
 
 // Utility function to format dates
 export const formatDate = (date: string | Date) => {
-  const distance = formatDistanceToNow(new Date(date), { addSuffix: true })
+  const _date = new Date(date)
+  const distance = formatDistanceToNow(_date, { addSuffix: true })
   return distance
     .replace(/less than a minute?/, "<1m")
     .replace(/ minutes?/, "m")
