@@ -28,7 +28,7 @@ const Feed = ({
     async (overwrite: boolean = false) => {
       const response = await fetchFeedData({
         filter: { timerange: selectedFilter },
-        next: dataResponse?.next,
+        next: dataResponse?.next ?? undefined,
         current: dataResponse?.current,
         limit: 5
       })

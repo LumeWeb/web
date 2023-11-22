@@ -24,6 +24,7 @@ const SearchBar = ({ }: Props) => {
   const inputRef = useRef<HTMLInputElement>()
   const [isLoading, setIsLoading] = useState(false)
   const [activeInput, setActiveInput] = useState(true)
+  const [dirtyInput, setDirtyInput] = useState(false)
   const [results, setResults] = useState<SearchResult[]>([])
 
   const handleSearch = useCallback(
@@ -61,27 +62,30 @@ const SearchBar = ({ }: Props) => {
     ]
   )
 
+  const isActive = results.length > 0 || dirtyInput
+
   useEffect(() => {
-    if (searchParams.get("q") && searchParams.get("q") !== "") {
+    if (!dirtyInput && searchParams.get("q") && searchParams.get("q") !== "") {
       handleSearch()
     }
-  }, [searchParams, handleSearch])
+  }, [])
+
 
   return (
     <div
       className={`w-full mt-8  p-4 border-2 ${
-        results.length > 0 ? "border-sky-300 bg-gray-950" : "border-primary"
+        isActive ? "border-sky-300 bg-gray-950" : "border-primary"
       }`}
     >
       <form className={`flex items-center text-lg`} onSubmit={handleSearch}>
-        {isLoading || results.length > 0 ? (
+        {isLoading || isActive ? (
           <span className="text-white mr-2">Searching for</span>
         ) : null}
         {activeInput ? (
           <fieldset
             className={`block w-full p-0 h-auto flex-1 overflow-hidden`}
           >
-            {results.length > 0 ? (
+            {isActive ? (
               <span className="text-blue-300 underline-offset-4 underline mr-[-0.5px]">
                 {'"'}
               </span>
@@ -95,12 +99,12 @@ const SearchBar = ({ }: Props) => {
                 }
               }}
               className={`flex-grow inline bg-transparent text-white placeholder-gray-400 outline-none ring-none ${
-                results.length > 0
+                isActive
                   ? `text-blue-300 p-0 underline underline-offset-4`
                   : "w-full p-2"
               }`}
               placeholder={
-                results.length === 0
+                isActive
                   ? "Search for web3 news from the community"
                   : undefined
               }
@@ -113,9 +117,14 @@ const SearchBar = ({ }: Props) => {
                     }
                   : undefined
               }
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                if(!dirtyInput) { 
+                  setDirtyInput(true);
+                }
+                setQuery(e.target.value)
+              }}
             />
-            {results.length > 0 ? (
+            {isActive ? (
               <span className="text-blue-300 underline-offset-4 underline ml-[-5.5px]">
                 {'"'}
               </span>
