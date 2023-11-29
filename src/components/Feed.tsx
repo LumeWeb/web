@@ -1,57 +1,70 @@
-"use client"
+"use client";
 
-import { formatDate } from "@/utils"
-import * as ScrollArea from "@radix-ui/react-scroll-area"
-import { sub } from "date-fns"
-import { useState, useCallback, useEffect } from "react"
+import { formatDate } from "@/utils";
+import * as ScrollArea from "@radix-ui/react-scroll-area";
+import { useState, useEffect } from "react";
+import { Article } from "../lib/prisma.ts";
+import useSWR from "swr";
+import { ApiResponse, fetchFeedData } from "../lib/feed.ts";
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 const Feed = ({
   className,
   variant = "col",
   icon,
-  title
+  title,
+  initialData,
 }: {
-  className?: string
-  variant?: "row" | "col"
-  title: string
-  icon: keyof typeof ICON_DICT
+  className?: string;
+  variant?: "row" | "col";
+  title: string;
+  icon: keyof typeof ICON_DICT;
+  initialData: Article[];
 }) => {
-  const filters = ["latest", "day", "week", "month"] as const
-  const [dataResponse, setDataResponse] = useState<Awaited<ReturnType<typeof fetchFeedData>>>();
-  const [content, setContent] = useState<NonNullable<typeof dataResponse>['data']>([])
+  const filters = ["latest", "day", "week", "month"] as const;
+  const [dataResponse, setDataResponse] =
+    useState<Awaited<ReturnType<typeof fetchFeedData>>>();
+  const [content, setContent] = useState<NonNullable<Article[]>>(initialData);
   const [selectedFilter, setSelectedFilter] =
-    useState<(typeof filters)[number]>("latest")
+    useState<(typeof filters)[number]>("latest");
+  const [currentPage, setCurrentPage] = useState(0);
 
-  const Icon = ICON_DICT[icon]
+  const Icon = ICON_DICT[icon];
 
-  const fetchContent = useCallback(
-    async (overwrite: boolean = false) => {
-      const response = await fetchFeedData({
-        filter: { timerange: selectedFilter },
-        next: dataResponse?.next ?? undefined,
-        current: dataResponse?.current,
-        limit: 5
-      })
-      setDataResponse(response)
-      setContent((current) => {
-        if (overwrite) {
-          return response.data
-        }
-        return [...current, ...response.data]
-      })
-      console.log("Fetched data")
+  const { data: swrData, error } = useSWR<ApiResponse<Article>, any>(
+    `/api/feed?filter=${selectedFilter}&page=${currentPage}`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateIfStale: false,
+      revalidateOnReconnect: false,
+      shouldRetryOnError: false,
+      fallbackData:
+        currentPage === 0 ? { data: initialData, current: 0 } : undefined, // Use initialData only for the first page
     },
-    [setContent, dataResponse, selectedFilter]
-  )
-
-  const handleFilterChange = (filter: (typeof filters)[number]) => {
-    setSelectedFilter(filter)
-    fetchContent(true)
-  }
+  );
 
   useEffect(() => {
-    fetchContent()
-  }, [])
+    if (swrData && currentPage !== 0) {
+      setContent((prevContent) => [...prevContent, ...swrData.data]);
+    } else if (swrData) {
+      setContent(swrData.data);
+    }
+  }, [swrData, currentPage]);
+
+  const handleFilterChange = (filter: (typeof filters)[number]) => {
+    setSelectedFilter(filter);
+    setCurrentPage(0); // Reset to the first page when the filter changes
+  };
+
+  const handleLoadMore = () => {
+    setCurrentPage((prevPage) => prevPage + 1); // Increment page number to fetch next set of data
+  };
+
+  if (error) {
+    return <div>Failed to load</div>;
+  }
 
   return (
     <section className={`w-full h-full space-y-6 ${className}`}>
@@ -78,7 +91,9 @@ const Feed = ({
           </ul>
         </nav>
       </header>
-      <ScrollArea.Root className={`overflow-hidden w-full h-[400px] rounded-md`}>
+      <ScrollArea.Root
+        className={`overflow-hidden w-full h-[400px] rounded-md`}
+      >
         <ScrollArea.Viewport className="w-full h-full">
           <div className={`flex gap-4 flex-${variant}`}>
             {content.map((item, index) => {
@@ -88,71 +103,36 @@ const Feed = ({
                   className="flex bg-gray-800 flex-col justify-between w-full py-4 px-6 rounded"
                 >
                   <span className="inline-block text-gray-500 w-full flex-1">
-                    {formatDate(item.date)}
+                    {formatDate(item.createdAt)}
                   </span>
                   <p className="inline-block text-white w-[25ch] flex-auto">
-                    {item.content}
+                    {item.title}
                   </p>
                 </article>
-              )
+              );
             })}
-            {dataResponse?.next ? <button
-              className="bg-gray-600 text-gray-300 rounded-md p-2 px-4"
-              onClick={() => fetchContent()}
-            >
-              Fetch more
-            </button> : null}
+            {dataResponse?.next ? (
+              <button
+                className="bg-gray-600 text-gray-300 rounded-md p-2 px-4"
+                onClick={handleLoadMore}
+              >
+                Fetch more
+              </button>
+            ) : null}
           </div>
         </ScrollArea.Viewport>
-        <ScrollArea.ScrollAreaScrollbar orientation="vertical" className="flex h-full select-none touch-none p-0.5 bg-gray-500 transition-colors duration-[160ms] ease-out hover:bg-gray-700 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2.5">
+        <ScrollArea.ScrollAreaScrollbar
+          orientation="vertical"
+          className="flex h-full select-none touch-none p-0.5 bg-gray-500 transition-colors duration-[160ms] ease-out hover:bg-gray-700 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2.5"
+        >
           <ScrollArea.ScrollAreaThumb className="flex-1 bg-gray-400 rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
         </ScrollArea.ScrollAreaScrollbar>
       </ScrollArea.Root>
     </section>
-  )
-}
+  );
+};
 
-const data = Array.from({ length: 20 }, (_, i) => ({
-  id: i,
-  date: sub(new Date(), { days: i }).toISOString(),
-  content: `Content ${i}`
-}))
-
-// Filter data by timerange and pagination
-// Randomly sort the data
-const randomlySortedData = data.sort(() => Math.random() - 0.5)
-
-type ApiResponse<T = Record<string, any>> = {
-  data: T[],
-  current: number,
-  next?: number | null,
-  amount?: number
-}
-
-async function fetchFeedData({
-  filter,
-  limit = 5,
-  next = 5,
-  current = 0
-}: {
-  filter?: { timerange?: "latest" | "day" | "week" | "month" }
-  next?: number
-  limit?: number
-  current?: number
-}): Promise<ApiResponse<typeof data[number]>> {
-  const data = filter?.timerange
-    ? randomlySortedData.filter(() => Math.random() > 0.5)
-    : randomlySortedData
-  const sliced = data.slice(current, next)
-  const nextPointer = sliced.length >= limit ? next + limit : null
-  return {
-    data: sliced,
-    current: next,
-    next: nextPointer,
-    amount: sliced.length
-  }
-}
-export default Feed
+export default Feed;
 
 const PaperIcon = ({ className }: { className?: string }) => {
   return (
@@ -169,8 +149,8 @@ const PaperIcon = ({ className }: { className?: string }) => {
         fill="currentColor"
       />
     </svg>
-  )
-}
+  );
+};
 const TopArrowLodashIcon = ({ className }: { className?: string }) => {
   return (
     <svg
@@ -194,8 +174,8 @@ const TopArrowLodashIcon = ({ className }: { className?: string }) => {
         fill="currentColor"
       />
     </svg>
-  )
-}
+  );
+};
 const TrendUpIcon = ({ className }: { className?: string }) => {
   return (
     <svg
@@ -233,11 +213,11 @@ const TrendUpIcon = ({ className }: { className?: string }) => {
         </clipPath>
       </defs>
     </svg>
-  )
-}
+  );
+};
 
 const ICON_DICT = {
   "paper-icon": PaperIcon,
   "trend-up-icon": TrendUpIcon,
-  "top-arrow-icon": TopArrowLodashIcon
-} as const
+  "top-arrow-icon": TopArrowLodashIcon,
+} as const;
