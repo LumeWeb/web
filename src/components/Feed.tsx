@@ -39,7 +39,7 @@ const Feed = ({
       revalidateOnReconnect: false,
       shouldRetryOnError: false,
       fallbackData:
-        currentPage === 0 ? { data: initialData, current: 0 } : undefined, // Use initialData only for the first page
+        currentPage === 0 ? { data: initialData, current: 0, next: 5 } : undefined, // Use initialData only for the first page
     },
   );
 
