@@ -23,8 +23,6 @@ const Feed = ({
   initialData: Article[];
 }) => {
   const filters = ["latest", "day", "week", "month"] as const;
-  const [dataResponse, setDataResponse] =
-    useState<Awaited<ReturnType<typeof fetchFeedData>>>();
   const [content, setContent] = useState<NonNullable<Article[]>>(initialData);
   const [selectedFilter, setSelectedFilter] =
     useState<(typeof filters)[number]>("latest");
@@ -111,7 +109,7 @@ const Feed = ({
                 </article>
               );
             })}
-            {dataResponse?.next ? (
+            {swrData?.next ? (
               <button
                 className="bg-gray-600 text-gray-300 rounded-md p-2 px-4"
                 onClick={handleLoadMore}
