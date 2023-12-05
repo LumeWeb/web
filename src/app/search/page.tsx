@@ -24,7 +24,7 @@ const Page = async ({ searchParams }: Props) => {
       />
 
       <Link href="/">
-        <button className="my-4 px-3 py-2 text-gray-400 hover:bg-gray-800 hover:text-white rounded">
+        <button className="my-4 -ml-3 px-3 py-2 text-gray-400 hover:bg-gray-800 hover:text-white rounded">
           <ArrowLeftIcon className="w-4 h-4 inline mr-2 -mt-1" />
           Go Back Home
         </button>

@@ -58,30 +58,6 @@ export default async function Home({ searchParams }: Props) {
             </div>
           </GraphicSection.Foreground>
         </GraphicSection.Root>
-        <GraphicSection.Root href="https://lumeweb.com" className="h-[300px] border border-gray-800 cursor-pointer [&:hover_.link]:underline [&:hover_.background]:rotate-12 [&:hover_.background]:scale-110">
-          <GraphicSection.Background>
-            <img
-              src="/lume-logo-bg.png"
-              className="background transition-transform duration-500 transform-gpu absolute -top-[100px] -left-10"
-              alt=""
-              aria-hidden
-            />
-          </GraphicSection.Background>
-          <GraphicSection.Foreground>
-            <div className="flex flex-col items-start justify-center h-full w-[500px] float-right mr-20">
-              <p className="text-white text-2xl">
-                WEB3.NEWS is a project by <span className="underline">Lume</span>. Let’s build an open, user-owned
-                web together.
-              </p>
-              <div className="link mt-2 flex text-gray-400">
-                <span>
-                  Learn more about Lume and join our community
-                </span>
-                <ArrowIcon className=" ml-2 mt-2"/>
-              </div>
-            </div>
-          </GraphicSection.Foreground>
-        </GraphicSection.Root>
       </div>
     </>
   )
