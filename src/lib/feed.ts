@@ -39,7 +39,12 @@ export async function fetchFeedData({
     }
   }
 
-  // Mocking the data instead of fetching from the database
+  // const articles = await prisma.article.findMany({
+  //   ...query,
+  //   skip: current,
+  //   take: next,
+  // });
+
   const articles: Article[] = [
     {
       id: 1,

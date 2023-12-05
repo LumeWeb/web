@@ -17,7 +17,7 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        main: "var(--font-inter)",
+        main: "var(--font-be-vietnam-pro)",
         secondary: "var(--font-jaldi)",
       },
       colors: {

@@ -1,11 +1,10 @@
 import type { Metadata } from "next"
-import Image  from "next/image"
-import { Inter, Jaldi } from "next/font/google"
-import "./globals.css"
+import { Jaldi, Be_Vietnam_Pro } from "next/font/google"
 import Header from "@/components/LayoutHeader"
 import Footer from "@/components/LayoutFooter"
+import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
+const beVietnamPro = Be_Vietnam_Pro({ weight: ["400"], subsets: ["latin"], variable: "--font-be-vietnam-pro" })
 const jaldi = Jaldi({
   subsets: ["latin"],
   weight: ["400"],
@@ -24,7 +23,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`font-main bg-gray-900 flex`}>
+      <body className={`font-main bg-gray-900 flex ${beVietnamPro.variable} ${jaldi.variable}`}>
         <main className="flex w-full min-h-screen flex-col md:px-40 items-center py-16 mx-auto">
           <Header />
           {children}
