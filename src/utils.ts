@@ -1,4 +1,11 @@
 import { formatDistanceToNow } from "date-fns"
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
 
 // Utility function to format dates
 export const formatDate = (date: string | Date) => {
@@ -36,3 +43,4 @@ export async function getResults({
     }
   ]
 }
+

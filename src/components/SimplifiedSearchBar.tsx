@@ -1,18 +1,33 @@
 "use client"
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { ChevronDownIcon } from "@heroicons/react/24/outline"
 import React, { FormEvent, useState } from "react"
+import { Select, SelectContent, SelectTrigger, SelectItem } from "./ui/select"
+import { subDays, subMonths, subYears } from "date-fns"
 
 type Props = {
   value: string
   placeholder?: string
   className?: string
+  filters?: {
+    sites: {value: string, label:string}[]
+  }
 }
+
+export const TIME_FILTER_OPTIONS = [
+  { value: subDays(new Date(), 1), label: '1d ago' },
+  { value: subDays(new Date(), 7), label: '7d ago' },
+  { value: subDays(new Date(), 15), label: '15d ago' },
+  { value: subMonths(new Date(), 1), label: '1m ago' },
+  { value: subMonths(new Date(), 6), label: '6m ago' },
+  { value: subYears(new Date(), 1), label: '1y ago' },
+];
+
 
 const SimplifiedSearchBar = ({
   value: initialValue,
   placeholder,
+  filters,
   className
 }: Props) => {
   const searchParams = useSearchParams();
@@ -50,17 +65,23 @@ const SimplifiedSearchBar = ({
           />
         </fieldset>
       </div>
-      <div className="w-[220px] flex">
-          {/* Dropdown component should be here */}
-          <div className="uppercase text-white text-[12px] mx-3 font-semibold">
-            <span>All Sites</span>
-            <ChevronDownIcon className="w-4 h-4 inline-block ml-2" />
-          </div>
-          {/* Dropdown component should be here */}
-          <div className="uppercase text-white text-[12px] mx-3 font-semibold">
-            <span>All Times</span>
-            <ChevronDownIcon className="w-4 h-4 inline-block ml-2" />
-          </div>
+      <div className="w-56 flex">
+            <Select>
+                <SelectTrigger className="w-32 flex-1">
+                  All Sites
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Options yet</SelectItem>
+                </SelectContent>
+            </Select>
+          <Select>
+                <SelectTrigger className="w-32 flex-1">
+                  All Times
+                </SelectTrigger>
+                <SelectContent>
+                  {TIME_FILTER_OPTIONS.map(o => <SelectItem key={o.value.toISOString()} value={o.value.toISOString()}> {o.label}</SelectItem>)}
+                </SelectContent>
+            </Select>
         </div>
     </form>
   )
