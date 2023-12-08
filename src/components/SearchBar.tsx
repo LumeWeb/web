@@ -12,15 +12,23 @@ import { flushSync } from "react-dom"
 import Link from "next/link"
 import { usePathname, useSearchParams, useRouter } from "next/navigation"
 import { formatDate, getResults } from "@/utils"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue
+} from "./ui/select"
+import { SitesCombobox } from "./SitesCombobox"
 
-type Props = {
-}
+type Props = {}
 
-const SearchBar = ({ }: Props) => {
+const SearchBar = ({}: Props) => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
-  const [query, setQuery] = useState(searchParams.get("q") ?? "")
+  const [query, setQuery] = useState(searchParams?.get("q") ?? "")
   const inputRef = useRef<HTMLInputElement>()
   const [isLoading, setIsLoading] = useState(false)
   const [activeInput, setActiveInput] = useState(true)
@@ -31,7 +39,7 @@ const SearchBar = ({ }: Props) => {
     async (event?: FormEvent<HTMLFormElement>) => {
       event?.preventDefault()
       setIsLoading(true)
-      const newSearchParams = new URLSearchParams(searchParams)
+      const newSearchParams = new URLSearchParams(searchParams ?? undefined)
 
       if (query) {
         newSearchParams.set("q", query)
@@ -111,8 +119,8 @@ const SearchBar = ({ }: Props) => {
                   : undefined
               }
               onChange={(e) => {
-                if(!dirtyInput) { 
-                  setDirtyInput(true);
+                if (!dirtyInput) {
+                  setDirtyInput(true)
                 }
                 setQuery(e.target.value)
               }}
@@ -144,17 +152,20 @@ const SearchBar = ({ }: Props) => {
           // Shadcn Loading component placeholder
           <LoadingComponent />
         ) : (
-          <div className="justify-self-end w-[220px] flex">
+          <div className="justify-self-end min-w-[220px] flex justify-end gap-2">
             {/* Dropdown component should be here */}
-            <div className="uppercase text-white text-[12px] mx-3 font-semibold">
-              <span>All Sites</span>
-              <ChevronDownIcon className="w-4 h-4 inline-block ml-2" />
-            </div>
+            <SitesCombobox />
             {/* Dropdown component should be here */}
-            <div className="uppercase text-white text-[12px] mx-3 font-semibold">
-              <span>All Times</span>
-              <ChevronDownIcon className="w-4 h-4 inline-block ml-2" />
-            </div>
+            <Select defaultValue={'0'}>
+              <SelectTrigger className="hover:bg-muted w-auto">
+                <SelectValue placeholder="Time ago"/>
+              </SelectTrigger>
+              <SelectContent>
+                {FILTER_TIMES.map((v) => (
+                  <SelectItem value={String(v.value)} key={`FilteTimeSelectItem_${v.value}`}>{v.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
       </form>
@@ -186,6 +197,29 @@ const SearchBar = ({ }: Props) => {
     </div>
   )
 }
+
+const FILTER_TIMES = [
+  {
+    label: "All Times",
+    value: 0,
+  },
+  {
+    label: "1d ago",
+    value: 1
+  },
+  {
+    label: "7d ago",
+    value: 7
+  },
+  {
+    label: "15d ago",
+    value: 15
+  },
+  {
+    label: "1m ago",
+    value: 30
+  }
+]
 
 // Placeholder components for Shadcn
 const LoadingComponent = () => {

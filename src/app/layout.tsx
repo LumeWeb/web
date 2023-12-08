@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-main bg-gray-900 flex ${beVietnamPro.variable} ${jaldi.variable}`}>
-        <main className="flex w-full min-h-screen flex-col md:px-40 items-center py-16 mx-auto">
+        <main className="dark flex w-full min-h-screen flex-col md:px-40 items-center py-16 mx-auto">
           <Header />
           {children}
           <Footer />
