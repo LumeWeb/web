@@ -11,7 +11,7 @@ import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline" 
 import { flushSync } from "react-dom"
 import Link from "next/link"
 import { usePathname, useSearchParams, useRouter } from "next/navigation"
-import { formatDate, getResults } from "@/utils"
+import { FILTER_TIMES, formatDate, getResults } from "@/utils"
 import {
   Select,
   SelectContent,
@@ -197,29 +197,6 @@ const SearchBar = ({}: Props) => {
     </div>
   )
 }
-
-const FILTER_TIMES = [
-  {
-    label: "All Times",
-    value: 0,
-  },
-  {
-    label: "1d ago",
-    value: 1
-  },
-  {
-    label: "7d ago",
-    value: 7
-  },
-  {
-    label: "15d ago",
-    value: 15
-  },
-  {
-    label: "1m ago",
-    value: 30
-  }
-]
 
 // Placeholder components for Shadcn
 const LoadingComponent = () => {

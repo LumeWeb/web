@@ -1,4 +1,4 @@
-import { formatDistanceToNow } from "date-fns"
+import { formatDistanceToNow, subDays, subMonths, subYears } from "date-fns"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -71,3 +71,13 @@ export async function getAvailableSites() {
   
   return statuses;
 }
+
+export const FILTER_TIMES = [
+  { value: 0, label: "All Times" },
+  { value: subDays(new Date(), 1), label: "1d ago" },
+  { value: subDays(new Date(), 7), label: "7d ago" },
+  { value: subDays(new Date(), 15), label: "15d ago" },
+  { value: subMonths(new Date(), 1), label: "1m ago" },
+  { value: subMonths(new Date(), 6), label: "6m ago" },
+  { value: subYears(new Date(), 1), label: "1y ago" }
+]
