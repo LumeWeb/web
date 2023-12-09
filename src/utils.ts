@@ -44,3 +44,30 @@ export async function getResults({
   ]
 }
 
+export async function getAvailableSites() {
+  const statuses: SelectOptions[] = [
+    {
+      value: "backlog",
+      label: "Backlog"
+    },
+    {
+      value: "todo",
+      label: "Todo"
+    },
+    {
+      value: "in progress",
+      label: "In Progress"
+    },
+    {
+      value: "done",
+      label: "Done"
+    },
+    {
+      value: "canceled",
+      label: "Canceled"
+    }
+  ]
+  
+  
+  return statuses;
+}

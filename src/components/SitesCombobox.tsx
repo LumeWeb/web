@@ -17,38 +17,13 @@ import {
   PopoverTrigger
 } from "@/components/ui/popover"
 import { ChevronDownIcon } from "@heroicons/react/24/solid"
-
-type Status = {
-  value: string
-  label: string
-}
-
-const statuses: Status[] = [
-  {
-    value: "backlog",
-    label: "Backlog"
-  },
-  {
-    value: "todo",
-    label: "Todo"
-  },
-  {
-    value: "in progress",
-    label: "In Progress"
-  },
-  {
-    value: "done",
-    label: "Done"
-  },
-  {
-    value: "canceled",
-    label: "Canceled"
-  }
-]
+import useSWR from "swr"
+import { getAvailableSites } from "@/utils"
 
 export function SitesCombobox() {
+  const {data: statuses} = useSWR('/api/statuses', getAvailableSites)
   const [open, setOpen] = React.useState(false)
-  const [selectedStatus, setSelectedStatus] = React.useState<Status | null>(
+  const [selectedStatus, setSelectedStatus] = React.useState<SelectOptions | null>(
     null
   )
 
@@ -67,7 +42,7 @@ export function SitesCombobox() {
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
-                {statuses.map((status) => (
+                {statuses?.map((status) => (
                   <CommandItem
                     className="text-white"
                     key={status.value}
