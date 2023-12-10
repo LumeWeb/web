@@ -5,7 +5,7 @@ import * as ScrollArea from "@radix-ui/react-scroll-area";
 import { useState, useEffect } from "react";
 import { Article } from "../lib/prisma.ts";
 import useSWR from "swr";
-import { ApiResponse, fetchFeedData } from "../lib/feed.ts";
+import { ApiResponse } from "../lib/feed.ts";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -39,7 +39,9 @@ const Feed = ({
       revalidateOnReconnect: false,
       shouldRetryOnError: false,
       fallbackData:
-        currentPage === 0 ? { data: initialData, current: 0, next: 5 } : undefined, // Use initialData only for the first page
+        currentPage === 0
+          ? { data: initialData, current: 0, next: 5 }
+          : undefined, // Use initialData only for the first page
     },
   );
 
