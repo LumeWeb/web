@@ -17,7 +17,11 @@ export {
   BasePeer,
 } from "./transports/index.js";
 export type { SignedRegistryEntry, KeyPairEd25519 };
-export { NodeId, CID };
+
+import Packer from "./serialization/pack.js";
+import Unpacker from "./serialization/unpack.js";
+
+export { Packer, Unpacker };
 
 export function createNode(config: S5NodeConfig) {
   return new S5Node(config);
