@@ -21,7 +21,7 @@ export type { SignedRegistryEntry, KeyPairEd25519 };
 import Packer from "./serialization/pack.js";
 import Unpacker from "./serialization/unpack.js";
 
-export { Packer, Unpacker };
+export { Packer, Unpacker, CID };
 
 export function createNode(config: S5NodeConfig) {
   return new S5Node(config);
