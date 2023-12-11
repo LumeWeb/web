@@ -1,11 +1,8 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { fetchFeedData } from "@/lib/feed.ts";
+import { type NextRequest, NextResponse } from "next/server";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
-  const { filter, page = "0" } = req.query as any as {
+export async function GET(req: NextRequest) {
+  const { filter, page = "0" } = req.nextUrl.searchParams as any as {
     filter: "latest" | "day" | "week" | "month";
     page: string;
   };
@@ -29,10 +26,8 @@ export default async function handler(
     // Fetch data using the fetchFeedData function
     const dataResponse = await fetchFeedData(queryParams);
 
-    // Send the response back
-    res.status(200).json(dataResponse);
+    return NextResponse.json(dataResponse);
   } catch (error) {
-    // Handle any errors
-    res.status(500).json({ error: "Internal Server Error" });
+    return NextResponse.json({ error: "Internal Server Error" });
   }
 }
