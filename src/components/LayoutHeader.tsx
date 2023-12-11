@@ -8,25 +8,33 @@ export const Header = ({}: Props) => {
   return (
     <header className="w-full flex flex-row justify-between relative">
       <div className="flex flex-col">
-        <Web3NewsLogo />
-        <div className="relative mt-1">
-          <Image
-            className="-right-8 -top-3 absolute"
-            width={28}
-            height={24}
-            src="/lume-logo-sm.png"
-            alt=""
-          />
-          <span className="right-0 -top-[6px] absolute text-white text-opacity-50 text-sm font-normal font-secondary leading-7">
-            a Lume project
-          </span>
-        </div>
+        <Link href="/">
+          <Web3NewsLogo />
+          <div className="relative mt-1">
+            <Image
+              className="-right-8 -top-3 absolute"
+              width={28}
+              height={24}
+              src="/lume-logo-sm.png"
+              alt=""
+            />
+            <span className="right-0 -top-[6px] absolute text-white text-opacity-50 text-sm font-normal font-secondary leading-7">
+              a Lume project
+            </span>
+          </div>
+        </Link>
       </div>
       <div className="flex gap-3 font-normal flex-row text-gray-300 rounded">
-        <Link href="/about" className="hover:text-white p-2 px-4 hover:bg-gray-800 rounded">
+        <Link
+          href="/about"
+          className="hover:text-white p-2 px-4 hover:bg-gray-800 rounded"
+        >
           About
         </Link>
-        <Link href="/donate" className="hover:text-white p-2 px-4 hover:bg-gray-800 rounded">
+        <Link
+          href="/donate"
+          className="hover:text-white p-2 px-4 hover:bg-gray-800 rounded"
+        >
           Contribute
         </Link>
       </div>
