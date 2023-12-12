@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
@@ -11,6 +11,7 @@ model Article {
     id        Int      @id @default(autoincrement())
     title     String
     slug      String
+    cid       String
     url       String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
