@@ -4,6 +4,7 @@ import { CID_HASH_TYPES, CID_TYPES, REGISTRY_TYPES } from "#constants.js";
 import { decodeEndian, encodeEndian } from "#util.js";
 import { concatBytes, equalBytes } from "@noble/curves/abstract/utils";
 import { hexToBytes } from "@noble/hashes/utils";
+import { SignedRegistryEntry } from "#types.js";
 
 export default class CID extends Multibase {
   type: number;
@@ -40,6 +41,10 @@ export default class CID extends Multibase {
 
   static fromBytes(bytes: Uint8Array): CID {
     return CID._init(bytes);
+  }
+
+  static fromSignedRegistryEntry(sre: SignedRegistryEntry): CID {
+    return CID.fromRegistryPublicKey(sre.pk);
   }
 
   static fromRegistryPublicKey(pubkey: string | Uint8Array): CID {
