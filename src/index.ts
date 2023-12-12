@@ -9,6 +9,10 @@ import CID from "#cid.js";
 export * from "./types.js";
 export * from "./constants.js";
 export * from "./util.js";
+import WebAppMetadata, {
+  WebAppMetadataFileReference,
+  deserialize as deserializeWebAppMetadata,
+} from "./serialization/metadata/webapp.js";
 export type { S5Node } from "./node.js";
 export {
   createTransportSocket,
@@ -21,7 +25,14 @@ export type { SignedRegistryEntry, KeyPairEd25519 };
 import Packer from "./serialization/pack.js";
 import Unpacker from "./serialization/unpack.js";
 
-export { Packer, Unpacker, CID };
+export {
+  Packer,
+  Unpacker,
+  CID,
+  WebAppMetadata,
+  WebAppMetadataFileReference,
+  deserializeWebAppMetadata,
+};
 
 export function createNode(config: S5NodeConfig) {
   return new S5Node(config);

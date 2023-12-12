@@ -47,7 +47,7 @@ export default class WebAppMetadata extends Metadata {
   }
 }
 
-class WebAppMetadataFileReference {
+export class WebAppMetadataFileReference {
   contentType: string | null;
   cid: CID;
 
