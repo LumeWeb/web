@@ -11,7 +11,7 @@ model Article {
     id        Int      @id @default(autoincrement())
     title     String
     slug      String
-    cid       String
+    cid       String   @unique
     url       String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
