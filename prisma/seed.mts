@@ -13,7 +13,7 @@ async function main() {
         const url = faker.internet.url();
         const siteKey = faker.string.alphanumeric(10);
 
-        articles.push({title, slug, cid: "", url, siteKey});
+        articles.push({title, slug, cid: Math.random().toString(), url, siteKey});
     }
 
     for (const article of articles) {
