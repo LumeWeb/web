@@ -8,6 +8,7 @@ datasource db {
 }
 
 model Article {
+    @@map("articles")
     id        Int      @id @default(autoincrement())
     title     String
     slug      String
