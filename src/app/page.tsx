@@ -1,27 +1,34 @@
-import { redirect } from "next/navigation"
-import { headers } from "next/headers"
-import Feed from "@/components/Feed"
-import SearchBar from "@/components/SearchBar"
-import { fetchFeedData } from "@/lib/feed.ts"
-import * as GraphicSection from "@/components/GraphicSection"
-import { ArrowIcon } from "@/components/ArrowIcon"
+import Feed from "@/components/Feed";
+import SearchBar from "@/components/SearchBar";
+import { ApiResponse, fetchFeedData } from "@/lib/feed.ts";
+import * as GraphicSection from "@/components/GraphicSection";
+import { ArrowIcon } from "@/components/ArrowIcon";
+import { GetServerSideProps } from "next";
+import { Article } from "@/lib/prisma.ts";
 
 type Props = {
-  searchParams?: {
-    q?: string | undefined
+  data: ApiResponse<Article>;
+};
+
+export const getServerSideProps: GetServerSideProps<Props> = async ({
+  req,
+  params,
+}) => {
+  if (!req.headers.referer && params?.q) {
+    return {
+      redirect: {
+        destination: `/search?q=${params?.q}`,
+        permanent: false,
+      },
+    };
   }
-}
 
-export default async function Home({ searchParams }: Props) {
-  const headerList = headers()
-  const referer = headerList.get("referer")
+  const data = await fetchFeedData({});
 
-  if (!referer && searchParams?.q) {
-    redirect(`/search?q=${searchParams.q}`)
-  }
+  return { props: { data } };
+};
 
-  const data = await fetchFeedData({})
-
+export default async function Home({ data }: Props) {
   return (
     <>
       <SearchBar />
@@ -34,7 +41,10 @@ export default async function Home({ searchParams }: Props) {
             initialData={data.data}
           />
         </div>
-        <GraphicSection.Root href="https://lumeweb.com" className="h-[100px] border border-gray-800 cursor-pointer [&:hover_.link]:underline [&:hover_.background]:rotate-12 [&:hover_.background]:scale-110">
+        <GraphicSection.Root
+          href="https://lumeweb.com"
+          className="h-[100px] border border-gray-800 cursor-pointer [&:hover_.link]:underline [&:hover_.background]:rotate-12 [&:hover_.background]:scale-110"
+        >
           <GraphicSection.Background>
             <img
               src="/lume-logo-bg.png"
@@ -50,15 +60,13 @@ export default async function Home({ searchParams }: Props) {
                 web together.
               </p>
               <div className="link flex text-gray-400">
-                <span>
-                  Learn more about Lume and join our community
-                </span>
-                <ArrowIcon className=" ml-2 mt-2"/>
+                <span>Learn more about Lume and join our community</span>
+                <ArrowIcon className=" ml-2 mt-2" />
               </div>
             </div>
           </GraphicSection.Foreground>
         </GraphicSection.Root>
       </div>
     </>
-  )
+  );
 }
