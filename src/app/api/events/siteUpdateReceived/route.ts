@@ -4,18 +4,15 @@ import xml2js from "xml2js";
 import prisma from "../../../../lib/prisma.ts";
 import * as cheerio from "cheerio";
 import slugify from "slugify";
+import path from "path";
 
-export async function GET(req: NextRequest) {
-  if (req.ip != "127.0.0.1") {
-    return NextResponse.error();
-  }
-
+export async function POST(req: NextRequest) {
   const client = new S5Client("https://s5.web3portal.com");
-  const meta = await client.getMetadata(
-    req.nextUrl.searchParams.get("cid") as string,
-  );
+  const data = await req.json();
+  const meta = (await client.getMetadata(data.cid)) as any;
+  const fileMeta = meta.metadata as any;
 
-  const paths = (meta.metadata as any).paths as {
+  const paths = fileMeta.paths as {
     [file: string]: {
       cid: string;
     };
@@ -29,8 +26,32 @@ export async function GET(req: NextRequest) {
 
   const urls = sitemap.urlset.url.map((urlEntry: any) => {
     const url = urlEntry.loc[0];
-    const cid = paths[url]?.cid;
-    return { url, cid };
+    let pathname = new URL(url).pathname;
+
+    // Normalize and remove leading and trailing slashes from the path
+    pathname = path.normalize(pathname).replace(/^\/|\/$/g, "");
+
+    // Function to determine if a URL path represents a directory
+    const isDirectory = (pathname: string) => {
+      // Check if the path directly maps to a file in the paths object
+      return !paths.hasOwnProperty(pathname);
+    };
+
+    // Check if the path is a directory and look for a directory index
+    if (isDirectory(pathname)) {
+      for (const file of fileMeta.tryFiles) {
+        const indexPath = path.join(pathname, file);
+        if (paths.hasOwnProperty(indexPath)) {
+          pathname = indexPath;
+          break;
+        }
+      }
+    }
+
+    // Fetch cid after confirming the final path
+    const cid = paths[pathname]?.cid;
+
+    return { url, cid, path: pathname }; // including cid in return object after final path is determined
   });
 
   for (const { url, cid } of urls) {
@@ -48,17 +69,19 @@ export async function GET(req: NextRequest) {
         const $ = cheerio.load(contentData);
         const title = $("title").text(); // Extract the title from the content
 
+        const record = {
+          title,
+          url,
+          cid: cid,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          slug: slugify(new URL(url).pathname),
+          siteKey: slugify(data.site as string),
+        };
+
         // Insert a new record into the database
         await prisma.article.create({
-          data: {
-            title,
-            url,
-            cid: cid,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            slug: slugify(new URL(url).pathname),
-            siteKey: slugify(req.nextUrl.searchParams.get("site") as string),
-          },
+          data: record,
         });
       }
     }
