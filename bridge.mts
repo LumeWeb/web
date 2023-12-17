@@ -14,6 +14,9 @@ const sites = JSON.parse(
 ) as SiteList;
 
 const client = new S5Client("https://s5.web3portal.com");
+const httpClient = axios.create({
+  baseURL: "http://localhost",
+});
 
 for (const siteName in sites) {
   const site = sites[siteName];
@@ -22,9 +25,11 @@ for (const siteName in sites) {
   sub.listen((entry) => {
     const cid = CID.fromRegistry(entry.data);
 
-    axios.post("http://localhost/api/events/siteUpdateReceived", {
-      cid: cid.toString(),
-      site: siteName,
-    });
+    try {
+      httpClient.post("/api/events/siteUpdateReceived", {
+        cid: cid.toString(),
+        site: siteName,
+      });
+    } catch {}
   });
 }
