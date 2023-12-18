@@ -15,11 +15,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
-import useSWR from "swr";
 import { getAvailableSites } from "@/utils";
+import { SelectOptions } from "@/types.js";
 
 export function SitesCombobox() {
-  const { statuses } = getAvailableSites();
+  const statuses = getAvailableSites();
   const [open, setOpen] = React.useState(false);
   const [selectedStatus, setSelectedStatus] =
     React.useState<SelectOptions | null>(null);
