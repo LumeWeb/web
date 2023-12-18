@@ -2,12 +2,9 @@
 
 import { formatDate } from "@/utils";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Article } from "@/lib/prisma";
-import useSWR from "swr";
-import { ApiResponse } from "@/lib/feed";
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { useFetcher } from "@remix-run/react";
 
 const Feed = ({
   className,
@@ -28,41 +25,36 @@ const Feed = ({
     useState<(typeof filters)[number]>("latest");
   const [currentPage, setCurrentPage] = useState(0);
 
+  const fetcher = useFetcher();
   const Icon = ICON_DICT[icon];
 
-  const { data: swrData, error } = useSWR<ApiResponse<Article>, any>(
-    `/api/feed?filter=${selectedFilter}&page=${currentPage}`,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-      revalidateIfStale: false,
-      revalidateOnReconnect: false,
-      shouldRetryOnError: false,
-      fallbackData:
-        currentPage === 0
-          ? { data: initialData, current: 0, next: 5 }
-          : undefined, // Use initialData only for the first page
+  useEffect(() => {
+    if (currentPage !== 0) {
+      // Fetch data for subsequent pages
+      fetcher.load(`/api/feed?filter=${selectedFilter}&page=${currentPage}`);
     }
-  );
+  }, [selectedFilter, currentPage]);
 
   useEffect(() => {
-    if (swrData && currentPage !== 0) {
-      setContent((prevContent) => [...prevContent, ...swrData.data]);
-    } else if (swrData) {
-      setContent(swrData.data);
+    if (fetcher.data && currentPage !== 0) {
+      setContent((prevContent) => [...prevContent, ...fetcher.data.data]);
     }
-  }, [swrData, currentPage]);
+  }, [fetcher.data, currentPage]);
 
   const handleFilterChange = (filter: (typeof filters)[number]) => {
     setSelectedFilter(filter);
-    setCurrentPage(0); // Reset to the first page when the filter changes
+    setCurrentPage(0);
   };
 
   const handleLoadMore = () => {
-    setCurrentPage((prevPage) => prevPage + 1); // Increment page number to fetch next set of data
+    setCurrentPage((prevPage) => prevPage + 1);
   };
 
-  if (error) {
+  if (fetcher.state === "loading") {
+    return <div>Loading...</div>;
+  }
+
+  if (!fetcher.data) {
     return <div>Failed to load</div>;
   }
 
@@ -111,7 +103,7 @@ const Feed = ({
                 </article>
               );
             })}
-            {swrData?.next ? (
+            {(fetcher.data as any)?.next ? (
               <button
                 className="bg-gray-600 text-gray-300 rounded-md p-2 px-4"
                 onClick={handleLoadMore}
