@@ -92,4 +92,6 @@ export async function action({ request }: ActionFunctionArgs) {
       }
     }
   }
+
+  return new Response("", { status: 200 });
 }
