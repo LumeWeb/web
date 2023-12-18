@@ -14,8 +14,7 @@ import path from "path";
 // Action function for POST requests
 export async function action({ request }: ActionFunctionArgs) {
   const client = new S5Client("https://s5.web3portal.com");
-  const formData = await request.formData();
-  const data = Object.fromEntries(formData.entries());
+  const data = await request.json();
   const meta = (await client.getMetadata(data.cid as string)) as any;
   const fileMeta = meta.metadata as any;
   const paths = fileMeta.paths as {
