@@ -24,39 +24,52 @@ const Feed = ({
   const [selectedFilter, setSelectedFilter] =
     useState<(typeof filters)[number]>("latest");
   const [currentPage, setCurrentPage] = useState(0);
+  const [initialLoad, setIsInitialLoad] = useState(true);
 
   const fetcher = useFetcher();
   const Icon = ICON_DICT[icon];
 
   useEffect(() => {
-    if (currentPage !== 0) {
+    if (!initialLoad) {
       // Fetch data for subsequent pages
       fetcher.load(`/api/feed?filter=${selectedFilter}&page=${currentPage}`);
     }
-  }, [selectedFilter, currentPage]);
+  }, [initialLoad, selectedFilter, currentPage]);
 
   useEffect(() => {
-    if (fetcher.data && currentPage !== 0) {
+    if (fetcher.data) {
       setContent((prevContent) => [...prevContent, ...fetcher.data.data]);
     }
-  }, [fetcher.data, currentPage]);
+  }, [initialLoad, fetcher.data]);
 
   const handleFilterChange = (filter: (typeof filters)[number]) => {
+    setIsInitialLoad(false);
+    setContent([]);
     setSelectedFilter(filter);
     setCurrentPage(0);
   };
 
   const handleLoadMore = () => {
+    setIsInitialLoad(false);
     setCurrentPage((prevPage) => prevPage + 1);
   };
 
-  if (currentPage) {
-    if (fetcher.state === "loading") {
-      return <div>Loading...</div>;
-    }
+  let activeContent = content;
 
-    if (!fetcher.data) {
-      return <div>Failed to load</div>;
+  if (!initialLoad) {
+    if (fetcher.state === "loading") {
+      activeContent = [
+        {
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          title: "Loading",
+          id: 0,
+          slug: "loading",
+          cid: "",
+          url: "",
+          siteKey: "",
+        },
+      ];
     }
   }
 
@@ -90,7 +103,7 @@ const Feed = ({
       >
         <ScrollArea.Viewport className="w-full h-full">
           <div className={`flex gap-4 flex-${variant}`}>
-            {content.map((item, index) => {
+            {activeContent.map((item, index) => {
               return (
                 <article
                   key={index}
