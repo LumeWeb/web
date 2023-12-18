@@ -45,27 +45,6 @@ export async function fetchFeedData({
     take: next,
   });
 
-  // const articles: Article[] = [
-  //   {
-  //     id: 1,
-  //     title: "Mock Article 1",
-  //     slug: "This is a mock article.",
-  //     siteKey: "asdas",
-  //     url: "asdasd",
-  //     createdAt: new Date(),
-  //     updatedAt: new Date(),
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Mock Article 2",
-  //     slug: "This is a mock article.",
-  //     siteKey: "asdas",
-  //     url: "asdasd",
-  //     createdAt: new Date(),
-  //     updatedAt: new Date(),
-  //   },
-  // ];
-
   const nextPointer = articles.length >= limit ? next + limit : null;
 
   return {
