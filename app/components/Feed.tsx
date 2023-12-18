@@ -50,12 +50,14 @@ const Feed = ({
     setCurrentPage((prevPage) => prevPage + 1);
   };
 
-  if (fetcher.state === "loading") {
-    return <div>Loading...</div>;
-  }
+  if (currentPage) {
+    if (fetcher.state === "loading") {
+      return <div>Loading...</div>;
+    }
 
-  if (!fetcher.data) {
-    return <div>Failed to load</div>;
+    if (!fetcher.data) {
+      return <div>Failed to load</div>;
+    }
   }
 
   return (
