@@ -1,21 +1,22 @@
-import React from "react"
-import Image from "next/image"
-import Link from "next/link"
+import React from "react";
+import { Link } from "@remix-run/react";
 
-type Props = {}
+import Logo from "@/images/lume-logo-sm.png";
+
+type Props = {};
 
 export const Header = ({}: Props) => {
   return (
     <header className="w-full flex flex-row justify-between relative">
       <div className="flex flex-col">
-        <Link href="/">
+        <Link to="/">
           <Web3NewsLogo />
           <div className="relative mt-1">
-            <Image
+            <image
               className="-right-8 -top-3 absolute"
               width={28}
               height={24}
-              src="/lume-logo-sm.png"
+              src={Logo}
               alt=""
             />
             <span className="right-0 -top-[6px] absolute text-white text-opacity-50 text-sm font-normal font-secondary leading-7">
@@ -26,21 +27,21 @@ export const Header = ({}: Props) => {
       </div>
       <div className="flex gap-3 font-normal flex-row text-gray-300 rounded">
         <Link
-          href="/about"
+          to="/about"
           className="hover:text-white p-2 px-4 hover:bg-gray-800 rounded"
         >
           About
         </Link>
         <Link
-          href="/donate"
+          to="/donate"
           className="hover:text-white p-2 px-4 hover:bg-gray-800 rounded"
         >
           Contribute
         </Link>
       </div>
     </header>
-  )
-}
+  );
+};
 
 const Web3NewsLogo = ({ className }: { className?: string }) => {
   return (
@@ -61,7 +62,7 @@ const Web3NewsLogo = ({ className }: { className?: string }) => {
         fill="#ACF9C0"
       />
     </svg>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@remix-run/react";
 
 export default function Page() {
   return (
@@ -34,7 +34,7 @@ export default function Page() {
 
       <p>So help us in our goals to level-up Web3.</p>
 
-      <Link href="https://gitcoin.com">
+      <Link to="https://gitcoin.com">
         <button
           className={`my-6 p-8 text-gray-500 bg-gray-800 hover:bg-gray-800/70`}
         >
@@ -42,5 +42,5 @@ export default function Page() {
         </button>
       </Link>
     </span>
-  )
+  );
 }

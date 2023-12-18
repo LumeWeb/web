@@ -1,45 +1,50 @@
-"use client"
-
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import React, { FormEvent, useState } from "react"
-import { Select, SelectContent, SelectTrigger, SelectItem, SelectValue } from "./ui/select"
-import { SitesCombobox } from "./SitesCombobox"
-import { FILTER_TIMES } from "@/utils"
+import React, { FormEvent, useState } from "react";
+import { useLocation, useNavigate } from "@remix-run/react";
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectItem,
+  SelectValue,
+} from "./ui/select";
+import { SitesCombobox } from "./SitesCombobox";
+import { FILTER_TIMES } from "@/utils";
 
 type Props = {
-  value: string
-  placeholder?: string
-  className?: string
+  value: string;
+  placeholder?: string;
+  className?: string;
   filters?: {
-    sites: { value: string; label: string }[]
-  }
-}
+    sites: { value: string; label: string }[];
+  };
+};
 
 const SimplifiedSearchBar = ({
   value: initialValue,
   placeholder,
   filters,
-  className
+  className,
 }: Props) => {
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
-  const router = useRouter()
-  const [value, setValue] = useState<string>(initialValue)
+  let navigate = useNavigate();
+  let location = useLocation();
+  const [value, setValue] = useState<string>(initialValue);
+
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const newSearchParams = new URLSearchParams(searchParams ?? undefined)
+    event.preventDefault();
+    const newSearchParams = new URLSearchParams(location.search);
 
     if (value) {
-      newSearchParams.set("q", value)
+      newSearchParams.set("q", value);
     } else {
-      newSearchParams.delete("q")
+      newSearchParams.delete("q");
     }
 
-    router.push(`${pathname}?${newSearchParams}`)
-  }
+    navigate(`${location.pathname}?${newSearchParams}`);
+  };
+
   return (
     <form
-      className={`flex items-center text-lg border-b border-primary pb-2`}
+      className={`flex items-center text-lg border-b border-primary pb-2 ${className}`}
       onSubmit={handleSearch}
     >
       <div className="flex-1 flex flex-row max-w-full">
@@ -83,7 +88,7 @@ const SimplifiedSearchBar = ({
         </Select>
       </div>
     </form>
-  )
-}
+  );
+};
 
-export default SimplifiedSearchBar
+export default SimplifiedSearchBar;

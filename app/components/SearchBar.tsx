@@ -1,76 +1,71 @@
-"use client"
+"use client";
 
 import React, {
-  FormEvent,
+  type FormEvent,
   useCallback,
   useEffect,
   useRef,
-  useState
-} from "react"
-import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline" // Assuming usage of Heroicons for icons
-import { flushSync } from "react-dom"
-import Link from "next/link"
-import { usePathname, useSearchParams, useRouter } from "next/navigation"
-import { FILTER_TIMES, formatDate, getResults } from "@/utils"
+  useState,
+} from "react";
+import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline"; // Assuming usage of Heroicons for icons
+import { flushSync } from "react-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "@remix-run/react";
+import { FILTER_TIMES, formatDate, getResults } from "@/utils";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectLabel,
   SelectTrigger,
-  SelectValue
-} from "./ui/select"
-import { SitesCombobox } from "./SitesCombobox"
+  SelectValue,
+} from "./ui/select";
+import { SitesCombobox } from "./SitesCombobox";
 
-type Props = {}
+type Props = {};
 
-const SearchBar = ({}: Props) => {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
-  const [query, setQuery] = useState(searchParams?.get("q") ?? "")
-  const inputRef = useRef<HTMLInputElement>()
-  const [isLoading, setIsLoading] = useState(false)
-  const [activeInput, setActiveInput] = useState(true)
-  const [dirtyInput, setDirtyInput] = useState(false)
-  const [results, setResults] = useState<SearchResult[]>([])
+const SearchBar = () => {
+  let navigate = useNavigate();
+  let { pathname } = useLocation();
+  let [searchParams] = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
+  const inputRef = useRef<HTMLInputElement>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeInput, setActiveInput] = useState(true);
+  const [dirtyInput, setDirtyInput] = useState(false);
+  const [results, setResults] = useState<SearchResult[]>([]);
 
   const handleSearch = useCallback(
-    async (event?: FormEvent<HTMLFormElement>) => {
-      event?.preventDefault()
-      setIsLoading(true)
-      const newSearchParams = new URLSearchParams(searchParams ?? undefined)
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      setIsLoading(true);
+      let newSearchParams = new URLSearchParams(searchParams.toString());
 
       if (query) {
-        newSearchParams.set("q", query)
+        newSearchParams.set("q", query);
       } else {
-        newSearchParams.delete("q")
+        newSearchParams.delete("q");
       }
 
-      router.push(`${pathname}?${newSearchParams}`)
+      navigate(`${pathname}?${newSearchParams.toString()}`);
 
       // Perform search and update results state
-      // Assume fetchResults is a function that fetches search results
       // const searchResults = await fetchResults(query);
       // Mock the search results
-      const searchResults = await getResults({ query })
+      const searchResults = await getResults({ query });
 
-      setResults(searchResults)
-      setIsLoading(false)
-      setActiveInput(false)
+      setResults(searchResults);
+      setIsLoading(false);
+      setActiveInput(false);
     },
-    [
-      query,
-      setResults,
-      setIsLoading,
-      setActiveInput,
-      searchParams,
-      router,
-      pathname
-    ]
-  )
+    [query, searchParams, navigate, pathname]
+  );
 
-  const isActive = results.length > 0 || dirtyInput
+  const isActive = results.length > 0 || dirtyInput;
 
   return (
     <div
@@ -96,7 +91,7 @@ const SearchBar = ({}: Props) => {
             <input
               ref={(element) => {
                 if (element) {
-                  inputRef.current = element
+                  inputRef.current = element;
                 }
               }}
               className={`flex-grow inline bg-transparent text-white placeholder-gray-400 outline-none ring-none ${
@@ -114,15 +109,15 @@ const SearchBar = ({}: Props) => {
               style={
                 query
                   ? {
-                      width: `calc(${query.length}ch+2px)`
+                      width: `calc(${query.length}ch+2px)`,
                     }
                   : undefined
               }
               onChange={(e) => {
                 if (!dirtyInput) {
-                  setDirtyInput(true)
+                  setDirtyInput(true);
                 }
-                setQuery(e.target.value)
+                setQuery(e.target.value);
               }}
             />
             {isActive ? (
@@ -138,9 +133,9 @@ const SearchBar = ({}: Props) => {
             className="block w-full flex-1 text-blue-300"
             onClick={() => {
               flushSync(() => {
-                setActiveInput(true)
-              })
-              inputRef.current?.focus()
+                setActiveInput(true);
+              });
+              inputRef.current?.focus();
             }}
           >
             {'"'}
@@ -156,13 +151,18 @@ const SearchBar = ({}: Props) => {
             {/* Dropdown component should be here */}
             <SitesCombobox />
             {/* Dropdown component should be here */}
-            <Select defaultValue={'0'}>
+            <Select defaultValue={"0"}>
               <SelectTrigger className="hover:bg-muted w-auto">
-                <SelectValue placeholder="Time ago"/>
+                <SelectValue placeholder="Time ago" />
               </SelectTrigger>
               <SelectContent>
                 {FILTER_TIMES.map((v) => (
-                  <SelectItem value={String(v.value)} key={`FilteTimeSelectItem_${v.value}`}>{v.label}</SelectItem>
+                  <SelectItem
+                    value={String(v.value)}
+                    key={`FilteTimeSelectItem_${v.value}`}
+                  >
+                    {v.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -175,7 +175,7 @@ const SearchBar = ({}: Props) => {
           <hr className="my-4 border-1" />
           {results.map((item) => (
             <Link
-              href={`/article/${item.slug}`}
+              to={`/article/${item.slug}`}
               key={item.id}
               className="flex cursor-pointer flex-row items-center space-x-5 my-2 py-2 px-4 hover:bg-gray-800 rounded-md"
             >
@@ -185,7 +185,7 @@ const SearchBar = ({}: Props) => {
               <h3 className="text-md font-semibold text-white">{item.title}</h3>
             </Link>
           ))}
-          <Link href={`/search?q=${encodeURIComponent(query)}`}>
+          <Link to={`/search?q=${encodeURIComponent(query)}`}>
             <button className="mt-4 flex justify-center items-center bg-secondary w-full py-7 text-white hover:bg-teal-800 transition-colors">
               {results.length}+ search results for{" "}
               <span className="text-blue-300 ml-1">{query}</span>
@@ -195,13 +195,13 @@ const SearchBar = ({}: Props) => {
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
 // Placeholder components for Shadcn
 const LoadingComponent = () => {
   // Replace with actual Shadcn Loading component
-  return <div>Loading...</div>
-}
+  return <div>Loading...</div>;
+};
 
-export default SearchBar
+export default SearchBar;

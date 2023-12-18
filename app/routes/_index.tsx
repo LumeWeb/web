@@ -1,34 +1,37 @@
 import Feed from "@/components/Feed";
 import SearchBar from "@/components/SearchBar";
-import { ApiResponse, fetchFeedData } from "@/lib/feed.ts";
+import { ApiResponse, fetchFeedData } from "@/lib/feed";
 import * as GraphicSection from "@/components/GraphicSection";
 import { ArrowIcon } from "@/components/ArrowIcon";
-import { GetServerSideProps } from "next";
-import { Article } from "@/lib/prisma.ts";
+import { Article } from "@/lib/prisma";
 
-type Props = {
+import Logo from "@/images/lume-logo-bg.png";
+import { json, LoaderFunction, redirect } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+
+type LoaderData = {
   data: ApiResponse<Article>;
 };
 
-export const getServerSideProps: GetServerSideProps<Props> = async ({
-  req,
-  params,
-}) => {
-  if (!req.headers.referer && params?.q) {
-    return {
-      redirect: {
-        destination: `/search?q=${params?.q}`,
-        permanent: false,
-      },
-    };
+export let loader: LoaderFunction = async ({ request }) => {
+  const url = new URL(request.url);
+  const referer = request.headers.get("referer");
+  const queryParam = url.searchParams.get("q");
+
+  // Handle redirection based on referer and query parameters
+  if (!referer && queryParam) {
+    return redirect(`/search?q=${queryParam}`);
   }
 
+  // Fetch your data here
   const data = await fetchFeedData({});
 
-  return { props: { data } };
+  // Return the fetched data as JSON
+  return json({ data });
 };
 
-export default async function Home({ data }: Props) {
+export default function Index() {
+  let { data } = useLoaderData<LoaderData>();
   return (
     <>
       <SearchBar />
@@ -47,7 +50,7 @@ export default async function Home({ data }: Props) {
         >
           <GraphicSection.Background>
             <img
-              src="/lume-logo-bg.png"
+              src={Logo}
               className="background transition-transform duration-500 transform-gpu absolute -top-[320px] -right-10"
               alt=""
               aria-hidden

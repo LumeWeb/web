@@ -1,5 +1,7 @@
-import { ArrowIcon } from "@/components/ArrowIcon"
-import * as GraphicSection from "@/components/GraphicSection"
+import { ArrowIcon } from "@/components/ArrowIcon";
+import * as GraphicSection from "@/components/GraphicSection";
+
+import Logo from "@/images/lume-logo-bg.png";
 
 export default function Page() {
   return (
@@ -40,7 +42,7 @@ export default function Page() {
       >
         <GraphicSection.Background>
           <img
-            src="/lume-logo-bg.png"
+            src={Logo}
             className="background opacity-50 transition-transform duration-500 transform-gpu absolute -top-[100px] -left-10"
             alt=""
             aria-hidden
@@ -60,5 +62,5 @@ export default function Page() {
         </GraphicSection.Foreground>
       </GraphicSection.Root>
     </span>
-  )
+  );
 }

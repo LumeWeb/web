@@ -1,4 +1,4 @@
-import prisma, { Article } from "../lib/prisma.ts";
+import prisma, { Article } from "@/lib/prisma";
 export type ApiResponse<T = Record<string, any>> = {
   data: T[];
   current: number;

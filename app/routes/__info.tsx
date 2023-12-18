@@ -1,29 +1,27 @@
-"use client"
-
-import { ArrowLeftIcon } from "@radix-ui/react-icons"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { ArrowLeftIcon } from "@radix-ui/react-icons";
+import { Link, Outlet, useLocation } from "@remix-run/react";
 
 const TEXT_DICT = {
-    "/about": {
-        headline: "Sharing community news on the open, user-owned web you deserve.",
-        tagline: "Learn about our community"
-    },
-    "/donate": {
-        headline: "We think people should have free access to information no matter how they choose to access it.",
-        tagline: "Help us break the pattern"
-    }
-}
+  "/about": {
+    headline: "Sharing community news on the open, user-owned web you deserve.",
+    tagline: "Learn about our community",
+  },
+  "/donate": {
+    headline:
+      "We think people should have free access to information no matter how they choose to access it.",
+    tagline: "Help us break the pattern",
+  },
+};
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-    const pathname = usePathname();
-    const text = TEXT_DICT[pathname! as '/about' | '/donate']
+export default function Layout() {
+  const { pathname } = useLocation();
+  const text = TEXT_DICT[pathname! as "/about" | "/donate"];
   return (
     <section className="w-full">
       <header className="text-white mt-10 pb-3 border-b-2 border-primary">
         <h2>{text.headline}</h2>
       </header>
-      <Link href="/">
+      <Link to="/">
         <button className="my-4 -ml-3 px-3 py-2 text-gray-400 hover:bg-gray-800 hover:text-white rounded">
           <ArrowLeftIcon className="w-4 h-4 inline mr-2 -mt-1" />
           Back to Home
@@ -39,16 +37,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </ol>
           </nav>
         </aside>
-        <section className="w-full">{children}</section>
+        <section className="w-full">
+          <Outlet />
+        </section>
       </div>
     </section>
-  )
+  );
 }
 
 const AsideItem = ({ title, href }: { title: string; href: string }) => {
-  const pathname = usePathname()
+  const { pathname } = useLocation();
   return (
-    <Link href={href}>
+    <Link to={href}>
       <li>
         <button
           className={`w-[calc(100%-20px)] mb-3 p-8 text-gray-500 bg-gray-800 text-start ${
@@ -61,5 +61,5 @@ const AsideItem = ({ title, href }: { title: string; href: string }) => {
         </button>
       </li>
     </Link>
-  )
-}
+  );
+};

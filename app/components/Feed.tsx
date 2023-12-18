@@ -3,9 +3,9 @@
 import { formatDate } from "@/utils";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import { useState, useEffect } from "react";
-import { Article } from "../lib/prisma.ts";
+import { Article } from "@/lib/prisma";
 import useSWR from "swr";
-import { ApiResponse } from "../lib/feed.ts";
+import { ApiResponse } from "@/lib/feed";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -42,7 +42,7 @@ const Feed = ({
         currentPage === 0
           ? { data: initialData, current: 0, next: 5 }
           : undefined, // Use initialData only for the first page
-    },
+    }
   );
 
   useEffect(() => {
