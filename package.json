@@ -14,7 +14,7 @@
         "dev:css": "npm run generate:css -- --watch",
         "dev:remix": "remix dev",
         "generate:css": "sass styles/:app/styles/",
-        "start": "remix-serve build",
+        "start": "remix-serve ./build/index.js",
         "typecheck": "tsc",
         "bridge": "ts-node-esm bridge.mts"
     },
