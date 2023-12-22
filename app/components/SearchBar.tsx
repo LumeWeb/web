@@ -25,10 +25,11 @@ import {
   SelectValue,
 } from "./ui/select";
 import { SitesCombobox } from "./SitesCombobox";
+import { SearchResult, SiteList } from "@/types.js";
 
 type Props = {};
 
-const SearchBar = () => {
+const SearchBar = ({ sites }: { sites: SiteList }) => {
   let navigate = useNavigate();
   let { pathname } = useLocation();
   let [searchParams] = useSearchParams();
@@ -149,7 +150,7 @@ const SearchBar = () => {
         ) : (
           <div className="justify-self-end min-w-[220px] flex justify-end gap-2">
             {/* Dropdown component should be here */}
-            <SitesCombobox />
+            <SitesCombobox siteList={sites} />
             {/* Dropdown component should be here */}
             <Select defaultValue={"0"}>
               <SelectTrigger className="hover:bg-muted w-auto">

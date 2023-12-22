@@ -1,17 +1,9 @@
-import * as fs from "fs";
 import { S5Client } from "@lumeweb/s5-js";
 import { CID } from "@lumeweb/libs5";
 import axios from "axios";
+import { getAvailableSites } from "app/utils.js";
 
-type SiteList = {
-  [domain: string]: {
-    pubkey: string;
-  };
-};
-
-const sites = JSON.parse(
-  fs.readFileSync("sites.json", { encoding: "utf8" }),
-) as SiteList;
+const sites = getAvailableSites();
 
 const client = new S5Client("https://s5.web3portal.com");
 const httpClient = axios.create({

@@ -8,9 +8,12 @@ import { Article } from "@/lib/prisma";
 import Logo from "@/images/lume-logo-bg.png";
 import { json, LoaderFunction, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import type { SiteList } from "@/types.js";
+import { getAvailableSites } from "@/utils";
 
 type LoaderData = {
   data: ApiResponse<Article>;
+  sites: SiteList;
 };
 
 export let loader: LoaderFunction = async ({ request }) => {
@@ -26,15 +29,17 @@ export let loader: LoaderFunction = async ({ request }) => {
   // Fetch your data here
   const data = await fetchFeedData({});
 
+  const sites = getAvailableSites();
+
   // Return the fetched data as JSON
-  return json({ data });
+  return json({ data, sites });
 };
 
 export default function Index() {
-  let { data } = useLoaderData<LoaderData>();
+  let { data, sites } = useLoaderData<LoaderData>();
   return (
     <>
-      <SearchBar />
+      <SearchBar sites={sites} />
       <div className="space-y-8 w-full my-10">
         <div className="flex flex-row flex-wrap justify-between w-full">
           <Feed

@@ -16,13 +16,20 @@ import {
 } from "@/components/ui/popover";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { getAvailableSites } from "@/utils";
-import { SelectOptions } from "@/types.js";
+import { SelectOptions, SiteList } from "@/types.js";
+import slugify from "slugify";
 
-export function SitesCombobox() {
-  const statuses = getAvailableSites();
+export function SitesCombobox({ siteList }: { siteList: SiteList }) {
+  const sites = Object.entries(siteList).map((item) => {
+    return {
+      label: item[1].name,
+      value: slugify(item[0]),
+    };
+  });
   const [open, setOpen] = React.useState(false);
-  const [selectedStatus, setSelectedStatus] =
-    React.useState<SelectOptions | null>(null);
+  const [selectedSite, setSelectedSite] = React.useState<SelectOptions | null>(
+    null
+  );
 
   return (
     <div className="flex flex- items-center space-x-4">
@@ -32,24 +39,24 @@ export function SitesCombobox() {
             variant={"ghost"}
             className="max-w-[120px] focus:ring-2 focus:ring-ring px-2 font-bold items-center w-full flex justify-between text-white text-xs uppercase"
           >
-            {selectedStatus ? <>{selectedStatus.label}</> : <>All Sites</>}
+            {selectedSite ? <>{selectedSite.label}</> : <>All Sites</>}
             <ChevronDownIcon className="ml-3 w-5 h-5" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="p-0" side="right" align="start">
           <Command>
-            <CommandInput placeholder="Change status..." />
+            <CommandInput placeholder="Select site..." />
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
-                {statuses?.map((status) => (
+                {sites?.map((status) => (
                   <CommandItem
                     className="text-white"
                     key={status.value}
                     value={status.value}
                     onSelect={(value) => {
-                      setSelectedStatus(
-                        statuses.find((priority) => priority.value === value) ||
+                      setSelectedSite(
+                        sites.find((priority) => priority.value === value) ||
                           null
                       );
                       setOpen(false);

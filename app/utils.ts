@@ -1,7 +1,8 @@
 import { formatDistanceToNow, subDays, subMonths, subYears } from "date-fns";
-import { clsx, type ClassValue } from "clsx";
+import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { SearchResult, SelectOptions } from "@/types.js";
+import { SearchResult, SiteList } from "@/types.js";
+import fs from "fs";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -45,30 +46,9 @@ export async function getResults({
 }
 
 export function getAvailableSites() {
-  const statuses: SelectOptions[] = [
-    {
-      value: "backlog",
-      label: "Backlog",
-    },
-    {
-      value: "todo",
-      label: "Todo",
-    },
-    {
-      value: "in progress",
-      label: "In Progress",
-    },
-    {
-      value: "done",
-      label: "Done",
-    },
-    {
-      value: "canceled",
-      label: "Canceled",
-    },
-  ];
-
-  return statuses;
+  return JSON.parse(
+    fs.readFileSync("sites.json", { encoding: "utf8" })
+  ) as SiteList;
 }
 
 export const FILTER_TIMES = [
