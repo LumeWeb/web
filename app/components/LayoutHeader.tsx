@@ -12,7 +12,7 @@ export const Header = ({}: Props) => {
         <Link to="/">
           <Web3NewsLogo />
           <div className="relative mt-1">
-            <image
+            <img
               className="-right-8 -top-3 absolute"
               width={28}
               height={24}
