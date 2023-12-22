@@ -3,6 +3,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { SearchResult, SiteList } from "@/types.js";
 import fs from "fs";
+import search from "@/lib/search";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -25,24 +26,21 @@ export async function getResults({
 }: {
   query?: string;
 }): Promise<SearchResult[]> {
-  if (!query) return [];
+  if (!query) {
+    return [];
+  }
 
-  return [
-    {
-      id: 1,
-      timestamp: new Date(),
-      title: "Mock Title 1",
-      description: "Mock Description 1",
-      slug: "hello-world",
-    },
-    {
-      id: 2,
-      timestamp: new Date(),
-      title: "Mock Title 2",
-      description: "Mock Description 2",
-      slug: "hello-world-2",
-    },
-  ];
+  const results = await search.index("articles").search(query);
+
+  return results.hits.map((item) => {
+    return {
+      id: item.id,
+      timestamp: item.createdAt,
+      title: item.title,
+      description: "",
+      slug: item.slug,
+    };
+  });
 }
 
 export function getAvailableSites() {

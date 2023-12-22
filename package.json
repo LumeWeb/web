@@ -38,6 +38,7 @@
         "cmdk": "^0.2.0",
         "date-fns": "^2.30.0",
         "isbot": "^3.7.1",
+        "meilisearch": "^0.36.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "slugify": "^1.6.6",
