@@ -3,11 +3,14 @@ import { fetchFeedData } from "@/lib/feed";
 
 type Filter = "latest" | "day" | "week" | "month";
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
+  const search = new URL(request.url).searchParams;
   let filter: Filter | null = null;
   let page = "0";
-  if (params?.searchParams) {
-    ({ filter, page = "0" } = params.searchParams as any as {
+  const searchEntries = Array.from(search.entries());
+  if (searchEntries.length) {
+    const searchParams = Object.fromEntries(searchEntries);
+    ({ filter, page = "0" } = searchParams as any as {
       filter: Filter;
       page: string;
     });
