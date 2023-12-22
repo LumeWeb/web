@@ -1,13 +1,29 @@
 import React from "react";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import { formatDate, getResults } from "@/utils";
+import { formatDate, getAvailableSites, getResults } from "@/utils";
 import SimplifiedSearchBar from "@/components/SimplifiedSearchBar";
-import { Link, useSearchParams } from "@remix-run/react";
+import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
+import { json, LoaderFunction } from "@remix-run/node";
+import type { SearchResult, SiteList } from "@/types.js";
 
-const Page = async () => {
-  const [searchParams] = useSearchParams();
-  const query = searchParams.get("q") ?? "";
+type LoaderData = {
+  sites: SiteList;
+  results: SearchResult[];
+  query: string;
+};
+
+export let loader: LoaderFunction = async ({ request }) => {
+  const sites = getAvailableSites();
+  const search = new URL(request.url).searchParams;
+  const query = search.get("q") ?? "";
   const results = await getResults({ query: query });
+
+  // Return the fetched data as JSON
+  return json({ sites, results, query });
+};
+
+const Page = () => {
+  const { sites, results, query } = useLoaderData<LoaderData>();
 
   return (
     <div className="w-full items-center text-lg">
@@ -16,6 +32,7 @@ const Page = async () => {
         placeholder={
           query ? undefined : "Search for web3 news from the community"
         }
+        sites={sites}
       />
 
       <Link to="/">

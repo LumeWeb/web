@@ -15,7 +15,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
-import { getAvailableSites } from "@/utils";
 import { SelectOptions, SiteList } from "@/types.js";
 import slugify from "slugify";
 

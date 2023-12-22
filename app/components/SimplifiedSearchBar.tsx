@@ -9,6 +9,7 @@ import {
 } from "./ui/select";
 import { SitesCombobox } from "./SitesCombobox";
 import { FILTER_TIMES } from "@/utils";
+import { SiteList } from "@/types.js";
 
 type Props = {
   value: string;
@@ -17,6 +18,7 @@ type Props = {
   filters?: {
     sites: { value: string; label: string }[];
   };
+  sites: SiteList;
 };
 
 const SimplifiedSearchBar = ({
@@ -24,6 +26,7 @@ const SimplifiedSearchBar = ({
   placeholder,
   filters,
   className,
+  sites,
 }: Props) => {
   let navigate = useNavigate();
   let location = useLocation();
@@ -69,7 +72,7 @@ const SimplifiedSearchBar = ({
       </div>
       <div className="w-56 flex gap-2">
         {/* Dropdown component should be here */}
-        <SitesCombobox />
+        <SitesCombobox siteList={sites} />
         {/* Dropdown component should be here */}
         <Select defaultValue={"0"}>
           <SelectTrigger className="hover:bg-muted w-auto">
