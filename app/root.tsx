@@ -9,7 +9,7 @@ import {
 } from "@remix-run/react";
 import Header from "@/components/LayoutHeader"; // Adjust the import path as needed
 import Footer from "@/components/LayoutFooter"; // Adjust the import path as needed
-import globalStyles from "./styles/global.css";
+import globalStyles from "../styles/global.scss?inline";
 import { cssBundleHref } from "@remix-run/css-bundle"; // Adjust the import path as needed
 
 export const links: LinksFunction = () => [
