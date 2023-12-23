@@ -12,7 +12,17 @@ export const prisma = (globalForPrisma.prisma || new PrismaClient()).$extends({
 
         // Index the created record in MeiliSearch
         const index = search.index("articles");
-        await index.addDocuments([createdRecord]);
+        const timestampInMilliseconds = Date.parse(
+          createdRecord.createdAt as any
+        ); // Date.parse returns the timestamp in milliseconds
+        const timestamp = timestampInMilliseconds / 1000;
+        await index.addDocuments([
+          {
+            ...createdRecord,
+
+            createdTimestamp: timestamp,
+          },
+        ]);
 
         return createdRecord;
       },

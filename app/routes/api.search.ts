@@ -13,9 +13,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
 
   const site = searchParams.get("site");
+  const time = searchParams.get("time");
+
+  let filters = [];
+
+  if (site) {
+    filters.push(`siteKey = ${site}`);
+  }
+  if (time) {
+    filters.push(`createdTimestamp >= ${parseInt(time).toString()}`);
+  }
 
   const results = await search.index("articles").search(query, {
-    filter: site ? `siteKey = ${site}` : undefined,
+    filter: filters.length ? filters.join(" AND ") : undefined,
   });
 
   return results.hits.map((item) => {

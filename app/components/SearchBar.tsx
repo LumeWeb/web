@@ -32,6 +32,7 @@ const SearchBar = ({ sites }: { sites: SiteList }) => {
   const [dirtyInput, setDirtyInput] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [selectedSite, setSelectedSite] = useState(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   const fetcher = useFetcher({ key: "seach" });
 
@@ -58,6 +59,12 @@ const SearchBar = ({ sites }: { sites: SiteList }) => {
       newSearchParams.set("site", selectedSite);
     }
 
+    if (selectedTime) {
+      const timestampInMilliseconds = Date.parse(selectedTime); // Date.parse returns the timestamp in milliseconds
+      const timestamp = timestampInMilliseconds / 1000;
+      newSearchParams.set("time", timestamp.toString());
+    }
+
     fetcher.load(`/api/search?${newSearchParams}`);
   }
 
@@ -71,7 +78,7 @@ const SearchBar = ({ sites }: { sites: SiteList }) => {
 
   useEffect(() => {
     doSearch();
-  }, [selectedSite]);
+  }, [selectedSite, selectedTime]);
 
   const isActive = results.length > 0 || dirtyInput;
 
@@ -159,7 +166,10 @@ const SearchBar = ({ sites }: { sites: SiteList }) => {
             {/* Dropdown component should be here */}
             <SitesCombobox siteList={sites} onSiteSelect={setSelectedSite} />
             {/* Dropdown component should be here */}
-            <Select defaultValue={"0"}>
+            <Select
+              defaultValue={"0"}
+              onValueChange={(v) => setSelectedTime(v)}
+            >
               <SelectTrigger className="hover:bg-muted w-auto">
                 <SelectValue placeholder="Time ago" />
               </SelectTrigger>
