@@ -23,14 +23,29 @@ export const formatDate = (date: string | Date) => {
 
 export async function getResults({
   query,
+  site,
+  time,
 }: {
   query?: string;
+  site?: string;
+  time?: string;
 }): Promise<SearchResult[]> {
   if (!query) {
     return [];
   }
 
-  const results = await search.index("articles").search(query);
+  let filters = [];
+
+  if (site) {
+    filters.push(`siteKey = ${site}`);
+  }
+  if (time) {
+    filters.push(`createdTimestamp >= ${parseInt(time).toString()}`);
+  }
+
+  const results = await search.index("articles").search(query, {
+    filter: filters.length ? filters.join(" AND ") : undefined,
+  });
 
   return results.hits.map((item) => {
     return {

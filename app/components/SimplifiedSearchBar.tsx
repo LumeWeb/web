@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "@remix-run/react";
 import {
   Select,
@@ -31,19 +31,43 @@ const SimplifiedSearchBar = ({
   let navigate = useNavigate();
   let location = useLocation();
   const [value, setValue] = useState<string>(initialValue);
+  const [selectedSite, setSelectedSite] = useState<any>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
-  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSearch = useCallback(
+    (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      doSearch();
+    },
+    [value]
+  );
+
+  function doSearch() {
     const newSearchParams = new URLSearchParams(location.search);
 
     if (value) {
       newSearchParams.set("q", value);
     } else {
       newSearchParams.delete("q");
+      return;
+    }
+
+    if (selectedSite) {
+      newSearchParams.set("site", selectedSite);
+    }
+
+    if (selectedTime) {
+      const timestampInMilliseconds = Date.parse(selectedTime); // Date.parse returns the timestamp in milliseconds
+      const timestamp = timestampInMilliseconds / 1000;
+      newSearchParams.set("time", timestamp.toString());
     }
 
     navigate(`${location.pathname}?${newSearchParams}`);
-  };
+  }
+
+  useEffect(() => {
+    doSearch();
+  }, [selectedSite, selectedTime]);
 
   return (
     <form
@@ -72,9 +96,9 @@ const SimplifiedSearchBar = ({
       </div>
       <div className="w-56 flex gap-2">
         {/* Dropdown component should be here */}
-        <SitesCombobox siteList={sites} />
+        <SitesCombobox siteList={sites} onSiteSelect={setSelectedSite} />
         {/* Dropdown component should be here */}
-        <Select defaultValue={"0"}>
+        <Select defaultValue={"0"} onValueChange={(v) => setSelectedTime(v)}>
           <SelectTrigger className="hover:bg-muted w-auto">
             <SelectValue placeholder="Time ago" />
           </SelectTrigger>

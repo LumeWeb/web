@@ -16,7 +16,9 @@ export let loader: LoaderFunction = async ({ request }) => {
   const sites = getAvailableSites();
   const search = new URL(request.url).searchParams;
   const query = search.get("q") ?? "";
-  const results = await getResults({ query: query });
+  const site = search.get("site") ?? undefined;
+  const time = search.get("time") ?? undefined;
+  const results = await getResults({ query: query, site, time });
 
   // Return the fetched data as JSON
   return json({ sites, results, query });
