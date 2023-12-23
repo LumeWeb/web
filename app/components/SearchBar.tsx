@@ -11,6 +11,7 @@ import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { flushSync } from "react-dom";
 import {
   Link,
+  useFetcher,
   useLocation,
   useNavigate,
   useSearchParams,
@@ -40,6 +41,8 @@ const SearchBar = ({ sites }: { sites: SiteList }) => {
   const [dirtyInput, setDirtyInput] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
 
+  const fetcher = useFetcher();
+
   const handleSearch = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -50,21 +53,23 @@ const SearchBar = ({ sites }: { sites: SiteList }) => {
         newSearchParams.set("q", query);
       } else {
         newSearchParams.delete("q");
+        return;
       }
 
       navigate(`${pathname}?${newSearchParams.toString()}`);
 
-      // Perform search and update results state
-      // const searchResults = await fetchResults(query);
-      // Mock the search results
-      const searchResults = await getResults({ query });
-
-      setResults(searchResults);
-      setIsLoading(false);
-      setActiveInput(false);
+      fetcher.load(`/api/search?${newSearchParams}`);
     },
     [query, searchParams, navigate, pathname]
   );
+
+  useEffect(() => {
+    if (fetcher.data) {
+      setResults(fetcher.data as SearchResult[]);
+      setIsLoading(false);
+      setActiveInput(false);
+    }
+  }, [fetcher.data]);
 
   const isActive = results.length > 0 || dirtyInput;
 
