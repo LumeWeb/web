@@ -7,21 +7,14 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline"; // Assuming usage of Heroicons for icons
+import { ChevronRightIcon } from "@heroicons/react/24/outline"; // Assuming usage of Heroicons for icons
 import { flushSync } from "react-dom";
-import {
-  Link,
-  useFetcher,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "@remix-run/react";
-import { FILTER_TIMES, formatDate, getResults } from "@/utils";
+import { Link, useFetcher, useSearchParams } from "@remix-run/react";
+import { FILTER_TIMES, formatDate } from "@/utils";
 import {
   Select,
   SelectContent,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
@@ -31,8 +24,6 @@ import { SearchResult, SiteList } from "@/types.js";
 type Props = {};
 
 const SearchBar = ({ sites }: { sites: SiteList }) => {
-  let navigate = useNavigate();
-  let { pathname } = useLocation();
   let [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const inputRef = useRef<HTMLInputElement>();
@@ -40,28 +31,35 @@ const SearchBar = ({ sites }: { sites: SiteList }) => {
   const [activeInput, setActiveInput] = useState(true);
   const [dirtyInput, setDirtyInput] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [selectedSite, setSelectedSite] = useState(null);
 
-  const fetcher = useFetcher();
+  const fetcher = useFetcher({ key: "seach" });
 
   const handleSearch = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
+    (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      setIsLoading(true);
-      let newSearchParams = new URLSearchParams(searchParams.toString());
-
-      if (query) {
-        newSearchParams.set("q", query);
-      } else {
-        newSearchParams.delete("q");
-        return;
-      }
-
-      navigate(`${pathname}?${newSearchParams.toString()}`);
-
-      fetcher.load(`/api/search?${newSearchParams}`);
+      doSearch();
     },
-    [query, searchParams, navigate, pathname]
+    [query, selectedSite]
   );
+
+  function doSearch() {
+    setIsLoading(true);
+    let newSearchParams = new URLSearchParams(searchParams.toString());
+
+    if (query) {
+      newSearchParams.set("q", query);
+    } else {
+      newSearchParams.delete("q");
+      return;
+    }
+
+    if (selectedSite) {
+      newSearchParams.set("site", selectedSite);
+    }
+
+    fetcher.load(`/api/search?${newSearchParams}`);
+  }
 
   useEffect(() => {
     if (fetcher.data) {
@@ -70,6 +68,10 @@ const SearchBar = ({ sites }: { sites: SiteList }) => {
       setActiveInput(false);
     }
   }, [fetcher.data]);
+
+  useEffect(() => {
+    doSearch();
+  }, [selectedSite]);
 
   const isActive = results.length > 0 || dirtyInput;
 
@@ -155,7 +157,7 @@ const SearchBar = ({ sites }: { sites: SiteList }) => {
         ) : (
           <div className="justify-self-end min-w-[220px] flex justify-end gap-2">
             {/* Dropdown component should be here */}
-            <SitesCombobox siteList={sites} />
+            <SitesCombobox siteList={sites} onSiteSelect={setSelectedSite} />
             {/* Dropdown component should be here */}
             <Select defaultValue={"0"}>
               <SelectTrigger className="hover:bg-muted w-auto">

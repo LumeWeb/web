@@ -17,8 +17,15 @@ import {
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { SelectOptions, SiteList } from "@/types.js";
 import slugify from "slugify";
+import { useEffect } from "react";
 
-export function SitesCombobox({ siteList }: { siteList: SiteList }) {
+export function SitesCombobox({
+  siteList,
+  onSiteSelect,
+}: {
+  siteList: SiteList;
+  onSiteSelect: React.Dispatch<React.SetStateAction<any>>;
+}) {
   const sites = Object.entries(siteList).map((item) => {
     return {
       label: item[1].name,
@@ -29,6 +36,10 @@ export function SitesCombobox({ siteList }: { siteList: SiteList }) {
   const [selectedSite, setSelectedSite] = React.useState<SelectOptions | null>(
     null
   );
+
+  useEffect(() => {
+    onSiteSelect(selectedSite?.value as any);
+  }, [selectedSite]);
 
   return (
     <div className="flex flex- items-center space-x-4">
@@ -55,8 +66,7 @@ export function SitesCombobox({ siteList }: { siteList: SiteList }) {
                     value={status.value}
                     onSelect={(value) => {
                       setSelectedSite(
-                        sites.find((priority) => priority.value === value) ||
-                          null
+                        sites.find((site) => site.value === value) || null
                       );
                       setOpen(false);
                     }}

@@ -12,7 +12,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
     });
   }
 
-  const results = await search.index("articles").search(query);
+  const site = searchParams.get("site");
+
+  const results = await search.index("articles").search(query, {
+    filter: site ? `siteKey = ${site}` : undefined,
+  });
 
   return results.hits.map((item) => {
     return {
