@@ -41,7 +41,7 @@ const SearchBar = ({ sites }: { sites: SiteList }) => {
       event.preventDefault();
       doSearch();
     },
-    [query, selectedSite]
+    [query]
   );
 
   function doSearch() {
