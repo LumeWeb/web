@@ -7,10 +7,10 @@ import {
 import { S5Client } from "@lumeweb/s5-js";
 import xml2js from "xml2js";
 import { prisma } from "@/lib/prisma";
-import * as cheerio from "cheerio";
 import slugify from "slugify";
 import path from "path";
 import { getAvailableSites } from "@/utils.js";
+import { CID } from "@lumeweb/libs5";
 
 // Action function for POST requests
 export async function action({ request }: ActionFunctionArgs) {
@@ -34,15 +34,20 @@ export async function action({ request }: ActionFunctionArgs) {
     };
   };
 
-  if (!("sitemap.xml" in paths)) {
-    throw new Response("Sitemap not found", { status: 404 });
+  // Check if the RSS feed path exists in the paths
+  if (!(siteInfo.rss in paths)) {
+    throw new Response("RSS feed not found", { status: 404 });
   }
 
-  const sitemapData = await client.downloadData(paths[siteInfo.sitemap].cid);
-  const sitemap = await xml2js.parseStringPromise(sitemapData);
+  // Download and parse the RSS feed
+  const rssData = await client.downloadData(paths[siteInfo.rss].cid);
+  const rss = await xml2js.parseStringPromise(rssData);
 
-  const urls = sitemap.urlset.url.map((urlEntry: any) => {
-    const url = urlEntry.loc[0];
+  // Process each item in the RSS feed
+  for (const item of rss.rss.channel[0].item) {
+    const url = item.link[0];
+    const title = item.title[0]; // Title is directly available from the feed
+
     let pathname = new URL(url).pathname;
 
     // Normalize and remove leading and trailing slashes from the path
@@ -50,7 +55,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
     // Function to determine if a URL path represents a directory
     const isDirectory = (pathname: string) => {
-      // Check if the path directly maps to a file in the paths object
       return !paths.hasOwnProperty(pathname);
     };
 
@@ -65,35 +69,22 @@ export async function action({ request }: ActionFunctionArgs) {
       }
     }
 
-    // Fetch cid after confirming the final path
     const cid = paths[pathname]?.cid;
 
-    return { url, cid, path: pathname }; // including cid in return object after final path is determined
-  });
-
-  for (const { url, cid } of urls) {
     if (cid) {
       const exists = await prisma.article.findUnique({
         where: { cid },
       });
 
       if (!exists) {
-        // Fetch and parse the content using CID
-        const contentData = Buffer.from(
-          await client.downloadData(cid)
-        ).toString();
-
-        const $ = cheerio.load(contentData);
-        const title = $("title").text(); // Extract the title from the content
-
         const record = {
           title,
           url,
-          cid: cid,
+          cid: CID.decode(cid).toString(),
           createdAt: new Date(),
           updatedAt: new Date(),
           slug: slugify(new URL(url).pathname),
-          siteKey: slugify(data.site as string),
+          siteKey: data.site,
         };
 
         // Insert a new record into the database
