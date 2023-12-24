@@ -4,7 +4,7 @@ import { formatDate } from "@/utils";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import { useEffect, useState } from "react";
 import { Article } from "@/lib/prisma";
-import { useFetcher } from "@remix-run/react";
+import { Link, useFetcher } from "@remix-run/react";
 
 const Feed = ({
   className,
@@ -112,7 +112,7 @@ const Feed = ({
                     {formatDate(item.createdAt)}
                   </span>
                   <p className="inline-block text-white w-[25ch] flex-auto">
-                    {item.title}
+                    <Link to={`/article/${item.cid}`}>{item.title}</Link>
                   </p>
                 </article>
               );

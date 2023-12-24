@@ -55,7 +55,10 @@ const Page = () => {
               <span className="text-sm text-gray-400">
                 {formatDate(item.timestamp)}
               </span>
-              <h3 className="text-md font-semibold text-white">{item.title}</h3>
+              <h3 className="text-md font-semibold text-white">
+                {" "}
+                <Link to={`/article/${item.cid}`}>{item.title}</Link>
+              </h3>
             </Link>
           ))}
           <Link to={`/search?q=${encodeURIComponent(query)}`}>

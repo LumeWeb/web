@@ -4,6 +4,7 @@ export type SearchResult = {
   title: string;
   description: string;
   slug: string;
+  cid: string;
 };
 
 export type SelectOptions = {
