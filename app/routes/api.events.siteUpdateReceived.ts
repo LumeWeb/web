@@ -10,11 +10,22 @@ import { prisma } from "@/lib/prisma";
 import * as cheerio from "cheerio";
 import slugify from "slugify";
 import path from "path";
+import { getAvailableSites } from "@/utils.js";
 
 // Action function for POST requests
 export async function action({ request }: ActionFunctionArgs) {
   const client = new S5Client("https://s5.web3portal.com");
   const data = await request.json();
+
+  const site = data.site;
+  const sites = getAvailableSites();
+
+  if (!(site in sites)) {
+    throw new Response("Site does not exist", { status: 404 });
+  }
+
+  const siteInfo = sites[site];
+
   const meta = (await client.getMetadata(data.cid as string)) as any;
   const fileMeta = meta.metadata as any;
   const paths = fileMeta.paths as {
@@ -27,7 +38,7 @@ export async function action({ request }: ActionFunctionArgs) {
     throw new Response("Sitemap not found", { status: 404 });
   }
 
-  const sitemapData = await client.downloadData(paths["sitemap.xml"].cid);
+  const sitemapData = await client.downloadData(paths[siteInfo.sitemap].cid);
   const sitemap = await xml2js.parseStringPromise(sitemapData);
 
   const urls = sitemap.urlset.url.map((urlEntry: any) => {

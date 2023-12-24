@@ -14,6 +14,6 @@ export type SelectOptions = {
 export type SiteList = {
   [domain: string]: {
     name: string;
-    pubkey: string;
+    sitemap: string;
   };
 };
