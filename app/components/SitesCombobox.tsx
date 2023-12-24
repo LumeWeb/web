@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/popover";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { SelectOptions, SiteList } from "@/types.js";
-import slugify from "slugify";
 import { useEffect } from "react";
 
 export function SitesCombobox({
@@ -29,7 +28,7 @@ export function SitesCombobox({
   const sites = Object.entries(siteList).map((item) => {
     return {
       label: item[1].name,
-      value: slugify(item[0]),
+      value: item[0],
     };
   });
   const [open, setOpen] = React.useState(false);

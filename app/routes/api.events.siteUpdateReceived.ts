@@ -7,7 +7,6 @@ import {
 import { S5Client } from "@lumeweb/s5-js";
 import xml2js from "xml2js";
 import { prisma } from "@/lib/prisma";
-import slugify from "slugify";
 import path from "path";
 import { getAvailableSites } from "@/utils.js";
 import { CID } from "@lumeweb/libs5";
@@ -83,7 +82,6 @@ export async function action({ request }: ActionFunctionArgs) {
           cid: CID.decode(cid).toString(),
           createdAt: new Date(),
           updatedAt: new Date(),
-          slug: slugify(new URL(url).pathname),
           site: data.site,
         };
 
