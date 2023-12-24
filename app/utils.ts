@@ -37,7 +37,7 @@ export async function getResults({
   let filters = [];
 
   if (site) {
-    filters.push(`siteKey = ${site}`);
+    filters.push(`site = ${site}`);
   }
   if (time) {
     filters.push(`createdTimestamp >= ${parseInt(time).toString()}`);

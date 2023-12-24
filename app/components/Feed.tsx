@@ -64,10 +64,9 @@ const Feed = ({
           updatedAt: new Date(),
           title: "Loading",
           id: 0,
-          slug: "loading",
           cid: "",
           url: "",
-          siteKey: "",
+          site: "",
         },
       ];
     }

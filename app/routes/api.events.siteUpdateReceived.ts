@@ -84,7 +84,7 @@ export async function action({ request }: ActionFunctionArgs) {
           createdAt: new Date(),
           updatedAt: new Date(),
           slug: slugify(new URL(url).pathname),
-          siteKey: data.site,
+          site: data.site,
         };
 
         // Insert a new record into the database
