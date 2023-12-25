@@ -2,8 +2,6 @@ version: '3.8'
 services:
     app:
         image: git.lumeweb.com/lumeweb/web3.news:latest
-        ports:
-            - "3000:3000"
         volumes:
             - ./data/app.db:/app/prisma/dev.db
     bridge:
