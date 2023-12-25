@@ -15,7 +15,7 @@ services:
             - ./melli_data:/meili_data
     caddy:
         image: iarekylew00t/caddy-cloudflare
-        command: caddy run
+        command: caddy run --config=/etc/caddy/Caddyfile
         env_file:
             - .env
         ports:
