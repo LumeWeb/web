@@ -1,7 +1,7 @@
 import { S5Client } from "@lumeweb/s5-js";
 import { CID } from "@lumeweb/libs5";
 import axios from "axios";
-import { getAvailableSites } from "app/utils.js";
+import { getAvailableSites } from "./app/utils.js";
 
 const sites = getAvailableSites();
 
