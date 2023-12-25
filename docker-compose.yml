@@ -15,6 +15,18 @@ services:
         image: getmeili/meilisearch:v1.5
         volumes:
             - ./melli_data:/meili_data
+    caddy:
+        image: caddy
+        command: caddy
+        ports:
+            - "80:80"
+            - "443:443"
+            - "443:443/udp"
+        volumes:
+            - ./caddy/data/:/data
+            - ./caddy/config/Caddyfile:/etc/caddy/Caddyfile
+        cap_add:
+            - NET_ADMIN
     melli_init:
         image: git.lumeweb.com/lumeweb/web3.news:latest
         command: ["npm", "run", "melli-init"]
