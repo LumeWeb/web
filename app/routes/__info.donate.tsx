@@ -2,45 +2,67 @@ import { Link } from "@remix-run/react";
 
 export default function Page() {
   return (
-    <span className="px-8 block text-gray-400 space-y-5">
+    <article className="px-8 block text-gray-400 space-y-5">
       <h1 className="text-primary text-3xl leading-9">
-        You believe the internet should be free and open for everyone,
-        regardless of political beliefs.
+        Building an Open, User-Owned Web Together
       </h1>
       <p className="text-white mt-3 leading-7">
-        Please understand that, according to United States regulations for our
-        present incorporation status, donations are not currently
-        tax-deductible.
+        Our mission is clear:{" "}
+        <strong>to create a web that is owned and shaped by its users</strong>.
+        If we don't take the lead, others <strong>will</strong> shape it for us.
       </p>
       <p>
-        If you are a corporation or business, planning to make a large donation,
-        we recommend that you consult a CPA to ensure you understand the tax
-        implications of your donated funds first.
+        Operated under the Lume Web project, web3.news exists for the
+        community's benefit and is developed under the MIT license. We’re
+        committed to <strong>transparency and open collaboration</strong>.
       </p>
-
       <p>
-        All payments are nondeductible donations (unless you get consulted
-        otherwise) and do not create any implied service contract or obligation
-        for Hammer Technologies LLC to render any services.
+        At web3.news, we are dedicated to{" "}
+        <strong>building technology, fostering community,</strong> and{" "}
+        <strong>providing education</strong>. Our vision is powered by your
+        participation and support.
       </p>
-
       <p>
-        To those that see Web3 as DeFi, we ask this: Do you go on your web
-        browser to access TradingView or other market tools as your homepage, or
-        do you go check your social media, email, and news sites, as well as
-        your money? Blockchain itself is more than just money, and so is Web3,
-        and by extension P2P networks.
+        Currently, web3.news operates thanks to your generous donations and
+        grant funding, at this time primarily from the{" "}
+        <Link to="https://sia.tech/" className="text-white">
+          <strong>Sia Foundation</strong>
+        </Link>
+        , a 501c3 blockchain foundation focused on decentralized storage. This
+        significant support aligns closely with our mission of{" "}
+        <strong>building an open and decentralized web</strong>. These
+        contributions are vital for our ongoing operations and development,
+        ensuring web3.news remains a vibrant and valuable resource for everyone,
+        and paving the way for our future growth and sustainability.
       </p>
-
-      <p>So help us in our goals to level-up Web3.</p>
-
-      <Link to="https://gitcoin.com">
-        <button
-          className={`my-6 p-8 text-gray-500 bg-gray-800 hover:bg-gray-800/70`}
-        >
-          Donate via Gitcoin during funding rounds
+      <p>
+        The support from the Sia Foundation not only bolsters our present
+        efforts but also aligns with our vision of leveraging blockchain
+        technology for{" "}
+        <strong>decentralized information sharing and storage</strong>.
+      </p>
+      <p>
+        Looking to the future, the Lume Web project is set to introduce
+        separate, community-supported paid products. This strategic move aims to
+        ensure the <strong>long-term sustainability of web3.news</strong> and
+        the ongoing development of innovative solutions. Aligned with our core
+        values and community focus, these products are envisioned as providing
+        essential services and value back to the community, shaped in part by
+        your feedback and participation.
+      </p>
+      <p>
+        We pledge to maintain web3.news as a platform{" "}
+        <strong>free from sponsorships and advertising</strong>, focusing on
+        solving problems through collaboration and innovation.
+      </p>
+      <p>
+        <strong>Join us in shaping the future of Web3.</strong>
+      </p>
+      <Link to="https://lumeweb.com/donate" aria-label="Support Our Mission">
+        <button className="my-6 p-8 text-gray-500 bg-gray-800 hover:bg-gray-800/70">
+          Support Our Mission
         </button>
       </Link>
-    </span>
+    </article>
   );
 }
