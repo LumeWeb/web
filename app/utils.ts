@@ -50,6 +50,7 @@ export async function getResults({
   return results.hits.map((item) => {
     return {
       id: item.id,
+      cid: item.cid,
       timestamp: item.createdAt,
       title: item.title,
       description: "",
