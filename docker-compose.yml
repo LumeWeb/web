@@ -24,6 +24,7 @@ services:
             - "443:443/udp"
         volumes:
             - ./caddy/data/:/data
+            - ./caddy/config/Caddyfile:/etc/caddy/Caddyfile
         cap_add:
             - NET_ADMIN
     melli_init:
