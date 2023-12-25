@@ -14,15 +14,16 @@ services:
         volumes:
             - ./melli_data:/meili_data
     caddy:
-        image: caddy
+        image: iarekylew00t/caddy-cloudflare
         command: caddy run
+        env_file:
+            - .env
         ports:
             - "80:80"
             - "443:443"
             - "443:443/udp"
         volumes:
             - ./caddy/data/:/data
-            - ./caddy/config/Caddyfile:/etc/caddy/Caddyfile
         cap_add:
             - NET_ADMIN
     melli_init:
