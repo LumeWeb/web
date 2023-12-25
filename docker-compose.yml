@@ -15,7 +15,7 @@ services:
             - ./melli_data:/meili_data
     caddy:
         image: caddy
-        command: caddy
+        command: caddy run
         ports:
             - "80:80"
             - "443:443"
