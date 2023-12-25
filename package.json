@@ -17,6 +17,7 @@
         "start": "remix-serve ./build/server/index.js",
         "typecheck": "tsc",
         "bridge": "bun run scripts/bridge.mts",
+        "melli-init": "bun run scripts/melli-init.mts",
         "postinstall": "patch-package"
     },
     "dependencies": {

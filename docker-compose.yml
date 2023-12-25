@@ -15,3 +15,9 @@ services:
         image: getmeili/meilisearch:v1.5
         volumes:
             - ./melli_data:/meili_data
+    melli_init:
+        build: .
+        command: ["npm", "run", "melli-init"]
+        volumes:
+            - ./data/app.db:/app/prisma/dev.db
+        profiles: ["mellisearch_init"]
