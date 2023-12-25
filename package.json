@@ -8,8 +8,8 @@
     },
     "scripts": {
         "build": "run-s \"build:*\"",
-        "build:css": "npm run generate:css -- --style=compressed",
         "build:remix": "NODE_ENV=production remix vite:build",
+        "build:prisma": "prisma generate",
         "dev": "run-p \"dev:*\"",
         "dev:css": "npm run generate:css -- --watch",
         "dev:remix": "remix vite:dev",
