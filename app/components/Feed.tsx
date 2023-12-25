@@ -1,5 +1,3 @@
-"use client";
-
 import { formatDate } from "@/utils";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import { useEffect, useState } from "react";
