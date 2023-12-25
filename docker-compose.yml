@@ -1,13 +1,13 @@
 version: '3.8'
 services:
     app:
-        build: .
+        image: git.lumeweb.com/lumeweb/web3.news:latest
         ports:
             - "3000:3000"
         volumes:
             - ./data/app.db:/app/prisma/dev.db
     bridge:
-        build: .
+        image: git.lumeweb.com/lumeweb/web3.news:latest
         command: ["npm", "run", "bridge"]
         volumes:
             - ./data/app.db:/app/prisma/dev.db
@@ -16,13 +16,13 @@ services:
         volumes:
             - ./melli_data:/meili_data
     melli_init:
-        build: .
+        image: git.lumeweb.com/lumeweb/web3.news:latest
         command: ["npm", "run", "melli-init"]
         volumes:
             - ./data/app.db:/app/prisma/dev.db
         profiles: ["disabled"]
     db_init:
-        build: .
+        image: git.lumeweb.com/lumeweb/web3.news:latest
         command: ["npm", "run", "db-init"]
         volumes:
             - ./data/app.db:/app/prisma/dev.db
