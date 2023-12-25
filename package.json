@@ -16,7 +16,7 @@
         "generate:css": "sass styles/:app/styles/",
         "start": "remix-serve ./build/server/index.js",
         "typecheck": "tsc",
-        "bridge": "bun run bridge.mts",
+        "bridge": "bun run scripts/bridge.mts",
         "postinstall": "patch-package"
     },
     "dependencies": {
