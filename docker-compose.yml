@@ -20,4 +20,10 @@ services:
         command: ["npm", "run", "melli-init"]
         volumes:
             - ./data/app.db:/app/prisma/dev.db
-        profiles: ["mellisearch_init"]
+        profiles: ["disabled"]
+    db_init:
+        build: .
+        command: ["npm", "run", "db-init"]
+        volumes:
+            - ./data/app.db:/app/prisma/dev.db
+        profiles: ["disabled"]
