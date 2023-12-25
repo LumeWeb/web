@@ -1,0 +1,54 @@
+diff --git a/node_modules/@remix-run/serve/dist/.rej b/node_modules/@remix-run/serve/dist/.rej
+new file mode 100644
+index 0000000..bcb1d11
+--- /dev/null
++++ b/node_modules/@remix-run/serve/dist/.rej
+@@ -0,0 +1,23 @@
++--- dist/cli.js
+++++ dist/cli.js
++@@ -41,13 +41,15 @@ var getPort__default = /*#__PURE__*/_interopDefaultLegacy(getPort);
++ process.env.NODE_ENV = process.env.NODE_ENV ?? "production";
++ sourceMapSupport__default["default"].install({
++   retrieveSourceMap: function (source) {
++-    // get source file with the `file://` prefix
++-    let match = source.match(/^file:\/\/(.*)$/);
++-    if (match) {
++-      let filePath = url__default["default"].fileURLToPath(source);
+++    let filePath = source;
+++    if (filePath.startsWith("file://")) {
+++      filePath = url__default["default"].fileURLToPath(source);
+++    }
+++    let mapPath = `${filePath}.map`;
+++    if (fs__default["default"].existsSync(mapPath)) {
++       return {
++         url: source,
++-        map: fs__default["default"].readFileSync(`${filePath}.map`, "utf8")
+++        map: fs__default["default"].readFileSync(mapPath, "utf8")
++       };
++     }
++     return null;
+diff --git a/node_modules/@remix-run/serve/dist/cli.js b/node_modules/@remix-run/serve/dist/cli.js
+index fa63111..6647eea 100755
+--- a/node_modules/@remix-run/serve/dist/cli.js
++++ b/node_modules/@remix-run/serve/dist/cli.js
+@@ -41,13 +41,15 @@ var getPort__default = /*#__PURE__*/_interopDefaultLegacy(getPort);
+ process.env.NODE_ENV = process.env.NODE_ENV ?? "production";
+ sourceMapSupport__default["default"].install({
+   retrieveSourceMap: function (source) {
+-    // get source file with the `file://` prefix
+-    let match = source.match(/^file:\/\/(.*)$/);
+-    if (match) {
+-      let filePath = url__default["default"].fileURLToPath(source);
++    let filePath = source;
++    if (filePath.startsWith("file://")) {
++      filePath = url__default["default"].fileURLToPath(source);
++    }
++    let mapPath = `${filePath}.map`;
++    if (fs__default["default"].existsSync(mapPath)) {
+       return {
+         url: source,
+-        map: fs__default["default"].readFileSync(`${filePath}.map`, "utf8")
++        map: fs__default["default"].readFileSync(mapPath, "utf8")
+       };
+     }
+     return null;
