@@ -32,7 +32,7 @@ export default function Layout() {
           <h3 className="text-white mb-5">{text.tagline}</h3>
           <nav className="sticky top-3">
             <ol>
-              <AsideItem href="/about" title="About Web3News" />
+              <AsideItem href="/about" title="About Web3.News" />
               <AsideItem href="/donate" title="Donate" />
             </ol>
           </nav>
