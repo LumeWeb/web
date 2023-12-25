@@ -14,7 +14,7 @@
         "dev:css": "npm run generate:css -- --watch",
         "dev:remix": "remix vite:dev",
         "generate:css": "sass styles/:app/styles/",
-        "start": "remix-serve ./build/server/index.js",
+        "start": "PORT=8080 remix-serve ./build/server/index.js",
         "typecheck": "tsc",
         "bridge": "bun run scripts/bridge.mts",
         "melli-init": "bun run scripts/melli-init.mts",
