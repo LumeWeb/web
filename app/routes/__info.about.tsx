@@ -7,35 +7,38 @@ export default function Page() {
   return (
     <span className="px-8 block text-gray-400 space-y-5">
       <h1 className="text-primary text-3xl leading-9">
-        An evolved, user-owned web where you have access to the world in a way
-        only you control.
+        Web3.news: Your Community-Focused FOSS News Platform
       </h1>
-      <p className="text-white mt-3 leading-7">
-        Web3 is about what you want to do, post, read, play, chat, or interact
-        without others saying otherwise. It is about freedom of speech and
-        freedom of economy.
+      <p className="mt-3 leading-7">
+        At Web3.news, we're dedicated to addressing a vital need in the Web3,
+        Crypto, and DeFi ecosystems: providing a{" "}
+        <b>trusted, single-source platform </b>
+        for community-centered news. Born from the vision inspired by Satoshi's
+        pioneering work, we strive to uphold the principles of{" "}
+        <b>financial freedom </b>
+        and <b>free speech</b>.
       </p>
-      <p>
-        First defined by Gavin Wood when the Ethereum network was starting out.
-        He defined it as a &quot;decentralized online ecosystem based on
-        blockchain&quot;.
-      </p>
-
-      <p>
-        However, we view it as much more than that, and definitely more than
-        access to DeFi. We see a ton of more potential to what Web3 as an ideal
-        can evolve to, and are setting out to make it a reality.
-      </p>
-
-      <p>
-        To those that see Web3 as DeFi, we ask this: Do you go on your web
-        browser to access TradingView or other market tools as your homepage, or
-        do you go check your social media, email, and news sites, as well as
-        your money? Blockchain itself is more than just money, and so is Web3,
-        and by extension P2P networks.
+      <p className="mt-3 leading-7">
+        We aim to transcend tribalism, a challenging but vital goal, fostering a
+        spirit of <b>unity </b> among diverse factions within the Web3 culture.
+        Our platform is a space where cyberpunks, lunarpunks, solarpunks, and
+        all enthusiasts collaborate in advancing technology that safeguards our{" "}
+        <b>civil liberties</b>, especially <b>privacy</b>, while steering clear
+        of the usual hype and overstatement.
       </p>
 
-      <p>So help us in our goals to level-up Web3.</p>
+      <p className="mt-3 leading-7">
+        Web3.news is more than a platform; it's a <b>sanctuary </b> for everyone
+        in the community, a place where <b>collaboration and innovation </b>{" "}
+        take precedence over competition and division.
+      </p>
+      <p className="mt-3 leading-7">
+        Join us in our mission to elevate Web3. Together, we can shape a future
+        that emphasizes <b>collective advancement </b> and{" "}
+        <b>universal empowerment</b>, where progress is shared and{" "}
+        <b>everyone has a voice</b>.
+      </p>
+
       <GraphicSection.Root
         href="https://lumeweb.com"
         className="h-[300px] border border-gray-800 cursor-pointer [&:hover_.link]:underline [&:hover_.background]:rotate-12 [&:hover_.background]:scale-110"
