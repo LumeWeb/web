@@ -21,6 +21,8 @@ services:
         volumes:
             - ./data/app.db:/app/prisma/dev.db
         profiles: ["disabled"]
+        depends_on:
+            - melli
     db_init:
         image: git.lumeweb.com/lumeweb/web3.news:latest
         command: ["npm", "run", "db-init"]
