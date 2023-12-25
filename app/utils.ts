@@ -3,7 +3,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { SearchResult, SiteList } from "@/types.js";
 import fs from "fs";
-import search from "@/lib/search";
+import search from "./lib/search.js";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
