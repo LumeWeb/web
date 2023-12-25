@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+    app:
+        build: .
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./data/app.db:/app/prisma/dev.db
+    bridge:
+        build: .
+        command: ["npm", "run", "bridge"]
+        volumes:
+            - ./data/app.db:/app/prisma/dev.db
