@@ -17,7 +17,7 @@ type LoaderData = {
 export function meta(meta: ServerRuntimeMetaArgs) {
   const title = "Search - web3.news: Discover Community Web3 News";
   const description =
-    "Explore a vast array of Web3, Crypto, and DeFi news and insights. Use web3.news search to dive deep into community-driven content, uncovering the latest trends and developments in the decentralized world.";
+    "Find the latest Web3, Crypto, and DeFi news easily with web3.news search. Dive into community-driven, cutting-edge content.";
 
   return [
     ...generateMetaTags({

@@ -8,7 +8,7 @@ import type { ServerRuntimeMetaArgs } from "@remix-run/server-runtime";
 export function meta(meta: ServerRuntimeMetaArgs) {
   const title = "About - web3.news: Uniting Web3 Community";
   const description =
-    "Explore web3.news's mission to unite the Web3, Crypto, and DeFi communities under shared values of free speech, financial freedom, and privacy. Join our collaborative journey towards a technology-driven future.";
+    "About Web3.news: Uniting the Web3, Crypto, and DeFi communities. We're dedicated to fostering collaboration, privacy, and financial freedom for all.";
 
   return [
     ...generateMetaTags({

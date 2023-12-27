@@ -5,7 +5,7 @@ import type { ServerRuntimeMetaArgs } from "@remix-run/server-runtime";
 export function meta(meta: ServerRuntimeMetaArgs) {
   const title = "Support - web3.news: Empowering a User-Owned Web";
   const description =
-    "Join the mission of web3.news to shape an open, decentralized web. Your support fuels our commitment to community-driven innovation, transparency, and education in the Web3 space. Help us maintain our ad-free, user-focused platform. Donate now to be a part of this transformative journey.";
+    "Support an open web with web3.news. Contribute to our ad-free, user-focused platform and fuel community-led innovation.";
 
   return [
     ...generateMetaTags({
