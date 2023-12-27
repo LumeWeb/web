@@ -13,6 +13,8 @@ import "../styles/global.scss";
 import { cssBundleHref } from "@remix-run/css-bundle"; // Adjust the import path as needed
 
 import "unfonts.css";
+import initTracking from "@/lib/analytics.js";
+import { useEffect } from "react";
 
 export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
@@ -26,6 +28,12 @@ export const meta: MetaFunction = () => [
 ];
 
 export default function Root() {
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") {
+      initTracking();
+    }
+  }, []);
+
   return (
     <html lang="en">
       <head>
