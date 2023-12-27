@@ -7,6 +7,7 @@ export function generateMetaTags(
   ogType: "website" | "article" = "website"
 ) {
   return [
+    { title },
     { name: "title", content: title },
     { name: "description", content: description },
     { name: "og:title", content: title },
