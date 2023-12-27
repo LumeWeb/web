@@ -19,7 +19,8 @@ type LoaderData = {
 };
 
 export function meta(meta: ServerRuntimeMetaArgs) {
-  const title = "web3.news - Your Community Hub for Web3 & Blockchain News";
+  const title =
+    "web3.news - Your Community Hub for Web3, DeFi, and the Open Web";
   const description =
     "Discover Web3.news: Your hub for community-driven FOSS news in Web3, Crypto, and DeFi. Engage in collaboration, innovation, and uphold free speech and privacy.";
 
