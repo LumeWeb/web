@@ -13,8 +13,8 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        main: "var(--font-be-vietnam-pro)",
-        secondary: "var(--font-jaldi)",
+        main: '"Be Vietnam Pro"',
+        secondary: '"Jaldi"',
       },
       colors: {
         border: "hsl(var(--border))",

@@ -12,11 +12,10 @@ import Footer from "@/components/LayoutFooter"; // Adjust the import path as nee
 import "../styles/global.scss";
 import { cssBundleHref } from "@remix-run/css-bundle"; // Adjust the import path as needed
 
+import "unfonts.css";
+
 export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
-  // Add your Google font links here
-  // Example: { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400&display=swap" },
-  // Example: { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Jaldi:wght@400&display=swap" },
 ];
 
 export const meta: MetaFunction = () => [
@@ -33,7 +32,7 @@ export default function Root() {
         <Meta />
         <Links />
       </head>
-      <body className="font-main bg-gray-900 flex">
+      <body className={`font-main bg-gray-900 flex`}>
         <main className="dark flex w-full min-h-screen flex-col md:px-40 items-center py-16 mx-auto">
           <Header />
           <Outlet />
