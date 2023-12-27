@@ -17,7 +17,7 @@ export const Header = ({}: Props) => {
               width={28}
               height={24}
               src={Logo}
-              alt=""
+              alt="Lume Web logo"
             />
             <span className="right-0 -top-[6px] absolute text-white text-opacity-50 text-sm font-normal font-secondary leading-7">
               a Lume project

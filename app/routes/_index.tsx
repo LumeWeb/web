@@ -73,7 +73,7 @@ export default function Index() {
             <img
               src={Logo}
               className="background transition-transform duration-500 transform-gpu absolute -top-[320px] -right-10"
-              alt=""
+              alt="Logo background"
               aria-hidden
             />
           </GraphicSection.Background>

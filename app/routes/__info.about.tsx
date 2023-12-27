@@ -62,7 +62,7 @@ export default function Page() {
           <img
             src={Logo}
             className="background opacity-50 transition-transform duration-500 transform-gpu absolute -top-[100px] -left-10"
-            alt=""
+            alt="Logo background"
             aria-hidden
           />
         </GraphicSection.Background>
