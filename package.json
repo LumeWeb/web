@@ -41,6 +41,7 @@
         "meilisearch": "^0.36.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
+        "remix-sitemap": "^3.2.0",
         "swr": "^2.2.4",
         "tailwind-merge": "^2.0.0",
         "xml2js": "^0.6.2"
