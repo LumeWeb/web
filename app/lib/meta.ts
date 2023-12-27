@@ -63,6 +63,7 @@ export function generateMetaTags({
     { name: "og:description", content: description },
     { name: "og:image", content: imageUrl },
     { name: "og:type", content: ogType },
+    { name: "twitter:card", content: "summary" },
   ];
 
   newMetaTags.forEach((tag) => {
