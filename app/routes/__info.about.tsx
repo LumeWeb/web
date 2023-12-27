@@ -3,13 +3,20 @@ import * as GraphicSection from "@/components/GraphicSection";
 
 import Logo from "@/images/lume-logo-bg.png";
 import { generateMetaTags } from "@/lib/meta.js";
+import type { ServerRuntimeMetaArgs } from "@remix-run/server-runtime";
 
-export function meta() {
+export function meta(meta: ServerRuntimeMetaArgs) {
   const title = "About - web3.news: Uniting Web3 Community";
   const description =
     "Explore web3.news's mission to unite the Web3, Crypto, and DeFi communities under shared values of free speech, financial freedom, and privacy. Join our collaborative journey towards a technology-driven future.";
 
-  return [...generateMetaTags(title, description)];
+  return [
+    ...generateMetaTags({
+      title: title,
+      description: description,
+      parentMeta: meta,
+    }),
+  ];
 }
 export default function Page() {
   return (

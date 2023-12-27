@@ -6,6 +6,7 @@ import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
 import { json, LoaderFunction } from "@remix-run/node";
 import type { SearchResult, SiteList } from "@/types.js";
 import { generateMetaTags } from "@/lib/meta.js";
+import type { ServerRuntimeMetaArgs } from "@remix-run/server-runtime";
 
 type LoaderData = {
   sites: SiteList;
@@ -13,12 +14,18 @@ type LoaderData = {
   query: string;
 };
 
-export function meta() {
+export function meta(meta: ServerRuntimeMetaArgs) {
   const title = "Search - web3.news: Discover Community Web3 News";
   const description =
     "Explore a vast array of Web3, Crypto, and DeFi news and insights. Use web3.news search to dive deep into community-driven content, uncovering the latest trends and developments in the decentralized world.";
 
-  return [...generateMetaTags(title, description)];
+  return [
+    ...generateMetaTags({
+      title: title,
+      description: description,
+      parentMeta: meta,
+    }),
+  ];
 }
 export let loader: LoaderFunction = async ({ request }) => {
   const sites = getAvailableSites();

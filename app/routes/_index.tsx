@@ -11,18 +11,25 @@ import { useLoaderData } from "@remix-run/react";
 import type { SiteList } from "@/types.js";
 import { getAvailableSites } from "@/utils";
 import { generateMetaTags } from "@/lib/meta.js";
+import type { ServerRuntimeMetaArgs } from "@remix-run/server-runtime";
 
 type LoaderData = {
   data: ApiResponse<Article>;
   sites: SiteList;
 };
 
-export function meta() {
+export function meta(meta: ServerRuntimeMetaArgs) {
   const title = "web3.news - Your Community Hub for Web3 & Blockchain News";
   const description =
     "Explore the pulse of the Web3 and blockchain world on web3.news, a community-driven platform championing privacy, free speech, and informed collaboration. Dive into the latest in Crypto and DeFi with us.";
 
-  return [...generateMetaTags(title, description)];
+  return [
+    ...generateMetaTags({
+      title: title,
+      description: description,
+      parentMeta: meta,
+    }),
+  ];
 }
 export let loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);

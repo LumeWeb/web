@@ -4,13 +4,22 @@ import { prisma } from "@/lib/prisma";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { Article } from "@prisma/client";
 import { generateMetaTags } from "@/lib/meta.js";
+import type { ServerRuntimeMetaArgs } from "@remix-run/server-runtime";
 
-export function meta({ data }: { data: Article }) {
+export function meta(meta: ServerRuntimeMetaArgs<Article>) {
+  const data = meta.data as Article;
+
   const title = `${data.title} - web3.news`;
   const description = `Read "${data.title}" on web3.news. Dive into insightful Web3 and blockchain discussions and stay updated with the latest trends and developments.`;
 
   return [
-    ...generateMetaTags(title, description, undefined, "article"),
+    ...generateMetaTags({
+      title: title,
+      description: description,
+      imageUrl: undefined,
+      ogType: "article",
+      parentMeta: meta,
+    }),
     { name: "og:url", content: data.url },
     { name: "twitter:url", content: data.url },
     { name: "canonical", content: data.url },
