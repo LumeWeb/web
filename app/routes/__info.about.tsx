@@ -2,7 +2,15 @@ import { ArrowIcon } from "@/components/ArrowIcon";
 import * as GraphicSection from "@/components/GraphicSection";
 
 import Logo from "@/images/lume-logo-bg.png";
+import { generateMetaTags } from "@/lib/meta.js";
 
+export function meta() {
+  const title = "About - web3.news: Uniting Web3 Community";
+  const description =
+    "Explore web3.news's mission to unite the Web3, Crypto, and DeFi communities under shared values of free speech, financial freedom, and privacy. Join our collaborative journey towards a technology-driven future.";
+
+  return [...generateMetaTags(title, description)];
+}
 export default function Page() {
   return (
     <span className="px-8 block text-gray-400 space-y-5">

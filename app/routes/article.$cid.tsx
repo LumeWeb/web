@@ -3,6 +3,19 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { prisma } from "@/lib/prisma";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { Article } from "@prisma/client";
+import { generateMetaTags } from "@/lib/meta.js";
+
+export function meta({ data }: { data: Article }) {
+  const title = `${data.title} - web3.news`;
+  const description = `Read "${data.title}" on web3.news. Dive into insightful Web3 and blockchain discussions and stay updated with the latest trends and developments.`;
+
+  return [
+    ...generateMetaTags(title, description, undefined, "article"),
+    { name: "og:url", content: data.url },
+    { name: "twitter:url", content: data.url },
+    { name: "canonical", content: data.url },
+  ];
+}
 
 // Loader function to fetch article data
 export async function loader({ params }: LoaderFunctionArgs) {

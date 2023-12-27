@@ -1,5 +1,13 @@
 import { Link } from "@remix-run/react";
+import { generateMetaTags } from "@/lib/meta.js";
 
+export function meta() {
+  const title = "Support - web3.news: Empowering a User-Owned Web";
+  const description =
+    "Join the mission of web3.news to shape an open, decentralized web. Your support fuels our commitment to community-driven innovation, transparency, and education in the Web3 space. Help us maintain our ad-free, user-focused platform. Donate now to be a part of this transformative journey.";
+
+  return [...generateMetaTags(title, description)];
+}
 export default function Page() {
   return (
     <article className="px-8 block text-gray-400 space-y-5">
