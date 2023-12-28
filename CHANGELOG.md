@@ -1,3 +1,10 @@
+# [0.1.0-develop.82](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.81...v0.1.0-develop.82) (2023-12-28)
+
+
+### Bug Fixes
+
+* don't force override cid type ([64d9535](https://git.lumeweb.com/LumeWeb/libs5/commit/64d95353aa53ba09f822e88c7e4e3475728d5bf5))
+
 # [0.1.0-develop.81](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.80...v0.1.0-develop.81) (2023-12-12)
 
 
