@@ -7,7 +7,7 @@ const sites = getAvailableSites();
 
 const client = new S5Client("https://s5.web3portal.com");
 const httpClient = axios.create({
-  baseURL: "http://localhost",
+  baseURL: "http://app:8080",
 });
 
 for (const siteName in sites) {
