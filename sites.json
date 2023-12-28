@@ -1,0 +1,7 @@
+{
+    "blog.lumeweb.com": {
+        "name": "Lume Web News",
+        "pubkey": "2F66BFFAD819A6BF221D26EE0FFE75E48D154F13761EAAE575896F17DBDA5FD3",
+        "rss": "posts/index.xml"
+    }
+}
