@@ -17,6 +17,11 @@ for (const siteName in sites) {
   sub.listen((entry) => {
     const cid = CID.fromRegistry(entry.data);
 
+    console.log({
+      cid: cid.toString(),
+      site: siteName,
+    });
+
     try {
       httpClient.post("/api/events/siteUpdateReceived", {
         cid: cid.toString(),
