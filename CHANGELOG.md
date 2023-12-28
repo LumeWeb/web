@@ -1,3 +1,10 @@
+# [0.1.0-develop.81](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.80...v0.1.0-develop.81) (2023-12-12)
+
+
+### Features
+
+* add fromSignedRegistryEntry ([8e786ec](https://git.lumeweb.com/LumeWeb/libs5/commit/8e786ec164cfd20eba5d89834579fbe07ac96480))
+
 # [0.1.0-develop.80](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.79...v0.1.0-develop.80) (2023-12-12)
 
 # [0.1.0-develop.79](https://git.lumeweb.com/LumeWeb/libs5/compare/v0.1.0-develop.78...v0.1.0-develop.79) (2023-12-11)
