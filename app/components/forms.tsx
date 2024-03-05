@@ -1,6 +1,6 @@
 import { Label } from "@radix-ui/react-label"
 import { Input } from "./ui/input"
-import { FieldName } from "@conform-to/react"
+import { FieldName, useInputControl } from "@conform-to/react"
 import { useId } from "react"
 import { cn } from "~/utils"
 import { Checkbox } from "~/components/ui/checkbox"
@@ -44,12 +44,22 @@ export const FieldCheckbox = ({
   className
 }: {
   inputProps: {
-    name: FieldName<string>
+    name: string
+    form: string
+    value?: string
   } & React.ComponentPropsWithoutRef<typeof Checkbox>
   labelProps: React.LabelHTMLAttributes<HTMLLabelElement>
   errors?: ListOfErrors
   className?: string
 }) => {
+  const { key, defaultChecked, ...checkboxProps } = inputProps
+  const checkedValue = inputProps.value ?? "on"
+  const input = useInputControl({
+    key,
+    name: inputProps.name,
+    formId: inputProps.form,
+    initialValue: defaultChecked ? checkedValue : undefined
+  })
   const fallbackId = useId()
   const id = inputProps.id ?? fallbackId
   const errorId = errors?.length ? `${id}-error` : undefined
@@ -58,10 +68,24 @@ export const FieldCheckbox = ({
       className={cn("space-x-2 flex items-center text-primary-2", className)}
     >
       <Checkbox
-        {...inputProps}
+        {...checkboxProps}
         id={id}
         aria-invalid={errorId ? true : undefined}
         aria-describedby={errorId}
+        checked={input.value === checkedValue}
+        onCheckedChange={(state) => {
+          input.change(state.valueOf() ? checkedValue : "")
+          inputProps.onCheckedChange?.(state)
+        }}
+        onFocus={(event) => {
+          input.focus()
+          inputProps.onFocus?.(event)
+        }}
+        onBlur={(event) => {
+          input.blur()
+          inputProps.onBlur?.(event)
+        }}
+        type="button"
       />
       <Label {...labelProps} htmlFor={id} />
       <div className="min-h-[32px] px-4 pb-3 pt-1">
