@@ -6,6 +6,7 @@ import lumeColorLogoPng from "~/images/lume-color-logo.png?url"
 import discordLogoPng from "~/images/discord-logo.png?url"
 import lumeBgPng from "~/images/lume-bg-image.png?url"
 import { Field, FieldCheckbox } from "~/components/forms"
+import { useForm } from "@conform-to/react"
 
 export const meta: MetaFunction = () => {
   return [
@@ -15,6 +16,9 @@ export const meta: MetaFunction = () => {
 }
 
 export default function Index() {
+  const [form, fields] = useForm({
+    id: "login"
+  })
   return (
     <div className="p-10 h-screen relative overflow-clip">
       <header>
@@ -23,16 +27,19 @@ export default function Index() {
       <form className="w-full p-2 max-w-md space-y-4 mt-12 bg-background">
         <h2 className="text-3xl font-bold !mb-12">Welcome back! 🎉</h2>
         <Field
-          inputProps={{ name: "email" }}
+          inputProps={{ name: fields.email.name }}
           labelProps={{ children: "Email" }}
+          errors={fields.email.errors}
         />
         <Field
-          inputProps={{ name: "password", type: "password" }}
+          inputProps={{ name: fields.password.name, type: "password" }}
           labelProps={{ children: "Password" }}
+          errors={fields.password.errors}
         />
         <FieldCheckbox 
-          inputProps={{ name: "rememberMe" }}
+          inputProps={{ name: fields.rememberMe.name, form: form.id }}
           labelProps={{ children: "Remember Me" }}
+          errors={fields.rememberMe.errors}
         />
         <Button className="w-full h-14">Login</Button>
         <p className="text-input-placeholder">

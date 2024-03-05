@@ -7,7 +7,7 @@ import { cn } from "~/utils"
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> & {
-    className: string
+    className?: string
   }
 >(({ className, ...props }, ref) => (
   <CheckboxPrimitive.Root
