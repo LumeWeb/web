@@ -20,7 +20,9 @@
     --primary-1-foreground: 240 50% 9%;
  
     --secondary: 0 0% 96.1%;
+    --secondary-1: 242 52% 9%;
     --secondary-foreground: 0 0% 9%;
+    --secondary-1-foreground: 0 0% 100%;
  
     --muted: 0 0% 96.1%;
     --muted-foreground: 0 0% 45.1%;
@@ -75,6 +77,6 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans h-screen;
   }
 }

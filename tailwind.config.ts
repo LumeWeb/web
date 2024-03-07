@@ -40,6 +40,10 @@ const config = {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))"
         },
+        "secondary-1": {
+          DEFAULT: "hsl(var(--secondary-1))",
+          foreground: "hsl(var(--secondary-1-foreground))"
+        },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))"

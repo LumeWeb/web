@@ -22,7 +22,7 @@ export default function Login() {
   const hash = location.hash
 
   return (
-    <div className="p-10 h-screen relative overflow-clip">
+    <div className="p-10 h-screen relative">
       <header>
         <img src={logoPng} alt="Lume logo" className="h-10" />
       </header>
