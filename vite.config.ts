@@ -7,7 +7,6 @@ export default defineConfig({
     remix({
       ssr: false,
       ignoredRouteFiles: ["**/*.css"],
-      
     }),
     tsconfigPaths(),
   ],

@@ -5,7 +5,7 @@ import logoPng from "~/images/lume-logo.png?url"
 import lumeColorLogoPng from "~/images/lume-color-logo.png?url"
 import discordLogoPng from "~/images/discord-logo.png?url"
 import lumeBgPng from "~/images/lume-bg-image.png?url"
-import { Field, FieldCheckbox } from "~/components/forms"
+import { Field } from "~/components/forms"
 import { getFormProps, useForm } from "@conform-to/react"
 import { z } from "zod"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod"
@@ -14,36 +14,16 @@ export const meta: MetaFunction = () => {
   return [{ title: "Sign Up" }]
 }
 
-const SignUpSchema = z
+const RecoverPasswordSchema = z
   .object({
     email: z.string().email(),
-    password: z
-      .string()
-      .min(8, { message: "Password must be at least 8 characters" }),
-    confirmPassword: z
-      .string()
-      .min(8, { message: "Password must be at least 8 characters" }),
-    termsOfService: z.boolean({
-      required_error: "You must agree to the terms of service"
-    })
   })
-  .superRefine((data, ctx) => {
-    if (data.password !== data.confirmPassword) {
-      return ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["confirmPassword"],
-        message: "Passwords do not match"
-      })
-    }
-    return true
-  })
-
-export default function SignUp() {
+export default function RecoverPassword() {
   const [form, fields] = useForm({
     id: "sign-up",
-    constraint: getZodConstraint(SignUpSchema),
+    constraint: getZodConstraint(RecoverPasswordSchema),
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: SignUpSchema })
+      return parseWithZod(formData, { schema: RecoverPasswordSchema })
     }
   })
 
@@ -57,65 +37,20 @@ export default function SignUp() {
         {...getFormProps(form)}
       >
         <span className="!mb-12 space-y-2">
-          <h2 className="text-3xl font-bold">All roads lead to Lume</h2>
-          <p className="text-input-placeholder">
-            🤘 Get 50 GB free storage and download for free,{" "}
-            <b
-              className="text-primar
-        y-2"
-            >
-              forever
-            </b>
-            .{" "}
-          </p>
+          <h2 className="text-3xl font-bold">Reset your password</h2>
         </span>
         <Field
           inputProps={{ name: fields.email.name }}
-          labelProps={{ children: "Email" }}
+          labelProps={{ children: "Email Address" }}
           errors={fields.email.errors}
         />
-        <Field
-          inputProps={{ name: fields.password.name, type: "password" }}
-          labelProps={{ children: "Password" }}
-          errors={fields.password.errors}
-        />
-        <Field
-          inputProps={{ name: fields.confirmPassword.name, type: "password" }}
-          labelProps={{ children: "Confirm Password" }}
-          errors={fields.confirmPassword.errors}
-        />
-        <FieldCheckbox
-          inputProps={{ name: fields.termsOfService.name, form: form.id }}
-          labelProps={{
-            children: (
-              <span>
-                I agree to the
-                <Link
-                  to="/terms-of-service"
-                  className="text-primary-1 text-md hover:underline hover:underline-offset-4 mx-1"
-                >
-                  Terms of Service
-                </Link>
-                and
-                <Link
-                  to="/privacy-policy"
-                  className="text-primary-1 text-md hover:underline hover:underline-offset-4 mx-1"
-                >
-                  Privacy Policy
-                </Link>
-              </span>
-            )
-          }}
-          errors={fields.termsOfService.errors}
-        />
         <Button className="w-full h-14">Create Account</Button>
-        <p className="text-input-placeholder w-full text-right">
-          Already have an account?{" "}
+        <p className="text-input-placeholder w-full text-left">
           <Link
             to="/login"
             className="text-primary-1 text-md hover:underline hover:underline-offset-4"
           >
-            Login here instead →
+            ← Back to Login 
           </Link>
         </p>
       </form>

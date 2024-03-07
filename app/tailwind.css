@@ -29,12 +29,12 @@
     --accent-foreground: 0 0% 9%;
  
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 0 72% 51%;
 
     --border: 240 50% 17%;
     --input: 240 50% 17%;
     --input-placeholder: 241 21% 42%;
-    --ring: 0 0% 3.9%;
+    --ring: 241 90% 82%;
  
     --radius: 5px;
   }
