@@ -4,7 +4,7 @@ import lumeColorLogoPng from "~/images/lume-color-logo.png?url"
 import discordLogoPng from "~/images/discord-logo.png?url"
 import { Link } from "@remix-run/react"
 
-export const DashboardLayout = ({ children }: React.PropsWithChildren<{}>) => {
+export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
   return (
     <div className="p-10 h-full flex flex-row">
       <header className="w-full flex flex-col max-w-[240px] h-full">

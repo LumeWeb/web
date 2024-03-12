@@ -1,4 +1,4 @@
-import { DashboardLayout } from "~/components/dashboard-layout"
+import { GeneralLayout } from "~/components/general-layout"
 
 export default function Dashboard() {
   const isLogged = true
@@ -7,8 +7,8 @@ export default function Dashboard() {
   }
 
   return (
-    <DashboardLayout>
+    <GeneralLayout>
       <div>Hello</div>
-    </DashboardLayout>
+    </GeneralLayout>
   )
 }
