@@ -20,7 +20,7 @@ const config = {
         border: "hsl(var(--border))",
         input: {
           DEFAULT: "hsl(var(--input))",
-          placeholder: "hsl(var(--input-placeholder))",
+          placeholder: "hsl(var(--input-placeholder))"
         },
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
@@ -34,7 +34,10 @@ const config = {
           foreground: "hsl(var(--primary-1-foreground))"
         },
         "primary-2": {
-          DEFAULT: "hsl(var(--primary-2))",
+          DEFAULT: "hsl(var(--primary-2))"
+        },
+        "primary-dark": {
+          DEFAULT: "hsl(var(--primary-dark))"
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
