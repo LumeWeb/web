@@ -148,22 +148,16 @@ export function useUppy({
       })
     }
     setState("idle")
-
-    return () => {
-      // for (const event of ["complete", ...LISTENING_EVENTS]) {
-      //   uppyInstance.current?.off(
-      //     event as "complete" & keyof typeof LISTENING_EVENTS,
-      //     //@ts-expect-error -- huh? typescript wtf
-      //     setStateCb
-      //   )
-      // }
-      // uppyInstance.current?.cancelAll({ reason: "unmount" })
-      // uppyInstance.current?.logout()
-      // uppyInstance.current?.close()
-      // uppyInstance.current = undefined
-    }
   }, [targetRef, endpoint, uploader])
 
+  useEffect(() => {
+    return () => {
+      uppyInstance.current?.cancelAll({ reason: "unmount" })
+      uppyInstance.current?.logout()
+      uppyInstance.current?.close()
+      uppyInstance.current = undefined
+    }
+  }, [])
   return {
     getFiles: () => uppyInstance.current?.getFiles() ?? [],
     error: uppyInstance.current?.getState,
