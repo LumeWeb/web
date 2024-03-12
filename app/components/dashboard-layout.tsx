@@ -49,34 +49,36 @@ export const DashboardLayout = ({ children }: React.PropsWithChildren<{}>) => {
         </Button>
       </header>
 
-      {children}
+      <div className="flex-1">
+        {children}
 
-      <footer className="my-5">
-        <ul className="flex flex-row">
-          <li>
-            <Link to="https://discord.lumeweb.com">
-              <Button
-                variant={"link"}
-                className="flex flex-row gap-x-2 text-input-placeholder"
-              >
-                <img className="h-5" src={discordLogoPng} alt="Discord Logo" />
-                Connect with us
-              </Button>
-            </Link>
-          </li>
-          <li>
-            <Link to="https://lumeweb.com">
-              <Button
-                variant={"link"}
-                className="flex flex-row gap-x-2 text-input-placeholder"
-              >
-                <img className="h-5" src={lumeColorLogoPng} alt="Lume Logo" />
-                Connect with us
-              </Button>
-            </Link>
-          </li>
-        </ul>
-      </footer>
+        <footer className="my-5">
+          <ul className="flex flex-row">
+            <li>
+              <Link to="https://discord.lumeweb.com">
+                <Button
+                  variant={"link"}
+                  className="flex flex-row gap-x-2 text-input-placeholder"
+                >
+                  <img className="h-5" src={discordLogoPng} alt="Discord Logo" />
+                  Connect with us
+                </Button>
+              </Link>
+            </li>
+            <li>
+              <Link to="https://lumeweb.com">
+                <Button
+                  variant={"link"}
+                  className="flex flex-row gap-x-2 text-input-placeholder"
+                >
+                  <img className="h-5" src={lumeColorLogoPng} alt="Lume Logo" />
+                  Connect with us
+                </Button>
+              </Link>
+            </li>
+          </ul>
+        </footer>
+      </div>
     </div>
   )
 }
