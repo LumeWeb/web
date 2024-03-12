@@ -36,7 +36,10 @@ export function useUppy({
     (element: HTMLElement | null) => _setTargetRef(element),
     []
   )
-  const [state, setState] = useState<State>()
+  const [uppyState, setUppyState] = useState<State>()
+  const [state, setState] = useState<
+    "completed" | "idle" | "initializing" | "error" | "uploading"
+  >("initializing")
 
   const [inputProps, setInputProps] = useState<
     | {
@@ -71,7 +74,7 @@ export function useUppy({
     [targetRef, uppyInstance]
   )
   const cancelAll = useCallback(
-    () => uppyInstance.current?.cancelAll(),
+    () => uppyInstance.current?.cancelAll({ reason: "user" }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [targetRef, uppyInstance]
   )
@@ -116,36 +119,53 @@ export function useUppy({
     uppy.on("complete", (result) => {
       if (result.failed.length === 0) {
         console.log("Upload successful üòÄ")
+        setState("completed")
       } else {
         console.warn("Upload failed üòû")
+        setState("error")
       }
       console.log("successful files:", result.successful)
       console.log("failed files:", result.failed)
     })
 
-    const setStateCb = () => {
-      setState(uppy.getState())
+    const setStateCb = (event: (typeof LISTENING_EVENTS)[number]) => {
+      switch (event) {
+        case "upload":
+          setState("uploading")
+          break
+        case "upload-error":
+          setState("error")
+          break
+        default:
+          break
+      }
+      setUppyState(uppy.getState())
     }
 
     for (const event of LISTENING_EVENTS) {
-      uppy.on(event, setStateCb)
+      uppy.on(event, function cb() {
+        setStateCb(event)
+      })
     }
+    setState("idle")
 
     return () => {
-      for (const event of ["complete", ...LISTENING_EVENTS]) {
-        uppyInstance.current?.off(
-          event as "complete" & keyof typeof LISTENING_EVENTS,
-          //@ts-expect-error -- huh? typescript wtf
-          setStateCb
-        )
-      }
-      uppyInstance.current?.close()
-      uppyInstance.current = undefined
+      // for (const event of ["complete", ...LISTENING_EVENTS]) {
+      //   uppyInstance.current?.off(
+      //     event as "complete" & keyof typeof LISTENING_EVENTS,
+      //     //@ts-expect-error -- huh? typescript wtf
+      //     setStateCb
+      //   )
+      // }
+      // uppyInstance.current?.cancelAll({ reason: "unmount" })
+      // uppyInstance.current?.logout()
+      // uppyInstance.current?.close()
+      // uppyInstance.current = undefined
     }
   }, [targetRef, endpoint, uploader])
 
   return {
-    files: uppyInstance.current?.getFiles() ?? [],
+    getFiles: () => uppyInstance.current?.getFiles() ?? [],
     error: uppyInstance.current?.getState,
     state,
     upload: () =>
@@ -154,6 +174,6 @@ export function useUppy({
     getInputProps: () => inputProps,
     getRootProps,
     removeFile,
-    cancelAll,
+    cancelAll
   }
 }

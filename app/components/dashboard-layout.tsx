@@ -54,7 +54,17 @@ export const DashboardLayout = ({ children }: React.PropsWithChildren<{}>) => {
           <p>Privacy</p>
           <p>Ownership</p>
         </span>
-        <UploadFileModal />
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button size={"lg"} className="w-[calc(100%-3rem)] font-semibold">
+              <CloudUploadIcon className="w-6 h-6 -ml-3 mr-4" />
+              Upload Files
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <UploadFileForm />
+          </DialogContent>
+        </Dialog>
       </header>
 
       {children}
@@ -89,97 +99,92 @@ export const DashboardLayout = ({ children }: React.PropsWithChildren<{}>) => {
   )
 }
 
-const UploadFileModal = () => {
-  const { getRootProps, getInputProps, files, upload, removeFile, cancelAll } =
-    useUppy({
-      uploader: "tus",
-      endpoint: import.meta.env.VITE_PUBLIC_TUS_ENDPOINT
-    })
+const UploadFileForm = () => {
+  const {
+    getRootProps,
+    getInputProps,
+    getFiles,
+    upload,
+    state,
+    removeFile,
+    cancelAll
+  } = useUppy({
+    uploader: "tus",
+    endpoint: import.meta.env.VITE_PUBLIC_TUS_ENDPOINT
+  })
 
-  const isUploading =
-    files.length > 0
-      ? files.map((file) => file.progress?.uploadStarted != null).includes(true)
-      : false
-  const isCompleted =
-    files.length > 0
-      ? files
-          .map((file) => file.progress?.uploadComplete)
-          .reduce((acc, cur) => acc && cur, true)
-      : false
-  const hasStarted = isUploading || isCompleted
+  console.log({ state, files: getFiles() })
+
+  const isUploading = state === "uploading"
+  const isCompleted = state === "completed"
+  const hasStarted = state !== "idle" && state !== "initializing"
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button size={"lg"} className="w-[calc(100%-3rem)] font-semibold">
-          <CloudUploadIcon className="w-6 h-6 -ml-3 mr-4" />
-          Upload Files
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader className="mb-6">
-          <DialogTitle>Upload Files</DialogTitle>
-        </DialogHeader>
-        {!hasStarted ? (
-          <div
-            {...getRootProps()}
-            className="border border-border rounded text-primary-2 bg-primary-dark h-48 flex flex-col items-center justify-center"
-          >
-            <input
-              hidden
-              aria-hidden
-              name="uppyFiles[]"
-              key={new Date().toISOString()}
-              multiple
-              {...getInputProps()}
-            />
-            <CloudUploadIcon className="w-24 h-24 stroke stroke-primary-dark" />
-            <p>Drag & Drop Files or Browse</p>
-          </div>
-        ) : null}
-
-        <div className="w-full space-y-3 max-h-48 overflow-y-auto">
-          {files.map((file) => (
-            <UploadFileItem
-              key={file.id}
-              file={file}
-              onRemove={(id) => {
-                removeFile(id)
-              }}
-            />
-          ))}
+    <>
+      <DialogHeader className="mb-6">
+        <DialogTitle>Upload Files</DialogTitle>
+      </DialogHeader>
+      {!hasStarted ? (
+        <div
+          {...getRootProps()}
+          className="border border-border rounded text-primary-2 bg-primary-dark h-48 flex flex-col items-center justify-center"
+        >
+          <input
+            hidden
+            aria-hidden
+            name="uppyFiles[]"
+            key={new Date().toISOString()}
+            multiple
+            {...getInputProps()}
+          />
+          <CloudUploadIcon className="w-24 h-24 stroke stroke-primary-dark" />
+          <p>Drag & Drop Files or Browse</p>
         </div>
+      ) : null}
 
-        {hasStarted ? (
-          <div className="flex flex-col items-center gap-y-2 w-full text-primary-1">
-            <CloudCheckIcon className="w-32 h-32" />
-            {isCompleted
-              ? "Upload completed"
-              : `${files.length} being uploaded`}
-          </div>
-        ) : null}
+      <div className="w-full space-y-3 max-h-48 overflow-y-auto">
+        {getFiles().map((file) => (
+          <UploadFileItem
+            key={file.id}
+            file={file}
+            onRemove={(id) => {
+              removeFile(id)
+            }}
+          />
+        ))}
+      </div>
 
-        {hasStarted ? (
-          <DialogClose asChild onClick={cancelAll}>
-            <Button size={"lg"} className="mt-6">
-              Cancel
-            </Button>
-          </DialogClose>
-        ) : (
-          <Button size={"lg"} className="mt-6" onClick={upload}>
-            Upload
+      {hasStarted ? (
+        <div className="flex flex-col items-center gap-y-2 w-full text-primary-1">
+          <CloudCheckIcon className="w-32 h-32" />
+          {isCompleted
+            ? "Upload completed"
+            : `${getFiles().length} files being uploaded`}
+        </div>
+      ) : null}
+
+      {isUploading ? (
+        <DialogClose asChild onClick={cancelAll}>
+          <Button size={"lg"} className="mt-6">
+            Cancel
           </Button>
-        )}
+        </DialogClose>
+      ) : null}
 
-        {hasStarted && isCompleted ? (
-          <DialogClose asChild>
-            <Button size={"lg"} className="mt-6">
-              Close
-            </Button>
-          </DialogClose>
-        ) : null}
-      </DialogContent>
-    </Dialog>
+      {isCompleted ? (
+        <DialogClose asChild>
+          <Button size={"lg"} className="mt-6">
+            Close
+          </Button>
+        </DialogClose>
+      ) : null}
+
+      {!hasStarted && !isCompleted && !isUploading ? (
+        <Button size={"lg"} className="mt-6" onClick={upload}>
+          Upload
+        </Button>
+      ) : null}
+    </>
   )
 }
 
