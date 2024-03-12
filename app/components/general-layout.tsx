@@ -17,8 +17,8 @@ import { DialogClose } from "@radix-ui/react-dialog"
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
   return (
-    <div className="p-10 h-full flex flex-row">
-      <header className="w-full flex flex-col max-w-[240px] h-full">
+    <div className="h-full flex flex-row">
+      <header className="p-10 pr-0 flex flex-col w-[240px] h-full scroll-m-0 overflow-hidden">
         <img src={logoPng} alt="Lume logo" className="h-10 w-32" />
 
         <nav className="my-10 flex-1">
@@ -67,10 +67,10 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
         </Dialog>
       </header>
 
-      <div className="flex-1">
+      <div className="flex-1 overflow-y-auto p-10">
         {children}
 
-        <footer className="my-5">
+        <footer className="mt-5">
           <ul className="flex flex-row">
             <li>
               <Link to="https://discord.lumeweb.com">
@@ -230,7 +230,7 @@ const UploadFileItem = ({
       </div>
 
       {file.progress?.uploadStarted && !file.progress.uploadComplete ? (
-        <Progress value={file.progress.percentage} className="mt-2" />
+        <Progress max={100} value={file.progress.percentage} className="mt-2" />
       ) : null}
     </div>
   )
@@ -240,7 +240,7 @@ const NavigationButton = ({ children }: React.PropsWithChildren) => {
   return (
     <Button
       variant="ghost"
-      className="justify-start h-14 w-[calc(100%-3rem)] font-semibold"
+      className="justify-start h-14 w-full font-semibold"
     >
       {children}
     </Button>
