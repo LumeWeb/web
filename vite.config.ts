@@ -1,14 +1,14 @@
-import { vitePlugin as remix } from "@remix-run/dev";
-import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
+import { vitePlugin as remix } from "@remix-run/dev"
+import { defineConfig } from "vite"
+import tsconfigPaths from "vite-tsconfig-paths"
 
 export default defineConfig({
   plugins: [
     remix({
       ssr: false,
-      ignoredRouteFiles: ["**/*.css"],
+      ignoredRouteFiles: ["**/*.css"]
     }),
-    tsconfigPaths(),
+    tsconfigPaths()
   ],
   server: {
     fs: {
@@ -18,7 +18,10 @@ export default defineConfig({
       // If you're comfortable with Vite's dev server making any file within the
       // project root available, you can remove this option.  See more:
       // https://vitejs.dev/config/server-options.html#server-fs-allow
-      allow: ["app", "node_modules/@fontsource-variable/manrope"],
-    },
-  },
-});
+      allow: [
+        "app",
+        "node_modules/@fontsource-variable/manrope",
+      ]
+    }
+  }
+})
