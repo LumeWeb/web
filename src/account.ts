@@ -1,15 +1,15 @@
 import {
-  LoginRequest,
-  LoginResponse,
-  OTPDisableRequest,
-  OTPGenerateResponse,
-  OTPValidateRequest,
-  OTPVerifyRequest,
-  PasswordResetVerifyRequest,
-  postApiAuthPasswordResetRequest,
-  RegisterRequest,
-  VerifyEmailRequest,
-} from "./account/generated/index.js";
+    LoginRequest,
+    LoginResponse,
+    OTPDisableRequest,
+    OTPGenerateResponse,
+    OTPValidateRequest,
+    OTPVerifyRequest,
+    PasswordResetVerifyRequest,
+    postApiAuthPasswordResetRequest, postApiAuthPing,
+    RegisterRequest,
+    VerifyEmailRequest,
+} from './account/generated/index.js';
 import {
   postApiAuthLogin,
   postApiAuthRegister,
@@ -107,6 +107,12 @@ export default class AccountApi {
         passwordResetVerifyRequest,
         this.buildOptions(),
       ),
+    );
+  }
+
+  public async ping(): Promise<boolean> {
+    return this.checkSuccessBool(
+      await postApiAuthPing( this.buildOptions()),
     );
   }
 
