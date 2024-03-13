@@ -28,7 +28,8 @@ import * as URL from 'url';
 
 export class AccountApi {
   private apiUrl: string;
-  private jwtToken?: string;
+  private _jwtToken?: string;
+
 
   constructor(apiUrl: string) {
     let apiUrlParsed = new URL.URL(apiUrl);
@@ -36,6 +37,10 @@ export class AccountApi {
     apiUrlParsed.hostname = `account.${apiUrlParsed.hostname}`;
     this.apiUrl = apiUrlParsed.toString();
   }
+
+    set jwtToken(value: string) {
+        this._jwtToken = value;
+    }
 
   public static create(apiUrl: string): AccountApi {
     return new AccountApi(apiUrl);
