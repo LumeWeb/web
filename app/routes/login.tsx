@@ -140,7 +140,7 @@ const LoginForm = () => {
                     Reset Password
                 </Link>
             </p>
-            <Link to="/sign-up" className="block">
+            <Link to="/register" className="block">
                 <Button type="button" className="w-full h-14" variant={"outline"}>
                     Create an Account
                 </Button>

@@ -14,7 +14,7 @@ export const meta: MetaFunction = () => {
   return [{ title: "Sign Up" }]
 }
 
-const SignUpSchema = z
+const RegisterSchema = z
   .object({
     email: z.string().email(),
     password: z
@@ -38,12 +38,12 @@ const SignUpSchema = z
     return true
   })
 
-export default function SignUp() {
+export default function Register() {
   const [form, fields] = useForm({
-    id: "sign-up",
-    constraint: getZodConstraint(SignUpSchema),
+    id: "register",
+    constraint: getZodConstraint(RegisterSchema),
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: SignUpSchema })
+      return parseWithZod(formData, { schema: RegisterSchema })
     }
   })
 
