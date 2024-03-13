@@ -21,7 +21,6 @@
     "private": false,
     "devDependencies": {
         "@changesets/cli": "^2.27.1",
-        "patch-package": "^8.0.0",
         "presetter": "^4.7.0",
         "presetter-preset-esm": "^4.7.0"
     },
@@ -30,7 +29,8 @@
     "dependencies": {
         "axios": "^1.6.7",
         "memize": "^2.1.0",
-        "orval": "^6.25.0"
+        "orval": "^6.25.0",
+        "patch-package": "^8.0.0"
     },
     "publishConfig": {
         "access": "public"
