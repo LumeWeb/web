@@ -28,7 +28,10 @@ export default class AccountApi {
   private jwtToken?: string;
 
   constructor(apiUrl: string) {
-    this.apiUrl = apiUrl;
+    let apiUrlParsed = new URL(apiUrl);
+
+    apiUrlParsed.hostname = `account.${apiUrlParsed.hostname}`;
+    this.apiUrl = apiUrlParsed.toString();
   }
 
   public static create(apiUrl: string): AccountApi {
