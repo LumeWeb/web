@@ -44,13 +44,13 @@ export default function RecoverPassword() {
           labelProps={{ children: "Email Address" }}
           errors={fields.email.errors}
         />
-        <Button className="w-full h-14">Create Account</Button>
+        <Button className="w-full h-14">Reset Password</Button>
         <p className="text-input-placeholder w-full text-left">
           <Link
             to="/login"
             className="text-primary-1 text-md hover:underline hover:underline-offset-4"
           >
-            ← Back to Login 
+            ← Back to Login
           </Link>
         </p>
       </form>
