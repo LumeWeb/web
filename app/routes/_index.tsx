@@ -1,4 +1,3 @@
-import Login from "./login";
 import {useGo, useIsAuthenticated} from "@refinedev/core";
 import {useEffect} from "react";
 
