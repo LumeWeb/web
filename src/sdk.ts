@@ -1,4 +1,4 @@
-import AccountApi from 'src/account.js';
+import AccountApi from './account.js';
 
 export class Sdk {
     private apiUrl: string;
