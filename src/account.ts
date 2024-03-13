@@ -24,13 +24,14 @@ import {
   postApiAuthPasswordResetConfirm,
 } from "./account/generated/index.js";
 import { AxiosResponse } from "axios";
+import * as URL from 'url';
 
 export default class AccountApi {
   private apiUrl: string;
   private jwtToken?: string;
 
   constructor(apiUrl: string) {
-    let apiUrlParsed = new URL(apiUrl);
+    let apiUrlParsed = new URL.URL(apiUrl);
 
     apiUrlParsed.hostname = `account.${apiUrlParsed.hostname}`;
     this.apiUrl = apiUrlParsed.toString();
@@ -50,7 +51,7 @@ export default class AccountApi {
     ret = this.checkSuccessVal<LoginResponse>(ret);
 
     if (ret) {
-      this.jwtToken = (ret as LoginResponse).token;
+      this._jwtToken = (ret as LoginResponse).token;
       return true;
     }
 
@@ -58,7 +59,7 @@ export default class AccountApi {
   }
 
   public async logout(): Promise<boolean> {
-    this.jwtToken = undefined;
+    this._jwtToken = undefined;
     return true;
   }
 
@@ -192,8 +193,8 @@ export default class AccountApi {
 
   private buildOptions(): any {
     const headers: any = {};
-    if (this.jwtToken) {
-      headers.Authorization = `Bearer ${this.jwtToken}`;
+    if (this._jwtToken) {
+      headers.Authorization = `Bearer ${this._jwtToken}`;
     }
 
     return {
