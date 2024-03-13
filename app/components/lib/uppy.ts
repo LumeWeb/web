@@ -1,17 +1,17 @@
-import Uppy, { State, debugLogger } from "@uppy/core"
+import Uppy, { type State, debugLogger } from "@uppy/core"
 
 import Tus from "@uppy/tus"
 import toArray from "@uppy/utils/lib/toArray"
 
 import {
-  ChangeEvent,
+  type ChangeEvent,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState
 } from "react"
-import DropTarget, { DropTargetOptions } from "./uppy-dropzone"
+import DropTarget, { type DropTargetOptions } from "./uppy-dropzone"
 
 const LISTENING_EVENTS = [
   "upload",
@@ -36,7 +36,7 @@ export function useUppy({
     (element: HTMLElement | null) => _setTargetRef(element),
     []
   )
-  const [uppyState, setUppyState] = useState<State>()
+  const [, setUppyState] = useState<State>()
   const [state, setState] = useState<
     "completed" | "idle" | "initializing" | "error" | "uploading"
   >("initializing")
