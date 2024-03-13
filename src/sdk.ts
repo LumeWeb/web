@@ -18,4 +18,8 @@ export class Sdk {
     }
     return this.accountApi!;
   }
+
+  public setAuthToken(token: string) {
+    this.account().jwtToken = token;
+  }
 }
