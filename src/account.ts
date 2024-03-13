@@ -26,6 +26,7 @@ import {
 import { AxiosResponse } from "axios";
 
 export class AccountApi {
+
   private apiUrl: string;
   private _jwtToken?: string;
 
@@ -39,6 +40,9 @@ export class AccountApi {
 
     set jwtToken(value: string) {
         this._jwtToken = value;
+    }
+    get jwtToken(): string {
+        return <string>this._jwtToken;
     }
 
   public static create(apiUrl: string): AccountApi {
