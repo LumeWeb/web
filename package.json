@@ -10,6 +10,8 @@
     "scripts": {
         "prepare": "presetter bootstrap",
         "build": "run build",
+        "postinstall": "patch-package",
+        "patch-package": "patch-package",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {
@@ -19,6 +21,7 @@
     "private": false,
     "devDependencies": {
         "@changesets/cli": "^2.27.1",
+        "patch-package": "^8.0.0",
         "presetter": "^4.7.0",
         "presetter-preset-esm": "^4.7.0"
     },
