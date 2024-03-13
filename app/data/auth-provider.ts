@@ -1,37 +1,99 @@
-import { AuthProvider } from "@refinedev/core"
-import type {
-  AuthActionResponse,
-  CheckResponse,
-  OnErrorResponse
-  // @ts-ignore
-} from "@refinedev/core/dist/interfaces/bindings/auth"
+import type {AuthProvider} from "@refinedev/core"
 
-export const authProvider: AuthProvider = {
-  login: async (params: any) => {
-    return { success: true } satisfies AuthActionResponse
-  },
-  logout: async (params: any) => {
-    return { success: true } satisfies AuthActionResponse
-  },
-  check: async (params?: any) => {
-    return { authenticated: true } satisfies CheckResponse
-  },
-  onError: async (error: any) => {
-    return { logout: true } satisfies OnErrorResponse
-  },
-  register: async (params: any) => {
-    return { success: true } satisfies AuthActionResponse
-  },
-  forgotPassword: async (params: any) => {
-    return { success: true } satisfies AuthActionResponse
-  },
-  updatePassword: async (params: any) => {
-    return { success: true } satisfies AuthActionResponse
-  },
-  getPermissions: async (params: any) => {
-    return { success: true } satisfies AuthActionResponse
-  },
-  getIdentity: async (params: any) => {
-    return { id: "1", fullName: "John Doe", avatar: "https://via.placeholder.com/150" }
-  }
+// @ts-ignore
+import type {AuthActionResponse, CheckResponse, OnErrorResponse} from "@refinedev/core/dist/interfaces/bindings/auth"
+import {Sdk} from "@lumeweb/portal-sdk";
+
+export type AuthFormRequest = {
+    email: string;
+    password: string;
+    rememberMe: boolean;
+}
+
+export class PortalAuthProvider implements RequiredAuthProvider {
+    private apiUrl: string;
+    private sdk: Sdk;
+
+    constructor(apiUrl: string) {
+        this.apiUrl = apiUrl;
+        this.sdk = Sdk.create(apiUrl);
+
+        const methods: Array<keyof AuthProvider> = [
+            'login',
+            'logout',
+            'check',
+            'onError',
+            'register',
+            'forgotPassword',
+            'updatePassword',
+            'getPermissions',
+            'getIdentity',
+        ];
+
+        methods.forEach((method) => {
+            this[method] = this[method]?.bind(this);
+        });
+    }
+
+    async login(params: AuthFormRequest): Promise<AuthActionResponse> {
+        const ret = await this.sdk.account().login({
+            email: params.email,
+            password: params.password,
+        })
+        return {
+            success: ret,
+            redirectTo: ret ? "/dashboard" : undefined,
+        };
+    }
+
+    async logout(params: any): Promise<AuthActionResponse> {
+        let ret = await this.sdk.account().logout();
+        return {success: ret, redirectTo: "/login"};
+    }
+
+    async check(params?: any): Promise<CheckResponse> {
+        const ret = await this.sdk.account().ping();
+
+        return {authenticated: ret};
+    }
+
+    async onError(error: any): Promise<OnErrorResponse> {
+        return {logout: true};
+    }
+
+    async register(params: any): Promise<AuthActionResponse> {
+        return {success: true};
+    }
+
+    async forgotPassword(params: any): Promise<AuthActionResponse> {
+        return {success: true};
+    }
+
+    async updatePassword(params: any): Promise<AuthActionResponse> {
+        return {success: true};
+    }
+
+    async getPermissions(params?: Record<string, any>): Promise<AuthActionResponse> {
+        return {success: true};
+    }
+
+    async getIdentity(params?: any): Promise<AuthActionResponse> {
+        return {id: "1", fullName: "John Doe", avatar: "https://via.placeholder.com/150"};
+    }
+
+    public static create(apiUrl: string): AuthProvider {
+        return new PortalAuthProvider(apiUrl);
+    }
+}
+
+interface RequiredAuthProvider extends AuthProvider {
+    login: AuthProvider['login'];
+    logout: AuthProvider['logout'];
+    check: AuthProvider['check'];
+    onError: AuthProvider['onError'];
+    register: AuthProvider['register'];
+    forgotPassword: AuthProvider['forgotPassword'];
+    updatePassword: AuthProvider['updatePassword'];
+    getPermissions: AuthProvider['getPermissions'];
+    getIdentity: AuthProvider['getIdentity'];
 }
