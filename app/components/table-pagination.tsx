@@ -2,18 +2,26 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   DoubleArrowLeftIcon,
-  DoubleArrowRightIcon,
-} from "@radix-ui/react-icons";
-import { Table } from "@tanstack/react-table";
+  DoubleArrowRightIcon
+} from "@radix-ui/react-icons"
+import type { Table } from "@tanstack/react-table"
 
-import { Button } from "./ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Button } from "./ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "./ui/select"
 
 interface DataTablePaginationProps<TData> {
-  table: Table<TData>;
+  table: Table<TData>
 }
 
-export function DataTablePagination<TData>({ table }: DataTablePaginationProps<TData>) {
+export function DataTablePagination<TData>({
+  table
+}: DataTablePaginationProps<TData>) {
   return (
     <div className="flex items-center justify-between px-2 border border-t-2 border-x-0 h-14">
       <div className="flex items-center space-x-2">
@@ -21,7 +29,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
         <Select
           value={`${table.getState().pagination.pageSize}`}
           onValueChange={(value) => {
-            table.setPageSize(Number(value));
+            table.setPageSize(Number(value))
           }}
         >
           <SelectTrigger className="h-8 w-[70px]">
@@ -39,10 +47,14 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
       <div className="flex items-center space-x-6 lg:space-x-8">
         <div className="flex items-center justify-center text-sm font-bold text-primary-1">
           Showing
-          <span className="text-white">
-            {` ${table.getState().pagination.pageSize -
-              (table.getState().pagination.pageSize - 1)
-              } to ${(table.getState().pagination.pageIndex + 1) * table.getRowCount()} `}
+          <span className="text-white mx-1">
+            {` ${
+              table.getState().pagination.pageIndex *
+                table.getState().pagination.pageSize +
+              1
+            } to ${
+              (table.getState().pagination.pageIndex + 1) * table.getRowCount()
+            } `}
           </span>
           of {table.getRowCount()}
         </div>
@@ -86,5 +98,5 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
         </div>
       </div>
     </div>
-  );
+  )
 }

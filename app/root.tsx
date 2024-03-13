@@ -7,14 +7,13 @@ import {
 } from "@remix-run/react";
 
 import stylesheet from "./tailwind.css?url";
-import { LinksFunction } from "@remix-run/node";
+import type { LinksFunction } from "@remix-run/node";
 
 // Supports weights 200-800
 import '@fontsource-variable/manrope';
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
-  // { rel: "stylesheet", href: manropeStylesheet },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {

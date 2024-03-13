@@ -4,6 +4,7 @@ import { DataTable } from "~/components/data-table";
 import { columns } from "./columns";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
+import { AddIcon } from "~/components/icons";
 
 export default function FileManager() {
   const isLogged = true;
@@ -46,7 +47,7 @@ export default function FileManager() {
           fullWidth
           leftIcon={<AddIcon />}
           placeholder="Search files by name or CID"
-          className="border-ring font-bold w-full grow h-12 flex-1"
+          className="border-ring font-medium w-full grow h-12 flex-1 bg-primary-2/10"
         />
         <Button className="h-12 gap-x-2">
           <AddIcon />
@@ -77,28 +78,3 @@ export default function FileManager() {
     </GeneralLayout>
   );
 }
-
-const AddIcon = ({ className }: { className?: string }) => {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
-      <g clipPath="url(#clip0_323_1258)">
-        <path
-          d="M9 1.5C4.85625 1.5 1.5 4.85625 1.5 9C1.5 13.1438 4.85625 16.5 9 16.5C13.1438 16.5 16.5 13.1438 16.5 9C16.5 4.85625 13.1438 1.5 9 1.5ZM12.75 9.75H9.75V12.75H8.25V9.75H5.25V8.25H8.25V5.25H9.75V8.25H12.75V9.75Z"
-          fill="currentColor"
-        />
-      </g>
-      <defs>
-        <clipPath id="clip0_323_1258">
-          <rect width="18" height="18" fill="currentColor" />
-        </clipPath>
-      </defs>
-    </svg>
-  );
-};
