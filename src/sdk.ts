@@ -1,6 +1,6 @@
 import AccountApi from 'src/account.js';
 
-export default class Sdk {
+export class Sdk {
     private apiUrl: string;
     private accountApi?: AccountApi;
 
