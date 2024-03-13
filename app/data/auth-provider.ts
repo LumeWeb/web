@@ -3,6 +3,7 @@ import type {AuthProvider} from "@refinedev/core"
 // @ts-ignore
 import type {AuthActionResponse, CheckResponse, OnErrorResponse} from "@refinedev/core/dist/interfaces/bindings/auth"
 import {Sdk} from "@lumeweb/portal-sdk";
+import Cookies from 'universal-cookie';
 
 export type AuthFormRequest = {
     email: string;
@@ -18,11 +19,9 @@ export type RegisterFormRequest = {
 }
 
 export class PortalAuthProvider implements RequiredAuthProvider {
-    private apiUrl: string;
     private sdk: Sdk;
 
     constructor(apiUrl: string) {
-        this.apiUrl = apiUrl;
         this.sdk = Sdk.create(apiUrl);
 
         const methods: Array<keyof AuthProvider> = [
@@ -38,15 +37,20 @@ export class PortalAuthProvider implements RequiredAuthProvider {
         ];
 
         methods.forEach((method) => {
-            this[method] = this[method]?.bind(this);
+            this[method] = this[method]?.bind(this) as any;
         });
     }
 
     async login(params: AuthFormRequest): Promise<AuthActionResponse> {
+        const cookies = new Cookies();
         const ret = await this.sdk.account().login({
             email: params.email,
             password: params.password,
         })
+
+        if (ret) {
+            cookies.set('jwt', this.sdk.account().jwtToken, { path: '/' });
+        }
         return {
             success: ret,
             redirectTo: ret ? "/dashboard" : undefined,
@@ -55,13 +59,29 @@ export class PortalAuthProvider implements RequiredAuthProvider {
 
     async logout(params: any): Promise<AuthActionResponse> {
         let ret = await this.sdk.account().logout();
+        if (ret) {
+            const cookies = new Cookies();
+            cookies.remove('jwt');
+        }
         return {success: ret, redirectTo: "/login"};
     }
 
     async check(params?: any): Promise<CheckResponse> {
+        const cookies = new Cookies();
+
+        const jwtCookie = cookies.get('jwt');
+
+        if (jwtCookie) {
+            this.sdk.setAuthToken(jwtCookie);
+        }
+
         const ret = await this.sdk.account().ping();
 
-        return {authenticated: ret};
+        if (!ret) {
+            cookies.remove('jwt');
+        }
+
+        return {authenticated: ret, redirectTo: ret ? undefined: "/login"};
     }
 
     async onError(error: any): Promise<OnErrorResponse> {
