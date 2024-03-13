@@ -8,14 +8,6 @@ interface UsageCardProps {
     icon: React.ReactNode
 }
 
-export const UsageList = ({ children }: React.PropsWithChildren<{}>) => {
-    return (
-        <div className="grid grid-cols-2 gap-8 flex-wrap w-full">
-            {children}
-        </div>
-    )
-}
-
 export const UsageCard = ({ usageName, monthlyUsage, currentUsage, icon }: UsageCardProps) => {
     return (
         <div className="p-8 border rounded-lg w-full">

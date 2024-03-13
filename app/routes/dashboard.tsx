@@ -1,6 +1,6 @@
 import { GeneralLayout } from "~/components/general-layout";
 import { UpgradeAccountBanner } from "~/components/upgrade-account-banner";
-import { UsageCard, UsageList } from "~/components/usage-card";
+import { UsageCard } from "~/components/usage-card";
 import { UsageChart } from "~/components/usage-chart";
 
 export default function Dashboard() {
@@ -14,7 +14,7 @@ export default function Dashboard() {
             <h1 className="font-bold mb-4 text-lg">Dashboard</h1>
             <UpgradeAccountBanner />
             <h2 className="font-bold mb-8 mt-10">Current Usage</h2>
-            <UsageList>
+            <div className="grid grid-cols-2 gap-8">
                 <UsageCard
                     usageName="Storage"
                     currentUsage={120}
@@ -33,7 +33,7 @@ export default function Dashboard() {
                     monthlyUsage={15}
                     icon={<CloudUploadIcon className="text-ring" />}
                 />
-            </UsageList>
+            </div>
             <h2 className="font-bold mb-8 mt-10">Historical Usage</h2>
             <div className="grid gap-8 grid-cols-2">
                 <UsageChart
