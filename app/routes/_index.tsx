@@ -1,13 +1,25 @@
-import Login from "./login"
+import Login from "./login";
+import { useGo, useIsAuthenticated } from "@refinedev/core";
+import { useEffect } from "react";
 
 export default function Index() {
-  const isLogged = false
+  const { isLoading, data } = useIsAuthenticated();
 
-  if (isLogged) {
-    window.location.href = "/dashboard"
-  } else {
-    window.location.href = "/login"
+  const go = useGo();
+
+  useEffect(() => {
+    if (!isLoading && data?.authenticated) {
+      go({ to: "/dashboard", type: "replace" });
+    }
+  }, [isLoading, data]);
+
+  if (isLoading) {
+    return <>Checking Login Status</> || null;
   }
 
-  return isLogged ? <div>Dashboard</div> : <Login />
+  if (data?.authenticated) {
+    return <>Redirecting</> || null;
+  }
+
+  return <Login />;
 }
