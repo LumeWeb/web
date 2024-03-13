@@ -55,7 +55,7 @@ export class AccountApi {
     ret = this.checkSuccessVal<LoginResponse>(ret);
 
     if (ret) {
-      this.jwtToken = (ret as LoginResponse).token;
+      this._jwtToken = (ret as LoginResponse).token;
       return true;
     }
 
@@ -63,7 +63,7 @@ export class AccountApi {
   }
 
   public async logout(): Promise<boolean> {
-    this.jwtToken = undefined;
+    this._jwtToken = undefined;
     return true;
   }
 
