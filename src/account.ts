@@ -51,9 +51,10 @@ export default class AccountApi {
 
     if (ret) {
       this.jwtToken = (ret as LoginResponse).token;
+      return true;
     }
 
-    return ret as boolean;
+    return false;
   }
 
   public async logout(): Promise<boolean> {
