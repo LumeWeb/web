@@ -129,11 +129,14 @@ export default class AccountApi {
   }
 
   private buildOptions(): any {
+    const headers: any = {};
+    if (this.jwtToken) {
+      headers.Authorization = `Bearer ${this.jwtToken}`;
+    }
+
     return {
       baseURL: this.apiUrl,
-      headers: {
-        Authorization: `Bearer ${this.jwtToken}`,
-      },
+      headers: headers,
     };
   }
 }
