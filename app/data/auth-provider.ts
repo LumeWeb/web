@@ -3,7 +3,8 @@ import type {
   AuthActionResponse,
   CheckResponse,
   OnErrorResponse
-} from "@refinedev/core/dist/interfaces"
+  // @ts-ignore
+} from "@refinedev/core/dist/interfaces/bindings/auth"
 
 export const authProvider: AuthProvider = {
   login: async (params: any) => {
@@ -30,7 +31,7 @@ export const authProvider: AuthProvider = {
   getPermissions: async (params: any) => {
     return { success: true } satisfies AuthActionResponse
   },
-  getIdentity: async (params: any) => { 
+  getIdentity: async (params: any) => {
     return { id: "1", fullName: "John Doe", avatar: "https://via.placeholder.com/150" }
   }
 }
