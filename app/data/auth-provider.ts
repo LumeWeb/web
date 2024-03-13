@@ -9,6 +9,7 @@ export type AuthFormRequest = {
     email: string;
     password: string;
     rememberMe: boolean;
+    redirectTo?: string;
 }
 
 export type RegisterFormRequest = {
@@ -48,12 +49,19 @@ export class PortalAuthProvider implements RequiredAuthProvider {
             password: params.password,
         })
 
+        let redirectTo:string | undefined;
+
         if (ret) {
             cookies.set('jwt', this.sdk.account().jwtToken, { path: '/' });
+            redirectTo = params.redirectTo;
+            if (!redirectTo) {
+                redirectTo = ret ? "/dashboard" : "/login";
+            }
         }
+
         return {
             success: ret,
-            redirectTo: ret ? "/dashboard" : undefined,
+            redirectTo,
         };
     }
 

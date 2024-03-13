@@ -9,7 +9,7 @@ import lumeBgPng from "~/images/lume-bg-image.png?url"
 import {Field, FieldCheckbox} from "~/components/forms"
 import {getFormProps, useForm} from "@conform-to/react"
 import {getZodConstraint, parseWithZod} from "@conform-to/zod"
-import {useGo, useIsAuthenticated, useLogin} from "@refinedev/core";
+import {useGo, useIsAuthenticated, useLogin, useParsed} from "@refinedev/core";
 import {AuthFormRequest} from "~/data/auth-provider.js";
 import {useEffect} from "react";
 
@@ -20,17 +20,26 @@ export const meta: MetaFunction = () => {
     ]
 }
 
+type LoginParams = {
+    to: string;
+}
+
 export default function Login() {
     const location = useLocation()
     const {isLoading: isAuthLoading, data: authData} = useIsAuthenticated();
-    const auth = useIsAuthenticated();
     const hash = location.hash
     const go = useGo();
+    const parsed = useParsed<LoginParams>()
 
     useEffect(() => {
         if (!isAuthLoading) {
             if (authData?.authenticated) {
-                go({to: "/dashboard", type: "replace"});
+                let to = "/dashboard";
+                if(parsed.params?.to){
+                    to = parsed.params.to
+                }
+
+                go({to, type: "push"});
             }
         }
     }, [isAuthLoading, authData]);
@@ -89,7 +98,7 @@ const LoginSchema = z.object({
 
 const LoginForm = () => {
     const login = useLogin<AuthFormRequest>()
-
+    const parsed = useParsed<LoginParams>()
     const [form, fields] = useForm({
         id: "login",
         constraint: getZodConstraint(LoginSchema),
@@ -104,7 +113,8 @@ const LoginForm = () => {
             login.mutate({
                 email: data.email.toString(),
                 password: data.password.toString(),
-                rememberMe: data.rememberMe.toString() === "on"
+                rememberMe: data.rememberMe.toString() === "on",
+                redirectTo: parsed.params?.to
             });
         }
     })
