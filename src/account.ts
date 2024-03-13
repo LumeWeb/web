@@ -26,7 +26,7 @@ import {
 import { AxiosResponse } from "axios";
 import * as URL from 'url';
 
-export default class AccountApi {
+export class AccountApi {
   private apiUrl: string;
   private jwtToken?: string;
 

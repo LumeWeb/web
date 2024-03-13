@@ -1,4 +1,4 @@
-import AccountApi from "./account.js";
+import {AccountApi} from "./account.js";
 
 export class Sdk {
   private apiUrl: string;
@@ -16,6 +16,6 @@ export class Sdk {
     if (!this.accountApi) {
       this.accountApi = AccountApi.create(this.apiUrl);
     }
-    return this.accountApi;
+    return this.accountApi!;
   }
 }
