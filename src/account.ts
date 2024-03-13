@@ -50,6 +50,11 @@ export default class AccountApi {
     return false;
   }
 
+  public async logout(): Promise<boolean> {
+    this.jwtToken = undefined;
+    return true;
+  }
+
   public async register(registerRequest: RegisterRequest): Promise<boolean> {
     return this.checkSuccessBool(
       await postApiAuthRegister(registerRequest, this.buildOptions()),
