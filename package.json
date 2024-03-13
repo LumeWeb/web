@@ -1,6 +1,7 @@
 {
     "name": "@lumeweb/portal-sdk",
     "version": "0.0.0",
+    "type": "module",
     "description": "",
     "main": "lib/index.js",
     "files": [
