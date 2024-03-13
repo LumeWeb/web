@@ -13,6 +13,13 @@
           "compilerOptions": {
               "rootDir": "src"
           }
+      },
+      "tsconfig": {
+          "compilerOptions": {
+              "lib": [
+                  "dom"
+              ]
+          }
       }
   }
 }
