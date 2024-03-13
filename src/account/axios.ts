@@ -14,7 +14,7 @@ export const customInstance = <T>(
     ...config,
     ...options,
     cancelToken: source.token,
-  }).then(({ data }) => data);
+  });
 
   // @ts-ignore
   promise.cancel = () => {
