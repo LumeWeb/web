@@ -6,6 +6,7 @@ import {
   OTPValidateRequest,
   OTPVerifyRequest,
   PasswordResetVerifyRequest,
+  PingResponse,
   postApiAuthPasswordResetRequest,
   postApiAuthPing,
   RegisterRequest,
@@ -166,7 +167,14 @@ export default class AccountApi {
   }
 
   public async ping(): Promise<boolean> {
-    return this.checkSuccessBool(await postApiAuthPing(this.buildOptions()));
+    let ret: AxiosResponse<PingResponse>;
+    try {
+      ret = await postApiAuthPing(this.buildOptions());
+    } catch (e) {
+      return false;
+    }
+
+    return this.checkSuccessVal(ret) && ret.data.ping == "pong";
   }
 
   private checkSuccessBool(ret: AxiosResponse<void>): boolean {
