@@ -26,10 +26,8 @@ import {
 import { AxiosResponse } from "axios";
 
 export class AccountApi {
-
   private apiUrl: string;
   private _jwtToken?: string;
-
 
   constructor(apiUrl: string) {
     let apiUrlParsed = new URL(apiUrl);
@@ -38,12 +36,12 @@ export class AccountApi {
     this.apiUrl = apiUrlParsed.toString();
   }
 
-    set jwtToken(value: string) {
-        this._jwtToken = value;
-    }
-    get jwtToken(): string {
-        return <string>this._jwtToken;
-    }
+  set jwtToken(value: string) {
+    this._jwtToken = value;
+  }
+  get jwtToken(): string {
+    return <string>this._jwtToken;
+  }
 
   public static create(apiUrl: string): AccountApi {
     return new AccountApi(apiUrl);
