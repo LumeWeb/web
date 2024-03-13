@@ -1,14 +1,16 @@
-import type { MetaFunction } from "@remix-run/node";
-import { Link } from "@remix-run/react";
-import { Button } from "~/components/ui/button";
-import logoPng from "~/images/lume-logo.png?url";
-import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
-import discordLogoPng from "~/images/discord-logo.png?url";
-import lumeBgPng from "~/images/lume-bg-image.png?url";
-import { Field, FieldCheckbox } from "~/components/forms";
-import { getFormProps, useForm } from "@conform-to/react";
-import { z } from "zod";
-import { getZodConstraint, parseWithZod } from "@conform-to/zod";
+import type { MetaFunction } from "@remix-run/node"
+import { Link } from "@remix-run/react"
+import { Button } from "~/components/ui/button"
+import logoPng from "~/images/lume-logo.png?url"
+import lumeColorLogoPng from "~/images/lume-color-logo.png?url"
+import discordLogoPng from "~/images/discord-logo.png?url"
+import lumeBgPng from "~/images/lume-bg-image.png?url"
+import { Field, FieldCheckbox } from "~/components/forms"
+import { getFormProps, useForm } from "@conform-to/react"
+import { z } from "zod"
+import { getZodConstraint, parseWithZod } from "@conform-to/zod"
+import {useLogin, useRegister} from "@refinedev/core";
+import {AuthFormRequest, RegisterFormRequest} from "~/data/auth-provider.js";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Sign Up" }];
@@ -41,13 +43,34 @@ const RegisterSchema = z
   });
 
 export default function Register() {
+    const register = useRegister<RegisterFormRequest>()
+    const login = useLogin<AuthFormRequest>();
   const [form, fields] = useForm({
     id: "register",
     constraint: getZodConstraint(RegisterSchema),
     onValidate({ formData }) {
       return parseWithZod(formData, { schema: RegisterSchema });
     },
-  });
+      onSubmit(e) {
+          e.preventDefault();
+
+          const data = Object.fromEntries(new FormData(e.currentTarget).entries());
+          register.mutate({
+              email: data.email.toString(),
+              password: data.password.toString(),
+              firstName: data.firstName.toString(),
+              lastName: data.lastName.toString(),
+          }, {
+                onSuccess: () => {
+                    login.mutate({
+                        email: data.email.toString(),
+                        password: data.password.toString(),
+                        rememberMe: false,
+                    })
+                }
+            })
+          }
+    });
 
   return (
     <div className="p-10 h-screen relative">

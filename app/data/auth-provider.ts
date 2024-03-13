@@ -10,6 +10,13 @@ export type AuthFormRequest = {
     rememberMe: boolean;
 }
 
+export type RegisterFormRequest = {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+}
+
 export class PortalAuthProvider implements RequiredAuthProvider {
     private apiUrl: string;
     private sdk: Sdk;
@@ -61,8 +68,14 @@ export class PortalAuthProvider implements RequiredAuthProvider {
         return {logout: true};
     }
 
-    async register(params: any): Promise<AuthActionResponse> {
-        return {success: true};
+    async register(params: RegisterFormRequest): Promise<AuthActionResponse> {
+        const ret = await this.sdk.account().register({
+            email: params.email,
+            password: params.password,
+            first_name: params.firstName,
+            last_name: params.lastName,
+        });
+        return {success: ret, redirectTo: ret ? "/dashboard" : undefined};
     }
 
     async forgotPassword(params: any): Promise<AuthActionResponse> {
