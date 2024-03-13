@@ -40,14 +40,19 @@ export default class AccountApi {
   }
 
   public async login(loginRequest: LoginRequest): Promise<boolean> {
-    let ret = this.checkSuccessVal<LoginResponse>(
-      await postApiAuthLogin(loginRequest, { baseURL: this.apiUrl }),
-    );
+    let ret: AxiosResponse<LoginResponse> | LoginResponse | boolean = false;
+    try {
+      ret = await postApiAuthLogin(loginRequest, { baseURL: this.apiUrl });
+    } catch (e) {
+      return false;
+    }
+    ret = this.checkSuccessVal<LoginResponse>(ret);
+
     if (ret) {
       this.jwtToken = (ret as LoginResponse).token;
     }
 
-    return false;
+    return ret as boolean;
   }
 
   public async logout(): Promise<boolean> {
@@ -56,67 +61,108 @@ export default class AccountApi {
   }
 
   public async register(registerRequest: RegisterRequest): Promise<boolean> {
-    return this.checkSuccessBool(
-      await postApiAuthRegister(registerRequest, this.buildOptions()),
-    );
+    let ret: AxiosResponse<void>;
+    try {
+      ret = await postApiAuthRegister(registerRequest, {
+        baseURL: this.apiUrl,
+      });
+    } catch (e) {
+      return false;
+    }
+
+    return this.checkSuccessBool(ret);
   }
 
   public async verifyEmail(
     verifyEmailRequest: VerifyEmailRequest,
   ): Promise<boolean> {
-    return this.checkSuccessBool(
-      await postApiAuthVerifyEmail(verifyEmailRequest, this.buildOptions()),
-    );
+    let ret: AxiosResponse<void>;
+    try {
+      ret = await postApiAuthVerifyEmail(
+        verifyEmailRequest,
+        this.buildOptions(),
+      );
+    } catch (e) {
+      return false;
+    }
+    return this.checkSuccessBool(ret);
   }
 
   public async generateOtp(): Promise<boolean | OTPGenerateResponse> {
-    return this.checkSuccessVal<OTPGenerateResponse>(
-      await getApiAuthOtpGenerate(this.buildOptions()),
-    );
+    let ret: AxiosResponse<OTPGenerateResponse>;
+    try {
+      ret = await getApiAuthOtpGenerate(this.buildOptions());
+    } catch (e) {
+      return false;
+    }
+    return this.checkSuccessVal<OTPGenerateResponse>(ret);
   }
 
   public async verifyOtp(otpVerifyRequest: OTPVerifyRequest): Promise<boolean> {
-    return this.checkSuccessBool(
-      await postApiAuthOtpVerify(otpVerifyRequest, this.buildOptions()),
-    );
+    let ret: AxiosResponse<void>;
+    try {
+      ret = await postApiAuthOtpVerify(otpVerifyRequest, this.buildOptions());
+    } catch (e) {
+      return false;
+    }
+    return this.checkSuccessBool(ret);
   }
 
   public async validateOtp(
     otpValidateRequest: OTPValidateRequest,
   ): Promise<boolean> {
-    return this.checkSuccessBool(
-      await postApiAuthOtpValidate(otpValidateRequest, this.buildOptions()),
-    );
+    let ret: AxiosResponse<void>;
+    try {
+      ret = await postApiAuthOtpValidate(
+        otpValidateRequest,
+        this.buildOptions(),
+      );
+    } catch (e) {
+      return false;
+    }
+    return this.checkSuccessBool(ret);
   }
 
   public async disableOtp(
     otpDisableRequest: OTPDisableRequest,
   ): Promise<boolean> {
-    return this.checkSuccessBool(
-      await postApiAuthOtpDisable(otpDisableRequest, this.buildOptions()),
-    );
+    let ret: AxiosResponse<void>;
+    try {
+      ret = await postApiAuthOtpDisable(otpDisableRequest, this.buildOptions());
+    } catch (e) {
+      return false;
+    }
+    return this.checkSuccessBool(ret);
   }
 
   public async requestPasswordReset(
     passwordResetRequest: PasswordResetRequest,
   ): Promise<boolean> {
-    return this.checkSuccessBool(
-      await postApiAuthPasswordResetRequest(
+    let ret: AxiosResponse<void>;
+    try {
+      ret = await postApiAuthPasswordResetRequest(
         passwordResetRequest,
         this.buildOptions(),
-      ),
-    );
+      );
+    } catch (e) {
+      return false;
+    }
+    return this.checkSuccessBool(ret);
   }
 
   public async confirmPasswordReset(
     passwordResetVerifyRequest: PasswordResetVerifyRequest,
   ): Promise<boolean> {
-    return this.checkSuccessBool(
-      await postApiAuthPasswordResetConfirm(
+    let ret: AxiosResponse<void>;
+    try {
+      ret = await postApiAuthPasswordResetConfirm(
         passwordResetVerifyRequest,
         this.buildOptions(),
-      ),
-    );
+      );
+    } catch (e) {
+      return false;
+    }
+    return this.checkSuccessBool(ret);
   }
 
   public async ping(): Promise<boolean> {
