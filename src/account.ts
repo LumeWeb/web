@@ -1,4 +1,6 @@
 import {
+  AccountInfoResponse,
+  getApiAccount,
   LoginRequest,
   LoginResponse,
   OTPDisableRequest,
@@ -183,6 +185,17 @@ export class AccountApi {
     }
 
     return this.checkSuccessVal(ret) && ret.data.ping == "pong";
+  }
+
+  public async info(): Promise<boolean | AccountInfoResponse> {
+    let ret: AxiosResponse<AccountInfoResponse>;
+    try {
+      ret = await getApiAccount(this.buildOptions());
+    } catch (e) {
+      return false;
+    }
+
+    return this.checkSuccessVal(ret);
   }
 
   private checkSuccessBool(ret: AxiosResponse<void>): boolean {
