@@ -2,7 +2,7 @@ import { Button } from "~/components/ui/button"
 import logoPng from "~/images/lume-logo.png?url"
 import lumeColorLogoPng from "~/images/lume-color-logo.png?url"
 import discordLogoPng from "~/images/discord-logo.png?url"
-import { Link } from "@remix-run/react"
+import { Link, useLocation } from "@remix-run/react"
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,7 @@ import { useUppy } from "./lib/uppy"
 import type { UppyFile } from "@uppy/core"
 import { Progress } from "~/components/ui/progress"
 import { DialogClose } from "@radix-ui/react-dialog"
-import {  TrashIcon } from "@radix-ui/react-icons"
+import {  ChevronDownIcon, TrashIcon } from "@radix-ui/react-icons"
 import {
   ClockIcon,
   DriveIcon,
@@ -22,10 +22,15 @@ import {
   CloudUploadIcon,
   CloudCheckIcon,
   BoxCheckedIcon,
-  PageIcon
+  PageIcon,
+  ThemeIcon
 } from "./icons"
+import { DropdownMenu, DropdownMenuTrigger } from "./ui/dropdown-menu"
+import { Avatar } from "@radix-ui/react-avatar"
+import { cn } from "~/utils"
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
+  const location = useLocation();
   return (
     <div className="h-full flex flex-row">
       <header className="p-10 pr-0 flex flex-col w-[240px] h-full scroll-m-0 overflow-hidden">
@@ -35,7 +40,7 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
           <ul>
             <li>
               <Link to="/dashboard">
-                <NavigationButton>
+                <NavigationButton active={location.pathname.includes("dashboard")}>
                   <ClockIcon className="w-5 h-5 mr-2" />
                   Dashboard
                 </NavigationButton>
@@ -43,7 +48,7 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
             </li>
             <li>
               <Link to="/file-manager">
-                <NavigationButton>
+                <NavigationButton active={location.pathname.includes("file-manager")}>
                   <DriveIcon className="w-5 h-5 mr-2" />
                   File Manager
                 </NavigationButton>
@@ -51,7 +56,7 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
             </li>
             <li>
               <Link to="/account">
-                <NavigationButton>
+                <NavigationButton active={location.pathname.includes("account")}>
                   <CircleLockIcon className="w-5 h-5 mr-2" />
                   Account
                 </NavigationButton>
@@ -71,13 +76,29 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
               Upload Files
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="border rounded-lg p-8">
             <UploadFileForm />
           </DialogContent>
         </Dialog>
       </header>
 
       <div className="flex-1 overflow-y-auto p-10">
+        <div className="flex items-center gap-x-4 justify-end">
+          <Button variant="ghost" className="rounded-full w-fit">
+            <ThemeIcon className="text-ring" />
+          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Button className="border rounded-full h-auto p-2 gap-x-2 text-ring font-semibold">
+                <Avatar className="bg-ring h-7 w-7 rounded-full" />
+                whirly10
+                <ChevronDownIcon />
+              </Button>
+            </DropdownMenuTrigger>
+          </DropdownMenu>
+        </div>
+
         {children}
 
         <footer className="mt-5">
@@ -250,9 +271,12 @@ const UploadFileItem = ({
   )
 }
 
-const NavigationButton = ({ children }: React.PropsWithChildren) => {
+const NavigationButton = ({ children, active }: React.PropsWithChildren<{ active?: boolean }>) => {
   return (
-    <Button variant="ghost" className="justify-start h-14 w-full font-semibold">
+    <Button variant="ghost" className={cn(
+      "justify-start h-14 w-full font-semibold",
+      active && "bg-secondary-1 text-secondary-1-foreground"
+    )}>
       {children}
     </Button>
   )
