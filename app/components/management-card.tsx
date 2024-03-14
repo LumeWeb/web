@@ -10,7 +10,7 @@ const ManagementCardAvatar = ({ src }: { src?: string }) => {
         <Avatar className="border-2 border-ring h-28 w-28" />
         <Button
           variant="outline"
-          className="h-10 w-10 rounded-full hover:bg-secondary-2 border-white absolute bottom-0 right-0 z-50">
+          className="absolute bottom-0 right-0 z-50 flex items-center w-10 h-10 p-0 border-white rounded-full justiyf-center hover:bg-secondary-2">
           <EditIcon />
         </Button>
       </div>
@@ -23,7 +23,7 @@ const ManagementCardTitle = ({
   className,
 }: React.PropsWithChildren<{ className?: string }>) => {
   return (
-    <div className={cn("flex gap-x-2 items-center font-semibold", className)}>
+    <div className={cn("flex items-center gap-x-2 font-semibold", className)}>
       <FingerPrintIcon className="text-ring" />
       {children}
     </div>
@@ -35,7 +35,7 @@ const ManagementCardContent = ({
   className,
 }: React.PropsWithChildren<{ className?: string }>) => {
   return (
-    <div className={cn("text-primary-2 mt-4 mb-8 block text-sm", className)}>
+    <div className={cn("mt-4 mb-8 text-sm text-primary-2", className)}>
       {children}
     </div>
   );
