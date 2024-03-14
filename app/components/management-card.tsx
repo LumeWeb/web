@@ -44,22 +44,22 @@ export const ManagementCard = ({
                     <Avatar className="border-2 border-ring h-28 w-28" />
                     <Button
                         variant="outline"
-                        className="h-10 w-10 rounded-full hover:bg-secondary-2 border-white absolute bottom-0 right-0 z-50"
+                        className="absolute bottom-0 right-0 z-50 flex items-center w-10 h-10 p-0 border-white rounded-full justiyf-center hover:bg-secondary-2"
                     >
-                        <EditIcon />
+                        <EditIcon className="mt-1 ml-1" />
                     </Button>
                 </div>
             ) : (
                 <>
-                    <div className="flex gap-x-2 items-center">
+                    <div className="flex items-center gap-x-2">
                         <FingerPrintIcon className="text-ring" />
                         <h4 className="font-bold">{title}</h4>
                     </div>
                     {subtitle && (
-                        <span className="text-primary-2 mt-4 mb-8 block text-sm">{subtitle}</span>
+                        <span className="block mt-4 mb-8 text-sm text-primary-2">{subtitle}</span>
                     )}
                     {value && (
-                        <span className="text-ring font-bold mt-4 mb-8 block text-sm">{value}</span>
+                        <span className="block mt-4 mb-8 text-sm font-bold text-ring">{value}</span>
                     )}
                     {isPasswordCard && <PasswordDots className="mt-6 mb-8 text-primary-2" />}
                     {!dialogNode ? (

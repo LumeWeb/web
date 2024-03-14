@@ -102,20 +102,20 @@ export default function MyAccount() {
       </div>
       {/* Dialogs must be near to body as possible to open the modal, otherwise will be restricted to parent height-width */}
       <ChangeEmailForm
-        open={openModal["changeEmail"]}
+        open={openModal.changeEmail}
         setOpen={(value: boolean) =>
           setModal({ ...openModal, changeEmail: value })
         }
         currentValue="bsimpson@springfield.oh.gov.com"
       />
       <ChangePasswordForm
-        open={openModal["changePassword"]}
+        open={openModal.changePassword}
         setOpen={(value: boolean) =>
           setModal({ ...openModal, changePassword: value })
         }
       />
       <SetupTwoFactorDialog
-        open={openModal["setupTwoFactor"]}
+        open={openModal.setupTwoFactor}
         setOpen={(value: boolean) =>
           setModal({ ...openModal, setupTwoFactor: value })
         }
