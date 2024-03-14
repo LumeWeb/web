@@ -248,36 +248,45 @@ const SetupTwoFactorDialog = ({
   open: boolean;
   setOpen: (value: boolean) => void;
 }) => {
-    const [continueModal, setContinue] = useState<boolean>(false);
+  const [continueModal, setContinue] = useState<boolean>(false);
 
   return (
-    <Dialog open={open} onOpenChange={(value) => {
-        setOpen(value)
+    <Dialog
+      open={open}
+      onOpenChange={(value) => {
+        setOpen(value);
         setContinue(false);
-    }}>
+      }}>
       <DialogContent className="p-8">
         <DialogHeader>
           <DialogTitle className="mb-8">Setup Two-Factor</DialogTitle>
           <div className="flex flex-col gap-y-6">
             {continueModal ? (
-                <>
-                    <p className="text-sm text-primary-2">Enter the authentication code generated in your two-factor application to confirm your setup.</p>
-                    <Input fullWidth className="text-center" />
-                    <Button className="w-full h-14">Confirm</Button>
-                </>
+              <>
+                <p className="text-sm text-primary-2">
+                  Enter the authentication code generated in your two-factor
+                  application to confirm your setup.
+                </p>
+                <Input fullWidth className="text-center" />
+                <Button className="w-full h-14">Confirm</Button>
+              </>
             ) : (
-                <>
-                    <div className="p-6 flex justify-center border bg-secondary-2">
-                    <img src={QRImg} alt="QR" className="h-36 w-36" />
-                    </div>
-                    <p className="font-semibold">
-                        Don’t have access to scan? Use this code instead.
-                    </p>
-                    <div className="p-4 border text-primary-2 text-center font-bold">
-                        HHH7MFGAMPJ44OM44FGAMPJ44O232
-                    </div>
-                    <Button className="w-full h-14" onClick={() => setContinue(true)}>Continue</Button>
-                </>    
+              <>
+                <div className="p-6 flex justify-center border bg-secondary-2">
+                  <img src={QRImg} alt="QR" className="h-36 w-36" />
+                </div>
+                <p className="font-semibold">
+                  Don’t have access to scan? Use this code instead.
+                </p>
+                <div className="p-4 border text-primary-2 text-center font-bold">
+                  HHH7MFGAMPJ44OM44FGAMPJ44O232
+                </div>
+                <Button
+                  className="w-full h-14"
+                  onClick={() => setContinue(true)}>
+                  Continue
+                </Button>
+              </>
             )}
           </div>
         </DialogHeader>

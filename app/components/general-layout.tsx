@@ -1,20 +1,20 @@
-import { Button } from "~/components/ui/button"
-import logoPng from "~/images/lume-logo.png?url"
-import lumeColorLogoPng from "~/images/lume-color-logo.png?url"
-import discordLogoPng from "~/images/discord-logo.png?url"
-import { Link, useLocation } from "@remix-run/react"
+import { Button } from "~/components/ui/button";
+import logoPng from "~/images/lume-logo.png?url";
+import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
+import discordLogoPng from "~/images/discord-logo.png?url";
+import { Link, useLocation } from "@remix-run/react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
-} from "~/components/ui/dialog"
-import { useUppy } from "./lib/uppy"
-import type { UppyFile } from "@uppy/core"
-import { Progress } from "~/components/ui/progress"
-import { DialogClose } from "@radix-ui/react-dialog"
-import {  ChevronDownIcon, TrashIcon } from "@radix-ui/react-icons"
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import { useUppy } from "./lib/uppy";
+import type { UppyFile } from "@uppy/core";
+import { Progress } from "~/components/ui/progress";
+import { DialogClose } from "@radix-ui/react-dialog";
+import { ChevronDownIcon, TrashIcon } from "@radix-ui/react-icons";
 import {
   ClockIcon,
   DriveIcon,
@@ -23,11 +23,11 @@ import {
   CloudCheckIcon,
   BoxCheckedIcon,
   PageIcon,
-  ThemeIcon
-} from "./icons"
-import { DropdownMenu, DropdownMenuTrigger } from "./ui/dropdown-menu"
-import { Avatar } from "@radix-ui/react-avatar"
-import { cn } from "~/utils"
+  ThemeIcon,
+} from "./icons";
+import { DropdownMenu, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { Avatar } from "@radix-ui/react-avatar";
+import { cn } from "~/utils";
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
   const location = useLocation();
@@ -40,7 +40,8 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
           <ul>
             <li>
               <Link to="/dashboard">
-                <NavigationButton active={location.pathname.includes("dashboard")}>
+                <NavigationButton
+                  active={location.pathname.includes("dashboard")}>
                   <ClockIcon className="w-5 h-5 mr-2" />
                   Dashboard
                 </NavigationButton>
@@ -48,7 +49,8 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
             </li>
             <li>
               <Link to="/file-manager">
-                <NavigationButton active={location.pathname.includes("file-manager")}>
+                <NavigationButton
+                  active={location.pathname.includes("file-manager")}>
                   <DriveIcon className="w-5 h-5 mr-2" />
                   File Manager
                 </NavigationButton>
@@ -56,7 +58,8 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
             </li>
             <li>
               <Link to="/account">
-                <NavigationButton active={location.pathname.includes("account")}>
+                <NavigationButton
+                  active={location.pathname.includes("account")}>
                   <CircleLockIcon className="w-5 h-5 mr-2" />
                   Account
                 </NavigationButton>
@@ -87,7 +90,7 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
           <Button variant="ghost" className="rounded-full w-fit">
             <ThemeIcon className="text-ring" />
           </Button>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Button className="border rounded-full h-auto p-2 gap-x-2 text-ring font-semibold">
@@ -107,8 +110,7 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
               <Link to="https://discord.lumeweb.com">
                 <Button
                   variant={"link"}
-                  className="flex flex-row gap-x-2 text-input-placeholder"
-                >
+                  className="flex flex-row gap-x-2 text-input-placeholder">
                   <img
                     className="h-5"
                     src={discordLogoPng}
@@ -122,8 +124,7 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
               <Link to="https://lumeweb.com">
                 <Button
                   variant={"link"}
-                  className="flex flex-row gap-x-2 text-input-placeholder"
-                >
+                  className="flex flex-row gap-x-2 text-input-placeholder">
                   <img className="h-5" src={lumeColorLogoPng} alt="Lume Logo" />
                   Connect with us
                 </Button>
@@ -133,8 +134,8 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
         </footer>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const UploadFileForm = () => {
   const {
@@ -144,17 +145,17 @@ const UploadFileForm = () => {
     upload,
     state,
     removeFile,
-    cancelAll
+    cancelAll,
   } = useUppy({
     uploader: "tus",
-    endpoint: import.meta.env.VITE_PUBLIC_TUS_ENDPOINT
-  })
+    endpoint: import.meta.env.VITE_PUBLIC_TUS_ENDPOINT,
+  });
 
-  console.log({ state, files: getFiles() })
+  console.log({ state, files: getFiles() });
 
-  const isUploading = state === "uploading"
-  const isCompleted = state === "completed"
-  const hasStarted = state !== "idle" && state !== "initializing"
+  const isUploading = state === "uploading";
+  const isCompleted = state === "completed";
+  const hasStarted = state !== "idle" && state !== "initializing";
 
   return (
     <>
@@ -164,8 +165,7 @@ const UploadFileForm = () => {
       {!hasStarted ? (
         <div
           {...getRootProps()}
-          className="border border-border rounded text-primary-2 bg-primary-dark h-48 flex flex-col items-center justify-center"
-        >
+          className="border border-border rounded text-primary-2 bg-primary-dark h-48 flex flex-col items-center justify-center">
           <input
             hidden
             aria-hidden
@@ -185,7 +185,7 @@ const UploadFileForm = () => {
             key={file.id}
             file={file}
             onRemove={(id) => {
-              removeFile(id)
+              removeFile(id);
             }}
           />
         ))}
@@ -222,19 +222,19 @@ const UploadFileForm = () => {
         </Button>
       ) : null}
     </>
-  )
-}
+  );
+};
 
 function bytestoMegabytes(bytes: number) {
-  return bytes / 1024 / 1024
+  return bytes / 1024 / 1024;
 }
 
 const UploadFileItem = ({
   file,
-  onRemove
+  onRemove,
 }: {
-  file: UppyFile
-  onRemove: (id: string) => void
+  file: UppyFile;
+  onRemove: (id: string) => void;
 }) => {
   return (
     <div className="flex flex-col w-full py-4 px-2 bg-primary-dark">
@@ -258,8 +258,7 @@ const UploadFileItem = ({
           size={"icon"}
           variant={"ghost"}
           className="!text-inherit"
-          onClick={() => onRemove(file.id)}
-        >
+          onClick={() => onRemove(file.id)}>
           <TrashIcon className="w-4 h-4" />
         </Button>
       </div>
@@ -268,16 +267,21 @@ const UploadFileItem = ({
         <Progress max={100} value={file.progress.percentage} className="mt-2" />
       ) : null}
     </div>
-  )
-}
+  );
+};
 
-const NavigationButton = ({ children, active }: React.PropsWithChildren<{ active?: boolean }>) => {
+const NavigationButton = ({
+  children,
+  active,
+}: React.PropsWithChildren<{ active?: boolean }>) => {
   return (
-    <Button variant="ghost" className={cn(
-      "justify-start h-14 w-full font-semibold",
-      active && "bg-secondary-1 text-secondary-1-foreground"
-    )}>
+    <Button
+      variant="ghost"
+      className={cn(
+        "justify-start h-14 w-full font-semibold",
+        active && "bg-secondary-1 text-secondary-1-foreground",
+      )}>
       {children}
     </Button>
-  )
-}
+  );
+};
