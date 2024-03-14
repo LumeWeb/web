@@ -1,9 +1,15 @@
 import type {AuthProvider} from "@refinedev/core"
 
-// @ts-ignore
-import type {AuthActionResponse, CheckResponse, OnErrorResponse} from "@refinedev/core/dist/interfaces/bindings/auth"
+import type {
+    AuthActionResponse,
+    CheckResponse,
+    IdentityResponse,
+    OnErrorResponse
+    // @ts-ignore
+} from "@refinedev/core/dist/interfaces/bindings/auth"
 import {Sdk} from "@lumeweb/portal-sdk";
 import Cookies from 'universal-cookie';
+import type {AccountInfoResponse} from "@lumeweb/portal-sdk";
 
 export type AuthFormRequest = {
     email: string;
@@ -17,6 +23,13 @@ export type RegisterFormRequest = {
     password: string;
     firstName: string;
     lastName: string;
+}
+
+export type Identity = {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
 }
 
 export class PortalAuthProvider implements RequiredAuthProvider {
@@ -49,10 +62,10 @@ export class PortalAuthProvider implements RequiredAuthProvider {
             password: params.password,
         })
 
-        let redirectTo:string | undefined;
+        let redirectTo: string | undefined;
 
         if (ret) {
-            cookies.set('jwt', this.sdk.account().jwtToken, { path: '/' });
+            cookies.set('jwt', this.sdk.account().jwtToken, {path: '/'});
             redirectTo = params.redirectTo;
             if (!redirectTo) {
                 redirectTo = ret ? "/dashboard" : "/login";
@@ -89,7 +102,7 @@ export class PortalAuthProvider implements RequiredAuthProvider {
             cookies.remove('jwt');
         }
 
-        return {authenticated: ret, redirectTo: ret ? undefined: "/login"};
+        return {authenticated: ret, redirectTo: ret ? undefined : "/login"};
     }
 
     async onError(error: any): Promise<OnErrorResponse> {
@@ -118,8 +131,21 @@ export class PortalAuthProvider implements RequiredAuthProvider {
         return {success: true};
     }
 
-    async getIdentity(params?: any): Promise<AuthActionResponse> {
-        return {id: "1", fullName: "John Doe", avatar: "https://via.placeholder.com/150"};
+    async getIdentity(params?: Identity): Promise<IdentityResponse> {
+        const ret = await this.sdk.account().info();
+
+        if (!ret) {
+            return {identity: null};
+        }
+
+        const acct = ret as AccountInfoResponse;
+
+        return {
+            id: acct.id,
+            firstName: acct.first_name,
+            lastName: acct.last_name,
+            email: acct.email,
+        };
     }
 
     public static create(apiUrl: string): AuthProvider {
