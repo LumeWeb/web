@@ -15,9 +15,6 @@ import {
   VerifyEmailRequest,
 } from "./account/generated/index.js";
 
-
-export * from "./account/generated/openapi.schemas.js";
-
 import {
   postApiAuthLogin,
   postApiAuthRegister,
