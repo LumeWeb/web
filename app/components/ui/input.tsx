@@ -36,7 +36,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         />
         {type === "password" ? <button
           type="button"
-          className="absolute right-4 top-5 text-input"
+          className="absolute right-4 top-5 text-ring"
           onClick={toggleShowPassword}
           onKeyDown={toggleShowPassword}
         >

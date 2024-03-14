@@ -23,9 +23,10 @@ export const Field = ({
   const errorId = errors?.length ? `${id}-error` : undefined
   return (
     <div className={className}>
-      <Label {...labelProps} htmlFor={id} />
+      <Label {...labelProps} htmlFor={id} className="font-semibold text-sm" />
       <Input
         {...inputProps}
+        className="mt-4"
         id={id}
         aria-invalid={errorId ? true : undefined}
         aria-describedby={errorId}
