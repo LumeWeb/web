@@ -6,10 +6,11 @@ interface UsageCardProps {
     label: string,
     monthlyUsage: number, // Asumming that the minimium is 1GB
     currentUsage: number,
-    icon: React.ReactNode
+    icon: React.ReactNode,
+    button?: React.ReactNode;
 }
 
-export const UsageCard = ({ label, monthlyUsage, currentUsage, icon }: UsageCardProps) => {
+export const UsageCard = ({ label, monthlyUsage, currentUsage, icon, button }: UsageCardProps) => {
     return (
         <div className="p-8 border rounded-lg w-full">
             <div className="flex items-center justify-between mb-8">
@@ -20,10 +21,14 @@ export const UsageCard = ({ label, monthlyUsage, currentUsage, icon }: UsageCard
                     </div>
                     Montly {label.toLocaleLowerCase()} limit is {monthlyUsage} GB
                 </div>
-                <Button className="gap-x-2 h-12">
-                    <AddIcon />
-                    Add More
-                </Button>
+                {!button ? (
+                    <Button className="gap-x-2 h-12">
+                        <AddIcon />
+                        Add More
+                    </Button>
+                ) : (
+                    button
+                )}
             </div>
             <Progress max={monthlyUsage} value={currentUsage} />
             <div className="flex items-center justify-between mt-4 font-semibold text-sm">
