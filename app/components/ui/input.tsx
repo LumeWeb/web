@@ -5,7 +5,7 @@ import { EyeOpenIcon, EyeNoneIcon } from "@radix-ui/react-icons"
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
-    fullWidth: boolean,
+    fullWidth?: boolean,
     leftIcon?: React.ReactNode
   }
 
