@@ -9,13 +9,17 @@ import { Field, FieldCheckbox } from "~/components/forms"
 import { getFormProps, useForm } from "@conform-to/react"
 import { z } from "zod"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod"
+import {useLogin, useRegister} from "@refinedev/core";
+import {AuthFormRequest, RegisterFormRequest} from "~/data/auth-provider.js";
 
 export const meta: MetaFunction = () => {
-  return [{ title: "Sign Up" }]
-}
+  return [{ title: "Sign Up" }];
+};
 
-const SignUpSchema = z
+const RegisterSchema = z
   .object({
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
     email: z.string().email(),
     password: z
       .string()
@@ -24,28 +28,49 @@ const SignUpSchema = z
       .string()
       .min(8, { message: "Password must be at least 8 characters" }),
     termsOfService: z.boolean({
-      required_error: "You must agree to the terms of service"
-    })
+      required_error: "You must agree to the terms of service",
+    }),
   })
   .superRefine((data, ctx) => {
     if (data.password !== data.confirmPassword) {
       return ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["confirmPassword"],
-        message: "Passwords do not match"
-      })
+        message: "Passwords do not match",
+      });
     }
-    return true
-  })
+    return true;
+  });
 
-export default function SignUp() {
+export default function Register() {
+    const register = useRegister<RegisterFormRequest>()
+    const login = useLogin<AuthFormRequest>();
   const [form, fields] = useForm({
-    id: "sign-up",
-    constraint: getZodConstraint(SignUpSchema),
+    id: "register",
+    constraint: getZodConstraint(RegisterSchema),
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: SignUpSchema })
-    }
-  })
+      return parseWithZod(formData, { schema: RegisterSchema });
+    },
+      onSubmit(e) {
+          e.preventDefault();
+
+          const data = Object.fromEntries(new FormData(e.currentTarget).entries());
+          register.mutate({
+              email: data.email.toString(),
+              password: data.password.toString(),
+              firstName: data.firstName.toString(),
+              lastName: data.lastName.toString(),
+          }, {
+                onSuccess: () => {
+                    login.mutate({
+                        email: data.email.toString(),
+                        password: data.password.toString(),
+                        rememberMe: false,
+                    })
+                }
+            })
+          }
+    });
 
   return (
     <div className="p-10 h-screen relative">
@@ -54,21 +79,33 @@ export default function SignUp() {
       </header>
       <form
         className="w-full p-2 max-w-md space-y-4 mt-12 bg-background"
-        {...getFormProps(form)}
-      >
+        {...getFormProps(form)}>
         <span className="!mb-12 space-y-2">
           <h2 className="text-3xl font-bold">All roads lead to Lume</h2>
           <p className="text-input-placeholder">
             🤘 Get 50 GB free storage and download for free,{" "}
             <b
               className="text-primar
-        y-2"
-            >
+        y-2">
               forever
             </b>
             .{" "}
           </p>
         </span>
+        <div className="flex gap-4">
+          <Field
+            className="flex-1"
+            inputProps={{ name: fields.firstName.name }}
+            labelProps={{ children: "First Name" }}
+            errors={fields.firstName.errors}
+          />
+          <Field
+            className="flex-1"
+            inputProps={{ name: fields.lastName.name }}
+            labelProps={{ children: "Last Name" }}
+            errors={fields.lastName.errors}
+          />
+        </div>
         <Field
           inputProps={{ name: fields.email.name }}
           labelProps={{ children: "Email" }}
@@ -92,19 +129,17 @@ export default function SignUp() {
                 I agree to the
                 <Link
                   to="/terms-of-service"
-                  className="text-primary-1 text-md hover:underline hover:underline-offset-4 mx-1"
-                >
+                  className="text-primary-1 text-md hover:underline hover:underline-offset-4 mx-1">
                   Terms of Service
                 </Link>
                 and
                 <Link
                   to="/privacy-policy"
-                  className="text-primary-1 text-md hover:underline hover:underline-offset-4 mx-1"
-                >
+                  className="text-primary-1 text-md hover:underline hover:underline-offset-4 mx-1">
                   Privacy Policy
                 </Link>
               </span>
-            )
+            ),
           }}
           errors={fields.termsOfService.errors}
         />
@@ -113,8 +148,7 @@ export default function SignUp() {
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-primary-1 text-md hover:underline hover:underline-offset-4"
-          >
+            className="text-primary-1 text-md hover:underline hover:underline-offset-4">
             Login here instead →
           </Link>
         </p>
@@ -132,8 +166,7 @@ export default function SignUp() {
             <Link to="https://discord.lumeweb.com">
               <Button
                 variant={"link"}
-                className="flex flex-row gap-x-2 text-input-placeholder"
-              >
+                className="flex flex-row gap-x-2 text-input-placeholder">
                 <img className="h-5" src={discordLogoPng} alt="Discord Logo" />
                 Connect with us
               </Button>
@@ -143,8 +176,7 @@ export default function SignUp() {
             <Link to="https://lumeweb.com">
               <Button
                 variant={"link"}
-                className="flex flex-row gap-x-2 text-input-placeholder"
-              >
+                className="flex flex-row gap-x-2 text-input-placeholder">
                 <img className="h-5" src={lumeColorLogoPng} alt="Lume Logo" />
                 Connect with us
               </Button>
@@ -153,5 +185,5 @@ export default function SignUp() {
         </ul>
       </footer>
     </div>
-  )
+  );
 }
