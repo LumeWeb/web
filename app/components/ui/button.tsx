@@ -14,7 +14,7 @@ const buttonVariants = cva(
           // TODO: name it better
         accent: "bg-ring text-primary-1-foreground hover:bg-ring/75 font-bold",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+          "bg-destructive text-white shadow-sm hover:bg-destructive/90",
         outline:
           "border border-input bg-background shadow-sm hover:bg-primary-2/5",
         secondary:
