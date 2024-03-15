@@ -7,11 +7,6 @@ import { Button } from "~/components/ui/button";
 import { AddIcon } from "~/components/icons";
 
 export default function FileManager() {
-  const isLogged = true;
-  if (!isLogged) {
-    window.location.href = "/login";
-  }
-
   return (
     <GeneralLayout>
       <h1 className="font-bold mb-4 text-lg">File Manager</h1>
@@ -60,20 +55,6 @@ export default function FileManager() {
       </div>
       <DataTable
         columns={columns}
-        data={[
-          {
-            name: "whirly-final-draft.psd",
-            cid: "0xB45165ED3CD437B",
-            size: "1.89 MB",
-            createdOn: "03/02/2024 at 13:29 PM",
-          },
-          {
-            name: "whirly-final-draft.psd",
-            cid: "0xB45165ED3CD437B",
-            size: "1.89 MB",
-            createdOn: "03/02/2024 at 13:29 PM",
-          },
-        ]}
       />
     </GeneralLayout>
   );

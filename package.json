@@ -28,6 +28,7 @@
     "@refinedev/core": "https://gitpkg.now.sh/LumeWeb/refine/packages/core?remix",
     "@refinedev/devtools-internal": "https://gitpkg.now.sh/LumeWeb/refine/packages/devtools-internal?remix",
     "@refinedev/devtools-shared": "https://gitpkg.now.sh/LumeWeb/refine/packages/devtools-shared?remix",
+    "@refinedev/react-table": "https://gitpkg.now.sh/LumeWeb/refine/packages/react-table?remix",
     "@refinedev/remix-router": "https://gitpkg.now.sh/LumeWeb/refine/packages/remix?remix",
     "@remix-run/node": "^2.8.0",
     "@remix-run/react": "^2.8.0",

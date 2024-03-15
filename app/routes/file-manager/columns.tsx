@@ -1,6 +1,8 @@
-import type { ColumnDef } from "@tanstack/react-table";
+import { DrawingPinIcon, TrashIcon } from "@radix-ui/react-icons";
+import type { ColumnDef, RowData } from "@tanstack/react-table";
 import { FileIcon, MoreIcon } from "~/components/icons";
 import { Checkbox } from "~/components/ui/checkbox";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -11,9 +13,16 @@ export type File = {
     createdOn: string;
 };
 
+declare module '@tanstack/table-core' {
+  interface TableMeta<TData extends RowData> {
+      hoveredRowId: string,
+  }
+}
+
 export const columns: ColumnDef<File>[] = [
     {
       id: "select",
+      size: 20,
       header: ({ table }) => (
         <Checkbox
           
@@ -55,11 +64,31 @@ export const columns: ColumnDef<File>[] = [
     },
     {
         accessorKey: "createdOn",
+        size: 200,
         header: "Created On",
-        cell: ({ row }) => (
+        cell: ({ row, table }) => (
           <div className="flex items-center justify-between">
             {row.getValue("createdOn")}
-            {row.getIsSelected() && <MoreIcon />}
+            {(row.getIsSelected() || table.options.meta?.hoveredRowId === row.id)  && (
+              <DropdownMenu>
+              <DropdownMenuTrigger>
+                <MoreIcon />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem>
+                    <DrawingPinIcon className="mr-2" />
+                    Ping CID
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem variant="destructive">
+                    <TrashIcon className="mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            )}
           </div>
         )
     }

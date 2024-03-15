@@ -1,10 +1,10 @@
+import { useState } from "react";
+import { BaseRecord } from "@refinedev/core";
+import { useTable } from "@refinedev/react-table";
 import {
   ColumnDef,
   flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getPaginationRowModel,
-} from "@tanstack/react-table"
+} from "@tanstack/react-table";
 
 import {
   Table,
@@ -16,20 +16,23 @@ import {
 } from "./ui/table"
 import { DataTablePagination } from "./table-pagination"
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends BaseRecord = BaseRecord, TValue = unknown> {
   columns: ColumnDef<TData, TValue>[]
-  data: TData[]
 }
 
-export function DataTable<TData, TValue>({
-  columns,
-  data,
+export function DataTable<TData extends BaseRecord, TValue>({
+  columns
 }: DataTableProps<TData, TValue>) {
-  const table = useReactTable({
-    data,
+  const [hoveredRowId, setHoveredRowId] = useState<string>("");
+
+  const table = useTable({
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    meta: {
+      hoveredRowId,
+    },
+    refineCoreProps: {
+      resource: "files"
+    }
   })
 
   return (
@@ -40,7 +43,7 @@ export function DataTable<TData, TValue>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} style={{ width: header.getSize() }}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -59,6 +62,10 @@ export function DataTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                onMouseEnter={() => {
+                  console.log(hoveredRowId, row.id);
+                  setHoveredRowId(row.id)
+                }}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
