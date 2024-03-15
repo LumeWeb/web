@@ -14,6 +14,7 @@ import '@fontsource-variable/manrope';
 import {Refine} from "@refinedev/core";
 import {PortalAuthProvider} from "~/data/auth-provider.js";
 import routerProvider from "@refinedev/remix-router";
+import { defaultProvider } from "./data/file-provider";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -42,6 +43,11 @@ export default function App() {
         <Refine
             authProvider={PortalAuthProvider.create("https://alpha.pinner.xyz")}
             routerProvider={routerProvider}
+            dataProvider={defaultProvider}
+            resources={[
+                { name: 'files' },
+                { name: 'users' }
+            ]}
         >
             <Outlet/>
         </Refine>
