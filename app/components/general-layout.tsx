@@ -14,7 +14,7 @@ import { useUppy } from "./lib/uppy";
 import type { UppyFile } from "@uppy/core";
 import { Progress } from "~/components/ui/progress";
 import { DialogClose } from "@radix-ui/react-dialog";
-import { ChevronDownIcon, TrashIcon } from "@radix-ui/react-icons";
+import { ChevronDownIcon, ExitIcon, TrashIcon } from "@radix-ui/react-icons";
 import {
   ClockIcon,
   DriveIcon,
@@ -25,12 +25,17 @@ import {
   PageIcon,
   ThemeIcon,
 } from "./icons";
-import { DropdownMenu, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger,  DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem } from "./ui/dropdown-menu";
 import { Avatar } from "@radix-ui/react-avatar";
 import { cn } from "~/utils";
+import { useGetIdentity, useLogout } from "@refinedev/core";
+import { Identity } from "~/data/auth-provider";
+
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
   const location = useLocation();
+  const { data: identity } = useGetIdentity<Identity>();
+  const{ mutate: logout } = useLogout()
   return (
     <div className="h-full flex flex-row">
       <header className="p-10 pr-0 flex flex-col w-[240px] h-full scroll-m-0 overflow-hidden">
@@ -95,10 +100,18 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
             <DropdownMenuTrigger>
               <Button className="border rounded-full h-auto p-2 gap-x-2 text-ring font-semibold">
                 <Avatar className="bg-ring h-7 w-7 rounded-full" />
-                whirly10
+                {`${identity?.firstName} ${identity?.lastName}`}
                 <ChevronDownIcon />
               </Button>
             </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={() => logout()}>
+                  <ExitIcon className="mr-2" />
+                  Log Out
+                </DropdownMenuItem>  
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
           </DropdownMenu>
         </div>
 

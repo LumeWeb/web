@@ -1,5 +1,6 @@
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
+import { BaseKey, useGetIdentity, useUpdate, useUpdatePassword } from "@refinedev/core";
 import { useState } from "react";
 import { z } from "zod";
 import { Field } from "~/components/forms";
@@ -19,10 +20,7 @@ import { UsageCard } from "~/components/usage-card";
 import QRImg from "~/images/QR.png";
 
 export default function MyAccount() {
-  const isLogged = true;
-  if (!isLogged) {
-    window.location.href = "/login";
-  }
+  const { data: identity } = useGetIdentity<{ email: string }>();
 
   const [openModal, setModal] = useState({
     changeEmail: false,
@@ -53,7 +51,7 @@ export default function MyAccount() {
         <ManagementCard>
           <ManagementCardTitle>Email Address</ManagementCardTitle>
           <ManagementCardContent className="text-ring font-semibold">
-          bsimpson@springfield.oh.gov.com
+          {identity?.email}
           </ManagementCardContent>
           <ManagementCardFooter>
             <Button className="h-12 gap-x-2" onClick={() => setModal({ ...openModal, changeEmail: true })}>
@@ -154,7 +152,7 @@ export default function MyAccount() {
         setOpen={(value: boolean) =>
           setModal({ ...openModal, changeEmail: value })
         }
-        currentValue="bsimpson@springfield.oh.gov.com"
+        currentValue={identity?.email || ""}
       />
       <ChangePasswordForm
         open={openModal.changePassword}
@@ -176,6 +174,16 @@ const ChangeEmailSchema = z.object({
   email: z.string().email(),
   password: z.string(),
   retypePassword: z.string(),
+})
+.superRefine((data, ctx) => {
+  if (data.password !== data.retypePassword) {
+    return ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["retypePassword"],
+      message: "Passwords do not match",
+    });
+  }
+  return true;
 });
 
 const ChangeEmailForm = ({
@@ -187,6 +195,8 @@ const ChangeEmailForm = ({
   setOpen: (value: boolean) => void;
   currentValue: string;
 }) => {
+  const{ data: identity } = useGetIdentity<{ id: BaseKey }>();
+  const { mutate: updateEmail } = useUpdate();
   const [form, fields] = useForm({
     id: "login",
     constraint: getZodConstraint(ChangeEmailSchema),
@@ -194,6 +204,19 @@ const ChangeEmailForm = ({
       return parseWithZod(formData, { schema: ChangeEmailSchema });
     },
     shouldValidate: "onSubmit",
+    onSubmit(e) {
+      e.preventDefault();
+
+      const data = Object.fromEntries(new FormData(e.currentTarget).entries());
+      console.log(identity);
+      updateEmail({
+        resource: 'users',
+        id: identity?.id || "",
+        values: {
+          email: data.email.toString()
+        }
+      })
+    }
   });
 
   return (
@@ -236,6 +259,16 @@ const ChangePasswordSchema = z.object({
   currentPassword: z.string().email(),
   newPassword: z.string(),
   retypePassword: z.string(),
+})
+.superRefine((data, ctx) => {
+  if (data.newPassword !== data.retypePassword) {
+    return ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["retypePassword"],
+      message: "Passwords do not match",
+    });
+  }
+  return true;
 });
 
 const ChangePasswordForm = ({
@@ -245,6 +278,7 @@ const ChangePasswordForm = ({
   open: boolean;
   setOpen: (value: boolean) => void;
 }) => {
+  const { mutate: updatePassword } = useUpdatePassword<{ password: string }>();
   const [form, fields] = useForm({
     id: "login",
     constraint: getZodConstraint(ChangeEmailSchema),
@@ -252,6 +286,16 @@ const ChangePasswordForm = ({
       return parseWithZod(formData, { schema: ChangePasswordSchema });
     },
     shouldValidate: "onSubmit",
+    onSubmit(e) {
+      e.preventDefault();
+
+      const data = Object.fromEntries(new FormData(e.currentTarget).entries());
+      
+      updatePassword({
+        password: data.newPassword.toString()
+      });
+
+    },
   });
 
   return (
@@ -270,7 +314,7 @@ const ChangePasswordForm = ({
             />
             <Field
               inputProps={{ name: fields.newPassword.name, type: "password" }}
-              labelProps={{ children: "Password" }}
+              labelProps={{ children: "New Password" }}
               errors={fields.newPassword.errors}
             />
             <Field
