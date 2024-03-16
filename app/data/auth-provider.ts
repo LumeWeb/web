@@ -56,7 +56,6 @@ export class PortalAuthProvider implements RequiredAuthProvider {
     }
 
     async login(params: AuthFormRequest): Promise<AuthActionResponse> {
-        const cookies = new Cookies();
         const ret = await this.sdk.account().login({
             email: params.email,
             password: params.password,
@@ -65,7 +64,6 @@ export class PortalAuthProvider implements RequiredAuthProvider {
         let redirectTo: string | undefined;
 
         if (ret) {
-            cookies.set('jwt', this.sdk.account().jwtToken, {path: '/'});
             redirectTo = params.redirectTo;
             if (!redirectTo) {
                 redirectTo = ret ? "/dashboard" : "/login";
@@ -88,17 +86,12 @@ export class PortalAuthProvider implements RequiredAuthProvider {
     }
 
     async check(params?: any): Promise<CheckResponse> {
-        const cookies = new Cookies();
-
-        const jwtCookie = cookies.get('jwt');
-
-        if (jwtCookie) {
-            this.sdk.setAuthToken(jwtCookie);
-        }
+        this.maybeSetupAuth();
 
         const ret = await this.sdk.account().ping();
 
         if (!ret) {
+            const cookies = new Cookies();
             cookies.remove('jwt');
         }
 
@@ -106,6 +99,9 @@ export class PortalAuthProvider implements RequiredAuthProvider {
     }
 
     async onError(error: any): Promise<OnErrorResponse> {
+        const cookies = new Cookies();
+        cookies.remove('jwt');
+        this.sdk.setAuthToken('');
         return {logout: true};
     }
 
@@ -132,6 +128,7 @@ export class PortalAuthProvider implements RequiredAuthProvider {
     }
 
     async getIdentity(params?: Identity): Promise<IdentityResponse> {
+        this.maybeSetupAuth();
         const ret = await this.sdk.account().info();
 
         if (!ret) {
@@ -146,6 +143,14 @@ export class PortalAuthProvider implements RequiredAuthProvider {
             lastName: acct.last_name,
             email: acct.email,
         };
+    }
+
+    maybeSetupAuth(): void {
+        const cookies = new Cookies();
+        const jwtCookie = cookies.get('jwt');
+        if (jwtCookie) {
+            this.sdk.setAuthToken(jwtCookie);
+        }
     }
 
     public static create(apiUrl: string): AuthProvider {
