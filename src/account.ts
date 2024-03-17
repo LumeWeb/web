@@ -25,6 +25,7 @@ import {
   postApiAuthOtpDisable,
   PasswordResetRequest,
   postApiAuthPasswordResetConfirm,
+  postApiAuthLogout,
 } from "./account/generated/index.js";
 import { AxiosResponse } from "axios";
 
@@ -65,11 +66,6 @@ export class AccountApi {
     }
 
     return false;
-  }
-
-  public async logout(): Promise<boolean> {
-    this._jwtToken = undefined;
-    return true;
   }
 
   public async register(registerRequest: RegisterRequest): Promise<boolean> {
@@ -197,6 +193,18 @@ export class AccountApi {
     }
 
     return this.checkSuccessVal(ret);
+  }
+
+  public async logout(): Promise<boolean> {
+    try {
+      await postApiAuthLogout(this.buildOptions());
+    } catch (e) {
+      return false;
+    }
+
+    this._jwtToken = undefined;
+
+    return true;
   }
 
   private checkSuccessBool(ret: AxiosResponse<void>): boolean {
