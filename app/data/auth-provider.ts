@@ -147,7 +147,7 @@ export class PortalAuthProvider implements RequiredAuthProvider {
 
     maybeSetupAuth(): void {
         const cookies = new Cookies();
-        const jwtCookie = cookies.get('jwt');
+        const jwtCookie = cookies.get('auth_token');
         if (jwtCookie) {
             this.sdk.setAuthToken(jwtCookie);
         }
