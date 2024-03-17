@@ -108,8 +108,8 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={() => logout()}>
                   <ExitIcon className="mr-2" />
-                  Log Out
-                </DropdownMenuItem>  
+                  Logout
+                </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
