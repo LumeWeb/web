@@ -12,6 +12,7 @@ import {
   postApiAuthPasswordResetRequest,
   postApiAuthPing,
   RegisterRequest,
+  UploadLimitResponse,
   VerifyEmailRequest,
 } from "./account/generated/index.js";
 
@@ -26,6 +27,7 @@ import {
   PasswordResetRequest,
   postApiAuthPasswordResetConfirm,
   postApiAuthLogout,
+  getApiUploadLimit,
 } from "./account/generated/index.js";
 import { AxiosResponse } from "axios";
 
@@ -205,6 +207,17 @@ export class AccountApi {
     this._jwtToken = undefined;
 
     return true;
+  }
+
+  public async uploadLimit(): Promise<number> {
+    let ret: AxiosResponse<UploadLimitResponse>;
+    try {
+      ret = await getApiUploadLimit(this.buildOptions());
+    } catch (e) {
+      return 0;
+    }
+
+    return this.checkSuccessVal<UploadLimitResponse>(ret) ? ret.data.limit : 0;
   }
 
   private checkSuccessBool(ret: AxiosResponse<void>): boolean {
