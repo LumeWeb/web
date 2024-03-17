@@ -78,10 +78,6 @@ export class PortalAuthProvider implements RequiredAuthProvider {
 
     async logout(params: any): Promise<AuthActionResponse> {
         let ret = await this.sdk.account().logout();
-        if (ret) {
-            const cookies = new Cookies();
-            cookies.remove('jwt');
-        }
         return {success: ret, redirectTo: "/login"};
     }
 
@@ -90,18 +86,11 @@ export class PortalAuthProvider implements RequiredAuthProvider {
 
         const ret = await this.sdk.account().ping();
 
-        if (!ret) {
-            const cookies = new Cookies();
-            cookies.remove('jwt');
-        }
-
         return {authenticated: ret, redirectTo: ret ? undefined : "/login"};
     }
 
     async onError(error: any): Promise<OnErrorResponse> {
         const cookies = new Cookies();
-        cookies.remove('jwt');
-        this.sdk.setAuthToken('');
         return {logout: true};
     }
 
