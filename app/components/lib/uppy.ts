@@ -7,7 +7,8 @@ import {type ChangeEvent, useCallback, useEffect, useMemo, useRef, useState} fro
 import DropTarget, {type DropTargetOptions} from "./uppy-dropzone"
 import {useSdk} from "~/components/lib/sdk-context.js";
 import UppyFileUpload from "~/components/lib/uppy-file-upload.js";
-import {Sdk} from "@lumeweb/portal-sdk";
+import {PROTOCOL_S5, Sdk} from "@lumeweb/portal-sdk";
+import {S5Client} from "@lumeweb/s5-js";
 
 const LISTENING_EVENTS = [
   "upload",
@@ -92,6 +93,18 @@ export function useUppy({
   useEffect(() => {
     if (!targetRef) return
 
+      const tusPreprocessor = async (fileIDs: string[]) => {
+        for(const fileID of fileIDs) {
+            const file = uppyInstance.current?.getFile(fileID) as UppyFile
+            // @ts-ignore
+            if (file.uploader === "tus") {
+                uppyInstance.current?.setFileState(fileID, {
+                    tus: await sdk.protocols!().get<S5Client>(PROTOCOL_S5).getSdk().getTusOptions(file.data as File)
+                })
+            }
+        }
+      }
+
     const uppy = new Uppy({
         logger: debugLogger,
         onBeforeUpload: (files) => {
@@ -133,6 +146,7 @@ export function useUppy({
 
           if (useTus) {
               uppy.use(Tus, { endpoint: endpoint, limit: 6 })
+              uppy.addPreProcessor(tusPreprocessor)
           }
 
         // We clear the input after a file is selected, because otherwise
@@ -146,6 +160,9 @@ export function useUppy({
         event.target.value = null
       }
     })
+
+
+
     uppy.on("complete", (result) => {
       if (result.failed.length === 0) {
         console.log("Upload successful üòÄ")
