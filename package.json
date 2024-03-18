@@ -27,7 +27,7 @@
     "readme": "ERROR: No README data found!",
     "_id": "@lumeweb/portal-sdk@0.0.0",
     "dependencies": {
-        "@lumeweb/s5-js": "^0.0.0-20240318183028",
+        "@lumeweb/s5-js": "0.0.0-20240318220410",
         "axios": "^1.6.7",
         "memize": "^2.1.0",
         "orval": "^6.25.0",

@@ -9,7 +9,7 @@
             "version": "0.0.0",
             "hasInstallScript": true,
             "dependencies": {
-                "@lumeweb/s5-js": "^0.0.0-20240318183028",
+                "@lumeweb/s5-js": "0.0.0-20240318220410",
                 "axios": "^1.6.7",
                 "memize": "^2.1.0",
                 "orval": "^6.25.0",
@@ -2873,9 +2873,9 @@
             }
         },
         "node_modules/@lumeweb/libs5": {
-            "version": "0.1.0-develop.82",
-            "resolved": "https://registry.npmjs.org/@lumeweb/libs5/-/libs5-0.1.0-develop.82.tgz",
-            "integrity": "sha512-ahcC1P2Uqd7kaUk1COvEU/bmPyaBeO0uq5ueNMoLc2E+OpoKkrNPasH+XQb2XEKcMNf67Cx8rHObH7eyHcUCuQ==",
+            "version": "0.0.0-20240318220243",
+            "resolved": "https://registry.npmjs.org/@lumeweb/libs5/-/libs5-0.0.0-20240318220243.tgz",
+            "integrity": "sha512-FddOjGZieiUExWIt3KJzNR6s2XzXKAVHPw4AJMqiYoXvVFdkmuaGvUp/gYzcoCSkD8Lo5XKm5bpOo8L632zfhg==",
             "dependencies": {
                 "@noble/curves": "^1.1.0",
                 "@noble/hashes": "^1.3.1",
@@ -2897,12 +2897,12 @@
             }
         },
         "node_modules/@lumeweb/s5-js": {
-            "version": "0.0.0-20240318183028",
-            "resolved": "https://registry.npmjs.org/@lumeweb/s5-js/-/s5-js-0.0.0-20240318183028.tgz",
-            "integrity": "sha512-mOGuVELytVmONrShaTsC9i4mb77p3K9V2/imu+RnROanHQC1As0vDMfTul3jCRg5C9T+prLP964Ag4aVPisawA==",
+            "version": "0.0.0-20240318220410",
+            "resolved": "https://registry.npmjs.org/@lumeweb/s5-js/-/s5-js-0.0.0-20240318220410.tgz",
+            "integrity": "sha512-cKmtgH75OdMBCQH7QV7O6VJeCSFvatiJg5UrnxBshddZeGnmc59o1+RUCOx36aApF8rFE78PcuyqEU8EEunPrg==",
             "hasInstallScript": true,
             "dependencies": {
-                "@lumeweb/libs5": "^0.1.0-develop.82",
+                "@lumeweb/libs5": "0.0.0-20240318220243",
                 "@noble/hashes": "^1.3.2",
                 "axios": "^1.6.2",
                 "isomorphic-ws": "^5.0.0",
