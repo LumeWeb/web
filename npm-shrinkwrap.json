@@ -9,7 +9,7 @@
             "version": "0.0.0",
             "hasInstallScript": true,
             "dependencies": {
-                "@lumeweb/s5-js": "^0.0.0-20240316160642",
+                "@lumeweb/s5-js": "^0.0.0-20240318132139",
                 "axios": "^1.6.7",
                 "memize": "^2.1.0",
                 "orval": "^6.25.0",
@@ -2897,9 +2897,9 @@
             }
         },
         "node_modules/@lumeweb/s5-js": {
-            "version": "0.0.0-20240316160642",
-            "resolved": "https://registry.npmjs.org/@lumeweb/s5-js/-/s5-js-0.0.0-20240316160642.tgz",
-            "integrity": "sha512-bpsut5rt6GZ+jfG7ycydV4F/gaUBWsZRhJP8J/OwOAh/QV9Vtpq2edYDaUEbv0EXv3hPCB/s5ZFn9ohNC9fKYQ==",
+            "version": "0.0.0-20240318132139",
+            "resolved": "https://registry.npmjs.org/@lumeweb/s5-js/-/s5-js-0.0.0-20240318132139.tgz",
+            "integrity": "sha512-4XDMlbxxGzgDwipPP1+lVlbPU1uD/0PRK/DG1EWGQ6lN7OIT2vHmCEW0h2WPWQhfG27CYy/4xYYku6F0KxlLFw==",
             "dependencies": {
                 "@lumeweb/libs5": "^0.1.0-develop.82",
                 "@noble/hashes": "^1.3.2",
@@ -2907,6 +2907,7 @@
                 "isomorphic-ws": "^5.0.0",
                 "mime": "^4.0.1",
                 "multiformats": "^13.0.0",
+                "p-defer": "^4.0.0",
                 "tus-js-client": "^4.0.0",
                 "url-join": "^5.0.0"
             }
