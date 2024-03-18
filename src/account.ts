@@ -183,7 +183,13 @@ export class AccountApi {
       return false;
     }
 
-    return this.checkSuccessVal(ret) && ret.data.ping == "pong";
+    const success = this.checkSuccessVal(ret) && ret.data.ping == "pong";
+
+    if (success) {
+      this._jwtToken = ret.data.token;
+    }
+
+    return success;
   }
 
   public async info(): Promise<boolean | AccountInfoResponse> {
