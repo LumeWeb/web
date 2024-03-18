@@ -8,6 +8,7 @@
     "url": "gitea@git.lumeweb.com:LumeWeb/libs5.git"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "@lumeweb/node-library-preset": "^0.2.7",
     "presetter": "*"
   },
