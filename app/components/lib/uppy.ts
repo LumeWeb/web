@@ -117,6 +117,24 @@ export function useUppy({
           uppyInstance.current?.addFiles(files)
         }
 
+        uppy.iteratePlugins((plugin) => {
+            uppy.removePlugin(plugin);
+        });
+
+          uppy.use(UppyFileUpload, { sdk: sdk as Sdk })
+
+          let useTus = false;
+
+          uppyInstance.current?.getFiles().forEach((file) => {
+              if (file.size > uploadLimit) {
+                  useTus = true;
+              }
+          })
+
+          if (useTus) {
+              uppy.use(Tus, { endpoint: endpoint, limit: 6 })
+          }
+
         // We clear the input after a file is selected, because otherwise
         // change event is not fired in Chrome and Safari when a file
         // with the same name is selected.
@@ -128,22 +146,6 @@ export function useUppy({
         event.target.value = null
       }
     })
-
-
-      uppy.use(UppyFileUpload, { sdk: sdk as Sdk })
-
-      let useTus = false;
-
-      uppyInstance.current?.getFiles().forEach((file) => {
-        if (file.size > uploadLimit) {
-          useTus = true;
-        }
-      })
-
-        if (useTus) {
-            uppy.use(Tus, { endpoint: endpoint, limit: 6 })
-        }
-
     uppy.on("complete", (result) => {
       if (result.failed.length === 0) {
         console.log("Upload successful üòÄ")
