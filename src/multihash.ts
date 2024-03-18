@@ -22,16 +22,23 @@ export class Multihash {
     while (hash.length % 4 !== 0) {
       hash += "=";
     }
+    if (hash[0] !== "u") {
+      hash = "u" + hash;
+    }
     const bytes = base64url.decode(hash);
     return new Multihash(new Uint8Array(bytes));
   }
 
   toBase64Url(): string {
-    return base64url.encode(this.fullBytes);
+    return base64url.encode(this.fullBytes).substring(1);
   }
 
   toBase32(): string {
-    return base32.encode(this.fullBytes).replace(/=/g, "").toLowerCase();
+    return base32
+      .encode(this.fullBytes)
+      .replace(/=/g, "")
+      .toLowerCase()
+      .substring(1);
   }
 
   toString(): string {
