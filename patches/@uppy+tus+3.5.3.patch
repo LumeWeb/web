@@ -1,0 +1,13 @@
+diff --git a/node_modules/@uppy/tus/lib/index.js b/node_modules/@uppy/tus/lib/index.js
+index 1e0a1bb..ba95bb5 100644
+--- a/node_modules/@uppy/tus/lib/index.js
++++ b/node_modules/@uppy/tus/lib/index.js
+@@ -506,7 +506,7 @@ function _getCompanionClientArgs2(file) {
+ }
+ async function _uploadFiles2(files) {
+   const filesFiltered = filterNonFailedFiles(files);
+-  const filesToEmit = filterFilesToEmitUploadStarted(filesFiltered);
++  const filesToEmit = filterFilesToEmitUploadStarted(filesFiltered).filter(file => file?.uploader == 'tus');
+   this.uppy.emit('upload-start', filesToEmit);
+   await Promise.allSettled(filesFiltered.map(file => {
+     if (file.isRemote) {
