@@ -50,6 +50,7 @@ export default function App() {
                 { name: 'files' },
                 { name: 'users' }
             ]}
+            options={{disableTelemetry: true}}
         >
             <SdkContextProvider sdk={(auth as PortalAuthProvider).sdk}>
                 <Outlet/>
