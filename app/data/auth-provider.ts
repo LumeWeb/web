@@ -151,7 +151,7 @@ export class PortalAuthProvider implements RequiredAuthProvider {
     }
 }
 
-interface RequiredAuthProvider extends AuthProvider {
+export interface RequiredAuthProvider extends AuthProvider {
     login: AuthProvider['login'];
     logout: AuthProvider['logout'];
     check: AuthProvider['check'];
