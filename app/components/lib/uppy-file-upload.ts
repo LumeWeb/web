@@ -14,6 +14,7 @@ export default class UppyFileUpload extends BasePlugin {
     constructor(uppy: Uppy, opts?: UppyFileUploadOptions) {
         super(uppy, opts);
         this.id = opts?.id || 'file-upload';
+        this.type = 'uploader';
         this._sdk = opts?.sdk as Sdk;
     }
 
