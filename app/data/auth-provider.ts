@@ -76,6 +76,7 @@ export class PortalAuthProvider implements RequiredAuthProvider {
             if (!redirectTo) {
                 redirectTo = ret ? "/dashboard" : "/login";
             }
+            this._sdk.setAuthToken(this._sdk.account().jwtToken);
         }
 
         return {
