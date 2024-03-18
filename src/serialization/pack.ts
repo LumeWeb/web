@@ -1,12 +1,12 @@
 import NodeId from "../nodeId.js";
-import CID from "#cid.js";
-import { MediaFormat } from "#serialization/metadata/media.js";
+import CID from "../cid.js";
+import { MediaFormat } from "./metadata/media.js";
 import {
   DirectoryReference,
   FileReference,
   FileVersion,
   FileVersionThumbnail,
-} from "#serialization/metadata/directory.js";
+} from "./metadata/directory.js";
 import { Buffer } from "buffer";
 
 export default class Packer {
