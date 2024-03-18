@@ -98,8 +98,13 @@ export function useUppy({
             const file = uppyInstance.current?.getFile(fileID) as UppyFile
             // @ts-ignore
             if (file.uploader === "tus") {
+                const options = await sdk.protocols!().get<S5Client>(PROTOCOL_S5).getSdk().getTusOptions(file.data as File)
                 uppyInstance.current?.setFileState(fileID, {
-                    tus: await sdk.protocols!().get<S5Client>(PROTOCOL_S5).getSdk().getTusOptions(file.data as File)
+                    tus: options,
+                    meta: {
+                        ...options.metadata,
+                        ...file.meta,
+                    }
                 })
             }
         }
