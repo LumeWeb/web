@@ -8,7 +8,6 @@ import type {
     // @ts-ignore
 } from "@refinedev/core/dist/interfaces/bindings/auth"
 import {Sdk} from "@lumeweb/portal-sdk";
-import Cookies from 'universal-cookie';
 import type {AccountInfoResponse} from "@lumeweb/portal-sdk";
 
 export type AuthFormRequest = {
@@ -91,15 +90,16 @@ export class PortalAuthProvider implements RequiredAuthProvider {
     }
 
     async check(params?: any): Promise<CheckResponse> {
-        this.maybeSetupAuth();
-
         const ret = await this._sdk.account().ping();
+
+        if(ret){
+            this.maybeSetupAuth();
+        }
 
         return {authenticated: ret, redirectTo: ret ? undefined : "/login"};
     }
 
     async onError(error: any): Promise<OnErrorResponse> {
-        const cookies = new Cookies();
         return {logout: true};
     }
 
@@ -144,10 +144,9 @@ export class PortalAuthProvider implements RequiredAuthProvider {
     }
 
     maybeSetupAuth(): void {
-        const cookies = new Cookies();
-        const jwtCookie = cookies.get('auth_token');
-        if (jwtCookie) {
-            this._sdk.setAuthToken(jwtCookie);
+       const jwt = this._sdk.account().jwtToken
+        if (jwt) {
+            this._sdk.setAuthToken(jwt);
         }
     }
 }
