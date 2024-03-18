@@ -150,7 +150,7 @@ export function useUppy({
           })
 
           if (useTus) {
-              uppy.use(Tus, { endpoint: endpoint, limit: 6 })
+              uppy.use(Tus, { endpoint: endpoint, limit: 6, parallelUploads: 10 })
               uppy.addPreProcessor(tusPreprocessor)
           }
 
