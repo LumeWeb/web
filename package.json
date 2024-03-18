@@ -8,7 +8,9 @@
     "dev": "remix vite:dev",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "preview": "vite preview",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "patch-package": "patch-package",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@conform-to/react": "^1.0.2",
