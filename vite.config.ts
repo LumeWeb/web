@@ -12,6 +12,9 @@ export default defineConfig({
         tsconfigPaths(),
         nodePolyfills({protocolImports: false}),
     ],
+    build: {
+        minify: false
+    },
     server: {
         fs: {
             // Restrict files that could be served by Vite's dev server.  Accessing
