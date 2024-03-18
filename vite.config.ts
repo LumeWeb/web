@@ -10,7 +10,7 @@ export default defineConfig({
             ignoredRouteFiles: ["**/*.css"]
         }),
         tsconfigPaths(),
-        nodePolyfills(),
+        nodePolyfills({protocolImports: false}),
     ],
     server: {
         fs: {
