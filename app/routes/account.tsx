@@ -1,12 +1,23 @@
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
-import { BaseKey, useGetIdentity, useUpdate, useUpdatePassword } from "@refinedev/core";
+import {
+  BaseKey,
+  useGetIdentity,
+  useUpdate,
+  useUpdatePassword,
+} from "@refinedev/core";
 import { useState } from "react";
 import { z } from "zod";
 import { Field } from "~/components/forms";
 import { GeneralLayout } from "~/components/general-layout";
 import { AddIcon, CloudIcon, CrownIcon } from "~/components/icons";
-import { ManagementCard, ManagementCardAvatar, ManagementCardContent, ManagementCardFooter, ManagementCardTitle } from "~/components/management-card";
+import {
+  ManagementCard,
+  ManagementCardAvatar,
+  ManagementCardContent,
+  ManagementCardFooter,
+  ManagementCardTitle,
+} from "~/components/management-card";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -51,10 +62,12 @@ export default function MyAccount() {
         <ManagementCard>
           <ManagementCardTitle>Email Address</ManagementCardTitle>
           <ManagementCardContent className="text-ring font-semibold">
-          {identity?.email}
+            {identity?.email}
           </ManagementCardContent>
           <ManagementCardFooter>
-            <Button className="h-12 gap-x-2" onClick={() => setModal({ ...openModal, changeEmail: true })}>
+            <Button
+              className="h-12 gap-x-2"
+              onClick={() => setModal({ ...openModal, changeEmail: true })}>
               <AddIcon />
               Change Email Address
             </Button>
@@ -63,8 +76,8 @@ export default function MyAccount() {
         <ManagementCard>
           <ManagementCardTitle>Account Type</ManagementCardTitle>
           <ManagementCardContent className="text-ring font-semibold flex gap-x-2">
-          Lite Premium Account
-          <CrownIcon />
+            Lite Premium Account
+            <CrownIcon />
           </ManagementCardContent>
           <ManagementCardFooter>
             <Button className="h-12 gap-x-2">
@@ -82,7 +95,9 @@ export default function MyAccount() {
             <PasswordDots className="mt-6" />
           </ManagementCardContent>
           <ManagementCardFooter>
-            <Button className="h-12 gap-x-2" onClick={() => setModal({ ...openModal, changePassword: true })}>
+            <Button
+              className="h-12 gap-x-2"
+              onClick={() => setModal({ ...openModal, changePassword: true })}>
               <AddIcon />
               Change Password
             </Button>
@@ -91,24 +106,14 @@ export default function MyAccount() {
         <ManagementCard>
           <ManagementCardTitle>Two-Factor Authentication</ManagementCardTitle>
           <ManagementCardContent>
-          Improve security by enabling 2FA.
+            Improve security by enabling 2FA.
           </ManagementCardContent>
           <ManagementCardFooter>
-            <Button className="h-12 gap-x-2" onClick={() => setModal({ ...openModal, setupTwoFactor: true })}>
+            <Button
+              className="h-12 gap-x-2"
+              onClick={() => setModal({ ...openModal, setupTwoFactor: true })}>
               <AddIcon />
               Enable Two-Factor Authorization
-            </Button>
-          </ManagementCardFooter>
-        </ManagementCard>
-        <ManagementCard>
-          <ManagementCardTitle>Backup Key</ManagementCardTitle>
-          <ManagementCardContent>
-          Never share this code with anyone.
-          </ManagementCardContent>
-          <ManagementCardFooter>
-            <Button className="h-12 gap-x-2">
-              <AddIcon />
-              Export Backup Key
             </Button>
           </ManagementCardFooter>
         </ManagementCard>
@@ -117,9 +122,11 @@ export default function MyAccount() {
       <div className="grid grid-cols-3 gap-x-8">
         <ManagementCard variant="accent">
           <ManagementCardTitle>Invite a Friend</ManagementCardTitle>
-          <ManagementCardContent>Get 1 GB per friend invited for free (max 5 GB).</ManagementCardContent>
+          <ManagementCardContent>
+            Get 1 GB per friend invited for free (max 5 GB).
+          </ManagementCardContent>
           <ManagementCardFooter>
-          <Button variant="accent" className="h-12 gap-x-2">
+            <Button variant="accent" className="h-12 gap-x-2">
               <AddIcon />
               Send Invitation
             </Button>
@@ -127,7 +134,9 @@ export default function MyAccount() {
         </ManagementCard>
         <ManagementCard>
           <ManagementCardTitle>Read our Resources</ManagementCardTitle>
-          <ManagementCardContent>Navigate helpful articles or get assistance.</ManagementCardContent>
+          <ManagementCardContent>
+            Navigate helpful articles or get assistance.
+          </ManagementCardContent>
           <ManagementCardFooter>
             <Button className="h-12 gap-x-2">
               <AddIcon />
@@ -137,7 +146,9 @@ export default function MyAccount() {
         </ManagementCard>
         <ManagementCard>
           <ManagementCardTitle>Delete Account</ManagementCardTitle>
-          <ManagementCardContent>Once initiated, this action cannot be undone.</ManagementCardContent>
+          <ManagementCardContent>
+            Once initiated, this action cannot be undone.
+          </ManagementCardContent>
           <ManagementCardFooter>
             <Button className="h-12 gap-x-2" variant="destructive">
               <AddIcon />
@@ -170,21 +181,22 @@ export default function MyAccount() {
   );
 }
 
-const ChangeEmailSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
-  retypePassword: z.string(),
-})
-.superRefine((data, ctx) => {
-  if (data.password !== data.retypePassword) {
-    return ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["retypePassword"],
-      message: "Passwords do not match",
-    });
-  }
-  return true;
-});
+const ChangeEmailSchema = z
+  .object({
+    email: z.string().email(),
+    password: z.string(),
+    retypePassword: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.password !== data.retypePassword) {
+      return ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["retypePassword"],
+        message: "Passwords do not match",
+      });
+    }
+    return true;
+  });
 
 const ChangeEmailForm = ({
   open,
@@ -195,7 +207,7 @@ const ChangeEmailForm = ({
   setOpen: (value: boolean) => void;
   currentValue: string;
 }) => {
-  const{ data: identity } = useGetIdentity<{ id: BaseKey }>();
+  const { data: identity } = useGetIdentity<{ id: BaseKey }>();
   const { mutate: updateEmail } = useUpdate();
   const [form, fields] = useForm({
     id: "login",
@@ -210,13 +222,13 @@ const ChangeEmailForm = ({
       const data = Object.fromEntries(new FormData(e.currentTarget).entries());
       console.log(identity);
       updateEmail({
-        resource: 'users',
+        resource: "users",
         id: identity?.id || "",
         values: {
-          email: data.email.toString()
-        }
-      })
-    }
+          email: data.email.toString(),
+        },
+      });
+    },
   });
 
   return (
@@ -255,21 +267,22 @@ const ChangeEmailForm = ({
   );
 };
 
-const ChangePasswordSchema = z.object({
-  currentPassword: z.string().email(),
-  newPassword: z.string(),
-  retypePassword: z.string(),
-})
-.superRefine((data, ctx) => {
-  if (data.newPassword !== data.retypePassword) {
-    return ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["retypePassword"],
-      message: "Passwords do not match",
-    });
-  }
-  return true;
-});
+const ChangePasswordSchema = z
+  .object({
+    currentPassword: z.string().email(),
+    newPassword: z.string(),
+    retypePassword: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.newPassword !== data.retypePassword) {
+      return ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["retypePassword"],
+        message: "Passwords do not match",
+      });
+    }
+    return true;
+  });
 
 const ChangePasswordForm = ({
   open,
@@ -290,11 +303,10 @@ const ChangePasswordForm = ({
       e.preventDefault();
 
       const data = Object.fromEntries(new FormData(e.currentTarget).entries());
-      
-      updatePassword({
-        password: data.newPassword.toString()
-      });
 
+      updatePassword({
+        password: data.newPassword.toString(),
+      });
     },
   });
 
@@ -390,6 +402,7 @@ const SetupTwoFactorDialog = ({
 const PasswordDots = ({ className }: { className?: string }) => {
   return (
     <svg
+      aria-hidden="true"
       width="219"
       height="7"
       viewBox="0 0 219 7"
