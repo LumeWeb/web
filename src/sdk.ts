@@ -33,9 +33,8 @@ export class Sdk {
   public protocols(): Registry {
     if (!this.registry) {
       this.registry = new Registry(this);
+      registerDefaults(this.registry!);
     }
-
-    registerDefaults(this.registry!);
 
     return this.registry!;
   }
