@@ -1,5 +1,5 @@
-import { Sdk } from "src/sdk.js";
-import { Protocol } from "src/protocol/impl/protocol.js";
+import { Sdk } from "../sdk";
+import { Protocol } from "./impl/protocol";
 
 export class Registry {
   private store: Map<string, Protocol<any>>;
