@@ -19,7 +19,7 @@ export default class UppyFileUpload extends BasePlugin {
     }
 
     install() {
-        this.uppy.addUploader(this.handleUpload);
+        this.uppy.addUploader(this.handleUpload.bind(this));
     }
 
     private async handleUpload(fileIDs: string[]) {
