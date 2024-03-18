@@ -14,7 +14,7 @@
     "@conform-to/react": "^1.0.2",
     "@conform-to/zod": "^1.0.2",
     "@fontsource-variable/manrope": "^5.0.19",
-    "@lumeweb/portal-sdk": "0.0.0-20240314110748",
+    "@lumeweb/portal-sdk": "0.0.0-20240318183202",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -40,10 +40,10 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "react": "^18.2.0",
-    "react-cookie": "^7.1.0",
     "react-dom": "^18.2.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
+    "universal-cookie": "^7.1.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -62,6 +62,7 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5.1.6",
     "vite": "^5.1.0",
+    "vite-plugin-node-polyfills": "^0.21.0",
     "vite-tsconfig-paths": "^4.2.1"
   },
   "engines": {

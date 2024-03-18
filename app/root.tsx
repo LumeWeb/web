@@ -15,6 +15,7 @@ import {Refine} from "@refinedev/core";
 import {PortalAuthProvider} from "~/data/auth-provider.js";
 import routerProvider from "@refinedev/remix-router";
 import { defaultProvider } from "./data/file-provider";
+import {SdkContextProvider} from "~/components/lib/sdk-context.js";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -39,9 +40,10 @@ export function Layout({children}: { children: React.ReactNode }) {
 }
 
 export default function App() {
+    const auth = PortalAuthProvider.create("https://alpha.pinner.xyz")
     return (
         <Refine
-            authProvider={PortalAuthProvider.create("https://alpha.pinner.xyz")}
+            authProvider={auth}
             routerProvider={routerProvider}
             dataProvider={defaultProvider}
             resources={[
@@ -49,7 +51,9 @@ export default function App() {
                 { name: 'users' }
             ]}
         >
-            <Outlet/>
+            <SdkContextProvider sdk={(auth as PortalAuthProvider).sdk}>
+                <Outlet/>
+            </SdkContextProvider>
         </Refine>
     );
 }

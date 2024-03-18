@@ -33,10 +33,8 @@ export type Identity = {
 }
 
 export class PortalAuthProvider implements RequiredAuthProvider {
-    private sdk: Sdk;
-
     constructor(apiUrl: string) {
-        this.sdk = Sdk.create(apiUrl);
+        this._sdk = Sdk.create(apiUrl);
 
         const methods: Array<keyof AuthProvider> = [
             'login',
@@ -55,9 +53,18 @@ export class PortalAuthProvider implements RequiredAuthProvider {
         });
     }
 
+    private _sdk: Sdk;
+
+    get sdk(): Sdk {
+        return this._sdk;
+    }
+
+    public static create(apiUrl: string): AuthProvider {
+        return new PortalAuthProvider(apiUrl);
+    }
+
     async login(params: AuthFormRequest): Promise<AuthActionResponse> {
-        const cookies = new Cookies();
-        const ret = await this.sdk.account().login({
+        const ret = await this._sdk.account().login({
             email: params.email,
             password: params.password,
         })
@@ -65,11 +72,11 @@ export class PortalAuthProvider implements RequiredAuthProvider {
         let redirectTo: string | undefined;
 
         if (ret) {
-            cookies.set('jwt', this.sdk.account().jwtToken, {path: '/'});
             redirectTo = params.redirectTo;
             if (!redirectTo) {
                 redirectTo = ret ? "/dashboard" : "/login";
             }
+            this._sdk.setAuthToken(this._sdk.account().jwtToken);
         }
 
         return {
@@ -79,38 +86,25 @@ export class PortalAuthProvider implements RequiredAuthProvider {
     }
 
     async logout(params: any): Promise<AuthActionResponse> {
-        let ret = await this.sdk.account().logout();
-        if (ret) {
-            const cookies = new Cookies();
-            cookies.remove('jwt');
-        }
+        let ret = await this._sdk.account().logout();
         return {success: ret, redirectTo: "/login"};
     }
 
     async check(params?: any): Promise<CheckResponse> {
-        const cookies = new Cookies();
+        this.maybeSetupAuth();
 
-        const jwtCookie = cookies.get('jwt');
-
-        if (jwtCookie) {
-            this.sdk.setAuthToken(jwtCookie);
-        }
-
-        const ret = await this.sdk.account().ping();
-
-        if (!ret) {
-            cookies.remove('jwt');
-        }
+        const ret = await this._sdk.account().ping();
 
         return {authenticated: ret, redirectTo: ret ? undefined : "/login"};
     }
 
     async onError(error: any): Promise<OnErrorResponse> {
+        const cookies = new Cookies();
         return {logout: true};
     }
 
     async register(params: RegisterFormRequest): Promise<AuthActionResponse> {
-        const ret = await this.sdk.account().register({
+        const ret = await this._sdk.account().register({
             email: params.email,
             password: params.password,
             first_name: params.firstName,
@@ -132,7 +126,8 @@ export class PortalAuthProvider implements RequiredAuthProvider {
     }
 
     async getIdentity(params?: Identity): Promise<IdentityResponse> {
-        const ret = await this.sdk.account().info();
+        this.maybeSetupAuth();
+        const ret = await this._sdk.account().info();
 
         if (!ret) {
             return {identity: null};
@@ -148,12 +143,16 @@ export class PortalAuthProvider implements RequiredAuthProvider {
         };
     }
 
-    public static create(apiUrl: string): AuthProvider {
-        return new PortalAuthProvider(apiUrl);
+    maybeSetupAuth(): void {
+        const cookies = new Cookies();
+        const jwtCookie = cookies.get('auth_token');
+        if (jwtCookie) {
+            this._sdk.setAuthToken(jwtCookie);
+        }
     }
 }
 
-interface RequiredAuthProvider extends AuthProvider {
+export interface RequiredAuthProvider extends AuthProvider {
     login: AuthProvider['login'];
     logout: AuthProvider['logout'];
     check: AuthProvider['check'];
