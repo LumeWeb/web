@@ -8,7 +8,7 @@ import DropTarget, {type DropTargetOptions} from "./uppy-dropzone"
 import {useSdk} from "~/components/lib/sdk-context.js";
 import UppyFileUpload from "~/components/lib/uppy-file-upload.js";
 import {PROTOCOL_S5, Sdk} from "@lumeweb/portal-sdk";
-import {S5Client} from "@lumeweb/s5-js";
+import {S5Client, HashProgressEvent} from "@lumeweb/s5-js";
 
 const LISTENING_EVENTS = [
   "upload",
@@ -98,7 +98,18 @@ export function useUppy({
             const file = uppyInstance.current?.getFile(fileID) as UppyFile
             // @ts-ignore
             if (file.uploader === "tus") {
-                const options = await sdk.protocols!().get<S5Client>(PROTOCOL_S5).getSdk().getTusOptions(file.data as File)
+                const hashProgressCb = (event: HashProgressEvent) => {
+                    uppyInstance.current?.emit("preprocess-progress", file, {
+                        uploadStarted: false,
+                        bytesUploaded: 0,
+                        preprocess: {
+                            mode: "determinate",
+                            message: "Hashing file...",
+                            value: Math.round((event.total / event.total) * 100)
+                        }
+                    })
+                }
+                const options = await sdk.protocols!().get<S5Client>(PROTOCOL_S5).getSdk().getTusOptions(file.data as File,  {}, {onHashProgress: hashProgressCb})
                 uppyInstance.current?.setFileState(fileID, {
                     tus: options,
                     meta: {
