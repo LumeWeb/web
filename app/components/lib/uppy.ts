@@ -1,17 +1,13 @@
-import Uppy, { type State, debugLogger } from "@uppy/core"
+import Uppy, {debugLogger, type State, UppyFile} from "@uppy/core"
 
 import Tus from "@uppy/tus"
 import toArray from "@uppy/utils/lib/toArray"
 
-import {
-  type ChangeEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from "react"
-import DropTarget, { type DropTargetOptions } from "./uppy-dropzone"
+import {type ChangeEvent, useCallback, useEffect, useMemo, useRef, useState} from "react"
+import DropTarget, {type DropTargetOptions} from "./uppy-dropzone"
+import {useSdk} from "~/components/lib/sdk-context.js";
+import UppyFileUpload from "~/components/lib/uppy-file-upload.js";
+import {Sdk} from "@lumeweb/portal-sdk";
 
 const LISTENING_EVENTS = [
   "upload",
@@ -23,12 +19,26 @@ const LISTENING_EVENTS = [
 ] as const
 
 export function useUppy({
-  uploader,
   endpoint
 }: {
-  uploader: "tus"
   endpoint: string
 }) {
+    const sdk = useSdk()
+
+    const [uploadLimit, setUploadLimit] = useState<number>(0)
+
+    useEffect(() => {
+        async function getUploadLimit() {
+            try {
+                const limit = await sdk.account!().uploadLimit();
+                setUploadLimit(limit);
+            } catch (err) {
+                console.log('Error occured while fetching upload limit', err);
+            }
+        }
+        getUploadLimit();
+    }, []);
+
   const inputRef = useRef<HTMLInputElement>(null)
   const [targetRef, _setTargetRef] = useState<HTMLElement | null>(null)
   const uppyInstance = useRef<Uppy>()
@@ -82,7 +92,17 @@ export function useUppy({
   useEffect(() => {
     if (!targetRef) return
 
-    const uppy = new Uppy({ logger: debugLogger }).use(DropTarget, {
+    const uppy = new Uppy({
+        logger: debugLogger,
+        onBeforeUpload: (files) => {
+            for (const file of Object.entries(files)) {
+                // @ts-ignore
+                file[1].uploader = file[1].size > uploadLimit ? "tus" : "file";
+            }
+
+            return true;
+        },
+    }).use(DropTarget, {
       target: targetRef
     } as DropTargetOptions)
 
@@ -109,12 +129,20 @@ export function useUppy({
       }
     })
 
-    switch (uploader) {
-      case "tus":
-        uppy.use(Tus, { endpoint: endpoint, limit: 6 })
-        break
-      default:
-    }
+
+      uppy.use(UppyFileUpload, { sdk: sdk as Sdk })
+
+      let useTus = false;
+
+      uppyInstance.current?.getFiles().forEach((file) => {
+        if (file.size > uploadLimit) {
+          useTus = true;
+        }
+      })
+
+        if (useTus) {
+            uppy.use(Tus, { endpoint: endpoint, limit: 6 })
+        }
 
     uppy.on("complete", (result) => {
       if (result.failed.length === 0) {
@@ -148,7 +176,7 @@ export function useUppy({
       })
     }
     setState("idle")
-  }, [targetRef, endpoint, uploader])
+  }, [targetRef, endpoint, uploadLimit])
 
   useEffect(() => {
     return () => {
