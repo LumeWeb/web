@@ -20,7 +20,7 @@ export const accountProvider: SdkProvider = {
         params: UpdateParams<AccountParams>,
     ): Promise<UpdateResponse<AccountData>> {
         if (params.variables.email && params.variables.password) {
-            const ret = accountProvider.sdk?.account().updateEmail(params.variables.email, params.variables.password);
+            const ret = await accountProvider.sdk?.account().updateEmail(params.variables.email, params.variables.password);
 
             if (ret) {
                 if (ret instanceof Error) {
