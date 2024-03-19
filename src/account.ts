@@ -9,7 +9,7 @@ import {
   OTPVerifyRequest,
   PasswordResetVerifyRequest,
   PingResponse,
-  postApiAuthPasswordResetRequest,
+  postApiAccountPasswordResetRequest,
   postApiAuthPing,
   RegisterRequest,
   UploadLimitResponse,
@@ -154,7 +154,7 @@ export class AccountApi {
   ): Promise<boolean> {
     let ret: AxiosResponse<void>;
     try {
-      ret = await postApiAuthPasswordResetRequest(
+      ret = await postApiAccountPasswordResetRequest(
         passwordResetRequest,
         this.buildOptions(),
       );
