@@ -1,4 +1,4 @@
-import type {AuthProvider} from "@refinedev/core"
+import type {AuthProvider, UpdatePasswordFormTypes} from "@refinedev/core"
 
 import type {
     AuthActionResponse,
@@ -8,7 +8,6 @@ import type {
     // @ts-ignore
 } from "@refinedev/core/dist/interfaces/bindings/auth"
 import {Sdk} from "@lumeweb/portal-sdk";
-import Cookies from 'universal-cookie';
 import type {AccountInfoResponse} from "@lumeweb/portal-sdk";
 
 export type AuthFormRequest = {
@@ -32,134 +31,116 @@ export type Identity = {
     email: string;
 }
 
-export class PortalAuthProvider implements RequiredAuthProvider {
-    constructor(apiUrl: string) {
-        this._sdk = Sdk.create(apiUrl);
+export interface UpdatePasswordFormRequest extends UpdatePasswordFormTypes{
+    currentPassword: string;
+}
 
-        const methods: Array<keyof AuthProvider> = [
-            'login',
-            'logout',
-            'check',
-            'onError',
-            'register',
-            'forgotPassword',
-            'updatePassword',
-            'getPermissions',
-            'getIdentity',
-        ];
+export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
+    const maybeSetupAuth = (): void => {
+        const jwt = sdk.account().jwtToken;
+        if (jwt) {
+            sdk.setAuthToken(jwt);
+        }
+    };
 
-        methods.forEach((method) => {
-            this[method] = this[method]?.bind(this) as any;
-        });
-    }
+    return {
+        async login(params: AuthFormRequest): Promise<AuthActionResponse> {
+            const ret = await sdk.account().login({
+                email: params.email,
+                password: params.password,
+            });
 
-    private _sdk: Sdk;
+            let redirectTo: string | undefined;
 
-    get sdk(): Sdk {
-        return this._sdk;
-    }
-
-    public static create(apiUrl: string): AuthProvider {
-        return new PortalAuthProvider(apiUrl);
-    }
-
-    async login(params: AuthFormRequest): Promise<AuthActionResponse> {
-        const ret = await this._sdk.account().login({
-            email: params.email,
-            password: params.password,
-        })
-
-        let redirectTo: string | undefined;
-
-        if (ret) {
-            redirectTo = params.redirectTo;
-            if (!redirectTo) {
-                redirectTo = ret ? "/dashboard" : "/login";
+            if (ret) {
+                redirectTo = params.redirectTo;
+                if (!redirectTo) {
+                    redirectTo = ret ? "/dashboard" : "/login";
+                }
+                sdk.setAuthToken(sdk.account().jwtToken);
             }
-            this._sdk.setAuthToken(this._sdk.account().jwtToken);
-        }
 
-        return {
-            success: ret,
-            redirectTo,
-        };
-    }
+            return {
+                success: ret,
+                redirectTo,
+            };
+        },
 
-    async logout(params: any): Promise<AuthActionResponse> {
-        let ret = await this._sdk.account().logout();
-        return {success: ret, redirectTo: "/login"};
-    }
+        async logout(params: any): Promise<AuthActionResponse> {
+            let ret = await sdk.account().logout();
+            return {success: ret, redirectTo: "/login"};
+        },
 
-    async check(params?: any): Promise<CheckResponse> {
-        this.maybeSetupAuth();
+        async check(params?: any): Promise<CheckResponse> {
+            const ret = await sdk.account().ping();
 
-        const ret = await this._sdk.account().ping();
+            if (ret) {
+                maybeSetupAuth();
+            }
 
-        return {authenticated: ret, redirectTo: ret ? undefined : "/login"};
-    }
+            return {authenticated: ret, redirectTo: ret ? undefined : "/login"};
+        },
 
-    async onError(error: any): Promise<OnErrorResponse> {
-        const cookies = new Cookies();
-        return {logout: true};
-    }
+        async onError(error: any): Promise<OnErrorResponse> {
+            return {logout: true};
+        },
 
-    async register(params: RegisterFormRequest): Promise<AuthActionResponse> {
-        const ret = await this._sdk.account().register({
-            email: params.email,
-            password: params.password,
-            first_name: params.firstName,
-            last_name: params.lastName,
-        });
-        return {success: ret, redirectTo: ret ? "/dashboard" : undefined};
-    }
+        async register(params: RegisterFormRequest): Promise<AuthActionResponse> {
+            const ret = await sdk.account().register({
+                email: params.email,
+                password: params.password,
+                first_name: params.firstName,
+                last_name: params.lastName,
+            });
+            return {success: ret, redirectTo: ret ? "/dashboard" : undefined};
+        },
 
-    async forgotPassword(params: any): Promise<AuthActionResponse> {
-        return {success: true};
-    }
+        async forgotPassword(params: any): Promise<AuthActionResponse> {
+            return {success: true};
+        },
 
-    async updatePassword(params: any): Promise<AuthActionResponse> {
-        return {success: true};
-    }
+        async updatePassword(params: UpdatePasswordFormRequest): Promise<AuthActionResponse> {
+            maybeSetupAuth();
+            const ret = await sdk.account().updatePassword(params.currentPassword, params.password as string);
 
-    async getPermissions(params?: Record<string, any>): Promise<AuthActionResponse> {
-        return {success: true};
-    }
+            if (ret) {
+                if (ret instanceof Error) {
+                    return {
+                        success: false,
+                        error: ret
+                    }
+                }
 
-    async getIdentity(params?: Identity): Promise<IdentityResponse> {
-        this.maybeSetupAuth();
-        const ret = await this._sdk.account().info();
+                return {
+                    success: true
+                }
+            } else {
+                return {
+                    success: false
+                }
+            }
+        },
 
-        if (!ret) {
-            return {identity: null};
-        }
+        async getPermissions(params?: Record<string, any>): Promise<AuthActionResponse> {
+            return {success: true};
+        },
 
-        const acct = ret as AccountInfoResponse;
+        async getIdentity(params?: Identity): Promise<IdentityResponse> {
+            maybeSetupAuth();
+            const ret = await sdk.account().info();
 
-        return {
-            id: acct.id,
-            firstName: acct.first_name,
-            lastName: acct.last_name,
-            email: acct.email,
-        };
-    }
+            if (!ret) {
+                return {identity: null};
+            }
 
-    maybeSetupAuth(): void {
-        const cookies = new Cookies();
-        const jwtCookie = cookies.get('auth_token');
-        if (jwtCookie) {
-            this._sdk.setAuthToken(jwtCookie);
-        }
-    }
-}
+            const acct = ret as AccountInfoResponse;
 
-export interface RequiredAuthProvider extends AuthProvider {
-    login: AuthProvider['login'];
-    logout: AuthProvider['logout'];
-    check: AuthProvider['check'];
-    onError: AuthProvider['onError'];
-    register: AuthProvider['register'];
-    forgotPassword: AuthProvider['forgotPassword'];
-    updatePassword: AuthProvider['updatePassword'];
-    getPermissions: AuthProvider['getPermissions'];
-    getIdentity: AuthProvider['getIdentity'];
-}
+            return {
+                id: acct.id,
+                firstName: acct.first_name,
+                lastName: acct.last_name,
+                email: acct.email,
+            };
+        },
+    };
+};

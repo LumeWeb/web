@@ -3,10 +3,11 @@ import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import {
-  BaseKey,
-  useGetIdentity,
-  useUpdate,
-  useUpdatePassword,
+    Authenticated,
+    BaseKey,
+    useGetIdentity,
+    useUpdate,
+    useUpdatePassword,
 } from "@refinedev/core";
 import { useMemo, useState } from "react";
 import { z } from "zod";
@@ -40,6 +41,7 @@ import { Input } from "~/components/ui/input";
 import { UsageCard } from "~/components/usage-card";
 
 import QRImg from "~/images/QR.png";
+import {UpdatePasswordFormRequest} from "~/data/auth-provider.js";
 
 export default function MyAccount() {
   const { data: identity } = useGetIdentity<{ email: string }>();
@@ -52,7 +54,8 @@ export default function MyAccount() {
   });
 
   return (
-    <GeneralLayout>
+      <Authenticated key="account" v3LegacyAuthProviderCompatible>
+        <GeneralLayout>
       <h1 className="text-lg font-bold mb-4">My Account</h1>
       <Dialog
         onOpenChange={(open) => {
@@ -211,6 +214,7 @@ export default function MyAccount() {
         </DialogContent>
       </Dialog>
     </GeneralLayout>
+      </Authenticated>
   );
 }
 
@@ -247,10 +251,11 @@ const ChangeEmailForm = ({ currentValue }: { currentValue: string }) => {
       const data = Object.fromEntries(new FormData(e.currentTarget).entries());
       console.log(identity);
       updateEmail({
-        resource: "users",
-        id: identity?.id || "",
+        resource: "account",
+        id:  "",
         values: {
           email: data.email.toString(),
+          password: data.password.toString(),
         },
       });
     },
@@ -292,7 +297,7 @@ const ChangeEmailForm = ({ currentValue }: { currentValue: string }) => {
 
 const ChangePasswordSchema = z
   .object({
-    currentPassword: z.string().email(),
+    currentPassword: z.string(),
     newPassword: z.string(),
     retypePassword: z.string(),
   })
@@ -311,7 +316,7 @@ const ChangePasswordForm = () => {
   const { mutate: updatePassword } = useUpdatePassword<{ password: string }>();
   const [form, fields] = useForm({
     id: "login",
-    constraint: getZodConstraint(ChangeEmailSchema),
+    constraint: getZodConstraint(ChangePasswordSchema),
     onValidate({ formData }) {
       return parseWithZod(formData, { schema: ChangePasswordSchema });
     },
@@ -322,7 +327,7 @@ const ChangePasswordForm = () => {
       const data = Object.fromEntries(new FormData(e.currentTarget).entries());
 
       updatePassword({
-        password: data.newPassword.toString(),
+          password: data.newPassword.toString(),
       });
     },
   });
@@ -408,10 +413,7 @@ const ChangeAvatarForm = () => {
     state,
     removeFile,
     cancelAll,
-  } = useUppy({
-    uploader: "tus",
-    endpoint: import.meta.env.VITE_PUBLIC_TUS_ENDPOINT,
-  });
+  } = useUppy();
 
   console.log({ state, files: getFiles() });
 

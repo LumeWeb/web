@@ -1,24 +1,18 @@
-import {
-    Links,
-    Meta,
-    Outlet,
-    Scripts,
-    ScrollRestoration,
-} from "@remix-run/react";
+import {Links, Meta, Outlet, Scripts, ScrollRestoration,} from "@remix-run/react";
 
 import stylesheet from "./tailwind.css?url";
-import type { LinksFunction } from "@remix-run/node";
+import type {LinksFunction} from "@remix-run/node";
 
 // Supports weights 200-800
 import '@fontsource-variable/manrope';
 import {Refine} from "@refinedev/core";
 import routerProvider from "@refinedev/remix-router";
-import { defaultProvider } from "~/data/file-provider";
-import {PortalAuthProvider} from "~/data/auth-provider";
 import { notificationProvider } from "~/data/notification-provider";
 import {SdkContextProvider} from "~/components/lib/sdk-context";
 import { Toaster } from "~/components/ui/toaster";
-
+import {getProviders} from "~/data/providers.js";
+import {Sdk} from "@lumeweb/portal-sdk";
+import resources from "~/data/resources.js";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -44,19 +38,18 @@ export function Layout({children}: { children: React.ReactNode }) {
 }
 
 export default function App() {
-    const auth = PortalAuthProvider.create("https://alpha.pinner.xyz")
+    const sdk = Sdk.create(import.meta.env.VITE_PORTAL_URL)
+    const providers = getProviders(sdk);
     return (
         <Refine
-            authProvider={auth}
+            authProvider={providers.auth}
             routerProvider={routerProvider}
-            dataProvider={defaultProvider}
             notificationProvider={notificationProvider}
-            resources={[
-                { name: 'files' },
-                { name: 'users' }
-            ]}
+            dataProvider={providers.default}
+            resources={resources}
+            options={{disableTelemetry: true}}
         >
-            <SdkContextProvider sdk={(auth as PortalAuthProvider).sdk}>
+            <SdkContextProvider sdk={sdk}>
                 <Outlet/>
             </SdkContextProvider>
         </Refine>
