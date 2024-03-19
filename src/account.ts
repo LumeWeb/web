@@ -28,8 +28,9 @@ import {
   postApiAccountPasswordResetConfirm,
   postApiAuthLogout,
   getApiUploadLimit,
+  postApiAccountUpdateEmail,
 } from "./account/generated/index.js";
-import { AxiosResponse } from "axios";
+import { AxiosError, AxiosResponse } from "axios";
 
 export class AccountApi {
   private apiUrl: string;
@@ -111,7 +112,10 @@ export class AccountApi {
   public async verifyOtp(otpVerifyRequest: OTPVerifyRequest): Promise<boolean> {
     let ret: AxiosResponse<void>;
     try {
-      ret = await postApiAccountOtpVerify(otpVerifyRequest, this.buildOptions());
+      ret = await postApiAccountOtpVerify(
+        otpVerifyRequest,
+        this.buildOptions(),
+      );
     } catch (e) {
       return false;
     }
@@ -224,6 +228,23 @@ export class AccountApi {
     }
 
     return this.checkSuccessVal<UploadLimitResponse>(ret) ? ret.data.limit : 0;
+  }
+
+  public async updateEmail(
+    email: string,
+    password: string,
+  ): Promise<boolean | Error> {
+    let ret: AxiosResponse<void>;
+    try {
+      ret = await postApiAccountUpdateEmail(
+        { email, password },
+        this.buildOptions(),
+      );
+    } catch (e) {
+      return new Error((e as AxiosError).response.data as string);
+    }
+
+    return this.checkSuccessBool(ret);
   }
 
   private checkSuccessBool(ret: AxiosResponse<void>): boolean {
