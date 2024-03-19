@@ -29,6 +29,7 @@ import {
   postApiAuthLogout,
   getApiUploadLimit,
   postApiAccountUpdateEmail,
+  postApiAccountUpdatePassword,
 } from "./account/generated/index.js";
 import { AxiosError, AxiosResponse } from "axios";
 
@@ -238,6 +239,23 @@ export class AccountApi {
     try {
       ret = await postApiAccountUpdateEmail(
         { email, password },
+        this.buildOptions(),
+      );
+    } catch (e) {
+      return new Error((e as AxiosError).response?.data as string);
+    }
+
+    return this.checkSuccessBool(ret);
+  }
+
+  public async updatePassword(
+    currentPasswprd: string,
+    newPassword: string,
+  ): Promise<boolean | Error> {
+    let ret: AxiosResponse<void>;
+    try {
+      ret = await postApiAccountUpdatePassword(
+        { current_password: currentPasswprd, new_password: newPassword },
         this.buildOptions(),
       );
     } catch (e) {
