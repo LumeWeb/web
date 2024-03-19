@@ -226,6 +226,7 @@ const ChangeEmailForm = ({
         id:  "",
         values: {
           email: data.email.toString(),
+          password: data.password.toString(),
         },
       });
     },
