@@ -160,7 +160,6 @@ const UploadFileForm = () => {
     removeFile,
     cancelAll,
   } = useUppy({
-    uploader: "tus",
     endpoint: import.meta.env.VITE_PUBLIC_TUS_ENDPOINT,
   });
 
