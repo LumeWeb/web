@@ -42,7 +42,7 @@ paths:
           description: Successfully registered
         "400":
           description: Bad Request
-  /api/auth/verify-email:
+  /api/account/verify-email:
     post:
       summary: Verify email address
       requestBody:
@@ -64,7 +64,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/OTPGenerateResponse"
-  /api/auth/otp/verify:
+  /api/account/otp/verify:
     post:
       summary: Verify OTP for enabling two-factor authentication
       requestBody:
@@ -76,7 +76,7 @@ paths:
       responses:
         "200":
           description: OTP verified successfully
-  /api/auth/otp/validate:
+  /api/account/otp/validate:
     post:
       summary: Validate OTP for two-factor authentication login
       requestBody:
@@ -100,7 +100,7 @@ paths:
       responses:
         "200":
           description: OTP disabled successfully
-  /api/auth/password-reset/request:
+  /api/account/password-reset/request:
     post:
       summary: Request a password reset
       requestBody:
@@ -112,7 +112,7 @@ paths:
       responses:
         "200":
           description: Password reset requested successfully
-  /api/auth/password-reset/confirm:
+  /api/account/password-reset/confirm:
     post:
       summary: Confirm a password reset
       requestBody:
@@ -148,6 +148,18 @@ paths:
                 $ref: "#/components/schemas/AccountInfoResponse"
         "401":
           description: Unauthorized
+  /api/account/update-email:
+    post:
+      summary: Update email address
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEmailRequest"
+      responses:
+        "200":
+          description: Email updated successfully
   /api/upload-limit:
     get:
       summary: Get the basic file upload (POST) upload limit set by the portal
@@ -245,6 +257,16 @@ components:
         email:
           type: string
         token:
+          type: string
+        password:
+          type: string
+    UpdateEmailRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
           type: string
         password:
           type: string
