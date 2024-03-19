@@ -29,6 +29,7 @@ import { Input } from "~/components/ui/input";
 import { UsageCard } from "~/components/usage-card";
 
 import QRImg from "~/images/QR.png";
+import {UpdatePasswordFormRequest} from "~/data/auth-provider.js";
 
 export default function MyAccount() {
   const { data: identity } = useGetIdentity<{ email: string }>();
@@ -292,7 +293,7 @@ const ChangePasswordForm = ({
   open: boolean;
   setOpen: (value: boolean) => void;
 }) => {
-  const { mutate: updatePassword } = useUpdatePassword<{ password: string }>();
+  const { mutate: updatePassword } = useUpdatePassword<UpdatePasswordFormRequest>();
   const [form, fields] = useForm({
     id: "login",
     constraint: getZodConstraint(ChangePasswordSchema),
@@ -306,7 +307,8 @@ const ChangePasswordForm = ({
       const data = Object.fromEntries(new FormData(e.currentTarget).entries());
 
       updatePassword({
-        password: data.newPassword.toString(),
+          currentPassword: data.currentPassword.toString(),
+          password: data.newPassword.toString(),
       });
     },
   });
