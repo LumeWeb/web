@@ -241,7 +241,7 @@ export class AccountApi {
         this.buildOptions(),
       );
     } catch (e) {
-      return new Error((e as AxiosError).response.data as string);
+      return new Error((e as AxiosError).response?.data as string);
     }
 
     return this.checkSuccessBool(ret);
