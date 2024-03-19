@@ -19,11 +19,7 @@ const LISTENING_EVENTS = [
   "files-added"
 ] as const
 
-export function useUppy({
-  endpoint
-}: {
-  endpoint: string
-}) {
+export function useUppy() {
     const sdk = useSdk()
 
     const [uploadLimit, setUploadLimit] = useState<number>(0)
@@ -161,7 +157,7 @@ export function useUppy({
           })
 
           if (useTus) {
-              uppy.use(Tus, { endpoint: endpoint, limit: 6, parallelUploads: 10 })
+              uppy.use(Tus, { limit: 6, parallelUploads: 10 })
               uppy.addPreProcessor(tusPreprocessor)
           }
 
@@ -211,7 +207,7 @@ export function useUppy({
       })
     }
     setState("idle")
-  }, [targetRef, endpoint, uploadLimit])
+  }, [targetRef, uploadLimit])
 
   useEffect(() => {
     return () => {
