@@ -1,5 +1,7 @@
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
+import { DialogClose } from "@radix-ui/react-dialog";
+import { Cross2Icon } from "@radix-ui/react-icons";
 import {
   BaseKey,
   useGetIdentity,
@@ -10,7 +12,8 @@ import { useState } from "react";
 import { z } from "zod";
 import { Field } from "~/components/forms";
 import { GeneralLayout } from "~/components/general-layout";
-import { AddIcon, CloudIcon, CrownIcon } from "~/components/icons";
+import { AddIcon, CloudCheckIcon, CloudIcon, CloudUploadIcon, CrownIcon, TrashIcon } from "~/components/icons";
+import { useUppy } from "~/components/lib/uppy";
 import {
   ManagementCard,
   ManagementCardAvatar,
@@ -37,6 +40,7 @@ export default function MyAccount() {
     changeEmail: false,
     changePassword: false,
     setupTwoFactor: false,
+    changeAvatar: false,
   });
 
   return (
@@ -57,7 +61,9 @@ export default function MyAccount() {
       <h2 className="font-bold my-8">Account Management</h2>
       <div className="grid grid-cols-3 gap-x-8">
         <ManagementCard>
-          <ManagementCardAvatar />
+          <ManagementCardAvatar
+            onClick={() => setModal({ ...openModal, changeAvatar: true })}
+          />
         </ManagementCard>
         <ManagementCard>
           <ManagementCardTitle>Email Address</ManagementCardTitle>
@@ -158,6 +164,12 @@ export default function MyAccount() {
         </ManagementCard>
       </div>
       {/* Dialogs must be near to body as possible to open the modal, otherwise will be restricted to parent height-width */}
+      <ChangeAvatarForm
+        open={openModal.changeAvatar}
+        setOpen={(value: boolean) =>
+          setModal({ ...openModal, changeAvatar: value })
+        }
+      />
       <ChangeEmailForm
         open={openModal.changeEmail}
         setOpen={(value: boolean) =>
@@ -233,7 +245,7 @@ const ChangeEmailForm = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="p-8">
+      <DialogContent className="p-8" forceMount>
         <DialogHeader>
           <DialogTitle className="mb-8">Change Email</DialogTitle>
           <div className="rounded-full px-4 py-2 w-fit text-sm bg-ring font-bold text-secondary-1">
@@ -394,6 +406,105 @@ const SetupTwoFactorDialog = ({
             )}
           </div>
         </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const ChangeAvatarForm = ({
+  open,
+  setOpen,
+}: {
+  open: boolean;
+  setOpen: (value: boolean) => void;
+}) => {
+  const {
+    getRootProps,
+    getInputProps,
+    getFiles,
+    upload,
+    state,
+    removeFile,
+    cancelAll,
+  } = useUppy({
+    uploader: "tus",
+    endpoint: import.meta.env.VITE_PUBLIC_TUS_ENDPOINT,
+  });
+
+  console.log({ state, files: getFiles() });
+
+  const isUploading = state === "uploading";
+  const isCompleted = state === "completed";
+  const hasStarted = state !== "idle" && state !== "initializing";
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(value) => {
+        setOpen(value);
+      }}>
+      <DialogContent className="p-8">
+        <DialogHeader className="mb-6">
+          <DialogTitle>Edit Avatar</DialogTitle>
+        </DialogHeader>
+        {!hasStarted && !getFiles().length ? (
+          <div
+            {...getRootProps()}
+            className="border border-border rounded text-primary-2 bg-primary-dark h-48 flex flex-col items-center justify-center">
+            <input
+              hidden
+              aria-hidden
+              name="uppyFiles[]"
+              key={new Date().toISOString()}
+              multiple
+              {...getInputProps()}
+            />
+            <CloudUploadIcon className="w-24 h-24 stroke stroke-primary-dark" />
+            <p>Drag & Drop Files or Browse</p>
+          </div>
+        ) : null}
+
+          {(!hasStarted && getFiles().length > 0) && (
+            <div className="border border-border rounded p-4 bg-primary-dark relative">
+              <Button
+                className="absolute top-4 right-4 rounded-full aspect-square bg-primary-dark hover:bg-primary p-2 text-sm"
+                onClick={() => removeFile(getFiles()[0].id)}>
+                <Cross2Icon />
+              </Button>
+              <img className="w-full h-48" src={URL.createObjectURL(getFiles()[0].data)} alt="New Avatar Preview" />
+            </div>
+          )}
+
+        {hasStarted ? (
+          <div className="flex flex-col items-center gap-y-2 w-full text-primary-1">
+            <CloudCheckIcon className="w-32 h-32" />
+            {isCompleted
+              ? "Upload completed"
+              : `0% completed`}
+          </div>
+        ) : null}
+
+        {isUploading ? (
+          <DialogClose asChild onClick={cancelAll}>
+            <Button size={"lg"} className="mt-6">
+              Cancel
+            </Button>
+          </DialogClose>
+        ) : null}
+
+        {isCompleted ? (
+          <DialogClose asChild>
+            <Button size={"lg"} className="mt-6">
+              Close
+            </Button>
+          </DialogClose>
+        ) : null}
+
+        {!hasStarted && !isCompleted && !isUploading ? (
+          <Button size={"lg"} className="mt-6" onClick={upload}>
+            Upload
+          </Button>
+        ) : null}
       </DialogContent>
     </Dialog>
   );
