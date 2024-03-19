@@ -271,7 +271,7 @@ const ChangeEmailForm = ({
 
 const ChangePasswordSchema = z
   .object({
-    currentPassword: z.string().email(),
+    currentPassword: z.string(),
     newPassword: z.string(),
     retypePassword: z.string(),
   })
