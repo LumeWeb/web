@@ -96,7 +96,7 @@ export default function Login() {
 const LoginSchema = z.object({
   email: z.string().email(),
   password: z.string(),
-  rememberMe: z.boolean(),
+  rememberMe: z.boolean().optional(),
 });
 
 const LoginForm = () => {
