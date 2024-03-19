@@ -7,7 +7,9 @@ import type {LinksFunction} from "@remix-run/node";
 import '@fontsource-variable/manrope';
 import {Refine} from "@refinedev/core";
 import routerProvider from "@refinedev/remix-router";
-import {SdkContextProvider} from "~/components/lib/sdk-context.js";
+import { notificationProvider } from "~/data/notification-provider";
+import {SdkContextProvider} from "~/components/lib/sdk-context";
+import { Toaster } from "~/components/ui/toaster";
 import {getProviders} from "~/data/providers.js";
 import {Sdk} from "@lumeweb/portal-sdk";
 import resources from "~/data/resources.js";
@@ -27,6 +29,7 @@ export function Layout({children}: { children: React.ReactNode }) {
         </head>
         <body>
         {children}
+        <Toaster />
         <ScrollRestoration/>
         <Scripts/>
         </body>
@@ -41,6 +44,7 @@ export default function App() {
         <Refine
             authProvider={providers.auth}
             routerProvider={routerProvider}
+            notificationProvider={notificationProvider}
             dataProvider={providers.default}
             resources={resources}
             options={{disableTelemetry: true}}

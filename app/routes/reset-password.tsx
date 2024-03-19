@@ -9,6 +9,8 @@ import { Field } from "~/components/forms";
 import { getFormProps, useForm } from "@conform-to/react";
 import { z } from "zod";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
+import { ToastAction } from "~/components/ui/toast";
+import { useNotification } from "@refinedev/core";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Sign Up" }];
@@ -18,12 +20,26 @@ const RecoverPasswordSchema = z.object({
   email: z.string().email(),
 });
 export default function RecoverPassword() {
+  const { open } = useNotification();
   const [form, fields] = useForm({
     id: "sign-up",
     constraint: getZodConstraint(RecoverPasswordSchema),
     onValidate({ formData }) {
       return parseWithZod(formData, { schema: RecoverPasswordSchema });
     },
+    onSubmit(e) {
+      e.preventDefault();
+      open?.({
+        type: "success",
+        message: "Password reset email sent",
+        description: "Check your email for a link to reset your password. If it doesn’t appear within a few minutes, check your spam folder.",
+        action: <ToastAction altText="Cancel">Cancel</ToastAction>,
+        cancelMutation: () => {
+          console.log("cancel mutation");
+        },
+      })
+      
+    }
   });
 
   // TODO: another detail is the reset password has no screen to either accept a new pass or  

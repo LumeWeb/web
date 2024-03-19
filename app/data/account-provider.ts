@@ -10,10 +10,16 @@ type AccountData = AccountParams;
 
 export const accountProvider: SdkProvider = {
     getList: () => {
-        throw Error("Not Implemented")
+        console.log("Not implemented");
+        return Promise.resolve({
+            data: [],
+        });
     },
     getOne: () => {
-        throw Error("Not Implemented")
+        console.log("Not implemented");
+        return Promise.resolve({
+            data: {},
+        });
     },
     // @ts-ignore
     async update<TVariables extends AccountParams = AccountParams>(
@@ -44,10 +50,16 @@ export const accountProvider: SdkProvider = {
         };
     },
     create: () => {
-        throw Error("Not Implemented")
+        console.log("Not implemented");
+        return Promise.resolve({
+            data: {},
+        });
     },
     deleteOne: () => {
-        throw Error("Not Implemented")
+        console.log("Not implemented");
+        return Promise.resolve({
+            data: {},
+        });
     },
     getApiUrl: () => "",
 }
