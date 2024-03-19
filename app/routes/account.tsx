@@ -295,7 +295,7 @@ const ChangePasswordForm = ({
   const { mutate: updatePassword } = useUpdatePassword<{ password: string }>();
   const [form, fields] = useForm({
     id: "login",
-    constraint: getZodConstraint(ChangeEmailSchema),
+    constraint: getZodConstraint(ChangePasswordSchema),
     onValidate({ formData }) {
       return parseWithZod(formData, { schema: ChangePasswordSchema });
     },
