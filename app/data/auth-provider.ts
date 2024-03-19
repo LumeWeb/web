@@ -31,6 +31,11 @@ export type Identity = {
     email: string;
 }
 
+export type UpdatePasswordFormRequest = {
+    currentPassword: string;
+    newPassword: string;
+}
+
 export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
     const maybeSetupAuth = (): void => {
         const jwt = sdk.account().jwtToken;
@@ -64,7 +69,7 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
 
         async logout(params: any): Promise<AuthActionResponse> {
             let ret = await sdk.account().logout();
-            return { success: ret, redirectTo: "/login" };
+            return {success: ret, redirectTo: "/login"};
         },
 
         async check(params?: any): Promise<CheckResponse> {
@@ -74,11 +79,11 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
                 maybeSetupAuth();
             }
 
-            return { authenticated: ret, redirectTo: ret ? undefined : "/login" };
+            return {authenticated: ret, redirectTo: ret ? undefined : "/login"};
         },
 
         async onError(error: any): Promise<OnErrorResponse> {
-            return { logout: true };
+            return {logout: true};
         },
 
         async register(params: RegisterFormRequest): Promise<AuthActionResponse> {
@@ -88,19 +93,37 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
                 first_name: params.firstName,
                 last_name: params.lastName,
             });
-            return { success: ret, redirectTo: ret ? "/dashboard" : undefined };
+            return {success: ret, redirectTo: ret ? "/dashboard" : undefined};
         },
 
         async forgotPassword(params: any): Promise<AuthActionResponse> {
-            return { success: true };
+            return {success: true};
         },
 
-        async updatePassword(params: any): Promise<AuthActionResponse> {
-            return { success: true };
+        async updatePassword(params: UpdatePasswordFormRequest): Promise<AuthActionResponse> {
+            maybeSetupAuth();
+            const ret = await sdk.account().updatePassword(params.currentPassword, params.newPassword);
+
+            if (ret) {
+                if (ret instanceof Error) {
+                    return {
+                        success: false,
+                        error: ret
+                    }
+                }
+
+                return {
+                    success: true
+                }
+            } else {
+                return {
+                    success: false
+                }
+            }
         },
 
         async getPermissions(params?: Record<string, any>): Promise<AuthActionResponse> {
-            return { success: true };
+            return {success: true};
         },
 
         async getIdentity(params?: Identity): Promise<IdentityResponse> {
@@ -108,7 +131,7 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
             const ret = await sdk.account().info();
 
             if (!ret) {
-                return { identity: null };
+                return {identity: null};
             }
 
             const acct = ret as AccountInfoResponse;
