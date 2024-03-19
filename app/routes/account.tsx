@@ -1,10 +1,11 @@
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import {
-  BaseKey,
-  useGetIdentity,
-  useUpdate,
-  useUpdatePassword,
+    Authenticated,
+    BaseKey,
+    useGetIdentity,
+    useUpdate,
+    useUpdatePassword,
 } from "@refinedev/core";
 import { useState } from "react";
 import { z } from "zod";
@@ -41,7 +42,8 @@ export default function MyAccount() {
   });
 
   return (
-    <GeneralLayout>
+      <Authenticated key="account" v3LegacyAuthProviderCompatible>
+        <GeneralLayout>
       <h1 className="text-lg font-bold mb-4">My Account</h1>
       <UsageCard
         label="Usage"
@@ -179,6 +181,7 @@ export default function MyAccount() {
         }
       />
     </GeneralLayout>
+      </Authenticated>
   );
 }
 
