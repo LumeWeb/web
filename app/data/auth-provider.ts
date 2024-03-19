@@ -1,4 +1,4 @@
-import type {AuthProvider} from "@refinedev/core"
+import type {AuthProvider, UpdatePasswordFormTypes} from "@refinedev/core"
 
 import type {
     AuthActionResponse,
@@ -31,9 +31,8 @@ export type Identity = {
     email: string;
 }
 
-export type UpdatePasswordFormRequest = {
+export interface UpdatePasswordFormRequest extends UpdatePasswordFormTypes{
     currentPassword: string;
-    newPassword: string;
 }
 
 export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
@@ -102,7 +101,7 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
 
         async updatePassword(params: UpdatePasswordFormRequest): Promise<AuthActionResponse> {
             maybeSetupAuth();
-            const ret = await sdk.account().updatePassword(params.currentPassword, params.newPassword);
+            const ret = await sdk.account().updatePassword(params.currentPassword, params.password as string);
 
             if (ret) {
                 if (ret instanceof Error) {
