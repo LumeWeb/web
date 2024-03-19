@@ -222,8 +222,8 @@ const ChangeEmailForm = ({
       const data = Object.fromEntries(new FormData(e.currentTarget).entries());
       console.log(identity);
       updateEmail({
-        resource: "users",
-        id: identity?.id || "",
+        resource: "account",
+        id:  "",
         values: {
           email: data.email.toString(),
         },
