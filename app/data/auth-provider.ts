@@ -123,7 +123,7 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
         },
 
         async onError(error: any): Promise<OnErrorResponse> {
-            return {logout: true};
+            return {};
         },
 
         async register(params: RegisterFormRequest): Promise<AuthActionResponse> {
