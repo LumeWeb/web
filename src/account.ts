@@ -33,6 +33,16 @@ import {
 } from "./account/generated/index.js";
 import { AxiosError, AxiosResponse } from "axios";
 
+export class AccountError extends Error {
+  public statusCode: number;
+
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.name = "AccountError";
+    this.statusCode = statusCode;
+  }
+}
+
 export class AccountApi {
   private apiUrl: string;
   private _jwtToken?: string;
@@ -47,6 +57,7 @@ export class AccountApi {
   set jwtToken(value: string) {
     this._jwtToken = value;
   }
+
   get jwtToken(): string {
     return <string>this._jwtToken;
   }
@@ -55,12 +66,17 @@ export class AccountApi {
     return new AccountApi(apiUrl);
   }
 
-  public async login(loginRequest: LoginRequest): Promise<boolean> {
+  public async login(
+    loginRequest: LoginRequest,
+  ): Promise<boolean | AccountError> {
     let ret: AxiosResponse<LoginResponse> | LoginResponse | boolean = false;
     try {
       ret = await postApiAuthLogin(loginRequest, { baseURL: this.apiUrl });
     } catch (e) {
-      return false;
+      return new AccountError(
+        (e as AxiosError).response?.data as string,
+        (e as AxiosError).response?.status as number,
+      );
     }
     ret = this.checkSuccessVal<LoginResponse>(ret);
 
@@ -81,7 +97,10 @@ export class AccountApi {
         baseURL: this.apiUrl,
       });
     } catch (e) {
-      return new Error((e as AxiosError).response?.data as string);
+      return new AccountError(
+        (e as AxiosError).response?.data as string,
+        (e as AxiosError).response?.status as number,
+      );
     }
 
     return this.checkSuccessBool(ret);
@@ -97,17 +116,25 @@ export class AccountApi {
         this.buildOptions(),
       );
     } catch (e) {
-      return new Error((e as AxiosError).response?.data as string);
+      return new AccountError(
+        (e as AxiosError).response?.data as string,
+        (e as AxiosError).response?.status as number,
+      );
     }
     return this.checkSuccessBool(ret);
   }
 
-  public async generateOtp(): Promise<boolean | OTPGenerateResponse | Error> {
+  public async generateOtp(): Promise<
+    boolean | OTPGenerateResponse | AccountError
+  > {
     let ret: AxiosResponse<OTPGenerateResponse>;
     try {
       ret = await getApiAuthOtpGenerate(this.buildOptions());
     } catch (e) {
-      return new Error((e as AxiosError).response?.data as string);
+      return new AccountError(
+        (e as AxiosError).response?.data as string,
+        (e as AxiosError).response?.status as number,
+      );
     }
     return this.checkSuccessVal<OTPGenerateResponse>(ret);
   }
@@ -122,14 +149,17 @@ export class AccountApi {
         this.buildOptions(),
       );
     } catch (e) {
-      return new Error((e as AxiosError).response?.data as string);
+      return new AccountError(
+        (e as AxiosError).response?.data as string,
+        (e as AxiosError).response?.status as number,
+      );
     }
     return this.checkSuccessBool(ret);
   }
 
   public async validateOtp(
     otpValidateRequest: OTPValidateRequest,
-  ): Promise<boolean | Error> {
+  ): Promise<boolean | AccountError> {
     let ret: AxiosResponse<void>;
     try {
       ret = await postApiAccountOtpValidate(
@@ -137,26 +167,32 @@ export class AccountApi {
         this.buildOptions(),
       );
     } catch (e) {
-      return new Error((e as AxiosError).response?.data as string);
+      return new AccountError(
+        (e as AxiosError).response?.data as string,
+        (e as AxiosError).response?.status as number,
+      );
     }
     return this.checkSuccessBool(ret);
   }
 
   public async disableOtp(
     otpDisableRequest: OTPDisableRequest,
-  ): Promise<boolean | Error> {
+  ): Promise<boolean | AccountError> {
     let ret: AxiosResponse<void>;
     try {
       ret = await postApiAuthOtpDisable(otpDisableRequest, this.buildOptions());
     } catch (e) {
-      return new Error((e as AxiosError).response?.data as string);
+      return new AccountError(
+        (e as AxiosError).response?.data as string,
+        (e as AxiosError).response?.status as number,
+      );
     }
     return this.checkSuccessBool(ret);
   }
 
   public async requestPasswordReset(
     passwordResetRequest: PasswordResetRequest,
-  ): Promise<boolean | Error> {
+  ): Promise<boolean | AccountError> {
     let ret: AxiosResponse<void>;
     try {
       ret = await postApiAccountPasswordResetRequest(
@@ -164,14 +200,17 @@ export class AccountApi {
         this.buildOptions(),
       );
     } catch (e) {
-      return new Error((e as AxiosError).response?.data as string);
+      return new AccountError(
+        (e as AxiosError).response?.data as string,
+        (e as AxiosError).response?.status as number,
+      );
     }
     return this.checkSuccessBool(ret);
   }
 
   public async confirmPasswordReset(
     passwordResetVerifyRequest: PasswordResetVerifyRequest,
-  ): Promise<boolean | Error> {
+  ): Promise<boolean | AccountError> {
     let ret: AxiosResponse<void>;
     try {
       ret = await postApiAccountPasswordResetConfirm(
@@ -179,7 +218,10 @@ export class AccountApi {
         this.buildOptions(),
       );
     } catch (e) {
-      return new Error((e as AxiosError).response?.data as string);
+      return new AccountError(
+        (e as AxiosError).response?.data as string,
+        (e as AxiosError).response?.status as number,
+      );
     }
     return this.checkSuccessBool(ret);
   }
@@ -212,11 +254,11 @@ export class AccountApi {
     return this.checkSuccessVal(ret);
   }
 
-  public async logout(): Promise<boolean | Error> {
+  public async logout(): Promise<boolean> {
     try {
       await postApiAuthLogout(this.buildOptions());
     } catch (e) {
-      return new Error((e as AxiosError).response?.data as string);
+      return false;
     }
 
     this._jwtToken = undefined;
@@ -238,7 +280,7 @@ export class AccountApi {
   public async updateEmail(
     email: string,
     password: string,
-  ): Promise<boolean | Error> {
+  ): Promise<boolean | AccountError> {
     let ret: AxiosResponse<void>;
     try {
       ret = await postApiAccountUpdateEmail(
@@ -246,7 +288,10 @@ export class AccountApi {
         this.buildOptions(),
       );
     } catch (e) {
-      return new Error((e as AxiosError).response?.data as string);
+      return new AccountError(
+        (e as AxiosError).response?.data as string,
+        (e as AxiosError).response?.status as number,
+      );
     }
 
     return this.checkSuccessBool(ret);
@@ -255,7 +300,7 @@ export class AccountApi {
   public async updatePassword(
     currentPasswprd: string,
     newPassword: string,
-  ): Promise<boolean | Error> {
+  ): Promise<boolean | AccountError> {
     let ret: AxiosResponse<void>;
     try {
       ret = await postApiAccountUpdatePassword(
@@ -263,7 +308,10 @@ export class AccountApi {
         this.buildOptions(),
       );
     } catch (e) {
-      return new Error((e as AxiosError).response?.data as string);
+      return new AccountError(
+        (e as AxiosError).response?.data as string,
+        (e as AxiosError).response?.status as number,
+      );
     }
 
     return this.checkSuccessBool(ret);
