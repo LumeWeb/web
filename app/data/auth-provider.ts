@@ -124,7 +124,12 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
                 first_name: params.firstName,
                 last_name: params.lastName,
             });
-            return handleResponse({ret, redirectToSuccess: "/login"});
+            return handleResponse({
+                ret, redirectToSuccess: "/login", successNotification: {
+                    message: "Registration Successful",
+                    description: "You have successfully registered. Please check your email to verify your account.",
+                }
+            });
         },
 
         async forgotPassword(params: any): Promise<AuthActionResponse> {
