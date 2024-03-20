@@ -54,6 +54,10 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
         successCb?: () => void;
     }
 
+    interface CheckResponseResult extends ResponseResult {
+        authenticated?: boolean;
+    }
+
     const handleResponse = (result: ResponseResult): AuthActionResponse => {
         if (result.ret) {
             if (result.ret instanceof Error) {
@@ -76,6 +80,17 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
         return {
             success: false,
             redirectTo: result.redirectToError
+        }
+    }
+
+    const handleCheckResponse = (result: CheckResponseResult): CheckResponse => {
+        const response = handleResponse(result);
+        const success = response.success;
+        delete response.success;
+
+        return {
+            ...response,
+            authenticated: success
         }
     }
 
@@ -105,7 +120,7 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
         async check(params?: any): Promise<CheckResponse> {
             const ret = await sdk.account().ping();
 
-            return handleResponse({ret, redirectToError: "/login", successCb: maybeSetupAuth});
+            return handleCheckResponse({ret, redirectToError: "/login", successCb: maybeSetupAuth});
         },
 
         async onError(error: any): Promise<OnErrorResponse> {
