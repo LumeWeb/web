@@ -1,19 +1,24 @@
-import { useGo, useIsAuthenticated } from "@refinedev/core";
+import {useGo, useIsAuthenticated} from "@refinedev/core";
+import {useEffect} from "react";
 
 export default function Index() {
-  const { isLoading, data } = useIsAuthenticated();
+    const {isLoading, data} = useIsAuthenticated();
 
-  const go = useGo();
+    const go = useGo();
 
-  if (isLoading) {
-    return <>Checking Login Status</>;
-  }
+    useEffect(() => {
+        if (!isLoading) {
+            if (data?.authenticated) {
+                go({to: "/dashboard", type: "replace"});
+            } else {
+                go({to: "/login", type: "replace"});
+            }
+        }
+    }, [isLoading, data]);
 
-  if (data?.authenticated) {
-    go({ to: "/dashboard", type: "replace" });
-  } else {
-    go({ to: "/login", type: "replace" });
-  }
+    if (isLoading) {
+        return <>Checking Login Status</> || null;
+    }
 
-  return <>Redirecting</>;
+    return (<>Redirecting</>) || null;
 }
