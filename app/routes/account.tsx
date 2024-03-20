@@ -1,16 +1,27 @@
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
+import { DialogClose } from "@radix-ui/react-dialog";
+import { Cross2Icon } from "@radix-ui/react-icons";
 import {
-  BaseKey,
-  useGetIdentity,
-  useUpdate,
-  useUpdatePassword,
+    Authenticated,
+    BaseKey,
+    useGetIdentity,
+    useUpdate,
+    useUpdatePassword,
 } from "@refinedev/core";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { z } from "zod";
 import { Field } from "~/components/forms";
 import { GeneralLayout } from "~/components/general-layout";
-import { AddIcon, CloudIcon, CrownIcon } from "~/components/icons";
+import {
+  AddIcon,
+  CloudCheckIcon,
+  CloudIcon,
+  CloudUploadIcon,
+  CrownIcon,
+  EditIcon,
+} from "~/components/icons";
+import { useUppy } from "~/components/lib/uppy";
 import {
   ManagementCard,
   ManagementCardAvatar,
@@ -24,6 +35,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { UsageCard } from "~/components/usage-card";
@@ -38,147 +50,171 @@ export default function MyAccount() {
     changeEmail: false,
     changePassword: false,
     setupTwoFactor: false,
+    changeAvatar: false,
   });
 
   return (
-    <GeneralLayout>
+      <Authenticated key="account" v3LegacyAuthProviderCompatible>
+        <GeneralLayout>
       <h1 className="text-lg font-bold mb-4">My Account</h1>
-      <UsageCard
-        label="Usage"
-        currentUsage={2}
-        monthlyUsage={10}
-        icon={<CloudIcon className="text-ring" />}
-        button={
-          <Button variant="accent" className="gap-x-2 h-12">
-            <AddIcon />
-            Upgrade to Premium
-          </Button>
-        }
-      />
-      <h2 className="font-bold my-8">Account Management</h2>
-      <div className="grid grid-cols-3 gap-x-8">
-        <ManagementCard>
-          <ManagementCardAvatar />
-        </ManagementCard>
-        <ManagementCard>
-          <ManagementCardTitle>Email Address</ManagementCardTitle>
-          <ManagementCardContent className="text-ring font-semibold">
-            {identity?.email}
-          </ManagementCardContent>
-          <ManagementCardFooter>
-            <Button
-              className="h-12 gap-x-2"
-              onClick={() => setModal({ ...openModal, changeEmail: true })}>
-              <AddIcon />
-              Change Email Address
-            </Button>
-          </ManagementCardFooter>
-        </ManagementCard>
-        <ManagementCard>
-          <ManagementCardTitle>Account Type</ManagementCardTitle>
-          <ManagementCardContent className="text-ring font-semibold flex gap-x-2">
-            Lite Premium Account
-            <CrownIcon />
-          </ManagementCardContent>
-          <ManagementCardFooter>
-            <Button className="h-12 gap-x-2">
+      <Dialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setModal({
+              changeEmail: false,
+              changePassword: false,
+              setupTwoFactor: false,
+              changeAvatar: false,
+            });
+          }
+        }}>
+        <UsageCard
+          label="Usage"
+          currentUsage={2}
+          monthlyUsage={10}
+          icon={<CloudIcon className="text-ring" />}
+          button={
+            <Button variant="accent" className="gap-x-2 h-12">
               <AddIcon />
               Upgrade to Premium
             </Button>
-          </ManagementCardFooter>
-        </ManagementCard>
-      </div>
-      <h2 className="font-bold my-8">Security</h2>
-      <div className="grid grid-cols-3 gap-x-8">
-        <ManagementCard>
-          <ManagementCardTitle>Password</ManagementCardTitle>
-          <ManagementCardContent>
-            <PasswordDots className="mt-6" />
-          </ManagementCardContent>
-          <ManagementCardFooter>
-            <Button
-              className="h-12 gap-x-2"
-              onClick={() => setModal({ ...openModal, changePassword: true })}>
-              <AddIcon />
-              Change Password
-            </Button>
-          </ManagementCardFooter>
-        </ManagementCard>
-        <ManagementCard>
-          <ManagementCardTitle>Two-Factor Authentication</ManagementCardTitle>
-          <ManagementCardContent>
-            Improve security by enabling 2FA.
-          </ManagementCardContent>
-          <ManagementCardFooter>
-            <Button
-              className="h-12 gap-x-2"
-              onClick={() => setModal({ ...openModal, setupTwoFactor: true })}>
-              <AddIcon />
-              Enable Two-Factor Authorization
-            </Button>
-          </ManagementCardFooter>
-        </ManagementCard>
-      </div>
-      <h2 className="font-bold my-8">More</h2>
-      <div className="grid grid-cols-3 gap-x-8">
-        <ManagementCard variant="accent">
-          <ManagementCardTitle>Invite a Friend</ManagementCardTitle>
-          <ManagementCardContent>
-            Get 1 GB per friend invited for free (max 5 GB).
-          </ManagementCardContent>
-          <ManagementCardFooter>
-            <Button variant="accent" className="h-12 gap-x-2">
-              <AddIcon />
-              Send Invitation
-            </Button>
-          </ManagementCardFooter>
-        </ManagementCard>
-        <ManagementCard>
-          <ManagementCardTitle>Read our Resources</ManagementCardTitle>
-          <ManagementCardContent>
-            Navigate helpful articles or get assistance.
-          </ManagementCardContent>
-          <ManagementCardFooter>
-            <Button className="h-12 gap-x-2">
-              <AddIcon />
-              Open Support Centre
-            </Button>
-          </ManagementCardFooter>
-        </ManagementCard>
-        <ManagementCard>
-          <ManagementCardTitle>Delete Account</ManagementCardTitle>
-          <ManagementCardContent>
-            Once initiated, this action cannot be undone.
-          </ManagementCardContent>
-          <ManagementCardFooter>
-            <Button className="h-12 gap-x-2" variant="destructive">
-              <AddIcon />
-              Delete my Account
-            </Button>
-          </ManagementCardFooter>
-        </ManagementCard>
-      </div>
-      {/* Dialogs must be near to body as possible to open the modal, otherwise will be restricted to parent height-width */}
-      <ChangeEmailForm
-        open={openModal.changeEmail}
-        setOpen={(value: boolean) =>
-          setModal({ ...openModal, changeEmail: value })
-        }
-        currentValue={identity?.email || ""}
-      />
-      <ChangePasswordForm
-        open={openModal.changePassword}
-        setOpen={(value: boolean) =>
-          setModal({ ...openModal, changePassword: value })
-        }
-      />
-      <SetupTwoFactorDialog
-        open={openModal.setupTwoFactor}
-        setOpen={(value: boolean) =>
-          setModal({ ...openModal, setupTwoFactor: value })
-        }
-      />
+          }
+        />
+        <h2 className="font-bold my-8">Account Management</h2>
+        <div className="grid grid-cols-3 gap-x-8">
+          <ManagementCard>
+            <ManagementCardAvatar
+              button={
+                <DialogTrigger className="absolute bottom-0 right-0 z-50">
+                  <Button
+                    onClick={() => setModal({ ...openModal, changeAvatar: true })}
+                    variant="outline"
+                    className=" flex items-center w-10 h-10 p-0 border-white rounded-full justiyf-center hover:bg-secondary-2">
+                    <EditIcon />
+                  </Button>
+                </DialogTrigger>
+              }
+            />
+          </ManagementCard>
+          <ManagementCard>
+            <ManagementCardTitle>Email Address</ManagementCardTitle>
+            <ManagementCardContent className="text-ring font-semibold">
+              {identity?.email}
+            </ManagementCardContent>
+            <ManagementCardFooter>
+              <DialogTrigger>
+                <Button
+                  className="h-12 gap-x-2"
+                  onClick={() => setModal({ ...openModal, changeEmail: true })}>
+                  <AddIcon />
+                  Change Email Address
+                </Button>
+              </DialogTrigger>
+            </ManagementCardFooter>
+          </ManagementCard>
+          <ManagementCard>
+            <ManagementCardTitle>Account Type</ManagementCardTitle>
+            <ManagementCardContent className="text-ring font-semibold flex gap-x-2">
+              Lite Premium Account
+              <CrownIcon />
+            </ManagementCardContent>
+            <ManagementCardFooter>
+              <Button className="h-12 gap-x-2">
+                <AddIcon />
+                Upgrade to Premium
+              </Button>
+            </ManagementCardFooter>
+          </ManagementCard>
+        </div>
+        <h2 className="font-bold my-8">Security</h2>
+        <div className="grid grid-cols-3 gap-x-8">
+          <ManagementCard>
+            <ManagementCardTitle>Password</ManagementCardTitle>
+            <ManagementCardContent>
+              <PasswordDots className="mt-6" />
+            </ManagementCardContent>
+            <ManagementCardFooter>
+              <DialogTrigger>
+                <Button
+                  className="h-12 gap-x-2"
+                  onClick={() =>
+                    setModal({ ...openModal, changePassword: true })
+                  }>
+                  <AddIcon />
+                  Change Password
+                </Button>
+              </DialogTrigger>
+            </ManagementCardFooter>
+          </ManagementCard>
+          <ManagementCard>
+            <ManagementCardTitle>Two-Factor Authentication</ManagementCardTitle>
+            <ManagementCardContent>
+              Improve security by enabling 2FA.
+            </ManagementCardContent>
+            <ManagementCardFooter>
+              <DialogTrigger>
+                <Button
+                  className="h-12 gap-x-2"
+                  onClick={() =>
+                    setModal({ ...openModal, setupTwoFactor: true })
+                  }>
+                  <AddIcon />
+                  Enable Two-Factor Authorization
+                </Button>
+              </DialogTrigger>
+            </ManagementCardFooter>
+          </ManagementCard>
+        </div>
+        <h2 className="font-bold my-8">More</h2>
+        <div className="grid grid-cols-3 gap-x-8">
+          <ManagementCard variant="accent">
+            <ManagementCardTitle>Invite a Friend</ManagementCardTitle>
+            <ManagementCardContent>
+              Get 1 GB per friend invited for free (max 5 GB).
+            </ManagementCardContent>
+            <ManagementCardFooter>
+              <Button variant="accent" className="h-12 gap-x-2">
+                <AddIcon />
+                Send Invitation
+              </Button>
+            </ManagementCardFooter>
+          </ManagementCard>
+          <ManagementCard>
+            <ManagementCardTitle>Read our Resources</ManagementCardTitle>
+            <ManagementCardContent>
+              Navigate helpful articles or get assistance.
+            </ManagementCardContent>
+            <ManagementCardFooter>
+              <Button className="h-12 gap-x-2">
+                <AddIcon />
+                Open Support Centre
+              </Button>
+            </ManagementCardFooter>
+          </ManagementCard>
+          <ManagementCard>
+            <ManagementCardTitle>Delete Account</ManagementCardTitle>
+            <ManagementCardContent>
+              Once initiated, this action cannot be undone.
+            </ManagementCardContent>
+            <ManagementCardFooter>
+              <Button className="h-12 gap-x-2" variant="destructive">
+                <AddIcon />
+                Delete my Account
+              </Button>
+            </ManagementCardFooter>
+          </ManagementCard>
+        </div>
+        <DialogContent>
+          {openModal.changeAvatar && <ChangeAvatarForm />}
+          {openModal.changeEmail && (
+            <ChangeEmailForm currentValue={identity?.email || ""} />
+          )}
+          {openModal.changePassword && <ChangePasswordForm />}
+          {openModal.setupTwoFactor && <SetupTwoFactorDialog />}
+        </DialogContent>
+      </Dialog>
     </GeneralLayout>
+      </Authenticated>
   );
 }
 
@@ -199,15 +235,7 @@ const ChangeEmailSchema = z
     return true;
   });
 
-const ChangeEmailForm = ({
-  open,
-  setOpen,
-  currentValue,
-}: {
-  open: boolean;
-  setOpen: (value: boolean) => void;
-  currentValue: string;
-}) => {
+const ChangeEmailForm = ({ currentValue }: { currentValue: string }) => {
   const { data: identity } = useGetIdentity<{ id: BaseKey }>();
   const { mutate: updateEmail } = useUpdate();
   const [form, fields] = useForm({
@@ -234,38 +262,36 @@ const ChangeEmailForm = ({
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="p-8">
-        <DialogHeader>
-          <DialogTitle className="mb-8">Change Email</DialogTitle>
-          <div className="rounded-full px-4 py-2 w-fit text-sm bg-ring font-bold text-secondary-1">
-            {currentValue}
-          </div>
-          <form {...getFormProps(form)}>
-            <Field
-              className="mt-8"
-              inputProps={{ name: fields.email.name }}
-              labelProps={{ children: "New Email Address" }}
-              errors={fields.email.errors}
-            />
-            <Field
-              inputProps={{ name: fields.password.name, type: "password" }}
-              labelProps={{ children: "Password" }}
-              errors={fields.password.errors}
-            />
-            <Field
-              inputProps={{
-                name: fields.retypePassword.name,
-                type: "password",
-              }}
-              labelProps={{ children: "Retype Password" }}
-              errors={fields.retypePassword.errors}
-            />
-            <Button className="w-full h-14">Change Email Address</Button>
-          </form>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+    <>
+      <DialogHeader>
+        <DialogTitle className="mb-8">Change Email</DialogTitle>
+      </DialogHeader>
+      <div className="rounded-full px-4 py-2 w-fit text-sm bg-ring font-bold text-secondary-1">
+        {currentValue}
+      </div>
+      <form {...getFormProps(form)}>
+        <Field
+          className="mt-8"
+          inputProps={{ name: fields.email.name }}
+          labelProps={{ children: "New Email Address" }}
+          errors={fields.email.errors}
+        />
+        <Field
+          inputProps={{ name: fields.password.name, type: "password" }}
+          labelProps={{ children: "Password" }}
+          errors={fields.password.errors}
+        />
+        <Field
+          inputProps={{
+            name: fields.retypePassword.name,
+            type: "password",
+          }}
+          labelProps={{ children: "Retype Password" }}
+          errors={fields.retypePassword.errors}
+        />
+        <Button className="w-full h-14">Change Email Address</Button>
+      </form>
+    </>
   );
 };
 
@@ -286,14 +312,8 @@ const ChangePasswordSchema = z
     return true;
   });
 
-const ChangePasswordForm = ({
-  open,
-  setOpen,
-}: {
-  open: boolean;
-  setOpen: (value: boolean) => void;
-}) => {
-  const { mutate: updatePassword } = useUpdatePassword<UpdatePasswordFormRequest>();
+const ChangePasswordForm = () => {
+  const { mutate: updatePassword } = useUpdatePassword<{ password: string }>();
   const [form, fields] = useForm({
     id: "login",
     constraint: getZodConstraint(ChangePasswordSchema),
@@ -307,98 +327,174 @@ const ChangePasswordForm = ({
       const data = Object.fromEntries(new FormData(e.currentTarget).entries());
 
       updatePassword({
-          currentPassword: data.currentPassword.toString(),
           password: data.newPassword.toString(),
       });
     },
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="p-8">
-        <DialogHeader>
-          <DialogTitle className="mb-8">Change Password</DialogTitle>
-          <form {...getFormProps(form)}>
-            <Field
-              inputProps={{
-                name: fields.currentPassword.name,
-                type: "password",
-              }}
-              labelProps={{ children: "Current Password" }}
-              errors={fields.currentPassword.errors}
-            />
-            <Field
-              inputProps={{ name: fields.newPassword.name, type: "password" }}
-              labelProps={{ children: "New Password" }}
-              errors={fields.newPassword.errors}
-            />
-            <Field
-              inputProps={{
-                name: fields.retypePassword.name,
-                type: "password",
-              }}
-              labelProps={{ children: "Retype Password" }}
-              errors={fields.retypePassword.errors}
-            />
-            <Button className="w-full h-14">Change Password</Button>
-          </form>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+    <>
+      <DialogHeader>
+        <DialogTitle className="mb-8">Change Password</DialogTitle>
+      </DialogHeader>
+      <form {...getFormProps(form)}>
+        <Field
+          inputProps={{
+            name: fields.currentPassword.name,
+            type: "password",
+          }}
+          labelProps={{ children: "Current Password" }}
+          errors={fields.currentPassword.errors}
+        />
+        <Field
+          inputProps={{ name: fields.newPassword.name, type: "password" }}
+          labelProps={{ children: "New Password" }}
+          errors={fields.newPassword.errors}
+        />
+        <Field
+          inputProps={{
+            name: fields.retypePassword.name,
+            type: "password",
+          }}
+          labelProps={{ children: "Retype Password" }}
+          errors={fields.retypePassword.errors}
+        />
+        <Button className="w-full h-14">Change Password</Button>
+      </form>
+    </>
   );
 };
 
-const SetupTwoFactorDialog = ({
-  open,
-  setOpen,
-}: {
-  open: boolean;
-  setOpen: (value: boolean) => void;
-}) => {
+const SetupTwoFactorDialog = () => {
   const [continueModal, setContinue] = useState<boolean>(false);
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(value) => {
-        setOpen(value);
-        setContinue(false);
-      }}>
-      <DialogContent className="p-8">
-        <DialogHeader>
-          <DialogTitle className="mb-8">Setup Two-Factor</DialogTitle>
-          <div className="flex flex-col gap-y-6">
-            {continueModal ? (
-              <>
-                <p className="text-sm text-primary-2">
-                  Enter the authentication code generated in your two-factor
-                  application to confirm your setup.
-                </p>
-                <Input fullWidth className="text-center" />
-                <Button className="w-full h-14">Confirm</Button>
-              </>
-            ) : (
-              <>
-                <div className="p-6 flex justify-center border bg-secondary-2">
-                  <img src={QRImg} alt="QR" className="h-36 w-36" />
-                </div>
-                <p className="font-semibold">
-                  Don’t have access to scan? Use this code instead.
-                </p>
-                <div className="p-4 border text-primary-2 text-center font-bold">
-                  HHH7MFGAMPJ44OM44FGAMPJ44O232
-                </div>
-                <Button
-                  className="w-full h-14"
-                  onClick={() => setContinue(true)}>
-                  Continue
-                </Button>
-              </>
-            )}
-          </div>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+    <>
+      <DialogHeader>
+        <DialogTitle className="mb-8">Setup Two-Factor</DialogTitle>
+      </DialogHeader>
+      <div className="flex flex-col gap-y-6">
+        {continueModal ? (
+          <>
+            <p className="text-sm text-primary-2">
+              Enter the authentication code generated in your two-factor
+              application to confirm your setup.
+            </p>
+            <Input fullWidth className="text-center" />
+            <Button className="w-full h-14">Confirm</Button>
+          </>
+        ) : (
+          <>
+            <div className="p-6 flex justify-center border bg-secondary-2">
+              <img src={QRImg} alt="QR" className="h-36 w-36" />
+            </div>
+            <p className="font-semibold">
+              Don’t have access to scan? Use this code instead.
+            </p>
+            <div className="p-4 border text-primary-2 text-center font-bold">
+              HHH7MFGAMPJ44OM44FGAMPJ44O232
+            </div>
+            <Button className="w-full h-14" onClick={() => setContinue(true)}>
+              Continue
+            </Button>
+          </>
+        )}
+      </div>
+    </>
+  );
+};
+
+const ChangeAvatarForm = () => {
+  const {
+    getRootProps,
+    getInputProps,
+    getFiles,
+    upload,
+    state,
+    removeFile,
+    cancelAll,
+  } = useUppy();
+
+  console.log({ state, files: getFiles() });
+
+  const isUploading = state === "uploading";
+  const isCompleted = state === "completed";
+  const hasStarted = state !== "idle" && state !== "initializing";
+
+  const file = getFiles()?.[0];
+
+  const imagePreview = useMemo(() => {
+    if (file) {
+      return URL.createObjectURL(file.data);
+    }
+  }, [file]);
+
+  return (
+    <>
+      <DialogHeader className="mb-6">
+        <DialogTitle>Edit Avatar</DialogTitle>
+      </DialogHeader>
+      {!hasStarted && !getFiles().length ? (
+        <div
+          {...getRootProps()}
+          className="border border-border rounded text-primary-2 bg-primary-dark h-48 flex flex-col items-center justify-center">
+          <input
+            hidden
+            aria-hidden
+            name="uppyFiles[]"
+            key={new Date().toISOString()}
+            multiple
+            {...getInputProps()}
+          />
+          <CloudUploadIcon className="w-24 h-24 stroke stroke-primary-dark" />
+          <p>Drag & Drop Files or Browse</p>
+        </div>
+      ) : null}
+
+      {!hasStarted && file && (
+        <div className="border border-border rounded p-4 bg-primary-dark relative">
+          <Button
+            className="absolute top-1/2 right-1/2 rounded-full bg-gray-800/50 hover:bg-primary p-2 text-sm"
+            onClick={() => removeFile(file?.id)}>
+            <Cross2Icon className="size-4" />
+          </Button>
+          <img
+            className="w-full h-48 object-contain"
+            src={imagePreview}
+            alt="New Avatar Preview"
+          />
+        </div>
+      )}
+
+      {hasStarted ? (
+        <div className="flex flex-col items-center gap-y-2 w-full text-primary-1">
+          <CloudCheckIcon className="w-32 h-32" />
+          {isCompleted ? "Upload completed" : `0% completed`}
+        </div>
+      ) : null}
+
+      {isUploading ? (
+        <DialogClose asChild onClick={cancelAll}>
+          <Button size={"lg"} className="mt-6">
+            Cancel
+          </Button>
+        </DialogClose>
+      ) : null}
+
+      {isCompleted ? (
+        <DialogClose asChild>
+          <Button size={"lg"} className="mt-6">
+            Close
+          </Button>
+        </DialogClose>
+      ) : null}
+
+      {!hasStarted && !isCompleted && !isUploading ? (
+        <Button size={"lg"} className="mt-6" onClick={upload}>
+          Upload
+        </Button>
+      ) : null}
+    </>
   );
 };
 

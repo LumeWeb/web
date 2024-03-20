@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo} from "react";
 import { BaseRecord } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import {
@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table"
+import { Skeleton } from "./ui/skeleton";
 import { DataTablePagination } from "./table-pagination"
 
 interface DataTableProps<TData extends BaseRecord = BaseRecord, TValue = unknown> {
@@ -21,22 +22,31 @@ interface DataTableProps<TData extends BaseRecord = BaseRecord, TValue = unknown
 }
 
 export function DataTable<TData extends BaseRecord, TValue>({
-  columns
+  columns,
 }: DataTableProps<TData, TValue>) {
-  const [hoveredRowId, setHoveredRowId] = useState<string>("");
-
   const table = useTable({
     columns,
-    meta: {
-      hoveredRowId,
-    },
     refineCoreProps: {
       resource: "files"
     }
   })
 
+  const loadingRows = useMemo(() => Array(4).fill({}).map(() => ({
+    getIsSelected: () => false,
+    getVisibleCells: () => columns.map(() => ({
+      column: {
+        columnDef: {
+          cell: <Skeleton className="h-4 w-full bg-primary-1/30" />,
+        }
+      },
+      getContext: () => null
+    })),
+  })), [])
+
+  const rows = table.refineCore.tableQueryResult.isLoading ? loadingRows : table.getRowModel().rows
+
   return (
-    <div className="rounded-lg">
+    <>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -57,15 +67,12 @@ export function DataTable<TData extends BaseRecord, TValue>({
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
+          {rows.length ? (
+            rows.map((row) => (
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                onMouseEnter={() => {
-                  console.log(hoveredRowId, row.id);
-                  setHoveredRowId(row.id)
-                }}
+                className="group"
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
@@ -84,6 +91,6 @@ export function DataTable<TData extends BaseRecord, TValue>({
         </TableBody>
       </Table>
       <DataTablePagination table={table} />
-    </div>
+    </>
   )
 }

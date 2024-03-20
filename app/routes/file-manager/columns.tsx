@@ -3,6 +3,7 @@ import type { ColumnDef, RowData } from "@tanstack/react-table";
 import { FileIcon, MoreIcon } from "~/components/icons";
 import { Checkbox } from "~/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import { cn } from "~/utils";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -66,12 +67,13 @@ export const columns: ColumnDef<File>[] = [
         accessorKey: "createdOn",
         size: 200,
         header: "Created On",
-        cell: ({ row, table }) => (
+        cell: ({ row }) => (
           <div className="flex items-center justify-between">
             {row.getValue("createdOn")}
-            {(row.getIsSelected() || table.options.meta?.hoveredRowId === row.id)  && (
               <DropdownMenu>
-              <DropdownMenuTrigger>
+              <DropdownMenuTrigger className={
+                cn("hidden group-hover:block data-[state=open]:block", row.getIsSelected() && "block")
+              }>
                 <MoreIcon />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -88,7 +90,6 @@ export const columns: ColumnDef<File>[] = [
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
-            )}
           </div>
         )
     }
