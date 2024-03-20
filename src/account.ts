@@ -72,14 +72,16 @@ export class AccountApi {
     return false;
   }
 
-  public async register(registerRequest: RegisterRequest): Promise<boolean> {
+  public async register(
+    registerRequest: RegisterRequest,
+  ): Promise<boolean | Error> {
     let ret: AxiosResponse<void>;
     try {
       ret = await postApiAuthRegister(registerRequest, {
         baseURL: this.apiUrl,
       });
     } catch (e) {
-      return false;
+      return new Error((e as AxiosError).response?.data as string);
     }
 
     return this.checkSuccessBool(ret);
@@ -87,7 +89,7 @@ export class AccountApi {
 
   public async verifyEmail(
     verifyEmailRequest: VerifyEmailRequest,
-  ): Promise<boolean> {
+  ): Promise<boolean | Error> {
     let ret: AxiosResponse<void>;
     try {
       ret = await postApiAccountVerifyEmail(
@@ -95,22 +97,24 @@ export class AccountApi {
         this.buildOptions(),
       );
     } catch (e) {
-      return false;
+      return new Error((e as AxiosError).response?.data as string);
     }
     return this.checkSuccessBool(ret);
   }
 
-  public async generateOtp(): Promise<boolean | OTPGenerateResponse> {
+  public async generateOtp(): Promise<boolean | OTPGenerateResponse | Error> {
     let ret: AxiosResponse<OTPGenerateResponse>;
     try {
       ret = await getApiAuthOtpGenerate(this.buildOptions());
     } catch (e) {
-      return false;
+      return new Error((e as AxiosError).response?.data as string);
     }
     return this.checkSuccessVal<OTPGenerateResponse>(ret);
   }
 
-  public async verifyOtp(otpVerifyRequest: OTPVerifyRequest): Promise<boolean> {
+  public async verifyOtp(
+    otpVerifyRequest: OTPVerifyRequest,
+  ): Promise<boolean | Error> {
     let ret: AxiosResponse<void>;
     try {
       ret = await postApiAccountOtpVerify(
@@ -118,14 +122,14 @@ export class AccountApi {
         this.buildOptions(),
       );
     } catch (e) {
-      return false;
+      return new Error((e as AxiosError).response?.data as string);
     }
     return this.checkSuccessBool(ret);
   }
 
   public async validateOtp(
     otpValidateRequest: OTPValidateRequest,
-  ): Promise<boolean> {
+  ): Promise<boolean | Error> {
     let ret: AxiosResponse<void>;
     try {
       ret = await postApiAccountOtpValidate(
@@ -133,26 +137,26 @@ export class AccountApi {
         this.buildOptions(),
       );
     } catch (e) {
-      return false;
+      return new Error((e as AxiosError).response?.data as string);
     }
     return this.checkSuccessBool(ret);
   }
 
   public async disableOtp(
     otpDisableRequest: OTPDisableRequest,
-  ): Promise<boolean> {
+  ): Promise<boolean | Error> {
     let ret: AxiosResponse<void>;
     try {
       ret = await postApiAuthOtpDisable(otpDisableRequest, this.buildOptions());
     } catch (e) {
-      return false;
+      return new Error((e as AxiosError).response?.data as string);
     }
     return this.checkSuccessBool(ret);
   }
 
   public async requestPasswordReset(
     passwordResetRequest: PasswordResetRequest,
-  ): Promise<boolean> {
+  ): Promise<boolean | Error> {
     let ret: AxiosResponse<void>;
     try {
       ret = await postApiAccountPasswordResetRequest(
@@ -160,14 +164,14 @@ export class AccountApi {
         this.buildOptions(),
       );
     } catch (e) {
-      return false;
+      return new Error((e as AxiosError).response?.data as string);
     }
     return this.checkSuccessBool(ret);
   }
 
   public async confirmPasswordReset(
     passwordResetVerifyRequest: PasswordResetVerifyRequest,
-  ): Promise<boolean> {
+  ): Promise<boolean | Error> {
     let ret: AxiosResponse<void>;
     try {
       ret = await postApiAccountPasswordResetConfirm(
@@ -175,7 +179,7 @@ export class AccountApi {
         this.buildOptions(),
       );
     } catch (e) {
-      return false;
+      return new Error((e as AxiosError).response?.data as string);
     }
     return this.checkSuccessBool(ret);
   }
@@ -208,11 +212,11 @@ export class AccountApi {
     return this.checkSuccessVal(ret);
   }
 
-  public async logout(): Promise<boolean> {
+  public async logout(): Promise<boolean | Error> {
     try {
       await postApiAuthLogout(this.buildOptions());
     } catch (e) {
-      return false;
+      return new Error((e as AxiosError).response?.data as string);
     }
 
     this._jwtToken = undefined;
