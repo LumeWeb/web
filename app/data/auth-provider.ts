@@ -1,4 +1,4 @@
-import type {AuthProvider, UpdatePasswordFormTypes} from "@refinedev/core"
+import type {AuthProvider, HttpError, UpdatePasswordFormTypes} from "@refinedev/core"
 
 import type {
     AuthActionResponse,
@@ -8,10 +8,9 @@ import type {
     SuccessNotificationResponse
     // @ts-ignore
 } from "@refinedev/core/dist/interfaces/bindings/auth"
-import {Sdk} from "@lumeweb/portal-sdk";
+import {Sdk, AccountError} from "@lumeweb/portal-sdk";
 import type {AccountInfoResponse} from "@lumeweb/portal-sdk";
 
-;
 
 export type AuthFormRequest = {
     email: string;
@@ -60,10 +59,10 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
 
     const handleResponse = (result: ResponseResult): AuthActionResponse => {
         if (result.ret) {
-            if (result.ret instanceof Error) {
+            if (result.ret instanceof AccountError) {
                 return {
                     success: false,
-                    error: result.ret,
+                    error: result.ret satisfies HttpError,
                     redirectTo: result.redirectToError
                 }
             }
