@@ -86,20 +86,15 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
                 password: params.password,
             });
 
-            let redirectTo: string | undefined;
+            return handleResponse({
+                ret, redirectToSuccess: "/dashboard", redirectToError: "/login", successCb: () => {
+                    sdk.setAuthToken(sdk.account().jwtToken);
+                }, successNotification: {
+                    message: "Login Successful",
+                    description: "You have successfully logged in."
 
-            if (ret) {
-                redirectTo = params.redirectTo;
-                if (!redirectTo) {
-                    redirectTo = ret ? "/dashboard" : "/login";
                 }
-                sdk.setAuthToken(sdk.account().jwtToken);
-            }
-
-            return {
-                success: ret,
-                redirectTo,
-            };
+            });
         },
 
         async logout(params: any): Promise<AuthActionResponse> {
