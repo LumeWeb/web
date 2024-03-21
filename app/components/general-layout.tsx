@@ -30,123 +30,129 @@ import { Avatar } from "@radix-ui/react-avatar";
 import { cn } from "~/utils";
 import { useGetIdentity, useLogout } from "@refinedev/core";
 import { Identity } from "~/data/auth-provider";
+import { PinningNetworkBanner } from "./pinnning-network-banner";
+import { PinningProvider } from "~/providers/PinningProvider";
 
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
   const location = useLocation();
   const { data: identity } = useGetIdentity<Identity>();
   const{ mutate: logout } = useLogout()
+
   return (
-    <div className="h-full flex flex-row">
-      <header className="p-10 pr-0 flex flex-col w-[240px] h-full scroll-m-0 overflow-hidden">
-        <img src={logoPng} alt="Lume logo" className="h-10 w-32" />
+    <PinningProvider>
+      <div className="h-full flex flex-row">
+        <header className="p-10 pr-0 flex flex-col w-[240px] h-full scroll-m-0 overflow-hidden">
+          <img src={logoPng} alt="Lume logo" className="h-10 w-32" />
 
-        <nav className="my-10 flex-1">
-          <ul>
-            <li>
-              <Link to="/dashboard">
-                <NavigationButton
-                  active={location.pathname.includes("dashboard")}>
-                  <ClockIcon className="w-5 h-5 mr-2" />
-                  Dashboard
-                </NavigationButton>
-              </Link>
-            </li>
-            <li>
-              <Link to="/file-manager">
-                <NavigationButton
-                  active={location.pathname.includes("file-manager")}>
-                  <DriveIcon className="w-5 h-5 mr-2" />
-                  File Manager
-                </NavigationButton>
-              </Link>
-            </li>
-            <li>
-              <Link to="/account">
-                <NavigationButton
-                  active={location.pathname.includes("account")}>
-                  <CircleLockIcon className="w-5 h-5 mr-2" />
-                  Account
-                </NavigationButton>
-              </Link>
-            </li>
-          </ul>
-        </nav>
-        <span className="text-primary-2 mb-3 -space-y-1 opacity-40">
-          <p>Freedom</p>
-          <p>Privacy</p>
-          <p>Ownership</p>
-        </span>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button size={"lg"} className="w-[calc(100%-3rem)] font-semibold">
-              <CloudUploadIcon className="w-5 h-5 mr-2" />
-              Upload Files
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="border rounded-lg p-8">
-            <UploadFileForm />
-          </DialogContent>
-        </Dialog>
-      </header>
-
-      <div className="flex-1 overflow-y-auto p-10">
-        <div className="flex items-center gap-x-4 justify-end">
-          <Button variant="ghost" className="rounded-full w-fit">
-            <ThemeIcon className="text-ring" />
-          </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button className="border rounded-full h-auto p-2 gap-x-2 text-ring font-semibold">
-                <Avatar className="bg-ring h-7 w-7 rounded-full" />
-                {`${identity?.firstName} ${identity?.lastName}`}
-                <ChevronDownIcon />
+          <nav className="my-10 flex-1">
+            <ul>
+              <li>
+                <Link to="/dashboard">
+                  <NavigationButton
+                    active={location.pathname.includes("dashboard")}>
+                    <ClockIcon className="w-5 h-5 mr-2" />
+                    Dashboard
+                  </NavigationButton>
+                </Link>
+              </li>
+              <li>
+                <Link to="/file-manager">
+                  <NavigationButton
+                    active={location.pathname.includes("file-manager")}>
+                    <DriveIcon className="w-5 h-5 mr-2" />
+                    File Manager
+                  </NavigationButton>
+                </Link>
+              </li>
+              <li>
+                <Link to="/account">
+                  <NavigationButton
+                    active={location.pathname.includes("account")}>
+                    <CircleLockIcon className="w-5 h-5 mr-2" />
+                    Account
+                  </NavigationButton>
+                </Link>
+              </li>
+            </ul>
+          </nav>
+          <span className="text-primary-2 mb-3 -space-y-1 opacity-40">
+            <p>Freedom</p>
+            <p>Privacy</p>
+            <p>Ownership</p>
+          </span>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size={"lg"} className="w-[calc(100%-3rem)] font-semibold">
+                <CloudUploadIcon className="w-5 h-5 mr-2" />
+                Upload Files
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => logout()}>
-                  <ExitIcon className="mr-2" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </DialogTrigger>
+            <DialogContent className="border rounded-lg p-8">
+              <UploadFileForm />
+            </DialogContent>
+          </Dialog>
+        </header>
+
+        <div className="flex-1 overflow-y-auto p-10">
+          <div className="flex items-center gap-x-4 justify-end">
+            <Button variant="ghost" className="rounded-full w-fit">
+              <ThemeIcon className="text-ring" />
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button className="border rounded-full h-auto p-2 gap-x-2 text-ring font-semibold">
+                  <Avatar className="bg-ring h-7 w-7 rounded-full" />
+                  {`${identity?.firstName} ${identity?.lastName}`}
+                  <ChevronDownIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => logout()}>
+                    <ExitIcon className="mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {children}
+
+          <footer className="mt-5">
+            <ul className="flex flex-row">
+              <li>
+                <Link to="https://discord.lumeweb.com">
+                  <Button
+                    variant={"link"}
+                    className="flex flex-row gap-x-2 text-input-placeholder">
+                    <img
+                      className="h-5"
+                      src={discordLogoPng}
+                      alt="Discord Logo"
+                    />
+                    Connect with us
+                  </Button>
+                </Link>
+              </li>
+              <li>
+                <Link to="https://lumeweb.com">
+                  <Button
+                    variant={"link"}
+                    className="flex flex-row gap-x-2 text-input-placeholder">
+                    <img className="h-5" src={lumeColorLogoPng} alt="Lume Logo" />
+                    Connect with us
+                  </Button>
+                </Link>
+              </li>
+            </ul>
+          </footer>
         </div>
-
-        {children}
-
-        <footer className="mt-5">
-          <ul className="flex flex-row">
-            <li>
-              <Link to="https://discord.lumeweb.com">
-                <Button
-                  variant={"link"}
-                  className="flex flex-row gap-x-2 text-input-placeholder">
-                  <img
-                    className="h-5"
-                    src={discordLogoPng}
-                    alt="Discord Logo"
-                  />
-                  Connect with us
-                </Button>
-              </Link>
-            </li>
-            <li>
-              <Link to="https://lumeweb.com">
-                <Button
-                  variant={"link"}
-                  className="flex flex-row gap-x-2 text-input-placeholder">
-                  <img className="h-5" src={lumeColorLogoPng} alt="Lume Logo" />
-                  Connect with us
-                </Button>
-              </Link>
-            </li>
-          </ul>
-        </footer>
       </div>
-    </div>
+      <PinningNetworkBanner />
+    </PinningProvider>
   );
 };
 
