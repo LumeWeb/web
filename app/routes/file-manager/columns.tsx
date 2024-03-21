@@ -57,7 +57,7 @@ export const columns: ColumnDef<FileItem>[] = [
         header: "Size",
     },
     {
-        accessorKey: "pinnedOn",
+        accessorKey: "pinned",
         size: 200,
         header: "Pinned On",
         cell: ({ row }) => (
