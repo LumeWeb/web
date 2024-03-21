@@ -1,39 +1,126 @@
-import type { DataProvider } from "@refinedev/core";
-import { SdkProvider } from "~/data/sdk-provider.js";
+import {SdkProvider} from "~/data/sdk-provider.js";
+import {S5Client} from "@lumeweb/s5-js";
+import {PROTOCOL_S5} from "@lumeweb/portal-sdk";
+import {Multihash} from "@lumeweb/libs5/lib/multihash.js";
+import {AxiosProgressEvent} from "axios";
+import {CancelablePromise} from "@lumeweb/s5-js/lib/axios.js";
+import {MetadataResult} from "@lumeweb/s5-js/lib/options/download.js";
+import {metadataMagicByte, Unpacker, CID, METADATA_TYPES, CID_TYPES} from "@lumeweb/libs5";
 
-export const fileProvider = {
-  getList: () => {
-    console.log("Not implemented");
-    return Promise.resolve({
-      data: [],
-      total: 0,
-    });
-  },
-  getOne: () => {
-    console.log("Not implemented");
-    return Promise.resolve({
-      data: {
-        id: 1
-      },
-    });
-  },
-  update: () => {
-    console.log("Not implemented");
-    return Promise.resolve({
-      data: {},
-    });
-  },
-  create: () => {
-    console.log("Not implemented");
-    return Promise.resolve({
-      data: {},
-    });
-  },
-  deleteOne: () => {
-    console.log("Not implemented");
-    return Promise.resolve({
-      data: {},
-    });
-  },
-  getApiUrl: () => "",
+async function getIsManifest(s5: S5Client, hash: string): Promise<boolean | number> {
+
+    let type: number | null;
+    try {
+        const resp = s5.downloadData(hash, {
+            onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
+                if (progressEvent.loaded >= 10) {
+                    resp.cancel();
+                }
+            },
+        }) as CancelablePromise<ArrayBuffer>;
+
+        const data = await resp;
+        const unpacker = Unpacker.fromPacked(Buffer.from(data));
+        try {
+            const magic = unpacker.unpackInt();
+
+            if (magic !== metadataMagicByte) {
+                return false;
+            }
+
+            type = unpacker.unpackInt();
+
+            if (!type || !Object.values(METADATA_TYPES).includes(type)) {
+                return false;
+            }
+        } catch (e) {
+            return false;
+        }
+
+    } catch (e) {
+        return false;
+    }
+
+    switch (type) {
+        case METADATA_TYPES.DIRECTORY:
+            return CID_TYPES.DIRECTORY;
+        case METADATA_TYPES.WEBAPP:
+            return CID_TYPES.METADATA_WEBAPP;
+        case METADATA_TYPES.MEDIA:
+            return CID_TYPES.METADATA_MEDIA;
+        case METADATA_TYPES.USER_IDENTITY:
+            return CID_TYPES.USER_IDENTITY;
+    }
+
+    return 0;
+}
+
+export interface FileItem {
+    cid: string;
+    type: string;
+    mimeType: string;
+}
+
+export const fileProvider: SdkProvider = {
+    sdk: undefined,
+    async getList() {
+        const items: FileItem[] = [];
+        try {
+            const s5 = fileProvider.sdk?.protocols().get<S5Client>(PROTOCOL_S5)!.getSdk()!;
+            const pinList = await s5.accountPins();
+            for (const pin of pinList!.pins) {
+                const manifest = await getIsManifest(s5, pin.hash) as number;
+
+                if (manifest) {
+                    items.push({
+                        cid: CID.fromHash(pin.hash, pin.size, manifest).toString(),
+                        type: "manifest",
+                        mimeType: "application/octet-stream",
+                    });
+                } else {
+                    items.push({
+                        cid: CID.fromHash(pin.hash, pin.size, CID_TYPES.RAW).toString(),
+                        type: "raw",
+                        mimeType: pin.mime_type,
+                    });
+                }
+            }
+        } catch (e) {
+            return Promise.reject(e);
+        }
+
+        return {
+            data: items,
+            total: items.length,
+        };
+    },
+    getOne() {
+        console.log("Not implemented");
+        return Promise.resolve({
+            data: {
+                id: 1
+            },
+        });
+    },
+    update() {
+        console.log("Not implemented");
+        return Promise.resolve({
+            data: {},
+        });
+    },
+    create() {
+        console.log("Not implemented");
+        return Promise.resolve({
+            data: {},
+        });
+    },
+    deleteOne() {
+        console.log("Not implemented");
+        return Promise.resolve({
+            data: {},
+        });
+    },
+    getApiUrl() {
+        return "";
+    },
 } satisfies SdkProvider;
