@@ -45,7 +45,7 @@ export default function App() {
             authProvider={providers.auth}
             routerProvider={routerProvider}
             notificationProvider={notificationProvider}
-            dataProvider={providers.default}
+            dataProvider={providers}
             resources={resources}
             options={{disableTelemetry: true}}
         >
