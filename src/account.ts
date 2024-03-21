@@ -298,13 +298,13 @@ export class AccountApi {
   }
 
   public async updatePassword(
-    currentPasswprd: string,
+    currentPassword: string,
     newPassword: string,
   ): Promise<boolean | AccountError> {
     let ret: AxiosResponse<void>;
     try {
       ret = await postApiAccountUpdatePassword(
-        { current_password: currentPasswprd, new_password: newPassword },
+        { current_password: currentPassword, new_password: newPassword },
         this.buildOptions(),
       );
     } catch (e) {
