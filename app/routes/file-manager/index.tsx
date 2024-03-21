@@ -1,14 +1,16 @@
-import { GeneralLayout } from "~/components/general-layout";
-import { FileCard, FileCardList, FileTypes } from "~/components/file-card";
-import { DataTable } from "~/components/data-table";
-import { columns } from "./columns";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { AddIcon } from "~/components/icons";
+import {GeneralLayout} from "~/components/general-layout";
+import {FileCard, FileCardList, FileTypes} from "~/components/file-card";
+import {DataTable} from "~/components/data-table";
+import {columns} from "./columns";
+import {Input} from "~/components/ui/input";
+import {Button} from "~/components/ui/button";
+import {AddIcon} from "~/components/icons";
+import {Authenticated} from "@refinedev/core";
 
 export default function FileManager() {
   return (
-    <GeneralLayout>
+      <Authenticated key="dashboard" v3LegacyAuthProviderCompatible>
+          <GeneralLayout>
       <h1 className="font-bold mb-4 text-lg">File Manager</h1>
       <FileCardList>
         <FileCard
@@ -57,5 +59,6 @@ export default function FileManager() {
         columns={columns}
       />
     </GeneralLayout>
+      </Authenticated>
   );
 }
