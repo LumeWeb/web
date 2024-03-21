@@ -9,7 +9,7 @@
             "version": "0.0.0",
             "hasInstallScript": true,
             "dependencies": {
-                "@lumeweb/s5-js": "0.0.0-20240321163801",
+                "@lumeweb/s5-js": "0.0.0-20240321165510",
                 "axios": "^1.6.7",
                 "memize": "^2.1.0",
                 "orval": "^6.25.0",
@@ -2873,9 +2873,9 @@
             }
         },
         "node_modules/@lumeweb/libs5": {
-            "version": "0.0.0-20240318220243",
-            "resolved": "https://registry.npmjs.org/@lumeweb/libs5/-/libs5-0.0.0-20240318220243.tgz",
-            "integrity": "sha512-FddOjGZieiUExWIt3KJzNR6s2XzXKAVHPw4AJMqiYoXvVFdkmuaGvUp/gYzcoCSkD8Lo5XKm5bpOo8L632zfhg==",
+            "version": "0.0.0-20240321165322",
+            "resolved": "https://registry.npmjs.org/@lumeweb/libs5/-/libs5-0.0.0-20240321165322.tgz",
+            "integrity": "sha512-2sP6+2S4dayDimkRjWcoPFaFKj36kDgMZiJdNydK5NzJGbzW+REAyWatPJ2VhI4Lk+usGJsB48sazKnARH5hZA==",
             "dependencies": {
                 "@noble/curves": "^1.1.0",
                 "@noble/hashes": "^1.3.1",
@@ -2897,12 +2897,12 @@
             }
         },
         "node_modules/@lumeweb/s5-js": {
-            "version": "0.0.0-20240321163801",
-            "resolved": "https://registry.npmjs.org/@lumeweb/s5-js/-/s5-js-0.0.0-20240321163801.tgz",
-            "integrity": "sha512-WhBd1B7UG+gGSsG189dcGxNUgcjd8NjrVWNA+/Q6GYTb7iYMk7NIBGW73Hch0SRZMJMHvEdWvtqEhkJM2/5+0A==",
+            "version": "0.0.0-20240321165510",
+            "resolved": "https://registry.npmjs.org/@lumeweb/s5-js/-/s5-js-0.0.0-20240321165510.tgz",
+            "integrity": "sha512-PKvCnYAGm3JrrNJdxyurR9hQ2t70uVU02XVqttvYNVQzIj41uivR6o2gGGmRdvn1LOvJOCzEdA9dq2NnvExEdg==",
             "hasInstallScript": true,
             "dependencies": {
-                "@lumeweb/libs5": "0.0.0-20240318220243",
+                "@lumeweb/libs5": "0.0.0-20240321165322",
                 "@noble/hashes": "^1.3.2",
                 "axios": "^1.6.2",
                 "isomorphic-ws": "^5.0.0",
