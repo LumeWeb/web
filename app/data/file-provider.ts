@@ -3,9 +3,7 @@ import {S5Client} from "@lumeweb/s5-js";
 import {PROTOCOL_S5} from "@lumeweb/portal-sdk";
 import {Multihash} from "@lumeweb/libs5/lib/multihash.js";
 import {AxiosProgressEvent} from "axios";
-import {CancelablePromise} from "@lumeweb/s5-js/lib/axios.js";
-import {MetadataResult} from "@lumeweb/s5-js/lib/options/download.js";
-import {metadataMagicByte, Unpacker, CID, METADATA_TYPES, CID_TYPES} from "@lumeweb/libs5";
+import {CID, CID_TYPES, METADATA_TYPES, metadataMagicByte, Unpacker} from "@lumeweb/libs5";
 
 async function getIsManifest(s5: S5Client, hash: string): Promise<boolean | number> {
 
@@ -63,6 +61,7 @@ export interface FileItem {
     cid: string;
     type: string;
     mimeType: string;
+    pinned: string;
 }
 
 export const fileProvider: SdkProvider = {
@@ -81,12 +80,14 @@ export const fileProvider: SdkProvider = {
                         cid: new CID(manifest, mHash, pin.size).toString(),
                         type: "manifest",
                         mimeType: "application/octet-stream",
+                        pinned: pin.pinned_at,
                     });
                 } else {
                     items.push({
                         cid: new CID(CID_TYPES.RAW, Multihash.fromBase64Url(pin.hash), pin.size).toString(),
                         type: "raw",
                         mimeType: pin.mime_type,
+                        pinned: pin.pinned_at,
                     });
                 }
             }
