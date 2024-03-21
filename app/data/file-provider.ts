@@ -76,14 +76,15 @@ export const fileProvider: SdkProvider = {
                 const manifest = await getIsManifest(s5, pin.hash) as number;
 
                 if (manifest) {
+                    const mHash = Multihash.fromBase64Url(pin.hash);
                     items.push({
-                        cid: CID.fromHash(pin.hash, pin.size, manifest).toString(),
+                        cid: new CID(manifest, mHash, pin.size).toString(),
                         type: "manifest",
                         mimeType: "application/octet-stream",
                     });
                 } else {
                     items.push({
-                        cid: CID.fromHash(pin.hash, pin.size, CID_TYPES.RAW).toString(),
+                        cid: new CID(CID_TYPES.RAW, Multihash.fromBase64Url(pin.hash), pin.size).toString(),
                         type: "raw",
                         mimeType: pin.mime_type,
                     });
