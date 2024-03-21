@@ -16,7 +16,7 @@
     "@conform-to/react": "^1.0.2",
     "@conform-to/zod": "^1.0.2",
     "@fontsource-variable/manrope": "^5.0.19",
-    "@lumeweb/portal-sdk": "0.0.0-20240321203143",
+    "@lumeweb/portal-sdk": "0.0.0-20240321203634",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
