@@ -9,7 +9,7 @@
             "version": "0.0.0",
             "hasInstallScript": true,
             "dependencies": {
-                "@lumeweb/s5-js": "0.0.0-20240321161001",
+                "@lumeweb/s5-js": "0.0.0-20240321161413",
                 "axios": "^1.6.7",
                 "memize": "^2.1.0",
                 "orval": "^6.25.0",
@@ -2897,9 +2897,9 @@
             }
         },
         "node_modules/@lumeweb/s5-js": {
-            "version": "0.0.0-20240321161001",
-            "resolved": "https://registry.npmjs.org/@lumeweb/s5-js/-/s5-js-0.0.0-20240321161001.tgz",
-            "integrity": "sha512-1NZAMAeLIkRTRnOR0xVNgEeg3GZtEJ0s1+de/kipYGRc/6tklqdV+yKpdSKALC3VVUrMgwYXtzgs9bAqSbTggQ==",
+            "version": "0.0.0-20240321161413",
+            "resolved": "https://registry.npmjs.org/@lumeweb/s5-js/-/s5-js-0.0.0-20240321161413.tgz",
+            "integrity": "sha512-cKSWOobZ54bInkNUjBz1hXOTMPjL4toaYqR1sVYsj8RgDb8pMjrI9bvZmplENM3C8glW4jikNx3hvXBk+mZWcA==",
             "hasInstallScript": true,
             "dependencies": {
                 "@lumeweb/libs5": "0.0.0-20240318220243",
