@@ -313,7 +313,7 @@ const ChangePasswordSchema = z
   });
 
 const ChangePasswordForm = () => {
-  const { mutate: updatePassword } = useUpdatePassword<{ password: string }>();
+  const { mutate: updatePassword } = useUpdatePassword<UpdatePasswordFormRequest>();
   const [form, fields] = useForm({
     id: "login",
     constraint: getZodConstraint(ChangePasswordSchema),
@@ -327,6 +327,7 @@ const ChangePasswordForm = () => {
       const data = Object.fromEntries(new FormData(e.currentTarget).entries());
 
       updatePassword({
+          currentPassword: data.currentPassword.toString(),
           password: data.newPassword.toString(),
       });
     },
