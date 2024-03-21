@@ -18,16 +18,21 @@ import { Skeleton } from "./ui/skeleton";
 import { DataTablePagination } from "./table-pagination"
 
 interface DataTableProps<TData extends BaseRecord = BaseRecord, TValue = unknown> {
-  columns: ColumnDef<TData, TValue>[]
+  columns: ColumnDef<TData, TValue>[],
+  resource: string;
+  dataProviderName?: string;
 }
 
 export function DataTable<TData extends BaseRecord, TValue>({
   columns,
+  resource,
+  dataProviderName
 }: DataTableProps<TData, TValue>) {
   const table = useTable({
     columns,
     refineCoreProps: {
-      resource: "files"
+      resource,
+      dataProviderName: dataProviderName || "default"
     }
   })
 

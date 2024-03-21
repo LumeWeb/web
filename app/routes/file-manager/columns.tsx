@@ -46,7 +46,7 @@ const CreatedOnCell = ({ row }: { row: Row<File> }) => {
                 onPin(row.getValue("cid"));
               }}>
               <DrawingPinIcon className="mr-2" />
-              Ping CID
+              Pin CID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive">

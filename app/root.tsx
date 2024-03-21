@@ -48,6 +48,7 @@ export default function App() {
             notificationProvider={notificationProvider}
             dataProvider={{
                 default: providers.default,
+                files: providers.files,
                 pinning: providers.pinning
             }}
             resources={resources}

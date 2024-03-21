@@ -55,6 +55,8 @@ export default function FileManager() {
       </div>
       <DataTable
         columns={columns}
+        resource="file"
+        dataProviderName="files"
       />
     </GeneralLayout>
   );

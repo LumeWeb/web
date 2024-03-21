@@ -33,7 +33,7 @@ export const PinningNetworkBanner = () => {
       <Accordion type="single" defaultValue="item-1" collapsible>
         <AccordionItem value="item-1">
           <AccordionTrigger className="font-bold bg-primary px-4 rounded-tr-lg rounded-tl-lg">
-            {itemsLeft.length > 0 ? `${itemsLeft.length} left` : "Completed"}
+            {`${completedItems.length}/${cidList.length} items completed`}
           </AccordionTrigger>
           <AccordionContent>
             <Tabs className="w-full" defaultValue="inProgress">
