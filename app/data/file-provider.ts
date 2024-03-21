@@ -4,10 +4,23 @@ import { SdkProvider } from "~/data/sdk-provider.js";
 export const fileProvider = {
   getList: () => {
     console.log("Not implemented");
-    return Promise.resolve({
-      data: [],
-      total: 0,
-    });
+    return {
+      data: [
+        {
+          name: "whirly-final-draft.psd",
+          cid: "0xB45165ED3CD437B",
+          size: "1.89 MB",
+          createdOn: " 03/02/2024 at 13:29 PM",
+        },
+        {
+          name: "whirly-final-draft.psd",
+          cid: "0xB45165ED3CD437B",
+          size: "1.89 MB",
+          createdOn: " 03/02/2024 at 13:29 PM",
+        },
+      ],
+      total: 2
+    }
   },
   getOne: () => {
     console.log("Not implemented");

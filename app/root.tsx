@@ -38,6 +38,7 @@ export function Layout({children}: { children: React.ReactNode }) {
 }
 
 export default function App() {
+    console.log(import.meta.env.VITE_PORTAL_URL);
     const sdk = Sdk.create(import.meta.env.VITE_PORTAL_URL)
     const providers = getProviders(sdk);
     return (
@@ -45,7 +46,10 @@ export default function App() {
             authProvider={providers.auth}
             routerProvider={routerProvider}
             notificationProvider={notificationProvider}
-            dataProvider={providers.default}
+            dataProvider={{
+                default: providers.default,
+                pinning: providers.pinning
+            }}
             resources={resources}
             options={{disableTelemetry: true}}
         >

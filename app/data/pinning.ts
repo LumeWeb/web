@@ -5,7 +5,7 @@ interface PinningStatus {
 }
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
-class PinningProcess {
+export class PinningProcess {
     private static instances: Map<string, PinningStatus> = new Map();
 
     static async pin(id: string): Promise<{ success: boolean; message: string }> {
