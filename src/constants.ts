@@ -5,6 +5,7 @@ export const CID_TYPES = {
   RESOLVER: 0x25,
   USER_IDENTITY: 0x77,
   BRIDGE: 0x3a,
+  DIRECTORY: 0x5d,
   // format for dynamic encrypted CID
   // type algo key resolver_type mkey_ed255 pubkey
   // in entry: encrypt(RAW CID or MEDIA or SOMETHING)
