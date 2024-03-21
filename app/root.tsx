@@ -7,15 +7,16 @@ import type {LinksFunction} from "@remix-run/node";
 import '@fontsource-variable/manrope';
 import {Refine} from "@refinedev/core";
 import routerProvider from "@refinedev/remix-router";
-import { notificationProvider } from "~/data/notification-provider";
-import {SdkContextProvider} from "~/components/lib/sdk-context";
-import { Toaster } from "~/components/ui/toaster";
+import {notificationProvider} from "~/data/notification-provider";
+import {SdkContextProvider, useSdk} from "~/components/lib/sdk-context";
+import {Toaster} from "~/components/ui/toaster";
 import {getProviders} from "~/data/providers.js";
 import {Sdk} from "@lumeweb/portal-sdk";
 import resources from "~/data/resources.js";
+import {useMemo} from "react";
 
 export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: stylesheet },
+    {rel: "stylesheet", href: stylesheet},
 ];
 
 export function Layout({children}: { children: React.ReactNode }) {
@@ -29,7 +30,7 @@ export function Layout({children}: { children: React.ReactNode }) {
         </head>
         <body>
         {children}
-        <Toaster />
+        <Toaster/>
         <ScrollRestoration/>
         <Scripts/>
         </body>
@@ -37,9 +38,9 @@ export function Layout({children}: { children: React.ReactNode }) {
     );
 }
 
-export default function App() {
-    const sdk = Sdk.create(import.meta.env.VITE_PORTAL_URL)
-    const providers = getProviders(sdk);
+function App() {
+    const sdk = useSdk();
+    const providers = useMemo(() => getProviders(sdk as Sdk), [sdk]);
     return (
         <Refine
             authProvider={providers.auth}
@@ -49,10 +50,17 @@ export default function App() {
             resources={resources}
             options={{disableTelemetry: true}}
         >
-            <SdkContextProvider sdk={sdk}>
-                <Outlet/>
-            </SdkContextProvider>
+            <Outlet/>
         </Refine>
+    );
+}
+
+export default function Root() {
+    const sdk = Sdk.create(import.meta.env.VITE_PORTAL_URL)
+    return (
+        <SdkContextProvider sdk={sdk}>
+            <App/>
+        </SdkContextProvider>
     );
 }
 
