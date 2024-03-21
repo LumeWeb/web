@@ -27,7 +27,7 @@ export function DataTable<TData extends BaseRecord, TValue>({
   const table = useTable({
     columns,
     refineCoreProps: {
-      resource: "files"
+      resource: "file"
     }
   })
 
