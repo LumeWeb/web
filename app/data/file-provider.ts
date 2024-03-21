@@ -60,6 +60,7 @@ async function getIsManifest(s5: S5Client, hash: string): Promise<boolean | numb
 export interface FileItem {
     cid: string;
     type: string;
+    size: number;
     mimeType: string;
     pinned: string;
 }
@@ -80,6 +81,7 @@ export const fileProvider: SdkProvider = {
                         cid: new CID(manifest, mHash, pin.size).toString(),
                         type: "manifest",
                         mimeType: "application/octet-stream",
+                        size: pin.size,
                         pinned: pin.pinned_at,
                     });
                 } else {
@@ -87,6 +89,7 @@ export const fileProvider: SdkProvider = {
                         cid: new CID(CID_TYPES.RAW, Multihash.fromBase64Url(pin.hash), pin.size).toString(),
                         type: "raw",
                         mimeType: pin.mime_type,
+                        size: pin.size,
                         pinned: pin.pinned_at,
                     });
                 }
