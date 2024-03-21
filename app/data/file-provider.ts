@@ -11,13 +11,17 @@ async function getIsManifest(s5: S5Client, hash: string): Promise<boolean | numb
 
     let type: number | null;
     try {
+        const abort = new AbortController();
         const resp = s5.downloadData(hash, {
             onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
                 if (progressEvent.loaded >= 10) {
-                    resp.cancel();
+                    abort.abort();
                 }
             },
-        }) as CancelablePromise<ArrayBuffer>;
+            httpConfig: {
+                signal: abort.signal,
+            },
+        });
 
         const data = await resp;
         const unpacker = Unpacker.fromPacked(Buffer.from(data));
