@@ -29,10 +29,10 @@ import { DropdownMenu, DropdownMenuTrigger,  DropdownMenuContent, DropdownMenuGr
 import { Avatar } from "@radix-ui/react-avatar";
 import { cn } from "~/utils";
 import { useGetIdentity, useLogout } from "@refinedev/core";
-import { Identity } from "~/data/auth-provider";
+import type { Identity } from "~/data/auth-provider";
 
 
-export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
+export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   const location = useLocation();
   const { data: identity } = useGetIdentity<Identity>();
   const{ mutate: logout } = useLogout()

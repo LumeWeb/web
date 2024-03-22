@@ -1,14 +1,21 @@
-import Uppy, {debugLogger, type State, UppyFile} from "@uppy/core"
+import Uppy, { debugLogger, type State, type UppyFile } from "@uppy/core";
 
-import Tus from "@uppy/tus"
-import toArray from "@uppy/utils/lib/toArray"
+import Tus from "@uppy/tus";
+import toArray from "@uppy/utils/lib/toArray";
 
-import {type ChangeEvent, useCallback, useEffect, useMemo, useRef, useState} from "react"
-import DropTarget, {type DropTargetOptions} from "./uppy-dropzone"
-import {useSdk} from "~/components/lib/sdk-context.js";
-import UppyFileUpload from "~/components/lib/uppy-file-upload.js";
-import {PROTOCOL_S5, Sdk} from "@lumeweb/portal-sdk";
-import {S5Client, HashProgressEvent} from "@lumeweb/s5-js";
+import {
+  type ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import DropTarget, { type DropTargetOptions } from "./uppy-dropzone";
+import { useSdk } from "~/components/lib/sdk-context";
+import UppyFileUpload from "~/components/lib/uppy-file-upload";
+import { PROTOCOL_S5, type Sdk } from "@lumeweb/portal-sdk";
+import type { S5Client, HashProgressEvent } from "@lumeweb/s5-js";
 
 const LISTENING_EVENTS = [
   "upload",
@@ -16,46 +23,46 @@ const LISTENING_EVENTS = [
   "upload-error",
   "file-added",
   "file-removed",
-  "files-added"
-] as const
+  "files-added",
+] as const;
 
 export function useUppy() {
-    const sdk = useSdk()
+  const sdk = useSdk();
 
-    const [uploadLimit, setUploadLimit] = useState<number>(0)
+  const [uploadLimit, setUploadLimit] = useState<number>(0);
 
-    useEffect(() => {
-        async function getUploadLimit() {
-            try {
-                const limit = await sdk.account!().uploadLimit();
-                setUploadLimit(limit);
-            } catch (err) {
-                console.log('Error occured while fetching upload limit', err);
-            }
-        }
-        getUploadLimit();
-    }, []);
+  useEffect(() => {
+    async function getUploadLimit() {
+      try {
+        const limit = await sdk.account!().uploadLimit();
+        setUploadLimit(limit);
+      } catch (err) {
+        console.log("Error occured while fetching upload limit", err);
+      }
+    }
+    getUploadLimit();
+  }, [sdk.account]);
 
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [targetRef, _setTargetRef] = useState<HTMLElement | null>(null)
-  const uppyInstance = useRef<Uppy>()
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [targetRef, _setTargetRef] = useState<HTMLElement | null>(null);
+  const uppyInstance = useRef<Uppy>();
   const setRef = useCallback(
     (element: HTMLElement | null) => _setTargetRef(element),
-    []
-  )
-  const [, setUppyState] = useState<State>()
+    [],
+  );
+  const [, setUppyState] = useState<State>();
   const [state, setState] = useState<
     "completed" | "idle" | "initializing" | "error" | "uploading"
-  >("initializing")
+  >("initializing");
 
   const [inputProps, setInputProps] = useState<
     | {
-        ref: typeof inputRef
-        type: "file"
-        onChange: (event: ChangeEvent<HTMLInputElement>) => void
+        ref: typeof inputRef;
+        type: "file";
+        onChange: (event: ChangeEvent<HTMLInputElement>) => void;
       }
     | object
-  >({})
+  >({});
   const getRootProps = useMemo(
     () => () => {
       return {
@@ -63,103 +70,110 @@ export function useUppy() {
         onClick: () => {
           if (inputRef.current) {
             //@ts-expect-error -- dumb html
-            inputRef.current.value = null
-            inputRef.current.click()
-            console.log("clicked", { input: inputRef.current })
+            inputRef.current.value = null;
+            inputRef.current.click();
+            console.log("clicked", { input: inputRef.current });
           }
         },
-        role: "presentation"
-      }
+        role: "presentation",
+      };
     },
-    [setRef]
-  )
+    [setRef],
+  );
   const removeFile = useCallback(
     (id: string) => {
-      uppyInstance.current?.removeFile(id)
+      uppyInstance.current?.removeFile(id);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [targetRef, uppyInstance]
-  )
+    [targetRef, uppyInstance],
+  );
   const cancelAll = useCallback(
     () => uppyInstance.current?.cancelAll({ reason: "user" }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [targetRef, uppyInstance]
-  )
+    [targetRef, uppyInstance],
+  );
 
   useEffect(() => {
-    if (!targetRef) return
+    if (!targetRef) return;
 
-      const tusPreprocessor = async (fileIDs: string[]) => {
-        for(const fileID of fileIDs) {
-            const file = uppyInstance.current?.getFile(fileID) as UppyFile
-            // @ts-ignore
-            if (file.uploader === "tus") {
-                const hashProgressCb = (event: HashProgressEvent) => {
-                    uppyInstance.current?.emit("preprocess-progress", file, {
-                        uploadStarted: false,
-                        bytesUploaded: 0,
-                        preprocess: {
-                            mode: "determinate",
-                            message: "Hashing file...",
-                            value: Math.round((event.total / event.total) * 100)
-                        }
-                    })
-                }
-                const options = await sdk.protocols!().get<S5Client>(PROTOCOL_S5).getSdk().getTusOptions(file.data as File,  {}, {onHashProgress: hashProgressCb})
-                uppyInstance.current?.setFileState(fileID, {
-                    tus: options,
-                    meta: {
-                        ...options.metadata,
-                        ...file.meta,
-                    }
-                })
-            }
+    const tusPreprocessor = async (fileIDs: string[]) => {
+      for (const fileID of fileIDs) {
+        const file = uppyInstance.current?.getFile(fileID) as UppyFile;
+        // @ts-ignore
+        if (file.uploader === "tus") {
+          const hashProgressCb = (event: HashProgressEvent) => {
+            uppyInstance.current?.emit("preprocess-progress", file, {
+              uploadStarted: false,
+              bytesUploaded: 0,
+              preprocess: {
+                mode: "determinate",
+                message: "Hashing file...",
+                value: Math.round((event.total / event.total) * 100),
+              },
+            });
+          };
+          const options = await sdk.protocols!()
+            .get<S5Client>(PROTOCOL_S5)
+            .getSdk()
+            .getTusOptions(
+              file.data as File,
+              {},
+              { onHashProgress: hashProgressCb },
+            );
+          uppyInstance.current?.setFileState(fileID, {
+            tus: options,
+            meta: {
+              ...options.metadata,
+              ...file.meta,
+            },
+          });
         }
       }
+    };
 
     const uppy = new Uppy({
-        logger: debugLogger,
-        onBeforeUpload: (files) => {
-            for (const file of Object.entries(files)) {
-                // @ts-ignore
-                file[1].uploader = file[1].size > uploadLimit ? "tus" : "file";
-            }
+      logger: debugLogger,
+      onBeforeUpload: (files) => {
+        for (const file of Object.entries(files)) {
+          // @ts-ignore
+          file[1].uploader = file[1].size > uploadLimit ? "tus" : "file";
+        }
 
-            return true;
-        },
+        return true;
+      },
     }).use(DropTarget, {
-      target: targetRef
-    } as DropTargetOptions)
+      target: targetRef,
+    } as DropTargetOptions);
 
-    uppyInstance.current = uppy
+    uppyInstance.current = uppy;
     setInputProps({
       ref: inputRef,
       type: "file",
       onChange: (event) => {
-        const files = toArray(event.target.files)
+        const files = toArray(event.target.files);
         if (files.length > 0) {
-          uppyInstance.current?.log("[DragDrop] Files selected through input")
-          uppyInstance.current?.addFiles(files)
+          uppyInstance.current?.log("[DragDrop] Files selected through input");
+          uppyInstance.current?.addFiles(files);
         }
 
         uppy.iteratePlugins((plugin) => {
-            uppy.removePlugin(plugin);
+          uppy.removePlugin(plugin);
         });
 
-          uppy.use(UppyFileUpload, { sdk: sdk as Sdk })
+        uppy.use(UppyFileUpload, { sdk: sdk as Sdk });
 
-          let useTus = false;
+        let useTus = false;
 
-          uppyInstance.current?.getFiles().forEach((file) => {
-              if (file.size > uploadLimit) {
-                  useTus = true;
-              }
-          })
-
-          if (useTus) {
-              uppy.use(Tus, { limit: 6, parallelUploads: 10 })
-              uppy.addPreProcessor(tusPreprocessor)
+        uppyInstance.current?.getFiles().forEach((file) => {
+          if (file.size > uploadLimit) {
+            useTus = true;
           }
+        });
+
+        if (useTus) {
+          uppy.use(Tus, { limit: 6, parallelUploads: 10 });
+          uppy.addPreProcessor(tusPreprocessor);
+        }
 
         // We clear the input after a file is selected, because otherwise
         // change event is not fired in Chrome and Safari when a file
@@ -169,54 +183,52 @@ export function useUppy() {
         //    Chrome will not trigger change if we drop the same file twice (Issue #768).
         // @ts-expect-error TS freaks out, but this is fine
         // eslint-disable-next-line no-param-reassign
-        event.target.value = null
-      }
-    })
-
-
+        event.target.value = null;
+      },
+    });
 
     uppy.on("complete", (result) => {
       if (result.failed.length === 0) {
-        console.log("Upload successful üòÄ")
-        setState("completed")
+        console.log("Upload successful üòÄ");
+        setState("completed");
       } else {
-        console.warn("Upload failed üòû")
-        setState("error")
+        console.warn("Upload failed üòû");
+        setState("error");
       }
-      console.log("successful files:", result.successful)
-      console.log("failed files:", result.failed)
-    })
+      console.log("successful files:", result.successful);
+      console.log("failed files:", result.failed);
+    });
 
     const setStateCb = (event: (typeof LISTENING_EVENTS)[number]) => {
       switch (event) {
         case "upload":
-          setState("uploading")
-          break
+          setState("uploading");
+          break;
         case "upload-error":
-          setState("error")
-          break
+          setState("error");
+          break;
         default:
-          break
+          break;
       }
-      setUppyState(uppy.getState())
-    }
+      setUppyState(uppy.getState());
+    };
 
     for (const event of LISTENING_EVENTS) {
       uppy.on(event, function cb() {
-        setStateCb(event)
-      })
+        setStateCb(event);
+      });
     }
-    setState("idle")
-  }, [targetRef, uploadLimit])
+    setState("idle");
+  }, [targetRef, uploadLimit]);
 
   useEffect(() => {
     return () => {
-      uppyInstance.current?.cancelAll({ reason: "unmount" })
-      uppyInstance.current?.logout()
-      uppyInstance.current?.close()
-      uppyInstance.current = undefined
-    }
-  }, [])
+      uppyInstance.current?.cancelAll({ reason: "unmount" });
+      uppyInstance.current?.logout();
+      uppyInstance.current?.close();
+      uppyInstance.current = undefined;
+    };
+  }, []);
   return {
     getFiles: () => uppyInstance.current?.getFiles() ?? [],
     error: uppyInstance.current?.getState,
@@ -227,6 +239,6 @@ export function useUppy() {
     getInputProps: () => inputProps,
     getRootProps,
     removeFile,
-    cancelAll
-  }
+    cancelAll,
+  };
 }

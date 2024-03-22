@@ -47,7 +47,7 @@ export default function Login() {
         go({ to, type: "push" });
       }
     }
-  }, [isAuthLoading, authData]);
+  }, [isAuthLoading, authData, parsed, go]);
 
   return (
     <div className="p-10 h-screen relative">
@@ -109,16 +109,18 @@ const LoginForm = () => {
       return parseWithZod(formData, { schema: LoginSchema });
     },
     shouldValidate: "onSubmit",
-    onSubmit(e) {
+    onSubmit(e, { submission }) {
       e.preventDefault();
 
-      const data = Object.fromEntries(new FormData(e.currentTarget).entries());
-      login.mutate({
-        email: data.email.toString(),
-        password: data.password.toString(),
-        rememberMe: data.rememberMe.toString() === "on",
-        redirectTo: parsed.params?.to,
-      });
+      if (submission?.status === "success") {
+        const data = submission.value;
+        login.mutate({
+          email: data.email,
+          password: data.password,
+          rememberMe: data.rememberMe ?? false,
+          redirectTo: parsed.params?.to,
+        });
+      }
     },
   });
 

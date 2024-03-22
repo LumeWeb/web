@@ -1,8 +1,8 @@
 import { useMemo} from "react";
-import { BaseRecord } from "@refinedev/core";
+import type { BaseRecord } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import {
-  ColumnDef,
+  type ColumnDef,
   flexRender,
 } from "@tanstack/react-table";
 

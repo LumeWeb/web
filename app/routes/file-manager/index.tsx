@@ -18,8 +18,8 @@ import { Field } from "~/components/forms";
 export default function FileManager() {
   return (
     <Authenticated key="dashboard" v3LegacyAuthProviderCompatible>
-      <Dialog>
-        <GeneralLayout>
+      <GeneralLayout>
+        <Dialog>
           <h1 className="font-bold mb-4 text-lg">File Manager</h1>
           <FileCardList>
             <FileCard
@@ -67,23 +67,26 @@ export default function FileManager() {
             </DialogTrigger>
           </div>
           <DataTable columns={columns} />
-        </GeneralLayout>
-        <DialogHeader>
-          <DialogTitle>Pinning Contnet</DialogTitle>
-        </DialogHeader>
-        <DialogContent>
-          <form action="" className="w-full flex flex-col gap-y-4">
-            <Field
-              inputProps={{ name: "cids", placeholder: "Comma separated CIDs" }}
-              labelProps={{ htmlFor: "cids", children: "Content to Pin" }}
-            />
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Pin Content</DialogTitle>
+            </DialogHeader>
+            <form action="" className="w-full flex flex-col gap-y-4">
+              <Field
+                inputProps={{
+                  name: "cids",
+                  placeholder: "Comma separated CIDs",
+                }}
+                labelProps={{ htmlFor: "cids", children: "Content to Pin" }}
+              />
 
-            <Button type="submit" className="w-full">
-              Pin Content
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+              <Button type="submit" className="w-full">
+                Pin Content
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </GeneralLayout>
     </Authenticated>
   );
 }

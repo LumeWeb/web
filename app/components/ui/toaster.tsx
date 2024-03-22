@@ -14,7 +14,7 @@ export function Toaster() {
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, cancelMutation, ...props }) {
+      {toasts.map(({ id, title, description, action, cancelMutation, ...props }) => {
         const undoButton = cancelMutation ? <ToastAction altText="Undo" onClick={cancelMutation}>Undo</ToastAction> : undefined
         return (
           <Toast key={id} {...props}>
