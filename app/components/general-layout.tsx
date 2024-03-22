@@ -110,7 +110,7 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
             </Button>
 
             <DropdownMenu>
-              <DropdownMenuTrigger>
+              <DropdownMenuTrigger asChild>
                 <Button className="border rounded-full h-auto p-2 gap-x-2 text-ring font-semibold">
                   <Avatar className="bg-ring h-7 w-7 rounded-full" />
                   {`${identity?.firstName} ${identity?.lastName}`}

@@ -21,7 +21,7 @@ import { usePinning } from "~/hooks/usePinning";
 
 export default function FileManager() {
   return (
-    <Authenticated key="dashboard" v3LegacyAuthProviderCompatible>
+    <Authenticated key="file-manager">
       <GeneralLayout>
         <Dialog>
           <h1 className="font-bold mb-4 text-lg">File Manager</h1>
@@ -98,6 +98,7 @@ const PinFilesForm = () => {
     },
     shouldValidate: "onSubmit",
     onSubmit(e, { submission }) {
+      e.preventDefault();
       if (submission?.status === "success") {
         const value = submission.value;
 

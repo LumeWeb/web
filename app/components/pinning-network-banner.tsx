@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -10,25 +10,33 @@ import { usePinning } from "~/hooks/usePinning";
 import { Tabs, TabsTrigger, TabsList, TabsContent } from "./ui/tabs";
 import { Button } from "./ui/button";
 import { Cross2Icon } from "@radix-ui/react-icons";
-import { PinningStatus } from "~/data/pinning";
+import type { PinningStatus } from "~/data/pinning";
+import { PinningContext } from "~/providers/PinningProvider";
 
 export const PinningNetworkBanner = () => {
+  // const context = useContext(PinningContext);
   const { data } = usePinning();
 
   // TODO: Adapt to real API
   const itemsLeft = useMemo(
-    () => data?.items.filter((item: PinningStatus) => item.status.includes("inprogress")) || [],
+    () =>
+      data?.items.filter((item: PinningStatus) =>
+        item.status.includes("inprogress"),
+      ) || [],
     [data],
   );
 
   const completedItems = useMemo(
-    () => data?.items.filter((item: PinningStatus) => item.status.includes("completed")) || [],
+    () =>
+      data?.items.filter((item: PinningStatus) =>
+        item.status.includes("completed"),
+      ) || [],
     [data],
   );
 
   return (
     <div
-      className={`border border-border rounded-lg absolute w-1/3 bottom-4 right-4 ${
+      className={`bg-background border border-border rounded-lg absolute w-1/3 bottom-4 right-4 ${
         !data?.items.length ? "hidden" : "block"
       }`}>
       <Accordion type="single" defaultValue="item-1" collapsible>
@@ -73,29 +81,27 @@ export const PinningNetworkBanner = () => {
 };
 
 const PinCidItem = ({ item }: { item: PinningStatus }) => {
-  const { mutate } = usePinning();
+  const { unpin } = usePinning();
 
   return (
     <div className="px-4 mb-4">
-      <div className="flex justify-between items-center rounded-lg h-10 py-2 px-4 hover:bg-primary/50 group">
-        <span className="font-semibold">{item.id}</span>
-        <span className="group-hover:hidden">{item.progress}%</span>
-        <div className="gap-x-2 hidden group-hover:flex">
+      <div className="relative flex flex-col items-center rounded-lg py-2 px-4 hover:bg-primary/50 group">
+        <div className="flex justify-between items-center w-full">
+          <span className="font-semibold">{item.id}</span>
+          <span className="group-hover:hidden">{item.progress}%</span>
           <Button
             variant="ghost"
-            className="p-2 rounded-full h-6"
-            onClick={() => mutate({
-              cid: item.id,
-              type: "unpin"
-            })}>
+            className="absolute top-2 right-2 hidden group-hover:flex rounded-full h-3"
+            onClick={() =>
+              unpin({
+                cid: item.id,
+              })
+            }>
             <Cross2Icon />
           </Button>
         </div>
+        <Progress value={item.progress} className="h-2" />
       </div>
-      <Progress
-        value={item.progress}
-        className="h-2 w-[calc(100%-1rem)] ml-2"
-      />
     </div>
   );
 };
