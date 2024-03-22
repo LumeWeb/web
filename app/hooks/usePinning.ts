@@ -1,51 +1,62 @@
-import { useMutation } from "@tanstack/react-query";
-import { useContext } from "react";
+import { useNotification } from "@refinedev/core";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useContext } from "react";
 import { PinningProcess } from "~/data/pinning";
 import { PinningContext } from "~/providers/PinningProvider";
 
-// TODO: Adapt to real API
-
 export const usePinning = () => {
+  const queryClient = useQueryClient();
   const context = useContext(PinningContext);
+  const { open } = useNotification();
 
-  const { mutate } = useMutation({
-    mutationKey: ["pin-progress"],
-    mutationFn: async (variables: { cid: string, type: "pin" | "unpin" }) => {
-      const { cid, type } = variables;
-      switch (type) {
-        case "pin": {
-          const response = await PinningProcess.pin(cid);
+  const { mutate: pinMutation } = useMutation({
+    mutationKey: ["pin-mutation"],
+    mutationFn: async (variables: { cid: string }) => {
+      const { cid } = variables;
+      const response = await PinningProcess.pin(cid);
 
-          if (!response.success) {
-            open?.({
-              type: "destructive",
-              message: "Erorr pinning " + cid,
-              description: response.message,
-            });
-          }
-          break;
-        }
-        case "unpin": {
-          const response = await PinningProcess.unpin(cid);
-
-          if (!response.success) {
-            open?.({
-              type: "destructive",
-              message: "Erorr removing " + cid,
-              description: response.message,
-            });
-          }
-          
-          break;
-        }
+      if (!response.success) {
+        open?.({
+          type: "error",
+          message: `Error pinning ${cid}`,
+          description: response.message,
+        });
       }
 
-      context.queryClient.invalidateQueries({ queryKey: ["pin-progress"] })
-    }
+      queryClient.invalidateQueries({ queryKey: ["pin-progress"] });
+    },
   });
+
+  const { mutate: unpinMutation } = useMutation({
+    mutationKey: ["unpin-mutation"],
+    mutationFn: async (variables: { cid: string }) => {
+      const { cid } = variables;
+      const response = await PinningProcess.unpin(cid);
+
+      if (!response.success) {
+        open?.({
+          type: "error",
+          message: `Error removing ${cid}`,
+          description: response.message,
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ["pin-progress"] });
+    },
+  });
+
+  const bulkPin = useCallback(
+    (cids: string[]) => {
+      for (const cid of cids) {
+        pinMutation({ cid });
+      }
+    },
+    [pinMutation],
+  );
 
   return {
     ...context.query,
-    mutate
+    pin: pinMutation,
+    unpin: unpinMutation,
+    bulkPin,
   };
 };

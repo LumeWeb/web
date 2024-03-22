@@ -14,6 +14,10 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Field } from "~/components/forms";
+import { z } from "zod";
+import { getFormProps, useForm } from "@conform-to/react";
+import { getZodConstraint, parseWithZod } from "@conform-to/zod";
+import { usePinning } from "~/hooks/usePinning";
 
 export default function FileManager() {
   return (
@@ -72,25 +76,55 @@ export default function FileManager() {
             dataProviderName="files"
           />
           <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Pin Content</DialogTitle>
-            </DialogHeader>
-            <form action="" className="w-full flex flex-col gap-y-4">
-              <Field
-                inputProps={{
-                  name: "cids",
-                  placeholder: "Comma separated CIDs",
-                }}
-                labelProps={{ htmlFor: "cids", children: "Content to Pin" }}
-              />
-
-              <Button type="submit" className="w-full">
-                Pin Content
-              </Button>
-            </form>
+            <PinFilesForm />
           </DialogContent>
         </Dialog>
       </GeneralLayout>
     </Authenticated>
   );
 }
+
+const PinFilesSchema = z.object({
+  cids: z.string().transform((value) => value.split(",")),
+});
+
+const PinFilesForm = () => {
+  const { bulkPin } = usePinning();
+  const [form, fields] = useForm({
+    id: "pin-files",
+    constraint: getZodConstraint(PinFilesSchema),
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: PinFilesSchema });
+    },
+    shouldValidate: "onSubmit",
+    onSubmit(e, { submission }) {
+      if (submission?.status === "success") {
+        const value = submission.value;
+
+        bulkPin(value.cids);
+      }
+    },
+  });
+
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle>Pin Content</DialogTitle>
+      </DialogHeader>
+      <form {...getFormProps(form)} className="w-full flex flex-col gap-y-4">
+        <Field
+          inputProps={{
+            name: fields.cids.name,
+            placeholder: "Comma separated CIDs",
+          }}
+          labelProps={{ htmlFor: "cids", children: "Content to Pin" }}
+          errors={fields.cids.errors}
+        />
+
+        <Button type="submit" className="w-full">
+          Pin Content
+        </Button>
+      </form>
+    </>
+  );
+};

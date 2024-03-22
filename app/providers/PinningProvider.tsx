@@ -1,11 +1,11 @@
 import {
-  QueryClient,
-  UseQueryResult,
+  type QueryClient,
+  type UseQueryResult,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
-import { PinningProcess, PinningStatus } from "~/data/pinning";
+import { PinningProcess, type PinningStatus } from "~/data/pinning";
 
 export interface IPinningData {
   cid: string;
