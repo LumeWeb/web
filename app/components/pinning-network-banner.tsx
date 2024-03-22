@@ -21,7 +21,7 @@ export const PinningNetworkBanner = () => {
   const itemsLeft = useMemo(
     () =>
       data?.items.filter((item: PinningStatus) =>
-        item.status.includes("inprogress"),
+        item.status.includes("processing"),
       ) || [],
     [data],
   );

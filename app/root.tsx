@@ -21,6 +21,7 @@ import { Sdk } from "@lumeweb/portal-sdk";
 import resources from "~/data/resources.js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMemo } from "react";
+import {PinningProcess} from "~/data/pinning.js";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -50,6 +51,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 function App() {
   const sdk = useSdk();
   const providers = useMemo(() => getProviders(sdk as Sdk), [sdk]);
+    useMemo(() => PinningProcess.setupSdk(sdk as Sdk), [sdk]);
   return (
     <QueryClientProvider client={queryClient}>
       <Refine
