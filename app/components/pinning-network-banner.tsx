@@ -6,14 +6,14 @@ import {
   AccordionTrigger,
 } from "./ui/accordion";
 import { Progress } from "./ui/progress";
-import { usePinning, useUnpinMutation } from "~/hooks/usePinnning";
+import { usePinning } from "~/hooks/usePinning";
 import { Tabs, TabsTrigger, TabsList, TabsContent } from "./ui/tabs";
 import { Button } from "./ui/button";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { PinningStatus } from "~/data/pinning";
 
 export const PinningNetworkBanner = () => {
-  const { data} = usePinning();
+  const { data } = usePinning();
 
   // TODO: Adapt to real API
   const itemsLeft = useMemo(
@@ -73,7 +73,7 @@ export const PinningNetworkBanner = () => {
 };
 
 const PinCidItem = ({ item }: { item: PinningStatus }) => {
-  const { mutate } = useUnpinMutation();
+  const { mutate } = usePinning();
 
   return (
     <div className="px-4 mb-4">
@@ -86,6 +86,7 @@ const PinCidItem = ({ item }: { item: PinningStatus }) => {
             className="p-2 rounded-full h-6"
             onClick={() => mutate({
               cid: item.id,
+              type: "unpin"
             })}>
             <Cross2Icon />
           </Button>

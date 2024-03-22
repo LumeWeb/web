@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
-import { usePinMutation } from "~/hooks/usePinnning";
+import { usePinning } from "~/hooks/usePinning";
 import { cn } from "~/utils";
 
 // This type is used to define the shape of our data.
@@ -25,7 +25,7 @@ export type File = {
 
 const CreatedOnCell = ({ row }: { row: Row<File> }) => {
   // const { open } = useNotification();
-  const { mutate } = usePinMutation();
+  const { mutate } = usePinning();
 
   return (
     <div className="flex items-center justify-between">
@@ -45,6 +45,7 @@ const CreatedOnCell = ({ row }: { row: Row<File> }) => {
                 console.log(`Adding ${row.getValue("cid")} for pinning...`);
                 mutate({
                   cid: row.getValue("cid"),
+                  type: "pin"
                 });
               }}>
               <DrawingPinIcon className="mr-2" />

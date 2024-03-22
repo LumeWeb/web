@@ -30,7 +30,7 @@ import { Avatar } from "@radix-ui/react-avatar";
 import { cn } from "~/utils";
 import { useGetIdentity, useLogout } from "@refinedev/core";
 import { Identity } from "~/data/auth-provider";
-import { PinningNetworkBanner } from "./pinnning-network-banner";
+import { PinningNetworkBanner } from "./pinning-network-banner";
 import { PinningProvider } from "~/providers/PinningProvider";
 
 
