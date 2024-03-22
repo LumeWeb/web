@@ -58,7 +58,7 @@ export const FieldCheckbox = ({
   const input = useInputControl({
     key,
     name: inputProps.name,
-    formId: inputProps.form,
+    formId: inputProps.form,  
     initialValue: defaultChecked ? checkedValue : undefined
   })
   const fallbackId = useId()
