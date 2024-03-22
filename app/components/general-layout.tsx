@@ -25,17 +25,28 @@ import {
   PageIcon,
   ThemeIcon,
 } from "./icons";
-import { DropdownMenu, DropdownMenuTrigger,  DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem } from "./ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+} from "./ui/dropdown-menu";
 import { Avatar } from "@radix-ui/react-avatar";
 import { cn } from "~/utils";
 import { useGetIdentity, useLogout } from "@refinedev/core";
 import type { Identity } from "~/data/auth-provider";
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "./ui/tooltip";
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   const location = useLocation();
   const { data: identity } = useGetIdentity<Identity>();
-  const{ mutate: logout } = useLogout()
+  const { mutate: logout } = useLogout();
   return (
     <div className="h-full flex flex-row">
       <header className="p-10 pr-0 flex flex-col w-[240px] h-full scroll-m-0 overflow-hidden">
@@ -246,6 +257,7 @@ const UploadFileItem = ({
   file: UppyFile;
   onRemove: (id: string) => void;
 }) => {
+  const sizeInMb = bytestoMegabytes(file.size).toFixed(2);
   return (
     <div className="flex flex-col w-full py-4 px-2 bg-primary-dark">
       <div className="flex text-primary-1 items-center justify-between">
@@ -257,12 +269,23 @@ const UploadFileItem = ({
               <PageIcon className="w-4 h-4" />
             )}
           </div>
-          <p className="w-full flex justify-between items-center">
-            <span className="truncate text-ellipsis max-w-[30ch]">
-              {file.name}
-            </span>{" "}
-            <span>({bytestoMegabytes(file.size).toFixed(2)} MB)</span>
-          </p>
+          <TooltipProvider>
+            <Tooltip delayDuration={500}>
+              <TooltipTrigger>
+                <p className="w-full flex justify-between items-center">
+                  <span className="truncate text-ellipsis max-w-[20ch]">
+                    {file.name}
+                  </span>{" "}
+                  <span>({sizeInMb}MB)</span>
+                </p>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {file.name} ({sizeInMb}MB)
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <Button
           size={"icon"}
