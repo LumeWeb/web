@@ -13,10 +13,13 @@ import { Toaster } from "~/components/ui/toaster";
 import {getProviders} from "~/data/providers.js";
 import {Sdk} from "@lumeweb/portal-sdk";
 import resources from "~/data/resources.js";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
 ];
+
+const queryClient = new QueryClient();
 
 export function Layout({children}: { children: React.ReactNode }) {
     return (
@@ -42,22 +45,23 @@ export default function App() {
     const sdk = Sdk.create(import.meta.env.VITE_PORTAL_URL)
     const providers = getProviders(sdk);
     return (
-        <Refine
-            authProvider={providers.auth}
-            routerProvider={routerProvider}
-            notificationProvider={notificationProvider}
-            dataProvider={{
-                default: providers.default,
-                files: providers.files,
-                pinning: providers.pinning
-            }}
-            resources={resources}
-            options={{disableTelemetry: true}}
-        >
-            <SdkContextProvider sdk={sdk}>
-                <Outlet/>
-            </SdkContextProvider>
-        </Refine>
+        <QueryClientProvider client={queryClient}>
+            <Refine
+                authProvider={providers.auth}
+                routerProvider={routerProvider}
+                notificationProvider={notificationProvider}
+                dataProvider={{
+                    default: providers.default,
+                    files: providers.files
+                }}
+                resources={resources}
+                options={{disableTelemetry: true}}
+            >
+                <SdkContextProvider sdk={sdk}>
+                    <Outlet/>
+                </SdkContextProvider>
+            </Refine>
+        </QueryClientProvider>
     );
 }
 

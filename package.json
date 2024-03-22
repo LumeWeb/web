@@ -37,6 +37,7 @@
     "@refinedev/remix-router": "https://gitpkg.now.sh/LumeWeb/refine/packages/remix?remix",
     "@remix-run/node": "^2.8.0",
     "@remix-run/react": "^2.8.0",
+    "@tanstack/react-query": "^5.28.6",
     "@tanstack/react-table": "^8.13.2",
     "@uppy/core": "^3.9.3",
     "@uppy/tus": "^3.5.3",

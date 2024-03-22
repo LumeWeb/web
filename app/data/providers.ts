@@ -4,7 +4,6 @@ import {Sdk} from "@lumeweb/portal-sdk";
 import {accountProvider} from "~/data/account-provider.js";
 import type {SdkProvider} from "~/data/sdk-provider.js";
 import {createPortalAuthProvider} from "~/data/auth-provider.js";
-import { pinningProvider } from "./pinning-provider";
 
 interface DataProviders {
     default: SdkProvider;
@@ -25,7 +24,6 @@ export function getProviders(sdk: Sdk) {
         default: accountProvider,
         auth: createPortalAuthProvider(sdk),
         files: fileProvider,
-        pinning: pinningProvider
     };
 
     return providers;

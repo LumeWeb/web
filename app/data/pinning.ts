@@ -1,4 +1,4 @@
-interface PinningStatus {
+export interface PinningStatus {
     id: string;
     progress: number;
     status: 'inprogress' | 'completed' | 'stale';
@@ -30,13 +30,26 @@ export class PinningProcess {
         return { success: true, message: "Pinning process started" };
     }
 
-    static *pollProgress(id: string): Generator<PinningStatus | null, void, unknown> {
-        let status = PinningProcess.instances.get(id);
-        while (status && status.status !== 'completed') {
-            yield status;
-            status = PinningProcess.instances.get(id);
+    static async unpin(id: string): Promise<{ success: boolean; message: string }> {
+        if (!PinningProcess.instances.has(id)) {
+            return { success: false, message: "ID not found or not being processed" };
         }
-        yield status ?? null; // Yield the final status, could be null if ID doesn't exist
+
+        PinningProcess.instances.delete(id);
+        return { success: true, message: "Pinning process removed" }
+    }
+
+    static *pollAllProgress(): Generator<PinningStatus[], void, unknown> {
+        let allStatuses = Array.from(PinningProcess.instances.values());
+        let inProgress = allStatuses.some(status => status.status !== 'completed');
+
+        while (inProgress) {
+            yield allStatuses;
+            allStatuses = Array.from(PinningProcess.instances.values());
+            inProgress = allStatuses.some(status => status.status !== 'completed');
+        }
+
+        yield allStatuses ?? []; // Yield the final statuses
     }
 }
 

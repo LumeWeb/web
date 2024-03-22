@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -6,34 +6,35 @@ import {
   AccordionTrigger,
 } from "./ui/accordion";
 import { Progress } from "./ui/progress";
-import { usePinning } from "~/hooks/usePinnning";
-import { IPinningData } from "~/providers/PinningProvider";
+import { usePinning, useUnpinMutation } from "~/hooks/usePinnning";
 import { Tabs, TabsTrigger, TabsList, TabsContent } from "./ui/tabs";
 import { Button } from "./ui/button";
 import { Cross2Icon } from "@radix-ui/react-icons";
+import { PinningStatus } from "~/data/pinning";
 
 export const PinningNetworkBanner = () => {
-  const { cidList } = usePinning();
+  const { data} = usePinning();
 
+  // TODO: Adapt to real API
   const itemsLeft = useMemo(
-    () => cidList.filter((item) => item.progress < 100),
-    [cidList],
+    () => data?.items.filter((item: PinningStatus) => item.status.includes("inprogress")) || [],
+    [data],
   );
 
   const completedItems = useMemo(
-    () => cidList.filter((item) => item.progress === 100),
-    [cidList],
+    () => data?.items.filter((item: PinningStatus) => item.status.includes("completed")) || [],
+    [data],
   );
 
   return (
     <div
       className={`border border-border rounded-lg absolute w-1/3 bottom-4 right-4 ${
-        !cidList.length ? "hidden" : "block"
+        !data?.items.length ? "hidden" : "block"
       }`}>
       <Accordion type="single" defaultValue="item-1" collapsible>
         <AccordionItem value="item-1">
           <AccordionTrigger className="font-bold bg-primary px-4 rounded-tr-lg rounded-tl-lg">
-            {`${completedItems.length}/${cidList.length} items completed`}
+            {`${completedItems.length}/${data?.items.length} items completed`}
           </AccordionTrigger>
           <AccordionContent>
             <Tabs className="w-full" defaultValue="inProgress">
@@ -43,8 +44,8 @@ export const PinningNetworkBanner = () => {
               </TabsList>
               <TabsContent value="inProgress">
                 {itemsLeft.length ? (
-                  itemsLeft.map((cid) => (
-                    <PinCidItem key={cid.cid} item={cid} />
+                  itemsLeft.map((item: PinningStatus) => (
+                    <PinCidItem key={item.id} item={item} />
                   ))
                 ) : (
                   <div className="text-primary-2 text-sm flex justify-center items-center h-10">
@@ -54,8 +55,8 @@ export const PinningNetworkBanner = () => {
               </TabsContent>
               <TabsContent value="completed">
                 {completedItems.length ? (
-                  completedItems.map((cid) => (
-                    <PinCidItem key={cid.cid} item={cid} />
+                  completedItems.map((item: PinningStatus) => (
+                    <PinCidItem key={item.id} item={item} />
                   ))
                 ) : (
                   <div className="text-muted text-sm flex justify-center items-center h-10">
@@ -71,29 +72,21 @@ export const PinningNetworkBanner = () => {
   );
 };
 
-const PinCidItem = ({ item }: { item: IPinningData }) => {
-  const { getProgress, onRemoveCidFromList } = usePinning();
-
-  useEffect(() => {
-    if (item.progress < 100) {
-      const intervalId = setInterval(() => {
-        getProgress(item.cid);
-      }, 1000); // Adjust the interval time (1000ms = 1 second) as needed
-
-      return () => clearInterval(intervalId); // Clear interval on component unmount
-    }
-  }, [getProgress, item]); // Add dependencies to ensure the effect runs correctly
+const PinCidItem = ({ item }: { item: PinningStatus }) => {
+  const { mutate } = useUnpinMutation();
 
   return (
     <div className="px-4 mb-4">
       <div className="flex justify-between items-center rounded-lg h-10 py-2 px-4 hover:bg-primary/50 group">
-        <span className="font-semibold">{item.cid}</span>
+        <span className="font-semibold">{item.id}</span>
         <span className="group-hover:hidden">{item.progress}%</span>
         <div className="gap-x-2 hidden group-hover:flex">
           <Button
             variant="ghost"
             className="p-2 rounded-full h-6"
-            onClick={() => onRemoveCidFromList(item.cid)}>
+            onClick={() => mutate({
+              cid: item.id,
+            })}>
             <Cross2Icon />
           </Button>
         </div>

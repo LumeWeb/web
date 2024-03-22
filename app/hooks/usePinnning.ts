@@ -1,62 +1,73 @@
-import { useCustom, useNotification } from "@refinedev/core";
-import { usePinningContext } from "~/providers/PinningProvider";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { PinningProcess } from "~/data/pinning";
 
-export const usePinning = () => {
-  const { open } = useNotification();
-  const { data: cidList, setData } = usePinningContext();
+// TODO: Adapt to real API
 
-  const { data } = useCustom({
-    // useCustom requires URL and METHOD params
-    url: "",
-    method: "get",
-    dataProviderName: "pinning",
+export const usePinMutation = () => {
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation({
+    mutationFn: async ({ cid  }) => {
+      const response = await PinningProcess.pin(cid);
+
+      if (!response.success) {
+        open?.({
+          type: "destructive",
+          message: "Erorr pinning " + cid,
+          description: response.message,
+        });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["pin-progress"] })
+    }
   });
 
-  const onPin = async (cid: string) => {
-    if (!data?.pinCid) return;
+  return { mutate }
+}
 
-    const response = await data?.pinCid(cid);
+export const useUnpinMutation = () => {
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation({
+    mutationFn: async ({ cid }) => {
+      const response = await PinningProcess.unpin(cid);
 
-    if (response.success) {
-      setData((prev) => [...prev, { cid, progress: 0 }]);
-    } else {
-      open?.({
-        type: "destrunctive",
-        message: "Erorr pinning " + cid,
-        description: response.message,
-      });
+      if (!response.success) {
+        open?.({
+          type: "destructive",
+          message: "Erorr pinning " + cid,
+          description: response.message,
+        });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["pin-progress"] })
     }
-  };
+  });
 
-  const getProgress = (cid: string) => {
-    if (!data?.checkCidProgress) return;
+  return { mutate }
+}
 
-    const response = data?.checkCidProgress(cid);
+export const usePinning = () => {
+  const { data } = useQuery({
+    queryKey: ["pin-progress"],
+    refetchInterval: (query) => {
+      if (!query.state.data || !query.state.data.items.length) {
+        return false;
+      }
 
-    if (!response.done) {
-      setData((prev) =>
-        prev.map((cidInfo) => {
-          const newData = cidInfo;
+      return 1000;
+    },
+    refetchIntervalInBackground: true,
+    queryFn: () => {
+      const response = PinningProcess.pollAllProgress();
+      const result = response.next();
 
-          if (cidInfo.cid === cid) {
-            newData.progress = response.value.progress;
-
-            return newData;
-          }
-          return cidInfo;
-        }),
-      );
-    }
-  };
-
-  const onRemoveCidFromList = (cid: string) => {
-    setData((prev) => prev.filter((item) => item.cid !== cid));
-  };
+      return {
+        items: result.value || [],
+        lastUpdated: Date.now()
+      };
+    },
+  })
 
   return {
-    cidList,
-    onPin,
-    getProgress,
-    onRemoveCidFromList,
+    data
   };
 };
