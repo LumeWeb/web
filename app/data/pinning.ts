@@ -1,6 +1,7 @@
 import {PROTOCOL_S5, Sdk} from "@lumeweb/portal-sdk";
 import {useSdk} from "~/components/lib/sdk-context.js";
 import {S5Client} from "@lumeweb/s5-js";
+import {S5Error} from "@lumeweb/s5-js/lib/client.js";
 
 export interface PinningStatus {
     id: string;
@@ -25,14 +26,6 @@ export class PinningProcess {
 
         await s5.pin(id);
 
-        (async () => {
-            const ret = await s5.pinStatus(id);
-            pinningStatus.progress = ret.progress;
-            if (ret.status === 'completed') {
-                pinningStatus.status = 'completed';
-            }
-        })();
-
         return {success: true, message: "Pinning process started"};
     }
 
@@ -48,15 +41,40 @@ export class PinningProcess {
 
     static* pollAllProgress(): Generator<PinningStatus[], void, unknown> {
         let allStatuses = Array.from(PinningProcess.instances.values());
-        let inProgress = allStatuses.some(status => status.status !== 'completed');
+        let inProgress = allStatuses.some(status => {
+            PinningProcess.checkStatus(status.id);
+            return status.status !== 'completed';
+        });
 
         while (inProgress) {
             yield allStatuses;
             allStatuses = Array.from(PinningProcess.instances.values());
-            inProgress = allStatuses.some(status => status.status !== 'completed');
+            inProgress = allStatuses.some(status => {
+                PinningProcess.checkStatus(status.id);
+                return status.status !== 'completed';
+            });
         }
 
         yield allStatuses ?? []; // Yield the final statuses
+    }
+
+    private static async checkStatus(id: string) {
+        const s5 = PinningProcess.sdk?.protocols().get<S5Client>(PROTOCOL_S5)!.getSdk()!;
+        try {
+            const ret = await s5.pinStatus(id);
+            const status = PinningProcess.instances.get(id);
+            if (!status) {
+                return;
+            }
+
+            status.progress = ret.progress;
+            status.status = ret.status as any;
+        } catch (e) {
+            if ((e as S5Error).statusCode == 404) {
+                PinningProcess.instances.delete(id);
+            }
+            return
+        }
     }
 
     public static setupSdk(sdk: Sdk) {
