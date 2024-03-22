@@ -51,9 +51,9 @@ export function DataTable<TData extends BaseRecord, TValue>({
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
+              {headerGroup.headers.map((header, index) => {
                 return (
-                  <TableHead key={header.id} style={{ width: header.getSize() }}>
+                  <TableHead key={`FileDataTableHeader_${index}`} style={{ width: header.getSize() }}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -68,14 +68,14 @@ export function DataTable<TData extends BaseRecord, TValue>({
         </TableHeader>
         <TableBody>
           {rows.length ? (
-            rows.map((row) => (
+            rows.map((row, index) => (
               <TableRow
-                key={row.id}
+                key={`FileDataTableRow_${index}`}
                 data-state={row.getIsSelected() && "selected"}
                 className="group"
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableCell key={`FileDataTableCell_${index}`}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
