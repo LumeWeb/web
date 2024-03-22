@@ -18,6 +18,7 @@ import { z } from "zod";
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { usePinning } from "~/hooks/usePinning";
+import {CID} from "@lumeweb/libs5";
 
 export default function FileManager() {
   return (
@@ -85,7 +86,19 @@ export default function FileManager() {
 }
 
 const PinFilesSchema = z.object({
-  cids: z.string().transform((value) => value.split(",")),
+    cids: z.string().transform((value) => value.split(",")).refine((value) => {
+        return value.every((cid) => {
+            try {
+                CID.decode(cid)
+            } catch (e) {
+                return false
+            }
+
+            return true
+        });
+    },(val) => ({
+        message: `${val} is not a valid CID`,
+    })),
 });
 
 const PinFilesForm = () => {
