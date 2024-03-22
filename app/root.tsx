@@ -7,16 +7,17 @@ import type {LinksFunction} from "@remix-run/node";
 import '@fontsource-variable/manrope';
 import {Refine} from "@refinedev/core";
 import routerProvider from "@refinedev/remix-router";
-import { notificationProvider } from "~/data/notification-provider";
-import {SdkContextProvider} from "~/components/lib/sdk-context";
-import { Toaster } from "~/components/ui/toaster";
+import {notificationProvider} from "~/data/notification-provider";
+import {SdkContextProvider, useSdk} from "~/components/lib/sdk-context";
+import {Toaster} from "~/components/ui/toaster";
 import {getProviders} from "~/data/providers.js";
 import {Sdk} from "@lumeweb/portal-sdk";
 import resources from "~/data/resources.js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {useMemo} from "react";
 
 export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: stylesheet },
+    {rel: "stylesheet", href: stylesheet},
 ];
 
 const queryClient = new QueryClient();
@@ -30,9 +31,9 @@ export function Layout({children}: { children: React.ReactNode }) {
             <Meta/>
             <Links/>
         </head>
-        <body>
+        <body className="overflow-hidden">
         {children}
-        <Toaster />
+        <Toaster/>
         <ScrollRestoration/>
         <Scripts/>
         </body>
@@ -40,10 +41,9 @@ export function Layout({children}: { children: React.ReactNode }) {
     );
 }
 
-export default function App() {
-    console.log(import.meta.env.VITE_PORTAL_URL);
-    const sdk = Sdk.create(import.meta.env.VITE_PORTAL_URL)
-    const providers = getProviders(sdk);
+function App() {
+    const sdk = useSdk();
+    const providers = useMemo(() => getProviders(sdk as Sdk), [sdk]);
     return (
         <QueryClientProvider client={queryClient}>
             <Refine
@@ -62,6 +62,15 @@ export default function App() {
                 </SdkContextProvider>
             </Refine>
         </QueryClientProvider>
+    );
+}
+
+export default function Root() {
+    const sdk = Sdk.create(import.meta.env.VITE_PORTAL_URL)
+    return (
+        <SdkContextProvider sdk={sdk}>
+            <App/>
+        </SdkContextProvider>
     );
 }
 

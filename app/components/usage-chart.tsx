@@ -50,7 +50,7 @@ export const UsageChart = ({ label, dataset }: UsageChartProps) => {
           <AnimatedAxis
             orientation="bottom"
             hideTicks
-            tickTransform="translateX(50%)"
+            tickTransform="translate(50 0)"
             tickLabelProps={{ className: "text-sm" }}
           />
           <AnimatedAxis

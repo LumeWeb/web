@@ -1,6 +1,6 @@
 import { Label } from "@radix-ui/react-label"
 import { Input } from "./ui/input"
-import { FieldName, useInputControl } from "@conform-to/react"
+import { type FieldName, useInputControl } from "@conform-to/react"
 import { useId } from "react"
 import { cn } from "~/utils"
 import { Checkbox } from "~/components/ui/checkbox"
@@ -58,7 +58,7 @@ export const FieldCheckbox = ({
   const input = useInputControl({
     key,
     name: inputProps.name,
-    formId: inputProps.form,
+    formId: inputProps.form,  
     initialValue: defaultChecked ? checkedValue : undefined
   })
   const fallbackId = useId()

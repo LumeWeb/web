@@ -47,11 +47,11 @@ export default function Register() {
   const login = useLogin<AuthFormRequest>();
   const { open } = useNotification();
   const [form, fields] = useForm({
-    id: "register",
-    constraint: getZodConstraint(RegisterSchema),
-    onValidate({ formData }) {
-      return parseWithZod(formData, { schema: RegisterSchema });
-    },
+      id: "register",
+      constraint: getZodConstraint(RegisterSchema),
+      onValidate({formData}) {
+          return parseWithZod(formData, {schema: RegisterSchema});
+      },
       onSubmit(e) {
           e.preventDefault();
 
@@ -61,23 +61,9 @@ export default function Register() {
               password: data.password.toString(),
               firstName: data.firstName.toString(),
               lastName: data.lastName.toString(),
-          }, {
-                onSuccess: () => {
-                  open?.({
-                    type: "success",
-                    message: "Verify your Email",
-                    description: "An Email was sent to your email address. Please verify your email address to activate your account.",
-                    key: "register-success"
-                  })
-                    login.mutate({
-                        email: data.email.toString(),
-                        password: data.password.toString(),
-                        rememberMe: false,
-                    })
-                }
-            })
-          }
-    });
+          })
+      }
+  });
 
   return (
     <div className="p-10 h-screen relative">

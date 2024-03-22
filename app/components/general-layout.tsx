@@ -25,20 +25,30 @@ import {
   PageIcon,
   ThemeIcon,
 } from "./icons";
-import { DropdownMenu, DropdownMenuTrigger,  DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem } from "./ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+} from "./ui/dropdown-menu";
 import { Avatar } from "@radix-ui/react-avatar";
 import { cn } from "~/utils";
 import { useGetIdentity, useLogout } from "@refinedev/core";
-import { Identity } from "~/data/auth-provider";
 import { PinningNetworkBanner } from "./pinning-network-banner";
 import { PinningProvider } from "~/providers/PinningProvider";
+import type { Identity } from "~/data/auth-provider";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "./ui/tooltip";
 
-
-export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
+export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   const location = useLocation();
   const { data: identity } = useGetIdentity<Identity>();
-  const{ mutate: logout } = useLogout()
-
+  const { mutate: logout } = useLogout();
   return (
     <PinningProvider>
       <div className="h-full flex flex-row">
@@ -93,7 +103,6 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
             </DialogContent>
           </Dialog>
         </header>
-
         <div className="flex-1 overflow-y-auto p-10">
           <div className="flex items-center gap-x-4 justify-end">
             <Button variant="ghost" className="rounded-full w-fit">
@@ -142,7 +151,11 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren<{}>) => {
                   <Button
                     variant={"link"}
                     className="flex flex-row gap-x-2 text-input-placeholder">
-                    <img className="h-5" src={lumeColorLogoPng} alt="Lume Logo" />
+                    <img
+                      className="h-5"
+                      src={lumeColorLogoPng}
+                      alt="Lume Logo"
+                    />
                     Connect with us
                   </Button>
                 </Link>
@@ -252,6 +265,7 @@ const UploadFileItem = ({
   file: UppyFile;
   onRemove: (id: string) => void;
 }) => {
+  const sizeInMb = bytestoMegabytes(file.size).toFixed(2);
   return (
     <div className="flex flex-col w-full py-4 px-2 bg-primary-dark">
       <div className="flex text-primary-1 items-center justify-between">
@@ -263,12 +277,23 @@ const UploadFileItem = ({
               <PageIcon className="w-4 h-4" />
             )}
           </div>
-          <p className="w-full flex justify-between items-center">
-            <span className="truncate text-ellipsis max-w-[30ch]">
-              {file.name}
-            </span>{" "}
-            <span>({bytestoMegabytes(file.size).toFixed(2)} MB)</span>
-          </p>
+          <TooltipProvider>
+            <Tooltip delayDuration={500}>
+              <TooltipTrigger>
+                <p className="w-full flex justify-between items-center">
+                  <span className="truncate text-ellipsis max-w-[20ch]">
+                    {file.name}
+                  </span>{" "}
+                  <span>({sizeInMb}MB)</span>
+                </p>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {file.name} ({sizeInMb}MB)
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <Button
           size={"icon"}

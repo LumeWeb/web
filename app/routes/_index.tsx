@@ -1,19 +1,12 @@
-import { useGo, useIsAuthenticated } from "@refinedev/core";
+import {Authenticated} from "@refinedev/core";
+import {Navigate} from "@remix-run/react";
 
 export default function Index() {
-  const { isLoading, data } = useIsAuthenticated();
-
-  const go = useGo();
-
-  if (isLoading) {
-    return <>Checking Login Status</>;
-  }
-
-  if (data?.authenticated) {
-    go({ to: "/dashboard", type: "replace" });
-  } else {
-    go({ to: "/login", type: "replace" });
-  }
-
-  return <>Redirecting</>;
+    return (
+        <Authenticated v3LegacyAuthProviderCompatible key={"index"} loading={
+            <>Checking Login Status</>
+        }>
+            <Navigate to="/dashboard" replace/>
+        </Authenticated>
+    )
 }

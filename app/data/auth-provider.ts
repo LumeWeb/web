@@ -1,14 +1,16 @@
-import type {AuthProvider, UpdatePasswordFormTypes} from "@refinedev/core"
+import type {AuthProvider, HttpError, UpdatePasswordFormTypes} from "@refinedev/core"
 
 import type {
     AuthActionResponse,
     CheckResponse,
     IdentityResponse,
-    OnErrorResponse
+    OnErrorResponse,
+    SuccessNotificationResponse
     // @ts-ignore
 } from "@refinedev/core/dist/interfaces/bindings/auth"
-import {Sdk} from "@lumeweb/portal-sdk";
+import {Sdk, AccountError} from "@lumeweb/portal-sdk";
 import type {AccountInfoResponse} from "@lumeweb/portal-sdk";
+
 
 export type AuthFormRequest = {
     email: string;
@@ -31,7 +33,7 @@ export type Identity = {
     email: string;
 }
 
-export interface UpdatePasswordFormRequest extends UpdatePasswordFormTypes{
+export interface UpdatePasswordFormRequest extends UpdatePasswordFormTypes {
     currentPassword: string;
 }
 
@@ -43,6 +45,54 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
         }
     };
 
+    type ResponseResult = {
+        ret: boolean | Error;
+        successNotification?: SuccessNotificationResponse;
+        redirectToSuccess?: string;
+        redirectToError?: string;
+        successCb?: () => void;
+    }
+
+    interface CheckResponseResult extends ResponseResult {
+        authenticated?: boolean;
+    }
+
+    const handleResponse = (result: ResponseResult): AuthActionResponse => {
+        if (result.ret) {
+            if (result.ret instanceof AccountError) {
+                return {
+                    success: false,
+                    error: result.ret satisfies HttpError,
+                    redirectTo: result.redirectToError
+                }
+            }
+
+            result.successCb?.();
+
+            return {
+                success: true,
+                successNotification: result.successNotification,
+                redirectTo: result.redirectToSuccess,
+            }
+        }
+
+        return {
+            success: false,
+            redirectTo: result.redirectToError
+        }
+    }
+
+    const handleCheckResponse = (result: CheckResponseResult): CheckResponse => {
+        const response = handleResponse(result);
+        const success = response.success;
+        delete response.success;
+
+        return {
+            ...response,
+            authenticated: success
+        }
+    }
+
     return {
         async login(params: AuthFormRequest): Promise<AuthActionResponse> {
             const ret = await sdk.account().login({
@@ -50,39 +100,30 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
                 password: params.password,
             });
 
-            let redirectTo: string | undefined;
+            return handleResponse({
+                ret, redirectToSuccess: "/dashboard", redirectToError: "/login", successCb: () => {
+                    sdk.setAuthToken(sdk.account().jwtToken);
+                }, successNotification: {
+                    message: "Login Successful",
+                    description: "You have successfully logged in."
 
-            if (ret) {
-                redirectTo = params.redirectTo;
-                if (!redirectTo) {
-                    redirectTo = ret ? "/dashboard" : "/login";
                 }
-                sdk.setAuthToken(sdk.account().jwtToken);
-            }
-
-            return {
-                success: ret,
-                redirectTo,
-            };
+            });
         },
 
         async logout(params: any): Promise<AuthActionResponse> {
             let ret = await sdk.account().logout();
-            return {success: ret, redirectTo: "/login"};
+            return handleResponse({ret, redirectToSuccess: "/login"});
         },
 
         async check(params?: any): Promise<CheckResponse> {
             const ret = await sdk.account().ping();
 
-            if (ret) {
-                maybeSetupAuth();
-            }
-
-            return {authenticated: ret, redirectTo: ret ? undefined : "/login"};
+            return handleCheckResponse({ret, redirectToError: "/login", successCb: maybeSetupAuth});
         },
 
         async onError(error: any): Promise<OnErrorResponse> {
-            return {logout: true};
+            return {};
         },
 
         async register(params: RegisterFormRequest): Promise<AuthActionResponse> {
@@ -92,7 +133,12 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
                 first_name: params.firstName,
                 last_name: params.lastName,
             });
-            return {success: ret, redirectTo: ret ? "/dashboard" : undefined};
+            return handleResponse({
+                ret, redirectToSuccess: "/login", successNotification: {
+                    message: "Registration Successful",
+                    description: "You have successfully registered. Please check your email to verify your account.",
+                }
+            });
         },
 
         async forgotPassword(params: any): Promise<AuthActionResponse> {
@@ -103,22 +149,12 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
             maybeSetupAuth();
             const ret = await sdk.account().updatePassword(params.currentPassword, params.password as string);
 
-            if (ret) {
-                if (ret instanceof Error) {
-                    return {
-                        success: false,
-                        error: ret
-                    }
+            return handleResponse({
+                ret, successNotification: {
+                    message: "Password Updated",
+                    description: "Your password has been updated successfully.",
                 }
-
-                return {
-                    success: true
-                }
-            } else {
-                return {
-                    success: false
-                }
-            }
+            });
         },
 
         async getPermissions(params?: Record<string, any>): Promise<AuthActionResponse> {

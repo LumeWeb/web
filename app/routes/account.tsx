@@ -4,7 +4,7 @@ import { DialogClose } from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import {
     Authenticated,
-    BaseKey,
+    type BaseKey,
     useGetIdentity,
     useUpdate,
     useUpdatePassword,
@@ -41,7 +41,7 @@ import { Input } from "~/components/ui/input";
 import { UsageCard } from "~/components/usage-card";
 
 import QRImg from "~/images/QR.png";
-import {UpdatePasswordFormRequest} from "~/data/auth-provider.js";
+import type {UpdatePasswordFormRequest} from "~/data/auth-provider";
 
 export default function MyAccount() {
   const { data: identity } = useGetIdentity<{ email: string }>();
@@ -85,7 +85,7 @@ export default function MyAccount() {
           <ManagementCard>
             <ManagementCardAvatar
               button={
-                <DialogTrigger className="absolute bottom-0 right-0 z-50">
+                <DialogTrigger asChild className="absolute bottom-0 right-0 z-50">
                   <Button
                     onClick={() => setModal({ ...openModal, changeAvatar: true })}
                     variant="outline"
@@ -102,7 +102,7 @@ export default function MyAccount() {
               {identity?.email}
             </ManagementCardContent>
             <ManagementCardFooter>
-              <DialogTrigger>
+              <DialogTrigger asChild>
                 <Button
                   className="h-12 gap-x-2"
                   onClick={() => setModal({ ...openModal, changeEmail: true })}>
@@ -134,7 +134,7 @@ export default function MyAccount() {
               <PasswordDots className="mt-6" />
             </ManagementCardContent>
             <ManagementCardFooter>
-              <DialogTrigger>
+              <DialogTrigger asChild>
                 <Button
                   className="h-12 gap-x-2"
                   onClick={() =>
@@ -152,7 +152,7 @@ export default function MyAccount() {
               Improve security by enabling 2FA.
             </ManagementCardContent>
             <ManagementCardFooter>
-              <DialogTrigger>
+              <DialogTrigger asChild>
                 <Button
                   className="h-12 gap-x-2"
                   onClick={() =>
@@ -313,7 +313,7 @@ const ChangePasswordSchema = z
   });
 
 const ChangePasswordForm = () => {
-  const { mutate: updatePassword } = useUpdatePassword<{ password: string }>();
+  const { mutate: updatePassword } = useUpdatePassword<UpdatePasswordFormRequest>();
   const [form, fields] = useForm({
     id: "login",
     constraint: getZodConstraint(ChangePasswordSchema),
@@ -327,6 +327,7 @@ const ChangePasswordForm = () => {
       const data = Object.fromEntries(new FormData(e.currentTarget).entries());
 
       updatePassword({
+          currentPassword: data.currentPassword.toString(),
           password: data.newPassword.toString(),
       });
     },
@@ -469,7 +470,7 @@ const ChangeAvatarForm = () => {
       {hasStarted ? (
         <div className="flex flex-col items-center gap-y-2 w-full text-primary-1">
           <CloudCheckIcon className="w-32 h-32" />
-          {isCompleted ? "Upload completed" : `0% completed`}
+          {isCompleted ? "Upload completed" : "0% completed"}
         </div>
       ) : null}
 

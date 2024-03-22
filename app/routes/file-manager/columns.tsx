@@ -1,5 +1,5 @@
-import { DrawingPinIcon, TrashIcon } from "@radix-ui/react-icons";
-import type { ColumnDef, Row } from "@tanstack/react-table";
+import { TrashIcon } from "@radix-ui/react-icons";
+import type { ColumnDef } from "@tanstack/react-table";
 import { FileIcon, MoreIcon } from "~/components/icons";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
@@ -7,12 +7,11 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
-import { usePinning } from "~/hooks/usePinning";
 import { cn } from "~/utils";
+import type { FileItem } from "~/data/file-provider";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -23,47 +22,7 @@ export type File = {
   createdOn: string;
 };
 
-const CreatedOnCell = ({ row }: { row: Row<File> }) => {
-  // const { open } = useNotification();
-  const { mutate } = usePinning();
-
-  return (
-    <div className="flex items-center justify-between">
-      {row.getValue("createdOn")}
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          className={cn(
-            "hidden group-hover:block data-[state=open]:block",
-            row.getIsSelected() && "block",
-          )}>
-          <MoreIcon />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuGroup>
-            <DropdownMenuItem
-              onClick={() => {
-                console.log(`Adding ${row.getValue("cid")} for pinning...`);
-                mutate({
-                  cid: row.getValue("cid"),
-                  type: "pin"
-                });
-              }}>
-              <DrawingPinIcon className="mr-2" />
-              Pin CID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">
-              <TrashIcon className="mr-2" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
-};
-
-export const columns: ColumnDef<File>[] = [
+export const columns: ColumnDef<FileItem>[] = [
   {
     id: "select",
     size: 20,
@@ -106,9 +65,34 @@ export const columns: ColumnDef<File>[] = [
     header: "Size",
   },
   {
-    accessorKey: "createdOn",
-    size: 200,
-    header: "Created On",
-    cell: ({ row }) => <CreatedOnCell row={row} />,
+    accessorKey: "pinned",
+    header: "Pinned On",
+    cell: ({ row }) => new Date(row.getValue("pinned")).toLocaleString(),
+  },
+  {
+    accessorKey: "actions",
+    header: () => null,
+    size: 20,
+    cell: ({ row }) => (
+      <div className="flex w-5 items-center justify-between">
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className={cn(
+              "hidden group-hover:block data-[state=open]:block",
+              row.getIsSelected() && "block",
+            )}>
+            <MoreIcon />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuGroup>
+              <DropdownMenuItem variant="destructive">
+                <TrashIcon className="mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    ),
   },
 ];
