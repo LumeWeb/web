@@ -4,15 +4,8 @@ import { FileIcon, MoreIcon } from "~/components/icons";
 import { Checkbox } from "~/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { cn } from "~/utils";
-
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-export type File = {
-    name: string;
-    cid: string;
-    size: string;
-    createdOn: string;
-};
+import {FileItem} from "~/data/file-provider.js";
+import {format} from "date-fns/fp";
 
 declare module '@tanstack/table-core' {
   interface TableMeta<TData extends RowData> {
@@ -20,13 +13,13 @@ declare module '@tanstack/table-core' {
   }
 }
 
-export const columns: ColumnDef<File>[] = [
+export const columns: ColumnDef<FileItem>[] = [
     {
       id: "select",
       size: 20,
       header: ({ table }) => (
         <Checkbox
-          
+
           checked={
             table.getIsAllPageRowsSelected() ||
             (table.getIsSomePageRowsSelected() && "indeterminate")
@@ -64,12 +57,12 @@ export const columns: ColumnDef<File>[] = [
         header: "Size",
     },
     {
-        accessorKey: "createdOn",
+        accessorKey: "pinned",
         size: 200,
-        header: "Created On",
+        header: "Pinned On",
         cell: ({ row }) => (
           <div className="flex items-center justify-between">
-            {row.getValue("createdOn")}
+            {format(row.getValue("pinned")) as unknown as string}
               <DropdownMenu>
               <DropdownMenuTrigger className={
                 cn("hidden group-hover:block data-[state=open]:block", row.getIsSelected() && "block")

@@ -30,7 +30,7 @@ export const accountProvider: SdkProvider = {
 
             if (ret) {
                 if (ret instanceof Error) {
-                    return Promise.reject(ret)
+                    return Promise.reject(ret satisfies HttpError)
                 }
             } else {
                 return Promise.reject();
