@@ -9,7 +9,7 @@ import {
   useUpdate,
   useUpdatePassword,
 } from "@refinedev/core";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { Field } from "~/components/forms";
 import { GeneralLayout } from "~/components/general-layout";
@@ -53,21 +53,28 @@ export default function MyAccount() {
     changeAvatar: false,
   });
 
+  const closeModal = () => {
+    setModal({
+      changeEmail: false,
+      changePassword: false,
+      setupTwoFactor: false,
+      changeAvatar: false,
+    });
+  };
+  const isModalOpen = Object.values(openModal).some(isOpen => isOpen);
+
   return (
-    <Authenticated key="account" v3LegacyAuthProviderCompatible>
+    <Authenticated key="account">
       <GeneralLayout>
         <h1 className="text-lg font-bold mb-4">My Account</h1>
         <Dialog
           onOpenChange={(open) => {
             if (!open) {
-              setModal({
-                changeEmail: false,
-                changePassword: false,
-                setupTwoFactor: false,
-                changeAvatar: false,
-              });
+              closeModal();
             }
-          }}>
+          }}
+          open={isModalOpen}
+          >
           <UsageCard
             label="Usage"
             currentUsage={2}
@@ -213,12 +220,12 @@ export default function MyAccount() {
             </ManagementCard>
           </div>
           <DialogContent>
-            {openModal.changeAvatar && <ChangeAvatarForm />}
+            {openModal.changeAvatar && <ChangeAvatarForm close={closeModal} />}
             {openModal.changeEmail && (
-              <ChangeEmailForm currentValue={identity?.email || ""} />
+              <ChangeEmailForm currentValue={identity?.email || ""} close={closeModal} />
             )}
-            {openModal.changePassword && <ChangePasswordForm />}
-            {openModal.setupTwoFactor && <SetupTwoFactorDialog />}
+            {openModal.changePassword && <ChangePasswordForm close={closeModal} />}
+            {openModal.setupTwoFactor && <SetupTwoFactorDialog close={closeModal} />}
           </DialogContent>
         </Dialog>
       </GeneralLayout>
@@ -243,9 +250,9 @@ const ChangeEmailSchema = z
     return true;
   });
 
-const ChangeEmailForm = ({ currentValue }: { currentValue: string }) => {
+const ChangeEmailForm = ({ currentValue, close }: { currentValue: string, close: () => void }) => {
   const { data: identity } = useGetIdentity<{ id: BaseKey }>();
-  const { mutate: updateEmail } = useUpdate();
+  const { mutate: updateEmail, isSuccess } = useUpdate();
   const [form, fields] = useForm({
     id: "login",
     constraint: getZodConstraint(ChangeEmailSchema),
@@ -268,6 +275,12 @@ const ChangeEmailForm = ({ currentValue }: { currentValue: string }) => {
       });
     },
   });
+
+  useEffect(() => {
+    if (isSuccess) {
+      close();
+    }
+  }, [isSuccess, close]);
 
   return (
     <>
@@ -320,8 +333,8 @@ const ChangePasswordSchema = z
     return true;
   });
 
-const ChangePasswordForm = () => {
-  const { mutate: updatePassword } =
+const ChangePasswordForm = ({ close }: { close: () => void }) => {
+  const { mutate: updatePassword, isSuccess } =
     useUpdatePassword<UpdatePasswordFormRequest>();
   const [form, fields] = useForm({
     id: "login",
@@ -341,6 +354,12 @@ const ChangePasswordForm = () => {
       });
     },
   });
+
+  useEffect(() => {
+    if (isSuccess) {
+      close();
+    }
+  }, [isSuccess, close]);
 
   return (
     <>
@@ -375,7 +394,7 @@ const ChangePasswordForm = () => {
   );
 };
 
-const SetupTwoFactorDialog = () => {
+const SetupTwoFactorDialog = ({ close }: { close: () => void }) => {
   const [continueModal, setContinue] = useState<boolean>(false);
 
   return (
@@ -414,7 +433,7 @@ const SetupTwoFactorDialog = () => {
   );
 };
 
-const ChangeAvatarForm = () => {
+const ChangeAvatarForm = ({ close }: { close: () => void }) => {
   const {
     getRootProps,
     getInputProps,
@@ -424,9 +443,6 @@ const ChangeAvatarForm = () => {
     removeFile,
     cancelAll,
   } = useUppy();
-
-  console.log({ state, files: getFiles() });
-
   const isUploading = state === "uploading";
   const isCompleted = state === "completed";
   const hasStarted = state !== "idle" && state !== "initializing";
@@ -438,6 +454,12 @@ const ChangeAvatarForm = () => {
       return URL.createObjectURL(file.data);
     }
   }, [file]);
+
+  useEffect(() => {
+    if (isCompleted) {
+      close();
+    }
+  }, [isCompleted, close]);
 
   return (
     <>

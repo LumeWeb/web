@@ -11,7 +11,7 @@ import { Authenticated } from "@refinedev/core";
 
 export default function Dashboard() {
   return (
-    <Authenticated key="dashboard" v3LegacyAuthProviderCompatible>
+    <Authenticated key="dashboard">
       <GeneralLayout>
         <h1 className="font-bold mb-4 text-3xl">Dashboard</h1>
         <UpgradeAccountBanner />
