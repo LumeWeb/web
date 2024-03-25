@@ -1,4 +1,4 @@
-import { useInvalidate, useNotification } from "@refinedev/core";
+import { useNotification } from "@refinedev/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useContext } from "react";
 import { PinningProcess } from "~/data/pinning";
@@ -8,7 +8,6 @@ export const usePinning = () => {
   const queryClient = useQueryClient();
   const context = useContext(PinningContext);
   const { open } = useNotification();
-  const invalidate = useInvalidate();
 
   const { status: pinStatus, data: pinData, mutate: pinMutation } = useMutation({
     mutationKey: ["pin-mutation"],
@@ -25,7 +24,6 @@ export const usePinning = () => {
       }
 
       queryClient.invalidateQueries({ queryKey: ["pin-progress", "file"] });
-      invalidate({ resource: "files", invalidates: ["list"] });
     },
   });
 
@@ -43,7 +41,6 @@ export const usePinning = () => {
         });
       }
       queryClient.invalidateQueries({ queryKey: ["pin-progress"] });
-      invalidate({ resource: "files", invalidates: ["list"] });
     },
   });
 

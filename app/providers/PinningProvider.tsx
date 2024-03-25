@@ -1,10 +1,11 @@
+import { useInvalidate } from "@refinedev/core";
 import {
   type QueryClient,
   type UseQueryResult,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { PinningProcess, type PinningStatus } from "~/data/pinning";
 
 export interface IPinningData {
@@ -26,11 +27,10 @@ export interface IPinningContextType {
 export const PinningContext = createContext<IPinningContextType>(
   {} as IPinningContextType,
 );
-
-export const usePinningContext = () => useContext(PinningContext);
-
-const usePinProgressQuery = () =>
-  useQuery({
+export const PinningProvider = ({ children }: React.PropsWithChildren) => {
+  const invalidate = useInvalidate();
+  const queryClient = useQueryClient();
+  const queryResult = useQuery({
     queryKey: ["pin-progress"],
     refetchInterval: (query) => {
       if (!query.state.data || !query.state.data.items.length) {
@@ -51,9 +51,24 @@ const usePinProgressQuery = () =>
     },
   });
 
-export const PinningProvider = ({ children }: React.PropsWithChildren) => {
-  const queryClient = useQueryClient();
-  const queryResult = usePinProgressQuery();
+  useEffect(() => {
+    if (
+      queryResult.isSuccess &&
+      queryResult.fetchStatus === "idle" &&
+      queryResult.isFetched
+    ) {
+      const hasCompletedItems = queryResult.data.items.some(item => item.status === 'completed');
+      if (hasCompletedItems) {
+        invalidate({ resource: "files", invalidates: ["list"] });
+      }
+    }
+  }, [
+    queryResult.fetchStatus,
+    queryResult.isSuccess,
+    queryResult.isFetched,
+    invalidate,
+    queryResult.data,
+  ]);
 
   return (
     <PinningContext.Provider value={{ query: queryResult, queryClient }}>
