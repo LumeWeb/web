@@ -4,6 +4,7 @@ import { type FieldName, useInputControl } from "@conform-to/react"
 import { useId } from "react"
 import { cn } from "~/utils"
 import { Checkbox } from "~/components/ui/checkbox"
+import { Textarea } from "./ui/textarea"
 
 export const Field = ({
   inputProps,
@@ -96,6 +97,36 @@ export const FieldCheckbox = ({
       </div>
     </>
   )
+}
+
+export function TextareaField({
+	labelProps,
+	textareaProps,
+	errors,
+	className,
+}: {
+	labelProps: React.LabelHTMLAttributes<HTMLLabelElement>
+	textareaProps: React.TextareaHTMLAttributes<HTMLTextAreaElement>
+	errors?: ListOfErrors
+	className?: string
+}) {
+	const fallbackId = useId()
+	const id = textareaProps.id ?? textareaProps.name ?? fallbackId
+	const errorId = errors?.length ? `${id}-error` : undefined
+	return (
+		<div className={className}>
+			<Label htmlFor={id} {...labelProps} />
+			<Textarea
+				id={id}
+				aria-invalid={errorId ? true : undefined}
+				aria-describedby={errorId}
+				{...textareaProps}
+			/>
+			<div className="min-h-[32px] pb-1 pt-1">
+				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
+			</div>
+		</div>
+	)
 }
 
 export type ListOfErrors = Array<string | null | undefined> | null | undefined

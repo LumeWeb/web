@@ -1,4 +1,4 @@
-import { useNotification } from "@refinedev/core";
+import { useInvalidate, useNotification } from "@refinedev/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useContext } from "react";
 import { PinningProcess } from "~/data/pinning";
@@ -8,8 +8,9 @@ export const usePinning = () => {
   const queryClient = useQueryClient();
   const context = useContext(PinningContext);
   const { open } = useNotification();
+  const invalidate = useInvalidate();
 
-  const { mutate: pinMutation } = useMutation({
+  const { status: pinStatus, data: pinData, mutate: pinMutation } = useMutation({
     mutationKey: ["pin-mutation"],
     mutationFn: async (variables: { cid: string }) => {
       const { cid } = variables;
@@ -23,11 +24,12 @@ export const usePinning = () => {
         });
       }
 
-      queryClient.invalidateQueries({ queryKey: ["pin-progress"] });
+      queryClient.invalidateQueries({ queryKey: ["pin-progress", "file"] });
+      invalidate({ resource: "files", invalidates: ["list"] });
     },
   });
 
-  const { mutate: unpinMutation } = useMutation({
+  const { status: unpinStatus, data: unpinData, mutate: unpinMutation } = useMutation({
     mutationKey: ["unpin-mutation"],
     mutationFn: async (variables: { cid: string }) => {
       const { cid } = variables;
@@ -41,6 +43,7 @@ export const usePinning = () => {
         });
       }
       queryClient.invalidateQueries({ queryKey: ["pin-progress"] });
+      invalidate({ resource: "files", invalidates: ["list"] });
     },
   });
 
@@ -54,7 +57,12 @@ export const usePinning = () => {
   );
 
   return {
-    ...context.query,
+    progressStatus: context.query.status,
+    progressData: context.query.data,
+    pinStatus,
+    pinData,
+    unpinStatus,
+    unpinData,
     pin: pinMutation,
     unpin: unpinMutation,
     bulkPin,

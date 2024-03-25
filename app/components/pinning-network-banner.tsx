@@ -1,4 +1,4 @@
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -11,13 +11,10 @@ import { Tabs, TabsTrigger, TabsList, TabsContent } from "./ui/tabs";
 import { Button } from "./ui/button";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import type { PinningStatus } from "~/data/pinning";
-import { PinningContext } from "~/providers/PinningProvider";
 
 export const PinningNetworkBanner = () => {
-  // const context = useContext(PinningContext);
-  const { data } = usePinning();
+  const { progressData: data } = usePinning();
 
-  // TODO: Adapt to real API
   const itemsLeft = useMemo(
     () =>
       data?.items.filter((item: PinningStatus) =>

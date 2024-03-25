@@ -13,18 +13,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { Field } from "~/components/forms";
+import { TextareaField } from "~/components/forms";
 import { z } from "zod";
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { usePinning } from "~/hooks/usePinning";
-import {CID} from "@lumeweb/libs5";
+import { CID } from "@lumeweb/libs5";
+import { useEffect, useState } from "react";
 
 export default function FileManager() {
+  const [open, setOpen] = useState(false);
+  const closeModal = () => setOpen(false);
+
   return (
     <Authenticated key="file-manager">
       <GeneralLayout>
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           <h1 className="font-bold mb-4 text-lg">File Manager</h1>
           <FileCardList>
             <FileCard
@@ -77,7 +81,7 @@ export default function FileManager() {
             dataProviderName="files"
           />
           <DialogContent>
-            <PinFilesForm />
+            <PinFilesForm close={closeModal} />
           </DialogContent>
         </Dialog>
       </GeneralLayout>
@@ -86,23 +90,29 @@ export default function FileManager() {
 }
 
 const PinFilesSchema = z.object({
-    cids: z.string().transform((value) => value.split(",")).refine((value) => {
+  cids: z
+    .string()
+    .transform((value) => value.split(","))
+    .refine(
+      (value) => {
         return value.every((cid) => {
-            try {
-                CID.decode(cid)
-            } catch (e) {
-                return false
-            }
+          try {
+            CID.decode(cid);
+          } catch (e) {
+            return false;
+          }
 
-            return true
+          return true;
         });
-    },(val) => ({
+      },
+      (val) => ({
         message: `${val} is not a valid CID`,
-    })),
+      }),
+    ),
 });
 
-const PinFilesForm = () => {
-  const { bulkPin } = usePinning();
+const PinFilesForm = ({ close }: { close: () => void }) => {
+  const { bulkPin, pinStatus } = usePinning();
   const [form, fields] = useForm({
     id: "pin-files",
     constraint: getZodConstraint(PinFilesSchema),
@@ -120,14 +130,20 @@ const PinFilesForm = () => {
     },
   });
 
+  useEffect(() => {
+    if (pinStatus === "success") {
+      close();
+    }
+  }, [pinStatus, close]);
+
   return (
     <>
       <DialogHeader>
         <DialogTitle>Pin Content</DialogTitle>
       </DialogHeader>
       <form {...getFormProps(form)} className="w-full flex flex-col gap-y-4">
-        <Field
-          inputProps={{
+        <TextareaField
+          textareaProps={{
             name: fields.cids.name,
             placeholder: "Comma separated CIDs",
           }}
