@@ -78,24 +78,12 @@ export const PinningNetworkBanner = () => {
 };
 
 const PinCidItem = ({ item }: { item: PinningStatus }) => {
-  const { unpin } = usePinning();
-
   return (
     <div className="px-4 mb-4">
-      <div className="relative flex flex-col items-center rounded-lg py-2 px-4 hover:bg-primary/50 group">
+      <div className="flex flex-col items-center rounded-lg py-2 px-4 hover:bg-primary/50 group">
         <div className="flex justify-between items-center w-full">
           <span className="font-semibold">{item.id}</span>
           <span className="group-hover:hidden">{item.progress}%</span>
-          <Button
-            variant="ghost"
-            className="absolute top-2 right-2 hidden group-hover:flex rounded-full h-3"
-            onClick={() =>
-              unpin({
-                cid: item.id,
-              })
-            }>
-            <Cross2Icon />
-          </Button>
         </div>
         <Progress value={item.progress} className="h-2" />
       </div>
