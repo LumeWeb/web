@@ -39,9 +39,19 @@ export interface UpdatePasswordFormRequest extends UpdatePasswordFormTypes {
 
 export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
     const maybeSetupAuth = (): void => {
-        const jwt = sdk.account().jwtToken;
+        let jwt = sdk.account().jwtToken;
         if (jwt) {
             sdk.setAuthToken(jwt);
+            if (import.meta.env.DEV) {
+                localStorage.setItem("jwt", jwt);
+            }
+        }
+
+        if (import.meta.env.DEV) {
+            let jwt = localStorage.getItem("jwt");
+            if (jwt) {
+                sdk.setAuthToken(jwt);
+            }
         }
     };
 
@@ -100,6 +110,8 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
                 password: params.password,
             });
 
+            maybeSetupAuth();
+
             return handleResponse({
                 ret, redirectToSuccess: "/dashboard", redirectToError: "/login", successCb: () => {
                     sdk.setAuthToken(sdk.account().jwtToken);
@@ -113,11 +125,20 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
 
         async logout(params: any): Promise<AuthActionResponse> {
             let ret = await sdk.account().logout();
+
+            if (ret){
+                if (import.meta.env.DEV) {
+                    localStorage.removeItem("jwt");
+                }
+            }
+
             return handleResponse({ret, redirectToSuccess: "/login"});
         },
 
         async check(params?: any): Promise<CheckResponse> {
+            maybeSetupAuth();
             const ret = await sdk.account().ping();
+            maybeSetupAuth();
 
             return handleCheckResponse({ret, redirectToError: "/login", successCb: maybeSetupAuth});
         },
