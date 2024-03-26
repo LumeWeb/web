@@ -317,6 +317,12 @@ components:
           type: string
     AccountInfoResponse:
       type: object
+      required:
+        - id
+        - first_name
+        - last_name
+        - email
+        - verified
       properties:
         id:
           type: number
@@ -326,6 +332,8 @@ components:
           type: string
         email:
           type: string
+        verified:
+          type: boolean
     UploadLimitResponse:
       type: object
       properties:
