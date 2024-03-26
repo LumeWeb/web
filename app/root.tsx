@@ -20,7 +20,7 @@ import { getProviders } from "~/data/providers.js";
 import { Sdk } from "@lumeweb/portal-sdk";
 import resources from "~/data/resources.js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useMemo } from "react";
+import {useEffect, useMemo, useState} from "react";
 import {PinningProcess} from "~/data/pinning.js";
 
 export const links: LinksFunction = () => [
@@ -71,7 +71,22 @@ function App() {
 }
 
 export default function Root() {
-  const sdk = Sdk.create(import.meta.env.VITE_PORTAL_URL);
+    const [portalUrl, setPortalUrl] = useState(import.meta.env.VITE_PORTAL_URL);
+
+    useEffect(() => {
+        if (!portalUrl) {
+            fetch('/api/meta')
+                .then(response => response.json())
+                .then(data => {
+                    setPortalUrl(data.domain);
+                })
+                .catch((error: any) => {
+                    console.error('Failed to fetch portal url:', error);
+                });
+        }
+    }, [portalUrl]);
+
+  const sdk = Sdk.create(portalUrl);
   return (
     <SdkContextProvider sdk={sdk}>
       <App />
