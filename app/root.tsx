@@ -78,7 +78,7 @@ export default function Root() {
             fetch('/api/meta')
                 .then(response => response.json())
                 .then(data => {
-                    setPortalUrl(`https://${data.portalUrl}`);
+                    setPortalUrl(`https://${data.domain}`);
                 })
                 .catch((error: any) => {
                     console.error('Failed to fetch portal url:', error);
