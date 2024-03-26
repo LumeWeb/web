@@ -20,8 +20,8 @@ import { getProviders } from "~/data/providers.js";
 import { Sdk } from "@lumeweb/portal-sdk";
 import resources from "~/data/resources.js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {useEffect, useMemo, useState} from "react";
-import {PinningProcess} from "~/data/pinning.js";
+import { useEffect, useMemo, useState } from "react";
+import { PinningProcess } from "~/data/pinning.js";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -38,9 +38,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="overflow-hidden">
+      <body>
         {children}
-        <Toaster />
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -49,51 +48,59 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-  const sdk = useSdk();
-  const providers = useMemo(() => getProviders(sdk as Sdk), [sdk]);
-    useMemo(() => PinningProcess.setupSdk(sdk as Sdk), [sdk]);
   return (
-    <QueryClientProvider client={queryClient}>
-      <Refine
-        authProvider={providers.auth}
-        routerProvider={routerProvider}
-        notificationProvider={notificationProvider}
-        dataProvider={{
-          default: providers.default,
-          files: providers.files,
-        }}
-        resources={resources}
-        options={{ disableTelemetry: true }}>
-        <Outlet />
-      </Refine>
-    </QueryClientProvider>
+    <>
+      <Outlet />
+      <Toaster />
+    </>
   );
 }
 
 export default function Root() {
-    const [portalUrl, setPortalUrl] = useState(import.meta.env.VITE_PORTAL_URL);
-
-    useEffect(() => {
-        if (!portalUrl) {
-            fetch('/api/meta')
-                .then(response => response.json())
-                .then(data => {
-                    setPortalUrl(`https://${data.domain}`);
-                })
-                .catch((error: any) => {
-                    console.error('Failed to fetch portal url:', error);
-                });
-        }
-    }, [portalUrl]);
-
-    if (!portalUrl) {
-        return <p>Loading...</p>;
-    }
-
+  const [portalUrl, setPortalUrl] = useState(import.meta.env.VITE_PORTAL_URL);
   const sdk = Sdk.create(portalUrl);
+
+  const providers = useMemo(() => getProviders(sdk as Sdk), [sdk]);
+
+  useEffect(() => {
+    if (sdk) {
+      PinningProcess.setupSdk(sdk as Sdk);
+    }
+  }, [sdk]);
+
+  useEffect(() => {
+    if (!portalUrl) {
+      fetch("/api/meta")
+        .then((response) => response.json())
+        .then((data) => {
+          setPortalUrl(`https://${data.domain}`);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch portal url:", error);
+        });
+    }
+  }, [portalUrl]);
+
+  if (!portalUrl) {
+    return <p>Loading...</p>;
+  }
+  
   return (
     <SdkContextProvider sdk={sdk}>
-      <App />
+      <QueryClientProvider client={queryClient}>
+        <Refine
+          authProvider={providers.auth}
+          routerProvider={routerProvider}
+          notificationProvider={notificationProvider}
+          dataProvider={{
+            default: providers.default,
+            files: providers.files,
+          }}
+          resources={resources}
+          options={{ disableTelemetry: true }}>
+          <App />
+        </Refine>
+      </QueryClientProvider>
     </SdkContextProvider>
   );
 }
