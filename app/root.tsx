@@ -86,6 +86,10 @@ export default function Root() {
         }
     }, [portalUrl]);
 
+    if (!portalUrl) {
+        return <p>Loading...</p>;
+    }
+
   const sdk = Sdk.create(portalUrl);
   return (
     <SdkContextProvider sdk={sdk}>
