@@ -10,6 +10,7 @@ import {
   PasswordResetVerifyRequest,
   PingResponse,
   postApiAccountPasswordResetRequest,
+  postApiAccountVerifyEmailResend,
   postApiAuthPing,
   RegisterRequest,
   UploadLimitResponse,
@@ -115,6 +116,19 @@ export class AccountApi {
         verifyEmailRequest,
         this.buildOptions(),
       );
+    } catch (e) {
+      return new AccountError(
+        (e as AxiosError).response?.data as string,
+        (e as AxiosError).response?.status as number,
+      );
+    }
+    return this.checkSuccessBool(ret);
+  }
+
+  public async requestEmailVerification(): Promise<boolean | AccountError> {
+    let ret: AxiosResponse<void>;
+    try {
+      ret = await postApiAccountVerifyEmailResend(this.buildOptions());
     } catch (e) {
       return new AccountError(
         (e as AxiosError).response?.data as string,
