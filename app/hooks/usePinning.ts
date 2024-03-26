@@ -21,9 +21,11 @@ export const usePinning = () => {
           message: `Error pinning ${cid}`,
           description: response.message,
         });
+        return Promise.reject(response);
       }
-
+      
       queryClient.invalidateQueries({ queryKey: ["pin-progress", "file"] });
+      return Promise.resolve(response);
     },
   });
 
@@ -39,8 +41,10 @@ export const usePinning = () => {
           message: `Error removing ${cid}`,
           description: response.message,
         });
+        return Promise.reject(response);
       }
       queryClient.invalidateQueries({ queryKey: ["pin-progress"] });
+      return Promise.resolve(response);
     },
   });
 

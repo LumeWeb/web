@@ -75,29 +75,32 @@ export const columns: ColumnDef<FileItem>[] = [
     header: () => null,
     size: 20,
     cell: ({ row }) => {
-      const {unpin} = usePinning();
+      const { unpin } = usePinning();
       return (
-      <div className="flex w-5 items-center justify-between">
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className={cn(
-              "hidden group-hover:block data-[state=open]:block",
-              row.getIsSelected() && "block",
-            )}>
-            <MoreIcon />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuGroup>
-              <DropdownMenuItem variant="destructive" onClick={() => {
-                unpin(row.getValue("cid"))
-              }}>
-                <TrashIcon className="mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    )},
+        <div className="flex w-5 items-center justify-between">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(
+                "hidden group-hover:block data-[state=open]:block",
+                row.getIsSelected() && "block",
+              )}>
+              <MoreIcon />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => {
+                    unpin(row.getValue("cid"));
+                  }}>
+                  <TrashIcon className="mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      );
+    },
   },
 ];
