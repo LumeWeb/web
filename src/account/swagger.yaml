@@ -54,6 +54,12 @@ paths:
       responses:
         "200":
           description: Email verified successfully
+  /api/account/verify-email/resend:
+    post:
+      summary: Resend email verification
+      responses:
+        "200":
+          description: Email verification resent successfully
   /api/auth/otp/generate:
     get:
       summary: Generate OTP for two-factor authentication
@@ -182,6 +188,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UploadLimitResponse"
+  /api/meta:
+    get:
+      summary: Get metadata about the portal
+      responses:
+        "200":
+          description: Metadata retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetaResponse"
 
 components:
   schemas:
@@ -317,3 +333,10 @@ components:
           type: number
       required:
         - limit
+    MetaResponse:
+      type: object
+      required:
+        - domain
+      properties:
+        domain:
+          type: string
