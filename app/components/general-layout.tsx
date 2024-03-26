@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { useUppy } from "./lib/uppy";
-import type { UppyFile } from "@uppy/core";
+import type { FailedUppyFile, UppyFile } from "@uppy/core";
 import { Progress } from "~/components/ui/progress";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { ChevronDownIcon, ExitIcon, TrashIcon } from "@radix-ui/react-icons";
@@ -24,6 +24,7 @@ import {
   BoxCheckedIcon,
   PageIcon,
   ThemeIcon,
+  ExclamationCircleIcon,
 } from "./icons";
 import {
   DropdownMenu,
@@ -178,13 +179,15 @@ const UploadFileForm = () => {
     state,
     removeFile,
     cancelAll,
+    failedFiles,
   } = useUppy();
-
-  console.log({ state, files: getFiles() });
 
   const isUploading = state === "uploading";
   const isCompleted = state === "completed";
+  const hasErrored = state === "error";
   const hasStarted = state !== "idle" && state !== "initializing";
+  const getFailedState = (id: string) =>
+    failedFiles.find((file) => file.id === id);
 
   return (
     <>
@@ -216,11 +219,18 @@ const UploadFileForm = () => {
             onRemove={(id) => {
               removeFile(id);
             }}
+            failedState={getFailedState(file.id)}
           />
         ))}
       </div>
+      
+      {hasErrored ? (
+        <div className="text-red-500">
+          <p>An error occurred</p>
+        </div>
+      ) : null}
 
-      {hasStarted ? (
+      {hasStarted && !hasErrored ? (
         <div className="flex flex-col items-center gap-y-2 w-full text-primary-1">
           <CloudCheckIcon className="w-32 h-32" />
           {isCompleted
@@ -260,19 +270,26 @@ function bytestoMegabytes(bytes: number) {
 
 const UploadFileItem = ({
   file,
+  failedState,
   onRemove,
 }: {
   file: UppyFile;
+  failedState?: FailedUppyFile<Record<string, any>, Record<string, any>>;
   onRemove: (id: string) => void;
 }) => {
   const sizeInMb = bytestoMegabytes(file.size).toFixed(2);
   return (
     <div className="flex flex-col w-full py-4 px-2 bg-primary-dark">
-      <div className="flex text-primary-1 items-center justify-between">
+      <div
+        className={`flex items-center justify-between ${
+          failedState ? "text-red-500" : "text-primary-1"
+        }`}>
         <div className="flex items-center">
           <div className="p-2">
             {file.progress?.uploadComplete ? (
               <BoxCheckedIcon className="w-4 h-4" />
+            ) : failedState?.error ? (
+              <ExclamationCircleIcon className="w-4 h-4" />
             ) : (
               <PageIcon className="w-4 h-4" />
             )}
@@ -303,6 +320,27 @@ const UploadFileItem = ({
           <TrashIcon className="w-4 h-4" />
         </Button>
       </div>
+
+      {failedState ? (
+        <div className="mt-2 text-red-500 text-sm">
+          <p>Error uploading: {failedState.error}</p>
+          <div className="flex gap-2">
+            <Button
+              size={"sm"}
+              onClick={() => {
+                /* Retry upload function here */
+              }}>
+              Retry
+            </Button>
+            <Button
+              size={"sm"}
+              variant={"outline"}
+              onClick={() => onRemove(file.id)}>
+              Remove
+            </Button>
+          </div>
+        </div>
+      ) : null}
 
       {file.progress?.uploadStarted && !file.progress.uploadComplete ? (
         <Progress max={100} value={file.progress.percentage} className="mt-2" />

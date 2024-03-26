@@ -1,4 +1,4 @@
-import Uppy, { debugLogger, type State, type UppyFile } from "@uppy/core";
+import Uppy, { debugLogger, FailedUppyFile, type State, type UppyFile } from "@uppy/core";
 
 import Tus from "@uppy/tus";
 import toArray from "@uppy/utils/lib/toArray";
@@ -63,6 +63,8 @@ export function useUppy() {
       }
     | object
   >({});
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [failedFiles, setFailedFiles] = useState<FailedUppyFile<Record<string, any>, Record<string, any>>[]>([])
   const getRootProps = useMemo(
     () => () => {
       return {
@@ -197,6 +199,7 @@ export function useUppy() {
       }
       console.log("successful files:", result.successful);
       console.log("failed files:", result.failed);
+      setFailedFiles(result.failed);
     });
 
     const setStateCb = (event: (typeof LISTENING_EVENTS)[number]) => {
@@ -232,6 +235,7 @@ export function useUppy() {
   return {
     getFiles: () => uppyInstance.current?.getFiles() ?? [],
     error: uppyInstance.current?.getState,
+    failedFiles,
     state,
     upload: () =>
       uppyInstance.current?.upload() ??

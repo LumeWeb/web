@@ -12,6 +12,7 @@ import {
 
 import { cn } from "~/utils";
 import type { FileItem } from "~/data/file-provider";
+import { usePinning } from "~/hooks/usePinning";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -73,7 +74,9 @@ export const columns: ColumnDef<FileItem>[] = [
     accessorKey: "actions",
     header: () => null,
     size: 20,
-    cell: ({ row }) => (
+    cell: ({ row }) => {
+      const {unpin} = usePinning();
+      return (
       <div className="flex w-5 items-center justify-between">
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -85,7 +88,9 @@ export const columns: ColumnDef<FileItem>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuGroup>
-              <DropdownMenuItem variant="destructive">
+              <DropdownMenuItem variant="destructive" onClick={() => {
+                unpin(row.getValue("cid"))
+              }}>
                 <TrashIcon className="mr-2" />
                 Delete
               </DropdownMenuItem>
@@ -93,6 +98,6 @@ export const columns: ColumnDef<FileItem>[] = [
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    ),
+    )},
   },
 ];
