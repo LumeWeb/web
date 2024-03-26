@@ -1,27 +1,21 @@
-import {
-  Links,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-} from "@remix-run/react";
+import {Links, Meta, Outlet, Scripts, ScrollRestoration,} from "@remix-run/react";
 
 import stylesheet from "./tailwind.css?url";
-import type { LinksFunction } from "@remix-run/node";
+import type {LinksFunction} from "@remix-run/node";
 
 // Supports weights 200-800
 import "@fontsource-variable/manrope";
-import { Refine } from "@refinedev/core";
+import {Refine} from "@refinedev/core";
 import routerProvider from "@refinedev/remix-router";
-import { notificationProvider } from "~/data/notification-provider";
-import { SdkContextProvider, useSdk } from "~/components/lib/sdk-context";
-import { Toaster } from "~/components/ui/toaster";
-import { getProviders } from "~/data/providers.js";
-import { Sdk } from "@lumeweb/portal-sdk";
+import {notificationProvider} from "~/data/notification-provider";
+import {SdkContextProvider, useSdk} from "~/components/lib/sdk-context";
+import {Toaster} from "~/components/ui/toaster";
+import {getProviders} from "~/data/providers.js";
+import {Sdk} from "@lumeweb/portal-sdk";
 import resources from "~/data/resources.js";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
-import { PinningProcess } from "~/data/pinning.js";
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
+import {useEffect, useMemo, useState} from "react";
+import {PinningProcess} from "~/data/pinning.js";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -58,16 +52,7 @@ function App() {
 
 export default function Root() {
   const [portalUrl, setPortalUrl] = useState(import.meta.env.VITE_PORTAL_URL);
-  const sdk = Sdk.create(portalUrl);
-
-  const providers = useMemo(() => getProviders(sdk as Sdk), [sdk]);
-
-  useEffect(() => {
-    if (sdk) {
-      PinningProcess.setupSdk(sdk as Sdk);
-    }
-  }, [sdk]);
-
+  const [sdk, setSdk] = useState<Sdk| undefined>(portalUrl ? Sdk.create(portalUrl) : undefined);
   useEffect(() => {
     if (!portalUrl) {
       fetch("/api/meta")
@@ -81,28 +66,49 @@ export default function Root() {
     }
   }, [portalUrl]);
 
+    useEffect(() => {
+        if (portalUrl) {
+            setSdk(Sdk.create(portalUrl));
+        }
+    }, [portalUrl]);
+
   if (!portalUrl) {
     return <p>Loading...</p>;
   }
-  
-  return (
-    <SdkContextProvider sdk={sdk}>
-      <QueryClientProvider client={queryClient}>
-        <Refine
-          authProvider={providers.auth}
-          routerProvider={routerProvider}
-          notificationProvider={notificationProvider}
-          dataProvider={{
-            default: providers.default,
-            files: providers.files,
-          }}
-          resources={resources}
-          options={{ disableTelemetry: true }}>
-          <App />
-        </Refine>
-      </QueryClientProvider>
-    </SdkContextProvider>
-  );
+
+    return (
+        <SdkContextProvider sdk={sdk as Sdk}>
+            <SdkWrapper />
+        </SdkContextProvider>
+    );
+}
+
+function SdkWrapper() {
+    const sdk = useSdk();
+    PinningProcess.setupSdk(sdk as Sdk);
+
+    const providers = useMemo(() => getProviders(sdk as Sdk), [sdk]);
+
+    if (!sdk) {
+        return <p>Loading...</p>;
+    }
+
+    return (
+        <QueryClientProvider client={queryClient}>
+            <Refine
+                authProvider={providers.auth}
+                routerProvider={routerProvider}
+                notificationProvider={notificationProvider}
+                dataProvider={{
+                    default: providers.default,
+                    files: providers.files,
+                }}
+                resources={resources}
+                options={{disableTelemetry: true}}>
+                <App/>
+            </Refine>
+        </QueryClientProvider>
+    )
 }
 
 export function HydrateFallback() {
