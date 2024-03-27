@@ -16,6 +16,7 @@ import { useSdk } from "~/components/lib/sdk-context";
 import UppyFileUpload from "~/components/lib/uppy-file-upload";
 import { PROTOCOL_S5, type Sdk } from "@lumeweb/portal-sdk";
 import type { S5Client, HashProgressEvent } from "@lumeweb/s5-js";
+import { useInvalidate } from "@refinedev/core";
 
 const LISTENING_EVENTS = [
   "upload",
@@ -27,6 +28,7 @@ const LISTENING_EVENTS = [
 ] as const;
 
 export function useUppy() {
+  const invalidate = useInvalidate()
   const sdk = useSdk();
 
   const [uploadLimit, setUploadLimit] = useState<number>(0);
@@ -200,6 +202,10 @@ export function useUppy() {
       console.log("successful files:", result.successful);
       console.log("failed files:", result.failed);
       setFailedFiles(result.failed);
+      invalidate({
+        resource: "file",
+        invalidates: ["list"]
+      })
     });
 
     const setStateCb = (event: (typeof LISTENING_EVENTS)[number]) => {

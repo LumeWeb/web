@@ -59,7 +59,7 @@ export const PinningProvider = ({ children }: React.PropsWithChildren) => {
     ) {
       const hasCompletedItems = queryResult.data.items.some(item => item.status === 'completed');
       if (hasCompletedItems) {
-        invalidate({ resource: "files", invalidates: ["list"] });
+        invalidate({ resource: "file", invalidates: ["list"] });
       }
     }
   }, [
