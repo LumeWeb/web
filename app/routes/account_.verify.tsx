@@ -32,6 +32,7 @@ function VerifyAuthenticated() {
     const exchangeToken = useQuery({
         queryKey: ["exchange-token", token],
         retry: false,
+        enabled: !!user.data?.email && !!token,
         queryFn: async () => {
             const ret= await sdk.account!().verifyEmail({
                 email: user.data?.email as string,
