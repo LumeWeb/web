@@ -1,10 +1,5 @@
 // Copied from https://github.com/hustcc/filesize.js
 
-type SPEC = {
-  readonly radix: number;
-  readonly unit: string[];
-};
-
 const si = {
   radix: 1e3,
   unit: ["b", "kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb", "Yb"],
