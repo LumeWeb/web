@@ -13,6 +13,8 @@ import {
 import { cn } from "~/utils";
 import type { FileItem } from "~/data/file-provider";
 import { usePinning } from "~/hooks/usePinning";
+import filesize from "~/components/lib/filesize";
+
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -64,6 +66,10 @@ export const columns: ColumnDef<FileItem>[] = [
   {
     accessorKey: "size",
     header: "Size",
+    cell: ({ row }) => {
+      const size = row.getValue("size");
+      return size ? filesize(size as number, 2) : "";
+    },
   },
   {
     accessorKey: "pinned",

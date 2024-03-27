@@ -45,6 +45,7 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "./ui/tooltip";
+import filesize from "./lib/filesize";
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   const location = useLocation();
@@ -223,7 +224,7 @@ const UploadFileForm = () => {
           />
         ))}
       </div>
-      
+
       {hasErrored ? (
         <div className="text-red-500">
           <p>An error occurred</p>
@@ -277,7 +278,6 @@ const UploadFileItem = ({
   failedState?: FailedUppyFile<Record<string, any>, Record<string, any>>;
   onRemove: (id: string) => void;
 }) => {
-  const sizeInMb = bytestoMegabytes(file.size).toFixed(2);
   return (
     <div className="flex flex-col w-full py-4 px-2 bg-primary-dark">
       <div
@@ -301,12 +301,12 @@ const UploadFileItem = ({
                   <span className="truncate text-ellipsis max-w-[20ch]">
                     {file.name}
                   </span>{" "}
-                  <span>({sizeInMb}MB)</span>
+                  <span>({filesize(file.size, 2)})</span>
                 </p>
               </TooltipTrigger>
               <TooltipContent>
                 <p>
-                  {file.name} ({sizeInMb}MB)
+                  {file.name} ({filesize(file.size, 2)})
                 </p>
               </TooltipContent>
             </Tooltip>
