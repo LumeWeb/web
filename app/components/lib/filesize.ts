@@ -37,5 +37,5 @@ export default function filesize(bytes: number, fixed = 1, spec: keyof typeof SP
     _bytes /= radix;
     ++loop;
   }
-  return `${bytes.toFixed(fixed)} ${unit[loop]}`;
+  return `${_bytes.toFixed(fixed)} ${unit[loop]}`;
 }
