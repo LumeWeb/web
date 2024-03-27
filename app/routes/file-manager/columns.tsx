@@ -1,6 +1,6 @@
 import { TrashIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
-import { FileIcon, MoreIcon } from "~/components/icons";
+import { DownloadIcon, FileIcon, MoreIcon } from "~/components/icons";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -14,6 +14,7 @@ import { cn } from "~/utils";
 import type { FileItem } from "~/data/file-provider";
 import { usePinning } from "~/hooks/usePinning";
 import filesize from "~/components/lib/filesize";
+import { Button } from "~/components/ui/button";
 
 
 // This type is used to define the shape of our data.
@@ -50,18 +51,14 @@ export const columns: ColumnDef<FileItem>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
-    header: "Name",
+    accessorKey: "cid",
+    header: "CID",
     cell: ({ row }) => (
       <div className="flex items-center gap-x-2">
         <FileIcon />
-        {row.getValue("name")}
+        {row.getValue("name") ?? row.getValue("cid")}
       </div>
     ),
-  },
-  {
-    accessorKey: "cid",
-    header: "CID",
   },
   {
     accessorKey: "size",
@@ -82,12 +79,20 @@ export const columns: ColumnDef<FileItem>[] = [
     size: 20,
     cell: ({ row }) => {
       const { unpin } = usePinning();
+      const downloadFile = () => {
+        // TODO: @pcfreak30 download file
+        const cid = row.getValue("cid");
+        console.log(cid);
+      };
       return (
-        <div className="flex w-5 items-center justify-between">
+        <div className="flex space-x-2 w-10 items-center justify-between">
+          <Button size={"icon"} variant="ghost" onClick={downloadFile}>
+            <DownloadIcon className="w-5"/>
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(
-                "hidden group-hover:block data-[state=open]:block",
+                "opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100",
                 row.getIsSelected() && "block",
               )}>
               <MoreIcon />
