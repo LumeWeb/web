@@ -15,6 +15,9 @@ import type { FileItem } from "~/data/file-provider";
 import { usePinning } from "~/hooks/usePinning";
 import filesize from "~/components/lib/filesize";
 import { Button } from "~/components/ui/button";
+import {useSdk} from "~/components/lib/sdk-context.js";
+import {S5Client} from "@lumeweb/s5-js";
+import {PROTOCOL_S5} from "@lumeweb/portal-sdk";
 
 
 // This type is used to define the shape of our data.
@@ -79,10 +82,12 @@ export const columns: ColumnDef<FileItem>[] = [
     size: 20,
     cell: ({ row }) => {
       const { unpin } = usePinning();
+      const sdk = useSdk();
       const downloadFile = () => {
-        // TODO: @pcfreak30 download file
         const cid = row.getValue("cid");
-        console.log(cid);
+        const portalUrl = sdk.protocols!().get<S5Client>(PROTOCOL_S5).getSdk().portalUrl;
+
+        window.open(`${portalUrl}/s5/download/${cid}`,"_blank");
       };
       return (
         <div className="flex space-x-2 w-10 items-center justify-between">
