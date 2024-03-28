@@ -1,0 +1,36 @@
+diff --git a/node_modules/tus-js-client/lib.es5/upload.js b/node_modules/tus-js-client/lib.es5/upload.js
+index fc3734c..e4ea6cb 100644
+--- a/node_modules/tus-js-client/lib.es5/upload.js
++++ b/node_modules/tus-js-client/lib.es5/upload.js
+@@ -731,7 +731,6 @@ var BaseUpload = /*#__PURE__*/function () {
+               parallelUploads: 1,
+               // Reset this option as we are not doing a parallel upload.
+               parallelUploadBoundaries: null,
+-              metadata: {},
+               // Add the header to indicate the this is a partial upload.
+               headers: _objectSpread(_objectSpread({}, _this3.options.headers), {}, {
+                 'Upload-Concat': 'partial'
+diff --git a/node_modules/tus-js-client/lib.esm/upload.js b/node_modules/tus-js-client/lib.esm/upload.js
+index 99cc7ff..f8f832d 100644
+--- a/node_modules/tus-js-client/lib.esm/upload.js
++++ b/node_modules/tus-js-client/lib.esm/upload.js
+@@ -279,7 +279,6 @@ var BaseUpload = /*#__PURE__*/function () {
+               parallelUploads: 1,
+               // Reset this option as we are not doing a parallel upload.
+               parallelUploadBoundaries: null,
+-              metadata: {},
+               // Add the header to indicate the this is a partial upload.
+               headers: _objectSpread(_objectSpread({}, _this3.options.headers), {}, {
+                 'Upload-Concat': 'partial'
+diff --git a/node_modules/tus-js-client/lib/upload.js b/node_modules/tus-js-client/lib/upload.js
+index e564de3..10fba60 100644
+--- a/node_modules/tus-js-client/lib/upload.js
++++ b/node_modules/tus-js-client/lib/upload.js
+@@ -332,7 +332,6 @@ class BaseUpload {
+               parallelUploads: 1,
+               // Reset this option as we are not doing a parallel upload.
+               parallelUploadBoundaries: null,
+-              metadata: {},
+               // Add the header to indicate the this is a partial upload.
+               headers: {
+                 ...this.options.headers,
