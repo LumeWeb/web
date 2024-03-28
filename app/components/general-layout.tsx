@@ -2,7 +2,7 @@ import { Button } from "~/components/ui/button";
 import logoPng from "~/images/lume-logo.png?url";
 import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
 import discordLogoPng from "~/images/discord-logo.png?url";
-import { Form, Link, useLocation } from "@remix-run/react";
+import { Link, useLocation } from "@remix-run/react";
 import {
   Dialog,
   DialogContent,
@@ -46,18 +46,22 @@ import {
   TooltipProvider,
 } from "./ui/tooltip";
 import filesize from "./lib/filesize";
-import { z } from "zod";
-import { getFormProps, useForm, useInputControl } from "@conform-to/react";
-import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { ErrorList } from "./forms";
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   const location = useLocation();
   const { data: identity } = useGetIdentity<Identity>();
   const { mutate: logout } = useLogout();
+
   return (
     <PinningProvider>
-      <div className="h-full flex flex-row">
+      {!identity?.verified ? (
+        <div className="bg-primary-1 text-primary-1-foreground p-4">
+          We have sent you a verification email. Please click on the link in the
+          email to start using the platform.
+        </div>
+      ) : null}
+      <div className={"h-full flex flex-row"}>
         <header className="p-10 pr-0 flex flex-col w-[240px] h-full scroll-m-0 overflow-hidden">
           <img src={logoPng} alt="Lume logo" className="h-10 w-32" />
 
@@ -201,77 +205,73 @@ const UploadFileForm = () => {
       <DialogHeader className="mb-6">
         <DialogTitle>Upload Files</DialogTitle>
       </DialogHeader>
-        {!hasStarted ? (
-          <div
-            {...getRootProps()}
-            className="border border-border rounded text-primary-2 bg-primary-dark h-48 flex flex-col items-center justify-center">
-            <input
-              hidden
-              aria-hidden
-              key={new Date().toISOString()}
-              multiple
-              name="uppyFiles[]"
-              {...inputProps}
-            />
-            <CloudUploadIcon className="w-24 h-24 stroke stroke-primary-dark" />
-            <p>Drag & Drop Files or Browse</p>
-          </div>
-        ) : null}
-
-        <div className="w-full space-y-3 max-h-48 overflow-y-auto">
-          {getFiles().map((file) => (
-            <UploadFileItem
-              key={file.id}
-              file={file}
-              onRemove={(id) => {
-                removeFile(id);
-              }}
-              failedState={getFailedState(file.id)}
-            />
-          ))}
+      {!hasStarted ? (
+        <div
+          {...getRootProps()}
+          className="border border-border rounded text-primary-2 bg-primary-dark h-48 flex flex-col items-center justify-center">
+          <input
+            hidden
+            aria-hidden
+            key={new Date().toISOString()}
+            multiple
+            name="uppyFiles[]"
+            {...inputProps}
+          />
+          <CloudUploadIcon className="w-24 h-24 stroke stroke-primary-dark" />
+          <p>Drag & Drop Files or Browse</p>
         </div>
+      ) : null}
 
-        <ErrorList
-          errors={[
-            ...(hasErrored ? ["An error occurred"] : []),
-          ]}
-        />
+      <div className="w-full space-y-3 max-h-48 overflow-y-auto">
+        {getFiles().map((file) => (
+          <UploadFileItem
+            key={file.id}
+            file={file}
+            onRemove={(id) => {
+              removeFile(id);
+            }}
+            failedState={getFailedState(file.id)}
+          />
+        ))}
+      </div>
 
-        {hasStarted && !hasErrored ? (
-          <div className="flex flex-col items-center gap-y-2 w-full text-primary-1">
-            <CloudCheckIcon className="w-32 h-32" />
-            {isCompleted
-              ? "Upload completed"
-              : `${getFiles().length} files being uploaded`}
-          </div>
-        ) : null}
+      <ErrorList errors={[...(hasErrored ? ["An error occurred"] : [])]} />
 
-        {isUploading ? (
-          <DialogClose asChild onClick={cancelAll}>
-            <Button type="button" size={"lg"} className="mt-6">
-              Cancel
-            </Button>
-          </DialogClose>
-        ) : null}
+      {hasStarted && !hasErrored ? (
+        <div className="flex flex-col items-center gap-y-2 w-full text-primary-1">
+          <CloudCheckIcon className="w-32 h-32" />
+          {isCompleted
+            ? "Upload completed"
+            : `${getFiles().length} files being uploaded`}
+        </div>
+      ) : null}
 
-        {isCompleted ? (
-          <DialogClose asChild>
-            <Button type="button" size={"lg"} className="mt-6">
-              Close
-            </Button>
-          </DialogClose>
-        ) : null}
-
-        {!hasStarted && !isCompleted && !isUploading ? (
-          <Button
-            type="submit"
-            size={"lg"}
-            onClick={isValid ? upload : () => {}}
-            className="mt-6"
-            disabled={!isValid}>
-            Upload
+      {isUploading ? (
+        <DialogClose asChild onClick={cancelAll}>
+          <Button type="button" size={"lg"} className="mt-6">
+            Cancel
           </Button>
-        ) : null}
+        </DialogClose>
+      ) : null}
+
+      {isCompleted ? (
+        <DialogClose asChild>
+          <Button type="button" size={"lg"} className="mt-6">
+            Close
+          </Button>
+        </DialogClose>
+      ) : null}
+
+      {!hasStarted && !isCompleted && !isUploading ? (
+        <Button
+          type="submit"
+          size={"lg"}
+          onClick={isValid ? upload : () => {}}
+          className="mt-6"
+          disabled={!isValid}>
+          Upload
+        </Button>
+      ) : null}
     </>
   );
 };
@@ -285,7 +285,7 @@ const UploadFileItem = ({
   failedState?: FailedUppyFile<Record<string, any>, Record<string, any>>;
   onRemove: (id: string) => void;
 }) => {
-  console.log({file: file.progress})
+  console.log({ file: file.progress });
   return (
     <div className="flex flex-col w-full py-4 px-2 bg-primary-dark">
       <div
@@ -350,7 +350,9 @@ const UploadFileItem = ({
         </div>
       ) : null}
 
-      {file.progress?.preprocess ? <p className="text-sm text-primary-2 ml-2">Processing...</p> : null}
+      {file.progress?.preprocess ? (
+        <p className="text-sm text-primary-2 ml-2">Processing...</p>
+      ) : null}
       {file.progress?.uploadStarted && !file.progress.uploadComplete ? (
         <Progress max={100} value={file.progress.percentage} className="mt-2" />
       ) : null}

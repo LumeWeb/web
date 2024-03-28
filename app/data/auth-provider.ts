@@ -31,6 +31,7 @@ export type Identity = {
     firstName: string;
     lastName: string;
     email: string;
+    verified: boolean;
 }
 
 export interface UpdatePasswordFormRequest extends UpdatePasswordFormTypes {
@@ -197,6 +198,7 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
                 firstName: acct.first_name,
                 lastName: acct.last_name,
                 email: acct.email,
+                verified: acct.verified,
             };
         },
     };
