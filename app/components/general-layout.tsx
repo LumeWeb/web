@@ -350,11 +350,17 @@ const UploadFileItem = ({
         </div>
       ) : null}
 
-      {file.progress?.preprocess ? (
-        <p className="text-sm text-primary-2 ml-2">Processing...</p>
+      {file.progress?.preprocess || true ? (
+        <div>
+          <p className="text-sm text-primary-2 ml-2">{file.progress?.preprocess?.value ?? "Processing..."}</p>
+          <Progress max={100} value={file.progress?.preprocess?.value ?? 0} className="mt-2" />
+        </div>
       ) : null}
       {file.progress?.uploadStarted && !file.progress.uploadComplete ? (
-        <Progress max={100} value={file.progress.percentage} className="mt-2" />
+        <div>
+          <p className="text-sm text-primary-2 ml-2">Uploading...</p>
+          <Progress max={100} value={file.progress.percentage} className="mt-2" />
+        </div>
       ) : null}
     </div>
   );
