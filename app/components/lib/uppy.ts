@@ -57,14 +57,12 @@ export function useUppy() {
     "completed" | "idle" | "initializing" | "error" | "uploading"
   >("initializing");
 
-  const [inputProps, setInputProps] = useState<
-    | {
+  const [inputProps, setInputProps] = useState<{
         ref: typeof inputRef;
         type: "file";
         onChange: (event: ChangeEvent<HTMLInputElement>) => void;
       }
-    | object
-  >({});
+  >();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [failedFiles, setFailedFiles] = useState<FailedUppyFile<Record<string, any>, Record<string, any>>[]>([])
   const getRootProps = useMemo(
@@ -76,7 +74,6 @@ export function useUppy() {
             //@ts-expect-error -- dumb html
             inputRef.current.value = null;
             inputRef.current.click();
-            console.log("clicked", { input: inputRef.current });
           }
         },
         role: "presentation",

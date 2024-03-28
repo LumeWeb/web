@@ -174,13 +174,6 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
     </PinningProvider>
   );
 };
-
-const UploadFormSchema = z.object({
-  uppyFiles: z.array(z.any()).min(1, {
-    message: "At least one file must be uploaded",
-  }),
-});
-
 const UploadFileForm = () => {
   const {
     getRootProps,
@@ -193,44 +186,21 @@ const UploadFileForm = () => {
     upload,
   } = useUppy();
 
-  const [form, fields] = useForm({
-    constraint: getZodConstraint(UploadFormSchema),
-    shouldValidate: "onInput",
-    onValidate: ({ formData }) => {
-      const result = parseWithZod(formData, {
-        schema: UploadFormSchema,
-      });
-      return result;
-    },
-    onSubmit: (e) => {
-      e.preventDefault();
-      return upload();
-    },
-  });
-
   const inputProps = getInputProps();
-  const files = useInputControl({
-    key: fields.uppyFiles.key,
-    name: fields.uppyFiles.name,
-    formId: form.id
-  });
 
   const isUploading = state === "uploading";
   const isCompleted = state === "completed";
   const hasErrored = state === "error";
   const hasStarted = state !== "idle" && state !== "initializing";
-  const isValid = form.valid || getFiles().length > 0;
+  const isValid = getFiles().length > 0;
   const getFailedState = (id: string) =>
     failedFiles.find((file) => file.id === id);
-
-  console.log({ files: getFiles() });
 
   return (
     <>
       <DialogHeader className="mb-6">
         <DialogTitle>Upload Files</DialogTitle>
       </DialogHeader>
-      <Form {...getFormProps(form)} className="flex flex-col">
         {!hasStarted ? (
           <div
             {...getRootProps()}
@@ -240,13 +210,8 @@ const UploadFileForm = () => {
               aria-hidden
               key={new Date().toISOString()}
               multiple
-              name={fields.uppyFiles.name}
+              name="uppyFiles[]"
               {...inputProps}
-              value={files.value}
-              onChange={() => {
-                //@ts-expect-error -- conform has shitty typeinference for controls
-                files.change(getFiles());
-              }}
             />
             <CloudUploadIcon className="w-24 h-24 stroke stroke-primary-dark" />
             <p>Drag & Drop Files or Browse</p>
@@ -268,7 +233,6 @@ const UploadFileForm = () => {
 
         <ErrorList
           errors={[
-            ...(fields.uppyFiles.errors ?? []),
             ...(hasErrored ? ["An error occurred"] : []),
           ]}
         />
@@ -302,12 +266,12 @@ const UploadFileForm = () => {
           <Button
             type="submit"
             size={"lg"}
+            onClick={isValid ? upload : () => {}}
             className="mt-6"
             disabled={!isValid}>
             Upload
           </Button>
         ) : null}
-      </Form>
     </>
   );
 };
