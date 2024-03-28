@@ -257,17 +257,13 @@ const UploadFileForm = () => {
       ) : null}
 
       {!hasStarted && !isCompleted && !isUploading ? (
-        <Button size={"lg"} className="mt-6" onClick={upload}>
+        <Button size={"lg"} className="mt-6" onClick={upload} disabled={getFiles().length === 0}>
           Upload
         </Button>
       ) : null}
     </>
   );
 };
-
-function bytestoMegabytes(bytes: number) {
-  return bytes / 1024 / 1024;
-}
 
 const UploadFileItem = ({
   file,
