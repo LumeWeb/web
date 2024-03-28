@@ -1,8 +1,8 @@
 diff --git a/node_modules/tus-js-client/lib.es5/upload.js b/node_modules/tus-js-client/lib.es5/upload.js
-index fe647f2..a2fbf56 100644
+index fc3734c..e4ea6cb 100644
 --- a/node_modules/tus-js-client/lib.es5/upload.js
 +++ b/node_modules/tus-js-client/lib.es5/upload.js
-@@ -724,7 +724,6 @@ var BaseUpload = /*#__PURE__*/function () {
+@@ -731,7 +731,6 @@ var BaseUpload = /*#__PURE__*/function () {
                parallelUploads: 1,
                // Reset this option as we are not doing a parallel upload.
                parallelUploadBoundaries: null,
@@ -11,10 +11,10 @@ index fe647f2..a2fbf56 100644
                headers: _objectSpread(_objectSpread({}, _this3.options.headers), {}, {
                  'Upload-Concat': 'partial'
 diff --git a/node_modules/tus-js-client/lib.esm/upload.js b/node_modules/tus-js-client/lib.esm/upload.js
-index 02fde5b..f9e3972 100644
+index 99cc7ff..f8f832d 100644
 --- a/node_modules/tus-js-client/lib.esm/upload.js
 +++ b/node_modules/tus-js-client/lib.esm/upload.js
-@@ -272,7 +272,6 @@ var BaseUpload = /*#__PURE__*/function () {
+@@ -279,7 +279,6 @@ var BaseUpload = /*#__PURE__*/function () {
                parallelUploads: 1,
                // Reset this option as we are not doing a parallel upload.
                parallelUploadBoundaries: null,
@@ -23,10 +23,10 @@ index 02fde5b..f9e3972 100644
                headers: _objectSpread(_objectSpread({}, _this3.options.headers), {}, {
                  'Upload-Concat': 'partial'
 diff --git a/node_modules/tus-js-client/lib/upload.js b/node_modules/tus-js-client/lib/upload.js
-index 61289da..0cdb559 100644
+index e564de3..10fba60 100644
 --- a/node_modules/tus-js-client/lib/upload.js
 +++ b/node_modules/tus-js-client/lib/upload.js
-@@ -322,7 +322,6 @@ class BaseUpload {
+@@ -332,7 +332,6 @@ class BaseUpload {
                parallelUploads: 1,
                // Reset this option as we are not doing a parallel upload.
                parallelUploadBoundaries: null,
