@@ -230,7 +230,7 @@ export function useUppy() {
       });
     }
     setState("idle");
-  }, [targetRef, uploadLimit]);
+  }, [targetRef, invalidate, sdk, uploadLimit]);
 
   useEffect(() => {
     return () => {

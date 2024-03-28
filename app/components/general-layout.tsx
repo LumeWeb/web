@@ -285,6 +285,7 @@ const UploadFileItem = ({
   failedState?: FailedUppyFile<Record<string, any>, Record<string, any>>;
   onRemove: (id: string) => void;
 }) => {
+  console.log({file: file.progress})
   return (
     <div className="flex flex-col w-full py-4 px-2 bg-primary-dark">
       <div
@@ -349,6 +350,7 @@ const UploadFileItem = ({
         </div>
       ) : null}
 
+      {file.progress?.preprocess ? <p className="text-sm text-primary-2 ml-2">Processing...</p> : null}
       {file.progress?.uploadStarted && !file.progress.uploadComplete ? (
         <Progress max={100} value={file.progress.percentage} className="mt-2" />
       ) : null}
