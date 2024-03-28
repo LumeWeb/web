@@ -22,3 +22,15 @@ index 02fde5b..f9e3972 100644
                // Add the header to indicate the this is a partial upload.
                headers: _objectSpread(_objectSpread({}, _this3.options.headers), {}, {
                  'Upload-Concat': 'partial'
+diff --git a/node_modules/tus-js-client/lib/upload.js b/node_modules/tus-js-client/lib/upload.js
+index 61289da..0cdb559 100644
+--- a/node_modules/tus-js-client/lib/upload.js
++++ b/node_modules/tus-js-client/lib/upload.js
+@@ -322,7 +322,6 @@ class BaseUpload {
+               parallelUploads: 1,
+               // Reset this option as we are not doing a parallel upload.
+               parallelUploadBoundaries: null,
+-              metadata: {},
+               // Add the header to indicate the this is a partial upload.
+               headers: {
+                 ...this.options.headers,
