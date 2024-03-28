@@ -54,6 +54,10 @@ export const columns: ColumnDef<FileItem>[] = [
   //   enableHiding: false,
   // },
   {
+    accessorKey: "name",
+    header: () => null,
+  },
+  {
     accessorKey: "cid",
     header: "CID",
     cell: ({ row }) => (

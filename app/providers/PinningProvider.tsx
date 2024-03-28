@@ -33,7 +33,7 @@ export const PinningProvider = ({ children }: React.PropsWithChildren) => {
   const queryResult = useQuery({
     queryKey: ["pin-progress"],
     refetchInterval: (query) => {
-      if (!query.state.data || !query.state.data.items.length) {
+      if (!query.state.data?.items || query.state.data.items.length === 0) {
         return false;
       }
 

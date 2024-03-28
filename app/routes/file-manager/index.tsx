@@ -113,7 +113,7 @@ const PinFilesSchema = z.object({
 });
 
 const PinFilesForm = ({ close }: { close: () => void }) => {
-  const { bulkPin, pinStatus, pinData } = usePinning();
+  const { bulkPin, pinStatus, fetchProgress } = usePinning();
   const [form, fields] = useForm({
     id: "pin-files",
     constraint: getZodConstraint(PinFilesSchema),
@@ -131,13 +131,12 @@ const PinFilesForm = ({ close }: { close: () => void }) => {
     },
   });
 
-  console.log({pinStatus, pinData})
-
   useEffect(() => {
     if (pinStatus === "success") {
+      fetchProgress();
       close();
     }
-  }, [pinStatus, close]);
+  }, [pinStatus, fetchProgress, close]);
 
   return (
     <>
@@ -154,8 +153,8 @@ const PinFilesForm = ({ close }: { close: () => void }) => {
           errors={fields.cids.errors || pinStatus === "error" ? ["An error occurred, please try again"] : []}
         />
 
-        <Button type="submit" className="w-full">
-          Pin Content
+        <Button type="submit" className="w-full" disabled={pinStatus === "pending"}>
+          {pinStatus === "pending" ? "Processing..." : "Pin Content"}
         </Button>
       </form>
     </>

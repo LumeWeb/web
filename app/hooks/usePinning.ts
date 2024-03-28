@@ -63,6 +63,7 @@ export const usePinning = () => {
   return {
     progressStatus: context.query.status,
     progressData: context.query.data,
+    fetchProgress: context.query.refetch,
     pinStatus,
     pinData,
     unpinStatus,

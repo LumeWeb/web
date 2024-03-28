@@ -60,7 +60,7 @@ export class PinningProcess {
     let allStatuses = Array.from(PinningProcess.instances.values());
     let inProgress = allStatuses.some((status) => {
       PinningProcess.checkStatus(status.id);
-      return status.status !== "completed";
+      return status.status !== "processing";
     });
 
     while (inProgress) {

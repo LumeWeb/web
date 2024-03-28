@@ -2,7 +2,7 @@ import { Button } from "~/components/ui/button";
 import logoPng from "~/images/lume-logo.png?url";
 import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
 import discordLogoPng from "~/images/discord-logo.png?url";
-import { Link, useLocation } from "@remix-run/react";
+import { Form, Link, useLocation } from "@remix-run/react";
 import {
   Dialog,
   DialogContent,
@@ -46,6 +46,10 @@ import {
   TooltipProvider,
 } from "./ui/tooltip";
 import filesize from "./lib/filesize";
+import { z } from "zod";
+import { getFormProps, useForm, useInputControl } from "@conform-to/react";
+import { getZodConstraint, parseWithZod } from "@conform-to/zod";
+import { ErrorList } from "./forms";
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   const location = useLocation();
@@ -171,96 +175,139 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   );
 };
 
+const UploadFormSchema = z.object({
+  uppyFiles: z.array(z.any()).min(1, {
+    message: "At least one file must be uploaded",
+  }),
+});
+
 const UploadFileForm = () => {
   const {
     getRootProps,
     getInputProps,
     getFiles,
-    upload,
     state,
     removeFile,
     cancelAll,
     failedFiles,
+    upload,
   } = useUppy();
+
+  const [form, fields] = useForm({
+    constraint: getZodConstraint(UploadFormSchema),
+    shouldValidate: "onInput",
+    onValidate: ({ formData }) => {
+      const result = parseWithZod(formData, {
+        schema: UploadFormSchema,
+      });
+      return result;
+    },
+    onSubmit: (e) => {
+      e.preventDefault();
+      return upload();
+    },
+  });
+
+  const inputProps = getInputProps();
+  const files = useInputControl({
+    key: fields.uppyFiles.key,
+    name: fields.uppyFiles.name,
+    formId: form.id
+  });
 
   const isUploading = state === "uploading";
   const isCompleted = state === "completed";
   const hasErrored = state === "error";
   const hasStarted = state !== "idle" && state !== "initializing";
+  const isValid = form.valid || getFiles().length > 0;
   const getFailedState = (id: string) =>
     failedFiles.find((file) => file.id === id);
+
+  console.log({ files: getFiles() });
 
   return (
     <>
       <DialogHeader className="mb-6">
         <DialogTitle>Upload Files</DialogTitle>
       </DialogHeader>
-      {!hasStarted ? (
-        <div
-          {...getRootProps()}
-          className="border border-border rounded text-primary-2 bg-primary-dark h-48 flex flex-col items-center justify-center">
-          <input
-            hidden
-            aria-hidden
-            name="uppyFiles[]"
-            key={new Date().toISOString()}
-            multiple
-            {...getInputProps()}
-          />
-          <CloudUploadIcon className="w-24 h-24 stroke stroke-primary-dark" />
-          <p>Drag & Drop Files or Browse</p>
+      <Form {...getFormProps(form)} className="flex flex-col">
+        {!hasStarted ? (
+          <div
+            {...getRootProps()}
+            className="border border-border rounded text-primary-2 bg-primary-dark h-48 flex flex-col items-center justify-center">
+            <input
+              hidden
+              aria-hidden
+              key={new Date().toISOString()}
+              multiple
+              name={fields.uppyFiles.name}
+              {...inputProps}
+              value={files.value}
+              onChange={() => {
+                //@ts-expect-error -- conform has shitty typeinference for controls
+                files.change(getFiles());
+              }}
+            />
+            <CloudUploadIcon className="w-24 h-24 stroke stroke-primary-dark" />
+            <p>Drag & Drop Files or Browse</p>
+          </div>
+        ) : null}
+
+        <div className="w-full space-y-3 max-h-48 overflow-y-auto">
+          {getFiles().map((file) => (
+            <UploadFileItem
+              key={file.id}
+              file={file}
+              onRemove={(id) => {
+                removeFile(id);
+              }}
+              failedState={getFailedState(file.id)}
+            />
+          ))}
         </div>
-      ) : null}
 
-      <div className="w-full space-y-3 max-h-48 overflow-y-auto">
-        {getFiles().map((file) => (
-          <UploadFileItem
-            key={file.id}
-            file={file}
-            onRemove={(id) => {
-              removeFile(id);
-            }}
-            failedState={getFailedState(file.id)}
-          />
-        ))}
-      </div>
+        <ErrorList
+          errors={[
+            ...(fields.uppyFiles.errors ?? []),
+            ...(hasErrored ? ["An error occurred"] : []),
+          ]}
+        />
 
-      {hasErrored ? (
-        <div className="text-red-500">
-          <p>An error occurred</p>
-        </div>
-      ) : null}
+        {hasStarted && !hasErrored ? (
+          <div className="flex flex-col items-center gap-y-2 w-full text-primary-1">
+            <CloudCheckIcon className="w-32 h-32" />
+            {isCompleted
+              ? "Upload completed"
+              : `${getFiles().length} files being uploaded`}
+          </div>
+        ) : null}
 
-      {hasStarted && !hasErrored ? (
-        <div className="flex flex-col items-center gap-y-2 w-full text-primary-1">
-          <CloudCheckIcon className="w-32 h-32" />
-          {isCompleted
-            ? "Upload completed"
-            : `${getFiles().length} files being uploaded`}
-        </div>
-      ) : null}
+        {isUploading ? (
+          <DialogClose asChild onClick={cancelAll}>
+            <Button type="button" size={"lg"} className="mt-6">
+              Cancel
+            </Button>
+          </DialogClose>
+        ) : null}
 
-      {isUploading ? (
-        <DialogClose asChild onClick={cancelAll}>
-          <Button size={"lg"} className="mt-6">
-            Cancel
+        {isCompleted ? (
+          <DialogClose asChild>
+            <Button type="button" size={"lg"} className="mt-6">
+              Close
+            </Button>
+          </DialogClose>
+        ) : null}
+
+        {!hasStarted && !isCompleted && !isUploading ? (
+          <Button
+            type="submit"
+            size={"lg"}
+            className="mt-6"
+            disabled={!isValid}>
+            Upload
           </Button>
-        </DialogClose>
-      ) : null}
-
-      {isCompleted ? (
-        <DialogClose asChild>
-          <Button size={"lg"} className="mt-6">
-            Close
-          </Button>
-        </DialogClose>
-      ) : null}
-
-      {!hasStarted && !isCompleted && !isUploading ? (
-        <Button size={"lg"} className="mt-6" onClick={upload} disabled={getFiles().length === 0}>
-          Upload
-        </Button>
-      ) : null}
+        ) : null}
+      </Form>
     </>
   );
 };
