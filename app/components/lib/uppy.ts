@@ -19,6 +19,7 @@ import type { S5Client, HashProgressEvent } from "@lumeweb/s5-js";
 import { useInvalidate } from "@refinedev/core";
 
 const LISTENING_EVENTS = [
+  "upload-progress",
   "upload",
   "upload-success",
   "upload-error",
@@ -208,10 +209,14 @@ export function useUppy() {
     const setStateCb = (event: (typeof LISTENING_EVENTS)[number]) => {
       switch (event) {
         case "upload":
+        case "upload-progress":
           setState("uploading");
           break;
         case "upload-error":
           setState("error");
+          break;
+        case "upload-success":
+          setState("completed");
           break;
         default:
           break;
