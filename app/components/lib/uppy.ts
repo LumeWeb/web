@@ -170,7 +170,7 @@ export function useUppy() {
         });
 
         if (useTus) {
-          uppy.use(Tus, { limit: 6, parallelUploads: 0 });
+          uppy.use(Tus, { limit: 1, parallelUploads: 1 });
           uppy.addPreProcessor(tusPreprocessor);
         }
 
