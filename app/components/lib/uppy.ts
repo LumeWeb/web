@@ -1,4 +1,5 @@
 import Uppy, { debugLogger, FailedUppyFile, type State, type UppyFile } from "@uppy/core";
+import NoopUrlStorage from "tus-js-client/lib.es5/noopUrlStorage.js";
 
 import Tus from "@uppy/tus";
 import toArray from "@uppy/utils/lib/toArray";
@@ -170,7 +171,7 @@ export function useUppy() {
         });
 
         if (useTus) {
-          uppy.use(Tus, { limit: 1, parallelUploads: 1, chunkSize: 1024 * 1024 });
+          uppy.use(Tus, { limit: 1, parallelUploads: 1, chunkSize: 1024 * 1024, urlStorage: new NoopUrlStorage() });
           uppy.addPreProcessor(tusPreprocessor);
         }
 
