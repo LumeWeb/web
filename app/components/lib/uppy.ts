@@ -108,7 +108,7 @@ export function useUppy() {
             uppyInstance.current?.emit("preprocess-progress", file, {
                 mode: "determinate",
                 message: "Hashing file...",
-                value: Math.round((event.total / event.total) * 100),
+                value: Math.round((event.bytes / event.total) * 100),
             });
           };
           const options = await sdk.protocols!()
