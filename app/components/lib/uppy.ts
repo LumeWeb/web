@@ -26,6 +26,7 @@ const LISTENING_EVENTS = [
   "file-added",
   "file-removed",
   "files-added",
+  "preprocess-progress"
 ] as const;
 
 export function useUppy() {
@@ -210,6 +211,7 @@ export function useUppy() {
       switch (event) {
         case "upload":
         case "upload-progress":
+        case "preprocess-progress":
           setState("uploading");
           break;
         case "upload-error":
