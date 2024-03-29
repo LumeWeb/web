@@ -106,13 +106,9 @@ export function useUppy() {
         if (file.uploader === "tus") {
           const hashProgressCb = (event: HashProgressEvent) => {
             uppyInstance.current?.emit("preprocess-progress", file, {
-              uploadStarted: false,
-              bytesUploaded: 0,
-              preprocess: {
                 mode: "determinate",
                 message: "Hashing file...",
                 value: Math.round((event.total / event.total) * 100),
-              },
             });
           };
           const options = await sdk.protocols!()
