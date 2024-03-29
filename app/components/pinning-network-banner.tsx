@@ -15,7 +15,15 @@ import type { PinningStatus } from "~/data/pinning";
 export const PinningNetworkBanner = () => {
   const { progressData: data } = usePinning();
 
-  const itemsLeft = useMemo(
+    const itemsQueued = useMemo(
+        () =>
+            data?.items.filter((item: PinningStatus) =>
+                item.status.includes("queued"),
+            ) || [],
+        [data],
+    );
+
+  const itemsProcessing = useMemo(
     () =>
       data?.items.filter((item: PinningStatus) =>
         item.status.includes("processing"),
@@ -44,12 +52,24 @@ export const PinningNetworkBanner = () => {
           <AccordionContent>
             <Tabs className="w-full" defaultValue="inProgress">
               <TabsList className="rounded-none">
+                <TabsTrigger value="queued">Queued</TabsTrigger>
                 <TabsTrigger value="inProgress">In Progress</TabsTrigger>
                 <TabsTrigger value="completed">Completed</TabsTrigger>
               </TabsList>
+                <TabsContent value="queued">
+                    {itemsQueued.length ? (
+                    itemsQueued.map((item: PinningStatus) => (
+                        <PinCidItem key={item.id} item={item} />
+                    ))
+                    ) : (
+                    <div className="text-muted text-sm flex justify-center items-center h-10">
+                        Nothing yet.
+                    </div>
+                    )}
+                </TabsContent>
               <TabsContent value="inProgress">
-                {itemsLeft.length ? (
-                  itemsLeft.map((item: PinningStatus) => (
+                {itemsProcessing.length ? (
+                    itemsProcessing.map((item: PinningStatus) => (
                     <PinCidItem key={item.id} item={item} />
                   ))
                 ) : (
