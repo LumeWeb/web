@@ -7,3 +7,6 @@ yarn.lock
 /build
 /public/build
 .env
+
+
+.nx/cache

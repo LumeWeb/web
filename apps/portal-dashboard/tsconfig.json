@@ -17,10 +17,8 @@
     "paths": {
       "~/*": ["./app/*"],
       "~/components/*": ["./app/components/*"],
-      "~/utils/*": ["./app/utils/*"],
+      "~/utils/*": ["./app/utils/*"]
     },
-
-    // Remix takes care of building everything in `remix build`.
     "noEmit": true
   }
 }
