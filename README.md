@@ -1,2 +1,0 @@
-# web
-Monorepo for Project
