@@ -1,0 +1,13 @@
+{
+  "preset": [
+    "@lumeweb/node-library-preset"
+  ],
+    "config": {
+        "tsconfig": {
+            "compilerOptions": {
+                "module": "ESNext",
+                "moduleResolution": "node"
+            }
+        }
+    }
+}
