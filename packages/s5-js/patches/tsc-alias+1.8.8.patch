@@ -1,0 +1,15 @@
+diff --git a/node_modules/tsc-alias/dist/utils/import-path-resolver.js b/node_modules/tsc-alias/dist/utils/import-path-resolver.js
+index ebaf620..227d4c7 100644
+--- a/node_modules/tsc-alias/dist/utils/import-path-resolver.js
++++ b/node_modules/tsc-alias/dist/utils/import-path-resolver.js
+@@ -5,8 +5,9 @@ const normalizePath = require("normalize-path");
+ const fs_1 = require("fs");
+ const path_1 = require("path");
+ const anyQuote = `["']`;
++const excludeLocalImportSyntax = `[(?!\.)]`;
+ const pathStringContent = `[^"'\r\n]+`;
+-const importString = `(?:${anyQuote}${pathStringContent}${anyQuote})`;
++const importString = `(?:${anyQuote}${excludeLocalImportSyntax}${pathStringContent}${anyQuote})`;
+ const funcStyle = `(?:\\b(?:import|require)\\s*\\(\\s*(\\/\\*.*\\*\\/\\s*)?${importString}\\s*\\))`;
+ const globalStyle = `(?:\\bimport\\s+${importString})`;
+ const fromStyle = `(?:\\bfrom\\s+${importString})`;
