@@ -130,7 +130,7 @@ export class S5Node {
           );
 
           // Assuming providerMessage is a property of StorageLocation
-          storageLocation.providerMessage = value[4];
+          storageLocation.providerMessage = value.get(4);
           locations.set(key, storageLocation);
         }
       });
