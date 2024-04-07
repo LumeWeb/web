@@ -4,18 +4,23 @@
   "sourceRoot": "packages/s5-js/src",
   "projectType": "library",
   "tags": [],
+
   "targets": {
     "build": {
+      "command": "orval",
+      "dependsOn": ["build-base"]
+    },
+    "build-base": {
       "executor": "@nx/js:tsc",
       "outputs": [
         "{options.outputPath}"
       ],
       "options": {
         "outputPath": "dist/s5-js",
-        "main": "s5-js/src/index.ts",
-        "tsConfig": "s5-js/tsconfig.lib.json",
+        "main": "packages/s5-js/src/index.ts",
+        "tsConfig": "packages/s5-js/tsconfig.lib.json",
         "assets": [
-          "s5-js/*.md"
+          "packages/libs5/*.md"
         ]
       }
     }

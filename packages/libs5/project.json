@@ -11,11 +11,11 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "dist/libs5",
-        "main": "libs5/src/index.ts",
-        "tsConfig": "libs5/tsconfig.lib.json",
+        "outputPath": "dist/packages/libs5",
+        "main": "packages/libs5/src/index.ts",
+        "tsConfig": "packages/libs5/tsconfig.lib.json",
         "assets": [
-          "libs5/*.md"
+          "packages/libs5/*.md"
         ]
       }
     }
