@@ -12,20 +12,20 @@ import {
   storageLocationTypeFull,
 } from "../constants.js";
 import defer from "p-defer";
-import { calculateScore, encodeEndian } from "#util.js";
-import Packer from "#serialization/pack.js";
-import Unpacker from "#serialization/unpack.js";
+import { calculateScore, encodeEndian } from "@/util.js";
+import Packer from "@/serialization/pack.js";
+import Unpacker from "@/serialization/unpack.js";
 import { ed25519 } from "@noble/curves/ed25519";
 import { AbstractLevel, AbstractSublevel } from "abstract-level";
-import StorageLocation from "#storage.js";
-import { S5Node, stringifyNode } from "#node.js";
+import StorageLocation from "@/storage.js";
+import { S5Node, stringifyNode } from "@/node.js";
 import { URL } from "url";
 import { Buffer } from "buffer";
 import {
   createTransportPeer,
   createTransportSocket,
-} from "#transports/index.js";
-import messages from "#messages/index.js";
+} from "@/transports/index.js";
+import messages from "@/messages/index.js";
 import { EventEmitter } from "events";
 
 export class P2PService extends EventEmitter {

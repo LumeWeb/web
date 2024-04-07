@@ -3,7 +3,7 @@ import * as net from "net";
 import { URL } from "url";
 import { decodeEndian } from "../util.js";
 import * as console from "console";
-import { BasePeer } from "#transports/base.js";
+import { BasePeer } from "@/transports/base.js";
 
 export class TcpPeer extends BasePeer implements Peer {
   declare _socket: net.Socket;

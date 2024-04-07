@@ -1,10 +1,10 @@
 import NodeId from "./nodeId.js";
-import KeyPairEd25519 from "#ed25519.js";
+import KeyPairEd25519 from "@/ed25519.js";
 import { AbstractLevel } from "abstract-level";
 import { P2PService } from "./service/p2p.js";
 import { RegistryService } from "./service/registry.js";
-import { S5Node } from "#node.js";
-import Unpacker from "#serialization/unpack.js";
+import { S5Node } from "@/node.js";
+import Unpacker from "@/serialization/unpack.js";
 import type { URL } from "url";
 
 export interface Peer {

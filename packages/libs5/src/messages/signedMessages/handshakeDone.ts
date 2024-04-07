@@ -1,6 +1,6 @@
-import { S5Node } from "#node.js";
-import { Peer, SignedMessage } from "#types.js";
-import Unpacker from "#serialization/unpack.js";
+import { S5Node } from "@/node.js";
+import { Peer, SignedMessage } from "@/types.js";
+import Unpacker from "@/serialization/unpack.js";
 import { equalBytes } from "@noble/curves/abstract/utils";
 import { URL } from "url";
 

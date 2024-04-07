@@ -1,8 +1,8 @@
-import Metadata from "#serialization/metadata/base.js";
-import ExtraMetadata from "#serialization/metadata/extra.js";
-import CID from "#cid.js";
-import Unpacker from "#serialization/unpack.js";
-import { METADATA_TYPES, metadataMagicByte } from "#constants.js";
+import Metadata from "@/serialization/metadata/base.js";
+import ExtraMetadata from "@/serialization/metadata/extra.js";
+import CID from "@/cid.js";
+import Unpacker from "@/serialization/unpack.js";
+import { METADATA_TYPES, metadataMagicByte } from "@/constants.js";
 import { Buffer } from "buffer";
 
 export default class WebAppMetadata extends Metadata {

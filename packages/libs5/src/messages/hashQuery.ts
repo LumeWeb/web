@@ -1,7 +1,7 @@
-import { S5Node } from "#node.js";
-import { Peer } from "#types.js";
-import Unpacker from "#serialization/unpack.js";
-import { Multihash } from "#multihash.js";
+import { S5Node } from "@/node.js";
+import { Peer } from "@/types.js";
+import Unpacker from "@/serialization/unpack.js";
+import { Multihash } from "@/multihash.js";
 
 export default async function (
   node: S5Node,

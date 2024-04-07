@@ -1,7 +1,7 @@
 import { Logger, Peer } from "../types.js";
 import { URL } from "url";
 import * as WS from "ws";
-import { BasePeer } from "#transports/base.js";
+import { BasePeer } from "@/transports/base.js";
 import isNode from "detect-node";
 import net from "net";
 

@@ -1,6 +1,6 @@
-import { Logger, Peer, PeerConstructorOptions } from "#types.js";
+import { Logger, Peer, PeerConstructorOptions } from "@/types.js";
 import { URL } from "url";
-import NodeId from "#nodeId.js";
+import NodeId from "@/nodeId.js";
 
 export abstract class BasePeer implements Peer {
   connectionUris: URL[];
