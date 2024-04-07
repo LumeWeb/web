@@ -19,6 +19,15 @@
       }
     },
     {
+      "plugin": "@nx/remix/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "devTargetName": "dev",
+        "startTargetName": "start",
+        "typecheckTargetName": "typecheck"
+      }
+    },
+    {
       "plugin": "@nx/vite/plugin",
       "options": {
         "buildTargetName": "build",
@@ -35,6 +44,11 @@
   },
   "targetDefaults": {
     "build": {
+      "inputs": ["production", "^production"]
+    },
+    "@nx/remix:build": {
+      "cache": true,
+      "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
     }
   },
