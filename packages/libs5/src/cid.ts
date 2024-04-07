@@ -140,7 +140,7 @@ export default class CID extends Multibase {
     return this.copyWith({ type: CID_TYPES.RESOLVER }).toBytes();
   }
 
-  toString(): string {
+  override toString(): string {
     return this.type === CID_TYPES.BRIDGE
       ? Buffer.from(this.hash.fullBytes).toString("utf8")
       : this.toBase58();
