@@ -54,7 +54,7 @@ export class WebSocketPeer extends BasePeer implements Peer {
       socket.addEventListener("open", () => {
         resolve(socket);
       });
-      socket.addEventListener("error", (err) => {
+      socket.addEventListener("error", (err: any) => {
         reject(err);
       });
     });
