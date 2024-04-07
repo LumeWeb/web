@@ -204,11 +204,11 @@ export class RegistryService {
     cb: (sre: SignedRegistryEntry) => void,
   ): () => void {
     const key = new Multihash(pk).toString();
-    if (!this.streams[key]) {
-      this.streams[key] = new EventEmitter();
+    if (!this.streams.has(key)) {
+      this.streams.set(key, new EventEmitter());
       this.sendRegistryRequest(pk);
     }
-    const stream = this.streams[key] as EventEmitter;
+    const stream = this.streams.get(key) as EventEmitter;
 
     const done = () => {
       stream.off("event", cb);
