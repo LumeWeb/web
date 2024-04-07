@@ -1,0 +1,23 @@
+{
+  "name": "@lumeweb/s5-js",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/s5-js/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/s5-js",
+        "main": "s5-js/src/index.ts",
+        "tsConfig": "s5-js/tsconfig.lib.json",
+        "assets": [
+          "s5-js/*.md"
+        ]
+      }
+    }
+  }
+}

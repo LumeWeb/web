@@ -1,0 +1,23 @@
+{
+  "name": "@lumeweb/libs5",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/libs5/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/libs5",
+        "main": "libs5/src/index.ts",
+        "tsConfig": "libs5/tsconfig.lib.json",
+        "assets": [
+          "libs5/*.md"
+        ]
+      }
+    }
+  }
+}
