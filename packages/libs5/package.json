@@ -7,15 +7,7 @@
     "type": "git",
     "url": "gitea@git.lumeweb.com:LumeWeb/libs5.git"
   },
-  "devDependencies": {
-    "@changesets/cli": "^2.27.1"
-  },
   "readme": "ERROR: No README data found!",
-  "dependencies": {
-  },
-  "publishConfig": {
-    "access": "public"
-  },
   "files": [
     "lib"
   ]
