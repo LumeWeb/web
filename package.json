@@ -126,7 +126,9 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "@nx/vite@18.2.3": "patches/@nx__vite@18.2.3.patch"
+      "@nx/vite@18.2.3": "patches/@nx__vite@18.2.3.patch",
+      "@uppy/tus@3.5.4": "patches/@uppy__tus@3.5.4.patch",
+      "tus-js-client@4.1.0": "patches/tus-js-client@4.1.0.patch"
     }
   }
 }

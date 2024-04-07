@@ -1,7 +1,7 @@
-diff --git a/node_modules/@uppy/tus/lib/index.js b/node_modules/@uppy/tus/lib/index.js
-index 1e0a1bb..ba95bb5 100644
---- a/node_modules/@uppy/tus/lib/index.js
-+++ b/node_modules/@uppy/tus/lib/index.js
+diff --git a/lib/index.js b/lib/index.js
+index 69185b8fcbc9be4bac9ce6914b234bae046a2810..28069925c08a9eb3e3cff6bccb41ac4233d635da 100644
+--- a/lib/index.js
++++ b/lib/index.js
 @@ -506,7 +506,7 @@ function _getCompanionClientArgs2(file) {
  }
  async function _uploadFiles2(files) {
