@@ -26,7 +26,7 @@ export abstract class BasePeer implements Peer {
     this._id = value;
   }
 
-  abstract sendMessage(message: Uint8Array);
+  abstract sendMessage(message: Uint8Array): void;
 
   abstract renderLocationUri(): string;
 
