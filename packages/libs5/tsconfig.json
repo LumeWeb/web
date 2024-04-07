@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
     "module": "esnext",
     "forceConsistentCasingInFileNames": true,
     "strict": true,

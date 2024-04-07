@@ -294,6 +294,9 @@ devDependencies:
   '@testing-library/react':
     specifier: 14.0.0
     version: 14.0.0(react-dom@18.2.0)(react@18.2.0)
+  '@types/detect-node':
+    specifier: ^2.0.2
+    version: 2.0.2
   '@types/node':
     specifier: 18.16.9
     version: 18.16.9
@@ -5990,6 +5993,10 @@ packages:
     dependencies:
       '@types/ms': 0.7.34
     dev: false
+
+  /@types/detect-node@2.0.2:
+    resolution: {integrity: sha512-2r16DIvQ3dLcRHBPzbdlPsqUWvNaIE7g3fPlGcoA5IF0Nvv7gaONWleB2rhEmggvj/P5VvxseWchR2noncrgGg==}
+    dev: true
 
   /@types/es-aggregate-error@1.0.6:
     resolution: {integrity: sha512-qJ7LIFp06h1QE1aVxbVd+zJP2wdaugYXYfd6JxsyRMrYHaxb6itXPogW2tz+ylUJ1n1b+JF1PHyYCfYHm0dvUg==}
