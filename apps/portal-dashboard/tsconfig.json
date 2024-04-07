@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "jsx": "react-jsx",
     "allowJs": false,
     "esModuleInterop": false,
