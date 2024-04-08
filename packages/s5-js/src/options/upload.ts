@@ -23,7 +23,7 @@ import { BaseCustomOptions } from "./registry.js";
 import { optionsToConfig } from "../utils/options.js";
 import { buildRequestUrl } from "../request.js";
 import defer from "p-defer";
-import { Multihash } from "@lumeweb/libs5/lib/multihash.js";
+import { Multihash } from "@lumeweb/libs5";
 
 /**
  * The tus chunk size is (4MiB - encryptionOverhead) * dataPieces, set as default.
