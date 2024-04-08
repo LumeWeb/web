@@ -1,0 +1,36 @@
+diff --git a/lib/upload.js b/lib/upload.js
+index e564de34bb6fea2a544a74cf92502e9aaa153f06..10fba60580862028ad976655d19ebb85e6fb2491 100644
+--- a/lib/upload.js
++++ b/lib/upload.js
+@@ -332,7 +332,6 @@ class BaseUpload {
+               parallelUploads: 1,
+               // Reset this option as we are not doing a parallel upload.
+               parallelUploadBoundaries: null,
+-              metadata: {},
+               // Add the header to indicate the this is a partial upload.
+               headers: {
+                 ...this.options.headers,
+diff --git a/lib.es5/upload.js b/lib.es5/upload.js
+index fc3734cdae75407890f1f29b475277257219a545..8ec53a995a6486c163e3e15f8685c836a53a38f3 100644
+--- a/lib.es5/upload.js
++++ b/lib.es5/upload.js
+@@ -731,7 +731,6 @@ var BaseUpload = /*#__PURE__*/function () {
+               parallelUploads: 1,
+               // Reset this option as we are not doing a parallel upload.
+               parallelUploadBoundaries: null,
+-              metadata: {},
+               // Add the header to indicate the this is a partial upload.
+               headers: _objectSpread(_objectSpread({}, _this3.options.headers), {}, {
+                 'Upload-Concat': 'partial'
+diff --git a/lib.esm/upload.js b/lib.esm/upload.js
+index 99cc7ffeac25ea1fa81d24644877c616904980b9..7bd8d044625dde1ac144b8b9dfe70a02b3362a3f 100644
+--- a/lib.esm/upload.js
++++ b/lib.esm/upload.js
+@@ -279,7 +279,6 @@ var BaseUpload = /*#__PURE__*/function () {
+               parallelUploads: 1,
+               // Reset this option as we are not doing a parallel upload.
+               parallelUploadBoundaries: null,
+-              metadata: {},
+               // Add the header to indicate the this is a partial upload.
+               headers: _objectSpread(_objectSpread({}, _this3.options.headers), {}, {
+                 'Upload-Concat': 'partial'

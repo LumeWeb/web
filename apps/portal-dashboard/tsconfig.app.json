@@ -1,0 +1,33 @@
+{
+  "extends": "./tsconfig.json"
+  "compilerOptions": {
+    "paths": {
+      "~/*": [
+        "./app/*"
+      ],
+      "~/components/*": [
+        "./app/components/*"
+      ],
+      "~/utils/*": [
+        "./app/utils/*"
+      ]
+    }
+  },
+  "include": [
+    "env.d.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "app/**/*.js",
+    "app/**/*.jsx"
+  ],
+  "exclude": [
+    "tests/**/*.spec.ts",
+    "tests/**/*.test.ts",
+    "tests/**/*.spec.tsx",
+    "tests/**/*.test.tsx",
+    "tests/**/*.spec.js",
+    "tests/**/*.test.js",
+    "tests/**/*.spec.jsx",
+    "tests/**/*.test.jsx"
+  ]
+}

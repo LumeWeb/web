@@ -1,0 +1,32 @@
+{
+  "name": "@lumeweb/s5-js",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/s5-js/src",
+  "projectType": "library",
+  "tags": [],
+
+  "targets": {
+    "build": {
+      "command": "echo Building",
+      "dependsOn": ["base-build"]
+    },
+    "base-build": {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "outputPath": "dist/libs/s5-js",
+        "main": "libs/s5-js/src/index.ts",
+        "tsConfig": "libs/s5-js/tsconfig.lib.json",
+        "assets": [
+          "libs/libs5/*.md"
+        ]
+      },
+      "dependsOn": ["orval"]
+    },
+    "orval": {
+      "command": "orval; orval",
+      "options": {
+        "cwd": "libs/s5-js"
+      }
+    }
+  }
+}

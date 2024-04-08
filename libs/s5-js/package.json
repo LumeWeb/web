@@ -1,0 +1,8 @@
+{
+    "name": "@lumeweb/s5-js",
+    "version": "0.1.0-develop.29",
+    "type": "module",
+    "module": "lib/index.js",
+    "main": "lib/index.js",
+    "readme": "ERROR: No README data found!"
+}

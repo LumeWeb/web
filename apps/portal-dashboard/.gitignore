@@ -1,0 +1,12 @@
+/node_modules
+package-lock.json
+yarn.lock
+
+
+/.cache
+/build
+/public/build
+.env
+
+
+.nx/cache
