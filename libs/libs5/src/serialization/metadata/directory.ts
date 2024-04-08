@@ -1,13 +1,13 @@
-import Metadata from "@/serialization/metadata/base.js";
-import Packer from "@/serialization/pack.js";
-import { METADATA_TYPES, metadataMagicByte } from "@/constants.js";
-import Unpacker from "@/serialization/unpack.js";
-import ExtraMetadata from "@/serialization/metadata/extra.js";
+import Metadata from "../../serialization/metadata/base.js";
+import Packer from "../../serialization/pack.js";
+import { METADATA_TYPES, metadataMagicByte } from "../../constants.js";
+import Unpacker from "../../serialization/unpack.js";
+import ExtraMetadata from "../../serialization/metadata/extra.js";
 import { Buffer } from "buffer";
-import CID from "@/cid.js";
-import { Multihash } from "@/multihash.js";
+import CID from "../../cid.js";
+import { Multihash } from "../../multihash.js";
 import { base64url } from "multiformats/bases/base64";
-import EncryptedCID from "@/encrypted_cid.js";
+import EncryptedCID from "../../encrypted_cid.js";
 
 export default class DirectoryMetadata extends Metadata {
   details: DirectoryMetadataDetails;

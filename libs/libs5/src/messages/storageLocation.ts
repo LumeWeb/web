@@ -1,12 +1,12 @@
-import { S5Node } from "@/node.js";
-import { Peer } from "@/types.js";
-import Unpacker from "@/serialization/unpack.js";
-import { Multihash } from "@/multihash.js";
-import { decodeEndian } from "@/util.js";
+import { S5Node } from "../node.js";
+import { Peer } from "../types.js";
+import Unpacker from "../serialization/unpack.js";
+import { Multihash } from "../multihash.js";
+import { decodeEndian } from "../util.js";
 import { ed25519 } from "@noble/curves/ed25519";
-import NodeId from "@/nodeId.js";
-import StorageLocation from "@/storage.js";
-import { CID_HASH_TYPES } from "@/constants.js";
+import NodeId from "../nodeId.js";
+import StorageLocation from "../storage.js";
+import { CID_HASH_TYPES } from "../constants.js";
 
 export default async function (
   node: S5Node,

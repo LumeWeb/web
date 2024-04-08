@@ -1,5 +1,5 @@
-import CID from "@/cid.js";
-import { parentLinkTypeUserIdentity } from "@/constants.js";
+import CID from "../../cid.js";
+import { parentLinkTypeUserIdentity } from "../../constants.js";
 
 export class MetadataParentLink {
   cid: CID;

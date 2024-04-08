@@ -1,20 +1,20 @@
-import { Logger, Peer, SignedRegistryEntry } from "@/types.js";
+import { Logger, Peer, SignedRegistryEntry } from "../types.js";
 import { AbstractLevel, AbstractSublevel } from "abstract-level";
 import {
   CID_HASH_TYPES,
   protocolMethodRegistryQuery,
   recordTypeRegistryEntry,
   registryMaxDataSize,
-} from "@/constants.js";
-import { Multihash } from "@/multihash.js";
+} from "../constants.js";
+import { Multihash } from "../multihash.js";
 import { base64url } from "multiformats/bases/base64";
-import { decodeEndian, encodeEndian } from "@/util.js";
+import { decodeEndian, encodeEndian } from "../util.js";
 import { ed25519 } from "@noble/curves/ed25519";
-import Packer from "@/serialization/pack.js";
+import Packer from "../serialization/pack.js";
 import { Buffer } from "buffer";
 import { EventEmitter } from "events";
-import KeyPairEd25519 from "@/ed25519.js";
-import { S5Node, stringifyBytes } from "@/node.js";
+import KeyPairEd25519 from "../ed25519.js";
+import { S5Node, stringifyBytes } from "../node.js";
 
 export class RegistryService {
   private db?: AbstractSublevel<

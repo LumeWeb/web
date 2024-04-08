@@ -5,20 +5,20 @@ import Unpacker from "./serialization/unpack.js";
 import Packer from "./serialization/pack.js";
 import StorageLocation, { StorageLocationProvider } from "./storage.js";
 import { AbstractLevel } from "abstract-level";
-import { P2PService } from "@/service/p2p.js";
-import { RegistryService } from "@/service/registry.js";
+import { P2PService } from "./service/p2p.js";
+import { RegistryService } from "./service/registry.js";
 import {
   CID_TYPES,
   storageLocationTypeFile,
   storageLocationTypeFull,
-} from "@/constants.js";
+} from "./constants.js";
 import axios from "axios";
 import { equalBytes } from "@noble/curves/abstract/utils";
 import { blake3 } from "@noble/hashes/blake3";
-import CID from "@/cid.js";
-import type Metadata from "@/serialization/metadata/base.js";
-import { deserialize as deserializeMediaMetadata } from "@/serialization/metadata/media.js";
-import { deserialize as deserializeWebAppMetadata } from "@/serialization/metadata/webapp.js";
+import CID from "./cid.js";
+import type Metadata from "./serialization/metadata/base.js";
+import { deserialize as deserializeMediaMetadata } from "./serialization/metadata/media.js";
+import { deserialize as deserializeWebAppMetadata } from "./serialization/metadata/webapp.js";
 const DEFAULT_LOGGER = {
   info(s: any) {
     console.info(s);

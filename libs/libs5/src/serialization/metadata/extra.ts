@@ -14,8 +14,8 @@ import {
   metadataExtensionUpdateCID,
   metadataExtensionViewTypes,
   metadataExtensionWikidataClaims,
-} from "@/constants.js";
-import CID from "@/cid.js";
+} from "../../constants.js";
+import CID from "../../cid.js";
 
 export default class ExtraMetadata {
   data: Map<number, any>;

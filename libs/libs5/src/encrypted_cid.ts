@@ -1,8 +1,8 @@
-import Multibase from "@/multibase.js";
-import { Multihash } from "@/multihash.js";
-import CID from "@/cid.js";
-import { CID_TYPES } from "@/constants.js";
-import { decodeEndian, encodeEndian } from "@/util.js";
+import Multibase from "./multibase.js";
+import { Multihash } from "./multihash.js";
+import CID from "./cid.js";
+import { CID_TYPES } from "./constants.js";
+import { decodeEndian, encodeEndian } from "./util.js";
 
 export default class EncryptedCID extends Multibase {
   encryptedBlobHash: Multihash;

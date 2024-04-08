@@ -6,7 +6,7 @@
   "tags": [],
   "targets": {
     "build": {
-      "command": "tsc-alias -p libs/libs5/tsconfig.lib.json",
+      "command": "",
       "dependsOn": ["base-build"]
     },
     "base-build": {

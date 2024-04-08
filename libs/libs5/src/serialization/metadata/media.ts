@@ -1,5 +1,5 @@
-import Metadata from "@/serialization/metadata/base.js";
-import CID from "@/cid.js";
+import Metadata from "../../serialization/metadata/base.js";
+import CID from "../../cid.js";
 import {
   CID_HASH_TYPES,
   METADATA_TYPES,
@@ -8,17 +8,17 @@ import {
   metadataMediaDetailsIsLive,
   metadataProofTypeSignature,
   parentLinkTypeUserIdentity,
-} from "@/constants.js";
-import ExtraMetadata from "@/serialization/metadata/extra.js";
-import { MetadataParentLink } from "@/serialization/metadata/parent.js";
-import { Multihash } from "@/multihash.js";
-import { decodeEndian, encodeEndian } from "@/util.js";
-import Unpacker from "@/serialization/unpack.js";
+} from "../../constants.js";
+import ExtraMetadata from "../../serialization/metadata/extra.js";
+import { MetadataParentLink } from "../../serialization/metadata/parent.js";
+import { Multihash } from "../../multihash.js";
+import { decodeEndian, encodeEndian } from "../../util.js";
+import Unpacker from "../../serialization/unpack.js";
 import { Buffer } from "buffer";
 import { blake3 } from "@noble/hashes/blake3";
 import { ed25519 } from "@noble/curves/ed25519";
-import KeyPairEd25519 from "@/ed25519.js";
-import Packer from "@/serialization/pack.js";
+import KeyPairEd25519 from "../../ed25519.js";
+import Packer from "../../serialization/pack.js";
 
 export default class MediaMetadata extends Metadata {
   name: string;

@@ -1,6 +1,6 @@
-import { S5Node } from "@/node.js";
-import { Multihash } from "@/multihash.js";
-import NodeId from "@/nodeId.js";
+import { S5Node } from "./node.js";
+import { Multihash } from "./multihash.js";
+import NodeId from "./nodeId.js";
 
 export default class StorageLocation {
   type: number;
