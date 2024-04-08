@@ -261,7 +261,10 @@ export class S5Client {
     await getS5BlobCid(cid, {
       ...config,
       responseType: "arraybuffer",
-      beforeRedirect: (config, responseDetails) => {
+      beforeRedirect: (
+        config: any,
+        responseDetails: { headers: { [x: string]: string | null } },
+      ) => {
         location = responseDetails.headers["location"];
       },
     });
