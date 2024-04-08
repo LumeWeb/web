@@ -1,10 +1,10 @@
-import Multibase from "./multibase.js";
-import { Multihash } from "./multihash.js";
-import { CID_TYPES, REGISTRY_TYPES } from "./constants.js";
-import { decodeEndian, encodeEndian } from "./util.js";
+import Multibase from "@/multibase.js";
+import { Multihash } from "@/multihash.js";
+import { CID_TYPES, REGISTRY_TYPES } from "@/constants.js";
+import { decodeEndian, encodeEndian } from "@/util.js";
 import { concatBytes, equalBytes } from "@noble/curves/abstract/utils";
 import { hexToBytes } from "@noble/hashes/utils";
-import { SignedRegistryEntry } from "./types.js";
+import { SignedRegistryEntry } from "@/types.js";
 
 export default class CID extends Multibase {
   type: number;

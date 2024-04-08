@@ -1,5 +1,5 @@
-import { P2PMessageHandler } from "../types.js";
-import handshakeOpen from "../messages/handshakeOpen.js";
+import { P2PMessageHandler } from "@/types.js";
+import handshakeOpen from "@/messages/handshakeOpen.js";
 import {
   protocolMethodHandshakeOpen,
   protocolMethodHashQuery,
@@ -7,12 +7,12 @@ import {
   protocolMethodSignedMessage,
   recordTypeRegistryEntry,
   recordTypeStorageLocation,
-} from "../constants.js";
-import registryQuery from "../messages/registryQuery.js";
-import registryEntry from "../messages/registryEntry.js";
-import storageLocation from "../messages/storageLocation.js";
-import signedMessage from "../messages/signedMessage.js";
-import hashQuery from "../messages/hashQuery.js";
+} from "@/constants.js";
+import registryQuery from "@/messages/registryQuery.js";
+import registryEntry from "@/messages/registryEntry.js";
+import storageLocation from "@/messages/storageLocation.js";
+import signedMessage from "@/messages/signedMessage.js";
+import hashQuery from "@/messages/hashQuery.js";
 
 const messages = new Map<number, P2PMessageHandler>(
   Object.entries({

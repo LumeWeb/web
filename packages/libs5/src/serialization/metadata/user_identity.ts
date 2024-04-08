@@ -1,4 +1,4 @@
-import CID from "../../cid.js";
+import CID from "@/cid.js";
 
 export default class UserIdentityMetadata {
   userID?: CID;

@@ -1,9 +1,9 @@
 import { URL } from "url";
-import { TcpPeer } from "./tcp.js";
-import { WebSocketPeer } from "./webSocket.js";
-import { PeerConstructorOptions, PeerStatic } from "../types.js";
+import { TcpPeer } from "@/transports/tcp.js";
+import { WebSocketPeer } from "@/transports/webSocket.js";
+import { PeerConstructorOptions, PeerStatic } from "@/types.js";
 import isNode from "detect-node";
-import { BasePeer } from "./base.js";
+import { BasePeer } from "@/transports/base.js";
 const transports = new Map<string, PeerStatic>();
 
 export function registerTransport(type: string, transport: PeerStatic) {

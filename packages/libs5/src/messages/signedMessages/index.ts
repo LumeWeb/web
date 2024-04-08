@@ -1,10 +1,10 @@
-import { P2PSignedMessageHandler } from "../../types.js";
-import handshakeDone from "../../messages/signedMessages/handshakeDone.js";
+import { P2PSignedMessageHandler } from "@/types.js";
+import handshakeDone from "@/messages/signedMessages/handshakeDone.js";
 import {
   protocolMethodAnnouncePeers,
   protocolMethodHandshakeDone,
-} from "../../constants.js";
-import announcePeers from "../../messages/signedMessages/announcePeers.js";
+} from "@/constants.js";
+import announcePeers from "@/messages/signedMessages/announcePeers.js";
 
 const messages = new Map<number, P2PSignedMessageHandler>(
   Object.entries({
