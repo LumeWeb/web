@@ -2,9 +2,5 @@
   "name": "@lumeweb/portal-dashboard",
   "private": true,
   "sideEffects": false,
-  "type": "module",
-  "scripts": {
-    "patch-package": "patch-package",
-    "postinstall": "patch-package"
-  }
+  "type": "module"
 }
