@@ -193,6 +193,9 @@ dependencies:
   level:
     specifier: ^8.0.0
     version: 8.0.1
+  memize:
+    specifier: ^2.1.0
+    version: 2.1.0
   mime:
     specifier: ^4.0.1
     version: 4.0.1
@@ -6174,7 +6177,7 @@ packages:
       '@babel/plugin-syntax-typescript': 7.24.1(@babel/core@7.24.4)
       '@vanilla-extract/babel-plugin-debug-ids': 1.0.5
       '@vanilla-extract/css': 1.14.2
-      esbuild: 0.17.6
+      esbuild: 0.19.12
       eval: 0.1.8
       find-up: 5.0.0
       javascript-stringify: 2.1.0
@@ -11984,6 +11987,10 @@ packages:
     engines: {node: '>= 0.6'}
     dev: false
 
+  /memize@2.1.0:
+    resolution: {integrity: sha512-yywVJy8ctVlN5lNPxsep5urnZ6TTclwPEyigM9M3Bi8vseJBOfqNrGWN/r8NzuIt3PovM323W04blJfGQfQSVg==}
+    dev: false
+
   /merge-descriptors@1.0.1:
     resolution: {integrity: sha512-cCi6g3/Zr1iqQi6ySbseM1Xvooa98N0w31jzUYrXPX2xqObmFGHJ0tQ5u74H3mVh7wLouTseZyYIq39g8cNp1w==}
     dev: false
@@ -16332,7 +16339,7 @@ packages:
     dev: false
 
   '@gitpkg.now.sh/LumeWeb/refine/packages/core?remix(@tanstack/react-query@5.29.0)(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)':
-    resolution: {tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/core?remix}
+    resolution: {registry: https://registry.npmjs.org/, tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/core?remix}
     id: '@gitpkg.now.sh/LumeWeb/refine/packages/core?remix'
     name: '@refinedev/core'
     version: 4.48.0
@@ -16361,7 +16368,7 @@ packages:
     dev: false
 
   '@gitpkg.now.sh/LumeWeb/refine/packages/devtools-internal?remix(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)':
-    resolution: {tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/devtools-internal?remix}
+    resolution: {registry: https://registry.npmjs.org/, tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/devtools-internal?remix}
     id: '@gitpkg.now.sh/LumeWeb/refine/packages/devtools-internal?remix'
     name: '@refinedev/devtools-internal'
     version: 1.1.6
@@ -16384,7 +16391,7 @@ packages:
     dev: false
 
   '@gitpkg.now.sh/LumeWeb/refine/packages/devtools-shared?remix(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)':
-    resolution: {tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/devtools-shared?remix}
+    resolution: {registry: https://registry.npmjs.org/, tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/devtools-shared?remix}
     id: '@gitpkg.now.sh/LumeWeb/refine/packages/devtools-shared?remix'
     name: '@refinedev/devtools-shared'
     version: 1.1.4
@@ -16406,7 +16413,7 @@ packages:
     dev: false
 
   '@gitpkg.now.sh/LumeWeb/refine/packages/react-table?remix(@refinedev/core@4.48.0)(@tanstack/react-table@8.15.3)(react-dom@18.2.0)(react@18.2.0)':
-    resolution: {tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/react-table?remix}
+    resolution: {registry: https://registry.npmjs.org/, tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/react-table?remix}
     id: '@gitpkg.now.sh/LumeWeb/refine/packages/react-table?remix'
     name: '@refinedev/react-table'
     version: 5.6.7
@@ -16424,7 +16431,7 @@ packages:
     dev: false
 
   '@gitpkg.now.sh/LumeWeb/refine/packages/remix?remix(@refinedev/core@4.48.0)(@remix-run/node@2.8.1)(@remix-run/react@2.8.1)(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)(remix@2.8.1)':
-    resolution: {tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/remix?remix}
+    resolution: {registry: https://registry.npmjs.org/, tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/remix?remix}
     id: '@gitpkg.now.sh/LumeWeb/refine/packages/remix?remix'
     name: '@refinedev/remix-router'
     version: 3.0.1

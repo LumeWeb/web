@@ -64,6 +64,7 @@
     "isbot": "^4.4.0",
     "isomorphic-ws": "^5.0.0",
     "level": "^8.0.0",
+    "memize": "^2.1.0",
     "mime": "^4.0.1",
     "multiformats": "^13.0.0",
     "nx": "18.2.3",
@@ -144,4 +145,3 @@
   },
   "packageManager": "pnpm@8.8.0"
 }
-
