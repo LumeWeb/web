@@ -1,18 +1,5 @@
 {
-  "extends": "./tsconfig.json"
-  "compilerOptions": {
-    "paths": {
-      "~/*": [
-        "./app/*"
-      ],
-      "~/components/*": [
-        "./app/components/*"
-      ],
-      "~/utils/*": [
-        "./app/utils/*"
-      ]
-    }
-  },
+  "extends": "./tsconfig.json",
   "include": [
     "env.d.ts",
     "app/**/*.ts",
