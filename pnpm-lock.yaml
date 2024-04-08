@@ -139,7 +139,13 @@ dependencies:
   '@uppy/utils':
     specifier: ^5.7.4
     version: 5.7.5
+  '@visx/curve':
+    specifier: ^3.3.0
+    version: 3.3.0
   '@visx/visx':
+    specifier: ^3.10.2
+    version: 3.10.2(@react-spring/web@9.7.3)(react-dom@18.2.0)(react@18.2.0)
+  '@visx/xychart':
     specifier: ^3.10.2
     version: 3.10.2(@react-spring/web@9.7.3)(react-dom@18.2.0)(react@18.2.0)
   '@vitest/ui':
