@@ -1,0 +1,24 @@
+{
+  "name": "@lumeweb/portal-sdk",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/portal-sdk/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "command": "tsc-alias -p libs/portal-sdk/tsconfig.lib.json",
+      "dependsOn": ["base-build"]
+    },
+    "base-build": {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "outputPath": "dist/libs/portal-sdk",
+        "main": "libs/portal-sdk/src/index.ts",
+        "tsConfig": "libs/portal-sdk/tsconfig.lib.json",
+        "assets": [
+          "libs/portal-sdk/*.md"
+        ]
+      }
+    }
+  }
+}
