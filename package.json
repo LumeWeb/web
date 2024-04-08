@@ -1,0 +1,39 @@
+{
+    "name": "@lumeweb/portal-sdk",
+    "version": "0.0.0",
+    "type": "module",
+    "description": "",
+    "main": "lib/index.js",
+    "files": [
+        "lib"
+    ],
+    "scripts": {
+        "prepare": "presetter bootstrap",
+        "build": "run build",
+        "postinstall": "patch-package",
+        "patch-package": "patch-package",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "gitea@git.lumeweb.com:LumeWeb/portal-sdk.git"
+    },
+    "private": false,
+    "devDependencies": {
+        "@changesets/cli": "^2.27.1",
+        "presetter": "^4.7.0",
+        "presetter-preset-esm": "^4.7.0"
+    },
+    "readme": "ERROR: No README data found!",
+    "_id": "@lumeweb/portal-sdk@0.0.0",
+    "dependencies": {
+        "@lumeweb/s5-js": "0.0.0-20240329003038",
+        "axios": "^1.6.7",
+        "memize": "^2.1.0",
+        "orval": "^6.25.0",
+        "patch-package": "^8.0.0"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
+}

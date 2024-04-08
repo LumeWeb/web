@@ -1,0 +1,25 @@
+{
+  "preset": [
+      "presetter-preset-esm"
+  ],
+  "config": {
+      "prettier": {
+          "singleQuote": false
+      },
+      "tsconfig.build": {
+          "include": {
+              "0": "src"
+          },
+          "compilerOptions": {
+              "rootDir": "src"
+          }
+      },
+      "tsconfig": {
+          "compilerOptions": {
+              "lib": [
+                  "dom"
+              ]
+          }
+      }
+  }
+}
