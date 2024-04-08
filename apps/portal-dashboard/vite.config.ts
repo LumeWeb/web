@@ -4,6 +4,7 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 
 export default defineConfig({
+  cacheDir: "../../node_modules/.vite/apps/portal-dashboard",
   plugins: [
     remix({
       ssr: false,
@@ -14,6 +15,9 @@ export default defineConfig({
   ],
   build: {
     minify: false,
+    outDir: "../../dist/apps/portal-dashboard",
+    reportCompressedSize: true,
+    commonjsOptions: { transformMixedEsModules: true },
   },
   server: {
     fs: {
