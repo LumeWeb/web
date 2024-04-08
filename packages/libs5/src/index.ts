@@ -8,6 +8,11 @@ import CID from "./cid.js";
 export * from "./types.js";
 export * from "./constants.js";
 export * from "./util.js";
+export {
+  deserializeRegistryEntry,
+  serializeRegistryEntry,
+  signRegistryEntry,
+} from "./service/registry.js";
 import WebAppMetadata, {
   WebAppMetadataFileReference,
   deserialize as deserializeWebAppMetadata,
