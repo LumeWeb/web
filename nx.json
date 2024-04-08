@@ -44,14 +44,15 @@
   "targetDefaults": {
     "build": {
       "inputs": ["production", "^production"],
-      "outputs": [
-        "{workspaceRoot}/dist/{projectRoot}"
-      ]
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"]
     },
     "base-build": {
-      "outputs": [
-        "{workspaceRoot}/dist/{projectRoot}"
-      ]
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"]
+    },
+    "@nx/remix:build": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   },
   "generators": {
