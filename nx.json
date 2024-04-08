@@ -44,12 +44,8 @@
   },
   "targetDefaults": {
     "build": {
-      "inputs": ["production", "^production"]
-    },
-    "@nx/remix:build": {
-      "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "inputs": ["production", "^production"],
+      "dependsOn": ["^build"]
     }
   },
   "generators": {
