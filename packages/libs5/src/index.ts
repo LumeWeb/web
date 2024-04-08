@@ -12,6 +12,7 @@ export {
   deserializeRegistryEntry,
   serializeRegistryEntry,
   signRegistryEntry,
+  verifyRegistryEntry,
 } from "./service/registry.js";
 export * from "./multihash.js";
 import WebAppMetadata, {
