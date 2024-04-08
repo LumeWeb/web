@@ -129,6 +129,12 @@
   "overrides": {
     "tus-js-client": "^4.1.0"
   },
+  "workspaces": {
+    "packages": [
+      "libs/*",
+      "apps/*"
+    ]
+  },
   "pnpm": {
     "patchedDependencies": {
       "@nx/vite@18.2.3": "patches/@nx__vite@18.2.3.patch",
