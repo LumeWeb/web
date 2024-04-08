@@ -18,6 +18,13 @@
         "assets": [
           "libs/portal-sdk/*.md"
         ]
+      },
+      "dependsOn": ["orval"]
+    },
+    "orval": {
+      "command": "orval; orval",
+      "options": {
+        "cwd": "libs/portal-sdk"
       }
     }
   }
