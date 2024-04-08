@@ -25,9 +25,6 @@ dependencies:
   '@fontsource-variable/manrope':
     specifier: ^5.0.19
     version: 5.0.19
-  '@lumeweb/portal-sdk':
-    specifier: 0.0.0-20240329003300
-    version: 0.0.0-20240329003300(openapi-types@12.1.3)(typescript@5.4.4)(ws@8.16.0)
   '@noble/curves':
     specifier: ^1.1.0
     version: 1.4.0
@@ -2514,65 +2511,6 @@ packages:
 
   /@jspm/core@2.0.1:
     resolution: {integrity: sha512-Lg3PnLp0QXpxwLIAuuJboLeRaIhrgJjeuh797QADg3xz8wGLugQOS5DpsE8A6i6Adgzf+bacllkKZG3J0tGfDw==}
-    dev: false
-
-  /@lumeweb/libs5@0.0.0-20240321165322:
-    resolution: {integrity: sha512-2sP6+2S4dayDimkRjWcoPFaFKj36kDgMZiJdNydK5NzJGbzW+REAyWatPJ2VhI4Lk+usGJsB48sazKnARH5hZA==}
-    dependencies:
-      '@noble/curves': 1.4.0
-      '@noble/hashes': 1.4.0
-      axios: 1.6.8
-      detect-node: 2.1.0
-      level: 8.0.1
-      multiformats: 12.1.3
-      p-defer: 4.0.1
-      ws: 8.16.0
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - utf-8-validate
-    dev: false
-
-  /@lumeweb/portal-sdk@0.0.0-20240329003300(openapi-types@12.1.3)(typescript@5.4.4)(ws@8.16.0):
-    resolution: {integrity: sha512-G32F267I5nGvpgZRv+FtYsqRSfMtrobLixYLXpnuCZsoG+OJ270FsSlnBs5nHzeFloemnwl5nQOkIazaq3JR0w==}
-    requiresBuild: true
-    dependencies:
-      '@lumeweb/s5-js': 0.0.0-20240329003038(ws@8.16.0)
-      axios: 1.6.8
-      memize: 2.1.0
-      orval: 6.26.0(openapi-types@12.1.3)(typescript@5.4.4)
-      patch-package: 8.0.0
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - encoding
-      - openapi-types
-      - supports-color
-      - typescript
-      - utf-8-validate
-      - ws
-    dev: false
-
-  /@lumeweb/s5-js@0.0.0-20240329003038(ws@8.16.0):
-    resolution: {integrity: sha512-z2LYEEqqcfWHnRd1RL9K9tRRldWC0RTaf6VExP+EFR1JiH7oqP3eLvlWIRWpZnZjVQSLBWqrYG0Av3Ytml+Ofw==}
-    requiresBuild: true
-    dependencies:
-      '@lumeweb/libs5': 0.0.0-20240321165322
-      '@noble/hashes': 1.4.0
-      axios: 1.6.8
-      isomorphic-ws: 5.0.0(ws@8.16.0)
-      mime: 4.0.1
-      multiformats: 13.1.0
-      p-defer: 4.0.1
-      patch-package: 8.0.0
-      tus-js-client: 4.1.0(patch_hash=ix3wb5jsxkda2mun5fypwfnuwa)
-      url-join: 5.0.0
-      url-parse: 1.5.10
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - utf-8-validate
-      - ws
     dev: false
 
   /@mdx-js/mdx@2.3.0:
@@ -12369,10 +12307,6 @@ packages:
     engines: {node: '>= 0.6'}
     dev: false
 
-  /memize@2.1.0:
-    resolution: {integrity: sha512-yywVJy8ctVlN5lNPxsep5urnZ6TTclwPEyigM9M3Bi8vseJBOfqNrGWN/r8NzuIt3PovM323W04blJfGQfQSVg==}
-    dev: false
-
   /merge-descriptors@1.0.1:
     resolution: {integrity: sha512-cCi6g3/Zr1iqQi6ySbseM1Xvooa98N0w31jzUYrXPX2xqObmFGHJ0tQ5u74H3mVh7wLouTseZyYIq39g8cNp1w==}
     dev: false
@@ -12879,11 +12813,6 @@ packages:
 
   /ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
-
-  /multiformats@12.1.3:
-    resolution: {integrity: sha512-eajQ/ZH7qXZQR2AgtfpmSMizQzmyYVmCql7pdhldPuYQi4atACekbJaQplk6dWyIi10jCaFnd6pqvcEFXjbaJw==}
-    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
-    dev: false
 
   /multiformats@13.1.0:
     resolution: {integrity: sha512-HzdtdBwxsIkzpeXzhQ5mAhhuxcHbjEHH+JQoxt7hG/2HGFjjwyolLo7hbaexcnhoEuV4e0TNJ8kkpMjiEYY4VQ==}
