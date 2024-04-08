@@ -26,7 +26,10 @@
       "dependsOn": ["orval"]
     },
     "orval": {
-      "command": "orval"
+      "command": "orval; orval",
+      "options": {
+        "cwd": "packages/s5-js"
+      }
     }
   }
 }
