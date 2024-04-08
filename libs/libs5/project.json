@@ -11,11 +11,7 @@
     },
     "base-build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
       "options": {
-        "outputPath": "dist/libs/libs5",
         "main": "libs/libs5/src/index.ts",
         "tsConfig": "libs/libs5/tsconfig.lib.json",
         "assets": [
