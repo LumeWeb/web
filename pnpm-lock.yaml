@@ -80,23 +80,23 @@ dependencies:
     specifier: ^1.0.7
     version: 1.0.7(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
   '@refinedev/cli':
-    specifier: ^2.16.1
+    specifier: ^2.16.29
     version: 2.16.29(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
   '@refinedev/core':
-    specifier: https://gitpkg.now.sh/LumeWeb/refine/packages/core?remix
-    version: '@gitpkg.now.sh/LumeWeb/refine/packages/core?remix(@tanstack/react-query@5.29.0)(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)'
+    specifier: ^4.49.0
+    version: 4.49.0(@tanstack/react-query@5.29.0)(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
   '@refinedev/devtools-internal':
-    specifier: https://gitpkg.now.sh/LumeWeb/refine/packages/devtools-internal?remix
-    version: '@gitpkg.now.sh/LumeWeb/refine/packages/devtools-internal?remix(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)'
+    specifier: ^1.1.7
+    version: 1.1.7(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
   '@refinedev/devtools-shared':
-    specifier: https://gitpkg.now.sh/LumeWeb/refine/packages/devtools-shared?remix
-    version: '@gitpkg.now.sh/LumeWeb/refine/packages/devtools-shared?remix(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)'
+    specifier: ^1.1.5
+    version: 1.1.5(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
   '@refinedev/react-table':
-    specifier: https://gitpkg.now.sh/LumeWeb/refine/packages/react-table?remix
-    version: '@gitpkg.now.sh/LumeWeb/refine/packages/react-table?remix(@refinedev/core@4.48.0)(@tanstack/react-table@8.15.3)(react-dom@18.2.0)(react@18.2.0)'
+    specifier: ^5.6.8
+    version: 5.6.8(@refinedev/core@4.49.0)(@tanstack/react-table@8.15.3)(react-dom@18.2.0)(react@18.2.0)
   '@refinedev/remix-router':
-    specifier: https://gitpkg.now.sh/LumeWeb/refine/packages/remix?remix
-    version: '@gitpkg.now.sh/LumeWeb/refine/packages/remix?remix(@refinedev/core@4.48.0)(@remix-run/node@2.8.1)(@remix-run/react@2.8.1)(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)(remix@2.8.1)'
+    specifier: ^3.0.2
+    version: 3.0.2(@refinedev/core@4.49.0)(@remix-run/node@2.8.1)(@remix-run/react@2.8.1)(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)(remix@2.8.1)
   '@remix-run/dev':
     specifier: ^2.8.1
     version: 2.8.1(@remix-run/serve@2.8.1)(@types/node@18.16.9)(typescript@5.4.4)(vite@5.2.8)
@@ -4226,8 +4226,34 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@refinedev/devtools-internal@1.1.6(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-5RMv8euyngJDJGyPa97o2d/h9qKZGvIzIjBbnjm0+teO6+Q9ADPCIOVwtC0ZgqEiEQMmPS8k+qD7UZuFJStIHg==}
+  /@refinedev/core@4.49.0(@tanstack/react-query@5.29.0)(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-rkWCPAboJG1Ta/cD0VMovNaRHxi5D2F9yQBq+mT7Qj3jMiJhq7wTrzJUpHLNOr7SKttOhv61+DhrIjEmOAx90A==}
+    peerDependencies:
+      '@tanstack/react-query': ^4.10.1
+      '@types/react': ^17.0.0 || ^18.0.0
+      '@types/react-dom': ^17.0.0 || ^18.0.0
+      react: ^17.0.0 || ^18.0.0
+      react-dom: ^17.0.0 || ^18.0.0
+    dependencies:
+      '@refinedev/devtools-internal': 1.1.7(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
+      '@tanstack/react-query': 5.29.0(react@18.2.0)
+      '@types/react': 18.2.33
+      '@types/react-dom': 18.2.14
+      lodash: 4.17.21
+      lodash-es: 4.17.21
+      papaparse: 5.4.1
+      pluralize: 8.0.0
+      qs: 6.12.0
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      tslib: 2.6.2
+      warn-once: 0.1.1
+    transitivePeerDependencies:
+      - react-native
+    dev: false
+
+  /@refinedev/devtools-internal@1.1.7(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-Mn18hsm3cp8JnpK4RcyMiz2CVpn/IcjCTRaNoCPiwmf/GWxY/Exa7fzEEbME+0yYqyLSpQqg6z34cX2CYRplaA==}
     engines: {node: '>=10'}
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0
@@ -4235,7 +4261,7 @@ packages:
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
     dependencies:
-      '@refinedev/devtools-shared': 1.1.4(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
+      '@refinedev/devtools-shared': 1.1.5(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
       '@tanstack/react-query': 4.36.1(react-dom@18.2.0)(react@18.2.0)
       '@types/react': 18.2.33
       '@types/react-dom': 18.2.14
@@ -4293,25 +4319,6 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@refinedev/devtools-shared@1.1.4(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-YMVRGVmck0UyV5UoIW82EMCSFm2E1ejjXYWzqTiaiZgU5tbLR4NZf8W10enyxtCLzUPONFF5uvFc6tMleodXYA==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      '@types/react': ^17.0.0 || ^18.0.0
-      '@types/react-dom': ^17.0.0 || ^18.0.0
-      react: ^17.0.0 || ^18.0.0
-      react-dom: ^17.0.0 || ^18.0.0
-    dependencies:
-      '@tanstack/react-query': 4.36.1(react-dom@18.2.0)(react@18.2.0)
-      '@types/react': 18.2.33
-      '@types/react-dom': 18.2.14
-      error-stack-parser: 2.1.4
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    transitivePeerDependencies:
-      - react-native
-    dev: false
-
   /@refinedev/devtools-shared@1.1.5(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-2WUmiKj337xjaQBpaJHj3ahFjhtx7rD/+sID+vMp5N7abdtSUiMebn5bk9ty7BAj+CCnw0J4MRqFg1XNjYieHQ==}
     engines: {node: '>=10'}
@@ -4362,6 +4369,45 @@ packages:
       - debug
       - encoding
       - react-native
+    dev: false
+
+  /@refinedev/react-table@5.6.8(@refinedev/core@4.49.0)(@tanstack/react-table@8.15.3)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-Fw8Ac3DJJKjheX4oWVeXS+yr4+atWDeKkkhItmJ3G256ymB8T5wyuvKvCSI1xxazDSPfzq6jTnP79De9a4z1rw==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      '@refinedev/core': ^4.46.1
+      '@tanstack/react-table': ^8.2.6
+      react: ^17.0.0 || ^18.0.0
+      react-dom: ^17.0.0 || ^18.0.0
+    dependencies:
+      '@refinedev/core': 4.49.0(@tanstack/react-query@5.29.0)(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
+      '@tanstack/react-table': 8.15.3(react-dom@18.2.0)(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /@refinedev/remix-router@3.0.2(@refinedev/core@4.49.0)(@remix-run/node@2.8.1)(@remix-run/react@2.8.1)(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)(remix@2.8.1):
+    resolution: {integrity: sha512-k060fZZ+CpHZmsG4ozoXNFG7b/v87O1SljlxyomQ5PzC59glRd8Trj4KyWQ2j+PUnMbanLMg2Ff3t5hhMKs2yg==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      '@refinedev/core': ^4.46.1
+      '@remix-run/node': '*'
+      '@remix-run/react': '*'
+      '@types/react': ^17.0.0 || ^18.0.0
+      '@types/react-dom': ^17.0.0 || ^18.0.0
+      react: ^17.0.0 || ^18.0.0
+      react-dom: ^17.0.0 || ^18.0.0
+      remix: '*'
+    dependencies:
+      '@refinedev/core': 4.49.0(@tanstack/react-query@5.29.0)(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
+      '@remix-run/node': 2.8.1(typescript@5.4.4)
+      '@remix-run/react': 2.8.1(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.4)
+      '@types/react': 18.2.33
+      '@types/react-dom': 18.2.14
+      qs: 6.12.0
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      remix: 2.8.1
     dev: false
 
   /@remix-run/dev@2.8.1(@remix-run/serve@2.8.1)(@types/node@18.16.9)(typescript@5.4.4)(vite@5.2.8):
@@ -8135,7 +8181,7 @@ packages:
       json-schema-typed: 7.0.3
       onetime: 5.1.2
       pkg-up: 3.1.0
-      semver: 7.5.2
+      semver: 7.6.0
     dev: false
 
   /confusing-browser-globals@1.0.11:
@@ -16379,123 +16425,4 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
-    dev: false
-
-  '@gitpkg.now.sh/LumeWeb/refine/packages/core?remix(@tanstack/react-query@5.29.0)(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)':
-    resolution: {registry: https://registry.npmjs.org/, tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/core?remix}
-    id: '@gitpkg.now.sh/LumeWeb/refine/packages/core?remix'
-    name: '@refinedev/core'
-    version: 4.48.0
-    peerDependencies:
-      '@tanstack/react-query': ^4.10.1
-      '@types/react': ^17.0.0 || ^18.0.0
-      '@types/react-dom': ^17.0.0 || ^18.0.0
-      react: ^17.0.0 || ^18.0.0
-      react-dom: ^17.0.0 || ^18.0.0
-    dependencies:
-      '@refinedev/devtools-internal': 1.1.6(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
-      '@tanstack/react-query': 5.29.0(react@18.2.0)
-      '@types/react': 18.2.33
-      '@types/react-dom': 18.2.14
-      lodash: 4.17.21
-      lodash-es: 4.17.21
-      papaparse: 5.4.1
-      pluralize: 8.0.0
-      qs: 6.12.0
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 2.6.2
-      warn-once: 0.1.1
-    transitivePeerDependencies:
-      - react-native
-    dev: false
-
-  '@gitpkg.now.sh/LumeWeb/refine/packages/devtools-internal?remix(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)':
-    resolution: {registry: https://registry.npmjs.org/, tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/devtools-internal?remix}
-    id: '@gitpkg.now.sh/LumeWeb/refine/packages/devtools-internal?remix'
-    name: '@refinedev/devtools-internal'
-    version: 1.1.6
-    engines: {node: '>=10'}
-    peerDependencies:
-      '@types/react': ^17.0.0 || ^18.0.0
-      '@types/react-dom': ^17.0.0 || ^18.0.0
-      react: ^17.0.0 || ^18.0.0
-      react-dom: ^17.0.0 || ^18.0.0
-    dependencies:
-      '@refinedev/devtools-shared': 1.1.4(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
-      '@tanstack/react-query': 4.36.1(react-dom@18.2.0)(react@18.2.0)
-      '@types/react': 18.2.33
-      '@types/react-dom': 18.2.14
-      error-stack-parser: 2.1.4
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    transitivePeerDependencies:
-      - react-native
-    dev: false
-
-  '@gitpkg.now.sh/LumeWeb/refine/packages/devtools-shared?remix(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)':
-    resolution: {registry: https://registry.npmjs.org/, tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/devtools-shared?remix}
-    id: '@gitpkg.now.sh/LumeWeb/refine/packages/devtools-shared?remix'
-    name: '@refinedev/devtools-shared'
-    version: 1.1.4
-    engines: {node: '>=10'}
-    peerDependencies:
-      '@types/react': ^17.0.0 || ^18.0.0
-      '@types/react-dom': ^17.0.0 || ^18.0.0
-      react: ^17.0.0 || ^18.0.0
-      react-dom: ^17.0.0 || ^18.0.0
-    dependencies:
-      '@tanstack/react-query': 4.36.1(react-dom@18.2.0)(react@18.2.0)
-      '@types/react': 18.2.33
-      '@types/react-dom': 18.2.14
-      error-stack-parser: 2.1.4
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    transitivePeerDependencies:
-      - react-native
-    dev: false
-
-  '@gitpkg.now.sh/LumeWeb/refine/packages/react-table?remix(@refinedev/core@4.48.0)(@tanstack/react-table@8.15.3)(react-dom@18.2.0)(react@18.2.0)':
-    resolution: {registry: https://registry.npmjs.org/, tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/react-table?remix}
-    id: '@gitpkg.now.sh/LumeWeb/refine/packages/react-table?remix'
-    name: '@refinedev/react-table'
-    version: 5.6.7
-    engines: {node: '>=10'}
-    peerDependencies:
-      '@refinedev/core': ^4.46.1
-      '@tanstack/react-table': ^8.2.6
-      react: ^17.0.0 || ^18.0.0
-      react-dom: ^17.0.0 || ^18.0.0
-    dependencies:
-      '@refinedev/core': '@gitpkg.now.sh/LumeWeb/refine/packages/core?remix(@tanstack/react-query@5.29.0)(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)'
-      '@tanstack/react-table': 8.15.3(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    dev: false
-
-  '@gitpkg.now.sh/LumeWeb/refine/packages/remix?remix(@refinedev/core@4.48.0)(@remix-run/node@2.8.1)(@remix-run/react@2.8.1)(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)(remix@2.8.1)':
-    resolution: {registry: https://registry.npmjs.org/, tarball: https://gitpkg.now.sh/LumeWeb/refine/packages/remix?remix}
-    id: '@gitpkg.now.sh/LumeWeb/refine/packages/remix?remix'
-    name: '@refinedev/remix-router'
-    version: 3.0.1
-    engines: {node: '>=10'}
-    peerDependencies:
-      '@refinedev/core': ^4.46.1
-      '@remix-run/node': '*'
-      '@remix-run/react': '*'
-      '@types/react': ^17.0.0 || ^18.0.0
-      '@types/react-dom': ^17.0.0 || ^18.0.0
-      react: ^17.0.0 || ^18.0.0
-      react-dom: ^17.0.0 || ^18.0.0
-      remix: '*'
-    dependencies:
-      '@refinedev/core': '@gitpkg.now.sh/LumeWeb/refine/packages/core?remix(@tanstack/react-query@5.29.0)(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)'
-      '@remix-run/node': 2.8.1(typescript@5.4.4)
-      '@remix-run/react': 2.8.1(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.4)
-      '@types/react': 18.2.33
-      '@types/react-dom': 18.2.14
-      qs: 6.12.0
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      remix: 2.8.1
     dev: false
