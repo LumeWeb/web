@@ -1,6 +1,19 @@
 {
-    "name": "@lumeweb/s5-js",
-    "version": "0.1.0-develop.29",
-    "type": "module",
-    "readme": "ERROR: No README data found!"
+  "name": "@lumeweb/s5-js",
+  "version": "0.1.0-develop.29",
+  "type": "module",
+  "readme": "ERROR: No README data found!",
+  "dependencies": {
+    "@lumeweb/libs5": "0.0.0-20240321165322",
+    "@noble/hashes": "^1.3.2",
+    "axios": "^1.6.2",
+    "isomorphic-ws": "^5.0.0",
+    "mime": "^4.0.1",
+    "multiformats": "^13.0.0",
+    "p-defer": "^4.0.0",
+    "patch-package": "^8.0.0",
+    "tus-js-client": "^4.0.0",
+    "url-join": "^5.0.0",
+    "url-parse": "^1.5.10"
+  }
 }
