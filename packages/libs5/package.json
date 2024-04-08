@@ -2,7 +2,6 @@
   "name": "@lumeweb/libs5",
   "version": "0.1.0-develop.82",
   "type": "module",
-  "main": "lib/index.js",
   "repository": {
     "type": "git",
     "url": "gitea@git.lumeweb.com:LumeWeb/libs5.git"
