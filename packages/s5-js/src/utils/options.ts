@@ -1,6 +1,9 @@
 import { AxiosHeaders, AxiosProgressEvent, AxiosRequestConfig } from "axios";
 import { S5Client } from "../client.js";
-import { BaseCustomOptions, CustomRegistryOptions } from "#options/registry.js";
+import {
+  BaseCustomOptions,
+  CustomRegistryOptions,
+} from "../options/registry.js";
 
 /**
  * Custom client options.
@@ -34,12 +37,16 @@ export function optionsToConfig(
 
   config.baseURL = client.portalUrl;
 
-  const extraOptions= Object.values(options.reduce((acc, val) => {
-    return {
-      ...acc,
-      ...val,
-    };
-  }, options)).reverse().pop();
+  const extraOptions = Object.values(
+    options.reduce((acc, val) => {
+      return {
+        ...acc,
+        ...val,
+      };
+    }, options),
+  )
+    .reverse()
+    .pop();
 
   const finalOptions = {
     ...def,
