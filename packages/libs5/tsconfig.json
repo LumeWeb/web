@@ -7,10 +7,7 @@
     "strict": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "paths": {
-      "@/*": ["packages/libs5/src/*"]
-    },
+    "noFallthroughCasesInSwitch": true
   },
   "files": [],
   "include": [],
