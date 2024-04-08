@@ -22,7 +22,7 @@
         "packages/s5-js/src/index.ts"
       ],
       "@lumeweb/libs5": [
-        "packages/s5-js/src/index.ts"
+        "packages/libs5/src/index.ts"
       ],
       "@lumeweb/portal-dashboard/*": [
         "packages/portal-dashboard/src/*"
