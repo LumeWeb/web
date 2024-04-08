@@ -47,6 +47,11 @@
       "outputs": [
         "{workspaceRoot}/dist/{projectRoot}"
       ]
+    },
+    "base-build": {
+      "outputs": [
+        "{workspaceRoot}/dist/{projectRoot}"
+      ]
     }
   },
   "generators": {
