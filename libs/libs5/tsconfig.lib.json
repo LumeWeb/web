@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/packages/libs5/src",
+    "outDir": "../../dist/libs/libs5/src",
     "declaration": true,
     "types": ["node"]
   },

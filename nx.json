@@ -41,14 +41,9 @@
       }
     }
   ],
-  "workspaceLayout": {
-    "appsDir": "apps",
-    "libsDir": "packages"
-  },
   "targetDefaults": {
     "build": {
-      "inputs": ["production", "^production"],
-      "dependsOn": ["^build"]
+      "inputs": ["production", "^production"]
     }
   },
   "generators": {

@@ -19,13 +19,13 @@
     "baseUrl": ".",
     "paths": {
       "@lumeweb/s5-js": [
-        "packages/s5-js/src/index.ts"
+        "libs/s5-js/src/index.ts"
       ],
       "@lumeweb/libs5": [
-        "packages/libs5/src/index.ts"
+        "libs/libs5/src/index.ts"
       ],
       "@lumeweb/portal-dashboard/*": [
-        "packages/portal-dashboard/src/*"
+        "libs/portal-dashboard/src/*"
       ]
     }
   },

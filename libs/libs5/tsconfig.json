@@ -9,7 +9,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@/*": ["packages/libs5/src/*"]
+      "@/*": ["libs/libs5/src/*"]
     },
   },
   "files": [],
