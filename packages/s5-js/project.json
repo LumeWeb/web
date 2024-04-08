@@ -7,7 +7,7 @@
 
   "targets": {
     "build": {
-      "command": "orval",
+      "command": "echo Building",
       "dependsOn": ["build-base"]
     },
     "build-base": {
@@ -22,7 +22,11 @@
         "assets": [
           "packages/libs5/*.md"
         ]
-      }
+      },
+      "dependsOn": ["orval"]
+    },
+    "orval": {
+      "command": "orval"
     }
   }
 }
