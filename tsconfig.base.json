@@ -24,6 +24,9 @@
       "@lumeweb/libs5": [
         "libs/libs5/src/index.ts"
       ],
+      "@lumeweb/portal-sdk": [
+        "libs/portal-sdk/src/index.ts"
+      ],
       "@lumeweb/portal-dashboard/*": [
         "libs/portal-dashboard/src/*"
       ]
