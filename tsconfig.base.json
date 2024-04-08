@@ -10,30 +10,16 @@
     "importHelpers": true,
     "target": "es2015",
     "module": "esnext",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@lumeweb/s5-js": [
-        "libs/s5-js/src/index.ts"
-      ],
-      "@lumeweb/libs5": [
-        "libs/libs5/src/index.ts"
-      ],
-      "@lumeweb/portal-sdk": [
-        "libs/portal-sdk/src/index.ts"
-      ],
-      "@lumeweb/portal-dashboard/*": [
-        "libs/portal-dashboard/src/*"
-      ]
+      "@lumeweb/libs5": ["libs/libs5/src/index.ts"],
+      "@lumeweb/portal-dashboard/*": ["libs/portal-dashboard/src/*"],
+      "@lumeweb/portal-sdk": ["libs/portal-sdk/src/index.ts"],
+      "@lumeweb/s5-js": ["libs/s5-js/src/index.ts"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "exclude": ["node_modules", "tmp"]
 }
