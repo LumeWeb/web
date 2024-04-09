@@ -10,6 +10,7 @@ export default defineConfig({
     remix({
       ssr: false,
       ignoredRouteFiles: ["**/*.css"],
+      buildDirectory: "../../dist/apps/portal-dashboard",
     }),
     nxViteTsPaths(),
     tsconfigPaths(),
