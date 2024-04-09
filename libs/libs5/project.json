@@ -6,7 +6,7 @@
   "tags": [],
   "targets": {
     "build": {
-      "command": "",
+      "command": "echo",
       "dependsOn": ["base-build"]
     },
     "base-build": {
