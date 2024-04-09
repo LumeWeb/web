@@ -26,7 +26,7 @@ import {
   createTransportSocket,
 } from "../transports/index.js";
 import messages from "../messages/index.js";
-import { EventEmitter } from "events";
+import EventEmitter from "events";
 
 export class P2PService extends EventEmitter {
   private logger: Logger;
