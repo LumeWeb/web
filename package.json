@@ -85,6 +85,7 @@
     "url-join": "^5.0.0",
     "url-parse": "^1.5.10",
     "vite": "^5.1.0",
+    "vite-plugin-commonjs": "^0.10.1",
     "vite-plugin-node-polyfills": "^0.21.0",
     "vite-tsconfig-paths": "^4.3.2",
     "ws": "^8.13.0",
