@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
+  '@nx/remix@18.2.3':
+    hash: l2dace4heens6kbn7dfx3pneqi
+    path: patches/@nx__remix@18.2.3.patch
   '@nx/vite@18.2.3':
     hash: p7a27ou2gur5m75ldckor3tn6e
     path: patches/@nx__vite@18.2.3.patch
@@ -14,6 +17,9 @@ patchedDependencies:
   tus-js-client@4.1.0:
     hash: ix3wb5jsxkda2mun5fypwfnuwa
     path: patches/tus-js-client@4.1.0.patch
+  vite-plugin-node-polyfills@0.21.0:
+    hash: 5tqaruiqgnko5sezr26m7jyv2q
+    path: patches/vite-plugin-node-polyfills@0.21.0.patch
 
 dependencies:
   '@conform-to/react':
@@ -255,7 +261,7 @@ dependencies:
     version: 5.2.8(@types/node@18.16.9)
   vite-plugin-node-polyfills:
     specifier: ^0.21.0
-    version: 0.21.0(vite@5.2.8)
+    version: 0.21.0(patch_hash=5tqaruiqgnko5sezr26m7jyv2q)(vite@5.2.8)
   vite-tsconfig-paths:
     specifier: ^4.3.2
     version: 4.3.2(typescript@5.4.4)(vite@5.2.8)
@@ -281,7 +287,7 @@ devDependencies:
     version: 18.2.3(@swc-node/register@1.8.0)(@swc/core@1.3.107)(@types/node@18.16.9)(nx@18.2.3)(typescript@5.4.4)(webpack@5.91.0)
   '@nx/remix':
     specifier: 18.2.3
-    version: 18.2.3(@swc-node/register@1.8.0)(@swc/core@1.3.107)(@types/node@18.16.9)(nx@18.2.3)(typescript@5.4.4)(webpack@5.91.0)
+    version: 18.2.3(patch_hash=l2dace4heens6kbn7dfx3pneqi)(@swc-node/register@1.8.0)(@swc/core@1.3.107)(@types/node@18.16.9)(nx@18.2.3)(typescript@5.4.4)(webpack@5.91.0)
   '@nx/vite':
     specifier: 18.2.3
     version: 18.2.3(patch_hash=p7a27ou2gur5m75ldckor3tn6e)(@swc-node/register@1.8.0)(@swc/core@1.3.107)(@types/node@18.16.9)(nx@18.2.3)(typescript@5.4.4)(vite@5.2.8)(vitest@1.4.0)
@@ -2711,7 +2717,7 @@ packages:
   /@nrwl/remix@18.2.3(@swc-node/register@1.8.0)(@swc/core@1.3.107)(@types/node@18.16.9)(nx@18.2.3)(typescript@5.4.4)(webpack@5.91.0):
     resolution: {integrity: sha512-ShUXj7RP27gzkl8PcNMls0Trmx8TjBLpa8HwmoyMdDRb5bKufnIorlPYVZKDzdDE7it0scbXDR/e2Yv6y8Oi3g==}
     dependencies:
-      '@nx/remix': 18.2.3(@swc-node/register@1.8.0)(@swc/core@1.3.107)(@types/node@18.16.9)(nx@18.2.3)(typescript@5.4.4)(webpack@5.91.0)
+      '@nx/remix': 18.2.3(patch_hash=l2dace4heens6kbn7dfx3pneqi)(@swc-node/register@1.8.0)(@swc/core@1.3.107)(@types/node@18.16.9)(nx@18.2.3)(typescript@5.4.4)(webpack@5.91.0)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -3031,7 +3037,7 @@ packages:
       - webpack
     dev: true
 
-  /@nx/remix@18.2.3(@swc-node/register@1.8.0)(@swc/core@1.3.107)(@types/node@18.16.9)(nx@18.2.3)(typescript@5.4.4)(webpack@5.91.0):
+  /@nx/remix@18.2.3(patch_hash=l2dace4heens6kbn7dfx3pneqi)(@swc-node/register@1.8.0)(@swc/core@1.3.107)(@types/node@18.16.9)(nx@18.2.3)(typescript@5.4.4)(webpack@5.91.0):
     resolution: {integrity: sha512-fOfkNPjKWiRPaW3QB8dYobIo2lPZOiGP8MTf8xyWZYltnwDex+1s7+bGiZzJBGgIDkCdtL3iWwXUYf8YyGeDiw==}
     dependencies:
       '@nrwl/remix': 18.2.3(@swc-node/register@1.8.0)(@swc/core@1.3.107)(@types/node@18.16.9)(nx@18.2.3)(typescript@5.4.4)(webpack@5.91.0)
@@ -3054,6 +3060,7 @@ packages:
       - verdaccio
       - webpack
     dev: true
+    patched: true
 
   /@nx/vite@18.2.3(patch_hash=p7a27ou2gur5m75ldckor3tn6e)(@swc-node/register@1.8.0)(@swc/core@1.3.107)(@types/node@18.16.9)(nx@18.2.3)(typescript@5.4.4)(vite@5.2.8)(vitest@1.4.0):
     resolution: {integrity: sha512-0tcy7TAO8YY6wXQeG01lS1e7C/OmJVRKyDKriECl1hMp8/vQp/PnXd+oj2MmCo9n2qX66pZBvmrwG8B2PMAtTA==}
@@ -15957,7 +15964,7 @@ packages:
       - supports-color
       - terser
 
-  /vite-plugin-node-polyfills@0.21.0(vite@5.2.8):
+  /vite-plugin-node-polyfills@0.21.0(patch_hash=5tqaruiqgnko5sezr26m7jyv2q)(vite@5.2.8):
     resolution: {integrity: sha512-Sk4DiKnmxN8E0vhgEhzLudfJQfaT8k4/gJ25xvUPG54KjLJ6HAmDKbr4rzDD/QWEY+Lwg80KE85fGYBQihEPQA==}
     peerDependencies:
       vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0
@@ -15968,6 +15975,7 @@ packages:
     transitivePeerDependencies:
       - rollup
     dev: false
+    patched: true
 
   /vite-tsconfig-paths@4.3.2(typescript@5.4.4)(vite@5.2.8):
     resolution: {integrity: sha512-0Vd/a6po6Q+86rPlntHye7F31zA2URZMbH8M3saAZ/xR9QoGN/L21bxEGfXdWmFdNkqPpRdxFT7nmNe12e9/uA==}

@@ -1,0 +1,13 @@
+diff --git a/src/plugins/plugin.js b/src/plugins/plugin.js
+index 6850cb0144d87efdbcb10ac4274532adcc16be6c..f01fbca3078dd9844585223c571c0ecbe9a070ec 100644
+--- a/src/plugins/plugin.js
++++ b/src/plugins/plugin.js
+@@ -80,7 +80,7 @@ function buildTarget(buildTargetName, projectRoot, buildDirectory, assetsBuildDi
+                 : ['default', '^default']),
+         ],
+         outputs: [serverBuildOutputPath, assetsBuildOutputPath],
+-        command: 'remix build',
++        command: 'remix vite:build',
+         options: { cwd: projectRoot },
+     };
+ }
