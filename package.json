@@ -96,7 +96,7 @@
     "@nrwl/workspace": "18.2.3",
     "@nx/eslint": "18.2.4",
     "@nx/eslint-plugin": "18.2.3",
-    "@nx/js": "18.2.3",
+    "@nx/js": "18.2.4",
     "@nx/react": "18.2.3",
     "@nx/remix": "18.2.3",
     "@nx/vite": "18.2.3",
