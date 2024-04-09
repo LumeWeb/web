@@ -3,6 +3,10 @@ import { defineConfig } from "vite";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import tsconfigPaths from "vite-tsconfig-paths";
+import commonjs from "vite-plugin-commonjs";
+
+import path from "path";
+import fs from "fs";
 
 export default defineConfig({
   cacheDir: "../../node_modules/.vite/apps/portal-dashboard",
@@ -14,7 +18,15 @@ export default defineConfig({
     }),
     nxViteTsPaths(),
     tsconfigPaths(),
-    nodePolyfills({ protocolImports: false }),
+    nodePolyfills({
+      protocolImports: false,
+      include: ["buffer", "url", "events"],
+    }),
+    commonjs({
+      filter(id) {
+        return id.includes("url") || id.includes("events");
+      },
+    }),
   ],
   build: {
     minify: false,
@@ -30,7 +42,12 @@ export default defineConfig({
       // If you're comfortable with Vite's dev server making any file within the
       // project root available, you can remove this option.  See more:
       // https://vitejs.dev/config/server-options.html#server-fs-allow
-      allow: ["app", "node_modules/@fontsource-variable/manrope"],
+      allow: [
+        "app",
+        fs.realpathSync(
+          path.resolve("../../node_modules/@fontsource-variable/manrope"),
+        ),
+      ],
     },
   },
 });
