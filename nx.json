@@ -44,10 +44,8 @@
   "targetDefaults": {
     "build": {
       "inputs": ["production", "^production"],
-      "outputs": ["{workspaceRoot}/dist/{projectRoot}"]
-    },
-    "base-build": {
-      "outputs": ["{workspaceRoot}/dist/{projectRoot}"]
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "dependsOn": ["^build"]
     },
     "@nx/remix:build": {
       "cache": true,

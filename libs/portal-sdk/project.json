@@ -6,10 +6,6 @@
   "tags": [],
   "targets": {
     "build": {
-      "command": "tsc-alias -p libs/portal-sdk/tsconfig.lib.json",
-      "dependsOn": ["base-build"]
-    },
-    "base-build": {
       "executor": "@nx/js:tsc",
       "options": {
         "outputPath": "dist/libs/portal-sdk",
@@ -19,10 +15,10 @@
           "libs/portal-sdk/*.md"
         ]
       },
-      "dependsOn": ["orval"]
+      "dependsOn": ["^build", "orval"]
     },
     "orval": {
-      "command": "orval; orval",
+      "command": "orval",
       "options": {
         "cwd": "libs/portal-sdk"
       }
