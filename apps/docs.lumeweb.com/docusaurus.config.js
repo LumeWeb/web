@@ -38,7 +38,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            "https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/src/branch/master/",
+            "https://github.com/LumeWeb/src/branch/master/apps/docs.lumeweb.com/",
         },
         blog: false,
       }),
