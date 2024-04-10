@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "nx run-many -t build",
+    "build:changed": "nx affected -t build",
     "build:portal-dashboard": "nx run @lumeweb/portal-dashboard:build"
   },
   "private": true,
