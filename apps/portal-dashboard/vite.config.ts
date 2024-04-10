@@ -16,7 +16,7 @@ export default defineConfig({
       ignoredRouteFiles: ["**/*.css"],
       buildDirectory: "../../dist/apps/portal-dashboard",
     }),
-    nxViteTsPaths(),
+    // nxViteTsPaths(),
     tsconfigPaths(),
     nodePolyfills({
       protocolImports: false,
