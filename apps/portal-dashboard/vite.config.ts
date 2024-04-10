@@ -1,7 +1,6 @@
 import { vitePlugin as remix } from "@remix-run/dev";
 import { defineConfig } from "vite";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
-import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import tsconfigPaths from "vite-tsconfig-paths";
 import commonjs from "vite-plugin-commonjs";
 
@@ -16,7 +15,6 @@ export default defineConfig({
       ignoredRouteFiles: ["**/*.css"],
       buildDirectory: "../../dist/apps/portal-dashboard",
     }),
-    nxViteTsPaths(),
     tsconfigPaths(),
     nodePolyfills({
       protocolImports: false,
