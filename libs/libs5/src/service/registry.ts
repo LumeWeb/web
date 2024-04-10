@@ -12,7 +12,7 @@ import { decodeEndian, encodeEndian } from "../util.js";
 import { ed25519 } from "@noble/curves/ed25519";
 import Packer from "../serialization/pack.js";
 import { Buffer } from "buffer";
-import { EventEmitter } from "events";
+import EventEmitter from "events";
 import KeyPairEd25519 from "../ed25519.js";
 import { S5Node, stringifyBytes } from "../node.js";
 
