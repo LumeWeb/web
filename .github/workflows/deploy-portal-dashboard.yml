@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   build:
-    name: Build
+    name: Deploy Portal Dashboard
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -39,7 +39,7 @@ jobs:
           VITE_PORTAL_URL: ${{ vars.TESTING_PORTAL_URL }}
           NODE_ENV: development
       - name: Publish to Cloudflare Pages
-        id: deploy_cf
+        id: deploy-cf
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -51,4 +51,4 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           message: |
-            The Portal Dashboard has been deployed to [Staging](${{ steps.deploy_cf.outputs.url }}).
+            The Portal Dashboard has been deployed to [Staging](${{ outputs.steps.deploy-cf.url }})
