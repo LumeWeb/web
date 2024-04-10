@@ -1,0 +1,13 @@
+diff --git a/lib/index.js b/lib/index.js
+index 69185b8fcbc9be4bac9ce6914b234bae046a2810..28069925c08a9eb3e3cff6bccb41ac4233d635da 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -506,7 +506,7 @@ function _getCompanionClientArgs2(file) {
+ }
+ async function _uploadFiles2(files) {
+   const filesFiltered = filterNonFailedFiles(files);
+-  const filesToEmit = filterFilesToEmitUploadStarted(filesFiltered);
++  const filesToEmit = filterFilesToEmitUploadStarted(filesFiltered).filter(file => file?.uploader == 'tus');
+   this.uppy.emit('upload-start', filesToEmit);
+   await Promise.allSettled(filesFiltered.map(file => {
+     if (file.isRemote) {

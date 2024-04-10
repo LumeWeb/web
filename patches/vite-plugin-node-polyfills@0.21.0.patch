@@ -1,0 +1,21 @@
+diff --git a/shims/buffer/dist/index.js b/shims/buffer/dist/index.js
+index 70cdd527ffa297e831582c874148c41b1bfe7b1f..d4cfb46dcd900fd9ef928c22ba0f6c0dd8d6a0e7 100644
+--- a/shims/buffer/dist/index.js
++++ b/shims/buffer/dist/index.js
+@@ -257,6 +257,7 @@ ieee754.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+ 	    : null;
+ 
+ 	exports.Buffer = Buffer;
++	exports.Buffer.Buffer = Buffer;
+ 	exports.SlowBuffer = SlowBuffer;
+ 	exports.INSPECT_MAX_BYTES = 50;
+ 
+@@ -2345,7 +2346,7 @@ ieee754.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+ 
+ 	function BufferBigIntNotDefined () {
+ 	  throw new Error('BigInt not supported')
+-	} 
++	}
+ } (buffer));
+ 
+ const Buffer = buffer.Buffer;
