@@ -19,6 +19,9 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
+      - name: Set origin remote for changeset-release
+        run: git remote set-url changeset-release ${{ GITHUB_SERVER_URL }}/${{ GITHUB_REPOSITORY }}.git
+
       - uses: pnpm/action-setup@v3
         with:
           run_install: true
