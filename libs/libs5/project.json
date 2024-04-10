@@ -6,10 +6,6 @@
   "tags": [],
   "targets": {
     "build": {
-      "command": "echo",
-      "dependsOn": ["base-build"]
-    },
-    "base-build": {
       "executor": "@nx/js:tsc",
       "options": {
         "outputPath": "dist/libs/libs5",

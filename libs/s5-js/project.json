@@ -4,13 +4,8 @@
   "sourceRoot": "libs/s5-js/src",
   "projectType": "library",
   "tags": [],
-
   "targets": {
     "build": {
-      "command": "echo Building",
-      "dependsOn": ["base-build"]
-    },
-    "base-build": {
       "executor": "@nx/js:tsc",
       "options": {
         "outputPath": "dist/libs/s5-js",
@@ -20,10 +15,10 @@
           "libs/libs5/*.md"
         ]
       },
-      "dependsOn": ["orval"]
+      "dependsOn": ["^build", "orval"]
     },
     "orval": {
-      "command": "orval; orval",
+      "command": "orval",
       "options": {
         "cwd": "libs/s5-js"
       }
