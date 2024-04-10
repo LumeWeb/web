@@ -4,7 +4,8 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "build": "nx run-many -t build"
+    "build": "nx run-many -t build",
+    "build:portal-dashboard": "nx run @lumeweb/portal-dashboard:build"
   },
   "private": true,
   "dependencies": {
