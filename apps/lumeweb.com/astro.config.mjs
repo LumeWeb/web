@@ -7,8 +7,5 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
     site: 'https://lumeweb.com',
     outDir: '../../dist/apps/lumeweb.com',
-    integrations: [tailwind({ config: { applyBaseStyles: false } }), react(), sitemap()],
-    experimental: {
-        assets: true
-    }
+    integrations: [tailwind({ config: { applyBaseStyles: false } }), react(), sitemap()]
 })
