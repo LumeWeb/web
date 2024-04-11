@@ -1,0 +1,18 @@
+
+{
+    "name": "@lumeweb/lumeweb.com",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/portal-dashboard/src",
+    "projectType": "application",
+    "targets": {
+        "build": {
+            "executor": "nx:run-commands",
+            "options": {
+                "cwd": "apps/lumeweb.com",
+                "commands": [
+                    "astro build"
+                ]
+            }
+        }
+    }
+}
