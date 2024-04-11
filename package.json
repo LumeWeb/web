@@ -6,7 +6,8 @@
   "scripts": {
     "build": "nx run-many -t build",
     "build:changed": "nx affected -t build",
-    "build:portal-dashboard": "nx run @lumeweb/portal-dashboard:build"
+    "build:portal-dashboard": "nx run @lumeweb/portal-dashboard:build",
+    "build:docs.lumeweb.com": "nx run @lumeweb/docs.lumeweb.com:build"
   },
   "private": true,
   "dependencies": {
