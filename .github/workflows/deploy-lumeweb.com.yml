@@ -1,0 +1,56 @@
+name: Deploy lumeweb.com
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'apps/lumeweb.com/**'
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'apps/lumeweb.com/**'
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+permissions:
+  pull-requests: write
+  deployments: write
+  contents: read
+
+
+jobs:
+  build:
+    name: Deploy docs.lumeweb.com
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v3
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+      - name: Install Dependencies
+        uses: pnpm/action-setup@v3
+        with:
+          run_install: true
+      - name: Build
+        run: pnpm build:lumeweb.com
+      - name: Publish to Cloudflare Pages
+        id: deploy_cf
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          projectName: lumeweb-com
+          directory: dist/apps/lumeweb.com
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - uses: mshick/add-pr-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          message: |
+            The Portal Dashboard has been deployed to [Staging](${{ steps.deploy_cf.outputs.url }}).
