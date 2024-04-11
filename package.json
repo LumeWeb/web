@@ -12,6 +12,8 @@
   },
   "private": true,
   "dependencies": {
+    "@astrojs/react": "^3.2.0",
+    "@astrojs/tailwind": "^5.1.0",
     "@conform-to/react": "^1.1.0",
     "@conform-to/zod": "^1.0.2",
     "@docusaurus/core": "^2.4.3",
