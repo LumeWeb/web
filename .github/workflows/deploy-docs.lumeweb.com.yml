@@ -5,12 +5,12 @@ on:
     branches:
       - '**'
     paths:
-      - 'apps/docs.luemweb.com/**'
+      - 'apps/docs.lumeweb.com/**'
   pull_request:
     branches:
       - '**'
     paths:
-      - 'apps/docs.luemweb.com/**'
+      - 'apps/docs.lumeweb.com/**'
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
