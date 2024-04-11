@@ -12,7 +12,7 @@
         "main": "libs/s5-js/src/index.ts",
         "tsConfig": "libs/s5-js/tsconfig.lib.json",
         "assets": [
-          "libs/libs5/*.md"
+          "libs/s5-js/*.md"
         ]
       },
       "dependsOn": ["^build", "orval"]
