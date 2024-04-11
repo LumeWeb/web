@@ -39,7 +39,7 @@ jobs:
         with:
           run_install: true
       - name: Build
-        run: pnpm build:build:docs.lumeweb.com
+        run: pnpm build:docs.lumeweb.com
       - name: Publish to Cloudflare Pages
         id: deploy_cf
         uses: cloudflare/pages-action@v1
