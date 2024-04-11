@@ -1,0 +1,274 @@
+@import "./mixins.scss";
+@import "./vars.scss";
+
+@font-face {
+  font-family: 'Jaldi';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/Jaldi-Regular.woff2") format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/JetBrainsMono-Regular.woff2") format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/JetBrainsMono-Bold.woff2") format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Devanagari';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/ibm-plex-sans-devanagari.woff2") format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/Inter-VariableFont.ttf") format('ttf');
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-aquamarine: #7afcbb;
+  --color-dark-aquamarine: #1F4A3D;
+  --color-gray: #C7C7C7;
+  --color-charcoal: #020e10;
+  --color-blue-charcoal: #0B3F48;
+}
+
+html {
+  display: flex;
+  flex-direction: column;
+  min-width: 20rem;
+  min-height: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-family: $font-family-jetbrains-mono;
+  background: $color-blue-charcoal-2;
+  color: $color-white;
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  &.scroll-lock {
+    overflow-y: hidden;
+  }
+}
+
+.tilted-bg {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -5%;
+    bottom: 0;
+    left: -5%;
+    margin: 2% 0;
+    background: $color-blue-charcoal;
+    transform: matrix(1, -0.04, 0.04, 1, 0, 0);
+    z-index: -1;
+  }
+}
+
+.tilted-bg-r {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -5%;
+    bottom: 0;
+    left: -5%;
+    margin: 2% 0;
+    background: $color-blue-charcoal;
+    transform: matrix(1, 0.04, -0.04, 1, 0, 0);
+    z-index: -1;
+  }
+}
+
+main {
+  @include fluid-font-size(0.625rem);
+  flex-grow: 1;
+}
+
+a, button {
+  transition: color $transition-duration;
+}
+
+.btn-main {
+    display: inline-block;
+    padding: 0.5em 0.8em;
+    color: $color-black;
+    background: $color-aquamarine;
+    border: 0.05em solid $color-aquamarine;
+    border-radius: 0.25em;
+    transition: color $transition-duration, background $transition-duration;
+    white-space: nowrap;
+
+    &:hover {
+        color: $color-white;
+        background: $color-blue-charcoal;
+    }
+}
+
+.feature-group {
+  h2 {
+    margin-bottom: 1em;
+    @include fluid-font-size(1.5625rem);
+    font-weight: 700;
+    line-height: 100%;
+    text-transform: uppercase;
+    color: $color-aquamarine;
+  }
+
+  h3 {
+    margin-bottom: 0.65em;
+    @include fluid-font-size(2.8125rem);
+    line-height: 109%;
+  }
+
+  h2, h3 {
+    text-shadow: 0.017em 0.017em 0.034em rgba($color-blue-charcoal, 0.65);
+  }
+
+  p, ul {
+    @include fluid-font-size(1.5rem);
+    font-family: $font-family-jaldi;
+    line-height: 148%;
+    color: $color-cloud;
+    transition: background $transition-duration;
+  }
+
+  p + p, ul + p {
+    margin-top: 0.78em;
+  }
+
+  ul {
+    list-style-type: disc;
+    margin-left: 1em;
+  }
+
+  .btn-main {
+    font-family: $font-family-jaldi;
+    @include fluid-font-size(1.5rem);
+    margin-top: 1.57em;
+  }
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 0.9em;
+  padding: 0 7.5%;
+  @include fluid-font-size(1.25rem);
+
+  @media screen and (min-width: 48rem) {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 1fr;
+  }
+
+  @media screen and (min-width: 64rem) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2.95em 1.95em;
+    background: $color-blue-charcoal;
+    border: 0.05em solid transparent;
+    border-radius: 0.5em;
+    font-family: $font-family-jaldi;
+    transition: border-color $transition-duration;
+
+    &:hover {
+      border-color: $color-aquamarine;
+    }
+  }
+
+  h3 {
+    @include fluid-font-size(2rem);
+    line-height: 109%;
+  }
+
+  p {
+    @include fluid-font-size(1.375rem);
+    margin-top: 0.67em;
+    line-height: 124%;
+    color: $color-cloud;
+  }
+}
+
+.tilted-bg {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -5%;
+    bottom: 0;
+    left: -5%;
+    margin: 2% 0;
+    background: $color-blue-charcoal;
+    transform: matrix(1, -0.04, 0.04, 1, 0, 0);
+    z-index: -1;
+  }
+}
+
+.tilted-bg-r {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -5%;
+    bottom: 0;
+    left: -5%;
+    margin: 2% 0;
+    background: $color-blue-charcoal;
+    transform: matrix(1, 0.04, -0.04, 1, 0, 0);
+    z-index: -1;
+  }
+}
+
+main.donate {
+  &::before {
+    content: "";
+    position: absolute;
+    top: -3em;
+    left: 50%;
+    width: 144em;
+    height: 93.3em;
+    background: url("/src/assets/donate-bg.png");
+    background-size: contain;
+    transform: translate(-50%, 0);
+    z-index: -1;
+  }
+}

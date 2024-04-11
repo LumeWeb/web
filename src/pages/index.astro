@@ -1,0 +1,34 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Typewriter from "../components/Home/Typewriter/Typewriter.astro";
+import Vision from "../components/Home/Vision.astro";
+import Web3 from "../components/Home/Web3.astro";
+import PoweredBy from "../components/Home/PoweredBy.astro";
+import Meme from "../components/Home/Meme.astro";
+import WebComparison from "../components/Home/WebComparison.astro";
+import Socials from "../components/Home/Socials.astro";
+import CTO from "../components/Home/CTO.astro";
+import Message from "../components/Home/Message.astro";
+import bg from "../assets/main-page-hero.png";
+import bgSmall from "../assets/main-page-hero@0.75x.png";
+import bgSmaller from "../assets/main-page-hero@0.5x.png";
+---
+
+<Layout view="home" title="Lume Web - Your Open Web">
+  <img
+    class="absolute -z-10 -right-[150px] top-[50px] md:-right-[200px] md:-top-[100px] xl:-right-[100px] xl:-top-[100px] object-contain w-[500px] md:w-[800px] xl:w-[1000px] max-w-none"
+    srcset={`${bg.src} 1250w, ${bgSmall.src} 1000w, ${bgSmaller.src} 500w`}
+    sizes="(max-width: 1024px) 1000px, 1250px"
+    src={bg.src}
+  />
+
+  <Typewriter />
+  <Vision />
+  <Web3 />
+  <PoweredBy />
+  <WebComparison />
+  <Meme />
+  <Socials />
+  <CTO />
+  <Message />
+</Layout>

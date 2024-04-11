@@ -1,0 +1,22 @@
+---
+import FeaturedGroup from "../ui/FeaturedGroup.astro";
+import backgroundSrc from "/src/assets/new-world-bg.png";
+---
+
+<section
+  id="new-world"
+  class="mx-10 md:mx-20 lg:mx-40 relative h-[400px] lg:h-[850px]"
+>
+  <div class="-z-10 absolute top-0 right-0 bottom-0 w-[1500px] -mx-40 h-full">
+    <img class="object-cover w-full max-w-none" src={backgroundSrc.src} />
+  </div>
+  <div class="float-right max-w-3xl mt-[25%]">
+    <FeaturedGroup
+      subtitle="Your Web, Your Rules"
+      title="Community-Powered"
+      text={[
+        "In summary, Web3 is about what you want to do, post, read, play, chat, or interact without others saying otherwise. It is about freedom of speech <i>and</i> freedom of economy.",
+      ]}
+    />
+  </div>
+</section>

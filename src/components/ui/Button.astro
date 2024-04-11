@@ -1,0 +1,27 @@
+---
+export interface Props {
+  label: string;
+  href?: string;
+  type?: "submit" | "button";
+  color?: string;
+  class?: string;
+}
+
+const { label, class: customClass, type, color, href } = Astro.props;
+const className = `text-2xl w-full block text-center md:max-w-[350px] rounded-md text-black font-body bg-${
+  color ?? "primary"
+} hover:ring-2 ring-${
+  color ?? "primary"
+} hover:bg-transparent hover:text-white transition-[background-color] duration-150`;
+---
+
+<button class={`mt-10 ${className} ${customClass}`} type={type ?? "button"}>
+  {
+    href && (
+      <a href={href} class="w-full text-inherit my-3 block">
+        {label}
+      </a>
+    )
+  }
+  {!href && label}
+</button>

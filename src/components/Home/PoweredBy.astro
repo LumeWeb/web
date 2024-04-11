@@ -1,0 +1,39 @@
+---
+import svgSia from "/src/assets/icons/sia.svg?raw";
+import svgHns from "/src/assets/icons/hns.svg?raw";
+import svgOsi from "/src/assets/icons/osi.svg?raw";
+---
+
+<section
+  id="powered-by"
+  class="flex flex-col md:flex-row gap-16 items-center justify-center"
+>
+  <h2
+    class="font-display text-xl md:text-3xl text-primary uppercase font-bold mr-5"
+  >
+    Powered By
+  </h2>
+  <div class="flex flex-row items-center gap-x-10">
+    <a
+      href="https://sia.tech"
+      title="Sia"
+      class="w-28 h-28 text-gray-300 hover:text-white transition-all ease-in"
+    >
+      <Fragment set:html={svgSia} />
+    </a>
+    <a
+      href="https://handshake.org"
+      title="Handshake"
+      class="w-20 h-20 -mt-4 text-gray-300 hover:text-white transition-all ease-in"
+    >
+      <Fragment set:html={svgHns} />
+    </a>
+    <a
+      href="https://opensource.org/osd/"
+      title="Open Source Initiative"
+      class="w-20 h-20 -mt-6 text-gray-300 hover:text-white transition-all ease-in"
+    >
+      <Fragment set:html={svgOsi} />
+    </a>
+  </div>
+</section>

@@ -1,0 +1,43 @@
+---
+import flagSvg from "/src/assets/icons/flag.svg?raw";
+import starSvg from "/src/assets/icons/star.svg?raw";
+export interface Props {
+  title: string;
+  description: string;
+  badge?: "idea" | "goal";
+}
+
+const BADGE_ICON = {
+  goal: flagSvg,
+  idea: starSvg,
+};
+
+const { title, description, badge } = Astro.props;
+---
+
+<div
+  class="md:w-full h-full p-10 rounded-md bg-black mx-[10px] space-y-5 hover:ring-2 ring-primary transition-all flex flex-col justify-center"
+>
+  <div>
+    <h3 class="font-body text-xl md:text-3xl">
+      {title}
+    </h3>
+    {
+      badge && (
+        <div
+          class={`mt-1 py-1 px-2 rounded-sm ${
+            badge === "idea" ? "bg-[#E9541F]" : "bg-[#54A7CD]"
+          } text-black flex-row justify-center items-center gap-1 inline-flex`}
+        >
+          <div class="[&>svg]:w-3 [&>svg]:h-3">
+            <Fragment set:html={BADGE_ICON[badge]} />
+          </div>
+          <h4 class="font-inter font-bold text-md uppercase">{badge}</h4>
+        </div>
+      )
+    }
+  </div>
+  <p class="text-lg md:text-xl text-body font-body">
+    {description}
+  </p>
+</div>

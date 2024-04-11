@@ -1,0 +1,379 @@
+---
+import QRCode from "qrcode";
+
+const currencies = [];
+
+const addCurrency = async (id, title, address, mainColor) => {
+  currencies.push({
+    id: id,
+    title: title,
+    address: address,
+    mainColor,
+    svgLogo: await import(`./icons/${id}.svg?raw`),
+    qrSmall: await QRCode.toDataURL(address, {
+      version: 6,
+      scale: 1,
+      margin: 1,
+    }),
+    qrLarge: await QRCode.toDataURL(address, {
+      version: 6,
+      scale: 7,
+      margin: 2,
+    }),
+  });
+};
+
+await addCurrency(
+  "bitcoin",
+  "Bitcoin (BTC)",
+  "bc1q9xq2w4w2hjc240rs6mf0g8gpzz3rmcz4h77a2a",
+  "#f7931a"
+);
+await addCurrency(
+  "litecoin",
+  "Litecoin (LTC)",
+  "ltc1qgk6fc4u6grqyhfzw208477ze35vrr5tcwhq8zq",
+  "#345d9d"
+);
+await addCurrency(
+  "ethereum",
+  "Ethereum (ETH, USDT/USDC, ERC20)",
+  "0x63cd2C691632720Ff2ABDD0b6AABA2466D3Fe468",
+  "#8c8c8c"
+);
+await addCurrency(
+  "polygon",
+  "Polygon (MATIC)",
+  "0x63cd2C691632720Ff2ABDD0b6AABA2466D3Fe468",
+  "#8247e5"
+);
+await addCurrency(
+  "solana",
+  "Solana (SOL)",
+  "4nMRucCuqttipwQXm31vBgoaxDW6o25TnD8fj1imviCu",
+  "#dc1fff"
+);
+await addCurrency(
+  "cardano",
+  "Cardano (ADA)",
+  "addr1q9jd69s53pdy9j567a27ac6uvc2966x0rjz2l9sxy4y5w8383jl87mrdf6uuk9ja7lmagm2p4vw30sa42kjylxxrdufqucgst6",
+  "#0033ad"
+);
+await addCurrency(
+  "siacoin",
+  "Siacoin (SC)",
+  "7506caa950cdddbaec8f465937b50324e942ac6f5280a053662e58e3cc8bdb543ab88ccd5c23",
+  "#20ee82"
+);
+await addCurrency(
+  "monero",
+  "Monero (XMR)",
+  "48A33fSyFo9YAiux3KHKVBagPGvqmcr2h4oy5pufJn6NUWyZsPF6PAufmrET3gLJjsLwxfU7HU9xe8mEeCqtHqvZN3Ly12h",
+  "#f26822"
+);
+await addCurrency(
+  "handshake",
+  "Handshake (HNS)",
+  "hs1qe67ak3j2u4yrq0qnfs2hmycxqdvaf9v5rjsxzy",
+  "#fff"
+);
+await addCurrency(
+  "cosmos",
+  "Cosmos (ATOM)",
+  "cosmos1pvy8zyzqwz2r2jl9j9d3zrfmg6dqc5hyhj6d5z",
+  "#6f7390"
+);
+await addCurrency(
+  "secret",
+  "Secret (SCRT)",
+  "secret18377vc3af588ggauhrpuyfd954lmmu05xqhf0y",
+  "#fff"
+);
+await addCurrency(
+  "algorand",
+  "Algorand (ALGO)",
+  "3QBE5TZ63TF5W7V2QRJWRB72M7INQLA3RZW4XHD3ISRE7CRYCVNU4EEVAE",
+  "#fff"
+);
+---
+
+<style lang="scss">
+  @import "../../../styles/vars.scss";
+  button#copy-address {
+    mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg>');
+    background: $color-cloud;
+    transition: background $transition-duration;
+
+    &:hover {
+      background: $color-white;
+    }
+
+    &.success {
+      mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>');
+      background: $color-aquamarine;
+    }
+  }
+
+  button#copy-address:hover + div,
+  button#copy-address.success + div {
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -0.5em;
+      padding: 0.5em;
+      background: rgba($color-blue-charcoal, 0.6);
+      animation: $transition-duration overlay-opacity forwards;
+    }
+
+    &::after {
+      content: "Copy to Clipboard";
+      position: absolute;
+      top: 0;
+      right: -0.5em;
+      padding: 0 0.5em;
+      background: rgba($color-blue-charcoal, 0.85);
+      text-align: center;
+      white-space: nowrap;
+      color: $color-white;
+      border-radius: 0.5em 0 0 0.5em;
+      animation: $transition-duration hint-opacity forwards;
+      transition: color $transition-duration;
+    }
+  }
+
+  button#copy-address.success + div {
+    &::after {
+      content: "Copied to Clipboard";
+      color: $color-aquamarine;
+    }
+  }
+
+  @keyframes overlay-opacity {
+    0% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 0.75;
+    }
+  }
+
+  @keyframes hint-opacity {
+    0% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+</style>
+<section id="methods">
+  <div class="mx-5 md:mx-20 lg:mx-40">
+    <h2 class="text-3xl lg:text-4xl mb-5 mt-20">Donate Cryptocurrency</h2>
+    <div
+      class="flex w-full flex-col lg:flex-row lg:flex-wrap gap-y-[10px] lg:gap-x-[10px]"
+    >
+      {
+        currencies.map((currency) => (
+          <div
+            id={"donate-" + currency.id}
+            class={`hover:ring-2 flex flex-col bg-black rounded-md p-5 w-full max-w-[calc(100vw-40px)] lg:max-w-none lg:w-[calc(50%-20px)]`}
+            style={`--tw-ring-color: ${currency.mainColor}`}
+          >
+            <div class="flex flex-row gap-x-4 w-full justify-between">
+              <div class="w-12 h-12">
+                <Fragment set:html={currency.svgLogo.default} />
+              </div>
+              <h3 class="w-full text-2xl">{currency.title}</h3>
+              <img
+                class="w-12 h-12"
+                onclick={"openDialog('" + currency.qrLarge + "')"}
+                src={currency.qrSmall}
+              />
+            </div>
+            <div class="flex flex-row-reverse px-5 py-2 rounded-md text-body items-start justify-between mt-4">
+              <button
+                id="copy-address"
+                class="w-7 h-7 bg-gray-500"
+                onclick="
+                                copyToClipboard(this)
+                                "
+              />
+              <div class="text-lg relative break-words max-w-[calc(100%-50px)]">
+                {currency.address}
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+  <div class="mx-5 md:mx-20 lg:mx-40 max-w-[calc(100vw-40px)]">
+    <h2 class="text-3xl lg:text-4xl mb-10 mt-40">Donate Fiat</h2>
+    <div
+      class="flex flex-col items-center justify-between gap-y-4 lg:gap-x-4 lg:flex-row lg:flex-wrap"
+    >
+      <div
+        id="donate-paypal"
+        class={`flex flex-row justify-between items-center h-full hover:ring ring-[#0070e0] bg-black rounded-md px-10 py-5 w-full lg:w-[calc(50%-20px)]`}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-10 h-10"
+          viewBox="0 0 154.728 190.5"
+        >
+          <g transform="translate(898.192 276.071)">
+            <path
+              clip-path="none"
+              d="M-837.663-237.968a5.49 5.49 0 0 0-5.423 4.633l-9.013 57.15-8.281 52.514-.005.044.01-.044 8.281-52.514c.421-2.669 2.719-4.633 5.42-4.633h26.404c26.573 0 49.127-19.387 53.246-45.658.314-1.996.482-3.973.52-5.924v-.003h-.003c-6.753-3.543-14.683-5.565-23.372-5.565z"
+              fill="#001c64"></path>
+            <path
+              clip-path="none"
+              d="M-766.506-232.402c-.037 1.951-.207 3.93-.52 5.926-4.119 26.271-26.673 45.658-53.246 45.658h-26.404c-2.701 0-4.999 1.964-5.42 4.633l-8.281 52.514-5.197 32.947a4.46 4.46 0 0 0 4.405 5.153h28.66a5.49 5.49 0 0 0 5.423-4.633l7.55-47.881c.423-2.669 2.722-4.636 5.423-4.636h16.876c26.573 0 49.124-19.386 53.243-45.655 2.924-18.649-6.46-35.614-22.511-44.026z"
+              fill="#0070e0"></path>
+            <path
+              clip-path="none"
+              d="M-870.225-276.071a5.49 5.49 0 0 0-5.423 4.636l-22.489 142.608a4.46 4.46 0 0 0 4.405 5.156h33.351l8.281-52.514 9.013-57.15a5.49 5.49 0 0 1 5.423-4.633h47.782c8.691 0 16.621 2.025 23.375 5.563.46-23.917-19.275-43.666-46.412-43.666z"
+              fill="#003087"></path>
+          </g>
+        </svg>
+        <h3 class="ml-4 w-full text-2xl">PayPal</h3>
+        <form
+          action="https://www.paypal.com/donate"
+          method="post"
+          target="_top"
+        >
+          <input type="hidden" name="hosted_button_id" value="LKDLTQQRQV2U8" />
+          <button
+            class="text-lg bg-[#0070e0] ring-[#0070e0] hover:ring text-white hover:bg-transparent transition-[background-color] duration-150 rounded-md p-3 px-5"
+          >
+            Donate
+          </button>
+        </form>
+      </div>
+      <div
+        id="donate-patreon"
+        class="flex flex-1 flex-row justify-between items-center hover:ring ring-[#ff424d] bg-black rounded-md px-10 py-5 w-full lg:w-[calc(50%-20px)]"
+      >
+        <svg
+          version="1.1"
+          viewBox="0 -4.5 256 256"
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-14 h-14"
+        >
+          <path
+            d="M45.1355837,0 L45.1355837,246.35001 L0,246.35001 L0,0 L45.1355837,0 Z M163.657111,0 C214.65668,0 256,41.3433196 256,92.3428889 C256,143.342458 214.65668,184.685778 163.657111,184.685778 C112.657542,184.685778 71.3142222,143.342458 71.3142222,92.3428889 C71.3142222,41.3433196 112.657542,0 163.657111,0 Z"
+            fill="#FF424D"></path>
+        </svg>
+        <h3 class="w-full ml-4 mr-[60px] text-2xl">Patreon</h3>
+        <button
+          class="text-lg bg-[#ff424d] w-full ring-[#ff424d] hover:ring text-white hover:bg-transparent transition-[background-color] duration-150 rounded-md p-3"
+          ><a
+            href="https://www.patreon.com/bePatron?u=71702133"
+            class="block -m-3 py-3">Become a Patron!</a
+          >
+        </button>
+      </div>
+      <div
+        id="donate-liberapay"
+        class="flex flex-row justify-between items-center hover:ring ring-[#f6c915] bg-black rounded-md px-10 py-5 w-full lg:w-[calc(50%-20px)]"
+      >
+        <svg
+          viewBox="0 0 80 80"
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-10 h-10"
+        >
+          <rect fill="#f6c915" width="80" height="80" rx="8"></rect>
+          <path
+            fill="#FFF"
+            d="M32.73 56.2651c-2.5867 0-4.6175-.3376-6.0925-1.0107s-2.5308-1.5936-3.1708-2.7611-.9458-2.4933-.9275-4.015.2267-3.1234.6284-4.8357l6.9391-29.0143 8.47-1.3108-7.595 31.4733c-.1458.655-.2275 1.2567-.2458 1.8025s.0817 1.0292.3 1.4475.5917.7566 1.12 1.0108 1.2658.42 2.2133.4925zM40.5333 28.0209c1.46-.4367 3.1267-.8284 5.0025-1.175s3.9075-.5183 6.0933-.5183 3.7985.3092 5.2726.9283 2.6864 1.4667 3.6341 2.5409 1.6475 2.3316 2.1024 3.77.6832 2.9783.6832 4.6183c0 2.6583-.4373 5.09-1.3214 7.2942s-2.076 4.1075-3.6237 5.71-3.4059 2.851-5.5763 3.7475-4.5235 1.3344-7.0718 1.3344c-1.2391 0-2.4775-.1104-3.7158-.3296l-2.4592 9.8912h-8.0865zM43.4867 49.3867c.6192.1458 1.3842.2133 2.295.2133 1.42 0 2.7133-.2583 3.8792-.7875s2.1583-1.265 2.9783-2.2125 1.4557-2.0842 1.9117-3.415.6827-2.795.6827-4.3983-.3467-2.8958-1.0379-3.9892-1.894-1.6391-3.6057-1.6391c-1.1667 0-2.2592.1092-3.2792.3283z"
+          ></path>
+        </svg>
+        <h3 class="w-full text-2xl mx-4">Liberapay</h3>
+        <a
+          class="text-lg bg-[#f6c915] ring-[#f6c915] hover:ring text-black hover:text-white hover:bg-transparent transition-[background-color] duration-150 rounded-md p-3 px-5"
+          href="https://liberapay.com/lumeweb/donate">Donate</a
+        >
+      </div>
+      <div
+        id="donate-github"
+        class="flex flex-row justify-between items-center hover:ring ring-white bg-black rounded-md px-10 py-5 w-full lg:w-[calc(50%+3px)]"
+      >
+        <svg
+          viewBox="0 0 98 96"
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-10 h-10"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"
+            fill="#fff"></path>
+        </svg>
+        <h3 class="w-full text-2xl mx-4">GitHub Sponsors</h3>
+        <button
+          class="text-lg bg-white ring-white hover:ring text-black hover:text-white hover:bg-transparent transition-[background-color] duration-150 rounded-md p-3"
+          ><a
+            href="https://github.com/sponsors/LumeWeb"
+            class="block -m-3 py-3 px-5">Donate</a
+          >
+        </button>
+      </div>
+    </div>
+  </div>
+  <p class="text-lg italic font-body text-body mt-5 mx-10 md:mx-20 lg:mx-40">
+    If you are interested in donating through other means, please get in touch
+    with us to discuss. If there is a cryptocurrency you wish to contribute with
+    that we have not listed, please let me know!
+  </p>
+</section>
+
+<dialog id="qr-dialog" class="backdrop:bg-black/20 backdrop:backdrop-blur-sm">
+</dialog>
+<script is:inline>
+  var msgCallback,
+    msgTimeout,
+    qrDialog = document.getElementById("qr-dialog");
+
+  function copyToClipboard(element) {
+    var range = document.createRange(),
+      selection = window.getSelection();
+
+    if (msgCallback) {
+      clearTimeout(msgTimeout);
+      msgCallback();
+    }
+
+    range.selectNode(element.nextElementSibling); // select address container
+    selection.removeAllRanges(); // clear current selection
+    selection.addRange(range); // select address
+    document.execCommand("copy"); // copy
+    selection.removeAllRanges(); // deselect
+
+    element.classList.add("success");
+
+    msgCallback = function () {
+      element.classList.remove("success");
+      msgCallback = undefined;
+    };
+
+    msgTimeout = window.setTimeout(msgCallback, 5000);
+  }
+
+  function openDialog(qrLarge) {
+    document.body.classList.add("scroll-lock");
+    qrDialog.innerHTML = '<img src="' + qrLarge + '"/>';
+    qrDialog.showModal();
+  }
+
+  qrDialog.addEventListener("close", function () {
+    document.body.classList.remove("scroll-lock");
+  });
+
+  qrDialog.addEventListener("click", function (event) {
+    if (event.target === this) {
+      this.close();
+    }
+  });
+</script>

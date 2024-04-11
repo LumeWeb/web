@@ -1,0 +1,110 @@
+---
+import logo from "/src/assets/lume-logo.png";
+const { view } = Astro.props;
+
+function getActiveClass(linkView) {
+  return view === linkView ? "border-b border-white" : "";
+}
+---
+
+<nav class="flex flex-row px-[25px] justify-between items-center py-8 md:p-14">
+  <div class="logo">
+    <!-- TODO: Hide this logo and show simplified when 320 > width -->
+    <a href="/">
+      <img class="w-44" src={logo.src} alt="Lume Logo" />
+    </a>
+  </div>
+  <menu
+    class="hidden flex-col items-center gap-14 z-20 max-sm:absolute max-sm:right-0 max-sm:top-0 max-sm:bottom-0 max-sm:z-20 max-sm:py-20 max-sm:px-10 max-sm:bg-black lg:flex-row lg:flex"
+  >
+    <li>
+      <a href="/" class={getActiveClass("home")}>Home</a>
+    </li>
+    <li>
+      <a href="/vision" class={getActiveClass("vision")}>Vision</a>
+    </li>
+    <li>
+      <a href="/what-is-web3" class={getActiveClass("what")}>What is Web3</a>
+    </li>
+    <li>
+      <a href="/donate" class={getActiveClass("donate")}>Donate</a>
+    </li>
+    <li>
+      <a
+        href="https://web3extension.io"
+        class="text-md rounded-md bg-primary py-3 px-10 mt-14 text-[black] font-body"
+        >Download Extension</a
+      >
+    </li>
+  </menu>
+  <div
+    id="navbar-overlay"
+    class="hidden lg:hidden bg-black/40 w-screen h-screen fixed z-10 top-0 botton-0 right-0 left-0"
+  >
+  </div>
+  <button id="hamburger" class="z-30 text-4xl lg:hidden">
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 52 43"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M1 1.06787H51.295"
+        stroke="white"
+        stroke-width="1.28"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
+      <path
+        d="M1 21.5728H51.295"
+        stroke="white"
+        stroke-width="1.28"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
+      <path
+        d="M1 42.0776H51.295"
+        stroke="white"
+        stroke-width="1.28"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
+    </svg>
+  </button>
+  <script>
+    const navbarOverlayEl = document.getElementById("navbar-overlay");
+    const hamburgerEl = document.getElementById("hamburger");
+    const menuEl = document.querySelector("menu");
+
+    function toggleScrollBlock() {
+      // When not hidden, should block scroll
+      if (!navbarOverlayEl.classList.contains("hidden")) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = null;
+      }
+    }
+
+    function handleMenuClick() {
+      // Toggle menu open/closed
+      ["hidden", "flex"].forEach((className) => {
+        menuEl.classList.toggle(className);
+      });
+
+      navbarOverlayEl.classList.toggle("hidden");
+      toggleScrollBlock();
+    }
+
+    function handleOverlayClick() {
+      // Close menu on overlay click
+      ["hidden", "flex"].forEach((className) => {
+        menuEl.classList.toggle(className);
+      });
+
+      navbarOverlayEl.classList.toggle("hidden");
+      toggleScrollBlock();
+    }
+
+    hamburgerEl.addEventListener("click", handleMenuClick);
+    navbarOverlayEl.addEventListener("click", handleOverlayClick);
+  </script>
+</nav>

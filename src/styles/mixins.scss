@@ -1,0 +1,249 @@
+@use "sass:math";
+
+$min-vw: 56rem;
+$max-vw: 476rem; // 336rem, 616rem
+
+$screen-min:     24rem; // 384px
+$screen-sm:      48rem; // 768px
+$screen-md:      64rem; // 1024px
+$screen-lg:      80rem; // 1280px
+$screen-default: 96rem; // 1536px
+
+@function strip-unit($value) {
+  @return math.div($value, ($value * 0 + 1));
+}
+
+@mixin fluid-font-size($font-size) {
+  $min-font-size: calc($font-size * 0.75);
+  $max-font-size: calc($font-size * 2.5);
+
+  $u1: unit($min-vw);
+  $u2: unit($max-vw);
+  $u3: unit($font-size);
+
+  @if $u1 == $u2 and $u1 == $u3 {
+    & {
+      font-size: $min-font-size;
+
+      @media screen and (min-width: $min-vw) {
+        font-size: calc(#{$min-font-size} + #{strip-unit($max-font-size - $min-font-size)} * ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)}));
+      }
+
+      @media screen and (min-width: $max-vw) {
+        font-size: $max-font-size;
+      }
+    }
+  }
+}
+
+@mixin fluid-font-size-s($font-size) {
+  $min-font-size: calc($font-size * 0.5);
+  $medium-font-size: calc($font-size * 0.75);
+  $max-font-size: calc($font-size * 2.5);
+
+  $u1: unit($min-vw);
+  $u2: unit($max-vw);
+  $u3: unit($font-size);
+
+  @if $u1 == $u2 and $u1 == $u3 {
+    & {
+      font-size: $min-font-size;
+
+      @media screen and (min-width: 20rem) {
+        font-size: calc(#{$min-font-size} + #{strip-unit($medium-font-size - $min-font-size)} * ((100vw - 20rem) / (56 - 20)));
+      }
+
+      @media screen and (min-width: $min-vw) {
+        font-size: calc(#{$medium-font-size} + #{strip-unit($max-font-size - $medium-font-size)} * ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)}));
+      }
+
+      @media screen and (min-width: $max-vw) {
+        font-size: $max-font-size;
+      }
+    }
+  }
+}
+
+@mixin fluid-font-size-xs($font-size) {
+  $min-font-size: calc($font-size * 0.25);
+  $medium-font-size: calc($font-size * 0.75);
+  $max-font-size: calc($font-size * 2.5);
+
+  $u1: unit($min-vw);
+  $u2: unit($max-vw);
+  $u3: unit($font-size);
+
+  @if $u1 == $u2 and $u1 == $u3 {
+    & {
+      font-size: $min-font-size;
+
+      @media screen and (min-width: 20rem) {
+        font-size: calc(#{$min-font-size} + #{strip-unit($medium-font-size - $min-font-size)} * ((100vw - 20rem) / (56 - 20)));
+      }
+
+      @media screen and (min-width: $min-vw) {
+        font-size: calc(#{$medium-font-size} + #{strip-unit($max-font-size - $medium-font-size)} * ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)}));
+      }
+
+      @media screen and (min-width: $max-vw) {
+        font-size: $max-font-size;
+      }
+    }
+  }
+}
+
+@mixin fluid-width-height($width, $height) {
+  $min-width: calc($width * 0.75);
+  $max-width: calc($width * 2.5);
+
+  $min-height: calc($height * 0.75);
+  $max-height: calc($height * 2.5);
+
+  $u1: unit($min-vw);
+  $u2: unit($max-vw);
+  $u3: unit($width);
+  $u4: unit($height);
+
+  @if $u1 == $u2 and $u1 == $u3 and $u1 == $u4 {
+    & {
+      width: $min-width;
+      height: $min-height;
+
+      @media screen and (min-width: $min-vw) {
+        width: calc(#{$min-width} + #{strip-unit($max-width - $min-width)} * ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)}));
+        height: calc(#{$min-height} + #{strip-unit($max-height - $min-height)} * ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)}));
+      }
+
+      @media screen and (min-width: $max-vw) {
+        width: $max-width;
+        height: $max-height;
+      }
+    }
+  }
+}
+
+@mixin fluid-width($width) {
+  $min-width: calc($width * 0.75);
+  $max-width: calc($width * 2.5);
+
+  $u1: unit($min-vw);
+  $u2: unit($max-vw);
+  $u3: unit($width);
+
+  @if $u1 == $u2 and $u1 == $u3 {
+    & {
+      width: $min-width;
+
+      @media screen and (min-width: $min-vw) {
+        width: calc(#{$min-width} + #{strip-unit($max-width - $min-width)} * ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)}));
+      }
+
+      @media screen and (min-width: $max-vw) {
+        width: $max-width;
+      }
+    }
+  }
+}
+
+@mixin fluid-height($height) {
+  $min-height: calc($height * 0.75);
+  $max-height: calc($height * 2.5);
+
+  $u1: unit($min-vw);
+  $u2: unit($max-vw);
+  $u3: unit($height);
+
+  @if $u1 == $u2 and $u1 == $u3 {
+    & {
+      height: $min-height;
+
+      @media screen and (min-width: $min-vw) {
+        height: calc(#{$min-height} + #{strip-unit($max-height - $min-height)} * ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)}));
+      }
+
+      @media screen and (min-width: $max-vw) {
+        height: $max-height;
+      }
+    }
+  }
+}
+
+@mixin fluid-max-width-height($width, $height) {
+  $min-width: calc($width * 0.75);
+  $max-width: calc($width * 2.5);
+
+  $min-height: calc($height * 0.75);
+  $max-height: calc($height * 2.5);
+
+  $u1: unit($min-vw);
+  $u2: unit($max-vw);
+  $u3: unit($width);
+  $u4: unit($height);
+
+  @if $u1 == $u2 and $u1 == $u3 and $u1 == $u4 {
+    & {
+      max-width: $min-width;
+      max-height: $min-height;
+
+      @media screen and (min-width: $min-vw) {
+        max-width: calc(#{$min-width} + #{strip-unit($max-width - $min-width)} * ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)}));
+        max-height: calc(#{$min-height} + #{strip-unit($max-height - $min-height)} * ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)}));
+      }
+
+      @media screen and (min-width: $max-vw) {
+        max-width: $max-width;
+        max-height: $max-height;
+      }
+    }
+  }
+}
+
+@mixin fluid-position-left($offset, $width) {
+  $min-vw: 48rem;
+  $max-vw: 96rem;
+
+  $min-margin: 7.5%;
+  $max-margin: 7.5%;
+
+  & {
+    margin-left: min(calc($offset + $min-margin), max($min-margin, calc(100vw - $width - $min-margin)));
+    margin-right: $min-margin;
+
+    @media screen and (min-width: $min-vw) {
+      $margin: calc(#{$min-margin} + #{strip-unit($max-margin - $min-margin)} * ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)}));
+      margin-left: min(calc($offset + $margin), max($margin, calc(100vw - $width - $margin)));
+      margin-right: $margin;
+    }
+
+    @media screen and (min-width: $max-vw) {
+      margin-left: min(calc($offset + $max-margin), max($max-margin, calc(100vw - $width - $max-margin)));
+      margin-right: $max-margin;
+    }
+  }
+}
+
+@mixin fluid-margin-lr-rem($margin) {
+  $min-margin: calc($margin * 0.75);
+  $max-margin: calc($margin * 2.5);
+
+  $u1: unit($min-vw);
+  $u2: unit($max-vw);
+  $u3: unit($margin);
+
+  @if $u1 == $u2 and $u1 == $u3 {
+    & {
+      margin-left: $min-margin;
+      margin-right: $min-margin;
+
+      @media screen and (min-width: $min-vw) {
+        margin-left: calc(#{$min-margin} + #{strip-unit($max-margin - $min-margin)} * ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)}));
+        margin-right: calc(#{$min-margin} + #{strip-unit($max-margin - $min-margin)} * ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)}));
+      }
+
+      @media screen and (min-width: $max-vw) {
+        margin-left: $max-margin;
+        margin-right: $max-margin;
+      }
+    }
+  }
+}

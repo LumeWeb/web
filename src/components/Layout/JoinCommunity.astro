@@ -1,0 +1,55 @@
+---
+import svgGit from "/src/assets/icons/git.svg?raw";
+import svgGithub from "/src/assets/icons/github.svg?raw";
+import svgDiscord from "/src/assets/icons/discord.svg?raw";
+import svgTwitter from "/src/assets/icons/twitter.svg?raw";
+---
+
+<section
+  id="join-community"
+  class="bg-primary max-w-[100vw] space-between text-black gap-10 p-10 my-10 lg:py-20 lg:px-40 flex flex-col lg:flex-row"
+>
+  <div
+    class="w-full items-center justify-center lg:items-start lg:justify-start flex flex-col"
+  >
+    <h2 class="text-3xl font-bold lg:text-4xl font-display mb-3">
+      Join our community, lend a hand.
+    </h2>
+    <p class="text-xl lg:text-2xl font-body">
+      Web3 gives people control over their data, privacy, and ownership.
+    </p>
+  </div>
+  <div class="flex flex-row gap-14">
+    <a
+      href="https://git.lumeweb.com"
+      title="Git"
+      class="w-16 h-16 text-blue-charcoal hover:text-black transition-colors duration-200 cursor-pointer"
+    >
+      <Fragment set:html={svgGit} />
+    </a>
+
+    <a
+      href="https://github.com/LumeWeb"
+      title="GitHub"
+      class="w-16 h-16 text-blue-charcoal hover:text-black transition-colors duration-200 cursor-pointer"
+    >
+      <Fragment set:html={svgGithub} />
+    </a>
+
+    <a
+      href="https://discord.gg/qpC8ADp3rS"
+      title="Discord"
+      class="mt-2 w-16 h-16 text-blue-charcoal hover:text-black transition-colors duration-200 cursor-pointer"
+    >
+      <Fragment set:html={svgDiscord} />
+    </a>
+
+    <a
+      href="https://twitter.com/lumeweb3"
+      title="Twitter"
+      class="w-16 h-16 text-blue-charcoal hover:text-black transition-colors duration-200 cursor-pointer"
+    >
+      <Fragment set:html={svgTwitter} />
+    </a>
+  </div>
+</section>
