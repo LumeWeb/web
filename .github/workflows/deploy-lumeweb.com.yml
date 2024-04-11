@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   build:
-    name: Deploy docs.lumeweb.com
+    name: Deploy lumeweb.com
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
