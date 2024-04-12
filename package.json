@@ -92,7 +92,7 @@
     "preset-classic@2.4": "link:@docusaurus/preset-classic@2.4",
     "prism-react-renderer": "^1.3.5",
     "qrcode": "^1.5.3",
-    "react": "17.0.2",
+    "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-router-dom": "6.11.2",
     "tailwind-merge": "^2.2.1",
