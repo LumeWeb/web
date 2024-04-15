@@ -319,8 +319,8 @@ devDependencies:
     specifier: ^2.27.1
     version: 2.27.1
   '@docusaurus/module-type-aliases':
-    specifier: ^2.4
-    version: 2.4.3(@swc/core@1.3.107)(esbuild@0.17.6)(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^3.2
+    version: 3.2.1(@swc/core@1.3.107)(esbuild@0.17.6)(react-dom@18.2.0)(react@18.2.0)
   '@docusaurus/types':
     specifier: ^3.2.1
     version: 3.2.1(@swc/core@1.3.107)(esbuild@0.17.6)(react-dom@18.2.0)(react@18.2.0)
@@ -2669,6 +2669,31 @@ packages:
       - esbuild
       - uglify-js
       - webpack-cli
+    dev: false
+
+  /@docusaurus/module-type-aliases@3.2.1(@swc/core@1.3.107)(esbuild@0.17.6)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-FyViV5TqhL1vsM7eh29nJ5NtbRE6Ra6LP1PDcPvhwPSlA7eiWGRKAn3jWwMUcmjkos5SYY+sr0/feCdbM3eQHQ==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+    dependencies:
+      '@docusaurus/react-loadable': 5.5.2(react@18.2.0)
+      '@docusaurus/types': 3.2.1(@swc/core@1.3.107)(esbuild@0.17.6)(react-dom@18.2.0)(react@18.2.0)
+      '@types/history': 4.7.11
+      '@types/react': 18.2.75
+      '@types/react-router-config': 5.0.11
+      '@types/react-router-dom': 5.3.3
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-helmet-async: 1.3.0(react-dom@18.2.0)(react@18.2.0)
+      react-loadable: /@docusaurus/react-loadable@5.5.2(react@18.2.0)
+    transitivePeerDependencies:
+      - '@swc/core'
+      - esbuild
+      - supports-color
+      - uglify-js
+      - webpack-cli
+    dev: true
 
   /@docusaurus/plugin-content-blog@2.4.3(@swc/core@1.3.107)(esbuild@0.17.6)(eslint@8.57.0)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.4):
     resolution: {integrity: sha512-PVhypqaA0t98zVDpOeTqWUTvRqCEjJubtfFUQ7zJNYdbYTbS/E/ytq6zbLVsN/dImvemtO/5JQgjLxsh8XLo8Q==}
@@ -3192,6 +3217,7 @@ packages:
       - esbuild
       - uglify-js
       - webpack-cli
+    dev: false
 
   /@docusaurus/types@3.2.1(@swc/core@1.3.107)(esbuild@0.17.6)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-n/toxBzL2oxTtRTOFiGKsHypzn/Pm+sXyw+VSk1UbqbXQiHOwHwts55bpKwbcUgA530Is6kix3ELiFOv9GAMfw==}

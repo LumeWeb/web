@@ -112,7 +112,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
-    "@docusaurus/module-type-aliases": "^2.4",
+    "@docusaurus/module-type-aliases": "^3.2",
     "@docusaurus/types": "^3.2.1",
     "@nrwl/workspace": "18.2.3",
     "@nx/eslint": "18.2.4",
