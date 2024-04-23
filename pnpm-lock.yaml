@@ -35,8 +35,8 @@ dependencies:
     specifier: ^1.1.0
     version: 1.1.0(react@18.2.0)
   '@conform-to/zod':
-    specifier: ^1.0.2
-    version: 1.0.6(zod@3.22.4)
+    specifier: ^1.1.1
+    version: 1.1.1(zod@3.22.4)
   '@docusaurus/core':
     specifier: ^2.4.3
     version: 2.4.3(@docusaurus/types@3.2.1)(@swc/core@1.3.107)(esbuild@0.17.6)(eslint@8.57.0)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.4)
@@ -2285,12 +2285,12 @@ packages:
     dev: false
     optional: true
 
-  /@conform-to/dom@1.0.6:
-    resolution: {integrity: sha512-24teTftuAfcjv+SiaFYb9msjdQA7Kq8Yk9QkMPrkF8LETl80+i5fpCaIG8V91KyTitBeBcc80gg9HuPuuq3dqQ==}
-    dev: false
-
   /@conform-to/dom@1.1.0:
     resolution: {integrity: sha512-KtiGwke6qeh8xDMwebbT/EanxhVX40uZtyHr8VH2V8jBHwavy94V673F4YdlhHpXoqRcZcewie/GQ7tIi2mC/A==}
+    dev: false
+
+  /@conform-to/dom@1.1.1:
+    resolution: {integrity: sha512-6IiHuHjW12cZZ6DICiewZEYW8R3Kif90RDa5GOdyifvNF5ISQvy+sXakZlVoliPR3xRYMdOq8TCuwBwBca1+DQ==}
     dev: false
 
   /@conform-to/react@1.1.0(react@18.2.0):
@@ -2302,12 +2302,12 @@ packages:
       react: 18.2.0
     dev: false
 
-  /@conform-to/zod@1.0.6(zod@3.22.4):
-    resolution: {integrity: sha512-l+fMqEymGG7wrCIdp7Lyt1UPKdlvHbM5KDHeGQkuIEgqISpDVwOH/xt3xb/THzW1unk6beYWh99xMuEmV/ATYw==}
+  /@conform-to/zod@1.1.1(zod@3.22.4):
+    resolution: {integrity: sha512-IvGNKmpxsdJC2oHTpQxknJqLSPpTSruL8we+9fti1AQX2XPki7dugVcaudrtTpErxzik6naOcohAAzGp/3Q80w==}
     peerDependencies:
       zod: ^3.21.0
     dependencies:
-      '@conform-to/dom': 1.0.6
+      '@conform-to/dom': 1.1.1
       zod: 3.22.4
     dev: false
 
