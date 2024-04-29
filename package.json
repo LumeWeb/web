@@ -57,7 +57,7 @@
     "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
-    "@uppy/core": "^3.9.3",
+    "@uppy/core": "^3.11.0",
     "@uppy/tus": "^3.5.4",
     "@uppy/utils": "^5.7.4",
     "@visx/curve": "^3.3.0",
