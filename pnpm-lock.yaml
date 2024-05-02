@@ -120,7 +120,7 @@ dependencies:
     version: 5.6.8(@refinedev/core@4.49.0)(@tanstack/react-table@8.15.3)(react-dom@18.2.0)(react@18.2.0)
   '@refinedev/remix-router':
     specifier: ^3.0.2
-    version: 3.0.2(@refinedev/core@4.49.0)(@remix-run/node@2.8.1)(@remix-run/react@2.8.1)(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)(remix@2.8.1)
+    version: 3.0.2(@refinedev/core@4.49.0)(@remix-run/node@2.8.1)(@remix-run/react@2.8.1)(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)(remix@2.9.1)
   '@remix-run/dev':
     specifier: ^2.8.1
     version: 2.8.1(@remix-run/serve@2.8.1)(@types/node@20.12.7)(sass@1.74.1)(typescript@5.4.4)(vite@5.2.8)
@@ -4548,7 +4548,7 @@ packages:
       nx: '>= 16 <= 18'
     dependencies:
       '@nrwl/devkit': 18.2.3(nx@18.2.3)
-      ejs: 3.1.9
+      ejs: 3.1.10
       enquirer: 2.3.6
       ignore: 5.3.1
       nx: 18.2.3(@swc-node/register@1.8.0)(@swc/core@1.3.107)
@@ -4563,7 +4563,7 @@ packages:
       nx: '>= 16 <= 18'
     dependencies:
       '@nrwl/devkit': 18.2.4(nx@18.2.3)
-      ejs: 3.1.9
+      ejs: 3.1.10
       enquirer: 2.3.6
       ignore: 5.3.1
       nx: 18.2.3(@swc-node/register@1.8.0)(@swc/core@1.3.107)
@@ -4578,7 +4578,7 @@ packages:
       nx: '>= 16 <= 18'
     dependencies:
       '@nrwl/devkit': 18.2.4(nx@18.2.3)
-      ejs: 3.1.9
+      ejs: 3.1.10
       enquirer: 2.3.6
       ignore: 5.3.1
       nx: 18.2.4(@swc-node/register@1.8.0)(@swc/core@1.3.107)
@@ -6366,7 +6366,7 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@refinedev/remix-router@3.0.2(@refinedev/core@4.49.0)(@remix-run/node@2.8.1)(@remix-run/react@2.8.1)(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)(remix@2.8.1):
+  /@refinedev/remix-router@3.0.2(@refinedev/core@4.49.0)(@remix-run/node@2.8.1)(@remix-run/react@2.8.1)(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)(remix@2.9.1):
     resolution: {integrity: sha512-k060fZZ+CpHZmsG4ozoXNFG7b/v87O1SljlxyomQ5PzC59glRd8Trj4KyWQ2j+PUnMbanLMg2Ff3t5hhMKs2yg==}
     engines: {node: '>=10'}
     peerDependencies:
@@ -6387,7 +6387,7 @@ packages:
       qs: 6.12.0
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-      remix: 2.8.1
+      remix: 2.9.1
     dev: false
 
   /@remix-run/dev@2.8.1(@remix-run/serve@2.8.1)(@types/node@20.12.7)(sass@1.74.1)(typescript@5.4.4)(vite@5.2.8):
@@ -10031,13 +10031,13 @@ packages:
     dev: false
     optional: true
 
-  /bare-fs@2.2.3:
-    resolution: {integrity: sha512-amG72llr9pstfXOBOHve1WjiuKKAMnebcmMbPWDZ7BCevAoJLpugjuAPRsDINEyjT0a6tbaVx3DctkXIRbLuJw==}
+  /bare-fs@2.3.0:
+    resolution: {integrity: sha512-TNFqa1B4N99pds2a5NYHR15o0ZpdNKbAeKTE/+G6ED/UeOavv8RY3dr/Fu99HW3zU3pXpo2kDNO8Sjsm2esfOw==}
     requiresBuild: true
     dependencies:
       bare-events: 2.2.2
-      bare-path: 2.1.1
-      streamx: 2.16.1
+      bare-path: 2.1.2
+      bare-stream: 1.0.0
     dev: false
     optional: true
 
@@ -10047,11 +10047,19 @@ packages:
     dev: false
     optional: true
 
-  /bare-path@2.1.1:
-    resolution: {integrity: sha512-OHM+iwRDRMDBsSW7kl3dO62JyHdBKO3B25FB9vNQBPcGHMo4+eA8Yj41Lfbk3pS/seDY+siNge0LdRTulAau/A==}
+  /bare-path@2.1.2:
+    resolution: {integrity: sha512-o7KSt4prEphWUHa3QUwCxUI00R86VdjiuxmJK0iNVDHYPGo+HsDaVCnqCmPbf/MiW1ok8F4p3m8RTHlWk8K2ig==}
     requiresBuild: true
     dependencies:
       bare-os: 2.2.1
+    dev: false
+    optional: true
+
+  /bare-stream@1.0.0:
+    resolution: {integrity: sha512-KhNUoDL40iP4gFaLSsoGE479t0jHijfYdIcxRn/XtezA2BaUD0NRf/JGRpsMq6dMNM+SrCrB0YSSo/5wBY4rOQ==}
+    requiresBuild: true
+    dependencies:
+      streamx: 2.16.1
     dev: false
     optional: true
 
@@ -12061,8 +12069,8 @@ packages:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
     dev: false
 
-  /ejs@3.1.9:
-    resolution: {integrity: sha512-rC+QVNMJWv+MtPgkt0y+0rVEIdbtxVADApW9JXrUVlzHetgcyczP/E7DJmWJ4fJCZF2cPcBk0laWO9ZHMG3DmQ==}
+  /ejs@3.1.10:
+    resolution: {integrity: sha512-UeJmFfOrAQS8OJWPZ4qtgHyWExa088/MtK5UEyoJGFH67cDEXkZSviOiKRCZ4Xij0zxI3JECgYs3oKx+AizQBA==}
     engines: {node: '>=0.10.0'}
     hasBin: true
     dependencies:
@@ -18972,7 +18980,7 @@ packages:
     dependencies:
       '@jest/schemas': 29.6.3
       ansi-styles: 5.2.0
-      react-is: 18.2.0
+      react-is: 18.3.1
 
   /pretty-ms@7.0.1:
     resolution: {integrity: sha512-973driJZvxiGOQ5ONsFhOF/DtzPMOMtgC11kCpUrPGMTgqp2q/1gwzCquocrN33is0VZ5GFHXZYMM9l6h67v2Q==}
@@ -19353,8 +19361,8 @@ packages:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
     dev: true
 
-  /react-is@18.2.0:
-    resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
+  /react-is@18.3.1:
+    resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
   /react-json-view@1.21.3(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-13p8IREj9/x/Ye4WI/JpjhoIwuzEgUAtgJZNBJckfzJt1qyh24BdTm6UQNGnyTq9dapQdrqvquZTo3dz1X6Cjw==}
@@ -19964,8 +19972,8 @@ packages:
       unified: 11.0.4
     dev: false
 
-  /remix@2.8.1:
-    resolution: {integrity: sha512-ySWPcfC6Do6EB+EO6eerOwnuFHqcL0Ppf358N+9pZszqEq+LV4tK5g270eNu7HnzgPtspaCogb4obOs+cn/Fyw==}
+  /remix@2.9.1:
+    resolution: {integrity: sha512-kJeRlKnd3+fohpG7zKXB4ipFwFiLAqAryWTrZ+pOVRFiaDimrmNAIzuuLgkK/z946Rj7/fOTagaNx6IR7F9ylg==}
     engines: {node: '>=18.0.0'}
     dev: false
 
@@ -21325,8 +21333,8 @@ packages:
       pump: 3.0.0
       tar-stream: 3.1.7
     optionalDependencies:
-      bare-fs: 2.2.3
-      bare-path: 2.1.1
+      bare-fs: 2.3.0
+      bare-path: 2.1.2
     dev: false
     optional: true
 
