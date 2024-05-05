@@ -127,7 +127,7 @@
     "@faker-js/faker": "^8.4.1",
     "@nrwl/workspace": "18.2.3",
     "@nx/eslint": "18.2.4",
-    "@nx/eslint-plugin": "18.2.3",
+    "@nx/eslint-plugin": "18.3.4",
     "@nx/js": "18.2.4",
     "@nx/react": "18.2.3",
     "@nx/remix": "18.2.3",
