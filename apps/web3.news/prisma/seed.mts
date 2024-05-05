@@ -11,9 +11,9 @@ async function main() {
         const title = faker.lorem.sentence();
         const slug = faker.helpers.slugify(title).toLowerCase();
         const url = faker.internet.url();
-        const siteKey = faker.string.alphanumeric(10);
+        const site = faker.string.alphanumeric(10);
 
-        articles.push({title, slug, cid: Math.random().toString(), url, siteKey});
+        articles.push({title, slug, cid: Math.random().toString(), url, site});
     }
 
     for (const article of articles) {
