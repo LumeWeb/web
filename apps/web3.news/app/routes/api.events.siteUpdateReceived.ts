@@ -1,14 +1,15 @@
 import { ActionFunctionArgs } from "@remix-run/node";
-import { S5Client } from "@lumeweb/s5-js";
+//import { S5Client } from "@lumeweb/s5-js";
 import xml2js from "xml2js";
 import { prisma } from "@/lib/prisma";
 import path from "path";
 import { getAvailableSites } from "@/utils.js";
-import { CID } from "@lumeweb/libs5";
+//import { CID } from "@lumeweb/libs5";
 
 // Action function for POST requests
 export async function action({ request }: ActionFunctionArgs) {
-  const client = new S5Client("https://s5.web3portal.com");
+  return new Response("", { status: 200 });
+  /*const client = new S5Client("https://s5.web3portal.com");
   const data = await request.json();
 
   const site = data.site;
@@ -88,5 +89,5 @@ export async function action({ request }: ActionFunctionArgs) {
     }
   }
 
-  return new Response("", { status: 200 });
+  return new Response("", { status: 200 });*/
 }
