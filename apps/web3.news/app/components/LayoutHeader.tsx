@@ -28,14 +28,17 @@ export const Header = ({}: Props) => {
       <div className="flex gap-3 font-normal flex-row text-gray-300 rounded">
         <Link
           to="/about"
-          className="hover:text-white p-2 px-4 hover:bg-gray-800 rounded"
-        >
+          className="hover:text-white p-2 px-4 hover:bg-gray-800 rounded">
           About
         </Link>
         <Link
+          to="https://forum.web3.news"
+          className="hover:text-white p-2 px-4 hover:bg-gray-800 rounded">
+          Forums
+        </Link>
+        <Link
           to="/donate"
-          className="hover:text-white p-2 px-4 hover:bg-gray-800 rounded"
-        >
+          className="hover:text-white p-2 px-4 hover:bg-gray-800 rounded">
           Contribute
         </Link>
       </div>
@@ -51,8 +54,7 @@ const Web3NewsLogo = ({ className }: { className?: string }) => {
       height="23"
       viewBox="0 0 159 23"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+      xmlns="http://www.w3.org/2000/svg">
       <path
         d="M0.55 0.299999H3.309V16.172L8.703 8.081H11.059L16.391 16.172V0.299999H19.15V22H17.104L9.85 11.367L2.627 22H0.55V0.299999ZM22.2251 22L22.2561 0.299999H36.7641V3.059H25.0151V9.755H33.6331V12.545H25.0151V19.241H36.7641V22H22.2251ZM39.4824 22L39.4514 0.299999H47.7284C53.1844 0.299999 55.8194 6.903 52.0374 10.654C57.2144 14.157 55.0444 22 48.9374 22H39.4824ZM42.2414 9.786H47.7284C52.0064 9.786 52.2234 3.059 47.7284 3.059H42.2414V9.786ZM42.2414 19.241H48.9374C53.2154 19.241 53.4324 12.514 48.9374 12.514H42.2414V19.241ZM62.7651 22C59.9751 22 57.8051 19.768 57.8051 16.761H60.5021C60.5021 18.342 61.5251 19.303 62.7651 19.303H66.7021C71.1661 19.303 71.2281 12.297 66.7021 12.297H63.3541V10.003H66.0511C70.5771 10.003 70.5461 2.997 66.0511 2.997H62.8891C61.6181 2.997 60.5951 4.02 60.5951 5.415H57.9291C57.9291 2.532 60.1611 0.299999 62.8891 0.299999H66.0511C71.6931 0.299999 74.4831 7.771 69.7091 10.902C75.3511 13.909 72.6541 22 66.7021 22H62.7651Z"
         fill="white"
