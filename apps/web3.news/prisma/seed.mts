@@ -9,11 +9,11 @@ async function main() {
 
     for (let i = 0; i < numberOfArticles; i++) {
         const title = faker.lorem.sentence();
-        const slug = faker.helpers.slugify(title).toLowerCase();
+        const cid = faker.string.alphanumeric(10);;
         const url = faker.internet.url();
         const site = faker.string.alphanumeric(10);
 
-        articles.push({title, slug, cid: Math.random().toString(), url, site});
+        articles.push({title, cid, url, site});
     }
 
     for (const article of articles) {
