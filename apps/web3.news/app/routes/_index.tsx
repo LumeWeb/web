@@ -55,6 +55,17 @@ export default function Index() {
   let { data, sites } = useLoaderData<LoaderData>();
   return (
     <>
+      <div className="bg-muted p-6 mt-10 rounded-lg">
+        <p className="text-muted-foreground font-bold mb-2">MVP Notice</p>
+        <p className="text-muted-foreground mb-4">
+          This is a Minimum Viable Product (MVP) and we need your feedback and
+          involvement to help it evolve. Please join our community forums to
+          discuss more and contribute to the project's growth.
+        </p>
+        <a href="https://forum.web3.news" className="text-primary underline">
+          Visit Community Forums
+        </a>
+      </div>
       <SearchBar sites={sites} />
       <div className="space-y-8 w-full my-10">
         <div className="flex flex-row flex-wrap justify-between w-full">
@@ -67,8 +78,7 @@ export default function Index() {
         </div>
         <GraphicSection.Root
           href="https://lumeweb.com"
-          className="h-[100px] border border-gray-800 cursor-pointer [&:hover_.link]:underline [&:hover_.background]:rotate-12 [&:hover_.background]:scale-110"
-        >
+          className="h-[100px] border border-gray-800 cursor-pointer [&:hover_.link]:underline [&:hover_.background]:rotate-12 [&:hover_.background]:scale-110">
           <GraphicSection.Background>
             <img
               src={Logo}
