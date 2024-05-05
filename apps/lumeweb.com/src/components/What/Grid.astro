@@ -1,0 +1,47 @@
+---
+import GridCell from "../ui/GridCell.astro";
+import GridContainer from "../ui/GridContainer.astro";
+
+const features = [
+    {
+        title: "Access the markets, aka DeFi",
+        description:
+            "Web3 commonly get mixed up with DeFi, however, while you should be able to access any decentralized website or network, access to DeFi to manage your money is critical as well.",
+    },
+    {
+        title: "NFT's... Anywhere",
+        description:
+            "You should be able to access your favorite NFT's anywhere, any time, any place. They are yours and no one should be able to tell you otherwise.",
+    },
+    {
+        title: "Access any decentralized or P2P network",
+        description:
+            "The basics of Web3 is the sum of all the open networks and ecosystems. You should be able to access and visit any of these places. You can compare this to accessing things on Google, Facebook, Apple, or other networks/platforms that are generally walled gardens in the current web system.",
+    },
+    {
+        title: "Publish Freely",
+        description:
+            'A core tenant of Web3 is censorship-resistance. You should be able to freely post controversial (or even things others just don\'t want to hear) information, such as news, blogging, or video. You should be allowed to openly debate, educate, inform, or entertain without getting "de-platformed".',
+    },
+    {
+        title: "Socialize and Discover Freely",
+        description:
+            "While you have the ability to post, you should also have the ability to read.",
+    },
+    {
+        title: "Own your web. Own your identity.",
+        description:
+            "You should be able to have your private data be and stay private unless you choose otherwise. This is achieved with your online web3 account, which serves as your identity and means of encrypting everything you do. If you want to share you can, but your data is yours, no one else's.",
+    },
+];
+---
+
+<section id="grid" class="mx-10 md:mx-20 lg:mx-40">
+    <GridContainer>
+        {
+            features.map((feature) => (
+                <GridCell description={feature.description} title={feature.title}/>
+            ))
+        }
+    </GridContainer>
+</section>

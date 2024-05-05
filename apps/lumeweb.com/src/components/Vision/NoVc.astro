@@ -1,0 +1,26 @@
+---
+import Button from "../ui/Button.astro";
+import FeaturedGroup from "../ui/FeaturedGroup.astro";
+import background from "/src/assets/double-brand-bg.png";
+---
+
+<section id="no-vc" class="relative flex flex-row mx-10 md:mx-20 lg:mx-40">
+  <img
+    src={background.src}
+    class="absolute top-0 right-0 md:static -mx-10 -md:mx-20 lg:-mx-40 w-[1000px] max-h-[650px]"
+  />
+  <div class="flex flex-col py-10">
+    <FeaturedGroup
+      subtitle="Community-Powered"
+      title="All about the people, no VC here."
+      text={[
+        "Our vision is completely grass roots, and FOSS. The user needs to have a voice and be in control of their web. Due to our principles, we have not taken any VC money that might be able to strap a jetpack to the project, because the output would compromise the spirit and goals we are setting out to achieve.",
+        "We are <i>very</i> aware of the projects that have come before us and whom have made similar promises. We are also doing our best to learn from their mistakes and failures.",
+        "The key difference that we see big picture is you need both an <b>economy</b> and <b>decentralized/P2P</b> networks, because running the internet is not free, and someone <i>always</i> has to foot the bill.",
+        "Blockchain <b><i>finally</i></b> makes this possible.",
+        "Having a pragmatic view on mass adoption without compromising on principles is needed to make progress on a user-owned web.",
+      ]}
+    />
+    <Button label="Contribute to our cause" href="/donate" />
+  </div>
+</section>

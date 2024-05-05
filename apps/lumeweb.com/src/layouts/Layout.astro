@@ -1,0 +1,75 @@
+---
+import "../styles/global.scss";
+import opengraph from "/src/assets/opengraph.png";
+import Navbar from "../components/Layout/Navbar.astro";
+import Footer from "../components/Layout/Footer.astro";
+import JoinCommunity from "../components/Layout/JoinCommunity.astro";
+
+export interface Props {
+  view: string;
+  title: string;
+}
+
+const { view, title } = Astro.props;
+const description =
+  "A platform, network and experience that allows you to control and own your online web, and access all of the possibilities Web3 has to offer. Join the open web.";
+const url = "https://lumeweb.com";
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{title}</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0"
+    />
+    <meta name="description" content="" />
+    <meta
+      name="keywords"
+      content="Web3 Extension, web3 browser, Lume Web, Web3, dWeb, p2p, handshake, eth, ethereum, ipfs, open web, privacy, decentralization, blockchain"
+    />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={url} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={opengraph.src} />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={url} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={opengraph.src} />
+      <link rel="sitemap" href="/sitemap-index.xml" />
+    <!-- Matomo -->
+    <script is:inline>
+      var _paq = (window._paq = window._paq || []);
+      /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+      _paq.push(["trackPageView"]);
+      _paq.push(["enableLinkTracking"]);
+      (function () {
+        var u = "//piwiki.lumeweb.com/";
+        _paq.push(["setTrackerUrl", u + "matomo.php"]);
+        _paq.push(["setSiteId", "1"]);
+        var d = document,
+          g = d.createElement("script"),
+          s = d.getElementsByTagName("script")[0];
+        g.async = true;
+        g.src = u + "matomo.js";
+        s.parentNode.insertBefore(g, s);
+      })();
+    </script>
+    <!-- End Matomo Code -->
+  </head>
+  <body class="max-w-[1600px] mx-auto">
+    <Navbar view={view} />
+    <main class={view + " space-y-40 overflow-x-hidden relative "}>
+      <slot />
+    </main>
+    {view !== "home" && <JoinCommunity />}
+    <Footer />
+  </body>
+</html>

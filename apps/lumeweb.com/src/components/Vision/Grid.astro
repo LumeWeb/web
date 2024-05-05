@@ -1,0 +1,56 @@
+---
+import GridCell from "../ui/GridCell.astro";
+import GridContainer from "../ui/GridContainer.astro";
+
+const features = [
+  {
+    title: "Decentralized Websites",
+    badge: "goal" as const,
+    description:
+      "You should be able to gain access to any website on any network, in a secure and decentralized way",
+  },
+  {
+    title: "Decentralized Publishing",
+    badge: "idea" as const,
+    description:
+      "You should be able to easily publish a blog or any other basic website for personal or professional use",
+  },
+  {
+    title: "Website Building Tools",
+    badge: "idea" as const,
+    description:
+      "You should be able to easily build a website that targets the decentralized web",
+  },
+  {
+    title: "eCommerce",
+    badge: "idea" as const,
+    description:
+      "You should be be able to buy or sell in a free market without censorship or politics blocking your ability to transact",
+  },
+  {
+    title: "Earn a Living",
+    badge: "idea" as const,
+    description:
+      "You should be able to monetize your content or skills, without a middleman or gatekeeper. You should be able to be free to live your best life by having access to an open market so that you are never chained down or restricted",
+  },
+];
+---
+
+<section id="grid" class="mx-10 md:mx-20 lg:mx-40">
+  <GridContainer>
+    <div class="w-[calc(33.33%-20px)] pl-12 pt-5 mx-[10px]">
+      <h2 class="text-primary font-display text-4xl leading-[1.6] font-bold">
+        Freedom. <br /> Privacy. Ownership.
+      </h2>
+    </div>
+    {
+      features.map((feature) => (
+        <GridCell
+          title={feature.title}
+          description={feature.description}
+          badge={feature.badge}
+        />
+      ))
+    }
+  </GridContainer>
+</section>

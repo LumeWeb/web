@@ -1,0 +1,33 @@
+---
+import Button from "../ui/Button.astro";
+import FeaturedGroup from "../ui/FeaturedGroup.astro";
+import backgroud from "/src/assets/why-bg-2.png";
+---
+
+<section
+  id="why"
+  class="flex flex-col overflow-hidden relative lg:flex-row mx-10 md:mx-20 lg:mx-40"
+>
+  <img
+    src={backgroud.src}
+    class="absolute xl:relative -z-10 min-w-[1000px] h-[750px] -mx-10 md:-mx-20 lg:-mx-40"
+  />
+  <div class="py-5 px-2 lg:px-0">
+    <FeaturedGroup
+      subtitle="Why should I donate to Lume?"
+      title="Help us break the pattern"
+      text={[
+        `<ul class="space-y-3 -mb-10 text-body font-body list-disc list-inside text-xl lg:text-2xl">
+        <li class="list-item">You believe the internet should be free and open for everyone, regardless of political beliefs.</li>
+        <li class="list-item">You want a neutral web accessible to everyday people.</li>
+        <li class="list-item">You believe your data should be private and secure unless you choose to share it.</li>
+        <li class="list-item">You want to ensure that you or someone else can’t be censored or “de-platformed.”</li>
+        <li class="list-item">You think people should have free access to information no matter how they choose to access it.</li>
+        <li class="list-item">You believe in handling web abuse using legal and social means instead of censorship and restriction.</li>
+        </ul>`,
+        `Every single day you use the Internet, your data is sold to companies to pay for your usage. Help us break the pattern by funding the creation of free and open-source Web3 tools.`,
+      ]}
+    />
+    <Button label="Donate" href="#methods" />
+  </div>
+</section>

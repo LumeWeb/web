@@ -1,0 +1,175 @@
+---
+import meme1 from "/src/assets/meme-1.png";
+import meme2 from "/src/assets/meme-2.png";
+import meme3 from "/src/assets/meme-3.png";
+import meme4 from "/src/assets/meme-4.png";
+import meme1Small from "/src/assets/meme-1-small.png";
+import meme2Small from "/src/assets/meme-2-small.png";
+import meme3Small from "/src/assets/meme-3-small.png";
+import meme4Small from "/src/assets/meme-4-small.png";
+---
+
+<section
+  class="flex flex-col w-full border-y border-dark-aquamarine divide-y divide-dark-aquamarine lg:h-[1200px]"
+>
+  <h3
+    class="font-display text-4xl md:text-6xl font-bold p-5 uppercase bg-dark-aquamarine text-primary"
+  >
+    Web3's Current Path
+  </h3>
+  <!-- MEME GRID BIG -->
+  <div
+    class="hidden lg:flex flex-1 flex-row w-full divide-x divide-dark-aquamarine"
+  >
+    <div class="relative flex-1 w-1/2 h-full max-w-full overflow-hidden">
+      <img
+        src={meme1.src}
+        alt=""
+        class="absolute bottom-0 -left-[100px] object-contain xl:-left-5 float-left"
+      />
+      <span class="float-right mt-16 w-[300px] space-y-10 mr-5">
+        <h3 class="font-display text-6xl">Web1</h3>
+        <p class="font-body text-2xl text-body">
+          Nostalgically recalled for chat rooms and IRC by tech enthusiasts,
+          signifies the era of integrated services like AOL dial-up, providing
+          web access, email, shopping, and chat for mainstream users.
+        </p>
+      </span>
+    </div>
+    <div class="relative flex-1 max-w-full overflow-hidden">
+      <img
+        src={meme2.src}
+        alt=""
+        class="absolute bottom-0 -left-[110px] object-contain xl:-left-5 float-left"
+      />
+      <span class="float-right mt-16 w-[300px] space-y-10 mr-5">
+        <h3 class="font-display text-6xl">Web2</h3>
+        <p class="font-body text-2xl text-body">
+          Featuring improved gaming, online apps, and video streaming, was
+          swiftly monopolized by Silicon Valley, creating a top-down system
+          controlled by a few tech elites. Despite innovations, this system,
+          including the broader internet infrastructure like ISPs and domains,
+          regulates your web experience, often citing "safety".
+        </p>
+      </span>
+    </div>
+  </div>
+  <div
+    class="hidden lg:flex flex-1 flex-row w-full divide-x divide-dark-aquamarine"
+  >
+    <div class="relative flex-1 overflow-hidden">
+      <img
+        src={meme3.src}
+        alt=""
+        class="absolute bottom-0 -left-[110px] xl:-left-5 float-left object-contain"
+      />
+      <span class="float-right mt-16 w-[300px] space-y-10 mr-1 xl:mr-5">
+        <h3 class="font-display text-6xl">Crypto/<br />DeFi</h3>
+        <p class="font-body text-2xl text-body">
+          The advent of Bitcoin sparked innovation, but over time,
+          centralization increased. Factors such as the influx of big money,
+          greed, hype, and FOMO contributed to this trend. The introduction of
+          many money legos worsened the situation, leading to boom and bust
+          cycles.
+        </p>
+      </span>
+    </div>
+    <div class="relative flex-1 overflow-hidden">
+      <img
+        src={meme4.src}
+        alt=""
+        class="absolute bottom-0 -left-[110px] object-contain xl:-left-5 float-left"
+      />
+      <span class="float-right mt-16 w-[300px] space-y-10 mr-1 xl:mr-5">
+        <h3 class="font-display text-6xl">Web3</h3>
+        <p class="font-body text-2xl text-body">
+          Web3 emerged as a buzzword to replace DeFi, but its meaning varies.
+          Despite aiming for decentralization, Web3 relies on centralized
+          crypto/DeFi infrastructure. Money dominates over ideology, driven by
+          funders. A balance is necessary between free markets and public goods
+          to address the current imbalance.
+        </p>
+      </span>
+    </div>
+  </div>
+  <!-- MEME GRID BIG -->
+
+  <!-- MEME GRID SMALL -->
+  <div class="lg:hidden flex flex-col gap-8 py-10 px-8">
+    <h3 class="font-display text-3xl">Web1</h3>
+    <p class="font-body text-body text-xl">
+      Web1 is probably best remembered by geeks as chat rooms and IRC (which
+      still exist to this day, but only to power users). To normal users it was
+      the age of AOL dial-up and similar networks where you got web, email,
+      shopping, and chat all in one place..
+    </p>
+    <img src={meme1Small.src} class="-mb-10 w-60 self-center" />
+  </div>
+  <div class="lg:hidden flex flex-col gap-8 py-10 px-8">
+    <h3 class="font-display text-3xl">Web2</h3>
+    <p class="font-body text-body text-xl">
+      Web2 since evolved with the web browser and we got better gaming, online
+      apps, video streaming and calling and much, much more. However, it also
+      got quickly captured by Silicon Valley and what some refer to as the "tech
+      bros".
+    </p>
+    <p class="font-body text-body text-xl">
+      So <i>despite</i> the innovation that occurred, it has turned into a top-down
+      system where only a few geeks/CEO's and their investors control your entire
+      web.
+    </p>
+    <p class="font-body text-body text-xl">
+      This also excludes the wider internet infrastructure of domains and ISP's
+      (internet providers and hosting), who also play a part in controlling your
+      web, be it for your "safety", or other reasons.
+    </p>
+    <img src={meme2Small.src} class="-mb-10 w-60 self-center" />
+  </div>
+  <div class="lg:hidden flex flex-col gap-8 py-10 px-8">
+    <h3 class="font-display text-3xl">Crypto/DeFi</h3>
+    <p class="font-body text-body text-xl">
+      We get the birth of Bitcoin and all of the innovation that followed. While
+      BTC and a handful of other chains have remained decentralized both in
+      operation, and access, the innovation over time has caused things to
+      re-centralize.
+    </p>
+    <p class="font-body text-body text-xl">
+      This is due to several factors including big money coming in, pushing
+      greed, hype, and "FOMO". The invention of several new logos's causing this
+      to only get worse, creating a classic "boom" and "bust". Human nature
+      tends to be greedy, so over time, money overrode principles.
+    </p>
+    <p class="font-body text-body text-xl">
+      Many development teams prioritized inventing new ideas and "shipping" them
+      to users, while selling them "tokens" to exit at their expense, all while
+      knowing none of what they created was <i>truly decentralized</i>.
+    </p>
+    <p class="font-body text-body text-xl">
+      It became one large crypto casino.
+    </p>
+    <img src={meme3Small.src} class="-mb-10 w-60 self-center" />
+  </div>
+  <div class="lg:hidden flex flex-col gap-8 py-10 px-8">
+    <h3 class="font-display text-3xl">Web3</h3>
+    <p class="font-body text-xl text-body">
+      What to say about Web3? Honestly... upfront it appeared to get used as a
+      new buzz word to replace "DeFi". Terms like "Web3" and "Metaverse" have
+      many different meanings to many people. It is intended to include more
+      than just money and trading, and yet every blockchain-based system that
+      can be labeled "web3" still builds onto of the same centralized
+      crypto/defi infrastructure.
+    </p>
+    <p class="font-body text-xl text-body">
+      The end result is an ecosystem that promotes and <b><i>wants</i></b> to be
+      decentralized, but where money overrules ideology, ethos, and principles. This
+      is in part due to who's bankrolling it all, and thus the incentives to build
+      make it more about the money then about freedom.
+    </p>
+    <p class="font-body text-xl text-body">
+      There needs to be a balance here between free markets/money and public
+      goods/infra, and so far things are way out of wack and need to be fixed.
+    </p>
+    <img src={meme4Small.src} class="-mb-10 w-60 self-center" />
+  </div>
+  <!-- MEME GRID SMALL -->
+</section>

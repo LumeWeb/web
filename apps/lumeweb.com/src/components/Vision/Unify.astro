@@ -1,0 +1,23 @@
+---
+import unifyBg from "/src/assets/unifying-bg.png";
+import FeaturedGroup from "../ui/FeaturedGroup.astro";
+---
+
+<section
+  id="unify"
+  class="mx-10 md:mx-20 lg:mx-40 flex flex-col-reverse md:flex-row gap-10"
+>
+  <FeaturedGroup
+    subtitle="Unifying all the Networks"
+    title="Community-Powered"
+    text={[
+      `There are many, <i class="mr-1">many</i> "crypto", "defi", "web3", "P2P", and "dWeb" projects
+      that have all taken hundreds of different approaches to innovate. However,
+      they all have the same broad ethos in common, and they all need an easy means
+      to access them in one place, but in a censorship-resistant way.`,
+      `We have a very ambitious vision, and this requires all "tribes" to work together enough for the benefit of the end user.`,
+      `Below are some of the ideas we are aiming for, and some we would like to tackle eventually.`,
+    ]}
+  />
+  <img src={unifyBg.src} class="float-right w-full max-h-[550px] -mr-40" />
+</section>

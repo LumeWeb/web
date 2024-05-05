@@ -1,0 +1,32 @@
+---
+import avatar from "/src/assets/cto-avatar.png";
+import abstractBg from "/src/assets/single-brand-bg-1.png";
+---
+
+<section id="cto" class="w-full my-24 flex flex-row">
+  <div class="flex flex-col mx-10 sm:mx-20 xl:mx-40 lg:max-w-xl gap-y-10">
+    <h2
+      class="font-display text-primary font-bold text-xl md:text-2xl uppercase"
+    >
+      Community-Powered
+    </h2>
+    <h3 class="font-display text-4xl md:text-6xl font-bold">
+      Building the open, user-owned web you deserve
+    </h3>
+    <p class="font-body text-xl md:text-3xl text-body">
+      Right now, Lume has only one full-time developer, a few freelancers, and
+      limited helper staff! We need help from developers, fundraisers, funders,
+      and contributors to bring the new internet to the masses.
+    </p>
+    <div class="flex flex-row items-center gap-6">
+      <img src={avatar.src} class="w-20 h-20" />
+      <div class="flex flex-col font-body">
+        <h6 class="text-xl">Derrick Hammer</h6>
+        <p class="text-lg text-body">CTO</p>
+      </div>
+    </div>
+  </div>
+  <div class="float-right w-1/2 -z-10 max-w-7xl">
+    <img src={abstractBg.src} class="absolute max-xl:right-0 w-[800px]" />
+  </div>
+</section>
