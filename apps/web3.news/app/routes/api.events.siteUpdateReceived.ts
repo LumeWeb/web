@@ -1,9 +1,4 @@
-import {
-  json,
-  LoaderFunction,
-  ActionFunction,
-  ActionFunctionArgs,
-} from "@remix-run/node";
+import { ActionFunctionArgs } from "@remix-run/node";
 import { S5Client } from "@lumeweb/s5-js";
 import xml2js from "xml2js";
 import { prisma } from "@/lib/prisma";
