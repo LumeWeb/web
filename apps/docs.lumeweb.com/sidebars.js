@@ -19,7 +19,7 @@ const sidebars = {
       type: "category",
       label: "Introduction",
       link: null,
-      items: ["intro/about", "intro/components", "intro/history"],
+      items: ["intro/about", "intro/history"],
     },
     {
       type: "category",
@@ -30,12 +30,6 @@ const sidebars = {
         "problems/web2-limits",
         "problems/web3-building-blocks",
       ],
-    },
-    {
-      type: "category",
-      label: "Apps",
-      link: null,
-      items: ["apps/browser-webapp"],
     },
     "roadmap",
   ],
