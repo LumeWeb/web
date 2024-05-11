@@ -4,13 +4,20 @@ title: What is Lume?
 
 `What is Lume?` This is something we have often asked ourselves to explain it 😅.
 
-Lume can be broken down into a few major focuses:
+Lume has attempted to be several things as experiments in the past. We intend to continue those experiments in the future, as they were important to do, and are in some of our long term goals.
 
-- Lume is a **P2P network** that uses public keys instead of torrent hashes to access peers and content.
-    -  Like a BitTorrent, but ready for Web3.  You can also see it to be a bit like IPFS which uses Libp2p, but more light weight.
-        - The goal here is to create a bridge P2P network `to service all of Web3`.
-        - `It's NOT a blockchain`. You don't need one since anyone can provide services with RPC or their own custom protocol, and anyone can query them.
-- Lume is a **storage portal** (think `L2` in blockchain terms).
-    - It builds on Sia and stores your private data, and eventually public. In other words think of it like a paid IPFS service, but its not IPFS.
-- Lume is the **end user gateway**.
-    - It is how you will interface with all content networks, blockchains, or other nets in the future. This could be a browser extension, web browser itself or anything in-between.
+Today, Lume is more of a symbolic vision of what we want to achieve.
+
+* We intend to use P2P technology to solve access issues to the open web and to open money (defi).
+* We intend to ensure you have the freedom to create, share, and own your content and private data.
+* We intend to leverage the crypto economy to do what we believe P2P technology cannot do alone, in a quid pro quo manner.
+* We intend to be the users gateway into web3 and bring it mainstream, pushing civil rights further.
+* We intend to break you out of the big-tech sandbox and give you your freedom back.
+
+We are actively building technologies, but we are also building to be financially sustainable, funded by our community as a community-focused service provider.
+
+We are currently grant funded by the Sia Foundation, and aim for having our community fund development long term by using our services we will offer.
+
+Simply put, this means anything offered as a service under the Lume Web brand goes towards R&D for public goods technologies and effectively web3 development for civil rights.
+
+And *everything* we create is under an [OSI approved license](https://opensource.org). Most of it is under MIT! 
