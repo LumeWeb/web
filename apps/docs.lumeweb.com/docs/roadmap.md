@@ -6,8 +6,6 @@ The following is our currently planned roadmap:
 
 ## 2024
 
-Here's the updated roadmap table using `<li>` tags instead of `<br>`:
-
 | Quarter | Focus Area                                                | Activities |
 |---------|-----------------------------------------------------------|------------|
 | Q1      | Building Core Portal                                      | <ul><li>📝 **Rewrite the core of the portal**, creating a framework for a flexible L2.</li><li>🚀 **Port S5 to Golang** to create a library for integration as a new implementation.</li><li>🔌 **Implement support for S5** in the portal.</li><li>📊 **Build MVP of the dashboard** for user-friendly management.</li><li>✅ **Ensure VUP works with the portal** for seamless integration.</li></ul> |
