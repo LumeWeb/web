@@ -17,6 +17,6 @@
         "bridge": "bun run scripts/bridge.mts",
         "melli-init": "bun run scripts/melli-init.mts",
         "db-init": "prisma db push",
-        "postinstall": "patch-package"
+        "postinstall": "../../node_modules/.bin/patch-package"
     }
 }
