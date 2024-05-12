@@ -1,5 +1,11 @@
 # [0.3.0-develop.4](https://git.lumeweb.com/LumeWeb/docs.lumeweb.com/compare/v0.3.0-develop.3...v0.3.0-develop.4) (2023-11-15)
 
+## 0.3.1
+
+### Patch Changes
+
+- 33431b6: Remove content added in error
+
 ## 0.3.0
 
 ### Minor Changes
