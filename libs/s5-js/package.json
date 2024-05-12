@@ -4,7 +4,7 @@
   "type": "module",
   "readme": "ERROR: No README data found!",
   "dependencies": {
-    "@lumeweb/libs5": "0.1.0",
+    "@lumeweb/libs5": "workspace:*",
     "@noble/hashes": "^1.3.2",
     "axios": "^1.6.2",
     "isomorphic-ws": "^5.0.0",
