@@ -348,8 +348,8 @@ importers:
         specifier: ^2.27.1
         version: 2.27.1
       '@docusaurus/module-type-aliases':
-        specifier: ^2.4
-        version: 2.4.3(@swc/core@1.4.17(@swc/helpers@0.5.8))(esbuild@0.17.19)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^3.3
+        version: 3.3.2(@swc/core@1.4.17(@swc/helpers@0.5.8))(esbuild@0.17.19)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@docusaurus/types':
         specifier: ^3.2.1
         version: 3.2.1(@swc/core@1.4.17(@swc/helpers@0.5.8))(esbuild@0.17.19)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -1454,6 +1454,12 @@ packages:
       react: '*'
       react-dom: '*'
 
+  '@docusaurus/module-type-aliases@3.3.2':
+    resolution: {integrity: sha512-b/XB0TBJah5yKb4LYuJT4buFvL0MGAb0+vJDrJtlYMguRtsEBkf2nWl5xP7h4Dlw6ol0hsHrCYzJ50kNIOEclw==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+
   '@docusaurus/plugin-content-blog@2.4.3':
     resolution: {integrity: sha512-PVhypqaA0t98zVDpOeTqWUTvRqCEjJubtfFUQ7zJNYdbYTbS/E/ytq6zbLVsN/dImvemtO/5JQgjLxsh8XLo8Q==}
     engines: {node: '>=16.14'}
@@ -1522,6 +1528,11 @@ packages:
     peerDependencies:
       react: '*'
 
+  '@docusaurus/react-loadable@6.0.0':
+    resolution: {integrity: sha512-YMMxTUQV/QFSnbgrP3tjDzLHRg7vsbMn8e9HAa8o/1iXoiomo48b7sk/kkmWEuWNDPJVlKSJRB6Y2fHqdJk+SQ==}
+    peerDependencies:
+      react: '*'
+
   '@docusaurus/theme-classic@2.4.3':
     resolution: {integrity: sha512-QKRAJPSGPfDY2yCiPMIVyr+MqwZCIV2lxNzqbyUW0YkrlmdzzP3WuQJPMGLCjWgQp/5c9kpWMvMxjhpZx1R32Q==}
     engines: {node: '>=16.14'}
@@ -1555,6 +1566,12 @@ packages:
 
   '@docusaurus/types@3.2.1':
     resolution: {integrity: sha512-n/toxBzL2oxTtRTOFiGKsHypzn/Pm+sXyw+VSk1UbqbXQiHOwHwts55bpKwbcUgA530Is6kix3ELiFOv9GAMfw==}
+    peerDependencies:
+      react: ^18.0.0
+      react-dom: ^18.0.0
+
+  '@docusaurus/types@3.3.2':
+    resolution: {integrity: sha512-5p201S7AZhliRxTU7uMKtSsoC8mgPA9bs9b5NQg1IRdRxJfflursXNVsgc3PcMqiUTul/v1s3k3rXXFlRE890w==}
     peerDependencies:
       react: ^18.0.0
       react-dom: ^18.0.0
@@ -13680,6 +13697,24 @@ snapshots:
       - uglify-js
       - webpack-cli
 
+  '@docusaurus/module-type-aliases@3.3.2(@swc/core@1.4.17(@swc/helpers@0.5.8))(esbuild@0.17.19)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      '@docusaurus/types': 3.3.2(@swc/core@1.4.17(@swc/helpers@0.5.8))(esbuild@0.17.19)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@types/history': 4.7.11
+      '@types/react': 18.2.75
+      '@types/react-router-config': 5.0.11
+      '@types/react-router-dom': 5.3.3
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-helmet-async: 1.3.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react-loadable: '@docusaurus/react-loadable@6.0.0(react@18.2.0)'
+    transitivePeerDependencies:
+      - '@swc/core'
+      - esbuild
+      - supports-color
+      - uglify-js
+      - webpack-cli
+
   '@docusaurus/plugin-content-blog@2.4.3(@swc/core@1.4.17(@swc/helpers@0.5.8))(esbuild@0.17.19)(eslint@8.57.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.4)':
     dependencies:
       '@docusaurus/core': 2.4.3(@docusaurus/types@2.4.3(@swc/core@1.4.17(@swc/helpers@0.5.8))(esbuild@0.17.19)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@swc/core@1.4.17(@swc/helpers@0.5.8))(esbuild@0.17.19)(eslint@8.57.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.4)
@@ -13970,6 +14005,11 @@ snapshots:
       prop-types: 15.8.1
       react: 18.2.0
 
+  '@docusaurus/react-loadable@6.0.0(react@18.2.0)':
+    dependencies:
+      '@types/react': 18.2.75
+      react: 18.2.0
+
   '@docusaurus/theme-classic@2.4.3(@swc/core@1.4.17(@swc/helpers@0.5.8))(esbuild@0.17.19)(eslint@8.57.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.4)':
     dependencies:
       '@docusaurus/core': 2.4.3(@docusaurus/types@2.4.3(@swc/core@1.4.17(@swc/helpers@0.5.8))(esbuild@0.17.19)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@swc/core@1.4.17(@swc/helpers@0.5.8))(esbuild@0.17.19)(eslint@8.57.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.4)
@@ -14122,6 +14162,26 @@ snapshots:
       - webpack-cli
 
   '@docusaurus/types@3.2.1(@swc/core@1.4.17(@swc/helpers@0.5.8))(esbuild@0.17.19)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      '@mdx-js/mdx': 3.0.1
+      '@types/history': 4.7.11
+      '@types/react': 18.2.75
+      commander: 5.1.0
+      joi: 17.12.3
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-helmet-async: 1.3.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      utility-types: 3.11.0
+      webpack: 5.91.0(@swc/core@1.4.17(@swc/helpers@0.5.8))(esbuild@0.17.19)
+      webpack-merge: 5.10.0
+    transitivePeerDependencies:
+      - '@swc/core'
+      - esbuild
+      - supports-color
+      - uglify-js
+      - webpack-cli
+
+  '@docusaurus/types@3.3.2(@swc/core@1.4.17(@swc/helpers@0.5.8))(esbuild@0.17.19)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@mdx-js/mdx': 3.0.1
       '@types/history': 4.7.11
