@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+    app:
+        image: git.lumeweb.com/lumeweb/web3.news:latest
+        volumes:
+            - ./data/app.db:/app/prisma/dev.db
+    bridge:
+        image: git.lumeweb.com/lumeweb/web3.news:latest
+        command: ["npm", "run", "bridge"]
+        volumes:
+            - ./data/app.db:/app/prisma/dev.db
+    melli:
+        image: getmeili/meilisearch:v1.5
+        volumes:
+            - ./melli_data:/meili_data
+    caddy:
+        image: iarekylew00t/caddy-cloudflare
+        command: caddy run --config=/etc/caddy/Caddyfile
+        env_file:
+            - .env
+        ports:
+            - "80:80"
+            - "443:443"
+            - "443:443/udp"
+        volumes:
+            - ./caddy/data/:/data
+            - ./caddy/config/Caddyfile:/etc/caddy/Caddyfile
+        cap_add:
+            - NET_ADMIN
+    melli_init:
+        image: git.lumeweb.com/lumeweb/web3.news:latest
+        command: ["npm", "run", "melli-init"]
+        volumes:
+            - ./data/app.db:/app/prisma/dev.db
+        profiles: ["disabled"]
+        depends_on:
+            - melli
+    db_init:
+        image: git.lumeweb.com/lumeweb/web3.news:latest
+        command: ["npm", "run", "db-init"]
+        volumes:
+            - ./data/app.db:/app/prisma/dev.db
+        profiles: ["disabled"]
