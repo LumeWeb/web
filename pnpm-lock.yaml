@@ -138,7 +138,7 @@ importers:
         version: 1.1.5(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@refinedev/react-table':
         specifier: ^5.6.8
-        version: 5.6.8(@refinedev/core@4.49.0(@tanstack/react-query@5.29.0(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@tanstack/react-table@8.15.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 5.6.8(@refinedev/core@4.49.0(@tanstack/react-query@5.29.0(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@tanstack/react-table@8.17.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@refinedev/remix-router':
         specifier: ^3.0.2
         version: 3.0.2(@refinedev/core@4.49.0(@tanstack/react-query@5.29.0(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@remix-run/node@2.8.1(typescript@5.4.4))(@remix-run/react@2.8.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.4))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(remix@2.8.1)
@@ -164,8 +164,8 @@ importers:
         specifier: ^5.28.6
         version: 5.29.0(react@18.2.0)
       '@tanstack/react-table':
-        specifier: ^8.13.2
-        version: 8.15.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^8.17.0
+        version: 8.17.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@types/react':
         specifier: 18.2.75
         version: 18.2.75
@@ -3958,8 +3958,8 @@ packages:
     peerDependencies:
       react: ^18.0.0
 
-  '@tanstack/react-table@8.15.3':
-    resolution: {integrity: sha512-aocQ4WpWiAh7R+yxNp+DGQYXeVACh5lv2kk96DjYgFiHDCB0cOFoYMT/pM6eDOzeMXR9AvPoLeumTgq8/0qX+w==}
+  '@tanstack/react-table@8.17.0':
+    resolution: {integrity: sha512-LSJxTDzlKGs8EN7/UHB1l3yLR9HUIxoHFkTbTjHaUUGL4kgYZFYhsQsdDJSIykG86qpIA/6gSWmtwNfy5Iprhw==}
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=16.8'
@@ -3971,8 +3971,8 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
 
-  '@tanstack/table-core@8.15.3':
-    resolution: {integrity: sha512-wOgV0HfEvuMOv8RlqdR9MdNNqq0uyvQtP39QOvGlggHvIObOE4exS+D5LGO8LZ3LUXxId2IlUKcHDHaGujWhUg==}
+  '@tanstack/table-core@8.16.0':
+    resolution: {integrity: sha512-dCG8vQGk4js5v88/k83tTedWOwjGnIyONrKpHpfmSJB8jwFHl8GSu1sBBxbtACVAPtAQgwNxl0rw1d3RqRM1Tg==}
     engines: {node: '>=12'}
 
   '@tanstack/virtual-core@3.2.0':
@@ -16607,7 +16607,7 @@ snapshots:
       '@headlessui/react': 1.7.18(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@ory/client': 1.9.0
       '@refinedev/devtools-shared': 1.1.5(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@tanstack/react-table': 8.15.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@tanstack/react-table': 8.17.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@types/react': 18.2.75
       '@types/react-dom': 18.2.14
       clsx: 1.2.1
@@ -16626,10 +16626,10 @@ snapshots:
       - encoding
       - react-native
 
-  '@refinedev/react-table@5.6.8(@refinedev/core@4.49.0(@tanstack/react-query@5.29.0(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@tanstack/react-table@8.15.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@refinedev/react-table@5.6.8(@refinedev/core@4.49.0(@tanstack/react-query@5.29.0(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@tanstack/react-table@8.17.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@refinedev/core': 4.49.0(@tanstack/react-query@5.29.0(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@tanstack/react-table': 8.15.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@tanstack/react-table': 8.17.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
@@ -17395,9 +17395,9 @@ snapshots:
       '@tanstack/query-core': 5.29.0
       react: 18.2.0
 
-  '@tanstack/react-table@8.15.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@tanstack/react-table@8.17.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@tanstack/table-core': 8.15.3
+      '@tanstack/table-core': 8.16.0
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
@@ -17407,7 +17407,7 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@tanstack/table-core@8.15.3': {}
+  '@tanstack/table-core@8.16.0': {}
 
   '@tanstack/virtual-core@3.2.0': {}
 
