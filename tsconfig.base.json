@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@lumeweb/libs5": ["libs/libs5/src/index.ts"],
+      "@lumeweb/libs5-encoding": ["libs/libs5-encoding/src/index.ts"],
       "@lumeweb/portal-dashboard/*": ["libs/portal-dashboard/src/*"],
       "@lumeweb/portal-sdk": ["libs/portal-sdk/src/index.ts"],
       "@lumeweb/s5-js": ["libs/s5-js/src/index.ts"]
