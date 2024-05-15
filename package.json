@@ -4,8 +4,8 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "build": "nx run-many -t build",
-    "build:changed": "nx affected -t build",
+    "build": "nx run-many -t test build",
+    "build:changed": "nx affected -t test build",
     "build:portal-dashboard": "nx run @lumeweb/portal-dashboard:build",
     "build:docs.lumeweb.com": "nx run @lumeweb/docs.lumeweb.com:build",
     "build:lumeweb.com": "nx run @lumeweb/lumeweb.com:build"
