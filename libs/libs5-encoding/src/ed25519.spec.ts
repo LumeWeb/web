@@ -1,7 +1,7 @@
 import { KeyPairEd25519 } from "./ed25519";
 import { ed25519 } from "@noble/curves/ed25519";
 import { concatBytes } from "@noble/hashes/utils";
-import { CID_HASH_TYPES } from "./bytes";
+import { CID_HASH_BYTES } from "./bytes";
 
 describe("KeyPairEd25519", () => {
   let keyPair: KeyPairEd25519;
@@ -14,7 +14,7 @@ describe("KeyPairEd25519", () => {
     keyPair = new KeyPairEd25519(bytes);
     publicKeyRaw = ed25519.getPublicKey(bytes);
     publicKey = concatBytes(
-      Uint8Array.from([CID_HASH_TYPES.ED25519]),
+      Uint8Array.from([CID_HASH_BYTES.TYPES.ED25519]),
       publicKeyRaw,
     );
   });
