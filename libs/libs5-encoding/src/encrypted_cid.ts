@@ -4,7 +4,7 @@ import { CID } from "./cid.js";
 import { CID_BYTES } from "./bytes";
 import { decodeEndian, encodeEndian } from "./util.js";
 
-export default class EncryptedCID extends Multibase {
+export class EncryptedCID extends Multibase {
   encryptedBlobHash: Multihash;
   originalCID: CID;
   encryptionAlgorithm: number;
