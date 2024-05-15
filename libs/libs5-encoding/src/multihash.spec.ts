@@ -1,12 +1,12 @@
 import { Multihash } from "./multihash";
-import { CID_HASH_TYPES, CID_TYPES } from "./bytes";
+import { CID_HASH_BYTES, CID_BYTES } from "./bytes";
 import { concatBytes, hexToBytes } from "@noble/hashes/utils";
 
 describe("Multihash", () => {
   const testCases = [
     {
       fullBytes: concatBytes(
-        Uint8Array.from([CID_HASH_TYPES.BLAKE3]),
+        Uint8Array.from([CID_HASH_BYTES.TYPES.BLAKE3]),
         hexToBytes(
           "479693009307376069d47e545e5963f08fa56d8378a11b25c560d7bf2af25b1a",
         ),
@@ -30,7 +30,7 @@ describe("Multihash", () => {
       const fullBytes = testCases[0].fullBytes;
       const multihash = new Multihash(fullBytes);
 
-      expect(multihash.functionType).toBe(CID_HASH_TYPES.BLAKE3);
+      expect(multihash.functionType).toBe(CID_HASH_BYTES.TYPES.BLAKE3);
     });
   });
 
@@ -83,7 +83,7 @@ describe("Multihash", () => {
 
     it("should return the decoded string for BRIDGE function type", () => {
       const fullBytes = new Uint8Array([
-        CID_TYPES.BRIDGE,
+        CID_BYTES.TYPES.BRIDGE,
         72,
         101,
         108,

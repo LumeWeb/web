@@ -1,7 +1,7 @@
 import { Multihash } from "./multihash";
 import { CID } from "./cid";
 import { equalBytes } from "@noble/curves/abstract/utils";
-import { CID_HASH_TYPES, CID_TYPES, REGISTRY_TYPES } from "./bytes";
+import { CID_BYTES, REGISTRY_BYTES, CID_HASH_BYTES } from "./bytes";
 import { concatBytes, hexToBytes } from "@noble/hashes/utils";
 import { ed25519 } from "@noble/curves/ed25519";
 import { signRegistryEntry } from "./registry";
@@ -19,12 +19,12 @@ describe("CID", () => {
     "261f479693009307376069d47e545e5963f08fa56d8378a11b25c560d7bf2af25b1a5fdf8f5b",
   );
   const rawCidRegistryBytes = concatBytes(
-    new Uint8Array([REGISTRY_TYPES.CID]),
+    new Uint8Array([REGISTRY_BYTES.TYPES.CID]),
     rawCidBytes,
   );
   const rawResolverCidBytes = concatBytes(
-    new Uint8Array([CID_TYPES.RESOLVER]),
-    new Uint8Array([CID_HASH_TYPES.BLAKE3]),
+    new Uint8Array([CID_BYTES.TYPES.RESOLVER]),
+    new Uint8Array([CID_HASH_BYTES.TYPES.BLAKE3]),
     rawHashBytes,
   );
 
@@ -35,7 +35,7 @@ describe("CID", () => {
   });
 
   test("can create a CID with valid type, hash, and size", () => {
-    const type = CID_TYPES.RAW;
+    const type = CID_BYTES.TYPES.RAW;
     const hash = new Multihash(rawHashBytes.slice());
     const size = rawHashSize;
     const cid = new CID(type, hash, size);
@@ -54,22 +54,22 @@ describe("CID", () => {
 
   test("can create a CID from a registry", () => {
     const cid = CID.fromRegistry(
-      concatBytes(new Uint8Array([REGISTRY_TYPES.CID]), rawCidBytes),
+      concatBytes(new Uint8Array([REGISTRY_BYTES.TYPES.CID]), rawCidBytes),
     );
 
-    expect(cid.type).toBe(CID_TYPES.RAW);
+    expect(cid.type).toBe(CID_BYTES.TYPES.RAW);
   });
 
   test("can create a CID from a signed registry entry", () => {
     const cid = CID.fromSignedRegistryEntry(registryEntry);
 
-    expect(cid.type).toBe(CID_TYPES.RESOLVER);
+    expect(cid.type).toBe(CID_BYTES.TYPES.RESOLVER);
   });
 
   test("can create a CID from a registry public key", () => {
     const cid = CID.fromRegistryPublicKey(registryEntry.pk);
 
-    expect(cid.type).toBe(CID_TYPES.RESOLVER);
+    expect(cid.type).toBe(CID_BYTES.TYPES.RESOLVER);
   });
 
   test("can verify a CID", () => {
@@ -81,7 +81,7 @@ describe("CID", () => {
     const size = 66;
     const cid = CID.fromBytes(rawCidBytes).copyWith({ size });
 
-    expect(cid.type).toBe(CID_TYPES.RAW);
+    expect(cid.type).toBe(CID_BYTES.TYPES.RAW);
     expect(cid.size).toBe(size);
   });
 

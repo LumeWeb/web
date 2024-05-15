@@ -6,3 +6,5 @@ export const TYPES = {
   ENCRYPTED_CID: 0x5e,
 };
 Object.freeze(TYPES);
+
+export const RECORD = 0x07;
