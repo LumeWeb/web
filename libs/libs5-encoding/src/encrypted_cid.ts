@@ -1,7 +1,7 @@
 import { Multibase } from "./multibase.js";
 import { Multihash } from "./multihash.js";
 import { CID } from "./cid.js";
-import { CID_TYPES } from "./bytes";
+import { CID_BYTES } from "./bytes";
 import { decodeEndian, encodeEndian } from "./util.js";
 
 export default class EncryptedCID extends Multibase {
@@ -34,7 +34,7 @@ export default class EncryptedCID extends Multibase {
   }
 
   static fromBytes(bytes: Uint8Array): EncryptedCID {
-    if (bytes[0] !== CID_TYPES.ENCRYPTED_DYNAMIC) {
+    if (bytes[0] !== CID_BYTES.TYPES.ENCRYPTED_DYNAMIC) {
       throw new Error(`Invalid CID type (${bytes[0]})`);
     }
 
@@ -54,7 +54,7 @@ export default class EncryptedCID extends Multibase {
 
   toBytes(): Uint8Array {
     const data = [
-      CID_TYPES.ENCRYPTED_STATIC,
+      CID_BYTES.TYPES.ENCRYPTED_STATIC,
       this.encryptionAlgorithm,
       this.chunkSizeAsPowerOf2,
       ...this.encryptedBlobHash.fullBytes,

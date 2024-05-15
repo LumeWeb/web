@@ -1,7 +1,7 @@
 import { base64url } from "multiformats/bases/base64";
 import { base32 } from "multiformats/bases/base32";
 import { equalBytes } from "@noble/curves/abstract/utils";
-import { CID_TYPES } from "./bytes";
+import { CID_BYTES } from "./bytes";
 
 export class Multihash {
   fullBytes: Uint8Array;
@@ -42,7 +42,7 @@ export class Multihash {
   }
 
   toString(): string {
-    return this.functionType === CID_TYPES.BRIDGE
+    return this.functionType === CID_BYTES.TYPES.BRIDGE
       ? new TextDecoder().decode(this.fullBytes)
       : this.toBase64Url();
   }

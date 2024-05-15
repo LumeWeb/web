@@ -1,6 +1,6 @@
 import { Multibase } from "./multibase";
 import { Multihash } from "./multihash";
-import { CID_TYPES, REGISTRY_TYPES } from "./bytes";
+import { CID_BYTES, REGISTRY_BYTES } from "./bytes";
 import { decodeEndian, encodeEndian } from "./util";
 import { concatBytes, equalBytes } from "@noble/curves/abstract/utils";
 import { hexToBytes } from "@noble/hashes/utils";
@@ -24,7 +24,7 @@ export class CID extends Multibase {
   }
 
   static fromRegistry(bytes: Uint8Array): CID {
-    if (!Object.values(REGISTRY_TYPES).includes(bytes[0])) {
+    if (!Object.values(REGISTRY_BYTES.TYPES).includes(bytes[0])) {
       throw new Error(`invalid registry type ${bytes[0]}`);
     }
 
@@ -42,19 +42,19 @@ export class CID extends Multibase {
   }
 
   static fromRegistryPublicKey(pubkey: string | Uint8Array): CID {
-    return CID.fromHash(pubkey, 0, CID_TYPES.RESOLVER);
+    return CID.fromHash(pubkey, 0, CID_BYTES.TYPES.RESOLVER);
   }
 
   static fromHash(
     bytes: string | Uint8Array,
     size: number,
-    type = CID_TYPES.RAW,
+    type = CID_BYTES.TYPES.RAW,
   ): CID {
     if (typeof bytes === "string") {
       bytes = hexToBytes(bytes);
     }
 
-    if (!Object.values(CID_TYPES).includes(type)) {
+    if (!Object.values(CID_BYTES.TYPES).includes(type)) {
       throw new Error(`invalid cid type ${type}`);
     }
 
@@ -77,7 +77,7 @@ export class CID extends Multibase {
 
   private static _init(bytes: Uint8Array): CID {
     const type = bytes[0];
-    if (type === CID_TYPES.BRIDGE) {
+    if (type === CID_BYTES.TYPES.BRIDGE) {
       return new CID(type, new Multihash(bytes));
     }
 
@@ -88,7 +88,7 @@ export class CID extends Multibase {
       size = decodeEndian(sizeBytes);
     }
 
-    if (!Object.values(CID_TYPES).includes(type)) {
+    if (!Object.values(CID_BYTES.TYPES).includes(type)) {
       throw new Error(`invalid cid type ${type}`);
     }
 
@@ -98,7 +98,7 @@ export class CID extends Multibase {
   copyWith({ size, type }: { type?: number; size?: number }): CID {
     type = type || this.type;
 
-    if (!Object.values(CID_TYPES).includes(type)) {
+    if (!Object.values(CID_BYTES.TYPES).includes(type)) {
       throw new Error(`invalid cid type ${type}`);
     }
 
@@ -106,9 +106,9 @@ export class CID extends Multibase {
   }
 
   toBytes(): Uint8Array {
-    if (this.type === CID_TYPES.BRIDGE) {
+    if (this.type === CID_BYTES.TYPES.BRIDGE) {
       return this.hash.fullBytes;
-    } else if (this.type === CID_TYPES.RAW) {
+    } else if (this.type === CID_BYTES.TYPES.RAW) {
       let sizeBytes = encodeEndian(this.size as number, 8);
 
       while (sizeBytes.length > 0 && sizeBytes[sizeBytes.length - 1] === 0) {
@@ -133,15 +133,18 @@ export class CID extends Multibase {
   }
 
   toRegistryEntry(): Uint8Array {
-    return concatBytes(Uint8Array.from([REGISTRY_TYPES.CID]), this.toBytes());
+    return concatBytes(
+      Uint8Array.from([REGISTRY_BYTES.TYPES.CID]),
+      this.toBytes(),
+    );
   }
 
   toRegistryCID(): Uint8Array {
-    return this.copyWith({ type: CID_TYPES.RESOLVER }).toBytes();
+    return this.copyWith({ type: CID_BYTES.TYPES.RESOLVER }).toBytes();
   }
 
   override toString(): string {
-    return this.type === CID_TYPES.BRIDGE
+    return this.type === CID_BYTES.TYPES.BRIDGE
       ? Buffer.from(this.hash.fullBytes).toString("utf8")
       : this.toBase58();
   }
