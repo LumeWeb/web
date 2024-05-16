@@ -19,7 +19,7 @@ export abstract class Multibase {
       }
       bytes = base32.decode(str);
     } else if (data[0] === "u") {
-      bytes = base64url.decode(data[0].toUpperCase() + data.substring(1));
+      bytes = base64url.decode(data);
     } else if (data[0] === ":") {
       bytes = utf8ToBytes(data);
     } else {
@@ -38,7 +38,7 @@ export abstract class Multibase {
   }
 
   toBase64Url(): string {
-    return `u${base64url.encode(this.toBytes()).substring(1)}`;
+    return `${base64url.encode(this.toBytes())}`;
   }
 
   toBase58(): string {
