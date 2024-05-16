@@ -1,7 +1,7 @@
 import { base58btc } from "multiformats/bases/base58";
 import { bytesToHex, hexToBytes, utf8ToBytes } from "@noble/hashes/utils";
 import { base32 } from "multiformats/bases/base32";
-import { base64urlpad } from "multiformats/bases/base64";
+import { base64url } from "multiformats/bases/base64";
 
 export abstract class Multibase {
   abstract toBytes(): Uint8Array;
@@ -19,7 +19,7 @@ export abstract class Multibase {
       }
       bytes = base32.decode(str);
     } else if (data[0] === "u") {
-      bytes = base64urlpad.decode(data[0].toUpperCase() + data.substring(1));
+      bytes = base64url.decode(data[0].toUpperCase() + data.substring(1));
     } else if (data[0] === ":") {
       bytes = utf8ToBytes(data);
     } else {
@@ -38,7 +38,7 @@ export abstract class Multibase {
   }
 
   toBase64Url(): string {
-    return `u${base64urlpad.encode(this.toBytes()).substring(1)}`;
+    return `u${base64url.encode(this.toBytes()).substring(1)}`;
   }
 
   toBase58(): string {
