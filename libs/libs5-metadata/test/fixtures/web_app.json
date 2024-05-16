@@ -1,0 +1,257 @@
+{
+  "type": "web_app",
+  "name": "web",
+  "tryFiles": [
+    "index.html"
+  ],
+  "errorPages": {
+    "404": "/404.html"
+  },
+  "paths": {
+    ".nojekyll": {
+      "cid": "uJh_DNRdxfkPcuDCWkyM_2u6EBElr0Gbu0aWu0QZUvp_XmUg",
+      "contentType": null
+    },
+    "404.html": {
+      "cid": "uJh999Ng_tTWPMEbePbRKZof5HeiiJngmVBh7gUrC3ngLjAoq",
+      "contentType": "text/html"
+    },
+    "FontAwesome/css/font-awesome.css": {
+      "cid": "uJh_M_h82B_m4J2q89FxU4w65HlI1--8jtVm3dAcWFiCwQhh5",
+      "contentType": "text/css"
+    },
+    "FontAwesome/fonts/FontAwesome.ttf": {
+      "cid": "uJh-29gvrgO3E6BtME5CtvLSHIx6flERr76pK2jXrgwKIq6yGAg",
+      "contentType": "application/x-font-ttf"
+    },
+    "FontAwesome/fonts/fontawesome-webfont.eot": {
+      "cid": "uJh8GI6QOtlnUy2BBPNF1_rL4j7SjAmES5IYP_3TNXAB-YW6HAg",
+      "contentType": "application/vnd.ms-fontobject"
+    },
+    "FontAwesome/fonts/fontawesome-webfont.svg": {
+      "cid": "uJh8-FX8_AihAVyprcTk0i1SvKn3ZfskOZj770fI2_8UHT9vHBg",
+      "contentType": "image/svg+xml"
+    },
+    "FontAwesome/fonts/fontawesome-webfont.ttf": {
+      "cid": "uJh-29gvrgO3E6BtME5CtvLSHIx6flERr76pK2jXrgwKIq6yGAg",
+      "contentType": "application/x-font-ttf"
+    },
+    "FontAwesome/fonts/fontawesome-webfont.woff": {
+      "cid": "uJh-EvJ3GDUONMdZifENOxC_-BaOjdUo-mW38NRjLxXMCNuh-AQ",
+      "contentType": "application/x-font-woff"
+    },
+    "FontAwesome/fonts/fontawesome-webfont.woff2": {
+      "cid": "uJh8HUcHcSbc2l_OpxhUOL0Ar_98EylsZ4xP6-u0Bt_4hCGgtAQ",
+      "contentType": "font/woff2"
+    },
+    "ayu-highlight.css": {
+      "cid": "uJh_BBS0byn7CHwK9kUP9EDG3PaaqNzE4Iuwh1TIjaAwufaED",
+      "contentType": "text/css"
+    },
+    "book.js": {
+      "cid": "uJh-TkrWLMe3rsSv25YWA84vpiGw7j1_9N-DjDUWnwMA7pAxj",
+      "contentType": "text/javascript"
+    },
+    "clipboard.min.js": {
+      "cid": "uJh_kBxqcztJ8FJHnSzazx-5ytgJFYzfQAWHe6k040wvRWAIq",
+      "contentType": "text/javascript"
+    },
+    "concepts/content-addressed-data.html": {
+      "cid": "uJh8wOjq44JQABX0fAKq7wDUWrFoVxBK3EZ4ZyjMOzsA-KgpH",
+      "contentType": "text/html"
+    },
+    "concepts/index.html": {
+      "cid": "uJh9pLJKkRpdBWlt7e_fVbOKTPbQtzCh_iABVxHGABrizlzEv",
+      "contentType": "text/html"
+    },
+    "concepts/peer-to-peer-network.html": {
+      "cid": "uJh9CaCY9_OKxvmSuEk0QlLgH49a92Vl4d4Y2eATCnsGPEac5",
+      "contentType": "text/html"
+    },
+    "concepts/registry.html": {
+      "cid": "uJh8iFI6fkaOYN6AG3AxbNzWhb3JrjCUgNRcyApN3BiXwJnw0",
+      "contentType": "text/html"
+    },
+    "css/chrome.css": {
+      "cid": "uJh_1Be20xtlkC2Xt5PiAq_KsTL6uHTpe57-aJgu88esilxEq",
+      "contentType": "text/css"
+    },
+    "css/general.css": {
+      "cid": "uJh8yfrMc6lxmDo-_C77H-jWkxwgToBr_XAmvtzhMtP5UsSUR",
+      "contentType": "text/css"
+    },
+    "css/print.css": {
+      "cid": "uJh976QhSYuKQm5dPbPvDNpO18UpsUomJn-8X8ae61X8RvvUC",
+      "contentType": "text/css"
+    },
+    "css/variables.css": {
+      "cid": "uJh_fAgKBRroMMKrWwNRwSpml6vh_FJObBRv6JgERqGEr3AAY",
+      "contentType": "text/css"
+    },
+    "elasticlunr.min.js": {
+      "cid": "uJh_BpIJeJ7hV2UYZMX0yjZC1tqhqhVZHdXtN83a9OFZuaYNG",
+      "contentType": "text/javascript"
+    },
+    "favicon.png": {
+      "cid": "uJh_5OT0gK218KjuSk2qAaZhWDDoLEyxyoDp2WeX7UKnJRS8W",
+      "contentType": "image/png"
+    },
+    "favicon.svg": {
+      "cid": "uJh9wwAN7mRAp5xp1gNh2MYElVvaIxo8SXGMNdXOxvSlv9isH",
+      "contentType": "image/svg+xml"
+    },
+    "fonts/OPEN-SANS-LICENSE.txt": {
+      "cid": "uJh-Dyzovz4KbYTjglbCDAWw03c36B7aNOHgnIsFPz4Ws5l4s",
+      "contentType": "text/plain"
+    },
+    "fonts/SOURCE-CODE-PRO-LICENSE.txt": {
+      "cid": "uJh9g1uChv94iJex9qSp0miZhG0dsihvYZmoDmRU2I1qOG7AR",
+      "contentType": "text/plain"
+    },
+    "fonts/fonts.css": {
+      "cid": "uJh8lzvS6ZHUOPdgUqL4pZMYwx18-1LHnUcLZD_hLapAoJyQO",
+      "contentType": "text/css"
+    },
+    "fonts/open-sans-v17-all-charsets-300.woff2": {
+      "cid": "uJh8P6ttpcyOrWOiPhOQIsxaOWKG05jnPzvuUaP6vGo4ADECt",
+      "contentType": "font/woff2"
+    },
+    "fonts/open-sans-v17-all-charsets-300italic.woff2": {
+      "cid": "uJh86sgHtF0QzpTk_rz02uICkCxwapdF7hiGvkYBpewUJNdCe",
+      "contentType": "font/woff2"
+    },
+    "fonts/open-sans-v17-all-charsets-600.woff2": {
+      "cid": "uJh-xsn_HW-SF6GLHvQc81-9uSUCSEGdalJTmmE0D9ANMdIiv",
+      "contentType": "font/woff2"
+    },
+    "fonts/open-sans-v17-all-charsets-600italic.woff2": {
+      "cid": "uJh_ONfCHHrkyEGWtfw6hojsJNBbGLW5xUKne3BueeqXN_oik",
+      "contentType": "font/woff2"
+    },
+    "fonts/open-sans-v17-all-charsets-700.woff2": {
+      "cid": "uJh9voO4iLK5W4_ucP_ZFRHeCboAg122x3Ylgd3JxizkcoLyv",
+      "contentType": "font/woff2"
+    },
+    "fonts/open-sans-v17-all-charsets-700italic.woff2": {
+      "cid": "uJh92FFWrhZ9pc06a6Y0rSid9x415zYgd9muPXODnBtFqlGCf",
+      "contentType": "font/woff2"
+    },
+    "fonts/open-sans-v17-all-charsets-800.woff2": {
+      "cid": "uJh8PMxxkzvfnSVr7CemKriubw1mjIv4D3PpCYH-TgNHb9fit",
+      "contentType": "font/woff2"
+    },
+    "fonts/open-sans-v17-all-charsets-800italic.woff2": {
+      "cid": "uJh-tjTL9pf5qIrGJ6hyVog5pBDhjKidi8I4OlJOKe9zmlmyf",
+      "contentType": "font/woff2"
+    },
+    "fonts/open-sans-v17-all-charsets-italic.woff2": {
+      "cid": "uJh_JZKjdaz_DYZKJpfzGYpUybkCiik53yZQB3f6ux7k4YHSg",
+      "contentType": "font/woff2"
+    },
+    "fonts/open-sans-v17-all-charsets-regular.woff2": {
+      "cid": "uJh86CThN35aD2OjVQlLIUUWtUIPa_xn39wXVlWcqD8HwIeSo",
+      "contentType": "font/woff2"
+    },
+    "fonts/source-code-pro-v11-all-charsets-500.woff2": {
+      "cid": "uJh_69C-IE9DktUDwkKiXwnzV7yLLoY2zZoO1hmrzz1JAnATn",
+      "contentType": "font/woff2"
+    },
+    "highlight.css": {
+      "cid": "uJh-9y3aKQZy37phJKMLvnH9A0q7v2E8Rr2fbCghoWmpP4K0E",
+      "contentType": "text/css"
+    },
+    "highlight.js": {
+      "cid": "uJh-LUv93t01qYGO2-1qZ4sa9_boKVw2wBaDl3FWUO62JIOIQAg",
+      "contentType": "text/javascript"
+    },
+    "index.html": {
+      "cid": "uJh_oll4cULUNfgd0pe_pq-cifdlVgLVgFrTZzv0Otx5lUgAu",
+      "contentType": "text/html"
+    },
+    "install/caddy.html": {
+      "cid": "uJh_7vEWUpxg4m7AJu-4rldjeJ_Si1EjkNA_I4vgSIjRX_Uwy",
+      "contentType": "text/html"
+    },
+    "install/config/index.html": {
+      "cid": "uJh-vFERg2iOoKh5ELsdRtwU5iH4TFWEgn9D40KgIQfbU9Sg2",
+      "contentType": "text/html"
+    },
+    "install/index.html": {
+      "cid": "uJh8GYnazHqYrp_b8qHA8wGfaTYpFCG68cwt1O_gdY5ZIXgg9",
+      "contentType": "text/html"
+    },
+    "mark.min.js": {
+      "cid": "uJh8AqaIgOLDy8tpyY6qIZ9ELpZNL6NKytLEO2ihNAO9-iahD",
+      "contentType": "text/javascript"
+    },
+    "metadata/directory.html": {
+      "cid": "uJh-Tnl5MTw0dy6y1TGPPU7qylSKn0OcG-QIrm7W_einNadku",
+      "contentType": "text/html"
+    },
+    "metadata/index.html": {
+      "cid": "uJh9VJYuxAudF65ApEfsbzysllxFtAQeQg399O7k-0JxA9xEx",
+      "contentType": "text/html"
+    },
+    "metadata/media.html": {
+      "cid": "uJh864pdmfnBlpHHEa8KrZSDy7l4oGALJYsrerv-L2GUPQIQv",
+      "contentType": "text/html"
+    },
+    "metadata/web-app.html": {
+      "cid": "uJh-Dyd8nDOh_7s_XGNLmrYq9UeLXel-oeKz_fkiQ97L-Fjox",
+      "contentType": "text/html"
+    },
+    "print.html": {
+      "cid": "uJh-jtbPI4rEW-kWjYu2-tZT17gBGoMyOYemdJWAJbCIYrvCc",
+      "contentType": "text/html"
+    },
+    "searcher.js": {
+      "cid": "uJh8Qa-ugWhb5VYtuHQ8PvExFNSC_KSrMJ12sRLcH0gaM3CpI",
+      "contentType": "text/javascript"
+    },
+    "searchindex.js": {
+      "cid": "uJh-SHxgLyg4tjwRhLjSyGkU6GWMaDWGtAakBlrSC_4Oa9kmaAw",
+      "contentType": "text/javascript"
+    },
+    "searchindex.json": {
+      "cid": "uJh-KzHML7Jw374DotB994AAKRCNJcpfJ5preJuy0wQA1bCqaAw",
+      "contentType": "application/json"
+    },
+    "stores/arweave.html": {
+      "cid": "uJh8ejPUBJyo1WA9u_-75kNDAJw7tviw8TIkPkVfQp08qHOIu",
+      "contentType": "text/html"
+    },
+    "stores/index.html": {
+      "cid": "uJh9KpaV_mEK9hm17lsPN0jq7M5D657FVQldsc1suTLG12R4w",
+      "contentType": "text/html"
+    },
+    "stores/local.html": {
+      "cid": "uJh__s-SqZLuen-Qk3o-r8IkBzACZmqfEDFWpW1I2hoQYKoIw",
+      "contentType": "text/html"
+    },
+    "stores/s3.html": {
+      "cid": "uJh8PwIVeCloJJYlQxI2MLOwKFO1oc50Ho0cXNHnHr2OYBPsv",
+      "contentType": "text/html"
+    },
+    "stores/sia.html": {
+      "cid": "uJh8D-zdXUFnxSc5O6Ggmk_7qdfLrK2qmPLUEr9lzMOzaXJY0",
+      "contentType": "text/html"
+    },
+    "tomorrow-night.css": {
+      "cid": "uJh9KIWHDZw2IFTRxks9TU8gMlT9ntFZMX11ZBMgSLfG8jZkG",
+      "contentType": "text/css"
+    },
+    "tools/cid-one.html": {
+      "cid": "uJh9h11sJXOGXUv24xrervCjaOQ4eR-x5w1k25MyNu64g05sx",
+      "contentType": "text/html"
+    },
+    "tools/index.html": {
+      "cid": "uJh8iU6yXW97HblRJAl9Y8NYk1gm3hqVWLjVRufQbJF6Jy64u",
+      "contentType": "text/html"
+    },
+    "tools/s5-cx.html": {
+      "cid": "uJh8Fnc6d3X15LvTNrcdQkz34a2Dd0NkzMdEoynHtoL_MnZQx",
+      "contentType": "text/html"
+    }
+  },
+  "extraMetadata": {}
+}
