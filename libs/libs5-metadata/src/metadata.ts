@@ -6,6 +6,7 @@ export interface IMetadata {
   encode(): Buffer;
   decode(data: Buffer): boolean;
   toJSON(): any;
+  fromJSON(json: any): this;
 }
 
 export type MetadataCtor<T extends IMetadata> = new (props?: any) => T;
