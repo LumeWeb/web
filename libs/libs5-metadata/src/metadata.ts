@@ -44,7 +44,11 @@ export class Metadata {
 
     const foundType = p.unpackInt();
 
-    if (!type || !Object.values(METADATA_BYTES.TYPES).includes(type)) {
+    if (!foundType) {
+      throw new Error("Invalid metadata type");
+    }
+
+    if (type && !Object.values(METADATA_BYTES.TYPES).includes(foundType)) {
       throw new Error("Invalid metadata type");
     }
 
@@ -52,6 +56,6 @@ export class Metadata {
       throw new Error("Metadata type mismatch");
     }
 
-    return type;
+    return foundType;
   }
 }
