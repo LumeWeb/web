@@ -1,6 +1,6 @@
 import { IMetadata, Metadata } from "./metadata";
 import { Extra } from "./extra";
-import { CID, METADATA_BYTES } from "@lumeweb/libs5-encoding";
+import { CID, METADATA_BYTES, Multihash } from "@lumeweb/libs5-encoding";
 import { Unpacker } from "./unpack";
 import { Packer } from "./pack";
 
@@ -185,7 +185,15 @@ export class WebAppFile implements IMetadata {
   public contentType: string;
   public cid: CID;
 
-  constructor({ contentType, cid }: WebAppFileConstructorParams) {
+  constructor(
+    {
+      contentType = "",
+      cid = new CID(0, new Multihash(new Uint8Array()), 0),
+    }: WebAppFileConstructorParams = {
+      contentType: "",
+      cid: new CID(0, new Multihash(new Uint8Array()), 0),
+    },
+  ) {
     this.contentType = contentType;
     this.cid = cid;
   }
