@@ -13,7 +13,8 @@ import {
 } from "@lumeweb/libs5-encoding";
 import { Unpacker } from "./unpack";
 import { OrderedSet } from "immutable";
-import { Packer } from "./pack";
+import { Packer, registerEncodeableClass } from "./pack";
+import { DirectoryDetails } from "libs/libs5-metadata/src/directory.js";
 
 interface MediaConstructorParams {
   name: string;
@@ -753,3 +754,6 @@ export class MediaFormat implements IMetadata, IChildMetadata {
     return this;
   }
 }
+
+registerEncodeableClass(MediaFormat);
+registerEncodeableClass(MediaLinks);

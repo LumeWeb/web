@@ -1,15 +1,19 @@
 import { Buffer } from "buffer";
 import { CID, NodeId } from "@lumeweb/libs5-encoding";
-import { MediaFormat, MediaLinks } from "./media";
-import {
-  DirectoryDetails,
-  DirectoryReference,
-  FileReference,
-  FileVersion,
-  FileVersionThumbnail,
-} from "./directory";
 import { OrderedMap, OrderedSet } from "immutable";
 import { IChildMetadata } from "libs/libs5-metadata/src/metadata.js";
+
+type EncodeableClass = new (...args: any[]) => IChildMetadata;
+
+const encodeableClasses = new Set<EncodeableClass>();
+
+export function registerEncodeableClass(cls: EncodeableClass) {
+  encodeableClasses.add(cls);
+}
+
+function isEncodeableClass(cls: any): cls is IChildMetadata {
+  return encodeableClasses.has(cls.constructor);
+}
 
 export class Packer {
   private _bufSize: number;
@@ -279,15 +283,7 @@ export class Packer {
       });
     } else if (OrderedSet.isOrderedSet(v)) {
       this.pack(v.toArray());
-    } else if (
-      v instanceof MediaFormat ||
-      v instanceof MediaLinks ||
-      v instanceof DirectoryReference ||
-      v instanceof DirectoryDetails ||
-      v instanceof FileReference ||
-      v instanceof FileVersion ||
-      v instanceof FileVersionThumbnail
-    ) {
+    } else if (isEncodeableClass(v)) {
       this.pack((v as IChildMetadata).encodeData());
     } else if (v instanceof CID) {
       this.pack(v.toBytes());
