@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "dependencies": {
     "tslib": "^2.3.0",
-    "@lumeweb/libs5-encoding": "^0.0.2"
+    "@lumeweb/libs5-encoding": "^0.0.2",
+    "immutable": "^4.3.6"
   },
   "type": "module",
   "main": "./src/index.js",
