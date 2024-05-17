@@ -1,5 +1,13 @@
 import { Buffer } from "buffer";
 import { CID, NodeId } from "@lumeweb/libs5-encoding";
+import { MediaFormat, MediaLinks } from "./media";
+import {
+  DirectoryReference,
+  FileReference,
+  FileVersion,
+  FileVersionThumbnail,
+} from "./directory";
+import { OrderedMap, OrderedSet } from "immutable";
 
 export class Packer {
   private _bufSize: number;
@@ -261,18 +269,33 @@ export class Packer {
         this.pack(key);
         this.pack(value);
       });
-    } /* else if (
+    } else if (OrderedMap.isOrderedMap(v)) {
+      this.packMapLength(v.size);
+      v.forEach((value, key) => {
+        this.pack(key);
+        this.pack(value);
+      });
+    } else if (OrderedSet.isOrderedSet(v)) {
+      this.pack(v.toArray());
+    } else if (
       v instanceof MediaFormat ||
+      v instanceof MediaLinks ||
       v instanceof DirectoryReference ||
       v instanceof FileReference ||
       v instanceof FileVersion ||
       v instanceof FileVersionThumbnail
     ) {
-      this.pack(v.encode());
-    }*/ else if (v instanceof CID) {
+      this.pack(v.encodeData());
+    } else if (v instanceof CID) {
       this.pack(v.toBytes());
     } else if (v instanceof NodeId) {
       this.pack(v.bytes);
+    } else if (typeof v === "object") {
+      this.packMapLength(Object.keys(v).length);
+      for (const [key, value] of Object.entries(v)) {
+        this.pack(key);
+        this.pack(value);
+      }
     } else {
       throw new Error(`Could not pack type: ${typeof v}`);
     }
