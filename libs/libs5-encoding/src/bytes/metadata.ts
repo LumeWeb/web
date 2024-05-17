@@ -7,4 +7,14 @@ export const TYPES = {
 };
 Object.freeze(TYPES);
 
+export const DETAILS = {
+  MEDIA: {
+    DURATION: 10,
+    IS_LIVE: 11,
+    WAS_LIVE: 12,
+  },
+};
+
+Object.freeze(DETAILS);
+
 export const MAGIC_BYTE = 0x5f;
