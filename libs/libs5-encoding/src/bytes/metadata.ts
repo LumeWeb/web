@@ -1,7 +1,10 @@
+import * as CID_BYTES from "./cid";
+
 export const TYPES = {
   MEDIA: 0x02,
   WEBAPP: 0x03,
-  DIRECTORY: 0x04,
+  DIRECTORY: CID_BYTES.TYPES.DIRECTORY,
+  DIRECTORY_LEGACY: 0x04,
   PROOF: 0x05,
   USER_IDENTITY: 0x07,
 };
