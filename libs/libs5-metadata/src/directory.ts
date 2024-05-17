@@ -15,7 +15,7 @@ import {
 import { CID } from "@lumeweb/libs5-encoding";
 import { Buffer } from "buffer";
 import { base64url } from "multiformats/bases/base64";
-import { Packer } from "./pack";
+import { Packer, registerEncodeableClass } from "./pack";
 
 interface DirectoryConstructorParams {
   details?: DirectoryDetails;
@@ -708,3 +708,9 @@ export class FileVersionThumbnail implements IMetadata, IChildMetadata {
     };
   }
 }
+
+registerEncodeableClass(DirectoryDetails);
+registerEncodeableClass(DirectoryReference);
+registerEncodeableClass(FileReference);
+registerEncodeableClass(FileVersion);
+registerEncodeableClass(FileVersionThumbnail);
