@@ -9,13 +9,15 @@ import { SignedRegistryEntry } from "./types";
 export class CID extends Multibase {
   type: number;
   hash: Multihash;
-  size?: number;
+  size: number = 0;
 
   constructor(type: number, hash: Multihash, size?: number) {
     super();
     this.type = type;
     this.hash = hash;
-    this.size = size;
+    if (size !== undefined) {
+      this.size = size;
+    }
   }
 
   static decode(cid: string): CID {
