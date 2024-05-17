@@ -59,3 +59,16 @@ export class Metadata {
     return foundType;
   }
 }
+
+export function maybeConvertObjectToIntMap(obj: object): Map<number, any> {
+  if (obj instanceof Map) {
+    return obj;
+  }
+
+  const map = new Map<number, any>();
+  for (const [key, value] of Object.entries(obj)) {
+    map.set(parseInt(key), value);
+  }
+
+  return map;
+}
