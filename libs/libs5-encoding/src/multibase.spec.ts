@@ -17,7 +17,7 @@ describe("Multibase", () => {
       base58: "z2VfUX",
       hex: "f01020304",
       base32: "baebagba",
-      base64url: "uAQIDBA==",
+      base64url: "uAQIDBA",
     },
   ];
 
