@@ -14,7 +14,6 @@ import {
 import { Unpacker } from "./unpack";
 import { OrderedSet } from "immutable";
 import { Packer, registerEncodeableClass } from "./pack";
-import { DirectoryDetails } from "libs/libs5-metadata/src/directory.js";
 
 interface MediaConstructorParams {
   name: string;

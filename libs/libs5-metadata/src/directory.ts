@@ -6,13 +6,12 @@ import {
 } from "./metadata";
 import { Unpacker } from "./unpack";
 import {
-  CID_BYTES,
+  CID,
   EncryptedCID,
   METADATA_BYTES,
   Multibase,
   Multihash,
 } from "@lumeweb/libs5-encoding";
-import { CID } from "@lumeweb/libs5-encoding";
 import { Buffer } from "buffer";
 import { base64url } from "multiformats/bases/base64";
 import { Packer, registerEncodeableClass } from "./pack";

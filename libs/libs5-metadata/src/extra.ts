@@ -1,6 +1,5 @@
 import { IMetadata } from "./metadata";
-import { CID } from "@lumeweb/libs5-encoding";
-import { METADATA_BYTES } from "@lumeweb/libs5-encoding";
+import { CID, METADATA_BYTES } from "@lumeweb/libs5-encoding";
 
 const IDS_TO_NAMES: Record<string, string> = {
   [METADATA_BYTES.EXTENSIONS.LICENSES]: "licenses",
