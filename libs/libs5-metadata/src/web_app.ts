@@ -212,4 +212,11 @@ export class WebAppFile implements IMetadata {
       contentType: this.contentType,
     };
   }
+
+  fromJSON(json: any): this {
+    this.cid = CID.decode(json.cid);
+    this.contentType = json.contentType;
+
+    return this;
+  }
 }
