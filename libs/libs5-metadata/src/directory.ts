@@ -1,4 +1,9 @@
-import { IMetadata, maybeConvertObjectToIntMap, Metadata } from "./metadata";
+import {
+  IChildMetadata,
+  IMetadata,
+  maybeConvertObjectToIntMap,
+  Metadata,
+} from "./metadata";
 import { Unpacker } from "./unpack";
 import {
   CID_BYTES,
@@ -165,7 +170,7 @@ interface DirectoryReferenceConstructorParams {
   size?: number;
 }
 
-export class DirectoryReference implements IMetadata {
+export class DirectoryReference implements IMetadata, IChildMetadata {
   public created: number;
   public name: string;
   public encryptedWriteKey: Uint8Array;
@@ -267,7 +272,7 @@ export class DirectoryReference implements IMetadata {
   }
 }
 
-export class DirectoryDetails implements IMetadata {
+export class DirectoryDetails implements IMetadata, IChildMetadata {
   public data!: Map<number, any>;
 
   constructor(data: Map<number, any> | object = {}) {
@@ -341,7 +346,7 @@ interface FileReferenceConstructorParams {
   mimeType?: string;
 }
 
-export class FileReference implements IMetadata {
+export class FileReference implements IMetadata, IChildMetadata {
   public name: string;
   public created: number;
   public version: number;
@@ -485,7 +490,7 @@ interface FileVersionConstructorParams {
   hashes?: Set<Multihash>;
 }
 
-export class FileVersion implements IMetadata {
+export class FileVersion implements IMetadata, IChildMetadata {
   public ts: number;
   public encryptedCID?: EncryptedCID;
   public plaintextCID?: CID;
@@ -623,7 +628,7 @@ interface FileVersionThumbnailConstructorParams {
   imageType?: string;
 }
 
-export class FileVersionThumbnail implements IMetadata {
+export class FileVersionThumbnail implements IMetadata, IChildMetadata {
   public aspectRatio: number;
   public cid: CID;
   public thumbhash: Uint8Array;

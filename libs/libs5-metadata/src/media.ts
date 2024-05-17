@@ -1,4 +1,9 @@
-import { IMetadata, maybeConvertObjectToIntMap, Metadata } from "./metadata";
+import {
+  IChildMetadata,
+  IMetadata,
+  maybeConvertObjectToIntMap,
+  Metadata,
+} from "./metadata";
 import { Extra } from "./extra";
 import {
   CID,
@@ -274,7 +279,7 @@ export class ParentLink implements IMetadata {
   }
 }
 
-export class MediaLinks implements IMetadata {
+export class MediaLinks implements IMetadata, IChildMetadata {
   public count: number;
   public head: OrderedSet<CID>;
   public collapsed?: OrderedSet<CID>;
@@ -480,7 +485,7 @@ interface MediaFormatConstructorParams {
   caption?: string;
 }
 
-export class MediaFormat implements IMetadata {
+export class MediaFormat implements IMetadata, IChildMetadata {
   public subtype: string;
   public role?: string;
   public ext?: string;

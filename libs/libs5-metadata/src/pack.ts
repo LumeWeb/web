@@ -9,6 +9,7 @@ import {
   FileVersionThumbnail,
 } from "./directory";
 import { OrderedMap, OrderedSet } from "immutable";
+import { IChildMetadata } from "libs/libs5-metadata/src/metadata.js";
 
 export class Packer {
   private _bufSize: number;
@@ -287,7 +288,7 @@ export class Packer {
       v instanceof FileVersion ||
       v instanceof FileVersionThumbnail
     ) {
-      this.pack(v.encodeData());
+      this.pack((v as IChildMetadata).encodeData());
     } else if (v instanceof CID) {
       this.pack(v.toBytes());
     } else if (v instanceof NodeId) {

@@ -8,6 +8,9 @@ export interface IMetadata {
   toJSON(): any;
   fromJSON(json: any): this;
 }
+export interface IChildMetadata {
+  encodeData(): Map<number, any>;
+}
 
 export type MetadataCtor<T extends IMetadata> = new (props?: any) => T;
 
