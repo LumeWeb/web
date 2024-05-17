@@ -3,8 +3,16 @@ import { IMetadata } from "./metadata";
 export class Extra implements IMetadata {
   public data: Map<number, any>;
 
-  constructor(data: Map<number, any> = new Map<number, any>()) {
-    this.data = data;
+  constructor(
+    data: Map<number, any> | Record<string, any> = new Map<number, any>(),
+  ) {
+    if (data instanceof Map) {
+      this.data = data;
+    } else {
+      this.data = new Map<number, any>(
+        Object.entries(data).map(([key, value]) => [Number(key), value]),
+      );
+    }
   }
 
   encode(): Buffer {
