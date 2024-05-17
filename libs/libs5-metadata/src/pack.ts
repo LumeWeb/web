@@ -2,6 +2,7 @@ import { Buffer } from "buffer";
 import { CID, NodeId } from "@lumeweb/libs5-encoding";
 import { MediaFormat, MediaLinks } from "./media";
 import {
+  DirectoryDetails,
   DirectoryReference,
   FileReference,
   FileVersion,
@@ -281,6 +282,7 @@ export class Packer {
       v instanceof MediaFormat ||
       v instanceof MediaLinks ||
       v instanceof DirectoryReference ||
+      v instanceof DirectoryDetails ||
       v instanceof FileReference ||
       v instanceof FileVersion ||
       v instanceof FileVersionThumbnail
