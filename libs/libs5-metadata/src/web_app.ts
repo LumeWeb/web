@@ -132,7 +132,43 @@ export class WebApp implements IMetadata {
   }
 
   toJSON(): any {
-    throw new Error("Method not implemented.");
+    return {
+      type: "web_app",
+      name: this.name,
+      tryFiles: this.tryFiles,
+      errorPages: Object.fromEntries(
+        Array.from(this.errorPages.entries()).map(([key, value]) => [
+          key.toString(),
+          value,
+        ]),
+      ),
+      paths: Object.fromEntries(
+        Array.from(this.paths.entries()).map(([key, value]) => [
+          key.toString(),
+          value.toJSON(),
+        ]),
+      ),
+      extraMetadata: this.extraMetadata.toJSON(),
+    };
+  }
+
+  fromJSON(json: any): this {
+    this.name = json.name;
+    this.tryFiles = json.tryFiles;
+    this.errorPages = new Map<number, string>(
+      Object.entries<string>(json.errorPages).map(([key, value]) => [
+        parseInt(key),
+        value,
+      ]),
+    );
+    this.paths = new Map<string, WebAppFile>(
+      Object.entries(json.paths).map(([key, value]) => {
+        return [key, new WebAppFile().fromJSON(value)];
+      }),
+    );
+    this.extraMetadata = new Extra(json.extraMetadata);
+
+    return this;
   }
 
   public static fromBuffer(encoded: Buffer): WebApp {
