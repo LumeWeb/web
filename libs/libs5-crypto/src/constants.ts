@@ -1,0 +1,3 @@
+export const ENCRYPTION_KEY_LENGTH = 32;
+export const ENCRYPTION_NONCE_LENGTH = 24;
+export const ENCRYPTION_OVERHEAD_LENGTH = 16;
