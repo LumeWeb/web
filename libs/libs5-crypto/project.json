@@ -1,0 +1,9 @@
+{
+  "name": "@lumeweb/libs5-crypto",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/libs5-crypto/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project libs5-crypto --web",
+  "targets": {}
+}
