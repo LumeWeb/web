@@ -61,6 +61,9 @@ dependencies:
   '@mdx-js/react':
     specifier: ^1.6.22
     version: 1.6.22(react@18.2.0)
+  '@noble/ciphers':
+    specifier: ^0.5.3
+    version: 0.5.3
   '@noble/curves':
     specifier: ^1.1.0
     version: 1.4.0
@@ -5055,7 +5058,6 @@ packages:
 
   /@noble/ciphers@0.5.3:
     resolution: {integrity: sha512-B0+6IIHiqEs3BPMT0hcRmHvEj2QHOLu+uwt+tqDDeVd0oyVzh7BPrDcPjRnV1PV/5LaknXJJQvOuRGR0zQJz+w==}
-    dev: true
 
   /@noble/curves@1.4.0:
     resolution: {integrity: sha512-p+4cb332SFCrReJkCYe8Xzm0OWi4Jji5jVdIZRL/PmacmDkFNw6MrrV+gGpiPxLHbV+zKFRywUWbaseT+tZRXg==}
