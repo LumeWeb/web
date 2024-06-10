@@ -156,7 +156,7 @@
     "@vitest/coverage-v8": "^1.0.4",
     "autoprefixer": "10.4.13",
     "bun": "^1.1.7",
-    "ed25519-keygen": "^0.6.0",
+    "ed25519-keygen": "^0.6.2",
     "eslint": "~8.57.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "2.29.1",
