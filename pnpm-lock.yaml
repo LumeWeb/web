@@ -427,8 +427,8 @@ devDependencies:
     specifier: ^1.1.7
     version: 1.1.8
   ed25519-keygen:
-    specifier: ^0.6.0
-    version: 0.6.1
+    specifier: ^0.6.2
+    version: 0.6.2
   eslint-config-prettier:
     specifier: ^9.0.0
     version: 9.1.0(eslint@8.57.0)
@@ -13477,14 +13477,15 @@ packages:
     dependencies:
       safe-buffer: 5.2.1
 
-  /ed25519-keygen@0.6.1:
-    resolution: {integrity: sha512-seBWk/syurtyRts6LC42KSeGVlaun+X5QnxMOScez+58rw5F1X7hTPg/jSp/iveFf/cBq4hITi+0a4FgFHBWCw==}
+  /ed25519-keygen@0.6.2:
+    resolution: {integrity: sha512-yBKOM6JQ1z2Sa0/tX0bCM/Q7R77abRuGMbfCEMhpb0xPKWCeHwzXmTNmcqGpcnVzdRqkno/DXZzLnx5QTIpu2g==}
+    deprecated: 'Switch to micro-key-producer: the package has been merged into it'
     dependencies:
       '@noble/ciphers': 0.5.3
       '@noble/curves': 1.4.0
       '@noble/hashes': 1.4.0
       '@scure/base': 1.1.6
-      micro-packed: 0.5.3
+      micro-packed: 0.6.3
     dev: true
 
   /ee-first@1.1.1:
@@ -18031,8 +18032,8 @@ packages:
     resolution: {integrity: sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==}
     engines: {node: '>= 0.6'}
 
-  /micro-packed@0.5.3:
-    resolution: {integrity: sha512-zWRoH+qUb/ZMp9gVZhexvRGCENDM5HEQF4sflqpdilUHWK2/zKR7/MT8GBctnTwbhNJwy1iuk5q6+TYP7/twYA==}
+  /micro-packed@0.6.3:
+    resolution: {integrity: sha512-VmVkyc7lIzAq/XCPFuLc/CwQ7Ehs5XDK3IwqsZHiBIDttAI9Gs7go6Lv4lNRuAIKrGKcRTtthFKUNyHS0S4wJQ==}
     dependencies:
       '@scure/base': 1.1.6
     dev: true
