@@ -218,8 +218,8 @@ dependencies:
     specifier: ^0.7.0
     version: 0.7.0
   clsx:
-    specifier: ^1.2.1
-    version: 1.2.1
+    specifier: ^2.1.1
+    version: 2.1.1
   cmdk:
     specifier: ^1.0.0
     version: 1.0.0(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)
