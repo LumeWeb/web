@@ -59,8 +59,8 @@ dependencies:
     specifier: 0.1.0-develop.1
     version: 0.1.0-develop.1
   '@mdx-js/react':
-    specifier: ^1.6.22
-    version: 1.6.22(react@18.2.0)
+    specifier: ^3.0.1
+    version: 3.0.1(@types/react@18.2.75)(react@18.2.0)
   '@noble/ciphers':
     specifier: ^0.5.3
     version: 0.5.3
@@ -5040,6 +5040,17 @@ packages:
     peerDependencies:
       react: ^16.13.1 || ^17.0.0
     dependencies:
+      react: 18.2.0
+    dev: false
+
+  /@mdx-js/react@3.0.1(@types/react@18.2.75)(react@18.2.0):
+    resolution: {integrity: sha512-9ZrPIU4MGf6et1m1ov3zKf+q9+deetI51zprKB1D/z3NOb+rUxxtEl3mCjW5wTGh6VhRdwPueh1oRzi6ezkA8A==}
+    peerDependencies:
+      '@types/react': '>=16'
+      react: '>=16'
+    dependencies:
+      '@types/mdx': 2.0.13
+      '@types/react': 18.2.75
       react: 18.2.0
     dev: false
 
