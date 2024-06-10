@@ -379,8 +379,8 @@ devDependencies:
     specifier: 18.2.3
     version: 18.2.3(patch_hash=p7a27ou2gur5m75ldckor3tn6e)(@swc-node/register@1.9.1)(@swc/core@1.4.17)(@types/node@20.12.7)(nx@18.2.3)(typescript@5.4.5)(verdaccio@5.31.0)(vite@5.2.11)(vitest@1.6.0)
   '@nx/workspace':
-    specifier: 18.2.3
-    version: 18.2.3(@swc-node/register@1.9.1)(@swc/core@1.4.17)
+    specifier: 19.2.3
+    version: 19.2.3(@swc-node/register@1.9.1)(@swc/core@1.4.17)
   '@remix-run/eslint-config':
     specifier: ^2.8.1
     version: 2.9.2(eslint@8.57.0)(react@18.2.0)(typescript@5.4.5)
@@ -5164,6 +5164,14 @@ packages:
       - nx
     dev: true
 
+  /@nrwl/devkit@19.2.3(nx@19.2.3):
+    resolution: {integrity: sha512-OL6sc70gR/USasvbYzyYY44Hd5ZCde2UfiA5h8VeAYAJbq+JmtscpvjcnZ7OIsXyYEOxe1rypULElqu/8qpKzQ==}
+    dependencies:
+      '@nx/devkit': 19.2.3(nx@19.2.3)
+    transitivePeerDependencies:
+      - nx
+    dev: true
+
   /@nrwl/eslint-plugin-nx@19.0.2(@swc-node/register@1.9.1)(@swc/core@1.4.17)(@types/node@20.12.7)(@typescript-eslint/parser@6.21.0)(eslint-config-prettier@9.1.0)(eslint@8.57.0)(nx@18.2.3)(typescript@5.4.5)(verdaccio@5.31.0):
     resolution: {integrity: sha512-T/01uFi6xAjbpU04kqiD+H4NNlZpuPiQbY8T3k/hn3/+2ePK1je09Z2ilsfWUcsH23p95yM4LMmFDTPlrRjwAw==}
     dependencies:
@@ -5305,6 +5313,18 @@ packages:
       - debug
     dev: true
 
+  /@nrwl/tao@19.2.3(@swc-node/register@1.9.1)(@swc/core@1.4.17):
+    resolution: {integrity: sha512-vwo6ogcy6A9vJggDOsHGi1F0cTRqSqRypbgq/EdNuZqL7rGyZB/ctId69/i8dV6cLkl8BJG/4WpEe5BIrMTsjA==}
+    hasBin: true
+    dependencies:
+      nx: 19.2.3(@swc-node/register@1.9.1)(@swc/core@1.4.17)
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - '@swc-node/register'
+      - '@swc/core'
+      - debug
+    dev: true
+
   /@nrwl/vite@18.2.3(@swc-node/register@1.9.1)(@swc/core@1.4.17)(@types/node@20.12.7)(nx@18.2.3)(typescript@5.4.5)(verdaccio@5.31.0)(vite@5.2.11)(vitest@1.6.0):
     resolution: {integrity: sha512-VSwJtKp9Tx0l2y/yWHaPYJvJ0I2xz1hkcV5efM3lFLT/rYuQPnTg7Y759lcyu1iLArdHQKdbEUV644YF7jbLZQ==}
     dependencies:
@@ -5362,6 +5382,16 @@ packages:
     resolution: {integrity: sha512-DtMbNhTpkcsDRn+pBiqFGUpZkBTzhbwQKRacwD2n+NqBFhCSCMoKYxsRnd5A874hiF3fyGB8AYEmuuTOxhATgg==}
     dependencies:
       '@nx/workspace': 19.0.2(@swc-node/register@1.9.1)(@swc/core@1.4.17)
+    transitivePeerDependencies:
+      - '@swc-node/register'
+      - '@swc/core'
+      - debug
+    dev: true
+
+  /@nrwl/workspace@19.2.3(@swc-node/register@1.9.1)(@swc/core@1.4.17):
+    resolution: {integrity: sha512-pqT2UDk3DjB+Ny+1Av22vZ4NIYpwRbfPHR9tm4Skxs7dSr5zlf3ChUl+MwrQhzvM3KhBoGEmHhQOR6n45Bo4Sg==}
+    dependencies:
+      '@nx/workspace': 19.2.3(@swc-node/register@1.9.1)(@swc/core@1.4.17)
     transitivePeerDependencies:
       - '@swc-node/register'
       - '@swc/core'
@@ -5441,6 +5471,23 @@ packages:
       ignore: 5.3.1
       minimatch: 9.0.3
       nx: 19.0.2(@swc-node/register@1.9.1)(@swc/core@1.4.17)
+      semver: 7.6.2
+      tmp: 0.2.3
+      tslib: 2.6.2
+      yargs-parser: 21.1.1
+    dev: true
+
+  /@nx/devkit@19.2.3(nx@19.2.3):
+    resolution: {integrity: sha512-if1WwRVexrQBBADObEcxVIivq4QRZWY/nYRhCQy/qfFI6Cu2jBSI6ZQ1uy7to2L2sQPLgn8v2beQZiAeZdIktg==}
+    peerDependencies:
+      nx: '>= 17 <= 20'
+    dependencies:
+      '@nrwl/devkit': 19.2.3(nx@19.2.3)
+      ejs: 3.1.10
+      enquirer: 2.3.6
+      ignore: 5.3.1
+      minimatch: 9.0.3
+      nx: 19.2.3(@swc-node/register@1.9.1)(@swc/core@1.4.17)
       semver: 7.6.2
       tmp: 0.2.3
       tslib: 2.6.2
@@ -5743,6 +5790,15 @@ packages:
     dev: true
     optional: true
 
+  /@nx/nx-darwin-arm64@19.2.3:
+    resolution: {integrity: sha512-1beJscdMraGgLHpvjyC5FXUzpdQYW8JwnPK0Yj9iti9Vnahtx3PLQHCFOFwoE0KZF9VEL1KsZSSVPljMgW/j+g==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [darwin]
+    requiresBuild: true
+    dev: true
+    optional: true
+
   /@nx/nx-darwin-x64@18.2.3:
     resolution: {integrity: sha512-UsBbNbNXj+L2OzPyQYotyzmZF4h+ryaZ8quYDfdnlYwvFeqkdb2QJ3vJRd6in0kMWGrdk/ria/wZMCxR7U1ggg==}
     engines: {node: '>= 10'}
@@ -5761,6 +5817,15 @@ packages:
 
   /@nx/nx-darwin-x64@19.0.2:
     resolution: {integrity: sha512-qfj3AJ/RCbEps+Evbycrf1qUQk/zkwX5NT80dgK/r9eGBbo3qOA3VLa1z0PtaaJaYhZxZkjhwXOqhqAjDNN8bw==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [darwin]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@nx/nx-darwin-x64@19.2.3:
+    resolution: {integrity: sha512-wCpIRThGKL/FebPe+WaFk/V6nk31mMc83APoEyhyS5kAodqeKjb6iPud+QNydtUJ/jsF9aQ/DaHIioKC9wbg8A==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
@@ -5793,6 +5858,15 @@ packages:
     dev: true
     optional: true
 
+  /@nx/nx-freebsd-x64@19.2.3:
+    resolution: {integrity: sha512-ytY18USCyf83wqyUgFaeRO/3zvysJXPJf1Di8czBhiUSroSMB6088OaeqW7SnzdcYNdACZUv0Q6PupXpx3w2Ng==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [freebsd]
+    requiresBuild: true
+    dev: true
+    optional: true
+
   /@nx/nx-linux-arm-gnueabihf@18.2.3:
     resolution: {integrity: sha512-ekqr5jZhD6PxGM5IbI/RtlERDJ+8HR04OIdfo6HkbwxwCHxZlzZq+ApEZYum4AbjP6cuc3Zd/us1uuDqfQbeHw==}
     engines: {node: '>= 10'}
@@ -5811,6 +5885,15 @@ packages:
 
   /@nx/nx-linux-arm-gnueabihf@19.0.2:
     resolution: {integrity: sha512-0IW/gYZo5toGjjrqKL4SqV2twfkVDfMpx6M4BxwJlYEzzl+gtF0VrWfhVU3r4p2YZV8yW3cmH9SNChB6YZgQmA==}
+    engines: {node: '>= 10'}
+    cpu: [arm]
+    os: [linux]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@nx/nx-linux-arm-gnueabihf@19.2.3:
+    resolution: {integrity: sha512-FPtqIMzdOzYSSDnLXUpcrflqEsNe6UgpAgYoHLVbWiR47O3qJnpQRDfYUsP7Lv+2C0CBKNXgwPEvmDLXKHcfYg==}
     engines: {node: '>= 10'}
     cpu: [arm]
     os: [linux]
@@ -5843,6 +5926,15 @@ packages:
     dev: true
     optional: true
 
+  /@nx/nx-linux-arm64-gnu@19.2.3:
+    resolution: {integrity: sha512-VOuzPD5FBPZmctvXqdB9K1MYVzkV8TgOZFS7Md6ClH7UwJTEOjnMoomYCMM1VlOZV4P0S5E0u/Zere5YWh+ZWw==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    requiresBuild: true
+    dev: true
+    optional: true
+
   /@nx/nx-linux-arm64-musl@18.2.3:
     resolution: {integrity: sha512-AJjGVHGGew0QVKUL30mjFjafowrSDYSQ1GgkJCLuWef5jl4rFvm9ruZswVja1KfZTFaImTCU01tZjPBr3zhmAA==}
     engines: {node: '>= 10'}
@@ -5861,6 +5953,15 @@ packages:
 
   /@nx/nx-linux-arm64-musl@19.0.2:
     resolution: {integrity: sha512-hmQ6evq9S5a/svQOwpRF5Zcu114A9jpeDKEBysFmbdV1eTFkrxlnvSCs/xXOeYOe/QS8Ijl50d7+1zkOE2HVMA==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@nx/nx-linux-arm64-musl@19.2.3:
+    resolution: {integrity: sha512-qd6QZysktt0D7rNCOlBaV3ME0/J0VwvC1cmdjtZoljwtsX6Zc56AEdfwsgGzsZNU4w+N+BtXxowan3D44iiSzQ==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
@@ -5893,6 +5994,15 @@ packages:
     dev: true
     optional: true
 
+  /@nx/nx-linux-x64-gnu@19.2.3:
+    resolution: {integrity: sha512-wE08BstTD65dt6c+9L9bEp98PxFwc7CuaUVX2cZTDFAERBXCMhu7y6Gb1JbiAvfVci4+yLrm+h0E1ieY1wMTXw==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: true
+    optional: true
+
   /@nx/nx-linux-x64-musl@18.2.3:
     resolution: {integrity: sha512-bOlhul/eov58k9fX8lltopUDOIBEohZq2qc4ag91W2r4jdp6suAiqfXRxQwNZ2iHd8nAXuCDIHCbUuojs6OZnA==}
     engines: {node: '>= 10'}
@@ -5911,6 +6021,15 @@ packages:
 
   /@nx/nx-linux-x64-musl@19.0.2:
     resolution: {integrity: sha512-72hT2V9IQNMIrC7sBzllrHEnoJOhuPxKXJTUYzz4v/Y11t1ziTHflGXO9nJOpydh8vA+91dPVrDM5mWr6IEPzg==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@nx/nx-linux-x64-musl@19.2.3:
+    resolution: {integrity: sha512-IA09+NZ0kKPSfK/dXsyjZ8TN+hN/1PcnbdNuUCn1Opmbrdda9GBfzHSDFKXxoA6TVB/j/qnXHKgKxhhVH05TGg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
@@ -5943,6 +6062,15 @@ packages:
     dev: true
     optional: true
 
+  /@nx/nx-win32-arm64-msvc@19.2.3:
+    resolution: {integrity: sha512-fkbcTp+XuxGaL5e4Ve8AjxNEim5Ifdn61ofaxEDMoGjauKvKZBejbLhBFOonCKDqntXsY8D2nDXjhcsdNYxzMg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [win32]
+    requiresBuild: true
+    dev: true
+    optional: true
+
   /@nx/nx-win32-x64-msvc@18.2.3:
     resolution: {integrity: sha512-BgzPjF/wqi7zIFcspcKzN37BX1wgGo0OTLncK2PN5nyzSQ+XeNbR5laDswxzOGdB4CRLPqak2+YMhYnoiXeRCg==}
     engines: {node: '>= 10'}
@@ -5961,6 +6089,15 @@ packages:
 
   /@nx/nx-win32-x64-msvc@19.0.2:
     resolution: {integrity: sha512-lgxgj+ilhL9StCLzRxU+EB1n944bMjwbU3CxvYW2TYa+380UXVMUACjbLyzONQPeJPIm9azaVQNKnf5+c+nnBQ==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@nx/nx-win32-x64-msvc@19.2.3:
+    resolution: {integrity: sha512-E2q3c504xjFXTY+/iq57DOZmS6CPA8RbFwLf6bCG5wo2BDajxmvU3VCeCSkxqXEwCY7NJSI3PT1V/3vRDzJ3lQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
@@ -6111,6 +6248,22 @@ packages:
       chalk: 4.1.2
       enquirer: 2.3.6
       nx: 19.0.2(@swc-node/register@1.9.1)(@swc/core@1.4.17)
+      tslib: 2.6.2
+      yargs-parser: 21.1.1
+    transitivePeerDependencies:
+      - '@swc-node/register'
+      - '@swc/core'
+      - debug
+    dev: true
+
+  /@nx/workspace@19.2.3(@swc-node/register@1.9.1)(@swc/core@1.4.17):
+    resolution: {integrity: sha512-LC3CxKDzoLqRGNwVD1wWkxGwCBf9AzyCztXyMIh1ihVL2hLnRna3pLJrk+3R2hXYapRsbhpGT7twLlNZJz9lQw==}
+    dependencies:
+      '@nrwl/workspace': 19.2.3(@swc-node/register@1.9.1)(@swc/core@1.4.17)
+      '@nx/devkit': 19.2.3(nx@19.2.3)
+      chalk: 4.1.2
+      enquirer: 2.3.6
+      nx: 19.2.3(@swc-node/register@1.9.1)(@swc/core@1.4.17)
       tslib: 2.6.2
       yargs-parser: 21.1.1
     transitivePeerDependencies:
@@ -10618,6 +10771,13 @@ packages:
     dependencies:
       argparse: 2.0.1
 
+  /@zkochan/js-yaml@0.0.7:
+    resolution: {integrity: sha512-nrUSn7hzt7J6JWgWGz78ZYI8wj+gdIJdk0Ynjpp8l+trkn58Uqsf6RYrYkEK+3X18EX+TNdtJI0WxAtc+L84SQ==}
+    hasBin: true
+    dependencies:
+      argparse: 2.0.1
+    dev: true
+
   /@zxing/text-encoding@0.9.0:
     resolution: {integrity: sha512-U/4aVJ2mxI0aDNI8Uq0wEhMgY+u4CNtEb0om3+y3+niDAsoTCOB33UF0sxpzqzdqXLqmvc+vZyAt4O8pPdfkwA==}
     requiresBuild: true
@@ -15078,6 +15238,12 @@ packages:
     resolution: {integrity: sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q==}
     engines: {node: '>= 0.6'}
 
+  /front-matter@4.0.2:
+    resolution: {integrity: sha512-I8ZuJ/qG92NWX8i5x1Y8qyj3vizhXS31OxjKDu3LKP+7/qBgfIKValiZIEwoVoJKUHlhWtYrktkxV1XsX+pPlg==}
+    dependencies:
+      js-yaml: 3.14.1
+    dev: true
+
   /fs-constants@1.0.0:
     resolution: {integrity: sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow==}
 
@@ -19430,6 +19596,70 @@ packages:
       '@nx/nx-linux-x64-musl': 19.0.2
       '@nx/nx-win32-arm64-msvc': 19.0.2
       '@nx/nx-win32-x64-msvc': 19.0.2
+    transitivePeerDependencies:
+      - debug
+    dev: true
+
+  /nx@19.2.3(@swc-node/register@1.9.1)(@swc/core@1.4.17):
+    resolution: {integrity: sha512-SvxFgk9PD2m6tXEaqB6DENOpe4jhov/Ili/2JmOnPAAIGUR6H9WajCzVuHfq3bvQxmGRvkQQRv/rfvAuLTme3g==}
+    hasBin: true
+    requiresBuild: true
+    peerDependencies:
+      '@swc-node/register': ^1.8.0
+      '@swc/core': ^1.3.85
+    peerDependenciesMeta:
+      '@swc-node/register':
+        optional: true
+      '@swc/core':
+        optional: true
+    dependencies:
+      '@nrwl/tao': 19.2.3(@swc-node/register@1.9.1)(@swc/core@1.4.17)
+      '@swc-node/register': 1.9.1(@swc/core@1.4.17)(@swc/types@0.1.7)(typescript@5.4.5)
+      '@swc/core': 1.4.17(@swc/helpers@0.5.11)
+      '@yarnpkg/lockfile': 1.1.0
+      '@yarnpkg/parsers': 3.0.0-rc.46
+      '@zkochan/js-yaml': 0.0.7
+      axios: 1.6.8
+      chalk: 4.1.2
+      cli-cursor: 3.1.0
+      cli-spinners: 2.6.1
+      cliui: 8.0.1
+      dotenv: 16.3.2
+      dotenv-expand: 10.0.0
+      enquirer: 2.3.6
+      figures: 3.2.0
+      flat: 5.0.2
+      front-matter: 4.0.2
+      fs-extra: 11.2.0
+      ignore: 5.3.1
+      jest-diff: 29.7.0
+      jsonc-parser: 3.2.0
+      lines-and-columns: 2.0.4
+      minimatch: 9.0.3
+      node-machine-id: 1.1.12
+      npm-run-path: 4.0.1
+      open: 8.4.2
+      ora: 5.3.0
+      semver: 7.6.2
+      string-width: 4.2.3
+      strong-log-transformer: 2.1.0
+      tar-stream: 2.2.0
+      tmp: 0.2.3
+      tsconfig-paths: 4.2.0
+      tslib: 2.6.2
+      yargs: 17.7.2
+      yargs-parser: 21.1.1
+    optionalDependencies:
+      '@nx/nx-darwin-arm64': 19.2.3
+      '@nx/nx-darwin-x64': 19.2.3
+      '@nx/nx-freebsd-x64': 19.2.3
+      '@nx/nx-linux-arm-gnueabihf': 19.2.3
+      '@nx/nx-linux-arm64-gnu': 19.2.3
+      '@nx/nx-linux-arm64-musl': 19.2.3
+      '@nx/nx-linux-x64-gnu': 19.2.3
+      '@nx/nx-linux-x64-musl': 19.2.3
+      '@nx/nx-win32-arm64-msvc': 19.2.3
+      '@nx/nx-win32-x64-msvc': 19.2.3
     transitivePeerDependencies:
       - debug
     dev: true
