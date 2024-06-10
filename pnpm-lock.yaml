@@ -140,8 +140,8 @@ dependencies:
     specifier: ^5.6.8
     version: 5.6.10(@refinedev/core@4.49.2)(@tanstack/react-table@8.17.3)(react-dom@18.2.0)(react@18.2.0)
   '@refinedev/remix-router':
-    specifier: ^3.0.2
-    version: 3.0.4(@refinedev/core@4.49.2)(@remix-run/node@2.9.2)(@remix-run/react@2.9.2)(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)(remix@2.9.2)
+    specifier: ^3.0.6
+    version: 3.0.6(@refinedev/core@4.49.2)(@remix-run/node@2.9.2)(@remix-run/react@2.9.2)(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)(remix@2.9.2)
   '@remix-run/css-bundle':
     specifier: ^2.9.1
     version: 2.9.2
@@ -7483,8 +7483,8 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@refinedev/remix-router@3.0.4(@refinedev/core@4.49.2)(@remix-run/node@2.9.2)(@remix-run/react@2.9.2)(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)(remix@2.9.2):
-    resolution: {integrity: sha512-o1MoEeJjTerf5wtBcAFxTUHg4A1fopZRRW83TdSql/Xt6gdF2VGedI7h5Z2RikMH77IR3tXOQ4afSquZ5gS49g==}
+  /@refinedev/remix-router@3.0.6(@refinedev/core@4.49.2)(@remix-run/node@2.9.2)(@remix-run/react@2.9.2)(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)(remix@2.9.2):
+    resolution: {integrity: sha512-9yGkg8Mm5FW83n2kUFQzdKOLW2JTB69LS4+sSWZFbKKjnIjLEUxd4EVsWNaWGKX4vWlIepDfQr+WfTSK7QuihQ==}
     engines: {node: '>=10'}
     peerDependencies:
       '@refinedev/core': ^4.46.1
