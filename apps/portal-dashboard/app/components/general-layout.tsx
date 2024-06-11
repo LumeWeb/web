@@ -56,7 +56,7 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   return (
     <PinningProvider>
       {!identity?.verified ? (
-        <div className="bg-primary-1 text-primary-1-foreground p-4">
+        <div className="bg-secondary text-foreground p-4">
           We have sent you a verification email. Please click on the link in the
           email to start using the platform.
         </div>
@@ -64,7 +64,6 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
       <div className={"h-full flex flex-row"}>
         <header className="p-10 pr-0 flex flex-col w-[240px] h-full scroll-m-0 overflow-hidden">
           <img src={logoPng} alt="Lume logo" className="h-10 w-32" />
-
           <nav className="my-10 flex-1">
             <ul>
               <li>
@@ -96,8 +95,9 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
               </li>
             </ul>
           </nav>
-          <span className="text-primary-2 mb-3 -space-y-1 opacity-40">
-            <p>Freedom</p>
+          <span className="text-foreground/60 mb-3 space-y-1 ">
+            <p
+            >Freedom</p>
             <p>Privacy</p>
             <p>Ownership</p>
           </span>
@@ -116,12 +116,12 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
         <div className="flex-1 overflow-y-auto p-10">
           <div className="flex items-center gap-x-4 justify-end">
             <Button variant="ghost" className="rounded-full w-fit">
-              <ThemeIcon className="text-ring" />
+              <ThemeIcon className="text-foreground" />
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className="border rounded-full h-auto p-2 gap-x-2 text-ring font-semibold">
+                <Button className="border rounded-full h-auto p-2 gap-x-2 text-foreground font-semibold">
                   <Avatar className="bg-ring h-7 w-7 rounded-full" />
                   {`${identity?.firstName} ${identity?.lastName}`}
                   <ChevronDownIcon />
@@ -266,7 +266,7 @@ const UploadFileForm = () => {
         <Button
           type="submit"
           size={"lg"}
-          onClick={isValid ? upload : () => {}}
+          onClick={isValid ? upload : () => { }}
           className="mt-6"
           disabled={!isValid}>
           Upload
@@ -289,9 +289,8 @@ const UploadFileItem = ({
   return (
     <div className="flex flex-col w-full py-4 px-2 bg-primary-dark">
       <div
-        className={`flex items-center justify-between ${
-          failedState ? "text-red-500" : "text-primary-1"
-        }`}>
+        className={`flex items-center justify-between ${failedState ? "text-red-500" : "text-primary-1"
+          }`}>
         <div className="flex items-center">
           <div className="p-2">
             {file.progress?.uploadComplete ? (
@@ -354,7 +353,7 @@ const UploadFileItem = ({
         <div>
           <p className="text-sm text-primary-2 ml-2">{file.progress?.preprocess?.message ?? "Processing..."}</p>
           <Progress max={100} value={
-              file.progress?.preprocess?.value ?? 0} className="mt-2" />
+            file.progress?.preprocess?.value ?? 0} className="mt-2" />
         </div>
       ) : null}
       {file.progress?.uploadStarted && !file.progress.uploadComplete ? (
@@ -375,8 +374,8 @@ const NavigationButton = ({
     <Button
       variant="ghost"
       className={cn(
-        "justify-start h-14 w-full font-semibold",
-        active && "bg-secondary-1 text-secondary-1-foreground",
+        "justify-start h-14 w-full font-semibold text-foreground/70 hover:bg-secondary/80",
+        active && "bg-secondary-1 text-foreground hover:bg-secondary-1",
       )}>
       {children}
     </Button>

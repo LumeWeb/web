@@ -10,14 +10,14 @@ const ManagementCardAvatar = ({ src, button, onClick }: { src?: string; button?:
         <Avatar className="border-2 border-ring h-28 w-28" />
         {!button
           ? <Button
-              onClick={onClick}
-              variant="outline"
-              className="absolute bottom-0 right-0 z-50 flex items-center w-10 h-10 p-0 border-white rounded-full justiyf-center hover:bg-secondary-2">
-              <EditIcon />
-            </Button>
+            onClick={onClick}
+            variant="outline"
+            className="absolute bottom-0 right-0 z-50 flex items-center w-10 h-10 p-0 border-white rounded-full justify-center hover:bg-secondary-2">
+            <EditIcon />
+          </Button>
           : button
         }
-        
+
       </div>
     </div>
   );

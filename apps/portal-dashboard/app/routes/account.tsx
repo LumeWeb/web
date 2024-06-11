@@ -74,14 +74,14 @@ export default function MyAccount() {
             }
           }}
           open={isModalOpen}
-          >
+        >
           <UsageCard
             label="Usage"
             currentUsage={2}
             monthlyUsage={10}
             icon={<CloudIcon className="text-ring" />}
             button={
-              <Button variant="accent" className="gap-x-2 h-12">
+              <Button variant="accent" className="gap-x-2 h-12 text-foreground">
                 <AddIcon />
                 Upgrade to Premium
               </Button>
@@ -100,7 +100,7 @@ export default function MyAccount() {
                         setModal({ ...openModal, changeAvatar: true })
                       }
                       variant="outline"
-                      className=" flex items-center w-10 h-10 p-0 border-white rounded-full justiyf-center hover:bg-secondary-2">
+                      className=" flex items-center w-10 h-10 p-0 border-border rounded-full justify-center hover:bg-ring">
                       <EditIcon />
                     </Button>
                   </DialogTrigger>
@@ -109,7 +109,7 @@ export default function MyAccount() {
             </ManagementCard>
             <ManagementCard>
               <ManagementCardTitle>Email Address</ManagementCardTitle>
-              <ManagementCardContent className="text-ring font-semibold">
+              <ManagementCardContent className="text-foreground font-semibold">
                 {identity?.email}
               </ManagementCardContent>
               <ManagementCardFooter>
@@ -127,12 +127,12 @@ export default function MyAccount() {
             </ManagementCard>
             <ManagementCard>
               <ManagementCardTitle>Account Type</ManagementCardTitle>
-              <ManagementCardContent className="text-ring font-semibold flex gap-x-2">
+              <ManagementCardContent className="text-foreground font-semibold flex gap-x-2">
                 Lite Premium Account
                 <CrownIcon />
               </ManagementCardContent>
               <ManagementCardFooter>
-                <Button className="h-12 gap-x-2">
+                <Button className="h-12 gap-x-2 text-foreground">
                   <AddIcon />
                   Upgrade to Premium
                 </Button>
@@ -143,7 +143,9 @@ export default function MyAccount() {
           <div className="grid grid-cols-3 gap-x-8">
             <ManagementCard>
               <ManagementCardTitle>Password</ManagementCardTitle>
-              <ManagementCardContent>
+              <ManagementCardContent
+                className="text-foreground"
+              >
                 <PasswordDots className="mt-6" />
               </ManagementCardContent>
               <ManagementCardFooter>
@@ -163,7 +165,9 @@ export default function MyAccount() {
               <ManagementCardTitle>
                 Two-Factor Authentication
               </ManagementCardTitle>
-              <ManagementCardContent>
+              <ManagementCardContent
+                className="text-foreground"
+              >
                 Improve security by enabling 2FA.
               </ManagementCardContent>
               <ManagementCardFooter>
@@ -182,13 +186,15 @@ export default function MyAccount() {
           </div>
           <h2 className="font-bold my-8">More</h2>
           <div className="grid grid-cols-3 gap-x-8">
-            <ManagementCard variant="accent">
+            <ManagementCard>
               <ManagementCardTitle>Invite a Friend</ManagementCardTitle>
-              <ManagementCardContent>
+              <ManagementCardContent
+                className="text-foreground"
+              >
                 Get 1 GB per friend invited for free (max 5 GB).
               </ManagementCardContent>
               <ManagementCardFooter>
-                <Button variant="accent" className="h-12 gap-x-2">
+                <Button variant="accent" className="h-12 gap-x-2 text-foreground">
                   <AddIcon />
                   Send Invitation
                 </Button>
@@ -196,7 +202,9 @@ export default function MyAccount() {
             </ManagementCard>
             <ManagementCard>
               <ManagementCardTitle>Read our Resources</ManagementCardTitle>
-              <ManagementCardContent>
+              <ManagementCardContent
+                className="text-foreground"
+              >
                 Navigate helpful articles or get assistance.
               </ManagementCardContent>
               <ManagementCardFooter>
@@ -208,7 +216,9 @@ export default function MyAccount() {
             </ManagementCard>
             <ManagementCard>
               <ManagementCardTitle>Delete Account</ManagementCardTitle>
-              <ManagementCardContent>
+              <ManagementCardContent
+                className="text-foreground"
+              >
                 Once initiated, this action cannot be undone.
               </ManagementCardContent>
               <ManagementCardFooter>

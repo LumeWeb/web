@@ -62,7 +62,7 @@ export default function FileManager() {
               fullWidth
               leftIcon={<AddIcon />}
               placeholder="Search files by name or CID"
-              className="border-ring font-medium w-full grow h-12 flex-1 bg-primary-2/10"
+              className="border-ring font-medium w-full grow h-12 flex-1 bg-background"
             />
             {/* We dont yet have any functionality for selecting so im commenting this out */}
             {/* <Button className="h-12 gap-x-2">
