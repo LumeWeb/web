@@ -14,12 +14,12 @@ export const UsageCard = ({ label, monthlyUsage, currentUsage, icon, button }: U
     return (
         <div className="p-8 border rounded-lg w-full">
             <div className="flex items-center justify-between mb-8">
-                <div className="text-primary-2 text-sm">
-                    <div className="flex items-center gap-x-2 text-lg font-bold text-white mb-2">
+                <div className="text-foreground text-sm">
+                    <div className="flex items-center gap-x-2 text-lg font-bold text-foreground mb-2">
                         {icon}
                         {label}
                     </div>
-                    Montly {label.toLocaleLowerCase()} limit is {monthlyUsage} GB
+                    Monthly {label.toLocaleLowerCase()} limit is {monthlyUsage} GB
                 </div>
                 {!button ? (
                     <Button className="gap-x-2 h-12">
@@ -31,9 +31,9 @@ export const UsageCard = ({ label, monthlyUsage, currentUsage, icon, button }: U
                 )}
             </div>
             <Progress max={monthlyUsage} value={currentUsage} />
-            <div className="flex items-center justify-between mt-4 font-semibold text-sm">
-                <span className="text-primary-2">{currentUsage} GB used</span>
-                <span className="text-white">{monthlyUsage - currentUsage} GB left</span>
+            <div className="flex items-center justify-between mt-4 text-sm">
+                <span className="text-foreground">{currentUsage} GB used</span>
+                <span className="text-foreground">{monthlyUsage - currentUsage} GB left</span>
             </div>
         </div>
     )

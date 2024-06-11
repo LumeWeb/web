@@ -68,6 +68,9 @@ const config = {
           foreground: "hsl(var(--card-foreground))"
         }
       },
+      backgroundImage: {
+        "hero-pattern": "url('./images/lume-bg.png')"
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

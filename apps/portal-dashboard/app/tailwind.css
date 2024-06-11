@@ -1,78 +1,78 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
+    /* System Colors */
+    --system-color-1: 173 24% 7%; /* App background */
+    --system-color-2: 175 24% 9%; /* Subtle background */
+    --system-color-3: 174 55% 11%; /* UI element background */
+    --system-color-4: 176 93% 12%; /* Hovered UI element */
+    --system-color-5: 175 80% 16%; /* Active/selected UI element background */
+    --system-color-6: 174 63% 21%; /* Subtle borders and separators */
+    --system-color-7: 174 58% 26%; /* UI element border and focus */
+    --system-color-8: 173 59% 31%; /* Hovered UI element border */
+    --system-color-9: 174 80% 36%; /* Solid backgrounds */
+    --system-color-10: 172 85% 38%; /* Hovered solid background */
+    --system-color-11: 170 90% 45%; /* Low contrast text */
+    --system-color-12: 163 69% 81%; /* High contrast text */
 
-    --card: 0 0% 0%;
-    --card-foreground: 0 0% 3.9%;
- 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
- 
+    --background: var(--system-color-1);
+    --foreground: var(--system-color-12);
+
+    --card: var(--system-color-6);
+    --card-foreground: var(--system-color-11);
+
+    --popover: var(--system-color-3);
+    --popover-foreground: var(--system-color-11);
+
     --primary: 242 51% 14%;
     --primary-1: 241 90% 82%;
     --primary-2: 241 21% 42%;
     --primary-dark: 240 33% 4%;
     --primary-foreground: 0 0% 88%;
     --primary-1-foreground: 240 50% 9%;
- 
-    --secondary: 0 0% 96.1%;
-    --secondary-1: 242 52% 9%;
-    --secondary-foreground: 0 0% 9%;
-    --secondary-1-foreground: 0 0% 100%;
- 
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
- 
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
- 
+
+    --secondary: var(--system-color-3);
+    --secondary-1: var(--system-color-5);
+    --secondary-foreground: var(--system-color-11);
+    --secondary-1-foreground: var(--system-color-12);
+
+    --muted: var(--system-color-2);
+    --muted-foreground: var(--system-color-11);
+
+    --accent: var(--system-color-3);
+    --accent-foreground: var(--system-color-11);
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 72% 51%;
 
-    --border: 240 50% 17%;
-    --input: 240 50% 17%;
-    --input-placeholder: 241 21% 42%;
-    --ring: 241 90% 82%;
- 
-    --radius: 5px;
+    --border: var(--system-color-6);
+    --input: var(--system-color-2);
+    --input-placeholder: var(--system-color-6);
+    --ring: var(--system-color-4);
+
+    --radius: 6px;
   }
- 
+
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
- 
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
- 
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
- 
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
- 
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
- 
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
- 
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
- 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
- 
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    /* Dark Theme System Colors */
+    --system-color-1: 173 24% 7%;
+    --system-color-2: 175 24% 9%;
+    --system-color-3: 174 55% 11%;
+    --system-color-4: 176 93% 12%;
+    --system-color-5: 175 80% 16%;
+    --system-color-6: 174 63% 21%;
+    --system-color-7: 174 58% 26%;
+    --system-color-8: 173 59% 31%;
+    --system-color-9: 174 80% 36%;
+    --system-color-10: 172 85% 38%;
+    --system-color-11: 170 90% 45%;
+    --system-color-12: 163 69% 81%;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
