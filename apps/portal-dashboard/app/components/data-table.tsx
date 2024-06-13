@@ -1,4 +1,4 @@
-import { useMemo} from "react";
+import { useMemo } from "react";
 import type { BaseRecord } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import {
@@ -41,7 +41,7 @@ export function DataTable<TData extends BaseRecord, TValue>({
     getVisibleCells: () => columns.map(() => ({
       column: {
         columnDef: {
-          cell: <Skeleton className="h-4 w-full bg-primary-1/30" />,
+          cell: <Skeleton className="h-4 w-full bg-foreground/30" />,
         }
       },
       getContext: () => null
@@ -62,9 +62,9 @@ export function DataTable<TData extends BaseRecord, TValue>({
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 )
               })}
@@ -88,7 +88,7 @@ export function DataTable<TData extends BaseRecord, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell colSpan={columns.length} className="h-24 text-center text-foreground">
                 No results.
               </TableCell>
             </TableRow>
