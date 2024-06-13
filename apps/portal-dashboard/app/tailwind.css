@@ -28,30 +28,7 @@
 
     --popover: var(--system-color-2);
     --popover-foreground: var(--system-color-11);
-
-    /* System Colors */
-    --system-color-1: 173 24% 7%; /* App background */
-    --system-color-2: 175 24% 9%; /* Subtle background */
-    --system-color-3: 174 55% 11%; /* UI element background */
-    --system-color-4: 176 93% 12%; /* Hovered UI element */
-    --system-color-5: 175 80% 16%; /* Active/selected UI element background */
-    --system-color-6: 174 63% 21%; /* Subtle borders and separators */
-    --system-color-7: 174 58% 26%; /* UI element border and focus */
-    --system-color-8: 173 59% 31%; /* Hovered UI element border */
-    --system-color-9: 174 80% 36%; /* Solid backgrounds */
-    --system-color-10: 172 85% 38%; /* Hovered solid background */
-    --system-color-11: 170 90% 45%; /* Low contrast text */
-    --system-color-12: 163 69% 81%; /* High contrast text */
-
-    --background: var(--system-color-1);
-    --foreground: var(--system-color-12);
-
-    --card: var(--system-color-6);
-    --card-foreground: var(--system-color-11);
-
-    --popover: var(--system-color-3);
-    --popover-foreground: var(--system-color-11);
-
+    
     --primary: 242 51% 14%;
     --primary-1: 241 90% 82%;
     --primary-2: 241 21% 42%;
@@ -69,6 +46,7 @@
 
     --accent: var(--system-color-3);
     --accent-foreground: var(--system-color-11);
+
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 72% 51%;
