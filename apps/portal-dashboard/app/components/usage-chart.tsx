@@ -23,13 +23,19 @@ const accessors = {
 }
 
 const customTheme = buildChartTheme({
-  colors: ["hsl(var(--ring))"],
+  colors: ["hsl(var(--system-color-12))"],
   backgroundColor: "hsl(var(--primary-2))",
-  gridColor: "hsl(var(--primary-2))",
-  gridColorDark: "hsl(var(--primary-2))",
+  gridColor: "hsl(var(--system-color-12))",
+  gridColorDark: "hsl(var(--system-color-12))",
+  htmlLabel: {
+    color: "hsl(var(--system-color-12))",
+  },
   tickLength: 8,
+  yTickLineStyles: {
+    strokeWidth: 1,
+  },
   xAxisLineStyles: {
-    strokeWidth: 1
+    strokeWidth: 1,
   }
 })
 
@@ -38,14 +44,15 @@ export const UsageChart = ({ label, dataset }: UsageChartProps) => {
     <div className="p-8 border rounded-lg w-full">
       <div className="flex items-center justify-between">
         <span className="font-bold text-lg">{label}</span>
-        <InfoIcon className="text-ring" />
+        <InfoIcon className="text-foreground/50 cursor-pointer hover:text-foreground" />
       </div>
-      <div>
+      <div className="text-foreground">
         <XYChart
           height={400}
           xScale={{ type: "band" }}
           yScale={{ type: "linear" }}
           theme={customTheme}
+
         >
           <AnimatedAxis
             orientation="bottom"

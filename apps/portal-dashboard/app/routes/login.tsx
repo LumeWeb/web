@@ -5,7 +5,7 @@ import { Button } from "~/components/ui/button";
 import logoPng from "~/images/lume-logo.png?url";
 import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
 import discordLogoPng from "~/images/discord-logo.png?url";
-import lumeBgPng from "~/images/lume-bg-image.png?url";
+import lumeBgPng from "~/images/lume-bg-login.png?url";
 import { Field, FieldCheckbox } from "~/components/forms";
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
@@ -38,7 +38,7 @@ export default function Login() {
         <img
           src={lumeBgPng}
           alt="Lume background"
-          className="absolute top-0 right-0 md:w-2/3 object-cover z-[-1]"
+          className="absolute top-0 right-0 md:w-2/3 sm:h-full object-cover z-[-1]"
         />
       </div>
 

@@ -4,7 +4,7 @@ import { Button } from "~/components/ui/button"
 import logoPng from "~/images/lume-logo.png?url"
 import lumeColorLogoPng from "~/images/lume-color-logo.png?url"
 import discordLogoPng from "~/images/discord-logo.png?url"
-import lumeBgPng from "~/images/lume-bg-image.png?url"
+import lumeBgPng from "~/images/lume-bg-register.png?url"
 import { Field, FieldCheckbox } from "~/components/forms"
 import { getFormProps, useForm } from "@conform-to/react"
 import { z } from "zod"
@@ -78,7 +78,7 @@ export default function Register() {
           <p className="text-input-placeholder">
             🤘 Get 50 GB free storage and download for free,{" "}
             <b
-              className="text-primary-2">
+              className="text-foreground">
               forever
             </b>
             .{" "}
@@ -149,7 +149,7 @@ export default function Register() {
         <img
           src={lumeBgPng}
           alt="Lume background"
-          className="absolute top-0 right-0 md:w-2/3 object-cover z-[-1]"
+          className="absolute top-0 right-0 md:w-2/3 sm:h-full object-cover z-[-1]"
         />
       </div>
       <footer className="my-5">

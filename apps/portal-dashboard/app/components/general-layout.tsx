@@ -208,7 +208,7 @@ const UploadFileForm = () => {
       {!hasStarted ? (
         <div
           {...getRootProps()}
-          className="border border-border rounded text-primary-2 bg-primary-dark h-48 flex flex-col items-center justify-center">
+          className="border border-border rounded text-foreground bg-background/30 h-48 flex flex-col items-center justify-center">
           <input
             hidden
             aria-hidden
@@ -217,7 +217,7 @@ const UploadFileForm = () => {
             name="uppyFiles[]"
             {...inputProps}
           />
-          <CloudUploadIcon className="w-24 h-24 stroke stroke-primary-dark" />
+          <CloudUploadIcon className="w-24 h-24 stroke stroke-background" />
           <p>Drag & Drop Files or Browse</p>
         </div>
       ) : null}
@@ -285,26 +285,25 @@ const UploadFileItem = ({
   failedState?: FailedUppyFile<Record<string, any>, Record<string, any>>;
   onRemove: (id: string) => void;
 }) => {
-  console.log({ file: file.progress });
   return (
-    <div className="flex flex-col w-full py-4 px-2 bg-primary-dark">
+    <div className="flex flex-col w-full py-4 px-2 bg-secondary">
       <div
         className={`flex items-center justify-between ${failedState ? "text-red-500" : "text-primary-1"
           }`}>
         <div className="flex items-center">
           <div className="p-2">
             {file.progress?.uploadComplete ? (
-              <BoxCheckedIcon className="w-4 h-4" />
+              <BoxCheckedIcon className="w-4 h-4 " />
             ) : failedState?.error ? (
               <ExclamationCircleIcon className="w-4 h-4" />
             ) : (
-              <PageIcon className="w-4 h-4" />
+              <PageIcon className="w-4 h-4 text-foreground" />
             )}
           </div>
           <TooltipProvider>
             <Tooltip delayDuration={500}>
               <TooltipTrigger>
-                <p className="w-full flex justify-between items-center">
+                <p className="w-full flex justify-between items-center text-foreground">
                   <span className="truncate text-ellipsis max-w-[20ch]">
                     {file.name}
                   </span>{" "}
@@ -324,7 +323,7 @@ const UploadFileItem = ({
           variant={"ghost"}
           className="!text-inherit"
           onClick={() => onRemove(file.id)}>
-          <TrashIcon className="w-4 h-4" />
+          <TrashIcon className="w-4 h-4 text-foreground" />
         </Button>
       </div>
 
