@@ -50,7 +50,7 @@
     "@refinedev/cli": "^2.16.33",
     "@refinedev/core": "^4.49.0",
     "@refinedev/devtools-internal": "^1.1.7",
-    "@refinedev/devtools-shared": "^1.1.5",
+    "@refinedev/devtools-shared": "^1.1.9",
     "@refinedev/react-table": "^5.6.8",
     "@refinedev/remix-router": "^3.0.6",
     "@remix-run/css-bundle": "^2.9.1",
