@@ -125,8 +125,8 @@ dependencies:
     specifier: ^1.0.7
     version: 1.0.7(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)
   '@refinedev/cli':
-    specifier: ^2.16.29
-    version: 2.16.31(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^2.16.33
+    version: 2.16.33(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)
   '@refinedev/core':
     specifier: ^4.49.0
     version: 4.49.2(@tanstack/react-query@5.36.0)(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)
@@ -779,13 +779,6 @@ packages:
       '@types/json-schema': 7.0.15
     dev: false
 
-  /@babel/code-frame@7.24.2:
-    resolution: {integrity: sha512-y5+tLQyV8pg3fsiln67BVLD1P13Eg4lh5RW9mF0zUuvLrv9uIQ4MCL+CRT+FTsBlBjcIan6PGsLcBN0m3ClUyQ==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/highlight': 7.24.5
-      picocolors: 1.0.1
-
   /@babel/code-frame@7.24.7:
     resolution: {integrity: sha512-BcYH1CVJBO9tvyIZ2jVeXgSIMvGZ2FDRvDdOIVQyuklNKSsx+eppDEBq/g47Ayw+RqNFE+URvOShmf+f/qwAlA==}
     engines: {node: '>=6.9.0'}
@@ -1044,10 +1037,6 @@ packages:
     resolution: {integrity: sha512-2ofRCjnnA9y+wk8b9IAREroeUP02KHp431N2mhKniy2yKIDKpbrHv9eXwm8cBeWQYcJmzv5qKCu65P47eCF7CQ==}
     engines: {node: '>=6.9.0'}
 
-  /@babel/helper-validator-identifier@7.24.5:
-    resolution: {integrity: sha512-3q93SSKX2TWCG30M2G2kwaKeTYgEUp5Snjuj8qm729SObL6nbtUldAi37qbxkD5gg3xnBio+f9nqpSepGZMvxA==}
-    engines: {node: '>=6.9.0'}
-
   /@babel/helper-validator-identifier@7.24.7:
     resolution: {integrity: sha512-rR+PBcQ1SMQDDyF6X0wxtG8QyLCgUB0eRAGguqRLfkCA87l7yAP7ehq8SNj96OOGTO8OBV70KhuFYcIkHXOg0w==}
     engines: {node: '>=6.9.0'}
@@ -1073,15 +1062,6 @@ packages:
       '@babel/types': 7.24.5
     transitivePeerDependencies:
       - supports-color
-
-  /@babel/highlight@7.24.5:
-    resolution: {integrity: sha512-8lLmua6AVh/8SLJRRVD6V8p73Hir9w5mJrhE+IPpILG31KKlI9iz5zmBYKcWPS59qSfgP9RaSBQSHHE81WKuEw==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/helper-validator-identifier': 7.24.7
-      chalk: 2.4.2
-      js-tokens: 4.0.0
-      picocolors: 1.0.1
 
   /@babel/highlight@7.24.7:
     resolution: {integrity: sha512-EStJpq4OuY8xYfhGVXngigBJRWxftKX9ksiGDnmlY3o7B/V7KIAc9X4oiK87uPJSc/vs5L869bem5fhZa8caZw==}
@@ -1632,7 +1612,7 @@ packages:
       '@babel/helper-hoist-variables': 7.22.5
       '@babel/helper-module-transforms': 7.24.5(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
-      '@babel/helper-validator-identifier': 7.24.5
+      '@babel/helper-validator-identifier': 7.24.7
 
   /@babel/plugin-transform-modules-umd@7.24.1(@babel/core@7.24.5):
     resolution: {integrity: sha512-tuA3lpPj+5ITfcCluy6nWonSL7RvaG0AOTeAuvXqEKS34lnLzXpDb0dcP6K8jD0zWZFNDVly90AGFJPnm4fOYg==}
@@ -2165,7 +2145,7 @@ packages:
     resolution: {integrity: sha512-7aaBLeDQ4zYcUFDUD41lJc1fG8+5IU9DaNSJAgal866FGvmD5EbWQgnEC6kO1gGLsX0esNkfnJSndbTXA3r7UA==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      '@babel/code-frame': 7.24.2
+      '@babel/code-frame': 7.24.7
       '@babel/generator': 7.24.5
       '@babel/helper-environment-visitor': 7.22.20
       '@babel/helper-function-name': 7.23.0
@@ -2183,7 +2163,7 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/helper-string-parser': 7.24.1
-      '@babel/helper-validator-identifier': 7.24.5
+      '@babel/helper-validator-identifier': 7.24.7
       to-fast-properties: 2.0.0
 
   /@bcoe/v8-coverage@0.2.3:
@@ -7494,11 +7474,11 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@refinedev/cli@2.16.31(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-WF6yQcgV/wqaTFq7swWdwlxglbsNPqPW6kpTJXCLhx1m7mdL4+j2EKp5BZGmDZxkqiZ5FC3scxL+em3VrIftgQ==}
+  /@refinedev/cli@2.16.33(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-0Z6an6+Sw8dzWanwiHqjf9Rdw2i+tbCKWsjl8b2n4l0OnDhJvEclUconu+KTJ0fXFfMZALAvgo8LVeAXUe6KQw==}
     hasBin: true
     dependencies:
-      '@refinedev/devtools-server': 1.1.29(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)
+      '@refinedev/devtools-server': 1.1.31(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)
       boxen: 5.1.2
       cardinal: 2.1.1
       center-align: 1.0.1
@@ -7595,8 +7575,8 @@ packages:
       - react-native
     dev: false
 
-  /@refinedev/devtools-server@1.1.29(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-3IjFo6f6a06rlZkQCo1JOfB+Z415LsZYb/ruFbJeYA+ySbzUj2HX+/c9CpNEdeBzejTJxSiW4ie8buUlHelAGw==}
+  /@refinedev/devtools-server@1.1.31(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-BWmOJHXW4GDXrbzDOxQiTP+IcfO0CBgsxLrzlYJi5uKhlyEUpgu165mey7/PV5d8c/fUYF6bZL/QjweX723GRg==}
     engines: {node: '>=10'}
     hasBin: true
     peerDependencies:
@@ -7606,7 +7586,7 @@ packages:
       react-dom: ^17.0.0 || ^18.0.0
     dependencies:
       '@ory/client': 1.9.0
-      '@refinedev/devtools-shared': 1.1.7(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)
+      '@refinedev/devtools-shared': 1.1.9(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)
       '@types/react': 18.2.75
       '@types/react-dom': 18.2.14
       body-parser: 1.20.2
@@ -7643,6 +7623,25 @@ packages:
 
   /@refinedev/devtools-shared@1.1.7(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-03sXT9kMmwqHO1Zk2KqZag5b9rlZY4ymICumiCKdW1b4v+RSy8yqDiFMBfNJbXIaQ9srb1OC9wFTKizoFx9k4Q==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      '@types/react': ^17.0.0 || ^18.0.0
+      '@types/react-dom': ^17.0.0 || ^18.0.0
+      react: ^17.0.0 || ^18.0.0
+      react-dom: ^17.0.0 || ^18.0.0
+    dependencies:
+      '@tanstack/react-query': 4.36.1(react-dom@18.2.0)(react@18.2.0)
+      '@types/react': 18.2.75
+      '@types/react-dom': 18.2.14
+      error-stack-parser: 2.1.4
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    transitivePeerDependencies:
+      - react-native
+    dev: false
+
+  /@refinedev/devtools-shared@1.1.9(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-BBVvtffxSkSIFD5ii8OuvJ7I8rHG0Fui/3ZRejr8ssI9QmbG44TXg5npsHiLlVbRicMK4FJfIU4A71lfjwD6jw==}
     engines: {node: '>=10'}
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0
@@ -21382,7 +21381,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@babel/code-frame': 7.24.2
+      '@babel/code-frame': 7.24.7
       address: 1.2.2
       browserslist: 4.23.0
       chalk: 4.1.2
@@ -22279,6 +22278,7 @@ packages:
 
   /rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
     dependencies:
       glob: 7.2.3
