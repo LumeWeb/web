@@ -6,7 +6,7 @@
   "dependencies": {
     "@lumeweb/libs5": "workspace:*",
     "@noble/hashes": "^1.3.2",
-    "axios": "^1.7.1",
+    "axios": "^1.7.2",
     "isomorphic-ws": "^5.0.0",
     "mime": "^4.0.1",
     "multiformats": "^13.0.0",
