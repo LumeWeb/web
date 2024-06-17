@@ -47,7 +47,7 @@
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
-    "@refinedev/cli": "^2.16.29",
+    "@refinedev/cli": "^2.16.33",
     "@refinedev/core": "^4.49.0",
     "@refinedev/devtools-internal": "^1.1.7",
     "@refinedev/devtools-shared": "^1.1.5",
