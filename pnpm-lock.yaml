@@ -77,8 +77,8 @@ dependencies:
     specifier: 18.2.3
     version: 18.2.3(@swc-node/register@1.9.1)(@swc/core@1.4.17)(@types/node@20.12.7)(nx@18.2.3)(typescript@5.4.5)(verdaccio@5.31.0)
   '@prisma/client':
-    specifier: ^5.13.0
-    version: 5.14.0(prisma@5.14.0)
+    specifier: ^5.15.0
+    version: 5.15.0(prisma@5.14.0)
   '@radix-ui/react-accordion':
     specifier: ^1.1.2
     version: 1.1.2(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)
@@ -6487,8 +6487,8 @@ packages:
   /@polka/url@1.0.0-next.25:
     resolution: {integrity: sha512-j7P6Rgr3mmtdkeDGTe0E/aYyWEWVtc5yFXtHCRHs28/jptDEWfaVOc5T7cblqy1XKPPfCxJc/8DwQ5YgLOZOVQ==}
 
-  /@prisma/client@5.14.0(prisma@5.14.0):
-    resolution: {integrity: sha512-akMSuyvLKeoU4LeyBAUdThP/uhVP3GuLygFE3MlYzaCb3/J8SfsYBE5PkaFuLuVpLyA6sFoW+16z/aPhNAESqg==}
+  /@prisma/client@5.15.0(prisma@5.14.0):
+    resolution: {integrity: sha512-wPTeTjbd2Q0abOeffN7zCDCbkp9C9cF+e9HPiI64lmpehyq2TepgXE+sY7FXr7Rhbb21prLMnhXX27/E11V09w==}
     engines: {node: '>=16.13'}
     requiresBuild: true
     peerDependencies:
