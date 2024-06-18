@@ -3,20 +3,24 @@ import {
   CloudIcon,
   CloudDownloadIcon,
   CloudUploadSolidIcon,
+  CurrentUsageIcon,
 } from "~/components/icons";
 import { UpgradeAccountBanner } from "~/components/upgrade-account-banner";
 import { UsageCard } from "~/components/usage-card";
 import { UsageChart } from "~/components/usage-chart";
 import { Authenticated } from "@refinedev/core";
+import SectionTitle from "~/components/section-title";
+import currentUsageIcon from "~/images/icons/current-usage.svg";
 
 export default function Dashboard() {
   return (
     <Authenticated key="dashboard">
       <GeneralLayout>
-        <h1 className="font-bold mb-4 text-3xl">Dashboard</h1>
         <UpgradeAccountBanner />
-        <h2 className="font-bold mb-8 mt-10 text-2xl">Current Usage</h2>
-        <div className="grid grid-cols-2 gap-8">
+        <SectionTitle
+          icon={<CurrentUsageIcon className="text-foreground w-8 h-8" />}
+          title="Current Usage" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <UsageCard
             label="Storage"
             currentUsage={120}
@@ -36,8 +40,10 @@ export default function Dashboard() {
             icon={<CloudUploadSolidIcon className="text-ring" />}
           />
         </div>
-        <h2 className="font-bold mb-8 mt-10 text-2xl">Historical Usage</h2>
-        <div className="grid gap-8 grid-cols-2">
+        <SectionTitle
+          icon={<CurrentUsageIcon className="text-foreground w-8 h-8" />}
+          title="Historical Usage" />
+        <div className="grid gap-8 grid-cols-1 lg:grid-cols-2 ">
           <UsageChart
             dataset={[
               { x: "3/2", y: "50" },

@@ -14,12 +14,12 @@ interface FileCardProps {
 }
 
 export const FileCardList = ({ children }: React.PropsWithChildren<{}>) => {
-  return <div className="flex flex-row gap-x-8">{children}</div>;
+  return <div className="flex flex-col lg:flex-row gap-x-8 gap-6">{children}</div>;
 };
 
 export const FileCard = ({ type, fileName, createdAt, size }: FileCardProps) => {
   return (
-    <div className="border-1 rounded-lg p-4 w-[calc((100%/4))]">
+    <div className="border border-border/30 bg-secondary/30 rounded-lg p-4 lg:w-[calc((100%/4))]">
       <div className="flex justify-end">
         <MoreIcon className="text-foreground/50" />
       </div>
