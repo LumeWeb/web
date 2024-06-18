@@ -74,6 +74,7 @@ export const UsageChart = ({ label, dataset }: UsageChartProps) => {
           xScale={{ type: "band" }}
           yScale={{ type: "linear" }}
           theme={customTheme}
+
         >
           <AnimatedAxis
             orientation="bottom"

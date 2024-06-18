@@ -52,6 +52,7 @@
     --popover: var(--system-color-3);
     --popover-foreground: var(--system-color-11);
 
+
     --primary: 242 51% 14%;
     --primary-1: 241 90% 82%;
     --primary-2: 241 21% 42%;
@@ -69,6 +70,7 @@
 
     --accent: var(--system-color-3);
     --accent-foreground: var(--system-color-11);
+
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 72% 51%;
@@ -98,7 +100,6 @@
     --system-color-12: 163 69% 81%;
   }
 }
-
 
 @layer base {
   * {
