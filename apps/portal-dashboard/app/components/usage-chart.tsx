@@ -1,30 +1,30 @@
+import { curveCardinal } from "@visx/curve";
 import {
   AnimatedAxis, // any of these can be non-animated equivalents
   AnimatedLineSeries,
   XYChart,
-  buildChartTheme
-} from "@visx/xychart"
-import { curveCardinal } from "@visx/curve"
-import { InfoIcon } from "./icons"
+  buildChartTheme,
+} from "@visx/xychart";
+import { InfoIcon } from "./icons";
 
 type Coords = {
-  x: string
-  y: string
-}
+  x: string;
+  y: string;
+};
 
 type UsageChartProps = {
-  label: string
-  dataset: Coords[]
-}
+  label: string;
+  dataset: Coords[];
+};
 
 const accessors = {
   xAccessor: (d: Coords) => d.x,
-  yAccessor: (d: Coords) => d.y
-}
+  yAccessor: (d: Coords) => d.y,
+};
 
 const customTheme = buildChartTheme({
   colors: ["hsl(var(--system-color-12))"],
-  backgroundColor: "hsl(var(--primary-2))",
+  backgroundColor: "hsl(var(--muted))",
   gridColor: "hsl(var(--system-color-12))",
   gridColorDark: "hsl(var(--system-color-12))",
   htmlLabel: {
@@ -36,8 +36,8 @@ const customTheme = buildChartTheme({
   },
   xAxisLineStyles: {
     strokeWidth: 1,
-  }
-})
+  },
+});
 
 export const UsageChart = ({ label, dataset }: UsageChartProps) => {
   return (
@@ -51,9 +51,7 @@ export const UsageChart = ({ label, dataset }: UsageChartProps) => {
           height={400}
           xScale={{ type: "band" }}
           yScale={{ type: "linear" }}
-          theme={customTheme}
-
-        >
+          theme={customTheme}>
           <AnimatedAxis
             orientation="bottom"
             hideTicks
@@ -76,5 +74,5 @@ export const UsageChart = ({ label, dataset }: UsageChartProps) => {
         </XYChart>
       </div>
     </div>
-  )
-}
+  );
+};

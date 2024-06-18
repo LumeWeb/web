@@ -41,7 +41,7 @@
     --secondary-foreground: var(--system-color-11);
     --secondary-1-foreground: var(--system-color-12);
 
-    --muted: var(--system-color-2);
+    --muted: var(--system-color-3);
     --muted-foreground: var(--system-color-11);
 
     --accent: var(--system-color-3);
