@@ -190,8 +190,8 @@ export const UploadFileForm = () => {
       <ErrorList errors={[...(hasErrored ? ["An error occurred"] : [])]} />
 
       {hasStarted && !hasErrored ? (
-        <div className="flex flex-col items-center gap-y-2 w-full text-primary-1">
-          <CloudCheckIcon className="w-32 h-32" />
+        <div className="flex flex-col items-center gap-y-2 w-full text-foreground">
+          <CloudCheckIcon className="w-32 h-32 text-foreground" />
           {isCompleted
             ? "Upload completed"
             : `${getFiles().length} files being uploaded`}
@@ -200,7 +200,7 @@ export const UploadFileForm = () => {
 
       {isUploading ? (
         <DialogClose asChild onClick={cancelAll}>
-          <Button type="button" size={"lg"} className="mt-6">
+          <Button type="button" size={"lg"} className="mt-6 w-full">
             Cancel
           </Button>
         </DialogClose>

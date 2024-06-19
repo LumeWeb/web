@@ -66,7 +66,8 @@ const config = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))"
-        }
+        },
+        "upload-file-background": "hsla(48, 100%, 74%, 1)",
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -53,17 +53,6 @@ export default function DesktopSidebar() {
           <UploadFileForm />
         </SheetContent>
       </Sheet>
-      {/* <Dialog>
-        <DialogTrigger asChild>
-          <Button size={"lg"} className="w-full text-base font-semibold bg-[#FFE478] hover:bg-current/60 text-gray-800 mt-10 lg:mt-4">
-            <CloudUploadIcon className="mr-1" />
-            Upload
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="border rounded-lg p-8">
-          <UploadFileForm />
-        </DialogContent>
-      </Dialog> */}
     </header>
   )
 }
