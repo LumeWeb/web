@@ -20,6 +20,7 @@
       "@lumeweb/libs5-encoding": ["libs/libs5-encoding/src/index.ts"],
       "@lumeweb/libs5-metadata": ["libs/libs5-metadata/src/index.ts"],
       "@lumeweb/portal-dashboard/*": ["libs/portal-dashboard/src/*"],
+      "@lumeweb/portal-admin/*": ["libs/portal-admin/src/*"],
       "@lumeweb/portal-sdk": ["libs/portal-sdk/src/index.ts"],
       "portal-shared": ["libs/portal-shared/src/index.ts"],
       "@lumeweb/s5-js": ["libs/s5-js/src/index.ts"]
