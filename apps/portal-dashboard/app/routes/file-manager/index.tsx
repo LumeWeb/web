@@ -4,7 +4,7 @@ import { DataTable } from "~/components/data-table";
 import { columns } from "./columns";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
-import { AddIcon } from "~/components/icons";
+import { AddIcon, CurrentUsageIcon, FilesIcon } from "~/components/icons";
 import { Authenticated } from "@refinedev/core";
 import {
   Dialog,
@@ -20,6 +20,8 @@ import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { usePinning } from "~/hooks/usePinning";
 import { CID } from "@lumeweb/libs5";
 import { useEffect, useState } from "react";
+import SectionTitle from "~/components/section-title";
+import fileIcon from "~/images/icons/file.svg?url";
 
 export default function FileManager() {
   const [open, setOpen] = useState(false);
@@ -29,7 +31,9 @@ export default function FileManager() {
     <Authenticated key="file-manager">
       <GeneralLayout>
         <Dialog open={open} onOpenChange={setOpen}>
-          <h1 className="font-bold mb-4 text-lg">File Manager</h1>
+          <SectionTitle
+            icon={<FilesIcon className="text-foreground w-8 h-8" />}
+            title="Recently Viewed Files" />
           <FileCardList>
             <FileCard
               fileName="Backups"
@@ -56,7 +60,9 @@ export default function FileManager() {
               createdAt="2 days ago"
             />
           </FileCardList>
-          <h2 className="font-bold text-l mt-8">Files</h2>
+          <SectionTitle
+            icon={<FilesIcon className="text-foreground w-8 h-8" />}
+            title="Files" />
           <div className="flex items-center space-x-4 my-6 w-full">
             <Input
               fullWidth

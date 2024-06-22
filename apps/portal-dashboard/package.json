@@ -3,5 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "sideEffects": false,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.0.5"
+  }
 }

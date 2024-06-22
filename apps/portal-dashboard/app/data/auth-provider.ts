@@ -72,7 +72,7 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
         if (result.ret) {
             if (result.ret instanceof AccountError) {
                 return {
-                    success: false,
+                    success: true,
                     error: result.ret satisfies HttpError,
                     redirectTo: result.redirectToError
                 }
@@ -88,7 +88,7 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
         }
 
         return {
-            success: false,
+            success: true,
             redirectTo: result.redirectToError
         }
     }

@@ -66,7 +66,6 @@ export default function MyAccount() {
   return (
     <Authenticated key="account">
       <GeneralLayout>
-        <h1 className="text-lg font-bold mb-4">My Account</h1>
         <Dialog
           onOpenChange={(open) => {
             if (!open) {
@@ -74,20 +73,24 @@ export default function MyAccount() {
             }
           }}
           open={isModalOpen}>
-          <UsageCard
-            label="Usage"
-            currentUsage={2}
-            monthlyUsage={10}
-            icon={<CloudIcon className="text-ring" />}
-            button={
-              <Button variant="accent" className="gap-x-2 h-12 text-foreground">
-                <AddIcon />
-                Upgrade to Premium
-              </Button>
-            }
-          />
+          <div className="mt-10">
+            <UsageCard
+              label="Usage"
+              currentUsage={2}
+              monthlyUsage={10}
+              icon={<CloudIcon className="text-foreground" />}
+              button={
+                <Button
+                  variant="accent"
+                  className="gap-x-2 h-12 text-foreground">
+                  <AddIcon />
+                  Upgrade to Premium
+                </Button>
+              }
+            />
+          </div>
           <h2 className="font-bold my-8">Account Management</h2>
-          <div className="grid grid-cols-3 gap-x-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-4">
             <ManagementCard>
               <ManagementCardAvatar
                 button={
@@ -139,7 +142,7 @@ export default function MyAccount() {
             </ManagementCard>
           </div>
           <h2 className="font-bold my-8">Security</h2>
-          <div className="grid grid-cols-3 gap-x-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-4">
             <ManagementCard>
               <ManagementCardTitle>Password</ManagementCardTitle>
               <ManagementCardContent className="text-foreground">
@@ -180,7 +183,7 @@ export default function MyAccount() {
             </ManagementCard>
           </div>
           <h2 className="font-bold my-8">More</h2>
-          <div className="grid grid-cols-3 gap-x-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-4">
             <ManagementCard>
               <ManagementCardTitle>Invite a Friend</ManagementCardTitle>
               <ManagementCardContent className="text-foreground">

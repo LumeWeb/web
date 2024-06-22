@@ -14,17 +14,18 @@ import {
 } from "~/components/ui/dialog";
 import { Progress } from "~/components/ui/progress";
 import type { Identity } from "~/data/auth-provider";
+import useIsMobile from "~/hooks/useIsMobile";
 import discordLogoPng from "~/images/discord-logo.png?url";
 import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
-import logoPng from "~/images/lume-logo.png?url";
 import { PinningProvider } from "~/providers/PinningProvider";
-import { cn } from "~/utils";
+import DesktopSidebar from "./desktop-sidebar";
 import { ErrorList } from "./forms";
 import {
   BoxCheckedIcon,
   CircleLockIcon,
   ClockIcon,
   CloudCheckIcon,
+  CloudSelectIcon,
   CloudUploadIcon,
   DriveIcon,
   ExclamationCircleIcon,
@@ -33,6 +34,7 @@ import {
 } from "./icons";
 import filesize from "./lib/filesize";
 import { useUppy } from "./lib/uppy";
+import MobileSidebar from "./mobile-sidebar";
 import { PinningNetworkBanner } from "./pinning-network-banner";
 import {
   DropdownMenu,
@@ -49,75 +51,26 @@ import {
 } from "./ui/tooltip";
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
-  const location = useLocation();
   const { data: identity } = useGetIdentity<Identity>();
   const { mutate: logout } = useLogout();
+
+  const isMobile = useIsMobile();
 
   return (
     <PinningProvider>
       {!identity?.verified ? (
-        <div className="bg-secondary text-foreground p-4">
+        <div className="bg-secondary text-foreground p-2">
           We have sent you a verification email. Please click on the link in the
           email to start using the platform.
         </div>
       ) : null}
-      <div className={"h-full flex flex-row"}>
-        <header className="p-10 pr-0 flex flex-col w-[240px] h-full scroll-m-0 overflow-hidden">
-          <img src={logoPng} alt="Lume logo" className="h-10 w-32" />
-          <nav className="my-10 flex-1">
-            <ul>
-              <li>
-                <Link to="/dashboard">
-                  <NavigationButton
-                    active={location.pathname.includes("dashboard")}>
-                    <ClockIcon className="w-5 h-5 mr-2" />
-                    Dashboard
-                  </NavigationButton>
-                </Link>
-              </li>
-              <li>
-                <Link to="/file-manager">
-                  <NavigationButton
-                    active={location.pathname.includes("file-manager")}>
-                    <DriveIcon className="w-5 h-5 mr-2" />
-                    File Manager
-                  </NavigationButton>
-                </Link>
-              </li>
-              <li>
-                <Link to="/account">
-                  <NavigationButton
-                    active={location.pathname.includes("account")}>
-                    <CircleLockIcon className="w-5 h-5 mr-2" />
-                    Account
-                  </NavigationButton>
-                </Link>
-              </li>
-            </ul>
-          </nav>
-          <span className="text-foreground/60 mb-3 space-y-1 ">
-            <p>Freedom</p>
-            <p>Privacy</p>
-            <p>Ownership</p>
-          </span>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button size={"lg"} className="w-[calc(100%-3rem)] font-semibold">
-                <CloudUploadIcon className="w-5 h-5 mr-2" />
-                Upload Files
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="border rounded-lg p-8">
-              <UploadFileForm />
-            </DialogContent>
-          </Dialog>
-        </header>
-        <div className="flex-1 overflow-y-auto p-10">
-          <div className="flex items-center gap-x-4 justify-end">
+      <div className="w-full h-full flex flex-col sm:flex-row">
+        {isMobile ? <MobileSidebar /> : <DesktopSidebar />}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-10">
+          <div className="hidden sm:flex items-center gap-x-4 justify-end">
             <Button variant="ghost" className="rounded-full w-fit">
               <ThemeIcon className="text-foreground" />
             </Button>
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button className="border rounded-full h-auto p-2 gap-x-2 text-foreground font-semibold">
@@ -136,9 +89,7 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
           {children}
-
           <footer className="mt-5">
             <ul className="flex flex-row">
               <li>
@@ -177,7 +128,7 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
     </PinningProvider>
   );
 };
-const UploadFileForm = () => {
+export const UploadFileForm = () => {
   const {
     getRootProps,
     getInputProps,
@@ -216,12 +167,12 @@ const UploadFileForm = () => {
             name="uppyFiles[]"
             {...inputProps}
           />
-          <CloudUploadIcon className="w-24 h-24 stroke stroke-background" />
+          <CloudSelectIcon className="w-24 h-24 stroke stroke-background" />
           <p>Drag & Drop Files or Browse</p>
         </div>
       ) : null}
 
-      <div className="w-full space-y-3 max-h-48 overflow-y-auto">
+      <div className="w-full mt-3 space-y-3 max-h-44 lg:max-h-[calc(60%)] overflow-y-auto">
         {getFiles().map((file) => (
           <UploadFileItem
             key={file.id}
@@ -238,7 +189,7 @@ const UploadFileForm = () => {
 
       {hasStarted && !hasErrored ? (
         <div className="flex flex-col items-center gap-y-2 w-full text-foreground">
-          <CloudCheckIcon className="w-32 h-32" />
+          <CloudCheckIcon className="w-32 h-32 text-foreground" />
           {isCompleted
             ? "Upload completed"
             : `${getFiles().length} files being uploaded`}
@@ -247,7 +198,7 @@ const UploadFileForm = () => {
 
       {isUploading ? (
         <DialogClose asChild onClick={cancelAll}>
-          <Button type="button" size={"lg"} className="mt-6">
+          <Button type="button" size={"lg"} className="mt-6 w-full">
             Cancel
           </Button>
         </DialogClose>
@@ -266,7 +217,7 @@ const UploadFileForm = () => {
           type="submit"
           size={"lg"}
           onClick={isValid ? upload : () => {}}
-          className="mt-6"
+          className="mt-6 w-full"
           disabled={!isValid}>
           Upload
         </Button>
@@ -372,21 +323,5 @@ const UploadFileItem = ({
         </div>
       ) : null}
     </div>
-  );
-};
-
-const NavigationButton = ({
-  children,
-  active,
-}: React.PropsWithChildren<{ active?: boolean }>) => {
-  return (
-    <Button
-      variant="ghost"
-      className={cn(
-        "justify-start h-14 w-full font-semibold text-foreground/70 hover:bg-secondary/80",
-        active && "bg-secondary-1 text-foreground hover:bg-secondary-1",
-      )}>
-      {children}
-    </Button>
   );
 };

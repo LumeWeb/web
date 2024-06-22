@@ -33,11 +33,16 @@ const ManagementCardAvatar = ({
 
 const ManagementCardTitle = ({
   children,
+  icon: Icon = FingerPrintIcon,
   className,
-}: React.PropsWithChildren<{ className?: string }>) => {
+}: React.PropsWithChildren<{
+  className?: string
+  icon?: React.ComponentType<{ className?: string }>;
+}>) => {
+
   return (
     <div className={cn("flex items-center gap-x-2 font-semibold", className)}>
-      <FingerPrintIcon className="text-ring" />
+      <Icon className="text-foreground" />
       {children}
     </div>
   );
@@ -68,7 +73,7 @@ const ManagementCard = ({
   return (
     <div
       className={cn(
-        "rounded-lg p-8 border w-full border-[--variant-color]",
+        "rounded-lg p-8 border border-border/30 bg-secondary/30 w-full ",
         !variant && "[--variant-color:theme(colors.border)]",
         variant === "accent" &&
           "[--variant-color:theme(colors.primary-1.DEFAULT)]",

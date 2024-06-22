@@ -1,7 +1,6 @@
 import type { MetaFunction } from "@remix-run/node"
 import { Link } from "@remix-run/react"
 import { Button } from "~/components/ui/button"
-import logoPng from "~/images/lume-logo.png?url"
 import lumeColorLogoPng from "~/images/lume-color-logo.png?url"
 import discordLogoPng from "~/images/discord-logo.png?url"
 import lumeBgPng from "~/images/lume-bg-register.png?url"
@@ -11,6 +10,8 @@ import { z } from "zod"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod"
 import { useLogin, useNotification, useRegister } from "@refinedev/core";
 import { AuthFormRequest, RegisterFormRequest } from "~/data/auth-provider.js";
+import InlineAuthLinkBanner from "~/components/inline-auth-link-banner"
+import LumeLogo from "~/components/lume-logo"
 
 export const meta: MetaFunction = () => {
   return [{ title: "Sign Up" }];
@@ -66,16 +67,20 @@ export default function Register() {
   });
 
   return (
-    <div className="p-10 h-screen relative">
-      <header>
-        <img src={logoPng} alt="Lume logo" className="h-10" />
+    <div className="p-4 h-screen relative">
+      <header
+        className="absolute top-4 left-4 sm:left-8"
+      >
+        <LumeLogo />
       </header>
       <form
-        className="w-full p-2 max-w-md space-y-4 mt-12 bg-background"
+        className="w-full p-2 max-w-md space-y-4 mt-14 sm:bg-background"
         {...getFormProps(form)}>
-        <span className="!mb-12 space-y-2">
-          <h2 className="text-3xl font-bold">All roads lead to Lume</h2>
-          <p className="text-input-placeholder">
+        <span className=" space-y-2">
+          <h2 className="text-4xl sm:text-3xl">All Roads Lead to Lume
+
+          </h2>
+          <p className="text-foreground mt-4">
             🤘 Get 50 GB free storage and download for free,{" "}
             <b
               className="text-foreground">
@@ -84,72 +89,72 @@ export default function Register() {
             .{" "}
           </p>
         </span>
-        <div className="flex gap-4">
+        <InlineAuthLinkBanner to="/login" label="Already have an account?" />
+        <div
+          className="mt-10"
+        >
+          <h3 className=" block  sm:hidden text-2xl text-foreground mb-10">Create a New Account</h3>
+          <div className="flex gap-4">
+            <Field
+              className="flex-1"
+              inputProps={{ name: fields.firstName.name }}
+              labelProps={{ children: "First Name" }}
+              errors={fields.firstName.errors}
+            />
+            <Field
+              className="flex-1"
+              inputProps={{ name: fields.lastName.name }}
+              labelProps={{ children: "Last Name" }}
+              errors={fields.lastName.errors}
+            />
+          </div>
           <Field
-            className="flex-1"
-            inputProps={{ name: fields.firstName.name }}
-            labelProps={{ children: "First Name" }}
-            errors={fields.firstName.errors}
+            inputProps={{ name: fields.email.name }}
+            labelProps={{ children: "Email" }}
+            errors={fields.email.errors}
           />
           <Field
-            className="flex-1"
-            inputProps={{ name: fields.lastName.name }}
-            labelProps={{ children: "Last Name" }}
-            errors={fields.lastName.errors}
+            inputProps={{ name: fields.password.name, type: "password" }}
+            labelProps={{ children: "Password" }}
+            errors={fields.password.errors}
           />
+          <Field
+            inputProps={{ name: fields.confirmPassword.name, type: "password" }}
+            labelProps={{ children: "Confirm Password" }}
+            errors={fields.confirmPassword.errors}
+          />
+          <FieldCheckbox
+            inputProps={{ name: fields.termsOfService.name, form: form.id }}
+            labelProps={{
+              children: (
+                <span
+                  className="text-sm"
+                >
+                  I agree to the
+                  <Link
+                    to="/terms-of-service"
+                    className="text-foreground underline mx-1">
+                    Terms of Service
+                  </Link>
+                  and
+                  <Link
+                    to="/privacy-policy"
+                    className="text-foreground underline mx-1">
+                    Privacy Policy
+                  </Link>
+                </span>
+              ),
+            }}
+            errors={fields.termsOfService.errors}
+          />
+          <Button className=" w-full h-14">Create Account</Button>
         </div>
-        <Field
-          inputProps={{ name: fields.email.name }}
-          labelProps={{ children: "Email" }}
-          errors={fields.email.errors}
-        />
-        <Field
-          inputProps={{ name: fields.password.name, type: "password" }}
-          labelProps={{ children: "Password" }}
-          errors={fields.password.errors}
-        />
-        <Field
-          inputProps={{ name: fields.confirmPassword.name, type: "password" }}
-          labelProps={{ children: "Confirm Password" }}
-          errors={fields.confirmPassword.errors}
-        />
-        <FieldCheckbox
-          inputProps={{ name: fields.termsOfService.name, form: form.id }}
-          labelProps={{
-            children: (
-              <span>
-                I agree to the
-                <Link
-                  to="/terms-of-service"
-                  className="text-foreground underline mx-1">
-                  Terms of Service
-                </Link>
-                and
-                <Link
-                  to="/privacy-policy"
-                  className="text-foreground underline mx-1">
-                  Privacy Policy
-                </Link>
-              </span>
-            ),
-          }}
-          errors={fields.termsOfService.errors}
-        />
-        <Button className="w-full h-14 ">Create Account</Button>
-        <p className="text-input-placeholder w-full text-right">
-          Already have an account?{" "}
-          <Link
-            to="/login"
-            className="text-foreground text-md hover:underline hover:underline-offset-4">
-            Login here instead →
-          </Link>
-        </p>
       </form>
-      <div className="fixed inset-0 -z-10 overflow-clip">
+      <div className="h-1/3 sm:h-full fixed inset-0 -z-10 overflow-clip">
         <img
           src={lumeBgPng}
           alt="Lume background"
-          className="absolute top-0 right-0 md:w-2/3 sm:h-full object-cover z-[-1]"
+          className="absolute top-0 right-0 md:w-2/3 w-full sm:h-full object-cover z-[-1]"
         />
       </div>
       <footer className="my-5">
