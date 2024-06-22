@@ -237,7 +237,7 @@ const UploadFileForm = () => {
       <ErrorList errors={[...(hasErrored ? ["An error occurred"] : [])]} />
 
       {hasStarted && !hasErrored ? (
-        <div className="flex flex-col items-center gap-y-2 w-full text-primary-1">
+        <div className="flex flex-col items-center gap-y-2 w-full text-foreground">
           <CloudCheckIcon className="w-32 h-32" />
           {isCompleted
             ? "Upload completed"
@@ -288,7 +288,7 @@ const UploadFileItem = ({
     <div className="flex flex-col w-full py-4 px-2 bg-secondary">
       <div
         className={`flex items-center justify-between ${
-          failedState ? "text-red-500" : "text-primary-1"
+          failedState ? "text-red-500" : "text-foreground"
         }`}>
         <div className="flex items-center">
           <div className="p-2">
