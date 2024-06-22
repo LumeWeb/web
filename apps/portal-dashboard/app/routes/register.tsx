@@ -9,8 +9,8 @@ import { Field, FieldCheckbox } from "~/components/forms"
 import { getFormProps, useForm } from "@conform-to/react"
 import { z } from "zod"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod"
-import {useLogin, useNotification, useRegister} from "@refinedev/core";
-import {AuthFormRequest, RegisterFormRequest} from "~/data/auth-provider.js";
+import { useLogin, useNotification, useRegister } from "@refinedev/core";
+import { AuthFormRequest, RegisterFormRequest } from "~/data/auth-provider.js";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Sign Up" }];
@@ -47,22 +47,22 @@ export default function Register() {
   const login = useLogin<AuthFormRequest>();
   const { open } = useNotification();
   const [form, fields] = useForm({
-      id: "register",
-      constraint: getZodConstraint(RegisterSchema),
-      onValidate({formData}) {
-          return parseWithZod(formData, {schema: RegisterSchema});
-      },
-      onSubmit(e) {
-          e.preventDefault();
+    id: "register",
+    constraint: getZodConstraint(RegisterSchema),
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: RegisterSchema });
+    },
+    onSubmit(e) {
+      e.preventDefault();
 
-          const data = Object.fromEntries(new FormData(e.currentTarget).entries());
-          register.mutate({
-              email: data.email.toString(),
-              password: data.password.toString(),
-              firstName: data.firstName.toString(),
-              lastName: data.lastName.toString(),
-          })
-      }
+      const data = Object.fromEntries(new FormData(e.currentTarget).entries());
+      register.mutate({
+        email: data.email.toString(),
+        password: data.password.toString(),
+        firstName: data.firstName.toString(),
+        lastName: data.lastName.toString(),
+      })
+    }
   });
 
   return (
@@ -121,13 +121,13 @@ export default function Register() {
                 I agree to the
                 <Link
                   to="/terms-of-service"
-                  className="text-primary-1 text-md hover:underline hover:underline-offset-4 mx-1">
+                  className="text-foreground underline mx-1">
                   Terms of Service
                 </Link>
                 and
                 <Link
                   to="/privacy-policy"
-                  className="text-primary-1 text-md hover:underline hover:underline-offset-4 mx-1">
+                  className="text-foreground underline mx-1">
                   Privacy Policy
                 </Link>
               </span>
@@ -135,12 +135,12 @@ export default function Register() {
           }}
           errors={fields.termsOfService.errors}
         />
-        <Button className="w-full h-14">Create Account</Button>
+        <Button className="w-full h-14 ">Create Account</Button>
         <p className="text-input-placeholder w-full text-right">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-primary-1 text-md hover:underline hover:underline-offset-4">
+            className="text-foreground text-md hover:underline hover:underline-offset-4">
             Login here instead →
           </Link>
         </p>

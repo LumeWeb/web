@@ -1,8 +1,10 @@
-import { Button } from "~/components/ui/button";
-import logoPng from "~/images/lume-logo.png?url";
-import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
-import discordLogoPng from "~/images/discord-logo.png?url";
+import { Avatar } from "@radix-ui/react-avatar";
+import { DialogClose } from "@radix-ui/react-dialog";
+import { ChevronDownIcon, ExitIcon, TrashIcon } from "@radix-ui/react-icons";
+import { useGetIdentity, useLogout } from "@refinedev/core";
 import { Link, useLocation } from "@remix-run/react";
+import type { FailedUppyFile, UppyFile } from "@uppy/core";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,43 +12,41 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { useUppy } from "./lib/uppy";
-import type { FailedUppyFile, UppyFile } from "@uppy/core";
 import { Progress } from "~/components/ui/progress";
-import { DialogClose } from "@radix-ui/react-dialog";
-import { ChevronDownIcon, ExitIcon, TrashIcon } from "@radix-ui/react-icons";
+import type { Identity } from "~/data/auth-provider";
+import discordLogoPng from "~/images/discord-logo.png?url";
+import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
+import logoPng from "~/images/lume-logo.png?url";
+import { PinningProvider } from "~/providers/PinningProvider";
+import { cn } from "~/utils";
+import { ErrorList } from "./forms";
 import {
-  ClockIcon,
-  DriveIcon,
-  CircleLockIcon,
-  CloudUploadIcon,
-  CloudCheckIcon,
   BoxCheckedIcon,
+  CircleLockIcon,
+  ClockIcon,
+  CloudCheckIcon,
+  CloudUploadIcon,
+  DriveIcon,
+  ExclamationCircleIcon,
   PageIcon,
   ThemeIcon,
-  ExclamationCircleIcon,
 } from "./icons";
+import filesize from "./lib/filesize";
+import { useUppy } from "./lib/uppy";
+import { PinningNetworkBanner } from "./pinning-network-banner";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Avatar } from "@radix-ui/react-avatar";
-import { cn } from "~/utils";
-import { useGetIdentity, useLogout } from "@refinedev/core";
-import { PinningNetworkBanner } from "./pinning-network-banner";
-import { PinningProvider } from "~/providers/PinningProvider";
-import type { Identity } from "~/data/auth-provider";
 import {
   Tooltip,
   TooltipContent,
-  TooltipTrigger,
   TooltipProvider,
+  TooltipTrigger,
 } from "./ui/tooltip";
-import filesize from "./lib/filesize";
-import { ErrorList } from "./forms";
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   const location = useLocation();
@@ -56,7 +56,7 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   return (
     <PinningProvider>
       {!identity?.verified ? (
-        <div className="bg-primary-1 text-primary-1-foreground p-4">
+        <div className="bg-secondary text-foreground p-4">
           We have sent you a verification email. Please click on the link in the
           email to start using the platform.
         </div>
@@ -64,7 +64,6 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
       <div className={"h-full flex flex-row"}>
         <header className="p-10 pr-0 flex flex-col w-[240px] h-full scroll-m-0 overflow-hidden">
           <img src={logoPng} alt="Lume logo" className="h-10 w-32" />
-
           <nav className="my-10 flex-1">
             <ul>
               <li>
@@ -96,7 +95,7 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
               </li>
             </ul>
           </nav>
-          <span className="text-primary-2 mb-3 -space-y-1 opacity-40">
+          <span className="text-foreground/60 mb-3 space-y-1 ">
             <p>Freedom</p>
             <p>Privacy</p>
             <p>Ownership</p>
@@ -116,12 +115,12 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
         <div className="flex-1 overflow-y-auto p-10">
           <div className="flex items-center gap-x-4 justify-end">
             <Button variant="ghost" className="rounded-full w-fit">
-              <ThemeIcon className="text-ring" />
+              <ThemeIcon className="text-foreground" />
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className="border rounded-full h-auto p-2 gap-x-2 text-ring font-semibold">
+                <Button className="border rounded-full h-auto p-2 gap-x-2 text-foreground font-semibold">
                   <Avatar className="bg-ring h-7 w-7 rounded-full" />
                   {`${identity?.firstName} ${identity?.lastName}`}
                   <ChevronDownIcon />
@@ -238,7 +237,7 @@ const UploadFileForm = () => {
       <ErrorList errors={[...(hasErrored ? ["An error occurred"] : [])]} />
 
       {hasStarted && !hasErrored ? (
-        <div className="flex flex-col items-center gap-y-2 w-full text-primary-1">
+        <div className="flex flex-col items-center gap-y-2 w-full text-foreground">
           <CloudCheckIcon className="w-32 h-32" />
           {isCompleted
             ? "Upload completed"
@@ -289,7 +288,7 @@ const UploadFileItem = ({
     <div className="flex flex-col w-full py-4 px-2 bg-secondary">
       <div
         className={`flex items-center justify-between ${
-          failedState ? "text-red-500" : "text-primary-1"
+          failedState ? "text-red-500" : "text-foreground"
         }`}>
         <div className="flex items-center">
           <div className="p-2">
@@ -351,15 +350,25 @@ const UploadFileItem = ({
 
       {file.progress?.preprocess ? (
         <div>
-          <p className="text-sm text-primary-2 ml-2">{file.progress?.preprocess?.message ?? "Processing..."}</p>
-          <Progress max={100} value={
-              file.progress?.preprocess?.value ?? 0} className="mt-2" />
+          <p className="text-sm text-muted-foreground ml-2">
+            {file.progress?.preprocess?.message ?? "Processing..."}
+          </p>
+          <Progress
+            max={100}
+            value={file.progress?.preprocess?.value ?? 0}
+            className="mt-2"
+          />
+          muted
         </div>
       ) : null}
       {file.progress?.uploadStarted && !file.progress.uploadComplete ? (
         <div>
-          <p className="text-sm text-primary-2 ml-2">Uploading...</p>
-          <Progress max={100} value={file.progress.percentage} className="mt-2" />
+          <p className="text-sm text-muted-foreground ml-2">Uploading...</p>
+          <Progress
+            max={100}
+            value={file.progress.percentage}
+            className="mt-2"
+          />
         </div>
       ) : null}
     </div>
@@ -374,8 +383,8 @@ const NavigationButton = ({
     <Button
       variant="ghost"
       className={cn(
-        "justify-start h-14 w-full font-semibold",
-        active && "bg-secondary-1 text-secondary-1-foreground",
+        "justify-start h-14 w-full font-semibold text-foreground/70 hover:bg-secondary/80",
+        active && "bg-secondary-1 text-foreground hover:bg-secondary-1",
       )}>
       {children}
     </Button>

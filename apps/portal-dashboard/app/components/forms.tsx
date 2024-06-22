@@ -24,10 +24,10 @@ export const Field = ({
   const errorId = errors?.length ? `${id}-error` : undefined
   return (
     <div className={className}>
-      <Label {...labelProps} htmlFor={id} className="font-semibold text-sm" />
+      <Label {...labelProps} htmlFor={id} className="font-semibold text-sm text-secondary-foreground" />
       <Input
         {...inputProps}
-        className="mt-4"
+        className="mt-4 bg-input border-border placeholder-input-placeholder"
         id={id}
         aria-invalid={errorId ? true : undefined}
         aria-describedby={errorId}
@@ -59,7 +59,7 @@ export const FieldCheckbox = ({
   const input = useInputControl({
     key,
     name: inputProps.name,
-    formId: inputProps.form,  
+    formId: inputProps.form,
     initialValue: defaultChecked ? checkedValue : undefined
   })
   const fallbackId = useId()
@@ -68,7 +68,7 @@ export const FieldCheckbox = ({
   return (
     <>
       <div
-        className={cn("space-x-2 flex items-center text-primary-2", className)}
+        className={cn("space-x-2 flex items-center text-foreground", className)}
       >
         <Checkbox
           {...checkboxProps}
@@ -100,33 +100,33 @@ export const FieldCheckbox = ({
 }
 
 export function TextareaField({
-	labelProps,
-	textareaProps,
-	errors,
-	className,
+  labelProps,
+  textareaProps,
+  errors,
+  className,
 }: {
-	labelProps: React.LabelHTMLAttributes<HTMLLabelElement>
-	textareaProps: React.TextareaHTMLAttributes<HTMLTextAreaElement>
-	errors?: ListOfErrors
-	className?: string
+  labelProps: React.LabelHTMLAttributes<HTMLLabelElement>
+  textareaProps: React.TextareaHTMLAttributes<HTMLTextAreaElement>
+  errors?: ListOfErrors
+  className?: string
 }) {
-	const fallbackId = useId()
-	const id = textareaProps.id ?? textareaProps.name ?? fallbackId
-	const errorId = errors?.length ? `${id}-error` : undefined
-	return (
-		<div className={className}>
-			<Label htmlFor={id} {...labelProps} />
-			<Textarea
-				id={id}
-				aria-invalid={errorId ? true : undefined}
-				aria-describedby={errorId}
-				{...textareaProps}
-			/>
-			<div className="min-h-[32px] pb-1 pt-1">
-				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
-			</div>
-		</div>
-	)
+  const fallbackId = useId()
+  const id = textareaProps.id ?? textareaProps.name ?? fallbackId
+  const errorId = errors?.length ? `${id}-error` : undefined
+  return (
+    <div className={className}>
+      <Label htmlFor={id} {...labelProps} />
+      <Textarea
+        id={id}
+        aria-invalid={errorId ? true : undefined}
+        aria-describedby={errorId}
+        {...textareaProps}
+      />
+      <div className="min-h-[32px] pb-1 pt-1">
+        {errorId ? <ErrorList id={errorId} errors={errors} /> : null}
+      </div>
+    </div>
+  )
 }
 
 export type ListOfErrors = Array<string | null | undefined> | null | undefined

@@ -135,7 +135,7 @@ const LoginForm = () => {
         Forgot your password?{" "}
         <Link
           to="/reset-password"
-          className="text-primary-1 text-md hover:underline hover:underline-offset-4">
+          className="text-foreground text-md hover:underline hover:underline-offset-4">
           Reset Password
         </Link>
       </p>
