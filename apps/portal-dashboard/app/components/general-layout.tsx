@@ -25,6 +25,7 @@ import {
   CircleLockIcon,
   ClockIcon,
   CloudCheckIcon,
+  CloudSelectIcon,
   CloudUploadIcon,
   DriveIcon,
   ExclamationCircleIcon,
@@ -171,7 +172,7 @@ export const UploadFileForm = () => {
         </div>
       ) : null}
 
-      <div className="w-full space-y-3 max-h-48 overflow-y-auto">
+      <div className="w-full mt-3 space-y-3 max-h-44 lg:max-h-[calc(60%)] overflow-y-auto">
         {getFiles().map((file) => (
           <UploadFileItem
             key={file.id}
