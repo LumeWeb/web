@@ -55,9 +55,9 @@ export default function MobileSidebar() {
                             <SheetTrigger>
                                 <Button
                                     size="lg"
-                                    className='h-full p-2 border border-border bg-none'
+                                    className='h-full p-2 bg-upload-file-background'
                                 >
-                                    <CloudUploadIcon className='w-7 h-7 text-foreground' />
+                                    <CloudUploadIcon className='w-7 h-7 text-black' />
                                 </Button>
                             </SheetTrigger>
                             <SheetContent
