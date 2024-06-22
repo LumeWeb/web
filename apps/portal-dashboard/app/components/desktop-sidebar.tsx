@@ -36,7 +36,7 @@ export default function DesktopSidebar() {
       </span>
 
       <Sheet>
-        <SheetTrigger>
+        <SheetTrigger asChild>
           <UploadFileButton />
         </SheetTrigger>
         <SheetContent>
