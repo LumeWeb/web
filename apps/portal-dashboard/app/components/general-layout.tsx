@@ -1,8 +1,10 @@
-import { Button } from "~/components/ui/button";
-import logoPng from "~/images/lume-logo.png?url";
-import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
-import discordLogoPng from "~/images/discord-logo.png?url";
+import { Avatar } from "@radix-ui/react-avatar";
+import { DialogClose } from "@radix-ui/react-dialog";
+import { ChevronDownIcon, ExitIcon, TrashIcon } from "@radix-ui/react-icons";
+import { useGetIdentity, useLogout } from "@refinedev/core";
 import { Link, useLocation } from "@remix-run/react";
+import type { FailedUppyFile, UppyFile } from "@uppy/core";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,47 +12,42 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { useUppy } from "./lib/uppy";
-import type { FailedUppyFile, UppyFile } from "@uppy/core";
 import { Progress } from "~/components/ui/progress";
-import { DialogClose } from "@radix-ui/react-dialog";
-import { ChevronDownIcon, ExitIcon, TrashIcon } from "@radix-ui/react-icons";
+import type { Identity } from "~/data/auth-provider";
+import useIsMobile from "~/hooks/useIsMobile";
+import discordLogoPng from "~/images/discord-logo.png?url";
+import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
+import { PinningProvider } from "~/providers/PinningProvider";
+import DesktopSidebar from "./desktop-sidebar";
+import { ErrorList } from "./forms";
 import {
-  ClockIcon,
-  DriveIcon,
-  CircleLockIcon,
-  CloudUploadIcon,
-  CloudCheckIcon,
   BoxCheckedIcon,
+  CircleLockIcon,
+  ClockIcon,
+  CloudCheckIcon,
+  CloudUploadIcon,
+  DriveIcon,
+  ExclamationCircleIcon,
   PageIcon,
   ThemeIcon,
-  ExclamationCircleIcon,
-  CloudSelectIcon,
 } from "./icons";
+import filesize from "./lib/filesize";
+import { useUppy } from "./lib/uppy";
+import MobileSidebar from "./mobile-sidebar";
+import { PinningNetworkBanner } from "./pinning-network-banner";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Avatar } from "@radix-ui/react-avatar";
-import { cn } from "~/utils";
-import { useGetIdentity, useLogout } from "@refinedev/core";
-import { PinningNetworkBanner } from "./pinning-network-banner";
-import { PinningProvider } from "~/providers/PinningProvider";
-import type { Identity } from "~/data/auth-provider";
 import {
   Tooltip,
   TooltipContent,
-  TooltipTrigger,
   TooltipProvider,
+  TooltipTrigger,
 } from "./ui/tooltip";
-import filesize from "./lib/filesize";
-import { ErrorList } from "./forms";
-import DesktopSidebar from "./desktop-sidebar";
-import MobileSidebar from "./mobile-sidebar";
-import useIsMobile from "~/hooks/useIsMobile";
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   const { data: identity } = useGetIdentity<Identity>();
@@ -218,7 +215,7 @@ export const UploadFileForm = () => {
         <Button
           type="submit"
           size={"lg"}
-          onClick={isValid ? upload : () => { }}
+          onClick={isValid ? upload : () => {}}
           className="mt-6 w-full"
           disabled={!isValid}>
           Upload
@@ -240,8 +237,9 @@ const UploadFileItem = ({
   return (
     <div className="flex flex-col w-full py-4 px-2 bg-secondary">
       <div
-        className={`flex items-center justify-between ${failedState ? "text-red-500" : "text-primary-1"
-          }`}>
+        className={`flex items-center justify-between ${
+          failedState ? "text-red-500" : "text-foreground"
+        }`}>
         <div className="flex items-center">
           <div className="p-2">
             {file.progress?.uploadComplete ? (
@@ -302,18 +300,27 @@ const UploadFileItem = ({
 
       {file.progress?.preprocess ? (
         <div>
-          <p className="text-sm text-primary-2 ml-2">{file.progress?.preprocess?.message ?? "Processing..."}</p>
-          <Progress max={100} value={
-            file.progress?.preprocess?.value ?? 0} className="mt-2" />
+          <p className="text-sm text-muted-foreground ml-2">
+            {file.progress?.preprocess?.message ?? "Processing..."}
+          </p>
+          <Progress
+            max={100}
+            value={file.progress?.preprocess?.value ?? 0}
+            className="mt-2"
+          />
+          muted
         </div>
       ) : null}
       {file.progress?.uploadStarted && !file.progress.uploadComplete ? (
         <div>
-          <p className="text-sm text-primary-2 ml-2">Uploading...</p>
-          <Progress max={100} value={file.progress.percentage} className="mt-2" />
+          <p className="text-sm text-muted-foreground ml-2">Uploading...</p>
+          <Progress
+            max={100}
+            value={file.progress.percentage}
+            className="mt-2"
+          />
         </div>
       ) : null}
     </div>
   );
 };
-

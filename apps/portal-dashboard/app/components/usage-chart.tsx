@@ -1,13 +1,13 @@
-import React, { useRef, useEffect, useState } from 'react';
+import { curveCardinal } from "@visx/curve";
 import {
   AnimatedAxis,
   AnimatedLineSeries,
   XYChart,
-  buildChartTheme
+  buildChartTheme,
 } from "@visx/xychart";
-import { curveCardinal } from "@visx/curve";
+import React, { useRef, useEffect, useState } from "react";
+import useIsMobile from "~/hooks/useIsMobile";
 import { InfoIcon } from "./icons";
-import useIsMobile from '~/hooks/useIsMobile';
 
 type Coords = {
   x: string;
@@ -21,12 +21,12 @@ type UsageChartProps = {
 
 const accessors = {
   xAccessor: (d: Coords) => d.x,
-  yAccessor: (d: Coords) => d.y
+  yAccessor: (d: Coords) => d.y,
 };
 
 const customTheme = buildChartTheme({
   colors: ["hsl(var(--system-color-12))"],
-  backgroundColor: "hsl(var(--primary-2))",
+  backgroundColor: "hsl(var(--muted))",
   gridColor: "hsl(var(--system-color-12))",
   gridColorDark: "hsl(var(--system-color-12))",
   htmlLabel: {
@@ -38,7 +38,7 @@ const customTheme = buildChartTheme({
   },
   xAxisLineStyles: {
     strokeWidth: 1,
-  }
+  },
 });
 
 export const UsageChart = ({ label, dataset }: UsageChartProps) => {
@@ -54,15 +54,16 @@ export const UsageChart = ({ label, dataset }: UsageChartProps) => {
     };
 
     handleResize(); // Set initial width
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
-
   return (
-    <div ref={containerRef} className="p-2 lg:p-8 border border-border/30 rounded-lg w-full">
+    <div
+      ref={containerRef}
+      className="p-2 lg:p-8 border border-border/30 rounded-lg w-full">
       <div className="flex items-center justify-between">
         <span className="font-bold text-lg">{label}</span>
         <InfoIcon className="text-foreground/50 cursor-pointer hover:text-foreground" />
@@ -73,9 +74,7 @@ export const UsageChart = ({ label, dataset }: UsageChartProps) => {
           width={width}
           xScale={{ type: "band" }}
           yScale={{ type: "linear" }}
-          theme={customTheme}
-
-        >
+          theme={customTheme}>
           <AnimatedAxis
             orientation="bottom"
             hideTicks

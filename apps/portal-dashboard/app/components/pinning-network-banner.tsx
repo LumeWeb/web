@@ -1,27 +1,27 @@
+import { Cross2Icon } from "@radix-ui/react-icons";
 import { useMemo } from "react";
+import type { PinningStatus } from "~/data/pinning";
+import { usePinning } from "~/hooks/usePinning";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "./ui/accordion";
-import { Progress } from "./ui/progress";
-import { usePinning } from "~/hooks/usePinning";
-import { Tabs, TabsTrigger, TabsList, TabsContent } from "./ui/tabs";
 import { Button } from "./ui/button";
-import { Cross2Icon } from "@radix-ui/react-icons";
-import type { PinningStatus } from "~/data/pinning";
+import { Progress } from "./ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 export const PinningNetworkBanner = () => {
   const { progressData: data } = usePinning();
 
-    const itemsQueued = useMemo(
-        () =>
-            data?.items.filter((item: PinningStatus) =>
-                item.status.includes("queued"),
-            ) || [],
-        [data],
-    );
+  const itemsQueued = useMemo(
+    () =>
+      data?.items.filter((item: PinningStatus) =>
+        item.status.includes("queued"),
+      ) || [],
+    [data],
+  );
 
   const itemsProcessing = useMemo(
     () =>
@@ -56,24 +56,24 @@ export const PinningNetworkBanner = () => {
                 <TabsTrigger value="inProgress">In Progress</TabsTrigger>
                 <TabsTrigger value="completed">Completed</TabsTrigger>
               </TabsList>
-                <TabsContent value="queued">
-                    {itemsQueued.length ? (
-                    itemsQueued.map((item: PinningStatus) => (
-                        <PinCidItem key={item.id} item={item} />
-                    ))
-                    ) : (
-                    <div className="text-muted text-sm flex justify-center items-center h-10">
-                        Nothing yet.
-                    </div>
-                    )}
-                </TabsContent>
-              <TabsContent value="inProgress">
-                {itemsProcessing.length ? (
-                    itemsProcessing.map((item: PinningStatus) => (
+              <TabsContent value="queued">
+                {itemsQueued.length ? (
+                  itemsQueued.map((item: PinningStatus) => (
                     <PinCidItem key={item.id} item={item} />
                   ))
                 ) : (
-                  <div className="text-primary-2 text-sm flex justify-center items-center h-10">
+                  <div className="text-muted-foreground text-sm flex justify-center items-center h-10">
+                    Nothing yet.
+                  </div>
+                )}
+              </TabsContent>
+              <TabsContent value="inProgress">
+                {itemsProcessing.length ? (
+                  itemsProcessing.map((item: PinningStatus) => (
+                    <PinCidItem key={item.id} item={item} />
+                  ))
+                ) : (
+                  <div className="text-muted-foreground text-sm flex justify-center items-center h-10">
                     Nothing yet.
                   </div>
                 )}
@@ -84,7 +84,7 @@ export const PinningNetworkBanner = () => {
                     <PinCidItem key={item.id} item={item} />
                   ))
                 ) : (
-                  <div className="text-muted text-sm flex justify-center items-center h-10">
+                  <div className="text-muted-foreground text-sm flex justify-center items-center h-10">
                     Nothing yet.
                   </div>
                 )}

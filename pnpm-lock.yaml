@@ -22,6 +22,7 @@ patchedDependencies:
     path: patches/vite-plugin-node-polyfills@0.21.0.patch
 
 
+
 dependencies:
   '@astrojs/react':
     specifier: ^3.3.4
@@ -606,9 +607,6 @@ packages:
   '@asyncapi/specs@4.3.1':
     resolution: {integrity: sha512-EfexhJu/lwF8OdQDm28NKLJHFkx0Gb6O+rcezhZYLPIoNYKXJMh2J1vFGpwmfAcTTh+ffK44Oc2Hs1Q4sLBp+A==}
 
-  '@babel/code-frame@7.24.2':
-    resolution: {integrity: sha512-y5+tLQyV8pg3fsiln67BVLD1P13Eg4lh5RW9mF0zUuvLrv9uIQ4MCL+CRT+FTsBlBjcIan6PGsLcBN0m3ClUyQ==}
-    engines: {node: '>=6.9.0'}
 
   '@babel/code-frame@7.24.7':
 
@@ -13680,6 +13678,7 @@ snapshots:
       '@babel/helper-module-transforms': 7.24.5(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/helper-validator-identifier': 7.24.5
+      '@babel/helper-validator-identifier': 7.24.5
 
   '@babel/plugin-transform-modules-umd@7.24.1(@babel/core@7.24.5)':
     dependencies:
@@ -17441,6 +17440,7 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
 
 
+
   /@refinedev/cli@2.16.33(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-0Z6an6+Sw8dzWanwiHqjf9Rdw2i+tbCKWsjl8b2n4l0OnDhJvEclUconu+KTJ0fXFfMZALAvgo8LVeAXUe6KQw==}
     hasBin: true
@@ -17582,6 +17582,7 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
     transitivePeerDependencies:
       - react-native
+
 
 
   /@refinedev/devtools-shared@1.1.9(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0):
@@ -18654,6 +18655,7 @@ snapshots:
   '@types/parse-json@4.0.2': {}
 
   '@types/parse5@5.0.3': {}
+
 
 
   /@types/prismjs@1.26.4:
@@ -20171,6 +20173,7 @@ snapshots:
       follow-redirects: 1.15.6
     transitivePeerDependencies:
       - debug
+
 
 
   /axios@1.7.2:
@@ -22142,6 +22145,7 @@ snapshots:
       eslint: 8.57.0
 
 
+
   /eslint-plugin-react@7.34.2(eslint@8.57.0):
     resolution: {integrity: sha512-2HCmrU+/JNigDN6tg55cRDKCQWicYAPB38JGSFDQt95jDm8rrvSUo7YPkOIm5l6ts1j1zCvysNcasvfTMQzUOw==}
     engines: {node: '>=4'}
@@ -23778,6 +23782,7 @@ snapshots:
       - encoding
 
   isomorphic-timers-promises@1.0.1: {}
+
 
 
   /isomorphic-ws@5.0.0(ws@8.17.1):
@@ -26631,6 +26636,7 @@ snapshots:
       react: 18.2.0
 
 
+
   /prism-react-renderer@2.3.1(react@18.2.0):
     resolution: {integrity: sha512-Rdf+HzBLR7KYjzpJ1rSoxT9ioO85nZngQEoFIhL07XhtJHlCU3SOz0GJ6+qvMyQe0Se+BV3qpe6Yd/NmQF5Juw==}
     peerDependencies:
@@ -27429,8 +27435,10 @@ snapshots:
       glob: 7.2.3
 
   rimraf@2.7.1:
+  rimraf@2.7.1:
     dependencies:
       glob: 7.2.3
+
 
 
   /rimraf@3.0.2:
@@ -29293,6 +29301,7 @@ snapshots:
       sockjs: 0.3.24
       spdy: 4.0.2
 
+
       webpack: 5.91.0(@swc/core@1.4.17)(esbuild@0.17.19)
       webpack-dev-middleware: 5.3.4(webpack@5.91.0)
       ws: 8.17.1
@@ -29496,6 +29505,7 @@ snapshots:
       typedarray-to-buffer: 3.1.5
 
   ws@7.5.9: {}
+
 
 
   /ws@8.17.1:

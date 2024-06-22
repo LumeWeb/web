@@ -40,8 +40,8 @@ import {
 import { Input } from "~/components/ui/input";
 import { UsageCard } from "~/components/usage-card";
 
-import QRImg from "~/images/QR.png";
 import type { UpdatePasswordFormRequest } from "~/data/auth-provider";
+import QRImg from "~/images/QR.png";
 
 export default function MyAccount() {
   const { data: identity } = useGetIdentity<{ email: string }>();
@@ -61,7 +61,7 @@ export default function MyAccount() {
       changeAvatar: false,
     });
   };
-  const isModalOpen = Object.values(openModal).some(isOpen => isOpen);
+  const isModalOpen = Object.values(openModal).some((isOpen) => isOpen);
 
   return (
     <Authenticated key="account">
@@ -72,16 +72,17 @@ export default function MyAccount() {
               closeModal();
             }
           }}
-          open={isModalOpen}
-        >
-          <div className="mt-10" >
+          open={isModalOpen}>
+          <div className="mt-10">
             <UsageCard
               label="Usage"
               currentUsage={2}
               monthlyUsage={10}
               icon={<CloudIcon className="text-foreground" />}
               button={
-                <Button variant="accent" className="gap-x-2 h-12 text-foreground">
+                <Button
+                  variant="accent"
+                  className="gap-x-2 h-12 text-foreground">
                   <AddIcon />
                   Upgrade to Premium
                 </Button>
@@ -144,10 +145,8 @@ export default function MyAccount() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-4">
             <ManagementCard>
               <ManagementCardTitle>Password</ManagementCardTitle>
-              <ManagementCardContent
-                className="text-foreground"
-              >
-                <PasswordDots className="mt-6 " />
+              <ManagementCardContent className="text-foreground">
+                <PasswordDots className="mt-6" />
               </ManagementCardContent>
               <ManagementCardFooter>
                 <DialogTrigger asChild>
@@ -166,9 +165,7 @@ export default function MyAccount() {
               <ManagementCardTitle>
                 Two-Factor Authentication
               </ManagementCardTitle>
-              <ManagementCardContent
-                className="text-foreground"
-              >
+              <ManagementCardContent className="text-foreground">
                 Improve security by enabling 2FA.
               </ManagementCardContent>
               <ManagementCardFooter>
@@ -189,13 +186,13 @@ export default function MyAccount() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-4">
             <ManagementCard>
               <ManagementCardTitle>Invite a Friend</ManagementCardTitle>
-              <ManagementCardContent
-                className="text-foreground"
-              >
+              <ManagementCardContent className="text-foreground">
                 Get 1 GB per friend invited for free (max 5 GB).
               </ManagementCardContent>
               <ManagementCardFooter>
-                <Button variant="accent" className="h-12 gap-x-2 text-foreground">
+                <Button
+                  variant="accent"
+                  className="h-12 gap-x-2 text-foreground">
                   <AddIcon />
                   Send Invitation
                 </Button>
@@ -203,9 +200,7 @@ export default function MyAccount() {
             </ManagementCard>
             <ManagementCard>
               <ManagementCardTitle>Read our Resources</ManagementCardTitle>
-              <ManagementCardContent
-                className="text-foreground"
-              >
+              <ManagementCardContent className="text-foreground">
                 Navigate helpful articles or get assistance.
               </ManagementCardContent>
               <ManagementCardFooter>
@@ -217,9 +212,7 @@ export default function MyAccount() {
             </ManagementCard>
             <ManagementCard>
               <ManagementCardTitle>Delete Account</ManagementCardTitle>
-              <ManagementCardContent
-                className="text-foreground"
-              >
+              <ManagementCardContent className="text-foreground">
                 Once initiated, this action cannot be undone.
               </ManagementCardContent>
               <ManagementCardFooter>
@@ -233,10 +226,17 @@ export default function MyAccount() {
           <DialogContent>
             {openModal.changeAvatar && <ChangeAvatarForm close={closeModal} />}
             {openModal.changeEmail && (
-              <ChangeEmailForm currentValue={identity?.email || ""} close={closeModal} />
+              <ChangeEmailForm
+                currentValue={identity?.email || ""}
+                close={closeModal}
+              />
             )}
-            {openModal.changePassword && <ChangePasswordForm close={closeModal} />}
-            {openModal.setupTwoFactor && <SetupTwoFactorDialog close={closeModal} />}
+            {openModal.changePassword && (
+              <ChangePasswordForm close={closeModal} />
+            )}
+            {openModal.setupTwoFactor && (
+              <SetupTwoFactorDialog close={closeModal} />
+            )}
           </DialogContent>
         </Dialog>
       </GeneralLayout>
@@ -261,7 +261,13 @@ const ChangeEmailSchema = z
     return true;
   });
 
-const ChangeEmailForm = ({ currentValue, close }: { currentValue: string, close: () => void }) => {
+const ChangeEmailForm = ({
+  currentValue,
+  close,
+}: {
+  currentValue: string;
+  close: () => void;
+}) => {
   const { data: identity } = useGetIdentity<{ id: BaseKey }>();
   const { mutate: updateEmail, isSuccess } = useUpdate();
   const [form, fields] = useForm({
@@ -416,7 +422,7 @@ const SetupTwoFactorDialog = ({ close }: { close: () => void }) => {
       <div className="flex flex-col gap-y-6">
         {continueModal ? (
           <>
-            <p className="text-sm text-primary-2">
+            <p className="text-sm">
               Enter the authentication code generated in your two-factor
               application to confirm your setup.
             </p>
@@ -431,7 +437,7 @@ const SetupTwoFactorDialog = ({ close }: { close: () => void }) => {
             <p className="font-semibold">
               Don’t have access to scan? Use this code instead.
             </p>
-            <div className="p-4 border text-primary-2 text-center font-bold">
+            <div className="p-4 border text-center font-bold">
               HHH7MFGAMPJ44OM44FGAMPJ44O232
             </div>
             <Button className="w-full h-14" onClick={() => setContinue(true)}>
@@ -480,7 +486,7 @@ const ChangeAvatarForm = ({ close }: { close: () => void }) => {
       {!hasStarted && !getFiles().length ? (
         <div
           {...getRootProps()}
-          className="border border-border rounded text-primary-2 bg-primary-dark h-48 flex flex-col items-center justify-center">
+          className="border border-border rounded text-muted bg-primary-dark h-48 flex flex-col items-center justify-center">
           <input
             hidden
             aria-hidden
