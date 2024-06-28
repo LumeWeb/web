@@ -1,16 +1,16 @@
-import { u as useLocation, d as useMatches, r as reactExports, e as useNavigate, f as useParams, R as React, j as jsxRuntimeExports, O as Outlet } from "./index-D_nKaDFf.js";
-import { G, i as it, a as Go, B as Buffer, Q as QueryClient, b as QueryClientProvider, j as ju } from "./index-PvxHHzOq.js";
-import { f as useRemixContext, _ as _extends, L as Link, M as Meta, h as Links, S as Scripts } from "./components-BjLx0zCB.js";
-import { S as SdkContextProvider, u as useSdk } from "./sdk-context-umh223ZI.js";
-import { T as ToastProvider, a as Toast, b as ToastTitle, c as ToastDescription, d as ToastClose, e as ToastViewport, f as ToastAction } from "./toast-BRtHcHLh.js";
-import { c as customInstance, P as PROTOCOL_S5, a as createProtocol, S as S5, M as Multihash, C as CID, b as CID_TYPES, U as Unpacker, m as metadataMagicByte, d as METADATA_TYPES, e as PinningProcess } from "./pinning-_MfjFw6t.js";
-import { z } from "./index-D6hcoGBN.js";
-import { u as useScrollRestoration } from "./index-reyVn01_.js";
-import "./index-DTpHO9Dm.js";
-import "./utils-Cugm_gHJ.js";
-import "./index-CnnG_NQj.js";
+import { e as useLocation, f as useMatches, r as reactExports, g as useNavigate, h as useParams, R as React, j as jsxRuntimeExports, O as Outlet } from "./index-CZkutDaP.js";
+import { G, i as it, a as Go, B as Buffer, Q as QueryClient, b as QueryClientProvider, j as ju } from "./index-VoJZYkST.js";
+import { u as useRemixContext, _ as _extends, L as Link, M as Meta, k as Links, S as Scripts } from "./components-Bt5ybS0r.js";
+import { S as SdkContextProvider, u as useSdk } from "./sdk-context-D31_5OTC.js";
+import { T as ToastProvider, a as Toast, b as ToastTitle, c as ToastDescription, d as ToastClose, e as ToastViewport, f as ToastAction } from "./toast-DweFccid.js";
+import { c as customInstance, P as PROTOCOL_S5, a as createProtocol, S as S5, M as Multihash, C as CID, b as CID_TYPES, U as Unpacker, m as metadataMagicByte, d as METADATA_TYPES, e as PinningProcess } from "./pinning-C3Ssqtc8.js";
+import { z } from "./index-D3-297m7.js";
+import { u as useScrollRestoration } from "./index-BtTpAOFQ.js";
+import "./index-BZHzSmil.js";
+import "./utils-CrxSwyC8.js";
+import "./index-CeNAs65J.js";
 /**
- * @remix-run/react v2.10.0
+ * @remix-run/react v2.9.2
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -1129,7 +1129,7 @@ function createEnv(opts) {
   });
   return env2;
 }
-var define_import_meta_env_default = { VITE_PORTAL_URL: "https://alpha.pinner.xyz", BASE_URL: "/", MODE: "production", DEV: false, PROD: true, SSR: false };
+var define_import_meta_env_default = { BASE_URL: "/", MODE: "production", DEV: false, PROD: true, SSR: false };
 const env = createEnv({
   /**
    * The prefix that client-side variables must have. This is enforced both at
