@@ -67,7 +67,7 @@
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
     "@uppy/core": "^3.11.1",
-    "@uppy/tus": "^3.5.4",
+    "@uppy/tus": "^3.5.5",
     "@uppy/utils": "^5.7.4",
     "@visx/curve": "^3.3.0",
     "@visx/visx": "^3.10.2",
@@ -197,7 +197,7 @@
   "pnpm": {
     "patchedDependencies": {
       "@nx/vite@18.2.3": "patches/@nx__vite@18.2.3.patch",
-      "@uppy/tus@3.5.4": "patches/@uppy__tus@3.5.4.patch",
+      "@uppy/tus@3.5.5": "patches/@uppy__tus@3.5.5.patch",
       "tus-js-client@4.1.0": "patches/tus-js-client@4.1.0.patch",
       "@nx/remix@18.2.3": "patches/@nx__remix@18.2.3.patch",
       "vite-plugin-node-polyfills@0.21.0": "patches/vite-plugin-node-polyfills@0.21.0.patch"
