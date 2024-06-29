@@ -16,5 +16,16 @@
     },
     "engines": {
         "node": ">=16.14"
+    },
+    "dependencies": {
+        "@docusaurus/core": "^3.4.0",
+        "@docusaurus/preset-classic": "^3.4.0",
+        "@mdx-js/react": "^3",
+        "prism-react-renderer": "^2.3.1"
+    },
+    "devDependencies": {
+        "@docusaurus/module-type-aliases": "^3",
+        "@docusaurus/tsconfig": "^3",
+        "@docusaurus/types": "^3"
     }
 }
