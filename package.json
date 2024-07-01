@@ -127,7 +127,7 @@
     "@docusaurus/module-type-aliases": "^3.3",
     "@docusaurus/types": "^3.2.1",
     "@faker-js/faker": "^8.4.1",
-    "@nrwl/workspace": "18.2.3",
+    "@nrwl/workspace": "19.3.2",
     "@nx/eslint": "18.2.4",
     "@nx/eslint-plugin": "19.0.2",
     "@nx/js": "18.2.4",
