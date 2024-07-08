@@ -145,7 +145,7 @@
     "@testing-library/react": "16.0.0",
     "@tsconfig/docusaurus": "^2.0.3",
     "@types/detect-node": "^2.0.2",
-    "@types/node": "20.12.7",
+    "@types/node": "20.14.10",
     "@types/react": "18.2.75",
     "@types/react-dom": "18.2.14",
     "@types/url-parse": "^1.4.11",
