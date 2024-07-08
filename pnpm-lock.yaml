@@ -258,7 +258,7 @@ dependencies:
     version: 4.4.0
   isomorphic-ws:
     specifier: ^5.0.0
-    version: 5.0.0(ws@8.17.1)
+    version: 5.0.0(ws@8.18.0)
   level:
     specifier: ^8.0.0
     version: 8.0.1
@@ -338,8 +338,8 @@ dependencies:
     specifier: ^0.21.0
     version: 0.21.0(patch_hash=5tqaruiqgnko5sezr26m7jyv2q)(vite@5.3.2)
   ws:
-    specifier: ^8.17.1
-    version: 8.17.1
+    specifier: ^8.18.0
+    version: 8.18.0
   xml2js:
     specifier: ^0.6.2
     version: 0.6.2
@@ -4452,7 +4452,7 @@ packages:
       level: 8.0.1
       multiformats: 13.1.1
       p-defer: 4.0.1
-      ws: 8.17.1
+      ws: 8.18.0
     transitivePeerDependencies:
       - bufferutil
       - debug
@@ -7516,7 +7516,7 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       sanitize-html: 2.13.0
-      ws: 8.17.1
+      ws: 8.18.0
     transitivePeerDependencies:
       - '@babel/preset-env'
       - '@types/express'
@@ -9261,6 +9261,7 @@ packages:
       typescript: 5.5.3
     transitivePeerDependencies:
       - supports-color
+    dev: false
 
   /@typescript-eslint/parser@5.62.0(eslint@8.57.0)(typescript@5.5.3):
     resolution: {integrity: sha512-VlJEV0fOQ7BExOsHYAGrgbEiZoi8D+Bl2+f6V2RrXerRSylnp+ZBHmPvaIa8cz0Ajx7WO7Z5RqfgYg7ED1nRhA==}
@@ -16358,12 +16359,12 @@ packages:
     engines: {node: '>=10'}
     dev: false
 
-  /isomorphic-ws@5.0.0(ws@8.17.1):
+  /isomorphic-ws@5.0.0(ws@8.18.0):
     resolution: {integrity: sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==}
     peerDependencies:
       ws: '*'
     dependencies:
-      ws: 8.17.1
+      ws: 8.18.0
     dev: false
 
   /isstream@0.1.2:
@@ -16580,7 +16581,7 @@ packages:
       whatwg-encoding: 2.0.0
       whatwg-mimetype: 3.0.0
       whatwg-url: 12.0.1
-      ws: 8.17.1
+      ws: 8.18.0
       xml-name-validator: 4.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -24247,7 +24248,7 @@ packages:
       spdy: 4.0.2
       webpack: 5.92.1(@swc/core@1.4.17)(esbuild@0.17.19)
       webpack-dev-middleware: 5.3.4(webpack@5.92.1)
-      ws: 8.17.1
+      ws: 8.18.0
     transitivePeerDependencies:
       - bufferutil
       - debug
@@ -24549,8 +24550,8 @@ packages:
         optional: true
     dev: false
 
-  /ws@8.17.1:
-    resolution: {integrity: sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==}
+  /ws@8.18.0:
+    resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
