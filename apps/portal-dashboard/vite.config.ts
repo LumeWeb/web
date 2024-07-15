@@ -14,6 +14,15 @@ export default defineConfig({
       ssr: false,
       ignoredRouteFiles: ["**/*.css"],
       buildDirectory: "../../dist/apps/portal-dashboard",
+      routes(defineRoutes) {
+        return defineRoutes((route) => {
+          route("/", "routes/index.tsx", { index: true });
+          route("/account", "routes/Account/index.tsx", { index: true });
+          route("/account/verify", "routes/Account/verify.tsx");
+          route("/login", "routes/Login/index.tsx");
+          route("/register", "routes/Register/index.tsx");
+        });
+      },
     }),
     tsconfigPaths(),
     nodePolyfills({

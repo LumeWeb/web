@@ -1,9 +1,9 @@
 {
-	"name": "@lumeweb/portal-dashboard",
-	"version": "0.0.0",
-	"private": true,
-	"sideEffects": false,
-	"type": "module",
+  "name": "@lumeweb/portal-dashboard",
+  "version": "0.0.0",
+  "private": true,
+  "sideEffects": false,
+  "type": "module",
 	"dependencies": {
 		"@radix-ui/react-dialog": "^1.0.5",
 		"@radix-ui/react-popover": "^1.1.1",
