@@ -31,24 +31,24 @@ import {
   ExclamationCircleIcon,
   PageIcon,
   ThemeIcon,
-} from "./icons";
+} from "../icons";
 import filesize from "~/util/filesize";
-import { useUppy } from "./lib/uppy";
-import MobileSidebar from "./mobile-sidebar";
-import { PinningNetworkBanner } from "./pinning-network-banner";
+import { useUppy } from "~/hooks/uppy";
+import MobileSidebar from "../mobile-sidebar";
+import { PinningNetworkBanner } from "../PinningNetworkBanner";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+} from "../ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "./ui/tooltip";
+} from "../ui/tooltip";
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   const { data: identity } = useGetIdentity<Identity>();
@@ -57,7 +57,8 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   const isMobile = useIsMobile();
 
   return (
-    <PinningProvider>
+    /*<PinningProvider>*/
+    <>
       {!identity?.verified ? (
         <div className="bg-secondary text-foreground p-2">
           We have sent you a verification email. Please click on the link in the
@@ -125,7 +126,8 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
         </div>
       </div>
       <PinningNetworkBanner />
-    </PinningProvider>
+    </>
+    /*</PinningProvider>*/
   );
 };
 export const UploadFileForm = () => {

@@ -5,11 +5,11 @@ import {
   CloudUploadSolidIcon,
   CurrentUsageIcon,
 } from "~/components/icons";
-import { UpgradeAccountBanner } from "~/components/UpgradeAccountBanner.js";
-import { UsageCard } from "~/components/UsageCard.js";
-import { UsageChart } from "~/components/UsageChart.js";
+import { UpgradeAccountBanner } from "~/components/UpgradeAccountBanner";
+import { UsageCard } from "~/components/UsageCard";
+import { UsageChart } from "~/components/UsageChart";
 import { Authenticated } from "@refinedev/core";
-import SectionTitle from "~/components/SectionTitle.js";
+import SectionTitle from "~/components/SectionTitle";
 
 export default function Dashboard() {
   return (
