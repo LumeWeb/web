@@ -1,11 +1,11 @@
-import SectionTitle from "@/components/SectionTitle.js";
-import { CurrentUsageIcon } from "@/components/icons.js";
-import { UsageChart } from "@/components/UsageChart.js";
+import SectionTitle from "portal-shared/components/SectionTitle";
+import { CurrentUsageIcon } from "portal-shared/components/icons";
+import { UsageChart } from "portal-shared/components/UsageChart";
 import { UsageData, useUsageHistory } from "@/hooks/useUsageHistory.js";
-import { Skeleton } from "@/components/ui/skeleton.js";
-import filesize from "@/util/filesize.js";
+import { Skeleton } from "portal-shared/components/ui/skeleton.js";
+import filesize from "portal-shared/util/filesize.js";
 import useSubscription from "@/hooks/useSubscription";
-import useIsBillingEnabled from "@/hooks/useIsBillingEnabled";
+import useIsBillingEnabled from "portal-shared/hooks/useIsBillingEnabled";
 import { fileProvider } from "@/dataProviders/old/file-provider";
 import { padFileSizeDefault } from "libs/libs5-crypto";
 

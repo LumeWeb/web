@@ -12,7 +12,7 @@ import { UppyFileDefault } from "@/features/uploadManager/lib/uploadManager.js";
 import type { CID } from "multiformats/cid";
 import type { AbortOptions } from "@libp2p/interfaces";
 import type { ProgressOptions } from "progress-events";
-import { appStore } from "@/stores/app.js";
+import { dashboardStore } from "@/stores/app";
 import { IPFS, SERVICE_ID } from "@/services/ipfs/index.js";
 import { asyncIterableReader, createDecoder } from "@ipld/car/decoder";
 // @ts-ignore
@@ -180,7 +180,10 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
   }
 
   async #createHelia() {
-    return appStore.getState().getServiceById<IPFS>(SERVICE_ID)?.getHelia()!;
+    return dashboardStore
+      .getState()
+      .getServiceById<IPFS>(SERVICE_ID)
+      ?.getHelia()!;
   }
 
   async #isCarFile(file: UppyFileDefault): Promise<boolean> {

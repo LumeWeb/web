@@ -11,9 +11,9 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
-} from "@/components/ui/dialog.js";
-import { Button } from "@/components/ui/button.js";
-import { AddIcon, RemoveIcon } from "@/components/icons.js";
+} from "portal-shared/components/ui/dialog.js";
+import { Button } from "portal-shared/components/ui/button.js";
+import { AddIcon, RemoveIcon } from "portal-shared/components/icons";
 import { useGetIdentity } from "@refinedev/core";
 import SetupTwoFactorDialog from "@/routes/account/components/SetupTwoFactorDialog.js";
 import DisableTwoFactorDialog from "@/routes/account/components/DisableTwoFactorDialog.js";

@@ -10,7 +10,7 @@ import React, {
 import {
   SubscriptionPlan,
   SubscriptionResponse,
-} from "@/dataProviders/accountProvider";
+} from "portal-shared/dataProviders/accountProvider";
 import {
   QueryObserverResult,
   RefetchOptions,

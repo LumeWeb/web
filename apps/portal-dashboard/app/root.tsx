@@ -7,7 +7,7 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 
-import stylesheet from "@/tailwind.css?url";
+import stylesheet from "portal-shared/tailwind.css?url";
 import type { LinksFunction } from "@remix-run/node";
 
 // Supports weights 200-800
@@ -18,17 +18,17 @@ import {
   Refine,
   ResourceProps,
 } from "@refinedev/core";
-import { Toaster } from "@/components/ui/toaster";
-import useSdk from "@/hooks/useSdk.js";
+import { Toaster } from "portal-shared/components/ui/toaster";
+import useSdk from "portal-shared/hooks/useSdk";
 import routerProvider from "@refinedev/remix-router";
-import { notificationProvider } from "@/dataProviders/notificationProvider";
+import { notificationProvider } from "portal-shared/dataProviders/notificationProvider";
 import { getResetServices } from "@/services/index";
 import useUploader from "@/features/uploadManager/hooks/useUploader";
-import { createAccountProvider } from "@/dataProviders/accountProvider";
-import { useAuthProvider } from "@/hooks/useAuthProvider.js";
+import { createAccountProvider } from "portal-shared/dataProviders/accountProvider";
+import { useAuthProvider } from "portal-shared/hooks/useAuthProvider";
 import { useAppInitialization } from "@/hooks/useAppInitialization";
-import { withTheme } from "@/hooks/useTheme";
-import { Skeleton } from "@/components/ui/skeleton";
+import { withTheme } from "portal-shared/hooks/useTheme";
+import { Skeleton } from "portal-shared/components/ui/skeleton";
 import restDataProvider from "@refinedev/simple-rest";
 import { createServiceProvider } from "@/dataProviders/serviceProvider";
 import { SERVICE_ROUTE } from "@/routeConfig";

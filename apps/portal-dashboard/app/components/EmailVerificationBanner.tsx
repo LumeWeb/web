@@ -1,9 +1,13 @@
 import { useGetIdentity } from "@refinedev/core";
-import { Identity } from "@/dataProviders/authProvider.js";
+import { Identity } from "portal-shared/dataProviders/authProvider";
 import useEmailVerification from "@/hooks/useEmailVerification.js";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "portal-shared/components/ui/alert";
 import { Mail } from "lucide-react";
-import { Button } from "@/components/ui/button.js";
+import { Button } from "portal-shared/components/ui/button.js";
 
 export default function EmailVerificationBanner() {
   const { data: identity } = useGetIdentity<Identity>();

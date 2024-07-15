@@ -4,8 +4,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+} from "portal-shared/components/ui/dropdown-menu";
+import { Button } from "portal-shared/components/ui/button";
 import { Download, MoreVertical, Trash } from "lucide-react";
 import { CID } from "multiformats/cid";
 import { useActiveService } from "../hooks/useActiveService";

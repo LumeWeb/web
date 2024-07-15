@@ -1,9 +1,9 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useCustomMutation, useNotification } from "@refinedev/core";
-import { Button } from "@/components/ui/button";
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Button } from "portal-shared/components/ui/button";
+import { DialogHeader, DialogTitle } from "portal-shared/components/ui/dialog";
+import { Input } from "portal-shared/components/ui/input";
 import {
   Form,
   FormControl,
@@ -12,9 +12,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "portal-shared/components/ui/form";
 import { AlertCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "portal-shared/components/ui/alert";
 import useApiUrl from "@/hooks/useApiUrl.js";
 import { useInvalidateAuthStore } from "@refinedev/core";
 

@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "portal-shared/components/ui/button";
+import { Input } from "portal-shared/components/ui/input";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
+} from "portal-shared/components/ui/sheet";
 import { MoreHorizontal, Search } from "lucide-react";
-import usePluginMeta from "@/hooks/usePluginMeta";
+import usePluginMeta from "portal-shared/hooks/usePluginMeta";
 import socialLoginProviders from "./SocialProviders";
 import useAccountSubdomain from "@/hooks/useAccountSubdomain";
 import { useParsed } from "@refinedev/core";

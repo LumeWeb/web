@@ -1,19 +1,38 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ES2019"],
-    "isolatedModules": true,
-    "esModuleInterop": true,
+    "module": "ESNext",
+    "target": "es2020",
+    "moduleResolution": "Bundler",
     "jsx": "react-jsx",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "target": "ES2019",
+    "allowJs": false,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
     "strict": true,
-    "allowJs": true,
-    "forceConsistentCasingInFileNames": true,
-    // Remix takes care of building everything in `remix build`.
-    "noEmit": true
+    "types": ["vite/client"],
+    "paths": {
+      "@/*": [
+        "apps/portal-admin/app/*"
+      ],
+      "@/components/*": [
+        "apps/portal-admin/app/components/*"
+      ],
+      "@/utils/*": [
+        "apps/portal-admin/app/utils/*"
+      ],
+      "@lumeweb/libs5": ["libs/libs5/src/index.ts"],
+      "@lumeweb/portal-dashboard/*": ["libs/portal-dashboard/src/*"],
+      "@lumeweb/portal-sdk": ["libs/portal-sdk/src/index.ts"],
+      "@lumeweb/s5-js": ["libs/s5-js/src/index.ts"],
+      "portal-shared/*": ["libs/portal-shared/src/*"]
+    }
   },
-  "include": [],
-  "files": []
+  "files": [],
+  "include": [
+    "env.d.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "app/**/*.js",
+    "app/**/*.jsx"
+  ],
+  "extends": "../../tsconfig.base.json"
 }

@@ -1,7 +1,7 @@
-import { cn } from "@/util/cn.js";
-import { EditIcon, FingerPrintIcon } from "./icons";
-import { Avatar } from "./ui/avatar";
-import { Button } from "./ui/button";
+import { cn } from "portal-shared/util/cn.js";
+import { EditIcon, FingerPrintIcon } from "portal-shared/components/icons";
+import { Avatar } from "portal-shared/components/ui/avatar";
+import { Button } from "portal-shared/components/ui/button";
 
 const ManagementCardAvatar = ({
   src,

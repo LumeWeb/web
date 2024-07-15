@@ -4,17 +4,17 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "portal-shared/components/ui/tooltip";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button, buttonVariants } from "@/components/ui/button";
+} from "portal-shared/components/ui/popover";
+import { Button, buttonVariants } from "portal-shared/components/ui/button";
 import { CID } from "multiformats/cid";
 import useCopy from "../hooks/useCopy";
 import BareCopyButton from "./BareCopyButton";
-import { cn } from "@/util/cn";
+import { cn } from "portal-shared/util/cn";
 
 export default function CIDTooltip({ cid }: { cid: CID }) {
   const [open, setOpen] = useState(false);

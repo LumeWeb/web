@@ -1,13 +1,13 @@
-import SectionTitle from "@/components/SectionTitle.js";
+import SectionTitle from "portal-shared/components/SectionTitle";
 import {
   CloudDownloadIcon,
   CloudIcon,
   CloudUploadSolidIcon,
   CurrentUsageIcon,
-} from "@/components/icons.js";
-import { UsageCard } from "@/components/UsageCard.js";
-import useIsBillingEnabled from "@/hooks/useIsBillingEnabled.js";
-import { Skeleton } from "@/components/ui/skeleton.js";
+} from "portal-shared/components/icons";
+import { UsageCard } from "portal-shared/components/UsageCard";
+import useIsBillingEnabled from "portal-shared/hooks/useIsBillingEnabled";
+import { Skeleton } from "portal-shared/components/ui/skeleton.js";
 import { useCurrentUsage } from "@/hooks/useCurrentUsage.js";
 import useSubscription from "@/hooks/useSubscription.js";
 

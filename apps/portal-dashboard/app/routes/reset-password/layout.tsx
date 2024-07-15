@@ -1,9 +1,9 @@
 import { Link, Outlet } from "@remix-run/react";
-import { Button } from "@/components/ui/button.js";
+import { Button } from "portal-shared/components/ui/button.js";
 import lumeBgPng from "@/images/lume-bg-reset-password.png";
 import discordLogoPng from "@/images/discord-logo.png?url";
 import lumeColorLogoPng from "@/images/lume-color-logo.png?url";
-import LumeLogo from "@/components/LumeLogo.js";
+import LumeLogo from "portal-shared/components/LumeLogo";
 
 export default function ResetPasswordLayout() {
   return (

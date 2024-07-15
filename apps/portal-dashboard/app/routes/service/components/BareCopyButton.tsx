@@ -1,6 +1,6 @@
 import React from "react";
 import { Check, Copy } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "portal-shared/components/ui/button";
 
 interface BareCopyButtonProps extends React.ComponentPropsWithoutRef<"button"> {
   copied: boolean;

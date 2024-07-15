@@ -1,19 +1,19 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
-import { Button } from "@/components/ui/button";
+import { Button } from "portal-shared/components/ui/button";
 import lumeColorLogoPng from "@/images/lume-color-logo.png?url";
 import discordLogoPng from "@/images/discord-logo.png?url";
 import lumeBgPng from "@/images/lume-bg-register.png?url";
-import { Field, FieldCheckbox } from "@/components/Forms";
+import { Field, FieldCheckbox } from "portal-shared/components/Forms";
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { useLogin, useNotification, useRegister } from "@refinedev/core";
 import {
   AuthFormRequest,
   RegisterFormRequest,
-} from "@/dataProviders/authProvider.js";
+} from "portal-shared/dataProviders/authProvider";
 import InlineAuthLinkBanner from "@/components/InlineAuthLinkBanner";
-import LumeLogo from "@/components/LumeLogo";
+import LumeLogo from "portal-shared/components/LumeLogo";
 import { RegisterSchema } from "@/routes/register/schema";
 
 export const meta: MetaFunction = () => {

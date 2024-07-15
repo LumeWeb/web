@@ -2,7 +2,7 @@ import { useCustomMutation, useNotification } from "@refinedev/core";
 import { useCallback } from "react";
 import useApiUrl from "@/hooks/useApiUrl.js";
 import useSubscription from "@/hooks/useSubscription.js";
-import { SubscriptionBillingInfo } from "@/dataProviders/accountProvider.js";
+import { SubscriptionBillingInfo } from "portal-shared/dataProviders/accountProvider";
 import { AxiosError } from "axios";
 
 interface UpdateBillingErrorResponse {

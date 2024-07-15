@@ -1,11 +1,11 @@
 import { useGo, useLogin, useParsed } from "@refinedev/core";
-import type { AuthFormRequest } from "@/dataProviders/authProvider.js";
+import type { AuthFormRequest } from "portal-shared/dataProviders/authProvider";
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import LoginSchema from "@/routes/login/components/LoginForm.schema.js";
 import { useEffect } from "react";
-import { Field, FieldCheckbox } from "@/components/Forms.js";
-import { Button } from "@/components/ui/button.js";
+import { Field, FieldCheckbox } from "portal-shared/components/Forms";
+import { Button } from "portal-shared/components/ui/button.js";
 import { Link } from "@remix-run/react";
 
 export type LoginParams = {

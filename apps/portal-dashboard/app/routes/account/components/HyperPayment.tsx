@@ -6,8 +6,8 @@ import {
   useHyper,
   // @ts-ignore
 } from "../lib/hyper-react.js";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+import { Skeleton } from "portal-shared/components/ui/skeleton";
+import { Button } from "portal-shared/components/ui/button";
 import { useSubscriptionContext } from "@/routes/account/contexts/SubscriptionContext.js";
 import useRequestPaymentMethodChange from "../hooks/useRequestPaymentMethodChange";
 export default function HyperPayment({

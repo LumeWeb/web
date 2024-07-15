@@ -1,9 +1,9 @@
-import { UsageCard } from "@/components/UsageCard.js";
-import { AddIcon, CloudIcon } from "@/components/icons.js";
+import { UsageCard } from "portal-shared/components/UsageCard";
+import { AddIcon, CloudIcon } from "portal-shared/components/icons";
 import { Link } from "@remix-run/react";
-import { Button } from "@/components/ui/button.js";
+import { Button } from "portal-shared/components/ui/button.js";
 import useSubscription from "@/hooks/useSubscription.js";
-import useIsBillingEnabled from "@/hooks/useIsBillingEnabled.js";
+import useIsBillingEnabled from "portal-shared/hooks/useIsBillingEnabled";
 import { useCurrentUsage } from "@/hooks/useCurrentUsage.js";
 
 export default function AccountUsage() {

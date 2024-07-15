@@ -4,8 +4,8 @@ import {
   CardContent,
   CardFooter,
   CardTitle,
-} from "@/components/ui/card.js";
-import { Button } from "@/components/ui/button.js";
+} from "portal-shared/components/ui/card.js";
+import { Button } from "portal-shared/components/ui/button.js";
 
 export default function Addons() {
   return (

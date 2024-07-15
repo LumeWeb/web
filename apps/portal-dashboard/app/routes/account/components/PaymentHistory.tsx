@@ -5,8 +5,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "portal-shared/components/ui/card";
+import { Button } from "portal-shared/components/ui/button";
 import { useSubscriptionContext } from "../contexts/SubscriptionContext";
 import React, { MouseEventHandler, useEffect } from "react";
 import useSubmitSubscriptionCancellation from "@/routes/account/hooks/useSubmitSubscriptionCancellation.js";
@@ -19,7 +19,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog.js";
+} from "portal-shared/components/ui/alert-dialog.js";
 
 export default function SubscriptionHistory() {
   const [showDialog, setShowDialog] = React.useState(false);

@@ -1,13 +1,13 @@
 import type { MetaFunction } from "@remix-run/node";
 import { useSearchParams } from "@remix-run/react";
-import { Button } from "@/components/ui/button.js";
+import { Button } from "portal-shared/components/ui/button.js";
 import { useGetIdentity, useGo, useIsAuthenticated } from "@refinedev/core";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Identity } from "@/dataProviders/authProvider";
+import { Identity } from "portal-shared/dataProviders/authProvider";
 import logoPng from "@/images/lume-logo.png?url";
 import lumeBgPng from "@/images/lume-bg-image.png?url";
-import useSdk from "@/hooks/useSdk";
+import useSdk from "portal-shared/hooks/useSdk";
 import { Sdk } from "@lumeweb/portal-sdk";
 import useEmailVerification from "@/hooks/useEmailVerification";
 

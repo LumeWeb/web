@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from "react";
-import { DataTable, DataTableProps } from "@/components/DataTable";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DataTable, DataTableProps } from "portal-shared/components/DataTable";
+import { Button } from "portal-shared/components/ui/button";
+import { Input } from "portal-shared/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -9,20 +9,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "portal-shared/components/ui/dialog";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/ui/form";
+} from "portal-shared/components/ui/form";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { AlertCircle, Copy, Plus, Trash2 } from "lucide-react";
 import { APIKey, apiKeyColumns } from "./api-keys.columns.js";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "portal-shared/components/ui/alert";
 import { FieldValues } from "react-hook-form";
 import { DeleteOneResponse, useDelete, useNotification } from "@refinedev/core";
 import { createColumnHelper } from "@tanstack/react-table";

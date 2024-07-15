@@ -1,4 +1,8 @@
-import { FolderIcon, MoreIcon, RecentIcon } from "@/components/icons";
+import {
+  FolderIcon,
+  MoreIcon,
+  RecentIcon,
+} from "portal-shared/components/icons";
 
 export enum FileTypes {
   Folder = "FOLDER",

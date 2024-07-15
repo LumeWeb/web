@@ -1,9 +1,9 @@
-import { useAppStore } from "@/stores/app.js";
 import BaseService from "@/services/base.js";
 import { SERVICE_MENU_KEY } from "@/menuConfig.js";
+import { useBaseStore } from "portal-shared/store/baseStore";
 
 export function useRegisterServiceMenuItem() {
-  const addMenuItem = useAppStore((state) => state.addMenuItem);
+  const addMenuItem = useBaseStore((state) => state.addMenuItem);
 
   return (svc: BaseService) => {
     addMenuItem(

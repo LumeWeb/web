@@ -4,8 +4,8 @@ import { SetStateAction, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useModalForm } from "@refinedev/react-hook-form";
 import * as z from "zod";
-import { Tag, TagInput } from "@/components/ui/tag-input";
-import { Button } from "@/components/ui/button";
+import { Tag, TagInput } from "portal-shared/components/ui/tag-input";
+import { Button } from "portal-shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -13,14 +13,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "portal-shared/components/ui/dialog";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
+} from "portal-shared/components/ui/form";
 import { useActiveService } from "../hooks/useActiveService";
 
 const formSchema = z.object({

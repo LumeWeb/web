@@ -9,8 +9,8 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
+} from "portal-shared/components/ui/popover";
+import { Button } from "portal-shared/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -18,18 +18,18 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from "portal-shared/components/ui/command";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+} from "portal-shared/components/ui/form";
+import { Input } from "portal-shared/components/ui/input";
+import { cn } from "portal-shared/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "portal-shared/components/ui/skeleton";
 import { GetListResponse } from "@refinedev/core";
 import type { QueryObserverResult } from "@tanstack/react-query";
 

@@ -2,7 +2,7 @@ import { Link } from "@remix-run/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import { Button } from "portal-shared/components/ui/button";
 import {
   Form,
   FormControl,
@@ -10,12 +10,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { ToastAction } from "@/components/ui/toast";
+} from "portal-shared/components/ui/form";
+import { Input } from "portal-shared/components/ui/input";
+import { ToastAction } from "portal-shared/components/ui/toast";
 import { useForgotPassword, useNotification } from "@refinedev/core";
 import schema from "./ResetPasswordForm.schema";
-import { ForgotPasswordRequest } from "@/dataProviders/authProvider";
+import { ForgotPasswordRequest } from "portal-shared/dataProviders/authProvider";
 
 type ResetPasswordFormValues = z.infer<typeof schema>;
 

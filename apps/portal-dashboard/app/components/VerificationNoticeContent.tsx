@@ -1,6 +1,6 @@
 import React from "react";
 import { AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "portal-shared/components/ui/button";
 import useEmailVerification from "@/hooks/useEmailVerification";
 
 interface VerificationNoticeContentProps {

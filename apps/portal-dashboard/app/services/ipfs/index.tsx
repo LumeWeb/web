@@ -8,8 +8,8 @@ import getUploadManager from "@/features/uploadManager/store/getUploadManager";
 import XHRUpload, { XhrUploadOpts } from "@uppy/xhr-upload";
 import TusUpload, { TusOpts } from "@uppy/tus";
 import CarPreprocessorPlugin from "@/services/ipfs/carPreprocessor";
-import getProtocolDomain from "@/util/getProtocolDomain";
-import getSdk from "@/stores/getSdk.js";
+import getProtocolDomain from "portal-shared/util/getProtocolDomain";
+import getSdk from "portal-shared/store/getSdk";
 import dataProvider from "@refinedev/simple-rest";
 import {
   CreateParams,
@@ -30,8 +30,8 @@ import {
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { CID } from "multiformats/cid";
 import { Helia } from "helia";
-import fetchPortalMeta from "@/util/fetchPortalMeta.js";
-import getPortalUrl from "@/stores/getPortalUrl.js";
+import fetchPortalMeta from "portal-shared/util/fetchPortalMeta.js";
+import getPortalUrl from "portal-shared/store/getPortalUrl";
 import { IDBBlockstore } from "blockstore-idb";
 import { IDBDatastore } from "datastore-idb";
 import { createHeliaHTTP } from "@helia/http";
@@ -47,7 +47,7 @@ import { Folder } from "lucide-react";
 import { Button } from "apps/web3.news/app/components/ui/button";
 import { IPFS_SUBFOLDER_ROUTE } from "@/routeConfig";
 import { IPFS_SERVICE_ID } from "@/config";
-import { FileIcon } from "@/components/icons";
+import { FileIcon } from "portal-shared/components/icons";
 import { DataType, FileTree, FileTreeNode, PinStatus } from "./fileTree";
 import CIDTooltip from "@/routes/service/components/CIDToolTip";
 import ItemActions from "@/routes/service/components/ItemActions";
@@ -58,7 +58,7 @@ import Mutex from "p-mutex";
 import { trustlessGateway } from "@helia/block-brokers";
 import React from "react";
 import { CopyButton } from "@/routes/service/components/CopyButton";
-import { Tag } from "@/components/ui/tag-input.js";
+import { Tag } from "portal-shared/components/ui/tag-input.js";
 
 export const SERVICE_ID = IPFS_SERVICE_ID;
 const SERVICE_NAME = "IPFS";

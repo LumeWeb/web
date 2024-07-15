@@ -4,13 +4,13 @@ import PaymentHistory from "./components/PaymentHistory";
 import ChangePaymentMethod from "./components/ChangePaymentMethod";
 import Addons from "./components/Addons";
 import BillingInformation from "./components/BillingInformation";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "portal-shared/components/ui/skeleton";
 import {
   SubscriptionProvider,
   useSubscriptionContext,
 } from "./contexts/SubscriptionContext";
-import useIsPaidBillingEnabled from "@/hooks/useIsPaidBillingEnabled";
-import useOnFreePlan from "@/hooks/useOnFreePlan";
+import useIsPaidBillingEnabled from "portal-shared/hooks/useIsPaidBillingEnabled";
+import useOnFreePlan from "portal-shared/hooks/useOnFreePlan";
 
 export default function Subscription() {
   return (

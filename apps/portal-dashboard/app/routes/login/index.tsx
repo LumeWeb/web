@@ -1,14 +1,14 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
-import { Button } from "@/components/ui/button.js";
+import { Button } from "portal-shared/components/ui/button.js";
 import lumeColorLogoPng from "@/images/lume-color-logo.png?url";
 import discordLogoPng from "@/images/discord-logo.png?url";
 import lumeBgPng from "@/images/lume-bg-login.png?url";
 import InlineAuthLinkBanner from "@/components/InlineAuthLinkBanner";
-import LumeLogo from "@/components/LumeLogo.js";
+import LumeLogo from "portal-shared/components/LumeLogo";
 import { LoginForm } from "@/routes/login/components/LoginForm";
 import SocialLogin from "@/routes/login/components/SocialLogin";
-import useFeatureFlag from "@/hooks/useFeatureFlag";
+import useFeatureFlag from "portal-shared/hooks/useFeatureFlag";
 
 export const meta: MetaFunction = () => {
   return [

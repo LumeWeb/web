@@ -1,5 +1,9 @@
 import React from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "portal-shared/components/ui/dialog";
 import VerificationNoticeContent from "./VerificationNoticeContent";
 import useEmailVerification from "@/hooks/useEmailVerification";
 
