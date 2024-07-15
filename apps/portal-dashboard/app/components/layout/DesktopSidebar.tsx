@@ -1,6 +1,6 @@
 import { Link } from "@remix-run/react";
 import React from "react";
-import { UploadFileForm } from "./GeneralLayout";
+import UploadFileForm from "~/components/UploadFileForm";
 import { CircleLockIcon, ClockIcon, DriveIcon } from "../icons";
 import LumeLogo from "~/components/LumeLogo";
 import NavigationButton from "~/components/NavigationButton";
