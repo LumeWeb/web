@@ -38,9 +38,9 @@ export const PinningNetworkBanner = () => {
       ) || [],
     [data],
   );*/
-  const itemsQueued = [];
-  const itemsProcessing = [];
-  const completedItems = [];
+  const itemsQueued: any[] = [];
+  const itemsProcessing: any[] = [];
+  const completedItems: any[] = [];
   const data = {
     items: [],
   };
@@ -103,7 +103,7 @@ export const PinningNetworkBanner = () => {
   );
 };
 
-const PinCidItem = ({ item }: { item /*: PinningStatus */ }) => {
+const PinCidItem = ({ item }: { item: any /*: PinningStatus */ }) => {
   //const { unpin } = usePinning();
 
   return (
