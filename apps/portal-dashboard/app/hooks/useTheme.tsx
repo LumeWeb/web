@@ -1,10 +1,4 @@
-import {
-  type ReactNode,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { useCallback, useEffect } from "react";
 import { ThemeIcon } from "~/components/icons";
 import { Button } from "~/components/ui/button";
 import {
@@ -12,36 +6,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import useAppStore, {
+  PortalThemeActions,
+  PortalThemeState,
+} from "~/stores/app";
+import { useShallow } from "zustand/react/shallow";
 
 type Theme = "theme-blue" | "theme-eclipse" | "theme-custom";
 
-interface ThemeContextType {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-}
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-
-export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const [theme, setTheme] = useState<Theme>("theme-eclipse");
-
-  useEffect(() => {
-    document.documentElement.classList.remove(
-      "theme-blue",
-      "theme-eclipse",
-      "theme-custom",
-    );
-    document.documentElement.classList.add(theme);
-  }, [theme]);
-
-  return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
-};
+type ThemeStore = PortalThemeState & PortalThemeActions;
 
 export const ThemeSwitcher: React.FC = () => {
   const { theme, setTheme } = useTheme();
@@ -80,10 +53,30 @@ export const ThemeSwitcher: React.FC = () => {
   );
 };
 
-export const useTheme = (): ThemeContextType => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-  return context;
+export const useTheme = () => {
+  const selector = useCallback(
+    (state: ThemeStore) => ({
+      theme: state.theme,
+      setTheme: state.setTheme,
+    }),
+    [],
+  );
+
+  const { theme, setTheme } = useAppStore(
+    useShallow<ThemeStore, ThemeStore>(selector),
+  );
+
+  useEffect(() => {
+    document.documentElement.classList.forEach((item) => {
+      if (item.startsWith("theme-")) {
+        document.documentElement.classList.remove(item);
+      }
+    });
+    document.documentElement.classList.add(theme);
+  }, [theme]);
+
+  return {
+    theme,
+    setTheme,
+  };
 };
