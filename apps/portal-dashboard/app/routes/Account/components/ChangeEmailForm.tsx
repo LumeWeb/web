@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { DialogHeader, DialogTitle } from "~/components/ui/dialog.js";
 import schema from "./ChangeEmailForm.schema";
 import { Field } from "~/components/Forms";
+import { Button } from "~/components/ui/button";
 
 export default function ChangeEmailForm({
   currentValue,
