@@ -4,6 +4,7 @@ import { type BaseKey, useGetIdentity, useUpdate } from "@refinedev/core";
 import { useEffect } from "react";
 import { DialogHeader, DialogTitle } from "~/components/ui/dialog.js";
 import schema from "./ChangeEmailForm.schema";
+import { Field } from "~/components/Forms";
 
 export default function ChangeEmailForm({
   currentValue,
@@ -51,7 +52,28 @@ export default function ChangeEmailForm({
       <div className="rounded-full px-4 py-2 w-fit text-sm bg-ring font-bold text-secondary-1">
         {currentValue}
       </div>
-      <form {...getFormProps(form)}>{/* Form fields */}</form>
+      <form {...getFormProps(form)}>
+        <Field
+          className="mt-8"
+          inputProps={{ name: fields.email.name }}
+          labelProps={{ children: "New Email Address" }}
+          errors={fields.email.errors}
+        />
+        <Field
+          inputProps={{ name: fields.password.name, type: "password" }}
+          labelProps={{ children: "Password" }}
+          errors={fields.password.errors}
+        />
+        <Field
+          inputProps={{
+            name: fields.retypePassword.name,
+            type: "password",
+          }}
+          labelProps={{ children: "Retype Password" }}
+          errors={fields.retypePassword.errors}
+        />
+        <Button className="w-full h-14">Change Email Address</Button>
+      </form>
     </>
   );
 }
