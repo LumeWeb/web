@@ -1,13 +1,11 @@
-import { Dialog, DialogContent, DialogTrigger } from "@radix-ui/react-dialog";
 import { Link } from "@remix-run/react";
 import React from "react";
-import { UploadFileForm } from "./general-layout";
-import { CircleLockIcon, ClockIcon, CloudUploadIcon, DriveIcon } from "./icons";
-import LumeLogo from "./lume-logo";
-import NavigationButton from "./navigation-button";
-import { Button } from "./ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
-import { UploadFileButton } from "./upload-file-button";
+import { UploadFileForm } from "./GeneralLayout";
+import { CircleLockIcon, ClockIcon, DriveIcon } from "../icons";
+import LumeLogo from "~/components/LumeLogo";
+import NavigationButton from "~/components/NavigationButton";
+import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
+import { UploadFileButton } from "~/components/UploadFileButton";
 
 const navigationLinks = [
   { path: "/dashboard", label: "Dashboard", icon: ClockIcon },

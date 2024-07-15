@@ -13,13 +13,13 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Progress } from "~/components/ui/progress";
-import type { Identity } from "~/data/auth-provider";
+import type { Identity } from "~/dataProviders/authProvider";
 import useIsMobile from "~/hooks/useIsMobile";
 import discordLogoPng from "~/images/discord-logo.png?url";
 import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
-import { PinningProvider } from "~/providers/PinningProvider";
-import DesktopSidebar from "./desktop-sidebar";
-import { ErrorList } from "./forms";
+//import { PinningProvider } from "~/providers/PinningProvider";
+import DesktopSidebar from "./DesktopSidebar";
+import { ErrorList } from "../Forms";
 import {
   BoxCheckedIcon,
   CircleLockIcon,
@@ -32,7 +32,7 @@ import {
   PageIcon,
   ThemeIcon,
 } from "./icons";
-import filesize from "./lib/filesize";
+import filesize from "~/util/filesize";
 import { useUppy } from "./lib/uppy";
 import MobileSidebar from "./mobile-sidebar";
 import { PinningNetworkBanner } from "./pinning-network-banner";

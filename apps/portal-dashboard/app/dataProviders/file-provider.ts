@@ -1,15 +1,15 @@
-import type { SdkProvider } from "~/data/sdk-provider.js";
+import type { SdkProvider } from "~/dataProviders/sdk-provider.js";
 import type { S5Client } from "@lumeweb/s5-js";
 import { PROTOCOL_S5 } from "@lumeweb/portal-sdk";
-import { Multihash } from "@lumeweb/libs5";
-import type { AxiosProgressEvent } from "axios";
 import {
   CID,
   CID_TYPES,
   METADATA_TYPES,
   metadataMagicByte,
+  Multihash,
   Unpacker,
 } from "@lumeweb/libs5";
+import type { AxiosProgressEvent } from "axios";
 
 async function getIsManifest(
   s5: S5Client,

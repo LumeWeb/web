@@ -1,4 +1,10 @@
-import Uppy, { debugLogger, FailedUppyFile, type State, type UppyFile } from "@uppy/core";
+import Uppy, {
+  debugLogger,
+  FailedUppyFile,
+  type State,
+  type UppyFile,
+} from "@uppy/core";
+// @ts-ignore
 import NoopUrlStorage from "tus-js-client/lib.es5/noopUrlStorage.js";
 
 import Tus from "@uppy/tus";
@@ -12,9 +18,9 @@ import {
   useRef,
   useState,
 } from "react";
-import DropTarget, { type DropTargetOptions } from "./uppy-dropzone";
-import { useSdk } from "~/components/lib/sdk-context";
-import UppyFileUpload from "~/components/lib/uppy-file-upload";
+import DropTarget, { type DropTargetOptions } from "~/lib/uppy-dropzone.js";
+//import { useSdk } from "~/components/lib/sdk-context";
+import UppyFileUpload from "~/lib/uppy-file-upload";
 import { PROTOCOL_S5, type Sdk } from "@lumeweb/portal-sdk";
 import type { S5Client, HashProgressEvent } from "@lumeweb/s5-js";
 import { useInvalidate } from "@refinedev/core";
@@ -27,16 +33,16 @@ const LISTENING_EVENTS = [
   "file-added",
   "file-removed",
   "files-added",
-  "preprocess-progress"
+  "preprocess-progress",
 ] as const;
 
 export function useUppy() {
-  const invalidate = useInvalidate()
-  const sdk = useSdk();
+  const invalidate = useInvalidate();
+  // const sdk = useSdk();
 
   const [uploadLimit, setUploadLimit] = useState<number>(0);
 
-  useEffect(() => {
+  /*  useEffect(() => {
     async function getUploadLimit() {
       try {
         const limit = await sdk.account!().uploadLimit();
@@ -46,7 +52,7 @@ export function useUppy() {
       }
     }
     getUploadLimit();
-  }, [sdk.account]);
+  }, [sdk.account]);*/
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [targetRef, _setTargetRef] = useState<HTMLElement | null>(null);
@@ -61,13 +67,14 @@ export function useUppy() {
   >("initializing");
 
   const [inputProps, setInputProps] = useState<{
-        ref: typeof inputRef;
-        type: "file";
-        onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-      }
-  >();
+    ref: typeof inputRef;
+    type: "file";
+    onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  }>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [failedFiles, setFailedFiles] = useState<FailedUppyFile<Record<string, any>, Record<string, any>>[]>([])
+  const [failedFiles, setFailedFiles] = useState<
+    FailedUppyFile<Record<string, any>, Record<string, any>>[]
+  >([]);
   const getRootProps = useMemo(
     () => () => {
       return {
@@ -107,23 +114,23 @@ export function useUppy() {
         if (file.uploader === "tus") {
           const hashProgressCb = (event: HashProgressEvent) => {
             uppyInstance.current?.emit("preprocess-progress", file, {
-                mode: "determinate",
-                message: "Hashing file...",
-                value: Math.round((event.bytes / event.total) * 100),
+              mode: "determinate",
+              message: "Hashing file...",
+              value: Math.round((event.bytes / event.total) * 100),
             });
           };
-          const options = await sdk.protocols!()
+          /*  const options = await sdk.protocols!()
             .get<S5Client>(PROTOCOL_S5)
             .getSdk()
             .getTusOptions(
               file.data as File,
               {},
               { onHashProgress: hashProgressCb },
-            );
+            );*/
           uppyInstance.current?.setFileState(fileID, {
-            tus: options,
+            // tus: options,
             meta: {
-              ...options.metadata,
+              //   ...options.metadata,
               ...file.meta,
             },
           });
@@ -160,7 +167,7 @@ export function useUppy() {
           uppy.removePlugin(plugin);
         });
 
-        uppy.use(UppyFileUpload, { sdk: sdk as Sdk });
+        // uppy.use(UppyFileUpload, { sdk: sdk as Sdk });
 
         let useTus = false;
 
@@ -171,7 +178,12 @@ export function useUppy() {
         });
 
         if (useTus) {
-          uppy.use(Tus, { limit: 1, parallelUploads: 1, chunkSize: 1024 * 1024, urlStorage: new NoopUrlStorage() });
+          uppy.use(Tus, {
+            limit: 1,
+            parallelUploads: 1,
+            chunkSize: 1024 * 1024,
+            urlStorage: new NoopUrlStorage(),
+          });
           uppy.addPreProcessor(tusPreprocessor);
         }
 
@@ -200,8 +212,8 @@ export function useUppy() {
       setFailedFiles(result.failed);
       invalidate({
         resource: "file",
-        invalidates: ["list"]
-      })
+        invalidates: ["list"],
+      });
     });
 
     const setStateCb = (event: (typeof LISTENING_EVENTS)[number]) => {
@@ -224,12 +236,12 @@ export function useUppy() {
     };
 
     for (const event of LISTENING_EVENTS) {
-      uppy.on(event, function cb() {
+      uppy.on(event as any, function cb() {
         setStateCb(event);
       });
     }
     setState("idle");
-  }, [targetRef, invalidate, sdk, uploadLimit]);
+  }, [targetRef, invalidate, /*sdk,*/ uploadLimit]);
 
   useEffect(() => {
     return () => {

@@ -1,7 +1,7 @@
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { useMemo } from "react";
-import type { PinningStatus } from "~/data/pinning";
-import { usePinning } from "~/hooks/usePinning";
+//import type { PinningStatus } from "~/data/pinning";
+//import { usePinning } from "~/hooks/usePinning";
 import {
   Accordion,
   AccordionContent,
@@ -13,7 +13,7 @@ import { Progress } from "./ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 export const PinningNetworkBanner = () => {
-  const { progressData: data } = usePinning();
+  /*const { progressData: data } = usePinning();
 
   const itemsQueued = useMemo(
     () =>
@@ -37,7 +37,13 @@ export const PinningNetworkBanner = () => {
         item.status.includes("completed"),
       ) || [],
     [data],
-  );
+  );*/
+  const itemsQueued = [];
+  const itemsProcessing = [];
+  const completedItems = [];
+  const data = {
+    items: [],
+  };
 
   return (
     <div
@@ -58,7 +64,7 @@ export const PinningNetworkBanner = () => {
               </TabsList>
               <TabsContent value="queued">
                 {itemsQueued.length ? (
-                  itemsQueued.map((item: PinningStatus) => (
+                  itemsQueued.map((item /*: PinningStatus*/) => (
                     <PinCidItem key={item.id} item={item} />
                   ))
                 ) : (
@@ -69,7 +75,7 @@ export const PinningNetworkBanner = () => {
               </TabsContent>
               <TabsContent value="inProgress">
                 {itemsProcessing.length ? (
-                  itemsProcessing.map((item: PinningStatus) => (
+                  itemsProcessing.map((item /*: PinningStatus*/) => (
                     <PinCidItem key={item.id} item={item} />
                   ))
                 ) : (
@@ -80,7 +86,7 @@ export const PinningNetworkBanner = () => {
               </TabsContent>
               <TabsContent value="completed">
                 {completedItems.length ? (
-                  completedItems.map((item: PinningStatus) => (
+                  completedItems.map((item /*: PinningStatus*/) => (
                     <PinCidItem key={item.id} item={item} />
                   ))
                 ) : (
@@ -97,8 +103,8 @@ export const PinningNetworkBanner = () => {
   );
 };
 
-const PinCidItem = ({ item }: { item: PinningStatus }) => {
-  const { unpin } = usePinning();
+const PinCidItem = ({ item }: { item /*: PinningStatus */ }) => {
+  //const { unpin } = usePinning();
 
   return (
     <div className="px-4 mb-4">
@@ -110,11 +116,11 @@ const PinCidItem = ({ item }: { item: PinningStatus }) => {
             <Button
               variant="ghost"
               className="absolute top-2 right-2 hidden group-hover:flex rounded-full h-3"
-              onClick={() =>
-                unpin({
+              onClick={() => {
+                /*unpin({
                   cid: item.id,
-                })
-              }>
+                })*/
+              }}>
               <Cross2Icon />
             </Button>
           ) : null}

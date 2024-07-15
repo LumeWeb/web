@@ -1,25 +1,25 @@
-import { GeneralLayout } from "~/components/general-layout";
+import { GeneralLayout } from "~/components/layout/GeneralLayout";
 import {
-  CloudIcon,
   CloudDownloadIcon,
+  CloudIcon,
   CloudUploadSolidIcon,
   CurrentUsageIcon,
 } from "~/components/icons";
-import { UpgradeAccountBanner } from "~/components/upgrade-account-banner";
-import { UsageCard } from "~/components/usage-card";
-import { UsageChart } from "~/components/usage-chart";
+import { UpgradeAccountBanner } from "~/components/UpgradeAccountBanner.js";
+import { UsageCard } from "~/components/UsageCard.js";
+import { UsageChart } from "~/components/UsageChart.js";
 import { Authenticated } from "@refinedev/core";
-import SectionTitle from "~/components/section-title";
-import currentUsageIcon from "~/images/icons/current-usage.svg";
+import SectionTitle from "~/components/SectionTitle.js";
 
 export default function Dashboard() {
   return (
-    <Authenticated key="dashboard">
+    <Authenticated key="dashboard" v3LegacyAuthProviderCompatible>
       <GeneralLayout>
         <UpgradeAccountBanner />
         <SectionTitle
           icon={<CurrentUsageIcon className="text-foreground w-8 h-8" />}
-          title="Current Usage" />
+          title="Current Usage"
+        />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <UsageCard
             label="Storage"
@@ -42,7 +42,8 @@ export default function Dashboard() {
         </div>
         <SectionTitle
           icon={<CurrentUsageIcon className="text-foreground w-8 h-8" />}
-          title="Historical Usage" />
+          title="Historical Usage"
+        />
         <div className="grid gap-8 grid-cols-1 lg:grid-cols-2 ">
           <UsageChart
             dataset={[

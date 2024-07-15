@@ -1,4 +1,4 @@
-import { cn } from "~/utils";
+import { cn } from "~/util/cn.js";
 import { EditIcon, FingerPrintIcon } from "./icons";
 import { Avatar } from "./ui/avatar";
 import { Button } from "./ui/button";
@@ -36,10 +36,9 @@ const ManagementCardTitle = ({
   icon: Icon = FingerPrintIcon,
   className,
 }: React.PropsWithChildren<{
-  className?: string
+  className?: string;
   icon?: React.ComponentType<{ className?: string }>;
 }>) => {
-
   return (
     <div className={cn("flex items-center gap-x-2 font-semibold", className)}>
       <Icon className="text-foreground" />

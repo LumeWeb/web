@@ -1,10 +1,7 @@
 import { useMemo } from "react";
 import type { BaseRecord } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
-import {
-  type ColumnDef,
-  flexRender,
-} from "@tanstack/react-table";
+import { type ColumnDef, flexRender } from "@tanstack/react-table";
 
 import {
   Table,
@@ -13,12 +10,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./ui/table"
+} from "./ui/table";
 import { Skeleton } from "./ui/skeleton";
-import { DataTablePagination } from "./table-pagination"
+import { DataTablePagination } from "apps/portal-dashboard/app/components/TablePagination.js";
 
-interface DataTableProps<TData extends BaseRecord = BaseRecord, TValue = unknown> {
-  columns: ColumnDef<TData, TValue>[],
+interface DataTableProps<
+  TData extends BaseRecord = BaseRecord,
+  TValue = unknown,
+> {
+  columns: ColumnDef<TData, TValue>[];
   resource: string;
   dataProviderName?: string;
 }
@@ -26,29 +26,38 @@ interface DataTableProps<TData extends BaseRecord = BaseRecord, TValue = unknown
 export function DataTable<TData extends BaseRecord, TValue>({
   columns,
   resource,
-  dataProviderName
+  dataProviderName,
 }: DataTableProps<TData, TValue>) {
   const table = useTable({
     columns,
     refineCoreProps: {
       resource,
-      dataProviderName: dataProviderName || "default"
-    }
-  })
+      dataProviderName: dataProviderName || "default",
+    },
+  });
 
-  const loadingRows = useMemo(() => Array(4).fill({}).map(() => ({
-    getIsSelected: () => false,
-    getVisibleCells: () => columns.map(() => ({
-      column: {
-        columnDef: {
-          cell: <Skeleton className="h-4 w-full bg-foreground/30" />,
-        }
-      },
-      getContext: () => null
-    })),
-  })), [])
+  const loadingRows = useMemo(
+    () =>
+      Array(4)
+        .fill({})
+        .map(() => ({
+          getIsSelected: () => false,
+          getVisibleCells: () =>
+            columns.map(() => ({
+              column: {
+                columnDef: {
+                  cell: <Skeleton className="h-4 w-full bg-foreground/30" />,
+                },
+              },
+              getContext: () => null,
+            })),
+        })),
+    [],
+  );
 
-  const rows = table.refineCore.tableQueryResult.isLoading ? loadingRows : table.getRowModel().rows
+  const rows = table.refineCore.tableQueryResult.isLoading
+    ? loadingRows
+    : table.getRowModel().rows;
 
   return (
     <>
@@ -58,15 +67,17 @@ export function DataTable<TData extends BaseRecord, TValue>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header, index) => {
                 return (
-                  <TableHead key={`FileDataTableHeader_${index}`} style={{ width: header.getSize() }}>
+                  <TableHead
+                    key={`FileDataTableHeader_${index}`}
+                    style={{ width: header.getSize() }}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
-                )
+                );
               })}
             </TableRow>
           ))}
@@ -77,8 +88,7 @@ export function DataTable<TData extends BaseRecord, TValue>({
               <TableRow
                 key={`FileDataTableRow_${index}`}
                 data-state={row.getIsSelected() && "selected"}
-                className="group"
-              >
+                className="group">
                 {row.getVisibleCells().map((cell, index) => (
                   <TableCell key={`FileDataTableCell_${index}`}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -88,7 +98,9 @@ export function DataTable<TData extends BaseRecord, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center text-foreground">
+              <TableCell
+                colSpan={columns.length}
+                className="h-24 text-center text-foreground">
                 No results.
               </TableCell>
             </TableRow>
@@ -97,5 +109,5 @@ export function DataTable<TData extends BaseRecord, TValue>({
       </Table>
       <DataTablePagination table={table} />
     </>
-  )
+  );
 }
