@@ -8,19 +8,19 @@ import {
   DriveIcon,
   HamburgerMenuIcon,
   ThemeIcon,
-} from "./icons";
-import LumeLogo from "apps/portal-dashboard/app/components/LumeLogo.js";
-import NavigationButton from "apps/portal-dashboard/app/components/NavigationButton.js";
-import { Button } from "./ui/button";
-import { UploadFileForm } from "./general-layout";
+} from "apps/portal-dashboard/app/components/icons";
+import LumeLogo from "~/components/LumeLogo";
+import NavigationButton from "~/components/NavigationButton";
+import { Button } from "apps/portal-dashboard/app/components/ui/button";
+import UploadFileForm from "~/components/UploadFileForm";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { Avatar } from "./ui/avatar";
+} from "apps/portal-dashboard/app/components/ui/dropdown-menu";
+import { Avatar } from "apps/portal-dashboard/app/components/ui/avatar";
 import {
   Sheet,
   SheetContent,
@@ -28,7 +28,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "./ui/sheet";
+} from "apps/portal-dashboard/app/components/ui/sheet";
 import { ExitIcon } from "@radix-ui/react-icons";
 import { useLogout } from "@refinedev/core";
 

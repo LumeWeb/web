@@ -17,10 +17,10 @@ export default defineConfig({
       routes(defineRoutes) {
         return defineRoutes((route) => {
           route("/", "routes/index.tsx", { index: true });
-          route("/account", "app/routes/Account/index.tsx", { index: true });
-          route("/account/verify", "app/routes/Account/verify.tsx");
-          route("/login", "app/routes/Login/index.tsx");
-          route("/register", "app/routes/Register/index.tsx");
+          route("/account", "routes/Account/index.tsx", { index: true });
+          route("/account/verify", "routes/Account/verify.tsx");
+          route("/login", "routes/Login/index.tsx");
+          route("/register", "routes/Register/index.tsx");
         });
       },
     }),
