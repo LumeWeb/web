@@ -3,8 +3,8 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card.js";
-import { Button } from "@/components/ui/button.js";
+} from "portal-shared/components/ui/card.js";
+import { Button } from "portal-shared/components/ui/button.js";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -13,7 +13,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog.js";
+} from "portal-shared/components/ui/alert-dialog.js";
 import React, { useEffect } from "react";
 import HyperPayment from "./HyperPayment.js";
 import useSubmitSubscriptionConnect from "@/routes/account/hooks/useSubmitSubscriptionConnect.js";

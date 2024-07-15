@@ -1,5 +1,5 @@
 import { Authenticated } from "@refinedev/core";
-import { GeneralLayout } from "@/components/layout/GeneralLayout";
+import { GeneralLayout } from "portal-shared/components/layout/GeneralLayout";
 import DashboardCurrentUsage from "./components/DashboardCurrentUsage.js";
 import DashboardHistoricalUsage from "./components/DashboardHistoricalUsage.js";
 

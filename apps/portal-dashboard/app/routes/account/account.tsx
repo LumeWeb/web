@@ -1,18 +1,18 @@
 import { useGetIdentity } from "@refinedev/core";
 import { useState } from "react";
-import { AddIcon, CrownIcon } from "@/components/icons.js";
+import { AddIcon, CrownIcon } from "portal-shared/components/icons";
 import {
   ManagementCard,
   ManagementCardContent,
   ManagementCardFooter,
   ManagementCardTitle,
 } from "@/components/ManagementCard";
-import { Button } from "@/components/ui/button";
+import { Button } from "portal-shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
-} from "@/components/ui/dialog.js";
+} from "portal-shared/components/ui/dialog.js";
 import PasswordDots from "./components/PasswordDots";
 import ChangeAvatarForm from "./components/ChangeAvatarForm";
 import ChangeEmailForm from "./components/ChangeEmailForm";
@@ -20,13 +20,13 @@ import ChangePasswordForm from "./components/ChangePasswordForm";
 import SetupTwoFactorDialog from "./components/SetupTwoFactorDialog";
 import DisableTwoFactorDialog from "./components/DisableTwoFactorDialog";
 import DeleteAccountDialog from "@/routes/account/components/DeleteAccountDialog.js";
-import useIsBillingEnabled from "@/hooks/useIsBillingEnabled.js";
+import useIsBillingEnabled from "portal-shared/hooks/useIsBillingEnabled";
 import ManagementGrid from "@/components/ManagementGrid.js";
 import AccountUsage from "@/routes/account/components/AccountUsage.js";
-import useIsSupportEnabled from "@/hooks/useIsSupportEnabled";
-import usePluginMeta from "@/hooks/usePluginMeta";
+import useIsSupportEnabled from "portal-shared/hooks/useIsSupportEnabled";
+import usePluginMeta from "portal-shared/hooks/usePluginMeta";
 import { Link } from "@remix-run/react";
-import useIsPaidBillingEnabled from "@/hooks/useIsPaidBillingEnabled";
+import useIsPaidBillingEnabled from "portal-shared/hooks/useIsPaidBillingEnabled";
 import useSubscription from "@/hooks/useSubscription";
 
 interface ModalState {

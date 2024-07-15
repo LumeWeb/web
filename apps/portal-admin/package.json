@@ -3,5 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "sideEffects": false,
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm run start",
+    "start": "remix vite:dev  --mode production",
+    "build": "remix vite:build",
+    "serve": "remix preview"
+  }
 }

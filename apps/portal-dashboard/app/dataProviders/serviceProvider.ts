@@ -1,17 +1,13 @@
 import type {
   CreateParams,
-  CreateResponse,
-  DataProvider,
   DeleteOneParams,
   DeleteOneResponse,
   GetListParams,
   GetListResponse,
   GetOneParams,
-  GetOneResponse,
   UpdateParams,
-  UpdateResponse,
 } from "@refinedev/core";
-import { appStore } from "@/stores/app.js";
+import { dashboardStore } from "@/stores/app";
 
 export type ServiceItem = {
   id: string;
@@ -53,7 +49,7 @@ export const createServiceProvider = (): {
       params: GetListParams,
     ): Promise<GetListResponse<ServiceItem>> {
       const services: ServiceItem[] = [];
-      appStore
+      dashboardStore
         .getState()
         .getServices()
         .forEach((service) => {

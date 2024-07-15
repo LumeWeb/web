@@ -6,9 +6,14 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "portal-shared/components/ui/carousel";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "portal-shared/components/ui/card";
+import { Button } from "portal-shared/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,13 +23,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/util/cn.js";
-import filesize from "@/util/filesize.js";
-import { SubscriptionPlan } from "@/dataProviders/accountProvider";
+} from "portal-shared/components/ui/alert-dialog";
+import { Skeleton } from "portal-shared/components/ui/skeleton";
+import { cn } from "portal-shared/util/cn.js";
+import filesize from "portal-shared/util/filesize.js";
+import { SubscriptionPlan } from "portal-shared/dataProviders/accountProvider";
 import { useSubscriptionContext } from "@/routes/account/contexts/SubscriptionContext.js";
-import useOnFreePlan from "@/hooks/useOnFreePlan";
+import useOnFreePlan from "portal-shared/hooks/useOnFreePlan";
 import SubscribePayment from "@/routes/account/components/SubscribePayment";
 
 export default function PricingPlans() {

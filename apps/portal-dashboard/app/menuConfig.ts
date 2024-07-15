@@ -1,9 +1,9 @@
-import { MenuItem } from "./types";
+import { MenuItem } from "portal-shared/types";
 import {
   ClockIcon,
   CircleLockIcon,
   CloudUploadSolidIcon,
-} from "./components/icons";
+} from "portal-shared/components/icons";
 
 export const SERVICE_MENU_KEY = "service";
 

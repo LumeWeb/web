@@ -1,5 +1,5 @@
-import { appStore } from "@/stores/app";
+import { dashboardStore } from "@/stores/app";
 
 export default function getUploadManager() {
-  return appStore.getState().uploader;
+  return dashboardStore.getState().uploader;
 }

@@ -1,5 +1,5 @@
-import { useAppStore } from "@/stores/app.js";
+import { useDashboardStore } from "@/stores/app";
 
 export default function useUploader() {
-  return useAppStore((state) => state.uploader);
+  return useDashboardStore((state) => state.uploader);
 }

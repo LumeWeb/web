@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "@remix-run/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import { Button } from "portal-shared/components/ui/button";
 import {
   Form,
   FormControl,
@@ -11,10 +11,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "portal-shared/components/ui/form";
+import { Input } from "portal-shared/components/ui/input";
 import { useForgotPassword, useGo } from "@refinedev/core";
-import { ForgotPasswordConfirmRequest } from "@/dataProviders/authProvider";
+import { ForgotPasswordConfirmRequest } from "portal-shared/dataProviders/authProvider";
 
 const schema = z
   .object({

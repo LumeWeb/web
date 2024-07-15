@@ -1,6 +1,11 @@
 import { getServiceById, getServiceIds } from "@/services/index.js";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DataTable } from "@/components/DataTable.js";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "portal-shared/components/ui/tabs";
+import { DataTable } from "portal-shared/components/DataTable";
 import React from "react";
 
 export default function Manager() {

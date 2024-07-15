@@ -5,13 +5,13 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "portal-shared/components/ui/tooltip";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
+} from "portal-shared/components/ui/popover";
+import { Button } from "portal-shared/components/ui/button";
 import { CID } from "multiformats/cid";
 
 // Custom hook for copy functionality

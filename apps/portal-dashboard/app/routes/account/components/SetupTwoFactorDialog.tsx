@@ -6,9 +6,9 @@ import {
   useInvalidateAuthStore,
   useNotification,
 } from "@refinedev/core";
-import { Button } from "@/components/ui/button";
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Button } from "portal-shared/components/ui/button";
+import { DialogHeader, DialogTitle } from "portal-shared/components/ui/dialog";
+import { Input } from "portal-shared/components/ui/input";
 import {
   Form,
   FormControl,
@@ -17,13 +17,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "portal-shared/components/ui/form";
 import useApiUrl from "@/hooks/useApiUrl.js";
-import { OPTGenerateResponse } from "@/dataProviders/accountProvider";
+import { OPTGenerateResponse } from "portal-shared/dataProviders/accountProvider";
 import QRCode from "qrcode";
 import * as OTPAuth from "otpauth";
-import usePortalMeta from "@/hooks/usePortalMeta";
-import { Identity } from "@/dataProviders/authProvider";
+import usePortalMeta from "portal-shared/hooks/usePortalMeta";
+import { Identity } from "portal-shared/dataProviders/authProvider";
 
 export default function SetupTwoFactorDialog({ close }: { close: () => void }) {
   const [otp, setOtp] = useState("");

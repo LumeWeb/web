@@ -1,12 +1,16 @@
 import type React from "react";
 import { useEffect, useState } from "react";
-import { cn } from "@/util/cn";
-import { TrashIcon } from "./icons";
-import { Button } from "./ui/button";
-import { Checkbox } from "./ui/checkbox";
-import { Input } from "./ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Switch } from "./ui/switch";
+import { cn } from "portal-shared/util/cn";
+import { TrashIcon } from "portal-shared/components/icons";
+import { Button } from "portal-shared/components/ui/button";
+import { Checkbox } from "portal-shared/components/ui/checkbox";
+import { Input } from "portal-shared/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "portal-shared/components/ui/popover";
+import { Switch } from "portal-shared/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -14,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./ui/table";
+} from "portal-shared/components/ui/table";
 
 interface FlattenedField {
   key: string;

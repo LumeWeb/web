@@ -8,7 +8,7 @@ import {
 } from "@refinedev/core";
 import { Link } from "@remix-run/react";
 import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "portal-shared/components/ui/button";
 import {
   Form,
   FormControl,
@@ -16,12 +16,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "portal-shared/components/ui/form";
+import { Input } from "portal-shared/components/ui/input";
 
 import { LoginParams } from "./components/LoginForm";
 import schema from "./otp.schema";
-import { OTPFormRequest } from "@/dataProviders/authProvider.js";
+import { OTPFormRequest } from "portal-shared/dataProviders/authProvider";
 
 export default function OtpForm() {
   const { isLoading: isAuthLoading, data: authData } = useIsAuthenticated();

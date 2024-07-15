@@ -5,8 +5,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from "portal-shared/components/ui/dialog";
+import { Button } from "portal-shared/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,8 +14,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "portal-shared/components/ui/form";
+import { Input } from "portal-shared/components/ui/input";
 import { useForm } from "react-hook-form";
 import schema from "./ChangeEmailForm.schema";
 import { z } from "zod";

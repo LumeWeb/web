@@ -1,5 +1,5 @@
 import { useCustom } from "@refinedev/core";
-import type { SubscriptionPlansResponse } from "@/dataProviders/accountProvider";
+import type { SubscriptionPlansResponse } from "portal-shared/dataProviders/accountProvider";
 import useApiUrl from "@/hooks/useApiUrl.js";
 
 export default function useSubscriptionPlans() {

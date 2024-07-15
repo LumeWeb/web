@@ -1,13 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
-import { useCheckAuth } from "./useCheckAuth";
+import { useCheckAuth } from "portal-shared/hooks/useCheckAuth";
 import { useInitializeProviders } from "./useInitializeProviders";
 import { useInitializeResources } from "./useInitializeResources";
-import { AppActions } from "@/stores/app.js";
+import { DashboardActions } from "@/stores/app";
 import { IPFS } from "@/services/ipfs/index";
 import { getAddService, getGetServices } from "@/services/index";
 import { Sdk } from "@lumeweb/portal-sdk";
 import { AuthProvider, ResourceProps } from "@refinedev/core";
 import { useRegisterServiceMenuItem } from "@/hooks/useRegisterServiceMenuItem.js";
+import { menuConfig } from "@/menuConfig";
+import {
+  BaseActions,
+  baseStore,
+  useBaseStore,
+} from "portal-shared/store/baseStore";
+import { MenuItem } from "portal-shared/types";
 
 export function useAppInitialization(sdk?: Sdk, authProvider?: AuthProvider) {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -20,6 +27,7 @@ export function useAppInitialization(sdk?: Sdk, authProvider?: AuthProvider) {
   const initializeProviders = useInitializeProviders();
   const initializeResources = useInitializeResources();
   const registerServiceMenuItem = useRegisterServiceMenuItem();
+  const baseStore = useBaseStore((state) => state);
 
   const initializeApp = useCallback(async () => {
     if (!sdk || !authProvider || isInitialized) return;
@@ -37,6 +45,10 @@ export function useAppInitialization(sdk?: Sdk, authProvider?: AuthProvider) {
 
       setProviders(newProviders);
       setResources(newResources);
+
+      menuConfig.forEach((menu) => {
+        registerMenuItem(menu, baseStore);
+      });
 
       getServices().forEach(registerServiceMenuItem);
     }
@@ -76,12 +88,19 @@ export function useAppInitialization(sdk?: Sdk, authProvider?: AuthProvider) {
 }
 
 function registerServices(
-  addFunc: AppActions["addService"],
-  getFunc: AppActions["getServices"],
+  addFunc: DashboardActions["addService"],
+  getFunc: DashboardActions["getServices"],
 ) {
   [new IPFS()].forEach((svc) => {
     if (!getFunc().find((s) => s.id() === svc.id())) {
       addFunc(svc);
     }
+  });
+}
+
+function registerMenuItem(menu: MenuItem, baseStore: BaseActions) {
+  baseStore.addMenuItem(menu);
+  menu.children?.forEach((item) => {
+    baseStore.addMenuItem(item, menu.key);
   });
 }

@@ -1,9 +1,15 @@
 import { DialogClose } from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { useEffect, useMemo } from "react";
-import { CloudCheckIcon, CloudUploadIcon } from "@/components/icons.js";
-import { Button } from "@/components/ui/button";
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog.js";
+import {
+  CloudCheckIcon,
+  CloudUploadIcon,
+} from "portal-shared/components/icons";
+import { Button } from "portal-shared/components/ui/button";
+import {
+  DialogHeader,
+  DialogTitle,
+} from "portal-shared/components/ui/dialog.js";
 
 function useUppy() {
   return {

@@ -1,9 +1,9 @@
 import type { AuthProvider } from "@refinedev/core";
 import { fileProvider } from "@/dataProviders/file-provider.js";
 import { Sdk } from "@lumeweb/portal-sdk";
-import { accountProvider } from "@/dataProviders/accountProvider.js";
+import { accountProvider } from "portal-shared/dataProviders/accountProvider";
 import type { SdkProvider } from "@/dataProviders/sdk-provider.js";
-import { createPortalAuthProvider } from "@/dataProviders/authProvider.js";
+import { createPortalAuthProvider } from "portal-shared/dataProviders/authProvider";
 
 export interface DataProviders {
   default: SdkProvider;

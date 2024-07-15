@@ -7,7 +7,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "portal-shared/components/ui/card";
 import {
   Form,
   FormControl,
@@ -15,11 +15,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "portal-shared/components/ui/form";
+import { Input } from "portal-shared/components/ui/input";
+import { Textarea } from "portal-shared/components/ui/textarea";
+import { Button } from "portal-shared/components/ui/button";
+import { Skeleton } from "portal-shared/components/ui/skeleton";
 import useBillingInfo from "@/routes/account/hooks/useBillingInfo";
 import useSubmitBillingInfo from "@/routes/account/hooks/useSubmitBillingInfo";
 import {

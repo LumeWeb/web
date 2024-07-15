@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "./ui/button";
-import { cn } from "@/util/cn.js";
+import { Button } from "portal-shared/components/ui/button";
+import { cn } from "portal-shared/util/cn.js";
 
 const NavigationButton = ({
   children,

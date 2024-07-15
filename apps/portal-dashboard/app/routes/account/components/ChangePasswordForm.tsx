@@ -6,8 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from "portal-shared/components/ui/dialog";
+import { Button } from "portal-shared/components/ui/button";
 import {
   Form,
   FormControl,
@@ -15,9 +15,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import type { UpdatePasswordFormRequest } from "@/dataProviders/authProvider";
+} from "portal-shared/components/ui/form";
+import { Input } from "portal-shared/components/ui/input";
+import type { UpdatePasswordFormRequest } from "portal-shared/dataProviders/authProvider";
 import schema from "./ChangePasswordForm.schema";
 import { z } from "zod";
 

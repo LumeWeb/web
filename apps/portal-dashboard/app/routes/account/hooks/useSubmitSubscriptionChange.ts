@@ -1,6 +1,6 @@
 import { HttpError, useCustomMutation, useNotification } from "@refinedev/core";
 import { useCallback } from "react";
-import { SubscriptionPlan } from "@/dataProviders/accountProvider";
+import { SubscriptionPlan } from "portal-shared/dataProviders/accountProvider";
 import useSubscription from "@/hooks/useSubscription.js";
 import useApiUrl from "@/hooks/useApiUrl.js";
 

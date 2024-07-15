@@ -5,11 +5,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+} from "portal-shared/components/ui/dialog";
+import { Button } from "portal-shared/components/ui/button";
+import { Input } from "portal-shared/components/ui/input";
+import { Label } from "portal-shared/components/ui/label";
+import { Alert, AlertDescription } from "portal-shared/components/ui/alert";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 

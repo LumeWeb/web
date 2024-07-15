@@ -5,12 +5,12 @@ import {
   useNavigation,
   useParsed,
 } from "@refinedev/core";
-import { GeneralLayout } from "@/components/layout/GeneralLayout";
-import { DataTable } from "@/components/DataTable.js";
-import { AddIcon } from "@/components/icons.js";
+import { GeneralLayout } from "portal-shared/components/layout/GeneralLayout";
+import { DataTable } from "portal-shared/components/DataTable";
+import { AddIcon } from "portal-shared/components/icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "portal-shared/components/ui/button";
+import { Input } from "portal-shared/components/ui/input";
 import { ChevronRight, Search, X } from "lucide-react";
 import PinDialog from "./components/PinDialog";
 import { useActiveService } from "./hooks/useActiveService";
@@ -18,7 +18,7 @@ import { IPFS_SUBFOLDER_ROUTE, SERVICE_ROUTE } from "@/routeConfig.js";
 import { CID } from "multiformats/cid";
 import { BreadCrumbPath } from "@/services/base.js";
 import { useSearchParams } from "@remix-run/react";
-import { Identity } from "@/dataProviders/authProvider";
+import { Identity } from "portal-shared/dataProviders/authProvider";
 import UnverifiedUserModal from "@/components/UnverifiedUserModal";
 
 export default function Service() {

@@ -1,16 +1,16 @@
 import BaseService from "../services/base";
-import { AppActions, useAppStore } from "@/stores/app.js";
+import { DashboardActions, useDashboardStore } from "@/stores/app";
 
-export function getAddService(): AppActions["addService"] {
-  return useAppStore((state) => state.addService);
+export function getAddService(): DashboardActions["addService"] {
+  return useDashboardStore((state) => state.addService);
 }
 
 export function addService(svc: BaseService) {
   return getAddService()(svc);
 }
 
-export function getGetServices(): AppActions["getServices"] {
-  return useAppStore((state) => state.getServices);
+export function getGetServices(): DashboardActions["getServices"] {
+  return useDashboardStore((state) => state.getServices);
 }
 
 export function getServiceIds(): string[] {
@@ -18,9 +18,9 @@ export function getServiceIds(): string[] {
 }
 
 export function getServiceById(id: string): BaseService | undefined {
-  return useAppStore((state) => state.getServiceById)(id);
+  return useDashboardStore((state) => state.getServiceById)(id);
 }
 
 export function getResetServices() {
-  return useAppStore((state) => state.resetServices);
+  return useDashboardStore((state) => state.resetServices);
 }
