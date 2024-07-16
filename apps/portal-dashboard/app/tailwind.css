@@ -4,22 +4,6 @@
 
 @layer base {
   :root {
-    --system-color-1: 173 24% 7%; /* App background */
-    --system-color-2: 175 24% 9%; /* Subtle background */
-    --system-color-3: 174 55% 11%; /* UI element background */
-    --system-color-4: 176 93% 12%; /* Hovered UI element */
-    --system-color-5: 175 80% 16%; /* Active/selected UI element background */
-    --system-color-6: 174 63% 21%; /* Subtle borders and separators */
-    --system-color-7: 174 58% 26%; /* UI element border and focus */
-    --system-color-8: 173 59% 31%; /* Hovered UI element border */
-    --system-color-9: 174 80% 36%; /* Solid backgrounds */
-    --system-color-10: 172 85% 38%; /* Hovered solid background */
-    --system-color-11: 170 90% 45%; /* Low contrast text */
-    --system-color-12: 163 69% 81%; /* High contrast text */
-    --lume-bg-register: url("./images/lume-bg-register.png");
-    --lume-bg-reset-password: url("./images/lume-bg-reset-password.png");
-    --lume-bg-login: url("./images/lume-bg-login.png");
-
     --background: var(--system-color-1);
     --foreground: var(--system-color-12);
 
@@ -28,7 +12,7 @@
 
     --popover: var(--system-color-2);
     --popover-foreground: var(--system-color-11);
-    
+
     --primary: 242 51% 14%;
     --primary-1: 241 90% 82%;
     --primary-2: 241 21% 42%;
@@ -47,7 +31,6 @@
     --accent: var(--system-color-3);
     --accent-foreground: var(--system-color-11);
 
-
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 72% 51%;
 
@@ -58,7 +41,6 @@
 
     --radius: 6px;
   }
-
 
   .dark {
     /* Dark Theme System Colors */
@@ -77,6 +59,47 @@
   }
 }
 
+@layer base {
+  :root.theme-blue {
+    --system-color-1: 247 0% 0%;
+    --system-color-2: 249 0% 2%;
+    --system-color-3: 248 47% 10%;
+    --system-color-4: 250 65% 5%;
+    --system-color-5: 249 52% 9%;
+    --system-color-6: 248 35% 32%;
+    --system-color-7: 248 30% 19%;
+    --system-color-8: 247 31% 24%;
+    --system-color-9: 248 52% 29%;
+    --system-color-10: 246 57% 31%;
+    --system-color-11: 244 50% 64%;
+    --system-color-12: 237 41% 74%;
+
+    --lume-bg-register: url("./images/lume-bg-blue.png");
+    --lume-bg-reset-password: url("./images/lume-bg-blue.png");
+    --lume-bg-login: url("./images/lume-bg-blue.png");
+  }
+}
+
+@layer base {
+  :root.theme-eclipse {
+    --system-color-1: 173 24% 7%; /* App background */
+    --system-color-2: 175 24% 9%; /* Subtle background */
+    --system-color-3: 174 55% 11%; /* UI element background */
+    --system-color-4: 176 93% 12%; /* Hovered UI element */
+    --system-color-5: 175 80% 16%; /* Active/selected UI element background */
+    --system-color-6: 174 63% 21%; /* Subtle borders and separators */
+    --system-color-7: 174 58% 26%; /* UI element border and focus */
+    --system-color-8: 173 59% 31%; /* Hovered UI element border */
+    --system-color-9: 174 80% 36%; /* Solid backgrounds */
+    --system-color-10: 172 85% 38%; /* Hovered solid background */
+    --system-color-11: 170 90% 45%; /* Low contrast text */
+    --system-color-12: 163 69% 81%; /* High contrast text */
+
+    --lume-bg-register: url("./images/lume-bg-register.png");
+    --lume-bg-reset-password: url("./images/lume-bg-reset-password.png");
+    --lume-bg-login: url("./images/lume-bg-login.png");
+  }
+}
 
 @layer base {
   * {

@@ -15,6 +15,7 @@ import {
 import { Progress } from "~/components/ui/progress";
 import type { Identity } from "~/data/auth-provider";
 import useIsMobile from "~/hooks/useIsMobile";
+import { ThemeSwitcher } from "~/hooks/useTheme";
 import discordLogoPng from "~/images/discord-logo.png?url";
 import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
 import { PinningProvider } from "~/providers/PinningProvider";
@@ -68,9 +69,7 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
         {isMobile ? <MobileSidebar /> : <DesktopSidebar />}
         <div className="flex-1 overflow-y-auto p-4 sm:p-10">
           <div className="hidden sm:flex items-center gap-x-4 justify-end">
-            <Button variant="ghost" className="rounded-full w-fit">
-              <ThemeIcon className="text-foreground" />
-            </Button>
+            <ThemeSwitcher />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button className="border rounded-full h-auto p-2 gap-x-2 text-foreground font-semibold">
