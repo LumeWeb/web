@@ -68,12 +68,12 @@ export const ThemeSwitcher: React.FC = () => {
             onClick={() => setTheme("theme-eclipse")}>
             Eclipse {theme === "theme-eclipse" && "•"}
           </Button>
-          <Button
+          {/* <Button
             variant={theme === "theme-custom" ? "default" : "ghost"}
             className="w-full justify-start"
             onClick={() => setTheme("theme-custom")}>
             Custom {theme === "theme-custom" && "•"}
-          </Button>
+          </Button> */}
         </div>
       </PopoverContent>
     </Popover>
