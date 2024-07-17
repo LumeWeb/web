@@ -26,7 +26,7 @@ export default function ResetPasswordForm() {
         cancelMutation: () => {
           console.log("cancel mutation");
         },
-      });
+      } as any);
     },
   });
 
