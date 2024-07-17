@@ -1,22 +1,16 @@
-import { atom, useAtom } from "jotai";
+import { useAtom } from "jotai";
 import { useEffect } from "react";
-import { env } from "~/env.js";
-
-const portalAtom = atom(env.VITE_PORTAL_URL);
+import { portalUrlAtom } from "~/atoms/portalUrl";
+import fetchPortalMeta from "~/util/fetchPortalMeta.js";
 
 export default function usePortalUrl() {
-  const [portalUrl, setPortalUrl] = useAtom(portalAtom);
+  let [portalUrl, setPortalUrl] = useAtom(portalUrlAtom);
   useEffect(() => {
-    if (!portalUrl) {
-      fetch("/api/meta")
-        .then((response) => response.json())
-        .then((data) => {
-          setPortalUrl(`https://${data.domain}`);
-        })
-        .catch((error) => {
-          console.error("Failed to fetch portal url:", error);
-        });
-    }
+    fetchPortalMeta(portalUrl).then((data) => {
+      if (!portalUrl) {
+        setPortalUrl(`https://${data.domain}`);
+      }
+    });
   }, []);
 
   return portalUrl;
