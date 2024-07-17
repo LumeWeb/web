@@ -8,17 +8,18 @@ import {
 } from "@refinedev/core";
 import { useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-/*import { useSdk } from "~/components/lib/sdk-context.js";*/
 import { Identity } from "~/dataProviders/authProvider";
 import logoPng from "~/images/lume-logo.png?url";
 import lumeBgPng from "~/images/lume-bg-image.png?url";
+import useSdk from "~/hooks/useSdk";
+import { Sdk } from "@lumeweb/portal-sdk";
 
 export default function VerifyAuthenticated() {
   const go = useGo();
   const { open } = useNotification();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
-  //const sdk = useSdk();
+  const sdk = useSdk() as Sdk;
   const user = useGetIdentity<Identity>();
 
   const exchangeToken = useQuery({
@@ -26,8 +27,7 @@ export default function VerifyAuthenticated() {
     retry: false,
     enabled: !!user.data?.email && !!token,
     queryFn: async () => {
-      return false;
-      /*      const ret = await sdk.account!().verifyEmail({
+      const ret = await sdk.account!().verifyEmail({
         email: user.data?.email as string,
         token: token!,
       });
@@ -36,7 +36,7 @@ export default function VerifyAuthenticated() {
         return Promise.reject(ret);
       }
 
-      return ret;*/
+      return ret;
     },
   });
 
