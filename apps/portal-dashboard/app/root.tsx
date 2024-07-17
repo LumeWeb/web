@@ -16,6 +16,8 @@ import { Toaster } from "~/components/ui/toaster";
 import usePortalUrl from "~/hooks/usePortalUrl.js";
 import { IndeterminateProgressBar } from "~/components/ui/indeterminate-progress-bar";
 import useSdk from "~/hooks/useSdk.js";
+import { createPortalAuthProvider } from "~/dataProviders/authProvider";
+import routerProvider from "@refinedev/remix-router";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -57,7 +59,10 @@ export default function Root() {
   }
 
   return (
-    <Refine options={{ disableTelemetry: true }}>
+    <Refine
+      authProvider={createPortalAuthProvider(sdk)}
+      routerProvider={routerProvider}
+      options={{ disableTelemetry: true }}>
       <App />
     </Refine>
   );

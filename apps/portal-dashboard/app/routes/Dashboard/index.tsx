@@ -13,7 +13,7 @@ import SectionTitle from "~/components/SectionTitle";
 
 export default function Dashboard() {
   return (
-    <Authenticated key="dashboard" v3LegacyAuthProviderCompatible>
+    <Authenticated key="dashboard" v3LegacyAuthProviderCompatible={false}>
       <GeneralLayout>
         <UpgradeAccountBanner />
         <SectionTitle

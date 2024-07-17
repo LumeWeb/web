@@ -13,5 +13,9 @@ export default function usePortalUrl() {
     });
   }, []);
 
+  if (!portalUrl?.startsWith("http")) {
+    portalUrl = `https://${portalUrl}`;
+  }
+
   return portalUrl;
 }

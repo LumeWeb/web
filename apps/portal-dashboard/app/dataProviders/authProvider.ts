@@ -1,20 +1,12 @@
+import { create } from "zustand";
+import type { AccountInfoResponse } from "@lumeweb/portal-sdk";
+import { AccountError, Sdk } from "@lumeweb/portal-sdk";
 import type {
   AuthProvider,
   HttpError,
   UpdatePasswordFormTypes,
 } from "@refinedev/core";
-
-import type {
-  AuthActionResponse,
-  CheckResponse,
-  IdentityResponse,
-  OnErrorResponse,
-  SuccessNotificationResponse,
-  // @ts-ignore
-} from "@refinedev/core/dist/interfaces/bindings/auth";
-import { Sdk, AccountError } from "@lumeweb/portal-sdk";
-import type { AccountInfoResponse } from "@lumeweb/portal-sdk";
-
+import useAppStore from "~/stores/app";
 export type AuthFormRequest = {
   email: string;
   password: string;
@@ -41,81 +33,80 @@ export interface UpdatePasswordFormRequest extends UpdatePasswordFormTypes {
   currentPassword: string;
 }
 
-export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
-  const maybeSetupAuth = (): void => {
-    let jwt = sdk.account().jwtToken;
-    if (jwt) {
-      sdk.setAuthToken(jwt);
-      if (import.meta.env.DEV) {
-        localStorage.setItem("jwt", jwt);
-      }
-    }
+type ResponseResult = {
+  ret: boolean | Error;
+  successNotification?: any;
+  redirectToSuccess?: string;
+  redirectToError?: string;
+  successCb?: () => void;
+};
 
+interface CheckResponseResult extends ResponseResult {
+  authenticated?: boolean;
+}
+
+// Helper functions
+const maybeSetupAuth = (sdk: Sdk): void => {
+  let jwt = sdk.account().jwtToken;
+  if (jwt) {
+    sdk.setAuthToken(jwt);
     if (import.meta.env.DEV) {
-      let jwt = localStorage.getItem("jwt");
-      if (jwt) {
-        sdk.setAuthToken(jwt);
-      }
+      localStorage.setItem("jwt", jwt);
     }
-  };
-
-  type ResponseResult = {
-    ret: boolean | Error;
-    successNotification?: SuccessNotificationResponse;
-    redirectToSuccess?: string;
-    redirectToError?: string;
-    successCb?: () => void;
-  };
-
-  interface CheckResponseResult extends ResponseResult {
-    authenticated?: boolean;
   }
 
-  const handleResponse = (result: ResponseResult): AuthActionResponse => {
-    if (result.ret) {
-      if (result.ret instanceof AccountError) {
-        return {
-          success: false,
-          error: result.ret satisfies HttpError,
-          redirectTo: result.redirectToError,
-        };
-      }
-
-      result.successCb?.();
-
-      return {
-        success: result.ret,
-        successNotification: result.successNotification,
-        redirectTo: result.redirectToSuccess,
-      };
+  if (import.meta.env.DEV) {
+    let jwt = localStorage.getItem("jwt");
+    if (jwt) {
+      sdk.setAuthToken(jwt);
     }
+  }
+};
 
+const handleResponse = (result: ResponseResult): any => {
+  if (result.ret instanceof AccountError) {
     return {
-      success: result.ret,
+      success: false,
+      error: result.ret as HttpError,
       redirectTo: result.redirectToError,
     };
-  };
+  }
 
-  const handleCheckResponse = (result: CheckResponseResult): CheckResponse => {
-    const response = handleResponse(result);
-    const success = response.success;
-    console.log({ response });
-    delete response.success;
-
+  if (result.ret) {
+    result.successCb?.();
     return {
-      ...response,
-      authenticated: success,
+      success: true,
+      successNotification: result.successNotification,
+      redirectTo: result.redirectToSuccess,
     };
-  };
+  }
 
   return {
-    async login(params: AuthFormRequest): Promise<AuthActionResponse> {
+    success: false,
+    redirectTo: result.redirectToError,
+  };
+};
+
+const handleCheckResponse = (result: CheckResponseResult): any => {
+  const response = handleResponse(result);
+  const success = response.success;
+  delete response.success;
+
+  return {
+    ...response,
+    authenticated: success,
+  };
+};
+
+export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
+  return {
+    async login(params: AuthFormRequest): Promise<any> {
       const ret = await sdk.account().login({
         email: params.email,
         password: params.password,
       });
 
-      maybeSetupAuth();
+      maybeSetupAuth(sdk);
 
       return handleResponse({
         ret,
@@ -131,44 +122,40 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
       });
     },
 
-    async logout(params: any): Promise<AuthActionResponse> {
-      let ret = await sdk.account().logout();
+    async logout(): Promise<any> {
+      const ret = await sdk.account().logout();
 
-      if (ret) {
-        if (import.meta.env.DEV) {
-          localStorage.removeItem("jwt");
-        }
+      if (ret && import.meta.env.DEV) {
+        localStorage.removeItem("jwt");
       }
 
       return handleResponse({ ret, redirectToSuccess: "/login" });
     },
 
-    async check(params?: any): Promise<CheckResponse> {
-      maybeSetupAuth();
+    async check(): Promise<any> {
+      maybeSetupAuth(sdk);
       const ret = await sdk.account().ping();
-      maybeSetupAuth();
+      maybeSetupAuth(sdk);
 
-      const response = handleCheckResponse({
+      return handleCheckResponse({
         ret,
         redirectToError: "/login",
-        successCb: maybeSetupAuth,
+        successCb: () => maybeSetupAuth(sdk),
       });
-
-      console.log({ response });
-      return response;
     },
 
-    async onError(error: any): Promise<OnErrorResponse> {
+    async onError(): Promise<any> {
       return {};
     },
 
-    async register(params: RegisterFormRequest): Promise<AuthActionResponse> {
+    async register(params: RegisterFormRequest): Promise<any> {
       const ret = await sdk.account().register({
         email: params.email,
         password: params.password,
         first_name: params.firstName,
         last_name: params.lastName,
       });
+
       return handleResponse({
         ret,
         redirectToSuccess: "/login",
@@ -180,14 +167,12 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
       });
     },
 
-    async forgotPassword(params: any): Promise<AuthActionResponse> {
+    async forgotPassword(): Promise<any> {
       return { success: true };
     },
 
-    async updatePassword(
-      params: UpdatePasswordFormRequest,
-    ): Promise<AuthActionResponse> {
-      maybeSetupAuth();
+    async updatePassword(params: UpdatePasswordFormRequest): Promise<any> {
+      maybeSetupAuth(sdk);
       const ret = await sdk
         .account()
         .updatePassword(params.currentPassword, params.password as string);
@@ -201,14 +186,12 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
       });
     },
 
-    async getPermissions(
-      params?: Record<string, any>,
-    ): Promise<AuthActionResponse> {
+    async getPermissions(): Promise<any> {
       return { success: true };
     },
 
-    async getIdentity(params?: Identity): Promise<IdentityResponse> {
-      maybeSetupAuth();
+    async getIdentity(): Promise<any> {
+      maybeSetupAuth(sdk);
       const ret = await sdk.account().info();
 
       if (!ret) {
