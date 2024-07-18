@@ -8,12 +8,18 @@ import path from "path";
 import fs from "fs";
 
 export default defineConfig({
-  cacheDir: "../../node_modules/.vite/apps/portal-dashboard",
+  cacheDir: "../../node_modules/.vite/apps/portal-admin",
   plugins: [
     remix({
       ssr: false,
       ignoredRouteFiles: ["**/*.css"],
-      buildDirectory: "../../dist/apps/portal-dashboard",
+      buildDirectory: "../../dist/apps/portal-admin",
+      routes(defineRoutes) {
+        return defineRoutes((route) => {
+          route("/", "routes/index.tsx", { index: true });
+          route("/dashboard", "routes/Dashboard/index.tsx");
+        });
+      },
     }),
     tsconfigPaths(),
     nodePolyfills({
@@ -28,7 +34,7 @@ export default defineConfig({
   ],
   build: {
     minify: false,
-    outDir: "../../dist/apps/portal-dashboard",
+    outDir: "../../dist/apps/portal-admin",
     reportCompressedSize: true,
     commonjsOptions: { transformMixedEsModules: true },
   },
