@@ -89,7 +89,7 @@ function VerifyAuthenticated() {
             : null}
         </h1>
         {exchangeToken.isError ? (
-          <div>
+          <div className="flex flex-col gap-2 my-4 w-full max-w-md">
             <p className="opacity-60">{exchangeToken.error.message}</p>
             <Button
               onClick={() => {
