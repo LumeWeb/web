@@ -7,8 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 
 const navigationLinks = [
   { path: "/dashboard", label: "Dashboard", icon: ClockIcon },
-  { path: "/file-manager", label: "File Manager", icon: DriveIcon },
-  { path: "/account", label: "Account", icon: CircleLockIcon },
+  { path: "/cron", label: "Cron", icon: ClockIcon },
 ];
 
 export default function DesktopSidebar() {

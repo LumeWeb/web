@@ -18,6 +18,7 @@ import { IndeterminateProgressBar } from "~/components/ui/indeterminate-progress
 import useSdk from "~/hooks/useSdk.js";
 import { createPortalAuthProvider } from "~/dataProviders/authProvider";
 import routerProvider from "@refinedev/remix-router";
+import cronDataProvider from "~/dataProviders/cronProvider.js";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -62,6 +63,7 @@ export default function Root() {
     <Refine
       authProvider={createPortalAuthProvider(sdk)}
       routerProvider={routerProvider}
+      dataProvider={cronDataProvider}
       options={{ disableTelemetry: true }}>
       <App />
     </Refine>

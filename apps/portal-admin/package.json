@@ -3,5 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "sideEffects": false,
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "dotenv": "^16.4.5"
+  }
 }

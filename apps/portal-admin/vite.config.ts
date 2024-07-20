@@ -3,10 +3,15 @@ import { defineConfig } from "vite";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import tsconfigPaths from "vite-tsconfig-paths";
 import commonjs from "vite-plugin-commonjs";
+import mkcert from "vite-plugin-mkcert";
 
 import path from "path";
 import fs from "fs";
-
+import dotenv from "dotenv";
+import { resolve } from "node:url";
+dotenv.config({
+  path: resolve(process.cwd(), ".env.local"),
+});
 export default defineConfig({
   cacheDir: "../../node_modules/.vite/apps/portal-admin",
   plugins: [
@@ -18,6 +23,7 @@ export default defineConfig({
         return defineRoutes((route) => {
           route("/", "routes/index.tsx", { index: true });
           route("/dashboard", "routes/Dashboard/index.tsx");
+          route("/cron", "routes/Cron/index.tsx");
         });
       },
     }),
@@ -39,6 +45,8 @@ export default defineConfig({
     commonjsOptions: { transformMixedEsModules: true },
   },
   server: {
+    host: true,
+    port: 8081,
     fs: {
       // Restrict files that could be served by Vite's dev server.  Accessing
       // files outside this directory list that aren't imported from an allowed
