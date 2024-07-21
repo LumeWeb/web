@@ -1,14 +1,14 @@
 {
-  "name": "@lumeweb/portal-dashboard",
-  "version": "0.0.0",
-  "private": true,
-  "sideEffects": false,
-  "type": "module",
-  "dependencies": {
-    "@radix-ui/react-dialog": "^1.0.5",
-    "@radix-ui/react-popover": "^1.1.1",
-    "@radix-ui/react-switch": "^1.1.0",
-    "json-schema": "^0.4.0",
+	"name": "@lumeweb/portal-dashboard",
+	"version": "0.0.0",
+	"private": true,
+	"sideEffects": false,
+	"type": "module",
+	"dependencies": {
+		"@radix-ui/react-dialog": "^1.0.5",
+		"@radix-ui/react-popover": "^1.1.1",
+		"@radix-ui/react-switch": "^1.1.0",
+		"json-schema": "^0.4.0",
     "lucide-react": "^0.396.0"
-  }
+	}
 }
