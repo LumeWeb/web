@@ -1,7 +1,7 @@
-import { Trash } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { cn } from "../utils";
+import { TrashIcon } from "./icons";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
@@ -71,7 +71,7 @@ const ArrayEditor: React.FC<{
             <div key={index} className="flex items-center justify-between">
               <span>{item}</span>
               <Button variant="ghost" onClick={() => removeItem(item)}>
-                <Trash size={20} />
+                <TrashIcon className="h-4 w-4" />
               </Button>
             </div>
           ))}
