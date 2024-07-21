@@ -5,6 +5,7 @@ import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
 import { useEffect } from "react";
 import { z } from "zod";
+import { CssThemeableBg } from "~/components/css-themeable-bg";
 import { Field, FieldCheckbox } from "~/components/forms";
 import InlineAuthLinkBanner from "~/components/inline-auth-link-banner";
 import LumeLogo from "~/components/lume-logo";
@@ -12,7 +13,6 @@ import { Button } from "~/components/ui/button";
 import type { AuthFormRequest } from "~/data/auth-provider";
 import { ThemeSwitcher } from "~/hooks/useTheme";
 import discordLogoPng from "~/images/discord-logo.png?url";
-import lumeBgPng from "~/images/lume-bg-login.png?url";
 import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
 
 export const meta: MetaFunction = () => {
@@ -30,16 +30,12 @@ export default function Login() {
   return (
     <div className="h-screen relative sm:overflow-hidden">
       <div className="flex flex-col sm:flex-row-reverse items-center justify-center w-full h-full">
-        <header className="absolute z-50 top-4 left-4 sm:left-8">
+        <header className="absolute z-50 top-0 left-0 md:left-4 flex flex-row justify-between w-full p-8 lg:p-4">
           <LumeLogo />
+          <ThemeSwitcher />
         </header>
-        <div className="relative w-full h-full ">
-          <img
-            src={lumeBgPng}
-            alt="Lume background"
-            className="w-full sm:h-full object-cover"
-          />
-          <div className="absolute inset-0 flex sm:hidden flex-col items-start justify-center gap-2 text-left p-4 mt-60 sm:mt-10 ">
+        <div className="relative w-full h-full">
+          <div className="flex flex-col items-start justify-center lg:hidden gap-2 text-left p-4 mt-60 sm:mt-10 ">
             <h2 className="text-4xl sm:text-3xl font-bold">Welcome back</h2>
             <InlineAuthLinkBanner
               to="/register"
@@ -49,7 +45,7 @@ export default function Login() {
           </div>
         </div>
         <div className="flex flex-col items-start justify-start bg-background w-full sm:max-w-md ">
-          <div className="sm:mt-20 p-4 sm:p-10">
+          <div className="p-4 lg:p-10">
             <div className="hidden sm:flex flex-col items-start justify-center gap-2 text-left mb-10">
               <h2 className="text-4xl mb-2">Welcome back</h2>
               <InlineAuthLinkBanner
@@ -91,6 +87,10 @@ export default function Login() {
                 </li>
               </ul>
             </footer>
+            <CssThemeableBg
+              varName="--lume-bg-login"
+              className="h-1/3 lg:h-full"
+            />
           </div>
         </div>
       </div>

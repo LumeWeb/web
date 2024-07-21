@@ -1,17 +1,21 @@
-import type { MetaFunction } from "@remix-run/node"
-import { Link } from "@remix-run/react"
-import { Button } from "~/components/ui/button"
-import lumeColorLogoPng from "~/images/lume-color-logo.png?url"
-import discordLogoPng from "~/images/discord-logo.png?url"
-import lumeBgPng from "~/images/lume-bg-register.png?url"
-import { Field, FieldCheckbox } from "~/components/forms"
-import { getFormProps, useForm } from "@conform-to/react"
-import { z } from "zod"
-import { getZodConstraint, parseWithZod } from "@conform-to/zod"
+import { getFormProps, useForm } from "@conform-to/react";
+import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { useLogin, useNotification, useRegister } from "@refinedev/core";
-import { AuthFormRequest, RegisterFormRequest } from "~/data/auth-provider.js";
-import InlineAuthLinkBanner from "~/components/inline-auth-link-banner"
-import LumeLogo from "~/components/lume-logo"
+import type { MetaFunction } from "@remix-run/node";
+import { Link } from "@remix-run/react";
+import { z } from "zod";
+import { CssThemeableBg } from "~/components/css-themeable-bg";
+import { Field, FieldCheckbox } from "~/components/forms";
+import InlineAuthLinkBanner from "~/components/inline-auth-link-banner";
+import LumeLogo from "~/components/lume-logo";
+import { Button } from "~/components/ui/button";
+import type {
+  AuthFormRequest,
+  RegisterFormRequest,
+} from "~/data/auth-provider.js";
+import { ThemeSwitcher } from "~/hooks/useTheme";
+import discordLogoPng from "~/images/discord-logo.png?url";
+import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Sign Up" }];
@@ -44,7 +48,7 @@ const RegisterSchema = z
   });
 
 export default function Register() {
-  const register = useRegister<RegisterFormRequest>()
+  const register = useRegister<RegisterFormRequest>();
   const login = useLogin<AuthFormRequest>();
   const { open } = useNotification();
   const [form, fields] = useForm({
@@ -62,38 +66,33 @@ export default function Register() {
         password: data.password.toString(),
         firstName: data.firstName.toString(),
         lastName: data.lastName.toString(),
-      })
-    }
+      });
+    },
   });
 
   return (
-    <div className="p-4 h-screen relative">
-      <header
-        className="absolute top-4 left-4 sm:left-8"
-      >
+    <div className="p-4 h-screen flex flex-col lg:justify-center relative">
+      <header className="absolute top-0 left-0 md:left-4 flex flex-row justify-between w-full p-8 lg:p-4">
         <LumeLogo />
+        <ThemeSwitcher />
       </header>
       <form
-        className="w-full p-2 max-w-md space-y-4 mt-14 sm:bg-background"
+        className="w-full p-4 lg:p-10 max-w-md mt-14 sm:bg-background"
         {...getFormProps(form)}>
-        <span className=" space-y-2">
-          <h2 className="text-4xl sm:text-3xl">All Roads Lead to Lume
-
+        <span className="space-y-4 block">
+          <h2 className="text-4xl sm:text-3xl font-medium">
+            All Roads Lead to Lume
           </h2>
-          <p className="text-foreground mt-4">
+          <p className="text-foreground">
             🤘 Get 50 GB free storage and download for free,{" "}
-            <b
-              className="text-foreground">
-              forever
-            </b>
-            .{" "}
+            <b className="text-foreground">forever</b>.{" "}
           </p>
+          <InlineAuthLinkBanner to="/login" label="Already have an account?" />
         </span>
-        <InlineAuthLinkBanner to="/login" label="Already have an account?" />
-        <div
-          className="mt-10"
-        >
-          <h3 className=" block  sm:hidden text-2xl text-foreground mb-10">Create a New Account</h3>
+        <div className="mt-6 lg:mt-10">
+          <h3 className="block sm:hidden text-2xl text-foreground mb-10">
+            Create a New Account
+          </h3>
           <div className="flex gap-4">
             <Field
               className="flex-1"
@@ -127,9 +126,7 @@ export default function Register() {
             inputProps={{ name: fields.termsOfService.name, form: form.id }}
             labelProps={{
               children: (
-                <span
-                  className="text-sm"
-                >
+                <span className="text-sm">
                   I agree to the
                   <Link
                     to="/terms-of-service"
@@ -149,38 +146,39 @@ export default function Register() {
           />
           <Button className=" w-full h-14">Create Account</Button>
         </div>
+        <footer className="my-5">
+          <ul className="flex flex-row">
+            <li>
+              <Link to="https://discord.lumeweb.com">
+                <Button
+                  variant={"link"}
+                  className="flex flex-row gap-x-2 text-input-placeholder">
+                  <img
+                    className="h-5"
+                    src={discordLogoPng}
+                    alt="Discord Logo"
+                  />
+                  Connect with us
+                </Button>
+              </Link>
+            </li>
+            <li>
+              <Link to="https://lumeweb.com">
+                <Button
+                  variant={"link"}
+                  className="flex flex-row gap-x-2 text-input-placeholder">
+                  <img className="h-5" src={lumeColorLogoPng} alt="Lume Logo" />
+                  Connect with us
+                </Button>
+              </Link>
+            </li>
+          </ul>
+        </footer>
       </form>
-      <div className="h-1/3 sm:h-full fixed inset-0 -z-10 overflow-clip">
-        <img
-          src={lumeBgPng}
-          alt="Lume background"
-          className="absolute top-0 right-0 md:w-2/3 w-full sm:h-full object-cover z-[-1]"
-        />
-      </div>
-      <footer className="my-5">
-        <ul className="flex flex-row">
-          <li>
-            <Link to="https://discord.lumeweb.com">
-              <Button
-                variant={"link"}
-                className="flex flex-row gap-x-2 text-input-placeholder">
-                <img className="h-5" src={discordLogoPng} alt="Discord Logo" />
-                Connect with us
-              </Button>
-            </Link>
-          </li>
-          <li>
-            <Link to="https://lumeweb.com">
-              <Button
-                variant={"link"}
-                className="flex flex-row gap-x-2 text-input-placeholder">
-                <img className="h-5" src={lumeColorLogoPng} alt="Lume Logo" />
-                Connect with us
-              </Button>
-            </Link>
-          </li>
-        </ul>
-      </footer>
+      <CssThemeableBg
+        varName="--lume-bg-register"
+        className="h-1/3 lg:w-auto lg:h-1/3"
+      />
     </div>
   );
 }

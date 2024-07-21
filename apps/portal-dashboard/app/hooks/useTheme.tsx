@@ -25,7 +25,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [theme, setTheme] = useState<Theme>("theme-blue");
+  const [theme, setTheme] = useState<Theme>("theme-eclipse");
 
   useEffect(() => {
     document.documentElement.classList.remove(
