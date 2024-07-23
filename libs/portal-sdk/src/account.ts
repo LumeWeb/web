@@ -352,6 +352,7 @@ export class AccountApi {
     return {
       baseURL: this.apiUrl,
       headers: headers,
+      withCredentials: true,
     };
   }
 }
