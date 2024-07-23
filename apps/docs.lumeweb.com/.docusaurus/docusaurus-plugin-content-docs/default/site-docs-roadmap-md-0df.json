@@ -1,0 +1,22 @@
+{
+  "id": "roadmap",
+  "title": "Roadmap",
+  "description": "The following is our currently planned roadmap:",
+  "source": "@site/docs/roadmap.md",
+  "sourceDirName": ".",
+  "slug": "/roadmap",
+  "permalink": "/roadmap",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/LumeWeb/web/tree/develop/apps/docs.lumeweb.com/docs/roadmap.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Roadmap"
+  },
+  "sidebar": "main",
+  "previous": {
+    "title": "Building Blocks of Web3",
+    "permalink": "/problems/web3-building-blocks"
+  }
+}
