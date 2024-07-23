@@ -4,6 +4,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
+    "release": "changeset publish",
     "build": "nx run-many -t test build",
     "build:changed": "nx affected -t test build",
     "build:portal-dashboard": "nx run @lumeweb/portal-dashboard:build",
