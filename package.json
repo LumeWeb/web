@@ -98,7 +98,7 @@
     "meilisearch": "^0.38.0",
     "memize": "^2.1.0",
     "memoizee": "^0.4.17",
-    "mime": "^4.0.1",
+    "mime": "^4.0.4",
     "multiformats": "^13.0.0",
     "nx": "18.2.3",
     "orval": "^6.24.0",
