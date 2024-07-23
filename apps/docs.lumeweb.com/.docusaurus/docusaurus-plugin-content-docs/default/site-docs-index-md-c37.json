@@ -1,0 +1,24 @@
+{
+  "id": "index",
+  "title": "Welcome",
+  "description": "This project was created so that we can have a true open web in which we can start back from web 1.0 and build what should have been, but never happened. While this idea as a whole takes on many names, we can all agree that it should be about openness and freedom.",
+  "source": "@site/docs/index.md",
+  "sourceDirName": ".",
+  "slug": "/",
+  "permalink": "/",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/LumeWeb/web/tree/develop/apps/docs.lumeweb.com/docs/index.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "route": "/",
+    "id": "index",
+    "title": "Welcome"
+  },
+  "sidebar": "main",
+  "next": {
+    "title": "What is Lume?",
+    "permalink": "/intro/about"
+  }
+}
