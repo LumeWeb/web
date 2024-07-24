@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { ThemeIcon } from "~/components/icons";
 import { Button } from "~/components/ui/button";
 import {
@@ -6,15 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import useAppStore, {
-  PortalThemeActions,
-  PortalThemeState,
-} from "~/stores/app";
-import { useShallow } from "zustand/react/shallow";
-
-type Theme = "theme-blue" | "theme-eclipse" | "theme-custom";
-
-type ThemeStore = PortalThemeState & PortalThemeActions;
+import { useAppStore } from "~/stores/app";
 
 export const ThemeSwitcher: React.FC = () => {
   const { theme, setTheme } = useTheme();
@@ -54,17 +46,8 @@ export const ThemeSwitcher: React.FC = () => {
 };
 
 export const useTheme = () => {
-  const selector = useCallback(
-    (state: ThemeStore) => ({
-      theme: state.theme,
-      setTheme: state.setTheme,
-    }),
-    [],
-  );
-
-  const { theme, setTheme } = useAppStore(
-    useShallow<ThemeStore, ThemeStore>(selector),
-  );
+  const theme = useAppStore((state) => state.theme);
+  const setTheme = useAppStore((state) => state.setTheme);
 
   useEffect(() => {
     document.documentElement.classList.forEach((item) => {

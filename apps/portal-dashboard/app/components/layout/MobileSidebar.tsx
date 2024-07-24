@@ -4,15 +4,12 @@ import {
   CircleLockIcon,
   ClockIcon,
   CloudUploadIcon,
-  CurrentUsageIcon,
   DriveIcon,
   HamburgerMenuIcon,
-  ThemeIcon,
 } from "apps/portal-dashboard/app/components/icons";
 import LumeLogo from "~/components/LumeLogo";
 import NavigationButton from "~/components/NavigationButton";
 import { Button } from "apps/portal-dashboard/app/components/ui/button";
-import UploadFileForm from "~/components/UploadFileForm";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,11 +23,12 @@ import {
   SheetContent,
   SheetDescription,
   SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "apps/portal-dashboard/app/components/ui/sheet";
 import { ExitIcon } from "@radix-ui/react-icons";
 import { useLogout } from "@refinedev/core";
+import React from "react";
+import UploadForm from "~/features/uploadManager/components/UploadForm";
 
 const navigationLinks = [
   { path: "/dashboard", label: "Dashboard", icon: ClockIcon },
@@ -74,7 +72,7 @@ export default function MobileSidebar() {
               <SheetContent side="bottom">
                 <div className="w-full flex flex-col items-start justify-between my-auto">
                   <div className="w-full flex flex-col">
-                    <UploadFileForm />
+                    <UploadForm />
                   </div>
                 </div>
               </SheetContent>

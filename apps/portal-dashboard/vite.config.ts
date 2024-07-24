@@ -17,21 +17,21 @@ export default defineConfig({
       routes(defineRoutes) {
         return defineRoutes((route) => {
           route("/", "routes/index.tsx", { index: true });
-          route("/account", "routes/Account/index.tsx", { index: true });
-          route("/account/verify", "routes/Account/verify.tsx");
-          route("/login", "routes/Login/index.tsx");
-          route("/register", "routes/Register/index.tsx");
+          route("/account", "routes/account/index.tsx", { index: true });
+          route("/account/verify", "routes/account/verify.tsx");
+          route("/login", "routes/login/index.tsx");
+          route("/register", "routes/register/index.tsx");
         });
       },
     }),
     tsconfigPaths(),
     nodePolyfills({
       protocolImports: false,
-      include: ["buffer", "url", "events"],
+      include: ["buffer", "url"],
     }),
     commonjs({
       filter(id) {
-        return id.includes("url") || id.includes("events");
+        return id.includes("url");
       },
     }),
   ],

@@ -1,8 +1,9 @@
 import memoize from "memoizee";
 import getApiBaseUrl from "./getApiBaseUrl";
+import { PortalMeta } from "~/stores/app";
 
 const _fetchPortalMeta = memoize(
-  function (portalUrl?: string) {
+  function (portalUrl?: string): PortalMeta {
     const endpoint = "/api/meta";
     const baseUrl = getApiBaseUrl();
     let fullEndpoint = "";
