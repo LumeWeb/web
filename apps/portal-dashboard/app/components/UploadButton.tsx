@@ -1,10 +1,10 @@
 import React from "react";
-import { CloudUploadIcon } from "./icons";
-import { Button } from "./ui/button";
 
 import { forwardRef } from "react";
+import { Button } from "./ui/button";
+import { CloudUploadIcon } from "./icons";
 
-export const UploadFileButton = forwardRef<
+export const UploadButton = forwardRef<
   HTMLButtonElement,
   React.ComponentPropsWithoutRef<typeof Button>
 >((props, ref) => {
@@ -20,4 +20,4 @@ export const UploadFileButton = forwardRef<
   );
 });
 
-UploadFileButton.displayName = "UploadFileButton";
+UploadButton.displayName = "UploadFileButton";

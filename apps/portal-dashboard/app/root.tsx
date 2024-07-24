@@ -19,6 +19,10 @@ import useSdk from "~/hooks/useSdk.js";
 import { createPortalAuthProvider } from "~/dataProviders/authProvider";
 import routerProvider from "@refinedev/remix-router";
 import { notificationProvider } from "~/dataProviders/notificationProvider";
+import { IPFS } from "~/services/ipfs/index.js";
+import BaseService from "~/services/base";
+import { useEffect, useRef } from "react";
+import { AppActions, appStore, useAppStore } from "~/stores/app";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -54,6 +58,15 @@ function App() {
 export default function Root() {
   const portalUrl = usePortalUrl();
   const sdk = useSdk();
+  const servicesRegistered = useRef(false);
+  const addService = useAppStore((state) => state.addService);
+
+  useEffect(() => {
+    if (sdk && !servicesRegistered.current) {
+      registerServices(addService);
+      servicesRegistered.current = true;
+    }
+  }, [sdk]);
 
   if (!portalUrl || !sdk) {
     return <IndeterminateProgressBar indeterminate={true} />;
@@ -74,4 +87,8 @@ export default function Root() {
 
 export function HydrateFallback() {
   return <IndeterminateProgressBar indeterminate={true} />;
+}
+
+function registerServices(addFunc: AppActions["addService"]) {
+  [new IPFS()].forEach((svc: BaseService) => addFunc(svc));
 }

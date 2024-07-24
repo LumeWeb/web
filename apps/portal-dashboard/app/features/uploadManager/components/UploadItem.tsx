@@ -1,29 +1,32 @@
-import type { FailedUppyFile, UppyFile } from "@uppy/core";
+import type { UppyFile, Meta, Body } from "@uppy/core";
 import {
   BoxCheckedIcon,
   ExclamationCircleIcon,
   PageIcon,
-} from "~/components/icons.js";
+} from "~/components/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "~/components/ui/tooltip.js";
-import filesize from "~/util/filesize.js";
-import { Button } from "~/components/ui/button.js";
+} from "~/components/ui/tooltip";
+import filesize from "~/util/filesize";
+import { Button } from "~/components/ui/button";
 import { TrashIcon } from "@radix-ui/react-icons";
-import { Progress } from "~/components/ui/progress.js";
+import { Progress } from "~/components/ui/progress";
+import { UppyFileDefault } from "~/features/uploadManager/lib/uploadManager";
+import useUploader from "~/features/uploadManager/hooks/useUploader.js";
 
-export default function UploadFileItem({
+export default function UploadItem({
   file,
   failedState,
   onRemove,
 }: {
-  file: UppyFile;
-  failedState?: FailedUppyFile<Record<string, any>, Record<string, any>>;
+  file: UppyFileDefault;
+  failedState?: any;
   onRemove: (id: string) => void;
 }) {
+  const uploader = useUploader();
   return (
     <div className="flex flex-col w-full py-4 px-2 bg-secondary">
       <div
@@ -47,12 +50,12 @@ export default function UploadFileItem({
                   <span className="truncate text-ellipsis max-w-[20ch]">
                     {file.name}
                   </span>{" "}
-                  <span>({filesize(file.size, 2)})</span>
+                  <span>({filesize(file!.size as number, 2)})</span>
                 </p>
               </TooltipTrigger>
               <TooltipContent>
                 <p>
-                  {file.name} ({filesize(file.size, 2)})
+                  {file.name} ({filesize(file!.size as number, 2)})
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -63,7 +66,9 @@ export default function UploadFileItem({
           variant={"ghost"}
           className="!text-inherit"
           onClick={() => onRemove(file.id)}>
-          <TrashIcon className="w-4 h-4 text-foreground" />
+          {!file.progress?.uploadComplete && (
+            <TrashIcon className="w-4 h-4 text-foreground" />
+          )}
         </Button>
       </div>
 
@@ -74,7 +79,7 @@ export default function UploadFileItem({
             <Button
               size={"sm"}
               onClick={() => {
-                /* Retry upload function here */
+                uploader.retryFile(file);
               }}>
               Retry
             </Button>
@@ -98,7 +103,6 @@ export default function UploadFileItem({
             value={file.progress?.preprocess?.value ?? 0}
             className="mt-2"
           />
-          muted
         </div>
       ) : null}
       {file.progress?.uploadStarted && !file.progress.uploadComplete ? (

@@ -2,9 +2,20 @@ import { DialogClose } from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { useEffect, useMemo } from "react";
 import { CloudCheckIcon, CloudUploadIcon } from "~/components/icons.js";
-import { useUppy } from "~/hooks/uppy";
 import { Button } from "~/components/ui/button";
 import { DialogHeader, DialogTitle } from "~/components/ui/dialog.js";
+
+function useUppy() {
+  return {
+    getRootProps: () => ({}),
+    getInputProps: () => ({}),
+    getFiles: () => [],
+    upload: () => {},
+    state: "idle",
+    removeFile: () => {},
+    cancelAll: () => {},
+  };
+}
 
 export default function ChangeAvatarForm({ close }: { close: () => void }) {
   const {
@@ -24,7 +35,7 @@ export default function ChangeAvatarForm({ close }: { close: () => void }) {
 
   const imagePreview = useMemo(() => {
     if (file) {
-      return URL.createObjectURL(file.data);
+      return URL.createObjectURL(file?.data);
     }
   }, [file]);
 

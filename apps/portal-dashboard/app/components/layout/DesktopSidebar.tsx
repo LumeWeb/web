@@ -1,11 +1,11 @@
 import { Link } from "@remix-run/react";
 import React from "react";
-import UploadFileForm from "~/components/UploadFileForm";
 import { CircleLockIcon, ClockIcon, DriveIcon } from "../icons";
 import LumeLogo from "~/components/LumeLogo";
 import NavigationButton from "~/components/NavigationButton";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
-import { UploadFileButton } from "~/components/UploadFileButton";
+import { UploadButton } from "~/components/UploadButton";
+import UploadForm from "~/features/uploadManager/components/UploadForm";
 
 const navigationLinks = [
   { path: "/dashboard", label: "Dashboard", icon: ClockIcon },
@@ -35,10 +35,10 @@ export default function DesktopSidebar() {
 
       <Sheet>
         <SheetTrigger asChild>
-          <UploadFileButton />
+          <UploadButton />
         </SheetTrigger>
         <SheetContent>
-          <UploadFileForm />
+          <UploadForm />
         </SheetContent>
       </Sheet>
     </header>

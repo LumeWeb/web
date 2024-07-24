@@ -1,45 +1,60 @@
-import { create } from "zustand";
+import { createStore } from "zustand/vanilla";
 import { Sdk } from "@lumeweb/portal-sdk";
+import UploadManager from "~/features/uploadManager/lib/uploadManager";
+import BaseService from "~/services/base.js";
+import { StoreApi, useStore } from "zustand";
+import { env } from "~/env.js";
 
-interface PortalMeta {
+export interface PortalMeta {
   domain: string;
 }
 
-export interface SdkState {
+export interface AppState {
   sdk?: Sdk;
-}
-
-export interface SdkActions {
-  setSdk: (sdk: Sdk) => void;
-}
-
-export interface PortalMetaState {
   meta?: PortalMeta;
-}
-
-export type AppState = SdkState & PortalMetaState & PortalThemeState;
-
-export interface PortalMetaActions {
-  setMeta: (meta: PortalMeta) => void;
-}
-
-export interface PortalThemeState {
+  portalUrl?: string;
   theme: string;
+  uploader: UploadManager;
+  services: BaseService[];
 }
 
-export interface PortalThemeActions {
+export interface AppActions {
+  setSdk: (sdk: Sdk) => void;
+  setMeta: (meta: PortalMeta) => void;
+  setPortalUrl: (portalUrl: string) => void;
   setTheme: (theme: string) => void;
+  addService: (service: BaseService) => void;
+  getServices: () => BaseService[];
 }
 
-export type AppActions = SdkActions & PortalMetaActions & PortalThemeActions;
+export const appStore = createStore<AppState & AppActions>()((set, get) => {
+  return {
+    sdk: undefined,
+    setSdk: (sdk) => set({ sdk }),
+    meta: undefined,
+    setMeta: (meta) => set({ meta }),
+    theme: "theme-eclipse",
+    portalUrl: env.VITE_PORTAL_DOMAIN,
+    setPortalUrl: (portalUrl) => set({ portalUrl }),
+    setTheme: (theme) => set({ theme }),
+    uploader: new UploadManager(),
+    services: [],
+    addService: (service) => {
+      service.register();
+      set((state) => ({ services: [...state.services, service] }));
+    },
+    getServices: () => get().services,
+  };
+});
 
-const useAppStore = create<AppState & AppActions>()((set) => ({
-  sdk: undefined,
-  setSdk: (sdk) => set({ sdk }),
-  meta: undefined,
-  setMeta: (meta) => set({ meta }),
-  theme: "theme-eclipse",
-  setTheme: (theme) => set({ theme }),
-}));
+const createBoundedUseStore = ((store) => (selector) =>
+  useStore(store, selector)) as <S extends StoreApi<unknown>>(
+  store: S,
+) => {
+  (): ExtractState<S>;
+  <T>(selector: (state: ExtractState<S>) => T): T;
+};
 
-export default useAppStore;
+type ExtractState<S> = S extends { getState: () => infer X } ? X : never;
+
+export const useAppStore = createBoundedUseStore(appStore);

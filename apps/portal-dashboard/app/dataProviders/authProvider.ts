@@ -1,4 +1,3 @@
-import { create } from "zustand";
 import type { AccountInfoResponse } from "@lumeweb/portal-sdk";
 import { AccountError, Sdk } from "@lumeweb/portal-sdk";
 import type {
@@ -6,7 +5,6 @@ import type {
   HttpError,
   UpdatePasswordFormTypes,
 } from "@refinedev/core";
-import useAppStore from "~/stores/app";
 export type AuthFormRequest = {
   email: string;
   password: string;

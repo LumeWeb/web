@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "ESNext",
+    "target": "es2020",
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
     "allowJs": false,
