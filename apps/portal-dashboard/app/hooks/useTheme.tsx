@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { ThemeIcon } from "~/components/icons";
 import { Button } from "~/components/ui/button";
 import {
@@ -45,18 +46,50 @@ export const ThemeSwitcher: React.FC = () => {
   );
 };
 
+/**
+ * Higher-Order Component (HoC) for managing theme application at the root level.
+ *
+ * This HoC is used to control the theme for the Root component, ensuring proper
+ * theme management throughout the application. It's an alternative to using
+ * React Context, which is the current best practice, but we've chosen a different
+ * approach here with global state management.
+ *
+ * Wrapping a component in this HoC will ensure that the theme is applied to the
+ * <html> element of the page, so this HoC should be used for the Root component
+ * only.
+ *
+ * The HoC:
+ * 1. Retrieves the current theme from the global app store.
+ * 2. Uses an effect to apply the theme by manipulating the document's root element classes.
+ * 3. Wraps the provided component, passing through all props.
+ *
+ * @param Component - The React component to be wrapped.
+ * @returns A new component with theme management capabilities.
+ */
+export const withTheme = <P extends object>(
+  Component: React.ComponentType<P>,
+) => {
+  return function WithTheme(props: P) {
+    const { theme } = useTheme();
+
+    useEffect(() => {
+      // Remove any existing theme classes
+      for (const item of Array.from(document.documentElement.classList)) {
+        if (item.startsWith("theme-")) {
+          document.documentElement.classList.remove(item);
+        }
+      }
+      // Add the current theme class
+      document.documentElement.classList.add(theme);
+    }, [theme]);
+
+    return <Component {...props} />;
+  };
+};
+
 export const useTheme = () => {
   const theme = useAppStore((state) => state.theme);
   const setTheme = useAppStore((state) => state.setTheme);
-
-  useEffect(() => {
-    document.documentElement.classList.forEach((item) => {
-      if (item.startsWith("theme-")) {
-        document.documentElement.classList.remove(item);
-      }
-    });
-    document.documentElement.classList.add(theme);
-  }, [theme]);
 
   return {
     theme,
