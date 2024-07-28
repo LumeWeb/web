@@ -1,15 +1,15 @@
-import { GeneralLayout } from "~/components/layout/GeneralLayout";
+import { Authenticated } from "@refinedev/core";
+import SectionTitle from "~/components/SectionTitle";
+import { UpgradeAccountBanner } from "~/components/UpgradeAccountBanner";
+import { UsageCard } from "~/components/UsageCard";
+import { UsageChart } from "~/components/UsageChart";
 import {
   CloudDownloadIcon,
   CloudIcon,
   CloudUploadSolidIcon,
   CurrentUsageIcon,
 } from "~/components/icons";
-import { UpgradeAccountBanner } from "~/components/UpgradeAccountBanner";
-import { UsageCard } from "~/components/UsageCard";
-import { UsageChart } from "~/components/UsageChart";
-import { Authenticated } from "@refinedev/core";
-import SectionTitle from "~/components/SectionTitle";
+import { GeneralLayout } from "~/components/layout/GeneralLayout";
 
 export default function Dashboard() {
   return (
@@ -25,19 +25,19 @@ export default function Dashboard() {
             label="Storage"
             currentUsage={120}
             monthlyUsage={130}
-            icon={<CloudIcon className="text-ring" />}
+            icon={<CloudIcon className="text-foreground" />}
           />
           <UsageCard
             label="Download"
             currentUsage={2}
             monthlyUsage={10}
-            icon={<CloudDownloadIcon className="text-ring" />}
+            icon={<CloudDownloadIcon className="text-foreground" />}
           />
           <UsageCard
             label="Upload"
             currentUsage={5}
             monthlyUsage={15}
-            icon={<CloudUploadSolidIcon className="text-ring" />}
+            icon={<CloudUploadSolidIcon className="text-foreground" />}
           />
         </div>
         <SectionTitle

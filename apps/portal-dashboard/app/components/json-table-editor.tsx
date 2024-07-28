@@ -1,6 +1,6 @@
 import type React from "react";
 import { useEffect, useState } from "react";
-import { cn } from "../utils";
+import { cn } from "~/util/cn";
 import { TrashIcon } from "./icons";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";

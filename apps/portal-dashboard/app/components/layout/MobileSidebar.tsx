@@ -29,12 +29,7 @@ import { ExitIcon } from "@radix-ui/react-icons";
 import { useLogout } from "@refinedev/core";
 import React from "react";
 import UploadForm from "~/features/uploadManager/components/UploadForm";
-
-const navigationLinks = [
-  { path: "/dashboard", label: "Dashboard", icon: ClockIcon },
-  { path: "/file-manager", label: "File Manager", icon: DriveIcon },
-  { path: "/account", label: "Account", icon: CircleLockIcon },
-];
+import { MainNavigation } from "../MainNavigation";
 
 export default function MobileSidebar() {
   const location = useLocation();
@@ -88,21 +83,7 @@ export default function MobileSidebar() {
               <SheetContent>
                 <SheetHeader>
                   <SheetDescription>
-                    <div className="w-full flex flex-col items-start justify-between my-auto">
-                      <div className="w-full flex flex-col items-start justify-between ">
-                        {navigationLinks.map((link) => (
-                          <Link key={link.path} to={link.path}>
-                            <NavigationButton
-                              active={location.pathname.includes(link.path)}>
-                              {link.icon && (
-                                <link.icon className="w-5 h-5 mr-2" />
-                              )}
-                              {link.label}
-                            </NavigationButton>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
+                    <MainNavigation />
                   </SheetDescription>
                 </SheetHeader>
               </SheetContent>

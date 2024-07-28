@@ -22,7 +22,8 @@ import { notificationProvider } from "~/dataProviders/notificationProvider";
 import { IPFS } from "~/services/ipfs/index.js";
 import BaseService from "~/services/base";
 import { useEffect, useRef } from "react";
-import { AppActions, appStore, useAppStore } from "~/stores/app";
+import { AppActions, useAppStore } from "~/stores/app";
+import { withTheme } from "~/hooks/useTheme";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -55,7 +56,7 @@ function App() {
   );
 }
 
-export default function Root() {
+export function Root() {
   const portalUrl = usePortalUrl();
   const sdk = useSdk();
   const servicesRegistered = useRef(false);
@@ -84,6 +85,8 @@ export default function Root() {
     </Refine>
   );
 }
+
+export default withTheme(Root);
 
 export function HydrateFallback() {
   return <IndeterminateProgressBar indeterminate={true} />;
