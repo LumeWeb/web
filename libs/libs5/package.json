@@ -13,7 +13,7 @@
     "axios": "^1.7.2",
     "detect-node": "^2.1.0",
     "level": "^8.0.0",
-    "multiformats": "^13.1.0",
+    "multiformats": "^13.2.1",
     "p-defer": "^4.0.0",
     "ws": "^8.17.1"
   },
