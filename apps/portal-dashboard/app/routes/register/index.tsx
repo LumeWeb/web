@@ -14,7 +14,7 @@ import {
 } from "~/dataProviders/authProvider.js";
 import InlineAuthLinkBanner from "~/components/InlineAuthLinkBanner";
 import LumeLogo from "~/components/LumeLogo";
-import { RegisterSchema } from "~/routes/Register/schema";
+import { RegisterSchema } from "~/routes/register/schema";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Sign Up" }];
