@@ -147,7 +147,7 @@
     "@nx/eslint": "18.2.4",
     "@nx/eslint-plugin": "19.0.2",
     "@nx/js": "18.2.4",
-    "@nx/react": "18.2.3",
+    "@nx/react": "19.5.7",
     "@nx/remix": "18.2.3",
     "@nx/vite": "18.2.3",
     "@nx/web": "18.2.3",
