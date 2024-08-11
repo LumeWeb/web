@@ -8,12 +8,10 @@ import path from "path";
 import fs from "fs";
 
 export default defineConfig({
-  cacheDir: "../../node_modules/.vite/apps/portal-dashboard",
   plugins: [
     remix({
       ssr: false,
       ignoredRouteFiles: ["**/*.css"],
-      buildDirectory: "../../dist/apps/portal-dashboard",
       routes(defineRoutes) {
         return defineRoutes((route) => {
           route("/", "routes/index.tsx", { index: true });

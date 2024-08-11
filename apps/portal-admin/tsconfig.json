@@ -15,10 +15,5 @@
     "noEmit": true
   },
   "include": [],
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    }
-  ]
+  "files": []
 }

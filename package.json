@@ -5,12 +5,12 @@
   "license": "MIT",
   "scripts": {
     "release": "changeset publish",
-    "build": "nx run-many -t test build",
-    "build:changed": "nx affected -t test build",
-    "build:portal-dashboard": "nx run @lumeweb/portal-dashboard:build",
-    "dev:portal-dashboard": "nx run @lumeweb/portal-dashboard:dev",
-    "build:docs.lumeweb.com": "nx run @lumeweb/docs.lumeweb.com:build",
-    "build:lumeweb.com": "nx run @lumeweb/lumeweb.com:build"
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "build:docs.lumeweb.com": "turbo build --filter=@lumeweb/docs.lumeweb.com",
+    "build:lumeweb.com": "turbo build --filter=@lumeweb/lumeweb.com",
+    "build:portal-dashboard": "turbo build --filter=@lumeweb/portal-dashboard"
   },
   "private": true,
   "dependencies": {
@@ -33,8 +33,6 @@
     "@noble/ciphers": "^0.5.3",
     "@noble/curves": "^1.1.0",
     "@noble/hashes": "^1.3.2",
-    "@nx/eslint": "18.2.4",
-    "@nx/web": "18.2.3",
     "@prisma/client": "^5.15.0",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -108,7 +106,6 @@
     "memoizee": "^0.4.17",
     "mime": "^4.0.1",
     "multiformats": "^13.0.0",
-    "nx": "18.2.3",
     "orval": "^6.24.0",
     "p-defer": "^4.0.0",
     "prism-react-renderer": "^2.3.1",
@@ -144,14 +141,6 @@
     "@faker-js/faker": "^8.4.1",
     "@libp2p/interfaces": "^3.3.2",
     "@nrwl/workspace": "19.3.2",
-    "@nx/eslint": "18.2.4",
-    "@nx/eslint-plugin": "19.0.2",
-    "@nx/js": "18.2.4",
-    "@nx/react": "18.2.3",
-    "@nx/remix": "18.2.3",
-    "@nx/vite": "18.2.3",
-    "@nx/web": "18.2.3",
-    "@nx/workspace": "19.3.2",
     "@remix-run/eslint-config": "^2.8.1",
     "@scure/bip39": "^1.3.0",
     "@swc-node/register": "~1.9.1",
@@ -192,6 +181,7 @@
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.8",
     "tslib": "^2.6.2",
+    "turbo": "^2.0.12",
     "typescript": "~5.4.2",
     "unplugin-fonts": "^1.1.1",
     "verdaccio": "^5.0.4",
@@ -205,17 +195,9 @@
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
-  "workspaces": {
-    "packages": [
-      "libs/*",
-      "apps/*"
-    ]
-  },
   "pnpm": {
     "patchedDependencies": {
-      "@nx/vite@18.2.3": "patches/@nx__vite@18.2.3.patch",
       "tus-js-client@4.1.0": "patches/tus-js-client@4.1.0.patch",
-      "@nx/remix@18.2.3": "patches/@nx__remix@18.2.3.patch",
       "vite-plugin-node-polyfills@0.21.0": "patches/vite-plugin-node-polyfills@0.21.0.patch"
     }
   },

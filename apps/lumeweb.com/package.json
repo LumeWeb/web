@@ -3,6 +3,11 @@
   "type": "module",
   "version": "0.3.1-develop.1",
   "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "start": "astro start"
+  },
   "dependencies": {
     "@astrojs/react": "^3.3.4",
     "@astrojs/sitemap": "^3.1.2",

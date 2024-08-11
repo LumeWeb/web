@@ -4,6 +4,11 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "scripts": {
+    "start": "remix vite:dev",
+    "build": "remix vite:build",
+    "serve": "remix vite:preview"
+  },
 	"dependencies": {
 		"@radix-ui/react-dialog": "^1.0.5",
 		"@radix-ui/react-popover": "^1.1.1",
