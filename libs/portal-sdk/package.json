@@ -6,6 +6,9 @@
     "files": [
         "lib"
     ],
+  "scripts": {
+    "orval": "orval"
+  },
     "repository": {
         "type": "git",
         "url": "gitea@git.lumeweb.com:LumeWeb/portal-sdk.git"
