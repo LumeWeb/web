@@ -6,7 +6,7 @@ import discordLogoPng from "~/images/discord-logo.png?url";
 import lumeBgPng from "~/images/lume-bg-login.png?url";
 import InlineAuthLinkBanner from "~/components/InlineAuthLinkBanner.js";
 import LumeLogo from "~/components/LumeLogo.js";
-import { LoginForm } from "~/routes/Login/components/LoginForm.js";
+import { LoginForm } from "~/routes/login/components/LoginForm.js";
 
 export const meta: MetaFunction = () => {
   return [
