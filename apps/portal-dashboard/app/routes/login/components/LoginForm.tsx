@@ -2,7 +2,7 @@ import { useGo, useLogin, useParsed } from "@refinedev/core";
 import type { AuthFormRequest } from "~/dataProviders/authProvider.js";
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
-import LoginSchema from "~/routes/Login/components/LoginForm.schema.js";
+import LoginSchema from "~/routes/login/components/LoginForm.schema.js";
 import { useEffect } from "react";
 import { Field, FieldCheckbox } from "~/components/Forms.js";
 import { Button } from "~/components/ui/button.js";
