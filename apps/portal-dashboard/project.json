@@ -1,7 +1,0 @@
-{
-  "name": "@lumeweb/portal-dashboard",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/portal-dashboard/src",
-  "projectType": "application",
-  "tags": []
-}
