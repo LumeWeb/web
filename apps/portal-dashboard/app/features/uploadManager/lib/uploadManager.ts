@@ -26,6 +26,18 @@ export type UppyFileDefault = UppyFile<Meta, Body>;
 export default class UploadManager {
   #uppy: Uppy<Meta, Body> = new Uppy<Meta, Body>();
   #services: ServiceConfig[] = [];
+  constructor() {
+    this.addEvent("file-added", (file: UppyFileDefault) => {
+      const serviceId = this.getAssociatedServiceForFile(file);
+      if (!file?.plugins?.length && serviceId) {
+        this.patchFilesState({
+          [file.id]: {
+            plugins: [serviceId],
+          },
+        });
+      }
+    });
+  }
 
   registerService(config: ServiceConfig) {
     this.#services.push(config);
@@ -133,25 +145,6 @@ export default class UploadManager {
     this.#uppy.retryUpload(file.id);
   }
 
-  public reset() {
-    this.#uppy.cancelAll();
-    this.#services = [];
-    this.#uppy.iteratePlugins((plugin) => {
-      this.#uppy.removePlugin(plugin);
-    });
-  }
-
-  public setUIDropTarget(target: HTMLElement | string | null) {
-    this.clearUIDropTarget();
-    this.#uppy.use(DropTarget, { target });
-  }
-
-  public clearUIDropTarget() {
-    this.#uppy.iteratePlugins(
-      (plugin) => plugin.id === "DropTarget" && this.#uppy.removePlugin(plugin),
-    );
-  }
-
   public async getFilePluginId(file: File, serviceId: string) {
     const service =
       this.#services.filter((item) => item.id === serviceId).length > 0;
@@ -171,5 +164,24 @@ export default class UploadManager {
     return file.size >= uploadLimit
       ? `${serviceId}-large`
       : `${serviceId}-small`;
+  }
+
+  public reset() {
+    this.#uppy.cancelAll();
+    this.#services = [];
+    this.#uppy.iteratePlugins((plugin) => {
+      this.#uppy.removePlugin(plugin);
+    });
+  }
+
+  public setUIDropTarget(target: HTMLElement | string | null) {
+    this.clearUIDropTarget();
+    this.#uppy.use(DropTarget, { target });
+  }
+
+  public clearUIDropTarget() {
+    this.#uppy.iteratePlugins(
+      (plugin) => plugin.id === "DropTarget" && this.#uppy.removePlugin(plugin),
+    );
   }
 }

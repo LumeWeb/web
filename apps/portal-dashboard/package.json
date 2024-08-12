@@ -8,7 +8,6 @@
     "dev": "pnpm run start",
     "start": "remix vite:dev",
     "build": "remix vite:build",
-    "build-dev": "remix vite:build --mode development",
     "serve": "remix vite:preview"
   },
   "dependencies": {
@@ -18,6 +17,6 @@
     "@radix-ui/react-scroll-area": "^1.0.5",
     "@radix-ui/react-switch": "^1.1.0",
     "json-schema": "^0.4.0",
-    "lucide-react": "^0.436.0"
+    "lucide-react": "^0.396.0"
   }
 }
