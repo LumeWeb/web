@@ -102,7 +102,7 @@
     "isomorphic-ws": "^5.0.0",
     "jotai": "^2.9.0",
     "level": "^8.0.0",
-    "meilisearch": "^0.38.0",
+    "meilisearch": "^0.41.0",
     "memize": "^2.1.0",
     "memoizee": "^0.4.17",
     "mime": "^4.0.1",
