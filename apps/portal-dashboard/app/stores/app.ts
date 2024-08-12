@@ -25,6 +25,8 @@ export interface AppActions {
   setTheme: (theme: string) => void;
   addService: (service: BaseService) => void;
   getServices: () => BaseService[];
+  getServiceById: (id: string) => BaseService | undefined;
+  resetServices: () => void;
 }
 
 export const appStore = createStore<AppState & AppActions>()((set, get) => {
@@ -44,6 +46,8 @@ export const appStore = createStore<AppState & AppActions>()((set, get) => {
       set((state) => ({ services: [...state.services, service] }));
     },
     getServices: () => get().services,
+    getServiceById: (id) => get().services.find((svc) => svc.id() === id),
+    resetServices: () => set({ services: [] }),
   };
 });
 

@@ -8,7 +8,8 @@ import useIsMobile from "~/hooks/useIsMobile";
 import { ThemeSwitcher } from "~/hooks/useTheme";
 import discordLogoPng from "~/images/discord-logo.png?url";
 import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
-import { PinningNetworkBanner } from "../PinningNetworkBanner";
+import DesktopSidebar from "./DesktopSidebar";
+import MobileSidebar from "./MobileSidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,8 +17,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import DesktopSidebar from "./DesktopSidebar";
-import MobileSidebar from "./MobileSidebar";
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   const { data: identity } = useGetIdentity<Identity>();
@@ -92,8 +91,6 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
           </footer>
         </div>
       </div>
-      <PinningNetworkBanner />
     </>
-    /*</PinningProvider>*/
   );
 };

@@ -11,7 +11,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "build:docs.lumeweb.com": "turbo build --filter=@lumeweb/docs.lumeweb.com",
     "build:lumeweb.com": "turbo build --filter=@lumeweb/lumeweb.com",
-    "build:portal-dashboard": "turbo build --filter=@lumeweb/portal-dashboard"
+    "build:portal-dashboard": "turbo build --filter=@lumeweb/portal-dashboard",
+    "dev:portal-dashboard": "turbo dev --filter=@lumeweb/portal-dashboard"
   },
   "private": true,
   "dependencies": {
@@ -20,8 +21,8 @@
     "@astrojs/tailwind": "^5.1.0",
     "@conform-to/react": "^1.1.0",
     "@conform-to/zod": "^1.1.1",
-    "@docusaurus/core": "^3.4.0",
-    "@docusaurus/preset-classic": "~3.4.0",
+    "@docusaurus/core": "^3.5.2",
+    "@docusaurus/preset-classic": "~3.5.2",
     "@fontsource-variable/manrope": "^5.0.19",
     "@fontsource/be-vietnam-pro": "^5.0.20",
     "@fontsource/jaldi": "^5.0.13",
@@ -56,6 +57,7 @@
     "@refinedev/devtools-shared": "^1.1.9",
     "@refinedev/react-table": "^5.6.8",
     "@refinedev/remix-router": "^3.0.6",
+    "@refinedev/simple-rest": "^5.0.8",
     "@remix-run/css-bundle": "^2.9.1",
     "@remix-run/dev": "^2.8.1",
     "@remix-run/node": "^2.8.1",
@@ -69,10 +71,10 @@
     "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^8.0.1",
     "@typescript-eslint/parser": "^6.7.4",
-    "@uppy/core": "^4.0.1",
+    "@uppy/core": "4.1.0",
     "@uppy/drop-target": "^3.0.1",
     "@uppy/tus": "^4.0.0",
-    "@uppy/utils": "^6.0.0",
+    "@uppy/utils": "6.0.1",
     "@uppy/xhr-upload": "^4.0.2",
     "@visx/curve": "^3.3.0",
     "@visx/visx": "^3.10.2",
@@ -200,7 +202,9 @@
   "pnpm": {
     "patchedDependencies": {
       "tus-js-client@4.1.0": "patches/tus-js-client@4.1.0.patch",
-      "vite-plugin-node-polyfills@0.21.0": "patches/vite-plugin-node-polyfills@0.21.0.patch"
+      "vite-plugin-node-polyfills@0.21.0": "patches/vite-plugin-node-polyfills@0.21.0.patch",
+      "@uppy/core@4.1.0": "patches/@uppy__core@4.1.0.patch",
+      "@uppy/utils@6.0.1": "patches/@uppy__utils@6.0.1.patch"
     }
   },
   "packageManager": "pnpm@8.15.8"

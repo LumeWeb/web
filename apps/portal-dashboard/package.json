@@ -5,16 +5,18 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
+    "dev": "pnpm run start",
     "start": "remix vite:dev",
     "build": "remix vite:build",
     "serve": "remix vite:preview"
   },
-	"dependencies": {
-		"@radix-ui/react-dialog": "^1.0.5",
-		"@radix-ui/react-popover": "^1.1.1",
-		"@radix-ui/react-switch": "^1.1.0",
-		"json-schema": "^0.4.0",
-    "lucide-react": "^0.396.0",
-    "@lumeweb/portal-sdk": "workspace:*"
-	}
+  "dependencies": {
+    "@lumeweb/portal-sdk": "workspace:*",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-popover": "^1.1.1",
+    "@radix-ui/react-scroll-area": "^1.0.5",
+    "@radix-ui/react-switch": "^1.1.0",
+    "json-schema": "^0.4.0",
+    "lucide-react": "^0.396.0"
+  }
 }

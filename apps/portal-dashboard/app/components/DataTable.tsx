@@ -12,27 +12,37 @@ import {
   TableRow,
 } from "./ui/table";
 import { Skeleton } from "./ui/skeleton";
-import { DataTablePagination } from "apps/portal-dashboard/app/components/TablePagination.js";
+import { DataTablePagination } from "~/components/TablePagination";
 
-interface DataTableProps<
+export interface DataTableProps<
   TData extends BaseRecord = BaseRecord,
   TValue = unknown,
 > {
   columns: ColumnDef<TData, TValue>[];
   resource: string;
   dataProviderName?: string;
+  className?: string;
+  autoRefresh?: boolean;
+  autoRefreshInterval?: number;
 }
 
 export function DataTable<TData extends BaseRecord, TValue>({
   columns,
   resource,
   dataProviderName,
+  className,
+  autoRefresh,
+  autoRefreshInterval,
 }: DataTableProps<TData, TValue>) {
   const table = useTable({
     columns,
     refineCoreProps: {
       resource,
       dataProviderName: dataProviderName || "default",
+      // @ts-ignore
+      queryOptions: {
+        refetchInterval: autoRefresh ? autoRefreshInterval : undefined,
+      },
     },
   });
 
@@ -61,14 +71,14 @@ export function DataTable<TData extends BaseRecord, TValue>({
 
   return (
     <>
-      <Table>
+      <Table className={className}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header, index) => {
                 return (
                   <TableHead
-                    key={`FileDataTableHeader_${index}`}
+                    key={`DataTableHeader_${index}`}
                     style={{ width: header.getSize() }}>
                     {header.isPlaceholder
                       ? null
@@ -86,12 +96,15 @@ export function DataTable<TData extends BaseRecord, TValue>({
           {rows.length ? (
             rows.map((row, index) => (
               <TableRow
-                key={`FileDataTableRow_${index}`}
+                key={`DataTableRow_${index}`}
                 data-state={row.getIsSelected() && "selected"}
                 className="group">
                 {row.getVisibleCells().map((cell, index) => (
-                  <TableCell key={`FileDataTableCell_${index}`}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  <TableCell key={`DataTableCell_${index}`}>
+                    {flexRender(
+                      cell.column.columnDef.cell,
+                      cell.getContext() as any,
+                    )}
                   </TableCell>
                 ))}
               </TableRow>
@@ -107,7 +120,9 @@ export function DataTable<TData extends BaseRecord, TValue>({
           )}
         </TableBody>
       </Table>
-      <DataTablePagination table={table} />
+      {table.refineCore.tableQueryResult.isLoading && (
+        <DataTablePagination table={table} />
+      )}
     </>
   );
 }

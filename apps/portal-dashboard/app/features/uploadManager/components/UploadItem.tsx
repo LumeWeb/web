@@ -17,27 +17,21 @@ import { Progress } from "~/components/ui/progress";
 import { UppyFileDefault } from "~/features/uploadManager/lib/uploadManager";
 import useUploader from "~/features/uploadManager/hooks/useUploader.js";
 
-export default function UploadItem({
-  file,
-  failedState,
-  onRemove,
-}: {
-  file: UppyFileDefault;
-  failedState?: any;
-  onRemove: (id: string) => void;
-}) {
+export default function UploadItem({ file }: { file: UppyFileDefault }) {
+  const error = !!file.error;
+
   const uploader = useUploader();
   return (
     <div className="flex flex-col w-full py-4 px-2 bg-secondary">
       <div
         className={`flex items-center justify-between ${
-          failedState ? "text-red-500" : "text-foreground"
+          error ? "text-red-500" : "text-foreground"
         }`}>
         <div className="flex items-center">
           <div className="p-2">
             {file.progress?.uploadComplete ? (
               <BoxCheckedIcon className="w-4 h-4 " />
-            ) : failedState?.error ? (
+            ) : error ? (
               <ExclamationCircleIcon className="w-4 h-4" />
             ) : (
               <PageIcon className="w-4 h-4 text-foreground" />
@@ -65,28 +59,24 @@ export default function UploadItem({
           size={"icon"}
           variant={"ghost"}
           className="!text-inherit"
-          onClick={() => onRemove(file.id)}>
+          onClick={() => uploader.removeFile(file.id)}>
           {!file.progress?.uploadComplete && (
             <TrashIcon className="w-4 h-4 text-foreground" />
           )}
         </Button>
       </div>
 
-      {failedState ? (
+      {error ? (
         <div className="mt-2 text-red-500 text-sm">
-          <p>Error uploading: {failedState.error}</p>
+          <p>Error uploading: {file.error}</p>
           <div className="flex gap-2">
-            <Button
-              size={"sm"}
-              onClick={() => {
-                uploader.retryFile(file);
-              }}>
+            <Button size={"sm"} onClick={() => uploader.retryFile(file)}>
               Retry
             </Button>
             <Button
               size={"sm"}
               variant={"outline"}
-              onClick={() => onRemove(file.id)}>
+              onClick={() => uploader.removeFile(file.id)}>
               Remove
             </Button>
           </div>
@@ -105,7 +95,9 @@ export default function UploadItem({
           />
         </div>
       ) : null}
-      {file.progress?.uploadStarted && !file.progress.uploadComplete ? (
+      {file.progress?.uploadStarted &&
+      !file.progress.uploadComplete &&
+      !error ? (
         <div>
           <p className="text-sm text-muted-foreground ml-2">Uploading...</p>
           <Progress

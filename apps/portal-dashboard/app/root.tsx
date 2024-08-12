@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import {
   Links,
   Meta,
@@ -11,19 +12,20 @@ import type { LinksFunction } from "@remix-run/node";
 
 // Supports weights 200-800
 import "@fontsource-variable/manrope";
-import { NotificationProvider, Refine } from "@refinedev/core";
+import { AuthProvider, NotificationProvider, Refine } from "@refinedev/core";
 import { Toaster } from "~/components/ui/toaster";
-import usePortalUrl from "~/hooks/usePortalUrl.js";
 import { IndeterminateProgressBar } from "~/components/ui/indeterminate-progress-bar";
 import useSdk from "~/hooks/useSdk.js";
-import { createPortalAuthProvider } from "~/dataProviders/authProvider";
 import routerProvider from "@refinedev/remix-router";
 import { notificationProvider } from "~/dataProviders/notificationProvider";
-import { IPFS } from "~/services/ipfs/index.js";
-import BaseService from "~/services/base";
-import { useEffect, useRef } from "react";
-import { AppActions, useAppStore } from "~/stores/app";
+import { useMemo } from "react";
+import { getResetServices } from "~/services/index";
+import useUploader from "~/features/uploadManager/hooks/useUploader";
+import { createAccountProvider } from "~/dataProviders/accountProvider";
+import { useAuthProvider } from "~/hooks/useAuthProvider.js";
+import { useAppInitialization } from "~/hooks/useAppInitialization.js";
 import { withTheme } from "~/hooks/useTheme";
+import { Skeleton } from "~/components/ui/skeleton";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -57,29 +59,47 @@ function App() {
 }
 
 export function Root() {
-  const portalUrl = usePortalUrl();
   const sdk = useSdk();
-  const servicesRegistered = useRef(false);
-  const addService = useAppStore((state) => state.addService);
+  const resetServices = getResetServices();
+  const uploader = useUploader();
 
-  useEffect(() => {
-    if (sdk && !servicesRegistered.current) {
-      registerServices(addService);
-      servicesRegistered.current = true;
-    }
-  }, [sdk]);
+  const authProvider = useAuthProvider(sdk);
 
-  if (!portalUrl || !sdk) {
-    return <IndeterminateProgressBar indeterminate={true} />;
+  const { isInitialized, providers, resources, setIsInitialized } =
+    useAppInitialization(sdk, authProvider);
+
+  const wrappedAuthProvider = useMemo(() => {
+    if (!authProvider) return null;
+    return {
+      ...authProvider,
+      login: async (params: any) => {
+        const result = await authProvider.login(params);
+        setIsInitialized(false); // Trigger re-initialization after login
+        return result;
+      },
+      logout: async (params: any) => {
+        const result = await authProvider.logout(params);
+        setIsInitialized(false); // Trigger re-initialization after logout
+        resetServices();
+        uploader.reset();
+        return result;
+      },
+    };
+  }, [authProvider, setIsInitialized, resetServices, uploader]);
+
+  if (!isInitialized) {
+    return <SkeletonLoader />;
   }
 
   return (
     <Refine
-      authProvider={createPortalAuthProvider(sdk)}
+      authProvider={wrappedAuthProvider as AuthProvider}
       routerProvider={routerProvider}
+      dataProvider={{ ...providers, default: createAccountProvider(sdk!) }}
       notificationProvider={
         notificationProvider as unknown as NotificationProvider
       }
+      resources={resources}
       options={{ disableTelemetry: true }}>
       <App />
     </Refine>
@@ -89,9 +109,18 @@ export function Root() {
 export default withTheme(Root);
 
 export function HydrateFallback() {
-  return <IndeterminateProgressBar indeterminate={true} />;
+  return <SkeletonLoader />;
 }
 
-function registerServices(addFunc: AppActions["addService"]) {
-  [new IPFS()].forEach((svc: BaseService) => addFunc(svc));
-}
+const SkeletonLoader = () => {
+  return (
+    <div className="flex items-start justify-center min-h-screen p-4 pt-60">
+      <div className="w-full max-w-md space-y-2">
+        <Skeleton className="h-4 w-3/4 mx-auto" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6 mx-auto" />
+        <Skeleton className="h-4 w-2/3 mx-auto" />
+      </div>
+    </div>
+  );
+};

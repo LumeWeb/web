@@ -86,28 +86,13 @@ export default function UploadForm() {
 
   useEffect(() => {
     if (zoneRef.current) {
-      uploader.usePlugin(DropTarget, {
-        target: zoneRef.current,
-        onDrop() {
-          uploader.getFiles().forEach((file) => {
-            uploader.patchFilesState({
-              [file.id]: {
-                plugins: [uploader.getAssociatedServiceForFile(file) as string],
-              },
-            });
-          });
-        },
-      });
+      uploader.setUIDropTarget(zoneRef.current);
     }
 
     return () => {
-      uploader.iteratePlugins((plugin) => {
-        if (Object.getPrototypeOf(plugin) === DropTarget.prototype) {
-          uploader.removePlugin(plugin);
-        }
-      });
+      uploader.clearUIDropTarget();
     };
-  }, [zoneRef]);
+  }, [hasStarted, selectedService, zoneRef]);
 
   useEffect(() => {
     const events: Array<keyof UppyEventMap<Meta, Body>> = [
@@ -119,6 +104,7 @@ export default function UploadForm() {
       "upload-retry",
       "upload-stalled",
       "upload-success",
+      "upload-error",
     ];
 
     events.forEach((event) => {
@@ -161,7 +147,8 @@ export default function UploadForm() {
         <div
           role="presentation"
           className="border border-border rounded text-foreground bg-background/30 h-48 flex flex-col items-center justify-center cursor-pointer"
-          onClick={openDialog}>
+          onClick={openDialog}
+          ref={zoneRef}>
           <input
             type="file"
             ref={inputRef}
@@ -179,16 +166,7 @@ export default function UploadForm() {
 
       <div className="w-full mt-3 space-y-3 max-h-44 lg:max-h-[calc(60%)] overflow-y-auto">
         {uploader.getFiles().map((file: UppyFileDefault) => {
-          return (
-            <UploadItem
-              key={file.id}
-              file={file}
-              onRemove={(id) => {
-                uploader.removeFile(id);
-              }}
-              failedState={false}
-            />
-          );
+          return <UploadItem key={file.id} file={file} />;
         })}
       </div>
 
