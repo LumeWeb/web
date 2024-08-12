@@ -152,7 +152,7 @@
     "@tsconfig/docusaurus": "^2.0.3",
     "@types/detect-node": "^2.0.2",
     "@types/memoizee": "^0.4.11",
-    "@types/node": "20.14.11",
+    "@types/node": "22.2.0",
     "@types/react": "18.2.75",
     "@types/react-dom": "18.2.14",
     "@types/url-parse": "^1.4.11",
