@@ -41,7 +41,7 @@ jobs:
       - name: Build
         run: pnpm build:portal-dashboard
         env:
-          VITE_PORTAL_URL: ${{ vars.TESTING_PORTAL_URL }}
+          VITE_PORTAL_DOMAIN: ${{ vars.TESTING_PORTAL_DOMAIN }}
           NODE_ENV: development
       - name: Publish to Cloudflare Pages
         id: deploy_cf

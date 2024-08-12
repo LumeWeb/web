@@ -11,6 +11,7 @@ import {
   ServiceConfig,
 } from "~/features/uploadManager/api/service";
 import getSdk from "~/stores/getSdk";
+import DropTarget from "@uppy/drop-target";
 
 export const PLUGIN_SUFFIX_REGEX = /-(?:small|large)$/;
 export const PLUGIN_SMALL_SUFFIX_REGEX = /-small$/;
@@ -25,6 +26,18 @@ export type UppyFileDefault = UppyFile<Meta, Body>;
 export default class UploadManager {
   #uppy: Uppy<Meta, Body> = new Uppy<Meta, Body>();
   #services: ServiceConfig[] = [];
+  constructor() {
+    this.addEvent("file-added", (file: UppyFileDefault) => {
+      const serviceId = this.getAssociatedServiceForFile(file);
+      if (!file?.plugins?.length && serviceId) {
+        this.patchFilesState({
+          [file.id]: {
+            plugins: [serviceId],
+          },
+        });
+      }
+    });
+  }
 
   registerService(config: ServiceConfig) {
     this.#services.push(config);
@@ -145,5 +158,24 @@ export default class UploadManager {
 
   public retryFile(file: UppyFileDefault) {
     this.#uppy.retryUpload(file.id);
+  }
+
+  public reset() {
+    this.#uppy.cancelAll();
+    this.#services = [];
+    this.#uppy.iteratePlugins((plugin) => {
+      this.#uppy.removePlugin(plugin);
+    });
+  }
+
+  public setUIDropTarget(target: HTMLElement | string | null) {
+    this.clearUIDropTarget();
+    this.#uppy.use(DropTarget, { target });
+  }
+
+  public clearUIDropTarget() {
+    this.#uppy.iteratePlugins(
+      (plugin) => plugin.id === "DropTarget" && this.#uppy.removePlugin(plugin),
+    );
   }
 }

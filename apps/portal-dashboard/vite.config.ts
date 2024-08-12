@@ -19,6 +19,7 @@ export default defineConfig({
           route("/account/verify", "routes/account/verify.tsx");
           route("/login", "routes/login/index.tsx");
           route("/register", "routes/register/index.tsx");
+          route("/uploads", "routes/uploads/index.tsx");
         });
       },
     }),

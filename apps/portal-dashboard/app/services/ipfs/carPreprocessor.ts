@@ -148,19 +148,13 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
       )) as BlobPart;
 
       file.data = new File([carBlob], cid.toString());
-      file.name = `${cid.toString()}.car`;
-      file.type = "application/vnd.ipld.car";
-
-      // Flag
-      // @ts-ignore
-      file.car = true;
 
       // Update the file in Uppy's state
       this.uppy.setFileState(file.id, {
-        [file.id]: file,
+        data: file.data,
+        // @ts-ignore
+        car: true,
       });
-
-      return file;
     } catch (error) {
       console.error("Error processing file:", error);
       throw error;
