@@ -278,8 +278,8 @@ importers:
         specifier: ^8.0.0
         version: 8.0.1
       meilisearch:
-        specifier: ^0.38.0
-        version: 0.38.0
+        specifier: ^0.41.0
+        version: 0.41.0
       memize:
         specifier: ^2.1.0
         version: 2.1.0
@@ -19484,8 +19484,8 @@ packages:
     resolution: {integrity: sha512-dq+qelQ9akHpcOl/gUVRTxVIOkAJ1wR3QAvb4RsVjS8oVoFjDGTc679wJYmUmknUF5HwMLOgb5O+a3KxfWapPQ==}
     engines: {node: '>= 0.6'}
 
-  /meilisearch@0.38.0:
-    resolution: {integrity: sha512-bHaq8nYxSKw9/Qslq1Zes5g9tHgFkxy/I9o8942wv2PqlNOT0CzptIkh/x98N52GikoSZOXSQkgt6oMjtf5uZw==}
+  /meilisearch@0.41.0:
+    resolution: {integrity: sha512-5KcGLxEXD7E+uNO7R68rCbGSHgCqeM3Q3RFFLSsN7ZrIgr8HPDXVAIlP4LHggAZfk0FkSzo8VSXifHCwa2k80g==}
     dependencies:
       cross-fetch: 3.1.8
     transitivePeerDependencies:
