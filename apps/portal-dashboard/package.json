@@ -8,6 +8,7 @@
     "dev": "pnpm run start",
     "start": "remix vite:dev",
     "build": "remix vite:build",
+    "build-dev": "remix vite:build --mode development",
     "serve": "remix vite:preview"
   },
   "dependencies": {

@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "turbo build",
+    "build-dev": "turbo build-dev",
     "release": "changeset publish",
     "dev": "turbo dev",
     "lint": "turbo lint",
@@ -12,6 +13,7 @@
     "build:docs.lumeweb.com": "turbo build --filter=@lumeweb/docs.lumeweb.com",
     "build:lumeweb.com": "turbo build --filter=@lumeweb/lumeweb.com",
     "build:portal-dashboard": "turbo build --filter=@lumeweb/portal-dashboard",
+    "build-dev:portal-dashboard": "turbo build-dev --filter=@lumeweb/portal-dashboard",
     "dev:portal-dashboard": "turbo dev --filter=@lumeweb/portal-dashboard"
   },
   "private": true,
