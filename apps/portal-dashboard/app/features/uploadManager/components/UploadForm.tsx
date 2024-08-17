@@ -15,13 +15,12 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Button } from "~/components/ui/button.js";
-import DropTarget from "@uppy/drop-target";
 import { ServiceConfig } from "~/features/uploadManager/api/service";
 import UploadItem from "~/features/uploadManager/components/UploadItem.js";
 import { UppyFileDefault } from "~/features/uploadManager/lib/uploadManager.js";
 import { ErrorList } from "~/components/Forms.js";
 import useForceUpdate from "use-force-update";
-import { Meta, Body, UppyEventMap } from "@uppy/core";
+import { Body, Meta, UppyEventMap } from "@uppy/core";
 
 export default function UploadForm() {
   const uploader = useUploader();
@@ -107,16 +106,36 @@ export default function UploadForm() {
       "upload-error",
     ];
 
+    function handleLinkService(file: UppyFileDefault) {}
+
     events.forEach((event) => {
       uploader.addEvent(event as any, forceUpdate);
+    });
+
+    uploader.addEvent("file-added", async (file: UppyFileDefault) => {
+      if (!selectedService?.id) {
+        return;
+      }
+      const pluginId = await uploader.getFilePluginId(
+        file.data as File,
+        selectedService.id,
+      );
+
+      uploader.patchFilesState({
+        [file.id]: {
+          plugins: [pluginId],
+        },
+      });
     });
 
     return () => {
       events.forEach((event) => {
         uploader.removeEvent(event, forceUpdate);
       });
+
+      uploader.removeEvent("file-added", handleLinkService);
     };
-  });
+  }, [selectedService]);
 
   useEffect(() => {
     uploader.removeCompletedUploads();

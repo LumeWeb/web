@@ -3,8 +3,8 @@ import Uppy, {
   Body,
   Meta,
   UnknownPlugin,
-  UppyFile,
   UppyEventMap,
+  UppyFile,
 } from "@uppy/core";
 import {
   PluginConfig,
@@ -26,18 +26,6 @@ export type UppyFileDefault = UppyFile<Meta, Body>;
 export default class UploadManager {
   #uppy: Uppy<Meta, Body> = new Uppy<Meta, Body>();
   #services: ServiceConfig[] = [];
-  constructor() {
-    this.addEvent("file-added", (file: UppyFileDefault) => {
-      const serviceId = this.getAssociatedServiceForFile(file);
-      if (!file?.plugins?.length && serviceId) {
-        this.patchFilesState({
-          [file.id]: {
-            plugins: [serviceId],
-          },
-        });
-      }
-    });
-  }
 
   registerService(config: ServiceConfig) {
     this.#services.push(config);
@@ -47,22 +35,7 @@ export default class UploadManager {
   }
 
   async addFile(file: File, serviceId: string) {
-    const service =
-      this.#services.filter((item) => item.id === serviceId).length > 0;
-
-    if (!service) {
-      throw new Error(`Service ${serviceId} not registered`);
-    }
-
-    const sdk = getSdk();
-
-    if (!sdk) {
-      throw new Error("SDK not initialized");
-    }
-
-    const uploadLimit = await sdk.account().uploadLimit();
-    const pluginId =
-      file.size >= uploadLimit ? `${serviceId}-large` : `${serviceId}-small`;
+    const pluginId = await this.getFilePluginId(file, serviceId);
 
     this.#uppy.addFile({
       name: file.name,
@@ -177,5 +150,26 @@ export default class UploadManager {
     this.#uppy.iteratePlugins(
       (plugin) => plugin.id === "DropTarget" && this.#uppy.removePlugin(plugin),
     );
+  }
+
+  public async getFilePluginId(file: File, serviceId: string) {
+    const service =
+      this.#services.filter((item) => item.id === serviceId).length > 0;
+
+    if (!service) {
+      throw new Error(`Service ${serviceId} not registered`);
+    }
+
+    const sdk = getSdk();
+
+    if (!sdk) {
+      throw new Error("SDK not initialized");
+    }
+
+    const uploadLimit = await sdk.account().uploadLimit();
+
+    return file.size >= uploadLimit
+      ? `${serviceId}-large`
+      : `${serviceId}-small`;
   }
 }
