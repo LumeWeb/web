@@ -6,6 +6,11 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**","build/**"]
     },
+    "build-dev": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**","build/**"]
+    },
     "check-types": {
       "dependsOn": ["^check-types"]
     },
