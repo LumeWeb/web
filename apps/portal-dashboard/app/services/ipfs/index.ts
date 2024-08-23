@@ -7,13 +7,12 @@ import getProtocolDomain from "~/util/getProtocolDomain";
 import getSdk from "~/stores/getSdk.js";
 import dataProvider from "@refinedev/simple-rest";
 import {
-  BaseRecord,
   DataProvider,
+  GetListParams,
   GetListResponse,
   ResourceProps,
 } from "@refinedev/core";
-import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import { GetListParams } from "@refinedev/core";
+import { createColumnHelper } from "@tanstack/react-table";
 
 const SERVICE_ID = "ipfs";
 const SERVICE_NAME = "IPFS";

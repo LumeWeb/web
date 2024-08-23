@@ -14,7 +14,6 @@ import type { LinksFunction } from "@remix-run/node";
 import "@fontsource-variable/manrope";
 import { AuthProvider, NotificationProvider, Refine } from "@refinedev/core";
 import { Toaster } from "~/components/ui/toaster";
-import { IndeterminateProgressBar } from "~/components/ui/indeterminate-progress-bar";
 import useSdk from "~/hooks/useSdk.js";
 import routerProvider from "@refinedev/remix-router";
 import { notificationProvider } from "~/dataProviders/notificationProvider";
@@ -26,6 +25,7 @@ import { useAuthProvider } from "~/hooks/useAuthProvider.js";
 import { useAppInitialization } from "~/hooks/useAppInitialization.js";
 import { withTheme } from "~/hooks/useTheme";
 import { Skeleton } from "~/components/ui/skeleton";
+import restDataProvider from "@refinedev/simple-rest";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -95,7 +95,10 @@ export function Root() {
     <Refine
       authProvider={wrappedAuthProvider as AuthProvider}
       routerProvider={routerProvider}
-      dataProvider={{ ...providers, default: createAccountProvider(sdk!) }}
+      dataProvider={{
+        ...providers,
+        default: createAccountProvider(sdk!, restDataProvider("/api")),
+      }}
       notificationProvider={
         notificationProvider as unknown as NotificationProvider
       }
