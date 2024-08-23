@@ -17,6 +17,7 @@ export default defineConfig({
           route("/", "routes/index.tsx", { index: true });
           route("/account", "routes/account/index.tsx", { index: true });
           route("/account/verify", "routes/account/verify.tsx");
+          route("/account/subscription", "routes/account/subscription.tsx");
           route("/login", "routes/login/index.tsx");
           route("/register", "routes/register/index.tsx");
           route("/uploads", "routes/uploads/index.tsx");

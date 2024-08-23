@@ -6,12 +6,13 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm run start",
-    "start": "remix vite:dev",
+    "start": "remix vite:dev  --mode production",
     "build": "remix vite:build",
-    "serve": "remix vite:preview"
+    "serve": "remix preview"
   },
   "dependencies": {
     "@lumeweb/portal-sdk": "workspace:*",
+    "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-scroll-area": "^1.0.5",
