@@ -112,7 +112,7 @@
     "memoizee": "^0.4.17",
     "mime": "^4.0.1",
     "multiformats": "^13.0.0",
-    "orval": "^6.24.0",
+    "orval": "^7.0.1",
     "p-defer": "^4.0.0",
     "prism-react-renderer": "^2.3.1",
     "qrcode": "^1.5.3",
