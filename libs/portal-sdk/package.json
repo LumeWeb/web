@@ -20,7 +20,7 @@
         "@lumeweb/s5-js": "workspace:*",
         "axios": "^1.7.2",
         "memize": "^2.1.0",
-        "orval": "^6.25.0",
+        "orval": "^7.0.1",
         "patch-package": "^8.0.0"
     },
     "publishConfig": {
