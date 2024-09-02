@@ -269,8 +269,8 @@ importers:
         specifier: ^4.6.0
         version: 4.6.2(eslint@8.57.0)
       framer-motion:
-        specifier: ^11.3.24
-        version: 11.3.28(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^11.3.31
+        version: 11.3.31(react-dom@18.2.0)(react@18.2.0)
       helia:
         specifier: ^4.2.4
         version: 4.2.5(react-native@0.75.1)
@@ -15932,8 +15932,8 @@ packages:
     resolution: {integrity: sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==}
     dev: false
 
-  /framer-motion@11.3.28(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-dqhoawipEAjqdv32zbv72sOMJZjol7dROWn7t/FOq23WXJ40O4OUybgnO2ldnuS+3YquSn8xO/KKRavZ+TBVOQ==}
+  /framer-motion@11.3.31(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-Xmxs08WBXnc2tNzNZbFSpquI33lvleJg4Y+hmZ+vFkn+laN9ZnR3gbZnNGKDtuz7c/x3u8dLg05OU3EhLobCsg==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0
