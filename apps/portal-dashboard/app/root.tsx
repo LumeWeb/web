@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useMemo } from "react";
 import {
   Links,
   Meta,
@@ -17,15 +17,16 @@ import { Toaster } from "~/components/ui/toaster";
 import useSdk from "~/hooks/useSdk.js";
 import routerProvider from "@refinedev/remix-router";
 import { notificationProvider } from "~/dataProviders/notificationProvider";
-import { useMemo } from "react";
 import { getResetServices } from "~/services/index";
 import useUploader from "~/features/uploadManager/hooks/useUploader";
 import { createAccountProvider } from "~/dataProviders/accountProvider";
 import { useAuthProvider } from "~/hooks/useAuthProvider.js";
-import { useAppInitialization } from "~/hooks/useAppInitialization.js";
+import { useAppInitialization } from "~/hooks/useAppInitialization";
 import { withTheme } from "~/hooks/useTheme";
 import { Skeleton } from "~/components/ui/skeleton";
 import restDataProvider from "@refinedev/simple-rest";
+import routes, { generateMenuResources } from "../routes";
+import { createServiceProvider } from "~/dataProviders/serviceProvider";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -91,6 +92,8 @@ export function Root() {
     return <SkeletonLoader />;
   }
 
+  const allResources = [...resources, ...generateMenuResources(routes)];
+
   return (
     <Refine
       authProvider={wrappedAuthProvider as AuthProvider}
@@ -98,11 +101,12 @@ export function Root() {
       dataProvider={{
         ...providers,
         default: createAccountProvider(sdk!, restDataProvider("/api")),
+        service: createServiceProvider(),
       }}
       notificationProvider={
         notificationProvider as unknown as NotificationProvider
       }
-      resources={resources}
+      resources={allResources}
       options={{ disableTelemetry: true }}>
       <App />
     </Refine>

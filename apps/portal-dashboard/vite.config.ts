@@ -4,8 +4,13 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 import tsconfigPaths from "vite-tsconfig-paths";
 import commonjs from "vite-plugin-commonjs";
 
+// @ts-ignore
 import path from "path";
+// @ts-ignore
 import fs from "fs";
+import routes, { createRemixRoutes } from "./routes.js";
+import { jsonRoutes } from "remix-json-routes";
+import type { DefineRoutesFunction } from "@remix-run/dev/dist/config/routes.js";
 
 export default defineConfig({
   plugins: [
@@ -13,15 +18,7 @@ export default defineConfig({
       ssr: false,
       ignoredRouteFiles: ["**/*.css"],
       routes(defineRoutes) {
-        return defineRoutes((route) => {
-          route("/", "routes/index.tsx", { index: true });
-          route("/account", "routes/account/index.tsx", { index: true });
-          route("/account/verify", "routes/account/verify.tsx");
-          route("/account/subscription", "routes/account/subscription.tsx");
-          route("/login", "routes/login/index.tsx");
-          route("/register", "routes/register/index.tsx");
-          route("/uploads", "routes/uploads/index.tsx");
-        });
+        return jsonRoutes(defineRoutes, createRemixRoutes(routes));
       },
     }),
     tsconfigPaths(),
@@ -51,6 +48,7 @@ export default defineConfig({
       // https://vitejs.dev/config/server-options.html#server-fs-allow
       allow: [
         "app",
+        "routes.ts",
         fs.realpathSync(
           path.resolve("../../node_modules/@fontsource-variable/manrope"),
         ),
