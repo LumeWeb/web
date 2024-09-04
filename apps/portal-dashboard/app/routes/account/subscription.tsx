@@ -15,13 +15,9 @@ import {
 
 export default function Subscription() {
   return (
-    <Authenticated key="subscription" v3LegacyAuthProviderCompatible={false}>
-      <SubscriptionProvider>
-        <GeneralLayout>
-          <SubscriptionContent />
-        </GeneralLayout>
-      </SubscriptionProvider>
-    </Authenticated>
+    <SubscriptionProvider>
+      <SubscriptionContent />
+    </SubscriptionProvider>
   );
 }
 
