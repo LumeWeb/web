@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "./ui/button";
-import { cn } from "~/util/cn.js";
+import { cn } from "@/util/cn.js";
 
 const NavigationButton = ({
   children,

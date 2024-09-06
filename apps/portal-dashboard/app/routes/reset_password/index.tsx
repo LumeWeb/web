@@ -1,10 +1,10 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
-import { Button } from "~/components/ui/button.js";
-import lumeBgPng from "~/images/lume-bg-reset-password.png";
-import discordLogoPng from "~/images/discord-logo.png?url";
-import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
-import LumeLogo from "~/components/LumeLogo.js";
+import { Button } from "@/components/ui/button.js";
+import lumeBgPng from "@/images/lume-bg-reset-password.png";
+import discordLogoPng from "@/images/discord-logo.png?url";
+import lumeColorLogoPng from "@/images/lume-color-logo.png?url";
+import LumeLogo from "@/components/LumeLogo.js";
 import ResetPasswordForm from "./components/ResetPasswordForm";
 
 export const meta: MetaFunction = () => {

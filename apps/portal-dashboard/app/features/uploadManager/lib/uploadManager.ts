@@ -9,8 +9,8 @@ import Uppy, {
 import {
   PluginConfig,
   ServiceConfig,
-} from "~/features/uploadManager/api/service";
-import getSdk from "~/stores/getSdk";
+} from "@/features/uploadManager/api/service";
+import getSdk from "@/stores/getSdk";
 import DropTarget from "@uppy/drop-target";
 
 export const PLUGIN_SUFFIX_REGEX = /-(?:small|large)$/;

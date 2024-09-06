@@ -1,12 +1,13 @@
 import * as React from "react";
 
-import { cn } from "~/util/cn.js";
+import { cn } from "@/lib/utils";
 import { EyeOpenIcon, EyeNoneIcon } from "@radix-ui/react-icons";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   fullWidth?: boolean;
   leftIcon?: React.ReactNode;
+  after?: React.ReactNode;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -43,6 +44,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {showPassword ? <EyeOpenIcon /> : <EyeNoneIcon />}
           </button>
         ) : null}
+        {props.after}
       </div>
     );
   },

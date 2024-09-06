@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useCheckAuth } from "./useCheckAuth";
 import { useInitializeProviders } from "./useInitializeProviders";
 import { useInitializeResources } from "./useInitializeResources";
-import { AppActions } from "~/stores/app.js";
-import { IPFS } from "~/services/ipfs/index.js";
-import { getAddService, getGetServices } from "~/services/index.js";
+import { AppActions } from "@/stores/app.js";
+import { IPFS } from "@/services/ipfs/index";
+import { getAddService, getGetServices } from "@/services/index";
 import { Sdk } from "@lumeweb/portal-sdk";
 import { AuthProvider, ResourceProps } from "@refinedev/core";
 

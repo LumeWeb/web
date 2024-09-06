@@ -2,8 +2,8 @@ import type {
   NotificationProvider,
   OpenNotificationParams,
 } from "@refinedev/core";
-import type { ToastActionElement } from "~/components/ui/toast";
-import { toast } from "~/components/ui/use-toast";
+import type { ToastActionElement } from "@/components/ui/toast";
+import { toast } from "@/components/ui/use-toast";
 
 interface Provider extends Omit<NotificationProvider, "open"> {
   open: (

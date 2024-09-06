@@ -1,9 +1,9 @@
 import { Link } from "@remix-run/react";
-import { Button } from "~/components/ui/button.js";
-import { Field } from "~/components/Forms.js";
+import { Button } from "@/components/ui/button.js";
+import { Field } from "@/components/Forms.js";
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
-import { ToastAction } from "~/components/ui/toast";
+import { ToastAction } from "@/components/ui/toast";
 import { useNotification } from "@refinedev/core";
 import RecoverPasswordSchema from "./ResetPasswordForm.schema";
 

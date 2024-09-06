@@ -2,8 +2,8 @@ import { Label } from "@radix-ui/react-label";
 import { Input } from "./ui/input";
 import { type FieldName, useInputControl } from "@conform-to/react";
 import { useId } from "react";
-import { cn } from "~/util/cn.js";
-import { Checkbox } from "~/components/ui/checkbox";
+import { cn } from "@/util/cn.js";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "./ui/textarea";
 
 export const Field = ({

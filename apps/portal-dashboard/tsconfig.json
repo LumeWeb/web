@@ -10,13 +10,13 @@
     "strict": true,
     "types": ["vite/client"],
     "paths": {
-      "~/*": [
+      "@/*": [
         "apps/portal-dashboard/app/*"
       ],
-      "~/components/*": [
+      "@/components/*": [
         "apps/portal-dashboard/app/components/*"
       ],
-      "~/utils/*": [
+      "@/utils/*": [
         "apps/portal-dashboard/app/utils/*"
       ],
       "@lumeweb/libs5": ["libs/libs5/src/index.ts"],

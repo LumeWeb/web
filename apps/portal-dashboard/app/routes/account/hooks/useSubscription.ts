@@ -1,6 +1,6 @@
 import { CustomResponse, HttpError, useCustom } from "@refinedev/core";
-import type { SubscriptionResponse } from "~/dataProviders/accountProvider";
-import useApiUrl from "~/routes/account/hooks/useApiUrl";
+import type { SubscriptionResponse } from "@/dataProviders/accountProvider";
+import useApiUrl from "@/routes/account/hooks/useApiUrl";
 import {
   QueryObserverResult,
   RefetchOptions,

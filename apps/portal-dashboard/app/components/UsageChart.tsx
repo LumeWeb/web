@@ -6,7 +6,7 @@ import {
   buildChartTheme,
 } from "@visx/xychart";
 import React, { useRef, useEffect, useState } from "react";
-import useIsMobile from "~/hooks/useIsMobile";
+import useIsMobile from "@/hooks/useIsMobile";
 import { InfoIcon } from "./icons";
 
 type Coords = {

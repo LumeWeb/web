@@ -1,8 +1,8 @@
 import { useState } from "react";
-import JsonSchemaTable from "~/components/json-table-editor";
-import { GeneralLayout } from "~/components/layout/GeneralLayout";
-import { Button } from "~/components/ui/button";
-import { Textarea } from "~/components/ui/textarea";
+import JsonSchemaTable from "@/components/json-table-editor";
+import { GeneralLayout } from "@/components/layout/GeneralLayout";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function AdminUI() {
   const schema = {

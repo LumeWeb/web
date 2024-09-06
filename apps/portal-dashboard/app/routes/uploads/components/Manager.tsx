@@ -1,6 +1,6 @@
-import { getServiceById, getServiceIds } from "~/services/index.js";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { DataTable } from "~/components/DataTable.js";
+import { getServiceById, getServiceIds } from "@/services/index.js";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DataTable } from "@/components/DataTable.js";
 import React from "react";
 
 export default function Manager() {
@@ -13,7 +13,7 @@ export default function Manager() {
           return (
             <>
               <TabsTrigger key={"activeService"} value={serviceId}>
-                {service?.name()}
+                <span className={"text-foreground"}> {service?.name()}</span>
               </TabsTrigger>
             </>
           );
@@ -30,7 +30,7 @@ export default function Manager() {
                   <DataTable
                     className="min-w-full border border-gray-700 border-x-1"
                     columns={service?.UIUploadQueueColumns() || []}
-                    resource={service?.UIUploadQueueResource() || ""}
+                    resource={service?.id() || ""}
                     dataProviderName={service?.id() || ""}
                     autoRefresh
                     autoRefreshInterval={5000}

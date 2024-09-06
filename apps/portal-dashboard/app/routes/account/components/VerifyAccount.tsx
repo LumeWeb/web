@@ -1,5 +1,5 @@
 import { useSearchParams } from "@remix-run/react";
-import { Button } from "~/components/ui/button.js";
+import { Button } from "@/components/ui/button.js";
 import {
   HttpError,
   useGetIdentity,
@@ -8,10 +8,10 @@ import {
 } from "@refinedev/core";
 import { useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Identity } from "~/dataProviders/authProvider";
-import logoPng from "~/images/lume-logo.png?url";
-import lumeBgPng from "~/images/lume-bg-image.png?url";
-import useSdk from "~/hooks/useSdk";
+import { Identity } from "@/dataProviders/authProvider";
+import logoPng from "@/images/lume-logo.png?url";
+import lumeBgPng from "@/images/lume-bg-image.png?url";
+import useSdk from "@/hooks/useSdk";
 import { Sdk } from "@lumeweb/portal-sdk";
 
 export default function VerifyAuthenticated() {

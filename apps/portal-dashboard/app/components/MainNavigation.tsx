@@ -1,31 +1,14 @@
-import { ClockIcon } from "@radix-ui/react-icons";
-import { CircleLockIcon, DriveIcon } from "./icons";
 import {
   Navigation,
   NavigationItem,
   NavigationItemContent,
   NavigationSubItem,
 } from "./ui/navigation-menu";
-import { useGetToPath, useList, useMenu } from "@refinedev/core";
-import { createElement } from "react";
 // @ts-ignore
-import { TreeMenuItem } from "@refinedev/core/src/hooks/menu/useMenu.js";
-import { ServiceItem } from "~/dataProviders/serviceProvider.js";
-
-const navigationLinks = [
-  { path: "/dashboard", label: "Dashboard", icon: ClockIcon },
-  { path: "/file-manager", label: "File Manager", icon: DriveIcon },
-  {
-    path: "/account",
-    label: "Account",
-    icon: CircleLockIcon,
-    children: [
-      { path: "/account/subscription", label: "Subscription" },
-      { path: "/account/security", label: "Security" },
-      { path: "/account/other", label: "Other" },
-    ],
-  },
-];
+import { TreeMenuItem, useGetToPath, useList, useMenu } from "@refinedev/core";
+import React, { createElement } from "react";
+import { ServiceItem } from "@/dataProviders/serviceProvider";
+import UploadsActiveLoader from "@/components/UploadsActiveLoader";
 
 const NavItemContent: React.FC<{
   item: TreeMenuItem;
@@ -35,11 +18,18 @@ const NavItemContent: React.FC<{
   return (
     <NavigationItem active={active} key={item.key} href={item.route}>
       <NavigationItemContent>
-        {item.icon &&
-          createElement(item.icon, {
-            className: "w-5 h-5 mr-2",
-          })}
-        {item.label}
+        <div className="flex flex-col">
+          <div className="flex items-center">
+            <>
+              {item.icon &&
+                createElement(item.icon, {
+                  className: "w-5 h-5 mr-2",
+                })}
+              {item.label}
+            </>
+          </div>
+          {item?.name === "uploads" && <UploadsActiveLoader />}
+        </div>
       </NavigationItemContent>
       {subItems?.map((subItem) => {
         return (
@@ -81,7 +71,16 @@ const DynamicNavItem: React.FC<{ item: TreeMenuItem; active: boolean }> = ({
       })
       .filter(Boolean) || [];
 
-  return <NavItemContent item={item} active={active} subItems={items} />;
+  return (
+    <NavItemContent
+      item={{
+        ...item,
+        route: undefined,
+      }}
+      active={active}
+      subItems={items}
+    />
+  );
 };
 
 const StaticNavItem: React.FC<{ item: TreeMenuItem; active: boolean }> = ({

@@ -1,4 +1,4 @@
-import type { SdkProvider } from "~/dataProviders/sdk-provider.js";
+import type { SdkProvider } from "@/dataProviders/sdk-provider.js";
 import type { S5Client } from "@lumeweb/s5-js";
 import { PROTOCOL_S5 } from "@lumeweb/portal-sdk";
 import {

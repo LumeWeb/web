@@ -2,11 +2,11 @@ import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { useUpdatePassword } from "@refinedev/core";
 import { useEffect } from "react";
-import { DialogHeader, DialogTitle } from "~/components/ui/dialog";
-import type { UpdatePasswordFormRequest } from "~/dataProviders/authProvider";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import type { UpdatePasswordFormRequest } from "@/dataProviders/authProvider";
 import schema from "./ChangeEmailForm.schema";
-import { Field } from "~/components/Forms";
-import { Button } from "~/components/ui/button";
+import { Field } from "@/components/Forms";
+import { Button } from "@/components/ui/button";
 
 export default function ChangePasswordForm({ close }: { close: () => void }) {
   const { mutate: updatePassword, isSuccess } =

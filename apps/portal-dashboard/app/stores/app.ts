@@ -1,9 +1,9 @@
 import { createStore } from "zustand/vanilla";
 import { Sdk } from "@lumeweb/portal-sdk";
-import UploadManager from "~/features/uploadManager/lib/uploadManager";
-import BaseService from "~/services/base.js";
+import UploadManager from "@/features/uploadManager/lib/uploadManager";
+import BaseService from "@/services/base.js";
 import { StoreApi, useStore } from "zustand";
-import { env } from "~/env.js";
+import { env } from "@/env.js";
 
 export interface PortalMeta {
   domain: string;
@@ -25,7 +25,9 @@ export interface AppActions {
   setTheme: (theme: string) => void;
   addService: (service: BaseService) => void;
   getServices: () => BaseService[];
-  getServiceById: (id: string) => BaseService | undefined;
+  getServiceById: <S extends BaseService = BaseService>(
+    id: string,
+  ) => S | undefined;
   resetServices: () => void;
 }
 
@@ -46,7 +48,9 @@ export const appStore = createStore<AppState & AppActions>()((set, get) => {
       set((state) => ({ services: [...state.services, service] }));
     },
     getServices: () => get().services,
-    getServiceById: (id) => get().services.find((svc) => svc.id() === id),
+    getServiceById: <S extends BaseService = BaseService>(
+      id: string,
+    ): S | undefined => get().services.find((svc): svc is S => svc.id() === id),
     resetServices: () => set({ services: [] }),
   };
 });

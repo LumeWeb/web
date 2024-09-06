@@ -1,15 +1,15 @@
 import { Authenticated } from "@refinedev/core";
-import SectionTitle from "~/components/SectionTitle";
-import { UpgradeAccountBanner } from "~/components/UpgradeAccountBanner";
-import { UsageCard } from "~/components/UsageCard";
-import { UsageChart } from "~/components/UsageChart";
+import SectionTitle from "@/components/SectionTitle";
+import { UpgradeAccountBanner } from "@/components/UpgradeAccountBanner";
+import { UsageCard } from "@/components/UsageCard";
+import { UsageChart } from "@/components/UsageChart";
 import {
   CloudDownloadIcon,
   CloudIcon,
   CloudUploadSolidIcon,
   CurrentUsageIcon,
-} from "~/components/icons";
-import { GeneralLayout } from "~/components/layout/GeneralLayout";
+} from "@/components/icons";
+import { GeneralLayout } from "@/components/layout/GeneralLayout";
 
 export default function Dashboard() {
   return (

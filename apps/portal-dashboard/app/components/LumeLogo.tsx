@@ -1,4 +1,4 @@
-import logoPng from "~/images/lume-logo.png?url";
+import logoPng from "@/images/lume-logo.png?url";
 
 export default function LumeLogo() {
   return (

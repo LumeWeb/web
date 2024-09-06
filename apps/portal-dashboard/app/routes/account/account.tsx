@@ -1,21 +1,21 @@
 import { Authenticated, useGetIdentity } from "@refinedev/core";
 import { useState } from "react";
-import { GeneralLayout } from "~/components/layout/GeneralLayout";
-import { AddIcon, CloudIcon, CrownIcon, EditIcon } from "~/components/icons.js";
+import { GeneralLayout } from "@/components/layout/GeneralLayout";
+import { AddIcon, CloudIcon, CrownIcon, EditIcon } from "@/components/icons.js";
 import {
   ManagementCard,
   ManagementCardAvatar,
   ManagementCardContent,
   ManagementCardFooter,
   ManagementCardTitle,
-} from "~/components/ManagementCard";
-import { Button } from "~/components/ui/button";
+} from "@/components/ManagementCard";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
-} from "~/components/ui/dialog.js";
-import { UsageCard } from "~/components/UsageCard";
+} from "@/components/ui/dialog.js";
+import { UsageCard } from "@/components/UsageCard";
 import PasswordDots from "./components/PasswordDots";
 import ChangeAvatarForm from "./components/ChangeAvatarForm";
 import ChangeEmailForm from "./components/ChangeEmailForm";

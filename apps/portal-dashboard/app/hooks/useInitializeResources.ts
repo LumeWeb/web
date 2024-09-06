@@ -1,6 +1,6 @@
 import { useCallback } from "use-memo-one";
 import { ResourceProps } from "@refinedev/core";
-import { getGetServices } from "~/services/index";
+import { getGetServices } from "@/services/index";
 
 export function useInitializeResources() {
   const getServices = getGetServices();

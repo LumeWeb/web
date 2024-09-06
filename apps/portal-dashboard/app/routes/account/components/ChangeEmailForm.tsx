@@ -2,10 +2,10 @@ import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { type BaseKey, useGetIdentity, useUpdate } from "@refinedev/core";
 import { useEffect } from "react";
-import { DialogHeader, DialogTitle } from "~/components/ui/dialog.js";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog.js";
 import schema from "./ChangeEmailForm.schema";
-import { Field } from "~/components/Forms";
-import { Button } from "~/components/ui/button";
+import { Field } from "@/components/Forms";
+import { Button } from "@/components/ui/button";
 
 export default function ChangeEmailForm({
   currentValue,

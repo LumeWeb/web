@@ -1,9 +1,9 @@
 import memoize from "memoizee";
 import getApiBaseUrl from "./getApiBaseUrl";
-import { PortalMeta } from "~/stores/app";
+import { PortalMeta } from "@/stores/app";
 
 const _fetchPortalMeta = memoize(
-  function (portalUrl?: string): PortalMeta {
+  async function (portalUrl?: string): Promise<PortalMeta> {
     const endpoint = "/api/meta";
     const baseUrl = getApiBaseUrl();
     let fullEndpoint = "";
@@ -22,15 +22,26 @@ const _fetchPortalMeta = memoize(
       }
     }
 
-    return fetch(fullEndpoint)
-      .then((response) => response.json())
-      .catch((error) => {
-        console.error("Failed to fetch portal url:", error);
-      });
+    try {
+      const response = await fetch(fullEndpoint);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (!data.domain) {
+        throw new Error("Response does not contain required 'domain' property");
+      }
+      return data as PortalMeta;
+    } catch (error) {
+      console.error("Failed to fetch portal url:", error);
+      throw error; // Re-throw the error instead of returning undefined
+    }
   },
   { promise: true },
 );
 
-export default function fetchPortalMeta(portalUrl?: string) {
+export default function fetchPortalMeta(
+  portalUrl?: string,
+): Promise<PortalMeta> {
   return _fetchPortalMeta(portalUrl);
 }

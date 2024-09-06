@@ -6,9 +6,9 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "~/components/ui/carousel";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
+} from "@/components/ui/carousel";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,14 +18,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
-import { Skeleton } from "~/components/ui/skeleton";
-import { cn } from "~/util/cn.js";
-import filesize from "~/util/filesize.js";
+} from "@/components/ui/alert-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/util/cn.js";
+import filesize from "@/util/filesize.js";
 import HyperPayment from "./HyperPayment";
-import { SubscriptionPlan } from "~/dataProviders/accountProvider";
+import { SubscriptionPlan } from "@/dataProviders/accountProvider";
 import useSubmitSubscriptionConnect from "../hooks/useSubmitSubscriptionConnect";
-import { useSubscriptionContext } from "~/routes/account/contexts/SubscriptionContext.js";
+import { useSubscriptionContext } from "@/routes/account/contexts/SubscriptionContext.js";
 
 export default function PricingPlans() {
   const {

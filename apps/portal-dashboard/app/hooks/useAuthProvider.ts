@@ -1,4 +1,4 @@
-import { createPortalAuthProvider } from "~/dataProviders/authProvider";
+import { createPortalAuthProvider } from "@/dataProviders/authProvider";
 import { useMemo } from "use-memo-one";
 import { Sdk } from "@lumeweb/portal-sdk";
 

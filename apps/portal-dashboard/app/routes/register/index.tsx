@@ -1,20 +1,20 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
-import { Button } from "~/components/ui/button";
-import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
-import discordLogoPng from "~/images/discord-logo.png?url";
-import lumeBgPng from "~/images/lume-bg-register.png?url";
-import { Field, FieldCheckbox } from "~/components/Forms";
+import { Button } from "@/components/ui/button";
+import lumeColorLogoPng from "@/images/lume-color-logo.png?url";
+import discordLogoPng from "@/images/discord-logo.png?url";
+import lumeBgPng from "@/images/lume-bg-register.png?url";
+import { Field, FieldCheckbox } from "@/components/Forms";
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { useLogin, useNotification, useRegister } from "@refinedev/core";
 import {
   AuthFormRequest,
   RegisterFormRequest,
-} from "~/dataProviders/authProvider.js";
-import InlineAuthLinkBanner from "~/components/InlineAuthLinkBanner";
-import LumeLogo from "~/components/LumeLogo";
-import { RegisterSchema } from "~/routes/register/schema";
+} from "@/dataProviders/authProvider.js";
+import InlineAuthLinkBanner from "@/components/InlineAuthLinkBanner";
+import LumeLogo from "@/components/LumeLogo";
+import { RegisterSchema } from "@/routes/register/schema";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Sign Up" }];

@@ -4,7 +4,7 @@ import { useGo, useIsAuthenticated, useParsed } from "@refinedev/core";
 import { Link } from "@remix-run/react";
 import { useEffect } from "react";
 import { Field } from "apps/portal-dashboard/app/components/Forms.js";
-import { Button } from "~/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 import { LoginParams } from "apps/portal-dashboard/app/routes/Login/components/LoginForm.js";
 import schema from "./otp.schema";

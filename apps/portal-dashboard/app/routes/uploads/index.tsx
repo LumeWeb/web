@@ -1,7 +1,7 @@
 import { Authenticated } from "@refinedev/core";
-import { GeneralLayout } from "~/components/layout/GeneralLayout";
+import { GeneralLayout } from "@/components/layout/GeneralLayout";
 import React from "react";
-import Manager from "~/routes/uploads/components/Manager";
+import Manager from "@/routes/uploads/components/Manager";
 
 export default function Uploads() {
   return (

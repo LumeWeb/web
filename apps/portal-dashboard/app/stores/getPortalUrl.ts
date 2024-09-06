@@ -1,4 +1,4 @@
-import { appStore } from "~/stores/app";
+import { appStore } from "@/stores/app";
 
 export default function getPortalUrl() {
   if (appStore.getState().portalUrl) {

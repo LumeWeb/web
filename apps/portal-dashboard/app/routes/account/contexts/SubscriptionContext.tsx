@@ -10,16 +10,16 @@ import React, {
 import {
   SubscriptionPlan,
   SubscriptionResponse,
-} from "~/dataProviders/accountProvider";
+} from "@/dataProviders/accountProvider";
 import {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
 } from "@tanstack/react-query";
 import { CustomResponse, HttpError } from "@refinedev/core";
-import useSubscription from "~/routes/account/hooks/useSubscription.js";
-import useSubscriptionPlans from "~/routes/account/hooks/useSubscriptionPlans.js";
-import useSubmitSubscriptionChange from "~/routes/account/hooks/useSubmitSubscriptionChange.js";
+import useSubscription from "@/routes/account/hooks/useSubscription.js";
+import useSubscriptionPlans from "@/routes/account/hooks/useSubscriptionPlans.js";
+import useSubmitSubscriptionChange from "@/routes/account/hooks/useSubmitSubscriptionChange.js";
 // @ts-ignore
 import { loadHyper } from "../lib/hyper.js";
 
