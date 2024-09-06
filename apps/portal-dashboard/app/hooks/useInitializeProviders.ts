@@ -1,7 +1,7 @@
 import { useCallback } from "use-memo-one";
-import BaseService from "~/services/base";
+import BaseService from "@/services/base";
 import { DataProviders } from "@refinedev/core";
-import { getGetServices } from "~/services/index.js";
+import { getGetServices } from "@/services/index.js";
 
 export function useInitializeProviders() {
   const getServices = getGetServices();

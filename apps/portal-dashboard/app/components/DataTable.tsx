@@ -1,8 +1,8 @@
-import { useMemo } from "react";
-import type { BaseRecord } from "@refinedev/core";
+import { useEffect, useMemo, useState } from "react";
+import type { BaseRecord, CrudFilters, MetaQuery } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
-import { type ColumnDef, flexRender } from "@tanstack/react-table";
-
+import { type ColumnDef, flexRender, RowData } from "@tanstack/react-table";
+import { cn } from "@/lib/utils"; // Make sure this import is correct for your project structure
 import {
   Table,
   TableBody,
@@ -12,7 +12,16 @@ import {
   TableRow,
 } from "./ui/table";
 import { Skeleton } from "./ui/skeleton";
-import { DataTablePagination } from "~/components/TablePagination";
+import { DataTablePagination } from "@/components/TablePagination";
+
+import "@tanstack/react-table";
+
+// @ts-ignore
+declare module "@tanstack/table-core" {
+  interface ColumnMeta<TData extends RowData, TValue> {
+    className?: string;
+  }
+}
 
 export interface DataTableProps<
   TData extends BaseRecord = BaseRecord,
@@ -24,6 +33,9 @@ export interface DataTableProps<
   className?: string;
   autoRefresh?: boolean;
   autoRefreshInterval?: number;
+  filters?: CrudFilters;
+  permanentFilters?: CrudFilters;
+  meta?: MetaQuery;
 }
 
 export function DataTable<TData extends BaseRecord, TValue>({
@@ -33,18 +45,31 @@ export function DataTable<TData extends BaseRecord, TValue>({
   className,
   autoRefresh,
   autoRefreshInterval,
+  filters,
+  permanentFilters,
+  meta,
 }: DataTableProps<TData, TValue>) {
   const table = useTable({
     columns,
     refineCoreProps: {
       resource,
+      filters: {
+        permanent: permanentFilters,
+      },
+      meta,
       dataProviderName: dataProviderName || "default",
       // @ts-ignore
       queryOptions: {
         refetchInterval: autoRefresh ? autoRefreshInterval : undefined,
+        refetchIntervalInBackground: true,
+        keepPreviousData: true,
       },
     },
   });
+
+  useEffect(() => {
+    table.refineCore.setFilters(filters || []);
+  }, [filters]);
 
   const loadingRows = useMemo(
     () =>
@@ -64,10 +89,8 @@ export function DataTable<TData extends BaseRecord, TValue>({
         })),
     [],
   );
-
-  const rows = table.refineCore.tableQueryResult.isLoading
-    ? loadingRows
-    : table.getRowModel().rows;
+  const initialLoading = table.refineCore.tableQueryResult.isInitialLoading;
+  const rows = initialLoading ? loadingRows : table.getRowModel().rows;
 
   return (
     <>
@@ -98,15 +121,22 @@ export function DataTable<TData extends BaseRecord, TValue>({
               <TableRow
                 key={`DataTableRow_${index}`}
                 data-state={row.getIsSelected() && "selected"}
-                className="group">
-                {row.getVisibleCells().map((cell, index) => (
-                  <TableCell key={`DataTableCell_${index}`}>
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext() as any,
-                    )}
-                  </TableCell>
-                ))}
+                className={cn("group")}>
+                {row.getVisibleCells().map((cell, index) => {
+                  return (
+                    <TableCell
+                      key={`DataTableCell_${index}`}
+                      // @ts-ignore
+                      style={{ width: cell?.column?.getSize?.() }}
+                      // @ts-ignore
+                      className={cn(cell.column.columnDef?.meta?.className)}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext() as any,
+                      )}
+                    </TableCell>
+                  );
+                })}
               </TableRow>
             ))
           ) : (
@@ -120,7 +150,7 @@ export function DataTable<TData extends BaseRecord, TValue>({
           )}
         </TableBody>
       </Table>
-      {table.refineCore.tableQueryResult.isLoading && (
+      {!table.refineCore.tableQueryResult.isLoading && (
         <DataTablePagination table={table} />
       )}
     </>

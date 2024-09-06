@@ -4,21 +4,24 @@ import {
   CircleLockIcon,
   ClockIcon,
   CloudUploadSolidIcon,
-} from "./app/components/icons";
+} from "./components/icons.js";
 import slugify from "slugify";
 // @ts-ignore
 import { TreeMenuItem } from "@refinedev/core/src/hooks/menu/useMenu";
-import { ServiceItem } from "~/dataProviders/serviceProvider";
+import { ServiceItem } from "./dataProviders/serviceProvider";
+import { IPFS_SERVICE_ID } from "./config";
 
-interface RouteConfig {
+export interface RouteConfig {
   id?: string;
   icon?: React.FC;
   path?: string;
+  show?: string;
   component: string;
-  name: string;
+  name?: string;
   parent?: string;
   index?: boolean;
-  hidden?: boolean;
+  skipMenu?: boolean;
+  hide?: boolean;
   children?: RouteConfig[];
   layoutComponent?: string;
   dynamic?: boolean;
@@ -27,6 +30,7 @@ interface RouteConfig {
 }
 
 export const SERVICE_ROUTE = "service";
+export const IPFS_SUBFOLDER_ROUTE = "service_ipfs_subfolder";
 
 function convertToJsonRoute(route: RouteConfig, parentPath: string = ""): any {
   const fullPath = path.join(parentPath, route.path || "");
@@ -76,15 +80,16 @@ export function generateMenuResources(routes: RouteConfig[]): ResourceProps[] {
     return {
       name,
       list: routePath,
-      show: (route.dynamic && routePath + "/:id") || undefined,
+      show: (route.dynamic && routePath + "/:id") || route.show || undefined,
       meta: {
-        ...(parent && { parent: parentName }),
+        ...((parent && { parent: parentName }) || { parent: route.parent }),
         label: route.name,
         //@ts-ignore
         icon: route?.icon,
         dynamic: route.dynamic && route.dynamicToItem,
         dataProviderName: route.dynamic && route.meta?.dataProviderName,
         dynamicToItem: route.dynamic && route.dynamicToItem,
+        hide: route.hide,
       },
     };
   };
@@ -94,7 +99,7 @@ export function generateMenuResources(routes: RouteConfig[]): ResourceProps[] {
     parent?: RouteConfig,
   ): ResourceProps[] => {
     return routes.reduce<ResourceProps[]>((acc, route) => {
-      if (route.hidden) {
+      if (route.skipMenu) {
         return acc; // Skip hidden routes
       }
 
@@ -112,7 +117,17 @@ export function generateMenuResources(routes: RouteConfig[]): ResourceProps[] {
   return processRoutesForMenu(routes);
 }
 
-const routes: RouteConfig[] = [
+export function getAllRoutes() {
+  return [
+    ...routeConfig,
+    ...hiddenRoutes.map((route) => {
+      route.hide = true;
+      return route;
+    }),
+  ];
+}
+
+const routeConfig: RouteConfig[] = [
   {
     icon: ClockIcon,
     id: "main",
@@ -157,7 +172,7 @@ const routes: RouteConfig[] = [
         path: "verify",
         component: "routes/account/verify.tsx",
         name: "Verify",
-        hidden: true,
+        skipMenu: true,
       },
     ],
   },
@@ -166,14 +181,14 @@ const routes: RouteConfig[] = [
     path: "login",
     component: "routes/login/index.tsx",
     name: "Login",
-    hidden: true,
+    skipMenu: true,
   },
   {
     id: "register",
     path: "register",
     component: "routes/register/index.tsx",
     name: "Register",
-    hidden: true,
+    skipMenu: true,
   },
   {
     id: "uploads",
@@ -184,4 +199,14 @@ const routes: RouteConfig[] = [
   },
 ];
 
-export default routes;
+const hiddenRoutes: RouteConfig[] = [
+  {
+    id: IPFS_SUBFOLDER_ROUTE,
+    path: "service/ipfs/folder/:id",
+    show: "service/ipfs/folder/:id",
+    component: "routes/service/index.tsx",
+    parent: IPFS_SERVICE_ID,
+  },
+];
+
+export { routeConfig, hiddenRoutes };

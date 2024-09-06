@@ -1,13 +1,13 @@
 // src/components/Subscription.tsx
 import React, { useEffect } from "react";
 import { Authenticated } from "@refinedev/core";
-import { GeneralLayout } from "~/components/layout/GeneralLayout.js";
+import { GeneralLayout } from "@/components/layout/GeneralLayout.js";
 import PricingPlans from "./components/PricingPlans";
 import PaymentHistory from "./components/PaymentHistory";
 import ChangePaymentMethod from "./components/ChangePaymentMethod";
 import Addons from "./components/Addons";
 import BillingInformation from "./components/BillingInformation";
-import { Skeleton } from "~/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   SubscriptionProvider,
   useSubscriptionContext,

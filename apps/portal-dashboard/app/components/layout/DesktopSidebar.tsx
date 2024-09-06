@@ -1,11 +1,11 @@
 import { Link } from "@remix-run/react";
 import React from "react";
 import { CircleLockIcon, ClockIcon, DriveIcon } from "../icons";
-import LumeLogo from "~/components/LumeLogo";
+import LumeLogo from "@/components/LumeLogo";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
-import { UploadButton } from "~/components/UploadButton";
-import UploadForm from "~/features/uploadManager/components/UploadForm";
-import { MainNavigation } from "~/components/MainNavigation";
+import { UploadButton } from "@/components/UploadButton";
+import UploadForm from "@/features/uploadManager/components/UploadForm";
+import { MainNavigation } from "@/components/MainNavigation";
 
 export default function DesktopSidebar() {
   return (

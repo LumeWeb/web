@@ -1,5 +1,5 @@
 import { PROTOCOL_S5, Sdk } from "@lumeweb/portal-sdk";
-import { useSdk } from "~/components/lib/sdk-context.js";
+import { useSdk } from "@/components/lib/sdk-context.js";
 import { S5Client } from "@lumeweb/s5-js";
 import { S5Error } from "@lumeweb/s5-js/lib/client.js";
 

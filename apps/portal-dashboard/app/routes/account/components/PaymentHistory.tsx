@@ -5,11 +5,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useSubscriptionContext } from "../contexts/SubscriptionContext";
 import React, { MouseEventHandler, useEffect } from "react";
-import useSubmitSubscriptionCancellation from "~/routes/account/hooks/useSubmitSubscriptionCancellation.js";
+import useSubmitSubscriptionCancellation from "@/routes/account/hooks/useSubmitSubscriptionCancellation.js";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +19,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "~/components/ui/alert-dialog.js";
+} from "@/components/ui/alert-dialog.js";
 
 export default function SubscriptionHistory() {
   const [showDialog, setShowDialog] = React.useState(true);

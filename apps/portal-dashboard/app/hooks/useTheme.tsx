@@ -1,13 +1,13 @@
 import { useCallback, useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { ThemeIcon } from "~/components/icons";
-import { Button } from "~/components/ui/button";
+import { ThemeIcon } from "@/components/icons";
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "~/components/ui/popover";
-import { useAppStore } from "~/stores/app";
+} from "@/components/ui/popover";
+import { useAppStore } from "@/stores/app";
 
 export const ThemeSwitcher: React.FC = () => {
   const { theme, setTheme } = useTheme();

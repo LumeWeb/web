@@ -3,19 +3,19 @@ import {
   BoxCheckedIcon,
   ExclamationCircleIcon,
   PageIcon,
-} from "~/components/icons";
+} from "@/components/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "~/components/ui/tooltip";
-import filesize from "~/util/filesize";
-import { Button } from "~/components/ui/button";
+} from "@/components/ui/tooltip";
+import filesize from "@/util/filesize";
+import { Button } from "@/components/ui/button";
 import { TrashIcon } from "@radix-ui/react-icons";
-import { Progress } from "~/components/ui/progress";
-import { UppyFileDefault } from "~/features/uploadManager/lib/uploadManager";
-import useUploader from "~/features/uploadManager/hooks/useUploader.js";
+import { Progress } from "@/components/ui/progress";
+import { UppyFileDefault } from "@/features/uploadManager/lib/uploadManager";
+import useUploader from "@/features/uploadManager/hooks/useUploader.js";
 
 export default function UploadItem({ file }: { file: UppyFileDefault }) {
   const error = !!file.error;

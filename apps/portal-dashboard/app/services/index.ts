@@ -1,5 +1,5 @@
-import BaseService from "~/services/base.js";
-import { AppActions, useAppStore } from "~/stores/app.js";
+import BaseService from "../services/base";
+import { AppActions, useAppStore } from "@/stores/app.js";
 
 export function getAddService(): AppActions["addService"] {
   return useAppStore((state) => state.addService);

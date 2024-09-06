@@ -2,12 +2,12 @@ import { Avatar } from "@radix-ui/react-avatar";
 import { ChevronDownIcon, ExitIcon } from "@radix-ui/react-icons";
 import { useGetIdentity, useLogout } from "@refinedev/core";
 import { Link } from "@remix-run/react";
-import { Button } from "~/components/ui/button";
-import type { Identity } from "~/dataProviders/authProvider";
-import useIsMobile from "~/hooks/useIsMobile";
-import { ThemeSwitcher } from "~/hooks/useTheme";
-import discordLogoPng from "~/images/discord-logo.png?url";
-import lumeColorLogoPng from "~/images/lume-color-logo.png?url";
+import { Button } from "@/components/ui/button";
+import type { Identity } from "@/dataProviders/authProvider";
+import useIsMobile from "@/hooks/useIsMobile";
+import { ThemeSwitcher } from "@/hooks/useTheme";
+import discordLogoPng from "@/images/discord-logo.png?url";
+import lumeColorLogoPng from "@/images/lume-color-logo.png?url";
 import DesktopSidebar from "./DesktopSidebar";
 import MobileSidebar from "./MobileSidebar";
 import {

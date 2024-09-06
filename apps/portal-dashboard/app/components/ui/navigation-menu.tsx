@@ -1,6 +1,6 @@
 import { Link } from "@remix-run/react";
 import React, { type ReactNode, useState } from "react";
-import { cn } from "~/util/cn";
+import { cn } from "@/lib/utils";
 import { ChevronDownIcon } from "../icons";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -47,7 +47,9 @@ export function NavigationItem({
     <div
       className={cn(
         "px-5 text-sm font-medium rounded-md transition-colors text-foreground",
-        active ? "opacity-100 border-[1px] border-secondary" : "opacity-50",
+        active
+          ? "opacity-100 border-[1px] border-secondary"
+          : "opacity-50 hover:opacity-75",
         isOpen && hasSubItems && "bg-input !h-auto pb-4",
       )}
       onClick={() => hasSubItems && setIsOpen(!isOpen)}
@@ -60,7 +62,13 @@ export function NavigationItem({
       role="button"
       tabIndex={0}>
       <div className="flex items-center justify-between h-[64px]">
-        {href ? <Link to={href}>{content}</Link> : content}
+        {href ? (
+          <Link to={href} className={"cursor-pointer"}>
+            {content}
+          </Link>
+        ) : (
+          content
+        )}
         {hasSubItems && (
           <motion.div
             animate={{ rotate: isOpen ? 180 : 0 }}
@@ -105,5 +113,11 @@ export function NavigationSubItem({ children, href }: NavigationSubItemProps) {
     </div>
   );
 
-  return href ? <Link to={href}>{content}</Link> : content;
+  return href ? (
+    <Link to={href} className="flex-grow">
+      {content}
+    </Link>
+  ) : (
+    content
+  );
 }

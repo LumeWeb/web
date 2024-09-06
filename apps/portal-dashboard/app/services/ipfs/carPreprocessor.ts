@@ -11,15 +11,18 @@ import type {
 import {
   PLUGIN_LARGE_SUFFIX_REGEX,
   UppyFileDefault,
-} from "~/features/uploadManager/lib/uploadManager.js";
+} from "@/features/uploadManager/lib/uploadManager.js";
 // @ts-ignore
 import type { CID } from "multiformats/cid";
 import type { AbortOptions } from "@libp2p/interfaces";
 import type { ProgressOptions } from "progress-events";
 import { IDBBlockstore } from "blockstore-idb";
 import { IDBDatastore } from "datastore-idb";
-import fetchPortalMeta from "~/util/fetchPortalMeta.js";
-import getPortalUrl from "~/stores/getPortalUrl.js";
+import fetchPortalMeta from "@/util/fetchPortalMeta.js";
+import getPortalUrl from "@/stores/getPortalUrl.js";
+import { getServiceById } from "@/services/index.js";
+import { appStore } from "@/stores/app.js";
+import { IPFS, SERVICE_ID } from "@/services/ipfs/index.js";
 
 interface CarPreprocessorOpts<M extends Meta, B extends Body>
   extends PluginOpts {}
@@ -36,8 +39,6 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
   M,
   B
 > {
-  #helia?: Helia;
-
   constructor(uppy: Uppy<M, B>, opts: CarPreprocessorOpts<M, B>) {
     super(uppy, { ...defaultOptions, ...opts });
     this.id = this.opts.id || "CarPreprocessor";
@@ -178,22 +179,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
   }
 
   async #createHelia() {
-    if (!this.#helia) {
-      const meta = await fetchPortalMeta(getPortalUrl());
-
-      const blockstore = new IDBBlockstore(meta.domain);
-      const datastore = new IDBDatastore(meta.domain);
-
-      await blockstore.open();
-      await datastore.open();
-
-      this.#helia = await createHeliaHTTP({
-        blockstore,
-        datastore,
-      });
-    }
-
-    return this.#helia;
+    return appStore.getState().getServiceById<IPFS>(SERVICE_ID)?.getHelia()!;
   }
 }
 

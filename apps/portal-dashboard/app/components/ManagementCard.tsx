@@ -1,4 +1,4 @@
-import { cn } from "~/util/cn.js";
+import { cn } from "@/util/cn.js";
 import { EditIcon, FingerPrintIcon } from "./icons";
 import { Avatar } from "./ui/avatar";
 import { Button } from "./ui/button";

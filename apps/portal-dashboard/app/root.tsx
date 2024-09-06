@@ -7,26 +7,26 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 
-import stylesheet from "~/tailwind.css?url";
+import stylesheet from "@/tailwind.css?url";
 import type { LinksFunction } from "@remix-run/node";
 
 // Supports weights 200-800
 import "@fontsource-variable/manrope";
 import { AuthProvider, NotificationProvider, Refine } from "@refinedev/core";
-import { Toaster } from "~/components/ui/toaster";
-import useSdk from "~/hooks/useSdk.js";
+import { Toaster } from "@/components/ui/toaster";
+import useSdk from "@/hooks/useSdk.js";
 import routerProvider from "@refinedev/remix-router";
-import { notificationProvider } from "~/dataProviders/notificationProvider";
-import { getResetServices } from "~/services/index";
-import useUploader from "~/features/uploadManager/hooks/useUploader";
-import { createAccountProvider } from "~/dataProviders/accountProvider";
-import { useAuthProvider } from "~/hooks/useAuthProvider.js";
-import { useAppInitialization } from "~/hooks/useAppInitialization";
-import { withTheme } from "~/hooks/useTheme";
-import { Skeleton } from "~/components/ui/skeleton";
+import { notificationProvider } from "@/dataProviders/notificationProvider";
+import { getResetServices } from "@/services/index";
+import useUploader from "@/features/uploadManager/hooks/useUploader";
+import { createAccountProvider } from "@/dataProviders/accountProvider";
+import { useAuthProvider } from "@/hooks/useAuthProvider.js";
+import { useAppInitialization } from "@/hooks/useAppInitialization";
+import { withTheme } from "@/hooks/useTheme";
+import { Skeleton } from "@/components/ui/skeleton";
 import restDataProvider from "@refinedev/simple-rest";
-import routes, { generateMenuResources } from "../routes";
-import { createServiceProvider } from "~/dataProviders/serviceProvider";
+import { generateMenuResources, getAllRoutes } from "@/routeConfig.js";
+import { createServiceProvider } from "@/dataProviders/serviceProvider";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -92,7 +92,7 @@ export function Root() {
     return <SkeletonLoader />;
   }
 
-  const allResources = [...resources, ...generateMenuResources(routes)];
+  const allResources = [...resources, ...generateMenuResources(getAllRoutes())];
 
   return (
     <Refine
@@ -107,7 +107,7 @@ export function Root() {
         notificationProvider as unknown as NotificationProvider
       }
       resources={allResources}
-      options={{ disableTelemetry: true }}>
+      options={{ disableTelemetry: true, warnWhenUnsavedChanges: true }}>
       <App />
     </Refine>
   );

@@ -2,23 +2,23 @@ import {
   DialogClose,
   DialogHeader,
   DialogTitle,
-} from "~/components/ui/dialog.js";
-import { CloudCheckIcon, CloudSelectIcon } from "~/components/icons.js";
-import useUploader from "~/features/uploadManager/hooks/useUploader";
+} from "@/components/ui/dialog.js";
+import { CloudCheckIcon, CloudSelectIcon } from "@/components/icons.js";
+import useUploader from "@/features/uploadManager/hooks/useUploader";
 import React, { useEffect, useState } from "react";
-import { Label } from "~/components/ui/label";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "~/components/ui/select";
-import { Button } from "~/components/ui/button.js";
-import { ServiceConfig } from "~/features/uploadManager/api/service";
-import UploadItem from "~/features/uploadManager/components/UploadItem.js";
-import { UppyFileDefault } from "~/features/uploadManager/lib/uploadManager.js";
-import { ErrorList } from "~/components/Forms.js";
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button.js";
+import { ServiceConfig } from "@/features/uploadManager/api/service";
+import UploadItem from "@/features/uploadManager/components/UploadItem.js";
+import { UppyFileDefault } from "@/features/uploadManager/lib/uploadManager.js";
+import { ErrorList } from "@/components/Forms.js";
 import useForceUpdate from "use-force-update";
 import { Body, Meta, UppyEventMap } from "@uppy/core";
 

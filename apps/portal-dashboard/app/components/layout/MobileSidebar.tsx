@@ -7,8 +7,8 @@ import {
   DriveIcon,
   HamburgerMenuIcon,
 } from "apps/portal-dashboard/app/components/icons";
-import LumeLogo from "~/components/LumeLogo";
-import NavigationButton from "~/components/NavigationButton";
+import LumeLogo from "@/components/LumeLogo";
+import NavigationButton from "@/components/NavigationButton";
 import { Button } from "apps/portal-dashboard/app/components/ui/button";
 import {
   DropdownMenu,
@@ -28,7 +28,7 @@ import {
 import { ExitIcon } from "@radix-ui/react-icons";
 import { useLogout } from "@refinedev/core";
 import React from "react";
-import UploadForm from "~/features/uploadManager/components/UploadForm";
+import UploadForm from "@/features/uploadManager/components/UploadForm";
 import { MainNavigation } from "../MainNavigation";
 
 export default function MobileSidebar() {

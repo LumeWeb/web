@@ -7,13 +7,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
-import { Skeleton } from "~/components/ui/skeleton";
-import useBillingInfo from "~/routes/account/hooks/useBillingInfo";
-import useSubmitBillingInfo from "~/routes/account/hooks/useSubmitBillingInfo";
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import useBillingInfo from "@/routes/account/hooks/useBillingInfo";
+import useSubmitBillingInfo from "@/routes/account/hooks/useSubmitBillingInfo";
 import billingInfoSchema from "./BillingInformation.schema";
-import { Field } from "~/components/Forms";
+import { Field } from "@/components/Forms";
 
 export default function BillingInformation() {
   const { billingInfo, isLoading } = useBillingInfo();

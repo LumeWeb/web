@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Button } from "~/components/ui/button";
-import { DialogHeader, DialogTitle } from "~/components/ui/dialog.js";
-import { Input } from "~/components/ui/input";
-import QRImg from "~/images/QR.png";
+import { Button } from "@/components/ui/button";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog.js";
+import { Input } from "@/components/ui/input";
+import QRImg from "@/images/QR.png";
 
 export default function SetupTwoFactorDialog({ close }: { close: () => void }) {
   const [continueModal, setContinue] = useState<boolean>(false);

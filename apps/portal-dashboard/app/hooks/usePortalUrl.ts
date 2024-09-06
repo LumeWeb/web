@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import fetchPortalMeta from "~/util/fetchPortalMeta.js";
-import { useAppStore } from "~/stores/app.js";
+import fetchPortalMeta from "@/util/fetchPortalMeta.js";
+import { useAppStore } from "@/stores/app.js";
 
 export default function usePortalUrl() {
   let portalUrl = useAppStore((state) => state.portalUrl);

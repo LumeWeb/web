@@ -3,8 +3,8 @@ import {
   CardHeader,
   CardContent,
   CardTitle,
-} from "~/components/ui/card.js";
-import { Button } from "~/components/ui/button.js";
+} from "@/components/ui/card.js";
+import { Button } from "@/components/ui/button.js";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -13,11 +13,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "~/components/ui/alert-dialog.js";
+} from "@/components/ui/alert-dialog.js";
 import React, { useEffect } from "react";
 import HyperPayment from "./HyperPayment.js";
 import { useSubscriptionContext } from "../contexts/SubscriptionContext.js";
-import useSubmitSubscriptionConnect from "~/routes/account/hooks/useSubmitSubscriptionConnect.js";
+import useSubmitSubscriptionConnect from "@/routes/account/hooks/useSubmitSubscriptionConnect.js";
 
 export default function ChangePaymentMethod() {
   const [showDialog, setShowDialog] = React.useState(false);
