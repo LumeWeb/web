@@ -191,6 +191,13 @@ const routeConfig: RouteConfig[] = [
     skipMenu: true,
   },
   {
+    id: "reset-password",
+    path: "reset-password",
+    component: "routes/reset_password/index.tsx",
+    name: "Reset Password",
+    skipMenu: true,
+  },
+  {
     id: "uploads",
     path: "uploads",
     icon: CloudUploadSolidIcon,
