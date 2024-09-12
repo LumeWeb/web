@@ -211,6 +211,8 @@ components:
           type: string
         password:
           type: string
+        remember:
+          type: boolean
     LoginResponse:
       type: object
       properties:
