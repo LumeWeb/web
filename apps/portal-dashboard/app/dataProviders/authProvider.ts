@@ -8,7 +8,7 @@ import type {
 export type AuthFormRequest = {
   email: string;
   password: string;
-  rememberMe: boolean;
+  remember: boolean;
   redirectTo?: string;
 };
 
@@ -102,6 +102,7 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
       const ret = await sdk.account().login({
         email: params.email,
         password: params.password,
+        remember: params.remember,
       });
 
       maybeSetupAuth(sdk);

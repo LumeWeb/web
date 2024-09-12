@@ -30,7 +30,7 @@ export const LoginForm = () => {
         login.mutate({
           email: data.email,
           password: data.password,
-          rememberMe: data.rememberMe ?? false,
+          remember: data.remember ?? false,
           redirectTo: parsed.params?.to,
         });
       }
@@ -56,9 +56,9 @@ export const LoginForm = () => {
         errors={fields.password.errors}
       />
       <FieldCheckbox
-        inputProps={{ name: fields.rememberMe.name, form: form.id }}
+        inputProps={{ name: fields.remember.name, form: form.id }}
         labelProps={{ children: "Remember Me" }}
-        errors={fields.rememberMe.errors}
+        errors={fields.remember.errors}
       />
       <Button className="w-full h-14">Login</Button>
       <p className="inline-block mt-4 text-input-placeholder">
