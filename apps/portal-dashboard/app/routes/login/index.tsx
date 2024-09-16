@@ -4,9 +4,12 @@ import { Button } from "@/components/ui/button.js";
 import lumeColorLogoPng from "@/images/lume-color-logo.png?url";
 import discordLogoPng from "@/images/discord-logo.png?url";
 import lumeBgPng from "@/images/lume-bg-login.png?url";
-import InlineAuthLinkBanner from "@/components/InlineAuthLinkBanner.js";
+import InlineAuthLinkBanner from "@/components/InlineAuthLinkBanner";
 import LumeLogo from "@/components/LumeLogo.js";
-import { LoginForm } from "@/routes/login/components/LoginForm.js";
+import { LoginForm } from "@/routes/login/components/LoginForm";
+import SocialLogin from "@/routes/login/components/SocialLogin";
+import useFeatureFlag from "@/hooks/useFeatureFlag";
+import usePluginMeta from "@/hooks/usePluginMeta";
 
 export const meta: MetaFunction = () => {
   return [
@@ -16,6 +19,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Login() {
+  const socialLoginEnabled = useFeatureFlag("social_login");
   return (
     <div className="h-screen relative sm:overflow-hidden">
       <div className="flex flex-col sm:flex-row-reverse items-center justify-center w-full h-full">
@@ -36,7 +40,8 @@ export default function Login() {
               linkLabel="Create an account →"
             />
           </div>
-        </div>
+        </div>{" "}
+        {socialLoginEnabled && <SocialLogin />}
         <div className="flex flex-col items-start justify-start bg-background w-full sm:max-w-md ">
           <div className="sm:mt-20 p-4 sm:p-10">
             <div className="hidden sm:flex flex-col items-start justify-center gap-2 text-left mb-10">
