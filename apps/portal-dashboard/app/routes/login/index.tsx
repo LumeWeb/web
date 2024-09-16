@@ -9,7 +9,6 @@ import LumeLogo from "@/components/LumeLogo.js";
 import { LoginForm } from "@/routes/login/components/LoginForm";
 import SocialLogin from "@/routes/login/components/SocialLogin";
 import useFeatureFlag from "@/hooks/useFeatureFlag";
-import usePluginMeta from "@/hooks/usePluginMeta";
 
 export const meta: MetaFunction = () => {
   return [

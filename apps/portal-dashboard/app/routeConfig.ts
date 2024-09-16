@@ -198,6 +198,13 @@ const routeConfig: RouteConfig[] = [
     skipMenu: true,
   },
   {
+    id: "otp",
+    path: "otp",
+    component: "routes/login/otp.tsx",
+    name: "OTP",
+    skipMenu: true,
+  },
+  {
     id: "uploads",
     path: "uploads",
     icon: CloudUploadSolidIcon,

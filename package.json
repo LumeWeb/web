@@ -124,7 +124,7 @@
     "p-queue": "^8.0.1",
     "path": "^0.12.7",
     "prism-react-renderer": "^2.3.1",
-    "qrcode": "^1.5.3",
+    "qrcode": "^1.5.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-icons": "^5.3.0",
@@ -172,6 +172,7 @@
     "@types/detect-node": "^2.0.2",
     "@types/memoizee": "^0.4.11",
     "@types/node": "22.2.0",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "18.2.75",
     "@types/react-dom": "18.2.14",
     "@types/url-parse": "^1.4.11",
@@ -223,7 +224,8 @@
       "vite-plugin-node-polyfills@0.21.0": "patches/vite-plugin-node-polyfills@0.21.0.patch",
       "@uppy/core@4.1.0": "patches/@uppy__core@4.1.0.patch",
       "@uppy/utils@6.0.1": "patches/@uppy__utils@6.0.1.patch",
-      "@helia/block-brokers@3.0.3": "patches/@helia__block-brokers@3.0.3.patch"
+      "@helia/block-brokers@3.0.3": "patches/@helia__block-brokers@3.0.3.patch",
+      "@refinedev/core@4.54.0": "patches/@refinedev__core@4.54.0.patch"
     }
   },
   "packageManager": "pnpm@8.15.8"
