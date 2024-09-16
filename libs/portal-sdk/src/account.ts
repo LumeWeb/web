@@ -22,8 +22,8 @@ import {
   postApiAuthRegister,
   postApiAccountVerifyEmail,
   getApiAuthOtpGenerate,
-  postApiAccountOtpVerify,
-  postApiAccountOtpValidate,
+  postApiAuthOtpVerify,
+  postApiAuthOtpValidate,
   postApiAuthOtpDisable,
   PasswordResetRequest,
   postApiAccountPasswordResetConfirm,
@@ -158,10 +158,7 @@ export class AccountApi {
   ): Promise<boolean | Error> {
     let ret: AxiosResponse<void>;
     try {
-      ret = await postApiAccountOtpVerify(
-        otpVerifyRequest,
-        this.buildOptions(),
-      );
+      ret = await postApiAuthOtpVerify(otpVerifyRequest, this.buildOptions());
     } catch (e) {
       return new AccountError(
         (e as AxiosError).response?.data as string,
@@ -176,7 +173,7 @@ export class AccountApi {
   ): Promise<boolean | AccountError> {
     let ret: AxiosResponse<void>;
     try {
-      ret = await postApiAccountOtpValidate(
+      ret = await postApiAuthOtpValidate(
         otpValidateRequest,
         this.buildOptions(),
       );
