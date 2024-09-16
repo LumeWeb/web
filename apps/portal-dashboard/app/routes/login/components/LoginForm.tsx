@@ -37,11 +37,11 @@ export const LoginForm = () => {
     },
   });
 
-  useEffect(() => {
+  /*  useEffect(() => {
     if (form.status === "success") {
       go({ to: "/login/otp", type: "push" });
     }
-  }, [form.status, go]);
+  }, [form.status, go]);*/
 
   return (
     <form className="w-full max-w-md " {...getFormProps(form)}>

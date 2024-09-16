@@ -8,6 +8,9 @@ patchedDependencies:
   '@helia/block-brokers@3.0.3':
     hash: befn6knnu77wjcj434zvhgbx3y
     path: patches/@helia__block-brokers@3.0.3.patch
+  '@refinedev/core@4.54.0':
+    hash: 2lrhuo3yso7iznvhuteddzl63q
+    path: patches/@refinedev__core@4.54.0.patch
   '@uppy/core@4.1.0':
     hash: 767d2bg2qbwbw4tujrxaaoxiky
     path: patches/@uppy__core@4.1.0.patch
@@ -147,7 +150,7 @@ importers:
         version: 2.16.37(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
       '@refinedev/core':
         specifier: ^4.53.0
-        version: 4.54.0(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
+        version: 4.54.0(patch_hash=2lrhuo3yso7iznvhuteddzl63q)(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
       '@refinedev/devtools-internal':
         specifier: ^1.1.7
         version: 1.1.14(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
@@ -156,16 +159,16 @@ importers:
         version: 1.1.12(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
       '@refinedev/react-hook-form':
         specifier: ^4.9.0
-        version: 4.9.0(@refinedev/core@4.54.0(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.53.0(react@18.2.0))(react@18.2.0)
+        version: 4.9.0(@refinedev/core@4.54.0(patch_hash=2lrhuo3yso7iznvhuteddzl63q)(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.53.0(react@18.2.0))(react@18.2.0)
       '@refinedev/react-table':
         specifier: ^5.6.8
-        version: 5.6.13(@refinedev/core@4.54.0(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@tanstack/react-table@8.20.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 5.6.13(@refinedev/core@4.54.0(patch_hash=2lrhuo3yso7iznvhuteddzl63q)(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@tanstack/react-table@8.20.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@refinedev/remix-router':
         specifier: ^3.0.6
-        version: 3.0.6(@refinedev/core@4.54.0(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@remix-run/node@2.11.1(typescript@5.5.4))(@remix-run/react@2.11.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.5.4))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(remix@2.11.1)
+        version: 3.0.6(@refinedev/core@4.54.0(patch_hash=2lrhuo3yso7iznvhuteddzl63q)(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@remix-run/node@2.11.1(typescript@5.5.4))(@remix-run/react@2.11.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.5.4))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(remix@2.11.1)
       '@refinedev/simple-rest':
         specifier: ^5.0.8
-        version: 5.0.8(@refinedev/core@4.54.0(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))
+        version: 5.0.8(@refinedev/core@4.54.0(patch_hash=2lrhuo3yso7iznvhuteddzl63q)(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))
       '@remix-run/css-bundle':
         specifier: ^2.9.1
         version: 2.11.1
@@ -350,7 +353,7 @@ importers:
         specifier: ^2.3.1
         version: 2.3.1(react@18.2.0)
       qrcode:
-        specifier: ^1.5.3
+        specifier: ^1.5.4
         version: 1.5.4
       react:
         specifier: 18.2.0
@@ -488,6 +491,9 @@ importers:
       '@types/node':
         specifier: 22.2.0
         version: 22.2.0
+      '@types/qrcode':
+        specifier: ^1.5.5
+        version: 1.5.5
       '@types/url-parse':
         specifier: ^1.4.11
         version: 1.4.11
@@ -4989,6 +4995,9 @@ packages:
 
   '@types/prop-types@15.7.12':
     resolution: {integrity: sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==}
+
+  '@types/qrcode@1.5.5':
+    resolution: {integrity: sha512-CdfBi/e3Qk+3Z/fXYShipBT13OJ2fDO2Q2w5CIP5anLTLIndQG9z6P1cnm+8zCWSpm5dnxMFd/uREtb0EXuQzg==}
 
   '@types/qs@6.9.15':
     resolution: {integrity: sha512-uXHQKES6DQKKCLh441Xv/dwxOq1TVS3JPUMlEqoEglvlhR6Mxnlew/Xq/LRVHpLyk7iK3zODe1qYHIMltO7XGg==}
@@ -19042,7 +19051,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@refinedev/core@4.54.0(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)':
+  '@refinedev/core@4.54.0(patch_hash=2lrhuo3yso7iznvhuteddzl63q)(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@refinedev/devtools-internal': 1.1.14(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
       '@tanstack/react-query': 4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
@@ -19118,9 +19127,9 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@refinedev/react-hook-form@4.9.0(@refinedev/core@4.54.0(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.53.0(react@18.2.0))(react@18.2.0)':
+  '@refinedev/react-hook-form@4.9.0(@refinedev/core@4.54.0(patch_hash=2lrhuo3yso7iznvhuteddzl63q)(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.53.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@refinedev/core': 4.54.0(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
+      '@refinedev/core': 4.54.0(patch_hash=2lrhuo3yso7iznvhuteddzl63q)(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
       '@types/react': 18.2.75
       '@types/react-dom': 18.2.14
       lodash: 4.17.21
@@ -19129,16 +19138,16 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
       react-hook-form: 7.53.0(react@18.2.0)
 
-  '@refinedev/react-table@5.6.13(@refinedev/core@4.54.0(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@tanstack/react-table@8.20.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@refinedev/react-table@5.6.13(@refinedev/core@4.54.0(patch_hash=2lrhuo3yso7iznvhuteddzl63q)(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@tanstack/react-table@8.20.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@refinedev/core': 4.54.0(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
+      '@refinedev/core': 4.54.0(patch_hash=2lrhuo3yso7iznvhuteddzl63q)(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
       '@tanstack/react-table': 8.20.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@refinedev/remix-router@3.0.6(@refinedev/core@4.54.0(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@remix-run/node@2.11.1(typescript@5.5.4))(@remix-run/react@2.11.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.5.4))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(remix@2.11.1)':
+  '@refinedev/remix-router@3.0.6(@refinedev/core@4.54.0(patch_hash=2lrhuo3yso7iznvhuteddzl63q)(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@remix-run/node@2.11.1(typescript@5.5.4))(@remix-run/react@2.11.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.5.4))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(remix@2.11.1)':
     dependencies:
-      '@refinedev/core': 4.54.0(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
+      '@refinedev/core': 4.54.0(patch_hash=2lrhuo3yso7iznvhuteddzl63q)(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
       '@remix-run/node': 2.11.1(typescript@5.5.4)
       '@remix-run/react': 2.11.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.5.4)
       '@types/react': 18.2.75
@@ -19148,9 +19157,9 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
       remix: 2.11.1
 
-  '@refinedev/simple-rest@5.0.8(@refinedev/core@4.54.0(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))':
+  '@refinedev/simple-rest@5.0.8(@refinedev/core@4.54.0(patch_hash=2lrhuo3yso7iznvhuteddzl63q)(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))':
     dependencies:
-      '@refinedev/core': 4.54.0(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
+      '@refinedev/core': 4.54.0(patch_hash=2lrhuo3yso7iznvhuteddzl63q)(@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0))(@types/react-dom@18.2.14)(@types/react@18.2.75)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.75)(react@18.2.0))(react@18.2.0)
       axios: 1.7.3
       query-string: 7.1.3
     transitivePeerDependencies:
@@ -20152,6 +20161,10 @@ snapshots:
   '@types/prismjs@1.26.4': {}
 
   '@types/prop-types@15.7.12': {}
+
+  '@types/qrcode@1.5.5':
+    dependencies:
+      '@types/node': 22.2.0
 
   '@types/qs@6.9.15': {}
 

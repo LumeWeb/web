@@ -62,6 +62,10 @@ export interface SubscriptionBillingInfo {
   country: string;
 }
 
+export interface OPTGenerateResponse {
+  otp: string;
+}
+
 export const createAccountProvider = (
   sdk: Sdk,
   restProvider: DataProvider,
@@ -122,7 +126,7 @@ export const createAccountProvider = (
     ): Promise<CustomResponse<TData>> => {
       const { url, method, payload, headers } = params;
 
-      if (url.includes("/subscription")) {
+      if (url.includes("/subscription") || url.includes("/otp")) {
         // Handle subscription operations using restProvider
         return restProvider.custom({
           url,

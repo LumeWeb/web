@@ -5,10 +5,17 @@ import type {
   HttpError,
   UpdatePasswordFormTypes,
 } from "@refinedev/core";
+
+// Type definitions
 export type AuthFormRequest = {
   email: string;
   password: string;
   remember: boolean;
+  redirectTo?: string;
+};
+
+export type OTPFormRequest = {
+  otp: string;
   redirectTo?: string;
 };
 
@@ -42,6 +49,11 @@ type ResponseResult = {
 interface CheckResponseResult extends ResponseResult {
   authenticated?: boolean;
 }
+
+type LoginResponse = {
+  token: string;
+  otp: boolean;
+};
 
 // Helper functions
 const maybeSetupAuth = (sdk: Sdk): void => {
@@ -98,27 +110,66 @@ const handleCheckResponse = (result: CheckResponseResult): any => {
 
 export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
   return {
-    async login(params: AuthFormRequest): Promise<any> {
-      const ret = await sdk.account().login({
-        email: params.email,
-        password: params.password,
-        remember: params.remember,
-      });
+    async login(params: AuthFormRequest | OTPFormRequest): Promise<any> {
+      try {
+        if ("otp" in params) {
+          // OTP verification
+          const response = await sdk.account().validateOtp({ otp: params.otp });
 
-      maybeSetupAuth(sdk);
+          if (response?.token) {
+            sdk.setAuthToken(response.token);
+            return handleResponse({
+              ret: true,
+              redirectToSuccess: params.redirectTo ?? "/dashboard",
+              successCb: () => {
+                sdk.setAuthToken(response.token);
+              },
+              successNotification: {
+                message: "Login Successful",
+                description: "You have successfully logged in with 2FA.",
+              },
+            });
+          } else {
+            return handleResponse({
+              ret: new AccountError("Invalid OTP", 400),
+              redirectToError: "/otp",
+            });
+          }
+        } else {
+          // Initial login
+          const response = await sdk.account().login(params);
+          const loginResponse = response as unknown as LoginResponse;
 
-      return handleResponse({
-        ret,
-        redirectToSuccess: "/dashboard",
-        redirectToError: "/login",
-        successCb: () => {
-          sdk.setAuthToken(sdk.account().jwtToken);
-        },
-        successNotification: {
-          message: "Login Successful",
-          description: "You have successfully logged in.",
-        },
-      });
+          if (loginResponse.otp) {
+            return handleResponse({
+              ret: true,
+              redirectToSuccess: `/otp?to=${encodeURIComponent(params.redirectTo ?? "/dashboard")}`,
+              successNotification: {
+                message: "Two-Factor Authentication Required",
+                description: "Please enter your 2FA code to complete login.",
+              },
+            });
+          } else {
+            sdk.setAuthToken(loginResponse.token);
+            return handleResponse({
+              ret: true,
+              redirectToSuccess: params.redirectTo ?? "/dashboard",
+              successCb: () => {
+                sdk.setAuthToken(loginResponse.token);
+              },
+              successNotification: {
+                message: "Login Successful",
+                description: "You have successfully logged in.",
+              },
+            });
+          }
+        }
+      } catch (error) {
+        return handleResponse({
+          ret: error as AccountError,
+          redirectToError: "/login",
+        });
+      }
     },
 
     async logout(): Promise<any> {
@@ -205,6 +256,7 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
         lastName: acct.last_name,
         email: acct.email,
         verified: acct.verified,
+        otp: acct.otp,
       };
     },
   };

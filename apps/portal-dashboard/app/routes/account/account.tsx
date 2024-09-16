@@ -1,7 +1,12 @@
-import { Authenticated, useGetIdentity } from "@refinedev/core";
+import { useGetIdentity } from "@refinedev/core";
 import { useState } from "react";
-import { GeneralLayout } from "@/components/layout/GeneralLayout";
-import { AddIcon, CloudIcon, CrownIcon, EditIcon } from "@/components/icons.js";
+import {
+  AddIcon,
+  CloudIcon,
+  CrownIcon,
+  EditIcon,
+  RemoveIcon,
+} from "@/components/icons.js";
 import {
   ManagementCard,
   ManagementCardAvatar,
@@ -21,14 +26,24 @@ import ChangeAvatarForm from "./components/ChangeAvatarForm";
 import ChangeEmailForm from "./components/ChangeEmailForm";
 import ChangePasswordForm from "./components/ChangePasswordForm";
 import SetupTwoFactorDialog from "./components/SetupTwoFactorDialog";
+import DisableTwoFactorDialog from "./components/DisableTwoFactorDialog";
+
+interface ModalState {
+  changeEmail: boolean;
+  changePassword: boolean;
+  setupTwoFactor: boolean;
+  disableTwoFactor: boolean;
+  changeAvatar: boolean;
+}
 
 export default function MyAccount() {
   const { data: identity } = useGetIdentity<{ email: string }>();
 
-  const [openModal, setModal] = useState({
+  const [openModal, setModal] = useState<ModalState>({
     changeEmail: false,
     changePassword: false,
     setupTwoFactor: false,
+    disableTwoFactor: false,
     changeAvatar: false,
   });
 
@@ -37,6 +52,7 @@ export default function MyAccount() {
       changeEmail: false,
       changePassword: false,
       setupTwoFactor: false,
+      disableTwoFactor: false,
       changeAvatar: false,
     });
   };
@@ -135,24 +151,44 @@ export default function MyAccount() {
               </DialogTrigger>
             </ManagementCardFooter>
           </ManagementCard>
-          <ManagementCard>
-            <ManagementCardTitle>Two-Factor Authentication</ManagementCardTitle>
-            <ManagementCardContent className="text-foreground">
-              Improve security by enabling 2FA.
-            </ManagementCardContent>
-            <ManagementCardFooter>
-              <DialogTrigger asChild>
-                <Button
-                  className="h-12 gap-x-2"
-                  onClick={() =>
-                    setModal({ ...openModal, setupTwoFactor: true })
-                  }>
-                  <AddIcon />
-                  Enable Two-Factor Authorization
-                </Button>
-              </DialogTrigger>
-            </ManagementCardFooter>
-          </ManagementCard>
+          {
+            <ManagementCard>
+              <ManagementCardTitle>
+                Two-Factor Authentication
+              </ManagementCardTitle>
+              <ManagementCardContent className="text-foreground">
+                Improve security by enabling 2FA.
+              </ManagementCardContent>
+              {!identity?.otp && (
+                <ManagementCardFooter>
+                  <DialogTrigger asChild>
+                    <Button
+                      className="h-12 gap-x-2"
+                      onClick={() =>
+                        setModal({ ...openModal, setupTwoFactor: true })
+                      }>
+                      <AddIcon />
+                      Enable Two-Factor Authorization
+                    </Button>
+                  </DialogTrigger>
+                </ManagementCardFooter>
+              )}
+              {identity?.otp && (
+                <ManagementCardFooter>
+                  <DialogTrigger asChild>
+                    <Button
+                      className="h-12 gap-x-2"
+                      onClick={() =>
+                        setModal({ ...openModal, disableTwoFactor: true })
+                      }>
+                      <RemoveIcon />
+                      Disable Two-Factor Authorization
+                    </Button>
+                  </DialogTrigger>
+                </ManagementCardFooter>
+              )}
+            </ManagementCard>
+          }
         </div>
         <h2 className="font-bold my-8">More</h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-4">
@@ -206,6 +242,9 @@ export default function MyAccount() {
           )}
           {openModal.setupTwoFactor && (
             <SetupTwoFactorDialog close={closeModal} />
+          )}
+          {openModal.disableTwoFactor && (
+            <DisableTwoFactorDialog close={closeModal} />
           )}
         </DialogContent>
       </Dialog>
