@@ -7,6 +7,16 @@ import { env } from "@/env.js";
 
 export interface PortalMeta {
   domain: string;
+  plugins: PortalMetaPlugins;
+  feature_flags: Record<string, boolean>;
+}
+
+export type PortalMetaPlugins = Record<string, PortalMetaPlugin>;
+
+type PortalPluginMeta = Record<string, any>;
+
+export interface PortalMetaPlugin {
+  meta: PortalPluginMeta;
 }
 
 export interface AppState {
