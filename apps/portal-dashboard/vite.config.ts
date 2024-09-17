@@ -8,7 +8,7 @@ import commonjs from "vite-plugin-commonjs";
 import path from "path";
 // @ts-ignore
 import fs from "fs";
-import { createRemixRoutes, getAllRoutes } from "./app/routeConfig";
+import { createRemixRoutes, routeConfig } from "./app/routeConfig";
 import { jsonRoutes } from "remix-json-routes";
 
 export default defineConfig({
@@ -17,7 +17,7 @@ export default defineConfig({
       ssr: false,
       ignoredRouteFiles: ["**/*.css"],
       routes(defineRoutes) {
-        return jsonRoutes(defineRoutes, createRemixRoutes(getAllRoutes()));
+        return jsonRoutes(defineRoutes, routeConfig);
       },
     }),
     tsconfigPaths(),
