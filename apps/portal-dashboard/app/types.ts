@@ -1,6 +1,7 @@
 import { ComponentType } from "react";
 
 export interface RouteConfig {
+  id?: string;
   path: string;
   file: string;
   children?: RouteConfig[];

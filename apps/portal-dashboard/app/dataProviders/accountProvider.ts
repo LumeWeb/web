@@ -71,53 +71,33 @@ export const createAccountProvider = (
   restProvider: DataProvider,
 ): DataProvider => {
   return {
-    getList: () => {
-      console.log("Not implemented");
-      return Promise.resolve({
-        data: [],
-        total: 0,
-      });
-    },
-    getOne: () => {
-      console.log("Not implemented");
-      return Promise.resolve({
-        data: {},
-      });
-    },
+    ...restProvider,
     update: async <TVariables extends AccountParams = AccountParams>(
       params: UpdateParams<TVariables>,
     ): Promise<UpdateResponse<AccountData>> => {
-      if (params.variables.email && params.variables.password) {
-        const ret = await sdk
-          ?.account()
-          .updateEmail(params.variables.email, params.variables.password);
+      if (params.resource === "default") {
+        if (params.variables.email && params.variables.password) {
+          const ret = await sdk
+            ?.account()
+            .updateEmail(params.variables.email, params.variables.password);
 
-        if (ret instanceof Error) {
-          return Promise.reject(ret as HttpError);
+          if (ret instanceof Error) {
+            return Promise.reject(ret as HttpError);
+          }
+
+          return {
+            data: {
+              email: params.variables.email,
+            },
+          };
         }
 
         return {
-          data: {
-            email: params.variables.email,
-          },
+          data: {} as AccountData,
         };
       }
 
-      return {
-        data: {} as AccountData,
-      };
-    },
-    create: () => {
-      console.log("Not implemented");
-      return Promise.resolve({
-        data: {},
-      });
-    },
-    deleteOne: () => {
-      console.log("Not implemented");
-      return Promise.resolve({
-        data: {},
-      });
+      return restProvider.update(params);
     },
     getApiUrl: () => sdk.account().apiUrl,
 
@@ -126,7 +106,11 @@ export const createAccountProvider = (
     ): Promise<CustomResponse<TData>> => {
       const { url, method, payload, headers } = params;
 
-      if (url.includes("/subscription") || url.includes("/otp")) {
+      if (
+        url.includes("/subscription") ||
+        url.includes("/otp") ||
+        url.includes("/key")
+      ) {
         // Handle subscription operations using restProvider
         return restProvider.custom({
           url,

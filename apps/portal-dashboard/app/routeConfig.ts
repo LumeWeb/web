@@ -3,20 +3,14 @@ import { RouteConfig } from "./types";
 export const SERVICE_ROUTE = "service";
 export const IPFS_SUBFOLDER_ROUTE = "service_ipfs_subfolder";
 
-export function createRemixRoutes(routes: RouteConfig[]): any[] {
-  return routes.map((route) => ({
-    path: route.path,
-    file: route.file,
-    children: route.children ? createRemixRoutes(route.children) : undefined,
-  }));
-}
-
 export const routeConfig: RouteConfig[] = [
   {
+    id: IPFS_SUBFOLDER_ROUTE,
     path: "/",
     file: "routes/index.tsx",
   },
   {
+    id: SERVICE_ROUTE,
     path: "service/:id",
     file: "routes/service/index.tsx",
   },
@@ -40,6 +34,10 @@ export const routeConfig: RouteConfig[] = [
       {
         path: "verify",
         file: "routes/account/verify.tsx",
+      },
+      {
+        path: "api-keys",
+        file: "routes/account/api-keys.tsx",
       },
     ],
   },
