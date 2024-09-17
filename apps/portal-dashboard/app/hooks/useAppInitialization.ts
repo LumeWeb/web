@@ -7,6 +7,7 @@ import { IPFS } from "@/services/ipfs/index";
 import { getAddService, getGetServices } from "@/services/index";
 import { Sdk } from "@lumeweb/portal-sdk";
 import { AuthProvider, ResourceProps } from "@refinedev/core";
+import { useRegisterServiceMenuItem } from "@/hooks/useRegisterServiceMenuItem.js";
 
 export function useAppInitialization(sdk?: Sdk, authProvider?: AuthProvider) {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -18,6 +19,7 @@ export function useAppInitialization(sdk?: Sdk, authProvider?: AuthProvider) {
   const getServices = getGetServices();
   const initializeProviders = useInitializeProviders();
   const initializeResources = useInitializeResources();
+  const registerServiceMenuItem = useRegisterServiceMenuItem();
 
   const initializeApp = useCallback(async () => {
     if (!sdk || !authProvider || isInitialized) return;
@@ -35,6 +37,8 @@ export function useAppInitialization(sdk?: Sdk, authProvider?: AuthProvider) {
 
       setProviders(newProviders);
       setResources(newResources);
+
+      getServices().forEach(registerServiceMenuItem);
     }
 
     setIsInitialized(true);

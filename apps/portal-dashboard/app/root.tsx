@@ -25,7 +25,6 @@ import { useAppInitialization } from "@/hooks/useAppInitialization";
 import { withTheme } from "@/hooks/useTheme";
 import { Skeleton } from "@/components/ui/skeleton";
 import restDataProvider from "@refinedev/simple-rest";
-import { generateMenuResources, getAllRoutes } from "@/routeConfig.js";
 import { createServiceProvider } from "@/dataProviders/serviceProvider";
 
 export const links: LinksFunction = () => [
@@ -92,7 +91,7 @@ export function Root() {
     return <SkeletonLoader />;
   }
 
-  const allResources = [...resources, ...generateMenuResources(getAllRoutes())];
+  const allResources = [...resources];
 
   return (
     <Refine
@@ -101,6 +100,7 @@ export function Root() {
       dataProvider={{
         ...providers,
         default: createAccountProvider(sdk!, restDataProvider("/api")),
+        // @ts-ignore
         service: createServiceProvider(),
       }}
       notificationProvider={

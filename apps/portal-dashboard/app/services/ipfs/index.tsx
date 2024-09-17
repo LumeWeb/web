@@ -268,6 +268,10 @@ export class IPFS extends BaseService {
           headers: this.#getAuthHeaders(),
         },
       },
+      {
+        name: IPFS_SUBFOLDER_ROUTE,
+        show: "/service/ipfs/folder/:id",
+      },
     ] satisfies ResourceProps[];
   }
 
