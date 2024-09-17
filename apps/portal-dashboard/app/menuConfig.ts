@@ -30,6 +30,11 @@ export const menuConfig: MenuItem[] = [
         label: "Subscription",
         path: "/account/subscription",
       },
+      {
+        key: "api-keys",
+        label: "API Keys",
+        path: "/account/api-keys",
+      },
     ],
   },
   {

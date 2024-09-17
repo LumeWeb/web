@@ -1,4 +1,3 @@
-// src/components/Subscription.tsx
 import React, { useEffect } from "react";
 import { Authenticated } from "@refinedev/core";
 import { GeneralLayout } from "@/components/layout/GeneralLayout.js";

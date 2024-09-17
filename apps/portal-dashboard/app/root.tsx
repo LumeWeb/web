@@ -12,7 +12,12 @@ import type { LinksFunction } from "@remix-run/node";
 
 // Supports weights 200-800
 import "@fontsource-variable/manrope";
-import { AuthProvider, NotificationProvider, Refine } from "@refinedev/core";
+import {
+  AuthProvider,
+  NotificationProvider,
+  Refine,
+  ResourceProps,
+} from "@refinedev/core";
 import { Toaster } from "@/components/ui/toaster";
 import useSdk from "@/hooks/useSdk.js";
 import routerProvider from "@refinedev/remix-router";
@@ -91,7 +96,17 @@ export function Root() {
     return <SkeletonLoader />;
   }
 
-  const allResources = [...resources];
+  const allResources: ResourceProps[] = [
+    ...resources,
+    {
+      name: "account/keys",
+      meta: {
+        headers: {
+          Authorization: `Bearer ${sdk?.account()?.jwtToken}`,
+        },
+      },
+    },
+  ];
 
   return (
     <Refine
@@ -99,7 +114,14 @@ export function Root() {
       routerProvider={routerProvider}
       dataProvider={{
         ...providers,
-        default: createAccountProvider(sdk!, restDataProvider("/api")),
+        default: createAccountProvider(
+          sdk!,
+          restDataProvider(
+            // @ts-ignore
+            sdk!.account()?.apiUrl?.replace(/\/+$/, "") + "/api",
+          ),
+        ),
+
         // @ts-ignore
         service: createServiceProvider(),
       }}
