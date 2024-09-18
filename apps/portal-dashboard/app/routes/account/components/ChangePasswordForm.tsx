@@ -1,34 +1,49 @@
-import { getFormProps, useForm } from "@conform-to/react";
-import { getZodConstraint, parseWithZod } from "@conform-to/zod";
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useUpdatePassword } from "@refinedev/core";
-import { useEffect } from "react";
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import type { UpdatePasswordFormRequest } from "@/dataProviders/authProvider";
-import schema from "./ChangeEmailForm.schema";
-import { Field } from "@/components/Forms";
+import {
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import type { UpdatePasswordFormRequest } from "@/dataProviders/authProvider";
+import schema from "./ChangePasswordForm.schema";
+import { z } from "zod";
+
+const formSchema = schema;
+
+type FormValues = z.infer<typeof formSchema>;
 
 export default function ChangePasswordForm({ close }: { close: () => void }) {
   const { mutate: updatePassword, isSuccess } =
     useUpdatePassword<UpdatePasswordFormRequest>();
-  const [form, fields] = useForm({
-    id: "login",
-    constraint: getZodConstraint(schema),
-    onValidate({ formData }) {
-      return parseWithZod(formData, { schema });
-    },
-    shouldValidate: "onSubmit",
-    onSubmit(e) {
-      e.preventDefault();
 
-      const data = Object.fromEntries(new FormData(e.currentTarget).entries());
-
-      updatePassword({
-        currentPassword: data.currentPassword.toString(),
-        password: data.newPassword.toString(),
-      });
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      retypePassword: "",
     },
   });
+
+  const onSubmit = (data: FormValues) => {
+    updatePassword({
+      currentPassword: data.currentPassword,
+      password: data.newPassword,
+    });
+  };
 
   useEffect(() => {
     if (isSuccess) {
@@ -37,34 +52,60 @@ export default function ChangePasswordForm({ close }: { close: () => void }) {
   }, [isSuccess, close]);
 
   return (
-    <>
-      <DialogHeader>
-        <DialogTitle className="mb-8">Change Password</DialogTitle>
-      </DialogHeader>
-      <form {...getFormProps(form)}>
-        <Field
-          inputProps={{
-            name: fields.currentPassword.name,
-            type: "password",
-          }}
-          labelProps={{ children: "Current Password" }}
-          errors={fields.currentPassword.errors}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <DialogHeader>
+          <DialogTitle className="mb-8">Change Password</DialogTitle>
+        </DialogHeader>
+
+        <FormField
+          control={form.control}
+          name="currentPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Current Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Field
-          inputProps={{ name: fields.newPassword.name, type: "password" }}
-          labelProps={{ children: "New Password" }}
-          errors={fields.newPassword.errors}
+
+        <FormField
+          control={form.control}
+          name="newPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>New Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Field
-          inputProps={{
-            name: fields.retypePassword.name,
-            type: "password",
-          }}
-          labelProps={{ children: "Retype Password" }}
-          errors={fields.retypePassword.errors}
+
+        <FormField
+          control={form.control}
+          name="retypePassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Retype Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Button className="w-full h-14">Change Password</Button>
+
+        <DialogFooter>
+          <Button type="submit" className="w-full h-14">
+            Change Password
+          </Button>
+        </DialogFooter>
       </form>
-    </>
+    </Form>
   );
 }

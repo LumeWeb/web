@@ -1,7 +1,7 @@
 import { HttpError, useCustomMutation, useNotification } from "@refinedev/core";
 import { useCallback } from "react";
-import useApiUrl from "@/routes/account/hooks/useApiUrl";
-import useSubscription from "@/routes/account/hooks/useSubscription.js";
+import useApiUrl from "@/hooks/useApiUrl.js";
+import useSubscription from "@/hooks/useSubscription.js";
 import { SubscriptionBillingInfo } from "@/dataProviders/accountProvider.js";
 
 export default function useSubmitBillingInfo() {

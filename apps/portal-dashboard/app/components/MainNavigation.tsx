@@ -8,11 +8,13 @@ import {
 } from "./ui/navigation-menu";
 import { MenuItem } from "@/types.js";
 import useMenuItems from "@/hooks/useMenuItems.js";
+import useIsBillingEnabled from "@/hooks/useIsBillingEnabled.js";
 
 const NavItem: React.FC<{ item: MenuItem; active: boolean }> = ({
   item,
   active,
 }) => {
+  const billingEnable = useIsBillingEnabled();
   return (
     <NavigationItem active={active} key={item.key} href={item.path}>
       <NavigationItemContent>
@@ -25,11 +27,19 @@ const NavItem: React.FC<{ item: MenuItem; active: boolean }> = ({
           {item.label}
         </div>
       </NavigationItemContent>
-      {item.children?.map((child) => (
-        <NavigationSubItem key={child.key} href={child.path}>
-          {child.label}
-        </NavigationSubItem>
-      ))}
+      {item.children
+        ?.filter((item) => {
+          if (item.key === "subscription" && !billingEnable) {
+            return false;
+          }
+
+          return true;
+        })
+        ?.map((child) => (
+          <NavigationSubItem key={child.key} href={child.path}>
+            {child.label}
+          </NavigationSubItem>
+        ))}
     </NavigationItem>
   );
 };
@@ -39,7 +49,7 @@ export const MainNavigation: React.FC = () => {
   const menu = useMenuItems();
 
   const renderMenuItem = (item: MenuItem) => {
-    const isActive = location.pathname.startsWith(item.path);
+    const isActive = location.pathname.startsWith(item.path!);
     return <NavItem key={item.key} item={item} active={isActive} />;
   };
 

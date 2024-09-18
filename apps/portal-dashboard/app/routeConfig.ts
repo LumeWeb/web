@@ -32,14 +32,18 @@ export const routeConfig: RouteConfig[] = [
         file: "routes/account/subscription.tsx",
       },
       {
-        path: "verify",
-        file: "routes/account/verify.tsx",
-      },
-      {
         path: "api-keys",
         file: "routes/account/api-keys.tsx",
       },
+      {
+        path: "security",
+        file: "routes/account/security.tsx",
+      },
     ],
+  },
+  {
+    path: "account/verify",
+    file: "routes/account/verify.tsx",
   },
   {
     path: "login",

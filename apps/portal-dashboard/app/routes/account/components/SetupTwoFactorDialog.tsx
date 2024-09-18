@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import useApiUrl from "@/routes/account/hooks/useApiUrl.js";
+import useApiUrl from "@/hooks/useApiUrl.js";
 import { OPTGenerateResponse } from "@/dataProviders/accountProvider";
 import QRCode from "qrcode";
 import { useInvalidateAuthStore } from "@refinedev/core";

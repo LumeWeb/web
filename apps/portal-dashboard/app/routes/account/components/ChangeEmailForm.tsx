@@ -1,11 +1,28 @@
-import { getFormProps, useForm } from "@conform-to/react";
-import { getZodConstraint, parseWithZod } from "@conform-to/zod";
-import { type BaseKey, useGetIdentity, useUpdate } from "@refinedev/core";
-import { useEffect } from "react";
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog.js";
-import schema from "./ChangeEmailForm.schema";
-import { Field } from "@/components/Forms";
+import React, { useEffect } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useUpdate, useGetIdentity, BaseKey } from "@refinedev/core";
+import {
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import schema from "./ChangeEmailForm.schema";
+import { z } from "zod";
+
+const formSchema = schema;
+
+type FormValues = z.infer<typeof formSchema>;
 
 export default function ChangeEmailForm({
   currentValue,
@@ -16,28 +33,26 @@ export default function ChangeEmailForm({
 }) {
   const { data: identity } = useGetIdentity<{ id: BaseKey }>();
   const { mutate: updateEmail, isSuccess } = useUpdate();
-  const [form, fields] = useForm({
-    id: "login",
-    constraint: getZodConstraint(schema),
-    onValidate({ formData }) {
-      return parseWithZod(formData, { schema });
-    },
-    shouldValidate: "onSubmit",
-    onSubmit(e) {
-      e.preventDefault();
 
-      const data = Object.fromEntries(new FormData(e.currentTarget).entries());
-      console.log(identity);
-      updateEmail({
-        resource: "account",
-        id: "",
-        values: {
-          email: data.email.toString(),
-          password: data.password.toString(),
-        },
-      });
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      retypePassword: "",
     },
   });
+
+  const onSubmit = (data: FormValues) => {
+    updateEmail({
+      resource: "account",
+      id: identity?.id || "",
+      values: {
+        email: data.email,
+        password: data.password,
+      },
+    });
+  };
 
   useEffect(() => {
     if (isSuccess) {
@@ -46,35 +61,60 @@ export default function ChangeEmailForm({
   }, [isSuccess, close]);
 
   return (
-    <>
-      <DialogHeader>
-        <DialogTitle className="mb-8">Change Email</DialogTitle>
-      </DialogHeader>
-      <div className="rounded-full px-4 py-2 w-fit text-sm bg-ring font-bold text-secondary-1">
-        {currentValue}
-      </div>
-      <form {...getFormProps(form)}>
-        <Field
-          className="mt-8"
-          inputProps={{ name: fields.email.name }}
-          labelProps={{ children: "New Email Address" }}
-          errors={fields.email.errors}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <DialogHeader>
+          <DialogTitle className="mb-8">Change Email</DialogTitle>
+        </DialogHeader>
+        <div className="rounded-full px-4 py-2 w-fit text-sm bg-ring font-bold text-secondary-1">
+          {currentValue}
+        </div>
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>New Email Address</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Field
-          inputProps={{ name: fields.password.name, type: "password" }}
-          labelProps={{ children: "Password" }}
-          errors={fields.password.errors}
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Field
-          inputProps={{
-            name: fields.retypePassword.name,
-            type: "password",
-          }}
-          labelProps={{ children: "Retype Password" }}
-          errors={fields.retypePassword.errors}
+        <FormField
+          control={form.control}
+          name="retypePassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Retype Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Button className="w-full h-14">Change Email Address</Button>
+        <DialogFooter>
+          <Button type="submit" className="w-full h-14">
+            Change Email Address
+          </Button>
+        </DialogFooter>
       </form>
-    </>
+    </Form>
   );
 }

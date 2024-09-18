@@ -1,8 +1,6 @@
-import { HttpError, useCustomMutation, useNotification } from "@refinedev/core";
-import { useCallback, useState } from "react";
-import useApiUrl from "@/routes/account/hooks/useApiUrl";
-
-import { useSubscriptionContext } from "@/routes/account/contexts/SubscriptionContext.js";
+import { useCustomMutation, useNotification } from "@refinedev/core";
+import { useState } from "react";
+import useApiUrl from "@/hooks/useApiUrl.js";
 
 export default function useCreatePaymentEncryptionKey() {
   const apiUrl = useApiUrl();

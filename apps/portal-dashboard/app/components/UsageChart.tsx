@@ -1,101 +1,155 @@
-import { curveCardinal } from "@visx/curve";
+import React, { useMemo } from "react";
+import { InfoIcon } from "lucide-react";
+import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  AnimatedAxis,
-  AnimatedLineSeries,
-  XYChart,
-  buildChartTheme,
-} from "@visx/xychart";
-import React, { useRef, useEffect, useState } from "react";
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  useChart,
+} from "@/components/ui/chart";
 import useIsMobile from "@/hooks/useIsMobile";
-import { InfoIcon } from "./icons";
+import filesize from "@/util/filesize.js";
+import { cn } from "@/lib/utils.js";
 
-type Coords = {
+type InputCoords = {
   x: string;
-  y: string;
+  y: string | number;
+};
+
+type ProcessedCoords = {
+  x: string;
+  y: number;
 };
 
 type UsageChartProps = {
   label: string;
-  dataset: Coords[];
+  dataset: InputCoords[];
 };
-
-const accessors = {
-  xAccessor: (d: Coords) => d.x,
-  yAccessor: (d: Coords) => d.y,
-};
-
-const customTheme = buildChartTheme({
-  colors: ["hsl(var(--system-color-12))"],
-  backgroundColor: "hsl(var(--muted))",
-  gridColor: "hsl(var(--system-color-12))",
-  gridColorDark: "hsl(var(--system-color-12))",
-  htmlLabel: {
-    color: "hsl(var(--system-color-12))",
-  },
-  tickLength: 8,
-  yTickLineStyles: {
-    strokeWidth: 1,
-  },
-  xAxisLineStyles: {
-    strokeWidth: 1,
-  },
-});
 
 export const UsageChart = ({ label, dataset }: UsageChartProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState<number>(0);
   const isMobile = useIsMobile();
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (containerRef.current) {
-        setWidth(containerRef.current.offsetWidth);
-      }
-    };
+  let processedData = useMemo(() => {
+    return dataset
+      .map((d) => {
+        const date = new Date(d.x);
+        const value = typeof d.y === "string" ? parseFloat(d.y) : d.y;
+        if (isNaN(date.getTime()) || isNaN(value)) {
+          console.error("Invalid data point:", d);
+          return null;
+        }
+        return { x: date.toISOString(), y: value };
+      })
+      .filter((d): d is ProcessedCoords => d !== null)
+      .sort((a, b) => new Date(a.x).getTime() - new Date(b.x).getTime());
+  }, [dataset]);
 
-    handleResize(); // Set initial width
-    window.addEventListener("resize", handleResize);
+  const formatYAxisTick = (value: number) => {
+    return filesize(value, 1, "jedec");
+  };
 
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+  const formatXAxisTick = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
+  };
+
   return (
-    <div
-      ref={containerRef}
-      className="p-2 lg:p-8 border border-border/30 rounded-lg w-full">
-      <div className="flex items-center justify-between">
-        <span className="font-bold text-lg">{label}</span>
-        <InfoIcon className="text-foreground/50 cursor-pointer hover:text-foreground" />
-      </div>
-      <div className="text-foreground">
-        <XYChart
-          height={isMobile ? 300 : 400} // Adjust height for mobile devices
-          width={width}
-          xScale={{ type: "band" }}
-          yScale={{ type: "linear" }}
-          theme={customTheme}>
-          <AnimatedAxis
-            orientation="bottom"
-            hideTicks
-            tickTransform="translate(50 0)"
-            tickLabelProps={{ className: "text-sm" }}
-          />
-          <AnimatedAxis
-            orientation="left"
-            hideTicks
-            tickLabelProps={{ className: "text-sm" }}
-          />
-          <AnimatedLineSeries
-            className="stroke-ring"
-            curve={curveCardinal}
-            strokeWidth={isMobile ? 2 : 4} // Adjust stroke width for mobile devices
-            dataKey="usage"
-            data={dataset}
-            {...accessors}
-          />
-        </XYChart>
-      </div>
-    </div>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-base font-normal">{label}</CardTitle>
+        <InfoIcon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <ChartContainer
+          config={{
+            usageArea: {},
+            usageLine: {},
+          }}>
+          <ResponsiveContainer>
+            <AreaChart data={processedData}>
+              <defs>
+                <linearGradient id="usageGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopOpacity={0.5} />
+                  <stop offset="95%" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis
+                dataKey="x"
+                tickFormatter={formatXAxisTick}
+                tick={{ fontSize: 12 }}
+                tickMargin={8}
+                tickCount={isMobile ? 4 : 6}
+              />
+              <YAxis
+                tickFormatter={formatYAxisTick}
+                tick={{ fontSize: 12 }}
+                tickMargin={8}
+                tickCount={5}
+              />
+              <Area
+                type="monotone"
+                dataKey="y"
+                stroke="var(--color-usageLine)"
+                fillOpacity={1}
+                fill="url(#usageGradient)"
+              />
+              <ChartTooltip content={<CustomTooltip />} />
+            </AreaChart>
+            {processedData.length === 0 && (
+              <p className="text-muted-foreground">No data available</p>
+            )}
+          </ResponsiveContainer>
+        </ChartContainer>
+      </CardContent>
+    </Card>
   );
 };
+
+const CustomTooltip = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<typeof ChartTooltipContent>
+>(({ active, payload, className }, ref) => {
+  const { config } = useChart();
+
+  if (!active || !payload || !payload.length) {
+    return null;
+  }
+
+  const data = payload[0].payload;
+  const date = new Date(data.x).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+  const value = filesize(data.y, 1);
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl",
+        className,
+      )}>
+      <div className="grid gap-1.5">
+        <div className="flex w-full flex-wrap items-center gap-2">
+          <div
+            className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+            style={{ backgroundColor: config.usageLine.theme?.light }}
+          />
+          <div className="flex flex-1 justify-between leading-none">
+            <span className="text-muted-foreground">Usage</span>
+            <span className="font-mono font-medium tabular-nums text-foreground">
+              {value}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="text-xs font-medium text-muted-foreground">{date}</div>
+    </div>
+  );
+});
+
+CustomTooltip.displayName = "CustomTooltip";
