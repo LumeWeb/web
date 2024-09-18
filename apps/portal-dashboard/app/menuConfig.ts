@@ -35,6 +35,11 @@ export const menuConfig: MenuItem[] = [
         label: "API Keys",
         path: "/account/api-keys",
       },
+      {
+        key: "security",
+        label: "Security",
+        path: "/account/security",
+      },
     ],
   },
   {

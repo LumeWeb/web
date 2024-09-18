@@ -17,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import EmailVerificationBanner from "@/components/EmailVerificationBanner.js";
 
 export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   const { data: identity } = useGetIdentity<Identity>();
@@ -25,14 +26,8 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
   const isMobile = useIsMobile();
 
   return (
-    /*<PinningProvider>*/
     <>
-      {!identity?.verified ? (
-        <div className="bg-secondary text-foreground p-2">
-          We have sent you a verification email. Please click on the link in the
-          email to start using the platform.
-        </div>
-      ) : null}
+      <EmailVerificationBanner />
       <div className="w-full h-full flex flex-col sm:flex-row">
         {isMobile ? <MobileSidebar /> : <DesktopSidebar />}
         <div className="flex-1 overflow-y-auto p-4 sm:p-10">

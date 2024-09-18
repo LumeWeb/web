@@ -17,7 +17,7 @@ import {
   RefetchQueryFilters,
 } from "@tanstack/react-query";
 import { CustomResponse, HttpError } from "@refinedev/core";
-import useSubscription from "@/routes/account/hooks/useSubscription.js";
+import useSubscription from "@/hooks/useSubscription.js";
 import useSubscriptionPlans from "@/routes/account/hooks/useSubscriptionPlans.js";
 import useSubmitSubscriptionChange from "@/routes/account/hooks/useSubmitSubscriptionChange.js";
 // @ts-ignore

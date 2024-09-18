@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import useApiUrl from "@/routes/account/hooks/useApiUrl.js";
+import useApiUrl from "@/hooks/useApiUrl.js";
 import { useInvalidateAuthStore } from "@refinedev/core";
 
 export default function DisableTwoFactorDialog({

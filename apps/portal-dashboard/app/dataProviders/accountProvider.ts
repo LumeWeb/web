@@ -76,7 +76,7 @@ export const createAccountProvider = (
     async update<TVariables extends AccountParams = AccountParams>(
       params: UpdateParams<TVariables>,
     ): Promise<UpdateResponse<AccountData>> {
-      if (params.resource === "default") {
+      if (params.resource === "account") {
         if (params.variables.email && params.variables.password) {
           const ret = await sdk
             ?.account()
@@ -128,6 +128,7 @@ export const createAccountProvider = (
       if (
         url.includes("/subscription") ||
         url.includes("/otp") ||
+        url.includes("/usage") ||
         url.includes("/key")
       ) {
         // Handle subscription operations using restProvider

@@ -1,15 +1,8 @@
 import { useGetIdentity } from "@refinedev/core";
 import { useState } from "react";
-import {
-  AddIcon,
-  CloudIcon,
-  CrownIcon,
-  EditIcon,
-  RemoveIcon,
-} from "@/components/icons.js";
+import { AddIcon, CrownIcon, RemoveIcon } from "@/components/icons.js";
 import {
   ManagementCard,
-  ManagementCardAvatar,
   ManagementCardContent,
   ManagementCardFooter,
   ManagementCardTitle,
@@ -20,7 +13,6 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog.js";
-import { UsageCard } from "@/components/UsageCard";
 import PasswordDots from "./components/PasswordDots";
 import ChangeAvatarForm from "./components/ChangeAvatarForm";
 import ChangeEmailForm from "./components/ChangeEmailForm";
@@ -28,6 +20,9 @@ import ChangePasswordForm from "./components/ChangePasswordForm";
 import SetupTwoFactorDialog from "./components/SetupTwoFactorDialog";
 import DisableTwoFactorDialog from "./components/DisableTwoFactorDialog";
 import DeleteAccountDialog from "@/routes/account/components/DeleteAccountDialog.js";
+import useIsBillingEnabled from "@/hooks/useIsBillingEnabled.js";
+import ManagementGrid from "@/components/ManagementGrid.js";
+import AccountUsage from "@/routes/account/components/AccountUsage.js";
 
 interface ModalState {
   changeEmail: boolean;
@@ -40,7 +35,6 @@ interface ModalState {
 
 export default function MyAccount() {
   const { data: identity } = useGetIdentity<{ email: string }>();
-
   const [openModal, setModal] = useState<ModalState>({
     changeEmail: false,
     changePassword: false,
@@ -62,6 +56,8 @@ export default function MyAccount() {
   };
   const isModalOpen = Object.values(openModal).some((isOpen) => isOpen);
 
+  const billingEnabled = useIsBillingEnabled();
+
   return (
     <>
       <Dialog
@@ -72,22 +68,11 @@ export default function MyAccount() {
         }}
         open={isModalOpen}>
         <div className="mt-10">
-          <UsageCard
-            label="Usage"
-            currentUsage={2}
-            monthlyUsage={10}
-            icon={<CloudIcon className="text-foreground" />}
-            button={
-              <Button variant="accent" className="gap-x-2 h-12 text-foreground">
-                <AddIcon />
-                Upgrade to Premium
-              </Button>
-            }
-          />
+          <AccountUsage />
         </div>
-        <h2 className="font-bold my-8">Account Management</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-4">
-          <ManagementCard>
+        <div className={"mt-10"}>
+          <ManagementGrid>
+            {/*          <ManagementCard>
             <ManagementCardAvatar
               button={
                 <DialogTrigger
@@ -104,99 +89,60 @@ export default function MyAccount() {
                 </DialogTrigger>
               }
             />
-          </ManagementCard>
-          <ManagementCard>
-            <ManagementCardTitle>Email Address</ManagementCardTitle>
-            <ManagementCardContent className="text-foreground font-semibold">
-              {identity?.email}
-            </ManagementCardContent>
-            <ManagementCardFooter>
-              <DialogTrigger asChild>
-                <Button
-                  className="h-12 gap-x-2"
-                  onClick={() => setModal({ ...openModal, changeEmail: true })}>
-                  <AddIcon />
-                  Change Email Address
-                </Button>
-              </DialogTrigger>
-            </ManagementCardFooter>
-          </ManagementCard>
-          <ManagementCard>
-            <ManagementCardTitle>Account Type</ManagementCardTitle>
-            <ManagementCardContent className="text-foreground font-semibold flex gap-x-2">
-              Lite Premium Account
-              <CrownIcon />
-            </ManagementCardContent>
-            <ManagementCardFooter>
-              <Button className="h-12 gap-x-2 text-foreground">
-                <AddIcon />
-                Upgrade to Premium
-              </Button>
-            </ManagementCardFooter>
-          </ManagementCard>
-        </div>
-        <h2 className="font-bold my-8">Security</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-4">
-          <ManagementCard>
-            <ManagementCardTitle>Password</ManagementCardTitle>
-            <ManagementCardContent className="text-foreground">
-              <PasswordDots className="mt-6" />
-            </ManagementCardContent>
-            <ManagementCardFooter>
-              <DialogTrigger asChild>
-                <Button
-                  className="h-12 gap-x-2"
-                  onClick={() =>
-                    setModal({ ...openModal, changePassword: true })
-                  }>
-                  <AddIcon />
-                  Change Password
-                </Button>
-              </DialogTrigger>
-            </ManagementCardFooter>
-          </ManagementCard>
-          {
+          </ManagementCard>*/}
             <ManagementCard>
-              <ManagementCardTitle>
-                Two-Factor Authentication
-              </ManagementCardTitle>
-              <ManagementCardContent className="text-foreground">
-                Improve security by enabling 2FA.
+              <ManagementCardTitle>Email Address</ManagementCardTitle>
+              <ManagementCardContent className="text-foreground font-semibold">
+                {identity?.email}
               </ManagementCardContent>
-              {!identity?.otp && (
-                <ManagementCardFooter>
-                  <DialogTrigger asChild>
-                    <Button
-                      className="h-12 gap-x-2"
-                      onClick={() =>
-                        setModal({ ...openModal, setupTwoFactor: true })
-                      }>
-                      <AddIcon />
-                      Enable Two-Factor Authorization
-                    </Button>
-                  </DialogTrigger>
-                </ManagementCardFooter>
-              )}
-              {identity?.otp && (
-                <ManagementCardFooter>
-                  <DialogTrigger asChild>
-                    <Button
-                      className="h-12 gap-x-2"
-                      onClick={() =>
-                        setModal({ ...openModal, disableTwoFactor: true })
-                      }>
-                      <RemoveIcon />
-                      Disable Two-Factor Authorization
-                    </Button>
-                  </DialogTrigger>
-                </ManagementCardFooter>
-              )}
+              <ManagementCardFooter>
+                <DialogTrigger asChild>
+                  <Button
+                    className="h-12 gap-x-2"
+                    onClick={() =>
+                      setModal({ ...openModal, changeEmail: true })
+                    }>
+                    <AddIcon />
+                    Change Email Address
+                  </Button>
+                </DialogTrigger>
+              </ManagementCardFooter>
             </ManagementCard>
-          }
-        </div>
-        <h2 className="font-bold my-8">More</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-4">
-          <ManagementCard>
+            {billingEnabled && (
+              <ManagementCard>
+                <ManagementCardTitle>Account Type</ManagementCardTitle>
+                <ManagementCardContent className="text-foreground font-semibold flex gap-x-2">
+                  Lite Premium Account
+                  <CrownIcon />
+                </ManagementCardContent>
+                <ManagementCardFooter>
+                  <Button className="h-12 gap-x-2 text-foreground">
+                    <AddIcon />
+                    Upgrade to Premium
+                  </Button>
+                </ManagementCardFooter>
+              </ManagementCard>
+            )}
+            <ManagementCard>
+              <ManagementCardTitle>Password</ManagementCardTitle>
+              <ManagementCardContent className="text-foreground">
+                <PasswordDots className="mt-6" />
+              </ManagementCardContent>
+              <ManagementCardFooter>
+                <DialogTrigger asChild>
+                  <Button
+                    className="h-12 gap-x-2"
+                    onClick={() =>
+                      setModal({ ...openModal, changePassword: true })
+                    }>
+                    <AddIcon />
+                    Change Password
+                  </Button>
+                </DialogTrigger>
+              </ManagementCardFooter>
+            </ManagementCard>
+
+            {/*          <ManagementCard>
             <ManagementCardTitle>Invite a Friend</ManagementCardTitle>
             <ManagementCardContent className="text-foreground">
               Get 1 GB per friend invited for free (max 5 GB).
@@ -207,34 +153,37 @@ export default function MyAccount() {
                 Send Invitation
               </Button>
             </ManagementCardFooter>
-          </ManagementCard>
-          <ManagementCard>
-            <ManagementCardTitle>Read our Resources</ManagementCardTitle>
-            <ManagementCardContent className="text-foreground">
-              Navigate helpful articles or get assistance.
-            </ManagementCardContent>
-            <ManagementCardFooter>
-              <Button className="h-12 gap-x-2">
-                <AddIcon />
-                Open Support Centre
-              </Button>
-            </ManagementCardFooter>
-          </ManagementCard>
-          <ManagementCard>
-            <ManagementCardTitle>Delete Account</ManagementCardTitle>
-            <ManagementCardContent className="text-foreground">
-              Once initiated, this action cannot be undone.
-            </ManagementCardContent>
-            <ManagementCardFooter>
-              <Button
-                className="h-12 gap-x-2"
-                variant="destructive"
-                onClick={() => setModal({ ...openModal, deleteAccount: true })}>
-                <AddIcon />
-                Delete my Account
-              </Button>
-            </ManagementCardFooter>
-          </ManagementCard>
+          </ManagementCard>*/}
+            <ManagementCard>
+              <ManagementCardTitle>Read our Resources</ManagementCardTitle>
+              <ManagementCardContent className="text-foreground">
+                Navigate helpful articles or get assistance.
+              </ManagementCardContent>
+              <ManagementCardFooter>
+                <Button className="h-12 gap-x-2">
+                  <AddIcon />
+                  Open Support Centre
+                </Button>
+              </ManagementCardFooter>
+            </ManagementCard>
+            <ManagementCard>
+              <ManagementCardTitle>Delete Account</ManagementCardTitle>
+              <ManagementCardContent className="text-foreground">
+                Once initiated, this action cannot be undone.
+              </ManagementCardContent>
+              <ManagementCardFooter>
+                <Button
+                  className="h-12 gap-x-2"
+                  variant="destructive"
+                  onClick={() =>
+                    setModal({ ...openModal, deleteAccount: true })
+                  }>
+                  <AddIcon />
+                  Delete my Account
+                </Button>
+              </ManagementCardFooter>
+            </ManagementCard>
+          </ManagementGrid>
         </div>
         <DialogContent>
           {openModal.changeAvatar && <ChangeAvatarForm close={closeModal} />}
