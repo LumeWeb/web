@@ -4,6 +4,7 @@ import type {
   CustomParams,
   CustomResponse,
   DataProvider,
+  DeleteOneParams,
   HttpError,
   UpdateParams,
   UpdateResponse,
@@ -72,9 +73,9 @@ export const createAccountProvider = (
 ): DataProvider => {
   return {
     ...restProvider,
-    update: async <TVariables extends AccountParams = AccountParams>(
+    async update<TVariables extends AccountParams = AccountParams>(
       params: UpdateParams<TVariables>,
-    ): Promise<UpdateResponse<AccountData>> => {
+    ): Promise<UpdateResponse<AccountData>> {
       if (params.resource === "default") {
         if (params.variables.email && params.variables.password) {
           const ret = await sdk
@@ -98,6 +99,24 @@ export const createAccountProvider = (
       }
 
       return restProvider.update(params);
+    },
+
+    async deleteOne(
+      params: DeleteOneParams<TVariables>,
+    ): Promise<DeleteOneResponse<any>> {
+      if (params.resource === "account") {
+        const ret = await sdk?.account().requestAccountDeletion();
+
+        if (ret instanceof Error) {
+          return Promise.reject(ret as HttpError);
+        }
+
+        return {
+          data: {},
+        };
+      }
+
+      return restProvider.deleteOne(params);
     },
     getApiUrl: () => sdk.account().apiUrl,
 
