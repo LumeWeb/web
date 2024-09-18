@@ -27,6 +27,7 @@ import ChangeEmailForm from "./components/ChangeEmailForm";
 import ChangePasswordForm from "./components/ChangePasswordForm";
 import SetupTwoFactorDialog from "./components/SetupTwoFactorDialog";
 import DisableTwoFactorDialog from "./components/DisableTwoFactorDialog";
+import DeleteAccountDialog from "@/routes/account/components/DeleteAccountDialog.js";
 
 interface ModalState {
   changeEmail: boolean;
@@ -34,6 +35,7 @@ interface ModalState {
   setupTwoFactor: boolean;
   disableTwoFactor: boolean;
   changeAvatar: boolean;
+  deleteAccount: boolean;
 }
 
 export default function MyAccount() {
@@ -45,6 +47,7 @@ export default function MyAccount() {
     setupTwoFactor: false,
     disableTwoFactor: false,
     changeAvatar: false,
+    deleteAccount: false,
   });
 
   const closeModal = () => {
@@ -54,6 +57,7 @@ export default function MyAccount() {
       setupTwoFactor: false,
       disableTwoFactor: false,
       changeAvatar: false,
+      deleteAccount: false,
     });
   };
   const isModalOpen = Object.values(openModal).some((isOpen) => isOpen);
@@ -222,7 +226,10 @@ export default function MyAccount() {
               Once initiated, this action cannot be undone.
             </ManagementCardContent>
             <ManagementCardFooter>
-              <Button className="h-12 gap-x-2" variant="destructive">
+              <Button
+                className="h-12 gap-x-2"
+                variant="destructive"
+                onClick={() => setModal({ ...openModal, deleteAccount: true })}>
                 <AddIcon />
                 Delete my Account
               </Button>
@@ -245,6 +252,9 @@ export default function MyAccount() {
           )}
           {openModal.disableTwoFactor && (
             <DisableTwoFactorDialog close={closeModal} />
+          )}
+          {openModal.deleteAccount && (
+            <DeleteAccountDialog close={closeModal} />
           )}
         </DialogContent>
       </Dialog>

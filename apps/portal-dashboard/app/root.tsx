@@ -106,6 +106,9 @@ export function Root() {
         },
       },
     },
+    {
+      name: "account",
+    },
   ];
 
   return (

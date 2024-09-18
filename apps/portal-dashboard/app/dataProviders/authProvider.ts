@@ -140,6 +140,12 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
           const response = await sdk.account().login(params);
           const loginResponse = response as unknown as LoginResponse;
 
+          if (response instanceof AccountError) {
+            return handleResponse({
+              ret: loginResponse as unknown as Error,
+            });
+          }
+
           if (loginResponse.otp) {
             return handleResponse({
               ret: true,

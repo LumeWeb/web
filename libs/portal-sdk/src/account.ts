@@ -1,36 +1,34 @@
 import {
   AccountInfoResponse,
+  deleteApiAccountDelete,
   getApiAccount,
+  getApiAuthOtpGenerate,
+  getApiUploadLimit,
   LoginRequest,
   LoginResponse,
   OTPDisableRequest,
   OTPGenerateResponse,
   OTPValidateRequest,
   OTPVerifyRequest,
+  PasswordResetRequest,
   PasswordResetVerifyRequest,
   PingResponse,
+  postApiAccountPasswordResetConfirm,
   postApiAccountPasswordResetRequest,
+  postApiAccountUpdateEmail,
+  postApiAccountUpdatePassword,
+  postApiAccountVerifyEmail,
   postApiAccountVerifyEmailResend,
+  postApiAuthLogin,
+  postApiAuthLogout,
+  postApiAuthOtpDisable,
+  postApiAuthOtpValidate,
+  postApiAuthOtpVerify,
   postApiAuthPing,
+  postApiAuthRegister,
   RegisterRequest,
   UploadLimitResponse,
   VerifyEmailRequest,
-} from "./account/generated/index.js";
-
-import {
-  postApiAuthLogin,
-  postApiAuthRegister,
-  postApiAccountVerifyEmail,
-  getApiAuthOtpGenerate,
-  postApiAuthOtpVerify,
-  postApiAuthOtpValidate,
-  postApiAuthOtpDisable,
-  PasswordResetRequest,
-  postApiAccountPasswordResetConfirm,
-  postApiAuthLogout,
-  getApiUploadLimit,
-  postApiAccountUpdateEmail,
-  postApiAccountUpdatePassword,
 } from "./account/generated/index.js";
 import { AxiosError, AxiosResponse } from "axios";
 
@@ -327,6 +325,20 @@ export class AccountApi {
         { current_password: currentPassword, new_password: newPassword },
         this.buildOptions(),
       );
+    } catch (e) {
+      return new AccountError(
+        (e as AxiosError).response?.data as string,
+        (e as AxiosError).response?.status as number,
+      );
+    }
+
+    return this.checkSuccessBool(ret);
+  }
+
+  public async requestAccountDeletion(): Promise<boolean | AccountError> {
+    let ret: AxiosResponse<void>;
+    try {
+      ret = await deleteApiAccountDelete(this.buildOptions());
     } catch (e) {
       return new AccountError(
         (e as AxiosError).response?.data as string,
