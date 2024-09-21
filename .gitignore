@@ -42,6 +42,7 @@ Thumbs.db
 libs/*/**/generated
 libs/*/**/pnpm-lock.yaml
 apps/*/**/pnpm-lock.yaml
-apps/lumeweb.com/.astro
+apps/*/.astro
+apps/*/build
 
 .docusaurus
