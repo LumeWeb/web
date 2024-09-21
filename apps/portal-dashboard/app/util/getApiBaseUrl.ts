@@ -23,8 +23,9 @@ export default function getApiBaseUrl() {
   // For FQDNs, extract the root domain
   const hostParts = urlObject.hostname.split(".");
   if (hostParts.length > 2) {
+    const left = hostParts.length - 1;
     // Get the last two parts of the domain (e.g., 'example.com' from 'subdomain.example.com')
-    const rootDomain = hostParts.slice(-2).join(".");
+    const rootDomain = hostParts.slice(-left).join(".");
     return `${urlObject.protocol}//${rootDomain}`;
   }
 
