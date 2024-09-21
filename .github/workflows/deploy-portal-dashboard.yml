@@ -38,6 +38,7 @@ jobs:
         uses: pnpm/action-setup@v3
         with:
           run_install: true
+          version: 9.11.0
       - name: Make envfile
         uses: SpicyPizza/create-envfile@v2.0
         with:
