@@ -70,7 +70,9 @@ export class AccountApi {
   ): Promise<LoginResponse | AccountError> {
     let ret: AxiosResponse<LoginResponse> | LoginResponse | boolean = false;
     try {
-      ret = await postApiAuthLogin(loginRequest, { baseURL: this.apiUrl });
+      ret = await postApiAuthLogin(loginRequest, {
+        ...(await this.buildOptions()),
+      });
     } catch (e) {
       return new AccountError(
         (e as AxiosError).response?.data as string,
