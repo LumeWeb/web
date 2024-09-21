@@ -13,7 +13,7 @@ export default function usePortalUrl() {
     });
   }, []);
 
-  if (!portalUrl?.startsWith("http")) {
+  if (portalUrl && !portalUrl?.startsWith("http")) {
     portalUrl = `https://${portalUrl}`;
   }
 
