@@ -1,0 +1,136 @@
+
+> @lumeweb/lumeweb.com@0.3.1-develop.1 build /home/runner/work/web/web/apps/lumeweb.com
+> astro build
+
+24:37:24 [types] Generated 93ms
+24:37:24 [build] output: "static"
+24:37:24 [build] directory: /home/runner/work/web/web/dist/apps/lumeweb.com/
+24:37:24 [build] Collecting build info...
+24:37:24 [build] ✓ Completed in 174ms.
+24:37:24 [build] Building static entrypoints...
+DEPRECATION WARNING: Sass's behavior for declarations that appear after nested
+rules will be changing to match the behavior specified by CSS in an upcoming
+version. To keep the existing behavior, move the declaration above the nested
+rule. To opt into the new behavior, wrap the declaration in `& {}`.
+
+More info: https://sass-lang.com/d/mixed-decls
+
+   ┌──> src/styles/global.scss
+115│     flex-grow: 1;
+   │     ^^^^^^^^^^^^ declaration
+   ╵
+   ┌──> src/styles/mixins.scss
+32 │ ┌       @media screen and (min-width: $max-vw) {
+33 │ │         font-size: $max-font-size;
+34 │ │       }
+   │ └─── nested rule
+   ╵
+    src/styles/global.scss 115:3  root stylesheet
+
+DEPRECATION WARNING: Sass's behavior for declarations that appear after nested
+rules will be changing to match the behavior specified by CSS in an upcoming
+version. To keep the existing behavior, move the declaration above the nested
+rule. To opt into the new behavior, wrap the declaration in `& {}`.
+
+More info: https://sass-lang.com/d/mixed-decls
+
+   ┌──> src/styles/global.scss
+142│       font-weight: 700;
+   │       ^^^^^^^^^^^^^^^^ declaration
+   ╵
+   ┌──> src/styles/mixins.scss
+32 │ ┌       @media screen and (min-width: $max-vw) {
+33 │ │         font-size: $max-font-size;
+34 │ │       }
+   │ └─── nested rule
+   ╵
+    src/styles/global.scss 142:5  root stylesheet
+
+DEPRECATION WARNING: Sass's behavior for declarations that appear after nested
+rules will be changing to match the behavior specified by CSS in an upcoming
+version. To keep the existing behavior, move the declaration above the nested
+rule. To opt into the new behavior, wrap the declaration in `& {}`.
+
+More info: https://sass-lang.com/d/mixed-decls
+
+   ┌──> src/styles/global.scss
+143│       line-height: 100%;
+   │       ^^^^^^^^^^^^^^^^^ declaration
+   ╵
+   ┌──> src/styles/mixins.scss
+32 │ ┌       @media screen and (min-width: $max-vw) {
+33 │ │         font-size: $max-font-size;
+34 │ │       }
+   │ └─── nested rule
+   ╵
+    src/styles/global.scss 143:5  root stylesheet
+
+DEPRECATION WARNING: Sass's behavior for declarations that appear after nested
+rules will be changing to match the behavior specified by CSS in an upcoming
+version. To keep the existing behavior, move the declaration above the nested
+rule. To opt into the new behavior, wrap the declaration in `& {}`.
+
+More info: https://sass-lang.com/d/mixed-decls
+
+   ┌──> src/styles/global.scss
+144│       text-transform: uppercase;
+   │       ^^^^^^^^^^^^^^^^^^^^^^^^^ declaration
+   ╵
+   ┌──> src/styles/mixins.scss
+32 │ ┌       @media screen and (min-width: $max-vw) {
+33 │ │         font-size: $max-font-size;
+34 │ │       }
+   │ └─── nested rule
+   ╵
+    src/styles/global.scss 144:5  root stylesheet
+
+DEPRECATION WARNING: Sass's behavior for declarations that appear after nested
+rules will be changing to match the behavior specified by CSS in an upcoming
+version. To keep the existing behavior, move the declaration above the nested
+rule. To opt into the new behavior, wrap the declaration in `& {}`.
+
+More info: https://sass-lang.com/d/mixed-decls
+
+   ┌──> src/styles/global.scss
+145│       color: $color-aquamarine;
+   │       ^^^^^^^^^^^^^^^^^^^^^^^^ declaration
+   ╵
+   ┌──> src/styles/mixins.scss
+32 │ ┌       @media screen and (min-width: $max-vw) {
+33 │ │         font-size: $max-font-size;
+34 │ │       }
+   │ └─── nested rule
+   ╵
+    src/styles/global.scss 145:5  root stylesheet
+
+WARNING: 10 repetitive deprecation warnings omitted.
+
+24:37:28 [WARN] [vite] 
+/src/assets/donate-bg.png referenced in /src/assets/donate-bg.png didn't resolve at build time, it will remain unchanged to be resolved at runtime
+24:37:29 [vite] [32m✓ built in 4.89s[39m
+24:37:29 [build] ✓ Completed in 4.94s.
+
+ building client (vite) 
+24:37:29 [vite] transforming...
+24:37:31 [vite] [32m✓[39m 33 modules transformed.
+24:37:31 [vite] rendering chunks...
+24:37:31 [vite] computing gzip size...
+24:37:31 [vite] [2m.astro/[22m[2m_astro/[22m[36mindex.BljroyU7.js              [39m[1m[2m  6.78 kB[22m[1m[22m[2m │ gzip:  2.71 kB[22m
+24:37:31 [vite] [2m.astro/[22m[2m_astro/[22m[36mTypewriterContent.D0VLGf_3.js  [39m[1m[2m 31.94 kB[22m[1m[22m[2m │ gzip: 10.85 kB[22m
+24:37:31 [vite] [2m.astro/[22m[2m_astro/[22m[36mclient.DMiTK47V.js             [39m[1m[2m135.66 kB[22m[1m[22m[2m │ gzip: 43.86 kB[22m
+24:37:31 [vite] [32m✓ built in 1.54s[39m
+
+ generating static routes 
+24:37:31 ▶ src/pages/donate.astro
+24:37:31   └─ /donate/index.html (+602ms)
+24:37:32 ▶ src/pages/vision.astro
+24:37:32   └─ /vision/index.html (+6ms)
+24:37:32 ▶ src/pages/what-is-web3.astro
+24:37:32   └─ /what-is-web3/index.html (+3ms)
+24:37:32 ▶ src/pages/index.astro
+24:37:32   └─ /index.html (+12ms)
+24:37:32 ✓ Completed in 710ms.
+
+24:37:32 [@astrojs/sitemap] `sitemap-index.xml` created at `../../dist/apps/lumeweb.com`
+24:37:32 [build] 4 page(s) built in 7.45s
+24:37:32 [build] Complete!
