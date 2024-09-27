@@ -53,10 +53,6 @@ export default function Register() {
         {...getFormProps(form)}>
         <span className=" space-y-2">
           <h2 className="text-4xl sm:text-3xl">All Roads Lead to Lume</h2>
-          <p className="text-foreground mt-4">
-            🤘 Get 50 GB free storage and download for free,{" "}
-            <b className="text-foreground">forever</b>.{" "}
-          </p>
         </span>
         <InlineAuthLinkBanner to="/login" label="Already have an account?" />
         <div className="mt-10">

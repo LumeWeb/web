@@ -5,6 +5,6 @@ export function useActiveService() {
   const params = useParsed<{ id: string }>();
 
   return getServiceById(
-    params?.resource?.meta?.parent || (params.id as string),
+    params?.resource?.meta?.serviceId || (params.id as string),
   );
 }

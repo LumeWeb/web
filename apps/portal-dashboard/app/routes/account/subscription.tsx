@@ -1,6 +1,4 @@
-import React, { useEffect } from "react";
-import { Authenticated } from "@refinedev/core";
-import { GeneralLayout } from "@/components/layout/GeneralLayout.js";
+import React from "react";
 import PricingPlans from "./components/PricingPlans";
 import PaymentHistory from "./components/PaymentHistory";
 import ChangePaymentMethod from "./components/ChangePaymentMethod";
@@ -11,6 +9,7 @@ import {
   SubscriptionProvider,
   useSubscriptionContext,
 } from "./contexts/SubscriptionContext";
+import useIsPaidBillingEnabled from "@/hooks/useIsPaidBillingEnabled";
 
 export default function Subscription() {
   return (
@@ -21,7 +20,9 @@ export default function Subscription() {
 }
 
 function SubscriptionContent() {
-  const { isLoading, subscription } = useSubscriptionContext();
+  const { isLoading } = useSubscriptionContext();
+
+  const paidBillingEnabled = useIsPaidBillingEnabled();
 
   if (isLoading) return <SkeletonSubscription />;
 
@@ -31,13 +32,15 @@ function SubscriptionContent() {
         <PricingPlans />
       </div>
       <div className="lg:col-span-1 flex flex-col gap-6">
-        <PaymentHistory />
-        {subscription?.plan && <ChangePaymentMethod />}
+        {paidBillingEnabled && <PaymentHistory />}
+        {paidBillingEnabled && <ChangePaymentMethod />}
         {false && <Addons />}
       </div>
-      <div className="lg:col-span-2">
-        <BillingInformation />
-      </div>
+      {paidBillingEnabled && (
+        <div className="lg:col-span-2">
+          <BillingInformation />
+        </div>
+      )}
     </div>
   );
 }

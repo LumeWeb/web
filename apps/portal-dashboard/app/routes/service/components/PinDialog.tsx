@@ -142,9 +142,9 @@ export default function PinDialog({
                       placeholder="Enter a CID"
                       tags={tags}
                       className="sm:min-w-[450px]"
-                      setTags={(newTags) => {
+                      setTags={(newTags: any) => {
                         setTags(newTags);
-                        setValue("cid", newTags as [Tag, ...Tag[]]);
+                        setValue("cid", newTags?.() as [Tag, ...Tag[]]);
                       }}
                       validateTag={(tag) => svc!.validateCid(tag)}
                     />

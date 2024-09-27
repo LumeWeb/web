@@ -1,6 +1,11 @@
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useStepsForm } from "@refinedev/react-hook-form";
-import { useCustomMutation, useNotification } from "@refinedev/core";
+import {
+  useCustomMutation,
+  useGetIdentity,
+  useInvalidateAuthStore,
+  useNotification,
+} from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -16,15 +21,19 @@ import {
 import useApiUrl from "@/hooks/useApiUrl.js";
 import { OPTGenerateResponse } from "@/dataProviders/accountProvider";
 import QRCode from "qrcode";
-import { useInvalidateAuthStore } from "@refinedev/core";
+import * as OTPAuth from "otpauth";
+import usePortalMeta from "@/hooks/usePortalMeta";
+import { Identity } from "@/dataProviders/authProvider";
 
 export default function SetupTwoFactorDialog({ close }: { close: () => void }) {
   const [otp, setOtp] = useState("");
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [qrCodeSvg, setQrCodeSvg] = useState("");
 
   const apiUrl = useApiUrl();
   const form = useStepsForm();
   const invalidateAuth = useInvalidateAuthStore();
+  const portalMeta = usePortalMeta();
+  const identity = useGetIdentity<Identity>();
 
   const {
     steps: { currentStep, gotoStep },
@@ -45,9 +54,16 @@ export default function SetupTwoFactorDialog({ close }: { close: () => void }) {
       {
         async onSuccess(data) {
           setOtp(data.data.otp);
-          if (canvasRef.current) {
-            await QRCode.toCanvas(canvasRef.current, data.data.otp);
-          }
+          let totp = new OTPAuth.TOTP({
+            // Provider or service the account is associated with.
+            issuer: portalMeta?.domain,
+            // Account identifier.
+            label: `${portalMeta?.domain}:${identity.data?.email}`,
+            secret: data.data.otp,
+          });
+
+          const svg = await QRCode.toString(totp.toString(), { type: "svg" });
+          setQrCodeSvg(svg);
         },
       },
     );
@@ -102,7 +118,12 @@ export default function SetupTwoFactorDialog({ close }: { close: () => void }) {
               className="space-y-8">
               <FormItem>
                 <div className="p-6 flex justify-center border bg-secondary-2">
-                  <canvas ref={canvasRef} className="h-36 w-36" />
+                  {qrCodeSvg && (
+                    <div
+                      dangerouslySetInnerHTML={{ __html: qrCodeSvg }}
+                      className="w-3/4"
+                    />
+                  )}
                 </div>
                 <FormDescription className="font-semibold">
                   Don't have access to scan? Use this code instead.

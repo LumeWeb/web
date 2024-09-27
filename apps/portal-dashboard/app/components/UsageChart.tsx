@@ -8,6 +8,12 @@ import {
   ChartTooltipContent,
   useChart,
 } from "@/components/ui/chart";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import useIsMobile from "@/hooks/useIsMobile";
 import filesize from "@/util/filesize.js";
 import { cn } from "@/lib/utils.js";
@@ -25,9 +31,10 @@ type ProcessedCoords = {
 type UsageChartProps = {
   label: string;
   dataset: InputCoords[];
+  tooltip: React.ReactNode;
 };
 
-export const UsageChart = ({ label, dataset }: UsageChartProps) => {
+export const UsageChart = ({ label, dataset, tooltip }: UsageChartProps) => {
   const isMobile = useIsMobile();
 
   let processedData = useMemo(() => {
@@ -61,7 +68,16 @@ export const UsageChart = ({ label, dataset }: UsageChartProps) => {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-base font-normal">{label}</CardTitle>
-        <InfoIcon className="h-4 w-4 text-muted-foreground" />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <InfoIcon className="h-4 w-4 text-muted-foreground cursor-pointer" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="space-y-2 max-w-xs">{tooltip}</div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </CardHeader>
       <CardContent>
         <ChartContainer
@@ -153,3 +169,5 @@ const CustomTooltip = React.forwardRef<
 });
 
 CustomTooltip.displayName = "CustomTooltip";
+
+export default UsageChart;
