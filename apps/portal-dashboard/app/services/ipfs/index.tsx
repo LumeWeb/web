@@ -124,6 +124,7 @@ export class IPFS extends BaseService {
             endpoint: `${apiDomain}/api/upload`,
             method: "POST",
             headers: this.#getAuthHeaders(),
+            shouldRetry: (xhr) => xhr.status !== 507 && xhr.status !== 403,
           } satisfies Partial<XhrUploadOpts<any, any>>,
         },
       });
@@ -177,12 +178,16 @@ export class IPFS extends BaseService {
 
         const pinsGetOptions: PinsGetRequest = {
           status: status,
-          limit: meta?.tree ? undefined : pageSize, // Fetch all pins if tree logic is needed
+          limit: meta?.fileManager ? undefined : pageSize, // Fetch all pins if tree logic is needed
           ...(meta?.before && { before: new Date(meta.before) }),
         };
 
-        const { count, results: resultsSet }: PinResults =
-          await client.pinsGet(pinsGetOptions);
+        const { count, results: resultsSet } = await getListViaPinner(
+          params,
+          that,
+        );
+
+        await client.pinsGet(pinsGetOptions);
 
         let pinStatuses = Array.from(resultsSet).map((result) => ({
           ...result,
@@ -192,7 +197,7 @@ export class IPFS extends BaseService {
           },
         }));
 
-        if (meta?.tree) {
+        if (meta?.fileManager) {
           const parentCid = meta.parentCid || null;
           const fileTree = await that.getFileTree();
 
@@ -213,13 +218,14 @@ export class IPFS extends BaseService {
         }
 
         // Apply pagination if not already done by tree logic
-        if (!meta?.tree) {
+        if (!meta?.fileManager) {
           pinStatuses = pinStatuses.slice(offset, offset + pageSize);
         }
 
         return {
           data: pinStatuses,
-          total: meta?.tree && meta.parentCid ? pinStatuses.length : count,
+          total:
+            meta?.fileManager && meta.parentCid ? pinStatuses.length : count,
         };
       },
       async create(
@@ -263,14 +269,17 @@ export class IPFS extends BaseService {
   public resources() {
     return [
       {
-        name: "ipfs",
+        name: SERVICE_ID,
         meta: {
           headers: this.#getAuthHeaders(),
         },
       },
       {
         name: IPFS_SUBFOLDER_ROUTE,
-        show: "/service/ipfs/folder/:id",
+        show: `/service/${SERVICE_ID}/folder/:id`,
+        meta: {
+          serviceId: SERVICE_ID,
+        },
       },
     ] satisfies ResourceProps[];
   }
@@ -462,10 +471,17 @@ export class IPFS extends BaseService {
     }
 
     const tree = await this.getFileTree();
-    const meta = await tree.getBlockMeta(cid.toString());
+
+    let meta;
+
+    try {
+      meta = await tree.getBlockMeta(cid.toString());
+    } catch {
+      // Ignore errors
+    }
 
     return {
-      name: meta.name || cid.toV1().toString(),
+      name: meta?.name || cid.toV1().toString(),
       mimeType: "application/octet-stream",
       blob: new Blob([content], { type: "application/octet-stream" }),
     };
@@ -658,7 +674,7 @@ async function getListViaRestProvider(
 async function getListViaPinner(
   params: GetListParams,
   svc: IPFS,
-): Promise<GetListResponse<PinStatus>> {
+): Promise<PinResults> {
   const { pagination = {} } = params;
   const { current = 1, pageSize = 50 } = pagination;
 
@@ -709,8 +725,8 @@ async function getListViaPinner(
     itemsToSkip + pageSize,
   );*/
   return {
-    data: allResults,
-    total: totalCount,
+    results: new Set(allResults) as any,
+    count: totalCount,
   };
 }
 

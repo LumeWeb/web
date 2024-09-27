@@ -117,6 +117,7 @@
     "multiformats": "^13.0.0",
     "native-file-system-adapter": "^3.0.1",
     "orval": "^6.24.0",
+    "otpauth": "^9.3.4",
     "p-defer": "^4.0.1",
     "p-mutex": "^0.1.0",
     "p-queue": "^8.0.1",
@@ -221,10 +222,10 @@
     "patchedDependencies": {
       "tus-js-client@4.1.0": "patches/tus-js-client@4.1.0.patch",
       "vite-plugin-node-polyfills@0.21.0": "patches/vite-plugin-node-polyfills@0.21.0.patch",
-      "@uppy/core@4.1.0": "patches/@uppy__core@4.1.0.patch",
       "@uppy/utils@6.0.1": "patches/@uppy__utils@6.0.1.patch",
       "@helia/block-brokers@3.0.3": "patches/@helia__block-brokers@3.0.3.patch",
-      "@refinedev/core@4.54.0": "patches/@refinedev__core@4.54.0.patch"
+      "@refinedev/core@4.54.0": "patches/@refinedev__core@4.54.0.patch",
+      "@uppy/core@4.1.0": "patches/@uppy__core@4.1.0.patch"
     }
   },
   "packageManager": "pnpm@9.11.0"

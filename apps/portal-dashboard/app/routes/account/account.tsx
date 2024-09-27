@@ -1,6 +1,6 @@
 import { useGetIdentity } from "@refinedev/core";
 import { useState } from "react";
-import { AddIcon, CrownIcon, RemoveIcon } from "@/components/icons.js";
+import { AddIcon, CrownIcon } from "@/components/icons.js";
 import {
   ManagementCard,
   ManagementCardContent,
@@ -23,6 +23,11 @@ import DeleteAccountDialog from "@/routes/account/components/DeleteAccountDialog
 import useIsBillingEnabled from "@/hooks/useIsBillingEnabled.js";
 import ManagementGrid from "@/components/ManagementGrid.js";
 import AccountUsage from "@/routes/account/components/AccountUsage.js";
+import useIsSupportEnabled from "@/hooks/useIsSupportEnabled";
+import usePluginMeta from "@/hooks/usePluginMeta";
+import { Link } from "@remix-run/react";
+import useIsPaidBillingEnabled from "@/hooks/useIsPaidBillingEnabled";
+import useSubscription from "@/hooks/useSubscription";
 
 interface ModalState {
   changeEmail: boolean;
@@ -57,6 +62,15 @@ export default function MyAccount() {
   const isModalOpen = Object.values(openModal).some((isOpen) => isOpen);
 
   const billingEnabled = useIsBillingEnabled();
+  const paidBillingEnabled = useIsPaidBillingEnabled();
+  const supportEnabled = useIsSupportEnabled();
+
+  const supportPortalUrl = usePluginMeta("support", "support_portal");
+  const supportPortalMailboxID = usePluginMeta("support", "mailbox_id");
+
+  const supportPortalUrlSSO = `${supportPortalUrl}/help/${supportPortalMailboxID}/oauth`;
+
+  const subscription = useSubscription();
 
   return (
     <>
@@ -108,17 +122,17 @@ export default function MyAccount() {
                 </DialogTrigger>
               </ManagementCardFooter>
             </ManagementCard>
-            {billingEnabled && (
+            {billingEnabled && paidBillingEnabled && (
               <ManagementCard>
                 <ManagementCardTitle>Account Type</ManagementCardTitle>
                 <ManagementCardContent className="text-foreground font-semibold flex gap-x-2">
-                  Lite Premium Account
+                  <span>{subscription?.subscriptionData?.plan?.name}</span>
                   <CrownIcon />
                 </ManagementCardContent>
                 <ManagementCardFooter>
                   <Button className="h-12 gap-x-2 text-foreground">
                     <AddIcon />
-                    Upgrade to Premium
+                    Change Plan
                   </Button>
                 </ManagementCardFooter>
               </ManagementCard>
@@ -154,18 +168,22 @@ export default function MyAccount() {
               </Button>
             </ManagementCardFooter>
           </ManagementCard>*/}
-            <ManagementCard>
-              <ManagementCardTitle>Read our Resources</ManagementCardTitle>
-              <ManagementCardContent className="text-foreground">
-                Navigate helpful articles or get assistance.
-              </ManagementCardContent>
-              <ManagementCardFooter>
-                <Button className="h-12 gap-x-2">
-                  <AddIcon />
-                  Open Support Centre
-                </Button>
-              </ManagementCardFooter>
-            </ManagementCard>
+            {supportEnabled && (
+              <ManagementCard>
+                <ManagementCardTitle>Read our Resources</ManagementCardTitle>
+                <ManagementCardContent className="text-foreground">
+                  Navigate helpful articles or get assistance.
+                </ManagementCardContent>
+                <ManagementCardFooter>
+                  <Link to={supportPortalUrlSSO} target="_blank">
+                    <Button className="h-12 gap-x-2">
+                      <AddIcon />
+                      Open Help Center
+                    </Button>
+                  </Link>
+                </ManagementCardFooter>
+              </ManagementCard>
+            )}
             <ManagementCard>
               <ManagementCardTitle>Delete Account</ManagementCardTitle>
               <ManagementCardContent className="text-foreground">

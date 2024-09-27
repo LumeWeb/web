@@ -37,6 +37,16 @@ export default class UploadManager {
         });
       }
     });
+    this.addEvent("modify-upload-error", function (file, error) {
+      if (error.request) {
+        const xhr = error.request as XMLHttpRequest;
+        if (xhr.status === 507) {
+          error.details = "Upload quota exceeded";
+        } else if (xhr.responseText.toLowerCase().includes("is not verified")) {
+          error.details = "Please verify your email to upload files";
+        }
+      }
+    });
   }
 
   registerService(config: ServiceConfig) {
