@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
-import { getFormProps, useForm } from "@conform-to/react";
-import { getZodConstraint, parseWithZod } from "@conform-to/zod";
+import React, { useState } from "react";
+import { useForm } from "@refinedev/react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Card,
   CardContent,
@@ -8,42 +8,50 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import useBillingInfo from "@/routes/account/hooks/useBillingInfo";
 import useSubmitBillingInfo from "@/routes/account/hooks/useSubmitBillingInfo";
 import billingInfoSchema from "./BillingInformation.schema";
-import { Field } from "@/components/Forms";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function BillingInformation() {
   const { billingInfo, isLoading } = useBillingInfo();
   const { submitBillingInfo, isSubmitting } = useSubmitBillingInfo();
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const [form, fields] = useForm({
-    id: "billing-info",
-    constraint: getZodConstraint(billingInfoSchema),
-    onValidate({ formData }) {
-      return parseWithZod(formData, { schema: billingInfoSchema });
-    },
-    shouldValidate: "onBlur",
-    defaultValue: billingInfo,
-    onSubmit(event) {
-      event.preventDefault();
-      const parsedSubmission = parseWithZod(new FormData(event.currentTarget), {
-        schema: billingInfoSchema,
-      });
-      if (parsedSubmission.status === "success") {
-        submitBillingInfo(parsedSubmission.value);
-      }
+  const form = useForm({
+    resolver: zodResolver(billingInfoSchema),
+    defaultValues: {
+      name: "",
+      address: "",
+      city: "",
+      state: "",
+      zip: "",
+      country: "",
     },
   });
 
-  useEffect(() => {
-    if (billingInfo) {
+  React.useEffect(() => {
+    if (billingInfo && !isInitialized) {
       console.log("Billing info loaded:", billingInfo);
       form.reset(billingInfo);
+      setIsInitialized(true);
     }
-  }, [billingInfo, form]);
+  }, [billingInfo, form, isInitialized]);
+
+  const onSubmit = (data: any) => {
+    submitBillingInfo(data);
+  };
 
   if (isLoading) {
     return (
@@ -64,54 +72,98 @@ export default function BillingInformation() {
         <CardTitle>Billing Information</CardTitle>
       </CardHeader>
       <CardContent>
-        <form {...getFormProps(form)}>
-          <div className="grid gap-4">
-            <Field
-              labelProps={{ children: "Name" }}
-              inputProps={{ name: fields.name.name }}
-              errors={fields.name.errors}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <Field
-              labelProps={{ children: "Address" }}
-              inputProps={{
-                name: fields.address.name,
-                as: "textarea",
-                rows: 3,
-              }}
-              errors={fields.address.errors}
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Address</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} rows={3} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
             <div className="grid grid-cols-2 gap-4">
-              <Field
-                labelProps={{ children: "City" }}
-                inputProps={{ name: fields.city.name }}
-                errors={fields.city.errors}
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <Field
-                labelProps={{ children: "State" }}
-                inputProps={{ name: fields.state.name }}
-                errors={fields.state.errors}
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Field
-                labelProps={{ children: "ZIP" }}
-                inputProps={{ name: fields.zip.name }}
-                errors={fields.zip.errors}
+              <FormField
+                control={form.control}
+                name="zip"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ZIP</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <Field
-                labelProps={{ children: "Country" }}
-                inputProps={{ name: fields.country.name }}
-                errors={fields.country.errors}
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
-        </form>
+            <CardFooter className="px-0">
+              <Button type="submit" className="ml-auto" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Save"}
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
       </CardContent>
-      <CardFooter>
-        <Button type="submit" className="ml-auto" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : "Save"}
-        </Button>
-      </CardFooter>
     </Card>
   );
 }
