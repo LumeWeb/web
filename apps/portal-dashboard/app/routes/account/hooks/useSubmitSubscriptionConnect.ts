@@ -10,10 +10,8 @@ export default function useSubmitSubscriptionConnect() {
   const { mutate, isLoading: isSubmitting } = useCustomMutation();
   const { refetchSubscription } = useSubscriptionContext();
 
-  const [onSuccess, setOnSuccess] = useState<() => void>(() => () => {});
-
   const connectPaymentMethod = useCallback(
-    async (paymentMethodId: string) => {
+    async (paymentMethodId: string, onSuccess: () => void) => {
       mutate(
         {
           url: `${apiUrl}/api/account/subscription/connect`,
@@ -44,6 +42,5 @@ export default function useSubmitSubscriptionConnect() {
   return {
     isSubmitting,
     connectPaymentMethod,
-    setConnectSuccessHandler: setOnSuccess,
   };
 }

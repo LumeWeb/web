@@ -22,20 +22,15 @@ import {
 } from "@/components/ui/alert-dialog.js";
 
 export default function SubscriptionHistory() {
-  const [showDialog, setShowDialog] = React.useState(true);
+  const [showDialog, setShowDialog] = React.useState(false);
 
   const { subscription } = useSubscriptionContext();
-  const { cancelSubscription, setCancelSuccessHandler } =
-    useSubmitSubscriptionCancellation();
-
-  useEffect(() => {
-    setCancelSuccessHandler(() => {
-      setShowDialog(false);
-    });
-  }, [setCancelSuccessHandler]);
+  const { cancelSubscription } = useSubmitSubscriptionCancellation();
 
   const doAction = () => {
-    cancelSubscription();
+    cancelSubscription(() => {
+      setShowDialog(true);
+    });
   };
 
   return (
