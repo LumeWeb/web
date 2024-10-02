@@ -55,8 +55,8 @@ export default function HyperPayment({
 
   if (
     !hyperState.isHyperLoaded ||
-    (mode === "change_payment" &&
-      (isRequestingPaymentMethodChange || !clientSecret))
+    !clientSecret ||
+    (mode === "change_payment" && isRequestingPaymentMethodChange)
   ) {
     return <StyledPaymentSkeleton />;
   }
