@@ -10,7 +10,7 @@ import {
   useSubscriptionContext,
 } from "./contexts/SubscriptionContext";
 import useIsPaidBillingEnabled from "@/hooks/useIsPaidBillingEnabled";
-import usePluginMeta from "@/hooks/usePluginMeta";
+import useOnFreePlan from "@/hooks/useOnFreePlan";
 
 export default function Subscription() {
   return (
@@ -21,16 +21,11 @@ export default function Subscription() {
 }
 
 function SubscriptionContent() {
-  const { isLoading, subscription } = useSubscriptionContext();
-
-  const freePlanName = usePluginMeta("billing", "free_plan_name");
+  const { isLoading } = useSubscriptionContext();
 
   const paidBillingEnabled = useIsPaidBillingEnabled();
 
-  const onFreePlan =
-    paidBillingEnabled &&
-    freePlanName &&
-    subscription?.plan.name === freePlanName;
+  const onFreePlan = useOnFreePlan();
 
   if (isLoading) return <SkeletonSubscription />;
 
