@@ -22,11 +22,10 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/util/cn.js";
 import filesize from "@/util/filesize.js";
-import HyperPayment from "./HyperPayment";
 import { SubscriptionPlan } from "@/dataProviders/accountProvider";
-import useSubmitSubscriptionConnect from "../hooks/useSubmitSubscriptionConnect";
 import { useSubscriptionContext } from "@/routes/account/contexts/SubscriptionContext.js";
 import useOnFreePlan from "@/hooks/useOnFreePlan";
+import SubscribePayment from "@/routes/account/components/SubscribePayment";
 
 export default function PricingPlans() {
   const {
@@ -88,6 +87,12 @@ export default function PricingPlans() {
     }
   }, [showPayment]);
 
+  useEffect(() => {
+    if (paymentExpired && planPending) {
+      submitPlanChange(subscription?.plan);
+    }
+  }, [paymentExpired, planPending]);
+
   const getChangeType = (
     currentPlan: SubscriptionPlan,
     newPlan: SubscriptionPlan,
@@ -135,7 +140,7 @@ export default function PricingPlans() {
           )}
         {plan.identifier === subscription?.plan?.identifier && (
           <div className="text-primary font-semibold text-center">
-            Current Plan
+            {planPending ? "Pending Plan" : "Current Plan"}
           </div>
         )}
       </CardContent>
@@ -180,7 +185,6 @@ export default function PricingPlans() {
         <CarouselPrevious />
         <CarouselNext />
       </Carousel>
-
       <AlertDialog open={showBillingDialog} onOpenChange={setShowBillingDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -196,7 +200,6 @@ export default function PricingPlans() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -219,6 +222,7 @@ export default function PricingPlans() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {showPaymentDialog && <SubscribePayment />}
     </>
   );
 }

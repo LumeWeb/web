@@ -21,18 +21,13 @@ import useSubmitSubscriptionConnect from "@/routes/account/hooks/useSubmitSubscr
 export default function ChangePaymentMethod() {
   const [showDialog, setShowDialog] = React.useState(false);
 
-  const { connectPaymentMethod, setConnectSuccessHandler } =
-    useSubmitSubscriptionConnect();
-
-  useEffect(() => {
-    setConnectSuccessHandler(() => {
-      setShowDialog(false);
-    });
-  }, [setConnectSuccessHandler]);
+  const { connectPaymentMethod } = useSubmitSubscriptionConnect();
 
   const handleSuccess = (paymentMethodId: string) => {
     setShowDialog(false);
-    connectPaymentMethod(paymentMethodId);
+    connectPaymentMethod(paymentMethodId, () => {
+      setShowDialog(false);
+    });
   };
 
   return (

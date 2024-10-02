@@ -19,21 +19,16 @@ import HyperPayment from "./HyperPayment.js";
 import { useSubscriptionContext } from "../contexts/SubscriptionContext.js";
 import useSubmitSubscriptionConnect from "@/routes/account/hooks/useSubmitSubscriptionConnect.js";
 
-export default function ChangePaymentMethod() {
-  const [showDialog, setShowDialog] = React.useState(false);
+export default function SubscribePayment() {
+  const [showDialog, setShowDialog] = React.useState(true);
 
-  const { subscription, selectedPlan } = useSubscriptionContext();
-  const { connectPaymentMethod, setConnectSuccessHandler } =
-    useSubmitSubscriptionConnect();
-
-  useEffect(() => {
-    setConnectSuccessHandler(() => {
-      setShowDialog(false);
-    });
-  }, [setConnectSuccessHandler]);
+  const { selectedPlan } = useSubscriptionContext();
+  const { connectPaymentMethod } = useSubmitSubscriptionConnect();
 
   const handleSuccess = (paymentMethodId: string) => {
-    connectPaymentMethod(paymentMethodId);
+    connectPaymentMethod(paymentMethodId, () => {
+      setShowDialog(false);
+    });
   };
 
   return (
