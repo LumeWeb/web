@@ -26,6 +26,7 @@ import HyperPayment from "./HyperPayment";
 import { SubscriptionPlan } from "@/dataProviders/accountProvider";
 import useSubmitSubscriptionConnect from "../hooks/useSubmitSubscriptionConnect";
 import { useSubscriptionContext } from "@/routes/account/contexts/SubscriptionContext.js";
+import useOnFreePlan from "@/hooks/useOnFreePlan";
 
 export default function PricingPlans() {
   const {
@@ -59,6 +60,8 @@ export default function PricingPlans() {
     subscription?.billing_info?.zip &&
     subscription?.billing_info?.country;
 
+  const onFreePlan = useOnFreePlan();
+
   const formatStorage = (storage: number) => filesize(storage, 0).toUpperCase();
   const formatBandwidth = (bandwidth: number) =>
     filesize(bandwidth, 0).toUpperCase();
@@ -89,6 +92,10 @@ export default function PricingPlans() {
     currentPlan: SubscriptionPlan,
     newPlan: SubscriptionPlan,
   ) => {
+    if (onFreePlan) {
+      return "Subscribe";
+    }
+
     const currentIndex = plans.findIndex(
       (p: { identifier: string }) => p.identifier === currentPlan.identifier,
     );
