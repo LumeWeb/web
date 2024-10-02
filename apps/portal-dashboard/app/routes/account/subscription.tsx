@@ -10,6 +10,7 @@ import {
   useSubscriptionContext,
 } from "./contexts/SubscriptionContext";
 import useIsPaidBillingEnabled from "@/hooks/useIsPaidBillingEnabled";
+import usePluginMeta from "@/hooks/usePluginMeta";
 
 export default function Subscription() {
   return (
@@ -20,9 +21,16 @@ export default function Subscription() {
 }
 
 function SubscriptionContent() {
-  const { isLoading } = useSubscriptionContext();
+  const { isLoading, subscription } = useSubscriptionContext();
+
+  const freePlanName = usePluginMeta("billing", "free_plan_name");
 
   const paidBillingEnabled = useIsPaidBillingEnabled();
+
+  const onFreePlan =
+    paidBillingEnabled &&
+    freePlanName &&
+    subscription?.plan.name === freePlanName;
 
   if (isLoading) return <SkeletonSubscription />;
 
@@ -32,8 +40,8 @@ function SubscriptionContent() {
         <PricingPlans />
       </div>
       <div className="lg:col-span-1 flex flex-col gap-6">
-        {paidBillingEnabled && <PaymentHistory />}
-        {paidBillingEnabled && <ChangePaymentMethod />}
+        {paidBillingEnabled && !onFreePlan && <PaymentHistory />}
+        {paidBillingEnabled && !onFreePlan && <ChangePaymentMethod />}
         {false && <Addons />}
       </div>
       {paidBillingEnabled && (
