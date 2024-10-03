@@ -10,10 +10,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { CID } from "multiformats/cid";
 import useCopy from "../hooks/useCopy";
 import BareCopyButton from "./BareCopyButton";
+import { cn } from "@/util/cn";
 
 export default function CIDTooltip({ cid }: { cid: CID }) {
   const [open, setOpen] = useState(false);
@@ -40,14 +41,13 @@ export default function CIDTooltip({ cid }: { cid: CID }) {
         </Tooltip>
       </TooltipProvider>
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="ghost" size="sm">
-            {copied ? (
-              <BareCopyButton copied={true} />
-            ) : (
-              <BareCopyButton copied={false} />
-            )}
-          </Button>
+        <PopoverTrigger
+          className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
+          {copied ? (
+            <BareCopyButton copied={true} useButton={false} />
+          ) : (
+            <BareCopyButton copied={false} useButton={false} />
+          )}
         </PopoverTrigger>
         <PopoverContent className="w-48">
           <div className="space-y-2">

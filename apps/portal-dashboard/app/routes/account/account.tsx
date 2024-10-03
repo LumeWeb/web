@@ -130,10 +130,14 @@ export default function MyAccount() {
                   <CrownIcon />
                 </ManagementCardContent>
                 <ManagementCardFooter>
-                  <Button className="h-12 gap-x-2 text-foreground">
-                    <AddIcon />
-                    Change Plan
-                  </Button>
+                  {paidBillingEnabled && (
+                    <Link to="/account/subscription">
+                      <Button className="h-12 gap-x-2 text-foreground">
+                        <AddIcon />
+                        Change Plan
+                      </Button>
+                    </Link>
+                  )}
                 </ManagementCardFooter>
               </ManagementCard>
             )}

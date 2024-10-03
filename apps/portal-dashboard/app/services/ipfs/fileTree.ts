@@ -1,11 +1,12 @@
 // Enum for UnixFS data types
 import { IDBDatastore } from "datastore-idb";
 import PQueue from "p-queue";
-import { CreateResponse, DataProvider } from "@refinedev/core";
+import { CreateResponse, DataProvider, HttpError } from "@refinedev/core";
 import { CID } from "multiformats/cid";
 import { Key } from "interface-datastore";
 import { SERVICE_ID } from "@/services/ipfs/index.js";
 import { PinStatus as BasePinStatus } from "@ipfs-shipyard/pinning-service-client";
+import { AxiosError } from "axios";
 
 export enum DataType {
   Raw = 0,
@@ -246,8 +247,17 @@ export class FileTree {
         const blockMeta = response.data;
         await this.cacheBlockMeta(cid, blockMeta);
         return blockMeta;
-      } catch (error) {
-        console.error(`Error fetching block meta for CID ${cid}:`, error);
+      } catch (error: any) {
+        if ((error as HttpError).statusCode === 404) {
+          return {
+            name: cid,
+            type: DataType.Raw,
+            block_size: 0,
+            child_cid: [],
+          } satisfies BlockMetaResponse;
+        }
+
+        console.error(`Error fetching batch block meta:`, error);
         throw error;
       }
     }) as Promise<BlockMetaResponse>;
@@ -277,7 +287,20 @@ export class FileTree {
         }
 
         return response.data;
-      } catch (error) {
+      } catch (error: any) {
+        if ((error as HttpError).statusCode === 404) {
+          return uncachedCids.map((cid) => {
+            return {
+              [cid]: {
+                name: cid,
+                type: DataType.Raw,
+                block_size: 0,
+                child_cid: [],
+              },
+            } satisfies GetBlockMetaBatchResponse;
+          });
+        }
+
         console.error(`Error fetching batch block meta:`, error);
         throw error;
       }

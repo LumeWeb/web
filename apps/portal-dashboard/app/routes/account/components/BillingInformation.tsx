@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useForm } from "@refinedev/react-hook-form";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Card,
@@ -19,41 +19,107 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import useBillingInfo from "@/routes/account/hooks/useBillingInfo";
 import useSubmitBillingInfo from "@/routes/account/hooks/useSubmitBillingInfo";
-import billingInfoSchema from "./BillingInformation.schema";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  createBillingInfoSchema,
+  EntityCode,
+  FieldName,
+  fieldMapping,
+  BillingInfoFields,
+} from "./BillingInformation.schema";
+import { useList } from "@refinedev/core";
+import { BillingAddressComboBox, Entry } from "./BillingAddressComboBox";
+
+type FormFields = {
+  [K in keyof BillingInfoFields]: string;
+};
 
 export default function BillingInformation() {
-  const { billingInfo, isLoading } = useBillingInfo();
+  const { billingInfo, isLoading: isBillingInfoLoading } = useBillingInfo();
   const { submitBillingInfo, isSubmitting } = useSubmitBillingInfo();
   const [isInitialized, setIsInitialized] = useState(false);
+  const [supportedEntities, setSupportedEntities] = useState<EntityCode[]>([]);
 
-  const form = useForm({
-    resolver: zodResolver(billingInfoSchema),
+  const useCountryList = () =>
+    useList<Entry>({ resource: "account/subscription/billing/countries" });
+  const { data: countryData } = useCountryList();
+
+  const form = useForm<FormFields>({
+    resolver: zodResolver(createBillingInfoSchema(supportedEntities)),
     defaultValues: {
       name: "",
-      address: "",
-      city: "",
-      state: "",
-      zip: "",
       country: "",
     },
+    mode: "onBlur",
   });
 
-  React.useEffect(() => {
+  const useStateList = () =>
+    useList<Entry>({
+      resource: "account/subscription/billing/states",
+      filters: [
+        { field: "country", operator: "eq", value: form.watch("country") },
+      ],
+    });
+  const useCityList = () =>
+    useList<Entry>({
+      resource: "account/subscription/billing/cities",
+      filters: [
+        { field: "country", operator: "eq", value: form.watch("country") },
+        { field: "state", operator: "eq", value: form.watch("state") },
+      ],
+    });
+
+  useEffect(() => {
     if (billingInfo && !isInitialized) {
       console.log("Billing info loaded:", billingInfo);
-      form.reset(billingInfo);
+      form.reset(billingInfo as FormFields);
       setIsInitialized(true);
     }
   }, [billingInfo, form, isInitialized]);
 
-  const onSubmit = (data: any) => {
-    submitBillingInfo(data);
+  useEffect(() => {
+    const selectedCountry = form.watch("country");
+    const selectedCountryData = countryData?.data.find(
+      (country) => country.code === selectedCountry,
+    );
+    const entities = (selectedCountryData?.supported_entities ||
+      []) as EntityCode[];
+    setSupportedEntities(entities);
+    form.reset(form.getValues(), { keepValues: true });
+  }, [form.watch("country"), countryData]);
+
+  const onSubmit = async (data: FormFields) => {
+    try {
+      await submitBillingInfo(data);
+      // Show success message
+    } catch (error) {
+      if (typeof error === "object" && error !== null) {
+        // Apply errors to form fields
+        Object.entries(error).forEach(([field, message]) => {
+          form.setError(field as keyof FormFields, {
+            type: "manual",
+            message: message as string,
+          });
+        });
+      } else {
+        // Handle unexpected error format
+        console.error("Error submitting billing info:", error);
+      }
+    }
   };
 
-  if (isLoading) {
+  const handleCountryChange = () => {
+    form.setValue("state", undefined);
+    form.setValue("city", undefined);
+  };
+
+  const handleStateChange = () => {
+    form.setValue("city", undefined);
+  };
+
+  if (isBillingInfoLoading) {
     return (
       <div className="flex items-start justify-center min-h-screen p-4 pt-60">
         <div className="w-full max-w-md space-y-2">
@@ -65,6 +131,76 @@ export default function BillingInformation() {
       </div>
     );
   }
+
+  const renderField = (fieldName: FieldName) => {
+    const entityCode = Object.keys(fieldMapping).find(
+      (key) => fieldMapping[key as EntityCode] === fieldName,
+    ) as EntityCode;
+
+    if (!supportedEntities.includes(entityCode)) {
+      return null;
+    }
+
+    switch (fieldName) {
+      case "address":
+        return (
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Address</FormLabel>
+                <FormControl>
+                  <Textarea {...field} rows={3} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        );
+      case "city":
+        return (
+          <BillingAddressComboBox
+            name="city"
+            control={form.control}
+            label="City"
+            placeholder="Select City"
+            useList={useCityList}
+            disabled={!form.watch("state")}
+          />
+        );
+      case "state":
+        return (
+          <BillingAddressComboBox
+            name="state"
+            control={form.control}
+            label="State"
+            placeholder="Select State"
+            useList={useStateList}
+            onSelectionChange={handleStateChange}
+            disabled={!form.watch("country")}
+          />
+        );
+      default:
+        return (
+          <FormField
+            control={form.control}
+            name={fieldName as keyof BillingInfoFields}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        );
+    }
+  };
 
   return (
     <Card>
@@ -87,77 +223,22 @@ export default function BillingInformation() {
                 </FormItem>
               )}
             />
-            <FormField
+            <BillingAddressComboBox
+              name="country"
               control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} rows={3} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Country"
+              placeholder="Select Country"
+              useList={useCountryList}
+              onSelectionChange={handleCountryChange}
             />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>City</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>State</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="zip"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ZIP</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="country"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Country</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            {Object.keys(fieldMapping).map((key) =>
+              renderField(fieldMapping[key as EntityCode]),
+            )}
             <CardFooter className="px-0">
-              <Button type="submit" className="ml-auto" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                className="ml-auto"
+                disabled={isSubmitting || !form.formState.isValid}>
                 {isSubmitting ? "Saving..." : "Save"}
               </Button>
             </CardFooter>

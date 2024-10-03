@@ -15,12 +15,8 @@ import {
 import { Button } from "@/components/ui/button.js";
 import { AddIcon, RemoveIcon } from "@/components/icons.js";
 import { useGetIdentity } from "@refinedev/core";
-import ChangeAvatarForm from "@/routes/account/components/ChangeAvatarForm.js";
-import ChangeEmailForm from "@/routes/account/components/ChangeEmailForm.js";
-import ChangePasswordForm from "@/routes/account/components/ChangePasswordForm.js";
 import SetupTwoFactorDialog from "@/routes/account/components/SetupTwoFactorDialog.js";
 import DisableTwoFactorDialog from "@/routes/account/components/DisableTwoFactorDialog.js";
-import DeleteAccountDialog from "@/routes/account/components/DeleteAccountDialog.js";
 
 interface ModalState {
   setupTwoFactor: boolean;

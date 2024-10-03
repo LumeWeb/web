@@ -52,10 +52,12 @@ export interface SubscriptionPlan {
   storage: number;
   upload: number;
   download: number;
+  is_free?: boolean;
 }
 
 export interface SubscriptionBillingInfo {
   name: string;
+  organization: string;
   address: string;
   city: string;
   state: string;

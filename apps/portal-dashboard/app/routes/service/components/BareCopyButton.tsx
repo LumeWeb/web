@@ -1,23 +1,29 @@
-import React, { useState, useEffect } from "react";
-import { Copy, Check } from "lucide-react";
+import React from "react";
+import { Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface BareCopyButtonProps
-  extends React.ComponentPropsWithoutRef<typeof Button> {
+interface BareCopyButtonProps extends React.ComponentPropsWithoutRef<"button"> {
   copied: boolean;
+  useButton?: boolean;
 }
 
 export default function BareCopyButton({
   copied,
+  useButton = true,
   ...props
 }: BareCopyButtonProps) {
-  return (
-    <Button variant="ghost" size="sm" {...props}>
-      {copied ? (
-        <Check className="h-4 w-4 text-green-500" />
-      ) : (
-        <Copy className="h-4 w-4" />
-      )}
-    </Button>
-  );
+  const Icon = copied ? Check : Copy;
+  const iconProps = {
+    className: copied ? "h-4 w-4 text-green-500" : "h-4 w-4",
+  };
+
+  if (useButton) {
+    return (
+      <Button variant="ghost" size="sm" {...props}>
+        <Icon {...iconProps} />
+      </Button>
+    );
+  }
+
+  return <Icon {...iconProps} />;
 }

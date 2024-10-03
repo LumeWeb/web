@@ -9,6 +9,10 @@ export default function EmailVerificationBanner() {
   const { data: identity } = useGetIdentity<Identity>();
   const { resendVerification, isLoading } = useEmailVerification();
 
+  if (!identity) {
+    return null;
+  }
+
   if (!identity?.verified) {
     return (
       <Alert variant="default" className="bg-secondary text-foreground mb-4">

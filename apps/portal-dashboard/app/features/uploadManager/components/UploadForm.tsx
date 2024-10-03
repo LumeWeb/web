@@ -21,6 +21,8 @@ import { UppyFileDefault } from "@/features/uploadManager/lib/uploadManager.js";
 import { ErrorList } from "@/components/Forms.js";
 import useForceUpdate from "use-force-update";
 import { Body, Meta, UppyEventMap } from "@uppy/core";
+import useEmailVerification from "@/hooks/useEmailVerification";
+import { AlertTriangle } from "lucide-react";
 
 export default function UploadForm() {
   const uploader = useUploader();
@@ -29,8 +31,17 @@ export default function UploadForm() {
   const state = "";
 
   const activeServices = uploader.getServices();
+  const emailVerification = useEmailVerification();
 
   const [selectedService, setSelectedService] = useState<ServiceConfig>();
+
+  // TODO: Remove this auto-selection of the first service
+  useEffect(() => {
+    if (activeServices.length > 0 && !selectedService) {
+      setSelectedService(activeServices[0]);
+    }
+  }, [activeServices, selectedService]);
+
   const inputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let files =
       event.target.files && event.target.files.length > 0
@@ -59,6 +70,19 @@ export default function UploadForm() {
     }
   };
 
+  // Commented version for easy reverting:
+  /*
+  const updateSelectedService = function (value: string) {
+    const svc = activeServices.filter((item) => item.id === value);
+    if (svc.length === 0) {
+      return;
+    }
+
+    setSelectedService(svc[0]);
+  };
+  */
+
+  // Modified version to auto-select the first service
   const updateSelectedService = function (value: string) {
     const svc = activeServices.filter((item) => item.id === value);
     if (svc.length === 0) {
@@ -141,6 +165,10 @@ export default function UploadForm() {
     uploader.removeCompletedUploads();
   }, []);
 
+  if (emailVerification.isLoading || !emailVerification.alreadyVerified) {
+    return <UnverifiedUserNotice />;
+  }
+
   return (
     <>
       <DialogHeader className="mb-6">
@@ -150,14 +178,18 @@ export default function UploadForm() {
         <Label htmlFor="service-select" className="block mb-2">
           Select Service
         </Label>
-        <Select onValueChange={updateSelectedService}>
+        <Select
+          onValueChange={updateSelectedService}
+          value={selectedService?.id}>
           <SelectTrigger className="w-full p-2 border rounded">
             <SelectValue placeholder="Service" />
           </SelectTrigger>
 
           <SelectContent>
             {activeServices.map((service) => (
-              <SelectItem value={service.id}>{service.name}</SelectItem>
+              <SelectItem key={service.id} value={service.id}>
+                {service.name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -227,5 +259,41 @@ export default function UploadForm() {
         </Button>
       ) : null}
     </>
+  );
+}
+
+function UnverifiedUserNotice() {
+  const emailVerification = useEmailVerification();
+  return (
+    <div className="bg-amber-50 border-l-4 border-amber-400 p-6 rounded-lg shadow-md">
+      <div className="flex items-center">
+        <div className="flex-shrink-0">
+          <AlertTriangle
+            className="h-6 w-6 text-amber-400"
+            aria-hidden="true"
+          />
+        </div>
+        <div className="ml-3">
+          <h3 className="text-lg font-medium text-amber-800">
+            Account Verification Required
+          </h3>
+          <div className="mt-2 text-sm text-amber-700">
+            <p>
+              Your account needs to be verified before you can upload files.
+              Please check your email and complete the verification process to
+              gain access to this feature.
+            </p>
+          </div>
+          <div className="mt-4">
+            <Button
+              onClick={emailVerification.resendVerification}
+              variant="outline"
+              className="bg-amber-100 text-amber-800 hover:bg-amber-200 focus:ring-amber-500 border-amber-300">
+              Resend Verification Email
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

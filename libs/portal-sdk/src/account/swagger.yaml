@@ -57,8 +57,14 @@ paths:
   /api/account/verify-email/resend:
     post:
       summary: Resend email verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResendVerifyEmailRequest"
       responses:
-        "200":
+        '200':
           description: Email verification resent successfully
   /api/account/delete:
     delete:
@@ -251,6 +257,13 @@ components:
         email:
           type: string
         token:
+          type: string
+    ResendVerifyEmailRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
           type: string
     OTPGenerateResponse:
       type: object

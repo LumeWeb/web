@@ -105,6 +105,7 @@ const FileManager = () => {
   const navigateToBreadcrumb = useCallback(
     (index: number) => {
       if (index === -1) {
+        console.log(nav.showUrl(SERVICE_ROUTE, svc?.id() as string));
         nav.show(SERVICE_ROUTE, svc?.id() as string);
         return;
       }

@@ -55,7 +55,18 @@ export const routeConfig: RouteConfig[] = [
   },
   {
     path: "reset-password",
-    file: "routes/reset_password/index.tsx",
+    file: "routes/reset-password/layout.tsx",
+    children: [
+      {
+        path: "",
+        file: "routes/reset-password/reset.tsx",
+        index: true,
+      },
+      {
+        path: "confirm",
+        file: "routes/reset-password/confirm.tsx",
+      },
+    ],
   },
   {
     path: "otp",

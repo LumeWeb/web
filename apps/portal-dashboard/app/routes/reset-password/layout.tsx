@@ -1,17 +1,11 @@
-import type { MetaFunction } from "@remix-run/node";
-import { Link } from "@remix-run/react";
+import { Link, Outlet } from "@remix-run/react";
 import { Button } from "@/components/ui/button.js";
 import lumeBgPng from "@/images/lume-bg-reset-password.png";
 import discordLogoPng from "@/images/discord-logo.png?url";
 import lumeColorLogoPng from "@/images/lume-color-logo.png?url";
 import LumeLogo from "@/components/LumeLogo.js";
-import ResetPasswordForm from "./components/ResetPasswordForm";
 
-export const meta: MetaFunction = () => {
-  return [{ title: "Reset Password" }];
-};
-
-export default function ResetPassword() {
+export default function ResetPasswordLayout() {
   return (
     <div className="h-screen relative">
       <header className="p-4 sm:p-10">
@@ -19,7 +13,7 @@ export default function ResetPassword() {
       </header>
 
       <div className="flex flex-col items-start max-w-md bg-background">
-        <ResetPasswordForm />
+        <Outlet />
       </div>
 
       <div className="fixed inset-0 -z-10 overflow-clip">
