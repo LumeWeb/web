@@ -1,6 +1,5 @@
 import { BasePlugin, Body, Meta, Uppy, UppyFile } from "@uppy/core";
-import { GetBlockProgressEvents, Helia } from "helia";
-import { createHeliaHTTP } from "@helia/http";
+import { GetBlockProgressEvents } from "helia";
 import { unixfs } from "@helia/unixfs";
 import { car } from "@helia/car";
 import { CarWriter } from "@ipld/car";
@@ -8,21 +7,16 @@ import type {
   DefinePluginOpts,
   PluginOpts,
 } from "@uppy/core/lib/BasePlugin.js";
-import {
-  PLUGIN_LARGE_SUFFIX_REGEX,
-  UppyFileDefault,
-} from "@/features/uploadManager/lib/uploadManager.js";
+import { UppyFileDefault } from "@/features/uploadManager/lib/uploadManager.js";
 // @ts-ignore
 import type { CID } from "multiformats/cid";
 import type { AbortOptions } from "@libp2p/interfaces";
 import type { ProgressOptions } from "progress-events";
-import { IDBBlockstore } from "blockstore-idb";
-import { IDBDatastore } from "datastore-idb";
-import fetchPortalMeta from "@/util/fetchPortalMeta.js";
-import getPortalUrl from "@/stores/getPortalUrl.js";
-import { getServiceById } from "@/services/index.js";
 import { appStore } from "@/stores/app.js";
 import { IPFS, SERVICE_ID } from "@/services/ipfs/index.js";
+import { asyncIterableReader, createDecoder } from "@ipld/car/decoder";
+// @ts-ignore
+import type { CarHeader, CarV2Header } from "@ipld/car/src/coding";
 
 interface CarPreprocessorOpts<M extends Meta, B extends Body>
   extends PluginOpts {}
@@ -115,9 +109,16 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
     for (const fileID of fileIDs) {
       const file = this.uppy.getFile(fileID);
 
-      // @ts-ignore
-      if (!file.car && this.#isIPFSFile(file)) {
-        await this.processFile(file);
+      if (this.#isIPFSFile(file)) {
+        const isCarFile = await this.#isCarFile(file);
+        if (isCarFile) {
+          console.log(
+            `File ${file.name} is a valid CAR file, skipping processing.`,
+          );
+          this.uppy.emit("preprocess-complete", asUppyFile(file));
+        } else {
+          await this.processFile(file);
+        }
       }
     }
 
@@ -180,6 +181,45 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
 
   async #createHelia() {
     return appStore.getState().getServiceById<IPFS>(SERVICE_ID)?.getHelia()!;
+  }
+
+  async #isCarFile(file: UppyFileDefault): Promise<boolean> {
+    if (
+      file.type !== "application/vnd.ipld.car" &&
+      !file.name?.endsWith(".car")
+    ) {
+      return false;
+    }
+
+    try {
+      // Create an async iterable from the file
+      const fileIterable = {
+        [Symbol.asyncIterator]: async function* () {
+          const reader = file.data.stream().getReader();
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            yield value;
+          }
+        },
+      };
+
+      const reader = asyncIterableReader(fileIterable);
+      // Attempt to decode the CAR file
+      const decoder = createDecoder(reader);
+      let header: CarHeader | CarV2Header;
+      try {
+        header = await decoder.header();
+      } catch {
+        return false;
+      }
+
+      // If we can get the roots, it's likely a valid CAR file
+      return header.roots.length > 0;
+    } catch (error) {
+      console.error("Error verifying CAR file:", error);
+      return false;
+    }
   }
 }
 

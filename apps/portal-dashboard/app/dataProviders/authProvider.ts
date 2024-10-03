@@ -55,6 +55,19 @@ type LoginResponse = {
   otp: boolean;
 };
 
+export type ForgotPasswordInitialRequest = {
+  email: string;
+};
+
+export type ForgotPasswordConfirmRequest = {
+  email: string;
+  password: string;
+  token: string;
+};
+export type ForgotPasswordRequest =
+  | ForgotPasswordInitialRequest
+  | ForgotPasswordConfirmRequest;
+
 // Helper functions
 const maybeSetupAuth = (sdk: Sdk): void => {
   let jwt = sdk.account().jwtToken;
@@ -223,8 +236,46 @@ export const createPortalAuthProvider = (sdk: Sdk): AuthProvider => {
       });
     },
 
-    async forgotPassword(): Promise<any> {
-      return { success: true };
+    async forgotPassword(params: ForgotPasswordRequest): Promise<any> {
+      try {
+        let ret;
+
+        if (params && params.password) {
+          // Confirm password reset
+          ret = await sdk.account().confirmPasswordReset({
+            token: params.token,
+            password: params.password,
+            email: params.email,
+          });
+
+          return handleResponse({
+            ret,
+            successNotification: {
+              message: "Password Reset Successful",
+              description:
+                "Your password has been successfully reset. You can now log in with your new password.",
+            },
+          });
+        } else {
+          // Request password reset
+          ret = await sdk
+            .account()
+            .requestPasswordReset({ email: params.email });
+
+          return handleResponse({
+            ret,
+            successNotification: {
+              message: "Password Reset Requested",
+              description:
+                "If an account exists for this email, you will receive password reset instructions. If it doesn't appear within a few minutes, check your spam folder.",
+            },
+          });
+        }
+      } catch (error) {
+        return handleResponse({
+          ret: error as AccountError,
+        });
+      }
     },
 
     async updatePassword(params: UpdatePasswordFormRequest): Promise<any> {

@@ -27,6 +27,7 @@ import {
   postApiAuthPing,
   postApiAuthRegister,
   RegisterRequest,
+  type ResendVerifyEmailRequest,
   UploadLimitResponse,
   VerifyEmailRequest,
 } from "./account/generated/index.js";
@@ -125,10 +126,15 @@ export class AccountApi {
     return this.checkSuccessBool(ret);
   }
 
-  public async requestEmailVerification(): Promise<boolean | AccountError> {
+  public async requestEmailVerification(
+    resendRequest: ResendVerifyEmailRequest,
+  ): Promise<boolean | AccountError> {
     let ret: AxiosResponse<void>;
     try {
-      ret = await postApiAccountVerifyEmailResend(this.buildOptions());
+      ret = await postApiAccountVerifyEmailResend(
+        resendRequest,
+        this.buildOptions(),
+      );
     } catch (e) {
       return new AccountError(
         (e as AxiosError).response?.data as string,

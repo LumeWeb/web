@@ -49,7 +49,8 @@ export default function PricingPlans() {
     !!subscription?.payment_info?.payment_id &&
     !!subscription?.payment_info?.client_secret &&
     planPending &&
-    !paymentExpired;
+    !paymentExpired &&
+    !!subscription?.plan?.is_free;
 
   const isBillingComplete =
     subscription?.billing_info?.name &&

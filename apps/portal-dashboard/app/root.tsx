@@ -31,6 +31,7 @@ import { withTheme } from "@/hooks/useTheme";
 import { Skeleton } from "@/components/ui/skeleton";
 import restDataProvider from "@refinedev/simple-rest";
 import { createServiceProvider } from "@/dataProviders/serviceProvider";
+import { SERVICE_ROUTE } from "@/routeConfig";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -96,18 +97,42 @@ export function Root() {
     return <SkeletonLoader />;
   }
 
+  const resourceAuthHeaders = {
+    Authorization: `Bearer ${sdk?.account()?.jwtToken}`,
+  };
+
   const allResources: ResourceProps[] = [
     ...resources,
     {
       name: "account/keys",
       meta: {
-        headers: {
-          Authorization: `Bearer ${sdk?.account()?.jwtToken}`,
-        },
+        headers: resourceAuthHeaders,
       },
     },
     {
       name: "account",
+    },
+    {
+      name: SERVICE_ROUTE,
+      show: "/service/:id",
+    },
+    {
+      name: "account/subscription/billing/countries",
+      meta: {
+        headers: resourceAuthHeaders,
+      },
+    },
+    {
+      name: "account/subscription/billing/states",
+      meta: {
+        headers: resourceAuthHeaders,
+      },
+    },
+    {
+      name: "account/subscription/billing/cities",
+      meta: {
+        headers: resourceAuthHeaders,
+      },
     },
   ];
 

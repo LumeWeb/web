@@ -169,25 +169,10 @@ export class IPFS extends BaseService {
         const { current = 1, pageSize = 50 } = pagination;
         const offset = (current - 1) * pageSize;
 
-        const client = await that.getRemoteClient();
-        let status: Set<Status> | undefined;
-
-        if (filters?.length) {
-          status = extractStatusFilters(filters);
-        }
-
-        const pinsGetOptions: PinsGetRequest = {
-          status: status,
-          limit: meta?.fileManager ? undefined : pageSize, // Fetch all pins if tree logic is needed
-          ...(meta?.before && { before: new Date(meta.before) }),
-        };
-
         const { count, results: resultsSet } = await getListViaPinner(
           params,
           that,
         );
-
-        await client.pinsGet(pinsGetOptions);
 
         let pinStatuses = Array.from(resultsSet).map((result) => ({
           ...result,
@@ -209,6 +194,9 @@ export class IPFS extends BaseService {
             pageSize,
           );
 
+          // Store the last pin set for breadcrumb navigation
+          that.#lastPinSet = pinStatuses;
+          that.#lastPinSetDefer.resolve();
           // Extract PinStatus objects from nodes
           pinStatuses = nodesToPins(nodes);
         }
@@ -224,8 +212,7 @@ export class IPFS extends BaseService {
 
         return {
           data: pinStatuses,
-          total:
-            meta?.fileManager && meta.parentCid ? pinStatuses.length : count,
+          total: meta?.fileManager ? pinStatuses.length : count,
         };
       },
       async create(
@@ -527,18 +514,20 @@ export class IPFS extends BaseService {
       while (lastPin) {
         let found = false;
         for (const pin of pinSet!) {
-          const meta = await fileTree.getBlockMeta(pin.pin.cid.toString());
-          if (meta.child_cid.includes(lastPin.pin.cid)) {
-            if (!isFirstIteration || parts.length === 0) {
-              parts.unshift({
-                name: await getName(lastPin),
-                cid: CID.parse(lastPin.pin.cid).toV1(),
-              });
+          try {
+            const meta = await fileTree.getBlockMeta(pin.pin.cid.toString());
+            if (meta.child_cid.includes(lastPin.pin.cid)) {
+              if (!isFirstIteration || parts.length === 0) {
+                parts.unshift({
+                  name: await getName(lastPin),
+                  cid: CID.parse(lastPin.pin.cid).toV1(),
+                });
+              }
+              lastPin = pin;
+              found = true;
+              break;
             }
-            lastPin = pin;
-            found = true;
-            break;
-          }
+          } catch {}
         }
 
         if (!found) {
@@ -651,52 +640,32 @@ function getPinLabel(status: PinStatus["status"]) {
   return "Unknown";
 }
 
-async function getListViaRestProvider(
-  params: GetListParams,
-  svc: IPFS,
-): Promise<GetListResponse<PinStatus>> {
-  params.resource = "pins";
-  try {
-    const restProvider = await svc.getRestProvider();
-    const response = await restProvider.getList(params);
-    // Check if the response matches the expected PinsResponse structure
-    if ("count" in response.data && "results" in response.data) {
-      return mapPinsResponseToGetListResult(response.data as PinResults);
-    } else {
-      // If the response doesn't match PinsResponse, assume it's already in the correct format
-      return response as GetListResponse<PinStatus>;
-    }
-  } catch (error) {
-    throw error;
-  }
-}
-
 async function getListViaPinner(
   params: GetListParams,
   svc: IPFS,
 ): Promise<PinResults> {
-  const { pagination = {} } = params;
-  const { current = 1, pageSize = 50 } = pagination;
-
   const client = await svc.getRemoteClient();
+
+  const { pagination = {}, filters, meta } = params;
+  const { pageSize = 50 } = pagination;
 
   let allResults: PinStatus[] = [];
   let hasMoreResults = true;
   let oldestTimestamp: Date | undefined;
   let totalCount = 0;
 
-  // Calculate how many items we need to skip
-  const itemsToSkip = (current - 1) * pageSize;
+  let status: Set<Status> | undefined;
 
-  while (hasMoreResults /* && allResults.length < itemsToSkip + pageSize*/) {
-    const pinsGetOptions: PinsGetRequest = {
-      status: new Set([Status.Pinned]),
+  if (filters?.length) {
+    status = extractStatusFilters(filters);
+  }
+
+  while (hasMoreResults) {
+    const { count, results: resultsSet }: PinResults = await client.pinsGet({
+      status,
       ...(oldestTimestamp && { before: oldestTimestamp }),
       limit: totalCount ?? pageSize,
-    };
-
-    const { count, results: resultsSet }: PinResults =
-      await client.pinsGet(pinsGetOptions);
+    });
 
     totalCount = count; // Update the total count from the API
 
@@ -719,11 +688,6 @@ async function getListViaPinner(
     hasMoreResults = totalCount > allResults.length && results.length > 0;
   }
 
-  /*  // Apply pagination to the results
-  const paginatedResults = allResults.slice(
-    itemsToSkip,
-    itemsToSkip + pageSize,
-  );*/
   return {
     results: new Set(allResults) as any,
     count: totalCount,

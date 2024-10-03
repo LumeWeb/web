@@ -3,6 +3,9 @@ import { Button } from "./ui/button";
 import { IndeterminateProgress } from "./ui/indeterminate-progress";
 import { Progress } from "./ui/progress";
 import filesize from "@/util/filesize.js";
+import useIsBillingEnabled from "@/hooks/useIsBillingEnabled";
+import useIsPaidBillingEnabled from "@/hooks/useIsPaidBillingEnabled";
+import { Link } from "@remix-run/react";
 
 interface UsageCardProps {
   label: string;
@@ -21,6 +24,8 @@ export const UsageCard = ({
 }: UsageCardProps) => {
   const limitEnabled = maxUsage > -1;
 
+  const paidBillingEnabled = useIsPaidBillingEnabled();
+
   return (
     <div className="p-8 border border-border/30 bg-secondary/50 rounded-lg w-full ">
       <div className="flex items-center justify-between mb-8">
@@ -35,16 +40,18 @@ export const UsageCard = ({
             </div>
           )}
         </div>
-        {limitEnabled && (
+        {limitEnabled && paidBillingEnabled && (
           <div className=" hidden lg:flex  mt-4 text-sm">
-            {!button ? (
-              <Button className="gap-x-2 h-12">
-                <AddIcon />
-                Add More
-              </Button>
-            ) : (
-              button
-            )}
+            <Link to="/account/subscription">
+              {!button ? (
+                <Button className="gap-x-2 h-12">
+                  <AddIcon />
+                  Add More
+                </Button>
+              ) : (
+                button
+              )}
+            </Link>
           </div>
         )}
       </div>
