@@ -23,6 +23,7 @@ import useForceUpdate from "use-force-update";
 import { Body, Meta, UppyEventMap } from "@uppy/core";
 import useEmailVerification from "@/hooks/useEmailVerification";
 import { AlertTriangle } from "lucide-react";
+import UnverifiedUserNotice from "@/components/UnverifiedUserNotice";
 
 export default function UploadForm() {
   const uploader = useUploader();
@@ -259,41 +260,5 @@ export default function UploadForm() {
         </Button>
       ) : null}
     </>
-  );
-}
-
-function UnverifiedUserNotice() {
-  const emailVerification = useEmailVerification();
-  return (
-    <div className="bg-amber-50 border-l-4 border-amber-400 p-6 rounded-lg shadow-md">
-      <div className="flex items-center">
-        <div className="flex-shrink-0">
-          <AlertTriangle
-            className="h-6 w-6 text-amber-400"
-            aria-hidden="true"
-          />
-        </div>
-        <div className="ml-3">
-          <h3 className="text-lg font-medium text-amber-800">
-            Account Verification Required
-          </h3>
-          <div className="mt-2 text-sm text-amber-700">
-            <p>
-              Your account needs to be verified before you can upload files.
-              Please check your email and complete the verification process to
-              gain access to this feature.
-            </p>
-          </div>
-          <div className="mt-4">
-            <Button
-              onClick={emailVerification.resendVerification}
-              variant="outline"
-              className="bg-amber-100 text-amber-800 hover:bg-amber-200 focus:ring-amber-500 border-amber-300">
-              Resend Verification Email
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
