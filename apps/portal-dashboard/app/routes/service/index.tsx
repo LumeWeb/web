@@ -1,5 +1,6 @@
 import {
   Authenticated,
+  useGetIdentity,
   useGo,
   useNavigation,
   useParsed,
@@ -7,7 +8,7 @@ import {
 import { GeneralLayout } from "@/components/layout/GeneralLayout";
 import { DataTable } from "@/components/DataTable.js";
 import { AddIcon } from "@/components/icons.js";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronRight, Search, X } from "lucide-react";
@@ -16,7 +17,9 @@ import { useActiveService } from "./hooks/useActiveService";
 import { IPFS_SUBFOLDER_ROUTE, SERVICE_ROUTE } from "@/routeConfig.js";
 import { CID } from "multiformats/cid";
 import { BreadCrumbPath } from "@/services/base.js";
-import { useNavigate, useSearchParams } from "@remix-run/react";
+import { useSearchParams } from "@remix-run/react";
+import { Identity } from "@/dataProviders/authProvider";
+import UnverifiedUserModal from "@/components/UnverifiedUserModal";
 
 export default function Service() {
   return (
@@ -38,9 +41,11 @@ const FileManager = () => {
 
   const [folderCid, setFolderCid] = useState<string | undefined>();
   const [currentPath, setCurrentPath] = useState<BreadCrumbPath>([]);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
 
   const breadcrumbHook = svc?.UIFileManagerCurrentBreadcrumbPathHook();
   const navigateToCID = svc?.UINavigateToCIDHook();
+  const user = useGetIdentity<Identity>();
 
   useEffect(() => {
     if (!svc) {
@@ -116,6 +121,14 @@ const FileManager = () => {
     [nav, svc, currentPath, navigateToCID],
   );
 
+  const handlePinContent = useCallback(() => {
+    if (!user.isLoading && user.data?.verified) {
+      setShowPinDialog(true);
+    } else {
+      setShowVerificationModal(true);
+    }
+  }, [user.isLoading, user.data?.verified]);
+
   if (!svc) {
     return null;
   }
@@ -143,7 +156,7 @@ const FileManager = () => {
           className="border-ring font-medium w-full grow h-12 flex-1 bg-primary-2/10"
           onChange={(e) => handleSearchChange(e.target.value)}
         />
-        <Button className="h-12 gap-x-2" onClick={() => setShowPinDialog(true)}>
+        <Button className="h-12 gap-x-2" onClick={handlePinContent}>
           <AddIcon />
           Pin Content
         </Button>
@@ -191,6 +204,10 @@ const FileManager = () => {
         }}
       />
       <PinDialog open={showPinDialog} stateChange={setShowPinDialog} />
+      <UnverifiedUserModal
+        isOpen={showVerificationModal}
+        onClose={() => setShowVerificationModal(false)}
+      />
     </>
   );
 };
