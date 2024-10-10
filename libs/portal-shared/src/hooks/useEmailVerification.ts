@@ -1,11 +1,11 @@
 // Custom hook for email verification
-import useSdk from "portal-shared/hooks/useSdk";
+import useSdk from "@/hooks/useSdk";
 import { useGetIdentity, useNotification } from "@refinedev/core";
 import { useMutation } from "@tanstack/react-query";
 import { AccountInfoResponse, Sdk } from "@lumeweb/portal-sdk";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "@remix-run/react";
-import { Identity } from "portal-shared/dataProviders/authProvider";
+import { Identity } from "@/dataProviders/authProvider";
 
 export default function useEmailVerification() {
   const sdk = useSdk() as Sdk;

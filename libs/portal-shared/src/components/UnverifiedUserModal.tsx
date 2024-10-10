@@ -1,10 +1,6 @@
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "portal-shared/components/ui/dialog";
-import VerificationNoticeContent from "./VerificationNoticeContent";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import VerificationNoticeContent from "@/components/VerificationNoticeContent";
 import useEmailVerification from "@/hooks/useEmailVerification";
 
 interface UnverifiedUserModalProps {

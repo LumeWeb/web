@@ -21,10 +21,6 @@ export default defineConfig({
       },
     }),
     tsconfigPaths(),
-    nodePolyfills({
-      protocolImports: false,
-      include: ["buffer", "url"],
-    }),
     commonjs({
       filter(id) {
         return id.includes("url");

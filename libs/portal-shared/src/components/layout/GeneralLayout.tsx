@@ -17,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import EmailVerificationBanner from "apps/portal-dashboard/app/components/EmailVerificationBanner";
+import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 
 interface GeneralLayoutProps {
   children?: React.ReactNode;
