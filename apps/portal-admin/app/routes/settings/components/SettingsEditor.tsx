@@ -138,7 +138,7 @@ const renderEditableValue = (
   }
 };
 
-const JsonSchemaTable: React.FC<JsonSchemaTableProps> = ({
+const SettingsTable: React.FC<JsonSchemaTableProps> = ({
   schema,
   initialData,
   hiddenFields,
@@ -294,4 +294,4 @@ const JsonSchemaTable: React.FC<JsonSchemaTableProps> = ({
   );
 };
 
-export default JsonSchemaTable;
+export default SettingsTable;
