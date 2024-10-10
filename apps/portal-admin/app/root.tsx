@@ -28,7 +28,7 @@ import { withTheme } from "portal-shared/hooks/useTheme";
 import { Skeleton } from "portal-shared/components/ui/skeleton";
 import restDataProvider from "@refinedev/simple-rest";
 import { useAppInitialization } from "@/hooks/useAppInitialization";
-import cronDataProvider from "@/dataProviders/cronProvider";
+import useProtocolDomain from "portal-shared/hooks/useProtocolDomain";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -65,6 +65,7 @@ export function Root() {
   const sdk = useSdk();
 
   const authProvider = useAuthProvider(sdk);
+  const adminDomain = useProtocolDomain("admin");
 
   const { isInitialized, providers, resources, setIsInitialized } =
     useAppInitialization(sdk, authProvider);
@@ -97,13 +98,24 @@ export function Root() {
   const allResources: ResourceProps[] = [
     ...resources,
     {
-      name: "cron",
+      name: "cron/jobs",
       meta: {
-        dataProviderName: "cron",
+        dataProviderName: "admin",
+        authHeaders: resourceAuthHeaders,
+      },
+    },
+    {
+      name: "settings",
+      list: "settings",
+      show: "settings/:id",
+      meta: {
+        dataProviderName: "admin",
         authHeaders: resourceAuthHeaders,
       },
     },
   ];
+
+  const adminDataProvider = restDataProvider(`https://${adminDomain}/api`);
 
   return (
     <Refine
@@ -118,7 +130,7 @@ export function Root() {
             sdk!.account()?.apiUrl?.replace(/\/+$/, "") + "/api",
           ),
         ),
-        cron: cronDataProvider,
+        admin: adminDataProvider,
       }}
       notificationProvider={
         notificationProvider as unknown as NotificationProvider

@@ -24,9 +24,9 @@ import { UppyFileDefault } from "@/features/uploadManager/lib/uploadManager.js";
 import { ErrorList } from "portal-shared/components/Forms";
 import useForceUpdate from "use-force-update";
 import { Body, Meta, UppyEventMap } from "@uppy/core";
-import useEmailVerification from "@/hooks/useEmailVerification";
+import useEmailVerification from "portal-shared/hooks/useEmailVerification";
 import { AlertTriangle } from "lucide-react";
-import UnverifiedUserNotice from "@/components/UnverifiedUserNotice";
+import UnverifiedUserNotice from "portal-shared/components/UnverifiedUserNotice";
 
 export default function UploadForm() {
   const uploader = useUploader();

@@ -9,7 +9,7 @@ import logoPng from "portal-shared/images/lume-logo.png?url";
 import lumeBgPng from "portal-shared/images/lume-bg-image.png?url";
 import useSdk from "portal-shared/hooks/useSdk";
 import { Sdk } from "@lumeweb/portal-sdk";
-import useEmailVerification from "@/hooks/useEmailVerification";
+import useEmailVerification from "portal-shared/hooks/useEmailVerification";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Verify Email" }];

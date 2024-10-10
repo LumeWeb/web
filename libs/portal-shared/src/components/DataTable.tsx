@@ -15,6 +15,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DataTablePagination } from "@/components/TablePagination";
 
 import "@tanstack/react-table";
+import { SkeletonLoader } from "@/components/SkeletonLoader";
+import type { Pagination } from "@refinedev/core/src/contexts/data/types";
 
 // @ts-ignore
 declare module "@tanstack/table-core" {
@@ -36,6 +38,7 @@ export interface DataTableProps<
   filters?: CrudFilters;
   permanentFilters?: CrudFilters;
   meta?: MetaQuery;
+  pagination?: Pagination;
 }
 
 export function DataTable<TData extends BaseRecord, TValue>({
@@ -48,6 +51,7 @@ export function DataTable<TData extends BaseRecord, TValue>({
   filters,
   permanentFilters,
   meta,
+  pagination,
 }: DataTableProps<TData, TValue>) {
   const table = useTable({
     columns,
@@ -57,13 +61,14 @@ export function DataTable<TData extends BaseRecord, TValue>({
         permanent: permanentFilters,
       },
       meta,
-      dataProviderName: dataProviderName || "default",
+      dataProviderName,
       // @ts-ignore
       queryOptions: {
         refetchInterval: autoRefresh ? autoRefreshInterval : undefined,
         refetchIntervalInBackground: true,
         keepPreviousData: true,
       },
+      pagination,
     },
   });
 
@@ -71,26 +76,19 @@ export function DataTable<TData extends BaseRecord, TValue>({
     table.refineCore.setFilters(filters || []);
   }, [filters]);
 
-  const loadingRows = useMemo(
-    () =>
-      Array(4)
-        .fill({})
-        .map(() => ({
-          getIsSelected: () => false,
-          getVisibleCells: () =>
-            columns.map(() => ({
-              column: {
-                columnDef: {
-                  cell: <Skeleton className="h-4 w-full bg-foreground/30" />,
-                },
-              },
-              getContext: () => null,
-            })),
-        })),
-    [],
-  );
   const initialLoading = table.refineCore.tableQueryResult.isInitialLoading;
-  const rows = initialLoading ? loadingRows : table.getRowModel().rows;
+  const rows = initialLoading ? [] : table.getRowModel().rows;
+
+  if (initialLoading) {
+    return (
+      <SkeletonLoader
+        layout="table"
+        table={table}
+        showHeader
+        className={className}
+      />
+    );
+  }
 
   return (
     <>
@@ -150,7 +148,7 @@ export function DataTable<TData extends BaseRecord, TValue>({
           )}
         </TableBody>
       </Table>
-      {!table.refineCore.tableQueryResult.isLoading && (
+      {!table?.refineCore.tableQueryResult.isLoading && (
         <DataTablePagination table={table} />
       )}
     </>

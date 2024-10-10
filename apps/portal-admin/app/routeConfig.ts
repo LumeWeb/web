@@ -13,4 +13,12 @@ export const routeConfig: RouteConfig[] = [
     path: "login",
     file: "routes/login/index.tsx",
   },
+  {
+    path: "cron",
+    file: "routes/cron/index.tsx",
+  },
+  {
+    path: "settings",
+    file: "routes/settings/index.tsx",
+  },
 ];
