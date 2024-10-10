@@ -10,7 +10,7 @@ import {
 } from "portal-shared/components/icons";
 import { Avatar } from "portal-shared/components/ui/avatar";
 import { Button } from "portal-shared/components/ui/button";
-import accountBannerImage from "@/images/account-banner-image.png?url";
+import accountBannerImage from "portal-shared/images/account-banner-image.png?url";
 
 export const UpgradeAccountBanner = () => {
   const { data: identity } = useGetIdentity<Identity>();

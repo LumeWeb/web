@@ -1,13 +1,15 @@
-import { Link } from "@remix-run/react";
 import React from "react";
-import { CircleLockIcon, ClockIcon, DriveIcon } from "@/components/icons";
 import LumeLogo from "@/components/LumeLogo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { UploadButton } from "apps/portal-dashboard/app/components/UploadButton";
 import UploadForm from "apps/portal-dashboard/app/features/uploadManager/components/UploadForm";
 import { MainNavigation } from "@/components/MainNavigation";
 
-export default function DesktopSidebar() {
+interface DesktopSidebarProps {
+  showUploadForm: boolean;
+}
+
+function DesktopSidebar({ showUploadForm }: DesktopSidebarProps) {
   return (
     <header className="p-10 pr-0 flex flex-col w-[240px] h-full scroll-m-0 overflow-hidden">
       <LumeLogo />
@@ -20,14 +22,18 @@ export default function DesktopSidebar() {
         <p>Ownership</p>
       </span>
 
-      <Sheet>
-        <SheetTrigger asChild>
-          <UploadButton />
-        </SheetTrigger>
-        <SheetContent>
-          <UploadForm />
-        </SheetContent>
-      </Sheet>
+      {showUploadForm && (
+        <Sheet>
+          <SheetTrigger asChild>
+            <UploadButton />
+          </SheetTrigger>
+          <SheetContent>
+            <UploadForm />
+          </SheetContent>
+        </Sheet>
+      )}
     </header>
   );
 }
+
+export default DesktopSidebar;

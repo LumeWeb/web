@@ -4,31 +4,36 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 import tsconfigPaths from "vite-tsconfig-paths";
 import commonjs from "vite-plugin-commonjs";
 
+// @ts-ignore
 import path from "path";
+// @ts-ignore
 import fs from "fs";
+import { routeConfig } from "./app/routeConfig";
+import { jsonRoutes } from "remix-json-routes";
 
 export default defineConfig({
-  cacheDir: "../../node_modules/.vite/apps/portal-dashboard",
   plugins: [
     remix({
       ssr: false,
       ignoredRouteFiles: ["**/*.css"],
-      buildDirectory: "../../dist/apps/portal-dashboard",
+      routes(defineRoutes) {
+        return jsonRoutes(defineRoutes, routeConfig);
+      },
     }),
     tsconfigPaths(),
     nodePolyfills({
       protocolImports: false,
-      include: ["buffer", "url", "events"],
+      include: ["buffer", "url"],
     }),
     commonjs({
       filter(id) {
-        return id.includes("url") || id.includes("events");
+        return id.includes("url");
       },
     }),
   ],
   build: {
     minify: false,
-    outDir: "../../dist/apps/portal-dashboard",
+    outDir: "../../dist/apps/portal-admin",
     reportCompressedSize: true,
     commonjsOptions: { transformMixedEsModules: true },
   },
@@ -42,6 +47,7 @@ export default defineConfig({
       // https://vitejs.dev/config/server-options.html#server-fs-allow
       allow: [
         "app",
+        "routes.ts",
         fs.realpathSync(
           path.resolve("../../node_modules/@fontsource-variable/manrope"),
         ),

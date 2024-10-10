@@ -31,8 +31,10 @@ import React from "react";
 import UploadForm from "apps/portal-dashboard/app/features/uploadManager/components/UploadForm";
 import { MainNavigation } from "@/components/MainNavigation";
 
-export default function MobileSidebar() {
-  const location = useLocation();
+interface MobileSidebarProps {
+  showUploadForm: boolean;
+}
+export default function MobileSidebar({ showUploadForm }: MobileSidebarProps) {
   const { mutate: logout } = useLogout();
   return (
     <>
@@ -56,22 +58,24 @@ export default function MobileSidebar() {
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Sheet>
-              <SheetTrigger>
-                <Button
-                  size="lg"
-                  className="h-full p-2 bg-upload-file-background">
-                  <CloudUploadIcon className="w-7 h-7 text-black" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom">
-                <div className="w-full flex flex-col items-start justify-between my-auto">
-                  <div className="w-full flex flex-col">
-                    <UploadForm />
+            {showUploadForm && (
+              <Sheet>
+                <SheetTrigger>
+                  <Button
+                    size="lg"
+                    className="h-full p-2 bg-upload-file-background">
+                    <CloudUploadIcon className="w-7 h-7 text-black" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="bottom">
+                  <div className="w-full flex flex-col items-start justify-between my-auto">
+                    <div className="w-full flex flex-col">
+                      <UploadForm />
+                    </div>
                   </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+                </SheetContent>
+              </Sheet>
+            )}
             <Sheet>
               <SheetTrigger>
                 <Button

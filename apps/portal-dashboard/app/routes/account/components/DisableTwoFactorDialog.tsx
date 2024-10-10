@@ -19,7 +19,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "portal-shared/components/ui/alert";
-import useApiUrl from "@/hooks/useApiUrl.js";
+import useApiUrl from "portal-shared/hooks/useApiUrl";
 import { useInvalidateAuthStore } from "@refinedev/core";
 
 export default function DisableTwoFactorDialog({

@@ -1,6 +1,6 @@
 import { useCustomMutation, useNotification } from "@refinedev/core";
 import { useCallback } from "react";
-import useApiUrl from "@/hooks/useApiUrl.js";
+import useApiUrl from "portal-shared/hooks/useApiUrl";
 import useSubscription from "@/hooks/useSubscription.js";
 import { SubscriptionBillingInfo } from "portal-shared/dataProviders/accountProvider";
 import { AxiosError } from "axios";
