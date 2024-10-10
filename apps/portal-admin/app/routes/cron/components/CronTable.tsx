@@ -76,10 +76,10 @@ const columns: ColumnDef<CronJob>[] = [
 
 export const CronTable: React.FC = () => {
   return (
-    <div className="container mx-auto py-10">
+    <>
       <h1 className="text-2xl font-bold mb-4">Cron Tasks</h1>
       <DataTable columns={columns} resource="cron/jobs" />
-    </div>
+    </>
   );
 };
 
