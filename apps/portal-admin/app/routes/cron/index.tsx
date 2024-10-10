@@ -1,4 +1,4 @@
-import { GeneralLayout } from "portal-shared/components/layout/GeneralLayout";
+import GeneralLayout from "@/components/layout/GeneralLayout";
 import { Authenticated } from "@refinedev/core";
 import CronTable from "./components/CronTable";
 

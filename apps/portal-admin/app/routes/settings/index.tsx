@@ -1,7 +1,7 @@
 import SettingsTable from "@/routes/settings/components/SettingsEditor";
 import { Authenticated } from "@refinedev/core";
 import { useState } from "react";
-import { GeneralLayout } from "portal-shared/components/layout/GeneralLayout";
+import GeneralLayout from "@/components/layout/GeneralLayout";
 import { Textarea } from "portal-shared/components/ui/textarea";
 import { Button } from "portal-shared/components/ui/button";
 
