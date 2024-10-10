@@ -18,7 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from "portal-shared/components/ui/form";
-import useApiUrl from "@/hooks/useApiUrl.js";
+import useApiUrl from "portal-shared/hooks/useApiUrl";
 import { OPTGenerateResponse } from "portal-shared/dataProviders/accountProvider";
 import QRCode from "qrcode";
 import * as OTPAuth from "otpauth";

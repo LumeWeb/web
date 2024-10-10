@@ -1,5 +1,5 @@
 import { useCustomMutation } from "@refinedev/core";
-import useApiUrl from "apps/portal-dashboard/app/hooks/useApiUrl.js";
+import useApiUrl from "portal-shared/hooks/useApiUrl";
 import { useCallback, useState } from "react";
 
 interface RequestPaymentMethodChangeResponse {

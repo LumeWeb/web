@@ -27,7 +27,8 @@ import { useAuthProvider } from "portal-shared/hooks/useAuthProvider";
 import { withTheme } from "portal-shared/hooks/useTheme";
 import { Skeleton } from "portal-shared/components/ui/skeleton";
 import restDataProvider from "@refinedev/simple-rest";
-import { SERVICE_ROUTE } from "@/routeConfig";
+import { useAppInitialization } from "@/hooks/useAppInitialization";
+import cronDataProvider from "@/dataProviders/cronProvider";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -61,12 +62,68 @@ function App() {
 }
 
 export function Root() {
+  const sdk = useSdk();
+
+  const authProvider = useAuthProvider(sdk);
+
+  const { isInitialized, providers, resources, setIsInitialized } =
+    useAppInitialization(sdk, authProvider);
+
+  const wrappedAuthProvider = useMemo(() => {
+    if (!authProvider) return null;
+    return {
+      ...authProvider,
+      login: async (params: any) => {
+        const result = await authProvider.login(params);
+        setIsInitialized(false); // Trigger re-initialization after login
+        return result;
+      },
+      logout: async (params: any) => {
+        const result = await authProvider.logout(params);
+        setIsInitialized(false); // Trigger re-initialization after logout
+        return result;
+      },
+    };
+  }, [authProvider, setIsInitialized]);
+
+  if (!isInitialized) {
+    return <SkeletonLoader />;
+  }
+
+  const resourceAuthHeaders = {
+    Authorization: `Bearer ${sdk?.account()?.jwtToken}`,
+  };
+
+  const allResources: ResourceProps[] = [
+    ...resources,
+    {
+      name: "cron",
+      meta: {
+        dataProviderName: "cron",
+        authHeaders: resourceAuthHeaders,
+      },
+    },
+  ];
+
   return (
     <Refine
+      authProvider={wrappedAuthProvider as AuthProvider}
       routerProvider={routerProvider}
+      dataProvider={{
+        ...providers,
+        default: createAccountProvider(
+          sdk!,
+          restDataProvider(
+            // @ts-ignore
+            sdk!.account()?.apiUrl?.replace(/\/+$/, "") + "/api",
+          ),
+        ),
+        cron: cronDataProvider,
+      }}
       notificationProvider={
         notificationProvider as unknown as NotificationProvider
       }
+      resources={allResources}
       options={{ disableTelemetry: true, warnWhenUnsavedChanges: true }}>
       <App />
     </Refine>

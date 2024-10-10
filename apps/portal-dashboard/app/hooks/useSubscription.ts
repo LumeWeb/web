@@ -1,6 +1,6 @@
 import { CustomResponse, HttpError, useCustom } from "@refinedev/core";
 import type { SubscriptionResponse } from "portal-shared/dataProviders/accountProvider";
-import useApiUrl from "@/hooks/useApiUrl.js";
+import useApiUrl from "portal-shared/hooks/useApiUrl";
 import {
   QueryObserverResult,
   RefetchOptions,

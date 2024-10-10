@@ -2,7 +2,7 @@ import { HttpError, useCustomMutation, useNotification } from "@refinedev/core";
 import { useCallback } from "react";
 import { SubscriptionPlan } from "portal-shared/dataProviders/accountProvider";
 import useSubscription from "@/hooks/useSubscription.js";
-import useApiUrl from "@/hooks/useApiUrl.js";
+import useApiUrl from "portal-shared/hooks/useApiUrl";
 
 import { useSubscriptionContext } from "@/routes/account/contexts/SubscriptionContext.js";
 

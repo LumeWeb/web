@@ -9,5 +9,5 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Login() {
-  return <LoginComponent socialLoginEnabled />;
+  return <LoginComponent showRegister={false} />;
 }

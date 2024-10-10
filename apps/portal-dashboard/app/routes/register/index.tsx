@@ -1,9 +1,9 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
 import { Button } from "portal-shared/components/ui/button";
-import lumeColorLogoPng from "@/images/lume-color-logo.png?url";
-import discordLogoPng from "@/images/discord-logo.png?url";
-import lumeBgPng from "@/images/lume-bg-register.png?url";
+import lumeColorLogoPng from "portal-shared/images/lume-color-logo.png?url";
+import discordLogoPng from "portal-shared/images/discord-logo.png?url";
+import lumeBgPng from "portal-shared/images/lume-bg-register.png?url";
 import { Field, FieldCheckbox } from "portal-shared/components/Forms";
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
@@ -12,7 +12,7 @@ import {
   AuthFormRequest,
   RegisterFormRequest,
 } from "portal-shared/dataProviders/authProvider";
-import InlineAuthLinkBanner from "@/components/InlineAuthLinkBanner";
+import InlineAuthLinkBanner from "portal-shared/components/InlineAuthLinkBanner";
 import LumeLogo from "portal-shared/components/LumeLogo";
 import { RegisterSchema } from "@/routes/register/schema";
 

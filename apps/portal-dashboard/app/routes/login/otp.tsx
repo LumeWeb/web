@@ -19,7 +19,7 @@ import {
 } from "portal-shared/components/ui/form";
 import { Input } from "portal-shared/components/ui/input";
 
-import { LoginParams } from "./components/LoginForm";
+import { LoginParams } from "portal-shared/components/routes/components/LoginForm";
 import schema from "./otp.schema";
 import { OTPFormRequest } from "portal-shared/dataProviders/authProvider";
 

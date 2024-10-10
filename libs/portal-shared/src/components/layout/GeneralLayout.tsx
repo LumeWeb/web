@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import type { Identity } from "@/dataProviders/authProvider";
 import useIsMobile from "@/hooks/useIsMobile";
 import { ThemeSwitcher } from "@/hooks/useTheme";
-import discordLogoPng from "apps/portal-dashboard/app/images/discord-logo.png?url";
-import lumeColorLogoPng from "apps/portal-dashboard/app/images/lume-color-logo.png?url";
+import discordLogoPng from "@/images/discord-logo.png?url";
+import lumeColorLogoPng from "@/images/lume-color-logo.png?url";
 import DesktopSidebar from "libs/portal-shared/src/components/layout/DesktopSidebar";
 import MobileSidebar from "libs/portal-shared/src/components/layout/MobileSidebar";
 import {
@@ -19,7 +19,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import EmailVerificationBanner from "apps/portal-dashboard/app/components/EmailVerificationBanner";
 
-export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
+interface GeneralLayoutProps {
+  children?: React.ReactNode;
+  showUploadForm?: boolean;
+}
+
+export function GeneralLayout({
+  children,
+  showUploadForm = true,
+}: GeneralLayoutProps) {
   const { data: identity } = useGetIdentity<Identity>();
   const { mutate: logout } = useLogout();
 
@@ -29,7 +37,11 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
     <>
       <EmailVerificationBanner />
       <div className="w-full h-full flex flex-col sm:flex-row">
-        {isMobile ? <MobileSidebar /> : <DesktopSidebar />}
+        {isMobile ? (
+          <MobileSidebar showUploadForm={showUploadForm} />
+        ) : (
+          <DesktopSidebar showUploadForm={showUploadForm} />
+        )}
         <div className="flex-1 overflow-y-auto p-4 sm:p-10">
           <div className="hidden sm:flex items-center gap-x-4 justify-end">
             <ThemeSwitcher />
@@ -88,4 +100,4 @@ export const GeneralLayout = ({ children }: React.PropsWithChildren) => {
       </div>
     </>
   );
-};
+}

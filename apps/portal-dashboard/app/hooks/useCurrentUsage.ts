@@ -1,5 +1,5 @@
 import { HttpError, useCustom } from "@refinedev/core";
-import useApiUrl from "@/hooks/useApiUrl.js";
+import useApiUrl from "portal-shared/hooks/useApiUrl";
 
 interface CurrentUsageData {
   storage: number;
