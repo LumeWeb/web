@@ -19,7 +19,7 @@
     "_id": "@lumeweb/portal-sdk@0.0.0",
     "dependencies": {
         "@lumeweb/s5-js": "workspace:*",
-        "axios": "^1.7.2",
+        "axios": "^1.7.4",
         "memize": "^2.1.0",
         "orval": "^7.0.1",
         "patch-package": "^8.0.0"
