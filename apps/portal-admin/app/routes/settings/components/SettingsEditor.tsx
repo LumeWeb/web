@@ -1,5 +1,4 @@
-import type React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "portal-shared/util/cn";
 import { TrashIcon } from "portal-shared/components/icons";
 import { Button } from "portal-shared/components/ui/button";
@@ -19,6 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from "portal-shared/components/ui/table";
+import { Textarea } from "portal-shared/components/ui/textarea";
+import { useUpdate } from "@refinedev/core";
+import { Alert, AlertDescription } from "portal-shared/components/ui/alert";
+import { SearchIcon } from "lucide-react";
 
 interface FlattenedField {
   key: string;
@@ -29,11 +32,12 @@ interface FlattenedField {
   schema: any;
 }
 
-interface JsonSchemaTableProps {
+interface EnhancedSettingsTableProps {
   schema: any;
   initialData: Record<string, any>;
   hiddenFields: string[];
   onDataChange: (data: Record<string, any>) => void;
+  onSearch: (searchTerm: string) => void;
 }
 
 const ArrayEditor: React.FC<{
@@ -42,10 +46,6 @@ const ArrayEditor: React.FC<{
 }> = ({ field, onChange }) => {
   const [newItemValue, setNewItemValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-
-  const handleItemChange = (newValue: any) => {
-    onChange(newValue, true);
-  };
 
   const addItem = () => {
     if (newItemValue) {
@@ -86,13 +86,7 @@ const ArrayEditor: React.FC<{
               className="bg-background w-full"
               placeholder="New item value"
             />
-            <Button
-              onClick={(e) => {
-                e.preventDefault();
-                addItem();
-              }}>
-              Add
-            </Button>
+            <Button onClick={addItem}>Add</Button>
           </div>
         </div>
       </PopoverContent>
@@ -138,17 +132,25 @@ const renderEditableValue = (
   }
 };
 
-const SettingsTable: React.FC<JsonSchemaTableProps> = ({
+const SettingsTable: React.FC<EnhancedSettingsTableProps> = ({
   schema,
   initialData,
   hiddenFields,
   onDataChange,
+  onSearch,
 }) => {
   const [flattenedData, setFlattenedData] = useState<FlattenedField[]>([]);
+  const [jsonText, setJsonText] = useState("");
+  const [jsonError, setJsonError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const { mutate: updateSetting } = useUpdate({
+    resource: "settings",
+  });
 
   useEffect(() => {
     const flattened = flattenObject(initialData, schema);
     setFlattenedData(flattened);
+    setJsonText(JSON.stringify(initialData, null, 2));
   }, [initialData, schema]);
 
   const flattenObject = (
@@ -187,23 +189,17 @@ const SettingsTable: React.FC<JsonSchemaTableProps> = ({
     const updatedData = [...flattenedData];
     updatedData[index] = { ...updatedData[index], value: newValue, isEdited };
 
-    const parts = updatedData[index].key.split(".");
-    while (parts.length > 1) {
-      parts.pop();
-      const parentKey = parts.join(".");
-      const parentIndex = updatedData.findIndex(
-        (field) => field.key === parentKey,
-      );
-      if (parentIndex !== -1) {
-        updatedData[parentIndex] = {
-          ...updatedData[parentIndex],
-          isEdited: true,
-        };
-      }
-    }
-
     setFlattenedData(updatedData);
-    onDataChange(unflattenObject(updatedData));
+    const unflattenedData = unflattenObject(updatedData);
+    onDataChange(unflattenedData);
+    setJsonText(JSON.stringify(unflattenedData, null, 2));
+
+    // Update individual setting
+    updateSetting({
+      resource: "settings",
+      id: updatedData[index].key,
+      values: { value: newValue },
+    });
   };
 
   const handleDisableToggle = (index: number) => {
@@ -253,43 +249,115 @@ const SettingsTable: React.FC<JsonSchemaTableProps> = ({
     );
   };
 
+  const handleJsonTextChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    setJsonText(event.target.value);
+    setJsonError("");
+  };
+
+  const applyJsonChanges = () => {
+    try {
+      const parsedData = JSON.parse(jsonText);
+      const flattened = flattenObject(parsedData, schema);
+      setFlattenedData(flattened);
+      onDataChange(parsedData);
+      setJsonError("");
+
+      // Update all settings
+      Object.entries(parsedData).forEach(([key, value]) => {
+        updateSetting({
+          resource: "settings",
+          id: key,
+          values: { value },
+        });
+      });
+    } catch (error) {
+      setJsonError("Invalid JSON: " + (error as Error).message);
+    }
+  };
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+    onSearch(term);
+  };
+
+  const filteredData = flattenedData.filter(
+    (field) =>
+      field.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      JSON.stringify(field.value)
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()),
+  );
+
   return (
-    <div className="border rounded-md">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/50 hover:bg-muted/50">
-            <TableHead className="font-bold">Command</TableHead>
-            <TableHead className="font-bold">Keybinding</TableHead>
-            <TableHead className="font-bold">When</TableHead>
-            <TableHead className="font-bold">Source</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {flattenedData.map(
-            (field, index) =>
-              !hiddenFields.includes(field.key) && (
-                <TableRow
-                  key={field.key}
-                  className={cn(
-                    "hover:bg-muted/50",
-                    index % 2 === 0 ? "bg-background" : "bg-muted/30",
-                  )}>
-                  <TableCell>{field.key}</TableCell>
-                  <TableCell>{renderEditableCell(field, index)}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {field.type}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    <Switch
-                      checked={!field.isDisabled}
-                      onCheckedChange={() => handleDisableToggle(index)}
-                    />
-                  </TableCell>
-                </TableRow>
-              ),
-          )}
-        </TableBody>
-      </Table>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="space-y-4">
+        <div className="relative">
+          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Search settings..."
+            value={searchTerm}
+            onChange={handleSearch}
+            className="w-full pl-10 pr-4 py-2 rounded-md bg-secondary"
+          />
+        </div>
+        <div className="border rounded-md overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50 hover:bg-muted/50">
+                <TableHead className="font-bold">Setting</TableHead>
+                <TableHead className="font-bold">Value</TableHead>
+                <TableHead className="font-bold">Type</TableHead>
+                <TableHead className="font-bold">Enabled</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredData.map(
+                (field, index) =>
+                  !hiddenFields.includes(field.key) && (
+                    <TableRow
+                      key={field.key}
+                      className={cn(
+                        "hover:bg-muted/50",
+                        index % 2 === 0 ? "bg-background" : "bg-muted/30",
+                      )}>
+                      <TableCell>{field.key}</TableCell>
+                      <TableCell>{renderEditableCell(field, index)}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {field.type}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        <Switch
+                          checked={!field.isDisabled}
+                          onCheckedChange={() => handleDisableToggle(index)}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ),
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">JSON Editor</h2>
+        <Textarea
+          value={jsonText}
+          onChange={handleJsonTextChange}
+          className="font-mono h-[calc(100vh-200px)] min-h-[300px] w-full"
+        />
+        {jsonError && (
+          <Alert variant="destructive">
+            <AlertDescription>{jsonError}</AlertDescription>
+          </Alert>
+        )}
+        <Button onClick={applyJsonChanges} className="w-full">
+          Apply JSON Changes
+        </Button>
+      </div>
     </div>
   );
 };
