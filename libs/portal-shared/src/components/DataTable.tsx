@@ -16,6 +16,7 @@ import { DataTablePagination } from "@/components/TablePagination";
 
 import "@tanstack/react-table";
 import { SkeletonLoader } from "@/components/SkeletonLoader";
+import type { Pagination } from "@refinedev/core/src/contexts/data/types";
 
 // @ts-ignore
 declare module "@tanstack/table-core" {
@@ -37,6 +38,7 @@ export interface DataTableProps<
   filters?: CrudFilters;
   permanentFilters?: CrudFilters;
   meta?: MetaQuery;
+  pagination?: Pagination;
 }
 
 export function DataTable<TData extends BaseRecord, TValue>({
@@ -49,6 +51,7 @@ export function DataTable<TData extends BaseRecord, TValue>({
   filters,
   permanentFilters,
   meta,
+  pagination,
 }: DataTableProps<TData, TValue>) {
   const table = useTable({
     columns,
@@ -65,6 +68,7 @@ export function DataTable<TData extends BaseRecord, TValue>({
         refetchIntervalInBackground: true,
         keepPreviousData: true,
       },
+      pagination,
     },
   });
 
