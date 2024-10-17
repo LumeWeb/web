@@ -1,27 +1,19 @@
-import React, { useEffect, useState } from "react";
-import { cn } from "portal-shared/util/cn";
-import { TrashIcon } from "portal-shared/components/icons";
-import { Button } from "portal-shared/components/ui/button";
-import { Checkbox } from "portal-shared/components/ui/checkbox";
+import React, { useState, useMemo, useEffect } from "react";
+import { createColumnHelper } from "@tanstack/react-table";
+import { CrudFilters, useList, useOne } from "@refinedev/core";
+import { DataTable } from "portal-shared/components/DataTable";
 import { Input } from "portal-shared/components/ui/input";
+import { Checkbox } from "portal-shared/components/ui/checkbox";
+import { Button } from "portal-shared/components/ui/button";
+import { Textarea } from "portal-shared/components/ui/textarea";
+import { Alert, AlertDescription } from "portal-shared/components/ui/alert";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "portal-shared/components/ui/popover";
-import { Switch } from "portal-shared/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "portal-shared/components/ui/table";
-import { Textarea } from "portal-shared/components/ui/textarea";
-import { useUpdate } from "@refinedev/core";
-import { Alert, AlertDescription } from "portal-shared/components/ui/alert";
-import { SearchIcon } from "lucide-react";
+import { TrashIcon, SearchIcon } from "lucide-react";
+import { SkeletonLoader } from "portal-shared/components/SkeletonLoader";
 
 interface FlattenedField {
   key: string;
@@ -32,13 +24,7 @@ interface FlattenedField {
   schema: any;
 }
 
-interface EnhancedSettingsTableProps {
-  schema: any;
-  initialData: Record<string, any>;
-  hiddenFields: string[];
-  onDataChange: (data: Record<string, any>) => void;
-  onSearch: (searchTerm: string) => void;
-}
+const columnHelper = createColumnHelper<FlattenedField>();
 
 const ArrayEditor: React.FC<{
   field: FlattenedField;
@@ -94,64 +80,16 @@ const ArrayEditor: React.FC<{
   );
 };
 
-const renderEditableValue = (
-  field: FlattenedField,
-  onChange: (newValue: any, isEdited: boolean) => void,
-) => {
-  switch (field.type) {
-    case "string":
-      return (
-        <Input
-          value={field.value}
-          className="h-9 border border-border/30 bg-background"
-          onChange={(e) => onChange(e.target.value, true)}
-        />
-      );
-    case "number":
-      return (
-        <Input
-          type="number"
-          value={field.value}
-          className="h-9 border border-border/30 bg-background"
-          onChange={(e) => onChange(Number(e.target.value), true)}
-        />
-      );
-    case "boolean":
-      return (
-        <Checkbox
-          checked={field.value}
-          onCheckedChange={(value) => onChange(value, true)}
-        />
-      );
-    case "array":
-      return <ArrayEditor field={field} onChange={onChange} />;
-    default:
-      return (
-        <span className="text-foreground">{JSON.stringify(field.value)}</span>
-      );
-  }
-};
-
-const SettingsTable: React.FC<EnhancedSettingsTableProps> = ({
-  schema,
-  initialData,
-  hiddenFields,
-  onDataChange,
-  onSearch,
-}) => {
+export const SettingsEditor: React.FC = () => {
   const [flattenedData, setFlattenedData] = useState<FlattenedField[]>([]);
   const [jsonText, setJsonText] = useState("");
   const [jsonError, setJsonError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const { mutate: updateSetting } = useUpdate({
-    resource: "settings",
-  });
 
-  useEffect(() => {
-    const flattened = flattenObject(initialData, schema);
-    setFlattenedData(flattened);
-    setJsonText(JSON.stringify(initialData, null, 2));
-  }, [initialData, schema]);
+  const { data: schemaData, isLoading: isSchemaLoading } = useOne({
+    resource: "settings",
+    id: "schema",
+  });
 
   const flattenObject = (
     obj: any,
@@ -181,44 +119,6 @@ const SettingsTable: React.FC<EnhancedSettingsTableProps> = ({
     }, []);
   };
 
-  const handleFieldChange = (
-    index: number,
-    newValue: any,
-    isEdited: boolean,
-  ) => {
-    const updatedData = [...flattenedData];
-    updatedData[index] = { ...updatedData[index], value: newValue, isEdited };
-
-    setFlattenedData(updatedData);
-    const unflattenedData = unflattenObject(updatedData);
-    onDataChange(unflattenedData);
-    setJsonText(JSON.stringify(unflattenedData, null, 2));
-
-    // Update individual setting
-    updateSetting({
-      resource: "settings",
-      id: updatedData[index].key,
-      values: { value: newValue },
-    });
-  };
-
-  const handleDisableToggle = (index: number) => {
-    const updatedData = [...flattenedData];
-    const currentField = updatedData[index];
-    const newDisabledState = !currentField.isDisabled;
-
-    currentField.isDisabled = newDisabledState;
-
-    const prefix = currentField.key + ".";
-    updatedData.forEach((field, i) => {
-      if (field.key.startsWith(prefix)) {
-        updatedData[i] = { ...field, isDisabled: newDisabledState };
-      }
-    });
-
-    setFlattenedData(updatedData);
-  };
-
   const unflattenObject = (flatData: FlattenedField[]): Record<string, any> => {
     const result: Record<string, any> = {};
     for (const item of flatData) {
@@ -237,17 +137,99 @@ const SettingsTable: React.FC<EnhancedSettingsTableProps> = ({
     return result;
   };
 
-  const renderEditableCell = (field: FlattenedField, index: number) => {
-    if (field.isDisabled) {
-      return (
-        <span className="text-foreground">{JSON.stringify(field.value)}</span>
-      );
-    }
-
-    return renderEditableValue(field, (newValue, isEdited) =>
-      handleFieldChange(index, newValue, isEdited),
+  const handleFieldChange = (key: string, newValue: any, isEdited: boolean) => {
+    const updatedData = flattenedData.map((field) =>
+      field.key === key ? { ...field, value: newValue, isEdited } : field,
     );
+
+    setFlattenedData(updatedData);
+    const unflattenedData = unflattenObject(updatedData);
+    setJsonText(JSON.stringify(unflattenedData, null, 2));
   };
+
+  const handleDisableToggle = (key: string) => {
+    const updatedData = flattenedData.map((field) => {
+      if (field.key === key || field.key.startsWith(key + ".")) {
+        return { ...field, isDisabled: !field.isDisabled };
+      }
+      return field;
+    });
+
+    setFlattenedData(updatedData);
+    const unflattenedData = unflattenObject(updatedData);
+  };
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("key", {
+        header: "Setting",
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor("value", {
+        header: "Value",
+        cell: (info) => {
+          const { key, value, type, isDisabled } = info.row.original;
+          if (isDisabled) return <span>{JSON.stringify(value)}</span>;
+
+          switch (type) {
+            case "string":
+              return (
+                <Input
+                  value={value}
+                  onChange={(e) => handleFieldChange(key, e.target.value, true)}
+                  className="h-9 border border-border/30 bg-background"
+                />
+              );
+            case "number":
+              return (
+                <Input
+                  type="number"
+                  value={value}
+                  onChange={(e) =>
+                    handleFieldChange(key, Number(e.target.value), true)
+                  }
+                  className="h-9 border border-border/30 bg-background"
+                />
+              );
+            case "boolean":
+              return (
+                <Checkbox
+                  checked={value}
+                  onCheckedChange={(checked) =>
+                    handleFieldChange(key, checked, true)
+                  }
+                />
+              );
+            case "array":
+              return (
+                <ArrayEditor
+                  field={info.row.original}
+                  onChange={(newValue, isEdited) =>
+                    handleFieldChange(key, newValue, isEdited)
+                  }
+                />
+              );
+            default:
+              return <span>{JSON.stringify(value)}</span>;
+          }
+        },
+      }),
+      columnHelper.accessor("type", {
+        header: "Type",
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor("isDisabled", {
+        header: "Enabled",
+        cell: (info) => (
+          <Checkbox
+            checked={!info.getValue()}
+            onCheckedChange={() => handleDisableToggle(info.row.original.key)}
+          />
+        ),
+      }),
+    ],
+    [],
+  );
 
   const handleJsonTextChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>,
@@ -259,19 +241,9 @@ const SettingsTable: React.FC<EnhancedSettingsTableProps> = ({
   const applyJsonChanges = () => {
     try {
       const parsedData = JSON.parse(jsonText);
-      const flattened = flattenObject(parsedData, schema);
+      const flattened = flattenObject(parsedData, schemaData!.data);
       setFlattenedData(flattened);
-      onDataChange(parsedData);
       setJsonError("");
-
-      // Update all settings
-      Object.entries(parsedData).forEach(([key, value]) => {
-        updateSetting({
-          resource: "settings",
-          id: key,
-          values: { value },
-        });
-      });
     } catch (error) {
       setJsonError("Invalid JSON: " + (error as Error).message);
     }
@@ -280,16 +252,21 @@ const SettingsTable: React.FC<EnhancedSettingsTableProps> = ({
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
     setSearchTerm(term);
-    onSearch(term);
   };
 
-  const filteredData = flattenedData.filter(
-    (field) =>
-      field.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      JSON.stringify(field.value)
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()),
-  );
+  if (isSchemaLoading) {
+    return <SkeletonLoader />;
+  }
+
+  const filters: CrudFilters = [];
+
+  if (searchTerm) {
+    filters.push({
+      field: "key",
+      operator: "contains",
+      value: searchTerm,
+    });
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -304,43 +281,7 @@ const SettingsTable: React.FC<EnhancedSettingsTableProps> = ({
             className="w-full pl-10 pr-4 py-2 rounded-md bg-secondary"
           />
         </div>
-        <div className="border rounded-md overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50 hover:bg-muted/50">
-                <TableHead className="font-bold">Setting</TableHead>
-                <TableHead className="font-bold">Value</TableHead>
-                <TableHead className="font-bold">Type</TableHead>
-                <TableHead className="font-bold">Enabled</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredData.map(
-                (field, index) =>
-                  !hiddenFields.includes(field.key) && (
-                    <TableRow
-                      key={field.key}
-                      className={cn(
-                        "hover:bg-muted/50",
-                        index % 2 === 0 ? "bg-background" : "bg-muted/30",
-                      )}>
-                      <TableCell>{field.key}</TableCell>
-                      <TableCell>{renderEditableCell(field, index)}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {field.type}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        <Switch
-                          checked={!field.isDisabled}
-                          onCheckedChange={() => handleDisableToggle(index)}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ),
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        <DataTable columns={columns} resource={"settings"} filters={filters} />
       </div>
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">JSON Editor</h2>
@@ -361,5 +302,3 @@ const SettingsTable: React.FC<EnhancedSettingsTableProps> = ({
     </div>
   );
 };
-
-export default SettingsTable;

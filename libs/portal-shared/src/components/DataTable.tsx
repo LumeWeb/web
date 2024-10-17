@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DataTablePagination } from "@/components/TablePagination";
 
 import "@tanstack/react-table";
+import { SkeletonLoader } from "@/components/SkeletonLoader";
 
 // @ts-ignore
 declare module "@tanstack/table-core" {
@@ -92,6 +93,17 @@ export function DataTable<TData extends BaseRecord, TValue>({
   const initialLoading = table.refineCore.tableQueryResult.isInitialLoading;
   const rows = initialLoading ? loadingRows : table.getRowModel().rows;
 
+  if (initialLoading) {
+    return (
+      <SkeletonLoader
+        layout="table"
+        table={table}
+        showHeader
+        className={className}
+      />
+    );
+  }
+
   return (
     <>
       <Table className={className}>
@@ -150,7 +162,7 @@ export function DataTable<TData extends BaseRecord, TValue>({
           )}
         </TableBody>
       </Table>
-      {!table.refineCore.tableQueryResult.isLoading && (
+      {!table?.refineCore.tableQueryResult.isLoading && (
         <DataTablePagination table={table} />
       )}
     </>
