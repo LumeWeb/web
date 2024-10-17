@@ -58,7 +58,7 @@ export function DataTable<TData extends BaseRecord, TValue>({
         permanent: permanentFilters,
       },
       meta,
-      dataProviderName: dataProviderName || "default",
+      dataProviderName: dataProviderName,
       // @ts-ignore
       queryOptions: {
         refetchInterval: autoRefresh ? autoRefreshInterval : undefined,
@@ -72,26 +72,8 @@ export function DataTable<TData extends BaseRecord, TValue>({
     table.refineCore.setFilters(filters || []);
   }, [filters]);
 
-  const loadingRows = useMemo(
-    () =>
-      Array(4)
-        .fill({})
-        .map(() => ({
-          getIsSelected: () => false,
-          getVisibleCells: () =>
-            columns.map(() => ({
-              column: {
-                columnDef: {
-                  cell: <Skeleton className="h-4 w-full bg-foreground/30" />,
-                },
-              },
-              getContext: () => null,
-            })),
-        })),
-    [],
-  );
   const initialLoading = table.refineCore.tableQueryResult.isInitialLoading;
-  const rows = initialLoading ? loadingRows : table.getRowModel().rows;
+  const rows = initialLoading ? [] : table.getRowModel().rows;
 
   if (initialLoading) {
     return (
