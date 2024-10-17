@@ -1,4 +1,10 @@
-import React, { useState, useMemo, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+  useEffect,
+} from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { CrudFilters, useOne } from "@refinedev/core";
 import { DataTable } from "portal-shared/components/DataTable";
@@ -14,6 +20,8 @@ import {
 } from "portal-shared/components/ui/popover";
 import { TrashIcon, SearchIcon, XIcon } from "lucide-react";
 import { SkeletonLoader } from "portal-shared/components/SkeletonLoader";
+import Ajv, { JSONSchemaType } from "ajv/dist/2020";
+import type { AnySchema } from "ajv/lib/types";
 
 interface FlattenedField {
   key: string;
@@ -86,14 +94,14 @@ export const SettingsEditor: React.FC = () => {
   const [jsonError, setJsonError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<CrudFilters>([]);
-  const invalidateRef = useRef<(() => void) | null>(null);
+  const ajv = useRef(new Ajv());
 
-  const { data: schemaData, isLoading: isSchemaLoading } = useOne({
+  const { data: schemaData, isLoading: isSchemaLoading } = useOne<AnySchema>({
     resource: "settings",
     id: "schema",
   });
 
-  const flattenObject = useCallback(
+  /*  const flattenObject = useCallback(
     (obj: any, schema: any, prefix = ""): FlattenedField[] => {
       return Object.keys(obj).reduce((acc: FlattenedField[], k) => {
         const pre = prefix.length ? prefix + "." : "";
@@ -118,9 +126,9 @@ export const SettingsEditor: React.FC = () => {
       }, []);
     },
     [],
-  );
+  );*/
 
-  const unflattenObject = useCallback(
+  /*const unflattenObject = useCallback(
     (flatData: FlattenedField[]): Record<string, any> => {
       const result: Record<string, any> = {};
       for (const item of flatData) {
@@ -139,16 +147,16 @@ export const SettingsEditor: React.FC = () => {
       return result;
     },
     [],
-  );
+  );*/
 
-  const handleFieldChange = useCallback(
+  /*  const handleFieldChange = useCallback(
     (key: string, newValue: any, isEdited: boolean) => {
       setFlattenedData((prevData) =>
         prevData.map((field) =>
           field.key === key ? { ...field, value: newValue, isEdited } : field,
         ),
       );
-      setJsonText((prevText) => {
+      setJsonText(() => {
         const updatedData = unflattenObject(
           flattenedData.map((field) =>
             field.key === key ? { ...field, value: newValue, isEdited } : field,
@@ -158,32 +166,7 @@ export const SettingsEditor: React.FC = () => {
       });
     },
     [flattenedData, unflattenObject],
-  );
-
-  const handleDisableToggle = useCallback(
-    (key: string) => {
-      setFlattenedData((prevData) =>
-        prevData.map((field) => {
-          if (field.key === key || field.key.startsWith(key + ".")) {
-            return { ...field, isDisabled: !field.isDisabled };
-          }
-          return field;
-        }),
-      );
-      setJsonText((prevText) => {
-        const updatedData = unflattenObject(
-          flattenedData.map((field) => {
-            if (field.key === key || field.key.startsWith(key + ".")) {
-              return { ...field, isDisabled: !field.isDisabled };
-            }
-            return field;
-          }),
-        );
-        return JSON.stringify(updatedData, null, 2);
-      });
-    },
-    [flattenedData, unflattenObject],
-  );
+  );*/
 
   const updateFilters = useCallback((term: string) => {
     if (term) {
@@ -197,8 +180,6 @@ export const SettingsEditor: React.FC = () => {
     } else {
       setFilters([]);
     }
-
-    invalidateRef.current?.();
   }, []);
 
   const handleSearch = useCallback(
@@ -213,7 +194,7 @@ export const SettingsEditor: React.FC = () => {
   const clearSearch = useCallback(() => {
     setSearchTerm("");
     updateFilters("");
-  }, [updateFilters]);
+  }, [updateFilters]); /*
 
   const handleJsonTextChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -232,7 +213,45 @@ export const SettingsEditor: React.FC = () => {
     } catch (error) {
       setJsonError("Invalid JSON: " + (error as Error).message);
     }
-  }, [jsonText, schemaData, flattenObject]);
+  }, [jsonText, schemaData, flattenObject]);*/
+
+  const getSchemaForKey = useCallback(
+    (key: string): JSONSchemaType<unknown> | null => {
+      const schema = ajv.current.getSchema("settings")!.schema;
+      const parts = key.split(".");
+      let currentSchema: JSONSchemaType<unknown> = schema!;
+
+      for (const part of parts) {
+        if (
+          currentSchema.type === "object" &&
+          currentSchema.properties &&
+          part in currentSchema.properties
+        ) {
+          currentSchema = currentSchema.properties[
+            part
+          ] as JSONSchemaType<unknown>;
+        } else if (currentSchema.type === "array" && currentSchema.items) {
+          // If it's an array, we need to handle numeric indices
+          if (/^\d+$/.test(part)) {
+            // If the part is a number, it's an array index, so we stay on the items schema
+            currentSchema = Array.isArray(currentSchema.items)
+              ? (currentSchema.items[
+                  Number(part)
+                ] as JSONSchemaType<unknown>) || currentSchema.items[0]
+              : currentSchema.items;
+          } else {
+            // If it's not a number, we're dealing with an object inside the array
+            currentSchema = currentSchema.items;
+          }
+        } else {
+          return null;
+        }
+      }
+
+      return currentSchema;
+    },
+    [],
+  );
 
   const columns = useMemo(
     () => [
@@ -243,10 +262,11 @@ export const SettingsEditor: React.FC = () => {
       columnHelper.accessor("value", {
         header: "Value",
         cell: (info) => {
-          const { key, value, type, isDisabled } = info.row.original;
-          if (isDisabled) return <span>{JSON.stringify(value)}</span>;
+          const { key, value } = info.row.original;
+          const fieldSchema = getSchemaForKey(key);
+          const fieldType = fieldSchema?.type || typeof value;
 
-          switch (type) {
+          switch (fieldType) {
             case "string":
               return (
                 <Input
@@ -289,17 +309,29 @@ export const SettingsEditor: React.FC = () => {
           }
         },
       }),
-      columnHelper.accessor("type", {
-        header: "Type",
-        cell: (info) => info.getValue(),
-      }),
+      columnHelper.accessor(
+        (row) => {
+          const fieldSchema = getSchemaForKey(row.key);
+          return fieldSchema?.type || typeof row.value;
+        },
+        {
+          id: "type",
+          header: "Type",
+          cell: (info) => info.getValue(),
+        },
+      ),
     ],
-    [handleFieldChange, handleDisableToggle],
+    [getSchemaForKey],
   );
 
-  const forceInvalidate = useCallback((cb: () => void) => {
-    invalidateRef.current = cb;
-  }, []);
+  useEffect(() => {
+    if (schemaData?.data) {
+      ajv.current.addSchema(
+        schemaData.data as unknown as AnySchema,
+        "settings",
+      );
+    }
+  }, [isSchemaLoading]);
 
   if (isSchemaLoading) {
     return <SkeletonLoader />;
@@ -327,18 +359,13 @@ export const SettingsEditor: React.FC = () => {
             </Button>
           )}
         </div>
-        <DataTable
-          columns={columns}
-          resource="settings"
-          filters={filters}
-          forceInvalidate={forceInvalidate}
-        />
+        <DataTable columns={columns} resource="settings" filters={filters} />
       </div>
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">JSON Editor</h2>
         <Textarea
           value={jsonText}
-          onChange={handleJsonTextChange}
+          /*          onChange={handleJsonTextChange}*/
           className="font-mono h-[calc(100vh-200px)] min-h-[300px] w-full"
         />
         {jsonError && (
@@ -346,7 +373,9 @@ export const SettingsEditor: React.FC = () => {
             <AlertDescription>{jsonError}</AlertDescription>
           </Alert>
         )}
-        <Button onClick={applyJsonChanges} className="w-full">
+        <Button
+          /*          onClick={applyJsonChanges}*/
+          className="w-full">
           Apply JSON Changes
         </Button>
       </div>

@@ -37,7 +37,6 @@ export interface DataTableProps<
   filters?: CrudFilters;
   permanentFilters?: CrudFilters;
   meta?: MetaQuery;
-  forceInvalidate?: (cb: () => void) => void;
 }
 
 export function DataTable<TData extends BaseRecord, TValue>({
@@ -50,7 +49,6 @@ export function DataTable<TData extends BaseRecord, TValue>({
   filters,
   permanentFilters,
   meta,
-  forceInvalidate,
 }: DataTableProps<TData, TValue>) {
   const table = useTable({
     columns,
@@ -73,12 +71,6 @@ export function DataTable<TData extends BaseRecord, TValue>({
   useEffect(() => {
     table.refineCore.setFilters(filters || []);
   }, [filters]);
-
-  useEffect(() => {
-    forceInvalidate?.(() => {
-      table.refineCore.tableQueryResult.refetch();
-    });
-  }, [forceInvalidate]);
 
   const initialLoading = table.refineCore.tableQueryResult.isInitialLoading;
   const rows = initialLoading ? [] : table.getRowModel().rows;
