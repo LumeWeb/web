@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useRef } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { CrudFilters, useList, useOne } from "@refinedev/core";
+import { CrudFilters, useOne } from "@refinedev/core";
 import { DataTable } from "portal-shared/components/DataTable";
 import { Input } from "portal-shared/components/ui/input";
 import { Checkbox } from "portal-shared/components/ui/checkbox";
@@ -12,7 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "portal-shared/components/ui/popover";
-import { TrashIcon, SearchIcon } from "lucide-react";
+import { TrashIcon, SearchIcon, XIcon } from "lucide-react";
 import { SkeletonLoader } from "portal-shared/components/SkeletonLoader";
 
 interface FlattenedField {
@@ -85,79 +85,154 @@ export const SettingsEditor: React.FC = () => {
   const [jsonText, setJsonText] = useState("");
   const [jsonError, setJsonError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState<CrudFilters>([]);
+  const invalidateRef = useRef<(() => void) | null>(null);
 
   const { data: schemaData, isLoading: isSchemaLoading } = useOne({
     resource: "settings",
     id: "schema",
   });
 
-  const flattenObject = (
-    obj: any,
-    schema: any,
-    prefix = "",
-  ): FlattenedField[] => {
-    return Object.keys(obj).reduce((acc: FlattenedField[], k) => {
-      const pre = prefix.length ? prefix + "." : "";
-      const currentSchema = schema.properties?.[k] || schema.items;
-      if (
-        typeof obj[k] === "object" &&
-        obj[k] !== null &&
-        !Array.isArray(obj[k])
-      ) {
-        acc.push(...flattenObject(obj[k], currentSchema, pre + k));
-      } else {
-        acc.push({
-          key: pre + k,
-          value: obj[k],
-          type: Array.isArray(obj[k]) ? "array" : typeof obj[k],
-          isEdited: false,
-          isDisabled: false,
-          schema: currentSchema,
-        });
-      }
-      return acc;
-    }, []);
-  };
-
-  const unflattenObject = (flatData: FlattenedField[]): Record<string, any> => {
-    const result: Record<string, any> = {};
-    for (const item of flatData) {
-      if (!item.isDisabled) {
-        let temp = result;
-        const keys = item.key.split(".");
-        for (let i = 0; i < keys.length - 1; i++) {
-          if (!(keys[i] in temp)) {
-            temp[keys[i]] = {};
-          }
-          temp = temp[keys[i]];
+  const flattenObject = useCallback(
+    (obj: any, schema: any, prefix = ""): FlattenedField[] => {
+      return Object.keys(obj).reduce((acc: FlattenedField[], k) => {
+        const pre = prefix.length ? prefix + "." : "";
+        const currentSchema = schema.properties?.[k] || schema.items;
+        if (
+          typeof obj[k] === "object" &&
+          obj[k] !== null &&
+          !Array.isArray(obj[k])
+        ) {
+          acc.push(...flattenObject(obj[k], currentSchema, pre + k));
+        } else {
+          acc.push({
+            key: pre + k,
+            value: obj[k],
+            type: Array.isArray(obj[k]) ? "array" : typeof obj[k],
+            isEdited: false,
+            isDisabled: false,
+            schema: currentSchema,
+          });
         }
-        temp[keys[keys.length - 1]] = item.value;
+        return acc;
+      }, []);
+    },
+    [],
+  );
+
+  const unflattenObject = useCallback(
+    (flatData: FlattenedField[]): Record<string, any> => {
+      const result: Record<string, any> = {};
+      for (const item of flatData) {
+        if (!item.isDisabled) {
+          let temp = result;
+          const keys = item.key.split(".");
+          for (let i = 0; i < keys.length - 1; i++) {
+            if (!(keys[i] in temp)) {
+              temp[keys[i]] = {};
+            }
+            temp = temp[keys[i]];
+          }
+          temp[keys[keys.length - 1]] = item.value;
+        }
       }
+      return result;
+    },
+    [],
+  );
+
+  const handleFieldChange = useCallback(
+    (key: string, newValue: any, isEdited: boolean) => {
+      setFlattenedData((prevData) =>
+        prevData.map((field) =>
+          field.key === key ? { ...field, value: newValue, isEdited } : field,
+        ),
+      );
+      setJsonText((prevText) => {
+        const updatedData = unflattenObject(
+          flattenedData.map((field) =>
+            field.key === key ? { ...field, value: newValue, isEdited } : field,
+          ),
+        );
+        return JSON.stringify(updatedData, null, 2);
+      });
+    },
+    [flattenedData, unflattenObject],
+  );
+
+  const handleDisableToggle = useCallback(
+    (key: string) => {
+      setFlattenedData((prevData) =>
+        prevData.map((field) => {
+          if (field.key === key || field.key.startsWith(key + ".")) {
+            return { ...field, isDisabled: !field.isDisabled };
+          }
+          return field;
+        }),
+      );
+      setJsonText((prevText) => {
+        const updatedData = unflattenObject(
+          flattenedData.map((field) => {
+            if (field.key === key || field.key.startsWith(key + ".")) {
+              return { ...field, isDisabled: !field.isDisabled };
+            }
+            return field;
+          }),
+        );
+        return JSON.stringify(updatedData, null, 2);
+      });
+    },
+    [flattenedData, unflattenObject],
+  );
+
+  const updateFilters = useCallback((term: string) => {
+    if (term) {
+      setFilters([
+        {
+          field: "key",
+          operator: "contains",
+          value: term,
+        },
+      ]);
+    } else {
+      setFilters([]);
     }
-    return result;
-  };
 
-  const handleFieldChange = (key: string, newValue: any, isEdited: boolean) => {
-    const updatedData = flattenedData.map((field) =>
-      field.key === key ? { ...field, value: newValue, isEdited } : field,
-    );
+    invalidateRef.current?.();
+  }, []);
 
-    setFlattenedData(updatedData);
-    const unflattenedData = unflattenObject(updatedData);
-    setJsonText(JSON.stringify(unflattenedData, null, 2));
-  };
+  const handleSearch = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const term = e.target.value;
+      setSearchTerm(term);
+      updateFilters(term);
+    },
+    [updateFilters],
+  );
 
-  const handleDisableToggle = (key: string) => {
-    const updatedData = flattenedData.map((field) => {
-      if (field.key === key || field.key.startsWith(key + ".")) {
-        return { ...field, isDisabled: !field.isDisabled };
-      }
-      return field;
-    });
+  const clearSearch = useCallback(() => {
+    setSearchTerm("");
+    updateFilters("");
+  }, [updateFilters]);
 
-    setFlattenedData(updatedData);
-    const unflattenedData = unflattenObject(updatedData);
-  };
+  const handleJsonTextChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setJsonText(event.target.value);
+      setJsonError("");
+    },
+    [],
+  );
+
+  const applyJsonChanges = useCallback(() => {
+    try {
+      const parsedData = JSON.parse(jsonText);
+      const flattened = flattenObject(parsedData, schemaData!.data);
+      setFlattenedData(flattened);
+      setJsonError("");
+    } catch (error) {
+      setJsonError("Invalid JSON: " + (error as Error).message);
+    }
+  }, [jsonText, schemaData, flattenObject]);
 
   const columns = useMemo(
     () => [
@@ -218,54 +293,16 @@ export const SettingsEditor: React.FC = () => {
         header: "Type",
         cell: (info) => info.getValue(),
       }),
-      columnHelper.accessor("isDisabled", {
-        header: "Enabled",
-        cell: (info) => (
-          <Checkbox
-            checked={!info.getValue()}
-            onCheckedChange={() => handleDisableToggle(info.row.original.key)}
-          />
-        ),
-      }),
     ],
-    [],
+    [handleFieldChange, handleDisableToggle],
   );
 
-  const handleJsonTextChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>,
-  ) => {
-    setJsonText(event.target.value);
-    setJsonError("");
-  };
-
-  const applyJsonChanges = () => {
-    try {
-      const parsedData = JSON.parse(jsonText);
-      const flattened = flattenObject(parsedData, schemaData!.data);
-      setFlattenedData(flattened);
-      setJsonError("");
-    } catch (error) {
-      setJsonError("Invalid JSON: " + (error as Error).message);
-    }
-  };
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const term = e.target.value;
-    setSearchTerm(term);
-  };
+  const forceInvalidate = useCallback((cb: () => void) => {
+    invalidateRef.current = cb;
+  }, []);
 
   if (isSchemaLoading) {
     return <SkeletonLoader />;
-  }
-
-  const filters: CrudFilters = [];
-
-  if (searchTerm) {
-    filters.push({
-      field: "key",
-      operator: "contains",
-      value: searchTerm,
-    });
   }
 
   return (
@@ -278,10 +315,24 @@ export const SettingsEditor: React.FC = () => {
             placeholder="Search settings..."
             value={searchTerm}
             onChange={handleSearch}
-            className="w-full pl-10 pr-4 py-2 rounded-md bg-secondary"
+            className="w-full pl-10 pr-10 py-2 rounded-md bg-secondary"
           />
+          {searchTerm && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2"
+              onClick={clearSearch}>
+              <XIcon className="h-4 w-4" />
+            </Button>
+          )}
         </div>
-        <DataTable columns={columns} resource={"settings"} filters={filters} />
+        <DataTable
+          columns={columns}
+          resource="settings"
+          filters={filters}
+          forceInvalidate={forceInvalidate}
+        />
       </div>
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">JSON Editor</h2>
