@@ -100,6 +100,7 @@ export function Root() {
     {
       name: "cron",
       list: "cron/jobs",
+      show: "cron/jobs/:id",
       meta: {
         dataProviderName: "admin",
         authHeaders: resourceAuthHeaders,
