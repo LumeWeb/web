@@ -43,6 +43,7 @@ import {
   DialogTitle,
 } from "portal-shared/components/ui/dialog";
 import { DialogHeader } from "apps/web3.news/app/components/ui/dialog";
+import GoDurationInput from "@/routes/settings/components/GoDurationInput";
 
 interface SettingField {
   key: string;
@@ -282,7 +283,11 @@ export const SettingsEditor: React.FC = () => {
           const { key } = row.original;
 
           const fieldSchema = getSchemaForKey(key);
-          const type = fieldSchema?.type || typeof row.value;
+          let type = fieldSchema?.type || typeof row.original.value;
+
+          if (type === "string" && isGoDuration(row.original.value)) {
+            type = "duration";
+          }
 
           switch (type) {
             case "string":
@@ -290,6 +295,8 @@ export const SettingsEditor: React.FC = () => {
                 <FormField
                   control={form.control}
                   name={key}
+                  disabled={!editableFields.has(key)}
+                  defaultValue={row.original.value}
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -308,6 +315,8 @@ export const SettingsEditor: React.FC = () => {
                 <FormField
                   control={form.control}
                   name={key}
+                  disabled={!editableFields.has(key)}
+                  defaultValue={row.original.value}
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -327,6 +336,8 @@ export const SettingsEditor: React.FC = () => {
                 <FormField
                   control={form.control}
                   name={key}
+                  disabled={!editableFields.has(key)}
+                  defaultValue={row.original.value}
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
                       <FormControl>
@@ -342,6 +353,23 @@ export const SettingsEditor: React.FC = () => {
             case "array":
               return (
                 <ArrayEditor field={row.original} form={form} name={key} />
+              );
+            case "duration":
+              return (
+                <FormField
+                  control={form.control}
+                  name={key}
+                  disabled={!editableFields.has(key)}
+                  defaultValue={row.original.value}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <GoDurationInput {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               );
             default:
               return <span>{JSON.stringify(row.original.value)}</span>;
@@ -525,4 +553,9 @@ export const SettingsEditor: React.FC = () => {
       </Dialog>
     </Form>
   );
+};
+const isGoDuration = (value) => {
+  // This regex matches common Go duration patterns
+  const goDurationRegex = /^(\d+(\.\d+)?[nµumsh])+$/;
+  return typeof value === "string" && goDurationRegex.test(value);
 };
