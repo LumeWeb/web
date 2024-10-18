@@ -36,6 +36,13 @@ import { flatten, unflatten } from "flat";
 import Ajv, { JSONSchemaType } from "ajv/dist/2020";
 import type { AnySchema } from "ajv/lib/types";
 import { JsonSchema } from "json-schema-to-zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "portal-shared/components/ui/dialog";
+import { DialogHeader } from "apps/web3.news/app/components/ui/dialog";
 
 interface SettingField {
   key: string;
@@ -128,6 +135,8 @@ export const SettingsEditor: React.FC = () => {
   const [jsonData, setJsonData] = useState<any>({});
   const [jsonEditorValue, setJsonEditorValue] = useState("");
   const [editableFields, setEditableFields] = useState<Set<string>>(new Set());
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const ajv = useRef(new Ajv());
 
@@ -381,7 +390,8 @@ export const SettingsEditor: React.FC = () => {
 
       if (!valid) {
         console.error("JSON validation failed:", ajv.current.errors);
-        // You might want to show an error message to the user here
+        setErrorMessage(JSON.stringify(ajv.current.errors, null, 2));
+        setIsErrorModalOpen(true);
         return;
       }
 
@@ -433,7 +443,8 @@ export const SettingsEditor: React.FC = () => {
       refetchSettings();
     } catch (error) {
       console.error("Failed to parse JSON:", error);
-      // You might want to show an error message to the user here
+      setErrorMessage(`Failed to parse JSON: ${error.message}`);
+      setIsErrorModalOpen(true);
     }
   };
 
@@ -477,7 +488,6 @@ export const SettingsEditor: React.FC = () => {
               value={jsonEditorValue}
               onChange={handleJsonEditorChange}
               className="font-mono h-[calc(100vh-200px)] min-h-[300px] w-full"
-              readOnly
             />
             <Button
               onClick={applyJsonChanges}
@@ -488,6 +498,18 @@ export const SettingsEditor: React.FC = () => {
           </div>
         </div>
       </form>
+      <Dialog open={isErrorModalOpen} onOpenChange={setIsErrorModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>JSON Error</DialogTitle>
+            <DialogDescription>
+              There was an error processing your JSON input:
+            </DialogDescription>
+          </DialogHeader>
+          {errorMessage}
+          <Button onClick={() => setIsErrorModalOpen(false)}>Close</Button>
+        </DialogContent>
+      </Dialog>
     </Form>
   );
 };
