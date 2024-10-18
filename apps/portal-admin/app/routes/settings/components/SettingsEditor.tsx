@@ -6,7 +6,7 @@ import React, {
   useState,
 } from "react";
 import { useForm } from "@refinedev/react-hook-form";
-import { CrudFilters, useList, useOne } from "@refinedev/core";
+import { CrudFilters, useList, useOne, useUpdate } from "@refinedev/core";
 import { DataTable } from "portal-shared/components/DataTable";
 import { Input } from "portal-shared/components/ui/input";
 import { Checkbox } from "portal-shared/components/ui/checkbox";
@@ -32,7 +32,7 @@ import { z } from "zod";
 import { createColumnHelper } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UseFormReturn } from "react-hook-form";
-import { unflatten } from "flat";
+import { flatten, unflatten } from "flat";
 import Ajv, { JSONSchemaType } from "ajv/dist/2020";
 import type { AnySchema } from "ajv/lib/types";
 import { JsonSchema } from "json-schema-to-zod/dist/types/Types";
@@ -126,6 +126,7 @@ export const SettingsEditor: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<CrudFilters>([]);
   const [jsonData, setJsonData] = useState<any>({});
+  const [jsonEditorValue, setJsonEditorValue] = useState("");
 
   const ajv = useRef(new Ajv());
 
@@ -141,6 +142,10 @@ export const SettingsEditor: React.FC = () => {
       resource: "settings",
     });
 
+  const { mutate: updateSetting } = useUpdate({
+    resource: "settings",
+  });
+
   useEffect(() => {
     if (settingsData?.data) {
       const settings = settingsData.data.reduce((acc: any, setting: any) => {
@@ -148,7 +153,9 @@ export const SettingsEditor: React.FC = () => {
         return acc;
       }, {});
 
-      setJsonData(unflatten(settings));
+      const unflattened = unflatten(settings);
+      setJsonData(unflattened);
+      setJsonEditorValue(JSON.stringify(unflattened, null, 2));
     }
   }, [settingsData?.data]);
 
@@ -355,6 +362,58 @@ export const SettingsEditor: React.FC = () => {
     updateFilters("");
   }, [updateFilters]);
 
+  const handleJsonEditorChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    setJsonEditorValue(e.target.value);
+  };
+
+  const applyJsonChanges = () => {
+    try {
+      const newJsonData = JSON.parse(jsonEditorValue);
+      const valid = ajv.current.validate("settings", newJsonData);
+
+      if (!valid) {
+        console.error("JSON validation failed:", ajv.current.errors);
+        // You might want to show an error message to the user here
+        return;
+      }
+
+      type FlattenData = Record<string, any>;
+
+      const flattenedNewData = flatten<any, FlattenData>(newJsonData);
+      const flattenedOldData = flatten<any, FlattenData>(jsonData);
+
+      const changedKeys = Object.keys(flattenedNewData).filter(
+        (key) => flattenedNewData[key] !== flattenedOldData[key],
+      );
+
+      changedKeys.forEach((key) => {
+        updateSetting(
+          {
+            resource: "settings",
+            id: key,
+            values: { value: flattenedNewData[key] },
+          },
+          {
+            onSuccess: () => {
+              console.log(`Successfully updated ${key}`);
+            },
+            onError: (error) => {
+              console.error(`Failed to update ${key}:`, error);
+            },
+          },
+        );
+      });
+
+      setJsonData(newJsonData);
+      refetchSettings();
+    } catch (error) {
+      console.error("Failed to parse JSON:", error);
+      // You might want to show an error message to the user here
+    }
+  };
+
   if (isSchemaLoading) {
     return <SkeletonLoader />;
   }
@@ -392,11 +451,15 @@ export const SettingsEditor: React.FC = () => {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">JSON Editor</h2>
             <Textarea
-              value={JSON.stringify(jsonData, null, 2)}
+              value={jsonEditorValue}
+              onChange={handleJsonEditorChange}
               className="font-mono h-[calc(100vh-200px)] min-h-[300px] w-full"
               readOnly
             />
-            <Button type="submit" className="w-full" disabled={formLoading}>
+            <Button
+              onClick={applyJsonChanges}
+              className="w-full"
+              disabled={formLoading}>
               {formLoading ? "Loading..." : "Apply Changes"}
             </Button>
           </div>
