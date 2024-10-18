@@ -1,6 +1,12 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useForm } from "@refinedev/react-hook-form";
-import { CrudFilters, useOne } from "@refinedev/core";
+import { CrudFilters, useList, useOne } from "@refinedev/core";
 import { DataTable } from "portal-shared/components/DataTable";
 import { Input } from "portal-shared/components/ui/input";
 import { Checkbox } from "portal-shared/components/ui/checkbox";
@@ -13,24 +19,34 @@ import {
 } from "portal-shared/components/ui/popover";
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "portal-shared/components/ui/form";
-import { TrashIcon, SearchIcon, XIcon } from "lucide-react";
+import { SearchIcon, TrashIcon, XIcon } from "lucide-react";
 import { SkeletonLoader } from "portal-shared/components/SkeletonLoader";
 import { jsonSchemaToZod } from "json-schema-to-zod";
 import { z } from "zod";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { createColumnHelper } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UseFormReturn } from "react-hook-form";
+import { unflatten } from "flat";
+import Ajv, { JSONSchemaType } from "ajv/dist/2020";
+import type { AnySchema } from "ajv/lib/types";
+import { JsonSchema } from "json-schema-to-zod/dist/types/Types";
 
 interface SettingField {
   key: string;
   value: any;
   type: string;
+}
+
+interface SettingsItem {
+  key: string;
+  value: any;
+  editable: boolean;
 }
 
 interface ArrayEditorProps {
@@ -109,6 +125,9 @@ const ArrayEditor: React.FC<ArrayEditorProps> = ({ field, form, name }) => {
 export const SettingsEditor: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<CrudFilters>([]);
+  const [jsonData, setJsonData] = useState<any>({});
+
+  const ajv = useRef(new Ajv());
 
   const { data: schemaData, isLoading: isSchemaLoading } = useOne<{
     properties: Record<string, any>;
@@ -117,11 +136,41 @@ export const SettingsEditor: React.FC = () => {
     id: "schema",
   });
 
+  const { data: settingsData, refetch: refetchSettings } =
+    useList<SettingsItem>({
+      resource: "settings",
+    });
+
+  useEffect(() => {
+    if (settingsData?.data) {
+      const settings = settingsData.data.reduce((acc: any, setting: any) => {
+        acc[setting.key] = setting.value;
+        return acc;
+      }, {});
+
+      setJsonData(unflatten(settings));
+    }
+  }, [settingsData?.data]);
+
+  useEffect(() => {
+    if (schemaData?.data) {
+      ajv.current.removeSchema();
+      ajv.current.addSchema(
+        schemaData.data as unknown as AnySchema,
+        "settings",
+      );
+    }
+  }, [isSchemaLoading]);
+
   const getSchemaForKey = useCallback(
-    (key: string) => {
-      if (!schemaData?.data) return null;
+    (key: string): JSONSchemaType<unknown> | null => {
+      const ret = ajv.current.getSchema("settings");
+      if (!ret) {
+        return null;
+      }
+      const schema = ret!.schema;
       const parts = key.split(".");
-      let currentSchema: any = schemaData.data;
+      let currentSchema: JSONSchemaType<unknown> = schema!;
 
       for (const part of parts) {
         if (
@@ -129,11 +178,22 @@ export const SettingsEditor: React.FC = () => {
           currentSchema.properties &&
           part in currentSchema.properties
         ) {
-          currentSchema = currentSchema.properties[part];
+          currentSchema = currentSchema.properties[
+            part
+          ] as JSONSchemaType<unknown>;
         } else if (currentSchema.type === "array" && currentSchema.items) {
-          currentSchema = Array.isArray(currentSchema.items)
-            ? currentSchema.items[0]
-            : currentSchema.items;
+          // If it's an array, we need to handle numeric indices
+          if (/^\d+$/.test(part)) {
+            // If the part is a number, it's an array index, so we stay on the items schema
+            currentSchema = Array.isArray(currentSchema.items)
+              ? (currentSchema.items[
+                  Number(part)
+                ] as JSONSchemaType<unknown>) || currentSchema.items[0]
+              : currentSchema.items;
+          } else {
+            // If it's not a number, we're dealing with an object inside the array
+            currentSchema = currentSchema.items;
+          }
         } else {
           return null;
         }
@@ -141,14 +201,14 @@ export const SettingsEditor: React.FC = () => {
 
       return currentSchema;
     },
-    [schemaData],
+    [],
   );
 
   const getZodSchemaForKey = useCallback(
     (key: string) => {
       const jsonSchema = getSchemaForKey(key);
       if (!jsonSchema) return z.any();
-      return jsonSchemaToZod(jsonSchema);
+      return jsonSchemaToZod(jsonSchema as JsonSchema);
     },
     [getSchemaForKey],
   );
@@ -332,7 +392,7 @@ export const SettingsEditor: React.FC = () => {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">JSON Editor</h2>
             <Textarea
-              value={JSON.stringify(form.getValues(), null, 2)}
+              value={JSON.stringify(jsonData, null, 2)}
               className="font-mono h-[calc(100vh-200px)] min-h-[300px] w-full"
               readOnly
             />
