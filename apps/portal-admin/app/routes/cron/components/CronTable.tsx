@@ -78,7 +78,7 @@ export const CronTable: React.FC = () => {
   return (
     <>
       <h1 className="text-2xl font-bold mb-4">Cron Tasks</h1>
-      <DataTable columns={columns} resource="cron/jobs" />
+      <DataTable columns={columns} resource="cron" />
     </>
   );
 };
