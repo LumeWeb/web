@@ -194,21 +194,6 @@ export const SettingsEditor: React.FC = () => {
                 editable: editableFields.has(row.original.key),
                 type,
               }}
-              /* onUpdate={(key, value) => {
-                updateSetting(
-                  { id: key, values: { value } },
-                  {
-                    onSuccess: () => {
-                      setJsonData((prev) => ({ ...prev, [key]: value }));
-                      setJsonEditorValue((prev) => {
-                        const updated = JSON.parse(prev);
-                        updated[key] = value;
-                        return JSON.stringify(updated, null, 2);
-                      });
-                    },
-                  },
-                );
-              }}*/
             />
           );
         },
@@ -345,14 +330,7 @@ export const SettingsEditor: React.FC = () => {
             </Button>
           )}
         </div>
-        <DataTable
-          columns={columns}
-          data={Object.entries(jsonData).map(([key, value]) => ({
-            key,
-            value,
-          }))}
-          filters={filters}
-        />
+        <DataTable columns={columns} filters={filters} />
       </div>
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">JSON Editor</h2>
