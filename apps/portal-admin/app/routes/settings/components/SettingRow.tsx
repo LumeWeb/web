@@ -24,7 +24,7 @@ interface SettingRowProps {
   onUpdate?: (key: string, value: any) => void;
 }
 
-export function SettingRow({ setting, onUpdate }: SettingRowProps) {
+export default function SettingRow({ setting, onUpdate }: SettingRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

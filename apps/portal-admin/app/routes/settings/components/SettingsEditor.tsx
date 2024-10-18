@@ -28,7 +28,7 @@ import {
   DialogTitle,
 } from "portal-shared/components/ui/dialog";
 import { DialogHeader } from "apps/web3.news/app/components/ui/dialog";
-import { SettingRow } from "./SettingRow";
+import SettingRow from "./SettingRow";
 
 interface SettingField {
   key: string;
