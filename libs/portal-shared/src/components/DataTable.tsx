@@ -61,7 +61,7 @@ export function DataTable<TData extends BaseRecord, TValue>({
         permanent: permanentFilters,
       },
       meta,
-      dataProviderName: dataProviderName,
+      dataProviderName,
       // @ts-ignore
       queryOptions: {
         refetchInterval: autoRefresh ? autoRefreshInterval : undefined,
