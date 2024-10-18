@@ -326,6 +326,7 @@ export const SettingsEditor: React.FC = () => {
 
   useEffect(() => {
     if (schemaData?.data) {
+      ajv.current.removeSchema();
       ajv.current.addSchema(
         schemaData.data as unknown as AnySchema,
         "settings",
@@ -338,8 +339,8 @@ export const SettingsEditor: React.FC = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="space-y-4">
+    <div className="grid grid-cols-3 gap-6">
+      <div className="col-span-2 space-y-4">
         <div className="relative">
           <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <Input
@@ -370,7 +371,6 @@ export const SettingsEditor: React.FC = () => {
         <h2 className="text-xl font-semibold">JSON Editor</h2>
         <Textarea
           value={jsonText}
-          /*          onChange={handleJsonTextChange}*/
           className="font-mono h-[calc(100vh-200px)] min-h-[300px] w-full"
         />
         {jsonError && (
@@ -378,11 +378,7 @@ export const SettingsEditor: React.FC = () => {
             <AlertDescription>{jsonError}</AlertDescription>
           </Alert>
         )}
-        <Button
-          /*          onClick={applyJsonChanges}*/
-          className="w-full">
-          Apply JSON Changes
-        </Button>
+        <Button className="w-full">Apply JSON Changes</Button>
       </div>
     </div>
   );
