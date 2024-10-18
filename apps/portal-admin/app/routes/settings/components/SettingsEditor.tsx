@@ -360,12 +360,7 @@ export const SettingsEditor: React.FC = () => {
             </Button>
           )}
         </div>
-        <DataTable
-          columns={columns}
-          resource="settings"
-          filters={filters}
-          pagination={{ pageSize: 20 }}
-        />
+        <DataTable columns={columns} resource="settings" filters={filters} />
       </div>
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">JSON Editor</h2>
