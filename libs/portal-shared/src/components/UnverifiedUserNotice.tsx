@@ -1,5 +1,5 @@
 import React from "react";
-import VerificationNoticeContent from "./VerificationNoticeContent";
+import VerificationNoticeContent from "@/components/VerificationNoticeContent";
 import useEmailVerification from "@/hooks/useEmailVerification";
 
 export default function UnverifiedUserNotice() {

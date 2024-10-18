@@ -1,8 +1,8 @@
 import React from "react";
 
 import { forwardRef } from "react";
-import { Button } from "portal-shared/components/ui/button";
-import { CloudUploadIcon } from "portal-shared/components/icons";
+import { Button } from "@/components/ui/button";
+import { CloudUploadIcon } from "@/components/icons";
 
 export const UploadButton = forwardRef<
   HTMLButtonElement,

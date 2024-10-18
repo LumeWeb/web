@@ -19,7 +19,7 @@ import { CID } from "multiformats/cid";
 import { BreadCrumbPath } from "@/services/base.js";
 import { useSearchParams } from "@remix-run/react";
 import { Identity } from "portal-shared/dataProviders/authProvider";
-import UnverifiedUserModal from "@/components/UnverifiedUserModal";
+import UnverifiedUserModal from "portal-shared/components/UnverifiedUserModal";
 
 export default function Service() {
   return (

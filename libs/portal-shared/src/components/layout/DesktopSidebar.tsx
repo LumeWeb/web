@@ -1,7 +1,7 @@
 import React from "react";
 import LumeLogo from "@/components/LumeLogo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { UploadButton } from "apps/portal-dashboard/app/components/UploadButton";
+import { UploadButton } from "@/components/UploadButton";
 import UploadForm from "apps/portal-dashboard/app/features/uploadManager/components/UploadForm";
 import { MainNavigation } from "@/components/MainNavigation";
 
