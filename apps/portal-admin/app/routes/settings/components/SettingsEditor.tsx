@@ -409,7 +409,6 @@ export const SettingsEditor: React.FC = () => {
       changedKeys.forEach((key) => {
         updateSetting(
           {
-            resource: "settings",
             id: key,
             values: { value: flattenedNewData[key] },
           },
@@ -443,7 +442,7 @@ export const SettingsEditor: React.FC = () => {
       refetchSettings();
     } catch (error) {
       console.error("Failed to parse JSON:", error);
-      setErrorMessage(`Failed to parse JSON: ${error.message}`);
+      setErrorMessage(`Failed to parse JSON: ${error?.message}`);
       setIsErrorModalOpen(true);
     }
   };
