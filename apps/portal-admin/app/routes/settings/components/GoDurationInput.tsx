@@ -2,65 +2,11 @@ import React, { useState, useEffect, ChangeEvent } from "react";
 import { Input } from "portal-shared/components/ui/input";
 import { Label } from "portal-shared/components/ui/label";
 import { ControllerRenderProps } from "react-hook-form";
+import { formatDuration, parseDuration } from "@/lib/time";
 
 interface GoDurationInputProps extends Omit<ControllerRenderProps, "ref"> {
   label?: string;
 }
-
-const parseDuration = (durationString: string): number | null => {
-  const regex = /^(\d+(\.\d+)?)(ns|us|µs|ms|s|m|h)$/;
-  const parts = durationString.match(/(\d+(\.\d+)?[nµumsh])/g);
-  if (!parts) return null;
-
-  let totalMs = 0;
-  for (const part of parts) {
-    const match = part.match(regex);
-    if (!match) return null;
-
-    const value = parseFloat(match[1]);
-    const unit = match[3];
-
-    const unitToMs: { [key: string]: number } = {
-      ns: value / 1e6,
-      us: value / 1e3,
-      µs: value / 1e3,
-      ms: value,
-      s: value * 1e3,
-      m: value * 60 * 1e3,
-      h: value * 60 * 60 * 1e3,
-    };
-
-    totalMs += unitToMs[unit] || 0;
-  }
-
-  return totalMs;
-};
-
-const formatDuration = (ms: number): string => {
-  const units = [
-    { value: 60 * 60 * 1000, label: "h" },
-    { value: 60 * 1000, label: "m" },
-    { value: 1000, label: "s" },
-    { value: 1, label: "ms" },
-    { value: 0.001, label: "us" },
-    { value: 0.000001, label: "ns" },
-  ];
-
-  let result = "";
-  let remainingMs = ms;
-
-  for (const unit of units) {
-    if (remainingMs >= unit.value || result !== "") {
-      const count = Math.floor(remainingMs / unit.value);
-      if (count > 0) {
-        result += `${count}${unit.label}`;
-        remainingMs %= unit.value;
-      }
-    }
-  }
-
-  return result || "0ns";
-};
 
 export default function GoDurationInput({
   value,

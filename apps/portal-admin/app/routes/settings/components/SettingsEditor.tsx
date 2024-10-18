@@ -9,29 +9,14 @@ import { useForm } from "@refinedev/react-hook-form";
 import { CrudFilters, useList, useOne, useUpdate } from "@refinedev/core";
 import { DataTable } from "portal-shared/components/DataTable";
 import { Input } from "portal-shared/components/ui/input";
-import { Checkbox } from "portal-shared/components/ui/checkbox";
 import { Button } from "portal-shared/components/ui/button";
 import { Textarea } from "portal-shared/components/ui/textarea";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "portal-shared/components/ui/popover";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "portal-shared/components/ui/form";
-import { SearchIcon, TrashIcon, XIcon } from "lucide-react";
+import { SearchIcon, XIcon } from "lucide-react";
 import { SkeletonLoader } from "portal-shared/components/SkeletonLoader";
 import { jsonSchemaToZod } from "json-schema-to-zod";
 import { z } from "zod";
 import { createColumnHelper } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UseFormReturn } from "react-hook-form";
 import { flatten, unflatten } from "flat";
 import Ajv, { JSONSchemaType } from "ajv/dist/2020";
 import type { AnySchema } from "ajv/lib/types";
@@ -43,7 +28,7 @@ import {
   DialogTitle,
 } from "portal-shared/components/ui/dialog";
 import { DialogHeader } from "apps/web3.news/app/components/ui/dialog";
-import GoDurationInput from "@/routes/settings/components/GoDurationInput";
+import { SettingRow } from "./SettingRow";
 
 interface SettingField {
   key: string;
@@ -56,79 +41,6 @@ interface SettingsItem {
   value: any;
   editable: boolean;
 }
-
-interface ArrayEditorProps {
-  field: SettingField;
-  form: UseFormReturn<any>;
-  name: string;
-}
-
-const ArrayEditor: React.FC<ArrayEditorProps> = ({ field, form, name }) => {
-  const [newItemValue, setNewItemValue] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <FormField
-      control={form.control}
-      name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormControl>
-            <Popover open={isOpen} onOpenChange={setIsOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start">
-                  {field.value.length > 0
-                    ? field.value[field.value.length - 1]
-                    : "Select or add an item"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80">
-                <div className="space-y-2">
-                  {field.value.map((item: string, index: number) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between">
-                      <span>{item}</span>
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          const newArray = field.value.filter(
-                            (v: string) => v !== item,
-                          );
-                          field.onChange(newArray);
-                        }}>
-                        <TrashIcon className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                  <div className="flex space-x-2">
-                    <Input
-                      value={newItemValue}
-                      onChange={(e) => setNewItemValue(e.target.value)}
-                      className="bg-background w-full"
-                      placeholder="New item value"
-                    />
-                    <Button
-                      onClick={() => {
-                        if (newItemValue) {
-                          const newArray = [...field.value, newItemValue];
-                          field.onChange(newArray);
-                          setNewItemValue("");
-                        }
-                      }}>
-                      Add
-                    </Button>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
-};
 
 export const SettingsEditor: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -154,14 +66,12 @@ export const SettingsEditor: React.FC = () => {
     useList<SettingsItem>({
       resource: "settings",
       pagination: {
-        pageSize: totalCount || 10, // Use totalCount when available, otherwise use a default value
+        pageSize: totalCount || 10,
         mode: "server",
       },
     });
 
-  const { mutate: updateSetting } = useUpdate({
-    resource: "settings",
-  });
+  const { mutate: updateSetting } = useUpdate();
 
   useEffect(() => {
     if (settingsData?.data && settingsData.data.length === totalCount) {
@@ -219,16 +129,13 @@ export const SettingsEditor: React.FC = () => {
             part
           ] as JSONSchemaType<unknown>;
         } else if (currentSchema.type === "array" && currentSchema.items) {
-          // If it's an array, we need to handle numeric indices
           if (/^\d+$/.test(part)) {
-            // If the part is a number, it's an array index, so we stay on the items schema
             currentSchema = Array.isArray(currentSchema.items)
               ? (currentSchema.items[
                   Number(part)
                 ] as JSONSchemaType<unknown>) || currentSchema.items[0]
               : currentSchema.items;
           } else {
-            // If it's not a number, we're dealing with an object inside the array
             currentSchema = currentSchema.items;
           }
         } else {
@@ -258,10 +165,7 @@ export const SettingsEditor: React.FC = () => {
     return z.object(Object.fromEntries(schemaEntries));
   }, [schemaData, getZodSchemaForKey]);
 
-  const {
-    refineCore: { onFinish, formLoading },
-    ...form
-  } = useForm({
+  const form = useForm({
     refineCoreProps: {
       resource: "settings",
       action: "edit",
@@ -280,100 +184,33 @@ export const SettingsEditor: React.FC = () => {
       columnHelper.accessor("value", {
         header: "Value",
         cell: ({ row }) => {
-          const { key } = row.original;
+          const schema = getSchemaForKey(row.original.key);
+          const type = schema?.type || typeof row.original.value;
 
-          const fieldSchema = getSchemaForKey(key);
-          let type = fieldSchema?.type || typeof row.original.value;
-
-          if (type === "string" && isGoDuration(row.original.value)) {
-            type = "duration";
-          }
-
-          switch (type) {
-            case "string":
-              return (
-                <FormField
-                  control={form.control}
-                  name={key}
-                  disabled={!editableFields.has(key)}
-                  defaultValue={row.original.value}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          className="h-9 border border-border/30 bg-background"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              );
-            case "number":
-              return (
-                <FormField
-                  control={form.control}
-                  name={key}
-                  disabled={!editableFields.has(key)}
-                  defaultValue={row.original.value}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          className="h-9 border border-border/30 bg-background"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              );
-            case "boolean":
-              return (
-                <FormField
-                  control={form.control}
-                  name={key}
-                  disabled={!editableFields.has(key)}
-                  defaultValue={row.original.value}
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              );
-            case "array":
-              return (
-                <ArrayEditor field={row.original} form={form} name={key} />
-              );
-            case "duration":
-              return (
-                <FormField
-                  control={form.control}
-                  name={key}
-                  disabled={!editableFields.has(key)}
-                  defaultValue={row.original.value}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <GoDurationInput {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              );
-            default:
-              return <span>{JSON.stringify(row.original.value)}</span>;
-          }
+          return (
+            <SettingRow
+              setting={{
+                ...row.original,
+                editable: editableFields.has(row.original.key),
+                type,
+              }}
+              /* onUpdate={(key, value) => {
+                updateSetting(
+                  { id: key, values: { value } },
+                  {
+                    onSuccess: () => {
+                      setJsonData((prev) => ({ ...prev, [key]: value }));
+                      setJsonEditorValue((prev) => {
+                        const updated = JSON.parse(prev);
+                        updated[key] = value;
+                        return JSON.stringify(updated, null, 2);
+                      });
+                    },
+                  },
+                );
+              }}*/
+            />
+          );
         },
       }),
       columnHelper.accessor(
@@ -388,18 +225,12 @@ export const SettingsEditor: React.FC = () => {
         },
       ),
     ],
-    [form],
+    [editableFields, getSchemaForKey, updateSetting],
   );
 
   const updateFilters = useCallback((term: string) => {
     if (term) {
-      setFilters([
-        {
-          field: "key",
-          operator: "contains",
-          value: term,
-        },
-      ]);
+      setFilters([{ field: "key", operator: "contains", value: term }]);
     } else {
       setFilters([]);
     }
@@ -465,7 +296,6 @@ export const SettingsEditor: React.FC = () => {
         );
       });
 
-      // Update jsonData with only the editable fields
       const editableNewData = Object.fromEntries(
         Object.entries(flattenedNewData).filter(([key]) =>
           editableFields.has(key),
@@ -494,51 +324,47 @@ export const SettingsEditor: React.FC = () => {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onFinish)}>
-        <div className="grid grid-cols-3 gap-6">
-          <div className="col-span-2 space-y-4">
-            <div className="relative">
-              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search settings..."
-                value={searchTerm}
-                onChange={handleSearch}
-                className="w-full pl-10 pr-10 py-2 rounded-md bg-secondary"
-              />
-              {searchTerm && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                  onClick={clearSearch}>
-                  <XIcon className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-            <DataTable
-              columns={columns}
-              resource="settings"
-              filters={filters}
-            />
-          </div>
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">JSON Editor</h2>
-            <Textarea
-              value={jsonEditorValue}
-              onChange={handleJsonEditorChange}
-              className="font-mono h-[calc(100vh-200px)] min-h-[300px] w-full"
-            />
+    <div className="grid grid-cols-3 gap-6">
+      <div className="col-span-2 space-y-4">
+        <div className="relative">
+          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Search settings..."
+            value={searchTerm}
+            onChange={handleSearch}
+            className="w-full pl-10 pr-10 py-2 rounded-md bg-secondary"
+          />
+          {searchTerm && (
             <Button
-              onClick={applyJsonChanges}
-              className="w-full"
-              disabled={formLoading}>
-              {formLoading ? "Loading..." : "Apply Changes"}
+              variant="ghost"
+              size="sm"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2"
+              onClick={clearSearch}>
+              <XIcon className="h-4 w-4" />
             </Button>
-          </div>
+          )}
         </div>
-      </form>
+        <DataTable
+          columns={columns}
+          data={Object.entries(jsonData).map(([key, value]) => ({
+            key,
+            value,
+          }))}
+          filters={filters}
+        />
+      </div>
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">JSON Editor</h2>
+        <Textarea
+          value={jsonEditorValue}
+          onChange={handleJsonEditorChange}
+          className="font-mono h-[calc(100vh-200px)] min-h-[300px] w-full"
+        />
+        <Button onClick={applyJsonChanges} className="w-full">
+          Apply Changes
+        </Button>
+      </div>
       <Dialog open={isErrorModalOpen} onOpenChange={setIsErrorModalOpen}>
         <DialogContent>
           <DialogHeader>
@@ -547,15 +373,10 @@ export const SettingsEditor: React.FC = () => {
               There was an error processing your JSON input:
             </DialogDescription>
           </DialogHeader>
-          {errorMessage}
+          <pre className="bg-gray-100 p-2 rounded">{errorMessage}</pre>
           <Button onClick={() => setIsErrorModalOpen(false)}>Close</Button>
         </DialogContent>
       </Dialog>
-    </Form>
+    </div>
   );
-};
-const isGoDuration = (value) => {
-  // This regex matches common Go duration patterns
-  const goDurationRegex = /^(\d+(\.\d+)?[nµumsh])+$/;
-  return typeof value === "string" && goDurationRegex.test(value);
 };
