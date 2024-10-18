@@ -23,7 +23,7 @@ import { TrashIcon, SearchIcon, XIcon } from "lucide-react";
 import { SkeletonLoader } from "portal-shared/components/SkeletonLoader";
 import { jsonSchemaToZod } from "json-schema-to-zod";
 import { z } from "zod";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UseFormReturn } from "react-hook-form";
 
@@ -172,14 +172,15 @@ export const SettingsEditor: React.FC = () => {
     resolver: zodResolver(formSchema),
   });
 
-  const columns = useMemo<ColumnDef<SettingField>[]>(() => {
-    return [
-      {
-        accessorKey: "key",
+  const columnHelper = createColumnHelper<SettingField>();
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("key", {
         header: "Setting",
-      },
-      {
-        accessorKey: "value",
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor("value", {
         header: "Value",
         cell: ({ row }) => {
           const { key, type } = row.original;
@@ -250,13 +251,21 @@ export const SettingsEditor: React.FC = () => {
               return <span>{JSON.stringify(row.original.value)}</span>;
           }
         },
-      },
-      {
-        accessorKey: "type",
-        header: "Type",
-      },
-    ];
-  }, [form]);
+      }),
+      columnHelper.accessor(
+        (row) => {
+          const fieldSchema = getSchemaForKey(row.key);
+          return fieldSchema?.type || typeof row.value;
+        },
+        {
+          id: "type",
+          header: "Type",
+          cell: (info) => info.getValue(),
+        },
+      ),
+    ],
+    [form],
+  );
 
   const updateFilters = useCallback((term: string) => {
     if (term) {
