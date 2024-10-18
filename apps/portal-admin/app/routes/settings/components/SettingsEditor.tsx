@@ -35,7 +35,7 @@ import { UseFormReturn } from "react-hook-form";
 import { flatten, unflatten } from "flat";
 import Ajv, { JSONSchemaType } from "ajv/dist/2020";
 import type { AnySchema } from "ajv/lib/types";
-import { JsonSchema } from "json-schema-to-zod/dist/types/Types";
+import { JsonSchema } from "json-schema-to-zod";
 
 interface SettingField {
   key: string;
@@ -127,6 +127,7 @@ export const SettingsEditor: React.FC = () => {
   const [filters, setFilters] = useState<CrudFilters>([]);
   const [jsonData, setJsonData] = useState<any>({});
   const [jsonEditorValue, setJsonEditorValue] = useState("");
+  const [editableFields, setEditableFields] = useState<Set<string>>(new Set());
 
   const ajv = useRef(new Ajv());
 
@@ -156,6 +157,11 @@ export const SettingsEditor: React.FC = () => {
       const unflattened = unflatten(settings);
       setJsonData(unflattened);
       setJsonEditorValue(JSON.stringify(unflattened, null, 2));
+
+      const editableKeys = settingsData.data
+        .filter((setting) => setting.editable)
+        .map((setting) => setting.key);
+      setEditableFields(new Set(editableKeys));
     }
   }, [settingsData?.data]);
 
@@ -385,7 +391,9 @@ export const SettingsEditor: React.FC = () => {
       const flattenedOldData = flatten<any, FlattenData>(jsonData);
 
       const changedKeys = Object.keys(flattenedNewData).filter(
-        (key) => flattenedNewData[key] !== flattenedOldData[key],
+        (key) =>
+          flattenedNewData[key] !== flattenedOldData[key] &&
+          editableFields.has(key),
       );
 
       changedKeys.forEach((key) => {
@@ -406,7 +414,22 @@ export const SettingsEditor: React.FC = () => {
         );
       });
 
-      setJsonData(newJsonData);
+      // Update jsonData with only the editable fields
+      const editableNewData = Object.fromEntries(
+        Object.entries(flattenedNewData).filter(([key]) =>
+          editableFields.has(key),
+        ),
+      );
+      const editableOldData = Object.fromEntries(
+        Object.entries(flattenedOldData).filter(
+          ([key]) => !editableFields.has(key),
+        ),
+      );
+      const updatedData = { ...editableOldData, ...editableNewData };
+      const unflattened = unflatten(updatedData);
+
+      setJsonData(unflattened);
+      setJsonEditorValue(JSON.stringify(unflattened, null, 2));
       refetchSettings();
     } catch (error) {
       console.error("Failed to parse JSON:", error);
