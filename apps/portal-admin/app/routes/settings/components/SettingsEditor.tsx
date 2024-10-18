@@ -137,6 +137,8 @@ export const SettingsEditor: React.FC = () => {
   const [editableFields, setEditableFields] = useState<Set<string>>(new Set());
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [totalCount, setTotalCount] = useState<number | undefined>(undefined);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const ajv = useRef(new Ajv());
 
@@ -150,6 +152,10 @@ export const SettingsEditor: React.FC = () => {
   const { data: settingsData, refetch: refetchSettings } =
     useList<SettingsItem>({
       resource: "settings",
+      pagination: {
+        pageSize: totalCount || 10, // Use totalCount when available, otherwise use a default value
+        mode: "server",
+      },
     });
 
   const { mutate: updateSetting } = useUpdate({
@@ -157,7 +163,7 @@ export const SettingsEditor: React.FC = () => {
   });
 
   useEffect(() => {
-    if (settingsData?.data) {
+    if (settingsData?.data && settingsData.data.length === totalCount) {
       const settings = settingsData.data.reduce((acc: any, setting: any) => {
         acc[setting.key] = setting.value;
         return acc;
@@ -171,8 +177,10 @@ export const SettingsEditor: React.FC = () => {
         .filter((setting) => setting.editable)
         .map((setting) => setting.key);
       setEditableFields(new Set(editableKeys));
+
+      setIsDataLoaded(true);
     }
-  }, [settingsData?.data]);
+  }, [settingsData?.data, totalCount]);
 
   useEffect(() => {
     if (schemaData?.data) {
@@ -183,6 +191,12 @@ export const SettingsEditor: React.FC = () => {
       );
     }
   }, [isSchemaLoading]);
+
+  useEffect(() => {
+    if (settingsData?.total) {
+      setTotalCount(settingsData.total);
+    }
+  }, [settingsData?.total]);
 
   const getSchemaForKey = useCallback(
     (key: string): JSONSchemaType<unknown> | null => {
@@ -265,7 +279,10 @@ export const SettingsEditor: React.FC = () => {
       columnHelper.accessor("value", {
         header: "Value",
         cell: ({ row }) => {
-          const { key, type } = row.original;
+          const { key } = row.original;
+
+          const fieldSchema = getSchemaForKey(key);
+          const type = fieldSchema?.type || typeof row.value;
 
           switch (type) {
             case "string":
@@ -311,16 +328,13 @@ export const SettingsEditor: React.FC = () => {
                   control={form.control}
                   name={key}
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
                         />
                       </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>{key}</FormLabel>
-                      </div>
                     </FormItem>
                   )}
                 />
@@ -447,7 +461,7 @@ export const SettingsEditor: React.FC = () => {
     }
   };
 
-  if (isSchemaLoading) {
+  if (isSchemaLoading || !isDataLoaded) {
     return <SkeletonLoader />;
   }
 
