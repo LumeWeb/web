@@ -39,5 +39,5 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PAT_REPOSITORY_DISPATCH }}
-          repository: lumeweb/web-debug
+          repository: lumeweb/web
           event-type: release-go
