@@ -27,18 +27,11 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v3
-      - name: Setup Node.js 20.x
-        uses: actions/setup-node@v4
+      - name: Setup
+        uses: ./.github/actions/setup-all
         with:
-          node-version: 20.x
-          cache: 'pnpm'
-      - name: Install Dependencies
-        uses: pnpm/action-setup@v3
-        with:
-          run_install: true
-          version: 9.11.0
+          node_version: 20.10.0
+          go_version: 1.23.0
       - name: Build
         run: pnpm build:docs.lumeweb.com
       - name: Publish to Cloudflare Pages
