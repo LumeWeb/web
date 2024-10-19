@@ -1,3 +1,3 @@
 module go.lumeweb.com/web/go/portal-dashboard
 
-go 1.22
+go 1.23
