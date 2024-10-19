@@ -56,8 +56,8 @@ importers:
         specifier: ^5.0.20
         version: 5.0.20
       '@fontsource/jaldi':
-        specifier: ^5.0.13
-        version: 5.0.13
+        specifier: ^5.1.0
+        version: 5.1.0
       '@helia/block-brokers':
         specifier: ^3.0.3
         version: 3.0.3(patch_hash=befn6knnu77wjcj434zvhgbx3y)
@@ -2594,8 +2594,8 @@ packages:
   '@fontsource/be-vietnam-pro@5.0.20':
     resolution: {integrity: sha512-ywviMcYs2PlJbFX6IEZDpkRtANxCe1mwUtcluL6Ae65sv58x1YOyYWjyOI3PGwbMG+qEVjCPr5llRQNeMvUM1w==}
 
-  '@fontsource/jaldi@5.0.13':
-    resolution: {integrity: sha512-YmYiSM4ufWfi4LVTDsnLIjLBN7l9ztEsR1rbRnsJdGvP40lsIwtbJ/2S4uZ69z91+rTtWl2MoqjonTw0heBOqQ==}
+  '@fontsource/jaldi@5.1.0':
+    resolution: {integrity: sha512-9gZlkQMjJKSU9/rr/OjWR0wDPdA2IKh2FqtNGXiswZSxPurlSkZPVfZHwDFu2c7DA32L3no0lbnRv1fhEjvt3g==}
 
   '@hapi/hoek@9.3.0':
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
@@ -16749,7 +16749,7 @@ snapshots:
 
   '@fontsource/be-vietnam-pro@5.0.20': {}
 
-  '@fontsource/jaldi@5.0.13': {}
+  '@fontsource/jaldi@5.1.0': {}
 
   '@hapi/hoek@9.3.0': {}
 
