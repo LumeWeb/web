@@ -5,13 +5,15 @@
   "license": "MIT",
   "scripts": {
     "build": "turbo build",
-    "release": "changeset publish",
+    "publish": "changeset publish",
+    "changeset:publish": "pnpm -r publish --publish-branch develop; pnpm changeset tag && git push --follow-tags",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "build:docs.lumeweb.com": "turbo build --filter=@lumeweb/docs.lumeweb.com",
     "build:lumeweb.com": "turbo build --filter=@lumeweb/lumeweb.com",
     "build:portal-dashboard": "turbo build --filter=@lumeweb/portal-dashboard",
+    "build:portal-admin": "turbo build --filter=@lumeweb/portal-admin",
     "dev:portal-dashboard": "turbo dev --filter=@lumeweb/portal-dashboard"
   },
   "private": true,
