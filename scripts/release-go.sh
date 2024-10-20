@@ -15,13 +15,13 @@ do
     echo "Latest release for $app does not exist"
   else
     echo "Latest release: $latest_release"
+    APP_NAME=$(echo $app | cut -d "/" -f 2)
     version=$(echo $latest_release | cut -d "@" -f 3)
-    go_release="$app/$version-go"
+    go_release="$APP_NAME/$version-go"
     tag=$(git describe --exact-match "$go_release" 2>/dev/null)
     if [ -z "$tag" ]
     then
       echo "Tag $go_release does not exist, building and exporting app"
-      APP_NAME=$(echo $app | cut -d "/" -f 2)
       pnpm run build:$APP_NAME
       mkdir -p go/$APP_NAME/build
       rm -rf go/$APP_NAME/build/*
