@@ -8,9 +8,10 @@ import JoinCommunity from "../components/Layout/JoinCommunity.astro";
 export interface Props {
   view: string;
   title: string;
+  favicon: string;
 }
 
-const { view, title } = Astro.props;
+const { view, title, favicon } = Astro.props;
 const description =
   "A platform, network and experience that allows you to control and own your online web, and access all of the possibilities Web3 has to offer. Join the open web.";
 const url = "https://lumeweb.com";
@@ -44,6 +45,7 @@ const url = "https://lumeweb.com";
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={opengraph.src} />
       <link rel="sitemap" href="/sitemap-index.xml" />
+      <link rel="icon" type="image/x-icon" href={favicon}>
     <!-- Matomo -->
     <script is:inline>
       var _paq = (window._paq = window._paq || []);

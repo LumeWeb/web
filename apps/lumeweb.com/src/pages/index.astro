@@ -12,9 +12,10 @@ import Message from "../components/Home/Message.astro";
 import bg from "../assets/main-page-hero.png";
 import bgSmall from "../assets/main-page-hero@0.75x.png";
 import bgSmaller from "../assets/main-page-hero@0.5x.png";
+import favicon from "../assets/icons/favicon.ico"
 ---
 
-<Layout view="home" title="Lume Web - Your Open Web">
+<Layout view="home" title="Lume Web - Your Open Web" favicon={favicon}>
   <img
     class="absolute -z-10 -right-[150px] top-[50px] md:-right-[200px] md:-top-[100px] xl:-right-[100px] xl:-top-[100px] object-contain w-[500px] md:w-[800px] xl:w-[1000px] max-w-none"
     srcset={`${bg.src} 1250w, ${bgSmall.src} 1000w, ${bgSmaller.src} 500w`}
