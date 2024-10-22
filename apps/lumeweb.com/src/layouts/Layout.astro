@@ -4,6 +4,7 @@ import opengraph from "/src/assets/opengraph.png";
 import Navbar from "../components/Layout/Navbar.astro";
 import Footer from "../components/Layout/Footer.astro";
 import JoinCommunity from "../components/Layout/JoinCommunity.astro";
+import favicon from "/src/assets/icons/favicon.ico";
 
 export interface Props {
   view: string;
@@ -44,6 +45,7 @@ const url = "https://lumeweb.com";
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={opengraph.src} />
       <link rel="sitemap" href="/sitemap-index.xml" />
+      <link rel="icon" type="image/svg" href={favicon}>
     <!-- Matomo -->
     <script is:inline>
       var _paq = (window._paq = window._paq || []);
