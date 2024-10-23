@@ -4,6 +4,7 @@
 dist
 tmp
 /out-tsc
+.turbo
 
 # dependencies
 node_modules
