@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import useBillingInfo from "@/routes/account/hooks/useBillingInfo";
+import useSubmitBillingInfo from "@/routes/account/hooks/useSubmitBillingInfo";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useList } from "@refinedev/core";
+import { Button } from "portal-shared/components/ui/button";
 import {
   Card,
   CardContent,
@@ -17,20 +19,19 @@ import {
   FormMessage,
 } from "portal-shared/components/ui/form";
 import { Input } from "portal-shared/components/ui/input";
-import { Textarea } from "portal-shared/components/ui/textarea";
-import { Button } from "portal-shared/components/ui/button";
 import { Skeleton } from "portal-shared/components/ui/skeleton";
-import useBillingInfo from "@/routes/account/hooks/useBillingInfo";
-import useSubmitBillingInfo from "@/routes/account/hooks/useSubmitBillingInfo";
+import { Textarea } from "portal-shared/components/ui/textarea";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { isValid } from "zod";
+import { BillingAddressComboBox, type Entry } from "./BillingAddressComboBox";
 import {
+  type BillingInfoFields,
+  type EntityCode,
+  type FieldName,
   createBillingInfoSchema,
-  EntityCode,
-  FieldName,
   fieldMapping,
-  BillingInfoFields,
 } from "./BillingInformation.schema";
-import { useList } from "@refinedev/core";
-import { BillingAddressComboBox, Entry } from "./BillingAddressComboBox";
 
 type FormFields = {
   [K in keyof BillingInfoFields]: string;
@@ -47,7 +48,7 @@ export default function BillingInformation() {
   const { data: countryData } = useCountryList();
 
   const form = useForm<FormFields>({
-    resolver: zodResolver(createBillingInfoSchema(supportedEntities)),
+    resolver: zodResolver(createBillingInfoSchema([])),
     defaultValues: {
       name: "",
       country: "",
@@ -71,6 +72,9 @@ export default function BillingInformation() {
       ],
     });
 
+
+  console.log({ formState: form.formState, errors: form.formState.errors });
+
   useEffect(() => {
     if (billingInfo && !isInitialized) {
       console.log("Billing info loaded:", billingInfo);
@@ -87,7 +91,7 @@ export default function BillingInformation() {
     const entities = (selectedCountryData?.supported_entities ||
       []) as EntityCode[];
     setSupportedEntities(entities);
-    form.reset(form.getValues(), { keepValues: true });
+    // form.reset(form.getValues(), { keepValues: true });
   }, [form.watch("country"), countryData]);
 
   const onSubmit = async (data: FormFields) => {
@@ -203,7 +207,7 @@ export default function BillingInformation() {
   };
 
   return (
-    <Card>
+    <Card className="bg-secondary/20">
       <CardHeader>
         <CardTitle>Billing Information</CardTitle>
       </CardHeader>
