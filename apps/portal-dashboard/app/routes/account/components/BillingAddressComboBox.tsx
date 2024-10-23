@@ -1,15 +1,6 @@
-import React, { useState, useEffect } from "react";
-import {
-  useController,
-  Control,
-  FieldPath,
-  FieldValues,
-} from "react-hook-form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "portal-shared/components/ui/popover";
+import type { GetListResponse } from "@refinedev/core";
+import type { QueryObserverResult } from "@tanstack/react-query";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "portal-shared/components/ui/button";
 import {
   Command,
@@ -27,11 +18,20 @@ import {
   FormMessage,
 } from "portal-shared/components/ui/form";
 import { Input } from "portal-shared/components/ui/input";
-import { cn } from "portal-shared/lib/utils";
-import { Check, ChevronsUpDown } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "portal-shared/components/ui/popover";
 import { Skeleton } from "portal-shared/components/ui/skeleton";
-import { GetListResponse } from "@refinedev/core";
-import type { QueryObserverResult } from "@tanstack/react-query";
+import { cn } from "portal-shared/lib/utils";
+import React, { useState, useEffect } from "react";
+import {
+  type Control,
+  type FieldPath,
+  type FieldValues,
+  useController,
+} from "react-hook-form";
 
 interface ComboBoxProps<TFieldValues extends FieldValues> {
   name: FieldPath<TFieldValues>;
@@ -92,7 +92,7 @@ export function BillingAddressComboBox<TFieldValues extends FieldValues>({
                     role="combobox"
                     disabled={disabled || isLoading}
                     className={cn(
-                      "w-full justify-between",
+                      "w-full justify-between bg-secondary border border-input h-14",
                       !field.value && "text-muted-foreground",
                     )}>
                     {isLoading ? (
