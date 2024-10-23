@@ -1,8 +1,8 @@
-import { Link } from "@remix-run/react";
-import React, { type ReactNode, useState } from "react";
-import { cn } from "@/lib/utils";
 import { ChevronDownIcon } from "@/components/icons";
+import { cn } from "@/lib/utils";
+import { Link } from "@remix-run/react";
 import { AnimatePresence, motion } from "framer-motion";
+import React, { type ReactNode, useState } from "react";
 
 interface NavigationProps {
   children: ReactNode;
@@ -21,6 +21,7 @@ interface NavigationItemContentProps {
 interface NavigationSubItemProps {
   children: ReactNode;
   href?: string;
+  active?: boolean;
 }
 
 export function Navigation({ children }: NavigationProps) {
@@ -44,9 +45,10 @@ export function NavigationItem({
   const hasSubItems = subItems.length > 0;
   const isOpen = _isOpen || active;
   const itemContent = (
-    <div
+    <button
+      data-active={active}
       className={cn(
-        "px-5 text-sm font-medium rounded-md transition-colors text-foreground",
+        "group px-5 text-sm font-medium rounded-md transition-colors text-foreground",
         active
           ? "opacity-100 border-[1px] border-secondary"
           : "opacity-50 hover:opacity-75",
@@ -59,7 +61,7 @@ export function NavigationItem({
           hasSubItems && setIsOpen(!isOpen);
         }
       }}
-      role="button"
+      type="button"
       tabIndex={0}>
       <div className="flex items-center justify-between h-[64px]">
         {href ? (
@@ -88,13 +90,13 @@ export function NavigationItem({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.1 }}
             className="ml-4 mt-1 space-y-1 overflow-hidden">
             {subItems}
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </button>
   );
 
   return <div>{itemContent}</div>;
@@ -103,12 +105,14 @@ export function NavigationItem({
 export function NavigationItemContent({
   children,
 }: NavigationItemContentProps) {
-  return <div className="flex items-center flex-grow">{children}</div>;
+  return <div className="flex items-center px-3 py-2 text-sm font-medium text-foreground/60 group-data-[active='true']:text-foreground group:data-[active=true]:border-secondary rounded-md transition-colors hover:opacity-50">{children}</div>;
 }
 
-export function NavigationSubItem({ children, href }: NavigationSubItemProps) {
+export function NavigationSubItem({ children, href, active }: NavigationSubItemProps) {
   const content = (
-    <div className="flex items-center px-3 py-2 text-sm font-medium text-foreground/60 rounded-md transition-colors hover:opacity-50">
+    <div className={cn("flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors hover:opacity-50",
+      active ? "text-foreground" : "text-foreground/60"
+    )}>
       {children}
     </div>
   );

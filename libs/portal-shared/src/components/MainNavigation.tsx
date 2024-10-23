@@ -1,20 +1,22 @@
-import React, { createElement } from "react";
-import { useLocation } from "@remix-run/react";
 import {
   Navigation,
   NavigationItem,
   NavigationItemContent,
   NavigationSubItem,
 } from "@/components/ui/navigation-menu";
-import { MenuItem } from "apps/portal-dashboard/app/types";
-import useMenuItems from "@/hooks/useMenuItems";
 import useIsBillingEnabled from "@/hooks/useIsBillingEnabled";
+import useMenuItems from "@/hooks/useMenuItems";
+import type { MenuItem } from "@/types";
+import { useMatches } from "@remix-run/react";
+import type React from "react";
+import { createElement } from "react";
 
 const NavItem: React.FC<{ item: MenuItem; active: boolean }> = ({
   item,
   active,
 }) => {
   const billingEnable = useIsBillingEnabled();
+  const matches = useMatches();
   return (
     <NavigationItem active={active} key={item.key} href={item.path}>
       <NavigationItemContent>
@@ -35,21 +37,24 @@ const NavItem: React.FC<{ item: MenuItem; active: boolean }> = ({
 
           return true;
         })
-        ?.map((child) => (
-          <NavigationSubItem key={child.key} href={child.path}>
+        ?.map((child) => {
+          const isActive = child.path ? matches.some((match) => match.pathname.startsWith(child.path)) : false;
+          return (
+          <NavigationSubItem key={child.key} href={child.path} active={isActive}>
             {child.label}
           </NavigationSubItem>
-        ))}
+        )})}
     </NavigationItem>
   );
 };
 
 export const MainNavigation: React.FC = () => {
-  const location = useLocation();
+  const matches = useMatches();
   const menu = useMenuItems();
 
   const renderMenuItem = (item: MenuItem) => {
-    const isActive = location.pathname.startsWith(item.path!);
+    const paths = item.path === "/" ? ["/dashboard"] : [item.path, ...(item.children?.map(child => child.path) ?? [])];
+    const isActive = matches.some((match) => paths.some(path => match.pathname.startsWith(path)));
     return <NavItem key={item.key} item={item} active={isActive} />;
   };
 

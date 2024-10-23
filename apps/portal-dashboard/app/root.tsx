@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   Links,
   Meta,
@@ -6,35 +5,37 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import { useMemo } from "react";
 
-import stylesheet from "portal-shared/tailwind.css?url";
 import type { LinksFunction } from "@remix-run/node";
+import stylesheet from "portal-shared/tailwind.css?url";
 
 // Supports weights 200-800
 import "@fontsource-variable/manrope";
-import {
-  AuthProvider,
-  NotificationProvider,
-  Refine,
-  ResourceProps,
-} from "@refinedev/core";
-import { Toaster } from "portal-shared/components/ui/toaster";
-import useSdk from "portal-shared/hooks/useSdk";
-import routerProvider from "@refinedev/remix-router";
-import { notificationProvider } from "portal-shared/dataProviders/notificationProvider";
-import { getResetServices } from "@/services/index";
-import useUploader from "@/features/uploadManager/hooks/useUploader";
-import { createAccountProvider } from "portal-shared/dataProviders/accountProvider";
-import { useAuthProvider } from "portal-shared/hooks/useAuthProvider";
-import { useAppInitialization } from "@/hooks/useAppInitialization";
-import { withTheme } from "portal-shared/hooks/useTheme";
-import { Skeleton } from "portal-shared/components/ui/skeleton";
-import restDataProvider from "@refinedev/simple-rest";
 import { createServiceProvider } from "@/dataProviders/serviceProvider";
+import useUploader from "@/features/uploadManager/hooks/useUploader";
+import { useAppInitialization } from "@/hooks/useAppInitialization";
 import { SERVICE_ROUTE } from "@/routeConfig";
+import { getResetServices } from "@/services/index";
+import {
+  type AuthProvider,
+  type NotificationProvider,
+  Refine,
+  type ResourceProps,
+} from "@refinedev/core";
+import routerProvider from "@refinedev/remix-router";
+import restDataProvider from "@refinedev/simple-rest";
+import { Skeleton } from "portal-shared/components/ui/skeleton";
+import { Toaster } from "portal-shared/components/ui/toaster";
+import { createAccountProvider } from "portal-shared/dataProviders/accountProvider";
+import { notificationProvider } from "portal-shared/dataProviders/notificationProvider";
+import { useAuthProvider } from "portal-shared/hooks/useAuthProvider";
+import useSdk from "portal-shared/hooks/useSdk";
+import { withTheme } from "portal-shared/hooks/useTheme";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
+  { rel: "icon", href: "/favicon.svg" },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
