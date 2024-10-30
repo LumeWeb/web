@@ -17,7 +17,7 @@ do
     echo "Latest release: $latest_release"
     APP_NAME=$(echo $app | cut -d "/" -f 2)
     version=$(echo $latest_release | cut -d "@" -f 3)
-    go_release="$APP_NAME/$version-go"
+    go_release="v$version-$APP_NAME-go"
     tag=$(git describe --exact-match "$go_release" 2>/dev/null)
     if [ -z "$tag" ]
     then
