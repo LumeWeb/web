@@ -1,5 +1,11 @@
 # @lumeweb/portal-dashboard
 
+## 0.2.1
+
+### Patch Changes
+
+- 0bcf64f: Billing UI Refactoring
+
 ## 0.2.0
 
 ### Minor Changes
