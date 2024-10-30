@@ -1,17 +1,17 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-KWbvBiNv.js","assets/index-DqVokHLY.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-C2KIIWov.js","assets/index-C3JligFb.js"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { R as React, r as reactExports, g as getDefaultExportFromCjs, h as commonjsGlobal, j as jsxRuntimeExports } from "./index-DqVokHLY.js";
-import { c as castPath, t as toKey, a as isLength, b as isIndex, d as isArray, e as isArguments, g as ge, $, v as vt, f as ah, h as Rr, j as get$1, A as Ae, Y, T as Te, L as Le, P as Pt, r as rR, O as Ot, z as zt, y as yo, m as mc } from "./index-KWbvBiNv.js";
-import { L as Label, D as Dialog, a as DialogContent$1, b as DialogTitle$1, c as DialogDescription$1, G as GeneralLayout } from "./GeneralLayout-DmtCpVT9.js";
-import { t as toDate, c as constructFrom, S as SkeletonLoader, D as DataTable, a as createColumnHelper } from "./constructFrom-tgNhsBhn.js";
-import { O as Overlay, C as Content, a as Close, T as Title, D as Description, P as Portal, I as Input, b as Checkbox, c as Textarea } from "./useFeatureFlag-B23ysOn1.js";
-import { k as createLucideIcon, t as twMerge, m as clsx, C as Cross2Icon, i as cn$1, S as Slot, n as Button, z } from "./createLucideIcon-eCGisUfw.js";
-import { P as Popover, b as PopoverTrigger, d as PopoverContent } from "./useTheme-B3LyQaHN.js";
-import { S as Search } from "./search-ZMXsRC-n.js";
-import "./components-BEb6BnMw.js";
-import "./skeleton-DFg-tT9t.js";
+import { R as React, r as reactExports, g as getDefaultExportFromCjs, h as commonjsGlobal, j as jsxRuntimeExports } from "./index-C3JligFb.js";
+import { c as castPath, t as toKey, a as isLength, b as isIndex, d as isArray, e as isArguments, g as ge, $, v as vt, f as ah, h as Rr, j as get$1, A as Ae, Y, T as Te, L as Le, P as Pt, r as rR, O as Ot, z as zt, y as yo, m as mc } from "./index-C2KIIWov.js";
+import { L as Label, D as Dialog, a as DialogContent$1, b as DialogTitle$1, c as DialogDescription$1, G as GeneralLayout } from "./GeneralLayout-qVZVRdVV.js";
+import { t as toDate, c as constructFrom, S as SkeletonLoader, D as DataTable, a as createColumnHelper } from "./constructFrom-D4XdxpMG.js";
+import { O as Overlay, C as Content, a as Close, T as Title, D as Description, P as Portal, I as Input, b as Checkbox, c as Textarea } from "./useFeatureFlag-HfBwOrYm.js";
+import { k as createLucideIcon, t as twMerge, m as clsx, C as Cross2Icon, i as cn$1, S as Slot, n as Button, z } from "./createLucideIcon-DpDjZ8c4.js";
+import { P as Popover, b as PopoverTrigger, d as PopoverContent } from "./useTheme-DKZzWJ_i.js";
+import { S as Search } from "./search-CzmgOvxZ.js";
+import "./components-Dv2u7XfC.js";
+import "./skeleton-Bh6ZuGaA.js";
 function hasPath(object, path, hasFunc) {
   path = castPath(path, object);
   var index = -1, length = path.length, result = false;
@@ -881,7 +881,7 @@ function createFormControl(props = {}) {
     timer = setTimeout(callback, wait);
   };
   const _updateValid = async (shouldUpdateValid) => {
-    if (_proxyFormState.isValid || shouldUpdateValid) {
+    if (!props.disabled && (_proxyFormState.isValid || shouldUpdateValid)) {
       const isValid = _options.resolver ? isEmptyObject((await _executeSchema()).errors) : await executeBuiltInValidation(_fields, true);
       if (isValid !== _formState.isValid) {
         _subjects.state.next({
@@ -891,7 +891,7 @@ function createFormControl(props = {}) {
     }
   };
   const _updateIsValidating = (names2, isValidating) => {
-    if (_proxyFormState.isValidating || _proxyFormState.validatingFields) {
+    if (!props.disabled && (_proxyFormState.isValidating || _proxyFormState.validatingFields)) {
       (names2 || Array.from(_names.mount)).forEach((name) => {
         if (name) {
           isValidating ? set(_formState.validatingFields, name, isValidating) : unset(_formState.validatingFields, name);
@@ -904,7 +904,7 @@ function createFormControl(props = {}) {
     }
   };
   const _updateFieldArray = (name, values = [], method, args, shouldSetValues = true, shouldUpdateFieldsAndState = true) => {
-    if (args && method) {
+    if (args && method && !props.disabled) {
       _state.action = true;
       if (shouldUpdateFieldsAndState && Array.isArray(get(_fields, name))) {
         const fieldValues = method(get(_fields, name), args.argA, args.argB);
@@ -960,28 +960,30 @@ function createFormControl(props = {}) {
     const output = {
       name
     };
-    const disabledField = !!(get(_fields, name) && get(_fields, name)._f && get(_fields, name)._f.disabled);
-    if (!isBlurEvent || shouldDirty) {
-      if (_proxyFormState.isDirty) {
-        isPreviousDirty = _formState.isDirty;
-        _formState.isDirty = output.isDirty = _getDirty();
-        shouldUpdateField = isPreviousDirty !== output.isDirty;
+    if (!props.disabled) {
+      const disabledField = !!(get(_fields, name) && get(_fields, name)._f && get(_fields, name)._f.disabled);
+      if (!isBlurEvent || shouldDirty) {
+        if (_proxyFormState.isDirty) {
+          isPreviousDirty = _formState.isDirty;
+          _formState.isDirty = output.isDirty = _getDirty();
+          shouldUpdateField = isPreviousDirty !== output.isDirty;
+        }
+        const isCurrentFieldPristine = disabledField || deepEqual(get(_defaultValues, name), fieldValue);
+        isPreviousDirty = !!(!disabledField && get(_formState.dirtyFields, name));
+        isCurrentFieldPristine || disabledField ? unset(_formState.dirtyFields, name) : set(_formState.dirtyFields, name, true);
+        output.dirtyFields = _formState.dirtyFields;
+        shouldUpdateField = shouldUpdateField || _proxyFormState.dirtyFields && isPreviousDirty !== !isCurrentFieldPristine;
       }
-      const isCurrentFieldPristine = disabledField || deepEqual(get(_defaultValues, name), fieldValue);
-      isPreviousDirty = !!(!disabledField && get(_formState.dirtyFields, name));
-      isCurrentFieldPristine || disabledField ? unset(_formState.dirtyFields, name) : set(_formState.dirtyFields, name, true);
-      output.dirtyFields = _formState.dirtyFields;
-      shouldUpdateField = shouldUpdateField || _proxyFormState.dirtyFields && isPreviousDirty !== !isCurrentFieldPristine;
-    }
-    if (isBlurEvent) {
-      const isPreviousFieldTouched = get(_formState.touchedFields, name);
-      if (!isPreviousFieldTouched) {
-        set(_formState.touchedFields, name, isBlurEvent);
-        output.touchedFields = _formState.touchedFields;
-        shouldUpdateField = shouldUpdateField || _proxyFormState.touchedFields && isPreviousFieldTouched !== isBlurEvent;
+      if (isBlurEvent) {
+        const isPreviousFieldTouched = get(_formState.touchedFields, name);
+        if (!isPreviousFieldTouched) {
+          set(_formState.touchedFields, name, isBlurEvent);
+          output.touchedFields = _formState.touchedFields;
+          shouldUpdateField = shouldUpdateField || _proxyFormState.touchedFields && isPreviousFieldTouched !== isBlurEvent;
+        }
       }
+      shouldUpdateField && shouldRender && _subjects.state.next(output);
     }
-    shouldUpdateField && shouldRender && _subjects.state.next(output);
     return shouldUpdateField ? output : {};
   };
   const shouldRenderByError = (name, isValid, error2, fieldState) => {
@@ -1064,7 +1066,7 @@ function createFormControl(props = {}) {
     }
     _names.unMount = /* @__PURE__ */ new Set();
   };
-  const _getDirty = (name, data) => (name && data && set(_formValues, name, data), !deepEqual(getValues(), _defaultValues));
+  const _getDirty = (name, data) => !props.disabled && (name && data && set(_formValues, name, data), !deepEqual(getValues(), _defaultValues));
   const _getWatch = (names2, defaultValue, isGlobal) => generateWatchOutput(names2, _names, {
     ..._state.mount ? _formValues : isUndefined(defaultValue) ? _defaultValues : isString(names2) ? { [names2]: defaultValue } : defaultValue
   }, isGlobal, defaultValue);
@@ -1106,7 +1108,7 @@ function createFormControl(props = {}) {
       const fieldValue = value[fieldKey];
       const fieldName = `${name}.${fieldKey}`;
       const field = get(_fields, fieldName);
-      (_names.array.has(name) || !isPrimitive(fieldValue) || field && !field._f) && !isDateObject(fieldValue) ? setValues(fieldName, fieldValue, options) : setFieldValue(fieldName, fieldValue, options);
+      (_names.array.has(name) || isObject(fieldValue) || field && !field._f) && !isDateObject(fieldValue) ? setValues(fieldName, fieldValue, options) : setFieldValue(fieldName, fieldValue, options);
     }
   };
   const setValue = (name, value, options = {}) => {
@@ -1143,7 +1145,7 @@ function createFormControl(props = {}) {
     const field = get(_fields, name);
     const getCurrentFieldValue = () => target.type ? getFieldValue(field._f) : getEventValue(event);
     const _updateIsFieldValueUpdated = (fieldValue) => {
-      isFieldValueUpdated = Number.isNaN(fieldValue) || deepEqual(fieldValue, get(_formValues, name, fieldValue));
+      isFieldValueUpdated = Number.isNaN(fieldValue) || isDateObject(fieldValue) && isNaN(fieldValue.getTime()) || deepEqual(fieldValue, get(_formValues, name, fieldValue));
     };
     if (field) {
       let error2;
@@ -1472,7 +1474,11 @@ function createFormControl(props = {}) {
     }
     if (!keepStateOptions.keepValues) {
       if (keepStateOptions.keepDirtyValues) {
-        for (const fieldName of _names.mount) {
+        const fieldsToCheck = /* @__PURE__ */ new Set([
+          ..._names.mount,
+          ...Object.keys(getDirtyFields(_defaultValues, _formValues))
+        ]);
+        for (const fieldName of Array.from(fieldsToCheck)) {
           get(_formState.dirtyFields, fieldName) ? set(values, fieldName, get(_formValues, fieldName)) : setValue(fieldName, get(values, fieldName));
         }
       } else {
@@ -1696,6 +1702,11 @@ function useForm(props = {}) {
       values: control._getWatch()
     });
   }, [props.shouldUnregister, control]);
+  React.useEffect(() => {
+    if (_formControl.current) {
+      _formControl.current.watch = _formControl.current.watch.bind({});
+    }
+  }, [formState]);
   _formControl.current.formState = getProxyFormState(formState, control);
   return _formControl.current;
 }
@@ -11805,7 +11816,7 @@ function encode64(data) {
 }
 async function sign(apiKey, encodedHeader, encodedPayload) {
   const { createHmac } = await __vitePreload(async () => {
-    const { createHmac: createHmac2 } = await import("./index-KWbvBiNv.js").then((n2) => n2._);
+    const { createHmac: createHmac2 } = await import("./index-C2KIIWov.js").then((n2) => n2._);
     return { createHmac: createHmac2 };
   }, true ? __vite__mapDeps([0,1]) : void 0);
   return createHmac("sha256", apiKey).update(`${encodedHeader}.${encodedPayload}`).digest("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");

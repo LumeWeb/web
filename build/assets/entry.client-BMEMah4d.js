@@ -1,7 +1,7 @@
-import { E as ErrorResponseImpl, r as reactExports, m as matchRoutes, c as createRouter, a as createBrowserHistory, b as mapRouteProperties, j as jsxRuntimeExports } from "./index-DqVokHLY.js";
-import { c as createClientRoutesWithHMRRevalidationOptOut, i as invariant, d as decodeViaTurboStream, a as createClientRoutes, s as shouldHydrateRouteLoader, b as initFogOfWar, g as getSingleFetchDataStrategy, u as useFogOFWarDiscovery, R as RemixContext, e as RemixErrorBoundary, f as RouterProvider, r as reactDomExports } from "./components-BEb6BnMw.js";
+import { E as ErrorResponseImpl, r as reactExports, m as matchRoutes, c as createRouter, a as createBrowserHistory, b as mapRouteProperties, j as jsxRuntimeExports } from "./index-C3JligFb.js";
+import { c as createClientRoutesWithHMRRevalidationOptOut, i as invariant, d as decodeViaTurboStream, a as createClientRoutes, s as shouldHydrateRouteLoader, b as initFogOfWar, g as getSingleFetchDataStrategy, u as useFogOFWarDiscovery, R as RemixContext, e as RemixErrorBoundary, f as RouterProvider, r as reactDomExports } from "./components-Dv2u7XfC.js";
 /**
- * @remix-run/react v2.11.1
+ * @remix-run/react v2.10.3
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -41,7 +41,7 @@ function deserializeErrors(errors) {
   return serialized;
 }
 /**
- * @remix-run/react v2.11.1
+ * @remix-run/react v2.10.3
  *
  * Copyright (c) Remix Software Inc.
  *

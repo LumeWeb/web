@@ -1,8 +1,8 @@
-import { r as reactExports, j as jsxRuntimeExports } from "./index-DqVokHLY.js";
-import { l as lC } from "./index-KWbvBiNv.js";
-import { i as cn, n as Button, I as DoubleArrowLeftIcon, J as ChevronLeftIcon, K as ChevronRightIcon, L as DoubleArrowRightIcon } from "./createLucideIcon-eCGisUfw.js";
-import { S as Select, d as SelectTrigger, e as SelectValue, f as SelectContent, g as SelectItem } from "./GeneralLayout-DmtCpVT9.js";
-import { S as Skeleton } from "./skeleton-DFg-tT9t.js";
+import { r as reactExports, j as jsxRuntimeExports } from "./index-C3JligFb.js";
+import { l as lC } from "./index-C2KIIWov.js";
+import { i as cn, n as Button, I as DoubleArrowLeftIcon, J as ChevronLeftIcon, K as ChevronRightIcon, L as DoubleArrowRightIcon } from "./createLucideIcon-DpDjZ8c4.js";
+import { S as Select, d as SelectTrigger, e as SelectValue, f as SelectContent, g as SelectItem } from "./GeneralLayout-qVZVRdVV.js";
+import { S as Skeleton } from "./skeleton-Bh6ZuGaA.js";
 /**
    * table-core
    *
@@ -141,7 +141,7 @@ function createColumn(table, columnDef, depth, parent) {
     ...columnDef
   };
   const accessorKey = resolvedColumnDef.accessorKey;
-  let id = (_ref = (_resolvedColumnDef$id = resolvedColumnDef.id) != null ? _resolvedColumnDef$id : accessorKey ? typeof String.prototype.replaceAll === "function" ? accessorKey.replaceAll(".", "_") : accessorKey.replace(/\./g, "_") : void 0) != null ? _ref : typeof resolvedColumnDef.header === "string" ? resolvedColumnDef.header : void 0;
+  let id = (_ref = (_resolvedColumnDef$id = resolvedColumnDef.id) != null ? _resolvedColumnDef$id : accessorKey ? accessorKey.replace(".", "_") : void 0) != null ? _ref : typeof resolvedColumnDef.header === "string" ? resolvedColumnDef.header : void 0;
   let accessorFn;
   if (resolvedColumnDef.accessorFn) {
     accessorFn = resolvedColumnDef.accessorFn;
@@ -2955,7 +2955,7 @@ var O = i(({ columns: t, crudFilters: o }) => o.map((e) => {
 }).filter(Boolean), "crudFiltersToColumnFilters");
 function N({ refineCoreProps: { hasPagination: t = true, ...o } = {}, initialState: e = {}, ...r }) {
   var D, S, E;
-  let s = x(), l = lC({ ...o, hasPagination: t }), a = (((D = o.filters) == null ? void 0 : D.mode) || "server") === "server", d = (((S = o.sorters) == null ? void 0 : S.mode) || "server") === "server", p = t === false ? "off" : "server", u = (((E = o.pagination) == null ? void 0 : E.mode) ?? p) !== "off", { tableQuery: { data: c }, current: T, setCurrent: y, pageSize: B, setPageSize: L, sorters: Q, setSorters: H, filters: g, setFilters: K, pageCount: h } = l, b = useReactTable({ data: (c == null ? void 0 : c.data) ?? [], getCoreRowModel: getCoreRowModel(), getSortedRowModel: d ? void 0 : getSortedRowModel(), getFilteredRowModel: a ? void 0 : getFilteredRowModel(), initialState: { pagination: { pageIndex: T - 1, pageSize: B }, sorting: Q.map((n) => ({ id: n.field, desc: n.order === "desc" })), columnFilters: O({ columns: r.columns, crudFilters: g }), ...e }, pageCount: h, manualPagination: true, manualSorting: d, manualFiltering: a, ...r }), { state: w, columns: R } = b.options, { pagination: z, sorting: m, columnFilters: v } = w, { pageIndex: f, pageSize: C } = z ?? {};
+  let s = x(), l = lC({ ...o, hasPagination: t }), a = (((D = o.filters) == null ? void 0 : D.mode) || "server") === "server", d = (((S = o.sorters) == null ? void 0 : S.mode) || "server") === "server", p = t === false ? "off" : "server", u = (((E = o.pagination) == null ? void 0 : E.mode) ?? p) !== "off", { tableQueryResult: { data: c }, current: T, setCurrent: y, pageSize: B, setPageSize: L, sorters: Q, setSorters: H, filters: g, setFilters: K, pageCount: h } = l, R = useReactTable({ data: (c == null ? void 0 : c.data) ?? [], getCoreRowModel: getCoreRowModel(), getSortedRowModel: d ? void 0 : getSortedRowModel(), getFilteredRowModel: a ? void 0 : getFilteredRowModel(), initialState: { pagination: { pageIndex: T - 1, pageSize: B }, sorting: Q.map((n) => ({ id: n.field, desc: n.order === "desc" })), columnFilters: O({ columns: r.columns, crudFilters: g }), ...e }, pageCount: h, manualPagination: true, manualSorting: d, manualFiltering: a, ...r }), { state: w, columns: b } = R.options, { pagination: z, sorting: m, columnFilters: v } = w, { pageIndex: f, pageSize: C } = z ?? {};
   return reactExports.useEffect(() => {
     f !== void 0 && y(f + 1);
   }, [f]), reactExports.useEffect(() => {
@@ -2963,9 +2963,9 @@ function N({ refineCoreProps: { hasPagination: t = true, ...o } = {}, initialSta
   }, [C]), reactExports.useEffect(() => {
     m !== void 0 && (H(m == null ? void 0 : m.map((n) => ({ field: n.id, order: n.desc ? "desc" : "asc" }))), m.length > 0 && u && !s && y(1));
   }, [m]), reactExports.useEffect(() => {
-    let n = P({ columns: R, columnFilters: v });
+    let n = P({ columns: b, columnFilters: v });
     n.push(...k({ nextFilters: n, coreFilters: g })), K(n), n.length > 0 && u && !s && y(1);
-  }, [v, R]), { ...b, refineCore: l };
+  }, [v, b]), { ...R, refineCore: l };
 }
 i(N, "useTable");
 const Table = reactExports.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative w-full overflow-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx(

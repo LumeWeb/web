@@ -1,6 +1,6 @@
-import { R as React, j as jsxRuntimeExports, r as reactExports } from "./index-DqVokHLY.js";
-import { c as createContextScope, u as useComposedRefs, S as Slot, P as Primitive, a6 as usePortalUrl, l as useBaseStore, a7 as useSize, d as useCallbackRef, g as useLayoutEffect2, e as composeEventHandlers, b as Presence, Q as hideOthers, U as ReactRemoveScroll, T as useFocusGuards, V as FocusScope, W as DismissableLayer, f as Portal$1, a as useControllableState, X as useId, i as cn, G as usePluginMeta, n as Button } from "./createLucideIcon-eCGisUfw.js";
-import { r as reactDomExports } from "./components-BEb6BnMw.js";
+import { R as React, j as jsxRuntimeExports, r as reactExports } from "./index-C3JligFb.js";
+import { c as createContextScope, u as useComposedRefs, S as Slot, P as Primitive, a6 as usePortalUrl, l as useBaseStore, a7 as useSize, d as useCallbackRef, g as useLayoutEffect2, e as composeEventHandlers, b as Presence, Q as hideOthers, U as ReactRemoveScroll, T as useFocusGuards, V as FocusScope, W as DismissableLayer, f as Portal$1, a as useControllableState, X as useId, i as cn, G as usePluginMeta, n as Button } from "./createLucideIcon-DpDjZ8c4.js";
+import { r as reactDomExports } from "./components-Dv2u7XfC.js";
 function createCollection(name) {
   const PROVIDER_NAME = name + "CollectionProvider";
   const [createCollectionContext, createCollectionScope] = createContextScope(PROVIDER_NAME);
@@ -3345,21 +3345,21 @@ const HamburgerMenuIcon = ({ className }) => {
           "path",
           {
             d: "M22.3424 8.73145H5.65782C5.34175 8.73145 5.03862 8.65215 4.81512 8.51099C4.59162 8.36984 4.46606 8.17839 4.46606 7.97876C4.46606 7.77914 4.59162 7.58769 4.81512 7.44653C5.03862 7.30538 5.34175 7.22607 5.65782 7.22607H22.3424C22.6585 7.22607 22.9616 7.30538 23.1851 7.44653C23.4086 7.58769 23.5342 7.77914 23.5342 7.97876C23.5342 8.17839 23.4086 8.36984 23.1851 8.51099C22.9616 8.65215 22.6585 8.73145 22.3424 8.73145Z",
-            fill: "#ADF0DD"
+            fill: "currentColor"
           }
         ),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "path",
           {
             d: "M22.3424 14.7529H5.65782C5.34175 14.7529 5.03862 14.6736 4.81512 14.5325C4.59162 14.3913 4.46606 14.1999 4.46606 14.0002C4.46606 13.8006 4.59162 13.6092 4.81512 13.468C5.03862 13.3269 5.34175 13.2476 5.65782 13.2476H22.3424C22.6585 13.2476 22.9616 13.3269 23.1851 13.468C23.4086 13.6092 23.5342 13.8006 23.5342 14.0002C23.5342 14.1999 23.4086 14.3913 23.1851 14.5325C22.9616 14.6736 22.6585 14.7529 22.3424 14.7529Z",
-            fill: "#ADF0DD"
+            fill: "currentColor"
           }
         ),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "path",
           {
             d: "M22.3424 20.7744H5.65782C5.34175 20.7744 5.03862 20.6951 4.81512 20.554C4.59162 20.4128 4.46606 20.2214 4.46606 20.0217C4.46606 19.8221 4.59162 19.6307 4.81512 19.4895C5.03862 19.3483 5.34175 19.269 5.65782 19.269H22.3424C22.6585 19.269 22.9616 19.3483 23.1851 19.4895C23.4086 19.6307 23.5342 19.8221 23.5342 20.0217C23.5342 20.2214 23.4086 20.4128 23.1851 20.554C22.9616 20.6951 22.6585 20.7744 22.3424 20.7744Z",
-            fill: "#ADF0DD"
+            fill: "currentColor"
           }
         )
       ]
@@ -4316,13 +4316,9 @@ function getOverflowAncestors(node, list, traverseIframes) {
   const isBody = scrollableAncestor === ((_node$ownerDocument2 = node.ownerDocument) == null ? void 0 : _node$ownerDocument2.body);
   const win = getWindow(scrollableAncestor);
   if (isBody) {
-    const frameElement = getFrameElement(win);
-    return list.concat(win, win.visualViewport || [], isOverflowElement(scrollableAncestor) ? scrollableAncestor : [], frameElement && traverseIframes ? getOverflowAncestors(frameElement) : []);
+    return list.concat(win, win.visualViewport || [], isOverflowElement(scrollableAncestor) ? scrollableAncestor : [], win.frameElement && traverseIframes ? getOverflowAncestors(win.frameElement) : []);
   }
   return list.concat(scrollableAncestor, getOverflowAncestors(scrollableAncestor, [], traverseIframes));
-}
-function getFrameElement(win) {
-  return win.parent && Object.getPrototypeOf(win.parent) ? win.frameElement : null;
 }
 function getCssDimensions(element) {
   const css = getComputedStyle(element);
@@ -4417,7 +4413,7 @@ function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetPar
     const win = getWindow(domElement);
     const offsetWin = offsetParent && isElement(offsetParent) ? getWindow(offsetParent) : offsetParent;
     let currentWin = win;
-    let currentIFrame = getFrameElement(currentWin);
+    let currentIFrame = currentWin.frameElement;
     while (currentIFrame && offsetParent && offsetWin !== currentWin) {
       const iframeScale = getScale(currentIFrame);
       const iframeRect = currentIFrame.getBoundingClientRect();
@@ -4431,7 +4427,7 @@ function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetPar
       x += left;
       y += top;
       currentWin = getWindow(currentIFrame);
-      currentIFrame = getFrameElement(currentWin);
+      currentIFrame = currentWin.frameElement;
     }
   }
   return rectToClientRect({

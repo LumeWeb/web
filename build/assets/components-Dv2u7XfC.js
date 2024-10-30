@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { r as reactExports, g as getDefaultExportFromCjs, D as DataRouterContext, k as DataRouterStateContext, l as Router, n as useRoutesImpl, o as NavigationContext, s as stripBasename, p as useHref, e as useNavigate, u as useLocation, q as useResolvedPath, t as createPath, d as useMatches, v as useNavigation, i as React, w as invariant$1, x as useRouteId, y as RouteContext, z as joinPaths, A as matchPath, B as parsePath, C as AbortedDeferredError, F as DeferredData, G as isRouteErrorResponse, H as data, I as redirect, E as ErrorResponseImpl, J as useRouteError, m as matchRoutes, K as useAsyncError, L as Await$1 } from "./index-DqVokHLY.js";
+import { r as reactExports, g as getDefaultExportFromCjs, D as DataRouterContext, k as DataRouterStateContext, l as Router, n as useRoutesImpl, o as NavigationContext, s as stripBasename, p as useHref, e as useNavigate, u as useLocation, q as useResolvedPath, t as createPath, d as useMatches$1, v as useNavigation, i as React, w as invariant$1, x as useRouteId, y as RouteContext, z as joinPaths, A as matchPath, B as parsePath, C as AbortedDeferredError, F as DeferredData, G as redirect, E as ErrorResponseImpl, H as isRouteErrorResponse, I as useRouteError, m as matchRoutes, J as useAsyncError, K as Await$1 } from "./index-C3JligFb.js";
 function _mergeNamespaces(n, m) {
   for (var i = 0; i < m.length; i++) {
     const e = m[i];
@@ -6696,7 +6696,7 @@ const ReactDOM$1 = /* @__PURE__ */ _mergeNamespaces({
   default: ReactDOM
 }, [reactDomExports]);
 /**
- * React Router DOM v6.26.0
+ * React Router DOM v6.25.0
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -7061,9 +7061,6 @@ function RouterProvider(_ref) {
     static: false,
     basename
   }), [router, navigator2, basename]);
-  let routerFuture = reactExports.useMemo(() => ({
-    v7_relativeSplatPath: router.future.v7_relativeSplatPath
-  }), [router.future.v7_relativeSplatPath]);
   return /* @__PURE__ */ reactExports.createElement(reactExports.Fragment, null, /* @__PURE__ */ reactExports.createElement(DataRouterContext.Provider, {
     value: dataRouterContext
   }, /* @__PURE__ */ reactExports.createElement(DataRouterStateContext.Provider, {
@@ -7077,14 +7074,15 @@ function RouterProvider(_ref) {
     location: state.location,
     navigationType: state.historyAction,
     navigator: navigator2,
-    future: routerFuture
-  }, state.initialized || router.future.v7_partialHydration ? /* @__PURE__ */ reactExports.createElement(MemoizedDataRoutes, {
+    future: {
+      v7_relativeSplatPath: router.future.v7_relativeSplatPath
+    }
+  }, state.initialized || router.future.v7_partialHydration ? /* @__PURE__ */ reactExports.createElement(DataRoutes, {
     routes: router.routes,
     future: router.future,
     state
   }) : fallbackElement))))), null);
 }
-const MemoizedDataRoutes = /* @__PURE__ */ reactExports.memo(DataRoutes);
 function DataRoutes(_ref3) {
   let {
     routes,
@@ -7100,7 +7098,7 @@ const Link$1 = /* @__PURE__ */ reactExports.forwardRef(function LinkWithRef(_ref
     onClick,
     relative,
     reloadDocument,
-    replace: replace2,
+    replace,
     state,
     target,
     to,
@@ -7132,7 +7130,7 @@ const Link$1 = /* @__PURE__ */ reactExports.forwardRef(function LinkWithRef(_ref
     relative
   });
   let internalOnClick = useLinkClickHandler(to, {
-    replace: replace2,
+    replace,
     state,
     target,
     preventScrollReset,
@@ -7219,7 +7217,7 @@ const Form$1 = /* @__PURE__ */ reactExports.forwardRef((_ref9, forwardedRef) => 
     fetcherKey,
     navigate,
     reloadDocument,
-    replace: replace2,
+    replace,
     state,
     method = defaultMethod,
     action,
@@ -7243,7 +7241,7 @@ const Form$1 = /* @__PURE__ */ reactExports.forwardRef((_ref9, forwardedRef) => 
       fetcherKey,
       method: submitMethod,
       navigate,
-      replace: replace2,
+      replace,
       state,
       relative,
       preventScrollReset,
@@ -7298,9 +7296,9 @@ function useLinkClickHandler(to, _temp) {
   return reactExports.useCallback((event) => {
     if (shouldProcessLinkClick(event, target)) {
       event.preventDefault();
-      let replace2 = replaceProp !== void 0 ? replaceProp : createPath(location) === createPath(path);
+      let replace = replaceProp !== void 0 ? replaceProp : createPath(location) === createPath(path);
       navigate(to, {
-        replace: replace2,
+        replace,
         state,
         preventScrollReset,
         relative,
@@ -7428,7 +7426,7 @@ function useScrollRestoration(_temp4) {
     basename
   } = reactExports.useContext(NavigationContext);
   let location = useLocation();
-  let matches = useMatches();
+  let matches = useMatches$1();
   let navigation = useNavigation();
   reactExports.useEffect(() => {
     window.history.scrollRestoration = "manual";
@@ -7782,7 +7780,7 @@ async function decodeDeferred(reader) {
   }
 }
 /**
- * @remix-run/server-runtime v2.11.1
+ * @remix-run/server-runtime v2.10.3
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -7793,7 +7791,7 @@ async function decodeDeferred(reader) {
  */
 const SingleFetchRedirectSymbol = Symbol("SingleFetchRedirect");
 /**
- * @remix-run/react v2.11.1
+ * @remix-run/react v2.10.3
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -7817,7 +7815,7 @@ function _extends() {
   return _extends.apply(this, arguments);
 }
 /**
- * @remix-run/react v2.11.1
+ * @remix-run/react v2.10.3
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -7832,7 +7830,7 @@ function invariant(value, message) {
   }
 }
 /**
- * @remix-run/react v2.11.1
+ * @remix-run/react v2.10.3
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -7865,7 +7863,7 @@ async function loadRouteModule(route, routeModulesCache) {
   }
 }
 /**
- * @remix-run/react v2.11.1
+ * @remix-run/react v2.10.3
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -8079,7 +8077,7 @@ function isPreloadSupported() {
   return _isPreloadSupported;
 }
 /**
- * @remix-run/react v2.11.1
+ * @remix-run/react v2.10.3
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -8105,7 +8103,7 @@ function createHtml(html) {
   };
 }
 /**
- * @remix-run/react v2.11.1
+ * @remix-run/react v2.10.3
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -8152,9 +8150,9 @@ async function fetchData(request, routeId, retry = 0) {
     throw error;
   });
   if (isErrorResponse(response)) {
-    let data2 = await response.json();
-    let error = new Error(data2.message);
-    error.stack = data2.stack;
+    let data = await response.json();
+    let error = new Error(data.message);
+    error.stack = data.stack;
     return error;
   }
   if (isNetworkErrorResponse(response)) {
@@ -8228,15 +8226,15 @@ async function parseDeferredReadableStream(stream) {
         for await (let section of sectionReader) {
           let [event, ...sectionDataStrings] = section.split(":");
           let sectionDataString = sectionDataStrings.join(":");
-          let data2 = JSON.parse(sectionDataString);
+          let data = JSON.parse(sectionDataString);
           if (event === "data") {
-            for (let [key, value] of Object.entries(data2)) {
+            for (let [key, value] of Object.entries(data)) {
               if (deferredResolvers[key]) {
                 deferredResolvers[key].resolve(value);
               }
             }
           } else if (event === "error") {
-            for (let [key, value] of Object.entries(data2)) {
+            for (let [key, value] of Object.entries(data)) {
               let err = new Error(value.message);
               err.stack = value.stack;
               if (deferredResolvers[key]) {
@@ -8321,7 +8319,7 @@ function mergeArrays(...arrays) {
   return out;
 }
 /**
- * @remix-run/react v2.11.1
+ * @remix-run/react v2.10.3
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -8344,23 +8342,22 @@ function singleFetchActionStrategy(request, matches) {
         let url = singleFetchUrl(request.url);
         let init = await createRequestInit(request);
         let {
-          data: data2,
+          data,
           status
         } = await fetchAndDecode(url, init);
         actionStatus = status;
-        return unwrapSingleFetchResult(data2, m.route.id);
+        return unwrapSingleFetchResult(data, m.route.id);
       });
       return {
         type: "data",
-        result: result2
+        result: result2,
+        status: actionStatus
       };
     });
-    if (isResponse(result.result) || isRouteErrorResponse(result.result)) {
-      return result;
-    }
     return {
-      type: result.type,
-      result: data(result.result, actionStatus)
+      ...result,
+      // Proxy along the action HTTP response status for thrown errors
+      status: actionStatus
     };
   }));
 }
@@ -8374,17 +8371,17 @@ function singleFetchLoaderStrategy(manifest, routeModules, request, matches) {
       result = await handler(async () => {
         url.searchParams.set("_routes", m.route.id);
         let {
-          data: data2
+          data
         } = await fetchAndDecode(url, init);
-        return unwrapSingleFetchResults(data2, m.route.id);
+        return unwrapSingleFetchResults(data, m.route.id);
       });
     } else {
       result = await handler(async () => {
         if (!singleFetchPromise) {
           url = addRevalidationParam(manifest, routeModules, matches.map((m2) => m2.route), matches.filter((m2) => m2.shouldLoad).map((m2) => m2.route), url);
           singleFetchPromise = fetchAndDecode(url, init).then(({
-            data: data2
-          }) => data2);
+            data
+          }) => data);
         }
         let results = await singleFetchPromise;
         return unwrapSingleFetchResults(results, m.route.id);
@@ -8431,11 +8428,7 @@ function addRevalidationParam(manifest, routeModules, matchedRoutes, loadRoutes,
 }
 function singleFetchUrl(reqUrl) {
   let url = typeof reqUrl === "string" ? new URL(reqUrl, window.location.origin) : reqUrl;
-  if (url.pathname === "/") {
-    url.pathname = "_root.data";
-  } else {
-    url.pathname = `${url.pathname.replace(/\/$/, "")}.data`;
-  }
+  url.pathname = `${url.pathname === "/" ? "_root" : url.pathname}.data`;
   return url;
 }
 async function fetchAndDecode(url, init) {
@@ -8468,9 +8461,9 @@ function decodeViaTurboStream(body, global) {
         };
       }
       if (type === "ErrorResponse") {
-        let [data2, status, statusText] = rest;
+        let [data, status, statusText] = rest;
         return {
-          value: new ErrorResponseImpl(status, statusText, data2)
+          value: new ErrorResponseImpl(status, statusText, data)
         };
       }
       if (type === "SingleFetchRedirect") {
@@ -8501,9 +8494,6 @@ function unwrapSingleFetchResult(result, routeId) {
     if (result.reload) {
       headers["X-Remix-Reload-Document"] = "yes";
     }
-    if (result.replace) {
-      headers["X-Remix-Replace"] = "yes";
-    }
     return redirect(result.redirect, {
       status: result.status,
       headers
@@ -8515,7 +8505,7 @@ function unwrapSingleFetchResult(result, routeId) {
   }
 }
 /**
- * @remix-run/react v2.11.1
+ * @remix-run/react v2.10.3
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -8634,7 +8624,7 @@ function BoundaryShell({
   }, children, renderScripts ? /* @__PURE__ */ reactExports.createElement(Scripts, null) : null)));
 }
 /**
- * @remix-run/react v2.11.1
+ * @remix-run/react v2.10.3
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -8660,7 +8650,7 @@ function RemixRootDefaultHydrateFallback() {
   }));
 }
 /**
- * @remix-run/react v2.11.1
+ * @remix-run/react v2.10.3
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -8969,10 +8959,6 @@ function getRedirect(response) {
   if (reloadDocument) {
     headers["X-Remix-Reload-Document"] = reloadDocument;
   }
-  let replace = response.headers.get("X-Remix-Replace");
-  if (replace) {
-    headers["X-Remix-Replace"] = replace;
-  }
   return redirect(url, {
     status,
     headers
@@ -8989,7 +8975,7 @@ function shouldHydrateRouteLoader(route, routeModule, isSpaMode) {
   return isSpaMode && route.id !== "root" || routeModule.clientLoader != null && (routeModule.clientLoader.hydrate === true || route.hasLoader !== true);
 }
 /**
- * @remix-run/react v2.11.1
+ * @remix-run/react v2.10.3
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -9001,7 +8987,7 @@ function shouldHydrateRouteLoader(route, routeModule, isSpaMode) {
 const URL_LIMIT = 7680;
 let fogOfWar = null;
 function isFogOfWarEnabled(future, isSpaMode) {
-  return future.unstable_lazyRouteDiscovery === true && !isSpaMode;
+  return future.unstable_fogOfWar === true && !isSpaMode;
 }
 function getPartialManifest(manifest, router) {
   let routeIds = new Set(router.state.matches.map((m) => m.route.id));
@@ -9154,13 +9140,13 @@ async function fetchAndApplyManifestPatches(paths, _fogOfWar, manifest, routeMod
   } else if (res.status >= 400) {
     throw new Error(await res.text());
   }
-  let data2 = await res.json();
+  let data = await res.json();
   let knownRoutes = new Set(Object.keys(manifest.routes));
-  let patches = Object.values(data2.patches).reduce((acc, route) => !knownRoutes.has(route.id) ? Object.assign(acc, {
+  let patches = Object.values(data.patches).reduce((acc, route) => !knownRoutes.has(route.id) ? Object.assign(acc, {
     [route.id]: route
   }) : acc, {});
   Object.assign(manifest.routes, patches);
-  data2.notFoundPaths.forEach((p2) => known404Paths.add(p2));
+  data.notFoundPaths.forEach((p2) => known404Paths.add(p2));
   paths.forEach((p2) => knownGoodPaths.add(p2));
   let parentIds = /* @__PURE__ */ new Set();
   Object.values(patches).forEach((patch) => {
@@ -9459,13 +9445,13 @@ function Meta() {
   for (let i = 0; i < _matches.length; i++) {
     let _match = _matches[i];
     let routeId = _match.route.id;
-    let data2 = loaderData[routeId];
+    let data = loaderData[routeId];
     let params = _match.params;
     let routeModule = routeModules[routeId];
     let routeMeta = [];
     let match = {
       id: routeId,
-      data: data2,
+      data,
       meta: [],
       params: _match.params,
       pathname: _match.pathname,
@@ -9475,7 +9461,7 @@ function Meta() {
     matches[i] = match;
     if (routeModule !== null && routeModule !== void 0 && routeModule.meta) {
       routeMeta = typeof routeModule.meta === "function" ? routeModule.meta({
-        data: data2,
+        data,
         params,
         location,
         matches,
@@ -9587,10 +9573,10 @@ function Scripts(props) {
     }
     return `${JSON.stringify(key)}:__remixContext.p(!1, ${escapeHtml(JSON.stringify(toSerialize))})`;
   };
-  let serializePreresolvedDataImp = (routeId, key, data2) => {
+  let serializePreresolvedDataImp = (routeId, key, data) => {
     let serializedData;
     try {
-      serializedData = JSON.stringify(data2);
+      serializedData = JSON.stringify(data);
     } catch (error) {
       return serializePreResolvedErrorImp(key, error);
     }
@@ -9605,10 +9591,10 @@ function Scripts(props) {
     }
     return `__remixContext.r(${JSON.stringify(routeId)}, ${JSON.stringify(key)}, !1, ${escapeHtml(JSON.stringify(toSerialize))})`;
   };
-  let serializeDataImp = (routeId, key, data2) => {
+  let serializeDataImp = (routeId, key, data) => {
     let serializedData;
     try {
-      serializedData = JSON.stringify(data2);
+      serializedData = JSON.stringify(data);
     } catch (error) {
       return serializeErrorImp(routeId, key, error);
     }
@@ -9730,12 +9716,12 @@ function DeferredHydrationScript({
       scriptProps,
       serializeError
     }),
-    children: (data2) => {
+    children: (data) => {
       return /* @__PURE__ */ reactExports.createElement("script", _extends({}, scriptProps, {
         async: true,
         suppressHydrationWarning: true,
         dangerouslySetInnerHTML: {
-          __html: serializeData(routeId, dataKey, data2)
+          __html: serializeData(routeId, dataKey, data)
         }
       }));
     }
@@ -9763,6 +9749,9 @@ function ErrorDeferredHydrationScript({
 }
 function dedupe(array) {
   return [...new Set(array)];
+}
+function useMatches() {
+  return useMatches$1();
 }
 function mergeRefs(...refs) {
   return (value) => {
@@ -9793,7 +9782,8 @@ export {
   useScrollRestoration as j,
   Links as k,
   useSearchParams as l,
-  ReactDOM as m,
+  useMatches as m,
+  ReactDOM as n,
   reactDomExports as r,
   shouldHydrateRouteLoader as s,
   useFogOFWarDiscovery as u

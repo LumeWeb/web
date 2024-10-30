@@ -340,7 +340,7 @@ reactJsxRuntime_production_min.jsxs = q;
 }
 var jsxRuntimeExports = jsxRuntime.exports;
 /**
- * @remix-run/router v1.19.0
+ * @remix-run/router v1.18.0
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -983,33 +983,21 @@ const joinPaths = (paths) => paths.join("/").replace(/\/\/+/g, "/");
 const normalizePathname = (pathname) => pathname.replace(/\/+$/, "").replace(/^\/*/, "/");
 const normalizeSearch = (search) => !search || search === "?" ? "" : search.startsWith("?") ? search : "?" + search;
 const normalizeHash = (hash) => !hash || hash === "#" ? "" : hash.startsWith("#") ? hash : "#" + hash;
-class DataWithResponseInit {
-  constructor(data2, init) {
-    this.type = "DataWithResponseInit";
-    this.data = data2;
-    this.init = init || null;
-  }
-}
-function data(data2, init) {
-  return new DataWithResponseInit(data2, typeof init === "number" ? {
-    status: init
-  } : init);
-}
 class AbortedDeferredError extends Error {
 }
 class DeferredData {
-  constructor(data2, responseInit) {
+  constructor(data, responseInit) {
     this.pendingKeysSet = /* @__PURE__ */ new Set();
     this.subscribers = /* @__PURE__ */ new Set();
     this.deferredKeys = [];
-    invariant(data2 && typeof data2 === "object" && !Array.isArray(data2), "defer() only accepts plain objects");
+    invariant(data && typeof data === "object" && !Array.isArray(data), "defer() only accepts plain objects");
     let reject;
     this.abortPromise = new Promise((_, r2) => reject = r2);
     this.controller = new AbortController();
     let onAbort = () => reject(new AbortedDeferredError("Deferred data aborted"));
     this.unlistenAbortSignal = () => this.controller.signal.removeEventListener("abort", onAbort);
     this.controller.signal.addEventListener("abort", onAbort);
-    this.data = Object.entries(data2).reduce((acc, _ref2) => {
+    this.data = Object.entries(data).reduce((acc, _ref2) => {
       let [key, value] = _ref2;
       return Object.assign(acc, {
         [key]: this.trackPromise(key, value)
@@ -1026,7 +1014,7 @@ class DeferredData {
     }
     this.deferredKeys.push(key);
     this.pendingKeysSet.add(key);
-    let promise = Promise.race([value, this.abortPromise]).then((data2) => this.onSettle(promise, key, void 0, data2), (error) => this.onSettle(promise, key, error));
+    let promise = Promise.race([value, this.abortPromise]).then((data) => this.onSettle(promise, key, void 0, data), (error) => this.onSettle(promise, key, error));
     promise.catch(() => {
     });
     Object.defineProperty(promise, "_tracked", {
@@ -1034,7 +1022,7 @@ class DeferredData {
     });
     return promise;
   }
-  onSettle(promise, key, error, data2) {
+  onSettle(promise, key, error, data) {
     if (this.controller.signal.aborted && error instanceof AbortedDeferredError) {
       this.unlistenAbortSignal();
       Object.defineProperty(promise, "_error", {
@@ -1046,7 +1034,7 @@ class DeferredData {
     if (this.done) {
       this.unlistenAbortSignal();
     }
-    if (error === void 0 && data2 === void 0) {
+    if (error === void 0 && data === void 0) {
       let undefinedError = new Error('Deferred data for key "' + key + '" resolved/rejected with `undefined`, you must resolve/reject with a value or `null`.');
       Object.defineProperty(promise, "_error", {
         get: () => undefinedError
@@ -1054,7 +1042,7 @@ class DeferredData {
       this.emit(false, key);
       return Promise.reject(undefinedError);
     }
-    if (data2 === void 0) {
+    if (data === void 0) {
       Object.defineProperty(promise, "_error", {
         get: () => error
       });
@@ -1062,10 +1050,10 @@ class DeferredData {
       return Promise.reject(error);
     }
     Object.defineProperty(promise, "_data", {
-      get: () => data2
+      get: () => data
     });
     this.emit(false, key);
-    return data2;
+    return data;
   }
   emit(aborted, settledKey) {
     this.subscribers.forEach((subscriber) => subscriber(aborted, settledKey));
@@ -1142,18 +1130,18 @@ const redirect = function redirect2(url, init) {
   }));
 };
 class ErrorResponseImpl {
-  constructor(status, statusText, data2, internal) {
+  constructor(status, statusText, data, internal) {
     if (internal === void 0) {
       internal = false;
     }
     this.status = status;
     this.statusText = statusText || "";
     this.internal = internal;
-    if (data2 instanceof Error) {
-      this.data = data2.toString();
-      this.error = data2;
+    if (data instanceof Error) {
+      this.data = data.toString();
+      this.error = data;
     } else {
-      this.data = data2;
+      this.data = data;
     }
   }
 }
@@ -1248,7 +1236,7 @@ function createRouter(init) {
       [route.id]: error
     };
   }
-  if (initialMatches && !init.hydrationData) {
+  if (initialMatches && patchRoutesOnMissImpl && !init.hydrationData) {
     let fogOfWar = checkFogOfWar(initialMatches, dataRoutes, init.history.location.pathname);
     if (fogOfWar.active) {
       initialMatches = null;
@@ -1258,12 +1246,6 @@ function createRouter(init) {
   if (!initialMatches) {
     initialized = false;
     initialMatches = [];
-    if (future.v7_partialHydration) {
-      let fogOfWar = checkFogOfWar(null, dataRoutes, init.history.location.pathname);
-      if (fogOfWar.active && fogOfWar.matches) {
-        initialMatches = fogOfWar.matches;
-      }
-    }
   } else if (initialMatches.some((m2) => m2.route.lazy)) {
     initialized = false;
   } else if (!initialMatches.some((m2) => m2.route.loader)) {
@@ -1315,7 +1297,7 @@ function createRouter(init) {
   let isUninterruptedRevalidation = false;
   let isRevalidationRequired = false;
   let cancelledDeferredRoutes = [];
-  let cancelledFetcherLoads = /* @__PURE__ */ new Set();
+  let cancelledFetcherLoads = [];
   let fetchControllers = /* @__PURE__ */ new Map();
   let incrementingLoadId = 0;
   let pendingNavigationLoadId = -1;
@@ -1513,6 +1495,7 @@ function createRouter(init) {
     isUninterruptedRevalidation = false;
     isRevalidationRequired = false;
     cancelledDeferredRoutes = [];
+    cancelledFetcherLoads = [];
   }
   async function navigate(to, opts) {
     if (typeof to === "number") {
@@ -2280,7 +2263,7 @@ function createRouter(init) {
       }
     }
     pendingNavigationController = null;
-    let redirectHistoryAction = replace === true || redirect3.response.headers.has("X-Remix-Replace") ? Action.Replace : Action.Push;
+    let redirectHistoryAction = replace === true ? Action.Replace : Action.Push;
     let {
       formMethod,
       formAction,
@@ -2354,7 +2337,7 @@ function createRouter(init) {
     cancelledDeferredRoutes.push(...cancelActiveDeferreds());
     fetchLoadMatches.forEach((_, key) => {
       if (fetchControllers.has(key)) {
-        cancelledFetcherLoads.add(key);
+        cancelledFetcherLoads.push(key);
         abortFetcher(key);
       }
     });
@@ -2403,7 +2386,6 @@ function createRouter(init) {
     fetchReloadIds.delete(key);
     fetchRedirectIds.delete(key);
     deletedFetchers.delete(key);
-    cancelledFetcherLoads.delete(key);
     state.fetchers.delete(key);
   }
   function deleteFetcherAndUpdateState(key) {
@@ -2954,8 +2936,7 @@ function getMatchesToLoad(history, state, matches, submission, location, isIniti
     let shouldRevalidate = false;
     if (fetchRedirectIds.has(key)) {
       shouldRevalidate = false;
-    } else if (cancelledFetcherLoads.has(key)) {
-      cancelledFetcherLoads.delete(key);
+    } else if (cancelledFetcherLoads.includes(key)) {
       shouldRevalidate = true;
     } else if (fetcher && fetcher.state !== "idle" && fetcher.data === void 0) {
       shouldRevalidate = isRevalidationRequired;
@@ -3206,20 +3187,21 @@ async function callLoaderOrAction(type, request, match, manifest, mapRouteProper
 async function convertHandlerResultToDataResult(handlerResult) {
   let {
     result,
-    type
+    type,
+    status
   } = handlerResult;
   if (isResponse(result)) {
-    let data2;
+    let data;
     try {
       let contentType = result.headers.get("Content-Type");
       if (contentType && /\bapplication\/json\b/.test(contentType)) {
         if (result.body == null) {
-          data2 = null;
+          data = null;
         } else {
-          data2 = await result.json();
+          data = await result.json();
         }
       } else {
-        data2 = await result.text();
+        data = await result.text();
       }
     } catch (e) {
       return {
@@ -3230,58 +3212,38 @@ async function convertHandlerResultToDataResult(handlerResult) {
     if (type === ResultType.error) {
       return {
         type: ResultType.error,
-        error: new ErrorResponseImpl(result.status, result.statusText, data2),
+        error: new ErrorResponseImpl(result.status, result.statusText, data),
         statusCode: result.status,
         headers: result.headers
       };
     }
     return {
       type: ResultType.data,
-      data: data2,
+      data,
       statusCode: result.status,
       headers: result.headers
     };
   }
   if (type === ResultType.error) {
-    if (isDataWithResponseInit(result)) {
-      var _result$init2;
-      if (result.data instanceof Error) {
-        var _result$init;
-        return {
-          type: ResultType.error,
-          error: result.data,
-          statusCode: (_result$init = result.init) == null ? void 0 : _result$init.status
-        };
-      }
-      result = new ErrorResponseImpl(((_result$init2 = result.init) == null ? void 0 : _result$init2.status) || 500, void 0, result.data);
-    }
     return {
       type: ResultType.error,
       error: result,
-      statusCode: isRouteErrorResponse(result) ? result.status : void 0
+      statusCode: isRouteErrorResponse(result) ? result.status : status
     };
   }
   if (isDeferredData(result)) {
-    var _result$init3, _result$init4;
+    var _result$init, _result$init2;
     return {
       type: ResultType.deferred,
       deferredData: result,
-      statusCode: (_result$init3 = result.init) == null ? void 0 : _result$init3.status,
-      headers: ((_result$init4 = result.init) == null ? void 0 : _result$init4.headers) && new Headers(result.init.headers)
-    };
-  }
-  if (isDataWithResponseInit(result)) {
-    var _result$init5, _result$init6;
-    return {
-      type: ResultType.data,
-      data: result.data,
-      statusCode: (_result$init5 = result.init) == null ? void 0 : _result$init5.status,
-      headers: (_result$init6 = result.init) != null && _result$init6.headers ? new Headers(result.init.headers) : void 0
+      statusCode: (_result$init = result.init) == null ? void 0 : _result$init.status,
+      headers: ((_result$init2 = result.init) == null ? void 0 : _result$init2.headers) && new Headers(result.init.headers)
     };
   }
   return {
     type: ResultType.data,
-    data: result
+    data: result,
+    statusCode: status
   };
 }
 function normalizeRelativeRoutingRedirectResponse(response, request, routeId, matches, basename, v7_relativeSplatPath) {
@@ -3577,9 +3539,6 @@ function isErrorResult(result) {
 function isRedirectResult(result) {
   return (result && result.type) === ResultType.redirect;
 }
-function isDataWithResponseInit(value) {
-  return typeof value === "object" && value != null && "type" in value && "data" in value && "init" in value && value.type === "DataWithResponseInit";
-}
 function isDeferredData(value) {
   let deferred = value;
   return deferred && typeof deferred === "object" && typeof deferred.data === "object" && typeof deferred.subscribe === "function" && typeof deferred.cancel === "function" && typeof deferred.resolveData === "function";
@@ -3731,7 +3690,7 @@ function getSubmittingNavigation(location, submission) {
   };
   return navigation;
 }
-function getLoadingFetcher(submission, data2) {
+function getLoadingFetcher(submission, data) {
   if (submission) {
     let fetcher = {
       state: "loading",
@@ -3741,7 +3700,7 @@ function getLoadingFetcher(submission, data2) {
       formData: submission.formData,
       json: submission.json,
       text: submission.text,
-      data: data2
+      data
     };
     return fetcher;
   } else {
@@ -3753,7 +3712,7 @@ function getLoadingFetcher(submission, data2) {
       formData: void 0,
       json: void 0,
       text: void 0,
-      data: data2
+      data
     };
     return fetcher;
   }
@@ -3771,7 +3730,7 @@ function getSubmittingFetcher(submission, existingFetcher) {
   };
   return fetcher;
 }
-function getDoneFetcher(data2) {
+function getDoneFetcher(data) {
   let fetcher = {
     state: "idle",
     formMethod: void 0,
@@ -3780,7 +3739,7 @@ function getDoneFetcher(data2) {
     formData: void 0,
     json: void 0,
     text: void 0,
-    data: data2
+    data
   };
   return fetcher;
 }
@@ -3812,7 +3771,7 @@ function persistAppliedTransitions(_window, transitions) {
   }
 }
 /**
- * React Router v6.26.0
+ * React Router v6.25.0
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -4077,7 +4036,7 @@ function RenderedRoute(_ref) {
   }, children);
 }
 function _renderMatches(matches, parentMatches, dataRouterState, future) {
-  var _dataRouterState;
+  var _dataRouterState2;
   if (parentMatches === void 0) {
     parentMatches = [];
   }
@@ -4088,20 +4047,15 @@ function _renderMatches(matches, parentMatches, dataRouterState, future) {
     future = null;
   }
   if (matches == null) {
-    var _future;
-    if (!dataRouterState) {
-      return null;
-    }
-    if (dataRouterState.errors) {
-      matches = dataRouterState.matches;
-    } else if ((_future = future) != null && _future.v7_partialHydration && parentMatches.length === 0 && !dataRouterState.initialized && dataRouterState.matches.length > 0) {
+    var _dataRouterState;
+    if ((_dataRouterState = dataRouterState) != null && _dataRouterState.errors) {
       matches = dataRouterState.matches;
     } else {
       return null;
     }
   }
   let renderedMatches = matches;
-  let errors = (_dataRouterState = dataRouterState) == null ? void 0 : _dataRouterState.errors;
+  let errors = (_dataRouterState2 = dataRouterState) == null ? void 0 : _dataRouterState2.errors;
   if (errors != null) {
     let errorIndex = renderedMatches.findIndex((m2) => m2.route.id && (errors == null ? void 0 : errors[m2.route.id]) !== void 0);
     !(errorIndex >= 0) ? invariant(false) : void 0;
@@ -4288,7 +4242,7 @@ function useNavigateStable() {
 function Navigate(_ref4) {
   let {
     to,
-    replace: replace2,
+    replace,
     state,
     relative
   } = _ref4;
@@ -4307,10 +4261,10 @@ function Navigate(_ref4) {
   let path = resolveTo(to, getResolveToMatches(matches, future.v7_relativeSplatPath), locationPathname, relative === "path");
   let jsonPath = JSON.stringify(path);
   reactExports.useEffect(() => navigate(JSON.parse(jsonPath), {
-    replace: replace2,
+    replace,
     state,
     relative
-  }), [navigate, jsonPath, relative, replace2, state]);
+  }), [navigate, jsonPath, relative, replace, state]);
   return null;
 }
 function Outlet(props) {
@@ -4442,8 +4396,8 @@ class AwaitErrorBoundary extends reactExports.Component {
       Object.defineProperty(resolve, "_tracked", {
         get: () => true
       });
-      promise = resolve.then((data2) => Object.defineProperty(resolve, "_data", {
-        get: () => data2
+      promise = resolve.then((data) => Object.defineProperty(resolve, "_data", {
+        get: () => data
       }), (error) => Object.defineProperty(resolve, "_error", {
         get: () => error
       }));
@@ -4473,8 +4427,8 @@ function ResolveAwait(_ref8) {
   let {
     children
   } = _ref8;
-  let data2 = useAsyncValue();
-  let toRender = typeof children === "function" ? children(data2) : children;
+  let data = useAsyncValue();
+  let toRender = typeof children === "function" ? children(data) : children;
   return /* @__PURE__ */ reactExports.createElement(reactExports.Fragment, null, toRender);
 }
 function mapRouteProperties(route) {
@@ -4510,13 +4464,12 @@ export {
   DataRouterContext as D,
   ErrorResponseImpl as E,
   DeferredData as F,
-  isRouteErrorResponse as G,
-  data as H,
-  redirect as I,
-  useRouteError as J,
-  useAsyncError as K,
-  Await as L,
-  getAugmentedNamespace as M,
+  redirect as G,
+  isRouteErrorResponse as H,
+  useRouteError as I,
+  useAsyncError as J,
+  Await as K,
+  getAugmentedNamespace as L,
   Navigate as N,
   Outlet as O,
   React as R,

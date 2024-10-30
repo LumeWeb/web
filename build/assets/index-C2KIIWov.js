@@ -1,4 +1,4 @@
-import { h as commonjsGlobal, r as reactExports, M as getAugmentedNamespace, g as getDefaultExportFromCjs, R as React } from "./index-DqVokHLY.js";
+import { h as commonjsGlobal, r as reactExports, L as getAugmentedNamespace, g as getDefaultExportFromCjs, R as React } from "./index-C3JligFb.js";
 var errorStackParser = { exports: {} };
 var stackframe = { exports: {} };
 var hasRequiredStackframe;
@@ -5180,7 +5180,6 @@ var defaults = {
   parameterLimit: 1e3,
   parseArrays: true,
   plainObjects: false,
-  strictDepth: false,
   strictNullHandling: false
 };
 var interpretNumericEntities = function(str) {
@@ -5307,9 +5306,6 @@ var parseKeys = function parseQueryStringKeys(givenKey, val, options, valuesPars
     keys2.push(segment[1]);
   }
   if (segment) {
-    if (options.strictDepth === true) {
-      throw new RangeError("Input depth exceeded depth option of " + options.depth + " and strictDepth is true");
-    }
     keys2.push("[" + key.slice(segment.index) + "]");
   }
   return parseObject(keys2, val, options, valuesParsed);
@@ -5356,7 +5352,6 @@ var normalizeParseOptions = function normalizeParseOptions2(opts) {
     parameterLimit: typeof opts.parameterLimit === "number" ? opts.parameterLimit : defaults.parameterLimit,
     parseArrays: opts.parseArrays !== false,
     plainObjects: typeof opts.plainObjects === "boolean" ? opts.plainObjects : defaults.plainObjects,
-    strictDepth: typeof opts.strictDepth === "boolean" ? !!opts.strictDepth : defaults.strictDepth,
     strictNullHandling: typeof opts.strictNullHandling === "boolean" ? opts.strictNullHandling : defaults.strictNullHandling
   };
 };
