@@ -1,3 +1,3 @@
-module go.lumeweb.com/web/go/portal-admin
+module go.lumeweb.com/web/portal-admin
 
 go 1.23
