@@ -3,8 +3,8 @@
 # Based off https://github.com/SiaFoundation/web/blob/6c7e3681853d7101d34b7f11c246fafd11dea275/scripts/release-go.sh
 
 APPS="@lumeweb/portal-dashboard,@lumeweb/portal-admin"
-go_releases=()
-modified_apps=()
+declare -a go_releases
+declare -a modified_apps
 
 for app in $(echo $APPS | tr ',' ' ')
 do
@@ -26,6 +26,7 @@ do
       mkdir -p go/$APP_NAME/build
       rm -rf go/$APP_NAME/build/*
       cp -R apps/$APP_NAME/build/client/* go/$APP_NAME/build/
+
       go_releases+=("$go_release")
       modified_apps+=("$APP_NAME")
     else
@@ -40,15 +41,27 @@ if [ ${#go_releases[@]} -gt 0 ]
 then
   echo "Releasing: ${go_releases[*]}"
 
-  # Targeted git add for each modified app
+  # First commit the build files
   for app in "${modified_apps[@]}"
   do
     git add go/$app/build
   done
-
   git commit -m "chore: export ${go_releases[*]}"
-  for tag in "${go_releases[@]}"
+
+  # Now create the subtree splits and tags
+  for i in "${!modified_apps[@]}"
   do
-    git tag -a $tag -m "Go module $tag"
+    app="${modified_apps[$i]}"
+    release="${go_releases[$i]}"
+    echo "Creating tag $release for $app"
+
+    # Create subtree split
+    git subtree split --prefix=go/$app -b "temp-$app"
+
+    # Create tag
+    git tag -a "$release" "temp-$app" -m "Go module $release"
+
+    # Clean up
+    git branch -D "temp-$app"
   done
 fi
