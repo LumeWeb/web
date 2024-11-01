@@ -11,8 +11,7 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      apps: ${{ steps.get_modified_apps.outputs.apps }}
-      versions: ${{ steps.get_modified_apps.outputs.versions }}
+      matrix: ${{ steps.get_modified_apps.outputs.matrix }}
       changes_exist: ${{ steps.release.outputs.changes_exist }}
       commit_hash: ${{ steps.release.outputs.commit_hash }}
     steps:
@@ -37,42 +36,35 @@ jobs:
         run: |
           ./scripts/release-go.sh
           if [ -n "$(git status --porcelain)" ]; then
+            git push origin HEAD:develop
             echo "changes_exist=true" >> "$GITHUB_OUTPUT"
             echo "commit_hash=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           else
             echo "changes_exist=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Push changes
-        if: steps.release.outputs.changes_exist == 'true'
-        run: |
-          git push origin HEAD:develop
-
       - name: Get modified apps info
         if: steps.release.outputs.changes_exist == 'true'
         id: get_modified_apps
         run: |
-          APPS=$(cat /tmp/modified_apps.txt | jq -R -s -c 'split("\n")[:-1]')
-          VERSIONS=$(cat /tmp/module_versions.txt | jq -R -s -c 'split("\n")[:-1]')
-          echo "apps=$APPS" >> "$GITHUB_OUTPUT"
-          echo "versions=$VERSIONS" >> "$GITHUB_OUTPUT"
+          # Create matrix parameter directly from the files
+          matrix=$(paste -d, /tmp/modified_apps.txt /tmp/module_versions.txt | \
+            jq -R 'split(",") | {app: .[0], version: .[1]}' | \
+            jq -s '{include: .}' | tr -d '\n')
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
 
   dispatch:
     needs: prepare
     if: needs.prepare.outputs.changes_exist == 'true'
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        include:
-          - app: ${{ fromJSON(needs.prepare.outputs.apps) }}
-            version: ${{ fromJSON(needs.prepare.outputs.versions) }}
-      max-parallel: 1
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
     steps:
       - name: Dispatch UI update
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PAT_REPOSITORY_DISPATCH }}
-          repository: lumeweb/portal-plugin-${{ matrix.app }}
+          repository: LumeWeb/portal-plugin-${{ matrix.app }}
           event-type: update-ui
           client-payload: |
             {
