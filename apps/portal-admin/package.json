@@ -9,5 +9,8 @@
     "start": "remix vite:dev  --mode production",
     "build": "remix vite:build",
     "serve": "remix preview"
+  },
+  "dependencies": {
+    "portal-shared": "workspace:*"
   }
 }
