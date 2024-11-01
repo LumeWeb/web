@@ -12,8 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.get_modified_apps.outputs.matrix }}
-      changes_exist: ${{ steps.release.outputs.changes_exist }}
-      commit_hash: ${{ steps.release.outputs.commit_hash }}
+      has_changes: ${{ steps.get_modified_apps.outputs.has_changes }}
     steps:
       - name: Checkout all commits
         uses: actions/checkout@v3
@@ -35,19 +34,19 @@ jobs:
         id: release
         run: |
           ./scripts/release-go.sh
-          # Check only for staged/unstaged changes to tracked files
-          if git diff-index --quiet HEAD --; then
-            echo "changes_exist=false" >> "$GITHUB_OUTPUT"
-          else
+          if [ -f "/tmp/modified_apps.txt" ] && [ -s "/tmp/modified_apps.txt" ]; then
             git push origin HEAD:develop
-            echo "changes_exist=true" >> "$GITHUB_OUTPUT"
-            echo "commit_hash=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Get modified apps info
-        if: steps.release.outputs.changes_exist == 'true'
         id: get_modified_apps
         run: |
+          if [ ! -f "/tmp/modified_apps.txt" ] || [ ! -s "/tmp/modified_apps.txt" ]; then
+            echo "matrix={\"include\":[]}" >> "$GITHUB_OUTPUT"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           # Use jq to read the mapping file and create the matrix
           while IFS=, read -r app version; do
             # Get repository name from mapping file, fallback to package name if not found
@@ -60,10 +59,12 @@ jobs:
             jq -R 'split(",") | {app: .[0], version: .[1]}' | \
             jq -s '{include: .}' | tr -d '\n')
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          echo "commit_hash=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
   dispatch:
     needs: prepare
-    if: needs.prepare.outputs.changes_exist == 'true'
+    if: needs.prepare.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
@@ -76,7 +77,7 @@ jobs:
           event-type: update-ui
           client-payload: |
             {
-              "commit_hash": "${{ needs.prepare.outputs.commit_hash }}",
+              "commit_hash": "${{ env.commit_hash }}",
               "version": "${{ matrix.version }}",
               "app_name": "${{ matrix.app }}",
               "repository": "${{ github.repository }}",
