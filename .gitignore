@@ -46,3 +46,5 @@ apps/*/.astro
 apps/*/build
 
 .docusaurus
+.turbo
+**/.turbo
