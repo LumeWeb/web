@@ -36,10 +36,8 @@ jobs:
         run: |
           ./scripts/release-go.sh
           if [ -f "/tmp/modified_apps.txt" ] && [ -s "/tmp/modified_apps.txt" ]; then
-            # Extract branch name from the full ref
             BRANCH_NAME=${GITHUB_REF#refs/heads/}
             git push origin HEAD:${BRANCH_NAME}
-            # Record the commit hash
             echo "commit_hash=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
 
@@ -52,17 +50,18 @@ jobs:
             exit 0
           fi
 
-          # Use jq to read the mapping file and create the matrix
+          # Read the mapping file and create the matrix
           while IFS=, read -r app version; do
-            # Strip 'portal-' prefix if it exists to avoid duplication
-            app_name=${app#portal-}
-            repo=$(jq -r --arg pkg "$app" '.[$pkg] // $pkg' .github/config/repo-names.json)
-            echo "$app_name,$version" >> /tmp/mapped_apps.txt
+            # Get base name without portal- prefix for repository mapping
+            base_name=${app#portal-}
+            # Create the repository name with portal-plugin- prefix
+            repo="portal-plugin-$base_name"
+            echo "$app,$version,$repo" >> /tmp/mapped_apps.txt
           done < <(paste -d, /tmp/modified_apps.txt /tmp/module_versions.txt)
 
-          # Create matrix parameter using the mapped names
+          # Create matrix parameter
           matrix=$(cat /tmp/mapped_apps.txt | \
-            jq -R 'split(",") | {app: .[0], version: .[1]}' | \
+            awk -F, '{print "{\"app\":\"" $1 "\",\"version\":\"" $2 "\",\"repo\":\"" $3 "\"}"}' | \
             jq -s '{include: .}' | tr -d '\n')
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
           echo "has_changes=true" >> "$GITHUB_OUTPUT"
@@ -78,7 +77,7 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PAT_TOKEN }}
-          repository: LumeWeb/portal-plugin-${{ matrix.app }}
+          repository: LumeWeb/${{ matrix.repo }}
           event-type: update-ui
           client-payload: |
             {
