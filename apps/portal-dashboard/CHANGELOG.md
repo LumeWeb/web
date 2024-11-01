@@ -1,5 +1,13 @@
 # @lumeweb/portal-dashboard
 
+## 0.2.4
+
+### Patch Changes
+
+- fd63b75: revert updating zustand
+- Updated dependencies [fd63b75]
+  - portal-shared@0.1.2
+
 ## 0.2.3
 
 ### Patch Changes
