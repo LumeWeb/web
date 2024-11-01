@@ -47,8 +47,15 @@ jobs:
         if: steps.release.outputs.changes_exist == 'true'
         id: get_modified_apps
         run: |
-          # Create matrix parameter directly from the files
-          matrix=$(paste -d, /tmp/modified_apps.txt /tmp/module_versions.txt | \
+          # Use jq to read the mapping file and create the matrix
+          while IFS=, read -r app version; do
+            # Get repository name from mapping file, fallback to package name if not found
+            repo=$(jq -r --arg pkg "$app" '.[$pkg] // $pkg' .github/config/repo-names.json)
+            echo "$repo,$version" >> /tmp/mapped_apps.txt
+          done < <(paste -d, /tmp/modified_apps.txt /tmp/module_versions.txt)
+
+          # Create matrix parameter using the mapped names
+          matrix=$(cat /tmp/mapped_apps.txt | \
             jq -R 'split(",") | {app: .[0], version: .[1]}' | \
             jq -s '{include: .}' | tr -d '\n')
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
