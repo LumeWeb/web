@@ -38,6 +38,6 @@ jobs:
       - if: steps.changesets.outputs.published == 'true'
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.PAT_REPOSITORY_DISPATCH }}
+          token: ${{ secrets.PAT_TOKEN }}
           repository: lumeweb/web
           event-type: release-go
