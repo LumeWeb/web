@@ -1,5 +1,12 @@
 # @lumeweb/portal-dashboard
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [217ca20]
+  - portal-shared@0.1.1
+
 ## 0.2.2
 
 ### Patch Changes
