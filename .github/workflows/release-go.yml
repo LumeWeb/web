@@ -8,8 +8,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  release-go:
+  prepare:
     runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.get_modified_apps.outputs.apps }}
+      versions: ${{ steps.get_modified_apps.outputs.versions }}
+      changes_exist: ${{ steps.release.outputs.changes_exist }}
+      commit_hash: ${{ steps.release.outputs.commit_hash }}
     steps:
       - name: Checkout all commits
         uses: actions/checkout@v3
@@ -28,21 +33,52 @@ jobs:
           git config user.email github-actions@github.com
 
       - name: Release
+        id: release
         run: |
           ./scripts/release-go.sh
           if [ -n "$(git status --porcelain)" ]; then
-            echo "CHANGES_EXIST=true" >> $GITHUB_ENV
+            echo "changes_exist=true" >> "$GITHUB_OUTPUT"
+            echo "commit_hash=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           else
-            echo "CHANGES_EXIST=false" >> $GITHUB_ENV
+            echo "changes_exist=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Push changes and tags
-        if: env.CHANGES_EXIST == 'true'
+      - name: Push changes
+        if: steps.release.outputs.changes_exist == 'true'
         run: |
           git push origin HEAD:develop
-          git push --tags
 
-      - name: Cleanup
+      - name: Get modified apps info
+        if: steps.release.outputs.changes_exist == 'true'
+        id: get_modified_apps
         run: |
-          git checkout develop
-          git branch -D release || true
+          APPS=$(cat /tmp/modified_apps.txt | jq -R -s -c 'split("\n")[:-1]')
+          VERSIONS=$(cat /tmp/module_versions.txt | jq -R -s -c 'split("\n")[:-1]')
+          echo "apps=$APPS" >> "$GITHUB_OUTPUT"
+          echo "versions=$VERSIONS" >> "$GITHUB_OUTPUT"
+
+  dispatch:
+    needs: prepare
+    if: needs.prepare.outputs.changes_exist == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - app: ${{ fromJSON(needs.prepare.outputs.apps) }}
+            version: ${{ fromJSON(needs.prepare.outputs.versions) }}
+      max-parallel: 1
+    steps:
+      - name: Dispatch UI update
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT_REPOSITORY_DISPATCH }}
+          repository: lumeweb/portal-plugin-${{ matrix.app }}
+          event-type: update-ui
+          client-payload: |
+            {
+              "commit_hash": "${{ needs.prepare.outputs.commit_hash }}",
+              "version": "${{ matrix.version }}",
+              "app_name": "${{ matrix.app }}",
+              "repository": "${{ github.repository }}",
+              "ref": "${{ github.ref }}"
+            }
