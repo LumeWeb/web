@@ -161,7 +161,7 @@
     "ws": "^8.17.1",
     "xml2js": "^0.6.2",
     "zod": "^3.22.4",
-    "zustand": "^5.0.1"
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.5",
