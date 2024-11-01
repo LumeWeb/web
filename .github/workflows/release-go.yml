@@ -35,12 +35,13 @@ jobs:
         id: release
         run: |
           ./scripts/release-go.sh
-          if [ -n "$(git status --porcelain)" ]; then
+          # Check only for staged/unstaged changes to tracked files
+          if git diff-index --quiet HEAD --; then
+            echo "changes_exist=false" >> "$GITHUB_OUTPUT"
+          else
             git push origin HEAD:develop
             echo "changes_exist=true" >> "$GITHUB_OUTPUT"
             echo "commit_hash=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          else
-            echo "changes_exist=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Get modified apps info
