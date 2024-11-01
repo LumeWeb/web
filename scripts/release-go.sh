@@ -28,14 +28,22 @@ do
 
   # Set up the build directory
   mkdir -p go/$APP_NAME/build
-  rm -rf go/$APP_NAME/build/*
-  cp -R apps/$APP_NAME/build/client/* go/$APP_NAME/build/
 
-  # Track modified app and its version
-  modified_apps+=("$APP_NAME")
-  module_versions+=("$version")
-  echo "$APP_NAME" >> /tmp/modified_apps.txt
-  echo "$version" >> /tmp/module_versions.txt
+  # Check if there are actual differences before copying
+  if ! diff -r apps/$APP_NAME/build/client/ go/$APP_NAME/build/ > /dev/null 2>&1; then
+    echo "Changes detected in $APP_NAME build output"
+    # Remove old files and copy new ones
+    rm -rf go/$APP_NAME/build/*
+    cp -R apps/$APP_NAME/build/client/* go/$APP_NAME/build/
+
+    # Track modified app and its version
+    modified_apps+=("$APP_NAME")
+    module_versions+=("$version")
+    echo "$APP_NAME" >> /tmp/modified_apps.txt
+    echo "$version" >> /tmp/module_versions.txt
+  else
+    echo "No changes detected in $APP_NAME build output"
+  fi
 done
 
 echo ""
