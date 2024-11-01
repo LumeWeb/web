@@ -1,5 +1,11 @@
 # @lumeweb/portal-dashboard
 
+## 0.2.2
+
+### Patch Changes
+
+- 05e7eed: Dummy version bump for go release
+
 ## 0.2.1
 
 ### Patch Changes
