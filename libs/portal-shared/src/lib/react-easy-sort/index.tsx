@@ -1,4 +1,4 @@
-import arrayMove from "array-move";
+import { arrayMoveImmutable as arrayMove } from "array-move";
 import React, { HTMLAttributes } from "react";
 
 import { findItemIndexAtPosition } from "libs/portal-shared/src/lib/react-easy-sort/helpers";
