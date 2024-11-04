@@ -167,7 +167,7 @@
     "@changesets/cli": "^2.27.5",
     "@docusaurus/module-type-aliases": "^3.3",
     "@docusaurus/types": "^3.2.1",
-    "@faker-js/faker": "^8.4.1",
+    "@faker-js/faker": "^9.2.0",
     "@libp2p/interfaces": "^3.3.2",
     "@nrwl/workspace": "19.8.4",
     "@remix-run/eslint-config": "^2.8.1",
