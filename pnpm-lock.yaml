@@ -35,8 +35,8 @@ importers:
         specifier: ^3.1.2
         version: 3.1.6
       '@astrojs/tailwind':
-        specifier: ^5.1.0
-        version: 5.1.0(astro@4.16.6(@types/node@22.2.0)(rollup@4.24.0)(sass@1.80.6)(terser@5.31.3)(typescript@5.6.3))(tailwindcss@3.4.6(ts-node@10.9.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/node@22.2.0)(typescript@5.6.3)))(ts-node@10.9.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/node@22.2.0)(typescript@5.6.3))
+        specifier: ^5.1.2
+        version: 5.1.2(astro@4.16.6(@types/node@22.2.0)(rollup@4.24.0)(sass@1.80.6)(terser@5.31.3)(typescript@5.6.3))(tailwindcss@3.4.6(ts-node@10.9.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/node@22.2.0)(typescript@5.6.3)))(ts-node@10.9.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/node@22.2.0)(typescript@5.6.3))
       '@conform-to/react':
         specifier: ^1.1.0
         version: 1.1.5(react@18.2.0)
@@ -628,8 +628,8 @@ importers:
         specifier: ^3.1.2
         version: 3.1.6
       '@astrojs/tailwind':
-        specifier: ^5.1.0
-        version: 5.1.0(astro@4.16.6(@types/node@22.2.0)(rollup@4.24.0)(sass@1.80.6)(terser@5.31.3)(typescript@5.6.3))(tailwindcss@3.4.6(ts-node@10.9.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/node@22.2.0)(typescript@5.6.3)))(ts-node@10.9.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/node@22.2.0)(typescript@5.6.3))
+        specifier: ^5.1.2
+        version: 5.1.2(astro@4.16.6(@types/node@22.2.0)(rollup@4.24.0)(sass@1.80.6)(terser@5.31.3)(typescript@5.6.3))(tailwindcss@3.4.6(ts-node@10.9.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/node@22.2.0)(typescript@5.6.3)))(ts-node@10.9.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/node@22.2.0)(typescript@5.6.3))
 
   apps/portal-admin:
     dependencies:
@@ -927,10 +927,10 @@ packages:
   '@astrojs/sitemap@3.1.6':
     resolution: {integrity: sha512-1Qp2NvAzVImqA6y+LubKi1DVhve/hXXgFvB0szxiipzh7BvtuKe4oJJ9dXSqaubaTkt4nMa6dv6RCCAYeB6xaQ==}
 
-  '@astrojs/tailwind@5.1.0':
-    resolution: {integrity: sha512-BJoCDKuWhU9FT2qYg+fr6Nfb3qP4ShtyjXGHKA/4mHN94z7BGcmauQK23iy+YH5qWvTnhqkd6mQPQ1yTZTe9Ig==}
+  '@astrojs/tailwind@5.1.2':
+    resolution: {integrity: sha512-IvOF0W/dtHElcXvhrPR35nHmhyV3cfz1EzPitMGtU7sYy9Hci3BNK1To6FWmVuuNKPxza1IgCGetSynJZL7fOg==}
     peerDependencies:
-      astro: ^3.0.0 || ^4.0.0
+      astro: ^3.0.0 || ^4.0.0 || ^5.0.0-beta.0
       tailwindcss: ^3.0.24
 
   '@astrojs/telemetry@3.1.0':
@@ -6098,6 +6098,13 @@ packages:
 
   autoprefixer@10.4.19:
     resolution: {integrity: sha512-BaENR2+zBZ8xXhM4pUaKUxlVdxZ0EZhjvbopwnXmxRUfqDmwSpC2lAi/QXvx7NRdPCo1WKEcEF6mV64si1z4Ew==}
+    engines: {node: ^10 || ^12 || >=14}
+    hasBin: true
+    peerDependencies:
+      postcss: ^8.1.0
+
+  autoprefixer@10.4.20:
+    resolution: {integrity: sha512-XY25y5xSv/wEoqzDyXXME4AFfkZI0P23z6Fs3YgymDnKJkCGOnkL0iTxCa85UTqaSgfcqyf3UA6+c7wUvx/16g==}
     engines: {node: ^10 || ^12 || >=14}
     hasBin: true
     peerDependencies:
@@ -14484,10 +14491,10 @@ snapshots:
       stream-replace-string: 2.0.0
       zod: 3.23.8
 
-  '@astrojs/tailwind@5.1.0(astro@4.16.6(@types/node@22.2.0)(rollup@4.24.0)(sass@1.80.6)(terser@5.31.3)(typescript@5.6.3))(tailwindcss@3.4.6(ts-node@10.9.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/node@22.2.0)(typescript@5.6.3)))(ts-node@10.9.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/node@22.2.0)(typescript@5.6.3))':
+  '@astrojs/tailwind@5.1.2(astro@4.16.6(@types/node@22.2.0)(rollup@4.24.0)(sass@1.80.6)(terser@5.31.3)(typescript@5.6.3))(tailwindcss@3.4.6(ts-node@10.9.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/node@22.2.0)(typescript@5.6.3)))(ts-node@10.9.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/node@22.2.0)(typescript@5.6.3))':
     dependencies:
       astro: 4.16.6(@types/node@22.2.0)(rollup@4.24.0)(sass@1.80.6)(terser@5.31.3)(typescript@5.6.3)
-      autoprefixer: 10.4.19(postcss@8.4.49)
+      autoprefixer: 10.4.20(postcss@8.4.49)
       postcss: 8.4.49
       postcss-load-config: 4.0.2(postcss@8.4.49)(ts-node@10.9.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/node@22.2.0)(typescript@5.6.3))
       tailwindcss: 3.4.6(ts-node@10.9.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/node@22.2.0)(typescript@5.6.3))
@@ -14605,7 +14612,7 @@ snapshots:
     dependencies:
       '@babel/compat-data': 7.24.9
       '@babel/helper-validator-option': 7.24.8
-      browserslist: 4.23.2
+      browserslist: 4.24.0
       lru-cache: 5.1.1
       semver: 6.3.1
 
@@ -22810,6 +22817,16 @@ snapshots:
       postcss: 8.4.49
       postcss-value-parser: 4.2.0
 
+  autoprefixer@10.4.20(postcss@8.4.49):
+    dependencies:
+      browserslist: 4.24.0
+      caniuse-lite: 1.0.30001669
+      fraction.js: 4.3.7
+      normalize-range: 0.1.2
+      picocolors: 1.1.1
+      postcss: 8.4.49
+      postcss-value-parser: 4.2.0
+
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.0.0
@@ -23280,8 +23297,8 @@ snapshots:
 
   caniuse-api@3.0.0:
     dependencies:
-      browserslist: 4.23.2
-      caniuse-lite: 1.0.30001643
+      browserslist: 4.24.0
+      caniuse-lite: 1.0.30001669
       lodash.memoize: 4.1.2
       lodash.uniq: 4.5.0
 
@@ -23680,7 +23697,7 @@ snapshots:
 
   core-js-compat@3.37.1:
     dependencies:
-      browserslist: 4.23.2
+      browserslist: 4.24.0
 
   core-js-pure@3.37.1: {}
 
@@ -23860,8 +23877,8 @@ snapshots:
 
   cssnano-preset-advanced@6.1.2(postcss@8.4.49):
     dependencies:
-      autoprefixer: 10.4.19(postcss@8.4.49)
-      browserslist: 4.23.2
+      autoprefixer: 10.4.20(postcss@8.4.49)
+      browserslist: 4.24.0
       cssnano-preset-default: 6.1.2(postcss@8.4.49)
       postcss: 8.4.49
       postcss-discard-unused: 6.0.5(postcss@8.4.49)
@@ -23871,7 +23888,7 @@ snapshots:
 
   cssnano-preset-default@6.1.2(postcss@8.4.49):
     dependencies:
-      browserslist: 4.23.2
+      browserslist: 4.24.0
       css-declaration-sorter: 7.2.0(postcss@8.4.49)
       cssnano-utils: 4.0.2(postcss@8.4.49)
       postcss: 8.4.49
@@ -29683,7 +29700,7 @@ snapshots:
 
   postcss-colormin@6.1.0(postcss@8.4.49):
     dependencies:
-      browserslist: 4.23.2
+      browserslist: 4.24.0
       caniuse-api: 3.0.0
       colord: 2.9.3
       postcss: 8.4.49
@@ -29691,7 +29708,7 @@ snapshots:
 
   postcss-convert-values@6.1.0(postcss@8.4.49):
     dependencies:
-      browserslist: 4.23.2
+      browserslist: 4.24.0
       postcss: 8.4.49
       postcss-value-parser: 4.2.0
 
@@ -29764,7 +29781,7 @@ snapshots:
 
   postcss-merge-rules@6.1.1(postcss@8.4.49):
     dependencies:
-      browserslist: 4.23.2
+      browserslist: 4.24.0
       caniuse-api: 3.0.0
       cssnano-utils: 4.0.2(postcss@8.4.49)
       postcss: 8.4.49
@@ -29784,7 +29801,7 @@ snapshots:
 
   postcss-minify-params@6.1.0(postcss@8.4.49):
     dependencies:
-      browserslist: 4.23.2
+      browserslist: 4.24.0
       cssnano-utils: 4.0.2(postcss@8.4.49)
       postcss: 8.4.49
       postcss-value-parser: 4.2.0
@@ -29863,7 +29880,7 @@ snapshots:
 
   postcss-normalize-unicode@6.1.0(postcss@8.4.49):
     dependencies:
-      browserslist: 4.23.2
+      browserslist: 4.24.0
       postcss: 8.4.49
       postcss-value-parser: 4.2.0
 
@@ -29890,7 +29907,7 @@ snapshots:
 
   postcss-reduce-initial@6.1.0(postcss@8.4.49):
     dependencies:
-      browserslist: 4.23.2
+      browserslist: 4.24.0
       caniuse-api: 3.0.0
       postcss: 8.4.49
 
@@ -31674,7 +31691,7 @@ snapshots:
 
   stylehacks@6.1.1(postcss@8.4.49):
     dependencies:
-      browserslist: 4.23.2
+      browserslist: 4.24.0
       postcss: 8.4.49
       postcss-selector-parser: 6.1.1
 
