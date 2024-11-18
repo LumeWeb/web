@@ -125,7 +125,7 @@
     "mime": "^4.0.1",
     "multiformats": "^13.0.0",
     "native-file-system-adapter": "^3.0.1",
-    "orval": "^6.24.0",
+    "orval": "^7.3.0",
     "otpauth": "^9.3.4",
     "p-defer": "^4.0.1",
     "p-mutex": "^0.1.0",
