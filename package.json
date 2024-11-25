@@ -102,7 +102,7 @@
     "date-fns": "^3.6.0",
     "detect-node": "^2.1.0",
     "docusaurus-plugin-matomo": "^0.0.8",
-    "embla-carousel-react": "^8.2.0",
+    "embla-carousel-react": "^8.5.1",
     "eslint": "^8.56.0",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-import": "^2.29.1",
