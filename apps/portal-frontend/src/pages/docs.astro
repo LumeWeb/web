@@ -13,41 +13,22 @@ import logos from "@/data/brand-logos";
     title="Secure storage starts here —let's talk"
     description="Connect with our team for support or inquiries."
     mobileTitle="Secure storage starts here"
+    client:load
   />
 
   <section class="bg-white py-[70px] md:py-[130px]">
     <div class="container">
       <div class="flex justify-center items-center gap-10">
-        <PricingCommunity
-          title="Community Metered"
-          description="Fair use"
-          priceType="Free"
-          features={[
-            "1 GB storage",
-            "1 GB bandwidth",
-            "Unlimited projects",
-            "Unlimited collaborators",
-          ]}
-          buttonText="Sign up now for free →"
-          url="#"
-        />
-
-        <PricingCommunityTwo
-          title="Community Metered"
-          description="Fair use"
-          priceType="Free"
-          features={[
-            "1 GB storage",
-            "1 GB bandwidth",
-            "Unlimited projects",
-            "Unlimited collaborators",
-          ]}
-          buttonText="Sign up now for free →"
-          url="#"
-        />
+        <PricingCommunity />
+        <PricingCommunityTwo />
       </div>
     </div>
   </section>
 
-  <BrandLogos logos={logos} logoType="dark" title="Powered & Trusted by" />
+  <BrandLogos
+    logos={logos}
+    logoType="dark"
+    title="Powered & Trusted by"
+    client:load
+  />
 </Layout>

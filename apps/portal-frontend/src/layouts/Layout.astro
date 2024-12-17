@@ -1,7 +1,6 @@
 ---
 import '@/styles/globals.css'
-import Nav from '@/components/Nav.jsx'
-import FooterDark from '@/components/FooterDark.jsx'
+import Navbar from '@/components/Navbar.jsx'
 import Footer from '@/components/Footer.jsx'
 
 const { title } = Astro.props
@@ -18,7 +17,7 @@ const { title } = Astro.props
 		<title>Lume - {title }</title>
 	</head>
 	<body class="bg-[#0D1D1C]">
-		<Nav client:load />
+		<Navbar client:load />
 		<main class="min-h-[220px]">
 			<slot />
 		</main>

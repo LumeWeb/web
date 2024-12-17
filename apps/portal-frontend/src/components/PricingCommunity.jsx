@@ -3,10 +3,35 @@ import iconUser from "../assets/icon-user-black.svg";
 import iconFolder from "../assets/icon-folder-black.svg";
 import iconDeliver from "../assets/icon-deliver-black.svg";
 import iconCheck from "../assets/icon-check-black.svg";
+import { useRef } from "react";
+import gsap from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 
 const PricingCommunity = () => {
+	const containerRef = useRef();
+
+	// useGSAP(() => {
+	// 	gsap.registerPlugin(ScrollTrigger);
+
+	// 	gsap.from(containerRef.current, {
+	// 		opacity: 0,
+	// 		yPercent: 50,
+	// 		ease: "power4.out",
+	// 		scrollTrigger: {
+	// 			trigger: containerRef.current,
+	// 			start: "top 85%",
+	// 			toggleActions: "play none none none",
+	// 			once: true,
+	// 		},
+	// 	});
+	// });
+
 	return (
-		<div className=" bg-[#E4E0D4] py-[28px] lg:py-[50px] px-[30px] lg:px-[40px] transition-all duration-300 ease-in-out w-full lg:w-1/2 max-w-[610px]">
+		<div
+			className=" bg-[#E4E0D4] py-[28px] lg:py-[50px] px-[30px] lg:px-[40px] transition-all duration-300 ease-in-out w-full lg:w-1/2 max-w-[610px]"
+			ref={containerRef}
+		>
 			<h3 className="text-[#0D1D1C] text-[21px] md:text-[40px] font-medium leading-10 mb-3 mb:mb-1">
 				Community Metered
 			</h3>

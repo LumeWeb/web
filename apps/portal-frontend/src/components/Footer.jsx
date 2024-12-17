@@ -35,7 +35,7 @@ const Footer = ({ theme }) => {
 							className={`${
 								theme === "dark"
 									? "text-[#F8F8F8]"
-									: "text-[#0D1D1C]"
+									: "text-[#0D1D1C] hover:!text-[#0c2d29]"
 							} basis-full flex-1 md:inline-block underline mb-4 text-base leading-[34px] transition ease-in-out duration-300 hover:text-white order-2 md:order-1`}
 						>
 							hello@lumeweb.com
@@ -48,7 +48,7 @@ const Footer = ({ theme }) => {
 									className={`${
 										theme === "dark"
 											? "text-[#F8F8F8]"
-											: "text-[#0D1D1C]"
+											: "text-[#0D1D1C] hover:!text-[#0c2d29]"
 									} text-base leading-[34px] transition ease-in-out duration-300 flex items-center gap-2 hover:text-white`}
 								>
 									{theme === "dark" ? (
@@ -107,7 +107,7 @@ const Footer = ({ theme }) => {
 									className={`${
 										theme === "dark"
 											? "text-[#F8F8F8]"
-											: "text-[#0D1D1C]"
+											: "text-[#0D1D1C] hover:!text-[#0c2d29]"
 									} text-base leading-[34px] transition ease-in-out duration-300 flex items-center gap-2 hover:text-white`}
 								>
 									{theme === "dark" ? (

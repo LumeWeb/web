@@ -1,8 +1,38 @@
 import Button from "./Button";
+import gsap from "gsap";
+import { useRef } from "react";
+import ScrollTrigger from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 
 const PricingItem = ({ pricingData, type = "dark" }) => {
+	const container = useRef();
+
+	gsap.registerPlugin(ScrollTrigger);
+
+	useGSAP(() => {
+		const tl = gsap.timeline({
+			scrollTrigger: {
+				trigger: container.current,
+				start: "top 80%",
+				toggleActions: "play none none none",
+				once: true,
+			},
+		});
+
+		tl.from(container.current, {
+			opacity: 0,
+			y: 50,
+			duration: 0.7,
+			delay: 1,
+			ease: "power1.out",
+		});
+	});
+
 	return (
-		<div className="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-2 md:gap-5 lg:gap-5">
+		<div
+			className="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-2 md:gap-5 lg:gap-5"
+			ref={container}
+		>
 			{pricingData.map((item, index) => (
 				<div
 					key={index}

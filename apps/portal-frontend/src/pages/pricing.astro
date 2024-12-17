@@ -15,12 +15,13 @@ import PricingContents from '@/data/pricing';
 		title="Transparent, simple pricing for secure file storage" 
 		description="Pay only for what you need, nothing more."
 		mobileTitle="Transparent, simple pricing"
+		client:load
 	/>
 	<section class="bg-white py-[44px] lg:py-[130px] md:py-[100px]">
 		<div class="container">
-			<Pricing pricingData={PricingContents} type="light" />
+			<Pricing pricingData={PricingContents} type="light" client:load />
 		</div>
 	</section>
 
-	<BrandLogos logos={logos} logoType="dark" title="Powered & Trusted by" />
+	<BrandLogos logos={logos} logoType="dark" title="Powered & Trusted by" client:load />
 </Layout>
