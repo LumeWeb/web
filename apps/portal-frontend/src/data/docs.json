@@ -1,0 +1,29 @@
+[
+    {
+        "id": 1,
+        "title": "December 15, 2024 Development & Roadmap Update",
+        "content": "We are doing progressive decentraliza. We are progressive decentralization.",
+        "categories": ["UPDATES", "ROADMAP", "Roadmap"],
+        "image": "./images/blog-1.png",
+        "buttonText": "Read more →",
+        "slug": "#"
+    },
+    {
+        "id": 2,
+        "title": "Introduction and Lume Quick Start Guide",
+        "content": "We are doing progressive decentraliza. We are progressive decentralization.",
+        "categories": ["SOP", "QUICKSTART", "FAQ"],
+        "image": "./images/blog-2.png",
+        "buttonText": "Read more →",
+        "slug": "#"
+    },
+    {
+        "id": 3,
+        "title": "December 15, 2024 Development & Roadmap Update",
+        "content": "We are doing progressive decentraliza. We are progressive decentralization.",
+        "categories": ["UPDATES", "ROADMAP"],
+        "image": "./images/blog-3.png",
+        "buttonText": "Read more →",
+        "slug": "#"
+    }
+]

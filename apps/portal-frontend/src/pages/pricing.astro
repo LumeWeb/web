@@ -1,0 +1,26 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+import BrandLogos from '@/components/BrandLogos';
+
+import logos from '@/data/brand-logos';
+
+import Pricing from '@/components/Pricing';
+import PricingContents from '@/data/pricing';
+---
+
+<Layout title="Pricing">
+
+	<PageHeader 
+		title="Transparent, simple pricing for secure file storage" 
+		description="Pay only for what you need, nothing more."
+		mobileTitle="Transparent, simple pricing"
+	/>
+	<section class="bg-white py-[44px] lg:py-[130px] md:py-[100px]">
+		<div class="container">
+			<Pricing pricingData={PricingContents} type="light" />
+		</div>
+	</section>
+
+	<BrandLogos logos={logos} logoType="dark" title="Powered & Trusted by" />
+</Layout>
