@@ -1,4 +1,41 @@
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import ScrollTrigger from "gsap/ScrollTrigger";
+import { useRef } from "react";
+
 const BrandLogos = ({ logos, title, logoType = "dark" }) => {
+	const logoContainer = useRef();
+	const titleRef = useRef();
+
+	useGSAP(() => {
+		gsap.registerPlugin(ScrollTrigger);
+
+		gsap.from(titleRef.current, {
+			opacity: 0,
+			y: 50,
+			duration: 0.5,
+			scrollTrigger: {
+				trigger: titleRef.current,
+				start: "top 85%",
+				toggleActions: "play none none none",
+				once: true,
+			},
+		});
+
+		gsap.from(logoContainer.current, {
+			opacity: 0,
+			y: 50,
+			duration: 0.5,
+			delay: 0.2,
+			scrollTrigger: {
+				trigger: logoContainer.current,
+				start: "top 85%",
+				toggleActions: "play none none none",
+				once: true,
+			},
+		});
+	});
+
 	return (
 		<section
 			className={`py-[40px] md:py-[90px] ${
@@ -14,14 +51,13 @@ const BrandLogos = ({ logos, title, logoType = "dark" }) => {
 									? "text-[#0D1D1C]"
 									: "text-[#F8F8F8]"
 							}`}
+							ref={titleRef}
 						>
 							{title}
 						</h2>
 					</div>
 
-					<div className="flex-grow">
-						{/* <BrandLogos logos={logos} logoType="light" /> */}
-
+					<div className="flex-grow" ref={logoContainer}>
 						<div className="flex flex-wrap gap-7 md:gap-10 flex-2 items-center justify-start md:justify-between">
 							{logoType === "light"
 								? logos.logoLight.map((logo) => (

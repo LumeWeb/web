@@ -21,6 +21,7 @@ import AboutImageMobileTwo from "../assets/about-mobile-2.png";
 		secondaryBtnText="Learn more about Lume →"
 		secondaryUrl="#"
 		mobileTitle="Insanely big files, with Lume"
+		client:load
 	/>
 
 	<AboutSection
@@ -31,6 +32,7 @@ import AboutImageMobileTwo from "../assets/about-mobile-2.png";
 		imgageMobileUrl={AboutImageMobile}
 		buttonText="Learn more →"
 		url="#"
+		client:load
 		
 	/>
 
@@ -44,9 +46,10 @@ import AboutImageMobileTwo from "../assets/about-mobile-2.png";
 		url="#"
 		theme="gray"
 		imagePosition="right"
+		client:load
 	/>
 
-	<BrandLogos logos={logos} logoType="light" title="Powered & Trusted by" />
+	<BrandLogos logos={logos} logoType="light" title="Powered & Trusted by" client:load />
 
-	<CallToAction />
+	<CallToAction client:load />
 </Layout>

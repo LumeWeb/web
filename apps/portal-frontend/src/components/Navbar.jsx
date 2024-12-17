@@ -2,35 +2,12 @@ import Logo from "../assets/site-logo.png";
 import Button from "./Button";
 import { useState } from "react";
 import FooterLogo from "../assets/footer-logo-light.png";
-
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { useRef } from "react";
-
 const Nav = () => {
 	// Correct destructuring of useState
 	const [toggleMenu, setToggleMenu] = useState(false);
 
-	const navAnimation = useRef();
-
 	const handleToggleMenu = () => {
 		setToggleMenu(!toggleMenu); // Toggle the menu state
-
-		// GSAP animation
-		const tl = gsap.timeline();
-
-		if (toggleMenu) {
-			useGSAP(
-				() => {
-					gsap.from(navAnimation.current, {
-						opacity: 0,
-						y: -50,
-						duration: 0.5,
-					});
-				},
-				{ scope: navAnimation.current }
-			);
-		}
 
 		// Disable scrolling when the menu is open
 		if (!toggleMenu) {
@@ -46,7 +23,7 @@ const Nav = () => {
 				<div className="container">
 					<div className="flex justify-between items-center">
 						<div className="flex items-center gap-[50px] 2xl:gap-[100px]">
-							<div className="relative z-40 w-24">
+							<div className="relative z-40 min-w-24">
 								<a href="/">
 									<img src={Logo.src} alt="site logo" />
 								</a>
@@ -54,10 +31,9 @@ const Nav = () => {
 							<nav
 								className={`${
 									toggleMenu
-										? "flex justify-between flex-col pb-10"
-										: "hidden"
+										? "flex justify-between flex-col pb-10 visible transition-all duration-300 ease-in-out"
+										: "opacity-0 lg:opacity-100 visible-hidden lg:visible transition-all duration-300 ease-in-out"
 								} fixed w-full top-0 pt-[130px] lg:pt-0 lg:block left-0 bg-[#0D1D1C]  lg:static lg:bg-transparent md:px-0 h-screen lg:h-auto`}
-								ref={navAnimation}
 							>
 								<ul className="flex flex-col py-5 lg:flex-row lg:py-0 space-x-0 lg:space-x-8 container">
 									<li>
@@ -118,7 +94,7 @@ const Nav = () => {
 											alt="footer logo"
 										/>
 
-										<ul className="flex gap-11 md:block">
+										<ul className="flex gap-11">
 											<li>
 												<a
 													href="#"

@@ -1,148 +1,29 @@
 ---
-import Hero from '@/components/Home/Hero';
 import Layout from '../layouts/Layout.astro';
-import Heading from '@/components/Heading';
-import StorageCard from '@/components/Home/StorageCard';
-import ContentCard from '@/components/Home/ContentCard';
-import Button from '@/components/Button';
-import BlogCard from '@/components/Home/BlogCard';
-import CallToAction from '@/components/CallToAction';
-import AccountSlider from '@/components/Home/AccountSlider';
-
-
-import Image from '../assets/progress-image.png';
+import Hero from '@/components/Home/Hero';
+import Account from '@/components/Home/Account';
+import DeleteSection from '@/components/Home/DeleteSection';
 import BrandLogos from '@/components/BrandLogos';
-import Pricing from '@/components/Pricing';
-import SignUp from '../assets/signup.svg';
-import signUpImage from '../assets/signup-image-1.svg';
-import signUpImageTwo from '../assets/signup-image-2.svg';
-
-import PricingContents from '@/data/pricing';
-import Docs from '@/data/docs';
+import PricingTable from '@/components/Home/PricingTable';
+import Blog from '@/components/Home/Blog';
+import CallToAction from '@/components/CallToAction';
 import logos from '@/data/brand-logos';
-
 
 ---
 
 <Layout title="Home">
 	<Hero client:only="react" />
 
-	<section class="py-[80px] md:py-[158px] bg-[#051413]">
-		<div class="container">
-			<Heading 
-				title="Sign up, upload, and" 
-				highligtText="share" 
-				description="Lume handles the privacy."
-				client:load
-			/>
+	<Account client:load />
 
-			<!-- <div class="mb-[65px] md:mb-[155px]">
-				
-				<img src={SignUp.src} alt="sign up" class="mx-auto" />
-			</div> -->
+	<DeleteSection client:load />
+	
+	<BrandLogos logos={logos} logoType="dark" title="Powered & Trusted by" client:load />
 
-			<!-- <div class="mb-5">
-				<img src={signUpImage.src} alt="sign up" class="mx-auto" />
-			</div>
+	<PricingTable client:load />
 
-			<div class="mb-[80px]">
-				<img src={signUpImageTwo.src} alt="sign up" class="mx-auto" />
-			</div> -->
+	<CallToAction client:load />
 
-			<AccountSlider client:load />
-
-			<!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
-				<ContentCard 
-					title="Create an account" 
-					description="Lume handles the privacy so that you can focus on you." 
-				/>
-
-				<ContentCard 
-					title="Upload" 
-					description="Lume handles the privacy so that you can focus on you." 
-				/>
-
-				<ContentCard 
-					title="Secure" 
-					description="Lume handles the privacy so that you can focus on you." 
-				/>
-			</div> -->
-		</div>
-	</section>
-
-	<section class="py-[65px] md:py-[158px]">
-		<div class="container">
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-11 md:gap-10 items-center">
-				<div>
-					<Heading 
-						client:load
-						align='text-left'
-						title="Delete what you  don’t need (forever)" 
-						description="Experience privacy-first solutions that are more affordable than most on the market, putting you in control."
-					/>
-
-					<Button 
-						style="outline"
-						label="Read more about data delection →" 
-						url="#" 
-					/>
-				</div>
-
-				<div>
-					<img src={Image.src} alt="Delete" />
-				</div>
-
-			</div>
-		</div>
-	</section>
-
-	<BrandLogos logos={logos} logoType="dark" title="Powered & Trusted by" />
-
-	<section class="py-[65px] md:py-[158px]">
-		<div class="container">
-			<Heading 
-				client:load
-				title="Pay as you go, upgrade" 
-				highligtText="whenever" 
-				description="To understand how Lume works, it helps to understand."
-			/>
-			<div class="mt-[65px] md:mt-[170px]">
-				<Pricing pricingData={PricingContents} />
-			</div>
-
-		</div>
-	</section>
-
-	<CallToAction />
-
-	<section class="py-[65px] md:py-[158px]">
-		<div class="container">
-			<div class="lg:flex justify-between items-center">
-				<Heading 
-					client:load
-					align='text-left'
-					title="Docs, Updates, & Guides"
-					description="To understand how Lume keeps you safe, it helps to understand."
-				/>
-
-				<Button 
-					label="Read our docs →" 
-					url="#" 
-					style="outline"
-				/>
-			</div>
-
-			<div class="grid grid-cols-1 gap-12 lg:grid-cols-3 md:grid-cols-2 mt-[55px] lg:mt-0">
-				{Docs.map((item, index) => (
-					<BlogCard 
-						client:load
-						key={index}
-						items={item}
-					/>
-				))}
-			</div>
-
-		</div>
-	</section>
+	<Blog client:load />
 
 </Layout>
