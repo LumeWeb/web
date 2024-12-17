@@ -3,7 +3,6 @@ import Layout from "../layouts/Layout.astro";
 import PageHeader from "@/components/PageHeader";
 import BrandLogos from "@/components/BrandLogos";
 import PricingCommunity from "@/components/PricingCommunity";
-import PricingCommunityTwo from "@/components/PricingCommunityTwo";
 
 import logos from "@/data/brand-logos";
 ---
@@ -18,9 +17,37 @@ import logos from "@/data/brand-logos";
 
   <section class="bg-white py-[70px] md:py-[130px]">
     <div class="container">
-      <div class="flex justify-center items-center gap-10">
-        <PricingCommunity />
-        <PricingCommunityTwo />
+      <div
+        class="flex flex-wrap justify-center items-center gap-10 md:flex-nowrap">
+        <PricingCommunity
+          title="Community Metered"
+          description="Fair use"
+          priceType="Free"
+          features={[
+            "1 GB storage",
+            "1 GB bandwidth",
+            "Unlimited projects",
+            "Unlimited collaborators",
+          ]}
+          buttonText="Sign up now for free →"
+          url="#"
+          client:load
+        />
+
+        <PricingCommunity
+          title="Non Metered"
+          description="No restrictions"
+          priceType="Varied"
+          features={[
+            "1 GB storage",
+            "1 GB bandwidth",
+            "Unlimited projects",
+            "Unlimited collaborators",
+          ]}
+          buttonText="Sign up now for free →"
+          url="#"
+          client:load
+        />
       </div>
     </div>
   </section>
