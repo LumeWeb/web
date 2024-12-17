@@ -1,0 +1,29 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+import BrandLogos from '@/components/BrandLogos';
+import PricingCommunity from '@/components/PricingCommunityTwo';
+
+import logos from '@/data/brand-logos';
+
+---
+
+<Layout title="Docs">
+	<PageHeader 
+		title="Secure storage starts here —let's talk" 
+		description="Connect with our team for support or inquiries."
+		mobileTitle="Secure storage starts here"
+	/>
+
+	<section class="bg-white py-[70px] md:py-[130px]">
+		<div class="container">
+			<div class="flex justify-center items-center">
+				<PricingCommunityTwo />
+			</div>
+		</div>
+	</section>
+
+
+	<BrandLogos logos={logos} logoType="dark" title="Powered & Trusted by" />
+
+</Layout>

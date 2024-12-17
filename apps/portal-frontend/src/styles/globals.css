@@ -1,0 +1,20 @@
+@import url("https://fonts.cdnfonts.com/css/euclid-circular-a");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+	:root {
+		--radius: 0.5rem;
+		--color-primary: #f3c614;
+		--color-primary-light: #f7d94c;
+	}
+}
+
+@layer components {
+	body {
+		font-family: "Euclid Circular A", sans-serif;
+		background-color: #f9f9f9;
+		color: #333;
+	}
+}
