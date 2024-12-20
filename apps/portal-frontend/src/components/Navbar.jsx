@@ -1,5 +1,5 @@
 import Logo from "../assets/site-logo.png";
-import Button from "./Button";
+import { Button } from "./ui/button";
 import { useState } from "react";
 import FooterLogo from "../assets/footer-logo-light.png";
 const Nav = () => {
@@ -21,8 +21,8 @@ const Nav = () => {
 		<>
 			<header className="pt-[58px] pb-[18px] md:py-10 absolute w-full top-0 left-0 z-40">
 				<div className="container">
-					<div className="flex justify-between items-center">
-						<div className="flex items-center gap-[50px] 2xl:gap-[100px]">
+					<div className="flex gap-[30px] justify-between items-center">
+						<div className="flex items-center xl:gap-[30px] 2xl:gap-[100px]">
 							<div className="relative z-40 min-w-24">
 								<a href="/">
 									<img src={Logo.src} alt="site logo" />
@@ -156,7 +156,7 @@ const Nav = () => {
 						<div className="flex items-center space-x-5 hidden lg:block">
 							<a
 								href="#"
-								className="text-[#F8F8F8] font-medium text-lg"
+								className="text-[#F8F8F8] font-medium text-lg transition ease-in-out duration-300 hover:text-gray-300"
 							>
 								Sign In
 							</a>

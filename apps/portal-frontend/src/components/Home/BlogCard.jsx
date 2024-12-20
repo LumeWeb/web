@@ -1,36 +1,20 @@
-import Button from "../Button";
-import { useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import ScrollTrigger from "gsap/ScrollTrigger";
+import { Button } from "@/components/ui/button";
+import { motion } from "motion/react";
 
 const BlogCard = ({ items }) => {
-	const { title, categories, content, image, buttonText, url } = items;
-	const container = useRef();
-
-	gsap.registerPlugin(ScrollTrigger);
-
-	useGSAP(() => {
-		const tl = gsap.timeline({
-			scrollTrigger: {
-				trigger: container.current,
-				start: "top 80%",
-				toggleActions: "play none none none",
-				once: true,
-			},
-		});
-
-		tl.from(container.current, {
-			opacity: 0,
-			y: 50,
-			duration: 0.7,
-			delay: 1,
-			ease: "power1.out",
-		});
-	});
+	const { title, categories, content, image, buttonText, slug } = items;
 
 	return (
-		<article ref={container}>
+		<motion.article
+			initial={{ opacity: 0, y: 50 }}
+			whileInView={{ opacity: 1, y: 0 }}
+			viewport={{ once: true, margin: "-100px" }}
+			transition={{
+				duration: 0.6,
+				delay: 0.4,
+				ease: "easeOut",
+			}}
+		>
 			<div className="mb-8 md:mb-[50px] overflow-hidden rounded-tl-[50px] rounded-br-[50px]">
 				<img src={image} alt="blog image" className="w-full" />
 			</div>
@@ -54,8 +38,8 @@ const BlogCard = ({ items }) => {
 			</h3>
 			<p className="text-lg text-[#EAEBEB] mb-6 md:mb-11">{content}</p>
 
-			<Button label={buttonText} url={url} />
-		</article>
+			<Button label={buttonText} url={slug} />
+		</motion.article>
 	);
 };
 

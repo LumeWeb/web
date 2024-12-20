@@ -1,41 +1,5 @@
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import ScrollTrigger from "gsap/ScrollTrigger";
-import { useRef } from "react";
-
+import { motion } from "motion/react";
 const BrandLogos = ({ logos, title, logoType = "dark" }) => {
-	const logoContainer = useRef();
-	const titleRef = useRef();
-
-	useGSAP(() => {
-		gsap.registerPlugin(ScrollTrigger);
-
-		gsap.from(titleRef.current, {
-			opacity: 0,
-			y: 50,
-			duration: 0.5,
-			scrollTrigger: {
-				trigger: titleRef.current,
-				start: "top 85%",
-				toggleActions: "play none none none",
-				once: true,
-			},
-		});
-
-		gsap.from(logoContainer.current, {
-			opacity: 0,
-			y: 50,
-			duration: 0.5,
-			delay: 0.2,
-			scrollTrigger: {
-				trigger: logoContainer.current,
-				start: "top 85%",
-				toggleActions: "play none none none",
-				once: true,
-			},
-		});
-	});
-
 	return (
 		<section
 			className={`py-[40px] md:py-[90px] ${
@@ -43,21 +7,37 @@ const BrandLogos = ({ logos, title, logoType = "dark" }) => {
 			}`}
 		>
 			<div className="container">
-				<div className="md:flex items-start md:items-center justify-between gap-[150px]">
-					<div className="basis-80 md:basis-[17rem] mb-[30px] md:mb-0">
-						<h2
+				<div className="lg:flex items-start md:items-center justify-between gap-[150px]">
+					<div className="basis-80 md:basis-[17rem] mb-[30px] lg:mb-0">
+						<motion.h2
+							initial={{ opacity: 0, y: 50 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true, margin: "-50px" }}
+							transition={{
+								duration: 0.8,
+								ease: "easeOut",
+							}}
 							className={`text-[31px] font-medium ${
 								logoType === "light"
 									? "text-[#0D1D1C]"
 									: "text-[#F8F8F8]"
 							}`}
-							ref={titleRef}
 						>
 							{title}
-						</h2>
+						</motion.h2>
 					</div>
 
-					<div className="flex-grow" ref={logoContainer}>
+					<motion.div
+						initial={{ opacity: 0, y: 50 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true, margin: "-50px" }}
+						transition={{
+							duration: 0.5,
+							delay: 0.2,
+							ease: "easeOut",
+						}}
+						className="flex-grow"
+					>
 						<div className="flex flex-wrap gap-7 md:gap-10 flex-2 items-center justify-start md:justify-between">
 							{logoType === "light"
 								? logos.logoLight.map((logo) => (
@@ -75,7 +55,7 @@ const BrandLogos = ({ logos, title, logoType = "dark" }) => {
 										/>
 								  ))}
 						</div>
-					</div>
+					</motion.div>
 				</div>
 			</div>
 		</section>

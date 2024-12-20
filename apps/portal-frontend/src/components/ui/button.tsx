@@ -1,56 +1,54 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
 
-import { cn } from "@/lib/utils"
-
+// Define buttonVariants outside the component to ensure consistency across HMR
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 dark:ring-offset-neutral-950 dark:focus-visible:ring-neutral-300",
+  "inline-flex rounded-full border border-transparent  text-[13px] lg:text-lg font-medium transition ease-in-out duration-300",
   {
     variants: {
-      variant: {
-        default: "bg-neutral-900 text-neutral-50 hover:bg-neutral-900/90 dark:bg-neutral-50 dark:text-neutral-900 dark:hover:bg-neutral-50/90",
-        destructive:
-          "bg-red-500 text-neutral-50 hover:bg-red-500/90 dark:bg-red-900 dark:text-neutral-50 dark:hover:bg-red-900/90",
-        outline:
-          "border border-neutral-200 bg-white hover:bg-neutral-100 hover:text-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:hover:bg-neutral-800 dark:hover:text-neutral-50",
-        secondary:
-          "bg-neutral-100 text-neutral-900 hover:bg-neutral-100/80 dark:bg-neutral-800 dark:text-neutral-50 dark:hover:bg-neutral-800/80",
-        ghost: "hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-neutral-800 dark:hover:text-neutral-50",
-        link: "text-neutral-900 underline-offset-4 hover:underline dark:text-neutral-50",
+      style: {
+        default: "text-[#F8F8F8] bg-[#0D2D2A] hover:bg-white hover:text-[#0D1D1C]",
+        outline: "border !border-[#F8F8F8] text-[#f8f8f8] bg-transparent hover:!bg-[#0D2D2A] hover:text-[#F8F8F8] hover:!border-[#0D2D2A]",
+        "outline-dark": "border !border-[#0D1D1C] !text-[#0D1D1C] bg-transparent hover:!bg-[#0D1D1C] hover:!text-white hover:!border-[#0D1D1C]",
+        "btn-light": "!bg-white !text-[#0D1D1C] hover:!bg-transparent hover:!text-white !border-white",
+        gray: "bg-[#E4E0D4] !text-[#0D1D1C] hover:!bg-[#0D2D2A] hover:!text-white",
+        light: "bg-white text-[#0D1D1C] hover:bg-[#0D2D2A] hover:text-white",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        sm: "py-2 px-6 text-[13px] leading-none",
+        md: "py-[11px] px-4 lg:py-4 lg:px-6",
+        lg: "text-xl",
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
+      style: "default",
+      size: "md",
     },
   }
-)
+);
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends React.AnchorHTMLAttributes<HTMLAnchorElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+  label: string;
+  url: string;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
+const Button = React.forwardRef<HTMLAnchorElement, ButtonProps>(
+  ({ label, url, style, size, className, ...props }, ref) => {
     return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+      <a
+        href={url}
+        className={cn(buttonVariants({ style, size, className }))}
         ref={ref}
         {...props}
-      />
-    )
+      >
+        {label}
+      </a>
+    );
   }
-)
-Button.displayName = "Button"
+);
+Button.displayName = "Button";
 
-export { Button, buttonVariants }
+export { Button, buttonVariants };
