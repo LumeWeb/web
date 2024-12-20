@@ -1,4 +1,4 @@
-import Button from "./Button";
+import { Button } from "@/components/ui/button";
 import iconUser from "../assets/icon-user-black.svg";
 import iconFolder from "../assets/icon-folder-black.svg";
 import iconDeliver from "../assets/icon-deliver-black.svg";
@@ -27,8 +27,9 @@ const PricingCommunity = ({
         {features.map((feature, index) => (
           <li
             key={index}
-            className="text-[#485453] flex items-center gap-2 md:gap-4 text-[13px] md:text-lg leading-8">
+            className="text-[#485453] flex items-center gap-2 md:gap-4 text-[13px] md:text-lg leading-8 mb-2">
             <img
+              className="w-[16px]"
               src={
                 index === 0
                   ? iconUser.src

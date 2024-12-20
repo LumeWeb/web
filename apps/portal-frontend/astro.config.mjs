@@ -9,10 +9,10 @@ export default defineConfig({
 	integrations: [react(), tailwind({ applyBaseStyles: false })],
 	vite: {
 		optimizeDeps: {
-			include: ["gsap", "swiper"],
+			include: ["swiper"],
 		},
 		ssr: {
-			noExternal: ["gsap", "swiper"], // Add this line
+			noExternal: ["swiper"], // Add this line
 		},
 	},
 });

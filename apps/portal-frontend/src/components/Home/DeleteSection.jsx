@@ -1,46 +1,9 @@
 import Heading from "../Heading";
-import Button from "../Button";
-import Image from "../../assets/progress-image.png";
-import { useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import ScrollTrigger from "gsap/ScrollTrigger";
+import { Button } from "@/components/ui/button";
+import Image from "../../assets/progress-image.svg";
+import { motion } from "motion/react";
 
 const DeleteSection = () => {
-	const buttonRef = useRef();
-	const imageRef = useRef();
-
-	useGSAP(() => {
-		gsap.registerPlugin(ScrollTrigger);
-
-		gsap.from(buttonRef.current, {
-			opacity: 0,
-			y: 50,
-			duration: 0.5,
-			delay: 1,
-			scrollTrigger: {
-				trigger: buttonRef.current,
-				start: "top 80%",
-				toggleActions: "play none none none",
-				once: true,
-			},
-		});
-
-		gsap.from(imageRef.current, {
-			opacity: 0,
-			y: 50,
-			duration: 0.7,
-			delay: 1,
-			ease: "power1.out",
-			scrollTrigger: {
-				trigger: imageRef.current,
-				start: "top 80%",
-				toggleActions: "play none none none",
-				once: true,
-			},
-		});
-	});
-
 	return (
 		<section className="py-[65px] md:py-[158px]">
 			<div className="container">
@@ -52,17 +15,51 @@ const DeleteSection = () => {
 							description="Experience privacy-first solutions that are more affordable than most on the market, putting you in control."
 						/>
 
-						<div ref={buttonRef}>
+						<motion.div
+							initial={{ opacity: 0, y: 50 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true, margin: "-100px" }}
+							transition={{
+								duration: 0.8,
+								delay: 0.4,
+								ease: "easeOut",
+							}}
+						>
 							<Button
 								style="outline"
 								label="Read more about data delection →"
 								url="#"
 							/>
-						</div>
+						</motion.div>
 					</div>
 
 					<div>
-						<img src={Image.src} alt="Delete" ref={imageRef} />
+						<motion.img
+							initial={{ opacity: 0, y: 50 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true, margin: "-100px" }}
+							transition={{
+								duration: 0.8,
+								delay: 0.2,
+								ease: "easeOut",
+							}}
+							src={Image.src}
+							alt="Delete"
+						/>
+						<motion.p
+							initial={{ opacity: 0, y: 50 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true, margin: "-100px" }}
+							transition={{
+								duration: 0.8,
+								delay: 0.3,
+								ease: "easeOut",
+							}}
+							className="text-[#abeedb]/50 text-lg font-normal font-['Euclid Circular A'] leading-[29px] tracking-tight mt-5"
+						>
+							* 503c related text might go here, along with any
+							other relevant info.
+						</motion.p>
 					</div>
 				</div>
 			</div>
