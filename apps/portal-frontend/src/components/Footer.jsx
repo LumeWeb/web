@@ -1,5 +1,3 @@
-// import { Image } from "astro:assets";
-
 import FooterMenu from "./FooterMenu";
 import footerMenu from "@/data/footer-menu";
 
