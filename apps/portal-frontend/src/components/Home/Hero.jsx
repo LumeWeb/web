@@ -1,6 +1,4 @@
-// import Button2 from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
-
 import HeroImage from "../../assets/hero-image.svg";
 import HeroImageMobile from "../../assets/hero-mobile-image.svg";
 import { motion } from "motion/react";
@@ -15,7 +13,8 @@ const Hero = () => {
               <motion.h1
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
+                viewport={{ once: true, margin: "100px" }}
+                transition={{ duration: 0.8, ease: "easeIn" }}
                 className="text-3xl  2xl:text-[75px] lg:text-5xl md:text-[2.5rem] sm:4xl font-medium mb-7 lg:mb-[50px] text-white leading-tight">
                 Store <span className="underline">a ton</span> of files, with
                 Lume
@@ -24,6 +23,7 @@ const Hero = () => {
               <motion.p
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "100px" }}
                 transition={{
                   duration: 0.8,
                   delay: 0.2,
@@ -37,6 +37,7 @@ const Hero = () => {
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "100px" }}
                 transition={{
                   duration: 0.8,
                   delay: 0.3,
@@ -53,6 +54,7 @@ const Hero = () => {
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "100px" }}
             transition={{
               duration: 0.8,
               delay: 0.1,
