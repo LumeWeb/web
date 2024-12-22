@@ -1,20 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { motion } from "motion/react";
+
 
 const BlogCard = ({ items }) => {
 	const { title, categories, content, image, buttonText, slug } = items;
 
 	return (
-		<motion.article
-			initial={{ opacity: 0, y: 50 }}
-			whileInView={{ opacity: 1, y: 0 }}
-			viewport={{ once: true, margin: "-100px" }}
-			transition={{
-				duration: 0.6,
-				delay: 0.4,
-				ease: "easeOut",
-			}}
-		>
+		<article>
 			<div className="mb-8 md:mb-[50px] overflow-hidden rounded-tl-[50px] rounded-br-[50px]">
 				<img src={image} alt="blog image" className="w-full" />
 			</div>
@@ -39,7 +30,7 @@ const BlogCard = ({ items }) => {
 			<p className="text-lg text-[#EAEBEB] mb-6 md:mb-11">{content}</p>
 
 			<Button label={buttonText} url={slug} />
-		</motion.article>
+		</article>
 	);
 };
 

@@ -1,29 +1,32 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Hero from '@/components/Home/Hero';
-import Account from '@/components/Home/Account';
-import DeleteSection from '@/components/Home/DeleteSection';
-import BrandLogos from '@/components/BrandLogos';
-import PricingTable from '@/components/Home/PricingTable';
-import Blog from '@/components/Home/Blog';
-import CallToAction from '@/components/CallToAction';
-import logos from '@/data/brand-logos';
-
+import Layout from "../layouts/Layout.astro";
+import Hero from "@/components/Home/Hero";
+import Account from "@/components/Home/Account";
+import DeleteSection from "@/components/Home/DeleteSection";
+import BrandLogos from "@/components/BrandLogos";
+import PricingTable from "@/components/Home/PricingTable";
+import Blog from "@/components/Home/Blog";
+import CallToAction from "@/components/CallToAction";
+import logos from "@/data/brand-logos";
 ---
 
 <Layout title="Home">
-	<Hero client:only="react" />
+  <Hero client:load />
 
-	<Account client:load />
+  <Account client:load />
 
-	<DeleteSection client:load />
-	
-	<BrandLogos logos={logos} logoType="dark" title="Powered & Trusted by" client:load />
+  <DeleteSection client:load />
 
-	<PricingTable client:load />
+  <BrandLogos
+    logos={logos}
+    logoType="dark"
+    title="Powered & Trusted by"
+    client:load
+  />
 
-	<CallToAction client:load />
+  <PricingTable client:load />
 
-	<Blog client:load />
+  <CallToAction client:load />
 
+  <Blog client:load />
 </Layout>

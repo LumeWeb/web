@@ -1,19 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { motion } from "motion/react";
+
 import { Badge } from "@/components/ui/badge";
 
 const PricingItem = ({ pricingData, type = "dark", tag = "true" }) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{
-        duration: 0.6,
-        delay: 0.4,
-        ease: "easeOut",
-      }}
-      className="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-2 md:gap-5 lg:gap-5">
+    <div className="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-2 md:gap-5 lg:gap-5">
       {pricingData.map((item, index) => (
         <div
           key={index}
@@ -78,7 +69,7 @@ const PricingItem = ({ pricingData, type = "dark", tag = "true" }) => {
           />
         </div>
       ))}
-    </motion.div>
+    </div>
   );
 };
 
