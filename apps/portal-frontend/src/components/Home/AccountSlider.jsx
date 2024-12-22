@@ -8,7 +8,7 @@ import signUpImage from "../../assets/signup-image-1.svg";
 import signUpImageTwo from "../../assets/signup-image-2.svg";
 
 import "swiper/swiper-bundle.css";
-import { motion } from "motion/react";
+
 
 const sliderContent = [
 	{
@@ -47,16 +47,7 @@ const AccountSlider = () => {
 	};
 
 	return (
-		<motion.div
-			initial={{ opacity: 0, y: 50 }}
-			whileInView={{ opacity: 1, y: 0 }}
-			viewport={{ once: true, margin: "-100px" }}
-			transition={{
-				duration: 0.8,
-				delay: 0.2,
-				ease: "easeOut",
-			}}
-		>
+		<div>
 			<Swiper
 				modules={[Controller]}
 				onSwiper={setFirstSwiper}
@@ -124,7 +115,7 @@ const AccountSlider = () => {
 					</SwiperSlide>
 				))}
 			</Swiper>
-		</motion.div>
+		</div>
 	);
 };
 

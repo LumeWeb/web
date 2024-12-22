@@ -32,7 +32,7 @@ const Nav = () => {
 								className={`${
 									toggleMenu
 										? "flex justify-between flex-col pb-10 visible transition-all duration-300 ease-in-out"
-										: "opacity-0 lg:opacity-100 visible-hidden lg:visible transition-all duration-300 ease-in-out"
+										: "opacity-0 lg:opacity-100 visible-hidden hidden lg:visible transition-all duration-300 ease-in-out"
 								} fixed w-full top-0 pt-[130px] lg:pt-0 lg:block left-0 bg-[#0D1D1C]  lg:static lg:bg-transparent md:px-0 h-screen lg:h-auto`}
 							>
 								<ul className="flex flex-col py-5 lg:flex-row lg:py-0 space-x-0 lg:space-x-8 container">
