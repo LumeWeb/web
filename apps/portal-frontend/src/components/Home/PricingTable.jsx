@@ -5,7 +5,7 @@ import PricingContents from "@/data/pricing";
 const PricingTable = () => {
 	return (
     <section className="py-[65px] md:pt-[158px] md:pb-[100px]">
-      <div className="container">
+      <div className="xl:container px-6">
         <Heading
           client:load
           title="Pay as you go, upgrade"

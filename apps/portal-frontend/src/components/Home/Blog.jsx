@@ -7,7 +7,7 @@ import BlogCard from "./BlogCard";
 const Blog = () => {
 	return (
 		<section className="py-[65px] md:py-[158px]">
-			<div className="container">
+			<div className="xl:container px-6">
 				<div className="lg:flex justify-between items-center">
 					<Heading
 						client:load

@@ -5,7 +5,7 @@ import Image from "../../assets/progress-image.svg";
 const DeleteSection = () => {
   return (
     <section className="py-[65px] md:py-[158px]">
-      <div className="container">
+      <div className="xl:container px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-11 md:gap-10 items-center">
           <div>
             <Heading

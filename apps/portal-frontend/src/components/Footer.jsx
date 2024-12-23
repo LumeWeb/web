@@ -153,7 +153,7 @@ const Footer = ({ theme }) => {
 						: "bg-[#E4E0D4] border-b border-[#E4E0D4]"
 				} py-8`}
 			>
-				<div className="container">
+				<div className="xl:container px-6">
 					<div className="flex items-center flex-wrap justify-between">
 						<p
 							className={`${

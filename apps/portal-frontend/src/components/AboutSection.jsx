@@ -17,7 +17,7 @@ const AboutSection = ({
       className={`py-[60px] md:py-[120px] ${
         theme == "gray" ? "bg-[#E4E0D4]" : "bg-white"
       }`}>
-      <div className="container">
+      <div className="xl:container px-6">
         <div className="flex md:gap-10 flex-wrap md:flex-nowrap md:items-center md:justify-between">
           <div
             className={`w-full md:w-auto basis-auto 2xl:basis-[40%] ${

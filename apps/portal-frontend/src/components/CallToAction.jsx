@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 const CallToAction = () => {
 	return (
 		<section className="py-[65px] md:py-[115px] bg-[#051413]">
-			<div className="container">
+			<div className="xl:container px-6">
 				<h2 className="text-[#F8F8F8] text-[25px] md:text-[35px] font-medium text-center">
 					Want to be a part of the next big thing?
 				</h2>
