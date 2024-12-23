@@ -12,7 +12,7 @@ const PageHeader = ({
 }) => {
   return (
     <div className="pt-[155px] md:pt-[230px] pb-[60px] md:pb-[120px] relative overflow-hidden">
-      <div className="container">
+      <div className="xl:container px-6">
         <img
           src={BgShape.src}
           alt="hero bg shape"

@@ -4,7 +4,7 @@ const BrandLogos = ({ logos, title, logoType = "dark" }) => {
       className={`py-[40px] md:py-[90px] ${
         logoType === "light" ? "bg-white" : "bg-[#051413]"
       }`}>
-      <div className="container">
+      <div className="xl:container px-6">
         <div className="lg:flex items-start md:items-center justify-between gap-[150px]">
           <div className="basis-80 md:basis-[17rem] mb-[30px] lg:mb-0">
             <h2

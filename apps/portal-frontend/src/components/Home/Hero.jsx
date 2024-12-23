@@ -6,8 +6,8 @@ import HeroImageMobile from "../../assets/hero-mobile-image.svg";
 const Hero = () => {
 	return (
     <section className="pt-[155px] lg:pt-[170px]">
-      <div className="container">
-        <div className="md:columns-2 sm:columns-1 lg:flex lg:min-h-[701px] xl:min-h-[910px] lg:items-center lg:justify-between">
+      <div className="xl:container px-6">
+        <div className="md:columns-2 sm:columns-1 lg:flex lg:h-[600px] xl:min-h-[910px] lg:items-center overflow-hidden lg:justify-between">
           <div className="mb-[50px] lg:mb-0 pb-[50px]">
             <div className="text-left max-w-[670px]">
               <h1 className="text-3xl  2xl:text-[75px] lg:text-5xl md:text-[2.5rem] sm:4xl font-medium mb-7 lg:mb-[50px] text-white leading-tight">
@@ -36,7 +36,7 @@ const Hero = () => {
 
             <div className="lg:hidden">
               <img
-                className="w-full"
+                className="m-auto"
                 src={HeroImageMobile.src}
                 alt="hero image"
               />
