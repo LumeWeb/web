@@ -2,12 +2,14 @@ import { Button } from "@/components/ui/button";
 import HeroImage from "../../assets/hero-image.svg";
 import HeroImageMobile from "../../assets/hero-mobile-image.svg";
 
+import ProgressCard from "../cards/ProgressCard";
+import MenuCard from "../cards/MenuCard";
 
 const Hero = () => {
-	return (
-    <section className="pt-[155px] lg:pt-[170px]">
+  return (
+    <section className="pt-[155px]">
       <div className="xl:container px-6">
-        <div className="md:columns-2 sm:columns-1 lg:flex lg:h-[600px] xl:min-h-[910px] lg:items-center overflow-hidden lg:justify-between">
+        <div className="md:columns-2 sm:columns-1 lg:flex lg:h-[600px] xl:min-h-[880px] lg:items-center overflow-hidden lg:justify-between">
           <div className="mb-[50px] lg:mb-0 pb-[50px]">
             <div className="text-left max-w-[670px]">
               <h1 className="text-3xl  2xl:text-[75px] lg:text-5xl md:text-[2.5rem] sm:4xl font-medium mb-7 lg:mb-[50px] text-white leading-tight">
@@ -27,18 +29,47 @@ const Hero = () => {
             </div>
           </div>
 
-          <div>
-            <img
-              src={HeroImage.src}
-              alt="hero image"
-              className="hidden lg:block"
-            />
+          <div className="lg:w-[480px] !translate-y-11 lg:translate-y-0">
+            <div className="hidden lg:block">
+              <ProgressCard
+                value="25"
+                width="w-[90%]"
+                title="lume-logo-vector.psd (28 MB)"
+                opacity="opacity-25"
+              />
+              <MenuCard
+                title="whirly-project.json"
+                description="1 files (1.2 MB)"
+                day="7 days ago"
+                style="bg-[#0D2D2A] border-none mb-8 opacity-100 max-w-[340px]"
+              />
+              <MenuCard
+                title="backups"
+                description="29 files (345 MB)"
+                day="2 days ago"
+                style="mb-8 opacity-25 max-w-[290px]"
+              />
+              <ProgressCard
+                value="88"
+                title="juan-top-secret-project.zip (13 MB)"
+              />
 
-            <div className="lg:hidden">
-              <img
-                className="m-auto"
-                src={HeroImageMobile.src}
-                alt="hero image"
+              <MenuCard
+                title="whirly-project.json"
+                style="bg-[#0D2D2A] border-none opacity-25 max-w-[360px]"
+              />
+            </div>
+
+            <div className="lg:hidden max-w-[342px]">
+              {/* <img src={HeroImageMobile.src} alt='hero image' /> */}
+              <ProgressCard
+                value="25"
+                title="lume-logo-vector.psd (28 MB)"
+                opacity="opacity-25"
+              />
+              <MenuCard
+                title="whirly-project.json"
+                style="bg-[#0D2D2A] border-none mb-8 opacity-100 max-w-[342px] !mb-[-60px]"
               />
             </div>
           </div>
