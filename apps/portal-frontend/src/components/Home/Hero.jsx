@@ -9,8 +9,8 @@ const Hero = () => {
   return (
     <section className="pt-[155px]">
       <div className="xl:container px-6">
-        <div className="md:columns-2 sm:columns-1 lg:flex lg:h-[600px] xl:min-h-[880px] lg:items-center overflow-hidden lg:justify-between">
-          <div className="mb-[50px] lg:mb-0 pb-[50px]">
+        <div className="md:columns-2 sm:columns-1 pb-16 lg:pb-0 lg:flex xl:min-h-[880px] lg:items-center overflow-hidden lg:justify-between">
+          <div className="lg:mb-0 md:pb-[50px]">
             <div className="text-left max-w-[670px]">
               <h1 className="text-3xl  2xl:text-[75px] lg:text-5xl md:text-[2.5rem] sm:4xl font-medium mb-7 lg:mb-[50px] text-white leading-tight">
                 Store <span className="underline">a ton</span> of files, with
@@ -60,7 +60,7 @@ const Hero = () => {
               />
             </div>
 
-            <div className="lg:hidden max-w-[342px]">
+            <div className="lg:hidden max-w-[342px] m-auto">
               {/* <img src={HeroImageMobile.src} alt='hero image' /> */}
               <ProgressCard
                 value="25"
@@ -69,7 +69,7 @@ const Hero = () => {
               />
               <MenuCard
                 title="whirly-project.json"
-                style="bg-[#0D2D2A] border-none mb-8 opacity-100 max-w-[342px] !mb-[-60px]"
+                style="bg-[#0D2D2A] border-none mb-8 opacity-50 max-w-[342px] !mb-[-60px]"
               />
             </div>
           </div>
