@@ -1,12 +1,13 @@
 import Heading from "../Heading";
 import { Button } from "@/components/ui/button";
 import Image from "../../assets/progress-image.svg";
+import { DownloadProgressCard } from "../cards/DownloadCard";
 
 const DeleteSection = () => {
   return (
-    <section className="py-[65px] md:py-[158px]">
+    <section className="py-[65px] lg:py-[158px]">
       <div className="xl:container px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-11 md:gap-10 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-11 lg:gap-28">
           <div>
             <Heading
               align="text-left"
@@ -23,9 +24,29 @@ const DeleteSection = () => {
             </div>
           </div>
 
-          <div>
-            <img src={Image.src} alt="Delete" />
-            <p className="text-[#abeedb]/50 text-lg hidden lg:block font-normal font-['Euclid Circular A'] leading-[29px] tracking-tight mt-5">
+          <div className="md:px-10 lg:px-0 w-full max-w-[550px] m-auto overflow-hidden md:overflow-visible">
+            {/* <img src={Image.src} alt="Delete" /> */}
+            <div className="relative space-y-6 h-[375px]">
+              <div className="relative left-6 md:left-0">
+                <DownloadProgressCard
+                  title="Download"
+                  limit={10}
+                  used={5}
+                  left={5}
+                  onAddMore={() => alert("Add more download limit")}
+                />
+              </div>
+              <div className="md:absolute bottom-1 w-full md:right-8 right-0 lg:right-[68px]">
+                <DownloadProgressCard
+                  title="Upload"
+                  limit={15}
+                  used={5}
+                  left={10}
+                  onAddMore={() => alert("Add more upload limit")}
+                />
+              </div>
+            </div>
+            <p className="text-[#abeedb]/50 text-md hidden lg:block font-normal font-['Euclid Circular A'] leading-[29px] tracking-tight relative right-14">
               * 503c related text might go here, along with any other relevant
               info.
             </p>
