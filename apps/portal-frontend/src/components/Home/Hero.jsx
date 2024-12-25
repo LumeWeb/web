@@ -9,7 +9,7 @@ const Hero = () => {
   return (
     <section className="pt-[155px]">
       <div className="xl:container px-6">
-        <div className="md:columns-2 sm:columns-1 pb-16 lg:pb-0 lg:flex xl:min-h-[860px] lg:items-center overflow-hidden lg:justify-between">
+        <div className="md:columns-2 pb-14 lg:pb-0 lg:flex xl:min-h-[860px] lg:items-center overflow-hidden lg:justify-between">
           <div className="lg:mb-0 md:pb-[50px]">
             <div className="text-left max-w-[670px]">
               <h1 className="text-3xl  2xl:text-[75px] lg:text-5xl md:text-[2.5rem] sm:4xl font-medium mb-7 lg:mb-[50px] text-white leading-tight">
@@ -69,6 +69,8 @@ const Hero = () => {
               />
               <MenuCard
                 title="whirly-project.json"
+                description="19 files (345 MB)"
+                day="2 days ago"
                 style="bg-[#0D2D2A] border-none mb-8 opacity-50 max-w-[342px] !mb-[-60px]"
               />
             </div>
