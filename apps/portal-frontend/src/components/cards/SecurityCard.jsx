@@ -1,9 +1,9 @@
 import React from "react";
 
-export const SecurityCard = ({ title, star, description, buttonText, background }) => {
+export const SecurityCard = ({ title, star, description, buttonStyle, buttonText, background }) => {
   return (
     <div
-      className={`${background ? background : "bg-[#111C1B]"} text-teal-100 rounded-lg p-10 shadow-md flex flex-col justify-between space-y-4 lg:w-[400px]`}>
+      className={`${background ? background : "bg-[#111C1B]"} text-teal-100 rounded-lg p-6 md:p-10 shadow-md flex flex-col justify-between space-y-4 lg:w-[400px]`}>
       {/* Icon and Title */}
       <div>
         <div className="mb-3 flex gap-3">
@@ -105,7 +105,8 @@ export const SecurityCard = ({ title, star, description, buttonText, background 
       </div>
 
       {/* Action Button */}
-      <div className="bg-[#0D2D2A] hover:bg-teal-900 text-sm px-4 py-2 rounded-lg text-white flex items-center justify-center space-x-2">
+      <div
+        className={`${buttonStyle} md:bg-[#0D2D2A] hover:bg-teal-900 text-sm px-4 py-2 rounded-lg text-white flex items-center justify-center space-x-2`}>
         <svg
           width="18"
           height="19"

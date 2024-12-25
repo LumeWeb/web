@@ -85,12 +85,13 @@ const AccountSlider = () => {
           </div>
         </SwiperSlide>
         <SwiperSlide className="flex items-center justify-center">
-          <div className="mb-[65px] md:mb-[55px]">
+          <div className="mb-0 md:mb-[55px]">
             <div className="m-auto relative max-w-[900px] h-[400px]">
               <div className="absolute bottom-0 left-0 md:-right-56 -z-10 min-w-[400px] max-w-[400px] md:w-auto">
                 <SecurityCard
                   title="Password"
                   star="true"
+                  buttonStyle="w-[200px] gap-2"
                   buttonText="Change Password"
                 />
               </div>
@@ -100,6 +101,7 @@ const AccountSlider = () => {
                 <SecurityCard
                   title="Two-Factor Authentication"
                   background="bg-[#0D2D2A]"
+                  buttonStyle="gap-2 w-[300px]"
                   description="Improve security by enabling 2FA."
                   buttonText="Enable Two-Factor Authorization"
                 />
@@ -111,6 +113,7 @@ const AccountSlider = () => {
                   title="Backup Key"
                   description="Keep a backup code for account recovery."
                   buttonText="Generate Backup Key"
+                  buttonStyle="w-[280px] gap-2"
                 />
               </div>
             </div>

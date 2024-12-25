@@ -8,7 +8,7 @@ const ProgressCard = ({
 }) => {
   return (
     <div
-      className={`bg-[#0D2D2A] rounded-sm p-5 mb-8 w-full ${opacity} ${width}`}>
+      className={`bg-[#0D2D2A] rounded-sm p-5 mb-3 md:mb-8 w-full ${opacity} ${width}`}>
       <div className="flex justify-between items-center mb-3 ">
         <h3 className="flex items-center gap-2 text-[#ABEEDB] text-base  font-medium">
           <svg
