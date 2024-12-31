@@ -34,6 +34,28 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Check for portal-frontend changes and notify template repo
+      - if: steps.changesets.outputs.published == 'true'
+        name: Check portal-frontend changes and notify
+        id: check-changes
+        run: |
+          CHANGES=$(git diff --name-only HEAD^ HEAD apps/portal-frontend)
+          if [ ! -z "$CHANGES" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - if: steps.check-changes.outputs.has_changes == 'true'
+        name: Trigger portal-frontend template repo update
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          repository: lumeweb/portal-frontend-template
+          event-type: portal-frontend-update
+          client-payload: |
+            {
+              "source_sha": "${{ github.sha }}",
+              "source_ref": "${{ github.ref }}"
+            }
         # if a release was published, release the Go modules
       - if: steps.changesets.outputs.published == 'true'
         uses: peter-evans/repository-dispatch@v3
