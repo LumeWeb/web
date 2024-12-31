@@ -2,7 +2,12 @@ import { Button } from "@/components/ui/button";
 
 import { Badge } from "@/components/ui/badge";
 
-const PricingItem = ({ pricingData, type = "dark", tag = "true" }) => {
+const PricingItem = ({
+  pricingData,
+  type = "dark",
+  tag = "true",
+  showPricing = false,
+}) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-2 md:gap-5 lg:gap-5">
       {pricingData.map((item, index) => (
@@ -14,7 +19,7 @@ const PricingItem = ({ pricingData, type = "dark", tag = "true" }) => {
           <h3
             className={`${
               type === "light" ? "text-[#0D1D1C]" : "text-[#F8F8F8]"
-            } text-[21px] md:text-[40px] font-medium leading-10 mb-3 mb:mb-1 items-center flex`}>
+            } text-[21px] md:text-[40px] font-medium leading-10 mb-3 mb:mb-1 items-center flex whitespace-nowrap`}>
             {item.title}
             {tag === "true" && item.tag && (
               <Badge className="ml-2" variant="custom">
@@ -29,13 +34,15 @@ const PricingItem = ({ pricingData, type = "dark", tag = "true" }) => {
             {item.description}
           </p>
 
-          <h4
-            className={`${
-              type === "light" ? "text-[#0D1D1C]" : "text-[#F8F8F8]"
-            }  text-[21px] md:text-[40px] font-medium flex items-center gap-2 mb-3 md:mb-5`}>
-            ${item.price}{" "}
-            <span className="text-[15px] md:text-base">/month</span>
-          </h4>
+          {showPricing && item.price !== undefined && (
+            <h4
+              className={`${
+                type === "light" ? "text-[#0D1D1C]" : "text-[#F8F8F8]"
+              } text-[32px] md:text-[40px] font-medium mb-4 md:mb-8`}>
+              ${item.price}{" "}
+              <span className="text-[15px] md:text-base">/month</span>
+            </h4>
+          )}
 
           <ul className="mb-5 md:mb-11">
             {item.features.map((feature) => (

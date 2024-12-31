@@ -14,42 +14,42 @@ import AboutImageMobileTwo from "../assets/about-mobile-2.png";
 ---
 
 <Layout title="About Lume">
-	<PageHeader 
-		title="Insanely huge file storage, with Lume" 
-		btnText="Get started →"
-		url="#"
-		secondaryBtnText="Learn more about Lume →"
-		secondaryUrl="#"
-		mobileTitle="Insanely big files, with Lume"
-		client:load
-	/>
+  <PageHeader
+    title="Decentralized storage that puts you in control"
+    btnText="Start Storing →"
+    url="#"
+    secondaryBtnText="See How It Works →"
+    secondaryUrl="#how-it-works"
+    mobileTitle="Storage under your control"
+    client:load
+  />
 
-	<AboutSection
-		title="Re-defining Web3, for the users"
-		subtitle="Our Origin Story"
-		description="Bacik in 2007, making work better for people meant designing a simpler way to keep files in sync. Today, it means designing products that reduce busywork so you can focus on the work that matters."
-		imageUrl={AboutImage}
-		imgageMobileUrl={AboutImageMobile}
-		buttonText="Learn more →"
-		url="#"
-		client:load
-		
-	/>
+  <AboutSection
+    title="Storage without the middleman"
+    subtitle="What is Lume?"
+    description="Lume is a decentralized storage portal that connects you directly to storage providers on the Sia network. No corporate middlemen, no data mining, just your files stored securely acros a distributed network."
+    imageUrl={AboutImage}
+    imgageMobileUrl={AboutImageMobile}
+    buttonText="Start Storing →"
+    url="#"
+    client:load
+  />
 
-	<AboutSection
-		title="Re-defining Web3, for the users"
-		subtitle="Our Origin Story"
-		description="Bacik in 2007, making work better for people meant designing a simpler way to keep files in sync. Today, it means designing products that reduce busywork so you can focus on the work that matters."
-		imageUrl={AboutImageTwo}
-		imgageMobileUrl={AboutImageMobileTwo}
-		buttonText="Learn more →"
-		url="#"
-		theme="gray"
-		imagePosition="right"
-		client:load
-	/>
+  <AboutSection
+    id="how-it-works"
+    title="Simple, secure, and private"
+    subtitle="How It Works"
+    description="Upload files through our intuitive interface, and Lume handles the complex work of splitting, encrypting, and distributing your data across the network. Access your files from any device, while maintaining complete privacy and control."
+    imageUrl={AboutImageTwo}
+    imgageMobileUrl={AboutImageMobileTwo}
+    buttonText="Start Now →"
+    url="#"
+    theme="gray"
+    imagePosition="right"
+    client:load
+  />
 
-	<BrandLogos logos={logos} logoType="light" title="Powered & Trusted by" client:load />
+  <BrandLogos logos={logos} logoType="light" title="Powered & Trusted by" client:load />
 
 	<CallToAction client:load />
 </Layout>

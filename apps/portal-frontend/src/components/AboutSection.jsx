@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 
-
 const AboutSection = ({
   subtitle,
   title,
@@ -11,9 +10,11 @@ const AboutSection = ({
   imgageMobileUrl,
   theme,
   imagePosition,
+  id,
 }) => {
   return (
     <section
+      id={id}
       className={`py-[60px] md:py-[120px] ${
         theme == "gray" ? "bg-[#E4E0D4]" : "bg-white"
       }`}>
@@ -25,17 +26,18 @@ const AboutSection = ({
             }`}>
             {imageUrl && (
               <div className="hidden md:block">
-                <img src={imageUrl.src} alt="hero image" className="w-full " />
+                <img src={imageUrl.src} alt="about image" className="w-full" />
               </div>
             )}
 
             {imgageMobileUrl && (
-              <div className={`md:hidden p-[10%] rounded-tl-[50px] rounded-br-[50px] ${
+              <div
+                className={`md:hidden p-[10%] rounded-tl-[50px] rounded-br-[50px] ${
                   theme == "gray" ? "bg-white" : "bg-[#E4E0D4]"
                 }`}>
                 <img
                   src={imgageMobileUrl.src}
-                  alt="hero image"
+                  alt="about image"
                   className="mix-blend-multiply w-full"
                 />
               </div>
@@ -43,7 +45,7 @@ const AboutSection = ({
           </div>
 
           <div
-            className={`mb-[44px] md:mb-[50px]  lg:mb-0  flex-2 ${
+            className={`mb-[44px] md:mb-[50px] lg:mb-0 flex-2 ${
               imagePosition == "right" ? "order-1" : "order-1 md:order-2"
             }`}>
             <div className="text-left max-w-[670px]">
@@ -55,16 +57,13 @@ const AboutSection = ({
 
               {title && (
                 <h2 className="text-[25px] lg:text-[40px] md:text-[32px] font-medium mb-4 lg:mb-[26px] text-[#0D1D1C] leading-tight">
-                  Re-defining Web3, for the users
+                  {title}
                 </h2>
               )}
 
               {description && (
                 <p className="text-[#485453] text-[13px] md:text-base lg:text-lg !leading-[21px] lg:!leading-[35px] md:!leading-[26px] lg:text-xl mb-6 lg:mb-[26px] max-w-[600px]">
-                  Back in 2007, making work better for people meant designing a
-                  simpler way to keep files in sync. Today, it means designing
-                  products that reduce busywork so you can focus on the work
-                  that matters.
+                  {description}
                 </p>
               )}
 
@@ -90,5 +89,4 @@ const AboutSection = ({
     </section>
   );
 };
-
 export default AboutSection;

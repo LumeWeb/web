@@ -1,12 +1,18 @@
 import React from "react";
-export const DownloadProgressCard = ({ title, limit, used, left, onAddMore }) => {
+export const DownloadProgressCard = ({
+  title,
+  limit,
+  used,
+  left,
+  onAddMore,
+}) => {
   return (
     <div className="bg-[#111C1B] rounded-lg p-[20px] md:p-[40px] flex flex-col shadow-md border border-transparent md:border-[#0D2D2A] w-full lg:w-[549px] lg:h-[216px]">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-lg font-semibold text-white flex items-center">
             <span className="mr-2 flex gap-2 items-center">
-              {title === "Upload" ? (
+              {title === "Network" ? (
                 <svg
                   width="24"
                   height="21"
@@ -46,11 +52,11 @@ export const DownloadProgressCard = ({ title, limit, used, left, onAddMore }) =>
               {title}
             </span>
           </h2>
-          <p className="text-sm text-gray-400">{`Monthly ${title.toLowerCase()} limit is ${limit} GB`}</p>
+          <p className="text-sm text-gray-400">
+            {title === "Network" ? "Network activity" : "Storage activity"}
+          </p>
         </div>
-        <button
-          className="md:bg-[#0D2D2A] text-[12px] md:text-[14px] text-white rounded px-3 py-1 flex items-center gap-1 hover:bg-teal-600"
-          onClick={onAddMore}>
+        <button className="md:bg-[#0D2D2A] text-[12px] md:text-[14px] text-white rounded px-3 py-1 flex items-center gap-1 hover:bg-teal-600">
           <span>+</span> Add More
         </button>
       </div>
