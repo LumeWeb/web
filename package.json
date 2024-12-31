@@ -14,6 +14,7 @@
     "build:lumeweb.com": "turbo build --filter=@lumeweb/lumeweb.com",
     "build:portal-dashboard": "turbo build --filter=@lumeweb/portal-dashboard",
     "build:portal-admin": "turbo build --filter=@lumeweb/portal-admin",
+    "build:portal-frontend": "turbo build --filter=@lumeweb/portal-frontend",
     "dev:portal-dashboard": "turbo dev --filter=@lumeweb/portal-dashboard"
   },
   "private": true,
