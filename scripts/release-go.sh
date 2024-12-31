@@ -29,12 +29,23 @@ do
   # Set up the build directory
   mkdir -p go/$APP_NAME/build
 
+  # Determine which output directory exists
+  OUTPUT_DIR=""
+  if [ -d "apps/$APP_NAME/build/client" ]; then
+    OUTPUT_DIR="apps/$APP_NAME/build/client"
+  elif [ -d "apps/$APP_NAME/dist" ]; then
+    OUTPUT_DIR="apps/$APP_NAME/dist"
+  else
+    echo "No client build output found for $APP_NAME"
+    continue
+  fi
+
   # Check if there are actual differences before copying
-  if ! diff -r apps/$APP_NAME/build/client/ go/$APP_NAME/build/ > /dev/null 2>&1; then
+  if ! diff -r "$OUTPUT_DIR" go/$APP_NAME/build/ > /dev/null 2>&1; then
     echo "Changes detected in $APP_NAME build output"
     # Remove old files and copy new ones
     rm -rf go/$APP_NAME/build/*
-    cp -R apps/$APP_NAME/build/client/* go/$APP_NAME/build/
+    cp -R "$OUTPUT_DIR"/* go/$APP_NAME/build/
 
     # Track modified app and its version
     modified_apps+=("$APP_NAME")
