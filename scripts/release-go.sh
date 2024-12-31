@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APPS="@lumeweb/portal-dashboard,@lumeweb/portal-admin"
+APPS="@lumeweb/portal-dashboard,@lumeweb/portal-admin,@lumeweb/portal-frontend"
 modified_apps=()
 module_versions=()
 
