@@ -1,66 +1,36 @@
 {
-	"logoDark": [
-		{
-			"id": 1,
-			"src": "images/brand-logo-dark-1.png",
-			"alt": "Logo one"
-		},
-		{
-			"id": 2,
-			"src": "images/brand-logo-dark-2.png",
-			"alt": "Logo two"
-		},
-		{
-			"id": 3,
-			"src": "images/brand-logo-dark-3.png",
-			"alt": "Logo three"
-		},
-		{
-			"id": 4,
-			"src": "images/brand-logo-dark-1.png",
-			"alt": "Logo one"
-		},
-		{
-			"id": 5,
-			"src": "images/brand-logo-dark-2.png",
-			"alt": "Logo two"
-		},
-		{
-			"id": 6,
-			"src": "images/brand-logo-dark-3.png",
-			"alt": "Logo three"
-		}
-	],
+  "logoDark": [
+    {
+      "id": 1,
+      "src": "images/brand-logo-dark-1.png",
+      "alt": "Sia Foundation - Core Infrastructure"
+    },
+    {
+      "id": 2,
+      "src": "images/brand-logo-dark-2.png",
+      "alt": "Open Source Initiative"
+    },
+    {
+      "id": 3,
+      "src": "images/brand-logo-dark-3.png",
+      "alt": "Handshake"
+    }
+  ],
 	"logoLight": [
-		{
-			"id": 1,
-			"src": "images/brand-logo-1.png",
-			"alt": "Logo one"
-		},
-		{
-			"id": 2,
-			"src": "images/brand-logo-2.png",
-			"alt": "Logo two"
-		},
-		{
-			"id": 3,
-			"src": "images/brand-logo-3.png",
-			"alt": "Logo three"
-		},
-		{
-			"id": 4,
-			"src": "images/brand-logo-1.png",
-			"alt": "Logo one"
-		},
-		{
-			"id": 5,
-			"src": "images/brand-logo-2.png",
-			"alt": "Logo two"
-		},
-		{
-			"id": 6,
-			"src": "images/brand-logo-3.png",
-			"alt": "Logo three"
-		}
+    {
+      "id": 1,
+      "src": "images/brand-logo-1.png",
+      "alt": "Sia Foundation - Core Infrastructure"
+    },
+    {
+      "id": 2,
+      "src": "images/brand-logo-2.png",
+      "alt": "Open Source Initiative"
+    },
+    {
+      "id": 3,
+      "src": "images/brand-logo-3.png",
+      "alt": "Handshake"
+    }
 	]
 }

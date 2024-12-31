@@ -11,14 +11,14 @@ const DeleteSection = () => {
           <div>
             <Heading
               align="text-left"
-              title="Delete what you  don’t need (forever)"
-              description="Experience privacy-first solutions that are more affordable than most on the market, putting you in control."
+              title="True data removal when you need it"
+              description="Unlike traditional cloud storage, when you delete files on Lume, they're genuinely gone"
             />
 
             <div>
               <Button
                 style="outline"
-                label="Read more about data delection →"
+                label="Read more about data deletion →"
                 url="#"
               />
             </div>
@@ -29,26 +29,23 @@ const DeleteSection = () => {
             <div className="relative space-y-6 h-[375px]">
               <div className="relative left-6 md:left-0">
                 <DownloadProgressCard
-                  title="Download"
-                  limit={10}
-                  used={5}
-                  left={5}
-                  onAddMore={() => alert("Add more download limit")}
+                  title="Network" // Instead of "Download"
+                  limit={100} // Use 100 to make percentages easy
+                  used={85} // Show high activity
+                  left={15} // Keep the math correct
                 />
               </div>
               <div className="md:absolute bottom-1 w-full md:right-8 right-0 lg:right-[68px]">
                 <DownloadProgressCard
-                  title="Upload"
-                  limit={15}
-                  used={5}
-                  left={10}
-                  onAddMore={() => alert("Add more upload limit")}
+                  title="Storage" // Instead of "Upload"
+                  limit={100} // Use 100 again
+                  used={40} // Show moderate usage
+                  left={60} // Keep the math correct
                 />
               </div>
             </div>
             <p className="text-[#abeedb]/50 text-md hidden lg:block font-normal font-['Euclid Circular A'] leading-[29px] tracking-tight relative right-14">
-              * 503c related text might go here, along with any other relevant
-              info.
+              Built on open source technology, powered by Sia
             </p>
           </div>
         </div>

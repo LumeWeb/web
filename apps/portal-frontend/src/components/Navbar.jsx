@@ -4,21 +4,21 @@ import { Button } from "./ui/button";
 import { useState } from "react";
 import FooterLogo from "../assets/footer-logo-light.png";
 const Nav = () => {
-	// Correct destructuring of useState
-	const [toggleMenu, setToggleMenu] = useState(false);
+  // Correct destructuring of useState
+  const [toggleMenu, setToggleMenu] = useState(false);
 
-	const handleToggleMenu = () => {
-		setToggleMenu(!toggleMenu); // Toggle the menu state
+  const handleToggleMenu = () => {
+    setToggleMenu(!toggleMenu); // Toggle the menu state
 
-		// Disable scrolling when the menu is open
-		if (!toggleMenu) {
-			document.body.style.overflow = "hidden";
-		} else {
-			document.body.style.overflow = "auto";
-		}
-	};
+    // Disable scrolling when the menu is open
+    if (!toggleMenu) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  };
 
-	return (
+  return (
     <>
       <header className="pt-[58px] pb-[18px] md:py-10 absolute w-full top-0 left-0 z-40">
         <div className="xl:container px-6">
@@ -74,7 +74,7 @@ const Nav = () => {
                         width="20px"
                         version="1.1"
                         viewBox="0 0 512 512"
-						className="md:block hidden"
+                        className="md:block hidden"
                         xml:space="preserve">
                         <path
                           style={{ fill: "#FF6647;" }}
@@ -163,7 +163,7 @@ const Nav = () => {
                 className="text-[#F8F8F8] font-medium text-lg transition ease-in-out duration-300 hover:text-[#ccc]">
                 Sign In
               </a>
-              <Button label="Get 1TB for free → " url="#" />
+              <Button label="Start Storing → " url="#" />
             </div>
 
             <div className="lg:hidden flex items-center space-x-4 relative z-40">

@@ -10,47 +10,45 @@ import StorageCard from "../cards/StorageCard";
 import { SecurityCard } from "../cards/SecurityCard";
 import ProgressCard from "../cards/ProgressCard";
 
-
 import "swiper/swiper-bundle.css";
 
-
 const sliderContent = [
-	{
-		title: "Create an account",
-		description: "Lume handles the privacy so that you can focus on you.",
-	},
-	{
-		title: "Upload",
-		description: "Lume handles the privacy so that you can focus on you.",
-	},
-	{
-		title: "Secure",
-		description: "Lume handles the privacy so that you can focus on you.",
-	},
+  {
+    title: "Create an account",
+    description: "Get started with decentralized storage in minutes",
+  },
+  {
+    title: "Upload",
+    description: "Simple drag and drop to the decentralized network",
+  },
+  {
+    title: "Secure",
+    description: "Your files, backed by Sia's proven network integrity",
+  },
 ];
 
 const AccountSlider = () => {
-	const [activeSlide, setActiveSlide] = useState(0);
-	const [firstSwiper, setFirstSwiper] = useState(null);
-	const [secondSwiper, setSecondSwiper] = useState(null);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [firstSwiper, setFirstSwiper] = useState(null);
+  const [secondSwiper, setSecondSwiper] = useState(null);
 
-	// Handle slide change from either swiper
-	const handleSlideChange = (swiper) => {
-		setActiveSlide(swiper.activeIndex);
-	};
+  // Handle slide change from either swiper
+  const handleSlideChange = (swiper) => {
+    setActiveSlide(swiper.activeIndex);
+  };
 
-	// Handle thumbnail click
-	const handleThumbClick = (index) => {
-		if (firstSwiper) {
-			firstSwiper.slideTo(index);
-		}
-		if (secondSwiper) {
-			secondSwiper.slideTo(index);
-		}
-		setActiveSlide(index);
-	};
+  // Handle thumbnail click
+  const handleThumbClick = (index) => {
+    if (firstSwiper) {
+      firstSwiper.slideTo(index);
+    }
+    if (secondSwiper) {
+      secondSwiper.slideTo(index);
+    }
+    setActiveSlide(index);
+  };
 
-	return (
+  return (
     <div>
       <Swiper
         modules={[Controller]}
@@ -66,22 +64,21 @@ const AccountSlider = () => {
           <div className="mb-5 max-w-[800px] m-auto">
             <ProgressCard
               value={30}
-              title="lume.png (13 MB)"
+              title="quarterly-presentation.pptx (8.4 MB)"
               style="pt-10 pb-[26px]"
             />
             <ProgressCard
               value={40}
               opacity="opacity-80"
-              title="personal-stuff.zip (133 MB)"
+              title="design-assets-v2.sketch (142 MB)"
               style="pt-10 pb-[26px]"
             />
             <ProgressCard
               value={40}
               opacity="opacity-20"
-              title="personal-stuff.zip (133 MB)"
+              title="client-deliverables.zip (298 MB)"
               style="pt-10 pb-[26px]"
             />
-            {/* <img src={signUpImage.src} alt="sign up" className="mx-auto" /> */}
           </div>
         </SwiperSlide>
         <SwiperSlide className="flex items-center justify-center">
