@@ -1,38 +1,17 @@
 {
   "name": "@lumeweb/docs.lumeweb.com",
   "version": "0.3.1",
-  "private": true,
+  "type": "module",
   "scripts": {
-    "start": "docusaurus start",
-    "build": "docusaurus build",
-    "swizzle": "docusaurus swizzle",
-    "serve": "docusaurus serve",
-    "lint": "docusaurus lint"
-  },
-  "browserslist": {
-    "production": [
-      ">0.5%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "engines": {
-    "node": ">=16.14"
+    "dev": "vocs dev",
+    "build": "vocs build",
+    "preview": "vocs preview"
   },
   "dependencies": {
-    "@docusaurus/core": "^3.5.2",
-    "@docusaurus/preset-classic": "^3.5.2",
-    "@mdx-js/react": "^3",
-    "prism-react-renderer": "^2.3.1"
-  },
-  "devDependencies": {
-    "@docusaurus/module-type-aliases": "^3",
-    "@docusaurus/tsconfig": "^3",
-    "@docusaurus/types": "^3"
+    "@types/react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "typescript": "latest",
+    "vocs": "latest"
   }
 }
