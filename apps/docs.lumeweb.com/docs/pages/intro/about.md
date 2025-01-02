@@ -20,4 +20,4 @@ We are currently grant funded by the Sia Foundation, and aim for having our comm
 
 Simply put, this means anything offered as a service under the Lume Web brand goes towards R&D for public goods technologies and effectively web3 development for civil rights.
 
-And *everything* we create is under an [OSI approved license](https://opensource.org). Most of it is under MIT! 
+And *everything* we create is under an [OSI approved license](https://opensource.org). Most of it is under MIT!
