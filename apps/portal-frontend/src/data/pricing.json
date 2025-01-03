@@ -4,7 +4,7 @@
     "title": "Getting Started",
     "description": "Ready to use now",
     "buttonText": "Start Storing →",
-    "url": "#",
+    "url": "https://account.pinner.xyz",
     "tag": "Current",
     "features": [
       {
@@ -38,7 +38,7 @@
     "title": "Run Your Own",
     "description": "Maximum control and privacy",
     "buttonText": "Learn More →",
-    "url": "/docs/self-hosting",
+    "url": "https://docs.lumeweb.com/operators/overview",
     "tag": "",
     "features": [
       {

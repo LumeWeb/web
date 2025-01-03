@@ -21,7 +21,11 @@ const Hero = () => {
               </p>
 
               <div className="flex space-x-3 lg:space-x-6 mt-8">
-                <Button label="Start Storing →" url="#" style="btn-light" />
+                <Button
+                  label="Start Storing →"
+                  url="https://account.pinner.xyz"
+                  style="btn-light"
+                />
                 <Button
                   label="How it works →"
                   url="/how-it-works"

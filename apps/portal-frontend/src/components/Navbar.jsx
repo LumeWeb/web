@@ -43,6 +43,7 @@ const Nav = () => {
                       About Lume
                     </a>
                   </li>
+
                   <li>
                     <a
                       href="/pricing"
@@ -50,24 +51,10 @@ const Nav = () => {
                       Pricing
                     </a>
                   </li>
-                  <li>
-                    <a
-                      href="/docs"
-                      className="text-[#F8F8F8] leading-[50px] border-b border-[#444] lg:border-transparent block lg:leading-5 text-[15px] lg:text-lg font-medium transition ease-in-out duration-300 hover:border-b hover:border-[#F8F8F8]">
-                      Docs
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/contact"
-                      className="text-[#F8F8F8] leading-[50px] border-b border-[#444] lg:border-transparent block lg:leading-5 text-[15px] lg:text-lg font-medium transition ease-in-out duration-300 hover:border-b hover:border-[#F8F8F8]">
-                      Contact
-                    </a>
-                  </li>
 
                   <li>
                     <a
-                      href="/sia"
+                      href="https://sia.tech"
                       className="flex gap-3 items-center text-[#F8F8F8] leading-[50px] border-b border-[#444] lg:border-transparent lg:leading-5 text-[15px] lg:text-lg font-medium transition ease-in-out duration-300">
                       <svg
                         height="20px"
@@ -95,6 +82,21 @@ const Nav = () => {
                         />
                       </svg>{" "}
                       SIA
+                    </a>
+                  </li>
+
+                  <li>
+                    <a
+                      href="https://docs.lumeweb.com"
+                      className="text-[#F8F8F8] leading-[50px] border-b border-[#444] lg:border-transparent block lg:leading-5 text-[15px] lg:text-lg font-medium transition ease-in-out duration-300 hover:border-b hover:border-[#F8F8F8]">
+                      Docs
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/contact"
+                      className="text-[#F8F8F8] leading-[50px] border-b border-[#444] lg:border-transparent block lg:leading-5 text-[15px] lg:text-lg font-medium transition ease-in-out duration-300 hover:border-b hover:border-[#F8F8F8]">
+                      Contact
                     </a>
                   </li>
                 </ul>
@@ -159,11 +161,16 @@ const Nav = () => {
 
             <div className="flex items-center space-x-5 hidden lg:flex">
               <a
-                href="#"
+                href="https://account.pinner.xyz/login"
+                target="_blank"
                 className="text-[#F8F8F8] font-medium text-lg transition ease-in-out duration-300 hover:text-[#ccc]">
                 Sign In
               </a>
-              <Button label="Start Storing → " url="#" />
+              <Button
+                label="Start Storing → "
+                url="https://account.pinner.xyz/"
+                target="_blank"
+              />
             </div>
 
             <div className="lg:hidden flex items-center space-x-4 relative z-40">
