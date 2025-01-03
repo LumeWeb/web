@@ -13,8 +13,12 @@ const CallToAction = () => {
         </p>
 
         <div className="mt-7 md:mt-[50px] flex gap-3 justify-center">
-          <Button label="Start Storing →" url="#" />
-          <Button style="outline" label="Read the Docs" url="/docs" />
+          <Button label="Start Storing →" url="https://account.pinner.xyz" />
+          <Button
+            style="outline"
+            label="Read the Docs"
+            url="https://docs.lumeweb.com"
+          />
         </div>
       </div>
     </section>

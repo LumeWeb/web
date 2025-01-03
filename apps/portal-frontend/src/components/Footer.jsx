@@ -16,7 +16,7 @@ const Footer = ({ theme }) => {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center space-x-5">
             <a
-              href="/docs"
+              href="https://docs.lumeweb.com"
               className={`${
                 theme === "dark"
                   ? "text-[#BBBFBF] hover:text-white"
@@ -34,7 +34,7 @@ const Footer = ({ theme }) => {
               GitHub
             </a>
             <a
-              href="https://discord.gg/lumeweb"
+              href="https://discord.gg/qpC8ADp3rS"
               className={`${
                 theme === "dark"
                   ? "text-[#BBBFBF] hover:text-white"
@@ -46,7 +46,7 @@ const Footer = ({ theme }) => {
 
           <div className="flex items-center space-x-5">
             <a
-              href="/privacy"
+              href="#"
               className={`${
                 theme === "dark"
                   ? "text-[#BBBFBF] hover:text-white"
@@ -55,7 +55,7 @@ const Footer = ({ theme }) => {
               Privacy Policy
             </a>
             <a
-              href="/terms"
+              href="#"
               className={`${
                 theme === "dark"
                   ? "text-[#BBBFBF] hover:text-white"
