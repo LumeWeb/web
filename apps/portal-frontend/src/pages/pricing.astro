@@ -1,0 +1,49 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageHeader from "@/components/PageHeader";
+import BrandLogos from "@/components/BrandLogos";
+import PricingCommunity from "@/components/PricingCommunity";
+
+import logos from "@/data/brand-logos";
+import pricingData from "@/data/pricing.json";
+---
+
+<Layout title="Docs">
+  <PageHeader
+    title="Storage that fits your needs"
+    description="Start storing now or deploy your own portal"
+    mobileTitle="Storage Options"
+    client:load
+  />
+
+  <section class="bg-white py-[70px] md:py-[130px]">
+    <div class="container">
+      <div class="flex flex-wrap justify-center items-center gap-10 md:flex-nowrap">
+        <PricingCommunity
+          title={pricingData[0].title}
+          description={pricingData[0].description}
+          features={pricingData[0].features.map(f => f.text)}
+          buttonText={pricingData[0].buttonText}
+          url={pricingData[0].url}
+          client:load
+        />
+
+        <PricingCommunity
+          title={pricingData[1].title}
+          description={pricingData[1].description}
+          features={pricingData[1].features.map(f => f.text)}
+          buttonText={pricingData[1].buttonText}
+          url={pricingData[1].url}
+          client:load
+        />
+      </div>
+    </div>
+  </section>
+
+  <BrandLogos
+    logos={logos}
+    logoType="dark"
+    title="Powered & Trusted by"
+    client:load
+  />
+</Layout>

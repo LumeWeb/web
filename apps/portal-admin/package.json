@@ -1,0 +1,16 @@
+{
+  "name": "@lumeweb/portal-admin",
+  "version": "0.1.2",
+  "private": true,
+  "sideEffects": false,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm run start",
+    "start": "remix vite:dev  --mode production",
+    "build": "remix vite:build",
+    "serve": "remix preview"
+  },
+  "dependencies": {
+    "portal-shared": "workspace:*"
+  }
+}

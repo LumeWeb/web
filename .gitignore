@@ -40,4 +40,11 @@ Thumbs.db
 
 .nx/cache
 libs/*/**/generated
-apps/lumeweb.com/.astro
+libs/*/**/pnpm-lock.yaml
+apps/*/**/pnpm-lock.yaml
+apps/*/.astro
+apps/*/build
+
+.docusaurus
+.turbo
+**/.turbo

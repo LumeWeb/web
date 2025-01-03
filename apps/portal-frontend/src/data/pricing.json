@@ -1,0 +1,70 @@
+[
+  {
+    "id": 1,
+    "title": "Getting Started",
+    "description": "Ready to use now",
+    "buttonText": "Start Storing →",
+    "url": "#",
+    "tag": "Current",
+    "features": [
+      {
+        "id": 1,
+        "icon": "./images/icon-check.svg",
+        "iconBlack": "./images/icon-check-black.svg",
+        "text": "Community storage access"
+      },
+      {
+        "id": 2,
+        "icon": "./images/icon-folder.svg",
+        "iconBlack": "./images/icon-folder-black.svg",
+        "text": "Fair use based resources"
+      },
+      {
+        "id": 3,
+        "icon": "./images/icon-deliver.svg",
+        "iconBlack": "./images/icon-deliver-black.svg",
+        "text": "Basic resource guarantees"
+      },
+      {
+        "id": 4,
+        "icon": "./images/icon-check.svg",
+        "iconBlack": "./images/icon-check-black.svg",
+        "text": "Start storing right away"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Run Your Own",
+    "description": "Maximum control and privacy",
+    "buttonText": "Learn More →",
+    "url": "/docs/self-hosting",
+    "tag": "",
+    "features": [
+      {
+        "id": 1,
+        "icon": "./images/icon-user.svg",
+        "iconBlack": "./images/icon-user-black.svg",
+        "text": "Self-hosted storage access"
+      },
+      {
+        "id": 2,
+        "icon": "./images/icon-folder.svg",
+        "iconBlack": "./images/icon-folder-black.svg",
+        "text": "Configure your own limits"
+      },
+      {
+        "id": 3,
+        "icon": "./images/icon-deliver.svg",
+        "iconBlack": "./images/icon-deliver-black.svg",
+        "text": "Your infrastructure controls"
+      },
+      {
+        "id": 4,
+        "icon": "./images/icon-check.svg",
+        "iconBlack": "./images/icon-check-black.svg",
+        "text": "Full privacy guarantees"
+      }
+    ]
+  }
+]

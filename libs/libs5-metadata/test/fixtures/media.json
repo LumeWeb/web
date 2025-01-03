@@ -1,0 +1,836 @@
+{
+  "type": "media",
+  "name": "Everything New In Home Assistant 2023.11!",
+  "details": {
+    "duration": 666000
+  },
+  "parents": [],
+  "mediaTypes": {
+    "audio": [
+      {
+        "cid": "uJh9uzPwKSWZfvK09eYYiIDrxa3TgrvvTss_7d2LdJy4fp4b8PQ",
+        "subtype": "mp4",
+        "ext": "m4a",
+        "languages": [
+          "en"
+        ],
+        "asr": 22050,
+        "bitrate": 47646,
+        "audioChannels": 2,
+        "acodec": "mp4a.40.5",
+        "container": "m4a_dash",
+        "duration": 666087,
+        "initRange": "0-640",
+        "indexRange": "641-1476",
+        "caption": "formatId=139-drc;lastModified=1698800957798138;loudnessDb=-7.6399994;isDrc=true"
+      },
+      {
+        "cid": "uJh95lmywFKdYzXth_zjHpdXh1fEyq4B15VhDzb2t0HNkFYb8PQ",
+        "subtype": "mp4",
+        "ext": "m4a",
+        "languages": [
+          "en"
+        ],
+        "asr": 22050,
+        "bitrate": 47646,
+        "audioChannels": 2,
+        "acodec": "mp4a.40.5",
+        "container": "m4a_dash",
+        "duration": 666087,
+        "initRange": "0-640",
+        "indexRange": "641-1476",
+        "caption": "formatId=139;lastModified=1699091165174763;loudnessDb=-7.8199997"
+      },
+      {
+        "cid": "uJh8J1Z_QfLd5xtGcV-zpOhou-Tvv_3gRLNppH3CyU_Ayi60xQA",
+        "subtype": "webm",
+        "ext": "webm",
+        "languages": [
+          "en"
+        ],
+        "asr": 48000,
+        "bitrate": 49352,
+        "audioChannels": 2,
+        "acodec": "opus",
+        "container": "webm_dash",
+        "duration": 665981,
+        "initRange": "0-265",
+        "indexRange": "266-1400",
+        "caption": "formatId=249;lastModified=1713313166772822;loudnessDb=-7.8199997"
+      },
+      {
+        "cid": "uJh8fTF6QbM7A5pAfaaje4n7pO0OE6agFY5tRvw9_78cswgkNSg",
+        "subtype": "webm",
+        "ext": "webm",
+        "languages": [
+          "en"
+        ],
+        "asr": 48000,
+        "bitrate": 56929,
+        "audioChannels": 2,
+        "acodec": "opus",
+        "container": "webm_dash",
+        "duration": 665981,
+        "initRange": "0-265",
+        "indexRange": "266-1401",
+        "caption": "formatId=250;lastModified=1713313166783943;loudnessDb=-7.8199997"
+      },
+      {
+        "cid": "uJh8vhxpSKZJrJzqBbZsVUP4BkldA-aCUcy3Nf3Ua1L-DqT97pA",
+        "subtype": "mp4",
+        "ext": "m4a",
+        "languages": [
+          "en"
+        ],
+        "asr": 44100,
+        "bitrate": 126444,
+        "audioChannels": 2,
+        "acodec": "mp4a.40.2",
+        "container": "m4a_dash",
+        "duration": 666017,
+        "initRange": "0-631",
+        "indexRange": "632-1467",
+        "caption": "formatId=140-drc;lastModified=1698800954980893;loudnessDb=-7.6399994;isDrc=true"
+      },
+      {
+        "cid": "uJh8CcPlLvHot7Exv3e_h_ghTxjzB_Ep1NAkAJugehoPBVD97pA",
+        "subtype": "mp4",
+        "ext": "m4a",
+        "languages": [
+          "en"
+        ],
+        "asr": 44100,
+        "bitrate": 126444,
+        "audioChannels": 2,
+        "acodec": "mp4a.40.2",
+        "container": "m4a_dash",
+        "duration": 666017,
+        "initRange": "0-631",
+        "indexRange": "632-1467",
+        "caption": "formatId=140;lastModified=1699091991129727;loudnessDb=-7.8199997"
+      },
+      {
+        "cid": "uJh_gPQTm5WL31pYzkmnGVAtOdSUGbJ3_Jq55j4iQaPb8GxYshg",
+        "subtype": "webm",
+        "ext": "webm",
+        "languages": [
+          "en"
+        ],
+        "asr": 48000,
+        "bitrate": 103149,
+        "audioChannels": 2,
+        "acodec": "opus",
+        "container": "webm_dash",
+        "duration": 665981,
+        "initRange": "0-265",
+        "indexRange": "266-1401",
+        "caption": "formatId=251;lastModified=1713313166773133;loudnessDb=-7.8199997"
+      }
+    ],
+    "image": [
+      {
+        "cid": "uJh-vCSVf4rallSxIAP3a55xbQPeVCG-AT7KvsKSISGAQhPeMAQ",
+        "subtype": "jpeg",
+        "role": "thumbnail",
+        "ext": "jpg",
+        "height": 720,
+        "width": 1280
+      },
+      {
+        "cid": "uJh9wUOjtT4NFWZ2jeYviIBbfi2_46AIkCFC6sasYzA0IF4zJ",
+        "subtype": "webp",
+        "role": "thumbnail",
+        "ext": "webp",
+        "height": 720,
+        "width": 1280
+      },
+      {
+        "cid": "uJh86KN-7Cm6_AK0WsqX9YAZfKkpKulqBWKi0yFzKdLbfVqxA",
+        "subtype": "jpeg",
+        "role": "thumbnail",
+        "ext": "jpg",
+        "height": 180,
+        "width": 320
+      },
+      {
+        "cid": "uJh-fSQsn1JuoqY1PuoeVdU83SaArUog50vP0lvpbCYbFsGYq",
+        "subtype": "webp",
+        "role": "thumbnail",
+        "ext": "webp",
+        "height": 180,
+        "width": 320
+      },
+      {
+        "cid": "uJh_nyMeOuNKlcqY6qaxuHZrk0DSVXJLsVUFxLHCctSQ4VFxs",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 0
+      },
+      {
+        "cid": "uJh_6gbrTlCCqIEDqqKZ-h-X7_dIFjh9_wtT4zdiS62PrDaJo",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 1
+      },
+      {
+        "cid": "uJh-3CDZ4rjVAuiGcdbV4aDGS95LY67rIIsAF0qc7EHjSUYxX",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 2
+      },
+      {
+        "cid": "uJh8-Dc4PjWag-JlzcbEYuX-56IaHfEeqF2tNsZ6BsNUbfzgx",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 3
+      },
+      {
+        "cid": "uJh9b3wn3WBjt8fDnYOl1p6iSmXHuTcycJxhZAWwOTpiYxqBH",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 4
+      },
+      {
+        "cid": "uJh9viECDJ-Sm1FdHsUTkMUtz2SGX4ddb5JK7bTfdafb3WcxM",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 5
+      },
+      {
+        "cid": "uJh8_q9viF0gfix7AaD32dYcsELTTyMpwwG3WLHOcqpB0IBpE",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 6
+      },
+      {
+        "cid": "uJh8cdhYxRCJuNhNpqRWeGKQ-h_klkV7gEdOZZ-XRO8rnFKZB",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 7
+      },
+      {
+        "cid": "uJh8rxToRULk0Jw2pQAxaJ-mPgAsZB_5-eo10iWJDtazXDORX",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 8
+      },
+      {
+        "cid": "uJh9M8qjm8sxSqqYTXNz3crmlzMXMYkdNyzF1Y5LeACemxMiA",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 9
+      },
+      {
+        "cid": "uJh_1hCmglTzHyGZLl0ihV59jF2h47mjKX87e0G_BKnQBgAA_",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 10
+      },
+      {
+        "cid": "uJh_SKoCTgrNW9wmVINPFMNMAe8Fav32ERgKsXa22MQiFKZw1",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 11
+      },
+      {
+        "cid": "uJh-4jb3f5NLZ2ndMCZc99uYS8oFXfCWNktywzQ2Rm_3KyzRW",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 12
+      },
+      {
+        "cid": "uJh9XQABEKw_jf12iOAZ9oB8uWhFNpC9dNioqrSUrzPRN6SRs",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 13
+      },
+      {
+        "cid": "uJh9nIJToJ_hLcn9_U1vqz6lIwjBU4AnpV87MqvgPAgrMYy5i",
+        "subtype": "webp",
+        "role": "storyboard",
+        "ext": "webp",
+        "height": 180,
+        "width": 320,
+        "duration": 44400,
+        "rows": 3,
+        "columns": 3,
+        "index": 14
+      }
+    ],
+    "text": [
+      {
+        "subtype": "plain",
+        "role": "title",
+        "ext": "yt-title.txt",
+        "value": "Everything New In Home Assistant 2023.11!"
+      },
+      {
+        "cid": "uJh9A4OpIoisAMoT2lh2D-1kHRoF09NjRhyaJI64jdRvMfrME",
+        "subtype": "plain",
+        "role": "description",
+        "ext": "yt-description.txt"
+      },
+      {
+        "subtype": "plain",
+        "role": "summary",
+        "ext": "txt",
+        "value": "Home Assistant 2023.11 has arrived and this month brings in huge shopping list upgrades, even more tile card features, conditional card improvements, variables …"
+      },
+      {
+        "cid": "uJh8n9aek5-nVtYkFfxWXR2Vry7GGrEnfRZKVu7HMsYVtIEyFAQ",
+        "subtype": "vtt",
+        "role": "automatic_caption",
+        "ext": "vtt",
+        "languages": [
+          "en-orig"
+        ]
+      },
+      {
+        "cid": "uJh8n9aek5-nVtYkFfxWXR2Vry7GGrEnfRZKVu7HMsYVtIEyFAQ",
+        "subtype": "vtt",
+        "role": "automatic_caption",
+        "ext": "vtt",
+        "languages": [
+          "en"
+        ]
+      }
+    ],
+    "video": [
+      {
+        "cid": "uJh9B1j-DQPn8x1AyRXoT4IPnTblOQGil7t9M4qnxadjaC5IsJA",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 144,
+        "width": 256,
+        "fps": 24,
+        "bitrate": 27811,
+        "vcodec": "av01.0.00M.08",
+        "container": "mp4_dash",
+        "dynamicRange": "SDR",
+        "duration": 665956,
+        "initRange": "0-699",
+        "indexRange": "700-2231",
+        "caption": "formatId=394;lastModified=1713315501167607"
+      },
+      {
+        "cid": "uJh-CVLXJFagXx2Gg8TyTxB0hy91caBxl6mOJpvkLwNlckdCHGA",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 144,
+        "width": 256,
+        "fps": 24,
+        "bitrate": 18859,
+        "vcodec": "avc1.4D400C",
+        "container": "mp4_dash",
+        "dynamicRange": "SDR",
+        "duration": 665956,
+        "initRange": "0-737",
+        "indexRange": "738-2269",
+        "caption": "formatId=160;lastModified=1699100629936736"
+      },
+      {
+        "cid": "uJh_mjQ2gd-CMX3zMLTSNLORPjDL0KQ2nj9s11Cv0yDaorykeMw",
+        "subtype": "webm",
+        "ext": "webm",
+        "height": 144,
+        "width": 256,
+        "fps": 24,
+        "bitrate": 39300,
+        "vcodec": "vp09.00.11.08",
+        "container": "webm_dash",
+        "dynamicRange": "SDR",
+        "duration": 665957,
+        "initRange": "0-218",
+        "indexRange": "219-2333",
+        "caption": "formatId=278;lastModified=1713317583970161"
+      },
+      {
+        "cid": "uJh8co0Yvc5vnitYsL956Z9MeF5DvAQGr-D0nQ6Q4Pp3ec_JJMA",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 240,
+        "width": 426,
+        "fps": 24,
+        "bitrate": 37125,
+        "vcodec": "av01.0.00M.08",
+        "container": "mp4_dash",
+        "dynamicRange": "SDR",
+        "duration": 665956,
+        "initRange": "0-699",
+        "indexRange": "700-2231",
+        "caption": "formatId=395;lastModified=1713315728450140"
+      },
+      {
+        "cid": "uJh_jCuMPiKuxaxeshudXrqKv619QdsUZy4L98UKNSryaBjo8MA",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 240,
+        "width": 426,
+        "fps": 24,
+        "bitrate": 37084,
+        "vcodec": "avc1.4D4015",
+        "container": "mp4_dash",
+        "dynamicRange": "SDR",
+        "duration": 665956,
+        "initRange": "0-738",
+        "indexRange": "739-2270",
+        "caption": "formatId=133;lastModified=1699101230480618"
+      },
+      {
+        "cid": "uJh9GMiygVJ696mWxsqZKPiBZopRf3lV4-2zW6n051VHpEYlRVA",
+        "subtype": "webm",
+        "ext": "webm",
+        "height": 240,
+        "width": 426,
+        "fps": 24,
+        "bitrate": 64825,
+        "vcodec": "vp09.00.20.08",
+        "container": "webm_dash",
+        "dynamicRange": "SDR",
+        "duration": 665957,
+        "initRange": "0-218",
+        "indexRange": "219-2334",
+        "caption": "formatId=242;lastModified=1713317584146053"
+      },
+      {
+        "cid": "uJh9WhS5DqgWV9Dz5eAGMVu4PXokrbMzK77Ppzu2qq6Shm6YeVw",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 360,
+        "width": 640,
+        "fps": 24,
+        "bitrate": 66979,
+        "vcodec": "av01.0.01M.08",
+        "container": "mp4_dash",
+        "dynamicRange": "SDR",
+        "duration": 665956,
+        "initRange": "0-699",
+        "indexRange": "700-2231",
+        "caption": "formatId=396;lastModified=1713315522929799"
+      },
+      {
+        "cid": "uJh9E6xj-c41maKphorWPTLbS6FbUGLkwkKS5yB-TJR5ATNVhWw",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 360,
+        "width": 640,
+        "fps": 24,
+        "bitrate": 70256,
+        "vcodec": "avc1.4D401E",
+        "container": "mp4_dash",
+        "dynamicRange": "SDR",
+        "duration": 665956,
+        "initRange": "0-738",
+        "indexRange": "739-2270",
+        "caption": "formatId=134;lastModified=1699100367920001"
+      },
+      {
+        "cid": "uJh-n0SIYtlP1p9h7KkV_LNBsOwyXkX59aOb9Gyxj_Y7yo6wcYAE",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 360,
+        "width": 640,
+        "languages": [
+          "en"
+        ],
+        "asr": 44100,
+        "fps": 24,
+        "bitrate": 270686,
+        "audioChannels": 2,
+        "vcodec": "avc1.42001E",
+        "acodec": "mp4a.40.2",
+        "dynamicRange": "SDR",
+        "duration": 666017,
+        "caption": "formatId=18;lastModified=1699101582479061"
+      },
+      {
+        "cid": "uJh9IMfBSESREQLwQy8gSG7dCvIH_C2n49rETbCYfgF--0f2Fvw",
+        "subtype": "webm",
+        "ext": "webm",
+        "height": 360,
+        "width": 640,
+        "fps": 24,
+        "bitrate": 147246,
+        "vcodec": "vp09.00.21.08",
+        "container": "webm_dash",
+        "dynamicRange": "SDR",
+        "duration": 665957,
+        "initRange": "0-219",
+        "indexRange": "220-2335",
+        "caption": "formatId=243;lastModified=1713317583882920"
+      },
+      {
+        "cid": "uJh-ASWqadhMOtKQ6ebwPj1O3Z20r1Zl2-lmeBSV1wRTGV_Pujw",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 480,
+        "width": 854,
+        "fps": 24,
+        "bitrate": 110658,
+        "vcodec": "av01.0.04M.08",
+        "container": "mp4_dash",
+        "dynamicRange": "SDR",
+        "duration": 665956,
+        "initRange": "0-699",
+        "indexRange": "700-2231",
+        "caption": "formatId=397;lastModified=1713316274177097"
+      },
+      {
+        "cid": "uJh8mQZzl2rPMlvYTlGQNM8_F93SAwFJSjug55P_f3nNsX9CWiA",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 480,
+        "width": 854,
+        "fps": 24,
+        "bitrate": 105012,
+        "vcodec": "avc1.4D401E",
+        "container": "mp4_dash",
+        "dynamicRange": "SDR",
+        "duration": 665956,
+        "initRange": "0-738",
+        "indexRange": "739-2270",
+        "caption": "formatId=135;lastModified=1699100972730887"
+      },
+      {
+        "cid": "uJh9WAhrfeJR8-sjxTY5qlHl1PD6rq0ZGAxuT0qPfVB5vMqJCIgE",
+        "subtype": "webm",
+        "ext": "webm",
+        "height": 480,
+        "width": 854,
+        "fps": 24,
+        "bitrate": 223157,
+        "vcodec": "vp09.00.30.08",
+        "container": "webm_dash",
+        "dynamicRange": "SDR",
+        "duration": 665957,
+        "initRange": "0-219",
+        "indexRange": "220-2343",
+        "caption": "formatId=244;lastModified=1713317586062860"
+      },
+      {
+        "cid": "uJh_4xZS7oOH4EtyrcHSLj98-R7XW7Cb7EcSpwRqy17L2OebjYQE",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 720,
+        "width": 1280,
+        "languages": [
+          "en"
+        ],
+        "asr": 44100,
+        "fps": 24,
+        "bitrate": 272085,
+        "audioChannels": 2,
+        "vcodec": "avc1.64001F",
+        "acodec": "mp4a.40.2",
+        "dynamicRange": "SDR",
+        "duration": 666017,
+        "caption": "formatId=22;lastModified=1699101055122473"
+      },
+      {
+        "cid": "uJh8sbhIGYO_3OIW7mtdc89RkW9pM1M0yji8mf1Y0De7pA4EIDAE",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 720,
+        "width": 1280,
+        "fps": 24,
+        "bitrate": 206068,
+        "vcodec": "av01.0.05M.08",
+        "container": "mp4_dash",
+        "dynamicRange": "SDR",
+        "duration": 665956,
+        "initRange": "0-699",
+        "indexRange": "700-2231",
+        "caption": "formatId=398;lastModified=1713315574950262"
+      },
+      {
+        "cid": "uJh8UgYdQwHIsZchDED0WYFF-sAPz-eU4ErsO0vkuOhkDbaIQvg",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 720,
+        "width": 1280,
+        "fps": 24,
+        "bitrate": 146125,
+        "vcodec": "avc1.4D401F",
+        "container": "mp4_dash",
+        "dynamicRange": "SDR",
+        "duration": 665956,
+        "initRange": "0-738",
+        "indexRange": "739-2270",
+        "caption": "formatId=136;lastModified=1699100169920265"
+      },
+      {
+        "cid": "uJh-ET01DgKfED1Wk9DUzW7TJHxWaMDx2-Dl00_MFEGQVMK94BgI",
+        "subtype": "webm",
+        "ext": "webm",
+        "height": 720,
+        "width": 1280,
+        "fps": 24,
+        "bitrate": 398610,
+        "vcodec": "vp09.00.31.08",
+        "container": "webm_dash",
+        "dynamicRange": "SDR",
+        "duration": 665957,
+        "initRange": "0-219",
+        "indexRange": "220-2386",
+        "caption": "formatId=247;lastModified=1713317600371833"
+      },
+      {
+        "cid": "uJh-gNAKf5Vsi_ozui032UgZEHNC_VG2SWQq-WSECM7VhqcCQ1gE",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 1080,
+        "width": 1920,
+        "fps": 24,
+        "bitrate": 361779,
+        "vcodec": "av01.0.08M.08",
+        "container": "mp4_dash",
+        "dynamicRange": "SDR",
+        "duration": 665956,
+        "initRange": "0-699",
+        "indexRange": "700-2231",
+        "caption": "formatId=399;lastModified=1713315572057183"
+      },
+      {
+        "cid": "uJh-jWUxr-8HhmVn9sClsns8LTNyfWBY9iHNE-J87X20fIC-xxwI",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 1080,
+        "width": 1920,
+        "fps": 24,
+        "bitrate": 547162,
+        "vcodec": "avc1.640028",
+        "container": "mp4_dash",
+        "dynamicRange": "SDR",
+        "duration": 665956,
+        "initRange": "0-740",
+        "indexRange": "741-2272",
+        "caption": "formatId=137;lastModified=1699100288710559"
+      },
+      {
+        "cid": "uJh-z-Tbsaue4KwgxEAeai1MxLgFAfHPk2l6kPMX-FI1tSnE_uwI",
+        "subtype": "webm",
+        "ext": "webm",
+        "height": 1080,
+        "width": 1920,
+        "fps": 24,
+        "bitrate": 537594,
+        "vcodec": "vp09.00.40.08",
+        "container": "webm_dash",
+        "dynamicRange": "SDR",
+        "duration": 665957,
+        "initRange": "0-219",
+        "indexRange": "220-2415",
+        "caption": "formatId=248;lastModified=1713316653961889"
+      },
+      {
+        "cid": "uJh80r8tXFtPYbkFk9u3IAIr4ypYK1Pw44Zz5WMrRDLR8FxHQXAU",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 1440,
+        "width": 2560,
+        "fps": 24,
+        "bitrate": 1055444,
+        "vcodec": "av01.0.12M.08",
+        "container": "mp4_dash",
+        "dynamicRange": "SDR",
+        "duration": 665956,
+        "initRange": "0-700",
+        "indexRange": "701-2232",
+        "caption": "formatId=400;lastModified=1713316285477550"
+      },
+      {
+        "cid": "uJh9LAccqBieWfrsx2iF4tNCBkIY1xXBF-bmeWh8MSh_kpHdHawg",
+        "subtype": "webm",
+        "ext": "webm",
+        "height": 1440,
+        "width": 2560,
+        "fps": 24,
+        "bitrate": 1657018,
+        "vcodec": "vp09.00.50.08",
+        "container": "webm_dash",
+        "dynamicRange": "SDR",
+        "duration": 665957,
+        "initRange": "0-219",
+        "indexRange": "220-2450",
+        "caption": "formatId=271;lastModified=1713315559573771"
+      },
+      {
+        "cid": "uJh8ba_UYIQ2mpcZ6Dyp7Tru5VCq_xuLy_yNQ9nzeShiDJSexQAw",
+        "subtype": "mp4",
+        "ext": "mp4",
+        "height": 2160,
+        "width": 3840,
+        "fps": 24,
+        "bitrate": 2411550,
+        "vcodec": "av01.0.12M.08",
+        "container": "mp4_dash",
+        "dynamicRange": "SDR",
+        "duration": 665956,
+        "initRange": "0-700",
+        "indexRange": "701-2232",
+        "caption": "formatId=401;lastModified=1713318260960099"
+      },
+      {
+        "cid": "uJh-rQRLgq6XTfhHMjrZQZQb1eT2wUIMuVPWJjcFTnWtRGE1y7R4",
+        "subtype": "webm",
+        "ext": "webm",
+        "height": 2160,
+        "width": 3840,
+        "fps": 24,
+        "bitrate": 6087078,
+        "vcodec": "vp09.00.50.08",
+        "container": "webm_dash",
+        "dynamicRange": "SDR",
+        "duration": 665957,
+        "initRange": "0-220",
+        "indexRange": "221-2459",
+        "caption": "formatId=313;lastModified=1713315588115420"
+      }
+    ],
+    "application": [
+      {
+        "cid": "uJh-NpgRnCy0IJIvTQHT705E_3feoYt_NasrsoiMrHY2yv88u",
+        "subtype": "dash+xml",
+        "role": "dash_manifest",
+        "ext": "mpd"
+      },
+      {
+        "subtype": "json",
+        "role": "yt_metadata",
+        "ext": "json",
+        "value": "{\"live_status\":\"not_live\",\"playable_in_embed\":true,\"comment_count\":82,\"like_count\":2110,\"upload_date\":\"20231101\",\"availability\":\"public\",\"view_count\":69300,\"duration\":666,\"age_limit\":0,\"duration_string\":\"11:06\",\"is_live\":false,\"was_live\":false,\"channel\":\"Everything Smart Home\",\"uploader\":\"Everything Smart Home\",\"channel_follower_count\":193000,\"channel_is_verified\":true}"
+      },
+      {
+        "subtype": "json",
+        "role": "yt_heatmap",
+        "ext": "json",
+        "value": "[{\"start_time\":0.0,\"end_time\":6.66,\"value\":0.5873575395397441},{\"start_time\":6.66,\"end_time\":13.32,\"value\":0.16624459425227386},{\"start_time\":13.32,\"end_time\":19.98,\"value\":0.18188405578138217},{\"start_time\":19.98,\"end_time\":26.64,\"value\":0.2331535314042355},{\"start_time\":26.64,\"end_time\":33.3,\"value\":0.2925019741420228},{\"start_time\":33.3,\"end_time\":39.96,\"value\":0.3300108225615784},{\"start_time\":39.96,\"end_time\":46.62,\"value\":0.31814863776207214},{\"start_time\":46.62,\"end_time\":53.28,\"value\":0.21959050680172398},{\"start_time\":53.28,\"end_time\":59.94,\"value\":0.20593201719865492},{\"start_time\":59.94,\"end_time\":66.6,\"value\":0.20578106426399034},{\"start_time\":66.6,\"end_time\":73.26,\"value\":0.20334521419458323},{\"start_time\":73.26,\"end_time\":79.92,\"value\":0.26794285647099825},{\"start_time\":79.92,\"end_time\":86.58,\"value\":0.37834090096616096},{\"start_time\":86.58,\"end_time\":93.24,\"value\":0.3642308695195596},{\"start_time\":93.24,\"end_time\":99.9,\"value\":0.2232353851062732},{\"start_time\":99.9,\"end_time\":106.56,\"value\":0.20188982655579507},{\"start_time\":106.56,\"end_time\":113.22,\"value\":0.20133643976991442},{\"start_time\":113.22,\"end_time\":119.88,\"value\":0.19457990581874324},{\"start_time\":119.88,\"end_time\":126.54,\"value\":0.17565076485441958},{\"start_time\":126.54,\"end_time\":133.2,\"value\":0.19878355581417081},{\"start_time\":133.2,\"end_time\":139.86,\"value\":0.17019471472598777},{\"start_time\":139.86,\"end_time\":146.52,\"value\":0.1814163884886447},{\"start_time\":146.52,\"end_time\":153.18,\"value\":0.17244109808368133},{\"start_time\":153.18,\"end_time\":159.84,\"value\":0.15010724850428595},{\"start_time\":159.84,\"end_time\":166.5,\"value\":0.14773875364603248},{\"start_time\":166.5,\"end_time\":173.16,\"value\":0.18166906930250548},{\"start_time\":173.16,\"end_time\":179.82,\"value\":0.23512935255158127},{\"start_time\":179.82,\"end_time\":186.48,\"value\":0.2794186743369175},{\"start_time\":186.48,\"end_time\":193.14,\"value\":0.27239008562020894},{\"start_time\":193.14,\"end_time\":199.8,\"value\":0.3183954946841147},{\"start_time\":199.8,\"end_time\":206.46,\"value\":0.3103075137064672},{\"start_time\":206.46,\"end_time\":213.12,\"value\":0.3750304135556555},{\"start_time\":213.12,\"end_time\":219.78,\"value\":0.40022126252712},{\"start_time\":219.78,\"end_time\":226.44,\"value\":0.3565914160092772},{\"start_time\":226.44,\"end_time\":233.1,\"value\":0.34451149374681933},{\"start_time\":233.1,\"end_time\":239.76,\"value\":0.45107308608898106},{\"start_time\":239.76,\"end_time\":246.42,\"value\":0.6726638582875037},{\"start_time\":246.42,\"end_time\":253.08,\"value\":0.9022875039848114},{\"start_time\":253.08,\"end_time\":259.74,\"value\":0.9416705920014568},{\"start_time\":259.74,\"end_time\":266.4,\"value\":0.8187379519609845},{\"start_time\":266.4,\"end_time\":273.06,\"value\":0.647624050048068},{\"start_time\":273.06,\"end_time\":279.72,\"value\":0.49234703667031776},{\"start_time\":279.72,\"end_time\":286.38,\"value\":0.5254698799692238},{\"start_time\":286.38,\"end_time\":293.04,\"value\":0.535308920842138},{\"start_time\":293.04,\"end_time\":299.7,\"value\":0.5500543125468952},{\"start_time\":299.7,\"end_time\":306.36,\"value\":0.5764407567567955},{\"start_time\":306.36,\"end_time\":313.02,\"value\":0.5009260683053396},{\"start_time\":313.02,\"end_time\":319.68,\"value\":0.47546641307080917},{\"start_time\":319.68,\"end_time\":326.34,\"value\":0.5792708169909819},{\"start_time\":326.34,\"end_time\":333.0,\"value\":0.6824763258248857},{\"start_time\":333.0,\"end_time\":339.66,\"value\":0.703029630227573},{\"start_time\":339.66,\"end_time\":346.32,\"value\":0.6022532988634053},{\"start_time\":346.32,\"end_time\":352.98,\"value\":0.5334715561379675},{\"start_time\":352.98,\"end_time\":359.64,\"value\":0.927481250269291},{\"start_time\":359.64,\"end_time\":366.3,\"value\":0.6109044999317119},{\"start_time\":366.3,\"end_time\":372.96,\"value\":0.5178691450965066},{\"start_time\":372.96,\"end_time\":379.62,\"value\":0.5202571163366948},{\"start_time\":379.62,\"end_time\":386.28,\"value\":0.6160038293698323},{\"start_time\":386.28,\"end_time\":392.94,\"value\":0.6922199016972423},{\"start_time\":392.94,\"end_time\":399.6,\"value\":0.7759109245404117},{\"start_time\":399.6,\"end_time\":406.26,\"value\":0.9646468109952414},{\"start_time\":406.26,\"end_time\":412.92,\"value\":1.0},{\"start_time\":412.92,\"end_time\":419.58,\"value\":0.8862516666226095},{\"start_time\":419.58,\"end_time\":426.24,\"value\":0.8281919721265611},{\"start_time\":426.24,\"end_time\":432.9,\"value\":0.746514845220966},{\"start_time\":432.9,\"end_time\":439.56,\"value\":0.618348955496343},{\"start_time\":439.56,\"end_time\":446.22,\"value\":0.5343173374120672},{\"start_time\":446.22,\"end_time\":452.88,\"value\":0.5170909677927589},{\"start_time\":452.88,\"end_time\":459.54,\"value\":0.49984200498509046},{\"start_time\":459.54,\"end_time\":466.2,\"value\":0.6956038462357059},{\"start_time\":466.2,\"end_time\":472.86,\"value\":0.6488501109718442},{\"start_time\":472.86,\"end_time\":479.52,\"value\":0.5897709134839433},{\"start_time\":479.52,\"end_time\":486.18,\"value\":0.5167973148756545},{\"start_time\":486.18,\"end_time\":492.84,\"value\":0.5011128425645542},{\"start_time\":492.84,\"end_time\":499.5,\"value\":0.47639858695117676},{\"start_time\":499.5,\"end_time\":506.16,\"value\":0.5134493672564692},{\"start_time\":506.16,\"end_time\":512.82,\"value\":0.5327843954349966},{\"start_time\":512.82,\"end_time\":519.48,\"value\":0.4264886535113096},{\"start_time\":519.48,\"end_time\":526.14,\"value\":0.3667896066329094},{\"start_time\":526.14,\"end_time\":532.8,\"value\":0.38937544928014683},{\"start_time\":532.8,\"end_time\":539.46,\"value\":0.40690650501864734},{\"start_time\":539.46,\"end_time\":546.12,\"value\":0.4108957245851708},{\"start_time\":546.12,\"end_time\":552.78,\"value\":0.48697834491915887},{\"start_time\":552.78,\"end_time\":559.44,\"value\":0.6328952227793363},{\"start_time\":559.44,\"end_time\":566.1,\"value\":0.8933176570164219},{\"start_time\":566.1,\"end_time\":572.76,\"value\":0.6932870493920095},{\"start_time\":572.76,\"end_time\":579.42,\"value\":0.506648641965371},{\"start_time\":579.42,\"end_time\":586.08,\"value\":0.593152107038332},{\"start_time\":586.08,\"end_time\":592.74,\"value\":0.4509247085436632},{\"start_time\":592.74,\"end_time\":599.4,\"value\":0.42716498587270907},{\"start_time\":599.4,\"end_time\":606.06,\"value\":0.38492745922044735},{\"start_time\":606.06,\"end_time\":612.72,\"value\":0.1603415092116665},{\"start_time\":612.72,\"end_time\":619.38,\"value\":0.04677358478459388},{\"start_time\":619.38,\"end_time\":626.04,\"value\":0.05009592483925199},{\"start_time\":626.04,\"end_time\":632.7,\"value\":0.054045064909066846},{\"start_time\":632.7,\"end_time\":639.36,\"value\":0.02462825809524804},{\"start_time\":639.36,\"end_time\":646.02,\"value\":0.008778990131744555},{\"start_time\":646.02,\"end_time\":652.68,\"value\":0.0},{\"start_time\":652.68,\"end_time\":659.34,\"value\":0.010147099874176866},{\"start_time\":659.34,\"end_time\":666.0,\"value\":0.0044569161250489955}]"
+      }
+    ]
+  },
+  "links": null,
+  "extraMetadata": {
+    "wikidataClaims": {
+      "P31": "Q63412991",
+      "P1651": "Nw8wLIkQXII",
+      "P2397": "UCrVLgIniVg6jW38uVqDRIiQ",
+      "P11245": "EverythingSmartHome",
+      "P1476": "Everything New In Home Assistant 2023.11!"
+    },
+    "categories": [
+      "Science & Technology"
+    ],
+    "tags": [
+      "home assistant",
+      "smart home",
+      "home automation",
+      "home assistant new features",
+      "home assistant thermostat card",
+      "home assistant thermostat dashboard",
+      "home assistant 2023.11",
+      "home assistant conditional card",
+      "home assistant november update",
+      "home assistant november 2023.11 update",
+      "home assistant november 2023.11"
+    ],
+    "sourceUris": [
+      "https://www.youtube.com/watch?v=Nw8wLIkQXII"
+    ],
+    "originalTimestamp": 1698796800000,
+    "basicMediaMetadata": {
+      "title": "Everything New In Home Assistant 2023.11!",
+      "artist": "Everything Smart Home",
+      "date": "20231101",
+      "comment": "https://www.youtube.com/watch?v=Nw8wLIkQXII"
+    },
+    "viewTypes": [
+      "video",
+      "audio"
+    ],
+    "timestamp": 1713544500242
+  }
+}

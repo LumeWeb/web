@@ -11,8 +11,6 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions:
   pull-requests: write
   contents: write
-
-
 jobs:
   release:
     name: Release
@@ -20,29 +18,48 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
         with:
-          run_install: true
-      - name: Setup Node.js 20.x
-        uses: actions/setup-node@v4
+          fetch-depth: 0
+      - name: Setup
+        uses: ./.github/actions/setup-all
         with:
-          node-version: 20.x
-          cache: 'pnpm'
-
-      - name: Cache Nx
-        uses: actions/cache@v4
-        with:
-          path: ./nx/cache
-          key: cache-nx-${{ hashFiles('pnpm-lock.yaml') }}-${{ matrix.target }}-${{ matrix.jobIndex }}-${{ github.sha }}
-          restore-keys: |
-            cache-nx-${{ hashFiles('pnpm-lock.yaml') }}-${{ matrix.target }}-${{ matrix.jobIndex }}-
-            cache-nx-${{ hashFiles('pnpm-lock.yaml') }}-
-      - name: Build
-        run: pnpm build:changed
-
+          node_version: 20.10.0
+          go_version: 1.23.0
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
+        with:
+          publish: pnpm changeset:publish
+          createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Check for portal-frontend changes and notify template repo
+      - if: steps.changesets.outputs.published == 'true'
+        name: Check portal-frontend changes and notify
+        id: check-changes
+        run: |
+          CHANGES=$(git diff --name-only HEAD^ HEAD apps/portal-frontend)
+          if [ ! -z "$CHANGES" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - if: steps.check-changes.outputs.has_changes == 'true'
+        name: Trigger portal-frontend template repo update
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          repository: lumeweb/portal-frontend-template
+          event-type: portal-frontend-update
+          client-payload: |
+            {
+              "source_sha": "${{ github.sha }}",
+              "source_ref": "${{ github.ref }}"
+            }
+        # if a release was published, release the Go modules
+      - if: steps.changesets.outputs.published == 'true'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          repository: lumeweb/web
+          event-type: release-go

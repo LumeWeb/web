@@ -1,0 +1,189 @@
+---
+title: Roadmap
+---
+
+import { Callout } from 'vocs/components'
+import RoadmapTable from '../../components/RoadmapTable'
+
+<Callout type="info">
+  This roadmap outlines our planned development timeline. Dates and features may adjust based on community needs and technical considerations.
+</Callout>
+
+<RoadmapTable
+  section={{
+    year: "2024",
+    quarters: [
+      {
+        quarter: "Q1",
+        focusArea: "Building Core Portal",
+        activities: [
+          {
+            icon: "📝",
+            title: "Core Portal Rewrite",
+            description: "Creating framework for flexible L2, establishing infrastructure"
+          },
+          {
+            icon: "🚀",
+            title: "S5 Integration",
+            description: "Porting to Golang, creating library, implementing portal support"
+          },
+          {
+            icon: "📊",
+            title: "Dashboard Development",
+            description: "Building MVP, user management, VUP compatibility"
+          }
+        ]
+      },
+      {
+        quarter: "Q2",
+        focusArea: "Scaling & Enhancement",
+        activities: [
+          {
+            icon: "🔄",
+            title: "P2P Portal Syncing",
+            description: "Implementing Hypercore for redundancy, backup systems"
+          },
+          {
+            icon: "📈",
+            title: "Infrastructure Scaling",
+            description: "Redis support, etcd clustering, dashboard enhancements"
+          }
+        ]
+      },
+      {
+        quarter: "Q3",
+        focusArea: "Integration & Systems",
+        activities: [
+          {
+            icon: "🌐",
+            title: "IPFS Integration",
+            description: "Sia ecosystem support, dashboard controls"
+          },
+          {
+            icon: "💳",
+            title: "Business Systems",
+            description: "Hyperswitch.io billing, usage tracking, support ticketing"
+          },
+          {
+            icon: "🎛️",
+            title: "Optional Features",
+            description: "Private portal billing, enhanced management"
+          }
+        ]
+      },
+      {
+        quarter: "Q4",
+        focusArea: "Production & Community",
+        activities: [
+          {
+            icon: "🖥️",
+            title: "Production Infrastructure",
+            description: "DevOps systems, monitoring"
+          },
+          {
+            icon: "🌐",
+            title: "Community Services",
+            description: "Paid hosting, community features"
+          },
+          {
+            icon: "📚",
+            title: "Documentation",
+            description: "Setup guides, API documentation"
+          }
+        ]
+      }
+    ]
+  }}
+/>
+
+<RoadmapTable
+  section={{
+    year: "2025",
+    quarters: [
+      {
+        quarter: "Q1",
+        focusArea: "Anti-Abuse System & Launch",
+        activities: [
+          {
+            icon: "🌐",
+            title: "Community Portal",
+            description: "web3portal.com launch, usage limits"
+          },
+          {
+            icon: "🛡️",
+            title: "Content Protection",
+            description: "Anti-abuse systems, content scanning"
+          },
+          {
+            icon: "🚫",
+            title: "Community Safety",
+            description: "Block systems, community lists"
+          },
+          {
+            icon: "📢",
+            title: "Reporting Tools",
+            description: "Reporting interface, case management"
+          }
+        ]
+      },
+      {
+        quarter: "Q2",
+        focusArea: "Bluesky Integration",
+        activities: [
+          {
+            icon: "🔄",
+            title: "Protocol Support",
+            description: "atproto implementation, data handlers"
+          },
+          {
+            icon: "💾",
+            title: "Data Management",
+            description: "Sia backup, identity systems"
+          },
+          {
+            icon: "👤",
+            title: "User Tools",
+            description: "Migration tools, status tracking"
+          }
+        ]
+      },
+      {
+        quarter: "Q3",
+        focusArea: "Protocol Expansion",
+        activities: [
+          {
+            icon: "📡",
+            title: "Nostr Integration",
+            description: "NIP-96, TUS upload support"
+          },
+          {
+            icon: "🔗",
+            title: "LBRY Support",
+            description: "Blob storage, DHT participation"
+          },
+          {
+            icon: "📤",
+            title: "Enhanced Sharing",
+            description: "File transfers, batch operations"
+          }
+        ]
+      },
+      {
+        quarter: "Q4",
+        focusArea: "Advanced Features",
+        activities: [
+          {
+            icon: "☁️",
+            title: "Cloud Integration",
+            description: "Service imports, provider support"
+          },
+          {
+            icon: "🔑",
+            title: "Naming Systems",
+            description: "IPNS implementation, persistence layer"
+          }
+        ]
+      }
+    ]
+  }}
+/>

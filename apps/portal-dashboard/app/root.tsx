@@ -5,30 +5,38 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import { useMemo } from "react";
 
-import stylesheet from "./tailwind.css?url";
 import type { LinksFunction } from "@remix-run/node";
+import stylesheet from "portal-shared/tailwind.css?url";
 
 // Supports weights 200-800
 import "@fontsource-variable/manrope";
-import { Refine } from "@refinedev/core";
+import { createServiceProvider } from "@/dataProviders/serviceProvider";
+import useUploader from "@/features/uploadManager/hooks/useUploader";
+import { useAppInitialization } from "@/hooks/useAppInitialization";
+import { SERVICE_ROUTE } from "@/routeConfig";
+import { getResetServices } from "@/services/index";
+import {
+  type AuthProvider,
+  type NotificationProvider,
+  Refine,
+  type ResourceProps,
+} from "@refinedev/core";
 import routerProvider from "@refinedev/remix-router";
-import { notificationProvider } from "~/data/notification-provider";
-import { SdkContextProvider, useSdk } from "~/components/lib/sdk-context";
-import { Toaster } from "~/components/ui/toaster";
-import { getProviders } from "~/data/providers.js";
-import { Sdk } from "@lumeweb/portal-sdk";
-import resources from "~/data/resources.js";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
-import { PinningProcess } from "~/data/pinning.js";
-import { env } from "~/env.js";
+import restDataProvider from "@refinedev/simple-rest";
+import { Skeleton } from "portal-shared/components/ui/skeleton";
+import { Toaster } from "portal-shared/components/ui/toaster";
+import { createAccountProvider } from "portal-shared/dataProviders/accountProvider";
+import { notificationProvider } from "portal-shared/dataProviders/notificationProvider";
+import { useAuthProvider } from "portal-shared/hooks/useAuthProvider";
+import useSdk from "portal-shared/hooks/useSdk";
+import { withTheme } from "portal-shared/hooks/useTheme";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
+  { rel: "icon", href: "/favicon.svg" },
 ];
-
-const queryClient = new QueryClient();
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -57,69 +65,120 @@ function App() {
   );
 }
 
-export default function Root() {
-  const [portalUrl, setPortalUrl] = useState(env.VITE_PORTAL_URL);
-  const [sdk, setSdk] = useState<Sdk | undefined>(
-    portalUrl ? Sdk.create(portalUrl) : undefined,
-  );
-  useEffect(() => {
-    if (!portalUrl) {
-      fetch("/api/meta")
-        .then((response) => response.json())
-        .then((data) => {
-          setPortalUrl(`https://${data.domain}`);
-        })
-        .catch((error) => {
-          console.error("Failed to fetch portal url:", error);
-        });
-    }
-  }, [portalUrl]);
-
-  useEffect(() => {
-    if (portalUrl) {
-      setSdk(Sdk.create(portalUrl));
-    }
-  }, [portalUrl]);
-
-  if (!portalUrl) {
-    return <p>Loading...</p>;
-  }
-
-  return (
-    <SdkContextProvider sdk={sdk as Sdk}>
-      <SdkWrapper />
-    </SdkContextProvider>
-  );
-}
-
-function SdkWrapper() {
+export function Root() {
   const sdk = useSdk();
-  PinningProcess.setupSdk(sdk as Sdk);
+  const resetServices = getResetServices();
+  const uploader = useUploader();
 
-  const providers = useMemo(() => getProviders(sdk as Sdk), [sdk]);
+  const authProvider = useAuthProvider(sdk);
 
-  if (!sdk) {
-    return <p>Loading...</p>;
+  const { isInitialized, providers, resources, setIsInitialized } =
+    useAppInitialization(sdk, authProvider);
+
+  const wrappedAuthProvider = useMemo(() => {
+    if (!authProvider) return null;
+    return {
+      ...authProvider,
+      login: async (params: any) => {
+        const result = await authProvider.login(params);
+        setIsInitialized(false); // Trigger re-initialization after login
+        return result;
+      },
+      logout: async (params: any) => {
+        const result = await authProvider.logout(params);
+        setIsInitialized(false); // Trigger re-initialization after logout
+        resetServices();
+        uploader.reset();
+        return result;
+      },
+    };
+  }, [authProvider, setIsInitialized, resetServices, uploader]);
+
+  if (!isInitialized) {
+    return <SkeletonLoader />;
   }
 
+  const resourceAuthHeaders = {
+    Authorization: `Bearer ${sdk?.account()?.jwtToken}`,
+  };
+
+  const allResources: ResourceProps[] = [
+    ...resources,
+    {
+      name: "account/keys",
+      meta: {
+        headers: resourceAuthHeaders,
+      },
+    },
+    {
+      name: "account",
+    },
+    {
+      name: SERVICE_ROUTE,
+      show: "/service/:id",
+    },
+    {
+      name: "account/subscription/billing/countries",
+      meta: {
+        headers: resourceAuthHeaders,
+      },
+    },
+    {
+      name: "account/subscription/billing/states",
+      meta: {
+        headers: resourceAuthHeaders,
+      },
+    },
+    {
+      name: "account/subscription/billing/cities",
+      meta: {
+        headers: resourceAuthHeaders,
+      },
+    },
+  ];
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <Refine
-        authProvider={providers.auth}
-        routerProvider={routerProvider}
-        notificationProvider={notificationProvider}
-        dataProvider={{
-          default: providers.default,
-          files: providers.files,
-        }}
-        resources={resources}
-        options={{ disableTelemetry: true }}>
-        <App />
-      </Refine>
-    </QueryClientProvider>
+    <Refine
+      authProvider={wrappedAuthProvider as AuthProvider}
+      routerProvider={routerProvider}
+      dataProvider={{
+        ...providers,
+        default: createAccountProvider(
+          sdk!,
+          restDataProvider(
+            // @ts-ignore
+            sdk!.account()?.apiUrl?.replace(/\/+$/, "") + "/api",
+          ),
+        ),
+
+        // @ts-ignore
+        service: createServiceProvider(),
+      }}
+      notificationProvider={
+        notificationProvider as unknown as NotificationProvider
+      }
+      resources={allResources}
+      options={{ disableTelemetry: true, warnWhenUnsavedChanges: true }}>
+      <App />
+    </Refine>
   );
 }
+
+export default withTheme(Root);
 
 export function HydrateFallback() {
-  return <p>Loading...</p>;
+  return <SkeletonLoader />;
 }
+
+const SkeletonLoader = () => {
+  return (
+    <div className="flex items-start justify-center min-h-screen p-4 pt-60">
+      <div className="w-full max-w-md space-y-2">
+        <Skeleton className="h-4 w-3/4 mx-auto" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6 mx-auto" />
+        <Skeleton className="h-4 w-2/3 mx-auto" />
+      </div>
+    </div>
+  );
+};

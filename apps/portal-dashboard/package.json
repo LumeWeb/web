@@ -1,7 +1,29 @@
 {
   "name": "@lumeweb/portal-dashboard",
-  "version": "0.0.0",
+  "version": "0.2.4",
   "private": true,
   "sideEffects": false,
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm run start",
+    "start": "remix vite:dev  --mode production",
+    "build": "remix vite:build",
+    "serve": "remix preview"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.9.0",
+    "@lumeweb/portal-sdk": "workspace:*",
+    "@radix-ui/react-alert-dialog": "^1.1.1",
+    "@radix-ui/react-dialog": "^1.1.2",
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-popover": "^1.1.1",
+    "@radix-ui/react-scroll-area": "^1.0.5",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-switch": "^1.1.0",
+    "json-schema": "^0.4.0",
+    "lucide-react": "^0.396.0",
+    "react-hook-form": "^7.53.0",
+    "zod": "^3.22.4",
+    "portal-shared": "workspace:*"
+  }
 }

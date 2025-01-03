@@ -1,0 +1,55 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+import CallToAction from '@/components/CallToAction';
+import AboutSection from '@/components/AboutSection';
+import BrandLogos from '@/components/BrandLogos';
+
+import logos from '@/data/brand-logos';
+
+import AboutImage from "../assets/about-1.png";
+import AboutImageTwo from "../assets/about-2.png";
+import AboutImageMobile from "../assets/about-mobile-1.png";
+import AboutImageMobileTwo from "../assets/about-mobile-2.png";
+---
+
+<Layout title="About Lume">
+  <PageHeader
+    title="Decentralized storage that puts you in control"
+    btnText="Start Storing →"
+    url="#"
+    secondaryBtnText="See How It Works →"
+    secondaryUrl="#how-it-works"
+    mobileTitle="Storage under your control"
+    client:load
+  />
+
+  <AboutSection
+    title="Storage without the middleman"
+    subtitle="What is Lume?"
+    description="Lume is a decentralized storage portal that connects you directly to storage providers on the Sia network. No corporate middlemen, no data mining, just your files stored securely acros a distributed network."
+    imageUrl={AboutImage}
+    imgageMobileUrl={AboutImageMobile}
+    buttonText="Start Storing →"
+    url="#"
+    client:load
+  />
+
+  <AboutSection
+    id="how-it-works"
+    title="Simple, secure, and private"
+    subtitle="How It Works"
+    description="Upload files through our intuitive interface, and Lume handles the complex work of splitting, encrypting, and distributing your data across the network. Access your files from any device, while maintaining complete privacy and control."
+    imageUrl={AboutImageTwo}
+    imgageMobileUrl={AboutImageMobileTwo}
+    buttonText="Start Now →"
+    url="#"
+    theme="gray"
+    imagePosition="right"
+    client:load
+  />
+
+  <BrandLogos logos={logos} logoType="light" title="Powered & Trusted by" client:load />
+
+	<CallToAction client:load />
+</Layout>

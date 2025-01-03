@@ -1,0 +1,27 @@
+---
+import "@/styles/globals.css";
+import Navbar from "@/components/Navbar.jsx";
+import { NavigationMenu } from "@/components/ui/navigation-menu";
+import Footer from "@/components/Footer.jsx";
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Lume - {title}</title>
+  </head>
+  <body class="bg-[#0D1D1C] antialiased">
+    <Navbar client:load />
+    <main class="min-h-[220px]">
+      <slot />
+    </main>
+
+    {title === "Home" ? <Footer theme="dark" /> : <Footer />}
+  </body>
+</html>

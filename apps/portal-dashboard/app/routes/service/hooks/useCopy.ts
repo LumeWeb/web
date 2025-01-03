@@ -1,0 +1,34 @@
+import React, { useState, useEffect, useCallback } from "react";
+import { Copy, Check } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "portal-shared/components/ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "portal-shared/components/ui/popover";
+import { Button } from "portal-shared/components/ui/button";
+import { CID } from "multiformats/cid";
+
+// Custom hook for copy functionality
+export default function useCopy(initialDelay = 500) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (copied) {
+      const timer = setTimeout(() => setCopied(false), initialDelay);
+      return () => clearTimeout(timer);
+    }
+  }, [copied, initialDelay]);
+
+  const copyToClipboard = useCallback(async (text: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+  }, []);
+
+  return { copied, copyToClipboard };
+}

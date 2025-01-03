@@ -1,0 +1,123 @@
+[
+    {
+        "title": "Company",
+        "menuItems": [
+            {
+                "id": 1,
+                "text": "About Us",
+                "url": "#"
+            },
+            {
+                "id": 2,
+                "text": "Customers",
+                "url": "#"
+            },
+            {
+                "id": 3,
+                "text": "Partners",
+                "url": "#"
+            }
+        ]
+    },
+    {
+        "title": "Foundation",
+        "menuItems": [
+            {
+                "id": 1,
+                "text": "Funding",
+                "url": "#"
+            },
+            {
+                "id": 2,
+                "text": "Community",
+                "url": "#"
+            },
+            {
+                "id": 3,
+                "text": "Grant",
+                "url": "#"
+            },
+            {
+                "id": 4,
+                "text": "FAQ",
+                "url": "#"
+            },
+            {
+                "id": 5,
+                "text": "References",
+                "url": "#"
+            }
+
+        ]
+    },
+    {
+        "title": "Solutions",
+        "menuItems": [
+            {
+                "id": 1,
+                "text": "Image API",
+                "url": "#"
+            },
+            {
+                "id": 2,
+                "text": "Pricing",
+                "url": "#"
+            },
+            {
+                "id": 3,
+                "text": "Demos",
+                "url": "#"
+            },
+            {
+                "id": 4,
+                "text": "Integrations",
+                "url": "#"
+            }
+        ]
+    },
+    {
+        "title": "Docs",
+        "menuItems": [
+            {
+                "id": 1,
+                "text": "Getting Started",
+                "url": "#"
+            },
+            {
+                "id": 2,
+                "text": "Documentation",
+                "url": "#"
+            },
+            {
+                "id": 3,
+                "text": "SDKs",
+                "url": "#"
+            },
+            {
+                "id": 4,
+                "text": "Add-Ons",
+                "url": "#"
+            }
+        ]
+    },
+    {
+        "title": "Contact Us",
+        "menuItems": [
+            {
+                "id": 1,
+                "text": "Technical Support",
+                "url": "#"
+            },
+            {
+                "id": 2,
+                "text": "Contact Sales",
+                "url": "#"
+            },
+            {
+                "id": 3,
+                "text": "Education & Training",
+                "url": "#"
+            }
+        ]
+    }
+]

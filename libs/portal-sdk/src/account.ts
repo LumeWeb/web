@@ -1,36 +1,35 @@
 import {
   AccountInfoResponse,
+  deleteApiAccountDelete,
   getApiAccount,
+  getApiAuthOtpGenerate,
+  getApiUploadLimit,
   LoginRequest,
   LoginResponse,
   OTPDisableRequest,
   OTPGenerateResponse,
   OTPValidateRequest,
   OTPVerifyRequest,
+  PasswordResetRequest,
   PasswordResetVerifyRequest,
   PingResponse,
-  postApiAccountPasswordResetRequest,
-  postApiAccountVerifyEmailResend,
-  postApiAuthPing,
-  RegisterRequest,
-  UploadLimitResponse,
-  VerifyEmailRequest,
-} from "./account/generated/index.js";
-
-import {
-  postApiAuthLogin,
-  postApiAuthRegister,
-  postApiAccountVerifyEmail,
-  getApiAuthOtpGenerate,
-  postApiAccountOtpVerify,
-  postApiAccountOtpValidate,
-  postApiAuthOtpDisable,
-  PasswordResetRequest,
   postApiAccountPasswordResetConfirm,
-  postApiAuthLogout,
-  getApiUploadLimit,
+  postApiAccountPasswordResetRequest,
   postApiAccountUpdateEmail,
   postApiAccountUpdatePassword,
+  postApiAccountVerifyEmail,
+  postApiAccountVerifyEmailResend,
+  postApiAuthLogin,
+  postApiAuthLogout,
+  postApiAuthOtpDisable,
+  postApiAuthOtpValidate,
+  postApiAuthOtpVerify,
+  postApiAuthPing,
+  postApiAuthRegister,
+  RegisterRequest,
+  type ResendVerifyEmailRequest,
+  UploadLimitResponse,
+  VerifyEmailRequest,
 } from "./account/generated/index.js";
 import { AxiosError, AxiosResponse } from "axios";
 
@@ -69,10 +68,12 @@ export class AccountApi {
 
   public async login(
     loginRequest: LoginRequest,
-  ): Promise<boolean | AccountError> {
+  ): Promise<LoginResponse | AccountError> {
     let ret: AxiosResponse<LoginResponse> | LoginResponse | boolean = false;
     try {
-      ret = await postApiAuthLogin(loginRequest, { baseURL: this.apiUrl });
+      ret = await postApiAuthLogin(loginRequest, {
+        ...(await this.buildOptions()),
+      });
     } catch (e) {
       return new AccountError(
         (e as AxiosError).response?.data as string,
@@ -83,10 +84,10 @@ export class AccountApi {
 
     if (ret) {
       this._jwtToken = (ret as LoginResponse).token;
-      return true;
+      return ret as LoginResponse;
     }
 
-    return false;
+    return new AccountError("Invalid response", 500);
   }
 
   public async register(
@@ -125,10 +126,15 @@ export class AccountApi {
     return this.checkSuccessBool(ret);
   }
 
-  public async requestEmailVerification(): Promise<boolean | AccountError> {
+  public async requestEmailVerification(
+    resendRequest: ResendVerifyEmailRequest,
+  ): Promise<boolean | AccountError> {
     let ret: AxiosResponse<void>;
     try {
-      ret = await postApiAccountVerifyEmailResend(this.buildOptions());
+      ret = await postApiAccountVerifyEmailResend(
+        resendRequest,
+        this.buildOptions(),
+      );
     } catch (e) {
       return new AccountError(
         (e as AxiosError).response?.data as string,
@@ -158,10 +164,7 @@ export class AccountApi {
   ): Promise<boolean | Error> {
     let ret: AxiosResponse<void>;
     try {
-      ret = await postApiAccountOtpVerify(
-        otpVerifyRequest,
-        this.buildOptions(),
-      );
+      ret = await postApiAuthOtpVerify(otpVerifyRequest, this.buildOptions());
     } catch (e) {
       return new AccountError(
         (e as AxiosError).response?.data as string,
@@ -173,10 +176,10 @@ export class AccountApi {
 
   public async validateOtp(
     otpValidateRequest: OTPValidateRequest,
-  ): Promise<boolean | AccountError> {
+  ): Promise<LoginResponse | AccountError> {
     let ret: AxiosResponse<void>;
     try {
-      ret = await postApiAccountOtpValidate(
+      ret = await postApiAuthOtpValidate(
         otpValidateRequest,
         this.buildOptions(),
       );
@@ -186,7 +189,16 @@ export class AccountApi {
         (e as AxiosError).response?.status as number,
       );
     }
-    return this.checkSuccessBool(ret);
+
+    const success = this.checkSuccessVal<LoginResponse>(ret);
+
+    if (success) {
+      this._jwtToken = ret.token;
+
+      return success;
+    }
+
+    return new AccountError("Invalid response", 500);
   }
 
   public async disableOtp(
@@ -331,6 +343,20 @@ export class AccountApi {
     return this.checkSuccessBool(ret);
   }
 
+  public async requestAccountDeletion(): Promise<boolean | AccountError> {
+    let ret: AxiosResponse<void>;
+    try {
+      ret = await deleteApiAccountDelete(this.buildOptions());
+    } catch (e) {
+      return new AccountError(
+        (e as AxiosError).response?.data as string,
+        (e as AxiosError).response?.status as number,
+      );
+    }
+
+    return this.checkSuccessBool(ret);
+  }
+
   private checkSuccessBool(ret: AxiosResponse<void>): boolean {
     return ret.status === 200;
   }
@@ -352,6 +378,7 @@ export class AccountApi {
     return {
       baseURL: this.apiUrl,
       headers: headers,
+      withCredentials: true,
     };
   }
 }

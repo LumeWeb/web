@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "es2020",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "allowJs": false,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "types": ["vite/client"],
+    "paths": {
+      "@/*": [
+        "libs/portal-shared/src/*"
+      ],
+      "@/components/*": [
+        "libs/portal-shared/src/components/*"
+      ],
+      "@/utils/*": [
+        "libs/portal-shared/src/utils/*"
+      ],
+      "@lumeweb/libs5": ["libs/libs5/src/index.ts"],
+      "@lumeweb/portal-dashboard/*": ["libs/portal-dashboard/src/*"],
+      "@lumeweb/portal-sdk": ["libs/portal-sdk/src/index.ts"],
+      "@lumeweb/s5-js": ["libs/s5-js/src/index.ts"]
+    }
+  },
+  "files": [],
+  "include": [
+    "env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx"
+  ],
+  "extends": "../../tsconfig.base.json"
+}

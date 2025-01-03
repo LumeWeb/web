@@ -57,9 +57,21 @@ paths:
   /api/account/verify-email/resend:
     post:
       summary: Resend email verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResendVerifyEmailRequest"
+      responses:
+        '200':
+          description: Email verification resent successfully
+  /api/account/delete:
+    delete:
+      summary: Request account deletion
       responses:
         "200":
-          description: Email verification resent successfully
+          description: Account deletion requested successfully
   /api/auth/otp/generate:
     get:
       summary: Generate OTP for two-factor authentication
@@ -70,7 +82,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/OTPGenerateResponse"
-  /api/account/otp/verify:
+  /api/auth/otp/verify:
     post:
       summary: Verify OTP for enabling two-factor authentication
       requestBody:
@@ -82,7 +94,7 @@ paths:
       responses:
         "200":
           description: OTP verified successfully
-  /api/account/otp/validate:
+  /api/auth/otp/validate:
     post:
       summary: Validate OTP for two-factor authentication login
       requestBody:
@@ -211,11 +223,15 @@ components:
           type: string
         password:
           type: string
+        remember:
+          type: boolean
     LoginResponse:
       type: object
       properties:
         token:
           type: string
+        otp:
+          type: boolean
     RegisterRequest:
       type: object
       required:
@@ -242,6 +258,13 @@ components:
           type: string
         token:
           type: string
+    ResendVerifyEmailRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
     OTPGenerateResponse:
       type: object
       properties:
@@ -257,9 +280,9 @@ components:
     OTPValidateRequest:
       type: object
       required:
-        - OTP
+        - otp
       properties:
-        OTP:
+        otp:
           type: string
     OTPDisableRequest:
       type: object

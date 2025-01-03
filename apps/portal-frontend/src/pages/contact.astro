@@ -1,0 +1,39 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+---
+
+<Layout title="Contact">
+  <PageHeader
+    title="Connect with the community"
+    description="Get help and join the discussion"
+    mobileTitle="Connect with us"
+    client:load
+  />
+
+  <section class="bg-[#F8F8F8] py-[70px] border-b border-[#E4E0D4]">
+    <div class="container text-center">
+      <div class="max-w-2xl mx-auto">
+        <h2 class="text-[21px] md:text-[32px] font-medium mb-8">Join our Discord community</h2>
+        <p class="text-[#485453] mb-8">Get support, share ideas, and connect with other users</p>
+        <a
+          href="https://discord.gg/lumeweb"
+          class="inline-block py-3 md:py-4 px-7 bg-[#E4E0D4] text-[#0D1D1C] font-medium text-[13px] md:text-lg rounded-full hover:bg-[#d6d1c4] transition-colors"
+        >
+          Join Discord →
+        </a>
+      </div>
+
+      <div class="max-w-2xl mx-auto mt-16">
+        <h2 class="text-[21px] md:text-[32px] font-medium mb-8">Contribute on GitHub</h2>
+        <p class="text-[#485453] mb-8">Help improve Lume by contributing to the project</p>
+        <a
+          href="https://github.com/lumeweb"
+          class="inline-block py-3 md:py-4 px-7 bg-[#E4E0D4] text-[#0D1D1C] font-medium text-[13px] md:text-lg rounded-full hover:bg-[#d6d1c4] transition-colors"
+        >
+          View Source →
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

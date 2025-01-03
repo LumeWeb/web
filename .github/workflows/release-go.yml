@@ -1,0 +1,89 @@
+name: Release Go modules
+
+concurrency: commits-to-master
+
+on:
+  repository_dispatch:
+    types: [release-go]
+  workflow_dispatch:
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.get_modified_apps.outputs.matrix }}
+      has_changes: ${{ steps.get_modified_apps.outputs.has_changes }}
+      commit_hash: ${{ steps.release.outputs.commit_hash }}
+    steps:
+      - name: Checkout all commits
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/setup-all
+        with:
+          node_version: 20.10.0
+          go_version: 1.23.0
+
+      - name: Configure Git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+      - name: Release
+        id: release
+        run: |
+          ./scripts/release-go.sh
+          if [ -f "/tmp/modified_apps.txt" ] && [ -s "/tmp/modified_apps.txt" ]; then
+            BRANCH_NAME=${GITHUB_REF#refs/heads/}
+            git push origin HEAD:${BRANCH_NAME}
+            echo "commit_hash=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Get modified apps info
+        id: get_modified_apps
+        run: |
+          if [ ! -f "/tmp/modified_apps.txt" ] || [ ! -s "/tmp/modified_apps.txt" ]; then
+            echo "matrix={\"include\":[]}" >> "$GITHUB_OUTPUT"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Read the mapping file and create the matrix
+          while IFS=, read -r app version; do
+            # Get base name without portal- prefix for repository mapping
+            base_name=${app#portal-}
+            # Create the repository name with portal-plugin- prefix
+            repo="portal-plugin-$base_name"
+            echo "$app,$version,$repo" >> /tmp/mapped_apps.txt
+          done < <(paste -d, /tmp/modified_apps.txt /tmp/module_versions.txt)
+
+          # Create matrix parameter
+          matrix=$(cat /tmp/mapped_apps.txt | \
+            awk -F, '{print "{\"app\":\"" $1 "\",\"version\":\"" $2 "\",\"repo\":\"" $3 "\"}"}' | \
+            jq -s '{include: .}' | tr -d '\n')
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+  dispatch:
+    needs: prepare
+    if: needs.prepare.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - name: Dispatch UI update
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          repository: LumeWeb/${{ matrix.repo }}
+          event-type: update-ui
+          client-payload: |
+            {
+              "commit_hash": "${{ needs.prepare.outputs.commit_hash }}",
+              "version": "${{ matrix.version }}",
+              "app_name": "${{ matrix.app }}",
+              "repository": "${{ github.repository }}",
+              "ref": "${{ github.ref }}"
+            }

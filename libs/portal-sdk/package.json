@@ -1,11 +1,15 @@
 {
     "name": "@lumeweb/portal-sdk",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "type": "module",
     "description": "",
     "files": [
         "lib"
     ],
+  "scripts": {
+    "build": "tsc",
+    "orval": "orval"
+  },
     "repository": {
         "type": "git",
         "url": "gitea@git.lumeweb.com:LumeWeb/portal-sdk.git"
@@ -15,9 +19,9 @@
     "_id": "@lumeweb/portal-sdk@0.0.0",
     "dependencies": {
         "@lumeweb/s5-js": "workspace:*",
-        "axios": "^1.6.7",
+        "axios": "^1.7.7",
         "memize": "^2.1.0",
-        "orval": "^6.25.0",
+        "orval": "^7.0.1",
         "patch-package": "^8.0.0"
     },
     "publishConfig": {

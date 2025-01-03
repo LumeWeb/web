@@ -27,22 +27,19 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v3
-      - name: Setup Node.js 20.x
-        uses: actions/setup-node@v4
+      - name: Setup
+        uses: ./.github/actions/setup-all
         with:
-          node-version: 20.x
-          cache: 'pnpm'
-      - name: Install Dependencies
-        uses: pnpm/action-setup@v3
+          node_version: 20.10.0
+          go_version: 1.23.0
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v2.0
         with:
-          run_install: true
+          envkey_VITE_PORTAL_DOMAIN: ${{ vars.TESTING_PORTAL_DOMAIN }}
+          envkey_NODE_ENV: development
+          directory: apps/portal-dashboard
       - name: Build
         run: pnpm build:portal-dashboard
-        env:
-          VITE_PORTAL_URL: ${{ vars.TESTING_PORTAL_URL }}
-          NODE_ENV: development
       - name: Publish to Cloudflare Pages
         id: deploy_cf
         uses: cloudflare/pages-action@v1
@@ -50,7 +47,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           projectName: lume-web-portal-dashboard-staging
-          directory: dist/apps/portal-dashboard/client
+          directory: apps/portal-dashboard/build/client
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
       - uses: mshick/add-pr-comment@v2
         if: github.event_name == 'pull_request'

@@ -1,0 +1,41 @@
+import * as CID_BYTES from "./cid";
+
+export const TYPES = {
+  MEDIA: 0x02,
+  WEBAPP: 0x03,
+  DIRECTORY: CID_BYTES.TYPES.DIRECTORY,
+  DIRECTORY_LEGACY: 0x04,
+  PROOF: 0x05,
+  USER_IDENTITY: 0x07,
+};
+Object.freeze(TYPES);
+
+export const DETAILS = {
+  MEDIA: {
+    DURATION: 10,
+    IS_LIVE: 11,
+    WAS_LIVE: 12,
+  },
+};
+
+Object.freeze(DETAILS);
+
+export const EXTENSIONS = {
+  LICENSES: 11,
+  DONATION_KEYS: 12,
+  WIKIDATA_CLAIMS: 13,
+  LANGUAGES: 14,
+  SOURCE_URIS: 15,
+  UPDATE_CID: 16,
+  PREVIOUS_VERSIONS: 17,
+  TIMESTAMP: 18,
+  TAGS: 19,
+  CATEGORIES: 20,
+  VIEW_TYPES: 21,
+  BASIC_MEDIA_METADATA: 22,
+  BRIDGE: 23,
+  ORIGINAL_TIMESTAMP: 24,
+  ROUTING_HINTS: 25,
+};
+
+export const MAGIC_BYTE = 0x5f;

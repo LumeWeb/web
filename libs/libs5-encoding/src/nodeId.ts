@@ -1,0 +1,29 @@
+import { base58btc } from "multiformats/bases/base58";
+import { equalBytes } from "@noble/curves/abstract/utils";
+
+export class NodeId {
+  bytes: Uint8Array;
+
+  constructor(bytes: Uint8Array) {
+    this.bytes = bytes;
+  }
+
+  static decode(nodeId: string): NodeId {
+    return new NodeId(base58btc.decode(nodeId));
+  }
+
+  equals(other: any): boolean {
+    if (!(other instanceof NodeId)) {
+      return false;
+    }
+    return equalBytes(this.bytes, other.bytes);
+  }
+
+  toBase58(): string {
+    return base58btc.encode(this.bytes);
+  }
+
+  toString(): string {
+    return this.toBase58();
+  }
+}

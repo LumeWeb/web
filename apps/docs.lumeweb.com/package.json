@@ -1,20 +1,17 @@
 {
-    "name": "@lumeweb/docs.lumeweb.com",
-    "version": "0.3.1",
-    "private": true,
-    "browserslist": {
-        "production": [
-            ">0.5%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
-    },
-    "engines": {
-        "node": ">=16.14"
-    }
+  "name": "@lumeweb/docs.lumeweb.com",
+  "version": "0.4.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vocs dev",
+    "build": "vocs build",
+    "preview": "vocs preview"
+  },
+  "dependencies": {
+    "@types/react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "typescript": "latest",
+    "vocs": "latest"
+  }
 }
