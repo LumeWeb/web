@@ -47,21 +47,6 @@ This interoperability is a key feature of decentralized storage - your data isn'
 - **Durability**: Data is redundantly stored across the network
 - **Privacy**: End-to-end encryption keeps your data private
 
-## Features
-
-### web3portal.com (Coming Soon)
-- Free community access
-- Basic file storage and retrieval
-- IPFS support
-- Community-driven infrastructure
-
-### pinner.xyz
-- Premium paid service
-- Enhanced storage options
-- Advanced management features
-- Priority support
-- Additional protocols as they become available
-
 ## Getting Started
 
 To start storing files:
