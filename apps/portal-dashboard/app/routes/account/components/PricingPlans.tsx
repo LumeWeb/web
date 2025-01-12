@@ -1,6 +1,10 @@
 import SubscribePayment from "@/routes/account/components/SubscribePayment";
 import { useSubscriptionContext } from "@/routes/account/contexts/SubscriptionContext.js";
-import { CloudIcon, CloudUploadIcon, DownloadIcon } from "portal-shared/components/icons";
+import {
+  CloudIcon,
+  CloudUploadIcon,
+  DownloadIcon,
+} from "portal-shared/components/icons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,13 +24,15 @@ import {
 } from "portal-shared/components/ui/card";
 import { Progress } from "portal-shared/components/ui/progress";
 import { Skeleton } from "portal-shared/components/ui/skeleton";
-import type { SubscriptionPlan, SubscriptionResponse } from "portal-shared/dataProviders/accountProvider";
+import type {
+  SubscriptionPlan,
+  SubscriptionResponse,
+} from "portal-shared/dataProviders/accountProvider";
 import useOnFreePlan from "portal-shared/hooks/useOnFreePlan";
 import { cn } from "portal-shared/util/cn.js";
 import filesize from "portal-shared/util/filesize.js";
 import { useEffect, useState } from "react";
-
-
+import useCreateSubscription from "../hooks/useCreateSubscription";
 
 // TODO(@pcfreak30): Changing plan is buggy when PAID_BILLING is disabled. It is requesting that the billing information is complete when it is not needed.
 export default function PricingPlans() {
@@ -39,6 +45,7 @@ export default function PricingPlans() {
     submitPlanChange,
     isLoading,
   } = useSubscriptionContext();
+  const { createSubscription, isCreating } = useCreateSubscription();
 
   const [showBillingDialog, setShowBillingDialog] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -76,7 +83,13 @@ export default function PricingPlans() {
   const handleConfirmPlanChange = async () => {
     setShowConfirmDialog(false);
     if (selectedPlan) {
-      await submitPlanChange(selectedPlan);
+      if (subscription?.plan) {
+        // Existing subscription - change plan
+        await submitPlanChange(selectedPlan);
+      } else {
+        // New subscription
+        await createSubscription(selectedPlan);
+      }
     }
   };
 
@@ -92,7 +105,7 @@ export default function PricingPlans() {
     }
   }, [paymentExpired, planPending, submitPlanChange, subscription?.plan]);
 
-  if (isLoading || isPlanChanging) {
+  if (isLoading || isPlanChanging || isCreating) {
     return (
       <div className="space-y-8">
         <Skeleton className="h-[200px] w-full" />
@@ -112,29 +125,31 @@ export default function PricingPlans() {
     <>
       {plan && (
         <Card className="mb-8 bg-transparent border">
-        <CardHeader>
-          <CardTitle>Current Plan: {plan.name}</CardTitle>
-          <div className="text-4xl font-medium">
-            ${plan?.price}/{plan?.period === "MONTH" ? "mo" : "yr"}
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between mb-2">
-                <span>Storage Used</span>
-                <span>{formatStorage(storageUsed)} / {formatStorage(plan.storage)}</span>
-              </div>
-              <Progress value={storagePercent} />
-              {storagePercent > 80 && (
-                <p className="text-red-500 text-sm mt-1">
-                  Running low on storage! Consider upgrading.
-                </p>
-              )}
+          <CardHeader>
+            <CardTitle>Current Plan: {plan.name}</CardTitle>
+            <div className="text-4xl font-medium">
+              ${plan?.price}/{plan?.period === "MONTH" ? "mo" : "yr"}
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span>Storage Used</span>
+                  <span>
+                    {formatStorage(storageUsed)} / {formatStorage(plan.storage)}
+                  </span>
+                </div>
+                <Progress value={storagePercent} />
+                {storagePercent > 80 && (
+                  <p className="text-red-500 text-sm mt-1">
+                    Running low on storage! Consider upgrading.
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
       {!subscription ? (
         <div className="grid md:grid-cols-3 gap-8">
@@ -156,11 +171,13 @@ export default function PricingPlans() {
                   ].includes(plan.identifier),
                 },
                 {
-                  "md:col-span-3": index === plans.length - 1 && plans.length % 3 === 1,
-                  "md:col-span-2": index === plans.length - 1 && plans.length % 3 === 2,
-                }
+                  "md:col-span-3":
+                    index === plans.length - 1 && plans.length % 3 === 1,
+                  "md:col-span-2":
+                    index === plans.length - 1 && plans.length % 3 === 2,
+                },
               )}>
-              <PlanCard 
+              <PlanCard
                 plan={plan}
                 subscription={subscription}
                 selectedPlan={selectedPlan}
@@ -214,7 +231,8 @@ export default function PricingPlans() {
 }
 
 const formatStorage = (storage: number) => filesize(storage, 0).toUpperCase();
-const formatBandwidth = (bandwidth: number) => filesize(bandwidth, 0).toUpperCase();
+const formatBandwidth = (bandwidth: number) =>
+  filesize(bandwidth, 0).toUpperCase();
 
 function PlanCard(props: {
   plan: SubscriptionPlan;
@@ -224,7 +242,10 @@ function PlanCard(props: {
   onFreePlan: boolean;
 }) {
   const { plan, subscription, onChoosePlan, onFreePlan } = props;
-  const getChangeType = (currentPlan: SubscriptionPlan, newPlan: SubscriptionPlan) => {
+  const getChangeType = (
+    currentPlan: SubscriptionPlan,
+    newPlan: SubscriptionPlan,
+  ) => {
     if (onFreePlan) {
       return "Subscribe";
     }
@@ -237,9 +258,7 @@ function PlanCard(props: {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="text-4xl font-bold">
-          {plan.name}
-        </CardTitle>
+        <CardTitle className="text-4xl font-bold">{plan.name}</CardTitle>
         <div className="text-5xl">
           ${plan.price}
           <span className="text-lg font-normal text-muted-foreground">
@@ -251,18 +270,24 @@ function PlanCard(props: {
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <CloudIcon className="size-5 text-primary" />
-            <span><b>Storage:</b> {formatStorage(plan.storage)}</span>
+            <span>
+              <b>Storage:</b> {formatStorage(plan.storage)}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <CloudUploadIcon className="size-5 text-primary" />
-            <span><b>Upload:</b> {formatBandwidth(plan.upload)}/month</span>
+            <span>
+              <b>Upload:</b> {formatBandwidth(plan.upload)}/month
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <DownloadIcon className="size-5 text-primary" />
-            <span><b>Download:</b> {formatBandwidth(plan.download)}/month</span>
+            <span>
+              <b>Download:</b> {formatBandwidth(plan.download)}/month
+            </span>
           </div>
         </div>
-        
+
         {!subscription?.plan && (
           <Button className="w-full" onClick={() => onChoosePlan(plan)}>
             Subscribe
@@ -270,7 +295,9 @@ function PlanCard(props: {
         )}
         {subscription?.plan &&
           plan.identifier !== subscription.plan.identifier && (
-            <Button className="w-full bg-muted-foreground text-black hover:bg-muted-foreground/80" onClick={() => onChoosePlan(plan)}>
+            <Button
+              className="w-full bg-muted-foreground text-black hover:bg-muted-foreground/80"
+              onClick={() => onChoosePlan(plan)}>
               {getChangeType(subscription.plan, plan)}
             </Button>
           )}

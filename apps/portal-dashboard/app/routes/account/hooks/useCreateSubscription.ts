@@ -1,22 +1,16 @@
 import { HttpError, useCustomMutation, useNotification } from "@refinedev/core";
 import { useCallback } from "react";
 import { SubscriptionPlan } from "portal-shared/dataProviders/accountProvider";
-import useSubscription from "@/hooks/useSubscription.js";
 import useApiUrl from "portal-shared/hooks/useApiUrl";
+import { useSubscriptionContext } from "../contexts/SubscriptionContext";
 
-import { useSubscriptionContext } from "@/routes/account/contexts/SubscriptionContext.js";
-
-export default function useSubmitSubscriptionChange(fromContext = false) {
+export default function useCreateSubscription() {
   const apiUrl = useApiUrl();
   const { open } = useNotification();
+  const { mutate, isLoading: isCreating } = useCustomMutation();
+  const { refetchSubscription } = useSubscriptionContext();
 
-  const { refetchSubscription } = fromContext
-    ? useSubscription()
-    : useSubscriptionContext();
-
-  const { mutate, isLoading: isPlanChanging } = useCustomMutation();
-
-  const submitPlanChange = //useCallback(
+  const createSubscription = useCallback(
     async (plan: SubscriptionPlan, paymentMethodId?: string) => {
       const values: { plan: string; payment_method_id?: string } = {
         plan: plan.identifier,
@@ -27,33 +21,32 @@ export default function useSubmitSubscriptionChange(fromContext = false) {
 
       mutate(
         {
-          url: `${apiUrl}/api/account/subscription/plan`,
-          method: "put",
+          url: `${apiUrl}/api/account/subscription`,
+          method: "post",
           values,
         },
         {
-          async onSuccess() {
+          onSuccess() {
             open?.({
               type: "success",
-              message: "Subscription change initiated",
+              message: "Subscription created successfully",
             });
-            // Force refetch of subscription data
             refetchSubscription();
           },
           onError(error: HttpError) {
             open?.({
               type: "error",
-              message: `Failed to change subscription: ${error.message}`,
+              message: `Failed to create subscription: ${error.message}`,
             });
           },
         },
       );
-    }; /*,
-    [mutate, open, refetchSubscription, apiUrl],
-  );*/
+    },
+    [mutate, open, apiUrl, refetchSubscription],
+  );
 
   return {
-    isPlanChanging,
-    submitPlanChange,
+    isCreating,
+    createSubscription,
   };
 }
