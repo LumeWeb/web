@@ -22,19 +22,31 @@ import { Input } from "portal-shared/components/ui/input";
 import { Skeleton } from "portal-shared/components/ui/skeleton";
 import { Textarea } from "portal-shared/components/ui/textarea";
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { isValid } from "zod";
+import { useForm, Control } from "react-hook-form";
 import { BillingAddressComboBox, type Entry } from "./BillingAddressComboBox";
 import {
-  type BillingInfoFields,
   type EntityCode,
   type FieldName,
   createBillingInfoSchema,
   fieldMapping,
 } from "./BillingInformation.schema";
+import { SubscriptionBillingInfo } from "portal-shared/dataProviders/accountProvider";
 
-type FormFields = {
-  [K in keyof BillingInfoFields]: string;
+type FormFields = Partial<SubscriptionBillingInfo> & {
+  name: string;
+  country: string;
+};
+
+type FieldType = keyof FormFields;
+
+const defaultBillingInfo: FormFields = {
+  name: "",
+  country: "",
+  organization: "",
+  address: "",
+  city: "",
+  state: "",
+  zip: "",
 };
 
 export default function BillingInformation() {
@@ -48,11 +60,8 @@ export default function BillingInformation() {
   const { data: countryData } = useCountryList();
 
   const form = useForm<FormFields>({
-    resolver: zodResolver(createBillingInfoSchema([])),
-    defaultValues: {
-      name: "",
-      country: "",
-    },
+    resolver: zodResolver(createBillingInfoSchema(supportedEntities)),
+    defaultValues: defaultBillingInfo,
     mode: "onBlur",
   });
 
@@ -63,6 +72,7 @@ export default function BillingInformation() {
         { field: "country", operator: "eq", value: form.watch("country") },
       ],
     });
+
   const useCityList = () =>
     useList<Entry>({
       resource: "account/subscription/billing/cities",
@@ -72,13 +82,9 @@ export default function BillingInformation() {
       ],
     });
 
-
-  console.log({ formState: form.formState, errors: form.formState.errors });
-
   useEffect(() => {
     if (billingInfo && !isInitialized) {
-      console.log("Billing info loaded:", billingInfo);
-      form.reset(billingInfo as FormFields);
+      form.reset({ ...defaultBillingInfo, ...billingInfo });
       setIsInitialized(true);
     }
   }, [billingInfo, form, isInitialized]);
@@ -91,36 +97,42 @@ export default function BillingInformation() {
     const entities = (selectedCountryData?.supported_entities ||
       []) as EntityCode[];
     setSupportedEntities(entities);
-    // form.reset(form.getValues(), { keepValues: true });
+    form.clearErrors();
   }, [form.watch("country"), countryData]);
 
   const onSubmit = async (data: FormFields) => {
     try {
-      await submitBillingInfo(data);
-      // Show success message
+      const billingInfo: SubscriptionBillingInfo = {
+        name: data.name,
+        organization: data.organization || "",
+        address: data.address || "",
+        city: data.city || "",
+        state: data.state || "",
+        zip: data.zip || "",
+        country: data.country,
+      };
+      await submitBillingInfo(billingInfo);
     } catch (error) {
       if (typeof error === "object" && error !== null) {
-        // Apply errors to form fields
         Object.entries(error).forEach(([field, message]) => {
-          form.setError(field as keyof FormFields, {
+          form.setError(field as FieldType, {
             type: "manual",
             message: message as string,
           });
         });
       } else {
-        // Handle unexpected error format
         console.error("Error submitting billing info:", error);
       }
     }
   };
 
   const handleCountryChange = () => {
-    form.setValue("state", undefined);
-    form.setValue("city", undefined);
+    form.setValue("state" as FieldType, "");
+    form.setValue("city" as FieldType, "");
   };
 
   const handleStateChange = () => {
-    form.setValue("city", undefined);
+    form.setValue("city" as FieldType, "");
   };
 
   if (isBillingInfoLoading) {
@@ -189,7 +201,7 @@ export default function BillingInformation() {
         return (
           <FormField
             control={form.control}
-            name={fieldName as keyof BillingInfoFields}
+            name={fieldName as FieldType}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
