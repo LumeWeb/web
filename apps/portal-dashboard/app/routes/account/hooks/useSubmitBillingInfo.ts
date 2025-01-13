@@ -28,7 +28,7 @@ export default function useSubmitBillingInfo() {
         mutate(
           {
             url: `${apiUrl}/api/account/subscription/billing`,
-            method: "post",
+            method: "put",
             values: billingInfo,
             errorNotification: false,
           },
