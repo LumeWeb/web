@@ -9,7 +9,8 @@ import {
 import { Skeleton } from "portal-shared/components/ui/skeleton";
 import { Button } from "portal-shared/components/ui/button";
 import { useSubscriptionContext } from "@/routes/account/contexts/SubscriptionContext.js";
-import useRequestPaymentMethodChange from "../hooks/useRequestPaymentMethodChange";
+import usePaymentMethod from "../hooks/usePaymentMethod";
+
 export default function HyperPayment({
   onPaymentSuccess,
   mode = "subscribe",
@@ -20,24 +21,22 @@ export default function HyperPayment({
   const { subscription, hyperPromise, hyperState } = useSubscriptionContext();
   const [clientSecret, setClientSecret] = useState<string | undefined>();
   const {
-    requestPaymentMethodChange,
-    isLoading: isRequestingPaymentMethodChange,
-    clientSecret: changePaymentClientSecret,
-  } = useRequestPaymentMethodChange();
-  const paymentRequestChangeMode = useRef(false);
+    initializePayment,
+    isInitializing,
+    clientSecret: setupClientSecret,
+    savePaymentMethod,
+  } = usePaymentMethod();
+  const initializationRequested = useRef(false);
 
   useEffect(() => {
     if (mode === "change_payment" && !clientSecret) {
-      if (
-        !isRequestingPaymentMethodChange &&
-        !paymentRequestChangeMode.current
-      ) {
-        paymentRequestChangeMode.current = true;
-        requestPaymentMethodChange();
+      if (!isInitializing && !initializationRequested.current) {
+        initializationRequested.current = true;
+        initializePayment();
       }
 
-      if (changePaymentClientSecret) {
-        setClientSecret(changePaymentClientSecret);
+      if (setupClientSecret) {
+        setClientSecret(setupClientSecret);
       }
     }
 
@@ -47,16 +46,15 @@ export default function HyperPayment({
   }, [
     mode,
     clientSecret,
-    isRequestingPaymentMethodChange,
-    paymentRequestChangeMode.current,
-    changePaymentClientSecret,
-    requestPaymentMethodChange,
+    isInitializing,
+    setupClientSecret,
+    initializePayment,
   ]);
 
   if (
     !hyperState.isHyperLoaded ||
     !clientSecret ||
-    (mode === "change_payment" && isRequestingPaymentMethodChange)
+    (mode === "change_payment" && isInitializing)
   ) {
     return <StyledPaymentSkeleton />;
   }
@@ -82,6 +80,7 @@ export default function HyperPayment({
         <PaymentConfirmationButton
           onPaymentSuccess={onPaymentSuccess}
           mode={mode}
+          savePaymentMethod={savePaymentMethod}
         />
       </HyperElements>
     </div>
@@ -91,9 +90,11 @@ export default function HyperPayment({
 const PaymentConfirmationButton = ({
   onPaymentSuccess,
   mode,
+  savePaymentMethod,
 }: {
   onPaymentSuccess: (paymentMethodId: string) => void;
   mode: "subscribe" | "change_payment";
+  savePaymentMethod: (paymentMethodId: string, onSuccess?: () => void) => void;
 }) => {
   const hyper = useHyper();
   const elements = useElements();
@@ -125,7 +126,9 @@ const PaymentConfirmationButton = ({
         console.error("Payment failed:", result.error);
       } else {
         console.log("Payment succeeded:", result);
-        onPaymentSuccess(result.payment_method_id);
+        mode === "change_payment"
+          ? savePaymentMethod(result.payment_method_id)
+          : onPaymentSuccess(result.payment_method_id);
       }
     } catch (error) {
       setPaymentError("An unexpected error occurred");
