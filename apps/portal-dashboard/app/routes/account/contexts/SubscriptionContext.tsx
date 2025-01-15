@@ -47,7 +47,6 @@ export interface SubscriptionContextType {
     error: Error | null;
   };
   hyperPromise?: Promise<any> | null;
-  setEphemeralKey: (key: string) => void;
 }
 
 const defaultContextValue: SubscriptionContextType = {
@@ -91,7 +90,6 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const { isPlanChanging, submitPlanChange } = useSubmitSubscriptionChange();
   const { isCreating, createSubscription } = useCreateSubscription(refetchSubscription);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
-  const [ephemeralKey, setEphemeralKey] = useState<string | null>(null);
 
   const handlePlanSelection = (plan: SubscriptionPlan) => {
     setSelectedPlan(plan);
@@ -104,7 +102,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   });
 
   const initializeHyper = useCallback(() => {
-    if (!subscriptionData?.payment?.publishable_key || !ephemeralKey) {
+    if (!subscriptionData?.payment?.publishable_key) {
       return;
     }
 
@@ -118,7 +116,6 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       subscriptionData.payment.publishable_key,
       {
         env: "SANDBOX",
-        ephemeralKey,
         clientSecret: subscriptionData.payment.client_secret,
       },
     );
@@ -147,14 +144,13 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   useEffect(() => {
     const shouldInitialize = 
       !hyperPromiseRef.current && 
-      subscriptionData?.payment?.publishable_key && 
-      ephemeralKey &&
+      subscriptionData?.payment?.publishable_key &&
       (!subscriptionData.status || subscriptionData.status === "PENDING" ? subscriptionData.payment.client_secret : true);
 
     if (shouldInitialize) {
       initializeHyper();
     }
-  }, [initializeHyper, subscriptionData?.payment?.publishable_key, ephemeralKey, subscriptionData?.status, subscriptionData?.payment?.client_secret]);
+  }, [initializeHyper, subscriptionData?.payment?.publishable_key, subscriptionData?.status, subscriptionData?.payment?.client_secret]);
 
 
   const value = React.useMemo(() => ({
@@ -183,7 +179,6 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       error: hyperState.error,
     },
     hyperPromise: hyperPromiseRef.current,
-    setEphemeralKey,
   }), [
     subscriptionData,
     subscriptionIsLoading,
