@@ -96,6 +96,15 @@ export default function PricingPlans() {
     setShowConfirmDialog(false);
     if (!selectedPlan) return;
     
+    // Check if there's an expired payment session
+    if (paymentExpired && subscription?.status === "PENDING") {
+      open?.({
+        type: "info",
+        message: "Payment session has expired. Please try subscribing again.",
+      });
+      return;
+    }
+    
     try {
       if (subscription) {
         // Existing subscription (even if pending) - change plan
