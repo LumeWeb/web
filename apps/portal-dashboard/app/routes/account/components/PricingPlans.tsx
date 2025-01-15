@@ -140,11 +140,16 @@ export default function PricingPlans() {
     }
   }, [subscription?.payment?.expires_at, showPaymentDialog, open]);
 
-  const handleShowPayment = async () => {
-    if (paymentExpired && subscription?.plan) {
-      // If payment expired, create new subscription request
-      await createSubscription(subscription.plan);
-    } else if (subscription?.payment?.client_secret) {
+  const handleShowPayment = () => {
+    if (paymentExpired) {
+      open?.({
+        type: "info",
+        message: "Payment session has expired. Please try subscribing again.",
+      });
+      return;
+    }
+    
+    if (subscription?.payment?.client_secret) {
       setPaymentStatus('active');
       setShowPaymentDialog(true);
     }
