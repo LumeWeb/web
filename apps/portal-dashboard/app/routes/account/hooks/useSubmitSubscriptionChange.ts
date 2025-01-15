@@ -14,14 +14,7 @@ export default function useSubmitSubscriptionChange(fromContext = false) {
     ? useSubscription()
     : useSubscriptionContext();
 
-  const { mutate, isLoading: isPlanChanging } = useCustomMutation({
-    onMutate: () => {
-      // Validate we have a valid plan before mutation
-      if (!plan?.id) {
-        throw new Error("Cannot change to undefined plan");
-      }
-    }
-  });
+  const { mutate, isLoading: isPlanChanging } = useCustomMutation();
 
   const submitPlanChange = useCallback(
     async (plan: SubscriptionPlan | undefined, paymentMethodId?: string) => {
