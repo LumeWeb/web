@@ -57,9 +57,10 @@ export default function PricingPlans() {
   const planPending = subscription?.status === "PENDING";
   const showPayment =
     !!subscription?.payment?.client_secret &&
-    !!subscription?.plan &&
+    !!subscription?.plan?.id &&  // Check for plan.id instead of just plan
     planPending &&
-    !paymentExpired;
+    !paymentExpired &&
+    !subscription.plan.is_free;  // Don't show payment for free plans
 
   // Debug logs
   console.log('Payment conditions:', {
