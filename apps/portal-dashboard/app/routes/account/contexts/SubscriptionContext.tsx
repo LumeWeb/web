@@ -165,12 +165,19 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     submitPlanChange: async (plan: SubscriptionPlan) => {
       if (!plan?.id) return;
       
-      if (subscriptionData) {
-        await submitPlanChange(plan);
+      try {
+        if (subscriptionData) {
+          await submitPlanChange(plan);
+        } else {
+          await createSubscription(plan);
+        }
+        // Clear selected plan after successful change
+        handlePlanSelection(null);
+        // Force immediate refetch
         await refetchSubscription();
-      } else {
-        await createSubscription(plan);
-        await refetchSubscription();
+      } catch (error) {
+        console.error("Failed to change subscription plan:", error);
+        throw error;
       }
     },
     refetchSubscription,
