@@ -2,16 +2,25 @@ import { useCustomMutation, useNotification } from "@refinedev/core";
 import { useCallback } from "react";
 import useApiUrl from "portal-shared/hooks/useApiUrl";
 import useSubscription from "@/hooks/useSubscription.js";
-import { SubscriptionBillingInfo } from "portal-shared/dataProviders/accountProvider";
 import { AxiosError } from "axios";
 
-interface UpdateBillingErrorResponse {
-  errors: UpdateBillingErrorResponseItem[];
+interface Billing {
+  name: string;
+  email: string;
+  address: {
+    line1: string;
+    line2?: string;
+    city: string;
+    state: string;
+    postal_code: string;
+    country: string;
+  };
 }
 
-interface UpdateBillingErrorResponseItem {
-  field: string;
+interface BillingError {
+  code: string;
   message: string;
+  details?: Record<string, string>;
 }
 
 export type UpdateBillingErrors = Record<string, string>;
@@ -23,7 +32,7 @@ export default function useSubmitBillingInfo() {
   const { refetchSubscription } = useSubscription();
 
   const submitBillingInfo = useCallback(
-    async (billingInfo: SubscriptionBillingInfo) => {
+    async (billingInfo: Billing) => {
       return new Promise((resolve, reject) => {
         mutate(
           {
@@ -43,20 +52,15 @@ export default function useSubmitBillingInfo() {
             },
             onError(error: AxiosError<UpdateBillingErrorResponse>) {
               if (error.response?.status === 400 && error.response.data) {
-                const errorData = error.response.data;
-                if (errorData.errors && Array.isArray(errorData.errors)) {
-                  const formattedErrors =
-                    errorData.errors.reduce<UpdateBillingErrors>((acc, err) => {
-                      acc[err.field] = err.message;
-                      return acc;
-                    }, {});
-                  reject(formattedErrors);
+                const errorData = error.response.data as BillingError;
+                if (errorData.details) {
+                  reject(errorData.details);
                 } else {
                   open?.({
                     type: "error",
-                    message: "Unexpected error format from server",
+                    message: errorData.message || "Invalid billing information",
                   });
-                  reject(new Error("Unexpected error format"));
+                  reject(new Error(errorData.message));
                 }
               } else {
                 open?.({
