@@ -354,6 +354,7 @@ function PlanCard(props: {
             </div>
             {planPending && !plan.is_free && (
               <Button 
+                variant="outline"
                 className="w-full" 
                 onClick={handleShowPayment}
                 disabled={paymentExpired}
