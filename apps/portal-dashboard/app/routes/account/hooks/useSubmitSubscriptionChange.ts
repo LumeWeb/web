@@ -30,8 +30,8 @@ export default function useSubmitSubscriptionChange(fromContext = false) {
         return;
       }
       
-      const values: { plan: string; payment_method_id?: string } = {
-        plan: plan.id,
+      const values: { plan_id: string; payment_method_id?: string } = {
+        plan_id: plan.id,
       };
       if (paymentMethodId) {
         values.payment_method_id = paymentMethodId;
