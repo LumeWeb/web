@@ -115,11 +115,6 @@ export default function PricingPlans() {
         // No existing plan - create new subscription
         await createSubscription(selectedPlan);
       }
-      // Show payment dialog immediately if needed
-      if (selectedPlan && !selectedPlan.is_free) {
-        setPaymentStatus('active');
-        setShowPaymentDialog(true);
-      }
     } catch (error) {
       console.error('Failed to change/create subscription:', error);
     }

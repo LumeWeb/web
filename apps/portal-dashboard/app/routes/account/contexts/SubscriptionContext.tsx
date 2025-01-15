@@ -170,11 +170,15 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
           await submitPlanChange(plan);
         } else {
           await createSubscription(plan);
+          const updatedSub = await refetchSubscription();
+          // Show payment dialog if needed and we have client secret
+          if (!plan.is_free && updatedSub.data?.data?.payment?.client_secret) {
+            handlePlanSelection(plan); // Keep selected plan for payment dialog
+            return;
+          }
         }
         // Clear selected plan after successful change
         handlePlanSelection(null);
-        // Force immediate refetch
-        await refetchSubscription();
       } catch (error) {
         console.error("Failed to change subscription plan:", error);
         throw error;
