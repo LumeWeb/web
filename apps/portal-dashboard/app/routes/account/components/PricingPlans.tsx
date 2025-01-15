@@ -91,14 +91,14 @@ export default function PricingPlans() {
 
   const handleConfirmPlanChange = async () => {
     setShowConfirmDialog(false);
-    if (selectedPlan) {
-      if (subscription?.plan) {
-        // Existing subscription - change plan
-        await submitPlanChange(selectedPlan);
-      } else {
-        // New subscription
-        await createSubscription(selectedPlan);
-      }
+    if (!selectedPlan) return;
+    
+    if (subscription?.plan) {
+      // Existing subscription with plan - change plan
+      await submitPlanChange(selectedPlan);
+    } else {
+      // No plan or new subscription - create subscription
+      await createSubscription(selectedPlan);
     }
   };
 
@@ -304,12 +304,11 @@ function PlanCard(props: {
           </div>
         </div>
 
-        {!subscription?.plan && (
+        {!subscription?.plan ? (
           <Button className="w-full" onClick={() => onChoosePlan(plan)}>
             Subscribe
           </Button>
-        )}
-        {subscription?.plan && plan.id !== subscription.plan.id && (
+        ) : plan.id !== subscription.plan.id && (
           <Button
             className="w-full bg-muted-foreground text-black hover:bg-muted-foreground/80"
             onClick={() => onChoosePlan(plan)}>
