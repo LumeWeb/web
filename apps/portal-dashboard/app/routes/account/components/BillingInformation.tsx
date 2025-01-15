@@ -53,7 +53,8 @@ export default function BillingInformation() {
     countryData,
     selectedCountry,
     selectedCountryData,
-    handleCountryChange
+    handleCountryChange,
+    useCountryList
   } = useCountryData(form);
 
   const { useStateList, useCityList } = useLocationLists(
