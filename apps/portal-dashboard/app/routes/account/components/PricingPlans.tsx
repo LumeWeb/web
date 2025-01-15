@@ -62,12 +62,12 @@ export default function PricingPlans() {
     !!subscription?.plan?.is_free;
 
   const isBillingComplete =
-    subscription?.billing_info?.name &&
-    subscription?.billing_info?.address &&
-    subscription?.billing_info?.city &&
-    subscription?.billing_info?.state &&
-    subscription?.billing_info?.zip &&
-    subscription?.billing_info?.country;
+    subscription?.billing?.name &&
+    subscription?.billing?.address &&
+    subscription?.billing?.city &&
+    subscription?.billing?.state &&
+    subscription?.billing?.zip &&
+    subscription?.billing?.country;
 
   const onFreePlan = useOnFreePlan();
 
