@@ -153,7 +153,7 @@ export default function PricingPlans() {
           </CardContent>
         </Card>
       )}
-      {!subscription ? (
+      {!plans?.length ? (
         <div className="grid md:grid-cols-3 gap-8">
           <Skeleton className="h-[400px]" />
           <Skeleton className="h-[400px]" />
@@ -238,7 +238,7 @@ const formatBandwidth = (bandwidth: number) =>
 
 function PlanCard(props: {
   plan: SubscriptionPlan;
-  subscription: Subscription;
+  subscription?: Subscription;
   selectedPlan: SubscriptionPlan | null;
   onChoosePlan: (plan: SubscriptionPlan) => void;
   onFreePlan: boolean;

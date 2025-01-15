@@ -148,7 +148,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   }, [refetchSubscription]);
 
   const value = {
-    subscription: subscriptionData ?? undefined,
+    subscription: subscriptionData,
     isLoading: subscriptionIsLoading || plansAreLoading,
     plans: plansData?.data?.plans ?? [],
     selectedPlan,
