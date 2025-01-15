@@ -262,7 +262,7 @@ function PlanCard(props: {
         <div className="text-5xl">
           ${plan.price}
           <span className="text-lg font-normal text-muted-foreground">
-            /{plan.period === "MONTH" ? "month" : "year"}
+            /{plan.period === "MONTHLY" ? "month" : "year"}
           </span>
         </div>
       </CardHeader>
