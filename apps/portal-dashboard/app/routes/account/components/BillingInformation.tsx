@@ -48,8 +48,8 @@ const defaultBillingInfo: BillingInfoFields = {
 export default function BillingInformation() {
   const { billingInfo, isLoading: isBillingInfoLoading } = useBillingInfo();
   const { submitBillingInfo, isSubmitting } = useSubmitBillingInfo();
-  const [isInitialized, setIsInitialized] = useState(false);
   const [supportedEntities, setSupportedEntities] = useState<EntityCode[]>(["C", "S"]);
+  const [initialValues, setInitialValues] = useState<BillingInfoFields | null>(null);
 
   const useCountryList = () =>
     useList<Entry>({ resource: "account/subscription/billing/countries" });
@@ -103,8 +103,8 @@ export default function BillingInformation() {
     });
 
   useEffect(() => {
-    if (billingInfo && !isInitialized) {
-      const initialValues: BillingInfoFields = {
+    if (billingInfo && !initialValues) {
+      const values: BillingInfoFields = {
         name: billingInfo.name,
         organization: billingInfo.organization,
         country: billingInfo.address.country,
@@ -116,10 +116,10 @@ export default function BillingInformation() {
         dependent_locality: undefined,
         sorting_code: undefined,
       };
-      form.reset(initialValues);
-      setIsInitialized(true);
+      setInitialValues(values);
+      form.reset(values);
     }
-  }, [billingInfo, form, isInitialized]);
+  }, [billingInfo, form, initialValues]);
 
   useEffect(() => {
     const selectedCountry = form.watch("country");
@@ -355,7 +355,10 @@ export default function BillingInformation() {
               <Button
                 type="submit"
                 className="ml-auto"
-                disabled={isSubmitting || !form.formState.isValid}>
+                disabled={isSubmitting || !form.formState.isValid || (
+                  initialValues !== null && 
+                  JSON.stringify(form.getValues()) === JSON.stringify(initialValues)
+                )}>
                 {isSubmitting ? "Saving..." : "Save"}
               </Button>
             </CardFooter>
