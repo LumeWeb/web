@@ -25,7 +25,7 @@ import useSubmitSubscriptionChange from "@/routes/account/hooks/useSubmitSubscri
 import { loadHyper } from "../lib/hyper.js";
 
 export interface SubscriptionContextType {
-  subscription: SubscriptionResponse | undefined;
+  subscription?: SubscriptionResponse;
   isLoading: boolean;
   plans: SubscriptionPlan[];
   selectedPlan: SubscriptionPlan | null;
