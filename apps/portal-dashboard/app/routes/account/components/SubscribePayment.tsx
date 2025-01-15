@@ -19,20 +19,23 @@ import HyperPayment from "./HyperPayment.js";
 import { useSubscriptionContext } from "../contexts/SubscriptionContext.js";
 import useSubmitSubscriptionConnect from "@/routes/account/hooks/useSubmitSubscriptionConnect.js";
 
-export default function SubscribePayment() {
-  const [showDialog, setShowDialog] = React.useState(true);
+interface SubscribePaymentProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
 
+export default function SubscribePayment({ open, onOpenChange }: SubscribePaymentProps) {
   const { selectedPlan } = useSubscriptionContext();
   const { connectPaymentMethod } = useSubmitSubscriptionConnect();
 
   const handleSuccess = (paymentMethodId: string) => {
     connectPaymentMethod(paymentMethodId, () => {
-      setShowDialog(false);
+      onOpenChange(false);
     });
   };
 
   return (
-    <AlertDialog open={showDialog} onOpenChange={setShowDialog}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Complete Payment</AlertDialogTitle>
