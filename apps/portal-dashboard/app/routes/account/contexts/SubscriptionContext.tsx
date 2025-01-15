@@ -107,7 +107,8 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       !subscriptionData?.payment?.client_secret ||
       subscriptionData.status !== "PENDING" ||
       !subscriptionData.plan?.id ||
-      subscriptionData.plan.is_free
+      subscriptionData.plan.is_free ||
+      (subscriptionData.payment.expires_at && new Date(subscriptionData.payment.expires_at) <= new Date())
     ) {
       return;
     }
