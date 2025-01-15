@@ -7,7 +7,7 @@ import useApiUrl from "portal-shared/hooks/useApiUrl";
 export default function useSubmitSubscriptionChange() {
   const apiUrl = useApiUrl();
   const { open } = useNotification();
-  const { subscriptionData } = useSubscription();
+  const { subscriptionData, refetchSubscription } = useSubscription();
 
   const { mutate, isLoading: isPlanChanging } = useCustomMutation();
 
