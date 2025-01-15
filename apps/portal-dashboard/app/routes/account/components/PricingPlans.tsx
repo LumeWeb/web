@@ -128,7 +128,7 @@ export default function PricingPlans() {
   const { open } = useNotification();
 
   useEffect(() => {
-    if (subscription?.payment?.expires_at && showPaymentDialog) {
+    if (subscription?.plan && subscription?.payment?.expires_at && showPaymentDialog) {
       const expiryDate = new Date(subscription.payment.expires_at);
       const interval = setInterval(() => {
         const remaining = expiryDate.getTime() - new Date().getTime();
