@@ -12,7 +12,7 @@ export default function useSubmitSubscriptionChange() {
   // Don't even create mutation if subscription is pending
   const { mutate, isLoading: isPlanChanging } = useCustomMutation({
     queryOptions: {
-      enabled: subscriptionData && subscriptionData?.status === "ACTIVE",
+      enabled: subscriptionData?.status === "ACTIVE",
     },
   });
 
