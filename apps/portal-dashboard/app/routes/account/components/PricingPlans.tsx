@@ -95,12 +95,21 @@ export default function PricingPlans() {
     setShowConfirmDialog(false);
     if (!selectedPlan) return;
     
-    if (subscription) {
-      // Existing subscription (even if pending) - change plan
-      await submitPlanChange(selectedPlan);
-    } else {
-      // No subscription at all - create new subscription
-      await createSubscription(selectedPlan);
+    try {
+      if (subscription) {
+        // Existing subscription (even if pending) - change plan
+        await submitPlanChange(selectedPlan);
+      } else {
+        // No subscription at all - create new subscription
+        await createSubscription(selectedPlan);
+      }
+      // Show payment dialog immediately if needed
+      if (selectedPlan && !selectedPlan.is_free) {
+        setPaymentStatus('active');
+        setShowPaymentDialog(true);
+      }
+    } catch (error) {
+      console.error('Failed to change/create subscription:', error);
     }
   };
 

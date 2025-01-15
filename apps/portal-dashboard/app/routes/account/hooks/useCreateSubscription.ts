@@ -20,13 +20,13 @@ export default function useCreateSubscription(refetchSubscription?: () => Promis
           values,
         },
         {
-          onSuccess() {
+          async onSuccess() {
             open?.({
               type: "success",
               message: "Subscription created successfully",
             });
             if (refetchSubscription) {
-              refetchSubscription();
+              await refetchSubscription();
             }
           },
           onError(error: HttpError) {
