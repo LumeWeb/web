@@ -79,15 +79,6 @@ export default function BillingInformation() {
     form.reset(values);
   }, [billingInfo, form]);
 
-  const hasFormChanges = () => {
-    if (!initialValues) return false;
-    const currentValues = form.getValues();
-    return Object.keys(currentValues).some(key => {
-      const k = key as keyof BillingInfoFields;
-      return currentValues[k] !== initialValues[k];
-    });
-  };
-
   useEffect(() => {
     if (!countryData) return;
     
