@@ -46,13 +46,15 @@ const defaultBillingInfo: BillingInfoFields = {
 };
 
 export default function BillingInformation() {
-  const { billingInfo, isLoading: isBillingInfoLoading } = useBillingInfo();
+  const { subscription, isLoading: isBillingInfoLoading } = useBillingInfo();
   const { submitBillingInfo, isSubmitting } = useSubmitBillingInfo();
   const [supportedEntities, setSupportedEntities] = useState<EntityCode[]>(["C", "S"]);
   const [initialValues, setInitialValues] = useState<BillingInfoFields | null>(null);
 
+  const billingInfo = subscription?.billing;
+
   // Debug loading states
-  console.log('Loading:', isBillingInfoLoading, 'BillingInfo:', billingInfo);
+  console.log('Loading:', isBillingInfoLoading, 'Subscription:', subscription, 'BillingInfo:', billingInfo);
 
   const useCountryList = () =>
     useList<Entry>({ resource: "account/subscription/billing/countries" });
@@ -60,18 +62,7 @@ export default function BillingInformation() {
 
   const form = useForm<BillingInfoFields>({
     resolver: zodResolver(createBillingInfoSchema(["C", "S"], [])),
-    defaultValues: billingInfo ? {
-      name: billingInfo.name,
-      organization: billingInfo.organization,
-      country: billingInfo.address.country,
-      address_line1: billingInfo.address.line1,
-      address_line2: billingInfo.address.line2,
-      city: billingInfo.address.city,
-      state: billingInfo.address.state,
-      postal_code: billingInfo.address.postal_code,
-      dependent_locality: undefined,
-      sorting_code: undefined,
-    } : defaultBillingInfo,
+    defaultValues: defaultBillingInfo,
     mode: "onBlur",
   });
 
