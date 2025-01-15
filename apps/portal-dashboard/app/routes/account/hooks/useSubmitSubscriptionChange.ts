@@ -10,10 +10,7 @@ export default function useSubmitSubscriptionChange(fromContext = false) {
   const apiUrl = useApiUrl();
   const { open } = useNotification();
 
-  const { refetchSubscription } = fromContext
-    ? useSubscription()
-    : useSubscriptionContext();
-
+  const subscription = fromContext ? useSubscription() : useSubscriptionContext();
   const { mutate, isLoading: isPlanChanging } = useCustomMutation();
 
   const submitPlanChange = useCallback(
@@ -42,8 +39,10 @@ export default function useSubmitSubscriptionChange(fromContext = false) {
               type: "success",
               message: "Subscription change initiated",
             });
-            // Force refetch of subscription data
-            await refetchSubscription();
+            // Only refetch if we have an active subscription
+            if (subscription.subscriptionData) {
+              await subscription.refetchSubscription();
+            }
           },
           onError(error: HttpError) {
             open?.({
@@ -54,7 +53,7 @@ export default function useSubmitSubscriptionChange(fromContext = false) {
         },
       );
     },
-    [mutate, open, refetchSubscription, apiUrl],
+    [mutate, open, subscription, apiUrl],
   );
 
   return {
