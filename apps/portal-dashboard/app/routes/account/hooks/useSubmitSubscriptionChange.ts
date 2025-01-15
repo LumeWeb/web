@@ -17,7 +17,7 @@ export default function useSubmitSubscriptionChange() {
   });
 
   const submitPlanChange = useCallback(
-    async (plan: SubscriptionPlan) => {
+    async (plan: SubscriptionPlan | undefined) => {
       if (!plan?.id) {
         console.warn("Attempted to submit plan change with no plan selected");
         return;
