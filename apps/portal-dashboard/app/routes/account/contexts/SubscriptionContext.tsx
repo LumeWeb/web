@@ -62,7 +62,6 @@ const defaultContextValue: SubscriptionContextType = {
     isHyperLoaded: false,
     error: null,
   },
-  setEphemeralKey: (key: string) => {},
 };
 
 export const SubscriptionContext =
@@ -139,7 +138,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
         hyperPromiseRef.current = null;
         setHyperState((prev) => ({ ...prev, isLoading: false, error }));
       });
-  }, [subscriptionData?.payment?.publishable_key, ephemeralKey]);
+  }, [subscriptionData?.payment?.publishable_key]);
 
   useEffect(() => {
     const shouldInitialize = 
