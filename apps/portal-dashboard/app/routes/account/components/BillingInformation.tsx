@@ -24,7 +24,7 @@ import {
 } from "portal-shared/components/ui/form";
 import { Input } from "portal-shared/components/ui/input";
 import { Skeleton } from "portal-shared/components/ui/skeleton";
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { BillingAddressComboBox, type Entry } from "./BillingAddressComboBox";
 import {
   type EntityCode,
