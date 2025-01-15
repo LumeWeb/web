@@ -18,19 +18,19 @@ export default function useSubmitSubscriptionChange() {
         return;
       }
 
+      if (!subscriptionData) {
+        console.warn("Cannot change plan without an existing subscription");
+        return;
+      }
+
       const values: { plan_id: string } = {
         plan_id: plan.id,
       };
 
-      const isNewSubscription = !subscriptionData;
-      const endpoint = isNewSubscription ? 
-        `${apiUrl}/api/account/subscription` :
-        `${apiUrl}/api/account/subscription/plan`;
-
       mutate(
         {
-          url: endpoint,
-          method: isNewSubscription ? "post" : "put",
+          url: `${apiUrl}/api/account/subscription/plan`,
+          method: "put",
           values,
         },
         {

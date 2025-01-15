@@ -88,6 +88,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     useSubscription();
   const { plansData, plansAreLoading } = useSubscriptionPlans();
   const { isPlanChanging, submitPlanChange } = useSubmitSubscriptionChange();
+  const { isCreating, createSubscription } = useCreateSubscription();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [ephemeralKey, setEphemeralKey] = useState<string | null>(null);
 
@@ -148,9 +149,9 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     isLoading: subscriptionIsLoading || plansAreLoading,
     plans: plansData?.data?.plans ?? [],
     selectedPlan,
-    isPlanChanging,
+    isPlanChanging: isPlanChanging || isCreating,
     handlePlanSelection,
-    submitPlanChange,
+    submitPlanChange: subscriptionData ? submitPlanChange : createSubscription,
     refetchSubscription,
     hyperState: {
       isHyperLoaded: hyperState.isHyperLoaded,
