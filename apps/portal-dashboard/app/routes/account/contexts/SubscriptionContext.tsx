@@ -89,7 +89,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     useSubscription();
   const { plansData, plansAreLoading } = useSubscriptionPlans();
   const { isPlanChanging, submitPlanChange } = useSubmitSubscriptionChange();
-  const { isCreating, createSubscription } = useCreateSubscription();
+  const { isCreating, createSubscription } = useCreateSubscription(refetchSubscription);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [ephemeralKey, setEphemeralKey] = useState<string | null>(null);
 
