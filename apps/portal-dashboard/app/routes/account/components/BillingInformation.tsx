@@ -1,7 +1,8 @@
 import useBillingInfo from "@/routes/account/hooks/useBillingInfo";
 import useSubmitBillingInfo from "@/routes/account/hooks/useSubmitBillingInfo";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useList } from "@refinedev/core";
+import { useBillingForm } from "../hooks/useBillingForm";
+import { useCountryData } from "../hooks/useCountryData";
+import { useLocationLists } from "../hooks/useLocationLists";
 import { Button } from "portal-shared/components/ui/button";
 import {
   Card,
@@ -32,60 +33,30 @@ import {
 } from "./BillingInformation.schema";
 import { Billing } from "portal-shared/dataProviders/accountProvider";
 
-const defaultBillingInfo: BillingInfoFields = {
-  name: "",
-  organization: undefined,
-  country: "",
-  address_line1: "",
-  address_line2: undefined,
-  city: "",
-  state: "",
-  postal_code: "",
-  dependent_locality: undefined,
-  sorting_code: undefined,
-};
-
 export default function BillingInformation() {
   const { billingInfo, isLoading: isBillingInfoLoading } = useBillingInfo();
   const { submitBillingInfo, isSubmitting } = useSubmitBillingInfo();
-  const [supportedEntities, setSupportedEntities] = useState<EntityCode[]>(["C", "S"]);
-  const [initialValues, setInitialValues] = useState<BillingInfoFields | null>(null);
+  const {
+    form,
+    supportedEntities,
+    setSupportedEntities,
+    initialValues,
+    setInitialValues,
+    hasFormChanges,
+    updateFormSchema
+  } = useBillingForm();
+  
+  const {
+    countryData,
+    selectedCountry,
+    selectedCountryData,
+    handleCountryChange
+  } = useCountryData(form);
 
-  // Debug loading states
-  console.log('Loading:', isBillingInfoLoading, 'BillingInfo:', billingInfo);
-
-  const useCountryList = () =>
-    useList<Entry>({ resource: "account/subscription/billing/countries" });
-  const { data: countryData } = useCountryList();
-
-  const form = useForm<BillingInfoFields>({
-    resolver: zodResolver(createBillingInfoSchema(["C", "S"], [])),
-    defaultValues: defaultBillingInfo,
-    mode: "onBlur",
-  });
-
-  const selectedCountry = form.watch("country");
-  const selectedCountryData = countryData?.data.find(
-    (country) => country.code === selectedCountry,
+  const { useStateList, useCityList } = useLocationLists(
+    form.watch("country"),
+    form.watch("state")
   );
-
-
-  const useStateList = () =>
-    useList<Entry>({
-      resource: "account/subscription/billing/states",
-      filters: [
-        { field: "country", operator: "eq", value: form.watch("country") },
-      ],
-    });
-
-  const useCityList = () =>
-    useList<Entry>({
-      resource: "account/subscription/billing/cities",
-      filters: [
-        { field: "country", operator: "eq", value: form.watch("country") },
-        { field: "state", operator: "eq", value: form.watch("state") },
-      ],
-    });
 
   // Set initial values when billing info is loaded
   useEffect(() => {
@@ -120,12 +91,6 @@ export default function BillingInformation() {
   useEffect(() => {
     if (!countryData) return;
     
-    const selectedCountry = form.watch("country");
-    const selectedCountryData = countryData.data.find(
-      (country) => country.code === selectedCountry,
-    );
-    
-    // Always maintain at least the base entities if no country is selected
     let entities: EntityCode[] = ["C", "S"];
     
     if (selectedCountry && selectedCountryData?.supported_entities) {
@@ -135,17 +100,9 @@ export default function BillingInformation() {
     setSupportedEntities(entities);
     
     if (selectedCountry) {
-      const currentValues = form.getValues();
-      form.clearErrors();
-      
-      form.reset(currentValues, {
-        resolver: zodResolver(createBillingInfoSchema(
-          entities,
-          selectedCountryData?.required_fields || []
-        ))
-      });
+      updateFormSchema(entities, selectedCountryData?.required_fields || []);
     }
-  }, [form.watch("country"), countryData]);
+  }, [selectedCountry, countryData, updateFormSchema]);
 
   const onSubmit = async (data: BillingInfoFields) => {
     try {
