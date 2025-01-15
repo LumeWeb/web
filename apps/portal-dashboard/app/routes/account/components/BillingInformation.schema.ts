@@ -58,8 +58,8 @@ export type FieldName = keyof typeof conditionalFields;
 
 // Mapping between entity codes and field names
 export const fieldMapping: Record<EntityCode, FieldName> = {
-  C: "city",
   S: "state",
+  C: "city",
   D: "dependent_locality",
   X: "sorting_code",
 };
