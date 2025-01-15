@@ -145,7 +145,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   }, [initializeHyper, subscriptionData?.payment?.publishable_key, ephemeralKey]);
 
 
-  const value = {
+  const value = React.useMemo(() => ({
     subscription: subscriptionData,
     isLoading: subscriptionIsLoading || plansAreLoading,
     plans: plansData?.data?.plans ?? [],
@@ -166,7 +166,22 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     },
     hyperPromise: hyperPromiseRef.current,
     setEphemeralKey,
-  };
+  }), [
+    subscriptionData,
+    subscriptionIsLoading,
+    plansAreLoading,
+    plansData?.data?.plans,
+    selectedPlan,
+    isPlanChanging,
+    isCreating,
+    handlePlanSelection,
+    submitPlanChange,
+    createSubscription,
+    refetchSubscription,
+    hyperState.isHyperLoaded,
+    hyperState.error,
+    hyperPromiseRef.current,
+  ]);
 
   return (
     <SubscriptionContext.Provider value={value}>
