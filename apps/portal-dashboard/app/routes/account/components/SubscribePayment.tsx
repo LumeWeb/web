@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
 } from "portal-shared/components/ui/alert-dialog.js";
 import React, { useEffect } from "react";
+import { cn } from "portal-shared/util/cn.js";
 import HyperPayment from "./HyperPayment.js";
 import { useSubscriptionContext } from "../contexts/SubscriptionContext.js";
 import useSubmitSubscriptionConnect from "@/routes/account/hooks/useSubmitSubscriptionConnect.js";
