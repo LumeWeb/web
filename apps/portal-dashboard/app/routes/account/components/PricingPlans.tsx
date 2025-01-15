@@ -113,6 +113,8 @@ export default function PricingPlans() {
     }
   };
 
+  const { open } = useNotification();
+
   useEffect(() => {
     if (subscription?.payment?.expires_at && showPaymentDialog) {
       const expiryDate = new Date(subscription.payment.expires_at);
@@ -135,7 +137,7 @@ export default function PricingPlans() {
 
       return () => clearInterval(interval);
     }
-  }, [subscription?.payment?.expires_at, showPaymentDialog]);
+  }, [subscription?.payment?.expires_at, showPaymentDialog, open]);
 
   const handleShowPayment = async () => {
     if (paymentExpired && subscription?.plan) {
