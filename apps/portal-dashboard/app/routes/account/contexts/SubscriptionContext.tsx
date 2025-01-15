@@ -107,6 +107,11 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     if (!subscriptionData?.payment?.publishable_key || !ephemeralKey) {
       return;
     }
+
+    // Don't initialize if there's no client secret for a pending subscription
+    if (subscriptionData.status === "PENDING" && !subscriptionData.payment.client_secret) {
+      return;
+    }
     
     setHyperState((prev) => ({ ...prev, isLoading: true, error: null }));
     const promise = loadHyper(
@@ -114,6 +119,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       {
         env: "SANDBOX",
         ephemeralKey,
+        clientSecret: subscriptionData.payment.client_secret,
       },
     );
     
@@ -139,10 +145,16 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   }, [subscriptionData?.payment?.publishable_key, ephemeralKey]);
 
   useEffect(() => {
-    if (!hyperPromiseRef.current && subscriptionData?.payment?.publishable_key && ephemeralKey) {
+    const shouldInitialize = 
+      !hyperPromiseRef.current && 
+      subscriptionData?.payment?.publishable_key && 
+      ephemeralKey &&
+      (!subscriptionData.status || subscriptionData.status === "PENDING" ? subscriptionData.payment.client_secret : true);
+
+    if (shouldInitialize) {
       initializeHyper();
     }
-  }, [initializeHyper, subscriptionData?.payment?.publishable_key, ephemeralKey]);
+  }, [initializeHyper, subscriptionData?.payment?.publishable_key, ephemeralKey, subscriptionData?.status, subscriptionData?.payment?.client_secret]);
 
 
   const value = React.useMemo(() => ({
