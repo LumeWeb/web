@@ -39,10 +39,8 @@ export default function useSubmitSubscriptionChange(fromContext = false) {
               type: "success",
               message: "Subscription change initiated",
             });
-            // Only refetch if we have an active subscription
-            if (subscription.subscriptionData) {
-              await subscription.refetchSubscription();
-            }
+            // Don't refetch immediately after plan change
+            // Let the normal polling handle updates
           },
           onError(error: HttpError) {
             open?.({

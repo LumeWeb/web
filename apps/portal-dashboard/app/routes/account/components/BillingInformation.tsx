@@ -63,14 +63,16 @@ export default function BillingInformation() {
   );
 
   useEffect(() => {
-    initializeForm(billingInfo);
-  }, [billingInfo, initializeForm]);
+    if (billingInfo && !initialValues) {
+      initializeForm(billingInfo);
+    }
+  }, [billingInfo, initializeForm, initialValues]);
 
   useEffect(() => {
-    if (!countryData || !selectedCountry) return;
+    if (!countryData || !selectedCountry || !selectedCountryData) return;
     
-    const entities = selectedCountryData?.supported_entities as EntityCode[] || ["C", "S"];
-    const requiredFields = selectedCountryData?.required_fields || [];
+    const entities = selectedCountryData.supported_entities as EntityCode[] || ["C", "S"];
+    const requiredFields = selectedCountryData.required_fields || [];
     
     setSupportedEntities(entities);
     updateFormSchema(entities, requiredFields);
