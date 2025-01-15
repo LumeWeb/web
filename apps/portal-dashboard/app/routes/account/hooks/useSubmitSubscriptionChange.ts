@@ -4,21 +4,26 @@ import { SubscriptionPlan } from "portal-shared/dataProviders/accountProvider";
 import useSubscription from "@/hooks/useSubscription.js";
 import useApiUrl from "portal-shared/hooks/useApiUrl";
 
-import { useSubscriptionContext } from "@/routes/account/contexts/SubscriptionContext.js";
-
-export default function useSubmitSubscriptionChange(fromContext = false) {
+export default function useSubmitSubscriptionChange() {
   const apiUrl = useApiUrl();
   const { open } = useNotification();
+  const { subscriptionData } = useSubscription();
 
   const { mutate, isLoading: isPlanChanging } = useCustomMutation();
 
   const submitPlanChange = useCallback(
     async (plan: SubscriptionPlan | undefined, paymentMethodId?: string) => {
+      // Early return conditions
       if (!plan?.id) {
         console.warn("Attempted to submit plan change with no plan selected");
         return;
       }
       
+      if (subscriptionData?.status === "PENDING") {
+        console.warn("Attempted to submit plan change while another change is pending");
+        return;
+      }
+
       const values: { plan_id: string; payment_method_id?: string } = {
         plan_id: plan.id,
       };
