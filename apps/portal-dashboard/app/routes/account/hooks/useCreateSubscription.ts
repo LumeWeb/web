@@ -13,7 +13,7 @@ export default function useCreateSubscription() {
   const createSubscription = useCallback(
     async (plan: SubscriptionPlan, paymentMethodId?: string) => {
       const values: { plan: string; payment_method_id?: string } = {
-        plan: plan.identifier,
+        plan: plan.id,
       };
       if (paymentMethodId) {
         values.payment_method_id = paymentMethodId;

@@ -52,8 +52,8 @@ export default function PricingPlans() {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   const paymentExpired =
-    new Date(subscription?.payment_info?.payment_expires ?? "") <= new Date();
-  const planPending = subscription?.plan?.status === "PENDING";
+    new Date(subscription?.payment?.payment_expires ?? "") <= new Date();
+  const planPending = subscription?.status === "PENDING";
   const showPayment =
     !!subscription?.payment_info?.payment_id &&
     !!subscription?.payment_info?.client_secret &&

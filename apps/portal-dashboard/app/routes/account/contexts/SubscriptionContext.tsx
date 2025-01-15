@@ -10,7 +10,8 @@ import React, {
 import {
   SubscriptionPlan,
   SubscriptionResponse,
-  Billing
+  Billing,
+  Subscription,
 } from "portal-shared/dataProviders/accountProvider";
 import {
   QueryObserverResult,
@@ -25,7 +26,7 @@ import useSubmitSubscriptionChange from "@/routes/account/hooks/useSubmitSubscri
 import { loadHyper } from "../lib/hyper.js";
 
 export interface SubscriptionContextType {
-  subscription?: SubscriptionResponse;
+  subscription?: Subscription;
   isLoading: boolean;
   plans: SubscriptionPlan[];
   selectedPlan: SubscriptionPlan | null;
@@ -105,12 +106,15 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   });
 
   const initializeHyper = useCallback(() => {
-    if (subscriptionData?.payment_info?.publishable_key) {
+    if ((subscriptionData as Subscription)?.payment?.publishable_key) {
       setHyperState((prev) => ({ ...prev, isLoading: true, error: null }));
-      const promise = loadHyper(subscriptionData.payment_info.publishable_key, {
-        env: "SANDBOX",
-        ephemeralKey,
-      });
+      const promise = loadHyper(
+        (subscriptionData as Subscription)?.payment?.publishable_key,
+        {
+          env: "SANDBOX",
+          ephemeralKey,
+        },
+      );
       if (promise) {
         hyperPromiseRef.current = promise;
         promise
@@ -144,7 +148,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   }, [refetchSubscription]);
 
   const value = {
-    subscription: subscriptionData,
+    subscription: subscriptionData!,
     isLoading: subscriptionIsLoading || plansAreLoading,
     plans: plansData?.data?.plans ?? [],
     selectedPlan,
