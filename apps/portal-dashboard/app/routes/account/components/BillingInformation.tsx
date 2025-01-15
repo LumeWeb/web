@@ -72,11 +72,17 @@ export default function BillingInformation() {
       (country) => country.code === selectedCountry,
     );
     
+    // Update form with new validation rules while preserving current values
+    const currentValues = form.getValues();
     form.clearErrors();
-    form.setResolver(zodResolver(createBillingInfoSchema(
-      supportedEntities,
-      selectedCountryData?.required_fields || []
-    )));
+    
+    // Re-initialize form with new schema but keep current values
+    form.reset(currentValues, {
+      resolver: zodResolver(createBillingInfoSchema(
+        supportedEntities,
+        selectedCountryData?.required_fields || []
+      ))
+    });
   }, [form.watch("country"), countryData, supportedEntities]);
 
   const useStateList = () =>
