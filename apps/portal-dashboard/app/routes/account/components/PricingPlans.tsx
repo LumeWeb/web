@@ -25,8 +25,8 @@ import {
 import { Progress } from "portal-shared/components/ui/progress";
 import { Skeleton } from "portal-shared/components/ui/skeleton";
 import type {
+  Subscription,
   SubscriptionPlan,
-  SubscriptionResponse,
 } from "portal-shared/dataProviders/accountProvider";
 import useOnFreePlan from "portal-shared/hooks/useOnFreePlan";
 import { cn } from "portal-shared/util/cn.js";
@@ -52,11 +52,10 @@ export default function PricingPlans() {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   const paymentExpired =
-    new Date(subscription?.payment?.payment_expires ?? "") <= new Date();
+    new Date(subscription?.payment?.expires_at ?? "") <= new Date();
   const planPending = subscription?.status === "PENDING";
   const showPayment =
-    !!subscription?.payment_info?.payment_id &&
-    !!subscription?.payment_info?.client_secret &&
+    !!subscription?.payment?.client_secret &&
     planPending &&
     !paymentExpired &&
     !!subscription?.plan?.is_free;
@@ -64,10 +63,10 @@ export default function PricingPlans() {
   const isBillingComplete =
     subscription?.billing?.name &&
     subscription?.billing?.address &&
-    subscription?.billing?.city &&
-    subscription?.billing?.state &&
-    subscription?.billing?.zip &&
-    subscription?.billing?.country;
+    subscription?.billing?.address?.city &&
+    subscription?.billing?.address?.state &&
+    subscription?.billing?.address?.postal_code &&
+    subscription?.billing?.address?.country;
 
   const onFreePlan = useOnFreePlan();
 
@@ -105,7 +104,7 @@ export default function PricingPlans() {
     }
   }, [paymentExpired, planPending, submitPlanChange, subscription?.plan]);
 
-  if (isLoading || isPlanChanging || isCreating) {
+  if ((isLoading && !plans?.length) || isPlanChanging || isCreating) {
     return (
       <div className="space-y-8">
         <Skeleton className="h-[200px] w-full" />
@@ -119,7 +118,9 @@ export default function PricingPlans() {
   const plan = subscription?.plan;
   // TODO(@pcfreak30): Get actual storage used
   const storageUsed = 1000000000; // This is in bytes
-  const storagePercent = plan ? (storageUsed / (plan?.storage ?? 0)) * 100 : 0;
+  const storagePercent = plan
+    ? (storageUsed / (plan?.resources.storage ?? 0)) * 100
+    : 0;
 
   return (
     <>
@@ -137,7 +138,8 @@ export default function PricingPlans() {
                 <div className="flex justify-between mb-2">
                   <span>Storage Used</span>
                   <span>
-                    {formatStorage(storageUsed)} / {formatStorage(plan.storage)}
+                    {formatStorage(storageUsed)} /{" "}
+                    {formatStorage(plan?.resources.storage)}
                   </span>
                 </div>
                 <Progress value={storagePercent} />
@@ -161,14 +163,14 @@ export default function PricingPlans() {
         <div className="grid md:grid-cols-3 gap-8">
           {plans.map((plan, index) => (
             <div
-              key={plan.identifier}
+              key={plan.id}
               className={cn(
                 "md:col-span-1",
                 {
                   "ring-2 ring-primary rounded-xl": [
-                    subscription?.plan?.identifier,
-                    selectedPlan?.identifier,
-                  ].includes(plan.identifier),
+                    subscription?.plan?.id,
+                    selectedPlan?.id,
+                  ].includes(plan.id),
                 },
                 {
                   "md:col-span-3":
@@ -236,7 +238,7 @@ const formatBandwidth = (bandwidth: number) =>
 
 function PlanCard(props: {
   plan: SubscriptionPlan;
-  subscription: SubscriptionResponse;
+  subscription: Subscription;
   selectedPlan: SubscriptionPlan | null;
   onChoosePlan: (plan: SubscriptionPlan) => void;
   onFreePlan: boolean;
@@ -253,7 +255,7 @@ function PlanCard(props: {
     return newPlan.price > currentPlan.price ? "Upgrade" : "Downgrade";
   };
 
-  const planPending = subscription?.plan?.status === "PENDING";
+  const planPending = subscription?.status === "PENDING";
 
   return (
     <Card className="h-full">
@@ -293,15 +295,14 @@ function PlanCard(props: {
             Subscribe
           </Button>
         )}
-        {subscription?.plan &&
-          plan.identifier !== subscription.plan.identifier && (
-            <Button
-              className="w-full bg-muted-foreground text-black hover:bg-muted-foreground/80"
-              onClick={() => onChoosePlan(plan)}>
-              {getChangeType(subscription.plan, plan)}
-            </Button>
-          )}
-        {plan.identifier === subscription?.plan?.identifier && (
+        {subscription?.plan && plan.id !== subscription.plan.id && (
+          <Button
+            className="w-full bg-muted-foreground text-black hover:bg-muted-foreground/80"
+            onClick={() => onChoosePlan(plan)}>
+            {getChangeType(subscription.plan, plan)}
+          </Button>
+        )}
+        {plan.id === subscription?.plan?.id && (
           <div className="text-primary font-semibold text-center">
             {planPending ? "Pending Plan" : "Current Plan"}
           </div>
