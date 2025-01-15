@@ -45,7 +45,8 @@ export default function BillingInformation() {
     initialValues,
     setInitialValues,
     hasFormChanges,
-    updateFormSchema
+    updateFormSchema,
+    initializeForm
   } = useBillingForm();
   
   const {

@@ -8,7 +8,11 @@ interface BillingError {
 }
 
 function isBillingError(error: unknown): error is BillingError {
-  return typeof error === "object" && error !== null;
+  if (typeof error !== "object" || error === null) return false;
+  const err = error as Record<string, unknown>;
+  return Object.entries(err).every(
+    ([key, value]) => typeof key === "string" && typeof value === "string"
+  );
 }
 
 export function useFormSubmission(
