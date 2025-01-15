@@ -47,6 +47,8 @@ export interface SubscriptionContextType {
     error: Error | null;
   };
   hyperPromise?: Promise<any> | null;
+  showPaymentDialog: boolean;
+  setShowPaymentDialog: (show: boolean) => void;
 }
 
 const defaultContextValue: SubscriptionContextType = {
@@ -83,6 +85,7 @@ interface SubscriptionProviderProps {
 }
 
 export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const { subscriptionData, subscriptionIsLoading, refetchSubscription } =
     useSubscription();
   const { plansData, plansAreLoading } = useSubscriptionPlans();
@@ -156,6 +159,8 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
 
 
   const value = React.useMemo(() => ({
+    showPaymentDialog,
+    setShowPaymentDialog,
     subscription: subscriptionData,
     isLoading: subscriptionIsLoading || plansAreLoading,
     plans: plansData?.data?.plans ?? [],
@@ -174,6 +179,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
           // Show payment dialog if needed and we have client secret
           if (!plan.is_free && updatedSub.data?.data?.payment?.client_secret) {
             handlePlanSelection(plan); // Keep selected plan for payment dialog
+            setShowPaymentDialog(true);
             return;
           }
         }

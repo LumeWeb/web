@@ -50,7 +50,7 @@ export default function PricingPlans() {
 
   const [showBillingDialog, setShowBillingDialog] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const { showPaymentDialog, setShowPaymentDialog } = useSubscriptionContext();
   const [paymentStatus, setPaymentStatus] = useState<'active' | 'ending-soon' | 'expired'>('active');
 
   const paymentExpired = subscription?.plan && subscription?.payment?.expires_at ? 
