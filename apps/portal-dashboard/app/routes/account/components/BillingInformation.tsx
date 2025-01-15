@@ -123,35 +123,32 @@ export default function BillingInformation() {
 
   useEffect(() => {
     const selectedCountry = form.watch("country");
+    console.log("Country changed to:", selectedCountry);
+    
     const selectedCountryData = countryData?.data.find(
       (country) => country.code === selectedCountry,
     );
-    const entities = (selectedCountryData?.supported_entities ||
-      []) as EntityCode[];
+    console.log("Country data:", selectedCountryData);
     
-    // Update supported entities first
-    setSupportedEntities(entities);
-  }, [form.watch("country"), countryData]);
-
-  // Separate effect to handle form updates after supportedEntities changes
-  useEffect(() => {
-    const selectedCountry = form.watch("country");
-    const selectedCountryData = countryData?.data.find(
-      (country) => country.code === selectedCountry,
-    );
-    
-    if (selectedCountry && supportedEntities.length > 0) {
+    if (selectedCountry && selectedCountryData) {
+      const entities = selectedCountryData.supported_entities as EntityCode[];
+      console.log("Supported entities:", entities);
+      
+      // Update form schema immediately with the new entities
       const currentValues = form.getValues();
+      console.log("Current form values:", currentValues);
+      
+      setSupportedEntities(entities);
       form.clearErrors();
       
       form.reset(currentValues, {
         resolver: zodResolver(createBillingInfoSchema(
-          supportedEntities,
-          selectedCountryData?.required_fields || []
+          entities,
+          selectedCountryData.required_fields || []
         ))
       });
     }
-  }, [supportedEntities, form.watch("country"), countryData]);
+  }, [form.watch("country"), countryData]);
 
   const onSubmit = async (data: BillingInfoFields) => {
     try {
@@ -211,7 +208,10 @@ export default function BillingInformation() {
       (key) => fieldMapping[key as EntityCode] === fieldName,
     ) as EntityCode;
 
+    console.log("Rendering field:", fieldName, "Entity code:", entityCode, "Supported:", supportedEntities);
+
     if (!supportedEntities.includes(entityCode)) {
+      console.log("Field not supported:", fieldName);
       return null;
     }
 
