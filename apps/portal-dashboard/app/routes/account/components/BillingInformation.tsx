@@ -89,12 +89,7 @@ export default function BillingInformation() {
 
   // Set initial values when billing info is loaded
   useEffect(() => {
-    console.log('Effect triggered - billingInfo:', billingInfo);
-    
-    if (!billingInfo) {
-      console.log('No billing info yet');
-      return;
-    }
+    if (!billingInfo) return;
 
     const values: BillingInfoFields = {
       name: billingInfo.name,
@@ -109,10 +104,18 @@ export default function BillingInformation() {
       sorting_code: undefined,
     };
 
-    console.log('Setting values:', values);
     setInitialValues(values);
     form.reset(values);
   }, [billingInfo, form]);
+
+  const hasFormChanges = () => {
+    if (!initialValues) return false;
+    const currentValues = form.getValues();
+    return Object.keys(currentValues).some(key => {
+      const k = key as keyof BillingInfoFields;
+      return currentValues[k] !== initialValues[k];
+    });
+  };
 
   useEffect(() => {
     if (!countryData) return;
@@ -351,10 +354,7 @@ export default function BillingInformation() {
               <Button
                 type="submit"
                 className="ml-auto"
-                disabled={isSubmitting || !form.formState.isValid || (
-                  initialValues !== null && 
-                  JSON.stringify(form.getValues()) === JSON.stringify(initialValues)
-                )}>
+                disabled={isSubmitting || !hasFormChanges()}>
                 {isSubmitting ? "Saving..." : "Save"}
               </Button>
             </CardFooter>
