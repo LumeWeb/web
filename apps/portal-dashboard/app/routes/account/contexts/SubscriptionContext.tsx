@@ -176,12 +176,15 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
         } else {
           await createSubscription(plan);
           const updatedSub = await refetchSubscription();
-          // Show payment dialog if needed and we have client secret
+          
+          // Keep selected plan and show payment dialog if needed
           if (!plan.is_free && updatedSub.data?.data?.payment?.client_secret) {
-            handlePlanSelection(plan); // Keep selected plan for payment dialog
+            handlePlanSelection(plan);
             setShowPaymentDialog(true);
-            return;
+          } else {
+            handlePlanSelection(null);
           }
+          return;
         }
         // Clear selected plan after successful change
         handlePlanSelection(null);

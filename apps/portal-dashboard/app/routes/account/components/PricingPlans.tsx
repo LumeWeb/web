@@ -57,12 +57,10 @@ export default function PricingPlans() {
     new Date(subscription.payment.expires_at) <= new Date() : 
     false; // Only check expiry if there's a plan
   const planPending = subscription?.status === "PENDING";
-  const showPayment =
+  const showPayment = planPending && 
+    !subscription?.plan?.is_free && 
     !!subscription?.payment?.client_secret &&
-    !!subscription?.plan?.id &&  // Check for plan.id instead of just plan
-    planPending &&
-    !paymentExpired &&
-    !subscription.plan.is_free;  // Don't show payment for free plans
+    !paymentExpired;
 
   // Debug logs
   console.log('Payment conditions:', {
@@ -382,15 +380,16 @@ function PlanCard(props: {
         {plan.id === subscription?.plan?.id && (
           <div className="space-y-2">
             <div className="text-primary font-semibold text-center">
-              {planPending ? "Pending Plan" : "Current Plan"}
+              {planPending ? "Payment Required" : "Current Plan"}
             </div>
             {planPending && !plan.is_free && (
               <Button 
                 variant="outline"
                 className="w-full" 
                 onClick={handleShowPayment}
+                disabled={paymentExpired}
               >
-                Complete Payment
+                {paymentExpired ? "Session Expired" : "Complete Payment"}
               </Button>
             )}
           </div>
