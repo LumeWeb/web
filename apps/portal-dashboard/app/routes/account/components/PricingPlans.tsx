@@ -223,6 +223,8 @@ export default function PricingPlans() {
                 selectedPlan={selectedPlan}
                 onChoosePlan={handleChoosePlan}
                 onFreePlan={onFreePlan}
+                handleShowPayment={handleShowPayment}
+                paymentExpired={paymentExpired}
               />
             </div>
           ))}
@@ -284,8 +286,10 @@ function PlanCard(props: {
   selectedPlan: SubscriptionPlan | null;
   onChoosePlan: (plan: SubscriptionPlan) => void;
   onFreePlan: boolean;
+  handleShowPayment: () => void;
+  paymentExpired: boolean;
 }) {
-  const { plan, subscription, onChoosePlan, onFreePlan } = props;
+  const { plan, subscription, onChoosePlan, onFreePlan, handleShowPayment, paymentExpired } = props;
   const getChangeType = (
     currentPlan: SubscriptionPlan,
     newPlan: SubscriptionPlan,
