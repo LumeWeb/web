@@ -41,7 +41,7 @@ export default function HyperPayment({
     }
 
     if (mode === "subscribe" && !clientSecret) {
-      setClientSecret(subscription?.payment_info?.client_secret);
+      setClientSecret(subscription?.payment?.client_secret);
     }
   }, [
     mode,
