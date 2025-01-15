@@ -76,14 +76,18 @@ type SchemaType = typeof baseSchema & {
  */
 export const createBillingInfoSchema = (
   supportedEntities: EntityCode[] = [],
+  requiredFields: EntityCode[] = []
 ) => {
   const schema: SchemaType = { ...baseSchema };
 
-  // Add conditional fields based on supported entities
+  // Add fields based on supported entities
   supportedEntities.forEach((entity) => {
     const field = fieldMapping[entity];
     if (field) {
-      schema[field] = conditionalFields[field];
+      // Make field required if it's in requiredFields
+      schema[field] = requiredFields.includes(entity) 
+        ? conditionalFields[field]
+        : conditionalFields[field].optional();
     }
   });
 
@@ -99,6 +103,7 @@ export interface CountryMetadata {
   code: string;
   name: string;
   supported_entities: EntityCode[];
+  required_fields: EntityCode[];
 }
 
 // Type for the complete address structure

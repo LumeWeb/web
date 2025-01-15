@@ -56,7 +56,10 @@ export default function BillingInformation() {
   const { data: countryData } = useCountryList();
 
   const form = useForm<BillingInfoFields>({
-    resolver: zodResolver(createBillingInfoSchema(supportedEntities)),
+    resolver: zodResolver(createBillingInfoSchema(
+      supportedEntities,
+      selectedCountryData?.required_fields || []
+    )),
     defaultValues: defaultBillingInfo,
     mode: "onBlur",
   });
@@ -104,11 +107,6 @@ export default function BillingInformation() {
     );
     const entities = (selectedCountryData?.supported_entities ||
       []) as EntityCode[];
-    
-    // For USA, ensure city and state are included
-    if (selectedCountry === "US") {
-      entities.push("C", "S");
-    }
     
     setSupportedEntities(entities);
     form.clearErrors();
