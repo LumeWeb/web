@@ -99,10 +99,11 @@ export default function PricingPlans() {
   }, [showPayment]);
 
   useEffect(() => {
-    if (paymentExpired && planPending) {
-      submitPlanChange(subscription?.plan);
+    if (paymentExpired && planPending && subscription?.plan) {
+      // If payment expired for pending subscription, allow resubmitting
+      createSubscription(subscription.plan);
     }
-  }, [paymentExpired, planPending, submitPlanChange, subscription?.plan]);
+  }, [paymentExpired, planPending, createSubscription, subscription?.plan]);
 
   if (isLoading || isPlanChanging || isCreating) {
     return (
