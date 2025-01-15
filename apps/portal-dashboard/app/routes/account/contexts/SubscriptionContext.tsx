@@ -152,11 +152,17 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     selectedPlan,
     isPlanChanging: isPlanChanging || isCreating,
     handlePlanSelection,
-    submitPlanChange: (plan: SubscriptionPlan) => {
+    submitPlanChange: async (plan: SubscriptionPlan) => {
+      if (!plan?.id) return;
+      
       if (subscriptionData) {
-        return submitPlanChange(plan);
+        if (subscriptionData.status === "PENDING") {
+          console.warn("Cannot change plan while subscription is pending");
+          return;
+        }
+        await submitPlanChange(plan);
       } else {
-        return createSubscription(plan);
+        await createSubscription(plan);
       }
     },
     refetchSubscription,

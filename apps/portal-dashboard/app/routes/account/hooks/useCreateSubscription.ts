@@ -13,7 +13,7 @@ export default function useCreateSubscription(refetchSubscription: () => Promise
         plan_id: plan.id,
       };
 
-      mutate(
+      return mutate(
         {
           url: `${apiUrl}/api/account/subscription`,
           method: "post",

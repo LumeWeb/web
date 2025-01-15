@@ -27,7 +27,7 @@ export default function useSubmitSubscriptionChange() {
         plan_id: plan.id,
       };
 
-      mutate(
+      return mutate(
         {
           url: `${apiUrl}/api/account/subscription/plan`,
           method: "put",
