@@ -30,27 +30,29 @@ import {
   createBillingInfoSchema,
   fieldMapping,
 } from "./BillingInformation.schema";
-import { SubscriptionBillingInfo } from "portal-shared/dataProviders/accountProvider";
+import { Billing, Address } from "portal-shared/dataProviders/accountProvider";
 
-type FormFields = Partial<SubscriptionBillingInfo> & {
-  name: string;
-  country: string;
+type FormFields = Partial<Billing> & {
+  address: string;
 };
 
 type FieldType = keyof FormFields;
 
-const defaultBillingInfo: FormFields = {
+const defaultBillingInfo: Billing = {
   name: "",
-  country: "",
   organization: "",
-  address: "",
-  city: "",
-  state: "",
-  zip: "",
+  address: {
+    line1: "",
+    line2: "",
+    city: "",
+    state: "",
+    postal_code: "",
+    country: ""
+  }
 };
 
 export default function BillingInformation() {
-  const { billingInfo, isLoading: isBillingInfoLoading } = useBillingInfo();
+  const { billing, isLoading: isBillingInfoLoading } = useBillingInfo();
   const { submitBillingInfo, isSubmitting } = useSubmitBillingInfo();
   const [isInitialized, setIsInitialized] = useState(false);
   const [supportedEntities, setSupportedEntities] = useState<EntityCode[]>([]);
@@ -83,8 +85,8 @@ export default function BillingInformation() {
     });
 
   useEffect(() => {
-    if (billingInfo && !isInitialized) {
-      form.reset({ ...defaultBillingInfo, ...billingInfo });
+    if (billing && !isInitialized) {
+      form.reset({ ...defaultBillingInfo, ...billing });
       setIsInitialized(true);
     }
   }, [billingInfo, form, isInitialized]);
@@ -102,14 +104,17 @@ export default function BillingInformation() {
 
   const onSubmit = async (data: FormFields) => {
     try {
-      const billingInfo: SubscriptionBillingInfo = {
+      const billingInfo: Billing = {
         name: data.name,
         organization: data.organization || "",
-        address: data.address || "",
-        city: data.city || "",
-        state: data.state || "",
-        zip: data.zip || "",
-        country: data.country,
+        address: {
+          line1: data.address || "",
+          line2: "",
+          city: data.city || "",
+          state: data.state || "",
+          postal_code: data.postal_code || "",
+          country: data.country
+        }
       };
       await submitBillingInfo(billingInfo);
     } catch (error) {
