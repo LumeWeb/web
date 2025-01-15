@@ -104,6 +104,12 @@ export default function BillingInformation() {
     );
     const entities = (selectedCountryData?.supported_entities ||
       []) as EntityCode[];
+    
+    // For USA, ensure city and state are included
+    if (selectedCountry === "US") {
+      entities.push("C", "S");
+    }
+    
     setSupportedEntities(entities);
     form.clearErrors();
   }, [form.watch("country"), countryData]);
