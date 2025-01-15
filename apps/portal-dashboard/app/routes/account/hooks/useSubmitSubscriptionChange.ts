@@ -10,7 +10,6 @@ export default function useSubmitSubscriptionChange(fromContext = false) {
   const apiUrl = useApiUrl();
   const { open } = useNotification();
 
-  const subscription = fromContext ? useSubscription() : useSubscriptionContext();
   const { mutate, isLoading: isPlanChanging } = useCustomMutation();
 
   const submitPlanChange = useCallback(
@@ -51,7 +50,7 @@ export default function useSubmitSubscriptionChange(fromContext = false) {
         },
       );
     },
-    [mutate, open, subscription, apiUrl],
+    [mutate, open, apiUrl],
   );
 
   return {
