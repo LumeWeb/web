@@ -56,8 +56,19 @@ export default function BillingInformation() {
   const { data: countryData } = useCountryList();
 
   const form = useForm<BillingInfoFields>({
-    resolver: zodResolver(createBillingInfoSchema(supportedEntities, [])),
-    defaultValues: defaultBillingInfo,
+    resolver: zodResolver(createBillingInfoSchema(["C", "S"], [])),
+    defaultValues: billingInfo ? {
+      name: billingInfo.name,
+      organization: billingInfo.organization,
+      country: billingInfo.address.country,
+      address_line1: billingInfo.address.line1,
+      address_line2: billingInfo.address.line2,
+      city: billingInfo.address.city,
+      state: billingInfo.address.state,
+      postal_code: billingInfo.address.postal_code,
+      dependent_locality: undefined,
+      sorting_code: undefined,
+    } : defaultBillingInfo,
     mode: "onBlur",
   });
 
@@ -84,6 +95,7 @@ export default function BillingInformation() {
       ],
     });
 
+  // Set initial values when billing info is loaded
   useEffect(() => {
     if (!billingInfo) return;
 
@@ -100,12 +112,8 @@ export default function BillingInformation() {
       sorting_code: undefined,
     };
 
-    // Set initial values first
     setInitialValues(values);
-    
-    // Then update the form with the values
-    form.reset(values);
-  }, [billingInfo, form]);
+  }, [billingInfo]);
 
   useEffect(() => {
     if (!countryData) return;
