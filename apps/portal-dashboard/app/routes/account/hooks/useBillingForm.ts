@@ -33,9 +33,13 @@ export function useBillingForm() {
     const currentValues = form.getValues();
     return Object.keys(currentValues).some(key => {
       const k = key as keyof BillingInfoFields;
-      return currentValues[k] !== initialValues[k];
+      const current = currentValues[k];
+      const initial = initialValues[k];
+      // Handle undefined/empty string equivalence
+      if (!current && !initial) return false;
+      return current !== initial;
     });
-  }, [initialValues, form]);
+  }, [initialValues]);
 
   const updateFormSchema = useCallback((entities: EntityCode[], requiredFields: EntityCode[] = []) => {
     const currentValues = form.getValues();

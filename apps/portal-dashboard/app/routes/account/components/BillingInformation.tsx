@@ -80,9 +80,9 @@ export default function BillingInformation() {
 
   const { handleSubmit } = useFormSubmission(form, submitBillingInfo);
   
-  const handleStateChange = () => {
-    form.setValue("city", "");
-  };
+  const handleStateChange = useCallback(() => {
+    form.setValue("city", "", { shouldDirty: true });
+  }, [form]);
 
   if (isBillingInfoLoading) {
     return (

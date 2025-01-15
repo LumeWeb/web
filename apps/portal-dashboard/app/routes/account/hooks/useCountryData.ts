@@ -14,12 +14,12 @@ export function useCountryData(form: UseFormReturn<BillingInfoFields>) {
     (country) => country.code === selectedCountry
   );
 
-  const handleCountryChange = () => {
-    form.setValue("state", "");
-    form.setValue("city", "");
-    form.setValue("dependent_locality", undefined);
-    form.setValue("sorting_code", undefined);
-  };
+  const handleCountryChange = useCallback(() => {
+    form.setValue("state", "", { shouldDirty: true });
+    form.setValue("city", "", { shouldDirty: true });
+    form.setValue("dependent_locality", undefined, { shouldDirty: true });
+    form.setValue("sorting_code", undefined, { shouldDirty: true });
+  }, [form]);
 
   return {
     countryData,
