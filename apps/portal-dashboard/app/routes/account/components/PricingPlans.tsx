@@ -50,6 +50,7 @@ export default function PricingPlans() {
   const [showBillingDialog, setShowBillingDialog] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<'active' | 'ending-soon' | 'expired'>('active');
 
   const paymentExpired = subscription?.payment?.expires_at ? 
     new Date(subscription.payment.expires_at) <= new Date() : 
@@ -104,6 +105,30 @@ export default function PricingPlans() {
   };
 
   useEffect(() => {
+    if (subscription?.payment?.expires_at && showPaymentDialog) {
+      const expiryDate = new Date(subscription.payment.expires_at);
+      const interval = setInterval(() => {
+        const remaining = expiryDate.getTime() - new Date().getTime();
+        
+        if (remaining <= 0) {
+          setShowPaymentDialog(false);
+          setPaymentStatus('expired');
+          open?.({
+            type: "info",
+            message: "Payment session timed out for security. Please try again.",
+          });
+        } else if (remaining < 120000) { // 2 minutes
+          setPaymentStatus('ending-soon');
+        } else {
+          setPaymentStatus('active');
+        }
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [subscription?.payment?.expires_at, showPaymentDialog]);
+
+  useEffect(() => {
     const shouldShowPayment = 
       subscription?.status === "PENDING" &&
       !!subscription?.plan?.id &&
@@ -111,15 +136,9 @@ export default function PricingPlans() {
       !!subscription?.payment?.client_secret &&
       !paymentExpired;
 
-    console.log('Payment dialog conditions:', {
-      isPending: subscription?.status === "PENDING",
-      hasPlanId: !!subscription?.plan?.id,
-      isNotFree: !subscription?.plan?.is_free,
-      hasClientSecret: !!subscription?.payment?.client_secret,
-      notExpired: !paymentExpired,
-      shouldShow: shouldShowPayment
-    });
-
+    if (shouldShowPayment) {
+      setPaymentStatus('active');
+    }
     setShowPaymentDialog(shouldShowPayment);
   }, [subscription, paymentExpired]);
 
@@ -253,7 +272,11 @@ export default function PricingPlans() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <SubscribePayment open={showPaymentDialog} onOpenChange={setShowPaymentDialog} />
+      <SubscribePayment 
+        open={showPaymentDialog} 
+        onOpenChange={setShowPaymentDialog}
+        status={paymentStatus}
+      />
     </>
   );
 }

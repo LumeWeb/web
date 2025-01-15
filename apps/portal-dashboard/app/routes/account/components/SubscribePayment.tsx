@@ -22,6 +22,7 @@ import useSubmitSubscriptionConnect from "@/routes/account/hooks/useSubmitSubscr
 interface SubscribePaymentProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  status: 'active' | 'ending-soon' | 'expired';
 }
 
 export default function SubscribePayment({ open, onOpenChange }: SubscribePaymentProps) {
@@ -39,6 +40,16 @@ export default function SubscribePayment({ open, onOpenChange }: SubscribePaymen
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Complete Payment</AlertDialogTitle>
+          <div className={cn(
+            "text-sm mb-2",
+            status === 'active' ? "text-muted-foreground" : 
+            status === 'ending-soon' ? "text-yellow-500" :
+            "text-red-500"
+          )}>
+            {status === 'active' && "Payment session active"}
+            {status === 'ending-soon' && "Payment session ending soon"}
+            {status === 'expired' && "Payment session expired"}
+          </div>
           <AlertDialogDescription asChild>
             <div>
               {`Please complete your payment to subscribe to the ${selectedPlan?.name} plan.`}
