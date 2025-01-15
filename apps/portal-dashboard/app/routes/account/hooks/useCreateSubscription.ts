@@ -2,7 +2,7 @@ import { HttpError, useCustomMutation, useNotification } from "@refinedev/core";
 import { useCallback } from "react";
 import { SubscriptionPlan } from "portal-shared/dataProviders/accountProvider";
 import useApiUrl from "portal-shared/hooks/useApiUrl";
-export default function useCreateSubscription(refetchSubscription: () => Promise<any>) {
+export default function useCreateSubscription(refetchSubscription?: () => Promise<any>) {
   const apiUrl = useApiUrl();
   const { open } = useNotification();
   const { mutate, isLoading: isCreating } = useCustomMutation();
@@ -25,7 +25,9 @@ export default function useCreateSubscription(refetchSubscription: () => Promise
               type: "success",
               message: "Subscription created successfully",
             });
-            refetchSubscription();
+            if (refetchSubscription) {
+              refetchSubscription();
+            }
           },
           onError(error: HttpError) {
             open?.({
