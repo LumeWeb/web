@@ -26,7 +26,7 @@ interface SubscribePaymentProps {
   status: 'active' | 'ending-soon' | 'expired';
 }
 
-export default function SubscribePayment({ open, onOpenChange }: SubscribePaymentProps) {
+export default function SubscribePayment({ open, onOpenChange, status }: SubscribePaymentProps) {
   const { selectedPlan } = useSubscriptionContext();
   const { connectPaymentMethod } = useSubmitSubscriptionConnect();
 
