@@ -106,11 +106,13 @@ export default function PricingPlans() {
     }
     
     try {
-      if (subscription) {
-        // Existing subscription (even if pending) - change plan
+      if (!selectedPlan) return;
+      
+      if (subscription?.plan) {
+        // Only use submitPlanChange when there's an existing plan
         await submitPlanChange(selectedPlan);
       } else {
-        // No subscription at all - create new subscription
+        // No existing plan - create new subscription
         await createSubscription(selectedPlan);
       }
       // Show payment dialog immediately if needed
