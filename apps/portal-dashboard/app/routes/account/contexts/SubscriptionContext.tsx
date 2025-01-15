@@ -10,6 +10,7 @@ import React, {
 import {
   SubscriptionPlan,
   SubscriptionResponse,
+  Billing
 } from "portal-shared/dataProviders/accountProvider";
 import {
   QueryObserverResult,
