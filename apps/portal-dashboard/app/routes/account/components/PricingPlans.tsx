@@ -240,7 +240,7 @@ export default function PricingPlans() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {showPaymentDialog && <SubscribePayment />}
+      <SubscribePayment open={showPaymentDialog} onOpenChange={setShowPaymentDialog} />
     </>
   );
 }
