@@ -11,13 +11,10 @@ export default function useCreateSubscription() {
   const { refetchSubscription } = useSubscriptionContext();
 
   const createSubscription = useCallback(
-    async (plan: SubscriptionPlan, paymentMethodId?: string) => {
-      const values: { plan: string; payment_method_id?: string } = {
-        plan: plan.id,
+    async (plan: SubscriptionPlan) => {
+      const values: { plan_id: string } = {
+        plan_id: plan.id,
       };
-      if (paymentMethodId) {
-        values.payment_method_id = paymentMethodId;
-      }
 
       mutate(
         {
