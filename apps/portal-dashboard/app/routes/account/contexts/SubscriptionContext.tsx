@@ -101,12 +101,14 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   });
 
   const initializeHyper = useCallback(() => {
-    if (!subscriptionData?.payment?.publishable_key) {
-      return;
-    }
-
-    // Don't initialize if there's no client secret for a pending subscription
-    if (subscriptionData.status === "PENDING" && !subscriptionData.payment.client_secret) {
+    // Only initialize if we have a pending subscription with a client secret and publishable key
+    if (
+      !subscriptionData?.payment?.publishable_key ||
+      !subscriptionData?.payment?.client_secret ||
+      subscriptionData.status !== "PENDING" ||
+      !subscriptionData.plan?.id ||
+      subscriptionData.plan.is_free
+    ) {
       return;
     }
     

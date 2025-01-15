@@ -105,8 +105,17 @@ export default function PricingPlans() {
 
   // Only show payment dialog when conditions are met
   useEffect(() => {
-    setShowPaymentDialog(showPayment);
-  }, [showPayment]);
+    // Only show payment dialog for pending paid subscriptions with valid payment details
+    const shouldShowPayment = 
+      subscription?.status === "PENDING" &&
+      !!subscription.plan?.id &&
+      !subscription.plan.is_free &&
+      !!subscription.payment?.client_secret &&
+      !!subscription.payment?.publishable_key &&
+      (!subscription.payment.expires_at || new Date(subscription.payment.expires_at) > new Date());
+    
+    setShowPaymentDialog(shouldShowPayment);
+  }, [subscription]);
 
   useEffect(() => {
     if (paymentExpired && planPending && subscription?.plan) {
