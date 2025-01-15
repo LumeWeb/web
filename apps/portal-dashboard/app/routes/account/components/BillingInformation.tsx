@@ -130,24 +130,27 @@ export default function BillingInformation() {
     );
     console.log("Country data:", selectedCountryData);
     
-    if (selectedCountry && selectedCountryData) {
-      const entities = selectedCountryData.supported_entities as EntityCode[];
+    // Always maintain at least the base entities if no country is selected
+    let entities: EntityCode[] = ["C", "S"];
+    
+    if (selectedCountry && selectedCountryData?.supported_entities) {
+      entities = selectedCountryData.supported_entities as EntityCode[];
       console.log("Supported entities:", entities);
-      
-      // Update form schema immediately with the new entities
-      const currentValues = form.getValues();
-      console.log("Current form values:", currentValues);
-      
-      setSupportedEntities(entities);
-      form.clearErrors();
-      
-      form.reset(currentValues, {
-        resolver: zodResolver(createBillingInfoSchema(
-          entities,
-          selectedCountryData.required_fields || []
-        ))
-      });
     }
+    
+    // Update form schema immediately with the new entities
+    const currentValues = form.getValues();
+    console.log("Current form values:", currentValues);
+    
+    setSupportedEntities(entities);
+    form.clearErrors();
+    
+    form.reset(currentValues, {
+      resolver: zodResolver(createBillingInfoSchema(
+        entities,
+        selectedCountryData?.required_fields || []
+      ))
+    });
   }, [form.watch("country"), countryData]);
 
   const onSubmit = async (data: BillingInfoFields) => {
