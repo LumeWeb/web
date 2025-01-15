@@ -1,6 +1,7 @@
 import React from "react";
 import type { UseFormReturn } from "react-hook-form";
 import type { BillingInfoFields, EntityCode, FieldName } from "./BillingInformation.schema";
+import type { Entry } from "./BillingAddressComboBox";
 import { BillingAddressComboBox } from "./BillingAddressComboBox";
 import {
   FormControl,

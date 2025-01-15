@@ -5,6 +5,7 @@ import { useCountryData } from "../hooks/useCountryData";
 import { useLocationLists } from "../hooks/useLocationLists";
 import { useFormSubmission } from "../hooks/useFormSubmission";
 import { BillingFormField } from "./BillingFormField";
+import { BillingFormInput } from "./BillingFormInput";
 import { Button } from "portal-shared/components/ui/button";
 import {
   Card,
@@ -108,32 +109,17 @@ export default function BillingInformation() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
+            <BillingFormInput
               name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Name"
+              form={form}
             />
 
-            <FormField
-              control={form.control}
+            <BillingFormInput
               name="organization"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Organization (Optional)</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Organization"
+              form={form}
+              optional
             />
 
             <BillingAddressComboBox
@@ -145,32 +131,17 @@ export default function BillingInformation() {
               onSelectionChange={handleCountryChange}
             />
 
-            <FormField
-              control={form.control}
+            <BillingFormInput
               name="address_line1"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address Line 1</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Address Line 1"
+              form={form}
             />
 
-            <FormField
-              control={form.control}
+            <BillingFormInput
               name="address_line2"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address Line 2 (Optional)</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Address Line 2"
+              form={form}
+              optional
             />
 
             {Object.keys(fieldMapping).map((key) => {
@@ -189,18 +160,10 @@ export default function BillingInformation() {
               );
             })}
 
-            <FormField
-              control={form.control}
+            <BillingFormInput
               name="postal_code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Postal Code</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Postal Code"
+              form={form}
             />
 
             <CardFooter className="px-0">

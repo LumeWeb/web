@@ -37,14 +37,14 @@ export function useBillingForm() {
     });
   };
 
-  const updateFormSchema = (entities: EntityCode[], requiredFields: EntityCode[] = []) => {
+  const updateFormSchema = useCallback((entities: EntityCode[], requiredFields: EntityCode[] = []) => {
     const currentValues = form.getValues();
     form.clearErrors();
     
     form.reset(currentValues, {
       resolver: zodResolver(createBillingInfoSchema(entities, requiredFields))
     });
-  };
+  }, [form]);
 
   const initializeForm = useCallback((billingInfo: Billing | undefined) => {
     if (!billingInfo) return;
