@@ -16,7 +16,7 @@ export default function useSubmitSubscriptionChange(fromContext = false) {
 
   const { mutate, isLoading: isPlanChanging } = useCustomMutation();
 
-  const submitPlanChange = //useCallback(
+  const submitPlanChange = useCallback(
     async (plan: SubscriptionPlan, paymentMethodId?: string) => {
       const values: { plan: string; payment_method_id?: string } = {
         plan: plan?.id,
@@ -38,7 +38,7 @@ export default function useSubmitSubscriptionChange(fromContext = false) {
               message: "Subscription change initiated",
             });
             // Force refetch of subscription data
-            refetchSubscription();
+            await refetchSubscription();
           },
           onError(error: HttpError) {
             open?.({
@@ -48,9 +48,9 @@ export default function useSubmitSubscriptionChange(fromContext = false) {
           },
         },
       );
-    }; /*,
+    },
     [mutate, open, refetchSubscription, apiUrl],
-  );*/
+  );
 
   return {
     isPlanChanging,

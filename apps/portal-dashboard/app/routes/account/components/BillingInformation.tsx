@@ -80,7 +80,7 @@ export default function BillingInformation() {
     if (selectedCountry) {
       updateFormSchema(entities, selectedCountryData?.required_fields || []);
     }
-  }, [selectedCountry, countryData, updateFormSchema]);
+  }, [selectedCountry, selectedCountryData, countryData, updateFormSchema, setSupportedEntities]);
 
   const { handleSubmit } = useFormSubmission(form, submitBillingInfo);
   
