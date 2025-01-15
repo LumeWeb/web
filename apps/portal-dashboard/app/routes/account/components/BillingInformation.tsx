@@ -49,7 +49,7 @@ export default function BillingInformation() {
   const { billingInfo, isLoading: isBillingInfoLoading } = useBillingInfo();
   const { submitBillingInfo, isSubmitting } = useSubmitBillingInfo();
   const [isInitialized, setIsInitialized] = useState(false);
-  const [supportedEntities, setSupportedEntities] = useState<EntityCode[]>([]);
+  const [supportedEntities, setSupportedEntities] = useState<EntityCode[]>(["C", "S"]);
 
   const useCountryList = () =>
     useList<Entry>({ resource: "account/subscription/billing/countries" });
