@@ -152,7 +152,13 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     selectedPlan,
     isPlanChanging: isPlanChanging || isCreating,
     handlePlanSelection,
-    submitPlanChange: subscriptionData ? submitPlanChange : createSubscription,
+    submitPlanChange: (plan: SubscriptionPlan) => {
+      if (subscriptionData) {
+        return submitPlanChange(plan);
+      } else {
+        return createSubscription(plan);
+      }
+    },
     refetchSubscription,
     hyperState: {
       isHyperLoaded: hyperState.isHyperLoaded,
