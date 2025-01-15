@@ -19,8 +19,8 @@ type AccountParams = {
 type AccountData = AccountParams;
 
 export enum SubscriptionPlanPeriod {
-  MONTH = "MONTH",
-  YEAR = "YEAR",
+  MONTHLY = "MONTHLY",
+  YEARLY = "YEARLY",
 }
 
 export enum SubscriptionPlanStatus {
@@ -28,41 +28,48 @@ export enum SubscriptionPlanStatus {
   PENDING = "PENDING",
 }
 
-export interface SubscriptionPlansResponse {
-  plans: SubscriptionPlan[];
+export interface Address {
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
 }
 
-export interface SubscriptionResponse {
-  plan: SubscriptionPlan;
-  billing_info: SubscriptionBillingInfo;
-  payment_info: {
-    payment_id: string;
-    payment_expires: string;
-    client_secret: string;
-    publishable_key: string;
-  };
+export interface Billing {
+  name: string;
+  organization?: string;
+  address: Address;
+}
+
+export interface Resources {
+  storage: number;   // In bytes
+  upload: number;    // In bytes
+  download: number;  // In bytes
 }
 
 export interface SubscriptionPlan {
+  id: string;
   name: string;
-  identifier: string;
-  status: SubscriptionPlanStatus;
-  price: number;
   period: SubscriptionPlanPeriod;
-  storage: number;
-  upload: number;
-  download: number;
-  is_free?: boolean;
+  price: number;
+  is_free: boolean;
+  resources: Resources;
 }
 
-export interface SubscriptionBillingInfo {
-  name: string;
-  organization: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
+export interface SubscriptionResponse {
+  subscription: {
+    id: string;
+    plan: SubscriptionPlan;
+    status: SubscriptionPlanStatus;
+    billing?: Billing;
+    payment?: {
+      client_secret?: string;
+      publishable_key?: string;
+      expires_at?: string;
+    }
+  }
 }
 
 export interface OPTGenerateResponse {
