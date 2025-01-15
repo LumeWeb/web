@@ -103,13 +103,9 @@ export default function PricingPlans() {
     }
   };
 
+  // Only show payment dialog when conditions are met
   useEffect(() => {
-    if (showPayment) {
-      console.log('Setting payment dialog to visible');
-      setShowPaymentDialog(true);
-    } else {
-      console.log('Payment dialog conditions not met');
-    }
+    setShowPaymentDialog(showPayment);
   }, [showPayment]);
 
   useEffect(() => {
