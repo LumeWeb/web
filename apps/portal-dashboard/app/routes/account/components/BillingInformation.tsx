@@ -55,16 +55,16 @@ export default function BillingInformation() {
     useList<Entry>({ resource: "account/subscription/billing/countries" });
   const { data: countryData } = useCountryList();
 
-  const selectedCountry = form?.watch("country");
-  const selectedCountryData = countryData?.data.find(
-    (country) => country.code === selectedCountry,
-  );
-
   const form = useForm<BillingInfoFields>({
     resolver: zodResolver(createBillingInfoSchema(supportedEntities, [])),
     defaultValues: defaultBillingInfo,
     mode: "onBlur",
   });
+
+  const selectedCountry = form.watch("country");
+  const selectedCountryData = countryData?.data.find(
+    (country) => country.code === selectedCountry,
+  );
 
   useEffect(() => {
     const selectedCountry = form.watch("country");
@@ -72,10 +72,11 @@ export default function BillingInformation() {
       (country) => country.code === selectedCountry,
     );
     
-    form.setError = zodResolver(createBillingInfoSchema(
+    form.clearErrors();
+    form.setResolver(zodResolver(createBillingInfoSchema(
       supportedEntities,
       selectedCountryData?.required_fields || []
-    ));
+    )));
   }, [form.watch("country"), countryData, supportedEntities]);
 
   const useStateList = () =>
