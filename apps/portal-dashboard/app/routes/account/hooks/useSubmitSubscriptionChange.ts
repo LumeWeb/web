@@ -17,9 +17,14 @@ export default function useSubmitSubscriptionChange(fromContext = false) {
   const { mutate, isLoading: isPlanChanging } = useCustomMutation();
 
   const submitPlanChange = useCallback(
-    async (plan: SubscriptionPlan, paymentMethodId?: string) => {
+    async (plan: SubscriptionPlan | undefined, paymentMethodId?: string) => {
+      if (!plan?.id) {
+        console.warn("Attempted to submit plan change with no plan selected");
+        return;
+      }
+      
       const values: { plan: string; payment_method_id?: string } = {
-        plan: plan?.id,
+        plan: plan.id,
       };
       if (paymentMethodId) {
         values.payment_method_id = paymentMethodId;
