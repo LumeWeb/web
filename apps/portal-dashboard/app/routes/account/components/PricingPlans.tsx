@@ -95,11 +95,11 @@ export default function PricingPlans() {
     setShowConfirmDialog(false);
     if (!selectedPlan) return;
     
-    if (subscription?.plan) {
-      // Existing subscription with plan - change plan
+    if (subscription) {
+      // Existing subscription (even if pending) - change plan
       await submitPlanChange(selectedPlan);
     } else {
-      // No plan or new subscription - create subscription
+      // No subscription at all - create new subscription
       await createSubscription(selectedPlan);
     }
   };
