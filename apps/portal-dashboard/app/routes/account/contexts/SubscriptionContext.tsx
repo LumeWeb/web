@@ -165,11 +165,6 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       if (!plan?.id) return;
       
       if (subscriptionData) {
-        const paymentExpired = new Date(subscriptionData.payment?.expires_at ?? "") <= new Date();
-        if (subscriptionData.status === "PENDING" && !paymentExpired) {
-          console.warn("Cannot change plan while subscription is pending and payment is still valid");
-          return;
-        }
         await submitPlanChange(plan);
       } else {
         await createSubscription(plan);
