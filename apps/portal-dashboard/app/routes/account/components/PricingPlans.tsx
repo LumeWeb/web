@@ -128,7 +128,7 @@ export default function PricingPlans() {
           <CardHeader>
             <CardTitle>Current Plan: {plan.name}</CardTitle>
             <div className="text-4xl font-medium">
-              ${plan?.price}/{plan?.period === "MONTH" ? "mo" : "yr"}
+              ${plan?.price}/{plan?.period === "MONTHLY" ? "mo" : "yr"}
             </div>
           </CardHeader>
           <CardContent>
@@ -271,19 +271,19 @@ function PlanCard(props: {
           <div className="flex items-center gap-2">
             <CloudIcon className="size-5 text-primary" />
             <span>
-              <b>Storage:</b> {formatStorage(plan.storage)}
+              <b>Storage:</b> {formatStorage(plan.resources.storage)}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <CloudUploadIcon className="size-5 text-primary" />
             <span>
-              <b>Upload:</b> {formatBandwidth(plan.upload)}/month
+              <b>Upload:</b> {formatBandwidth(plan.resources.upload)}/month
             </span>
           </div>
           <div className="flex items-center gap-2">
             <DownloadIcon className="size-5 text-primary" />
             <span>
-              <b>Download:</b> {formatBandwidth(plan.download)}/month
+              <b>Download:</b> {formatBandwidth(plan.resources.download)}/month
             </span>
           </div>
         </div>
