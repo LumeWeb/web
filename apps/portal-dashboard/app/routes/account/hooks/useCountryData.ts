@@ -3,10 +3,10 @@ import type { Entry } from "../components/BillingAddressComboBox";
 import type { UseFormReturn } from "react-hook-form";
 import type { BillingInfoFields } from "../components/BillingInformation.schema";
 
+const useCountryList = () =>
+  useList<Entry>({ resource: "account/subscription/billing/countries" });
+
 export function useCountryData(form: UseFormReturn<BillingInfoFields>) {
-  const useCountryList = () =>
-    useList<Entry>({ resource: "account/subscription/billing/countries" });
-  
   const { data: countryData } = useCountryList();
 
   const selectedCountry = form.watch("country");

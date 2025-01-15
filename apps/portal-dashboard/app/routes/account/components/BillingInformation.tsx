@@ -60,26 +60,9 @@ export default function BillingInformation() {
     form.watch("state")
   );
 
-  // Set initial values when billing info is loaded
   useEffect(() => {
-    if (!billingInfo) return;
-
-    const values: BillingInfoFields = {
-      name: billingInfo.name,
-      organization: billingInfo.organization,
-      country: billingInfo.address.country,
-      address_line1: billingInfo.address.line1,
-      address_line2: billingInfo.address.line2,
-      city: billingInfo.address.city,
-      state: billingInfo.address.state,
-      postal_code: billingInfo.address.postal_code,
-      dependent_locality: undefined,
-      sorting_code: undefined,
-    };
-
-    setInitialValues(values);
-    form.reset(values);
-  }, [billingInfo, form]);
+    initializeForm(billingInfo);
+  }, [billingInfo, initializeForm]);
 
   useEffect(() => {
     if (!countryData) return;

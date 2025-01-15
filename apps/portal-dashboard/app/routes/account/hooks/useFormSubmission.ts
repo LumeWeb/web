@@ -7,6 +7,19 @@ export function useFormSubmission(
   form: UseFormReturn<BillingInfoFields>,
   submitBillingInfo: (data: Billing) => Promise<void>
 ) {
+  const handleError = useCallback((error: unknown) => {
+    if (typeof error === "object" && error !== null) {
+      Object.entries(error).forEach(([field, message]) => {
+        form.setError(field as keyof BillingInfoFields, {
+          type: "manual",
+          message: message as string,
+        });
+      });
+    } else {
+      console.error("Error submitting billing info:", error);
+    }
+  }, [form]);
+
   const handleSubmit = useCallback(async (data: BillingInfoFields) => {
     try {
       const billingInfo: Billing = {
@@ -23,18 +36,9 @@ export function useFormSubmission(
       };
       await submitBillingInfo(billingInfo);
     } catch (error) {
-      if (typeof error === "object" && error !== null) {
-        Object.entries(error).forEach(([field, message]) => {
-          form.setError(field as keyof BillingInfoFields, {
-            type: "manual",
-            message: message as string,
-          });
-        });
-      } else {
-        console.error("Error submitting billing info:", error);
-      }
+      handleError(error);
     }
-  }, [form, submitBillingInfo]);
+  }, [form, submitBillingInfo, handleError]);
 
   return { handleSubmit };
 }

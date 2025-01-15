@@ -11,13 +11,15 @@ import {
 } from "portal-shared/components/ui/form";
 import { Input } from "portal-shared/components/ui/input";
 
+type ListHook = () => { data?: { data: Entry[] } };
+
 interface BillingFormFieldProps {
   fieldName: FieldName;
   form: UseFormReturn<BillingInfoFields>;
   entityCode: EntityCode;
   supportedEntities: EntityCode[];
-  useStateList?: () => any;
-  useCityList?: () => any;
+  useStateList?: ListHook;
+  useCityList?: ListHook;
   handleStateChange?: () => void;
 }
 

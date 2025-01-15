@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createBillingInfoSchema, BillingInfoFields } from "../components/BillingInformation.schema";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import type { Billing } from "portal-shared/dataProviders/accountProvider";
 import type { EntityCode } from "../components/BillingInformation.schema";
 
 const defaultBillingInfo: BillingInfoFields = {
@@ -45,6 +46,26 @@ export function useBillingForm() {
     });
   };
 
+  const initializeForm = useCallback((billingInfo: Billing | undefined) => {
+    if (!billingInfo) return;
+
+    const values: BillingInfoFields = {
+      name: billingInfo.name,
+      organization: billingInfo.organization,
+      country: billingInfo.address.country,
+      address_line1: billingInfo.address.line1,
+      address_line2: billingInfo.address.line2,
+      city: billingInfo.address.city,
+      state: billingInfo.address.state,
+      postal_code: billingInfo.address.postal_code,
+      dependent_locality: undefined,
+      sorting_code: undefined,
+    };
+
+    setInitialValues(values);
+    form.reset(values);
+  }, [form]);
+
   return {
     form,
     supportedEntities,
@@ -52,6 +73,7 @@ export function useBillingForm() {
     initialValues,
     setInitialValues,
     hasFormChanges,
-    updateFormSchema
+    updateFormSchema,
+    initializeForm
   };
 }
