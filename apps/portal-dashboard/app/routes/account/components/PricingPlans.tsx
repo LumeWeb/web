@@ -139,7 +139,7 @@ export default function PricingPlans() {
   };
 
 
-  if (isLoading || isPlanChanging || isCreating) {
+  if (isLoading) {
     return (
       <div className="space-y-8">
         <Skeleton className="h-[200px] w-full" />
@@ -334,14 +334,22 @@ function PlanCard(props: {
         </div>
 
         {!subscription?.plan ? (
-          <Button className="w-full" onClick={() => onChoosePlan(plan)}>
-            Subscribe
+          <Button 
+            className="w-full" 
+            onClick={() => onChoosePlan(plan)}
+            disabled={isPlanChanging || isCreating}
+          >
+            {(isPlanChanging || isCreating) ? "Processing..." : "Subscribe"}
           </Button>
         ) : plan.id !== subscription.plan.id && (
           <Button
             className="w-full bg-muted-foreground text-black hover:bg-muted-foreground/80"
-            onClick={() => onChoosePlan(plan)}>
-            {getChangeType(subscription.plan, plan)}
+            onClick={() => onChoosePlan(plan)}
+            disabled={isPlanChanging || isCreating}
+          >
+            {(isPlanChanging || isCreating) 
+              ? "Processing..." 
+              : getChangeType(subscription.plan, plan)}
           </Button>
         )}
         {plan.id === subscription?.plan?.id && (
