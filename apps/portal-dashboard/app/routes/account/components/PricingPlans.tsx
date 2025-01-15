@@ -354,7 +354,6 @@ function PlanCard(props: {
                 variant="outline"
                 className="w-full" 
                 onClick={handleShowPayment}
-                disabled={paymentExpired}
               >
                 Complete Payment
               </Button>
