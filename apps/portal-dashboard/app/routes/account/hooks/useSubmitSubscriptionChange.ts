@@ -29,8 +29,8 @@ export default function useSubmitSubscriptionChange() {
 
       mutate(
         {
-          url: `${apiUrl}/api/account/subscription/plan`,
-          method: "put",
+          url: endpoint,
+          method: isNewSubscription ? "post" : "put",
           values,
         },
         {

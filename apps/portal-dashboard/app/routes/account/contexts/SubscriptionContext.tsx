@@ -88,10 +88,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     useSubscription();
   const { plansData, plansAreLoading } = useSubscriptionPlans();
   const { isPlanChanging, submitPlanChange } = useSubmitSubscriptionChange();
-
-  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
-    null,
-  );
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [ephemeralKey, setEphemeralKey] = useState<string | null>(null);
 
   const handlePlanSelection = (plan: SubscriptionPlan) => {
