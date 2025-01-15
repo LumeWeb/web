@@ -104,7 +104,7 @@ export default function PricingPlans() {
     }
   }, [paymentExpired, planPending, submitPlanChange, subscription?.plan]);
 
-  if ((isLoading && !plans?.length) || isPlanChanging || isCreating) {
+  if (isLoading || isPlanChanging || isCreating) {
     return (
       <div className="space-y-8">
         <Skeleton className="h-[200px] w-full" />
