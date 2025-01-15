@@ -57,6 +57,7 @@ export default function PricingPlans() {
   const planPending = subscription?.status === "PENDING";
   const showPayment =
     !!subscription?.payment?.client_secret &&
+    !!subscription?.plan &&
     planPending &&
     !paymentExpired;
 
