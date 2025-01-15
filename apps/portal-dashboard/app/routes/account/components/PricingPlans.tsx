@@ -128,19 +128,12 @@ export default function PricingPlans() {
     }
   }, [subscription?.payment?.expires_at, showPaymentDialog]);
 
-  useEffect(() => {
-    const shouldShowPayment = 
-      subscription?.status === "PENDING" &&
-      !!subscription?.plan?.id &&
-      !subscription.plan.is_free &&
-      !!subscription?.payment?.client_secret &&
-      !paymentExpired;
-
-    if (shouldShowPayment) {
+  const handleShowPayment = () => {
+    if (subscription?.payment?.client_secret && !paymentExpired) {
       setPaymentStatus('active');
+      setShowPaymentDialog(true);
     }
-    setShowPaymentDialog(shouldShowPayment);
-  }, [subscription, paymentExpired]);
+  };
 
   useEffect(() => {
     if (paymentExpired && planPending && subscription?.plan) {
@@ -351,8 +344,19 @@ function PlanCard(props: {
           </Button>
         )}
         {plan.id === subscription?.plan?.id && (
-          <div className="text-primary font-semibold text-center">
-            {planPending ? "Pending Plan" : "Current Plan"}
+          <div className="space-y-2">
+            <div className="text-primary font-semibold text-center">
+              {planPending ? "Pending Plan" : "Current Plan"}
+            </div>
+            {planPending && !plan.is_free && (
+              <Button 
+                className="w-full" 
+                onClick={handleShowPayment}
+                disabled={paymentExpired}
+              >
+                Complete Payment
+              </Button>
+            )}
           </div>
         )}
       </CardContent>
