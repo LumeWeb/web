@@ -103,13 +103,15 @@ export default function PricingPlans() {
     }
   };
 
-  // Only show payment dialog when conditions are met
+  // Only show payment dialog when all required conditions are met
   useEffect(() => {
-    // Only show payment dialog for pending paid subscriptions with valid payment details
     const shouldShowPayment = 
       subscription?.status === "PENDING" &&
-      !!subscription.plan?.id &&
-      !subscription.plan.is_free;
+      !!subscription?.plan?.id &&
+      !subscription.plan.is_free &&
+      !!subscription?.payment?.client_secret &&
+      !!subscription?.payment?.publishable_key &&
+      (!subscription?.payment?.expires_at || new Date(subscription.payment.expires_at) > new Date());
 
     console.log('Payment dialog conditions:', {
       isPending: subscription?.status === "PENDING",
@@ -121,7 +123,11 @@ export default function PricingPlans() {
       shouldShow: shouldShowPayment
     });
     
-    setShowPaymentDialog(shouldShowPayment);
+    if (!shouldShowPayment) {
+      setShowPaymentDialog(false);
+    } else {
+      setShowPaymentDialog(true);
+    }
   }, [subscription]);
 
   useEffect(() => {
