@@ -51,14 +51,23 @@ export default function PricingPlans() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
-  const paymentExpired =
-    new Date(subscription?.payment?.expires_at ?? "") <= new Date();
+  const paymentExpired = subscription?.payment?.expires_at ? 
+    new Date(subscription.payment.expires_at) <= new Date() : 
+    false;
   const planPending = subscription?.status === "PENDING";
   const showPayment =
     !!subscription?.payment?.client_secret &&
     planPending &&
-    !paymentExpired &&
-    !!subscription?.plan?.is_free;
+    !paymentExpired;
+
+  // Debug logs
+  console.log('Payment conditions:', {
+    hasClientSecret: !!subscription?.payment?.client_secret,
+    planPending,
+    paymentExpired,
+    expiryDate: subscription?.payment?.expires_at,
+    showPayment
+  });
 
   const isBillingComplete =
     subscription?.billing?.name &&
@@ -94,7 +103,10 @@ export default function PricingPlans() {
 
   useEffect(() => {
     if (showPayment) {
+      console.log('Setting payment dialog to visible');
       setShowPaymentDialog(true);
+    } else {
+      console.log('Payment dialog conditions not met');
     }
   }, [showPayment]);
 
