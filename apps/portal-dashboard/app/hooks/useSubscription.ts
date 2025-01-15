@@ -1,5 +1,8 @@
 import { CustomResponse, HttpError, useCustom } from "@refinedev/core";
-import type { SubscriptionResponse } from "portal-shared/dataProviders/accountProvider";
+import type {
+  Subscription,
+  SubscriptionResponse,
+} from "portal-shared/dataProviders/accountProvider";
 import useApiUrl from "portal-shared/hooks/useApiUrl";
 import {
   QueryObserverResult,
@@ -28,12 +31,12 @@ export default function useSubscription() {
   });
 
   return {
-    subscriptionData: subscriptionData?.data,
+    subscriptionData: subscriptionData?.data?.subscription,
     subscriptionIsLoading,
     refetchSubscription,
     subscriptionIsError,
   } satisfies {
-    subscriptionData: SubscriptionResponse | undefined;
+    subscriptionData: Subscription | undefined;
     subscriptionIsLoading: boolean;
     subscriptionIsError: boolean;
     refetchSubscription: <TPageData>(

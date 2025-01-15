@@ -44,9 +44,9 @@ export interface Billing {
 }
 
 export interface Resources {
-  storage: number;   // In bytes
-  upload: number;    // In bytes
-  download: number;  // In bytes
+  storage: number; // In bytes
+  upload: number; // In bytes
+  download: number; // In bytes
 }
 
 export interface SubscriptionPlan {
@@ -59,17 +59,19 @@ export interface SubscriptionPlan {
 }
 
 export interface SubscriptionResponse {
-  subscription: {
-    id: string;
-    plan: SubscriptionPlan;
-    status: SubscriptionPlanStatus;
-    billing?: Billing;
-    payment?: {
-      client_secret?: string;
-      publishable_key?: string;
-      expires_at?: string;
-    }
-  }
+  subscription: Subscription;
+}
+
+export interface Subscription {
+  id: string;
+  plan: SubscriptionPlan;
+  status: SubscriptionPlanStatus;
+  billing?: Billing;
+  payment?: {
+    client_secret?: string;
+    publishable_key?: string;
+    expires_at?: string;
+  };
 }
 
 export interface OPTGenerateResponse {
