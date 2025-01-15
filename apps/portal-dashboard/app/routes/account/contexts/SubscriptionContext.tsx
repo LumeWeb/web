@@ -86,6 +86,8 @@ interface SubscriptionProviderProps {
 
 export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  
+  console.log('SubscriptionProvider state:', { showPaymentDialog });
   const { subscriptionData, subscriptionIsLoading, refetchSubscription } =
     useSubscription();
   const { plansData, plansAreLoading } = useSubscriptionPlans();
@@ -181,6 +183,11 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
           if (!plan.is_free && updatedSub.data?.data?.payment?.client_secret) {
             handlePlanSelection(plan);
             setShowPaymentDialog(true);
+            console.log('Showing payment dialog after subscription creation', {
+              clientSecret: updatedSub.data?.data?.payment?.client_secret,
+              plan: plan.name,
+              showPaymentDialog
+            });
           } else {
             handlePlanSelection(null);
           }
