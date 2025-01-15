@@ -167,8 +167,10 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       
       if (subscriptionData) {
         await submitPlanChange(plan);
+        await refetchSubscription();
       } else {
         await createSubscription(plan);
+        await refetchSubscription();
       }
     },
     refetchSubscription,

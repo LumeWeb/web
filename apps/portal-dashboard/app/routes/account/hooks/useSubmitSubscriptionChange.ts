@@ -39,8 +39,9 @@ export default function useSubmitSubscriptionChange() {
               type: "success",
               message: "Subscription change initiated",
             });
-            // Don't refetch immediately after plan change
-            // Let the normal polling handle updates
+            if (refetchSubscription) {
+              await refetchSubscription();
+            }
           },
           onError(error: HttpError) {
             open?.({
