@@ -9,18 +9,17 @@ export default function useSubmitSubscriptionChange() {
   const { open } = useNotification();
   const { subscriptionData } = useSubscription();
 
-  const { mutate, isLoading: isPlanChanging } = useCustomMutation();
+  // Don't even create mutation if subscription is pending
+  const { mutate, isLoading: isPlanChanging } = useCustomMutation({
+    queryOptions: {
+      enabled: subscriptionData?.status !== "PENDING"
+    }
+  });
 
   const submitPlanChange = useCallback(
     async (plan: SubscriptionPlan | undefined, paymentMethodId?: string) => {
-      // Early return conditions
       if (!plan?.id) {
         console.warn("Attempted to submit plan change with no plan selected");
-        return;
-      }
-      
-      if (subscriptionData?.status === "PENDING") {
-        console.warn("Attempted to submit plan change while another change is pending");
         return;
       }
 
