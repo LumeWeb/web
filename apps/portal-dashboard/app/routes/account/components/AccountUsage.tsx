@@ -15,7 +15,7 @@ export default function AccountUsage() {
     <UsageCard
       label="Usage"
       currentUsage={usage?.storage}
-      maxUsage={subscription.subscriptionData?.plan?.storage! ?? 999}
+      maxUsage={subscription.subscriptionData?.plan?.resources.storage! ?? 999}
       icon={<CloudIcon className="text-foreground" />}
       button={
         billingEnabled && (
