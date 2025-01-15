@@ -211,17 +211,6 @@ export default function BillingInformation() {
     }
 
     switch (fieldName) {
-      case "city":
-        return (
-          <BillingAddressComboBox
-            name="city"
-            control={form.control}
-            label="City"
-            placeholder="Select City"
-            useList={useCityList}
-            disabled={!form.watch("state")}
-          />
-        );
       case "state":
         return (
           <BillingAddressComboBox
@@ -232,6 +221,17 @@ export default function BillingInformation() {
             useList={useStateList}
             onSelectionChange={handleStateChange}
             disabled={!form.watch("country")}
+          />
+        );
+      case "city":
+        return (
+          <BillingAddressComboBox
+            name="city"
+            control={form.control}
+            label="City"
+            placeholder="Select City"
+            useList={useCityList}
+            disabled={!form.watch("state")}
           />
         );
       case "dependent_locality":
