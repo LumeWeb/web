@@ -46,15 +46,13 @@ const defaultBillingInfo: BillingInfoFields = {
 };
 
 export default function BillingInformation() {
-  const { subscription, isLoading: isBillingInfoLoading } = useBillingInfo();
+  const { billingInfo, isLoading: isBillingInfoLoading } = useBillingInfo();
   const { submitBillingInfo, isSubmitting } = useSubmitBillingInfo();
   const [supportedEntities, setSupportedEntities] = useState<EntityCode[]>(["C", "S"]);
   const [initialValues, setInitialValues] = useState<BillingInfoFields | null>(null);
 
-  const billingInfo = subscription?.billing;
-
   // Debug loading states
-  console.log('Loading:', isBillingInfoLoading, 'Subscription:', subscription, 'BillingInfo:', billingInfo);
+  console.log('Loading:', isBillingInfoLoading, 'BillingInfo:', billingInfo);
 
   const useCountryList = () =>
     useList<Entry>({ resource: "account/subscription/billing/countries" });
