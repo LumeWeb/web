@@ -64,22 +64,10 @@ export function BillingFormField({
     case "dependent_locality":
     case "sorting_code":
       return (
-        <FormField
-          control={form.control}
+        <BillingFormInput
           name={fieldName}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                {fieldName === "dependent_locality"
-                  ? "District/Ward"
-                  : "Sorting Code"}
-              </FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label={fieldName === "dependent_locality" ? "District/Ward" : "Sorting Code"}
+          form={form}
         />
       );
     default:

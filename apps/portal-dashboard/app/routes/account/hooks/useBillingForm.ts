@@ -28,14 +28,14 @@ export function useBillingForm() {
     mode: "onBlur",
   });
 
-  const hasFormChanges = () => {
+  const hasFormChanges = useCallback(() => {
     if (!initialValues) return false;
     const currentValues = form.getValues();
     return Object.keys(currentValues).some(key => {
       const k = key as keyof BillingInfoFields;
       return currentValues[k] !== initialValues[k];
     });
-  };
+  }, [initialValues, form]);
 
   const updateFormSchema = useCallback((entities: EntityCode[], requiredFields: EntityCode[] = []) => {
     const currentValues = form.getValues();

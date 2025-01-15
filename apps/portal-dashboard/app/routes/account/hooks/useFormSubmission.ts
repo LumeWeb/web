@@ -3,16 +3,24 @@ import type { UseFormReturn } from "react-hook-form";
 import type { BillingInfoFields } from "../components/BillingInformation.schema";
 import type { Billing } from "portal-shared/dataProviders/accountProvider";
 
+interface BillingError {
+  [key: string]: string;
+}
+
+function isBillingError(error: unknown): error is BillingError {
+  return typeof error === "object" && error !== null;
+}
+
 export function useFormSubmission(
   form: UseFormReturn<BillingInfoFields>,
   submitBillingInfo: (data: Billing) => Promise<void>
 ) {
   const handleError = useCallback((error: unknown) => {
-    if (typeof error === "object" && error !== null) {
+    if (isBillingError(error)) {
       Object.entries(error).forEach(([field, message]) => {
         form.setError(field as keyof BillingInfoFields, {
           type: "manual",
-          message: message as string,
+          message,
         });
       });
     } else {
