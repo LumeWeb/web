@@ -100,7 +100,12 @@ export default function BillingInformation() {
 
   // Set initial values when billing info is loaded
   useEffect(() => {
-    if (!billingInfo) return;
+    console.log('Effect triggered - billingInfo:', billingInfo);
+    
+    if (!billingInfo) {
+      console.log('No billing info yet');
+      return;
+    }
 
     const values: BillingInfoFields = {
       name: billingInfo.name,
@@ -115,8 +120,10 @@ export default function BillingInformation() {
       sorting_code: undefined,
     };
 
+    console.log('Setting values:', values);
     setInitialValues(values);
-  }, [billingInfo]);
+    form.reset(values);
+  }, [billingInfo, form]);
 
   useEffect(() => {
     if (!countryData) return;
