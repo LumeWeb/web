@@ -9,12 +9,7 @@ export default function useSubmitSubscriptionChange() {
   const { open } = useNotification();
   const { subscriptionData } = useSubscription();
 
-  // Don't even create mutation if subscription is pending
-  const { mutate, isLoading: isPlanChanging } = useCustomMutation({
-    queryOptions: {
-      enabled: subscriptionData?.status === "ACTIVE",
-    },
-  });
+  const { mutate, isLoading: isPlanChanging } = useCustomMutation();
 
   const submitPlanChange = useCallback(
     async (plan: SubscriptionPlan | undefined) => {
@@ -26,6 +21,11 @@ export default function useSubmitSubscriptionChange() {
       const values: { plan_id: string } = {
         plan_id: plan.id,
       };
+
+      const isNewSubscription = !subscriptionData;
+      const endpoint = isNewSubscription ? 
+        `${apiUrl}/api/account/subscription` :
+        `${apiUrl}/api/account/subscription/plan`;
 
       mutate(
         {
