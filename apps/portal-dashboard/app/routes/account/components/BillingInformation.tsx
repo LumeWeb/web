@@ -3,6 +3,8 @@ import useSubmitBillingInfo from "@/routes/account/hooks/useSubmitBillingInfo";
 import { useBillingForm } from "../hooks/useBillingForm";
 import { useCountryData } from "../hooks/useCountryData";
 import { useLocationLists } from "../hooks/useLocationLists";
+import { useFormSubmission } from "../hooks/useFormSubmission";
+import { BillingFormField } from "./BillingFormField";
 import { Button } from "portal-shared/components/ui/button";
 import {
   Card,
@@ -95,42 +97,8 @@ export default function BillingInformation() {
     }
   }, [selectedCountry, countryData, updateFormSchema]);
 
-  const onSubmit = async (data: BillingInfoFields) => {
-    try {
-      const billingInfo: Billing = {
-        name: data.name,
-        organization: data.organization,
-        address: {
-          line1: data.address_line1,
-          line2: data.address_line2,
-          city: data.city,
-          state: data.state,
-          postal_code: data.postal_code,
-          country: data.country,
-        },
-      };
-      await submitBillingInfo(billingInfo);
-    } catch (error) {
-      if (typeof error === "object" && error !== null) {
-        Object.entries(error).forEach(([field, message]) => {
-          form.setError(field as keyof BillingInfoFields, {
-            type: "manual",
-            message: message as string,
-          });
-        });
-      } else {
-        console.error("Error submitting billing info:", error);
-      }
-    }
-  };
-
-  const handleCountryChange = () => {
-    form.setValue("state", "");
-    form.setValue("city", "");
-    form.setValue("dependent_locality", undefined);
-    form.setValue("sorting_code", undefined);
-  };
-
+  const { handleSubmit } = useFormSubmission(form, submitBillingInfo);
+  
   const handleStateChange = () => {
     form.setValue("city", "");
   };
@@ -148,64 +116,6 @@ export default function BillingInformation() {
     );
   }
 
-  const renderField = (fieldName: FieldName) => {
-    const entityCode = Object.keys(fieldMapping).find(
-      (key) => fieldMapping[key as EntityCode] === fieldName,
-    ) as EntityCode;
-
-    if (!supportedEntities.includes(entityCode)) {
-      return null;
-    }
-
-    switch (fieldName) {
-      case "state":
-        return (
-          <BillingAddressComboBox
-            name="state"
-            control={form.control}
-            label="State"
-            placeholder="Select State"
-            useList={useStateList}
-            onSelectionChange={handleStateChange}
-            disabled={!form.watch("country")}
-          />
-        );
-      case "city":
-        return (
-          <BillingAddressComboBox
-            name="city"
-            control={form.control}
-            label="City"
-            placeholder="Select City"
-            useList={useCityList}
-            disabled={!form.watch("state")}
-          />
-        );
-      case "dependent_locality":
-      case "sorting_code":
-        return (
-          <FormField
-            control={form.control}
-            name={fieldName}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {fieldName === "dependent_locality"
-                    ? "District/Ward"
-                    : "Sorting Code"}
-                </FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        );
-      default:
-        return null;
-    }
-  };
 
   return (
     <Card className="bg-secondary/20">
@@ -214,7 +124,7 @@ export default function BillingInformation() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
@@ -280,9 +190,21 @@ export default function BillingInformation() {
               )}
             />
 
-            {Object.keys(fieldMapping).map((key) =>
-              renderField(fieldMapping[key as EntityCode]),
-            )}
+            {Object.keys(fieldMapping).map((key) => {
+              const fieldName = fieldMapping[key as EntityCode];
+              return (
+                <BillingFormField
+                  key={key}
+                  fieldName={fieldName}
+                  form={form}
+                  entityCode={key as EntityCode}
+                  supportedEntities={supportedEntities}
+                  useStateList={useStateList}
+                  useCityList={useCityList}
+                  handleStateChange={handleStateChange}
+                />
+              );
+            })}
 
             <FormField
               control={form.control}

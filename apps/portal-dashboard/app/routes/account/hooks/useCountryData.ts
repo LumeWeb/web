@@ -4,9 +4,10 @@ import type { UseFormReturn } from "react-hook-form";
 import type { BillingInfoFields } from "../components/BillingInformation.schema";
 
 export function useCountryData(form: UseFormReturn<BillingInfoFields>) {
-  const { data: countryData } = useList<Entry>({ 
-    resource: "account/subscription/billing/countries" 
-  });
+  const useCountryList = () =>
+    useList<Entry>({ resource: "account/subscription/billing/countries" });
+  
+  const { data: countryData } = useCountryList();
 
   const selectedCountry = form.watch("country");
   const selectedCountryData = countryData?.data.find(
