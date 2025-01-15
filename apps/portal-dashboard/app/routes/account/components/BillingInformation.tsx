@@ -129,20 +129,29 @@ export default function BillingInformation() {
     const entities = (selectedCountryData?.supported_entities ||
       []) as EntityCode[];
     
+    // Update supported entities first
     setSupportedEntities(entities);
-    
-    // Update form with new validation rules while preserving current values
-    const currentValues = form.getValues();
-    form.clearErrors();
-    
-    // Re-initialize form with new schema but keep current values
-    form.reset(currentValues, {
-      resolver: zodResolver(createBillingInfoSchema(
-        entities,
-        selectedCountryData?.required_fields || []
-      ))
-    });
   }, [form.watch("country"), countryData]);
+
+  // Separate effect to handle form updates after supportedEntities changes
+  useEffect(() => {
+    const selectedCountry = form.watch("country");
+    const selectedCountryData = countryData?.data.find(
+      (country) => country.code === selectedCountry,
+    );
+    
+    if (selectedCountry && supportedEntities.length > 0) {
+      const currentValues = form.getValues();
+      form.clearErrors();
+      
+      form.reset(currentValues, {
+        resolver: zodResolver(createBillingInfoSchema(
+          supportedEntities,
+          selectedCountryData?.required_fields || []
+        ))
+      });
+    }
+  }, [supportedEntities, form.watch("country"), countryData]);
 
   const onSubmit = async (data: BillingInfoFields) => {
     try {
