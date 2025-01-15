@@ -87,8 +87,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const { subscriptionData, subscriptionIsLoading, refetchSubscription } =
     useSubscription();
   const { plansData, plansAreLoading } = useSubscriptionPlans();
-  const { isPlanChanging, submitPlanChange } =
-    useSubmitSubscriptionChange(true);
+  const { isPlanChanging, submitPlanChange } = useSubmitSubscriptionChange();
 
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
     null,
