@@ -128,19 +128,16 @@ export default function PricingPlans() {
     }
   }, [subscription?.payment?.expires_at, showPaymentDialog]);
 
-  const handleShowPayment = () => {
-    if (subscription?.payment?.client_secret && !paymentExpired) {
+  const handleShowPayment = async () => {
+    if (paymentExpired && subscription?.plan) {
+      // If payment expired, create new subscription request
+      await createSubscription(subscription.plan);
+    } else if (subscription?.payment?.client_secret) {
       setPaymentStatus('active');
       setShowPaymentDialog(true);
     }
   };
 
-  useEffect(() => {
-    if (paymentExpired && planPending && subscription?.plan) {
-      // If payment expired for pending subscription, allow resubmitting
-      createSubscription(subscription.plan);
-    }
-  }, [paymentExpired, planPending, createSubscription, subscription?.plan]);
 
   if (isLoading || isPlanChanging || isCreating) {
     return (
