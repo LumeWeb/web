@@ -53,7 +53,7 @@ export default function PricingPlans() {
 
   const paymentExpired = subscription?.payment?.expires_at ? 
     new Date(subscription.payment.expires_at) <= new Date() : 
-    true; // Consider expired if no expiry date
+    false; // Don't consider expired if no expiry date - this allows initial payment flow
   const planPending = subscription?.status === "PENDING";
   const showPayment =
     !!subscription?.payment?.client_secret &&
@@ -110,6 +110,15 @@ export default function PricingPlans() {
       !subscription.plan.is_free &&
       !!subscription?.payment?.client_secret &&
       !paymentExpired;
+
+    console.log('Payment dialog conditions:', {
+      isPending: subscription?.status === "PENDING",
+      hasPlanId: !!subscription?.plan?.id,
+      isNotFree: !subscription?.plan?.is_free,
+      hasClientSecret: !!subscription?.payment?.client_secret,
+      notExpired: !paymentExpired,
+      shouldShow: shouldShowPayment
+    });
 
     setShowPaymentDialog(shouldShowPayment);
   }, [subscription, paymentExpired]);
