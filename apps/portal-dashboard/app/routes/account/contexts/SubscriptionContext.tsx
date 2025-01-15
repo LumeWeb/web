@@ -104,46 +104,46 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   });
 
   const initializeHyper = useCallback(() => {
-    if ((subscriptionData as Subscription)?.payment?.publishable_key) {
-      setHyperState((prev) => ({ ...prev, isLoading: true, error: null }));
-      const promise = loadHyper(
-        (subscriptionData as Subscription)?.payment?.publishable_key,
-        {
-          env: "SANDBOX",
-          ephemeralKey,
-        },
-      );
-      if (promise) {
-        hyperPromiseRef.current = promise;
-        promise
-          .then(() => {
-            setHyperState((prev) => ({
-              ...prev,
-              isLoading: false,
-              isHyperLoaded: true,
-            }));
-          })
-          .catch((error: Error) => {
-            console.error("Failed to load Hyper instance:", error);
-            hyperPromiseRef.current = null;
-            setHyperState((prev) => ({ ...prev, isLoading: false, error }));
-          });
-      } else {
-        setHyperState((prev) => ({ ...prev, isLoading: false }));
-      }
+    if (!subscriptionData?.payment?.publishable_key || !ephemeralKey) {
+      return;
     }
-  }, [subscriptionIsLoading]);
+    
+    setHyperState((prev) => ({ ...prev, isLoading: true, error: null }));
+    const promise = loadHyper(
+      subscriptionData.payment.publishable_key,
+      {
+        env: "SANDBOX",
+        ephemeralKey,
+      },
+    );
+    
+    if (!promise) {
+      setHyperState((prev) => ({ ...prev, isLoading: false }));
+      return;
+    }
+
+    hyperPromiseRef.current = promise;
+    promise
+      .then(() => {
+        setHyperState((prev) => ({
+          ...prev,
+          isLoading: false,
+          isHyperLoaded: true,
+        }));
+      })
+      .catch((error: Error) => {
+        console.error("Failed to load Hyper instance:", error);
+        hyperPromiseRef.current = null;
+        setHyperState((prev) => ({ ...prev, isLoading: false, error }));
+      });
+  }, [subscriptionData?.payment?.publishable_key, ephemeralKey]);
 
   useEffect(() => {
-    if (!hyperPromiseRef.current) {
+    if (!hyperPromiseRef.current && subscriptionData?.payment?.publishable_key && ephemeralKey) {
       initializeHyper();
     }
-  }, [initializeHyper]);
+  }, [initializeHyper, subscriptionData?.payment?.publishable_key, ephemeralKey]);
 
-  useEffect(() => {
-    // Refresh subscription data when the component mounts
-    refetchSubscription();
-  }, [refetchSubscription]);
 
   const value = {
     subscription: subscriptionData,
