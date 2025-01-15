@@ -123,24 +123,19 @@ export default function BillingInformation() {
 
   useEffect(() => {
     const selectedCountry = form.watch("country");
-    console.log("Country changed to:", selectedCountry);
-    
     const selectedCountryData = countryData?.data.find(
       (country) => country.code === selectedCountry,
     );
-    console.log("Country data:", selectedCountryData);
     
     // Always maintain at least the base entities if no country is selected
     let entities: EntityCode[] = ["C", "S"];
     
     if (selectedCountry && selectedCountryData?.supported_entities) {
       entities = selectedCountryData.supported_entities as EntityCode[];
-      console.log("Supported entities:", entities);
     }
     
     // Update form schema immediately with the new entities
     const currentValues = form.getValues();
-    console.log("Current form values:", currentValues);
     
     setSupportedEntities(entities);
     form.clearErrors();
@@ -211,10 +206,7 @@ export default function BillingInformation() {
       (key) => fieldMapping[key as EntityCode] === fieldName,
     ) as EntityCode;
 
-    console.log("Rendering field:", fieldName, "Entity code:", entityCode, "Supported:", supportedEntities);
-
     if (!supportedEntities.includes(entityCode)) {
-      console.log("Field not supported:", fieldName);
       return null;
     }
 
