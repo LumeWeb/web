@@ -130,7 +130,18 @@ export default function BillingInformation() {
       []) as EntityCode[];
     
     setSupportedEntities(entities);
+    
+    // Update form with new validation rules while preserving current values
+    const currentValues = form.getValues();
     form.clearErrors();
+    
+    // Re-initialize form with new schema but keep current values
+    form.reset(currentValues, {
+      resolver: zodResolver(createBillingInfoSchema(
+        entities,
+        selectedCountryData?.required_fields || []
+      ))
+    });
   }, [form.watch("country"), countryData]);
 
   const onSubmit = async (data: BillingInfoFields) => {
