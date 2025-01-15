@@ -66,24 +66,6 @@ export default function BillingInformation() {
     (country) => country.code === selectedCountry,
   );
 
-  useEffect(() => {
-    const selectedCountry = form.watch("country");
-    const selectedCountryData = countryData?.data.find(
-      (country) => country.code === selectedCountry,
-    );
-    
-    // Update form with new validation rules while preserving current values
-    const currentValues = form.getValues();
-    form.clearErrors();
-    
-    // Re-initialize form with new schema but keep current values
-    form.reset(currentValues, {
-      resolver: zodResolver(createBillingInfoSchema(
-        supportedEntities,
-        selectedCountryData?.required_fields || []
-      ))
-    });
-  }, [form.watch("country"), countryData, supportedEntities]);
 
   const useStateList = () =>
     useList<Entry>({
@@ -103,27 +85,33 @@ export default function BillingInformation() {
     });
 
   useEffect(() => {
-    if (billingInfo && !initialValues) {
-      const values: BillingInfoFields = {
-        name: billingInfo.name,
-        organization: billingInfo.organization,
-        country: billingInfo.address.country,
-        address_line1: billingInfo.address.line1,
-        address_line2: billingInfo.address.line2,
-        city: billingInfo.address.city,
-        state: billingInfo.address.state,
-        postal_code: billingInfo.address.postal_code,
-        dependent_locality: undefined,
-        sorting_code: undefined,
-      };
-      setInitialValues(values);
-      form.reset(values);
-    }
-  }, [billingInfo, form, initialValues]);
+    if (!billingInfo) return;
+
+    const values: BillingInfoFields = {
+      name: billingInfo.name,
+      organization: billingInfo.organization,
+      country: billingInfo.address.country,
+      address_line1: billingInfo.address.line1,
+      address_line2: billingInfo.address.line2,
+      city: billingInfo.address.city,
+      state: billingInfo.address.state,
+      postal_code: billingInfo.address.postal_code,
+      dependent_locality: undefined,
+      sorting_code: undefined,
+    };
+
+    // Set initial values first
+    setInitialValues(values);
+    
+    // Then update the form with the values
+    form.reset(values);
+  }, [billingInfo, form]);
 
   useEffect(() => {
+    if (!countryData) return;
+    
     const selectedCountry = form.watch("country");
-    const selectedCountryData = countryData?.data.find(
+    const selectedCountryData = countryData.data.find(
       (country) => country.code === selectedCountry,
     );
     
@@ -134,18 +122,19 @@ export default function BillingInformation() {
       entities = selectedCountryData.supported_entities as EntityCode[];
     }
     
-    // Update form schema immediately with the new entities
-    const currentValues = form.getValues();
-    
     setSupportedEntities(entities);
-    form.clearErrors();
     
-    form.reset(currentValues, {
-      resolver: zodResolver(createBillingInfoSchema(
-        entities,
-        selectedCountryData?.required_fields || []
-      ))
-    });
+    if (selectedCountry) {
+      const currentValues = form.getValues();
+      form.clearErrors();
+      
+      form.reset(currentValues, {
+        resolver: zodResolver(createBillingInfoSchema(
+          entities,
+          selectedCountryData?.required_fields || []
+        ))
+      });
+    }
   }, [form.watch("country"), countryData]);
 
   const onSubmit = async (data: BillingInfoFields) => {
