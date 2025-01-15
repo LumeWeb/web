@@ -58,9 +58,7 @@ export interface SubscriptionPlan {
   resources: Resources;
 }
 
-export interface SubscriptionResponse {
-  subscription: Subscription;
-}
+export type SubscriptionResponse = Subscription;
 
 export interface Subscription {
   id: string;

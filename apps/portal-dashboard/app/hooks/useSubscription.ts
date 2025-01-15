@@ -31,7 +31,7 @@ export default function useSubscription() {
   });
 
   return {
-    subscriptionData: subscriptionData?.data?.subscription,
+    subscriptionData: subscriptionData?.data,
     subscriptionIsLoading,
     refetchSubscription,
     subscriptionIsError,

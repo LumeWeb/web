@@ -5,6 +5,6 @@ export default function useBillingInfo() {
 
   return {
     billingInfo: subscriptionData?.billing,
-    isLoading: subscriptionIsLoading,
+    isLoading: subscriptionIsLoading || !subscriptionData,
   };
 }
