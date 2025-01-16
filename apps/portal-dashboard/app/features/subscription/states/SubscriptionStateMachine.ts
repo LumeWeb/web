@@ -11,16 +11,11 @@ export class SubscriptionStateMachine {
     return this.currentState;
   }
 
-  private readonly validTransitions: Record<SubscriptionState['type'], SubscriptionEvent['type'][]> = {
-    'LOADING': ['SUBSCRIPTION_LOADED', 'ERROR_OCCURRED'],
-    'INACTIVE': ['CREATE_SUBSCRIPTION', 'ERROR_OCCURRED'],
-    'PENDING_BILLING': ['UPDATE_BILLING', 'ERROR_OCCURRED', 'CANCEL_SUBSCRIPTION'],
-    'PENDING_PAYMENT': ['COMPLETE_PAYMENT', 'ERROR_OCCURRED', 'CANCEL_SUBSCRIPTION'],
-    'PROCESSING': ['COMPLETE_PAYMENT', 'ERROR_OCCURRED'],
-    'ACTIVE': ['CREATE_SUBSCRIPTION', 'CANCEL_SUBSCRIPTION', 'ERROR_OCCURRED'],
-    'SUSPENDED': ['COMPLETE_PAYMENT', 'CANCEL_SUBSCRIPTION', 'ERROR_OCCURRED'],
-    'CANCELLED': ['CREATE_SUBSCRIPTION'],
-    'ERROR': ['LOAD_SUBSCRIPTION', 'CREATE_SUBSCRIPTION', 'UPDATE_BILLING', 'COMPLETE_PAYMENT']
+  private readonly validTransitions: Record<SubscriptionStatus, SubscriptionStatus[]> = {
+    'INACTIVE': ['PENDING', 'ACTIVE'],
+    'PENDING': ['ACTIVE', 'CANCELLED', 'INACTIVE'],
+    'ACTIVE': ['CANCELLED'],
+    'CANCELLED': ['INACTIVE']
   };
 
   private canTransition(event: SubscriptionEvent): boolean {

@@ -2,16 +2,12 @@ import { z } from "zod";
 import { BillingInfo, billingInfoSchema } from "./billing.types";
 import { PaymentInfo, paymentInfoSchema } from "./payment.types";
 
-// Subscription Status - More granular states for better flow control
+// Core subscription states
 export type SubscriptionStatus = 
-  | 'INACTIVE'          // No active subscription
-  | 'PENDING_BILLING'   // Waiting for billing information
-  | 'PENDING_PAYMENT'   // Waiting for payment completion
-  | 'PROCESSING'        // Processing payment/activation
-  | 'ACTIVE'           // Subscription is active and paid
-  | 'SUSPENDED'        // Subscription suspended (e.g. payment failed)
-  | 'CANCELLED'        // Subscription has been cancelled
-  | 'ERROR';           // Error state with recovery possible
+  | 'INACTIVE'   // No subscription
+  | 'PENDING'    // Waiting for Hyper payment completion
+  | 'ACTIVE'     // Subscription is active
+  | 'CANCELLED'; // Subscription cancelled
 
 // Subscription Period
 export type SubscriptionPeriod = 'MONTHLY' | 'YEARLY';
