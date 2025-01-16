@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useNotification } from "@refinedev/core";
+import { useNotification, HttpError } from "@refinedev/core";
 import { useBilling } from "../../hooks/core/useBilling";
 import { useBillingMutations } from "../../hooks/mutations/useBillingMutations";
 import { BillingInfo } from "../../types/billing.types";

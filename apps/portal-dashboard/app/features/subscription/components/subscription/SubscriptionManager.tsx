@@ -63,7 +63,7 @@ export function SubscriptionManager() {
 
   const [validationError, setValidationError] = useState<string | null>(null);
   const [billingError, setBillingError] = useState<string | null>(null);
-  const { validateBillingInfo } = useBilling();
+  const { validateBillingInfo, formatBillingInfo } = useBilling();
 
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
 

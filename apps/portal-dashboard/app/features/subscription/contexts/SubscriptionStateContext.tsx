@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { useSubscriptionState } from '../hooks/useSubscriptionState';
 import { SubscriptionState, SubscriptionPlan, BillingInfo } from '../types/subscription.types';
 
