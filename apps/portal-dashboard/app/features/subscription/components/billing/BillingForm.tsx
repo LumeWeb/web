@@ -45,7 +45,7 @@ export function BillingForm() {
   const { useStateList, useCityList } = useLocationLists(form);
 
   const handleStateChange = () => {
-    form.setValue("city", "", { shouldDirty: true });
+    form.setValue("address.city", "", { shouldDirty: true });
   };
 
   const onSubmit = async (data: BillingInfo) => {
