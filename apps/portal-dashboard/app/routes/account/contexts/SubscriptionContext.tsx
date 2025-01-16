@@ -176,12 +176,28 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
         if (subscriptionData) {
           await submitPlanChange(plan);
         } else {
+          console.log('Creating subscription for plan:', {
+            planId: plan.id,
+            planName: plan.name,
+            isFree: plan.is_free
+          });
+          
           const result = await createSubscription(plan);
+          console.log('Create subscription result:', {
+            hasData: !!result?.data,
+            hasClientSecret: !!result?.data?.data?.payment?.client_secret
+          });
           
           // Keep selected plan and show payment dialog if needed
           if (!plan.is_free) {
             // Refetch to get latest state with client secret
+            console.log('Refetching subscription data...');
             const updatedSub = await refetchSubscription();
+            console.log('Refetched subscription:', {
+              hasData: !!updatedSub?.data,
+              hasClientSecret: !!updatedSub?.data?.data?.payment?.client_secret,
+              status: updatedSub?.data?.data?.status
+            });
             
             if (updatedSub.data?.data?.payment?.client_secret) {
               handlePlanSelection(plan);
@@ -191,6 +207,8 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
                 plan: plan.name
               });
               return;
+            } else {
+              console.log('No client secret found after refetch');
             }
           }
           
