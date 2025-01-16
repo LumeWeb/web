@@ -5,44 +5,87 @@ export class BillingService {
   public async validateAddress(address: Address): Promise<BillingErrors | null> {
     const errors: BillingErrors = [];
     
+    if (!address) {
+      errors.push({ field: 'general', message: 'Address is required' });
+      return errors;
+    }
+
     try {
-      const countryData = address.GetCountry(address.country);
+      // Validate country
+      const countryData = await this.getCountryData(address.country);
       if (!countryData) {
         errors.push({ field: 'country', message: 'Invalid country code' });
         return errors;
       }
 
-      // Validate required fields based on country
-      countryData.Required.forEach(field => {
-        const value = address[field.toLowerCase()];
+      // Required fields validation
+      const requiredFields = this.getRequiredFields(countryData);
+      requiredFields.forEach(field => {
+        const value = this.getAddressField(address, field);
         if (!value?.trim()) {
-          errors.push({ field: field.toLowerCase(), message: `${field} is required for ${countryData.Name}` });
+          errors.push({ 
+            field: field.toLowerCase(), 
+            message: `${field} is required for ${countryData.Name}` 
+          });
         }
       });
 
-      // Validate postal code format if country has specific rules
-      if (address.postal_code && countryData.PostCodeRegex.Regex) {
-        const regex = new RegExp(countryData.PostCodeRegex.Regex);
-        if (!regex.test(address.postal_code)) {
-          errors.push({ field: 'postal_code', message: 'Invalid postal code format' });
-        }
+      // Postal code validation
+      if (address.postal_code) {
+        const postalErrors = await this.validatePostalCode(
+          address.postal_code, 
+          address.country,
+          countryData
+        );
+        if (postalErrors) errors.push(...postalErrors);
       }
 
-      // Validate state/province if country has subdivisions
-      if (address.state && countryData.AdministrativeAreas) {
-        const validState = Object.values(countryData.AdministrativeAreas).some(
-          areas => areas.some(area => area.ID === address.state)
+      // State/Province validation
+      if (address.state) {
+        const stateErrors = await this.validateState(
+          address.state, 
+          address.country,
+          countryData
         );
-        if (!validState) {
-          errors.push({ field: 'state', message: 'Invalid state/province' });
-        }
+        if (stateErrors) errors.push(...stateErrors);
+      }
+
+      // City validation if country has city list
+      if (address.city && countryData.AdministrativeAreas) {
+        const cityErrors = await this.validateCity(
+          address.city,
+          address.state,
+          countryData
+        );
+        if (cityErrors) errors.push(...cityErrors);
       }
 
     } catch (error) {
-      errors.push({ field: 'general', message: 'Address validation failed' });
+      console.error('Address validation error:', error);
+      errors.push({ 
+        field: 'general', 
+        message: error instanceof Error ? error.message : 'Address validation failed' 
+      });
     }
 
     return errors.length > 0 ? errors : null;
+  }
+
+  private async getCountryData(countryCode: string) {
+    try {
+      return await address.GetCountry(countryCode);
+    } catch (error) {
+      console.error('Error fetching country data:', error);
+      return null;
+    }
+  }
+
+  private getRequiredFields(countryData: any): string[] {
+    return countryData.Required || [];
+  }
+
+  private getAddressField(address: Address, field: string): string | undefined {
+    return address[field.toLowerCase() as keyof Address];
   }
 
   public async validateBillingInfo(billing: BillingInfo): Promise<BillingErrors | null> {
