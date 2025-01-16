@@ -1,4 +1,5 @@
 import React from 'react';
+import { SubscriptionProvider } from '../../contexts/SubscriptionContext';
 import { useSubscriptionContext } from '../../contexts/SubscriptionContext';
 import { Button } from 'portal-shared/components/ui/button';
 import { CloudIcon } from 'portal-shared/components/icons';
@@ -11,7 +12,15 @@ import {
 import { usePaymentMethod } from '../../hooks/usePaymentMethod';
 import HyperPayment from '@/features/subscription/components/payment/HyperPayment';
 
-export function PaymentMethod() {
+export default function PaymentMethod() {
+  return (
+    <SubscriptionProvider>
+      <PaymentMethodContent />
+    </SubscriptionProvider>
+  );
+}
+
+function PaymentMethodContent() {
   const { subscription } = useSubscriptionContext();
   const { 
     clientSecret,
