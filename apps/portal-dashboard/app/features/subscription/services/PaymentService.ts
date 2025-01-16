@@ -6,12 +6,28 @@ export class PaymentService {
   public getPaymentStatus(payment: PaymentInfo | null | undefined): PaymentStatus {
     if (!payment) return 'PENDING';
     
-    // Simple status determination based on payment info
-    if (payment.errorMessage) return 'FAILED';
-    if (!payment.clientSecret) return 'PENDING';
-    if (this.isPaymentExpired(payment)) return 'FAILED';
-    if (payment.paymentMethodId) return 'COMPLETED';
-    return 'PROCESSING';
+    // Handle expired payments first
+    if (this.isPaymentExpired(payment)) {
+      return 'FAILED';
+    }
+    
+    // Then check explicit error states
+    if (payment.errorMessage || !payment.clientSecret) {
+      return 'FAILED';
+    }
+    
+    // Check completion state
+    if (payment.paymentMethodId && payment.status === 'COMPLETED') {
+      return 'COMPLETED';
+    }
+    
+    // Check processing state
+    if (payment.status === 'PROCESSING') {
+      return 'PROCESSING';
+    }
+    
+    // Default to pending if no other conditions met
+    return 'PENDING';
   }
 
   public isPaymentExpired(payment: PaymentInfo | null | undefined): boolean {

@@ -98,6 +98,51 @@ export class BillingService {
         return errors;
       }
 
+      // Basic field validation
+      if (!this.validateBasicFields(billing, errors)) {
+        return errors;
+      }
+
+      // Address validation
+      const addressErrors = await this.validateAddress(billing.address);
+      if (addressErrors) {
+        errors.push(...addressErrors);
+      }
+
+      return errors.length > 0 ? errors : null;
+    } catch (error) {
+      console.error('Billing validation error:', error);
+      return [{
+        field: 'general',
+        message: error instanceof Error ? error.message : 'Billing validation failed'
+      }];
+    }
+  }
+
+  private validateBasicFields(billing: BillingInfo, errors: BillingErrors): boolean {
+    let isValid = true;
+
+    // Name validation
+    if (!billing.name?.trim()) {
+      errors.push({ field: 'name', message: 'Name is required' });
+      isValid = false;
+    } else if (billing.name.trim().length < 2) {
+      errors.push({ field: 'name', message: 'Name must be at least 2 characters' });
+      isValid = false;
+    } else if (billing.name.trim().length > 100) {
+      errors.push({ field: 'name', message: 'Name must not exceed 100 characters' });
+      isValid = false;
+    }
+
+    // Organization validation (optional)
+    if (billing.organization && billing.organization.trim().length > 100) {
+      errors.push({ field: 'organization', message: 'Organization must not exceed 100 characters' });
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
       // Name validation
       if (!billing.name?.trim()) {
         errors.push({ field: 'name', message: 'Name is required' });

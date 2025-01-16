@@ -64,19 +64,30 @@ export class SubscriptionStateMachine {
     }
   }
 
-  private handleTransition(newStatus: SubscriptionStatus): void {
-    if (!this.canTransitionTo(newStatus)) {
-      throw new Error(`Invalid transition from ${this.currentState} to ${newStatus}`);
+  private handleTransition(event: SubscriptionEvent): SubscriptionState {
+    switch (event.type) {
+      case 'SUBSCRIPTION_LOADED':
+        return this.handleSubscriptionLoaded(event.subscription);
+      case 'CREATE_SUBSCRIPTION':
+        return { type: 'PENDING', plan: event.plan };
+      case 'UPDATE_BILLING':
+        if (this.currentState.type !== 'PENDING') {
+          throw new Error('Can only update billing in PENDING state');
+        }
+        return {
+          ...this.currentState,
+          billing: event.billing
+        };
+      case 'CANCEL_SUBSCRIPTION':
+        if (this.currentState.type !== 'ACTIVE') {
+          throw new Error('Can only cancel active subscriptions');
+        }
+        return { type: 'CANCELLED', subscription: this.currentState.subscription };
+      case 'ERROR_OCCURRED':
+        return { type: 'ERROR', error: event.error };
+      default:
+        throw new Error(`Unhandled event type: ${(event as any).type}`);
     }
-    this.currentState = newStatus;
-  }
-
-  public getState(): SubscriptionStatus {
-    return this.currentState;
-  }
-
-  private canTransitionTo(newStatus: SubscriptionStatus): boolean {
-    return this.validTransitions[this.currentState]?.includes(newStatus) ?? false;
   }
 
   private handleSubscriptionLoaded(subscription: Subscription): SubscriptionState {
