@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { BillingInfo, billingInfoSchema } from "./billing.types";
+import { PaymentInfo, paymentInfoSchema } from "./payment.types";
 
 // Subscription Status
 export type SubscriptionStatus = 
@@ -45,8 +47,8 @@ export type SubscriptionState =
   | { type: 'LOADING' }
   | { type: 'ERROR'; error: Error }
   | { type: 'INACTIVE' }
-  | { type: 'PENDING_BILLING' }
-  | { type: 'PENDING_PAYMENT' }
+  | { type: 'PENDING_BILLING'; plan: SubscriptionPlan }
+  | { type: 'PENDING_PAYMENT'; plan: SubscriptionPlan; billing: BillingInfo }
   | { type: 'ACTIVE'; subscription: Subscription }
   | { type: 'CANCELLED'; subscription: Subscription }
   | { type: 'SUSPENDED'; subscription: Subscription };
@@ -62,17 +64,19 @@ export type SubscriptionEvent =
   | { type: 'ERROR_OCCURRED'; error: Error };
 
 // Zod schema for runtime validation
+export const subscriptionResourcesSchema = z.object({
+  storage: z.number(),
+  upload: z.number(),
+  download: z.number()
+});
+
 export const subscriptionPlanSchema = z.object({
   id: z.string(),
   name: z.string(),
   period: z.enum(['MONTHLY', 'YEARLY']),
   price: z.number(),
   is_free: z.boolean(),
-  resources: z.object({
-    storage: z.number(),
-    upload: z.number(),
-    download: z.number()
-  })
+  resources: subscriptionResourcesSchema
 });
 
 export const subscriptionSchema = z.object({
@@ -82,6 +86,6 @@ export const subscriptionSchema = z.object({
   current_period_start: z.string().optional(),
   current_period_end: z.string().optional(),
   cancel_at_period_end: z.boolean().optional(),
-  billing: z.lazy(() => billingInfoSchema).optional(),
-  payment: z.lazy(() => paymentInfoSchema).optional()
+  billing: billingInfoSchema.optional(),
+  payment: paymentInfoSchema.optional()
 });
