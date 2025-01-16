@@ -1,36 +1,36 @@
 import { z } from "zod";
 
-// Payment status
-export type PaymentStatus = 
-  | 'PENDING'
-  | 'PROCESSING'
-  | 'SUCCEEDED'
-  | 'FAILED'
-  | 'CANCELLED';
+import { z } from "zod";
 
-// Payment information
+// Simplified payment status
+export type PaymentStatus = 
+  | 'PENDING'    // Initial payment state
+  | 'PROCESSING' // Payment is being processed
+  | 'COMPLETED'  // Payment successful
+  | 'FAILED';    // Payment failed
+
+// Simplified payment information
 export interface PaymentInfo {
-  client_secret?: string;
-  publishable_key?: string;
-  expires_at?: string;
-  payment_method_id?: string;
-  status?: PaymentStatus;
-  last_payment_error?: string;
+  clientSecret: string;        // Stripe client secret
+  publishableKey: string;      // Stripe publishable key
+  expiresAt: string;          // Payment session expiry
+  paymentMethodId?: string;    // Stored payment method ID
+  status: PaymentStatus;       // Current payment status
+  errorMessage?: string;       // Last error message if any
 }
 
 // Payment validation schema
 export const paymentInfoSchema = z.object({
-  client_secret: z.string().optional(),
-  publishable_key: z.string().optional(),
-  expires_at: z.string().optional(),
-  payment_method_id: z.string().optional(),
-  status: z.enum(['PENDING', 'PROCESSING', 'SUCCEEDED', 'FAILED', 'CANCELLED']).optional(),
-  last_payment_error: z.string().optional()
+  clientSecret: z.string(),
+  publishableKey: z.string(),
+  expiresAt: z.string(),
+  paymentMethodId: z.string().optional(),
+  status: z.enum(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED']),
+  errorMessage: z.string().optional()
 });
 
-// Payment error types
+// Payment error interface
 export interface PaymentError {
-  code: string;
   message: string;
-  decline_code?: string;
+  code?: string;
 }
