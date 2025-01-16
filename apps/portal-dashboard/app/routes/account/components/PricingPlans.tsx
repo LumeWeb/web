@@ -45,8 +45,9 @@ export default function PricingPlans() {
     isPlanChanging,
     submitPlanChange,
     isLoading,
+    createSubscription,
+    isCreating,
   } = useSubscriptionContext();
-  const { createSubscription, isCreating } = useCreateSubscription();
 
   const [showBillingDialog, setShowBillingDialog] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);

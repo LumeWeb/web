@@ -49,6 +49,8 @@ export interface SubscriptionContextType {
   hyperPromise?: Promise<any> | null;
   showPaymentDialog: boolean;
   setShowPaymentDialog: (show: boolean) => void;
+  createSubscription: (plan: SubscriptionPlan) => Promise<any>;
+  isCreating: boolean;
 }
 
 const defaultContextValue: SubscriptionContextType = {
@@ -64,6 +66,8 @@ const defaultContextValue: SubscriptionContextType = {
     isHyperLoaded: false,
     error: null,
   },
+  createSubscription: async () => ({}),
+  isCreating: false,
 };
 
 export const SubscriptionContext =
