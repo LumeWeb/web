@@ -14,7 +14,7 @@ import {
 } from "portal-shared/components/ui/tabs";
 import useIsPaidBillingEnabled from "portal-shared/hooks/useIsPaidBillingEnabled";
 import useOnFreePlan from "portal-shared/hooks/useOnFreePlan";
-import { AlertCircle } from "portal-shared/components/icons";
+import { ExclamationCircleIcon } from "portal-shared/components/icons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -266,7 +266,7 @@ export function SubscriptionManager() {
 
                 {validationError && (
                   <div className="flex items-center gap-2 text-destructive text-sm mt-2">
-                    <AlertCircle className="h-4 w-4" />
+                    <ExclamationCircleIcon className="h-4 w-4" />
                     <span>{validationError}</span>
                   </div>
                 )}

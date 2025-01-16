@@ -1,7 +1,7 @@
 import React from 'react';
 import { BillingInfo, BillingErrors } from '../../types/billing.types';
 import { Alert, AlertDescription, AlertTitle } from 'portal-shared/components/ui/alert';
-import { AlertCircle } from 'portal-shared/components/icons';
+import { ExclamationCircleIcon } from 'portal-shared/components/icons';
 
 interface BillingValidatorProps {
   billingInfo: BillingInfo;
@@ -33,7 +33,7 @@ export function BillingValidator({ billingInfo, errors }: BillingValidatorProps)
 
   return (
     <Alert variant="destructive">
-      <AlertCircle className="h-4 w-4" />
+      <ExclamationCircleIcon className="h-4 w-4" />
       <AlertTitle>Invalid Billing Information</AlertTitle>
       <AlertDescription>
         <div className="mt-2">
