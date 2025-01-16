@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNotification } from '@refinedev/core';
-import { useBillingForm } from '../../hooks/useBillingForm';
-import { useCountryData } from '../../hooks/useCountryData';
-import { useLocationLists } from '../../hooks/useLocationLists';
-import { BillingValidator } from './BillingValidator';
-import { BillingFormField } from './BillingFormField';
-import { BillingFormInput } from './BillingFormInput';
-import { BillingAddressComboBox } from './BillingAddressComboBox';
+import { useNotification, HttpError } from '@refinedev/core';
+import { useBilling } from '../../hooks/core/useBilling';
+import { useBillingMutations } from '../../hooks/mutations/useBillingMutations';
+import { BillingInfo } from '../../types/billing.types';
+import { formatBillingInfo } from '../../utils/formatBillingInfo';
+import { BillingValidator } from '../billing/BillingValidator';
+import { BillingFormField } from '../billing/BillingFormField';
+import { BillingFormInput } from '../billing/BillingFormInput';
+import { BillingAddressComboBox } from '../billing/BillingAddressComboBox';
 import { Button } from 'portal-shared/components/ui/button';
 import {
   Form,
@@ -161,7 +162,12 @@ export function BillingForm() {
               optional
             />
 
-            {Object.entries(fieldMapping).map(([key, fieldName]) => (
+            {Object.entries({
+              S: 'state',
+              C: 'city',
+              D: 'dependent_locality',
+              X: 'sorting_code'
+            }).map(([key, fieldName]) => (
               <BillingFormField
                 key={key}
                 fieldName={fieldName}
