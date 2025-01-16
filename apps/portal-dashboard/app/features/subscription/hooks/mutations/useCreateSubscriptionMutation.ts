@@ -3,9 +3,7 @@ import { SubscriptionPlan, Subscription, SubscriptionError } from '../../types/s
 import useApiUrl from 'portal-shared/hooks/useApiUrl';
 
 interface SubscriptionResponse {
-  data: {
-    subscription: Subscription;
-  };
+  subscription: Subscription;
 }
 
 export function useCreateSubscriptionMutation() {
@@ -27,7 +25,7 @@ export function useCreateSubscriptionMutation() {
               reject(new Error('Invalid server response - missing data'));
               return;
             }
-            resolve({ data: { subscription: response.data } });
+            resolve({ subscription: response.data });
           },
           onError: (error) => {
             reject(error);
