@@ -114,7 +114,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       error,
       isLoading,
       plansAreLoading,
-      plansData?.data?.data,
+      plansData?.data?.plans,
       selectedPlan,
       isProcessing,
       showPaymentDialog,
