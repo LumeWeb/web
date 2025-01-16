@@ -63,21 +63,6 @@ export class SubscriptionService {
     return true; // Placeholder - implement actual validation
   }
 
-  public async calculateProration(
-    currentPlan: SubscriptionPlan,
-    newPlan: SubscriptionPlan,
-    currentPeriodEnd: Date
-  ): Promise<number> {
-    // Implement proration calculation logic
-    const now = new Date();
-    const remainingDays = Math.ceil((currentPeriodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    const totalDays = 30; // Assuming monthly billing
-    
-    const currentAmount = currentPlan.price;
-    const newAmount = newPlan.price;
-    
-    return (newAmount - currentAmount) * (remainingDays / totalDays);
-  }
 
   public getSubscriptionPeriodDates(
     plan: SubscriptionPlan,
