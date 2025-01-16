@@ -8,16 +8,16 @@ import Addons from "./components/Addons";
 import BillingInformation from "./components/BillingInformation";
 import ChangePaymentMethod from "./components/ChangePaymentMethod";
 import PaymentHistory from "./components/PaymentHistory";
-import PricingPlans from "./components/PricingPlans";
-import {
-  SubscriptionProvider,
-  useSubscriptionContext,
-} from "./contexts/SubscriptionContext";
+import { SubscriptionManager } from "../../features/subscription/components/subscription/SubscriptionManager";
+import { SubscriptionProvider } from "../../features/subscription/contexts/SubscriptionContext";
+import { SubscriptionStateProvider } from "../../features/subscription/contexts/SubscriptionStateContext";
 
 export default function Subscription() {
   return (
     <SubscriptionProvider>
-      <SubscriptionContent />
+      <SubscriptionStateProvider>
+        <SubscriptionContent />
+      </SubscriptionStateProvider>
     </SubscriptionProvider>
   );
 }
@@ -42,7 +42,7 @@ function SubscriptionContent() {
   return (
     <div className="grid lg:grid-cols-3 gap-6 pt-4">
       <div className="lg:col-span-3">
-        <PricingPlans />
+        <SubscriptionManager />
       </div>
       <div className="lg:col-span-3 border-t border-border/30 pt-4">
         <Tabs defaultValue={searchTab} onValueChange={(value) => setSearchParams({ tab: value })} className="space-y-4">
