@@ -1,19 +1,19 @@
-import { useCallback, useState } from 'react';
-import { useCustomMutation, HttpError } from '@refinedev/core';
-import { BillingInfo, BillingErrors } from '../../types/billing.types';
-import useApiUrl from 'portal-shared/hooks/useApiUrl';
+import { useCallback, useState } from "react";
+import { HttpError, useCustomMutation } from "@refinedev/core";
+import { BillingInfo } from "../../types/billing.types";
+import useApiUrl from "portal-shared/hooks/useApiUrl";
 
 interface BillingResponse {
-  data: {
-    data: {
-      billing: BillingInfo;
-    };
-  };
+  billing: BillingInfo;
 }
 
 interface BillingError extends HttpError {
   errors?: {
-    [key: string]: string | boolean | string[] | { key: string; message: string; };
+    [key: string]:
+      | string
+      | boolean
+      | string[]
+      | { key: string; message: string };
   };
 }
 
@@ -37,35 +37,31 @@ export function useBillingMutations(): UseBillingMutationsResult {
       mutate(
         {
           url: `${apiUrl}/api/account/subscription/billing`,
-          method: 'put',
-          values: billing
+          method: "put",
+          values: billing,
         },
         {
           onSuccess: (response) => {
-            if (response?.data?.data?.billing) {
+            if (response?.data?.billing) {
               setMutationResult({
-                data: {
-                  data: {
-                    billing: response.data.data.billing
-                  }
-                }
+                billing: response.data.billing,
               });
             }
           },
           onError: (err) => {
             const error = err as BillingError;
             setError(error);
-          }
-        }
+          },
+        },
       );
     },
-    [mutate, apiUrl]
+    [mutate, apiUrl],
   );
 
   return {
     updateBillingInfo,
     isLoading,
     error,
-    mutationResult
+    mutationResult,
   };
 }
