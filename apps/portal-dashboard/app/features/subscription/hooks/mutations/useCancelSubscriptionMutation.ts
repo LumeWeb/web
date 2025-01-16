@@ -1,19 +1,33 @@
-import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
+import { useCustomMutation } from '@refinedev/core';
 import { SubscriptionError } from '../../types/subscription.types';
 import useApiUrl from 'portal-shared/hooks/useApiUrl';
-import { handleSubscriptionError } from '../../utils/errorHandling';
 
 export function useCancelSubscriptionMutation() {
   const apiUrl = useApiUrl();
 
-  return useMutation<void, SubscriptionError, void>({
-    mutationFn: async () => {
-      try {
-        await axios.post(`${apiUrl}/api/account/subscription/cancel`);
-      } catch (error) {
-        throw handleSubscriptionError(error);
-      }
-    }
-  });
+  const { mutate, isLoading } = useCustomMutation();
+
+  const mutateAsync = async (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      mutate(
+        {
+          url: `${apiUrl}/api/account/subscription/cancel`,
+          method: 'post'
+        },
+        {
+          onSuccess: () => {
+            resolve();
+          },
+          onError: (error) => {
+            reject(error);
+          }
+        }
+      );
+    });
+  };
+
+  return {
+    mutateAsync,
+    isLoading
+  };
 }

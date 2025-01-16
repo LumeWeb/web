@@ -1,26 +1,44 @@
-import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
+import { useCustomMutation } from '@refinedev/core';
 import { SubscriptionPlan, Subscription, SubscriptionError } from '../../types/subscription.types';
 import useApiUrl from 'portal-shared/hooks/useApiUrl';
-import { handleSubscriptionError } from '../../utils/errorHandling';
 
 interface SubscriptionResponse {
-  subscription: Subscription;
+  data: {
+    subscription: Subscription;
+  };
 }
 
 export function useUpdateSubscriptionMutation() {
   const apiUrl = useApiUrl();
 
-  return useMutation<SubscriptionResponse, SubscriptionError, SubscriptionPlan>({
-    mutationFn: async (plan: SubscriptionPlan) => {
-      try {
-        const response = await axios.put(`${apiUrl}/api/account/subscription/plan`, {
-          plan_id: plan.id
-        });
-        return response.data;
-      } catch (error) {
-        throw handleSubscriptionError(error);
-      }
-    }
-  });
+  const { mutate, isLoading } = useCustomMutation<SubscriptionResponse>();
+
+  const mutateAsync = async (plan: SubscriptionPlan): Promise<SubscriptionResponse> => {
+    return new Promise((resolve, reject) => {
+      mutate(
+        {
+          url: `${apiUrl}/api/account/subscription/plan`,
+          method: 'put',
+          values: { plan_id: plan.id }
+        },
+        {
+          onSuccess: (response) => {
+            if (!response?.data?.subscription) {
+              reject(new Error('Invalid server response - missing subscription data'));
+              return;
+            }
+            resolve(response);
+          },
+          onError: (error) => {
+            reject(error);
+          }
+        }
+      );
+    });
+  };
+
+  return {
+    mutateAsync,
+    isLoading
+  };
 }
