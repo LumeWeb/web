@@ -12,13 +12,15 @@ import {
 import { usePaymentMethod } from '../../hooks/usePaymentMethod';
 import HyperPayment from '@/features/subscription/components/payment/HyperPayment';
 
-export default function PaymentMethod() {
+export function PaymentMethod() {
   return (
     <SubscriptionProvider>
       <PaymentMethodContent />
     </SubscriptionProvider>
   );
 }
+
+export default PaymentMethod;
 
 function PaymentMethodContent() {
   const { subscription } = useSubscriptionContext();
