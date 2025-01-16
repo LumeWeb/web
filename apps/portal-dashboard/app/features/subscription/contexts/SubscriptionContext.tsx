@@ -1,12 +1,8 @@
 import { createContext, ReactNode, useContext, useMemo, useState } from "react";
-import {
-  SubscriptionPlan,
-  Subscription,
-} from "portal-shared/dataProviders/accountProvider";
+import { SubscriptionPlan, Subscription } from "../types/subscription.types";
 import { useSubscription } from "../hooks/core/useSubscription";
 import { useSubscriptionMutations } from "../hooks/mutations/useSubscriptionMutations";
 import { useSubscriptionPlans } from "../hooks/core/useSubscriptionPlans";
-import { SubscriptionResponse } from "../types/subscription.types";
 
 interface SubscriptionContextValue {
   // Current state
@@ -37,7 +33,9 @@ interface SubscriptionContextValue {
 }
 
 // Helper type to extract subscription from response
-type ExtractSubscription<T> = T extends { data: { subscription: infer S } } ? S : never;
+type ExtractSubscription<T> = T extends { data: { subscription: infer S } }
+  ? S
+  : never;
 
 const SubscriptionContext = createContext<SubscriptionContextValue | undefined>(
   undefined,
