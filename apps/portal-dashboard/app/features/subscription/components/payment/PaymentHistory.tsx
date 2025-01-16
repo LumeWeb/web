@@ -23,7 +23,7 @@ export function PaymentHistory() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {payments?.map((payment) => (
+          {payments?.map((payment: { id: string; amount: number; date: string; status: string }) => (
             <div key={payment.id} className="flex justify-between items-center border-b pb-2">
               <div>
                 <div className="font-medium">${payment.amount}</div>
