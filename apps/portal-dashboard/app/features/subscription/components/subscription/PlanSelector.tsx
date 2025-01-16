@@ -50,7 +50,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
 
   return (
     <div className="grid md:grid-cols-3 gap-8">
-      {plans.map((plan) => (
+      {(plans || []).map((plan) => (
         <Card key={plan.id} className={subscription?.plan.id === plan.id ? 'ring-2 ring-primary' : ''}>
           <CardHeader>
             <CardTitle>{plan.name}</CardTitle>
