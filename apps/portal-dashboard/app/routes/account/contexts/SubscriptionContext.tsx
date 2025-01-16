@@ -186,42 +186,39 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
           console.log('Create subscription result:', {
             hasData: !!result?.data,
             hasClientSecret: !!result?.data?.data?.payment?.client_secret,
-            clientSecret: result?.data?.data?.payment?.client_secret
+            clientSecret: result?.data?.data?.payment?.client_secret,
+            planIsFree: plan.is_free,
+            showPaymentDialog
           });
+
+          // Immediately update subscription data with creation response
+          if (result?.data?.data) {
+            console.log('Updating subscription data:', {
+              oldData: subscriptionData,
+              newData: result.data.data
+            });
+            subscriptionData = result.data.data;
+          }
           
           // Keep selected plan and show payment dialog if needed
-          if (!plan.is_free) {
-            // First try using the client secret from the creation response
-            if (result?.data?.data?.payment?.client_secret) {
-              handlePlanSelection(plan);
-              setShowPaymentDialog(true);
-              console.log('Showing payment dialog with creation client secret', {
-                clientSecret: result.data.data.payment.client_secret,
-                plan: plan.name
-              });
-              return;
-            }
-            
-            // Fallback to refetching if needed
-            console.log('No client secret in creation response, refetching...');
-            const updatedSub = await refetchSubscription();
-            console.log('Refetched subscription:', {
-              hasData: !!updatedSub?.data,
-              hasClientSecret: !!updatedSub?.data?.data?.payment?.client_secret,
-              status: updatedSub?.data?.data?.status
+          if (!plan.is_free && result?.data?.data?.payment?.client_secret) {
+            console.log('Attempting to show payment dialog:', {
+              planName: plan.name,
+              clientSecret: result.data.data.payment.client_secret,
+              currentDialogState: showPaymentDialog
             });
-            
-            if (updatedSub.data?.data?.payment?.client_secret) {
-              handlePlanSelection(plan);
-              setShowPaymentDialog(true);
-              console.log('Showing payment dialog with refetched client secret', {
-                clientSecret: updatedSub.data.data.payment.client_secret,
-                plan: plan.name
-              });
-              return;
-            } else {
-              console.log('No client secret found in creation or refetch');
-            }
+            handlePlanSelection(plan);
+            setShowPaymentDialog(true);
+            console.log('Payment dialog state after update:', {
+              showPaymentDialog: true,
+              selectedPlan: plan.name
+            });
+            return;
+          } else {
+            console.log('Payment dialog conditions not met:', {
+              planIsFree: plan.is_free,
+              hasClientSecret: !!result?.data?.data?.payment?.client_secret
+            });
           }
           
           handlePlanSelection(null);
