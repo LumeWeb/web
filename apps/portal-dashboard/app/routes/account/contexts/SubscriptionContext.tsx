@@ -191,15 +191,6 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
             showPaymentDialog
           });
 
-          // Immediately update subscription data with creation response
-          if (result?.data?.data) {
-            console.log('Updating subscription data:', {
-              oldData: subscriptionData,
-              newData: result.data.data
-            });
-            subscriptionData = result.data.data;
-          }
-          
           // Keep selected plan and show payment dialog if needed
           if (!plan.is_free && result?.data?.data?.payment?.client_secret) {
             console.log('Attempting to show payment dialog:', {
@@ -207,8 +198,14 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
               clientSecret: result.data.data.payment.client_secret,
               currentDialogState: showPaymentDialog
             });
+            
+            // Update subscription data first
+            await refetchSubscription();
+            
+            // Then show payment dialog
             handlePlanSelection(plan);
             setShowPaymentDialog(true);
+            
             console.log('Payment dialog state after update:', {
               showPaymentDialog: true,
               selectedPlan: plan.name
@@ -219,6 +216,8 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
               planIsFree: plan.is_free,
               hasClientSecret: !!result?.data?.data?.payment?.client_secret
             });
+            // Clear selected plan if no payment needed
+            handlePlanSelection(null);
           }
           
           handlePlanSelection(null);
