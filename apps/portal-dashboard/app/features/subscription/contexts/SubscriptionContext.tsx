@@ -81,9 +81,9 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
 
       // Plan management
       plans: (() => {
-        console.log('SubscriptionContext - raw plans data:', plansData?.data);
+        console.log("SubscriptionContext - raw plans data:", plansData?.data);
         const planArray = plansData?.data?.plans || [];
-        console.log('SubscriptionContext - processed plans array:', planArray);
+        console.log("SubscriptionContext - processed plans array:", planArray);
         return planArray;
       })(),
       selectedPlan,
@@ -92,17 +92,19 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       // Actions
       createSubscription: async (plan: SubscriptionPlan) => {
         try {
-          console.log('Creating subscription in context with plan:', plan);
+          console.log("Creating subscription in context with plan:", plan);
           const response = await createSubscription(plan);
-          console.log('Subscription creation response:', response);
-          
-          if (!response?.data?.subscription) {
-            throw new Error('Invalid server response - missing subscription data');
+          console.log("Subscription creation response:", response);
+
+          if (!response?.subscription) {
+            throw new Error(
+              "Invalid server response - missing subscription data",
+            );
           }
-          
-          return response.data.subscription;
+
+          return response.subscription;
         } catch (error) {
-          console.error('Error in subscription context:', error);
+          console.error("Error in subscription context:", error);
           throw error;
         }
       },
