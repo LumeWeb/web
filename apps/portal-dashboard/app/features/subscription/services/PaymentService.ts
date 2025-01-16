@@ -1,11 +1,17 @@
 import { PaymentInfo, PaymentStatus } from "../types/payment.types";
 
-import { PaymentInfo, PaymentStatus, PaymentError } from '../types/payment.types';
+import { PaymentInfo, PaymentStatus } from '../types/payment.types';
 
 export class PaymentService {
   public getPaymentStatus(payment: PaymentInfo | null | undefined): PaymentStatus {
     if (!payment) return 'PENDING';
-    return payment.status;
+    
+    // Simple status determination based on payment info
+    if (payment.errorMessage) return 'FAILED';
+    if (!payment.clientSecret) return 'PENDING';
+    if (this.isPaymentExpired(payment)) return 'FAILED';
+    if (payment.paymentMethodId) return 'COMPLETED';
+    return 'PROCESSING';
   }
 
   public isPaymentExpired(payment: PaymentInfo | null | undefined): boolean {
@@ -15,25 +21,8 @@ export class PaymentService {
       return new Date(payment.expiresAt) <= new Date();
     } catch (error) {
       console.error('Invalid payment expiry date:', error);
-      return false;
+      return true; // Fail safe - treat invalid dates as expired
     }
-  }
-
-  public validatePayment(payment: PaymentInfo): PaymentError | null {
-    if (!payment.clientSecret || !payment.publishableKey) {
-      return {
-        message: 'Invalid payment configuration'
-      };
-    }
-
-    if (this.isPaymentExpired(payment)) {
-      return {
-        message: 'Payment session expired',
-        code: 'SESSION_EXPIRED'
-      };
-    }
-
-    return null;
   }
 
   public getTimeRemaining(payment: PaymentInfo): number {
@@ -47,5 +36,11 @@ export class PaymentService {
       console.error('Error calculating remaining time:', error);
       return 0;
     }
+  }
+
+  public formatPaymentError(error: any): string {
+    if (typeof error === 'string') return error;
+    if (error?.message) return error.message;
+    return 'An unknown error occurred during payment processing';
   }
 }
