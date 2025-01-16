@@ -100,13 +100,27 @@ export default function PricingPlans() {
       if (!selectedPlan) return;
 
       if (!subscription?.plan) {
-        // Create new subscription
-        const result = await createSubscription(selectedPlan);
-        await refetchSubscription();
-        
-        // Show payment dialog for paid plans that require payment
-        if (!selectedPlan.is_free && result?.data?.payment?.client_secret) {
-          setShowPaymentDialog(true);
+        try {
+          // Create new subscription
+          const result = await createSubscription(selectedPlan);
+          
+          if (result?.data) {
+            await refetchSubscription();
+            
+            // Show payment dialog for paid plans that require payment
+            if (!selectedPlan.is_free && result.data?.payment?.client_secret) {
+              setShowPaymentDialog(true);
+            }
+          } else {
+            throw new Error("No response data received");
+          }
+        } catch (error) {
+          console.error("Failed to create subscription:", error);
+          open?.({
+            type: "error",
+            message: "Failed to create subscription. Please try again.",
+          });
+          return;
         }
       } else {
         // Change existing subscription
