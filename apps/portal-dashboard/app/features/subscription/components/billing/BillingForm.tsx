@@ -42,10 +42,7 @@ export function BillingForm() {
     useCountryList,
   } = useCountryData(form);
 
-  const { useStateList, useCityList } = useLocationLists(
-    form.watch("country"),
-    form.watch("state"),
-  );
+  const { useStateList, useCityList } = useLocationLists(form);
 
   const handleStateChange = () => {
     form.setValue("city", "", { shouldDirty: true });
