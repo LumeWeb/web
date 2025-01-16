@@ -28,22 +28,9 @@ export const paymentInfoSchema = z.object({
   last_payment_error: z.string().optional()
 });
 
-// Payment method types
-export interface PaymentMethod {
-  id: string;
-  type: string;
-  card?: {
-    brand: string;
-    last4: string;
-    exp_month: number;
-    exp_year: number;
-  };
-}
-
 // Payment error types
 export interface PaymentError {
   code: string;
   message: string;
   decline_code?: string;
-  payment_method?: PaymentMethod;
 }
