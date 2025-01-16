@@ -5,7 +5,9 @@ import useApiUrl from 'portal-shared/hooks/useApiUrl';
 
 interface BillingResponse {
   data: {
-    billing: BillingInfo;
+    data: {
+      billing: BillingInfo;
+    };
   };
 }
 
@@ -40,10 +42,10 @@ export function useBillingMutations(): UseBillingMutationsResult {
         },
         {
           onSuccess: (response) => {
-            if (response?.data) {
+            if (response?.data?.data?.billing) {
               setMutationResult({
                 data: {
-                  billing: response.data.data?.billing || response.data.billing
+                  billing: response.data.data.billing
                 }
               });
             }
