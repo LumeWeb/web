@@ -27,6 +27,7 @@ import {
 import { useBilling } from '../../hooks/core/useBilling';
 import { useBillingMutations } from '../../hooks/mutations/useBillingMutations';
 import { BillingInfo } from '../../types/billing.types';
+import { formatBillingInfo } from '../../utils/formatBillingInfo';
 
 export function BillingForm() {
   const { validateBillingInfo } = useBilling();
@@ -73,7 +74,7 @@ export function BillingForm() {
       }
 
       // Format billing info before submission
-      const formattedData = await formatBillingInfo(data);
+      const formattedData = formatBillingInfo(data);
       
       // Update billing info
       await updateBillingInfo(formattedData);
