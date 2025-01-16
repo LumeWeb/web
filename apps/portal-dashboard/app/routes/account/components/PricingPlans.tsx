@@ -96,47 +96,47 @@ export default function PricingPlans() {
       return;
     }
     
-    try {
-      if (!selectedPlan) return;
+    if (!selectedPlan) return;
 
-      if (!subscription?.plan) {
-        try {
-          // Create new subscription
-          const result = await createSubscription(selectedPlan);
+    if (!subscription?.plan) {
+      try {
+        // Create new subscription
+        const result = await createSubscription(selectedPlan);
+        
+        if (result?.data) {
+          await refetchSubscription();
           
-          if (result?.data) {
-            await refetchSubscription();
-            
-            // Show payment dialog for paid plans that require payment
-            if (!selectedPlan.is_free && result.data?.payment?.client_secret) {
-              setShowPaymentDialog(true);
-            }
-          } else {
-            throw new Error("No response data received");
+          // Show payment dialog for paid plans that require payment
+          if (!selectedPlan.is_free && result.data?.payment?.client_secret) {
+            setShowPaymentDialog(true);
           }
-        } catch (error) {
-          console.error("Failed to create subscription:", error);
-          open?.({
-            type: "error",
-            message: "Failed to create subscription. Please try again.",
-          });
-          return;
+          
+          // Clear selection for free plans
+          if (selectedPlan.is_free) {
+            handlePlanSelection(null);
+          }
+        } else {
+          throw new Error("No response data received");
         }
-      } else {
+      } catch (error) {
+        console.error("Failed to create subscription:", error);
+        open?.({
+          type: "error",
+          message: "Failed to create subscription. Please try again.",
+        });
+      }
+    } else {
+      try {
         // Change existing subscription
         await submitPlanChange(selectedPlan);
-      }
-      
-      // Clear selection unless we're showing payment dialog
-      if (selectedPlan.is_free || subscription?.plan) {
         handlePlanSelection(null);
+      } catch (error) {
+        console.error("Failed to change subscription:", error);
+        open?.({
+          type: "error", 
+          message: "Failed to process subscription change. Please try again.",
+        });
       }
-    } catch (error) {
-      console.error("Failed to handle plan change:", error);
-      open?.({
-        type: "error",
-        message: "Failed to process subscription change. Please try again.",
-      });
     }
   };
 
