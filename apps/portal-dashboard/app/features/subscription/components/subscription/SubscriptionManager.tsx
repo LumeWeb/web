@@ -4,6 +4,8 @@ import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
 import { usePayment } from "../../hooks/core/usePayment";
 import { useBilling } from "../../hooks/core/useBilling";
 import { SubscriptionPlan } from "../../types/subscription.types";
+import { SubscriptionStatus } from "./SubscriptionStatus";
+import { PlanSelector } from "./PlanSelector";
 import {
   Tabs,
   TabsContent,
