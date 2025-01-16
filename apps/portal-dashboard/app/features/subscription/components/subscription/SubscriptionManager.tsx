@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSubscriptionContext } from '../../contexts/SubscriptionContext';
-import { useSubscriptionStateContext } from '../../contexts/SubscriptionStateContext';
 import { SubscriptionPlan } from '../../types/subscription.types';
+import { Loader2 } from "portal-shared/components/icons";
 import { Button } from 'portal-shared/components/ui/button';
 import {
   Card,
@@ -30,17 +30,14 @@ export function SubscriptionManager() {
     isLoading,
     isProcessing,
     showPaymentDialog,
-    setShowPaymentDialog
+    setShowPaymentDialog,
+    createSubscription,
+    updateSubscription,
+    cancelSubscription,
+    validatePlanChange
   } = useSubscriptionContext();
 
-  const {
-    state: subscriptionState,
-    createSubscription,
-    updateBilling,
-    completePayment,
-    cancelSubscription,
-    isTransitioning
-  } = useSubscriptionStateContext();
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
 
@@ -51,25 +48,35 @@ export function SubscriptionManager() {
 
   const handleConfirm = async () => {
     if (!selectedPlan) return;
+    setValidationError(null);
 
     try {
       if (!subscription) {
         await createSubscription(selectedPlan);
       } else {
-        // Handle plan change logic
+        // Validate plan change
+        const isValid = await validatePlanChange(subscription.plan, selectedPlan);
+        if (!isValid) {
+          setValidationError('Invalid plan change. Please try again.');
+          return;
+        }
+
         if (selectedPlan.price > subscription.plan.price) {
           // Upgrade
-          await createSubscription(selectedPlan);
+          await updateSubscription(selectedPlan);
         } else {
-          // Downgrade
+          // Downgrade with confirmation
           await cancelSubscription();
           await createSubscription(selectedPlan);
         }
       }
     } catch (err) {
-      console.error('Subscription action failed:', err);
+      const error = err instanceof Error ? err.message : 'Subscription action failed';
+      setValidationError(error);
     } finally {
-      setShowConfirmDialog(false);
+      if (!validationError) {
+        setShowConfirmDialog(false);
+      }
     }
   };
 
@@ -116,10 +123,15 @@ export function SubscriptionManager() {
                 <p>Download: {formatBytes(plan.resources.download)}/month</p>
                 <Button
                   onClick={() => handlePlanSelect(plan)}
-                  disabled={isProcessing || isTransitioning}
+                  disabled={isProcessing}
                   variant={subscription?.plan.id === plan.id ? 'outline' : 'default'}
                 >
-                  {subscription?.plan.id === plan.id 
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : subscription?.plan.id === plan.id 
                     ? 'Current Plan'
                     : subscription
                       ? plan.price > subscription.plan.price
@@ -134,18 +146,32 @@ export function SubscriptionManager() {
       </div>
 
       {/* Confirmation Dialog */}
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      <AlertDialog 
+        open={showConfirmDialog} 
+        onOpenChange={(open) => {
+          setShowConfirmDialog(open);
+          if (!open) {
+            setValidationError(null);
+          }
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Subscription Change</AlertDialogTitle>
             <AlertDialogDescription>
-              {subscription
-                ? `Are you sure you want to ${
-                    selectedPlan && selectedPlan.price > subscription.plan.price
-                      ? 'upgrade'
-                      : 'downgrade'
-                  } to the ${selectedPlan?.name} plan?`
-                : `Are you sure you want to subscribe to the ${selectedPlan?.name} plan?`}
+              <div className="space-y-2">
+                {subscription
+                  ? `Are you sure you want to ${
+                      selectedPlan && selectedPlan.price > subscription.plan.price
+                        ? 'upgrade'
+                        : 'downgrade'
+                    } to the ${selectedPlan?.name} plan?`
+                  : `Are you sure you want to subscribe to the ${selectedPlan?.name} plan?`}
+                
+                {validationError && (
+                  <p className="text-destructive text-sm mt-2">{validationError}</p>
+                )}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
