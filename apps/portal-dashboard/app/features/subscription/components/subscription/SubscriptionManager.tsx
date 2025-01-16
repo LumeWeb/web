@@ -31,13 +31,15 @@ import { PaymentHistory } from "../payment/PaymentHistory";
 import { PaymentMethod } from "@/features/subscription/components/payment/PaymentMethod";
 import Addons from "@/routes/account/components/Addons";
 
-export default function SubscriptionManager() {
+export function SubscriptionManager() {
   return (
     <SubscriptionProvider>
       <SubscriptionContent />
     </SubscriptionProvider>
   );
 }
+
+export default SubscriptionManager;
 
 function SubscriptionContent() {
   const {
