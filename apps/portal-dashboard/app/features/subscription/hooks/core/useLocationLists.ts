@@ -7,8 +7,8 @@ interface LocationEntry {
 }
 
 export function useLocationLists(form: UseFormReturn<BillingInfo>) {
-  const country = form.watch('country');
-  const state = form.watch('state');
+  const country = form.watch('address.country');
+  const state = form.watch('address.state');
   const useStateList = useMemo(
     () => () => 
       useList<LocationEntry>({
