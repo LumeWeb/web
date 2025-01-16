@@ -65,7 +65,7 @@ export class BillingService {
     } catch (error) {
       console.error('Billing validation error:', error);
       return [{
-        field: 'general',
+        field: 'name',
         message: error instanceof Error ? error.message : 'Billing validation failed'
       }];
     }
