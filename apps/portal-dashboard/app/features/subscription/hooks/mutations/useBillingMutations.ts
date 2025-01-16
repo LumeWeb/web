@@ -45,7 +45,9 @@ export function useBillingMutations(): UseBillingMutationsResult {
             if (response?.data?.data?.billing) {
               setMutationResult({
                 data: {
-                  billing: response.data.data.billing
+                  data: {
+                    billing: response.data.data.billing
+                  }
                 }
               });
             }
