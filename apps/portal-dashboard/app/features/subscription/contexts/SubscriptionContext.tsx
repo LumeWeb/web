@@ -20,8 +20,8 @@ interface SubscriptionContextValue {
   setSelectedPlan: (plan: SubscriptionPlan | null) => void;
 
   // Actions
-  createSubscription: (plan: SubscriptionPlan) => Promise<SubscriptionResponse>;
-  updateSubscription: (plan: SubscriptionPlan) => Promise<SubscriptionResponse>;
+  createSubscription: (plan: SubscriptionPlan) => Promise<Subscription>;
+  updateSubscription: (plan: SubscriptionPlan) => Promise<Subscription>;
   cancelSubscription: () => Promise<void>;
   validatePlanChange: (
     currentPlan: SubscriptionPlan,
@@ -89,11 +89,11 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       // Actions
       createSubscription: async (plan: SubscriptionPlan) => {
         const response = await createSubscription(plan);
-        return response;
+        return response.data.subscription;
       },
       updateSubscription: async (plan: SubscriptionPlan) => {
         const response = await updateSubscription(plan);
-        return response;
+        return response.data.subscription;
       },
       cancelSubscription,
       validatePlanChange: async (
