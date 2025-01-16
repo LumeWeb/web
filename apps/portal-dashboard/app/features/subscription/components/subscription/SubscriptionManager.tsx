@@ -116,23 +116,8 @@ export function SubscriptionManager() {
 
   return (
     <div className="space-y-6">
-      {/* Current Subscription */}
-      {subscription && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Current Subscription</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p>Plan: {subscription.plan.name}</p>
-              <p>Status: {subscription.status}</p>
-              <p>
-                Price: ${subscription.plan.price}/{subscription.plan.period.toLowerCase()}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Subscription Status */}
+      <SubscriptionStatus />
 
       {/* Available Plans */}
       <PlanSelector onPlanSelect={handlePlanSelect} />
