@@ -1,6 +1,6 @@
-import { useCustomMutation } from '@refinedev/core';
-import { SubscriptionError } from '../../types/subscription.types';
-import useApiUrl from 'portal-shared/hooks/useApiUrl';
+import { useCustomMutation } from "@refinedev/core";
+import { SubscriptionError } from "../../types/subscription.types";
+import useApiUrl from "portal-shared/hooks/useApiUrl";
 
 export function useCancelSubscriptionMutation() {
   const apiUrl = useApiUrl();
@@ -12,7 +12,8 @@ export function useCancelSubscriptionMutation() {
       mutate(
         {
           url: `${apiUrl}/api/account/subscription/cancel`,
-          method: 'post'
+          method: "post",
+          values: {},
         },
         {
           onSuccess: () => {
@@ -20,14 +21,14 @@ export function useCancelSubscriptionMutation() {
           },
           onError: (error) => {
             reject(error);
-          }
-        }
+          },
+        },
       );
     });
   };
 
   return {
     mutateAsync,
-    isLoading
+    isLoading,
   };
 }
