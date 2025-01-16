@@ -61,102 +61,19 @@ export class SubscriptionStateMachine {
     }
   }
 
-  private handleTransition(event: SubscriptionEvent): SubscriptionState {
-
-    switch (event.type) {
-      case 'SUBSCRIPTION_LOADED':
-        const newState = this.handleSubscriptionLoaded(event.subscription);
-        // Preserve plan and billing info when transitioning to PENDING states
-        if (newState.type === 'PENDING_BILLING' && this.currentState.type === 'PENDING_BILLING') {
-          newState.plan = this.currentState.plan;
-        } else if (newState.type === 'PENDING_PAYMENT' && this.currentState.type === 'PENDING_PAYMENT') {
-          newState.plan = this.currentState.plan;
-          newState.billing = this.currentState.billing;
-        }
-        this.currentState = newState;
-        break;
-
-      case 'CREATE_SUBSCRIPTION':
-        this.currentState = { 
-          type: 'PENDING_BILLING',
-          plan: event.plan 
-        };
-        break;
-
-      case 'UPDATE_BILLING':
-        if (this.currentState.type === 'PENDING_BILLING') {
-          this.currentState = { 
-            type: 'PENDING_PAYMENT',
-            plan: this.currentState.plan,
-            billing: event.billing
-          };
-        }
-        break;
-
-      case 'COMPLETE_PAYMENT':
-        if (this.currentState.type === 'PENDING_PAYMENT') {
-          // Move to processing with plan and billing info preserved
-          this.currentState = { 
-            type: 'PROCESSING_PAYMENT',
-            plan: this.currentState.plan,
-            billing: this.currentState.billing,
-            paymentMethodId: event.paymentMethodId
-          };
-        } else if (this.currentState.type === 'PROCESSING_PAYMENT') {
-          // Payment completed successfully
-          this.currentState = { 
-            type: 'ACTIVE',
-            subscription: {
-              id: '', // Will be set by backend
-              status: 'ACTIVE',
-              plan: this.currentState.plan,
-              billing: this.currentState.billing
-            }
-          };
-        } else if (this.currentState.type === 'SUSPENDED') {
-          // Reactivate suspended subscription
-          this.currentState = { 
-            type: 'ACTIVE',
-            subscription: this.currentState.subscription
-          };
-        }
-        break;
-
-      case 'CANCEL_SUBSCRIPTION':
-        if ('subscription' in this.currentState) {
-          this.currentState = { 
-            type: 'CANCELLED', 
-            subscription: this.currentState.subscription 
-          };
-        }
-        break;
-
-      case 'ERROR_OCCURRED':
-        // Preserve the previous state's data in the error state
-        const errorState = { type: 'ERROR' as const, error: event.error };
-        if (this.currentState.type === 'PENDING_BILLING') {
-          Object.assign(errorState, { plan: this.currentState.plan });
-        } else if (this.currentState.type === 'PENDING_PAYMENT') {
-          Object.assign(errorState, { 
-            plan: this.currentState.plan,
-            billing: this.currentState.billing 
-          });
-        } else if (this.currentState.type === 'PROCESSING_PAYMENT') {
-          Object.assign(errorState, {
-            plan: this.currentState.plan,
-            billing: this.currentState.billing,
-            paymentMethodId: this.currentState.paymentMethodId
-          });
-        }
-        this.currentState = errorState;
-        break;
-
-      case 'LOAD_SUBSCRIPTION':
-        this.currentState = { type: 'LOADING' };
-        break;
+  private handleTransition(newStatus: SubscriptionStatus): void {
+    if (!this.canTransitionTo(newStatus)) {
+      throw new Error(`Invalid transition from ${this.currentState} to ${newStatus}`);
     }
+    this.currentState = newStatus;
+  }
 
+  public getState(): SubscriptionStatus {
     return this.currentState;
+  }
+
+  private canTransitionTo(newStatus: SubscriptionStatus): boolean {
+    return this.validTransitions[this.currentState]?.includes(newStatus) ?? false;
   }
 
   private handleSubscriptionLoaded(subscription: Subscription): SubscriptionState {
