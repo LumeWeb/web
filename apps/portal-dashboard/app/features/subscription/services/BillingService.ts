@@ -96,7 +96,7 @@ export class BillingService {
     return isValid;
   }
 
-  public async formatBillingInfo(billing: BillingInfo): Promise<BillingInfo> {
+  public formatBillingInfo(billing: BillingInfo): BillingInfo {
     return formatBillingInfo(billing);
   }
 
