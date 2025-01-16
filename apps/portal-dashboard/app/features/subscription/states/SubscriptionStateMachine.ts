@@ -56,24 +56,47 @@ export class SubscriptionStateMachine {
         break;
 
       case 'CREATE_SUBSCRIPTION':
-        this.currentState = { type: 'PENDING_BILLING' };
+        this.currentState = { 
+          type: 'PENDING_BILLING',
+          plan: event.plan 
+        };
         break;
 
       case 'UPDATE_BILLING':
-        this.currentState = { type: 'PENDING_PAYMENT' };
+        if (this.currentState.type === 'PENDING_BILLING') {
+          this.currentState = { 
+            type: 'PENDING_PAYMENT',
+            plan: this.currentState.plan,
+            billing: event.billing
+          };
+        }
         break;
 
       case 'COMPLETE_PAYMENT':
         if (this.currentState.type === 'PENDING_PAYMENT') {
+          // Move to processing with plan and billing info preserved
           this.currentState = { 
             type: 'PROCESSING_PAYMENT',
-            subscription: 'subscription' in this.currentState ? this.currentState.subscription : undefined,
+            plan: this.currentState.plan,
+            billing: this.currentState.billing,
             paymentMethodId: event.paymentMethodId
           };
-        } else if (this.currentState.type === 'PROCESSING_PAYMENT' || this.currentState.type === 'SUSPENDED') {
+        } else if (this.currentState.type === 'PROCESSING_PAYMENT') {
+          // Payment completed successfully
           this.currentState = { 
             type: 'ACTIVE',
-            subscription: 'subscription' in this.currentState ? this.currentState.subscription : undefined
+            subscription: {
+              id: '', // Will be set by backend
+              status: 'ACTIVE',
+              plan: this.currentState.plan,
+              billing: this.currentState.billing
+            }
+          };
+        } else if (this.currentState.type === 'SUSPENDED') {
+          // Reactivate suspended subscription
+          this.currentState = { 
+            type: 'ACTIVE',
+            subscription: this.currentState.subscription
           };
         }
         break;
@@ -88,7 +111,23 @@ export class SubscriptionStateMachine {
         break;
 
       case 'ERROR_OCCURRED':
-        this.currentState = { type: 'ERROR', error: event.error };
+        // Preserve the previous state's data in the error state
+        const errorState = { type: 'ERROR' as const, error: event.error };
+        if (this.currentState.type === 'PENDING_BILLING') {
+          Object.assign(errorState, { plan: this.currentState.plan });
+        } else if (this.currentState.type === 'PENDING_PAYMENT') {
+          Object.assign(errorState, { 
+            plan: this.currentState.plan,
+            billing: this.currentState.billing 
+          });
+        } else if (this.currentState.type === 'PROCESSING_PAYMENT') {
+          Object.assign(errorState, {
+            plan: this.currentState.plan,
+            billing: this.currentState.billing,
+            paymentMethodId: this.currentState.paymentMethodId
+          });
+        }
+        this.currentState = errorState;
         break;
 
       case 'LOAD_SUBSCRIPTION':
