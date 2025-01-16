@@ -1,28 +1,31 @@
-import React from 'react';
-import { Control } from 'react-hook-form';
-import { BillingInfo } from '../../types/billing.types';
+import React from "react";
+import { Control } from "react-hook-form";
+import { BillingInfo } from "../../types/billing.types";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from 'portal-shared/components/ui/form';
+} from "portal-shared/components/ui/form";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from 'portal-shared/components/ui/command';
+} from "portal-shared/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from 'portal-shared/components/ui/popover';
-import { Button } from 'portal-shared/components/ui/button';
-import { CheckIcon, ChevronUpDownIcon } from 'portal-shared/components/icons';
-import { cn } from 'portal-shared/lib/utils';
+} from "portal-shared/components/ui/popover";
+import { Button } from "portal-shared/components/ui/button";
+import {
+  CloudCheckIcon,
+  ChevronDownIcon,
+} from "portal-shared/components/icons";
+import { cn } from "portal-shared/lib/utils";
 
 interface BillingAddressComboBoxProps {
   name: string;
@@ -39,7 +42,7 @@ export function BillingAddressComboBox({
   label,
   placeholder,
   useList,
-  onSelectionChange
+  onSelectionChange,
 }: BillingAddressComboBoxProps) {
   const [open, setOpen] = React.useState(false);
   const options = useList();
@@ -58,20 +61,22 @@ export function BillingAddressComboBox({
                   variant="outline"
                   role="combobox"
                   className={cn(
-                    'w-full justify-between',
-                    !field.value && 'text-muted-foreground'
-                  )}
-                >
+                    "w-full justify-between",
+                    !field.value && "text-muted-foreground",
+                  )}>
                   {field.value
-                    ? options.find((option) => option.value === field.value)?.label
+                    ? options.find((option) => option.value === field.value)
+                        ?.label
                     : placeholder}
-                  <ChevronUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </FormControl>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0">
               <Command>
-                <CommandInput placeholder={`Search ${label.toLowerCase()}...`} />
+                <CommandInput
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                />
                 <CommandEmpty>No {label.toLowerCase()} found.</CommandEmpty>
                 <CommandGroup>
                   {options.map((option) => (
@@ -84,14 +89,13 @@ export function BillingAddressComboBox({
                           onSelectionChange();
                         }
                         setOpen(false);
-                      }}
-                    >
-                      <CheckIcon
+                      }}>
+                      <CloudCheckIcon
                         className={cn(
-                          'mr-2 h-4 w-4',
+                          "mr-2 h-4 w-4",
                           option.value === field.value
-                            ? 'opacity-100'
-                            : 'opacity-0'
+                            ? "opacity-100"
+                            : "opacity-0",
                         )}
                       />
                       {option.label}
