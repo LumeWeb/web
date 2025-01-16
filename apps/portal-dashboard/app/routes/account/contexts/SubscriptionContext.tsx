@@ -86,14 +86,17 @@ interface SubscriptionProviderProps {
 
 export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  
-  console.log('SubscriptionProvider state:', { showPaymentDialog });
+
+  console.log("SubscriptionProvider state:", { showPaymentDialog });
   const { subscriptionData, subscriptionIsLoading, refetchSubscription } =
     useSubscription();
   const { plansData, plansAreLoading } = useSubscriptionPlans();
   const { isPlanChanging, submitPlanChange } = useSubmitSubscriptionChange();
-  const { isCreating, createSubscription } = useCreateSubscription(refetchSubscription);
-  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
+  const { isCreating, createSubscription } =
+    useCreateSubscription(refetchSubscription);
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
+    null,
+  );
 
   const handlePlanSelection = (plan: SubscriptionPlan) => {
     setSelectedPlan(plan);
@@ -113,20 +116,18 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       subscriptionData.status !== "PENDING" ||
       !subscriptionData.plan?.id ||
       subscriptionData.plan.is_free ||
-      (subscriptionData.payment.expires_at && new Date(subscriptionData.payment.expires_at) <= new Date())
+      (subscriptionData.payment.expires_at &&
+        new Date(subscriptionData.payment.expires_at) <= new Date())
     ) {
       return;
     }
-    
+
     setHyperState((prev) => ({ ...prev, isLoading: true, error: null }));
-    const promise = loadHyper(
-      subscriptionData.payment.publishable_key,
-      {
-        env: "SANDBOX",
-        clientSecret: subscriptionData.payment.client_secret,
-      },
-    );
-    
+    const promise = loadHyper(subscriptionData.payment.publishable_key, {
+      env: "SANDBOX",
+      clientSecret: subscriptionData.payment.client_secret,
+    });
+
     if (!promise) {
       setHyperState((prev) => ({ ...prev, isLoading: false }));
       return;
@@ -149,82 +150,91 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   }, [subscriptionData?.payment?.publishable_key]);
 
   useEffect(() => {
-    const shouldInitialize = 
-      !hyperPromiseRef.current && 
+    const shouldInitialize =
+      !hyperPromiseRef.current &&
       subscriptionData?.payment?.publishable_key &&
-      (!subscriptionData.status || subscriptionData.status === "PENDING" ? subscriptionData.payment.client_secret : true);
+      (!subscriptionData.status || subscriptionData.status === "PENDING"
+        ? subscriptionData.payment.client_secret
+        : true);
 
     if (shouldInitialize) {
       initializeHyper();
     }
-  }, [initializeHyper, subscriptionData?.payment?.publishable_key, subscriptionData?.status, subscriptionData?.payment?.client_secret]);
-
-
-  const value = React.useMemo(() => ({
-    showPaymentDialog,
-    setShowPaymentDialog,
-    subscription: subscriptionData,
-    isLoading: subscriptionIsLoading || plansAreLoading,
-    plans: plansData?.data?.plans ?? [],
-    selectedPlan,
-    isPlanChanging: isPlanChanging || isCreating,
-    handlePlanSelection,
-    submitPlanChange: async (plan: SubscriptionPlan) => {
-      if (!plan?.id) return;
-      
-      try {
-        if (subscriptionData) {
-          await submitPlanChange(plan);
-        } else {
-          const result = await createSubscription(plan);
-
-          // Keep selected plan and show payment dialog if needed
-          if (!plan.is_free && result?.data?.data?.payment?.client_secret) {
-            // Update subscription data first
-            await refetchSubscription();
-            
-            // Then show payment dialog
-            handlePlanSelection(plan);
-            setShowPaymentDialog(true);
-            
-            return;
-          } else {
-            // Clear selected plan if no payment needed
-            handlePlanSelection(null);
-          }
-          
-          handlePlanSelection(null);
-          return;
-        }
-        // Clear selected plan after successful change
-        handlePlanSelection(null);
-      } catch (error) {
-        console.error("Failed to change subscription plan:", error);
-        throw error;
-      }
-    },
-    refetchSubscription,
-    hyperState: {
-      isHyperLoaded: hyperState.isHyperLoaded,
-      error: hyperState.error,
-    },
-    hyperPromise: hyperPromiseRef.current,
-  }), [
-    subscriptionData,
-    subscriptionIsLoading,
-    plansAreLoading,
-    plansData?.data?.plans,
-    selectedPlan,
-    isPlanChanging,
-    isCreating,
-    handlePlanSelection,
-    submitPlanChange,
-    createSubscription,
-    refetchSubscription,
-    hyperState.isHyperLoaded,
-    hyperState.error,
-    hyperPromiseRef.current,
+  }, [
+    initializeHyper,
+    subscriptionData?.payment?.publishable_key,
+    subscriptionData?.status,
+    subscriptionData?.payment?.client_secret,
   ]);
+
+  const value = React.useMemo(
+    () => ({
+      showPaymentDialog,
+      setShowPaymentDialog,
+      subscription: subscriptionData,
+      isLoading: subscriptionIsLoading || plansAreLoading,
+      plans: plansData?.data?.plans ?? [],
+      selectedPlan,
+      isPlanChanging: isPlanChanging || isCreating,
+      handlePlanSelection,
+      submitPlanChange: async (plan: SubscriptionPlan) => {
+        if (!plan?.id) return;
+
+        try {
+          if (subscriptionData) {
+            await submitPlanChange(plan);
+          } else {
+            const result = await createSubscription(plan);
+
+            // Keep selected plan and show payment dialog if needed
+            if (!plan.is_free && result?.data?.payment?.client_secret) {
+              // Update subscription data first
+              await refetchSubscription();
+
+              // Then show payment dialog
+              handlePlanSelection(plan);
+              setShowPaymentDialog(true);
+
+              return;
+            } else {
+              // Clear selected plan if no payment needed
+              handlePlanSelection(null);
+            }
+
+            handlePlanSelection(null);
+            return;
+          }
+          // Clear selected plan after successful change
+          handlePlanSelection(null);
+        } catch (error) {
+          console.error("Failed to change subscription plan:", error);
+          throw error;
+        }
+      },
+      refetchSubscription,
+      hyperState: {
+        isHyperLoaded: hyperState.isHyperLoaded,
+        error: hyperState.error,
+      },
+      hyperPromise: hyperPromiseRef.current,
+    }),
+    [
+      subscriptionData,
+      subscriptionIsLoading,
+      plansAreLoading,
+      plansData?.data?.plans,
+      selectedPlan,
+      isPlanChanging,
+      isCreating,
+      handlePlanSelection,
+      submitPlanChange,
+      createSubscription,
+      refetchSubscription,
+      hyperState.isHyperLoaded,
+      hyperState.error,
+      hyperPromiseRef.current,
+    ],
+  );
 
   return (
     <SubscriptionContext.Provider value={value}>
