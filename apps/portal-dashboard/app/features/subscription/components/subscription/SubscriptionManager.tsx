@@ -112,12 +112,12 @@ export function SubscriptionManager() {
 
         if (selectedPlan.price > subscription.plan.price) {
           // Upgrade
-          const result = await updateSubscription(selectedPlan);
-          if (result.payment && !selectedPlan.is_free) {
-            const paymentStatus = getPaymentStatus(result.payment);
-            if (paymentStatus === "PENDING") {
-              setShowPaymentDialog(true);
-            }
+          await updateSubscription(selectedPlan);
+          await refetchSubscription();
+          
+          // Show payment dialog for paid plans
+          if (!selectedPlan.is_free) {
+            setShowPaymentDialog(true);
           }
         } else {
           // Downgrade with confirmation
