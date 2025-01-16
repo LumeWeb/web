@@ -6,7 +6,8 @@ import {
   SubscriptionPlanStatus,
   SubscriptionPlan as SharedSubscriptionPlan,
   Subscription as SharedSubscription,
-  Resources
+  Resources,
+  SubscriptionResponse as SharedSubscriptionResponse
 } from "portal-shared/dataProviders/accountProvider";
 
 // Core subscription states
@@ -20,6 +21,9 @@ export type SubscriptionPlan = SharedSubscriptionPlan;
 
 // Active Subscription
 export type Subscription = SharedSubscription;
+
+// Subscription Response
+export type SubscriptionResponse = SharedSubscriptionResponse;
 
 // Subscription State
 export type SubscriptionState =
