@@ -1,13 +1,15 @@
-import React, { useEffect } from "react";
-import { useNotification, HttpError } from "@refinedev/core";
+import React from "react";
+import { useNotification } from "@refinedev/core";
 import { useBilling } from "../../hooks/core/useBilling";
 import { useBillingMutations } from "../../hooks/mutations/useBillingMutations";
 import { BillingInfo } from "../../types/billing.types";
-import { formatBillingInfo } from "../../utils/formatBillingInfo";
-import { BillingValidator } from "../billing/BillingValidator";
-import { BillingFormField } from "../billing/BillingFormField";
-import { BillingFormInput } from "../billing/BillingFormInput";
-import { BillingAddressComboBox } from "../billing/BillingAddressComboBox";
+import { useBillingForm } from "../../hooks/core/useBillingForm";
+import { useCountryData } from "../../hooks/core/useCountryData";
+import { useLocationLists } from "../../hooks/core/useLocationLists";
+import { BillingValidator } from "./BillingValidator";
+import { BillingFormField } from "./BillingFormField";
+import { BillingFormInput } from "./BillingFormInput";
+import { BillingAddressComboBox } from "./BillingAddressComboBox";
 import { Button } from "portal-shared/components/ui/button";
 import { Form } from "portal-shared/components/ui/form";
 import {
@@ -19,8 +21,9 @@ import {
 } from "portal-shared/components/ui/card";
 
 export function BillingForm() {
-  const { validateBillingInfo } = useBilling();
+  const { validateBillingInfo, formatBillingInfo } = useBilling();
   const { updateBillingInfo, isLoading, error } = useBillingMutations();
+  const { open } = useNotification();
   const {
     form,
     supportedEntities,
