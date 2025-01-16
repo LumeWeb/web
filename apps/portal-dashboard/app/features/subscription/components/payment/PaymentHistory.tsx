@@ -8,9 +8,25 @@ import {
 } from 'portal-shared/components/ui/card';
 import { usePaymentHistory } from '../../hooks/usePaymentHistory';
 import { formatDate } from '../../utils/formatDate';
+import { PaymentHistoryEntry, PaymentStatus } from '../../types/payment.types';
 
 export function PaymentHistory() {
   const { payments, isLoading } = usePaymentHistory();
+
+  const getStatusDisplay = (status: PaymentStatus) => {
+    switch (status) {
+      case 'COMPLETED':
+        return <span className="text-green-600">Paid</span>;
+      case 'FAILED':
+        return <span className="text-red-600">Failed</span>;
+      case 'PROCESSING':
+        return <span className="text-yellow-600">Processing</span>;
+      case 'PENDING':
+        return <span className="text-blue-600">Pending</span>;
+      default:
+        return <span className="text-muted-foreground">Unknown</span>;
+    }
+  };
 
   if (isLoading) {
     return <div>Loading payment history...</div>;
@@ -23,20 +39,23 @@ export function PaymentHistory() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {payments?.map((payment: { id: string; amount: number; date: string; status: string }) => (
+          {payments?.map((payment: PaymentHistoryEntry) => (
             <div key={payment.id} className="flex justify-between items-center border-b pb-2">
               <div>
-                <div className="font-medium">${payment.amount}</div>
+                <div className="font-medium">
+                  ${payment.amount} {payment.currency}
+                </div>
                 <div className="text-sm text-muted-foreground">
                   {formatDate(payment.date)}
                 </div>
+                {payment.paymentMethod && (
+                  <div className="text-xs text-muted-foreground">
+                    {payment.paymentMethod.brand} •••• {payment.paymentMethod.lastFour}
+                  </div>
+                )}
               </div>
               <div className="text-sm">
-                {payment.status === 'succeeded' ? (
-                  <span className="text-green-600">Paid</span>
-                ) : (
-                  <span className="text-red-600">Failed</span>
-                )}
+                {getStatusDisplay(payment.status)}
               </div>
             </div>
           ))}
