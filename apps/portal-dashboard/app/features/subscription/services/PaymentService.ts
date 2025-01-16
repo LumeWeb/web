@@ -1,5 +1,3 @@
-import { PaymentInfo, PaymentStatus } from "../types/payment.types";
-
 import { PaymentInfo, PaymentStatus } from '../types/payment.types';
 
 export class PaymentService {
@@ -17,12 +15,12 @@ export class PaymentService {
     }
     
     // Check completion state
-    if (payment.paymentMethodId && payment.status === 'COMPLETED') {
+    if (payment.paymentMethodId) {
       return 'COMPLETED';
     }
     
     // Check processing state
-    if (payment.status === 'PROCESSING') {
+    if (payment.clientSecret && !payment.errorMessage) {
       return 'PROCESSING';
     }
     

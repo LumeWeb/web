@@ -1,36 +1,33 @@
 import { z } from "zod";
 
-import { z } from "zod";
-
-// Simplified payment status
+// Payment status represents the current state of a payment
 export type PaymentStatus = 
-  | 'PENDING'    // Initial payment state
-  | 'PROCESSING' // Payment is being processed
+  | 'PENDING'    // Payment not yet initiated
+  | 'PROCESSING' // Payment in progress
   | 'COMPLETED'  // Payment successful
   | 'FAILED';    // Payment failed
 
-// Simplified payment information
+// Payment information structure
 export interface PaymentInfo {
-  clientSecret: string;        // Stripe client secret
+  clientSecret: string;        // Payment intent client secret
   publishableKey: string;      // Stripe publishable key
-  expiresAt: string;          // Payment session expiry
-  paymentMethodId?: string;    // Stored payment method ID
-  status: PaymentStatus;       // Current payment status
-  errorMessage?: string;       // Last error message if any
+  expiresAt: string;          // Session expiry timestamp
+  paymentMethodId?: string;    // ID of the payment method used
+  errorMessage?: string;       // Error message if payment failed
 }
 
-// Payment validation schema
+// Zod schema for payment info validation
 export const paymentInfoSchema = z.object({
-  clientSecret: z.string(),
-  publishableKey: z.string(),
-  expiresAt: z.string(),
+  clientSecret: z.string().min(1, "Client secret is required"),
+  publishableKey: z.string().min(1, "Publishable key is required"),
+  expiresAt: z.string().datetime("Invalid expiry date"),
   paymentMethodId: z.string().optional(),
-  status: z.enum(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED']),
   errorMessage: z.string().optional()
 });
 
-// Payment error interface
+// Error information for payment failures
 export interface PaymentError {
   message: string;
   code?: string;
+  details?: Record<string, string>;
 }
