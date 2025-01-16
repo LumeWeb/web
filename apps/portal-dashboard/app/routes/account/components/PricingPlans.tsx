@@ -97,15 +97,25 @@ export default function PricingPlans() {
     }
     
     try {
-      if (subscription?.plan) {
-        // Only use submitPlanChange when there's an existing plan
-        await submitPlanChange(selectedPlan);
-      } else {
-        // No existing plan - create new subscription
-        await createSubscription(selectedPlan);
+      await submitPlanChange(selectedPlan);
+      
+      // If this is a new subscription (no existing plan)
+      if (!subscription?.plan) {
+        const result = await createSubscription(selectedPlan);
+        
+        // Show payment dialog for paid plans that require payment
+        if (!selectedPlan.is_free && result?.data?.payment?.client_secret) {
+          setShowPaymentDialog(true);
+        } else {
+          handlePlanSelection(null); // Clear selection for free plans
+        }
       }
     } catch (error) {
-      throw error;
+      console.error("Failed to handle plan change:", error);
+      open?.({
+        type: "error",
+        message: "Failed to process subscription change. Please try again.",
+      });
     }
   };
 
