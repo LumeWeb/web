@@ -97,7 +97,13 @@ export default function PricingPlans() {
     }
     
     try {
-      if (!subscription?.plan) {
+      if (!selectedPlan) return;
+
+      if (subscription?.plan) {
+        // Change existing subscription
+        await submitPlanChange(selectedPlan);
+        handlePlanSelection(null);
+      } else {
         // Create new subscription
         const result = await createSubscription(selectedPlan);
         
@@ -107,9 +113,6 @@ export default function PricingPlans() {
         } else {
           handlePlanSelection(null); // Clear selection for free plans
         }
-      } else {
-        // Change existing subscription
-        await submitPlanChange(selectedPlan);
       }
     } catch (error) {
       console.error("Failed to handle plan change:", error);
