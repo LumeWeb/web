@@ -25,6 +25,9 @@ export class SubscriptionStateMachine {
       case 'PENDING_PAYMENT':
         return event.type === 'COMPLETE_PAYMENT' || event.type === 'ERROR_OCCURRED';
         
+      case 'PROCESSING_PAYMENT':
+        return event.type === 'COMPLETE_PAYMENT' || event.type === 'ERROR_OCCURRED';
+        
       case 'ACTIVE':
         return event.type === 'CREATE_SUBSCRIPTION' || event.type === 'CANCEL_SUBSCRIPTION';
         
@@ -61,7 +64,13 @@ export class SubscriptionStateMachine {
         break;
 
       case 'COMPLETE_PAYMENT':
-        if (this.currentState.type === 'PENDING_PAYMENT' || this.currentState.type === 'SUSPENDED') {
+        if (this.currentState.type === 'PENDING_PAYMENT') {
+          this.currentState = { 
+            type: 'PROCESSING_PAYMENT',
+            subscription: 'subscription' in this.currentState ? this.currentState.subscription : undefined,
+            paymentMethodId: event.paymentMethodId
+          };
+        } else if (this.currentState.type === 'PROCESSING_PAYMENT' || this.currentState.type === 'SUSPENDED') {
           this.currentState = { 
             type: 'ACTIVE',
             subscription: 'subscription' in this.currentState ? this.currentState.subscription : undefined
