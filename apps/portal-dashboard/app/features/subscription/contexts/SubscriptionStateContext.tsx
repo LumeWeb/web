@@ -1,6 +1,11 @@
-import React, { createContext, useContext, ReactNode } from 'react';
-import { useSubscriptionState } from '../hooks/useSubscriptionState';
-import { SubscriptionState, SubscriptionPlan, BillingInfo } from '../types/subscription.types';
+import React, { createContext, useContext, ReactNode } from "react";
+import { useSubscriptionState } from "../hooks/useSubscriptionState";
+import {
+  SubscriptionState,
+  SubscriptionPlan,
+  BillingInfo,
+  Subscription,
+} from "../types/subscription.types";
 
 interface SubscriptionStateContextValue {
   state: SubscriptionState;
@@ -13,9 +18,15 @@ interface SubscriptionStateContextValue {
   isTransitioning: boolean;
 }
 
-const SubscriptionStateContext = createContext<SubscriptionStateContextValue | undefined>(undefined);
+const SubscriptionStateContext = createContext<
+  SubscriptionStateContextValue | undefined
+>(undefined);
 
-export function SubscriptionStateProvider({ children }: { children: ReactNode }) {
+export function SubscriptionStateProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const {
     state,
     loadSubscription,
@@ -24,7 +35,7 @@ export function SubscriptionStateProvider({ children }: { children: ReactNode })
     completePayment,
     cancelSubscription,
     handleError,
-    isTransitioning
+    isTransitioning,
   } = useSubscriptionState();
 
   const contextValue = React.useMemo(
@@ -36,7 +47,7 @@ export function SubscriptionStateProvider({ children }: { children: ReactNode })
       completePayment,
       cancelSubscription,
       handleError,
-      isTransitioning
+      isTransitioning,
     }),
     [
       state,
@@ -46,8 +57,8 @@ export function SubscriptionStateProvider({ children }: { children: ReactNode })
       completePayment,
       cancelSubscription,
       handleError,
-      isTransitioning
-    ]
+      isTransitioning,
+    ],
   );
 
   return (
@@ -60,7 +71,9 @@ export function SubscriptionStateProvider({ children }: { children: ReactNode })
 export function useSubscriptionStateContext() {
   const context = useContext(SubscriptionStateContext);
   if (!context) {
-    throw new Error('useSubscriptionStateContext must be used within a SubscriptionStateProvider');
+    throw new Error(
+      "useSubscriptionStateContext must be used within a SubscriptionStateProvider",
+    );
   }
   return context;
 }
