@@ -136,20 +136,6 @@ export function SubscriptionManager() {
     return <div>Error: {error.message}</div>;
   }
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const paidBillingEnabled = useIsPaidBillingEnabled();
-  const onFreePlan = useOnFreePlan();
-
-  const TABS = {
-    BILLING: "billing",
-    PAYMENT_HISTORY: "payment-history",
-    PAYMENT_METHOD: "payment-method",
-    ADDONS: "addons",
-  } as const;
-
-  const searchTab =
-    TABS[searchParams.get("tab") as keyof typeof TABS] ?? TABS.BILLING;
-
   return (
     <div className="space-y-6">
       {/* Subscription Status */}

@@ -19,6 +19,11 @@ interface SubscriptionContextValue {
   createSubscription: (plan: SubscriptionPlan) => Promise<void>;
   updateSubscription: (plan: SubscriptionPlan) => Promise<void>;
   cancelSubscription: () => Promise<void>;
+  validatePlanChange: (currentPlan: SubscriptionPlan, newPlan: SubscriptionPlan) => Promise<boolean>;
+  
+  // Payment Dialog
+  showPaymentDialog: boolean;
+  setShowPaymentDialog: (show: boolean) => void;
   
   // Status flags
   isProcessing: boolean;
