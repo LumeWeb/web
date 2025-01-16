@@ -135,41 +135,7 @@ export function SubscriptionManager() {
       )}
 
       {/* Available Plans */}
-      <div className="grid gap-6 md:grid-cols-3">
-        {plans.map((plan) => (
-          <Card key={plan.id}>
-            <CardHeader>
-              <CardTitle>{plan.name}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p>${plan.price}/{plan.period.toLowerCase()}</p>
-                <p>Storage: {formatBytes(plan.resources.storage)}</p>
-                <p>Upload: {formatBytes(plan.resources.upload)}/month</p>
-                <p>Download: {formatBytes(plan.resources.download)}/month</p>
-                <Button
-                  onClick={() => handlePlanSelect(plan)}
-                  disabled={isProcessing}
-                  variant={subscription?.plan.id === plan.id ? 'outline' : 'default'}
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing...
-                    </>
-                  ) : subscription?.plan.id === plan.id 
-                    ? 'Current Plan'
-                    : subscription
-                      ? plan.price > subscription.plan.price
-                        ? 'Upgrade'
-                        : 'Downgrade'
-                      : 'Select Plan'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <PlanSelector onPlanSelect={handlePlanSelect} />
 
       {/* Confirmation Dialog */}
       <AlertDialog 
@@ -221,9 +187,3 @@ export function SubscriptionManager() {
   );
 }
 
-function formatBytes(bytes: number): string {
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  if (bytes === 0) return '0 B';
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${Math.round(bytes / Math.pow(1024, i))} ${sizes[i]}`;
-}
