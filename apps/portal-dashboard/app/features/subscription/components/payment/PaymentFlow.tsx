@@ -18,7 +18,7 @@ export function PaymentFlow() {
   } = useSubscriptionContext();
   
   const { getPaymentStatus, isPaymentExpired } = usePayment();
-  const [paymentStatus, setPaymentStatus] = useState<'active' | 'ending-soon' | 'expired'>('active');
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('PENDING');
   const { connectPaymentMethod, error: paymentError } = usePaymentMutations();
   const [stripePromise, setStripePromise] = useState<Promise<any> | null>(null);
   const [processingPayment, setProcessingPayment] = useState(false);
@@ -30,24 +30,15 @@ export function PaymentFlow() {
   }, [subscription?.payment?.publishable_key]);
 
   useEffect(() => {
-    if (subscription?.payment?.expires_at && showPaymentDialog) {
-      const checkExpiry = () => {
-        const expiryDate = new Date(subscription.payment.expires_at!);
-        const remaining = expiryDate.getTime() - Date.now();
-        
-        if (remaining <= 0) {
-          setPaymentStatus('expired');
-          setShowPaymentDialog(false);
-        } else if (remaining < 120000) { // 2 minutes
-          setPaymentStatus('ending-soon');
-        }
-      };
-
-      checkExpiry();
-      const interval = setInterval(checkExpiry, 1000);
-      return () => clearInterval(interval);
+    if (!subscription?.payment) return;
+    
+    const status = getPaymentStatus(subscription.payment);
+    setPaymentStatus(status);
+    
+    if (status === 'FAILED') {
+      setShowPaymentDialog(false);
     }
-  }, [subscription?.payment?.expires_at, showPaymentDialog, setShowPaymentDialog]);
+  }, [subscription?.payment, getPaymentStatus]);
 
   const handlePaymentSuccess = () => {
     setShowPaymentDialog(false);

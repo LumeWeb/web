@@ -6,7 +6,7 @@ import { Clock, AlertCircle, CheckCircle } from 'portal-shared/components/icons'
 import { useSubscriptionContext } from '../../contexts/SubscriptionContext';
 
 interface PaymentStatusProps {
-  status: 'active' | 'ending-soon' | 'expired';
+  status: PaymentStatus;
   plan?: SubscriptionPlan;
   subscription?: Subscription;
 }
@@ -19,25 +19,32 @@ export function PaymentStatus({ status, plan, subscription }: PaymentStatusProps
 
   const getStatusDisplay = () => {
     switch (status) {
-      case 'active':
+      case 'PENDING':
         return {
-          icon: <CheckCircle className="h-5 w-5 text-green-500" />,
-          title: 'Payment Session Active',
+          icon: <Clock className="h-5 w-5 text-yellow-500" />,
+          title: 'Payment Pending',
           description: `Complete your payment to subscribe to the ${plan?.name} plan.`,
           variant: 'default' as const
         };
-      case 'ending-soon':
+      case 'PROCESSING':
         return {
-          icon: <Clock className="h-5 w-5 text-yellow-500" />,
-          title: 'Session Ending Soon',
-          description: 'Please complete your payment in the next few minutes.',
-          variant: 'warning' as const
+          icon: <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />,
+          title: 'Processing Payment',
+          description: 'Please wait while we process your payment.',
+          variant: 'default' as const
         };
-      case 'expired':
+      case 'COMPLETED':
+        return {
+          icon: <CheckCircle className="h-5 w-5 text-green-500" />,
+          title: 'Payment Complete',
+          description: 'Your payment has been processed successfully.',
+          variant: 'default' as const
+        };
+      case 'FAILED':
         return {
           icon: <AlertCircle className="h-5 w-5 text-destructive" />,
-          title: 'Session Expired',
-          description: 'Your payment session has expired. Please try again.',
+          title: 'Payment Failed',
+          description: subscription?.payment?.errorMessage || 'Your payment could not be processed. Please try again.',
           variant: 'destructive' as const
         };
     }
