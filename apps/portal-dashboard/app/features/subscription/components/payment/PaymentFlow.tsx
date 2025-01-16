@@ -55,9 +55,20 @@ export function PaymentFlow() {
       const result = await connectPaymentMethod(paymentMethodId);
       if (result.data.payment.status === 'SUCCEEDED') {
         setShowPaymentDialog(false);
+        // Notify success
+        open?.({
+          type: 'success',
+          message: 'Payment processed successfully'
+        });
+      } else {
+        throw new Error('Payment processing failed');
       }
     } catch (error) {
       console.error('Payment failed:', error);
+      open?.({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Payment processing failed'
+      });
     } finally {
       setProcessingPayment(false);
     }
@@ -69,7 +80,7 @@ export function PaymentFlow() {
 
   return (
     <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Complete Payment</DialogTitle>
           <DialogDescription>

@@ -59,22 +59,46 @@ export function BillingForm() {
   };
 
   const onSubmit = async (data: BillingInfo) => {
-    const errors = await validateBillingInfo(data);
-    if (errors) {
-      errors.forEach(error => {
-        form.setError(error.field as any, {
-          type: 'manual',
-          message: error.message
-        });
-      });
-      return;
-    }
-
     try {
-      await updateBillingInfo(data);
-      form.reset(data);
+      // Validate billing info
+      const errors = await validateBillingInfo(data);
+      if (errors) {
+        errors.forEach(error => {
+          form.setError(error.field as any, {
+            type: 'manual',
+            message: error.message
+          });
+        });
+        return;
+      }
+
+      // Format billing info before submission
+      const formattedData = await formatBillingInfo(data);
+      
+      // Update billing info
+      await updateBillingInfo(formattedData);
+      form.reset(formattedData);
+      
+      open?.({
+        type: 'success',
+        message: 'Billing information updated successfully'
+      });
     } catch (err) {
       console.error('Failed to update billing info:', err);
+      open?.({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to update billing information'
+      });
+      
+      // Handle validation errors from API
+      if (err instanceof HttpError && err.data?.errors) {
+        Object.entries(err.data.errors).forEach(([field, message]) => {
+          form.setError(field as any, {
+            type: 'manual',
+            message: message as string
+          });
+        });
+      }
     }
   };
 

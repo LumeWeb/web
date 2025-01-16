@@ -18,8 +18,16 @@ export function PaymentStatus({ status, plan, subscription }: PaymentStatusProps
     if (!plan) return;
     try {
       await createSubscription(plan);
+      open?.({
+        type: 'success',
+        message: 'Payment session renewed successfully'
+      });
     } catch (error) {
       console.error('Failed to retry subscription:', error);
+      open?.({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Failed to renew payment session'
+      });
     }
   };
 
@@ -68,8 +76,16 @@ export function PaymentStatus({ status, plan, subscription }: PaymentStatusProps
           onClick={handleRetry}
           className="w-full"
           variant="outline"
+          disabled={isLoading}
         >
-          Start New Payment Session
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Renewing Session...
+            </>
+          ) : (
+            'Start New Payment Session'
+          )}
         </Button>
       )}
 
