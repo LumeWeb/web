@@ -116,72 +116,23 @@ export class BillingService {
     return /^[A-Z]{2}$/.test(countryCode);
   }
 
-  public async validatePostalCode(postalCode: string, countryCode: string): Promise<BillingErrors | null> {
-    if (!postalCode || !countryCode) {
+  public async validatePostalCode(postalCode: string): Promise<BillingErrors | null> {
+    if (!postalCode?.trim()) {
       return [{
         field: 'postal_code',
-        message: 'Postal code and country code are required'
+        message: 'Postal code is required'
       }];
     }
-
-    try {
-      const countryData = await this.getCountryData(countryCode);
-      
-      // Check if postal code is required for this country
-      const isRequired = countryData.Required.includes('POSTAL_CODE');
-      if (!isRequired && !postalCode) {
-        return null;
-      }
-
-      const regex = new RegExp(countryData.PostCodeRegex.Regex, 'i');
-      if (!regex.test(postalCode)) {
-        return [{
-          field: 'postal_code',
-          message: `Invalid postal code format for ${countryData.Name}`
-        }];
-      }
-
-      // Check subdivision-specific regex if available
-      if (countryData.PostCodeRegex.SubdivisionRegex) {
-        const subdivisionRegex = countryData.PostCodeRegex.SubdivisionRegex[countryData.DefaultLanguage];
-        if (subdivisionRegex && !new RegExp(subdivisionRegex.Regex, 'i').test(postalCode)) {
-          return [{
-            field: 'postal_code',
-            message: `Invalid postal code format for this region`
-          }];
-        }
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Postal code validation error:', error);
-      return [{
-        field: 'postal_code',
-        message: error instanceof Error ? error.message : 'Invalid postal code'
-      }];
-    }
+    return null;
   }
 
-  public async validateState(state: string, countryCode: string, countryData: any): Promise<BillingErrors | null> {
-    try {
-      const adminArea = countryData.AdministrativeAreas[countryData.DefaultLanguage]?.find(
-        (area: any) => area.ID === state
-      );
-
-      if (!adminArea) {
-        return [{
-          field: 'state',
-          message: `Invalid state/province for ${countryData.Name}`
-        }];
-      }
-
-      return null;
-    } catch (error) {
-      console.error('State validation error:', error);
+  public async validateState(state: string): Promise<BillingErrors | null> {
+    if (!state?.trim()) {
       return [{
         field: 'state',
-        message: error instanceof Error ? error.message : 'Invalid state/province'
+        message: 'State is required'
       }];
     }
+    return null;
   }
 }
