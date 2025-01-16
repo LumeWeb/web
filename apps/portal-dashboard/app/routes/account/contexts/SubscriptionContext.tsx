@@ -192,6 +192,8 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
           throw error;
         }
       },
+      createSubscription,
+      isCreating,
       refetchSubscription,
       hyperState: {
         isHyperLoaded: hyperState.isHyperLoaded,
