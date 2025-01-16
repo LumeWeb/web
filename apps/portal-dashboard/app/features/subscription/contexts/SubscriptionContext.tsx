@@ -80,7 +80,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       error,
 
       // Plan management
-      plans: (plansData?.data ?? []) as SubscriptionPlan[],
+      plans: Array.isArray(plansData?.data) ? plansData.data : [],
       selectedPlan,
       setSelectedPlan,
 

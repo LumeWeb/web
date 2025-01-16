@@ -18,12 +18,42 @@ interface PlanSelectorProps {
 export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
   const {
     subscription,
-    plans: rawPlans,
+    plans,
     selectedPlan,
     isProcessing,
+    isLoading,
   } = useSubscriptionContext();
 
-  const plans = Array.isArray(rawPlans) ? rawPlans : [];
+  if (isLoading) {
+    return (
+      <div className="grid md:grid-cols-3 gap-8">
+        {[1, 2, 3].map((i) => (
+          <Card key={i} className="animate-pulse">
+            <CardHeader>
+              <div className="h-8 bg-muted rounded" />
+              <div className="h-12 bg-muted rounded mt-2" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <div className="h-6 bg-muted rounded" />
+                <div className="h-6 bg-muted rounded" />
+                <div className="h-6 bg-muted rounded" />
+              </div>
+              <div className="h-10 bg-muted rounded" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (!plans?.length) {
+    return (
+      <div className="text-center p-4">
+        <p className="text-muted-foreground">No subscription plans available</p>
+      </div>
+    );
+  }
 
   const getButtonLabel = (plan: SubscriptionPlan) => {
     if (isProcessing) {
