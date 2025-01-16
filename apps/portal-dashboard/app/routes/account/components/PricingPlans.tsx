@@ -99,22 +99,24 @@ export default function PricingPlans() {
     try {
       if (!selectedPlan) return;
 
-      // Create new subscription if there isn't one
       if (!subscription?.plan) {
+        // Create new subscription
         const result = await createSubscription(selectedPlan);
+        await refetchSubscription();
         
         // Show payment dialog for paid plans that require payment
         if (!selectedPlan.is_free && result?.data?.payment?.client_secret) {
           setShowPaymentDialog(true);
-        } else {
-          handlePlanSelection(null); // Clear selection for free plans
         }
-        return;
+      } else {
+        // Change existing subscription
+        await submitPlanChange(selectedPlan);
       }
-
-      // Change existing subscription
-      await submitPlanChange(selectedPlan);
-      handlePlanSelection(null);
+      
+      // Clear selection unless we're showing payment dialog
+      if (selectedPlan.is_free || subscription?.plan) {
+        handlePlanSelection(null);
+      }
     } catch (error) {
       console.error("Failed to handle plan change:", error);
       open?.({
