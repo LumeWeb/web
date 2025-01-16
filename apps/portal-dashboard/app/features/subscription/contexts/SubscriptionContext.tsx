@@ -82,7 +82,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       // Plan management
       plans: (() => {
         console.log('SubscriptionContext - raw plans data:', plansData?.data);
-        const planArray = Array.isArray(plansData?.data) ? plansData.data : [];
+        const planArray = plansData?.data?.plans || [];
         console.log('SubscriptionContext - processed plans array:', planArray);
         return planArray;
       })(),

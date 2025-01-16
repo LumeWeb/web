@@ -3,7 +3,9 @@ import type { SubscriptionPlan } from '../../types/subscription.types';
 import useApiUrl from 'portal-shared/hooks/useApiUrl';
 
 interface PlansResponse {
-  data: SubscriptionPlan[];
+  data: {
+    plans: SubscriptionPlan[];
+  };
 }
 
 export function useSubscriptionPlans() {
