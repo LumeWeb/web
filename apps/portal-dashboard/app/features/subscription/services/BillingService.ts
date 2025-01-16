@@ -50,14 +50,12 @@ export class BillingService {
         if (stateErrors) errors.push(...stateErrors);
       }
 
-      // City validation if country has city list
-      if (address.city && countryData.AdministrativeAreas) {
-        const cityErrors = await this.validateCity(
-          address.city,
-          address.state,
-          countryData
-        );
-        if (cityErrors) errors.push(...cityErrors);
+      // City validation
+      if (!address.city?.trim()) {
+        errors.push({
+          field: 'city',
+          message: 'City is required'
+        });
       }
 
     } catch (error) {
