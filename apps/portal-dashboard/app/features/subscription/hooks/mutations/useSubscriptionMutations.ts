@@ -19,7 +19,7 @@ interface SubscriptionError extends HttpError {
 
 export interface UseSubscriptionMutationsResult {
   createSubscription: (plan: SubscriptionPlan) => Promise<SubscriptionResponse>;
-  updateSubscription: (planId: string) => Promise<SubscriptionResponse>;
+  updateSubscription: (plan: SubscriptionPlan) => Promise<SubscriptionResponse>;
   cancelSubscription: () => Promise<void>;
   isLoading: boolean;
   error: SubscriptionError | null;
@@ -69,13 +69,13 @@ export function useSubscriptionMutations(): UseSubscriptionMutationsResult {
   );
 
   const updateSubscription = useCallback(
-    async (planId: string) => {
+    async (plan: SubscriptionPlan) => {
       setError(null);
       try {
         return await updateMutation({
           url: `${apiUrl}/api/account/subscription/plan`,
           method: 'put',
-          values: { plan_id: planId }
+          values: { plan_id: plan.id }
         });
       } catch (err) {
         const error = err as SubscriptionError;

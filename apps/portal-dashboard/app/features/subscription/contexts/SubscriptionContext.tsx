@@ -19,8 +19,8 @@ interface SubscriptionContextValue {
   setSelectedPlan: (plan: SubscriptionPlan | null) => void;
 
   // Actions
-  createSubscription: (plan: SubscriptionPlan) => Promise<void>;
-  updateSubscription: (plan: SubscriptionPlan) => Promise<void>;
+  createSubscription: (plan: SubscriptionPlan) => Promise<SubscriptionResponse>;
+  updateSubscription: (plan: SubscriptionPlan) => Promise<SubscriptionResponse>;
   cancelSubscription: () => Promise<void>;
   validatePlanChange: (
     currentPlan: SubscriptionPlan,
