@@ -72,8 +72,16 @@ export class BillingService {
   }
 
   private async getCountryData(countryCode: string) {
+    if (!countryCode || countryCode.length !== 2) {
+      throw new Error('Invalid country code format');
+    }
+    
     try {
-      return address.GetCountry(countryCode.toUpperCase());
+      const data = address.GetCountry(countryCode.toUpperCase());
+      if (!data) {
+        throw new Error(`Unsupported country code: ${countryCode}`);
+      }
+      return data;
     } catch (error) {
       console.error('Error fetching country data:', error);
       throw new Error('Invalid country code');
@@ -199,15 +207,34 @@ export class BillingService {
   }
 
   public async validatePostalCode(postalCode: string, countryCode: string): Promise<BillingErrors | null> {
+    if (!postalCode || !countryCode) {
+      return [{
+        field: 'postal_code',
+        message: 'Postal code and country code are required'
+      }];
+    }
+
     try {
       const countryData = await this.getCountryData(countryCode);
-      const regex = new RegExp(countryData.PostCodeRegex.Regex);
+      const regex = new RegExp(countryData.PostCodeRegex.Regex, 'i');
       
+      // Check main regex
       if (!regex.test(postalCode)) {
         return [{
           field: 'postal_code',
           message: `Invalid postal code format for ${countryData.Name}`
         }];
+      }
+
+      // Check subdivision-specific regex if available
+      if (countryData.PostCodeRegex.SubdivisionRegex) {
+        const subdivisionRegex = countryData.PostCodeRegex.SubdivisionRegex[countryData.DefaultLanguage];
+        if (subdivisionRegex && !new RegExp(subdivisionRegex.Regex, 'i').test(postalCode)) {
+          return [{
+            field: 'postal_code',
+            message: `Invalid postal code format for this region`
+          }];
+        }
       }
 
       return null;
