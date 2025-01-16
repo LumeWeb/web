@@ -77,14 +77,14 @@ export class BillingService {
     }
     
     try {
-      const data = address.GetCountry(countryCode.toUpperCase());
+      const data = await address.GetCountry(countryCode.toUpperCase());
       if (!data) {
         throw new Error(`Unsupported country code: ${countryCode}`);
       }
       return data;
     } catch (error) {
       console.error('Error fetching country data:', error);
-      throw new Error('Invalid country code');
+      throw new Error(`Invalid country code: ${countryCode}`);
     }
   }
 
@@ -216,9 +216,14 @@ export class BillingService {
 
     try {
       const countryData = await this.getCountryData(countryCode);
-      const regex = new RegExp(countryData.PostCodeRegex.Regex, 'i');
       
-      // Check main regex
+      // Check if postal code is required for this country
+      const isRequired = countryData.Required.includes('POSTAL_CODE');
+      if (!isRequired && !postalCode) {
+        return null;
+      }
+
+      const regex = new RegExp(countryData.PostCodeRegex.Regex, 'i');
       if (!regex.test(postalCode)) {
         return [{
           field: 'postal_code',
