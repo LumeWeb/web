@@ -1,35 +1,22 @@
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useNotification, HttpError } from '@refinedev/core';
-import { useBilling } from '../../hooks/core/useBilling';
-import { useBillingMutations } from '../../hooks/mutations/useBillingMutations';
-import { BillingInfo } from '../../types/billing.types';
-import { formatBillingInfo } from '../../utils/formatBillingInfo';
-import { BillingValidator } from '../billing/BillingValidator';
-import { BillingFormField } from '../billing/BillingFormField';
-import { BillingFormInput } from '../billing/BillingFormInput';
-import { BillingAddressComboBox } from '../billing/BillingAddressComboBox';
-import { Button } from 'portal-shared/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from 'portal-shared/components/ui/form';
+import React, { useEffect } from "react";
+import { useNotification } from "@refinedev/core";
+import { useBilling } from "../../hooks/core/useBilling";
+import { useBillingMutations } from "../../hooks/mutations/useBillingMutations";
+import { BillingInfo } from "../../types/billing.types";
+import { formatBillingInfo } from "../../utils/formatBillingInfo";
+import { BillingValidator } from "../billing/BillingValidator";
+import { BillingFormField } from "../billing/BillingFormField";
+import { BillingFormInput } from "../billing/BillingFormInput";
+import { BillingAddressComboBox } from "../billing/BillingAddressComboBox";
+import { Button } from "portal-shared/components/ui/button";
+import { Form } from "portal-shared/components/ui/form";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from 'portal-shared/components/ui/card';
-import { useBilling } from '../../hooks/core/useBilling';
-import { useBillingMutations } from '../../hooks/mutations/useBillingMutations';
-import { BillingInfo } from '../../types/billing.types';
-import { formatBillingInfo } from '../../utils/formatBillingInfo';
+} from "portal-shared/components/ui/card";
 
 export function BillingForm() {
   const { validateBillingInfo } = useBilling();
@@ -41,7 +28,7 @@ export function BillingForm() {
     initialValues,
     hasFormChanges,
     updateFormSchema,
-    initializeForm
+    initializeForm,
   } = useBillingForm();
 
   const {
@@ -49,29 +36,29 @@ export function BillingForm() {
     selectedCountry,
     selectedCountryData,
     handleCountryChange,
-    useCountryList
+    useCountryList,
   } = useCountryData(form);
 
   const { useStateList, useCityList } = useLocationLists(
-    form.watch('country'),
-    form.watch('state')
+    form.watch("country"),
+    form.watch("state"),
   );
 
   const handleStateChange = () => {
-    form.setValue('city', '', { shouldDirty: true });
+    form.setValue("city", "", { shouldDirty: true });
   };
 
   const { open } = useNotification();
-  
+
   const onSubmit = async (data: BillingInfo) => {
     try {
       // Validate billing info
       const errors = await validateBillingInfo(data);
       if (errors) {
-        errors.forEach(error => {
+        errors.forEach((error) => {
           form.setError(error.field as any, {
-            type: 'manual',
-            message: error.message
+            type: "manual",
+            message: error.message,
           });
         });
         return;
@@ -79,28 +66,31 @@ export function BillingForm() {
 
       // Format billing info before submission
       const formattedData = formatBillingInfo(data);
-      
+
       // Update billing info
       await updateBillingInfo(formattedData);
       form.reset(formattedData);
-      
+
       open?.({
-        type: 'success',
-        message: 'Billing information updated successfully'
+        type: "success",
+        message: "Billing information updated successfully",
       });
     } catch (err) {
-      console.error('Failed to update billing info:', err);
+      console.error("Failed to update billing info:", err);
       open?.({
-        type: 'error',
-        message: err instanceof Error ? err.message : 'Failed to update billing information'
+        type: "error",
+        message:
+          err instanceof Error
+            ? err.message
+            : "Failed to update billing information",
       });
-      
+
       // Handle validation errors from API
       if (err instanceof HttpError && err.data?.errors) {
         Object.entries(err.data.errors).forEach(([field, message]) => {
           form.setError(field as any, {
-            type: 'manual',
-            message: message as string
+            type: "manual",
+            message: message as string,
           });
         });
       }
@@ -109,13 +99,19 @@ export function BillingForm() {
 
   useEffect(() => {
     if (!countryData || !selectedCountry || !selectedCountryData) return;
-    
-    const entities = selectedCountryData.supported_entities || ['C', 'S'];
+
+    const entities = selectedCountryData.supported_entities || ["C", "S"];
     const requiredFields = selectedCountryData.required_fields || [];
-    
+
     setSupportedEntities(entities);
     updateFormSchema(entities, requiredFields);
-  }, [selectedCountry, selectedCountryData, countryData, updateFormSchema, setSupportedEntities]);
+  }, [
+    selectedCountry,
+    selectedCountryData,
+    countryData,
+    updateFormSchema,
+    setSupportedEntities,
+  ]);
 
   return (
     <Card className="bg-secondary/20">
@@ -125,13 +121,12 @@ export function BillingForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <BillingValidator billingInfo={form.getValues()} errors={error?.errors} />
-
-            <BillingFormInput
-              name="name"
-              label="Name"
-              form={form}
+            <BillingValidator
+              billingInfo={form.getValues()}
+              errors={error?.errors}
             />
+
+            <BillingFormInput name="name" label="Name" form={form} />
 
             <BillingFormInput
               name="organization"
@@ -163,10 +158,10 @@ export function BillingForm() {
             />
 
             {Object.entries({
-              S: 'state',
-              C: 'city',
-              D: 'dependent_locality',
-              X: 'sorting_code'
+              S: "state",
+              C: "city",
+              D: "dependent_locality",
+              X: "sorting_code",
             }).map(([key, fieldName]) => (
               <BillingFormField
                 key={key}
@@ -190,9 +185,8 @@ export function BillingForm() {
               <Button
                 type="submit"
                 className="ml-auto"
-                disabled={isLoading || !hasFormChanges()}
-              >
-                {isLoading ? 'Saving...' : 'Save'}
+                disabled={isLoading || !hasFormChanges()}>
+                {isLoading ? "Saving..." : "Save"}
               </Button>
             </CardFooter>
           </form>
