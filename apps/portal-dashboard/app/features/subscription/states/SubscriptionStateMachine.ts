@@ -11,44 +11,62 @@ export class SubscriptionStateMachine {
     return this.currentState;
   }
 
+  private readonly validTransitions: Record<SubscriptionState['type'], SubscriptionEvent['type'][]> = {
+    'LOADING': ['SUBSCRIPTION_LOADED', 'ERROR_OCCURRED'],
+    'INACTIVE': ['CREATE_SUBSCRIPTION', 'ERROR_OCCURRED'],
+    'PENDING_BILLING': ['UPDATE_BILLING', 'ERROR_OCCURRED', 'CANCEL_SUBSCRIPTION'],
+    'PENDING_PAYMENT': ['COMPLETE_PAYMENT', 'ERROR_OCCURRED', 'CANCEL_SUBSCRIPTION'],
+    'PROCESSING': ['COMPLETE_PAYMENT', 'ERROR_OCCURRED'],
+    'ACTIVE': ['CREATE_SUBSCRIPTION', 'CANCEL_SUBSCRIPTION', 'ERROR_OCCURRED'],
+    'SUSPENDED': ['COMPLETE_PAYMENT', 'CANCEL_SUBSCRIPTION', 'ERROR_OCCURRED'],
+    'CANCELLED': ['CREATE_SUBSCRIPTION'],
+    'ERROR': ['LOAD_SUBSCRIPTION', 'CREATE_SUBSCRIPTION', 'UPDATE_BILLING', 'COMPLETE_PAYMENT']
+  };
+
   private canTransition(event: SubscriptionEvent): boolean {
-    switch (this.currentState.type) {
-      case 'LOADING':
-        return event.type === 'SUBSCRIPTION_LOADED' || event.type === 'ERROR_OCCURRED';
-        
-      case 'INACTIVE':
-        return event.type === 'CREATE_SUBSCRIPTION';
-        
-      case 'PENDING_BILLING':
-        return event.type === 'UPDATE_BILLING' || event.type === 'ERROR_OCCURRED';
-        
-      case 'PENDING_PAYMENT':
-        return event.type === 'COMPLETE_PAYMENT' || event.type === 'ERROR_OCCURRED';
-        
-      case 'PROCESSING_PAYMENT':
-        return event.type === 'COMPLETE_PAYMENT' || event.type === 'ERROR_OCCURRED';
-        
-      case 'ACTIVE':
-        return event.type === 'CREATE_SUBSCRIPTION' || event.type === 'CANCEL_SUBSCRIPTION';
-        
-      case 'CANCELLED':
-        return event.type === 'CREATE_SUBSCRIPTION';
-        
-      case 'SUSPENDED':
-        return event.type === 'COMPLETE_PAYMENT' || event.type === 'CANCEL_SUBSCRIPTION';
-        
-      case 'ERROR':
-        return event.type === 'LOAD_SUBSCRIPTION';
-        
-      default:
-        return false;
+    const allowedEvents = this.validTransitions[this.currentState.type];
+    if (!allowedEvents) {
+      console.error(`Invalid state: ${this.currentState.type}`);
+      return false;
     }
+
+    const canTransition = allowedEvents.includes(event.type);
+    if (!canTransition) {
+      console.error(
+        `Invalid transition: Cannot handle ${event.type} in state ${this.currentState.type}. ` +
+        `Allowed events: ${allowedEvents.join(', ')}`
+      );
+    }
+
+    return canTransition;
   }
 
   public transition(event: SubscriptionEvent): SubscriptionState {
     if (!this.canTransition(event)) {
-      throw new Error(`Invalid transition: Cannot handle ${event.type} in state ${this.currentState.type}`);
+      // Keep current state but mark as error
+      return {
+        type: 'ERROR',
+        error: new Error(`Invalid transition: Cannot handle ${event.type} in state ${this.currentState.type}`),
+        previousState: this.currentState
+      };
     }
+
+    try {
+      const newState = this.handleTransition(event);
+      this.currentState = newState;
+      return newState;
+    } catch (error) {
+      const errorState = {
+        type: 'ERROR' as const,
+        error: error instanceof Error ? error : new Error('Unknown error during transition'),
+        previousState: this.currentState
+      };
+      this.currentState = errorState;
+      return errorState;
+    }
+  }
+
+  private handleTransition(event: SubscriptionEvent): SubscriptionState {
 
     switch (event.type) {
       case 'SUBSCRIPTION_LOADED':
