@@ -39,6 +39,19 @@ export function SubscriptionManager() {
     validatePlanChange
   } = useSubscriptionContext();
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paidBillingEnabled = useIsPaidBillingEnabled();
+  const onFreePlan = useOnFreePlan();
+  
+  const TABS = {
+    BILLING: "billing",
+    PAYMENT_HISTORY: "payment-history",
+    PAYMENT_METHOD: "payment-method",
+    ADDONS: "addons",
+  } as const;
+
+  const searchTab = TABS[searchParams.get("tab") as keyof typeof TABS] ?? TABS.BILLING;
+
   const [validationError, setValidationError] = useState<string | null>(null);
   const [billingError, setBillingError] = useState<string | null>(null);
   const { getPaymentStatus, isPaymentExpired } = usePayment();
@@ -121,6 +134,42 @@ export function SubscriptionManager() {
 
       {/* Available Plans */}
       <PlanSelector onPlanSelect={handlePlanSelect} />
+
+      {/* Billing Tabs */}
+      <div className="border-t border-border/30 pt-4">
+        <Tabs defaultValue={searchTab} onValueChange={(value) => setSearchParams({ tab: value })} className="space-y-4">
+          <TabsList>
+            {paidBillingEnabled && <TabsTrigger value="billing">Billing Information</TabsTrigger>}
+            {paidBillingEnabled && !onFreePlan && <TabsTrigger value="payment-history">Payment History</TabsTrigger>}
+            {paidBillingEnabled && !onFreePlan && <TabsTrigger value="payment-method">Payment Method</TabsTrigger>}
+            {false && <TabsTrigger value="addons">Add-ons</TabsTrigger>}
+          </TabsList>
+
+          {paidBillingEnabled && (
+            <TabsContent value="billing">
+              <BillingForm />
+            </TabsContent>
+          )}
+
+          {paidBillingEnabled && !onFreePlan && (
+            <TabsContent value="payment-history">
+              <PaymentHistory />
+            </TabsContent>
+          )}
+
+          {paidBillingEnabled && !onFreePlan && (
+            <TabsContent value="payment-method">
+              <PaymentMethod />
+            </TabsContent>
+          )}
+
+          {false && (
+            <TabsContent value="addons">
+              <Addons />
+            </TabsContent>
+          )}
+        </Tabs>
+      </div>
 
       {/* Confirmation Dialog */}
       <AlertDialog 
