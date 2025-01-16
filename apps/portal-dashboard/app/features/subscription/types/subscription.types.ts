@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { BillingInfo, billingInfoSchema } from "./billing.types";
+import type { BillingInfo, billingInfoSchema } from "./billing.types";
+export type { BillingInfo } from "./billing.types";
 import { PaymentInfo, paymentInfoSchema } from "./payment.types";
 import {
   SubscriptionPlanPeriod,
