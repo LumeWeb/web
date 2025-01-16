@@ -18,46 +18,49 @@ export class SubscriptionStateMachine {
     'CANCELLED': ['INACTIVE']
   };
 
-  private canTransition(event: SubscriptionEvent): boolean {
-    const allowedEvents = this.validTransitions[this.currentState.type];
-    if (!allowedEvents) {
-      console.error(`Invalid state: ${this.currentState.type}`);
-      return false;
-    }
-
-    const canTransition = allowedEvents.includes(event.type);
-    if (!canTransition) {
-      console.error(
-        `Invalid transition: Cannot handle ${event.type} in state ${this.currentState.type}. ` +
-        `Allowed events: ${allowedEvents.join(', ')}`
-      );
-    }
-
-    return canTransition;
-  }
-
   public transition(event: SubscriptionEvent): SubscriptionState {
-    if (!this.canTransition(event)) {
-      // Keep current state but mark as error
-      return {
-        type: 'ERROR',
-        error: new Error(`Invalid transition: Cannot handle ${event.type} in state ${this.currentState.type}`),
-        previousState: this.currentState
-      };
-    }
-
     try {
       const newState = this.handleTransition(event);
+      
+      // Validate state transition
+      if (this.currentState.type !== 'LOADING' && this.currentState.type !== 'ERROR') {
+        const currentStatus = this.getStatusFromState(this.currentState);
+        const newStatus = this.getStatusFromState(newState);
+        
+        if (!this.validTransitions[currentStatus]?.includes(newStatus)) {
+          throw new Error(
+            `Invalid transition from ${currentStatus} to ${newStatus}`
+          );
+        }
+      }
+      
       this.currentState = newState;
       return newState;
     } catch (error) {
       const errorState = {
         type: 'ERROR' as const,
-        error: error instanceof Error ? error : new Error('Unknown error during transition'),
-        previousState: this.currentState
+        error: error instanceof Error ? error : new Error('Unknown error during transition')
       };
       this.currentState = errorState;
       return errorState;
+    }
+  }
+
+  private getStatusFromState(state: SubscriptionState): SubscriptionStatus {
+    switch (state.type) {
+      case 'INACTIVE':
+        return 'INACTIVE';
+      case 'PENDING':
+        return 'PENDING';
+      case 'ACTIVE':
+        return 'ACTIVE';
+      case 'CANCELLED':
+        return 'CANCELLED';
+      case 'LOADING':
+      case 'ERROR':
+        return 'INACTIVE';
+      default:
+        throw new Error(`Invalid state type: ${state.type}`);
     }
   }
 

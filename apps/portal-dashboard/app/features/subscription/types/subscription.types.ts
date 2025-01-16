@@ -5,7 +5,7 @@ import { PaymentInfo, paymentInfoSchema } from "./payment.types";
 // Core subscription states
 export type SubscriptionStatus = 
   | 'INACTIVE'   // No subscription
-  | 'PENDING'    // Waiting for Hyper payment completion
+  | 'PENDING'    // Waiting for completion
   | 'ACTIVE'     // Subscription is active
   | 'CANCELLED'; // Subscription cancelled
 
@@ -38,28 +38,23 @@ export interface Subscription {
   current_period_end?: string;
   cancel_at_period_end?: boolean;
   billing?: BillingInfo;
-  payment?: PaymentInfo;
 }
 
-// Subscription State for state machine
+// Subscription State
 export type SubscriptionState =
   | { type: 'LOADING' }
   | { type: 'ERROR'; error: Error }
   | { type: 'INACTIVE' }
-  | { type: 'PENDING_BILLING'; plan: SubscriptionPlan }
-  | { type: 'PENDING_PAYMENT'; plan: SubscriptionPlan; billing: BillingInfo }
+  | { type: 'PENDING'; plan: SubscriptionPlan; billing?: BillingInfo }
   | { type: 'ACTIVE'; subscription: Subscription }
-  | { type: 'CANCELLED'; subscription: Subscription }
-  | { type: 'SUSPENDED'; subscription: Subscription }
-  | { type: 'PROCESSING_PAYMENT'; subscription: Subscription; paymentMethodId: string };
+  | { type: 'CANCELLED'; subscription: Subscription };
 
-// Subscription Events for state machine
+// Subscription Events
 export type SubscriptionEvent =
   | { type: 'LOAD_SUBSCRIPTION' }
   | { type: 'SUBSCRIPTION_LOADED'; subscription: Subscription }
   | { type: 'CREATE_SUBSCRIPTION'; plan: SubscriptionPlan }
   | { type: 'UPDATE_BILLING'; billing: BillingInfo }
-  | { type: 'COMPLETE_PAYMENT'; paymentMethodId: string }
   | { type: 'CANCEL_SUBSCRIPTION' }
   | { type: 'ERROR_OCCURRED'; error: Error };
 
