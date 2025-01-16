@@ -10,7 +10,7 @@ interface Payment {
 }
 
 interface PaymentHistoryResponse {
-  data: Payment[];
+  payments: Payment[];
 }
 
 export function usePaymentHistory() {
@@ -22,7 +22,7 @@ export function usePaymentHistory() {
   });
 
   return {
-    payments: data?.data,
+    payments: data?.payments,
     isLoading,
     refetch
   };
