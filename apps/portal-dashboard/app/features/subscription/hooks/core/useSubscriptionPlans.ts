@@ -1,20 +1,22 @@
-import { useCallback } from 'react';
-import { useList } from '@refinedev/core';
-import { SubscriptionPlan } from '../../types/subscription.types';
+import { useCustom } from '@refinedev/core';
+import type { SubscriptionPlan } from '../../types/subscription.types';
+import useApiUrl from 'portal-shared/hooks/useApiUrl';
 
-interface UseSubscriptionPlansResult {
-  plansData: { data: { plans: SubscriptionPlan[] } } | undefined;
-  plansAreLoading: boolean;
-  refetchPlans: () => void;
+interface PlansResponse {
+  data: {
+    plans: SubscriptionPlan[];
+  };
 }
 
-export function useSubscriptionPlans(): UseSubscriptionPlansResult {
-  const {
+export function useSubscriptionPlans() {
+  const apiUrl = useApiUrl();
+  const { 
     data: plansData,
     isLoading: plansAreLoading,
     refetch: refetchPlans
-  } = useList<SubscriptionPlan>({
-    resource: 'account/subscription/plans'
+  } = useCustom<PlansResponse>({
+    url: `${apiUrl}/api/account/subscription/plans`,
+    method: 'get'
   });
 
   return {
