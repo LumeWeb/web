@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from "react";
 import { useSearchParams } from "@remix-run/react";
-import { useSubscriptionContext } from '../../contexts/SubscriptionContext';
-import { usePayment } from '../../hooks/core/usePayment';
-import { useBilling } from '../../hooks/core/useBilling';
-import { SubscriptionPlan } from '../../types/subscription.types';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "portal-shared/components/ui/tabs";
+import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
+import { usePayment } from "../../hooks/core/usePayment";
+import { useBilling } from "../../hooks/core/useBilling";
+import { SubscriptionPlan } from "../../types/subscription.types";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "portal-shared/components/ui/tabs";
 import useIsPaidBillingEnabled from "portal-shared/hooks/useIsPaidBillingEnabled";
 import useOnFreePlan from "portal-shared/hooks/useOnFreePlan";
-import { Loader2, AlertCircle } from "portal-shared/components/icons";
-import { Button } from 'portal-shared/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from 'portal-shared/components/ui/card';
+import { AlertCircle } from "portal-shared/components/icons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +22,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from 'portal-shared/components/ui/alert-dialog';
+} from "portal-shared/components/ui/alert-dialog";
 
 export function SubscriptionManager() {
   const {
@@ -40,13 +38,13 @@ export function SubscriptionManager() {
     createSubscription,
     updateSubscription,
     cancelSubscription,
-    validatePlanChange
+    validatePlanChange,
   } = useSubscriptionContext();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const paidBillingEnabled = useIsPaidBillingEnabled();
   const onFreePlan = useOnFreePlan();
-  
+
   const TABS = {
     BILLING: "billing",
     PAYMENT_HISTORY: "payment-history",
@@ -54,7 +52,8 @@ export function SubscriptionManager() {
     ADDONS: "addons",
   } as const;
 
-  const searchTab = TABS[searchParams.get("tab") as keyof typeof TABS] ?? TABS.BILLING;
+  const searchTab =
+    TABS[searchParams.get("tab") as keyof typeof TABS] ?? TABS.BILLING;
 
   const [validationError, setValidationError] = useState<string | null>(null);
   const [billingError, setBillingError] = useState<string | null>(null);
@@ -78,7 +77,9 @@ export function SubscriptionManager() {
       if (subscription?.billing) {
         const billingErrors = await validateBillingInfo(subscription.billing);
         if (billingErrors) {
-          setBillingError('Please complete billing information before changing plans');
+          setBillingError(
+            "Please complete billing information before changing plans",
+          );
           return;
         }
       }
@@ -88,15 +89,18 @@ export function SubscriptionManager() {
         const result = await createSubscription(selectedPlan);
         if (result.payment && !selectedPlan.is_free) {
           const paymentStatus = getPaymentStatus(result.payment);
-          if (paymentStatus === 'PENDING') {
+          if (paymentStatus === "PENDING") {
             setShowPaymentDialog(true);
           }
         }
       } else {
         // Existing subscription
-        const isValid = await validatePlanChange(subscription.plan, selectedPlan);
+        const isValid = await validatePlanChange(
+          subscription.plan,
+          selectedPlan,
+        );
         if (!isValid) {
-          setValidationError('Invalid plan change. Please try again.');
+          setValidationError("Invalid plan change. Please try again.");
           return;
         }
 
@@ -105,7 +109,7 @@ export function SubscriptionManager() {
           const result = await updateSubscription(selectedPlan);
           if (result.payment && !selectedPlan.is_free) {
             const paymentStatus = getPaymentStatus(result.payment);
-            if (paymentStatus === 'PENDING') {
+            if (paymentStatus === "PENDING") {
               setShowPaymentDialog(true);
             }
           }
@@ -118,7 +122,8 @@ export function SubscriptionManager() {
 
       setShowConfirmDialog(false);
     } catch (err) {
-      const error = err instanceof Error ? err.message : 'Subscription action failed';
+      const error =
+        err instanceof Error ? err.message : "Subscription action failed";
       setValidationError(error);
     }
   };
@@ -134,7 +139,7 @@ export function SubscriptionManager() {
   const [searchParams, setSearchParams] = useSearchParams();
   const paidBillingEnabled = useIsPaidBillingEnabled();
   const onFreePlan = useOnFreePlan();
-  
+
   const TABS = {
     BILLING: "billing",
     PAYMENT_HISTORY: "payment-history",
@@ -142,7 +147,8 @@ export function SubscriptionManager() {
     ADDONS: "addons",
   } as const;
 
-  const searchTab = TABS[searchParams.get("tab") as keyof typeof TABS] ?? TABS.BILLING;
+  const searchTab =
+    TABS[searchParams.get("tab") as keyof typeof TABS] ?? TABS.BILLING;
 
   return (
     <div className="space-y-6">
@@ -154,11 +160,20 @@ export function SubscriptionManager() {
 
       {/* Billing Tabs */}
       <div className="border-t border-border/30 pt-4">
-        <Tabs defaultValue={searchTab} onValueChange={(value) => setSearchParams({ tab: value })} className="space-y-4">
+        <Tabs
+          defaultValue={searchTab}
+          onValueChange={(value) => setSearchParams({ tab: value })}
+          className="space-y-4">
           <TabsList>
-            {paidBillingEnabled && <TabsTrigger value="billing">Billing Information</TabsTrigger>}
-            {paidBillingEnabled && !onFreePlan && <TabsTrigger value="payment-history">Payment History</TabsTrigger>}
-            {paidBillingEnabled && !onFreePlan && <TabsTrigger value="payment-method">Payment Method</TabsTrigger>}
+            {paidBillingEnabled && (
+              <TabsTrigger value="billing">Billing Information</TabsTrigger>
+            )}
+            {paidBillingEnabled && !onFreePlan && (
+              <TabsTrigger value="payment-history">Payment History</TabsTrigger>
+            )}
+            {paidBillingEnabled && !onFreePlan && (
+              <TabsTrigger value="payment-method">Payment Method</TabsTrigger>
+            )}
             {false && <TabsTrigger value="addons">Add-ons</TabsTrigger>}
           </TabsList>
 
@@ -190,11 +205,20 @@ export function SubscriptionManager() {
 
       {/* Billing Tabs */}
       <div className="border-t border-border/30 pt-4">
-        <Tabs defaultValue={searchTab} onValueChange={(value) => setSearchParams({ tab: value })} className="space-y-4">
+        <Tabs
+          defaultValue={searchTab}
+          onValueChange={(value) => setSearchParams({ tab: value })}
+          className="space-y-4">
           <TabsList>
-            {paidBillingEnabled && <TabsTrigger value="billing">Billing Information</TabsTrigger>}
-            {paidBillingEnabled && !onFreePlan && <TabsTrigger value="payment-history">Payment History</TabsTrigger>}
-            {paidBillingEnabled && !onFreePlan && <TabsTrigger value="payment-method">Payment Method</TabsTrigger>}
+            {paidBillingEnabled && (
+              <TabsTrigger value="billing">Billing Information</TabsTrigger>
+            )}
+            {paidBillingEnabled && !onFreePlan && (
+              <TabsTrigger value="payment-history">Payment History</TabsTrigger>
+            )}
+            {paidBillingEnabled && !onFreePlan && (
+              <TabsTrigger value="payment-method">Payment Method</TabsTrigger>
+            )}
             {false && <TabsTrigger value="addons">Add-ons</TabsTrigger>}
           </TabsList>
 
@@ -225,16 +249,15 @@ export function SubscriptionManager() {
       </div>
 
       {/* Confirmation Dialog */}
-      <AlertDialog 
-        open={showConfirmDialog} 
+      <AlertDialog
+        open={showConfirmDialog}
         onOpenChange={(open) => {
           setShowConfirmDialog(open);
           if (!open) {
             setValidationError(null);
             setBillingError(null);
           }
-        }}
-      >
+        }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Subscription Change</AlertDialogTitle>
@@ -242,12 +265,13 @@ export function SubscriptionManager() {
               <div className="space-y-2">
                 {subscription
                   ? `Are you sure you want to ${
-                      selectedPlan && selectedPlan.price > subscription.plan.price
-                        ? 'upgrade'
-                        : 'downgrade'
+                      selectedPlan &&
+                      selectedPlan.price > subscription.plan.price
+                        ? "upgrade"
+                        : "downgrade"
                     } to the ${selectedPlan?.name} plan?`
                   : `Are you sure you want to subscribe to the ${selectedPlan?.name} plan?`}
-                
+
                 {validationError && (
                   <div className="flex items-center gap-2 text-destructive text-sm mt-2">
                     <AlertCircle className="h-4 w-4" />
@@ -266,11 +290,12 @@ export function SubscriptionManager() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirm}>Confirm</AlertDialogAction>
+            <AlertDialogAction onClick={handleConfirm}>
+              Confirm
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
   );
 }
-
