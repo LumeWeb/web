@@ -13,21 +13,18 @@ export default function useCreateSubscription(refetchSubscription?: () => Promis
         plan_id: plan.id,
       };
 
-      return mutate(
+      const result = await mutate(
         {
           url: `${apiUrl}/api/account/subscription`,
           method: "post",
           values,
         },
         {
-          async onSuccess() {
+          async onSuccess(data) {
             open?.({
               type: "success",
               message: "Subscription created successfully",
             });
-            if (refetchSubscription) {
-              await refetchSubscription();
-            }
           },
           onError(error: HttpError) {
             open?.({
@@ -37,6 +34,7 @@ export default function useCreateSubscription(refetchSubscription?: () => Promis
           },
         },
       );
+      return result;
     },
     [mutate, open, apiUrl, refetchSubscription],
   );
