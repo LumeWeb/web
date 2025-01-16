@@ -18,10 +18,12 @@ interface PlanSelectorProps {
 export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
   const {
     subscription,
-    plans,
+    plans: rawPlans,
     selectedPlan,
     isProcessing,
   } = useSubscriptionContext();
+
+  const plans = Array.isArray(rawPlans) ? rawPlans : [];
 
   const getButtonLabel = (plan: SubscriptionPlan) => {
     if (isProcessing) {
