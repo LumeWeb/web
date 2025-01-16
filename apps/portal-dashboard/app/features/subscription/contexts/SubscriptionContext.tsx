@@ -6,6 +6,7 @@ import {
 import { useSubscription } from "../hooks/core/useSubscription";
 import { useSubscriptionMutations } from "../hooks/mutations/useSubscriptionMutations";
 import { useSubscriptionPlans } from "../hooks/core/useSubscriptionPlans";
+import { SubscriptionResponse } from "../types/subscription.types";
 
 interface SubscriptionContextValue {
   // Current state
@@ -86,7 +87,10 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       createSubscription,
       updateSubscription,
       cancelSubscription,
-      validatePlanChange: async (currentPlan: SubscriptionPlan, newPlan: SubscriptionPlan) => {
+      validatePlanChange: async (
+        currentPlan: SubscriptionPlan,
+        newPlan: SubscriptionPlan,
+      ) => {
         // Implement validation logic here
         return true;
       },
