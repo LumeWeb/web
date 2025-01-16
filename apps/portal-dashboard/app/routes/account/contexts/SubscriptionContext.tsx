@@ -185,13 +185,25 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
           const result = await createSubscription(plan);
           console.log('Create subscription result:', {
             hasData: !!result?.data,
-            hasClientSecret: !!result?.data?.data?.payment?.client_secret
+            hasClientSecret: !!result?.data?.data?.payment?.client_secret,
+            clientSecret: result?.data?.data?.payment?.client_secret
           });
           
           // Keep selected plan and show payment dialog if needed
           if (!plan.is_free) {
-            // Refetch to get latest state with client secret
-            console.log('Refetching subscription data...');
+            // First try using the client secret from the creation response
+            if (result?.data?.data?.payment?.client_secret) {
+              handlePlanSelection(plan);
+              setShowPaymentDialog(true);
+              console.log('Showing payment dialog with creation client secret', {
+                clientSecret: result.data.data.payment.client_secret,
+                plan: plan.name
+              });
+              return;
+            }
+            
+            // Fallback to refetching if needed
+            console.log('No client secret in creation response, refetching...');
             const updatedSub = await refetchSubscription();
             console.log('Refetched subscription:', {
               hasData: !!updatedSub?.data,
@@ -202,13 +214,13 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
             if (updatedSub.data?.data?.payment?.client_secret) {
               handlePlanSelection(plan);
               setShowPaymentDialog(true);
-              console.log('Showing payment dialog with client secret', {
+              console.log('Showing payment dialog with refetched client secret', {
                 clientSecret: updatedSub.data.data.payment.client_secret,
                 plan: plan.name
               });
               return;
             } else {
-              console.log('No client secret found after refetch');
+              console.log('No client secret found in creation or refetch');
             }
           }
           
