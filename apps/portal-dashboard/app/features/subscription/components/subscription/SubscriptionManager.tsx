@@ -94,7 +94,7 @@ export function SubscriptionManager() {
         // Create new subscription
         await createSubscription(selectedPlan);
         await refetchSubscription();
-        
+
         // Show payment dialog for paid plans
         if (!selectedPlan.is_free) {
           setShowPaymentDialog(true);
@@ -273,7 +273,7 @@ export function SubscriptionManager() {
 
                 {billingError && (
                   <div className="flex items-center gap-2 text-destructive text-sm mt-2">
-                    <AlertCircle className="h-4 w-4" />
+                    <ExclamationCircleIcon className="h-4 w-4" />
                     <span>{billingError}</span>
                   </div>
                 )}
