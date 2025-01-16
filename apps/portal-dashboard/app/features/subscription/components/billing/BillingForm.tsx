@@ -19,7 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "portal-shared/components/ui/card";
-import { HttpError } from "@refinedev/core";
+import { HttpError } from "@refinedev/core/dist/interfaces";
 
 export function BillingForm() {
   const { validateBillingInfo, formatBillingInfo } = useBilling();
