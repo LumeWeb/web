@@ -51,7 +51,6 @@ const conditionalFields = {
 };
 
 // Entity codes for different address fields
-export type EntityCode = "C" | "S" | "D" | "X";
 
 // Field names that correspond to entity codes
 export type FieldName = keyof typeof conditionalFields;
@@ -76,7 +75,7 @@ type SchemaType = typeof baseSchema & {
  */
 export const createBillingInfoSchema = (
   supportedEntities: EntityCode[] = [],
-  requiredFields: EntityCode[] = []
+  requiredFields: EntityCode[] = [],
 ) => {
   const schema: SchemaType = { ...baseSchema };
 
@@ -85,7 +84,7 @@ export const createBillingInfoSchema = (
     const field = fieldMapping[entity];
     if (field) {
       // Make field required if it's in requiredFields
-      schema[field] = requiredFields.includes(entity) 
+      schema[field] = requiredFields.includes(entity)
         ? conditionalFields[field]
         : conditionalFields[field].optional();
     }

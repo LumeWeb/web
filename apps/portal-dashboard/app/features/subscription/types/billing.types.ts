@@ -28,13 +28,13 @@ export const addressSchema = z.object({
   postal_code: z.string().min(1, "Postal code is required"),
   country: z.string().min(2, "Country code must be at least 2 characters"),
   dependent_locality: z.string().optional(),
-  sorting_code: z.string().optional()
+  sorting_code: z.string().optional(),
 });
 
 export const billingInfoSchema = z.object({
   name: z.string().min(1, "Name is required"),
   organization: z.string().optional(),
-  address: addressSchema
+  address: addressSchema,
 });
 
 // Billing error types
@@ -44,3 +44,5 @@ export interface BillingValidationError {
 }
 
 export type BillingErrors = BillingValidationError[];
+
+export type EntityCode = "C" | "S" | "D" | "X";
