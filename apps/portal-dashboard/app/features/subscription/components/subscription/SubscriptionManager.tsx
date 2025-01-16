@@ -91,13 +91,13 @@ export function SubscriptionManager() {
       }
 
       if (!subscription) {
-        // New subscription
-        const result = await createSubscription(selectedPlan);
-        if (result.payment && !selectedPlan.is_free) {
-          const paymentStatus = getPaymentStatus(result.payment);
-          if (paymentStatus === "PENDING") {
-            setShowPaymentDialog(true);
-          }
+        // Create new subscription
+        await createSubscription(selectedPlan);
+        await refetchSubscription();
+        
+        // Show payment dialog for paid plans
+        if (!selectedPlan.is_free) {
+          setShowPaymentDialog(true);
         }
       } else {
         // Existing subscription
