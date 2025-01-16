@@ -62,15 +62,41 @@ function SubscriptionContent() {
   const paidBillingEnabled = useIsPaidBillingEnabled();
   const onFreePlan = useOnFreePlan();
 
-  const TABS = {
-    BILLING: "billing",
-    PAYMENT_HISTORY: "payment-history",
-    PAYMENT_METHOD: "payment-method",
-    ADDONS: "addons",
-  } as const;
+  interface Tab {
+    id: string;
+    label: string;
+    component: React.ReactNode;
+    show: () => boolean;
+  }
 
-  const searchTab =
-    TABS[searchParams.get("tab") as keyof typeof TABS] ?? TABS.BILLING;
+  const SUBSCRIPTION_TABS: Tab[] = [
+    {
+      id: 'billing',
+      label: 'Billing Information',
+      component: <BillingForm />,
+      show: () => paidBillingEnabled
+    },
+    {
+      id: 'payment-history',
+      label: 'Payment History',
+      component: <PaymentHistory />,
+      show: () => paidBillingEnabled && !onFreePlan
+    },
+    {
+      id: 'payment-method',
+      label: 'Payment Method',
+      component: <PaymentMethod />,
+      show: () => paidBillingEnabled && !onFreePlan
+    },
+    {
+      id: 'addons',
+      label: 'Add-ons',
+      component: <Addons />,
+      show: () => false // Currently disabled
+    }
+  ];
+
+  const searchTab = searchParams.get("tab") ?? "billing";
 
   const [validationError, setValidationError] = useState<string | null>(null);
   const [billingError, setBillingError] = useState<string | null>(null);
@@ -165,40 +191,21 @@ function SubscriptionContent() {
           onValueChange={(value) => setSearchParams({ tab: value })}
           className="space-y-4">
           <TabsList>
-            {paidBillingEnabled && (
-              <TabsTrigger value="billing">Billing Information</TabsTrigger>
+            {SUBSCRIPTION_TABS.map(tab => 
+              tab.show() && (
+                <TabsTrigger key={tab.id} value={tab.id}>
+                  {tab.label}
+                </TabsTrigger>
+              )
             )}
-            {paidBillingEnabled && !onFreePlan && (
-              <TabsTrigger value="payment-history">Payment History</TabsTrigger>
-            )}
-            {paidBillingEnabled && !onFreePlan && (
-              <TabsTrigger value="payment-method">Payment Method</TabsTrigger>
-            )}
-            {false && <TabsTrigger value="addons">Add-ons</TabsTrigger>}
           </TabsList>
 
-          {paidBillingEnabled && (
-            <TabsContent value="billing">
-              <BillingForm />
-            </TabsContent>
-          )}
-
-          {paidBillingEnabled && !onFreePlan && (
-            <TabsContent value="payment-history">
-              <PaymentHistory />
-            </TabsContent>
-          )}
-
-          {paidBillingEnabled && !onFreePlan && (
-            <TabsContent value="payment-method">
-              <PaymentMethod />
-            </TabsContent>
-          )}
-
-          {false && (
-            <TabsContent value="addons">
-              <Addons />
-            </TabsContent>
+          {SUBSCRIPTION_TABS.map(tab =>
+            tab.show() && (
+              <TabsContent key={tab.id} value={tab.id}>
+                {tab.component}
+              </TabsContent>
+            )
           )}
         </Tabs>
       </div>
