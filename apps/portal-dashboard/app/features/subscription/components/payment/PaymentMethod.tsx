@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSubscriptionContext } from '../../contexts/SubscriptionContext';
 import { Button } from 'portal-shared/components/ui/button';
+import { CloudIcon } from 'portal-shared/components/icons';
 import {
   Card,
   CardContent,
@@ -37,9 +38,15 @@ export function PaymentMethod() {
             </div>
             <Button 
               onClick={handleUpdatePayment}
-              disabled={isInitializing || isSaving}
-            >
-              Update Payment Method
+              disabled={isInitializing || isSaving}>
+              {isInitializing || isSaving ? (
+                <>
+                  <CloudIcon className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                'Update Payment Method'
+              )}
             </Button>
           </div>
         ) : (
@@ -49,9 +56,15 @@ export function PaymentMethod() {
             </div>
             <Button 
               onClick={handleUpdatePayment}
-              disabled={isInitializing || isSaving}
-            >
-              Add Payment Method
+              disabled={isInitializing || isSaving}>
+              {isInitializing || isSaving ? (
+                <>
+                  <CloudIcon className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                'Add Payment Method'
+              )}
             </Button>
           </div>
         )}
