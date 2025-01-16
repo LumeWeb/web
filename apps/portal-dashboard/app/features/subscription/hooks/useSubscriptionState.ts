@@ -5,11 +5,24 @@ import { SubscriptionState, SubscriptionEvent, Subscription, SubscriptionPlan, B
 export function useSubscriptionState() {
   const stateMachine = useRef(new SubscriptionStateMachine());
   const [state, setState] = useState<SubscriptionState>(stateMachine.current.getState());
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const dispatch = useCallback((event: SubscriptionEvent) => {
-    const newState = stateMachine.current.transition(event);
-    setState(newState);
-    return newState;
+  const dispatch = useCallback(async (event: SubscriptionEvent) => {
+    setIsTransitioning(true);
+    try {
+      const newState = stateMachine.current.transition(event);
+      setState(newState);
+      return newState;
+    } catch (error) {
+      if (error instanceof Error) {
+        handleError(error);
+      } else {
+        handleError(new Error('Unknown error occurred during state transition'));
+      }
+      throw error;
+    } finally {
+      setIsTransitioning(false);
+    }
   }, []);
 
   const loadSubscription = useCallback((subscription: Subscription | null) => {
@@ -51,6 +64,7 @@ export function useSubscriptionState() {
     updateBilling,
     completePayment,
     cancelSubscription,
-    handleError
+    handleError,
+    isTransitioning
   };
 }
