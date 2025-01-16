@@ -10,88 +10,30 @@ export class BillingService {
       return errors;
     }
 
-    try {
-      // Validate country
-      const countryData = await this.getCountryData(address.country);
-      if (!countryData) {
-        errors.push({ field: 'country', message: 'Invalid country code' });
-        return errors;
-      }
+    // Basic required field validation
+    const line1Errors = this.validateAddressField(address.line1, 'line1');
+    const cityErrors = this.validateAddressField(address.city, 'city');
+    const stateErrors = this.validateAddressField(address.state, 'state');
+    const postalCodeErrors = this.validateAddressField(address.postal_code, 'postal_code');
+    const countryErrors = this.validateAddressField(address.country, 'country');
 
-      // Required fields validation
-      const requiredFields = this.getRequiredFields(countryData);
-      requiredFields.forEach(field => {
-        const value = this.getAddressField(address, field);
-        if (!value?.trim()) {
-          errors.push({ 
-            field: field.toLowerCase(), 
-            message: `${field} is required for ${countryData.Name}` 
-          });
-        }
-      });
-
-      // Postal code validation
-      if (address.postal_code) {
-        const postalErrors = await this.validatePostalCode(
-          address.postal_code, 
-          address.country,
-          countryData
-        );
-        if (postalErrors) errors.push(...postalErrors);
-      }
-
-      // State/Province validation
-      if (address.state) {
-        const stateErrors = await this.validateState(
-          address.state, 
-          address.country,
-          countryData
-        );
-        if (stateErrors) errors.push(...stateErrors);
-      }
-
-      // City validation
-      if (!address.city?.trim()) {
-        errors.push({
-          field: 'city',
-          message: 'City is required'
-        });
-      }
-
-    } catch (error) {
-      console.error('Address validation error:', error);
-      errors.push({ 
-        field: 'general', 
-        message: error instanceof Error ? error.message : 'Address validation failed' 
-      });
-    }
+    if (line1Errors) errors.push(...line1Errors);
+    if (cityErrors) errors.push(...cityErrors);
+    if (stateErrors) errors.push(...stateErrors);
+    if (postalCodeErrors) errors.push(...postalCodeErrors);
+    if (countryErrors) errors.push(...countryErrors);
 
     return errors.length > 0 ? errors : null;
   }
 
-  private async getCountryData(countryCode: string) {
-    if (!countryCode || countryCode.length !== 2) {
-      throw new Error('Invalid country code format');
+  private validateAddressField(value: string | undefined, fieldName: string): BillingErrors | null {
+    if (!value?.trim()) {
+      return [{
+        field: fieldName,
+        message: `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`
+      }];
     }
-    
-    try {
-      const data = await address.GetCountry(countryCode.toUpperCase());
-      if (!data) {
-        throw new Error(`Unsupported country code: ${countryCode}`);
-      }
-      return data;
-    } catch (error) {
-      console.error('Error fetching country data:', error);
-      throw new Error(`Invalid country code: ${countryCode}`);
-    }
-  }
-
-  private getRequiredFields(countryData: any): string[] {
-    return countryData.Required || [];
-  }
-
-  private getAddressField(address: Address, field: string): string | undefined {
-    return address[field.toLowerCase() as keyof Address];
+    return null;
   }
 
   public async validateBillingInfo(billing: BillingInfo): Promise<BillingErrors | null> {
