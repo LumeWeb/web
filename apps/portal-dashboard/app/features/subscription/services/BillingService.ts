@@ -104,7 +104,7 @@ export class BillingService {
     return /^[A-Z]{2}$/.test(countryCode);
   }
 
-  public async validatePostalCode(postalCode: string): Promise<BillingErrors | null> {
+  public async validatePostalCode(postalCode: string, countryCode: string): Promise<BillingErrors | null> {
     if (!postalCode?.trim()) {
       return [{
         field: 'postal_code',
