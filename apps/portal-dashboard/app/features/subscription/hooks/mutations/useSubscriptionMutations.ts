@@ -1,113 +1,71 @@
-import { useCallback, useState } from 'react';
-import { useCustomMutation, HttpError } from '@refinedev/core';
-import { SubscriptionPlan, Subscription } from '../../types/subscription.types';
-import useApiUrl from 'portal-shared/hooks/useApiUrl';
-
-interface SubscriptionResponse {
-  data: {
-    subscription: Subscription;
-  };
-}
-
-interface SubscriptionError extends HttpError {
-  errors?: {
-    code: string;
-    message: string;
-    details?: Record<string, string>;
-  };
-}
+import { useState, useCallback } from 'react';
+import { SubscriptionPlan, SubscriptionError } from '../../types/subscription.types';
+import { useCreateSubscriptionMutation } from './useCreateSubscriptionMutation';
+import { useUpdateSubscriptionMutation } from './useUpdateSubscriptionMutation';
+import { useCancelSubscriptionMutation } from './useCancelSubscriptionMutation';
 
 export interface UseSubscriptionMutationsResult {
-  createSubscription: (plan: SubscriptionPlan) => Promise<SubscriptionResponse>;
-  updateSubscription: (plan: SubscriptionPlan) => Promise<SubscriptionResponse>;
+  createSubscription: (plan: SubscriptionPlan) => Promise<any>;
+  updateSubscription: (plan: SubscriptionPlan) => Promise<any>;
   cancelSubscription: () => Promise<void>;
   isLoading: boolean;
   error: SubscriptionError | null;
 }
 
 export function useSubscriptionMutations(): UseSubscriptionMutationsResult {
-  const apiUrl = useApiUrl();
-  const { mutate: createMutation, isLoading: isCreateLoading } = useCustomMutation<SubscriptionResponse>();
-  const { mutate: updateMutation, isLoading: isUpdateLoading } = useCustomMutation<SubscriptionResponse>();
-  const { mutate: cancelMutation, isLoading: isCancelLoading } = useCustomMutation();
   const [error, setError] = useState<SubscriptionError | null>(null);
+  
+  const createMutation = useCreateSubscriptionMutation();
+  const updateMutation = useUpdateSubscriptionMutation();
+  const cancelMutation = useCancelSubscriptionMutation();
 
   const createSubscription = useCallback(
     async (plan: SubscriptionPlan) => {
       setError(null);
       try {
-        const result = await createMutation({
-          url: `${apiUrl}/api/account/subscription`,
-          method: 'post',
-          values: { plan_id: plan.id }
-        });
-
-        if (!result?.data?.subscription) {
-          throw new Error('Invalid server response - missing subscription data');
-        }
-
-        return result;
+        return await createMutation.mutateAsync(plan);
       } catch (err) {
         const error = err as SubscriptionError;
         setError(error);
-        
-        // Enhance error message based on error type
-        if (error.statusCode === 400) {
-          error.message = 'Invalid subscription request - please check plan details';
-        } else if (error.statusCode === 403) {
-          error.message = 'Not authorized to create subscription';
-        } else if (error.statusCode === 409) {
-          error.message = 'Subscription already exists';
-        } else if (!error.message) {
-          error.message = 'Failed to create subscription';
-        }
-
         throw error;
       }
     },
-    [createMutation, apiUrl]
+    [createMutation]
   );
 
   const updateSubscription = useCallback(
     async (plan: SubscriptionPlan) => {
       setError(null);
       try {
-        return await updateMutation({
-          url: `${apiUrl}/api/account/subscription/plan`,
-          method: 'put',
-          values: { plan_id: plan.id }
-        });
+        return await updateMutation.mutateAsync(plan);
       } catch (err) {
         const error = err as SubscriptionError;
         setError(error);
         throw error;
       }
     },
-    [updateMutation, apiUrl]
+    [updateMutation]
   );
 
   const cancelSubscription = useCallback(
     async () => {
       setError(null);
       try {
-        await cancelMutation({
-          url: `${apiUrl}/api/account/subscription/cancel`,
-          method: 'post'
-        });
+        await cancelMutation.mutateAsync();
       } catch (err) {
         const error = err as SubscriptionError;
         setError(error);
         throw error;
       }
     },
-    [cancelMutation, apiUrl]
+    [cancelMutation]
   );
 
   return {
     createSubscription,
     updateSubscription,
     cancelSubscription,
-    isLoading: isCreateLoading || isUpdateLoading || isCancelLoading,
+    isLoading: createMutation.isPending || updateMutation.isPending || cancelMutation.isPending,
     error
   };
 }
