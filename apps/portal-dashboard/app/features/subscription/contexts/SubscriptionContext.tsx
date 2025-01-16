@@ -36,6 +36,9 @@ interface SubscriptionContextValue {
   isProcessing: boolean;
 }
 
+// Helper type to extract subscription from response
+type ExtractSubscription<T> = T extends { data: { subscription: infer S } } ? S : never;
+
 const SubscriptionContext = createContext<SubscriptionContextValue | undefined>(
   undefined,
 );
@@ -84,8 +87,14 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       setSelectedPlan,
 
       // Actions
-      createSubscription,
-      updateSubscription,
+      createSubscription: async (plan: SubscriptionPlan) => {
+        const response = await createSubscription(plan);
+        return response;
+      },
+      updateSubscription: async (plan: SubscriptionPlan) => {
+        const response = await updateSubscription(plan);
+        return response;
+      },
       cancelSubscription,
       validatePlanChange: async (
         currentPlan: SubscriptionPlan,
