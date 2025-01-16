@@ -80,7 +80,12 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       error,
 
       // Plan management
-      plans: Array.isArray(plansData?.data) ? plansData.data : [],
+      plans: (() => {
+        console.log('SubscriptionContext - raw plans data:', plansData?.data);
+        const planArray = Array.isArray(plansData?.data) ? plansData.data : [];
+        console.log('SubscriptionContext - processed plans array:', planArray);
+        return planArray;
+      })(),
       selectedPlan,
       setSelectedPlan,
 

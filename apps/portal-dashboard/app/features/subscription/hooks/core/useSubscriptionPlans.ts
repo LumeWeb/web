@@ -17,6 +17,9 @@ export function useSubscriptionPlans() {
     method: 'get'
   });
 
+  console.log('useSubscriptionPlans - raw response:', plansData);
+  console.log('useSubscriptionPlans - plans array:', plansData?.data);
+
   return {
     plansData,
     plansAreLoading,
