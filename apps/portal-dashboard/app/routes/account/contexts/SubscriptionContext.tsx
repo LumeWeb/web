@@ -176,21 +176,25 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
         if (subscriptionData) {
           await submitPlanChange(plan);
         } else {
-          await createSubscription(plan);
-          const updatedSub = await refetchSubscription();
+          const result = await createSubscription(plan);
           
           // Keep selected plan and show payment dialog if needed
-          if (!plan.is_free && updatedSub.data?.data?.payment?.client_secret) {
-            handlePlanSelection(plan);
-            setShowPaymentDialog(true);
-            console.log('Showing payment dialog after subscription creation', {
-              clientSecret: updatedSub.data?.data?.payment?.client_secret,
-              plan: plan.name,
-              showPaymentDialog
-            });
-          } else {
-            handlePlanSelection(null);
+          if (!plan.is_free) {
+            // Refetch to get latest state with client secret
+            const updatedSub = await refetchSubscription();
+            
+            if (updatedSub.data?.data?.payment?.client_secret) {
+              handlePlanSelection(plan);
+              setShowPaymentDialog(true);
+              console.log('Showing payment dialog with client secret', {
+                clientSecret: updatedSub.data.data.payment.client_secret,
+                plan: plan.name
+              });
+              return;
+            }
           }
+          
+          handlePlanSelection(null);
           return;
         }
         // Clear selected plan after successful change
