@@ -13,13 +13,15 @@ export function PaymentFlow() {
     showPaymentDialog,
     setShowPaymentDialog,
     subscription,
-    selectedPlan
+    selectedPlan,
+    error: subscriptionError
   } = useSubscriptionContext();
   
   const { getPaymentStatus, isPaymentExpired } = usePayment();
   const [paymentStatus, setPaymentStatus] = useState<'active' | 'ending-soon' | 'expired'>('active');
-  const { connectPaymentMethod } = usePaymentMutations();
+  const { connectPaymentMethod, error: paymentError } = usePaymentMutations();
   const [stripePromise, setStripePromise] = useState<Promise<any> | null>(null);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   useEffect(() => {
     if (subscription?.payment?.publishable_key) {
@@ -48,11 +50,16 @@ export function PaymentFlow() {
   }, [subscription?.payment?.expires_at, showPaymentDialog, setShowPaymentDialog]);
 
   const handlePaymentSuccess = async (paymentMethodId: string) => {
+    setProcessingPayment(true);
     try {
-      await connectPaymentMethod(paymentMethodId);
-      setShowPaymentDialog(false);
+      const result = await connectPaymentMethod(paymentMethodId);
+      if (result.data.payment.status === 'SUCCEEDED') {
+        setShowPaymentDialog(false);
+      }
     } catch (error) {
       console.error('Payment failed:', error);
+    } finally {
+      setProcessingPayment(false);
     }
   };
 
@@ -73,7 +80,7 @@ export function PaymentFlow() {
                 subscription={subscription}
               />
               
-              {paymentStatus === 'active' && (
+              {paymentStatus === 'active' && !processingPayment && (
                 <Elements 
                   stripe={stripePromise} 
                   options={{
@@ -81,7 +88,11 @@ export function PaymentFlow() {
                     appearance: { theme: 'stripe' }
                   }}
                 >
-                  <PaymentForm onSuccess={handlePaymentSuccess} />
+                  <PaymentForm 
+                    onSuccess={handlePaymentSuccess}
+                    error={paymentError || subscriptionError}
+                    isProcessing={processingPayment}
+                  />
                 </Elements>
               )}
             </div>
@@ -94,12 +105,16 @@ export function PaymentFlow() {
 
 interface PaymentFormProps {
   onSuccess: (paymentMethodId: string) => Promise<void>;
+  error?: Error | null;
+  isProcessing?: boolean;
 }
 
-function PaymentForm({ onSuccess }: PaymentFormProps) {
+function PaymentForm({ onSuccess, error: externalError, isProcessing }: PaymentFormProps) {
   const { subscription } = useSubscriptionContext();
-  const [error, setError] = useState<string | null>(null);
+  const [internalError, setInternalError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
+
+  const error = externalError?.message || internalError;
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -112,7 +127,7 @@ function PaymentForm({ onSuccess }: PaymentFormProps) {
       const paymentMethodId = 'pm_123'; // This would come from Stripe
       await onSuccess(paymentMethodId);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Payment failed');
+      setInternalError(err instanceof Error ? err.message : 'Payment failed');
     } finally {
       setProcessing(false);
     }
