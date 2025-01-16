@@ -97,17 +97,15 @@ export default function PricingPlans() {
     }
     
     try {
-      if (!selectedPlan) return;
-      
       if (subscription?.plan) {
         // Only use submitPlanChange when there's an existing plan
         await submitPlanChange(selectedPlan);
       } else {
         // No existing plan - create new subscription
-        await createSubscription(selectedPlan);
+        await submitPlanChange(selectedPlan);
       }
     } catch (error) {
-      console.error('Failed to change/create subscription:', error);
+      throw error;
     }
   };
 
