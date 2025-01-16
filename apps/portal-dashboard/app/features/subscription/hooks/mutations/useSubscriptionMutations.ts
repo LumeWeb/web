@@ -1,12 +1,20 @@
-import { useState, useCallback } from 'react';
-import { SubscriptionPlan, SubscriptionError } from '../../types/subscription.types';
-import { useCreateSubscriptionMutation } from './useCreateSubscriptionMutation';
-import { useUpdateSubscriptionMutation } from './useUpdateSubscriptionMutation';
-import { useCancelSubscriptionMutation } from './useCancelSubscriptionMutation';
+import { useState, useCallback } from "react";
+import {
+  SubscriptionPlan,
+  SubscriptionError,
+  Subscription,
+} from "../../types/subscription.types";
+import { useCreateSubscriptionMutation } from "./useCreateSubscriptionMutation";
+import { useUpdateSubscriptionMutation } from "./useUpdateSubscriptionMutation";
+import { useCancelSubscriptionMutation } from "./useCancelSubscriptionMutation";
 
 export interface UseSubscriptionMutationsResult {
-  createSubscription: (plan: SubscriptionPlan) => Promise<{ subscription: Subscription }>;
-  updateSubscription: (plan: SubscriptionPlan) => Promise<{ subscription: Subscription }>;
+  createSubscription: (
+    plan: SubscriptionPlan,
+  ) => Promise<{ subscription: Subscription }>;
+  updateSubscription: (
+    plan: SubscriptionPlan,
+  ) => Promise<{ subscription: Subscription }>;
   cancelSubscription: () => Promise<void>;
   isLoading: boolean;
   error: SubscriptionError | null;
@@ -14,7 +22,7 @@ export interface UseSubscriptionMutationsResult {
 
 export function useSubscriptionMutations(): UseSubscriptionMutationsResult {
   const [error, setError] = useState<SubscriptionError | null>(null);
-  
+
   const createMutation = useCreateSubscriptionMutation();
   const updateMutation = useUpdateSubscriptionMutation();
   const cancelMutation = useCancelSubscriptionMutation();
@@ -30,7 +38,7 @@ export function useSubscriptionMutations(): UseSubscriptionMutationsResult {
         throw error;
       }
     },
-    [createMutation]
+    [createMutation],
   );
 
   const updateSubscription = useCallback(
@@ -44,28 +52,28 @@ export function useSubscriptionMutations(): UseSubscriptionMutationsResult {
         throw error;
       }
     },
-    [updateMutation]
+    [updateMutation],
   );
 
-  const cancelSubscription = useCallback(
-    async () => {
-      setError(null);
-      try {
-        await cancelMutation.mutateAsync();
-      } catch (err) {
-        const error = err as SubscriptionError;
-        setError(error);
-        throw error;
-      }
-    },
-    [cancelMutation]
-  );
+  const cancelSubscription = useCallback(async () => {
+    setError(null);
+    try {
+      await cancelMutation.mutateAsync();
+    } catch (err) {
+      const error = err as SubscriptionError;
+      setError(error);
+      throw error;
+    }
+  }, [cancelMutation]);
 
   return {
     createSubscription,
     updateSubscription,
     cancelSubscription,
-    isLoading: createMutation.isLoading || updateMutation.isLoading || cancelMutation.isLoading,
-    error
+    isLoading:
+      createMutation.isLoading ||
+      updateMutation.isLoading ||
+      cancelMutation.isLoading,
+    error,
   };
 }
