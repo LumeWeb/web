@@ -1,27 +1,26 @@
-import React from 'react';
-import { useSubscriptionContext } from '../../contexts/SubscriptionContext';
+import React from "react";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from 'portal-shared/components/ui/card';
-import { usePaymentHistory } from '../../hooks/usePaymentHistory';
-import { formatDate } from '../../utils/formatDate';
-import { PaymentHistoryEntry, PaymentStatus } from '../../types/payment.types';
+} from "portal-shared/components/ui/card";
+import { usePaymentHistory } from "../../hooks/usePaymentHistory";
+import { formatDate } from "../../utils/formatDate";
+import { PaymentHistoryEntry, PaymentStatus } from "../../types/payment.types";
 
 export function PaymentHistory() {
   const { payments, isLoading } = usePaymentHistory();
 
   const getStatusDisplay = (status: PaymentStatus) => {
     switch (status) {
-      case 'COMPLETED':
+      case "COMPLETED":
         return <span className="text-green-600">Paid</span>;
-      case 'FAILED':
+      case "FAILED":
         return <span className="text-red-600">Failed</span>;
-      case 'PROCESSING':
+      case "PROCESSING":
         return <span className="text-yellow-600">Processing</span>;
-      case 'PENDING':
+      case "PENDING":
         return <span className="text-blue-600">Pending</span>;
       default:
         return <span className="text-muted-foreground">Unknown</span>;
@@ -40,7 +39,9 @@ export function PaymentHistory() {
       <CardContent>
         <div className="space-y-4">
           {payments?.map((payment: PaymentHistoryEntry) => (
-            <div key={payment.id} className="flex justify-between items-center border-b pb-2">
+            <div
+              key={payment.id}
+              className="flex justify-between items-center border-b pb-2">
               <div>
                 <div className="font-medium">
                   ${payment.amount} {payment.currency}
@@ -50,13 +51,12 @@ export function PaymentHistory() {
                 </div>
                 {payment.paymentMethod && (
                   <div className="text-xs text-muted-foreground">
-                    {payment.paymentMethod.brand} •••• {payment.paymentMethod.lastFour}
+                    {payment.paymentMethod.brand} ••••{" "}
+                    {payment.paymentMethod.lastFour}
                   </div>
                 )}
               </div>
-              <div className="text-sm">
-                {getStatusDisplay(payment.status)}
-              </div>
+              <div className="text-sm">{getStatusDisplay(payment.status)}</div>
             </div>
           ))}
           {!payments?.length && (
