@@ -10,8 +10,7 @@ import { usePaymentHistory } from '../../hooks/usePaymentHistory';
 import { formatDate } from '../../utils/formatDate';
 
 export function PaymentHistory() {
-  const { data, isLoading } = usePaymentHistory();
-  const payments = data?.data;
+  const { payments, isLoading } = usePaymentHistory();
 
   if (isLoading) {
     return <div>Loading payment history...</div>;
