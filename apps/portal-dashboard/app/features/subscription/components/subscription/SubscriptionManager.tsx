@@ -92,8 +92,7 @@ export function SubscriptionManager() {
       if (!subscription) {
         // Create new subscription
         await createSubscription(selectedPlan);
-        await refetchSubscription();
-
+        
         // Show payment dialog for paid plans
         if (!selectedPlan.is_free) {
           setShowPaymentDialog(true);
@@ -112,7 +111,6 @@ export function SubscriptionManager() {
         if (selectedPlan.price > subscription.plan.price) {
           // Upgrade
           await updateSubscription(selectedPlan);
-          await refetchSubscription();
           
           // Show payment dialog for paid plans
           if (!selectedPlan.is_free) {
