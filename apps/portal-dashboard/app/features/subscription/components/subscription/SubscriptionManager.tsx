@@ -25,6 +25,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "portal-shared/components/ui/alert-dialog";
+import { BillingForm } from "../billing/BillingForm";
+import { PaymentHistory } from "../payment/PaymentHistory";
+import { PaymentMethod } from "@/features/subscription/components/payment/PaymentMethod";
+import Addons from "@/routes/account/components/Addons";
 
 export function SubscriptionManager() {
   const {
