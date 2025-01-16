@@ -18,30 +18,38 @@ interface BillingError extends HttpError {
 }
 
 export interface UseBillingMutationsResult {
-  updateBillingInfo: (billing: BillingInfo) => Promise<BillingResponse>;
+  updateBillingInfo: (billing: BillingInfo) => void;
   isLoading: boolean;
   error: BillingError | null;
+  mutationResult?: BillingResponse;
 }
 
 export function useBillingMutations(): UseBillingMutationsResult {
   const apiUrl = useApiUrl();
-  const { mutate, isLoading } = useCustomMutation<BillingResponse>();
   const [error, setError] = useState<BillingError | null>(null);
+  const [mutationResult, setMutationResult] = useState<BillingResponse>();
+
+  const { mutate, isLoading } = useCustomMutation<BillingResponse>();
 
   const updateBillingInfo = useCallback(
-    async (billing: BillingInfo) => {
+    (billing: BillingInfo) => {
       setError(null);
-      try {
-        return await mutate({
+      mutate(
+        {
           url: `${apiUrl}/api/account/subscription/billing`,
           method: 'put',
           values: billing
-        });
-      } catch (err) {
-        const error = err as BillingError;
-        setError(error);
-        throw error;
-      }
+        },
+        {
+          onSuccess: (response) => {
+            setMutationResult(response);
+          },
+          onError: (err) => {
+            const error = err as BillingError;
+            setError(error);
+          }
+        }
+      );
     },
     [mutate, apiUrl]
   );
@@ -49,6 +57,7 @@ export function useBillingMutations(): UseBillingMutationsResult {
   return {
     updateBillingInfo,
     isLoading,
-    error
+    error,
+    mutationResult
   };
 }
