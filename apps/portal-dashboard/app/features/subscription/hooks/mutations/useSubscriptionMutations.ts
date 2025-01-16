@@ -65,7 +65,7 @@ export function useSubscriptionMutations(): UseSubscriptionMutationsResult {
     createSubscription,
     updateSubscription,
     cancelSubscription,
-    isLoading: createMutation.isPending || updateMutation.isPending || cancelMutation.isPending,
+    isLoading: createMutation.isLoading || updateMutation.isLoading || cancelMutation.isLoading,
     error
   };
 }
