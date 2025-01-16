@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from 'portal-shared/components/ui/card';
 import { usePaymentMethod } from '../../hooks/usePaymentMethod';
-import HyperPayment from './HyperPayment';
+import HyperPayment from '@/features/subscription/components/payment/HyperPayment';
 
 export function PaymentMethod() {
   const { subscription } = useSubscriptionContext();

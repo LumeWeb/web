@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSubscriptionContext } from '../../contexts/SubscriptionContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from 'portal-shared/components/ui/dialog';
-import HyperPayment from './HyperPayment';
+import HyperPayment from '@/features/subscription/components/payment/HyperPayment';
 
 export function PaymentFlow() {
   const {
