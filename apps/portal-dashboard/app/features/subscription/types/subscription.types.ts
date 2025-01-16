@@ -2,6 +2,12 @@ import { z } from "zod";
 import type { BillingInfo, billingInfoSchema } from "./billing.types";
 export type { BillingInfo } from "./billing.types";
 import { PaymentInfo, paymentInfoSchema } from "./payment.types";
+import { HttpError } from "@refinedev/core";
+
+export interface SubscriptionError extends HttpError {
+  code?: string;
+  details?: Record<string, unknown>;
+}
 import {
   SubscriptionPlanPeriod,
   SubscriptionPlanStatus,
