@@ -20,10 +20,6 @@ interface SubscriptionContextValue {
   updateSubscription: (plan: SubscriptionPlan) => Promise<void>;
   cancelSubscription: () => Promise<void>;
   
-  // Payment flow
-  showPaymentDialog: boolean;
-  setShowPaymentDialog: (show: boolean) => void;
-  
   // Status flags
   isProcessing: boolean;
 }
@@ -47,8 +43,6 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const { state, error, isLoading } = useSubscription();
   const { plansData, plansAreLoading } = useSubscriptionPlans();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-
   // Mutations
   const { 
     createSubscription,
@@ -73,10 +67,6 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     updateSubscription,
     cancelSubscription,
 
-    // Payment flow
-    showPaymentDialog,
-    setShowPaymentDialog,
-
     // Status flags
     isProcessing
   }), [
@@ -86,7 +76,6 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     plansAreLoading,
     plansData?.data?.plans,
     selectedPlan,
-    showPaymentDialog,
     isProcessing
   ]);
 
