@@ -68,6 +68,8 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     isLoading: isProcessing,
   } = useSubscriptionMutations();
 
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+
   const value = useMemo(
     () => ({
       // Current state
@@ -84,6 +86,14 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       createSubscription,
       updateSubscription,
       cancelSubscription,
+      validatePlanChange: async (currentPlan: SubscriptionPlan, newPlan: SubscriptionPlan) => {
+        // Implement validation logic here
+        return true;
+      },
+
+      // Payment Dialog
+      showPaymentDialog,
+      setShowPaymentDialog,
 
       // Status flags
       isProcessing,
@@ -96,6 +106,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       plansData?.data?.plans,
       selectedPlan,
       isProcessing,
+      showPaymentDialog,
     ],
   );
 
