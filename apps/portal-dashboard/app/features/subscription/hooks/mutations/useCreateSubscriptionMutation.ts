@@ -1,13 +1,17 @@
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
-import { SubscriptionPlan } from '../../types/subscription.types';
+import { SubscriptionPlan, Subscription, SubscriptionError } from '../../types/subscription.types';
 import useApiUrl from 'portal-shared/hooks/useApiUrl';
 import { handleSubscriptionError } from '../../utils/errorHandling';
+
+interface SubscriptionResponse {
+  subscription: Subscription;
+}
 
 export function useCreateSubscriptionMutation() {
   const apiUrl = useApiUrl();
   
-  return useMutation({
+  return useMutation<SubscriptionResponse, SubscriptionError, SubscriptionPlan>({
     mutationFn: async (plan: SubscriptionPlan) => {
       try {
         const response = await axios.post(`${apiUrl}/api/account/subscription`, {

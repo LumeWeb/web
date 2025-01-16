@@ -5,8 +5,8 @@ import { useUpdateSubscriptionMutation } from './useUpdateSubscriptionMutation';
 import { useCancelSubscriptionMutation } from './useCancelSubscriptionMutation';
 
 export interface UseSubscriptionMutationsResult {
-  createSubscription: (plan: SubscriptionPlan) => Promise<any>;
-  updateSubscription: (plan: SubscriptionPlan) => Promise<any>;
+  createSubscription: (plan: SubscriptionPlan) => Promise<{ subscription: Subscription }>;
+  updateSubscription: (plan: SubscriptionPlan) => Promise<{ subscription: Subscription }>;
   cancelSubscription: () => Promise<void>;
   isLoading: boolean;
   error: SubscriptionError | null;
