@@ -51,8 +51,6 @@ export function BillingForm() {
     form.setValue("city", "", { shouldDirty: true });
   };
 
-  const { open } = useNotification();
-
   const onSubmit = async (data: BillingInfo) => {
     try {
       // Validate billing info
