@@ -21,7 +21,7 @@ export function useBilling() {
   );
 
   const formatBillingInfo = useCallback(
-    async (billing: BillingInfo) => {
+    (billing: BillingInfo) => {
       return billingService.formatBillingInfo(billing);
     },
     [billingService]

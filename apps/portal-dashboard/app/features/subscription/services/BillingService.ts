@@ -96,7 +96,7 @@ export class BillingService {
     return isValid;
   }
 
-  public formatBillingInfo(billing: BillingInfo): BillingInfo {
+  public formatBillingInfo(billing: BillingInfo) {
     return formatBillingInfo(billing);
   }
 
