@@ -6,7 +6,7 @@ export class BillingService {
     const errors: BillingErrors = [];
     
     if (!address) {
-      errors.push({ field: 'general', message: 'Address is required' });
+      errors.push({ field: 'address', message: 'Address is required' });
       return errors;
     }
 
@@ -42,7 +42,7 @@ export class BillingService {
 
       // Validate required fields
       if (!billing) {
-        errors.push({ field: 'general', message: 'Billing information is required' });
+        errors.push({ field: 'name', message: 'Billing information is required' });
         return errors;
       }
 
