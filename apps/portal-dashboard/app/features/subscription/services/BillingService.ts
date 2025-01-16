@@ -26,7 +26,7 @@ export class BillingService {
     return errors.length > 0 ? errors : null;
   }
 
-  private validateAddressField(value: string | undefined, fieldName: string): BillingErrors | null {
+  private validateAddressField(value: string | undefined, fieldName: keyof Address): BillingErrors | null {
     if (!value?.trim()) {
       return [{
         field: fieldName,
