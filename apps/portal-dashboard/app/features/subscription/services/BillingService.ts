@@ -58,4 +58,29 @@ export class BillingService {
       }
     };
   }
+
+  public async validateCountry(countryCode: string): Promise<boolean> {
+    return /^[A-Z]{2}$/.test(countryCode);
+  }
+
+  public async validatePostalCode(postalCode: string, countryCode: string): Promise<boolean> {
+    // Basic postal code validation per country
+    const postalCodePatterns: Record<string, RegExp> = {
+      US: /^\d{5}(-\d{4})?$/,
+      CA: /^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/,
+      GB: /^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$/,
+      // Add more country patterns as needed
+    };
+
+    const pattern = postalCodePatterns[countryCode];
+    if (!pattern) return true; // Skip validation if country pattern not defined
+    
+    return pattern.test(postalCode);
+  }
+
+  public async validateStateForCountry(state: string, countryCode: string): Promise<boolean> {
+    // Implement state/province validation logic per country
+    // This would typically involve checking against a list of valid states for each country
+    return true; // Placeholder - implement actual validation
+  }
 }

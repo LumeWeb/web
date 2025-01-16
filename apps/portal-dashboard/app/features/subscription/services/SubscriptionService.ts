@@ -56,4 +56,57 @@ export class SubscriptionService {
       error
     });
   }
+
+  public async validatePlanChange(currentPlan: SubscriptionPlan, newPlan: SubscriptionPlan): Promise<boolean> {
+    // Implement plan change validation logic
+    // e.g., check if downgrade is allowed, verify resource limits, etc.
+    return true; // Placeholder - implement actual validation
+  }
+
+  public async calculateProration(
+    currentPlan: SubscriptionPlan,
+    newPlan: SubscriptionPlan,
+    currentPeriodEnd: Date
+  ): Promise<number> {
+    // Implement proration calculation logic
+    const now = new Date();
+    const remainingDays = Math.ceil((currentPeriodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const totalDays = 30; // Assuming monthly billing
+    
+    const currentAmount = currentPlan.price;
+    const newAmount = newPlan.price;
+    
+    return (newAmount - currentAmount) * (remainingDays / totalDays);
+  }
+
+  public getSubscriptionPeriodDates(
+    plan: SubscriptionPlan,
+    startDate: Date = new Date()
+  ): { start: Date; end: Date } {
+    const start = new Date(startDate);
+    const end = new Date(startDate);
+    
+    if (plan.period === 'MONTHLY') {
+      end.setMonth(end.getMonth() + 1);
+    } else if (plan.period === 'YEARLY') {
+      end.setFullYear(end.getFullYear() + 1);
+    }
+    
+    return { start, end };
+  }
+
+  public async validateSubscriptionStatus(subscription: Subscription): Promise<boolean> {
+    const validTransitions = {
+      'INACTIVE': ['PENDING', 'ACTIVE'],
+      'PENDING': ['ACTIVE', 'CANCELLED'],
+      'ACTIVE': ['SUSPENDED', 'CANCELLED'],
+      'SUSPENDED': ['ACTIVE', 'CANCELLED'],
+      'CANCELLED': ['PENDING', 'ACTIVE']
+    };
+
+    const currentStatus = subscription.status;
+    const allowedStatuses = validTransitions[currentStatus];
+    
+    return !!allowedStatuses;
+  }
 }
