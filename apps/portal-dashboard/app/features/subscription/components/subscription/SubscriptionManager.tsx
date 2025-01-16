@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { SubscriptionProvider } from "../../contexts/SubscriptionContext";
 import { useSearchParams } from "@remix-run/react";
 import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
 import { usePayment } from "../../hooks/core/usePayment";
@@ -30,7 +31,15 @@ import { PaymentHistory } from "../payment/PaymentHistory";
 import { PaymentMethod } from "@/features/subscription/components/payment/PaymentMethod";
 import Addons from "@/routes/account/components/Addons";
 
-export function SubscriptionManager() {
+export default function SubscriptionManager() {
+  return (
+    <SubscriptionProvider>
+      <SubscriptionContent />
+    </SubscriptionProvider>
+  );
+}
+
+function SubscriptionContent() {
   const {
     subscription,
     plans,
