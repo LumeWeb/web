@@ -105,13 +105,37 @@ export class BillingService {
   }
 
   public async validatePostalCode(postalCode: string, countryCode: string): Promise<BillingErrors | null> {
+    const errors: BillingErrors = [];
+
     if (!postalCode?.trim()) {
-      return [{
+      errors.push({
         field: 'postal_code',
         message: 'Postal code is required'
-      }];
+      });
     }
-    return null;
+
+    // Add country-specific postal code validation
+    switch (countryCode) {
+      case 'US':
+        if (!/^\d{5}(-\d{4})?$/.test(postalCode)) {
+          errors.push({
+            field: 'postal_code',
+            message: 'Invalid US postal code format (e.g., 12345 or 12345-6789)'
+          });
+        }
+        break;
+      case 'CA':
+        if (!/^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/.test(postalCode.toUpperCase())) {
+          errors.push({
+            field: 'postal_code',
+            message: 'Invalid Canadian postal code format (e.g., A1A 1A1)'
+          });
+        }
+        break;
+      // Add more country-specific validations as needed
+    }
+
+    return errors.length > 0 ? errors : null;
   }
 
   public async validateState(state: string): Promise<BillingErrors | null> {
