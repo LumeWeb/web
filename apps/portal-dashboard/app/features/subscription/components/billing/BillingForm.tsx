@@ -19,7 +19,6 @@ import {
   CardHeader,
   CardTitle,
 } from "portal-shared/components/ui/card";
-import { HttpError } from "@refinedev/core/dist/interfaces";
 
 export function BillingForm() {
   const { validateBillingInfo, formatBillingInfo } = useBilling();
@@ -85,13 +84,18 @@ export function BillingForm() {
       });
 
       // Handle validation errors from API
-      if (err instanceof HttpError && err.data?.errors) {
-        Object.entries(err.data.errors).forEach(([field, message]) => {
-          form.setError(field as any, {
-            type: "manual",
-            message: message as string,
+      if (err && typeof err === 'object' && 'data' in err) {
+        const errorData = err.data?.errors;
+        if (errorData && typeof errorData === 'object') {
+          Object.entries(errorData).forEach(([field, message]) => {
+            if (typeof message === 'string') {
+              form.setError(field as any, {
+                type: 'manual',
+                message
+              });
+            }
           });
-        });
+        }
       }
     }
   };
