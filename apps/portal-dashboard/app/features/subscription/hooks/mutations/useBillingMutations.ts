@@ -11,9 +11,7 @@ interface BillingResponse {
 
 interface BillingError extends HttpError {
   errors?: {
-    code: string;
-    message: string;
-    details?: Record<string, string>;
+    [key: string]: string | boolean | string[] | { key: string; message: string; };
   };
 }
 
@@ -42,7 +40,13 @@ export function useBillingMutations(): UseBillingMutationsResult {
         },
         {
           onSuccess: (response) => {
-            setMutationResult(response);
+            if (response?.data) {
+              setMutationResult({
+                data: {
+                  billing: response.data.data?.billing || response.data.billing
+                }
+              });
+            }
           },
           onError: (err) => {
             const error = err as BillingError;
