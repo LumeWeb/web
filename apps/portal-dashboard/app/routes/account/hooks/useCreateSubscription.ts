@@ -20,11 +20,11 @@ export default function useCreateSubscription(refetchSubscription?: () => Promis
           values,
         },
         {
+          onSuccess(data) {
+            return data;
+          },
           onError(error: HttpError) {
-            open?.({
-              type: "error",
-              message: `Failed to create subscription: ${error.message}`,
-            });
+            throw error;
           },
         },
       );
