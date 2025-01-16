@@ -15,7 +15,7 @@ export function useCountryData(form: UseFormReturn<BillingInfo>) {
     resource: 'account/subscription/billing/countries'
   });
 
-  const selectedCountry = form.watch('address.country');
+  const selectedCountry = form.watch('country');
   const selectedCountryData = countryData?.data.find(
     (country) => country.code === selectedCountry
   );
