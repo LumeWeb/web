@@ -49,29 +49,12 @@ export function PaymentFlow() {
     }
   }, [subscription?.payment?.expires_at, showPaymentDialog, setShowPaymentDialog]);
 
-  const handlePaymentSuccess = async (paymentMethodId: string) => {
-    setProcessingPayment(true);
-    try {
-      const result = await connectPaymentMethod(paymentMethodId);
-      if (result.data.payment.status === 'SUCCEEDED') {
-        setShowPaymentDialog(false);
-        // Notify success
-        open?.({
-          type: 'success',
-          message: 'Payment processed successfully'
-        });
-      } else {
-        throw new Error('Payment processing failed');
-      }
-    } catch (error) {
-      console.error('Payment failed:', error);
-      open?.({
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Payment processing failed'
-      });
-    } finally {
-      setProcessingPayment(false);
-    }
+  const handlePaymentSuccess = () => {
+    setShowPaymentDialog(false);
+    open?.({
+      type: 'success',
+      message: 'Payment processed successfully'
+    });
   };
 
   if (!subscription?.payment?.client_secret || !stripePromise) {

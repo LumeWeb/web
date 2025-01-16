@@ -12,23 +12,9 @@ interface PaymentStatusProps {
 }
 
 export function PaymentStatus({ status, plan, subscription }: PaymentStatusProps) {
-  const { createSubscription } = useSubscriptionContext();
-
-  const handleRetry = async () => {
+  const handleRetry = () => {
     if (!plan) return;
-    try {
-      await createSubscription(plan);
-      open?.({
-        type: 'success',
-        message: 'Payment session renewed successfully'
-      });
-    } catch (error) {
-      console.error('Failed to retry subscription:', error);
-      open?.({
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Failed to renew payment session'
-      });
-    }
+    window.location.reload(); // Simple refresh to restart payment flow
   };
 
   const getStatusDisplay = () => {
