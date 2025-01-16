@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSubscriptionContext } from '../../contexts/SubscriptionContext';
+import { usePayment } from '../../hooks/core/usePayment';
+import { useBilling } from '../../hooks/core/useBilling';
 import { SubscriptionPlan } from '../../types/subscription.types';
-import { Loader2 } from "portal-shared/components/icons";
+import { Loader2, AlertCircle } from "portal-shared/components/icons";
 import { Button } from 'portal-shared/components/ui/button';
 import {
   Card,
@@ -38,6 +40,9 @@ export function SubscriptionManager() {
   } = useSubscriptionContext();
 
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [billingError, setBillingError] = useState<string | null>(null);
+  const { getPaymentStatus, isPaymentExpired } = usePayment();
+  const { validateBillingInfo } = useBilling();
 
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
 
@@ -49,12 +54,29 @@ export function SubscriptionManager() {
   const handleConfirm = async () => {
     if (!selectedPlan) return;
     setValidationError(null);
+    setBillingError(null);
 
     try {
+      // Validate billing info if required
+      if (subscription?.billing) {
+        const billingErrors = await validateBillingInfo(subscription.billing);
+        if (billingErrors) {
+          setBillingError('Please complete billing information before changing plans');
+          return;
+        }
+      }
+
       if (!subscription) {
-        await createSubscription(selectedPlan);
+        // New subscription
+        const result = await createSubscription(selectedPlan);
+        if (result.payment && !selectedPlan.is_free) {
+          const paymentStatus = getPaymentStatus(result.payment);
+          if (paymentStatus === 'PENDING') {
+            setShowPaymentDialog(true);
+          }
+        }
       } else {
-        // Validate plan change
+        // Existing subscription
         const isValid = await validatePlanChange(subscription.plan, selectedPlan);
         if (!isValid) {
           setValidationError('Invalid plan change. Please try again.');
@@ -63,20 +85,24 @@ export function SubscriptionManager() {
 
         if (selectedPlan.price > subscription.plan.price) {
           // Upgrade
-          await updateSubscription(selectedPlan);
+          const result = await updateSubscription(selectedPlan);
+          if (result.payment && !selectedPlan.is_free) {
+            const paymentStatus = getPaymentStatus(result.payment);
+            if (paymentStatus === 'PENDING') {
+              setShowPaymentDialog(true);
+            }
+          }
         } else {
           // Downgrade with confirmation
           await cancelSubscription();
           await createSubscription(selectedPlan);
         }
       }
+
+      setShowConfirmDialog(false);
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Subscription action failed';
       setValidationError(error);
-    } finally {
-      if (!validationError) {
-        setShowConfirmDialog(false);
-      }
     }
   };
 
@@ -152,6 +178,7 @@ export function SubscriptionManager() {
           setShowConfirmDialog(open);
           if (!open) {
             setValidationError(null);
+            setBillingError(null);
           }
         }}
       >
@@ -169,7 +196,17 @@ export function SubscriptionManager() {
                   : `Are you sure you want to subscribe to the ${selectedPlan?.name} plan?`}
                 
                 {validationError && (
-                  <p className="text-destructive text-sm mt-2">{validationError}</p>
+                  <div className="flex items-center gap-2 text-destructive text-sm mt-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{validationError}</span>
+                  </div>
+                )}
+
+                {billingError && (
+                  <div className="flex items-center gap-2 text-destructive text-sm mt-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{billingError}</span>
+                  </div>
                 )}
               </div>
             </AlertDialogDescription>
