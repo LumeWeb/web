@@ -10,10 +10,10 @@ import {
 interface SubscriptionStateContextValue {
   state: SubscriptionState;
   loadSubscription: (subscription: Subscription | null) => void;
-  createSubscription: (plan: SubscriptionPlan) => Promise<void>;
-  updateBilling: (billing: BillingInfo) => Promise<void>;
-  completePayment: (paymentMethodId: string) => Promise<void>;
-  cancelSubscription: () => Promise<void>;
+  createSubscription: (plan: SubscriptionPlan) => void;
+  updateBilling: (billing: BillingInfo) => void;
+  completePayment: (paymentMethodId: string) => void;
+  cancelSubscription: () => void;
   handleError: (error: Error) => void;
   isTransitioning: boolean;
 }

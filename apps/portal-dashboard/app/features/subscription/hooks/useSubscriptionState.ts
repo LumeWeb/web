@@ -37,20 +37,20 @@ export function useSubscriptionState() {
     }
   }, [dispatch]);
 
-  const createSubscription = useCallback((plan: SubscriptionPlan) => {
-    dispatch({ type: 'CREATE_SUBSCRIPTION', plan });
+  const createSubscription = useCallback(async (plan: SubscriptionPlan) => {
+    await dispatch({ type: 'CREATE_SUBSCRIPTION', plan });
   }, [dispatch]);
 
-  const updateBilling = useCallback((billing: BillingInfo) => {
-    dispatch({ type: 'UPDATE_BILLING', billing });
+  const updateBilling = useCallback(async (billing: BillingInfo) => {
+    await dispatch({ type: 'UPDATE_BILLING', billing });
   }, [dispatch]);
 
-  const completePayment = useCallback((paymentMethodId: string) => {
-    dispatch({ type: 'COMPLETE_PAYMENT', paymentMethodId });
+  const completePayment = useCallback(async (paymentMethodId: string) => {
+    await dispatch({ type: 'COMPLETE_PAYMENT', paymentMethodId });
   }, [dispatch]);
 
-  const cancelSubscription = useCallback(() => {
-    dispatch({ type: 'CANCEL_SUBSCRIPTION' });
+  const cancelSubscription = useCallback(async () => {
+    await dispatch({ type: 'CANCEL_SUBSCRIPTION' });
   }, [dispatch]);
 
   const handleError = useCallback((error: Error) => {
