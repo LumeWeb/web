@@ -102,7 +102,7 @@ export default function PricingPlans() {
         await submitPlanChange(selectedPlan);
       } else {
         // No existing plan - create new subscription
-        await submitPlanChange(selectedPlan);
+        await createSubscription(selectedPlan);
       }
     } catch (error) {
       throw error;
