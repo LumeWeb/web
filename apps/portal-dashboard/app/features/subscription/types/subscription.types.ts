@@ -51,7 +51,8 @@ export type SubscriptionState =
   | { type: 'PENDING_PAYMENT'; plan: SubscriptionPlan; billing: BillingInfo }
   | { type: 'ACTIVE'; subscription: Subscription }
   | { type: 'CANCELLED'; subscription: Subscription }
-  | { type: 'SUSPENDED'; subscription: Subscription };
+  | { type: 'SUSPENDED'; subscription: Subscription }
+  | { type: 'PROCESSING_PAYMENT'; subscription: Subscription; paymentMethodId: string };
 
 // Subscription Events for state machine
 export type SubscriptionEvent =
