@@ -52,7 +52,15 @@ export class SubscriptionStateMachine {
 
     switch (event.type) {
       case 'SUBSCRIPTION_LOADED':
-        this.currentState = this.handleSubscriptionLoaded(event.subscription);
+        const newState = this.handleSubscriptionLoaded(event.subscription);
+        // Preserve plan and billing info when transitioning to PENDING states
+        if (newState.type === 'PENDING_BILLING' && this.currentState.type === 'PENDING_BILLING') {
+          newState.plan = this.currentState.plan;
+        } else if (newState.type === 'PENDING_PAYMENT' && this.currentState.type === 'PENDING_PAYMENT') {
+          newState.plan = this.currentState.plan;
+          newState.billing = this.currentState.billing;
+        }
+        this.currentState = newState;
         break;
 
       case 'CREATE_SUBSCRIPTION':
@@ -143,15 +151,30 @@ export class SubscriptionStateMachine {
       case 'INACTIVE':
         return { type: 'INACTIVE' };
       case 'PENDING':
-        return subscription.billing 
-          ? { type: 'PENDING_PAYMENT' }
-          : { type: 'PENDING_BILLING' };
+        if (subscription.billing) {
+          return { 
+            type: 'PENDING_PAYMENT',
+            plan: subscription.plan,
+            billing: subscription.billing
+          };
+        }
+        return { 
+          type: 'PENDING_BILLING',
+          plan: subscription.plan
+        };
       case 'ACTIVE':
         return { type: 'ACTIVE', subscription };
       case 'CANCELLED':
         return { type: 'CANCELLED', subscription };
       case 'SUSPENDED':
         return { type: 'SUSPENDED', subscription };
+      case 'PROCESSING_PAYMENT':
+        return {
+          type: 'PROCESSING_PAYMENT',
+          plan: subscription.plan,
+          billing: subscription.billing,
+          paymentMethodId: subscription.payment?.payment_method_id || ''
+        };
       default:
         return { type: 'ERROR', error: new Error('Invalid subscription status') };
     }
