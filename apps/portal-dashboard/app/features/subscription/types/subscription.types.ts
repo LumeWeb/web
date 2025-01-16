@@ -1,44 +1,25 @@
 import { z } from "zod";
 import { BillingInfo, billingInfoSchema } from "./billing.types";
 import { PaymentInfo, paymentInfoSchema } from "./payment.types";
+import {
+  SubscriptionPlanPeriod,
+  SubscriptionPlanStatus,
+  SubscriptionPlan as SharedSubscriptionPlan,
+  Subscription as SharedSubscription,
+  Resources
+} from "portal-shared/dataProviders/accountProvider";
 
 // Core subscription states
-export type SubscriptionStatus = 
-  | 'INACTIVE'   // No subscription
-  | 'PENDING'    // Waiting for completion
-  | 'ACTIVE'     // Subscription is active
-  | 'CANCELLED'; // Subscription cancelled
-
-// Subscription Period
-export type SubscriptionPeriod = 'MONTHLY' | 'YEARLY';
+export type SubscriptionStatus = SubscriptionPlanStatus;
 
 // Resource limits/quotas
-export interface SubscriptionResources {
-  storage: number;     // Storage limit in bytes
-  upload: number;      // Upload bandwidth limit in bytes
-  download: number;    // Download bandwidth limit in bytes
-}
+export type SubscriptionResources = Resources;
 
 // Subscription Plan
-export interface SubscriptionPlan {
-  id: string;
-  name: string;
-  period: SubscriptionPeriod;
-  price: number;
-  is_free: boolean;
-  resources: SubscriptionResources;
-}
+export type SubscriptionPlan = SharedSubscriptionPlan;
 
 // Active Subscription
-export interface Subscription {
-  id: string;
-  status: SubscriptionStatus;
-  plan: SubscriptionPlan;
-  current_period_start?: string;
-  current_period_end?: string;
-  cancel_at_period_end?: boolean;
-  billing?: BillingInfo;
-}
+export type Subscription = SharedSubscription;
 
 // Subscription State
 export type SubscriptionState =
@@ -68,7 +49,7 @@ export const subscriptionResourcesSchema = z.object({
 export const subscriptionPlanSchema = z.object({
   id: z.string(),
   name: z.string(),
-  period: z.enum(['MONTHLY', 'YEARLY']),
+  period: z.nativeEnum(SubscriptionPlanPeriod),
   price: z.number(),
   is_free: z.boolean(),
   resources: subscriptionResourcesSchema
@@ -76,7 +57,7 @@ export const subscriptionPlanSchema = z.object({
 
 export const subscriptionSchema = z.object({
   id: z.string(),
-  status: z.enum(['INACTIVE', 'PENDING', 'ACTIVE', 'CANCELLED', 'SUSPENDED']),
+  status: z.nativeEnum(SubscriptionPlanStatus),
   plan: subscriptionPlanSchema,
   current_period_start: z.string().optional(),
   current_period_end: z.string().optional(),
