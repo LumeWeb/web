@@ -73,10 +73,10 @@ export class BillingService {
 
   private async getCountryData(countryCode: string) {
     try {
-      return await address.GetCountry(countryCode);
+      return address.GetCountry(countryCode.toUpperCase());
     } catch (error) {
       console.error('Error fetching country data:', error);
-      return null;
+      throw new Error('Invalid country code');
     }
   }
 
@@ -198,24 +198,48 @@ export class BillingService {
     return /^[A-Z]{2}$/.test(countryCode);
   }
 
-  public async validatePostalCode(postalCode: string, countryCode: string): Promise<boolean> {
-    // Basic postal code validation per country
-    const postalCodePatterns: Record<string, RegExp> = {
-      US: /^\d{5}(-\d{4})?$/,
-      CA: /^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/,
-      GB: /^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$/,
-      // Add more country patterns as needed
-    };
+  public async validatePostalCode(postalCode: string, countryCode: string): Promise<BillingErrors | null> {
+    try {
+      const countryData = await this.getCountryData(countryCode);
+      const regex = new RegExp(countryData.PostCodeRegex.Regex);
+      
+      if (!regex.test(postalCode)) {
+        return [{
+          field: 'postal_code',
+          message: `Invalid postal code format for ${countryData.Name}`
+        }];
+      }
 
-    const pattern = postalCodePatterns[countryCode];
-    if (!pattern) return true; // Skip validation if country pattern not defined
-    
-    return pattern.test(postalCode);
+      return null;
+    } catch (error) {
+      console.error('Postal code validation error:', error);
+      return [{
+        field: 'postal_code',
+        message: error instanceof Error ? error.message : 'Invalid postal code'
+      }];
+    }
   }
 
-  public async validateStateForCountry(state: string, countryCode: string): Promise<boolean> {
-    // Implement state/province validation logic per country
-    // This would typically involve checking against a list of valid states for each country
-    return true; // Placeholder - implement actual validation
+  public async validateState(state: string, countryCode: string, countryData: any): Promise<BillingErrors | null> {
+    try {
+      const adminArea = countryData.AdministrativeAreas[countryData.DefaultLanguage]?.find(
+        (area: any) => area.ID === state
+      );
+
+      if (!adminArea) {
+        return [{
+          field: 'state',
+          message: `Invalid state/province for ${countryData.Name}`
+        }];
+      }
+
+      return null;
+    } catch (error) {
+      console.error('State validation error:', error);
+      return [{
+        field: 'state',
+        message: error instanceof Error ? error.message : 'Invalid state/province'
+      }];
+    }
   }
 }
