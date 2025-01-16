@@ -103,7 +103,7 @@ export function BillingForm() {
   useEffect(() => {
     if (!countryData || !selectedCountry || !selectedCountryData) return;
 
-    const entities = selectedCountryData.supported_entities || ["C", "S"];
+    const entities = (selectedCountryData.supported_entities || ["C", "S"]) as EntityCode[];
     const requiredFields = selectedCountryData.required_fields || [];
 
     setSupportedEntities(entities);

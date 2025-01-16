@@ -3,11 +3,13 @@ import { UseFormReturn } from 'react-hook-form';
 import { useList } from '@refinedev/core';
 import { BillingInfo } from '../../types/billing.types';
 
+import { EntityCode } from '../../types/billing.types';
+
 interface CountryData {
   code: string;
   name: string;
-  supported_entities: string[];
-  required_fields: string[];
+  supported_entities: EntityCode[];
+  required_fields: EntityCode[];
 }
 
 export function useCountryData(form: UseFormReturn<BillingInfo>) {
