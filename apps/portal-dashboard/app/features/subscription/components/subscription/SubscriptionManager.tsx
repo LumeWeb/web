@@ -63,7 +63,6 @@ export function SubscriptionManager() {
 
   const [validationError, setValidationError] = useState<string | null>(null);
   const [billingError, setBillingError] = useState<string | null>(null);
-  const { getPaymentStatus, isPaymentExpired } = usePayment();
   const { validateBillingInfo } = useBilling();
 
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
