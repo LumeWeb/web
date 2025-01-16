@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from 'portal-shared/components/ui/card';
-import { CloudIcon, CloudUploadIcon, DownloadIcon, Loader2 } from "portal-shared/components/icons";
+import { CloudIcon, CloudUploadIcon, DownloadIcon } from "portal-shared/components/icons";
 import { formatBytes } from '../../utils/formatBytes';
 
 interface PlanSelectorProps {
@@ -27,7 +27,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
     if (isProcessing) {
       return (
         <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <CloudIcon className="mr-2 h-4 w-4 animate-spin" />
           Processing...
         </>
       );
