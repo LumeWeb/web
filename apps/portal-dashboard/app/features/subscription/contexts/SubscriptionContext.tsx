@@ -91,8 +91,20 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
 
       // Actions
       createSubscription: async (plan: SubscriptionPlan) => {
-        const response = await createSubscription(plan);
-        return response.data.subscription;
+        try {
+          console.log('Creating subscription in context with plan:', plan);
+          const response = await createSubscription(plan);
+          console.log('Subscription creation response:', response);
+          
+          if (!response?.data?.subscription) {
+            throw new Error('Invalid server response - missing subscription data');
+          }
+          
+          return response.data.subscription;
+        } catch (error) {
+          console.error('Error in subscription context:', error);
+          throw error;
+        }
       },
       updateSubscription: async (plan: SubscriptionPlan) => {
         const response = await updateSubscription(plan);

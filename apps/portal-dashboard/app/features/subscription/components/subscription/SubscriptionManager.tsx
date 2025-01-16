@@ -127,12 +127,18 @@ function SubscriptionContent() {
       }
 
       if (!subscription) {
-        // Create new subscription
-        await createSubscription(selectedPlan);
-        
-        // Show payment dialog for paid plans
-        if (!selectedPlan.is_free) {
-          setShowPaymentDialog(true);
+        try {
+          console.log('Creating subscription with plan:', selectedPlan);
+          const newSubscription = await createSubscription(selectedPlan);
+          console.log('Created subscription:', newSubscription);
+          
+          // Show payment dialog for paid plans
+          if (!selectedPlan.is_free) {
+            setShowPaymentDialog(true);
+          }
+        } catch (error) {
+          console.error('Error creating subscription:', error);
+          throw error;
         }
       } else {
         // Existing subscription
