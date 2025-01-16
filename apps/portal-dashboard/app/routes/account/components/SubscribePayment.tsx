@@ -27,7 +27,6 @@ interface SubscribePaymentProps {
 }
 
 export default function SubscribePayment({ open, onOpenChange, status }: SubscribePaymentProps) {
-  console.log('SubscribePayment render:', { open, status });
   const { selectedPlan } = useSubscriptionContext();
   const { connectPaymentMethod } = useSubmitSubscriptionConnect();
 

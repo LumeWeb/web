@@ -62,14 +62,6 @@ export default function PricingPlans() {
     !!subscription?.payment?.client_secret &&
     !paymentExpired;
 
-  // Debug logs
-  console.log('Payment conditions:', {
-    hasClientSecret: !!subscription?.payment?.client_secret,
-    planPending,
-    paymentExpired,
-    expiryDate: subscription?.payment?.expires_at,
-    showPayment
-  });
 
   const isBillingComplete =
     subscription?.billing?.name &&

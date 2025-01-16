@@ -176,29 +176,10 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
         if (subscriptionData) {
           await submitPlanChange(plan);
         } else {
-          console.log('Creating subscription for plan:', {
-            planId: plan.id,
-            planName: plan.name,
-            isFree: plan.is_free
-          });
-          
           const result = await createSubscription(plan);
-          console.log('Create subscription result:', {
-            hasData: !!result?.data,
-            hasClientSecret: !!result?.data?.data?.payment?.client_secret,
-            clientSecret: result?.data?.data?.payment?.client_secret,
-            planIsFree: plan.is_free,
-            showPaymentDialog
-          });
 
           // Keep selected plan and show payment dialog if needed
           if (!plan.is_free && result?.data?.data?.payment?.client_secret) {
-            console.log('Attempting to show payment dialog:', {
-              planName: plan.name,
-              clientSecret: result.data.data.payment.client_secret,
-              currentDialogState: showPaymentDialog
-            });
-            
             // Update subscription data first
             await refetchSubscription();
             
@@ -206,16 +187,8 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
             handlePlanSelection(plan);
             setShowPaymentDialog(true);
             
-            console.log('Payment dialog state after update:', {
-              showPaymentDialog: true,
-              selectedPlan: plan.name
-            });
             return;
           } else {
-            console.log('Payment dialog conditions not met:', {
-              planIsFree: plan.is_free,
-              hasClientSecret: !!result?.data?.data?.payment?.client_secret
-            });
             // Clear selected plan if no payment needed
             handlePlanSelection(null);
           }
