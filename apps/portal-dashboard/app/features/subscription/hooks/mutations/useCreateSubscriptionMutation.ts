@@ -23,11 +23,11 @@ export function useCreateSubscriptionMutation() {
         },
         {
           onSuccess: (response) => {
-            if (!response?.data?.subscription) {
-              reject(new Error('Invalid server response - missing subscription data'));
+            if (!response?.data) {
+              reject(new Error('Invalid server response - missing data'));
               return;
             }
-            resolve(response);
+            resolve({ data: { subscription: response.data } });
           },
           onError: (error) => {
             reject(error);
