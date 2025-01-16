@@ -36,14 +36,32 @@ export function useSubscriptionMutations(): UseSubscriptionMutationsResult {
     async (plan: SubscriptionPlan) => {
       setError(null);
       try {
-        return await createMutation({
+        const result = await createMutation({
           url: `${apiUrl}/api/account/subscription`,
           method: 'post',
           values: { plan_id: plan.id }
         });
+
+        if (!result?.data?.subscription) {
+          throw new Error('Invalid server response - missing subscription data');
+        }
+
+        return result;
       } catch (err) {
         const error = err as SubscriptionError;
         setError(error);
+        
+        // Enhance error message based on error type
+        if (error.statusCode === 400) {
+          error.message = 'Invalid subscription request - please check plan details';
+        } else if (error.statusCode === 403) {
+          error.message = 'Not authorized to create subscription';
+        } else if (error.statusCode === 409) {
+          error.message = 'Subscription already exists';
+        } else if (!error.message) {
+          error.message = 'Failed to create subscription';
+        }
+
         throw error;
       }
     },

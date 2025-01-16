@@ -89,20 +89,47 @@ export class BillingService {
   }
 
   public async validateBillingInfo(billing: BillingInfo): Promise<BillingErrors | null> {
-    const errors: BillingErrors = [];
+    try {
+      const errors: BillingErrors = [];
 
-    // Basic validation
-    if (!billing.name?.trim()) {
-      errors.push({ field: 'name', message: 'Name is required' });
+      // Validate required fields
+      if (!billing) {
+        errors.push({ field: 'general', message: 'Billing information is required' });
+        return errors;
+      }
+
+      // Name validation
+      if (!billing.name?.trim()) {
+        errors.push({ field: 'name', message: 'Name is required' });
+      } else if (billing.name.trim().length < 2) {
+        errors.push({ field: 'name', message: 'Name must be at least 2 characters' });
+      } else if (billing.name.trim().length > 100) {
+        errors.push({ field: 'name', message: 'Name must not exceed 100 characters' });
+      }
+
+      // Organization validation (optional)
+      if (billing.organization && billing.organization.trim().length > 100) {
+        errors.push({ field: 'organization', message: 'Organization must not exceed 100 characters' });
+      }
+
+      // Address validation
+      if (!billing.address) {
+        errors.push({ field: 'address', message: 'Address is required' });
+      } else {
+        const addressErrors = await this.validateAddress(billing.address);
+        if (addressErrors) {
+          errors.push(...addressErrors);
+        }
+      }
+
+      return errors.length > 0 ? errors : null;
+    } catch (error) {
+      console.error('Billing validation error:', error);
+      return [{
+        field: 'general',
+        message: error instanceof Error ? error.message : 'Billing validation failed'
+      }];
     }
-
-    // Validate address
-    const addressErrors = await this.validateAddress(billing.address);
-    if (addressErrors) {
-      errors.push(...addressErrors);
-    }
-
-    return errors.length > 0 ? errors : null;
   }
 
   public async formatBillingInfo(billing: BillingInfo): Promise<BillingInfo> {

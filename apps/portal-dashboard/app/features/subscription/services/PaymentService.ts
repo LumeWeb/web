@@ -89,27 +89,70 @@ export class PaymentService {
     amount: number
   ): Promise<PaymentResult<PaymentInfo>> {
     try {
-      const validation = this.validatePaymentMethod(paymentMethodId);
+      // Validate inputs
+      if (!paymentMethodId?.trim()) {
+        return {
+          success: false,
+          error: {
+            code: 'INVALID_PAYMENT_METHOD',
+            message: 'Payment method ID is required'
+          }
+        };
+      }
+
+      if (amount <= 0) {
+        return {
+          success: false,
+          error: {
+            code: 'INVALID_AMOUNT',
+            message: 'Payment amount must be greater than 0'
+          }
+        };
+      }
+
+      // Validate payment method
+      const validation = await this.validatePaymentMethod(paymentMethodId);
       if (!validation.success) {
         return validation as PaymentResult<PaymentInfo>;
       }
 
       // Process payment logic here
       // This is a placeholder - implement actual payment processing
+      try {
+        // Simulate payment processing
+        const result = {
+          success: true,
+          data: {
+            status: 'PROCESSING' as const,
+            payment_method_id: paymentMethodId,
+            amount: amount,
+            created_at: new Date().toISOString()
+          }
+        };
 
-      return {
-        success: true,
-        data: {
-          status: 'PROCESSING',
-          payment_method_id: paymentMethodId
-        }
-      };
+        return result;
+      } catch (processingError) {
+        return {
+          success: false,
+          error: {
+            code: 'PAYMENT_PROCESSING_ERROR',
+            message: processingError instanceof Error ? 
+              processingError.message : 
+              'Payment processing failed',
+            decline_code: processingError instanceof Error ? 
+              processingError.name : 
+              'unknown_error'
+          }
+        };
+      }
     } catch (error) {
+      console.error('Payment error:', error);
       return {
         success: false,
         error: {
-          code: 'PAYMENT_PROCESSING_ERROR',
-          message: error instanceof Error ? error.message : 'Payment processing failed'
+          code: 'PAYMENT_SYSTEM_ERROR',
+          message: 'An unexpected error occurred while processing payment',
+          decline_code: error instanceof Error ? error.name : 'system_error'
         }
       };
     }
