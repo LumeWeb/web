@@ -4,22 +4,42 @@ import { Address } from "portal-shared/dataProviders/accountProvider";
 export class BillingService {
   public async validateAddress(address: Address): Promise<BillingErrors | null> {
     const errors: BillingErrors = [];
+    
+    try {
+      const countryData = address.GetCountry(address.country);
+      if (!countryData) {
+        errors.push({ field: 'country', message: 'Invalid country code' });
+        return errors;
+      }
 
-    // Basic validation
-    if (!address.line1?.trim()) {
-      errors.push({ field: 'line1', message: 'Address line 1 is required' });
-    }
-    if (!address.city?.trim()) {
-      errors.push({ field: 'city', message: 'City is required' });
-    }
-    if (!address.state?.trim()) {
-      errors.push({ field: 'state', message: 'State is required' });
-    }
-    if (!address.postal_code?.trim()) {
-      errors.push({ field: 'postal_code', message: 'Postal code is required' });
-    }
-    if (!address.country?.trim()) {
-      errors.push({ field: 'country', message: 'Country is required' });
+      // Validate required fields based on country
+      countryData.Required.forEach(field => {
+        const value = address[field.toLowerCase()];
+        if (!value?.trim()) {
+          errors.push({ field: field.toLowerCase(), message: `${field} is required for ${countryData.Name}` });
+        }
+      });
+
+      // Validate postal code format if country has specific rules
+      if (address.postal_code && countryData.PostCodeRegex.Regex) {
+        const regex = new RegExp(countryData.PostCodeRegex.Regex);
+        if (!regex.test(address.postal_code)) {
+          errors.push({ field: 'postal_code', message: 'Invalid postal code format' });
+        }
+      }
+
+      // Validate state/province if country has subdivisions
+      if (address.state && countryData.AdministrativeAreas) {
+        const validState = Object.values(countryData.AdministrativeAreas).some(
+          areas => areas.some(area => area.ID === address.state)
+        );
+        if (!validState) {
+          errors.push({ field: 'state', message: 'Invalid state/province' });
+        }
+      }
+
+    } catch (error) {
+      errors.push({ field: 'general', message: 'Address validation failed' });
     }
 
     return errors.length > 0 ? errors : null;
