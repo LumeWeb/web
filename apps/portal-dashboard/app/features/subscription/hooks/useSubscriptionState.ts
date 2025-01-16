@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { SubscriptionStateMachine } from '../states/SubscriptionStateMachine';
 import { SubscriptionState, SubscriptionEvent, Subscription, SubscriptionPlan, BillingInfo } from '../types/subscription.types';
 
-export default function useSubscriptionState() {
+export function useSubscriptionState() {
   const stateMachine = useRef(new SubscriptionStateMachine());
   const [state, setState] = useState<SubscriptionState>(stateMachine.current.getState());
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -68,3 +68,5 @@ export default function useSubscriptionState() {
     isTransitioning
   };
 }
+
+export default useSubscriptionState;
