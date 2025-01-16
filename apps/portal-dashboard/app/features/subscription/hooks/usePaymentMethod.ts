@@ -16,7 +16,8 @@ export function usePaymentMethod() {
     try {
       const result = await setupMutate({
         url: `${apiUrl}/api/account/subscription/payment/setup`,
-        method: 'post'
+        method: 'post',
+        values: {}
       });
       
       if (result?.data?.client_secret) {
