@@ -87,7 +87,7 @@ const createTransitionMap = (
   return map;
 };
 
-export const subscriptionMachine = createMachine<SubscriptionContext, SubscriptionEvent, string>(
+export const subscriptionMachine = createMachine<SubscriptionStates, SubscriptionContext, SubscriptionEvent["type"]>(
   {
     idle: state(
       transition("SUBSCRIPTION_LOADED", "loading"),
