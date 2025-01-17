@@ -73,16 +73,16 @@ export class SubscriptionStateMachine {
   private getStatusFromState(state: SubscriptionState): SubscriptionStatus {
     switch (state.type) {
       case "INACTIVE":
-        return "INACTIVE";
+        return SubscriptionPlanStatus.INACTIVE;
       case "PENDING":
-        return "PENDING";
+        return SubscriptionPlanStatus.PENDING;
       case "ACTIVE":
-        return "ACTIVE";
+        return SubscriptionPlanStatus.ACTIVE;
       case "CANCELLED":
-        return "CANCELLED";
+        return SubscriptionPlanStatus.CANCELLED;
       case "LOADING":
       case "ERROR":
-        return "INACTIVE";
+        return SubscriptionPlanStatus.INACTIVE;
       default:
         throw new Error(`Invalid state type: ${state.type}`);
     }
