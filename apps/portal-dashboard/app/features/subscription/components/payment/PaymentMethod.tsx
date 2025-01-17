@@ -14,40 +14,32 @@ import HyperPayment from '@/features/subscription/components/payment/HyperPaymen
 import { Alert, AlertDescription } from 'portal-shared/components/ui/alert';
 
 export function PaymentMethod() {
-  const { subscription, state, send } = useSubscriptionContext();
-  const [error, setError] = useState<string | null>(null);
-  const { 
-    clientSecret,
-    isInitializing,
-    isSaving,
-    initializePayment,
-    savePaymentMethod 
-  } = usePaymentMethod();
-
-  const handleUpdatePayment = async () => {
-    try {
-      setError(null);
-      await initializePayment();
-      send('PAYMENT_METHOD_UPDATE_INITIATED');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to initialize payment update');
+  const { subscription } = useSubscriptionContext();
+  const {
+    state,
+    context,
+    actions: {
+      initialize,
+      handleInitialized,
+      startCollection,
+      validate,
+      handleValidated,
+      save,
+      handleError
     }
+  } = usePaymentMethodMachine();
+
+  const handleUpdatePayment = () => {
+    initialize();
   };
 
-  const handlePaymentSuccess = async (paymentMethodId: string) => {
-    try {
-      setError(null);
-      await savePaymentMethod(paymentMethodId);
-      send('PAYMENT_METHOD_UPDATED', { paymentMethodId });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save payment method');
-      send('PAYMENT_METHOD_UPDATE_FAILED', { error: err });
-    }
+  const handlePaymentSuccess = (paymentMethodId: string) => {
+    handleValidated(paymentMethodId);
+    save();
   };
 
-  const handlePaymentError = (err: Error) => {
-    setError(err.message);
-    send('PAYMENT_METHOD_UPDATE_FAILED', { error: err });
+  const handlePaymentError = (error: Error) => {
+    handleError(error);
   };
 
   return (
@@ -56,10 +48,10 @@ export function PaymentMethod() {
         <CardTitle>Payment Method</CardTitle>
       </CardHeader>
       <CardContent>
-        {error && (
+        {context.error && (
           <Alert variant="destructive" className="mb-4">
             <ExclamationCircleIcon className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{context.error.message}</AlertDescription>
           </Alert>
         )}
         
@@ -74,8 +66,8 @@ export function PaymentMethod() {
               </div>
               <Button 
                 onClick={handleUpdatePayment}
-                disabled={isInitializing || isSaving || current.matches('updatingPayment')}>
-                {isInitializing || isSaving || state === 'updatingPayment' ? (
+                disabled={state === 'initializing' || state === 'saving'}>
+                {state === 'initializing' || state === 'saving' ? (
                   <>
                     <CloudIcon className="mr-2 h-4 w-4 animate-spin" />
                     Processing...
