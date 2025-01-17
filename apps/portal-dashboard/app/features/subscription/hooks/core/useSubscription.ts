@@ -5,7 +5,7 @@ import useApiUrl from "portal-shared/hooks/useApiUrl";
 export function useSubscription() {
   const apiUrl = useApiUrl();
 
-  const { data, isLoading } = useCustom<SubscriptionResponse>({
+  const { data, isLoading, refetch } = useCustom<SubscriptionResponse>({
     url: `${apiUrl}/api/account/subscription`,
     method: "get",
   });
@@ -13,5 +13,6 @@ export function useSubscription() {
   return {
     data,
     isLoading,
+    refetch,
   };
 }
