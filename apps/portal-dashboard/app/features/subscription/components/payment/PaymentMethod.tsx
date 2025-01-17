@@ -74,7 +74,7 @@ export function PaymentMethod() {
               </div>
               <Button 
                 onClick={handleUpdatePayment}
-                disabled={isInitializing || isSaving || state === 'updatingPayment'}>
+                disabled={isInitializing || isSaving || current.matches('updatingPayment')}>
                 {isInitializing || isSaving || state === 'updatingPayment' ? (
                   <>
                     <CloudIcon className="mr-2 h-4 w-4 animate-spin" />

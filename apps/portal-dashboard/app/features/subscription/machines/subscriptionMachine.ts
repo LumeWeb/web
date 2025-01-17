@@ -22,7 +22,7 @@ export type SubscriptionMachineState = State<
 >;
 
 type SubscriptionService = {
-  initiatePayment: typeof initiatePayment;
+  initiatePayment: (context: SubscriptionContext) => Promise<{ payment: PaymentInfo }>;
 };
 import { SubscriptionPlanStatus } from 'portal-shared/dataProviders/accountProvider';
 import { PaymentService } from '../services/PaymentService';

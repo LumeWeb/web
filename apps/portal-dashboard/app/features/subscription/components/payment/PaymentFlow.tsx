@@ -33,7 +33,7 @@ export function PaymentFlow() {
   };
 
   // Don't show if not in pending payment state or no payment info
-  if (state !== 'pendingPayment' || !context.payment?.clientSecret) {
+  if (!current.matches('pendingPayment') || !context.payment?.clientSecret) {
     return null;
   }
 
