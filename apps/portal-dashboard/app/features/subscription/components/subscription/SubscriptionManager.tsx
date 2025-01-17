@@ -53,7 +53,7 @@ function SubscriptionContent() {
     actions: { selectPlan, updateBilling, complete, cancel, retry },
   } = useSubscriptionMachine();
 
-  const { subscription, plans, error, isLoading } = useSubscriptionContext();
+  const { isLoading } = useSubscriptionContext();
   const [localError, setLocalError] = useState<string | null>(null);
 
   const { data: subscriptionData, isLoading: isLoadingSubscription } =
