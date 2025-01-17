@@ -32,7 +32,7 @@ export type SubscriptionEvent =
   | { type: "REACTIVATE" };
 
 
-export const subscriptionMachine = createMachine(
+export const subscriptionMachine = createMachine<SubscriptionContext, SubscriptionEvent>(
   {
     idle: state(
       transition("SUBSCRIPTION_LOADED", "loading"),
