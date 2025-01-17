@@ -10,16 +10,25 @@ import HyperPayment from "@/features/subscription/components/payment/HyperPaymen
 import { SubscriptionPlanStatus } from "portal-shared/dataProviders/accountProvider";
 
 export function PaymentFlow() {
-  const { showPaymentDialog, setShowPaymentDialog, payment, state } =
-    useSubscriptionContext();
+  const { 
+    showPaymentDialog, 
+    setShowPaymentDialog, 
+    context,
+    state,
+    send 
+  } = useSubscriptionContext();
 
-  // Show payment dialog when in PENDING_PAYMENT state and has payment details
-  const hasPaymentDetails = payment?.client_secret;
+  const handlePaymentSuccess = (paymentMethodId: string) => {
+    send('PAYMENT_COMPLETE', { paymentMethodId });
+    setShowPaymentDialog(false);
+  };
 
-  if (
-    !hasPaymentDetails ||
-    state.type !== SubscriptionPlanStatus.PENDING_PAYMENT
-  ) {
+  const handlePaymentFailure = (error: Error) => {
+    send('PAYMENT_FAILED', { error: error.message });
+    setShowPaymentDialog(false);
+  };
+
+  if (state !== 'pendingPayment' || !context.payment?.clientSecret) {
     return null;
   }
 

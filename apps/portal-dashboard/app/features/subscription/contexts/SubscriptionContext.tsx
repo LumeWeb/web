@@ -83,52 +83,42 @@ interface SubscriptionProviderProps {
 }
 
 export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
-  const {
-    state,
-    context,
-    selectPlan,
-    updateBilling,
-    complete,
-    cancel,
-    retry
-  } = useSubscriptionMachine();
+  const machine = useSubscriptionMachine();
   const { plansData, plansAreLoading } = useSubscriptionPlans();
-  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
-    null,
-  );
-  // Mutations
-  const {
-    createSubscription,
-    updateSubscription,
-    cancelSubscription,
-    isLoading: isProcessing,
-  } = useSubscriptionMutations();
-
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-
   const { refetch: refetchSubscription } = useSubscription();
+  const { mutate: createMutation } = useCreateSubscriptionMutation();
+  const { mutate: updateMutation } = useUpdateSubscriptionMutation();
+  const { mutate: cancelMutation } = useCancelSubscriptionMutation();
+
+  const handlePaymentSuccess = useCallback((paymentMethodId: string) => {
+    machine.send('PAYMENT_COMPLETE', { paymentMethodId });
+    setShowPaymentDialog(false);
+    refetchSubscription();
+  }, [machine, refetchSubscription]);
+
+  const handlePaymentFailure = useCallback((error: Error) => {
+    machine.send('PAYMENT_FAILED', { error: error.message });
+    setShowPaymentDialog(false);
+  }, [machine]);
 
   const value = useMemo(
     () => ({
       // State management
-      state,
-      loadSubscription: loadSubscriptionState,
-      updateBilling: updateBillingState,
-      completePayment: completePaymentState,
-      handleError: handleErrorState,
-      isTransitioning,
+      state: machine.state,
+      context: machine.context,
+      send: machine.send,
       refetchSubscription,
 
       // Current subscription
-      subscription: state?.subscription,
-      payment: state?.payment,
-      isLoading: state.type === "LOADING" || plansAreLoading,
-      error: state.type === "ERROR" ? state.error : null,
+      subscription: machine.context.subscription,
+      payment: machine.context.payment,
+      isLoading: machine.state === "loading" || plansAreLoading,
+      error: machine.context.error,
 
       // Plan management
       plans: plansData?.data?.plans || [],
-      selectedPlan,
-      setSelectedPlan,
+      selectedPlan: machine.context.selectedPlan,
 
       // Actions
       createSubscription: async (plan: SubscriptionPlan) => {
