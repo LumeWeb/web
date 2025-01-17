@@ -171,12 +171,13 @@ function SubscriptionContent() {
         }
       }
 
-      // Send events to state machine
-      send('SELECT_PLAN', { plan: selectedPlan });
+      // Send events to state machine with proper payloads
+      send('SELECT_PLAN', { 
+        plan: selectedPlan,
+        billing: !selectedPlan.is_free ? context.billing : null 
+      });
       
       if (!selectedPlan.is_free) {
-        send('UPDATE_BILLING', { billing: context.billing });
-        send('COMPLETE');
         setShowPaymentDialog(true);
       } else {
         send('COMPLETE');

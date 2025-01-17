@@ -95,6 +95,7 @@ export const subscriptionMachine = createMachine<
     pending: {
       final: false,
       transitions: createTransitionMap({
+        SELECT_PLAN: ["pendingPayment"],
         SAVED: ["pendingPayment", "active"],
         FAILED: ["error"],
       }),
