@@ -28,7 +28,7 @@ export class SubscriptionStateMachine {
       SubscriptionPlanStatus.ACTIVE,
     ],
     [SubscriptionPlanStatus.PENDING]: [
-      SubscriptionPlanStatus.PENDING,  // Allow self-transition for updates
+      SubscriptionPlanStatus.PENDING, // Allow self-transition for updates
       SubscriptionPlanStatus.ACTIVE,
       SubscriptionPlanStatus.CANCELLED,
       SubscriptionPlanStatus.INACTIVE,
@@ -41,7 +41,7 @@ export class SubscriptionStateMachine {
     ],
     [SubscriptionPlanStatus.ACTIVE]: [
       SubscriptionPlanStatus.CANCELLED,
-      SubscriptionPlanStatus.PENDING,  // Allow transition back to pending for updates
+      SubscriptionPlanStatus.PENDING, // Allow transition back to pending for updates
     ],
     [SubscriptionPlanStatus.CANCELLED]: [SubscriptionPlanStatus.INACTIVE],
   };
@@ -110,15 +110,21 @@ export class SubscriptionStateMachine {
           return {
             type: "PENDING_PAYMENT",
             plan: event.plan,
-            billing: this.currentState.type === "PENDING" ? 
-              (this.currentState as any).billing : undefined
+            billing:
+              this.currentState.type === "PENDING"
+                ? (this.currentState as any).billing
+                : undefined,
           };
         }
         return { type: "PENDING", plan: event.plan };
       case "UPDATE_BILLING":
-        if (this.currentState.type !== "PENDING" && 
-            this.currentState.type !== "PENDING_PAYMENT") {
-          throw new Error("Can only update billing in PENDING or PENDING_PAYMENT state");
+        if (
+          this.currentState.type !== "PENDING" &&
+          this.currentState.type !== "PENDING_PAYMENT"
+        ) {
+          throw new Error(
+            "Can only update billing in PENDING or PENDING_PAYMENT state",
+          );
         }
         return {
           ...this.currentState,
@@ -155,14 +161,20 @@ export class SubscriptionStateMachine {
     subscription: Subscription,
   ): SubscriptionState {
     // If subscription has payment info but no payment method, go to PENDING_PAYMENT
-    if (subscription.payment?.client_secret && !subscription.payment?.payment_method) {
+    if (
+      subscription.payment?.client_secret &&
+      !subscription.payment?.payment_method
+    ) {
       if (!subscription.billing) {
-        throw new Error("Billing information required for PENDING_PAYMENT state");
+        throw new Error(
+          "Billing information required for PENDING_PAYMENT state",
+        );
       }
       return {
         type: "PENDING_PAYMENT",
         plan: subscription.plan,
         billing: subscription.billing,
+        payment: subscription.payment,
       };
     }
 
@@ -183,12 +195,15 @@ export class SubscriptionStateMachine {
         };
       case SubscriptionPlanStatus.PENDING_PAYMENT:
         if (!subscription.billing) {
-          throw new Error("Billing information required for PENDING_PAYMENT state");
+          throw new Error(
+            "Billing information required for PENDING_PAYMENT state",
+          );
         }
         return {
           type: "PENDING_PAYMENT",
           plan: subscription.plan,
           billing: subscription.billing,
+          payment: subscription.payment,
         };
       case SubscriptionPlanStatus.ACTIVE:
         return { type: "ACTIVE", subscription };

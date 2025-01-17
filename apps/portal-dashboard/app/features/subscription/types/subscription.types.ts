@@ -15,13 +15,13 @@ import {
   SubscriptionPlan as SharedSubscriptionPlan,
   Subscription as SharedSubscription,
   Resources,
-  SubscriptionResponse as SharedSubscriptionResponse
+  SubscriptionResponse as SharedSubscriptionResponse,
 } from "portal-shared/dataProviders/accountProvider";
 
 // Re-export subscription plan period as our own type
 export enum SubscriptionPlanPeriod {
   MONTHLY = "MONTHLY",
-  YEARLY = "YEARLY"
+  YEARLY = "YEARLY",
 }
 
 // Core subscription states
@@ -59,29 +59,34 @@ export type SubscriptionResponse = SharedSubscriptionResponse;
 
 // Subscription State
 export type SubscriptionState =
-  | { type: 'LOADING' }
-  | { type: 'ERROR'; error: Error }
-  | { type: 'INACTIVE' }
-  | { type: 'PENDING'; plan: SubscriptionPlan; billing?: BillingInfo }
-  | { type: 'PENDING_PAYMENT'; plan: SubscriptionPlan; billing: BillingInfo }
-  | { type: 'ACTIVE'; subscription: Subscription }
-  | { type: 'CANCELLED'; subscription: Subscription };
+  | { type: "LOADING" }
+  | { type: "ERROR"; error: Error }
+  | { type: "INACTIVE" }
+  | { type: "PENDING"; plan: SubscriptionPlan; billing?: BillingInfo }
+  | {
+      type: "PENDING_PAYMENT";
+      payment: Subscription["payment"];
+      plan: SubscriptionPlan;
+      billing: BillingInfo;
+    }
+  | { type: "ACTIVE"; subscription: Subscription }
+  | { type: "CANCELLED"; subscription: Subscription };
 
 // Subscription Events
 export type SubscriptionEvent =
-  | { type: 'LOAD_SUBSCRIPTION' }
-  | { type: 'SUBSCRIPTION_LOADED'; subscription: Subscription }
-  | { type: 'CREATE_SUBSCRIPTION'; plan: SubscriptionPlan }
-  | { type: 'UPDATE_BILLING'; billing: BillingInfo }
-  | { type: 'COMPLETE_PAYMENT'; paymentMethodId: string }
-  | { type: 'CANCEL_SUBSCRIPTION' }
-  | { type: 'ERROR_OCCURRED'; error: Error };
+  | { type: "LOAD_SUBSCRIPTION" }
+  | { type: "SUBSCRIPTION_LOADED"; subscription: Subscription }
+  | { type: "CREATE_SUBSCRIPTION"; plan: SubscriptionPlan }
+  | { type: "UPDATE_BILLING"; billing: BillingInfo }
+  | { type: "COMPLETE_PAYMENT"; paymentMethodId: string }
+  | { type: "CANCEL_SUBSCRIPTION" }
+  | { type: "ERROR_OCCURRED"; error: Error };
 
 // Zod schema for runtime validation
 export const subscriptionResourcesSchema = z.object({
   storage: z.number(),
   upload: z.number(),
-  download: z.number()
+  download: z.number(),
 });
 
 export const subscriptionPlanSchema = z.object({
@@ -90,7 +95,7 @@ export const subscriptionPlanSchema = z.object({
   period: z.nativeEnum(SubscriptionPlanPeriod),
   price: z.number(),
   is_free: z.boolean(),
-  resources: subscriptionResourcesSchema
+  resources: subscriptionResourcesSchema,
 });
 
 export const subscriptionSchema = z.object({
@@ -101,5 +106,5 @@ export const subscriptionSchema = z.object({
   current_period_end: z.string().optional(),
   cancel_at_period_end: z.boolean().optional(),
   billing: billingInfoSchema.optional(),
-  payment: paymentInfoSchema.optional()
+  payment: paymentInfoSchema.optional(),
 });
