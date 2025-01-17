@@ -47,9 +47,9 @@ export interface BillingStates {
 }
 
 export const billingMachine = createMachine<
+  BillingStates,
   BillingContext,
-  BillingEvent,
-  BillingStates
+  string
 >(
   {
     idle: state(transition("EDIT", "editing")),
