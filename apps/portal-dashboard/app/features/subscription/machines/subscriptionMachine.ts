@@ -14,6 +14,13 @@ interface SubscriptionContext {
   billing: BillingInfo | null;
   payment: PaymentInfo | null;
   error: Error | null;
+  status: "ACTIVE" | "PENDING" | "CANCELLED" | "PENDING_PAYMENT" | null;
+  previousStatus: string | null;
+  planChangeHistory: {
+    fromPlan: SubscriptionPlan | null;
+    toPlan: SubscriptionPlan | null;
+    timestamp: number;
+  }[];
 }
 
 type InvokedEvent<T> =
@@ -88,12 +95,21 @@ const states = {
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SELECT_PLAN",
       "pending",
+      guard(guards.canTransitionPlan),
+      guard(guards.isPlanChangeValid),
       reduce((ctx, ev) => {
         if (ev.type === "SELECT_PLAN") {
           return {
             ...ctx,
             selectedPlan: ev.plan,
             error: null,
+            previousStatus: ctx.status,
+            status: "PENDING",
+            planChangeHistory: [...ctx.planChangeHistory, {
+              fromPlan: ctx.subscription?.plan ?? null,
+              toPlan: ev.plan,
+              timestamp: Date.now()
+            }]
           };
         }
         return ctx;
@@ -259,7 +275,7 @@ const states = {
     ),
   ),
 
-  // Error handling state
+  // Error handling state with recovery
   error: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "RETRY",
@@ -268,12 +284,27 @@ const states = {
         ...ctx,
         error: null,
         payment: null,
+        status: ctx.previousStatus,
       })),
     ),
   ),
 } as const;
 
 // Create our subscription machine with initial context
+// Guards for subscription state transitions
+const guards = {
+  canTransitionPlan: (ctx: SubscriptionContext) => {
+    if (!ctx.subscription) return true;
+    return !["CANCELLED", "PENDING_PAYMENT"].includes(ctx.subscription.status);
+  },
+  
+  isPlanChangeValid: (ctx: SubscriptionContext) => {
+    if (!ctx.subscription) return true;
+    if (ctx.subscription.status === "CANCELLED") return false;
+    return true;
+  }
+};
+
 export const subscriptionMachine = createMachine(
   "idle",
   states,
@@ -283,5 +314,8 @@ export const subscriptionMachine = createMachine(
     billing: context?.billing ?? null,
     payment: context?.payment ?? null,
     error: context?.error ?? null,
+    status: context?.status ?? null,
+    previousStatus: context?.previousStatus ?? null,
+    planChangeHistory: context?.planChangeHistory ?? [],
   }),
 );
