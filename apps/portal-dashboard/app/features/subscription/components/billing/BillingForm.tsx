@@ -22,17 +22,13 @@ import {
 } from "portal-shared/components/ui/card";
 
 export function BillingForm() {
-  const { validateBillingInfo, formatBillingInfo } = useBilling();
-  const { updateBillingInfo, isLoading, error } = useBillingMutations();
   const { open } = useNotification();
   const {
     form,
     isSubmitting,
-    setIsSubmitting,
     formError,
-    setFormError,
+    handleSubmit,
     resetForm,
-    setFormData
   } = useSubscriptionForm();
 
   const {
@@ -49,57 +45,20 @@ export function BillingForm() {
     form.setValue("address.city", "", { shouldDirty: true });
   };
 
-  const onSubmit = async (data: BillingInfo) => {
-    try {
-      // Validate billing info
-      const errors = await validateBillingInfo(data);
-      if (errors) {
-        errors.forEach((error) => {
-          form.setError(error.field as any, {
-            type: "manual",
-            message: error.message,
-          });
-        });
-        return;
-      }
-
-      // Format billing info before submission
-      const formattedData = formatBillingInfo(data);
-
-      // Update billing info
-      await updateBillingInfo(formattedData);
-      form.reset(formattedData);
-
+  const onSubmit = handleSubmit({
+    onSuccess: () => {
       open?.({
         type: "success",
         message: "Billing information updated successfully",
       });
-    } catch (err) {
-      console.error("Failed to update billing info:", err);
+    },
+    onError: (error) => {
       open?.({
         type: "error",
-        message:
-          err instanceof Error
-            ? err.message
-            : "Failed to update billing information",
+        message: error.message || "Failed to update billing information",
       });
-
-      // Handle validation errors from API
-      if (err && typeof err === 'object' && 'data' in err) {
-        const errorData = err.data?.errors;
-        if (errorData && typeof errorData === 'object') {
-          Object.entries(errorData).forEach(([field, message]) => {
-            if (typeof message === 'string') {
-              form.setError(field as any, {
-                type: 'manual',
-                message
-              });
-            }
-          });
-        }
-      }
     }
-  };
+  });
 
   useEffect(() => {
     if (!countryData || !selectedCountry || !selectedCountryData) return;
