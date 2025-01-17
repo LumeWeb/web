@@ -62,6 +62,7 @@ function SubscriptionContent() {
 
   const { isLoading } = useSubscriptionContext();
   const [localError, setLocalError] = useState<string | null>(null);
+  const { createSubscription, updateSubscription } = useSubscriptionMutations();
 
   const { data: subscriptionData, isLoading: isLoadingSubscription } =
     useSubscription();
@@ -188,12 +189,33 @@ function SubscriptionContent() {
         return;
       }
 
-      // If validation passes, proceed with the plan change
+      // If we have an existing subscription, update it
+      if (context.subscription) {
+        const result = await updateSubscription(selectedPlan);
+        if (result.subscription) {
+          send({
+            type: "SUBSCRIPTION_LOADED",
+            subscription: result.subscription,
+          });
+        }
+      } else {
+        // Create new subscription
+        const result = await createSubscription(selectedPlan);
+        if (result.subscription) {
+          send({
+            type: "SUBSCRIPTION_LOADED",
+            subscription: result.subscription,
+          });
+        }
+      }
+
+      // Complete the flow
       if (selectedPlan.is_free) {
         complete();
       }
 
       setShowConfirmDialog(false);
+      closeDialog();
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Subscription action failed";
