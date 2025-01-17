@@ -154,6 +154,9 @@ export class SubscriptionStateMachine {
           plan: subscription.plan,
         };
       case SubscriptionPlanStatus.PENDING_PAYMENT:
+        if (!subscription.billing) {
+          throw new Error("Billing information required for PENDING_PAYMENT state");
+        }
         return {
           type: "PENDING_PAYMENT",
           plan: subscription.plan,
