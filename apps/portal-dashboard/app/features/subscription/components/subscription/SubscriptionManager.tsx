@@ -81,18 +81,6 @@ function SubscriptionContent() {
     initializeSubscription();
   }, []);
 
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  useEffect(() => {
-    // Initialize subscription state
-    loadSubscription(DEFAULT_SUBSCRIPTION);
-    setIsInitialized(true);
-  }, [loadSubscription]);
-
-  if (!isInitialized) {
-    return null;
-  }
-
   const [searchParams, setSearchParams] = useSearchParams();
   const paidBillingEnabled = useIsPaidBillingEnabled();
   const onFreePlan = useOnFreePlan();
