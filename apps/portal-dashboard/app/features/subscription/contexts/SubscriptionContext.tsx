@@ -1,8 +1,14 @@
 import { createContext, ReactNode, useContext, useMemo, useState } from "react";
-import { Subscription, SubscriptionPlan } from "../types/subscription.types";
+import {
+  BillingInfo,
+  Subscription,
+  SubscriptionPlan,
+  SubscriptionState,
+} from "../types/subscription.types";
 import { useSubscription } from "../hooks/core/useSubscription";
 import { useSubscriptionMutations } from "../hooks/mutations/useSubscriptionMutations";
 import { useSubscriptionPlans } from "../hooks/core/useSubscriptionPlans";
+import useSubscriptionState from "@/features/subscription/hooks/useSubscriptionState";
 
 interface SubscriptionContextValue {
   // State management
@@ -73,7 +79,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     updateBilling: updateBillingState,
     completePayment: completePaymentState,
     handleError: handleErrorState,
-    isTransitioning
+    isTransitioning,
   } = useSubscriptionState();
   const { plansData, plansAreLoading } = useSubscriptionPlans();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
