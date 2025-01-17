@@ -179,6 +179,7 @@ export const subscriptionMachine = createMachine<
         error: null
       }))
     ),
+    transition('PAYMENT_METHOD_UPDATE_INITIATED', 'updatingPayment'),
     transition('CANCEL', 'cancelled',
       reduce((ctx) => ({
         ...ctx,
@@ -190,6 +191,25 @@ export const subscriptionMachine = createMachine<
       }))
     ),
     transition('ERROR', 'error',
+      reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
+    )
+  ),
+
+  updatingPayment: state(
+    transition('PAYMENT_METHOD_UPDATED', 'active',
+      reduce((ctx, ev) => ({
+        ...ctx,
+        subscription: ctx.subscription ? {
+          ...ctx.subscription,
+          payment: {
+            ...ctx.subscription.payment,
+            paymentMethodId: ev.paymentMethodId
+          }
+        } : null,
+        error: null
+      }))
+    ),
+    transition('PAYMENT_METHOD_UPDATE_FAILED', 'active',
       reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
     )
   ),

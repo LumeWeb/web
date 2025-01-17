@@ -12,7 +12,8 @@ export type SubscriptionStateValue =
   | 'pendingPayment'
   | 'active'
   | 'cancelled'
-  | 'error';
+  | 'error'
+  | 'updatingPayment';
 
 export interface SubscriptionMachineState {
   value: StateValue;
@@ -96,7 +97,10 @@ export type SubscriptionEvent =
   | { type: "CANCEL" }
   | { type: "REACTIVATE" }
   | { type: "RETRY" }
-  | { type: "ERROR"; error: Error };
+  | { type: "ERROR"; error: Error }
+  | { type: "PAYMENT_METHOD_UPDATE_INITIATED" }
+  | { type: "PAYMENT_METHOD_UPDATED"; paymentMethodId: string }
+  | { type: "PAYMENT_METHOD_UPDATE_FAILED"; error: Error };
 
 // Zod schema for runtime validation
 export const subscriptionResourcesSchema = z.object({

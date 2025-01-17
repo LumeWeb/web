@@ -16,14 +16,9 @@ import { useSubscriptionMachine } from "../hooks/useSubscriptionMachine";
 
 interface SubscriptionContextValue {
   // Machine state and actions
-  state: string;
-  context: {
-    subscription: Subscription | null;
-    selectedPlan: SubscriptionPlan | null;
-    error: Error | null;
-    payment: any;
-  };
-  send: (type: string, payload?: any) => void;
+  state: SubscriptionStateValue;
+  context: SubscriptionContext;
+  send: (type: SubscriptionEvent['type'], payload?: any) => void;
   
   // Subscription data
   subscription: Subscription | null;
