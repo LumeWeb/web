@@ -127,9 +127,9 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
           console.log("Creating subscription in context with plan:", plan);
           
           // First validate the plan change using service
-          if (subscription?.plan) {
+          if (state.type === "ACTIVE") {
             const isValid = await subscriptionService.validatePlanChange(
-              subscription.plan,
+              state.subscription.plan,
               plan
             );
             if (!isValid) {
