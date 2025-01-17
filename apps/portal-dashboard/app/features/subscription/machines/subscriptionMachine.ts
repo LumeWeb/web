@@ -89,72 +89,42 @@ const createTransitionMap = (
   return map;
 };
 
-export const subscriptionMachine = createMachine<
-  SubscriptionStates,
-  SubscriptionContext,
-  SubscriptionEvent["type"]
->(
-  "idle",
-  {
-    idle: {
-      final: false,
-      transitions: createTransitionMap({
-        SUBSCRIPTION_LOADED: ["loading"],
-        ERROR: ["error"],
-      }),
-    },
-    loading: {
-      final: false,
-      transitions: createTransitionMap({
-        SUBSCRIPTION_LOADED: ["inactive"],
-        ERROR: ["error"],
-      }),
-    },
-    inactive: {
-      final: false,
-      transitions: createTransitionMap({
-        PLAN_SELECTED: ["pending"],
-        ERROR: ["error"],
-      }),
-    },
-    pending: {
-      final: false,
-      transitions: createTransitionMap({
-        SELECT_PLAN: ["pendingPayment"],
-        SAVED: ["pendingPayment", "active"],
-        FAILED: ["error"],
-      }),
-    },
-    pendingPayment: {
-      final: false,
-      transitions: createTransitionMap({
-        PAYMENT_COMPLETE: ["active"],
-        PAYMENT_FAILED: ["error"],
-      }),
-    },
-    active: {
-      final: false,
-      transitions: createTransitionMap({
-        SELECT_PLAN: ["pending"],
-        PAYMENT_METHOD_UPDATE_INITIATED: ["updatingPayment"],
-        CANCELED: ["cancelled"],
-        ERROR: ["error"],
-      }),
-    },
-    cancelled: {
-      final: false,
-      transitions: createTransitionMap({
-        REACTIVATE: ["pending"],
-        ERROR: ["error"],
-      }),
-    },
-    error: {
-      final: false,
-      transitions: createTransitionMap({
-        RETRY: ["pending"],
-      }),
-    },
-  },
+export const subscriptionMachine = createMachine({
+  idle: state(
+    transition("SUBSCRIPTION_LOADED", "loading"),
+    transition("ERROR", "error")
+  ),
+  loading: state(
+    transition("SUBSCRIPTION_LOADED", "inactive"),
+    transition("ERROR", "error")
+  ),
+  inactive: state(
+    transition("PLAN_SELECTED", "pending"),
+    transition("ERROR", "error")
+  ),
+  pending: state(
+    transition("SELECT_PLAN", "pendingPayment"),
+    transition("SAVED", "active"),
+    transition("FAILED", "error")
+  ),
+  pendingPayment: state(
+    transition("PAYMENT_COMPLETE", "active"),
+    transition("PAYMENT_FAILED", "error")
+  ),
+  active: state(
+    transition("SELECT_PLAN", "pending"),
+    transition("PAYMENT_METHOD_UPDATE_INITIATED", "updatingPayment"),
+    transition("CANCELED", "cancelled"),
+    transition("ERROR", "error")
+  ),
+  cancelled: state(
+    transition("REACTIVATE", "pending"),
+    transition("ERROR", "error")
+  ),
+  error: state(
+    transition("RETRY", "pending")
+  )
+},
   () => ({
     subscription: null,
     selectedPlan: null,
