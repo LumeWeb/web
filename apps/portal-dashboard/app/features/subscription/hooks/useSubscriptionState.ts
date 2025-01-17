@@ -8,6 +8,7 @@ import {
   BillingInfo,
 } from "../types/subscription.types";
 import { SubscriptionPlanPeriod } from "../types/subscription.types";
+import { SubscriptionPlanStatus } from "portal-shared/dataProviders/accountProvider";
 
 export function useSubscriptionState() {
   const stateMachine = useRef(new SubscriptionStateMachine());
@@ -45,7 +46,7 @@ export function useSubscriptionState() {
           type: "SUBSCRIPTION_LOADED",
           subscription: {
             id: "",
-            status: "PENDING",
+            status: SubscriptionPlanStatus.PENDING,
             plan: {
               id: "",
               name: "",
