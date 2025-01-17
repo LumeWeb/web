@@ -12,7 +12,7 @@ import {
 const useMachine = createUseMachine(useEffect, useState);
 
 export function useSubscriptionMachine() {
-  const [current, send] = useMachine(subscriptionMachine); 
+  const [current, send] = createUseMachine(useEffect, useState)(subscriptionMachine);
 
   return {
     state: current.name as SubscriptionStateValue,

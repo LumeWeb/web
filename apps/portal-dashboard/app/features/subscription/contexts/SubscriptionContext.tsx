@@ -52,7 +52,7 @@ interface SubscriptionProviderProps {
 }
 
 export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
-  const [current, send] = useMachine(subscriptionMachine);
+  const [current, send] = createUseMachine(useEffect, useState)(subscriptionMachine);
   const { plansData, plansAreLoading } = useSubscriptionPlans();
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const { refetch: refetchSubscription } = useSubscription();
