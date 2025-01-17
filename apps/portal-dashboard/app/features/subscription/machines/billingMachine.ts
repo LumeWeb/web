@@ -53,7 +53,7 @@ const createTransitionMap = (transitions: Record<string, string[]>) => {
       from: '',  // Will be set by Robot3
       to: state,
       guards: [],
-      reducers: [(ctx) => ctx]
+      reducers: [(ctx: BillingContext) => ctx]
     })));
   });
   return map;
