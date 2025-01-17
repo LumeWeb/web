@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useMemo, useState } from "react";
+import { createContext, ReactNode, useContext, useMemo, useState, useCallback } from "react";
 import {
   BillingInfo,
   Subscription,
@@ -9,6 +9,7 @@ import { useSubscriptionState } from "../hooks/core/useSubscription";
 import { useSubscriptionMutations } from "../hooks/mutations/useSubscriptionMutations";
 import { useSubscriptionPlans } from "../hooks/core/useSubscriptionPlans";
 import useSubscriptionState from "@/features/subscription/hooks/useSubscriptionState";
+import { useSubscription } from "@/features/subscription/hooks/core/useSubscription";
 
 interface SubscriptionContextValue {
   // State management
@@ -103,17 +104,17 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       completePayment: completePaymentState,
       handleError: handleErrorState,
       isTransitioning,
-      refetchSubscription: async () => {
+      refetchSubscription: useCallback(async () => {
         try {
-          const response = await fetch(`${apiUrl}/api/account/subscription`);
-          const data = await response.json();
-          if (data?.subscription) {
-            loadSubscriptionState(data.subscription);
+          const { refetch } = useSubscription();
+          const result = await refetch();
+          if (result.data?.data) {
+            loadSubscriptionState(result.data.data);
           }
         } catch (error) {
           handleErrorState(error instanceof Error ? error : new Error('Failed to refetch subscription'));
         }
-      },
+      }, [loadSubscriptionState, handleErrorState]),
 
       // Current subscription
       subscription:
