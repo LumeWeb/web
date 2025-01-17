@@ -9,7 +9,7 @@ import {
 import HyperPayment from "@/features/subscription/components/payment/HyperPayment";
 
 export function PaymentFlow() {
-  const { showPaymentDialog, setShowPaymentDialog, subscription, state } =
+  const { showPaymentDialog, setShowPaymentDialog, payment, state } =
     useSubscriptionContext();
 
   console.log("PaymentFlow - state:", state);
@@ -17,7 +17,7 @@ export function PaymentFlow() {
 
   // Show payment dialog when in PENDING_PAYMENT state and has payment details
   const hasPaymentDetails = subscription?.payment?.client_secret;
-  
+
   if (!hasPaymentDetails || state.type !== "PENDING_PAYMENT") {
     return null;
   }

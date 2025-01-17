@@ -22,6 +22,7 @@ interface SubscriptionContextValue {
 
   // Current subscription
   subscription?: Subscription;
+  payment?: Subscription["payment"];
   isLoading: boolean;
   error: Error | null;
 
