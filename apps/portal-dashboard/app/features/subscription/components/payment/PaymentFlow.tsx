@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
+import { PaymentError } from "../../types/payment.types";
 import {
   Dialog,
   DialogContent,
