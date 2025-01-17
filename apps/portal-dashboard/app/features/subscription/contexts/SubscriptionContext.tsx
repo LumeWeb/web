@@ -107,7 +107,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       refetchSubscription: useSubscription().refetch,
 
       // Current subscription
-      subscription: state,
+      subscription: state?.subscription,
       isLoading: state.type === "LOADING" || plansAreLoading,
       error: state.type === "ERROR" ? state.error : null,
 
