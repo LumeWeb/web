@@ -5,7 +5,15 @@ import { useSubscriptionMutations } from "../hooks/mutations/useSubscriptionMuta
 import { useSubscriptionPlans } from "../hooks/core/useSubscriptionPlans";
 
 interface SubscriptionContextValue {
-  // Current state
+  // State management
+  state: SubscriptionState;
+  loadSubscription: (subscription: Subscription | null) => void;
+  updateBilling: (billing: BillingInfo) => void;
+  completePayment: (paymentMethodId: string) => void;
+  handleError: (error: Error) => void;
+  isTransitioning: boolean;
+
+  // Current subscription
   subscription?: Subscription;
   isLoading: boolean;
   error: Error | null;
@@ -57,7 +65,16 @@ interface SubscriptionProviderProps {
 
 export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   // Core subscription state
-  const { state, error, isLoading } = useSubscription();
+  const {
+    state,
+    error,
+    isLoading,
+    loadSubscription: loadSubscriptionState,
+    updateBilling: updateBillingState,
+    completePayment: completePaymentState,
+    handleError: handleErrorState,
+    isTransitioning
+  } = useSubscriptionState();
   const { plansData, plansAreLoading } = useSubscriptionPlans();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
     null,
@@ -74,12 +91,19 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
 
   const value = useMemo(
     () => ({
-      // Current state
+      // State management
+      state,
+      loadSubscription: loadSubscriptionState,
+      updateBilling: updateBillingState,
+      completePayment: completePaymentState,
+      handleError: handleErrorState,
+      isTransitioning,
+
+      // Current subscription
       subscription:
         state.type !== "LOADING" && state.type !== "ERROR"
           ? state.subscription
           : undefined,
-      state,
       isLoading: isLoading || plansAreLoading,
       error,
 
