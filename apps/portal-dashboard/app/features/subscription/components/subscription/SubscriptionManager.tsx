@@ -146,18 +146,12 @@ function SubscriptionContent() {
           return;
         }
 
-        if (selectedPlan.price > subscription.plan.price) {
-          // Upgrade
-          await updateSubscription(selectedPlan);
-          
-          // Show payment dialog for paid plans
-          if (!selectedPlan.is_free) {
-            setShowPaymentDialog(true);
-          }
-        } else {
-          // Downgrade with confirmation
-          await cancelSubscription();
-          await createSubscription(selectedPlan);
+        // Let the backend handle the plan change logic
+        await updateSubscription(selectedPlan);
+        
+        // Show payment dialog if needed (backend will indicate this via response)
+        if (!selectedPlan.is_free && subscription.payment?.client_secret) {
+          setShowPaymentDialog(true);
         }
       }
 
@@ -230,11 +224,7 @@ function SubscriptionContent() {
               <div className="space-y-2">
                 {subscription ? (
                   <>
-                    Are you sure you want to{' '}
-                    {selectedPlan && selectedPlan.price > subscription.plan.price
-                      ? 'upgrade'
-                      : 'downgrade'}{' '}
-                    to the {selectedPlan?.name} plan?
+                    Are you sure you want to change to the {selectedPlan?.name} plan?
                   </>
                 ) : (
                   <>
