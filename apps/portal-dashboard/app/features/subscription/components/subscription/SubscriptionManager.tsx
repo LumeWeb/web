@@ -209,7 +209,7 @@ function SubscriptionContent() {
     return (
       <Alert variant="destructive" className="m-4">
         <ExclamationCircleIcon className="h-4 w-4" />
-        <AlertDescription>{error?.message || localError}</AlertDescription>
+        <AlertDescription>{localError}</AlertDescription>
       </Alert>
     );
   }
