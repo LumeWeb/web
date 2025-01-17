@@ -1,13 +1,10 @@
 import { createMachine, Transition } from "robot3";
-import { billingMachine } from "./billingMachine";
 import {
+  BillingInfo,
   Subscription,
   SubscriptionPlan,
-  BillingInfo,
-  SubscriptionEvent,
 } from "../types/subscription.types";
 import { PaymentInfo } from "../types/payment.types";
-import { SubscriptionPlanStatus } from "portal-shared/dataProviders/accountProvider";
 
 interface SubscriptionContext {
   subscription: Subscription | null;
