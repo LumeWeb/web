@@ -1,4 +1,4 @@
-import { createMachine, state, transition, reduce } from "robot3";
+import { createMachine, state, transition, reduce, Transition } from "robot3";
 import { BillingInfo, BillingErrors } from "../types/billing.types";
 
 // Context just holds the data
