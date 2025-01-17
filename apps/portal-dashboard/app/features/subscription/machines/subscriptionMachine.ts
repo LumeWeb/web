@@ -1,13 +1,13 @@
-import { createMachine, state, transition, invoke, reduce } from "robot3";
-
+import { createMachine, invoke, reduce, state, transition } from "robot3";
 import {
   BillingInfo,
   Subscription,
   SubscriptionPlan,
 } from "../types/subscription.types";
 import { PaymentInfo } from "../types/payment.types";
-import { billingMachine } from "./billingMachine";
+import { BillingContext, billingMachine } from "./billingMachine";
 
+// First, we define our context interface to track all the data our state machine needs
 interface SubscriptionContext {
   subscription: Subscription | null;
   selectedPlan: SubscriptionPlan | null;
@@ -16,9 +16,13 @@ interface SubscriptionContext {
   error: Error | null;
 }
 
+type InvokedEvent<T> =
+  | { type: "done"; data: T }
+  | { type: "error"; error: Error };
+
+// We define all possible events that can occur in our subscription flow
 export type SubscriptionEvent =
   | { type: "SUBSCRIPTION_LOADED"; subscription: Subscription }
-  | { type: "PLAN_SELECTED"; plan: SubscriptionPlan }
   | { type: "SELECT_PLAN"; plan: SubscriptionPlan }
   | { type: "COMPLETE" }
   | { type: "CANCEL" }
@@ -35,155 +39,176 @@ export type SubscriptionEvent =
   | { type: "REACTIVATE" }
   | { type: "EDIT_BILLING" }
   | { type: "BILLING_COMPLETE"; billing: BillingInfo }
-  | { type: "BILLING_FAILED"; error: Error };
+  | { type: "BILLING_FAILED"; error: Error }
+  | InvokedEvent<BillingContext>;
 
 type EventType = SubscriptionEvent["type"];
 
-// Define states with their transitions
 const states = {
+  // Initial state waits for subscription data to load
   idle: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SUBSCRIPTION_LOADED",
       "loading",
     ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "ERROR",
-      "error",
-    ),
   ),
+
+  // Loading state handles the initial subscription data
   loading: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SUBSCRIPTION_LOADED",
       "inactive",
-      reduce((ctx, ev) => ({
-        ...ctx,
-        subscription: ev.subscription,
-        error: null
-      }))
+      reduce((ctx, ev) => {
+        if (ev.type === "SUBSCRIPTION_LOADED") {
+          return {
+            ...ctx,
+            subscription: ev.subscription,
+            error: null,
+          };
+        }
+        return ctx;
+      }),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "ERROR",
       "error",
-      reduce((ctx, ev) => ({
-        ...ctx,
-        error: ev.error,
-        subscription: null
-      }))
-    ),
-  ),
-  inactive: state(
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "PLAN_SELECTED",
-      "pending",
-    ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "ERROR",
-      "error",
-    ),
-  ),
-  pending: state(
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "EDIT_BILLING",
-      "editingBilling"
-    ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "ERROR",
-      "error",
+      reduce((ctx, ev) => {
+        if (ev.type === "ERROR") {
+          return {
+            ...ctx,
+            error: ev.error,
+            subscription: null,
+          };
+        }
+        return ctx;
+      }),
     ),
   ),
 
-  editingBilling: invoke(billingMachine,
+  // Inactive state allows plan selection
+  inactive: state(
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "SELECT_PLAN",
+      "pending",
+      reduce((ctx, ev) => {
+        if (ev.type === "SELECT_PLAN") {
+          return {
+            ...ctx,
+            selectedPlan: ev.plan,
+            error: null,
+          };
+        }
+        return ctx;
+      }),
+    ),
+  ),
+
+  // Pending state handles the transition to billing collection
+  pending: state(
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "EDIT_BILLING",
+      "editingBilling",
+    ),
+  ),
+
+  // Editing billing information invokes the billing machine
+  editingBilling: invoke(
+    billingMachine,
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "done",
       "pendingPayment",
-      reduce((ctx, ev: { type: "done"; data: BillingContext }) => ({
-        ...ctx,
-        billing: ev.data.billing,
-        error: null
-      }))
+      reduce((ctx, ev) => {
+        if (ev.type === "done") {
+          return {
+            ...ctx,
+            billing: ev.data.billing,
+            error: null,
+          };
+        }
+        return ctx;
+      }),
     ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "error",
-      "error",
-      reduce((ctx, ev) => ({
-        ...ctx,
-        error: ev.error
-      }))
-    )
   ),
+
+  // Payment processing state
   pendingPayment: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "PAYMENT_COMPLETE",
       "active",
-      reduce((ctx, ev) => ({
-        ...ctx,
-        payment: {
-          ...ctx.payment,
-          paymentMethodId: ev.paymentMethodId
-        },
-        error: null
-      }))
-    ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "ERROR",
-      "error",
-      reduce((ctx, ev) => ({
-        ...ctx,
-        error: ev.error,
-        payment: null
-      }))
+      reduce((ctx, ev) => {
+        if (ev.type === "PAYMENT_COMPLETE") {
+          return {
+            ...ctx,
+            payment: ctx.payment
+              ? {
+                  ...ctx.payment,
+                  paymentMethodId: ev.paymentMethodId,
+                }
+              : null,
+            error: null,
+          };
+        }
+        return ctx;
+      }),
     ),
   ),
+
+  // Active subscription state handles plan changes and cancellation
   active: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SELECT_PLAN",
       "pending",
+      reduce((ctx, ev) => {
+        if (ev.type === "SELECT_PLAN") {
+          return {
+            ...ctx,
+            selectedPlan: ev.plan,
+          };
+        }
+        return ctx;
+      }),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "PAYMENT_METHOD_UPDATE_INITIATED", 
-      "updatingPayment"
+      "PAYMENT_METHOD_UPDATE_INITIATED",
+      "updatingPayment",
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "CANCEL",
       "cancelled",
     ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "ERROR",
-      "error",
-    ),
   ),
 
+  // Payment method update state
   updatingPayment: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "PAYMENT_METHOD_UPDATED",
       "active",
-      reduce((ctx, ev) => ({
-        ...ctx,
-        payment: {
-          ...ctx.payment,
-          paymentMethodId: ev.paymentMethodId
+      reduce((ctx, ev) => {
+        if (ev.type === "PAYMENT_METHOD_UPDATED") {
+          return {
+            ...ctx,
+            payment: ctx.payment
+              ? {
+                  ...ctx.payment,
+                  paymentMethodId: ev.paymentMethodId,
+                }
+              : null,
+          };
         }
-      }))
-    ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "PAYMENT_METHOD_UPDATE_FAILED",
-      "active",
-      reduce((ctx, ev) => ({
-        ...ctx,
-        error: ev.error
-      }))
+        return ctx;
+      }),
     ),
   ),
+
+  // Cancelled subscription state
   cancelled: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "REACTIVATE",
       "pending",
     ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "ERROR",
-      "error",
-    ),
   ),
+
+  // Error handling state
   error: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "RETRY",
@@ -191,12 +216,13 @@ const states = {
       reduce((ctx) => ({
         ...ctx,
         error: null,
-        payment: null
-      }))
+        payment: null,
+      })),
     ),
   ),
 } as const;
 
+// Create our subscription machine with initial context
 export const subscriptionMachine = createMachine(
   "idle",
   states,
