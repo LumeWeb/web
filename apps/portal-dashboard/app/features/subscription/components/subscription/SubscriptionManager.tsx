@@ -61,6 +61,8 @@ function SubscriptionContent() {
     validatePlanChange,
   } = useSubscriptionContext();
 
+  const { loadSubscription } = useSubscriptionContext();
+
   useEffect(() => {
     const initializeSubscription = async () => {
       try {
@@ -79,7 +81,7 @@ function SubscriptionContent() {
     };
 
     initializeSubscription();
-  }, []);
+  }, [loadSubscription]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const paidBillingEnabled = useIsPaidBillingEnabled();
