@@ -1,12 +1,13 @@
 import {
   SubscriptionEvent,
   subscriptionMachine,
-  useMachine,
 } from "../machines/subscriptionMachine";
 import {
+  BillingInfo,
   SubscriptionPlan,
   SubscriptionStateValue,
 } from "../types/subscription.types";
+import { useMachine } from "react-robot";
 
 export function useSubscriptionMachine() {
   const [current, send] = useMachine(subscriptionMachine);
@@ -23,6 +24,6 @@ export function useSubscriptionMachine() {
       complete: () => send({ type: "COMPLETE" }),
       cancel: () => send({ type: "CANCEL" }),
       retry: () => send({ type: "RETRY" }),
-    }
+    },
   };
 }

@@ -19,7 +19,7 @@ import {
   SubscriptionEvent,
   subscriptionMachine,
 } from "../machines/subscriptionMachine";
-import { createUseMachine } from "robot-hooks";
+import { useMachine } from "react-robot";
 
 interface SubscriptionContextValue {
   state: SubscriptionStateValue;
@@ -48,12 +48,9 @@ interface SubscriptionProviderProps {
   children: ReactNode;
 }
 
-const useMachine = createUseMachine(useEffect, useState);
-
 export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const [current, send] = useMachine(subscriptionMachine);
   const { plansData, plansAreLoading } = useSubscriptionPlans();
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const { refetch: refetchSubscription } = useSubscription();
 
   const value = useMemo(

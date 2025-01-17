@@ -13,7 +13,7 @@ import { jsonRoutes } from "remix-json-routes";
 
 export default defineConfig({
   optimizeDeps: {
-    include: ["robot3", "robot-hooks"],
+    include: ["robot3", "react-robot"],
   },
   plugins: [
     remix({
@@ -33,7 +33,7 @@ export default defineConfig({
         return (
           id.includes("url") ||
           id.includes("robot3") ||
-          id.includes("robot-hooks")
+          id.includes("react-robot")
         );
       },
     }),
@@ -46,9 +46,9 @@ export default defineConfig({
         __dirname,
         "../../node_modules/robot3/debug.js",
       ),
-      "robot-hooks": path.resolve(
+      "react-robot": path.resolve(
         __dirname,
-        "../../node_modules/robot-hooks/machine.js",
+        "../../node_modules/react-robot/machine.js",
       ),
     },
   },
