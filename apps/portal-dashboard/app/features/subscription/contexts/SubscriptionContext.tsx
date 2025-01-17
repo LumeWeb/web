@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useMemo, useState } from "react";
-import { SubscriptionPlan, Subscription } from "../types/subscription.types";
+import { Subscription, SubscriptionPlan } from "../types/subscription.types";
 import { useSubscription } from "../hooks/core/useSubscription";
 import { useSubscriptionMutations } from "../hooks/mutations/useSubscriptionMutations";
 import { useSubscriptionPlans } from "../hooks/core/useSubscriptionPlans";
@@ -85,8 +85,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
 
       // Plan management
       plans: (() => {
-        const planArray = plansData?.data?.plans || [];
-        return planArray;
+        return plansData?.data?.plans || [];
       })(),
       selectedPlan,
       setSelectedPlan,
