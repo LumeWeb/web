@@ -1,14 +1,4 @@
-import {
-  createMachine,
-  state,
-  transition,
-  reduce,
-  guard,
-  invoke,
-  State,
-  Machine,
-  Transition,
-} from "robot3";
+import { createMachine, Transition } from "robot3";
 import { billingMachine } from "./billingMachine";
 import {
   Subscription,
@@ -17,6 +7,15 @@ import {
   SubscriptionEvent,
 } from "../types/subscription.types";
 import { PaymentInfo } from "../types/payment.types";
+import { SubscriptionPlanStatus } from "portal-shared/dataProviders/accountProvider";
+
+interface SubscriptionContext {
+  subscription: Subscription | null;
+  selectedPlan: SubscriptionPlan | null;
+  billing: BillingInfo | null;
+  payment: PaymentInfo | null;
+  error: Error | null;
+}
 
 export interface SubscriptionStates {
   idle: {
@@ -53,29 +52,13 @@ export interface SubscriptionStates {
   };
 }
 
-type SubscriptionService = {
-  initiatePayment: (
-    context: SubscriptionContext,
-  ) => Promise<{ payment: PaymentInfo }>;
-};
-import { SubscriptionPlanStatus } from "portal-shared/dataProviders/accountProvider";
-import { PaymentService } from "../services/PaymentService";
-
-interface SubscriptionContext {
-  subscription: Subscription | null;
-  selectedPlan: SubscriptionPlan | null;
-  billing: BillingInfo | null;
-  payment: PaymentInfo | null;
-  error: Error | null;
-}
-
 const createTransitionMap = (transitions: Record<string, string[]>) => {
   const map = new Map<string, Array<Transition<string>>>();
   Object.entries(transitions).forEach(([event, states]) => {
     map.set(
       event,
       states.map((state) => ({
-        from: "", // Will be set by Robot3
+        from: "",
         to: state,
         guards: [],
         reducers: [(ctx: SubscriptionContext) => ctx],
@@ -84,31 +67,6 @@ const createTransitionMap = (transitions: Record<string, string[]>) => {
   });
   return map;
 };
-
-const paymentService = new PaymentService();
-
-// Validation guards
-const hasBillingInfo = (ctx: SubscriptionContext) => {
-  return !!ctx.billing?.name && !!ctx.billing?.address?.line1;
-};
-
-const isValidPlanChange = (ctx: SubscriptionContext) => {
-  if (!ctx.subscription || !ctx.selectedPlan) return true;
-
-  // Don't allow downgrades if current plan has higher resources
-  if (
-    ctx.selectedPlan.resources.storage <
-      ctx.subscription.plan.resources.storage ||
-    ctx.selectedPlan.resources.upload <
-      ctx.subscription.plan.resources.upload ||
-    ctx.selectedPlan.resources.download <
-      ctx.subscription.plan.resources.download
-  ) {
-    return false;
-  }
-  return true;
-};
-
 
 export const subscriptionMachine = createMachine<
   SubscriptionStates,
@@ -123,7 +81,6 @@ export const subscriptionMachine = createMachine<
         ERROR: ["error"],
       }),
     },
-
     loading: {
       final: false,
       transitions: createTransitionMap({
@@ -131,7 +88,6 @@ export const subscriptionMachine = createMachine<
         ERROR: ["error"],
       }),
     },
-
     inactive: {
       final: false,
       transitions: createTransitionMap({
@@ -139,7 +95,6 @@ export const subscriptionMachine = createMachine<
         ERROR: ["error"],
       }),
     },
-
     pending: {
       final: false,
       transitions: createTransitionMap({
@@ -147,7 +102,6 @@ export const subscriptionMachine = createMachine<
         FAILED: ["error"],
       }),
     },
-
     pendingPayment: {
       final: false,
       transitions: createTransitionMap({
@@ -155,7 +109,6 @@ export const subscriptionMachine = createMachine<
         PAYMENT_FAILED: ["error"],
       }),
     },
-
     active: {
       final: false,
       transitions: createTransitionMap({
@@ -165,7 +118,6 @@ export const subscriptionMachine = createMachine<
         ERROR: ["error"],
       }),
     },
-
     cancelled: {
       final: false,
       transitions: createTransitionMap({
@@ -173,7 +125,6 @@ export const subscriptionMachine = createMachine<
         ERROR: ["error"],
       }),
     },
-
     error: {
       final: false,
       transitions: createTransitionMap({
