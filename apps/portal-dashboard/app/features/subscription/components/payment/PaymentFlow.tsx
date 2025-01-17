@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "portal-shared/components/ui/dialog";
 import HyperPayment from "@/features/subscription/components/payment/HyperPayment";
 import { ExclamationCircleIcon } from "portal-shared/components/icons";
@@ -17,17 +17,17 @@ export function PaymentFlow() {
   const { getPaymentStatus, isPaymentExpired } = usePayment();
 
   const handlePaymentSuccess = (paymentMethodId: string) => {
-    send({ type: 'PAYMENT_COMPLETE', paymentMethodId });
+    send({ type: "PAYMENT_COMPLETE", paymentMethodId });
   };
 
   const handlePaymentFailure = (error: Error) => {
-    send({ 
-      type: 'ERROR', 
+    send({
+      type: "ERROR",
       error: {
         message: error.message,
         code: error instanceof PaymentError ? error.code : undefined,
-        details: error instanceof PaymentError ? error.details : undefined
-      } 
+        details: error instanceof PaymentError ? error.details : undefined,
+      },
     });
   };
 
@@ -35,7 +35,7 @@ export function PaymentFlow() {
 
   // Show modal when entering pendingPayment state
   useEffect(() => {
-    if (state === 'pendingPayment') {
+    if (state === "pendingPayment") {
       setIsOpen(true);
     } else {
       setIsOpen(false);
@@ -50,12 +50,12 @@ export function PaymentFlow() {
   // Check if payment session is expired
   if (context.payment && isPaymentExpired(context.payment)) {
     return (
-      <Dialog 
-        open={isOpen} 
-        onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-destructive">Payment Session Expired</DialogTitle>
+            <DialogTitle className="text-destructive">
+              Payment Session Expired
+            </DialogTitle>
             <DialogDescription>
               <div className="flex items-center gap-2 text-destructive">
                 <ExclamationCircleIcon className="h-5 w-5" />
@@ -71,18 +71,14 @@ export function PaymentFlow() {
   const paymentStatus = getPaymentStatus(context.payment);
 
   return (
-    <Dialog 
-      open={isOpen}
-      onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Complete Payment</DialogTitle>
           <DialogDescription>
-            {paymentStatus === 'PROCESSING' ? (
-              'Your payment is being processed...'
-            ) : (
-              'Please complete your payment to activate your subscription.'
-            )}
+            {paymentStatus === "PROCESSING"
+              ? "Your payment is being processed..."
+              : "Please complete your payment to activate your subscription."}
           </DialogDescription>
         </DialogHeader>
         <HyperPayment
