@@ -157,28 +157,15 @@ function SubscriptionContent() {
       setValidationError(null);
       setBillingError(null);
 
-      // Always open the confirmation dialog first
-      openPlanChangeDialog(plan);
-      
-      // Validate the plan change
-      const isValid = await validatePlanChange(
-        context.subscription?.plan,
-        plan,
-        context.billing,
-      );
-
-      if (!isValid) {
-        throw new Error("Plan change validation failed");
-      }
-
-      // Update state machine
+      // Update state machine first
       selectPlan(plan);
+      
+      // Then open dialog
       setShowConfirmDialog(true);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to select plan";
       setLocalError(errorMessage);
       setValidationError(errorMessage);
-      retry(); // Reset state machine on error
     }
   };
 
@@ -189,30 +176,21 @@ function SubscriptionContent() {
     setLocalError(null);
 
     try {
-      // Validate billing info if required
-      if (!selectedPlan.is_free) {
-        if (!context.billing) {
-          setBillingError("Billing information is required for paid plans");
-          return;
-        }
-        
-        const billingErrors = await validateBillingInfo(context.billing);
-        if (billingErrors) {
-          setBillingError(
-            "Please complete billing information before changing plans",
-          );
-          return;
-        }
+      // Validate plan change first
+      const isValid = await validatePlanChange(
+        context.subscription?.plan,
+        selectedPlan,
+        context.billing,
+      );
+
+      if (!isValid) {
+        setBillingError("Please complete billing information before changing plans");
+        return;
       }
 
-      // Send events to state machine with proper payloads
-      send("SELECT_PLAN", {
-        plan: selectedPlan,
-        billing: !selectedPlan.is_free ? context.billing : null,
-      });
-
+      // If validation passes, proceed with the plan change
       if (selectedPlan.is_free) {
-        send("COMPLETE");
+        complete();
       }
 
       setShowConfirmDialog(false);
