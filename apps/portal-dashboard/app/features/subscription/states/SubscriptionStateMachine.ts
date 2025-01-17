@@ -103,10 +103,20 @@ export class SubscriptionStateMachine {
       case "SUBSCRIPTION_LOADED":
         return this.handleSubscriptionLoaded(event.subscription);
       case "CREATE_SUBSCRIPTION":
+        // If plan requires payment, go to PENDING_PAYMENT after PENDING
+        if (!event.plan.is_free) {
+          return {
+            type: "PENDING_PAYMENT",
+            plan: event.plan,
+            billing: this.currentState.type === "PENDING" ? 
+              (this.currentState as any).billing : undefined
+          };
+        }
         return { type: "PENDING", plan: event.plan };
       case "UPDATE_BILLING":
-        if (this.currentState.type !== "PENDING") {
-          throw new Error("Can only update billing in PENDING state");
+        if (this.currentState.type !== "PENDING" && 
+            this.currentState.type !== "PENDING_PAYMENT") {
+          throw new Error("Can only update billing in PENDING or PENDING_PAYMENT state");
         }
         return {
           ...this.currentState,
