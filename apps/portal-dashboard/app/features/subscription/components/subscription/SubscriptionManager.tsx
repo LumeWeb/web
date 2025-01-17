@@ -126,7 +126,13 @@ function SubscriptionContent() {
   const [billingError, setBillingError] = useState<string | null>(null);
   const { validateBillingInfo, formatBillingInfo } = useBilling();
 
-  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
+  const {
+    dialog,
+    openPlanChangeDialog,
+    openCancelDialog,
+    openPaymentDialog,
+    closeDialog
+  } = useSubscriptionDialog();
 
   const handlePlanSelect = async (plan: SubscriptionPlan) => {
     try {

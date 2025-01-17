@@ -26,13 +26,13 @@ export function BillingForm() {
   const { open } = useNotification();
   const {
     form,
-    supportedEntities,
-    setSupportedEntities,
-    initialValues,
-    hasFormChanges,
-    updateFormSchema,
-    initializeForm,
-  } = useBillingForm();
+    isSubmitting,
+    setIsSubmitting,
+    formError,
+    setFormError,
+    resetForm,
+    setFormData
+  } = useSubscriptionForm();
 
   const {
     countryData,
