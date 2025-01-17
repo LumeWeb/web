@@ -86,6 +86,8 @@ export class SubscriptionStateMachine {
         return SubscriptionPlanStatus.INACTIVE;
       case "PENDING":
         return SubscriptionPlanStatus.PENDING;
+      case "PENDING_PAYMENT":
+        return SubscriptionPlanStatus.PENDING_PAYMENT;
       case "ACTIVE":
         return SubscriptionPlanStatus.ACTIVE;
       case "CANCELLED":
