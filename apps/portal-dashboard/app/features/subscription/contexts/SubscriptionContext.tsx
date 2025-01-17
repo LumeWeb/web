@@ -18,6 +18,7 @@ interface SubscriptionContextValue {
   completePayment: (paymentMethodId: string) => void;
   handleError: (error: Error) => void;
   isTransitioning: boolean;
+  refetchSubscription: () => Promise<void>;
 
   // Current subscription
   subscription?: Subscription;
@@ -102,6 +103,17 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       completePayment: completePaymentState,
       handleError: handleErrorState,
       isTransitioning,
+      refetchSubscription: async () => {
+        try {
+          const response = await fetch(`${apiUrl}/api/account/subscription`);
+          const data = await response.json();
+          if (data?.subscription) {
+            loadSubscriptionState(data.subscription);
+          }
+        } catch (error) {
+          handleErrorState(error instanceof Error ? error : new Error('Failed to refetch subscription'));
+        }
+      },
 
       // Current subscription
       subscription:
