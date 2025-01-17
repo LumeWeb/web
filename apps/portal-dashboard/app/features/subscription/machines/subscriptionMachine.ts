@@ -1,4 +1,11 @@
-import { createMachine, invoke, reduce, state, transition } from "robot3";
+import {
+  createMachine,
+  guard,
+  invoke,
+  reduce,
+  state,
+  transition,
+} from "robot3";
 import {
   BillingInfo,
   Subscription,
@@ -7,15 +14,20 @@ import {
 import { PaymentInfo } from "../types/payment.types";
 import { BillingContext, billingMachine } from "./billingMachine";
 
-// First, we define our context interface to track all the data our state machine needs
+type SubscriptionStatus =
+  | "ACTIVE"
+  | "PENDING"
+  | "CANCELLED"
+  | "PENDING_PAYMENT";
+
 interface SubscriptionContext {
   subscription: Subscription | null;
   selectedPlan: SubscriptionPlan | null;
   billing: BillingInfo | null;
   payment: PaymentInfo | null;
   error: Error | null;
-  status: "ACTIVE" | "PENDING" | "CANCELLED" | "PENDING_PAYMENT" | null;
-  previousStatus: string | null;
+  status: SubscriptionStatus | null;
+  previousStatus: SubscriptionStatus | null;
   planChangeHistory: {
     fromPlan: SubscriptionPlan | null;
     toPlan: SubscriptionPlan | null;
@@ -29,19 +41,18 @@ const guards = {
     if (!ctx.subscription) return true;
     return !["CANCELLED", "PENDING_PAYMENT"].includes(ctx.subscription.status);
   },
-  
+
   isPlanChangeValid: (ctx: SubscriptionContext) => {
     if (!ctx.subscription) return true;
     if (ctx.subscription.status === "CANCELLED") return false;
     return true;
-  }
+  },
 };
 
 type InvokedEvent<T> =
   | { type: "done"; data: T }
   | { type: "error"; error: Error };
 
-// We define all possible events that can occur in our subscription flow
 export type SubscriptionEvent =
   | { type: "SUBSCRIPTION_LOADED"; subscription: Subscription }
   | { type: "SELECT_PLAN"; plan: SubscriptionPlan }
@@ -52,6 +63,7 @@ export type SubscriptionEvent =
   | { type: "COMPLETE" }
   | { type: "CANCEL" }
   | { type: "RETRY" }
+  | { type: "REACTIVATE" }
   | { type: "ERROR"; error: Error }
   | { type: "PAYMENT_COMPLETE"; paymentMethodId: string }
   | { type: "PAYMENT_METHOD_UPDATE_INITIATED" }
@@ -64,7 +76,6 @@ export type SubscriptionEvent =
 type EventType = SubscriptionEvent["type"];
 
 const states = {
-  // Initial state waits for subscription data to load
   idle: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SUBSCRIPTION_LOADED",
@@ -72,7 +83,6 @@ const states = {
     ),
   ),
 
-  // Loading state handles the initial subscription data
   loading: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SUBSCRIPTION_LOADED",
@@ -104,7 +114,6 @@ const states = {
     ),
   ),
 
-  // Inactive state allows plan selection
   inactive: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SELECT_PLAN",
@@ -119,11 +128,14 @@ const states = {
             error: null,
             previousStatus: ctx.status,
             status: "PENDING",
-            planChangeHistory: [...ctx.planChangeHistory, {
-              fromPlan: ctx.subscription?.plan ?? null,
-              toPlan: ev.plan,
-              timestamp: Date.now()
-            }]
+            planChangeHistory: [
+              ...ctx.planChangeHistory,
+              {
+                fromPlan: ctx.subscription?.plan ?? null,
+                toPlan: ev.plan,
+                timestamp: Date.now(),
+              },
+            ],
           };
         }
         return ctx;
@@ -131,68 +143,86 @@ const states = {
     ),
   ),
 
-  // Pending state handles subscription operations
   pending: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "CREATE_SUBSCRIPTION",
-      "creating"
+      "creating",
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "UPDATE_SUBSCRIPTION", 
-      "changing"
+      "UPDATE_SUBSCRIPTION",
+      "changing",
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "EDIT_BILLING",
-      "editingBilling"
+      "editingBilling",
     ),
   ),
 
-  // Creating new subscription
   creating: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SUBSCRIPTION_CREATED",
       "active",
-      reduce((ctx, ev) => ({
-        ...ctx,
-        subscription: ev.subscription,
-        selectedPlan: null,
-        error: null
-      }))
+      reduce((ctx, ev) => {
+        if (ev.type === "SUBSCRIPTION_CREATED") {
+          return {
+            ...ctx,
+            subscription: ev.subscription,
+            selectedPlan: null,
+            error: null,
+            status: "ACTIVE",
+          };
+        }
+        return ctx;
+      }),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "ERROR",
       "error",
-      reduce((ctx, ev) => ({
-        ...ctx,
-        error: ev.error,
-        subscription: null
-      }))
-    )
+      reduce((ctx, ev) => {
+        if (ev.type === "ERROR") {
+          return {
+            ...ctx,
+            error: ev.error,
+            subscription: null,
+          };
+        }
+        return ctx;
+      }),
+    ),
   ),
 
-  // Changing existing subscription
   changing: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SUBSCRIPTION_UPDATED",
       "active",
-      reduce((ctx, ev) => ({
-        ...ctx,
-        subscription: ev.subscription,
-        selectedPlan: null,
-        error: null
-      }))
+      reduce((ctx, ev) => {
+        if (ev.type === "SUBSCRIPTION_UPDATED") {
+          return {
+            ...ctx,
+            subscription: ev.subscription,
+            selectedPlan: null,
+            error: null,
+            status: "ACTIVE",
+          };
+        }
+        return ctx;
+      }),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "ERROR",
       "error",
-      reduce((ctx, ev) => ({
-        ...ctx,
-        error: ev.error
-      }))
-    )
+      reduce((ctx, ev) => {
+        if (ev.type === "ERROR") {
+          return {
+            ...ctx,
+            error: ev.error,
+          };
+        }
+        return ctx;
+      }),
+    ),
   ),
 
-  // Editing billing information invokes the billing machine
   editingBilling: invoke(
     billingMachine,
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
@@ -204,6 +234,7 @@ const states = {
             ...ctx,
             billing: ev.data.billing,
             error: null,
+            status: "PENDING_PAYMENT",
           };
         }
         return ctx;
@@ -211,7 +242,6 @@ const states = {
     ),
   ),
 
-  // Payment processing state
   pendingPayment: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "PAYMENT_COMPLETE",
@@ -227,6 +257,7 @@ const states = {
                 }
               : null,
             error: null,
+            status: "ACTIVE",
           };
         }
         return ctx;
@@ -234,7 +265,6 @@ const states = {
     ),
   ),
 
-  // Active subscription state handles plan changes and cancellation
   active: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SELECT_PLAN",
@@ -249,11 +279,14 @@ const states = {
             error: null,
             previousStatus: ctx.status,
             status: "PENDING",
-            planChangeHistory: [...ctx.planChangeHistory, {
-              fromPlan: ctx.subscription?.plan ?? null,
-              toPlan: ev.plan,
-              timestamp: Date.now()
-            }]
+            planChangeHistory: [
+              ...ctx.planChangeHistory,
+              {
+                fromPlan: ctx.subscription?.plan ?? null,
+                toPlan: ev.plan,
+                timestamp: Date.now(),
+              },
+            ],
           };
         }
         return ctx;
@@ -266,10 +299,13 @@ const states = {
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "CANCEL",
       "cancelled",
+      reduce((ctx) => ({
+        ...ctx,
+        status: "CANCELLED",
+      })),
     ),
   ),
 
-  // Payment method update state
   updatingPayment: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "PAYMENT_METHOD_UPDATED",
@@ -284,6 +320,7 @@ const states = {
                   paymentMethodId: ev.paymentMethodId,
                 }
               : null,
+            status: "ACTIVE",
           };
         }
         return ctx;
@@ -291,15 +328,17 @@ const states = {
     ),
   ),
 
-  // Cancelled subscription state
   cancelled: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "REACTIVATE",
       "pending",
+      reduce((ctx) => ({
+        ...ctx,
+        status: "PENDING",
+      })),
     ),
   ),
 
-  // Error handling state with recovery
   error: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "RETRY",
@@ -313,21 +352,6 @@ const states = {
     ),
   ),
 } as const;
-
-// Create our subscription machine with initial context
-// Guards for subscription state transitions
-const guards = {
-  canTransitionPlan: (ctx: SubscriptionContext) => {
-    if (!ctx.subscription) return true;
-    return !["CANCELLED", "PENDING_PAYMENT"].includes(ctx.subscription.status);
-  },
-  
-  isPlanChangeValid: (ctx: SubscriptionContext) => {
-    if (!ctx.subscription) return true;
-    if (ctx.subscription.status === "CANCELLED") return false;
-    return true;
-  }
-};
 
 export const subscriptionMachine = createMachine(
   "idle",
