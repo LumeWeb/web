@@ -152,6 +152,18 @@ export class SubscriptionStateMachine {
   private handleSubscriptionLoaded(
     subscription: Subscription,
   ): SubscriptionState {
+    // If subscription has payment info but no payment method, go to PENDING_PAYMENT
+    if (subscription.payment?.client_secret && !subscription.payment?.payment_method) {
+      if (!subscription.billing) {
+        throw new Error("Billing information required for PENDING_PAYMENT state");
+      }
+      return {
+        type: "PENDING_PAYMENT",
+        plan: subscription.plan,
+        billing: subscription.billing,
+      };
+    }
+
     switch (subscription.status) {
       case SubscriptionPlanStatus.INACTIVE:
         return { type: "INACTIVE" };
