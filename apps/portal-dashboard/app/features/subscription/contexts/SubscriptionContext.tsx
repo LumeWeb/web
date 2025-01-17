@@ -94,31 +94,35 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   const value = useMemo(
-    () => ({
-      // State management
-      state,
-      loadSubscription: loadSubscriptionState,
-      updateBilling: updateBillingState,
-      completePayment: completePaymentState,
-      handleError: handleErrorState,
-      isTransitioning,
+    () => {
+      // Get current state once at the start of memo
+      const currentState = state;
+      
+      return {
+        // State management
+        state: currentState,
+        loadSubscription: loadSubscriptionState,
+        updateBilling: updateBillingState,
+        completePayment: completePaymentState,
+        handleError: handleErrorState,
+        isTransitioning,
 
-      // Current subscription
-      subscription:
-        state.type === "ACTIVE"
-          ? state.subscription
-          : state.type === "CANCELLED"
-            ? state.subscription
-            : undefined,
-      isLoading: state.type === "LOADING" || plansAreLoading,
-      error: state.type === "ERROR" ? state.error : null,
+        // Current subscription
+        subscription:
+          currentState.type === "ACTIVE"
+            ? currentState.subscription
+            : currentState.type === "CANCELLED"
+              ? currentState.subscription
+              : undefined,
+        isLoading: currentState.type === "LOADING" || plansAreLoading,
+        error: currentState.type === "ERROR" ? currentState.error : null,
 
-      // Plan management
-      plans: (() => {
-        return plansData?.data?.plans || [];
-      })(),
-      selectedPlan,
-      setSelectedPlan,
+        // Plan management
+        plans: (() => {
+          return plansData?.data?.plans || [];
+        })(),
+        selectedPlan,
+        setSelectedPlan,
 
       // Actions
       createSubscription: async (plan: SubscriptionPlan) => {
