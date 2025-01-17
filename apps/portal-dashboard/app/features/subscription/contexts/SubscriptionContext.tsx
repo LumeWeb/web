@@ -1,20 +1,10 @@
+import { createContext, ReactNode, useContext, useMemo } from "react";
 import {
-  createContext,
-  ReactNode,
-  useContext,
-  useMemo,
-  useState,
-  useCallback,
-  useEffect,
-} from "react";
-import {
-  Subscription,
   SubscriptionPlan,
   SubscriptionStateValue,
 } from "../types/subscription.types";
 import { useSubscriptionPlans } from "../hooks/core/useSubscriptionPlans";
 import { useSubscription } from "@/features/subscription/hooks/core/useSubscription";
-import { useSubscriptionMachine } from "../hooks/useSubscriptionMachine";
 import {
   SubscriptionEvent,
   subscriptionMachine,
