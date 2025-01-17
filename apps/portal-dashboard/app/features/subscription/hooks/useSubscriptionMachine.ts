@@ -22,7 +22,7 @@ export function useSubscriptionMachine() {
     context: current.context,
     send,
     // Convenience methods
-    selectPlan: (plan: SubscriptionPlan) => send("SELECT_PLAN"),
+    selectPlan: (plan: SubscriptionPlan) => send("SELECT_PLAN", { plan }),
     updateBilling: (billing: BillingInfo) => send("UPDATE_BILLING"),
     complete: () => send("COMPLETE"),
     cancel: () => send("CANCEL"),
