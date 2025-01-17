@@ -22,10 +22,21 @@ export class SubscriptionStateMachine {
     SubscriptionStatus,
     SubscriptionStatus[]
   > = {
-    INACTIVE: ["PENDING", "ACTIVE"],
-    PENDING: ["ACTIVE", "CANCELLED", "INACTIVE"],
-    ACTIVE: ["CANCELLED"],
-    CANCELLED: ["INACTIVE"],
+    [SubscriptionPlanStatus.INACTIVE]: [
+      SubscriptionPlanStatus.PENDING,
+      SubscriptionPlanStatus.ACTIVE
+    ],
+    [SubscriptionPlanStatus.PENDING]: [
+      SubscriptionPlanStatus.ACTIVE,
+      SubscriptionPlanStatus.CANCELLED,
+      SubscriptionPlanStatus.INACTIVE
+    ],
+    [SubscriptionPlanStatus.ACTIVE]: [
+      SubscriptionPlanStatus.CANCELLED
+    ],
+    [SubscriptionPlanStatus.CANCELLED]: [
+      SubscriptionPlanStatus.INACTIVE
+    ],
   };
 
   public transition(event: SubscriptionEvent): SubscriptionState {
