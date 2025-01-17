@@ -126,38 +126,72 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
         try {
           console.log("Creating subscription in context with plan:", plan);
           
-          // Call API first
+          // First validate the plan change using service
+          if (subscription?.plan) {
+            const isValid = await subscriptionService.validatePlanChange(
+              subscription.plan,
+              plan
+            );
+            if (!isValid) {
+              throw new Error("Invalid plan change");
+            }
+          }
+          
+          // Call API
           const response = await createSubscription(plan);
           console.log("Subscription creation response:", response);
 
           if (!response?.subscription) {
-            throw new Error(
-              "Invalid server response - missing subscription data",
-            );
+            throw new Error("Invalid server response - missing subscription data");
           }
 
-          // Then update state machine after successful API call
-          await subscriptionService.createSubscription(plan);
+          // Update state machine with new subscription
+          await subscriptionService.loadSubscription(response.subscription);
           
-          // Update state with new subscription
-          loadSubscriptionState(response.subscription);
           return response;
         } catch (error) {
           console.error("Error in subscription context:", error);
+          await subscriptionService.handleError(
+            error instanceof Error ? error : new Error(String(error))
+          );
           throw error;
         }
       },
       updateSubscription: async (plan: SubscriptionPlan) => {
-        const response = await updateSubscription(plan);
-        return response.data.subscription;
+        try {
+          // Validate and update state first
+          await subscriptionService.updateSubscription(plan);
+          
+          // Then call API
+          const response = await updateSubscription(plan);
+          
+          // Update state with response
+          await subscriptionService.loadSubscription(response.data.subscription);
+          
+          return response.data.subscription;
+        } catch (error) {
+          await subscriptionService.handleError(
+            error instanceof Error ? error : new Error(String(error))
+          );
+          throw error;
+        }
       },
-      cancelSubscription,
-      validatePlanChange: async (
-        currentPlan: SubscriptionPlan,
-        newPlan: SubscriptionPlan,
-      ) => {
-        // Implement validation logic here
-        return true;
+      cancelSubscription: async () => {
+        try {
+          // Update state first
+          await subscriptionService.cancelSubscription();
+          
+          // Then call API
+          await cancelSubscription();
+        } catch (error) {
+          await subscriptionService.handleError(
+            error instanceof Error ? error : new Error(String(error))
+          );
+          throw error;
+        }
+      },
+      validatePlanChange: async (currentPlan: SubscriptionPlan, newPlan: SubscriptionPlan) => {
+        return subscriptionService.validatePlanChange(currentPlan, newPlan);
       },
 
       // Payment Dialog
