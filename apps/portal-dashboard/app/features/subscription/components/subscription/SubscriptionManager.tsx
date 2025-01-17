@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "@remix-run/react";
 import {
-  useSubscriptionContext,
   SubscriptionProvider,
+  useSubscriptionContext,
 } from "../../contexts/SubscriptionContext";
-import { usePayment } from "../../hooks/core/usePayment";
 import { useBilling } from "../../hooks/core/useBilling";
 import {
   DEFAULT_SUBSCRIPTION,
@@ -36,7 +35,6 @@ import { PaymentHistory } from "../payment/PaymentHistory";
 import { PaymentMethod } from "@/features/subscription/components/payment/PaymentMethod";
 import { PaymentFlow } from "@/features/subscription/components/payment/PaymentFlow";
 import Addons from "@/routes/account/components/Addons";
-import { SubscriptionStateManager } from "@/features/subscription/states/SubscriptionStateManager";
 
 export function SubscriptionManager() {
   return (
@@ -49,7 +47,6 @@ export function SubscriptionManager() {
 export default SubscriptionManager;
 
 function SubscriptionContent() {
-  const [isInitialized, setIsInitialized] = useState(false);
   const {
     subscription,
     plans,
@@ -62,7 +59,7 @@ function SubscriptionContent() {
     updateSubscription,
     cancelSubscription,
     validatePlanChange,
-    loadSubscription
+    loadSubscription,
   } = useSubscriptionContext();
 
   const [isInitialized, setIsInitialized] = useState(false);
