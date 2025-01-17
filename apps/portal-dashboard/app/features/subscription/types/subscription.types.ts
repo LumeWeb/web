@@ -1,8 +1,23 @@
 import { z } from "zod";
+import { StateValue } from 'robot3';
 import { BillingInfo, billingInfoSchema } from "./billing.types";
 export type { BillingInfo } from "./billing.types";
 import { PaymentInfo, paymentInfoSchema } from "./payment.types";
 import { HttpError } from "@refinedev/core";
+
+export type SubscriptionStateValue = 
+  | 'loading'
+  | 'inactive'
+  | 'pending'
+  | 'pendingPayment'
+  | 'active'
+  | 'cancelled'
+  | 'error';
+
+export interface SubscriptionMachineState {
+  value: StateValue;
+  context: SubscriptionContext;
+}
 
 export interface SubscriptionError extends HttpError {
   code?: string;

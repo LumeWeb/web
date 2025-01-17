@@ -1,22 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
-import { interpret } from 'robot3';
+import { useMachine } from 'robot3/react';
 import { subscriptionMachine } from '../machines/subscriptionMachine';
 import { BillingInfo, SubscriptionPlan } from '../types/subscription.types';
 
 export function useSubscriptionMachine() {
-  const [current, setCurrent] = useState(() => subscriptionMachine.initialState);
-  
-  useEffect(() => {
-    const service = interpret(subscriptionMachine, (state) => {
-      setCurrent(state);
-    });
-    
-    return () => service.stop();
-  }, []);
-
-  const send = useCallback((type: string, payload?: any) => {
-    setCurrent(current => subscriptionMachine.transition(current, { type, ...payload }));
-  }, []);
+  const [current, send] = useMachine(subscriptionMachine);
 
   return {
     state: current.name,

@@ -63,16 +63,16 @@ interface SubscriptionProviderProps {
 }
 
 export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
-  const machine = useSubscriptionMachine();
+  const [current, send] = useMachine(subscriptionMachine);
   const { plansData, plansAreLoading } = useSubscriptionPlans();
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const { refetch: refetchSubscription } = useSubscription();
 
   const value = useMemo(() => ({
     // Machine state and actions
-    state: machine.state,
-    context: machine.context,
-    send: machine.send,
+    state: current.name,
+    context: current.context,
+    send,
     
     // Subscription data
     subscription: machine.context.subscription,
