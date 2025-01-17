@@ -104,8 +104,12 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       isTransitioning,
 
       // Current subscription
-      subscription: state.type === "ACTIVE" ? state.subscription : 
-                   state.type === "CANCELLED" ? state.subscription : undefined,
+      subscription:
+        state.type === "ACTIVE"
+          ? state.subscription
+          : state.type === "CANCELLED"
+            ? state.subscription
+            : undefined,
       isLoading: state.type === "LOADING" || plansAreLoading,
       error: state.type === "ERROR" ? state.error : null,
 
@@ -157,8 +161,6 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     }),
     [
       state,
-      error,
-      isLoading,
       plansAreLoading,
       plansData?.data ?? [],
       selectedPlan,
