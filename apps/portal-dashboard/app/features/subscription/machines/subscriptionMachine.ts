@@ -1,6 +1,4 @@
-import { createMachine, Transition } from "robot3";
-import { createUseMachine } from "robot-hooks";
-import { useEffect, useState } from "react";
+import { createMachine, state, transition, Transition } from "robot3";
 
 import {
   BillingInfo,
@@ -89,42 +87,41 @@ const createTransitionMap = (
   return map;
 };
 
-export const subscriptionMachine = createMachine({
-  idle: state(
-    transition("SUBSCRIPTION_LOADED", "loading"),
-    transition("ERROR", "error")
-  ),
-  loading: state(
-    transition("SUBSCRIPTION_LOADED", "inactive"),
-    transition("ERROR", "error")
-  ),
-  inactive: state(
-    transition("PLAN_SELECTED", "pending"),
-    transition("ERROR", "error")
-  ),
-  pending: state(
-    transition("SELECT_PLAN", "pendingPayment"),
-    transition("SAVED", "active"),
-    transition("FAILED", "error")
-  ),
-  pendingPayment: state(
-    transition("PAYMENT_COMPLETE", "active"),
-    transition("PAYMENT_FAILED", "error")
-  ),
-  active: state(
-    transition("SELECT_PLAN", "pending"),
-    transition("PAYMENT_METHOD_UPDATE_INITIATED", "updatingPayment"),
-    transition("CANCELED", "cancelled"),
-    transition("ERROR", "error")
-  ),
-  cancelled: state(
-    transition("REACTIVATE", "pending"),
-    transition("ERROR", "error")
-  ),
-  error: state(
-    transition("RETRY", "pending")
-  )
-},
+export const subscriptionMachine = createMachine(
+  {
+    idle: state(
+      transition("SUBSCRIPTION_LOADED", "loading"),
+      transition("ERROR", "error"),
+    ),
+    loading: state(
+      transition("SUBSCRIPTION_LOADED", "inactive"),
+      transition("ERROR", "error"),
+    ),
+    inactive: state(
+      transition("PLAN_SELECTED", "pending"),
+      transition("ERROR", "error"),
+    ),
+    pending: state(
+      transition("SELECT_PLAN", "pendingPayment"),
+      transition("SAVED", "active"),
+      transition("FAILED", "error"),
+    ),
+    pendingPayment: state(
+      transition("PAYMENT_COMPLETE", "active"),
+      transition("PAYMENT_FAILED", "error"),
+    ),
+    active: state(
+      transition("SELECT_PLAN", "pending"),
+      transition("PAYMENT_METHOD_UPDATE_INITIATED", "updatingPayment"),
+      transition("CANCELED", "cancelled"),
+      transition("ERROR", "error"),
+    ),
+    cancelled: state(
+      transition("REACTIVATE", "pending"),
+      transition("ERROR", "error"),
+    ),
+    error: state(transition("RETRY", "pending")),
+  },
   () => ({
     subscription: null,
     selectedPlan: null,
