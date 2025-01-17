@@ -39,22 +39,6 @@ import Addons from "@/routes/account/components/Addons";
 import { SubscriptionStateManager } from "@/features/subscription/states/SubscriptionStateManager";
 
 export function SubscriptionManager() {
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  useEffect(() => {
-    // Initialize subscription state
-    const stateManager = SubscriptionStateManager.getInstance();
-    stateManager.transition({
-      type: "SUBSCRIPTION_LOADED",
-      subscription: DEFAULT_SUBSCRIPTION,
-    });
-    setIsInitialized(true);
-  }, []);
-
-  if (!isInitialized) {
-    return null;
-  }
-
   return (
     <SubscriptionProvider>
       <SubscriptionContent />
@@ -65,6 +49,7 @@ export function SubscriptionManager() {
 export default SubscriptionManager;
 
 function SubscriptionContent() {
+  const [isInitialized, setIsInitialized] = useState(false);
   const {
     subscription,
     plans,
@@ -77,7 +62,20 @@ function SubscriptionContent() {
     updateSubscription,
     cancelSubscription,
     validatePlanChange,
+    loadSubscription
   } = useSubscriptionContext();
+
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    // Initialize subscription state
+    loadSubscription(DEFAULT_SUBSCRIPTION);
+    setIsInitialized(true);
+  }, [loadSubscription]);
+
+  if (!isInitialized) {
+    return null;
+  }
 
   const [searchParams, setSearchParams] = useSearchParams();
   const paidBillingEnabled = useIsPaidBillingEnabled();
@@ -150,15 +148,7 @@ function SubscriptionContent() {
       if (!subscription) {
         try {
           console.log("Creating subscription with plan:", selectedPlan);
-          const { subscription: newSubscription } = await createSubscription(selectedPlan);
-          console.log("Created subscription:", newSubscription);
-          
-          // Trigger state transition with new subscription
-          const stateManager = SubscriptionStateManager.getInstance();
-          stateManager.transition({
-            type: "SUBSCRIPTION_LOADED",
-            subscription: newSubscription
-          });
+          await createSubscription(selectedPlan);
         } catch (error) {
           console.error("Error creating subscription:", error);
           throw error;
