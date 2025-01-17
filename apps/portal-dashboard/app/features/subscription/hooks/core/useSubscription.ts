@@ -12,7 +12,6 @@ export interface UseSubscriptionResult {
   createSubscription: (plan: SubscriptionPlan) => Promise<void>;
   cancelSubscription: () => Promise<void>;
   validatePlanChange: (currentPlan: SubscriptionPlan, newPlan: SubscriptionPlan) => Promise<boolean>;
-  validateSubscriptionStatus: (subscription: Subscription) => Promise<boolean>;
   getSubscriptionPeriod: (plan: SubscriptionPlan, startDate?: Date) => { start: Date; end: Date };
   handleError: (error: Error) => void;
 }
@@ -83,19 +82,6 @@ export function useSubscription(): UseSubscriptionResult {
     [subscriptionService, handleErrorState]
   );
 
-  const validateSubscriptionStatus = useCallback(
-    async (subscription: Subscription) => {
-      try {
-        return await subscriptionService.validateSubscriptionStatus(subscription);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to validate subscription status');
-        setError(error);
-        handleErrorState(error);
-        return false;
-      }
-    },
-    [subscriptionService, handleErrorState]
-  );
 
   const getSubscriptionPeriod = useCallback(
     (plan: SubscriptionPlan, startDate?: Date) => {
@@ -113,7 +99,6 @@ export function useSubscription(): UseSubscriptionResult {
     createSubscription,
     cancelSubscription,
     validatePlanChange,
-    validateSubscriptionStatus,
     getSubscriptionPeriod,
     handleError: handleErrorState
   };

@@ -91,20 +91,4 @@ export class SubscriptionService {
     return { start, end };
   }
 
-  public async validateSubscriptionStatus(
-    subscription: Subscription,
-  ): Promise<boolean> {
-    const validTransitions = {
-      INACTIVE: ["PENDING", "ACTIVE"],
-      PENDING: ["ACTIVE", "CANCELLED"],
-      ACTIVE: ["SUSPENDED", "CANCELLED"],
-      SUSPENDED: ["ACTIVE", "CANCELLED"],
-      CANCELLED: ["PENDING", "ACTIVE"],
-    };
-
-    const currentStatus = subscription.status;
-    const allowedStatuses = validTransitions[currentStatus];
-
-    return !!allowedStatuses;
-  }
 }
