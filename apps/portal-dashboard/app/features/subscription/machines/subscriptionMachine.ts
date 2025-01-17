@@ -103,12 +103,65 @@ const states = {
     ),
   ),
 
-  // Pending state handles the transition to billing collection
+  // Pending state handles subscription operations
   pending: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "EDIT_BILLING",
-      "editingBilling",
+      "CREATE_SUBSCRIPTION",
+      "creating"
     ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "UPDATE_SUBSCRIPTION", 
+      "changing"
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "EDIT_BILLING",
+      "editingBilling"
+    ),
+  ),
+
+  // Creating new subscription
+  creating: state(
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "SUBSCRIPTION_CREATED",
+      "active",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        subscription: ev.subscription,
+        selectedPlan: null,
+        error: null
+      }))
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "ERROR",
+      "error",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        error: ev.error,
+        subscription: null
+      }))
+    )
+  ),
+
+  // Changing existing subscription
+  changing: state(
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "SUBSCRIPTION_UPDATED",
+      "active",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        subscription: ev.subscription,
+        selectedPlan: null,
+        error: null
+      }))
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "ERROR",
+      "error",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        error: ev.error
+      }))
+    )
   ),
 
   // Editing billing information invokes the billing machine

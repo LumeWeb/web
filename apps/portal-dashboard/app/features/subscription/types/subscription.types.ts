@@ -18,6 +18,8 @@ export type SubscriptionStateValue =
   | "loading"
   | "inactive"
   | "pending"
+  | "creating"
+  | "changing"
   | "editingBilling"
   | "pendingPayment"
   | "active"
@@ -101,6 +103,10 @@ export type SubscriptionEvent =
   | { type: "SUBSCRIPTION_LOADED"; subscription: Subscription }
   | { type: "PLAN_SELECTED"; plan: SubscriptionPlan }
   | { type: "SELECT_PLAN"; plan: SubscriptionPlan }
+  | { type: "CREATE_SUBSCRIPTION" }
+  | { type: "UPDATE_SUBSCRIPTION" }
+  | { type: "SUBSCRIPTION_CREATED"; subscription: Subscription }
+  | { type: "SUBSCRIPTION_UPDATED"; subscription: Subscription }
   | { type: "COMPLETE" }
   | { type: "CANCEL" }
   | { type: "REACTIVATED" }

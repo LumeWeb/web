@@ -190,27 +190,30 @@ function SubscriptionContent() {
         return;
       }
 
-      // If we have an existing subscription, update it
+      // Start subscription operation
       if (context.subscription) {
+        // Update existing subscription
+        send({ type: "UPDATE_SUBSCRIPTION" });
         console.log("Updating subscription to plan:", selectedPlan);
         const { subscription } = await updateSubscription(selectedPlan);
         console.log("Update subscription result:", subscription);
         
         if (subscription) {
           send({
-            type: "SUBSCRIPTION_LOADED",
+            type: "SUBSCRIPTION_UPDATED",
             subscription,
           });
         }
       } else {
         // Create new subscription
+        send({ type: "CREATE_SUBSCRIPTION" });
         console.log("Creating new subscription with plan:", selectedPlan);
         const { subscription } = await createSubscription(selectedPlan);
         console.log("Create subscription result:", subscription);
         
         if (subscription) {
           send({
-            type: "SUBSCRIPTION_LOADED",
+            type: "SUBSCRIPTION_CREATED",
             subscription,
           });
         }
