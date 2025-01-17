@@ -39,6 +39,7 @@ import { useSubscription } from "@/features/subscription/hooks/core/useSubscript
 import { useSubscriptionMachine } from "../../hooks/useSubscriptionMachine";
 import { useSubscriptionDialog } from "@/features/subscription/hooks/ui/useSubscriptionDialog";
 import { useSubscriptionConfirmation } from "@/features/subscription/hooks/ui/useSubscriptionConfirmation";
+import { useSubscriptionMutations } from "../../hooks/mutations/useSubscriptionMutations";
 import { Alert, AlertDescription } from "portal-shared/components/ui/alert";
 import { validateBillingInfo } from "../../services/billing";
 
