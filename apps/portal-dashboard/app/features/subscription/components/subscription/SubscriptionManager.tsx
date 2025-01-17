@@ -59,8 +59,27 @@ function SubscriptionContent() {
     updateSubscription,
     cancelSubscription,
     validatePlanChange,
-    loadSubscription,
   } = useSubscriptionContext();
+
+  useEffect(() => {
+    const initializeSubscription = async () => {
+      try {
+        // Load initial subscription data
+        const response = await fetch('/api/account/subscription');
+        const data = await response.json();
+        if (data?.subscription) {
+          loadSubscription(data.subscription);
+        } else {
+          loadSubscription(DEFAULT_SUBSCRIPTION);
+        }
+      } catch (error) {
+        console.error('Failed to initialize subscription:', error);
+        loadSubscription(DEFAULT_SUBSCRIPTION);
+      }
+    };
+
+    initializeSubscription();
+  }, []);
 
   const [isInitialized, setIsInitialized] = useState(false);
 
