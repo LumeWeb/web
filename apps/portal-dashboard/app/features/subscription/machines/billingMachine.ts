@@ -14,7 +14,7 @@ export type BillingEvent =
   | { type: "VALIDATION_FAILED"; errors: BillingErrors }
   | { type: "SAVE" }
   | { type: "SAVED" }
-  | { type: "ERROR"; error: Error };
+  | { type: "SAVE_ERROR"; error: Error };
 
 export const billingMachine = createMachine<BillingContext, BillingEvent>(
   {
@@ -58,7 +58,7 @@ export const billingMachine = createMachine<BillingContext, BillingEvent>(
         reduce((ctx) => ({ ...ctx, error: null })),
       ),
       transition(
-        "ERROR",
+        "SAVE_ERROR",
         "error",
         reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
       ),
