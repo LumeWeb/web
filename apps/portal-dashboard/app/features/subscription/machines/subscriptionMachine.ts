@@ -34,32 +34,32 @@ export interface SubscriptionStates {
   };
   inactive: {
     final: false;
-    transitions: Map<string, Array<Transition<string>>>;
+    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
   };
   pending: {
     final: false;
-    transitions: Map<string, Array<Transition<string>>>;
+    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
   };
   pendingPayment: {
     final: false;
-    transitions: Map<string, Array<Transition<string>>>;
+    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
   };
   active: {
     final: false;
-    transitions: Map<string, Array<Transition<string>>>;
+    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
   };
   cancelled: {
     final: false;
-    transitions: Map<string, Array<Transition<string>>>;
+    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
   };
   error: {
     final: false;
-    transitions: Map<string, Array<Transition<string>>>;
+    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
   };
 }
 
-const createTransitionMap = (transitions: Record<string, string[]>) => {
-  const map = new Map<string, Array<Transition<string>>>();
+const createTransitionMap = (transitions: Record<SubscriptionEvent["type"], string[]>) => {
+  const map = new Map<string, Array<Transition<SubscriptionEvent["type"]>>>();
   Object.entries(transitions).forEach(([event, states]) => {
     map.set(
       event,
