@@ -50,51 +50,36 @@ export default SubscriptionManager;
 
 function SubscriptionContent() {
   const {
-    subscription,
-    plans,
-    selectedPlan,
-    setSelectedPlan,
-    error,
-    isLoading,
-    isProcessing,
-    createSubscription,
-    updateSubscription,
-    cancelSubscription,
-    validatePlanChange,
     state,
-    setShowPaymentDialog,
-  } = useSubscriptionContext();
+    context,
+    send,
+    selectPlan,
+    updateBilling,
+    complete,
+    cancel,
+    retry
+  } = useSubscriptionMachine();
 
-  const { loadSubscription } = useSubscriptionContext();
+  const { subscription, plans, error, isLoading } = useSubscriptionContext();
 
   const { data: subscriptionData, isLoading: isLoadingSubscription } =
     useSubscription();
 
   useEffect(() => {
-    const initializeSubscription = async () => {
-      try {
-        loadSubscription(subscriptionData?.data || DEFAULT_SUBSCRIPTION);
-      } catch (error) {
-        console.error("Failed to read subscription:", error);
-        loadSubscription(DEFAULT_SUBSCRIPTION);
-      }
-    };
-
-    if (!isLoadingSubscription) {
-      initializeSubscription();
+    if (!isLoadingSubscription && subscriptionData?.data) {
+      send('LOADED', { subscription: subscriptionData.data });
     }
-  }, [loadSubscription, isLoadingSubscription]);
+  }, [isLoadingSubscription, subscriptionData, send]);
 
-  // Keep selectedPlan in sync with state machine
-  useEffect(() => {
-    if (state.type === "PENDING_PAYMENT" || state.type === "PENDING") {
-      setSelectedPlan(state.plan);
-    } else if (state.type === "ACTIVE" || state.type === "CANCELLED") {
-      setSelectedPlan(state.subscription.plan);
-    } else {
-      setSelectedPlan(null);
+  const selectedPlan = useMemo(() => {
+    if (state === 'pending' || state === 'pendingPayment') {
+      return context.selectedPlan;
     }
-  }, [state, setSelectedPlan]);
+    if (state === 'active' || state === 'cancelled') {
+      return context.subscription?.plan;
+    }
+    return null;
+  }, [state, context]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const paidBillingEnabled = useIsPaidBillingEnabled();
@@ -143,12 +128,20 @@ function SubscriptionContent() {
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
 
   const handlePlanSelect = (plan: SubscriptionPlan) => {
-    // Don't handle free plan selection - it's pseudo
     if (plan.is_free) {
       return;
     }
     
-    setSelectedPlan(plan);
+    // Validate plan change if needed
+    if (subscription?.plan) {
+      const isDowngrade = plan.price < subscription.plan.price;
+      if (isDowngrade) {
+        setValidationError("Downgrades are not allowed");
+        return;
+      }
+    }
+    
+    selectPlan(plan);
     setShowConfirmDialog(true);
   };
 
@@ -169,25 +162,9 @@ function SubscriptionContent() {
         }
       }
 
-      if (!subscription) {
-        console.log("Creating subscription with plan:", selectedPlan);
-        await createSubscription(selectedPlan);
-      } else {
-        // Existing subscription
-        const isValid = await validatePlanChange(
-          subscription.plan,
-          selectedPlan,
-        );
-        if (!isValid) {
-          setValidationError("Invalid plan change. Please try again.");
-          return;
-        }
-
-        await updateSubscription(selectedPlan);
-      }
-
-      // State machine will handle the transition and useEffect will update selectedPlan
-      if (state.type === SubscriptionPlanStatus.PENDING_PAYMENT) {
+      selectPlan(selectedPlan);
+      
+      if (state === 'pendingPayment') {
         setShowPaymentDialog(true);
       }
 
