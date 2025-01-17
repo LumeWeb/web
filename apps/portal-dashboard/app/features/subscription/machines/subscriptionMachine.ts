@@ -105,13 +105,16 @@ export const subscriptionMachine = createMachine<
     )
   ),
 
-  pending: state(
-    transition('BILLING_UPDATED', 'pending',
+  pending: invoke(billingMachine,
+    transition('resolved', 'pending',
       reduce((ctx, ev) => ({ 
         ...ctx, 
-        billing: ev.billing,
+        billing: ev.data.billing,
         error: null
       }))
+    ),
+    transition('rejected', 'error',
+      reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
     ),
     transition('COMPLETED', 'processing', 
       guard((ctx) => !ctx.selectedPlan?.is_free && hasBillingInfo(ctx) && isValidPlanChange(ctx)),
@@ -197,21 +200,21 @@ export const subscriptionMachine = createMachine<
     )
   ),
 
-  updatingPayment: state(
-    transition('PAYMENT_METHOD_UPDATED', 'active',
+  updatingPayment: invoke(paymentMethodMachine,
+    transition('resolved', 'active',
       reduce((ctx, ev) => ({
         ...ctx,
         subscription: ctx.subscription ? {
           ...ctx.subscription,
           payment: {
             ...ctx.subscription.payment,
-            paymentMethodId: ev.paymentMethodId
+            paymentMethodId: ev.data.paymentMethodId
           }
         } : null,
         error: null
       }))
     ),
-    transition('PAYMENT_METHOD_UPDATE_FAILED', 'active',
+    transition('rejected', 'error',
       reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
     )
   ),
