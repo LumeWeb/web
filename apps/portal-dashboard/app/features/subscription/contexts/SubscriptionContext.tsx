@@ -93,93 +93,87 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
 
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
-  const value = useMemo(() => ({
-    // State management
-    state,
-    loadSubscription: loadSubscriptionState,
-    updateBilling: updateBillingState,
-    completePayment: completePaymentState,
-    handleError: handleErrorState,
-    isTransitioning,
+  const value = useMemo(
+    () => ({
+      // State management
+      state,
+      loadSubscription: loadSubscriptionState,
+      updateBilling: updateBillingState,
+      completePayment: completePaymentState,
+      handleError: handleErrorState,
+      isTransitioning,
 
-    // Current subscription
-    subscription:
-      state.type === "ACTIVE"
-        ? state.subscription
-        : state.type === "CANCELLED"
+      // Current subscription
+      subscription:
+        state.type === "ACTIVE"
           ? state.subscription
-          : undefined,
-    isLoading: state.type === "LOADING" || plansAreLoading,
-    error: state.type === "ERROR" ? state.error : null,
+          : state.type === "CANCELLED"
+            ? state.subscription
+            : undefined,
+      isLoading: state.type === "LOADING" || plansAreLoading,
+      error: state.type === "ERROR" ? state.error : null,
 
-    // Plan management
-    plans: plansData?.data?.plans || [],
-    selectedPlan,
-    setSelectedPlan,
+      // Plan management
+      plans: plansData?.data?.plans || [],
+      selectedPlan,
+      setSelectedPlan,
 
-    // Actions
-    createSubscription: async (plan: SubscriptionPlan) => {
-      try {
-        console.log("Creating subscription in context with plan:", plan);
-        const response = await createSubscription(plan);
-        console.log("Subscription creation response:", response);
+      // Actions
+      createSubscription: async (plan: SubscriptionPlan) => {
+        try {
+          console.log("Creating subscription in context with plan:", plan);
+          const response = await createSubscription(plan);
+          console.log("Subscription creation response:", response);
 
-        if (!response?.subscription) {
-          throw new Error(
-            "Invalid server response - missing subscription data",
-          );
+          if (!response?.subscription) {
+            throw new Error(
+              "Invalid server response - missing subscription data",
+            );
+          }
+
+          return response.subscription;
+        } catch (error) {
+          console.error("Error in subscription context:", error);
+          throw error;
         }
+      },
+      updateSubscription: async (plan: SubscriptionPlan) => {
+        const response = await updateSubscription(plan);
+        return response.data.subscription;
+      },
+      cancelSubscription,
+      validatePlanChange: async (
+        currentPlan: SubscriptionPlan,
+        newPlan: SubscriptionPlan,
+      ) => {
+        // Implement validation logic here
+        return true;
+      },
 
-        return response.subscription;
-      } catch (error) {
-        console.error("Error in subscription context:", error);
-        throw error;
-      }
-    },
-    updateSubscription: async (plan: SubscriptionPlan) => {
-      const response = await updateSubscription(plan);
-      return response.data.subscription;
-    },
-    cancelSubscription,
-    validatePlanChange: async (
-      currentPlan: SubscriptionPlan,
-      newPlan: SubscriptionPlan,
-    ) => {
-      // Implement validation logic here
-      return true;
-    },
+      // Payment Dialog
+      showPaymentDialog,
+      setShowPaymentDialog,
 
-    // Payment Dialog
-    showPaymentDialog,
-    setShowPaymentDialog,
-
-    // Status flags
-    isProcessing
-  }), [
-    state,
-    loadSubscriptionState,
-    updateBillingState,
-    completePaymentState,
-    handleErrorState,
-    isTransitioning,
-    plansAreLoading,
-    plansData,
-    selectedPlan,
-    setSelectedPlan,
-    createSubscription,
-    updateSubscription,
-    cancelSubscription,
-    showPaymentDialog,
-    setShowPaymentDialog,
-    isProcessing
-  ]);
+      // Status flags
+      isProcessing,
+    }),
     [
       state,
+      loadSubscriptionState,
+      updateBillingState,
+      completePaymentState,
+      handleErrorState,
+      isTransitioning,
       plansAreLoading,
       plansData?.data ?? [],
       selectedPlan,
-      isProcessing,
+      setSelectedPlan,
+      createSubscription,
+      updateSubscription,
+      cancelSubscription,
       showPaymentDialog,
+      setShowPaymentDialog,
+      isProcessing,
     ],
   );
 
