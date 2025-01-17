@@ -223,17 +223,25 @@ function SubscriptionContent() {
         }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Subscription Change</AlertDialogTitle>
+            <AlertDialogTitle>
+              {subscription ? 'Confirm Subscription Change' : 'Confirm Subscription'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
               <div className="space-y-2">
-                {subscription
-                  ? `Are you sure you want to ${
-                      selectedPlan &&
-                      selectedPlan.price > subscription.plan.price
-                        ? "upgrade"
-                        : "downgrade"
-                    } to the ${selectedPlan?.name} plan?`
-                  : `Are you sure you want to subscribe to the ${selectedPlan?.name} plan?`}
+                {subscription ? (
+                  <>
+                    Are you sure you want to{' '}
+                    {selectedPlan && selectedPlan.price > subscription.plan.price
+                      ? 'upgrade'
+                      : 'downgrade'}{' '}
+                    to the {selectedPlan?.name} plan?
+                  </>
+                ) : (
+                  <>
+                    You are about to subscribe to the {selectedPlan?.name} plan.
+                    {!selectedPlan?.is_free && ' Payment information will be required.'}
+                  </>
+                )}
 
                 {validationError && (
                   <div className="flex items-center gap-2 text-destructive text-sm mt-2">
