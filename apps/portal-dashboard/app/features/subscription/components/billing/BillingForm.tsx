@@ -151,8 +151,8 @@ export function BillingForm() {
               <Button
                 type="submit"
                 className="ml-auto"
-                disabled={isLoading || !hasFormChanges()}>
-                {isLoading ? "Saving..." : "Save"}
+                disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Save"}
               </Button>
             </CardFooter>
           </form>
