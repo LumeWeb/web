@@ -67,7 +67,10 @@ const states = {
 
 export const billingMachine = createMachine(
   "idle",
-  states,
+  {
+    ...states,
+    complete: state() // Make it a final state
+  },
   (context?: BillingContext) => ({
     billing: context?.billing ?? null,
     errors: context?.errors ?? null, 

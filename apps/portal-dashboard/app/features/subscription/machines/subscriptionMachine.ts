@@ -1,4 +1,4 @@
-import { createMachine, state, transition } from "robot3";
+import { createMachine, state, transition, invoke, reduce } from "robot3";
 
 import {
   BillingInfo,
@@ -6,6 +6,7 @@ import {
   SubscriptionPlan,
 } from "../types/subscription.types";
 import { PaymentInfo } from "../types/payment.types";
+import { billingMachine } from "./billingMachine";
 
 interface SubscriptionContext {
   subscription: Subscription | null;
@@ -29,7 +30,10 @@ export type SubscriptionEvent =
   | { type: "PAYMENT_FAILED" }
   | { type: "PAYMENT_METHOD_UPDATE_INITIATED" }
   | { type: "CANCELED" }
-  | { type: "REACTIVATE" };
+  | { type: "REACTIVATE" }
+  | { type: "EDIT_BILLING" }
+  | { type: "BILLING_COMPLETE"; billing: BillingInfo }
+  | { type: "BILLING_FAILED"; error: Error };
 
 type EventType = SubscriptionEvent["type"];
 
@@ -67,17 +71,33 @@ const states = {
   ),
   pending: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "SELECT_PLAN",
-      "pendingPayment",
-    ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "COMPLETE",
-      "active",
+      "EDIT_BILLING",
+      "editingBilling"
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "ERROR",
       "error",
     ),
+  ),
+
+  editingBilling: invoke(billingMachine,
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "done",
+      "pendingPayment",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        billing: ev.data.billing,
+        error: null
+      }))
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "error",
+      "error",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        error: ev.error
+      }))
+    )
   ),
   pendingPayment: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
