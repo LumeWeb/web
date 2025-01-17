@@ -75,10 +75,10 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     send,
     
     // Subscription data
-    subscription: machine.context.subscription,
+    subscription: current.context.subscription,
     plans: plansData?.data?.plans || [],
-    isLoading: machine.state === "loading" || plansAreLoading,
-    error: machine.context.error,
+    isLoading: current.name === "loading" || plansAreLoading,
+    error: current.context.error,
 
     // Payment handling
     showPaymentDialog,
@@ -87,9 +87,8 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     // Utility functions
     refetchSubscription
   }), [
-    machine.state,
-    machine.context,
-    machine.send,
+    current,
+    send,
     plansData?.data?.plans,
     plansAreLoading,
     showPaymentDialog,

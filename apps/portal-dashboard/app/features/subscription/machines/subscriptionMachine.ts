@@ -1,4 +1,4 @@
-import { createMachine, state, transition, reduce, guard, invoke } from 'robot3';
+import { createMachine, state, transition, reduce, guard, invoke, State } from 'robot3';
 import { 
   Subscription,
   SubscriptionPlan,
@@ -6,6 +6,24 @@ import {
   PaymentInfo,
   SubscriptionEvent
 } from '../types/subscription.types';
+
+export type SubscriptionMachineState = State<
+  SubscriptionContext,
+  SubscriptionEvent,
+  {
+    loading: {};
+    inactive: {};
+    pending: {};
+    pendingPayment: {};
+    active: {};
+    cancelled: {};
+    error: {};
+  }
+>;
+
+type SubscriptionService = {
+  initiatePayment: typeof initiatePayment;
+};
 import { SubscriptionPlanStatus } from 'portal-shared/dataProviders/accountProvider';
 import { PaymentService } from '../services/PaymentService';
 
@@ -56,7 +74,11 @@ const initiatePayment = async (context: SubscriptionContext) => {
   return { payment };
 };
 
-export const subscriptionMachine = createMachine<SubscriptionContext, SubscriptionEvent>({
+export const subscriptionMachine = createMachine<
+  SubscriptionContext,
+  SubscriptionEvent,
+  SubscriptionService
+>({
   loading: state(
     transition('LOADED', 'inactive', 
       reduce((ctx, ev) => ({
