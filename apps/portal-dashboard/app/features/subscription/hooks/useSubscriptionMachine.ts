@@ -1,12 +1,12 @@
 import { useMachine } from 'robot3/react';
 import { subscriptionMachine } from '../machines/subscriptionMachine';
-import { BillingInfo, SubscriptionPlan, SubscriptionMachineState } from '../types/subscription.types';
+import { BillingInfo, SubscriptionPlan, SubscriptionMachineState, SubscriptionStateValue } from '../types/subscription.types';
 
 export function useSubscriptionMachine() {
   const [current, send] = useMachine(subscriptionMachine);
 
   return {
-    state: current.name as SubscriptionMachineState['value'],
+    state: current.name as SubscriptionStateValue,
     context: current.context,
     send,
     // Convenience methods

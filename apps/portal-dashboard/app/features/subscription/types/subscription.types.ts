@@ -16,8 +16,16 @@ export type SubscriptionStateValue =
   | 'error'
   | 'updatingPayment';
 
+export interface SubscriptionContext {
+  subscription: Subscription | null;
+  selectedPlan: SubscriptionPlan | null;
+  billing: BillingInfo | null;
+  payment: PaymentInfo | null;
+  error: Error | null;
+}
+
 export interface SubscriptionMachineState {
-  value: StateValue;
+  value: SubscriptionStateValue;
   context: SubscriptionContext;
 }
 
