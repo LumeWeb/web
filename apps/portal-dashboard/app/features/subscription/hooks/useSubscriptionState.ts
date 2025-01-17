@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import { SubscriptionStateMachine } from "../states/SubscriptionStateMachine";
 import {
   BillingInfo,
+  DEFAULT_SUBSCRIPTION,
   Subscription,
   SubscriptionEvent,
   SubscriptionPlan,
