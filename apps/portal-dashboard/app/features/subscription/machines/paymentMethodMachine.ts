@@ -1,12 +1,12 @@
 mport { createMachine, state, transition, reduce } from 'robot3';
 
-interface PaymentMethodContext {
+export interface PaymentMethodContext {
   clientSecret: string | null;
   paymentMethodId: string | null;
   error: Error | null;
 }
 
-type PaymentMethodEvent =
+export type PaymentMethodEvent =
   | { type: 'INITIALIZE' }
   | { type: 'INITIALIZED'; clientSecret: string }
   | { type: 'COLLECT' }

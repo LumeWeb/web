@@ -1,13 +1,13 @@
 import { createMachine, state, transition, reduce } from "robot3";
 import { BillingInfo, BillingErrors } from "../types/billing.types";
 
-interface BillingContext {
+export interface BillingContext {
   billing: BillingInfo | null;
   errors: BillingErrors | null;
   error: Error | null;
 }
 
-type BillingEvent =
+export type BillingEvent =
   | { type: "EDIT" }
   | { type: "VALIDATE"; billing: BillingInfo }
   | { type: "VALIDATED" }
