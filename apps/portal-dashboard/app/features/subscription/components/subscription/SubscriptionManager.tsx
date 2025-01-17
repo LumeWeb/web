@@ -123,9 +123,13 @@ function SubscriptionContent() {
 
   const searchTab = searchParams.get("tab") ?? "billing";
 
-  const [validationError, setValidationError] = useState<string | null>(null);
-  const [billingError, setBillingError] = useState<string | null>(null);
-  const { validateBillingInfo, formatBillingInfo } = useBilling();
+  const {
+    showConfirmDialog,
+    setShowConfirmDialog,
+    validationError,
+    billingError,
+    validatePlanChange
+  } = useSubscriptionConfirmation();
 
   const {
     dialog,
@@ -138,28 +142,26 @@ function SubscriptionContent() {
   const handlePlanSelect = async (plan: SubscriptionPlan) => {
     try {
       setLocalError(null);
-      setValidationError(null);
 
       if (plan.is_free) {
-        send("SELECT_PLAN", { plan });
-        send("COMPLETE");
+        selectPlan(plan);
+        complete();
         return;
       }
 
-      // Validate plan change if needed
-      if (context.subscription?.plan) {
-        const isDowngrade = plan.price < context.subscription.plan.price;
-        if (isDowngrade) {
-          setValidationError("Downgrades are not allowed");
-          return;
-        }
-      }
+      const isValid = await validatePlanChange(
+        context.subscription?.plan,
+        plan,
+        context.billing
+      );
 
-      selectPlan(plan);
-      setShowConfirmDialog(true);
+      if (isValid) {
+        selectPlan(plan);
+        setShowConfirmDialog(true);
+      }
     } catch (err) {
       setLocalError(
-        err instanceof Error ? err.message : "Failed to select plan",
+        err instanceof Error ? err.message : "Failed to select plan"
       );
     }
   };
