@@ -70,9 +70,7 @@ function SubscriptionContent() {
   useEffect(() => {
     const initializeSubscription = async () => {
       try {
-        loadSubscription(
-          subscriptionData?.data?.subscription || DEFAULT_SUBSCRIPTION,
-        );
+        loadSubscription(subscriptionData?.data || DEFAULT_SUBSCRIPTION);
       } catch (error) {
         console.error("Failed to read subscription:", error);
         loadSubscription(DEFAULT_SUBSCRIPTION);
