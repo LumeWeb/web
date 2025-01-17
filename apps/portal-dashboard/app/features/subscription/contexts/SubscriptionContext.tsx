@@ -104,17 +104,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       completePayment: completePaymentState,
       handleError: handleErrorState,
       isTransitioning,
-      refetchSubscription: useCallback(async () => {
-        try {
-          const { refetch } = useSubscription();
-          const result = await refetch();
-          if (result.data?.data) {
-            loadSubscriptionState(result.data.data);
-          }
-        } catch (error) {
-          handleErrorState(error instanceof Error ? error : new Error('Failed to refetch subscription'));
-        }
-      }, [loadSubscriptionState, handleErrorState]),
+      refetchSubscription: useSubscription().refetch,
 
       // Current subscription
       subscription:
