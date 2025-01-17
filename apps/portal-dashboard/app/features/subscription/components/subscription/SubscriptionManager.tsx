@@ -154,6 +154,10 @@ function SubscriptionContent() {
         try {
           console.log("Creating subscription with plan:", selectedPlan);
           await createSubscription(selectedPlan);
+          // Check if state machine transitioned to PENDING_PAYMENT
+          if (state.type === "PENDING_PAYMENT") {
+            setShowPaymentDialog(true);
+          }
         } catch (error) {
           console.error("Error creating subscription:", error);
           throw error;
@@ -171,6 +175,10 @@ function SubscriptionContent() {
 
         // Let the backend handle the plan change logic
         await updateSubscription(selectedPlan);
+        // Check if state machine transitioned to PENDING_PAYMENT
+        if (state.type === "PENDING_PAYMENT") {
+          setShowPaymentDialog(true);
+        }
       }
 
       setShowConfirmDialog(false);
