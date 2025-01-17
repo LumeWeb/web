@@ -1,27 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   HyperElements,
   UnifiedCheckout,
   useElements,
   useHyper,
-} from '@/routes/account/lib/hyper-react.js';
-import { Skeleton } from 'portal-shared/components/ui/skeleton';
-import { Button } from 'portal-shared/components/ui/button';
-import { useSubscriptionContext } from '../../contexts/SubscriptionContext';
+  //@ts-ignore
+} from "@/routes/account/lib/hyper-react.js";
+import { Skeleton } from "portal-shared/components/ui/skeleton";
+import { Button } from "portal-shared/components/ui/button";
+import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
 
 interface HyperPaymentProps {
   onPaymentSuccess: (paymentMethodId: string) => void;
-  mode: 'subscribe' | 'setup' | 'change_payment';
+  mode: "subscribe" | "setup" | "change_payment";
 }
 
-export default function HyperPayment({ onPaymentSuccess, mode }: HyperPaymentProps) {
+export default function HyperPayment({
+  onPaymentSuccess,
+  mode,
+}: HyperPaymentProps) {
   const { subscription } = useSubscriptionContext();
   const [clientSecret, setClientSecret] = useState<string | undefined>();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (mode === 'subscribe' || mode === 'setup') {
+    if (mode === "subscribe" || mode === "setup") {
       setClientSecret(subscription?.payment?.client_secret);
     }
   }, [mode, subscription?.payment?.client_secret]);
@@ -44,7 +48,7 @@ export default function HyperPayment({ onPaymentSuccess, mode }: HyperPaymentPro
             displaySavedPaymentMethodsCheckbox: false,
             hideCardNicknameField: true,
             layout: {
-              type: 'accordion',
+              type: "accordion",
             },
           }}
         />
@@ -70,7 +74,7 @@ const PaymentConfirmationButton = ({
   setPaymentError,
 }: {
   onPaymentSuccess: (paymentMethodId: string) => void;
-  mode: 'subscribe' | 'setup' | 'change_payment';
+  mode: "subscribe" | "setup" | "change_payment";
   isProcessing: boolean;
   setIsProcessing: (value: boolean) => void;
   paymentError: string | null;
@@ -81,7 +85,7 @@ const PaymentConfirmationButton = ({
 
   const handlePayment = async () => {
     if (!hyper || !elements) {
-      console.error('Hyper or elements not initialized');
+      console.error("Hyper or elements not initialized");
       return;
     }
 
@@ -94,19 +98,21 @@ const PaymentConfirmationButton = ({
         confirmParams: {
           return_url: window.location.href,
         },
-        redirect: 'if_required',
+        redirect: "if_required",
       });
 
       if (result?.error) {
-        setPaymentError(result.error.message || 'An error occurred during payment');
-        console.error('Payment failed:', result.error);
+        setPaymentError(
+          result.error.message || "An error occurred during payment",
+        );
+        console.error("Payment failed:", result.error);
       } else {
-        console.log('Payment succeeded:', result);
+        console.log("Payment succeeded:", result);
         onPaymentSuccess(result.payment_method_id);
       }
     } catch (error) {
-      setPaymentError('An unexpected error occurred');
-      console.error('Error confirming payment:', error);
+      setPaymentError("An unexpected error occurred");
+      console.error("Error confirming payment:", error);
     } finally {
       setIsProcessing(false);
     }
@@ -119,10 +125,10 @@ const PaymentConfirmationButton = ({
         disabled={isProcessing}
         className="w-full py-2 px-4 text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
         {isProcessing
-          ? 'Processing...'
-          : mode === 'subscribe'
-          ? 'Subscribe'
-          : 'Update Payment Method'}
+          ? "Processing..."
+          : mode === "subscribe"
+            ? "Subscribe"
+            : "Update Payment Method"}
       </Button>
       {paymentError && <div className="text-red-500 mt-2">{paymentError}</div>}
     </>
