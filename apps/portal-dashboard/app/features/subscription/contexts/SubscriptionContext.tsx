@@ -4,22 +4,21 @@ import {
   useContext,
   useMemo,
   useState,
-  useCallback
+  useCallback,
 } from "react";
-import {
-  Subscription,
-  SubscriptionPlan,
-} from "../types/subscription.types";
+import { Subscription, SubscriptionPlan } from "../types/subscription.types";
 import { useSubscriptionPlans } from "../hooks/core/useSubscriptionPlans";
 import { useSubscription } from "@/features/subscription/hooks/core/useSubscription";
 import { useSubscriptionMachine } from "../hooks/useSubscriptionMachine";
+import { subscriptionMachine } from "../machines/subscriptionMachine";
+import { useMachine } from "robot-hooks";
 
 interface SubscriptionContextValue {
   // Machine state and actions
   state: SubscriptionStateValue;
   context: SubscriptionContext;
-  send: (type: SubscriptionEvent['type'], payload?: any) => void;
-  
+  send: (type: SubscriptionEvent["type"], payload?: any) => void;
+
   // Subscription data
   subscription: Subscription | null;
   plans: SubscriptionPlan[];
@@ -29,7 +28,7 @@ interface SubscriptionContextValue {
   // Payment handling
   showPaymentDialog: boolean;
   setShowPaymentDialog: (show: boolean) => void;
-  
+
   // Utility functions
   refetchSubscription: () => Promise<any>;
 }
@@ -63,32 +62,35 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const { refetch: refetchSubscription } = useSubscription();
 
-  const value = useMemo(() => ({
-    // Machine state and actions
-    state: current.value,
-    context: current.context,
-    send,
-    
-    // Subscription data
-    subscription: current.context.subscription,
-    plans: plansData?.data?.plans || [],
-    isLoading: current.name === "loading" || plansAreLoading,
-    error: current.context.error,
+  const value = useMemo(
+    () => ({
+      // Machine state and actions
+      state: current.value,
+      context: current.context,
+      send,
 
-    // Payment handling
-    showPaymentDialog,
-    setShowPaymentDialog,
-    
-    // Utility functions
-    refetchSubscription
-  }), [
-    current,
-    send,
-    plansData?.data?.plans,
-    plansAreLoading,
-    showPaymentDialog,
-    refetchSubscription
-  ]);
+      // Subscription data
+      subscription: current.context.subscription,
+      plans: plansData?.data?.plans || [],
+      isLoading: current.name === "loading" || plansAreLoading,
+      error: current.context.error,
+
+      // Payment handling
+      showPaymentDialog,
+      setShowPaymentDialog,
+
+      // Utility functions
+      refetchSubscription,
+    }),
+    [
+      current,
+      send,
+      plansData?.data?.plans,
+      plansAreLoading,
+      showPaymentDialog,
+      refetchSubscription,
+    ],
+  );
 
   return (
     <SubscriptionContext.Provider value={value}>
