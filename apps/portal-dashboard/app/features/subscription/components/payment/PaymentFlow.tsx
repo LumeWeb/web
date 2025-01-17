@@ -26,8 +26,8 @@ export function PaymentFlow() {
       type: "ERROR",
       error: {
         message: error.message,
-        code: error instanceof PaymentError ? error.code : undefined,
-        details: error instanceof PaymentError ? error.details : undefined,
+        code: undefined,
+        details: undefined,
       },
     });
   };
