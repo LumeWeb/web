@@ -63,25 +63,16 @@ function SubscriptionContent() {
 
   const { loadSubscription } = useSubscriptionContext();
 
-  useEffect(() => {
-    const initializeSubscription = async () => {
-      try {
-        // Load initial subscription data
-        const response = await fetch('/api/account/subscription');
-        const data = await response.json();
-        if (data?.subscription) {
-          loadSubscription(data.subscription);
-        } else {
-          loadSubscription(DEFAULT_SUBSCRIPTION);
-        }
-      } catch (error) {
-        console.error('Failed to initialize subscription:', error);
-        loadSubscription(DEFAULT_SUBSCRIPTION);
-      }
-    };
+  const { data: subscriptionData, isLoading: isLoadingSubscription } = useCustom({
+    url: `${window.location.origin}/api/account/subscription`,
+    method: 'get'
+  });
 
-    initializeSubscription();
-  }, [loadSubscription]);
+  useEffect(() => {
+    if (!isLoadingSubscription) {
+      loadSubscription(subscriptionData?.data?.subscription || DEFAULT_SUBSCRIPTION);
+    }
+  }, [loadSubscription, subscriptionData, isLoadingSubscription]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const paidBillingEnabled = useIsPaidBillingEnabled();
