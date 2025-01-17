@@ -84,6 +84,17 @@ function SubscriptionContent() {
     }
   }, [loadSubscription, isLoadingSubscription]);
 
+  // Keep selectedPlan in sync with state machine
+  useEffect(() => {
+    if (state.type === "PENDING_PAYMENT" || state.type === "PENDING") {
+      setSelectedPlan(state.plan);
+    } else if (state.type === "ACTIVE" || state.type === "CANCELLED") {
+      setSelectedPlan(state.subscription.plan);
+    } else {
+      setSelectedPlan(null);
+    }
+  }, [state, setSelectedPlan]);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const paidBillingEnabled = useIsPaidBillingEnabled();
   const onFreePlan = useOnFreePlan();
@@ -153,17 +164,8 @@ function SubscriptionContent() {
       }
 
       if (!subscription) {
-        try {
-          console.log("Creating subscription with plan:", selectedPlan);
-          await createSubscription(selectedPlan);
-          // Check if state machine transitioned to PENDING_PAYMENT
-          if (state.type === "PENDING_PAYMENT") {
-            setShowPaymentDialog(true);
-          }
-        } catch (error) {
-          console.error("Error creating subscription:", error);
-          throw error;
-        }
+        console.log("Creating subscription with plan:", selectedPlan);
+        await createSubscription(selectedPlan);
       } else {
         // Existing subscription
         const isValid = await validatePlanChange(
@@ -175,12 +177,12 @@ function SubscriptionContent() {
           return;
         }
 
-        // Let the backend handle the plan change logic
         await updateSubscription(selectedPlan);
-        // Check if state machine transitioned to PENDING_PAYMENT
-        if (state.type === "PENDING_PAYMENT") {
-          setShowPaymentDialog(true);
-        }
+      }
+
+      // State machine will handle the transition and useEffect will update selectedPlan
+      if (state.type === "PENDING_PAYMENT") {
+        setShowPaymentDialog(true);
       }
 
       setShowConfirmDialog(false);
