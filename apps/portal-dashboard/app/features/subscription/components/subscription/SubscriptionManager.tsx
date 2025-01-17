@@ -181,9 +181,7 @@ function SubscriptionContent() {
         billing: !selectedPlan.is_free ? context.billing : null,
       });
 
-      if (!selectedPlan.is_free) {
-        setShowPaymentDialog(true);
-      } else {
+      if (selectedPlan.is_free) {
         send("COMPLETE");
       }
 
