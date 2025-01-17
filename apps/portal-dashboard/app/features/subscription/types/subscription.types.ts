@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { BillingInfo, billingInfoSchema } from "./billing.types";
+import { BillingInfo, billingInfoSchema } from "./billing.types";
 export type { BillingInfo } from "./billing.types";
 import { PaymentInfo, paymentInfoSchema } from "./payment.types";
 import { HttpError } from "@refinedev/core";

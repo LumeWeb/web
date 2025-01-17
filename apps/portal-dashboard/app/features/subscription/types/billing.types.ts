@@ -31,7 +31,7 @@ export const addressSchema = z.object({
   sorting_code: z.string().optional(),
 });
 
-export const billingInfoSchema = z.object({
+const billingInfoSchema = z.object({
   name: z.string().min(1, "Name is required"),
   organization: z.string().optional(),
   address: addressSchema,
@@ -46,3 +46,5 @@ export interface BillingValidationError {
 export type BillingErrors = BillingValidationError[];
 
 export type EntityCode = "C" | "S" | "D" | "X";
+
+export { billingInfoSchema };
