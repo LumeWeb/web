@@ -31,42 +31,8 @@ export type SubscriptionEvent =
   | { type: "CANCELED" }
   | { type: "REACTIVATE" };
 
-export interface SubscriptionStates {
-  idle: {
-    final: false;
-    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
-  };
-  loading: {
-    final: false;
-    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
-  };
-  inactive: {
-    final: false;
-    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
-  };
-  pending: {
-    final: false;
-    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
-  };
-  pendingPayment: {
-    final: false;
-    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
-  };
-  active: {
-    final: false;
-    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
-  };
-  cancelled: {
-    final: false;
-    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
-  };
-  error: {
-    final: false;
-    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
-  };
-}
 
-export const subscriptionMachine = createMachine<SubscriptionStates, SubscriptionContext, SubscriptionEvent["type"]>(
+export const subscriptionMachine = createMachine<SubscriptionContext, SubscriptionEvent>(
   {
     idle: state(
       transition("SUBSCRIPTION_LOADED", "loading"),
