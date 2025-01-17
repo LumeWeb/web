@@ -131,7 +131,9 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
             );
           }
 
-          return response.subscription;
+          // Update state with new subscription
+          loadSubscriptionState(response.subscription);
+          return { subscription: response.subscription };
         } catch (error) {
           console.error("Error in subscription context:", error);
           throw error;

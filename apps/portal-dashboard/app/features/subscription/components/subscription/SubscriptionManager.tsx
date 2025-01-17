@@ -150,8 +150,15 @@ function SubscriptionContent() {
       if (!subscription) {
         try {
           console.log("Creating subscription with plan:", selectedPlan);
-          const newSubscription = await createSubscription(selectedPlan);
+          const { subscription: newSubscription } = await createSubscription(selectedPlan);
           console.log("Created subscription:", newSubscription);
+          
+          // Trigger state transition with new subscription
+          const stateManager = SubscriptionStateManager.getInstance();
+          stateManager.transition({
+            type: "SUBSCRIPTION_LOADED",
+            subscription: newSubscription
+          });
         } catch (error) {
           console.error("Error creating subscription:", error);
           throw error;
