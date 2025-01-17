@@ -18,7 +18,10 @@ import {
   SubscriptionEvent,
   subscriptionMachine,
 } from "../machines/subscriptionMachine";
-import { useMachine } from "robot-hooks";
+import { createUseMachine } from "robot-hooks";
+import { useEffect, useState } from "react";
+
+const useMachine = createUseMachine(useEffect, useState);
 
 interface SubscriptionContextValue {
   subscription: Subscription | null;
