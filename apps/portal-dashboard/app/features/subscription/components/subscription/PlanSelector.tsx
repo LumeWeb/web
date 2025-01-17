@@ -82,6 +82,12 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
     return subscription?.plan.id === plan.id ? "outline" : "default";
   };
 
+  const handlePlanClick = (plan: SubscriptionPlan) => {
+    if (subscription?.plan.id !== plan.id && !isProcessing) {
+      onPlanSelect(plan);
+    }
+  };
+
   return (
     <div className="grid md:grid-cols-3 gap-8">
       {(plans || []).map((plan) => (
@@ -124,7 +130,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
             <Button
               className="w-full"
               variant={getButtonVariant(plan)}
-              onClick={() => onPlanSelect(plan)}
+              onClick={() => handlePlanClick(plan)}
               disabled={isProcessing || subscription?.plan.id === plan.id}>
               {getButtonLabel(plan)}
             </Button>

@@ -157,26 +157,28 @@ function SubscriptionContent() {
       setValidationError(null);
       setBillingError(null);
 
-      if (plan.is_free) {
-        selectPlan(plan);
-        complete();
-        return;
-      }
-
+      // Always open the confirmation dialog first
+      openPlanChangeDialog(plan);
+      
+      // Validate the plan change
       const isValid = await validatePlanChange(
         context.subscription?.plan,
         plan,
         context.billing,
       );
 
-      if (isValid) {
-        selectPlan(plan);
-        setShowConfirmDialog(true);
+      if (!isValid) {
+        throw new Error("Plan change validation failed");
       }
+
+      // Update state machine
+      selectPlan(plan);
+      setShowConfirmDialog(true);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to select plan";
       setLocalError(errorMessage);
       setValidationError(errorMessage);
+      retry(); // Reset state machine on error
     }
   };
 
