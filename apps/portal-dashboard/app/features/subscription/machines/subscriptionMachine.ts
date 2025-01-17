@@ -21,7 +21,14 @@ export type SubscriptionEvent =
   | { type: "COMPLETE" }
   | { type: "CANCEL" }
   | { type: "RETRY" }
-  | { type: "ERROR"; error: Error };
+  | { type: "ERROR"; error: Error }
+  | { type: "SAVED" }
+  | { type: "FAILED" }
+  | { type: "PAYMENT_COMPLETE" }
+  | { type: "PAYMENT_FAILED" }
+  | { type: "PAYMENT_METHOD_UPDATE_INITIATED" }
+  | { type: "CANCELED" }
+  | { type: "REACTIVATE" };
 
 export interface SubscriptionStates {
   idle: {
@@ -58,13 +65,13 @@ export interface SubscriptionStates {
   };
 }
 
-const createTransitionMap = (transitions: Record<SubscriptionEvent["type"], string[]>) => {
-  const map = new Map<string, Array<Transition<SubscriptionEvent["type"]>>>();
+const createTransitionMap = (transitions: Partial<Record<SubscriptionEvent["type"], string[]>>) => {
+  const map = new Map<SubscriptionEvent["type"], Array<Transition<SubscriptionEvent["type"]>>>();
   Object.entries(transitions).forEach(([event, states]) => {
     map.set(
-      event,
+      event as SubscriptionEvent["type"],
       states.map((state) => ({
-        from: "",
+        from: null,
         to: state,
         guards: [],
         reducers: [(ctx: SubscriptionContext) => ctx],
