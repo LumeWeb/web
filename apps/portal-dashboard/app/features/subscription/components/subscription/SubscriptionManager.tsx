@@ -189,6 +189,11 @@ function SubscriptionContent() {
     try {
       // Validate billing info if required
       if (!selectedPlan.is_free) {
+        if (!context.billing) {
+          setBillingError("Billing information is required for paid plans");
+          return;
+        }
+        
         const billingErrors = await validateBillingInfo(context.billing);
         if (billingErrors) {
           setBillingError(
