@@ -190,44 +190,39 @@ function SubscriptionContent() {
         return;
       }
 
-      try {
-        // If we have an existing subscription, update it
-        if (context.subscription) {
-          console.log("Updating subscription to plan:", selectedPlan);
-          const result = await updateSubscription(selectedPlan);
-          console.log("Update subscription result:", result);
-          
-          if (result.subscription) {
-            send({
-              type: "SUBSCRIPTION_LOADED",
-              subscription: result.subscription,
-            });
-          }
-        } else {
-          // Create new subscription
-          console.log("Creating new subscription with plan:", selectedPlan);
-          const result = await createSubscription(selectedPlan);
-          console.log("Create subscription result:", result);
-          
-          if (result.subscription) {
-            send({
-              type: "SUBSCRIPTION_LOADED",
-              subscription: result.subscription,
-            });
-          }
+      // If we have an existing subscription, update it
+      if (context.subscription) {
+        console.log("Updating subscription to plan:", selectedPlan);
+        const { subscription } = await updateSubscription(selectedPlan);
+        console.log("Update subscription result:", subscription);
+        
+        if (subscription) {
+          send({
+            type: "SUBSCRIPTION_LOADED",
+            subscription,
+          });
         }
-
-        // Complete the flow
-        if (selectedPlan.is_free) {
-          complete();
+      } else {
+        // Create new subscription
+        console.log("Creating new subscription with plan:", selectedPlan);
+        const { subscription } = await createSubscription(selectedPlan);
+        console.log("Create subscription result:", subscription);
+        
+        if (subscription) {
+          send({
+            type: "SUBSCRIPTION_LOADED",
+            subscription,
+          });
         }
-
-        setShowConfirmDialog(false);
-        closeDialog();
-      } catch (error) {
-        console.error("Subscription operation failed:", error);
-        throw error; // Re-throw to be caught by outer catch block
       }
+
+      // Complete the flow
+      if (selectedPlan.is_free) {
+        complete();
+      }
+
+      setShowConfirmDialog(false);
+      closeDialog();
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Subscription action failed";
