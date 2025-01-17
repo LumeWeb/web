@@ -1,0 +1,92 @@
+import { BillingInfo, BillingErrors, Address } from "../types/billing.types";
+
+export function validateAddress(address: Address): BillingErrors | null {
+  const errors: BillingErrors = [];
+
+  if (!address) {
+    errors.push({ field: "address", message: "Address is required" });
+    return errors;
+  }
+
+  // Basic required field validation
+  if (!address.line1?.trim()) {
+    errors.push({ field: "line1", message: "Address line 1 is required" });
+  }
+  if (!address.city?.trim()) {
+    errors.push({ field: "city", message: "City is required" });
+  }
+  if (!address.state?.trim()) {
+    errors.push({ field: "state", message: "State is required" });
+  }
+  if (!address.postal_code?.trim()) {
+    errors.push({ field: "postal_code", message: "Postal code is required" });
+  }
+  if (!address.country?.trim()) {
+    errors.push({ field: "country", message: "Country is required" });
+  }
+
+  return errors.length > 0 ? errors : null;
+}
+
+export function validateBillingInfo(
+  billing: BillingInfo,
+): BillingErrors | null {
+  const errors: BillingErrors = [];
+
+  if (!billing) {
+    errors.push({ field: "name", message: "Billing information is required" });
+    return errors;
+  }
+
+  // Name validation
+  if (!billing.name?.trim()) {
+    errors.push({ field: "name", message: "Name is required" });
+  } else if (billing.name.trim().length < 2) {
+    errors.push({
+      field: "name",
+      message: "Name must be at least 2 characters",
+    });
+  } else if (billing.name.trim().length > 100) {
+    errors.push({
+      field: "name",
+      message: "Name must not exceed 100 characters",
+    });
+  }
+
+  // Organization validation (optional)
+  if (billing.organization && billing.organization.trim().length > 100) {
+    errors.push({
+      field: "organization",
+      message: "Organization must not exceed 100 characters",
+    });
+  }
+
+  // Address validation
+  if (!billing.address) {
+    errors.push({ field: "address", message: "Address is required" });
+  } else {
+    const addressErrors = validateAddress(billing.address);
+    if (addressErrors) {
+      errors.push(...addressErrors);
+    }
+  }
+
+  return errors.length > 0 ? errors : null;
+}
+
+export function formatBillingInfo(billing: BillingInfo): BillingInfo {
+  return {
+    name: billing.name.trim(),
+    organization: billing.organization?.trim(),
+    address: {
+      line1: billing.address.line1.trim(),
+      line2: billing.address.line2?.trim(),
+      city: billing.address.city.trim(),
+      state: billing.address.state.trim(),
+      postal_code: billing.address.postal_code.trim(),
+      country: billing.address.country.trim(),
+      dependent_locality: billing.address.dependent_locality?.trim(),
+      sorting_code: billing.address.sorting_code?.trim(),
+    },
+  };
+}
