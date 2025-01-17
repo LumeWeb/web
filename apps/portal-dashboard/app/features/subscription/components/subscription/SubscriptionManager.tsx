@@ -37,6 +37,7 @@ import { PaymentFlow } from "@/features/subscription/components/payment/PaymentF
 import Addons from "@/routes/account/components/Addons";
 import { useSubscription } from "@/features/subscription/hooks/core/useSubscription";
 import { useSubscriptionMachine } from "../../hooks/useSubscriptionMachine";
+import { useSubscriptionDialog } from "../../hooks/ui/useSubscriptionDialog";
 import { Alert, AlertDescription } from "portal-shared/components/ui/alert";
 
 export function SubscriptionManager() {
