@@ -70,29 +70,29 @@ function SubscriptionContent() {
 
   const SUBSCRIPTION_TABS: Tab[] = [
     {
-      id: 'billing',
-      label: 'Billing Information',
+      id: "billing",
+      label: "Billing Information",
       component: <BillingForm />,
-      show: () => paidBillingEnabled
+      show: () => paidBillingEnabled,
     },
     {
-      id: 'payment-history',
-      label: 'Payment History',
+      id: "payment-history",
+      label: "Payment History",
       component: <PaymentHistory />,
-      show: () => paidBillingEnabled && !onFreePlan
+      show: () => paidBillingEnabled && !onFreePlan,
     },
     {
-      id: 'payment-method',
-      label: 'Payment Method',
+      id: "payment-method",
+      label: "Payment Method",
       component: <PaymentMethod />,
-      show: () => paidBillingEnabled && !onFreePlan
+      show: () => paidBillingEnabled && !onFreePlan,
     },
     {
-      id: 'addons',
-      label: 'Add-ons',
+      id: "addons",
+      label: "Add-ons",
       component: <Addons />,
-      show: () => false // Currently disabled
-    }
+      show: () => false, // Currently disabled
+    },
   ];
 
   const searchTab = searchParams.get("tab") ?? "billing";
@@ -127,12 +127,11 @@ function SubscriptionContent() {
 
       if (!subscription) {
         try {
-          console.log('Creating subscription with plan:', selectedPlan);
+          console.log("Creating subscription with plan:", selectedPlan);
           const newSubscription = await createSubscription(selectedPlan);
-          console.log('Created subscription:', newSubscription);
-          
+          console.log("Created subscription:", newSubscription);
         } catch (error) {
-          console.error('Error creating subscription:', error);
+          console.error("Error creating subscription:", error);
           throw error;
         }
       } else {
@@ -148,11 +147,6 @@ function SubscriptionContent() {
 
         // Let the backend handle the plan change logic
         await updateSubscription(selectedPlan);
-        
-        // Show payment dialog if needed (backend will indicate this via response)
-        if (!selectedPlan.is_free && subscription.payment?.client_secret) {
-          setShowPaymentDialog(true);
-        }
       }
 
       setShowConfirmDialog(false);
@@ -186,21 +180,23 @@ function SubscriptionContent() {
           onValueChange={(value) => setSearchParams({ tab: value })}
           className="space-y-4">
           <TabsList>
-            {SUBSCRIPTION_TABS.map(tab => 
-              tab.show() && (
-                <TabsTrigger key={tab.id} value={tab.id}>
-                  {tab.label}
-                </TabsTrigger>
-              )
+            {SUBSCRIPTION_TABS.map(
+              (tab) =>
+                tab.show() && (
+                  <TabsTrigger key={tab.id} value={tab.id}>
+                    {tab.label}
+                  </TabsTrigger>
+                ),
             )}
           </TabsList>
 
-          {SUBSCRIPTION_TABS.map(tab =>
-            tab.show() && (
-              <TabsContent key={tab.id} value={tab.id}>
-                {tab.component}
-              </TabsContent>
-            )
+          {SUBSCRIPTION_TABS.map(
+            (tab) =>
+              tab.show() && (
+                <TabsContent key={tab.id} value={tab.id}>
+                  {tab.component}
+                </TabsContent>
+              ),
           )}
         </Tabs>
       </div>
@@ -218,18 +214,22 @@ function SubscriptionContent() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {subscription ? 'Confirm Subscription Change' : 'Confirm Subscription'}
+              {subscription
+                ? "Confirm Subscription Change"
+                : "Confirm Subscription"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               <div className="space-y-2">
                 {subscription ? (
                   <>
-                    Are you sure you want to change to the {selectedPlan?.name} plan?
+                    Are you sure you want to change to the {selectedPlan?.name}{" "}
+                    plan?
                   </>
                 ) : (
                   <>
                     You are about to subscribe to the {selectedPlan?.name} plan.
-                    {!selectedPlan?.is_free && ' Payment information will be required.'}
+                    {!selectedPlan?.is_free &&
+                      " Payment information will be required."}
                   </>
                 )}
 
