@@ -14,14 +14,23 @@ interface SubscriptionContext {
   error: Error | null;
 }
 
+export type SubscriptionEvent = 
+  | { type: "SUBSCRIPTION_LOADED"; subscription: Subscription }
+  | { type: "PLAN_SELECTED"; plan: SubscriptionPlan }
+  | { type: "SELECT_PLAN"; plan: SubscriptionPlan }
+  | { type: "COMPLETE" }
+  | { type: "CANCEL" }
+  | { type: "RETRY" }
+  | { type: "ERROR"; error: Error };
+
 export interface SubscriptionStates {
   idle: {
     final: false;
-    transitions: Map<string, Array<Transition<string>>>;
+    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
   };
   loading: {
     final: false;
-    transitions: Map<string, Array<Transition<string>>>;
+    transitions: Map<string, Array<Transition<SubscriptionEvent["type"]>>>;
   };
   inactive: {
     final: false;
