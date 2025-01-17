@@ -49,7 +49,12 @@ export interface BillingStates {
 const createTransitionMap = (transitions: Record<string, string[]>) => {
   const map = new Map<string, Array<Transition<string>>>();
   Object.entries(transitions).forEach(([event, states]) => {
-    map.set(event, states.map(state => ({ target: state })));
+    map.set(event, states.map(state => ({
+      from: '',  // Will be set by Robot3
+      to: state,
+      guards: [],
+      reducer: (ctx) => ctx
+    })));
   });
   return map;
 };
