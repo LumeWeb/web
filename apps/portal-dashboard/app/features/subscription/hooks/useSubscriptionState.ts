@@ -1,14 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { SubscriptionStateMachine } from "../states/SubscriptionStateMachine";
 import {
-  SubscriptionState,
-  SubscriptionEvent,
-  Subscription,
-  SubscriptionPlan,
   BillingInfo,
+  Subscription,
+  SubscriptionEvent,
+  SubscriptionPlan,
+  SubscriptionState,
 } from "../types/subscription.types";
-import { SubscriptionPlanPeriod } from "../types/subscription.types";
-import { SubscriptionPlanStatus } from "portal-shared/dataProviders/accountProvider";
 
 export function useSubscriptionState() {
   const stateMachine = useRef(new SubscriptionStateMachine());
