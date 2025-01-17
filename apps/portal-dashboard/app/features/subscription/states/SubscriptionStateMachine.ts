@@ -134,9 +134,9 @@ export class SubscriptionStateMachine {
     subscription: Subscription,
   ): SubscriptionState {
     switch (subscription.status) {
-      case "INACTIVE":
+      case SubscriptionPlanStatus.INACTIVE:
         return { type: "INACTIVE" };
-      case "PENDING":
+      case SubscriptionPlanStatus.PENDING:
         if (subscription.billing) {
           return {
             type: "PENDING_PAYMENT",
@@ -148,13 +148,13 @@ export class SubscriptionStateMachine {
           type: "PENDING_BILLING",
           plan: subscription.plan,
         };
-      case "ACTIVE":
+      case SubscriptionPlanStatus.ACTIVE:
         return { type: "ACTIVE", subscription };
-      case "CANCELLED":
+      case SubscriptionPlanStatus.CANCELLED:
         return { type: "CANCELLED", subscription };
-      case "SUSPENDED":
+      case SubscriptionPlanStatus.SUSPENDED:
         return { type: "SUSPENDED", subscription };
-      case "PROCESSING_PAYMENT":
+      case SubscriptionPlanStatus.PROCESSING_PAYMENT:
         return {
           type: "PROCESSING_PAYMENT",
           plan: subscription.plan,
