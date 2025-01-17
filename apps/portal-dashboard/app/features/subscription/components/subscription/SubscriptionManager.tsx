@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams } from "@remix-run/react";
-import { useSubscriptionContext, SubscriptionProvider } from "../../contexts/SubscriptionContext";
+import {
+  useSubscriptionContext,
+  SubscriptionProvider,
+} from "../../contexts/SubscriptionContext";
 import { usePayment } from "../../hooks/core/usePayment";
 import { useBilling } from "../../hooks/core/useBilling";
-import { SubscriptionPlan } from "../../types/subscription.types";
+import {
+  DEFAULT_SUBSCRIPTION,
+  SubscriptionPlan,
+} from "../../types/subscription.types";
 import { SubscriptionStatus } from "./SubscriptionStatus";
 import { PlanSelector } from "./PlanSelector";
 import {
@@ -30,6 +36,7 @@ import { PaymentHistory } from "../payment/PaymentHistory";
 import { PaymentMethod } from "@/features/subscription/components/payment/PaymentMethod";
 import { PaymentFlow } from "@/features/subscription/components/payment/PaymentFlow";
 import Addons from "@/routes/account/components/Addons";
+import { SubscriptionStateManager } from "@/features/subscription/states/SubscriptionStateManager";
 
 export function SubscriptionManager() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -39,7 +46,7 @@ export function SubscriptionManager() {
     const stateManager = SubscriptionStateManager.getInstance();
     stateManager.transition({
       type: "SUBSCRIPTION_LOADED",
-      subscription: DEFAULT_SUBSCRIPTION
+      subscription: DEFAULT_SUBSCRIPTION,
     });
     setIsInitialized(true);
   }, []);
