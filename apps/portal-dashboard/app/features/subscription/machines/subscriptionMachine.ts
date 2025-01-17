@@ -135,7 +135,7 @@ export const subscriptionMachine = createMachine<
   ),
 
   pendingPayment: invoke(initiatePayment,
-    transition('done', 'active',
+    transition('resolved', 'active',
       reduce((ctx, ev) => ({
         ...ctx,
         subscription: {
@@ -147,7 +147,7 @@ export const subscriptionMachine = createMachine<
         error: null
       }))
     ),
-    transition('error', 'error',
+    transition('rejected', 'error',
       reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
     ),
     transition('PAYMENT_COMPLETE', 'active',

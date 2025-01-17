@@ -65,7 +65,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
 
   const value = useMemo(() => ({
     // Machine state and actions
-    state: current.name,
+    state: current.value,
     context: current.context,
     send,
     
