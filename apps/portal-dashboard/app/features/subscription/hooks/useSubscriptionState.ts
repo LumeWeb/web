@@ -31,11 +31,11 @@ export function useSubscriptionState() {
     } else {
       dispatch({ type: 'SUBSCRIPTION_LOADED', subscription: { 
         id: '', 
-        status: 'INACTIVE',
+        status: 'PENDING',
         plan: {
           id: '',
           name: '',
-          period: 'MONTHLY',
+          period: SubscriptionPlanPeriod.MONTHLY,
           price: 0,
           is_free: true,
           resources: {

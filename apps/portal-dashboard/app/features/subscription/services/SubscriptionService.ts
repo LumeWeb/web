@@ -17,7 +17,7 @@ export class SubscriptionService {
       type: 'SUBSCRIPTION_LOADED',
       subscription: subscription || {
         id: '',
-        status: 'INACTIVE',
+        status: 'PENDING',
         plan: null
       } as Subscription
     });
