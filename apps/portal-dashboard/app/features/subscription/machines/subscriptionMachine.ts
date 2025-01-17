@@ -87,40 +87,42 @@ const createTransitionMap = (
   return map;
 };
 
-export const subscriptionMachine = createMachine(
+export const subscriptionMachine = createMachine<SubscriptionContext, SubscriptionEvent>(
   {
     idle: state(
-      transition("SUBSCRIPTION_LOADED", "loading"),
-      transition("ERROR", "error"),
+      transition<SubscriptionEvent>("SUBSCRIPTION_LOADED", "loading"),
+      transition<SubscriptionEvent>("ERROR_OCCURRED", "error")
     ),
     loading: state(
-      transition("SUBSCRIPTION_LOADED", "inactive"),
-      transition("ERROR", "error"),
+      transition<SubscriptionEvent>("SUBSCRIPTION_LOADED", "inactive"),
+      transition<SubscriptionEvent>("ERROR_OCCURRED", "error")
     ),
     inactive: state(
-      transition("PLAN_SELECTED", "pending"),
-      transition("ERROR", "error"),
+      transition<SubscriptionEvent>("PLAN_SELECTED", "pending"),
+      transition<SubscriptionEvent>("ERROR_OCCURRED", "error")
     ),
     pending: state(
-      transition("SELECT_PLAN", "pendingPayment"),
-      transition("SAVED", "active"),
-      transition("FAILED", "error"),
+      transition<SubscriptionEvent>("SELECT_PLAN", "pendingPayment"),
+      transition<SubscriptionEvent>("COMPLETED", "active"),
+      transition<SubscriptionEvent>("ERROR_OCCURRED", "error")
     ),
     pendingPayment: state(
-      transition("PAYMENT_COMPLETE", "active"),
-      transition("PAYMENT_FAILED", "error"),
+      transition<SubscriptionEvent>("PAYMENT_COMPLETE", "active"),
+      transition<SubscriptionEvent>("ERROR_OCCURRED", "error")
     ),
     active: state(
-      transition("SELECT_PLAN", "pending"),
-      transition("PAYMENT_METHOD_UPDATE_INITIATED", "updatingPayment"),
-      transition("CANCELED", "cancelled"),
-      transition("ERROR", "error"),
+      transition<SubscriptionEvent>("SELECT_PLAN", "pending"),
+      transition<SubscriptionEvent>("PAYMENT_METHOD_UPDATE_INITIATED", "updatingPayment"),
+      transition<SubscriptionEvent>("CANCELED", "cancelled"),
+      transition<SubscriptionEvent>("ERROR_OCCURRED", "error")
     ),
     cancelled: state(
-      transition("REACTIVATE", "pending"),
-      transition("ERROR", "error"),
+      transition<SubscriptionEvent>("REACTIVATED", "pending"),
+      transition<SubscriptionEvent>("ERROR_OCCURRED", "error")
     ),
-    error: state(transition("RETRY", "pending")),
+    error: state(
+      transition<SubscriptionEvent>("RETRIED", "pending")
+    )
   },
   () => ({
     subscription: null,
