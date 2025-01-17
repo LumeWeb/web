@@ -1,17 +1,12 @@
-import { createMachine, state, transition, reduce, Transition } from "robot3";
-import { createUseMachine } from "robot-hooks";
-import { useEffect, useState } from "react";
-
+import { createMachine, state, transition, reduce } from "robot3";
 import { BillingInfo, BillingErrors } from "../types/billing.types";
 
-// Context just holds the data
 export interface BillingContext {
   billing: BillingInfo | null;
   errors: BillingErrors | null;
   error: Error | null;
 }
 
-// Events define allowed transitions
 export type BillingEvent =
   | { type: "EDIT" }
   | { type: "VALIDATE"; billing: BillingInfo }
@@ -21,103 +16,61 @@ export type BillingEvent =
   | { type: "SAVED" }
   | { type: "FAILED"; error: Error };
 
-// States define the machine structure
-export interface BillingStates {
-  idle: {
-    final: false;
-    transitions: Map<string, Array<Transition<string>>>;
-  };
-  editing: {
-    final: false;
-    transitions: Map<string, Array<Transition<string>>>;
-  };
-  validating: {
-    final: false;
-    transitions: Map<string, Array<Transition<string>>>;
-  };
-  saving: {
-    final: false;
-    transitions: Map<string, Array<Transition<string>>>;
-  };
-  complete: {
-    final: true;
-    transitions: Map<string, Array<Transition<string>>>;
-  };
-  error: {
-    final: false;
-    transitions: Map<string, Array<Transition<string>>>;
-  };
-}
+type EventType = BillingEvent["type"];
 
-const createTransitionMap = (transitions: Record<string, string[]>) => {
-  const map = new Map<string, Array<Transition<string>>>();
-  Object.entries(transitions).forEach(([event, states]) => {
-    map.set(
-      event,
-      states.map((state) => ({
-        from: "", // Will be set by Robot3
-        to: state,
-        guards: [],
-        reducers: [(ctx: BillingContext) => ctx],
-      })),
-    );
-  });
-  return map;
-};
+const states = {
+  idle: state(
+    transition<EventType, BillingContext, BillingEvent>(
+      "EDIT",
+      "editing"
+    )
+  ),
 
-export const billingMachine = createMachine<
-  BillingStates,
-  BillingContext,
-  string
->(
-  {
-    idle: {
-      final: false,
-      transitions: createTransitionMap({
-        EDIT: ["editing"],
-      }),
-    },
+  editing: state(
+    transition<EventType, BillingContext, BillingEvent>(
+      "VALIDATE",
+      "validating",
+      reduce((ctx, ev) => ({ ...ctx, billing: ev.billing }))
+    )
+  ),
 
-    editing: {
-      final: false,
-      transitions: createTransitionMap({
-        VALIDATE: ["validating"],
-      }),
-    },
+  validating: state(
+    transition<EventType, BillingContext, BillingEvent>(
+      "VALIDATED",
+      "saving"
+    )
+  ),
 
-    validating: {
-      final: false,
-      transitions: createTransitionMap({
-        VALIDATED: ["saving"],
-        INVALID: ["editing"],
-      }),
-    },
+  saving: state(
+    transition<EventType, BillingContext, BillingEvent>(
+      "SAVED",
+      "complete",
+      reduce((ctx) => ({ ...ctx, error: null }))
+    )
+  ),
 
-    saving: {
-      final: false,
-      transitions: createTransitionMap({
-        SAVED: ["complete"],
-        FAILED: ["error"],
-      }),
-    },
+  complete: state(
+    transition<EventType, BillingContext, BillingEvent>(
+      "EDIT",
+      "editing"
+    )
+  ),
 
-    complete: {
-      final: true,
-      transitions: createTransitionMap({
-        EDIT: ["editing"],
-      }),
-    },
+  error: state(
+    transition<EventType, BillingContext, BillingEvent>(
+      "EDIT", 
+      "editing",
+      reduce((ctx) => ({ ...ctx, error: null }))
+    )
+  )
+} as const;
 
-    error: {
-      final: false,
-      transitions: createTransitionMap({
-        EDIT: ["editing"],
-      }),
-    },
-  },
-  () => ({
-    billing: null,
-    errors: null,
-    error: null,
-  }),
+export const billingMachine = createMachine(
+  "idle",
+  states,
+  (context?: BillingContext) => ({
+    billing: context?.billing ?? null,
+    errors: context?.errors ?? null, 
+    error: context?.error ?? null
+  })
 );

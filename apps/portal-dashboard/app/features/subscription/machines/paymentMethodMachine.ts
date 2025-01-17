@@ -1,6 +1,4 @@
 import { createMachine, state, transition, reduce } from "robot3";
-import { createUseMachine } from "robot-hooks";
-import { useEffect, useState } from "react";
 
 export interface PaymentMethodContext {
   clientSecret: string | null;
@@ -18,75 +16,72 @@ export type PaymentMethodEvent =
   | { type: "SAVED" }
   | { type: "ERROR"; error: Error };
 
-export const paymentMethodMachine = createMachine<
-  PaymentMethodContext,
-  PaymentMethodEvent
->(
-  {
-    idle: state(transition("INITIALIZE", "initializing")),
+type EventType = PaymentMethodEvent["type"];
 
-    initializing: state(
-      transition(
-        "INITIALIZED",
-        "collecting",
-        reduce((ctx, ev) => ({
-          ...ctx,
-          clientSecret: ev.clientSecret,
-          error: null,
-        })),
-      ),
-      transition(
-        "ERROR",
-        "error",
-        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
-      ),
-    ),
+const states = {
+  idle: state(
+    transition<EventType, PaymentMethodContext, PaymentMethodEvent>(
+      "INITIALIZE",
+      "initializing"
+    )
+  ),
 
-    collecting: state(transition("VALIDATE", "validating")),
+  initializing: state(
+    transition<EventType, PaymentMethodContext, PaymentMethodEvent>(
+      "INITIALIZED",
+      "collecting",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        clientSecret: ev.clientSecret,
+        error: null,
+      }))
+    )
+  ),
 
-    validating: state(
-      transition(
-        "VALIDATED",
-        "saving",
-        reduce((ctx, ev) => ({
-          ...ctx,
-          paymentMethodId: ev.paymentMethodId,
-          error: null,
-        })),
-      ),
-      transition(
-        "ERROR",
-        "error",
-        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
-      ),
-    ),
+  collecting: state(
+    transition<EventType, PaymentMethodContext, PaymentMethodEvent>(
+      "VALIDATE",
+      "validating"
+    )
+  ),
 
-    saving: state(
-      transition(
-        "SAVED",
-        "complete",
-        reduce((ctx) => ({ ...ctx, error: null })),
-      ),
-      transition(
-        "ERROR",
-        "error",
-        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
-      ),
-    ),
+  validating: state(
+    transition<EventType, PaymentMethodContext, PaymentMethodEvent>(
+      "VALIDATED", 
+      "saving",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        paymentMethodId: ev.paymentMethodId,
+        error: null,
+      }))
+    )
+  ),
 
-    complete: state(),
+  saving: state(
+    transition<EventType, PaymentMethodContext, PaymentMethodEvent>(
+      "SAVED",
+      "complete",
+      reduce((ctx) => ({ ...ctx, error: null }))
+    )
+  ),
 
-    error: state(
-      transition(
-        "INITIALIZE",
-        "initializing",
-        reduce((ctx) => ({ ...ctx, error: null })),
-      ),
-    ),
-  },
-  () => ({
-    clientSecret: null,
-    paymentMethodId: null,
-    error: null,
-  }),
+  complete: state(),
+
+  error: state(
+    transition<EventType, PaymentMethodContext, PaymentMethodEvent>(
+      "INITIALIZE",
+      "initializing",
+      reduce((ctx) => ({ ...ctx, error: null }))
+    )
+  )
+} as const;
+
+export const paymentMethodMachine = createMachine(
+  "idle",
+  states,
+  (context?: PaymentMethodContext) => ({
+    clientSecret: context?.clientSecret ?? null,
+    paymentMethodId: context?.paymentMethodId ?? null,
+    error: context?.error ?? null
+  })
 );
