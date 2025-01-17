@@ -101,15 +101,15 @@ export type SubscriptionState =
 export type SubscriptionEvent =
   | { type: "SUBSCRIPTION_LOADED"; subscription: Subscription }
   | { type: "PLAN_SELECTED"; plan: SubscriptionPlan }
-  | { type: "BILLING_UPDATED"; billing: BillingInfo }
-  | { type: "COMPLETED"; paymentMethodId?: string }
-  | { type: "CANCELED" }
+  | { type: "SELECT_PLAN"; plan: SubscriptionPlan }
+  | { type: "COMPLETE" }
+  | { type: "CANCEL" }
   | { type: "REACTIVATED" }
   | { type: "RETRIED" }
   | { type: "ERROR_OCCURRED"; error: Error }
   | { type: "PAYMENT_METHOD_UPDATE_INITIATED" }
-  | { type: "PAYMENT_METHOD_UPDATED"; paymentMethodId: string }
-  | { type: "PAYMENT_METHOD_UPDATE_FAILED"; error: Error };
+  | { type: "PAYMENT_COMPLETE"; paymentMethodId: string }
+  | { type: "ERROR"; error: Error };
 
 // Zod schema for runtime validation
 export const subscriptionResourcesSchema = z.object({

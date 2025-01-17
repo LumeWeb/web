@@ -91,34 +91,34 @@ export const subscriptionMachine = createMachine<SubscriptionContext, Subscripti
   {
     idle: state(
       transition("SUBSCRIPTION_LOADED", "loading"),
-      transition("ERROR_OCCURRED", "error")
+      transition("ERROR", "error")
     ),
     loading: state(
       transition("SUBSCRIPTION_LOADED", "inactive"),
-      transition("ERROR_OCCURRED", "error")
+      transition("ERROR", "error")
     ),
     inactive: state(
       transition("PLAN_SELECTED", "pending"),
-      transition("ERROR_OCCURRED", "error")
+      transition("ERROR", "error")
     ),
     pending: state(
       transition("SELECT_PLAN", "pendingPayment"),
       transition("COMPLETE", "active"),
-      transition("ERROR_OCCURRED", "error")
+      transition("ERROR", "error")
     ),
     pendingPayment: state(
       transition("PAYMENT_COMPLETE", "active"),
-      transition("ERROR_OCCURRED", "error")
+      transition("ERROR", "error")
     ),
     active: state(
       transition("SELECT_PLAN", "pending"),
-      transition("PAYMENT_METHOD_UPDATE_INITIATED", "updatingPayment"), 
+      transition("PAYMENT_METHOD_UPDATE_INITIATED", "updatingPayment"),
       transition("CANCEL", "cancelled"),
-      transition("ERROR_OCCURRED", "error")
+      transition("ERROR", "error")
     ),
     cancelled: state(
       transition("REACTIVATED", "pending"),
-      transition("ERROR_OCCURRED", "error")
+      transition("ERROR", "error")
     ),
     error: state(
       transition("RETRIED", "pending")
