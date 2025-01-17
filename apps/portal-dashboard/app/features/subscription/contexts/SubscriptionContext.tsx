@@ -6,11 +6,18 @@ import {
   useState,
   useCallback,
 } from "react";
-import { Subscription, SubscriptionPlan } from "../types/subscription.types";
+import {
+  Subscription,
+  SubscriptionPlan,
+  SubscriptionStateValue,
+} from "../types/subscription.types";
 import { useSubscriptionPlans } from "../hooks/core/useSubscriptionPlans";
 import { useSubscription } from "@/features/subscription/hooks/core/useSubscription";
 import { useSubscriptionMachine } from "../hooks/useSubscriptionMachine";
-import { subscriptionMachine } from "../machines/subscriptionMachine";
+import {
+  SubscriptionEvent,
+  subscriptionMachine,
+} from "../machines/subscriptionMachine";
 import { useMachine } from "robot-hooks";
 
 interface SubscriptionContextValue {
