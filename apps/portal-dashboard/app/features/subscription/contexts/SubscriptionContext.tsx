@@ -83,16 +83,15 @@ interface SubscriptionProviderProps {
 }
 
 export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
-  const subscriptionService = useMemo(() => new SubscriptionService(), []);
-  // Core subscription state
   const {
     state,
-    loadSubscription: loadSubscriptionState,
-    updateBilling: updateBillingState,
-    completePayment: completePaymentState,
-    handleError: handleErrorState,
-    isTransitioning,
-  } = useSubscriptionState();
+    context,
+    selectPlan,
+    updateBilling,
+    complete,
+    cancel,
+    retry
+  } = useSubscriptionMachine();
   const { plansData, plansAreLoading } = useSubscriptionPlans();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
     null,
