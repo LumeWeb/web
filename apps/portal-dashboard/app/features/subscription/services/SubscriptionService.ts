@@ -6,17 +6,17 @@ import {
   BillingInfo,
   DEFAULT_SUBSCRIPTION,
 } from "../types/subscription.types";
-import { SubscriptionStateMachine } from "../states/SubscriptionStateMachine";
+import { SubscriptionStateManager } from "../states/SubscriptionStateManager";
 
 export class SubscriptionService {
-  private stateMachine: SubscriptionStateMachine;
+  private stateManager: SubscriptionStateManager;
 
   constructor() {
-    this.stateMachine = new SubscriptionStateMachine();
+    this.stateManager = SubscriptionStateManager.getInstance();
   }
 
   public getState(): SubscriptionState {
-    return this.stateMachine.getState();
+    return this.stateManager.getState();
   }
 
   public async loadSubscription(

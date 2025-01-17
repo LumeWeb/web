@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from "react";
-import { SubscriptionStateMachine } from "../states/SubscriptionStateMachine";
+import { useCallback, useEffect, useState } from "react";
+import { SubscriptionStateManager } from "../states/SubscriptionStateManager";
 import {
   BillingInfo,
   DEFAULT_SUBSCRIPTION,
@@ -10,17 +10,19 @@ import {
 } from "../types/subscription.types";
 
 export function useSubscriptionState() {
-  const stateMachine = useRef(new SubscriptionStateMachine());
-  const [state, setState] = useState<SubscriptionState>(
-    stateMachine.current.getState(),
-  );
+  const stateManager = SubscriptionStateManager.getInstance();
+  const [state, setState] = useState<SubscriptionState>(stateManager.getState());
   const [isTransitioning, setIsTransitioning] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = stateManager.subscribe(setState);
+    return () => unsubscribe();
+  }, [stateManager]);
 
   const dispatch = useCallback(async (event: SubscriptionEvent) => {
     setIsTransitioning(true);
     try {
-      const newState = stateMachine.current.transition(event);
-      setState(newState);
+      const newState = stateManager.transition(event);
       return newState;
     } catch (error) {
       if (error instanceof Error) {
