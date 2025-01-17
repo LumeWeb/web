@@ -30,7 +30,7 @@ const states = {
     transition<EventType, BillingContext, BillingEvent>(
       "VALIDATE",
       "validating",
-      reduce((ctx, ev) => ({ ...ctx, billing: ev.billing }))
+      reduce((ctx, ev: { type: "VALIDATE"; billing: BillingInfo }) => ({ ...ctx, billing: ev.billing }))
     )
   ),
 

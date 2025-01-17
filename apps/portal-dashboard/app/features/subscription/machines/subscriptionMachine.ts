@@ -84,7 +84,7 @@ const states = {
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "done",
       "pendingPayment",
-      reduce((ctx, ev) => ({
+      reduce((ctx, ev: { type: "done"; data: BillingContext }) => ({
         ...ctx,
         billing: ev.data.billing,
         error: null
