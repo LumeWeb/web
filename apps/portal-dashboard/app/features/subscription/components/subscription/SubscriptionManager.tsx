@@ -40,6 +40,7 @@ import { useSubscriptionMachine } from "../../hooks/useSubscriptionMachine";
 import { useSubscriptionDialog } from "@/features/subscription/hooks/ui/useSubscriptionDialog";
 import { useSubscriptionConfirmation } from "@/features/subscription/hooks/ui/useSubscriptionConfirmation";
 import { Alert, AlertDescription } from "portal-shared/components/ui/alert";
+import { validateBillingInfo } from "../../services/billing";
 
 export function SubscriptionManager() {
   return (
@@ -129,7 +130,7 @@ function SubscriptionContent() {
     setShowConfirmDialog,
     validationError,
     billingError,
-    validatePlanChange
+    validatePlanChange,
   } = useSubscriptionConfirmation();
 
   const {
@@ -137,7 +138,7 @@ function SubscriptionContent() {
     openPlanChangeDialog,
     openCancelDialog,
     openPaymentDialog,
-    closeDialog
+    closeDialog,
   } = useSubscriptionDialog();
 
   const handlePlanSelect = async (plan: SubscriptionPlan) => {
@@ -153,7 +154,7 @@ function SubscriptionContent() {
       const isValid = await validatePlanChange(
         context.subscription?.plan,
         plan,
-        context.billing
+        context.billing,
       );
 
       if (isValid) {
@@ -162,7 +163,7 @@ function SubscriptionContent() {
       }
     } catch (err) {
       setLocalError(
-        err instanceof Error ? err.message : "Failed to select plan"
+        err instanceof Error ? err.message : "Failed to select plan",
       );
     }
   };
