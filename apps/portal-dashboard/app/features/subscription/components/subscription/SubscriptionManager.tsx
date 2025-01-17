@@ -5,10 +5,7 @@ import {
   useSubscriptionContext,
 } from "../../contexts/SubscriptionContext";
 import { useBilling } from "../../hooks/core/useBilling";
-import {
-  DEFAULT_SUBSCRIPTION,
-  SubscriptionPlan,
-} from "../../types/subscription.types";
+import { SubscriptionPlan } from "../../types/subscription.types";
 import { SubscriptionStatus } from "./SubscriptionStatus";
 import { PlanSelector } from "./PlanSelector";
 import {
@@ -36,7 +33,7 @@ import { PaymentMethod } from "@/features/subscription/components/payment/Paymen
 import { PaymentFlow } from "@/features/subscription/components/payment/PaymentFlow";
 import Addons from "@/routes/account/components/Addons";
 import { useSubscription } from "@/features/subscription/hooks/core/useSubscription";
-import { SubscriptionPlanStatus } from "portal-shared/dataProviders/accountProvider";
+import { useSubscriptionMachine } from "../../hooks/useSubscriptionMachine";
 
 export function SubscriptionManager() {
   return (
@@ -53,13 +50,7 @@ function SubscriptionContent() {
     state,
     context,
     send,
-    actions: {
-      selectPlan,
-      updateBilling,
-      complete,
-      cancel,
-      retry
-    }
+    actions: { selectPlan, updateBilling, complete, cancel, retry },
   } = useSubscriptionMachine();
 
   const { subscription, plans, error, isLoading } = useSubscriptionContext();
@@ -70,15 +61,18 @@ function SubscriptionContent() {
 
   useEffect(() => {
     if (!isLoadingSubscription && subscriptionData?.data) {
-      send({ type: 'SUBSCRIPTION_LOADED', subscription: subscriptionData.data });
+      send({
+        type: "SUBSCRIPTION_LOADED",
+        subscription: subscriptionData.data,
+      });
     }
   }, [isLoadingSubscription, subscriptionData, send]);
 
   const selectedPlan = useMemo(() => {
-    if (state === 'pending' || state === 'pendingPayment') {
+    if (state === "pending" || state === "pendingPayment") {
       return context.selectedPlan;
     }
-    if (state === 'active' || state === 'cancelled') {
+    if (state === "active" || state === "cancelled") {
       return context.subscription?.plan;
     }
     return null;
@@ -134,13 +128,13 @@ function SubscriptionContent() {
     try {
       setLocalError(null);
       setValidationError(null);
-      
+
       if (plan.is_free) {
-        send('SELECT_PLAN', { plan });
-        send('COMPLETE');
+        send("SELECT_PLAN", { plan });
+        send("COMPLETE");
         return;
       }
-      
+
       // Validate plan change if needed
       if (subscription?.plan) {
         const isDowngrade = plan.price < subscription.plan.price;
@@ -149,11 +143,13 @@ function SubscriptionContent() {
           return;
         }
       }
-      
+
       selectPlan(plan);
       setShowConfirmDialog(true);
     } catch (err) {
-      setLocalError(err instanceof Error ? err.message : 'Failed to select plan');
+      setLocalError(
+        err instanceof Error ? err.message : "Failed to select plan",
+      );
     }
   };
 
@@ -168,28 +164,31 @@ function SubscriptionContent() {
       if (!selectedPlan.is_free) {
         const billingErrors = await validateBillingInfo(context.billing);
         if (billingErrors) {
-          setBillingError("Please complete billing information before changing plans");
+          setBillingError(
+            "Please complete billing information before changing plans",
+          );
           return;
         }
       }
 
       // Send events to state machine with proper payloads
-      send('SELECT_PLAN', { 
+      send("SELECT_PLAN", {
         plan: selectedPlan,
-        billing: !selectedPlan.is_free ? context.billing : null 
+        billing: !selectedPlan.is_free ? context.billing : null,
       });
-      
+
       if (!selectedPlan.is_free) {
         setShowPaymentDialog(true);
       } else {
-        send('COMPLETE');
+        send("COMPLETE");
       }
 
       setShowConfirmDialog(false);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Subscription action failed";
+      const errorMessage =
+        err instanceof Error ? err.message : "Subscription action failed";
       setValidationError(errorMessage);
-      send('ERROR', { error: new Error(errorMessage) });
+      send("ERROR", { error: new Error(errorMessage) });
     }
   };
 
@@ -206,9 +205,7 @@ function SubscriptionContent() {
     return (
       <Alert variant="destructive" className="m-4">
         <ExclamationCircleIcon className="h-4 w-4" />
-        <AlertDescription>
-          {error?.message || localError}
-        </AlertDescription>
+        <AlertDescription>{error?.message || localError}</AlertDescription>
       </Alert>
     );
   }

@@ -12,6 +12,9 @@ import { routeConfig } from "./app/routeConfig";
 import { jsonRoutes } from "remix-json-routes";
 
 export default defineConfig({
+  optimizeDeps: {
+    include: ["robot3", "robot-hooks"],
+  },
   plugins: [
     remix({
       ssr: false,
@@ -27,15 +30,36 @@ export default defineConfig({
     }),
     commonjs({
       filter(id) {
-        return id.includes("url");
+        return (
+          id.includes("url") ||
+          id.includes("robot3") ||
+          id.includes("robot-hooks")
+        );
       },
     }),
   ],
+  resolve: {
+    alias: {
+      // Use the ESM version specifically
+      "robot3": path.resolve(__dirname, "../../node_modules/robot3/machine.js"),
+      "robot3/debug": path.resolve(
+        __dirname,
+        "../../node_modules/robot3/debug.js",
+      ),
+      "robot-hooks": path.resolve(
+        __dirname,
+        "../../node_modules/robot-hooks/machine.js",
+      ),
+    },
+  },
   build: {
     minify: false,
     outDir: "../../dist/apps/portal-dashboard",
     reportCompressedSize: true,
-    commonjsOptions: { transformMixedEsModules: true },
+    commonjsOptions: {
+      transformMixedEsModules: true,
+      requireReturnsDefault: "auto",
+    },
   },
   server: {
     fs: {
