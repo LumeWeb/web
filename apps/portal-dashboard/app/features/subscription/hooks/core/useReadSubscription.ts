@@ -4,14 +4,14 @@ import useApiUrl from "portal-shared/hooks/useApiUrl";
 
 export function useReadSubscription() {
   const apiUrl = useApiUrl();
-  
+
   const { data, isLoading } = useCustom<SubscriptionResponse>({
     url: `${apiUrl}/api/account/subscription`,
-    method: "get"
+    method: "get",
   });
 
   return {
     data,
-    isLoading
+    isLoading,
   };
 }
