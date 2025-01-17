@@ -12,13 +12,7 @@ import { ExclamationCircleIcon } from "portal-shared/components/icons";
 import { usePayment } from "../../hooks/core/usePayment";
 
 export function PaymentFlow() {
-  const { 
-    showPaymentDialog, 
-    setShowPaymentDialog, 
-    context,
-    current,
-    send 
-  } = useSubscriptionContext();
+  const { state, context, send } = useSubscriptionContext();
 
   const { getPaymentStatus, isPaymentExpired } = usePayment();
 
@@ -33,14 +27,16 @@ export function PaymentFlow() {
   };
 
   // Don't show if not in pending payment state or no payment info
-  if (!current.matches('pendingPayment') || !context.payment?.clientSecret) {
+  if (state !== 'pendingPayment' || !context.payment?.clientSecret) {
     return null;
   }
 
   // Check if payment session is expired
   if (context.payment && isPaymentExpired(context.payment)) {
     return (
-      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+      <Dialog 
+        open={state === 'pendingPayment'} 
+        onOpenChange={(open) => send({ type: open ? 'SHOW_PAYMENT_DIALOG' : 'HIDE_PAYMENT_DIALOG' })}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-destructive">Payment Session Expired</DialogTitle>

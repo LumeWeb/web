@@ -22,12 +22,11 @@ import {
 import { createUseMachine } from "robot-hooks";
 
 interface SubscriptionContextValue {
-  subscription: Subscription | null;
+  state: SubscriptionStateValue;
+  context: SubscriptionContext;
+  send: (event: SubscriptionEvent) => void;
   plans: SubscriptionPlan[];
   isLoading: boolean;
-  error: Error | null;
-  showPaymentDialog: boolean;
-  setShowPaymentDialog: (show: boolean) => void;
   refetchSubscription: () => Promise<any>;
 }
 
@@ -59,21 +58,19 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
 
   const value = useMemo(
     () => ({
-      subscription: current.context.subscription,
+      state: current.name as SubscriptionStateValue,
+      context: current.context,
+      send,
       plans: plansData?.data?.plans || [],
       isLoading: current.name === "loading" || plansAreLoading,
-      error: current.context.error,
-      showPaymentDialog,
-      setShowPaymentDialog,
       refetchSubscription,
     }),
     [
-      current.context.subscription,
       current.name,
-      current.context.error,
+      current.context,
+      send,
       plansData?.data?.plans,
       plansAreLoading,
-      showPaymentDialog,
       refetchSubscription,
     ],
   );
