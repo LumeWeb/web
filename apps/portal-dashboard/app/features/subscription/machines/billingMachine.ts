@@ -25,6 +25,11 @@ export type BillingState = {
   error: {};
 };
 
+type BillingReducer<E extends BillingEvent> = (
+  context: BillingContext,
+  event: E
+) => Partial<BillingContext>;
+
 export const billingMachine = createMachine<BillingContext, BillingEvent, BillingState>(
   {
     idle: state(transition("EDIT", "editing")),
@@ -33,7 +38,7 @@ export const billingMachine = createMachine<BillingContext, BillingEvent, Billin
       transition(
         "VALIDATE",
         "validating",
-        reduce((ctx, ev) => ({
+        reduce((ctx, ev: Extract<BillingEvent, { type: "VALIDATE" }>) => ({
           ...ctx,
           billing: ev.billing,
           errors: null,
@@ -51,12 +56,18 @@ export const billingMachine = createMachine<BillingContext, BillingEvent, Billin
       transition(
         "VALIDATION_FAILED",
         "editing",
-        reduce((ctx, ev) => ({ ...ctx, errors: ev.errors })),
+        reduce((ctx, ev: Extract<BillingEvent, { type: "VALIDATION_FAILED" }>) => ({
+          ...ctx,
+          errors: ev.errors
+        })),
       ),
       transition(
-        "ERROR",
+        "SAVE_ERROR",
         "error",
-        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
+        reduce((ctx, ev: Extract<BillingEvent, { type: "SAVE_ERROR" }>) => ({
+          ...ctx,
+          error: ev.error
+        })),
       ),
     ),
 
@@ -69,7 +80,10 @@ export const billingMachine = createMachine<BillingContext, BillingEvent, Billin
       transition(
         "SAVE_ERROR",
         "error",
-        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
+        reduce((ctx, ev: Extract<BillingEvent, { type: "SAVE_ERROR" }>) => ({
+          ...ctx,
+          error: ev.error
+        })),
       ),
     ),
 
