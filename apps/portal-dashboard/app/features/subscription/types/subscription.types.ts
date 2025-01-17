@@ -1,20 +1,28 @@
 import { z } from "zod";
-import { StateValue } from 'robot3';
 import { BillingInfo, billingInfoSchema } from "./billing.types";
-export type { BillingInfo } from "./billing.types";
 import { PaymentInfo, paymentInfoSchema } from "./payment.types";
 import { HttpError } from "@refinedev/core";
+// Import and re-export subscription types
+import {
+  Resources,
+  Subscription as SharedSubscription,
+  SubscriptionPlan as SharedSubscriptionPlan,
+  SubscriptionPlanStatus,
+  SubscriptionResponse as SharedSubscriptionResponse,
+} from "portal-shared/dataProviders/accountProvider";
 
-export type SubscriptionStateValue = 
-  | 'idle'
-  | 'loading'
-  | 'inactive'
-  | 'pending'
-  | 'editingBilling'
-  | 'pendingPayment'
-  | 'active'
-  | 'cancelled'
-  | 'error';
+export type { BillingInfo } from "./billing.types";
+
+export type SubscriptionStateValue =
+  | "idle"
+  | "loading"
+  | "inactive"
+  | "pending"
+  | "editingBilling"
+  | "pendingPayment"
+  | "active"
+  | "cancelled"
+  | "error";
 
 export interface SubscriptionContext {
   subscription: Subscription | null;
@@ -33,15 +41,6 @@ export interface SubscriptionError extends HttpError {
   code?: string;
   details?: Record<string, unknown>;
 }
-
-// Import and re-export subscription types
-import {
-  SubscriptionPlanStatus,
-  SubscriptionPlan as SharedSubscriptionPlan,
-  Subscription as SharedSubscription,
-  Resources,
-  SubscriptionResponse as SharedSubscriptionResponse,
-} from "portal-shared/dataProviders/accountProvider";
 
 // Re-export subscription plan period as our own type
 export enum SubscriptionPlanPeriod {
