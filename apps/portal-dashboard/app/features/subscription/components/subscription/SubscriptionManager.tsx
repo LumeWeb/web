@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSearchParams } from "@remix-run/react";
-import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
+import { useSubscriptionContext, SubscriptionProvider } from "../../contexts/SubscriptionContext";
 import { usePayment } from "../../hooks/core/usePayment";
 import { useBilling } from "../../hooks/core/useBilling";
 import { SubscriptionPlan } from "../../types/subscription.types";
