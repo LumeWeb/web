@@ -16,7 +16,16 @@ export type BillingEvent =
   | { type: "SAVED" }
   | { type: "SAVE_ERROR"; error: Error };
 
-export const billingMachine = createMachine<BillingContext, BillingEvent>(
+export type BillingState = {
+  idle: {};
+  editing: {};
+  validating: {};
+  saving: {};
+  complete: {};
+  error: {};
+};
+
+export const billingMachine = createMachine<BillingContext, BillingEvent, BillingState>(
   {
     idle: state(transition("EDIT", "editing")),
 
