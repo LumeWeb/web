@@ -1,28 +1,27 @@
-import React from 'react';
-import { useSubscriptionContext } from '../../contexts/SubscriptionContext';
-import { SubscriptionPlan } from '../../types/subscription.types';
-import { Button } from 'portal-shared/components/ui/button';
+import React from "react";
+import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
+import { SubscriptionPlan } from "../../types/subscription.types";
+import { Button } from "portal-shared/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from 'portal-shared/components/ui/card';
-import { CloudIcon, CloudUploadIcon, DownloadIcon } from "portal-shared/components/icons";
-import { formatBytes } from '../../utils/formatBytes';
+} from "portal-shared/components/ui/card";
+import {
+  CloudIcon,
+  CloudUploadIcon,
+  DownloadIcon,
+} from "portal-shared/components/icons";
+import { formatBytes } from "../../utils/formatters";
 
 interface PlanSelectorProps {
   onPlanSelect: (plan: SubscriptionPlan) => void;
 }
 
 export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
-  const {
-    subscription,
-    plans,
-    selectedPlan,
-    isProcessing,
-    isLoading,
-  } = useSubscriptionContext();
+  const { subscription, plans, selectedPlan, isProcessing, isLoading } =
+    useSubscriptionContext();
 
   if (isLoading) {
     return (
@@ -47,10 +46,10 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
     );
   }
 
-  console.log('PlanSelector - received plans:', plans);
-  
+  console.log("PlanSelector - received plans:", plans);
+
   if (!plans?.length) {
-    console.log('PlanSelector - no plans available');
+    console.log("PlanSelector - no plans available");
     return (
       <div className="text-center p-4">
         <p className="text-muted-foreground">No subscription plans available</p>
@@ -69,24 +68,28 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
     }
 
     if (subscription?.plan.id === plan.id) {
-      return 'Current Plan';
+      return "Current Plan";
     }
 
     if (!subscription) {
-      return 'Select Plan';
+      return "Select Plan";
     }
 
-    return plan.price > subscription.plan.price ? 'Upgrade' : 'Downgrade';
+    return plan.price > subscription.plan.price ? "Upgrade" : "Downgrade";
   };
 
   const getButtonVariant = (plan: SubscriptionPlan) => {
-    return subscription?.plan.id === plan.id ? 'outline' : 'default';
+    return subscription?.plan.id === plan.id ? "outline" : "default";
   };
 
   return (
     <div className="grid md:grid-cols-3 gap-8">
       {(plans || []).map((plan) => (
-        <Card key={plan.id} className={subscription?.plan.id === plan.id ? 'ring-2 ring-primary' : ''}>
+        <Card
+          key={plan.id}
+          className={
+            subscription?.plan.id === plan.id ? "ring-2 ring-primary" : ""
+          }>
           <CardHeader>
             <CardTitle>{plan.name}</CardTitle>
             <div className="text-4xl font-medium">
@@ -122,8 +125,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
               className="w-full"
               variant={getButtonVariant(plan)}
               onClick={() => onPlanSelect(plan)}
-              disabled={isProcessing || subscription?.plan.id === plan.id}
-            >
+              disabled={isProcessing || subscription?.plan.id === plan.id}>
               {getButtonLabel(plan)}
             </Button>
           </CardContent>
