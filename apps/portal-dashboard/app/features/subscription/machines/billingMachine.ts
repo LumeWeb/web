@@ -5,6 +5,7 @@ export interface BillingContext {
   billing: BillingInfo | null;
   errors: BillingErrors | null;
   error: Error | null;
+  currentState: keyof BillingState;
 }
 
 export type BillingEvent =
@@ -17,12 +18,12 @@ export type BillingEvent =
   | { type: "SAVE_ERROR"; error: Error };
 
 export type BillingState = {
-  idle: {};
-  editing: {};
-  validating: {};
-  saving: {};
-  complete: {};
-  error: {};
+  idle: { type: 'idle' };
+  editing: { type: 'editing' };
+  validating: { type: 'validating' };
+  saving: { type: 'saving' };
+  complete: { type: 'complete' };
+  error: { type: 'error' };
 };
 
 type BillingReducer<E extends BillingEvent> = (
@@ -101,5 +102,6 @@ export const billingMachine = createMachine<BillingContext, BillingEvent, Billin
     billing: null,
     errors: null,
     error: null,
+    currentState: 'idle'
   }),
 );
