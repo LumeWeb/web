@@ -32,7 +32,7 @@ export type SubscriptionEvent =
   | { type: "REACTIVATE" };
 
 
-export const subscriptionMachine = createMachine<SubscriptionContext, SubscriptionEvent>(
+export const subscriptionMachine = createMachine(
   {
     idle: state(
       transition("SUBSCRIPTION_LOADED", "loading"),
@@ -69,11 +69,11 @@ export const subscriptionMachine = createMachine<SubscriptionContext, Subscripti
       transition("RETRIED", "pending")
     )
   },
-  () => ({
-    subscription: null,
-    selectedPlan: null,
-    billing: null,
-    payment: null,
-    error: null,
-  }),
+  (context?: SubscriptionContext) => ({
+    subscription: context?.subscription ?? null,
+    selectedPlan: context?.selectedPlan ?? null,
+    billing: context?.billing ?? null,
+    payment: context?.payment ?? null,
+    error: context?.error ?? null,
+  })
 );
