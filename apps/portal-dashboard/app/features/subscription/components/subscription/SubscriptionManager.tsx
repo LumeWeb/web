@@ -63,13 +63,12 @@ function SubscriptionContent() {
 
   const { loadSubscription } = useSubscriptionContext();
 
-  const { mutateAsync: readSubscription, isLoading: isLoadingSubscription } = useReadSubscriptionMutation();
+  const { data: subscriptionData, isLoading: isLoadingSubscription } = useReadSubscription();
 
   useEffect(() => {
     const initializeSubscription = async () => {
       try {
-        const response = await readSubscription();
-        loadSubscription(response.data?.subscription || DEFAULT_SUBSCRIPTION);
+        loadSubscription(subscriptionData?.data?.subscription || DEFAULT_SUBSCRIPTION);
       } catch (error) {
         console.error('Failed to read subscription:', error);
         loadSubscription(DEFAULT_SUBSCRIPTION);
