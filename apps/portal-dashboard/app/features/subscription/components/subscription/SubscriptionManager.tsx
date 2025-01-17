@@ -161,6 +161,8 @@ function SubscriptionContent() {
 
       // Update state machine first
       selectPlan(plan);
+      console.log("Selected plan:", plan);
+      console.log("Context after selection:", context);
       
       // Then open dialog
       setShowConfirmDialog(true);
@@ -172,7 +174,12 @@ function SubscriptionContent() {
   };
 
   const handleConfirm = async () => {
-    if (!selectedPlan) return;
+    if (!context.selectedPlan) {
+      console.error("No plan selected in context");
+      setValidationError("No plan selected");
+      return;
+    }
+    const planToUse = context.selectedPlan;
     setValidationError(null);
     setBillingError(null);
     setLocalError(null);
@@ -181,7 +188,7 @@ function SubscriptionContent() {
       // Validate plan change first
       const isValid = await validatePlanChange(
         context.subscription?.plan,
-        selectedPlan,
+        planToUse,
         context.billing,
       );
 
@@ -194,8 +201,8 @@ function SubscriptionContent() {
       if (context.subscription) {
         // Update existing subscription
         send({ type: "UPDATE_SUBSCRIPTION" });
-        console.log("Updating subscription to plan:", selectedPlan);
-        const { subscription } = await updateSubscription(selectedPlan);
+        console.log("Updating subscription to plan:", planToUse);
+        const { subscription } = await updateSubscription(planToUse);
         console.log("Update subscription result:", subscription);
         
         if (subscription) {
@@ -207,8 +214,8 @@ function SubscriptionContent() {
       } else {
         // Create new subscription
         send({ type: "CREATE_SUBSCRIPTION" });
-        console.log("Creating new subscription with plan:", selectedPlan);
-        const { subscription } = await createSubscription(selectedPlan);
+        console.log("Creating new subscription with plan:", planToUse);
+        const { subscription } = await createSubscription(planToUse);
         console.log("Create subscription result:", subscription);
         
         if (subscription) {
@@ -220,7 +227,7 @@ function SubscriptionContent() {
       }
 
       // Complete the flow
-      if (selectedPlan.is_free) {
+      if (planToUse.is_free) {
         complete();
       }
 
