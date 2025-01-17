@@ -6,12 +6,13 @@ import { PaymentInfo, paymentInfoSchema } from "./payment.types";
 import { HttpError } from "@refinedev/core";
 
 export type SubscriptionStateValue = 
+  | 'idle'
   | 'loading'
-  | 'inactive'
   | 'pending'
-  | 'pendingPayment'
+  | 'validating'
+  | 'processing'
   | 'active'
-  | 'cancelled'
+  | 'canceled'
   | 'error'
   | 'updatingPayment';
 
@@ -90,14 +91,14 @@ export type SubscriptionState =
 
 // Robot State Machine Events
 export type SubscriptionEvent =
-  | { type: "LOADED"; subscription: Subscription }
-  | { type: "SELECT_PLAN"; plan: SubscriptionPlan }
-  | { type: "UPDATE_BILLING"; billing: BillingInfo }
-  | { type: "COMPLETE"; paymentMethodId?: string }
-  | { type: "CANCEL" }
-  | { type: "REACTIVATE" }
-  | { type: "RETRY" }
-  | { type: "ERROR"; error: Error }
+  | { type: "SUBSCRIPTION_LOADED"; subscription: Subscription }
+  | { type: "PLAN_SELECTED"; plan: SubscriptionPlan }
+  | { type: "BILLING_UPDATED"; billing: BillingInfo }
+  | { type: "COMPLETED"; paymentMethodId?: string }
+  | { type: "CANCELED" }
+  | { type: "REACTIVATED" }
+  | { type: "RETRIED" }
+  | { type: "ERROR_OCCURRED"; error: Error }
   | { type: "PAYMENT_METHOD_UPDATE_INITIATED" }
   | { type: "PAYMENT_METHOD_UPDATED"; paymentMethodId: string }
   | { type: "PAYMENT_METHOD_UPDATE_FAILED"; error: Error };

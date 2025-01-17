@@ -79,8 +79,8 @@ export const subscriptionMachine = createMachine<
   SubscriptionEvent,
   SubscriptionService
 >({
-  loading: state(
-    transition('LOADED', 'inactive', 
+  idle: state(
+    transition('SUBSCRIPTION_LOADED', 'loading', 
       reduce((ctx, ev) => ({
         ...ctx,
         subscription: ev.subscription,
@@ -93,7 +93,7 @@ export const subscriptionMachine = createMachine<
   ),
 
   inactive: state(
-    transition('SELECT_PLAN', 'pending', 
+    transition('PLAN_SELECTED', 'pending', 
       reduce((ctx, ev) => ({ 
         ...ctx, 
         selectedPlan: ev.plan,
@@ -106,14 +106,14 @@ export const subscriptionMachine = createMachine<
   ),
 
   pending: state(
-    transition('UPDATE_BILLING', 'pending',
+    transition('BILLING_UPDATED', 'pending',
       reduce((ctx, ev) => ({ 
         ...ctx, 
         billing: ev.billing,
         error: null
       }))
     ),
-    transition('COMPLETE', 'pendingPayment', 
+    transition('COMPLETED', 'processing', 
       guard((ctx) => !ctx.selectedPlan?.is_free && hasBillingInfo(ctx) && isValidPlanChange(ctx)),
       reduce((ctx) => ({ ...ctx, error: null }))
     ),
@@ -182,7 +182,7 @@ export const subscriptionMachine = createMachine<
       }))
     ),
     transition('PAYMENT_METHOD_UPDATE_INITIATED', 'updatingPayment'),
-    transition('CANCEL', 'cancelled',
+    transition('CANCELED', 'canceled',
       reduce((ctx) => ({
         ...ctx,
         subscription: {
