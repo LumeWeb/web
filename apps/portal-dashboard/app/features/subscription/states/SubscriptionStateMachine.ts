@@ -78,6 +78,14 @@ export class SubscriptionStateMachine {
           ...this.currentState,
           billing: event.billing
         };
+      case 'COMPLETE_PAYMENT':
+        if (this.currentState.type !== 'PENDING' && this.currentState.type !== 'ACTIVE') {
+          throw new Error('Can only complete payment in PENDING or ACTIVE state');
+        }
+        return {
+          ...this.currentState,
+          paymentMethodId: event.paymentMethodId
+        };
       case 'CANCEL_SUBSCRIPTION':
         if (this.currentState.type !== 'ACTIVE') {
           throw new Error('Can only cancel active subscriptions');

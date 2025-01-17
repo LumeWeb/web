@@ -47,6 +47,7 @@ export type SubscriptionEvent =
   | { type: 'SUBSCRIPTION_LOADED'; subscription: Subscription }
   | { type: 'CREATE_SUBSCRIPTION'; plan: SubscriptionPlan }
   | { type: 'UPDATE_BILLING'; billing: BillingInfo }
+  | { type: 'COMPLETE_PAYMENT'; paymentMethodId: string }
   | { type: 'CANCEL_SUBSCRIPTION' }
   | { type: 'ERROR_OCCURRED'; error: Error };
 
