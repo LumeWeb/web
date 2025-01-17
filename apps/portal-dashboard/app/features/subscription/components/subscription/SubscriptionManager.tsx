@@ -63,16 +63,23 @@ function SubscriptionContent() {
 
   const { loadSubscription } = useSubscriptionContext();
 
-  const { data: subscriptionData, isLoading: isLoadingSubscription } = useCustom({
-    url: `${window.location.origin}/api/account/subscription`,
-    method: 'get'
-  });
+  const { mutateAsync: readSubscription, isLoading: isLoadingSubscription } = useReadSubscriptionMutation();
 
   useEffect(() => {
+    const initializeSubscription = async () => {
+      try {
+        const response = await readSubscription();
+        loadSubscription(response.data?.subscription || DEFAULT_SUBSCRIPTION);
+      } catch (error) {
+        console.error('Failed to read subscription:', error);
+        loadSubscription(DEFAULT_SUBSCRIPTION);
+      }
+    };
+
     if (!isLoadingSubscription) {
-      loadSubscription(subscriptionData?.data?.subscription || DEFAULT_SUBSCRIPTION);
+      initializeSubscription();
     }
-  }, [loadSubscription, subscriptionData, isLoadingSubscription]);
+  }, [loadSubscription, readSubscription, isLoadingSubscription]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const paidBillingEnabled = useIsPaidBillingEnabled();
