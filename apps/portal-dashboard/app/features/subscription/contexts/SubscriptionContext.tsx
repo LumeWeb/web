@@ -161,8 +161,8 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       setShowPaymentDialog,
 
       // Status flags
-      isProcessing,
-    }),
+      isProcessing
+    };
     [
       state,
       plansAreLoading,
