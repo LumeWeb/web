@@ -73,8 +73,6 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   // Core subscription state
   const {
     state,
-    error,
-    isLoading,
     loadSubscription: loadSubscriptionState,
     updateBilling: updateBillingState,
     completePayment: completePaymentState,
@@ -106,12 +104,10 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       isTransitioning,
 
       // Current subscription
-      subscription:
-        state.type !== "LOADING" && state.type !== "ERROR"
-          ? state.subscription
-          : undefined,
-      isLoading: isLoading || plansAreLoading,
-      error,
+      subscription: state.type === "ACTIVE" ? state.subscription : 
+                   state.type === "CANCELLED" ? state.subscription : undefined,
+      isLoading: state.type === "LOADING" || plansAreLoading,
+      error: state.type === "ERROR" ? state.error : null,
 
       // Plan management
       plans: (() => {
