@@ -11,7 +11,9 @@ import {
 
 export function useSubscriptionState() {
   const stateManager = SubscriptionStateManager.getInstance();
-  const [state, setState] = useState<SubscriptionState>(stateManager.getState());
+  const [state, setState] = useState<SubscriptionState>(
+    stateManager.getState(),
+  );
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
@@ -22,8 +24,7 @@ export function useSubscriptionState() {
   const dispatch = useCallback(async (event: SubscriptionEvent) => {
     setIsTransitioning(true);
     try {
-      const newState = stateManager.transition(event);
-      return newState;
+      return stateManager.transition(event);
     } catch (error) {
       if (error instanceof Error) {
         handleError(error);
