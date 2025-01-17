@@ -8,14 +8,21 @@ export interface SubscriptionError extends HttpError {
   code?: string;
   details?: Record<string, unknown>;
 }
+
+// Import and re-export subscription types
 import {
-  SubscriptionPlanPeriod,
   SubscriptionPlanStatus,
   SubscriptionPlan as SharedSubscriptionPlan,
   Subscription as SharedSubscription,
   Resources,
   SubscriptionResponse as SharedSubscriptionResponse
 } from "portal-shared/dataProviders/accountProvider";
+
+// Re-export subscription plan period as our own type
+export enum SubscriptionPlanPeriod {
+  MONTHLY = "MONTHLY",
+  YEARLY = "YEARLY"
+}
 
 // Core subscription states
 export type SubscriptionStatus = SubscriptionPlanStatus;

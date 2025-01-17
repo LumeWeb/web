@@ -7,7 +7,7 @@ import {
   SubscriptionPlan,
   BillingInfo,
 } from "../types/subscription.types";
-import { SubscriptionPlanPeriod } from "portal-shared/dataProviders/accountProvider";
+import { SubscriptionPlanPeriod } from "../types/subscription.types";
 
 export function useSubscriptionState() {
   const stateMachine = useRef(new SubscriptionStateMachine());
