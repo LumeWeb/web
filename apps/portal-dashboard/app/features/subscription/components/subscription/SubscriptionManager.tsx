@@ -36,6 +36,7 @@ import { PaymentMethod } from "@/features/subscription/components/payment/Paymen
 import { PaymentFlow } from "@/features/subscription/components/payment/PaymentFlow";
 import Addons from "@/routes/account/components/Addons";
 import { useSubscription } from "@/features/subscription/hooks/core/useSubscription";
+import { SubscriptionPlanStatus } from "portal-shared/dataProviders/accountProvider";
 
 export function SubscriptionManager() {
   return (
@@ -181,7 +182,7 @@ function SubscriptionContent() {
       }
 
       // State machine will handle the transition and useEffect will update selectedPlan
-      if (state.type === "PENDING_PAYMENT") {
+      if (state.type === SubscriptionPlanStatus.PENDING_PAYMENT) {
         setShowPaymentDialog(true);
       }
 

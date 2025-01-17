@@ -1,4 +1,12 @@
-import { createContext, ReactNode, useContext, useMemo, useState, useRef, useEffect } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+} from "react";
 import { SubscriptionService } from "../services/SubscriptionService";
 import {
   BillingInfo,
@@ -33,7 +41,9 @@ interface SubscriptionContextValue {
   setSelectedPlan: (plan: SubscriptionPlan | null) => void;
 
   // Actions
-  createSubscription: (plan: SubscriptionPlan) => Promise<{ subscription: Subscription }>;
+  createSubscription: (
+    plan: SubscriptionPlan,
+  ) => Promise<{ subscription: Subscription }>;
   updateSubscription: (plan: SubscriptionPlan) => Promise<Subscription>;
   cancelSubscription: () => Promise<void>;
   validatePlanChange: (
@@ -125,34 +135,37 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       createSubscription: async (plan: SubscriptionPlan) => {
         try {
           console.log("Creating subscription in context with plan:", plan);
-          
+
           // First validate the plan change using service
           if (state.type === "ACTIVE") {
             const isValid = await subscriptionService.validatePlanChange(
               state.subscription.plan,
-              plan
+              plan,
             );
             if (!isValid) {
               throw new Error("Invalid plan change");
             }
           }
-          
+
           // Call API
           const response = await createSubscription(plan);
           console.log("Subscription creation response:", response);
 
           if (!response?.subscription) {
-            throw new Error("Invalid server response - missing subscription data");
+            throw new Error(
+              "Invalid server response - missing subscription data",
+            );
           }
 
           // Update state machine with new subscription
           await subscriptionService.loadSubscription(response.subscription);
-          
+          await subscriptionService.createSubscription(plan);
+
           return response;
         } catch (error) {
           console.error("Error in subscription context:", error);
           await subscriptionService.handleError(
-            error instanceof Error ? error : new Error(String(error))
+            error instanceof Error ? error : new Error(String(error)),
           );
           throw error;
         }
@@ -161,17 +174,19 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
         try {
           // Validate and update state first
           await subscriptionService.updateSubscription(plan);
-          
+
           // Then call API
           const response = await updateSubscription(plan);
-          
+
           // Update state with response
-          await subscriptionService.loadSubscription(response.data.subscription);
-          
+          await subscriptionService.loadSubscription(
+            response.data.subscription,
+          );
+
           return response.data.subscription;
         } catch (error) {
           await subscriptionService.handleError(
-            error instanceof Error ? error : new Error(String(error))
+            error instanceof Error ? error : new Error(String(error)),
           );
           throw error;
         }
@@ -180,17 +195,20 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
         try {
           // Update state first
           await subscriptionService.cancelSubscription();
-          
+
           // Then call API
           await cancelSubscription();
         } catch (error) {
           await subscriptionService.handleError(
-            error instanceof Error ? error : new Error(String(error))
+            error instanceof Error ? error : new Error(String(error)),
           );
           throw error;
         }
       },
-      validatePlanChange: async (currentPlan: SubscriptionPlan, newPlan: SubscriptionPlan) => {
+      validatePlanChange: async (
+        currentPlan: SubscriptionPlan,
+        newPlan: SubscriptionPlan,
+      ) => {
         return subscriptionService.validatePlanChange(currentPlan, newPlan);
       },
 
