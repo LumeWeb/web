@@ -1,6 +1,11 @@
-import { useCallback, useState } from 'react';
-import { SubscriptionStateManager } from '../../states/SubscriptionStateManager';
-import { SubscriptionState, Subscription, SubscriptionPlan } from '../../types/subscription.types';
+import { useCallback, useState } from "react";
+import { SubscriptionStateManager } from "../../states/SubscriptionStateManager";
+import {
+  SubscriptionState,
+  Subscription,
+  SubscriptionPlan,
+  DEFAULT_SUBSCRIPTION,
+} from "../../types/subscription.types";
 
 export interface UseSubscriptionResult {
   state: SubscriptionState;
@@ -10,8 +15,14 @@ export interface UseSubscriptionResult {
   loadSubscription: (subscription: Subscription | null) => Promise<void>;
   createSubscription: (plan: SubscriptionPlan) => Promise<void>;
   cancelSubscription: () => Promise<void>;
-  validatePlanChange: (currentPlan: SubscriptionPlan, newPlan: SubscriptionPlan) => Promise<boolean>;
-  getSubscriptionPeriod: (plan: SubscriptionPlan, startDate?: Date) => { start: Date; end: Date };
+  validatePlanChange: (
+    currentPlan: SubscriptionPlan,
+    newPlan: SubscriptionPlan,
+  ) => Promise<boolean>;
+  getSubscriptionPeriod: (
+    plan: SubscriptionPlan,
+    startDate?: Date,
+  ) => { start: Date; end: Date };
   handleError: (error: Error) => void;
 }
 
@@ -21,50 +32,61 @@ export function useSubscriptionState(): UseSubscriptionResult {
   const [isLoading, setIsLoading] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const loadSubscription = useCallback(async (subscription: Subscription | null) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await stateManager.transition({
-        type: "SUBSCRIPTION_LOADED",
-        subscription: subscription || DEFAULT_SUBSCRIPTION
-      });
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to load subscription');
-      setError(error);
-      handleError(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [stateManager]);
+  const loadSubscription = useCallback(
+    async (subscription: Subscription | null) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        await stateManager.transition({
+          type: "SUBSCRIPTION_LOADED",
+          subscription: subscription || DEFAULT_SUBSCRIPTION,
+        });
+      } catch (err) {
+        const error =
+          err instanceof Error ? err : new Error("Failed to load subscription");
+        setError(error);
+        handleError(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [stateManager],
+  );
 
-  const createSubscription = useCallback(async (plan: SubscriptionPlan) => {
-    setIsTransitioning(true);
-    setError(null);
-    try {
-      await stateManager.transition({
-        type: "CREATE_SUBSCRIPTION",
-        plan
-      });
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to create subscription');
-      setError(error);
-      handleError(error);
-      throw error;
-    } finally {
-      setIsTransitioning(false);
-    }
-  }, [stateManager]);
+  const createSubscription = useCallback(
+    async (plan: SubscriptionPlan) => {
+      setIsTransitioning(true);
+      setError(null);
+      try {
+        await stateManager.transition({
+          type: "CREATE_SUBSCRIPTION",
+          plan,
+        });
+      } catch (err) {
+        const error =
+          err instanceof Error
+            ? err
+            : new Error("Failed to create subscription");
+        setError(error);
+        handleError(error);
+        throw error;
+      } finally {
+        setIsTransitioning(false);
+      }
+    },
+    [stateManager],
+  );
 
   const cancelSubscription = useCallback(async () => {
     setIsTransitioning(true);
     setError(null);
     try {
       await stateManager.transition({
-        type: "CANCEL_SUBSCRIPTION"
+        type: "CANCEL_SUBSCRIPTION",
       });
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to cancel subscription');
+      const error =
+        err instanceof Error ? err : new Error("Failed to cancel subscription");
       setError(error);
       handleError(error);
       throw error;
@@ -79,13 +101,16 @@ export function useSubscriptionState(): UseSubscriptionResult {
         // Implement validation logic here
         return true;
       } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to validate plan change');
+        const error =
+          err instanceof Error
+            ? err
+            : new Error("Failed to validate plan change");
         setError(error);
         handleError(error);
         return false;
       }
     },
-    []
+    [],
   );
 
   const getSubscriptionPeriod = useCallback(
@@ -101,15 +126,18 @@ export function useSubscriptionState(): UseSubscriptionResult {
 
       return { start, end };
     },
-    []
+    [],
   );
 
-  const handleError = useCallback((error: Error) => {
-    stateManager.transition({
-      type: "ERROR_OCCURRED",
-      error
-    });
-  }, [stateManager]);
+  const handleError = useCallback(
+    (error: Error) => {
+      stateManager.transition({
+        type: "ERROR_OCCURRED",
+        error,
+      });
+    },
+    [stateManager],
+  );
 
   return {
     state: stateManager.getState(),
@@ -121,6 +149,6 @@ export function useSubscriptionState(): UseSubscriptionResult {
     cancelSubscription,
     validatePlanChange,
     getSubscriptionPeriod,
-    handleError
+    handleError,
   };
 }
