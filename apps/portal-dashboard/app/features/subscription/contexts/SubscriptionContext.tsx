@@ -18,7 +18,7 @@ interface SubscriptionContextValue {
   completePayment: (paymentMethodId: string) => void;
   handleError: (error: Error) => void;
   isTransitioning: boolean;
-  refetchSubscription: () => Promise<void>;
+  refetchSubscription: () => Promise<any>;
 
   // Current subscription
   subscription?: Subscription;
