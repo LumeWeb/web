@@ -9,12 +9,17 @@ import {
 import HyperPayment from "@/features/subscription/components/payment/HyperPayment";
 
 export function PaymentFlow() {
-  const { showPaymentDialog, setShowPaymentDialog, subscription } =
+  const { showPaymentDialog, setShowPaymentDialog, subscription, state } =
     useSubscriptionContext();
 
-  console.log("PaymentFlow", subscription);
+  console.log("PaymentFlow - state:", state);
+  console.log("PaymentFlow - subscription:", subscription);
 
-  if (!subscription?.payment?.client_secret) {
+  // Only show payment dialog when we have an active subscription with payment details
+  const hasPaymentDetails = state.type === "ACTIVE" && 
+                           subscription?.payment?.client_secret;
+
+  if (!hasPaymentDetails) {
     return null;
   }
 
