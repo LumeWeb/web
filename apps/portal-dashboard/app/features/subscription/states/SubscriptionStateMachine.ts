@@ -31,6 +31,12 @@ export class SubscriptionStateMachine {
       SubscriptionPlanStatus.ACTIVE,
       SubscriptionPlanStatus.CANCELLED,
       SubscriptionPlanStatus.INACTIVE,
+      SubscriptionPlanStatus.PENDING_PAYMENT,
+    ],
+    [SubscriptionPlanStatus.PENDING_PAYMENT]: [
+      SubscriptionPlanStatus.ACTIVE,
+      SubscriptionPlanStatus.CANCELLED,
+      SubscriptionPlanStatus.INACTIVE,
     ],
     [SubscriptionPlanStatus.ACTIVE]: [SubscriptionPlanStatus.CANCELLED],
     [SubscriptionPlanStatus.CANCELLED]: [SubscriptionPlanStatus.INACTIVE],
@@ -146,6 +152,12 @@ export class SubscriptionStateMachine {
         return {
           type: "PENDING",
           plan: subscription.plan,
+        };
+      case SubscriptionPlanStatus.PENDING_PAYMENT:
+        return {
+          type: "PENDING_PAYMENT",
+          plan: subscription.plan,
+          billing: subscription.billing,
         };
       case SubscriptionPlanStatus.ACTIVE:
         return { type: "ACTIVE", subscription };

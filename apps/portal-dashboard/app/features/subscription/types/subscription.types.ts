@@ -63,6 +63,7 @@ export type SubscriptionState =
   | { type: 'ERROR'; error: Error }
   | { type: 'INACTIVE' }
   | { type: 'PENDING'; plan: SubscriptionPlan; billing?: BillingInfo }
+  | { type: 'PENDING_PAYMENT'; plan: SubscriptionPlan; billing: BillingInfo }
   | { type: 'ACTIVE'; subscription: Subscription }
   | { type: 'CANCELLED'; subscription: Subscription };
 
