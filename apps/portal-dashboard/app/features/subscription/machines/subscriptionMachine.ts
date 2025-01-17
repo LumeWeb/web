@@ -1,4 +1,8 @@
 import { createMachine, Transition } from "robot3";
+import { createUseMachine } from "robot-hooks";
+import { useEffect, useState } from "react";
+
+export const useMachine = createUseMachine(useEffect, useState);
 import {
   BillingInfo,
   Subscription,

@@ -1,4 +1,8 @@
 import { createMachine, state, transition, reduce, Transition } from "robot3";
+import { createUseMachine } from "robot-hooks";
+import { useEffect, useState } from "react";
+
+export const useMachine = createUseMachine(useEffect, useState);
 import { BillingInfo, BillingErrors } from "../types/billing.types";
 
 // Context just holds the data

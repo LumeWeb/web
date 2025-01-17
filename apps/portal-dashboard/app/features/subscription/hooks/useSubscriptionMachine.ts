@@ -1,18 +1,15 @@
-import { createUseMachine } from "robot-hooks";
-import { useEffect, useState } from "react";
 import {
   SubscriptionEvent,
   subscriptionMachine,
+  useMachine,
 } from "../machines/subscriptionMachine";
 import {
   SubscriptionPlan,
   SubscriptionStateValue,
 } from "../types/subscription.types";
 
-const useMachine = createUseMachine(useEffect, useState);
-
 export function useSubscriptionMachine() {
-  const [current, send] = createUseMachine(useEffect, useState)(subscriptionMachine);
+  const [current, send] = useMachine(subscriptionMachine);
 
   return {
     state: current.name as SubscriptionStateValue,
