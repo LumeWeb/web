@@ -12,6 +12,7 @@ import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
 
 interface HyperPaymentProps {
   onPaymentSuccess: (paymentMethodId: string) => void;
+  onPaymentError: (error: Error) => void;
   mode: "subscribe" | "setup" | "change_payment";
 }
 
@@ -111,7 +112,9 @@ const PaymentConfirmationButton = ({
         onPaymentSuccess(result.payment_method_id);
       }
     } catch (error) {
-      setPaymentError("An unexpected error occurred");
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      setPaymentError(errorMessage);
+      onPaymentError(new Error(errorMessage));
       console.error("Error confirming payment:", error);
     } finally {
       setIsProcessing(false);

@@ -19,16 +19,38 @@ interface SubscriptionContext {
 
 const paymentService = new PaymentService();
 
+// Validation guards
+const hasBillingInfo = (ctx: SubscriptionContext) => {
+  return !!ctx.billing?.name && !!ctx.billing?.address?.line1;
+};
+
+const isValidPlanChange = (ctx: SubscriptionContext) => {
+  if (!ctx.subscription || !ctx.selectedPlan) return true;
+  
+  // Don't allow downgrades if current plan has higher resources
+  if (
+    ctx.selectedPlan.resources.storage < ctx.subscription.plan.resources.storage ||
+    ctx.selectedPlan.resources.upload < ctx.subscription.plan.resources.upload ||
+    ctx.selectedPlan.resources.download < ctx.subscription.plan.resources.download
+  ) {
+    return false;
+  }
+  return true;
+};
+
 const initiatePayment = async (context: SubscriptionContext) => {
   if (!context.selectedPlan) {
     throw new Error('No plan selected');
   }
+
+  if (!hasBillingInfo(context)) {
+    throw new Error('Billing information is required');
+  }
   
   // Initialize payment session
-  const payment = await paymentService.getPaymentStatus({
-    clientSecret: '',
-    publishableKey: '',
-    expiresAt: new Date().toISOString()
+  const payment = await paymentService.initializePayment({
+    planId: context.selectedPlan.id,
+    billingInfo: context.billing!
   });
   
   return { payment };
@@ -70,7 +92,7 @@ export const subscriptionMachine = createMachine<SubscriptionContext, Subscripti
       }))
     ),
     transition('COMPLETE', 'pendingPayment', 
-      guard((ctx) => !ctx.selectedPlan?.is_free),
+      guard((ctx) => !ctx.selectedPlan?.is_free && hasBillingInfo(ctx) && isValidPlanChange(ctx)),
       reduce((ctx) => ({ ...ctx, error: null }))
     ),
     transition('COMPLETE', 'active',
