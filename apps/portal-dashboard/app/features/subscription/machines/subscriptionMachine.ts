@@ -77,8 +77,9 @@ const createTransitionMap = (transitions: Record<string, string[]>) => {
 export const subscriptionMachine = createMachine<
   SubscriptionStates,
   SubscriptionContext,
-  string
+  SubscriptionEvent["type"]
 >(
+  "idle",
   {
     idle: {
       final: false,
