@@ -95,6 +95,8 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
 
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
+  const { refetch: refetchSubscription } = useSubscription();
+
   const value = useMemo(
     () => ({
       // State management
@@ -104,7 +106,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       completePayment: completePaymentState,
       handleError: handleErrorState,
       isTransitioning,
-      refetchSubscription: useSubscription().refetch,
+      refetchSubscription,
 
       // Current subscription
       subscription: state?.subscription,
