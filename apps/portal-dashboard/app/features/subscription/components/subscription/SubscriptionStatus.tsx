@@ -1,9 +1,13 @@
-import React from 'react';
-import { useSubscriptionContext } from '../../contexts/SubscriptionContext';
-import { Card, CardContent, CardHeader, CardTitle } from 'portal-shared/components/ui/card';
-import { formatDate } from '../../utils/formatDate';
-import { formatBytes } from '../../utils/formatBytes';
-import { Progress } from 'portal-shared/components/ui/progress';
+import React from "react";
+import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "portal-shared/components/ui/card";
+import { formatBytes, formatDate } from "../../utils/formatters";
+import { Progress } from "portal-shared/components/ui/progress";
 
 export function SubscriptionStatus() {
   const { subscription } = useSubscriptionContext();
@@ -13,7 +17,7 @@ export function SubscriptionStatus() {
   }
 
   const { plan, current_period_start, current_period_end } = subscription;
-  
+
   // TODO: Get actual storage used from backend
   const storageUsed = 1000000000; // 1GB for example
   const storagePercent = (storageUsed / plan.resources.storage) * 100;
@@ -31,9 +35,12 @@ export function SubscriptionStatus() {
           </div>
           {current_period_start && current_period_end && (
             <div>
-              <div className="text-sm text-muted-foreground">Billing Period</div>
+              <div className="text-sm text-muted-foreground">
+                Billing Period
+              </div>
               <div className="font-medium">
-                {formatDate(current_period_start)} - {formatDate(current_period_end)}
+                {formatDate(current_period_start)} -{" "}
+                {formatDate(current_period_end)}
               </div>
             </div>
           )}
