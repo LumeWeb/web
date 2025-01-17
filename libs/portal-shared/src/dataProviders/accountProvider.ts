@@ -26,6 +26,8 @@ export enum SubscriptionPlanPeriod {
 export enum SubscriptionPlanStatus {
   ACTIVE = "ACTIVE",
   PENDING = "PENDING",
+  INACTIVE = "INACTIVE",
+  CANCELLED = "CANCELLED",
 }
 
 export interface Address {

@@ -1,3 +1,4 @@
+import { SubscriptionPlanStatus } from "portal-shared/dataProviders/accountProvider";
 import {
   SubscriptionState,
   SubscriptionEvent,
@@ -24,19 +25,15 @@ export class SubscriptionStateMachine {
   > = {
     [SubscriptionPlanStatus.INACTIVE]: [
       SubscriptionPlanStatus.PENDING,
-      SubscriptionPlanStatus.ACTIVE
+      SubscriptionPlanStatus.ACTIVE,
     ],
     [SubscriptionPlanStatus.PENDING]: [
       SubscriptionPlanStatus.ACTIVE,
       SubscriptionPlanStatus.CANCELLED,
-      SubscriptionPlanStatus.INACTIVE
+      SubscriptionPlanStatus.INACTIVE,
     ],
-    [SubscriptionPlanStatus.ACTIVE]: [
-      SubscriptionPlanStatus.CANCELLED
-    ],
-    [SubscriptionPlanStatus.CANCELLED]: [
-      SubscriptionPlanStatus.INACTIVE
-    ],
+    [SubscriptionPlanStatus.ACTIVE]: [SubscriptionPlanStatus.CANCELLED],
+    [SubscriptionPlanStatus.CANCELLED]: [SubscriptionPlanStatus.INACTIVE],
   };
 
   public transition(event: SubscriptionEvent): SubscriptionState {
