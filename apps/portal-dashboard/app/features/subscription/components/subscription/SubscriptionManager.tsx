@@ -38,6 +38,7 @@ import Addons from "@/routes/account/components/Addons";
 import { useSubscription } from "@/features/subscription/hooks/core/useSubscription";
 import { useSubscriptionMachine } from "../../hooks/useSubscriptionMachine";
 import { useSubscriptionDialog } from "@/features/subscription/hooks/ui/useSubscriptionDialog";
+import { useSubscriptionConfirmation } from "@/features/subscription/hooks/ui/useSubscriptionConfirmation";
 import { Alert, AlertDescription } from "portal-shared/components/ui/alert";
 
 export function SubscriptionManager() {
