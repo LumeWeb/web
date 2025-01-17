@@ -1,11 +1,12 @@
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BillingInfo, billingInfoSchema } from "../../types/billing.types";
+import { BillingInfo, billingInfoSchema, EntityCode } from "../../types/billing.types";
 import { useBillingMutations } from "../mutations/useBillingMutations";
 
 export function useSubscriptionForm() {
   const [formError, setFormError] = useState<Error | null>(null);
+  const [supportedEntities, setSupportedEntities] = useState<EntityCode[]>(['S', 'C']);
   const { updateBillingInfo, isLoading: isSubmitting } = useBillingMutations();
 
   const form = useForm<BillingInfo>({
@@ -53,5 +54,7 @@ export function useSubscriptionForm() {
     formError,
     handleSubmit,
     resetForm,
+    supportedEntities,
+    setSupportedEntities,
   };
 }
