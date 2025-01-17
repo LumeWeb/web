@@ -31,6 +31,7 @@ export function BillingForm() {
     resetForm,
     updateFormSchema,
     setSupportedEntities,
+    supportedEntities,
   } = useSubscriptionForm();
 
   const {
