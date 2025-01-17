@@ -36,6 +36,24 @@ export type SubscriptionPlan = SharedSubscriptionPlan;
 // Active Subscription
 export type Subscription = SharedSubscription;
 
+// Default empty subscription
+export const DEFAULT_SUBSCRIPTION: Subscription = {
+  id: "",
+  status: SubscriptionPlanStatus.PENDING,
+  plan: {
+    id: "",
+    name: "",
+    period: SubscriptionPlanPeriod.MONTHLY,
+    price: 0,
+    is_free: true,
+    resources: {
+      storage: 0,
+      upload: 0,
+      download: 0,
+    },
+  },
+};
+
 // Subscription Response
 export type SubscriptionResponse = SharedSubscriptionResponse;
 

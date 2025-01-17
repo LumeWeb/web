@@ -39,29 +39,10 @@ export function useSubscriptionState() {
 
   const loadSubscription = useCallback(
     (subscription: Subscription | null) => {
-      if (subscription) {
-        dispatch({ type: "SUBSCRIPTION_LOADED", subscription });
-      } else {
-        dispatch({
-          type: "SUBSCRIPTION_LOADED",
-          subscription: {
-            id: "",
-            status: SubscriptionPlanStatus.PENDING,
-            plan: {
-              id: "",
-              name: "",
-              period: SubscriptionPlanPeriod.MONTHLY,
-              price: 0,
-              is_free: true,
-              resources: {
-                storage: 0,
-                upload: 0,
-                download: 0,
-              },
-            },
-          },
-        });
-      }
+      dispatch({
+        type: "SUBSCRIPTION_LOADED",
+        subscription: subscription || DEFAULT_SUBSCRIPTION,
+      });
     },
     [dispatch],
   );
