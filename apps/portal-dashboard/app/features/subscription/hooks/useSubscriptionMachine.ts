@@ -7,6 +7,13 @@ import {
   SubscriptionStateValue,
 } from "../types/subscription.types";
 
+type SubscriptionEvent = 
+  | "SELECT_PLAN"
+  | "UPDATE_BILLING"
+  | "COMPLETE"
+  | "CANCEL"
+  | "RETRY";
+
 export function useSubscriptionMachine() {
   const [current, send] = useMachine(subscriptionMachine);
 
@@ -15,9 +22,8 @@ export function useSubscriptionMachine() {
     context: current.context,
     send,
     // Convenience methods
-    selectPlan: (plan: SubscriptionPlan) => send("SELECT_PLAN", { plan }),
-    updateBilling: (billing: BillingInfo) =>
-      send("UPDATE_BILLING", { billing }),
+    selectPlan: (plan: SubscriptionPlan) => send("SELECT_PLAN"),
+    updateBilling: (billing: BillingInfo) => send("UPDATE_BILLING"),
     complete: () => send("COMPLETE"),
     cancel: () => send("CANCEL"),
     retry: () => send("RETRY"),
