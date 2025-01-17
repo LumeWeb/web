@@ -5,7 +5,7 @@ import {
   SubscriptionPlan,
   SubscriptionState,
 } from "../types/subscription.types";
-import { useSubscription } from "../hooks/core/useSubscription";
+import { useSubscriptionState } from "../hooks/core/useSubscription";
 import { useSubscriptionMutations } from "../hooks/mutations/useSubscriptionMutations";
 import { useSubscriptionPlans } from "../hooks/core/useSubscriptionPlans";
 import useSubscriptionState from "@/features/subscription/hooks/useSubscriptionState";

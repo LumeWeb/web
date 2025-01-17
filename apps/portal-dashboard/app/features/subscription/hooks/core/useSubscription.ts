@@ -15,7 +15,7 @@ export interface UseSubscriptionResult {
   handleError: (error: Error) => void;
 }
 
-export function useSubscription(): UseSubscriptionResult {
+export function useSubscriptionState(): UseSubscriptionResult {
   const stateManager = SubscriptionStateManager.getInstance();
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
