@@ -30,11 +30,6 @@ interface SubscriptionContextValue {
   refetchSubscription: () => Promise<any>;
 }
 
-// Helper type to extract subscription from response
-type ExtractSubscription<T> = T extends { data: { subscription: infer S } }
-  ? S
-  : never;
-
 const SubscriptionContext = createContext<SubscriptionContextValue | undefined>(
   undefined,
 );
