@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNotification } from "@refinedev/core";
 import { useBilling } from "../../hooks/core/useBilling";
-import { useSubscriptionForm } from "../../hooks/ui/useSubscriptionForm";
+import { useSubscriptionForm } from "@/features/subscription/hooks/ui/useSubscriptionForm";
 import { useBillingMutations } from "../../hooks/mutations/useBillingMutations";
 import { BillingInfo, EntityCode } from "../../types/billing.types";
 import { useBillingForm } from "../../hooks/core/useBillingForm";
