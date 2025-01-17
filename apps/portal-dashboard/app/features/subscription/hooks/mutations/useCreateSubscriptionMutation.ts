@@ -1,6 +1,6 @@
-import { useCustomMutation } from '@refinedev/core';
-import { SubscriptionPlan, Subscription, SubscriptionError } from '../../types/subscription.types';
-import useApiUrl from 'portal-shared/hooks/useApiUrl';
+import { useCustomMutation } from "@refinedev/core";
+import { Subscription, SubscriptionPlan } from "../../types/subscription.types";
+import useApiUrl from "portal-shared/hooks/useApiUrl";
 
 interface SubscriptionResponse {
   subscription: Subscription;
@@ -8,35 +8,37 @@ interface SubscriptionResponse {
 
 export function useCreateSubscriptionMutation() {
   const apiUrl = useApiUrl();
-  
+
   const { mutate, isLoading } = useCustomMutation<SubscriptionResponse>();
 
-  const mutateAsync = async (plan: SubscriptionPlan): Promise<SubscriptionResponse> => {
+  const mutateAsync = async (
+    plan: SubscriptionPlan,
+  ): Promise<SubscriptionResponse> => {
     return new Promise((resolve, reject) => {
       mutate(
         {
           url: `${apiUrl}/api/account/subscription`,
-          method: 'post',
-          values: { plan_id: plan.id }
+          method: "post",
+          values: { plan_id: plan.id },
         },
         {
           onSuccess: (response) => {
             if (!response?.data) {
-              reject(new Error('Invalid server response - missing data'));
+              reject(new Error("Invalid server response - missing data"));
               return;
             }
             resolve({ subscription: response.data });
           },
           onError: (error) => {
             reject(error);
-          }
-        }
+          },
+        },
       );
     });
   };
 
   return {
     mutateAsync,
-    isLoading
+    isLoading,
   };
 }
