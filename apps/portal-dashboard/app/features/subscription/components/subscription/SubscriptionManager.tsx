@@ -35,6 +35,7 @@ import { PaymentHistory } from "../payment/PaymentHistory";
 import { PaymentMethod } from "@/features/subscription/components/payment/PaymentMethod";
 import { PaymentFlow } from "@/features/subscription/components/payment/PaymentFlow";
 import Addons from "@/routes/account/components/Addons";
+import { useSubscription } from "@/features/subscription/hooks/core/useSubscription";
 
 export function SubscriptionManager() {
   return (
@@ -63,14 +64,17 @@ function SubscriptionContent() {
 
   const { loadSubscription } = useSubscriptionContext();
 
-  const { data: subscriptionData, isLoading: isLoadingSubscription } = useSubscription();
+  const { data: subscriptionData, isLoading: isLoadingSubscription } =
+    useSubscription();
 
   useEffect(() => {
     const initializeSubscription = async () => {
       try {
-        loadSubscription(subscriptionData?.data?.subscription || DEFAULT_SUBSCRIPTION);
+        loadSubscription(
+          subscriptionData?.data?.subscription || DEFAULT_SUBSCRIPTION,
+        );
       } catch (error) {
-        console.error('Failed to read subscription:', error);
+        console.error("Failed to read subscription:", error);
         loadSubscription(DEFAULT_SUBSCRIPTION);
       }
     };
@@ -78,7 +82,7 @@ function SubscriptionContent() {
     if (!isLoadingSubscription) {
       initializeSubscription();
     }
-  }, [loadSubscription, readSubscription, isLoadingSubscription]);
+  }, [loadSubscription, isLoadingSubscription]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const paidBillingEnabled = useIsPaidBillingEnabled();
