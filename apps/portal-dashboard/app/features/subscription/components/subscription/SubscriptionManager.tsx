@@ -61,6 +61,7 @@ function SubscriptionContent() {
   } = useSubscriptionMachine();
 
   const { subscription, plans, error, isLoading } = useSubscriptionContext();
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const { data: subscriptionData, isLoading: isLoadingSubscription } =
     useSubscription();
@@ -127,61 +128,86 @@ function SubscriptionContent() {
 
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
 
-  const handlePlanSelect = (plan: SubscriptionPlan) => {
-    if (plan.is_free) {
-      return;
-    }
-    
-    // Validate plan change if needed
-    if (subscription?.plan) {
-      const isDowngrade = plan.price < subscription.plan.price;
-      if (isDowngrade) {
-        setValidationError("Downgrades are not allowed");
+  const handlePlanSelect = async (plan: SubscriptionPlan) => {
+    try {
+      setLocalError(null);
+      setValidationError(null);
+      
+      if (plan.is_free) {
+        send('SELECT_PLAN', { plan });
+        send('COMPLETE');
         return;
       }
+      
+      // Validate plan change if needed
+      if (subscription?.plan) {
+        const isDowngrade = plan.price < subscription.plan.price;
+        if (isDowngrade) {
+          setValidationError("Downgrades are not allowed");
+          return;
+        }
+      }
+      
+      selectPlan(plan);
+      setShowConfirmDialog(true);
+    } catch (err) {
+      setLocalError(err instanceof Error ? err.message : 'Failed to select plan');
     }
-    
-    selectPlan(plan);
-    setShowConfirmDialog(true);
   };
 
   const handleConfirm = async () => {
     if (!selectedPlan) return;
     setValidationError(null);
     setBillingError(null);
+    setLocalError(null);
 
     try {
       // Validate billing info if required
-      if (subscription?.billing) {
-        const billingErrors = await validateBillingInfo(subscription.billing);
+      if (!selectedPlan.is_free) {
+        const billingErrors = await validateBillingInfo(context.billing);
         if (billingErrors) {
-          setBillingError(
-            "Please complete billing information before changing plans",
-          );
+          setBillingError("Please complete billing information before changing plans");
           return;
         }
       }
 
-      selectPlan(selectedPlan);
+      // Send events to state machine
+      send('SELECT_PLAN', { plan: selectedPlan });
       
-      if (state === 'pendingPayment') {
+      if (!selectedPlan.is_free) {
+        send('UPDATE_BILLING', { billing: context.billing });
+        send('COMPLETE');
         setShowPaymentDialog(true);
+      } else {
+        send('COMPLETE');
       }
 
       setShowConfirmDialog(false);
     } catch (err) {
-      const error =
-        err instanceof Error ? err.message : "Subscription action failed";
-      setValidationError(error);
+      const errorMessage = err instanceof Error ? err.message : "Subscription action failed";
+      setValidationError(errorMessage);
+      send('ERROR', { error: new Error(errorMessage) });
     }
   };
 
   if (isLoading) {
-    return <div>Loading subscription details...</div>;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <CloudIcon className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading subscription details...</span>
+      </div>
+    );
   }
 
-  if (error) {
-    return <div>Error: {error.message}</div>;
+  if (error || localError) {
+    return (
+      <Alert variant="destructive" className="m-4">
+        <ExclamationCircleIcon className="h-4 w-4" />
+        <AlertDescription>
+          {error?.message || localError}
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   return (
