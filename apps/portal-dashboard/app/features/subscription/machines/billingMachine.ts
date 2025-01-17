@@ -5,7 +5,6 @@ export interface BillingContext {
   billing: BillingInfo | null;
   errors: BillingErrors | null;
   error: Error | null;
-  currentState: keyof BillingState;
 }
 
 export type BillingEvent =
@@ -17,14 +16,40 @@ export type BillingEvent =
   | { type: "SAVED" }
   | { type: "SAVE_ERROR"; error: Error };
 
-export type BillingState = {
-  idle: { type: 'idle' };
-  editing: { type: 'editing' };
-  validating: { type: 'validating' };
-  saving: { type: 'saving' };
-  complete: { type: 'complete' };
-  error: { type: 'error' };
-};
+export type BillingStateValue = 
+  | 'idle'
+  | 'editing'
+  | 'validating'
+  | 'saving'
+  | 'complete'
+  | 'error';
+
+export interface BillingState {
+  idle: {
+    final: false;
+    transitions: Map<string, Array<{ type: BillingEvent['type']; to: BillingStateValue }>>;
+  };
+  editing: {
+    final: false;
+    transitions: Map<string, Array<{ type: BillingEvent['type']; to: BillingStateValue }>>;
+  };
+  validating: {
+    final: false;
+    transitions: Map<string, Array<{ type: BillingEvent['type']; to: BillingStateValue }>>;
+  };
+  saving: {
+    final: false;
+    transitions: Map<string, Array<{ type: BillingEvent['type']; to: BillingStateValue }>>;
+  };
+  complete: {
+    final: true;
+    transitions: Map<string, Array<{ type: BillingEvent['type']; to: BillingStateValue }>>;
+  };
+  error: {
+    final: false;
+    transitions: Map<string, Array<{ type: BillingEvent['type']; to: BillingStateValue }>>;
+  };
+}
 
 type BillingReducer<E extends BillingEvent> = (
   context: BillingContext,
@@ -101,7 +126,6 @@ export const billingMachine = createMachine<BillingContext, BillingEvent, Billin
   () => ({
     billing: null,
     errors: null,
-    error: null,
-    currentState: 'idle'
+    error: null
   }),
 );
