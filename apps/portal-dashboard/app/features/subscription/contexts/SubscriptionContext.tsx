@@ -1,11 +1,10 @@
-import { createContext, ReactNode, useContext, useMemo, useState, useCallback } from "react";
+import { createContext, ReactNode, useContext, useMemo, useState } from "react";
 import {
   BillingInfo,
   Subscription,
   SubscriptionPlan,
   SubscriptionState,
 } from "../types/subscription.types";
-import { useSubscriptionState } from "../hooks/core/useSubscription";
 import { useSubscriptionMutations } from "../hooks/mutations/useSubscriptionMutations";
 import { useSubscriptionPlans } from "../hooks/core/useSubscriptionPlans";
 import useSubscriptionState from "@/features/subscription/hooks/useSubscriptionState";
