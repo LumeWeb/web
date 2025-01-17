@@ -16,8 +16,8 @@ interface SubscriptionContext {
 }
 
 // Define all possible event types as a union of string literals
-type SubscriptionEventType = 
-  | "SUBSCRIPTION_LOADED" 
+type SubscriptionEventType =
+  | "SUBSCRIPTION_LOADED"
   | "PLAN_SELECTED"
   | "SELECT_PLAN"
   | "COMPLETE"
