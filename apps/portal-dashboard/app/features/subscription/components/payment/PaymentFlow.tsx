@@ -24,11 +24,7 @@ export function PaymentFlow() {
   const handlePaymentFailure = (error: Error) => {
     send({
       type: "ERROR",
-      error: {
-        message: error.message,
-        code: undefined,
-        details: undefined,
-      },
+      error: new Error(error.message),
     });
   };
 
