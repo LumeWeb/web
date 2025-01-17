@@ -205,7 +205,7 @@ function SubscriptionContent() {
     );
   }
 
-  if (error || localError) {
+  if (localError) {
     return (
       <Alert variant="destructive" className="m-4">
         <ExclamationCircleIcon className="h-4 w-4" />
@@ -263,13 +263,13 @@ function SubscriptionContent() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {subscription
+              {context.subscription
                 ? "Confirm Subscription Change"
                 : "Confirm Subscription"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               <div className="space-y-2">
-                {subscription ? (
+                {context.subscription ? (
                   <>
                     Are you sure you want to change to the {selectedPlan?.name}{" "}
                     plan?
