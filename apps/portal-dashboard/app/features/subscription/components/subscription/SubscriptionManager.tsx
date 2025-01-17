@@ -53,11 +53,13 @@ function SubscriptionContent() {
     state,
     context,
     send,
-    selectPlan,
-    updateBilling,
-    complete,
-    cancel,
-    retry
+    actions: {
+      selectPlan,
+      updateBilling,
+      complete,
+      cancel,
+      retry
+    }
   } = useSubscriptionMachine();
 
   const { subscription, plans, error, isLoading } = useSubscriptionContext();

@@ -8,13 +8,13 @@ import { HttpError } from "@refinedev/core";
 export type SubscriptionStateValue = 
   | 'idle'
   | 'loading'
+  | 'inactive'
   | 'pending'
-  | 'validating'
-  | 'processing'
+  | 'editingBilling'
+  | 'pendingPayment'
   | 'active'
-  | 'canceled'
-  | 'error'
-  | 'updatingPayment';
+  | 'cancelled'
+  | 'error';
 
 export interface SubscriptionContext {
   subscription: Subscription | null;

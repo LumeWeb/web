@@ -15,11 +15,14 @@ export function useSubscriptionMachine() {
     state: current.name as SubscriptionStateValue,
     context: current.context,
     send,
-    // Convenience methods
-    selectPlan: (plan: SubscriptionPlan) =>
-      send({ type: "SELECT_PLAN", plan } as SubscriptionEvent),
-    complete: () => send({ type: "COMPLETE" } as SubscriptionEvent),
-    cancel: () => send({ type: "CANCEL" } as SubscriptionEvent),
-    retry: () => send({ type: "RETRY" } as SubscriptionEvent),
+    actions: {
+      selectPlan: (plan: SubscriptionPlan) =>
+        send({ type: "SELECT_PLAN", plan }),
+      updateBilling: (billing: BillingInfo) =>
+        send({ type: "UPDATE_BILLING", billing }),
+      complete: () => send({ type: "COMPLETE" }),
+      cancel: () => send({ type: "CANCEL" }),
+      retry: () => send({ type: "RETRY" }),
+    }
   };
 }

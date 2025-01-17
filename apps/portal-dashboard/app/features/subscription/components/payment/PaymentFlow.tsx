@@ -17,13 +17,11 @@ export function PaymentFlow() {
   const { getPaymentStatus, isPaymentExpired } = usePayment();
 
   const handlePaymentSuccess = (paymentMethodId: string) => {
-    send('PAYMENT_COMPLETE', { paymentMethodId });
-    setShowPaymentDialog(false);
+    send({ type: 'PAYMENT_COMPLETE', paymentMethodId });
   };
 
   const handlePaymentFailure = (error: Error) => {
-    send('PAYMENT_FAILED', { error: error.message });
-    setShowPaymentDialog(false);
+    send({ type: 'ERROR', error });
   };
 
   // Don't show if not in pending payment state or no payment info
@@ -55,7 +53,11 @@ export function PaymentFlow() {
   const paymentStatus = getPaymentStatus(context.payment);
 
   return (
-    <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+    <Dialog 
+      open={state === 'pendingPayment'} 
+      onOpenChange={(open) => 
+        send({ type: open ? 'SHOW_PAYMENT_DIALOG' : 'HIDE_PAYMENT_DIALOG' })
+      }>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Complete Payment</DialogTitle>
