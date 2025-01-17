@@ -11,6 +11,14 @@ import {
 } from "../machines/subscriptionMachine";
 import { useMachine } from "react-robot";
 
+interface SubscriptionContext {
+  subscription: Subscription | null;
+  selectedPlan: SubscriptionPlan | null;
+  billing: BillingInfo | null;
+  payment: PaymentInfo | null;
+  error: Error | null;
+}
+
 interface SubscriptionContextValue {
   state: SubscriptionStateValue;
   context: SubscriptionContext;
