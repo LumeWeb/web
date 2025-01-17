@@ -32,7 +32,7 @@ interface SubscriptionContextValue {
   setSelectedPlan: (plan: SubscriptionPlan | null) => void;
 
   // Actions
-  createSubscription: (plan: SubscriptionPlan) => Promise<Subscription>;
+  createSubscription: (plan: SubscriptionPlan) => Promise<{ subscription: Subscription }>;
   updateSubscription: (plan: SubscriptionPlan) => Promise<Subscription>;
   cancelSubscription: () => Promise<void>;
   validatePlanChange: (
@@ -132,7 +132,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
 
           // Update state with new subscription
           loadSubscriptionState(response.subscription);
-          return { subscription: response.subscription };
+          return response;
         } catch (error) {
           console.error("Error in subscription context:", error);
           throw error;
