@@ -1,5 +1,7 @@
 import { createContext, ReactNode, useContext, useMemo } from "react";
 import {
+  BillingInfo,
+  Subscription,
   SubscriptionPlan,
   SubscriptionStateValue,
 } from "../types/subscription.types";
@@ -10,6 +12,7 @@ import {
   subscriptionMachine,
 } from "../machines/subscriptionMachine";
 import { useMachine } from "react-robot";
+import { PaymentInfo } from "../types/payment.types";
 
 interface SubscriptionContext {
   subscription: Subscription | null;
