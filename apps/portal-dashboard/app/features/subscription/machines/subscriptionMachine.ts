@@ -134,9 +134,9 @@ export const subscriptionMachine = createMachine<
     )
   ),
 
-  pendingPayment: state(
-    invoke(initiatePayment, {
-      onDone: (ctx, ev) => ({
+  pendingPayment: invoke(initiatePayment,
+    transition('done', 'active',
+      reduce((ctx, ev) => ({
         ...ctx,
         subscription: {
           ...ctx.subscription,
@@ -145,9 +145,11 @@ export const subscriptionMachine = createMachine<
           payment: ev.data.payment
         },
         error: null
-      }),
-      onError: (ctx, ev) => ({ ...ctx, error: ev.error })
-    }),
+      }))
+    ),
+    transition('error', 'error',
+      reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
+    ),
     transition('PAYMENT_COMPLETE', 'active',
       reduce((ctx, ev) => ({
         ...ctx,

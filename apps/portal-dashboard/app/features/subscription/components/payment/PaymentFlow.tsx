@@ -16,7 +16,7 @@ export function PaymentFlow() {
     showPaymentDialog, 
     setShowPaymentDialog, 
     context,
-    state,
+    current,
     send 
   } = useSubscriptionContext();
 
