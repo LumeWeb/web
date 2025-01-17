@@ -1,11 +1,19 @@
-import { createMachine, state, transition, reduce, guard, invoke, State } from 'robot3';
-import { 
+import {
+  createMachine,
+  state,
+  transition,
+  reduce,
+  guard,
+  invoke,
+  State,
+} from "robot3";
+import {
   Subscription,
   SubscriptionPlan,
   BillingInfo,
-  PaymentInfo,
-  SubscriptionEvent
-} from '../types/subscription.types';
+  SubscriptionEvent,
+} from "../types/subscription.types";
+import { PaymentInfo } from "../types/payment.types";
 
 export type SubscriptionMachineState = State<
   SubscriptionContext,
@@ -22,10 +30,12 @@ export type SubscriptionMachineState = State<
 >;
 
 type SubscriptionService = {
-  initiatePayment: (context: SubscriptionContext) => Promise<{ payment: PaymentInfo }>;
+  initiatePayment: (
+    context: SubscriptionContext,
+  ) => Promise<{ payment: PaymentInfo }>;
 };
-import { SubscriptionPlanStatus } from 'portal-shared/dataProviders/accountProvider';
-import { PaymentService } from '../services/PaymentService';
+import { SubscriptionPlanStatus } from "portal-shared/dataProviders/accountProvider";
+import { PaymentService } from "../services/PaymentService";
 
 interface SubscriptionContext {
   subscription: Subscription | null;
@@ -44,12 +54,15 @@ const hasBillingInfo = (ctx: SubscriptionContext) => {
 
 const isValidPlanChange = (ctx: SubscriptionContext) => {
   if (!ctx.subscription || !ctx.selectedPlan) return true;
-  
+
   // Don't allow downgrades if current plan has higher resources
   if (
-    ctx.selectedPlan.resources.storage < ctx.subscription.plan.resources.storage ||
-    ctx.selectedPlan.resources.upload < ctx.subscription.plan.resources.upload ||
-    ctx.selectedPlan.resources.download < ctx.subscription.plan.resources.download
+    ctx.selectedPlan.resources.storage <
+      ctx.subscription.plan.resources.storage ||
+    ctx.selectedPlan.resources.upload <
+      ctx.subscription.plan.resources.upload ||
+    ctx.selectedPlan.resources.download <
+      ctx.subscription.plan.resources.download
   ) {
     return false;
   }
@@ -58,19 +71,19 @@ const isValidPlanChange = (ctx: SubscriptionContext) => {
 
 const initiatePayment = async (context: SubscriptionContext) => {
   if (!context.selectedPlan) {
-    throw new Error('No plan selected');
+    throw new Error("No plan selected");
   }
 
   if (!hasBillingInfo(context)) {
-    throw new Error('Billing information is required');
+    throw new Error("Billing information is required");
   }
-  
+
   // Initialize payment session
   const payment = await paymentService.initializePayment({
     planId: context.selectedPlan.id,
-    billingInfo: context.billing!
+    billingInfo: context.billing!,
   });
-  
+
   return { payment };
 };
 
@@ -78,165 +91,220 @@ export const subscriptionMachine = createMachine<
   SubscriptionContext,
   SubscriptionEvent,
   SubscriptionService
->({
-  idle: state(
-    transition('SUBSCRIPTION_LOADED', 'loading', 
-      reduce((ctx, ev) => ({
-        ...ctx,
-        subscription: ev.subscription,
-        error: null
-      }))
+>(
+  {
+    idle: state(
+      transition(
+        "SUBSCRIPTION_LOADED",
+        "loading",
+        reduce((ctx, ev) => ({
+          ...ctx,
+          subscription: ev.subscription,
+          error: null,
+        })),
+      ),
+      transition(
+        "ERROR",
+        "error",
+        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
+      ),
     ),
-    transition('ERROR', 'error',
-      reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
-    )
-  ),
 
-  inactive: state(
-    transition('PLAN_SELECTED', 'pending', 
-      reduce((ctx, ev) => ({ 
-        ...ctx, 
-        selectedPlan: ev.plan,
-        error: null
-      }))
+    inactive: state(
+      transition(
+        "PLAN_SELECTED",
+        "pending",
+        reduce((ctx, ev) => ({
+          ...ctx,
+          selectedPlan: ev.plan,
+          error: null,
+        })),
+      ),
+      transition(
+        "ERROR",
+        "error",
+        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
+      ),
     ),
-    transition('ERROR', 'error',
-      reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
-    )
-  ),
 
-  pending: invoke(billingMachine,
-    transition('resolved', 'pending',
-      reduce((ctx, ev) => ({ 
-        ...ctx, 
-        billing: ev.data.billing,
-        error: null
-      }))
+    pending: invoke(
+      billingMachine,
+      transition(
+        "resolved",
+        "pending",
+        reduce((ctx, ev) => ({
+          ...ctx,
+          billing: ev.data.billing,
+          error: null,
+        })),
+      ),
+      transition(
+        "rejected",
+        "error",
+        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
+      ),
+      transition(
+        "COMPLETED",
+        "processing",
+        guard(
+          (ctx) =>
+            !ctx.selectedPlan?.is_free &&
+            hasBillingInfo(ctx) &&
+            isValidPlanChange(ctx),
+        ),
+        reduce((ctx) => ({ ...ctx, error: null })),
+      ),
+      transition(
+        "COMPLETE",
+        "active",
+        guard((ctx) => !!ctx.selectedPlan?.is_free),
+        reduce((ctx) => ({
+          ...ctx,
+          subscription: {
+            ...ctx.subscription,
+            plan: ctx.selectedPlan!,
+            status: SubscriptionPlanStatus.ACTIVE,
+          },
+          error: null,
+        })),
+      ),
+      transition(
+        "ERROR",
+        "error",
+        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
+      ),
     ),
-    transition('rejected', 'error',
-      reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
-    ),
-    transition('COMPLETED', 'processing', 
-      guard((ctx) => !ctx.selectedPlan?.is_free && hasBillingInfo(ctx) && isValidPlanChange(ctx)),
-      reduce((ctx) => ({ ...ctx, error: null }))
-    ),
-    transition('COMPLETE', 'active',
-      guard((ctx) => !!ctx.selectedPlan?.is_free),
-      reduce((ctx) => ({
-        ...ctx,
-        subscription: {
-          ...ctx.subscription,
-          plan: ctx.selectedPlan!,
-          status: SubscriptionPlanStatus.ACTIVE
-        },
-        error: null
-      }))
-    ),
-    transition('ERROR', 'error',
-      reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
-    )
-  ),
 
-  pendingPayment: invoke(initiatePayment,
-    transition('resolved', 'active',
-      reduce((ctx, ev) => ({
-        ...ctx,
-        subscription: {
-          ...ctx.subscription,
-          plan: ctx.selectedPlan!,
-          status: SubscriptionPlanStatus.ACTIVE,
-          payment: ev.data.payment
-        },
-        error: null
-      }))
+    pendingPayment: invoke(
+      initiatePayment,
+      transition(
+        "resolved",
+        "active",
+        reduce((ctx, ev) => ({
+          ...ctx,
+          subscription: {
+            ...ctx.subscription,
+            plan: ctx.selectedPlan!,
+            status: SubscriptionPlanStatus.ACTIVE,
+            payment: ev.data.payment,
+          },
+          error: null,
+        })),
+      ),
+      transition(
+        "rejected",
+        "error",
+        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
+      ),
+      transition(
+        "PAYMENT_COMPLETE",
+        "active",
+        reduce((ctx, ev) => ({
+          ...ctx,
+          subscription: {
+            ...ctx.subscription,
+            plan: ctx.selectedPlan!,
+            status: SubscriptionPlanStatus.ACTIVE,
+            payment: {
+              ...ctx.subscription?.payment,
+              paymentMethodId: ev.paymentMethodId,
+            },
+          },
+          error: null,
+        })),
+      ),
+      transition(
+        "PAYMENT_FAILED",
+        "error",
+        reduce((ctx, ev) => ({
+          ...ctx,
+          error: new Error(ev.error || "Payment failed"),
+        })),
+      ),
     ),
-    transition('rejected', 'error',
-      reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
-    ),
-    transition('PAYMENT_COMPLETE', 'active',
-      reduce((ctx, ev) => ({
-        ...ctx,
-        subscription: {
-          ...ctx.subscription,
-          plan: ctx.selectedPlan!,
-          status: SubscriptionPlanStatus.ACTIVE,
-          payment: {
-            ...ctx.subscription?.payment,
-            paymentMethodId: ev.paymentMethodId
-          }
-        },
-        error: null
-      }))
-    ),
-    transition('PAYMENT_FAILED', 'error',
-      reduce((ctx, ev) => ({ 
-        ...ctx, 
-        error: new Error(ev.error || 'Payment failed')
-      }))
-    )
-  ),
 
-  active: state(
-    transition('SELECT_PLAN', 'pending',
-      reduce((ctx, ev) => ({ 
-        ...ctx, 
-        selectedPlan: ev.plan,
-        error: null
-      }))
+    active: state(
+      transition(
+        "SELECT_PLAN",
+        "pending",
+        reduce((ctx, ev) => ({
+          ...ctx,
+          selectedPlan: ev.plan,
+          error: null,
+        })),
+      ),
+      transition("PAYMENT_METHOD_UPDATE_INITIATED", "updatingPayment"),
+      transition(
+        "CANCELED",
+        "canceled",
+        reduce((ctx) => ({
+          ...ctx,
+          subscription: {
+            ...ctx.subscription!,
+            status: SubscriptionPlanStatus.CANCELLED,
+          },
+          error: null,
+        })),
+      ),
+      transition(
+        "ERROR",
+        "error",
+        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
+      ),
     ),
-    transition('PAYMENT_METHOD_UPDATE_INITIATED', 'updatingPayment'),
-    transition('CANCELED', 'canceled',
-      reduce((ctx) => ({
-        ...ctx,
-        subscription: {
-          ...ctx.subscription!,
-          status: SubscriptionPlanStatus.CANCELLED
-        },
-        error: null
-      }))
-    ),
-    transition('ERROR', 'error',
-      reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
-    )
-  ),
 
-  updatingPayment: invoke(paymentMethodMachine,
-    transition('resolved', 'active',
-      reduce((ctx, ev) => ({
-        ...ctx,
-        subscription: ctx.subscription ? {
-          ...ctx.subscription,
-          payment: {
-            ...ctx.subscription.payment,
-            paymentMethodId: ev.data.paymentMethodId
-          }
-        } : null,
-        error: null
-      }))
+    updatingPayment: invoke(
+      paymentMethodMachine,
+      transition(
+        "resolved",
+        "active",
+        reduce((ctx, ev) => ({
+          ...ctx,
+          subscription: ctx.subscription
+            ? {
+                ...ctx.subscription,
+                payment: {
+                  ...ctx.subscription.payment,
+                  paymentMethodId: ev.data.paymentMethodId,
+                },
+              }
+            : null,
+          error: null,
+        })),
+      ),
+      transition(
+        "rejected",
+        "error",
+        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
+      ),
     ),
-    transition('rejected', 'error',
-      reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
-    )
-  ),
 
-  cancelled: state(
-    transition('REACTIVATE', 'pending',
-      reduce((ctx) => ({ ...ctx, error: null }))
+    cancelled: state(
+      transition(
+        "REACTIVATE",
+        "pending",
+        reduce((ctx) => ({ ...ctx, error: null })),
+      ),
+      transition(
+        "ERROR",
+        "error",
+        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
+      ),
     ),
-    transition('ERROR', 'error',
-      reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
-    )
-  ),
 
-  error: state(
-    transition('RETRY', 'pending',
-      reduce((ctx) => ({ ...ctx, error: null }))
-    )
-  )
-}, () => ({
-  subscription: null,
-  selectedPlan: null,
-  billing: null,
-  payment: null,
-  error: null
-}));
+    error: state(
+      transition(
+        "RETRY",
+        "pending",
+        reduce((ctx) => ({ ...ctx, error: null })),
+      ),
+    ),
+  },
+  () => ({
+    subscription: null,
+    selectedPlan: null,
+    billing: null,
+    payment: null,
+    error: null,
+  }),
+);
