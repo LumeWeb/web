@@ -9,7 +9,7 @@ import {
 import { SubscriptionStateManager } from "../states/SubscriptionStateManager";
 
 export class SubscriptionService {
-  private stateManager: SubscriptionStateManager;
+  private readonly stateManager: SubscriptionStateManager;
 
   constructor() {
     this.stateManager = SubscriptionStateManager.getInstance();
@@ -22,7 +22,7 @@ export class SubscriptionService {
   public async loadSubscription(
     subscription: Subscription | null,
   ): Promise<SubscriptionState> {
-    return this.stateMachine.transition({
+    return this.stateManager.transition({
       type: "SUBSCRIPTION_LOADED",
       subscription: subscription || DEFAULT_SUBSCRIPTION,
     });
@@ -31,14 +31,14 @@ export class SubscriptionService {
   public async createSubscription(
     plan: SubscriptionPlan,
   ): Promise<SubscriptionState> {
-    return this.stateMachine.transition({
+    return this.stateManager.transition({
       type: "CREATE_SUBSCRIPTION",
       plan,
     });
   }
 
   public async updateBilling(billing: BillingInfo): Promise<SubscriptionState> {
-    return this.stateMachine.transition({
+    return this.stateManager.transition({
       type: "UPDATE_BILLING",
       billing,
     });
@@ -47,20 +47,20 @@ export class SubscriptionService {
   public async completePayment(
     paymentMethodId: string,
   ): Promise<SubscriptionState> {
-    return this.stateMachine.transition({
+    return this.stateManager.transition({
       type: "COMPLETE_PAYMENT",
       paymentMethodId,
     });
   }
 
   public async cancelSubscription(): Promise<SubscriptionState> {
-    return this.stateMachine.transition({
+    return this.stateManager.transition({
       type: "CANCEL_SUBSCRIPTION",
     });
   }
 
   public async handleError(error: Error): Promise<SubscriptionState> {
-    return this.stateMachine.transition({
+    return this.stateManager.transition({
       type: "ERROR_OCCURRED",
       error,
     });
