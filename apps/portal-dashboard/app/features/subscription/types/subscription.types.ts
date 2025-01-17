@@ -72,15 +72,16 @@ export type SubscriptionState =
   | { type: "ACTIVE"; subscription: Subscription }
   | { type: "CANCELLED"; subscription: Subscription };
 
-// Subscription Events
+// Robot State Machine Events
 export type SubscriptionEvent =
-  | { type: "LOAD_SUBSCRIPTION" }
-  | { type: "SUBSCRIPTION_LOADED"; subscription: Subscription }
-  | { type: "CREATE_SUBSCRIPTION"; plan: SubscriptionPlan }
+  | { type: "LOADED"; subscription: Subscription }
+  | { type: "SELECT_PLAN"; plan: SubscriptionPlan }
   | { type: "UPDATE_BILLING"; billing: BillingInfo }
-  | { type: "COMPLETE_PAYMENT"; paymentMethodId: string }
-  | { type: "CANCEL_SUBSCRIPTION" }
-  | { type: "ERROR_OCCURRED"; error: Error };
+  | { type: "COMPLETE"; paymentMethodId?: string }
+  | { type: "CANCEL" }
+  | { type: "REACTIVATE" }
+  | { type: "RETRY" }
+  | { type: "ERROR"; error: Error };
 
 // Zod schema for runtime validation
 export const subscriptionResourcesSchema = z.object({
