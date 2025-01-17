@@ -26,9 +26,13 @@ export type SubscriptionEvent =
   | { type: "ERROR"; error: Error }
   | { type: "SAVED" }
   | { type: "FAILED" }
-  | { type: "PAYMENT_COMPLETE" }
+  | { type: "PAYMENT_COMPLETE"; paymentMethodId: string }
   | { type: "PAYMENT_FAILED" }
   | { type: "PAYMENT_METHOD_UPDATE_INITIATED" }
+  | { type: "PAYMENT_METHOD_UPDATED"; paymentMethodId: string }
+  | { type: "PAYMENT_METHOD_UPDATE_FAILED"; error: Error }
+  | { type: "SHOW_PAYMENT_DIALOG" }
+  | { type: "HIDE_PAYMENT_DIALOG" }
   | { type: "CANCELED" }
   | { type: "REACTIVATE" }
   | { type: "EDIT_BILLING" }
@@ -101,8 +105,30 @@ const states = {
   ),
   pendingPayment: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "SHOW_PAYMENT_DIALOG",
+      "showingPaymentDialog"
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "ERROR",
+      "error",
+    ),
+  ),
+
+  showingPaymentDialog: state(
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "HIDE_PAYMENT_DIALOG",
+      "pendingPayment"
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "PAYMENT_COMPLETE",
       "active",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        payment: {
+          ...ctx.payment,
+          paymentMethodId: ev.paymentMethodId
+        }
+      }))
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "ERROR",
@@ -115,8 +141,8 @@ const states = {
       "pending",
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "PAYMENT_METHOD_UPDATE_INITIATED",
-      "pendingPayment",
+      "PAYMENT_METHOD_UPDATE_INITIATED", 
+      "updatingPayment"
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "CANCEL",
@@ -125,6 +151,28 @@ const states = {
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "ERROR",
       "error",
+    ),
+  ),
+
+  updatingPayment: state(
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "PAYMENT_METHOD_UPDATED",
+      "active",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        payment: {
+          ...ctx.payment,
+          paymentMethodId: ev.paymentMethodId
+        }
+      }))
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "PAYMENT_METHOD_UPDATE_FAILED",
+      "active",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        error: ev.error
+      }))
     ),
   ),
   cancelled: state(
