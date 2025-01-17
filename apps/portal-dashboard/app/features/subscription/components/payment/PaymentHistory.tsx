@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "portal-shared/components/ui/card";
 import { usePaymentHistory } from "../../hooks/usePaymentHistory";
-import { formatDate } from "../../utils/formatDate";
+import { formatDate } from "../../utils/formatters";
 import { PaymentHistoryEntry, PaymentStatus } from "../../types/payment.types";
 
 export function PaymentHistory() {
