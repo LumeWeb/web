@@ -63,7 +63,7 @@ function SubscriptionContent() {
 
   const { loadSubscription } = useSubscriptionContext();
 
-  const { data: subscriptionData, isLoading: isLoadingSubscription } = useReadSubscription();
+  const { data: subscriptionData, isLoading: isLoadingSubscription } = useSubscription();
 
   useEffect(() => {
     const initializeSubscription = async () => {
