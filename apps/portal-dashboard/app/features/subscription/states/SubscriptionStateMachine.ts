@@ -28,6 +28,7 @@ export class SubscriptionStateMachine {
       SubscriptionPlanStatus.ACTIVE,
     ],
     [SubscriptionPlanStatus.PENDING]: [
+      SubscriptionPlanStatus.PENDING,  // Allow self-transition for updates
       SubscriptionPlanStatus.ACTIVE,
       SubscriptionPlanStatus.CANCELLED,
       SubscriptionPlanStatus.INACTIVE,
@@ -38,7 +39,10 @@ export class SubscriptionStateMachine {
       SubscriptionPlanStatus.CANCELLED,
       SubscriptionPlanStatus.INACTIVE,
     ],
-    [SubscriptionPlanStatus.ACTIVE]: [SubscriptionPlanStatus.CANCELLED],
+    [SubscriptionPlanStatus.ACTIVE]: [
+      SubscriptionPlanStatus.CANCELLED,
+      SubscriptionPlanStatus.PENDING,  // Allow transition back to pending for updates
+    ],
     [SubscriptionPlanStatus.CANCELLED]: [SubscriptionPlanStatus.INACTIVE],
   };
 
