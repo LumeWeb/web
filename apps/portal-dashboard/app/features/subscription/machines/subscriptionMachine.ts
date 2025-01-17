@@ -31,8 +31,6 @@ export type SubscriptionEvent =
   | { type: "PAYMENT_METHOD_UPDATE_INITIATED" }
   | { type: "PAYMENT_METHOD_UPDATED"; paymentMethodId: string }
   | { type: "PAYMENT_METHOD_UPDATE_FAILED"; error: Error }
-  | { type: "SHOW_PAYMENT_DIALOG" }
-  | { type: "HIDE_PAYMENT_DIALOG" }
   | { type: "CANCELED" }
   | { type: "REACTIVATE" }
   | { type: "EDIT_BILLING" }
@@ -114,25 +112,6 @@ const states = {
     )
   ),
   pendingPayment: state(
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "SHOW_PAYMENT_DIALOG",
-      "showingPaymentDialog"
-    ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "ERROR",
-      "error",
-    ),
-  ),
-
-  showingPaymentDialog: state(
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "HIDE_PAYMENT_DIALOG",
-      "pendingPayment",
-      reduce((ctx) => ({
-        ...ctx,
-        error: null
-      }))
-    ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "PAYMENT_COMPLETE",
       "active",

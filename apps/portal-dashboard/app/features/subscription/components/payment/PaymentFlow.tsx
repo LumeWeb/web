@@ -31,8 +31,19 @@ export function PaymentFlow() {
     });
   };
 
-  // Don't show if not in pending payment state or no payment info
-  if (state !== 'pendingPayment' || !context.payment?.clientSecret) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Show modal when entering pendingPayment state
+  useEffect(() => {
+    if (state === 'pendingPayment') {
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
+  }, [state]);
+
+  // Don't render if no payment info
+  if (!context.payment?.clientSecret) {
     return null;
   }
 
@@ -40,8 +51,8 @@ export function PaymentFlow() {
   if (context.payment && isPaymentExpired(context.payment)) {
     return (
       <Dialog 
-        open={state === 'pendingPayment'} 
-        onOpenChange={(open) => send({ type: open ? 'SHOW_PAYMENT_DIALOG' : 'HIDE_PAYMENT_DIALOG' })}>
+        open={isOpen} 
+        onOpenChange={setIsOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-destructive">Payment Session Expired</DialogTitle>
@@ -61,10 +72,8 @@ export function PaymentFlow() {
 
   return (
     <Dialog 
-      open={state === 'pendingPayment'} 
-      onOpenChange={(open) => 
-        send({ type: open ? 'SHOW_PAYMENT_DIALOG' : 'HIDE_PAYMENT_DIALOG' })
-      }>
+      open={isOpen}
+      onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Complete Payment</DialogTitle>
