@@ -75,7 +75,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const value = useMemo(
     () => ({
       // Current state
-      subscription: state.type === "ACTIVE" || state.type === "PENDING" ? state.subscription : undefined,
+      subscription: state.type !== "LOADING" && state.type !== "ERROR" ? state.subscription : undefined,
       state,
       isLoading: isLoading || plansAreLoading,
       error,

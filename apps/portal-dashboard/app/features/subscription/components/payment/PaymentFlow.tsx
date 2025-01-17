@@ -15,11 +15,10 @@ export function PaymentFlow() {
   console.log("PaymentFlow - state:", state);
   console.log("PaymentFlow - subscription:", subscription);
 
-  // Only show payment dialog when we have an active subscription with payment details
-  const hasPaymentDetails = state.type === "ACTIVE" && 
-                           subscription?.payment?.client_secret;
-
-  if (!hasPaymentDetails) {
+  // Show payment dialog for both active and pending subscriptions with payment details
+  const hasPaymentDetails = subscription?.payment?.client_secret;
+  
+  if (!hasPaymentDetails || state.type === "LOADING" || state.type === "ERROR") {
     return null;
   }
 
