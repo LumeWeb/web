@@ -1,30 +1,24 @@
 import { z } from "zod";
-
-import { z } from "zod";
-
 // Payment status represents the current state of a payment
-export type PaymentStatus = 
-  | 'PENDING'    // Payment not yet initiated
-  | 'PROCESSING' // Payment in progress
-  | 'COMPLETED'  // Payment successful
-  | 'FAILED';    // Payment failed
+export type PaymentStatus =
+  | "PENDING" // Payment not yet initiated
+  | "PROCESSING" // Payment in progress
+  | "COMPLETED" // Payment successful
+  | "FAILED"; // Payment failed
 
 // Payment method types
-export type PaymentMethodType =
-  | 'card'
-  | 'bank_transfer'
-  | 'wallet';
+export type PaymentMethodType = "card" | "bank_transfer" | "wallet";
 
 // Payment information structure
 export interface PaymentInfo {
-  clientSecret: string;        // Payment intent client secret
-  publishableKey: string;      // Payment gateway publishable key
-  expiresAt: string;          // Session expiry timestamp
-  paymentMethodId?: string;    // ID of the payment method used
+  clientSecret: string; // Payment intent client secret
+  publishableKey: string; // Payment gateway publishable key
+  expiresAt: string; // Session expiry timestamp
+  paymentMethodId?: string; // ID of the payment method used
   paymentMethodType?: PaymentMethodType; // Type of payment method
-  errorMessage?: string;       // Error message if payment failed
-  lastFour?: string;          // Last 4 digits (for cards)
-  brand?: string;             // Card brand or payment method brand
+  errorMessage?: string; // Error message if payment failed
+  lastFour?: string; // Last 4 digits (for cards)
+  brand?: string; // Card brand or payment method brand
 }
 
 // Payment history entry
@@ -51,9 +45,9 @@ export interface PaymentResponse {
 
 // Zod schema for payment method
 export const paymentMethodSchema = z.object({
-  type: z.enum(['card', 'bank_transfer', 'wallet']),
+  type: z.enum(["card", "bank_transfer", "wallet"]),
   lastFour: z.string().optional(),
-  brand: z.string().optional()
+  brand: z.string().optional(),
 });
 
 // Zod schema for payment info validation
@@ -62,10 +56,10 @@ export const paymentInfoSchema = z.object({
   publishableKey: z.string().min(1, "Publishable key is required"),
   expiresAt: z.string().datetime("Invalid expiry date"),
   paymentMethodId: z.string().optional(),
-  paymentMethodType: z.enum(['card', 'bank_transfer', 'wallet']).optional(),
+  paymentMethodType: z.enum(["card", "bank_transfer", "wallet"]).optional(),
   errorMessage: z.string().optional(),
   lastFour: z.string().optional(),
-  brand: z.string().optional()
+  brand: z.string().optional(),
 });
 
 // Zod schema for payment history entry
@@ -74,8 +68,8 @@ export const paymentHistoryEntrySchema = z.object({
   amount: z.number(),
   currency: z.string(),
   date: z.string(),
-  status: z.enum(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED']),
-  paymentMethod: paymentMethodSchema
+  status: z.enum(["PENDING", "PROCESSING", "COMPLETED", "FAILED"]),
+  paymentMethod: paymentMethodSchema,
 });
 
 // Error information for payment failures
@@ -92,5 +86,5 @@ export interface PaymentHistoryResponse {
 
 // Zod schema for payment history response
 export const paymentHistoryResponseSchema = z.object({
-  payments: z.array(paymentHistoryEntrySchema)
+  payments: z.array(paymentHistoryEntrySchema),
 });
