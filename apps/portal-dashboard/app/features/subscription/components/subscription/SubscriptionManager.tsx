@@ -68,7 +68,7 @@ function SubscriptionContent() {
 
   useEffect(() => {
     if (!isLoadingSubscription && subscriptionData?.data) {
-      send('LOADED', { subscription: subscriptionData.data });
+      send({ type: 'SUBSCRIPTION_LOADED', subscription: subscriptionData.data });
     }
   }, [isLoadingSubscription, subscriptionData, send]);
 

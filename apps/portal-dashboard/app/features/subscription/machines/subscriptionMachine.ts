@@ -98,7 +98,7 @@ export const subscriptionMachine = createMachine<
     loading: {
       final: false,
       transitions: createTransitionMap({
-        LOADED: ["inactive"],
+        SUBSCRIPTION_LOADED: ["inactive"],
         ERROR: ["error"],
       }),
     },
