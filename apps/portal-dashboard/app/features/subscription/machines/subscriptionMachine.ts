@@ -23,6 +23,20 @@ interface SubscriptionContext {
   }[];
 }
 
+// Guards for subscription state transitions
+const guards = {
+  canTransitionPlan: (ctx: SubscriptionContext) => {
+    if (!ctx.subscription) return true;
+    return !["CANCELLED", "PENDING_PAYMENT"].includes(ctx.subscription.status);
+  },
+  
+  isPlanChangeValid: (ctx: SubscriptionContext) => {
+    if (!ctx.subscription) return true;
+    if (ctx.subscription.status === "CANCELLED") return false;
+    return true;
+  }
+};
+
 type InvokedEvent<T> =
   | { type: "done"; data: T }
   | { type: "error"; error: Error };
