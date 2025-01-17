@@ -21,36 +21,28 @@ export type BillingEvent =
 // States define the machine structure
 export interface BillingStates {
   idle: {
-    transitions: {
-      EDIT: "editing";
-    };
+    final: false;
+    transitions: Map<string, Array<Transition<string>>>;
   };
   editing: {
-    transitions: {
-      VALIDATE: "validating";
-    };
+    final: false;
+    transitions: Map<string, Array<Transition<string>>>;
   };
   validating: {
-    transitions: {
-      VALIDATED: "saving";
-      INVALID: "editing";
-    };
+    final: false;
+    transitions: Map<string, Array<Transition<string>>>;
   };
   saving: {
-    transitions: {
-      SAVED: "complete";
-      FAILED: "error";
-    };
+    final: false;
+    transitions: Map<string, Array<Transition<string>>>;
   };
   complete: {
-    transitions: {
-      EDIT: "editing";
-    };
+    final: true;
+    transitions: Map<string, Array<Transition<string>>>;
   };
   error: {
-    transitions: {
-      EDIT: "editing";
-    };
+    final: false;
+    transitions: Map<string, Array<Transition<string>>>;
   };
 }
 
