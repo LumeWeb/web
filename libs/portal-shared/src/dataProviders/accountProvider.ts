@@ -28,6 +28,7 @@ export enum SubscriptionPlanStatus {
   PENDING = "PENDING",
   INACTIVE = "INACTIVE",
   CANCELLED = "CANCELLED",
+  PENDING_PAYMENT = "PENDING_PAYMENT",
 }
 
 export interface Address {

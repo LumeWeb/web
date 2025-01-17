@@ -113,7 +113,6 @@ export class SubscriptionStateMachine {
         }
         return {
           ...this.currentState,
-          paymentMethodId: event.paymentMethodId,
         };
       case "CANCEL_SUBSCRIPTION":
         if (this.currentState.type !== "ACTIVE") {
@@ -139,28 +138,19 @@ export class SubscriptionStateMachine {
       case SubscriptionPlanStatus.PENDING:
         if (subscription.billing) {
           return {
-            type: "PENDING_PAYMENT",
+            type: "PENDING",
             plan: subscription.plan,
             billing: subscription.billing,
           };
         }
         return {
-          type: "PENDING_BILLING",
+          type: "PENDING",
           plan: subscription.plan,
         };
       case SubscriptionPlanStatus.ACTIVE:
         return { type: "ACTIVE", subscription };
       case SubscriptionPlanStatus.CANCELLED:
         return { type: "CANCELLED", subscription };
-      case SubscriptionPlanStatus.SUSPENDED:
-        return { type: "SUSPENDED", subscription };
-      case SubscriptionPlanStatus.PROCESSING_PAYMENT:
-        return {
-          type: "PROCESSING_PAYMENT",
-          plan: subscription.plan,
-          billing: subscription.billing,
-          paymentMethodId: subscription.payment?.payment_method_id || "",
-        };
       default:
         return {
           type: "ERROR",
