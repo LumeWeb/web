@@ -32,6 +32,22 @@ import { PaymentFlow } from "@/features/subscription/components/payment/PaymentF
 import Addons from "@/routes/account/components/Addons";
 
 export function SubscriptionManager() {
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    // Initialize subscription state
+    const stateManager = SubscriptionStateManager.getInstance();
+    stateManager.transition({
+      type: "SUBSCRIPTION_LOADED",
+      subscription: DEFAULT_SUBSCRIPTION
+    });
+    setIsInitialized(true);
+  }, []);
+
+  if (!isInitialized) {
+    return null;
+  }
+
   return (
     <SubscriptionProvider>
       <SubscriptionContent />
