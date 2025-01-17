@@ -109,23 +109,6 @@ const isValidPlanChange = (ctx: SubscriptionContext) => {
   return true;
 };
 
-const initiatePayment = async (context: SubscriptionContext) => {
-  if (!context.selectedPlan) {
-    throw new Error("No plan selected");
-  }
-
-  if (!hasBillingInfo(context)) {
-    throw new Error("Billing information is required");
-  }
-
-  // Initialize payment session
-  const payment = await paymentService.initializePayment({
-    planId: context.selectedPlan.id,
-    billingInfo: context.billing!,
-  });
-
-  return { payment };
-};
 
 export const subscriptionMachine = createMachine<
   SubscriptionStates,
