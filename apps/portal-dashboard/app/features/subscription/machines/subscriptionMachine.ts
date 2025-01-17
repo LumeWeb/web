@@ -6,7 +6,9 @@ import {
   guard,
   invoke,
   State,
+  Machine
 } from "robot3";
+import { billingMachine } from "./billingMachine";
 import {
   Subscription,
   SubscriptionPlan,
@@ -127,36 +129,12 @@ export const subscriptionMachine = createMachine<
       ),
     ),
 
-    pending: invoke(
-      billingMachine,
-      transition(
-        "resolved",
-        "pending",
-        reduce((ctx, ev) => ({
-          ...ctx,
-          billing: ev.data.billing,
-          error: null,
-        })),
+    pending: invoke(billingMachine,
+      transition("SAVED", "pendingPayment",
+        guard((ctx) => !ctx.selectedPlan?.is_free),
+        reduce((ctx) => ({ ...ctx, error: null }))
       ),
-      transition(
-        "rejected",
-        "error",
-        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
-      ),
-      transition(
-        "COMPLETED",
-        "processing",
-        guard(
-          (ctx) =>
-            !ctx.selectedPlan?.is_free &&
-            hasBillingInfo(ctx) &&
-            isValidPlanChange(ctx),
-        ),
-        reduce((ctx) => ({ ...ctx, error: null })),
-      ),
-      transition(
-        "COMPLETE",
-        "active",
+      transition("SAVED", "active",
         guard((ctx) => !!ctx.selectedPlan?.is_free),
         reduce((ctx) => ({
           ...ctx,
@@ -166,13 +144,11 @@ export const subscriptionMachine = createMachine<
             status: SubscriptionPlanStatus.ACTIVE,
           },
           error: null,
-        })),
+        }))
       ),
-      transition(
-        "ERROR",
-        "error",
-        reduce((ctx, ev) => ({ ...ctx, error: ev.error })),
-      ),
+      transition("FAILED", "error",
+        reduce((ctx, ev) => ({ ...ctx, error: ev.error }))
+      )
     ),
 
     pendingPayment: invoke(
