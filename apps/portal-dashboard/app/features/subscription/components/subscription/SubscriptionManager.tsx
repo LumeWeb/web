@@ -16,7 +16,10 @@ import {
 } from "portal-shared/components/ui/tabs";
 import useIsPaidBillingEnabled from "portal-shared/hooks/useIsPaidBillingEnabled";
 import useOnFreePlan from "portal-shared/hooks/useOnFreePlan";
-import { ExclamationCircleIcon } from "portal-shared/components/icons";
+import {
+  CloudIcon,
+  ExclamationCircleIcon,
+} from "portal-shared/components/icons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +37,7 @@ import { PaymentFlow } from "@/features/subscription/components/payment/PaymentF
 import Addons from "@/routes/account/components/Addons";
 import { useSubscription } from "@/features/subscription/hooks/core/useSubscription";
 import { useSubscriptionMachine } from "../../hooks/useSubscriptionMachine";
+import { Alert, AlertDescription } from "portal-shared/components/ui/alert";
 
 export function SubscriptionManager() {
   return (
