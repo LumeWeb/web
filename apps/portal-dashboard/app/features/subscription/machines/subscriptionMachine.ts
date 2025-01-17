@@ -57,10 +57,20 @@ const states = {
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SUBSCRIPTION_LOADED",
       "inactive",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        subscription: ev.subscription,
+        error: null
+      }))
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "ERROR",
       "error",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        error: ev.error,
+        subscription: null
+      }))
     ),
   ),
   inactive: state(
@@ -117,7 +127,11 @@ const states = {
   showingPaymentDialog: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "HIDE_PAYMENT_DIALOG",
-      "pendingPayment"
+      "pendingPayment",
+      reduce((ctx) => ({
+        ...ctx,
+        error: null
+      }))
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "PAYMENT_COMPLETE",
@@ -127,12 +141,18 @@ const states = {
         payment: {
           ...ctx.payment,
           paymentMethodId: ev.paymentMethodId
-        }
+        },
+        error: null
       }))
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "ERROR",
       "error",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        error: ev.error,
+        payment: null
+      }))
     ),
   ),
   active: state(
@@ -189,6 +209,11 @@ const states = {
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "RETRY",
       "pending",
+      reduce((ctx) => ({
+        ...ctx,
+        error: null,
+        payment: null
+      }))
     ),
   ),
 } as const;

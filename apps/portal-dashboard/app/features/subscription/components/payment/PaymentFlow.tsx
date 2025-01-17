@@ -21,7 +21,14 @@ export function PaymentFlow() {
   };
 
   const handlePaymentFailure = (error: Error) => {
-    send({ type: 'ERROR', error });
+    send({ 
+      type: 'ERROR', 
+      error: {
+        message: error.message,
+        code: error instanceof PaymentError ? error.code : undefined,
+        details: error instanceof PaymentError ? error.details : undefined
+      } 
+    });
   };
 
   // Don't show if not in pending payment state or no payment info
