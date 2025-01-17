@@ -30,8 +30,29 @@ export function useBillingForm() {
 
   const updateFormSchema = useCallback((entities: EntityCode[], requiredFields: EntityCode[]) => {
     // Update form validation schema based on country requirements
-    const newSchema = billingInfoSchema;
     form.clearErrors();
+
+    // Reset validation state for optional fields
+    const optionalFields = ['organization', 'address.line2', 'address.dependent_locality', 'address.sorting_code'];
+    optionalFields.forEach(field => {
+      form.unregister(field);
+    });
+
+    // Apply required field validations
+    requiredFields.forEach(field => {
+      const fieldPath = `address.${field.toLowerCase()}`;
+      form.register(fieldPath, {
+        required: `${field} is required for this country`
+      });
+    });
+
+    // Update supported entities validation
+    entities.forEach(entity => {
+      const fieldPath = `address.${entity.toLowerCase()}`;
+      if (!form.getValues(fieldPath)) {
+        form.setValue(fieldPath, '', { shouldValidate: true });
+      }
+    });
   }, [form]);
 
   const hasFormChanges = useCallback(() => {
