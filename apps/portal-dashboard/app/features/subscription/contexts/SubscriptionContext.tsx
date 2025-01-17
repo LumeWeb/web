@@ -1,4 +1,5 @@
-import { createContext, ReactNode, useContext, useMemo, useState } from "react";
+import { createContext, ReactNode, useContext, useMemo, useState, useRef } from "react";
+import { SubscriptionService } from "../services/SubscriptionService";
 import {
   BillingInfo,
   Subscription,
@@ -123,6 +124,12 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       createSubscription: async (plan: SubscriptionPlan) => {
         try {
           console.log("Creating subscription in context with plan:", plan);
+          const subscriptionService = new SubscriptionService();
+          
+          // First update state machine
+          await subscriptionService.createSubscription(plan);
+          
+          // Then call API
           const response = await createSubscription(plan);
           console.log("Subscription creation response:", response);
 
