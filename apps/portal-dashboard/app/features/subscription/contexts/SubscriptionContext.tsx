@@ -5,6 +5,7 @@ import {
   useMemo,
   useState,
   useCallback,
+  useEffect,
 } from "react";
 import {
   Subscription,
@@ -18,6 +19,7 @@ import {
   SubscriptionEvent,
   subscriptionMachine,
 } from "../machines/subscriptionMachine";
+import { createUseMachine } from "robot-hooks";
 
 interface SubscriptionContextValue {
   subscription: Subscription | null;
@@ -46,6 +48,8 @@ export function useSubscriptionContext() {
 interface SubscriptionProviderProps {
   children: ReactNode;
 }
+
+const useMachine = createUseMachine(useEffect, useState);
 
 export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const [current, send] = useMachine(subscriptionMachine);

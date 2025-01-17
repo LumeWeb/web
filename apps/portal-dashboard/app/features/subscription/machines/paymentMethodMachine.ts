@@ -2,8 +2,6 @@ import { createMachine, state, transition, reduce } from "robot3";
 import { createUseMachine } from "robot-hooks";
 import { useEffect, useState } from "react";
 
-export const useMachine = createUseMachine(useEffect, useState);
-
 export interface PaymentMethodContext {
   clientSecret: string | null;
   paymentMethodId: string | null;

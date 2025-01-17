@@ -2,7 +2,6 @@ import { createMachine, Transition } from "robot3";
 import { createUseMachine } from "robot-hooks";
 import { useEffect, useState } from "react";
 
-export const useMachine = createUseMachine(useEffect, useState);
 import {
   BillingInfo,
   Subscription,
@@ -18,7 +17,7 @@ interface SubscriptionContext {
   error: Error | null;
 }
 
-export type SubscriptionEvent = 
+export type SubscriptionEvent =
   | { type: "SUBSCRIPTION_LOADED"; subscription: Subscription }
   | { type: "PLAN_SELECTED"; plan: SubscriptionPlan }
   | { type: "SELECT_PLAN"; plan: SubscriptionPlan }
@@ -69,8 +68,13 @@ export interface SubscriptionStates {
   };
 }
 
-const createTransitionMap = (transitions: Partial<Record<SubscriptionEvent["type"], string[]>>) => {
-  const map = new Map<SubscriptionEvent["type"], Array<Transition<SubscriptionEvent["type"]>>>();
+const createTransitionMap = (
+  transitions: Partial<Record<SubscriptionEvent["type"], string[]>>,
+) => {
+  const map = new Map<
+    SubscriptionEvent["type"],
+    Array<Transition<SubscriptionEvent["type"]>>
+  >();
   Object.entries(transitions).forEach(([event, states]) => {
     map.set(
       event as SubscriptionEvent["type"],

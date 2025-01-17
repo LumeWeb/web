@@ -2,7 +2,6 @@ import { createMachine, state, transition, reduce, Transition } from "robot3";
 import { createUseMachine } from "robot-hooks";
 import { useEffect, useState } from "react";
 
-export const useMachine = createUseMachine(useEffect, useState);
 import { BillingInfo, BillingErrors } from "../types/billing.types";
 
 // Context just holds the data
@@ -53,12 +52,15 @@ export interface BillingStates {
 const createTransitionMap = (transitions: Record<string, string[]>) => {
   const map = new Map<string, Array<Transition<string>>>();
   Object.entries(transitions).forEach(([event, states]) => {
-    map.set(event, states.map(state => ({
-      from: '',  // Will be set by Robot3
-      to: state,
-      guards: [],
-      reducers: [(ctx: BillingContext) => ctx]
-    })));
+    map.set(
+      event,
+      states.map((state) => ({
+        from: "", // Will be set by Robot3
+        to: state,
+        guards: [],
+        reducers: [(ctx: BillingContext) => ctx],
+      })),
+    );
   });
   return map;
 };
@@ -72,50 +74,50 @@ export const billingMachine = createMachine<
     idle: {
       final: false,
       transitions: createTransitionMap({
-        EDIT: ["editing"]
-      })
+        EDIT: ["editing"],
+      }),
     },
 
     editing: {
       final: false,
       transitions: createTransitionMap({
-        VALIDATE: ["validating"]
-      })
+        VALIDATE: ["validating"],
+      }),
     },
 
     validating: {
       final: false,
       transitions: createTransitionMap({
         VALIDATED: ["saving"],
-        INVALID: ["editing"]
-      })
+        INVALID: ["editing"],
+      }),
     },
 
     saving: {
       final: false,
       transitions: createTransitionMap({
         SAVED: ["complete"],
-        FAILED: ["error"]
-      })
+        FAILED: ["error"],
+      }),
     },
 
     complete: {
       final: true,
       transitions: createTransitionMap({
-        EDIT: ["editing"]
-      })
+        EDIT: ["editing"],
+      }),
     },
 
     error: {
       final: false,
       transitions: createTransitionMap({
-        EDIT: ["editing"]
-      })
-    }
+        EDIT: ["editing"],
+      }),
+    },
   },
   () => ({
     billing: null,
     errors: null,
-    error: null
-  })
+    error: null,
+  }),
 );
