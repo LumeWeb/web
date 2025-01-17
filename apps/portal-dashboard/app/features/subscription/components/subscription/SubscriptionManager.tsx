@@ -140,8 +140,8 @@ function SubscriptionContent() {
       }
 
       // Validate plan change if needed
-      if (subscription?.plan) {
-        const isDowngrade = plan.price < subscription.plan.price;
+      if (context.subscription?.plan) {
+        const isDowngrade = plan.price < context.subscription.plan.price;
         if (isDowngrade) {
           setValidationError("Downgrades are not allowed");
           return;
