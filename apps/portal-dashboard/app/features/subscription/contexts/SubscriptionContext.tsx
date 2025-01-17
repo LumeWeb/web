@@ -147,19 +147,19 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
             }
           }
 
-          // Call API
+          // Call API to create subscription
           const response = await createSubscription(plan);
           console.log("Subscription creation response:", response);
 
           if (!response?.subscription) {
-            throw new Error(
-              "Invalid server response - missing subscription data",
-            );
+            throw new Error("Invalid server response - missing subscription data");
           }
 
-          // Update state machine with new subscription
-          await subscriptionService.loadSubscription(response.subscription);
+          // Update state machine AFTER successful API call
           await subscriptionService.createSubscription(plan);
+
+          // Refetch subscription data to ensure we have latest state
+          await refetchSubscription();
 
           return response;
         } catch (error) {
