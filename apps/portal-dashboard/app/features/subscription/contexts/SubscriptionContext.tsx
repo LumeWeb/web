@@ -45,6 +45,7 @@ interface SubscriptionContextValue {
 
   // Status flags
   isProcessing: boolean;
+  state: SubscriptionState;
 }
 
 // Helper type to extract subscription from response

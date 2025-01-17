@@ -60,6 +60,8 @@ function SubscriptionContent() {
     updateSubscription,
     cancelSubscription,
     validatePlanChange,
+    state,
+    setShowPaymentDialog,
   } = useSubscriptionContext();
 
   const { loadSubscription } = useSubscriptionContext();
