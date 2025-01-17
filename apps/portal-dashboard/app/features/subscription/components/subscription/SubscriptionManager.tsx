@@ -143,6 +143,11 @@ function SubscriptionContent() {
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
 
   const handlePlanSelect = (plan: SubscriptionPlan) => {
+    // Don't handle free plan selection - it's pseudo
+    if (plan.is_free) {
+      return;
+    }
+    
     setSelectedPlan(plan);
     setShowConfirmDialog(true);
   };
