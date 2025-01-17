@@ -15,6 +15,23 @@ interface SubscriptionContext {
   error: Error | null;
 }
 
+// Define all possible event types as a union of string literals
+type SubscriptionEventType = 
+  | "SUBSCRIPTION_LOADED" 
+  | "PLAN_SELECTED"
+  | "SELECT_PLAN"
+  | "COMPLETE"
+  | "CANCEL"
+  | "RETRY"
+  | "ERROR"
+  | "SAVED"
+  | "FAILED"
+  | "PAYMENT_COMPLETE"
+  | "PAYMENT_FAILED"
+  | "PAYMENT_METHOD_UPDATE_INITIATED"
+  | "CANCELED"
+  | "REACTIVATE";
+
 export type SubscriptionEvent =
   | { type: "SUBSCRIPTION_LOADED"; subscription: Subscription }
   | { type: "PLAN_SELECTED"; plan: SubscriptionPlan }
