@@ -29,6 +29,7 @@ import {
 import { BillingForm } from "../billing/BillingForm";
 import { PaymentHistory } from "../payment/PaymentHistory";
 import { PaymentMethod } from "@/features/subscription/components/payment/PaymentMethod";
+import { PaymentFlow } from "@/features/subscription/components/payment/PaymentFlow";
 import Addons from "@/routes/account/components/Addons";
 
 export function SubscriptionManager() {
@@ -50,8 +51,6 @@ function SubscriptionContent() {
     error,
     isLoading,
     isProcessing,
-    showPaymentDialog,
-    setShowPaymentDialog,
     createSubscription,
     updateSubscription,
     cancelSubscription,
@@ -132,10 +131,6 @@ function SubscriptionContent() {
           const newSubscription = await createSubscription(selectedPlan);
           console.log('Created subscription:', newSubscription);
           
-          // Show payment dialog for paid plans
-          if (!selectedPlan.is_free) {
-            setShowPaymentDialog(true);
-          }
         } catch (error) {
           console.error('Error creating subscription:', error);
           throw error;
@@ -264,6 +259,9 @@ function SubscriptionContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Payment Flow Dialog */}
+      <PaymentFlow />
     </div>
   );
 }
