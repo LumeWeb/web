@@ -22,43 +22,45 @@ export type BillingEvent =
 export interface BillingStates {
   idle: {
     transitions: {
-      EDIT: 'editing';
+      EDIT: "editing";
     };
   };
   editing: {
     transitions: {
-      VALIDATE: 'validating';
+      VALIDATE: "validating";
     };
   };
   validating: {
     transitions: {
-      VALIDATED: 'saving';
-      INVALID: 'editing';
+      VALIDATED: "saving";
+      INVALID: "editing";
     };
   };
   saving: {
     transitions: {
-      SAVED: 'complete';
-      FAILED: 'error';
+      SAVED: "complete";
+      FAILED: "error";
     };
   };
   complete: {
     transitions: {
-      EDIT: 'editing';
+      EDIT: "editing";
     };
   };
   error: {
     transitions: {
-      EDIT: 'editing';
+      EDIT: "editing";
     };
   };
 }
 
-export const billingMachine = createMachine<BillingContext, BillingEvent, BillingStates>(
+export const billingMachine = createMachine<
+  BillingContext,
+  BillingEvent,
+  BillingStates
+>(
   {
-    idle: state(
-      transition("EDIT", "editing")
-    ),
+    idle: state(transition("EDIT", "editing")),
 
     editing: state(
       transition(
@@ -67,9 +69,9 @@ export const billingMachine = createMachine<BillingContext, BillingEvent, Billin
         reduce((ctx, ev: Extract<BillingEvent, { type: "VALIDATE" }>) => ({
           billing: ev.billing,
           errors: null,
-          error: null
-        }))
-      )
+          error: null,
+        })),
+      ),
     ),
 
     validating: state(
@@ -78,17 +80,17 @@ export const billingMachine = createMachine<BillingContext, BillingEvent, Billin
         "saving",
         reduce((ctx) => ({
           ...ctx,
-          errors: null
-        }))
+          errors: null,
+        })),
       ),
       transition(
         "INVALID",
         "editing",
         reduce((ctx, ev: Extract<BillingEvent, { type: "INVALID" }>) => ({
           ...ctx,
-          errors: ev.errors
-        }))
-      )
+          errors: ev.errors,
+        })),
+      ),
     ),
 
     saving: state(
@@ -97,22 +99,20 @@ export const billingMachine = createMachine<BillingContext, BillingEvent, Billin
         "complete",
         reduce((ctx) => ({
           ...ctx,
-          error: null
-        }))
+          error: null,
+        })),
       ),
       transition(
         "FAILED",
         "error",
         reduce((ctx, ev: Extract<BillingEvent, { type: "FAILED" }>) => ({
           ...ctx,
-          error: ev.error
-        }))
-      )
+          error: ev.error,
+        })),
+      ),
     ),
 
-    complete: state(
-      transition("EDIT", "editing")
-    ),
+    complete: state(transition("EDIT", "editing")),
 
     error: state(
       transition(
@@ -120,14 +120,14 @@ export const billingMachine = createMachine<BillingContext, BillingEvent, Billin
         "editing",
         reduce((ctx) => ({
           ...ctx,
-          error: null
-        }))
-      )
-    )
+          error: null,
+        })),
+      ),
+    ),
   },
   () => ({
     billing: null,
     errors: null,
-    error: null
-  })
+    error: null,
+  }),
 );
