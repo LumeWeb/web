@@ -46,80 +46,67 @@ export interface BillingStates {
   };
 }
 
+const createTransitionMap = (transitions: Record<string, string[]>) => {
+  const map = new Map<string, Array<Transition<string>>>();
+  Object.entries(transitions).forEach(([event, states]) => {
+    map.set(event, states.map(state => ({ target: state })));
+  });
+  return map;
+};
+
 export const billingMachine = createMachine<
   BillingStates,
   BillingContext,
   string
 >(
   {
-    idle: state(transition("EDIT", "editing")),
+    idle: {
+      final: false,
+      transitions: createTransitionMap({
+        EDIT: ["editing"]
+      })
+    },
 
-    editing: state(
-      transition(
-        "VALIDATE",
-        "validating",
-        reduce((ctx, ev: Extract<BillingEvent, { type: "VALIDATE" }>) => ({
-          billing: ev.billing,
-          errors: null,
-          error: null,
-        })),
-      ),
-    ),
+    editing: {
+      final: false,
+      transitions: createTransitionMap({
+        VALIDATE: ["validating"]
+      })
+    },
 
-    validating: state(
-      transition(
-        "VALIDATED",
-        "saving",
-        reduce((ctx) => ({
-          ...ctx,
-          errors: null,
-        })),
-      ),
-      transition(
-        "INVALID",
-        "editing",
-        reduce((ctx, ev: Extract<BillingEvent, { type: "INVALID" }>) => ({
-          ...ctx,
-          errors: ev.errors,
-        })),
-      ),
-    ),
+    validating: {
+      final: false,
+      transitions: createTransitionMap({
+        VALIDATED: ["saving"],
+        INVALID: ["editing"]
+      })
+    },
 
-    saving: state(
-      transition(
-        "SAVED",
-        "complete",
-        reduce((ctx) => ({
-          ...ctx,
-          error: null,
-        })),
-      ),
-      transition(
-        "FAILED",
-        "error",
-        reduce((ctx, ev: Extract<BillingEvent, { type: "FAILED" }>) => ({
-          ...ctx,
-          error: ev.error,
-        })),
-      ),
-    ),
+    saving: {
+      final: false,
+      transitions: createTransitionMap({
+        SAVED: ["complete"],
+        FAILED: ["error"]
+      })
+    },
 
-    complete: state(transition("EDIT", "editing")),
+    complete: {
+      final: true,
+      transitions: createTransitionMap({
+        EDIT: ["editing"]
+      })
+    },
 
-    error: state(
-      transition(
-        "EDIT",
-        "editing",
-        reduce((ctx) => ({
-          ...ctx,
-          error: null,
-        })),
-      ),
-    ),
+    error: {
+      final: false,
+      transitions: createTransitionMap({
+        EDIT: ["editing"]
+      })
+    }
   },
   () => ({
     billing: null,
     errors: null,
-    error: null,
-  }),
+    error: null
+  })
 );
