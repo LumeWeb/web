@@ -125,11 +125,11 @@ function SubscriptionContent() {
 
   const searchTab = searchParams.get("tab") ?? "billing";
 
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [billingError, setBillingError] = useState<string | null>(null);
   const {
     showConfirmDialog,
     setShowConfirmDialog,
-    validationError,
-    billingError,
     validatePlanChange,
   } = useSubscriptionConfirmation();
 
@@ -141,9 +141,21 @@ function SubscriptionContent() {
     closeDialog,
   } = useSubscriptionDialog();
 
+  useEffect(() => {
+    if (dialog.type === "plan-change" && dialog.plan) {
+      handlePlanSelect(dialog.plan);
+    } else if (dialog.type === "cancel") {
+      cancel();
+    } else if (dialog.type === "payment") {
+      openPaymentDialog();
+    }
+  }, [dialog]);
+
   const handlePlanSelect = async (plan: SubscriptionPlan) => {
     try {
       setLocalError(null);
+      setValidationError(null);
+      setBillingError(null);
 
       if (plan.is_free) {
         selectPlan(plan);
@@ -162,9 +174,9 @@ function SubscriptionContent() {
         setShowConfirmDialog(true);
       }
     } catch (err) {
-      setLocalError(
-        err instanceof Error ? err.message : "Failed to select plan",
-      );
+      const errorMessage = err instanceof Error ? err.message : "Failed to select plan";
+      setLocalError(errorMessage);
+      setValidationError(errorMessage);
     }
   };
 
