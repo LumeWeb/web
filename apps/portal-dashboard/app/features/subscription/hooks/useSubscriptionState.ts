@@ -32,8 +32,19 @@ export function useSubscriptionState() {
       dispatch({ type: 'SUBSCRIPTION_LOADED', subscription: { 
         id: '', 
         status: 'INACTIVE',
-        plan: null
-      } as Subscription });
+        plan: {
+          id: '',
+          name: '',
+          period: 'MONTHLY',
+          price: 0,
+          is_free: true,
+          resources: {
+            storage: 0,
+            upload: 0,
+            download: 0
+          }
+        }
+      } });
     }
   }, [dispatch]);
 
