@@ -1,30 +1,28 @@
-import { useCustom } from '@refinedev/core';
-import type { SubscriptionPlan } from '../../types/subscription.types';
-import useApiUrl from 'portal-shared/hooks/useApiUrl';
+import { useCustom } from "@refinedev/core";
+import type { SubscriptionPlan } from "../../types/subscription.types";
+import useApiUrl from "portal-shared/hooks/useApiUrl";
 
 interface PlansResponse {
-  data: {
-    plans: SubscriptionPlan[];
-  };
+  plans: SubscriptionPlan[];
 }
 
 export function useSubscriptionPlans() {
   const apiUrl = useApiUrl();
-  const { 
+  const {
     data: plansData,
     isLoading: plansAreLoading,
-    refetch: refetchPlans
+    refetch: refetchPlans,
   } = useCustom<PlansResponse>({
     url: `${apiUrl}/api/account/subscription/plans`,
-    method: 'get'
+    method: "get",
   });
 
-  console.log('useSubscriptionPlans - raw response:', plansData);
-  console.log('useSubscriptionPlans - plans array:', plansData?.data);
+  console.log("useSubscriptionPlans - raw response:", plansData);
+  console.log("useSubscriptionPlans - plans array:", plansData?.data);
 
   return {
     plansData,
     plansAreLoading,
-    refetchPlans
+    refetchPlans,
   };
 }

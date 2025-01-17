@@ -75,16 +75,17 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const value = useMemo(
     () => ({
       // Current state
-      subscription: state.type !== "LOADING" && state.type !== "ERROR" ? state.subscription : undefined,
+      subscription:
+        state.type !== "LOADING" && state.type !== "ERROR"
+          ? state.subscription
+          : undefined,
       state,
       isLoading: isLoading || plansAreLoading,
       error,
 
       // Plan management
       plans: (() => {
-        console.log("SubscriptionContext - raw plans data:", plansData?.data);
         const planArray = plansData?.data?.plans || [];
-        console.log("SubscriptionContext - processed plans array:", planArray);
         return planArray;
       })(),
       selectedPlan,
