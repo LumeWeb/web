@@ -24,19 +24,17 @@ type InvokedEvent<T> =
 export type SubscriptionEvent =
   | { type: "SUBSCRIPTION_LOADED"; subscription: Subscription }
   | { type: "SELECT_PLAN"; plan: SubscriptionPlan }
+  | { type: "CREATE_SUBSCRIPTION" }
+  | { type: "UPDATE_SUBSCRIPTION" }
+  | { type: "SUBSCRIPTION_CREATED"; subscription: Subscription }
+  | { type: "SUBSCRIPTION_UPDATED"; subscription: Subscription }
   | { type: "COMPLETE" }
   | { type: "CANCEL" }
   | { type: "RETRY" }
   | { type: "ERROR"; error: Error }
-  | { type: "SAVED" }
-  | { type: "FAILED" }
   | { type: "PAYMENT_COMPLETE"; paymentMethodId: string }
-  | { type: "PAYMENT_FAILED" }
   | { type: "PAYMENT_METHOD_UPDATE_INITIATED" }
   | { type: "PAYMENT_METHOD_UPDATED"; paymentMethodId: string }
-  | { type: "PAYMENT_METHOD_UPDATE_FAILED"; error: Error }
-  | { type: "CANCELED" }
-  | { type: "REACTIVATE" }
   | { type: "EDIT_BILLING" }
   | { type: "BILLING_COMPLETE"; billing: BillingInfo }
   | { type: "BILLING_FAILED"; error: Error }

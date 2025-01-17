@@ -101,7 +101,6 @@ export type SubscriptionState =
 // Robot State Machine Events
 export type SubscriptionEvent =
   | { type: "SUBSCRIPTION_LOADED"; subscription: Subscription }
-  | { type: "PLAN_SELECTED"; plan: SubscriptionPlan }
   | { type: "SELECT_PLAN"; plan: SubscriptionPlan }
   | { type: "CREATE_SUBSCRIPTION" }
   | { type: "UPDATE_SUBSCRIPTION" }
