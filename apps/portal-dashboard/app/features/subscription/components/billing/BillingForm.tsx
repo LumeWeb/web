@@ -45,6 +45,8 @@ export function BillingForm() {
 
   const { state, send, actions, context } = useBillingMachine();
 
+  const { updateBillingInfo } = useBillingMutations();
+
   const onSubmit = async (data: BillingInfo) => {
     try {
       // First send validate event with the data
@@ -65,8 +67,6 @@ export function BillingForm() {
       send({ type: "VALIDATED" });
       send({ type: "SAVE" });
 
-      // Call the billing mutation
-      const { updateBillingInfo } = useBillingMutations();
       try {
         await updateBillingInfo(data);
         send({ type: "SAVED" });
