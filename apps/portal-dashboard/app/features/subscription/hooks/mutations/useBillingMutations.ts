@@ -1,4 +1,3 @@
-import { useCallback, useState } from "react";
 import { HttpError, useCustomMutation } from "@refinedev/core";
 import { BillingInfo } from "../../types/billing.types";
 import useApiUrl from "portal-shared/hooks/useApiUrl";
@@ -18,22 +17,16 @@ interface BillingError extends HttpError {
 }
 
 export interface UseBillingMutationsResult {
-  updateBillingInfo: (billing: BillingInfo) => void;
+  updateBillingInfo: (billing: BillingInfo) => Promise<BillingResponse>;
   isLoading: boolean;
-  error: BillingError | null;
-  mutationResult?: BillingResponse;
 }
 
 export function useBillingMutations(): UseBillingMutationsResult {
   const apiUrl = useApiUrl();
-  const [error, setError] = useState<BillingError | null>(null);
-  const [mutationResult, setMutationResult] = useState<BillingResponse>();
-
   const { mutate, isLoading } = useCustomMutation<BillingResponse>();
 
-  const updateBillingInfo = useCallback(
-    (billing: BillingInfo) => {
-      setError(null);
+  const updateBillingInfo = async (billing: BillingInfo): Promise<BillingResponse> => {
+    return new Promise((resolve, reject) => {
       mutate(
         {
           url: `${apiUrl}/api/account/subscription/billing`,
@@ -42,26 +35,36 @@ export function useBillingMutations(): UseBillingMutationsResult {
         },
         {
           onSuccess: (response) => {
-            if (response?.data?.billing) {
-              setMutationResult({
-                billing: response.data.billing,
-              });
+            if (!response?.data?.billing) {
+              reject(new Error("Invalid server response - missing billing data"));
+              return;
             }
+            resolve(response.data);
           },
-          onError: (err) => {
-            const error = err as BillingError;
-            setError(error);
+          onError: (error: HttpError) => {
+            const enhancedError = error as BillingError;
+            if (enhancedError.errors) {
+              // Transform detailed validation errors if present
+              const messages = Object.entries(enhancedError.errors)
+                .map(([field, error]) => {
+                  const message = typeof error === 'string' ? error :
+                    typeof error === 'object' && 'message' in error ? error.message :
+                    Array.isArray(error) ? error.join(', ') :
+                    'Invalid value';
+                  return `${field}: ${message}`;
+                })
+                .join('\n');
+              enhancedError.message = messages;
+            }
+            reject(enhancedError);
           },
         },
       );
-    },
-    [mutate, apiUrl],
-  );
+    });
+  };
 
   return {
     updateBillingInfo,
     isLoading,
-    error,
-    mutationResult,
   };
 }
