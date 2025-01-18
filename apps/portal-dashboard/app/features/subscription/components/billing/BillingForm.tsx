@@ -48,16 +48,38 @@ export function BillingForm() {
     form.setValue("address.city", "", { shouldDirty: true });
   };
 
+  const { state, send } = useSubscriptionContext();
+
   const onSubmit = async (data: BillingInfo) => {
     try {
+      // First validate the billing info
+      send({ type: "VALIDATE", billing: data });
+      
+      const errors = await validateBillingInfo(data);
+      if (errors) {
+        send({ type: "INVALID", errors });
+        open?.({
+          type: "error",
+          message: "Please correct the billing information errors",
+        });
+        return;
+      }
+
+      send({ type: "VALIDATED" });
+      
+      // Then try to save it
+      send({ type: "SAVE" });
+      
       await handleSubmit({
         onSuccess: () => {
+          send({ type: "SAVED" });
           open?.({
-            type: "success",
+            type: "success", 
             message: "Billing information updated successfully",
           });
         },
         onError: (error) => {
+          send({ type: "FAILED", error });
           open?.({
             type: "error",
             message: error.message || "Failed to update billing information",
@@ -65,10 +87,12 @@ export function BillingForm() {
         }
       })(data);
     } catch (err) {
-      console.error('Form submission error:', err);
+      const error = err instanceof Error ? err : new Error("Failed to submit form");
+      send({ type: "FAILED", error });
+      console.error('Form submission error:', error);
       open?.({
         type: "error",
-        message: err instanceof Error ? err.message : "Failed to submit form",
+        message: error.message,
       });
     }
   };
@@ -161,8 +185,10 @@ export function BillingForm() {
               <Button
                 type="submit"
                 className="ml-auto"
-                disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Save"}
+                disabled={isSubmitting || state === "saving" || state === "validating"}>
+                {state === "saving" ? "Saving..." :
+                 state === "validating" ? "Validating..." : 
+                 "Save"}
               </Button>
             </CardFooter>
           </form>

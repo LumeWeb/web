@@ -27,20 +27,38 @@ export function useSubscriptionForm() {
     },
   });
 
+  const { state, send } = useSubscriptionContext();
+  
   const handleSubmit = useCallback(
     (options: { onSuccess?: () => void; onError?: (error: Error) => void }) =>
       async (data: BillingInfo) => {
         try {
           setFormError(null);
+          
+          // Validate first
+          const errors = await validateBillingInfo(data);
+          if (errors) {
+            send({ type: "INVALID", errors });
+            const error = new Error("Validation failed");
+            setFormError(error);
+            options.onError?.(error);
+            return;
+          }
+
+          send({ type: "VALIDATED" });
+          send({ type: "SAVE" });
+          
           await updateBillingInfo(data);
+          send({ type: "SAVED" });
           options.onSuccess?.();
         } catch (err) {
           const error = err instanceof Error ? err : new Error("Submission failed");
+          send({ type: "FAILED", error });
           setFormError(error);
           options.onError?.(error);
         }
       },
-    [updateBillingInfo]
+    [updateBillingInfo, send]
   );
 
   const resetForm = useCallback(() => {

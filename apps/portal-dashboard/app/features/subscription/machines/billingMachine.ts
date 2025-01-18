@@ -30,12 +30,26 @@ const states = {
       "VALIDATE",
       "validating",
       reduce((ctx, ev) => {
-        // Just like with FAILED event, we need to narrow the type to access billing
         if (ev.type === "VALIDATE") {
           return {
             ...ctx,
             billing: ev.billing,
             errors: null,
+            error: null
+          };
+        }
+        return ctx;
+      }),
+    ),
+    transition<EventType, BillingContext, BillingEvent>(
+      "FAILED",
+      "error",
+      reduce((ctx, ev) => {
+        if (ev.type === "FAILED") {
+          return {
+            ...ctx,
+            error: ev.error,
+            errors: null
           };
         }
         return ctx;
