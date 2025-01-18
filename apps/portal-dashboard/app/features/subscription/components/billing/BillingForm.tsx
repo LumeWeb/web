@@ -55,8 +55,6 @@ export function BillingForm() {
   const onSubmit = async (data: BillingInfo) => {
     try {
       // First validate the billing info
-      send({ type: "VALIDATE", billing: data });
-      
       const errors = await validateBillingInfo(data);
       if (errors) {
         send({ type: "INVALID", errors });
@@ -68,8 +66,6 @@ export function BillingForm() {
       }
 
       send({ type: "VALIDATED" });
-      
-      // Then try to save it
       send({ type: "SAVE" });
       
       await handleSubmit({
