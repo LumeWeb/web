@@ -1,8 +1,8 @@
-import React from 'react';
+import React from "react";
 import { Button } from "portal-shared/components/ui/button";
 import { usePaymentMachine } from "../../hooks/usePaymentMachine";
-import { usePaymentButtonState } from '../../hooks/usePaymentButtonState';
-import { PaymentMode, DEFAULT_PAYMENT_LABELS } from '../../types/payment.types';
+import { usePaymentButtonState } from "../../hooks/usePaymentButtonState";
+import { PaymentMode, DEFAULT_PAYMENT_LABELS } from "../../types/payment.types";
 import { useHyper, useElements } from "@/routes/account/lib/hyper-react.js";
 
 interface PaymentConfirmationButtonProps {
@@ -18,15 +18,10 @@ export function PaymentConfirmationButton({
 }: PaymentConfirmationButtonProps) {
   const hyper = useHyper();
   const elements = useElements();
-  const {
-    buttonState,
-    startProcessing,
-    handleSuccess,
-    handleError,
-    retry,
-  } = usePaymentButtonState();
+  const { buttonState, startProcessing, handleSuccess, handleError, retry } =
+    usePaymentButtonState();
   const [paymentError, setPaymentError] = React.useState<string | null>(null);
-  
+
   const buttonLabel = DEFAULT_PAYMENT_LABELS[mode][buttonState];
 
   const handlePaymentError = (error: Error) => {
@@ -47,7 +42,6 @@ export function PaymentConfirmationButton({
     if (buttonState === "failed") {
       retry();
       paymentActions.retry();
-      return;
     }
 
     if (buttonState === "idle") {
@@ -75,7 +69,7 @@ export function PaymentConfirmationButton({
       onPaymentSuccess();
     } catch (error) {
       handlePaymentError(
-        error instanceof Error ? error : new Error("Payment failed")
+        error instanceof Error ? error : new Error("Payment failed"),
       );
     }
   };
