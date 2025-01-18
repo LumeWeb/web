@@ -195,6 +195,7 @@ function SubscriptionContent() {
       if (!isValid) {
         setBillingError("Please complete billing information before changing plans");
         setValidationError("Invalid billing information");
+        setShowConfirmDialog(true); // Keep dialog open
         return;
       }
 
@@ -232,6 +233,7 @@ function SubscriptionContent() {
       const errorMessage =
         err instanceof Error ? err.message : "Subscription action failed";
       setValidationError(errorMessage);
+      setShowConfirmDialog(true); // Keep dialog open on error
       send("ERROR", { error: new Error(errorMessage) });
     }
   };
