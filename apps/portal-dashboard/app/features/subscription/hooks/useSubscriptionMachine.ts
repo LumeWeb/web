@@ -6,15 +6,16 @@ import {
   SubscriptionPlan,
   SubscriptionStateValue,
 } from "../types/subscription.types";
-import { useRef } from "react";
+
+let machine = null;
 
 export function useSubscriptionMachine() {
-  const machineRef = useRef<any>();
-  if (!machineRef.current) {
-    machineRef.current = useMachine(subscriptionMachine);
+  if (!machine) {
+    const [current, send] = useMachine(subscriptionMachine);
+    machine = { current, send };
   }
 
-  const [current, send] = machineRef.current;
+  const { current, send } = machine;
 
   return {
     state: current.name as SubscriptionStateValue,
