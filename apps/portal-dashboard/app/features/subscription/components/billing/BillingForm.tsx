@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useNotification } from "@refinedev/core";
+import { useNotification, HttpError } from "@refinedev/core";
 import { useBilling } from "../../hooks/core/useBilling";
 import { useSubscriptionForm } from "@/features/subscription/hooks/ui/useSubscriptionForm";
 import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
@@ -68,14 +68,43 @@ export function BillingForm() {
       send({ type: "SAVE" });
 
       try {
-        await updateBillingInfo(data);
+        const response = await updateBillingInfo(data);
         send({ type: "SAVED" });
         open?.({
           type: "success",
           message: "Billing information updated successfully"
         });
+        return response;
       } catch (saveError) {
-        throw new Error("Failed to save billing information");
+        // Handle specific server validation errors
+        if (saveError instanceof HttpError && saveError.errors) {
+          const serverErrors = Object.entries(saveError.errors).map(([field, error]) => ({
+            field: field as keyof BillingInfo,
+            message: typeof error === 'string' ? error :
+              typeof error === 'object' && 'message' in error ? error.message :
+              Array.isArray(error) ? error.join(', ') :
+              'Invalid value'
+          }));
+          send({ type: "INVALID", errors: serverErrors });
+          open?.({
+            type: "error",
+            message: "Server validation failed"
+          });
+          return;
+        }
+        
+        // Handle other server errors
+        const error = new Error(
+          saveError instanceof Error ? 
+            saveError.message : 
+            "Failed to save billing information"
+        );
+        send({ type: "FAILED", error });
+        open?.({
+          type: "error",
+          message: error.message
+        });
+        throw error;
       }
     } catch (err) {
       const error = err instanceof Error ? err : new Error("Failed to submit form");
@@ -85,6 +114,7 @@ export function BillingForm() {
         type: "error",
         message: error.message,
       });
+      throw error;
     }
   };
 
