@@ -23,9 +23,6 @@ interface SubscriptionContext {
 }
 
 interface SubscriptionContextValue {
-  state: SubscriptionStateValue;
-  context: SubscriptionContext;
-  send: (event: SubscriptionEvent) => void;
   plans: SubscriptionPlan[];
   isLoading: boolean;
   refetchSubscription: () => Promise<any>;
@@ -50,26 +47,16 @@ interface SubscriptionProviderProps {
 }
 
 export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
-  const [current, send] = useMachine(subscriptionMachine);
   const { plansData, plansAreLoading } = useSubscriptionPlans();
   const { refetch: refetchSubscription } = useSubscription();
 
   const value = useMemo(
     () => ({
-      state: current.name as SubscriptionStateValue,
-      context: current.context,
-      send,
       plans: plansData?.data?.plans || [],
-      isLoading: current.name === "loading" || plansAreLoading,
+      isLoading: plansAreLoading,
       refetchSubscription,
     }),
-    [
-      current,
-      send,
-      plansData?.data?.plans,
-      plansAreLoading,
-      refetchSubscription,
-    ],
+    [plansData?.data?.plans, plansAreLoading, refetchSubscription],
   );
 
   return (

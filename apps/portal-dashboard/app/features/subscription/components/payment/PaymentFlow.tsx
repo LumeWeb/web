@@ -12,7 +12,7 @@ import { ExclamationCircleIcon } from "portal-shared/components/icons";
 import { usePayment } from "../../hooks/core/usePayment";
 
 export function PaymentFlow() {
-  const { state, context, send } = useSubscriptionContext();
+  const { state, context, send } = useSubscriptionMachine();
 
   const { getPaymentStatus, isPaymentExpired } = usePayment();
 

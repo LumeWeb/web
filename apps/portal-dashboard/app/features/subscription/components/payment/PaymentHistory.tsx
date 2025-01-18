@@ -27,7 +27,7 @@ export function PaymentHistory() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || contextLoading) {
     return <div>Loading payment history...</div>;
   }
 
