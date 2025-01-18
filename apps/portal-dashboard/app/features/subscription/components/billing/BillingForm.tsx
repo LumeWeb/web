@@ -124,7 +124,7 @@ export function BillingForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <BillingValidator
               billingInfo={form.getValues()}
-              errors={context.errors}
+              errors={state.context.errors}
             />
 
             <BillingFormInput name="name" label="Full Name" form={form} />
