@@ -78,7 +78,7 @@ export function BillingForm() {
         // Handle specific server validation errors
         if (saveError.name === "AxiosError") {
           if (saveError.response?.data) {
-            const billingError = handleBillingError(saveError.isAxiosError);
+            const billingError = handleBillingError(saveError);
             if (billingError.errors) {
               // Handle validation errors from details
               send({ type: "INVALID", errors: billingError.errors });
