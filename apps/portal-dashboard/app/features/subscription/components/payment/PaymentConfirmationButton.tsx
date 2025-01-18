@@ -50,9 +50,11 @@ export function PaymentConfirmationButton({
       return;
     }
 
-    startProcessing();
-    paymentActions.startPayment();
-    setPaymentError(null);
+    if (buttonState === "idle") {
+      startProcessing();
+      paymentActions.startPayment();
+      setPaymentError(null);
+    }
 
     try {
       const result = await hyper.confirmPayment({
