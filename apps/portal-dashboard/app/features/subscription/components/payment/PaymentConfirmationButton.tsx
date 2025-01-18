@@ -41,6 +41,11 @@ export function PaymentConfirmationButton({
       return;
     }
 
+    if (buttonState === "failed") {
+      retry();
+      send({ type: "PAYMENT_RETRY" });
+    }
+
     startProcessing();
     setPaymentError(null);
 

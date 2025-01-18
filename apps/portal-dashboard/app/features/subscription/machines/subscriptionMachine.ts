@@ -361,6 +361,15 @@ const states = {
         selectedPlan: null,
       })),
     ),
+    // Add transition for payment retry
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "PAYMENT_RETRY",
+      "pendingPayment",
+      reduce((ctx) => ({
+        ...ctx,
+        error: null,
+      })),
+    ),
   ),
 };
 
