@@ -201,7 +201,39 @@ const states = {
   creating: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SUBSCRIPTION_CREATED",
+      "pendingPayment",
+      guard((ctx, ev) => {
+        if (ev.type === "SUBSCRIPTION_CREATED") {
+          return (
+            !ev.subscription.plan.is_free &&
+            ev.subscription.status === "PENDING"
+          );
+        }
+        return false;
+      }),
+      reduce((ctx, ev) => {
+        if (ev.type === "SUBSCRIPTION_CREATED") {
+          return {
+            ...ctx,
+            subscription: ev.subscription,
+            selectedPlan: null,
+            status: ev.subscription.status,
+          };
+        }
+        return ctx;
+      }),
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "SUBSCRIPTION_CREATED",
       "active",
+      guard((ctx, ev) => {
+        if (ev.type === "SUBSCRIPTION_CREATED") {
+          return (
+            ev.subscription.plan.is_free || ev.subscription.status === "ACTIVE"
+          );
+        }
+        return false;
+      }),
       reduce((ctx, ev) => {
         if (ev.type === "SUBSCRIPTION_CREATED") {
           return {

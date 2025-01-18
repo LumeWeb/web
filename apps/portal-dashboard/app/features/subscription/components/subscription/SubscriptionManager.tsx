@@ -261,16 +261,7 @@ function SubscriptionContent() {
       </div>
 
       {/* Confirmation Dialog */}
-      <AlertDialog
-        open={showConfirmDialog}
-        onOpenChange={(open) => {
-          setShowConfirmDialog(open);
-          if (!open) {
-            setValidationError(null);
-            setBillingError(null);
-            actions.cancelPlanSelection();
-          }
-        }}>
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
@@ -310,7 +301,14 @@ function SubscriptionContent() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel
+              onClick={() => {
+                setValidationError(null);
+                setBillingError(null);
+                actions.cancelPlanSelection();
+              }}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirm}>
               Confirm
             </AlertDialogAction>
