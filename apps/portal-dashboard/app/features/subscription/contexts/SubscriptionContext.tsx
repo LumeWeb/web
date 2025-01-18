@@ -48,12 +48,13 @@ interface SubscriptionProviderProps {
 
 export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const { plansData, plansAreLoading } = useSubscriptionPlans();
-  const { refetch: refetchSubscription } = useSubscription();
+  const { refetch: refetchSubscription, isLoading: subscriptionIsLoading } =
+    useSubscription();
 
   const value = useMemo(
     () => ({
       plans: plansData?.data?.plans || [],
-      isLoading: plansAreLoading,
+      isLoading: plansAreLoading || subscriptionIsLoading,
       refetchSubscription,
     }),
     [plansData?.data?.plans, plansAreLoading, refetchSubscription],
