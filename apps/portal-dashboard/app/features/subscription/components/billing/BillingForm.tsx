@@ -21,6 +21,7 @@ import {
 } from "portal-shared/components/ui/card";
 import { useBillingMachine } from "@/features/subscription/hooks/domain/useBillingMachine";
 import { AxiosError } from "axios";
+import { handleBillingError } from "@/features/subscription/utils/errorHandling";
 
 export function BillingForm() {
   const { open } = useNotification();
@@ -76,32 +77,32 @@ export function BillingForm() {
       } catch (saveError) {
         // Handle specific server validation errors
         if (saveError instanceof AxiosError) {
-          if (saveError.response?.data?.errors) {
-            const serverErrors = Object.entries(
-              saveError.response.data.errors,
-            ).map(([field, error]) => ({
-              field: field as keyof BillingInfo,
-              message:
-                typeof error === "string"
-                  ? error
-                  : typeof error === "object" && "message" in error
-                    ? error.message
-                    : Array.isArray(error)
-                      ? error.join(", ")
-                      : "Invalid value",
-            }));
-            send({ type: "INVALID", errors: serverErrors });
+          if (saveError instanceof AxiosError && saveError.response?.data) {
+            const billingError = handleBillingError(saveError);
 
-            serverErrors.forEach(({ field, message }) => {
-              form.setError(field, {
-                type: "server",
-                message,
+            if (billingError.errors) {
+              // Handle validation errors from details
+              send({ type: "INVALID", errors: billingError.errors });
+              billingError.errors.forEach(({ field, message }) => {
+                const fieldPath = field.includes(".")
+                  ? field
+                  : `address.${field}`;
+                form.setError(fieldPath as any, {
+                  type: "server",
+                  message,
+                });
               });
-            });
+            } else {
+              // Handle general errors
+              send({
+                type: "FAILED",
+                error: new Error(billingError.message),
+              });
+            }
 
             open?.({
               type: "error",
-              message: "Server validation failed",
+              message: billingError.message,
             });
             return;
           }
