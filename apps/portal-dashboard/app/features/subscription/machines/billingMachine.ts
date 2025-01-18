@@ -87,7 +87,21 @@ const states = {
     ),
   ),
 
-  complete: state(),
+  complete: state(
+    transition<EventType, BillingContext, BillingEvent>(
+      "FAILED",
+      "error",
+      reduce((ctx, ev) => {
+        if (ev.type === "FAILED") {
+          return {
+            ...ctx,
+            error: ev.error,
+          };
+        }
+        return ctx;
+      }),
+    ),
+  ),
 
   error: state(
     transition<EventType, BillingContext, BillingEvent>(

@@ -47,8 +47,7 @@ export function BillingForm() {
 
   const onSubmit = async (data: BillingInfo) => {
     try {
-      actions.validate(data);
-
+      // First validate the data
       const errors = await validateBillingInfo(data);
       if (errors) {
         send({ type: "INVALID", errors });
@@ -59,18 +58,26 @@ export function BillingForm() {
         return;
       }
 
+      // If validation passes, proceed with saving
+      send({ type: "VALIDATE", billing: data });
       send({ type: "VALIDATED" });
       send({ type: "SAVE" });
 
-      // Save billing info
-      send({ type: "SAVED" });
-      open?.({
-        type: "success",
-        message: "Billing information updated successfully",
-      });
+      try {
+        // Here you would typically make your API call to save the billing info
+        // For now we'll just simulate success
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        send({ type: "SAVED" });
+        open?.({
+          type: "success",
+          message: "Billing information updated successfully",
+        });
+      } catch (saveError) {
+        throw new Error("Failed to save billing information");
+      }
     } catch (err) {
-      const error =
-        err instanceof Error ? err : new Error("Failed to submit form");
+      const error = err instanceof Error ? err : new Error("Failed to submit form");
       send({ type: "FAILED", error });
       console.error("Form submission error:", error);
       open?.({
