@@ -77,46 +77,70 @@ export function BillingForm() {
         // Handle specific server validation errors
         if (saveError instanceof AxiosError) {
           if (saveError.response?.data?.errors) {
-            // Parse field-level validation errors
-            if (saveError.response?.data?.errors) {
-              // Parse field-level validation errors
-              const serverErrors = Object.entries(saveError.response.data.errors).map(
-                ([field, error]) => {
-                  // Handle nested field paths (e.g., "address.line1")
-                  const fieldPath = field.includes('.') ? field : `address.${field}`;
-                  return {
-                    field: fieldPath as keyof BillingInfo,
-                    message:
-                      typeof error === "string"
-                        ? error
-                        : typeof error === "object" && "message" in error
-                          ? error.message
-                          : Array.isArray(error)
-                            ? error.join(", ")
-                            : "Invalid value",
-                  };
-                }
-              );
-
-              // Send the parsed errors to the state machine
+            const serverErrors = Object.entries(
+              saveError.response.data.errors,
+            ).map(([field, error]) => ({
+              field: field as keyof BillingInfo,
+              message:
+                typeof error === "string"
+                  ? error
+                  : typeof error === "object" && "message" in error
+                    ? error.message
+                    : Array.isArray(error)
+                      ? error.join(", ")
+                      : "Invalid value",
+            }));
             send({ type: "INVALID", errors: serverErrors });
 
-            // Set form errors
             serverErrors.forEach(({ field, message }) => {
               form.setError(field, {
-                type: 'server',
-                message
+                type: "server",
+                message,
               });
             });
 
             open?.({
               type: "error",
-              message: "Please correct the validation errors",
+              message: "Server validation failed",
             });
             return;
           }
 
-          // Handle other server errors
+          // Handle other specific axios error cases
+          switch (saveError.code) {
+            case AxiosError.ERR_NETWORK:
+              send({
+                type: "FAILED",
+                error: new Error(
+                  "Network error - please check your connection",
+                ),
+              });
+              break;
+            case AxiosError.ERR_BAD_REQUEST:
+              send({
+                type: "FAILED",
+                error: new Error(
+                  saveError.response?.data?.message || "Invalid request",
+                ),
+              });
+              break;
+            default:
+              send({
+                type: "FAILED",
+                error: new Error(
+                  saveError.message || "An unexpected error occurred",
+                ),
+              });
+          }
+
+          open?.({
+            type: "error",
+            message: saveError.message || "Failed to save billing information",
+          });
+          return;
+        }
+
+        // Handle other server errors
         const error = new Error(
           saveError instanceof Error
             ? saveError.message
