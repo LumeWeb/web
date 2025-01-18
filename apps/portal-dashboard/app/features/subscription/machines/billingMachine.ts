@@ -71,11 +71,25 @@ const states = {
         error: null,
       })),
     ),
+    // Add this new transition for validation errors during saving
+    transition<EventType, BillingContext, BillingEvent>(
+      "INVALID",
+      "idle",
+      reduce((ctx, ev) => {
+        if (ev.type === "INVALID") {
+          return {
+            ...ctx,
+            errors: ev.errors,
+            error: null,
+          };
+        }
+        return ctx;
+      }),
+    ),
     transition<EventType, BillingContext, BillingEvent>(
       "FAILED",
       "error",
       reduce((ctx, ev) => {
-        // Type narrowing - we know this is a FAILED event with error property
         if (ev.type === "FAILED") {
           return {
             ...ctx,
