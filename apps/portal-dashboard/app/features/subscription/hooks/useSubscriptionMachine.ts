@@ -22,8 +22,20 @@ export function useSubscriptionMachine() {
         send({ type: "SUBSCRIPTION_LOADED", subscription }),
       selectPlan: (plan: SubscriptionPlan) =>
         send({ type: "SELECT_PLAN", plan }),
+      cancelPlanSelection: () =>
+        send({ type: "CANCEL_PLAN_SELECTION" }),
+      createSubscription: () =>
+        send({ type: "CREATE_SUBSCRIPTION" }),
+      updateSubscription: () =>
+        send({ type: "UPDATE_SUBSCRIPTION" }),
+      subscriptionCreated: (subscription: Subscription) =>
+        send({ type: "SUBSCRIPTION_CREATED", subscription }),
+      subscriptionUpdated: (subscription: Subscription) =>
+        send({ type: "SUBSCRIPTION_UPDATED", subscription }),
       updateBilling: (billing: BillingInfo) =>
         send({ type: "BILLING_COMPLETE", billing }),
+      billingFailed: (error: Error) =>
+        send({ type: "BILLING_FAILED", error }),
       completePayment: (paymentMethodId: string) =>
         send({ type: "PAYMENT_COMPLETE", paymentMethodId }),
       complete: () => send({ type: "COMPLETE" }),
@@ -34,6 +46,8 @@ export function useSubscriptionMachine() {
       editBilling: () => send({ type: "EDIT_BILLING" }),
       updatePaymentMethod: () => 
         send({ type: "PAYMENT_METHOD_UPDATE_INITIATED" }),
+      paymentMethodUpdated: (paymentMethodId: string) =>
+        send({ type: "PAYMENT_METHOD_UPDATED", paymentMethodId }),
     },
     isLoading: current.name === "loading",
     isProcessing: ["pendingPayment", "editingBilling"].includes(current.name),

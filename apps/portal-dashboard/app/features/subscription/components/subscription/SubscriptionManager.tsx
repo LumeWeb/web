@@ -200,29 +200,23 @@ function SubscriptionContent() {
       // Start subscription operation
       if (context.subscription) {
         // Update existing subscription
-        send({ type: "UPDATE_SUBSCRIPTION" });
+        actions.updateSubscription();
         console.log("Updating subscription to plan:", planToUse);
         const { subscription } = await updateSubscription(planToUse);
         console.log("Update subscription result:", subscription);
         
         if (subscription) {
-          send({
-            type: "SUBSCRIPTION_UPDATED",
-            subscription,
-          });
+          actions.subscriptionUpdated(subscription);
         }
       } else {
         // Create new subscription
-        send({ type: "CREATE_SUBSCRIPTION" });
+        actions.createSubscription();
         console.log("Creating new subscription with plan:", planToUse);
         const { subscription } = await createSubscription(planToUse);
         console.log("Create subscription result:", subscription);
         
         if (subscription) {
-          send({
-            type: "SUBSCRIPTION_CREATED",
-            subscription,
-          });
+          actions.subscriptionCreated(subscription);
         }
       }
 
@@ -303,7 +297,7 @@ function SubscriptionContent() {
           if (!open) {
             setValidationError(null);
             setBillingError(null);
-            send({ type: "CANCEL_PLAN_SELECTION" });
+            actions.cancelPlanSelection();
           }
         }}>
         <AlertDialogContent>
