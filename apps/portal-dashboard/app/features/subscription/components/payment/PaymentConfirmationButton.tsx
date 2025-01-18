@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from "portal-shared/components/ui/button";
+import { usePaymentMachine } from "../../hooks/usePaymentMachine";
 import { usePaymentButtonState } from '../../hooks/usePaymentButtonState';
 import { PaymentMode, DEFAULT_PAYMENT_LABELS } from '../../types/payment.types';
 import { useHyper, useElements } from "@/routes/account/lib/hyper-react.js";
@@ -35,6 +36,8 @@ export function PaymentConfirmationButton({
     onPaymentError(error);
   };
 
+  const { actions: paymentActions } = usePaymentMachine();
+
   const handlePayment = async () => {
     if (!hyper || !elements) {
       handlePaymentError(new Error("Payment system not initialized"));
@@ -43,9 +46,11 @@ export function PaymentConfirmationButton({
 
     if (buttonState === "failed") {
       retry();
+      paymentActions.retry();
     }
 
     startProcessing();
+    paymentActions.startPayment();
     setPaymentError(null);
 
     try {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
+import { usePaymentMachine } from "../../hooks/usePaymentMachine";
 import {
   Dialog,
   DialogContent,
@@ -18,12 +19,15 @@ export function PaymentFlow() {
 
   const { getPaymentStatus, isPaymentExpired } = usePayment();
 
+  const { state: paymentState, context: paymentContext, actions: paymentActions } = usePaymentMachine();
+
   const handlePaymentSuccess = () => {
+    paymentActions.completePayment();
     send({ type: "PAYMENT_COMPLETE" });
   };
 
   const handlePaymentFailure = (error: Error) => {
-    setHasError(true);
+    paymentActions.handleError(error);
     send({
       type: "ERROR",
       error: new Error(error.message),
@@ -31,12 +35,11 @@ export function PaymentFlow() {
   };
 
   const handleRetry = () => {
-    setHasError(false);
-    send({ type: "RETRY" });
+    paymentActions.retry();
   };
 
   const [isOpen, setIsOpen] = useState(false);
-  const { hasError, setHasError, handleOpenChange } = useDialogState({
+  const { handleOpenChange } = useDialogState({
     isOpen,
     onOpenChange: setIsOpen,
     shouldPreventClose: true,
