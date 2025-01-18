@@ -43,7 +43,6 @@ export default defineConfig({
       // Use the ESM version specifically
       "robot3": path.resolve(__dirname, "../../node_modules/robot3/machine.js"),
       "robot3/debug": path.resolve(__dirname, "../../node_modules/robot3/debug.js"),
-      "robot3/visualize": path.resolve(__dirname, "../../node_modules/robot3/visualize.js"),
       "react-robot": path.resolve(
         __dirname,
         "../../node_modules/react-robot/machine.js",

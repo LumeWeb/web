@@ -1,12 +1,6 @@
-import { visualize } from "robot3/visualize";
-import { subscriptionMachine } from "./machines/subscriptionMachine";
-import { billingMachine } from "./machines/billingMachine";
-import { paymentMethodMachine } from "./machines/paymentMethodMachine";
+import "robot3/debug";
 
-// Only enable visualization in development
+// Only enable debug mode in development
 if (process.env.NODE_ENV === 'development') {
-  // Visualize all state machines
-  visualize(subscriptionMachine, { id: 'subscription' });
-  visualize(billingMachine, { id: 'billing' });
-  visualize(paymentMethodMachine, { id: 'payment' });
+  console.log('Robot3 debug mode enabled');
 }
