@@ -30,7 +30,7 @@ export default function HyperPayment({
     }
   }, [mode, context?.payment?.client_secret]);
 
-  if (!clientSecret) {
+  if (!hyperState.isHyperLoaded || !clientSecret) {
     return <StyledPaymentSkeleton />;
   }
 
@@ -54,11 +54,8 @@ export default function HyperPayment({
         />
         <PaymentConfirmationButton
           onPaymentSuccess={onPaymentSuccess}
+          onPaymentError={onPaymentError}
           mode={mode}
-          isProcessing={isProcessing}
-          setIsProcessing={setIsProcessing}
-          paymentError={paymentError}
-          setPaymentError={setPaymentError}
         />
       </HyperElements>
     </div>
