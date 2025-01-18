@@ -23,6 +23,21 @@ type EventType = BillingEvent["type"];
 const states = {
   idle: state(
     transition<EventType, BillingContext, BillingEvent>("EDIT", "editing"),
+    transition<EventType, BillingContext, BillingEvent>(
+      "VALIDATE",
+      "validating",
+      reduce((ctx, ev) => {
+        if (ev.type === "VALIDATE") {
+          return {
+            ...ctx,
+            billing: ev.billing,
+            errors: null,
+            error: null
+          };
+        }
+        return ctx;
+      }),
+    ),
   ),
 
   editing: state(
