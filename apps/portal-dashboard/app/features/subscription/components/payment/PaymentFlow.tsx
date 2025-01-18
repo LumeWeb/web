@@ -40,7 +40,7 @@ export function PaymentFlow() {
   }, [state]);
 
   // Don't render if no payment info
-  if (!context.payment?.clientSecret) {
+  if (!context.payment?.client_secret) {
     return null;
   }
 
