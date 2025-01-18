@@ -12,8 +12,13 @@ import {
   SubscriptionPlan,
 } from "../types/subscription.types";
 import { billingMachine } from "@/features/subscription/machines/billingMachine";
+import { SubscriptionPlanStatus } from "portal-shared/dataProviders/accountProvider";
 
-type SubscriptionStatus = "ACTIVE" | "PENDING" | "CANCELLED";
+type SubscriptionStatus =
+  | "ACTIVE"
+  | "PENDING"
+  | "CANCELLED"
+  | SubscriptionPlanStatus;
 
 interface SubscriptionContext {
   subscription: Subscription | null;
@@ -171,11 +176,11 @@ const states = {
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "CANCEL_PLAN_SELECTION",
-      "active",
+      "idle",
       reduce((ctx) => ({
-        ...ctx,
+        ...ctx, // Spread existing context first
         selectedPlan: null,
-        status: "ACTIVE",
+        status: ctx.subscription?.status || null,
       })),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
