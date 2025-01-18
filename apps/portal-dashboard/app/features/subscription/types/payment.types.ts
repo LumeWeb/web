@@ -9,6 +9,47 @@ export type PaymentStatus =
 // Payment method types
 export type PaymentMethodType = "card" | "bank_transfer" | "wallet";
 
+export type PaymentButtonState = 
+  | "idle" 
+  | "processing"
+  | "retrying"
+  | "failed"
+  | "succeeded";
+
+export interface PaymentButtonLabels {
+  idle: string;
+  processing: string;
+  retrying: string;
+  failed: string;
+  succeeded: string;
+}
+
+export type PaymentMode = "subscribe" | "setup" | "change_payment";
+
+export const DEFAULT_PAYMENT_LABELS: Record<PaymentMode, PaymentButtonLabels> = {
+  subscribe: {
+    idle: "Subscribe",
+    processing: "Processing Payment...",
+    retrying: "Retrying Payment...",
+    failed: "Retry Payment",
+    succeeded: "Subscription Complete"
+  },
+  setup: {
+    idle: "Set Up Payment Method",
+    processing: "Setting Up Payment...",
+    retrying: "Retrying Setup...",
+    failed: "Retry Setup",
+    succeeded: "Setup Complete"
+  },
+  change_payment: {
+    idle: "Update Payment Method",
+    processing: "Updating Payment...",
+    retrying: "Retrying Update...",
+    failed: "Retry Update",
+    succeeded: "Update Complete"
+  }
+};
+
 // Payment information structure
 export interface PaymentInfo {
   client_secret: string; // Payment intent client secret

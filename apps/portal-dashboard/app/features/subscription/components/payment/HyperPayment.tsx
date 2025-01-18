@@ -73,8 +73,10 @@ const PaymentConfirmationButton = ({
 }) => {
   const hyper = useHyper();
   const elements = useElements();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [buttonState, setButtonState] = useState<PaymentButtonState>("idle");
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  
+  const buttonLabel = DEFAULT_PAYMENT_LABELS[mode][buttonState];
 
   const handlePaymentError = (error: Error) => {
     const errorMessage = error.message || "An unexpected error occurred";
@@ -88,7 +90,7 @@ const PaymentConfirmationButton = ({
       return;
     }
 
-    setIsProcessing(true);
+    setButtonState("processing");
     setPaymentError(null);
 
     try {
@@ -103,17 +105,18 @@ const PaymentConfirmationButton = ({
       if (result?.error) {
         // Keep dialog open and show error
         handlePaymentError(new Error(result.error.message || "Payment failed"));
+        setButtonState("failed");
         return; // Don't close dialog, allow retry
       }
 
       console.log("Payment succeeded:", result);
+      setButtonState("succeeded");
       onPaymentSuccess();
     } catch (error) {
       handlePaymentError(
         error instanceof Error ? error : new Error("Payment failed"),
       );
-    } finally {
-      setIsProcessing(false);
+      setButtonState("failed");
     }
   };
 
@@ -121,13 +124,9 @@ const PaymentConfirmationButton = ({
     <>
       <Button
         onClick={handlePayment}
-        disabled={isProcessing}
+        disabled={buttonState === "processing" || buttonState === "succeeded"}
         className="w-full py-2 px-4 text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-        {isProcessing
-          ? "Processing..."
-          : mode === "subscribe"
-            ? "Subscribe"
-            : "Update Payment Method"}
+        {buttonLabel}
       </Button>
       {paymentError && <div className="text-red-500 mt-2">{paymentError}</div>}
     </>
