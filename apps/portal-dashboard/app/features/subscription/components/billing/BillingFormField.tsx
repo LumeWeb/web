@@ -42,6 +42,7 @@ export function BillingFormField({
             form.setValue('address.state', value, { shouldDirty: true });
             handleStateChange();
           }}
+          disabled={!form.watch('address.country')}
         />
       );
     case 'city':
@@ -52,6 +53,7 @@ export function BillingFormField({
           label="City"
           placeholder="Select City"
           useList={useCityList}
+          disabled={!form.watch('address.state')}
         />
       );
     default:
