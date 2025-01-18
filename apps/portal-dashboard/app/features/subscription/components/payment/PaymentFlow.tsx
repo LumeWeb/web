@@ -74,7 +74,7 @@ export function PaymentFlow() {
   const paymentStatus = getPaymentStatus(context.payment);
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleDialogChange}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Complete Payment</DialogTitle>
