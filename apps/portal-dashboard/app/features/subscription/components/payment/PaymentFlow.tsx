@@ -19,7 +19,11 @@ export function PaymentFlow() {
 
   const { getPaymentStatus, isPaymentExpired } = usePayment();
 
-  const { state: paymentState, context: paymentContext, actions: paymentActions } = usePaymentMachine();
+  const { 
+    state: paymentState, 
+    context: paymentContext, 
+    actions: paymentActions 
+  } = usePaymentMachine();
 
   const handlePaymentSuccess = () => {
     paymentActions.completePayment();
@@ -48,10 +52,10 @@ export function PaymentFlow() {
   useEffect(() => {
     if (state === "pendingPayment") {
       setIsOpen(true);
-    } else if (!hasError) {
+    } else if (paymentState !== "error") {
       setIsOpen(false);
     }
-  }, [state, hasError]);
+  }, [state, paymentState]);
 
   // Don't render if no payment info
   if (!context.payment?.client_secret) {
@@ -89,12 +93,12 @@ export function PaymentFlow() {
           <DialogDescription>
             {paymentStatus === "PROCESSING"
               ? "Your payment is being processed..."
-              : hasError
+              : paymentState === "error"
                 ? "Payment failed. Please try again."
                 : "Please complete your payment to activate your subscription."}
           </DialogDescription>
         </DialogHeader>
-        {hasError && (
+        {paymentState === "error" && (
           <div className="flex justify-end p-4">
             <Button onClick={handleRetry} variant="secondary">
               Retry Payment
