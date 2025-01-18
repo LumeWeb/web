@@ -54,12 +54,7 @@ export function SubscriptionManager() {
 export default SubscriptionManager;
 
 function SubscriptionContent() {
-  const {
-    state,
-    context,
-    send,
-    actions: { selectPlan, updateBilling, complete, cancel, retry },
-  } = useSubscriptionMachine();
+  const { state, context, send, actions } = useSubscriptionMachine();
 
   const { isLoading } = useSubscriptionContext();
   const [localError, setLocalError] = useState<string | null>(null);
@@ -153,7 +148,7 @@ function SubscriptionContent() {
       setValidationError(null);
       setBillingError(null);
 
-      selectPlan(plan);
+      actions.selectPlan(plan);
       openPlanChangeDialog(plan);
     } catch (err) {
       const errorMessage =
@@ -202,7 +197,7 @@ function SubscriptionContent() {
         }
 
         if (context.selectedPlan.is_free) {
-          complete();
+          actions.complete();
         }
 
         setShowConfirmDialog(false);
