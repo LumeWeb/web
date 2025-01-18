@@ -14,6 +14,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "portal-shared/components/ui/command";
 import {
   Popover,
@@ -76,7 +77,8 @@ export function BillingAddressComboBox({
               <Command
                 filter={(value, search) => {
                   const name = options?.find(
-                    (option) => option.value.toLowerCase() === value.toLowerCase(),
+                    (option) =>
+                      option.value.toLowerCase() === value.toLowerCase(),
                   )?.label;
                   if (
                     value.includes(search) ||
@@ -86,7 +88,9 @@ export function BillingAddressComboBox({
                   }
                   return 0;
                 }}>
-                <CommandInput placeholder={`Search ${label.toLowerCase()}...`} />
+                <CommandInput
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                />
                 <CommandList>
                   <CommandEmpty>No {label.toLowerCase()} found.</CommandEmpty>
                   {options.map((option) => (
