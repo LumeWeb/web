@@ -35,7 +35,8 @@ interface BillingAddressComboBoxProps {
   label: string;
   placeholder: string;
   useList: () => { value: string; label: string }[];
-  onSelectionChange?: () => void;
+  onSelectionChange?: (value: string) => void;
+  disabled?: boolean;
 }
 
 export function BillingAddressComboBox({
@@ -51,8 +52,8 @@ export function BillingAddressComboBox({
   const options = useList();
 
   React.useEffect(() => {
-    setShowFreeInput(options.length === 0);
-  }, [options]);
+    setShowFreeInput(!disabled && options.length === 0);
+  }, [options, disabled]);
 
   return (
     <FormField
