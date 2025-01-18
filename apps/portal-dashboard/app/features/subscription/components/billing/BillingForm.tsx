@@ -20,6 +20,7 @@ import {
   CardTitle,
 } from "portal-shared/components/ui/card";
 import { useBillingMachine } from "@/features/subscription/hooks/domain/useBillingMachine";
+import { AxiosError } from "axios";
 
 export function BillingForm() {
   const { open } = useNotification();
@@ -74,7 +75,7 @@ export function BillingForm() {
         return response;
       } catch (saveError) {
         // Handle specific server validation errors
-        if (saveError instanceof Error && saveError.errors) {
+        if (saveError instanceof AxiosError) {
           const serverErrors = Object.entries(saveError.errors).map(
             ([field, error]) => ({
               field: field as keyof BillingInfo,
