@@ -100,7 +100,7 @@ export function BillingAddressComboBox({
                       onSelect={() => {
                         field.onChange(option.value);
                         if (onSelectionChange) {
-                          onSelectionChange();
+                          onSelectionChange(option.value);
                         }
                         setOpen(false);
                       }}>

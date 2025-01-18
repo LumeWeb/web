@@ -22,9 +22,13 @@ export function useCountryData(form: UseFormReturn<BillingInfo>) {
     (country) => country.code === selectedCountry
   );
 
-  const handleCountryChange = useCallback(() => {
+  const handleCountryChange = useCallback((countryCode: string) => {
+    // Reset state and city when country changes
     form.setValue('address.state', '', { shouldDirty: true });
     form.setValue('address.city', '', { shouldDirty: true });
+    
+    // Set the selected country
+    form.setValue('address.country', countryCode, { shouldDirty: true });
   }, [form]);
 
   const useCountryList = useCallback(() => {

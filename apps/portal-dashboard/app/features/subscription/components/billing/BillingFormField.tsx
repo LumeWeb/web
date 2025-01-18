@@ -38,7 +38,10 @@ export function BillingFormField({
           label="State/Province"
           placeholder="Select State/Province"
           useList={useStateList}
-          onSelectionChange={handleStateChange}
+          onSelectionChange={(value) => {
+            form.setValue('address.state', value, { shouldDirty: true });
+            handleStateChange();
+          }}
         />
       );
     case 'city':
