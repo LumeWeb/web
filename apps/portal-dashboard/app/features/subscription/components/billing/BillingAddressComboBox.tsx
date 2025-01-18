@@ -46,7 +46,12 @@ export function BillingAddressComboBox({
   onSelectionChange,
 }: BillingAddressComboBoxProps) {
   const [open, setOpen] = React.useState(false);
+  const [showFreeInput, setShowFreeInput] = React.useState(false);
   const options = useList();
+
+  React.useEffect(() => {
+    setShowFreeInput(options.length === 0);
+  }, [options]);
 
   return (
     <FormField
@@ -55,7 +60,15 @@ export function BillingAddressComboBox({
       render={({ field }) => (
         <FormItem className="flex flex-col">
           <FormLabel>{label}</FormLabel>
-          <Popover open={open} onOpenChange={setOpen}>
+          {showFreeInput ? (
+            <FormControl>
+              <Input
+                {...field}
+                placeholder={`Enter ${label.toLowerCase()}`}
+              />
+            </FormControl>
+          ) : (
+            <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <FormControl>
                 <Button
@@ -119,6 +132,7 @@ export function BillingAddressComboBox({
               </Command>
             </PopoverContent>
           </Popover>
+          )}
           <FormMessage />
         </FormItem>
       )}
