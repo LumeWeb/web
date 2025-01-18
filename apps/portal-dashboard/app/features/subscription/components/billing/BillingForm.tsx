@@ -76,23 +76,58 @@ export function BillingForm() {
       } catch (saveError) {
         // Handle specific server validation errors
         if (saveError instanceof AxiosError) {
-          const serverErrors = Object.entries(saveError.errors).map(
-            ([field, error]) => ({
-              field: field as keyof BillingInfo,
-              message:
-                typeof error === "string"
-                  ? error
-                  : typeof error === "object" && "message" in error
-                    ? error.message
-                    : Array.isArray(error)
-                      ? error.join(", ")
-                      : "Invalid value",
-            }),
-          );
-          send({ type: "INVALID", errors: serverErrors });
+          if (saveError.response?.data?.errors) {
+            const serverErrors = Object.entries(saveError.response.data.errors).map(
+              ([field, error]) => ({
+                field: field as keyof BillingInfo,
+                message:
+                  typeof error === "string"
+                    ? error
+                    : typeof error === "object" && "message" in error
+                      ? error.message
+                      : Array.isArray(error)
+                        ? error.join(", ")
+                        : "Invalid value",
+              }),
+            );
+            send({ type: "INVALID", errors: serverErrors });
+            open?.({
+              type: "error",
+              message: "Server validation failed",
+            });
+            return;
+          }
+
+          // Handle other specific axios error cases
+          switch (saveError.code) {
+            case AxiosError.ERR_NETWORK:
+              send({ 
+                type: "FAILED", 
+                error: new Error("Network error - please check your connection") 
+              });
+              break;
+            case AxiosError.ERR_TIMEOUT:
+              send({ 
+                type: "FAILED", 
+                error: new Error("Request timed out - please try again") 
+              });
+              break;
+            case AxiosError.ERR_BAD_REQUEST:
+              send({ 
+                type: "FAILED", 
+                error: new Error(saveError.response?.data?.message || "Invalid request") 
+              });
+              break;
+            default:
+              send({ 
+                type: "FAILED", 
+                error: new Error(saveError.message || "An unexpected error occurred") 
+              });
+          }
+          
           open?.({
             type: "error",
-            message: "Server validation failed",
+            message: saveError.message || "Failed to save billing information",
           });
           return;
         }
