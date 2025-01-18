@@ -193,7 +193,7 @@ function SubscriptionContent() {
       );
 
       if (!isValid) {
-        setBillingError("Please complete billing information before changing plans");
+        setBillingError("Please complete billing information before proceeding");
         setValidationError("Invalid billing information");
         setShowConfirmDialog(true); // Keep dialog open
         return;
