@@ -37,10 +37,12 @@ export function PaymentFlow() {
       type: "ERROR",
       error: new Error(error.message),
     });
+    setIsOpen(true); // Keep dialog open on error
   };
 
   const handleRetry = () => {
     paymentActions.retry();
+    paymentActions.startPayment(); // Ensure we're back in processing state
   };
 
   const [isOpen, setIsOpen] = useState(false);

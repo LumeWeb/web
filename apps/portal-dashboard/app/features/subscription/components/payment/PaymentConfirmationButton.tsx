@@ -52,6 +52,7 @@ export function PaymentConfirmationButton({
 
     startProcessing();
     paymentActions.startPayment();
+    paymentActions.processPayment();
     setPaymentError(null);
 
     try {
