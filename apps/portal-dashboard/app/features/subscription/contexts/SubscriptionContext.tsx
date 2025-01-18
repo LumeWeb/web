@@ -29,6 +29,26 @@ interface SubscriptionContextValue {
   state: SubscriptionStateValue;
   context: SubscriptionContext;
   send: (event: SubscriptionEvent) => void;
+  actions: {
+    loadSubscription: (subscription: Subscription) => void;
+    selectPlan: (plan: SubscriptionPlan) => void;
+    cancelPlanSelection: () => void;
+    createSubscription: () => void;
+    updateSubscription: () => void;
+    subscriptionCreated: (subscription: Subscription) => void;
+    subscriptionUpdated: (subscription: Subscription) => void;
+    updateBilling: (billing: BillingInfo) => void;
+    billingFailed: (error: Error) => void;
+    completePayment: (paymentMethodId: string) => void;
+    complete: () => void;
+    cancel: () => void;
+    reactivate: () => void;
+    retry: () => void;
+    handleError: (error: Error) => void;
+    editBilling: () => void;
+    updatePaymentMethod: () => void;
+    paymentMethodUpdated: (paymentMethodId: string) => void;
+  };
 }
 
 const SubscriptionContext = createContext<SubscriptionContextValue | undefined>(
@@ -55,6 +75,38 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const { refetch: refetchSubscription, isLoading: subscriptionIsLoading } =
     useSubscription();
 
+  const actions = useMemo(
+    () => ({
+      loadSubscription: (subscription: Subscription) =>
+        send({ type: "SUBSCRIPTION_LOADED", subscription }),
+      selectPlan: (plan: SubscriptionPlan) =>
+        send({ type: "SELECT_PLAN", plan }),
+      cancelPlanSelection: () => send({ type: "CANCEL_PLAN_SELECTION" }),
+      createSubscription: () => send({ type: "CREATE_SUBSCRIPTION" }),
+      updateSubscription: () => send({ type: "UPDATE_SUBSCRIPTION" }),
+      subscriptionCreated: (subscription: Subscription) =>
+        send({ type: "SUBSCRIPTION_CREATED", subscription }),
+      subscriptionUpdated: (subscription: Subscription) =>
+        send({ type: "SUBSCRIPTION_UPDATED", subscription }),
+      updateBilling: (billing: BillingInfo) =>
+        send({ type: "BILLING_COMPLETE", billing }),
+      billingFailed: (error: Error) => send({ type: "BILLING_FAILED", error }),
+      completePayment: (paymentMethodId: string) =>
+        send({ type: "PAYMENT_COMPLETE", paymentMethodId }),
+      complete: () => send({ type: "COMPLETE" }),
+      cancel: () => send({ type: "CANCEL" }),
+      reactivate: () => send({ type: "REACTIVATE" }),
+      retry: () => send({ type: "RETRY" }),
+      handleError: (error: Error) => send({ type: "ERROR", error }),
+      editBilling: () => send({ type: "EDIT_BILLING" }),
+      updatePaymentMethod: () =>
+        send({ type: "PAYMENT_METHOD_UPDATE_INITIATED" }),
+      paymentMethodUpdated: (paymentMethodId: string) =>
+        send({ type: "PAYMENT_METHOD_UPDATED", paymentMethodId }),
+    }),
+    [send],
+  );
+
   const value = useMemo(
     () => ({
       plans: plansData?.data?.plans || [],
@@ -67,6 +119,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
     [
       current,
       send,
+      actions,
       plansData?.data?.plans,
       plansAreLoading,
       subscriptionIsLoading,
