@@ -143,6 +143,22 @@ const states = {
 
   pending: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "SELECT_PLAN",
+      "pending",
+      guard(guards.canTransitionPlan),
+      guard(guards.hasBillingOrFree),
+      reduce((ctx, ev) => {
+        if (ev.type === "SELECT_PLAN") {
+          return {
+            ...ctx,
+            selectedPlan: ev.plan,
+            status: "PENDING",
+          };
+        }
+        return ctx;
+      }),
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "CREATE_SUBSCRIPTION",
       "creating",
     ),
