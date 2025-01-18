@@ -27,6 +27,7 @@ import {
   ChevronDownIcon,
 } from "portal-shared/components/icons";
 import { cn } from "portal-shared/lib/utils";
+import { Input } from "portal-shared/components/ui/input";
 
 interface BillingAddressComboBoxProps {
   name: string;
@@ -62,76 +63,73 @@ export function BillingAddressComboBox({
           <FormLabel>{label}</FormLabel>
           {showFreeInput ? (
             <FormControl>
-              <Input
-                {...field}
-                placeholder={`Enter ${label.toLowerCase()}`}
-              />
+              <Input {...field} placeholder={`Enter ${label.toLowerCase()}`} />
             </FormControl>
           ) : (
             <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <FormControl>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className={cn(
-                    "w-full justify-between",
-                    !field.value && "text-muted-foreground",
-                  )}>
-                  {field.value
-                    ? options.find((option) => option.value === field.value)
-                        ?.label
-                    : placeholder}
-                  <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </FormControl>
-            </PopoverTrigger>
-            <PopoverContent className="w-full p-0" align="start">
-              <Command
-                filter={(value, search) => {
-                  const name = options?.find(
-                    (option) =>
-                      option.value.toLowerCase() === value.toLowerCase(),
-                  )?.label;
-                  if (
-                    value.includes(search) ||
-                    name?.toLowerCase()?.includes(search.toLowerCase())
-                  ) {
-                    return 1;
-                  }
-                  return 0;
-                }}>
-                <CommandInput
-                  placeholder={`Search ${label.toLowerCase()}...`}
-                />
-                <CommandList>
-                  <CommandEmpty>No {label.toLowerCase()} found.</CommandEmpty>
-                  {options.map((option) => (
-                    <CommandItem
-                      key={option.value}
-                      value={option.value}
-                      onSelect={() => {
-                        field.onChange(option.value);
-                        if (onSelectionChange) {
-                          onSelectionChange(option.value);
-                        }
-                        setOpen(false);
-                      }}>
-                      <CloudCheckIcon
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          option.value === field.value
-                            ? "opacity-100"
-                            : "opacity-0",
-                        )}
-                      />
-                      {option.label}
-                    </CommandItem>
-                  ))}
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+              <PopoverTrigger asChild>
+                <FormControl>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className={cn(
+                      "w-full justify-between",
+                      !field.value && "text-muted-foreground",
+                    )}>
+                    {field.value
+                      ? options.find((option) => option.value === field.value)
+                          ?.label
+                      : placeholder}
+                    <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </FormControl>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0" align="start">
+                <Command
+                  filter={(value, search) => {
+                    const name = options?.find(
+                      (option) =>
+                        option.value.toLowerCase() === value.toLowerCase(),
+                    )?.label;
+                    if (
+                      value.includes(search) ||
+                      name?.toLowerCase()?.includes(search.toLowerCase())
+                    ) {
+                      return 1;
+                    }
+                    return 0;
+                  }}>
+                  <CommandInput
+                    placeholder={`Search ${label.toLowerCase()}...`}
+                  />
+                  <CommandList>
+                    <CommandEmpty>No {label.toLowerCase()} found.</CommandEmpty>
+                    {options.map((option) => (
+                      <CommandItem
+                        key={option.value}
+                        value={option.value}
+                        onSelect={() => {
+                          field.onChange(option.value);
+                          if (onSelectionChange) {
+                            onSelectionChange(option.value);
+                          }
+                          setOpen(false);
+                        }}>
+                        <CloudCheckIcon
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            option.value === field.value
+                              ? "opacity-100"
+                              : "opacity-0",
+                          )}
+                        />
+                        {option.label}
+                      </CommandItem>
+                    ))}
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           )}
           <FormMessage />
         </FormItem>
