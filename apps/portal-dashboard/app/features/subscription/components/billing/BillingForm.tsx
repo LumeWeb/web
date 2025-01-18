@@ -28,10 +28,6 @@ export function BillingForm() {
   const { open } = useNotification();
   const {
     form,
-    isSubmitting,
-    formError,
-    handleSubmit,
-    resetForm,
     setSupportedEntities,
     supportedEntities,
     updateFormSchema,
