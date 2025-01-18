@@ -79,9 +79,7 @@ const states = {
     ),
   ),
 
-  complete: state(
-    transition<EventType, BillingContext, BillingEvent>("EDIT", "editing"),
-  ),
+  complete: state(),
 
   error: state(
     transition<EventType, BillingContext, BillingEvent>(
