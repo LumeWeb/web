@@ -303,6 +303,7 @@ function SubscriptionContent() {
           if (!open) {
             setValidationError(null);
             setBillingError(null);
+            send({ type: "CANCEL_PLAN_SELECTION" });
           }
         }}>
         <AlertDialogContent>

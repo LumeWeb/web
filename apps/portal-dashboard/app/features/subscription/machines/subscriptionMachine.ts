@@ -56,6 +56,7 @@ type InvokedEvent<T> =
 export type SubscriptionEvent =
   | { type: "SUBSCRIPTION_LOADED"; subscription: Subscription }
   | { type: "SELECT_PLAN"; plan: SubscriptionPlan }
+  | { type: "CANCEL_PLAN_SELECTION" }
   | { type: "CREATE_SUBSCRIPTION" }
   | { type: "UPDATE_SUBSCRIPTION" }
   | { type: "SUBSCRIPTION_CREATED"; subscription: Subscription }
@@ -155,6 +156,16 @@ const states = {
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "EDIT_BILLING",
       "editingBilling",
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "CANCEL_PLAN_SELECTION",
+      "active",
+      reduce((ctx) => ({
+        ...ctx,
+        selectedPlan: null,
+        error: null,
+        status: ctx.previousStatus,
+      })),
     ),
   ),
 
