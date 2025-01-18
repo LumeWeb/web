@@ -41,7 +41,7 @@ const states = {
     transition<EventType, BillingContext, BillingEvent>("VALIDATED", "saving"),
     transition<EventType, BillingContext, BillingEvent>(
       "INVALID",
-      "editing",
+      "idle",
       reduce((ctx, ev) => {
         if (ev.type === "INVALID") {
           return {
