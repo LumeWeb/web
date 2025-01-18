@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
 import { usePaymentMachine } from "../../hooks/usePaymentMachine";
+import { MAX_RETRIES } from "../../machines/paymentMachine";
 import {
   Dialog,
   DialogContent,
