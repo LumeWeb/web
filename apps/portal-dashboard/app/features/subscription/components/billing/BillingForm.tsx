@@ -54,8 +54,7 @@ export function BillingForm() {
 
   const onSubmit = async (data: BillingInfo) => {
     try {
-      // Always start with validation
-      send({ type: "VALIDATE", billing: data });
+      actions.validate(data);
       
       const errors = await validateBillingInfo(data);
       if (errors) {
@@ -68,7 +67,7 @@ export function BillingForm() {
       }
 
       send({ type: "VALIDATED" });
-      send({ type: "SAVE" });
+      actions.save();
       
       await handleSubmit({
         onSuccess: () => {
