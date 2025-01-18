@@ -47,31 +47,32 @@ export function BillingForm() {
 
   const onSubmit = async (data: BillingInfo) => {
     try {
-      // First validate the data
+      // First send validate event with the data
+      send({ type: "VALIDATE", billing: data });
+
+      // Then validate the data
       const errors = await validateBillingInfo(data);
       if (errors) {
         send({ type: "INVALID", errors });
         open?.({
-          type: "error",
-          message: "Please correct the billing information errors",
+          type: "error", 
+          message: "Please correct the billing information errors"
         });
         return;
       }
 
       // If validation passes, proceed with saving
-      send({ type: "VALIDATE", billing: data });
       send({ type: "VALIDATED" });
       send({ type: "SAVE" });
 
+      // Call the billing mutation
+      const { updateBillingInfo } = useBillingMutations();
       try {
-        // Here you would typically make your API call to save the billing info
-        // For now we'll just simulate success
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+        await updateBillingInfo(data);
         send({ type: "SAVED" });
         open?.({
           type: "success",
-          message: "Billing information updated successfully",
+          message: "Billing information updated successfully"
         });
       } catch (saveError) {
         throw new Error("Failed to save billing information");
