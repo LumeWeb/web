@@ -41,20 +41,6 @@ const states = {
         return ctx;
       }),
     ),
-    transition<EventType, BillingContext, BillingEvent>(
-      "FAILED",
-      "error",
-      reduce((ctx, ev) => {
-        if (ev.type === "FAILED") {
-          return {
-            ...ctx,
-            error: ev.error,
-            errors: null
-          };
-        }
-        return ctx;
-      }),
-    ),
   ),
   validating: state(
     transition<EventType, BillingContext, BillingEvent>("VALIDATED", "saving"),
