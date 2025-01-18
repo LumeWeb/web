@@ -113,7 +113,7 @@ export function BillingForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <BillingValidator
               billingInfo={form.getValues()}
-              errors={state.context.errors}
+              errors={context.errors}
             />
 
             <BillingFormInput name="name" label="Full Name" form={form} />
@@ -175,9 +175,7 @@ export function BillingForm() {
               <Button
                 type="submit"
                 className="ml-auto"
-                disabled={
-                  isSubmitting || state === "saving" || state === "validating"
-                }>
+                disabled={state === "saving" || state === "validating"}>
                 {state === "saving"
                   ? "Saving..."
                   : state === "validating"
