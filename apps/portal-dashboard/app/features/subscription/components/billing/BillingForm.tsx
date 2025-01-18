@@ -50,7 +50,7 @@ export function BillingForm() {
     form.setValue("address.city", "", { shouldDirty: true });
   };
 
-  const { state, send } = useSubscriptionContext();
+  const { state, send, actions } = useBillingMachine();
 
   const onSubmit = async (data: BillingInfo) => {
     try {
