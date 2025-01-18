@@ -77,7 +77,7 @@ export function BillingAddressComboBox({
   return (
     <FormField
       control={control}
-      name={name}
+      name={name.includes('address.') ? name : `address.${name}`}
       render={({ field }) => (
         <FormItem className="flex flex-col">
           <FormLabel>{label}</FormLabel>

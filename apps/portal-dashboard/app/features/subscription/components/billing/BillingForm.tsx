@@ -48,20 +48,30 @@ export function BillingForm() {
     form.setValue("address.city", "", { shouldDirty: true });
   };
 
-  const onSubmit = handleSubmit({
-    onSuccess: () => {
-      open?.({
-        type: "success",
-        message: "Billing information updated successfully",
-      });
-    },
-    onError: (error) => {
+  const onSubmit = async (data: BillingInfo) => {
+    try {
+      await handleSubmit({
+        onSuccess: () => {
+          open?.({
+            type: "success",
+            message: "Billing information updated successfully",
+          });
+        },
+        onError: (error) => {
+          open?.({
+            type: "error",
+            message: error.message || "Failed to update billing information",
+          });
+        }
+      })(data);
+    } catch (err) {
+      console.error('Form submission error:', err);
       open?.({
         type: "error",
-        message: error.message || "Failed to update billing information",
+        message: err instanceof Error ? err.message : "Failed to submit form",
       });
     }
-  });
+  };
 
   useEffect(() => {
     if (!countryData || !selectedCountry || !selectedCountryData) return;
