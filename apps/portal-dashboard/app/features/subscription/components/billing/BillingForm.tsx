@@ -1,8 +1,5 @@
 import React, { useEffect } from "react";
-import { useNotification, HttpError } from "@refinedev/core";
-import { useBilling } from "../../hooks/core/useBilling";
-import { useSubscriptionForm } from "@/features/subscription/hooks/ui/useSubscriptionForm";
-import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
+import { useNotification } from "@refinedev/core";
 import { useBillingMutations } from "../../hooks/mutations/useBillingMutations";
 import { validateBillingInfo } from "../../services/billing";
 import { BillingInfo, EntityCode } from "../../types/billing.types";
@@ -57,8 +54,8 @@ export function BillingForm() {
       if (errors) {
         send({ type: "INVALID", errors });
         open?.({
-          type: "error", 
-          message: "Please correct the billing information errors"
+          type: "error",
+          message: "Please correct the billing information errors",
         });
         return;
       }
@@ -72,42 +69,49 @@ export function BillingForm() {
         send({ type: "SAVED" });
         open?.({
           type: "success",
-          message: "Billing information updated successfully"
+          message: "Billing information updated successfully",
         });
         return response;
       } catch (saveError) {
         // Handle specific server validation errors
-        if (saveError instanceof HttpError && saveError.errors) {
-          const serverErrors = Object.entries(saveError.errors).map(([field, error]) => ({
-            field: field as keyof BillingInfo,
-            message: typeof error === 'string' ? error :
-              typeof error === 'object' && 'message' in error ? error.message :
-              Array.isArray(error) ? error.join(', ') :
-              'Invalid value'
-          }));
+        if (saveError instanceof Error && saveError.errors) {
+          const serverErrors = Object.entries(saveError.errors).map(
+            ([field, error]) => ({
+              field: field as keyof BillingInfo,
+              message:
+                typeof error === "string"
+                  ? error
+                  : typeof error === "object" && "message" in error
+                    ? error.message
+                    : Array.isArray(error)
+                      ? error.join(", ")
+                      : "Invalid value",
+            }),
+          );
           send({ type: "INVALID", errors: serverErrors });
           open?.({
             type: "error",
-            message: "Server validation failed"
+            message: "Server validation failed",
           });
           return;
         }
-        
+
         // Handle other server errors
         const error = new Error(
-          saveError instanceof Error ? 
-            saveError.message : 
-            "Failed to save billing information"
+          saveError instanceof Error
+            ? saveError.message
+            : "Failed to save billing information",
         );
         send({ type: "FAILED", error });
         open?.({
           type: "error",
-          message: error.message
+          message: error.message,
         });
         throw error;
       }
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("Failed to submit form");
+      const error =
+        err instanceof Error ? err : new Error("Failed to submit form");
       send({ type: "FAILED", error });
       console.error("Form submission error:", error);
       open?.({
