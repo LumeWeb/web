@@ -62,6 +62,15 @@ const states = {
         error: ev.error,
         retryCount: ctx.retryCount + 1
       }))
+    ),
+    transition<EventType, PaymentContext, PaymentEvent>(
+      "RETRY",
+      "retrying",
+      guard(guards.canRetry),
+      reduce((ctx) => ({
+        ...ctx,
+        error: null
+      }))
     )
   ),
 
