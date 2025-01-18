@@ -83,12 +83,19 @@ const states = {
 
   error: state(
     transition<EventType, BillingContext, BillingEvent>(
-      "EDIT",
-      "editing",
-      reduce((ctx) => ({
-        ...ctx,
-        error: null,
-      })),
+      "VALIDATE",
+      "validating",
+      reduce((ctx, ev) => {
+        if (ev.type === "VALIDATE") {
+          return {
+            ...ctx,
+            billing: ev.billing,
+            errors: null,
+            error: null
+          };
+        }
+        return ctx;
+      }),
     ),
   ),
 } as const;
