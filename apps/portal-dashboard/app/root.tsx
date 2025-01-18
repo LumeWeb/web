@@ -33,6 +33,8 @@ import { useAuthProvider } from "portal-shared/hooks/useAuthProvider";
 import useSdk from "portal-shared/hooks/useSdk";
 import { withTheme } from "portal-shared/hooks/useTheme";
 
+import "@/features/subscription/dev.ts";
+
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
   { rel: "icon", href: "/favicon.svg" },
