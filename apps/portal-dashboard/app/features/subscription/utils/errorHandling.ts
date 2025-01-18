@@ -42,8 +42,8 @@ export interface BillingError {
   errors?: BillingValidationError[];
 }
 
-export function handleBillingError(error: unknown): BillingError {
-  if (axios.isAxiosError(error)) {
+export function handleBillingError(error: unknown | any): BillingError {
+  if (axios.isAxiosError(error) || error?.name === "AxiosError") {
     const response = error.response?.data as BillingErrorResponse;
 
     if (response?.details) {
