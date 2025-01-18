@@ -103,6 +103,21 @@ const states = {
 
   complete: state(
     transition<EventType, BillingContext, BillingEvent>(
+      "VALIDATE",
+      "validating",
+      reduce((ctx, ev) => {
+        if (ev.type === "VALIDATE") {
+          return {
+            ...ctx,
+            billing: ev.billing,
+            errors: null,
+            error: null,
+          };
+        }
+        return ctx;
+      }),
+    ),
+    transition<EventType, BillingContext, BillingEvent>(
       "FAILED",
       "error",
       reduce((ctx, ev) => {
