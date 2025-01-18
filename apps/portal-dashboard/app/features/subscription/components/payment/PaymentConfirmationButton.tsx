@@ -42,13 +42,12 @@ export function PaymentConfirmationButton({
     if (buttonState === "failed") {
       retry();
       paymentActions.retry();
+      return;
     }
 
-    if (buttonState === "idle") {
-      startProcessing();
-      paymentActions.startPayment();
-      setPaymentError(null);
-    }
+    startProcessing();
+    paymentActions.startPayment();
+    setPaymentError(null);
 
     try {
       const result = await hyper.confirmPayment({
