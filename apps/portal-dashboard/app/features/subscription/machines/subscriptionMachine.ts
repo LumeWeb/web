@@ -1,7 +1,7 @@
 import {
   createMachine,
   guard,
-  invoke,
+  interpret,
   reduce,
   state,
   transition,
@@ -11,68 +11,44 @@ import {
   Subscription,
   SubscriptionPlan,
 } from "../types/subscription.types";
-import { PaymentInfo } from "../types/payment.types";
-import { BillingContext, billingMachine } from "./billingMachine";
+import { billingMachine } from "@/features/subscription/machines/billingMachine";
 
-type SubscriptionStatus =
-  | "ACTIVE"
-  | "PENDING"
-  | "CANCELLED"
-  | "PENDING_PAYMENT";
+type SubscriptionStatus = "ACTIVE" | "PENDING" | "CANCELLED";
 
 interface SubscriptionContext {
   subscription: Subscription | null;
   selectedPlan: SubscriptionPlan | null;
   billing: BillingInfo | null;
-  payment: PaymentInfo | null;
   error: Error | null;
   status: SubscriptionStatus | null;
-  previousStatus: SubscriptionStatus | null;
-  planChangeHistory: {
-    fromPlan: SubscriptionPlan | null;
-    toPlan: SubscriptionPlan | null;
-    timestamp: number;
-  }[];
 }
 
 // Guards for subscription state transitions
 const guards = {
   canTransitionPlan: (ctx: SubscriptionContext) => {
     if (!ctx.subscription) return true;
-    return !["CANCELLED", "PENDING_PAYMENT"].includes(ctx.subscription.status);
+    return ctx.subscription.status !== "CANCELLED";
   },
-
-  isPlanChangeValid: (ctx: SubscriptionContext) => {
-    if (!ctx.subscription) return true;
-    if (ctx.subscription.status === "CANCELLED") return false;
-    return true;
+  hasBillingOrFree: (ctx: SubscriptionContext, ev: SubscriptionEvent) => {
+    if (ev.type === "SELECT_PLAN") {
+      return ev.plan.is_free || !!ctx.billing;
+    }
+    return false;
   },
 };
 
-type InvokedEvent<T> =
-  | { type: "done"; data: T }
-  | { type: "error"; error: Error };
-
 export type SubscriptionEvent =
   | { type: "SUBSCRIPTION_LOADED"; subscription: Subscription }
+  | { type: "BILLING_VALID"; billing: BillingInfo }
   | { type: "SELECT_PLAN"; plan: SubscriptionPlan }
   | { type: "CANCEL_PLAN_SELECTION" }
   | { type: "CREATE_SUBSCRIPTION" }
   | { type: "UPDATE_SUBSCRIPTION" }
   | { type: "SUBSCRIPTION_CREATED"; subscription: Subscription }
   | { type: "SUBSCRIPTION_UPDATED"; subscription: Subscription }
-  | { type: "COMPLETE" }
   | { type: "CANCEL" }
   | { type: "RETRY" }
-  | { type: "REACTIVATE" }
-  | { type: "ERROR"; error: Error }
-  | { type: "PAYMENT_COMPLETE"; paymentMethodId: string }
-  | { type: "PAYMENT_METHOD_UPDATE_INITIATED" }
-  | { type: "PAYMENT_METHOD_UPDATED"; paymentMethodId: string }
-  | { type: "EDIT_BILLING" }
-  | { type: "BILLING_COMPLETE"; billing: BillingInfo }
-  | { type: "BILLING_FAILED"; error: Error }
-  | InvokedEvent<BillingContext>;
+  | { type: "ERROR"; error: Error };
 
 type EventType = SubscriptionEvent["type"];
 
@@ -100,32 +76,6 @@ const states = {
       }),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "SELECT_PLAN",
-      "pending",
-      guard(guards.canTransitionPlan),
-      guard(guards.isPlanChangeValid),
-      reduce((ctx, ev) => {
-        if (ev.type === "SELECT_PLAN") {
-          return {
-            ...ctx,
-            selectedPlan: ev.plan,
-            error: null,
-            previousStatus: ctx.status,
-            status: "PENDING",
-            planChangeHistory: [
-              ...ctx.planChangeHistory,
-              {
-                fromPlan: ctx.subscription?.plan ?? null,
-                toPlan: ev.plan,
-                timestamp: Date.now(),
-              },
-            ],
-          };
-        }
-        return ctx;
-      }),
-    ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "ERROR",
       "error",
       reduce((ctx, ev) => {
@@ -145,24 +95,26 @@ const states = {
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SELECT_PLAN",
       "pending",
-      guard(guards.canTransitionPlan),
-      guard(guards.isPlanChangeValid),
+      guard(guards.hasBillingOrFree),
       reduce((ctx, ev) => {
         if (ev.type === "SELECT_PLAN") {
           return {
             ...ctx,
             selectedPlan: ev.plan,
-            error: null,
-            previousStatus: ctx.status,
             status: "PENDING",
-            planChangeHistory: [
-              ...ctx.planChangeHistory,
-              {
-                fromPlan: ctx.subscription?.plan ?? null,
-                toPlan: ev.plan,
-                timestamp: Date.now(),
-              },
-            ],
+          };
+        }
+        return ctx;
+      }),
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "BILLING_VALID",
+      "inactive",
+      reduce((ctx, ev) => {
+        if (ev.type === "BILLING_VALID") {
+          return {
+            ...ctx,
+            billing: ev.billing,
           };
         }
         return ctx;
@@ -180,40 +132,22 @@ const states = {
       "changing",
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "EDIT_BILLING",
-      "editingBilling",
-    ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "CANCEL_PLAN_SELECTION",
       "active",
       reduce((ctx) => ({
         ...ctx,
         selectedPlan: null,
-        error: null,
-        status: ctx.previousStatus,
+        status: "ACTIVE",
       })),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "SELECT_PLAN",
+      "BILLING_VALID",
       "pending",
-      guard(guards.canTransitionPlan),
-      guard(guards.isPlanChangeValid),
       reduce((ctx, ev) => {
-        if (ev.type === "SELECT_PLAN") {
+        if (ev.type === "BILLING_VALID") {
           return {
             ...ctx,
-            selectedPlan: ev.plan,
-            error: null,
-            previousStatus: ctx.status,
-            status: "PENDING",
-            planChangeHistory: [
-              ...ctx.planChangeHistory,
-              {
-                fromPlan: ctx.subscription?.plan ?? null,
-                toPlan: ev.plan,
-                timestamp: Date.now(),
-              },
-            ],
+            billing: ev.billing,
           };
         }
         return ctx;
@@ -231,7 +165,6 @@ const states = {
             ...ctx,
             subscription: ev.subscription,
             selectedPlan: null,
-            error: null,
             status: "ACTIVE",
           };
         }
@@ -246,7 +179,6 @@ const states = {
           return {
             ...ctx,
             error: ev.error,
-            subscription: null,
           };
         }
         return ctx;
@@ -264,7 +196,6 @@ const states = {
             ...ctx,
             subscription: ev.subscription,
             selectedPlan: null,
-            error: null,
             status: "ACTIVE",
           };
         }
@@ -286,78 +217,22 @@ const states = {
     ),
   ),
 
-  editingBilling: invoke(
-    billingMachine,
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "done",
-      "pendingPayment",
-      reduce((ctx, ev) => {
-        if (ev.type === "done" && ev.data?.billing) {
-          return {
-            ...ctx,
-            billing: ev.data.billing,
-            error: null,
-            status: "PENDING_PAYMENT",
-          };
-        }
-        return ctx;
-      }),
-    ),
-  ),
-
-  pendingPayment: state(
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "PAYMENT_COMPLETE",
-      "active",
-      reduce((ctx, ev) => {
-        if (ev.type === "PAYMENT_COMPLETE") {
-          return {
-            ...ctx,
-            payment: ctx.payment
-              ? {
-                  ...ctx.payment,
-                  paymentMethodId: ev.paymentMethodId,
-                }
-              : null,
-            error: null,
-            status: "ACTIVE",
-          };
-        }
-        return ctx;
-      }),
-    ),
-  ),
-
   active: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SELECT_PLAN",
       "pending",
       guard(guards.canTransitionPlan),
-      guard(guards.isPlanChangeValid),
+      guard(guards.hasBillingOrFree),
       reduce((ctx, ev) => {
         if (ev.type === "SELECT_PLAN") {
           return {
             ...ctx,
             selectedPlan: ev.plan,
-            error: null,
-            previousStatus: ctx.status,
             status: "PENDING",
-            planChangeHistory: [
-              ...ctx.planChangeHistory,
-              {
-                fromPlan: ctx.subscription?.plan ?? null,
-                toPlan: ev.plan,
-                timestamp: Date.now(),
-              },
-            ],
           };
         }
         return ctx;
       }),
-    ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "PAYMENT_METHOD_UPDATE_INITIATED",
-      "updatingPayment",
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "CANCEL",
@@ -369,38 +244,7 @@ const states = {
     ),
   ),
 
-  updatingPayment: state(
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "PAYMENT_METHOD_UPDATED",
-      "active",
-      reduce((ctx, ev) => {
-        if (ev.type === "PAYMENT_METHOD_UPDATED") {
-          return {
-            ...ctx,
-            payment: ctx.payment
-              ? {
-                  ...ctx.payment,
-                  paymentMethodId: ev.paymentMethodId,
-                }
-              : null,
-            status: "ACTIVE",
-          };
-        }
-        return ctx;
-      }),
-    ),
-  ),
-
-  cancelled: state(
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "REACTIVATE",
-      "pending",
-      reduce((ctx) => ({
-        ...ctx,
-        status: "PENDING",
-      })),
-    ),
-  ),
+  cancelled: state(),
 
   error: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
@@ -409,13 +253,11 @@ const states = {
       reduce((ctx) => ({
         ...ctx,
         error: null,
-        payment: null,
         selectedPlan: null,
-        status: ctx.previousStatus,
       })),
     ),
   ),
-} as const;
+};
 
 export const subscriptionMachine = createMachine(
   "idle",
@@ -424,10 +266,18 @@ export const subscriptionMachine = createMachine(
     subscription: context?.subscription ?? null,
     selectedPlan: context?.selectedPlan ?? null,
     billing: context?.billing ?? null,
-    payment: context?.payment ?? null,
     error: context?.error ?? null,
     status: context?.status ?? null,
-    previousStatus: context?.previousStatus ?? null,
-    planChangeHistory: context?.planChangeHistory ?? [],
   }),
 );
+
+const subscription = interpret(subscriptionMachine);
+
+interpret(billingMachine, (service) => {
+  if (service.machine.current === "complete") {
+    subscription.send({
+      type: "BILLING_VALID",
+      billing: service.context.billing,
+    });
+  }
+});
