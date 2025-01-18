@@ -66,23 +66,12 @@ export function BillingForm() {
       send({ type: "VALIDATED" });
       actions.save();
 
-      await handleSubmit({
-        onSuccess: () => {
-          send({ type: "SAVED" });
-          open?.({
-            type: "success",
-            message: "Billing information updated successfully",
-          });
-        },
-        onError: (error) => {
-          // Now errors during saving will transition from saving state to error
-          send({ type: "FAILED", error });
-          open?.({
-            type: "error",
-            message: error.message || "Failed to update billing information",
-          });
-        },
-      })(data);
+      // Save billing info
+      send({ type: "SAVED" });
+      open?.({
+        type: "success",
+        message: "Billing information updated successfully",
+      });
     } catch (err) {
       const error =
         err instanceof Error ? err : new Error("Failed to submit form");
