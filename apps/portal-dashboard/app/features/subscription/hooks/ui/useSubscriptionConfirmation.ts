@@ -22,22 +22,33 @@ export function useSubscriptionConfirmation() {
         return true;
       }
 
-      // Validate billing info exists for paid plans
-      if (!billing) {
-        setBillingError("Billing information is required for paid plans");
-        return false;
+      // Check if moving from free to paid plan
+      if (currentPlan?.is_free && !newPlan.is_free) {
+        // Require billing info when upgrading from free to paid
+        if (!billing) {
+          setBillingError("Billing information is required when upgrading to a paid plan");
+          return false;
+        }
       }
 
-      // Validate billing info is complete
-      const billingErrors = await validateBillingInfo(billing);
-      if (billingErrors) {
-        setBillingError("Please complete all required billing information");
-        return false;
+      // Always validate billing info for paid plans
+      if (!newPlan.is_free) {
+        if (!billing) {
+          setBillingError("Billing information is required for paid plans");
+          return false;
+        }
+
+        // Validate billing info is complete
+        const billingErrors = await validateBillingInfo(billing);
+        if (billingErrors) {
+          setBillingError("Please complete all required billing information");
+          return false;
+        }
       }
 
       return true;
     },
-    []
+    [validateBillingInfo]
   );
 
   return {

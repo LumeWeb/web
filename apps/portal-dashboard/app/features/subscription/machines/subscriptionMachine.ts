@@ -292,7 +292,7 @@ const states = {
       "done",
       "pendingPayment",
       reduce((ctx, ev) => {
-        if (ev.type === "done") {
+        if (ev.type === "done" && ev.data?.billing) {
           return {
             ...ctx,
             billing: ev.data.billing,
