@@ -73,12 +73,22 @@ export function BillingAddressComboBox({
               </FormControl>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0" align="start">
-              <Command>
-                <CommandInput
-                  placeholder={`Search ${label.toLowerCase()}...`}
-                />
-                <CommandEmpty>No {label.toLowerCase()} found.</CommandEmpty>
-                <CommandGroup>
+              <Command
+                filter={(value, search) => {
+                  const name = options?.find(
+                    (option) => option.value.toLowerCase() === value.toLowerCase(),
+                  )?.label;
+                  if (
+                    value.includes(search) ||
+                    name?.toLowerCase()?.includes(search.toLowerCase())
+                  ) {
+                    return 1;
+                  }
+                  return 0;
+                }}>
+                <CommandInput placeholder={`Search ${label.toLowerCase()}...`} />
+                <CommandList>
+                  <CommandEmpty>No {label.toLowerCase()} found.</CommandEmpty>
                   {options.map((option) => (
                     <CommandItem
                       key={option.value}
@@ -101,7 +111,7 @@ export function BillingAddressComboBox({
                       {option.label}
                     </CommandItem>
                   ))}
-                </CommandGroup>
+                </CommandList>
               </Command>
             </PopoverContent>
           </Popover>
