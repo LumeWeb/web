@@ -17,8 +17,8 @@ export function PaymentFlow() {
 
   const { getPaymentStatus, isPaymentExpired } = usePayment();
 
-  const handlePaymentSuccess = (paymentMethodId: string) => {
-    send({ type: "PAYMENT_COMPLETE", paymentMethodId });
+  const handlePaymentSuccess = () => {
+    send({ type: "PAYMENT_COMPLETE" });
   };
 
   const handlePaymentFailure = (error: Error) => {
