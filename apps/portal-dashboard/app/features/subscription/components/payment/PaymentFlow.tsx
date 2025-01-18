@@ -42,7 +42,6 @@ export function PaymentFlow() {
 
   const handleRetry = () => {
     paymentActions.retry();
-    paymentActions.startPayment(); // Ensure we're back in processing state
   };
 
   const [isOpen, setIsOpen] = useState(false);
