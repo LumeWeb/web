@@ -115,6 +115,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       state: current.name as SubscriptionStateValue,
       context: current.context,
       send,
+      actions,
     }),
     [
       current,
