@@ -64,8 +64,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       refetchSubscription,
     }),
     [
-      current.name,
-      current.context,
+      current,
       send,
       plansData?.data?.plans,
       plansAreLoading,
