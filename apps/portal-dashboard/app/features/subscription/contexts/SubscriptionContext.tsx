@@ -57,7 +57,12 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       isLoading: plansAreLoading || subscriptionIsLoading,
       refetchSubscription,
     }),
-    [plansData?.data?.plans, plansAreLoading, refetchSubscription],
+    [
+      plansData?.data?.plans,
+      plansAreLoading,
+      subscriptionIsLoading,
+      refetchSubscription,
+    ],
   );
 
   return (
