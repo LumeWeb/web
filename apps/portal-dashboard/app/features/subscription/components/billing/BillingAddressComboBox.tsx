@@ -46,6 +46,7 @@ export function BillingAddressComboBox({
   placeholder,
   useList,
   onSelectionChange,
+  disabled,
 }: BillingAddressComboBoxProps) {
   const [open, setOpen] = React.useState(false);
   const [showFreeInput, setShowFreeInput] = React.useState(false);
