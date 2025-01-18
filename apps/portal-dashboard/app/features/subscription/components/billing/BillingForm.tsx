@@ -26,12 +26,8 @@ import { useBillingMachine } from "@/features/subscription/hooks/domain/useBilli
 
 export function BillingForm() {
   const { open } = useNotification();
-  const {
-    form,
-    setSupportedEntities,
-    supportedEntities,
-    updateFormSchema,
-  } = useBillingForm();
+  const { form, setSupportedEntities, supportedEntities, updateFormSchema } =
+    useBillingForm();
 
   const {
     countryData,
@@ -47,7 +43,7 @@ export function BillingForm() {
     form.setValue("address.city", "", { shouldDirty: true });
   };
 
-  const { state, send, actions } = useBillingMachine();
+  const { state, send, actions, context } = useBillingMachine();
 
   const onSubmit = async (data: BillingInfo) => {
     try {
