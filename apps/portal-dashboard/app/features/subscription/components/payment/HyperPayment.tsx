@@ -18,12 +18,11 @@ interface HyperPaymentProps {
 
 export default function HyperPayment({
   onPaymentSuccess,
+  onPaymentError,
   mode,
 }: HyperPaymentProps) {
   const { context, hyperState, hyperPromise } = useSubscriptionContext();
   const [clientSecret, setClientSecret] = useState<string | undefined>();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   useEffect(() => {
     if (mode === "subscribe" || mode === "setup") {
@@ -68,25 +67,27 @@ export default function HyperPayment({
 
 const PaymentConfirmationButton = ({
   onPaymentSuccess,
+  onPaymentError,
   mode,
-  isProcessing,
-  setIsProcessing,
-  paymentError,
-  setPaymentError,
 }: {
   onPaymentSuccess: () => void;
+  onPaymentError: (error: Error) => void;
   mode: "subscribe" | "setup" | "change_payment";
-  isProcessing: boolean;
-  setIsProcessing: (value: boolean) => void;
-  paymentError: string | null;
-  setPaymentError: (value: string | null) => void;
 }) => {
   const hyper = useHyper();
   const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+
+  const handlePaymentError = (error: Error) => {
+    const errorMessage = error.message || "An unexpected error occurred";
+    setPaymentError(errorMessage);
+    onPaymentError(error);
+  };
 
   const handlePayment = async () => {
     if (!hyper || !elements) {
-      console.error("Hyper or elements not initialized");
+      handlePaymentError(new Error("Payment system not initialized"));
       return;
     }
 
@@ -103,20 +104,13 @@ const PaymentConfirmationButton = ({
       });
 
       if (result?.error) {
-        setPaymentError(
-          result.error.message || "An error occurred during payment",
-        );
-        console.error("Payment failed:", result.error);
+        handlePaymentError(new Error(result.error.message || "Payment failed"));
       } else {
         console.log("Payment succeeded:", result);
         onPaymentSuccess();
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "An unexpected error occurred";
-      setPaymentError(errorMessage);
-      onPaymentError(new Error(errorMessage));
-      console.error("Error confirming payment:", error);
+      handlePaymentError(error instanceof Error ? error : new Error("Payment failed"));
     } finally {
       setIsProcessing(false);
     }
