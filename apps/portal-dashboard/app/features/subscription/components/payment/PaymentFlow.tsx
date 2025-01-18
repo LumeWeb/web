@@ -29,6 +29,11 @@ export function PaymentFlow() {
     });
   };
 
+  const handleRetry = () => {
+    setHasError(false);
+    send({ type: "RETRY" });
+  };
+
   const [isOpen, setIsOpen] = useState(false);
   const { hasError, setHasError, handleOpenChange } = useDialogState({
     isOpen,
@@ -80,9 +85,18 @@ export function PaymentFlow() {
           <DialogDescription>
             {paymentStatus === "PROCESSING"
               ? "Your payment is being processed..."
-              : "Please complete your payment to activate your subscription."}
+              : hasError 
+                ? "Payment failed. Please try again."
+                : "Please complete your payment to activate your subscription."}
           </DialogDescription>
         </DialogHeader>
+        {hasError && (
+          <div className="flex justify-end p-4">
+            <Button onClick={handleRetry} variant="secondary">
+              Retry Payment
+            </Button>
+          </div>
+        )}
         <HyperPayment
           mode="subscribe"
           onPaymentSuccess={handlePaymentSuccess}

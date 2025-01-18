@@ -23,6 +23,14 @@ export default function HyperPayment({
 }: HyperPaymentProps) {
   const { context, hyperState, hyperPromise } = useSubscriptionContext();
   const [clientSecret, setClientSecret] = useState<string | undefined>();
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  useEffect(() => {
+    if (isRetrying) {
+      setClientSecret(context?.payment?.client_secret);
+      setIsRetrying(false);
+    }
+  }, [isRetrying, context?.payment?.client_secret]);
 
   useEffect(() => {
     if (mode === "subscribe" || mode === "setup") {
