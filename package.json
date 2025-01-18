@@ -238,7 +238,10 @@
       "@uppy/utils@6.0.1": "patches/@uppy__utils@6.0.1.patch",
       "@helia/block-brokers@3.0.3": "patches/@helia__block-brokers@3.0.3.patch",
       "@refinedev/core@4.54.0": "patches/@refinedev__core@4.54.0.patch",
-      "@uppy/core@4.1.0": "patches/@uppy__core@4.1.0.patch"
+      "@uppy/core@4.1.0": "patches/@uppy__core@4.1.0.patch",
+      "robot3": "patches/robot3.patch",
+      "robot-hooks": "patches/robot-hooks.patch",
+      "react-robot": "patches/react-robot.patch"
     }
   },
   "packageManager": "pnpm@9.11.0"

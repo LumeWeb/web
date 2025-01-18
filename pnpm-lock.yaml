@@ -17,6 +17,15 @@ patchedDependencies:
   '@uppy/utils@6.0.1':
     hash: dtsj2ai6tr6yk73vdif5bjxv3y
     path: patches/@uppy__utils@6.0.1.patch
+  react-robot:
+    hash: k2skphb7hkt5iccwy24k5nb2jq
+    path: patches/react-robot.patch
+  robot-hooks:
+    hash: ypk6xbrf2qskl3xcbfyym7agxu
+    path: patches/robot-hooks.patch
+  robot3:
+    hash: v43x6cvr42e2wzmwczcus4fg4u
+    path: patches/robot3.patch
   tus-js-client@4.1.0:
     hash: ix3wb5jsxkda2mun5fypwfnuwa
     path: patches/tus-js-client@4.1.0.patch
@@ -387,7 +396,7 @@ importers:
         version: 5.3.0(react@18.2.0)
       react-robot:
         specifier: ^1.2.0
-        version: 1.2.0(react@18.2.0)(robot3@1.1.0)
+        version: 1.2.0(patch_hash=k2skphb7hkt5iccwy24k5nb2jq)(react@18.2.0)(robot3@1.1.0(patch_hash=v43x6cvr42e2wzmwczcus4fg4u))
       react-router-dom:
         specifier: 6.23.1
         version: 6.23.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -402,7 +411,7 @@ importers:
         version: 3.2.0(@remix-run/server-runtime@2.13.1(typescript@5.6.3))(typescript@5.6.3)
       robot3:
         specifier: ^1.1.0
-        version: 1.1.0
+        version: 1.1.0(patch_hash=v43x6cvr42e2wzmwczcus4fg4u)
       slugify:
         specifier: ^1.6.6
         version: 1.6.6
@@ -7377,7 +7386,6 @@ packages:
 
   bun@1.1.20:
     resolution: {integrity: sha512-aqLmvaz0/vLUiCrOXtAsf7pCSOS/qXieYDsq8COa3+fIgMK05CjZt9m9r7DC+tjKy7hH8uKSNTapQOr/kX8gIA==}
-    cpu: [arm64, x64]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -16256,7 +16264,7 @@ snapshots:
     dependencies:
       '@babel/compat-data': 7.26.5
       '@babel/helper-validator-option': 7.25.9
-      browserslist: 4.24.0
+      browserslist: 4.24.4
       lru-cache: 5.1.1
       semver: 6.3.1
 
@@ -19267,7 +19275,7 @@ snapshots:
 
   '@docusaurus/react-loadable@6.0.0(react@18.2.0)':
     dependencies:
-      '@types/react': 19.0.2
+      '@types/react': 19.0.7
       react: 18.2.0
 
   '@docusaurus/theme-classic@3.5.2(@swc/core@1.7.0(@swc/helpers@0.5.12))(@types/react@18.2.75)(esbuild@0.17.19)(eslint@8.57.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.6.3)':
@@ -25020,7 +25028,7 @@ snapshots:
       '@babel/plugin-syntax-typescript': 7.24.7(@babel/core@7.25.8)
       '@vanilla-extract/babel-plugin-debug-ids': 1.0.6
       '@vanilla-extract/css': 1.15.3
-      esbuild: 0.17.6
+      esbuild: 0.19.12
       eval: 0.1.8
       find-up: 5.0.0
       javascript-stringify: 2.1.0
@@ -34208,11 +34216,11 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.0.7
 
-  react-robot@1.2.0(react@18.2.0)(robot3@1.1.0):
+  react-robot@1.2.0(patch_hash=k2skphb7hkt5iccwy24k5nb2jq)(react@18.2.0)(robot3@1.1.0(patch_hash=v43x6cvr42e2wzmwczcus4fg4u)):
     dependencies:
       react: 18.2.0
-      robot-hooks: 1.1.0(robot3@1.1.0)
-      robot3: 1.1.0
+      robot-hooks: 1.1.0(patch_hash=ypk6xbrf2qskl3xcbfyym7agxu)(robot3@1.1.0(patch_hash=v43x6cvr42e2wzmwczcus4fg4u))
+      robot3: 1.1.0(patch_hash=v43x6cvr42e2wzmwczcus4fg4u)
 
   react-router-config@5.1.1(react-router@5.3.4(react@18.2.0))(react@18.2.0):
     dependencies:
@@ -34884,11 +34892,11 @@ snapshots:
       hash-base: 3.1.0
       inherits: 2.0.4
 
-  robot-hooks@1.1.0(robot3@1.1.0):
+  robot-hooks@1.1.0(patch_hash=ypk6xbrf2qskl3xcbfyym7agxu)(robot3@1.1.0(patch_hash=v43x6cvr42e2wzmwczcus4fg4u)):
     dependencies:
-      robot3: 1.1.0
+      robot3: 1.1.0(patch_hash=v43x6cvr42e2wzmwczcus4fg4u)
 
-  robot3@1.1.0: {}
+  robot3@1.1.0(patch_hash=v43x6cvr42e2wzmwczcus4fg4u): {}
 
   robust-predicates@3.0.2: {}
 

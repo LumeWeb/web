@@ -1,0 +1,12 @@
+diff --git a/package.json b/package.json
+index 45d22a2e11cf78f9b85111096fb32f93a277e877..1a8903ae384932eb4f95056555d73dc9c5a18587 100644
+--- a/package.json
++++ b/package.json
+@@ -3,7 +3,6 @@
+   "version": "1.2.0",
+   "description": "React hooks for Robot finite state machines",
+   "main": "machine.js",
+-  "module": "machine.js",
+   "type": "module",
+   "scripts": {
+     "test": "wireit"

@@ -1,0 +1,13 @@
+diff --git a/package.json b/package.json
+index 20554c9998ebd4d8bfbe1e4c15a6facaeaee6512..d137d9a7ddf976cf813239ad0f9d92cc5aac17db 100644
+--- a/package.json
++++ b/package.json
+@@ -2,7 +2,7 @@
+   "name": "robot-hooks",
+   "version": "1.1.0",
+   "description": "Hooks for use with Robot finite state machines",
+-  "main": "dist/machine.js",
++  "type":"module",
+   "module": "machine.js",
+   "files": [
+     "dist/",
