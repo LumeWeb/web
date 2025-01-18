@@ -11,6 +11,7 @@ import HyperPayment from "@/features/subscription/components/payment/HyperPaymen
 import { ExclamationCircleIcon } from "portal-shared/components/icons";
 import { usePayment } from "../../hooks/core/usePayment";
 import { useSubscriptionMachine } from "@/features/subscription/hooks/useSubscriptionMachine";
+import { useDialogState } from "../../hooks/useDialogState";
 
 export function PaymentFlow() {
   const { state, context, send } = useSubscriptionContext();
@@ -33,7 +34,7 @@ export function PaymentFlow() {
   const { hasError, setHasError, handleOpenChange } = useDialogState({
     isOpen,
     onOpenChange: setIsOpen,
-    shouldPreventClose: true
+    shouldPreventClose: true,
   });
 
   useEffect(() => {
