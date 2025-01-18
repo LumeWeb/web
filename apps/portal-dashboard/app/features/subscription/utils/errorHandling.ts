@@ -1,5 +1,5 @@
 import axios from "axios";
-import { SubscriptionError } from "../types/subscription.types";
+import { BillingInfo, SubscriptionError } from "../types/subscription.types";
 
 export function handleSubscriptionError(error: unknown): SubscriptionError {
   if (axios.isAxiosError(error)) {
