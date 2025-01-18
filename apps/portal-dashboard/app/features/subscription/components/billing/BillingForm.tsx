@@ -128,11 +128,11 @@ export function BillingForm() {
               errors={formError?.errors}
             />
 
-            <BillingFormInput name="name" label="Name" form={form} />
+            <BillingFormInput name="name" label="Full Name" form={form} />
 
             <BillingFormInput
               name="organization"
-              label="Organization"
+              label="Organization Name"
               form={form}
               optional
             />
@@ -147,13 +147,13 @@ export function BillingForm() {
             />
 
             <BillingFormInput
-              name="address_line1"
+              name="address.line1"
               label="Address Line 1"
               form={form}
             />
 
             <BillingFormInput
-              name="address_line2"
+              name="address.line2"
               label="Address Line 2"
               form={form}
               optional
@@ -178,7 +178,7 @@ export function BillingForm() {
             ))}
 
             <BillingFormInput
-              name="postal_code"
+              name="address.postal_code"
               label="Postal Code"
               form={form}
             />
