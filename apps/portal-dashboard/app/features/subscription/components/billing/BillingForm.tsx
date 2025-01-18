@@ -34,7 +34,7 @@ export function BillingForm() {
     setSupportedEntities,
     supportedEntities,
     updateFormSchema,
-  } = useSubscriptionForm();
+  } = useBillingForm();
 
   const {
     countryData,
