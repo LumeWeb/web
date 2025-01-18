@@ -10,7 +10,6 @@ import {
 import HyperPayment from "@/features/subscription/components/payment/HyperPayment";
 import { ExclamationCircleIcon } from "portal-shared/components/icons";
 import { usePayment } from "../../hooks/core/usePayment";
-import { useSubscriptionMachine } from "@/features/subscription/hooks/useSubscriptionMachine";
 import { useDialogState } from "../../hooks/useDialogState";
 
 export function PaymentFlow() {
