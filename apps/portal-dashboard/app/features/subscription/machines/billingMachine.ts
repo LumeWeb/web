@@ -56,6 +56,14 @@ const states = {
 
   saving: state(
     transition<EventType, BillingContext, BillingEvent>(
+      "SAVE",
+      "saving",
+      reduce((ctx) => ({
+        ...ctx,
+        error: null,
+      })),
+    ),
+    transition<EventType, BillingContext, BillingEvent>(
       "SAVED",
       "complete",
       reduce((ctx) => ({

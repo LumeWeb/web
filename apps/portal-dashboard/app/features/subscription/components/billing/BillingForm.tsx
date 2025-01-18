@@ -60,7 +60,7 @@ export function BillingForm() {
       }
 
       send({ type: "VALIDATED" });
-      actions.save();
+      send({ type: "SAVE" });
 
       // Save billing info
       send({ type: "SAVED" });
