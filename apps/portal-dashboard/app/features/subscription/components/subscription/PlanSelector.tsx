@@ -46,10 +46,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
     );
   }
 
-  console.log("PlanSelector - received plans:", plans);
-
   if (!plans?.length) {
-    console.log("PlanSelector - no plans available");
     return (
       <div className="text-center p-4">
         <p className="text-muted-foreground">No subscription plans available</p>

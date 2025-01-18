@@ -135,13 +135,6 @@ function SubscriptionContent() {
     closeDialog,
   } = useSubscriptionDialog();
 
-  // Handle plan selection state changes
-  useEffect(() => {
-    if (state === "pending" && context.selectedPlan) {
-      setShowConfirmDialog(true);
-    }
-  }, [state, context.selectedPlan]);
-
   const handlePlanSelect = (plan: SubscriptionPlan) => {
     try {
       setLocalError(null);
@@ -149,6 +142,7 @@ function SubscriptionContent() {
       setBillingError(null);
 
       actions.selectPlan(plan);
+      setShowConfirmDialog(true);
       openPlanChangeDialog(plan);
     } catch (err) {
       const errorMessage =
@@ -158,70 +152,7 @@ function SubscriptionContent() {
     }
   };
 
-  // Handle subscription state changes
-  useEffect(() => {
-    const handleSubscriptionChange = async () => {
-      if (!context.selectedPlan || !showConfirmDialog) return;
-
-      try {
-        const isValid = await validatePlanChange(
-          context.subscription?.plan,
-          context.selectedPlan,
-          context.billing,
-        );
-
-        if (!isValid) {
-          setBillingError(
-            "Please complete billing information before proceeding",
-          );
-          setValidationError("Invalid billing information");
-          return;
-        }
-
-        if (context.subscription?.plan) {
-          actions.updateSubscription();
-          const { subscription } = await updateSubscription(
-            context.selectedPlan,
-          );
-          if (subscription) {
-            actions.subscriptionUpdated(subscription);
-          }
-        } else {
-          actions.createSubscription();
-          const { subscription } = await createSubscription(
-            context.selectedPlan,
-          );
-          if (subscription) {
-            actions.subscriptionCreated(subscription);
-          }
-        }
-
-        if (context.selectedPlan.is_free) {
-          actions.complete();
-        }
-
-        setShowConfirmDialog(false);
-        closeDialog();
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Subscription action failed";
-        setValidationError(errorMessage);
-        send({ type: "ERROR", error: new Error(errorMessage) });
-      }
-    };
-
-    if (state === "pending" && showConfirmDialog) {
-      handleSubscriptionChange();
-    }
-  }, [
-    state,
-    context.selectedPlan,
-    showConfirmDialog,
-    context.subscription,
-    context.billing,
-  ]);
-
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!context.selectedPlan) {
       console.error("No plan selected in context");
       setValidationError("No plan selected");
@@ -231,7 +162,48 @@ function SubscriptionContent() {
     setValidationError(null);
     setBillingError(null);
     setLocalError(null);
-    setShowConfirmDialog(true);
+
+    try {
+      const isValid = await validatePlanChange(
+        context.subscription?.plan,
+        context.selectedPlan,
+        context.billing,
+      );
+
+      if (!isValid) {
+        setBillingError(
+          "Please complete billing information before proceeding",
+        );
+        setValidationError("Invalid billing information");
+        return;
+      }
+
+      if (context.subscription?.plan) {
+        actions.updateSubscription();
+        const { subscription } = await updateSubscription(context.selectedPlan);
+        if (subscription) {
+          actions.subscriptionUpdated(subscription);
+        }
+      } else {
+        actions.createSubscription();
+        const { subscription } = await createSubscription(context.selectedPlan);
+        if (subscription) {
+          actions.subscriptionCreated(subscription);
+        }
+      }
+
+      if (context.selectedPlan.is_free) {
+        actions.complete();
+      }
+
+      setShowConfirmDialog(false);
+      closeDialog();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Subscription action failed";
+      setValidationError(errorMessage);
+      send({ type: "ERROR", error: new Error(errorMessage) });
+    }
   };
 
   if (isLoading) {
