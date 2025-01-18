@@ -55,7 +55,6 @@ export default SubscriptionManager;
 
 function SubscriptionContent() {
   const { state, context, send, actions, isLoading } = useSubscriptionMachine();
-  const { isLoading: contextLoading } = useSubscriptionContext();
   const [localError, setLocalError] = useState<string | null>(null);
   const { createSubscription, updateSubscription } = useSubscriptionMutations();
 
