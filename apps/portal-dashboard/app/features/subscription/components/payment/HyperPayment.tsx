@@ -101,13 +101,17 @@ const PaymentConfirmationButton = ({
       });
 
       if (result?.error) {
+        // Keep dialog open and show error
         handlePaymentError(new Error(result.error.message || "Payment failed"));
-      } else {
-        console.log("Payment succeeded:", result);
-        onPaymentSuccess();
+        return; // Don't close dialog, allow retry
       }
+
+      console.log("Payment succeeded:", result);
+      onPaymentSuccess();
     } catch (error) {
-      handlePaymentError(error instanceof Error ? error : new Error("Payment failed"));
+      handlePaymentError(
+        error instanceof Error ? error : new Error("Payment failed"),
+      );
     } finally {
       setIsProcessing(false);
     }
