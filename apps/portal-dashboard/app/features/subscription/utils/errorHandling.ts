@@ -35,6 +35,13 @@ interface BillingErrorResponse {
   details?: Record<string, string>;
 }
 
+export interface BillingError {
+  message: string;
+  code?: string;
+  statusCode?: number;
+  errors?: BillingValidationError[];
+}
+
 export function handleBillingError(error: unknown): BillingError {
   if (axios.isAxiosError(error)) {
     const response = error.response?.data as BillingErrorResponse;
