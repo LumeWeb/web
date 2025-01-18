@@ -12,9 +12,6 @@ import { routeConfig } from "./app/routeConfig";
 import { jsonRoutes } from "remix-json-routes";
 
 export default defineConfig({
-  optimizeDeps: {
-    include: ["robot3", "robot3/debug", "react-robot"],
-  },
   plugins: [
     remix({
       ssr: false,
@@ -30,25 +27,10 @@ export default defineConfig({
     }),
     commonjs({
       filter(id) {
-        return (
-          id.includes("url") ||
-          id.includes("robot3") ||
-          id.includes("react-robot")
-        );
+        return id.includes("url");
       },
     }),
   ],
-  resolve: {
-    alias: {
-      // Use the ESM version specifically
-      "robot3": path.resolve(__dirname, "../../node_modules/robot3/machine.js"),
-      "robot3/debug": path.resolve(__dirname, "../../node_modules/robot3/debug.js"),
-      "react-robot": path.resolve(
-        __dirname,
-        "../../node_modules/react-robot/machine.js",
-      ),
-    },
-  },
   build: {
     minify: false,
     outDir: "../../dist/apps/portal-dashboard",
