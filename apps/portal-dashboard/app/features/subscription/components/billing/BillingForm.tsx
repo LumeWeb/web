@@ -22,6 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from "portal-shared/components/ui/card";
+import { useBillingMachine } from "@/features/subscription/hooks/domain/useBillingMachine";
 
 export function BillingForm() {
   const { open } = useNotification();
@@ -55,7 +56,7 @@ export function BillingForm() {
   const onSubmit = async (data: BillingInfo) => {
     try {
       actions.validate(data);
-      
+
       const errors = await validateBillingInfo(data);
       if (errors) {
         send({ type: "INVALID", errors });
@@ -68,12 +69,12 @@ export function BillingForm() {
 
       send({ type: "VALIDATED" });
       actions.save();
-      
+
       await handleSubmit({
         onSuccess: () => {
           send({ type: "SAVED" });
           open?.({
-            type: "success", 
+            type: "success",
             message: "Billing information updated successfully",
           });
         },
@@ -84,12 +85,13 @@ export function BillingForm() {
             type: "error",
             message: error.message || "Failed to update billing information",
           });
-        }
+        },
       })(data);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("Failed to submit form");
+      const error =
+        err instanceof Error ? err : new Error("Failed to submit form");
       send({ type: "FAILED", error });
-      console.error('Form submission error:', error);
+      console.error("Form submission error:", error);
       open?.({
         type: "error",
         message: error.message,
@@ -100,7 +102,10 @@ export function BillingForm() {
   useEffect(() => {
     if (!countryData || !selectedCountry || !selectedCountryData) return;
 
-    const entities = (selectedCountryData.supported_entities || ["C", "S"]) as EntityCode[];
+    const entities = (selectedCountryData.supported_entities || [
+      "C",
+      "S",
+    ]) as EntityCode[];
     const requiredFields = selectedCountryData.required_fields || [];
 
     setSupportedEntities(entities);
@@ -185,10 +190,14 @@ export function BillingForm() {
               <Button
                 type="submit"
                 className="ml-auto"
-                disabled={isSubmitting || state === "saving" || state === "validating"}>
-                {state === "saving" ? "Saving..." :
-                 state === "validating" ? "Validating..." : 
-                 "Save"}
+                disabled={
+                  isSubmitting || state === "saving" || state === "validating"
+                }>
+                {state === "saving"
+                  ? "Saving..."
+                  : state === "validating"
+                    ? "Validating..."
+                    : "Save"}
               </Button>
             </CardFooter>
           </form>
