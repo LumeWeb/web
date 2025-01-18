@@ -63,6 +63,46 @@ const states = {
   loading: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SUBSCRIPTION_LOADED",
+      "active",
+      guard((ctx, ev) => {
+        return (
+          ev.type === "SUBSCRIPTION_LOADED" &&
+          ev.subscription?.status === "ACTIVE"
+        );
+      }),
+      reduce((ctx, ev) => {
+        if (ev.type === "SUBSCRIPTION_LOADED") {
+          return {
+            ...ctx,
+            subscription: ev.subscription,
+            error: null,
+          };
+        }
+        return ctx;
+      }),
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "SUBSCRIPTION_LOADED",
+      "pending",
+      guard((ctx, ev) => {
+        return (
+          ev.type === "SUBSCRIPTION_LOADED" &&
+          ev.subscription?.status === "PENDING"
+        );
+      }),
+      reduce((ctx, ev) => {
+        if (ev.type === "SUBSCRIPTION_LOADED") {
+          return {
+            ...ctx,
+            subscription: ev.subscription,
+            error: null,
+          };
+        }
+        return ctx;
+      }),
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "SUBSCRIPTION_LOADED",
       "inactive",
       reduce((ctx, ev) => {
         if (ev.type === "SUBSCRIPTION_LOADED") {
