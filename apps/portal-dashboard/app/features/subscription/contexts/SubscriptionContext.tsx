@@ -122,6 +122,8 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       context: current.context,
       send,
       actions,
+      hyperState,
+      hyperPromise,
     }),
     [
       current,
@@ -131,6 +133,8 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       plansAreLoading,
       subscriptionIsLoading,
       refetchSubscription,
+      hyperState,
+      hyperPromise,
     ],
   );
 
