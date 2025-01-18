@@ -56,13 +56,6 @@ const states = {
   idle: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SUBSCRIPTION_LOADED",
-      "loading",
-    ),
-  ),
-
-  loading: state(
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "SUBSCRIPTION_LOADED",
       "active",
       guard((ctx, ev) => {
         return (
@@ -110,20 +103,6 @@ const states = {
             ...ctx,
             subscription: ev.subscription,
             error: null,
-          };
-        }
-        return ctx;
-      }),
-    ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "ERROR",
-      "error",
-      reduce((ctx, ev) => {
-        if (ev.type === "ERROR") {
-          return {
-            ...ctx,
-            error: ev.error,
-            subscription: null,
           };
         }
         return ctx;
