@@ -194,6 +194,7 @@ function SubscriptionContent() {
 
       if (!isValid) {
         setBillingError("Please complete billing information before changing plans");
+        setValidationError("Invalid billing information");
         return;
       }
 
