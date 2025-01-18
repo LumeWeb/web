@@ -22,6 +22,7 @@ export function PaymentFlow() {
   };
 
   const handlePaymentFailure = (error: Error) => {
+    setHasError(true);
     send({
       type: "ERROR",
       error: new Error(error.message),
@@ -29,15 +30,24 @@ export function PaymentFlow() {
   };
 
   const [isOpen, setIsOpen] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   // Show modal when entering pendingPayment state
   useEffect(() => {
     if (state === "pendingPayment") {
       setIsOpen(true);
-    } else {
+      setHasError(false);
+    } else if (!hasError) {
       setIsOpen(false);
     }
-  }, [state]);
+  }, [state, hasError]);
+
+  const handleDialogChange = (open: boolean) => {
+    // Only allow closing if there's no error
+    if (!hasError) {
+      setIsOpen(open);
+    }
+  };
 
   // Don't render if no payment info
   if (!context.payment?.client_secret) {
@@ -68,7 +78,7 @@ export function PaymentFlow() {
   const paymentStatus = getPaymentStatus(context.payment);
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleDialogChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Complete Payment</DialogTitle>
