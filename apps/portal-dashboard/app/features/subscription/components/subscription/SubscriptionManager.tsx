@@ -143,29 +143,33 @@ function SubscriptionContent() {
     closeDialog,
   } = useSubscriptionDialog();
 
+  // Handle dialog state changes
   useEffect(() => {
+    if (!dialog.type) return;
+
+    setLocalError(null);
+    setValidationError(null);
+    setBillingError(null);
+
     if (dialog.type === "plan-change" && dialog.plan) {
-      handlePlanSelect(dialog.plan);
+      selectPlan(dialog.plan);
     } else if (dialog.type === "cancel") {
       cancel();
     } else if (dialog.type === "payment") {
       openPaymentDialog();
     }
-  }, [dialog]);
+  }, [dialog, selectPlan, cancel, openPaymentDialog]);
 
-  const handlePlanSelect = async (plan: SubscriptionPlan) => {
-    try {
-      setLocalError(null);
-      setValidationError(null);
-      setBillingError(null);
-
-      // Update state machine first
-      selectPlan(plan);
-      console.log("Selected plan:", plan);
-      console.log("Context after selection:", context);
-      
-      // Then open dialog
+  // Handle plan selection state changes
+  useEffect(() => {
+    if (state === "pending" && context.selectedPlan) {
       setShowConfirmDialog(true);
+    }
+  }, [state, context.selectedPlan]);
+
+  const handlePlanSelect = (plan: SubscriptionPlan) => {
+    try {
+      openPlanChangeDialog(plan);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to select plan";
       setLocalError(errorMessage);
@@ -173,69 +177,67 @@ function SubscriptionContent() {
     }
   };
 
-  const handleConfirm = async () => {
+  // Handle subscription state changes
+  useEffect(() => {
+    const handleSubscriptionChange = async () => {
+      if (!context.selectedPlan || !showConfirmDialog) return;
+
+      try {
+        const isValid = await validatePlanChange(
+          context.subscription?.plan,
+          context.selectedPlan,
+          context.billing
+        );
+
+        if (!isValid) {
+          setBillingError("Please complete billing information before proceeding");
+          setValidationError("Invalid billing information");
+          return;
+        }
+
+        if (context.subscription) {
+          actions.updateSubscription();
+          const { subscription } = await updateSubscription(context.selectedPlan);
+          if (subscription) {
+            actions.subscriptionUpdated(subscription);
+          }
+        } else {
+          actions.createSubscription();
+          const { subscription } = await createSubscription(context.selectedPlan);
+          if (subscription) {
+            actions.subscriptionCreated(subscription);
+          }
+        }
+
+        if (context.selectedPlan.is_free) {
+          complete();
+        }
+
+        setShowConfirmDialog(false);
+        closeDialog();
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Subscription action failed";
+        setValidationError(errorMessage);
+        send({ type: "ERROR", error: new Error(errorMessage) });
+      }
+    };
+
+    if (state === "pending" && showConfirmDialog) {
+      handleSubscriptionChange();
+    }
+  }, [state, context.selectedPlan, showConfirmDialog, context.subscription, context.billing]);
+
+  const handleConfirm = () => {
     if (!context.selectedPlan) {
       console.error("No plan selected in context");
       setValidationError("No plan selected");
       return;
     }
-    const planToUse = context.selectedPlan;
+    
     setValidationError(null);
     setBillingError(null);
     setLocalError(null);
-
-    try {
-      // Validate plan change first
-      const isValid = await validatePlanChange(
-        context.subscription?.plan,
-        planToUse,
-        context.billing,
-      );
-
-      if (!isValid) {
-        setBillingError("Please complete billing information before proceeding");
-        setValidationError("Invalid billing information");
-        setShowConfirmDialog(true); // Keep dialog open
-        return;
-      }
-
-      // Start subscription operation
-      if (context.subscription) {
-        // Update existing subscription
-        actions.updateSubscription();
-        console.log("Updating subscription to plan:", planToUse);
-        const { subscription } = await updateSubscription(planToUse);
-        console.log("Update subscription result:", subscription);
-        
-        if (subscription) {
-          actions.subscriptionUpdated(subscription);
-        }
-      } else {
-        // Create new subscription
-        actions.createSubscription();
-        console.log("Creating new subscription with plan:", planToUse);
-        const { subscription } = await createSubscription(planToUse);
-        console.log("Create subscription result:", subscription);
-        
-        if (subscription) {
-          actions.subscriptionCreated(subscription);
-        }
-      }
-
-      // Complete the flow
-      if (planToUse.is_free) {
-        complete();
-      }
-
-      setShowConfirmDialog(false);
-      closeDialog();
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Subscription action failed";
-      setValidationError(errorMessage);
-      setShowConfirmDialog(true); // Keep dialog open on error
-      send("ERROR", { error: new Error(errorMessage) });
-    }
+    setShowConfirmDialog(true);
   };
 
   if (isLoading) {
