@@ -100,6 +100,32 @@ const states = {
       }),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "SELECT_PLAN",
+      "pending",
+      guard(guards.canTransitionPlan),
+      guard(guards.isPlanChangeValid),
+      reduce((ctx, ev) => {
+        if (ev.type === "SELECT_PLAN") {
+          return {
+            ...ctx,
+            selectedPlan: ev.plan,
+            error: null,
+            previousStatus: ctx.status,
+            status: "PENDING",
+            planChangeHistory: [
+              ...ctx.planChangeHistory,
+              {
+                fromPlan: ctx.subscription?.plan ?? null,
+                toPlan: ev.plan,
+                timestamp: Date.now(),
+              },
+            ],
+          };
+        }
+        return ctx;
+      }),
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "ERROR",
       "error",
       reduce((ctx, ev) => {
