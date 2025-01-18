@@ -33,6 +33,15 @@ const states = {
         error: null,
         retryCount: 0
       }))
+    ),
+    transition<EventType, PaymentContext, PaymentEvent>(
+      "ERROR",
+      "error",
+      reduce((ctx, ev) => ({
+        ...ctx,
+        error: ev.error,
+        retryCount: ctx.retryCount + 1
+      }))
     )
   ),
 
