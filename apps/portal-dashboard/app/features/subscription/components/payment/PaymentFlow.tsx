@@ -10,6 +10,7 @@ import {
 import HyperPayment from "@/features/subscription/components/payment/HyperPayment";
 import { ExclamationCircleIcon } from "portal-shared/components/icons";
 import { usePayment } from "../../hooks/core/usePayment";
+import { useSubscriptionMachine } from "@/features/subscription/hooks/useSubscriptionMachine";
 
 export function PaymentFlow() {
   const { state, context, send } = useSubscriptionMachine();
