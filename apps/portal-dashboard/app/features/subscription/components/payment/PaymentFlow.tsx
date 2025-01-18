@@ -11,6 +11,7 @@ import HyperPayment from "@/features/subscription/components/payment/HyperPaymen
 import { ExclamationCircleIcon } from "portal-shared/components/icons";
 import { usePayment } from "../../hooks/core/usePayment";
 import { useDialogState } from "../../hooks/useDialogState";
+import { Button } from "portal-shared/components/ui/button";
 
 export function PaymentFlow() {
   const { state, context, send } = useSubscriptionContext();
@@ -85,7 +86,7 @@ export function PaymentFlow() {
           <DialogDescription>
             {paymentStatus === "PROCESSING"
               ? "Your payment is being processed..."
-              : hasError 
+              : hasError
                 ? "Payment failed. Please try again."
                 : "Please complete your payment to activate your subscription."}
           </DialogDescription>
