@@ -4,6 +4,7 @@ import { useBilling } from "../../hooks/core/useBilling";
 import { useSubscriptionForm } from "@/features/subscription/hooks/ui/useSubscriptionForm";
 import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
 import { useBillingMutations } from "../../hooks/mutations/useBillingMutations";
+import { validateBillingInfo } from "../../services/billing";
 import { BillingInfo, EntityCode } from "../../types/billing.types";
 import { useBillingForm } from "../../hooks/core/useBillingForm";
 import { useCountryData } from "../../hooks/core/useCountryData";

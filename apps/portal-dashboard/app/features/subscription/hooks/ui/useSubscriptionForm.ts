@@ -37,11 +37,29 @@ export function useSubscriptionForm() {
         try {
           setFormError(null);
           
+          // Format the data before validation
+          const formattedData = {
+            ...data,
+            name: data.name?.trim(),
+            organization: data.organization?.trim(),
+            address: {
+              ...data.address,
+              line1: data.address.line1?.trim(),
+              line2: data.address.line2?.trim(),
+              city: data.address.city?.trim(),
+              state: data.address.state?.trim(),
+              postal_code: data.address.postal_code?.trim(),
+              country: data.address.country?.trim(),
+              dependent_locality: data.address.dependent_locality?.trim(),
+              sorting_code: data.address.sorting_code?.trim()
+            }
+          };
+
           // Validate first
-          const errors = await validateBillingInfo(data);
+          const errors = await validateBillingInfo(formattedData);
           if (errors) {
             send({ type: "INVALID", errors });
-            const error = new Error("Validation failed");
+            const error = new Error("Please correct the validation errors");
             setFormError(error);
             options.onError?.(error);
             return;
@@ -50,11 +68,11 @@ export function useSubscriptionForm() {
           send({ type: "VALIDATED" });
           send({ type: "SAVE" });
           
-          await updateBillingInfo(data);
+          await updateBillingInfo(formattedData);
           send({ type: "SAVED" });
           options.onSuccess?.();
         } catch (err) {
-          const error = err instanceof Error ? err : new Error("Submission failed");
+          const error = err instanceof Error ? err : new Error("Failed to save billing information");
           send({ type: "FAILED", error });
           setFormError(error);
           options.onError?.(error);
