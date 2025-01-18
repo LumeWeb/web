@@ -55,6 +55,24 @@ export function BillingAddressComboBox({
     setShowFreeInput(!disabled && options.length === 0);
   }, [options, disabled]);
 
+  if (disabled) {
+    return (
+      <FormField
+        control={control}
+        name={name}
+        render={({ field }) => (
+          <FormItem className="flex flex-col">
+            <FormLabel>{label}</FormLabel>
+            <FormControl>
+              <Input {...field} disabled placeholder={placeholder} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    );
+  }
+
   return (
     <FormField
       control={control}
