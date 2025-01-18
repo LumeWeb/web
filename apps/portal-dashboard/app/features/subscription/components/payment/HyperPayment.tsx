@@ -62,76 +62,7 @@ export default function HyperPayment({
   );
 }
 
-const PaymentConfirmationButton = ({
-  onPaymentSuccess,
-  onPaymentError,
-  mode,
-}: {
-  onPaymentSuccess: () => void;
-  onPaymentError: (error: Error) => void;
-  mode: "subscribe" | "setup" | "change_payment";
-}) => {
-  const hyper = useHyper();
-  const elements = useElements();
-  const [buttonState, setButtonState] = useState<PaymentButtonState>("idle");
-  const [paymentError, setPaymentError] = useState<string | null>(null);
-  
-  const buttonLabel = DEFAULT_PAYMENT_LABELS[mode][buttonState];
-
-  const handlePaymentError = (error: Error) => {
-    const errorMessage = error.message || "An unexpected error occurred";
-    setPaymentError(errorMessage);
-    onPaymentError(error);
-  };
-
-  const handlePayment = async () => {
-    if (!hyper || !elements) {
-      handlePaymentError(new Error("Payment system not initialized"));
-      return;
-    }
-
-    setButtonState("processing");
-    setPaymentError(null);
-
-    try {
-      const result = await hyper.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: window.location.href,
-        },
-        redirect: "if_required",
-      });
-
-      if (result?.error) {
-        // Keep dialog open and show error
-        handlePaymentError(new Error(result.error.message || "Payment failed"));
-        setButtonState("failed");
-        return; // Don't close dialog, allow retry
-      }
-
-      console.log("Payment succeeded:", result);
-      setButtonState("succeeded");
-      onPaymentSuccess();
-    } catch (error) {
-      handlePaymentError(
-        error instanceof Error ? error : new Error("Payment failed"),
-      );
-      setButtonState("failed");
-    }
-  };
-
-  return (
-    <>
-      <Button
-        onClick={handlePayment}
-        disabled={buttonState === "processing" || buttonState === "succeeded"}
-        className="w-full py-2 px-4 text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-        {buttonLabel}
-      </Button>
-      {paymentError && <div className="text-red-500 mt-2">{paymentError}</div>}
-    </>
-  );
-};
+import { PaymentConfirmationButton } from './PaymentConfirmationButton';
 
 const StyledPaymentSkeleton = () => {
   return (

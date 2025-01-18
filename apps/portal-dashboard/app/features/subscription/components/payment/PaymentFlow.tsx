@@ -30,24 +30,19 @@ export function PaymentFlow() {
   };
 
   const [isOpen, setIsOpen] = useState(false);
-  const [hasError, setHasError] = useState(false);
+  const { hasError, setHasError, handleOpenChange } = useDialogState({
+    isOpen,
+    onOpenChange: setIsOpen,
+    shouldPreventClose: true
+  });
 
-  // Show modal when entering pendingPayment state
   useEffect(() => {
     if (state === "pendingPayment") {
       setIsOpen(true);
-      setHasError(false);
     } else if (!hasError) {
       setIsOpen(false);
     }
   }, [state, hasError]);
-
-  const handleDialogChange = (open: boolean) => {
-    // Only allow closing if there's no error
-    if (!hasError) {
-      setIsOpen(open);
-    }
-  };
 
   // Don't render if no payment info
   if (!context.payment?.client_secret) {
