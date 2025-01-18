@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   HyperElements,
   UnifiedCheckout,
-  useElements,
-  useHyper,
-  //@ts-ignore
 } from "@/routes/account/lib/hyper-react.js";
 import { Skeleton } from "portal-shared/components/ui/skeleton";
-import { Button } from "portal-shared/components/ui/button";
 import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
+import { PaymentConfirmationButton } from "./PaymentConfirmationButton";
 
 interface HyperPaymentProps {
   onPaymentSuccess: () => void;
@@ -69,8 +66,6 @@ export default function HyperPayment({
     </div>
   );
 }
-
-import { PaymentConfirmationButton } from './PaymentConfirmationButton';
 
 const StyledPaymentSkeleton = () => {
   return (
