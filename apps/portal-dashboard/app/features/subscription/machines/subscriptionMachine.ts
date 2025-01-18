@@ -68,6 +68,7 @@ const states = {
           return {
             ...ctx,
             subscription: ev.subscription,
+            billing: ev.subscription.billing ?? null,
             error: null,
           };
         }
@@ -88,6 +89,7 @@ const states = {
           return {
             ...ctx,
             subscription: ev.subscription,
+            billing: ev.subscription.billing ?? null,
             error: null,
           };
         }
@@ -102,6 +104,7 @@ const states = {
           return {
             ...ctx,
             subscription: ev.subscription,
+            billing: ev.subscription.billing ?? null,
             error: null,
           };
         }
