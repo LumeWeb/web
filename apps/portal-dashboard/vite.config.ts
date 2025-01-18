@@ -13,7 +13,7 @@ import { jsonRoutes } from "remix-json-routes";
 
 export default defineConfig({
   optimizeDeps: {
-    include: ["robot3", "react-robot"],
+    include: ["robot3", "robot3/debug", "react-robot"],
   },
   plugins: [
     remix({
@@ -42,10 +42,8 @@ export default defineConfig({
     alias: {
       // Use the ESM version specifically
       "robot3": path.resolve(__dirname, "../../node_modules/robot3/machine.js"),
-      "robot3/debug": path.resolve(
-        __dirname,
-        "../../node_modules/robot3/debug.js",
-      ),
+      "robot3/debug": path.resolve(__dirname, "../../node_modules/robot3/debug.js"),
+      "robot3/visualize": path.resolve(__dirname, "../../node_modules/robot3/visualize.js"),
       "react-robot": path.resolve(
         __dirname,
         "../../node_modules/react-robot/machine.js",
