@@ -80,7 +80,10 @@ export function BillingAddressComboBox({
       name={name.includes('address.') ? name : `address.${name}`}
       render={({ field }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>{label}</FormLabel>
+          <FormLabel>
+            {label}
+            <span className="text-destructive"> *</span>
+          </FormLabel>
           {showFreeInput ? (
             <FormControl>
               <Input {...field} placeholder={`Enter ${label.toLowerCase()}`} />
