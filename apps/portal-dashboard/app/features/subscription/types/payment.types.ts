@@ -11,14 +11,9 @@ export type PaymentMethodType = "card" | "bank_transfer" | "wallet";
 
 // Payment information structure
 export interface PaymentInfo {
-  clientSecret: string; // Payment intent client secret
-  publishableKey: string; // Payment gateway publishable key
-  expiresAt: string; // Session expiry timestamp
-  paymentMethodId?: string; // ID of the payment method used
-  paymentMethodType?: PaymentMethodType; // Type of payment method
-  errorMessage?: string; // Error message if payment failed
-  lastFour?: string; // Last 4 digits (for cards)
-  brand?: string; // Card brand or payment method brand
+  client_secret: string; // Payment intent client secret
+  publishable_key: string; // Payment gateway publishable key
+  expires_at: string; // Session expiry timestamp
 }
 
 // Payment history entry
