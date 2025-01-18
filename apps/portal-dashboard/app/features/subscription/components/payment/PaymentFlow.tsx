@@ -13,7 +13,7 @@ import { usePayment } from "../../hooks/core/usePayment";
 import { useSubscriptionMachine } from "@/features/subscription/hooks/useSubscriptionMachine";
 
 export function PaymentFlow() {
-  const { state, context, send } = useSubscriptionMachine();
+  const { state, context, send } = useSubscriptionContext();
 
   const { getPaymentStatus, isPaymentExpired } = usePayment();
 
