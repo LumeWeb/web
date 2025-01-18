@@ -20,16 +20,16 @@ export default function HyperPayment({
   onPaymentSuccess,
   mode,
 }: HyperPaymentProps) {
-  const { subscription } = useSubscriptionContext();
+  const { context } = useSubscriptionContext();
   const [clientSecret, setClientSecret] = useState<string | undefined>();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
   useEffect(() => {
     if (mode === "subscribe" || mode === "setup") {
-      setClientSecret(subscription?.payment?.client_secret);
+      setClientSecret(context?.payment?.client_secret);
     }
-  }, [mode, subscription?.payment?.client_secret]);
+  }, [mode, context?.payment?.client_secret]);
 
   if (!clientSecret) {
     return <StyledPaymentSkeleton />;
@@ -112,7 +112,8 @@ const PaymentConfirmationButton = ({
         onPaymentSuccess(result.payment_method_id);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
       setPaymentError(errorMessage);
       onPaymentError(new Error(errorMessage));
       console.error("Error confirming payment:", error);
