@@ -30,7 +30,7 @@ const states = {
             ...ctx,
             billing: ev.billing,
             errors: null,
-            error: null
+            error: null,
           };
         }
         return ctx;
@@ -113,7 +113,21 @@ const states = {
             ...ctx,
             billing: ev.billing,
             errors: null,
-            error: null
+            error: null,
+          };
+        }
+        return ctx;
+      }),
+    ),
+    // Add this new transition
+    transition<EventType, BillingContext, BillingEvent>(
+      "FAILED",
+      "error",
+      reduce((ctx, ev) => {
+        if (ev.type === "FAILED") {
+          return {
+            ...ctx,
+            error: ev.error,
           };
         }
         return ctx;
