@@ -129,11 +129,8 @@ function SubscriptionContent() {
 
   const [validationError, setValidationError] = useState<string | null>(null);
   const [billingError, setBillingError] = useState<string | null>(null);
-  const {
-    showConfirmDialog,
-    setShowConfirmDialog,
-    validatePlanChange,
-  } = useSubscriptionConfirmation();
+  const { showConfirmDialog, setShowConfirmDialog, validatePlanChange } =
+    useSubscriptionConfirmation();
 
   const {
     dialog,
@@ -142,23 +139,6 @@ function SubscriptionContent() {
     openPaymentDialog,
     closeDialog,
   } = useSubscriptionDialog();
-
-  // Handle dialog state changes
-  useEffect(() => {
-    if (!dialog.type) return;
-
-    setLocalError(null);
-    setValidationError(null);
-    setBillingError(null);
-
-    if (dialog.type === "plan-change" && dialog.plan) {
-      selectPlan(dialog.plan);
-    } else if (dialog.type === "cancel") {
-      cancel();
-    } else if (dialog.type === "payment") {
-      openPaymentDialog();
-    }
-  }, [dialog, selectPlan, cancel, openPaymentDialog]);
 
   // Handle plan selection state changes
   useEffect(() => {
@@ -169,9 +149,15 @@ function SubscriptionContent() {
 
   const handlePlanSelect = (plan: SubscriptionPlan) => {
     try {
+      setLocalError(null);
+      setValidationError(null);
+      setBillingError(null);
+
+      selectPlan(plan);
       openPlanChangeDialog(plan);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to select plan";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to select plan";
       setLocalError(errorMessage);
       setValidationError(errorMessage);
     }
@@ -186,24 +172,30 @@ function SubscriptionContent() {
         const isValid = await validatePlanChange(
           context.subscription?.plan,
           context.selectedPlan,
-          context.billing
+          context.billing,
         );
 
         if (!isValid) {
-          setBillingError("Please complete billing information before proceeding");
+          setBillingError(
+            "Please complete billing information before proceeding",
+          );
           setValidationError("Invalid billing information");
           return;
         }
 
         if (context.subscription) {
           actions.updateSubscription();
-          const { subscription } = await updateSubscription(context.selectedPlan);
+          const { subscription } = await updateSubscription(
+            context.selectedPlan,
+          );
           if (subscription) {
             actions.subscriptionUpdated(subscription);
           }
         } else {
           actions.createSubscription();
-          const { subscription } = await createSubscription(context.selectedPlan);
+          const { subscription } = await createSubscription(
+            context.selectedPlan,
+          );
           if (subscription) {
             actions.subscriptionCreated(subscription);
           }
@@ -216,7 +208,8 @@ function SubscriptionContent() {
         setShowConfirmDialog(false);
         closeDialog();
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Subscription action failed";
+        const errorMessage =
+          err instanceof Error ? err.message : "Subscription action failed";
         setValidationError(errorMessage);
         send({ type: "ERROR", error: new Error(errorMessage) });
       }
@@ -225,7 +218,13 @@ function SubscriptionContent() {
     if (state === "pending" && showConfirmDialog) {
       handleSubscriptionChange();
     }
-  }, [state, context.selectedPlan, showConfirmDialog, context.subscription, context.billing]);
+  }, [
+    state,
+    context.selectedPlan,
+    showConfirmDialog,
+    context.subscription,
+    context.billing,
+  ]);
 
   const handleConfirm = () => {
     if (!context.selectedPlan) {
@@ -233,7 +232,7 @@ function SubscriptionContent() {
       setValidationError("No plan selected");
       return;
     }
-    
+
     setValidationError(null);
     setBillingError(null);
     setLocalError(null);
