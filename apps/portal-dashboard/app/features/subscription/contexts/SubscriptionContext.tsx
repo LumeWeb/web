@@ -13,6 +13,7 @@ import {
 } from "../machines/subscriptionMachine";
 import { useMachine } from "react-robot";
 import { PaymentInfo } from "../types/payment.types";
+import { useHyperState } from "../hooks/useHyperState";
 
 interface SubscriptionContext {
   subscription: Subscription | null;
@@ -79,7 +80,9 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const { plansData, plansAreLoading } = useSubscriptionPlans();
   const { refetch: refetchSubscription, isLoading: subscriptionIsLoading } =
     useSubscription();
-  const { hyperState, hyperPromise } = useHyperState(current.context.subscription);
+  const { hyperState, hyperPromise } = useHyperState(
+    current.context.subscription,
+  );
 
   const actions = useMemo(
     () => ({
