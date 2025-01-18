@@ -1,10 +1,11 @@
-import { createMachine, state, transition, reduce } from "robot3";
+import { createMachine, state, transition, reduce, guard } from "robot3";
 import { PaymentInfo } from "../types/payment.types";
 
 interface PaymentContext {
   payment: PaymentInfo | null;
   error: Error | null;
   retryCount: number;
+  maxRetries: number;
 }
 
 export type PaymentEvent =
@@ -15,6 +16,12 @@ export type PaymentEvent =
   | { type: "RETRY" };
 
 type EventType = PaymentEvent["type"];
+
+const MAX_RETRIES = 3;
+
+const guards = {
+  canRetry: (ctx: PaymentContext) => ctx.retryCount < ctx.maxRetries
+};
 
 const states = {
   idle: state(
@@ -52,11 +59,19 @@ const states = {
   error: state(
     transition<EventType, PaymentContext, PaymentEvent>(
       "RETRY",
-      "processing",
+      "retrying",
+      guard(guards.canRetry),
       reduce((ctx) => ({
         ...ctx,
         error: null
       }))
+    )
+  ),
+
+  retrying: state(
+    transition<EventType, PaymentContext, PaymentEvent>(
+      "START",
+      "processing"
     ),
     transition<EventType, PaymentContext, PaymentEvent>(
       "ERROR",

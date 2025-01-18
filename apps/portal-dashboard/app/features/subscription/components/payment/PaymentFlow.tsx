@@ -94,11 +94,13 @@ export function PaymentFlow() {
             {paymentStatus === "PROCESSING"
               ? "Your payment is being processed..."
               : paymentState === "error"
-                ? "Payment failed. Please try again."
-                : "Please complete your payment to activate your subscription."}
+                ? `Payment failed. ${context.retryCount < MAX_RETRIES ? "Please try again." : "Maximum retry attempts reached."}`
+                : paymentState === "retrying"
+                  ? "Retrying payment..."
+                  : "Please complete your payment to activate your subscription."}
           </DialogDescription>
         </DialogHeader>
-        {paymentState === "error" && (
+        {paymentState === "error" && context.retryCount < MAX_RETRIES && (
           <div className="flex justify-end p-4">
             <Button onClick={handleRetry} variant="secondary">
               Retry Payment
