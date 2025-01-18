@@ -183,7 +183,7 @@ function SubscriptionContent() {
           return;
         }
 
-        if (context.subscription) {
+        if (context.subscription?.plan) {
           actions.updateSubscription();
           const { subscription } = await updateSubscription(
             context.selectedPlan,
