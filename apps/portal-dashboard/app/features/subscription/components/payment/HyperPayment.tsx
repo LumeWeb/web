@@ -20,7 +20,7 @@ export default function HyperPayment({
   onPaymentSuccess,
   mode,
 }: HyperPaymentProps) {
-  const { context } = useSubscriptionContext();
+  const { context, hyperState, hyperPromise } = useSubscriptionContext();
   const [clientSecret, setClientSecret] = useState<string | undefined>();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
@@ -42,7 +42,7 @@ export default function HyperPayment({
           manual_retry_allowed: true,
           clientSecret: clientSecret,
         }}
-        hyper={window.Hyper}>
+        hyper={hyperPromise}>
         <UnifiedCheckout
           options={{
             displaySavedPaymentMethods: false,

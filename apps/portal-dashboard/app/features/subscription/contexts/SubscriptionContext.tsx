@@ -29,6 +29,11 @@ interface SubscriptionContextValue {
   state: SubscriptionStateValue;
   context: SubscriptionContext;
   send: (event: SubscriptionEvent) => void;
+  hyperState: {
+    isHyperLoaded: boolean;
+    error: Error | null;
+  };
+  hyperPromise: Promise<any> | null;
   actions: {
     loadSubscription: (subscription: Subscription) => void;
     selectPlan: (plan: SubscriptionPlan) => void;
@@ -74,6 +79,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
   const { plansData, plansAreLoading } = useSubscriptionPlans();
   const { refetch: refetchSubscription, isLoading: subscriptionIsLoading } =
     useSubscription();
+  const { hyperState, hyperPromise } = useHyperState(current.context.subscription);
 
   const actions = useMemo(
     () => ({
