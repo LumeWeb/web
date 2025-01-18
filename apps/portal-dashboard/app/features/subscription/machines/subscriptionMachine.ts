@@ -220,6 +220,7 @@ const states = {
             subscription: ev.subscription,
             selectedPlan: null,
             status: "PENDING",
+            payment: ev.subscription.payment,
           };
         }
         return ctx;
