@@ -11,7 +11,7 @@ import { Button } from "portal-shared/components/ui/button";
 import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
 
 interface HyperPaymentProps {
-  onPaymentSuccess: (paymentMethodId: string) => void;
+  onPaymentSuccess: () => void;
   onPaymentError: (error: Error) => void;
   mode: "subscribe" | "setup" | "change_payment";
 }
@@ -74,7 +74,7 @@ const PaymentConfirmationButton = ({
   paymentError,
   setPaymentError,
 }: {
-  onPaymentSuccess: (paymentMethodId: string) => void;
+  onPaymentSuccess: () => void;
   mode: "subscribe" | "setup" | "change_payment";
   isProcessing: boolean;
   setIsProcessing: (value: boolean) => void;
@@ -109,7 +109,7 @@ const PaymentConfirmationButton = ({
         console.error("Payment failed:", result.error);
       } else {
         console.log("Payment succeeded:", result);
-        onPaymentSuccess(result.payment_method_id);
+        onPaymentSuccess();
       }
     } catch (error) {
       const errorMessage =
