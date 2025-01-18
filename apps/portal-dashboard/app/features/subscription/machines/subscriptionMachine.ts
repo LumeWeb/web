@@ -53,11 +53,13 @@ export type SubscriptionEvent =
   | { type: "SUBSCRIPTION_UPDATED"; subscription: Subscription }
   | { type: "CANCEL" }
   | { type: "RETRY" }
-  | { type: "ERROR"; error: Error };
+  | { type: "ERROR"; error: Error }
+  | { type: "PAYMENT_COMPLETE" };
 
 type EventType = SubscriptionEvent["type"];
 
 const states = {
+  // Initial state, waiting for subscription data
   idle: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SUBSCRIPTION_LOADED",
@@ -118,6 +120,7 @@ const states = {
     ),
   ),
 
+  // No active subscription
   inactive: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SELECT_PLAN",
@@ -149,6 +152,7 @@ const states = {
     ),
   ),
 
+  // Plan selected, waiting for confirmation
   pending: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SELECT_PLAN",
@@ -178,7 +182,7 @@ const states = {
       "CANCEL_PLAN_SELECTION",
       "idle",
       reduce((ctx) => ({
-        ...ctx, // Spread existing context first
+        ...ctx,
         selectedPlan: null,
         status: ctx.subscription?.status || null,
       })),
@@ -198,16 +202,14 @@ const states = {
     ),
   ),
 
+  // Creating new subscription
   creating: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SUBSCRIPTION_CREATED",
       "pendingPayment",
       guard((ctx, ev) => {
         if (ev.type === "SUBSCRIPTION_CREATED") {
-          return (
-            !ev.subscription.plan.is_free &&
-            ev.subscription.status === "PENDING"
-          );
+          return !ev.subscription.plan.is_free;
         }
         return false;
       }),
@@ -217,7 +219,7 @@ const states = {
             ...ctx,
             subscription: ev.subscription,
             selectedPlan: null,
-            status: ev.subscription.status,
+            status: "PENDING",
           };
         }
         return ctx;
@@ -228,9 +230,7 @@ const states = {
       "active",
       guard((ctx, ev) => {
         if (ev.type === "SUBSCRIPTION_CREATED") {
-          return (
-            ev.subscription.plan.is_free || ev.subscription.status === "ACTIVE"
-          );
+          return ev.subscription.plan.is_free;
         }
         return false;
       }),
@@ -261,6 +261,7 @@ const states = {
     ),
   ),
 
+  // Changing existing subscription
   changing: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SUBSCRIPTION_UPDATED",
@@ -292,6 +293,32 @@ const states = {
     ),
   ),
 
+  // Waiting for payment completion (new subscriptions only)
+  pendingPayment: state(
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "PAYMENT_COMPLETE",
+      "active",
+      reduce((ctx) => ({
+        ...ctx,
+        status: "ACTIVE",
+      })),
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "ERROR",
+      "error",
+      reduce((ctx, ev) => {
+        if (ev.type === "ERROR") {
+          return {
+            ...ctx,
+            error: ev.error,
+          };
+        }
+        return ctx;
+      }),
+    ),
+  ),
+
+  // Subscription is active
   active: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SELECT_PLAN",
@@ -319,8 +346,10 @@ const states = {
     ),
   ),
 
+  // Subscription is cancelled
   cancelled: state(),
 
+  // Error state
   error: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "RETRY",
