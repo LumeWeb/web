@@ -25,8 +25,16 @@ import { handleBillingError } from "@/features/subscription/utils/errorHandling"
 
 export function BillingForm() {
   const { open } = useNotification();
-  const { form, setSupportedEntities, supportedEntities, updateFormSchema } =
+  const { form, setSupportedEntities, supportedEntities, updateFormSchema, initializeForm } =
     useBillingForm();
+  const { data: subscriptionData, refetch: refetchSubscription } = useSubscription();
+
+  // Initialize form with subscription billing data
+  useEffect(() => {
+    if (subscriptionData?.data?.billing) {
+      initializeForm(subscriptionData.data.billing);
+    }
+  }, [subscriptionData, initializeForm]);
 
   const {
     countryData,

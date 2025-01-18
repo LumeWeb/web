@@ -8,6 +8,9 @@ export function useSubscription() {
   const { data, isLoading, refetch } = useCustom<SubscriptionResponse>({
     url: `${apiUrl}/api/account/subscription`,
     method: "get",
+    queryOptions: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
   });
 
   return {

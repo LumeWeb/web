@@ -24,6 +24,7 @@ export interface UseBillingMutationsResult {
 export function useBillingMutations(): UseBillingMutationsResult {
   const apiUrl = useApiUrl();
   const { mutate, isLoading } = useCustomMutation<BillingResponse>();
+  const { refetch: refetchSubscription } = useSubscription();
 
   const updateBillingInfo = async (billing: BillingInfo): Promise<BillingResponse> => {
     return new Promise((resolve, reject) => {
@@ -39,6 +40,8 @@ export function useBillingMutations(): UseBillingMutationsResult {
               reject(new Error("Invalid server response - missing billing data"));
               return;
             }
+            // Invalidate subscription data
+            refetchSubscription();
             resolve(response.data);
           },
           onError: (error: HttpError) => {
