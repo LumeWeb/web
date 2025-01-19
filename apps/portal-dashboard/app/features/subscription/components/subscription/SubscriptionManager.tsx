@@ -105,7 +105,7 @@ function SubscriptionContent() {
     if (state === "canceling") {
       doCancelSubscription();
     }
-  }, [state, actions]);
+  }, [state, actions, cancelSubscription, refetchSubscription]);
 
   useEffect(() => {
     const cancelSubscription = async () => {
