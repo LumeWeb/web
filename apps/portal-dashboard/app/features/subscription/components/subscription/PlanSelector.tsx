@@ -57,7 +57,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
   }
 
   const getButtonLabel = (plan: SubscriptionPlan) => {
-    if (isProcessing) {
+    if (isProcessing && context.selectedPlan?.id === plan.id) {
       return (
         <>
           <CloudIcon className="mr-2 h-4 w-4 animate-spin" />
@@ -144,15 +144,19 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
                   : "Complete Payment"}
               </Button>
             ) : (
-              <Button
-                className="w-full"
-                variant={getButtonVariant(plan)}
-                onClick={() => handlePlanClick(plan)}
-                disabled={
-                  isProcessing || context.subscription?.plan?.id === plan.id
-                }>
-                {getButtonLabel(plan)}
-              </Button>
+              // Only show button if not processing OR if this is the selected plan
+              (!isProcessing || context.selectedPlan?.id === plan.id) && (
+                <Button
+                  className="w-full"
+                  variant={getButtonVariant(plan)}
+                  onClick={() => handlePlanClick(plan)}
+                  disabled={
+                    (isProcessing && context.selectedPlan?.id === plan.id) ||
+                    context.subscription?.plan?.id === plan.id
+                  }>
+                  {getButtonLabel(plan)}
+                </Button>
+              )
             )}
           </CardContent>
         </Card>
