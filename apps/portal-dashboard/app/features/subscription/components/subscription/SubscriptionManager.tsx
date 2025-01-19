@@ -205,7 +205,7 @@ function SubscriptionContent() {
       const errorMessage =
         err instanceof Error ? err.message : "Subscription action failed";
       setValidationError(errorMessage);
-      send({ type: "ERROR", error: new Error(errorMessage) });
+      actions.handleError(new Error(errorMessage));
     }
   };
 
