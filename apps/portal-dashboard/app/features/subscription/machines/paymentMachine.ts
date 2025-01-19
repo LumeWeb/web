@@ -17,7 +17,7 @@ export type PaymentEvent =
 
 type EventType = PaymentEvent["type"];
 
-export const MAX_RETRIES = 3;
+export const MAX_RETRIES = Number.MAX_SAFE_INTEGER;
 
 const guards = {
   canRetry: (ctx: PaymentContext) => ctx.retryCount < ctx.maxRetries,
