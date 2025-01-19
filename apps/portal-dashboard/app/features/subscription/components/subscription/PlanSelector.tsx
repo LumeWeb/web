@@ -150,7 +150,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
                     <Button
                       variant="destructive"
                       className="w-full"
-                      onClick={() => actions.cancelSubscription()}
+                      onClick={handleCancelClick}
                       disabled={isProcessing}>
                       Cancel Subscription
                     </Button>
