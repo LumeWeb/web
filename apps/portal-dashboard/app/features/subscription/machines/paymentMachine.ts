@@ -50,7 +50,7 @@ const states = {
       "error",
       reduce((ctx, ev) => ({
         ...ctx,
-        error: ev.error,
+        error: ev.error || null,
         retryCount: ctx.retryCount + 1,
       })),
     ),
