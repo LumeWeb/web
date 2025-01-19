@@ -189,12 +189,6 @@ function SubscriptionContent() {
         if (result?.subscription) {
           actions.subscriptionCreated(result?.subscription);
           await refetchSubscription();
-          if (
-            !result.subscription.plan.is_free &&
-            result.subscription.payment?.client_secret
-          ) {
-            actions.triggerPayment();
-          }
         }
       }
 
