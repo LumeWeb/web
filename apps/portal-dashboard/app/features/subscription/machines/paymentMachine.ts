@@ -56,7 +56,7 @@ const states = {
     ),
     transition<EventType, PaymentContext, PaymentEvent>(
       "RETRY",
-      "retry",
+      "processing",
       guard(guards.canRetry),
       reduce((ctx) => ({
         ...ctx,
