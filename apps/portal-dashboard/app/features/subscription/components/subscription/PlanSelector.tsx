@@ -139,8 +139,8 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
                 variant="outline"
                 className="w-full"
                 onClick={() => send({ type: "TRIGGER_PAYMENT" })}
-                disabled={isPaymentExpired(subscription.payment)}>
-                {isPaymentExpired(subscription.payment)
+                disabled={isPaymentExpired(context.payment!)}>
+                {isPaymentExpired(context.payment!)
                   ? "Session Expired"
                   : "Complete Payment"}
               </Button>
@@ -149,7 +149,9 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
                 className="w-full"
                 variant={getButtonVariant(plan)}
                 onClick={() => handlePlanClick(plan)}
-                disabled={isProcessing || subscription?.plan.id === plan.id}>
+                disabled={
+                  isProcessing || context.subscription?.plan.id === plan.id
+                }>
                 {getButtonLabel(plan)}
               </Button>
             )}
