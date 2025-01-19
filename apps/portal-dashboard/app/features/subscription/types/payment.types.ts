@@ -12,7 +12,7 @@ export type PaymentMethodType = "card" | "bank_transfer" | "wallet";
 export type PaymentButtonState = 
   | "idle" 
   | "processing"
-  | "retrying"
+  | "retry"
   | "failed"
   | "succeeded";
 

@@ -33,7 +33,7 @@ const PaymentConfirmationButton = ({
       case "error":
         return "failed";
       case "retry":
-        return "retrying";
+        return "retry";
       case "completed":
         return "succeeded";
       default:
