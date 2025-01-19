@@ -110,10 +110,14 @@ export const PaymentConfirmationButton = ({
     onPaymentSuccess,
     onPaymentError,
     paymentActions,
+    triggerError,
   ]);
 
   const handleClick = () => {
     setShouldInitiatePayment(true);
+    if (paymentState === "error") {
+      paymentActions.retry();
+    }
   };
 
   return (
