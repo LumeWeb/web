@@ -30,21 +30,21 @@ export const DEFAULT_PAYMENT_LABELS: Record<PaymentMode, PaymentButtonLabels> = 
   subscribe: {
     idle: "Subscribe",
     processing: "Processing Payment...",
-    retry: "Retry Payment...",
+    retry: "Retrying Payment...",
     failed: "Retry Payment",
     succeeded: "Subscription Complete"
   },
   setup: {
     idle: "Set Up Payment Method",
     processing: "Setting Up Payment...",
-    retry: "Retry Setup...",
+    retry: "Retrying Setup...",
     failed: "Retry Setup",
     succeeded: "Setup Complete"
   },
   change_payment: {
     idle: "Update Payment Method",
     processing: "Updating Payment...",
-    retry: "Retry Update...",
+    retry: "Retrying Update...",
     failed: "Retry Update",
     succeeded: "Update Complete"
   }
