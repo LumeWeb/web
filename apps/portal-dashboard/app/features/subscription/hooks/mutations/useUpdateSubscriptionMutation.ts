@@ -30,7 +30,7 @@ export function useUpdateSubscriptionMutation() {
               );
               return;
             }
-            resolve(response);
+            resolve(response.data);
           },
           onError: (error) => {
             reject(error);
