@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "portal-shared/components/ui/button";
 import { usePaymentMachine } from "../../hooks/usePaymentMachine";
-import { usePaymentButtonState } from "../../hooks/usePaymentButtonState";
 import {
-  PaymentMode,
   DEFAULT_PAYMENT_LABELS,
   PaymentButtonState,
+  PaymentMode,
 } from "../../types/payment.types";
-import { useHyper, useElements } from "@/routes/account/lib/hyper-react.js";
+import { useElements, useHyper } from "@/routes/account/lib/hyper-react.js";
 
 interface PaymentConfirmationButtonProps {
   onPaymentSuccess: () => void;
@@ -44,6 +43,7 @@ export const PaymentConfirmationButton = ({
   const buttonLabel = DEFAULT_PAYMENT_LABELS[mode][buttonState];
 
   const [shouldInitiatePayment, setShouldInitiatePayment] = useState(false);
+  const [triggerError, setTriggerError] = useState<Error | boolean>(false);
 
   // Effect to handle payment initialization
   useEffect(() => {
@@ -86,13 +86,18 @@ export const PaymentConfirmationButton = ({
         if (!isActive) return;
         const err =
           error instanceof Error ? error : new Error("Payment failed");
-        onPaymentError(err);
+        setTriggerError(err);
         setPaymentError(err.message);
       }
     };
 
-    if (paymentState === "processing") {
+    if (paymentState === "processing" && !triggerError) {
       processPayment();
+    }
+
+    if (triggerError) {
+      onPaymentError(triggerError as Error);
+      setTriggerError(false);
     }
 
     return () => {
