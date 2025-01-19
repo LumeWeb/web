@@ -42,7 +42,6 @@ export function PaymentConfirmationButton({
     if (buttonState === "failed") {
       retry();
       paymentActions.retry();
-      return;
     }
 
     startProcessing();
