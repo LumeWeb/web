@@ -21,9 +21,9 @@ interface PlanSelectorProps {
 }
 
 export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
-  const { context, state, send } = useSubscriptionContext();
-  const isProcessing = state === 'creating' || state === 'changing';
-  const isLoading = state === 'idle';
+  const { context, state, send, plans } = useSubscriptionContext();
+  const isProcessing = state === "creating" || state === "changing";
+  const isLoading = state === "idle";
   const { isPaymentExpired } = usePayment();
 
   if (isLoading || !context.subscription?.plan) {
@@ -49,7 +49,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
     );
   }
 
-  if (!context.plans?.length) {
+  if (!plans?.length) {
     return (
       <div className="text-center p-4">
         <p className="text-muted-foreground">No subscription plans available</p>
@@ -75,7 +75,9 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
       return "Select Plan";
     }
 
-    return plan.price > context.subscription.plan.price ? "Upgrade" : "Downgrade";
+    return plan.price > context.subscription.plan.price
+      ? "Upgrade"
+      : "Downgrade";
   };
 
   const getButtonVariant = (plan: SubscriptionPlan) => {
@@ -94,7 +96,9 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
         <Card
           key={plan.id}
           className={
-            context.subscription?.plan?.id === plan.id ? "ring-2 ring-primary" : ""
+            context.subscription?.plan?.id === plan.id
+              ? "ring-2 ring-primary"
+              : ""
           }>
           <CardHeader>
             <CardTitle>{plan.name}</CardTitle>
@@ -127,17 +131,17 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
               </div>
             </div>
 
-            {context.subscription?.status === "PENDING" && 
-             context.subscription?.plan?.id === plan.id && 
-             !plan.is_free && 
-             context.subscription.payment?.client_secret ? (
+            {context.subscription?.status === "PENDING" &&
+            context.subscription?.plan?.id === plan.id &&
+            !plan.is_free &&
+            context.subscription.payment?.client_secret ? (
               <Button
                 variant="outline"
                 className="w-full"
                 onClick={() => send({ type: "TRIGGER_PAYMENT" })}
                 disabled={isPaymentExpired(subscription.payment)}>
-                {isPaymentExpired(subscription.payment) 
-                  ? "Session Expired" 
+                {isPaymentExpired(subscription.payment)
+                  ? "Session Expired"
                   : "Complete Payment"}
               </Button>
             ) : (
