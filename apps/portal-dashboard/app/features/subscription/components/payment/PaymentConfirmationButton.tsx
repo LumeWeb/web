@@ -72,7 +72,6 @@ export const PaymentConfirmationButton = ({
       onPaymentSuccess();
     } catch (error) {
       const err = error instanceof Error ? error : new Error("Payment failed");
-      paymentActions.handleError(err);
       onPaymentError(err);
       setPaymentError(err.message);
     }
