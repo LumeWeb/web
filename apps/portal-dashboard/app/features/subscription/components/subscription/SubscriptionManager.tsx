@@ -204,15 +204,15 @@ function SubscriptionContent() {
       if (context.subscription?.plan) {
         actions.updateSubscription();
         const result = await updateSubscription(context.selectedPlan);
-        if (result?.subscription) {
-          actions.subscriptionUpdated(result?.subscription);
+        if (result) {
+          actions.subscriptionUpdated(result);
           await refetchSubscription();
         }
       } else {
         actions.createSubscription();
         const result = await createSubscription(context.selectedPlan);
-        if (result?.subscription) {
-          actions.subscriptionCreated(result?.subscription);
+        if (result) {
+          actions.subscriptionCreated(result);
           await refetchSubscription();
         }
       }

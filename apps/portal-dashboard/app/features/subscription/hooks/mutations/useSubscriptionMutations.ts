@@ -3,18 +3,15 @@ import {
   SubscriptionPlan,
   SubscriptionError,
   Subscription,
+  SubscriptionResponse,
 } from "../../types/subscription.types";
 import { useCreateSubscriptionMutation } from "./useCreateSubscriptionMutation";
 import { useUpdateSubscriptionMutation } from "./useUpdateSubscriptionMutation";
 import { useCancelSubscriptionMutation } from "./useCancelSubscriptionMutation";
 
 export interface UseSubscriptionMutationsResult {
-  createSubscription: (
-    plan: SubscriptionPlan,
-  ) => Promise<{ subscription: Subscription }>;
-  updateSubscription: (
-    plan: SubscriptionPlan,
-  ) => Promise<{ subscription: Subscription }>;
+  createSubscription: (plan: SubscriptionPlan) => Promise<SubscriptionResponse>;
+  updateSubscription: (plan: SubscriptionPlan) => Promise<SubscriptionResponse>;
   cancelSubscription: () => Promise<void>;
   isLoading: boolean;
   error: SubscriptionError | null;

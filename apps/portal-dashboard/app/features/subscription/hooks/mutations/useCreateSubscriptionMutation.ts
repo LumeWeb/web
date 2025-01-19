@@ -27,7 +27,7 @@ export function useCreateSubscriptionMutation() {
               reject(new Error("Invalid server response - missing data"));
               return;
             }
-            resolve({ subscription: response.data });
+            resolve(response.data);
           },
           onError: (error) => {
             reject(error);

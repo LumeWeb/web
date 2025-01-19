@@ -1,5 +1,6 @@
 import { useCustomMutation } from "@refinedev/core";
 import {
+  Subscription,
   SubscriptionPlan,
   SubscriptionResponse,
 } from "../../types/subscription.types";
@@ -10,9 +11,7 @@ export function useUpdateSubscriptionMutation() {
 
   const { mutate, isLoading } = useCustomMutation<SubscriptionResponse>();
 
-  const mutateAsync = async (
-    plan: SubscriptionPlan,
-  ): Promise<SubscriptionResponse> => {
+  const mutateAsync = async (plan: SubscriptionPlan): Promise<Subscription> => {
     return new Promise((resolve, reject) => {
       mutate(
         {
