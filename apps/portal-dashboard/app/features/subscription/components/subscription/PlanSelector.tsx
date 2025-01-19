@@ -34,14 +34,14 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
 
   const handleConfirmCancel = () => {
     setShowCancelConfirm(false);
-    send({ type: "CANCEL_SUBSCRIPTION" });
+    actions.cancelSubscription();
   };
 
   const handleAbortCancel = () => {
     setShowCancelConfirm(false);
     // Reset initialization and trigger idle state
     loadedSubscriptionInit.current = false;
-    send({ type: "ABORT_CANCELLATION" });
+    actions.abortCancellation();
   };
 
   if (isLoading || !plans) {
@@ -159,7 +159,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
                     <Button
                       variant="outline"
                       className="w-full"
-                      onClick={() => send({ type: "TRIGGER_PAYMENT" })}
+                      onClick={() => actions.triggerPayment()}
                       disabled={isPaymentExpired(context.payment!)}>
                       {isPaymentExpired(context.payment!)
                         ? "Session Expired"
