@@ -25,7 +25,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
   const isProcessing = state === "creating" || state === "changing";
   const { isPaymentExpired } = usePayment();
 
-  if (isLoading || !context.subscription?.plan) {
+  if (isLoading || !plans) {
     return (
       <div className="grid md:grid-cols-3 gap-8">
         {[1, 2, 3].map((i) => (
@@ -149,7 +149,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
                 variant={getButtonVariant(plan)}
                 onClick={() => handlePlanClick(plan)}
                 disabled={
-                  isProcessing || context.subscription?.plan.id === plan.id
+                  isProcessing || context.subscription?.plan?.id === plan.id
                 }>
                 {getButtonLabel(plan)}
               </Button>
