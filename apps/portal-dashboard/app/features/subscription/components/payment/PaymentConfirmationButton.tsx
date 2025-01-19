@@ -50,7 +50,10 @@ const PaymentConfirmationButton = ({
     }
 
     try {
-      paymentActions.startPayment();
+      // Only call startPayment if we're in idle state
+      if (paymentState === 'idle') {
+        paymentActions.startPayment();
+      }
       setPaymentError(null);
 
       const result = await hyper.confirmPayment({
