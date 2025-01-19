@@ -223,12 +223,11 @@ const states = {
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "CANCEL_PLAN_SELECTION",
-      "idle",
+      "inactive",
       reduce((ctx) => ({
         ...ctx,
         selectedPlan: null,
         status: ctx.subscription?.status || null,
-        payment: null, // Clear payment info when canceling
       })),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
