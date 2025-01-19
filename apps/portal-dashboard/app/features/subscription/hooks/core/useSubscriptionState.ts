@@ -144,7 +144,7 @@ export function useSubscriptionState(): UseSubscriptionResult {
     error,
     isLoading,
     isTransitioning,
-    loadSubscription,
+    loadSubscription: subscriptionLoaded,
     createSubscription,
     cancelSubscription,
     validatePlanChange,

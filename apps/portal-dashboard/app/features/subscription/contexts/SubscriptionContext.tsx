@@ -36,7 +36,7 @@ interface SubscriptionContextValue {
   };
   hyperPromise: Promise<any> | null;
   actions: {
-    loadSubscription: (subscription: Subscription) => void;
+    subscriptionLoaded: (subscription: Subscription) => void;
     selectPlan: (plan: SubscriptionPlan) => void;
     cancelPlanSelection: () => void;
     createSubscription: () => void;
@@ -87,7 +87,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
 
   const actions = useMemo(
     () => ({
-      loadSubscription: (subscription: Subscription) =>
+      subscriptionLoaded: (subscription: Subscription) =>
         send({ type: "SUBSCRIPTION_LOADED", subscription }),
       selectPlan: (plan: SubscriptionPlan) =>
         send({ type: "SELECT_PLAN", plan }),

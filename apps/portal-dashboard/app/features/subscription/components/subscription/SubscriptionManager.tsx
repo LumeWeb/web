@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "@remix-run/react";
 import {
   SubscriptionProvider,
@@ -55,6 +55,7 @@ function SubscriptionContent() {
   const { state, context, send, actions, isLoading } = useSubscriptionContext();
   const [localError, setLocalError] = useState<string | null>(null);
   const { createSubscription, updateSubscription } = useSubscriptionMutations();
+  const loadedSubscriptionInit = useRef(false);
 
   const {
     data: subscriptionData,
@@ -63,11 +64,13 @@ function SubscriptionContent() {
   } = useSubscription();
 
   useEffect(() => {
-    if (!isLoadingSubscription && subscriptionData?.data) {
-      send({
-        type: "SUBSCRIPTION_LOADED",
-        subscription: subscriptionData.data,
-      });
+    if (
+      !loadedSubscriptionInit.current &&
+      !isLoadingSubscription &&
+      subscriptionData?.data
+    ) {
+      actions.subscriptionLoaded(subscriptionData.data);
+      loadedSubscriptionInit.current = true;
     }
   }, [isLoadingSubscription, subscriptionData, send]);
 
