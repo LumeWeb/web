@@ -63,7 +63,8 @@ export type SubscriptionEvent =
   | { type: "PAYMENT_COMPLETE" }
   | { type: "TRIGGER_PAYMENT" }
   | { type: "PAYMENT_CLOSE" }
-  | { type: "CANCEL_SUBSCRIPTION" };
+  | { type: "CANCEL_SUBSCRIPTION" }
+  | { type: "ABORT_CANCELLATION" };
 
 type EventType = SubscriptionEvent["type"];
 
@@ -438,6 +439,18 @@ const states = {
   canceling: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SUBSCRIPTION_LOADED",
+      "idle",
+      reduce((ctx) => ({
+        ...ctx,
+        subscription: null,
+        selectedPlan: null,
+        status: null,
+        payment: null,
+        error: null,
+      })),
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "ABORT_CANCELLATION",
       "idle",
       reduce((ctx) => ({
         ...ctx,
