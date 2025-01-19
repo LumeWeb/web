@@ -66,7 +66,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
       );
     }
 
-    if (subscription?.plan.id === plan.id) {
+    if (subscription?.plan?.id === plan.id) {
       return "Current Plan";
     }
 
@@ -78,11 +78,11 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
   };
 
   const getButtonVariant = (plan: SubscriptionPlan) => {
-    return subscription?.plan.id === plan.id ? "outline" : "default";
+    return subscription?.plan?.id === plan.id ? "outline" : "default";
   };
 
   const handlePlanClick = (plan: SubscriptionPlan) => {
-    if (subscription?.plan.id !== plan.id && !isProcessing) {
+    if (subscription?.plan?.id !== plan.id && !isProcessing) {
       onPlanSelect(plan);
     }
   };
@@ -93,7 +93,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
         <Card
           key={plan.id}
           className={
-            subscription?.plan.id === plan.id ? "ring-2 ring-primary" : ""
+            subscription?.plan?.id === plan.id ? "ring-2 ring-primary" : ""
           }>
           <CardHeader>
             <CardTitle>{plan.name}</CardTitle>
@@ -127,7 +127,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
             </div>
 
             {subscription?.status === "PENDING" && 
-             subscription.plan.id === plan.id && 
+             subscription?.plan?.id === plan.id && 
              !plan.is_free && 
              subscription.payment?.client_secret ? (
               <Button
