@@ -2,7 +2,11 @@ import React from "react";
 import { Button } from "portal-shared/components/ui/button";
 import { usePaymentMachine } from "../../hooks/usePaymentMachine";
 import { usePaymentButtonState } from "../../hooks/usePaymentButtonState";
-import { PaymentMode, DEFAULT_PAYMENT_LABELS } from "../../types/payment.types";
+import {
+  PaymentMode,
+  DEFAULT_PAYMENT_LABELS,
+  PaymentButtonState,
+} from "../../types/payment.types";
 import { useHyper, useElements } from "@/routes/account/lib/hyper-react.js";
 
 interface PaymentConfirmationButtonProps {
@@ -11,44 +15,44 @@ interface PaymentConfirmationButtonProps {
   mode: PaymentMode;
 }
 
-export function PaymentConfirmationButton({
+const PaymentConfirmationButton = ({
   onPaymentSuccess,
   onPaymentError,
   mode,
-}: PaymentConfirmationButtonProps) {
+}: PaymentConfirmationButtonProps) => {
   const hyper = useHyper();
   const elements = useElements();
-  const { buttonState, startProcessing, handleSuccess, handleError, retry } =
-    usePaymentButtonState();
   const [paymentError, setPaymentError] = React.useState<string | null>(null);
+  const { state: paymentState, actions: paymentActions } = usePaymentMachine();
+
+  // Derive button state from payment machine state
+  const buttonState: PaymentButtonState = React.useMemo(() => {
+    switch (paymentState) {
+      case "processing":
+        return "processing";
+      case "error":
+        return "failed";
+      case "retrying":
+        return "retrying";
+      case "completed":
+        return "succeeded";
+      default:
+        return "idle";
+    }
+  }, [paymentState]);
 
   const buttonLabel = DEFAULT_PAYMENT_LABELS[mode][buttonState];
 
-  const handlePaymentError = (error: Error) => {
-    const errorMessage = error.message || "An unexpected error occurred";
-    setPaymentError(errorMessage);
-    handleError();
-    onPaymentError(error);
-  };
-
-  const { actions: paymentActions } = usePaymentMachine();
-
   const handlePayment = async () => {
     if (!hyper || !elements) {
-      handlePaymentError(new Error("Payment system not initialized"));
+      onPaymentError(new Error("Payment system not initialized"));
       return;
     }
 
-    if (buttonState === "failed") {
-      retry();
-      paymentActions.retry();
-    }
-
-    startProcessing();
-    paymentActions.startPayment();
-    setPaymentError(null);
-
     try {
+      paymentActions.startPayment();
+      setPaymentError(null);
+
       const result = await hyper.confirmPayment({
         elements,
         confirmParams: {
@@ -58,17 +62,16 @@ export function PaymentConfirmationButton({
       });
 
       if (result?.error) {
-        handlePaymentError(new Error(result.error.message || "Payment failed"));
-        return;
+        throw new Error(result.error.message || "Payment failed");
       }
 
-      console.log("Payment succeeded:", result);
-      handleSuccess();
+      paymentActions.completePayment();
       onPaymentSuccess();
     } catch (error) {
-      handlePaymentError(
-        error instanceof Error ? error : new Error("Payment failed"),
-      );
+      const err = error instanceof Error ? error : new Error("Payment failed");
+      paymentActions.handleError(err);
+      onPaymentError(err);
+      setPaymentError(err.message);
     }
   };
 
@@ -83,4 +86,4 @@ export function PaymentConfirmationButton({
       {paymentError && <div className="text-red-500 mt-2">{paymentError}</div>}
     </>
   );
-}
+};
