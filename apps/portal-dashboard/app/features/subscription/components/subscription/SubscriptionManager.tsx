@@ -84,6 +84,28 @@ function SubscriptionContent() {
     }
   }, [state, context.error]);
 
+  useEffect(() => {
+    const cancelSubscription = async () => {
+      try {
+        actions.cancelSubscription();
+        // Reset initialization flag
+        loadedSubscriptionInit.current = false;
+        // Refetch subscription data
+        await refetchSubscription();
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to cancel subscription";
+        setErrorMessage(errorMessage);
+        setShowErrorDialog(true);
+      }
+    };
+    if (state === "canceling") {
+      cancelSubscription();
+    }
+  }, [state, actions]);
+
   const handleErrorDialogClose = async () => {
     setShowErrorDialog(false);
     setErrorMessage(null);
@@ -233,23 +255,6 @@ function SubscriptionContent() {
     }
   };
 
-  const handleCancelSubscription = async () => {
-    try {
-      actions.cancelSubscription();
-      // Reset initialization flag
-      loadedSubscriptionInit.current = false;
-      // Refetch subscription data
-      await refetchSubscription();
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to cancel subscription";
-      setErrorMessage(errorMessage);
-      setShowErrorDialog(true);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -363,7 +368,7 @@ function SubscriptionContent() {
       {/* Payment Flow Dialog */}
       {state === "pendingPayment" && (
         <PaymentProvider>
-          <PaymentFlow onCancel={handleCancelSubscription} />
+          <PaymentFlow />
         </PaymentProvider>
       )}
 

@@ -23,7 +23,7 @@ export type SubscriptionStateValue =
   | "editingBilling"
   | "pendingPayment"
   | "active"
-  | "cancelled"
+  | "canceling"
   | "error";
 
 export interface SubscriptionContext {

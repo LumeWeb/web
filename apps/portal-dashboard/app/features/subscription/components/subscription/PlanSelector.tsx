@@ -21,7 +21,8 @@ interface PlanSelectorProps {
 }
 
 export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
-  const { context, state, send, plans, isLoading } = useSubscriptionContext();
+  const { context, state, send, plans, isLoading, actions } =
+    useSubscriptionContext();
   const isProcessing = state === "creating" || state === "changing";
   const { isPaymentExpired } = usePayment();
 
@@ -147,9 +148,10 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
                         : "Complete Payment"}
                     </Button>
                     <Button
-                      variant="outline"
-                      onClick={onCancel}
-                      disabled={state === "processing"}>
+                      variant="destructive"
+                      className="w-full"
+                      onClick={() => actions.cancelSubscription()}
+                      disabled={isProcessing}>
                       Cancel Subscription
                     </Button>
                   </>
