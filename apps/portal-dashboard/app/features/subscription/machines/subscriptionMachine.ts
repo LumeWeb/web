@@ -109,6 +109,7 @@ const states = {
             payment: ev.subscription.payment ?? null,
             error: null,
             status: "PENDING",
+            selectedPlan: null,
           };
         }
         return ctx;
@@ -356,7 +357,7 @@ const states = {
             payment: null,
             billing: ctx.billing,
             error: ev.error,
-          };
+          } as SubscriptionContext;
         }
         return ctx;
       }),
@@ -417,6 +418,7 @@ export const subscriptionMachine = createMachine(
     billing: context?.billing ?? null,
     error: context?.error ?? null,
     status: context?.status ?? null,
+    payment: context?.payment ?? null,
   }),
 );
 
