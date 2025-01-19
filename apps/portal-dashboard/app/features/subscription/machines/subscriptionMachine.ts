@@ -155,6 +155,25 @@ const states = {
   // Plan selected, waiting for confirmation
   pending: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "SUBSCRIPTION_LOADED",
+      "active",
+      guard((ctx, ev) => {
+        return ev.type === "SUBSCRIPTION_LOADED" && ev.subscription?.status === "ACTIVE";
+      }),
+      reduce((ctx, ev) => {
+        if (ev.type === "SUBSCRIPTION_LOADED") {
+          return {
+            ...ctx,
+            subscription: ev.subscription,
+            billing: ev.subscription.billing ?? null,
+            selectedPlan: null,
+            error: null,
+          };
+        }
+        return ctx;
+      }),
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SELECT_PLAN",
       "pending",
       guard(guards.canTransitionPlan),
