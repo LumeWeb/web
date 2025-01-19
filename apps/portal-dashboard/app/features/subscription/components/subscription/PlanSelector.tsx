@@ -70,7 +70,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
       return "Current Plan";
     }
 
-    if (!context.subscription) {
+    if (!context.subscription?.plan) {
       return "Select Plan";
     }
 
