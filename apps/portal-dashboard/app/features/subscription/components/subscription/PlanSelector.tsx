@@ -21,11 +21,12 @@ interface PlanSelectorProps {
 }
 
 export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
-  const { subscription, plans, selectedPlan, isProcessing, isLoading, send } =
-    useSubscriptionContext();
+  const { context, state, send } = useSubscriptionContext();
+  const isProcessing = state === 'creating' || state === 'changing';
+  const isLoading = state === 'idle';
   const { isPaymentExpired } = usePayment();
 
-  if (isLoading) {
+  if (isLoading || !context.subscription?.plan) {
     return (
       <div className="grid md:grid-cols-3 gap-8">
         {[1, 2, 3].map((i) => (
@@ -48,7 +49,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
     );
   }
 
-  if (!plans?.length) {
+  if (!context.plans?.length) {
     return (
       <div className="text-center p-4">
         <p className="text-muted-foreground">No subscription plans available</p>
@@ -66,34 +67,34 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
       );
     }
 
-    if (subscription?.plan?.id === plan.id) {
+    if (context.subscription?.plan?.id === plan.id) {
       return "Current Plan";
     }
 
-    if (!subscription) {
+    if (!context.subscription) {
       return "Select Plan";
     }
 
-    return plan.price > subscription.plan.price ? "Upgrade" : "Downgrade";
+    return plan.price > context.subscription.plan.price ? "Upgrade" : "Downgrade";
   };
 
   const getButtonVariant = (plan: SubscriptionPlan) => {
-    return subscription?.plan?.id === plan.id ? "outline" : "default";
+    return context.subscription?.plan?.id === plan.id ? "outline" : "default";
   };
 
   const handlePlanClick = (plan: SubscriptionPlan) => {
-    if (subscription?.plan?.id !== plan.id && !isProcessing) {
+    if (context.subscription?.plan?.id !== plan.id && !isProcessing) {
       onPlanSelect(plan);
     }
   };
 
   return (
     <div className="grid md:grid-cols-3 gap-8">
-      {(plans || []).map((plan) => (
+      {(context.plans || []).map((plan) => (
         <Card
           key={plan.id}
           className={
-            subscription?.plan?.id === plan.id ? "ring-2 ring-primary" : ""
+            context.subscription?.plan?.id === plan.id ? "ring-2 ring-primary" : ""
           }>
           <CardHeader>
             <CardTitle>{plan.name}</CardTitle>
@@ -126,10 +127,10 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
               </div>
             </div>
 
-            {subscription?.status === "PENDING" && 
-             subscription?.plan?.id === plan.id && 
+            {context.subscription?.status === "PENDING" && 
+             context.subscription?.plan?.id === plan.id && 
              !plan.is_free && 
-             subscription.payment?.client_secret ? (
+             context.subscription.payment?.client_secret ? (
               <Button
                 variant="outline"
                 className="w-full"
