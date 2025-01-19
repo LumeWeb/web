@@ -60,7 +60,8 @@ export type SubscriptionEvent =
   | { type: "CANCEL" }
   | { type: "RETRY" }
   | { type: "ERROR"; error: Error }
-  | { type: "PAYMENT_COMPLETE" };
+  | { type: "PAYMENT_COMPLETE" }
+  | { type: "TRIGGER_PAYMENT" };
 
 type EventType = SubscriptionEvent["type"];
 
