@@ -110,7 +110,7 @@ const states = {
             error: null,
             status: "PENDING",
             selectedPlan: null,
-          };
+          } as SubscriptionContext;
         }
         return ctx;
       }),
@@ -259,8 +259,10 @@ const states = {
             subscription: ev.subscription,
             selectedPlan: null,
             status: "PENDING",
-            payment: ev.subscription.payment,
-          };
+            payment: ev.subscription.payment ?? null,
+            billing: ctx.billing,
+            error: ctx.error,
+          } as SubscriptionContext;
         }
         return ctx;
       }),
