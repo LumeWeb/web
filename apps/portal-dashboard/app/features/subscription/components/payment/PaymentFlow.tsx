@@ -20,10 +20,10 @@ export function PaymentFlow() {
 
   const { getPaymentStatus, isPaymentExpired } = usePayment();
 
-  const { 
-    state: paymentState, 
-    context: paymentContext, 
-    actions: paymentActions 
+  const {
+    state: paymentState,
+    context: paymentContext,
+    actions: paymentActions,
   } = usePaymentMachine();
 
   const handlePaymentSuccess = () => {
@@ -33,10 +33,6 @@ export function PaymentFlow() {
 
   const handlePaymentFailure = (error: Error) => {
     paymentActions.handleError(error);
-    send({
-      type: "ERROR",
-      error: new Error(error.message),
-    });
     setIsOpen(true); // Keep dialog open on error
   };
 
@@ -96,17 +92,18 @@ export function PaymentFlow() {
             {paymentStatus === "PROCESSING"
               ? "Your payment is being processed..."
               : paymentState === "error"
-                ? `Payment failed. ${context.retryCount < MAX_RETRIES ? "Please try again." : "Maximum retry attempts reached."}`
+                ? `Payment failed. ${paymentContext.retryCount < MAX_RETRIES ? "Please try again." : "Maximum retry attempts reached."}`
                 : "Please complete your payment to activate your subscription."}
           </DialogDescription>
         </DialogHeader>
-        {paymentState === "error" && context.retryCount < MAX_RETRIES && (
-          <div className="flex justify-end p-4">
-            <Button onClick={handleRetry} variant="secondary">
-              Retry Payment
-            </Button>
-          </div>
-        )}
+        {paymentState === "error" &&
+          paymentContext.retryCount < MAX_RETRIES && (
+            <div className="flex justify-end p-4">
+              <Button onClick={handleRetry} variant="secondary">
+                Retry Payment
+              </Button>
+            </div>
+          )}
         <HyperPayment
           mode="subscribe"
           onPaymentSuccess={handlePaymentSuccess}
