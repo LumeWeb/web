@@ -15,7 +15,7 @@ interface PaymentConfirmationButtonProps {
   mode: PaymentMode;
 }
 
-const PaymentConfirmationButton = ({
+export const PaymentConfirmationButton = ({
   onPaymentSuccess,
   onPaymentError,
   mode,
@@ -51,7 +51,7 @@ const PaymentConfirmationButton = ({
 
     try {
       // Only call startPayment if we're in idle state
-      if (paymentState === 'idle') {
+      if (paymentState === "idle") {
         paymentActions.startPayment();
       }
       setPaymentError(null);
