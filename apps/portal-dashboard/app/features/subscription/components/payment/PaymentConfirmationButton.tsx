@@ -47,7 +47,10 @@ export const PaymentConfirmationButton = ({
 
   // Effect to handle payment initialization
   useEffect(() => {
-    if (shouldInitiatePayment && paymentState === "idle") {
+    if (
+      (shouldInitiatePayment && paymentState === "idle") ||
+      paymentState === "retry"
+    ) {
       paymentActions.startPayment();
       setShouldInitiatePayment(false);
     }
