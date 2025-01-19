@@ -227,6 +227,7 @@ const states = {
         ...ctx,
         selectedPlan: null,
         status: ctx.subscription?.status || null,
+        payment: null, // Clear payment info when canceling
       })),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
