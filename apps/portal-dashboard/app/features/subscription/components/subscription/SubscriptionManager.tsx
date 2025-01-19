@@ -203,9 +203,10 @@ function SubscriptionContent() {
 
       if (context.subscription?.plan) {
         actions.updateSubscription();
-        const { subscription } = await updateSubscription(context.selectedPlan);
-        if (subscription) {
-          actions.subscriptionUpdated(subscription);
+        const result = await updateSubscription(context.selectedPlan);
+        if (result?.subscription) {
+          actions.subscriptionUpdated(result?.subscription);
+          await refetchSubscription();
         }
       } else {
         actions.createSubscription();
