@@ -352,6 +352,14 @@ const states = {
       })),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "PAYMENT_CLOSE",
+      "pending",
+      reduce((ctx) => ({
+        ...ctx,
+        status: "PENDING",
+      })),
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "ERROR",
       "error",
       reduce((ctx, ev) => {
