@@ -13,13 +13,8 @@ import HyperPayment from "@/features/subscription/components/payment/HyperPaymen
 import { ExclamationCircleIcon } from "portal-shared/components/icons";
 import { usePayment } from "../../hooks/core/usePayment";
 import { useDialogState } from "../../hooks/useDialogState";
-import { Button } from "portal-shared/components/ui/button";
 
-interface PaymentFlowProps {
-  onCancel: () => void;
-}
-
-export function PaymentFlow({ onCancel }: PaymentFlowProps) {
+export function PaymentFlow() {
   const { state, context, send } = useSubscriptionContext();
 
   const { getPaymentStatus, isPaymentExpired } = usePayment();
@@ -37,11 +32,7 @@ export function PaymentFlow({ onCancel }: PaymentFlowProps) {
 
   const handlePaymentFailure = (error: Error) => {
     paymentActions.handleError(error);
-    setIsOpen(true); // Keep dialog open on error
-  };
-
-  const handleRetry = () => {
-    paymentActions.retry();
+    setIsOpen(true);
   };
 
   const [isOpen, setIsOpen] = useState(false);
@@ -110,14 +101,6 @@ export function PaymentFlow({ onCancel }: PaymentFlowProps) {
           onPaymentSuccess={handlePaymentSuccess}
           onPaymentError={handlePaymentFailure}
         />
-        <div className="mt-4 flex justify-end space-x-2">
-          <Button
-            variant="outline"
-            onClick={onCancel}
-            disabled={paymentState === "processing"}>
-            Cancel Subscription
-          </Button>
-        </div>
       </DialogContent>
     </Dialog>
   );
