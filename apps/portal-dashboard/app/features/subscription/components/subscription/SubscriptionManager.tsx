@@ -313,9 +313,11 @@ function SubscriptionContent() {
       </AlertDialog>
 
       {/* Payment Flow Dialog */}
-      <PaymentProvider>
-        <PaymentFlow />
-      </PaymentProvider>
+      {state === "pendingPayment" && (
+        <PaymentProvider>
+          <PaymentFlow />
+        </PaymentProvider>
+      )}
     </div>
   );
 }
