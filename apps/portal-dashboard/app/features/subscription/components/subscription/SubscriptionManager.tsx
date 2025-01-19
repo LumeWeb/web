@@ -59,7 +59,15 @@ function SubscriptionContent() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { createSubscription, updateSubscription, cancelSubscription } =
     useSubscriptionMutations();
-  const loadedSubscriptionInit = useRef(false);
+  const initRef = useRef({
+    isInitialized: false,
+    isRefreshing: false,
+  });
+
+  const handleRefresh = () => {
+    initRef.current.isInitialized = false;
+    initRef.current.isRefreshing = false;
+  };
 
   const {
     data: subscriptionData,
@@ -68,13 +76,19 @@ function SubscriptionContent() {
   } = useSubscription();
 
   useEffect(() => {
-    if (
-      !loadedSubscriptionInit.current &&
+    if (!initRef.current.isInitialized && !isLoadingSubscription) {
+      // Initial load
+      refetchSubscription();
+      initRef.current.isRefreshing = true;
+    } else if (
+      initRef.current.isRefreshing &&
       !isLoadingSubscription &&
       subscriptionData?.data
     ) {
+      // Handle data after refresh
       actions.subscriptionLoaded(subscriptionData.data);
-      loadedSubscriptionInit.current = true;
+      initRef.current.isInitialized = true;
+      initRef.current.isRefreshing = false;
     }
   }, [isLoadingSubscription, subscriptionData, actions]);
 
@@ -86,12 +100,10 @@ function SubscriptionContent() {
   }, [state, context.error]);
 
   useEffect(() => {
-    const cancelSubscription = async () => {
+    const doCancelSubscription = async () => {
       try {
-        // Reset initialization flag
-        loadedSubscriptionInit.current = false;
-        // Refetch subscription data
-        await refetchSubscription();
+        await cancelSubscription();
+        handleRefresh();
       } catch (err) {
         const errorMessage =
           (err as AxiosError)?.name === "AxiosError"
@@ -102,7 +114,7 @@ function SubscriptionContent() {
       }
     };
     if (state === "canceling") {
-      cancelSubscription();
+      doCancelSubscription();
     }
   }, [state, actions]);
 
@@ -110,7 +122,7 @@ function SubscriptionContent() {
     setShowErrorDialog(false);
     setErrorMessage(null);
     // Reset initialization flag to allow fresh data fetch
-    loadedSubscriptionInit.current = false;
+    handleRefresh();
     // Use actions helper for state transition
     actions.retry();
     // Refetch subscription data
@@ -279,7 +291,10 @@ function SubscriptionContent() {
       <SubscriptionStatus />
 
       {/* Available Plans */}
-      <PlanSelector onPlanSelect={handlePlanSelect} />
+      <PlanSelector
+        onPlanSelect={handlePlanSelect}
+        onSubscriptionRefresh={handleRefresh}
+      />
 
       {/* Billing Tabs */}
       <div className="border-t border-border/30 pt-4">

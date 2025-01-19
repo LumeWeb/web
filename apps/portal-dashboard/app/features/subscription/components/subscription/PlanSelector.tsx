@@ -28,15 +28,18 @@ import {
 
 interface PlanSelectorProps {
   onPlanSelect: (plan: SubscriptionPlan) => void;
+  onSubscriptionRefresh: () => void;
 }
 
-export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
+export function PlanSelector({
+  onPlanSelect,
+  onSubscriptionRefresh,
+}: PlanSelectorProps) {
   const { context, state, send, plans, isLoading, actions } =
     useSubscriptionContext();
   const isProcessing = state === "creating" || state === "changing";
   const { isPaymentExpired } = usePayment();
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const loadedSubscriptionInit = useRef(false);
 
   const handleCancelClick = () => {
     setShowCancelConfirm(true);
@@ -49,8 +52,7 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
 
   const handleAbortCancel = () => {
     setShowCancelConfirm(false);
-    // Reset initialization and trigger idle state
-    loadedSubscriptionInit.current = false;
+    onSubscriptionRefresh();
     actions.abortCancellation();
   };
 
