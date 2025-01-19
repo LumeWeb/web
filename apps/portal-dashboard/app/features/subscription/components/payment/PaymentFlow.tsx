@@ -17,8 +17,7 @@ import { Button } from "portal-shared/components/ui/button";
 
 export function PaymentFlow() {
   const { state, context, send } = useSubscriptionContext();
-  const { forceRemount } = usePaymentContext();
-  
+
   const { getPaymentStatus, isPaymentExpired } = usePayment();
 
   const {
@@ -55,13 +54,6 @@ export function PaymentFlow() {
       setIsOpen(false);
     }
   }, [state, paymentState]);
-
-  // Reset the payment flow if we enter error state
-  useEffect(() => {
-    if (paymentState === "error") {
-      forceRemount();
-    }
-  }, [paymentState, forceRemount]);
 
   // Don't render if no payment info
   if (!context.payment?.client_secret) {
