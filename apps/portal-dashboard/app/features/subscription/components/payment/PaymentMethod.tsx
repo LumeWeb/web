@@ -12,6 +12,7 @@ import {
 import { usePaymentMethod } from '../../hooks/usePaymentMethod';
 import HyperPayment from '@/features/subscription/components/payment/HyperPayment';
 import { Alert, AlertDescription } from 'portal-shared/components/ui/alert';
+import { PaymentProvider } from '../../contexts/PaymentContext';
 
 export function PaymentMethod() {
   const { subscription } = useSubscriptionContext();
@@ -43,11 +44,12 @@ export function PaymentMethod() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Payment Method</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <PaymentProvider>
+      <Card>
+        <CardHeader>
+          <CardTitle>Payment Method</CardTitle>
+        </CardHeader>
+        <CardContent>
         {context.error && (
           <Alert variant="destructive" className="mb-4">
             <ExclamationCircleIcon className="h-4 w-4" />
@@ -110,7 +112,8 @@ export function PaymentMethod() {
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </PaymentProvider>
   );
 }
