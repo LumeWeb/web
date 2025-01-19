@@ -88,7 +88,6 @@ function SubscriptionContent() {
   useEffect(() => {
     const cancelSubscription = async () => {
       try {
-        actions.cancelSubscription();
         // Reset initialization flag
         loadedSubscriptionInit.current = false;
         // Refetch subscription data
