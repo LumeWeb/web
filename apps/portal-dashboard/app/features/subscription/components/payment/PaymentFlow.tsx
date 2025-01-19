@@ -97,9 +97,7 @@ export function PaymentFlow() {
               ? "Your payment is being processed..."
               : paymentState === "error"
                 ? `Payment failed. ${context.retryCount < MAX_RETRIES ? "Please try again." : "Maximum retry attempts reached."}`
-                : paymentState === "retrying"
-                  ? "Retrying payment..."
-                  : "Please complete your payment to activate your subscription."}
+                : "Please complete your payment to activate your subscription."}
           </DialogDescription>
         </DialogHeader>
         {paymentState === "error" && context.retryCount < MAX_RETRIES && (
