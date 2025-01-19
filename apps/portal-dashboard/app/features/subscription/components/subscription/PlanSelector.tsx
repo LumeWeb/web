@@ -25,6 +25,24 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
     useSubscriptionContext();
   const isProcessing = state === "creating" || state === "changing";
   const { isPaymentExpired } = usePayment();
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const loadedSubscriptionInit = useRef(false);
+
+  const handleCancelClick = () => {
+    setShowCancelConfirm(true);
+  };
+
+  const handleConfirmCancel = () => {
+    setShowCancelConfirm(false);
+    send({ type: "CANCEL_SUBSCRIPTION" });
+  };
+
+  const handleAbortCancel = () => {
+    setShowCancelConfirm(false);
+    // Reset initialization and trigger idle state
+    loadedSubscriptionInit.current = false;
+    send({ type: "ABORT_CANCELLATION" });
+  };
 
   if (isLoading || !plans) {
     return (
