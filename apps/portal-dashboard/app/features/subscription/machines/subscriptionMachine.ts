@@ -96,7 +96,7 @@ const states = {
         return (
           ev.type === "SUBSCRIPTION_LOADED" &&
           ev.subscription?.status === "PENDING" &&
-          !ev.subscription.plan.is_free &&
+          ev.subscription?.plan?.is_free === false &&
           !!ev.subscription.payment?.client_secret
         );
       }),
@@ -251,7 +251,7 @@ const states = {
       "pendingPayment",
       guard((ctx, ev) => {
         if (ev.type === "SUBSCRIPTION_CREATED") {
-          return !ev.subscription.plan.is_free;
+          return ev.subscription?.plan?.is_free === false;
         }
         return false;
       }),
@@ -275,7 +275,7 @@ const states = {
       "active",
       guard((ctx, ev) => {
         if (ev.type === "SUBSCRIPTION_CREATED") {
-          return ev.subscription.plan.is_free;
+          return ev.subscription?.plan?.is_free === true;
         }
         return false;
       }),
