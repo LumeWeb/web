@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
 import { SubscriptionPlan } from "../../types/subscription.types";
 import { usePayment } from "../../hooks/core/usePayment";
@@ -15,6 +15,16 @@ import {
   DownloadIcon,
 } from "portal-shared/components/icons";
 import { formatBytes } from "../../utils/formatters";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "portal-shared/components/ui/alert-dialog";
 
 interface PlanSelectorProps {
   onPlanSelect: (plan: SubscriptionPlan) => void;
@@ -109,88 +119,91 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
   };
 
   return (
-    <div className="grid md:grid-cols-3 gap-8">
-      {(plans || []).map((plan) => (
-        <Card
-          key={plan.id}
-          className={
-            context.subscription?.plan?.id === plan.id
-              ? "ring-2 ring-primary"
-              : ""
-          }>
-          <CardHeader>
-            <CardTitle>{plan.name}</CardTitle>
-            <div className="text-4xl font-medium">
-              ${plan.price}
-              <span className="text-lg font-normal text-muted-foreground">
-                /{plan.period.toLowerCase()}
-              </span>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <CloudIcon className="h-5 w-5 text-primary" />
-                <span>
-                  <b>Storage:</b> {formatBytes(plan.resources.storage)}
+    <>
+      <div className="grid md:grid-cols-3 gap-8">
+        {(plans || []).map((plan) => (
+          <Card
+            key={plan.id}
+            className={
+              context.subscription?.plan?.id === plan.id
+                ? "ring-2 ring-primary"
+                : ""
+            }>
+            <CardHeader>
+              <CardTitle>{plan.name}</CardTitle>
+              <div className="text-4xl font-medium">
+                ${plan.price}
+                <span className="text-lg font-normal text-muted-foreground">
+                  /{plan.period.toLowerCase()}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <CloudUploadIcon className="h-5 w-5 text-primary" />
-                <span>
-                  <b>Upload:</b> {formatBytes(plan.resources.upload)}/month
-                </span>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <CloudIcon className="h-5 w-5 text-primary" />
+                  <span>
+                    <b>Storage:</b> {formatBytes(plan.resources.storage)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CloudUploadIcon className="h-5 w-5 text-primary" />
+                  <span>
+                    <b>Upload:</b> {formatBytes(plan.resources.upload)}/month
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <DownloadIcon className="h-5 w-5 text-primary" />
+                  <span>
+                    <b>Download:</b> {formatBytes(plan.resources.download)}
+                    /month
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <DownloadIcon className="h-5 w-5 text-primary" />
-                <span>
-                  <b>Download:</b> {formatBytes(plan.resources.download)}/month
-                </span>
-              </div>
-            </div>
 
-            {context.subscription?.status === "PENDING" &&
-            context.subscription?.plan?.id === plan.id &&
-            !plan.is_free &&
-            context.subscription.payment?.client_secret
-              ? // Only show Complete Payment button if not processing
-                !isProcessing && (
-                  <>
+              {context.subscription?.status === "PENDING" &&
+              context.subscription?.plan?.id === plan.id &&
+              !plan.is_free &&
+              context.subscription.payment?.client_secret
+                ? // Only show Complete Payment button if not processing
+                  !isProcessing && (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => actions.triggerPayment()}
+                        disabled={isPaymentExpired(context.payment!)}>
+                        {isPaymentExpired(context.payment!)
+                          ? "Session Expired"
+                          : "Complete Payment"}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        className="w-full"
+                        onClick={handleCancelClick}
+                        disabled={isProcessing}>
+                        Cancel Subscription
+                      </Button>
+                    </>
+                  )
+                : // Only show plan selection button if not processing OR if this is the selected plan
+                  (!isProcessing || context.selectedPlan?.id === plan.id) && (
                     <Button
-                      variant="outline"
                       className="w-full"
-                      onClick={() => actions.triggerPayment()}
-                      disabled={isPaymentExpired(context.payment!)}>
-                      {isPaymentExpired(context.payment!)
-                        ? "Session Expired"
-                        : "Complete Payment"}
+                      variant={getButtonVariant(plan)}
+                      onClick={() => handlePlanClick(plan)}
+                      disabled={
+                        (isProcessing &&
+                          context.selectedPlan?.id === plan.id) ||
+                        context.subscription?.plan?.id === plan.id
+                      }>
+                      {getButtonLabel(plan)}
                     </Button>
-                    <Button
-                      variant="destructive"
-                      className="w-full"
-                      onClick={handleCancelClick}
-                      disabled={isProcessing}>
-                      Cancel Subscription
-                    </Button>
-                  </>
-                )
-              : // Only show plan selection button if not processing OR if this is the selected plan
-                (!isProcessing || context.selectedPlan?.id === plan.id) && (
-                  <Button
-                    className="w-full"
-                    variant={getButtonVariant(plan)}
-                    onClick={() => handlePlanClick(plan)}
-                    disabled={
-                      (isProcessing && context.selectedPlan?.id === plan.id) ||
-                      context.subscription?.plan?.id === plan.id
-                    }>
-                    {getButtonLabel(plan)}
-                  </Button>
-                )}
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+                  )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       {/* Cancellation Confirmation Dialog */}
       <AlertDialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
@@ -198,7 +211,8 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Subscription</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to cancel your subscription? This action cannot be undone.
+              Are you sure you want to cancel your subscription? This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
