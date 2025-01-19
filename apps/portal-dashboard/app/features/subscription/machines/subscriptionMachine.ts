@@ -244,6 +244,14 @@ const states = {
         return ctx;
       }),
     ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "CANCEL_SUBSCRIPTION",
+      "canceling",
+      reduce((ctx) => ({
+        ...ctx,
+        status: "CANCELING",
+      })),
+    ),
   ),
 
   // Creating new subscription
