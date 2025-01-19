@@ -56,8 +56,11 @@ function SubscriptionContent() {
   const [localError, setLocalError] = useState<string | null>(null);
   const { createSubscription, updateSubscription } = useSubscriptionMutations();
 
-  const { data: subscriptionData, isLoading: isLoadingSubscription } =
-    useSubscription();
+  const {
+    data: subscriptionData,
+    isLoading: isLoadingSubscription,
+    refetch: refetchSubscription,
+  } = useSubscription();
 
   useEffect(() => {
     if (!isLoadingSubscription && subscriptionData?.data) {
@@ -182,9 +185,16 @@ function SubscriptionContent() {
         }
       } else {
         actions.createSubscription();
-        const { subscription } = await createSubscription(context.selectedPlan);
-        if (subscription) {
-          actions.subscriptionCreated(subscription);
+        const result = await createSubscription(context.selectedPlan);
+        if (result?.subscription) {
+          actions.subscriptionCreated(result?.subscription);
+          await refetchSubscription();
+          if (
+            !result.subscription.plan.is_free &&
+            result.subscription.payment?.client_secret
+          ) {
+            actions.triggerPayment();
+          }
         }
       }
 
