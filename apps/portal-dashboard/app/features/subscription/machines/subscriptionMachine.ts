@@ -18,6 +18,7 @@ type SubscriptionStatus =
   | "ACTIVE"
   | "PENDING"
   | "CANCELLED"
+  | "PENDING_PAYMENT"
   | SubscriptionPlanStatus;
 
 interface SubscriptionContext {
@@ -26,6 +27,11 @@ interface SubscriptionContext {
   billing: BillingInfo | null;
   error: Error | null;
   status: SubscriptionStatus | null;
+  payment: {
+    client_secret?: string;
+    publishable_key?: string;
+    expires_at?: string;
+  } | null;
 }
 
 // Guards for subscription state transitions
@@ -88,7 +94,9 @@ const states = {
       guard((ctx, ev) => {
         return (
           ev.type === "SUBSCRIPTION_LOADED" &&
-          ev.subscription?.status === "PENDING"
+          ev.subscription?.status === "PENDING" &&
+          !ev.subscription.plan.is_free &&
+          !!ev.subscription.payment?.client_secret
         );
       }),
       reduce((ctx, ev) => {
@@ -97,7 +105,9 @@ const states = {
             ...ctx,
             subscription: ev.subscription,
             billing: ev.subscription.billing ?? null,
+            payment: ev.subscription.payment ?? null,
             error: null,
+            status: "PENDING",
           };
         }
         return ctx;
@@ -172,6 +182,14 @@ const states = {
         }
         return ctx;
       }),
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "TRIGGER_PAYMENT",
+      "pendingPayment",
+      reduce((ctx) => ({
+        ...ctx,
+        status: "PENDING_PAYMENT",
+      })),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "SELECT_PLAN",
@@ -313,7 +331,7 @@ const states = {
     ),
   ),
 
-  // Waiting for payment completion (new subscriptions only)
+  // Waiting for payment completion
   pendingPayment: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "PAYMENT_COMPLETE",
@@ -321,6 +339,15 @@ const states = {
       reduce((ctx) => ({
         ...ctx,
         status: "ACTIVE",
+        payment: null,
+      })),
+    ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "PAYMENT_FAILED",
+      "pending",
+      reduce((ctx) => ({
+        ...ctx,
+        status: "PENDING",
       })),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
