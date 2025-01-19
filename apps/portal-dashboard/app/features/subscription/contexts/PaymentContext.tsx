@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext } from "react";
+import React, { createContext, ReactNode, useContext, useState } from "react";
 import { usePaymentMachine } from "../hooks/usePaymentMachine";
 
 interface PaymentContextValue {
@@ -16,6 +16,7 @@ interface PaymentContextValue {
     handleError: (error: Error) => void;
     retry: () => void;
   };
+  forceRemount: () => void;
 }
 
 const PaymentContext = createContext<PaymentContextValue | undefined>(undefined);
@@ -33,14 +34,21 @@ interface PaymentProviderProps {
 }
 
 export function PaymentProvider({ children }: PaymentProviderProps) {
+  const [key, setKey] = useState(0);
   const { state, context, actions } = usePaymentMachine();
+
+  const forceRemount = () => {
+    setKey(prev => prev + 1);
+  };
 
   return (
     <PaymentContext.Provider
+      key={key}
       value={{
         state,
         context,
         actions,
+        forceRemount,
       }}>
       {children}
     </PaymentContext.Provider>

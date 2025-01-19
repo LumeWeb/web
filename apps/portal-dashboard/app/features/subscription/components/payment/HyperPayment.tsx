@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   HyperElements,
   UnifiedCheckout,
@@ -19,8 +19,11 @@ export default function HyperPayment({
   mode,
 }: HyperPaymentProps) {
   const { context, hyperState, hyperPromise } = useSubscriptionContext();
+  const { forceRemount } = usePaymentContext();
   const [clientSecret, setClientSecret] = useState<string | undefined>();
   const [isRetrying, setIsRetrying] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const loadStartTimeRef = useRef<number>();
 
   useEffect(() => {
     if (isRetrying) {
@@ -34,6 +37,32 @@ export default function HyperPayment({
       setClientSecret(context?.payment?.client_secret);
     }
   }, [mode, context?.payment?.client_secret]);
+
+  // Setup timeout when component mounts or when loading state changes
+  useEffect(() => {
+    if (!hyperState.isHyperLoaded && !loadStartTimeRef.current) {
+      loadStartTimeRef.current = Date.now();
+      
+      timeoutRef.current = setTimeout(() => {
+        console.warn('Payment skeleton timeout - forcing remount');
+        forceRemount();
+        loadStartTimeRef.current = undefined;
+      }, 5000); // 5 seconds timeout
+    }
+
+    // Clear timeout if loaded successfully
+    if (hyperState.isHyperLoaded && timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      loadStartTimeRef.current = undefined;
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [hyperState.isHyperLoaded, forceRemount]);
 
   if (!hyperState.isHyperLoaded || !clientSecret) {
     return <StyledPaymentSkeleton />;
