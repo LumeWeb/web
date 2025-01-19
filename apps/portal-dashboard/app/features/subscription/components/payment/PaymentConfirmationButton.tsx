@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "portal-shared/components/ui/button";
-import { usePaymentMachine } from "../../hooks/usePaymentMachine";
+import { usePaymentContext } from "../../contexts/PaymentContext";
 import {
   DEFAULT_PAYMENT_LABELS,
   PaymentButtonState,
@@ -22,7 +22,7 @@ export const PaymentConfirmationButton = ({
   const hyper = useHyper();
   const elements = useElements();
   const [paymentError, setPaymentError] = React.useState<string | null>(null);
-  const { state: paymentState, actions: paymentActions } = usePaymentMachine();
+  const { state: paymentState, actions: paymentActions } = usePaymentContext();
 
   // Derive button state from payment machine state
   const buttonState: PaymentButtonState = React.useMemo(() => {

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { PaymentProvider } from "../../contexts/PaymentContext";
 import {
   HyperElements,
   UnifiedCheckout,
@@ -41,12 +42,13 @@ export default function HyperPayment({
 
   return (
     <div className="relative min-h-[300px] w-full max-w-md mx-auto">
-      <HyperElements
-        options={{
-          manual_retry_allowed: true,
-          clientSecret: clientSecret,
-        }}
-        hyper={hyperPromise}>
+      <PaymentProvider>
+        <HyperElements
+          options={{
+            manual_retry_allowed: true,
+            clientSecret: clientSecret,
+          }}
+          hyper={hyperPromise}>
         <UnifiedCheckout
           options={{
             displaySavedPaymentMethods: false,
@@ -62,7 +64,8 @@ export default function HyperPayment({
           onPaymentError={onPaymentError}
           mode={mode}
         />
-      </HyperElements>
+        </HyperElements>
+      </PaymentProvider>
     </div>
   );
 }

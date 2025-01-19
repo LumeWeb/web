@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
-import { usePaymentMachine } from "../../hooks/usePaymentMachine";
+import { usePaymentContext } from "../../contexts/PaymentContext";
 import { MAX_RETRIES } from "../../machines/paymentMachine";
 import {
   Dialog,
@@ -24,7 +24,7 @@ export function PaymentFlow() {
     state: paymentState,
     context: paymentContext,
     actions: paymentActions,
-  } = usePaymentMachine();
+  } = usePaymentContext();
 
   const handlePaymentSuccess = () => {
     paymentActions.completePayment();
