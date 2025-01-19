@@ -12,14 +12,14 @@ export type PaymentMethodType = "card" | "bank_transfer" | "wallet";
 export type PaymentButtonState = 
   | "idle" 
   | "processing"
-  | "retrying"
+  | "retry"
   | "failed"
   | "succeeded";
 
 export interface PaymentButtonLabels {
   idle: string;
   processing: string;
-  retrying: string;
+  retry: string;
   failed: string;
   succeeded: string;
 }
@@ -30,21 +30,21 @@ export const DEFAULT_PAYMENT_LABELS: Record<PaymentMode, PaymentButtonLabels> = 
   subscribe: {
     idle: "Subscribe",
     processing: "Processing Payment...",
-    retrying: "Retrying Payment...",
+    retry: "Retry Payment...",
     failed: "Retry Payment",
     succeeded: "Subscription Complete"
   },
   setup: {
     idle: "Set Up Payment Method",
     processing: "Setting Up Payment...",
-    retrying: "Retrying Setup...",
+    retry: "Retry Setup...",
     failed: "Retry Setup",
     succeeded: "Setup Complete"
   },
   change_payment: {
     idle: "Update Payment Method",
     processing: "Updating Payment...",
-    retrying: "Retrying Update...",
+    retry: "Retry Update...",
     failed: "Retry Update",
     succeeded: "Update Complete"
   }
