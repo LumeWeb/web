@@ -1,6 +1,7 @@
 import React from "react";
 import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
 import { SubscriptionPlan } from "../../types/subscription.types";
+import { usePayment } from "../../hooks/core/usePayment";
 import { Button } from "portal-shared/components/ui/button";
 import {
   Card,
@@ -20,8 +21,9 @@ interface PlanSelectorProps {
 }
 
 export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
-  const { subscription, plans, selectedPlan, isProcessing, isLoading } =
+  const { subscription, plans, selectedPlan, isProcessing, isLoading, send } =
     useSubscriptionContext();
+  const { isPaymentExpired } = usePayment();
 
   if (isLoading) {
     return (
@@ -124,13 +126,28 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
               </div>
             </div>
 
-            <Button
-              className="w-full"
-              variant={getButtonVariant(plan)}
-              onClick={() => handlePlanClick(plan)}
-              disabled={isProcessing || subscription?.plan.id === plan.id}>
-              {getButtonLabel(plan)}
-            </Button>
+            {subscription?.status === "PENDING" && 
+             subscription.plan.id === plan.id && 
+             !plan.is_free && 
+             subscription.payment?.client_secret ? (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => send({ type: "TRIGGER_PAYMENT" })}
+                disabled={isPaymentExpired(subscription.payment)}>
+                {isPaymentExpired(subscription.payment) 
+                  ? "Session Expired" 
+                  : "Complete Payment"}
+              </Button>
+            ) : (
+              <Button
+                className="w-full"
+                variant={getButtonVariant(plan)}
+                onClick={() => handlePlanClick(plan)}
+                disabled={isProcessing || subscription?.plan.id === plan.id}>
+                {getButtonLabel(plan)}
+              </Button>
+            )}
           </CardContent>
         </Card>
       ))}
