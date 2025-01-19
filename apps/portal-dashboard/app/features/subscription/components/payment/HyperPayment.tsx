@@ -6,6 +6,7 @@ import {
 import { Skeleton } from "portal-shared/components/ui/skeleton";
 import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
 import { PaymentConfirmationButton } from "./PaymentConfirmationButton";
+import { usePaymentContext } from "../../contexts/PaymentContext";
 
 interface HyperPaymentProps {
   onPaymentSuccess: () => void;
@@ -42,9 +43,9 @@ export default function HyperPayment({
   useEffect(() => {
     if (!hyperState.isHyperLoaded && !loadStartTimeRef.current) {
       loadStartTimeRef.current = Date.now();
-      
+
       timeoutRef.current = setTimeout(() => {
-        console.warn('Payment skeleton timeout - forcing remount');
+        console.warn("Payment skeleton timeout - forcing remount");
         forceRemount();
         loadStartTimeRef.current = undefined;
       }, 5000); // 5 seconds timeout
