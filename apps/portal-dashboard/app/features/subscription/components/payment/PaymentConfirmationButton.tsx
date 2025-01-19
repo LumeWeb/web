@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "portal-shared/components/ui/button";
 import { usePaymentMachine } from "../../hooks/usePaymentMachine";
 import { usePaymentButtonState } from "../../hooks/usePaymentButtonState";
@@ -84,7 +84,8 @@ export const PaymentConfirmationButton = ({
         onPaymentSuccess();
       } catch (error) {
         if (!isActive) return;
-        const err = error instanceof Error ? error : new Error("Payment failed");
+        const err =
+          error instanceof Error ? error : new Error("Payment failed");
         onPaymentError(err);
         setPaymentError(err.message);
       }
@@ -97,7 +98,14 @@ export const PaymentConfirmationButton = ({
     return () => {
       isActive = false;
     };
-  }, [paymentState, hyper, elements, onPaymentSuccess, onPaymentError, paymentActions]);
+  }, [
+    paymentState,
+    hyper,
+    elements,
+    onPaymentSuccess,
+    onPaymentError,
+    paymentActions,
+  ]);
 
   const handleClick = () => {
     setShouldInitiatePayment(true);
