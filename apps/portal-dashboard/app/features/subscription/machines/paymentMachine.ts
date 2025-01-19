@@ -20,7 +20,7 @@ type EventType = PaymentEvent["type"];
 export const MAX_RETRIES = 3;
 
 const guards = {
-  canRetry: (ctx: PaymentContext) => ctx.retryCount < ctx.maxRetries
+  canRetry: (ctx: PaymentContext) => ctx.retryCount < ctx.maxRetries,
 };
 
 const states = {
@@ -31,18 +31,9 @@ const states = {
       reduce((ctx) => ({
         ...ctx,
         error: null,
-        retryCount: 0
-      }))
+        retryCount: 0,
+      })),
     ),
-    transition<EventType, PaymentContext, PaymentEvent>(
-      "ERROR",
-      "error",
-      reduce((ctx, ev) => ({
-        ...ctx,
-        error: ev.error,
-        retryCount: ctx.retryCount + 1
-      }))
-    )
   ),
 
   processing: state(
@@ -51,8 +42,8 @@ const states = {
       "completed",
       reduce((ctx) => ({
         ...ctx,
-        error: null
-      }))
+        error: null,
+      })),
     ),
     transition<EventType, PaymentContext, PaymentEvent>(
       "ERROR",
@@ -60,8 +51,8 @@ const states = {
       reduce((ctx, ev) => ({
         ...ctx,
         error: ev.error,
-        retryCount: ctx.retryCount + 1
-      }))
+        retryCount: ctx.retryCount + 1,
+      })),
     ),
     transition<EventType, PaymentContext, PaymentEvent>(
       "RETRY",
@@ -69,9 +60,9 @@ const states = {
       guard(guards.canRetry),
       reduce((ctx) => ({
         ...ctx,
-        error: null
-      }))
-    )
+        error: null,
+      })),
+    ),
   ),
 
   error: state(
@@ -81,13 +72,12 @@ const states = {
       guard(guards.canRetry),
       reduce((ctx) => ({
         ...ctx,
-        error: null
-      }))
-    )
+        error: null,
+      })),
+    ),
   ),
 
-
-  completed: state()
+  completed: state(),
 };
 
 export const paymentMachine = createMachine(
@@ -96,6 +86,6 @@ export const paymentMachine = createMachine(
   (context?: PaymentContext) => ({
     payment: context?.payment ?? null,
     error: context?.error ?? null,
-    retryCount: context?.retryCount ?? 0
-  })
+    retryCount: context?.retryCount ?? 0,
+  }),
 );
