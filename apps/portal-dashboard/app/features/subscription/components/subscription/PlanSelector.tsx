@@ -21,9 +21,8 @@ interface PlanSelectorProps {
 }
 
 export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
-  const { context, state, send, plans } = useSubscriptionContext();
+  const { context, state, send, plans, isLoading } = useSubscriptionContext();
   const isProcessing = state === "creating" || state === "changing";
-  const isLoading = state === "idle";
   const { isPaymentExpired } = usePayment();
 
   if (isLoading || !context.subscription?.plan) {
