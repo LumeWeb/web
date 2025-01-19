@@ -96,14 +96,6 @@ export function PaymentFlow() {
                 : "Please complete your payment to activate your subscription."}
           </DialogDescription>
         </DialogHeader>
-        {paymentState === "error" &&
-          paymentContext.retryCount < MAX_RETRIES && (
-            <div className="flex justify-end p-4">
-              <Button onClick={handleRetry} variant="secondary">
-                Retry Payment
-              </Button>
-            </div>
-          )}
         <HyperPayment
           mode="subscribe"
           onPaymentSuccess={handlePaymentSuccess}
