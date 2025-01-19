@@ -4,8 +4,6 @@ import {
   SubscriptionProvider,
   useSubscriptionContext,
 } from "../../contexts/SubscriptionContext";
-import { PaymentProvider } from "../../contexts/PaymentContext";
-import { useBilling } from "../../hooks/core/useBilling";
 import { SubscriptionPlan } from "../../types/subscription.types";
 import { SubscriptionStatus } from "./SubscriptionStatus";
 import { PlanSelector } from "./PlanSelector";
@@ -37,19 +35,16 @@ import { PaymentMethod } from "@/features/subscription/components/payment/Paymen
 import { PaymentFlow } from "@/features/subscription/components/payment/PaymentFlow";
 import Addons from "@/routes/account/components/Addons";
 import { useSubscription } from "@/features/subscription/hooks/core/useSubscription";
-import { useSubscriptionMachine } from "../../hooks/useSubscriptionMachine";
 import { useSubscriptionDialog } from "@/features/subscription/hooks/ui/useSubscriptionDialog";
 import { useSubscriptionConfirmation } from "@/features/subscription/hooks/ui/useSubscriptionConfirmation";
 import { useSubscriptionMutations } from "../../hooks/mutations/useSubscriptionMutations";
 import { Alert, AlertDescription } from "portal-shared/components/ui/alert";
-import { validateBillingInfo } from "../../services/billing";
+import { PaymentProvider } from "../../contexts/PaymentContext";
 
 export function SubscriptionManager() {
   return (
     <SubscriptionProvider>
-      <PaymentProvider>
-        <SubscriptionContent />
-      </PaymentProvider>
+      <SubscriptionContent />
     </SubscriptionProvider>
   );
 }
@@ -318,7 +313,9 @@ function SubscriptionContent() {
       </AlertDialog>
 
       {/* Payment Flow Dialog */}
-      <PaymentFlow />
+      <PaymentProvider>
+        <PaymentFlow />
+      </PaymentProvider>
     </div>
   );
 }
