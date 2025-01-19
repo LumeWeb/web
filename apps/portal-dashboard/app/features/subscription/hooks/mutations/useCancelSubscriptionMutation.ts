@@ -12,7 +12,7 @@ export function useCancelSubscriptionMutation() {
       mutate(
         {
           url: `${apiUrl}/api/account/subscription/cancel`,
-          method: "post",
+          method: "delete",
           values: {},
         },
         {
