@@ -43,8 +43,13 @@ export function PaymentFlow() {
   const [isOpen, setIsOpen] = useState(false);
   const { handleOpenChange } = useDialogState({
     isOpen,
-    onOpenChange: setIsOpen,
-    shouldPreventClose: true,
+    onOpenChange: (open: boolean) => {
+      if (!open) {
+        send({ type: "PAYMENT_CLOSE" });
+      }
+      setIsOpen(open);
+    },
+    shouldPreventClose: paymentState === "processing",
   });
 
   useEffect(() => {
