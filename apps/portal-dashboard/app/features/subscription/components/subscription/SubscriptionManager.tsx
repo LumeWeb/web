@@ -89,10 +89,10 @@ function SubscriptionContent() {
     setErrorMessage(null);
     // Reset initialization flag to allow fresh data fetch
     loadedSubscriptionInit.current = false;
-    // Refetch subscription data
-    await refetchSubscription();
     // Use actions helper for state transition
     actions.retry();
+    // Refetch subscription data
+    await refetchSubscription();
   };
 
   const selectedPlan = useMemo(() => {
