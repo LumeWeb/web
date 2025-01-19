@@ -57,7 +57,8 @@ function SubscriptionContent() {
   const [localError, setLocalError] = useState<string | null>(null);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { createSubscription, updateSubscription } = useSubscriptionMutations();
+  const { createSubscription, updateSubscription, cancelSubscription } =
+    useSubscriptionMutations();
   const loadedSubscriptionInit = useRef(false);
 
   const {
@@ -85,6 +86,28 @@ function SubscriptionContent() {
   }, [state, context.error]);
 
   useEffect(() => {
+    const doCancelSubscription = async () => {
+      try {
+        cancelSubscription();
+        // Reset initialization flag
+        loadedSubscriptionInit.current = false;
+        // Refetch subscription data
+        await refetchSubscription();
+      } catch (err) {
+        const errorMessage =
+          (err as AxiosError)?.name === "AxiosError"
+            ? ((err as AxiosError)?.response?.data as string)
+            : "Subscription action failed";
+        actions.handleError(err);
+        setShowErrorDialog(true);
+      }
+    };
+    if (state === "canceling") {
+      doCancelSubscription();
+    }
+  }, [state, actions]);
+
+  useEffect(() => {
     const cancelSubscription = async () => {
       try {
         actions.cancelSubscription();
@@ -92,11 +115,11 @@ function SubscriptionContent() {
         loadedSubscriptionInit.current = false;
         // Refetch subscription data
         await refetchSubscription();
-      } catch (error) {
+      } catch (err) {
         const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Failed to cancel subscription";
+          (err as AxiosError)?.name === "AxiosError"
+            ? ((err as AxiosError)?.response?.data as string)
+            : "Subscription action failed";
         setErrorMessage(errorMessage);
         setShowErrorDialog(true);
       }
