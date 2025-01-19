@@ -40,6 +40,7 @@ import { useSubscriptionConfirmation } from "@/features/subscription/hooks/ui/us
 import { useSubscriptionMutations } from "../../hooks/mutations/useSubscriptionMutations";
 import { Alert, AlertDescription } from "portal-shared/components/ui/alert";
 import { PaymentProvider } from "../../contexts/PaymentContext";
+import { AxiosError } from "axios";
 
 export function SubscriptionManager() {
   return (
@@ -77,7 +78,7 @@ function SubscriptionContent() {
   }, [isLoadingSubscription, subscriptionData, actions]);
 
   useEffect(() => {
-    if (state === 'error' && context.error) {
+    if (state === "error" && context.error) {
       setErrorMessage(context.error.message);
       setShowErrorDialog(true);
     }
@@ -223,7 +224,9 @@ function SubscriptionContent() {
       closeDialog();
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Subscription action failed";
+        (err as AxiosError)?.name === "AxiosError"
+          ? ((err as AxiosError)?.response?.data as string)
+          : "Subscription action failed";
       setValidationError(errorMessage);
       actions.handleError(new Error(errorMessage));
     }
