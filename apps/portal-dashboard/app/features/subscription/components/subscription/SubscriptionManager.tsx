@@ -54,6 +54,8 @@ export default SubscriptionManager;
 function SubscriptionContent() {
   const { state, context, send, actions, isLoading } = useSubscriptionContext();
   const [localError, setLocalError] = useState<string | null>(null);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { createSubscription, updateSubscription } = useSubscriptionMutations();
   const loadedSubscriptionInit = useRef(false);
 
@@ -72,7 +74,25 @@ function SubscriptionContent() {
       actions.subscriptionLoaded(subscriptionData.data);
       loadedSubscriptionInit.current = true;
     }
-  }, [isLoadingSubscription, subscriptionData, send]);
+  }, [isLoadingSubscription, subscriptionData, actions]);
+
+  useEffect(() => {
+    if (state === 'error' && context.error) {
+      setErrorMessage(context.error.message);
+      setShowErrorDialog(true);
+    }
+  }, [state, context.error]);
+
+  const handleErrorDialogClose = async () => {
+    setShowErrorDialog(false);
+    setErrorMessage(null);
+    // Reset initialization flag to allow fresh data fetch
+    loadedSubscriptionInit.current = false;
+    // Refetch subscription data
+    await refetchSubscription();
+    // Use actions helper for state transition
+    actions.retry();
+  };
 
   const selectedPlan = useMemo(() => {
     if (state === "pending" || state === "pendingPayment") {
@@ -325,6 +345,26 @@ function SubscriptionContent() {
           <PaymentFlow />
         </PaymentProvider>
       )}
+
+      {/* Error Dialog */}
+      <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Subscription Error</AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="flex items-center gap-2 text-destructive">
+                <ExclamationCircleIcon className="h-5 w-5" />
+                <span>{errorMessage}</span>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleErrorDialogClose}>
+              Close
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
