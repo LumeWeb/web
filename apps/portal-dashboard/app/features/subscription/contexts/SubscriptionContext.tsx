@@ -55,6 +55,7 @@ interface SubscriptionContextValue {
     updatePaymentMethod: () => void;
     paymentMethodUpdated: (paymentMethodId: string) => void;
     triggerPayment: () => void;
+    cancelSubscription: () => void;
   };
 }
 
@@ -114,6 +115,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       paymentMethodUpdated: (paymentMethodId: string) =>
         send({ type: "PAYMENT_METHOD_UPDATED", paymentMethodId }),
       triggerPayment: () => send({ type: "TRIGGER_PAYMENT" }),
+      cancelSubscription: () => send({ type: "CANCEL_SUBSCRIPTION" }),
     }),
     [send],
   );

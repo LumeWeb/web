@@ -17,8 +17,8 @@ import { SubscriptionPlanStatus } from "portal-shared/dataProviders/accountProvi
 type SubscriptionStatus =
   | "ACTIVE"
   | "PENDING"
-  | "CANCELLED"
   | "PENDING_PAYMENT"
+  | "CANCELING"
   | SubscriptionPlanStatus;
 
 interface SubscriptionContext {
@@ -62,7 +62,8 @@ export type SubscriptionEvent =
   | { type: "ERROR"; error: Error }
   | { type: "PAYMENT_COMPLETE" }
   | { type: "TRIGGER_PAYMENT" }
-  | { type: "PAYMENT_CLOSE" };
+  | { type: "PAYMENT_CLOSE" }
+  | { type: "CANCEL_SUBSCRIPTION" };
 
 type EventType = SubscriptionEvent["type"];
 
@@ -376,6 +377,14 @@ const states = {
         return ctx;
       }),
     ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "CANCEL_SUBSCRIPTION",
+      "canceling",
+      reduce((ctx) => ({
+        ...ctx,
+        status: "CANCELING",
+      })),
+    ),
   ),
 
   // Subscription is active
@@ -397,18 +406,14 @@ const states = {
       }),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "CANCEL",
-      "cancelled",
+      "CANCEL_SUBSCRIPTION",
+      "canceling",
       reduce((ctx) => ({
         ...ctx,
-        status: "CANCELLED",
+        status: "CANCELING",
       })),
     ),
   ),
-
-  // Subscription is cancelled
-  cancelled: state(),
-
   // Error state
   error: state(
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
@@ -418,6 +423,21 @@ const states = {
         ...ctx,
         error: null,
         selectedPlan: null,
+      })),
+    ),
+  ),
+
+  canceling: state(
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "SUBSCRIPTION_LOADED",
+      "idle",
+      reduce((ctx) => ({
+        ...ctx,
+        subscription: null,
+        selectedPlan: null,
+        status: null,
+        payment: null,
+        error: null,
       })),
     ),
   ),
