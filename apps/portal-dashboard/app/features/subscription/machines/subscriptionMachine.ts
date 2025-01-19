@@ -344,20 +344,17 @@ const states = {
       })),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
-      "PAYMENT_FAILED",
-      "pending",
-      reduce((ctx) => ({
-        ...ctx,
-        status: "PENDING",
-      })),
-    ),
-    transition<EventType, SubscriptionContext, SubscriptionEvent>(
       "ERROR",
       "error",
       reduce((ctx, ev) => {
         if (ev.type === "ERROR") {
           return {
             ...ctx,
+            subscription: ctx.subscription,
+            selectedPlan: null,
+            status: "PENDING",
+            payment: null,
+            billing: ctx.billing,
             error: ev.error,
           };
         }
