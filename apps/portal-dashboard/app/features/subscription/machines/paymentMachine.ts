@@ -1,7 +1,7 @@
 import { createMachine, state, transition, reduce, guard } from "robot3";
 import { PaymentInfo } from "../types/payment.types";
 
-interface PaymentContext {
+export interface PaymentContext {
   payment: PaymentInfo | null;
   error: Error | null;
   retryCount: number;
@@ -9,11 +9,11 @@ interface PaymentContext {
 }
 
 export type PaymentEvent =
-  | { type: "START" }
-  | { type: "PROCESSING" }
-  | { type: "COMPLETE" }
+  | { type: "START"; error?: never }
+  | { type: "PROCESSING"; error?: never }
+  | { type: "COMPLETE"; error?: never }
   | { type: "ERROR"; error: Error }
-  | { type: "RETRY" };
+  | { type: "RETRY"; error?: never };
 
 type EventType = PaymentEvent["type"];
 
@@ -87,5 +87,6 @@ export const paymentMachine = createMachine(
     payment: context?.payment ?? null,
     error: context?.error ?? null,
     retryCount: context?.retryCount ?? 0,
+    maxRetries: context?.maxRetries ?? MAX_RETRIES,
   }),
 );
