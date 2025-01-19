@@ -253,6 +253,18 @@ const states = {
         status: "CANCELING",
       })),
     ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "ABORT_CANCELLATION",
+      "idle",
+      reduce((ctx) => ({
+        ...ctx,
+        subscription: null,
+        selectedPlan: null,
+        status: null,
+        payment: null,
+        error: null,
+      })),
+    ),
   ),
 
   // Creating new subscription
