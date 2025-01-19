@@ -133,31 +133,32 @@ export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
             {context.subscription?.status === "PENDING" &&
             context.subscription?.plan?.id === plan.id &&
             !plan.is_free &&
-            context.subscription.payment?.client_secret ? (
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => send({ type: "TRIGGER_PAYMENT" })}
-                disabled={isPaymentExpired(context.payment!)}>
-                {isPaymentExpired(context.payment!)
-                  ? "Session Expired"
-                  : "Complete Payment"}
-              </Button>
-            ) : (
-              // Only show button if not processing OR if this is the selected plan
-              (!isProcessing || context.selectedPlan?.id === plan.id) && (
-                <Button
-                  className="w-full"
-                  variant={getButtonVariant(plan)}
-                  onClick={() => handlePlanClick(plan)}
-                  disabled={
-                    (isProcessing && context.selectedPlan?.id === plan.id) ||
-                    context.subscription?.plan?.id === plan.id
-                  }>
-                  {getButtonLabel(plan)}
-                </Button>
-              )
-            )}
+            context.subscription.payment?.client_secret
+              ? // Only show Complete Payment button if not processing
+                !isProcessing && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => send({ type: "TRIGGER_PAYMENT" })}
+                    disabled={isPaymentExpired(context.payment!)}>
+                    {isPaymentExpired(context.payment!)
+                      ? "Session Expired"
+                      : "Complete Payment"}
+                  </Button>
+                )
+              : // Only show plan selection button if not processing OR if this is the selected plan
+                (!isProcessing || context.selectedPlan?.id === plan.id) && (
+                  <Button
+                    className="w-full"
+                    variant={getButtonVariant(plan)}
+                    onClick={() => handlePlanClick(plan)}
+                    disabled={
+                      (isProcessing && context.selectedPlan?.id === plan.id) ||
+                      context.subscription?.plan?.id === plan.id
+                    }>
+                    {getButtonLabel(plan)}
+                  </Button>
+                )}
           </CardContent>
         </Card>
       ))}
