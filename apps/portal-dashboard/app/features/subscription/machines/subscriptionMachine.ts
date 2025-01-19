@@ -110,7 +110,7 @@ const states = {
             error: null,
             status: "PENDING",
             selectedPlan: null,
-          } as SubscriptionContext;
+          };
         }
         return ctx;
       }),
@@ -170,7 +170,10 @@ const states = {
       "SUBSCRIPTION_LOADED",
       "active",
       guard((ctx, ev) => {
-        return ev.type === "SUBSCRIPTION_LOADED" && ev.subscription?.status === "ACTIVE";
+        return (
+          ev.type === "SUBSCRIPTION_LOADED" &&
+          ev.subscription?.status === "ACTIVE"
+        );
       }),
       reduce((ctx, ev) => {
         if (ev.type === "SUBSCRIPTION_LOADED") {
@@ -262,7 +265,7 @@ const states = {
             payment: ev.subscription.payment ?? null,
             billing: ctx.billing,
             error: ctx.error,
-          } as SubscriptionContext;
+          };
         }
         return ctx;
       }),
@@ -359,7 +362,7 @@ const states = {
             payment: null,
             billing: ctx.billing,
             error: ev.error,
-          } as SubscriptionContext;
+          };
         }
         return ctx;
       }),
