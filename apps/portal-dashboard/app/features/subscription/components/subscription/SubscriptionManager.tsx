@@ -4,6 +4,7 @@ import {
   SubscriptionProvider,
   useSubscriptionContext,
 } from "../../contexts/SubscriptionContext";
+import { PaymentProvider } from "../../contexts/PaymentContext";
 import { useBilling } from "../../hooks/core/useBilling";
 import { SubscriptionPlan } from "../../types/subscription.types";
 import { SubscriptionStatus } from "./SubscriptionStatus";
@@ -46,7 +47,9 @@ import { validateBillingInfo } from "../../services/billing";
 export function SubscriptionManager() {
   return (
     <SubscriptionProvider>
-      <SubscriptionContent />
+      <PaymentProvider>
+        <SubscriptionContent />
+      </PaymentProvider>
     </SubscriptionProvider>
   );
 }
