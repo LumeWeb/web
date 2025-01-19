@@ -440,6 +440,21 @@ const states = {
         error: null,
       })),
     ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "ERROR",
+      "error",
+      reduce((ctx, ev) => {
+        if (ev.type === "ERROR") {
+          return {
+            ...ctx,
+            error: ev.error,
+            // Maintain subscription state in case of error
+            status: ctx.subscription?.status || null,
+          };
+        }
+        return ctx;
+      }),
+    ),
   ),
 };
 

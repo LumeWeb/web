@@ -88,7 +88,7 @@ function SubscriptionContent() {
   useEffect(() => {
     const doCancelSubscription = async () => {
       try {
-        cancelSubscription();
+        await cancelSubscription();
         // Reset initialization flag
         loadedSubscriptionInit.current = false;
         // Refetch subscription data
@@ -98,7 +98,7 @@ function SubscriptionContent() {
           (err as AxiosError)?.name === "AxiosError"
             ? ((err as AxiosError)?.response?.data as string)
             : "Subscription action failed";
-        actions.handleError(err);
+        actions.handleError(new Error(errorMessage));
         setShowErrorDialog(true);
       }
     };
@@ -144,7 +144,7 @@ function SubscriptionContent() {
     if (state === "pending" || state === "pendingPayment") {
       return context.selectedPlan;
     }
-    if (state === "active" || state === "cancelled") {
+    if (state === "active") {
       return context.subscription?.plan;
     }
     return null;
