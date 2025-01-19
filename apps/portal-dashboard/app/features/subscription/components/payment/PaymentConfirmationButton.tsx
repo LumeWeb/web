@@ -43,44 +43,70 @@ export const PaymentConfirmationButton = ({
 
   const buttonLabel = DEFAULT_PAYMENT_LABELS[mode][buttonState];
 
-  const handlePayment = async () => {
-    if (!hyper || !elements) {
-      onPaymentError(new Error("Payment system not initialized"));
-      return;
+  const [shouldInitiatePayment, setShouldInitiatePayment] = useState(false);
+
+  // Effect to handle payment initialization
+  useEffect(() => {
+    if (shouldInitiatePayment && paymentState === "idle") {
+      paymentActions.startPayment();
+      setShouldInitiatePayment(false);
     }
+  }, [shouldInitiatePayment, paymentState, paymentActions]);
 
-    try {
-      // Only call startPayment if we're in idle state
-      if (paymentState === "idle") {
-        paymentActions.startPayment();
-      }
-      setPaymentError(null);
+  // Effect to handle payment processing
+  useEffect(() => {
+    let isActive = true;
 
-      const result = await hyper.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: window.location.href,
-        },
-        redirect: "if_required",
-      });
-
-      if (result?.error) {
-        throw new Error(result.error.message || "Payment failed");
+    const processPayment = async () => {
+      if (!hyper || !elements) {
+        onPaymentError(new Error("Payment system not initialized"));
+        return;
       }
 
-      paymentActions.completePayment();
-      onPaymentSuccess();
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error("Payment failed");
-      onPaymentError(err);
-      setPaymentError(err.message);
+      try {
+        setPaymentError(null);
+
+        const result = await hyper.confirmPayment({
+          elements,
+          confirmParams: {
+            return_url: window.location.href,
+          },
+          redirect: "if_required",
+        });
+
+        if (!isActive) return;
+
+        if (result?.error) {
+          throw new Error(result.error.message || "Payment failed");
+        }
+
+        paymentActions.completePayment();
+        onPaymentSuccess();
+      } catch (error) {
+        if (!isActive) return;
+        const err = error instanceof Error ? error : new Error("Payment failed");
+        onPaymentError(err);
+        setPaymentError(err.message);
+      }
+    };
+
+    if (paymentState === "processing") {
+      processPayment();
     }
+
+    return () => {
+      isActive = false;
+    };
+  }, [paymentState, hyper, elements, onPaymentSuccess, onPaymentError, paymentActions]);
+
+  const handleClick = () => {
+    setShouldInitiatePayment(true);
   };
 
   return (
     <>
       <Button
-        onClick={handlePayment}
+        onClick={handleClick}
         disabled={buttonState === "processing" || buttonState === "succeeded"}
         className="w-full py-2 px-4 text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
         {buttonLabel}
