@@ -12,7 +12,7 @@ import {
 } from "portal-shared/components/icons";
 import { formatBytes } from "../../../utils/formatters";
 import { SubscriptionPlan } from "../../../types/subscription.types";
-import { usePlanCardState } from "../../../hooks/ui/usePlanCardState";
+import { usePlanActions } from "../../../hooks/ui/usePlanActions";
 import { SubscriptionActions } from "./SubscriptionActions";
 
 interface PlanCardProps {
@@ -21,7 +21,7 @@ interface PlanCardProps {
 }
 
 export function PlanCard({ plan, onSelect }: PlanCardProps) {
-  const { isSelected, buttonProps } = usePlanCardState(plan);
+  const { isSelected, buttonProps } = usePlanActions(plan);
 
   return (
     <Card className={isSelected ? "ring-2 ring-primary" : ""}>

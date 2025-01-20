@@ -18,8 +18,8 @@ export function SubscriptionActions({
   onSelect,
   buttonProps,
 }: SubscriptionActionsProps) {
-  const { isPending, needsPayment, isPaymentExpired } = usePlanActions();
-  const { actions } = useSubscriptionContext();
+  const { isPending, needsPayment, isPaymentExpired, actions } =
+    usePlanActions();
 
   if (isPending && needsPayment && !plan.is_free) {
     return (
