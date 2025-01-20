@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "portal-shared/components/ui/button";
 import { CloudIcon } from "portal-shared/components/icons";
 import {
@@ -25,26 +25,39 @@ interface SubscriptionActionsProps {
     variant: "outline" | "default";
     disabled: boolean;
   };
+  onSubscriptionRefresh: () => void;
 }
 
 export function SubscriptionActions({
   plan,
   onSelect,
   buttonProps,
+  onSubscriptionRefresh,
 }: SubscriptionActionsProps) {
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const {
     isPending,
     needsPayment,
     isProcessing,
     isSelected,
     isPaymentExpired,
-    showCancelConfirm,
-    setShowCancelConfirm,
-    handleCancelClick,
-    handleConfirmCancel,
-    handleAbortCancel,
     actions,
   } = usePlanActions(plan);
+
+  const handleCancelClick = () => {
+    setShowCancelConfirm(true);
+  };
+
+  const handleConfirmCancel = () => {
+    setShowCancelConfirm(false);
+    actions.cancelSubscription();
+  };
+
+  const handleAbortCancel = () => {
+    setShowCancelConfirm(false);
+    onSubscriptionRefresh();
+    actions.abortCancellation();
+  };
 
   if (
     isSelected &&
