@@ -21,9 +21,7 @@ export function usePlanActions(plan: SubscriptionPlan) {
   const isCurrent = getPlanId(currentPlan) === getPlanId(plan);
   const isSelectedForProcessing =
     getPlanId(context.selectedPlan) === getPlanId(plan);
-  const paymentExpired = !!context.payment
-    ? isPaymentExpired(context.payment)
-    : false;
+  const paymentExpired = isPaymentExpired(context.payment);
 
   const getButtonLabel = () => {
     if (isProcessing && (isSelectedForProcessing || isCurrent)) {

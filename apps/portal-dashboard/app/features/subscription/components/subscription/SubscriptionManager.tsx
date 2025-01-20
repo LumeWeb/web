@@ -42,6 +42,7 @@ import { Alert, AlertDescription } from "portal-shared/components/ui/alert";
 import { PaymentProvider } from "../../contexts/PaymentContext";
 import { AxiosError } from "axios";
 import useForceUpdate from "use-force-update";
+import { usePayment } from "@/features/subscription/hooks/core/usePayment";
 
 export function SubscriptionManager() {
   return (
@@ -65,6 +66,8 @@ function SubscriptionContent() {
     isInitialized: false,
     isRefreshed: false,
   });
+
+  const { isPaymentExpired } = usePayment();
 
   const force = () => setRefreshState(Math.random());
 
@@ -247,7 +250,7 @@ function SubscriptionContent() {
         return;
       }
 
-      if (context.subscription?.plan) {
+      if (context.subscription?.plan && isPaymentExpired(context.payment)) {
         actions.updateSubscription();
         const result = await updateSubscription(context.selectedPlan);
         if (result) {

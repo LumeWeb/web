@@ -9,7 +9,7 @@ export class PaymentService {
   }
 
   public isPaymentExpired(payment: PaymentInfo): boolean {
-    if (!payment.expires_at) return false;
+    if (!payment?.expires_at) return false;
 
     const expiryDate = new Date(payment.expires_at);
     return expiryDate <= new Date();
