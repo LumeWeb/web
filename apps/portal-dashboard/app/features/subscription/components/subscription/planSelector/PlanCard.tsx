@@ -18,7 +18,6 @@ import { SubscriptionActions } from "./SubscriptionActions";
 interface PlanCardProps {
   plan: SubscriptionPlan;
   onSelect: (plan: SubscriptionPlan) => void;
-  onSubscriptionRefresh: () => void;
 }
 
 export function PlanCard({ plan, onSelect }: PlanCardProps) {
