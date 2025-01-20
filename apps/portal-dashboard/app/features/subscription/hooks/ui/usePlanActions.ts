@@ -54,7 +54,18 @@ export function usePlanActions(plan: SubscriptionPlan) {
   };
 
   const getButtonVariant = () => {
-    return isSelected ? "outline" as const : "default" as const;
+    if (
+      !currentPlan ||
+      (currentPlan && isPending && isPaymentExpired(context.payment))
+    ) {
+      return "";
+    }
+
+    if (isSelected) {
+      return "outline";
+    }
+
+    return "default";
   };
 
   const getButtonDisabled = () => {
