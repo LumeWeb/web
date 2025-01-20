@@ -250,7 +250,7 @@ function SubscriptionContent() {
         return;
       }
 
-      if (context.subscription?.plan && isPaymentExpired(context.payment)) {
+      if (context.subscription?.plan && !isPaymentExpired(context.payment)) {
         actions.updateSubscription();
         const result = await updateSubscription(context.selectedPlan);
         if (result) {
