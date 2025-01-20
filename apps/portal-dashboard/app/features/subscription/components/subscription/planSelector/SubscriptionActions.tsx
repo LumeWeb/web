@@ -68,14 +68,7 @@ export function SubscriptionActions({
         <Button
           variant="outline"
           className="w-full"
-          onClick={() => {
-            if (isPaymentExpired && isPending) {
-              // Only recreate subscription if payment expired and status is pending
-              onSelect(plan);
-            } else {
-              actions.triggerPayment();
-            }
-          }}>
+          onClick={actions.triggerPayment}>
           Complete Payment
         </Button>
         <Button
