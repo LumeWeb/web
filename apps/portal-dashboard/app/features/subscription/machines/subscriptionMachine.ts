@@ -150,6 +150,7 @@ const states = {
             ...ctx,
             selectedPlan: ev.plan,
             status: "PENDING",
+            refresh: false
           };
         }
         return ctx;
@@ -266,6 +267,7 @@ const states = {
         status: null,
         payment: null,
         error: null,
+        refresh: false
       })),
     ),
   ),
@@ -312,6 +314,7 @@ const states = {
             subscription: ev.subscription,
             selectedPlan: null,
             status: "ACTIVE",
+            refresh: false
           };
         }
         return ctx;
@@ -447,6 +450,7 @@ const states = {
         ...ctx,
         error: null,
         selectedPlan: null,
+        refresh: true
       })),
     ),
   ),
@@ -462,6 +466,7 @@ const states = {
         status: "INACTIVE",
         payment: null,
         error: null,
+        refresh: false
       })),
     ),
     transition<EventType, SubscriptionContext, SubscriptionEvent>(
