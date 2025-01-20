@@ -81,31 +81,33 @@ function SubscriptionContent() {
   } = useSubscription();
 
   useEffect(() => {
-    if (
-      !initRef.current.isInitialized &&
-      !isLoadingSubscription &&
-      subscriptionData?.data
-    ) {
-      // Initial load
-      initRef.current.isInitialized = true;
-      actions.subscriptionLoaded(subscriptionData.data);
-    } else if (
-      initRef.current.triggerRefresh &&
-      !isLoadingSubscription &&
-      subscriptionData?.data
-    ) {
-      refetchSubscription();
-      initRef.current.triggerRefresh = false;
-      initRef.current.isRefreshed = true;
-      force();
-    } else if (
-      initRef.current.isRefreshed &&
-      !isLoadingSubscription &&
-      subscriptionData?.data
-    ) {
-      actions.subscriptionLoaded(subscriptionData.data);
-      initRef.current.isRefreshed = false;
-    }
+    (async () => {
+      if (
+        !initRef.current.isInitialized &&
+        !isLoadingSubscription &&
+        subscriptionData?.data
+      ) {
+        // Initial load
+        initRef.current.isInitialized = true;
+        actions.subscriptionLoaded(subscriptionData.data);
+      } else if (
+        initRef.current.triggerRefresh &&
+        !isLoadingSubscription &&
+        subscriptionData?.data
+      ) {
+        await refetchSubscription();
+        initRef.current.triggerRefresh = false;
+        initRef.current.isRefreshed = true;
+        force();
+      } else if (
+        initRef.current.isRefreshed &&
+        !isLoadingSubscription &&
+        subscriptionData?.data
+      ) {
+        actions.subscriptionLoaded(subscriptionData.data);
+        initRef.current.isRefreshed = false;
+      }
+    })();
   }, [isLoadingSubscription, subscriptionData, actions, refreshState]);
 
   useEffect(() => {

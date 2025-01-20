@@ -101,7 +101,8 @@ const states = {
           ev.type === "SUBSCRIPTION_LOADED" &&
           ev.subscription?.status === "PENDING" &&
           ev.subscription?.plan?.is_free === false &&
-          !!ev.subscription.payment?.client_secret
+          !!ev.subscription.payment?.client_secret &&
+          !!ev.subscription.plan?.id
         );
       }),
       reduce((ctx, ev) => {
