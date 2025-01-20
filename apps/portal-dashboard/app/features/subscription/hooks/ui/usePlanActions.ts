@@ -37,7 +37,10 @@ export function usePlanActions(plan: SubscriptionPlan) {
       };
     }
 
-    if (!currentPlan) {
+    if (
+      !currentPlan ||
+      (currentPlan && isPending && isPaymentExpired(context.payment))
+    ) {
       return {
         text: "Select Plan",
         showSpinner: false,
