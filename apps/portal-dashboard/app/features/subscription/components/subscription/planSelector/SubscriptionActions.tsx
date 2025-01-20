@@ -56,7 +56,13 @@ export function SubscriptionActions({
     actions.abortCancellation();
   };
 
-  if (isSelected && isPending && needsPayment && !plan.is_free && !isProcessing) {
+  if (
+    isSelected &&
+    isPending &&
+    needsPayment &&
+    !plan.is_free &&
+    !isProcessing
+  ) {
     // If payment is expired, just show the select button
     if (isPaymentExpired) {
       return (
@@ -65,6 +71,7 @@ export function SubscriptionActions({
           variant={buttonProps.variant}
           onClick={() => onSelect(plan)}
           disabled={buttonProps.disabled}>
+          {buttonProps.variant}
           {buttonProps.label.showSpinner && (
             <CloudIcon className="mr-2 h-4 w-4 animate-spin" />
           )}
