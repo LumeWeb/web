@@ -119,7 +119,7 @@ function SubscriptionContent() {
     const doCancelSubscription = async () => {
       try {
         await cancelSubscription();
-        actions.triggerPayment;
+        actions.subscriptionCanceled();
         handleRefresh();
       } catch (err) {
         const errorMessage =
