@@ -30,7 +30,7 @@ export function usePlanActions(plan: SubscriptionPlan) {
       };
     }
 
-    if (isSelected) {
+    if (isSelected && !isPending) {
       return {
         text: "Current Plan",
         showSpinner: false,
