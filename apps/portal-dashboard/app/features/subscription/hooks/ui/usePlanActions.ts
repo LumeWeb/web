@@ -1,10 +1,13 @@
+// usePlanActions.ts
+import { useState } from "react";
 import { useSubscriptionContext } from "@/features/subscription/contexts/SubscriptionContext";
-import { SubscriptionPlan } from "../../types/subscription.types";
 import { usePayment } from "@/features/subscription/hooks/core/usePayment";
+import { SubscriptionPlan } from "../../types/subscription.types";
 
 export function usePlanActions(plan: SubscriptionPlan) {
   const { context, state, actions } = useSubscriptionContext();
   const { isPaymentExpired } = usePayment();
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const getPlanId = (plan?: SubscriptionPlan | null) => plan?.id ?? null;
 
@@ -17,20 +20,42 @@ export function usePlanActions(plan: SubscriptionPlan) {
   const isSelectedForProcessing =
     getPlanId(context.selectedPlan) === getPlanId(plan);
 
+  const handleCancelClick = () => setShowCancelConfirm(true);
+  const handleConfirmCancel = () => {
+    setShowCancelConfirm(false);
+    actions.cancelSubscription();
+  };
+  const handleAbortCancel = () => {
+    setShowCancelConfirm(false);
+    actions.abortCancellation();
+  };
+
   const getButtonLabel = () => {
     if (isProcessing && isSelectedForProcessing) {
-      return "Processing...";
+      return {
+        text: "Processing...",
+        showSpinner: true,
+      };
     }
 
     if (isSelected) {
-      return "Current Plan";
+      return {
+        text: "Current Plan",
+        showSpinner: false,
+      };
     }
 
     if (!currentPlan) {
-      return "Select Plan";
+      return {
+        text: "Select Plan",
+        showSpinner: false,
+      };
     }
 
-    return plan?.price > currentPlan?.price ? "Upgrade" : "Downgrade";
+    return {
+      text: plan.price > currentPlan.price ? "Upgrade" : "Downgrade",
+      showSpinner: false,
+    };
   };
 
   return {
@@ -41,6 +66,10 @@ export function usePlanActions(plan: SubscriptionPlan) {
     isPaymentExpired: context.payment
       ? isPaymentExpired(context.payment)
       : false,
+    showCancelConfirm,
+    handleCancelClick,
+    handleConfirmCancel,
+    handleAbortCancel,
     buttonProps: {
       label: getButtonLabel(),
       variant: isSelected ? ("outline" as const) : ("default" as const),
