@@ -30,9 +30,9 @@ export function usePlanCardState(plan: SubscriptionPlan) {
     isSelected,
     buttonProps: {
       label: getButtonLabel(),
-      variant: isSelected ? "outline" : "default" as const,
+      variant: isSelected ? "outline" : "default",
       disabled: (isProcessing && context.selectedPlan?.id === plan.id) || 
                 context.subscription?.plan?.id === plan.id
-    }
+    } as const
   };
 }
