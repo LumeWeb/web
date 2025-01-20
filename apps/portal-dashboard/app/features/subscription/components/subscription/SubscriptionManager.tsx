@@ -41,6 +41,7 @@ import { useSubscriptionMutations } from "../../hooks/mutations/useSubscriptionM
 import { Alert, AlertDescription } from "portal-shared/components/ui/alert";
 import { PaymentProvider } from "../../contexts/PaymentContext";
 import { AxiosError } from "axios";
+import useForceUpdate from "use-force-update";
 
 export function SubscriptionManager() {
   return (
@@ -59,14 +60,18 @@ function SubscriptionContent() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { createSubscription, updateSubscription, cancelSubscription } =
     useSubscriptionMutations();
+  const [refreshState, setRefreshState] = useState<number>(Math.random());
   const initRef = useRef({
     isInitialized: false,
-    isRefreshing: false,
+    triggerRefresh: false,
+    isRefreshed: false,
   });
 
+  const force = () => setRefreshState(Math.random());
+
   const handleRefresh = () => {
-    initRef.current.isInitialized = false;
-    initRef.current.isRefreshing = false;
+    initRef.current.triggerRefresh = true;
+    force();
   };
 
   const {
@@ -76,21 +81,32 @@ function SubscriptionContent() {
   } = useSubscription();
 
   useEffect(() => {
-    if (!initRef.current.isInitialized && !isLoadingSubscription) {
-      // Initial load
-      refetchSubscription();
-      initRef.current.isRefreshing = true;
-    } else if (
-      initRef.current.isRefreshing &&
+    if (
+      !initRef.current.isInitialized &&
       !isLoadingSubscription &&
       subscriptionData?.data
     ) {
-      // Handle data after refresh
-      actions.subscriptionLoaded(subscriptionData.data);
+      // Initial load
       initRef.current.isInitialized = true;
-      initRef.current.isRefreshing = false;
+      actions.subscriptionLoaded(subscriptionData.data);
+    } else if (
+      initRef.current.triggerRefresh &&
+      !isLoadingSubscription &&
+      subscriptionData?.data
+    ) {
+      refetchSubscription();
+      initRef.current.triggerRefresh = false;
+      initRef.current.isRefreshed = true;
+      force();
+    } else if (
+      initRef.current.isRefreshed &&
+      !isLoadingSubscription &&
+      subscriptionData?.data
+    ) {
+      actions.subscriptionLoaded(subscriptionData.data);
+      initRef.current.isRefreshed = false;
     }
-  }, [isLoadingSubscription, subscriptionData, actions]);
+  }, [isLoadingSubscription, subscriptionData, actions, refreshState]);
 
   useEffect(() => {
     if (state === "error" && context.error) {
@@ -103,6 +119,7 @@ function SubscriptionContent() {
     const doCancelSubscription = async () => {
       try {
         await cancelSubscription();
+        actions.triggerPayment;
         handleRefresh();
       } catch (err) {
         const errorMessage =
