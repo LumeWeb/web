@@ -56,13 +56,24 @@ export function SubscriptionActions({
     actions.abortCancellation();
   };
 
-  if (
-    isSelected &&
-    isPending &&
-    needsPayment &&
-    !plan.is_free &&
-    !isProcessing
-  ) {
+  if (isSelected && isPending && needsPayment && !plan.is_free && !isProcessing) {
+    // If payment is expired, just show the select button
+    if (isPaymentExpired) {
+      return (
+        <Button
+          className="w-full"
+          variant={buttonProps.variant}
+          onClick={() => onSelect(plan)}
+          disabled={buttonProps.disabled}>
+          {buttonProps.label.showSpinner && (
+            <CloudIcon className="mr-2 h-4 w-4 animate-spin" />
+          )}
+          {buttonProps.label.text}
+        </Button>
+      );
+    }
+
+    // Otherwise show payment completion buttons
     return (
       <>
         <Button
