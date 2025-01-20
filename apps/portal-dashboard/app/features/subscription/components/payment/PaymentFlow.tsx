@@ -115,7 +115,7 @@ export function PaymentFlow() {
                 Warning: Payment session expiring soon. Please complete your payment.
               </div>
             )}
-            {paymentStatus === "PROCESSING"
+            {paymentState === "processing"
               ? "Your payment is being processed..."
               : paymentState === "error"
                 ? `Payment failed. ${paymentContext.retryCount < MAX_RETRIES ? "Please try again." : "Maximum retry attempts reached."}`
