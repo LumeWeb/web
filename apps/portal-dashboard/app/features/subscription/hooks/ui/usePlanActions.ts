@@ -18,11 +18,12 @@ export function usePlanActions(plan: SubscriptionPlan) {
   const needsPayment = Boolean(context.subscription?.payment?.client_secret);
   const currentPlan = context.subscription?.plan;
   const isSelected = getPlanId(currentPlan) === getPlanId(plan);
+  const isCurrent = getPlanId(currentPlan) === getPlanId(plan);
   const isSelectedForProcessing =
     getPlanId(context.selectedPlan) === getPlanId(plan);
 
   const getButtonLabel = () => {
-    if (isProcessing && isSelectedForProcessing) {
+    if (isProcessing && (isSelectedForProcessing || isCurrent)) {
       return {
         text: "Processing...",
         showSpinner: true,
