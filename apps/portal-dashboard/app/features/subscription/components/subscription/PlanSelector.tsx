@@ -1,9 +1,9 @@
 import React from "react";
 import { useSubscriptionContext } from "../../contexts/SubscriptionContext";
 import { SubscriptionPlan } from "../../types/subscription.types";
-import { PlanCard } from "./PlanCard";
-import { PlanCardSkeleton } from "./PlanCardSkeleton";
-import { CancellationDialog } from "./CancellationDialog";
+import { PlanCard } from "./planSelector/PlanCard";
+import { PlanCardSkeleton } from "./planSelector/PlanCardSkeleton";
+import { CancellationDialog } from "./planSelector/CancellationDialog";
 
 interface PlanSelectorProps {
   onPlanSelect: (plan: SubscriptionPlan) => void;
@@ -32,11 +32,7 @@ export function PlanSelector({
     <>
       <div className="grid md:grid-cols-3 gap-8">
         {plans.map((plan) => (
-          <PlanCard 
-            key={plan.id} 
-            plan={plan} 
-            onSelect={onPlanSelect}
-          />
+          <PlanCard key={plan.id} plan={plan} onSelect={onPlanSelect} />
         ))}
       </div>
       <CancellationDialog onConfirm={onSubscriptionRefresh} />
