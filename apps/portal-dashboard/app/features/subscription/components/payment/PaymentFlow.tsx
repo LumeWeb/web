@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "portal-shared/components/ui/dialog";
@@ -13,9 +14,10 @@ import HyperPayment from "@/features/subscription/components/payment/HyperPaymen
 import { ExclamationCircleIcon } from "portal-shared/components/icons";
 import { usePayment } from "../../hooks/core/usePayment";
 import { useDialogState } from "../../hooks/useDialogState";
+import { Button } from "portal-shared/components/ui/button";
 
 export function PaymentFlow() {
-  const { state, context, send } = useSubscriptionContext();
+  const { state, context, send, actions } = useSubscriptionContext();
 
   const { getPaymentStatus, isPaymentExpired } = usePayment();
 
@@ -62,10 +64,10 @@ export function PaymentFlow() {
     if (!context.payment?.expires_at) return;
 
     const checkExpiration = () => {
-      const expiryTime = new Date(context.payment.expires_at).getTime();
+      const expiryTime = new Date(context.payment?.expires_at!).getTime();
       const now = new Date().getTime();
       const timeLeft = expiryTime - now;
-      
+
       // Show warning if less than 2 minutes remaining
       setShowExpiringWarning(timeLeft > 0 && timeLeft <= 120000);
     };
@@ -98,10 +100,10 @@ export function PaymentFlow() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button 
+            <Button
               onClick={() => {
                 setIsOpen(false);
-                send({ type: "PAYMENT_EXPIRED" });
+                actions.paymentExpired();
               }}>
               Try Again
             </Button>
@@ -111,8 +113,6 @@ export function PaymentFlow() {
     );
   }
 
-  const paymentStatus = getPaymentStatus(context.payment);
-
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -121,7 +121,8 @@ export function PaymentFlow() {
           <DialogDescription>
             {showExpiringWarning && (
               <div className="mb-2 text-yellow-500 font-medium">
-                Warning: Payment session expiring soon. Please complete your payment.
+                Warning: Payment session expiring soon. Please complete your
+                payment.
               </div>
             )}
             {paymentState === "processing"

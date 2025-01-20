@@ -49,6 +49,7 @@ interface SubscriptionContextValue {
     cancelSubscription: () => void;
     subscriptionCanceled: () => void;
     abortCancellation: () => void;
+    paymentExpired: () => void;
   };
 }
 
@@ -110,6 +111,7 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       cancelSubscription: () => send({ type: "CANCEL_SUBSCRIPTION" }),
       abortCancellation: () => send({ type: "ABORT_CANCELLATION" }),
       subscriptionCanceled: () => send({ type: "SUBSCRIPTION_CANCELED" }),
+      paymentExpired: () => send({ type: "PAYMENT_EXPIRED" }),
     }),
     [send],
   );
