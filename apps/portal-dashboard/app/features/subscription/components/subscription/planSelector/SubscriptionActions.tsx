@@ -71,8 +71,8 @@ export function SubscriptionActions({
           variant="outline"
           className="w-full"
           onClick={() => {
-            if (isPaymentExpired) {
-              // Recreate subscription with same plan
+            if (isPaymentExpired && isPending) {
+              // Only recreate subscription if payment expired and status is pending
               onSelect(plan);
             } else {
               actions.triggerPayment();
