@@ -21,7 +21,7 @@ type SubscriptionStatus =
   | "CANCELING"
   | SubscriptionPlanStatus;
 
-interface SubscriptionContext {
+export interface SubscriptionContext {
   subscription: Subscription | null;
   selectedPlan: SubscriptionPlan | null;
   billing: BillingInfo | null;
@@ -32,6 +32,7 @@ interface SubscriptionContext {
     publishable_key?: string;
     expires_at?: string;
   } | null;
+  refresh?: boolean;
 }
 
 // Guards for subscription state transitions
@@ -57,7 +58,6 @@ export type SubscriptionEvent =
   | { type: "UPDATE_SUBSCRIPTION" }
   | { type: "SUBSCRIPTION_CREATED"; subscription: Subscription }
   | { type: "SUBSCRIPTION_UPDATED"; subscription: Subscription }
-  | { type: "CANCEL" }
   | { type: "RETRY" }
   | { type: "ERROR"; error: Error }
   | { type: "PAYMENT_COMPLETE" }
@@ -115,6 +115,7 @@ const states = {
             error: null,
             status: "PENDING",
             selectedPlan: null,
+            refresh: false,
           };
         }
         return ctx;

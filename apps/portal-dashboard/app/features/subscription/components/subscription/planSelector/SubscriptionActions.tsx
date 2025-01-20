@@ -55,7 +55,6 @@ export function SubscriptionActions({
 
   const handleAbortCancel = () => {
     setShowCancelConfirm(false);
-    onSubscriptionRefresh();
     actions.abortCancellation();
   };
 

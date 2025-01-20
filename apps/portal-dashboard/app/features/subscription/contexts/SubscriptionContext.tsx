@@ -10,18 +10,10 @@ import { useSubscription } from "@/features/subscription/hooks/core/useSubscript
 import {
   SubscriptionEvent,
   subscriptionMachine,
+  SubscriptionContext,
 } from "../machines/subscriptionMachine";
 import { useMachine } from "react-robot";
-import { PaymentInfo } from "../types/payment.types";
 import { useHyperState } from "../hooks/useHyperState";
-
-interface SubscriptionContext {
-  subscription: Subscription | null;
-  selectedPlan: SubscriptionPlan | null;
-  billing: BillingInfo | null;
-  payment: PaymentInfo | null;
-  error: Error | null;
-}
 
 interface SubscriptionContextValue {
   plans: SubscriptionPlan[];
@@ -47,7 +39,6 @@ interface SubscriptionContextValue {
     billingFailed: (error: Error) => void;
     completePayment: (paymentMethodId: string) => void;
     complete: () => void;
-    cancel: () => void;
     reactivate: () => void;
     retry: () => void;
     handleError: (error: Error) => void;
@@ -107,7 +98,6 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
       completePayment: (paymentMethodId: string) =>
         send({ type: "PAYMENT_COMPLETE", paymentMethodId }),
       complete: () => send({ type: "COMPLETE" }),
-      cancel: () => send({ type: "CANCEL" }),
       reactivate: () => send({ type: "REACTIVATE" }),
       retry: () => send({ type: "RETRY" }),
       handleError: (error: Error) => send({ type: "ERROR", error }),

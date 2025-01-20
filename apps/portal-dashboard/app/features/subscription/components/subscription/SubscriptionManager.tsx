@@ -63,7 +63,6 @@ function SubscriptionContent() {
   const [refreshState, setRefreshState] = useState<number>(Math.random());
   const initRef = useRef({
     isInitialized: false,
-    triggerRefresh: false,
     isRefreshed: false,
   });
 
@@ -91,24 +90,26 @@ function SubscriptionContent() {
         initRef.current.isInitialized = true;
         actions.subscriptionLoaded(subscriptionData.data);
       } else if (
-        initRef.current.triggerRefresh &&
+        state === "idle" &&
         !isLoadingSubscription &&
-        subscriptionData?.data
+        subscriptionData?.data &&
+        !initRef.current.isRefreshed
       ) {
-        await refetchSubscription();
-        initRef.current.triggerRefresh = false;
+        if (context.refresh) {
+          await refetchSubscription();
+        }
         initRef.current.isRefreshed = true;
         force();
       } else if (
-        initRef.current.isRefreshed &&
         !isLoadingSubscription &&
-        subscriptionData?.data
+        subscriptionData?.data &&
+        initRef.current.isRefreshed
       ) {
-        actions.subscriptionLoaded(subscriptionData.data);
         initRef.current.isRefreshed = false;
+        actions.subscriptionLoaded(subscriptionData.data);
       }
     })();
-  }, [isLoadingSubscription, subscriptionData, actions, refreshState]);
+  }, [state, isLoadingSubscription, subscriptionData, actions, refreshState]);
 
   useEffect(() => {
     if (state === "error" && context.error) {

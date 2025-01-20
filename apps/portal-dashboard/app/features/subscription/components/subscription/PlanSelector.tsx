@@ -32,7 +32,12 @@ export function PlanSelector({
     <>
       <div className="grid md:grid-cols-3 gap-8">
         {plans.map((plan) => (
-          <PlanCard key={plan.id} plan={plan} onSelect={onPlanSelect} />
+          <PlanCard
+            key={plan.id}
+            plan={plan}
+            onSelect={onPlanSelect}
+            onSubscriptionRefresh={onSubscriptionRefresh}
+          />
         ))}
       </div>
       <CancellationDialog onConfirm={onSubscriptionRefresh} />
