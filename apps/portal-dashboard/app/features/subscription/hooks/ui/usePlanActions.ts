@@ -21,6 +21,9 @@ export function usePlanActions(plan: SubscriptionPlan) {
   const isCurrent = getPlanId(currentPlan) === getPlanId(plan);
   const isSelectedForProcessing =
     getPlanId(context.selectedPlan) === getPlanId(plan);
+  const paymentExpired = !!context.payment
+    ? isPaymentExpired(context.payment)
+    : false;
 
   const getButtonLabel = () => {
     if (isProcessing && (isSelectedForProcessing || isCurrent)) {
@@ -37,10 +40,7 @@ export function usePlanActions(plan: SubscriptionPlan) {
       };
     }
 
-    if (
-      !currentPlan ||
-      (currentPlan && isPending && isPaymentExpired(context.payment))
-    ) {
+    if (!currentPlan || (currentPlan && isPending && paymentExpired)) {
       return {
         text: "Select Plan",
         showSpinner: false,
@@ -54,10 +54,7 @@ export function usePlanActions(plan: SubscriptionPlan) {
   };
 
   const getButtonVariant = () => {
-    if (
-      !currentPlan ||
-      (currentPlan && isPending && isPaymentExpired(context.payment))
-    ) {
+    if (!currentPlan || (currentPlan && isPending && paymentExpired)) {
       return "";
     }
 
@@ -69,7 +66,14 @@ export function usePlanActions(plan: SubscriptionPlan) {
   };
 
   const getButtonDisabled = () => {
-    return (isProcessing && isSelectedForProcessing) || isSelected;
+    if (isProcessing && !paymentExpired) {
+      return true;
+    }
+    if (isSelected && !paymentExpired) {
+      return true;
+    }
+
+    return false;
   };
 
   return {
