@@ -37,7 +37,8 @@ export function PlanSelector({
 }: PlanSelectorProps) {
   const { context, state, send, plans, isLoading, actions } =
     useSubscriptionContext();
-  const isProcessing = state === "creating" || state === "changing";
+  const isIdle = state === "idle";
+  const isProcessing = state === "creating" || state === "changing" || isIdle;
   const { isPaymentExpired } = usePayment();
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
@@ -189,7 +190,9 @@ export function PlanSelector({
                     </>
                   )
                 : // Only show plan selection button if not processing OR if this is the selected plan
-                  (!isProcessing || context.selectedPlan?.id === plan.id) && (
+                  (!isProcessing ||
+                    isIdle ||
+                    context.selectedPlan?.id === plan.id) && (
                     <Button
                       className="w-full"
                       variant={getButtonVariant(plan)}
