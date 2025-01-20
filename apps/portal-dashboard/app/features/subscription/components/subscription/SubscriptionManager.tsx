@@ -300,7 +300,7 @@ function SubscriptionContent() {
   return (
     <div className="space-y-6">
       {/* Subscription Status */}
-      <SubscriptionStatus />
+      {/*<SubscriptionStatus />*/}
 
       {/* Available Plans */}
       <PlanSelector onPlanSelect={handlePlanSelect} />
