@@ -7,13 +7,9 @@ import { CancellationDialog } from "./planSelector/CancellationDialog";
 
 interface PlanSelectorProps {
   onPlanSelect: (plan: SubscriptionPlan) => void;
-  onSubscriptionRefresh: () => void;
 }
 
-export function PlanSelector({
-  onPlanSelect,
-  onSubscriptionRefresh,
-}: PlanSelectorProps) {
+export function PlanSelector({ onPlanSelect }: PlanSelectorProps) {
   const { plans, isLoading } = useSubscriptionContext();
 
   if (isLoading || !plans) {
@@ -32,15 +28,10 @@ export function PlanSelector({
     <>
       <div className="grid md:grid-cols-3 gap-8">
         {plans.map((plan) => (
-          <PlanCard
-            key={plan.id}
-            plan={plan}
-            onSelect={onPlanSelect}
-            onSubscriptionRefresh={onSubscriptionRefresh}
-          />
+          <PlanCard key={plan.id} plan={plan} onSelect={onPlanSelect} />
         ))}
       </div>
-      <CancellationDialog onConfirm={onSubscriptionRefresh} />
+      <CancellationDialog />
     </>
   );
 }

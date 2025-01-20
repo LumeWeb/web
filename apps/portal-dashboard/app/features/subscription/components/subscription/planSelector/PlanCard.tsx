@@ -21,11 +21,7 @@ interface PlanCardProps {
   onSubscriptionRefresh: () => void;
 }
 
-export function PlanCard({
-  plan,
-  onSelect,
-  onSubscriptionRefresh,
-}: PlanCardProps) {
+export function PlanCard({ plan, onSelect }: PlanCardProps) {
   const { isSelected, buttonProps } = usePlanActions(plan);
 
   return (
@@ -65,7 +61,6 @@ export function PlanCard({
           plan={plan}
           onSelect={onSelect}
           buttonProps={buttonProps}
-          onSubscriptionRefresh={onSubscriptionRefresh}
         />
       </CardContent>
     </Card>

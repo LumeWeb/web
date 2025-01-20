@@ -11,11 +11,9 @@ import {
 } from "portal-shared/components/ui/alert-dialog";
 import { useSubscriptionContext } from "../../../contexts/SubscriptionContext";
 
-interface CancellationDialogProps {
-  onConfirm: () => void;
-}
+interface CancellationDialogProps {}
 
-export function CancellationDialog({ onConfirm }: CancellationDialogProps) {
+export function CancellationDialog({}: CancellationDialogProps) {
   const { actions } = useSubscriptionContext();
   const [showCancelConfirm, setShowCancelConfirm] = React.useState(false);
 
@@ -26,7 +24,6 @@ export function CancellationDialog({ onConfirm }: CancellationDialogProps) {
 
   const handleAbortCancel = () => {
     setShowCancelConfirm(false);
-    onConfirm();
     actions.abortCancellation();
   };
 
@@ -36,8 +33,8 @@ export function CancellationDialog({ onConfirm }: CancellationDialogProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>Cancel Subscription</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to cancel your subscription? This action cannot
-            be undone.
+            Are you sure you want to cancel your subscription? This action
+            cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

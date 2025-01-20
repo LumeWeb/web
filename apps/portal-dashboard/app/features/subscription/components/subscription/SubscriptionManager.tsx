@@ -68,11 +68,6 @@ function SubscriptionContent() {
 
   const force = () => setRefreshState(Math.random());
 
-  const handleRefresh = () => {
-    initRef.current.triggerRefresh = true;
-    force();
-  };
-
   const {
     data: subscriptionData,
     isLoading: isLoadingSubscription,
@@ -123,7 +118,6 @@ function SubscriptionContent() {
       try {
         await cancelSubscription();
         actions.subscriptionCanceled();
-        handleRefresh();
       } catch (err) {
         const errorMessage =
           (err as AxiosError)?.name === "AxiosError"
@@ -141,8 +135,6 @@ function SubscriptionContent() {
   const handleErrorDialogClose = async () => {
     setShowErrorDialog(false);
     setErrorMessage(null);
-    // Reset initialization flag to allow fresh data fetch
-    handleRefresh();
     // Use actions helper for state transition
     actions.retry();
     // Refetch subscription data
@@ -311,10 +303,7 @@ function SubscriptionContent() {
       <SubscriptionStatus />
 
       {/* Available Plans */}
-      <PlanSelector
-        onPlanSelect={handlePlanSelect}
-        onSubscriptionRefresh={handleRefresh}
-      />
+      <PlanSelector onPlanSelect={handlePlanSelect} />
 
       {/* Billing Tabs */}
       <div className="border-t border-border/30 pt-4">
