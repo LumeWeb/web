@@ -53,6 +53,14 @@ export function usePlanActions(plan: SubscriptionPlan) {
     };
   };
 
+  const getButtonVariant = () => {
+    return isSelected ? "outline" as const : "default" as const;
+  };
+
+  const getButtonDisabled = () => {
+    return (isProcessing && isSelectedForProcessing) || isSelected;
+  };
+
   return {
     isPending,
     needsPayment,
@@ -63,8 +71,8 @@ export function usePlanActions(plan: SubscriptionPlan) {
       : false,
     buttonProps: {
       label: getButtonLabel(),
-      variant: isSelected ? ("outline" as const) : ("default" as const),
-      disabled: (isProcessing && isSelectedForProcessing) || isSelected,
+      variant: getButtonVariant(),
+      disabled: getButtonDisabled(),
     },
     actions,
   };
