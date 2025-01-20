@@ -1,4 +1,3 @@
-// usePlanActions.ts
 import { useState } from "react";
 import { useSubscriptionContext } from "@/features/subscription/contexts/SubscriptionContext";
 import { usePayment } from "@/features/subscription/hooks/core/usePayment";
@@ -67,6 +66,7 @@ export function usePlanActions(plan: SubscriptionPlan) {
       ? isPaymentExpired(context.payment)
       : false,
     showCancelConfirm,
+    setShowCancelConfirm,
     handleCancelClick,
     handleConfirmCancel,
     handleAbortCancel,

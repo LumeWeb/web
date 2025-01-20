@@ -39,6 +39,7 @@ export function SubscriptionActions({
     isSelected,
     isPaymentExpired,
     showCancelConfirm,
+    setShowCancelConfirm,
     handleCancelClick,
     handleConfirmCancel,
     handleAbortCancel,
@@ -68,44 +69,44 @@ export function SubscriptionActions({
           disabled={isProcessing}>
           Cancel Subscription
         </Button>
+
+        <AlertDialog
+          open={showCancelConfirm}
+          onOpenChange={setShowCancelConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cancel Subscription</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to cancel your subscription? This action
+                cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleAbortCancel}>
+                No, Keep Subscription
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmCancel}
+                className="bg-destructive hover:bg-destructive/90">
+                Yes, Cancel Subscription
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </>
     );
   }
 
   return (
-    <>
-      <Button
-        className="w-full"
-        variant={buttonProps.variant}
-        onClick={() => onSelect(plan)}
-        disabled={buttonProps.disabled}>
-        {buttonProps.label.showSpinner && (
-          <CloudIcon className="mr-2 h-4 w-4 animate-spin" />
-        )}
-        {buttonProps.label.text}
-      </Button>
-
-      <AlertDialog open={showCancelConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancel Subscription</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to cancel your subscription? This action
-              cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleAbortCancel}>
-              No, Keep Subscription
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmCancel}
-              className="bg-destructive hover:bg-destructive/90">
-              Yes, Cancel Subscription
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    <Button
+      className="w-full"
+      variant={buttonProps.variant}
+      onClick={() => onSelect(plan)}
+      disabled={buttonProps.disabled}>
+      {buttonProps.label.showSpinner && (
+        <CloudIcon className="mr-2 h-4 w-4 animate-spin" />
+      )}
+      {buttonProps.label.text}
+    </Button>
   );
 }
