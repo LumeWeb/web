@@ -25,14 +25,12 @@ interface SubscriptionActionsProps {
     variant: "outline" | "default";
     disabled: boolean;
   };
-  onSubscriptionRefresh: () => void;
 }
 
 export function SubscriptionActions({
   plan,
   onSelect,
   buttonProps,
-  onSubscriptionRefresh,
 }: SubscriptionActionsProps) {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const {
