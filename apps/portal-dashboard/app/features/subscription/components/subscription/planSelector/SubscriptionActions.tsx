@@ -70,9 +70,15 @@ export function SubscriptionActions({
         <Button
           variant="outline"
           className="w-full"
-          onClick={() => actions.triggerPayment()}
-          disabled={isPaymentExpired}>
-          {isPaymentExpired ? "Session Expired" : "Complete Payment"}
+          onClick={() => {
+            if (isPaymentExpired) {
+              // Recreate subscription with same plan
+              onSelect(plan);
+            } else {
+              actions.triggerPayment();
+            }
+          }}>
+          Complete Payment
         </Button>
         <Button
           variant="destructive"
