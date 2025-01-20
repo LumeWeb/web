@@ -55,6 +55,27 @@ export function PaymentFlow() {
     }
   }, [state, paymentState]);
 
+  const [showExpiringWarning, setShowExpiringWarning] = React.useState(false);
+
+  // Check expiration time and show warning if under 2 minutes
+  React.useEffect(() => {
+    if (!context.payment?.expires_at) return;
+
+    const checkExpiration = () => {
+      const expiryTime = new Date(context.payment.expires_at).getTime();
+      const now = new Date().getTime();
+      const timeLeft = expiryTime - now;
+      
+      // Show warning if less than 2 minutes remaining
+      setShowExpiringWarning(timeLeft > 0 && timeLeft <= 120000);
+    };
+
+    const interval = setInterval(checkExpiration, 1000);
+    checkExpiration(); // Initial check
+
+    return () => clearInterval(interval);
+  }, [context.payment?.expires_at]);
+
   // Don't render if no payment info
   if (!context.payment?.client_secret) {
     return null;
@@ -89,6 +110,11 @@ export function PaymentFlow() {
         <DialogHeader>
           <DialogTitle>Complete Payment</DialogTitle>
           <DialogDescription>
+            {showExpiringWarning && (
+              <div className="mb-2 text-yellow-500 font-medium">
+                Warning: Payment session expiring soon. Please complete your payment.
+              </div>
+            )}
             {paymentStatus === "PROCESSING"
               ? "Your payment is being processed..."
               : paymentState === "error"
