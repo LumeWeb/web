@@ -333,6 +333,19 @@ const states = {
         return ctx;
       }),
     ),
+    transition<EventType, SubscriptionContext, SubscriptionEvent>(
+      "PAYMENT_EXPIRED",
+      "idle",
+      reduce((ctx) => ({
+        ...ctx,
+        subscription: null,
+        selectedPlan: ctx.subscription?.plan || null,
+        status: null,
+        payment: null,
+        error: null,
+        refresh: true
+      })),
+    ),
   ),
 
   // Changing existing subscription

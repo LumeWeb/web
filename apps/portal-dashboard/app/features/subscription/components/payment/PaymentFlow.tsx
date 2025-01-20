@@ -97,6 +97,15 @@ export function PaymentFlow() {
               </div>
             </DialogDescription>
           </DialogHeader>
+          <DialogFooter>
+            <Button 
+              onClick={() => {
+                setIsOpen(false);
+                send({ type: "PAYMENT_EXPIRED" });
+              }}>
+              Try Again
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     );

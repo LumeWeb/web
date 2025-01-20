@@ -113,7 +113,8 @@ export type SubscriptionEvent =
   | { type: "ERROR_OCCURRED"; error: Error }
   | { type: "PAYMENT_METHOD_UPDATE_INITIATED" }
   | { type: "PAYMENT_COMPLETE"; paymentMethodId: string }
-  | { type: "ERROR"; error: Error };
+  | { type: "ERROR"; error: Error }
+  | { type: "PAYMENT_EXPIRED" };
 
 // Zod schema for runtime validation
 export const subscriptionResourcesSchema = z.object({
