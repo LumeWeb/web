@@ -13,5 +13,7 @@
     "react-dom": "latest",
     "typescript": "latest",
     "vocs": "latest"
-  }
+  },
+  "devDependencies": {},
+  "peerDependencies": {}
 }
