@@ -1,20 +1,34 @@
 {
-    "name": "web3.news",
-    "version": "0.1.0",
-    "private": true,
-    "type": "module",
-    "prisma": {
-        "seed": "ts-node-esm prisma/seed.mts"
-    },
-    "scripts": {
-        "build:prisma": "prisma generate",
-        "dev": "run-p \"dev:*\"",
-        "dev:remix": "remix vite:dev",
-        "start": "PORT=8080 remix-serve ./build/server/index.js",
-        "typecheck": "tsc",
-        "bridge": "bun run scripts/bridge.mts",
-        "melli-init": "bun run scripts/melli-init.mts",
-        "db-init": "prisma db push",
-        "postinstall": "../../node_modules/.bin/patch-package"
-    }
+  "name": "web3.news",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "prisma": {
+    "seed": "ts-node-esm prisma/seed.mts"
+  },
+  "scripts": {
+    "build:prisma": "prisma generate",
+    "dev": "run-p \"dev:*\"",
+    "dev:remix": "remix vite:dev",
+    "start": "PORT=8080 remix-serve ./build/server/index.js",
+    "typecheck": "tsc",
+    "bridge": "bun run scripts/bridge.mts",
+    "melli-init": "bun run scripts/melli-init.mts",
+    "db-init": "prisma db push"
+  },
+  "dependencies": {
+    "cmdk": "^1.0.4",
+    "isbot": "^5.1.17",
+    "remix-sitemap": "^3.2.0",
+    "meilisearch": "^0.41.0",
+    "xml2js": "^0.6.2",
+    "date-fns": "^3.6.0",
+    "vite": "^5.4.9"
+  },
+  "devDependencies": {
+    "ed25519-keygen": "^0.6.2",
+    "vite-tsconfig-paths": "^4.3.2",
+    "unplugin-fonts": "^1.1.1"
+  },
+  "peerDependencies": {}
 }

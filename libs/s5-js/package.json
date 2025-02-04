@@ -10,10 +10,13 @@
     "isomorphic-ws": "^5.0.0",
     "mime": "^4.0.1",
     "multiformats": "^13.0.0",
-    "p-defer": "^4.0.0",
+    "p-defer": "^4.0.1",
     "patch-package": "^8.0.0",
-    "tus-js-client": "^4.0.0",
+    "tus-js-client": "^4.1.0",
     "url-join": "^5.0.0",
-    "url-parse": "^1.5.10"
-  }
+    "url-parse": "^1.5.10",
+    "orval": "^6.24.0"
+  },
+  "devDependencies": {},
+  "peerDependencies": {}
 }
