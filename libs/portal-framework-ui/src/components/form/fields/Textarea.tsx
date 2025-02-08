@@ -1,0 +1,40 @@
+import {
+  Textarea as BaseTextarea,
+  cn,
+} from "@lumeweb/portal-framework-ui-core";
+import React from "react";
+
+import { registerFormComponent } from ".";
+import { FormFieldType } from "../";
+
+export const Textarea = React.forwardRef<
+  HTMLTextAreaElement,
+  {
+    [key: string]: any; // Allow other props
+    className?: string;
+    inputClassName?: string; // Use inputClassName for the actual textarea element
+    label?: string;
+    placeholder?: string;
+    // onChange is included via React.TextareaHTMLAttributes
+    // value is included via React.TextareaHTMLAttributes
+  } & React.TextareaHTMLAttributes<HTMLTextAreaElement> // Include standard textarea props
+>(({ inputClassName, placeholder, onChange, value, ...props }, ref) => {
+  return (
+    <BaseTextarea
+      className={cn(
+        "flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+        inputClassName,
+      )}
+      onChange={onChange}
+      placeholder={placeholder}
+      ref={ref}
+      value={value ?? ""} // Use value prop directly, default to empty string
+      {...props}
+    />
+  );
+});
+Textarea.displayName = "Textarea";
+
+export function registerTextarea() {
+  registerFormComponent(FormFieldType.TEXTAREA, Textarea);
+}

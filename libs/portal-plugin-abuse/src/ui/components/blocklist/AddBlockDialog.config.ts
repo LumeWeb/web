@@ -1,0 +1,141 @@
+import {
+  BlockAction,
+  BlockReason,
+  BlockSeverity,
+  BlockSource,
+} from "@/types/blocklist";
+import { RefineResource } from "@/types/resources";
+import { z } from "zod";
+
+export const AddBlockConfig = {
+  formDefaults: {
+    action: BlockAction.Reject,
+    description: "",
+    fileName: "",
+    hash: "",
+    mimeType: "",
+    reason: BlockReason.Manual,
+    severity: BlockSeverity.Medium,
+    size: 0,
+    source: BlockSource.Admin,
+  },
+  formLayout: {
+    action: {
+      className: "col-span-1",
+      label: "Action",
+      options: Object.values(BlockAction),
+      required: true,
+      type: "select",
+    },
+    caseId: {
+      className: "col-span-1",
+      inputType: "number",
+      label: "Case ID",
+      placeholder: "Optional case reference",
+      type: "input",
+    },
+    description: {
+      className: "col-span-2",
+      label: "Description",
+      placeholder: "Block reason details",
+      required: true,
+      type: "textarea",
+    },
+    expiresAt: {
+      className: "col-span-2",
+      label: "Expiration Date",
+      placeholder: "Select expiration date",
+      type: "date",
+    },
+    fileName: {
+      className: "col-span-2",
+      label: "File Name",
+      placeholder: "Original file name",
+      required: true,
+      type: "input",
+    },
+    hash: {
+      className: "col-span-2",
+      inputType: "text",
+      label: "Hash",
+      placeholder: "Content hash",
+      required: true,
+      type: "input",
+    },
+    mimeType: {
+      className: "col-span-2",
+      label: "MIME Type",
+      placeholder: "e.g. image/jpeg",
+      required: true,
+      type: "input",
+    },
+    reason: {
+      className: "col-span-1",
+      label: "Reason",
+      options: Object.values(BlockReason),
+      required: true,
+      type: "select",
+    },
+    severity: {
+      className: "col-span-1",
+      label: "Severity",
+      options: Object.values(BlockSeverity),
+      required: true,
+      type: "select",
+    },
+    size: {
+      className: "col-span-2",
+      inputType: "number",
+      label: "Size (bytes)",
+      placeholder: "File size in bytes",
+      required: true,
+      type: "input",
+    },
+    source: {
+      className: "col-span-1",
+      label: "Source",
+      options: Object.values(BlockSource),
+      required: true,
+      type: "select",
+    },
+    uploaderId: {
+      className: "col-span-1",
+      inputType: "number",
+      label: "Uploader ID",
+      placeholder: "Optional uploader ID",
+      type: "input",
+    },
+  },
+  formSchema: z.object({
+    action: z.nativeEnum(BlockAction),
+    caseId: z.number().optional(),
+    description: z.string().min(1, "Description is required"),
+    expiresAt: z.string().optional(),
+    fileName: z.string().min(1, "File name is required"),
+    hash: z.string().min(1, "Hash is required"),
+    mimeType: z.string().min(1, "MIME type is required"),
+    reason: z.nativeEnum(BlockReason),
+    severity: z.nativeEnum(BlockSeverity),
+    size: z.number().min(1, "File size is required"),
+    source: z.nativeEnum(BlockSource),
+    uploaderId: z.number().optional(),
+  }),
+  refineCoreProps: {
+    errorNotification: (error) => ({
+      description: error.message,
+      message: "Error adding block",
+      type: "error",
+    }),
+    meta: {
+      // Any additional API metadata if needed
+    },
+    successNotification: (data, values) => ({
+      description: `${values.fileName} has been added to the blocklist`,
+      message: "Block added successfully",
+      type: "success",
+    }),
+  },
+  resource: RefineResource.Blocklist,
+  title: "Add Content to Blocklist",
+  type: "form" as const,
+};

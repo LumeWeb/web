@@ -1,9 +1,6 @@
+import type { RequestInit } from "./types.js";
 import {
   AccountInfoResponse,
-  deleteApiAccountDelete,
-  getApiAccount,
-  getApiAuthOtpGenerate,
-  getApiUploadLimit,
   LoginRequest,
   LoginResponse,
   OTPDisableRequest,
@@ -13,372 +10,327 @@ import {
   PasswordResetRequest,
   PasswordResetVerifyRequest,
   PingResponse,
-  postApiAccountPasswordResetConfirm,
-  postApiAccountPasswordResetRequest,
-  postApiAccountUpdateEmail,
-  postApiAccountUpdatePassword,
-  postApiAccountVerifyEmail,
-  postApiAccountVerifyEmailResend,
-  postApiAuthLogin,
-  postApiAuthLogout,
-  postApiAuthOtpDisable,
-  postApiAuthOtpValidate,
-  postApiAuthOtpVerify,
-  postApiAuthPing,
-  postApiAuthRegister,
   RegisterRequest,
-  type ResendVerifyEmailRequest,
+  ResendVerifyEmailRequest,
   UploadLimitResponse,
   VerifyEmailRequest,
-} from "./account/generated/index.js";
-import { AxiosError, AxiosResponse } from "axios";
-
-export class AccountError extends Error {
-  public statusCode: number;
-
-  constructor(message: string, statusCode: number) {
-    super(message);
-    this.name = "AccountError";
-    this.statusCode = statusCode;
-  }
-}
+} from "./account/generated/openapi.schemas.js";
+import { handleFetchError, handleUnknownError, Result } from "./types.js";
 
 export class AccountApi {
-  private apiUrl: string;
   private _jwtToken?: string;
+  private readonly apiUrl: string;
+
+  private get jwtToken(): string | undefined {
+    return this._jwtToken;
+  }
 
   constructor(apiUrl: string) {
-    let apiUrlParsed = new URL(apiUrl);
-
+    const apiUrlParsed = new URL(apiUrl);
     apiUrlParsed.hostname = `account.${apiUrlParsed.hostname}`;
     this.apiUrl = apiUrlParsed.toString();
   }
 
-  set jwtToken(value: string) {
-    this._jwtToken = value;
+  public clearToken(): void {
+    this._jwtToken = undefined;
   }
 
-  get jwtToken(): string {
-    return <string>this._jwtToken;
-  }
-
-  public static create(apiUrl: string): AccountApi {
-    return new AccountApi(apiUrl);
-  }
-
-  public async login(
-    loginRequest: LoginRequest,
-  ): Promise<LoginResponse | AccountError> {
-    let ret: AxiosResponse<LoginResponse> | LoginResponse | boolean = false;
-    try {
-      ret = await postApiAuthLogin(loginRequest, {
-        ...(await this.buildOptions()),
-      });
-    } catch (e) {
-      return new AccountError(
-        (e as AxiosError).response?.data as string,
-        (e as AxiosError).response?.status as number,
-      );
-    }
-    ret = this.checkSuccessVal<LoginResponse>(ret);
-
-    if (ret) {
-      this._jwtToken = (ret as LoginResponse).token;
-      return ret as LoginResponse;
-    }
-
-    return new AccountError("Invalid response", 500);
-  }
-
-  public async register(
-    registerRequest: RegisterRequest,
-  ): Promise<boolean | Error> {
-    let ret: AxiosResponse<void>;
-    try {
-      ret = await postApiAuthRegister(registerRequest, {
-        baseURL: this.apiUrl,
-      });
-    } catch (e) {
-      return new AccountError(
-        (e as AxiosError).response?.data as string,
-        (e as AxiosError).response?.status as number,
-      );
-    }
-
-    return this.checkSuccessBool(ret);
-  }
-
-  public async verifyEmail(
-    verifyEmailRequest: VerifyEmailRequest,
-  ): Promise<boolean | Error> {
-    let ret: AxiosResponse<void>;
-    try {
-      ret = await postApiAccountVerifyEmail(
-        verifyEmailRequest,
-        this.buildOptions(),
-      );
-    } catch (e) {
-      return new AccountError(
-        (e as AxiosError).response?.data as string,
-        (e as AxiosError).response?.status as number,
-      );
-    }
-    return this.checkSuccessBool(ret);
-  }
-
-  public async requestEmailVerification(
-    resendRequest: ResendVerifyEmailRequest,
-  ): Promise<boolean | AccountError> {
-    let ret: AxiosResponse<void>;
-    try {
-      ret = await postApiAccountVerifyEmailResend(
-        resendRequest,
-        this.buildOptions(),
-      );
-    } catch (e) {
-      return new AccountError(
-        (e as AxiosError).response?.data as string,
-        (e as AxiosError).response?.status as number,
-      );
-    }
-    return this.checkSuccessBool(ret);
-  }
-
-  public async generateOtp(): Promise<
-    boolean | OTPGenerateResponse | AccountError
-  > {
-    let ret: AxiosResponse<OTPGenerateResponse>;
-    try {
-      ret = await getApiAuthOtpGenerate(this.buildOptions());
-    } catch (e) {
-      return new AccountError(
-        (e as AxiosError).response?.data as string,
-        (e as AxiosError).response?.status as number,
-      );
-    }
-    return this.checkSuccessVal<OTPGenerateResponse>(ret);
-  }
-
-  public async verifyOtp(
-    otpVerifyRequest: OTPVerifyRequest,
-  ): Promise<boolean | Error> {
-    let ret: AxiosResponse<void>;
-    try {
-      ret = await postApiAuthOtpVerify(otpVerifyRequest, this.buildOptions());
-    } catch (e) {
-      return new AccountError(
-        (e as AxiosError).response?.data as string,
-        (e as AxiosError).response?.status as number,
-      );
-    }
-    return this.checkSuccessBool(ret);
-  }
-
-  public async validateOtp(
-    otpValidateRequest: OTPValidateRequest,
-  ): Promise<LoginResponse | AccountError> {
-    let ret: AxiosResponse<void>;
-    try {
-      ret = await postApiAuthOtpValidate(
-        otpValidateRequest,
-        this.buildOptions(),
-      );
-    } catch (e) {
-      return new AccountError(
-        (e as AxiosError).response?.data as string,
-        (e as AxiosError).response?.status as number,
-      );
-    }
-
-    const success = this.checkSuccessVal<LoginResponse>(ret);
-
-    if (success) {
-      this._jwtToken = ret.token;
-
-      return success;
-    }
-
-    return new AccountError("Invalid response", 500);
-  }
-
-  public async disableOtp(
-    otpDisableRequest: OTPDisableRequest,
-  ): Promise<boolean | AccountError> {
-    let ret: AxiosResponse<void>;
-    try {
-      ret = await postApiAuthOtpDisable(otpDisableRequest, this.buildOptions());
-    } catch (e) {
-      return new AccountError(
-        (e as AxiosError).response?.data as string,
-        (e as AxiosError).response?.status as number,
-      );
-    }
-    return this.checkSuccessBool(ret);
-  }
-
-  public async requestPasswordReset(
-    passwordResetRequest: PasswordResetRequest,
-  ): Promise<boolean | AccountError> {
-    let ret: AxiosResponse<void>;
-    try {
-      ret = await postApiAccountPasswordResetRequest(
-        passwordResetRequest,
-        this.buildOptions(),
-      );
-    } catch (e) {
-      return new AccountError(
-        (e as AxiosError).response?.data as string,
-        (e as AxiosError).response?.status as number,
-      );
-    }
-    return this.checkSuccessBool(ret);
-  }
-
+  /**
+   * Confirm a password reset
+   * @param passwordResetVerifyRequest Password reset verification details
+   * @returns Result indicating success or failure
+   */
   public async confirmPasswordReset(
     passwordResetVerifyRequest: PasswordResetVerifyRequest,
-  ): Promise<boolean | AccountError> {
-    let ret: AxiosResponse<void>;
-    try {
-      ret = await postApiAccountPasswordResetConfirm(
-        passwordResetVerifyRequest,
-        this.buildOptions(),
-      );
-    } catch (e) {
-      return new AccountError(
-        (e as AxiosError).response?.data as string,
-        (e as AxiosError).response?.status as number,
-      );
-    }
-    return this.checkSuccessBool(ret);
+  ): Promise<Result<void>> {
+    return this.fetchJson<void>("/api/account/password-reset/confirm", {
+      body: JSON.stringify(passwordResetVerifyRequest),
+      method: "POST",
+    });
   }
 
-  public async ping(): Promise<boolean> {
-    let ret: AxiosResponse<PingResponse>;
-    try {
-      ret = await postApiAuthPing(this.buildOptions());
-    } catch (e) {
-      return false;
-    }
-
-    const success = this.checkSuccessVal(ret) && ret.data.ping == "pong";
-
-    if (success) {
-      this._jwtToken = ret.data.token;
-    }
-
-    return success;
+  /**
+   * Disable OTP for two-factor authentication
+   * @param otpDisableRequest OTP disable request details
+   * @returns Result indicating success or failure
+   */
+  public async disableOtp(
+    otpDisableRequest: OTPDisableRequest,
+  ): Promise<Result<void>> {
+    return this.fetchJson<void>("/api/auth/otp/disable", {
+      body: JSON.stringify(otpDisableRequest),
+      method: "POST",
+    });
   }
 
-  public async info(): Promise<boolean | AccountInfoResponse> {
-    let ret: AxiosResponse<AccountInfoResponse>;
-    try {
-      ret = await getApiAccount(this.buildOptions());
-    } catch (e) {
-      return false;
-    }
-
-    return this.checkSuccessVal(ret);
+  /**
+   * Generate OTP for two-factor authentication
+   * @returns Result containing OTP response
+   */
+  public async generateOtp(): Promise<Result<OTPGenerateResponse>> {
+    return this.fetchJson<OTPGenerateResponse>("/api/auth/otp/generate", {
+      method: "GET",
+    });
   }
 
-  public async logout(): Promise<boolean> {
-    try {
-      await postApiAuthLogout(this.buildOptions());
-    } catch (e) {
-      return false;
-    }
-
-    this._jwtToken = undefined;
-
-    return true;
+  /**
+   * Get account information
+   * @returns Result containing account info
+   */
+  public async info(): Promise<Result<AccountInfoResponse>> {
+    return this.fetchJson<AccountInfoResponse>("/api/account", {
+      method: "GET",
+    });
   }
 
-  public async uploadLimit(): Promise<number> {
-    let ret: AxiosResponse<UploadLimitResponse>;
-    try {
-      ret = await getApiUploadLimit(this.buildOptions());
-    } catch (e) {
-      return 0;
+  /**
+   * Login to the account service
+   * @param loginRequest Login credentials
+   * @returns Result containing login response or error
+   */
+  public async login(
+    loginRequest: LoginRequest,
+  ): Promise<Result<LoginResponse>> {
+    const result = await this.fetchJson<LoginResponse>("/api/auth/login", {
+      body: JSON.stringify(loginRequest),
+      method: "POST",
+    });
+
+    if (result.success && result.data.token) {
+      this.setToken(result.data.token);
     }
 
-    return this.checkSuccessVal<UploadLimitResponse>(ret) ? ret.data.limit : 0;
+    return result;
   }
 
+  /**
+   * Logout from the account service
+   * @returns Result indicating success or failure
+   */
+  public async logout(): Promise<Result<void>> {
+    const result = await this.fetchJson<void>("/api/auth/logout", {
+      method: "POST",
+    });
+
+    if (result.success) {
+      this.clearToken();
+    }
+
+    return result;
+  }
+
+  /**
+   * Check authentication status
+   * @returns Result containing ping response
+   */
+  public async ping(): Promise<Result<PingResponse>> {
+    const result = await this.fetchJson<PingResponse>("/api/auth/ping", {
+      method: "POST",
+    });
+
+    if (result.success && result.data.token) {
+      this.setToken(result.data.token);
+    }
+
+    return result;
+  }
+
+  /**
+   * Register a new account
+   * @param registerRequest Registration details
+   * @returns Result indicating success or failure
+   */
+  public async register(
+    registerRequest: RegisterRequest,
+  ): Promise<Result<void>> {
+    return this.fetchJson<void>("/api/auth/register", {
+      body: JSON.stringify(registerRequest),
+      method: "POST",
+    });
+  }
+
+  /**
+   * Request account deletion
+   * @returns Result indicating success or failure
+   */
+  public async requestAccountDeletion(): Promise<Result<void>> {
+    return this.fetchJson<void>("/api/account/delete", {
+      method: "DELETE",
+    });
+  }
+
+  /**
+   * Request email verification to be resent
+   * @param resendRequest Email details for verification
+   * @returns Result indicating success or failure
+   */
+  public async requestEmailVerification(
+    resendRequest: ResendVerifyEmailRequest,
+  ): Promise<Result<void>> {
+    return this.fetchJson<void>("/api/account/verify-email/resend", {
+      body: JSON.stringify(resendRequest),
+      method: "POST",
+    });
+  }
+
+  /**
+   * Request a password reset
+   * @param passwordResetRequest Password reset request details
+   * @returns Result indicating success or failure
+   */
+  public async requestPasswordReset(
+    passwordResetRequest: PasswordResetRequest,
+  ): Promise<Result<void>> {
+    return this.fetchJson<void>("/api/account/password-reset/request", {
+      body: JSON.stringify(passwordResetRequest),
+      method: "POST",
+    });
+  }
+
+  public setToken(token: string): void {
+    this._jwtToken = token;
+  }
+
+  /**
+   * Update account email address
+   * @param email New email address
+   * @param password Current password for verification
+   * @returns Result indicating success or failure
+   */
   public async updateEmail(
     email: string,
     password: string,
-  ): Promise<boolean | AccountError> {
-    let ret: AxiosResponse<void>;
-    try {
-      ret = await postApiAccountUpdateEmail(
-        { email, password },
-        this.buildOptions(),
-      );
-    } catch (e) {
-      return new AccountError(
-        (e as AxiosError).response?.data as string,
-        (e as AxiosError).response?.status as number,
-      );
-    }
-
-    return this.checkSuccessBool(ret);
+  ): Promise<Result<void>> {
+    return this.fetchJson<void>("/api/account/update-email", {
+      body: JSON.stringify({ email, password }),
+      method: "POST",
+    });
   }
 
+  /**
+   * Update account password
+   * @param currentPassword Current password for verification
+   * @param newPassword New password to set
+   * @returns Result indicating success or failure
+   */
   public async updatePassword(
     currentPassword: string,
     newPassword: string,
-  ): Promise<boolean | AccountError> {
-    let ret: AxiosResponse<void>;
-    try {
-      ret = await postApiAccountUpdatePassword(
-        { current_password: currentPassword, new_password: newPassword },
-        this.buildOptions(),
-      );
-    } catch (e) {
-      return new AccountError(
-        (e as AxiosError).response?.data as string,
-        (e as AxiosError).response?.status as number,
-      );
+  ): Promise<Result<void>> {
+    return this.fetchJson<void>("/api/account/update-password", {
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword,
+      }),
+      method: "POST",
+    });
+  }
+
+  /**
+   * Get upload limit information
+   * @returns Result containing upload limit info
+   */
+  public async uploadLimit(): Promise<Result<UploadLimitResponse>> {
+    return this.fetchJson<UploadLimitResponse>("/api/upload-limit", {
+      method: "GET",
+    });
+  }
+
+  /**
+   * Validate OTP for two-factor authentication login
+   * @param otpValidateRequest OTP validation details
+   * @returns Result containing login response
+   */
+  public async validateOtp(
+    otpValidateRequest: OTPValidateRequest,
+  ): Promise<Result<LoginResponse>> {
+    const result = await this.fetchJson<LoginResponse>(
+      "/api/auth/otp/validate",
+      {
+        body: JSON.stringify(otpValidateRequest),
+        method: "POST",
+      },
+    );
+
+    if (result.success && result.data.token) {
+      this.setToken(result.data.token);
     }
 
-    return this.checkSuccessBool(ret);
+    return result;
   }
 
-  public async requestAccountDeletion(): Promise<boolean | AccountError> {
-    let ret: AxiosResponse<void>;
-    try {
-      ret = await deleteApiAccountDelete(this.buildOptions());
-    } catch (e) {
-      return new AccountError(
-        (e as AxiosError).response?.data as string,
-        (e as AxiosError).response?.status as number,
-      );
-    }
-
-    return this.checkSuccessBool(ret);
+  /**
+   * Verify email address
+   * @param verifyEmailRequest Email verification details
+   * @returns Result indicating success or failure
+   */
+  public async verifyEmail(
+    verifyEmailRequest: VerifyEmailRequest,
+  ): Promise<Result<void>> {
+    return this.fetchJson<void>("/api/account/verify-email", {
+      body: JSON.stringify(verifyEmailRequest),
+      method: "POST",
+    });
   }
 
-  private checkSuccessBool(ret: AxiosResponse<void>): boolean {
-    return ret.status === 200;
+  /**
+   * Verify OTP for enabling two-factor authentication
+   * @param otpVerifyRequest OTP verification details
+   * @returns Result indicating success or failure
+   */
+  public async verifyOtp(
+    otpVerifyRequest: OTPVerifyRequest,
+  ): Promise<Result<void>> {
+    return this.fetchJson<void>("/api/auth/otp/verify", {
+      body: JSON.stringify(otpVerifyRequest),
+      method: "POST",
+    });
   }
 
-  private checkSuccessVal<T>(ret: AxiosResponse<T>): T | boolean {
-    if (ret.status === 200) {
-      return ret.data as T;
-    }
-
-    return false;
-  }
-
-  private buildOptions(): any {
-    const headers: any = {};
+  private buildOptions(init: RequestInit = {}): RequestInit {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(init.headers as Record<string, string>),
+    };
+    
     if (this.jwtToken) {
-      headers.Authorization = `Bearer ${this.jwtToken}`;
+      headers["Authorization"] = `Bearer ${this.jwtToken}`;
     }
 
     return {
-      baseURL: this.apiUrl,
-      headers: headers,
-      withCredentials: true,
+      ...init,
+      credentials: "include",
+      headers,
     };
+  }
+
+  private async fetchJson<T>(
+    input: string,
+    init: RequestInit = {},
+  ): Promise<Result<T>> {
+    try {
+      const response = await fetch(
+        new URL(input, this.apiUrl).toString(),
+        this.buildOptions(init),
+      );
+
+      if (!response.ok) {
+        return {
+          error: await handleFetchError(response),
+          success: false,
+        };
+      }
+
+      const data = await response.json();
+      return {
+        data,
+        success: true,
+      };
+    } catch (e) {
+      return {
+        error: handleUnknownError(e),
+        success: false,
+      };
+    }
   }
 }

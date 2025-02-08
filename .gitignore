@@ -48,3 +48,7 @@ apps/*/build
 .docusaurus
 .turbo
 **/.turbo
+.aider*
+.__mf__temp
+libs/portal-plugin-abuse/abuse-management
+libs/portal-plugin-abuse-report/open-in-v0

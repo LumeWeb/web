@@ -1,0 +1,40 @@
+{
+  "name": "@lumeweb/portal-framework-auth",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@lumeweb/portal-framework-core": "workspace:*",
+    "@lumeweb/portal-framework-ui": "workspace:*",
+    "@lumeweb/portal-framework-ui-core": "workspace:*",
+    "@lumeweb/portal-sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "tsdown": "^0.11.12"
+  },
+  "peerDependencies": {
+    "@conform-to/react": "^1.6.0",
+    "@conform-to/zod": "^1.6.0",
+    "@hookform/resolvers": "^5.0.1",
+    "@refinedev/core": "^4.57.9",
+    "lucide-react": "^0.511.0",
+    "react": "^18.3.1",
+    "react-hook-form": "7.54.0",
+    "react-icons": "^5.5.0",
+    "react-router": "^7.6.0",
+    "zod": "3.24.2"
+  }
+}

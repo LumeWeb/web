@@ -1,3 +1,5 @@
 packages:
-  - "apps/**"
-  - "libs/**"
+  - "apps/*"
+  - "libs/*" # Ensure libs are included if they weren't already
+  - "apps/portal-storybook" # Add the new aggregated storybook app
+  - "packages/portal-storybook-config" # Add the new shared config package

@@ -1,0 +1,28 @@
+{
+  "name": "portal-storybook-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/cjs/index.cjs",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    "./main": {
+      "types": "./dist/esm/main.d.ts",
+      "import": "./dist/esm/main.js",
+      "require": "./dist/cjs/main.cjs"
+    },
+    "./preview": {
+      "types": "./dist/esm/preview.d.ts",
+      "import": "./dist/esm/preview.js",
+      "require": "./dist/cjs/preview.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup"
+  },
+  "dependencies": {
+    "@lumeweb/portal-framework-core": "workspace:*"
+  },
+  "devDependencies": {
+  }
+}

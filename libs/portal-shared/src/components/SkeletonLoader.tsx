@@ -1,4 +1,3 @@
-import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -9,27 +8,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { UseTableReturnType } from "@refinedev/react-table";
 import { BaseRecord, HttpError } from "@refinedev/core";
+import { UseTableReturnType } from "@refinedev/react-table";
 import { flexRender } from "@tanstack/react-table";
+import React from "react";
 
-type LayoutType = "default" | "card" | "list" | "table" | "profile" | "custom";
+type LayoutType = "card" | "custom" | "default" | "list" | "profile" | "table";
 
 interface SkeletonLoaderProps<TData extends BaseRecord> {
+  className?: string;
+  cols?: number;
   layout?: LayoutType;
   rows?: number;
-  cols?: number;
   showHeader?: boolean;
-  className?: string;
   table?: UseTableReturnType<TData, HttpError>;
 }
 
 export function SkeletonLoader<TData extends BaseRecord>({
+  className,
+  cols = 3,
   layout = "default",
   rows = 3,
-  cols = 3,
   showHeader = true,
-  className,
   table,
 }: SkeletonLoaderProps<TData>): JSX.Element {
   const renderTableSkeleton = (): JSX.Element => {
@@ -43,12 +43,12 @@ export function SkeletonLoader<TData extends BaseRecord>({
         {showHeader && (
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className={"border-none"}>
+              <TableRow className={"border-none"} key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead
+                    className={"border-none"}
                     key={header.id}
-                    style={{ width: header.getSize() }}
-                    className={"border-none"}>
+                    style={{ width: header.getSize() }}>
                     {header.isPlaceholder ? (
                       <Skeleton className="h-4 w-full" />
                     ) : (
@@ -65,9 +65,9 @@ export function SkeletonLoader<TData extends BaseRecord>({
         )}
         <TableBody>
           {Array.from({ length: rows }).map((_, rowIndex) => (
-            <TableRow key={rowIndex} className={"border-none"}>
+            <TableRow className={"border-none"} key={rowIndex}>
               {table.getAllColumns().map((column) => (
-                <TableCell key={column.id} className={"border-none"}>
+                <TableCell className={"border-none"} key={column.id}>
                   <Skeleton className="h-4 w-full" />
                 </TableCell>
               ))}
@@ -107,7 +107,7 @@ export function SkeletonLoader<TData extends BaseRecord>({
   const renderCustomSkeleton = (): JSX.Element => (
     <div className={cn(`grid grid-cols-${cols} gap-4`, className)}>
       {Array.from({ length: cols * rows }).map((_, index) => (
-        <Skeleton key={index} className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" key={index} />
       ))}
     </div>
   );
@@ -121,16 +121,16 @@ export function SkeletonLoader<TData extends BaseRecord>({
   );
 
   switch (layout) {
-    case "table":
-      return renderTableSkeleton();
     case "card":
       return renderCardSkeleton();
+    case "custom":
+      return renderCustomSkeleton();
     case "list":
       return renderListSkeleton();
     case "profile":
       return renderProfileSkeleton();
-    case "custom":
-      return renderCustomSkeleton();
+    case "table":
+      return renderTableSkeleton();
     default:
       return renderDefaultSkeleton();
   }

@@ -1,0 +1,24 @@
+{
+  "name": "@lumeweb/portal-plugin-dashboard",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@lumeweb/portal-framework-core": "workspace:*",
+    "@lumeweb/portal-framework-ui": "workspace:*",
+    "@lumeweb/portal-framework-ui-core": "workspace:*",
+    "@lumeweb/portal-framework-auth": "workspace:*",
+    "@lumeweb/portal-sdk": "workspace:*"
+  },
+  "devDependencies": {
+  },
+  "peerDependencies": {
+
+  }
+}

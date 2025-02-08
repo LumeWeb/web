@@ -1,0 +1,433 @@
+openapi: 3.0.0
+info:
+  title: Abuse Reporting API
+  description: API for submitting and tracking abuse reports
+  version: 1.0.0
+servers:
+  - url: /api
+
+tags:
+  - name: Public
+    description: Public-facing abuse reporting endpoints
+  - name: Provider
+    description: Provider template management endpoints
+
+paths:
+  /abuse/report:
+    post:
+      tags:
+        - Public
+      summary: Submit an abuse report
+      description: Allows end users to submit reports about abusive content
+      operationId: submitReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AbuseReportRequest'
+      responses:
+        '200':
+          description: Report successfully submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AbuseReportResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /abuse/report/{confirmationNumber}:
+    get:
+      tags:
+        - Public
+      summary: Check report status
+      description: Check the status of a previously submitted abuse report
+      operationId: getReportStatus
+      parameters:
+        - name: confirmationNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The confirmation number provided when the report was submitted
+      responses:
+        '200':
+          description: Report status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AbuseReportStatusResponse'
+        '404':
+          description: Report not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tokens/validate:
+    post:
+      tags:
+        - Public
+      summary: Validate an access token
+      description: Checks if a legacy access token is valid and returns case reference
+      operationId: validateToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenValidationRequest'
+      responses:
+        '200':
+          description: Token validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenValidationResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tokens/refresh:
+    post:
+      tags:
+        - Public
+      summary: Refresh a legacy access token
+      description: Generates a new legacy access token with extended validity
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+      responses:
+        '200':
+          description: New token generated and authentication cookie refreshed
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Updated authentication cookie containing the refreshed JWT
+              example: "auth_token=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9...; Path=/; Domain=example.com; HttpOnly; Secure; SameSite=Strict"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefreshResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tokens/jwt:
+    post:
+      tags:
+        - Public
+      summary: Exchange legacy token for JWT
+      description: Exchanges a legacy access token for a JWT token with 90-day validity
+      operationId: exchangeToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenExchangeRequest'
+      responses:
+        '200':
+          description: JWT token generated and authentication cookie set
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Authentication cookie containing the JWT
+              example: "auth_token=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9...; Path=/; Domain=example.com; HttpOnly; Secure; SameSite=Strict"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenJWTCreateResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AbuseReportRequest:
+      type: object
+      required:
+        - email
+        - location
+        - abuseType
+        - description
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address of the person reporting abuse
+          example: reporter@example.com
+        location:
+          type: string
+          format: uri
+          description: URL or content identifier where abuse was found
+          example: https://example.com/content/abc123
+        abuse_type:
+          type: string
+          enum:
+            - malicious_content
+            - resource_abuse
+            - copyright_violation
+            - phishing_scam
+            - other
+          description: Type of abuse being reported
+          example: malicious_content
+        description:
+          type: string
+          minLength: 10
+          description: Detailed description of the abuse
+          example: This content contains malware that attempts to steal credentials
+        additional_details:
+          type: string
+          description: Any additional information that may be relevant
+          example: I first noticed this on March 24, 2025
+
+    AbuseReportResponse:
+      type: object
+      required:
+        - confirmation_number
+        - received_at
+      properties:
+        confirmation_number:
+          type: string
+          description: Reference number for the report
+          example: ABC-12345-XYZ
+        received_at:
+          type: string
+          format: date-time
+          description: When the report was received
+          example: 2025-03-24T10:30:00Z
+        message:
+          type: string
+          description: Optional informational message
+          example: Thank you for your report. We will investigate.
+
+    AbuseReportStatusResponse:
+      type: object
+      required:
+        - confirmation_number
+        - status
+        - submitted_at
+      properties:
+        confirmation_number:
+          type: string
+          description: Reference number for the report
+          example: ABC-12345-XYZ
+        status:
+          type: string
+          enum:
+            - received
+            - under_review
+            - action_taken
+            - closed
+          description: Current status of the report
+          example: under_review
+        submitted_at:
+          type: string
+          format: date-time
+          description: When the report was submitted
+          example: 2025-03-24T10:30:00Z
+        last_updated_at:
+          type: string
+          format: date-time
+          description: When the report was last updated
+          example: 2025-03-24T14:45:00Z
+        message:
+          type: string
+          description: Optional status message
+          example: Your report is currently being reviewed by our team.
+
+    ProviderTemplateCreateRequest:
+      type: object
+      required:
+        - name
+        - contentPatterns
+      properties:
+        name:
+          type: string
+          description: Name of the provider template
+          example: Abuse Report Provider
+        priority:
+          type: integer
+          minimum: 1
+          description: Processing priority (higher numbers processed first)
+          example: 10
+        domainPatterns:
+          type: array
+          items:
+            type: string
+          description: List of domain patterns to match
+          example: ["abuse@*.com", "report@example.org"]
+        headerPatterns:
+          type: array
+          items:
+            type: string
+          description: List of email header patterns to match
+          example: ["X-Abuse-Report: true", "Subject: [ABUSE]"]
+        contentPatterns:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          description: List of content patterns to match
+          example: ["Abuse Report", "Content Violation"]
+
+    ProviderTemplateResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          description: Whether the template was successfully registered
+          example: true
+        message:
+          type: string
+          description: Informational message
+          example: Provider template successfully registered
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: Invalid request parameters
+        details:
+          type: object
+          description: Additional error details
+          example:
+            field: "email"
+            message: "Invalid email format"
+
+    TokenValidationRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Legacy access token to validate
+          example: "abcd-1234-efgh-5678"
+
+    TokenValidationResponse:
+      type: object
+      required:
+        - valid
+      properties:
+        valid:
+          type: boolean
+          description: Whether the token is valid
+          example: true
+        reference:
+          type: string
+          description: Case reference number if valid
+          example: ABC-12345-XYZ
+
+    TokenRefreshRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Legacy access token to refresh
+          example: "abcd-1234-efgh-5678"
+
+    TokenRefreshResponse:
+      type: object
+      required:
+        - token
+        - valid_days
+      properties:
+        token:
+          type: string
+          description: New legacy access token
+          example: "wxyz-9876-qrst-5432"
+        valid_days:
+          type: integer
+          description: Number of days the token is valid
+          example: 90
+
+    TokenExchangeRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Legacy access token to exchange
+          example: "abcd-1234-efgh-5678"
+
+    TokenJWTCreateResponse:
+      type: object
+      required:
+        - access_token
+        - expires_at
+      properties:
+        access_token:
+          type: string
+          description: JWT token for API access
+          example: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expires_at:
+          type: string
+          format: date-time
+          description: When the JWT token expires
+          example: 2025-06-24T14:45:00Z

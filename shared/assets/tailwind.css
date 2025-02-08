@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /*noinspection CssUnresolvedCustomProperty*/
+    --background: var(--theme-background);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --foreground: var(--theme-high-contrast-text);
+
+    /*noinspection CssUnresolvedCustomProperty*/
+    --card: var(--theme-borders);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --card-foreground: var(--theme-low-contrast-text);
+
+    /*noinspection CssUnresolvedCustomProperty*/
+    --popover: var(--theme-subtle-background);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --popover-foreground: var(--theme-low-contrast-text);
+
+    /*noinspection CssUnresolvedCustomProperty*/
+    --primary: var(--theme-solid-background);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --primary-1: var(--theme-hovered-ui-element);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --primary-2: var(--theme-ui-element-border);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --primary-dark: var(--theme-background);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --primary-foreground: var(--theme-high-contrast-text);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --primary-1-foreground: var(--theme-low-contrast-text);
+
+    /*noinspection CssUnresolvedCustomProperty*/
+    --secondary: var(--theme-ui-element-background);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --secondary-1: var(--theme-active-ui-element);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --secondary-foreground: var(--theme-low-contrast-text);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --secondary-1-foreground: var(--theme-high-contrast-text);
+
+    /*noinspection CssUnresolvedCustomProperty*/
+    --muted: var(--theme-ui-element-background);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --muted-foreground: var(--theme-low-contrast-text);
+
+    /*noinspection CssUnresolvedCustomProperty*/
+    --accent: var(--theme-ui-element-background);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --accent-foreground: var(--theme-low-contrast-text);
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 72% 51%;
+
+    /*noinspection CssUnresolvedCustomProperty*/
+    --border: var(--theme-borders);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --input: var(--theme-subtle-background);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --input-placeholder: var(--theme-borders);
+    /*noinspection CssUnresolvedCustomProperty*/
+    --ring: var(--theme-hovered-ui-element);
+
+    --radius: 6px;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans h-screen;
+  }
+
+  :root {
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+}
+
+.indeterminate {
+  background-image: linear-gradient(
+    45deg,
+    hsl(var(--primary)) 25%,
+    hsl(var(--primary-2)) 25%,
+    hsl(var(--primary-2)) 50%,
+    hsl(var(--primary)) 50%,
+    hsl(var(--primary)) 75%,
+    hsl(var(--primary-2)) 75%,
+    hsl(var(--primary-2)) 100%
+  );
+  background-size: 24px 24px;
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans h-screen;
+  }
+
+  :root {
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+}
+
+.indeterminate {
+  background-image: linear-gradient(
+    45deg,
+    hsl(var(--primary)) 25%,
+    hsl(var(--primary-2)) 25%,
+    hsl(var(--primary-2)) 50%,
+    hsl(var(--primary)) 50%,
+    hsl(var(--primary)) 75%,
+    hsl(var(--primary-2)) 75%,
+    hsl(var(--primary-2)) 100%
+  );
+  background-size: 24px 24px;
+}

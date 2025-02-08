@@ -1,0 +1,29 @@
+{
+  "name": "@lumeweb/portal-test-util",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs"
+    },
+    "./package.json": "./package.json",
+    "./vitest.setup": {
+      "types": "./dist/esm/vitest.setup.d.ts",
+      "import": "./dist/esm/vitest.setup.js",
+      "require": "./dist/cjs/vitest.setup.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@lumeweb/portal-framework-core": "workspace:*"
+  },
+  "devDependencies": {
+  }
+}

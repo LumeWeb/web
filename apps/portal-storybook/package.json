@@ -1,0 +1,13 @@
+{
+  "name": "portal-storybook",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "storybook dev -p 6006",
+    "build": "storybook build"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}

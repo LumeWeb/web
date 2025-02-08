@@ -1,0 +1,29 @@
+{
+  "name": "@lumeweb/portal-plugin-abuse-common",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsdown",
+    "lint": "eslint .",
+    "orval": "orval"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs"
+    },
+    "./vite": {
+      "types": "./dist/esm/vite/index.d.ts",
+      "import": "./dist/esm/vite/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "devDependencies": {
+    "orval": "^7.9.0",
+    "tsdown": "^0.12.7"
+  }
+}

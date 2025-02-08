@@ -1,0 +1,28 @@
+{
+  "name": "@lumeweb/advanced-rest-provider",
+  "version": "0.0.0",
+  "description": "An advanced rest data provider using KY for refine",
+  "dependencies": {
+    "@refinedev/core": "^4.57.9",
+    "ky": "^1.2.0",
+    "pupa": "^3.1.0",
+    "querystring": "^0.2.1"
+  },
+  "private": true,
+  "scripts": {
+    "build": "tsdown",
+    "lint": "eslint ."
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs"
+    },
+    "./images": {
+      "types": "./dist/esm/images.d.ts",
+      "import": "./dist/esm/images.js"
+    },
+    "./package.json": "./package.json"
+  }
+}

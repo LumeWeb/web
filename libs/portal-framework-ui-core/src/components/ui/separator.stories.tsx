@@ -1,0 +1,43 @@
+import type { Meta, StoryObj } from "@storybook/react";
+
+import { Separator } from "@/components/ui/separator";
+
+/**
+ * Visually or semantically separates content.
+ */
+const meta = {
+  argTypes: {},
+  component: Separator,
+  tags: ["autodocs"],
+  title: "ui/Separator",
+} satisfies Meta<typeof Separator>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+/**
+ * A separator between horizontal items.
+ */
+export const Horizontal: Story = {
+  render: () => (
+    <div className="flex h-12 items-center justify-center gap-2">
+      <div>Left</div>
+      <Separator orientation="vertical" />
+      <div>Right</div>
+    </div>
+  ),
+};
+
+/**
+ * A separator between vertical items.
+ */
+export const Vertical: Story = {
+  render: () => (
+    <div className="flex flex-col items-center justify-center gap-2">
+      <div>Top</div>
+      <Separator orientation="horizontal" />
+      <div>Bottom</div>
+    </div>
+  ),
+};

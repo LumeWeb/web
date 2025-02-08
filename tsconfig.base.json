@@ -1,29 +1,28 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "strictNullChecks": true,
     "rootDir": ".",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2015",
+    "target": "esnext",
     "module": "esnext",
     "lib": ["es2020", "dom"],
+    "jsx": "react-jsx",
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@lumeweb/libs5": ["libs/libs5/src/index.ts"],
-      "@lumeweb/libs5-crypto": ["libs/libs5-crypto/src/index.ts"],
-      "@lumeweb/libs5-encoding": ["libs/libs5-encoding/src/index.ts"],
-      "@lumeweb/libs5-metadata": ["libs/libs5-metadata/src/index.ts"],
       "@lumeweb/portal-dashboard/*": ["libs/portal-dashboard/src/*"],
       "@lumeweb/portal-admin/*": ["libs/portal-admin/src/*"],
-      "@lumeweb/portal-sdk": ["libs/portal-sdk/src/index.ts"],
-      "portal-shared": ["libs/portal-shared/src/index.ts"],
-      "@lumeweb/s5-js": ["libs/s5-js/src/index.ts"]
+      "@lumeweb/portal-framework-plugin-core/*": [
+        "libs/portal-framework-plugin-core/src/*"
+      ],
+      "@shared-assets/*": ["shared/assets/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]
