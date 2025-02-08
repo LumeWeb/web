@@ -34,7 +34,7 @@ The portal provides:
 - Data verification and integrity checks
 - Privacy-preserving access methods
 
-## Use Cases
+## Use Case
 
 Common ways to use the portal (some planned for future releases):
 - Access decentralized websites and applications

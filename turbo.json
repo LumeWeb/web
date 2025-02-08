@@ -17,6 +17,20 @@
     "dev": {
       "persistent": true,
       "cache": false
+    },
+    "lint": {
+      // Assuming linting should run independently per package
+    },
+    "test": {
+      "dependsOn": ["^build"]
+    },
+    "storybook": {
+      "dependsOn": ["^build"], // Ensure dependencies are built before running storybook
+      "cache": false, // Storybook dev server is not cacheable
+      "persistent": true
+    },
+    "build-storybook": {
+      "dependsOn": ["^build"] // Ensure dependencies are built before building storybook
     }
   }
 }

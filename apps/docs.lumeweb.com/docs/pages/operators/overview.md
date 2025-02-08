@@ -49,7 +49,7 @@ Before setting up your portal:
    - Review each plugin's requirements
    - Plan for resource needs
 
-2. **Consider Your Users**
+2. **Consider Your User**
    - Private or public access
    - Expected usage patterns
    - Access controls needed

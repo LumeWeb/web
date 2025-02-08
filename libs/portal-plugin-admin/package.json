@@ -1,0 +1,28 @@
+{
+  "name": "@lumeweb/portal-plugin-admin",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@lumeweb/portal-framework-auth": "workspace:*",
+    "@lumeweb/portal-framework-core": "workspace:*",
+    "@lumeweb/portal-framework-ui": "workspace:*",
+    "@lumeweb/portal-framework-ui-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@refinedev/core": "^4.57.9",
+    "@tanstack/react-query": "^4.36.1",
+    "lucide-react": "^0.511.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "7.54.0",
+    "react-router": "^7.6.0",
+    "zod": "3.24.2"
+  }
+}

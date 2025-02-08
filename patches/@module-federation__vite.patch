@@ -1,0 +1,1635 @@
+diff --git a/lib/index.cjs b/lib/index.cjs
+index 3dc7821b8bbd8ad417a95737ec4c588efa3fe0d8..c285ba12e11e7301f8333bb50915fa809ecf1a19 100644
+--- a/lib/index.cjs
++++ b/lib/index.cjs
+@@ -342,12 +342,9 @@ function searchPackageVersion(sharedName) {
+     var potentialPackageJsonDir = path__namespace.dirname(sharedPath);
+     var rootDir = path__namespace.parse(potentialPackageJsonDir).root;
+     while (path__namespace.parse(potentialPackageJsonDir).base !== 'node_modules' && potentialPackageJsonDir !== rootDir) {
+-      var potentialPackageJsonPath = path__namespace.join(potentialPackageJsonDir, 'package.json');
+-      if (fs__namespace.existsSync(potentialPackageJsonPath)) {
+-        var potentialPackageJson = require(potentialPackageJsonPath);
+-        if (typeof potentialPackageJson == 'object' && potentialPackageJson !== null && typeof potentialPackageJson.version === 'string' && potentialPackageJson.name === sharedName) {
+-          return potentialPackageJson.version;
+-        }
++      var potentialPackageJson = path__namespace.join(potentialPackageJsonDir, 'package.json');
++      if (fs__namespace.existsSync(potentialPackageJson)) {
++        return require(potentialPackageJson).version;
+       }
+       potentialPackageJsonDir = path__namespace.dirname(potentialPackageJsonDir);
+     }
+@@ -448,8 +445,7 @@ function normalizeModuleFederationOptions(options) {
+     dev: options.dev,
+     dts: options.dts,
+     getPublicPath: options.getPublicPath,
+-    shareStrategy: options.shareStrategy || 'version-first',
+-    ignoreOrigin: options.ignoreOrigin || false
++    shareStrategy: options.shareStrategy || 'version-first'
+   };
+ }
+ 
+@@ -764,6 +760,41 @@ var Manifest = function Manifest() {
+   var _command;
+   var _originalConfigBase;
+   var viteConfig;
++  // Helper function to initialize asset maps
++  var createEmptyAssetMap = function createEmptyAssetMap() {
++    return {
++      js: {
++        sync: [],
++        async: []
++      },
++      css: {
++        sync: [],
++        async: []
++      }
++    };
++  };
++  // Helper function to track assets with deduplication
++  var trackAsset = function trackAsset(map, key, fileName, isAsync, type) {
++    if (!map[key]) {
++      map[key] = createEmptyAssetMap();
++    }
++    var target = isAsync ? map[key][type].async : map[key][type].sync;
++    if (!target.includes(fileName)) {
++      target.push(fileName);
++    }
++  };
++  // Helper function to check if a file is CSS
++  var isCSSFile = function isCSSFile(fileName) {
++    return fileName.endsWith('.css') || fileName.endsWith('.scss') || fileName.endsWith('.less');
++  };
++  // Helper function to add CSS assets to all exports
++  var addCssAssetsToAllExports = function addCssAssetsToAllExports(filesMap, cssAssets) {
++    Object.keys(filesMap).forEach(function (key) {
++      cssAssets.forEach(function (cssAsset) {
++        trackAsset(filesMap, key, cssAsset, false, 'css');
++      });
++    });
++  };
+   return [{
+     name: 'module-federation-manifest',
+     apply: 'serve',
+@@ -772,12 +803,11 @@ var Manifest = function Manifest() {
+     },
+     configureServer: function configureServer(server) {
+       server.middlewares.use(function (req, res, next) {
+-        var _req$url;
+         if (!mfManifestName) {
+           next();
+           return;
+         }
+-        if (((_req$url = req.url) == null ? void 0 : _req$url.replace(/\?.*/, '')) === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
++        if (req.url === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
+           res.setHeader('Content-Type', 'application/json');
+           res.setHeader('Access-Control-Allow-Origin', '*');
+           res.end(JSON.stringify(_extends({}, generateMFManifest({}), {
+@@ -820,7 +850,9 @@ var Manifest = function Manifest() {
+     config: function config(_config, _ref) {
+       var command = _ref.command;
+       if (!_config.build) _config.build = {};
+-      if (!_config.build.manifest) _config.build.manifest = _config.build.manifest || !!manifestOptions;
++      if (!_config.build.manifest) {
++        _config.build.manifest = _config.build.manifest || !!manifestOptions;
++      }
+       _command = command;
+       _originalConfigBase = _config.base;
+     },
+@@ -836,38 +868,10 @@ var Manifest = function Manifest() {
+     generateBundle: function generateBundle(options, bundle) {
+       try {
+         var _this = this;
+-        // 递归查找模块的同步导入文件
+-        var _findSynchronousImports = function findSynchronousImports(fileName, array) {
+-          var fileData = bundle[fileName];
+-          if (fileData && fileData.type === 'chunk') {
+-            array.push(fileName); // 将当前文件加入预加载列表
+-            // 遍历该文件的同步导入文件
+-            fileData.imports.forEach(function (importedFile) {
+-              if (array.indexOf(importedFile) === -1) {
+-                _findSynchronousImports(importedFile, array); // 递归查找同步导入的文件
+-              }
+-            });
+-          }
+-        };
+         if (!mfManifestName) return Promise.resolve();
+-        var exposesModules = Object.keys(mfOptions.exposes).map(function (item) {
+-          return mfOptions.exposes[item]["import"];
+-        }); // 获取你提供的 moduleIds
+-        var filesContainingModules = {};
+-        // 帮助函数：检查模块路径是否匹配
+-        var isModuleMatched = function isModuleMatched(relativeModulePath, preloadModule) {
+-          // 先尝试直接匹配
+-          if (relativeModulePath === preloadModule) return true;
+-          // 如果 preloadModule 没有后缀，尝试添加可能的后缀进行匹配
+-          for (var _iterator = _createForOfIteratorHelperLoose(extensions), _step; !(_step = _iterator()).done;) {
+-            var ext = _step.value;
+-            if (relativeModulePath === "" + preloadModule + ext) {
+-              return true;
+-            }
+-          }
+-          return false;
+-        };
+-        // 遍历打包生成的每个文件
++        var filesMap = {};
++        var allCssAssets = new Set();
++        // Find remoteEntry file
+         for (var _i = 0, _Object$entries = Object.entries(bundle); _i < _Object$entries.length; _i++) {
+           var _Object$entries$_i = _Object$entries[_i],
+             fileName = _Object$entries$_i[0],
+@@ -875,34 +879,58 @@ var Manifest = function Manifest() {
+           if (mfOptions.filename.replace(/[\[\]]/g, '_').replace(/\.[^/.]+$/, '') === fileData.name || fileData.name === 'remoteEntry') {
+             remoteEntryFile = fileData.fileName;
+           }
+-          if (fileData.type === 'chunk') {
+-            // 遍历该文件的所有模块
+-            for (var _i2 = 0, _Object$keys = Object.keys(fileData.modules); _i2 < _Object$keys.length; _i2++) {
+-              var modulePath = _Object$keys[_i2];
+-              // 将绝对路径转换为相对于 Vite root 的相对路径
++          // Collect all CSS assets
++          if (fileData.type === 'asset' && isCSSFile(fileName)) {
++            allCssAssets.add(fileName);
++          }
++        }
++        var exposesModules = Object.keys(mfOptions.exposes).map(function (item) {
++          return mfOptions.exposes[item]["import"];
++        });
++        // Process modules and their associated assets
++        for (var _i2 = 0, _Object$entries2 = Object.entries(bundle); _i2 < _Object$entries2.length; _i2++) {
++          var _Object$entries2$_i = _Object$entries2[_i2],
++            _fileName = _Object$entries2$_i[0],
++            _fileData = _Object$entries2$_i[1];
++          if (_fileData.type === 'chunk') {
++            var _loop = function _loop() {
++              var modulePath = _Object$keys[_i3];
+               var relativeModulePath = path.relative(root, modulePath);
+-              // 检查模块是否在 preloadModules 列表中
+-              for (var _iterator2 = _createForOfIteratorHelperLoose(exposesModules), _step2; !(_step2 = _iterator2()).done;) {
+-                var preloadModule = _step2.value;
+-                var formatPreloadModule = preloadModule.replace('./', '');
+-                if (isModuleMatched(relativeModulePath, formatPreloadModule)) {
+-                  var _filesContainingModul;
+-                  if (!filesContainingModules[preloadModule]) {
+-                    filesContainingModules[preloadModule] = {
+-                      sync: [],
+-                      async: []
+-                    };
++              // Handle exposed modules
++              var _loop2 = function _loop2() {
++                var exposeModule = _step.value;
++                var formatExposeModule = exposeModule.replace('./', '');
++                if (relativeModulePath === formatExposeModule || extensions.some(function (ext) {
++                  return relativeModulePath === "" + formatExposeModule + ext;
++                })) {
++                  // Track the JS chunk
++                  trackAsset(filesMap, exposeModule, _fileName, false, 'js');
++                  // Handle dynamic imports
++                  if (_fileData.dynamicImports) {
++                    for (var _iterator2 = _createForOfIteratorHelperLoose(_fileData.dynamicImports), _step2; !(_step2 = _iterator2()).done;) {
++                      var dynamicImport = _step2.value;
++                      var importData = bundle[dynamicImport];
++                      if (importData) {
++                        if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
++                          trackAsset(filesMap, exposeModule, dynamicImport, true, 'css');
++                        } else {
++                          trackAsset(filesMap, exposeModule, dynamicImport, true, 'js');
++                        }
++                      }
++                    }
+                   }
+-                  console.log(Object.keys(fileData.modules));
+-                  filesContainingModules[preloadModule].sync.push(fileName);
+-                  (_filesContainingModul = filesContainingModules[preloadModule].async).push.apply(_filesContainingModul, fileData.dynamicImports || []);
+-                  _findSynchronousImports(fileName, filesContainingModules[preloadModule].sync);
+-                  break; // 如果找到匹配，跳出循环
+                 }
++              };
++              for (var _iterator = _createForOfIteratorHelperLoose(exposesModules), _step; !(_step = _iterator()).done;) {
++                _loop2();
+               }
++            };
++            for (var _i3 = 0, _Object$keys = Object.keys(_fileData.modules); _i3 < _Object$keys.length; _i3++) {
++              _loop();
+             }
+           }
+         }
++        // Process shared modules
+         var fileToShareKey = {};
+         return Promise.resolve(Promise.all(Array.from(getUsedShares()).map(function (shareKey) {
+           try {
+@@ -914,40 +942,49 @@ var Manifest = function Manifest() {
+             return Promise.reject(e);
+           }
+         }))).then(function () {
+-          // 遍历打包生成的每个文件
+-          for (var _i3 = 0, _Object$entries2 = Object.entries(bundle); _i3 < _Object$entries2.length; _i3++) {
+-            var _Object$entries2$_i = _Object$entries2[_i3],
+-              _fileName = _Object$entries2$_i[0],
+-              _fileData = _Object$entries2$_i[1];
+-            if (_fileData.type === 'chunk') {
+-              // 遍历该文件的所有模块
+-              for (var _i4 = 0, _Object$keys2 = Object.keys(_fileData.modules); _i4 < _Object$keys2.length; _i4++) {
+-                var _modulePath = _Object$keys2[_i4];
+-                var sharedKey = fileToShareKey[_modulePath];
++          for (var _i4 = 0, _Object$entries3 = Object.entries(bundle); _i4 < _Object$entries3.length; _i4++) {
++            var _Object$entries3$_i = _Object$entries3[_i4],
++              _fileName2 = _Object$entries3$_i[0],
++              _fileData2 = _Object$entries3$_i[1];
++            if (_fileData2.type === 'chunk') {
++              for (var _i5 = 0, _Object$keys2 = Object.keys(_fileData2.modules); _i5 < _Object$keys2.length; _i5++) {
++                var modulePath = _Object$keys2[_i5];
++                var sharedKey = fileToShareKey[modulePath];
+                 if (sharedKey) {
+-                  var _filesContainingModul2;
+-                  if (!filesContainingModules[sharedKey]) {
+-                    filesContainingModules[sharedKey] = {
+-                      sync: [],
+-                      async: []
+-                    };
++                  // Track the JS chunk
++                  trackAsset(filesMap, sharedKey, _fileName2, false, 'js');
++                  // Handle dynamic imports
++                  if (_fileData2.dynamicImports) {
++                    for (var _iterator3 = _createForOfIteratorHelperLoose(_fileData2.dynamicImports), _step3; !(_step3 = _iterator3()).done;) {
++                      var dynamicImport = _step3.value;
++                      var importData = bundle[dynamicImport];
++                      if (importData) {
++                        if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
++                          trackAsset(filesMap, sharedKey, dynamicImport, true, 'css');
++                        } else {
++                          trackAsset(filesMap, sharedKey, dynamicImport, true, 'js');
++                        }
++                      }
++                    }
+                   }
+-                  filesContainingModules[sharedKey].sync.push(_fileName);
+-                  (_filesContainingModul2 = filesContainingModules[sharedKey].async).push.apply(_filesContainingModul2, _fileData.dynamicImports || []);
+-                  _findSynchronousImports(_fileName, filesContainingModules[sharedKey].sync);
+-                  break; // 如果找到匹配，跳出循环
+                 }
+               }
+             }
+           }
+-          Object.keys(filesContainingModules).forEach(function (key) {
+-            filesContainingModules[key].sync = Array.from(new Set(filesContainingModules[key].sync));
+-            filesContainingModules[key].async = Array.from(new Set(filesContainingModules[key].async));
++          // Add all CSS assets to every export
++          // Final deduplication of all arrays in the filesMap
++          addCssAssetsToAllExports(filesMap, allCssAssets);
++          Object.values(filesMap).forEach(function (assetMaps) {
++            ['js', 'css'].forEach(function (type) {
++              ['sync', 'async'].forEach(function (timing) {
++                assetMaps[type][timing] = Array.from(new Set(assetMaps[type][timing]));
++              });
++            });
+           });
+           _this.emitFile({
+             type: 'asset',
+             fileName: mfManifestName,
+-            source: JSON.stringify(generateMFManifest(filesContainingModules))
++            source: JSON.stringify(generateMFManifest(filesMap))
+           });
+         });
+       } catch (e) {
+@@ -963,23 +1000,23 @@ var Manifest = function Manifest() {
+       path: '',
+       type: 'module'
+     };
+-    var remotes = [];
+-    var usedRemotesMap = getUsedRemotesMap();
+-    Object.keys(usedRemotesMap).forEach(function (remoteKey) {
+-      var usedModules = Array.from(usedRemotesMap[remoteKey]);
+-      usedModules.forEach(function (moduleKey) {
+-        remotes.push({
++    // Process remotes
++    var remotes = Array.from(Object.entries(getUsedRemotesMap())).flatMap(function (_ref2) {
++      var remoteKey = _ref2[0],
++        modules = _ref2[1];
++      return Array.from(modules).map(function (moduleKey) {
++        return {
+           federationContainerName: options.remotes[remoteKey].entry,
+           moduleName: moduleKey.replace(remoteKey, '').replace('/', ''),
+           alias: remoteKey,
+           entry: '*'
+-        });
++        };
+       });
+     });
+-    // @ts-ignore
++    // Process shared dependencies
+     var shared = Array.from(getUsedShares()).map(function (shareKey) {
+-      var _preloadMap$shareKey, _preloadMap$shareKey2;
+       var shareItem = getNormalizeShareItem(shareKey);
++      var assets = preloadMap[shareKey] || createEmptyAssetMap();
+       return {
+         id: name + ":" + shareKey,
+         name: shareKey,
+@@ -987,42 +1024,40 @@ var Manifest = function Manifest() {
+         requiredVersion: shareItem.shareConfig.requiredVersion,
+         assets: {
+           js: {
+-            async: (preloadMap == null || (_preloadMap$shareKey = preloadMap[shareKey]) == null ? void 0 : _preloadMap$shareKey.async) || [],
+-            sync: (preloadMap == null || (_preloadMap$shareKey2 = preloadMap[shareKey]) == null ? void 0 : _preloadMap$shareKey2.sync) || []
++            async: assets.js.async,
++            sync: assets.js.sync
+           },
+           css: {
+-            async: [],
+-            sync: []
++            async: assets.css.async,
++            sync: assets.css.sync
+           }
+         }
+       };
+-    }).filter(function (item) {
+-      return item;
+-    });
+-    var exposes = Object.keys(options.exposes).map(function (key) {
+-      var _preloadMap$sourceFil, _preloadMap$sourceFil2;
+-      // assets(.css, .jpg, .svg等)其他资源, 不重要, 暂未处理
++    }).filter(Boolean);
++    // Process exposed modules
++    var exposes = Object.entries(options.exposes).map(function (_ref3) {
++      var key = _ref3[0],
++        value = _ref3[1];
+       var formatKey = key.replace('./', '');
+-      var sourceFile = options.exposes[key]["import"];
++      var sourceFile = value["import"];
++      var assets = preloadMap[sourceFile] || createEmptyAssetMap();
+       return {
+-        id: name + ':' + formatKey,
++        id: name + ":" + formatKey,
+         name: formatKey,
+         assets: {
+           js: {
+-            async: (preloadMap == null || (_preloadMap$sourceFil = preloadMap[sourceFile]) == null ? void 0 : _preloadMap$sourceFil.async) || [],
+-            sync: (preloadMap == null || (_preloadMap$sourceFil2 = preloadMap[sourceFile]) == null ? void 0 : _preloadMap$sourceFil2.sync) || []
++            async: assets.js.async,
++            sync: assets.js.sync
+           },
+           css: {
+-            sync: [],
+-            async: []
++            async: assets.css.async,
++            sync: assets.css.sync
+           }
+         },
+         path: key
+       };
+-    }).filter(function (item) {
+-      return item;
+-    }); // Filter out any null values
+-    var result = {
++    }).filter(Boolean);
++    return {
+       id: name,
+       name: name,
+       metaData: _extends({
+@@ -1037,8 +1072,6 @@ var Manifest = function Manifest() {
+         types: {
+           path: '',
+           name: ''
+-          // "zip": "@mf-types.zip",
+-          // "api": "@mf-types.d.ts"
+         },
+         globalName: name,
+         pluginVersion: '0.2.5'
+@@ -1051,7 +1084,6 @@ var Manifest = function Manifest() {
+       remotes: remotes,
+       exposes: exposes
+     };
+-    return result;
+   }
+ };
+ 
+@@ -1155,7 +1187,7 @@ function pluginProxyRemoteEntry () {
+           if (_command === 'serve') {
+             var _viteConfig$server, _viteConfig$server2;
+             var host = typeof ((_viteConfig$server = viteConfig.server) == null ? void 0 : _viteConfig$server.host) === 'string' && viteConfig.server.host !== '0.0.0.0' ? viteConfig.server.host : 'localhost';
+-            return Promise.resolve("\n          const origin = (window && " + !options.ignoreOrigin + ") ? window.origin : \"//" + host + ":" + ((_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port) + "\"\n          const remoteEntryPromise = await import(origin + \"" + (viteConfig.base + options.filename) + "\")\n          // __tla only serves as a hack for vite-plugin-top-level-await. \n          Promise.resolve(remoteEntryPromise)\n          .then(remoteEntry => {\n            return Promise.resolve(remoteEntry.__tla)\n              .then(remoteEntry.init).catch(remoteEntry.init)\n          })\n          ");
++            return Promise.resolve("\n          const origin = window ? window.origin : \"//" + host + ":" + ((_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port) + "\"\n          const remoteEntryPromise = await import(origin + \"" + (viteConfig.base + options.filename) + "\")\n          // __tla only serves as a hack for vite-plugin-top-level-await. \n          Promise.resolve(remoteEntryPromise)\n          .then(remoteEntry => {\n            return Promise.resolve(remoteEntry.__tla)\n              .then(remoteEntry.init).catch(remoteEntry.init)\n          })\n          ");
+           }
+           return Promise.resolve(code);
+         }
+diff --git a/lib/index.esm.js b/lib/index.esm.js
+index 3b7f52dbb436776d3c7f3084f6e7f34dc34bc001..eaa9a6c3af2a0f0871a463f77738b1c0868f5bb0 100644
+--- a/lib/index.esm.js
++++ b/lib/index.esm.js
+@@ -318,12 +318,9 @@ function searchPackageVersion(sharedName) {
+     var potentialPackageJsonDir = path.dirname(sharedPath);
+     var rootDir = path.parse(potentialPackageJsonDir).root;
+     while (path.parse(potentialPackageJsonDir).base !== 'node_modules' && potentialPackageJsonDir !== rootDir) {
+-      var potentialPackageJsonPath = path.join(potentialPackageJsonDir, 'package.json');
+-      if (fs.existsSync(potentialPackageJsonPath)) {
+-        var potentialPackageJson = require(potentialPackageJsonPath);
+-        if (typeof potentialPackageJson == 'object' && potentialPackageJson !== null && typeof potentialPackageJson.version === 'string' && potentialPackageJson.name === sharedName) {
+-          return potentialPackageJson.version;
+-        }
++      var potentialPackageJson = path.join(potentialPackageJsonDir, 'package.json');
++      if (fs.existsSync(potentialPackageJson)) {
++        return require(potentialPackageJson).version;
+       }
+       potentialPackageJsonDir = path.dirname(potentialPackageJsonDir);
+     }
+@@ -424,8 +421,7 @@ function normalizeModuleFederationOptions(options) {
+     dev: options.dev,
+     dts: options.dts,
+     getPublicPath: options.getPublicPath,
+-    shareStrategy: options.shareStrategy || 'version-first',
+-    ignoreOrigin: options.ignoreOrigin || false
++    shareStrategy: options.shareStrategy || 'version-first'
+   };
+ }
+ 
+@@ -740,6 +736,41 @@ var Manifest = function Manifest() {
+   var _command;
+   var _originalConfigBase;
+   var viteConfig;
++  // Helper function to initialize asset maps
++  var createEmptyAssetMap = function createEmptyAssetMap() {
++    return {
++      js: {
++        sync: [],
++        async: []
++      },
++      css: {
++        sync: [],
++        async: []
++      }
++    };
++  };
++  // Helper function to track assets with deduplication
++  var trackAsset = function trackAsset(map, key, fileName, isAsync, type) {
++    if (!map[key]) {
++      map[key] = createEmptyAssetMap();
++    }
++    var target = isAsync ? map[key][type].async : map[key][type].sync;
++    if (!target.includes(fileName)) {
++      target.push(fileName);
++    }
++  };
++  // Helper function to check if a file is CSS
++  var isCSSFile = function isCSSFile(fileName) {
++    return fileName.endsWith('.css') || fileName.endsWith('.scss') || fileName.endsWith('.less');
++  };
++  // Helper function to add CSS assets to all exports
++  var addCssAssetsToAllExports = function addCssAssetsToAllExports(filesMap, cssAssets) {
++    Object.keys(filesMap).forEach(function (key) {
++      cssAssets.forEach(function (cssAsset) {
++        trackAsset(filesMap, key, cssAsset, false, 'css');
++      });
++    });
++  };
+   return [{
+     name: 'module-federation-manifest',
+     apply: 'serve',
+@@ -748,12 +779,11 @@ var Manifest = function Manifest() {
+     },
+     configureServer: function configureServer(server) {
+       server.middlewares.use(function (req, res, next) {
+-        var _req$url;
+         if (!mfManifestName) {
+           next();
+           return;
+         }
+-        if (((_req$url = req.url) == null ? void 0 : _req$url.replace(/\?.*/, '')) === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
++        if (req.url === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
+           res.setHeader('Content-Type', 'application/json');
+           res.setHeader('Access-Control-Allow-Origin', '*');
+           res.end(JSON.stringify(_extends({}, generateMFManifest({}), {
+@@ -796,7 +826,9 @@ var Manifest = function Manifest() {
+     config: function config(_config, _ref) {
+       var command = _ref.command;
+       if (!_config.build) _config.build = {};
+-      if (!_config.build.manifest) _config.build.manifest = _config.build.manifest || !!manifestOptions;
++      if (!_config.build.manifest) {
++        _config.build.manifest = _config.build.manifest || !!manifestOptions;
++      }
+       _command = command;
+       _originalConfigBase = _config.base;
+     },
+@@ -812,38 +844,10 @@ var Manifest = function Manifest() {
+     generateBundle: function generateBundle(options, bundle) {
+       try {
+         var _this = this;
+-        // 递归查找模块的同步导入文件
+-        var _findSynchronousImports = function findSynchronousImports(fileName, array) {
+-          var fileData = bundle[fileName];
+-          if (fileData && fileData.type === 'chunk') {
+-            array.push(fileName); // 将当前文件加入预加载列表
+-            // 遍历该文件的同步导入文件
+-            fileData.imports.forEach(function (importedFile) {
+-              if (array.indexOf(importedFile) === -1) {
+-                _findSynchronousImports(importedFile, array); // 递归查找同步导入的文件
+-              }
+-            });
+-          }
+-        };
+         if (!mfManifestName) return Promise.resolve();
+-        var exposesModules = Object.keys(mfOptions.exposes).map(function (item) {
+-          return mfOptions.exposes[item]["import"];
+-        }); // 获取你提供的 moduleIds
+-        var filesContainingModules = {};
+-        // 帮助函数：检查模块路径是否匹配
+-        var isModuleMatched = function isModuleMatched(relativeModulePath, preloadModule) {
+-          // 先尝试直接匹配
+-          if (relativeModulePath === preloadModule) return true;
+-          // 如果 preloadModule 没有后缀，尝试添加可能的后缀进行匹配
+-          for (var _iterator = _createForOfIteratorHelperLoose(extensions), _step; !(_step = _iterator()).done;) {
+-            var ext = _step.value;
+-            if (relativeModulePath === "" + preloadModule + ext) {
+-              return true;
+-            }
+-          }
+-          return false;
+-        };
+-        // 遍历打包生成的每个文件
++        var filesMap = {};
++        var allCssAssets = new Set();
++        // Find remoteEntry file
+         for (var _i = 0, _Object$entries = Object.entries(bundle); _i < _Object$entries.length; _i++) {
+           var _Object$entries$_i = _Object$entries[_i],
+             fileName = _Object$entries$_i[0],
+@@ -851,34 +855,58 @@ var Manifest = function Manifest() {
+           if (mfOptions.filename.replace(/[\[\]]/g, '_').replace(/\.[^/.]+$/, '') === fileData.name || fileData.name === 'remoteEntry') {
+             remoteEntryFile = fileData.fileName;
+           }
+-          if (fileData.type === 'chunk') {
+-            // 遍历该文件的所有模块
+-            for (var _i2 = 0, _Object$keys = Object.keys(fileData.modules); _i2 < _Object$keys.length; _i2++) {
+-              var modulePath = _Object$keys[_i2];
+-              // 将绝对路径转换为相对于 Vite root 的相对路径
++          // Collect all CSS assets
++          if (fileData.type === 'asset' && isCSSFile(fileName)) {
++            allCssAssets.add(fileName);
++          }
++        }
++        var exposesModules = Object.keys(mfOptions.exposes).map(function (item) {
++          return mfOptions.exposes[item]["import"];
++        });
++        // Process modules and their associated assets
++        for (var _i2 = 0, _Object$entries2 = Object.entries(bundle); _i2 < _Object$entries2.length; _i2++) {
++          var _Object$entries2$_i = _Object$entries2[_i2],
++            _fileName = _Object$entries2$_i[0],
++            _fileData = _Object$entries2$_i[1];
++          if (_fileData.type === 'chunk') {
++            var _loop = function _loop() {
++              var modulePath = _Object$keys[_i3];
+               var relativeModulePath = relative(root, modulePath);
+-              // 检查模块是否在 preloadModules 列表中
+-              for (var _iterator2 = _createForOfIteratorHelperLoose(exposesModules), _step2; !(_step2 = _iterator2()).done;) {
+-                var preloadModule = _step2.value;
+-                var formatPreloadModule = preloadModule.replace('./', '');
+-                if (isModuleMatched(relativeModulePath, formatPreloadModule)) {
+-                  var _filesContainingModul;
+-                  if (!filesContainingModules[preloadModule]) {
+-                    filesContainingModules[preloadModule] = {
+-                      sync: [],
+-                      async: []
+-                    };
++              // Handle exposed modules
++              var _loop2 = function _loop2() {
++                var exposeModule = _step.value;
++                var formatExposeModule = exposeModule.replace('./', '');
++                if (relativeModulePath === formatExposeModule || extensions.some(function (ext) {
++                  return relativeModulePath === "" + formatExposeModule + ext;
++                })) {
++                  // Track the JS chunk
++                  trackAsset(filesMap, exposeModule, _fileName, false, 'js');
++                  // Handle dynamic imports
++                  if (_fileData.dynamicImports) {
++                    for (var _iterator2 = _createForOfIteratorHelperLoose(_fileData.dynamicImports), _step2; !(_step2 = _iterator2()).done;) {
++                      var dynamicImport = _step2.value;
++                      var importData = bundle[dynamicImport];
++                      if (importData) {
++                        if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
++                          trackAsset(filesMap, exposeModule, dynamicImport, true, 'css');
++                        } else {
++                          trackAsset(filesMap, exposeModule, dynamicImport, true, 'js');
++                        }
++                      }
++                    }
+                   }
+-                  console.log(Object.keys(fileData.modules));
+-                  filesContainingModules[preloadModule].sync.push(fileName);
+-                  (_filesContainingModul = filesContainingModules[preloadModule].async).push.apply(_filesContainingModul, fileData.dynamicImports || []);
+-                  _findSynchronousImports(fileName, filesContainingModules[preloadModule].sync);
+-                  break; // 如果找到匹配，跳出循环
+                 }
++              };
++              for (var _iterator = _createForOfIteratorHelperLoose(exposesModules), _step; !(_step = _iterator()).done;) {
++                _loop2();
+               }
++            };
++            for (var _i3 = 0, _Object$keys = Object.keys(_fileData.modules); _i3 < _Object$keys.length; _i3++) {
++              _loop();
+             }
+           }
+         }
++        // Process shared modules
+         var fileToShareKey = {};
+         return Promise.resolve(Promise.all(Array.from(getUsedShares()).map(function (shareKey) {
+           try {
+@@ -890,40 +918,49 @@ var Manifest = function Manifest() {
+             return Promise.reject(e);
+           }
+         }))).then(function () {
+-          // 遍历打包生成的每个文件
+-          for (var _i3 = 0, _Object$entries2 = Object.entries(bundle); _i3 < _Object$entries2.length; _i3++) {
+-            var _Object$entries2$_i = _Object$entries2[_i3],
+-              _fileName = _Object$entries2$_i[0],
+-              _fileData = _Object$entries2$_i[1];
+-            if (_fileData.type === 'chunk') {
+-              // 遍历该文件的所有模块
+-              for (var _i4 = 0, _Object$keys2 = Object.keys(_fileData.modules); _i4 < _Object$keys2.length; _i4++) {
+-                var _modulePath = _Object$keys2[_i4];
+-                var sharedKey = fileToShareKey[_modulePath];
++          for (var _i4 = 0, _Object$entries3 = Object.entries(bundle); _i4 < _Object$entries3.length; _i4++) {
++            var _Object$entries3$_i = _Object$entries3[_i4],
++              _fileName2 = _Object$entries3$_i[0],
++              _fileData2 = _Object$entries3$_i[1];
++            if (_fileData2.type === 'chunk') {
++              for (var _i5 = 0, _Object$keys2 = Object.keys(_fileData2.modules); _i5 < _Object$keys2.length; _i5++) {
++                var modulePath = _Object$keys2[_i5];
++                var sharedKey = fileToShareKey[modulePath];
+                 if (sharedKey) {
+-                  var _filesContainingModul2;
+-                  if (!filesContainingModules[sharedKey]) {
+-                    filesContainingModules[sharedKey] = {
+-                      sync: [],
+-                      async: []
+-                    };
++                  // Track the JS chunk
++                  trackAsset(filesMap, sharedKey, _fileName2, false, 'js');
++                  // Handle dynamic imports
++                  if (_fileData2.dynamicImports) {
++                    for (var _iterator3 = _createForOfIteratorHelperLoose(_fileData2.dynamicImports), _step3; !(_step3 = _iterator3()).done;) {
++                      var dynamicImport = _step3.value;
++                      var importData = bundle[dynamicImport];
++                      if (importData) {
++                        if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
++                          trackAsset(filesMap, sharedKey, dynamicImport, true, 'css');
++                        } else {
++                          trackAsset(filesMap, sharedKey, dynamicImport, true, 'js');
++                        }
++                      }
++                    }
+                   }
+-                  filesContainingModules[sharedKey].sync.push(_fileName);
+-                  (_filesContainingModul2 = filesContainingModules[sharedKey].async).push.apply(_filesContainingModul2, _fileData.dynamicImports || []);
+-                  _findSynchronousImports(_fileName, filesContainingModules[sharedKey].sync);
+-                  break; // 如果找到匹配，跳出循环
+                 }
+               }
+             }
+           }
+-          Object.keys(filesContainingModules).forEach(function (key) {
+-            filesContainingModules[key].sync = Array.from(new Set(filesContainingModules[key].sync));
+-            filesContainingModules[key].async = Array.from(new Set(filesContainingModules[key].async));
++          // Add all CSS assets to every export
++          // Final deduplication of all arrays in the filesMap
++          addCssAssetsToAllExports(filesMap, allCssAssets);
++          Object.values(filesMap).forEach(function (assetMaps) {
++            ['js', 'css'].forEach(function (type) {
++              ['sync', 'async'].forEach(function (timing) {
++                assetMaps[type][timing] = Array.from(new Set(assetMaps[type][timing]));
++              });
++            });
+           });
+           _this.emitFile({
+             type: 'asset',
+             fileName: mfManifestName,
+-            source: JSON.stringify(generateMFManifest(filesContainingModules))
++            source: JSON.stringify(generateMFManifest(filesMap))
+           });
+         });
+       } catch (e) {
+@@ -939,23 +976,23 @@ var Manifest = function Manifest() {
+       path: '',
+       type: 'module'
+     };
+-    var remotes = [];
+-    var usedRemotesMap = getUsedRemotesMap();
+-    Object.keys(usedRemotesMap).forEach(function (remoteKey) {
+-      var usedModules = Array.from(usedRemotesMap[remoteKey]);
+-      usedModules.forEach(function (moduleKey) {
+-        remotes.push({
++    // Process remotes
++    var remotes = Array.from(Object.entries(getUsedRemotesMap())).flatMap(function (_ref2) {
++      var remoteKey = _ref2[0],
++        modules = _ref2[1];
++      return Array.from(modules).map(function (moduleKey) {
++        return {
+           federationContainerName: options.remotes[remoteKey].entry,
+           moduleName: moduleKey.replace(remoteKey, '').replace('/', ''),
+           alias: remoteKey,
+           entry: '*'
+-        });
++        };
+       });
+     });
+-    // @ts-ignore
++    // Process shared dependencies
+     var shared = Array.from(getUsedShares()).map(function (shareKey) {
+-      var _preloadMap$shareKey, _preloadMap$shareKey2;
+       var shareItem = getNormalizeShareItem(shareKey);
++      var assets = preloadMap[shareKey] || createEmptyAssetMap();
+       return {
+         id: name + ":" + shareKey,
+         name: shareKey,
+@@ -963,42 +1000,40 @@ var Manifest = function Manifest() {
+         requiredVersion: shareItem.shareConfig.requiredVersion,
+         assets: {
+           js: {
+-            async: (preloadMap == null || (_preloadMap$shareKey = preloadMap[shareKey]) == null ? void 0 : _preloadMap$shareKey.async) || [],
+-            sync: (preloadMap == null || (_preloadMap$shareKey2 = preloadMap[shareKey]) == null ? void 0 : _preloadMap$shareKey2.sync) || []
++            async: assets.js.async,
++            sync: assets.js.sync
+           },
+           css: {
+-            async: [],
+-            sync: []
++            async: assets.css.async,
++            sync: assets.css.sync
+           }
+         }
+       };
+-    }).filter(function (item) {
+-      return item;
+-    });
+-    var exposes = Object.keys(options.exposes).map(function (key) {
+-      var _preloadMap$sourceFil, _preloadMap$sourceFil2;
+-      // assets(.css, .jpg, .svg等)其他资源, 不重要, 暂未处理
++    }).filter(Boolean);
++    // Process exposed modules
++    var exposes = Object.entries(options.exposes).map(function (_ref3) {
++      var key = _ref3[0],
++        value = _ref3[1];
+       var formatKey = key.replace('./', '');
+-      var sourceFile = options.exposes[key]["import"];
++      var sourceFile = value["import"];
++      var assets = preloadMap[sourceFile] || createEmptyAssetMap();
+       return {
+-        id: name + ':' + formatKey,
++        id: name + ":" + formatKey,
+         name: formatKey,
+         assets: {
+           js: {
+-            async: (preloadMap == null || (_preloadMap$sourceFil = preloadMap[sourceFile]) == null ? void 0 : _preloadMap$sourceFil.async) || [],
+-            sync: (preloadMap == null || (_preloadMap$sourceFil2 = preloadMap[sourceFile]) == null ? void 0 : _preloadMap$sourceFil2.sync) || []
++            async: assets.js.async,
++            sync: assets.js.sync
+           },
+           css: {
+-            sync: [],
+-            async: []
++            async: assets.css.async,
++            sync: assets.css.sync
+           }
+         },
+         path: key
+       };
+-    }).filter(function (item) {
+-      return item;
+-    }); // Filter out any null values
+-    var result = {
++    }).filter(Boolean);
++    return {
+       id: name,
+       name: name,
+       metaData: _extends({
+@@ -1013,8 +1048,6 @@ var Manifest = function Manifest() {
+         types: {
+           path: '',
+           name: ''
+-          // "zip": "@mf-types.zip",
+-          // "api": "@mf-types.d.ts"
+         },
+         globalName: name,
+         pluginVersion: '0.2.5'
+@@ -1027,7 +1060,6 @@ var Manifest = function Manifest() {
+       remotes: remotes,
+       exposes: exposes
+     };
+-    return result;
+   }
+ };
+ 
+@@ -1131,7 +1163,7 @@ function pluginProxyRemoteEntry () {
+           if (_command === 'serve') {
+             var _viteConfig$server, _viteConfig$server2;
+             var host = typeof ((_viteConfig$server = viteConfig.server) == null ? void 0 : _viteConfig$server.host) === 'string' && viteConfig.server.host !== '0.0.0.0' ? viteConfig.server.host : 'localhost';
+-            return Promise.resolve("\n          const origin = (window && " + !options.ignoreOrigin + ") ? window.origin : \"//" + host + ":" + ((_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port) + "\"\n          const remoteEntryPromise = await import(origin + \"" + (viteConfig.base + options.filename) + "\")\n          // __tla only serves as a hack for vite-plugin-top-level-await. \n          Promise.resolve(remoteEntryPromise)\n          .then(remoteEntry => {\n            return Promise.resolve(remoteEntry.__tla)\n              .then(remoteEntry.init).catch(remoteEntry.init)\n          })\n          ");
++            return Promise.resolve("\n          const origin = window ? window.origin : \"//" + host + ":" + ((_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port) + "\"\n          const remoteEntryPromise = await import(origin + \"" + (viteConfig.base + options.filename) + "\")\n          // __tla only serves as a hack for vite-plugin-top-level-await. \n          Promise.resolve(remoteEntryPromise)\n          .then(remoteEntry => {\n            return Promise.resolve(remoteEntry.__tla)\n              .then(remoteEntry.init).catch(remoteEntry.init)\n          })\n          ");
+           }
+           return Promise.resolve(code);
+         }
+diff --git a/lib/index.modern.js b/lib/index.modern.js
+index aacb32d039cffa20235083f9fb7388a961d40546..010b1d554a18e25723d1c77ca0210ebc5774878c 100644
+--- a/lib/index.modern.js
++++ b/lib/index.modern.js
+@@ -291,12 +291,9 @@ function searchPackageVersion(sharedName) {
+     let potentialPackageJsonDir = path.dirname(sharedPath);
+     const rootDir = path.parse(potentialPackageJsonDir).root;
+     while (path.parse(potentialPackageJsonDir).base !== 'node_modules' && potentialPackageJsonDir !== rootDir) {
+-      const potentialPackageJsonPath = path.join(potentialPackageJsonDir, 'package.json');
+-      if (fs.existsSync(potentialPackageJsonPath)) {
+-        const potentialPackageJson = require(potentialPackageJsonPath);
+-        if (typeof potentialPackageJson == 'object' && potentialPackageJson !== null && typeof potentialPackageJson.version === 'string' && potentialPackageJson.name === sharedName) {
+-          return potentialPackageJson.version;
+-        }
++      const potentialPackageJson = path.join(potentialPackageJsonDir, 'package.json');
++      if (fs.existsSync(potentialPackageJson)) {
++        return require(potentialPackageJson).version;
+       }
+       potentialPackageJsonDir = path.dirname(potentialPackageJsonDir);
+     }
+@@ -394,8 +391,7 @@ function normalizeModuleFederationOptions(options) {
+     dev: options.dev,
+     dts: options.dts,
+     getPublicPath: options.getPublicPath,
+-    shareStrategy: options.shareStrategy || 'version-first',
+-    ignoreOrigin: options.ignoreOrigin || false
++    shareStrategy: options.shareStrategy || 'version-first'
+   };
+ }
+ 
+@@ -842,6 +838,39 @@ const Manifest = () => {
+   let _command;
+   let _originalConfigBase;
+   let viteConfig;
++  // Helper function to initialize asset maps
++  const createEmptyAssetMap = () => ({
++    js: {
++      sync: [],
++      async: []
++    },
++    css: {
++      sync: [],
++      async: []
++    }
++  });
++  // Helper function to track assets with deduplication
++  const trackAsset = (map, key, fileName, isAsync, type) => {
++    if (!map[key]) {
++      map[key] = createEmptyAssetMap();
++    }
++    const target = isAsync ? map[key][type].async : map[key][type].sync;
++    if (!target.includes(fileName)) {
++      target.push(fileName);
++    }
++  };
++  // Helper function to check if a file is CSS
++  const isCSSFile = fileName => {
++    return fileName.endsWith('.css') || fileName.endsWith('.scss') || fileName.endsWith('.less');
++  };
++  // Helper function to add CSS assets to all exports
++  const addCssAssetsToAllExports = (filesMap, cssAssets) => {
++    Object.keys(filesMap).forEach(key => {
++      cssAssets.forEach(cssAsset => {
++        trackAsset(filesMap, key, cssAsset, false, 'css');
++      });
++    });
++  };
+   return [{
+     name: 'module-federation-manifest',
+     apply: 'serve',
+@@ -850,12 +879,11 @@ const Manifest = () => {
+     },
+     configureServer(server) {
+       server.middlewares.use((req, res, next) => {
+-        var _req$url;
+         if (!mfManifestName) {
+           next();
+           return;
+         }
+-        if (((_req$url = req.url) == null ? void 0 : _req$url.replace(/\?.*/, '')) === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
++        if (req.url === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
+           res.setHeader('Content-Type', 'application/json');
+           res.setHeader('Access-Control-Allow-Origin', '*');
+           res.end(JSON.stringify(_extends({}, generateMFManifest({}), {
+@@ -899,7 +927,9 @@ const Manifest = () => {
+       command
+     }) {
+       if (!config.build) config.build = {};
+-      if (!config.build.manifest) config.build.manifest = config.build.manifest || !!manifestOptions;
++      if (!config.build.manifest) {
++        config.build.manifest = config.build.manifest || !!manifestOptions;
++      }
+       _command = command;
+       _originalConfigBase = config.base;
+     },
+@@ -914,97 +944,92 @@ const Manifest = () => {
+     },
+     async generateBundle(options, bundle) {
+       if (!mfManifestName) return;
+-      const exposesModules = Object.keys(mfOptions.exposes).map(item => mfOptions.exposes[item].import); // 获取你提供的 moduleIds
+-      const filesContainingModules = {};
+-      // 帮助函数：检查模块路径是否匹配
+-      const isModuleMatched = (relativeModulePath, preloadModule) => {
+-        // 先尝试直接匹配
+-        if (relativeModulePath === preloadModule) return true;
+-        // 如果 preloadModule 没有后缀，尝试添加可能的后缀进行匹配
+-        for (const ext of extensions) {
+-          if (relativeModulePath === `${preloadModule}${ext}`) {
+-            return true;
+-          }
+-        }
+-        return false;
+-      };
+-      // 遍历打包生成的每个文件
++      const filesMap = {};
++      const allCssAssets = new Set();
++      // Find remoteEntry file
+       for (const [fileName, fileData] of Object.entries(bundle)) {
+         if (mfOptions.filename.replace(/[\[\]]/g, '_').replace(/\.[^/.]+$/, '') === fileData.name || fileData.name === 'remoteEntry') {
+           remoteEntryFile = fileData.fileName;
+         }
++        // Collect all CSS assets
++        if (fileData.type === 'asset' && isCSSFile(fileName)) {
++          allCssAssets.add(fileName);
++        }
++      }
++      const exposesModules = Object.keys(mfOptions.exposes).map(item => mfOptions.exposes[item].import);
++      // Process modules and their associated assets
++      for (const [fileName, fileData] of Object.entries(bundle)) {
+         if (fileData.type === 'chunk') {
+-          // 遍历该文件的所有模块
+           for (const modulePath of Object.keys(fileData.modules)) {
+-            // 将绝对路径转换为相对于 Vite root 的相对路径
+             const relativeModulePath = relative(root, modulePath);
+-            // 检查模块是否在 preloadModules 列表中
+-            for (const preloadModule of exposesModules) {
+-              const formatPreloadModule = preloadModule.replace('./', '');
+-              if (isModuleMatched(relativeModulePath, formatPreloadModule)) {
+-                if (!filesContainingModules[preloadModule]) {
+-                  filesContainingModules[preloadModule] = {
+-                    sync: [],
+-                    async: []
+-                  };
++            // Handle exposed modules
++            for (const exposeModule of exposesModules) {
++              const formatExposeModule = exposeModule.replace('./', '');
++              if (relativeModulePath === formatExposeModule || extensions.some(ext => relativeModulePath === `${formatExposeModule}${ext}`)) {
++                // Track the JS chunk
++                trackAsset(filesMap, exposeModule, fileName, false, 'js');
++                // Handle dynamic imports
++                if (fileData.dynamicImports) {
++                  for (const dynamicImport of fileData.dynamicImports) {
++                    const importData = bundle[dynamicImport];
++                    if (importData) {
++                      if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
++                        trackAsset(filesMap, exposeModule, dynamicImport, true, 'css');
++                      } else {
++                        trackAsset(filesMap, exposeModule, dynamicImport, true, 'js');
++                      }
++                    }
++                  }
+                 }
+-                console.log(Object.keys(fileData.modules));
+-                filesContainingModules[preloadModule].sync.push(fileName);
+-                filesContainingModules[preloadModule].async.push(...(fileData.dynamicImports || []));
+-                findSynchronousImports(fileName, filesContainingModules[preloadModule].sync);
+-                break; // 如果找到匹配，跳出循环
+               }
+             }
+           }
+         }
+       }
+-      // 递归查找模块的同步导入文件
+-      function findSynchronousImports(fileName, array) {
+-        const fileData = bundle[fileName];
+-        if (fileData && fileData.type === 'chunk') {
+-          array.push(fileName); // 将当前文件加入预加载列表
+-          // 遍历该文件的同步导入文件
+-          fileData.imports.forEach(importedFile => {
+-            if (array.indexOf(importedFile) === -1) {
+-              findSynchronousImports(importedFile, array); // 递归查找同步导入的文件
+-            }
+-          });
+-        }
+-      }
++      // Process shared modules
+       const fileToShareKey = {};
+       await Promise.all(Array.from(getUsedShares()).map(async shareKey => {
+         const file = (await this.resolve(getPreBuildLibImportId(shareKey))).id.split('?')[0];
+         fileToShareKey[file] = shareKey;
+       }));
+-      // 遍历打包生成的每个文件
+       for (const [fileName, fileData] of Object.entries(bundle)) {
+         if (fileData.type === 'chunk') {
+-          // 遍历该文件的所有模块
+           for (const modulePath of Object.keys(fileData.modules)) {
+             const sharedKey = fileToShareKey[modulePath];
+             if (sharedKey) {
+-              if (!filesContainingModules[sharedKey]) {
+-                filesContainingModules[sharedKey] = {
+-                  sync: [],
+-                  async: []
+-                };
++              // Track the JS chunk
++              trackAsset(filesMap, sharedKey, fileName, false, 'js');
++              // Handle dynamic imports
++              if (fileData.dynamicImports) {
++                for (const dynamicImport of fileData.dynamicImports) {
++                  const importData = bundle[dynamicImport];
++                  if (importData) {
++                    if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
++                      trackAsset(filesMap, sharedKey, dynamicImport, true, 'css');
++                    } else {
++                      trackAsset(filesMap, sharedKey, dynamicImport, true, 'js');
++                    }
++                  }
++                }
+               }
+-              filesContainingModules[sharedKey].sync.push(fileName);
+-              filesContainingModules[sharedKey].async.push(...(fileData.dynamicImports || []));
+-              findSynchronousImports(fileName, filesContainingModules[sharedKey].sync);
+-              break; // 如果找到匹配，跳出循环
+             }
+           }
+         }
+       }
+-      Object.keys(filesContainingModules).forEach(key => {
+-        filesContainingModules[key].sync = Array.from(new Set(filesContainingModules[key].sync));
+-        filesContainingModules[key].async = Array.from(new Set(filesContainingModules[key].async));
++      // Add all CSS assets to every export
++      addCssAssetsToAllExports(filesMap, allCssAssets);
++      // Final deduplication of all arrays in the filesMap
++      Object.values(filesMap).forEach(assetMaps => {
++        ['js', 'css'].forEach(type => {
++          ['sync', 'async'].forEach(timing => {
++            assetMaps[type][timing] = Array.from(new Set(assetMaps[type][timing]));
++          });
++        });
+       });
+       this.emitFile({
+         type: 'asset',
+         fileName: mfManifestName,
+-        source: JSON.stringify(generateMFManifest(filesContainingModules))
++        source: JSON.stringify(generateMFManifest(filesMap))
+       });
+     }
+   }];
+@@ -1018,23 +1043,17 @@ const Manifest = () => {
+       path: '',
+       type: 'module'
+     };
+-    const remotes = [];
+-    const usedRemotesMap = getUsedRemotesMap();
+-    Object.keys(usedRemotesMap).forEach(remoteKey => {
+-      const usedModules = Array.from(usedRemotesMap[remoteKey]);
+-      usedModules.forEach(moduleKey => {
+-        remotes.push({
+-          federationContainerName: options.remotes[remoteKey].entry,
+-          moduleName: moduleKey.replace(remoteKey, '').replace('/', ''),
+-          alias: remoteKey,
+-          entry: '*'
+-        });
+-      });
+-    });
+-    // @ts-ignore
++    // Process remotes
++    const remotes = Array.from(Object.entries(getUsedRemotesMap())).flatMap(([remoteKey, modules]) => Array.from(modules).map(moduleKey => ({
++      federationContainerName: options.remotes[remoteKey].entry,
++      moduleName: moduleKey.replace(remoteKey, '').replace('/', ''),
++      alias: remoteKey,
++      entry: '*'
++    })));
++    // Process shared dependencies
+     const shared = Array.from(getUsedShares()).map(shareKey => {
+-      var _preloadMap$shareKey, _preloadMap$shareKey2;
+       const shareItem = getNormalizeShareItem(shareKey);
++      const assets = preloadMap[shareKey] || createEmptyAssetMap();
+       return {
+         id: `${name}:${shareKey}`,
+         name: shareKey,
+@@ -1042,42 +1061,42 @@ const Manifest = () => {
+         requiredVersion: shareItem.shareConfig.requiredVersion,
+         assets: {
+           js: {
+-            async: (preloadMap == null || (_preloadMap$shareKey = preloadMap[shareKey]) == null ? void 0 : _preloadMap$shareKey.async) || [],
+-            sync: (preloadMap == null || (_preloadMap$shareKey2 = preloadMap[shareKey]) == null ? void 0 : _preloadMap$shareKey2.sync) || []
++            async: assets.js.async,
++            sync: assets.js.sync
+           },
+           css: {
+-            async: [],
+-            sync: []
++            async: assets.css.async,
++            sync: assets.css.sync
+           }
+         }
+       };
+-    }).filter(item => item);
+-    const exposes = Object.keys(options.exposes).map(key => {
+-      var _preloadMap$sourceFil, _preloadMap$sourceFil2;
+-      // assets(.css, .jpg, .svg等)其他资源, 不重要, 暂未处理
++    }).filter(Boolean);
++    // Process exposed modules
++    const exposes = Object.entries(options.exposes).map(([key, value]) => {
+       const formatKey = key.replace('./', '');
+-      const sourceFile = options.exposes[key].import;
++      const sourceFile = value.import;
++      const assets = preloadMap[sourceFile] || createEmptyAssetMap();
+       return {
+-        id: name + ':' + formatKey,
++        id: `${name}:${formatKey}`,
+         name: formatKey,
+         assets: {
+           js: {
+-            async: (preloadMap == null || (_preloadMap$sourceFil = preloadMap[sourceFile]) == null ? void 0 : _preloadMap$sourceFil.async) || [],
+-            sync: (preloadMap == null || (_preloadMap$sourceFil2 = preloadMap[sourceFile]) == null ? void 0 : _preloadMap$sourceFil2.sync) || []
++            async: assets.js.async,
++            sync: assets.js.sync
+           },
+           css: {
+-            sync: [],
+-            async: []
++            async: assets.css.async,
++            sync: assets.css.sync
+           }
+         },
+         path: key
+       };
+-    }).filter(item => item); // Filter out any null values
+-    const result = {
++    }).filter(Boolean);
++    return {
+       id: name,
+-      name: name,
++      name,
+       metaData: _extends({
+-        name: name,
++        name,
+         type: 'app',
+         buildInfo: {
+           buildVersion: '1.0.0',
+@@ -1088,8 +1107,6 @@ const Manifest = () => {
+         types: {
+           path: '',
+           name: ''
+-          // "zip": "@mf-types.zip",
+-          // "api": "@mf-types.d.ts"
+         },
+         globalName: name,
+         pluginVersion: '0.2.5'
+@@ -1102,7 +1119,6 @@ const Manifest = () => {
+       remotes,
+       exposes
+     };
+-    return result;
+   }
+ };
+ 
+@@ -1203,7 +1219,7 @@ function pluginProxyRemoteEntry () {
+           var _viteConfig$server, _viteConfig$server2;
+           const host = typeof ((_viteConfig$server = viteConfig.server) == null ? void 0 : _viteConfig$server.host) === 'string' && viteConfig.server.host !== '0.0.0.0' ? viteConfig.server.host : 'localhost';
+           return `
+-          const origin = (window && ${!options.ignoreOrigin}) ? window.origin : "//${host}:${(_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port}"
++          const origin = window ? window.origin : "//${host}:${(_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port}"
+           const remoteEntryPromise = await import(origin + "${viteConfig.base + options.filename}")
+           // __tla only serves as a hack for vite-plugin-top-level-await. 
+           Promise.resolve(remoteEntryPromise)
+diff --git a/lib/index.umd.js b/lib/index.umd.js
+index 492c3c9fc35f244a5f4d1eb7f9f305b2da93eac6..8a22556a6ba355fbf55a863d749867506395e064 100644
+--- a/lib/index.umd.js
++++ b/lib/index.umd.js
+@@ -340,12 +340,9 @@
+       var potentialPackageJsonDir = path__namespace.dirname(sharedPath);
+       var rootDir = path__namespace.parse(potentialPackageJsonDir).root;
+       while (path__namespace.parse(potentialPackageJsonDir).base !== 'node_modules' && potentialPackageJsonDir !== rootDir) {
+-        var potentialPackageJsonPath = path__namespace.join(potentialPackageJsonDir, 'package.json');
+-        if (fs__namespace.existsSync(potentialPackageJsonPath)) {
+-          var potentialPackageJson = require(potentialPackageJsonPath);
+-          if (typeof potentialPackageJson == 'object' && potentialPackageJson !== null && typeof potentialPackageJson.version === 'string' && potentialPackageJson.name === sharedName) {
+-            return potentialPackageJson.version;
+-          }
++        var potentialPackageJson = path__namespace.join(potentialPackageJsonDir, 'package.json');
++        if (fs__namespace.existsSync(potentialPackageJson)) {
++          return require(potentialPackageJson).version;
+         }
+         potentialPackageJsonDir = path__namespace.dirname(potentialPackageJsonDir);
+       }
+@@ -446,8 +443,7 @@
+       dev: options.dev,
+       dts: options.dts,
+       getPublicPath: options.getPublicPath,
+-      shareStrategy: options.shareStrategy || 'version-first',
+-      ignoreOrigin: options.ignoreOrigin || false
++      shareStrategy: options.shareStrategy || 'version-first'
+     };
+   }
+ 
+@@ -762,6 +758,41 @@
+     var _command;
+     var _originalConfigBase;
+     var viteConfig;
++    // Helper function to initialize asset maps
++    var createEmptyAssetMap = function createEmptyAssetMap() {
++      return {
++        js: {
++          sync: [],
++          async: []
++        },
++        css: {
++          sync: [],
++          async: []
++        }
++      };
++    };
++    // Helper function to track assets with deduplication
++    var trackAsset = function trackAsset(map, key, fileName, isAsync, type) {
++      if (!map[key]) {
++        map[key] = createEmptyAssetMap();
++      }
++      var target = isAsync ? map[key][type].async : map[key][type].sync;
++      if (!target.includes(fileName)) {
++        target.push(fileName);
++      }
++    };
++    // Helper function to check if a file is CSS
++    var isCSSFile = function isCSSFile(fileName) {
++      return fileName.endsWith('.css') || fileName.endsWith('.scss') || fileName.endsWith('.less');
++    };
++    // Helper function to add CSS assets to all exports
++    var addCssAssetsToAllExports = function addCssAssetsToAllExports(filesMap, cssAssets) {
++      Object.keys(filesMap).forEach(function (key) {
++        cssAssets.forEach(function (cssAsset) {
++          trackAsset(filesMap, key, cssAsset, false, 'css');
++        });
++      });
++    };
+     return [{
+       name: 'module-federation-manifest',
+       apply: 'serve',
+@@ -770,12 +801,11 @@
+       },
+       configureServer: function configureServer(server) {
+         server.middlewares.use(function (req, res, next) {
+-          var _req$url;
+           if (!mfManifestName) {
+             next();
+             return;
+           }
+-          if (((_req$url = req.url) == null ? void 0 : _req$url.replace(/\?.*/, '')) === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
++          if (req.url === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
+             res.setHeader('Content-Type', 'application/json');
+             res.setHeader('Access-Control-Allow-Origin', '*');
+             res.end(JSON.stringify(_extends({}, generateMFManifest({}), {
+@@ -818,7 +848,9 @@
+       config: function config(_config, _ref) {
+         var command = _ref.command;
+         if (!_config.build) _config.build = {};
+-        if (!_config.build.manifest) _config.build.manifest = _config.build.manifest || !!manifestOptions;
++        if (!_config.build.manifest) {
++          _config.build.manifest = _config.build.manifest || !!manifestOptions;
++        }
+         _command = command;
+         _originalConfigBase = _config.base;
+       },
+@@ -834,38 +866,10 @@
+       generateBundle: function generateBundle(options, bundle) {
+         try {
+           var _this = this;
+-          // 递归查找模块的同步导入文件
+-          var _findSynchronousImports = function findSynchronousImports(fileName, array) {
+-            var fileData = bundle[fileName];
+-            if (fileData && fileData.type === 'chunk') {
+-              array.push(fileName); // 将当前文件加入预加载列表
+-              // 遍历该文件的同步导入文件
+-              fileData.imports.forEach(function (importedFile) {
+-                if (array.indexOf(importedFile) === -1) {
+-                  _findSynchronousImports(importedFile, array); // 递归查找同步导入的文件
+-                }
+-              });
+-            }
+-          };
+           if (!mfManifestName) return Promise.resolve();
+-          var exposesModules = Object.keys(mfOptions.exposes).map(function (item) {
+-            return mfOptions.exposes[item]["import"];
+-          }); // 获取你提供的 moduleIds
+-          var filesContainingModules = {};
+-          // 帮助函数：检查模块路径是否匹配
+-          var isModuleMatched = function isModuleMatched(relativeModulePath, preloadModule) {
+-            // 先尝试直接匹配
+-            if (relativeModulePath === preloadModule) return true;
+-            // 如果 preloadModule 没有后缀，尝试添加可能的后缀进行匹配
+-            for (var _iterator = _createForOfIteratorHelperLoose(extensions), _step; !(_step = _iterator()).done;) {
+-              var ext = _step.value;
+-              if (relativeModulePath === "" + preloadModule + ext) {
+-                return true;
+-              }
+-            }
+-            return false;
+-          };
+-          // 遍历打包生成的每个文件
++          var filesMap = {};
++          var allCssAssets = new Set();
++          // Find remoteEntry file
+           for (var _i = 0, _Object$entries = Object.entries(bundle); _i < _Object$entries.length; _i++) {
+             var _Object$entries$_i = _Object$entries[_i],
+               fileName = _Object$entries$_i[0],
+@@ -873,34 +877,58 @@
+             if (mfOptions.filename.replace(/[\[\]]/g, '_').replace(/\.[^/.]+$/, '') === fileData.name || fileData.name === 'remoteEntry') {
+               remoteEntryFile = fileData.fileName;
+             }
+-            if (fileData.type === 'chunk') {
+-              // 遍历该文件的所有模块
+-              for (var _i2 = 0, _Object$keys = Object.keys(fileData.modules); _i2 < _Object$keys.length; _i2++) {
+-                var modulePath = _Object$keys[_i2];
+-                // 将绝对路径转换为相对于 Vite root 的相对路径
++            // Collect all CSS assets
++            if (fileData.type === 'asset' && isCSSFile(fileName)) {
++              allCssAssets.add(fileName);
++            }
++          }
++          var exposesModules = Object.keys(mfOptions.exposes).map(function (item) {
++            return mfOptions.exposes[item]["import"];
++          });
++          // Process modules and their associated assets
++          for (var _i2 = 0, _Object$entries2 = Object.entries(bundle); _i2 < _Object$entries2.length; _i2++) {
++            var _Object$entries2$_i = _Object$entries2[_i2],
++              _fileName = _Object$entries2$_i[0],
++              _fileData = _Object$entries2$_i[1];
++            if (_fileData.type === 'chunk') {
++              var _loop = function _loop() {
++                var modulePath = _Object$keys[_i3];
+                 var relativeModulePath = path.relative(root, modulePath);
+-                // 检查模块是否在 preloadModules 列表中
+-                for (var _iterator2 = _createForOfIteratorHelperLoose(exposesModules), _step2; !(_step2 = _iterator2()).done;) {
+-                  var preloadModule = _step2.value;
+-                  var formatPreloadModule = preloadModule.replace('./', '');
+-                  if (isModuleMatched(relativeModulePath, formatPreloadModule)) {
+-                    var _filesContainingModul;
+-                    if (!filesContainingModules[preloadModule]) {
+-                      filesContainingModules[preloadModule] = {
+-                        sync: [],
+-                        async: []
+-                      };
++                // Handle exposed modules
++                var _loop2 = function _loop2() {
++                  var exposeModule = _step.value;
++                  var formatExposeModule = exposeModule.replace('./', '');
++                  if (relativeModulePath === formatExposeModule || extensions.some(function (ext) {
++                    return relativeModulePath === "" + formatExposeModule + ext;
++                  })) {
++                    // Track the JS chunk
++                    trackAsset(filesMap, exposeModule, _fileName, false, 'js');
++                    // Handle dynamic imports
++                    if (_fileData.dynamicImports) {
++                      for (var _iterator2 = _createForOfIteratorHelperLoose(_fileData.dynamicImports), _step2; !(_step2 = _iterator2()).done;) {
++                        var dynamicImport = _step2.value;
++                        var importData = bundle[dynamicImport];
++                        if (importData) {
++                          if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
++                            trackAsset(filesMap, exposeModule, dynamicImport, true, 'css');
++                          } else {
++                            trackAsset(filesMap, exposeModule, dynamicImport, true, 'js');
++                          }
++                        }
++                      }
+                     }
+-                    console.log(Object.keys(fileData.modules));
+-                    filesContainingModules[preloadModule].sync.push(fileName);
+-                    (_filesContainingModul = filesContainingModules[preloadModule].async).push.apply(_filesContainingModul, fileData.dynamicImports || []);
+-                    _findSynchronousImports(fileName, filesContainingModules[preloadModule].sync);
+-                    break; // 如果找到匹配，跳出循环
+                   }
++                };
++                for (var _iterator = _createForOfIteratorHelperLoose(exposesModules), _step; !(_step = _iterator()).done;) {
++                  _loop2();
+                 }
++              };
++              for (var _i3 = 0, _Object$keys = Object.keys(_fileData.modules); _i3 < _Object$keys.length; _i3++) {
++                _loop();
+               }
+             }
+           }
++          // Process shared modules
+           var fileToShareKey = {};
+           return Promise.resolve(Promise.all(Array.from(getUsedShares()).map(function (shareKey) {
+             try {
+@@ -912,40 +940,49 @@
+               return Promise.reject(e);
+             }
+           }))).then(function () {
+-            // 遍历打包生成的每个文件
+-            for (var _i3 = 0, _Object$entries2 = Object.entries(bundle); _i3 < _Object$entries2.length; _i3++) {
+-              var _Object$entries2$_i = _Object$entries2[_i3],
+-                _fileName = _Object$entries2$_i[0],
+-                _fileData = _Object$entries2$_i[1];
+-              if (_fileData.type === 'chunk') {
+-                // 遍历该文件的所有模块
+-                for (var _i4 = 0, _Object$keys2 = Object.keys(_fileData.modules); _i4 < _Object$keys2.length; _i4++) {
+-                  var _modulePath = _Object$keys2[_i4];
+-                  var sharedKey = fileToShareKey[_modulePath];
++            for (var _i4 = 0, _Object$entries3 = Object.entries(bundle); _i4 < _Object$entries3.length; _i4++) {
++              var _Object$entries3$_i = _Object$entries3[_i4],
++                _fileName2 = _Object$entries3$_i[0],
++                _fileData2 = _Object$entries3$_i[1];
++              if (_fileData2.type === 'chunk') {
++                for (var _i5 = 0, _Object$keys2 = Object.keys(_fileData2.modules); _i5 < _Object$keys2.length; _i5++) {
++                  var modulePath = _Object$keys2[_i5];
++                  var sharedKey = fileToShareKey[modulePath];
+                   if (sharedKey) {
+-                    var _filesContainingModul2;
+-                    if (!filesContainingModules[sharedKey]) {
+-                      filesContainingModules[sharedKey] = {
+-                        sync: [],
+-                        async: []
+-                      };
++                    // Track the JS chunk
++                    trackAsset(filesMap, sharedKey, _fileName2, false, 'js');
++                    // Handle dynamic imports
++                    if (_fileData2.dynamicImports) {
++                      for (var _iterator3 = _createForOfIteratorHelperLoose(_fileData2.dynamicImports), _step3; !(_step3 = _iterator3()).done;) {
++                        var dynamicImport = _step3.value;
++                        var importData = bundle[dynamicImport];
++                        if (importData) {
++                          if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
++                            trackAsset(filesMap, sharedKey, dynamicImport, true, 'css');
++                          } else {
++                            trackAsset(filesMap, sharedKey, dynamicImport, true, 'js');
++                          }
++                        }
++                      }
+                     }
+-                    filesContainingModules[sharedKey].sync.push(_fileName);
+-                    (_filesContainingModul2 = filesContainingModules[sharedKey].async).push.apply(_filesContainingModul2, _fileData.dynamicImports || []);
+-                    _findSynchronousImports(_fileName, filesContainingModules[sharedKey].sync);
+-                    break; // 如果找到匹配，跳出循环
+                   }
+                 }
+               }
+             }
+-            Object.keys(filesContainingModules).forEach(function (key) {
+-              filesContainingModules[key].sync = Array.from(new Set(filesContainingModules[key].sync));
+-              filesContainingModules[key].async = Array.from(new Set(filesContainingModules[key].async));
++            // Add all CSS assets to every export
++            // Final deduplication of all arrays in the filesMap
++            addCssAssetsToAllExports(filesMap, allCssAssets);
++            Object.values(filesMap).forEach(function (assetMaps) {
++              ['js', 'css'].forEach(function (type) {
++                ['sync', 'async'].forEach(function (timing) {
++                  assetMaps[type][timing] = Array.from(new Set(assetMaps[type][timing]));
++                });
++              });
+             });
+             _this.emitFile({
+               type: 'asset',
+               fileName: mfManifestName,
+-              source: JSON.stringify(generateMFManifest(filesContainingModules))
++              source: JSON.stringify(generateMFManifest(filesMap))
+             });
+           });
+         } catch (e) {
+@@ -961,23 +998,23 @@
+         path: '',
+         type: 'module'
+       };
+-      var remotes = [];
+-      var usedRemotesMap = getUsedRemotesMap();
+-      Object.keys(usedRemotesMap).forEach(function (remoteKey) {
+-        var usedModules = Array.from(usedRemotesMap[remoteKey]);
+-        usedModules.forEach(function (moduleKey) {
+-          remotes.push({
++      // Process remotes
++      var remotes = Array.from(Object.entries(getUsedRemotesMap())).flatMap(function (_ref2) {
++        var remoteKey = _ref2[0],
++          modules = _ref2[1];
++        return Array.from(modules).map(function (moduleKey) {
++          return {
+             federationContainerName: options.remotes[remoteKey].entry,
+             moduleName: moduleKey.replace(remoteKey, '').replace('/', ''),
+             alias: remoteKey,
+             entry: '*'
+-          });
++          };
+         });
+       });
+-      // @ts-ignore
++      // Process shared dependencies
+       var shared = Array.from(getUsedShares()).map(function (shareKey) {
+-        var _preloadMap$shareKey, _preloadMap$shareKey2;
+         var shareItem = getNormalizeShareItem(shareKey);
++        var assets = preloadMap[shareKey] || createEmptyAssetMap();
+         return {
+           id: name + ":" + shareKey,
+           name: shareKey,
+@@ -985,42 +1022,40 @@
+           requiredVersion: shareItem.shareConfig.requiredVersion,
+           assets: {
+             js: {
+-              async: (preloadMap == null || (_preloadMap$shareKey = preloadMap[shareKey]) == null ? void 0 : _preloadMap$shareKey.async) || [],
+-              sync: (preloadMap == null || (_preloadMap$shareKey2 = preloadMap[shareKey]) == null ? void 0 : _preloadMap$shareKey2.sync) || []
++              async: assets.js.async,
++              sync: assets.js.sync
+             },
+             css: {
+-              async: [],
+-              sync: []
++              async: assets.css.async,
++              sync: assets.css.sync
+             }
+           }
+         };
+-      }).filter(function (item) {
+-        return item;
+-      });
+-      var exposes = Object.keys(options.exposes).map(function (key) {
+-        var _preloadMap$sourceFil, _preloadMap$sourceFil2;
+-        // assets(.css, .jpg, .svg等)其他资源, 不重要, 暂未处理
++      }).filter(Boolean);
++      // Process exposed modules
++      var exposes = Object.entries(options.exposes).map(function (_ref3) {
++        var key = _ref3[0],
++          value = _ref3[1];
+         var formatKey = key.replace('./', '');
+-        var sourceFile = options.exposes[key]["import"];
++        var sourceFile = value["import"];
++        var assets = preloadMap[sourceFile] || createEmptyAssetMap();
+         return {
+-          id: name + ':' + formatKey,
++          id: name + ":" + formatKey,
+           name: formatKey,
+           assets: {
+             js: {
+-              async: (preloadMap == null || (_preloadMap$sourceFil = preloadMap[sourceFile]) == null ? void 0 : _preloadMap$sourceFil.async) || [],
+-              sync: (preloadMap == null || (_preloadMap$sourceFil2 = preloadMap[sourceFile]) == null ? void 0 : _preloadMap$sourceFil2.sync) || []
++              async: assets.js.async,
++              sync: assets.js.sync
+             },
+             css: {
+-              sync: [],
+-              async: []
++              async: assets.css.async,
++              sync: assets.css.sync
+             }
+           },
+           path: key
+         };
+-      }).filter(function (item) {
+-        return item;
+-      }); // Filter out any null values
+-      var result = {
++      }).filter(Boolean);
++      return {
+         id: name,
+         name: name,
+         metaData: _extends({
+@@ -1035,8 +1070,6 @@
+           types: {
+             path: '',
+             name: ''
+-            // "zip": "@mf-types.zip",
+-            // "api": "@mf-types.d.ts"
+           },
+           globalName: name,
+           pluginVersion: '0.2.5'
+@@ -1049,7 +1082,6 @@
+         remotes: remotes,
+         exposes: exposes
+       };
+-      return result;
+     }
+   };
+ 
+@@ -1153,7 +1185,7 @@
+             if (_command === 'serve') {
+               var _viteConfig$server, _viteConfig$server2;
+               var host = typeof ((_viteConfig$server = viteConfig.server) == null ? void 0 : _viteConfig$server.host) === 'string' && viteConfig.server.host !== '0.0.0.0' ? viteConfig.server.host : 'localhost';
+-              return Promise.resolve("\n          const origin = (window && " + !options.ignoreOrigin + ") ? window.origin : \"//" + host + ":" + ((_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port) + "\"\n          const remoteEntryPromise = await import(origin + \"" + (viteConfig.base + options.filename) + "\")\n          // __tla only serves as a hack for vite-plugin-top-level-await. \n          Promise.resolve(remoteEntryPromise)\n          .then(remoteEntry => {\n            return Promise.resolve(remoteEntry.__tla)\n              .then(remoteEntry.init).catch(remoteEntry.init)\n          })\n          ");
++              return Promise.resolve("\n          const origin = window ? window.origin : \"//" + host + ":" + ((_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port) + "\"\n          const remoteEntryPromise = await import(origin + \"" + (viteConfig.base + options.filename) + "\")\n          // __tla only serves as a hack for vite-plugin-top-level-await. \n          Promise.resolve(remoteEntryPromise)\n          .then(remoteEntry => {\n            return Promise.resolve(remoteEntry.__tla)\n              .then(remoteEntry.init).catch(remoteEntry.init)\n          })\n          ");
+             }
+             return Promise.resolve(code);
+           }
+diff --git a/lib/plugins/pluginMFManifest.d.ts b/lib/plugins/pluginMFManifest.d.ts
+index f3d07d0414f2ef5f02237d8faf5c9e11fb4f025a..b9748a39356f1ff9177e846109bdf08c4ddaf154 100644
+--- a/lib/plugins/pluginMFManifest.d.ts
++++ b/lib/plugins/pluginMFManifest.d.ts
+@@ -1,3 +1,3 @@
+-import { Manifest, Plugin } from 'vite';
++import { Plugin } from 'vite';
+ declare const Manifest: () => Plugin[];
+ export default Manifest;
+diff --git a/lib/utils/normalizeModuleFederationOptions.d.ts b/lib/utils/normalizeModuleFederationOptions.d.ts
+index e60463ba0478f409a91440388030cdb10957ff49..f528339707a1764c3bb7a70a2e5d9751a2de711f 100644
+--- a/lib/utils/normalizeModuleFederationOptions.d.ts
++++ b/lib/utils/normalizeModuleFederationOptions.d.ts
+@@ -51,7 +51,6 @@ export type ModuleFederationOptions = {
+     dev?: boolean | PluginDevOptions;
+     dts?: boolean | PluginDtsOptions;
+     shareStrategy?: ShareStrategy;
+-    ignoreOrigin?: boolean;
+ };
+ export interface NormalizedModuleFederationOptions {
+     exposes: Record<string, ExposesItem>;
+@@ -69,7 +68,6 @@ export interface NormalizedModuleFederationOptions {
+     dts?: boolean | PluginDtsOptions;
+     shareStrategy: ShareStrategy;
+     getPublicPath?: string;
+-    ignoreOrigin?: boolean;
+ }
+ interface PluginDevOptions {
+     disableLiveReload?: boolean;

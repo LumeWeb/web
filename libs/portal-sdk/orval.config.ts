@@ -1,18 +1,13 @@
-import { defineConfig } from 'orval';
+import { defineConfig } from "orval";
 
 export default defineConfig({
-    account: {
-        input: './src/account/swagger.yaml',
-        output: {
-            mode: 'split',
-            workspace: "./src/account/generated",
-            target: 'openapi.ts',
-            override: {
-                mutator: {
-                    path: '../axios.ts',
-                    name: 'customInstance',
-                },
-            },
-        },
+  account: {
+    input: "./src/account/swagger.yaml",
+    output: {
+      client: "fetch",
+      mode: "split",
+      target: "openapi.ts",
+      workspace: "./src/account/generated",
     },
+  },
 });

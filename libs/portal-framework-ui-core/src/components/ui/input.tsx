@@ -1,0 +1,54 @@
+import { EyeNoneIcon, EyeOpenIcon } from "@radix-ui/react-icons";
+import * as React from "react";
+
+import { cn } from "../../lib/utils";
+
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  after?: React.ReactNode;
+  fullWidth?: boolean;
+  leftIcon?: React.ReactNode;
+}
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, fullWidth, leftIcon, type, ...props }, ref) => {
+    const [showPassword, setShowPassword] = React.useState<boolean>(false);
+    const [mask, setMask] = React.useState<boolean>(false);
+    const toggleShowPassword = () => {
+      setShowPassword((show) => !show);
+      setMask((mask) => !mask);
+    };
+    return (
+      <div className={`relative ${fullWidth ? "w-full" : ""}`}>
+        {leftIcon && (
+          <div className="absolute left-4 top-1/2 -translate-y-1/2">
+            {leftIcon}
+          </div>
+        )}
+        <input
+          className={cn(
+            "flex h-14 w-full bg-secondary rounded-md border border-input px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-input-placeholder focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+            className,
+            leftIcon && "pl-10",
+          )}
+          ref={ref}
+          type={type && !mask ? type : "text"}
+          {...props}
+        />
+        {type === "password" ? (
+          <button
+            className="absolute right-4 top-5 text-ring"
+            onClick={toggleShowPassword}
+            onKeyDown={toggleShowPassword}
+            type="button">
+            {showPassword ? <EyeOpenIcon /> : <EyeNoneIcon />}
+          </button>
+        ) : null}
+        {props.after}
+      </div>
+    );
+  },
+);
+Input.displayName = "Input";
+
+export { Input };
