@@ -1,4 +1,4 @@
-package portal_admin
+package portal_plugin_admin
 
 import (
 	"embed"
@@ -9,9 +9,8 @@ import (
 //go:embed all:build/*
 var appFs embed.FS
 
-func Handler() http.Handler {
+func GetFS() http.Handler {
 	appFiles, _ := fs.Sub(appFs, "build")
-	appServ := http.FileServer(http.FS(appFiles))
 
-	return appServ
+	return appFiles
 }
