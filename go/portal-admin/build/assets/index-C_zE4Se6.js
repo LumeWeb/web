@@ -1,6 +1,6 @@
-import { a as admin__loadShare__react__loadShare__ } from "./admin__loadShare__react__loadShare__-Dmjt9gIa.js";
-import { s as shimExports } from "./index-Cm5-czH0.js";
-import "./_commonjsHelpers-CcAunmGO.js";
+import { a as admin__loadShare__react__loadShare__ } from "./admin__loadShare__react__loadShare__-C1ovXSRa.js";
+import { s as shimExports } from "./index-C2rzGpY6.js";
+import "./_commonjsHelpers-DWwsNxpa.js";
 import "./admin__mf_v__runtimeInit__mf_v__-CrLwvomy.js";
 class Subscribable {
   constructor() {
@@ -784,6 +784,11 @@ class Query extends Removable {
         this.setOptions(observer.options);
       }
     }
+    {
+      if (!Array.isArray(this.options.queryKey)) {
+        this.logger.error("As of v4, queryKey needs to be an Array. If you are using a string like 'repoData', please change it to an Array, e.g. ['repoData']");
+      }
+    }
     const abortController = getAbortController();
     const queryFnContext = {
       queryKey: this.queryKey,
@@ -838,6 +843,9 @@ class Query extends Removable {
         var _this$cache$config$on, _this$cache$config, _this$cache$config$on2, _this$cache$config2;
         (_this$cache$config$on = (_this$cache$config = this.cache.config).onError) == null ? void 0 : _this$cache$config$on.call(_this$cache$config, error, this);
         (_this$cache$config$on2 = (_this$cache$config2 = this.cache.config).onSettled) == null ? void 0 : _this$cache$config$on2.call(_this$cache$config2, this.state.data, error, this);
+        {
+          this.logger.error(error);
+        }
       }
       if (!this.isFetchingOptimistic) {
         this.scheduleGc();
@@ -850,6 +858,9 @@ class Query extends Removable {
       onSuccess: (data) => {
         var _this$cache$config$on3, _this$cache$config3, _this$cache$config$on4, _this$cache$config4;
         if (typeof data === "undefined") {
+          {
+            this.logger.error("Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: " + this.queryHash);
+          }
           onError(new Error(this.queryHash + " data is undefined"));
           return;
         }
@@ -1220,7 +1231,9 @@ class Mutation extends Removable {
       try {
         var _this$mutationCache$c7, _this$mutationCache$c8, _this$options$onError, _this$options4, _this$mutationCache$c9, _this$mutationCache$c10, _this$options$onSettl2, _this$options5;
         await ((_this$mutationCache$c7 = (_this$mutationCache$c8 = this.mutationCache.config).onError) == null ? void 0 : _this$mutationCache$c7.call(_this$mutationCache$c8, error, this.state.variables, this.state.context, this));
-        if (false) ;
+        if (true) {
+          this.logger.error(error);
+        }
         await ((_this$options$onError = (_this$options4 = this.options).onError) == null ? void 0 : _this$options$onError.call(_this$options4, error, this.state.variables, this.state.context));
         await ((_this$mutationCache$c9 = (_this$mutationCache$c10 = this.mutationCache.config).onSettled) == null ? void 0 : _this$mutationCache$c9.call(_this$mutationCache$c10, void 0, error, this.state.variables, this.state.context, this));
         await ((_this$options$onSettl2 = (_this$options5 = this.options).onSettled) == null ? void 0 : _this$options$onSettl2.call(_this$options5, void 0, error, this.state.variables, this.state.context));
@@ -1506,6 +1519,9 @@ class QueryClient {
     this.queryDefaults = [];
     this.mutationDefaults = [];
     this.mountCount = 0;
+    if (config.logger) {
+      this.logger.error("Passing a custom logger has been deprecated and will be removed in the next major version.");
+    }
   }
   mount() {
     this.mountCount++;
@@ -1704,6 +1720,12 @@ class QueryClient {
       return void 0;
     }
     const firstMatchingDefaults = this.queryDefaults.find((x) => partialMatchKey(queryKey, x.queryKey));
+    {
+      const matchingDefaults = this.queryDefaults.filter((x) => partialMatchKey(queryKey, x.queryKey));
+      if (matchingDefaults.length > 1) {
+        this.logger.error("[QueryClient] Several query defaults match with key '" + JSON.stringify(queryKey) + "'. The first matching query defaults are used. Please check how query defaults are registered. Order does matter here. cf. https://react-query.tanstack.com/reference/QueryClient#queryclientsetquerydefaults.");
+      }
+    }
     return firstMatchingDefaults == null ? void 0 : firstMatchingDefaults.defaultOptions;
   }
   setMutationDefaults(mutationKey, options) {
@@ -1722,6 +1744,12 @@ class QueryClient {
       return void 0;
     }
     const firstMatchingDefaults = this.mutationDefaults.find((x) => partialMatchKey(mutationKey, x.mutationKey));
+    {
+      const matchingDefaults = this.mutationDefaults.filter((x) => partialMatchKey(mutationKey, x.mutationKey));
+      if (matchingDefaults.length > 1) {
+        this.logger.error("[QueryClient] Several mutation defaults match with key '" + JSON.stringify(mutationKey) + "'. The first matching mutation defaults are used. Please check how mutation defaults are registered. Order does matter here. cf. https://react-query.tanstack.com/reference/QueryClient#queryclientsetmutationdefaults.");
+      }
+    }
     return firstMatchingDefaults == null ? void 0 : firstMatchingDefaults.defaultOptions;
   }
   defaultQueryOptions(options) {
@@ -1805,6 +1833,9 @@ class QueryObserver extends Subscribable {
     const prevOptions = this.options;
     const prevQuery = this.currentQuery;
     this.options = this.client.defaultQueryOptions(options);
+    if (typeof (options == null ? void 0 : options.isDataEqual) !== "undefined") {
+      this.client.getLogger().error("The isDataEqual option has been deprecated and will be removed in the next major version. You can achieve the same functionality by passing a function as the structuralSharing option");
+    }
     if (!shallowEqualObjects(prevOptions, this.options)) {
       this.client.getQueryCache().notify({
         type: "observerOptionsUpdated",
@@ -1997,6 +2028,9 @@ class QueryObserver extends Subscribable {
           this.selectResult = data;
           this.selectError = null;
         } catch (selectError) {
+          {
+            this.client.getLogger().error(selectError);
+          }
           this.selectError = selectError;
         }
       }
@@ -2014,6 +2048,9 @@ class QueryObserver extends Subscribable {
             placeholderData = options.select(placeholderData);
             this.selectError = null;
           } catch (selectError) {
+            {
+              this.client.getLogger().error(selectError);
+            }
             this.selectError = selectError;
           }
         }
@@ -2622,6 +2659,9 @@ const QueryClientProvider = ({
       client.unmount();
     };
   }, [client]);
+  if (contextSharing) {
+    client.getLogger().error("The contextSharing option has been deprecated and will be removed in the next major version");
+  }
   const Context = getQueryClientContext(context, contextSharing);
   return /* @__PURE__ */ admin__loadShare__react__loadShare__.createElement(QueryClientSharingContext.Provider, {
     value: !context && contextSharing
