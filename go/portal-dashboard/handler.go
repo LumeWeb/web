@@ -8,7 +8,7 @@ import (
 //go:embed all:build/*
 var appFs embed.FS
 
-func FS() fs.FS {
+func GetFS() fs.FS {
 	appFiles, _ := fs.Sub(appFs, "build")
 
 	return appFiles
