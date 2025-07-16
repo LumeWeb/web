@@ -196,6 +196,9 @@ importers:
       '@tanstack/react-query':
         specifier: 4.36.1
         version: 4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      events:
+        specifier: ^3.3.0
+        version: 3.3.0
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -940,6 +943,76 @@ importers:
       zod:
         specifier: 3.24.2
         version: 3.24.2
+
+  libs/portal-plugin-core:
+    dependencies:
+      '@conform-to/react':
+        specifier: ^1.2.2
+        version: 1.6.0(react@18.3.1)
+      '@conform-to/zod':
+        specifier: ^1.2.2
+        version: 1.6.0(zod@3.24.2)
+      '@hookform/resolvers':
+        specifier: ^3.9.0
+        version: 3.10.0(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))
+      '@lumeweb/advanced-rest-provider':
+        specifier: workspace:*
+        version: link:../advanced-rest
+      '@lumeweb/portal-framework-core':
+        specifier: workspace:*
+        version: link:../portal-framework-core
+      '@lumeweb/portal-framework-ui':
+        specifier: workspace:*
+        version: link:../portal-framework-ui
+      '@lumeweb/portal-framework-ui-core':
+        specifier: workspace:*
+        version: link:../portal-framework-ui-core
+      '@lumeweb/portal-sdk':
+        specifier: workspace:*
+        version: link:../portal-sdk
+      '@refinedev/react-hook-form':
+        specifier: ^4.9.3
+        version: 4.9.3(patch_hash=c5b4fa6f81d325769cf3c714ca76931058d7cc1961a3afc877e3a15d17e907a2)(@refinedev/core@4.57.9(patch_hash=7e7c212813579c7696d7060b58a761cc3c219b919122096e55996f3ed8f3069e)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))(react@18.3.1)
+      '@t3-oss/env-core':
+        specifier: ^0.12.0
+        version: 0.12.0(typescript@5.8.3)(zod@3.24.2)
+      '@tanstack/react-query':
+        specifier: 4.36.1
+        version: 4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@tanstack/react-table':
+        specifier: ^8.21.2
+        version: 8.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      otpauth:
+        specifier: ^9.3.4
+        version: 9.4.0
+      qrcode:
+        specifier: ^1.5.4
+        version: 1.5.4
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+      react-hook-form:
+        specifier: 7.54.0
+        version: 7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1)
+      react-icons:
+        specifier: ^5.3.0
+        version: 5.5.0(react@18.3.1)
+      react-router:
+        specifier: ^7
+        version: 7.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      zod:
+        specifier: 3.24.2
+        version: 3.24.2
+    devDependencies:
+      '@module-federation/bridge-react':
+        specifier: ^0.8.10
+        version: 0.8.12(patch_hash=24e5a7a8eea712aadb8f904acbf6d777793c1a227eeffcbedff1ee4c99e1f5c5)(react-dom@18.3.1(react@18.3.1))(react-router-dom@7.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+      vite-tsconfig-paths:
+        specifier: ^4.3.2
+        version: 4.3.2(typescript@5.8.3)(vite@6.1.6(@types/node@22.15.20)(jiti@2.4.2)(yaml@2.8.0))
 
   libs/portal-plugin-dashboard:
     dependencies:
@@ -5634,6 +5707,10 @@ packages:
 
   eventemitter3@5.0.1:
     resolution: {integrity: sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==}
+
+  events@3.3.0:
+    resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
+    engines: {node: '>=0.8.x'}
 
   execa@0.7.0:
     resolution: {integrity: sha512-RztN09XglpYI7aBBrJCPW95jEH7YF1UEPOoX9yDhUTPdp7mK+CQvnLTuD10BNXZ3byLTu2uehZ8EcKT/4CGiFw==}
@@ -14702,6 +14779,8 @@ snapshots:
   eventemitter3@4.0.7: {}
 
   eventemitter3@5.0.1: {}
+
+  events@3.3.0: {}
 
   execa@0.7.0:
     dependencies:
