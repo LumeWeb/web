@@ -3,15 +3,13 @@ package portal_admin
 import (
 	"embed"
 	"io/fs"
-	"net/http"
 )
 
 //go:embed all:build/*
 var appFs embed.FS
 
-func Handler() http.Handler {
+func GetFS() fs.FS {
 	appFiles, _ := fs.Sub(appFs, "build")
-	appServ := http.FileServer(http.FS(appFiles))
 
-	return appServ
+	return appFiles
 }
