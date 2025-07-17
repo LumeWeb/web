@@ -14,50 +14,6 @@ const routes = [
     path: "/dashboard",
   },
   {
-    children: [
-      {
-        component: "Account",
-        id: "account_index",
-        index: true,
-        path: "",
-      },
-      {
-        component: "Subscription",
-        id: "account_subscription",
-        navigation: {
-          label: "Subscription",
-          order: 2,
-        },
-        path: "subscription",
-      },
-      {
-        component: "ApiKeys",
-        id: "account_api_keys",
-        navigation: {
-          label: "API Keys",
-          order: 3,
-        },
-        path: "api-keys",
-      },
-      {
-        component: "Security",
-        id: "account_security",
-        navigation: {
-          label: "Security",
-          order: 4,
-        },
-        path: "security",
-      },
-    ],
-    component: "AccountLayout",
-    id: "account_layout",
-    navigation: {
-      label: "Account",
-      order: 1,
-    },
-    path: "account",
-  },
-  {
     component: "AccountVerify",
     id: "account_verify",
     path: "account/verify",
@@ -94,11 +50,6 @@ const routes = [
     component: "LoginOtp",
     id: "otp_login",
     path: "otp",
-  },
-  {
-    component: "UploadsIndex",
-    id: "uploads_index",
-    path: "uploads",
   },
 ];
 

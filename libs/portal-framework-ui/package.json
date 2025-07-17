@@ -34,7 +34,7 @@
   },
   "peerDependencies": {
     "@conform-to/react": "^1.6.0",
-    "@hookform/resolvers": "^5.0.1",
+    "@hookform/resolvers": "5.0.1",
     "@lexical/code": "^0.31.1",
     "@lexical/html": "^0.31.1",
     "@lexical/link": "^0.31.1",
