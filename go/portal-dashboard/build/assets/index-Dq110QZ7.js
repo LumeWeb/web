@@ -1,15 +1,3 @@
-import { d as dashboard__mf_v__runtimeInit__mf_v__, i as index_cjs } from "./dashboard__mf_v__runtimeInit__mf_v__-C0jw-Lkn.js";
-const { loadShare } = index_cjs;
-const { initPromise } = dashboard__mf_v__runtimeInit__mf_v__;
-const res = initPromise.then((_) => loadShare("react-router", {
-  customShareInfo: { shareConfig: {
-    singleton: true,
-    strictVersion: false,
-    requiredVersion: "^7.6.0"
-  } }
-}));
-const exportModule = await res.then((factory) => factory());
-var dashboard__loadShare__react_mf_2_router__loadShare__ = exportModule;
 var util;
 (function(util2) {
   util2.assertEqual = (val) => val;
@@ -4069,6 +4057,5 @@ var z = /* @__PURE__ */ Object.freeze({
   ZodError
 });
 export {
-  dashboard__loadShare__react_mf_2_router__loadShare__ as d,
   z
 };
