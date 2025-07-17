@@ -1,5 +1,5 @@
 import { index_cjs, core_dashboard__mf_v__runtimeInit__mf_v__ } from './core_dashboard__mf_v__runtimeInit__mf_v__-DlJLrLht.js';
-import exposesMap from './virtualExposes-DzIxNN4T.js';
+import exposesMap from './virtualExposes-BEIaoMc2.js';
 
 const federationRuntime = { instance: null };
 function BridgeReactPlugin() {
@@ -15,7 +15,7 @@ function BridgeReactPlugin() {
 const importMap = {
       
         "@lumeweb/portal-framework-core": async () => {
-          let pkg = await import('./index-CoeCdDEU.js');
+          let pkg = await import('./index-D1qAF1C_.js');
           return pkg
         }
       ,
@@ -29,6 +29,11 @@ const importMap = {
           return pkg
         }
       ,
+        "@tanstack/react-query": async () => {
+          let pkg = await import('./index-brHgiNra.js');
+          return pkg
+        }
+      ,
         "react": async () => {
           let pkg = await import('./index-DEOrzHNV.js').then(n => n.index);
           return pkg
@@ -36,11 +41,6 @@ const importMap = {
       ,
         "react-router": async () => {
           let pkg = await import('./index-CUmbJa2n.js');
-          return pkg
-        }
-      ,
-        "@tanstack/react-query": async () => {
-          let pkg = await import('./index-brHgiNra.js');
           return pkg
         }
       ,
@@ -140,6 +140,32 @@ const importMap = {
             }
           }
         ,
+          "@tanstack/react-query": {
+            name: "@tanstack/react-query",
+            version: "4.36.1",
+            scope: ["default"],
+            loaded: false,
+            from: "core:dashboard",
+            async get () {
+              usedShared["@tanstack/react-query"].loaded = true;
+              const {"@tanstack/react-query": pkgDynamicImport} = importMap; 
+              const res = await pkgDynamicImport();
+              const exportModule = {...res};
+              // All npm packages pre-built by vite will be converted to esm
+              Object.defineProperty(exportModule, "__esModule", {
+                value: true,
+                enumerable: false
+              });
+              return function () {
+                return exportModule
+              }
+            },
+            shareConfig: {
+              singleton: true,
+              requiredVersion: "^4.36.1"
+            }
+          }
+        ,
           "react": {
             name: "react",
             version: "18.3.1",
@@ -189,32 +215,6 @@ const importMap = {
             shareConfig: {
               singleton: true,
               requiredVersion: "^7.6.0"
-            }
-          }
-        ,
-          "@tanstack/react-query": {
-            name: "@tanstack/react-query",
-            version: "4.36.1",
-            scope: ["default"],
-            loaded: false,
-            from: "core:dashboard",
-            async get () {
-              usedShared["@tanstack/react-query"].loaded = true;
-              const {"@tanstack/react-query": pkgDynamicImport} = importMap; 
-              const res = await pkgDynamicImport();
-              const exportModule = {...res};
-              // All npm packages pre-built by vite will be converted to esm
-              Object.defineProperty(exportModule, "__esModule", {
-                value: true,
-                enumerable: false
-              });
-              return function () {
-                return exportModule
-              }
-            },
-            shareConfig: {
-              singleton: true,
-              requiredVersion: "^4.36.1"
             }
           }
         ,

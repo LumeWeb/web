@@ -186,7 +186,7 @@ const createAuthProvider = (sdk) => {
 
 //#region src/capabilities/refineConfig.ts
 var Capability$1 = class Capability {
-	dependencies;
+	dependencies = ["core:core:sdk-auth"];
 	status;
 	id = "core:core:refine-config-auth";
 	type = "core:refine-config";
