@@ -1,4 +1,3 @@
-import { createBridgeComponent } from "@lumeweb/portal-framework-core";
 import { GeneralLayout, withTheme } from "@lumeweb/portal-framework-ui";
 import { Authenticated } from "@refinedev/core";
 import React from "react";
@@ -14,4 +13,4 @@ function AccountLayout() {
     </Authenticated>
   );
 }
-export default createBridgeComponent(withTheme(AccountLayout));
+export default withTheme(AccountLayout);

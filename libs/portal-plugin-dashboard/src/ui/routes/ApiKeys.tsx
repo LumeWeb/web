@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createBridgeComponent } from "@lumeweb/portal-framework-core";
 import {
   Alert,
   AlertDescription,
@@ -210,4 +209,4 @@ function APIKeys() {
   );
 }
 
-export default createBridgeComponent(withTheme(APIKeys));
+export default withTheme(APIKeys);

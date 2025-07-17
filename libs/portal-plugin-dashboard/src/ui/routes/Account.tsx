@@ -1,4 +1,3 @@
-import { createBridgeComponent } from "@lumeweb/portal-framework-core";
 import {
   AddIcon,
   Button,
@@ -194,4 +193,4 @@ function Account() {
     </>
   );
 }
-export default createBridgeComponent(Account);
+export default Account;

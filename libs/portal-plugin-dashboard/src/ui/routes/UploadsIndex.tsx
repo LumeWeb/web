@@ -1,4 +1,3 @@
-import { createBridgeComponent } from "@lumeweb/portal-framework-core";
 import { GeneralLayout, withTheme } from "@lumeweb/portal-framework-ui";
 import { Authenticated } from "@refinedev/core";
 import React from "react";
@@ -15,4 +14,4 @@ function Uploads() {
     </Authenticated>
   );
 }
-export default createBridgeComponent(withTheme(Uploads));
+export default withTheme(Uploads);

@@ -1,5 +1,4 @@
 import {
-  createBridgeComponent,
   type Identity,
 } from "@lumeweb/portal-framework-core";
 import {
@@ -116,4 +115,4 @@ function AccountVerify() {
   );
 }
 
-export default createBridgeComponent(AccountVerify);
+export default AccountVerify;
