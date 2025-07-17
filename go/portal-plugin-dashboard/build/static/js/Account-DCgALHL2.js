@@ -1,5 +1,4 @@
 import { jsxRuntimeExports } from './jsx-runtime-ta0kGoHj.js';
-import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__-YjtT0XC7.js';
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__-CequMnfU.js';
 import { core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__-2mQxKAcF.js';
 import { core_dashboard__loadShare__react__loadShare__, React } from './core_dashboard__loadShare__react__loadShare__-mOMo2i32.js';
@@ -5414,6 +5413,5 @@ function Account() {
     }
   ) });
 }
-const Account$1 = core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createBridgeComponent(Account);
 
-export { Account$1 as default };
+export { Account as default };
