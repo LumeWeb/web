@@ -10,15 +10,28 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@lumeweb/portal-framework-core": "workspace:*",
     "@lumeweb/advanced-rest-provider": "workspace:*",
+    "@lumeweb/portal-framework-core": "workspace:*",
     "@lumeweb/portal-framework-ui": "workspace:*",
     "@lumeweb/portal-framework-ui-core": "workspace:*",
-    "@lumeweb/portal-plugin-abuse-common": "workspace:*"
-  },
-  "devDependencies": {
-  },
-  "peerDependencies": {
-
+    "@lumeweb/portal-plugin-abuse-common": "workspace:*",
+    "@tanstack/react-query": "4.36.1",
+    "@uppy/compressor": "^2.2.1",
+    "@uppy/core": "^4.4.7",
+    "@uppy/dashboard": "^4.3.4",
+    "@uppy/image-editor": "^3.3.3",
+    "@uppy/react": "^4.4.0",
+    "@uppy/screen-capture": "^4.3.1",
+    "@uppy/webcam": "^4.2.1",
+    "@uppy/xhr-upload": "^4.3.3",
+    "axios": "1.9.0",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.525.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "7.54.0",
+    "react-markdown": "^10.1.0",
+    "react-router": "7.5.0",
+    "zod": "3.24.2"
   }
 }
