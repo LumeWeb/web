@@ -2538,8 +2538,9 @@ var lib = {
   parse,
   stringify: stringify2
 };
-const qs4 = /* @__PURE__ */ getDefaultExportFromCjs(lib);
+const Dn = /* @__PURE__ */ getDefaultExportFromCjs(lib);
 export {
+  Dn as D,
   ListCache as L,
   MapCache as M,
   Symbol$1 as S,
@@ -2561,8 +2562,7 @@ export {
   isKey as p,
   toKey as q,
   root as r,
-  qs4 as s,
+  get$1 as s,
   toSource as t,
-  get$1 as u,
-  castPath as v
+  castPath as u
 };
