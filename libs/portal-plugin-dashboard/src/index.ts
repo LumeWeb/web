@@ -3,10 +3,15 @@ import {
   Framework,
   type Plugin,
 } from "@lumeweb/portal-framework-core";
+import {
+  RefineConfigCapability,
+  SdkCapability,
+} from "@lumeweb/portal-framework-auth";
 import routes from "./routes";
 
 export default function (): Plugin {
   return {
+    capabilities: [new RefineConfigCapability(), new SdkCapability()],
     id: createNamespacedId("core", "dashboard"),
     routes,
     async destroy(_framework: Framework) {
