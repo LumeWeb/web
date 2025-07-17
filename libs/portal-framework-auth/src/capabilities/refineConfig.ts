@@ -9,7 +9,7 @@ import { AuthProvider } from "@refinedev/core";
 import { createAuthProvider } from "../dataProviders/auth";
 
 export class Capability implements RefineConfigCapability {
-  dependencies?: string[] | undefined;
+  dependencies = ["core:core:sdk-auth"];
   status: CapabilityStatus;
   readonly id = "core:core:refine-config-auth";
   readonly type = "core:refine-config";
