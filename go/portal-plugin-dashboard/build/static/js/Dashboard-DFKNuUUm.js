@@ -7,6 +7,5 @@ import { core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } fro
 function Dashboard() {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Authenticated, { v3LegacyAuthProviderCompatible: false, children: /* @__PURE__ */ jsxRuntimeExports.jsx(core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.GeneralLayout, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.WidgetArea, { widgetAreaId: "core:dashboard" }) }) }, "dashboard");
 }
-const Dashboard$1 = core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.withTheme(Dashboard);
 
-export { Dashboard$1 as default };
+export { Dashboard as default };

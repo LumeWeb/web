@@ -34,7 +34,7 @@ const exposesMap = {
         }
       ,
         "./Dashboard": async () => {
-          const importModule = await import('./Dashboard-CGUbu_Zo.js');
+          const importModule = await import('./Dashboard-DFKNuUUm.js');
           const exportModule = {};
           Object.assign(exportModule, importModule);
           Object.defineProperty(exportModule, "__esModule", {
