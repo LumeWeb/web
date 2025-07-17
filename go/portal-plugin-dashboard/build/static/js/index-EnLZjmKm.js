@@ -1,6 +1,6 @@
 import { index_cjs } from './core_dashboard__mf_v__runtimeInit__mf_v__-DlJLrLht.js';
 import { React, core_dashboard__loadShare__react__loadShare__ } from './core_dashboard__loadShare__react__loadShare__-mOMo2i32.js';
-import { federationRuntime } from './virtual_mf-REMOTE_ENTRY_ID-CqkmfFoW.js';
+import { federationRuntime } from './virtual_mf-REMOTE_ENTRY_ID-VaxsDVK8.js';
 import { core_dashboard__loadShare__react_mf_2_dom__loadShare__ } from './core_dashboard__loadShare__react_mf_2_dom__loadShare__-D2zXm8HN.js';
 import { UNSAFE_invariant as invariant, UNSAFE_useFogOFWarDiscovery as useFogOFWarDiscovery, UNSAFE_FrameworkContext as FrameworkContext$1, UNSAFE_RemixErrorBoundary as RemixErrorBoundary, RouterProvider, UNSAFE_decodeViaTurboStream as decodeViaTurboStream, UNSAFE_createClientRoutes as createClientRoutes, matchRoutes, UNSAFE_shouldHydrateRouteLoader as shouldHydrateRouteLoader, UNSAFE_deserializeErrors as deserializeErrors2, UNSAFE_createRouter as createRouter, UNSAFE_getPatchRoutesOnNavigationFunction as getPatchRoutesOnNavigationFunction, UNSAFE_getSingleFetchDataStrategy as getSingleFetchDataStrategy, UNSAFE_mapRouteProperties as mapRouteProperties, UNSAFE_createBrowserHistory as createBrowserHistory, UNSAFE_createClientRoutesWithHMRRevalidationOptOut as createClientRoutesWithHMRRevalidationOptOut } from './index-CUmbJa2n.js';
 import { core_dashboard__loadShare__react_mf_2_router__loadShare__ } from './core_dashboard__loadShare__react_mf_2_router__loadShare__-BiEltBUg.js';
