@@ -1,4 +1,4 @@
-import { GeneralLayout, withTheme } from "@lumeweb/portal-framework-ui";
+import { GeneralLayout } from "@lumeweb/portal-framework-ui";
 import { Authenticated } from "@refinedev/core";
 import React from "react";
 import "@lumeweb/portal-framework-ui-core/tailwind.css";
@@ -14,4 +14,4 @@ function Uploads() {
     </Authenticated>
   );
 }
-export default withTheme(Uploads);
+export default Uploads;
