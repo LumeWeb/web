@@ -1,7 +1,4 @@
-import {
-  createBridgeComponent,
-  WidgetArea,
-} from "@lumeweb/portal-framework-core";
+import { WidgetArea } from "@lumeweb/portal-framework-core";
 import { GeneralLayout, withTheme } from "@lumeweb/portal-framework-ui";
 import { Authenticated } from "@refinedev/core";
 import React from "react";
@@ -17,4 +14,4 @@ function Dashboard() {
   );
 }
 
-export default createBridgeComponent(withTheme(Dashboard));
+export default withTheme(Dashboard);

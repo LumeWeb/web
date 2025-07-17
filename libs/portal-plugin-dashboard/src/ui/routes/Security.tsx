@@ -14,7 +14,6 @@ import {
   DialogTrigger,
   RemoveIcon,
 } from "@lumeweb/portal-framework-ui";
-import { createBridgeComponent } from "@module-federation/bridge-react";
 import { useGetIdentity } from "@refinedev/core";
 import "@lumeweb/portal-framework-ui-core/tailwind.css";
 import React, { useState } from "react";
@@ -101,4 +100,4 @@ function Security() {
   );
 }
 
-export default createBridgeComponent(Security);
+export default Security;
