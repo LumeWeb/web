@@ -1976,7 +1976,6 @@ export {
   Controller,
   Form,
   FormProvider,
-  HookFormContext,
   appendErrors,
   get,
   set,
