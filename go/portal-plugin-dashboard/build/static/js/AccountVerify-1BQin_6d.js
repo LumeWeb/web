@@ -1,5 +1,4 @@
 import { jsxRuntimeExports } from './jsx-runtime-ta0kGoHj.js';
-import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__-YjtT0XC7.js';
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__-CequMnfU.js';
 import { core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__-2mQxKAcF.js';
 import { core_dashboard__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__ } from './core_dashboard__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__-DVwYt3d-.js';
@@ -87,6 +86,5 @@ function AccountVerify() {
     ) })
   ] });
 }
-const AccountVerify$1 = core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createBridgeComponent(AccountVerify);
 
-export { AccountVerify$1 as default };
+export { AccountVerify as default };

@@ -1,5 +1,5 @@
 import { index_cjs, core_dashboard__mf_v__runtimeInit__mf_v__ } from './core_dashboard__mf_v__runtimeInit__mf_v__-DlJLrLht.js';
-import exposesMap from './virtualExposes-D4-Lp9jU.js';
+import exposesMap from './virtualExposes-DVfcXpFb.js';
 
 const federationRuntime = { instance: null };
 function BridgeReactPlugin() {
@@ -15,7 +15,7 @@ function BridgeReactPlugin() {
 const importMap = {
       
         "@lumeweb/portal-framework-core": async () => {
-          let pkg = await import('./index-D9Y9BuZk.js');
+          let pkg = await import('./index-Zw5An4Qh.js');
           return pkg
         }
       ,
