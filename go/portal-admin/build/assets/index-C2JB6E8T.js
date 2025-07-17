@@ -1,12 +1,12 @@
 import { i as index_cjs } from "./admin__mf_v__runtimeInit__mf_v__-CrLwvomy.js";
 import { R as React, a as admin__loadShare__react__loadShare__ } from "./admin__loadShare__react__loadShare__-C1ovXSRa.js";
-import { a as admin__loadShare__react_mf_2_dom__loadShare__ } from "./admin__loadShare__react_mf_2_dom__loadShare__-BCMi2lGq.js";
+import { a as admin__loadShare__react_mf_2_dom__loadShare__, j as jsxRuntimeExports } from "./admin__loadShare__react_mf_2_dom__loadShare__-CmlR8Dnz.js";
 import { UNSAFE_invariant as invariant, UNSAFE_useFogOFWarDiscovery as useFogOFWarDiscovery, UNSAFE_FrameworkContext as FrameworkContext$1, UNSAFE_RemixErrorBoundary as RemixErrorBoundary, RouterProvider, UNSAFE_decodeViaTurboStream as decodeViaTurboStream, UNSAFE_createClientRoutes as createClientRoutes, UNSAFE_getHydrationData as getHydrationData, UNSAFE_deserializeErrors as deserializeErrors2, UNSAFE_createRouter as createRouter, UNSAFE_getPatchRoutesOnNavigationFunction as getPatchRoutesOnNavigationFunction, UNSAFE_getTurboStreamSingleFetchDataStrategy as getTurboStreamSingleFetchDataStrategy, UNSAFE_mapRouteProperties as mapRouteProperties, UNSAFE_hydrationRouteProperties as hydrationRouteProperties, UNSAFE_createBrowserHistory as createBrowserHistory, UNSAFE_createClientRoutesWithHMRRevalidationOptOut as createClientRoutesWithHMRRevalidationOptOut } from "./index-SoLr86f9.js";
-import { a as admin__loadShare__react_mf_2_router__loadShare__, z } from "./index-DvPoCwG9.js";
-import { c as createEnv, a as createRoot } from "./index-B5dfKSSH.js";
+import { a as admin__loadShare__react_mf_2_router__loadShare__, C as CircleAlert } from "./circle-alert-Bliazfs-.js";
+import { c as createEnv, a as createRoot } from "./index-j0T4rkAH.js";
+import { z } from "./index-Dq110QZ7.js";
 import { g as getDefaultExportFromCjs } from "./_commonjsHelpers-DWwsNxpa.js";
-import { j as jsxRuntimeExports } from "./createLucideIcon-kyYRmneZ.js";
-import { C as CircleAlert } from "./circle-alert-DkAPJdSM.js";
+import "./createLucideIcon-BzDmmRa9.js";
 function _mergeNamespaces(n, m) {
   for (var i = 0; i < m.length; i++) {
     const e2 = m[i];
@@ -1347,13 +1347,8 @@ function HydratedRouter(props) {
     });
   }
   let [criticalCss, setCriticalCss] = admin__loadShare__react__loadShare__.useState(
-    ssrInfo?.context.criticalCss
+    void 0
   );
-  {
-    if (ssrInfo) {
-      window.__reactRouterClearCriticalCss = () => setCriticalCss(void 0);
-    }
-  }
   let [location, setLocation] = admin__loadShare__react__loadShare__.useState(router.state.location);
   admin__loadShare__react__loadShare__.useLayoutEffect(() => {
     if (ssrInfo && ssrInfo.router && !ssrInfo.routerInitialized) {
@@ -1622,7 +1617,7 @@ function createRemoteComponent$1(info) {
     );
   });
 }
-const __vite_import_meta_env__ = { "BASE_URL": "/", "DEV": true, "MODE": "production", "PROD": false, "SSR": false, "VITE_PORTAL_APP_NAME": "admin", "VITE_PORTAL_APP_TITLE": "Admin", "VITE_PORTAL_DOMAIN": "dev.pinner.xyz", "VITE_PORTAL_DOMAIN_IS_ROOT": "true" };
+const __vite_import_meta_env__ = { "BASE_URL": "/", "DEV": false, "MODE": "production", "PROD": true, "SSR": false, "VITE_PORTAL_APP_NAME": "admin", "VITE_PORTAL_APP_TITLE": "admin", "VITE_PORTAL_DOMAIN": "dev.pinner.xyz", "VITE_PORTAL_DOMAIN_IS_ROOT": "true" };
 const env = createEnv({
   client: {
     VITE_PORTAL_DOMAIN: z.string().includes(".").optional(),
@@ -4266,9 +4261,6 @@ class ErrorBoundary extends admin__loadShare__react__loadShare__.Component {
       } else if (fallback !== void 0) {
         childToRender = fallback;
       } else {
-        {
-          console.error("react-error-boundary requires either a fallback, fallbackRender, or FallbackComponent prop");
-        }
         throw error;
       }
     }
