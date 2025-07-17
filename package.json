@@ -66,12 +66,9 @@
   "pnpm": {
     "patchedDependencies": {
       "object-inspect": "patches/object-inspect.patch",
-      "@refinedev/core": "patches/@refinedev__core.patch",
       "@module-federation/vite": "patches/@module-federation__vite.patch",
       "@vitejs/plugin-react": "patches/@vitejs__plugin-react.patch",
-      "react-hook-form": "patches/react-hook-form.patch",
-      "@module-federation/bridge-react": "patches/@module-federation__bridge-react.patch",
-      "@refinedev/react-hook-form": "patches/@refinedev__react-hook-form.patch"
+      "@module-federation/bridge-react": "patches/@module-federation__bridge-react.patch"
     },
     "overrides": {
       "react": "18.3.1",
