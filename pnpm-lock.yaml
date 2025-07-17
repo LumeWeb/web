@@ -408,7 +408,7 @@ importers:
         version: 1.6.0(zod@3.24.2)
       '@hookform/resolvers':
         specifier: ^5.0.1
-        version: 5.0.1(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))
+        version: 5.1.1(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))
       '@lumeweb/portal-framework-core':
         specifier: workspace:*
         version: link:../portal-framework-core
@@ -570,7 +570,7 @@ importers:
         version: 1.6.0(react@18.3.1)
       '@hookform/resolvers':
         specifier: ^5.0.1
-        version: 5.0.1(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))
+        version: 5.1.1(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))
       '@lexical/code':
         specifier: ^0.31.1
         version: 0.31.1
@@ -612,7 +612,7 @@ importers:
         version: 1.3.2(react@18.3.1)
       '@refinedev/react-hook-form':
         specifier: ^4.9.3
-        version: 4.9.3(patch_hash=c5b4fa6f81d325769cf3c714ca76931058d7cc1961a3afc877e3a15d17e907a2)(@refinedev/core@4.57.9(patch_hash=7e7c212813579c7696d7060b58a761cc3c219b919122096e55996f3ed8f3069e)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))(react@18.3.1)
+        version: 4.10.2(patch_hash=c5b4fa6f81d325769cf3c714ca76931058d7cc1961a3afc877e3a15d17e907a2)(@refinedev/core@4.57.9(patch_hash=7e7c212813579c7696d7060b58a761cc3c219b919122096e55996f3ed8f3069e)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))(react@18.3.1)
       '@refinedev/react-router':
         specifier: ^1.0.1
         version: 1.0.1(@refinedev/core@4.57.9(patch_hash=7e7c212813579c7696d7060b58a761cc3c219b919122096e55996f3ed8f3069e)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-router@7.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
@@ -833,7 +833,7 @@ importers:
         version: 4.57.9(patch_hash=7e7c212813579c7696d7060b58a761cc3c219b919122096e55996f3ed8f3069e)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@refinedev/react-hook-form':
         specifier: ^4.9.3
-        version: 4.9.3(patch_hash=c5b4fa6f81d325769cf3c714ca76931058d7cc1961a3afc877e3a15d17e907a2)(@refinedev/core@4.57.9(patch_hash=7e7c212813579c7696d7060b58a761cc3c219b919122096e55996f3ed8f3069e)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))(react@18.3.1)
+        version: 4.10.2(patch_hash=c5b4fa6f81d325769cf3c714ca76931058d7cc1961a3afc877e3a15d17e907a2)(@refinedev/core@4.57.9(patch_hash=7e7c212813579c7696d7060b58a761cc3c219b919122096e55996f3ed8f3069e)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))(react@18.3.1)
       '@refinedev/react-router':
         specifier: ^1.0.1
         version: 1.0.1(@refinedev/core@4.57.9(patch_hash=7e7c212813579c7696d7060b58a761cc3c219b919122096e55996f3ed8f3069e)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-router@7.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
@@ -972,7 +972,7 @@ importers:
         version: link:../portal-sdk
       '@refinedev/react-hook-form':
         specifier: ^4.9.3
-        version: 4.9.3(patch_hash=c5b4fa6f81d325769cf3c714ca76931058d7cc1961a3afc877e3a15d17e907a2)(@refinedev/core@4.57.9(patch_hash=7e7c212813579c7696d7060b58a761cc3c219b919122096e55996f3ed8f3069e)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))(react@18.3.1)
+        version: 4.10.2(patch_hash=c5b4fa6f81d325769cf3c714ca76931058d7cc1961a3afc877e3a15d17e907a2)(@refinedev/core@4.57.9(patch_hash=7e7c212813579c7696d7060b58a761cc3c219b919122096e55996f3ed8f3069e)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))(react@18.3.1)
       '@t3-oss/env-core':
         specifier: ^0.12.0
         version: 0.12.0(typescript@5.8.3)(zod@3.24.2)
@@ -1016,6 +1016,9 @@ importers:
 
   libs/portal-plugin-dashboard:
     dependencies:
+      '@hookform/resolvers':
+        specifier: ^5.1.1
+        version: 5.1.1(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))
       '@lumeweb/portal-framework-auth':
         specifier: workspace:*
         version: link:../portal-framework-auth
@@ -1031,6 +1034,27 @@ importers:
       '@lumeweb/portal-sdk':
         specifier: workspace:*
         version: link:../portal-sdk
+      '@refinedev/react-hook-form':
+        specifier: ^4.10.2
+        version: 4.10.2(patch_hash=c5b4fa6f81d325769cf3c714ca76931058d7cc1961a3afc877e3a15d17e907a2)(@refinedev/core@4.57.9(patch_hash=7e7c212813579c7696d7060b58a761cc3c219b919122096e55996f3ed8f3069e)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))(react@18.3.1)
+      lucide-react:
+        specifier: ^0.525.0
+        version: 0.525.0(react@18.3.1)
+      otpauth:
+        specifier: ^9.4.0
+        version: 9.4.0
+      qrcode:
+        specifier: ^1.5.4
+        version: 1.5.4
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+      zod:
+        specifier: 3.24.2
+        version: 3.24.2
 
   libs/portal-sdk:
     dependencies:
@@ -2343,8 +2367,8 @@ packages:
     peerDependencies:
       react-hook-form: 7.54.0
 
-  '@hookform/resolvers@5.0.1':
-    resolution: {integrity: sha512-u/+Jp83luQNx9AdyW2fIPGY6Y7NG68eN2ZW8FOJYL+M0i4s49+refdJdOp/A9n9HFQtQs3HIDHQvX3ZET2o7YA==}
+  '@hookform/resolvers@5.1.1':
+    resolution: {integrity: sha512-J/NVING3LMAEvexJkyTLjruSm7aOFx7QX21pzkiJfMoNG0wl5aFEjLTl7ay7IQb9EWY6AkrBy7tHL2Alijpdcg==}
     peerDependencies:
       react-hook-form: 7.54.0
 
@@ -3548,6 +3572,17 @@ packages:
       '@types/react-dom': 18.3.0
       react: 18.3.1
       react-dom: 18.3.1
+
+  '@refinedev/react-hook-form@4.10.2':
+    resolution: {integrity: sha512-5Jos0YaogSbz00MYMD4zy9QgYeo+zDQ0yPIKZRNYm95mYaeKGsv3DgUs82GEKek28YjvMsZOn101CDqLyLXvQg==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      '@refinedev/core': ^4.46.1
+      '@types/react': 18.3.3
+      '@types/react-dom': 18.3.0
+      react: 18.3.1
+      react-dom: 18.3.1
+      react-hook-form: 7.54.0
 
   '@refinedev/react-hook-form@4.9.3':
     resolution: {integrity: sha512-quAHYPe9TzknXg1AFP6ZSeigkRFL8Mbk8B7pXCsT+/M5MAfQsdtd8hq3PX8hDapQFKz8HbB3UVNXdWZgG8fOOA==}
@@ -6819,6 +6854,11 @@ packages:
 
   lucide-react@0.511.0:
     resolution: {integrity: sha512-VK5a2ydJ7xm8GvBeKLS9mu1pVK6ucef9780JVUjw6bAjJL/QXnd4Y0p7SPeOUMC27YhzNCZvm5d/QX0Tp3rc0w==}
+    peerDependencies:
+      react: 18.3.1
+
+  lucide-react@0.525.0:
+    resolution: {integrity: sha512-Tm1txJ2OkymCGkvwoHt33Y2JpN5xucVq1slHcgE6Lk0WjDfjgKWor5CdVER8U6DvcfMwh4M8XxmpTiyzfmfDYQ==}
     peerDependencies:
       react: 18.3.1
 
@@ -10583,7 +10623,7 @@ snapshots:
     dependencies:
       react-hook-form: 7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1)
 
-  '@hookform/resolvers@5.0.1(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))':
+  '@hookform/resolvers@5.1.1(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))':
     dependencies:
       '@standard-schema/utils': 0.3.0
       react-hook-form: 7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1)
@@ -12193,6 +12233,17 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
     transitivePeerDependencies:
       - react-native
+
+  '@refinedev/react-hook-form@4.10.2(patch_hash=c5b4fa6f81d325769cf3c714ca76931058d7cc1961a3afc877e3a15d17e907a2)(@refinedev/core@4.57.9(patch_hash=7e7c212813579c7696d7060b58a761cc3c219b919122096e55996f3ed8f3069e)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@refinedev/core': 4.57.9(patch_hash=7e7c212813579c7696d7060b58a761cc3c219b919122096e55996f3ed8f3069e)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@types/react': 18.3.3
+      '@types/react-dom': 18.3.0
+      lodash: 4.17.21
+      lodash-es: 4.17.21
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      react-hook-form: 7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1)
 
   '@refinedev/react-hook-form@4.9.3(patch_hash=c5b4fa6f81d325769cf3c714ca76931058d7cc1961a3afc877e3a15d17e907a2)(@refinedev/core@4.57.9(patch_hash=7e7c212813579c7696d7060b58a761cc3c219b919122096e55996f3ed8f3069e)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(patch_hash=73c807a0e77f5c90671f9928144fe404187f6f01c6de1d11151e637e2f246978)(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -15920,6 +15971,10 @@ snapshots:
       react: 18.3.1
 
   lucide-react@0.511.0(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+
+  lucide-react@0.525.0(react@18.3.1):
     dependencies:
       react: 18.3.1
 
