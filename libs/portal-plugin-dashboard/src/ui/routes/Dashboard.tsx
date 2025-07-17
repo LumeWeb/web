@@ -1,5 +1,5 @@
 import { WidgetArea } from "@lumeweb/portal-framework-core";
-import { GeneralLayout, withTheme } from "@lumeweb/portal-framework-ui";
+import { GeneralLayout } from "@lumeweb/portal-framework-ui";
 import { Authenticated } from "@refinedev/core";
 import React from "react";
 import "@lumeweb/portal-framework-ui-core/tailwind.css";
@@ -14,4 +14,4 @@ function Dashboard() {
   );
 }
 
-export default withTheme(Dashboard);
+export default Dashboard;
