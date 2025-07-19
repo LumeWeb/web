@@ -91,7 +91,7 @@ function CaseViewContent({ id }: { id: BaseKey }) {
   // Check if subject is blocked - only after we have the record
   const { data: blockData, refetch: refetchBlockStatus } = useCustom({
     method: "get",
-    url: `blocklist/subject/blocked/${record?.subject_id}`,
+    url: `blocklist/subjects/blocked/${record?.subject_id}`,
     queryOptions: {
       enabled: !!record?.subject_id,
     },
