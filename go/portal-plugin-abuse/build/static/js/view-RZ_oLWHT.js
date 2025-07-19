@@ -2318,13 +2318,16 @@ function CaseViewContent({ id }) {
   const { mutate } = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useUpdate();
   const { goBack } = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useNavigation();
   const { open: openNotification } = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useNotification();
-  const { data: blockData, refetch: refetchBlockStatus } = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useCustom({
-    method: "get",
-    url: `blocklist/check-subject/${id}`
-  });
-  const isSubjectBlocked = blockData?.data?.isBlocked || false;
   const { data, isLoading, refetch } = queryResult;
   const record = data?.data;
+  const { data: blockData, refetch: refetchBlockStatus } = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useCustom({
+    method: "get",
+    url: `blocklist/subject/blocked/${record?.subject_id}`,
+    queryOptions: {
+      enabled: !!record?.subject_id
+    }
+  });
+  const isSubjectBlocked = blockData?.data?.blocked || false;
   const { control, handleSubmit } = k({
     defaultValues: {
       // @ts-ignore
@@ -2532,9 +2535,11 @@ function CaseViewContent({ id }) {
     });
     goBack();
   };
-  const handleRefresh = () => {
-    refetch();
-    refetchBlockStatus();
+  const handleRefresh = async () => {
+    await refetch();
+    if (record?.subject_id) {
+      await refetchBlockStatus();
+    }
   };
   if (isLoading) {
     return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "container mx-auto py-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex animate-pulse flex-col gap-4", children: [

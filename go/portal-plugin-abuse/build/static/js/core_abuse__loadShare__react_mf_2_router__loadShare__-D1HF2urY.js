@@ -8,7 +8,7 @@ import { core_abuse__mf_v__runtimeInit__mf_v__, index_cjs } from './core_abuse__
     customShareInfo: {shareConfig:{
       singleton: true,
       strictVersion: false,
-      requiredVersion: "^7.6.0"
+      requiredVersion: "^7.5.0"
     }}}));
     const exportModule = await res.then(factory => factory());
     var core_abuse__loadShare__react_mf_2_router__loadShare__ = exportModule;
