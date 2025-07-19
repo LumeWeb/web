@@ -85,16 +85,19 @@ function CaseViewContent({ id }: { id: BaseKey }) {
   const { goBack } = useNavigation();
   const { open: openNotification } = useNotification();
 
-  // Check if subject is blocked
-  const { data: blockData, refetch: refetchBlockStatus } = useCustom({
-    method: "get",
-    url: `blocklist/check-subject/${id}`,
-  });
-
-  const isSubjectBlocked = blockData?.data?.isBlocked || false;
-
   const { data, isLoading, refetch } = queryResult;
   const record = data?.data;
+
+  // Check if subject is blocked - only after we have the record
+  const { data: blockData, refetch: refetchBlockStatus } = useCustom({
+    method: "get",
+    url: `blocklist/subject/blocked/${record?.subject_id}`,
+    queryOptions: {
+      enabled: !!record?.subject_id,
+    },
+  });
+
+  const isSubjectBlocked = blockData?.data?.blocked || false;
 
   const { control, handleSubmit } = useForm<CaseUpdateRequest>({
     defaultValues: {
@@ -322,9 +325,11 @@ function CaseViewContent({ id }: { id: BaseKey }) {
     goBack();
   };
 
-  const handleRefresh = () => {
-    refetch();
-    refetchBlockStatus();
+  const handleRefresh = async () => {
+    await refetch();
+    if (record?.subject_id) {
+      await refetchBlockStatus();
+    }
   };
 
   if (isLoading) {
