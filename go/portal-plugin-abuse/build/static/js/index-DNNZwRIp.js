@@ -154,18 +154,13 @@ function requireUseSyncExternalStoreShim_development () {
 	return useSyncExternalStoreShim_development;
 }
 
-var hasRequiredShim;
-
-function requireShim () {
-	if (hasRequiredShim) return shim.exports;
-	hasRequiredShim = 1;
-	var define_process_env_default = {};
-	if (define_process_env_default.NODE_ENV === "production") {
-	  shim.exports = requireUseSyncExternalStoreShim_production();
-	} else {
-	  shim.exports = requireUseSyncExternalStoreShim_development();
-	}
-	return shim.exports;
+var define_process_env_default = {};
+if (define_process_env_default.NODE_ENV === "production") {
+  shim.exports = requireUseSyncExternalStoreShim_production();
+} else {
+  shim.exports = requireUseSyncExternalStoreShim_development();
 }
 
-export { requireShim };
+var shimExports = shim.exports;
+
+export { shimExports };
