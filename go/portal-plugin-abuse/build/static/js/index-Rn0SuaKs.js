@@ -12,7 +12,7 @@ import { core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from '.
 import { k as k$4, CircleCheck, Check, Hash, ChevronDown } from './index-IOmeA5Pk.js';
 import { CircleAlert } from './circle-alert-DChmjxwJ.js';
 import { Dn as Dn$1 } from './index-Dhd5UQSC.js';
-import { shimExports } from './index-DNNZwRIp.js';
+import { requireShim } from './index-BgdDUbMs.js';
 import { Q as Q$3, RefreshCw } from './isEqual-B99CRTfA.js';
 import { createTable, getFilteredRowModel, getSortedRowModel, getCoreRowModel } from './index-BHHcI-E1.js';
 import { createLucideIcon } from './createLucideIcon-Bv-P5XEu.js';
@@ -7848,7 +7848,7 @@ function requireWithSelector_production () {
 	if (hasRequiredWithSelector_production) return withSelector_production;
 	hasRequiredWithSelector_production = 1;
 	var React = core_abuse__loadShare__react__loadShare__,
-	  shim = shimExports;
+	  shim = requireShim();
 	function is(x, y) {
 	  return (x === y && (0 !== x || 1 / x === 1 / y)) || (x !== x && y !== y);
 	}
@@ -7946,7 +7946,7 @@ function requireWithSelector_development () {
 	    return x === y && (0 !== x || 1 / x === 1 / y) || x !== x && y !== y;
 	  }
 	  "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(Error());
-	  var React = core_abuse__loadShare__react__loadShare__, shim = shimExports, objectIs = "function" === typeof Object.is ? Object.is : is, useSyncExternalStore = shim.useSyncExternalStore, useRef = React.useRef, useEffect = React.useEffect, useMemo = React.useMemo, useDebugValue = React.useDebugValue;
+	  var React = core_abuse__loadShare__react__loadShare__, shim = requireShim(), objectIs = "function" === typeof Object.is ? Object.is : is, useSyncExternalStore = shim.useSyncExternalStore, useRef = React.useRef, useEffect = React.useEffect, useMemo = React.useMemo, useDebugValue = React.useDebugValue;
 	  withSelector_development.useSyncExternalStoreWithSelector = function(subscribe, getSnapshot, getServerSnapshot, selector, isEqual) {
 	    var instRef = useRef(null);
 	    if (null === instRef.current) {

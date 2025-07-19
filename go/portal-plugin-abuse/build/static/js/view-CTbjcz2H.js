@@ -1,12 +1,12 @@
 import { jsxRuntimeExports } from './jsx-runtime-dlxeb5L7.js';
-import { RelatedCasesPanel } from './RelatedCasesPanel-CfuZLRYW.js';
+import { RelatedCasesPanel } from './RelatedCasesPanel-DxlWDiA0.js';
 import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CZ-6RiII.js';
 import { User } from './user-S2yq91K-.js';
 import { Mail } from './mail-C-nC00Av.js';
 import { Clock } from './clock-DbY6-WNS.js';
 import { format } from './format-AJBx0DHd.js';
 import { core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__-QzxGLbUR.js';
-import { RefineResource } from './index-Bms_1MiW.js';
+import { RefineResource } from './index-C3iL_nDr.js';
 import { ArrowLeft, SquarePen } from './square-pen-Bs3GwhB_.js';
 
 function ReporterInfoCard({ reporter }) {

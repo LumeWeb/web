@@ -1,6 +1,6 @@
 import { jsxRuntimeExports } from './jsx-runtime-dlxeb5L7.js';
-import { RefineResource } from './index-Bms_1MiW.js';
-import { RelatedCasesPanel } from './RelatedCasesPanel-CfuZLRYW.js';
+import { RefineResource } from './index-C3iL_nDr.js';
+import { RelatedCasesPanel } from './RelatedCasesPanel-DxlWDiA0.js';
 import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CZ-6RiII.js';
 import { Link2 } from './link-2-DBKrVJU1.js';
 import { core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__-QzxGLbUR.js';

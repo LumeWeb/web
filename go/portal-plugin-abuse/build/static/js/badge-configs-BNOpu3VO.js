@@ -25,7 +25,9 @@ const ReportSource = {
 	system: "system"
 };
 const ScanStatus = {
-	};
+	in_progress: "in_progress",
+	failed: "failed"
+};
 const CommunicationType = {
 	email: "email",
 	note: "note",
@@ -38,7 +40,11 @@ const CommunicationDirection = {
 	external: "external"
 };
 const EvidenceSource = {
-	};
+	email: "email",
+	web_upload: "web_upload",
+	api: "api",
+	system: "system"
+};
 const BlockReason = {
 	malware: "malware",
 	csam: "csam",

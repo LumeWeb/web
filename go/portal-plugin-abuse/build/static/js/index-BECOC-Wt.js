@@ -1,5 +1,5 @@
 import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__-BwLVOP21.js';
-import { RefineResource } from './index-Bms_1MiW.js';
+import { RefineResource } from './index-C3iL_nDr.js';
 
 class Capability {
   dependencies = ["core:core:sdk"];
@@ -40,6 +40,12 @@ class Capability {
         },
         {
           name: RefineResource.CaseCommunication,
+          meta: {
+            template: "/abuse/cases/:caseId/communications"
+          }
+        },
+        {
+          name: RefineResource.CaseEvidence,
           meta: {
             template: "/abuse/cases/:caseId/communications"
           }
