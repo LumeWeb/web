@@ -1,15 +1,15 @@
 import { jsxRuntimeExports } from './jsx-runtime-dlxeb5L7.js';
-import { RefineResource } from './index-Bms_1MiW.js';
+import { RefineResource } from './index-C3iL_nDr.js';
 import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CZ-6RiII.js';
 import { core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__-QzxGLbUR.js';
 import { core_abuse__loadShare__react__loadShare__ } from './core_abuse__loadShare__react__loadShare__-BrHXNZXB.js';
-import { BlockReason, BlockSource, BlockSeverity, BlockAction, CaseStatus, CommunicationType, CommunicationDirection, EvidenceSource, ScanStatus, CasePriority } from './badge-configs-B5Ptjltb.js';
+import { BlockReason, BlockSource, BlockSeverity, BlockAction, CaseStatus, CommunicationType, CommunicationDirection, EvidenceSource, ScanStatus, CasePriority } from './badge-configs-BNOpu3VO.js';
 import { createLucideIcon } from './createLucideIcon-Bv-P5XEu.js';
 import { LoaderCircle } from './loader-circle-gglMm6-L.js';
 import { Download } from './download-CdKm5ecN.js';
 import { ChevronDown, Check, CircleCheck, k, Hash } from './index-IOmeA5Pk.js';
 import { Clock } from './clock-DbY6-WNS.js';
-import { CaseStatusBadge } from './CaseStatusBadge-D-MPH6uO.js';
+import { CaseStatusBadge } from './CaseStatusBadge-D8EgmP8g.js';
 import { Mail } from './mail-C-nC00Av.js';
 import { User } from './user-S2yq91K-.js';
 import { format } from './format-AJBx0DHd.js';
@@ -1675,24 +1675,24 @@ function EvidenceList({ caseId }) {
     pagination: {
       pageSize: 10
     },
-    resource: RefineResource.Evidence
+    resource: RefineResource.CaseEvidence
   });
   const handleViewDetails = (evidence) => {
     setSelectedEvidence(evidence);
     setDetailsOpen(true);
   };
   const handleDownload = (evidenceId) => {
-    window.open(`/api/evidence/${evidenceId}/content`, "_blank");
+    window.open(`/api/abuse/evidence/${evidenceId}/content`, "_blank");
   };
   const getSourceLabel = (source) => {
     switch (source) {
-      case EvidenceSource.API:
+      case EvidenceSource.api:
         return "API";
-      case EvidenceSource.Email:
+      case EvidenceSource.email:
         return "Email";
-      case EvidenceSource.System:
+      case EvidenceSource.system:
         return "System";
-      case EvidenceSource.WebUpload:
+      case EvidenceSource.web_upload:
         return "Web Upload";
       default:
         return source;
@@ -1732,13 +1732,13 @@ function EvidenceList({ caseId }) {
         ] }) }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableBody, { children: evidenceFiles.map((evidence) => /* @__PURE__ */ jsxRuntimeExports.jsxs(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, { className: "flex items-center gap-2", children: [
-            getFileTypeIcon(evidence.contentType),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate max-w-[200px]", children: evidence.fileName })
+            getFileTypeIcon(evidence.content_type),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate max-w-[200px]", children: evidence.file_name })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, { children: evidence.contentType }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, { children: formatFileSize(evidence.fileSize) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, { children: evidence.content_type }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, { children: formatFileSize(evidence.file_size) }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, { children: getSourceLabel(evidence.source) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, { children: format(new Date(evidence.createdAt), "MMM d, yyyy") }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, { children: format(new Date(evidence.created_at), "MMM d, yyyy") }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, { className: "text-right", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-end gap-2", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(
               core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button,
@@ -2048,7 +2048,7 @@ function SubjectScanPanel({ caseId, subjectId }) {
             ]
           }
         );
-      case ScanStatus.error:
+      case ScanStatus.failed:
         return /* @__PURE__ */ jsxRuntimeExports.jsxs(
           core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Badge,
           {
@@ -2072,7 +2072,7 @@ function SubjectScanPanel({ caseId, subjectId }) {
             ]
           }
         );
-      case ScanStatus.pending:
+      case ScanStatus.in_progress:
       default:
         return /* @__PURE__ */ jsxRuntimeExports.jsxs(
           core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Badge,
@@ -2111,21 +2111,21 @@ function SubjectScanPanel({ caseId, subjectId }) {
             getSubjectTypeIcon(),
             /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-medium", children: "Subject Details" })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Badge, { variant: "outline", children: subject.type.toUpperCase() })
+          /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Badge, { variant: "outline", children: subject.type?.toUpperCase() })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-4", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-mono break-all", children: subject.identifier }),
-          subject.source_url && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-muted-foreground mt-1", children: [
+          subject?.source_url && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-muted-foreground mt-1", children: [
             "Source:",
             " ",
             /* @__PURE__ */ jsxRuntimeExports.jsx(
               "a",
               {
                 className: "hover:underline",
-                href: subject.source_url,
+                href: subject?.source_url,
                 rel: "noopener noreferrer",
                 target: "_blank",
-                children: subject.source_url
+                children: subject?.source_url
               }
             )
           ] })
@@ -2780,10 +2780,10 @@ function CaseViewContent({ id }) {
             {
               isReporter: true,
               title: "Reporter",
-              user: record.reporter_id
+              id: record.reporter_id
             }
           ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(UserInfoCard, { title: "Subject", user: record.subject_id }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(UserInfoCard, { title: "Subject", id: record.subject_id }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(RiskFactorsCard, { riskFactors: record?.riskFactors }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(
             CaseActions,

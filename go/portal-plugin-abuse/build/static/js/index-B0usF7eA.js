@@ -1,5 +1,5 @@
 import { core_abuse__loadShare__react__loadShare__ } from './core_abuse__loadShare__react__loadShare__-BrHXNZXB.js';
-import { shimExports } from './index-DNNZwRIp.js';
+import { shimExports } from './index-DYeRG4p5.js';
 
 class Subscribable {
   constructor() {
