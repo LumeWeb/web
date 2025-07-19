@@ -1,6 +1,6 @@
-import { jsxRuntimeExports } from './jsx-runtime-BezR6sBY.js';
+import { jsxRuntimeExports } from './jsx-runtime-CP8sJthG.js';
 import { core_core__mf_v__runtimeInit__mf_v__, index_cjs } from './core_core__mf_v__runtimeInit__mf_v__-DHIRDVBI.js';
-import { core_core__loadShare__react_mf_2_router__loadShare__ } from './core_core__loadShare__react_mf_2_router__loadShare__-DBAFzq9k.js';
+import { core_core__loadShare__react_mf_2_router__loadShare__ } from './core_core__loadShare__react_mf_2_router__loadShare__-BHct9UD3.js';
 
 // dev uses dynamic import to separate chunks
     
