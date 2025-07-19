@@ -11,6 +11,20 @@ import { httpClient } from "./utils/kyInstance";
 
 import { stringify } from "querystring";
 
+type QueryParams = {
+  [key: string]: string | number | boolean;
+};
+
+const addParam = (
+  key: string,
+  value: string | number | boolean | undefined,
+  queryParams: QueryParams,
+) => {
+  if (value !== undefined) {
+    queryParams[key] = value;
+  }
+};
+
 export const dataProvider = (apiUrl: string): DataProvider => {
   const baseFetch = async (
     url: string,
@@ -92,10 +106,18 @@ export const dataProvider = (apiUrl: string): DataProvider => {
         meta,
         operation,
       });
-      const queryParams = {
-        ...generateFilter(filters),
-        ...generateSort(sorters),
-      };
+
+      const filterParams = generateFilter(filters);
+      const sortParams = generateSort(sorters);
+
+      const queryParams: QueryParams = {};
+
+      Object.entries(filterParams).forEach(([key, value]) =>
+        addParam(key, value, queryParams),
+      );
+      Object.entries(sortParams).forEach(([key, value]) =>
+        addParam(key, value, queryParams),
+      );
       const response = await baseFetch(
         baseUrl,
         method.toUpperCase(),
@@ -141,32 +163,17 @@ export const dataProvider = (apiUrl: string): DataProvider => {
       const filterParams = generateFilter(filters);
       const sortParams = generateSort(sorters);
 
-      // Create a type that excludes undefined values
-      type QueryParams = {
-        [key: string]: string | number | boolean;
-      };
-
       const queryParams: QueryParams = {};
-
-      // Helper function to add parameters safely
-      const addParam = (
-        key: string,
-        value: string | number | boolean | undefined,
-      ) => {
-        if (value !== undefined) {
-          queryParams[key] = value;
-        }
-      };
 
       // Add parameters
       Object.entries(filterParams).forEach(([key, value]) =>
-        addParam(key, value),
+        addParam(key, value, queryParams),
       );
       Object.entries(sortParams).forEach(([key, value]) =>
-        addParam(key, value),
+        addParam(key, value, queryParams),
       );
-      addParam("_page", pagination?.current);
-      addParam("_per_page", pagination?.pageSize);
+      addParam("_page", pagination?.current, queryParams);
+      addParam("_per_page", pagination?.pageSize, queryParams);
 
       try {
         const response = await httpClient(apiUrl).get(url, {
