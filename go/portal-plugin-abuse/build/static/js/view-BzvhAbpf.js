@@ -2322,7 +2322,7 @@ function CaseViewContent({ id }) {
   const record = data?.data;
   const { data: blockData, refetch: refetchBlockStatus } = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useCustom({
     method: "get",
-    url: `blocklist/subjects/${record?.subject_id}/blocked`,
+    url: `/abuse/blocklist/subjects/${record?.subject_id}/blocked`,
     queryOptions: {
       enabled: !!record?.subject_id
     }
