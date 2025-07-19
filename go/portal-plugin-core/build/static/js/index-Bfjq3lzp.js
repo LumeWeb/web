@@ -1,4 +1,4 @@
-import { core_core__loadShare__react__loadShare__ } from './core_core__loadShare__react__loadShare__-B-lUt_9_.js';
+import { core_core__loadShare__react__loadShare__ } from './core_core__loadShare__react__loadShare__-Dp0YNvAn.js';
 import { serialize_1, parse_1 } from './index-C__1Ej_O.js';
 
 var setCookie = {exports: {}};

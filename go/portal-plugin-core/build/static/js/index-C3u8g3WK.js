@@ -1,5 +1,5 @@
 import { core_core__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__, core_core__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__ } from './core_core__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-94kw7pu9.js';
-import { core_core__loadShare__react__loadShare__ } from './core_core__loadShare__react__loadShare__-B-lUt_9_.js';
+import { core_core__loadShare__react__loadShare__ } from './core_core__loadShare__react__loadShare__-Dp0YNvAn.js';
 
 const notificationProvider = () => {
   return {
@@ -31,6 +31,7 @@ const notificationProvider = () => {
 //#region src/utils/mapOperator.ts
 const mapOperator = (operator) => {
 	const mapping = {
+		and: "and",
 		eq: "",
 		ne: "ne",
 		lt: "lt",
@@ -66,34 +67,81 @@ const mapOperator = (operator) => {
 
 //#region src/utils/generateFilter.ts
 const processCondition = (condition) => {
-	if (condition.field === "q") return `q=${encodeURIComponent(String(condition.value))}`;
+	if (condition.field === "q") return {
+		path: ["q"],
+		value: encodeURIComponent(String(condition.value))
+	};
 	const operator = mapOperator(condition.operator);
-	const value = condition.value;
-	const operatorPart = operator ? `[${operator}]` : "";
-	const encodedValue = Array.isArray(value) ? value.map((v) => encodeURIComponent(String(v))).join("%2C") : encodeURIComponent(String(value));
-	return `${condition.field}${operatorPart}=${encodedValue}`;
+	let value = condition.value;
+	if (Array.isArray(value)) {
+		value = value.map((v) => String(v)).join(",");
+		value = encodeURIComponent(value);
+	} else if (condition.operator === "null" || condition.operator === "nnull") value = "";
+	else value = encodeURIComponent(String(value));
+	if (!condition.field) return null;
+	const path = [condition.field];
+	if (operator) path.push(operator);
+	return {
+		path,
+		value
+	};
+};
+const processOrCondition = (filter, basePath, query) => {
+	if (filter.operator === "or" && Array.isArray(filter.value)) filter.value.forEach((condition, index) => {
+		const conditionPath = [
+			...basePath,
+			"or",
+			String(index)
+		];
+		if ("operator" in condition && condition.operator === "and" && Array.isArray(condition.value)) condition.value.forEach((subCondition, subIndex) => {
+			const subConditionPath = [
+				...conditionPath,
+				"and",
+				String(subIndex)
+			];
+			const processedCondition = processCondition(subCondition);
+			if (processedCondition) {
+				const finalPath = [...subConditionPath, ...processedCondition.path];
+				const key = finalPath.reduce((acc, segment) => {
+					return acc ? `${acc}[${segment}]` : segment;
+				}, "");
+				query[key] = processedCondition.value;
+			}
+		});
+		else {
+			const processedCondition = processCondition(condition);
+			if (processedCondition) {
+				const finalPath = [...conditionPath, ...processedCondition.path];
+				const key = finalPath.reduce((acc, segment) => {
+					return acc ? `${acc}[${segment}]` : segment;
+				}, "");
+				query[key] = processedCondition.value;
+			}
+		}
+	});
 };
 const generateFilter = (filters) => {
 	const query = {};
 	let hasGlobalSearch = false;
 	filters?.forEach((filter) => {
-		if (filter.operator === "or") {
-			let conditionIndex = 0;
-			filter.value.forEach((condition) => {
-				const field = condition.field;
-				const operator = mapOperator(condition.operator);
-				const encodedValue = Array.isArray(condition.value) ? condition.value.map((v) => encodeURIComponent(String(v))).join("%2C") : encodeURIComponent(String(condition.value));
-				const baseKey = `filters[or][0][and][${conditionIndex}]`;
-				const operatorSegment = operator ? `[${operator}]` : "";
-				const fullKey = `${baseKey}[${field}]${operatorSegment}`;
-				query[encodeURIComponent(fullKey)] = encodedValue;
-				conditionIndex++;
-			});
+		if (filter.operator === "or") processOrCondition(filter, ["filters"], query);
+		else if ("field" in filter && filter.field === "q") {
+			if (hasGlobalSearch) {
+				console.warn("Only one global search (q) filter allowed");
+				return;
+			}
+			hasGlobalSearch = true;
+			const processedCondition = processCondition(filter);
+			if (processedCondition) query[processedCondition.path.join("")] = processedCondition.value;
 		} else {
-			if (filter.field === "q" && hasGlobalSearch) throw new Error("Only one global search (q) filter allowed");
-			if (filter.field === "q") hasGlobalSearch = true;
-			const [key, value] = processCondition(filter).split("=");
-			query[encodeURIComponent(key)] = value;
+			const processedCondition = processCondition(filter);
+			if (processedCondition) {
+				const finalPath = ["filters", ...processedCondition.path];
+				const key = finalPath.reduce((acc, segment) => {
+					return acc ? `${acc}[${segment}]` : segment;
+				}, "");
+				query[key] = processedCondition.value;
+			}
 		}
 	});
 	return query;
@@ -862,53 +910,142 @@ const httpClient = (apiBase) => ky.extend({
 	prefixUrl: apiBase
 });
 
+var stringifyPrimitive = function(v) {
+  switch (typeof v) {
+    case 'string':
+      return v;
+
+    case 'boolean':
+      return v ? 'true' : 'false';
+
+    case 'number':
+      return isFinite(v) ? v : '';
+
+    default:
+      return '';
+  }
+};
+
+var encode = function(obj, sep, eq, name) {
+  sep = sep || '&';
+  eq = eq || '=';
+  if (obj === null) {
+    obj = undefined;
+  }
+
+  if (typeof obj === 'object') {
+    return Object.keys(obj).map(function(k) {
+      var ks = encodeURIComponent(stringifyPrimitive(k)) + eq;
+      if (Array.isArray(obj[k])) {
+        return obj[k].map(function(v) {
+          return ks + encodeURIComponent(stringifyPrimitive(v));
+        }).join(sep);
+      } else {
+        return ks + encodeURIComponent(stringifyPrimitive(obj[k]));
+      }
+    }).filter(Boolean).join(sep);
+
+  }
+
+  if (!name) return '';
+  return encodeURIComponent(stringifyPrimitive(name)) + eq +
+         encodeURIComponent(stringifyPrimitive(obj));
+};
+
+var stringify;
+stringify = encode;
+
 //#region src/provider.ts
-const dataProvider = (apiUrl) => ({
-	async create({ meta, resource, variables }) {
+const addParam = (key, value, queryParams) => {
+	if (value !== void 0) queryParams[key] = value;
+};
+const dataProvider = (apiUrl) => {
+	const baseFetch = async (url, method, payload, queryParams) => {
+		const searchParams = queryParams ? `?${stringify(queryParams)}` : "";
+		const fullUrl = `${url}${searchParams}`;
+		const options = {
+			headers: { "Content-Type": "application/json" },
+			...payload ? { json: payload } : {},
+			searchParams: queryParams,
+			throwHttpErrors: false
+		};
 		try {
+			let response;
+			switch (method.toUpperCase()) {
+				case "GET":
+					response = await httpClient(apiUrl).get(fullUrl, options);
+					break;
+				case "POST":
+					response = await httpClient(apiUrl).post(fullUrl, options);
+					break;
+				case "PUT":
+					response = await httpClient(apiUrl).put(fullUrl, options);
+					break;
+				case "PATCH":
+					response = await httpClient(apiUrl).patch(fullUrl, options);
+					break;
+				case "DELETE":
+					response = await httpClient(apiUrl).delete(fullUrl, options);
+					break;
+				default: throw new Error(`Unsupported HTTP method: ${method}`);
+			}
+			if (response instanceof Response && !response.ok) try {
+				const errorBody = await response.json();
+				throw new Error(errorBody.message || `HTTP error ${response.status}`);
+			} catch (jsonError) {
+				throw new Error(`HTTP error ${response.status}: Could not parse error body`);
+			}
+			return response;
+		} catch (error) {
+			console.error(`Fetch error for ${method} ${fullUrl}:`, error);
+			return Promise.reject(error);
+		}
+	};
+	return {
+		create: async ({ meta, resource, variables }) => {
 			const url = generateNestedUrl({
 				apiBase: apiUrl,
 				meta,
 				resource
 			});
-			const response = await httpClient(apiUrl).post(url, { json: variables });
+			const response = await baseFetch(url, "POST", variables);
 			const data = await response.json();
 			return { data };
-		} catch (error) {
-			return Promise.reject(error);
-		}
-	},
-	async custom({ meta, method, payload, url: operation }) {
-		try {
+		},
+		custom: async ({ meta, method, payload, url: operation, filters, sorters }) => {
 			const baseUrl = generateNestedUrl({
 				apiBase: apiUrl,
 				meta,
 				operation
 			});
-			const response = await httpClient(apiUrl)[method.toLowerCase()](baseUrl, { json: payload });
-			return { data: await response.json() };
-		} catch (error) {
-			return Promise.reject(error);
-		}
-	},
-	async deleteOne({ id, meta, resource, variables }) {
-		try {
+			const filterParams = generateFilter(filters);
+			const sortParams = generateSort(sorters);
+			const queryParams = {};
+			Object.entries(filterParams).forEach(([key, value]) => addParam(key, value, queryParams));
+			Object.entries(sortParams).forEach(([key, value]) => addParam(key, value, queryParams));
+			const response = await baseFetch(baseUrl, method.toUpperCase(), payload, queryParams);
+			if (response instanceof Response && !response.ok) try {
+				const errorBody = await response.json();
+				throw new Error(errorBody.message || `HTTP error ${response.status}`);
+			} catch (jsonError) {
+				throw new Error(`HTTP error ${response.status}: Could not parse error body`);
+			}
+			const data = await response.json();
+			return { data };
+		},
+		deleteOne: async ({ id, meta, resource, variables }) => {
 			const url = generateNestedUrl({
 				apiBase: apiUrl,
 				id,
 				meta,
 				resource
 			});
-			const response = await httpClient(apiUrl).delete(url, { json: variables });
+			const response = await baseFetch(url, "DELETE", variables);
 			const data = await response.json();
 			return { data };
-		} catch (error) {
-			return Promise.reject(error);
-		}
-	},
-	getApiUrl: () => apiUrl,
-	async getList({ filters, meta: _meta, pagination, resource, sorters }) {
-		try {
+		},
+		getApiUrl: () => apiUrl,
+		getList: async ({ filters, meta: _meta, pagination, resource, sorters }) => {
 			const meta = _meta?.paramsMap ? {
 				..._meta,
 				params: _meta.paramsMap,
@@ -919,57 +1056,71 @@ const dataProvider = (apiUrl) => ({
 				meta,
 				resource
 			});
-			const queryParams = {
-				...generateFilter(filters),
-				...generateSort(sorters),
-				_page: pagination?.current,
-				_per_page: pagination?.pageSize
-			};
-			const response = await httpClient(apiUrl).get(url, { searchParams: Object.entries(queryParams).filter(([, v]) => v !== void 0).reduce((acc, [k, v]) => ({
-				...acc,
-				[k]: v
-			}), {}) });
-			const data = await response.json();
-			const total = Number(response.headers.get("x-total-count")) || data.length;
-			return {
-				data,
-				total
-			};
-		} catch (error) {
-			return Promise.reject(error);
-		}
-	},
-	async getOne({ id, meta, resource }) {
-		try {
+			const filterParams = generateFilter(filters);
+			const sortParams = generateSort(sorters);
+			const queryParams = {};
+			Object.entries(filterParams).forEach(([key, value]) => addParam(key, value, queryParams));
+			Object.entries(sortParams).forEach(([key, value]) => addParam(key, value, queryParams));
+			addParam("_page", pagination?.current, queryParams);
+			addParam("_per_page", pagination?.pageSize, queryParams);
+			try {
+				const response = await httpClient(apiUrl).get(url, { searchParams: queryParams });
+				const data = await response.json();
+				let total = Number(response.headers.get("x-total-count"));
+				if (Number.isNaN(total) || total === 0) if ("total" in data && typeof data.total === "number") total = data.total;
+				else {
+					total = 0;
+					console.warn("Total count not found in headers or data.");
+				}
+				if ("data" in data && Array.isArray(data.data)) return {
+					data: data.data,
+					total
+				};
+				return {
+					data: [],
+					total: 0
+				};
+			} catch (error) {
+				console.error("Error fetching list:", error);
+				return Promise.reject(error);
+			}
+		},
+		getOne: async ({ id, meta, resource }) => {
 			const url = generateNestedUrl({
 				apiBase: apiUrl,
 				id,
 				meta,
 				resource
 			});
-			const response = await httpClient(apiUrl).get(url);
+			const response = await baseFetch(url, "GET");
+			if (response instanceof Response && !response.ok) try {
+				const errorBody = await response.json();
+				throw new Error(errorBody.message || `HTTP error ${response.status}`);
+			} catch (jsonError) {
+				throw new Error(`HTTP error ${response.status}: Could not parse error body`);
+			}
 			const data = await response.json();
 			return { data };
-		} catch (error) {
-			return Promise.reject(error);
-		}
-	},
-	async update({ id, meta, resource, variables }) {
-		try {
+		},
+		update: async ({ id, meta, resource, variables }) => {
 			const url = generateNestedUrl({
 				apiBase: apiUrl,
 				id,
 				meta,
 				resource
 			});
-			const response = await httpClient(apiUrl).patch(url, { json: variables });
+			const response = await baseFetch(url, "PATCH", variables);
+			if (response instanceof Response && !response.ok) try {
+				const errorBody = await response.json();
+				throw new Error(errorBody.message || `HTTP error ${response.status}`);
+			} catch (jsonError) {
+				throw new Error(`HTTP error ${response.status}: Could not parse error body`);
+			}
 			const data = await response.json();
 			return { data };
-		} catch (error) {
-			return Promise.reject(error);
 		}
-	}
-});
+	};
+};
 
 //#region src/index.ts
 var src_default = dataProvider;

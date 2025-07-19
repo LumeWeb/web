@@ -1,4 +1,4 @@
-import { React } from './core_core__loadShare__react__loadShare__-B-lUt_9_.js';
+import { React } from './core_core__loadShare__react__loadShare__-Dp0YNvAn.js';
 
 var isCheckBoxInput = (element) => element.type === 'checkbox';
 
@@ -2680,4 +2680,4 @@ function useForm(props = {}) {
     }), [formState, control]);
 }
 
-export { Controller, Form, FormProvider, HookFormContext, appendErrors, get, set, useController, useFieldArray, useForm, useFormContext, useFormState, useWatch };
+export { Controller, Form, FormProvider, appendErrors, get, set, useController, useFieldArray, useForm, useFormContext, useFormState, useWatch };

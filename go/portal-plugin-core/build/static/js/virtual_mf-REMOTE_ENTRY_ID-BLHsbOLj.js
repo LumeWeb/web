@@ -1,5 +1,5 @@
 import { index_cjs, core_core__mf_v__runtimeInit__mf_v__ } from './core_core__mf_v__runtimeInit__mf_v__-DHIRDVBI.js';
-import exposesMap from './virtualExposes-C96vNyvN.js';
+import exposesMap from './virtualExposes-BPFHPbT6.js';
 
 const federationRuntime = { instance: null };
 function BridgeReactPlugin() {
@@ -14,54 +14,80 @@ function BridgeReactPlugin() {
 
 const importMap = {
       
+        "@lumeweb/portal-framework-core": async () => {
+          let pkg = await import('./index-4B1xCX4E.js');
+          return pkg
+        }
+      ,
         "@lumeweb/portal-framework-ui": async () => {
-          let pkg = await import('./index-D20d8pRf.js');
+          let pkg = await import('./index-CQz8blk9.js');
           return pkg
         }
       ,
         "react-router": async () => {
-          let pkg = await import('./index-zgkZEYKh.js');
-          return pkg
-        }
-      ,
-        "@lumeweb/portal-framework-core": async () => {
-          let pkg = await import('./index-C7GjSNId.js');
+          let pkg = await import('./index-Bfjq3lzp.js');
           return pkg
         }
       ,
         "react": async () => {
-          let pkg = await import('./index-BKdn_oPW.js').then(n => n.index);
+          let pkg = await import('./index-DEOrzHNV.js').then(n => n.index);
           return pkg
         }
       ,
         "@lumeweb/portal-framework-ui-core": async () => {
-          let pkg = await import('./index-C3oj82fp.js');
+          let pkg = await import('./index-D91LsUZd.js');
           return pkg
         }
       ,
         "@refinedev/core": async () => {
-          let pkg = await import('./index-TuPZtxeC.js');
+          let pkg = await import('./index-Dd59g-Y1.js');
           return pkg
         }
       ,
         "react-hook-form": async () => {
-          let pkg = await import('./index.esm-BXcl734w.js');
+          let pkg = await import('./index.esm-BJJne0QF.js');
           return pkg
         }
       ,
         "react-dom": async () => {
-          let pkg = await import('./index-CJMKG0vD.js').then(n => n.index);
+          let pkg = await import('./index-9SDGGjt4.js').then(n => n.index);
           return pkg
         }
       ,
         "@tanstack/react-query": async () => {
-          let pkg = await import('./index-BFVNL9x2.js');
+          let pkg = await import('./index-Cpj4nw-y.js');
           return pkg
         }
       
     };
       const usedShared = {
       
+          "@lumeweb/portal-framework-core": {
+            name: "@lumeweb/portal-framework-core",
+            version: "0.0.0",
+            scope: ["default"],
+            loaded: false,
+            from: "core:core",
+            async get () {
+              usedShared["@lumeweb/portal-framework-core"].loaded = true;
+              const {"@lumeweb/portal-framework-core": pkgDynamicImport} = importMap; 
+              const res = await pkgDynamicImport();
+              const exportModule = {...res};
+              // All npm packages pre-built by vite will be converted to esm
+              Object.defineProperty(exportModule, "__esModule", {
+                value: true,
+                enumerable: false
+              });
+              return function () {
+                return exportModule
+              }
+            },
+            shareConfig: {
+              singleton: true,
+              requiredVersion: "^0.0.0"
+            }
+          }
+        ,
           "@lumeweb/portal-framework-ui": {
             name: "@lumeweb/portal-framework-ui",
             version: "0.0.0",
@@ -90,7 +116,7 @@ const importMap = {
         ,
           "react-router": {
             name: "react-router",
-            version: "7.6.0",
+            version: "7.5.0",
             scope: ["default"],
             loaded: false,
             from: "core:core",
@@ -110,33 +136,7 @@ const importMap = {
             },
             shareConfig: {
               singleton: true,
-              requiredVersion: "^7.6.0"
-            }
-          }
-        ,
-          "@lumeweb/portal-framework-core": {
-            name: "@lumeweb/portal-framework-core",
-            version: "0.0.0",
-            scope: ["default"],
-            loaded: false,
-            from: "core:core",
-            async get () {
-              usedShared["@lumeweb/portal-framework-core"].loaded = true;
-              const {"@lumeweb/portal-framework-core": pkgDynamicImport} = importMap; 
-              const res = await pkgDynamicImport();
-              const exportModule = {...res};
-              // All npm packages pre-built by vite will be converted to esm
-              Object.defineProperty(exportModule, "__esModule", {
-                value: true,
-                enumerable: false
-              });
-              return function () {
-                return exportModule
-              }
-            },
-            shareConfig: {
-              singleton: true,
-              requiredVersion: "^0.0.0"
+              requiredVersion: "^7.5.0"
             }
           }
         ,
