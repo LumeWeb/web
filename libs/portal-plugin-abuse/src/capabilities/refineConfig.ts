@@ -50,6 +50,12 @@ export class Capability implements RefineConfigCapability {
             template: "/abuse/cases/:caseId/communications",
           },
         },
+        {
+          name: RefineResource.CaseEvidence,
+          meta: {
+            template: "/abuse/cases/:caseId/communications",
+          },
+        },
       ],
       ...existing,
     };

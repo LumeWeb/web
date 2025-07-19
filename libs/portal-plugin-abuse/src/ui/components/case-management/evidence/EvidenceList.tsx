@@ -42,7 +42,7 @@ export function EvidenceList({ caseId }: EvidenceListProps) {
     pagination: {
       pageSize: 10,
     },
-    resource: RefineResource.Evidence,
+    resource: RefineResource.CaseEvidence,
   });
 
   const handleViewDetails = (evidence: EvidenceResponse) => {
@@ -52,18 +52,18 @@ export function EvidenceList({ caseId }: EvidenceListProps) {
 
   const handleDownload = (evidenceId: number) => {
     // In a real app, this would download the file
-    window.open(`/api/evidence/${evidenceId}/content`, "_blank");
+    window.open(`/api/abuse/evidence/${evidenceId}/content`, "_blank");
   };
 
   const getSourceLabel = (source: EvidenceSource) => {
     switch (source) {
-      case EvidenceSource.API:
+      case EvidenceSource.api:
         return "API";
-      case EvidenceSource.Email:
+      case EvidenceSource.email:
         return "Email";
-      case EvidenceSource.System:
+      case EvidenceSource.system:
         return "System";
-      case EvidenceSource.WebUpload:
+      case EvidenceSource.web_upload:
         return "Web Upload";
       default:
         return source;
@@ -128,16 +128,16 @@ export function EvidenceList({ caseId }: EvidenceListProps) {
                 {evidenceFiles.map((evidence) => (
                   <TableRow key={evidence.id}>
                     <TableCell className="flex items-center gap-2">
-                      {getFileTypeIcon(evidence.contentType)}
+                      {getFileTypeIcon(evidence.content_type)}
                       <span className="truncate max-w-[200px]">
-                        {evidence.fileName}
+                        {evidence.file_name}
                       </span>
                     </TableCell>
-                    <TableCell>{evidence.contentType}</TableCell>
-                    <TableCell>{formatFileSize(evidence.fileSize)}</TableCell>
+                    <TableCell>{evidence.content_type}</TableCell>
+                    <TableCell>{formatFileSize(evidence.file_size)}</TableCell>
                     <TableCell>{getSourceLabel(evidence.source)}</TableCell>
                     <TableCell>
-                      {format(new Date(evidence.createdAt), "MMM d, yyyy")}
+                      {format(new Date(evidence.created_at), "MMM d, yyyy")}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

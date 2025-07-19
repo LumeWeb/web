@@ -151,7 +151,7 @@ export function SubjectScanPanel({ caseId, subjectId }: SubjectScanPanelProps) {
             Clean
           </Badge>
         );
-      case ScanStatus.error:
+      case ScanStatus.failed:
         return (
           <Badge
             className="bg-orange-100 text-orange-800 hover:bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400"
@@ -169,7 +169,7 @@ export function SubjectScanPanel({ caseId, subjectId }: SubjectScanPanelProps) {
             Flagged
           </Badge>
         );
-      case ScanStatus.pending:
+      case ScanStatus.in_progress:
       default:
         return (
           <Badge
@@ -229,20 +229,20 @@ export function SubjectScanPanel({ caseId, subjectId }: SubjectScanPanelProps) {
               {getSubjectTypeIcon()}
               <h3 className="font-medium">Subject Details</h3>
             </div>
-            <Badge variant="outline">{subject.type.toUpperCase()}</Badge>
+            <Badge variant="outline">{subject.type?.toUpperCase()}</Badge>
           </div>
 
           <div className="mb-4">
             <p className="text-sm font-mono break-all">{subject.identifier}</p>
-            {subject.source_url && (
+            {subject?.source_url && (
               <p className="text-xs text-muted-foreground mt-1">
                 Source:{" "}
                 <a
                   className="hover:underline"
-                  href={subject.source_url}
+                  href={subject?.source_url}
                   rel="noopener noreferrer"
                   target="_blank">
-                  {subject.source_url}
+                  {subject?.source_url}
                 </a>
               </p>
             )}

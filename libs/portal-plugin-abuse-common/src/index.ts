@@ -75,6 +75,7 @@ export enum RefineResource {
   Case = "cases",
   Communication = "communication",
   CaseCommunication = "case.communication",
+  CaseEvidence = "case.evidence",
   Evidence = "evidence",
   Reporter = "reporter",
   ReporterCase = "reporter-case",
