@@ -2268,7 +2268,7 @@ function UserInfoCard({
   if (!data) {
     return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: "User not found." });
   }
-  const user = data;
+  const user = data?.data;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Card, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CardHeader, { className: "pb-2", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CardTitle, { className: "text-base font-medium flex items-center gap-2", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(User, { className: "h-4 w-4" }),
