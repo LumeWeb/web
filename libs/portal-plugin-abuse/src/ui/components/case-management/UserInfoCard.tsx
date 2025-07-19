@@ -40,12 +40,7 @@ export function UserInfoCard({
     return <div>User not found.</div>;
   }
 
-  const user = data;
-
-  // TODO: Implement
-  /*  const previousCount = isReporter
-    ? (user as ReporterResponse).previousReports
-    : (user as SubjectResponse).previousViolations;*/
+  const user = data?.data;
 
   return (
     <Card>
