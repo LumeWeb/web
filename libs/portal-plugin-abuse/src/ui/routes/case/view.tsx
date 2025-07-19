@@ -621,9 +621,9 @@ function CaseViewContent({ id }: { id: BaseKey }) {
               <UserInfoCard
                 isReporter={true}
                 title="Reporter"
-                user={record.reporter_id}
+                id={record.reporter_id}
               />
-              <UserInfoCard title="Subject" user={record.subject_id} />
+              <UserInfoCard title="Subject" id={record.subject_id} />
               {/* @ts-ignore */}
               <RiskFactorsCard riskFactors={record?.riskFactors} />
               <CaseActions
