@@ -1,9 +1,9 @@
 import { index_cjs } from './core_abuse__mf_v__runtimeInit__mf_v__-BhTJRpXJ.js';
 import { React, core_abuse__loadShare__react__loadShare__ } from './core_abuse__loadShare__react__loadShare__-BrHXNZXB.js';
-import { federationRuntime } from './virtual_mf-REMOTE_ENTRY_ID-CakXdazK.js';
+import { federationRuntime } from './virtual_mf-REMOTE_ENTRY_ID-CIRONXJv.js';
 import { core_abuse__loadShare__react_mf_2_dom__loadShare__ } from './core_abuse__loadShare__react_mf_2_dom__loadShare__-CgnY3flI.js';
 import './index-C__1Ej_O.js';
-import { core_abuse__loadShare__react_mf_2_router__loadShare__ } from './core_abuse__loadShare__react_mf_2_router__loadShare__-FO0Yg0OQ.js';
+import { core_abuse__loadShare__react_mf_2_router__loadShare__ } from './core_abuse__loadShare__react_mf_2_router__loadShare__-D1HF2urY.js';
 import { z } from './index-DESmQ-Cl.js';
 import { getDefaultExportFromCjs } from './_commonjsHelpers-BILit0S-.js';
 import { jsxRuntimeExports } from './jsx-runtime-dlxeb5L7.js';

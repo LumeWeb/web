@@ -11,7 +11,7 @@ import { FileText } from './file-text-lxKDeUfn.js';
 import { Search } from './search-V2RKDEqx.js';
 import { X } from './x-Cbh8VDn9.js';
 import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CZ-6RiII.js';
-import { core_abuse__loadShare__react_mf_2_router__loadShare__ } from './core_abuse__loadShare__react_mf_2_router__loadShare__-FO0Yg0OQ.js';
+import { core_abuse__loadShare__react_mf_2_router__loadShare__ } from './core_abuse__loadShare__react_mf_2_router__loadShare__-D1HF2urY.js';
 
 function useDebounce(value, delay) {
   const [debouncedValue, setDebouncedValue] = core_abuse__loadShare__react__loadShare__.useState(value);
