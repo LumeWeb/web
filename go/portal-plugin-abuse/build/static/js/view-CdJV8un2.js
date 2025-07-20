@@ -944,25 +944,25 @@ function StatusSwitch({
       className: "text-blue-700 dark:text-blue-400",
       icon: /* @__PURE__ */ jsxRuntimeExports.jsx(CircleDot, { className: "h-4 w-4 text-blue-500" }),
       label: "New",
-      value: CaseStatus.New
+      value: CaseStatus.new
     },
     {
       className: "text-yellow-700 dark:text-yellow-400",
       icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-4 w-4 text-yellow-500" }),
       label: "In Progress",
-      value: CaseStatus.InProgress
+      value: CaseStatus.in_progress
     },
     {
       className: "text-green-700 dark:text-green-400",
       icon: /* @__PURE__ */ jsxRuntimeExports.jsx(CircleCheck, { className: "h-4 w-4 text-green-500" }),
       label: "Resolved",
-      value: CaseStatus.Resolved
+      value: CaseStatus.resolved
     },
     {
       className: "text-gray-700 dark:text-gray-400",
       icon: /* @__PURE__ */ jsxRuntimeExports.jsx(CircleX, { className: "h-4 w-4 text-gray-500" }),
       label: "Closed",
-      value: CaseStatus.Closed
+      value: CaseStatus.closed
     }
   ];
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -2206,25 +2206,25 @@ function PrioritySwitch({
       className: "text-green-700 dark:text-green-400",
       icon: /* @__PURE__ */ jsxRuntimeExports.jsx(CircleCheck, { className: "h-4 w-4 text-green-500" }),
       label: "Low",
-      value: CasePriority.Low
+      value: CasePriority.low
     },
     {
       className: "text-blue-700 dark:text-blue-400",
       icon: /* @__PURE__ */ jsxRuntimeExports.jsx(CircleAlert, { className: "h-4 w-4 text-blue-500" }),
       label: "Medium",
-      value: CasePriority.Medium
+      value: CasePriority.medium
     },
     {
       className: "text-orange-700 dark:text-orange-400",
       icon: /* @__PURE__ */ jsxRuntimeExports.jsx(TriangleAlert, { className: "h-4 w-4 text-orange-500" }),
       label: "High",
-      value: CasePriority.High
+      value: CasePriority.high
     },
     {
       className: "text-red-700 dark:text-red-400",
       icon: /* @__PURE__ */ jsxRuntimeExports.jsx(CircleAlert, { className: "h-4 w-4 text-red-500" }),
       label: "Critical",
-      value: CasePriority.Critical
+      value: CasePriority.critical
     }
   ];
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
