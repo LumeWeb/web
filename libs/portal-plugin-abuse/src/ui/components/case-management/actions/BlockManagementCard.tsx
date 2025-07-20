@@ -6,6 +6,7 @@ import {
 } from "@/types/blocklist";
 import { CaseStatus } from "@/types/case";
 import { RefineResource } from "@/types/resources";
+import { useShow } from "@refinedev/core";
 import {
   Button,
   Card,
@@ -27,6 +28,7 @@ import {
 import { useCustomMutation, useNotification } from "@refinedev/core";
 import { Shield, ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
 import React, { useState } from "react";
+import { SubjectResponse } from "@/types/subject";
 
 interface BlockManagementCardProps {
   caseId: number;
@@ -34,7 +36,6 @@ interface BlockManagementCardProps {
   onRefresh?: () => void;
   onStatusChange: (status: CaseStatus, comment: string) => Promise<void>;
   subjectId: number;
-  subjectName: string;
 }
 
 export function BlockManagementCard({
@@ -43,12 +44,19 @@ export function BlockManagementCard({
   onRefresh,
   onStatusChange,
   subjectId,
-  subjectName,
 }: BlockManagementCardProps) {
+  const {
+    queryResult: { data: subjectData },
+  } = useShow<SubjectResponse>({
+    resource: RefineResource.Subject,
+    id: subjectId,
+  });
+
+  const subjectName = subjectData?.data.identifier || `Subject ${subjectId}`;
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [unblockDialogOpen, setUnblockDialogOpen] = useState(false);
   const [blockReason, setBlockReason] = useState<BlockReason>(
-    BlockReason.Policy,
+    BlockReason.system_policy,
   );
   const [blockNotes, setBlockNotes] = useState("");
   const [unblockNotes, setUnblockNotes] = useState("");
@@ -68,24 +76,23 @@ export function BlockManagementCard({
         method: "post",
         url: RefineResource.Blocklist,
         values: {
-          action: BlockAction.Reject,
+          action: BlockAction.reject,
           caseId,
           description:
             blockNotes ||
             `Subject blocked due to ${blockReason.replace("_", " ")}`,
-          fileName: `subject-${subjectId}.block`,
-          hash: `subject-${subjectId}`,
-          mimeType: "application/x-subject",
+          hash: subjectData?.data?.identifier,
+          mimeType: subjectData?.data?.mime_type || undefined,
           reason: blockReason,
-          severity: BlockSeverity.High,
-          size: 0,
-          source: BlockSource.Admin,
+          severity: BlockSeverity.high,
+          size: subjectData?.data?.size || undefined,
+          source: BlockSource.admin,
           uploaderId: subjectId,
         },
       },
       {
         onError: (error) => {
-          openNotification({
+          openNotification?.({
             description:
               error?.message || "An error occurred while blocking the subject.",
             message: "Failed to block subject",
@@ -93,7 +100,7 @@ export function BlockManagementCard({
           });
         },
         onSuccess: async () => {
-          openNotification({
+          openNotification?.({
             description: `${subjectName} has been blocked successfully.`,
             message: "Subject blocked",
             type: "success",
@@ -101,7 +108,7 @@ export function BlockManagementCard({
 
           // Mark case as resolved
           await onStatusChange(
-            CaseStatus.Resolved,
+            CaseStatus.resolved,
             `Case resolved due to subject being blocked. Reason: ${blockReason.replace("_", " ")}`,
           );
 
@@ -117,11 +124,12 @@ export function BlockManagementCard({
     unblockSubject(
       {
         method: "delete",
-        url: `blocklist/subject-${subjectId}`,
+        url: `/abuse/blocklist/${subjectData?.data?.identifier || `subject-${subjectId}`}`,
+        values: {},
       },
       {
         onError: (error) => {
-          openNotification({
+          openNotification?.({
             description:
               error?.message ||
               "An error occurred while unblocking the subject.",
@@ -130,7 +138,7 @@ export function BlockManagementCard({
           });
         },
         onSuccess: () => {
-          openNotification({
+          openNotification?.({
             description: `${subjectName} has been unblocked successfully.`,
             message: "Subject unblocked",
             type: "success",
@@ -203,32 +211,32 @@ export function BlockManagementCard({
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem
                             id="policy"
-                            value={BlockReason.Policy}
+                            value={BlockReason.system_policy}
                           />
                           <Label htmlFor="policy">Policy Violation</Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem
                             id="harassment"
-                            value={BlockReason.Harassment}
+                            value={BlockReason.harassment}
                           />
                           <Label htmlFor="harassment">Harassment</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem id="spam" value={BlockReason.Spam} />
+                          <RadioGroupItem id="spam" value={BlockReason.spam} />
                           <Label htmlFor="spam">Spam</Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem
                             id="hate-speech"
-                            value={BlockReason.HateSpeech}
+                            value={BlockReason.hate_speech}
                           />
                           <Label htmlFor="hate-speech">Hate Speech</Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem
                             id="malware"
-                            value={BlockReason.Malware}
+                            value={BlockReason.malware}
                           />
                           <Label htmlFor="malware">Malware</Label>
                         </div>
