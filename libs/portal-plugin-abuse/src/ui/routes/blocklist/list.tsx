@@ -7,7 +7,7 @@ import React from "react";
 
 export default function List() {
   return (
-    <div className="container mx-auto py-6">
+    <div className="mx-auto py-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-background">

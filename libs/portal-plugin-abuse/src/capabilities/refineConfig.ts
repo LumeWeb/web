@@ -29,6 +29,14 @@ export class Capability implements RefineConfigCapability {
           show: "/abuse/cases/:id",
         },
         {
+          name: RefineResource.Blocklist,
+          meta: {
+            template: "/abuse/blocklist",
+          },
+          list: "/abuse/blocklist",
+          show: "/abuse/blocklist/:id",
+        },
+        {
           name: RefineResource.Reporter,
           meta: {
             template: "/abuse/reporters",
