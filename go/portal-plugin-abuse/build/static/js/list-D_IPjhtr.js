@@ -391,7 +391,7 @@ function BlocklistTable() {
 }
 
 function List() {
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "container mx-auto py-6", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mx-auto py-6", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6 flex items-center justify-between", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-2xl font-semibold text-background", children: "Content Blocklist" }),
