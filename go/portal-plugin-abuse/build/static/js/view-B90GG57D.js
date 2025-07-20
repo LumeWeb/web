@@ -285,12 +285,13 @@ function BlockManagementCard({
   const [unblockNotes, setUnblockNotes] = core_abuse__loadShare__react__loadShare__.useState("");
   const { open: openNotification } = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useNotification();
   const { isLoading: isBlocking, mutate: blockSubject } = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useCustomMutation();
+  const apiUrl = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useApiUrl();
   const { isLoading: isUnblocking, mutate: unblockSubject } = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useCustomMutation();
   const handleBlock = async () => {
     blockSubject(
       {
         method: "post",
-        url: RefineResource.Blocklist,
+        url: `${apiUrl}/abuse/${RefineResource.Blocklist}`,
         values: {
           action: BlockAction.reject,
           caseId,
@@ -333,7 +334,7 @@ function BlockManagementCard({
     unblockSubject(
       {
         method: "delete",
-        url: `/abuse/blocklist/${subjectData?.data?.identifier || `subject-${subjectId}`}`,
+        url: `${apiUrl}/abuse/${RefineResource.Blocklist}/${subjectData?.data?.identifier}`,
         values: {}
       },
       {
