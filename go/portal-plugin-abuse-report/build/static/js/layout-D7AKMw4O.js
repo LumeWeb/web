@@ -105,4 +105,4 @@ function _ReportLayout() {
 }
 const ReportLayout = core_abuse_mf_2_report__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.withTheme(_ReportLayout);
 
-export { ReportLayout };
+export { ReportLayout as default };
