@@ -32,7 +32,7 @@ function _View({ openUploadDialog }: { openUploadDialog: () => void }) {
   if (isLoading) return <div>Loading case details...</div>;
   if (isError || !caseData) return <div>Error loading case details</div>;
 
-  const isCaseClosed = caseData.status === CaseStatus.Closed;
+  const isCaseClosed = caseData.status === CaseStatus.closed;
   const attachments = caseData.attachments || [];
 
   const communicationSchema = z.object({
@@ -81,11 +81,11 @@ function _View({ openUploadDialog }: { openUploadDialog: () => void }) {
 
   const statusVariant = () => {
     switch (caseData.status) {
-      case CaseStatus.Closed:
+      case CaseStatus.closed:
         return "destructive";
-      case CaseStatus.InProgress:
+      case CaseStatus.in_progress:
         return "secondary";
-      case CaseStatus.Resolved:
+      case CaseStatus.resolved:
         return "success";
       default:
         return "default";
