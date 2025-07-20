@@ -1,7 +1,7 @@
 import { jsxRuntimeExports } from './jsx-runtime-dlxeb5L7.js';
 import { RefineResource } from './index-C3iL_nDr.js';
-import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CZ-6RiII.js';
 import { core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__-QzxGLbUR.js';
+import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CZ-6RiII.js';
 import { core_abuse__loadShare__react__loadShare__ } from './core_abuse__loadShare__react__loadShare__-BrHXNZXB.js';
 import { BlockReason, BlockSource, BlockSeverity, BlockAction, CaseStatus, CommunicationType, CommunicationDirection, EvidenceSource, ScanStatus, CasePriority } from './badge-configs-BNOpu3VO.js';
 import { createLucideIcon } from './createLucideIcon-Bv-P5XEu.js';
@@ -267,13 +267,19 @@ function BlockManagementCard({
   isBlocked,
   onRefresh,
   onStatusChange,
-  subjectId,
-  subjectName
+  subjectId
 }) {
+  const {
+    queryResult: { data: subjectData }
+  } = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useShow({
+    resource: RefineResource.Subject,
+    id: subjectId
+  });
+  const subjectName = subjectData?.data.identifier || `Subject ${subjectId}`;
   const [blockDialogOpen, setBlockDialogOpen] = core_abuse__loadShare__react__loadShare__.useState(false);
   const [unblockDialogOpen, setUnblockDialogOpen] = core_abuse__loadShare__react__loadShare__.useState(false);
   const [blockReason, setBlockReason] = core_abuse__loadShare__react__loadShare__.useState(
-    BlockReason.Policy
+    BlockReason.system_policy
   );
   const [blockNotes, setBlockNotes] = core_abuse__loadShare__react__loadShare__.useState("");
   const [unblockNotes, setUnblockNotes] = core_abuse__loadShare__react__loadShare__.useState("");
@@ -286,35 +292,34 @@ function BlockManagementCard({
         method: "post",
         url: RefineResource.Blocklist,
         values: {
-          action: BlockAction.Reject,
+          action: BlockAction.reject,
           caseId,
           description: blockNotes || `Subject blocked due to ${blockReason.replace("_", " ")}`,
-          fileName: `subject-${subjectId}.block`,
-          hash: `subject-${subjectId}`,
-          mimeType: "application/x-subject",
+          hash: subjectData?.data?.identifier,
+          mimeType: subjectData?.data?.mime_type || void 0,
           reason: blockReason,
-          severity: BlockSeverity.High,
-          size: 0,
-          source: BlockSource.Admin,
+          severity: BlockSeverity.high,
+          size: subjectData?.data?.size || void 0,
+          source: BlockSource.admin,
           uploaderId: subjectId
         }
       },
       {
         onError: (error) => {
-          openNotification({
+          openNotification?.({
             description: error?.message || "An error occurred while blocking the subject.",
             message: "Failed to block subject",
             type: "error"
           });
         },
         onSuccess: async () => {
-          openNotification({
+          openNotification?.({
             description: `${subjectName} has been blocked successfully.`,
             message: "Subject blocked",
             type: "success"
           });
           await onStatusChange(
-            CaseStatus.Resolved,
+            CaseStatus.resolved,
             `Case resolved due to subject being blocked. Reason: ${blockReason.replace("_", " ")}`
           );
           setBlockDialogOpen(false);
@@ -328,18 +333,19 @@ function BlockManagementCard({
     unblockSubject(
       {
         method: "delete",
-        url: `blocklist/subject-${subjectId}`
+        url: `/abuse/blocklist/${subjectData?.data?.identifier || `subject-${subjectId}`}`,
+        values: {}
       },
       {
         onError: (error) => {
-          openNotification({
+          openNotification?.({
             description: error?.message || "An error occurred while unblocking the subject.",
             message: "Failed to unblock subject",
             type: "error"
           });
         },
         onSuccess: () => {
-          openNotification({
+          openNotification?.({
             description: `${subjectName} has been unblocked successfully.`,
             message: "Subject unblocked",
             type: "success"
@@ -395,7 +401,7 @@ function BlockManagementCard({
                         core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.RadioGroupItem,
                         {
                           id: "policy",
-                          value: BlockReason.Policy
+                          value: BlockReason.system_policy
                         }
                       ),
                       /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, { htmlFor: "policy", children: "Policy Violation" })
@@ -405,13 +411,13 @@ function BlockManagementCard({
                         core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.RadioGroupItem,
                         {
                           id: "harassment",
-                          value: BlockReason.Harassment
+                          value: BlockReason.harassment
                         }
                       ),
                       /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, { htmlFor: "harassment", children: "Harassment" })
                     ] }),
                     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.RadioGroupItem, { id: "spam", value: BlockReason.Spam }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.RadioGroupItem, { id: "spam", value: BlockReason.spam }),
                       /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, { htmlFor: "spam", children: "Spam" })
                     ] }),
                     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
@@ -419,7 +425,7 @@ function BlockManagementCard({
                         core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.RadioGroupItem,
                         {
                           id: "hate-speech",
-                          value: BlockReason.HateSpeech
+                          value: BlockReason.hate_speech
                         }
                       ),
                       /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, { htmlFor: "hate-speech", children: "Hate Speech" })
@@ -429,7 +435,7 @@ function BlockManagementCard({
                         core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.RadioGroupItem,
                         {
                           id: "malware",
-                          value: BlockReason.Malware
+                          value: BlockReason.malware
                         }
                       ),
                       /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, { htmlFor: "malware", children: "Malware" })
