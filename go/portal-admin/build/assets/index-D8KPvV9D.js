@@ -4,7 +4,7 @@ import { a as admin__loadShare__react_mf_2_router__loadShare__, C as CircleAlert
 import { a as admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__, R as ReloadIcon, F as FontBoldIcon, b as FontItalicIcon, U as UnderlineIcon, g as get_1, _ as _baseIsEqual, X as X$4, S as Search, C as Calendar, c as ChevronLeft, d as ChevronRight } from "./_baseIsEqual-CDmbb0mw.js";
 import { a as admin__loadShare__react__loadShare__, R as React$1 } from "./admin__loadShare__react__loadShare__-C1ovXSRa.js";
 import { c as commonjsGlobal, g as getDefaultExportFromCjs } from "./_commonjsHelpers-DWwsNxpa.js";
-import { u as castPath, q as toKey, b as isLength, n as isIndex, i as isArray, a as isArguments, s as get, D as Dn$1 } from "./index-B90HCQcT.js";
+import { u as castPath, q as toKey, b as isLength, n as isIndex, i as isArray, a as isArguments, s as get, D as Dn$1 } from "./index-CzJLPSgC.js";
 import { c as createLucideIcon } from "./createLucideIcon-BzDmmRa9.js";
 import { s as shimExports } from "./index-BtSAyZnk.js";
 import { z as z$6 } from "./index-Dq110QZ7.js";
@@ -30030,7 +30030,10 @@ function DesktopSidebar() {
       className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
         "hidden md:flex",
         "flex flex-col fixed top-0 left-0 z-20 h-screen -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300",
-        isCollapsed ? "w-[5%]" : "w-[10%]"
+        {
+          "sm:w-[20%] lg:w-[10%]": !isCollapsed,
+          "sm:w-[10%] lg:w-[5%]": isCollapsed
+        }
       ),
       children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(SidebarToggle, { setIsOpen: toggleCollapsed, isOpen: !isCollapsed }),
