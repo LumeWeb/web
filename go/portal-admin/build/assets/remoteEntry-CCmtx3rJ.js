@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-B0OThK7f.js","assets/_commonjsHelpers-DWwsNxpa.js","assets/index-DWdysHa2.js","assets/admin__loadShare__react_mf_2_dom__loadShare__-CmlR8Dnz.js","assets/admin__loadShare__react__loadShare__-C1ovXSRa.js","assets/admin__mf_v__runtimeInit__mf_v__-CrLwvomy.js","assets/circle-alert-Bliazfs-.js","assets/createLucideIcon-BzDmmRa9.js","assets/_baseIsEqual-CDmbb0mw.js","assets/index-B90HCQcT.js","assets/index-BtSAyZnk.js","assets/index-Dq110QZ7.js","assets/index-Sc5xQAUH.js","assets/index-UUCixPiW.js","assets/index-C2JB6E8T.js","assets/index-SoLr86f9.js","assets/index-j0T4rkAH.js","assets/index--9EazPJd.js","assets/index.esm-BCInxeWc.js","assets/index-Cp7-DRlg.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-B0OThK7f.js","assets/_commonjsHelpers-DWwsNxpa.js","assets/index-BUqlbl1W.js","assets/admin__loadShare__react_mf_2_dom__loadShare__-CmlR8Dnz.js","assets/admin__loadShare__react__loadShare__-C1ovXSRa.js","assets/admin__mf_v__runtimeInit__mf_v__-CrLwvomy.js","assets/circle-alert-MQIeVBbL.js","assets/createLucideIcon-BzDmmRa9.js","assets/_baseIsEqual-CDmbb0mw.js","assets/index-B90HCQcT.js","assets/index-BtSAyZnk.js","assets/index-Dq110QZ7.js","assets/index-Sc5xQAUH.js","assets/index-UUCixPiW.js","assets/index--9EazPJd.js","assets/index-BQPlW0yV.js","assets/index-SoLr86f9.js","assets/index-j0T4rkAH.js","assets/index.esm-BCInxeWc.js","assets/index-Cp7-DRlg.js"])))=>i.map(i=>d[i]);
 import { i as index_cjs, a as admin__mf_v__runtimeInit__mf_v__ } from "./admin__mf_v__runtimeInit__mf_v__-CrLwvomy.js";
 import exposesMap from "./virtualExposes-Dff6wIYf.js";
 import { _ as __vitePreload } from "./preload-helper-BkSzTOHT.js";
@@ -8,7 +8,7 @@ const importMap = {
     return pkg;
   },
   "@lumeweb/portal-framework-ui": async () => {
-    let pkg = await __vitePreload(() => import("./index-DWdysHa2.js"), true ? __vite__mapDeps([2,3,4,1,5,6,7,8,9,10,11]) : void 0);
+    let pkg = await __vitePreload(() => import("./index-BUqlbl1W.js"), true ? __vite__mapDeps([2,3,4,1,5,6,7,8,9,10,11]) : void 0);
     return pkg;
   },
   "react-dom": async () => {
@@ -19,16 +19,16 @@ const importMap = {
     let pkg = await __vitePreload(() => import("./index-UUCixPiW.js"), true ? __vite__mapDeps([13,4,1,5,3,8,7,10]) : void 0);
     return pkg;
   },
-  "@lumeweb/portal-framework-core": async () => {
-    let pkg = await __vitePreload(() => import("./index-C2JB6E8T.js"), true ? __vite__mapDeps([14,5,4,1,3,15,6,7,16,11]) : void 0);
+  "@refinedev/core": async () => {
+    let pkg = await __vitePreload(() => import("./index--9EazPJd.js"), true ? __vite__mapDeps([14,4,1,5,9]) : void 0);
     return pkg;
   },
-  "@refinedev/core": async () => {
-    let pkg = await __vitePreload(() => import("./index--9EazPJd.js"), true ? __vite__mapDeps([17,4,1,5,9]) : void 0);
+  "@lumeweb/portal-framework-core": async () => {
+    let pkg = await __vitePreload(() => import("./index-BQPlW0yV.js"), true ? __vite__mapDeps([15,5,4,1,3,16,6,7,17,11]) : void 0);
     return pkg;
   },
   "react-router": async () => {
-    let pkg = await __vitePreload(() => import("./index-SoLr86f9.js"), true ? __vite__mapDeps([15,4,1,5]) : void 0);
+    let pkg = await __vitePreload(() => import("./index-SoLr86f9.js"), true ? __vite__mapDeps([16,4,1,5]) : void 0);
     return pkg;
   },
   "react-hook-form": async () => {
@@ -137,30 +137,6 @@ const usedShared = {
       requiredVersion: "^0.0.0"
     }
   },
-  "@lumeweb/portal-framework-core": {
-    name: "@lumeweb/portal-framework-core",
-    version: "0.0.0",
-    scope: ["default"],
-    loaded: false,
-    from: "admin",
-    async get() {
-      usedShared["@lumeweb/portal-framework-core"].loaded = true;
-      const { "@lumeweb/portal-framework-core": pkgDynamicImport } = importMap;
-      const res = await pkgDynamicImport();
-      const exportModule = { ...res };
-      Object.defineProperty(exportModule, "__esModule", {
-        value: true,
-        enumerable: false
-      });
-      return function() {
-        return exportModule;
-      };
-    },
-    shareConfig: {
-      singleton: true,
-      requiredVersion: "^0.0.0"
-    }
-  },
   "@refinedev/core": {
     name: "@refinedev/core",
     version: "4.57.9",
@@ -185,9 +161,33 @@ const usedShared = {
       requiredVersion: "^4.57.9"
     }
   },
+  "@lumeweb/portal-framework-core": {
+    name: "@lumeweb/portal-framework-core",
+    version: "0.0.0",
+    scope: ["default"],
+    loaded: false,
+    from: "admin",
+    async get() {
+      usedShared["@lumeweb/portal-framework-core"].loaded = true;
+      const { "@lumeweb/portal-framework-core": pkgDynamicImport } = importMap;
+      const res = await pkgDynamicImport();
+      const exportModule = { ...res };
+      Object.defineProperty(exportModule, "__esModule", {
+        value: true,
+        enumerable: false
+      });
+      return function() {
+        return exportModule;
+      };
+    },
+    shareConfig: {
+      singleton: true,
+      requiredVersion: "^0.0.0"
+    }
+  },
   "react-router": {
     name: "react-router",
-    version: "7.6.0",
+    version: "7.5.0",
     scope: ["default"],
     loaded: false,
     from: "admin",
@@ -206,7 +206,7 @@ const usedShared = {
     },
     shareConfig: {
       singleton: true,
-      requiredVersion: "^7.6.0"
+      requiredVersion: "^7.5.0"
     }
   },
   "react-hook-form": {
