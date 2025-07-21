@@ -6,7 +6,7 @@ import { core_core__loadShare__react__loadShare__, React } from './core_core__lo
 import { commonjsGlobal, getDefaultExportFromCjs } from './_commonjsHelpers-BILit0S-.js';
 import { createLucideIcon, core_core__loadShare__react_mf_2_dom__loadShare__ } from './createLucideIcon-DPMNxxyq.js';
 import { core_core__mf_v__runtimeInit__mf_v__, index_cjs } from './core_core__mf_v__runtimeInit__mf_v__-DHIRDVBI.js';
-import { castPath, toKey, isLength, isIndex, isArray, isArguments, get, Dn as Dn$1 } from './index-DX6S3gkV.js';
+import { castPath, toKey, isLength, isIndex, isArray, isArguments, get, Dn as Dn$1 } from './index-BHrwmvBf.js';
 import { CircleAlert, z as z$6 } from './circle-alert-Ddey1lEy.js';
 import { requireShim } from './index-DGPg8JMk.js';
 
@@ -25601,19 +25601,16 @@ const CollapseMenuButton = ({
                 children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full items-center flex justify-between", children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center", children: [
                     Icon && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "mr-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Icon, { size: 18 }) }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs(core_core__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, { to: "/abuse", children: [
-                      " ",
-                      /* @__PURE__ */ jsxRuntimeExports.jsx(
-                        "p",
-                        {
-                          className: core_core__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
-                            "max-w-[150px] truncate",
-                            isOpen ? "translate-x-0 opacity-100" : "-translate-x-96 opacity-0"
-                          ),
-                          children: label
-                        }
-                      )
-                    ] })
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(core_core__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, { to: submenus[0]?.href || "#", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "p",
+                      {
+                        className: core_core__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
+                          "translate-x-0 opacity-100": isOpen,
+                          "-translate-x-96 opacity-0": !isOpen
+                        }),
+                        children: label
+                      }
+                    ) })
                   ] }),
                   /* @__PURE__ */ jsxRuntimeExports.jsx(
                     "div",
@@ -25647,10 +25644,10 @@ const CollapseMenuButton = ({
               /* @__PURE__ */ jsxRuntimeExports.jsx(
                 "p",
                 {
-                  className: core_core__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
-                    "max-w-[170px] truncate",
-                    isOpen ? "translate-x-0 opacity-100" : "-translate-x-96 opacity-0"
-                  ),
+                  className: core_core__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
+                    "translate-x-0 opacity-100": isOpen,
+                    "-translate-x-96 opacity-0": !isOpen
+                  }),
                   children: label2
                 }
               )
@@ -25755,7 +25752,10 @@ function DesktopSidebar() {
       className: core_core__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
         "hidden md:flex",
         "flex flex-col fixed top-0 left-0 z-20 h-screen -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300",
-        isCollapsed ? "w-[5%]" : "w-[10%]"
+        {
+          "md:w-[20%] 2xl:w-[10%]": !isCollapsed,
+          "md:w-[10%] 2xl:w-[5%]": isCollapsed
+        }
       ),
       children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(SidebarToggle, { setIsOpen: toggleCollapsed, isOpen: !isCollapsed }),
