@@ -52,7 +52,7 @@ const res = initPromise.then((_) => loadShare("@lumeweb/portal-framework-ui", {
 }));
 const exportModule = await res.then((factory) => factory());
 var dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__ = exportModule;
-const __vite_import_meta_env__ = { "BASE_URL": "/", "DEV": false, "MODE": "production", "PROD": true, "SSR": false, "VITE_PORTAL_APP_NAME": "dashboard", "VITE_PORTAL_APP_TITLE": "Dashboard", "VITE_PORTAL_DOMAIN": "dev.pinner.xyz", "VITE_PORTAL_DOMAIN_IS_ROOT": "true" };
+const __vite_import_meta_env__ = { "BASE_URL": "/", "DEV": false, "MODE": "production", "PROD": true, "SSR": false, "VITE_PORTAL_APP_NAME": "dashboard", "VITE_PORTAL_APP_TITLE": "Dashboard", "VITE_PORTAL_DOMAIN": "abuse-demo.lumeweb.com", "VITE_PORTAL_DOMAIN_IS_ROOT": "true" };
 const env = createEnv({
   client: {
     VITE_PORTAL_APP_DISABLE_NAV: z.string().optional(),

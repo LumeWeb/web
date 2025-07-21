@@ -1,7 +1,7 @@
-import { j as jsxRuntimeExports } from "./admin__loadShare__react_mf_2_dom__loadShare__-CmlR8Dnz.js";
-import { R as React } from "./admin__loadShare__react__loadShare__-C1ovXSRa.js";
-import { c as createEnv, a as createRoot } from "./index-j0T4rkAH.js";
-import { a as admin__mf_v__runtimeInit__mf_v__, i as index_cjs } from "./admin__mf_v__runtimeInit__mf_v__-CrLwvomy.js";
+import { j as jsxRuntimeExports } from "./abuse__loadShare__react_mf_2_dom__loadShare__-CpomVz3Y.js";
+import { R as React } from "./abuse__loadShare__react__loadShare__-C6wwnR7P.js";
+import { c as createEnv, a as createRoot } from "./index-DcPQr_uN.js";
+import { a as abuse__mf_v__runtimeInit__mf_v__, i as index_cjs } from "./abuse__mf_v__runtimeInit__mf_v__-D-IlhcC-.js";
 import { z } from "./index-Dq110QZ7.js";
 import "./_commonjsHelpers-DWwsNxpa.js";
 (function polyfill() {
@@ -42,7 +42,7 @@ import "./_commonjsHelpers-DWwsNxpa.js";
   }
 })();
 const { loadShare } = index_cjs;
-const { initPromise } = admin__mf_v__runtimeInit__mf_v__;
+const { initPromise } = abuse__mf_v__runtimeInit__mf_v__;
 const res = initPromise.then((_) => loadShare("@lumeweb/portal-framework-ui", {
   customShareInfo: { shareConfig: {
     singleton: true,
@@ -51,8 +51,8 @@ const res = initPromise.then((_) => loadShare("@lumeweb/portal-framework-ui", {
   } }
 }));
 const exportModule = await res.then((factory) => factory());
-var admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__ = exportModule;
-const __vite_import_meta_env__ = { "BASE_URL": "/", "DEV": false, "MODE": "production", "PROD": true, "SSR": false, "VITE_PORTAL_APP_NAME": "admin", "VITE_PORTAL_APP_TITLE": "admin", "VITE_PORTAL_DOMAIN": "dev.pinner.xyz", "VITE_PORTAL_DOMAIN_IS_ROOT": "true" };
+var abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__ = exportModule;
+const __vite_import_meta_env__ = { "BASE_URL": "/", "DEV": false, "MODE": "production", "PROD": true, "SSR": false, "VITE_PORTAL_APP_NAME": "abuse", "VITE_PORTAL_APP_TITLE": "Abuse Report", "VITE_PORTAL_DOMAIN": "abuse-demo.lumeweb.com", "VITE_PORTAL_DOMAIN_IS_ROOT": "true" };
 const env = createEnv({
   client: {
     VITE_PORTAL_APP_DISABLE_NAV: z.string().optional(),
@@ -97,7 +97,7 @@ function App() {
   if (env.VITE_PORTAL_APP_DISABLE_ROUTING) {
     opts.loadNavigation = false;
   }
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.AppComponent, { ...opts });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.AppComponent, { ...opts });
 }
 const container = document.getElementById("root");
 const root = createRoot(container);

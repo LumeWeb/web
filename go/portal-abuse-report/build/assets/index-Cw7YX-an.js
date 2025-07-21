@@ -4,7 +4,7 @@ import { a as abuse__loadShare__react_mf_2_router__loadShare__, C as CircleAlert
 import { a as abuse__loadShare__react_mf_2_hook_mf_2_form__loadShare__, R as ReloadIcon, F as FontBoldIcon, b as FontItalicIcon, U as UnderlineIcon, g as get_1, _ as _baseIsEqual, X as X$4, S as Search, C as Calendar, c as ChevronLeft, d as ChevronRight } from "./_baseIsEqual-C_TPMinx.js";
 import { a as abuse__loadShare__react__loadShare__, R as React$1 } from "./abuse__loadShare__react__loadShare__-C6wwnR7P.js";
 import { c as commonjsGlobal, g as getDefaultExportFromCjs } from "./_commonjsHelpers-DWwsNxpa.js";
-import { u as castPath, q as toKey, b as isLength, n as isIndex, i as isArray, a as isArguments, s as get, D as Dn$1 } from "./index-B90HCQcT.js";
+import { u as castPath, q as toKey, b as isLength, n as isIndex, i as isArray, a as isArguments, s as get, D as Dn$1 } from "./index-CzJLPSgC.js";
 import { c as createLucideIcon } from "./createLucideIcon-B3zrXXln.js";
 import { s as shimExports } from "./index-BGJNuQf_.js";
 import { z as z$6 } from "./index-Dq110QZ7.js";
@@ -29881,19 +29881,16 @@ const CollapseMenuButton = ({
                 children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full items-center flex justify-between", children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center", children: [
                     Icon && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "mr-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Icon, { size: 18 }) }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs(abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, { to: "/abuse", children: [
-                      " ",
-                      /* @__PURE__ */ jsxRuntimeExports.jsx(
-                        "p",
-                        {
-                          className: abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
-                            "max-w-[150px] truncate",
-                            isOpen ? "translate-x-0 opacity-100" : "-translate-x-96 opacity-0"
-                          ),
-                          children: label
-                        }
-                      )
-                    ] })
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, { to: submenus[0]?.href || "#", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "p",
+                      {
+                        className: abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
+                          "translate-x-0 opacity-100": isOpen,
+                          "-translate-x-96 opacity-0": !isOpen
+                        }),
+                        children: label
+                      }
+                    ) })
                   ] }),
                   /* @__PURE__ */ jsxRuntimeExports.jsx(
                     "div",
@@ -29927,10 +29924,10 @@ const CollapseMenuButton = ({
               /* @__PURE__ */ jsxRuntimeExports.jsx(
                 "p",
                 {
-                  className: abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
-                    "max-w-[170px] truncate",
-                    isOpen ? "translate-x-0 opacity-100" : "-translate-x-96 opacity-0"
-                  ),
+                  className: abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
+                    "translate-x-0 opacity-100": isOpen,
+                    "-translate-x-96 opacity-0": !isOpen
+                  }),
                   children: label2
                 }
               )
@@ -30033,7 +30030,10 @@ function DesktopSidebar() {
       className: abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
         "hidden md:flex",
         "flex flex-col fixed top-0 left-0 z-20 h-screen -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300",
-        isCollapsed ? "w-[5%]" : "w-[10%]"
+        {
+          "md:w-[20%] 2xl:w-[10%]": !isCollapsed,
+          "md:w-[10%] 2xl:w-[5%]": isCollapsed
+        }
       ),
       children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(SidebarToggle, { setIsOpen: toggleCollapsed, isOpen: !isCollapsed }),

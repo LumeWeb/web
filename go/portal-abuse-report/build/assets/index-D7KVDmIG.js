@@ -1,12 +1,12 @@
-import { i as index_cjs } from "./admin__mf_v__runtimeInit__mf_v__-CrLwvomy.js";
-import { R as React, a as admin__loadShare__react__loadShare__ } from "./admin__loadShare__react__loadShare__-C1ovXSRa.js";
-import { a as admin__loadShare__react_mf_2_dom__loadShare__, j as jsxRuntimeExports } from "./admin__loadShare__react_mf_2_dom__loadShare__-CmlR8Dnz.js";
-import { UNSAFE_invariant as invariant, UNSAFE_useFogOFWarDiscovery as useFogOFWarDiscovery, UNSAFE_FrameworkContext as FrameworkContext$1, UNSAFE_RemixErrorBoundary as RemixErrorBoundary, RouterProvider, UNSAFE_decodeViaTurboStream as decodeViaTurboStream, UNSAFE_createClientRoutes as createClientRoutes, UNSAFE_getHydrationData as getHydrationData, UNSAFE_deserializeErrors as deserializeErrors2, UNSAFE_createRouter as createRouter, UNSAFE_getPatchRoutesOnNavigationFunction as getPatchRoutesOnNavigationFunction, UNSAFE_getTurboStreamSingleFetchDataStrategy as getTurboStreamSingleFetchDataStrategy, UNSAFE_mapRouteProperties as mapRouteProperties, UNSAFE_hydrationRouteProperties as hydrationRouteProperties, UNSAFE_createBrowserHistory as createBrowserHistory, UNSAFE_createClientRoutesWithHMRRevalidationOptOut as createClientRoutesWithHMRRevalidationOptOut } from "./index-SoLr86f9.js";
-import { a as admin__loadShare__react_mf_2_router__loadShare__, C as CircleAlert } from "./circle-alert-MQIeVBbL.js";
-import { c as createEnv, a as createRoot } from "./index-j0T4rkAH.js";
+import { i as index_cjs } from "./abuse__mf_v__runtimeInit__mf_v__-D-IlhcC-.js";
+import { R as React, a as abuse__loadShare__react__loadShare__ } from "./abuse__loadShare__react__loadShare__-C6wwnR7P.js";
+import { a as abuse__loadShare__react_mf_2_dom__loadShare__, j as jsxRuntimeExports } from "./abuse__loadShare__react_mf_2_dom__loadShare__-CpomVz3Y.js";
+import { UNSAFE_invariant as invariant, UNSAFE_useFogOFWarDiscovery as useFogOFWarDiscovery, UNSAFE_FrameworkContext as FrameworkContext$1, UNSAFE_RemixErrorBoundary as RemixErrorBoundary, RouterProvider, UNSAFE_decodeViaTurboStream as decodeViaTurboStream, UNSAFE_createClientRoutes as createClientRoutes, UNSAFE_getHydrationData as getHydrationData, UNSAFE_deserializeErrors as deserializeErrors2, UNSAFE_createRouter as createRouter, UNSAFE_getPatchRoutesOnNavigationFunction as getPatchRoutesOnNavigationFunction, UNSAFE_getTurboStreamSingleFetchDataStrategy as getTurboStreamSingleFetchDataStrategy, UNSAFE_mapRouteProperties as mapRouteProperties, UNSAFE_hydrationRouteProperties as hydrationRouteProperties, UNSAFE_createBrowserHistory as createBrowserHistory, UNSAFE_createClientRoutesWithHMRRevalidationOptOut as createClientRoutesWithHMRRevalidationOptOut } from "./index-95rntDMt.js";
+import { a as abuse__loadShare__react_mf_2_router__loadShare__, C as CircleAlert } from "./circle-alert-cI2tjBU6.js";
+import { c as createEnv, a as createRoot } from "./index-DcPQr_uN.js";
 import { z } from "./index-Dq110QZ7.js";
 import { g as getDefaultExportFromCjs } from "./_commonjsHelpers-DWwsNxpa.js";
-import "./createLucideIcon-BzDmmRa9.js";
+import "./createLucideIcon-B3zrXXln.js";
 function _mergeNamespaces(n, m) {
   for (var i = 0; i < m.length; i++) {
     const e2 = m[i];
@@ -1012,12 +1012,12 @@ const getRootDomDefaultClassName = (moduleName) => {
   return `bridge-root-component-${name}`;
 };
 const federationRuntime = { instance: null };
-const ErrorBoundaryContext$1 = admin__loadShare__react__loadShare__.createContext(null);
+const ErrorBoundaryContext$1 = abuse__loadShare__react__loadShare__.createContext(null);
 const initialState$1 = {
   didCatch: false,
   error: null
 };
-let ErrorBoundary$1 = class ErrorBoundary2 extends admin__loadShare__react__loadShare__.Component {
+let ErrorBoundary$1 = class ErrorBoundary2 extends abuse__loadShare__react__loadShare__.Component {
   constructor(props) {
     super(props);
     this.resetErrorBoundary = this.resetErrorBoundary.bind(this);
@@ -1086,14 +1086,14 @@ let ErrorBoundary$1 = class ErrorBoundary2 extends admin__loadShare__react__load
       if (typeof fallbackRender === "function") {
         childToRender = fallbackRender(props);
       } else if (FallbackComponent) {
-        childToRender = admin__loadShare__react__loadShare__.createElement(FallbackComponent, props);
+        childToRender = abuse__loadShare__react__loadShare__.createElement(FallbackComponent, props);
       } else if (fallback !== void 0) {
         childToRender = fallback;
       } else {
         throw error;
       }
     }
-    return admin__loadShare__react__loadShare__.createElement(ErrorBoundaryContext$1.Provider, {
+    return abuse__loadShare__react__loadShare__.createElement(ErrorBoundaryContext$1.Provider, {
       value: {
         didCatch,
         error,
@@ -1122,7 +1122,7 @@ function createBaseBridgeComponent({
     const RawComponent = (info) => {
       const { appInfo, propsInfo, ...restProps } = info;
       const { moduleName, memoryRoute, basename = "/" } = appInfo;
-      return /* @__PURE__ */ admin__loadShare__react__loadShare__.createElement(RouterContext.Provider, { value: { moduleName, basename, memoryRoute } }, /* @__PURE__ */ admin__loadShare__react__loadShare__.createElement(
+      return /* @__PURE__ */ abuse__loadShare__react__loadShare__.createElement(RouterContext.Provider, { value: { moduleName, basename, memoryRoute } }, /* @__PURE__ */ abuse__loadShare__react__loadShare__.createElement(
         bridgeInfo.rootComponent,
         {
           ...propsInfo,
@@ -1149,12 +1149,12 @@ function createBaseBridgeComponent({
           ...rootOptions
         };
         const beforeBridgeRenderRes = ((_c = (_b = (_a = void 0) == null ? void 0 : _a.lifecycle) == null ? void 0 : _b.beforeBridgeRender) == null ? void 0 : _c.emit(info)) || {};
-        const rootComponentWithErrorBoundary = /* @__PURE__ */ admin__loadShare__react__loadShare__.createElement(
+        const rootComponentWithErrorBoundary = /* @__PURE__ */ abuse__loadShare__react__loadShare__.createElement(
           ErrorBoundary$1,
           {
             FallbackComponent: fallback
           },
-          /* @__PURE__ */ admin__loadShare__react__loadShare__.createElement(
+          /* @__PURE__ */ abuse__loadShare__react__loadShare__.createElement(
             RawComponent,
             {
               appInfo: {
@@ -1214,7 +1214,7 @@ function createBaseBridgeComponent({
  * @license MIT
  */
 function RouterProvider2(props) {
-  return /* @__PURE__ */ admin__loadShare__react__loadShare__.createElement(RouterProvider, { flushSync: admin__loadShare__react_mf_2_dom__loadShare__.flushSync, ...props });
+  return /* @__PURE__ */ abuse__loadShare__react__loadShare__.createElement(RouterProvider, { flushSync: abuse__loadShare__react_mf_2_dom__loadShare__.flushSync, ...props });
 }
 var ssrInfo = null;
 var router = null;
@@ -1346,17 +1346,17 @@ function HydratedRouter(props) {
       unstable_getContext: props.unstable_getContext
     });
   }
-  let [criticalCss, setCriticalCss] = admin__loadShare__react__loadShare__.useState(
+  let [criticalCss, setCriticalCss] = abuse__loadShare__react__loadShare__.useState(
     void 0
   );
-  let [location, setLocation] = admin__loadShare__react__loadShare__.useState(router.state.location);
-  admin__loadShare__react__loadShare__.useLayoutEffect(() => {
+  let [location, setLocation] = abuse__loadShare__react__loadShare__.useState(router.state.location);
+  abuse__loadShare__react__loadShare__.useLayoutEffect(() => {
     if (ssrInfo && ssrInfo.router && !ssrInfo.routerInitialized) {
       ssrInfo.routerInitialized = true;
       ssrInfo.router.initialize();
     }
   }, []);
-  admin__loadShare__react__loadShare__.useLayoutEffect(() => {
+  abuse__loadShare__react__loadShare__.useLayoutEffect(() => {
     if (ssrInfo && ssrInfo.router) {
       return ssrInfo.router.subscribe((newState) => {
         if (newState.location !== location) {
@@ -1377,7 +1377,7 @@ function HydratedRouter(props) {
   return (
     // This fragment is important to ensure we match the <ServerRouter> JSX
     // structure so that useId values hydrate correctly
-    /* @__PURE__ */ admin__loadShare__react__loadShare__.createElement(admin__loadShare__react__loadShare__.Fragment, null, /* @__PURE__ */ admin__loadShare__react__loadShare__.createElement(
+    /* @__PURE__ */ abuse__loadShare__react__loadShare__.createElement(abuse__loadShare__react__loadShare__.Fragment, null, /* @__PURE__ */ abuse__loadShare__react__loadShare__.createElement(
       FrameworkContext$1.Provider,
       {
         value: {
@@ -1390,8 +1390,8 @@ function HydratedRouter(props) {
           routeDiscovery: ssrInfo.context.routeDiscovery
         }
       },
-      /* @__PURE__ */ admin__loadShare__react__loadShare__.createElement(RemixErrorBoundary, { location }, /* @__PURE__ */ admin__loadShare__react__loadShare__.createElement(RouterProvider2, { router }))
-    ), /* @__PURE__ */ admin__loadShare__react__loadShare__.createElement(admin__loadShare__react__loadShare__.Fragment, null))
+      /* @__PURE__ */ abuse__loadShare__react__loadShare__.createElement(RemixErrorBoundary, { location }, /* @__PURE__ */ abuse__loadShare__react__loadShare__.createElement(RouterProvider2, { router }))
+    ), /* @__PURE__ */ abuse__loadShare__react__loadShare__.createElement(abuse__loadShare__react__loadShare__.Fragment, null))
   );
 }
 /**
@@ -1408,12 +1408,12 @@ const ReactRouterDOM = /* @__PURE__ */ _mergeNamespaces({
   __proto__: null,
   HydratedRouter,
   RouterProvider: RouterProvider2
-}, [admin__loadShare__react_mf_2_router__loadShare__]);
+}, [abuse__loadShare__react_mf_2_router__loadShare__]);
 function e() {
   const t = new PopStateEvent("popstate", { state: window.history.state });
   window.dispatchEvent(t);
 }
-const RemoteAppWrapper = admin__loadShare__react__loadShare__.forwardRef(function(props, ref) {
+const RemoteAppWrapper = abuse__loadShare__react__loadShare__.forwardRef(function(props, ref) {
   const {
     moduleName,
     memoryRoute,
@@ -1425,12 +1425,12 @@ const RemoteAppWrapper = admin__loadShare__react__loadShare__.forwardRef(functio
     ...resProps
   } = props;
   const instance = federationRuntime.instance;
-  const rootRef = ref && "current" in ref ? ref : admin__loadShare__react__loadShare__.useRef(null);
-  const renderDom = admin__loadShare__react__loadShare__.useRef(null);
-  const providerInfoRef = admin__loadShare__react__loadShare__.useRef(null);
-  const [initialized, setInitialized] = admin__loadShare__react__loadShare__.useState(false);
+  const rootRef = ref && "current" in ref ? ref : abuse__loadShare__react__loadShare__.useRef(null);
+  const renderDom = abuse__loadShare__react__loadShare__.useRef(null);
+  const providerInfoRef = abuse__loadShare__react__loadShare__.useRef(null);
+  const [initialized, setInitialized] = abuse__loadShare__react__loadShare__.useState(false);
   LoggerInstance.debug(`RemoteAppWrapper instance from props >>>`, instance);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  abuse__loadShare__react__loadShare__.useEffect(() => {
     if (initialized) return;
     const providerReturn = providerInfo();
     providerInfoRef.current = providerReturn;
@@ -1465,7 +1465,7 @@ const RemoteAppWrapper = admin__loadShare__react__loadShare__.forwardRef(functio
       }
     };
   }, [moduleName]);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  abuse__loadShare__react__loadShare__.useEffect(() => {
     var _a, _b, _c, _d, _e, _f;
     if (!initialized || !providerInfoRef.current) return;
     let renderProps = {
@@ -1486,7 +1486,7 @@ const RemoteAppWrapper = admin__loadShare__react__loadShare__.forwardRef(functio
   return /* @__PURE__ */ React.createElement("div", { className: rootComponentClassName, style, ref: rootRef });
 });
 function withRouterData(WrappedComponent) {
-  const Component = admin__loadShare__react__loadShare__.forwardRef(function(props, ref) {
+  const Component = abuse__loadShare__react__loadShare__.forwardRef(function(props, ref) {
     var _a;
     if (props == null ? void 0 : props.basename) {
       return /* @__PURE__ */ React.createElement(WrappedComponent, { ...props, basename: props.basename, ref });
@@ -1494,7 +1494,7 @@ function withRouterData(WrappedComponent) {
     let enableDispathPopstate = false;
     let routerContextVal;
     try {
-      admin__loadShare__react_mf_2_router__loadShare__.useLocation();
+      abuse__loadShare__react_mf_2_router__loadShare__.useLocation();
       enableDispathPopstate = true;
     } catch {
       enableDispathPopstate = false;
@@ -1510,7 +1510,7 @@ function withRouterData(WrappedComponent) {
         if (useHref) {
           basename = useHref == null ? void 0 : useHref("/");
         }
-        routerContextVal = admin__loadShare__react__loadShare__.useContext(UNSAFE_RouteContext);
+        routerContextVal = abuse__loadShare__react__loadShare__.useContext(UNSAFE_RouteContext);
         if (routerContextVal && routerContextVal.matches && routerContextVal.matches.length > 0) {
           const matchIndex = routerContextVal.matches.length - 1;
           const pathnameBase = routerContextVal.matches[matchIndex].pathnameBase;
@@ -1534,9 +1534,9 @@ function withRouterData(WrappedComponent) {
       enableDispathPopstate
     });
     if (enableDispathPopstate) {
-      const location = admin__loadShare__react_mf_2_router__loadShare__.useLocation();
-      const [pathname, setPathname] = admin__loadShare__react__loadShare__.useState(location.pathname);
-      admin__loadShare__react__loadShare__.useEffect(() => {
+      const location = abuse__loadShare__react_mf_2_router__loadShare__.useLocation();
+      const [pathname, setPathname] = abuse__loadShare__react__loadShare__.useState(location.pathname);
+      abuse__loadShare__react__loadShare__.useEffect(() => {
         if (pathname !== "" && pathname !== location.pathname) {
           LoggerInstance.debug(
             `createRemoteComponent dispatchPopstateEnv >>>`,
@@ -1552,7 +1552,7 @@ function withRouterData(WrappedComponent) {
     }
     return /* @__PURE__ */ React.createElement(WrappedComponent, { ...props, basename, ref });
   });
-  return admin__loadShare__react__loadShare__.forwardRef(function(props, ref) {
+  return abuse__loadShare__react__loadShare__.forwardRef(function(props, ref) {
     return /* @__PURE__ */ React.createElement(Component, { ...props, ref });
   });
 }
@@ -1573,7 +1573,7 @@ function createLazyRemoteComponent$1(info) {
       );
       const exportFn = m[exportName];
       if (exportName in m && typeof exportFn === "function") {
-        const RemoteAppComponent = admin__loadShare__react__loadShare__.forwardRef((props, ref) => {
+        const RemoteAppComponent = abuse__loadShare__react__loadShare__.forwardRef((props, ref) => {
           return /* @__PURE__ */ React.createElement(
             RemoteApp,
             {
@@ -1607,7 +1607,7 @@ function createLazyRemoteComponent$1(info) {
 }
 function createRemoteComponent$1(info) {
   const LazyComponent = createLazyRemoteComponent$1(info);
-  return admin__loadShare__react__loadShare__.forwardRef((props, ref) => {
+  return abuse__loadShare__react__loadShare__.forwardRef((props, ref) => {
     return /* @__PURE__ */ React.createElement(
       ErrorBoundary$1,
       {
@@ -1617,7 +1617,7 @@ function createRemoteComponent$1(info) {
     );
   });
 }
-const __vite_import_meta_env__ = { "BASE_URL": "/", "DEV": false, "MODE": "production", "PROD": true, "SSR": false, "VITE_PORTAL_APP_NAME": "admin", "VITE_PORTAL_APP_TITLE": "admin", "VITE_PORTAL_DOMAIN": "dev.pinner.xyz", "VITE_PORTAL_DOMAIN_IS_ROOT": "true" };
+const __vite_import_meta_env__ = { "BASE_URL": "/", "DEV": false, "MODE": "production", "PROD": true, "SSR": false, "VITE_PORTAL_APP_NAME": "abuse", "VITE_PORTAL_APP_TITLE": "Abuse Report", "VITE_PORTAL_DOMAIN": "abuse-demo.lumeweb.com", "VITE_PORTAL_DOMAIN_IS_ROOT": "true" };
 const env = createEnv({
   client: {
     VITE_PORTAL_DOMAIN: z.string().includes(".").optional(),
@@ -4183,12 +4183,12 @@ function ErrorDisplay({ error, onRetry }) {
     )
   ] }) });
 }
-const ErrorBoundaryContext = admin__loadShare__react__loadShare__.createContext(null);
+const ErrorBoundaryContext = abuse__loadShare__react__loadShare__.createContext(null);
 const initialState = {
   didCatch: false,
   error: null
 };
-class ErrorBoundary extends admin__loadShare__react__loadShare__.Component {
+class ErrorBoundary extends abuse__loadShare__react__loadShare__.Component {
   constructor(props) {
     super(props);
     this.resetErrorBoundary = this.resetErrorBoundary.bind(this);
@@ -4257,14 +4257,14 @@ class ErrorBoundary extends admin__loadShare__react__loadShare__.Component {
       if (typeof fallbackRender === "function") {
         childToRender = fallbackRender(props);
       } else if (FallbackComponent) {
-        childToRender = admin__loadShare__react__loadShare__.createElement(FallbackComponent, props);
+        childToRender = abuse__loadShare__react__loadShare__.createElement(FallbackComponent, props);
       } else if (fallback !== void 0) {
         childToRender = fallback;
       } else {
         throw error;
       }
     }
-    return admin__loadShare__react__loadShare__.createElement(ErrorBoundaryContext.Provider, {
+    return abuse__loadShare__react__loadShare__.createElement(ErrorBoundaryContext.Provider, {
       value: {
         didCatch,
         error,
@@ -4337,7 +4337,7 @@ function RouteErrorBoundary({ children }) {
   let useRouteErrorAttempted = false;
   try {
     useRouteErrorAttempted = true;
-    const potentialRouterError = admin__loadShare__react_mf_2_router__loadShare__.useRouteError();
+    const potentialRouterError = abuse__loadShare__react_mf_2_router__loadShare__.useRouteError();
     if (potentialRouterError !== null && potentialRouterError !== void 0) {
       routerError = potentialRouterError;
     } else {
@@ -4451,15 +4451,15 @@ class ContextBridgeStore {
   }
 }
 const store = ContextBridgeStore.getInstance();
-const DummyContext = admin__loadShare__react__loadShare__.createContext(void 0);
+const DummyContext = abuse__loadShare__react__loadShare__.createContext(void 0);
 function ContextBridgeProvider({
   children,
   contextId,
   name
 }) {
   const context = store.getContext(contextId);
-  const value2 = admin__loadShare__react__loadShare__.useContext(context || DummyContext);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  const value2 = abuse__loadShare__react__loadShare__.useContext(context || DummyContext);
+  abuse__loadShare__react__loadShare__.useEffect(() => {
     if (context) {
       store.setValue(contextId, value2);
     }
@@ -4499,7 +4499,7 @@ function RemoteContextBridge({
   const [value2, setValue] = React.useState(() => {
     return context ? store.getValue(contextId) : void 0;
   });
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  abuse__loadShare__react__loadShare__.useEffect(() => {
     if (!context) return;
     if (name) {
       console.debug(
@@ -4524,7 +4524,7 @@ function RemoteContextConsumer({
   children,
   context
 }) {
-  const [value2, setValue] = admin__loadShare__react__loadShare__.useState(() => {
+  const [value2, setValue] = abuse__loadShare__react__loadShare__.useState(() => {
     const allContexts = store.getRegisteredContextIds();
     for (const id of allContexts) {
       if (store.getContext(id) === context) {
@@ -4533,7 +4533,7 @@ function RemoteContextConsumer({
     }
     return void 0;
   });
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  abuse__loadShare__react__loadShare__.useEffect(() => {
     const allContexts = store.getRegisteredContextIds();
     for (const id of allContexts) {
       if (store.getContext(id) === context) {
@@ -4655,7 +4655,7 @@ async function initializeFramework(options) {
 function shouldInitialize(builder, framework) {
   return !framework || !framework.isInitialized();
 }
-const FrameworkContext = admin__loadShare__react__loadShare__.createContext(
+const FrameworkContext = abuse__loadShare__react__loadShare__.createContext(
   null
 );
 registerBridgedContext(FrameworkContext);
@@ -4664,14 +4664,14 @@ function FrameworkProvider({
   children,
   configure: configure2
 }) {
-  const builderRef = admin__loadShare__react__loadShare__.useRef();
-  const frameworkRef = admin__loadShare__react__loadShare__.useRef();
-  const [state, setState] = admin__loadShare__react__loadShare__.useState({
+  const builderRef = abuse__loadShare__react__loadShare__.useRef();
+  const frameworkRef = abuse__loadShare__react__loadShare__.useRef();
+  const [state, setState] = abuse__loadShare__react__loadShare__.useState({
     error: null,
     framework: null,
     isLoading: true
   });
-  const initializeFrameworkInstance = admin__loadShare__react__loadShare__.useCallback(async () => {
+  const initializeFrameworkInstance = abuse__loadShare__react__loadShare__.useCallback(async () => {
     try {
       if (!shouldInitialize(builderRef.current, frameworkRef.current)) {
         setState({
@@ -4709,7 +4709,7 @@ function FrameworkProvider({
       });
     }
   }, [appName, configure2]);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  abuse__loadShare__react__loadShare__.useEffect(() => {
     initializeFrameworkInstance();
   }, [appName, configure2, initializeFrameworkInstance]);
   const contextValue = {
@@ -4722,14 +4722,14 @@ function FrameworkProvider({
   return /* @__PURE__ */ jsxRuntimeExports.jsx(FrameworkContext.Provider, { value: contextValue, children });
 }
 function useFramework() {
-  const context = admin__loadShare__react__loadShare__.useContext(FrameworkContext);
+  const context = abuse__loadShare__react__loadShare__.useContext(FrameworkContext);
   if (!context) {
     throw new Error("useFramework must be used within a FrameworkProvider");
   }
   return context;
 }
 function useFrameworkLoading() {
-  const context = admin__loadShare__react__loadShare__.useContext(FrameworkContext);
+  const context = abuse__loadShare__react__loadShare__.useContext(FrameworkContext);
   if (!context) {
     throw new Error(
       "useFrameworkLoading must be used within a FrameworkProvider"
@@ -4802,7 +4802,7 @@ const defaultRemoteOptions = {
   LoadingComponent: DefaultLoadingComponent
 };
 function createBridgeComponent(Component) {
-  const WrappedComponent = admin__loadShare__react__loadShare__.forwardRef(
+  const WrappedComponent = abuse__loadShare__react__loadShare__.forwardRef(
     (props, ref) => {
       return store.getRegisteredContextIds().reduce(
         (children, contextId) => /* @__PURE__ */ jsxRuntimeExports.jsx(RemoteContextBridge, { contextId, children }),
@@ -4818,7 +4818,7 @@ function createBridgeComponent(Component) {
 }
 function createRemoteComponent(info) {
   const LazyComponent = createLazyRemoteComponent(info);
-  return admin__loadShare__react__loadShare__.forwardRef((props, ref) => {
+  return abuse__loadShare__react__loadShare__.forwardRef((props, ref) => {
     const { props: componentProps } = props;
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       ErrorBoundary,
@@ -4853,8 +4853,8 @@ function createLazyRemoteComponent(info) {
 }
 function WidgetArea({ widgetAreaId }) {
   const framework = useFramework();
-  const [widgets, setWidgets] = admin__loadShare__react__loadShare__.useState([]);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  const [widgets, setWidgets] = abuse__loadShare__react__loadShare__.useState([]);
+  abuse__loadShare__react__loadShare__.useEffect(() => {
     if (!framework) {
       return;
     }
@@ -4872,8 +4872,8 @@ function WidgetArea({ widgetAreaId }) {
     const renderableWidgets = loadedWidgets.map((widget) => {
       if (typeof widget === "function" && "then" in widget && typeof widget.then === "function") {
         const BridgeWrapper = () => {
-          const [isLoading, setIsLoading] = admin__loadShare__react__loadShare__.useState(true);
-          admin__loadShare__react__loadShare__.useEffect(() => {
+          const [isLoading, setIsLoading] = abuse__loadShare__react__loadShare__.useState(true);
+          abuse__loadShare__react__loadShare__.useEffect(() => {
             const bridgeLoader = widget;
             bridgeLoader().then(() => {
               setIsLoading(false);

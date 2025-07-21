@@ -1,6 +1,6 @@
-import { R as React, a as admin__loadShare__react__loadShare__ } from "./admin__loadShare__react__loadShare__-C1ovXSRa.js";
-import { a as admin__mf_v__runtimeInit__mf_v__, i as index_cjs } from "./admin__mf_v__runtimeInit__mf_v__-CrLwvomy.js";
-import { M as MapCache, S as Symbol$1, i as isArray, a as isArguments, g as getNative, b as isLength, c as isFunction, d as isObjectLike, r as root, e as arrayMap, f as isSymbol, h as isObject, L as ListCache, j as Map, k as eq, l as baseGetTag, m as freeGlobal, n as isIndex, t as toSource, o as baseGet, p as isKey, q as toKey, D as Dn, s as get } from "./index-B90HCQcT.js";
+import { R as React, a as abuse__loadShare__react__loadShare__ } from "./abuse__loadShare__react__loadShare__-C6wwnR7P.js";
+import { a as abuse__mf_v__runtimeInit__mf_v__, i as index_cjs } from "./abuse__mf_v__runtimeInit__mf_v__-D-IlhcC-.js";
+import { M as MapCache, S as Symbol$1, i as isArray, a as isArguments, g as getNative, b as isLength, c as isFunction, d as isObjectLike, r as root, e as arrayMap, f as isSymbol, h as isObject, L as ListCache, j as Map, k as eq, l as baseGetTag, m as freeGlobal, n as isIndex, t as toSource, o as baseGet, p as isKey, q as toKey, D as Dn, s as get } from "./index-CzJLPSgC.js";
 import { g as getDefaultExportFromCjs } from "./_commonjsHelpers-DWwsNxpa.js";
 var errorStackParser$1 = { exports: {} };
 var stackframe$1 = { exports: {} };
@@ -294,7 +294,7 @@ function k(r, e, n, o2) {
   return { hookName: "", trace: [], resourcePath: null, legacyKey: false };
 }
 const { loadShare } = index_cjs;
-const { initPromise } = admin__mf_v__runtimeInit__mf_v__;
+const { initPromise } = abuse__mf_v__runtimeInit__mf_v__;
 const res = initPromise.then((_) => loadShare("@tanstack/react-query", {
   customShareInfo: { shareConfig: {
     singleton: true,
@@ -303,7 +303,7 @@ const res = initPromise.then((_) => loadShare("@tanstack/react-query", {
   } }
 }));
 const exportModule = await res.then((factory) => factory());
-var admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__ = exportModule;
+var abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__ = exportModule;
 var HASH_UNDEFINED = "__lodash_hash_undefined__";
 function setCacheAdd(value) {
   this.__data__.set(value, HASH_UNDEFINED);
@@ -2348,8 +2348,8 @@ var Wt = o(({ hasPagination: e, pagination: t, configPagination: r } = {}) => {
   return { current: i, pageSize: a, mode: n };
 }, "handlePaginationParams");
 var Pr = o((e) => {
-  let [t, r] = admin__loadShare__react__loadShare__.useState(false);
-  return admin__loadShare__react__loadShare__.useEffect(() => {
+  let [t, r] = abuse__loadShare__react__loadShare__.useState(false);
+  return abuse__loadShare__react__loadShare__.useEffect(() => {
     let s = window.matchMedia(e);
     s.matches !== t && r(s.matches);
     let n = o(() => r(s.matches), "listener");
@@ -2367,28 +2367,28 @@ function ls(e, t, r, s, n) {
 }
 o(ls, "generateDefaultDocumentTitle");
 var _e = o((e, t) => {
-  let { mutationMode: r, undoableTimeout: s } = admin__loadShare__react__loadShare__.useContext(Qe);
+  let { mutationMode: r, undoableTimeout: s } = abuse__loadShare__react__loadShare__.useContext(Qe);
   return { mutationMode: e ?? r, undoableTimeout: t ?? s };
 }, "useMutationMode");
 var eo = React.createContext({}), fs = o(({ children: e }) => {
-  let [t, r] = admin__loadShare__react__loadShare__.useState(false);
+  let [t, r] = abuse__loadShare__react__loadShare__.useState(false);
   return React.createElement(eo.Provider, { value: { warnWhen: t, setWarnWhen: r } }, e);
 }, "UnsavedWarnContextProvider");
 var vt = o(() => {
-  let { warnWhenUnsavedChanges: e } = admin__loadShare__react__loadShare__.useContext(Qe), { warnWhen: t, setWarnWhen: r } = admin__loadShare__react__loadShare__.useContext(eo);
+  let { warnWhenUnsavedChanges: e } = abuse__loadShare__react__loadShare__.useContext(Qe), { warnWhen: t, setWarnWhen: r } = abuse__loadShare__react__loadShare__.useContext(eo);
   return { warnWhenUnsavedChanges: e, warnWhen: !!t, setWarnWhen: r ?? (() => {
   }) };
 }, "useWarnAboutChange");
 var to = o(() => {
-  let { syncWithLocation: e } = admin__loadShare__react__loadShare__.useContext(Qe);
+  let { syncWithLocation: e } = abuse__loadShare__react__loadShare__.useContext(Qe);
   return { syncWithLocation: e };
 }, "useSyncWithLocation");
 var Ta = o(() => {
-  let { Title: e } = admin__loadShare__react__loadShare__.useContext(Qe);
+  let { Title: e } = abuse__loadShare__react__loadShare__.useContext(Qe);
   return e;
 }, "useTitle");
 var ge = o(() => {
-  let { Footer: e, Header: t, Layout: r, OffLayoutArea: s, Sider: n, Title: i, hasDashboard: a, mutationMode: u, syncWithLocation: c, undoableTimeout: p, warnWhenUnsavedChanges: l, DashboardPage: m, LoginPage: y, catchAll: d, options: T, __initialized: x } = admin__loadShare__react__loadShare__.useContext(Qe);
+  let { Footer: e, Header: t, Layout: r, OffLayoutArea: s, Sider: n, Title: i, hasDashboard: a, mutationMode: u, syncWithLocation: c, undoableTimeout: p, warnWhenUnsavedChanges: l, DashboardPage: m, LoginPage: y, catchAll: d, options: T, __initialized: x } = abuse__loadShare__react__loadShare__.useContext(Qe);
   return { __initialized: x, Footer: e, Header: t, Layout: r, OffLayoutArea: s, Sider: n, Title: i, hasDashboard: a, mutationMode: u, syncWithLocation: c, undoableTimeout: p, warnWhenUnsavedChanges: l, DashboardPage: m, LoginPage: y, catchAll: d, options: T };
 }, "useRefineContext");
 var ht = o(() => {
@@ -2471,28 +2471,28 @@ var Z = o(() => {
   return { keys: nt, preferLegacyKeys: !e };
 }, "useKeys");
 function Ua({ v3LegacyAuthProviderCompatible: e = false, options: t, params: r } = {}) {
-  let { getPermissions: s } = xe(), { getPermissions: n } = Ue(), { keys: i, preferLegacyKeys: a } = Z(), u = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: i().auth().action("permissions").get(a), queryFn: n ? () => n(r) : () => Promise.resolve(void 0), enabled: !e && !!n, ...e ? {} : t, meta: { ...e ? {} : t == null ? void 0 : t.meta, ...k() } }), c = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: [...i().auth().action("permissions").get(a), "v3LegacyAuthProviderCompatible"], queryFn: s ? () => s(r) : () => Promise.resolve(void 0), enabled: e && !!s, ...e ? t : {}, meta: { ...e ? t == null ? void 0 : t.meta : {}, ...k() } });
+  let { getPermissions: s } = xe(), { getPermissions: n } = Ue(), { keys: i, preferLegacyKeys: a } = Z(), u = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: i().auth().action("permissions").get(a), queryFn: n ? () => n(r) : () => Promise.resolve(void 0), enabled: !e && !!n, ...e ? {} : t, meta: { ...e ? {} : t == null ? void 0 : t.meta, ...k() } }), c = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: [...i().auth().action("permissions").get(a), "v3LegacyAuthProviderCompatible"], queryFn: s ? () => s(r) : () => Promise.resolve(void 0), enabled: e && !!s, ...e ? t : {}, meta: { ...e ? t == null ? void 0 : t.meta : {}, ...k() } });
   return e ? c : u;
 }
 o(Ua, "usePermissions");
 function no({ v3LegacyAuthProviderCompatible: e = false, queryOptions: t } = {}) {
-  let { getUserIdentity: r } = xe(), { getIdentity: s } = Ue(), { keys: n, preferLegacyKeys: i } = Z(), a = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: n().auth().action("identity").get(i), queryFn: s ?? (() => Promise.resolve({})), enabled: !e && !!s, retry: false, ...e === true ? {} : t, meta: { ...e === true ? {} : t == null ? void 0 : t.meta, ...k() } }), u = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: [...n().auth().action("identity").get(i), "v3LegacyAuthProviderCompatible"], queryFn: r ?? (() => Promise.resolve({})), enabled: e && !!r, retry: false, ...e ? t : {}, meta: { ...e ? t == null ? void 0 : t.meta : {}, ...k() } });
+  let { getUserIdentity: r } = xe(), { getIdentity: s } = Ue(), { keys: n, preferLegacyKeys: i } = Z(), a = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: n().auth().action("identity").get(i), queryFn: s ?? (() => Promise.resolve({})), enabled: !e && !!s, retry: false, ...e === true ? {} : t, meta: { ...e === true ? {} : t == null ? void 0 : t.meta, ...k() } }), u = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: [...n().auth().action("identity").get(i), "v3LegacyAuthProviderCompatible"], queryFn: r ?? (() => Promise.resolve({})), enabled: e && !!r, retry: false, ...e ? t : {}, meta: { ...e ? t == null ? void 0 : t.meta : {}, ...k() } });
   return e ? u : a;
 }
 o(no, "useGetIdentity");
 var Dt = o(() => {
-  let e = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), { keys: t, preferLegacyKeys: r } = Z();
+  let e = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), { keys: t, preferLegacyKeys: r } = Z();
   return o(async () => {
     await Promise.all(["check", "identity", "permissions"].map((n) => e.invalidateQueries(t().auth().action(n).get(r))));
   }, "invalidate");
 }, "useInvalidateAuthStore");
 function Mr({ v3LegacyAuthProviderCompatible: e, mutationOptions: t } = {}) {
-  let r = Dt(), s = oe(), n = Pe(), { push: i } = he(), { open: a, close: u } = He(), { logout: c } = xe(), { logout: p } = Ue(), { keys: l, preferLegacyKeys: m } = Z(), y = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: l().auth().action("logout").get(m), mutationFn: p, onSuccess: async (T, x) => {
+  let r = Dt(), s = oe(), n = Pe(), { push: i } = he(), { open: a, close: u } = He(), { logout: c } = xe(), { logout: p } = Ue(), { keys: l, preferLegacyKeys: m } = Z(), y = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: l().auth().action("logout").get(m), mutationFn: p, onSuccess: async (T, x) => {
     let { success: v, error: f, redirectTo: P, successNotification: M } = T, { redirectPath: Q } = x ?? {}, g = Q ?? P;
     v && (u == null || u("useLogout-error"), M && (a == null || a(La(M)))), (f || !v) && (a == null || a(ao(f))), g !== false && (s === "legacy" ? i(g ?? "/login") : g && n({ to: g })), await r();
   }, onError: (T) => {
     a == null || a(ao(T));
-  }, ...e === true ? {} : t, meta: { ...e === true ? {} : t == null ? void 0 : t.meta, ...k() } }), d = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: [...l().auth().action("logout").get(m), "v3LegacyAuthProviderCompatible"], mutationFn: c, onSuccess: async (T, x) => {
+  }, ...e === true ? {} : t, meta: { ...e === true ? {} : t == null ? void 0 : t.meta, ...k() } }), d = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: [...l().auth().action("logout").get(m), "v3LegacyAuthProviderCompatible"], mutationFn: c, onSuccess: async (T, x) => {
     let v = (x == null ? void 0 : x.redirectPath) ?? T;
     if (v !== false) {
       if (v) {
@@ -2512,13 +2512,13 @@ function Ht({ v3LegacyAuthProviderCompatible: e, mutationOptions: t } = {}) {
   let r = Dt(), s = oe(), n = Pe(), { replace: i } = he(), a = Te(), { useLocation: u } = pe(), { search: c } = u(), { close: p, open: l } = He(), { login: m } = xe(), { login: y } = Ue(), { keys: d, preferLegacyKeys: T } = Z(), x = React.useMemo(() => {
     var P;
     return s === "legacy" ? Dn.parse(c, { ignoreQueryPrefix: true }).to : (P = a.params) == null ? void 0 : P.to;
-  }, [s, a.params, c]), v = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: d().auth().action("login").get(T), mutationFn: y, onSuccess: async ({ success: P, redirectTo: M, error: Q, successNotification: g }) => {
+  }, [s, a.params, c]), v = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: d().auth().action("login").get(T), mutationFn: y, onSuccess: async ({ success: P, redirectTo: M, error: Q, successNotification: g }) => {
     P && (p == null || p("login-error"), g && (l == null || l(Ia(g)))), (Q || !P) && (l == null || l(io(Q))), x && P ? s === "legacy" ? i(x) : n({ to: x, type: "replace" }) : M ? s === "legacy" ? i(M) : n({ to: M, type: "replace" }) : s === "legacy" && i("/"), setTimeout(() => {
       r();
     }, 32);
   }, onError: (P) => {
     l == null || l(io(P));
-  }, ...e === true ? {} : t, meta: { ...e === true ? {} : t == null ? void 0 : t.meta, ...k() } }), f = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: [...d().auth().action("login").get(T), "v3LegacyAuthProviderCompatible"], mutationFn: m, onSuccess: async (P) => {
+  }, ...e === true ? {} : t, meta: { ...e === true ? {} : t == null ? void 0 : t.meta, ...k() } }), f = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: [...d().auth().action("login").get(T), "v3LegacyAuthProviderCompatible"], mutationFn: m, onSuccess: async (P) => {
     x && i(x), P !== false && !x && (typeof P == "string" ? s === "legacy" ? i(P) : n({ to: P, type: "replace" }) : s === "legacy" ? i("/") : n({ to: "/", type: "replace" })), setTimeout(() => {
       r();
     }, 32), p == null || p("login-error");
@@ -2530,11 +2530,11 @@ function Ht({ v3LegacyAuthProviderCompatible: e, mutationOptions: t } = {}) {
 o(Ht, "useLogin");
 var io = o((e) => ({ message: (e == null ? void 0 : e.name) || "Login Error", description: (e == null ? void 0 : e.message) || "Invalid credentials", key: "login-error", type: "error" }), "buildNotification"), Ia = o((e) => ({ message: e.message, description: e.description, key: "login-success", type: "success" }), "buildSuccessNotification");
 function co({ v3LegacyAuthProviderCompatible: e, mutationOptions: t } = {}) {
-  let r = Dt(), s = oe(), n = Pe(), { replace: i } = he(), { register: a } = xe(), { register: u } = Ue(), { close: c, open: p } = He(), { keys: l, preferLegacyKeys: m } = Z(), y = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: l().auth().action("register").get(m), mutationFn: u, onSuccess: async ({ success: T, redirectTo: x, error: v, successNotification: f }) => {
+  let r = Dt(), s = oe(), n = Pe(), { replace: i } = he(), { register: a } = xe(), { register: u } = Ue(), { close: c, open: p } = He(), { keys: l, preferLegacyKeys: m } = Z(), y = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: l().auth().action("register").get(m), mutationFn: u, onSuccess: async ({ success: T, redirectTo: x, error: v, successNotification: f }) => {
     T && (c == null || c("register-error"), f && (p == null || p(Sa(f))), await r()), (v || !T) && (p == null || p(uo(v))), x ? s === "legacy" ? i(x) : n({ to: x, type: "replace" }) : s === "legacy" && i("/");
   }, onError: (T) => {
     p == null || p(uo(T));
-  }, ...e === true ? {} : t, meta: { ...e === true ? {} : t == null ? void 0 : t.meta, ...k() } }), d = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: [...l().auth().action("register").get(m), "v3LegacyAuthProviderCompatible"], mutationFn: a, onSuccess: async (T) => {
+  }, ...e === true ? {} : t, meta: { ...e === true ? {} : t == null ? void 0 : t.meta, ...k() } }), d = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: [...l().auth().action("register").get(m), "v3LegacyAuthProviderCompatible"], mutationFn: a, onSuccess: async (T) => {
     T !== false && (T ? s === "legacy" ? i(T) : n({ to: T, type: "replace" }) : s === "legacy" ? i("/") : n({ to: "/", type: "replace" }), await r(), c == null || c("register-error"));
   }, onError: (T) => {
     p == null || p(uo(T));
@@ -2544,11 +2544,11 @@ function co({ v3LegacyAuthProviderCompatible: e, mutationOptions: t } = {}) {
 o(co, "useRegister");
 var uo = o((e) => ({ message: (e == null ? void 0 : e.name) || "Register Error", description: (e == null ? void 0 : e.message) || "Error while registering", key: "register-error", type: "error" }), "buildNotification"), Sa = o((e) => ({ message: e.message, description: e.description, key: "register-success", type: "success" }), "buildSuccessNotification");
 function lo({ v3LegacyAuthProviderCompatible: e, mutationOptions: t } = {}) {
-  let r = oe(), s = Pe(), { replace: n } = he(), { forgotPassword: i } = xe(), { forgotPassword: a } = Ue(), { close: u, open: c } = He(), { keys: p, preferLegacyKeys: l } = Z(), m = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: p().auth().action("forgotPassword").get(l), mutationFn: a, onSuccess: ({ success: d, redirectTo: T, error: x, successNotification: v }) => {
+  let r = oe(), s = Pe(), { replace: n } = he(), { forgotPassword: i } = xe(), { forgotPassword: a } = Ue(), { close: u, open: c } = He(), { keys: p, preferLegacyKeys: l } = Z(), m = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: p().auth().action("forgotPassword").get(l), mutationFn: a, onSuccess: ({ success: d, redirectTo: T, error: x, successNotification: v }) => {
     d && (u == null || u("forgot-password-error"), v && (c == null || c(Aa(v)))), (x || !d) && (c == null || c(po(x))), T && (r === "legacy" ? n(T) : s({ to: T, type: "replace" }));
   }, onError: (d) => {
     c == null || c(po(d));
-  }, ...e === true ? {} : t, meta: { ...e === true ? {} : t == null ? void 0 : t.meta, ...k() } }), y = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: [...p().auth().action("forgotPassword").get(l), "v3LegacyAuthProviderCompatible"], mutationFn: i, onSuccess: (d) => {
+  }, ...e === true ? {} : t, meta: { ...e === true ? {} : t == null ? void 0 : t.meta, ...k() } }), y = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: [...p().auth().action("forgotPassword").get(l), "v3LegacyAuthProviderCompatible"], mutationFn: i, onSuccess: (d) => {
     d !== false && d && (r === "legacy" ? n(d) : s({ to: d, type: "replace" })), u == null || u("forgot-password-error");
   }, onError: (d) => {
     c == null || c(po(d));
@@ -2558,11 +2558,11 @@ function lo({ v3LegacyAuthProviderCompatible: e, mutationOptions: t } = {}) {
 o(lo, "useForgotPassword");
 var po = o((e) => ({ message: (e == null ? void 0 : e.name) || "Forgot Password Error", description: (e == null ? void 0 : e.message) || "Error while resetting password", key: "forgot-password-error", type: "error" }), "buildNotification"), Aa = o((e) => ({ message: e.message, description: e.description, key: "forgot-password-success", type: "success" }), "buildSuccessNotification");
 function fo({ v3LegacyAuthProviderCompatible: e, mutationOptions: t } = {}) {
-  let r = oe(), s = Pe(), { replace: n } = he(), { updatePassword: i } = xe(), { updatePassword: a } = Ue(), { close: u, open: c } = He(), { keys: p, preferLegacyKeys: l } = Z(), m = Te(), { useLocation: y } = pe(), { search: d } = y(), T = React.useMemo(() => r === "legacy" ? Dn.parse(d, { ignoreQueryPrefix: true }) ?? {} : m.params ?? {}, [d, m, r]), x = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: p().auth().action("updatePassword").get(l), mutationFn: async (f) => a == null ? void 0 : a({ ...T, ...f }), onSuccess: ({ success: f, redirectTo: P, error: M, successNotification: Q }) => {
+  let r = oe(), s = Pe(), { replace: n } = he(), { updatePassword: i } = xe(), { updatePassword: a } = Ue(), { close: u, open: c } = He(), { keys: p, preferLegacyKeys: l } = Z(), m = Te(), { useLocation: y } = pe(), { search: d } = y(), T = React.useMemo(() => r === "legacy" ? Dn.parse(d, { ignoreQueryPrefix: true }) ?? {} : m.params ?? {}, [d, m, r]), x = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: p().auth().action("updatePassword").get(l), mutationFn: async (f) => a == null ? void 0 : a({ ...T, ...f }), onSuccess: ({ success: f, redirectTo: P, error: M, successNotification: Q }) => {
     f && (u == null || u("update-password-error"), Q && (c == null || c(Qa(Q)))), (M || !f) && (c == null || c(mo(M))), P && (r === "legacy" ? n(P) : s({ to: P, type: "replace" }));
   }, onError: (f) => {
     c == null || c(mo(f));
-  }, ...e === true ? {} : t, meta: { ...e === true ? {} : t == null ? void 0 : t.meta, ...k() } }), v = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: [...p().auth().action("updatePassword").get(l), "v3LegacyAuthProviderCompatible"], mutationFn: async (f) => i == null ? void 0 : i({ ...T, ...f }), onSuccess: (f) => {
+  }, ...e === true ? {} : t, meta: { ...e === true ? {} : t == null ? void 0 : t.meta, ...k() } }), v = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: [...p().auth().action("updatePassword").get(l), "v3LegacyAuthProviderCompatible"], mutationFn: async (f) => i == null ? void 0 : i({ ...T, ...f }), onSuccess: (f) => {
     f !== false && f && (r === "legacy" ? n(f) : s({ to: f, type: "replace" })), u == null || u("update-password-error");
   }, onError: (f) => {
     c == null || c(mo(f));
@@ -2572,13 +2572,13 @@ function fo({ v3LegacyAuthProviderCompatible: e, mutationOptions: t } = {}) {
 o(fo, "useUpdatePassword");
 var mo = o((e) => ({ message: (e == null ? void 0 : e.name) || "Update Password Error", description: (e == null ? void 0 : e.message) || "Error while updating password", key: "update-password-error", type: "error" }), "buildNotification"), Qa = o((e) => ({ message: e.message, description: e.description, key: "update-password-success", type: "success" }), "buildSuccessNotification");
 function wr({ v3LegacyAuthProviderCompatible: e = false, params: t } = {}) {
-  let { checkAuth: r } = xe(), { check: s } = Ue(), { keys: n, preferLegacyKeys: i } = Z(), a = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: n().auth().action("check").params(t).get(i), queryFn: async () => await (s == null ? void 0 : s(t)) ?? {}, retry: false, enabled: !e, meta: { ...k() } }), u = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: [...n().auth().action("check").params(t).get(i), "v3LegacyAuthProviderCompatible"], queryFn: async () => await (r == null ? void 0 : r(t)) ?? {}, retry: false, enabled: e, meta: { ...k() } });
+  let { checkAuth: r } = xe(), { check: s } = Ue(), { keys: n, preferLegacyKeys: i } = Z(), a = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: n().auth().action("check").params(t).get(i), queryFn: async () => await (s == null ? void 0 : s(t)) ?? {}, retry: false, enabled: !e, meta: { ...k() } }), u = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: [...n().auth().action("check").params(t).get(i), "v3LegacyAuthProviderCompatible"], queryFn: async () => await (r == null ? void 0 : r(t)) ?? {}, retry: false, enabled: e, meta: { ...k() } });
   return e ? u : a;
 }
 o(wr, "useIsAuthenticated");
 var Va = wr;
 function Re({ v3LegacyAuthProviderCompatible: e = false } = {}) {
-  let t = oe(), r = Pe(), { replace: s } = he(), { checkError: n } = xe(), { onError: i } = Ue(), { keys: a, preferLegacyKeys: u } = Z(), { mutate: c } = Mr({ v3LegacyAuthProviderCompatible: !!e }), { mutate: p } = Mr({ v3LegacyAuthProviderCompatible: !!e }), l = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: a().auth().action("onError").get(u), ...i ? { mutationFn: i, onSuccess: ({ logout: y, redirectTo: d }) => {
+  let t = oe(), r = Pe(), { replace: s } = he(), { checkError: n } = xe(), { onError: i } = Ue(), { keys: a, preferLegacyKeys: u } = Z(), { mutate: c } = Mr({ v3LegacyAuthProviderCompatible: !!e }), { mutate: p } = Mr({ v3LegacyAuthProviderCompatible: !!e }), l = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: a().auth().action("onError").get(u), ...i ? { mutationFn: i, onSuccess: ({ logout: y, redirectTo: d }) => {
     if (y) {
       p({ redirectPath: d });
       return;
@@ -2587,7 +2587,7 @@ function Re({ v3LegacyAuthProviderCompatible: e = false } = {}) {
       t === "legacy" ? s(d) : r({ to: d, type: "replace" });
       return;
     }
-  } } : { mutationFn: () => ({}) }, meta: { ...k() } }), m = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: [...a().auth().action("onError").get(u), "v3LegacyAuthProviderCompatible"], mutationFn: n, onError: (y) => {
+  } } : { mutationFn: () => ({}) }, meta: { ...k() } }), m = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationKey: [...a().auth().action("onError").get(u), "v3LegacyAuthProviderCompatible"], mutationFn: n, onError: (y) => {
     c({ redirectPath: y });
   }, meta: { ...k() } });
   return e ? m : l;
@@ -2599,22 +2599,22 @@ var yo = o(() => {
   return !!(t || e);
 }, "useIsExistAuthentication");
 var fe = o(({ enabled: e, isLoading: t, interval: r, onInterval: s }) => {
-  let [n, i] = admin__loadShare__react__loadShare__.useState(void 0), { options: a } = ge(), { overtime: u } = a, c = r ?? u.interval, p = s ?? (u == null ? void 0 : u.onInterval), l = typeof e < "u" ? e : typeof u.enabled < "u" ? u.enabled : true;
-  return admin__loadShare__react__loadShare__.useEffect(() => {
+  let [n, i] = abuse__loadShare__react__loadShare__.useState(void 0), { options: a } = ge(), { overtime: u } = a, c = r ?? u.interval, p = s ?? (u == null ? void 0 : u.onInterval), l = typeof e < "u" ? e : typeof u.enabled < "u" ? u.enabled : true;
+  return abuse__loadShare__react__loadShare__.useEffect(() => {
     let m;
     return l && t && (m = setInterval(() => {
       i((y) => y === void 0 ? c : y + c);
     }, c)), () => {
       typeof m < "u" && clearInterval(m), i(void 0);
     };
-  }, [t, c, l]), admin__loadShare__react__loadShare__.useEffect(() => {
+  }, [t, c, l]), abuse__loadShare__react__loadShare__.useEffect(() => {
     p && n && p(n);
   }, [n]), { elapsedTime: n };
 }, "useLoadingOvertime");
 var $t = o(({ resource: e, config: t, filters: r, hasPagination: s, pagination: n, sorters: i, queryOptions: a, successNotification: u, errorNotification: c, meta: p, metaData: l, liveMode: m, onLiveEvent: y, liveParams: d, dataProviderName: T, overtimeOptions: x } = {}) => {
   let { resources: v, resource: f, identifier: P } = q(e), M = le(), Q = z(), g = ie(), { mutate: C } = Re({ v3LegacyAuthProviderCompatible: !!(g != null && g.isLegacy) }), h = Ce(), D = ue(), { keys: k$1, preferLegacyKeys: E } = Z(), L = ee(P, T, v), U = I(p, l), w = I(r, t == null ? void 0 : t.filters), N = I(i, t == null ? void 0 : t.sort), b = I(s, t == null ? void 0 : t.hasPagination), F = Wt({ pagination: n, configPagination: t == null ? void 0 : t.pagination, hasPagination: b }), V = F.mode === "server", G = D({ resource: f, meta: U }), W = { meta: G, metaData: G, filters: w, hasPagination: V, pagination: F, sorters: N, config: { ...t, sort: N } }, K = (a == null ? void 0 : a.enabled) === void 0 || (a == null ? void 0 : a.enabled) === true, { getList: j } = M(L);
   Pt({ resource: P, types: ["*"], params: { meta: G, metaData: G, pagination: F, hasPagination: V, sort: N, sorters: N, filters: w, subscriptionType: "useList", ...d }, channel: `resources/${f == null ? void 0 : f.name}`, enabled: K, liveMode: m, onLiveEvent: y, dataProviderName: L, meta: { ...p, dataProviderName: T } });
-  let re = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: k$1().data(L).resource(P ?? "").action("list").params({ ...U || {}, filters: w, hasPagination: V, ...V && { pagination: F }, ...i && { sorters: i }, ...(t == null ? void 0 : t.sort) && { sort: t == null ? void 0 : t.sort } }).get(E), queryFn: (R) => {
+  let re = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: k$1().data(L).resource(P ?? "").action("list").params({ ...U || {}, filters: w, hasPagination: V, ...V && { pagination: F }, ...i && { sorters: i }, ...(t == null ? void 0 : t.sort) && { sort: t == null ? void 0 : t.sort } }).get(E), queryFn: (R) => {
     let S = { ...G, queryContext: je(R) };
     return j({ resource: (f == null ? void 0 : f.name) ?? "", pagination: F, hasPagination: V, filters: w, sort: N, sorters: N, meta: S, metaData: S });
   }, ...a, enabled: typeof (a == null ? void 0 : a.enabled) < "u" ? a == null ? void 0 : a.enabled : !!(f != null && f.name), select: (R) => {
@@ -2637,7 +2637,7 @@ var $t = o(({ resource: e, config: t, filters: r, hasPagination: s, pagination: 
 var zt = o(({ resource: e, id: t, queryOptions: r, successNotification: s, errorNotification: n, meta: i, metaData: a, liveMode: u, onLiveEvent: c, liveParams: p, dataProviderName: l, overtimeOptions: m }) => {
   let { resources: y, resource: d, identifier: T } = q(e), x = le(), v = z(), f = ie(), { mutate: P } = Re({ v3LegacyAuthProviderCompatible: !!(f != null && f.isLegacy) }), M = Ce(), Q = ue(), { keys: g, preferLegacyKeys: C } = Z(), h = I(i, a), D = ee(T, l, y), { getOne: k$1 } = x(D), E = Q({ resource: d, meta: h });
   Pt({ resource: T, types: ["*"], channel: `resources/${d == null ? void 0 : d.name}`, params: { ids: t ? [t] : [], id: t, meta: E, metaData: E, subscriptionType: "useOne", ...p }, enabled: typeof (r == null ? void 0 : r.enabled) < "u" ? r == null ? void 0 : r.enabled : typeof (d == null ? void 0 : d.name) < "u" && typeof t < "u", liveMode: u, onLiveEvent: c, dataProviderName: D, meta: { ...i, dataProviderName: l } });
-  let L = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: g().data(D).resource(T ?? "").action("one").id(t ?? "").params({ ...h || {} }).get(C), queryFn: (w) => k$1({ resource: (d == null ? void 0 : d.name) ?? "", id: t, meta: { ...E, queryContext: je(w) }, metaData: { ...E, queryContext: je(w) } }), ...r, enabled: typeof (r == null ? void 0 : r.enabled) < "u" ? r == null ? void 0 : r.enabled : typeof t < "u", onSuccess: (w) => {
+  let L = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: g().data(D).resource(T ?? "").action("one").id(t ?? "").params({ ...h || {} }).get(C), queryFn: (w) => k$1({ resource: (d == null ? void 0 : d.name) ?? "", id: t, meta: { ...E, queryContext: je(w) }, metaData: { ...E, queryContext: je(w) } }), ...r, enabled: typeof (r == null ? void 0 : r.enabled) < "u" ? r == null ? void 0 : r.enabled : typeof t < "u", onSuccess: (w) => {
     var b;
     (b = r == null ? void 0 : r.onSuccess) == null || b.call(r, w);
     let N = typeof s == "function" ? s(w, { id: t, ...E }, T) : s;
@@ -2653,7 +2653,7 @@ var zt = o(({ resource: e, id: t, queryOptions: r, successNotification: s, error
 var go = o(({ resource: e, ids: t, queryOptions: r, successNotification: s, errorNotification: n, meta: i, metaData: a, liveMode: u, onLiveEvent: c, liveParams: p, dataProviderName: l, overtimeOptions: m }) => {
   let { resources: y, resource: d, identifier: T } = q(e), x = le(), v = z(), f = ie(), { mutate: P } = Re({ v3LegacyAuthProviderCompatible: !!(f != null && f.isLegacy) }), M = Ce(), Q = ue(), { keys: g, preferLegacyKeys: C } = Z(), h = I(i, a), D = ee(T, l, y), k$1 = (r == null ? void 0 : r.enabled) === void 0 || (r == null ? void 0 : r.enabled) === true, { getMany: E, getOne: L } = x(D), U = Q({ resource: d, meta: h }), w = Array.isArray(t), N = !!(d != null && d.name), b = (r == null ? void 0 : r.enabled) === true;
   $u(!w && !b, za(t, d == null ? void 0 : d.name)), $u(!N && !b, _a()), Pt({ resource: T, types: ["*"], params: { ids: t ?? [], meta: U, metaData: U, subscriptionType: "useMany", ...p }, channel: `resources/${(d == null ? void 0 : d.name) ?? ""}`, enabled: k$1, liveMode: u, onLiveEvent: c, dataProviderName: D, meta: { ...i, dataProviderName: l } });
-  let F = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: g().data(D).resource(T).action("many").ids(...t ?? []).params({ ...h || {} }).get(C), queryFn: (G) => {
+  let F = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: g().data(D).resource(T).action("many").ids(...t ?? []).params({ ...h || {} }).get(C), queryFn: (G) => {
     let W = { ...U, queryContext: je(G) };
     return E ? E({ resource: d == null ? void 0 : d.name, ids: t, meta: W, metaData: W }) : lt(t.map((K) => L({ resource: d == null ? void 0 : d.name, id: K, meta: W, metaData: W })));
   }, enabled: w && N, ...r, onSuccess: (G) => {
@@ -2675,7 +2675,7 @@ See https://refine.dev/docs/data/hooks/use-many/#ids-`, "idsWarningMessage"), _a
 See https://refine.dev/docs/data/hooks/use-many/#resource-`, "resourceWarningMessage");
 var Os = ((s) => (s.ADD = "ADD", s.REMOVE = "REMOVE", s.DECREASE_NOTIFICATION_SECOND = "DECREASE_NOTIFICATION_SECOND", s))(Os || {});
 var To = o(({ id: e, resource: t, values: r, dataProviderName: s, successNotification: n, errorNotification: i, meta: a, metaData: u, mutationMode: c, undoableTimeout: p, onCancel: l, optimisticUpdateMap: m, invalidates: y, mutationOptions: d, overtimeOptions: T } = {}) => {
-  let { resources: x, select: v } = q(), f = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), P = le(), { mutationMode: M, undoableTimeout: Q } = _e(), g = z(), C = ie(), { mutate: h } = Re({ v3LegacyAuthProviderCompatible: !!(C != null && C.isLegacy) }), D = Ye(), { log: k$1 } = Je(), { notificationDispatch: E } = ut(), L = Ce(), U = Ae(), w = ue(), { options: { textTransformers: N } } = ge(), { keys: b, preferLegacyKeys: F } = Z(), V = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationFn: ({ id: R = e, values: S = r, resource: B = t, mutationMode: H = c, undoableTimeout: $ = p, onCancel: X = l, meta: ne = a, metaData: Y = u, dataProviderName: O = s }) => {
+  let { resources: x, select: v } = q(), f = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), P = le(), { mutationMode: M, undoableTimeout: Q } = _e(), g = z(), C = ie(), { mutate: h } = Re({ v3LegacyAuthProviderCompatible: !!(C != null && C.isLegacy) }), D = Ye(), { log: k$1 } = Je(), { notificationDispatch: E } = ut(), L = Ce(), U = Ae(), w = ue(), { options: { textTransformers: N } } = ge(), { keys: b, preferLegacyKeys: F } = Z(), V = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationFn: ({ id: R = e, values: S = r, resource: B = t, mutationMode: H = c, undoableTimeout: $ = p, onCancel: X = l, meta: ne = a, metaData: Y = u, dataProviderName: O = s }) => {
     if (typeof R > "u") throw jt;
     if (!S) throw Ir;
     if (!B) throw _t;
@@ -2753,7 +2753,7 @@ var To = o(({ id: e, resource: t, values: r, dataProviderName: s, successNotific
   return { ...K, mutate: o((R, S) => G(R || {}, S), "handleMutation"), mutateAsync: o((R, S) => W(R || {}, S), "handleMutateAsync"), overtime: { elapsedTime: j } };
 }, "useUpdate"), _t = new Error("[useUpdate]: `resource` is not defined or not matched but is required"), jt = new Error("[useUpdate]: `id` is not defined but is required in edit and clone actions"), Ir = new Error("[useUpdate]: `values` is not provided but is required");
 var Xt = o(({ resource: e, values: t, dataProviderName: r, successNotification: s, errorNotification: n, invalidates: i, meta: a, metaData: u, mutationOptions: c, overtimeOptions: p } = {}) => {
-  let l = ie(), { mutate: m } = Re({ v3LegacyAuthProviderCompatible: !!(l != null && l.isLegacy) }), y = le(), d = Ae(), { resources: T, select: x } = q(), v = z(), f = Ye(), { log: P } = Je(), M = Ce(), Q = ue(), { options: { textTransformers: g } } = ge(), { keys: C, preferLegacyKeys: h } = Z(), D = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationFn: ({ resource: b = e, values: F = t, meta: V = a, metaData: G = u, dataProviderName: W = r }) => {
+  let l = ie(), { mutate: m } = Re({ v3LegacyAuthProviderCompatible: !!(l != null && l.isLegacy) }), y = le(), d = Ae(), { resources: T, select: x } = q(), v = z(), f = Ye(), { log: P } = Je(), M = Ce(), Q = ue(), { options: { textTransformers: g } } = ge(), { keys: C, preferLegacyKeys: h } = Z(), D = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationFn: ({ resource: b = e, values: F = t, meta: V = a, metaData: G = u, dataProviderName: W = r }) => {
     if (!F) throw ho;
     if (!b) throw xo;
     let { resource: K, identifier: j } = x(b), re = Q({ resource: K, meta: I(V, G) });
@@ -2779,7 +2779,7 @@ var Xt = o(({ resource: e, values: t, dataProviderName: r, successNotification: 
   return { ...L, mutate: o((b, F) => k$1(b || {}, F), "handleMutation"), mutateAsync: o((b, F) => E(b || {}, F), "handleMutateAsync"), overtime: { elapsedTime: U } };
 }, "useCreate"), xo = new Error("[useCreate]: `resource` is not defined or not matched but is required"), ho = new Error("[useCreate]: `values` is not provided but is required");
 var Po = o(({ mutationOptions: e, overtimeOptions: t } = {}) => {
-  let r = ie(), { mutate: s } = Re({ v3LegacyAuthProviderCompatible: !!(r != null && r.isLegacy) }), n = le(), { resources: i, select: a } = q(), u = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), { mutationMode: c, undoableTimeout: p } = _e(), { notificationDispatch: l } = ut(), m = z(), y = Ye(), { log: d } = Je(), T = Ce(), x = Ae(), v = ue(), { options: { textTransformers: f } } = ge(), { keys: P, preferLegacyKeys: M } = Z(), Q = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationFn: ({ id: C, mutationMode: h, undoableTimeout: D, resource: k2, onCancel: E, meta: L, metaData: U, dataProviderName: w, values: N }) => {
+  let r = ie(), { mutate: s } = Re({ v3LegacyAuthProviderCompatible: !!(r != null && r.isLegacy) }), n = le(), { resources: i, select: a } = q(), u = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), { mutationMode: c, undoableTimeout: p } = _e(), { notificationDispatch: l } = ut(), m = z(), y = Ye(), { log: d } = Je(), T = Ce(), x = Ae(), v = ue(), { options: { textTransformers: f } } = ge(), { keys: P, preferLegacyKeys: M } = Z(), Q = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationFn: ({ id: C, mutationMode: h, undoableTimeout: D, resource: k2, onCancel: E, meta: L, metaData: U, dataProviderName: w, values: N }) => {
     let { resource: b, identifier: F } = a(k2), V = v({ resource: b, meta: I(L, U) }), G = h ?? c, W = D ?? p;
     return G !== "undoable" ? n(ee(F, w, i)).deleteOne({ resource: b.name, id: C, meta: V, metaData: V, variables: N }) : new Promise((j, re) => {
       let te = o(() => {
@@ -2826,7 +2826,7 @@ var Po = o(({ mutationOptions: e, overtimeOptions: t } = {}) => {
   return { ...Q, overtime: { elapsedTime: g } };
 }, "useDelete");
 var bo = o(({ resource: e, values: t, dataProviderName: r, successNotification: s, errorNotification: n, meta: i, metaData: a, invalidates: u, mutationOptions: c, overtimeOptions: p } = {}) => {
-  let l = le(), { resources: m, select: y } = q(), d = z(), T = Ye(), x = Ce(), v = Ae(), { log: f } = Je(), P = ue(), { options: { textTransformers: M } } = ge(), { keys: Q, preferLegacyKeys: g } = Z(), C = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationFn: ({ resource: w = e, values: N = t, meta: b = i, metaData: F = a, dataProviderName: V = r }) => {
+  let l = le(), { resources: m, select: y } = q(), d = z(), T = Ye(), x = Ce(), v = Ae(), { log: f } = Je(), P = ue(), { options: { textTransformers: M } } = ge(), { keys: Q, preferLegacyKeys: g } = Z(), C = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationFn: ({ resource: w = e, values: N = t, meta: b = i, metaData: F = a, dataProviderName: V = r }) => {
     if (!N) throw Co;
     if (!w) throw Ro;
     let { resource: G, identifier: W } = y(w), K = P({ resource: G, meta: I(b, F) }), j = l(ee(W, V, m));
@@ -2853,7 +2853,7 @@ var bo = o(({ resource: e, values: t, dataProviderName: r, successNotification: 
   return { ...k$1, mutate: o((w, N) => h(w || {}, N), "handleMutation"), mutateAsync: o((w, N) => D(w || {}, N), "handleMutateAsync"), overtime: { elapsedTime: E } };
 }, "useCreateMany"), Ro = new Error("[useCreateMany]: `resource` is not defined or not matched but is required"), Co = new Error("[useCreateMany]: `values` is not provided but is required");
 var ii = o(({ ids: e, resource: t, values: r, dataProviderName: s, successNotification: n, errorNotification: i, meta: a, metaData: u, mutationMode: c, undoableTimeout: p, onCancel: l, optimisticUpdateMap: m, invalidates: y, mutationOptions: d, overtimeOptions: T } = {}) => {
-  let { resources: x, select: v } = q(), f = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), P = le(), M = z(), { mutationMode: Q, undoableTimeout: g } = _e(), C = ie(), { mutate: h } = Re({ v3LegacyAuthProviderCompatible: !!(C != null && C.isLegacy) }), { notificationDispatch: D } = ut(), k$1 = Ye(), E = Ce(), L = Ae(), { log: U } = Je(), w = ue(), { options: { textTransformers: N } } = ge(), { keys: b, preferLegacyKeys: F } = Z(), V = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationFn: ({ ids: R = e, values: S = r, resource: B = t, onCancel: H = l, mutationMode: $ = c, undoableTimeout: X = p, meta: ne = a, metaData: Y = u, dataProviderName: O = s }) => {
+  let { resources: x, select: v } = q(), f = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), P = le(), M = z(), { mutationMode: Q, undoableTimeout: g } = _e(), C = ie(), { mutate: h } = Re({ v3LegacyAuthProviderCompatible: !!(C != null && C.isLegacy) }), { notificationDispatch: D } = ut(), k$1 = Ye(), E = Ce(), L = Ae(), { log: U } = Je(), w = ue(), { options: { textTransformers: N } } = ge(), { keys: b, preferLegacyKeys: F } = Z(), V = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationFn: ({ ids: R = e, values: S = r, resource: B = t, onCancel: H = l, mutationMode: $ = c, undoableTimeout: X = p, meta: ne = a, metaData: Y = u, dataProviderName: O = s }) => {
     if (!R) throw Yt;
     if (!S) throw Sr;
     if (!B) throw Zt;
@@ -2933,7 +2933,7 @@ var ii = o(({ ids: e, resource: t, values: r, dataProviderName: s, successNotifi
   return { ...K, mutate: o((R, S) => G(R || {}, S), "handleMutation"), mutateAsync: o((R, S) => W(R || {}, S), "handleMutateAsync"), overtime: { elapsedTime: j } };
 }, "useUpdateMany"), Zt = new Error("[useUpdateMany]: `resource` is not defined or not matched but is required"), Yt = new Error("[useUpdateMany]: `id` is not defined but is required in edit and clone actions"), Sr = new Error("[useUpdateMany]: `values` is not provided but is required");
 var di = o(({ mutationOptions: e, overtimeOptions: t } = {}) => {
-  let r = ie(), { mutate: s } = Re({ v3LegacyAuthProviderCompatible: !!(r != null && r.isLegacy) }), { mutationMode: n, undoableTimeout: i } = _e(), a = le(), { notificationDispatch: u } = ut(), c = z(), p = Ye(), l = Ce(), m = Ae(), { log: y } = Je(), { resources: d, select: T } = q(), x = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), v = ue(), { options: { textTransformers: f } } = ge(), { keys: P, preferLegacyKeys: M } = Z(), Q = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationFn: ({ resource: C, ids: h, mutationMode: D, undoableTimeout: k2, onCancel: E, meta: L, metaData: U, dataProviderName: w, values: N }) => {
+  let r = ie(), { mutate: s } = Re({ v3LegacyAuthProviderCompatible: !!(r != null && r.isLegacy) }), { mutationMode: n, undoableTimeout: i } = _e(), a = le(), { notificationDispatch: u } = ut(), c = z(), p = Ye(), l = Ce(), m = Ae(), { log: y } = Je(), { resources: d, select: T } = q(), x = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), v = ue(), { options: { textTransformers: f } } = ge(), { keys: P, preferLegacyKeys: M } = Z(), Q = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation({ mutationFn: ({ resource: C, ids: h, mutationMode: D, undoableTimeout: k2, onCancel: E, meta: L, metaData: U, dataProviderName: w, values: N }) => {
     let { resource: b, identifier: F } = T(C), V = v({ resource: b, meta: I(L, U) }), G = D ?? n, W = k2 ?? i, K = a(ee(F, w, d)), j = o(() => K.deleteMany ? K.deleteMany({ resource: b.name, ids: h, meta: V, metaData: V, variables: N }) : lt(h.map((te) => K.deleteOne({ resource: b.name, id: te, meta: V, metaData: V, variables: N }))), "mutationFn");
     return G !== "undoable" ? j() : new Promise((te, R) => {
       let S = o(() => {
@@ -2985,7 +2985,7 @@ var li = o((e) => {
 var yi = o(({ url: e, method: t, config: r, queryOptions: s, successNotification: n, errorNotification: i, meta: a, metaData: u, dataProviderName: c, overtimeOptions: p }) => {
   let l = le(), m = ie(), { mutate: y } = Re({ v3LegacyAuthProviderCompatible: !!(m != null && m.isLegacy) }), d = z(), T = Ce(), x = ue(), { keys: v, preferLegacyKeys: f } = Z(), P = I(a, u), { custom: M } = l(c), Q = x({ meta: P });
   if (M) {
-    let g = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: v().data(c).mutation("custom").params({ method: t, url: e, ...r, ...P || {} }).get(f), queryFn: (h) => M({ url: e, method: t, ...r, meta: { ...Q, queryContext: je(h) }, metaData: { ...Q, queryContext: je(h) } }), ...s, onSuccess: (h) => {
+    let g = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: v().data(c).mutation("custom").params({ method: t, url: e, ...r, ...P || {} }).get(f), queryFn: (h) => M({ url: e, method: t, ...r, meta: { ...Q, queryContext: je(h) }, metaData: { ...Q, queryContext: je(h) } }), ...s, onSuccess: (h) => {
       var k2;
       (k2 = s == null ? void 0 : s.onSuccess) == null || k2.call(s, h);
       let D = typeof n == "function" ? n(h, { ...r, ...Q }) : n;
@@ -3001,7 +3001,7 @@ var yi = o(({ url: e, method: t, config: r, queryOptions: s, successNotification
   throw Error("Not implemented custom on data provider.");
 }, "useCustom");
 var xi = o(({ mutationOptions: e, overtimeOptions: t } = {}) => {
-  let r = ie(), { mutate: s } = Re({ v3LegacyAuthProviderCompatible: !!(r != null && r.isLegacy) }), n = Ce(), i = le(), a = z(), u = ue(), { keys: c, preferLegacyKeys: p } = Z(), l = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation(({ url: y, method: d, values: T, meta: x, metaData: v, dataProviderName: f, config: P }) => {
+  let r = ie(), { mutate: s } = Re({ v3LegacyAuthProviderCompatible: !!(r != null && r.isLegacy) }), n = Ce(), i = le(), a = z(), u = ue(), { keys: c, preferLegacyKeys: p } = Z(), l = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation(({ url: y, method: d, values: T, meta: x, metaData: v, dataProviderName: f, config: P }) => {
     let M = u({ meta: I(x, v) }), { custom: Q } = i(f);
     if (Q) return Q({ url: y, method: d, payload: T, meta: M, metaData: M, headers: { ...P == null ? void 0 : P.headers } });
     throw Error("Not implemented custom on data provider.");
@@ -3020,8 +3020,8 @@ var Hs = { default: {} }, Jt = React.createContext(Hs), $s = o(({ children: e, d
   return t && (!("default" in t) && ("getList" in t || "getOne" in t) ? r = { default: t } : r = t), React.createElement(Jt.Provider, { value: r }, e);
 }, "DataContextProvider");
 var le = o(() => {
-  let e = admin__loadShare__react__loadShare__.useContext(Jt);
-  return admin__loadShare__react__loadShare__.useCallback((r) => {
+  let e = abuse__loadShare__react__loadShare__.useContext(Jt);
+  return abuse__loadShare__react__loadShare__.useCallback((r) => {
     if (r) {
       let s = e == null ? void 0 : e[r];
       if (!s) throw new Error(`"${r}" Data provider not found`);
@@ -3035,7 +3035,7 @@ var le = o(() => {
 var bi = o(({ resource: e, config: t, filters: r, hasPagination: s, pagination: n, sorters: i, queryOptions: a, successNotification: u, errorNotification: c, meta: p, metaData: l, liveMode: m, onLiveEvent: y, liveParams: d, dataProviderName: T, overtimeOptions: x }) => {
   let { resources: v, resource: f, identifier: P } = q(e), M = le(), Q = z(), g = ie(), { mutate: C } = Re({ v3LegacyAuthProviderCompatible: !!(g != null && g.isLegacy) }), h = Ce(), D = ue(), { keys: k$1, preferLegacyKeys: E } = Z(), L = ee(P, T, v), U = I(p, l), w = I(r, t == null ? void 0 : t.filters), N = I(i, t == null ? void 0 : t.sort), b = I(s, t == null ? void 0 : t.hasPagination), F = Wt({ pagination: n, configPagination: t == null ? void 0 : t.pagination, hasPagination: b }), V = F.mode === "server", G = { meta: U, metaData: U, filters: w, hasPagination: V, pagination: F, sorters: N, config: { ...t, sort: N } }, W = (a == null ? void 0 : a.enabled) === void 0 || (a == null ? void 0 : a.enabled) === true, K = D({ resource: f, meta: U }), { getList: j } = M(L);
   Pt({ resource: P, types: ["*"], params: { meta: K, metaData: K, pagination: F, hasPagination: V, sort: N, sorters: N, filters: w, subscriptionType: "useList", ...d }, channel: `resources/${f.name}`, enabled: W, liveMode: m, onLiveEvent: y, dataProviderName: L, meta: { ...K, dataProviderName: T } });
-  let re = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useInfiniteQuery({ queryKey: k$1().data(L).resource(P).action("infinite").params({ ...U || {}, filters: w, hasPagination: V, ...V && { pagination: F }, ...i && { sorters: i }, ...(t == null ? void 0 : t.sort) && { sort: t == null ? void 0 : t.sort } }).get(E), queryFn: (R) => {
+  let re = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useInfiniteQuery({ queryKey: k$1().data(L).resource(P).action("infinite").params({ ...U || {}, filters: w, hasPagination: V, ...V && { pagination: F }, ...i && { sorters: i }, ...(t == null ? void 0 : t.sort) && { sort: t == null ? void 0 : t.sort } }).get(E), queryFn: (R) => {
     let S = { ...F, current: R.pageParam }, B = { ...K, queryContext: je(R) };
     return j({ resource: f.name, pagination: S, hasPagination: V, filters: w, sort: N, sorters: N, meta: B, metaData: B }).then(({ data: H, total: $, ...X }) => ({ data: H, total: $, pagination: S, ...X }));
   }, getNextPageParam: (R) => Tr(R), getPreviousPageParam: (R) => xr(R), ...a, onSuccess: (R) => {
@@ -3053,8 +3053,8 @@ var bi = o(({ resource: e, config: t, filters: r, hasPagination: s, pagination: 
 }, "useInfiniteList");
 var mt = React.createContext({}), _s = o(({ liveProvider: e, children: t }) => React.createElement(mt.Provider, { value: { liveProvider: e } }, t), "LiveContextProvider");
 var Ae = o(() => {
-  let { resources: e } = q(), t = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), { keys: r, preferLegacyKeys: s } = Z();
-  return admin__loadShare__react__loadShare__.useCallback(async ({ resource: i, dataProviderName: a, invalidates: u, id: c, invalidationFilters: p = { type: "all", refetchType: "active" }, invalidationOptions: l = { cancelRefetch: false } }) => {
+  let { resources: e } = q(), t = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), { keys: r, preferLegacyKeys: s } = Z();
+  return abuse__loadShare__react__loadShare__.useCallback(async ({ resource: i, dataProviderName: a, invalidates: u, id: c, invalidationFilters: p = { type: "all", refetchType: "active" }, invalidationOptions: l = { cancelRefetch: false } }) => {
     if (u === false) return;
     let m = ee(i, a, e), y = r().data(m).resource(i ?? "");
     await Promise.all(u.map((d) => {
@@ -3076,21 +3076,21 @@ var Ae = o(() => {
   }, []);
 }, "useInvalidate");
 var js = o((e) => {
-  let t = admin__loadShare__react__loadShare__.useRef(e);
+  let t = abuse__loadShare__react__loadShare__.useRef(e);
   return isEqual(t.current, e) || (t.current = e), t.current;
 }, "useMemoized");
 var Ar = o((e, t) => {
   let r = js(t);
-  return admin__loadShare__react__loadShare__.useMemo(e, r);
+  return abuse__loadShare__react__loadShare__.useMemo(e, r);
 }, "useDeepMemo");
 var Rt = React.createContext({ resources: [] }), Zs = o(({ resources: e, children: t }) => {
   let r = Ar(() => hr(e ?? []), [e]);
   return React.createElement(Rt.Provider, { value: { resources: r } }, t);
 }, "ResourceContextProvider");
 var Js = React.createContext("new"), qs = Js.Provider, oe = o(() => React.useContext(Js), "useRouterType");
-var en = {}, ft = admin__loadShare__react__loadShare__.createContext(en), tn = o(({ children: e, router: t }) => React.createElement(ft.Provider, { value: t ?? en }, e), "RouterContextProvider");
+var en = {}, ft = abuse__loadShare__react__loadShare__.createContext(en), tn = o(({ children: e, router: t }) => React.createElement(ft.Provider, { value: t ?? en }, e), "RouterContextProvider");
 var vo = o(() => {
-  let e = admin__loadShare__react__loadShare__.useContext(ft);
+  let e = abuse__loadShare__react__loadShare__.useContext(ft);
   return React.useMemo(() => (e == null ? void 0 : e.parse) ?? (() => () => ({})), [e == null ? void 0 : e.parse])();
 }, "useParse");
 var Te = o(() => {
@@ -3098,7 +3098,7 @@ var Te = o(() => {
   return React.useMemo(() => e(), [e]);
 }, "useParsed");
 function q(e) {
-  let { resources: t } = admin__loadShare__react__loadShare__.useContext(Rt), r = oe(), s = Te(), n = { resourceName: e && typeof e != "string" ? e.resourceName : e, resourceNameOrRouteName: e && typeof e != "string" ? e.resourceNameOrRouteName : e, recordItemId: e && typeof e != "string" ? e.recordItemId : void 0 }, i = o((m, y = true) => {
+  let { resources: t } = abuse__loadShare__react__loadShare__.useContext(Rt), r = oe(), s = Te(), n = { resourceName: e && typeof e != "string" ? e.resourceName : e, resourceNameOrRouteName: e && typeof e != "string" ? e.resourceNameOrRouteName : e, recordItemId: e && typeof e != "string" ? e.recordItemId : void 0 }, i = o((m, y = true) => {
     let T = Ee(m, t, r === "legacy");
     if (T) return { resource: T, identifier: T.identifier ?? T.name };
     if (y) {
@@ -3119,16 +3119,16 @@ function q(e) {
 }
 o(q, "useResource");
 var rn = o(() => {
-  let { resources: e } = admin__loadShare__react__loadShare__.useContext(Rt);
-  return admin__loadShare__react__loadShare__.useCallback((r) => {
+  let { resources: e } = abuse__loadShare__react__loadShare__.useContext(Rt);
+  return abuse__loadShare__react__loadShare__.useCallback((r) => {
     let s = Ee(r, e, true);
     return s || { name: r, route: r };
   }, [e]);
 }, "useResourceWithRoute");
 var Pt = o(({ resource: e, params: t, channel: r, types: s, enabled: n = true, liveMode: i, onLiveEvent: a, dataProviderName: u, meta: c }) => {
   var f;
-  let { resource: p, identifier: l } = q(e), { liveProvider: m } = admin__loadShare__react__loadShare__.useContext(mt), { liveMode: y, onLiveEvent: d } = admin__loadShare__react__loadShare__.useContext(Qe), T = i ?? y, x = Ae(), v = u ?? (c == null ? void 0 : c.dataProviderName) ?? ((f = p == null ? void 0 : p.meta) == null ? void 0 : f.dataProviderName);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  let { resource: p, identifier: l } = q(e), { liveProvider: m } = abuse__loadShare__react__loadShare__.useContext(mt), { liveMode: y, onLiveEvent: d } = abuse__loadShare__react__loadShare__.useContext(Qe), T = i ?? y, x = Ae(), v = u ?? (c == null ? void 0 : c.dataProviderName) ?? ((f = p == null ? void 0 : p.meta) == null ? void 0 : f.dataProviderName);
+  abuse__loadShare__react__loadShare__.useEffect(() => {
     let P, M = o((Q) => {
       T === "auto" && x({ resource: l, dataProviderName: v, invalidates: ["resourceAll"], invalidationFilters: { type: "active", refetchType: "active" }, invalidationOptions: { cancelRefetch: false } }), a == null || a(Q), d == null || d(Q);
     }, "callback");
@@ -3138,12 +3138,12 @@ var Pt = o(({ resource: e, params: t, channel: r, types: s, enabled: n = true, l
   }, [n]);
 }, "useResourceSubscription");
 var sn = o((e) => {
-  let { liveMode: t } = admin__loadShare__react__loadShare__.useContext(Qe);
+  let { liveMode: t } = abuse__loadShare__react__loadShare__.useContext(Qe);
   return e ?? t;
 }, "useLiveMode");
 var ph = o(({ params: e, channel: t, types: r = ["*"], enabled: s = true, onLiveEvent: n, dataProviderName: i = "default", meta: a }) => {
-  let { liveProvider: u } = admin__loadShare__react__loadShare__.useContext(mt);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  let { liveProvider: u } = abuse__loadShare__react__loadShare__.useContext(mt);
+  abuse__loadShare__react__loadShare__.useEffect(() => {
     let c;
     return s && (c = u == null ? void 0 : u.subscribe({ channel: t, params: e, types: r, callback: n, dataProviderName: i, meta: { ...a, dataProviderName: i } })), () => {
       c && (u == null || u.unsubscribe(c));
@@ -3151,10 +3151,10 @@ var ph = o(({ params: e, channel: t, types: r = ["*"], enabled: s = true, onLive
   }, [s]);
 }, "useSubscription");
 var Ye = o(() => {
-  let { liveProvider: e } = admin__loadShare__react__loadShare__.useContext(mt);
+  let { liveProvider: e } = abuse__loadShare__react__loadShare__.useContext(mt);
   return e == null ? void 0 : e.publish;
 }, "usePublish");
-var Uo = admin__loadShare__react__loadShare__.createContext({ notifications: [], notificationDispatch: () => false }), Hi = [], $i = o((e, t) => {
+var Uo = abuse__loadShare__react__loadShare__.createContext({ notifications: [], notificationDispatch: () => false }), Hi = [], $i = o((e, t) => {
   switch (t.type) {
     case "ADD":
       return [...e.filter((s) => !(isEqual(s.id, t.payload.id) && s.resource === t.payload.resource)), { ...t.payload, isRunning: true }];
@@ -3166,32 +3166,32 @@ var Uo = admin__loadShare__react__loadShare__.createContext({ notifications: [],
       return e;
   }
 }, "undoableQueueReducer"), an = o(({ children: e }) => {
-  let [t, r] = admin__loadShare__react__loadShare__.useReducer($i, Hi), s = { notifications: t, notificationDispatch: r };
+  let [t, r] = abuse__loadShare__react__loadShare__.useReducer($i, Hi), s = { notifications: t, notificationDispatch: r };
   return React.createElement(Uo.Provider, { value: s }, e, typeof window < "u" ? t.map((n) => React.createElement(un, { key: `${n.id}-${n.resource}-queue`, notification: n })) : null);
 }, "UndoableQueueContextProvider");
 var ut = o(() => {
-  let { notifications: e, notificationDispatch: t } = admin__loadShare__react__loadShare__.useContext(Uo);
+  let { notifications: e, notificationDispatch: t } = abuse__loadShare__react__loadShare__.useContext(Uo);
   return { notifications: e, notificationDispatch: t };
 }, "useCancelNotification");
-var qt = admin__loadShare__react__loadShare__.createContext({}), cn = o(({ open: e, close: t, children: r }) => React.createElement(qt.Provider, { value: { open: e, close: t } }, r), "NotificationContextProvider");
+var qt = abuse__loadShare__react__loadShare__.createContext({}), cn = o(({ open: e, close: t, children: r }) => React.createElement(qt.Provider, { value: { open: e, close: t } }, r), "NotificationContextProvider");
 var He = o(() => {
-  let { open: e, close: t } = admin__loadShare__react__loadShare__.useContext(qt);
+  let { open: e, close: t } = abuse__loadShare__react__loadShare__.useContext(qt);
   return { open: e, close: t };
 }, "useNotification");
 var Ce = o(() => {
   let { open: e } = He();
-  return admin__loadShare__react__loadShare__.useCallback((r, s) => {
+  return abuse__loadShare__react__loadShare__.useCallback((r, s) => {
     r !== false && (r ? e == null || e(r) : s && (e == null || e(s)));
   }, []);
 }, "useHandleNotification");
 var Xe = React.createContext({}), dn = o(({ children: e, i18nProvider: t }) => React.createElement(Xe.Provider, { value: { i18nProvider: t } }, e), "I18nContextProvider");
 var Eo = o(() => {
-  let { i18nProvider: e } = admin__loadShare__react__loadShare__.useContext(Xe);
-  return admin__loadShare__react__loadShare__.useCallback((t) => e == null ? void 0 : e.changeLocale(t), []);
+  let { i18nProvider: e } = abuse__loadShare__react__loadShare__.useContext(Xe);
+  return abuse__loadShare__react__loadShare__.useCallback((t) => e == null ? void 0 : e.changeLocale(t), []);
 }, "useSetLocale");
 var z = o(() => {
-  let { i18nProvider: e } = admin__loadShare__react__loadShare__.useContext(Xe);
-  return admin__loadShare__react__loadShare__.useMemo(() => {
+  let { i18nProvider: e } = abuse__loadShare__react__loadShare__.useContext(Xe);
+  return abuse__loadShare__react__loadShare__.useMemo(() => {
     function r(s, n, i) {
       return (e == null ? void 0 : e.translate(s, n, i)) ?? i ?? (typeof n == "string" && typeof i > "u" ? n : s);
     }
@@ -3199,15 +3199,15 @@ var z = o(() => {
   }, [e]);
 }, "useTranslate");
 var Lo = o(() => {
-  let { i18nProvider: e } = admin__loadShare__react__loadShare__.useContext(Xe);
-  return admin__loadShare__react__loadShare__.useCallback(() => e == null ? void 0 : e.getLocale(), []);
+  let { i18nProvider: e } = abuse__loadShare__react__loadShare__.useContext(Xe);
+  return abuse__loadShare__react__loadShare__.useCallback(() => e == null ? void 0 : e.getLocale(), []);
 }, "useGetLocale");
 var tP = o(() => {
   let e = z(), t = Eo(), r = Lo();
   return { translate: e, changeLocale: t, getLocale: r };
 }, "useTranslation");
 var fP = o(({ resourceName: e, resource: t, sorter: r, sorters: s, filters: n, maxItemCount: i, pageSize: a = 20, mapData: u = o((x) => x, "mapData"), exportOptions: c, unparseConfig: p, meta: l, metaData: m, dataProviderName: y, onError: d, download: T } = {}) => {
-  let [x, v] = admin__loadShare__react__loadShare__.useState(false), f = le(), P = ue(), { resource: M, resources: Q, identifier: g } = q(I(t, e)), h = `${ht()(g, "plural")}-${(/* @__PURE__ */ new Date()).toLocaleString()}`, { getList: D } = f(ee(g, y, Q)), k2 = P({ resource: M, meta: I(l, m) });
+  let [x, v] = abuse__loadShare__react__loadShare__.useState(false), f = le(), P = ue(), { resource: M, resources: Q, identifier: g } = q(I(t, e)), h = `${ht()(g, "plural")}-${(/* @__PURE__ */ new Date()).toLocaleString()}`, { getList: D } = f(ee(g, y, Q)), k2 = P({ resource: M, meta: I(l, m) });
   return { isLoading: x, triggerExport: o(async () => {
     v(true);
     let L = [], U = 1, w = true;
@@ -3282,12 +3282,12 @@ If you don't use the \`setId\` method to set the \`id\`, you should pass the \`i
 See https://refine.dev/docs/data/hooks/use-form/#id-`, "idWarningMessage");
 var fn = o(() => {
   let { show: e, edit: t, list: r, create: s } = he();
-  return admin__loadShare__react__loadShare__.useCallback(({ redirect: i, resource: a, id: u, meta: c = {} }) => {
+  return abuse__loadShare__react__loadShare__.useCallback(({ redirect: i, resource: a, id: u, meta: c = {} }) => {
     if (i && a) return a.show && i === "show" && u ? e(a, u, void 0, c) : a.edit && i === "edit" && u ? t(a, u, void 0, c) : a.create && i === "create" ? s(a, void 0, c) : r(a, "push", c);
   }, []);
 }, "useRedirectionAfterSubmission");
 var Mo = o(() => {
-  let e = admin__loadShare__react__loadShare__.useContext(ft);
+  let e = abuse__loadShare__react__loadShare__.useContext(ft);
   return React.useMemo(() => (e == null ? void 0 : e.back) ?? (() => () => {
   }), [e == null ? void 0 : e.back])();
 }, "useBack");
@@ -3302,9 +3302,9 @@ var Ut = o(() => {
   }, [r, t, s]);
 }, "useGetToPath");
 var Pe = o(() => {
-  let e = admin__loadShare__react__loadShare__.useContext(ft), { select: t } = q(), r = Ut(), n = React.useMemo(() => (e == null ? void 0 : e.go) ?? (() => () => {
+  let e = abuse__loadShare__react__loadShare__.useContext(ft), { select: t } = q(), r = Ut(), n = React.useMemo(() => (e == null ? void 0 : e.go) ?? (() => () => {
   }), [e == null ? void 0 : e.go])();
-  return admin__loadShare__react__loadShare__.useCallback((a) => {
+  return abuse__loadShare__react__loadShare__.useCallback((a) => {
     if (typeof a.to != "object") return n({ ...a, to: a.to });
     let { resource: u } = t(a.to.resource);
     xu(a.to, u);
@@ -3392,7 +3392,7 @@ If you don't use the \`setShowId\` method to set the \`showId\`, you should pass
 
 See https://refine.dev/docs/data/hooks/use-show/#resource`, "idWarningMessage");
 var mR = o(({ resourceName: e, resource: t, mapData: r = o((l) => l, "mapData"), paparseOptions: s, batchSize: n = Number.MAX_SAFE_INTEGER, onFinish: i, meta: a, metaData: u, onProgress: c, dataProviderName: p } = {}) => {
-  let [l, m] = admin__loadShare__react__loadShare__.useState(0), [y, d] = admin__loadShare__react__loadShare__.useState(0), [T, x] = admin__loadShare__react__loadShare__.useState(false), { resource: v, identifier: f } = q(t ?? e), P = ue(), M = bo(), Q = Xt(), g = P({ resource: v, meta: I(a, u) }), C;
+  let [l, m] = abuse__loadShare__react__loadShare__.useState(0), [y, d] = abuse__loadShare__react__loadShare__.useState(0), [T, x] = abuse__loadShare__react__loadShare__.useState(false), { resource: v, identifier: f } = q(t ?? e), P = ue(), M = bo(), Q = Xt(), g = P({ resource: v, meta: I(a, u) }), C;
   n === 1 ? C = Q : C = M;
   let h = o(() => {
     d(0), m(0), x(false);
@@ -3400,7 +3400,7 @@ var mR = o(({ resourceName: e, resource: t, mapData: r = o((l) => l, "mapData"),
     let L = { succeeded: E.filter((U) => U.type === "success"), errored: E.filter((U) => U.type === "error") };
     i == null || i(L), x(false);
   }, "handleFinish");
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  abuse__loadShare__react__loadShare__.useEffect(() => {
     c == null || c({ totalAmount: y, processedAmount: l });
   }, [y, l]);
   let k2 = o(({ file: E }) => (h(), new Promise((L) => {
@@ -3420,18 +3420,18 @@ var mR = o(({ resourceName: e, resource: t, mapData: r = o((l) => l, "mapData"),
   } }, mutationResult: C, isLoading: T, handleChange: k2 };
 }, "useImport");
 var TR = o(({ defaultVisible: e = false } = {}) => {
-  let [t, r] = admin__loadShare__react__loadShare__.useState(e), s = admin__loadShare__react__loadShare__.useCallback(() => r(true), [t]), n = admin__loadShare__react__loadShare__.useCallback(() => r(false), [t]);
+  let [t, r] = abuse__loadShare__react__loadShare__.useState(e), s = abuse__loadShare__react__loadShare__.useCallback(() => r(true), [t]), n = abuse__loadShare__react__loadShare__.useCallback(() => r(false), [t]);
   return { visible: t, show: s, close: n };
 }, "useModal");
 var Du = o(({ resource: e, action: t, meta: r, legacy: s }) => Ut()({ resource: e, action: t, meta: r, legacy: s }), "useToPath");
 var Mu = o((e, t) => {
-  let r = admin__loadShare__react__loadShare__.useContext(ft), s = r == null ? void 0 : r.Link, n = Pe(), i = "";
+  let r = abuse__loadShare__react__loadShare__.useContext(ft), s = r == null ? void 0 : r.Link, n = Pe(), i = "";
   return "go" in e && (r != null && r.go || $u(true, "[Link]: `routerProvider` is not found. To use `go`, Please make sure that you have provided the `routerProvider` for `<Refine />` https://refine.dev/docs/routing/router-provider/ \n"), i = n({ ...e.go, type: "path" })), "to" in e && (i = e.to), s ? React.createElement(s, { ref: t, ...e, to: i, go: void 0 }) : React.createElement("a", { ref: t, href: i, ...e, to: void 0, go: void 0 });
-}, "LinkComponent"), Io = admin__loadShare__react__loadShare__.forwardRef(Mu);
+}, "LinkComponent"), Io = abuse__loadShare__react__loadShare__.forwardRef(Mu);
 var yt = o(() => Io, "useLink");
 var gt = { useHistory: () => false, useLocation: () => false, useParams: () => ({}), Prompt: () => null, Link: () => null }, er = React.createContext(gt), xn = o(({ children: e, useHistory: t, useLocation: r, useParams: s, Prompt: n, Link: i, routes: a }) => React.createElement(er.Provider, { value: { useHistory: t ?? gt.useHistory, useLocation: r ?? gt.useLocation, useParams: s ?? gt.useParams, Prompt: n ?? gt.Prompt, Link: i ?? gt.Link, routes: a ?? gt.routes } }, e), "LegacyRouterContextProvider");
 var pe = o(() => {
-  let e = admin__loadShare__react__loadShare__.useContext(er), { useHistory: t, useLocation: r, useParams: s, Prompt: n, Link: i, routes: a } = e ?? gt;
+  let e = abuse__loadShare__react__loadShare__.useContext(er), { useHistory: t, useLocation: r, useParams: s, Prompt: n, Link: i, routes: a } = e ?? gt;
   return { useHistory: t, useLocation: r, useParams: s, Prompt: n, Link: i, routes: a };
 }, "useRouterContext");
 var ct = React.createContext({ options: { buttons: { enableAccessControl: true, hideIfUnauthorized: false } } }), Pn = o(({ can: e, children: t, options: r }) => React.createElement(ct.Provider, { value: { can: e, options: r ? { ...r, buttons: { enableAccessControl: true, hideIfUnauthorized: false, ...r.buttons } } : { buttons: { enableAccessControl: true, hideIfUnauthorized: false }, queryOptions: void 0 } } }, t), "AccessControlContextProvider");
@@ -3441,7 +3441,7 @@ var kt = o((e) => {
   return { ...l, ...c ? { meta: y } : {}, ...p ? { options: T } : {} };
 }, "sanitizeResource");
 var kr = o(({ action: e, resource: t, params: r, queryOptions: s }) => {
-  let { can: n, options: i } = admin__loadShare__react__loadShare__.useContext(ct), { keys: a, preferLegacyKeys: u } = Z(), { queryOptions: c } = i || {}, p = { ...c, ...s }, { resource: l, ...m } = r ?? {}, y = kt(l), d = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: a().access().resource(t).action(e).params({ params: { ...m, resource: y }, enabled: p == null ? void 0 : p.enabled }).get(u), queryFn: () => (n == null ? void 0 : n({ action: e, resource: t, params: { ...m, resource: y } })) ?? Promise.resolve({ can: true }), enabled: typeof n < "u", ...p, meta: { ...p == null ? void 0 : p.meta, ...k() }, retry: false });
+  let { can: n, options: i } = abuse__loadShare__react__loadShare__.useContext(ct), { keys: a, preferLegacyKeys: u } = Z(), { queryOptions: c } = i || {}, p = { ...c, ...s }, { resource: l, ...m } = r ?? {}, y = kt(l), d = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: a().access().resource(t).action(e).params({ params: { ...m, resource: y }, enabled: p == null ? void 0 : p.enabled }).get(u), queryFn: () => (n == null ? void 0 : n({ action: e, resource: t, params: { ...m, resource: y } })) ?? Promise.resolve({ can: true }), enabled: typeof n < "u", ...p, meta: { ...p == null ? void 0 : p.meta, ...k() }, retry: false });
   return typeof n > "u" ? { data: { can: true } } : d;
 }, "useCan");
 var cC = o(() => {
@@ -3452,17 +3452,17 @@ var cC = o(() => {
   }, "canWithSanitizedResource") : void 0, [e]) };
 }, "useCanWithoutCache");
 var PC = o((e) => {
-  let [t, r] = admin__loadShare__react__loadShare__.useState([]), [s, n] = admin__loadShare__react__loadShare__.useState([]), [i, a] = admin__loadShare__react__loadShare__.useState([]), { resource: u, sort: c, sorters: p, filters: l = [], optionLabel: m = "title", optionValue: y = "id", searchField: d = typeof m == "string" ? m : "title", debounce: T = 300, successNotification: x, errorNotification: v, defaultValueQueryOptions: f, queryOptions: P, fetchSize: M, pagination: Q, hasPagination: g = false, liveMode: C, defaultValue: h = [], selectedOptionsOrder: D = "in-place", onLiveEvent: k2, onSearch: E, liveParams: L, meta: U, metaData: w, dataProviderName: N, overtimeOptions: b } = e, F = admin__loadShare__react__loadShare__.useCallback((O) => typeof m == "string" ? get(O, m) : m(O), [m]), V = admin__loadShare__react__loadShare__.useCallback((O) => typeof y == "string" ? get(O, y) : y(O), [y]), { resource: G, identifier: W } = q(u), j = ue()({ resource: G, meta: I(U, w) }), re = Array.isArray(h) ? h : [h], te = admin__loadShare__react__loadShare__.useCallback((O) => {
+  let [t, r] = abuse__loadShare__react__loadShare__.useState([]), [s, n] = abuse__loadShare__react__loadShare__.useState([]), [i, a] = abuse__loadShare__react__loadShare__.useState([]), { resource: u, sort: c, sorters: p, filters: l = [], optionLabel: m = "title", optionValue: y = "id", searchField: d = typeof m == "string" ? m : "title", debounce: T = 300, successNotification: x, errorNotification: v, defaultValueQueryOptions: f, queryOptions: P, fetchSize: M, pagination: Q, hasPagination: g = false, liveMode: C, defaultValue: h = [], selectedOptionsOrder: D = "in-place", onLiveEvent: k2, onSearch: E, liveParams: L, meta: U, metaData: w, dataProviderName: N, overtimeOptions: b } = e, F = abuse__loadShare__react__loadShare__.useCallback((O) => typeof m == "string" ? get(O, m) : m(O), [m]), V = abuse__loadShare__react__loadShare__.useCallback((O) => typeof y == "string" ? get(O, y) : y(O), [y]), { resource: G, identifier: W } = q(u), j = ue()({ resource: G, meta: I(U, w) }), re = Array.isArray(h) ? h : [h], te = abuse__loadShare__react__loadShare__.useCallback((O) => {
     a(O.data.map((_) => ({ label: F(_), value: V(_) })));
   }, [m, y]), R = f ?? P, S = go({ resource: W, ids: re, queryOptions: { ...R, enabled: re.length > 0 && ((R == null ? void 0 : R.enabled) ?? true), onSuccess: (O) => {
     var _;
     te(O), (_ = R == null ? void 0 : R.onSuccess) == null || _.call(R, O);
-  } }, overtimeOptions: { enabled: false }, meta: j, metaData: j, liveMode: "off", dataProviderName: N }), B = admin__loadShare__react__loadShare__.useCallback((O) => {
+  } }, overtimeOptions: { enabled: false }, meta: j, metaData: j, liveMode: "off", dataProviderName: N }), B = abuse__loadShare__react__loadShare__.useCallback((O) => {
     n(O.data.map((_) => ({ label: F(_), value: V(_) })));
   }, [m, y]), H = $t({ resource: W, sorters: I(p, c), filters: l.concat(t), pagination: { current: Q == null ? void 0 : Q.current, pageSize: (Q == null ? void 0 : Q.pageSize) ?? M, mode: Q == null ? void 0 : Q.mode }, hasPagination: g, queryOptions: { ...P, onSuccess: (O) => {
     var _;
     B(O), (_ = P == null ? void 0 : P.onSuccess) == null || _.call(P, O);
-  } }, overtimeOptions: { enabled: false }, successNotification: x, errorNotification: v, meta: j, metaData: j, liveMode: C, liveParams: L, onLiveEvent: k2, dataProviderName: N }), { elapsedTime: $ } = fe({ ...b, isLoading: H.isFetching || S.isFetching }), X = admin__loadShare__react__loadShare__.useMemo(() => uniqBy(D === "in-place" ? [...s, ...i] : [...i, ...s], "value"), [s, i]), ne = admin__loadShare__react__loadShare__.useRef(E), Y = admin__loadShare__react__loadShare__.useMemo(() => debounce((O) => {
+  } }, overtimeOptions: { enabled: false }, successNotification: x, errorNotification: v, meta: j, metaData: j, liveMode: C, liveParams: L, onLiveEvent: k2, dataProviderName: N }), { elapsedTime: $ } = fe({ ...b, isLoading: H.isFetching || S.isFetching }), X = abuse__loadShare__react__loadShare__.useMemo(() => uniqBy(D === "in-place" ? [...s, ...i] : [...i, ...s], "value"), [s, i]), ne = abuse__loadShare__react__loadShare__.useRef(E), Y = abuse__loadShare__react__loadShare__.useMemo(() => debounce((O) => {
     if (ne.current) {
       r(ne.current(O));
       return;
@@ -3473,7 +3473,7 @@ var PC = o((e) => {
     }
     r([{ field: d, operator: "contains", value: O }]);
   }, T), [d, T]);
-  return admin__loadShare__react__loadShare__.useEffect(() => {
+  return abuse__loadShare__react__loadShare__.useEffect(() => {
     ne.current = E;
   }, [E]), { queryResult: H, defaultValueQueryResult: S, query: H, defaultValueQuery: S, options: X, onSearch: Y, overtime: { elapsedTime: $ } };
 }, "useSelect");
@@ -3486,7 +3486,7 @@ function IC({ initialCurrent: e, initialPageSize: t, hasPagination: r = true, pa
   React.useEffect(() => {
     $u(typeof Ne > "u", "useTable: `resource` is not defined.");
   }, [Ne]);
-  let [me, ce] = admin__loadShare__react__loadShare__.useState(Lr(ne, ae ?? [])), [ve, rt] = admin__loadShare__react__loadShare__.useState(Er($, J ?? [])), [Ke, Ct] = admin__loadShare__react__loadShare__.useState(O), [Ge, Tt] = admin__loadShare__react__loadShare__.useState(_), xt = o(() => {
+  let [me, ce] = abuse__loadShare__react__loadShare__.useState(Lr(ne, ae ?? [])), [ve, rt] = abuse__loadShare__react__loadShare__.useState(Er($, J ?? [])), [Ke, Ct] = abuse__loadShare__react__loadShare__.useState(O), [Ge, Tt] = abuse__loadShare__react__loadShare__.useState(_), xt = o(() => {
     if (E === "new") {
       let { sorters: jo, filters: Nc, pageSize: Bc, current: Kc, ...sa } = (b == null ? void 0 : b.params) ?? {};
       return sa;
@@ -3498,9 +3498,9 @@ function IC({ initialCurrent: e, initialPageSize: t, hasPagination: r = true, pa
     let jr = Dn.parse(U == null ? void 0 : U.substring(1)), jo = Dr({ pagination: { pageSize: ot, current: Ie }, sorters: me ?? zr, filters: _r, ...jr });
     return `${w ?? ""}?${jo ?? ""}`;
   }, "createLinkForSyncWithLocation");
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  abuse__loadShare__react__loadShare__.useEffect(() => {
     U === "" && (Ct(O), Tt(_), ce(Lr(ne, ae ?? [])), rt(Er($, J ?? [])));
-  }, [U]), admin__loadShare__react__loadShare__.useEffect(() => {
+  }, [U]), abuse__loadShare__react__loadShare__.useEffect(() => {
     if (D) {
       let Ie = xt();
       if (E === "new") ye({ type: "replace", options: { keepQuery: true }, query: { ...W ? { pageSize: Ge, current: Ke } : {}, sorters: differenceWith(me, ne, isEqual), filters: differenceWith(ve, $, isEqual) } });
@@ -3510,15 +3510,15 @@ function IC({ initialCurrent: e, initialPageSize: t, hasPagination: r = true, pa
       }
     }
   }, [D, Ke, Ge, me, ve]);
-  let or = $t({ resource: Ne, hasPagination: r, pagination: { current: Ke, pageSize: Ge, mode: s == null ? void 0 : s.mode }, filters: F ? St($, ve) : void 0, sorters: V ? Ur(ne, me) : void 0, queryOptions: x, overtimeOptions: C, successNotification: d, errorNotification: T, meta: se, metaData: se, liveMode: k2, liveParams: P, onLiveEvent: f, dataProviderName: g }), Bo = admin__loadShare__react__loadShare__.useCallback((Ie) => {
+  let or = $t({ resource: Ne, hasPagination: r, pagination: { current: Ke, pageSize: Ge, mode: s == null ? void 0 : s.mode }, filters: F ? St($, ve) : void 0, sorters: V ? Ur(ne, me) : void 0, queryOptions: x, overtimeOptions: C, successNotification: d, errorNotification: T, meta: se, metaData: se, liveMode: k2, liveParams: P, onLiveEvent: f, dataProviderName: g }), Bo = abuse__loadShare__react__loadShare__.useCallback((Ie) => {
     rt((ot) => St($, Ie, ot));
-  }, [$]), Ko = admin__loadShare__react__loadShare__.useCallback((Ie) => {
+  }, [$]), Ko = abuse__loadShare__react__loadShare__.useCallback((Ie) => {
     rt(St($, Ie));
-  }, [$]), Go = admin__loadShare__react__loadShare__.useCallback((Ie) => {
+  }, [$]), Go = abuse__loadShare__react__loadShare__.useCallback((Ie) => {
     rt((ot) => St($, Ie(ot)));
-  }, [$]), oa = admin__loadShare__react__loadShare__.useCallback((Ie, ot = Y) => {
+  }, [$]), oa = abuse__loadShare__react__loadShare__.useCallback((Ie, ot = Y) => {
     typeof Ie == "function" ? Go(Ie) : ot === "replace" ? Ko(Ie) : Bo(Ie);
-  }, [Go, Ko, Bo]), Oo = admin__loadShare__react__loadShare__.useCallback((Ie) => {
+  }, [Go, Ko, Bo]), Oo = abuse__loadShare__react__loadShare__.useCallback((Ie) => {
     ce(() => Ur(ne, Ie));
   }, [ne]);
   return { tableQueryResult: or, tableQuery: or, sorters: me, setSorters: Oo, sorter: me, setSorter: Oo, filters: ve, setFilters: oa, current: Ke, setCurrent: Ct, pageSize: Ge, setPageSize: Tt, pageCount: Ge ? Math.ceil((((_o = or.data) == null ? void 0 : _o.total) ?? 0) / Ge) : 1, createLinkForSyncWithLocation: bt, overtime: or.overtime };
@@ -3526,13 +3526,13 @@ function IC({ initialCurrent: e, initialPageSize: t, hasPagination: r = true, pa
 o(IC, "useTable");
 var Et = React.createContext({}), Mn = o(({ create: e, get: t, update: r, children: s }) => React.createElement(Et.Provider, { value: { create: e, get: t, update: r } }, s), "AuditLogContextProvider");
 var Je = o(({ logMutationOptions: e, renameMutationOptions: t } = {}) => {
-  let r = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), s = admin__loadShare__react__loadShare__.useContext(Et), { keys: n, preferLegacyKeys: i } = Z(), a = ie(), { resources: u } = admin__loadShare__react__loadShare__.useContext(Rt), { data: c, refetch: p, isLoading: l } = no({ v3LegacyAuthProviderCompatible: !!(a != null && a.isLegacy), queryOptions: { enabled: !!(s != null && s.create) } }), m = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation(async (d) => {
+  let r = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), s = abuse__loadShare__react__loadShare__.useContext(Et), { keys: n, preferLegacyKeys: i } = Z(), a = ie(), { resources: u } = abuse__loadShare__react__loadShare__.useContext(Rt), { data: c, refetch: p, isLoading: l } = no({ v3LegacyAuthProviderCompatible: !!(a != null && a.isLegacy), queryOptions: { enabled: !!(s != null && s.create) } }), m = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation(async (d) => {
     var f, P, M, Q, g;
     let T = Ee(d.resource, u), x = I((f = T == null ? void 0 : T.meta) == null ? void 0 : f.audit, (P = T == null ? void 0 : T.options) == null ? void 0 : P.audit, (Q = (M = T == null ? void 0 : T.options) == null ? void 0 : M.auditLog) == null ? void 0 : Q.permissions);
     if (x && !Xr(x, d.action)) return;
     let v;
     return l && (s != null && s.create) && (v = await p()), await ((g = s.create) == null ? void 0 : g.call(s, { ...d, author: c ?? (v == null ? void 0 : v.data) }));
-  }, { mutationKey: n().audit().action("log").get(), ...e, meta: { ...e == null ? void 0 : e.meta, ...k() } }), y = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation(async (d) => {
+  }, { mutationKey: n().audit().action("log").get(), ...e, meta: { ...e == null ? void 0 : e.meta, ...k() } }), y = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useMutation(async (d) => {
     var T;
     return await ((T = s.update) == null ? void 0 : T.call(s, d));
   }, { onSuccess: (d) => {
@@ -3541,11 +3541,11 @@ var Je = o(({ logMutationOptions: e, renameMutationOptions: t } = {}) => {
   return { log: m, rename: y };
 }, "useLog");
 var eb = o(({ resource: e, action: t, meta: r, author: s, metaData: n, queryOptions: i }) => {
-  let { get: a } = admin__loadShare__react__loadShare__.useContext(Et), { keys: u, preferLegacyKeys: c } = Z();
-  return admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: u().audit().resource(e).action("list").params(r).get(c), queryFn: () => (a == null ? void 0 : a({ resource: e, action: t, author: s, meta: r, metaData: n })) ?? Promise.resolve([]), enabled: typeof a < "u", ...i, retry: false, meta: { ...i == null ? void 0 : i.meta, ...k() } });
+  let { get: a } = abuse__loadShare__react__loadShare__.useContext(Et), { keys: u, preferLegacyKeys: c } = Z();
+  return abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQuery({ queryKey: u().audit().resource(e).action("list").params(r).get(c), queryFn: () => (a == null ? void 0 : a({ resource: e, action: t, author: s, meta: r, metaData: n })) ?? Promise.resolve([]), enabled: typeof a < "u", ...i, retry: false, meta: { ...i == null ? void 0 : i.meta, ...k() } });
 }, "useLogList");
 var fb = o(({ meta: e = {} } = {}) => {
-  let t = oe(), { i18nProvider: r } = admin__loadShare__react__loadShare__.useContext(Xe), s = Te(), n = z(), { resources: i, resource: a, action: u } = q(), { options: { textTransformers: c } } = ge(), p = [];
+  let t = oe(), { i18nProvider: r } = abuse__loadShare__react__loadShare__.useContext(Xe), s = Te(), n = z(), { resources: i, resource: a, action: u } = q(), { options: { textTransformers: c } } = ge(), p = [];
   if (!(a != null && a.name)) return { breadcrumbs: p };
   let l = o((m) => {
     var d, T, x, v, f, P;
@@ -3612,12 +3612,12 @@ var kn = o((e) => e.split("?")[0].split("#")[0].replace(/(.+)(\/$)/, "$1"), "get
   }, [a, n, x]);
   return { defaultOpenKeys: T, selectedKey: d, menuItems: v };
 }, "useMenu");
-var ko = admin__loadShare__react__loadShare__.createContext({}), Zu = o(({ children: e, value: t }) => {
-  let r = Br(), s = admin__loadShare__react__loadShare__.useMemo(() => ({ ...r, ...t }), [r, t]);
+var ko = abuse__loadShare__react__loadShare__.createContext({}), Zu = o(({ children: e, value: t }) => {
+  let r = Br(), s = abuse__loadShare__react__loadShare__.useMemo(() => ({ ...r, ...t }), [r, t]);
   return React.createElement(ko.Provider, { value: s }, e);
 }, "MetaContextProvider"), Br = o(() => {
-  if (!admin__loadShare__react__loadShare__.useContext(ko)) throw new Error("useMetaContext must be used within a MetaContextProvider");
-  return admin__loadShare__react__loadShare__.useContext(ko);
+  if (!abuse__loadShare__react__loadShare__.useContext(ko)) throw new Error("useMetaContext must be used within a MetaContextProvider");
+  return abuse__loadShare__react__loadShare__.useContext(ko);
 }, "useMetaContext");
 var ue = o(() => {
   let { params: e } = Te(), t = Br();
@@ -3678,7 +3678,7 @@ function qu(e) {
 }
 o(qu, "useDeleteButton");
 function tc(e) {
-  let t = z(), { keys: r, preferLegacyKeys: s } = Z(), n = admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), i = Ae(), { identifier: a, id: u } = qe({ resource: e.resource, id: e.id }), { resources: c } = q(), p = !!n.isFetching({ queryKey: r().data(ee(a, e.dataProviderName, c)).resource(a).action("one").get(s) }), l = o(() => {
+  let t = z(), { keys: r, preferLegacyKeys: s } = Z(), n = abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.useQueryClient(), i = Ae(), { identifier: a, id: u } = qe({ resource: e.resource, id: e.id }), { resources: c } = q(), p = !!n.isFetching({ queryKey: r().data(ee(a, e.dataProviderName, c)).resource(a).action("one").get(s) }), l = o(() => {
     i({ id: u, invalidates: ["detail"], dataProviderName: e.dataProviderName, resource: a });
   }, "onClick"), m = t("buttons.refresh", "Refresh");
   return { onClick: l, label: m, loading: p };
@@ -3686,21 +3686,21 @@ function tc(e) {
 o(tc, "useRefreshButton");
 var Zv = o((e) => Qt({ ...e, action: "show" }), "useShowButton"), Yv = o((e) => Qt({ ...e, action: "edit" }), "useEditButton"), Jv = o((e) => Qt({ ...e, action: "clone" }), "useCloneButton"), qv = o((e) => Qt({ ...e, action: "create" }), "useCreateButton"), eD = o((e) => Qt({ ...e, action: "list" }), "useListButton"), tD = o(() => Gr({ type: "save" }), "useSaveButton"), rD = o(() => Gr({ type: "export" }), "useExportButton"), oD = o(() => Gr({ type: "import" }), "useImportButton");
 var sc = o(() => {
-  let [e, t] = admin__loadShare__react__loadShare__.useState(), r = z(), { push: s } = he(), n = Pe(), i = oe(), { resource: a, action: u } = q();
-  return admin__loadShare__react__loadShare__.useEffect(() => {
+  let [e, t] = abuse__loadShare__react__loadShare__.useState(), r = z(), { push: s } = he(), n = Pe(), i = oe(), { resource: a, action: u } = q();
+  return abuse__loadShare__react__loadShare__.useEffect(() => {
     a && u && t(r("pages.error.info", { action: u, resource: a.name }, `You may have forgotten to add the "${u}" component to "${a.name}" resource.`));
   }, [a, u]), React.createElement(React.Fragment, null, React.createElement("h1", null, r("pages.error.404", void 0, "Sorry, the page you visited does not exist.")), e && React.createElement("p", null, e), React.createElement("button", { onClick: () => {
     i === "legacy" ? s("/") : n({ to: "/" });
   } }, r("pages.error.backHome", void 0, "Back Home")));
 }, "ErrorComponent");
 var Yr = o(() => {
-  let [e, t] = admin__loadShare__react__loadShare__.useState(""), [r, s] = admin__loadShare__react__loadShare__.useState(""), n = z(), i = ie(), { mutate: a } = Ht({ v3LegacyAuthProviderCompatible: !!(i != null && i.isLegacy) });
+  let [e, t] = abuse__loadShare__react__loadShare__.useState(""), [r, s] = abuse__loadShare__react__loadShare__.useState(""), n = z(), i = ie(), { mutate: a } = Ht({ v3LegacyAuthProviderCompatible: !!(i != null && i.isLegacy) });
   return React.createElement(React.Fragment, null, React.createElement("h1", null, n("pages.login.title", "Sign in your account")), React.createElement("form", { onSubmit: (u) => {
     u.preventDefault(), a({ username: e, password: r });
   } }, React.createElement("table", null, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, n("pages.login.username", void 0, "username"), ":"), React.createElement("td", null, React.createElement("input", { type: "text", size: 20, autoCorrect: "off", spellCheck: false, autoCapitalize: "off", autoFocus: true, required: true, value: e, onChange: (u) => t(u.target.value) }))), React.createElement("tr", null, React.createElement("td", null, n("pages.login.password", void 0, "password"), ":"), React.createElement("td", null, React.createElement("input", { type: "password", required: true, size: 20, value: r, onChange: (u) => s(u.target.value) }))))), React.createElement("br", null), React.createElement("input", { type: "submit", value: "login" })));
 }, "LoginPage");
 var Kn = o(({ providers: e, registerLink: t, forgotPasswordLink: r, rememberMe: s, contentProps: n, wrapperProps: i, renderContent: a, formProps: u, title: c = void 0, hideForm: p, mutationVariables: l }) => {
-  let m = oe(), y = yt(), { Link: d } = pe(), T = m === "legacy" ? d : y, [x, v] = admin__loadShare__react__loadShare__.useState(""), [f, P] = admin__loadShare__react__loadShare__.useState(""), [M, Q] = admin__loadShare__react__loadShare__.useState(false), g = z(), C = ie(), { mutate: h } = Ht({ v3LegacyAuthProviderCompatible: !!(C != null && C.isLegacy) }), D = o((L, U) => React.createElement(T, { to: L }, U), "renderLink"), k2 = o(() => e ? e.map((L) => React.createElement("div", { key: L.name, style: { display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" } }, React.createElement("button", { onClick: () => h({ ...l, providerName: L.name }), style: { display: "flex", alignItems: "center" } }, L == null ? void 0 : L.icon, L.label ?? React.createElement("label", null, L.label)))) : null, "renderProviders"), E = React.createElement("div", { ...n }, React.createElement("h1", { style: { textAlign: "center" } }, g("pages.login.title", "Sign in to your account")), k2(), !p && React.createElement(React.Fragment, null, React.createElement("hr", null), React.createElement("form", { onSubmit: (L) => {
+  let m = oe(), y = yt(), { Link: d } = pe(), T = m === "legacy" ? d : y, [x, v] = abuse__loadShare__react__loadShare__.useState(""), [f, P] = abuse__loadShare__react__loadShare__.useState(""), [M, Q] = abuse__loadShare__react__loadShare__.useState(false), g = z(), C = ie(), { mutate: h } = Ht({ v3LegacyAuthProviderCompatible: !!(C != null && C.isLegacy) }), D = o((L, U) => React.createElement(T, { to: L }, U), "renderLink"), k2 = o(() => e ? e.map((L) => React.createElement("div", { key: L.name, style: { display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" } }, React.createElement("button", { onClick: () => h({ ...l, providerName: L.name }), style: { display: "flex", alignItems: "center" } }, L == null ? void 0 : L.icon, L.label ?? React.createElement("label", null, L.label)))) : null, "renderProviders"), E = React.createElement("div", { ...n }, React.createElement("h1", { style: { textAlign: "center" } }, g("pages.login.title", "Sign in to your account")), k2(), !p && React.createElement(React.Fragment, null, React.createElement("hr", null), React.createElement("form", { onSubmit: (L) => {
     L.preventDefault(), h({ ...l, email: x, password: f, remember: M });
   }, ...u }, React.createElement("div", { style: { display: "flex", flexDirection: "column", padding: 25 } }, React.createElement("label", { htmlFor: "email-input" }, g("pages.login.fields.email", "Email")), React.createElement("input", { id: "email-input", name: "email", type: "text", size: 20, autoCorrect: "off", spellCheck: false, autoCapitalize: "off", required: true, value: x, onChange: (L) => v(L.target.value) }), React.createElement("label", { htmlFor: "password-input" }, g("pages.login.fields.password", "Password")), React.createElement("input", { id: "password-input", type: "password", name: "password", required: true, size: 20, value: f, onChange: (L) => P(L.target.value) }), s ?? React.createElement(React.Fragment, null, React.createElement("label", { htmlFor: "remember-me-input" }, g("pages.login.buttons.rememberMe", "Remember me"), React.createElement("input", { id: "remember-me-input", name: "remember", type: "checkbox", size: 20, checked: M, value: M.toString(), onChange: () => {
     Q(!M);
@@ -3708,19 +3708,19 @@ var Kn = o(({ providers: e, registerLink: t, forgotPasswordLink: r, rememberMe: 
   return React.createElement("div", { ...i }, a ? a(E, c) : E);
 }, "LoginPage");
 var On = o(({ providers: e, loginLink: t, wrapperProps: r, contentProps: s, renderContent: n, formProps: i, title: a = void 0, hideForm: u, mutationVariables: c }) => {
-  let p = oe(), l = yt(), { Link: m } = pe(), y = p === "legacy" ? m : l, [d, T] = admin__loadShare__react__loadShare__.useState(""), [x, v] = admin__loadShare__react__loadShare__.useState(""), f = z(), P = ie(), { mutate: M, isLoading: Q } = co({ v3LegacyAuthProviderCompatible: !!(P != null && P.isLegacy) }), g = o((D, k2) => React.createElement(y, { to: D }, k2), "renderLink"), C = o(() => e ? e.map((D) => React.createElement("div", { key: D.name, style: { display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" } }, React.createElement("button", { onClick: () => M({ ...c, providerName: D.name }), style: { display: "flex", alignItems: "center" } }, D == null ? void 0 : D.icon, D.label ?? React.createElement("label", null, D.label)))) : null, "renderProviders"), h = React.createElement("div", { ...s }, React.createElement("h1", { style: { textAlign: "center" } }, f("pages.register.title", "Sign up for your account")), C(), !u && React.createElement(React.Fragment, null, React.createElement("hr", null), React.createElement("form", { onSubmit: (D) => {
+  let p = oe(), l = yt(), { Link: m } = pe(), y = p === "legacy" ? m : l, [d, T] = abuse__loadShare__react__loadShare__.useState(""), [x, v] = abuse__loadShare__react__loadShare__.useState(""), f = z(), P = ie(), { mutate: M, isLoading: Q } = co({ v3LegacyAuthProviderCompatible: !!(P != null && P.isLegacy) }), g = o((D, k2) => React.createElement(y, { to: D }, k2), "renderLink"), C = o(() => e ? e.map((D) => React.createElement("div", { key: D.name, style: { display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" } }, React.createElement("button", { onClick: () => M({ ...c, providerName: D.name }), style: { display: "flex", alignItems: "center" } }, D == null ? void 0 : D.icon, D.label ?? React.createElement("label", null, D.label)))) : null, "renderProviders"), h = React.createElement("div", { ...s }, React.createElement("h1", { style: { textAlign: "center" } }, f("pages.register.title", "Sign up for your account")), C(), !u && React.createElement(React.Fragment, null, React.createElement("hr", null), React.createElement("form", { onSubmit: (D) => {
     D.preventDefault(), M({ ...c, email: d, password: x });
   }, ...i }, React.createElement("div", { style: { display: "flex", flexDirection: "column", padding: 25 } }, React.createElement("label", { htmlFor: "email-input" }, f("pages.register.fields.email", "Email")), React.createElement("input", { id: "email-input", name: "email", type: "email", size: 20, autoCorrect: "off", spellCheck: false, autoCapitalize: "off", required: true, value: d, onChange: (D) => T(D.target.value) }), React.createElement("label", { htmlFor: "password-input" }, f("pages.register.fields.password", "Password")), React.createElement("input", { id: "password-input", name: "password", type: "password", required: true, size: 20, value: x, onChange: (D) => v(D.target.value) }), React.createElement("input", { type: "submit", value: f("pages.register.buttons.submit", "Sign up"), disabled: Q }), t ?? React.createElement(React.Fragment, null, React.createElement("span", null, f("pages.login.buttons.haveAccount", "Have an account?"), " ", g("/login", f("pages.login.signin", "Sign in"))))))), t !== false && u && React.createElement("div", { style: { textAlign: "center" } }, f("pages.login.buttons.haveAccount", "Have an account?"), " ", g("/login", f("pages.login.signin", "Sign in"))));
   return React.createElement("div", { ...r }, n ? n(h, a) : h);
 }, "RegisterPage");
 var Wn = o(({ loginLink: e, wrapperProps: t, contentProps: r, renderContent: s, formProps: n, title: i = void 0, mutationVariables: a }) => {
-  let u = z(), c = oe(), p = yt(), { Link: l } = pe(), m = c === "legacy" ? l : p, [y, d] = admin__loadShare__react__loadShare__.useState(""), { mutate: T, isLoading: x } = lo(), v = o((P, M) => React.createElement(m, { to: P }, M), "renderLink"), f = React.createElement("div", { ...r }, React.createElement("h1", { style: { textAlign: "center" } }, u("pages.forgotPassword.title", "Forgot your password?")), React.createElement("hr", null), React.createElement("form", { onSubmit: (P) => {
+  let u = z(), c = oe(), p = yt(), { Link: l } = pe(), m = c === "legacy" ? l : p, [y, d] = abuse__loadShare__react__loadShare__.useState(""), { mutate: T, isLoading: x } = lo(), v = o((P, M) => React.createElement(m, { to: P }, M), "renderLink"), f = React.createElement("div", { ...r }, React.createElement("h1", { style: { textAlign: "center" } }, u("pages.forgotPassword.title", "Forgot your password?")), React.createElement("hr", null), React.createElement("form", { onSubmit: (P) => {
     P.preventDefault(), T({ ...a, email: y });
   }, ...n }, React.createElement("div", { style: { display: "flex", flexDirection: "column", padding: 25 } }, React.createElement("label", { htmlFor: "email-input" }, u("pages.forgotPassword.fields.email", "Email")), React.createElement("input", { id: "email-input", name: "email", type: "mail", autoCorrect: "off", spellCheck: false, autoCapitalize: "off", required: true, value: y, onChange: (P) => d(P.target.value) }), React.createElement("input", { type: "submit", disabled: x, value: u("pages.forgotPassword.buttons.submit", "Send reset instructions") }), React.createElement("br", null), e ?? React.createElement("span", null, u("pages.register.buttons.haveAccount", "Have an account? "), " ", v("/login", u("pages.login.signin", "Sign in"))))));
   return React.createElement("div", { ...t }, s ? s(f, i) : f);
 }, "ForgotPasswordPage");
 var $n = o(({ wrapperProps: e, contentProps: t, renderContent: r, formProps: s, title: n = void 0, mutationVariables: i }) => {
-  let a = z(), u = ie(), { mutate: c, isLoading: p } = fo({ v3LegacyAuthProviderCompatible: !!(u != null && u.isLegacy) }), [l, m] = admin__loadShare__react__loadShare__.useState(""), [y, d] = admin__loadShare__react__loadShare__.useState(""), T = React.createElement("div", { ...t }, React.createElement("h1", { style: { textAlign: "center" } }, a("pages.updatePassword.title", "Update Password")), React.createElement("hr", null), React.createElement("form", { onSubmit: (x) => {
+  let a = z(), u = ie(), { mutate: c, isLoading: p } = fo({ v3LegacyAuthProviderCompatible: !!(u != null && u.isLegacy) }), [l, m] = abuse__loadShare__react__loadShare__.useState(""), [y, d] = abuse__loadShare__react__loadShare__.useState(""), T = React.createElement("div", { ...t }, React.createElement("h1", { style: { textAlign: "center" } }, a("pages.updatePassword.title", "Update Password")), React.createElement("hr", null), React.createElement("form", { onSubmit: (x) => {
     x.preventDefault(), c({ ...i, password: l, confirmPassword: y });
   }, ...s }, React.createElement("div", { style: { display: "flex", flexDirection: "column", padding: 25 } }, React.createElement("label", { htmlFor: "password-input" }, a("pages.updatePassword.fields.password", "New Password")), React.createElement("input", { id: "password-input", name: "password", type: "password", required: true, size: 20, value: l, onChange: (x) => m(x.target.value) }), React.createElement("label", { htmlFor: "confirm-password-input" }, a("pages.updatePassword.fields.confirmPassword", "Confirm New Password")), React.createElement("input", { id: "confirm-password-input", name: "confirmPassword", type: "password", required: true, size: 20, value: y, onChange: (x) => d(x.target.value) }), React.createElement("input", { type: "submit", disabled: p, value: a("pages.updatePassword.buttons.submit", "Update") }))));
   return React.createElement("div", { ...e }, r ? r(T, n) : T);
@@ -3745,7 +3745,7 @@ var uc = [{ title: "Documentation", description: "Learn about the technical deta
   let e = Pr("(max-width: 1010px)"), t = Pr("(max-width: 650px)"), r = o(() => t ? "1, 280px" : e ? "2, 280px" : "4, 1fr", "getGridTemplateColumns"), s = o(() => t ? "32px" : e ? "40px" : "48px", "getHeaderFontSize"), n = o(() => t ? "16px" : e ? "20px" : "24px", "getSubHeaderFontSize");
   return React.createElement("div", { style: { position: "fixed", zIndex: 10, inset: 0, overflow: "auto", width: "100dvw", height: "100dvh" } }, React.createElement("div", { style: { overflow: "hidden", position: "relative", backgroundSize: "cover", backgroundRepeat: "no-repeat", background: t ? "url(https://refine.ams3.cdn.digitaloceanspaces.com/website/static/assets/landing-noise.webp), radial-gradient(88.89% 50% at 50% 100%, rgba(38, 217, 127, 0.10) 0%, rgba(38, 217, 127, 0.00) 100%), radial-gradient(88.89% 50% at 50% 0%, rgba(71, 235, 235, 0.15) 0%, rgba(71, 235, 235, 0.00) 100%), #1D1E30" : e ? "url(https://refine.ams3.cdn.digitaloceanspaces.com/website/static/assets/landing-noise.webp), radial-gradient(66.67% 50% at 50% 100%, rgba(38, 217, 127, 0.10) 0%, rgba(38, 217, 127, 0.00) 100%), radial-gradient(66.67% 50% at 50% 0%, rgba(71, 235, 235, 0.15) 0%, rgba(71, 235, 235, 0.00) 100%), #1D1E30" : "url(https://refine.ams3.cdn.digitaloceanspaces.com/website/static/assets/landing-noise.webp), radial-gradient(35.56% 50% at 50% 100%, rgba(38, 217, 127, 0.12) 0%, rgba(38, 217, 127, 0) 100%), radial-gradient(35.56% 50% at 50% 0%, rgba(71, 235, 235, 0.18) 0%, rgba(71, 235, 235, 0) 100%), #1D1E30", minHeight: "100%", minWidth: "100%", fontFamily: "Arial", color: "#FFFFFF" } }, React.createElement("div", { style: { zIndex: 2, position: "absolute", width: t ? "400px" : "800px", height: "552px", opacity: "0.5", background: "url(https://refine.ams3.cdn.digitaloceanspaces.com/assets/welcome-page-hexagon.png)", backgroundRepeat: "no-repeat", backgroundSize: "contain", top: "0", left: "50%", transform: "translateX(-50%)" } }), React.createElement("div", { style: { height: t ? "40px" : "80px" } }), React.createElement("div", { style: { display: "flex", justifyContent: "center" } }, React.createElement("div", { style: { backgroundRepeat: "no-repeat", backgroundSize: t ? "112px 58px" : "224px 116px", backgroundImage: "url(https://refine.ams3.cdn.digitaloceanspaces.com/assets/refine-logo.svg)", width: t ? 112 : 224, height: t ? 58 : 116 } })), React.createElement("div", { style: { height: t ? "120px" : e ? "200px" : "30vh", minHeight: t ? "120px" : "200px" } }), React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "16px", textAlign: "center" } }, React.createElement("h1", { style: { fontSize: s(), fontWeight: 700, margin: "0px" } }, "Welcome Aboard!"), React.createElement("h4", { style: { fontSize: n(), fontWeight: 400, margin: "0px" } }, "Your configuration is completed.")), React.createElement("div", { style: { height: "64px" } }), React.createElement("div", { style: { display: "grid", gridTemplateColumns: `repeat(${r()})`, justifyContent: "center", gap: "48px", paddingRight: "16px", paddingLeft: "16px", paddingBottom: "32px", maxWidth: "976px", margin: "auto" } }, uc.map((i) => React.createElement(cc, { key: `welcome-page-${i.title}`, card: i })))));
 }, "ConfigSuccessPage"), cc = o(({ card: e }) => {
-  let { title: t, description: r, iconUrl: s, link: n } = e, [i, a] = admin__loadShare__react__loadShare__.useState(false);
+  let { title: t, description: r, iconUrl: s, link: n } = e, [i, a] = abuse__loadShare__react__loadShare__.useState(false);
   return React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } }, React.createElement("div", { style: { display: "flex", alignItems: "center" } }, React.createElement("a", { onPointerEnter: () => a(true), onPointerLeave: () => a(false), style: { display: "flex", alignItems: "center", color: "#fff", textDecoration: "none" }, href: n }, React.createElement("div", { style: { width: "16px", height: "16px", backgroundPosition: "center", backgroundSize: "contain", backgroundRepeat: "no-repeat", backgroundImage: `url(${s})` } }), React.createElement("span", { style: { fontSize: "16px", fontWeight: 700, marginLeft: "13px", marginRight: "14px" } }, t), React.createElement("svg", { style: { transition: "transform 0.5s ease-in-out, opacity 0.2s ease-in-out", ...i && { transform: "translateX(4px)", opacity: 1 } }, width: "12", height: "8", fill: "none", opacity: "0.5", xmlns: "http://www.w3.org/2000/svg" }, React.createElement("path", { d: "M7.293.293a1 1 0 0 1 1.414 0l3 3a1 1 0 0 1 0 1.414l-3 3a1 1 0 0 1-1.414-1.414L8.586 5H1a1 1 0 0 1 0-2h7.586L7.293 1.707a1 1 0 0 1 0-1.414Z", fill: "#fff" })))), React.createElement("span", { style: { fontSize: "12px", opacity: 0.5, lineHeight: "16px" } }, r));
 }, "Card");
 var _n = o(() => React.createElement("div", { style: { position: "fixed", zIndex: 11, inset: 0, overflow: "auto", width: "100dvw", height: "100dvh" } }, React.createElement("div", { style: { width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", padding: "24px", background: "#14141FBF", backdropFilter: "blur(3px)" } }, React.createElement("div", { style: { maxWidth: "640px", width: "100%", background: "#1D1E30", borderRadius: "16px", border: "1px solid #303450", boxShadow: "0px 0px 120px -24px #000000" } }, React.createElement("div", { style: { padding: "16px 20px", borderBottom: "1px solid #303450", display: "flex", alignItems: "center", gap: "8px", position: "relative" } }, React.createElement(dc, { style: { position: "absolute", left: 0, top: 0 } }), React.createElement("div", { style: { lineHeight: "24px", fontSize: "16px", color: "#FFFFFF", display: "flex", alignItems: "center", gap: "16px" } }, React.createElement(lc, null), React.createElement("span", { style: { fontWeight: 400 } }, "Configuration Error"))), React.createElement("div", { style: { padding: "20px", color: "#A3ADC2", lineHeight: "20px", fontSize: "14px", display: "flex", flexDirection: "column", gap: "20px" } }, React.createElement("p", { style: { margin: 0, padding: 0, lineHeight: "28px", fontSize: "16px" } }, React.createElement("code", { style: { display: "inline-block", background: "#30345080", padding: "0 4px", lineHeight: "24px", fontSize: "16px", borderRadius: "4px", color: "#FFFFFF" } }, "<Refine />"), " ", "is not initialized. Please make sure you have it mounted in your app and placed your components inside it."), React.createElement("div", null, React.createElement(pc, null)))))), "ConfigErrorPage"), pc = o(() => React.createElement("pre", { style: { display: "block", overflowX: "auto", borderRadius: "8px", fontSize: "14px", lineHeight: "24px", backgroundColor: "#14141F", color: "#E5ECF2", padding: "16px", margin: "0", maxHeight: "400px", overflow: "auto" } }, React.createElement("span", { style: { color: "#FF7B72" } }, "import"), " ", "{", " Refine, WelcomePage", " ", "}", " ", React.createElement("span", { style: { color: "#FF7B72" } }, "from"), " ", React.createElement("span", { style: { color: "#A5D6FF" } }, '"@refinedev/core"'), ";", `
@@ -3767,7 +3767,7 @@ var mc = o(() => {
 }, "WelcomePage");
 var fc = "4.57.9", jn = o(() => {
   var P;
-  let e = yo(), t = admin__loadShare__react__loadShare__.useContext(Et), { liveProvider: r } = admin__loadShare__react__loadShare__.useContext(mt), s = admin__loadShare__react__loadShare__.useContext(er), n = admin__loadShare__react__loadShare__.useContext(Jt), { i18nProvider: i } = admin__loadShare__react__loadShare__.useContext(Xe), a = admin__loadShare__react__loadShare__.useContext(qt), u = admin__loadShare__react__loadShare__.useContext(ct), { resources: c } = q(), p = ge(), l = !!t.create || !!t.get || !!t.update, m = !!(r != null && r.publish) || !!(r != null && r.subscribe) || !!(r != null && r.unsubscribe), y = !!s.useHistory || !!s.Link || !!s.Prompt || !!s.useLocation || !!s.useParams, d = !!n, T = !!(i != null && i.changeLocale) || !!(i != null && i.getLocale) || !!(i != null && i.translate), x = !!a.close || !!a.open, v = !!u.can, f = (P = p == null ? void 0 : p.options) == null ? void 0 : P.projectId;
+  let e = yo(), t = abuse__loadShare__react__loadShare__.useContext(Et), { liveProvider: r } = abuse__loadShare__react__loadShare__.useContext(mt), s = abuse__loadShare__react__loadShare__.useContext(er), n = abuse__loadShare__react__loadShare__.useContext(Jt), { i18nProvider: i } = abuse__loadShare__react__loadShare__.useContext(Xe), a = abuse__loadShare__react__loadShare__.useContext(qt), u = abuse__loadShare__react__loadShare__.useContext(ct), { resources: c } = q(), p = ge(), l = !!t.create || !!t.get || !!t.update, m = !!(r != null && r.publish) || !!(r != null && r.subscribe) || !!(r != null && r.unsubscribe), y = !!s.useHistory || !!s.Link || !!s.Prompt || !!s.useLocation || !!s.useParams, d = !!n, T = !!(i != null && i.changeLocale) || !!(i != null && i.getLocale) || !!(i != null && i.translate), x = !!a.close || !!a.open, v = !!u.can, f = (P = p == null ? void 0 : p.options) == null ? void 0 : P.projectId;
   return { providers: { auth: e, auditLog: l, live: m, router: y, data: d, i18n: T, notification: x, accessControl: v }, version: fc, resourceCount: c.length, projectId: f };
 }, "useTelemetryData");
 var yc = o((e) => {
@@ -3805,15 +3805,15 @@ var qn = o((e) => {
 var Rc = o(({ legacyAuthProvider: e, authProvider: t, dataProvider: r, legacyRouterProvider: s, routerProvider: n, notificationProvider: i, accessControlProvider: a, auditLogProvider: u, resources: c, DashboardPage: p, ReadyPage: l, LoginPage: m, catchAll: y, children: d, liveProvider: T, i18nProvider: x, Title: v, Layout: f, Sider: P, Header: M, Footer: Q, OffLayoutArea: g, onLiveEvent: C, options: h }) => {
   let { optionsWithDefaults: D, disableTelemetryWithDefault: k2, reactQueryWithDefaults: E } = Jr({ options: h }), L = Ar(() => {
     var b;
-    return E.clientConfig instanceof admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.QueryClient ? E.clientConfig : new admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.QueryClient({ ...E.clientConfig, defaultOptions: { ...E.clientConfig.defaultOptions, queries: { refetchOnWindowFocus: false, keepPreviousData: true, ...(b = E.clientConfig.defaultOptions) == null ? void 0 : b.queries } } });
+    return E.clientConfig instanceof abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.QueryClient ? E.clientConfig : new abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.QueryClient({ ...E.clientConfig, defaultOptions: { ...E.clientConfig.defaultOptions, queries: { refetchOnWindowFocus: false, keepPreviousData: true, ...(b = E.clientConfig.defaultOptions) == null ? void 0 : b.queries } } });
   }, [E.clientConfig]);
   let w = React.useMemo(() => typeof i == "function" ? i : () => i, [i])();
   if (qn(n), s && !n && (c ?? []).length === 0) return l ? React.createElement(l, null) : React.createElement(Qo, null);
   let { RouterComponent: N = React.Fragment } = n ? {} : s ?? {};
-  return React.createElement(admin__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.QueryClientProvider, { client: L }, React.createElement(cn, { ...w }, React.createElement(Zo, { ...e ?? {}, isProvided: !!e }, React.createElement(Jo, { ...t ?? {}, isProvided: !!t }, React.createElement($s, { dataProvider: r }, React.createElement(_s, { liveProvider: T }, React.createElement(qs, { value: s && !n ? "legacy" : "new" }, React.createElement(tn, { router: n }, React.createElement(xn, { ...s }, React.createElement(Zs, { resources: c ?? [] }, React.createElement(dn, { i18nProvider: x }, React.createElement(Pn, { ...a ?? {} }, React.createElement(Mn, { ...u ?? {} }, React.createElement(an, null, React.createElement(cs, { mutationMode: D.mutationMode, warnWhenUnsavedChanges: D.warnWhenUnsavedChanges, syncWithLocation: D.syncWithLocation, Title: v, undoableTimeout: D.undoableTimeout, catchAll: y, DashboardPage: p, LoginPage: m, Layout: f, Sider: P, Footer: Q, Header: M, OffLayoutArea: g, hasDashboard: !!p, liveMode: D.liveMode, onLiveEvent: C, options: D }, React.createElement(fs, null, React.createElement(N, null, d, !k2 && React.createElement(Zn, null), React.createElement(Vo, null))))))))))))))))));
+  return React.createElement(abuse__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__.QueryClientProvider, { client: L }, React.createElement(cn, { ...w }, React.createElement(Zo, { ...e ?? {}, isProvided: !!e }, React.createElement(Jo, { ...t ?? {}, isProvided: !!t }, React.createElement($s, { dataProvider: r }, React.createElement(_s, { liveProvider: T }, React.createElement(qs, { value: s && !n ? "legacy" : "new" }, React.createElement(tn, { router: n }, React.createElement(xn, { ...s }, React.createElement(Zs, { resources: c ?? [] }, React.createElement(dn, { i18nProvider: x }, React.createElement(Pn, { ...a ?? {} }, React.createElement(Mn, { ...u ?? {} }, React.createElement(an, null, React.createElement(cs, { mutationMode: D.mutationMode, warnWhenUnsavedChanges: D.warnWhenUnsavedChanges, syncWithLocation: D.syncWithLocation, Title: v, undoableTimeout: D.undoableTimeout, catchAll: y, DashboardPage: p, LoginPage: m, Layout: f, Sider: P, Footer: Q, Header: M, OffLayoutArea: g, hasDashboard: !!p, liveMode: D.liveMode, onLiveEvent: C, options: D }, React.createElement(fs, null, React.createElement(N, null, d, !k2 && React.createElement(Zn, null), React.createElement(Vo, null))))))))))))))))));
 }, "Refine");
 var un = o(({ notification: e }) => {
-  let t = z(), { notificationDispatch: r } = ut(), { open: s } = He(), [n, i] = admin__loadShare__react__loadShare__.useState(), a = o(() => {
+  let t = z(), { notificationDispatch: r } = ut(), { open: s } = He(), [n, i] = abuse__loadShare__react__loadShare__.useState(), a = o(() => {
     if (e.isRunning === true && (e.seconds === 0 && e.doMutation(), e.isSilent || s == null || s({ key: `${e.id}-${e.resource}-notification`, type: "progress", message: t("notifications.undoable", { seconds: Bt(e.seconds) }, `You have ${Bt(e.seconds)} seconds to undo`), cancelMutation: e.cancelMutation, undoableTimeout: Bt(e.seconds) }), e.seconds > 0)) {
       n && clearTimeout(n);
       let u = setTimeout(() => {
@@ -3822,7 +3822,7 @@ var un = o(({ notification: e }) => {
       i(u);
     }
   }, "cancelNotification");
-  return admin__loadShare__react__loadShare__.useEffect(() => {
+  return abuse__loadShare__react__loadShare__.useEffect(() => {
     a();
   }, [e]), null;
 }, "UndoableQueue");
@@ -3831,7 +3831,7 @@ var Dc = o(({ children: e, Layout: t, Sider: r, Header: s, Title: n, Footer: i, 
   return React.createElement(t ?? u, { Sider: r ?? l, Header: s ?? p, Footer: i ?? c, Title: n ?? m, OffLayoutArea: a ?? y }, e, React.createElement(Uc, null));
 }, "LayoutWrapper"), Uc = o(() => {
   let { Prompt: e } = pe(), t = z(), { warnWhen: r, setWarnWhen: s } = vt(), n = o((i) => (i.preventDefault(), i.returnValue = t("warnWhenUnsavedChanges", "Are you sure you want to leave? You have unsaved changes."), i.returnValue), "warnWhenListener");
-  return admin__loadShare__react__loadShare__.useEffect(() => (r && window.addEventListener("beforeunload", n), window.removeEventListener("beforeunload", n)), [r]), React.createElement(e, { when: r, message: t("warnWhenUnsavedChanges", "Are you sure you want to leave? You have unsaved changes."), setWarnWhen: s });
+  return abuse__loadShare__react__loadShare__.useEffect(() => (r && window.addEventListener("beforeunload", n), window.removeEventListener("beforeunload", n)), [r]), React.createElement(e, { when: r, message: t("warnWhenUnsavedChanges", "Are you sure you want to leave? You have unsaved changes."), setWarnWhen: s });
 }, "UnsavedPrompt");
 function Ec({ redirectOnFail: e = true, appendCurrentPathToQuery: t = true, children: r, fallback: s, loading: n, params: i }) {
   var C;
@@ -3865,13 +3865,13 @@ var Lc = o(({ config: e }) => {
 }, "RedirectLegacy");
 var Vo = o(() => {
   let { useLocation: e } = pe(), { checkAuth: t } = xe(), r = e();
-  return admin__loadShare__react__loadShare__.useEffect(() => {
+  return abuse__loadShare__react__loadShare__.useEffect(() => {
     t == null || t().catch(() => false);
   }, [r == null ? void 0 : r.pathname]), null;
 }, "RouteChangeHandler");
 var Sc = o(({ resource: e, action: t, params: r, fallback: s, onUnauthorized: n, children: i, queryOptions: a, ...u }) => {
   let { id: c, resource: p, action: l = "" } = qe({ resource: e, id: r == null ? void 0 : r.id }), m = t ?? l, y = r ?? { id: c, resource: p }, { data: d } = kr({ resource: p == null ? void 0 : p.name, action: m, params: y, queryOptions: a });
-  return admin__loadShare__react__loadShare__.useEffect(() => {
+  return abuse__loadShare__react__loadShare__.useEffect(() => {
     n && (d == null ? void 0 : d.can) === false && n({ resource: p == null ? void 0 : p.name, action: m, reason: d == null ? void 0 : d.reason, params: y });
   }, [d == null ? void 0 : d.can]), d != null && d.can ? React.isValidElement(i) ? React.cloneElement(i, u) : React.createElement(React.Fragment, null, i) : (d == null ? void 0 : d.can) === false ? React.createElement(React.Fragment, null, s ?? null) : null;
 }, "CanAccess");
@@ -3915,7 +3915,7 @@ var ta = [`
         }
     }
     `];
-var kc = "If you find Refine useful, you can contribute to its growth by giving it a star on GitHub", Fc = o(({ containerStyle: e }) => (admin__loadShare__react__loadShare__.useEffect(() => {
+var kc = "If you find Refine useful, you can contribute to its growth by giving it a star on GitHub", Fc = o(({ containerStyle: e }) => (abuse__loadShare__react__loadShare__.useEffect(() => {
   let t = document.createElement("style");
   document.head.appendChild(t), ta.forEach((r) => {
     var s;
