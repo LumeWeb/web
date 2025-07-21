@@ -1,10 +1,10 @@
 import { j as jsxRuntimeExports, d as dashboard__loadShare__react_mf_2_dom__loadShare__ } from "./dashboard__loadShare__react_mf_2_dom__loadShare__-CxucHwhd.js";
 import { d as dashboard__mf_v__runtimeInit__mf_v__, i as index_cjs } from "./dashboard__mf_v__runtimeInit__mf_v__-C0jw-Lkn.js";
-import { d as dashboard__loadShare__react_mf_2_router__loadShare__, C as CircleAlert } from "./circle-alert-m16Tgfk6.js";
+import { d as dashboard__loadShare__react_mf_2_router__loadShare__, C as CircleAlert } from "./circle-alert-bkU3ixL2.js";
 import { d as dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__, R as ReloadIcon, F as FontBoldIcon, a as FontItalicIcon, U as UnderlineIcon, g as get_1, _ as _baseIsEqual, X as X$4, S as Search, C as Calendar, b as ChevronLeft, c as ChevronRight } from "./_baseIsEqual-C0afv05f.js";
 import { d as dashboard__loadShare__react__loadShare__, R as React$1 } from "./dashboard__loadShare__react__loadShare__-B-YtubD3.js";
 import { c as commonjsGlobal, g as getDefaultExportFromCjs } from "./_commonjsHelpers-DWwsNxpa.js";
-import { u as castPath, q as toKey, b as isLength, n as isIndex, i as isArray, a as isArguments, s as get, D as Dn$1 } from "./index-CzJLPSgC.js";
+import { u as castPath, q as toKey, b as isLength, n as isIndex, i as isArray, a as isArguments, s as get, D as Dn$1 } from "./index-B90HCQcT.js";
 import { c as createLucideIcon } from "./createLucideIcon-Od_tcS2A.js";
 import { s as shimExports } from "./index-aPZK1Msq.js";
 import { z as z$6 } from "./index-Dq110QZ7.js";
@@ -29863,19 +29863,16 @@ const CollapseMenuButton = ({
                 children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full items-center flex justify-between", children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center", children: [
                     Icon && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "mr-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Icon, { size: 18 }) }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, { to: "/abuse", children: [
-                      " ",
-                      /* @__PURE__ */ jsxRuntimeExports.jsx(
-                        "p",
-                        {
-                          className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
-                            "max-w-[150px] truncate",
-                            isOpen ? "translate-x-0 opacity-100" : "-translate-x-96 opacity-0"
-                          ),
-                          children: label
-                        }
-                      )
-                    ] })
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, { to: submenus[0]?.href || "#", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "p",
+                      {
+                        className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
+                          "translate-x-0 opacity-100": isOpen,
+                          "-translate-x-96 opacity-0": !isOpen
+                        }),
+                        children: label
+                      }
+                    ) })
                   ] }),
                   /* @__PURE__ */ jsxRuntimeExports.jsx(
                     "div",
