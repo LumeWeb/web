@@ -2,7 +2,7 @@ import { i as index_cjs } from "./admin__mf_v__runtimeInit__mf_v__-CrLwvomy.js";
 import { R as React, a as admin__loadShare__react__loadShare__ } from "./admin__loadShare__react__loadShare__-C1ovXSRa.js";
 import { a as admin__loadShare__react_mf_2_dom__loadShare__, j as jsxRuntimeExports } from "./admin__loadShare__react_mf_2_dom__loadShare__-CmlR8Dnz.js";
 import { UNSAFE_invariant as invariant, UNSAFE_useFogOFWarDiscovery as useFogOFWarDiscovery, UNSAFE_FrameworkContext as FrameworkContext$1, UNSAFE_RemixErrorBoundary as RemixErrorBoundary, RouterProvider, UNSAFE_decodeViaTurboStream as decodeViaTurboStream, UNSAFE_createClientRoutes as createClientRoutes, UNSAFE_getHydrationData as getHydrationData, UNSAFE_deserializeErrors as deserializeErrors2, UNSAFE_createRouter as createRouter, UNSAFE_getPatchRoutesOnNavigationFunction as getPatchRoutesOnNavigationFunction, UNSAFE_getTurboStreamSingleFetchDataStrategy as getTurboStreamSingleFetchDataStrategy, UNSAFE_mapRouteProperties as mapRouteProperties, UNSAFE_hydrationRouteProperties as hydrationRouteProperties, UNSAFE_createBrowserHistory as createBrowserHistory, UNSAFE_createClientRoutesWithHMRRevalidationOptOut as createClientRoutesWithHMRRevalidationOptOut } from "./index-SoLr86f9.js";
-import { a as admin__loadShare__react_mf_2_router__loadShare__, C as CircleAlert } from "./circle-alert-Bliazfs-.js";
+import { a as admin__loadShare__react_mf_2_router__loadShare__, C as CircleAlert } from "./circle-alert-MQIeVBbL.js";
 import { c as createEnv, a as createRoot } from "./index-j0T4rkAH.js";
 import { z } from "./index-Dq110QZ7.js";
 import { g as getDefaultExportFromCjs } from "./_commonjsHelpers-DWwsNxpa.js";
