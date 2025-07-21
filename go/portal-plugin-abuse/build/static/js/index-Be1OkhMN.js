@@ -11,7 +11,7 @@ import { get_1 } from './_baseIsEqual-DVybp83P.js';
 import { core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__-QzxGLbUR.js';
 import { k as k$4, CircleCheck, Check, Hash, ChevronDown } from './index-IOmeA5Pk.js';
 import { CircleAlert } from './circle-alert-DChmjxwJ.js';
-import { Dn as Dn$1 } from './index-Dhd5UQSC.js';
+import { Dn as Dn$1 } from './index-DT1h3lmZ.js';
 import { requireShim } from './index-BgdDUbMs.js';
 import { Q as Q$3, RefreshCw } from './isEqual-B99CRTfA.js';
 import { createTable, getFilteredRowModel, getSortedRowModel, getCoreRowModel } from './index-BHHcI-E1.js';
@@ -22446,19 +22446,16 @@ const CollapseMenuButton = ({
                 children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full items-center flex justify-between", children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center", children: [
                     Icon && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "mr-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Icon, { size: 18 }) }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs(core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, { to: "/abuse", children: [
-                      " ",
-                      /* @__PURE__ */ jsxRuntimeExports.jsx(
-                        "p",
-                        {
-                          className: core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
-                            "max-w-[150px] truncate",
-                            isOpen ? "translate-x-0 opacity-100" : "-translate-x-96 opacity-0"
-                          ),
-                          children: label
-                        }
-                      )
-                    ] })
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, { to: submenus[0]?.href || "#", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "p",
+                      {
+                        className: core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
+                          "translate-x-0 opacity-100": isOpen,
+                          "-translate-x-96 opacity-0": !isOpen
+                        }),
+                        children: label
+                      }
+                    ) })
                   ] }),
                   /* @__PURE__ */ jsxRuntimeExports.jsx(
                     "div",
