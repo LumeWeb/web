@@ -264,7 +264,7 @@ var objectInspect = function inspect_(obj, options, depth, seen) {
         var ys = arrObjKeys(obj, inspect);
         var isPlainObject = gPO ? gPO(obj) === Object.prototype : obj instanceof Object || obj.constructor === Object;
         var protoTag = obj instanceof Object ? '' : 'null prototype';
-        var stringTag = !isPlainObject && toStringTag && Object(obj) === obj && toStringTag in obj ? $slice.call(toStr(obj), 8, -1) : protoTag ? 'Object' : '';
+        var stringTag = !isPlainObject && toStringTag && Object(obj) === obj && toStringTag in obj ? $slice.call(toStr$1(obj), 8, -1) : protoTag ? 'Object' : '';
         var constructorTag = isPlainObject || typeof obj.constructor !== 'function' ? '' : obj.constructor.name ? obj.constructor.name + ' ' : '';
         var tag = constructorTag + (stringTag || protoTag ? '[' + $join.call($concat$1.call([], stringTag || [], protoTag || []), ': ') + '] ' : '');
         if (ys.length === 0) { return tag + '{}'; }
@@ -289,13 +289,13 @@ function quote(s) {
 function canTrustToString(obj) {
     return !toStringTag || !(typeof obj === 'object' && (toStringTag in obj || typeof obj[toStringTag] !== 'undefined'));
 }
-function isArray$3(obj) { return toStr(obj) === '[object Array]' && canTrustToString(obj); }
-function isDate(obj) { return toStr(obj) === '[object Date]' && canTrustToString(obj); }
-function isRegExp$1(obj) { return toStr(obj) === '[object RegExp]' && canTrustToString(obj); }
-function isError(obj) { return toStr(obj) === '[object Error]' && canTrustToString(obj); }
-function isString(obj) { return toStr(obj) === '[object String]' && canTrustToString(obj); }
-function isNumber(obj) { return toStr(obj) === '[object Number]' && canTrustToString(obj); }
-function isBoolean(obj) { return toStr(obj) === '[object Boolean]' && canTrustToString(obj); }
+function isArray$3(obj) { return toStr$1(obj) === '[object Array]' && canTrustToString(obj); }
+function isDate(obj) { return toStr$1(obj) === '[object Date]' && canTrustToString(obj); }
+function isRegExp$1(obj) { return toStr$1(obj) === '[object RegExp]' && canTrustToString(obj); }
+function isError(obj) { return toStr$1(obj) === '[object Error]' && canTrustToString(obj); }
+function isString(obj) { return toStr$1(obj) === '[object String]' && canTrustToString(obj); }
+function isNumber(obj) { return toStr$1(obj) === '[object Number]' && canTrustToString(obj); }
+function isBoolean(obj) { return toStr$1(obj) === '[object Boolean]' && canTrustToString(obj); }
 
 // Symbol and BigInt do have Symbol.toStringTag by spec, so that can't be used to eliminate false positives
 function isSymbol(obj) {
@@ -331,7 +331,7 @@ function has$3(obj, key) {
     return hasOwn$1.call(obj, key);
 }
 
-function toStr(obj) {
+function toStr$1(obj) {
     return objectToString.call(obj);
 }
 
@@ -682,7 +682,7 @@ var abs$1 = Math.abs;
 var floor$1 = Math.floor;
 
 /** @type {import('./max')} */
-var max$1 = Math.max;
+var max$2 = Math.max;
 
 /** @type {import('./min')} */
 var min$1 = Math.min;
@@ -839,122 +839,95 @@ function requireObject_getPrototypeOf () {
 	return Object_getPrototypeOf;
 }
 
-var implementation;
-var hasRequiredImplementation;
+/* eslint no-invalid-this: 1 */
 
-function requireImplementation () {
-	if (hasRequiredImplementation) return implementation;
-	hasRequiredImplementation = 1;
+var ERROR_MESSAGE = 'Function.prototype.bind called on incompatible ';
+var toStr = Object.prototype.toString;
+var max$1 = Math.max;
+var funcType = '[object Function]';
 
-	/* eslint no-invalid-this: 1 */
+var concatty = function concatty(a, b) {
+    var arr = [];
 
-	var ERROR_MESSAGE = 'Function.prototype.bind called on incompatible ';
-	var toStr = Object.prototype.toString;
-	var max = Math.max;
-	var funcType = '[object Function]';
+    for (var i = 0; i < a.length; i += 1) {
+        arr[i] = a[i];
+    }
+    for (var j = 0; j < b.length; j += 1) {
+        arr[j + a.length] = b[j];
+    }
 
-	var concatty = function concatty(a, b) {
-	    var arr = [];
+    return arr;
+};
 
-	    for (var i = 0; i < a.length; i += 1) {
-	        arr[i] = a[i];
-	    }
-	    for (var j = 0; j < b.length; j += 1) {
-	        arr[j + a.length] = b[j];
-	    }
+var slicy = function slicy(arrLike, offset) {
+    var arr = [];
+    for (var i = offset, j = 0; i < arrLike.length; i += 1, j += 1) {
+        arr[j] = arrLike[i];
+    }
+    return arr;
+};
 
-	    return arr;
-	};
+var joiny = function (arr, joiner) {
+    var str = '';
+    for (var i = 0; i < arr.length; i += 1) {
+        str += arr[i];
+        if (i + 1 < arr.length) {
+            str += joiner;
+        }
+    }
+    return str;
+};
 
-	var slicy = function slicy(arrLike, offset) {
-	    var arr = [];
-	    for (var i = offset, j = 0; i < arrLike.length; i += 1, j += 1) {
-	        arr[j] = arrLike[i];
-	    }
-	    return arr;
-	};
+var implementation$1 = function bind(that) {
+    var target = this;
+    if (typeof target !== 'function' || toStr.apply(target) !== funcType) {
+        throw new TypeError(ERROR_MESSAGE + target);
+    }
+    var args = slicy(arguments, 1);
 
-	var joiny = function (arr, joiner) {
-	    var str = '';
-	    for (var i = 0; i < arr.length; i += 1) {
-	        str += arr[i];
-	        if (i + 1 < arr.length) {
-	            str += joiner;
-	        }
-	    }
-	    return str;
-	};
+    var bound;
+    var binder = function () {
+        if (this instanceof bound) {
+            var result = target.apply(
+                this,
+                concatty(args, arguments)
+            );
+            if (Object(result) === result) {
+                return result;
+            }
+            return this;
+        }
+        return target.apply(
+            that,
+            concatty(args, arguments)
+        );
 
-	implementation = function bind(that) {
-	    var target = this;
-	    if (typeof target !== 'function' || toStr.apply(target) !== funcType) {
-	        throw new TypeError(ERROR_MESSAGE + target);
-	    }
-	    var args = slicy(arguments, 1);
+    };
 
-	    var bound;
-	    var binder = function () {
-	        if (this instanceof bound) {
-	            var result = target.apply(
-	                this,
-	                concatty(args, arguments)
-	            );
-	            if (Object(result) === result) {
-	                return result;
-	            }
-	            return this;
-	        }
-	        return target.apply(
-	            that,
-	            concatty(args, arguments)
-	        );
+    var boundLength = max$1(0, target.length - args.length);
+    var boundArgs = [];
+    for (var i = 0; i < boundLength; i++) {
+        boundArgs[i] = '$' + i;
+    }
 
-	    };
+    bound = Function('binder', 'return function (' + joiny(boundArgs, ',') + '){ return binder.apply(this,arguments); }')(binder);
 
-	    var boundLength = max(0, target.length - args.length);
-	    var boundArgs = [];
-	    for (var i = 0; i < boundLength; i++) {
-	        boundArgs[i] = '$' + i;
-	    }
+    if (target.prototype) {
+        var Empty = function Empty() {};
+        Empty.prototype = target.prototype;
+        bound.prototype = new Empty();
+        Empty.prototype = null;
+    }
 
-	    bound = Function('binder', 'return function (' + joiny(boundArgs, ',') + '){ return binder.apply(this,arguments); }')(binder);
+    return bound;
+};
 
-	    if (target.prototype) {
-	        var Empty = function Empty() {};
-	        Empty.prototype = target.prototype;
-	        bound.prototype = new Empty();
-	        Empty.prototype = null;
-	    }
+var implementation = implementation$1;
 
-	    return bound;
-	};
-	return implementation;
-}
+var functionBind = Function.prototype.bind || implementation;
 
-var functionBind;
-var hasRequiredFunctionBind;
-
-function requireFunctionBind () {
-	if (hasRequiredFunctionBind) return functionBind;
-	hasRequiredFunctionBind = 1;
-
-	var implementation = requireImplementation();
-
-	functionBind = Function.prototype.bind || implementation;
-	return functionBind;
-}
-
-var functionCall;
-var hasRequiredFunctionCall;
-
-function requireFunctionCall () {
-	if (hasRequiredFunctionCall) return functionCall;
-	hasRequiredFunctionCall = 1;
-
-	/** @type {import('./functionCall')} */
-	functionCall = Function.prototype.call;
-	return functionCall;
-}
+/** @type {import('./functionCall')} */
+var functionCall = Function.prototype.call;
 
 var functionApply;
 var hasRequiredFunctionApply;
@@ -971,19 +944,19 @@ function requireFunctionApply () {
 /** @type {import('./reflectApply')} */
 var reflectApply = typeof Reflect !== 'undefined' && Reflect && Reflect.apply;
 
-var bind$2 = requireFunctionBind();
+var bind$2 = functionBind;
 
 var $apply$1 = requireFunctionApply();
-var $call$2 = requireFunctionCall();
+var $call$2 = functionCall;
 var $reflectApply = reflectApply;
 
 /** @type {import('./actualApply')} */
 var actualApply = $reflectApply || bind$2.call($call$2, $apply$1);
 
-var bind$1 = requireFunctionBind();
+var bind$1 = functionBind;
 var $TypeError$4 = type;
 
-var $call$1 = requireFunctionCall();
+var $call$1 = functionCall;
 var $actualApply = actualApply;
 
 /** @type {(args: [Function, thisArg?: unknown, ...args: unknown[]]) => Function} TODO FIXME, find a way to use import('.') */
@@ -1076,7 +1049,7 @@ function requireHasown () {
 
 	var call = Function.prototype.call;
 	var $hasOwn = Object.prototype.hasOwnProperty;
-	var bind = requireFunctionBind();
+	var bind = functionBind;
 
 	/** @type {import('.')} */
 	hasown = bind.call(call, $hasOwn);
@@ -1097,7 +1070,7 @@ var $URIError = uri;
 
 var abs = abs$1;
 var floor = floor$1;
-var max = max$1;
+var max = max$2;
 var min = min$1;
 var pow = pow$1;
 var round = round$1;
@@ -1142,7 +1115,7 @@ var $ObjectGPO = requireObject_getPrototypeOf();
 var $ReflectGPO = requireReflect_getPrototypeOf();
 
 var $apply = requireFunctionApply();
-var $call = requireFunctionCall();
+var $call = functionCall;
 
 var needsEval = {};
 
@@ -1323,7 +1296,7 @@ var LEGACY_ALIASES = {
 	'%WeakSetPrototype%': ['WeakSet', 'prototype']
 };
 
-var bind = requireFunctionBind();
+var bind = functionBind;
 var hasOwn = /*@__PURE__*/ requireHasown();
 var $concat = bind.call($call, Array.prototype.concat);
 var $spliceApply = bind.call($apply, Array.prototype.splice);
@@ -2651,6 +2624,6 @@ var lib = {
     stringify: stringify
 };
 
-const P = /*@__PURE__*/getDefaultExportFromCjs(lib);
+const Dn = /*@__PURE__*/getDefaultExportFromCjs(lib);
 
-export { P };
+export { Dn };

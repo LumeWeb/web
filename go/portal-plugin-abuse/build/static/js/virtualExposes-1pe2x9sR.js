@@ -56,7 +56,7 @@ const exposesMap = {
         }
       ,
         "./CaseView": async () => {
-          const importModule = await import('./view-BSl1-KT2.js');
+          const importModule = await import('./view-BEPE2LFx.js');
           const exportModule = {};
           Object.assign(exportModule, importModule);
           Object.defineProperty(exportModule, "__esModule", {
