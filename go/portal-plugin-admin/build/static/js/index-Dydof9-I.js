@@ -1,5 +1,5 @@
 import { core_admin__loadShare__react__loadShare__ } from './core_admin__loadShare__react__loadShare__-Wf-NLjTz.js';
-import { shimExports } from './index-CLnJNVNo.js';
+import { shimExports } from './index-CbhAMfLD.js';
 
 class Subscribable {
   constructor() {
