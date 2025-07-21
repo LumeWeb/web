@@ -1,6 +1,6 @@
 import { index_cjs } from './core_core__mf_v__runtimeInit__mf_v__-DHIRDVBI.js';
 import { React, core_core__loadShare__react__loadShare__ } from './core_core__loadShare__react__loadShare__-Dp0YNvAn.js';
-import { federationRuntime } from './virtual_mf-REMOTE_ENTRY_ID-BLHsbOLj.js';
+import { federationRuntime } from './virtual_mf-REMOTE_ENTRY_ID-DdN8WeEO.js';
 import { core_core__loadShare__react_mf_2_dom__loadShare__ } from './createLucideIcon-DPMNxxyq.js';
 import './index-C__1Ej_O.js';
 import { core_core__loadShare__react_mf_2_router__loadShare__ } from './core_core__loadShare__react_mf_2_router__loadShare__-BHct9UD3.js';

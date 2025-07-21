@@ -956,6 +956,21 @@ var stringify;
 stringify = encode;
 
 //#region src/provider.ts
+const parseResponse = async (response) => {
+	if (response instanceof Response && !response.ok) try {
+		const errorBody = await response.json();
+		throw new Error(errorBody.message || `HTTP error ${response.status}`);
+	} catch (jsonError) {
+		throw new Error(`HTTP error ${response.status}: Could not parse error body`);
+	}
+	const responseText = await response.text();
+	if (!responseText.trim()) return null;
+	try {
+		return JSON.parse(responseText);
+	} catch (e) {
+		return responseText;
+	}
+};
 const addParam = (key, value, queryParams) => {
 	if (value !== void 0) queryParams[key] = value;
 };
@@ -1009,7 +1024,7 @@ const dataProvider = (apiUrl) => {
 				resource
 			});
 			const response = await baseFetch(url, "POST", variables);
-			const data = await response.json();
+			const data = await parseResponse(response);
 			return { data };
 		},
 		custom: async ({ meta, method, payload, url: operation, filters, sorters }) => {
@@ -1024,13 +1039,7 @@ const dataProvider = (apiUrl) => {
 			Object.entries(filterParams).forEach(([key, value]) => addParam(key, value, queryParams));
 			Object.entries(sortParams).forEach(([key, value]) => addParam(key, value, queryParams));
 			const response = await baseFetch(baseUrl, method.toUpperCase(), payload, queryParams);
-			if (response instanceof Response && !response.ok) try {
-				const errorBody = await response.json();
-				throw new Error(errorBody.message || `HTTP error ${response.status}`);
-			} catch (jsonError) {
-				throw new Error(`HTTP error ${response.status}: Could not parse error body`);
-			}
-			const data = await response.json();
+			const data = await parseResponse(response);
 			return { data };
 		},
 		deleteOne: async ({ id, meta, resource, variables }) => {
@@ -1041,8 +1050,20 @@ const dataProvider = (apiUrl) => {
 				resource
 			});
 			const response = await baseFetch(url, "DELETE", variables);
-			const data = await response.json();
-			return { data };
+			if (response instanceof Response && !response.ok) try {
+				const errorBody = await response.json();
+				throw new Error(errorBody.message || `HTTP error ${response.status}`);
+			} catch (jsonError) {
+				throw new Error(`HTTP error ${response.status}: Could not parse error body`);
+			}
+			const responseText = await response.text();
+			if (!responseText.trim()) return { data: null };
+			try {
+				const data = JSON.parse(responseText);
+				return { data };
+			} catch (e) {
+				return { data: responseText };
+			}
 		},
 		getApiUrl: () => apiUrl,
 		getList: async ({ filters, meta: _meta, pagination, resource, sorters }) => {
@@ -1065,14 +1086,14 @@ const dataProvider = (apiUrl) => {
 			addParam("_per_page", pagination?.pageSize, queryParams);
 			try {
 				const response = await httpClient(apiUrl).get(url, { searchParams: queryParams });
-				const data = await response.json();
+				const data = await parseResponse(response);
 				let total = Number(response.headers.get("x-total-count"));
-				if (Number.isNaN(total) || total === 0) if ("total" in data && typeof data.total === "number") total = data.total;
+				if (Number.isNaN(total) || total === 0) if (data && typeof data.total === "number") total = data.total;
 				else {
 					total = 0;
 					console.warn("Total count not found in headers or data.");
 				}
-				if ("data" in data && Array.isArray(data.data)) return {
+				if (data && Array.isArray(data.data)) return {
 					data: data.data,
 					total
 				};
@@ -1093,13 +1114,7 @@ const dataProvider = (apiUrl) => {
 				resource
 			});
 			const response = await baseFetch(url, "GET");
-			if (response instanceof Response && !response.ok) try {
-				const errorBody = await response.json();
-				throw new Error(errorBody.message || `HTTP error ${response.status}`);
-			} catch (jsonError) {
-				throw new Error(`HTTP error ${response.status}: Could not parse error body`);
-			}
-			const data = await response.json();
+			const data = await parseResponse(response);
 			return { data };
 		},
 		update: async ({ id, meta, resource, variables }) => {
@@ -1110,13 +1125,7 @@ const dataProvider = (apiUrl) => {
 				resource
 			});
 			const response = await baseFetch(url, "PATCH", variables);
-			if (response instanceof Response && !response.ok) try {
-				const errorBody = await response.json();
-				throw new Error(errorBody.message || `HTTP error ${response.status}`);
-			} catch (jsonError) {
-				throw new Error(`HTTP error ${response.status}: Could not parse error body`);
-			}
-			const data = await response.json();
+			const data = await parseResponse(response);
 			return { data };
 		}
 	};
