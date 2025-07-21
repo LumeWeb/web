@@ -1,5 +1,5 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-B0OThK7f.js","assets/_commonjsHelpers-DWwsNxpa.js","assets/index-Domn_xjh.js","assets/dashboard__loadShare__react_mf_2_dom__loadShare__-CxucHwhd.js","assets/dashboard__loadShare__react__loadShare__-B-YtubD3.js","assets/dashboard__mf_v__runtimeInit__mf_v__-C0jw-Lkn.js","assets/circle-alert-bkU3ixL2.js","assets/createLucideIcon-Od_tcS2A.js","assets/_baseIsEqual-C0afv05f.js","assets/index-B90HCQcT.js","assets/index-aPZK1Msq.js","assets/index-Dq110QZ7.js","assets/index-CimZ0-bn.js","assets/index-DjFOLbEQ.js","assets/index-BN8IXIiO.js","assets/index-Psk6eg-4.js","assets/index-CoPiY3dc.js","assets/index-ByaWsVWX.js","assets/index.esm-Bcaxk7r3.js","assets/index-DwqD0hK1.js"])))=>i.map(i=>d[i]);
-import { i as index_cjs, d as dashboard__mf_v__runtimeInit__mf_v__ } from "./dashboard__mf_v__runtimeInit__mf_v__-C0jw-Lkn.js";
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-B0OThK7f.js","assets/_commonjsHelpers-DWwsNxpa.js","assets/index-Cw7YX-an.js","assets/abuse__loadShare__react_mf_2_dom__loadShare__-CpomVz3Y.js","assets/abuse__loadShare__react__loadShare__-C6wwnR7P.js","assets/abuse__mf_v__runtimeInit__mf_v__-D-IlhcC-.js","assets/circle-alert-cI2tjBU6.js","assets/createLucideIcon-B3zrXXln.js","assets/_baseIsEqual-C_TPMinx.js","assets/index-CzJLPSgC.js","assets/index-BGJNuQf_.js","assets/index-Dq110QZ7.js","assets/index-DTJbv2Oa.js","assets/index-D7KVDmIG.js","assets/index-95rntDMt.js","assets/index-DcPQr_uN.js","assets/index-BgdNhNE7.js","assets/index-BfusABoy.js","assets/index.esm-D227pe9g.js","assets/index-D7K5VO2P.js"])))=>i.map(i=>d[i]);
+import { i as index_cjs, a as abuse__mf_v__runtimeInit__mf_v__ } from "./abuse__mf_v__runtimeInit__mf_v__-D-IlhcC-.js";
 import exposesMap from "./virtualExposes-Dff6wIYf.js";
 import { _ as __vitePreload } from "./preload-helper-BkSzTOHT.js";
 const importMap = {
@@ -8,35 +8,35 @@ const importMap = {
     return pkg;
   },
   "@lumeweb/portal-framework-ui": async () => {
-    let pkg = await __vitePreload(() => import("./index-Domn_xjh.js"), true ? __vite__mapDeps([2,3,4,1,5,6,7,8,9,10,11]) : void 0);
+    let pkg = await __vitePreload(() => import("./index-Cw7YX-an.js"), true ? __vite__mapDeps([2,3,4,1,5,6,7,8,9,10,11]) : void 0);
     return pkg;
   },
   "react-dom": async () => {
-    let pkg = await __vitePreload(() => import("./index-CimZ0-bn.js").then((n) => n.i), true ? __vite__mapDeps([12,1,4,5]) : void 0);
+    let pkg = await __vitePreload(() => import("./index-DTJbv2Oa.js").then((n) => n.i), true ? __vite__mapDeps([12,1,4,5]) : void 0);
     return pkg;
   },
   "@lumeweb/portal-framework-core": async () => {
-    let pkg = await __vitePreload(() => import("./index-DjFOLbEQ.js"), true ? __vite__mapDeps([13,5,4,1,3,14,6,7,15,11]) : void 0);
+    let pkg = await __vitePreload(() => import("./index-D7KVDmIG.js"), true ? __vite__mapDeps([13,5,4,1,3,14,6,7,15,11]) : void 0);
     return pkg;
   },
   "@lumeweb/portal-framework-ui-core": async () => {
-    let pkg = await __vitePreload(() => import("./index-CoPiY3dc.js"), true ? __vite__mapDeps([16,4,1,5,3,8,7,10]) : void 0);
+    let pkg = await __vitePreload(() => import("./index-BgdNhNE7.js"), true ? __vite__mapDeps([16,4,1,5,3,8,7,10]) : void 0);
     return pkg;
   },
   "@refinedev/core": async () => {
-    let pkg = await __vitePreload(() => import("./index-ByaWsVWX.js"), true ? __vite__mapDeps([17,4,1,5,9]) : void 0);
+    let pkg = await __vitePreload(() => import("./index-BfusABoy.js"), true ? __vite__mapDeps([17,4,1,5,9]) : void 0);
     return pkg;
   },
   "react-router": async () => {
-    let pkg = await __vitePreload(() => import("./index-BN8IXIiO.js"), true ? __vite__mapDeps([14,4,1,5]) : void 0);
+    let pkg = await __vitePreload(() => import("./index-95rntDMt.js"), true ? __vite__mapDeps([14,4,1,5]) : void 0);
     return pkg;
   },
   "react-hook-form": async () => {
-    let pkg = await __vitePreload(() => import("./index.esm-Bcaxk7r3.js"), true ? __vite__mapDeps([18,4,1,5]) : void 0);
+    let pkg = await __vitePreload(() => import("./index.esm-D227pe9g.js"), true ? __vite__mapDeps([18,4,1,5]) : void 0);
     return pkg;
   },
   "@tanstack/react-query": async () => {
-    let pkg = await __vitePreload(() => import("./index-DwqD0hK1.js"), true ? __vite__mapDeps([19,4,1,5,10]) : void 0);
+    let pkg = await __vitePreload(() => import("./index-D7K5VO2P.js"), true ? __vite__mapDeps([19,4,1,5,10]) : void 0);
     return pkg;
   }
 };
@@ -46,7 +46,7 @@ const usedShared = {
     version: "18.3.1",
     scope: ["default"],
     loaded: false,
-    from: "dashboard",
+    from: "abuse",
     async get() {
       usedShared["react"].loaded = true;
       const { "react": pkgDynamicImport } = importMap;
@@ -70,7 +70,7 @@ const usedShared = {
     version: "0.0.0",
     scope: ["default"],
     loaded: false,
-    from: "dashboard",
+    from: "abuse",
     async get() {
       usedShared["@lumeweb/portal-framework-ui"].loaded = true;
       const { "@lumeweb/portal-framework-ui": pkgDynamicImport } = importMap;
@@ -94,7 +94,7 @@ const usedShared = {
     version: "18.3.1",
     scope: ["default"],
     loaded: false,
-    from: "dashboard",
+    from: "abuse",
     async get() {
       usedShared["react-dom"].loaded = true;
       const { "react-dom": pkgDynamicImport } = importMap;
@@ -118,7 +118,7 @@ const usedShared = {
     version: "0.0.0",
     scope: ["default"],
     loaded: false,
-    from: "dashboard",
+    from: "abuse",
     async get() {
       usedShared["@lumeweb/portal-framework-core"].loaded = true;
       const { "@lumeweb/portal-framework-core": pkgDynamicImport } = importMap;
@@ -142,7 +142,7 @@ const usedShared = {
     version: "0.0.0",
     scope: ["default"],
     loaded: false,
-    from: "dashboard",
+    from: "abuse",
     async get() {
       usedShared["@lumeweb/portal-framework-ui-core"].loaded = true;
       const { "@lumeweb/portal-framework-ui-core": pkgDynamicImport } = importMap;
@@ -166,7 +166,7 @@ const usedShared = {
     version: "4.57.9",
     scope: ["default"],
     loaded: false,
-    from: "dashboard",
+    from: "abuse",
     async get() {
       usedShared["@refinedev/core"].loaded = true;
       const { "@refinedev/core": pkgDynamicImport } = importMap;
@@ -190,7 +190,7 @@ const usedShared = {
     version: "7.5.0",
     scope: ["default"],
     loaded: false,
-    from: "dashboard",
+    from: "abuse",
     async get() {
       usedShared["react-router"].loaded = true;
       const { "react-router": pkgDynamicImport } = importMap;
@@ -214,7 +214,7 @@ const usedShared = {
     version: "7.54.0",
     scope: ["default"],
     loaded: false,
-    from: "dashboard",
+    from: "abuse",
     async get() {
       usedShared["react-hook-form"].loaded = true;
       const { "react-hook-form": pkgDynamicImport } = importMap;
@@ -238,7 +238,7 @@ const usedShared = {
     version: "4.36.1",
     scope: ["default"],
     loaded: false,
-    from: "dashboard",
+    from: "abuse",
     async get() {
       usedShared["@tanstack/react-query"].loaded = true;
       const { "@tanstack/react-query": pkgDynamicImport } = importMap;
@@ -261,7 +261,7 @@ const usedShared = {
 const usedRemotes = [];
 const initTokens = {};
 const shareScopeName = "default";
-const mfName = "dashboard";
+const mfName = "abuse";
 async function init(shared = {}, initScope = []) {
   const initRes = index_cjs.init({
     name: mfName,
@@ -285,7 +285,7 @@ async function init(shared = {}, initScope = []) {
   } catch (e) {
     console.error(e);
   }
-  dashboard__mf_v__runtimeInit__mf_v__.initResolve(initRes);
+  abuse__mf_v__runtimeInit__mf_v__.initResolve(initRes);
   return initRes;
 }
 function getExposes(moduleName) {
