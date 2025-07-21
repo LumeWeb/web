@@ -14,8 +14,8 @@ function DesktopSidebar() {
         "hidden md:flex",
         "flex flex-col fixed top-0 left-0 z-20 h-screen -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300",
         {
-          "sm:w-[20%] lg:w-[10%]": !isCollapsed,
-          "sm:w-[10%] lg:w-[5%]": isCollapsed,
+          "sm:w-[20%]": !isCollapsed,
+          "sm:w-[10%]": isCollapsed,
         },
       )}>
       <SidebarToggle setIsOpen={toggleCollapsed} isOpen={!isCollapsed} />
