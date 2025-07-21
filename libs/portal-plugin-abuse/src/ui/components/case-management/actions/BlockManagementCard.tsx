@@ -25,7 +25,7 @@ import {
   RadioGroupItem,
   Textarea,
 } from "@lumeweb/portal-framework-ui-core";
-import { useCustomMutation, useNotification, useApiUrl } from "@refinedev/core";
+import { useCustomMutation, useNotification } from "@refinedev/core";
 import { Shield, ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
 import React, { useState } from "react";
 import { SubjectResponse } from "@/types/subject";
@@ -65,7 +65,6 @@ export function BlockManagementCard({
 
   // Block subject mutation
   const { isLoading: isBlocking, mutate: blockSubject } = useCustomMutation();
-  const apiUrl = useApiUrl();
 
   // Unblock subject mutation
   const { isLoading: isUnblocking, mutate: unblockSubject } =
@@ -75,7 +74,7 @@ export function BlockManagementCard({
     blockSubject(
       {
         method: "post",
-        url: `${apiUrl}/abuse/${RefineResource.Blocklist}`,
+        url: `/abuse/${RefineResource.Blocklist}`,
         values: {
           action: BlockAction.reject,
           caseId,
@@ -125,7 +124,7 @@ export function BlockManagementCard({
     unblockSubject(
       {
         method: "delete",
-        url: `${apiUrl}/abuse/${RefineResource.Blocklist}/${subjectData?.data?.identifier}`,
+        url: `/abuse/${RefineResource.Blocklist}/${subjectData?.data?.identifier}`,
         values: {},
       },
       {
