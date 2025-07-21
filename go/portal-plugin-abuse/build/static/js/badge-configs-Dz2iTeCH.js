@@ -52,7 +52,7 @@ const BlockReason = {
 	harassment: "harassment",
 	hate_speech: "hate_speech",
 	spam: "spam",
-	system_policy: "system_policy",
+	system_policy: "policy",
 	manual: "manual"
 };
 const BlockSeverity = {

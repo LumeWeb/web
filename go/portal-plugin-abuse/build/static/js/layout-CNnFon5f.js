@@ -3,8 +3,8 @@ import { core_abuse__loadShare__react__loadShare__ } from './core_abuse__loadSha
 import { RefineResource } from './index-C3iL_nDr.js';
 import { core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__-QzxGLbUR.js';
 import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__-qcw4tOvU.js';
-import { PRIORITY_BADGE_CONFIG } from './badge-configs-BNOpu3VO.js';
-import { CaseStatusBadge } from './CaseStatusBadge-D8EgmP8g.js';
+import { PRIORITY_BADGE_CONFIG } from './badge-configs-Dz2iTeCH.js';
+import { CaseStatusBadge } from './CaseStatusBadge-CM8B-a15.js';
 import { TriangleAlert } from './triangle-alert-CI9wSOJ5.js';
 import { User } from './user-S2yq91K-.js';
 import { FileText } from './file-text-lxKDeUfn.js';

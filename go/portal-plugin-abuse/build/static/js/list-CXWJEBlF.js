@@ -1,5 +1,5 @@
 import { jsxRuntimeExports } from './jsx-runtime-dlxeb5L7.js';
-import { BlockSource, BlockSeverity, BlockReason, BlockAction, REASON_BADGE_CONFIG, SEVERITY_BADGE_CONFIG, ACTION_BADGE_CONFIG, SOURCE_BADGE_CONFIG } from './badge-configs-BNOpu3VO.js';
+import { BlockSource, BlockSeverity, BlockReason, BlockAction, REASON_BADGE_CONFIG, SEVERITY_BADGE_CONFIG, ACTION_BADGE_CONFIG, SOURCE_BADGE_CONFIG } from './badge-configs-Dz2iTeCH.js';
 import { RefineResource } from './index-C3iL_nDr.js';
 import { File, formatFileSize } from './util-B4AIY5au.js';
 import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__-qcw4tOvU.js';
