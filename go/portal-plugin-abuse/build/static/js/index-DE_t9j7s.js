@@ -2651,6 +2651,6 @@ var lib = {
     stringify: stringify
 };
 
-const Dn = /*@__PURE__*/getDefaultExportFromCjs(lib);
+const P = /*@__PURE__*/getDefaultExportFromCjs(lib);
 
-export { Dn };
+export { P };
