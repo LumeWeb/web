@@ -6,7 +6,7 @@ const res = initPromise.then((_) => loadShare("react-router", {
   customShareInfo: { shareConfig: {
     singleton: true,
     strictVersion: false,
-    requiredVersion: "^7.6.0"
+    requiredVersion: "^7.5.0"
   } }
 }));
 const exportModule = await res.then((factory) => factory());
