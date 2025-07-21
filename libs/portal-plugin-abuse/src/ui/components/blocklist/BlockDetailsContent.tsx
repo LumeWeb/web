@@ -8,7 +8,7 @@ import {
 } from "@/types/badge-configs";
 import { RefineResource } from "@/types/resources";
 import { formatFileSize } from "@/ui/util";
-import { ComplexBadge } from "@lumeweb/portal-framework-ui";
+import { ThemedBadge } from "@lumeweb/portal-framework-ui";
 import { Button } from "@lumeweb/portal-framework-ui-core";
 import { Link as RLink } from "@refinedev/core";
 import { format } from "date-fns";
@@ -47,22 +47,22 @@ export function BlockDetailsContent({ block }: { block: BlockedContent }) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <h4 className="text-sm font-medium mb-1">Reason</h4>
-          <ComplexBadge config={REASON_BADGE_CONFIG} value={block.reason} />
+          <ThemedBadge config={REASON_BADGE_CONFIG} value={block.reason} />
         </div>
         <div>
           <h4 className="text-sm font-medium mb-1">Severity</h4>
-          <ComplexBadge config={SEVERITY_BADGE_CONFIG} value={block.severity} />
+          <ThemedBadge config={SEVERITY_BADGE_CONFIG} value={block.severity} />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <h4 className="text-sm font-medium mb-1">Action</h4>
-          <ComplexBadge config={ACTION_BADGE_CONFIG} value={block.action} />
+          <ThemedBadge config={ACTION_BADGE_CONFIG} value={block.action} />
         </div>
         <div>
           <h4 className="text-sm font-medium mb-1">Source</h4>
-          <ComplexBadge config={SOURCE_BADGE_CONFIG} value={block.source} />
+          <ThemedBadge config={SOURCE_BADGE_CONFIG} value={block.source} />
         </div>
       </div>
 

@@ -5,7 +5,7 @@ import {
   PRIORITY_BADGE_CONFIG,
   STATUS_BADGE_CONFIG,
 } from "@/types/badge-configs";
-import { ComplexBadge } from "@lumeweb/portal-framework-ui";
+import { ThemedBadge } from "@lumeweb/portal-framework-ui";
 import {
   Button,
   Card,
@@ -110,14 +110,14 @@ export function RelatedCasesPanel({
                       {caseItem.type.replace("_", " ")}
                     </TableCell>
                     <TableCell>
-                      <ComplexBadge
+                      <ThemedBadge
                         className="capitalize"
                         config={STATUS_BADGE_CONFIG}
                         value={caseItem.status}
                       />
                     </TableCell>
                     <TableCell>
-                      <ComplexBadge
+                      <ThemedBadge
                         className="capitalize"
                         config={PRIORITY_BADGE_CONFIG}
                         value={caseItem.priority}
