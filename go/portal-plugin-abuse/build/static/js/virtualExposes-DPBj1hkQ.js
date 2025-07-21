@@ -78,7 +78,7 @@ const exposesMap = {
         }
       ,
         "./BlockListList": async () => {
-          const importModule = await import('./list-CXWJEBlF.js');
+          const importModule = await import('./list-B0R6phrk.js');
           const exportModule = {};
           Object.assign(exportModule, importModule);
           Object.defineProperty(exportModule, "__esModule", {

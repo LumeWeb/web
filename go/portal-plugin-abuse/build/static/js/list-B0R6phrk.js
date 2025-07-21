@@ -305,8 +305,8 @@ function BlocklistTable() {
       cell: ({ row }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: formatFileSize(row.original.size) }),
       header: "Size"
     }),
-    columnHelper.accessor("createdAt", {
-      cell: ({ row }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: format(new Date(row.original.createdAt), "MMM d, yyyy") }),
+    columnHelper.accessor("created_at", {
+      cell: ({ row }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: format(new Date(row.original.created_at), "MMM d, yyyy") }),
       header: "Created At"
     })
   ];
