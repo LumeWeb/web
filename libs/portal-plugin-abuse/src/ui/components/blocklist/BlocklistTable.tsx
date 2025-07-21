@@ -9,11 +9,12 @@ import {
 import { RefineResource } from "@/types/resources";
 import { formatFileSize } from "@/ui/util";
 import {
-  Button,
-  ComplexBadge,
+  ThemedBadge,
   CrudTable,
   useDialog,
 } from "@lumeweb/portal-framework-ui";
+import { Button } from "@lumeweb/portal-framework-ui-core";
+
 import { useDeleteMany, useNotification } from "@refinedev/core";
 import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
@@ -54,16 +55,13 @@ export function BlocklistTable() {
     }),
     columnHelper.accessor("reason", {
       cell: ({ row }) => (
-        <ComplexBadge
-          config={REASON_BADGE_CONFIG}
-          value={row.original.reason}
-        />
+        <ThemedBadge config={REASON_BADGE_CONFIG} value={row.original.reason} />
       ),
       header: "Reason",
     }),
     columnHelper.accessor("severity", {
       cell: ({ row }) => (
-        <ComplexBadge
+        <ThemedBadge
           config={SEVERITY_BADGE_CONFIG}
           value={row.original.severity}
         />
@@ -72,19 +70,13 @@ export function BlocklistTable() {
     }),
     columnHelper.accessor("action", {
       cell: ({ row }) => (
-        <ComplexBadge
-          config={ACTION_BADGE_CONFIG}
-          value={row.original.action}
-        />
+        <ThemedBadge config={ACTION_BADGE_CONFIG} value={row.original.action} />
       ),
       header: "Action",
     }),
     columnHelper.accessor("source", {
       cell: ({ row }) => (
-        <ComplexBadge
-          config={SOURCE_BADGE_CONFIG}
-          value={row.original.source}
-        />
+        <ThemedBadge config={SOURCE_BADGE_CONFIG} value={row.original.source} />
       ),
       header: "Source",
     }),
@@ -110,7 +102,7 @@ export function BlocklistTable() {
       },
       {
         onError: () => {
-          openNotification({
+          openNotification?.({
             description:
               "There was an error removing the content from the blocklist.",
             message: "Delete failed",
@@ -118,7 +110,7 @@ export function BlocklistTable() {
           });
         },
         onSuccess: () => {
-          openNotification({
+          openNotification?.({
             description: `${selectedIds.length} items have been successfully removed from the blocklist.`,
             message: "Blocks deleted",
             type: "success",
