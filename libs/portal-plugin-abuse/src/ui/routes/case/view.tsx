@@ -608,7 +608,7 @@ function CaseViewContent({ id }: { id: BaseKey }) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm whitespace-pre-line">
+                  <p className="text-sm whitespace-pre-line break-all">
                     {record.description}
                   </p>
                 </CardContent>
