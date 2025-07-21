@@ -51,7 +51,7 @@ export function useGlobalSearch(initialQuery = "", enabled = true) {
     filters: debouncedQuery
       ? [
           {
-            field: "search",
+            field: "q",
             operator: "contains",
             value: debouncedQuery,
           },
@@ -120,12 +120,12 @@ export function useGlobalSearch(initialQuery = "", enabled = true) {
         (caseItem: CaseResponse) => ({
           id: caseItem.id,
           priority: caseItem.priority,
-          referenceNumber: caseItem.referenceNumber,
+          referenceNumber: caseItem.reference_number,
           status: caseItem.status,
           subtitle:
             caseItem.description.substring(0, 60) +
             (caseItem.description.length > 60 ? "..." : ""),
-          title: `Case ${caseItem.referenceNumber}`,
+          title: `Case ${caseItem.reference_number}`,
           type: "case",
         }),
       );
