@@ -1679,10 +1679,10 @@ function setCurrentLocation(location) {
 var noop = function() {
 };
 var _undefined$1 = noop();
-var isValue$6 = function(val) {
+var isValue$5 = function(val) {
   return val !== _undefined$1 && val !== null;
 };
-var isValue$5 = isValue$6;
+var isValue$4 = isValue$5;
 var forEach$2 = Array.prototype.forEach, create$1 = Object.create;
 var process$1 = function(src, obj) {
   var key;
@@ -1691,7 +1691,7 @@ var process$1 = function(src, obj) {
 var normalizeOptions = function(opts1) {
   var result = create$1(null);
   forEach$2.call(arguments, function(options) {
-    if (!isValue$5(options)) return;
+    if (!isValue$4(options)) return;
     process$1(Object(options), result);
   });
   return result;
@@ -1741,12 +1741,19 @@ var validCallable = function(fn) {
   if (typeof fn !== "function") throw new TypeError(fn + " is not a function");
   return fn;
 };
-var isValue$4 = isValue$6;
-var validValue = function(value2) {
-  if (!isValue$4(value2)) throw new TypeError("Cannot use null or undefined");
-  return value2;
-};
-var callable$3 = validCallable, value = validValue, bind = Function.prototype.bind, call$1 = Function.prototype.call, keys$1 = Object.keys, objPropertyIsEnumerable = Object.prototype.propertyIsEnumerable;
+var validValue;
+var hasRequiredValidValue;
+function requireValidValue() {
+  if (hasRequiredValidValue) return validValue;
+  hasRequiredValidValue = 1;
+  var isValue2 = isValue$5;
+  validValue = function(value2) {
+    if (!isValue2(value2)) throw new TypeError("Cannot use null or undefined");
+    return value2;
+  };
+  return validValue;
+}
+var callable$3 = validCallable, value = requireValidValue(), bind = Function.prototype.bind, call$1 = Function.prototype.call, keys$1 = Object.keys, objPropertyIsEnumerable = Object.prototype.propertyIsEnumerable;
 var _iterate = function(method, defVal) {
   return function(obj, cb2) {
     var list, thisArg = arguments[2], compareFn = arguments[3];
@@ -1793,7 +1800,7 @@ var hasRequiredShim$4;
 function requireShim$4() {
   if (hasRequiredShim$4) return shim$4;
   hasRequiredShim$4 = 1;
-  var isValue2 = isValue$6;
+  var isValue2 = isValue$5;
   var keys2 = Object.keys;
   shim$4 = function(object) {
     return keys2(isValue2(object) ? Object(object) : object);
@@ -1813,7 +1820,7 @@ var hasRequiredShim$3;
 function requireShim$3() {
   if (hasRequiredShim$3) return shim$3;
   hasRequiredShim$3 = 1;
-  var keys2 = requireKeys(), value2 = validValue, max2 = Math.max;
+  var keys2 = requireKeys(), value2 = requireValidValue(), max2 = Math.max;
   shim$3 = function(dest, src) {
     var error, i, length = max2(arguments.length, 2), assign2;
     dest = Object(value2(dest));
@@ -1834,13 +1841,13 @@ function requireShim$3() {
   return shim$3;
 }
 var assign$1 = isImplemented$6() ? Object.assign : requireShim$3();
-var isValue$3 = isValue$6;
+var isValue$3 = isValue$5;
 var map$1 = { function: true, object: true };
 var isObject$1 = function(value2) {
   return isValue$3(value2) && map$1[typeof value2] || false;
 };
 (function(module) {
-  var assign2 = assign$1, isObject2 = isObject$1, isValue2 = isValue$6, captureStackTrace = Error.captureStackTrace;
+  var assign2 = assign$1, isObject2 = isObject$1, isValue2 = isValue$5, captureStackTrace = Error.captureStackTrace;
   module.exports = function(message) {
     var err = new Error(message), code = arguments[1], ext = arguments[2];
     if (!isValue2(ext)) {
@@ -1862,7 +1869,7 @@ var hasRequiredMixin;
 function requireMixin() {
   if (hasRequiredMixin) return mixin$1;
   hasRequiredMixin = 1;
-  var value2 = validValue, defineProperty2 = Object.defineProperty, getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor, getOwnPropertyNames = Object.getOwnPropertyNames, getOwnPropertySymbols = Object.getOwnPropertySymbols;
+  var value2 = requireValidValue(), defineProperty2 = Object.defineProperty, getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor, getOwnPropertyNames = Object.getOwnPropertyNames, getOwnPropertySymbols = Object.getOwnPropertySymbols;
   mixin$1 = function(target, source) {
     var error, sourceObject = Object(value2(source));
     target = Object(value2(target));
@@ -2482,10 +2489,10 @@ var hasRequiredShim$1;
 function requireShim$1() {
   if (hasRequiredShim$1) return shim$1;
   hasRequiredShim$1 = 1;
-  var iteratorSymbol = requireEs6Symbol().iterator, isArguments2 = requireIsArguments(), isFunction2 = requireIsFunction(), toPosInt2 = toPosInteger, callable2 = validCallable, validValue$1 = validValue, isValue2 = isValue$6, isString2 = requireIsString(), isArray2 = Array.isArray, call2 = Function.prototype.call, desc2 = { configurable: true, enumerable: true, writable: true, value: null }, defineProperty2 = Object.defineProperty;
+  var iteratorSymbol = requireEs6Symbol().iterator, isArguments2 = requireIsArguments(), isFunction2 = requireIsFunction(), toPosInt2 = toPosInteger, callable2 = validCallable, validValue2 = requireValidValue(), isValue2 = isValue$5, isString2 = requireIsString(), isArray2 = Array.isArray, call2 = Function.prototype.call, desc2 = { configurable: true, enumerable: true, writable: true, value: null }, defineProperty2 = Object.defineProperty;
   shim$1 = function(arrayLike) {
     var mapFn = arguments[1], thisArg = arguments[2], Context, i, j, arr, length, code, iterator, result, getIterator, value2;
-    arrayLike = Object(validValue$1(arrayLike));
+    arrayLike = Object(validValue2(arrayLike));
     if (isValue2(mapFn)) callable2(mapFn);
     if (!this || this === Array || !isFunction2(this)) {
       if (!mapFn) {
@@ -2578,7 +2585,7 @@ var from = requireFrom(), isArray = Array.isArray;
 var toArray$1 = function(arrayLike) {
   return isArray(arrayLike) ? arrayLike : from(arrayLike);
 };
-var toArray = toArray$1, isValue = isValue$6, callable$2 = validCallable;
+var toArray = toArray$1, isValue = isValue$5, callable$2 = validCallable;
 var slice = Array.prototype.slice, resolveArgs;
 resolveArgs = function(args) {
   return this.map(function(resolve, i) {
@@ -2851,7 +2858,7 @@ var hasRequiredEIndexOf;
 function requireEIndexOf() {
   if (hasRequiredEIndexOf) return eIndexOf;
   hasRequiredEIndexOf = 1;
-  var numberIsNaN = requireIsNan(), toPosInt2 = toPosInteger, value2 = validValue, indexOf = Array.prototype.indexOf, objHasOwnProperty = Object.prototype.hasOwnProperty, abs2 = Math.abs, floor2 = Math.floor;
+  var numberIsNaN = requireIsNan(), toPosInt2 = toPosInteger, value2 = requireValidValue(), indexOf = Array.prototype.indexOf, objHasOwnProperty = Object.prototype.hasOwnProperty, abs2 = Math.abs, floor2 = Math.floor;
   eIndexOf = function(searchElement) {
     var i, length, fromIndex, val;
     if (!numberIsNaN(searchElement)) return indexOf.apply(this, arguments);
@@ -3329,7 +3336,7 @@ var hasRequiredValidateStringifiableValue;
 function requireValidateStringifiableValue() {
   if (hasRequiredValidateStringifiableValue) return validateStringifiableValue;
   hasRequiredValidateStringifiableValue = 1;
-  var ensureValue = validValue, stringifiable = requireValidateStringifiable();
+  var ensureValue = requireValidValue(), stringifiable = requireValidateStringifiable();
   validateStringifiableValue = function(value2) {
     return stringifiable(ensureValue(value2));
   };
