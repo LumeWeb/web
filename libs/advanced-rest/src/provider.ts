@@ -11,6 +11,32 @@ import { httpClient } from "./utils/kyInstance";
 
 import { stringify } from "querystring";
 
+const parseResponse = async (response: any) => {
+  if (response instanceof Response && !response.ok) {
+    try {
+      const errorBody = await response.json();
+      throw new Error(errorBody.message || `HTTP error ${response.status}`);
+    } catch (jsonError) {
+      throw new Error(
+        `HTTP error ${response.status}: Could not parse error body`,
+      );
+    }
+  }
+
+  // Handle empty or non-JSON responses
+  const responseText = await response.text();
+  if (!responseText.trim()) {
+    return null;
+  }
+  
+  try {
+    return JSON.parse(responseText);
+  } catch (e) {
+    // Return raw text if not JSON
+    return responseText;
+  }
+};
+
 type QueryParams = {
   [key: string]: string | number | boolean;
 };
@@ -89,7 +115,7 @@ export const dataProvider = (apiUrl: string): DataProvider => {
     create: async ({ meta, resource, variables }) => {
       const url = generateNestedUrl({ apiBase: apiUrl, meta, resource });
       const response = await baseFetch(url, "POST", variables);
-      const data = await response.json();
+      const data = await parseResponse(response);
       return { data };
     },
 
@@ -124,6 +150,14 @@ export const dataProvider = (apiUrl: string): DataProvider => {
         payload,
         queryParams,
       );
+      const data = await parseResponse(response);
+      return { data };
+    },
+
+    deleteOne: async ({ id, meta, resource, variables }) => {
+      const url = generateNestedUrl({ apiBase: apiUrl, id, meta, resource });
+      const response = await baseFetch(url, "DELETE", variables);
+      
       if (response instanceof Response && !response.ok) {
         try {
           const errorBody = await response.json();
@@ -134,15 +168,20 @@ export const dataProvider = (apiUrl: string): DataProvider => {
           );
         }
       }
-      const data = await response.json();
-      return { data };
-    },
 
-    deleteOne: async ({ id, meta, resource, variables }) => {
-      const url = generateNestedUrl({ apiBase: apiUrl, id, meta, resource });
-      const response = await baseFetch(url, "DELETE", variables);
-      const data = await response.json();
-      return { data };
+      // Handle empty or non-JSON responses
+      const responseText = await response.text();
+      if (!responseText.trim()) {
+        return { data: null };
+      }
+      
+      try {
+        const data = JSON.parse(responseText);
+        return { data };
+      } catch (e) {
+        // Return raw text if not JSON
+        return { data: responseText };
+      }
     },
 
     getApiUrl: () => apiUrl,
@@ -180,26 +219,26 @@ export const dataProvider = (apiUrl: string): DataProvider => {
           searchParams: queryParams,
         });
 
-        const data = await response.json<GetListResponse<TData>>();
+        const data = await parseResponse(response);
 
         let total = Number(response.headers.get("x-total-count"));
 
         if (Number.isNaN(total) || total === 0) {
-          if ("total" in data && typeof data.total === "number") {
+          if (data && typeof data.total === "number") {
             total = data.total;
           } else {
-            total = 0; // Provide a default value if total is not found
-            console.warn("Total count not found in headers or data."); // Log a warning
+            total = 0;
+            console.warn("Total count not found in headers or data.");
           }
         }
 
-        if ("data" in data && Array.isArray(data.data)) {
+        if (data && Array.isArray(data.data)) {
           return { data: data.data, total };
         }
 
-        return { data: [], total: 0 }; // Or throw an error, depending on your requirements
+        return { data: [], total: 0 };
       } catch (error) {
-        console.error("Error fetching list:", error); // Log the error
+        console.error("Error fetching list:", error);
         return Promise.reject(error);
       }
     },
@@ -207,34 +246,14 @@ export const dataProvider = (apiUrl: string): DataProvider => {
     getOne: async ({ id, meta, resource }) => {
       const url = generateNestedUrl({ apiBase: apiUrl, id, meta, resource });
       const response = await baseFetch(url, "GET");
-      if (response instanceof Response && !response.ok) {
-        try {
-          const errorBody = await response.json();
-          throw new Error(errorBody.message || `HTTP error ${response.status}`);
-        } catch (jsonError) {
-          throw new Error(
-            `HTTP error ${response.status}: Could not parse error body`,
-          );
-        }
-      }
-      const data = await response.json();
+      const data = await parseResponse(response);
       return { data };
     },
 
     update: async ({ id, meta, resource, variables }) => {
       const url = generateNestedUrl({ apiBase: apiUrl, id, meta, resource });
       const response = await baseFetch(url, "PATCH", variables);
-      if (response instanceof Response && !response.ok) {
-        try {
-          const errorBody = await response.json();
-          throw new Error(errorBody.message || `HTTP error ${response.status}`);
-        } catch (jsonError) {
-          throw new Error(
-            `HTTP error ${response.status}: Could not parse error body`,
-          );
-        }
-      }
-      const data = await response.json();
+      const data = await parseResponse(response);
       return { data };
     },
   };
