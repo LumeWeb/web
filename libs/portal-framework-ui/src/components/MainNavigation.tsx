@@ -109,12 +109,10 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
                 <Dot size={18} />
               </span>
               <p
-                className={cn(
-                  "max-w-[170px] truncate",
-                  isOpen
-                    ? "translate-x-0 opacity-100"
-                    : "-translate-x-96 opacity-0",
-                )}>
+                className={cn({
+                  "translate-x-0 opacity-100": isOpen,
+                  "-translate-x-96 opacity-0": !isOpen,
+                })}>
                 {label}
               </p>
             </Link>
