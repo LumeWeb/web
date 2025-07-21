@@ -67,16 +67,13 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
                   <Icon size={18} />
                 </span>
               )}
-              <Link to={"/abuse"}>
-                {" "}
+              <Link to={submenus[0]?.href || "#"}>
                 {/* Link only wraps the text */}
                 <p
-                  className={cn(
-                    "max-w-[150px] truncate",
-                    isOpen
-                      ? "translate-x-0 opacity-100"
-                      : "-translate-x-96 opacity-0",
-                  )}>
+                  className={cn({
+                    "translate-x-0 opacity-100": isOpen,
+                    "-translate-x-96 opacity-0": !isOpen,
+                  })}>
                   {label}
                 </p>
               </Link>
