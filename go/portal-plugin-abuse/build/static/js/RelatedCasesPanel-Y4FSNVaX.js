@@ -1,5 +1,5 @@
 import { jsxRuntimeExports } from './jsx-runtime-dlxeb5L7.js';
-import { STATUS_BADGE_CONFIG, PRIORITY_BADGE_CONFIG } from './badge-configs-BNOpu3VO.js';
+import { STATUS_BADGE_CONFIG, PRIORITY_BADGE_CONFIG } from './badge-configs-Dz2iTeCH.js';
 import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__-qcw4tOvU.js';
 import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CZ-6RiII.js';
 import { core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__-QzxGLbUR.js';

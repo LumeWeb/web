@@ -3,13 +3,13 @@ import { RefineResource } from './index-C3iL_nDr.js';
 import { core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__-QzxGLbUR.js';
 import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CZ-6RiII.js';
 import { core_abuse__loadShare__react__loadShare__ } from './core_abuse__loadShare__react__loadShare__-BrHXNZXB.js';
-import { BlockReason, BlockSource, BlockSeverity, BlockAction, CaseStatus, CommunicationType, CommunicationDirection, EvidenceSource, ScanStatus, CasePriority } from './badge-configs-BNOpu3VO.js';
+import { BlockReason, BlockSource, BlockSeverity, BlockAction, CaseStatus, CommunicationType, CommunicationDirection, EvidenceSource, ScanStatus, CasePriority } from './badge-configs-Dz2iTeCH.js';
 import { createLucideIcon } from './createLucideIcon-Bv-P5XEu.js';
 import { LoaderCircle } from './loader-circle-gglMm6-L.js';
 import { Download } from './download-CdKm5ecN.js';
 import { ChevronDown, Check, CircleCheck, k, Hash } from './index-IOmeA5Pk.js';
 import { Clock } from './clock-DbY6-WNS.js';
-import { CaseStatusBadge } from './CaseStatusBadge-D8EgmP8g.js';
+import { CaseStatusBadge } from './CaseStatusBadge-CM8B-a15.js';
 import { Mail } from './mail-C-nC00Av.js';
 import { User } from './user-S2yq91K-.js';
 import { format } from './format-AJBx0DHd.js';
@@ -285,13 +285,12 @@ function BlockManagementCard({
   const [unblockNotes, setUnblockNotes] = core_abuse__loadShare__react__loadShare__.useState("");
   const { open: openNotification } = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useNotification();
   const { isLoading: isBlocking, mutate: blockSubject } = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useCustomMutation();
-  const apiUrl = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useApiUrl();
   const { isLoading: isUnblocking, mutate: unblockSubject } = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useCustomMutation();
   const handleBlock = async () => {
     blockSubject(
       {
         method: "post",
-        url: `${apiUrl}/abuse/${RefineResource.Blocklist}`,
+        url: `/abuse/${RefineResource.Blocklist}`,
         values: {
           action: BlockAction.reject,
           caseId,
@@ -334,7 +333,7 @@ function BlockManagementCard({
     unblockSubject(
       {
         method: "delete",
-        url: `${apiUrl}/abuse/${RefineResource.Blocklist}/${subjectData?.data?.identifier}`,
+        url: `/abuse/${RefineResource.Blocklist}/${subjectData?.data?.identifier}`,
         values: {}
       },
       {

@@ -1,5 +1,5 @@
 import { index_cjs, core_abuse__mf_v__runtimeInit__mf_v__ } from './core_abuse__mf_v__runtimeInit__mf_v__-BhTJRpXJ.js';
-import exposesMap from './virtualExposes-lKb1v-aL.js';
+import exposesMap from './virtualExposes-BjswlRZd.js';
 
 const federationRuntime = { instance: null };
 function BridgeReactPlugin() {
@@ -15,17 +15,17 @@ function BridgeReactPlugin() {
 const importMap = {
       
         "@lumeweb/portal-framework-core": async () => {
-          let pkg = await import('./index-D8BdToR9.js');
+          let pkg = await import('./index-BB3GQxbc.js');
           return pkg
         }
       ,
         "@lumeweb/portal-framework-ui": async () => {
-          let pkg = await import('./index-Be1OkhMN.js');
+          let pkg = await import('./index-BEM_34Iq.js');
           return pkg
         }
       ,
         "@refinedev/core": async () => {
-          let pkg = await import('./index-B0xlfkbT.js');
+          let pkg = await import('./index-CLaNRmd_.js');
           return pkg
         }
       ,
