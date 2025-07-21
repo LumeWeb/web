@@ -74,7 +74,7 @@ function RelatedCasesPanel({
           /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, { className: "font-medium", children: caseItem.referenceNumber }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, { className: "capitalize", children: caseItem.type.replace("_", " ") }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-            core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ComplexBadge,
+            core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ThemedBadge,
             {
               className: "capitalize",
               config: STATUS_BADGE_CONFIG,
@@ -82,7 +82,7 @@ function RelatedCasesPanel({
             }
           ) }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-            core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ComplexBadge,
+            core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ThemedBadge,
             {
               className: "capitalize",
               config: PRIORITY_BADGE_CONFIG,

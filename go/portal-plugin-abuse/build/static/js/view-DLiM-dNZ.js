@@ -1,5 +1,5 @@
 import { jsxRuntimeExports } from './jsx-runtime-dlxeb5L7.js';
-import { RelatedCasesPanel } from './RelatedCasesPanel-Y4FSNVaX.js';
+import { RelatedCasesPanel } from './RelatedCasesPanel-DDFT7QVH.js';
 import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CZ-6RiII.js';
 import { User } from './user-S2yq91K-.js';
 import { Mail } from './mail-C-nC00Av.js';

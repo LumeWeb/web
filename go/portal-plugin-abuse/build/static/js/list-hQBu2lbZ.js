@@ -3,9 +3,9 @@ import { BlockSource, BlockSeverity, BlockReason, BlockAction, REASON_BADGE_CONF
 import { RefineResource } from './index-C3iL_nDr.js';
 import { File, formatFileSize } from './util-B4AIY5au.js';
 import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__-qcw4tOvU.js';
+import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CZ-6RiII.js';
 import { core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__-QzxGLbUR.js';
 import { z } from './index-DESmQ-Cl.js';
-import { core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CZ-6RiII.js';
 import { createLucideIcon } from './createLucideIcon-Bv-P5XEu.js';
 import { format } from './format-AJBx0DHd.js';
 import { Eye, Trash2 } from './trash-2-DUO5TTSl.js';
@@ -182,21 +182,21 @@ function BlockDetailsContent({ block }) {
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-sm font-medium mb-1", children: "Reason" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ComplexBadge, { config: REASON_BADGE_CONFIG, value: block.reason })
+        /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ThemedBadge, { config: REASON_BADGE_CONFIG, value: block.reason })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-sm font-medium mb-1", children: "Severity" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ComplexBadge, { config: SEVERITY_BADGE_CONFIG, value: block.severity })
+        /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ThemedBadge, { config: SEVERITY_BADGE_CONFIG, value: block.severity })
       ] })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-sm font-medium mb-1", children: "Action" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ComplexBadge, { config: ACTION_BADGE_CONFIG, value: block.action })
+        /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ThemedBadge, { config: ACTION_BADGE_CONFIG, value: block.action })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-sm font-medium mb-1", children: "Source" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ComplexBadge, { config: SOURCE_BADGE_CONFIG, value: block.source })
+        /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ThemedBadge, { config: SOURCE_BADGE_CONFIG, value: block.source })
       ] })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
@@ -262,18 +262,12 @@ function BlocklistTable() {
       header: "MIME Type"
     }),
     columnHelper.accessor("reason", {
-      cell: ({ row }) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-        core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ComplexBadge,
-        {
-          config: REASON_BADGE_CONFIG,
-          value: row.original.reason
-        }
-      ),
+      cell: ({ row }) => /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ThemedBadge, { config: REASON_BADGE_CONFIG, value: row.original.reason }),
       header: "Reason"
     }),
     columnHelper.accessor("severity", {
       cell: ({ row }) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-        core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ComplexBadge,
+        core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ThemedBadge,
         {
           config: SEVERITY_BADGE_CONFIG,
           value: row.original.severity
@@ -282,23 +276,11 @@ function BlocklistTable() {
       header: "Severity"
     }),
     columnHelper.accessor("action", {
-      cell: ({ row }) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-        core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ComplexBadge,
-        {
-          config: ACTION_BADGE_CONFIG,
-          value: row.original.action
-        }
-      ),
+      cell: ({ row }) => /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ThemedBadge, { config: ACTION_BADGE_CONFIG, value: row.original.action }),
       header: "Action"
     }),
     columnHelper.accessor("source", {
-      cell: ({ row }) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-        core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ComplexBadge,
-        {
-          config: SOURCE_BADGE_CONFIG,
-          value: row.original.source
-        }
-      ),
+      cell: ({ row }) => /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.ThemedBadge, { config: SOURCE_BADGE_CONFIG, value: row.original.source }),
       header: "Source"
     }),
     columnHelper.accessor("size", {
@@ -319,14 +301,14 @@ function BlocklistTable() {
       },
       {
         onError: () => {
-          openNotification({
+          openNotification?.({
             description: "There was an error removing the content from the blocklist.",
             message: "Delete failed",
             type: "error"
           });
         },
         onSuccess: () => {
-          openNotification({
+          openNotification?.({
             description: `${selectedIds.length} items have been successfully removed from the blocklist.`,
             message: "Blocks deleted",
             type: "success"
@@ -350,7 +332,7 @@ function BlocklistTable() {
           icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-4 w-4" }),
           label: "Delete",
           onClick: handleBulkDelete,
-          render: (label, count) => /* @__PURE__ */ jsxRuntimeExports.jsxs(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.Button, { className: "h-8", size: "sm", variant: "destructive", children: [
+          render: (label, count) => /* @__PURE__ */ jsxRuntimeExports.jsxs(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, { className: "h-8", size: "sm", variant: "destructive", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3.5 w-3.5 mr-1" }),
             label,
             " (",

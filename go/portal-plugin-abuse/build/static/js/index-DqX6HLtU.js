@@ -671,7 +671,7 @@ function registerAllActionItems() {
   registerLinkActionItem();
 }
 
-const r$3=(t,r,o)=>{if(t&&"reportValidity"in t){const s=core_abuse__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(o,r);t.setCustomValidity(s&&s.message||""),t.reportValidity();}},o$4=(e,t)=>{for(const o in t.fields){const s=t.fields[o];s&&s.ref&&"reportValidity"in s.ref?r$3(s.ref,o,e):s&&s.refs&&s.refs.forEach(t=>r$3(t,o,e));}},s$4=(r,s)=>{s.shouldUseNativeValidation&&o$4(r,s);const n={};for(const o in r){const f=core_abuse__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(s.fields,o),c=Object.assign(r[o]||{},{ref:f&&f.ref});if(i$2(s.names||Object.keys(r),o)){const r=Object.assign({},core_abuse__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(n,o));core_abuse__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(r,"root",c),core_abuse__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(n,o,r);}else core_abuse__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(n,o,c);}return n},i$2=(e,t)=>{const r=n$5(t);return e.some(e=>n$5(e).match(`^${r}\\.\\d+`))};function n$5(e){return e.replace(/\]|\[/g,"")}
+const r$3=(t,r,o)=>{if(t&&"reportValidity"in t){const s=core_abuse__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(o,r);t.setCustomValidity(s&&s.message||""),t.reportValidity();}},o$4=(e,t)=>{for(const o in t.fields){const s=t.fields[o];s&&s.ref&&"reportValidity"in s.ref?r$3(s.ref,o,e):s&&s.refs&&s.refs.forEach(t=>r$3(t,o,e));}},s$4=(r,s)=>{s.shouldUseNativeValidation&&o$4(r,s);const n={};for(const o in r){const f=core_abuse__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(s.fields,o),c=Object.assign(r[o]||{},{ref:f&&f.ref});if(i$3(s.names||Object.keys(r),o)){const r=Object.assign({},core_abuse__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(n,o));core_abuse__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(r,"root",c),core_abuse__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(n,o,r);}else core_abuse__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(n,o,c);}return n},i$3=(e,t)=>{const r=n$5(t);return e.some(e=>n$5(e).match(`^${r}\\.\\d+`))};function n$5(e){return e.replace(/\]|\[/g,"")}
 
 function n$4(r,e){for(var n={};r.length;){var s=r[0],t=s.code,i=s.message,a=s.path.join(".");if(!n[a])if("unionErrors"in s){var u=s.unionErrors[0].errors[0];n[a]={message:u.message,type:u.code};}else n[a]={message:i,type:t};if("unionErrors"in s&&s.unionErrors.forEach(function(e){return e.errors.forEach(function(e){return r.push(e)})}),e){var c=n[a].types,f=c&&c[s.code];n[a]=core_abuse__loadShare__react_mf_2_hook_mf_2_form__loadShare__.appendErrors(a,e,n,t,f?[].concat(f,s.message):s.message);}r.shift();}return n}function s$3(o,s,t){return void 0===t&&(t={}),function(i,a,u){try{return Promise.resolve(function(e,n){try{var a=Promise.resolve(o["sync"===t.mode?"parse":"parseAsync"](i,s)).then(function(e){return u.shouldUseNativeValidation&&o$4({},u),{errors:{},values:t.raw?Object.assign({},i):e}});}catch(r){return n(r)}return a&&a.then?a.then(void 0,n):a}(0,function(r){if(function(r){return Array.isArray(null==r?void 0:r.errors)}(r))return {values:{},errors:s$4(n$4(r.errors,!u.shouldUseNativeValidation&&"all"===u.criteriaMode),u)};throw r}))}catch(r){return Promise.reject(r)}}}
 
@@ -866,7 +866,7 @@ function registerFormComponent(type, component, metadata) {
  *
  */
 
-function t$2(t,...e){const n=new URL("https://lexical.dev/docs/error"),r=new URLSearchParams;r.append("code",t);for(const t of e)r.append("v",t);throw n.search=r.toString(),Error(`Minified Lexical error #${t}; visit ${n.toString()} for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`)}const e$1="undefined"!=typeof window&&void 0!==window.document&&void 0!==window.document.createElement,n$3=e$1&&"documentMode"in document?document.documentMode:null,r$2=e$1&&/Mac|iPod|iPhone|iPad/.test(navigator.platform),i$1=e$1&&/^(?!.*Seamonkey)(?=.*Firefox).*/i.test(navigator.userAgent),s$2=!(!e$1||!("InputEvent"in window)||n$3)&&"getTargetRanges"in new window.InputEvent("input"),o$3=e$1&&/Version\/[\d.]+.*Safari/.test(navigator.userAgent),l=e$1&&/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream,c$3=e$1&&/Android/.test(navigator.userAgent),a$4=e$1&&/^(?=.*Chrome).*/i.test(navigator.userAgent),u$3=e$1&&c$3&&a$4,f$5=e$1&&/AppleWebKit\/[\d.]+/.test(navigator.userAgent)&&!a$4;function d$3(...t){const e=[];for(const n of t)if(n&&"string"==typeof n)for(const[t]of n.matchAll(/\S+/g))e.push(t);return e}const h$6=1,g$5=3,_$3=9,p$3=11,y$4=0,m$5=1,x$6=2,C$2=0,S$2=1,v$4=2,b$2=4,N$2=8,A$3=128,O$3=1792|(112|(3|b$2|N$2)|A$3),D$5=1,P$2=2,F$1=3,L$3=4,I$4=5,z$5=6,K$3=o$3||l||f$5?" ":"​",B$6="\n\n",R$5=i$1?" ":K$3,W$3="֑-߿יִ-﷽ﹰ-ﻼ",J$5="A-Za-zÀ-ÖØ-öø-ʸ̀-֐ࠀ-῿‎Ⰰ-﬜︀-﹯﻽-￿",U$4=new RegExp("^[^"+J$5+"]*["+W$3+"]"),$$1=new RegExp("^[^"+W$3+"]*["+J$5+"]"),j$3={bold:1,capitalize:1024,code:16,highlight:A$3,italic:2,lowercase:256,strikethrough:b$2,subscript:32,superscript:64,underline:N$2,uppercase:512},V$3={directionless:1,unmergeable:2},Y$3={center:P$2,end:z$5,justify:L$3,left:D$5,right:F$1,start:I$4},H$3={[P$2]:"center",[z$5]:"end",[L$3]:"justify",[D$5]:"left",[F$1]:"right",[I$4]:"start"},q$2={normal:0,segmented:2,token:1},G$2={[C$2]:"normal",[v$4]:"segmented",[S$2]:"token"},X$3="$";function Q$2(t,e,n,r,i,s){let o=t.getFirstChild();for(;null!==o;){const t=o.__key;o.__parent===e&&(di(o)&&Q$2(o,t,n,r,i,s),n.has(t)||s.delete(t),i.push(t)),o=o.getNextSibling();}}const Z$4=100;let tt$3=false,et$4=0;function nt$3(t){et$4=t.timeStamp;}function rt$3(t,e,n){const r="BR"===t.nodeName,i=e.__lexicalLineBreak;return i&&(t===i||r&&t.previousSibling===i)||r&&void 0!==fs(t,n)}function it$3(t,e,n){const r=oo(Gs(n));let i=null,s=null;null!==r&&r.anchorNode===t&&(i=r.anchorOffset,s=r.focusOffset);const o=t.nodeValue;null!==o&&bs(e,o,i,s,false);}function st$2(t,e,n){if(cr(t)){const e=t.anchor.getNode();if(e.is(n)&&t.format!==e.getFormat())return  false}return Zi(e)&&n.isAttached()}function ot$2(t,e,n,r){for(let i=t;i&&!bo(i);i=Us(i)){const t=fs(i,e);if(void 0!==t){const e=as(t,n);if(e)return _i(e)||!uo(i)?void 0:[i,e]}else if(i===r)return [r,ps(n)]}}function lt$2(t,e,n){tt$3=true;const r=performance.now()-et$4>Z$4;try{ci(t,(()=>{const s=Nr()||function(t){return t.getEditorState().read((()=>{const t=Nr();return null!==t?t.clone():null}))}(t),o=new Map,l=t.getRootElement(),c=t._editorState,a=t._blockCursorElement;let u=!1,f="";for(let n=0;n<e.length;n++){const d=e[n],h=d.type,g=d.target,_=ot$2(g,t,c,l);if(!_)continue;const[p,y]=_;if("characterData"===h)r&&Qn(y)&&Zi(g)&&st$2(s,g,y)&&it$3(g,y,t);else if("childList"===h){u=!0;const e=d.addedNodes;for(let n=0;n<e.length;n++){const r=e[n],s=us(r),o=r.parentNode;if(null!=o&&r!==a&&null===s&&!rt$3(r,o,t)){if(i$1){const t=(uo(r)?r.innerText:null)||r.nodeValue;t&&(f+=t);}o.removeChild(r);}}const n=d.removedNodes,r=n.length;if(r>0){let e=0;for(let i=0;i<r;i++){const r=n[i];(rt$3(r,g,t)||a===r)&&(g.appendChild(r),e++);}r!==e&&o.set(p,y);}}}if(o.size>0)for(const[e,n]of o)n.reconcileObservedMutation(e,t);const d=n.takeRecords();if(d.length>0){for(let e=0;e<d.length;e++){const n=d[e],r=n.addedNodes,i=n.target;for(let e=0;e<r.length;e++){const n=r[e],s=n.parentNode;null==s||"BR"!==n.nodeName||rt$3(n,i,t)||s.removeChild(n);}}n.takeRecords();}null!==s&&(u&&ys(s),i$1&&Bs(t)&&s.insertRawText(f));}));}finally{tt$3=false;}}function ct$3(t){const e=t._observer;if(null!==e){lt$2(t,e.takeRecords(),e);}}function at$2(t){!function(t){0===et$4&&Gs(t).addEventListener("textInput",nt$3,true);}(t),t._observer=new MutationObserver(((e,n)=>{lt$2(t,e,n);}));}let pt$3 = class pt{constructor(t,e=new Map,n=void 0,r=new Map,i=void 0){this.node=t,this.sharedConfigMap=e,this.unknownState=n,this.knownState=r;const s=void 0!==i?i:function(t,e,n){let r=n.size;if(e)for(const i in e){const e=t.get(i);e&&n.has(e)||r++;}return r}(e,n,r);this.size=s;}getValue(t){const e=this.knownState.get(t);if(void 0!==e)return e;this.sharedConfigMap.set(t.key,t);let n=t.defaultValue;if(this.unknownState&&t.key in this.unknownState){const e=this.unknownState[t.key];void 0!==e&&(n=t.parse(e)),this.updateFromKnown(t,n);}return n}getInternalState(){return [this.unknownState,this.knownState]}toJSON(){const t={...this.unknownState};for(const[e,n]of this.knownState)e.isEqual(n,e.defaultValue)?delete t[e.key]:t[e.key]=e.unparse(n);return yt$4(t)?{[X$3]:t}:{}}getWritable(t){if(this.node===t)return this;const e=new Map(this.knownState),n=yt$4(r=this.unknownState)&&{...r};var r;if(n)for(const t of e.keys())delete n[t.key];return new pt(t,this.sharedConfigMap,yt$4(n),e,this.size)}updateFromKnown(t,e){const n=t.key;this.sharedConfigMap.set(n,t);const{knownState:r,unknownState:i}=this;r.has(t)||i&&n in i||this.size++,r.set(t,e);}updateFromUnknown(t,e){const n=this.sharedConfigMap.get(t);n?this.updateFromKnown(n,n.parse(e)):(this.unknownState=this.unknownState||{},t in this.unknownState||this.size++,this.unknownState[t]=e);}updateFromJSON(t){const{knownState:e}=this;for(const t of e.keys())e.set(t,t.defaultValue);if(this.size=e.size,this.unknownState={},t)for(const[e,n]of Object.entries(t))this.updateFromUnknown(e,n);this.unknownState=yt$4(this.unknownState);}};function yt$4(t){if(t)for(const e in t)return t}function mt$3(t){const e=t.getWritable(),n=e.__state?e.__state.getWritable(e):new pt$3(e);return e.__state=n,n}function xt$2(t,e){const n=t.__mode,r=t.__format,i=t.__style,s=e.__mode,o=e.__format,l=e.__style,c=t.__state,a=e.__state;return (null===n||n===s)&&(null===r||r===o)&&(null===i||i===l)&&(null===t.__state||c===a||function(t,e){if(t===e)return  true;if(t&&e&&t.size!==e.size)return  false;const n=new Set,r=(t,e)=>{for(const[r,i]of t.knownState){if(n.has(r.key))continue;n.add(r.key);const t=e?e.getValue(r):r.defaultValue;if(t!==i&&!r.isEqual(t,i))return  true}return  false},i=(t,e)=>{const{unknownState:r}=t,i=e?e.unknownState:void 0;if(r)for(const[t,e]of Object.entries(r))if(!n.has(t)&&(n.add(t),e!==(i?i[t]:void 0)))return  true;return  false};return !(t&&r(t,e)||e&&r(e,t)||t&&i(t,e)||e&&i(e,t))}(c,a))}function Ct$2(t,e){const n=t.mergeWithSibling(e),r=qr()._normalizedNodes;return r.add(t.__key),r.add(e.__key),n}function St$2(t){let e,n,r=t;if(""!==r.__text||!r.isSimpleText()||r.isUnmergeable()){for(;null!==(e=r.getPreviousSibling())&&Qn(e)&&e.isSimpleText()&&!e.isUnmergeable();){if(""!==e.__text){if(xt$2(e,r)){r=Ct$2(e,r);break}break}e.remove();}for(;null!==(n=r.getNextSibling())&&Qn(n)&&n.isSimpleText()&&!n.isUnmergeable();){if(""!==n.__text){if(xt$2(r,n)){r=Ct$2(r,n);break}break}n.remove();}}else r.remove();}function vt$4(t){return kt$1(t.anchor),kt$1(t.focus),t}function kt$1(t){for(;"element"===t.type;){const e=t.getNode(),n=t.offset;let r,i;if(n===e.getChildrenSize()?(r=e.getChildAtIndex(n-1),i=true):(r=e.getChildAtIndex(n),i=false),Qn(r)){t.set(r.__key,i?r.getTextContentSize():0,"text",true);break}if(!di(r))break;t.set(r.__key,i?r.getChildrenSize():0,"element",true);}}let Tt$3,bt$1,Nt$2,wt$3,Et$2,Mt$3,At$1,Ot$1,Dt$1,Pt$3,Ft$2="",Lt$2="",It$2=null,zt="",Kt="",Bt$1=false,Rt$1=false,Wt=null;function Jt(t,e){const n=At$1.get(t);if(null!==e){const n=se(t);n.parentNode===e&&e.removeChild(n);}if(Ot$1.has(t)||bt$1._keyToDOMMap.delete(t),di(n)){const t=te(n,At$1);Ut(t,0,t.length-1,null);} void 0!==n&&Ls(Pt$3,Nt$2,wt$3,n,"destroyed");}function Ut(t,e,n,r){let i=e;for(;i<=n;++i){const e=t[i];void 0!==e&&Jt(e,r);}}function $t$1(t,e){t.setProperty("text-align",e);}const jt="40px";function Vt(t,e){const n=Tt$3.theme.indent;if("string"==typeof n){const r=t.classList.contains(n);e>0&&!r?t.classList.add(n):e<1&&r&&t.classList.remove(n);}const r=getComputedStyle(t).getPropertyValue("--lexical-indent-base-value")||jt;t.style.setProperty("padding-inline-start",0===e?"":`calc(${e} * ${r})`);}function Yt(t,e){const n=t.style;0===e?$t$1(n,""):e===D$5?$t$1(n,"left"):e===P$2?$t$1(n,"center"):e===F$1?$t$1(n,"right"):e===L$3?$t$1(n,"justify"):e===I$4?$t$1(n,"start"):e===z$5&&$t$1(n,"end");}function Ht(e,n){const r=Ot$1.get(e);void 0===r&&t$2(60);const i=r.createDOM(Tt$3,bt$1);if(function(t,e,n){const r=n._keyToDOMMap;((function(t,e,n){const r=`__lexicalKey_${e._key}`;t[r]=n;}))(e,n,t),r.set(t,e);}(e,i,bt$1),Qn(r)?i.setAttribute("data-lexical-text","true"):_i(r)&&i.setAttribute("data-lexical-decorator","true"),di(r)){const t=r.__indent,e=r.__size;if(0!==t&&Vt(i,t),0!==e){const t=e-1;!function(t,e,n,r){const i=Lt$2;Lt$2="",qt(t,n,0,e,n.getDOMSlot(r)),Qt(n,r),Lt$2=i;}(te(r,Ot$1),t,r,i);}const n=r.__format;0!==n&&Yt(i,n),r.isInline()||Xt(null,r,i),Ws(r)&&(Ft$2+=B$6,Kt+=B$6);}else {const t=r.getTextContent();if(_i(r)){const t=r.decorate(bt$1,Tt$3);null!==t&&ne(e,t),i.contentEditable="false";}else Qn(r)&&(r.isDirectionless()||(Lt$2+=t));Ft$2+=t,Kt+=t;}return null!==n&&n.insertChild(i),Ls(Pt$3,Nt$2,wt$3,r,"created"),i}function qt(t,e,n,r,i){const s=Ft$2;Ft$2="";let o=n;for(;o<=r;++o){Ht(t[o],i);const e=Ot$1.get(t[o]);null!==e&&Qn(e)&&(null===It$2&&(It$2=e.getFormat()),""===zt&&(zt=e.getStyle()));}Ws(e)&&(Ft$2+=B$6);i.element.__lexicalTextContent=Ft$2,Ft$2=s+Ft$2;}function Gt(t,e){if(t){const n=t.__last;if(n){const t=e.get(n);if(t)return Fn(t)?"line-break":_i(t)&&t.isInline()?"decorator":null}return "empty"}return null}function Xt(t,e,n){const r=Gt(t,At$1),i=Gt(e,Ot$1);r!==i&&e.getDOMSlot(n).setManagedLineBreak(i);}function Qt(t,e){const n=e.__lexicalDirTextContent||"",r=e.__lexicalDir||"";if(n!==Lt$2||r!==Wt){const n=""===Lt$2,i=n?Wt:function(t){if(U$4.test(t))return "rtl";if($$1.test(t))return "ltr";return null}(Lt$2);if(i!==r){const s=e.classList,o=Tt$3.theme;let l=null!==r?o[r]:void 0,c=null!==i?o[i]:void 0;if(void 0!==l){if("string"==typeof l){const t=d$3(l);l=o[r]=t;}s.remove(...l);}if(null===i||n&&"ltr"===i)e.removeAttribute("dir");else {if(void 0!==c){if("string"==typeof c){const t=d$3(c);c=o[i]=t;} void 0!==c&&s.add(...c);}e.dir=i;}if(!Rt$1){t.getWritable().__dir=i;}}Wt=i,e.__lexicalDirTextContent=Lt$2,e.__lexicalDir=i;}}function Zt(e,n,r){const i=Lt$2;var s;Lt$2="",It$2=null,zt="",function(e,n,r){const i=Ft$2,s=e.__size,o=n.__size;Ft$2="";const l=r.element;if(1===s&&1===o){const t=e.__first,r=n.__first;if(t===r)ee(t,l);else {const e=se(t),n=Ht(r,null);try{l.replaceChild(n,e);}catch(i){if("object"==typeof i&&null!=i){const s=`${i.toString()} Parent: ${l.tagName}, new child: {tag: ${n.tagName} key: ${r}}, old child: {tag: ${e.tagName}, key: ${t}}.`;throw new Error(s)}throw i}Jt(t,null);}const i=Ot$1.get(r);Qn(i)&&(null===It$2&&(It$2=i.getFormat()),""===zt&&(zt=i.getStyle()));}else {const i=te(e,At$1),c=te(n,Ot$1);if(i.length!==s&&t$2(227),c.length!==o&&t$2(228),0===s)0!==o&&qt(c,n,0,o-1,r);else if(0===o){if(0!==s){const t=null==r.after&&null==r.before&&null==r.element.__lexicalLineBreak;Ut(i,0,s-1,t?null:l),t&&(l.textContent="");}}else !function(t,e,n,r,i,s){const o=r-1,l=i-1;let c,a,u=s.getFirstChild(),f=0,d=0;for(;f<=o&&d<=l;){const t=e[f],r=n[d];if(t===r)u=re(ee(r,s.element)),f++,d++;else { void 0===c&&(c=new Set(e)),void 0===a&&(a=new Set(n));const i=a.has(t),o=c.has(r);if(i)if(o){const t=Js(bt$1,r);t===u?u=re(ee(r,s.element)):(s.withBefore(u).insertChild(t),ee(r,s.element)),f++,d++;}else Ht(r,s.withBefore(u)),d++;else u=re(se(t)),Jt(t,s.element),f++;}const i=Ot$1.get(r);null!==i&&Qn(i)&&(null===It$2&&(It$2=i.getFormat()),""===zt&&(zt=i.getStyle()));}const h=f>o,g=d>l;if(h&&!g){const e=n[l+1],r=void 0===e?null:bt$1.getElementByKey(e);qt(n,t,d,l,s.withBefore(r));}else g&&!h&&Ut(e,f,o,s.element);}(n,i,c,s,o,r);}Ws(n)&&(Ft$2+=B$6);l.__lexicalTextContent=Ft$2,Ft$2=i+Ft$2;}(e,n,n.getDOMSlot(r)),Qt(n,r),s=n,null==It$2||It$2===s.__textFormat||Rt$1||s.setTextFormat(It$2),function(t){""===zt||zt===t.__textStyle||Rt$1||t.setTextStyle(zt);}(n),Lt$2=i;}function te(e,n){const r=[];let i=e.__first;for(;null!==i;){const e=n.get(i);void 0===e&&t$2(101),r.push(i),i=e.__next;}return r}function ee(e,n){const r=At$1.get(e);let i=Ot$1.get(e);void 0!==r&&void 0!==i||t$2(61);const s=Bt$1||Mt$3.has(e)||Et$2.has(e),o=Js(bt$1,e);if(r===i&&!s){if(di(r)){const t=o.__lexicalTextContent;void 0!==t&&(Ft$2+=t,Kt+=t);const e=o.__lexicalDirTextContent;void 0!==e&&(Lt$2+=e);}else {const t=r.getTextContent();Qn(r)&&!r.isDirectionless()&&(Lt$2+=t),Kt+=t,Ft$2+=t;}return o}if(r!==i&&s&&Ls(Pt$3,Nt$2,wt$3,i,"updated"),i.updateDOM(r,o,Tt$3)){const r=Ht(e,null);return null===n&&t$2(62),n.replaceChild(r,o),Jt(e,null),r}if(di(r)&&di(i)){const t=i.__indent;t!==r.__indent&&Vt(o,t);const e=i.__format;e!==r.__format&&Yt(o,e),s&&(Zt(r,i,o),yi(i)||i.isInline()||Xt(r,i,o)),Ws(i)&&(Ft$2+=B$6,Kt+=B$6);}else {const t=i.getTextContent();if(_i(i)){const t=i.decorate(bt$1,Tt$3);null!==t&&ne(e,t);}else Qn(i)&&!i.isDirectionless()&&(Lt$2+=t);Ft$2+=t,Kt+=t;}if(!Rt$1&&yi(i)&&i.__cachedText!==Kt){const t=i.getWritable();t.__cachedText=Kt,i=t;}return o}function ne(t,e){let n=bt$1._pendingDecorators;const r=bt$1._decorators;if(null===n){if(r[t]===e)return;n=hs(bt$1);}n[t]=e;}function re(t){let e=t.nextSibling;return null!==e&&e===bt$1._blockCursorElement&&(e=e.nextSibling),e}function ie(t,e,n,r,i,s){Ft$2="",Kt="",Lt$2="",Bt$1=r===x$6,Wt=null,bt$1=n,Tt$3=n._config,Nt$2=n._nodes,wt$3=bt$1._listeners.mutation,Et$2=i,Mt$3=s,At$1=t._nodeMap,Ot$1=e._nodeMap,Rt$1=e._readOnly,Dt$1=new Map(n._keyToDOMMap);const o=new Map;return Pt$3=o,ee("root",null),bt$1=void 0,Nt$2=void 0,Et$2=void 0,Mt$3=void 0,At$1=void 0,Ot$1=void 0,Tt$3=void 0,Dt$1=void 0,Pt$3=void 0,o}function se(e){const n=Dt$1.get(e);return void 0===n&&t$2(75,e),n}function oe(t){return {type:t}}const le=oe("SELECTION_CHANGE_COMMAND"),ce=oe("SELECTION_INSERT_CLIPBOARD_NODES_COMMAND"),ae=oe("CLICK_COMMAND"),ue=oe("DELETE_CHARACTER_COMMAND"),fe=oe("INSERT_LINE_BREAK_COMMAND"),de=oe("INSERT_PARAGRAPH_COMMAND"),he=oe("CONTROLLED_TEXT_INSERTION_COMMAND"),ge=oe("PASTE_COMMAND"),_e=oe("REMOVE_TEXT_COMMAND"),pe=oe("DELETE_WORD_COMMAND"),ye=oe("DELETE_LINE_COMMAND"),me=oe("FORMAT_TEXT_COMMAND"),xe=oe("UNDO_COMMAND"),Ce=oe("REDO_COMMAND"),Se=oe("KEYDOWN_COMMAND"),ve=oe("KEY_ARROW_RIGHT_COMMAND"),ke=oe("MOVE_TO_END"),Te=oe("KEY_ARROW_LEFT_COMMAND"),be=oe("MOVE_TO_START"),Ne=oe("KEY_ARROW_UP_COMMAND"),we=oe("KEY_ARROW_DOWN_COMMAND"),Ee=oe("KEY_ENTER_COMMAND"),Me=oe("KEY_SPACE_COMMAND"),Ae=oe("KEY_BACKSPACE_COMMAND"),Oe=oe("KEY_ESCAPE_COMMAND"),De=oe("KEY_DELETE_COMMAND"),Pe=oe("KEY_TAB_COMMAND"),Fe=oe("INSERT_TAB_COMMAND"),Le=oe("INDENT_CONTENT_COMMAND"),Ie=oe("OUTDENT_CONTENT_COMMAND"),ze=oe("DROP_COMMAND"),Ke=oe("FORMAT_ELEMENT_COMMAND"),Be=oe("DRAGSTART_COMMAND"),Re=oe("DRAGOVER_COMMAND"),We=oe("DRAGEND_COMMAND"),Je=oe("COPY_COMMAND"),Ue=oe("CUT_COMMAND"),$e=oe("SELECT_ALL_COMMAND"),je=oe("CLEAR_EDITOR_COMMAND"),Ve=oe("CLEAR_HISTORY_COMMAND"),Ye=oe("CAN_REDO_COMMAND"),He=oe("CAN_UNDO_COMMAND"),qe=oe("FOCUS_COMMAND"),Ge=oe("BLUR_COMMAND"),Xe=oe("KEY_MODIFIER_COMMAND"),Qe=Object.freeze({}),Ze=30,tn=[["keydown",function(t,e){if(en=t.timeStamp,nn=t.key,e.isComposing())return;if(Rs(e,Se,t))return;if(null==t.key)return;if(fn&&Os(t))return ci(e,(()=>{Sn(e,dn);})),fn=false,void(dn="");if(function(t){return Es(t,"ArrowRight",{shiftKey:"any"})}(t))Rs(e,ve,t);else if(function(t){return Es(t,"ArrowRight",Ms)}(t))Rs(e,ke,t);else if(function(t){return Es(t,"ArrowLeft",{shiftKey:"any"})}(t))Rs(e,Te,t);else if(function(t){return Es(t,"ArrowLeft",Ms)}(t))Rs(e,be,t);else if(function(t){return Es(t,"ArrowUp",{altKey:"any",shiftKey:"any"})}(t))Rs(e,Ne,t);else if(function(t){return Es(t,"ArrowDown",{altKey:"any",shiftKey:"any"})}(t))Rs(e,we,t);else if(function(t){return Es(t,"Enter",{altKey:"any",ctrlKey:"any",metaKey:"any",shiftKey:true})}(t))an=true,Rs(e,Ee,t);else if(function(t){return " "===t.key}(t))Rs(e,Me,t);else if(function(t){return r$2&&Es(t,"o",{ctrlKey:true})}(t))t.preventDefault(),an=true,Rs(e,fe,true);else if(function(t){return Es(t,"Enter",{altKey:"any",ctrlKey:"any",metaKey:"any"})}(t))an=false,Rs(e,Ee,t);else if(function(t){return Es(t,"Backspace",{shiftKey:"any"})||r$2&&Es(t,"h",{ctrlKey:true})}(t))Os(t)?Rs(e,Ae,t):(t.preventDefault(),Rs(e,ue,true));else if(function(t){return "Escape"===t.key}(t))Rs(e,Oe,t);else if(function(t){return Es(t,"Delete",{})||r$2&&Es(t,"d",{ctrlKey:true})}(t))!function(t){return "Delete"===t.key}(t)?(t.preventDefault(),Rs(e,ue,false)):Rs(e,De,t);else if(function(t){return Es(t,"Backspace",As)}(t))t.preventDefault(),Rs(e,pe,true);else if(function(t){return Es(t,"Delete",As)}(t))t.preventDefault(),Rs(e,pe,false);else if(function(t){return r$2&&Es(t,"Backspace",{metaKey:true})}(t))t.preventDefault(),Rs(e,ye,true);else if(function(t){return r$2&&(Es(t,"Delete",{metaKey:true})||Es(t,"k",{ctrlKey:true}))}(t))t.preventDefault(),Rs(e,ye,false);else if(function(t){return Es(t,"b",Ms)}(t))t.preventDefault(),Rs(e,me,"bold");else if(function(t){return Es(t,"u",Ms)}(t))t.preventDefault(),Rs(e,me,"underline");else if(function(t){return Es(t,"i",Ms)}(t))t.preventDefault(),Rs(e,me,"italic");else if(function(t){return Es(t,"Tab",{shiftKey:"any"})}(t))Rs(e,Pe,t);else if(function(t){return Es(t,"z",Ms)}(t))t.preventDefault(),Rs(e,xe,void 0);else if(function(t){if(r$2)return Es(t,"z",{metaKey:true,shiftKey:true});return Es(t,"y",{ctrlKey:true})||Es(t,"z",{ctrlKey:true,shiftKey:true})}(t))t.preventDefault(),Rs(e,Ce,void 0);else {const n=e._editorState._selection;null===n||cr(n)?!i$1&&Ds(t)&&(t.preventDefault(),Rs(e,$e,t)):!function(t){return Es(t,"c",Ms)}(t)?!function(t){return Es(t,"x",Ms)}(t)?Ds(t)&&(t.preventDefault(),Rs(e,$e,t)):(t.preventDefault(),Rs(e,Ue,t)):(t.preventDefault(),Rs(e,Je,t));}(function(t){return t.ctrlKey||t.shiftKey||t.altKey||t.metaKey})(t)&&Rs(e,Xe,t);}],["pointerdown",function(t,e){const n=t.target,r=t.pointerType;fo(n)&&"touch"!==r&&0===t.button&&ci(e,(()=>{Vi(n)||(cn=true);}));}],["compositionstart",function(t,e){ci(e,(()=>{const n=Nr();if(cr(n)&&!e.isComposing()){const r=n.anchor,i=n.anchor.getNode();ls(r.key),(t.timeStamp<en+Ze||"element"===r.type||!n.isCollapsed()||i.getFormat()!==n.format||Qn(i)&&i.getStyle()!==n.style)&&Rs(e,he,R$5);}}));}],["compositionend",function(t,e){i$1?un=true:l||!o$3&&!f$5?ci(e,(()=>{Sn(e,t.data);})):(fn=true,dn=t.data);}],["input",function(t,e){t.stopPropagation(),ci(e,(()=>{if(uo(t.target)&&Vi(t.target))return;const n=Nr(),r=t.data,c=Cn(t);if(null!=r&&cr(n)&&_n(n,c,r,t.timeStamp,false)){un&&(Sn(e,r),un=false);const c=n.anchor.getNode(),a=oo(Gs(e));if(null===a)return;const u=n.isBackward(),d=u?n.anchor.offset:n.focus.offset,h=u?n.focus.offset:n.anchor.offset;s$2&&!n.isCollapsed()&&Qn(c)&&null!==a.anchorNode&&c.getTextContent().slice(0,d)+r+c.getTextContent().slice(d+h)===ks(a.anchorNode)||Rs(e,he,r);const g=r.length;i$1&&g>1&&"insertCompositionText"===t.inputType&&!e.isComposing()&&(n.anchor.offset-=g),o$3||l||f$5||!e.isComposing()||(en=0,ls(null));}else {Ts(false,e,null!==r?r:void 0),un&&(Sn(e,r||void 0),un=false);}!function(){Vr();const t=qr();ct$3(t);}();}),{event:t}),sn=null;}],["click",function(t,e){ci(e,(()=>{const n=Nr(),r=oo(Gs(e)),i=wr();if(r)if(cr(n)){const e=n.anchor,s=e.getNode();if("element"===e.type&&0===e.offset&&n.isCollapsed()&&!yi(s)&&1===_s().getChildrenSize()&&s.getTopLevelElementOrThrow().isEmpty()&&null!==i&&n.is(i))r.removeAllRanges(),n.dirty=true;else if(3===t.detail&&!n.isCollapsed()){if(s!==n.focus.getNode()){const t=function(t,e){let n=t;for(;n!==_s()&&null!=n;){if(e(n))return n;n=n.getParent();}return null}(s,(t=>di(t)&&!t.isInline()));di(t)&&t.select(0);}}}else if("touch"===t.pointerType){const n=r.anchorNode;if(uo(n)||Zi(n)){ys(br(i,r,e,t));}}Rs(e,ae,t);}));}],["cut",Qe],["copy",Qe],["dragstart",Qe],["dragover",Qe],["dragend",Qe],["paste",Qe],["focus",Qe],["blur",Qe],["drop",Qe]];s$2&&tn.push(["beforeinput",(e,n)=>function(e,n){const r=e.inputType,s=Cn(e);if("deleteCompositionText"===r||i$1&&Bs(n))return;if("insertCompositionText"===r)return;ci(n,(()=>{const i=Nr();if("deleteContentBackward"===r){if(null===i){const t=wr();if(!cr(t))return;ys(t.clone());}if(cr(i)){const r=i.anchor.key===i.focus.key;if(o=e.timeStamp,"MediaLast"===nn&&o<en+Ze&&n.isComposing()&&r){if(ls(null),en=0,setTimeout((()=>{ci(n,(()=>{ls(null);}));}),Ze),cr(i)){const e=i.anchor.getNode();e.markDirty(),Qn(e)||t$2(142),xn(i,e);}}else {ls(null),e.preventDefault();const t=i.anchor.getNode(),s=t.getTextContent(),o=t.canInsertTextAfter(),l=0===i.anchor.offset&&i.focus.offset===s.length;let c=u$3&&r&&!l&&o;if(c&&i.isCollapsed()&&(c=!_i(Ks(i.anchor,true))),!c){Rs(n,ue,true);const t=Nr();u$3&&cr(t)&&t.isCollapsed()&&(hn=t,setTimeout((()=>hn=null)));}}return}}var o;if(!cr(i))return;const c=e.data;null!==sn&&Ts(false,n,sn),i.dirty&&null===sn||!i.isCollapsed()||yi(i.anchor.getNode())||null===s||i.applyDOMRange(s),sn=null;const a=i.anchor,f=i.focus,d=a.getNode(),h=f.getNode();if("insertText"!==r&&"insertTranspose"!==r)switch(e.preventDefault(),r){case "insertFromYank":case "insertFromDrop":case "insertReplacementText":Rs(n,he,e);break;case "insertFromComposition":ls(null),Rs(n,he,e);break;case "insertLineBreak":ls(null),Rs(n,fe,false);break;case "insertParagraph":ls(null),an&&!l?(an=false,Rs(n,fe,false)):Rs(n,de,void 0);break;case "insertFromPaste":case "insertFromPasteAsQuotation":Rs(n,ge,e);break;case "deleteByComposition":(function(t,e){return t!==e||di(t)||di(e)||!t.isToken()||!e.isToken()})(d,h)&&Rs(n,_e,e);break;case "deleteByDrag":case "deleteByCut":Rs(n,_e,e);break;case "deleteContent":Rs(n,ue,false);break;case "deleteWordBackward":Rs(n,pe,true);break;case "deleteWordForward":Rs(n,pe,false);break;case "deleteHardLineBackward":case "deleteSoftLineBackward":Rs(n,ye,true);break;case "deleteContentForward":case "deleteHardLineForward":case "deleteSoftLineForward":Rs(n,ye,false);break;case "formatStrikeThrough":Rs(n,me,"strikethrough");break;case "formatBold":Rs(n,me,"bold");break;case "formatItalic":Rs(n,me,"italic");break;case "formatUnderline":Rs(n,me,"underline");break;case "historyUndo":Rs(n,xe,void 0);break;case "historyRedo":Rs(n,Ce,void 0);}else {if("\n"===c)e.preventDefault(),Rs(n,fe,false);else if(c===B$6)e.preventDefault(),Rs(n,de,void 0);else if(null==c&&e.dataTransfer){const t=e.dataTransfer.getData("text/plain");e.preventDefault(),i.insertRawText(t);}else null!=c&&_n(i,s,c,e.timeStamp,true)?(e.preventDefault(),Rs(n,he,c)):sn=c;rn=e.timeStamp;}}));}(e,n)]);let en=0,nn=null,rn=0,sn=null;const on=new WeakMap;let ln=false,cn=false,an=false,un=false,fn=false,dn="",hn=null,gn=[0,"",0,"root",0];function _n(t,e,n,r,i){const o=t.anchor,l=t.focus,c=o.getNode(),a=qr(),u=oo(Gs(a)),f=null!==u?u.anchorNode:null,d=o.key,h=a.getElementByKey(d),g=n.length;return d!==l.key||!Qn(c)||(!i&&(!s$2||rn<r+50)||c.isDirty()&&g<2||Cs(n))&&o.offset!==l.offset&&!c.isComposing()||Qi(c)||c.isDirty()&&g>1||(i||!s$2)&&null!==h&&!c.isComposing()&&f!==es(h)||null!==u&&null!==e&&(!e.collapsed||e.startContainer!==u.anchorNode||e.startOffset!==u.anchorOffset)||c.getFormat()!==t.format||c.getStyle()!==t.style||function(t,e){if(e.isSegmented())return  true;if(!t.isCollapsed())return  false;const n=t.anchor.offset,r=e.getParentOrThrow(),i=e.isToken();return 0===n?!e.canInsertTextBefore()||!r.canInsertTextBefore()&&!e.isComposing()||i||function(t){const e=t.getPreviousSibling();return (Qn(e)||di(e)&&e.isInline())&&!e.canInsertTextAfter()}(e):n===e.getTextContentSize()&&(!e.canInsertTextAfter()||!r.canInsertTextAfter()&&!e.isComposing()||i)}(t,c)}function pn(t,e){return Zi(t)&&null!==t.nodeValue&&0!==e&&e!==t.nodeValue.length}function yn(e,n,r){const{anchorNode:i,anchorOffset:s,focusNode:o,focusOffset:l}=e;ln&&(ln=false,pn(i,s)&&pn(o,l)&&!hn)||ci(n,(()=>{if(!r)return void ys(null);if(!Hi(n,i,o))return;let c=Nr();if(hn&&cr(c)&&c.isCollapsed()){const t=c.anchor,e=hn.anchor;(t.key===e.key&&t.offset===e.offset+1||1===t.offset&&e.getNode().is(t.getNode().getPreviousSibling()))&&(c=hn.clone(),ys(c));}if(hn=null,cr(c)){const r=c.anchor,i=r.getNode();if(c.isCollapsed()){"Range"===e.type&&e.anchorNode===e.focusNode&&(c.dirty=true);const s=Gs(n).event,o=s?s.timeStamp:performance.now(),[l,a,u,f,d]=gn,h=_s(),g=false===n.isComposing()&&""===h.getTextContent();if(o<d+200&&r.offset===u&&r.key===f)mn(c,l,a);else if("text"===r.type)Qn(i)||t$2(141),xn(c,i);else if("element"===r.type&&!g){di(i)||t$2(259);const e=r.getNode();e.isEmpty()?function(t,e){const n=e.getTextFormat(),r=e.getTextStyle();mn(t,n,r);}(c,e):mn(c,0,"");}}else {const t=r.key,e=c.focus.key,n=c.getNodes(),i=n.length,o=c.isBackward(),a=o?l:s,u=o?s:l,f=o?e:t,d=o?t:e;let h=O$3,g=false;for(let t=0;t<i;t++){const e=n[t],r=e.getTextContentSize();if(Qn(e)&&0!==r&&!(0===t&&e.__key===f&&a===r||t===i-1&&e.__key===d&&0===u)&&(g=true,h&=e.getFormat(),0===h))break}c.format=g?h:0;}}Rs(n,le,void 0);}));}function mn(t,e,n){t.format===e&&t.style===n||(t.format=e,t.style=n,t.dirty=true);}function xn(t,e){mn(t,e.getFormat(),e.getStyle());}function Cn(t){if(!t.getTargetRanges)return null;const e=t.getTargetRanges();return 0===e.length?null:e[0]}function Sn(t,e){const n=t._compositionKey;if(ls(null),null!==n&&null!=e){if(""===e){const e=as(n),r=es(t.getElementByKey(n));return void(null!==r&&null!==r.nodeValue&&Qn(e)&&bs(e,r.nodeValue,null,null,true))}if("\n"===e[e.length-1]){const e=Nr();if(cr(e)){const n=e.focus;return e.anchor.set(n.key,n.offset,n.type),void Rs(t,Ee,null)}}}Ts(true,t,e);}function vn(t){let e=t.__lexicalEventHandles;return void 0===e&&(e=[],t.__lexicalEventHandles=e),e}const kn=new Map;function Tn(t){const e=lo(t.target);if(null===e)return;const n=Gi(e.anchorNode);if(null===n)return;cn&&(cn=false,ci(n,(()=>{const r=wr(),i=e.anchorNode;if(uo(i)||Zi(i)){ys(br(r,e,n,t));}})));const r=Ss(n),i=r[r.length-1],s=i._key,o=kn.get(s),l=o||i;l!==n&&yn(e,l,false),yn(e,n,true),n!==i?kn.set(s,n):o&&kn.delete(s);}function bn(t){t._lexicalHandled=true;}function Nn(t){return  true===t._lexicalHandled}function En(e){const n=e.ownerDocument,r=on.get(n);if(void 0===r)return void 0;const i=r-1;i>=0||t$2(164),on.set(n,i),0===i&&n.removeEventListener("selectionchange",Tn);const s=Xi(e);qi(s)?(!function(t){if(null!==t._parentEditor){const e=Ss(t),n=e[e.length-1]._key;kn.get(n)===t&&kn.delete(n);}else kn.delete(t._key);}(s),e.__lexicalEditor=null):s&&t$2(198);const o=vn(e);for(let t=0;t<o.length;t++)o[t]();e.__lexicalEventHandles=[];}function Mn(t,e,n){Vr();const r=t.__key,i=t.getParent();if(null===i)return;const s=function(t){const e=Nr();if(!cr(e)||!di(t))return e;const{anchor:n,focus:r}=e,i=n.getNode(),s=r.getNode();Hs(i,t)&&n.set(t.__key,0,"element");Hs(s,t)&&r.set(t.__key,0,"element");return e}(t);let o=false;if(cr(s)&&e){const e=s.anchor,n=s.focus;e.key===r&&(Ar(e,t,i,t.getPreviousSibling(),t.getNextSibling()),o=true),n.key===r&&(Ar(n,t,i,t.getPreviousSibling(),t.getNextSibling()),o=true);}else ur(s)&&e&&t.isSelected()&&t.selectPrevious();if(cr(s)&&e&&!o){const e=t.getIndexWithinParent();ss(t),Er(s,i,e,-1);}else ss(t);n||Zs(i)||i.canBeEmpty()||!i.isEmpty()||Mn(i,e),e&&s&&yi(i)&&i.isEmpty()&&i.selectEnd();}class An{static getType(){t$2(64,this.name);}static clone(e){t$2(65,this.name);}afterCloneFrom(t){this.__parent=t.__parent,this.__next=t.__next,this.__prev=t.__prev,this.__state=t.__state;}constructor(t){this.__type=this.constructor.getType(),this.__parent=null,this.__prev=null,this.__next=null,Object.defineProperty(this,"__state",{configurable:true,enumerable:false,value:void 0,writable:true}),is(this,t);}getType(){return this.__type}isInline(){t$2(137,this.constructor.name);}isAttached(){let t=this.__key;for(;null!==t;){if("root"===t)return  true;const e=as(t);if(null===e)break;t=e.__parent;}return  false}isSelected(t){const e=t||Nr();if(null==e)return  false;const n=e.getNodes().some((t=>t.__key===this.__key));if(Qn(this))return n;if(cr(e)&&"element"===e.anchor.type&&"element"===e.focus.type){if(e.isCollapsed())return  false;const t=this.getParent();if(_i(this)&&this.isInline()&&t){const n=e.isBackward()?e.focus:e.anchor;if(t.is(n.getNode())&&n.offset===t.getChildrenSize()&&this.is(t.getLastChild()))return  false}}return n}getKey(){return this.__key}getIndexWithinParent(){const t=this.getParent();if(null===t)return  -1;let e=t.getFirstChild(),n=0;for(;null!==e;){if(this.is(e))return n;n++,e=e.getNextSibling();}return  -1}getParent(){const t=this.getLatest().__parent;return null===t?null:as(t)}getParentOrThrow(){const e=this.getParent();return null===e&&t$2(66,this.__key),e}getTopLevelElement(){let e=this;for(;null!==e;){const n=e.getParent();if(Zs(n))return di(e)||e===this&&_i(e)||t$2(194),e;e=n;}return null}getTopLevelElementOrThrow(){const e=this.getTopLevelElement();return null===e&&t$2(67,this.__key),e}getParents(){const t=[];let e=this.getParent();for(;null!==e;)t.push(e),e=e.getParent();return t}getParentKeys(){const t=[];let e=this.getParent();for(;null!==e;)t.push(e.__key),e=e.getParent();return t}getPreviousSibling(){const t=this.getLatest().__prev;return null===t?null:as(t)}getPreviousSiblings(){const t=[],e=this.getParent();if(null===e)return t;let n=e.getFirstChild();for(;null!==n&&!n.is(this);)t.push(n),n=n.getNextSibling();return t}getNextSibling(){const t=this.getLatest().__next;return null===t?null:as(t)}getNextSiblings(){const t=[];let e=this.getNextSibling();for(;null!==e;)t.push(e),e=e.getNextSibling();return t}getCommonAncestor(t){const e=di(this)?this:this.getParent(),n=di(t)?t:t.getParent(),r=e&&n?sl(e,n):null;return r?r.commonAncestor:null}is(t){return null!=t&&this.__key===t.__key}isBefore(e){const n=sl(this,e);return null!==n&&("descendant"===n.type||("branch"===n.type?-1===nl(n):("same"!==n.type&&"ancestor"!==n.type&&t$2(279),false)))}isParentOf(t){const e=sl(this,t);return null!==e&&"ancestor"===e.type}getNodesBetween(e){const n=this.isBefore(e),r=[],i=new Set;let s=this;for(;null!==s;){const o=s.__key;if(i.has(o)||(i.add(o),r.push(s)),s===e)break;const l=di(s)?n?s.getFirstChild():s.getLastChild():null;if(null!==l){s=l;continue}const c=n?s.getNextSibling():s.getPreviousSibling();if(null!==c){s=c;continue}const a=s.getParentOrThrow();if(i.has(a.__key)||r.push(a),a===e)break;let u=null,f=a;do{if(null===f&&t$2(68),u=n?f.getNextSibling():f.getPreviousSibling(),f=f.getParent(),null===f)break;null!==u||i.has(f.__key)||r.push(f);}while(null===u);s=u;}return n||r.reverse(),r}isDirty(){const t=qr()._dirtyLeaves;return null!==t&&t.has(this.__key)}getLatest(){const e=as(this.__key);return null===e&&t$2(113),e}getWritable(){Vr();const t=Hr(),e=qr(),n=t._nodeMap,r=this.__key,i=this.getLatest(),s=e._cloneNotNeeded,o=Nr();if(null!==o&&o.setCachedNodes(null),s.has(r))return os(i),i;const l=vo(i);return s.add(r),os(l),n.set(r,l),l}getTextContent(){return ""}getTextContentSize(){return this.getTextContent().length}createDOM(e,n){t$2(70);}updateDOM(e,n,r){t$2(71);}exportDOM(t){return {element:this.createDOM(t._config,t)}}exportJSON(){const t=this.__state?this.__state.toJSON():void 0;return {type:this.__type,version:1,...t}}static importJSON(e){t$2(18,this.name);}updateFromJSON(t){return function(t,e){const n=t.getWritable();return (e||n.__state)&&mt$3(t).updateFromJSON(e),n}(this,t.$)}static transform(){return null}remove(t){Mn(this,true,t);}replace(e,n){Vr();let r=Nr();null!==r&&(r=r.clone()),no(this,e);const i=this.getLatest(),s=this.__key,o=e.__key,l=e.getWritable(),c=this.getParentOrThrow().getWritable(),a=c.__size;ss(l);const u=i.getPreviousSibling(),f=i.getNextSibling(),d=i.__prev,h=i.__next,g=i.__parent;if(Mn(i,false,true),null===u)c.__first=o;else {u.getWritable().__next=o;}if(l.__prev=d,null===f)c.__last=o;else {f.getWritable().__prev=o;}if(l.__next=h,l.__parent=g,c.__size=a,n&&(di(this)&&di(l)||t$2(139),this.getChildren().forEach((t=>{l.append(t);}))),cr(r)){ys(r);const t=r.anchor,e=r.focus;t.key===s&&or(t,l),e.key===s&&or(e,l);}return cs()===s&&ls(o),l}insertAfter(t,e=true){Vr(),no(this,t);const n=this.getWritable(),r=t.getWritable(),i=r.getParent(),s=Nr();let o=false,l=false;if(null!==i){const e=t.getIndexWithinParent();if(ss(r),cr(s)){const t=i.__key,n=s.anchor,r=s.focus;o="element"===n.type&&n.key===t&&n.offset===e+1,l="element"===r.type&&r.key===t&&r.offset===e+1;}}const c=this.getNextSibling(),a=this.getParentOrThrow().getWritable(),u=r.__key,f=n.__next;if(null===c)a.__last=u;else {c.getWritable().__prev=u;}if(a.__size++,n.__next=u,r.__next=f,r.__prev=n.__key,r.__parent=n.__parent,e&&cr(s)){const t=this.getIndexWithinParent();Er(s,a,t+1);const e=a.__key;o&&s.anchor.set(e,t+2,"element"),l&&s.focus.set(e,t+2,"element");}return t}insertBefore(t,e=true){Vr(),no(this,t);const n=this.getWritable(),r=t.getWritable(),i=r.__key;ss(r);const s=this.getPreviousSibling(),o=this.getParentOrThrow().getWritable(),l=n.__prev,c=this.getIndexWithinParent();if(null===s)o.__first=i;else {s.getWritable().__next=i;}o.__size++,n.__prev=i,r.__prev=l,r.__next=n.__key,r.__parent=n.__parent;const a=Nr();if(e&&cr(a)){Er(a,this.getParentOrThrow(),c);}return t}isParentRequired(){return  false}createParentElementNode(){return Pi()}selectStart(){return this.selectPrevious()}selectEnd(){return this.selectNext(0,0)}selectPrevious(t,e){Vr();const n=this.getPreviousSibling(),r=this.getParentOrThrow();if(null===n)return r.select(0,0);if(di(n))return n.select();if(!Qn(n)){const t=n.getIndexWithinParent()+1;return r.select(t,t)}return n.select(t,e)}selectNext(t,e){Vr();const n=this.getNextSibling(),r=this.getParentOrThrow();if(null===n)return r.select();if(di(n))return n.select(0,0);if(!Qn(n)){const t=n.getIndexWithinParent();return r.select(t,t)}return n.select(t,e)}markDirty(){this.getWritable();}reconcileObservedMutation(t,e){this.markDirty();}}class On extends An{static getType(){return "linebreak"}static clone(t){return new On(t.__key)}constructor(t){super(t);}getTextContent(){return "\n"}createDOM(){return document.createElement("br")}updateDOM(){return  false}isInline(){return  true}static importDOM(){return {br:t=>function(t){const e=t.parentElement;if(null!==e&&_o(e)){const n=e.firstChild;if(n===t||n.nextSibling===t&&Ln(n)){const n=e.lastChild;if(n===t||n.previousSibling===t&&Ln(n))return  true}}return  false}(t)||function(t){const e=t.parentElement;if(null!==e&&_o(e)){const n=e.firstChild;if(n===t||n.nextSibling===t&&Ln(n))return  false;const r=e.lastChild;if(r===t||r.previousSibling===t&&Ln(r))return  true}return  false}(t)?null:{conversion:Dn,priority:0}}}static importJSON(t){return Pn().updateFromJSON(t)}}function Dn(t){return {node:Pn()}}function Pn(){return eo(new On)}function Fn(t){return t instanceof On}function Ln(t){return Zi(t)&&/^( |\t|\r?\n)+$/.test(t.textContent||"")}function In(t,e){return 16&e?"code":e&A$3?"mark":32&e?"sub":64&e?"sup":null}function zn(t,e){return 1&e?"strong":2&e?"em":"span"}function Kn(t,e,n,r,i){const s=r.classList;let o=Fs(i,"base");void 0!==o&&s.add(...o),o=Fs(i,"underlineStrikethrough");let l=false;const c=e&N$2&&e&b$2;void 0!==o&&(n&N$2&&n&b$2?(l=true,c||s.add(...o)):c&&s.remove(...o));for(const t in j$3){const r=j$3[t];if(o=Fs(i,t),void 0!==o)if(n&r){if(l&&("underline"===t||"strikethrough"===t)){e&r&&s.remove(...o);continue}e&r&&(!c||"underline"!==t)&&"strikethrough"!==t||s.add(...o);}else e&r&&s.remove(...o);}}function Bn(t,e,n){const r=e.firstChild,s=n.isComposing(),o=t+(s?K$3:"");if(null==r)e.textContent=o;else {const t=r.nodeValue;if(t!==o)if(s||i$1){const[e,n,i]=function(t,e){const n=t.length,r=e.length;let i=0,s=0;for(;i<n&&i<r&&t[i]===e[i];)i++;for(;s+i<n&&s+i<r&&t[n-s-1]===e[r-s-1];)s++;return [i,n-i-s,e.slice(i,r-s)]}(t,o);0!==n&&r.deleteData(e,n),r.insertData(e,i);}else r.nodeValue=o;}}function Rn(t,e,n,r,i,s){Bn(i,t,e);const o=s.theme.text;void 0!==o&&Kn(0,0,r,t,o);}function Wn(t,e){const n=document.createElement(e);return n.appendChild(t),n}class Jn extends An{static getType(){return "text"}static clone(t){return new Jn(t.__text,t.__key)}afterCloneFrom(t){super.afterCloneFrom(t),this.__text=t.__text,this.__format=t.__format,this.__style=t.__style,this.__mode=t.__mode,this.__detail=t.__detail;}constructor(t="",e){super(e),this.__text=t,this.__format=0,this.__style="",this.__mode=0,this.__detail=0;}getFormat(){return this.getLatest().__format}getDetail(){return this.getLatest().__detail}getMode(){const t=this.getLatest();return G$2[t.__mode]}getStyle(){return this.getLatest().__style}isToken(){return 1===this.getLatest().__mode}isComposing(){return this.__key===cs()}isSegmented(){return 2===this.getLatest().__mode}isDirectionless(){return !!(1&this.getLatest().__detail)}isUnmergeable(){return !!(2&this.getLatest().__detail)}hasFormat(t){const e=j$3[t];return !!(this.getFormat()&e)}isSimpleText(){return "text"===this.__type&&0===this.__mode}getTextContent(){return this.getLatest().__text}getFormatFlags(t,e){return ns(this.getLatest().__format,t,e)}canHaveFormat(){return  true}isInline(){return  true}createDOM(t,e){const n=this.__format,r=In(0,n),i=zn(0,n),s=null===r?i:r,o=document.createElement(s);let l=o;this.hasFormat("code")&&o.setAttribute("spellcheck","false"),null!==r&&(l=document.createElement(i),o.appendChild(l));Rn(l,this,0,n,this.__text,t);const c=this.__style;return ""!==c&&(o.style.cssText=c),o}updateDOM(e,n,r){const i=this.__text,s=e.__format,o=this.__format,l=In(0,s),c=In(0,o),a=zn(0,s),u=zn(0,o);if((null===l?a:l)!==(null===c?u:c))return  true;if(l===c&&a!==u){const e=n.firstChild;null==e&&t$2(48);const s=document.createElement(u);return Rn(s,this,0,o,i,r),n.replaceChild(s,e),false}let f=n;null!==c&&null!==l&&(f=n.firstChild,null==f&&t$2(49)),Bn(i,f,this);const d=r.theme.text;void 0!==d&&s!==o&&Kn(0,s,o,f,d);const h=e.__style,g=this.__style;return h!==g&&(n.style.cssText=g),false}static importDOM(){return {"#text":()=>({conversion:Yn,priority:0}),b:()=>({conversion:$n,priority:0}),code:()=>({conversion:Gn,priority:0}),em:()=>({conversion:Gn,priority:0}),i:()=>({conversion:Gn,priority:0}),mark:()=>({conversion:Gn,priority:0}),s:()=>({conversion:Gn,priority:0}),span:()=>({conversion:Un,priority:0}),strong:()=>({conversion:Gn,priority:0}),sub:()=>({conversion:Gn,priority:0}),sup:()=>({conversion:Gn,priority:0}),u:()=>({conversion:Gn,priority:0})}}static importJSON(t){return Xn().updateFromJSON(t)}updateFromJSON(t){return super.updateFromJSON(t).setTextContent(t.text).setFormat(t.format).setDetail(t.detail).setMode(t.mode).setStyle(t.style)}exportDOM(e){let{element:n}=super.exportDOM(e);return uo(n)||t$2(132),n.style.whiteSpace="pre-wrap",this.hasFormat("lowercase")?n.style.textTransform="lowercase":this.hasFormat("uppercase")?n.style.textTransform="uppercase":this.hasFormat("capitalize")&&(n.style.textTransform="capitalize"),this.hasFormat("bold")&&(n=Wn(n,"b")),this.hasFormat("italic")&&(n=Wn(n,"i")),this.hasFormat("strikethrough")&&(n=Wn(n,"s")),this.hasFormat("underline")&&(n=Wn(n,"u")),{element:n}}exportJSON(){return {detail:this.getDetail(),format:this.getFormat(),mode:this.getMode(),style:this.getStyle(),text:this.getTextContent(),...super.exportJSON()}}selectionTransform(t,e){}setFormat(t){const e=this.getWritable();return e.__format="string"==typeof t?j$3[t]:t,e}setDetail(t){const e=this.getWritable();return e.__detail="string"==typeof t?V$3[t]:t,e}setStyle(t){const e=this.getWritable();return e.__style=t,e}toggleFormat(t){const e=ns(this.getFormat(),t,null);return this.setFormat(e)}toggleDirectionless(){const t=this.getWritable();return t.__detail^=1,t}toggleUnmergeable(){const t=this.getWritable();return t.__detail^=2,t}setMode(t){const e=q$2[t];if(this.__mode===e)return this;const n=this.getWritable();return n.__mode=e,n}setTextContent(t){if(this.__text===t)return this;const e=this.getWritable();return e.__text=t,e}select(t,e){Vr();let n=t,r=e;const i=Nr(),s=this.getTextContent(),o=this.__key;if("string"==typeof s){const t=s.length;void 0===n&&(n=t),void 0===r&&(r=t);}else n=0,r=0;if(!cr(i))return Sr(o,n,o,r,"text","text");{const t=cs();t!==i.anchor.key&&t!==i.focus.key||ls(o),i.setTextNodeRange(this,n,this,r);}return i}selectStart(){return this.select(0,0)}selectEnd(){const t=this.getTextContentSize();return this.select(t,t)}spliceText(t,e,n,r){const i=this.getWritable(),s=i.__text,o=n.length;let l=t;l<0&&(l=o+l,l<0&&(l=0));const c=Nr();if(r&&cr(c)){const e=t+o;c.setTextNodeRange(i,e,i,e);}const a=s.slice(0,l)+n+s.slice(l+e);return i.__text=a,i}canInsertTextBefore(){return  true}canInsertTextAfter(){return  true}splitText(...t){Vr();const e=this.getLatest(),n=e.getTextContent();if(""===n)return [];const r=e.__key,i=cs(),s=n.length;t.sort(((t,e)=>t-e)),t.push(s);const o=[],l=t.length;for(let e=0,r=0;e<s&&r<=l;r++){const i=t[r];i>e&&(o.push(n.slice(e,i)),e=i);}const c=o.length;if(1===c)return [e];const a=o[0],u=e.getParent();let f;const d=e.getFormat(),h=e.getStyle(),g=e.__detail;let _=false,p=null,y=null;const m=Nr();if(cr(m)){const[t,e]=m.isBackward()?[m.focus,m.anchor]:[m.anchor,m.focus];"text"===t.type&&t.key===r&&(p=t),"text"===e.type&&e.key===r&&(y=e);}e.isSegmented()?(f=Xn(a),f.__format=d,f.__style=h,f.__detail=g,_=true):(f=e.getWritable(),f.__text=a);const x=[f];for(let t=1;t<c;t++){const e=Xn(o[t]);e.__format=d,e.__style=h,e.__detail=g;const n=e.__key;i===r&&ls(n),x.push(e);}const C=p?p.offset:null,S=y?y.offset:null;let v=0;for(const t of x){if(!p&&!y)break;const e=v+t.getTextContentSize();if(null!==p&&null!==C&&C<=e&&C>=v&&(p.set(t.getKey(),C-v,"text"),C<e&&(p=null)),null!==y&&null!==S&&S<=e&&S>=v){y.set(t.getKey(),S-v,"text");break}v=e;}if(null!==u){!function(t){const e=t.getPreviousSibling(),n=t.getNextSibling();null!==e&&os(e);null!==n&&os(n);}(this);const t=u.getWritable(),e=this.getIndexWithinParent();_?(t.splice(e,0,x),this.remove()):t.splice(e,1,x),cr(m)&&Er(m,u,e,c-1);}return x}mergeWithSibling(e){const n=e===this.getPreviousSibling();n||e===this.getNextSibling()||t$2(50);const r=this.__key,i=e.__key,s=this.__text,o=s.length;cs()===i&&ls(r);const l=Nr();if(cr(l)){const t=l.anchor,s=l.focus;null!==t&&t.key===i&&Or(t,n,r,e,o),null!==s&&s.key===i&&Or(s,n,r,e,o);}const c=e.__text,a=n?c+s:s+c;this.setTextContent(a);const u=this.getWritable();return e.remove(),u}isTextEntity(){return  false}}function Un(t){return {forChild:Zn(t.style),node:null}}function $n(t){const e=t,n="normal"===e.style.fontWeight;return {forChild:Zn(e.style,n?void 0:"bold"),node:null}}const jn=new WeakMap;function Vn(t){if(!uo(t))return  false;if("PRE"===t.nodeName)return  true;const e=t.style.whiteSpace;return "string"==typeof e&&e.startsWith("pre")}function Yn(e){const n=e;null===e.parentElement&&t$2(129);let r=n.textContent||"";if(null!==function(t){let e,n=t.parentNode;const r=[t];for(;null!==n&&void 0===(e=jn.get(n))&&!Vn(n);)r.push(n),n=n.parentNode;const i=void 0===e?n:e;for(let t=0;t<r.length;t++)jn.set(r[t],i);return i}(n)){const t=r.split(/(\r?\n|\t)/),e=[],n=t.length;for(let r=0;r<n;r++){const n=t[r];"\n"===n||"\r\n"===n?e.push(Pn()):"\t"===n?e.push(er()):""!==n&&e.push(Xn(n));}return {node:e}}if(r=r.replace(/\r/g,"").replace(/[ \t\n]+/g," "),""===r)return {node:null};if(" "===r[0]){let t=n,e=true;for(;null!==t&&null!==(t=Hn(t,false));){const n=t.textContent||"";if(n.length>0){/[ \t\n]$/.test(n)&&(r=r.slice(1)),e=false;break}}e&&(r=r.slice(1));}if(" "===r[r.length-1]){let t=n,e=true;for(;null!==t&&null!==(t=Hn(t,true));){if((t.textContent||"").replace(/^( |\t|\r?\n)+/,"").length>0){e=false;break}}e&&(r=r.slice(0,r.length-1));}return ""===r?{node:null}:{node:Xn(r)}}function Hn(t,e){let n=t;for(;;){let t;for(;null===(t=e?n.nextSibling:n.previousSibling);){const t=n.parentElement;if(null===t)return null;n=t;}if(n=t,uo(n)){const t=n.style.display;if(""===t&&!go(n)||""!==t&&!t.startsWith("inline"))return null}let r=n;for(;null!==(r=e?n.firstChild:n.lastChild);)n=r;if(Zi(n))return n;if("BR"===n.nodeName)return null}}const qn={code:"code",em:"italic",i:"italic",mark:"highlight",s:"strikethrough",strong:"bold",sub:"subscript",sup:"superscript",u:"underline"};function Gn(t){const e=qn[t.nodeName.toLowerCase()];return void 0===e?{node:null}:{forChild:Zn(t.style,e),node:null}}function Xn(t=""){return eo(new Jn(t))}function Qn(t){return t instanceof Jn}function Zn(t,e){const n=t.fontWeight,r=t.textDecoration.split(" "),i="700"===n||"bold"===n,s=r.includes("line-through"),o="italic"===t.fontStyle,l=r.includes("underline"),c=t.verticalAlign;return t=>Qn(t)?(i&&!t.hasFormat("bold")&&t.toggleFormat("bold"),s&&!t.hasFormat("strikethrough")&&t.toggleFormat("strikethrough"),o&&!t.hasFormat("italic")&&t.toggleFormat("italic"),l&&!t.hasFormat("underline")&&t.toggleFormat("underline"),"sub"!==c||t.hasFormat("subscript")||t.toggleFormat("subscript"),"super"!==c||t.hasFormat("superscript")||t.toggleFormat("superscript"),e&&!t.hasFormat(e)&&t.toggleFormat(e),t):t}class tr extends Jn{static getType(){return "tab"}static clone(t){return new tr(t.__key)}constructor(t){super("\t",t),this.__detail=2;}static importDOM(){return null}createDOM(t){const e=super.createDOM(t),n=Fs(t.theme,"tab");if(void 0!==n){e.classList.add(...n);}return e}static importJSON(t){return er().updateFromJSON(t)}setTextContent(e){return "\t"!==e&&""!==e&&t$2(126),super.setTextContent(e)}setDetail(e){return 2!==e&&t$2(127),this}setMode(e){return "normal"!==e&&t$2(128),this}canInsertTextBefore(){return  false}canInsertTextAfter(){return  false}}function er(){return eo(new tr)}function nr(t){return t instanceof tr}class rr{constructor(t,e,n){this._selection=null,this.key=t,this.offset=e,this.type=n;}is(t){return this.key===t.key&&this.offset===t.offset&&this.type===t.type}isBefore(t){if(this.key===t.key)return this.offset<t.offset;return el(_l(ol(this,"next")),_l(ol(t,"next")))<0}getNode(){const e=as(this.key);return null===e&&t$2(20),e}set(t,e,n,r){const i=this._selection,s=this.key;r&&this.key===t&&this.offset===e&&this.type===n||(this.key=t,this.offset=e,this.type=n,jr()||(cs()===s&&ls(t),null!==i&&(i.setCachedNodes(null),i.dirty=true)));}}function ir(t,e,n){return new rr(t,e,n)}function sr(t,e){let n=e.__key,r=t.offset,i="element";if(Qn(e)){i="text";const t=e.getTextContentSize();r>t&&(r=t);}else if(!di(e)){const t=e.getNextSibling();if(Qn(t))n=t.__key,r=0,i="text";else {const t=e.getParent();t&&(n=t.__key,r=e.getIndexWithinParent()+1);}}t.set(n,r,i);}function or(t,e){if(di(e)){const n=e.getLastDescendant();di(n)||Qn(n)?sr(t,n):sr(t,e);}else sr(t,e);}class lr{constructor(t){this._cachedNodes=null,this._nodes=t,this.dirty=false;}getCachedNodes(){return this._cachedNodes}setCachedNodes(t){this._cachedNodes=t;}is(t){if(!ur(t))return  false;const e=this._nodes,n=t._nodes;return e.size===n.size&&Array.from(e).every((t=>n.has(t)))}isCollapsed(){return  false}isBackward(){return  false}getStartEndPoints(){return null}add(t){this.dirty=true,this._nodes.add(t),this._cachedNodes=null;}delete(t){this.dirty=true,this._nodes.delete(t),this._cachedNodes=null;}clear(){this.dirty=true,this._nodes.clear(),this._cachedNodes=null;}has(t){return this._nodes.has(t)}clone(){return new lr(new Set(this._nodes))}extract(){return this.getNodes()}insertRawText(t){}insertText(){}insertNodes(t){const e=this.getNodes(),n=e.length,r=e[n-1];let i;if(Qn(r))i=r.select();else {const t=r.getIndexWithinParent()+1;i=r.getParentOrThrow().select(t,t);}i.insertNodes(t);for(let t=0;t<n;t++)e[t].remove();}getNodes(){const t=this._cachedNodes;if(null!==t)return t;const e=this._nodes,n=[];for(const t of e){const e=as(t);null!==e&&n.push(e);}return jr()||(this._cachedNodes=n),n}getTextContent(){const t=this.getNodes();let e="";for(let n=0;n<t.length;n++)e+=t[n].getTextContent();return e}deleteNodes(){const t=this.getNodes();if((Nr()||wr())===this&&t[0]){const e=Wo(t[0],"next");cl(Zo(e,e));}for(const e of t)e.remove();}}function cr(t){return t instanceof ar}class ar{constructor(t,e,n,r){this.anchor=t,this.focus=e,t._selection=this,e._selection=this,this._cachedNodes=null,this.format=n,this.style=r,this.dirty=false;}getCachedNodes(){return this._cachedNodes}setCachedNodes(t){this._cachedNodes=t;}is(t){return !!cr(t)&&(this.anchor.is(t.anchor)&&this.focus.is(t.focus)&&this.format===t.format&&this.style===t.style)}isCollapsed(){return this.anchor.is(this.focus)}getNodes(){const t=this._cachedNodes;if(null!==t)return t;const e=function(t){const e=[],[n,r]=t.getTextSlices();n&&e.push(n.caret.origin);const i=new Set,s=new Set;for(const n of t)if(zo(n)){const{origin:t}=n;0===e.length?i.add(t):(s.add(t),e.push(t));}else {const{origin:t}=n;di(t)&&s.has(t)||e.push(t);}r&&e.push(r.caret.origin);if(Io(t.focus)&&di(t.focus.origin)&&null===t.focus.getNodeAtCaret())for(let n=jo(t.focus.origin,"previous");zo(n)&&i.has(n.origin)&&!n.origin.isEmpty()&&n.origin.is(e[e.length-1]);n=Yo(n))i.delete(n.origin),e.pop();for(;e.length>1;){const t=e[e.length-1];if(!di(t)||s.has(t)||t.isEmpty()||i.has(t))break;e.pop();}if(0===e.length&&t.isCollapsed()){const n=_l(t.anchor),r=_l(t.anchor.getFlipped()),i=t=>Fo(t)?t.origin:t.getNodeAtCaret(),s=i(n)||i(r)||(t.anchor.getNodeAtCaret()?n.origin:r.origin);e.push(s);}return e}(ml(ul(this),"next"));return jr()||(this._cachedNodes=e),e}setTextNodeRange(t,e,n,r){this.anchor.set(t.__key,e,"text"),this.focus.set(n.__key,r,"text");}getTextContent(){const t=this.getNodes();if(0===t.length)return "";const e=t[0],n=t[t.length-1],r=this.anchor,i=this.focus,s=r.isBefore(i),[o,l]=dr(this);let c="",a=true;for(let u=0;u<t.length;u++){const f=t[u];if(di(f)&&!f.isInline())a||(c+="\n"),a=!f.isEmpty();else if(a=false,Qn(f)){let t=f.getTextContent();f===e?f===n?"element"===r.type&&"element"===i.type&&i.offset!==r.offset||(t=o<l?t.slice(o,l):t.slice(l,o)):t=s?t.slice(o):t.slice(l):f===n&&(t=s?t.slice(0,l):t.slice(0,o)),c+=t;}else !_i(f)&&!Fn(f)||f===n&&this.isCollapsed()||(c+=f.getTextContent());}return c}applyDOMRange(t){const e=qr(),n=e.getEditorState()._selection,r=xr(t.startContainer,t.startOffset,t.endContainer,t.endOffset,e,n);if(null===r)return;const[i,s]=r;this.anchor.set(i.key,i.offset,i.type,true),this.focus.set(s.key,s.offset,s.type,true),vt$4(this);}clone(){const t=this.anchor,e=this.focus;return new ar(ir(t.key,t.offset,t.type),ir(e.key,e.offset,e.type),this.format,this.style)}toggleFormat(t){this.format=ns(this.format,t,null),this.dirty=true;}setStyle(t){this.style=t,this.dirty=true;}hasFormat(t){const e=j$3[t];return !!(this.format&e)}insertRawText(t){const e=t.split(/(\r?\n|\t)/),n=[],r=e.length;for(let t=0;t<r;t++){const r=e[t];"\n"===r||"\r\n"===r?n.push(Pn()):"\t"===r?n.push(er()):n.push(Xn(r));}this.insertNodes(n);}insertText(e){const n=this.anchor,r=this.focus,i=this.format,s=this.style;let o=n,l=r;!this.isCollapsed()&&r.isBefore(n)&&(o=r,l=n),"element"===o.type&&function(t,e,n,r){const i=t.getNode(),s=i.getChildAtIndex(t.offset),o=Xn(),l=yi(i)?Pi().append(o):o;o.setFormat(n),o.setStyle(r),null===s?i.append(l):s.insertBefore(l),t.is(e)&&e.set(o.__key,0,"text"),t.set(o.__key,0,"text");}(o,l,i,s),"element"===l.type&&ll(l,_l(ol(l,"next")));const c=o.offset;let a=l.offset;const u=this.getNodes(),f=u.length;let d=u[0];Qn(d)||t$2(26);const h=d.getTextContent().length,g=d.getParentOrThrow();let _=u[f-1];if(1===f&&"element"===l.type&&(a=h,l.set(o.key,a,"text")),this.isCollapsed()&&c===h&&(d.isSegmented()||d.isToken()||!d.canInsertTextAfter()||!g.canInsertTextAfter()&&null===d.getNextSibling())){let t=d.getNextSibling();if(Qn(t)&&t.canInsertTextBefore()&&!Qi(t)||(t=Xn(),t.setFormat(i),t.setStyle(s),g.canInsertTextAfter()?d.insertAfter(t):g.insertAfter(t)),t.select(0,0),d=t,""!==e)return void this.insertText(e)}else if(this.isCollapsed()&&0===c&&(d.isSegmented()||d.isToken()||!d.canInsertTextBefore()||!g.canInsertTextBefore()&&null===d.getPreviousSibling())){let t=d.getPreviousSibling();if(Qn(t)&&!Qi(t)||(t=Xn(),t.setFormat(i),g.canInsertTextBefore()?d.insertBefore(t):g.insertBefore(t)),t.select(),d=t,""!==e)return void this.insertText(e)}else if(d.isSegmented()&&c!==h){const t=Xn(d.getTextContent());t.setFormat(i),d.replace(t),d=t;}else if(!this.isCollapsed()&&""!==e){const t=_.getParent();if(!g.canInsertTextBefore()||!g.canInsertTextAfter()||di(t)&&(!t.canInsertTextBefore()||!t.canInsertTextAfter()))return this.insertText(""),mr(this.anchor,this.focus,null),void this.insertText(e)}if(1===f){if(d.isToken()){const t=Xn(e);return t.select(),void d.replace(t)}const t=d.getFormat(),n=d.getStyle();if(c!==a||t===i&&n===s){if(nr(d)){const t=Xn(e);return t.setFormat(i),t.setStyle(s),t.select(),void d.replace(t)}}else {if(""!==d.getTextContent()){const t=Xn(e);if(t.setFormat(i),t.setStyle(s),t.select(),0===c)d.insertBefore(t,false);else {const[e]=d.splitText(c);e.insertAfter(t,false);}return void(t.isComposing()&&"text"===this.anchor.type&&(this.anchor.offset-=e.length))}d.setFormat(i),d.setStyle(s);}const r=a-c;d=d.spliceText(c,r,e,true),""===d.getTextContent()?d.remove():"text"===this.anchor.type&&(d.isComposing()?this.anchor.offset-=e.length:(this.format=t,this.style=n));}else {const t=new Set([...d.getParentKeys(),..._.getParentKeys()]),n=di(d)?d:d.getParentOrThrow();let r=di(_)?_:_.getParentOrThrow(),i=_;if(!n.is(r)&&r.isInline())do{i=r,r=r.getParentOrThrow();}while(r.isInline());if("text"===l.type&&(0!==a||""===_.getTextContent())||"element"===l.type&&_.getIndexWithinParent()<a)if(Qn(_)&&!_.isToken()&&a!==_.getTextContentSize()){if(_.isSegmented()){const t=Xn(_.getTextContent());_.replace(t),_=t;}yi(l.getNode())||"text"!==l.type||(_=_.spliceText(0,a,"")),t.add(_.__key);}else {const t=_.getParentOrThrow();t.canBeEmpty()||1!==t.getChildrenSize()?_.remove():t.remove();}else t.add(_.__key);const s=r.getChildren(),o=new Set(u),g=n.is(r),p=n.isInline()&&null===d.getNextSibling()?n:d;for(let t=s.length-1;t>=0;t--){const e=s[t];if(e.is(d)||di(e)&&e.isParentOf(d))break;e.isAttached()&&(!o.has(e)||e.is(i)?g||p.insertAfter(e,false):e.remove());}if(!g){let e=r,n=null;for(;null!==e;){const r=e.getChildren(),i=r.length;(0===i||r[i-1].is(n))&&(t.delete(e.__key),n=e),e=e.getParent();}}if(d.isToken())if(c===h)d.select();else {const t=Xn(e);t.select(),d.replace(t);}else d=d.spliceText(c,h-c,e,true),""===d.getTextContent()?d.remove():d.isComposing()&&"text"===this.anchor.type&&(this.anchor.offset-=e.length);for(let e=1;e<f;e++){const n=u[e],r=n.__key;t.has(r)||n.remove();}}}removeText(){const t=Nr()===this;al(this,gl(ul(this))),t&&Nr()!==this&&ys(this);}formatText(t,e=null){if(this.isCollapsed())return this.toggleFormat(t),void ls(null);const n=this.getNodes(),r=[];for(const t of n)Qn(t)&&r.push(t);const i=e=>{n.forEach((n=>{if(di(n)){const r=n.getFormatFlags(t,e);n.setTextFormat(r);}}));},s=r.length;if(0===s)return this.toggleFormat(t),ls(null),void i(e);const o=this.anchor,l=this.focus,c=this.isBackward(),a=c?l:o,u=c?o:l;let f=0,d=r[0],h="element"===a.type?0:a.offset;if("text"===a.type&&h===d.getTextContentSize()&&(f=1,d=r[1],h=0),null==d)return;const g=d.getFormatFlags(t,e);i(g);const _=s-1;let p=r[_];const y="text"===u.type?u.offset:p.getTextContentSize();if(d.is(p)){if(h===y)return;if(Qi(d)||0===h&&y===d.getTextContentSize())d.setFormat(g);else {const t=d.splitText(h,y),e=0===h?t[0]:t[1];e.setFormat(g),"text"===a.type&&a.set(e.__key,0,"text"),"text"===u.type&&u.set(e.__key,y-h,"text");}return void(this.format=g)}0===h||Qi(d)||([,d]=d.splitText(h),h=0),d.setFormat(g);const m=p.getFormatFlags(t,g);y>0&&(y===p.getTextContentSize()||Qi(p)||([p]=p.splitText(y)),p.setFormat(m));for(let e=f+1;e<_;e++){const n=r[e],i=n.getFormatFlags(t,m);n.setFormat(i);}"text"===a.type&&a.set(d.__key,h,"text"),"text"===u.type&&u.set(p.__key,y,"text"),this.format=g|m;}insertNodes(e){if(0===e.length)return;if(this.isCollapsed()||this.removeText(),"root"===this.anchor.key){this.insertParagraph();const n=Nr();return cr(n)||t$2(134),n.insertNodes(e)}const n=(this.isBackward()?this.focus:this.anchor).getNode(),r=yo(n,po),i=e[e.length-1];if(di(r)&&"__language"in r){if("__language"in e[0])this.insertText(e[0].getTextContent());else {const t=Ir(this);r.splice(t,0,e),i.selectEnd();}return}if(!e.some((t=>(di(t)||_i(t))&&!t.isInline()))){di(r)||t$2(211,n.constructor.name,n.getType());const s=Ir(this);return r.splice(s,0,e),void i.selectEnd()}const s=function(t){const e=Pi();let n=null;for(let r=0;r<t.length;r++){const i=t[r],s=Fn(i);if(s||_i(i)&&i.isInline()||di(i)&&i.isInline()||Qn(i)||i.isParentRequired()){if(null===n&&(n=i.createParentElementNode(),e.append(n),s))continue;null!==n&&n.append(i);}else e.append(i),n=null;}return e}(e),o=s.getLastDescendant(),l=s.getChildren(),c=!di(r)||!r.isEmpty()?this.insertParagraph():null,a=l[l.length-1];let u=l[0];var f;di(f=u)&&po(f)&&!f.isEmpty()&&di(r)&&(!r.isEmpty()||r.canMergeWhenEmpty())&&(di(r)||t$2(211,n.constructor.name,n.getType()),r.append(...u.getChildren()),u=l[1]),u&&(null===r&&t$2(212,n.constructor.name,n.getType()),function(e,n,r){const i=n.getParentOrThrow().getLastChild();let s=n;const o=[n];for(;s!==i;)s.getNextSibling()||t$2(140),s=s.getNextSibling(),o.push(s);let l=e;for(const t of o)l=l.insertAfter(t);}(r,u));const d=yo(o,po);c&&di(d)&&(c.canMergeWhenEmpty()||po(a))&&(d.append(...c.getChildren()),c.remove()),di(r)&&r.isEmpty()&&r.remove(),o.selectEnd();const h=di(r)?r.getLastChild():null;Fn(h)&&d!==r&&h.remove();}insertParagraph(){if("root"===this.anchor.key){const t=Pi();return _s().splice(this.anchor.offset,0,[t]),t.select(),t}const e=Ir(this),n=yo(this.anchor.getNode(),po);di(n)||t$2(213);const r=n.getChildAtIndex(e),i=r?[r,...r.getNextSiblings()]:[],s=n.insertNewAfter(this,false);return s?(s.append(...i),s.selectStart(),s):null}insertLineBreak(t){const e=Pn();if(this.insertNodes([e]),t){const t=e.getParentOrThrow(),n=e.getIndexWithinParent();t.select(n,n);}}extract(){const t=this.getNodes(),e=t.length,n=e-1,r=this.anchor,i=this.focus;let s=t[0],o=t[n];const[l,c]=dr(this);if(0===e)return [];if(1===e){if(Qn(s)&&!this.isCollapsed()){const t=l>c?c:l,e=l>c?l:c,n=s.splitText(t,e),r=0===t?n[0]:n[1];return null!=r?[r]:[]}return [s]}const a=r.isBefore(i);if(Qn(s)){const e=a?l:c;e===s.getTextContentSize()?t.shift():0!==e&&([,s]=s.splitText(e),t[0]=s);}if(Qn(o)){const e=o.getTextContent().length,r=a?c:l;0===r?t.pop():r!==e&&([o]=o.splitText(r),t[n]=o);}return t}modify(t,e,n){if(Kr(this,t,e,n))return;const r="move"===t,i=qr(),s=oo(Gs(i));if(!s)return;const o=i._blockCursorElement,l=i._rootElement,c=this.focus.getNode();if(null===l||null===o||!di(c)||c.isInline()||c.canBeEmpty()||so(o,i,l),this.dirty){let t=Js(i,this.anchor.key),e=Js(i,this.focus.key);"text"===this.anchor.type&&(t=es(t)),"text"===this.focus.type&&(e=es(e)),t&&e&&Dr(s,t,this.anchor.offset,e,this.focus.offset);}if(function(t,e,n,r){t.modify(e,n,r);}(s,t,e?"backward":"forward",n),s.rangeCount>0){const t=s.getRangeAt(0),n=this.anchor.getNode(),i=yi(n)?n:Qs(n);if(this.applyDOMRange(t),this.dirty=true,!r){const n=this.getNodes(),r=[];let o=false;for(let t=0;t<n.length;t++){const e=n[t];Hs(e,i)?r.push(e):o=true;}if(o&&r.length>0)if(e){const t=r[0];di(t)?t.selectStart():t.getParentOrThrow().selectStart();}else {const t=r[r.length-1];di(t)?t.selectEnd():t.getParentOrThrow().selectEnd();}s.anchorNode===t.startContainer&&s.anchorOffset===t.startOffset||function(t){const e=t.focus,n=t.anchor,r=n.key,i=n.offset,s=n.type;n.set(e.key,e.offset,e.type,true),e.set(r,i,s,true);}(this);}}"lineboundary"===n&&Kr(this,t,e,n,"decorators");}forwardDeletion(t,e,n){if(!n&&("element"===t.type&&di(e)&&t.offset===e.getChildrenSize()||"text"===t.type&&t.offset===e.getTextContentSize())){const t=e.getParent(),n=e.getNextSibling()||(null===t?null:t.getNextSibling());if(di(n)&&n.isShadowRoot())return  true}return  false}deleteCharacter(t){const e=this.isCollapsed();if(this.isCollapsed()){const e=this.anchor;let n=e.getNode();if(this.forwardDeletion(e,n,t))return;const r=Xo(ol(e,t?"previous":"next"));if(r.getTextSlices().every((t=>null===t||0===t.distance))){let t={type:"initial"};for(const e of r.iterNodeCarets("shadowRoot"))if(zo(e))if(e.origin.isInline());else {if(e.origin.isShadowRoot()){if("merge-block"===t.type)break;if(di(r.anchor.origin)&&r.anchor.origin.isEmpty()){const t=_l(e);al(this,Zo(t,t)),r.anchor.origin.remove();}return}"merge-next-block"!==t.type&&"merge-block"!==t.type||(t={block:t.block,caret:e,type:"merge-block"});}else {if("merge-block"===t.type)break;if(Io(e)){if(di(e.origin)){if(e.origin.isInline()){if(!e.origin.isParentOf(r.anchor.origin))break}else t={block:e.origin,type:"merge-next-block"};continue}if(_i(e.origin)){if(e.origin.isIsolated());else if("merge-next-block"===t.type&&(e.origin.isKeyboardSelectable()||!e.origin.isInline())&&di(r.anchor.origin)&&r.anchor.origin.isEmpty()){r.anchor.origin.remove();const t=kr();t.add(e.origin.getKey()),ys(t);}else e.origin.remove();return}break}}if("merge-block"===t.type){const{caret:e,block:n}=t;return al(this,Zo(!e.origin.isEmpty()&&n.isEmpty()?fl(Wo(n,e.direction)):r.anchor,e)),this.removeText()}}const i=this.focus;if(this.modify("extend",t,"character"),this.isCollapsed()){if(t&&0===e.offset&&hr(this,e.getNode()))return}else {const r="text"===i.type?i.getNode():null;if(n="text"===e.type?e.getNode():null,null!==r&&r.isSegmented()){const e=i.offset,s=r.getTextContentSize();if(r.is(n)||t&&e!==s||!t&&0!==e)return void _r(r,t,e)}else if(null!==n&&n.isSegmented()){const i=e.offset,s=n.getTextContentSize();if(n.is(r)||t&&0!==i||!t&&i!==s)return void _r(n,t,i)}!function(t,e){const n=t.anchor,r=t.focus,i=n.getNode(),s=r.getNode();if(i===s&&"text"===n.type&&"text"===r.type){const t=n.offset,s=r.offset,o=t<s,l=o?t:s,c=o?s:t,a=c-1;if(l!==a){(function(t){return !(Cs(t)||gr(t))})(i.getTextContent().slice(l,c))&&(e?r.set(r.key,a,r.type):n.set(n.key,a,n.type));}}}(this,t);}}if(this.removeText(),t&&!e&&this.isCollapsed()&&"element"===this.anchor.type&&0===this.anchor.offset){const t=this.anchor.getNode();t.isEmpty()&&yi(t.getParent())&&null===t.getPreviousSibling()&&hr(this,t);}}deleteLine(t){this.isCollapsed()&&this.modify("extend",t,"lineboundary"),this.isCollapsed()?this.deleteCharacter(t):this.removeText();}deleteWord(t){if(this.isCollapsed()){const e=this.anchor,n=e.getNode();if(this.forwardDeletion(e,n,t))return;this.modify("extend",t,"word");}this.removeText();}isBackward(){return this.focus.isBefore(this.anchor)}getStartEndPoints(){return [this.anchor,this.focus]}}function ur(t){return t instanceof lr}function fr(t){const e=t.offset;if("text"===t.type)return e;const n=t.getNode();return e===n.getChildrenSize()?n.getTextContent().length:0}function dr(t){const e=t.getStartEndPoints();if(null===e)return [0,0];const[n,r]=e;return "element"===n.type&&"element"===r.type&&n.key===r.key&&n.offset===r.offset?[0,0]:[fr(n),fr(r)]}function hr(t,e){for(let n=e;n;n=n.getParent()){if(di(n)){if(n.collapseAtStart(t))return  true;if(Zs(n))break}if(n.getPreviousSibling())break}return  false}const gr=(()=>{try{const t=new RegExp("\\p{Emoji}","u"),e=t.test.bind(t);if(e("❤️")&&e("#️⃣")&&e("👍"))return e}catch(t){}return ()=>false})();function _r(t,e,n){const r=t,i=r.getTextContent().split(/(?=\s)/g),s=i.length;let o=0,l=0;for(let t=0;t<s;t++){const r=t===s-1;if(l=o,o+=i[t].length,e&&o===n||o>n||r){i.splice(t,1),r&&(l=void 0);break}}const c=i.join("").trim();""===c?r.remove():(r.setTextContent(c),r.select(l,l));}function pr(e,n,r,i){let s,o=n;if(uo(e)){let l=false;const c=e.childNodes,a=c.length,u=i._blockCursorElement;o===a&&(l=true,o=a-1);let f=c[o],d=false;if(f===u)f=c[o+1],d=true;else if(null!==u){const t=u.parentNode;if(e===t){n>Array.prototype.indexOf.call(t.children,u)&&o--;}}if(s=ms(f),Qn(s))o=xs(s,l);else {let c=ms(e);if(null===c)return null;if(di(c)){const a=i.getElementByKey(c.getKey());null===a&&t$2(214);const u=c.getDOMSlot(a);[c,o]=u.resolveChildIndex(c,a,e,n),di(c)||t$2(215),l&&o>=c.getChildrenSize()&&(o=Math.max(0,c.getChildrenSize()-1));let f=c.getChildAtIndex(o);if(di(f)&&function(t,e,n){const r=t.getParent();return null===n||null===r||!r.canBeEmpty()||r!==n.getNode()}(f,0,r)){const t=l?f.getLastDescendant():f.getFirstDescendant();null===t?c=f:(f=t,c=di(f)?f:f.getParentOrThrow()),o=0;}Qn(f)?(s=f,c=null,o=xs(f,l)):f!==c&&l&&!d&&(di(c)||t$2(216),o=Math.min(c.getChildrenSize(),o+1));}else {const t=c.getIndexWithinParent();o=0===n&&_i(c)&&ms(e)===c?t:t+1,c=c.getParentOrThrow();}if(di(c))return ir(c.__key,o,"element")}}else s=ms(e);return Qn(s)?ir(s.__key,o,"text"):null}function yr(t,e,n){const r=t.offset,i=t.getNode();if(0===r){const r=i.getPreviousSibling(),s=i.getParent();if(e){if((n||!e)&&null===r&&di(s)&&s.isInline()){const e=s.getPreviousSibling();Qn(e)&&t.set(e.__key,e.getTextContent().length,"text");}}else di(r)&&!n&&r.isInline()?t.set(r.__key,r.getChildrenSize(),"element"):Qn(r)&&t.set(r.__key,r.getTextContent().length,"text");}else if(r===i.getTextContent().length){const r=i.getNextSibling(),s=i.getParent();if(e&&di(r)&&r.isInline())t.set(r.__key,0,"element");else if((n||e)&&null===r&&di(s)&&s.isInline()&&!s.canInsertTextAfter()){const e=s.getNextSibling();Qn(e)&&t.set(e.__key,0,"text");}}}function mr(t,e,n){if("text"===t.type&&"text"===e.type){const r=t.isBefore(e),i=t.is(e);yr(t,r,i),yr(e,!r,i),i&&e.set(t.key,t.offset,t.type);const s=qr();if(s.isComposing()&&s._compositionKey!==t.key&&cr(n)){const r=n.anchor,i=n.focus;t.set(r.key,r.offset,r.type,true),e.set(i.key,i.offset,i.type,true);}}}function xr(t,e,n,r,i,s){if(null===t||null===n||!Hi(i,t,n))return null;const o=pr(t,e,cr(s)?s.anchor:null,i);if(null===o)return null;const l=pr(n,r,cr(s)?s.focus:null,i);if(null===l)return null;if("element"===o.type&&"element"===l.type){const e=ms(t),r=ms(n);if(_i(e)&&_i(r))return null}return mr(o,l,s),[o,l]}function Cr(t){return di(t)&&!t.isInline()}function Sr(t,e,n,r,i,s){const o=Hr(),l=new ar(ir(t,e,i),ir(n,r,s),0,"");return l.dirty=true,o._selection=l,l}function vr(){const t=ir("root",0,"element"),e=ir("root",0,"element");return new ar(t,e,0,"")}function kr(){return new lr(new Set)}function br(t,e,n,r){const i=n._window;if(null===i)return null;const s=r||i.event,o=s?s.type:void 0,l="selectionchange"===o,c=!tt$3&&(l||"beforeinput"===o||"compositionstart"===o||"compositionend"===o||"click"===o&&s&&3===s.detail||"drop"===o||void 0===o);let a,u,f,d;if(cr(t)&&!c)return t.clone();if(null===e)return null;if(a=e.anchorNode,u=e.focusNode,f=e.anchorOffset,d=e.focusOffset,l&&cr(t)&&!Hi(n,a,u))return t.clone();const h=xr(a,f,u,d,n,t);if(null===h)return null;const[g,_]=h;return new ar(g,_,cr(t)?t.format:0,cr(t)?t.style:"")}function Nr(){return Hr()._selection}function wr(){return qr()._editorState._selection}function Er(t,e,n,r=1){const i=t.anchor,s=t.focus,o=i.getNode(),l=s.getNode();if(!e.is(o)&&!e.is(l))return;const c=e.__key;if(t.isCollapsed()){const e=i.offset;if(n<=e&&r>0||n<e&&r<0){const n=Math.max(0,e+r);i.set(c,n,"element"),s.set(c,n,"element"),Mr(t);}}else {const o=t.isBackward(),l=o?s:i,a=l.getNode(),u=o?i:s,f=u.getNode();if(e.is(a)){const t=l.offset;(n<=t&&r>0||n<t&&r<0)&&l.set(c,Math.max(0,t+r),"element");}if(e.is(f)){const t=u.offset;(n<=t&&r>0||n<t&&r<0)&&u.set(c,Math.max(0,t+r),"element");}}Mr(t);}function Mr(t){const e=t.anchor,n=e.offset,r=t.focus,i=r.offset,s=e.getNode(),o=r.getNode();if(t.isCollapsed()){if(!di(s))return;const t=s.getChildrenSize(),i=n>=t,o=i?s.getChildAtIndex(t-1):s.getChildAtIndex(n);if(Qn(o)){let t=0;i&&(t=o.getTextContentSize()),e.set(o.__key,t,"text"),r.set(o.__key,t,"text");}}else {if(di(s)){const t=s.getChildrenSize(),r=n>=t,i=r?s.getChildAtIndex(t-1):s.getChildAtIndex(n);if(Qn(i)){let t=0;r&&(t=i.getTextContentSize()),e.set(i.__key,t,"text");}}if(di(o)){const t=o.getChildrenSize(),e=i>=t,n=e?o.getChildAtIndex(t-1):o.getChildAtIndex(i);if(Qn(n)){let t=0;e&&(t=n.getTextContentSize()),r.set(n.__key,t,"text");}}}}function Ar(t,e,n,r,i){let s=null,o=0,l=null;null!==r?(s=r.__key,Qn(r)?(o=r.getTextContentSize(),l="text"):di(r)&&(o=r.getChildrenSize(),l="element")):null!==i&&(s=i.__key,Qn(i)?l="text":di(i)&&(l="element")),null!==s&&null!==l?t.set(s,o,l):(o=e.getIndexWithinParent(),-1===o&&(o=n.getChildrenSize()),t.set(n.__key,o,"element"));}function Or(t,e,n,r,i){"text"===t.type?t.set(n,t.offset+(e?0:i),"text"):t.offset>r.getIndexWithinParent()&&t.set(t.key,t.offset-1,"element");}function Dr(t,e,n,r,i){try{t.setBaseAndExtent(e,n,r,i);}catch(t){}}function Pr(t,e,n,r,i,s,o){const l=r.anchorNode,c=r.focusNode,a=r.anchorOffset,u=r.focusOffset,f=document.activeElement;if(i.has(Ni)&&f!==s||null!==f&&Yi(f))return;if(!cr(e))return void(null!==t&&Hi(n,l,c)&&r.removeAllRanges());const d=e.anchor,h=e.focus,g=d.key,_=h.key,p=Js(n,g),y=Js(n,_),m=d.offset,x=h.offset,C=e.format,S=e.style,v=e.isCollapsed();let k=p,T=y,b=false;if("text"===d.type){k=es(p);const t=d.getNode();b=t.getFormat()!==C||t.getStyle()!==S;}else cr(t)&&"text"===t.anchor.type&&(b=true);var N,w,E,M,A;if(("text"===h.type&&(T=es(y)),null!==k&&null!==T)&&(v&&(null===t||b||cr(t)&&(t.format!==C||t.style!==S))&&(N=C,w=S,E=m,M=g,A=performance.now(),gn=[N,w,E,M,A]),a!==m||u!==x||l!==k||c!==T||"Range"===r.type&&v||(null!==f&&s.contains(f)||s.focus({preventScroll:true}),"element"===d.type))){if(Dr(r,k,m,T,x),!i.has(Ei)&&e.isCollapsed()&&null!==s&&s===document.activeElement){const t=cr(e)&&"element"===e.anchor.type?k.childNodes[m]||null:r.rangeCount>0?r.getRangeAt(0):null;if(null!==t){let e;if(t instanceof Text){const n=document.createRange();n.selectNode(t),e=n.getBoundingClientRect();}else e=t.getBoundingClientRect();!function(t,e,n){const r=$s(n),i=qs(r);if(null===r||null===i)return;let{top:s,bottom:o}=e,l=0,c=0,a=n;for(;null!==a;){const e=a===r.body;if(e)l=0,c=Gs(t).innerHeight;else {const t=a.getBoundingClientRect();l=t.top,c=t.bottom;}let n=0;if(s<l?n=-(l-s):o>c&&(n=o-c),0!==n)if(e)i.scrollBy(0,n);else {const t=a.scrollTop;a.scrollTop+=n;const e=a.scrollTop-t;s-=e,o-=e;}if(e)break;a=Us(a);}}(n,e,s);}}ln=true;}}function Fr(t){let e=Nr()||wr();null===e&&(e=_s().selectEnd()),e.insertNodes(t);}function Ir(e){let n=e;e.isCollapsed()||n.removeText();const r=Nr();cr(r)&&(n=r),cr(n)||t$2(161);const i=n.anchor;let s=i.getNode(),o=i.offset;for(;!po(s);){const t=s;if([s,o]=zr(s,o),t.is(s))break}return o}function zr(t,e){const n=t.getParent();if(!n){const t=Pi();return _s().append(t),t.select(),[_s(),0]}if(Qn(t)){const r=t.splitText(e);if(0===r.length)return [n,t.getIndexWithinParent()];const i=0===e?0:1;return [n,r[0].getIndexWithinParent()+i]}if(!di(t)||0===e)return [n,t.getIndexWithinParent()];const r=t.getChildAtIndex(e);if(r){const n=new ar(ir(t.__key,e,"element"),ir(t.__key,e,"element"),0,""),i=t.insertNewAfter(n);i&&i.append(r,...r.getNextSiblings());}return [n,t.getIndexWithinParent()+1]}function Kr(t,e,n,r,i="decorators-and-blocks"){if("move"===e&&"character"===r&&!t.isCollapsed()){const[e,r]=n===t.isBackward()?[t.focus,t.anchor]:[t.anchor,t.focus];return r.set(e.key,e.offset,e.type),true}const s=ol(t.focus,n?"previous":"next"),o="lineboundary"===r,l="move"===e;let c=s,a="decorators-and-blocks"===i;if(!pl(c)){for(const t of c){a=false;const{origin:e}=t;if(!_i(e)||e.isIsolated()||(c=t,!o||!e.isInline()))break}if(a)for(const t of Xo(s).iterNodeCarets("extend"===e?"shadowRoot":"root")){if(zo(t))t.origin.isInline()||(c=t);else {if(di(t.origin))continue;_i(t.origin)&&!t.origin.isInline()&&(c=t);}break}}if(c===s)return  false;if(l&&!o&&_i(c.origin)&&c.origin.isKeyboardSelectable()){const t=kr();return t.add(c.origin.getKey()),ys(t),true}return c=_l(c),l&&ll(t.anchor,c),ll(t.focus,c),a||!o}let Br=null,Rr=null,Wr=false,Jr=false,Ur=0;const $r={characterData:true,childList:true,subtree:true};function jr(){return Wr||null!==Br&&Br._readOnly}function Vr(){Wr&&t$2(13);}function Yr(){Ur>99&&t$2(14);}function Hr(){return null===Br&&t$2(195,Gr()),Br}function qr(){return null===Rr&&t$2(196,Gr()),Rr}function Gr(){let t=0;const e=new Set,n=Ji.version;if("undefined"!=typeof window)for(const r of document.querySelectorAll("[contenteditable]")){const i=Xi(r);if(qi(i))t++;else if(i){let t=String(i.constructor.version||"<0.17.1");t===n&&(t+=" (separately built, likely a bundler configuration issue)"),e.add(t);}}let r=` Detected on the page: ${t} compatible editor(s) with version ${n}`;return e.size&&(r+=` and incompatible editors with versions ${Array.from(e).join(", ")}`),r}function Xr(){return Rr}function Qr(e,n,r){const i=n.__type,s=function(e,n){const r=e._nodes.get(n);void 0===r&&t$2(30,n);return r}(e,i);let o=r.get(i);void 0===o&&(o=Array.from(s.transforms),r.set(i,o));const l=o.length;for(let t=0;t<l&&(o[t](n),n.isAttached());t++);}function Zr(t,e){return void 0!==t&&t.__key!==e&&t.isAttached()}function ti(t,e){if(!e)return;const n=t._updateTags;let r=e;Array.isArray(e)||(r=[e]);for(const t of r)n.add(t);}function ei(t){return ni(t,qr()._nodes)}function ni(e,n){const r=e.type,i=n.get(r);void 0===i&&t$2(17,r);const s=i.klass;e.type!==s.getType()&&t$2(18,s.name);const o=s.importJSON(e),l=e.children;if(di(o)&&Array.isArray(l))for(let t=0;t<l.length;t++){const e=ni(l[t],n);o.append(e);}return o}function ri(t,e,n){const r=Br,i=Wr,s=Rr;Br=e,Wr=true,Rr=t;try{return n()}finally{Br=r,Wr=i,Rr=s;}}function ii(t,e){const n=t._pendingEditorState,r=t._rootElement,i=t._headless||null===r;if(null===n)return;const s=t._editorState,o=s._selection,l=n._selection,c=t._dirtyType!==y$4,a=Br,u=Wr,f=Rr,h=t._updating,g=t._observer;let _=null;if(t._pendingEditorState=null,t._editorState=n,!i&&c&&null!==g){Rr=t,Br=n,Wr=false,t._updating=true;try{const e=t._dirtyType,r=t._dirtyElements,i=t._dirtyLeaves;g.disconnect(),_=ie(s,n,t,e,r,i);}catch(e){if(e instanceof Error&&t._onError(e),Jr)throw e;return Ri(t,null,r,n),at$2(t),t._dirtyType=x$6,Jr=true,ii(t,s),void(Jr=false)}finally{g.observe(r,$r),t._updating=h,Br=a,Wr=u,Rr=f;}}n._readOnly||(n._readOnly=true);const p=t._dirtyLeaves,m=t._dirtyElements,C=t._normalizedNodes,S=t._updateTags,v=t._deferred;c&&(t._dirtyType=y$4,t._cloneNotNeeded.clear(),t._dirtyLeaves=new Set,t._dirtyElements=new Map,t._normalizedNodes=new Set,t._updateTags=new Set),function(t,e){const n=t._decorators;let r=t._pendingDecorators||n;const i=e._nodeMap;let s;for(s in r)i.has(s)||(r===n&&(r=hs(t)),delete r[s]);}(t,n);const k=i?null:oo(Gs(t));if(t._editable&&null!==k&&(c||null===l||l.dirty)&&null!==r&&!S.has(Mi)){Rr=t,Br=n;try{if(null!==g&&g.disconnect(),c||null===l||l.dirty){const e=t._blockCursorElement;null!==e&&so(e,t,r),Pr(o,l,t,k,S,r);}!function(t,e,n){let r=t._blockCursorElement;if(cr(n)&&n.isCollapsed()&&"element"===n.anchor.type&&e.contains(document.activeElement)){const i=n.anchor,s=i.getNode(),o=i.offset;let l=!1,c=null;if(o===s.getChildrenSize()){io(s.getChildAtIndex(o-1))&&(l=!0);}else {const e=s.getChildAtIndex(o);if(null!==e&&io(e)){const n=e.getPreviousSibling();(null===n||io(n))&&(l=!0,c=t.getElementByKey(e.__key));}}if(l){const n=t.getElementByKey(s.__key);return null===r&&(t._blockCursorElement=r=function(t){const e=t.theme,n=document.createElement("div");n.contentEditable="false",n.setAttribute("data-lexical-cursor","true");let r=e.blockCursor;if(void 0!==r){if("string"==typeof r){const t=d$3(r);r=e.blockCursor=t;}void 0!==r&&n.classList.add(...r);}return n}(t._config)),e.style.caretColor="transparent",void(null===c?n.appendChild(r):n.insertBefore(r,c))}}null!==r&&so(r,t,e);}(t,r,l);}finally{null!==g&&g.observe(r,$r),Rr=f,Br=a;}}null!==_&&function(t,e,n,r,i){const s=Array.from(t._listeners.mutation),o=s.length;for(let t=0;t<o;t++){const[o,l]=s[t],c=e.get(l);void 0!==c&&o(c,{dirtyLeaves:r,prevEditorState:i,updateTags:n});}}(t,_,S,p,s),cr(l)||null===l||null!==o&&o.is(l)||t.dispatchCommand(le,void 0);const T=t._pendingDecorators;null!==T&&(t._decorators=T,t._pendingDecorators=null,si("decorator",t,true,T)),function(t,e,n){const r=gs(e),i=gs(n);r!==i&&si("textcontent",t,true,i);}(t,e||s,n),si("update",t,true,{dirtyElements:m,dirtyLeaves:p,editorState:n,mutatedNodes:_,normalizedNodes:C,prevEditorState:e||s,tags:S}),function(t,e){if(t._deferred=[],0!==e.length){const n=t._updating;t._updating=true;try{for(let t=0;t<e.length;t++)e[t]();}finally{t._updating=n;}}}(t,v),function(t){const e=t._updates;if(0!==e.length){const n=e.shift();if(n){const[e,r]=n;li(t,e,r);}}}(t);}function si(t,e,n,...r){const i=e._updating;e._updating=n;try{const n=Array.from(e._listeners[t]);for(let t=0;t<n.length;t++)n[t].apply(null,r);}finally{e._updating=i;}}function oi(e,n){const r=e._updates;let i=n||false;for(;0!==r.length;){const n=r.shift();if(n){const[r,s]=n;let o;if(void 0!==s){if(o=s.onUpdate,s.skipTransforms&&(i=true),s.discrete){const n=e._pendingEditorState;null===n&&t$2(191),n._flushSync=true;}o&&e._deferred.push(o),ti(e,s.tag);}r();}}return i}function li(e,n,r){const i=e._updateTags;let s,o=false,l=false;void 0!==r&&(s=r.onUpdate,ti(e,r.tag),o=r.skipTransforms||false,l=r.discrete||false),s&&e._deferred.push(s);const c=e._editorState;let a=e._pendingEditorState,u=false;(null===a||a._readOnly)&&(a=e._pendingEditorState=mi(a||c),u=true),a._flushSync=l;const f=Br,d=Wr,h=Rr,g=e._updating;Br=a,Wr=false,e._updating=true,Rr=e;const _=e._headless||null===e.getRootElement();try{u&&(_?null!==c._selection&&(a._selection=c._selection.clone()):a._selection=function(t,e){const n=t.getEditorState()._selection,r=oo(Gs(t));return cr(n)||null==n?br(n,r,t,e):n.clone()}(e,r&&r.event||null));const i=e._compositionKey;n(),o=oi(e,o),function(t,e){const n=e.getEditorState()._selection,r=t._selection;if(cr(r)){const t=r.anchor,e=r.focus;let i;if("text"===t.type&&(i=t.getNode(),i.selectionTransform(n,r)),"text"===e.type){const t=e.getNode();i!==t&&t.selectionTransform(n,r);}}}(a,e),e._dirtyType!==y$4&&(o?function(t,e){const n=e._dirtyLeaves,r=t._nodeMap;for(const t of n){const e=r.get(t);Qn(e)&&e.isAttached()&&e.isSimpleText()&&!e.isUnmergeable()&&St$2(e);}}(a,e):function(t,e){const n=e._dirtyLeaves,r=e._dirtyElements,i=t._nodeMap,s=cs(),o=new Map;let l=n,c=l.size,a=r,u=a.size;for(;c>0||u>0;){if(c>0){e._dirtyLeaves=new Set;for(const t of l){const r=i.get(t);Qn(r)&&r.isAttached()&&r.isSimpleText()&&!r.isUnmergeable()&&St$2(r),void 0!==r&&Zr(r,s)&&Qr(e,r,o),n.add(t);}if(l=e._dirtyLeaves,c=l.size,c>0){Ur++;continue}}e._dirtyLeaves=new Set,e._dirtyElements=new Map,a.delete("root")&&a.set("root",!0);for(const t of a){const n=t[0],l=t[1];if(r.set(n,l),!l)continue;const c=i.get(n);void 0!==c&&Zr(c,s)&&Qr(e,c,o);}l=e._dirtyLeaves,c=l.size,a=e._dirtyElements,u=a.size,Ur++;}e._dirtyLeaves=n,e._dirtyElements=r;}(a,e),oi(e),function(t,e,n,r){const i=t._nodeMap,s=e._nodeMap,o=[];for(const[t]of r){const e=s.get(t);void 0!==e&&(e.isAttached()||(di(e)&&Q$2(e,t,i,s,o,r),i.has(t)||r.delete(t),o.push(t)));}for(const t of o)s.delete(t);for(const t of n){const e=s.get(t);void 0===e||e.isAttached()||(i.has(t)||n.delete(t),s.delete(t));}}(c,a,e._dirtyLeaves,e._dirtyElements));i!==e._compositionKey&&(a._flushSync=!0);const s=a._selection;if(cr(s)){const e=a._nodeMap,n=s.anchor.key,r=s.focus.key;void 0!==e.get(n)&&void 0!==e.get(r)||t$2(19);}else ur(s)&&0===s._nodes.size&&(a._selection=null);}catch(t){return t instanceof Error&&e._onError(t),e._pendingEditorState=c,e._dirtyType=x$6,e._cloneNotNeeded.clear(),e._dirtyLeaves=new Set,e._dirtyElements.clear(),void ii(e)}finally{Br=f,Wr=d,Rr=h,e._updating=g,Ur=0;}const p=e._dirtyType!==y$4||e._deferred.length>0||function(t,e){const n=e.getEditorState()._selection,r=t._selection;if(null!==r){if(r.dirty||!r.is(n))return  true}else if(null!==n)return  true;return  false}(a,e);p?a._flushSync?(a._flushSync=false,ii(e)):u&&ji((()=>{ii(e);})):(a._flushSync=false,u&&(i.clear(),e._deferred=[],e._pendingEditorState=null));}function ci(t,e,n){Rr===t&&void 0===n?e():li(t,e,n);}class ai{constructor(t,e,n){this.element=t,this.before=e||null,this.after=n||null;}withBefore(t){return new ai(this.element,t,this.after)}withAfter(t){return new ai(this.element,this.before,t)}withElement(t){return this.element===t?this:new ai(t,this.before,this.after)}insertChild(e){const n=this.before||this.getManagedLineBreak();return null!==n&&n.parentElement!==this.element&&t$2(222),this.element.insertBefore(e,n),this}removeChild(e){return e.parentElement!==this.element&&t$2(223),this.element.removeChild(e),this}replaceChild(e,n){return n.parentElement!==this.element&&t$2(224),this.element.replaceChild(e,n),this}getFirstChild(){const t=this.after?this.after.nextSibling:this.element.firstChild;return t===this.before||t===this.getManagedLineBreak()?null:t}getManagedLineBreak(){return this.element.__lexicalLineBreak||null}setManagedLineBreak(t){if(null===t)this.removeManagedLineBreak();else {const e="decorator"===t&&(l||o$3);this.insertManagedLineBreak(e);}}removeManagedLineBreak(){const t=this.getManagedLineBreak();if(t){const e=this.element,n="IMG"===t.nodeName?t.nextSibling:null;n&&e.removeChild(n),e.removeChild(t),e.__lexicalLineBreak=void 0;}}insertManagedLineBreak(t){const e=this.getManagedLineBreak();if(e){if(t===("IMG"===e.nodeName))return;this.removeManagedLineBreak();}const n=this.element,r=this.before,i=document.createElement("br");if(n.insertBefore(i,r),t){const t=document.createElement("img");t.setAttribute("data-lexical-linebreak","true"),t.style.cssText="display: inline !important; border: 0px !important; margin: 0px !important;",t.alt="",n.insertBefore(t,i),n.__lexicalLineBreak=t;}else n.__lexicalLineBreak=i;}getFirstChildOffset(){let t=0;for(let e=this.after;null!==e;e=e.previousSibling)t++;return t}resolveChildIndex(t,e,n,r){if(n===this.element){const e=this.getFirstChildOffset();return [t,Math.min(e+t.getChildrenSize(),Math.max(e,r))]}const i=ui(e,n);i.push(r);const s=ui(e,this.element);let o=t.getIndexWithinParent();for(let t=0;t<s.length;t++){const e=i[t],n=s[t];if(void 0===e||e<n)break;if(e>n){o+=1;break}}return [t.getParentOrThrow(),o]}}function ui(e,n){const r=[];let i=n;for(;i!==e&&null!==i;i=n.parentNode){let t=0;for(let e=i.previousSibling;null!==e;e=e.previousSibling)t++;r.push(t);}return i!==e&&t$2(225),r.reverse()}class fi extends An{constructor(t){super(t),this.__first=null,this.__last=null,this.__size=0,this.__format=0,this.__style="",this.__indent=0,this.__dir=null,this.__textFormat=0,this.__textStyle="";}afterCloneFrom(t){super.afterCloneFrom(t),this.__first=t.__first,this.__last=t.__last,this.__size=t.__size,this.__indent=t.__indent,this.__format=t.__format,this.__style=t.__style,this.__dir=t.__dir,this.__textFormat=t.__textFormat,this.__textStyle=t.__textStyle;}getFormat(){return this.getLatest().__format}getFormatType(){const t=this.getFormat();return H$3[t]||""}getStyle(){return this.getLatest().__style}getIndent(){return this.getLatest().__indent}getChildren(){const t=[];let e=this.getFirstChild();for(;null!==e;)t.push(e),e=e.getNextSibling();return t}getChildrenKeys(){const t=[];let e=this.getFirstChild();for(;null!==e;)t.push(e.__key),e=e.getNextSibling();return t}getChildrenSize(){return this.getLatest().__size}isEmpty(){return 0===this.getChildrenSize()}isDirty(){const t=qr()._dirtyElements;return null!==t&&t.has(this.__key)}isLastChild(){const t=this.getLatest(),e=this.getParentOrThrow().getLastChild();return null!==e&&e.is(t)}getAllTextNodes(){const t=[];let e=this.getFirstChild();for(;null!==e;){if(Qn(e)&&t.push(e),di(e)){const n=e.getAllTextNodes();t.push(...n);}e=e.getNextSibling();}return t}getFirstDescendant(){let t=this.getFirstChild();for(;di(t);){const e=t.getFirstChild();if(null===e)break;t=e;}return t}getLastDescendant(){let t=this.getLastChild();for(;di(t);){const e=t.getLastChild();if(null===e)break;t=e;}return t}getDescendantByIndex(t){const e=this.getChildren(),n=e.length;if(t>=n){const t=e[n-1];return di(t)&&t.getLastDescendant()||t||null}const r=e[t];return di(r)&&r.getFirstDescendant()||r||null}getFirstChild(){const t=this.getLatest().__first;return null===t?null:as(t)}getFirstChildOrThrow(){const e=this.getFirstChild();return null===e&&t$2(45,this.__key),e}getLastChild(){const t=this.getLatest().__last;return null===t?null:as(t)}getLastChildOrThrow(){const e=this.getLastChild();return null===e&&t$2(96,this.__key),e}getChildAtIndex(t){const e=this.getChildrenSize();let n,r;if(t<e/2){for(n=this.getFirstChild(),r=0;null!==n&&r<=t;){if(r===t)return n;n=n.getNextSibling(),r++;}return null}for(n=this.getLastChild(),r=e-1;null!==n&&r>=t;){if(r===t)return n;n=n.getPreviousSibling(),r--;}return null}getTextContent(){let t="";const e=this.getChildren(),n=e.length;for(let r=0;r<n;r++){const i=e[r];t+=i.getTextContent(),di(i)&&r!==n-1&&!i.isInline()&&(t+=B$6);}return t}getTextContentSize(){let t=0;const e=this.getChildren(),n=e.length;for(let r=0;r<n;r++){const i=e[r];t+=i.getTextContentSize(),di(i)&&r!==n-1&&!i.isInline()&&(t+=B$6.length);}return t}getDirection(){return this.getLatest().__dir}getTextFormat(){return this.getLatest().__textFormat}hasFormat(t){if(""!==t){const e=Y$3[t];return !!(this.getFormat()&e)}return  false}hasTextFormat(t){const e=j$3[t];return !!(this.getTextFormat()&e)}getFormatFlags(t,e){return ns(this.getLatest().__textFormat,t,e)}getTextStyle(){return this.getLatest().__textStyle}select(t,e){Vr();const n=Nr();let r=t,i=e;const s=this.getChildrenSize();if(!this.canBeEmpty())if(0===t&&0===e){const t=this.getFirstChild();if(Qn(t)||di(t))return t.select(0,0)}else if(!(void 0!==t&&t!==s||void 0!==e&&e!==s)){const t=this.getLastChild();if(Qn(t)||di(t))return t.select()} void 0===r&&(r=s),void 0===i&&(i=s);const o=this.__key;return cr(n)?(n.anchor.set(o,r,"element"),n.focus.set(o,i,"element"),n.dirty=true,n):Sr(o,r,o,i,"element","element")}selectStart(){const t=this.getFirstDescendant();return t?t.selectStart():this.select()}selectEnd(){const t=this.getLastDescendant();return t?t.selectEnd():this.select()}clear(){const t=this.getWritable();return this.getChildren().forEach((t=>t.remove())),t}append(...t){return this.splice(this.getChildrenSize(),0,t)}setDirection(t){const e=this.getWritable();return e.__dir=t,e}setFormat(t){return this.getWritable().__format=""!==t?Y$3[t]:0,this}setStyle(t){return this.getWritable().__style=t||"",this}setTextFormat(t){const e=this.getWritable();return e.__textFormat=t,e}setTextStyle(t){const e=this.getWritable();return e.__textStyle=t,e}setIndent(t){return this.getWritable().__indent=t,this}splice(e,n,r){const i=r.length,s=this.getChildrenSize(),o=this.getWritable();e+n<=s||t$2(226,String(e),String(n),String(s));const l=o.__key,c=[],a=[],u=this.getChildAtIndex(e+n);let f=null,d=s-n+i;if(0!==e)if(e===s)f=this.getLastChild();else {const t=this.getChildAtIndex(e);null!==t&&(f=t.getPreviousSibling());}if(n>0){let e=null===f?this.getFirstChild():f.getNextSibling();for(let r=0;r<n;r++){null===e&&t$2(100);const n=e.getNextSibling(),r=e.__key;ss(e.getWritable()),a.push(r),e=n;}}let h=f;for(let e=0;e<i;e++){const n=r[e];null!==h&&n.is(h)&&(f=h=h.getPreviousSibling());const i=n.getWritable();i.__parent===l&&d--,ss(i);const s=n.__key;if(null===h)o.__first=s,i.__prev=null;else {const t=h.getWritable();t.__next=s,i.__prev=t.__key;}n.__key===l&&t$2(76),i.__parent=l,c.push(s),h=n;}if(e+n===s){if(null!==h){h.getWritable().__next=null,o.__last=h.__key;}}else if(null!==u){const t=u.getWritable();if(null!==h){const e=h.getWritable();t.__prev=h.__key,e.__next=u.__key;}else t.__prev=null;}if(o.__size=d,a.length){const t=Nr();if(cr(t)){const e=new Set(a),n=new Set(c),{anchor:r,focus:i}=t;hi(r,e,n)&&Ar(r,r.getNode(),this,f,u),hi(i,e,n)&&Ar(i,i.getNode(),this,f,u),0!==d||this.canBeEmpty()||Zs(this)||this.remove();}}return o}getDOMSlot(t){return new ai(t)}exportDOM(t){const{element:e}=super.exportDOM(t);if(uo(e)){const t=this.getIndent();t>0&&(e.style.paddingInlineStart=40*t+"px");const n=this.getDirection();n&&(e.dir=n);}return {element:e}}exportJSON(){const t={children:[],direction:this.getDirection(),format:this.getFormatType(),indent:this.getIndent(),...super.exportJSON()},e=this.getTextFormat(),n=this.getTextStyle();return 0!==e&&(t.textFormat=e),""!==n&&(t.textStyle=n),t}updateFromJSON(t){return super.updateFromJSON(t).setFormat(t.format).setIndent(t.indent).setDirection(t.direction).setTextFormat(t.textFormat||0).setTextStyle(t.textStyle||"")}insertNewAfter(t,e){return null}canIndent(){return  true}collapseAtStart(t){return  false}excludeFromCopy(t){return  false}canReplaceWith(t){return  true}canInsertAfter(t){return  true}canBeEmpty(){return  true}canInsertTextBefore(){return  true}canInsertTextAfter(){return  true}isInline(){return  false}isShadowRoot(){return  false}canMergeWith(t){return  false}extractWithChild(t,e,n){return  false}canMergeWhenEmpty(){return  false}reconcileObservedMutation(t,e){const n=this.getDOMSlot(t);let r=n.getFirstChild();for(let t=this.getFirstChild();t;t=t.getNextSibling()){const i=e.getElementByKey(t.getKey());null!==i&&(null==r?(n.insertChild(i),r=i):r!==i&&n.replaceChild(i,r),r=r.nextSibling);}}}function di(t){return t instanceof fi}function hi(t,e,n){let r=t.getNode();for(;r;){const t=r.__key;if(e.has(t)&&!n.has(t))return  true;r=r.getParent();}return  false}class gi extends An{decorate(e,n){t$2(47);}isIsolated(){return  false}isInline(){return  true}isKeyboardSelectable(){return  true}}function _i(t){return t instanceof gi}class pi extends fi{static getType(){return "root"}static clone(){return new pi}constructor(){super("root"),this.__cachedText=null;}getTopLevelElementOrThrow(){t$2(51);}getTextContent(){const t=this.__cachedText;return !jr()&&qr()._dirtyType!==y$4||null===t?super.getTextContent():t}remove(){t$2(52);}replace(e){t$2(53);}insertBefore(e){t$2(54);}insertAfter(e){t$2(55);}updateDOM(t,e){return  false}splice(e,n,r){for(const e of r)di(e)||_i(e)||t$2(282);return super.splice(e,n,r)}static importJSON(t){return _s().updateFromJSON(t)}collapseAtStart(){return  true}}function yi(t){return t instanceof pi}function mi(t){return new Si(new Map(t._nodeMap))}function xi(){return new Si(new Map([["root",new pi]]))}function Ci(e){const n=e.exportJSON(),r=e.constructor;if(n.type!==r.getType()&&t$2(130,r.name),di(e)){const i=n.children;Array.isArray(i)||t$2(59,r.name);const s=e.getChildren();for(let t=0;t<s.length;t++){const e=Ci(s[t]);i.push(e);}}return n}class Si{constructor(t,e){this._nodeMap=t,this._selection=e||null,this._flushSync=false,this._readOnly=false;}isEmpty(){return 1===this._nodeMap.size&&null===this._selection}read(t,e){return ri(e&&e.editor||null,this,t)}clone(t){const e=new Si(this._nodeMap,void 0===t?this._selection:t);return e._readOnly=true,e}toJSON(){return ri(null,this,(()=>({root:Ci(_s())})))}}const vi="historic",ki="history-push",Ti="history-merge",bi="paste",Ni="collaboration",Ei="skip-scroll-into-view",Mi="skip-dom-selection";class Ai extends fi{static getType(){return "artificial"}createDOM(t){return document.createElement("div")}}class Oi extends fi{static getType(){return "paragraph"}static clone(t){return new Oi(t.__key)}createDOM(t){const e=document.createElement("p"),n=Fs(t.theme,"paragraph");if(void 0!==n){e.classList.add(...n);}return e}updateDOM(t,e,n){return  false}static importDOM(){return {p:t=>({conversion:Di,priority:0})}}exportDOM(t){const{element:e}=super.exportDOM(t);if(uo(e)){this.isEmpty()&&e.append(document.createElement("br"));const t=this.getFormatType();e.style.textAlign=t;}return {element:e}}static importJSON(t){return Pi().updateFromJSON(t)}exportJSON(){return {...super.exportJSON(),textFormat:this.getTextFormat(),textStyle:this.getTextStyle()}}insertNewAfter(t,e){const n=Pi();n.setTextFormat(t.format),n.setTextStyle(t.style);const r=this.getDirection();return n.setDirection(r),n.setFormat(this.getFormatType()),n.setStyle(this.getStyle()),this.insertAfter(n,e),n}collapseAtStart(){const t=this.getChildren();if(0===t.length||Qn(t[0])&&""===t[0].getTextContent().trim()){if(null!==this.getNextSibling())return this.selectNext(),this.remove(),true;if(null!==this.getPreviousSibling())return this.selectPrevious(),this.remove(),true}return  false}}function Di(t){const e=Pi();return t.style&&(e.setFormat(t.style.textAlign),ko(t,e)),{node:e}}function Pi(){return eo(new Oi)}function Fi(t){return t instanceof Oi}const Li=0,Ii=1,Bi=4;function Ri(t,e,n,r){const i=t._keyToDOMMap;i.clear(),t._editorState=xi(),t._pendingEditorState=r,t._compositionKey=null,t._dirtyType=y$4,t._cloneNotNeeded.clear(),t._dirtyLeaves=new Set,t._dirtyElements.clear(),t._normalizedNodes=new Set,t._updateTags=new Set,t._updates=[],t._blockCursorElement=null;const s=t._observer;null!==s&&(s.disconnect(),t._observer=null),null!==e&&(e.textContent=""),null!==n&&(n.textContent="",i.set("root",n));}function Wi(t){const e=t||{},n=Xr(),r=e.theme||{},i=void 0===t?n:e.parentEditor||null,s=e.disableEvents||false,o=xi(),l=e.namespace||(null!==i?i._config.namespace:vs()),c=e.editorState,a=[pi,Jn,On,tr,Oi,Ai,...e.nodes||[]],{onError:u,html:f}=e,d=void 0===e.editable||e.editable;let h;if(void 0===t&&null!==n)h=n._nodes;else {h=new Map;for(let t=0;t<a.length;t++){let e=a[t],n=null,r=null;if("function"!=typeof e){const t=e;e=t.replace,n=t.with,r=t.withKlass||null;}const i=e.getType(),s=e.transform(),o=new Set;null!==s&&o.add(s),h.set(i,{exportDOM:f&&f.export?f.export.get(e):void 0,klass:e,replace:n,replaceWithKlass:r,transforms:o});}}const g=new Ji(o,i,h,{disableEvents:s,namespace:l,theme:r},u||console.error,function(t,e){const n=new Map,r=new Set,i=t=>{Object.keys(t).forEach((e=>{let r=n.get(e);void 0===r&&(r=[],n.set(e,r)),r.push(t[e]);}));};return t.forEach((t=>{const e=t.klass.importDOM;if(null==e||r.has(e))return;r.add(e);const n=e.call(t.klass);null!==n&&i(n);})),e&&i(e),n}(h,f?f.import:void 0),d,t);return void 0!==c&&(g._pendingEditorState=c,g._dirtyType=x$6),g}class Ji{constructor(t,e,n,r,i,s,o,l){this._createEditorArgs=l,this._parentEditor=e,this._rootElement=null,this._editorState=t,this._pendingEditorState=null,this._compositionKey=null,this._deferred=[],this._keyToDOMMap=new Map,this._updates=[],this._updating=false,this._listeners={decorator:new Set,editable:new Set,mutation:new Map,root:new Set,textcontent:new Set,update:new Set},this._commands=new Map,this._config=r,this._nodes=n,this._decorators={},this._pendingDecorators=null,this._dirtyType=y$4,this._cloneNotNeeded=new Set,this._dirtyLeaves=new Set,this._dirtyElements=new Map,this._normalizedNodes=new Set,this._updateTags=new Set,this._observer=null,this._key=vs(),this._onError=i,this._htmlConversions=s,this._editable=o,this._headless=null!==e&&e._headless,this._window=null,this._blockCursorElement=null;}isComposing(){return null!=this._compositionKey}registerUpdateListener(t){const e=this._listeners.update;return e.add(t),()=>{e.delete(t);}}registerEditableListener(t){const e=this._listeners.editable;return e.add(t),()=>{e.delete(t);}}registerDecoratorListener(t){const e=this._listeners.decorator;return e.add(t),()=>{e.delete(t);}}registerTextContentListener(t){const e=this._listeners.textcontent;return e.add(t),()=>{e.delete(t);}}registerRootListener(t){const e=this._listeners.root;return t(this._rootElement,null),e.add(t),()=>{t(null,this._rootElement),e.delete(t);}}registerCommand(e,n,r){ void 0===r&&t$2(35);const i=this._commands;i.has(e)||i.set(e,[new Set,new Set,new Set,new Set,new Set]);const s=i.get(e);void 0===s&&t$2(36,String(e));const o=s[r];return o.add(n),()=>{o.delete(n),s.every((t=>0===t.size))&&i.delete(e);}}registerMutationListener(t,e,n){const r=this.resolveRegisteredNodeAfterReplacements(this.getRegisteredNode(t)).klass,i=this._listeners.mutation;i.set(e,r);const s=n&&n.skipInitialization;return void 0!==s&&s||this.initializeMutationListener(e,r),()=>{i.delete(e);}}getRegisteredNode(e){const n=this._nodes.get(e.getType());return void 0===n&&t$2(37,e.name),n}resolveRegisteredNodeAfterReplacements(t){for(;t.replaceWithKlass;)t=this.getRegisteredNode(t.replaceWithKlass);return t}initializeMutationListener(t,e){const n=this._editorState,r=So(n).get(e.getType());if(!r)return;const i=new Map;for(const t of r.keys())i.set(t,"created");i.size>0&&t(i,{dirtyLeaves:new Set,prevEditorState:n,updateTags:new Set(["registerMutationListener"])});}registerNodeTransformToKlass(t,e){const n=this.getRegisteredNode(t);return n.transforms.add(e),n}registerNodeTransform(t,e){const n=this.registerNodeTransformToKlass(t,e),r=[n],i=n.replaceWithKlass;if(null!=i){const t=this.registerNodeTransformToKlass(i,e);r.push(t);}return function(t,e){const n=So(t.getEditorState()),r=[];for(const t of e){const e=n.get(t);e&&r.push(e);}if(0===r.length)return;t.update((()=>{for(const t of r)for(const e of t.keys()){const t=as(e);t&&t.markDirty();}}),null===t._pendingEditorState?{tag:Ti}:void 0);}(this,r.map((t=>t.klass.getType()))),()=>{r.forEach((t=>t.transforms.delete(e)));}}hasNode(t){return this._nodes.has(t.getType())}hasNodes(t){return t.every(this.hasNode.bind(this))}dispatchCommand(t,e){return Rs(this,t,e)}getDecorators(){return this._decorators}getRootElement(){return this._rootElement}getKey(){return this._key}setRootElement(t){const e=this._rootElement;if(t!==e){const n=Fs(this._config.theme,"root"),r=this._pendingEditorState||this._editorState;if(this._rootElement=t,Ri(this,e,t,r),null!==e&&(this._config.disableEvents||En(e),null!=n&&e.classList.remove(...n)),null!==t){const e=qs(t),r=t.style;r.userSelect="text",r.whiteSpace="pre-wrap",r.wordBreak="break-word",t.setAttribute("data-lexical-editor","true"),this._window=e,this._dirtyType=x$6,at$2(this),this._updateTags.add(Ti),ii(this),this._config.disableEvents||function(t,e){const n=t.ownerDocument,r=on.get(n);(void 0===r||r<1)&&n.addEventListener("selectionchange",Tn),on.set(n,(r||0)+1),t.__lexicalEditor=e;const i=vn(t);for(let n=0;n<tn.length;n++){const[r,s]=tn[n],o="function"==typeof s?t=>{Nn(t)||(bn(t),(e.isEditable()||"click"===r)&&s(t,e));}:t=>{if(Nn(t))return;bn(t);const n=e.isEditable();switch(r){case "cut":return n&&Rs(e,Ue,t);case "copy":return Rs(e,Je,t);case "paste":return n&&Rs(e,ge,t);case "dragstart":return n&&Rs(e,Be,t);case "dragover":return n&&Rs(e,Re,t);case "dragend":return n&&Rs(e,We,t);case "focus":return n&&Rs(e,qe,t);case "blur":return n&&Rs(e,Ge,t);case "drop":return n&&Rs(e,ze,t)}};t.addEventListener(r,o),i.push((()=>{t.removeEventListener(r,o);}));}}(t,this),null!=n&&t.classList.add(...n);}else this._window=null,this._updateTags.add(Ti),ii(this);si("root",this,false,t,e);}}getElementByKey(t){return this._keyToDOMMap.get(t)||null}getEditorState(){return this._editorState}setEditorState(e,n){e.isEmpty()&&t$2(38);let r=e;r._readOnly&&(r=mi(e),r._selection=e._selection?e._selection.clone():null),ct$3(this);const i=this._pendingEditorState,s=this._updateTags,o=void 0!==n?n.tag:null;null===i||i.isEmpty()||(null!=o&&s.add(o),ii(this)),this._pendingEditorState=r,this._dirtyType=x$6,this._dirtyElements.set("root",false),this._compositionKey=null,null!=o&&s.add(o),this._updating||ii(this);}parseEditorState(t,e){return function(t,e,n){const r=xi(),i=Br,s=Wr,o=Rr,l=e._dirtyElements,c=e._dirtyLeaves,a=e._cloneNotNeeded,u=e._dirtyType;e._dirtyElements=new Map,e._dirtyLeaves=new Set,e._cloneNotNeeded=new Set,e._dirtyType=0,Br=r,Wr=false,Rr=e;try{const i=e._nodes;ni(t.root,i),n&&n(),r._readOnly=!0;}catch(t){t instanceof Error&&e._onError(t);}finally{e._dirtyElements=l,e._dirtyLeaves=c,e._cloneNotNeeded=a,e._dirtyType=u,Br=i,Wr=s,Rr=o;}return r}("string"==typeof t?JSON.parse(t):t,this,e)}read(t){return ii(this),this.getEditorState().read(t,{editor:this})}update(t,e){!function(t,e,n){t._updating?t._updates.push([e,n]):li(t,e,n);}(this,t,e);}focus(t,e={}){const n=this._rootElement;null!==n&&(n.setAttribute("autocapitalize","off"),ci(this,(()=>{const r=Nr(),i=_s();null!==r?r.dirty||ys(r.clone()):0!==i.getChildrenSize()&&("rootStart"===e.defaultSelection?i.selectStart():i.selectEnd()),Vs("focus"),Ys((()=>{n.removeAttribute("autocapitalize"),t&&t();}));})),null===this._pendingEditorState&&n.removeAttribute("autocapitalize"));}blur(){const t=this._rootElement;null!==t&&t.blur();const e=oo(this._window);null!==e&&e.removeAllRanges();}isEditable(){return this._editable}setEditable(t){this._editable!==t&&(this._editable=t,si("editable",this,true,t));}toJSON(){return {editorState:this._editorState.toJSON()}}}Ji.version="0.31.1+prod.esm";let Ui=1;const ji="function"==typeof queueMicrotask?queueMicrotask:t=>{Promise.resolve().then(t);};function Vi(t){return _i(ds(t))}function Yi(t){const e=document.activeElement;if(!uo(e))return  false;const n=e.nodeName;return _i(ds(t))&&("INPUT"===n||"TEXTAREA"===n||"true"===e.contentEditable&&null==Xi(e))}function Hi(t,e,n){const r=t.getRootElement();try{return null!==r&&r.contains(e)&&r.contains(n)&&null!==e&&!Yi(e)&&Gi(e)===t}catch(t){return  false}}function qi(t){return t instanceof Ji}function Gi(t){let e=t;for(;null!=e;){const t=Xi(e);if(qi(t))return t;e=Us(e);}return null}function Xi(t){return t?t.__lexicalEditor:null}function Qi(t){return t.isToken()||t.isSegmented()}function Zi(t){return fo(t)&&t.nodeType===g$5}function ts(t){return fo(t)&&t.nodeType===_$3}function es(t){let e=t;for(;null!=e;){if(Zi(e))return e;e=e.firstChild;}return null}function ns(t,e,n){const r=j$3[e];if(null!==n&&(t&r)==(n&r))return t;let i=t^r;return "subscript"===e?i&=-65:"superscript"===e?i&=-33:"lowercase"===e?(i&=-513,i&=-1025):"uppercase"===e?(i&=-257,i&=-1025):"capitalize"===e&&(i&=-257,i&=-513),i}function rs(t){return Qn(t)||Fn(t)||_i(t)}function is(t,e){if(null!=e)return void(t.__key=e);Vr(),Yr();const n=qr(),r=Hr(),i=""+Ui++;r._nodeMap.set(i,t),di(t)?n._dirtyElements.set(i,true):n._dirtyLeaves.add(i),n._cloneNotNeeded.add(i),n._dirtyType=m$5,t.__key=i;}function ss(t){const e=t.getParent();if(null!==e){const n=t.getWritable(),r=e.getWritable(),i=t.getPreviousSibling(),s=t.getNextSibling(),o=null!==s?s.__key:null,l=null!==i?i.__key:null,c=null!==i?i.getWritable():null,a=null!==s?s.getWritable():null;null===i&&(r.__first=o),null===s&&(r.__last=l),null!==c&&(c.__next=o),null!==a&&(a.__prev=l),n.__prev=null,n.__next=null,n.__parent=null,r.__size--;}}function os(t){Yr();const e=t.getLatest(),n=e.__parent,r=Hr(),i=qr(),s=r._nodeMap,o=i._dirtyElements;null!==n&&function(t,e,n){let r=t;for(;null!==r;){if(n.has(r))return;const t=e.get(r);if(void 0===t)break;n.set(r,false),r=t.__parent;}}(n,s,o);const l=e.__key;i._dirtyType=m$5,di(t)?o.set(l,true):i._dirtyLeaves.add(l);}function ls(t){Vr();const e=qr(),n=e._compositionKey;if(t!==n){if(e._compositionKey=t,null!==n){const t=as(n);null!==t&&t.getWritable();}if(null!==t){const e=as(t);null!==e&&e.getWritable();}}}function cs(){if(jr())return null;return qr()._compositionKey}function as(t,e){const n=(e||Hr())._nodeMap.get(t);return void 0===n?null:n}function us(t,e){const n=fs(t,qr());return void 0!==n?as(n,e):null}function fs(t,e){return t[`__lexicalKey_${e._key}`]}function ds(t,e){let n=t;for(;null!=n;){const t=us(n,e);if(null!==t)return t;n=Us(n);}return null}function hs(t){const e=t._decorators,n=Object.assign({},e);return t._pendingDecorators=n,n}function gs(t){return t.read((()=>_s().getTextContent()))}function _s(){return ps(Hr())}function ps(t){return t._nodeMap.get("root")}function ys(t){Vr();const e=Hr();null!==t&&(t.dirty=true,t.setCachedNodes(null)),e._selection=t;}function ms(t){const e=qr(),n=function(t,e){let n=t;for(;null!=n;){const t=fs(n,e);if(void 0!==t)return t;n=Us(n);}return null}(t,e);if(null===n){return t===e.getRootElement()?as("root"):null}return as(n)}function xs(t,e){return e?t.getTextContentSize():0}function Cs(t){return /[\uD800-\uDBFF][\uDC00-\uDFFF]/g.test(t)}function Ss(t){const e=[];let n=t;for(;null!==n;)e.push(n),n=n._parentEditor;return e}function vs(){return Math.random().toString(36).replace(/[^a-z]+/g,"").substring(0,5)}function ks(t){return Zi(t)?t.nodeValue:null}function Ts(t,e,n){const r=oo(Gs(e));if(null===r)return;const i=r.anchorNode;let{anchorOffset:s,focusOffset:o}=r;if(null!==i){let e=ks(i);const r=ds(i);if(null!==e&&Qn(r)){if(e===K$3&&n){const t=n.length;e=n,s=t,o=t;}null!==e&&bs(r,e,s,o,t);}}}function bs(t,e,n,r,i){let s=t;if(s.isAttached()&&(i||!s.isDirty())){const c=s.isComposing();let a=e;(c||i)&&e[e.length-1]===K$3&&(a=e.slice(0,-1));const u=s.getTextContent();if(i||a!==u){if(""===a){if(ls(null),o$3||l||f$5)s.remove();else {const t=qr();setTimeout((()=>{t.update((()=>{s.isAttached()&&s.remove();}));}),20);}return}const e=s.getParent(),i=wr(),u=s.getTextContentSize(),d=cs(),h=s.getKey();if(s.isToken()||null!==d&&h===d&&!c||cr(i)&&(null!==e&&!e.canInsertTextBefore()&&0===i.anchor.offset||i.anchor.key===t.__key&&0===i.anchor.offset&&!s.canInsertTextBefore()&&!c||i.focus.key===t.__key&&i.focus.offset===u&&!s.canInsertTextAfter()&&!c))return void s.markDirty();const g=Nr();if(!cr(g)||null===n||null===r)return void s.setTextContent(a);if(g.setTextNodeRange(s,n,s,r),s.isSegmented()){const t=Xn(s.getTextContent());s.replace(t),s=t;}s.setTextContent(a);}}}function Ns(t,e,n){const r=e[n]||false;return "any"===r||r===t[n]}function ws(t,e){return Ns(t,e,"altKey")&&Ns(t,e,"ctrlKey")&&Ns(t,e,"shiftKey")&&Ns(t,e,"metaKey")}function Es(t,e,n){return ws(t,n)&&t.key.toLowerCase()===e.toLowerCase()}const Ms={ctrlKey:!r$2,metaKey:r$2},As={altKey:r$2,ctrlKey:!r$2};function Os(t){return "Backspace"===t.key}function Ds(t){return Es(t,"a",Ms)}function Ps(t){const e=_s();if(cr(t)){const e=t.anchor,n=t.focus,r=e.getNode().getTopLevelElementOrThrow().getParentOrThrow();return e.set(r.getKey(),0,"element"),n.set(r.getKey(),r.getChildrenSize(),"element"),vt$4(t),t}{const t=e.select(0,e.getChildrenSize());return ys(vt$4(t)),t}}function Fs(t,e){ void 0===t.__lexicalClassNameCache&&(t.__lexicalClassNameCache={});const n=t.__lexicalClassNameCache,r=n[e];if(void 0!==r)return r;const i=t[e];if("string"==typeof i){const t=d$3(i);return n[e]=t,t}return i}function Ls(e,n,r,i,s){if(0===r.size)return;const o=i.__type,l=i.__key,c=n.get(o);void 0===c&&t$2(33,o);const a=c.klass;let u=e.get(a);void 0===u&&(u=new Map,e.set(a,u));const f=u.get(l),d="destroyed"===f&&"created"===s;(void 0===f||d)&&u.set(l,d?"updated":s);}function zs(t,e,n){const r=t.getParent();let i=n,s=t;return null!==r&&(e&&0===n?(i=s.getIndexWithinParent(),s=r):e||n!==s.getChildrenSize()||(i=s.getIndexWithinParent()+1,s=r)),s.getChildAtIndex(e?i-1:i)}function Ks(t,e){const n=t.offset;if("element"===t.type){return zs(t.getNode(),e,n)}{const r=t.getNode();if(e&&0===n||!e&&n===r.getTextContentSize()){const t=e?r.getPreviousSibling():r.getNextSibling();return null===t?zs(r.getParentOrThrow(),e,r.getIndexWithinParent()+(e?0:1)):t}}return null}function Bs(t){const e=Gs(t).event,n=e&&e.inputType;return "insertFromPaste"===n||"insertFromPasteAsQuotation"===n}function Rs(t,e,n){return function(t,e,n){const r=Ss(t);for(let i=4;i>=0;i--)for(let s=0;s<r.length;s++){const o=r[s],l=o._commands.get(e);if(void 0!==l){const e=l[i];if(void 0!==e){const r=Array.from(e),i=r.length;let s=false;if(ci(o,(()=>{for(let e=0;e<i;e++)if(r[e](n,t))return void(s=true)})),s)return s}}}return  false}(t,e,n)}function Ws(t){return !yi(t)&&!t.isLastChild()&&!t.isInline()}function Js(e,n){const r=e._keyToDOMMap.get(n);return void 0===r&&t$2(75,n),r}function Us(t){const e=t.assignedSlot||t.parentElement;return ho(e)?e.host:e}function $s(t){return ts(t)?t:uo(t)?t.ownerDocument:null}function Vs(t){Vr();qr()._updateTags.add(t);}function Ys(t){Vr();qr()._deferred.push(t);}function Hs(t,e){let n=t.getParent();for(;null!==n;){if(n.is(e))return  true;n=n.getParent();}return  false}function qs(t){const e=$s(t);return e?e.defaultView:null}function Gs(e){const n=e._window;return null===n&&t$2(78),n}function Qs(t){let e=t.getParentOrThrow();for(;null!==e;){if(Zs(e))return e;e=e.getParentOrThrow();}return e}function Zs(t){return yi(t)||di(t)&&t.isShadowRoot()}function eo(e){const n=qr(),r=e.constructor.getType(),i=n._nodes.get(r);void 0===i&&t$2(200,e.constructor.name,r);const{replace:s,replaceWithKlass:o}=i;if(null!==s){const n=s(e),i=n.constructor;return null!==o?n instanceof o||t$2(201,o.name,o.getType(),i.name,i.getType(),e.constructor.name,r):n instanceof e.constructor&&i!==e.constructor||t$2(202,i.name,i.getType(),e.constructor.name,r),n.__key===e.__key&&t$2(203,e.constructor.name,r,i.name,i.getType()),n}return e}function no(e,n){!yi(e.getParent())||di(n)||_i(n)||t$2(99);}function ro(e){const n=as(e);return null===n&&t$2(63,e),n}function io(t){return (_i(t)||di(t)&&!t.canBeEmpty())&&!t.isInline()}function so(t,e,n){n.style.removeProperty("caret-color"),e._blockCursorElement=null;const r=t.parentElement;null!==r&&r.removeChild(t);}function oo(t){return e$1?(t||window).getSelection():null}function lo(t){const e=qs(t);return e?e.getSelection():null}function ao(t){return uo(t)&&"A"===t.tagName}function uo(t){return fo(t)&&t.nodeType===h$6}function fo(t){return "object"==typeof t&&null!==t&&"nodeType"in t&&"number"==typeof t.nodeType}function ho(t){return fo(t)&&t.nodeType===p$3}function go(t){const e=new RegExp(/^(a|abbr|acronym|b|cite|code|del|em|i|ins|kbd|label|mark|output|q|ruby|s|samp|span|strong|sub|sup|time|u|tt|var|#text)$/,"i");return null!==t.nodeName.match(e)}function _o(t){const e=new RegExp(/^(address|article|aside|blockquote|canvas|dd|div|dl|dt|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hr|li|main|nav|noscript|ol|p|pre|section|table|td|tfoot|ul|video)$/,"i");return null!==t.nodeName.match(e)}function po(t){if(_i(t)&&!t.isInline())return  true;if(!di(t)||Zs(t))return  false;const e=t.getFirstChild(),n=null===e||Fn(e)||Qn(e)||e.isInline();return !t.isInline()&&false!==t.canBeEmpty()&&n}function yo(t,e){let n=t;for(;null!==n&&null!==n.getParent()&&!e(n);)n=n.getParentOrThrow();return e(n)?n:null}function mo(){return qr()}const xo=new WeakMap,Co=new Map;function So(e){if(!e._readOnly&&e.isEmpty())return Co;e._readOnly||t$2(192);let n=xo.get(e);return n||(n=function(t){const e=new Map;for(const[n,r]of t._nodeMap){const t=r.__type;let i=e.get(t);i||(i=new Map,e.set(t,i)),i.set(n,r);}return e}(e),xo.set(e,n)),n}function vo(t){const e=t.constructor.clone(t);return e.afterCloneFrom(t),e}function ko(t,e){const n=parseInt(t.style.paddingInlineStart,10)||0,r=Math.round(n/40);e.setIndent(r);}function bo(t){return  true===t.__lexicalUnmanaged}const No={next:"previous",previous:"next"};class wo{constructor(t){this.origin=t;}[Symbol.iterator](){return tl({hasNext:Io,initial:this.getAdjacentCaret(),map:t=>t,step:t=>t.getAdjacentCaret()})}getAdjacentCaret(){return Wo(this.getNodeAtCaret(),this.direction)}getSiblingCaret(){return Wo(this.origin,this.direction)}remove(){const t=this.getNodeAtCaret();return t&&t.remove(),this}replaceOrInsert(t,e){const n=this.getNodeAtCaret();return t.is(this.origin)||t.is(n)||(null===n?this.insert(t):n.replace(t,e)),this}splice(e,n,r="next"){const i=r===this.direction?n:Array.from(n).reverse();let s=this;const o=this.getParentAtCaret(),l=new Map;for(let t=s.getAdjacentCaret();null!==t&&l.size<e;t=t.getAdjacentCaret()){const e=t.origin.getWritable();l.set(e.getKey(),e);}for(const e of i){if(l.size>0){const n=s.getNodeAtCaret();if(n)if(l.delete(n.getKey()),l.delete(e.getKey()),n.is(e)||s.origin.is(e));else {const t=e.getParent();t&&t.is(o)&&e.remove(),n.replace(e);}else null===n&&t$2(263,Array.from(l).join(" "));}else s.insert(e);s=Wo(e,this.direction);}for(const t of l.values())t.remove();return this}}class Eo extends wo{type="child";getLatest(){const t=this.origin.getLatest();return t===this.origin?this:jo(t,this.direction)}getParentCaret(t="root"){return Wo(Oo(this.getParentAtCaret(),t),this.direction)}getFlipped(){const t=Ao(this.direction);return Wo(this.getNodeAtCaret(),t)||jo(this.origin,t)}getParentAtCaret(){return this.origin}getChildCaret(){return this}isSameNodeCaret(t){return t instanceof Eo&&this.direction===t.direction&&this.origin.is(t.origin)}isSamePointCaret(t){return this.isSameNodeCaret(t)}}const Mo={root:yi,shadowRoot:Zs};function Ao(t){return No[t]}function Oo(t,e="root"){return Mo[e](t)?null:t}class Do extends wo{type="sibling";getLatest(){const t=this.origin.getLatest();return t===this.origin?this:Wo(t,this.direction)}getSiblingCaret(){return this}getParentAtCaret(){return this.origin.getParent()}getChildCaret(){return di(this.origin)?jo(this.origin,this.direction):null}getParentCaret(t="root"){return Wo(Oo(this.getParentAtCaret(),t),this.direction)}getFlipped(){const t=Ao(this.direction);return Wo(this.getNodeAtCaret(),t)||jo(this.origin.getParentOrThrow(),t)}isSamePointCaret(t){return t instanceof Do&&this.direction===t.direction&&this.origin.is(t.origin)}isSameNodeCaret(t){return (t instanceof Do||t instanceof Po)&&this.direction===t.direction&&this.origin.is(t.origin)}}class Po extends wo{type="text";constructor(t,e){super(t),this.offset=e;}getLatest(){const t=this.origin.getLatest();return t===this.origin?this:Jo(t,this.direction,this.offset)}getParentAtCaret(){return this.origin.getParent()}getChildCaret(){return null}getParentCaret(t="root"){return Wo(Oo(this.getParentAtCaret(),t),this.direction)}getFlipped(){return Jo(this.origin,Ao(this.direction),this.offset)}isSamePointCaret(t){return t instanceof Po&&this.direction===t.direction&&this.origin.is(t.origin)&&this.offset===t.offset}isSameNodeCaret(t){return (t instanceof Do||t instanceof Po)&&this.direction===t.direction&&this.origin.is(t.origin)}getSiblingCaret(){return Wo(this.origin,this.direction)}}function Fo(t){return t instanceof Po}function Io(t){return t instanceof Do}function zo(t){return t instanceof Eo}const Ko={next:class extends Po{direction="next";getNodeAtCaret(){return this.origin.getNextSibling()}insert(t){return this.origin.insertAfter(t),this}},previous:class extends Po{direction="previous";getNodeAtCaret(){return this.origin.getPreviousSibling()}insert(t){return this.origin.insertBefore(t),this}}},Bo={next:class extends Do{direction="next";getNodeAtCaret(){return this.origin.getNextSibling()}insert(t){return this.origin.insertAfter(t),this}},previous:class extends Do{direction="previous";getNodeAtCaret(){return this.origin.getPreviousSibling()}insert(t){return this.origin.insertBefore(t),this}}},Ro={next:class extends Eo{direction="next";getNodeAtCaret(){return this.origin.getFirstChild()}insert(t){return this.origin.splice(0,0,[t]),this}},previous:class extends Eo{direction="previous";getNodeAtCaret(){return this.origin.getLastChild()}insert(t){return this.origin.splice(this.origin.getChildrenSize(),0,[t]),this}}};function Wo(t,e){return t?new Bo[e](t):null}function Jo(t,e,n){return t?new Ko[e](t,Uo(t,n)):null}function Uo(t,e){const n=t.getTextContentSize();let r="next"===e?n:"previous"===e?0:e;return (r<0||r>n)&&(!function(t,...e){const n=new URL("https://lexical.dev/docs/error"),r=new URLSearchParams;r.append("code",t);for(const t of e)r.append("v",t);n.search=r.toString(),console.warn(`Minified Lexical warning #${t}; visit ${n.toString()} for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`);}(284,String(e),String(n),t.getKey()),r=r<0?0:n),r}function $o(t,e){return new qo(t,e)}function jo(t,e){return di(t)?new Ro[e](t):null}function Vo(t){return t&&t.getChildCaret()||t}function Yo(t){return t&&Vo(t.getAdjacentCaret())}class Ho{type="node-caret-range";constructor(t,e,n){this.anchor=t,this.focus=e,this.direction=n;}getLatest(){const t=this.anchor.getLatest(),e=this.focus.getLatest();return t===this.anchor&&e===this.focus?this:new Ho(t,e,this.direction)}isCollapsed(){return this.anchor.isSamePointCaret(this.focus)}getTextSlices(){const t=t=>{const e=this[t].getLatest();return Fo(e)?function(t,e){const{direction:n,origin:r}=t,i=Uo(r,"focus"===e?Ao(n):n);return $o(t,i-t.offset)}(e,t):null},e=t("anchor"),n=t("focus");if(e&&n){const{caret:t}=e,{caret:r}=n;if(t.isSameNodeCaret(r))return [$o(t,r.offset-t.offset),null]}return [e,n]}iterNodeCarets(t="root"){const e=Fo(this.anchor)?this.anchor.getSiblingCaret():this.anchor.getLatest(),n=this.focus.getLatest(),r=Fo(n),i=e=>e.isSameNodeCaret(n)?null:Yo(e)||e.getParentCaret(t);return tl({hasNext:t=>null!==t&&!(r&&n.isSameNodeCaret(t)),initial:e.isSameNodeCaret(n)?null:i(e),map:t=>t,step:i})}[Symbol.iterator](){return this.iterNodeCarets("root")}}class qo{type="slice";constructor(t,e){this.caret=t,this.distance=e;}getSliceIndices(){const{distance:t,caret:{offset:e}}=this,n=e+t;return n<e?[n,e]:[e,n]}getTextContent(){const[t,e]=this.getSliceIndices();return this.caret.origin.getTextContent().slice(t,e)}getTextContentSize(){return Math.abs(this.distance)}removeTextSlice(){const{caret:{origin:t,direction:e}}=this,[n,r]=this.getSliceIndices(),i=t.getTextContent();return Jo(t.setTextContent(i.slice(0,n)+i.slice(r)),e,n)}}function Xo(t){return Zo(t,Wo(_s(),t.direction))}function Qo(t){return Zo(t,t)}function Zo(e,n){return e.direction!==n.direction&&t$2(265),new Ho(e,n,e.direction)}function tl(t){const{initial:e,hasNext:n,step:r,map:i}=t;let s=e;return {[Symbol.iterator](){return this},next(){if(!n(s))return {done:true,value:void 0};const t={done:false,value:i(s)};return s=r(s),t}}}function el(e,n){const r=sl(e.origin,n.origin);switch(null===r&&t$2(275,e.origin.getKey(),n.origin.getKey()),r.type){case "same":{const t="text"===e.type,r="text"===n.type;return t&&r?function(t,e){return Math.sign(t-e)}(e.offset,n.offset):e.type===n.type?0:t?-1:r?1:"child"===e.type?-1:1}case "ancestor":return "child"===e.type?-1:1;case "descendant":return "child"===n.type?1:-1;case "branch":return nl(r)}}function nl(t){const{a:e,b:n}=t,r=e.__key,i=n.__key;let s=e,o=n;for(;s&&o;s=s.getNextSibling(),o=o.getNextSibling()){if(s.__key===i)return  -1;if(o.__key===r)return 1}return null===s?1:-1}function rl(t,e){return e.is(t)}function il(t){return di(t)?[t.getLatest(),null]:[t.getParent(),t.getLatest()]}function sl(e,n){if(e.is(n))return {commonAncestor:e,type:"same"};const r=new Map;for(let[t,n]=il(e);t;n=t,t=t.getParent())r.set(t,n);for(let[i,s]=il(n);i;s=i,i=i.getParent()){const o=r.get(i);if(void 0!==o)return null===o?(rl(e,i)||t$2(276),{commonAncestor:i,type:"ancestor"}):null===s?(rl(n,i)||t$2(277),{commonAncestor:i,type:"descendant"}):((di(o)||rl(e,o))&&(di(s)||rl(n,s))&&i.is(o.getParent())&&i.is(s.getParent())||t$2(278),{a:o,b:s,commonAncestor:i,type:"branch"})}return null}function ol(e,n){const{type:r,key:i,offset:s}=e,o=ro(e.key);return "text"===r?(Qn(o)||t$2(266,o.getType(),i),Jo(o,n,s)):(di(o)||t$2(267,o.getType(),i),xl(o,e.offset,n))}function ll(e,n){const{origin:r,direction:i}=n,s="next"===i;Fo(n)?e.set(r.getKey(),n.offset,"text"):Io(n)?Qn(r)?e.set(r.getKey(),Uo(r,i),"text"):e.set(r.getParentOrThrow().getKey(),r.getIndexWithinParent()+(s?1:0),"element"):(zo(n)&&di(r)||t$2(268),e.set(r.getKey(),s?0:r.getChildrenSize(),"element"));}function cl(t){const e=Nr(),n=cr(e)?e:vr();return al(n,t),ys(n),n}function al(t,e){ll(t.anchor,e.anchor),ll(t.focus,e.focus);}function ul(t){const{anchor:e,focus:n}=t,r=ol(e,"next"),i=ol(n,"next"),s=el(r,i)<=0?"next":"previous";return Zo(yl(r,s),yl(i,s))}function fl(t){const{direction:e,origin:n}=t,r=Wo(n,Ao(e)).getNodeAtCaret();return r?Wo(r,e):jo(n.getParentOrThrow(),e)}function dl(t,e="root"){const n=[t];for(let r=zo(t)?t.getParentCaret(e):t.getSiblingCaret();null!==r;r=r.getParentCaret(e))n.push(fl(r));return n}function hl(t){return !!t&&t.origin.isAttached()}function gl(e,n="removeEmptySlices"){if(e.isCollapsed())return e;const r="root",i="next";let s=n;const o=ml(e,i),l=dl(o.anchor,r),c=dl(o.focus.getFlipped(),r),a=new Set,u=[];for(const t of o.iterNodeCarets(r))if(zo(t))a.add(t.origin.getKey());else if(Io(t)){const{origin:e}=t;di(e)&&!a.has(e.getKey())||u.push(e);}for(const t of u)t.remove();for(const t of o.getTextSlices()){if(!t)continue;const{origin:e}=t.caret,n=e.getTextContentSize(),r=fl(Wo(e,i)),o=e.getMode();if(Math.abs(t.distance)===n&&"removeEmptySlices"===s||"token"===o&&0!==t.distance)r.remove();else if(0!==t.distance){s="removeEmptySlices";let e=t.removeTextSlice();const n=t.caret.origin;if("segmented"===o){const t=e.origin,n=Xn(t.getTextContent()).setStyle(t.getStyle()).setFormat(t.getFormat());r.replaceOrInsert(n),e=Jo(n,i,e.offset);}n.is(l[0].origin)&&(l[0]=e),n.is(c[0].origin)&&(c[0]=e.getFlipped());}}let f,d;for(const t of l)if(hl(t)){f=_l(t);break}for(const t of c)if(hl(t)){d=_l(t);break}const h=function(t,e,n){if(!t||!e)return null;const r=t.getParentAtCaret(),i=e.getParentAtCaret();if(!r||!i)return null;const s=r.getParents().reverse();s.push(r);const o=i.getParents().reverse();o.push(i);const l=Math.min(s.length,o.length);let c;for(c=0;c<l&&s[c]===o[c];c++);const a=(t,e)=>{let n;for(let r=c;r<t.length;r++){const i=t[r];if(Zs(i))return;!n&&e(i)&&(n=i);}return n},u=a(s,po),f=u&&a(o,(t=>n.has(t.getKey())&&po(t)));return u&&f?[u,f]:null}(f,d,a);if(h){const[t,e]=h;jo(t,"previous").splice(0,e.getChildren()),e.remove();}const g=[f,d,...l,...c].find(hl);if(g){return Qo(yl(_l(g),e.direction))}t$2(269,JSON.stringify(l.map((t=>t.origin.__key))));}function _l(t){const e=function(t){let e=t;for(;zo(e);){const t=Yo(e);if(!zo(t))break;e=t;}return e}(t.getLatest()),{direction:n}=e;if(Qn(e.origin))return Fo(e)?e:Jo(e.origin,n,n);const r=e.getAdjacentCaret();return Io(r)&&Qn(r.origin)?Jo(r.origin,n,Ao(n)):e}function pl(t){return Fo(t)&&t.offset!==Uo(t.origin,t.direction)}function yl(t,e){return t.direction===e?t:t.getFlipped()}function ml(t,e){return t.direction===e?t:Zo(yl(t.focus,e),yl(t.anchor,e))}function xl(t,e,n){let r=jo(t,"next");for(let t=0;t<e;t++){const t=r.getAdjacentCaret();if(null===t)break;r=t;}return yl(r,n)}
+function t$2(t,...e){const n=new URL("https://lexical.dev/docs/error"),r=new URLSearchParams;r.append("code",t);for(const t of e)r.append("v",t);throw n.search=r.toString(),Error(`Minified Lexical error #${t}; visit ${n.toString()} for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`)}const e$1="undefined"!=typeof window&&void 0!==window.document&&void 0!==window.document.createElement,n$3=e$1&&"documentMode"in document?document.documentMode:null,r$2=e$1&&/Mac|iPod|iPhone|iPad/.test(navigator.platform),i$2=e$1&&/^(?!.*Seamonkey)(?=.*Firefox).*/i.test(navigator.userAgent),s$2=!(!e$1||!("InputEvent"in window)||n$3)&&"getTargetRanges"in new window.InputEvent("input"),o$3=e$1&&/Version\/[\d.]+.*Safari/.test(navigator.userAgent),l=e$1&&/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream,c$3=e$1&&/Android/.test(navigator.userAgent),a$4=e$1&&/^(?=.*Chrome).*/i.test(navigator.userAgent),u$3=e$1&&c$3&&a$4,f$5=e$1&&/AppleWebKit\/[\d.]+/.test(navigator.userAgent)&&!a$4;function d$3(...t){const e=[];for(const n of t)if(n&&"string"==typeof n)for(const[t]of n.matchAll(/\S+/g))e.push(t);return e}const h$6=1,g$5=3,_$3=9,p$3=11,y$4=0,m$5=1,x$6=2,C$2=0,S$2=1,v$4=2,b$2=4,N$2=8,A$3=128,O$3=1792|(112|(3|b$2|N$2)|A$3),D$5=1,P$2=2,F$1=3,L$3=4,I$4=5,z$5=6,K$3=o$3||l||f$5?" ":"​",B$6="\n\n",R$5=i$2?" ":K$3,W$3="֑-߿יִ-﷽ﹰ-ﻼ",J$5="A-Za-zÀ-ÖØ-öø-ʸ̀-֐ࠀ-῿‎Ⰰ-﬜︀-﹯﻽-￿",U$4=new RegExp("^[^"+J$5+"]*["+W$3+"]"),$$1=new RegExp("^[^"+W$3+"]*["+J$5+"]"),j$3={bold:1,capitalize:1024,code:16,highlight:A$3,italic:2,lowercase:256,strikethrough:b$2,subscript:32,superscript:64,underline:N$2,uppercase:512},V$3={directionless:1,unmergeable:2},Y$3={center:P$2,end:z$5,justify:L$3,left:D$5,right:F$1,start:I$4},H$3={[P$2]:"center",[z$5]:"end",[L$3]:"justify",[D$5]:"left",[F$1]:"right",[I$4]:"start"},q$2={normal:0,segmented:2,token:1},G$2={[C$2]:"normal",[v$4]:"segmented",[S$2]:"token"},X$3="$";function Q$2(t,e,n,r,i,s){let o=t.getFirstChild();for(;null!==o;){const t=o.__key;o.__parent===e&&(di(o)&&Q$2(o,t,n,r,i,s),n.has(t)||s.delete(t),i.push(t)),o=o.getNextSibling();}}const Z$4=100;let tt$3=false,et$4=0;function nt$3(t){et$4=t.timeStamp;}function rt$3(t,e,n){const r="BR"===t.nodeName,i=e.__lexicalLineBreak;return i&&(t===i||r&&t.previousSibling===i)||r&&void 0!==fs(t,n)}function it$3(t,e,n){const r=oo(Gs(n));let i=null,s=null;null!==r&&r.anchorNode===t&&(i=r.anchorOffset,s=r.focusOffset);const o=t.nodeValue;null!==o&&bs(e,o,i,s,false);}function st$2(t,e,n){if(cr(t)){const e=t.anchor.getNode();if(e.is(n)&&t.format!==e.getFormat())return  false}return Zi(e)&&n.isAttached()}function ot$2(t,e,n,r){for(let i=t;i&&!bo(i);i=Us(i)){const t=fs(i,e);if(void 0!==t){const e=as(t,n);if(e)return _i(e)||!uo(i)?void 0:[i,e]}else if(i===r)return [r,ps(n)]}}function lt$2(t,e,n){tt$3=true;const r=performance.now()-et$4>Z$4;try{ci(t,(()=>{const s=Nr()||function(t){return t.getEditorState().read((()=>{const t=Nr();return null!==t?t.clone():null}))}(t),o=new Map,l=t.getRootElement(),c=t._editorState,a=t._blockCursorElement;let u=!1,f="";for(let n=0;n<e.length;n++){const d=e[n],h=d.type,g=d.target,_=ot$2(g,t,c,l);if(!_)continue;const[p,y]=_;if("characterData"===h)r&&Qn(y)&&Zi(g)&&st$2(s,g,y)&&it$3(g,y,t);else if("childList"===h){u=!0;const e=d.addedNodes;for(let n=0;n<e.length;n++){const r=e[n],s=us(r),o=r.parentNode;if(null!=o&&r!==a&&null===s&&!rt$3(r,o,t)){if(i$2){const t=(uo(r)?r.innerText:null)||r.nodeValue;t&&(f+=t);}o.removeChild(r);}}const n=d.removedNodes,r=n.length;if(r>0){let e=0;for(let i=0;i<r;i++){const r=n[i];(rt$3(r,g,t)||a===r)&&(g.appendChild(r),e++);}r!==e&&o.set(p,y);}}}if(o.size>0)for(const[e,n]of o)n.reconcileObservedMutation(e,t);const d=n.takeRecords();if(d.length>0){for(let e=0;e<d.length;e++){const n=d[e],r=n.addedNodes,i=n.target;for(let e=0;e<r.length;e++){const n=r[e],s=n.parentNode;null==s||"BR"!==n.nodeName||rt$3(n,i,t)||s.removeChild(n);}}n.takeRecords();}null!==s&&(u&&ys(s),i$2&&Bs(t)&&s.insertRawText(f));}));}finally{tt$3=false;}}function ct$3(t){const e=t._observer;if(null!==e){lt$2(t,e.takeRecords(),e);}}function at$2(t){!function(t){0===et$4&&Gs(t).addEventListener("textInput",nt$3,true);}(t),t._observer=new MutationObserver(((e,n)=>{lt$2(t,e,n);}));}let pt$3 = class pt{constructor(t,e=new Map,n=void 0,r=new Map,i=void 0){this.node=t,this.sharedConfigMap=e,this.unknownState=n,this.knownState=r;const s=void 0!==i?i:function(t,e,n){let r=n.size;if(e)for(const i in e){const e=t.get(i);e&&n.has(e)||r++;}return r}(e,n,r);this.size=s;}getValue(t){const e=this.knownState.get(t);if(void 0!==e)return e;this.sharedConfigMap.set(t.key,t);let n=t.defaultValue;if(this.unknownState&&t.key in this.unknownState){const e=this.unknownState[t.key];void 0!==e&&(n=t.parse(e)),this.updateFromKnown(t,n);}return n}getInternalState(){return [this.unknownState,this.knownState]}toJSON(){const t={...this.unknownState};for(const[e,n]of this.knownState)e.isEqual(n,e.defaultValue)?delete t[e.key]:t[e.key]=e.unparse(n);return yt$4(t)?{[X$3]:t}:{}}getWritable(t){if(this.node===t)return this;const e=new Map(this.knownState),n=yt$4(r=this.unknownState)&&{...r};var r;if(n)for(const t of e.keys())delete n[t.key];return new pt(t,this.sharedConfigMap,yt$4(n),e,this.size)}updateFromKnown(t,e){const n=t.key;this.sharedConfigMap.set(n,t);const{knownState:r,unknownState:i}=this;r.has(t)||i&&n in i||this.size++,r.set(t,e);}updateFromUnknown(t,e){const n=this.sharedConfigMap.get(t);n?this.updateFromKnown(n,n.parse(e)):(this.unknownState=this.unknownState||{},t in this.unknownState||this.size++,this.unknownState[t]=e);}updateFromJSON(t){const{knownState:e}=this;for(const t of e.keys())e.set(t,t.defaultValue);if(this.size=e.size,this.unknownState={},t)for(const[e,n]of Object.entries(t))this.updateFromUnknown(e,n);this.unknownState=yt$4(this.unknownState);}};function yt$4(t){if(t)for(const e in t)return t}function mt$3(t){const e=t.getWritable(),n=e.__state?e.__state.getWritable(e):new pt$3(e);return e.__state=n,n}function xt$2(t,e){const n=t.__mode,r=t.__format,i=t.__style,s=e.__mode,o=e.__format,l=e.__style,c=t.__state,a=e.__state;return (null===n||n===s)&&(null===r||r===o)&&(null===i||i===l)&&(null===t.__state||c===a||function(t,e){if(t===e)return  true;if(t&&e&&t.size!==e.size)return  false;const n=new Set,r=(t,e)=>{for(const[r,i]of t.knownState){if(n.has(r.key))continue;n.add(r.key);const t=e?e.getValue(r):r.defaultValue;if(t!==i&&!r.isEqual(t,i))return  true}return  false},i=(t,e)=>{const{unknownState:r}=t,i=e?e.unknownState:void 0;if(r)for(const[t,e]of Object.entries(r))if(!n.has(t)&&(n.add(t),e!==(i?i[t]:void 0)))return  true;return  false};return !(t&&r(t,e)||e&&r(e,t)||t&&i(t,e)||e&&i(e,t))}(c,a))}function Ct$2(t,e){const n=t.mergeWithSibling(e),r=qr()._normalizedNodes;return r.add(t.__key),r.add(e.__key),n}function St$2(t){let e,n,r=t;if(""!==r.__text||!r.isSimpleText()||r.isUnmergeable()){for(;null!==(e=r.getPreviousSibling())&&Qn(e)&&e.isSimpleText()&&!e.isUnmergeable();){if(""!==e.__text){if(xt$2(e,r)){r=Ct$2(e,r);break}break}e.remove();}for(;null!==(n=r.getNextSibling())&&Qn(n)&&n.isSimpleText()&&!n.isUnmergeable();){if(""!==n.__text){if(xt$2(r,n)){r=Ct$2(r,n);break}break}n.remove();}}else r.remove();}function vt$4(t){return kt$1(t.anchor),kt$1(t.focus),t}function kt$1(t){for(;"element"===t.type;){const e=t.getNode(),n=t.offset;let r,i;if(n===e.getChildrenSize()?(r=e.getChildAtIndex(n-1),i=true):(r=e.getChildAtIndex(n),i=false),Qn(r)){t.set(r.__key,i?r.getTextContentSize():0,"text",true);break}if(!di(r))break;t.set(r.__key,i?r.getChildrenSize():0,"element",true);}}let Tt$3,bt$1,Nt$2,wt$3,Et$2,Mt$3,At$1,Ot$1,Dt$1,Pt$3,Ft$2="",Lt$2="",It$2=null,zt="",Kt="",Bt$1=false,Rt$1=false,Wt=null;function Jt(t,e){const n=At$1.get(t);if(null!==e){const n=se(t);n.parentNode===e&&e.removeChild(n);}if(Ot$1.has(t)||bt$1._keyToDOMMap.delete(t),di(n)){const t=te(n,At$1);Ut(t,0,t.length-1,null);} void 0!==n&&Ls(Pt$3,Nt$2,wt$3,n,"destroyed");}function Ut(t,e,n,r){let i=e;for(;i<=n;++i){const e=t[i];void 0!==e&&Jt(e,r);}}function $t$1(t,e){t.setProperty("text-align",e);}const jt="40px";function Vt(t,e){const n=Tt$3.theme.indent;if("string"==typeof n){const r=t.classList.contains(n);e>0&&!r?t.classList.add(n):e<1&&r&&t.classList.remove(n);}const r=getComputedStyle(t).getPropertyValue("--lexical-indent-base-value")||jt;t.style.setProperty("padding-inline-start",0===e?"":`calc(${e} * ${r})`);}function Yt(t,e){const n=t.style;0===e?$t$1(n,""):e===D$5?$t$1(n,"left"):e===P$2?$t$1(n,"center"):e===F$1?$t$1(n,"right"):e===L$3?$t$1(n,"justify"):e===I$4?$t$1(n,"start"):e===z$5&&$t$1(n,"end");}function Ht(e,n){const r=Ot$1.get(e);void 0===r&&t$2(60);const i=r.createDOM(Tt$3,bt$1);if(function(t,e,n){const r=n._keyToDOMMap;((function(t,e,n){const r=`__lexicalKey_${e._key}`;t[r]=n;}))(e,n,t),r.set(t,e);}(e,i,bt$1),Qn(r)?i.setAttribute("data-lexical-text","true"):_i(r)&&i.setAttribute("data-lexical-decorator","true"),di(r)){const t=r.__indent,e=r.__size;if(0!==t&&Vt(i,t),0!==e){const t=e-1;!function(t,e,n,r){const i=Lt$2;Lt$2="",qt(t,n,0,e,n.getDOMSlot(r)),Qt(n,r),Lt$2=i;}(te(r,Ot$1),t,r,i);}const n=r.__format;0!==n&&Yt(i,n),r.isInline()||Xt(null,r,i),Ws(r)&&(Ft$2+=B$6,Kt+=B$6);}else {const t=r.getTextContent();if(_i(r)){const t=r.decorate(bt$1,Tt$3);null!==t&&ne(e,t),i.contentEditable="false";}else Qn(r)&&(r.isDirectionless()||(Lt$2+=t));Ft$2+=t,Kt+=t;}return null!==n&&n.insertChild(i),Ls(Pt$3,Nt$2,wt$3,r,"created"),i}function qt(t,e,n,r,i){const s=Ft$2;Ft$2="";let o=n;for(;o<=r;++o){Ht(t[o],i);const e=Ot$1.get(t[o]);null!==e&&Qn(e)&&(null===It$2&&(It$2=e.getFormat()),""===zt&&(zt=e.getStyle()));}Ws(e)&&(Ft$2+=B$6);i.element.__lexicalTextContent=Ft$2,Ft$2=s+Ft$2;}function Gt(t,e){if(t){const n=t.__last;if(n){const t=e.get(n);if(t)return Fn(t)?"line-break":_i(t)&&t.isInline()?"decorator":null}return "empty"}return null}function Xt(t,e,n){const r=Gt(t,At$1),i=Gt(e,Ot$1);r!==i&&e.getDOMSlot(n).setManagedLineBreak(i);}function Qt(t,e){const n=e.__lexicalDirTextContent||"",r=e.__lexicalDir||"";if(n!==Lt$2||r!==Wt){const n=""===Lt$2,i=n?Wt:function(t){if(U$4.test(t))return "rtl";if($$1.test(t))return "ltr";return null}(Lt$2);if(i!==r){const s=e.classList,o=Tt$3.theme;let l=null!==r?o[r]:void 0,c=null!==i?o[i]:void 0;if(void 0!==l){if("string"==typeof l){const t=d$3(l);l=o[r]=t;}s.remove(...l);}if(null===i||n&&"ltr"===i)e.removeAttribute("dir");else {if(void 0!==c){if("string"==typeof c){const t=d$3(c);c=o[i]=t;} void 0!==c&&s.add(...c);}e.dir=i;}if(!Rt$1){t.getWritable().__dir=i;}}Wt=i,e.__lexicalDirTextContent=Lt$2,e.__lexicalDir=i;}}function Zt(e,n,r){const i=Lt$2;var s;Lt$2="",It$2=null,zt="",function(e,n,r){const i=Ft$2,s=e.__size,o=n.__size;Ft$2="";const l=r.element;if(1===s&&1===o){const t=e.__first,r=n.__first;if(t===r)ee(t,l);else {const e=se(t),n=Ht(r,null);try{l.replaceChild(n,e);}catch(i){if("object"==typeof i&&null!=i){const s=`${i.toString()} Parent: ${l.tagName}, new child: {tag: ${n.tagName} key: ${r}}, old child: {tag: ${e.tagName}, key: ${t}}.`;throw new Error(s)}throw i}Jt(t,null);}const i=Ot$1.get(r);Qn(i)&&(null===It$2&&(It$2=i.getFormat()),""===zt&&(zt=i.getStyle()));}else {const i=te(e,At$1),c=te(n,Ot$1);if(i.length!==s&&t$2(227),c.length!==o&&t$2(228),0===s)0!==o&&qt(c,n,0,o-1,r);else if(0===o){if(0!==s){const t=null==r.after&&null==r.before&&null==r.element.__lexicalLineBreak;Ut(i,0,s-1,t?null:l),t&&(l.textContent="");}}else !function(t,e,n,r,i,s){const o=r-1,l=i-1;let c,a,u=s.getFirstChild(),f=0,d=0;for(;f<=o&&d<=l;){const t=e[f],r=n[d];if(t===r)u=re(ee(r,s.element)),f++,d++;else { void 0===c&&(c=new Set(e)),void 0===a&&(a=new Set(n));const i=a.has(t),o=c.has(r);if(i)if(o){const t=Js(bt$1,r);t===u?u=re(ee(r,s.element)):(s.withBefore(u).insertChild(t),ee(r,s.element)),f++,d++;}else Ht(r,s.withBefore(u)),d++;else u=re(se(t)),Jt(t,s.element),f++;}const i=Ot$1.get(r);null!==i&&Qn(i)&&(null===It$2&&(It$2=i.getFormat()),""===zt&&(zt=i.getStyle()));}const h=f>o,g=d>l;if(h&&!g){const e=n[l+1],r=void 0===e?null:bt$1.getElementByKey(e);qt(n,t,d,l,s.withBefore(r));}else g&&!h&&Ut(e,f,o,s.element);}(n,i,c,s,o,r);}Ws(n)&&(Ft$2+=B$6);l.__lexicalTextContent=Ft$2,Ft$2=i+Ft$2;}(e,n,n.getDOMSlot(r)),Qt(n,r),s=n,null==It$2||It$2===s.__textFormat||Rt$1||s.setTextFormat(It$2),function(t){""===zt||zt===t.__textStyle||Rt$1||t.setTextStyle(zt);}(n),Lt$2=i;}function te(e,n){const r=[];let i=e.__first;for(;null!==i;){const e=n.get(i);void 0===e&&t$2(101),r.push(i),i=e.__next;}return r}function ee(e,n){const r=At$1.get(e);let i=Ot$1.get(e);void 0!==r&&void 0!==i||t$2(61);const s=Bt$1||Mt$3.has(e)||Et$2.has(e),o=Js(bt$1,e);if(r===i&&!s){if(di(r)){const t=o.__lexicalTextContent;void 0!==t&&(Ft$2+=t,Kt+=t);const e=o.__lexicalDirTextContent;void 0!==e&&(Lt$2+=e);}else {const t=r.getTextContent();Qn(r)&&!r.isDirectionless()&&(Lt$2+=t),Kt+=t,Ft$2+=t;}return o}if(r!==i&&s&&Ls(Pt$3,Nt$2,wt$3,i,"updated"),i.updateDOM(r,o,Tt$3)){const r=Ht(e,null);return null===n&&t$2(62),n.replaceChild(r,o),Jt(e,null),r}if(di(r)&&di(i)){const t=i.__indent;t!==r.__indent&&Vt(o,t);const e=i.__format;e!==r.__format&&Yt(o,e),s&&(Zt(r,i,o),yi(i)||i.isInline()||Xt(r,i,o)),Ws(i)&&(Ft$2+=B$6,Kt+=B$6);}else {const t=i.getTextContent();if(_i(i)){const t=i.decorate(bt$1,Tt$3);null!==t&&ne(e,t);}else Qn(i)&&!i.isDirectionless()&&(Lt$2+=t);Ft$2+=t,Kt+=t;}if(!Rt$1&&yi(i)&&i.__cachedText!==Kt){const t=i.getWritable();t.__cachedText=Kt,i=t;}return o}function ne(t,e){let n=bt$1._pendingDecorators;const r=bt$1._decorators;if(null===n){if(r[t]===e)return;n=hs(bt$1);}n[t]=e;}function re(t){let e=t.nextSibling;return null!==e&&e===bt$1._blockCursorElement&&(e=e.nextSibling),e}function ie(t,e,n,r,i,s){Ft$2="",Kt="",Lt$2="",Bt$1=r===x$6,Wt=null,bt$1=n,Tt$3=n._config,Nt$2=n._nodes,wt$3=bt$1._listeners.mutation,Et$2=i,Mt$3=s,At$1=t._nodeMap,Ot$1=e._nodeMap,Rt$1=e._readOnly,Dt$1=new Map(n._keyToDOMMap);const o=new Map;return Pt$3=o,ee("root",null),bt$1=void 0,Nt$2=void 0,Et$2=void 0,Mt$3=void 0,At$1=void 0,Ot$1=void 0,Tt$3=void 0,Dt$1=void 0,Pt$3=void 0,o}function se(e){const n=Dt$1.get(e);return void 0===n&&t$2(75,e),n}function oe(t){return {type:t}}const le=oe("SELECTION_CHANGE_COMMAND"),ce=oe("SELECTION_INSERT_CLIPBOARD_NODES_COMMAND"),ae=oe("CLICK_COMMAND"),ue=oe("DELETE_CHARACTER_COMMAND"),fe=oe("INSERT_LINE_BREAK_COMMAND"),de=oe("INSERT_PARAGRAPH_COMMAND"),he=oe("CONTROLLED_TEXT_INSERTION_COMMAND"),ge=oe("PASTE_COMMAND"),_e=oe("REMOVE_TEXT_COMMAND"),pe=oe("DELETE_WORD_COMMAND"),ye=oe("DELETE_LINE_COMMAND"),me=oe("FORMAT_TEXT_COMMAND"),xe=oe("UNDO_COMMAND"),Ce=oe("REDO_COMMAND"),Se=oe("KEYDOWN_COMMAND"),ve=oe("KEY_ARROW_RIGHT_COMMAND"),ke=oe("MOVE_TO_END"),Te=oe("KEY_ARROW_LEFT_COMMAND"),be=oe("MOVE_TO_START"),Ne=oe("KEY_ARROW_UP_COMMAND"),we=oe("KEY_ARROW_DOWN_COMMAND"),Ee=oe("KEY_ENTER_COMMAND"),Me=oe("KEY_SPACE_COMMAND"),Ae=oe("KEY_BACKSPACE_COMMAND"),Oe=oe("KEY_ESCAPE_COMMAND"),De=oe("KEY_DELETE_COMMAND"),Pe=oe("KEY_TAB_COMMAND"),Fe=oe("INSERT_TAB_COMMAND"),Le=oe("INDENT_CONTENT_COMMAND"),Ie=oe("OUTDENT_CONTENT_COMMAND"),ze=oe("DROP_COMMAND"),Ke=oe("FORMAT_ELEMENT_COMMAND"),Be=oe("DRAGSTART_COMMAND"),Re=oe("DRAGOVER_COMMAND"),We=oe("DRAGEND_COMMAND"),Je=oe("COPY_COMMAND"),Ue=oe("CUT_COMMAND"),$e=oe("SELECT_ALL_COMMAND"),je=oe("CLEAR_EDITOR_COMMAND"),Ve=oe("CLEAR_HISTORY_COMMAND"),Ye=oe("CAN_REDO_COMMAND"),He=oe("CAN_UNDO_COMMAND"),qe=oe("FOCUS_COMMAND"),Ge=oe("BLUR_COMMAND"),Xe=oe("KEY_MODIFIER_COMMAND"),Qe=Object.freeze({}),Ze=30,tn=[["keydown",function(t,e){if(en=t.timeStamp,nn=t.key,e.isComposing())return;if(Rs(e,Se,t))return;if(null==t.key)return;if(fn&&Os(t))return ci(e,(()=>{Sn(e,dn);})),fn=false,void(dn="");if(function(t){return Es(t,"ArrowRight",{shiftKey:"any"})}(t))Rs(e,ve,t);else if(function(t){return Es(t,"ArrowRight",Ms)}(t))Rs(e,ke,t);else if(function(t){return Es(t,"ArrowLeft",{shiftKey:"any"})}(t))Rs(e,Te,t);else if(function(t){return Es(t,"ArrowLeft",Ms)}(t))Rs(e,be,t);else if(function(t){return Es(t,"ArrowUp",{altKey:"any",shiftKey:"any"})}(t))Rs(e,Ne,t);else if(function(t){return Es(t,"ArrowDown",{altKey:"any",shiftKey:"any"})}(t))Rs(e,we,t);else if(function(t){return Es(t,"Enter",{altKey:"any",ctrlKey:"any",metaKey:"any",shiftKey:true})}(t))an=true,Rs(e,Ee,t);else if(function(t){return " "===t.key}(t))Rs(e,Me,t);else if(function(t){return r$2&&Es(t,"o",{ctrlKey:true})}(t))t.preventDefault(),an=true,Rs(e,fe,true);else if(function(t){return Es(t,"Enter",{altKey:"any",ctrlKey:"any",metaKey:"any"})}(t))an=false,Rs(e,Ee,t);else if(function(t){return Es(t,"Backspace",{shiftKey:"any"})||r$2&&Es(t,"h",{ctrlKey:true})}(t))Os(t)?Rs(e,Ae,t):(t.preventDefault(),Rs(e,ue,true));else if(function(t){return "Escape"===t.key}(t))Rs(e,Oe,t);else if(function(t){return Es(t,"Delete",{})||r$2&&Es(t,"d",{ctrlKey:true})}(t))!function(t){return "Delete"===t.key}(t)?(t.preventDefault(),Rs(e,ue,false)):Rs(e,De,t);else if(function(t){return Es(t,"Backspace",As)}(t))t.preventDefault(),Rs(e,pe,true);else if(function(t){return Es(t,"Delete",As)}(t))t.preventDefault(),Rs(e,pe,false);else if(function(t){return r$2&&Es(t,"Backspace",{metaKey:true})}(t))t.preventDefault(),Rs(e,ye,true);else if(function(t){return r$2&&(Es(t,"Delete",{metaKey:true})||Es(t,"k",{ctrlKey:true}))}(t))t.preventDefault(),Rs(e,ye,false);else if(function(t){return Es(t,"b",Ms)}(t))t.preventDefault(),Rs(e,me,"bold");else if(function(t){return Es(t,"u",Ms)}(t))t.preventDefault(),Rs(e,me,"underline");else if(function(t){return Es(t,"i",Ms)}(t))t.preventDefault(),Rs(e,me,"italic");else if(function(t){return Es(t,"Tab",{shiftKey:"any"})}(t))Rs(e,Pe,t);else if(function(t){return Es(t,"z",Ms)}(t))t.preventDefault(),Rs(e,xe,void 0);else if(function(t){if(r$2)return Es(t,"z",{metaKey:true,shiftKey:true});return Es(t,"y",{ctrlKey:true})||Es(t,"z",{ctrlKey:true,shiftKey:true})}(t))t.preventDefault(),Rs(e,Ce,void 0);else {const n=e._editorState._selection;null===n||cr(n)?!i$2&&Ds(t)&&(t.preventDefault(),Rs(e,$e,t)):!function(t){return Es(t,"c",Ms)}(t)?!function(t){return Es(t,"x",Ms)}(t)?Ds(t)&&(t.preventDefault(),Rs(e,$e,t)):(t.preventDefault(),Rs(e,Ue,t)):(t.preventDefault(),Rs(e,Je,t));}(function(t){return t.ctrlKey||t.shiftKey||t.altKey||t.metaKey})(t)&&Rs(e,Xe,t);}],["pointerdown",function(t,e){const n=t.target,r=t.pointerType;fo(n)&&"touch"!==r&&0===t.button&&ci(e,(()=>{Vi(n)||(cn=true);}));}],["compositionstart",function(t,e){ci(e,(()=>{const n=Nr();if(cr(n)&&!e.isComposing()){const r=n.anchor,i=n.anchor.getNode();ls(r.key),(t.timeStamp<en+Ze||"element"===r.type||!n.isCollapsed()||i.getFormat()!==n.format||Qn(i)&&i.getStyle()!==n.style)&&Rs(e,he,R$5);}}));}],["compositionend",function(t,e){i$2?un=true:l||!o$3&&!f$5?ci(e,(()=>{Sn(e,t.data);})):(fn=true,dn=t.data);}],["input",function(t,e){t.stopPropagation(),ci(e,(()=>{if(uo(t.target)&&Vi(t.target))return;const n=Nr(),r=t.data,c=Cn(t);if(null!=r&&cr(n)&&_n(n,c,r,t.timeStamp,false)){un&&(Sn(e,r),un=false);const c=n.anchor.getNode(),a=oo(Gs(e));if(null===a)return;const u=n.isBackward(),d=u?n.anchor.offset:n.focus.offset,h=u?n.focus.offset:n.anchor.offset;s$2&&!n.isCollapsed()&&Qn(c)&&null!==a.anchorNode&&c.getTextContent().slice(0,d)+r+c.getTextContent().slice(d+h)===ks(a.anchorNode)||Rs(e,he,r);const g=r.length;i$2&&g>1&&"insertCompositionText"===t.inputType&&!e.isComposing()&&(n.anchor.offset-=g),o$3||l||f$5||!e.isComposing()||(en=0,ls(null));}else {Ts(false,e,null!==r?r:void 0),un&&(Sn(e,r||void 0),un=false);}!function(){Vr();const t=qr();ct$3(t);}();}),{event:t}),sn=null;}],["click",function(t,e){ci(e,(()=>{const n=Nr(),r=oo(Gs(e)),i=wr();if(r)if(cr(n)){const e=n.anchor,s=e.getNode();if("element"===e.type&&0===e.offset&&n.isCollapsed()&&!yi(s)&&1===_s().getChildrenSize()&&s.getTopLevelElementOrThrow().isEmpty()&&null!==i&&n.is(i))r.removeAllRanges(),n.dirty=true;else if(3===t.detail&&!n.isCollapsed()){if(s!==n.focus.getNode()){const t=function(t,e){let n=t;for(;n!==_s()&&null!=n;){if(e(n))return n;n=n.getParent();}return null}(s,(t=>di(t)&&!t.isInline()));di(t)&&t.select(0);}}}else if("touch"===t.pointerType){const n=r.anchorNode;if(uo(n)||Zi(n)){ys(br(i,r,e,t));}}Rs(e,ae,t);}));}],["cut",Qe],["copy",Qe],["dragstart",Qe],["dragover",Qe],["dragend",Qe],["paste",Qe],["focus",Qe],["blur",Qe],["drop",Qe]];s$2&&tn.push(["beforeinput",(e,n)=>function(e,n){const r=e.inputType,s=Cn(e);if("deleteCompositionText"===r||i$2&&Bs(n))return;if("insertCompositionText"===r)return;ci(n,(()=>{const i=Nr();if("deleteContentBackward"===r){if(null===i){const t=wr();if(!cr(t))return;ys(t.clone());}if(cr(i)){const r=i.anchor.key===i.focus.key;if(o=e.timeStamp,"MediaLast"===nn&&o<en+Ze&&n.isComposing()&&r){if(ls(null),en=0,setTimeout((()=>{ci(n,(()=>{ls(null);}));}),Ze),cr(i)){const e=i.anchor.getNode();e.markDirty(),Qn(e)||t$2(142),xn(i,e);}}else {ls(null),e.preventDefault();const t=i.anchor.getNode(),s=t.getTextContent(),o=t.canInsertTextAfter(),l=0===i.anchor.offset&&i.focus.offset===s.length;let c=u$3&&r&&!l&&o;if(c&&i.isCollapsed()&&(c=!_i(Ks(i.anchor,true))),!c){Rs(n,ue,true);const t=Nr();u$3&&cr(t)&&t.isCollapsed()&&(hn=t,setTimeout((()=>hn=null)));}}return}}var o;if(!cr(i))return;const c=e.data;null!==sn&&Ts(false,n,sn),i.dirty&&null===sn||!i.isCollapsed()||yi(i.anchor.getNode())||null===s||i.applyDOMRange(s),sn=null;const a=i.anchor,f=i.focus,d=a.getNode(),h=f.getNode();if("insertText"!==r&&"insertTranspose"!==r)switch(e.preventDefault(),r){case "insertFromYank":case "insertFromDrop":case "insertReplacementText":Rs(n,he,e);break;case "insertFromComposition":ls(null),Rs(n,he,e);break;case "insertLineBreak":ls(null),Rs(n,fe,false);break;case "insertParagraph":ls(null),an&&!l?(an=false,Rs(n,fe,false)):Rs(n,de,void 0);break;case "insertFromPaste":case "insertFromPasteAsQuotation":Rs(n,ge,e);break;case "deleteByComposition":(function(t,e){return t!==e||di(t)||di(e)||!t.isToken()||!e.isToken()})(d,h)&&Rs(n,_e,e);break;case "deleteByDrag":case "deleteByCut":Rs(n,_e,e);break;case "deleteContent":Rs(n,ue,false);break;case "deleteWordBackward":Rs(n,pe,true);break;case "deleteWordForward":Rs(n,pe,false);break;case "deleteHardLineBackward":case "deleteSoftLineBackward":Rs(n,ye,true);break;case "deleteContentForward":case "deleteHardLineForward":case "deleteSoftLineForward":Rs(n,ye,false);break;case "formatStrikeThrough":Rs(n,me,"strikethrough");break;case "formatBold":Rs(n,me,"bold");break;case "formatItalic":Rs(n,me,"italic");break;case "formatUnderline":Rs(n,me,"underline");break;case "historyUndo":Rs(n,xe,void 0);break;case "historyRedo":Rs(n,Ce,void 0);}else {if("\n"===c)e.preventDefault(),Rs(n,fe,false);else if(c===B$6)e.preventDefault(),Rs(n,de,void 0);else if(null==c&&e.dataTransfer){const t=e.dataTransfer.getData("text/plain");e.preventDefault(),i.insertRawText(t);}else null!=c&&_n(i,s,c,e.timeStamp,true)?(e.preventDefault(),Rs(n,he,c)):sn=c;rn=e.timeStamp;}}));}(e,n)]);let en=0,nn=null,rn=0,sn=null;const on=new WeakMap;let ln=false,cn=false,an=false,un=false,fn=false,dn="",hn=null,gn=[0,"",0,"root",0];function _n(t,e,n,r,i){const o=t.anchor,l=t.focus,c=o.getNode(),a=qr(),u=oo(Gs(a)),f=null!==u?u.anchorNode:null,d=o.key,h=a.getElementByKey(d),g=n.length;return d!==l.key||!Qn(c)||(!i&&(!s$2||rn<r+50)||c.isDirty()&&g<2||Cs(n))&&o.offset!==l.offset&&!c.isComposing()||Qi(c)||c.isDirty()&&g>1||(i||!s$2)&&null!==h&&!c.isComposing()&&f!==es(h)||null!==u&&null!==e&&(!e.collapsed||e.startContainer!==u.anchorNode||e.startOffset!==u.anchorOffset)||c.getFormat()!==t.format||c.getStyle()!==t.style||function(t,e){if(e.isSegmented())return  true;if(!t.isCollapsed())return  false;const n=t.anchor.offset,r=e.getParentOrThrow(),i=e.isToken();return 0===n?!e.canInsertTextBefore()||!r.canInsertTextBefore()&&!e.isComposing()||i||function(t){const e=t.getPreviousSibling();return (Qn(e)||di(e)&&e.isInline())&&!e.canInsertTextAfter()}(e):n===e.getTextContentSize()&&(!e.canInsertTextAfter()||!r.canInsertTextAfter()&&!e.isComposing()||i)}(t,c)}function pn(t,e){return Zi(t)&&null!==t.nodeValue&&0!==e&&e!==t.nodeValue.length}function yn(e,n,r){const{anchorNode:i,anchorOffset:s,focusNode:o,focusOffset:l}=e;ln&&(ln=false,pn(i,s)&&pn(o,l)&&!hn)||ci(n,(()=>{if(!r)return void ys(null);if(!Hi(n,i,o))return;let c=Nr();if(hn&&cr(c)&&c.isCollapsed()){const t=c.anchor,e=hn.anchor;(t.key===e.key&&t.offset===e.offset+1||1===t.offset&&e.getNode().is(t.getNode().getPreviousSibling()))&&(c=hn.clone(),ys(c));}if(hn=null,cr(c)){const r=c.anchor,i=r.getNode();if(c.isCollapsed()){"Range"===e.type&&e.anchorNode===e.focusNode&&(c.dirty=true);const s=Gs(n).event,o=s?s.timeStamp:performance.now(),[l,a,u,f,d]=gn,h=_s(),g=false===n.isComposing()&&""===h.getTextContent();if(o<d+200&&r.offset===u&&r.key===f)mn(c,l,a);else if("text"===r.type)Qn(i)||t$2(141),xn(c,i);else if("element"===r.type&&!g){di(i)||t$2(259);const e=r.getNode();e.isEmpty()?function(t,e){const n=e.getTextFormat(),r=e.getTextStyle();mn(t,n,r);}(c,e):mn(c,0,"");}}else {const t=r.key,e=c.focus.key,n=c.getNodes(),i=n.length,o=c.isBackward(),a=o?l:s,u=o?s:l,f=o?e:t,d=o?t:e;let h=O$3,g=false;for(let t=0;t<i;t++){const e=n[t],r=e.getTextContentSize();if(Qn(e)&&0!==r&&!(0===t&&e.__key===f&&a===r||t===i-1&&e.__key===d&&0===u)&&(g=true,h&=e.getFormat(),0===h))break}c.format=g?h:0;}}Rs(n,le,void 0);}));}function mn(t,e,n){t.format===e&&t.style===n||(t.format=e,t.style=n,t.dirty=true);}function xn(t,e){mn(t,e.getFormat(),e.getStyle());}function Cn(t){if(!t.getTargetRanges)return null;const e=t.getTargetRanges();return 0===e.length?null:e[0]}function Sn(t,e){const n=t._compositionKey;if(ls(null),null!==n&&null!=e){if(""===e){const e=as(n),r=es(t.getElementByKey(n));return void(null!==r&&null!==r.nodeValue&&Qn(e)&&bs(e,r.nodeValue,null,null,true))}if("\n"===e[e.length-1]){const e=Nr();if(cr(e)){const n=e.focus;return e.anchor.set(n.key,n.offset,n.type),void Rs(t,Ee,null)}}}Ts(true,t,e);}function vn(t){let e=t.__lexicalEventHandles;return void 0===e&&(e=[],t.__lexicalEventHandles=e),e}const kn=new Map;function Tn(t){const e=lo(t.target);if(null===e)return;const n=Gi(e.anchorNode);if(null===n)return;cn&&(cn=false,ci(n,(()=>{const r=wr(),i=e.anchorNode;if(uo(i)||Zi(i)){ys(br(r,e,n,t));}})));const r=Ss(n),i=r[r.length-1],s=i._key,o=kn.get(s),l=o||i;l!==n&&yn(e,l,false),yn(e,n,true),n!==i?kn.set(s,n):o&&kn.delete(s);}function bn(t){t._lexicalHandled=true;}function Nn(t){return  true===t._lexicalHandled}function En(e){const n=e.ownerDocument,r=on.get(n);if(void 0===r)return void 0;const i=r-1;i>=0||t$2(164),on.set(n,i),0===i&&n.removeEventListener("selectionchange",Tn);const s=Xi(e);qi(s)?(!function(t){if(null!==t._parentEditor){const e=Ss(t),n=e[e.length-1]._key;kn.get(n)===t&&kn.delete(n);}else kn.delete(t._key);}(s),e.__lexicalEditor=null):s&&t$2(198);const o=vn(e);for(let t=0;t<o.length;t++)o[t]();e.__lexicalEventHandles=[];}function Mn(t,e,n){Vr();const r=t.__key,i=t.getParent();if(null===i)return;const s=function(t){const e=Nr();if(!cr(e)||!di(t))return e;const{anchor:n,focus:r}=e,i=n.getNode(),s=r.getNode();Hs(i,t)&&n.set(t.__key,0,"element");Hs(s,t)&&r.set(t.__key,0,"element");return e}(t);let o=false;if(cr(s)&&e){const e=s.anchor,n=s.focus;e.key===r&&(Ar(e,t,i,t.getPreviousSibling(),t.getNextSibling()),o=true),n.key===r&&(Ar(n,t,i,t.getPreviousSibling(),t.getNextSibling()),o=true);}else ur(s)&&e&&t.isSelected()&&t.selectPrevious();if(cr(s)&&e&&!o){const e=t.getIndexWithinParent();ss(t),Er(s,i,e,-1);}else ss(t);n||Zs(i)||i.canBeEmpty()||!i.isEmpty()||Mn(i,e),e&&s&&yi(i)&&i.isEmpty()&&i.selectEnd();}class An{static getType(){t$2(64,this.name);}static clone(e){t$2(65,this.name);}afterCloneFrom(t){this.__parent=t.__parent,this.__next=t.__next,this.__prev=t.__prev,this.__state=t.__state;}constructor(t){this.__type=this.constructor.getType(),this.__parent=null,this.__prev=null,this.__next=null,Object.defineProperty(this,"__state",{configurable:true,enumerable:false,value:void 0,writable:true}),is(this,t);}getType(){return this.__type}isInline(){t$2(137,this.constructor.name);}isAttached(){let t=this.__key;for(;null!==t;){if("root"===t)return  true;const e=as(t);if(null===e)break;t=e.__parent;}return  false}isSelected(t){const e=t||Nr();if(null==e)return  false;const n=e.getNodes().some((t=>t.__key===this.__key));if(Qn(this))return n;if(cr(e)&&"element"===e.anchor.type&&"element"===e.focus.type){if(e.isCollapsed())return  false;const t=this.getParent();if(_i(this)&&this.isInline()&&t){const n=e.isBackward()?e.focus:e.anchor;if(t.is(n.getNode())&&n.offset===t.getChildrenSize()&&this.is(t.getLastChild()))return  false}}return n}getKey(){return this.__key}getIndexWithinParent(){const t=this.getParent();if(null===t)return  -1;let e=t.getFirstChild(),n=0;for(;null!==e;){if(this.is(e))return n;n++,e=e.getNextSibling();}return  -1}getParent(){const t=this.getLatest().__parent;return null===t?null:as(t)}getParentOrThrow(){const e=this.getParent();return null===e&&t$2(66,this.__key),e}getTopLevelElement(){let e=this;for(;null!==e;){const n=e.getParent();if(Zs(n))return di(e)||e===this&&_i(e)||t$2(194),e;e=n;}return null}getTopLevelElementOrThrow(){const e=this.getTopLevelElement();return null===e&&t$2(67,this.__key),e}getParents(){const t=[];let e=this.getParent();for(;null!==e;)t.push(e),e=e.getParent();return t}getParentKeys(){const t=[];let e=this.getParent();for(;null!==e;)t.push(e.__key),e=e.getParent();return t}getPreviousSibling(){const t=this.getLatest().__prev;return null===t?null:as(t)}getPreviousSiblings(){const t=[],e=this.getParent();if(null===e)return t;let n=e.getFirstChild();for(;null!==n&&!n.is(this);)t.push(n),n=n.getNextSibling();return t}getNextSibling(){const t=this.getLatest().__next;return null===t?null:as(t)}getNextSiblings(){const t=[];let e=this.getNextSibling();for(;null!==e;)t.push(e),e=e.getNextSibling();return t}getCommonAncestor(t){const e=di(this)?this:this.getParent(),n=di(t)?t:t.getParent(),r=e&&n?sl(e,n):null;return r?r.commonAncestor:null}is(t){return null!=t&&this.__key===t.__key}isBefore(e){const n=sl(this,e);return null!==n&&("descendant"===n.type||("branch"===n.type?-1===nl(n):("same"!==n.type&&"ancestor"!==n.type&&t$2(279),false)))}isParentOf(t){const e=sl(this,t);return null!==e&&"ancestor"===e.type}getNodesBetween(e){const n=this.isBefore(e),r=[],i=new Set;let s=this;for(;null!==s;){const o=s.__key;if(i.has(o)||(i.add(o),r.push(s)),s===e)break;const l=di(s)?n?s.getFirstChild():s.getLastChild():null;if(null!==l){s=l;continue}const c=n?s.getNextSibling():s.getPreviousSibling();if(null!==c){s=c;continue}const a=s.getParentOrThrow();if(i.has(a.__key)||r.push(a),a===e)break;let u=null,f=a;do{if(null===f&&t$2(68),u=n?f.getNextSibling():f.getPreviousSibling(),f=f.getParent(),null===f)break;null!==u||i.has(f.__key)||r.push(f);}while(null===u);s=u;}return n||r.reverse(),r}isDirty(){const t=qr()._dirtyLeaves;return null!==t&&t.has(this.__key)}getLatest(){const e=as(this.__key);return null===e&&t$2(113),e}getWritable(){Vr();const t=Hr(),e=qr(),n=t._nodeMap,r=this.__key,i=this.getLatest(),s=e._cloneNotNeeded,o=Nr();if(null!==o&&o.setCachedNodes(null),s.has(r))return os(i),i;const l=vo(i);return s.add(r),os(l),n.set(r,l),l}getTextContent(){return ""}getTextContentSize(){return this.getTextContent().length}createDOM(e,n){t$2(70);}updateDOM(e,n,r){t$2(71);}exportDOM(t){return {element:this.createDOM(t._config,t)}}exportJSON(){const t=this.__state?this.__state.toJSON():void 0;return {type:this.__type,version:1,...t}}static importJSON(e){t$2(18,this.name);}updateFromJSON(t){return function(t,e){const n=t.getWritable();return (e||n.__state)&&mt$3(t).updateFromJSON(e),n}(this,t.$)}static transform(){return null}remove(t){Mn(this,true,t);}replace(e,n){Vr();let r=Nr();null!==r&&(r=r.clone()),no(this,e);const i=this.getLatest(),s=this.__key,o=e.__key,l=e.getWritable(),c=this.getParentOrThrow().getWritable(),a=c.__size;ss(l);const u=i.getPreviousSibling(),f=i.getNextSibling(),d=i.__prev,h=i.__next,g=i.__parent;if(Mn(i,false,true),null===u)c.__first=o;else {u.getWritable().__next=o;}if(l.__prev=d,null===f)c.__last=o;else {f.getWritable().__prev=o;}if(l.__next=h,l.__parent=g,c.__size=a,n&&(di(this)&&di(l)||t$2(139),this.getChildren().forEach((t=>{l.append(t);}))),cr(r)){ys(r);const t=r.anchor,e=r.focus;t.key===s&&or(t,l),e.key===s&&or(e,l);}return cs()===s&&ls(o),l}insertAfter(t,e=true){Vr(),no(this,t);const n=this.getWritable(),r=t.getWritable(),i=r.getParent(),s=Nr();let o=false,l=false;if(null!==i){const e=t.getIndexWithinParent();if(ss(r),cr(s)){const t=i.__key,n=s.anchor,r=s.focus;o="element"===n.type&&n.key===t&&n.offset===e+1,l="element"===r.type&&r.key===t&&r.offset===e+1;}}const c=this.getNextSibling(),a=this.getParentOrThrow().getWritable(),u=r.__key,f=n.__next;if(null===c)a.__last=u;else {c.getWritable().__prev=u;}if(a.__size++,n.__next=u,r.__next=f,r.__prev=n.__key,r.__parent=n.__parent,e&&cr(s)){const t=this.getIndexWithinParent();Er(s,a,t+1);const e=a.__key;o&&s.anchor.set(e,t+2,"element"),l&&s.focus.set(e,t+2,"element");}return t}insertBefore(t,e=true){Vr(),no(this,t);const n=this.getWritable(),r=t.getWritable(),i=r.__key;ss(r);const s=this.getPreviousSibling(),o=this.getParentOrThrow().getWritable(),l=n.__prev,c=this.getIndexWithinParent();if(null===s)o.__first=i;else {s.getWritable().__next=i;}o.__size++,n.__prev=i,r.__prev=l,r.__next=n.__key,r.__parent=n.__parent;const a=Nr();if(e&&cr(a)){Er(a,this.getParentOrThrow(),c);}return t}isParentRequired(){return  false}createParentElementNode(){return Pi()}selectStart(){return this.selectPrevious()}selectEnd(){return this.selectNext(0,0)}selectPrevious(t,e){Vr();const n=this.getPreviousSibling(),r=this.getParentOrThrow();if(null===n)return r.select(0,0);if(di(n))return n.select();if(!Qn(n)){const t=n.getIndexWithinParent()+1;return r.select(t,t)}return n.select(t,e)}selectNext(t,e){Vr();const n=this.getNextSibling(),r=this.getParentOrThrow();if(null===n)return r.select();if(di(n))return n.select(0,0);if(!Qn(n)){const t=n.getIndexWithinParent();return r.select(t,t)}return n.select(t,e)}markDirty(){this.getWritable();}reconcileObservedMutation(t,e){this.markDirty();}}class On extends An{static getType(){return "linebreak"}static clone(t){return new On(t.__key)}constructor(t){super(t);}getTextContent(){return "\n"}createDOM(){return document.createElement("br")}updateDOM(){return  false}isInline(){return  true}static importDOM(){return {br:t=>function(t){const e=t.parentElement;if(null!==e&&_o(e)){const n=e.firstChild;if(n===t||n.nextSibling===t&&Ln(n)){const n=e.lastChild;if(n===t||n.previousSibling===t&&Ln(n))return  true}}return  false}(t)||function(t){const e=t.parentElement;if(null!==e&&_o(e)){const n=e.firstChild;if(n===t||n.nextSibling===t&&Ln(n))return  false;const r=e.lastChild;if(r===t||r.previousSibling===t&&Ln(r))return  true}return  false}(t)?null:{conversion:Dn,priority:0}}}static importJSON(t){return Pn().updateFromJSON(t)}}function Dn(t){return {node:Pn()}}function Pn(){return eo(new On)}function Fn(t){return t instanceof On}function Ln(t){return Zi(t)&&/^( |\t|\r?\n)+$/.test(t.textContent||"")}function In(t,e){return 16&e?"code":e&A$3?"mark":32&e?"sub":64&e?"sup":null}function zn(t,e){return 1&e?"strong":2&e?"em":"span"}function Kn(t,e,n,r,i){const s=r.classList;let o=Fs(i,"base");void 0!==o&&s.add(...o),o=Fs(i,"underlineStrikethrough");let l=false;const c=e&N$2&&e&b$2;void 0!==o&&(n&N$2&&n&b$2?(l=true,c||s.add(...o)):c&&s.remove(...o));for(const t in j$3){const r=j$3[t];if(o=Fs(i,t),void 0!==o)if(n&r){if(l&&("underline"===t||"strikethrough"===t)){e&r&&s.remove(...o);continue}e&r&&(!c||"underline"!==t)&&"strikethrough"!==t||s.add(...o);}else e&r&&s.remove(...o);}}function Bn(t,e,n){const r=e.firstChild,s=n.isComposing(),o=t+(s?K$3:"");if(null==r)e.textContent=o;else {const t=r.nodeValue;if(t!==o)if(s||i$2){const[e,n,i]=function(t,e){const n=t.length,r=e.length;let i=0,s=0;for(;i<n&&i<r&&t[i]===e[i];)i++;for(;s+i<n&&s+i<r&&t[n-s-1]===e[r-s-1];)s++;return [i,n-i-s,e.slice(i,r-s)]}(t,o);0!==n&&r.deleteData(e,n),r.insertData(e,i);}else r.nodeValue=o;}}function Rn(t,e,n,r,i,s){Bn(i,t,e);const o=s.theme.text;void 0!==o&&Kn(0,0,r,t,o);}function Wn(t,e){const n=document.createElement(e);return n.appendChild(t),n}class Jn extends An{static getType(){return "text"}static clone(t){return new Jn(t.__text,t.__key)}afterCloneFrom(t){super.afterCloneFrom(t),this.__text=t.__text,this.__format=t.__format,this.__style=t.__style,this.__mode=t.__mode,this.__detail=t.__detail;}constructor(t="",e){super(e),this.__text=t,this.__format=0,this.__style="",this.__mode=0,this.__detail=0;}getFormat(){return this.getLatest().__format}getDetail(){return this.getLatest().__detail}getMode(){const t=this.getLatest();return G$2[t.__mode]}getStyle(){return this.getLatest().__style}isToken(){return 1===this.getLatest().__mode}isComposing(){return this.__key===cs()}isSegmented(){return 2===this.getLatest().__mode}isDirectionless(){return !!(1&this.getLatest().__detail)}isUnmergeable(){return !!(2&this.getLatest().__detail)}hasFormat(t){const e=j$3[t];return !!(this.getFormat()&e)}isSimpleText(){return "text"===this.__type&&0===this.__mode}getTextContent(){return this.getLatest().__text}getFormatFlags(t,e){return ns(this.getLatest().__format,t,e)}canHaveFormat(){return  true}isInline(){return  true}createDOM(t,e){const n=this.__format,r=In(0,n),i=zn(0,n),s=null===r?i:r,o=document.createElement(s);let l=o;this.hasFormat("code")&&o.setAttribute("spellcheck","false"),null!==r&&(l=document.createElement(i),o.appendChild(l));Rn(l,this,0,n,this.__text,t);const c=this.__style;return ""!==c&&(o.style.cssText=c),o}updateDOM(e,n,r){const i=this.__text,s=e.__format,o=this.__format,l=In(0,s),c=In(0,o),a=zn(0,s),u=zn(0,o);if((null===l?a:l)!==(null===c?u:c))return  true;if(l===c&&a!==u){const e=n.firstChild;null==e&&t$2(48);const s=document.createElement(u);return Rn(s,this,0,o,i,r),n.replaceChild(s,e),false}let f=n;null!==c&&null!==l&&(f=n.firstChild,null==f&&t$2(49)),Bn(i,f,this);const d=r.theme.text;void 0!==d&&s!==o&&Kn(0,s,o,f,d);const h=e.__style,g=this.__style;return h!==g&&(n.style.cssText=g),false}static importDOM(){return {"#text":()=>({conversion:Yn,priority:0}),b:()=>({conversion:$n,priority:0}),code:()=>({conversion:Gn,priority:0}),em:()=>({conversion:Gn,priority:0}),i:()=>({conversion:Gn,priority:0}),mark:()=>({conversion:Gn,priority:0}),s:()=>({conversion:Gn,priority:0}),span:()=>({conversion:Un,priority:0}),strong:()=>({conversion:Gn,priority:0}),sub:()=>({conversion:Gn,priority:0}),sup:()=>({conversion:Gn,priority:0}),u:()=>({conversion:Gn,priority:0})}}static importJSON(t){return Xn().updateFromJSON(t)}updateFromJSON(t){return super.updateFromJSON(t).setTextContent(t.text).setFormat(t.format).setDetail(t.detail).setMode(t.mode).setStyle(t.style)}exportDOM(e){let{element:n}=super.exportDOM(e);return uo(n)||t$2(132),n.style.whiteSpace="pre-wrap",this.hasFormat("lowercase")?n.style.textTransform="lowercase":this.hasFormat("uppercase")?n.style.textTransform="uppercase":this.hasFormat("capitalize")&&(n.style.textTransform="capitalize"),this.hasFormat("bold")&&(n=Wn(n,"b")),this.hasFormat("italic")&&(n=Wn(n,"i")),this.hasFormat("strikethrough")&&(n=Wn(n,"s")),this.hasFormat("underline")&&(n=Wn(n,"u")),{element:n}}exportJSON(){return {detail:this.getDetail(),format:this.getFormat(),mode:this.getMode(),style:this.getStyle(),text:this.getTextContent(),...super.exportJSON()}}selectionTransform(t,e){}setFormat(t){const e=this.getWritable();return e.__format="string"==typeof t?j$3[t]:t,e}setDetail(t){const e=this.getWritable();return e.__detail="string"==typeof t?V$3[t]:t,e}setStyle(t){const e=this.getWritable();return e.__style=t,e}toggleFormat(t){const e=ns(this.getFormat(),t,null);return this.setFormat(e)}toggleDirectionless(){const t=this.getWritable();return t.__detail^=1,t}toggleUnmergeable(){const t=this.getWritable();return t.__detail^=2,t}setMode(t){const e=q$2[t];if(this.__mode===e)return this;const n=this.getWritable();return n.__mode=e,n}setTextContent(t){if(this.__text===t)return this;const e=this.getWritable();return e.__text=t,e}select(t,e){Vr();let n=t,r=e;const i=Nr(),s=this.getTextContent(),o=this.__key;if("string"==typeof s){const t=s.length;void 0===n&&(n=t),void 0===r&&(r=t);}else n=0,r=0;if(!cr(i))return Sr(o,n,o,r,"text","text");{const t=cs();t!==i.anchor.key&&t!==i.focus.key||ls(o),i.setTextNodeRange(this,n,this,r);}return i}selectStart(){return this.select(0,0)}selectEnd(){const t=this.getTextContentSize();return this.select(t,t)}spliceText(t,e,n,r){const i=this.getWritable(),s=i.__text,o=n.length;let l=t;l<0&&(l=o+l,l<0&&(l=0));const c=Nr();if(r&&cr(c)){const e=t+o;c.setTextNodeRange(i,e,i,e);}const a=s.slice(0,l)+n+s.slice(l+e);return i.__text=a,i}canInsertTextBefore(){return  true}canInsertTextAfter(){return  true}splitText(...t){Vr();const e=this.getLatest(),n=e.getTextContent();if(""===n)return [];const r=e.__key,i=cs(),s=n.length;t.sort(((t,e)=>t-e)),t.push(s);const o=[],l=t.length;for(let e=0,r=0;e<s&&r<=l;r++){const i=t[r];i>e&&(o.push(n.slice(e,i)),e=i);}const c=o.length;if(1===c)return [e];const a=o[0],u=e.getParent();let f;const d=e.getFormat(),h=e.getStyle(),g=e.__detail;let _=false,p=null,y=null;const m=Nr();if(cr(m)){const[t,e]=m.isBackward()?[m.focus,m.anchor]:[m.anchor,m.focus];"text"===t.type&&t.key===r&&(p=t),"text"===e.type&&e.key===r&&(y=e);}e.isSegmented()?(f=Xn(a),f.__format=d,f.__style=h,f.__detail=g,_=true):(f=e.getWritable(),f.__text=a);const x=[f];for(let t=1;t<c;t++){const e=Xn(o[t]);e.__format=d,e.__style=h,e.__detail=g;const n=e.__key;i===r&&ls(n),x.push(e);}const C=p?p.offset:null,S=y?y.offset:null;let v=0;for(const t of x){if(!p&&!y)break;const e=v+t.getTextContentSize();if(null!==p&&null!==C&&C<=e&&C>=v&&(p.set(t.getKey(),C-v,"text"),C<e&&(p=null)),null!==y&&null!==S&&S<=e&&S>=v){y.set(t.getKey(),S-v,"text");break}v=e;}if(null!==u){!function(t){const e=t.getPreviousSibling(),n=t.getNextSibling();null!==e&&os(e);null!==n&&os(n);}(this);const t=u.getWritable(),e=this.getIndexWithinParent();_?(t.splice(e,0,x),this.remove()):t.splice(e,1,x),cr(m)&&Er(m,u,e,c-1);}return x}mergeWithSibling(e){const n=e===this.getPreviousSibling();n||e===this.getNextSibling()||t$2(50);const r=this.__key,i=e.__key,s=this.__text,o=s.length;cs()===i&&ls(r);const l=Nr();if(cr(l)){const t=l.anchor,s=l.focus;null!==t&&t.key===i&&Or(t,n,r,e,o),null!==s&&s.key===i&&Or(s,n,r,e,o);}const c=e.__text,a=n?c+s:s+c;this.setTextContent(a);const u=this.getWritable();return e.remove(),u}isTextEntity(){return  false}}function Un(t){return {forChild:Zn(t.style),node:null}}function $n(t){const e=t,n="normal"===e.style.fontWeight;return {forChild:Zn(e.style,n?void 0:"bold"),node:null}}const jn=new WeakMap;function Vn(t){if(!uo(t))return  false;if("PRE"===t.nodeName)return  true;const e=t.style.whiteSpace;return "string"==typeof e&&e.startsWith("pre")}function Yn(e){const n=e;null===e.parentElement&&t$2(129);let r=n.textContent||"";if(null!==function(t){let e,n=t.parentNode;const r=[t];for(;null!==n&&void 0===(e=jn.get(n))&&!Vn(n);)r.push(n),n=n.parentNode;const i=void 0===e?n:e;for(let t=0;t<r.length;t++)jn.set(r[t],i);return i}(n)){const t=r.split(/(\r?\n|\t)/),e=[],n=t.length;for(let r=0;r<n;r++){const n=t[r];"\n"===n||"\r\n"===n?e.push(Pn()):"\t"===n?e.push(er()):""!==n&&e.push(Xn(n));}return {node:e}}if(r=r.replace(/\r/g,"").replace(/[ \t\n]+/g," "),""===r)return {node:null};if(" "===r[0]){let t=n,e=true;for(;null!==t&&null!==(t=Hn(t,false));){const n=t.textContent||"";if(n.length>0){/[ \t\n]$/.test(n)&&(r=r.slice(1)),e=false;break}}e&&(r=r.slice(1));}if(" "===r[r.length-1]){let t=n,e=true;for(;null!==t&&null!==(t=Hn(t,true));){if((t.textContent||"").replace(/^( |\t|\r?\n)+/,"").length>0){e=false;break}}e&&(r=r.slice(0,r.length-1));}return ""===r?{node:null}:{node:Xn(r)}}function Hn(t,e){let n=t;for(;;){let t;for(;null===(t=e?n.nextSibling:n.previousSibling);){const t=n.parentElement;if(null===t)return null;n=t;}if(n=t,uo(n)){const t=n.style.display;if(""===t&&!go(n)||""!==t&&!t.startsWith("inline"))return null}let r=n;for(;null!==(r=e?n.firstChild:n.lastChild);)n=r;if(Zi(n))return n;if("BR"===n.nodeName)return null}}const qn={code:"code",em:"italic",i:"italic",mark:"highlight",s:"strikethrough",strong:"bold",sub:"subscript",sup:"superscript",u:"underline"};function Gn(t){const e=qn[t.nodeName.toLowerCase()];return void 0===e?{node:null}:{forChild:Zn(t.style,e),node:null}}function Xn(t=""){return eo(new Jn(t))}function Qn(t){return t instanceof Jn}function Zn(t,e){const n=t.fontWeight,r=t.textDecoration.split(" "),i="700"===n||"bold"===n,s=r.includes("line-through"),o="italic"===t.fontStyle,l=r.includes("underline"),c=t.verticalAlign;return t=>Qn(t)?(i&&!t.hasFormat("bold")&&t.toggleFormat("bold"),s&&!t.hasFormat("strikethrough")&&t.toggleFormat("strikethrough"),o&&!t.hasFormat("italic")&&t.toggleFormat("italic"),l&&!t.hasFormat("underline")&&t.toggleFormat("underline"),"sub"!==c||t.hasFormat("subscript")||t.toggleFormat("subscript"),"super"!==c||t.hasFormat("superscript")||t.toggleFormat("superscript"),e&&!t.hasFormat(e)&&t.toggleFormat(e),t):t}class tr extends Jn{static getType(){return "tab"}static clone(t){return new tr(t.__key)}constructor(t){super("\t",t),this.__detail=2;}static importDOM(){return null}createDOM(t){const e=super.createDOM(t),n=Fs(t.theme,"tab");if(void 0!==n){e.classList.add(...n);}return e}static importJSON(t){return er().updateFromJSON(t)}setTextContent(e){return "\t"!==e&&""!==e&&t$2(126),super.setTextContent(e)}setDetail(e){return 2!==e&&t$2(127),this}setMode(e){return "normal"!==e&&t$2(128),this}canInsertTextBefore(){return  false}canInsertTextAfter(){return  false}}function er(){return eo(new tr)}function nr(t){return t instanceof tr}class rr{constructor(t,e,n){this._selection=null,this.key=t,this.offset=e,this.type=n;}is(t){return this.key===t.key&&this.offset===t.offset&&this.type===t.type}isBefore(t){if(this.key===t.key)return this.offset<t.offset;return el(_l(ol(this,"next")),_l(ol(t,"next")))<0}getNode(){const e=as(this.key);return null===e&&t$2(20),e}set(t,e,n,r){const i=this._selection,s=this.key;r&&this.key===t&&this.offset===e&&this.type===n||(this.key=t,this.offset=e,this.type=n,jr()||(cs()===s&&ls(t),null!==i&&(i.setCachedNodes(null),i.dirty=true)));}}function ir(t,e,n){return new rr(t,e,n)}function sr(t,e){let n=e.__key,r=t.offset,i="element";if(Qn(e)){i="text";const t=e.getTextContentSize();r>t&&(r=t);}else if(!di(e)){const t=e.getNextSibling();if(Qn(t))n=t.__key,r=0,i="text";else {const t=e.getParent();t&&(n=t.__key,r=e.getIndexWithinParent()+1);}}t.set(n,r,i);}function or(t,e){if(di(e)){const n=e.getLastDescendant();di(n)||Qn(n)?sr(t,n):sr(t,e);}else sr(t,e);}class lr{constructor(t){this._cachedNodes=null,this._nodes=t,this.dirty=false;}getCachedNodes(){return this._cachedNodes}setCachedNodes(t){this._cachedNodes=t;}is(t){if(!ur(t))return  false;const e=this._nodes,n=t._nodes;return e.size===n.size&&Array.from(e).every((t=>n.has(t)))}isCollapsed(){return  false}isBackward(){return  false}getStartEndPoints(){return null}add(t){this.dirty=true,this._nodes.add(t),this._cachedNodes=null;}delete(t){this.dirty=true,this._nodes.delete(t),this._cachedNodes=null;}clear(){this.dirty=true,this._nodes.clear(),this._cachedNodes=null;}has(t){return this._nodes.has(t)}clone(){return new lr(new Set(this._nodes))}extract(){return this.getNodes()}insertRawText(t){}insertText(){}insertNodes(t){const e=this.getNodes(),n=e.length,r=e[n-1];let i;if(Qn(r))i=r.select();else {const t=r.getIndexWithinParent()+1;i=r.getParentOrThrow().select(t,t);}i.insertNodes(t);for(let t=0;t<n;t++)e[t].remove();}getNodes(){const t=this._cachedNodes;if(null!==t)return t;const e=this._nodes,n=[];for(const t of e){const e=as(t);null!==e&&n.push(e);}return jr()||(this._cachedNodes=n),n}getTextContent(){const t=this.getNodes();let e="";for(let n=0;n<t.length;n++)e+=t[n].getTextContent();return e}deleteNodes(){const t=this.getNodes();if((Nr()||wr())===this&&t[0]){const e=Wo(t[0],"next");cl(Zo(e,e));}for(const e of t)e.remove();}}function cr(t){return t instanceof ar}class ar{constructor(t,e,n,r){this.anchor=t,this.focus=e,t._selection=this,e._selection=this,this._cachedNodes=null,this.format=n,this.style=r,this.dirty=false;}getCachedNodes(){return this._cachedNodes}setCachedNodes(t){this._cachedNodes=t;}is(t){return !!cr(t)&&(this.anchor.is(t.anchor)&&this.focus.is(t.focus)&&this.format===t.format&&this.style===t.style)}isCollapsed(){return this.anchor.is(this.focus)}getNodes(){const t=this._cachedNodes;if(null!==t)return t;const e=function(t){const e=[],[n,r]=t.getTextSlices();n&&e.push(n.caret.origin);const i=new Set,s=new Set;for(const n of t)if(zo(n)){const{origin:t}=n;0===e.length?i.add(t):(s.add(t),e.push(t));}else {const{origin:t}=n;di(t)&&s.has(t)||e.push(t);}r&&e.push(r.caret.origin);if(Io(t.focus)&&di(t.focus.origin)&&null===t.focus.getNodeAtCaret())for(let n=jo(t.focus.origin,"previous");zo(n)&&i.has(n.origin)&&!n.origin.isEmpty()&&n.origin.is(e[e.length-1]);n=Yo(n))i.delete(n.origin),e.pop();for(;e.length>1;){const t=e[e.length-1];if(!di(t)||s.has(t)||t.isEmpty()||i.has(t))break;e.pop();}if(0===e.length&&t.isCollapsed()){const n=_l(t.anchor),r=_l(t.anchor.getFlipped()),i=t=>Fo(t)?t.origin:t.getNodeAtCaret(),s=i(n)||i(r)||(t.anchor.getNodeAtCaret()?n.origin:r.origin);e.push(s);}return e}(ml(ul(this),"next"));return jr()||(this._cachedNodes=e),e}setTextNodeRange(t,e,n,r){this.anchor.set(t.__key,e,"text"),this.focus.set(n.__key,r,"text");}getTextContent(){const t=this.getNodes();if(0===t.length)return "";const e=t[0],n=t[t.length-1],r=this.anchor,i=this.focus,s=r.isBefore(i),[o,l]=dr(this);let c="",a=true;for(let u=0;u<t.length;u++){const f=t[u];if(di(f)&&!f.isInline())a||(c+="\n"),a=!f.isEmpty();else if(a=false,Qn(f)){let t=f.getTextContent();f===e?f===n?"element"===r.type&&"element"===i.type&&i.offset!==r.offset||(t=o<l?t.slice(o,l):t.slice(l,o)):t=s?t.slice(o):t.slice(l):f===n&&(t=s?t.slice(0,l):t.slice(0,o)),c+=t;}else !_i(f)&&!Fn(f)||f===n&&this.isCollapsed()||(c+=f.getTextContent());}return c}applyDOMRange(t){const e=qr(),n=e.getEditorState()._selection,r=xr(t.startContainer,t.startOffset,t.endContainer,t.endOffset,e,n);if(null===r)return;const[i,s]=r;this.anchor.set(i.key,i.offset,i.type,true),this.focus.set(s.key,s.offset,s.type,true),vt$4(this);}clone(){const t=this.anchor,e=this.focus;return new ar(ir(t.key,t.offset,t.type),ir(e.key,e.offset,e.type),this.format,this.style)}toggleFormat(t){this.format=ns(this.format,t,null),this.dirty=true;}setStyle(t){this.style=t,this.dirty=true;}hasFormat(t){const e=j$3[t];return !!(this.format&e)}insertRawText(t){const e=t.split(/(\r?\n|\t)/),n=[],r=e.length;for(let t=0;t<r;t++){const r=e[t];"\n"===r||"\r\n"===r?n.push(Pn()):"\t"===r?n.push(er()):n.push(Xn(r));}this.insertNodes(n);}insertText(e){const n=this.anchor,r=this.focus,i=this.format,s=this.style;let o=n,l=r;!this.isCollapsed()&&r.isBefore(n)&&(o=r,l=n),"element"===o.type&&function(t,e,n,r){const i=t.getNode(),s=i.getChildAtIndex(t.offset),o=Xn(),l=yi(i)?Pi().append(o):o;o.setFormat(n),o.setStyle(r),null===s?i.append(l):s.insertBefore(l),t.is(e)&&e.set(o.__key,0,"text"),t.set(o.__key,0,"text");}(o,l,i,s),"element"===l.type&&ll(l,_l(ol(l,"next")));const c=o.offset;let a=l.offset;const u=this.getNodes(),f=u.length;let d=u[0];Qn(d)||t$2(26);const h=d.getTextContent().length,g=d.getParentOrThrow();let _=u[f-1];if(1===f&&"element"===l.type&&(a=h,l.set(o.key,a,"text")),this.isCollapsed()&&c===h&&(d.isSegmented()||d.isToken()||!d.canInsertTextAfter()||!g.canInsertTextAfter()&&null===d.getNextSibling())){let t=d.getNextSibling();if(Qn(t)&&t.canInsertTextBefore()&&!Qi(t)||(t=Xn(),t.setFormat(i),t.setStyle(s),g.canInsertTextAfter()?d.insertAfter(t):g.insertAfter(t)),t.select(0,0),d=t,""!==e)return void this.insertText(e)}else if(this.isCollapsed()&&0===c&&(d.isSegmented()||d.isToken()||!d.canInsertTextBefore()||!g.canInsertTextBefore()&&null===d.getPreviousSibling())){let t=d.getPreviousSibling();if(Qn(t)&&!Qi(t)||(t=Xn(),t.setFormat(i),g.canInsertTextBefore()?d.insertBefore(t):g.insertBefore(t)),t.select(),d=t,""!==e)return void this.insertText(e)}else if(d.isSegmented()&&c!==h){const t=Xn(d.getTextContent());t.setFormat(i),d.replace(t),d=t;}else if(!this.isCollapsed()&&""!==e){const t=_.getParent();if(!g.canInsertTextBefore()||!g.canInsertTextAfter()||di(t)&&(!t.canInsertTextBefore()||!t.canInsertTextAfter()))return this.insertText(""),mr(this.anchor,this.focus,null),void this.insertText(e)}if(1===f){if(d.isToken()){const t=Xn(e);return t.select(),void d.replace(t)}const t=d.getFormat(),n=d.getStyle();if(c!==a||t===i&&n===s){if(nr(d)){const t=Xn(e);return t.setFormat(i),t.setStyle(s),t.select(),void d.replace(t)}}else {if(""!==d.getTextContent()){const t=Xn(e);if(t.setFormat(i),t.setStyle(s),t.select(),0===c)d.insertBefore(t,false);else {const[e]=d.splitText(c);e.insertAfter(t,false);}return void(t.isComposing()&&"text"===this.anchor.type&&(this.anchor.offset-=e.length))}d.setFormat(i),d.setStyle(s);}const r=a-c;d=d.spliceText(c,r,e,true),""===d.getTextContent()?d.remove():"text"===this.anchor.type&&(d.isComposing()?this.anchor.offset-=e.length:(this.format=t,this.style=n));}else {const t=new Set([...d.getParentKeys(),..._.getParentKeys()]),n=di(d)?d:d.getParentOrThrow();let r=di(_)?_:_.getParentOrThrow(),i=_;if(!n.is(r)&&r.isInline())do{i=r,r=r.getParentOrThrow();}while(r.isInline());if("text"===l.type&&(0!==a||""===_.getTextContent())||"element"===l.type&&_.getIndexWithinParent()<a)if(Qn(_)&&!_.isToken()&&a!==_.getTextContentSize()){if(_.isSegmented()){const t=Xn(_.getTextContent());_.replace(t),_=t;}yi(l.getNode())||"text"!==l.type||(_=_.spliceText(0,a,"")),t.add(_.__key);}else {const t=_.getParentOrThrow();t.canBeEmpty()||1!==t.getChildrenSize()?_.remove():t.remove();}else t.add(_.__key);const s=r.getChildren(),o=new Set(u),g=n.is(r),p=n.isInline()&&null===d.getNextSibling()?n:d;for(let t=s.length-1;t>=0;t--){const e=s[t];if(e.is(d)||di(e)&&e.isParentOf(d))break;e.isAttached()&&(!o.has(e)||e.is(i)?g||p.insertAfter(e,false):e.remove());}if(!g){let e=r,n=null;for(;null!==e;){const r=e.getChildren(),i=r.length;(0===i||r[i-1].is(n))&&(t.delete(e.__key),n=e),e=e.getParent();}}if(d.isToken())if(c===h)d.select();else {const t=Xn(e);t.select(),d.replace(t);}else d=d.spliceText(c,h-c,e,true),""===d.getTextContent()?d.remove():d.isComposing()&&"text"===this.anchor.type&&(this.anchor.offset-=e.length);for(let e=1;e<f;e++){const n=u[e],r=n.__key;t.has(r)||n.remove();}}}removeText(){const t=Nr()===this;al(this,gl(ul(this))),t&&Nr()!==this&&ys(this);}formatText(t,e=null){if(this.isCollapsed())return this.toggleFormat(t),void ls(null);const n=this.getNodes(),r=[];for(const t of n)Qn(t)&&r.push(t);const i=e=>{n.forEach((n=>{if(di(n)){const r=n.getFormatFlags(t,e);n.setTextFormat(r);}}));},s=r.length;if(0===s)return this.toggleFormat(t),ls(null),void i(e);const o=this.anchor,l=this.focus,c=this.isBackward(),a=c?l:o,u=c?o:l;let f=0,d=r[0],h="element"===a.type?0:a.offset;if("text"===a.type&&h===d.getTextContentSize()&&(f=1,d=r[1],h=0),null==d)return;const g=d.getFormatFlags(t,e);i(g);const _=s-1;let p=r[_];const y="text"===u.type?u.offset:p.getTextContentSize();if(d.is(p)){if(h===y)return;if(Qi(d)||0===h&&y===d.getTextContentSize())d.setFormat(g);else {const t=d.splitText(h,y),e=0===h?t[0]:t[1];e.setFormat(g),"text"===a.type&&a.set(e.__key,0,"text"),"text"===u.type&&u.set(e.__key,y-h,"text");}return void(this.format=g)}0===h||Qi(d)||([,d]=d.splitText(h),h=0),d.setFormat(g);const m=p.getFormatFlags(t,g);y>0&&(y===p.getTextContentSize()||Qi(p)||([p]=p.splitText(y)),p.setFormat(m));for(let e=f+1;e<_;e++){const n=r[e],i=n.getFormatFlags(t,m);n.setFormat(i);}"text"===a.type&&a.set(d.__key,h,"text"),"text"===u.type&&u.set(p.__key,y,"text"),this.format=g|m;}insertNodes(e){if(0===e.length)return;if(this.isCollapsed()||this.removeText(),"root"===this.anchor.key){this.insertParagraph();const n=Nr();return cr(n)||t$2(134),n.insertNodes(e)}const n=(this.isBackward()?this.focus:this.anchor).getNode(),r=yo(n,po),i=e[e.length-1];if(di(r)&&"__language"in r){if("__language"in e[0])this.insertText(e[0].getTextContent());else {const t=Ir(this);r.splice(t,0,e),i.selectEnd();}return}if(!e.some((t=>(di(t)||_i(t))&&!t.isInline()))){di(r)||t$2(211,n.constructor.name,n.getType());const s=Ir(this);return r.splice(s,0,e),void i.selectEnd()}const s=function(t){const e=Pi();let n=null;for(let r=0;r<t.length;r++){const i=t[r],s=Fn(i);if(s||_i(i)&&i.isInline()||di(i)&&i.isInline()||Qn(i)||i.isParentRequired()){if(null===n&&(n=i.createParentElementNode(),e.append(n),s))continue;null!==n&&n.append(i);}else e.append(i),n=null;}return e}(e),o=s.getLastDescendant(),l=s.getChildren(),c=!di(r)||!r.isEmpty()?this.insertParagraph():null,a=l[l.length-1];let u=l[0];var f;di(f=u)&&po(f)&&!f.isEmpty()&&di(r)&&(!r.isEmpty()||r.canMergeWhenEmpty())&&(di(r)||t$2(211,n.constructor.name,n.getType()),r.append(...u.getChildren()),u=l[1]),u&&(null===r&&t$2(212,n.constructor.name,n.getType()),function(e,n,r){const i=n.getParentOrThrow().getLastChild();let s=n;const o=[n];for(;s!==i;)s.getNextSibling()||t$2(140),s=s.getNextSibling(),o.push(s);let l=e;for(const t of o)l=l.insertAfter(t);}(r,u));const d=yo(o,po);c&&di(d)&&(c.canMergeWhenEmpty()||po(a))&&(d.append(...c.getChildren()),c.remove()),di(r)&&r.isEmpty()&&r.remove(),o.selectEnd();const h=di(r)?r.getLastChild():null;Fn(h)&&d!==r&&h.remove();}insertParagraph(){if("root"===this.anchor.key){const t=Pi();return _s().splice(this.anchor.offset,0,[t]),t.select(),t}const e=Ir(this),n=yo(this.anchor.getNode(),po);di(n)||t$2(213);const r=n.getChildAtIndex(e),i=r?[r,...r.getNextSiblings()]:[],s=n.insertNewAfter(this,false);return s?(s.append(...i),s.selectStart(),s):null}insertLineBreak(t){const e=Pn();if(this.insertNodes([e]),t){const t=e.getParentOrThrow(),n=e.getIndexWithinParent();t.select(n,n);}}extract(){const t=this.getNodes(),e=t.length,n=e-1,r=this.anchor,i=this.focus;let s=t[0],o=t[n];const[l,c]=dr(this);if(0===e)return [];if(1===e){if(Qn(s)&&!this.isCollapsed()){const t=l>c?c:l,e=l>c?l:c,n=s.splitText(t,e),r=0===t?n[0]:n[1];return null!=r?[r]:[]}return [s]}const a=r.isBefore(i);if(Qn(s)){const e=a?l:c;e===s.getTextContentSize()?t.shift():0!==e&&([,s]=s.splitText(e),t[0]=s);}if(Qn(o)){const e=o.getTextContent().length,r=a?c:l;0===r?t.pop():r!==e&&([o]=o.splitText(r),t[n]=o);}return t}modify(t,e,n){if(Kr(this,t,e,n))return;const r="move"===t,i=qr(),s=oo(Gs(i));if(!s)return;const o=i._blockCursorElement,l=i._rootElement,c=this.focus.getNode();if(null===l||null===o||!di(c)||c.isInline()||c.canBeEmpty()||so(o,i,l),this.dirty){let t=Js(i,this.anchor.key),e=Js(i,this.focus.key);"text"===this.anchor.type&&(t=es(t)),"text"===this.focus.type&&(e=es(e)),t&&e&&Dr(s,t,this.anchor.offset,e,this.focus.offset);}if(function(t,e,n,r){t.modify(e,n,r);}(s,t,e?"backward":"forward",n),s.rangeCount>0){const t=s.getRangeAt(0),n=this.anchor.getNode(),i=yi(n)?n:Qs(n);if(this.applyDOMRange(t),this.dirty=true,!r){const n=this.getNodes(),r=[];let o=false;for(let t=0;t<n.length;t++){const e=n[t];Hs(e,i)?r.push(e):o=true;}if(o&&r.length>0)if(e){const t=r[0];di(t)?t.selectStart():t.getParentOrThrow().selectStart();}else {const t=r[r.length-1];di(t)?t.selectEnd():t.getParentOrThrow().selectEnd();}s.anchorNode===t.startContainer&&s.anchorOffset===t.startOffset||function(t){const e=t.focus,n=t.anchor,r=n.key,i=n.offset,s=n.type;n.set(e.key,e.offset,e.type,true),e.set(r,i,s,true);}(this);}}"lineboundary"===n&&Kr(this,t,e,n,"decorators");}forwardDeletion(t,e,n){if(!n&&("element"===t.type&&di(e)&&t.offset===e.getChildrenSize()||"text"===t.type&&t.offset===e.getTextContentSize())){const t=e.getParent(),n=e.getNextSibling()||(null===t?null:t.getNextSibling());if(di(n)&&n.isShadowRoot())return  true}return  false}deleteCharacter(t){const e=this.isCollapsed();if(this.isCollapsed()){const e=this.anchor;let n=e.getNode();if(this.forwardDeletion(e,n,t))return;const r=Xo(ol(e,t?"previous":"next"));if(r.getTextSlices().every((t=>null===t||0===t.distance))){let t={type:"initial"};for(const e of r.iterNodeCarets("shadowRoot"))if(zo(e))if(e.origin.isInline());else {if(e.origin.isShadowRoot()){if("merge-block"===t.type)break;if(di(r.anchor.origin)&&r.anchor.origin.isEmpty()){const t=_l(e);al(this,Zo(t,t)),r.anchor.origin.remove();}return}"merge-next-block"!==t.type&&"merge-block"!==t.type||(t={block:t.block,caret:e,type:"merge-block"});}else {if("merge-block"===t.type)break;if(Io(e)){if(di(e.origin)){if(e.origin.isInline()){if(!e.origin.isParentOf(r.anchor.origin))break}else t={block:e.origin,type:"merge-next-block"};continue}if(_i(e.origin)){if(e.origin.isIsolated());else if("merge-next-block"===t.type&&(e.origin.isKeyboardSelectable()||!e.origin.isInline())&&di(r.anchor.origin)&&r.anchor.origin.isEmpty()){r.anchor.origin.remove();const t=kr();t.add(e.origin.getKey()),ys(t);}else e.origin.remove();return}break}}if("merge-block"===t.type){const{caret:e,block:n}=t;return al(this,Zo(!e.origin.isEmpty()&&n.isEmpty()?fl(Wo(n,e.direction)):r.anchor,e)),this.removeText()}}const i=this.focus;if(this.modify("extend",t,"character"),this.isCollapsed()){if(t&&0===e.offset&&hr(this,e.getNode()))return}else {const r="text"===i.type?i.getNode():null;if(n="text"===e.type?e.getNode():null,null!==r&&r.isSegmented()){const e=i.offset,s=r.getTextContentSize();if(r.is(n)||t&&e!==s||!t&&0!==e)return void _r(r,t,e)}else if(null!==n&&n.isSegmented()){const i=e.offset,s=n.getTextContentSize();if(n.is(r)||t&&0!==i||!t&&i!==s)return void _r(n,t,i)}!function(t,e){const n=t.anchor,r=t.focus,i=n.getNode(),s=r.getNode();if(i===s&&"text"===n.type&&"text"===r.type){const t=n.offset,s=r.offset,o=t<s,l=o?t:s,c=o?s:t,a=c-1;if(l!==a){(function(t){return !(Cs(t)||gr(t))})(i.getTextContent().slice(l,c))&&(e?r.set(r.key,a,r.type):n.set(n.key,a,n.type));}}}(this,t);}}if(this.removeText(),t&&!e&&this.isCollapsed()&&"element"===this.anchor.type&&0===this.anchor.offset){const t=this.anchor.getNode();t.isEmpty()&&yi(t.getParent())&&null===t.getPreviousSibling()&&hr(this,t);}}deleteLine(t){this.isCollapsed()&&this.modify("extend",t,"lineboundary"),this.isCollapsed()?this.deleteCharacter(t):this.removeText();}deleteWord(t){if(this.isCollapsed()){const e=this.anchor,n=e.getNode();if(this.forwardDeletion(e,n,t))return;this.modify("extend",t,"word");}this.removeText();}isBackward(){return this.focus.isBefore(this.anchor)}getStartEndPoints(){return [this.anchor,this.focus]}}function ur(t){return t instanceof lr}function fr(t){const e=t.offset;if("text"===t.type)return e;const n=t.getNode();return e===n.getChildrenSize()?n.getTextContent().length:0}function dr(t){const e=t.getStartEndPoints();if(null===e)return [0,0];const[n,r]=e;return "element"===n.type&&"element"===r.type&&n.key===r.key&&n.offset===r.offset?[0,0]:[fr(n),fr(r)]}function hr(t,e){for(let n=e;n;n=n.getParent()){if(di(n)){if(n.collapseAtStart(t))return  true;if(Zs(n))break}if(n.getPreviousSibling())break}return  false}const gr=(()=>{try{const t=new RegExp("\\p{Emoji}","u"),e=t.test.bind(t);if(e("❤️")&&e("#️⃣")&&e("👍"))return e}catch(t){}return ()=>false})();function _r(t,e,n){const r=t,i=r.getTextContent().split(/(?=\s)/g),s=i.length;let o=0,l=0;for(let t=0;t<s;t++){const r=t===s-1;if(l=o,o+=i[t].length,e&&o===n||o>n||r){i.splice(t,1),r&&(l=void 0);break}}const c=i.join("").trim();""===c?r.remove():(r.setTextContent(c),r.select(l,l));}function pr(e,n,r,i){let s,o=n;if(uo(e)){let l=false;const c=e.childNodes,a=c.length,u=i._blockCursorElement;o===a&&(l=true,o=a-1);let f=c[o],d=false;if(f===u)f=c[o+1],d=true;else if(null!==u){const t=u.parentNode;if(e===t){n>Array.prototype.indexOf.call(t.children,u)&&o--;}}if(s=ms(f),Qn(s))o=xs(s,l);else {let c=ms(e);if(null===c)return null;if(di(c)){const a=i.getElementByKey(c.getKey());null===a&&t$2(214);const u=c.getDOMSlot(a);[c,o]=u.resolveChildIndex(c,a,e,n),di(c)||t$2(215),l&&o>=c.getChildrenSize()&&(o=Math.max(0,c.getChildrenSize()-1));let f=c.getChildAtIndex(o);if(di(f)&&function(t,e,n){const r=t.getParent();return null===n||null===r||!r.canBeEmpty()||r!==n.getNode()}(f,0,r)){const t=l?f.getLastDescendant():f.getFirstDescendant();null===t?c=f:(f=t,c=di(f)?f:f.getParentOrThrow()),o=0;}Qn(f)?(s=f,c=null,o=xs(f,l)):f!==c&&l&&!d&&(di(c)||t$2(216),o=Math.min(c.getChildrenSize(),o+1));}else {const t=c.getIndexWithinParent();o=0===n&&_i(c)&&ms(e)===c?t:t+1,c=c.getParentOrThrow();}if(di(c))return ir(c.__key,o,"element")}}else s=ms(e);return Qn(s)?ir(s.__key,o,"text"):null}function yr(t,e,n){const r=t.offset,i=t.getNode();if(0===r){const r=i.getPreviousSibling(),s=i.getParent();if(e){if((n||!e)&&null===r&&di(s)&&s.isInline()){const e=s.getPreviousSibling();Qn(e)&&t.set(e.__key,e.getTextContent().length,"text");}}else di(r)&&!n&&r.isInline()?t.set(r.__key,r.getChildrenSize(),"element"):Qn(r)&&t.set(r.__key,r.getTextContent().length,"text");}else if(r===i.getTextContent().length){const r=i.getNextSibling(),s=i.getParent();if(e&&di(r)&&r.isInline())t.set(r.__key,0,"element");else if((n||e)&&null===r&&di(s)&&s.isInline()&&!s.canInsertTextAfter()){const e=s.getNextSibling();Qn(e)&&t.set(e.__key,0,"text");}}}function mr(t,e,n){if("text"===t.type&&"text"===e.type){const r=t.isBefore(e),i=t.is(e);yr(t,r,i),yr(e,!r,i),i&&e.set(t.key,t.offset,t.type);const s=qr();if(s.isComposing()&&s._compositionKey!==t.key&&cr(n)){const r=n.anchor,i=n.focus;t.set(r.key,r.offset,r.type,true),e.set(i.key,i.offset,i.type,true);}}}function xr(t,e,n,r,i,s){if(null===t||null===n||!Hi(i,t,n))return null;const o=pr(t,e,cr(s)?s.anchor:null,i);if(null===o)return null;const l=pr(n,r,cr(s)?s.focus:null,i);if(null===l)return null;if("element"===o.type&&"element"===l.type){const e=ms(t),r=ms(n);if(_i(e)&&_i(r))return null}return mr(o,l,s),[o,l]}function Cr(t){return di(t)&&!t.isInline()}function Sr(t,e,n,r,i,s){const o=Hr(),l=new ar(ir(t,e,i),ir(n,r,s),0,"");return l.dirty=true,o._selection=l,l}function vr(){const t=ir("root",0,"element"),e=ir("root",0,"element");return new ar(t,e,0,"")}function kr(){return new lr(new Set)}function br(t,e,n,r){const i=n._window;if(null===i)return null;const s=r||i.event,o=s?s.type:void 0,l="selectionchange"===o,c=!tt$3&&(l||"beforeinput"===o||"compositionstart"===o||"compositionend"===o||"click"===o&&s&&3===s.detail||"drop"===o||void 0===o);let a,u,f,d;if(cr(t)&&!c)return t.clone();if(null===e)return null;if(a=e.anchorNode,u=e.focusNode,f=e.anchorOffset,d=e.focusOffset,l&&cr(t)&&!Hi(n,a,u))return t.clone();const h=xr(a,f,u,d,n,t);if(null===h)return null;const[g,_]=h;return new ar(g,_,cr(t)?t.format:0,cr(t)?t.style:"")}function Nr(){return Hr()._selection}function wr(){return qr()._editorState._selection}function Er(t,e,n,r=1){const i=t.anchor,s=t.focus,o=i.getNode(),l=s.getNode();if(!e.is(o)&&!e.is(l))return;const c=e.__key;if(t.isCollapsed()){const e=i.offset;if(n<=e&&r>0||n<e&&r<0){const n=Math.max(0,e+r);i.set(c,n,"element"),s.set(c,n,"element"),Mr(t);}}else {const o=t.isBackward(),l=o?s:i,a=l.getNode(),u=o?i:s,f=u.getNode();if(e.is(a)){const t=l.offset;(n<=t&&r>0||n<t&&r<0)&&l.set(c,Math.max(0,t+r),"element");}if(e.is(f)){const t=u.offset;(n<=t&&r>0||n<t&&r<0)&&u.set(c,Math.max(0,t+r),"element");}}Mr(t);}function Mr(t){const e=t.anchor,n=e.offset,r=t.focus,i=r.offset,s=e.getNode(),o=r.getNode();if(t.isCollapsed()){if(!di(s))return;const t=s.getChildrenSize(),i=n>=t,o=i?s.getChildAtIndex(t-1):s.getChildAtIndex(n);if(Qn(o)){let t=0;i&&(t=o.getTextContentSize()),e.set(o.__key,t,"text"),r.set(o.__key,t,"text");}}else {if(di(s)){const t=s.getChildrenSize(),r=n>=t,i=r?s.getChildAtIndex(t-1):s.getChildAtIndex(n);if(Qn(i)){let t=0;r&&(t=i.getTextContentSize()),e.set(i.__key,t,"text");}}if(di(o)){const t=o.getChildrenSize(),e=i>=t,n=e?o.getChildAtIndex(t-1):o.getChildAtIndex(i);if(Qn(n)){let t=0;e&&(t=n.getTextContentSize()),r.set(n.__key,t,"text");}}}}function Ar(t,e,n,r,i){let s=null,o=0,l=null;null!==r?(s=r.__key,Qn(r)?(o=r.getTextContentSize(),l="text"):di(r)&&(o=r.getChildrenSize(),l="element")):null!==i&&(s=i.__key,Qn(i)?l="text":di(i)&&(l="element")),null!==s&&null!==l?t.set(s,o,l):(o=e.getIndexWithinParent(),-1===o&&(o=n.getChildrenSize()),t.set(n.__key,o,"element"));}function Or(t,e,n,r,i){"text"===t.type?t.set(n,t.offset+(e?0:i),"text"):t.offset>r.getIndexWithinParent()&&t.set(t.key,t.offset-1,"element");}function Dr(t,e,n,r,i){try{t.setBaseAndExtent(e,n,r,i);}catch(t){}}function Pr(t,e,n,r,i,s,o){const l=r.anchorNode,c=r.focusNode,a=r.anchorOffset,u=r.focusOffset,f=document.activeElement;if(i.has(Ni)&&f!==s||null!==f&&Yi(f))return;if(!cr(e))return void(null!==t&&Hi(n,l,c)&&r.removeAllRanges());const d=e.anchor,h=e.focus,g=d.key,_=h.key,p=Js(n,g),y=Js(n,_),m=d.offset,x=h.offset,C=e.format,S=e.style,v=e.isCollapsed();let k=p,T=y,b=false;if("text"===d.type){k=es(p);const t=d.getNode();b=t.getFormat()!==C||t.getStyle()!==S;}else cr(t)&&"text"===t.anchor.type&&(b=true);var N,w,E,M,A;if(("text"===h.type&&(T=es(y)),null!==k&&null!==T)&&(v&&(null===t||b||cr(t)&&(t.format!==C||t.style!==S))&&(N=C,w=S,E=m,M=g,A=performance.now(),gn=[N,w,E,M,A]),a!==m||u!==x||l!==k||c!==T||"Range"===r.type&&v||(null!==f&&s.contains(f)||s.focus({preventScroll:true}),"element"===d.type))){if(Dr(r,k,m,T,x),!i.has(Ei)&&e.isCollapsed()&&null!==s&&s===document.activeElement){const t=cr(e)&&"element"===e.anchor.type?k.childNodes[m]||null:r.rangeCount>0?r.getRangeAt(0):null;if(null!==t){let e;if(t instanceof Text){const n=document.createRange();n.selectNode(t),e=n.getBoundingClientRect();}else e=t.getBoundingClientRect();!function(t,e,n){const r=$s(n),i=qs(r);if(null===r||null===i)return;let{top:s,bottom:o}=e,l=0,c=0,a=n;for(;null!==a;){const e=a===r.body;if(e)l=0,c=Gs(t).innerHeight;else {const t=a.getBoundingClientRect();l=t.top,c=t.bottom;}let n=0;if(s<l?n=-(l-s):o>c&&(n=o-c),0!==n)if(e)i.scrollBy(0,n);else {const t=a.scrollTop;a.scrollTop+=n;const e=a.scrollTop-t;s-=e,o-=e;}if(e)break;a=Us(a);}}(n,e,s);}}ln=true;}}function Fr(t){let e=Nr()||wr();null===e&&(e=_s().selectEnd()),e.insertNodes(t);}function Ir(e){let n=e;e.isCollapsed()||n.removeText();const r=Nr();cr(r)&&(n=r),cr(n)||t$2(161);const i=n.anchor;let s=i.getNode(),o=i.offset;for(;!po(s);){const t=s;if([s,o]=zr(s,o),t.is(s))break}return o}function zr(t,e){const n=t.getParent();if(!n){const t=Pi();return _s().append(t),t.select(),[_s(),0]}if(Qn(t)){const r=t.splitText(e);if(0===r.length)return [n,t.getIndexWithinParent()];const i=0===e?0:1;return [n,r[0].getIndexWithinParent()+i]}if(!di(t)||0===e)return [n,t.getIndexWithinParent()];const r=t.getChildAtIndex(e);if(r){const n=new ar(ir(t.__key,e,"element"),ir(t.__key,e,"element"),0,""),i=t.insertNewAfter(n);i&&i.append(r,...r.getNextSiblings());}return [n,t.getIndexWithinParent()+1]}function Kr(t,e,n,r,i="decorators-and-blocks"){if("move"===e&&"character"===r&&!t.isCollapsed()){const[e,r]=n===t.isBackward()?[t.focus,t.anchor]:[t.anchor,t.focus];return r.set(e.key,e.offset,e.type),true}const s=ol(t.focus,n?"previous":"next"),o="lineboundary"===r,l="move"===e;let c=s,a="decorators-and-blocks"===i;if(!pl(c)){for(const t of c){a=false;const{origin:e}=t;if(!_i(e)||e.isIsolated()||(c=t,!o||!e.isInline()))break}if(a)for(const t of Xo(s).iterNodeCarets("extend"===e?"shadowRoot":"root")){if(zo(t))t.origin.isInline()||(c=t);else {if(di(t.origin))continue;_i(t.origin)&&!t.origin.isInline()&&(c=t);}break}}if(c===s)return  false;if(l&&!o&&_i(c.origin)&&c.origin.isKeyboardSelectable()){const t=kr();return t.add(c.origin.getKey()),ys(t),true}return c=_l(c),l&&ll(t.anchor,c),ll(t.focus,c),a||!o}let Br=null,Rr=null,Wr=false,Jr=false,Ur=0;const $r={characterData:true,childList:true,subtree:true};function jr(){return Wr||null!==Br&&Br._readOnly}function Vr(){Wr&&t$2(13);}function Yr(){Ur>99&&t$2(14);}function Hr(){return null===Br&&t$2(195,Gr()),Br}function qr(){return null===Rr&&t$2(196,Gr()),Rr}function Gr(){let t=0;const e=new Set,n=Ji.version;if("undefined"!=typeof window)for(const r of document.querySelectorAll("[contenteditable]")){const i=Xi(r);if(qi(i))t++;else if(i){let t=String(i.constructor.version||"<0.17.1");t===n&&(t+=" (separately built, likely a bundler configuration issue)"),e.add(t);}}let r=` Detected on the page: ${t} compatible editor(s) with version ${n}`;return e.size&&(r+=` and incompatible editors with versions ${Array.from(e).join(", ")}`),r}function Xr(){return Rr}function Qr(e,n,r){const i=n.__type,s=function(e,n){const r=e._nodes.get(n);void 0===r&&t$2(30,n);return r}(e,i);let o=r.get(i);void 0===o&&(o=Array.from(s.transforms),r.set(i,o));const l=o.length;for(let t=0;t<l&&(o[t](n),n.isAttached());t++);}function Zr(t,e){return void 0!==t&&t.__key!==e&&t.isAttached()}function ti(t,e){if(!e)return;const n=t._updateTags;let r=e;Array.isArray(e)||(r=[e]);for(const t of r)n.add(t);}function ei(t){return ni(t,qr()._nodes)}function ni(e,n){const r=e.type,i=n.get(r);void 0===i&&t$2(17,r);const s=i.klass;e.type!==s.getType()&&t$2(18,s.name);const o=s.importJSON(e),l=e.children;if(di(o)&&Array.isArray(l))for(let t=0;t<l.length;t++){const e=ni(l[t],n);o.append(e);}return o}function ri(t,e,n){const r=Br,i=Wr,s=Rr;Br=e,Wr=true,Rr=t;try{return n()}finally{Br=r,Wr=i,Rr=s;}}function ii(t,e){const n=t._pendingEditorState,r=t._rootElement,i=t._headless||null===r;if(null===n)return;const s=t._editorState,o=s._selection,l=n._selection,c=t._dirtyType!==y$4,a=Br,u=Wr,f=Rr,h=t._updating,g=t._observer;let _=null;if(t._pendingEditorState=null,t._editorState=n,!i&&c&&null!==g){Rr=t,Br=n,Wr=false,t._updating=true;try{const e=t._dirtyType,r=t._dirtyElements,i=t._dirtyLeaves;g.disconnect(),_=ie(s,n,t,e,r,i);}catch(e){if(e instanceof Error&&t._onError(e),Jr)throw e;return Ri(t,null,r,n),at$2(t),t._dirtyType=x$6,Jr=true,ii(t,s),void(Jr=false)}finally{g.observe(r,$r),t._updating=h,Br=a,Wr=u,Rr=f;}}n._readOnly||(n._readOnly=true);const p=t._dirtyLeaves,m=t._dirtyElements,C=t._normalizedNodes,S=t._updateTags,v=t._deferred;c&&(t._dirtyType=y$4,t._cloneNotNeeded.clear(),t._dirtyLeaves=new Set,t._dirtyElements=new Map,t._normalizedNodes=new Set,t._updateTags=new Set),function(t,e){const n=t._decorators;let r=t._pendingDecorators||n;const i=e._nodeMap;let s;for(s in r)i.has(s)||(r===n&&(r=hs(t)),delete r[s]);}(t,n);const k=i?null:oo(Gs(t));if(t._editable&&null!==k&&(c||null===l||l.dirty)&&null!==r&&!S.has(Mi)){Rr=t,Br=n;try{if(null!==g&&g.disconnect(),c||null===l||l.dirty){const e=t._blockCursorElement;null!==e&&so(e,t,r),Pr(o,l,t,k,S,r);}!function(t,e,n){let r=t._blockCursorElement;if(cr(n)&&n.isCollapsed()&&"element"===n.anchor.type&&e.contains(document.activeElement)){const i=n.anchor,s=i.getNode(),o=i.offset;let l=!1,c=null;if(o===s.getChildrenSize()){io(s.getChildAtIndex(o-1))&&(l=!0);}else {const e=s.getChildAtIndex(o);if(null!==e&&io(e)){const n=e.getPreviousSibling();(null===n||io(n))&&(l=!0,c=t.getElementByKey(e.__key));}}if(l){const n=t.getElementByKey(s.__key);return null===r&&(t._blockCursorElement=r=function(t){const e=t.theme,n=document.createElement("div");n.contentEditable="false",n.setAttribute("data-lexical-cursor","true");let r=e.blockCursor;if(void 0!==r){if("string"==typeof r){const t=d$3(r);r=e.blockCursor=t;}void 0!==r&&n.classList.add(...r);}return n}(t._config)),e.style.caretColor="transparent",void(null===c?n.appendChild(r):n.insertBefore(r,c))}}null!==r&&so(r,t,e);}(t,r,l);}finally{null!==g&&g.observe(r,$r),Rr=f,Br=a;}}null!==_&&function(t,e,n,r,i){const s=Array.from(t._listeners.mutation),o=s.length;for(let t=0;t<o;t++){const[o,l]=s[t],c=e.get(l);void 0!==c&&o(c,{dirtyLeaves:r,prevEditorState:i,updateTags:n});}}(t,_,S,p,s),cr(l)||null===l||null!==o&&o.is(l)||t.dispatchCommand(le,void 0);const T=t._pendingDecorators;null!==T&&(t._decorators=T,t._pendingDecorators=null,si("decorator",t,true,T)),function(t,e,n){const r=gs(e),i=gs(n);r!==i&&si("textcontent",t,true,i);}(t,e||s,n),si("update",t,true,{dirtyElements:m,dirtyLeaves:p,editorState:n,mutatedNodes:_,normalizedNodes:C,prevEditorState:e||s,tags:S}),function(t,e){if(t._deferred=[],0!==e.length){const n=t._updating;t._updating=true;try{for(let t=0;t<e.length;t++)e[t]();}finally{t._updating=n;}}}(t,v),function(t){const e=t._updates;if(0!==e.length){const n=e.shift();if(n){const[e,r]=n;li(t,e,r);}}}(t);}function si(t,e,n,...r){const i=e._updating;e._updating=n;try{const n=Array.from(e._listeners[t]);for(let t=0;t<n.length;t++)n[t].apply(null,r);}finally{e._updating=i;}}function oi(e,n){const r=e._updates;let i=n||false;for(;0!==r.length;){const n=r.shift();if(n){const[r,s]=n;let o;if(void 0!==s){if(o=s.onUpdate,s.skipTransforms&&(i=true),s.discrete){const n=e._pendingEditorState;null===n&&t$2(191),n._flushSync=true;}o&&e._deferred.push(o),ti(e,s.tag);}r();}}return i}function li(e,n,r){const i=e._updateTags;let s,o=false,l=false;void 0!==r&&(s=r.onUpdate,ti(e,r.tag),o=r.skipTransforms||false,l=r.discrete||false),s&&e._deferred.push(s);const c=e._editorState;let a=e._pendingEditorState,u=false;(null===a||a._readOnly)&&(a=e._pendingEditorState=mi(a||c),u=true),a._flushSync=l;const f=Br,d=Wr,h=Rr,g=e._updating;Br=a,Wr=false,e._updating=true,Rr=e;const _=e._headless||null===e.getRootElement();try{u&&(_?null!==c._selection&&(a._selection=c._selection.clone()):a._selection=function(t,e){const n=t.getEditorState()._selection,r=oo(Gs(t));return cr(n)||null==n?br(n,r,t,e):n.clone()}(e,r&&r.event||null));const i=e._compositionKey;n(),o=oi(e,o),function(t,e){const n=e.getEditorState()._selection,r=t._selection;if(cr(r)){const t=r.anchor,e=r.focus;let i;if("text"===t.type&&(i=t.getNode(),i.selectionTransform(n,r)),"text"===e.type){const t=e.getNode();i!==t&&t.selectionTransform(n,r);}}}(a,e),e._dirtyType!==y$4&&(o?function(t,e){const n=e._dirtyLeaves,r=t._nodeMap;for(const t of n){const e=r.get(t);Qn(e)&&e.isAttached()&&e.isSimpleText()&&!e.isUnmergeable()&&St$2(e);}}(a,e):function(t,e){const n=e._dirtyLeaves,r=e._dirtyElements,i=t._nodeMap,s=cs(),o=new Map;let l=n,c=l.size,a=r,u=a.size;for(;c>0||u>0;){if(c>0){e._dirtyLeaves=new Set;for(const t of l){const r=i.get(t);Qn(r)&&r.isAttached()&&r.isSimpleText()&&!r.isUnmergeable()&&St$2(r),void 0!==r&&Zr(r,s)&&Qr(e,r,o),n.add(t);}if(l=e._dirtyLeaves,c=l.size,c>0){Ur++;continue}}e._dirtyLeaves=new Set,e._dirtyElements=new Map,a.delete("root")&&a.set("root",!0);for(const t of a){const n=t[0],l=t[1];if(r.set(n,l),!l)continue;const c=i.get(n);void 0!==c&&Zr(c,s)&&Qr(e,c,o);}l=e._dirtyLeaves,c=l.size,a=e._dirtyElements,u=a.size,Ur++;}e._dirtyLeaves=n,e._dirtyElements=r;}(a,e),oi(e),function(t,e,n,r){const i=t._nodeMap,s=e._nodeMap,o=[];for(const[t]of r){const e=s.get(t);void 0!==e&&(e.isAttached()||(di(e)&&Q$2(e,t,i,s,o,r),i.has(t)||r.delete(t),o.push(t)));}for(const t of o)s.delete(t);for(const t of n){const e=s.get(t);void 0===e||e.isAttached()||(i.has(t)||n.delete(t),s.delete(t));}}(c,a,e._dirtyLeaves,e._dirtyElements));i!==e._compositionKey&&(a._flushSync=!0);const s=a._selection;if(cr(s)){const e=a._nodeMap,n=s.anchor.key,r=s.focus.key;void 0!==e.get(n)&&void 0!==e.get(r)||t$2(19);}else ur(s)&&0===s._nodes.size&&(a._selection=null);}catch(t){return t instanceof Error&&e._onError(t),e._pendingEditorState=c,e._dirtyType=x$6,e._cloneNotNeeded.clear(),e._dirtyLeaves=new Set,e._dirtyElements.clear(),void ii(e)}finally{Br=f,Wr=d,Rr=h,e._updating=g,Ur=0;}const p=e._dirtyType!==y$4||e._deferred.length>0||function(t,e){const n=e.getEditorState()._selection,r=t._selection;if(null!==r){if(r.dirty||!r.is(n))return  true}else if(null!==n)return  true;return  false}(a,e);p?a._flushSync?(a._flushSync=false,ii(e)):u&&ji((()=>{ii(e);})):(a._flushSync=false,u&&(i.clear(),e._deferred=[],e._pendingEditorState=null));}function ci(t,e,n){Rr===t&&void 0===n?e():li(t,e,n);}class ai{constructor(t,e,n){this.element=t,this.before=e||null,this.after=n||null;}withBefore(t){return new ai(this.element,t,this.after)}withAfter(t){return new ai(this.element,this.before,t)}withElement(t){return this.element===t?this:new ai(t,this.before,this.after)}insertChild(e){const n=this.before||this.getManagedLineBreak();return null!==n&&n.parentElement!==this.element&&t$2(222),this.element.insertBefore(e,n),this}removeChild(e){return e.parentElement!==this.element&&t$2(223),this.element.removeChild(e),this}replaceChild(e,n){return n.parentElement!==this.element&&t$2(224),this.element.replaceChild(e,n),this}getFirstChild(){const t=this.after?this.after.nextSibling:this.element.firstChild;return t===this.before||t===this.getManagedLineBreak()?null:t}getManagedLineBreak(){return this.element.__lexicalLineBreak||null}setManagedLineBreak(t){if(null===t)this.removeManagedLineBreak();else {const e="decorator"===t&&(l||o$3);this.insertManagedLineBreak(e);}}removeManagedLineBreak(){const t=this.getManagedLineBreak();if(t){const e=this.element,n="IMG"===t.nodeName?t.nextSibling:null;n&&e.removeChild(n),e.removeChild(t),e.__lexicalLineBreak=void 0;}}insertManagedLineBreak(t){const e=this.getManagedLineBreak();if(e){if(t===("IMG"===e.nodeName))return;this.removeManagedLineBreak();}const n=this.element,r=this.before,i=document.createElement("br");if(n.insertBefore(i,r),t){const t=document.createElement("img");t.setAttribute("data-lexical-linebreak","true"),t.style.cssText="display: inline !important; border: 0px !important; margin: 0px !important;",t.alt="",n.insertBefore(t,i),n.__lexicalLineBreak=t;}else n.__lexicalLineBreak=i;}getFirstChildOffset(){let t=0;for(let e=this.after;null!==e;e=e.previousSibling)t++;return t}resolveChildIndex(t,e,n,r){if(n===this.element){const e=this.getFirstChildOffset();return [t,Math.min(e+t.getChildrenSize(),Math.max(e,r))]}const i=ui(e,n);i.push(r);const s=ui(e,this.element);let o=t.getIndexWithinParent();for(let t=0;t<s.length;t++){const e=i[t],n=s[t];if(void 0===e||e<n)break;if(e>n){o+=1;break}}return [t.getParentOrThrow(),o]}}function ui(e,n){const r=[];let i=n;for(;i!==e&&null!==i;i=n.parentNode){let t=0;for(let e=i.previousSibling;null!==e;e=e.previousSibling)t++;r.push(t);}return i!==e&&t$2(225),r.reverse()}class fi extends An{constructor(t){super(t),this.__first=null,this.__last=null,this.__size=0,this.__format=0,this.__style="",this.__indent=0,this.__dir=null,this.__textFormat=0,this.__textStyle="";}afterCloneFrom(t){super.afterCloneFrom(t),this.__first=t.__first,this.__last=t.__last,this.__size=t.__size,this.__indent=t.__indent,this.__format=t.__format,this.__style=t.__style,this.__dir=t.__dir,this.__textFormat=t.__textFormat,this.__textStyle=t.__textStyle;}getFormat(){return this.getLatest().__format}getFormatType(){const t=this.getFormat();return H$3[t]||""}getStyle(){return this.getLatest().__style}getIndent(){return this.getLatest().__indent}getChildren(){const t=[];let e=this.getFirstChild();for(;null!==e;)t.push(e),e=e.getNextSibling();return t}getChildrenKeys(){const t=[];let e=this.getFirstChild();for(;null!==e;)t.push(e.__key),e=e.getNextSibling();return t}getChildrenSize(){return this.getLatest().__size}isEmpty(){return 0===this.getChildrenSize()}isDirty(){const t=qr()._dirtyElements;return null!==t&&t.has(this.__key)}isLastChild(){const t=this.getLatest(),e=this.getParentOrThrow().getLastChild();return null!==e&&e.is(t)}getAllTextNodes(){const t=[];let e=this.getFirstChild();for(;null!==e;){if(Qn(e)&&t.push(e),di(e)){const n=e.getAllTextNodes();t.push(...n);}e=e.getNextSibling();}return t}getFirstDescendant(){let t=this.getFirstChild();for(;di(t);){const e=t.getFirstChild();if(null===e)break;t=e;}return t}getLastDescendant(){let t=this.getLastChild();for(;di(t);){const e=t.getLastChild();if(null===e)break;t=e;}return t}getDescendantByIndex(t){const e=this.getChildren(),n=e.length;if(t>=n){const t=e[n-1];return di(t)&&t.getLastDescendant()||t||null}const r=e[t];return di(r)&&r.getFirstDescendant()||r||null}getFirstChild(){const t=this.getLatest().__first;return null===t?null:as(t)}getFirstChildOrThrow(){const e=this.getFirstChild();return null===e&&t$2(45,this.__key),e}getLastChild(){const t=this.getLatest().__last;return null===t?null:as(t)}getLastChildOrThrow(){const e=this.getLastChild();return null===e&&t$2(96,this.__key),e}getChildAtIndex(t){const e=this.getChildrenSize();let n,r;if(t<e/2){for(n=this.getFirstChild(),r=0;null!==n&&r<=t;){if(r===t)return n;n=n.getNextSibling(),r++;}return null}for(n=this.getLastChild(),r=e-1;null!==n&&r>=t;){if(r===t)return n;n=n.getPreviousSibling(),r--;}return null}getTextContent(){let t="";const e=this.getChildren(),n=e.length;for(let r=0;r<n;r++){const i=e[r];t+=i.getTextContent(),di(i)&&r!==n-1&&!i.isInline()&&(t+=B$6);}return t}getTextContentSize(){let t=0;const e=this.getChildren(),n=e.length;for(let r=0;r<n;r++){const i=e[r];t+=i.getTextContentSize(),di(i)&&r!==n-1&&!i.isInline()&&(t+=B$6.length);}return t}getDirection(){return this.getLatest().__dir}getTextFormat(){return this.getLatest().__textFormat}hasFormat(t){if(""!==t){const e=Y$3[t];return !!(this.getFormat()&e)}return  false}hasTextFormat(t){const e=j$3[t];return !!(this.getTextFormat()&e)}getFormatFlags(t,e){return ns(this.getLatest().__textFormat,t,e)}getTextStyle(){return this.getLatest().__textStyle}select(t,e){Vr();const n=Nr();let r=t,i=e;const s=this.getChildrenSize();if(!this.canBeEmpty())if(0===t&&0===e){const t=this.getFirstChild();if(Qn(t)||di(t))return t.select(0,0)}else if(!(void 0!==t&&t!==s||void 0!==e&&e!==s)){const t=this.getLastChild();if(Qn(t)||di(t))return t.select()} void 0===r&&(r=s),void 0===i&&(i=s);const o=this.__key;return cr(n)?(n.anchor.set(o,r,"element"),n.focus.set(o,i,"element"),n.dirty=true,n):Sr(o,r,o,i,"element","element")}selectStart(){const t=this.getFirstDescendant();return t?t.selectStart():this.select()}selectEnd(){const t=this.getLastDescendant();return t?t.selectEnd():this.select()}clear(){const t=this.getWritable();return this.getChildren().forEach((t=>t.remove())),t}append(...t){return this.splice(this.getChildrenSize(),0,t)}setDirection(t){const e=this.getWritable();return e.__dir=t,e}setFormat(t){return this.getWritable().__format=""!==t?Y$3[t]:0,this}setStyle(t){return this.getWritable().__style=t||"",this}setTextFormat(t){const e=this.getWritable();return e.__textFormat=t,e}setTextStyle(t){const e=this.getWritable();return e.__textStyle=t,e}setIndent(t){return this.getWritable().__indent=t,this}splice(e,n,r){const i=r.length,s=this.getChildrenSize(),o=this.getWritable();e+n<=s||t$2(226,String(e),String(n),String(s));const l=o.__key,c=[],a=[],u=this.getChildAtIndex(e+n);let f=null,d=s-n+i;if(0!==e)if(e===s)f=this.getLastChild();else {const t=this.getChildAtIndex(e);null!==t&&(f=t.getPreviousSibling());}if(n>0){let e=null===f?this.getFirstChild():f.getNextSibling();for(let r=0;r<n;r++){null===e&&t$2(100);const n=e.getNextSibling(),r=e.__key;ss(e.getWritable()),a.push(r),e=n;}}let h=f;for(let e=0;e<i;e++){const n=r[e];null!==h&&n.is(h)&&(f=h=h.getPreviousSibling());const i=n.getWritable();i.__parent===l&&d--,ss(i);const s=n.__key;if(null===h)o.__first=s,i.__prev=null;else {const t=h.getWritable();t.__next=s,i.__prev=t.__key;}n.__key===l&&t$2(76),i.__parent=l,c.push(s),h=n;}if(e+n===s){if(null!==h){h.getWritable().__next=null,o.__last=h.__key;}}else if(null!==u){const t=u.getWritable();if(null!==h){const e=h.getWritable();t.__prev=h.__key,e.__next=u.__key;}else t.__prev=null;}if(o.__size=d,a.length){const t=Nr();if(cr(t)){const e=new Set(a),n=new Set(c),{anchor:r,focus:i}=t;hi(r,e,n)&&Ar(r,r.getNode(),this,f,u),hi(i,e,n)&&Ar(i,i.getNode(),this,f,u),0!==d||this.canBeEmpty()||Zs(this)||this.remove();}}return o}getDOMSlot(t){return new ai(t)}exportDOM(t){const{element:e}=super.exportDOM(t);if(uo(e)){const t=this.getIndent();t>0&&(e.style.paddingInlineStart=40*t+"px");const n=this.getDirection();n&&(e.dir=n);}return {element:e}}exportJSON(){const t={children:[],direction:this.getDirection(),format:this.getFormatType(),indent:this.getIndent(),...super.exportJSON()},e=this.getTextFormat(),n=this.getTextStyle();return 0!==e&&(t.textFormat=e),""!==n&&(t.textStyle=n),t}updateFromJSON(t){return super.updateFromJSON(t).setFormat(t.format).setIndent(t.indent).setDirection(t.direction).setTextFormat(t.textFormat||0).setTextStyle(t.textStyle||"")}insertNewAfter(t,e){return null}canIndent(){return  true}collapseAtStart(t){return  false}excludeFromCopy(t){return  false}canReplaceWith(t){return  true}canInsertAfter(t){return  true}canBeEmpty(){return  true}canInsertTextBefore(){return  true}canInsertTextAfter(){return  true}isInline(){return  false}isShadowRoot(){return  false}canMergeWith(t){return  false}extractWithChild(t,e,n){return  false}canMergeWhenEmpty(){return  false}reconcileObservedMutation(t,e){const n=this.getDOMSlot(t);let r=n.getFirstChild();for(let t=this.getFirstChild();t;t=t.getNextSibling()){const i=e.getElementByKey(t.getKey());null!==i&&(null==r?(n.insertChild(i),r=i):r!==i&&n.replaceChild(i,r),r=r.nextSibling);}}}function di(t){return t instanceof fi}function hi(t,e,n){let r=t.getNode();for(;r;){const t=r.__key;if(e.has(t)&&!n.has(t))return  true;r=r.getParent();}return  false}class gi extends An{decorate(e,n){t$2(47);}isIsolated(){return  false}isInline(){return  true}isKeyboardSelectable(){return  true}}function _i(t){return t instanceof gi}class pi extends fi{static getType(){return "root"}static clone(){return new pi}constructor(){super("root"),this.__cachedText=null;}getTopLevelElementOrThrow(){t$2(51);}getTextContent(){const t=this.__cachedText;return !jr()&&qr()._dirtyType!==y$4||null===t?super.getTextContent():t}remove(){t$2(52);}replace(e){t$2(53);}insertBefore(e){t$2(54);}insertAfter(e){t$2(55);}updateDOM(t,e){return  false}splice(e,n,r){for(const e of r)di(e)||_i(e)||t$2(282);return super.splice(e,n,r)}static importJSON(t){return _s().updateFromJSON(t)}collapseAtStart(){return  true}}function yi(t){return t instanceof pi}function mi(t){return new Si(new Map(t._nodeMap))}function xi(){return new Si(new Map([["root",new pi]]))}function Ci(e){const n=e.exportJSON(),r=e.constructor;if(n.type!==r.getType()&&t$2(130,r.name),di(e)){const i=n.children;Array.isArray(i)||t$2(59,r.name);const s=e.getChildren();for(let t=0;t<s.length;t++){const e=Ci(s[t]);i.push(e);}}return n}class Si{constructor(t,e){this._nodeMap=t,this._selection=e||null,this._flushSync=false,this._readOnly=false;}isEmpty(){return 1===this._nodeMap.size&&null===this._selection}read(t,e){return ri(e&&e.editor||null,this,t)}clone(t){const e=new Si(this._nodeMap,void 0===t?this._selection:t);return e._readOnly=true,e}toJSON(){return ri(null,this,(()=>({root:Ci(_s())})))}}const vi="historic",ki="history-push",Ti="history-merge",bi="paste",Ni="collaboration",Ei="skip-scroll-into-view",Mi="skip-dom-selection";class Ai extends fi{static getType(){return "artificial"}createDOM(t){return document.createElement("div")}}class Oi extends fi{static getType(){return "paragraph"}static clone(t){return new Oi(t.__key)}createDOM(t){const e=document.createElement("p"),n=Fs(t.theme,"paragraph");if(void 0!==n){e.classList.add(...n);}return e}updateDOM(t,e,n){return  false}static importDOM(){return {p:t=>({conversion:Di,priority:0})}}exportDOM(t){const{element:e}=super.exportDOM(t);if(uo(e)){this.isEmpty()&&e.append(document.createElement("br"));const t=this.getFormatType();e.style.textAlign=t;}return {element:e}}static importJSON(t){return Pi().updateFromJSON(t)}exportJSON(){return {...super.exportJSON(),textFormat:this.getTextFormat(),textStyle:this.getTextStyle()}}insertNewAfter(t,e){const n=Pi();n.setTextFormat(t.format),n.setTextStyle(t.style);const r=this.getDirection();return n.setDirection(r),n.setFormat(this.getFormatType()),n.setStyle(this.getStyle()),this.insertAfter(n,e),n}collapseAtStart(){const t=this.getChildren();if(0===t.length||Qn(t[0])&&""===t[0].getTextContent().trim()){if(null!==this.getNextSibling())return this.selectNext(),this.remove(),true;if(null!==this.getPreviousSibling())return this.selectPrevious(),this.remove(),true}return  false}}function Di(t){const e=Pi();return t.style&&(e.setFormat(t.style.textAlign),ko(t,e)),{node:e}}function Pi(){return eo(new Oi)}function Fi(t){return t instanceof Oi}const Li=0,Ii=1,Bi=4;function Ri(t,e,n,r){const i=t._keyToDOMMap;i.clear(),t._editorState=xi(),t._pendingEditorState=r,t._compositionKey=null,t._dirtyType=y$4,t._cloneNotNeeded.clear(),t._dirtyLeaves=new Set,t._dirtyElements.clear(),t._normalizedNodes=new Set,t._updateTags=new Set,t._updates=[],t._blockCursorElement=null;const s=t._observer;null!==s&&(s.disconnect(),t._observer=null),null!==e&&(e.textContent=""),null!==n&&(n.textContent="",i.set("root",n));}function Wi(t){const e=t||{},n=Xr(),r=e.theme||{},i=void 0===t?n:e.parentEditor||null,s=e.disableEvents||false,o=xi(),l=e.namespace||(null!==i?i._config.namespace:vs()),c=e.editorState,a=[pi,Jn,On,tr,Oi,Ai,...e.nodes||[]],{onError:u,html:f}=e,d=void 0===e.editable||e.editable;let h;if(void 0===t&&null!==n)h=n._nodes;else {h=new Map;for(let t=0;t<a.length;t++){let e=a[t],n=null,r=null;if("function"!=typeof e){const t=e;e=t.replace,n=t.with,r=t.withKlass||null;}const i=e.getType(),s=e.transform(),o=new Set;null!==s&&o.add(s),h.set(i,{exportDOM:f&&f.export?f.export.get(e):void 0,klass:e,replace:n,replaceWithKlass:r,transforms:o});}}const g=new Ji(o,i,h,{disableEvents:s,namespace:l,theme:r},u||console.error,function(t,e){const n=new Map,r=new Set,i=t=>{Object.keys(t).forEach((e=>{let r=n.get(e);void 0===r&&(r=[],n.set(e,r)),r.push(t[e]);}));};return t.forEach((t=>{const e=t.klass.importDOM;if(null==e||r.has(e))return;r.add(e);const n=e.call(t.klass);null!==n&&i(n);})),e&&i(e),n}(h,f?f.import:void 0),d,t);return void 0!==c&&(g._pendingEditorState=c,g._dirtyType=x$6),g}class Ji{constructor(t,e,n,r,i,s,o,l){this._createEditorArgs=l,this._parentEditor=e,this._rootElement=null,this._editorState=t,this._pendingEditorState=null,this._compositionKey=null,this._deferred=[],this._keyToDOMMap=new Map,this._updates=[],this._updating=false,this._listeners={decorator:new Set,editable:new Set,mutation:new Map,root:new Set,textcontent:new Set,update:new Set},this._commands=new Map,this._config=r,this._nodes=n,this._decorators={},this._pendingDecorators=null,this._dirtyType=y$4,this._cloneNotNeeded=new Set,this._dirtyLeaves=new Set,this._dirtyElements=new Map,this._normalizedNodes=new Set,this._updateTags=new Set,this._observer=null,this._key=vs(),this._onError=i,this._htmlConversions=s,this._editable=o,this._headless=null!==e&&e._headless,this._window=null,this._blockCursorElement=null;}isComposing(){return null!=this._compositionKey}registerUpdateListener(t){const e=this._listeners.update;return e.add(t),()=>{e.delete(t);}}registerEditableListener(t){const e=this._listeners.editable;return e.add(t),()=>{e.delete(t);}}registerDecoratorListener(t){const e=this._listeners.decorator;return e.add(t),()=>{e.delete(t);}}registerTextContentListener(t){const e=this._listeners.textcontent;return e.add(t),()=>{e.delete(t);}}registerRootListener(t){const e=this._listeners.root;return t(this._rootElement,null),e.add(t),()=>{t(null,this._rootElement),e.delete(t);}}registerCommand(e,n,r){ void 0===r&&t$2(35);const i=this._commands;i.has(e)||i.set(e,[new Set,new Set,new Set,new Set,new Set]);const s=i.get(e);void 0===s&&t$2(36,String(e));const o=s[r];return o.add(n),()=>{o.delete(n),s.every((t=>0===t.size))&&i.delete(e);}}registerMutationListener(t,e,n){const r=this.resolveRegisteredNodeAfterReplacements(this.getRegisteredNode(t)).klass,i=this._listeners.mutation;i.set(e,r);const s=n&&n.skipInitialization;return void 0!==s&&s||this.initializeMutationListener(e,r),()=>{i.delete(e);}}getRegisteredNode(e){const n=this._nodes.get(e.getType());return void 0===n&&t$2(37,e.name),n}resolveRegisteredNodeAfterReplacements(t){for(;t.replaceWithKlass;)t=this.getRegisteredNode(t.replaceWithKlass);return t}initializeMutationListener(t,e){const n=this._editorState,r=So(n).get(e.getType());if(!r)return;const i=new Map;for(const t of r.keys())i.set(t,"created");i.size>0&&t(i,{dirtyLeaves:new Set,prevEditorState:n,updateTags:new Set(["registerMutationListener"])});}registerNodeTransformToKlass(t,e){const n=this.getRegisteredNode(t);return n.transforms.add(e),n}registerNodeTransform(t,e){const n=this.registerNodeTransformToKlass(t,e),r=[n],i=n.replaceWithKlass;if(null!=i){const t=this.registerNodeTransformToKlass(i,e);r.push(t);}return function(t,e){const n=So(t.getEditorState()),r=[];for(const t of e){const e=n.get(t);e&&r.push(e);}if(0===r.length)return;t.update((()=>{for(const t of r)for(const e of t.keys()){const t=as(e);t&&t.markDirty();}}),null===t._pendingEditorState?{tag:Ti}:void 0);}(this,r.map((t=>t.klass.getType()))),()=>{r.forEach((t=>t.transforms.delete(e)));}}hasNode(t){return this._nodes.has(t.getType())}hasNodes(t){return t.every(this.hasNode.bind(this))}dispatchCommand(t,e){return Rs(this,t,e)}getDecorators(){return this._decorators}getRootElement(){return this._rootElement}getKey(){return this._key}setRootElement(t){const e=this._rootElement;if(t!==e){const n=Fs(this._config.theme,"root"),r=this._pendingEditorState||this._editorState;if(this._rootElement=t,Ri(this,e,t,r),null!==e&&(this._config.disableEvents||En(e),null!=n&&e.classList.remove(...n)),null!==t){const e=qs(t),r=t.style;r.userSelect="text",r.whiteSpace="pre-wrap",r.wordBreak="break-word",t.setAttribute("data-lexical-editor","true"),this._window=e,this._dirtyType=x$6,at$2(this),this._updateTags.add(Ti),ii(this),this._config.disableEvents||function(t,e){const n=t.ownerDocument,r=on.get(n);(void 0===r||r<1)&&n.addEventListener("selectionchange",Tn),on.set(n,(r||0)+1),t.__lexicalEditor=e;const i=vn(t);for(let n=0;n<tn.length;n++){const[r,s]=tn[n],o="function"==typeof s?t=>{Nn(t)||(bn(t),(e.isEditable()||"click"===r)&&s(t,e));}:t=>{if(Nn(t))return;bn(t);const n=e.isEditable();switch(r){case "cut":return n&&Rs(e,Ue,t);case "copy":return Rs(e,Je,t);case "paste":return n&&Rs(e,ge,t);case "dragstart":return n&&Rs(e,Be,t);case "dragover":return n&&Rs(e,Re,t);case "dragend":return n&&Rs(e,We,t);case "focus":return n&&Rs(e,qe,t);case "blur":return n&&Rs(e,Ge,t);case "drop":return n&&Rs(e,ze,t)}};t.addEventListener(r,o),i.push((()=>{t.removeEventListener(r,o);}));}}(t,this),null!=n&&t.classList.add(...n);}else this._window=null,this._updateTags.add(Ti),ii(this);si("root",this,false,t,e);}}getElementByKey(t){return this._keyToDOMMap.get(t)||null}getEditorState(){return this._editorState}setEditorState(e,n){e.isEmpty()&&t$2(38);let r=e;r._readOnly&&(r=mi(e),r._selection=e._selection?e._selection.clone():null),ct$3(this);const i=this._pendingEditorState,s=this._updateTags,o=void 0!==n?n.tag:null;null===i||i.isEmpty()||(null!=o&&s.add(o),ii(this)),this._pendingEditorState=r,this._dirtyType=x$6,this._dirtyElements.set("root",false),this._compositionKey=null,null!=o&&s.add(o),this._updating||ii(this);}parseEditorState(t,e){return function(t,e,n){const r=xi(),i=Br,s=Wr,o=Rr,l=e._dirtyElements,c=e._dirtyLeaves,a=e._cloneNotNeeded,u=e._dirtyType;e._dirtyElements=new Map,e._dirtyLeaves=new Set,e._cloneNotNeeded=new Set,e._dirtyType=0,Br=r,Wr=false,Rr=e;try{const i=e._nodes;ni(t.root,i),n&&n(),r._readOnly=!0;}catch(t){t instanceof Error&&e._onError(t);}finally{e._dirtyElements=l,e._dirtyLeaves=c,e._cloneNotNeeded=a,e._dirtyType=u,Br=i,Wr=s,Rr=o;}return r}("string"==typeof t?JSON.parse(t):t,this,e)}read(t){return ii(this),this.getEditorState().read(t,{editor:this})}update(t,e){!function(t,e,n){t._updating?t._updates.push([e,n]):li(t,e,n);}(this,t,e);}focus(t,e={}){const n=this._rootElement;null!==n&&(n.setAttribute("autocapitalize","off"),ci(this,(()=>{const r=Nr(),i=_s();null!==r?r.dirty||ys(r.clone()):0!==i.getChildrenSize()&&("rootStart"===e.defaultSelection?i.selectStart():i.selectEnd()),Vs("focus"),Ys((()=>{n.removeAttribute("autocapitalize"),t&&t();}));})),null===this._pendingEditorState&&n.removeAttribute("autocapitalize"));}blur(){const t=this._rootElement;null!==t&&t.blur();const e=oo(this._window);null!==e&&e.removeAllRanges();}isEditable(){return this._editable}setEditable(t){this._editable!==t&&(this._editable=t,si("editable",this,true,t));}toJSON(){return {editorState:this._editorState.toJSON()}}}Ji.version="0.31.1+prod.esm";let Ui=1;const ji="function"==typeof queueMicrotask?queueMicrotask:t=>{Promise.resolve().then(t);};function Vi(t){return _i(ds(t))}function Yi(t){const e=document.activeElement;if(!uo(e))return  false;const n=e.nodeName;return _i(ds(t))&&("INPUT"===n||"TEXTAREA"===n||"true"===e.contentEditable&&null==Xi(e))}function Hi(t,e,n){const r=t.getRootElement();try{return null!==r&&r.contains(e)&&r.contains(n)&&null!==e&&!Yi(e)&&Gi(e)===t}catch(t){return  false}}function qi(t){return t instanceof Ji}function Gi(t){let e=t;for(;null!=e;){const t=Xi(e);if(qi(t))return t;e=Us(e);}return null}function Xi(t){return t?t.__lexicalEditor:null}function Qi(t){return t.isToken()||t.isSegmented()}function Zi(t){return fo(t)&&t.nodeType===g$5}function ts(t){return fo(t)&&t.nodeType===_$3}function es(t){let e=t;for(;null!=e;){if(Zi(e))return e;e=e.firstChild;}return null}function ns(t,e,n){const r=j$3[e];if(null!==n&&(t&r)==(n&r))return t;let i=t^r;return "subscript"===e?i&=-65:"superscript"===e?i&=-33:"lowercase"===e?(i&=-513,i&=-1025):"uppercase"===e?(i&=-257,i&=-1025):"capitalize"===e&&(i&=-257,i&=-513),i}function rs(t){return Qn(t)||Fn(t)||_i(t)}function is(t,e){if(null!=e)return void(t.__key=e);Vr(),Yr();const n=qr(),r=Hr(),i=""+Ui++;r._nodeMap.set(i,t),di(t)?n._dirtyElements.set(i,true):n._dirtyLeaves.add(i),n._cloneNotNeeded.add(i),n._dirtyType=m$5,t.__key=i;}function ss(t){const e=t.getParent();if(null!==e){const n=t.getWritable(),r=e.getWritable(),i=t.getPreviousSibling(),s=t.getNextSibling(),o=null!==s?s.__key:null,l=null!==i?i.__key:null,c=null!==i?i.getWritable():null,a=null!==s?s.getWritable():null;null===i&&(r.__first=o),null===s&&(r.__last=l),null!==c&&(c.__next=o),null!==a&&(a.__prev=l),n.__prev=null,n.__next=null,n.__parent=null,r.__size--;}}function os(t){Yr();const e=t.getLatest(),n=e.__parent,r=Hr(),i=qr(),s=r._nodeMap,o=i._dirtyElements;null!==n&&function(t,e,n){let r=t;for(;null!==r;){if(n.has(r))return;const t=e.get(r);if(void 0===t)break;n.set(r,false),r=t.__parent;}}(n,s,o);const l=e.__key;i._dirtyType=m$5,di(t)?o.set(l,true):i._dirtyLeaves.add(l);}function ls(t){Vr();const e=qr(),n=e._compositionKey;if(t!==n){if(e._compositionKey=t,null!==n){const t=as(n);null!==t&&t.getWritable();}if(null!==t){const e=as(t);null!==e&&e.getWritable();}}}function cs(){if(jr())return null;return qr()._compositionKey}function as(t,e){const n=(e||Hr())._nodeMap.get(t);return void 0===n?null:n}function us(t,e){const n=fs(t,qr());return void 0!==n?as(n,e):null}function fs(t,e){return t[`__lexicalKey_${e._key}`]}function ds(t,e){let n=t;for(;null!=n;){const t=us(n,e);if(null!==t)return t;n=Us(n);}return null}function hs(t){const e=t._decorators,n=Object.assign({},e);return t._pendingDecorators=n,n}function gs(t){return t.read((()=>_s().getTextContent()))}function _s(){return ps(Hr())}function ps(t){return t._nodeMap.get("root")}function ys(t){Vr();const e=Hr();null!==t&&(t.dirty=true,t.setCachedNodes(null)),e._selection=t;}function ms(t){const e=qr(),n=function(t,e){let n=t;for(;null!=n;){const t=fs(n,e);if(void 0!==t)return t;n=Us(n);}return null}(t,e);if(null===n){return t===e.getRootElement()?as("root"):null}return as(n)}function xs(t,e){return e?t.getTextContentSize():0}function Cs(t){return /[\uD800-\uDBFF][\uDC00-\uDFFF]/g.test(t)}function Ss(t){const e=[];let n=t;for(;null!==n;)e.push(n),n=n._parentEditor;return e}function vs(){return Math.random().toString(36).replace(/[^a-z]+/g,"").substring(0,5)}function ks(t){return Zi(t)?t.nodeValue:null}function Ts(t,e,n){const r=oo(Gs(e));if(null===r)return;const i=r.anchorNode;let{anchorOffset:s,focusOffset:o}=r;if(null!==i){let e=ks(i);const r=ds(i);if(null!==e&&Qn(r)){if(e===K$3&&n){const t=n.length;e=n,s=t,o=t;}null!==e&&bs(r,e,s,o,t);}}}function bs(t,e,n,r,i){let s=t;if(s.isAttached()&&(i||!s.isDirty())){const c=s.isComposing();let a=e;(c||i)&&e[e.length-1]===K$3&&(a=e.slice(0,-1));const u=s.getTextContent();if(i||a!==u){if(""===a){if(ls(null),o$3||l||f$5)s.remove();else {const t=qr();setTimeout((()=>{t.update((()=>{s.isAttached()&&s.remove();}));}),20);}return}const e=s.getParent(),i=wr(),u=s.getTextContentSize(),d=cs(),h=s.getKey();if(s.isToken()||null!==d&&h===d&&!c||cr(i)&&(null!==e&&!e.canInsertTextBefore()&&0===i.anchor.offset||i.anchor.key===t.__key&&0===i.anchor.offset&&!s.canInsertTextBefore()&&!c||i.focus.key===t.__key&&i.focus.offset===u&&!s.canInsertTextAfter()&&!c))return void s.markDirty();const g=Nr();if(!cr(g)||null===n||null===r)return void s.setTextContent(a);if(g.setTextNodeRange(s,n,s,r),s.isSegmented()){const t=Xn(s.getTextContent());s.replace(t),s=t;}s.setTextContent(a);}}}function Ns(t,e,n){const r=e[n]||false;return "any"===r||r===t[n]}function ws(t,e){return Ns(t,e,"altKey")&&Ns(t,e,"ctrlKey")&&Ns(t,e,"shiftKey")&&Ns(t,e,"metaKey")}function Es(t,e,n){return ws(t,n)&&t.key.toLowerCase()===e.toLowerCase()}const Ms={ctrlKey:!r$2,metaKey:r$2},As={altKey:r$2,ctrlKey:!r$2};function Os(t){return "Backspace"===t.key}function Ds(t){return Es(t,"a",Ms)}function Ps(t){const e=_s();if(cr(t)){const e=t.anchor,n=t.focus,r=e.getNode().getTopLevelElementOrThrow().getParentOrThrow();return e.set(r.getKey(),0,"element"),n.set(r.getKey(),r.getChildrenSize(),"element"),vt$4(t),t}{const t=e.select(0,e.getChildrenSize());return ys(vt$4(t)),t}}function Fs(t,e){ void 0===t.__lexicalClassNameCache&&(t.__lexicalClassNameCache={});const n=t.__lexicalClassNameCache,r=n[e];if(void 0!==r)return r;const i=t[e];if("string"==typeof i){const t=d$3(i);return n[e]=t,t}return i}function Ls(e,n,r,i,s){if(0===r.size)return;const o=i.__type,l=i.__key,c=n.get(o);void 0===c&&t$2(33,o);const a=c.klass;let u=e.get(a);void 0===u&&(u=new Map,e.set(a,u));const f=u.get(l),d="destroyed"===f&&"created"===s;(void 0===f||d)&&u.set(l,d?"updated":s);}function zs(t,e,n){const r=t.getParent();let i=n,s=t;return null!==r&&(e&&0===n?(i=s.getIndexWithinParent(),s=r):e||n!==s.getChildrenSize()||(i=s.getIndexWithinParent()+1,s=r)),s.getChildAtIndex(e?i-1:i)}function Ks(t,e){const n=t.offset;if("element"===t.type){return zs(t.getNode(),e,n)}{const r=t.getNode();if(e&&0===n||!e&&n===r.getTextContentSize()){const t=e?r.getPreviousSibling():r.getNextSibling();return null===t?zs(r.getParentOrThrow(),e,r.getIndexWithinParent()+(e?0:1)):t}}return null}function Bs(t){const e=Gs(t).event,n=e&&e.inputType;return "insertFromPaste"===n||"insertFromPasteAsQuotation"===n}function Rs(t,e,n){return function(t,e,n){const r=Ss(t);for(let i=4;i>=0;i--)for(let s=0;s<r.length;s++){const o=r[s],l=o._commands.get(e);if(void 0!==l){const e=l[i];if(void 0!==e){const r=Array.from(e),i=r.length;let s=false;if(ci(o,(()=>{for(let e=0;e<i;e++)if(r[e](n,t))return void(s=true)})),s)return s}}}return  false}(t,e,n)}function Ws(t){return !yi(t)&&!t.isLastChild()&&!t.isInline()}function Js(e,n){const r=e._keyToDOMMap.get(n);return void 0===r&&t$2(75,n),r}function Us(t){const e=t.assignedSlot||t.parentElement;return ho(e)?e.host:e}function $s(t){return ts(t)?t:uo(t)?t.ownerDocument:null}function Vs(t){Vr();qr()._updateTags.add(t);}function Ys(t){Vr();qr()._deferred.push(t);}function Hs(t,e){let n=t.getParent();for(;null!==n;){if(n.is(e))return  true;n=n.getParent();}return  false}function qs(t){const e=$s(t);return e?e.defaultView:null}function Gs(e){const n=e._window;return null===n&&t$2(78),n}function Qs(t){let e=t.getParentOrThrow();for(;null!==e;){if(Zs(e))return e;e=e.getParentOrThrow();}return e}function Zs(t){return yi(t)||di(t)&&t.isShadowRoot()}function eo(e){const n=qr(),r=e.constructor.getType(),i=n._nodes.get(r);void 0===i&&t$2(200,e.constructor.name,r);const{replace:s,replaceWithKlass:o}=i;if(null!==s){const n=s(e),i=n.constructor;return null!==o?n instanceof o||t$2(201,o.name,o.getType(),i.name,i.getType(),e.constructor.name,r):n instanceof e.constructor&&i!==e.constructor||t$2(202,i.name,i.getType(),e.constructor.name,r),n.__key===e.__key&&t$2(203,e.constructor.name,r,i.name,i.getType()),n}return e}function no(e,n){!yi(e.getParent())||di(n)||_i(n)||t$2(99);}function ro(e){const n=as(e);return null===n&&t$2(63,e),n}function io(t){return (_i(t)||di(t)&&!t.canBeEmpty())&&!t.isInline()}function so(t,e,n){n.style.removeProperty("caret-color"),e._blockCursorElement=null;const r=t.parentElement;null!==r&&r.removeChild(t);}function oo(t){return e$1?(t||window).getSelection():null}function lo(t){const e=qs(t);return e?e.getSelection():null}function ao(t){return uo(t)&&"A"===t.tagName}function uo(t){return fo(t)&&t.nodeType===h$6}function fo(t){return "object"==typeof t&&null!==t&&"nodeType"in t&&"number"==typeof t.nodeType}function ho(t){return fo(t)&&t.nodeType===p$3}function go(t){const e=new RegExp(/^(a|abbr|acronym|b|cite|code|del|em|i|ins|kbd|label|mark|output|q|ruby|s|samp|span|strong|sub|sup|time|u|tt|var|#text)$/,"i");return null!==t.nodeName.match(e)}function _o(t){const e=new RegExp(/^(address|article|aside|blockquote|canvas|dd|div|dl|dt|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hr|li|main|nav|noscript|ol|p|pre|section|table|td|tfoot|ul|video)$/,"i");return null!==t.nodeName.match(e)}function po(t){if(_i(t)&&!t.isInline())return  true;if(!di(t)||Zs(t))return  false;const e=t.getFirstChild(),n=null===e||Fn(e)||Qn(e)||e.isInline();return !t.isInline()&&false!==t.canBeEmpty()&&n}function yo(t,e){let n=t;for(;null!==n&&null!==n.getParent()&&!e(n);)n=n.getParentOrThrow();return e(n)?n:null}function mo(){return qr()}const xo=new WeakMap,Co=new Map;function So(e){if(!e._readOnly&&e.isEmpty())return Co;e._readOnly||t$2(192);let n=xo.get(e);return n||(n=function(t){const e=new Map;for(const[n,r]of t._nodeMap){const t=r.__type;let i=e.get(t);i||(i=new Map,e.set(t,i)),i.set(n,r);}return e}(e),xo.set(e,n)),n}function vo(t){const e=t.constructor.clone(t);return e.afterCloneFrom(t),e}function ko(t,e){const n=parseInt(t.style.paddingInlineStart,10)||0,r=Math.round(n/40);e.setIndent(r);}function bo(t){return  true===t.__lexicalUnmanaged}const No={next:"previous",previous:"next"};class wo{constructor(t){this.origin=t;}[Symbol.iterator](){return tl({hasNext:Io,initial:this.getAdjacentCaret(),map:t=>t,step:t=>t.getAdjacentCaret()})}getAdjacentCaret(){return Wo(this.getNodeAtCaret(),this.direction)}getSiblingCaret(){return Wo(this.origin,this.direction)}remove(){const t=this.getNodeAtCaret();return t&&t.remove(),this}replaceOrInsert(t,e){const n=this.getNodeAtCaret();return t.is(this.origin)||t.is(n)||(null===n?this.insert(t):n.replace(t,e)),this}splice(e,n,r="next"){const i=r===this.direction?n:Array.from(n).reverse();let s=this;const o=this.getParentAtCaret(),l=new Map;for(let t=s.getAdjacentCaret();null!==t&&l.size<e;t=t.getAdjacentCaret()){const e=t.origin.getWritable();l.set(e.getKey(),e);}for(const e of i){if(l.size>0){const n=s.getNodeAtCaret();if(n)if(l.delete(n.getKey()),l.delete(e.getKey()),n.is(e)||s.origin.is(e));else {const t=e.getParent();t&&t.is(o)&&e.remove(),n.replace(e);}else null===n&&t$2(263,Array.from(l).join(" "));}else s.insert(e);s=Wo(e,this.direction);}for(const t of l.values())t.remove();return this}}class Eo extends wo{type="child";getLatest(){const t=this.origin.getLatest();return t===this.origin?this:jo(t,this.direction)}getParentCaret(t="root"){return Wo(Oo(this.getParentAtCaret(),t),this.direction)}getFlipped(){const t=Ao(this.direction);return Wo(this.getNodeAtCaret(),t)||jo(this.origin,t)}getParentAtCaret(){return this.origin}getChildCaret(){return this}isSameNodeCaret(t){return t instanceof Eo&&this.direction===t.direction&&this.origin.is(t.origin)}isSamePointCaret(t){return this.isSameNodeCaret(t)}}const Mo={root:yi,shadowRoot:Zs};function Ao(t){return No[t]}function Oo(t,e="root"){return Mo[e](t)?null:t}class Do extends wo{type="sibling";getLatest(){const t=this.origin.getLatest();return t===this.origin?this:Wo(t,this.direction)}getSiblingCaret(){return this}getParentAtCaret(){return this.origin.getParent()}getChildCaret(){return di(this.origin)?jo(this.origin,this.direction):null}getParentCaret(t="root"){return Wo(Oo(this.getParentAtCaret(),t),this.direction)}getFlipped(){const t=Ao(this.direction);return Wo(this.getNodeAtCaret(),t)||jo(this.origin.getParentOrThrow(),t)}isSamePointCaret(t){return t instanceof Do&&this.direction===t.direction&&this.origin.is(t.origin)}isSameNodeCaret(t){return (t instanceof Do||t instanceof Po)&&this.direction===t.direction&&this.origin.is(t.origin)}}class Po extends wo{type="text";constructor(t,e){super(t),this.offset=e;}getLatest(){const t=this.origin.getLatest();return t===this.origin?this:Jo(t,this.direction,this.offset)}getParentAtCaret(){return this.origin.getParent()}getChildCaret(){return null}getParentCaret(t="root"){return Wo(Oo(this.getParentAtCaret(),t),this.direction)}getFlipped(){return Jo(this.origin,Ao(this.direction),this.offset)}isSamePointCaret(t){return t instanceof Po&&this.direction===t.direction&&this.origin.is(t.origin)&&this.offset===t.offset}isSameNodeCaret(t){return (t instanceof Do||t instanceof Po)&&this.direction===t.direction&&this.origin.is(t.origin)}getSiblingCaret(){return Wo(this.origin,this.direction)}}function Fo(t){return t instanceof Po}function Io(t){return t instanceof Do}function zo(t){return t instanceof Eo}const Ko={next:class extends Po{direction="next";getNodeAtCaret(){return this.origin.getNextSibling()}insert(t){return this.origin.insertAfter(t),this}},previous:class extends Po{direction="previous";getNodeAtCaret(){return this.origin.getPreviousSibling()}insert(t){return this.origin.insertBefore(t),this}}},Bo={next:class extends Do{direction="next";getNodeAtCaret(){return this.origin.getNextSibling()}insert(t){return this.origin.insertAfter(t),this}},previous:class extends Do{direction="previous";getNodeAtCaret(){return this.origin.getPreviousSibling()}insert(t){return this.origin.insertBefore(t),this}}},Ro={next:class extends Eo{direction="next";getNodeAtCaret(){return this.origin.getFirstChild()}insert(t){return this.origin.splice(0,0,[t]),this}},previous:class extends Eo{direction="previous";getNodeAtCaret(){return this.origin.getLastChild()}insert(t){return this.origin.splice(this.origin.getChildrenSize(),0,[t]),this}}};function Wo(t,e){return t?new Bo[e](t):null}function Jo(t,e,n){return t?new Ko[e](t,Uo(t,n)):null}function Uo(t,e){const n=t.getTextContentSize();let r="next"===e?n:"previous"===e?0:e;return (r<0||r>n)&&(!function(t,...e){const n=new URL("https://lexical.dev/docs/error"),r=new URLSearchParams;r.append("code",t);for(const t of e)r.append("v",t);n.search=r.toString(),console.warn(`Minified Lexical warning #${t}; visit ${n.toString()} for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`);}(284,String(e),String(n),t.getKey()),r=r<0?0:n),r}function $o(t,e){return new qo(t,e)}function jo(t,e){return di(t)?new Ro[e](t):null}function Vo(t){return t&&t.getChildCaret()||t}function Yo(t){return t&&Vo(t.getAdjacentCaret())}class Ho{type="node-caret-range";constructor(t,e,n){this.anchor=t,this.focus=e,this.direction=n;}getLatest(){const t=this.anchor.getLatest(),e=this.focus.getLatest();return t===this.anchor&&e===this.focus?this:new Ho(t,e,this.direction)}isCollapsed(){return this.anchor.isSamePointCaret(this.focus)}getTextSlices(){const t=t=>{const e=this[t].getLatest();return Fo(e)?function(t,e){const{direction:n,origin:r}=t,i=Uo(r,"focus"===e?Ao(n):n);return $o(t,i-t.offset)}(e,t):null},e=t("anchor"),n=t("focus");if(e&&n){const{caret:t}=e,{caret:r}=n;if(t.isSameNodeCaret(r))return [$o(t,r.offset-t.offset),null]}return [e,n]}iterNodeCarets(t="root"){const e=Fo(this.anchor)?this.anchor.getSiblingCaret():this.anchor.getLatest(),n=this.focus.getLatest(),r=Fo(n),i=e=>e.isSameNodeCaret(n)?null:Yo(e)||e.getParentCaret(t);return tl({hasNext:t=>null!==t&&!(r&&n.isSameNodeCaret(t)),initial:e.isSameNodeCaret(n)?null:i(e),map:t=>t,step:i})}[Symbol.iterator](){return this.iterNodeCarets("root")}}class qo{type="slice";constructor(t,e){this.caret=t,this.distance=e;}getSliceIndices(){const{distance:t,caret:{offset:e}}=this,n=e+t;return n<e?[n,e]:[e,n]}getTextContent(){const[t,e]=this.getSliceIndices();return this.caret.origin.getTextContent().slice(t,e)}getTextContentSize(){return Math.abs(this.distance)}removeTextSlice(){const{caret:{origin:t,direction:e}}=this,[n,r]=this.getSliceIndices(),i=t.getTextContent();return Jo(t.setTextContent(i.slice(0,n)+i.slice(r)),e,n)}}function Xo(t){return Zo(t,Wo(_s(),t.direction))}function Qo(t){return Zo(t,t)}function Zo(e,n){return e.direction!==n.direction&&t$2(265),new Ho(e,n,e.direction)}function tl(t){const{initial:e,hasNext:n,step:r,map:i}=t;let s=e;return {[Symbol.iterator](){return this},next(){if(!n(s))return {done:true,value:void 0};const t={done:false,value:i(s)};return s=r(s),t}}}function el(e,n){const r=sl(e.origin,n.origin);switch(null===r&&t$2(275,e.origin.getKey(),n.origin.getKey()),r.type){case "same":{const t="text"===e.type,r="text"===n.type;return t&&r?function(t,e){return Math.sign(t-e)}(e.offset,n.offset):e.type===n.type?0:t?-1:r?1:"child"===e.type?-1:1}case "ancestor":return "child"===e.type?-1:1;case "descendant":return "child"===n.type?1:-1;case "branch":return nl(r)}}function nl(t){const{a:e,b:n}=t,r=e.__key,i=n.__key;let s=e,o=n;for(;s&&o;s=s.getNextSibling(),o=o.getNextSibling()){if(s.__key===i)return  -1;if(o.__key===r)return 1}return null===s?1:-1}function rl(t,e){return e.is(t)}function il(t){return di(t)?[t.getLatest(),null]:[t.getParent(),t.getLatest()]}function sl(e,n){if(e.is(n))return {commonAncestor:e,type:"same"};const r=new Map;for(let[t,n]=il(e);t;n=t,t=t.getParent())r.set(t,n);for(let[i,s]=il(n);i;s=i,i=i.getParent()){const o=r.get(i);if(void 0!==o)return null===o?(rl(e,i)||t$2(276),{commonAncestor:i,type:"ancestor"}):null===s?(rl(n,i)||t$2(277),{commonAncestor:i,type:"descendant"}):((di(o)||rl(e,o))&&(di(s)||rl(n,s))&&i.is(o.getParent())&&i.is(s.getParent())||t$2(278),{a:o,b:s,commonAncestor:i,type:"branch"})}return null}function ol(e,n){const{type:r,key:i,offset:s}=e,o=ro(e.key);return "text"===r?(Qn(o)||t$2(266,o.getType(),i),Jo(o,n,s)):(di(o)||t$2(267,o.getType(),i),xl(o,e.offset,n))}function ll(e,n){const{origin:r,direction:i}=n,s="next"===i;Fo(n)?e.set(r.getKey(),n.offset,"text"):Io(n)?Qn(r)?e.set(r.getKey(),Uo(r,i),"text"):e.set(r.getParentOrThrow().getKey(),r.getIndexWithinParent()+(s?1:0),"element"):(zo(n)&&di(r)||t$2(268),e.set(r.getKey(),s?0:r.getChildrenSize(),"element"));}function cl(t){const e=Nr(),n=cr(e)?e:vr();return al(n,t),ys(n),n}function al(t,e){ll(t.anchor,e.anchor),ll(t.focus,e.focus);}function ul(t){const{anchor:e,focus:n}=t,r=ol(e,"next"),i=ol(n,"next"),s=el(r,i)<=0?"next":"previous";return Zo(yl(r,s),yl(i,s))}function fl(t){const{direction:e,origin:n}=t,r=Wo(n,Ao(e)).getNodeAtCaret();return r?Wo(r,e):jo(n.getParentOrThrow(),e)}function dl(t,e="root"){const n=[t];for(let r=zo(t)?t.getParentCaret(e):t.getSiblingCaret();null!==r;r=r.getParentCaret(e))n.push(fl(r));return n}function hl(t){return !!t&&t.origin.isAttached()}function gl(e,n="removeEmptySlices"){if(e.isCollapsed())return e;const r="root",i="next";let s=n;const o=ml(e,i),l=dl(o.anchor,r),c=dl(o.focus.getFlipped(),r),a=new Set,u=[];for(const t of o.iterNodeCarets(r))if(zo(t))a.add(t.origin.getKey());else if(Io(t)){const{origin:e}=t;di(e)&&!a.has(e.getKey())||u.push(e);}for(const t of u)t.remove();for(const t of o.getTextSlices()){if(!t)continue;const{origin:e}=t.caret,n=e.getTextContentSize(),r=fl(Wo(e,i)),o=e.getMode();if(Math.abs(t.distance)===n&&"removeEmptySlices"===s||"token"===o&&0!==t.distance)r.remove();else if(0!==t.distance){s="removeEmptySlices";let e=t.removeTextSlice();const n=t.caret.origin;if("segmented"===o){const t=e.origin,n=Xn(t.getTextContent()).setStyle(t.getStyle()).setFormat(t.getFormat());r.replaceOrInsert(n),e=Jo(n,i,e.offset);}n.is(l[0].origin)&&(l[0]=e),n.is(c[0].origin)&&(c[0]=e.getFlipped());}}let f,d;for(const t of l)if(hl(t)){f=_l(t);break}for(const t of c)if(hl(t)){d=_l(t);break}const h=function(t,e,n){if(!t||!e)return null;const r=t.getParentAtCaret(),i=e.getParentAtCaret();if(!r||!i)return null;const s=r.getParents().reverse();s.push(r);const o=i.getParents().reverse();o.push(i);const l=Math.min(s.length,o.length);let c;for(c=0;c<l&&s[c]===o[c];c++);const a=(t,e)=>{let n;for(let r=c;r<t.length;r++){const i=t[r];if(Zs(i))return;!n&&e(i)&&(n=i);}return n},u=a(s,po),f=u&&a(o,(t=>n.has(t.getKey())&&po(t)));return u&&f?[u,f]:null}(f,d,a);if(h){const[t,e]=h;jo(t,"previous").splice(0,e.getChildren()),e.remove();}const g=[f,d,...l,...c].find(hl);if(g){return Qo(yl(_l(g),e.direction))}t$2(269,JSON.stringify(l.map((t=>t.origin.__key))));}function _l(t){const e=function(t){let e=t;for(;zo(e);){const t=Yo(e);if(!zo(t))break;e=t;}return e}(t.getLatest()),{direction:n}=e;if(Qn(e.origin))return Fo(e)?e:Jo(e.origin,n,n);const r=e.getAdjacentCaret();return Io(r)&&Qn(r.origin)?Jo(r.origin,n,Ao(n)):e}function pl(t){return Fo(t)&&t.offset!==Uo(t.origin,t.direction)}function yl(t,e){return t.direction===e?t:t.getFlipped()}function ml(t,e){return t.direction===e?t:Zo(yl(t.focus,e),yl(t.anchor,e))}function xl(t,e,n){let r=jo(t,"next");for(let t=0;t<e;t++){const t=r.getAdjacentCaret();if(null===t)break;r=t;}return yl(r,n)}
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -4725,7 +4725,7 @@ function s({hasStrictIndent:s=false}){const[c]=o$2();return core_abuse__loadShar
  *
  */
 
-const i=[{dependencies:[f],export:e=>h$2(e)?"***":null,regExp:/^(---|\*\*\*|___)\s?$/,replace:(e,r,t,o)=>{const l=y();o||null!=e.getNextSibling()?e.replace(l):e.insertBefore(l),l.selectNext();},type:"element"},...Bt];function a$1({transformers:e=i}){const[o]=o$2();return core_abuse__loadShare__react__loadShare__.useEffect((()=>et(o,e)),[o,e]),null}
+const i$1=[{dependencies:[f],export:e=>h$2(e)?"***":null,regExp:/^(---|\*\*\*|___)\s?$/,replace:(e,r,t,o)=>{const l=y();o||null!=e.getNextSibling()?e.replace(l):e.insertBefore(l),l.selectNext();},type:"element"},...Bt];function a$1({transformers:e=i$1}){const[o]=o$2();return core_abuse__loadShare__react__loadShare__.useEffect((()=>et(o,e)),[o,e]),null}
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -8744,258 +8744,243 @@ var buffer = {};
 
 var base64Js = {};
 
-var hasRequiredBase64Js;
+base64Js.byteLength = byteLength;
+base64Js.toByteArray = toByteArray;
+base64Js.fromByteArray = fromByteArray;
 
-function requireBase64Js () {
-	if (hasRequiredBase64Js) return base64Js;
-	hasRequiredBase64Js = 1;
+var lookup$1 = [];
+var revLookup = [];
+var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
 
-	base64Js.byteLength = byteLength;
-	base64Js.toByteArray = toByteArray;
-	base64Js.fromByteArray = fromByteArray;
+var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+for (var i = 0, len = code.length; i < len; ++i) {
+  lookup$1[i] = code[i];
+  revLookup[code.charCodeAt(i)] = i;
+}
 
-	var lookup = [];
-	var revLookup = [];
-	var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
+// Support decoding URL-safe base64 strings, as Node.js does.
+// See: https://en.wikipedia.org/wiki/Base64#URL_applications
+revLookup['-'.charCodeAt(0)] = 62;
+revLookup['_'.charCodeAt(0)] = 63;
 
-	var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-	for (var i = 0, len = code.length; i < len; ++i) {
-	  lookup[i] = code[i];
-	  revLookup[code.charCodeAt(i)] = i;
-	}
+function getLens (b64) {
+  var len = b64.length;
 
-	// Support decoding URL-safe base64 strings, as Node.js does.
-	// See: https://en.wikipedia.org/wiki/Base64#URL_applications
-	revLookup['-'.charCodeAt(0)] = 62;
-	revLookup['_'.charCodeAt(0)] = 63;
+  if (len % 4 > 0) {
+    throw new Error('Invalid string. Length must be a multiple of 4')
+  }
 
-	function getLens (b64) {
-	  var len = b64.length;
+  // Trim off extra bytes after placeholder bytes are found
+  // See: https://github.com/beatgammit/base64-js/issues/42
+  var validLen = b64.indexOf('=');
+  if (validLen === -1) validLen = len;
 
-	  if (len % 4 > 0) {
-	    throw new Error('Invalid string. Length must be a multiple of 4')
-	  }
+  var placeHoldersLen = validLen === len
+    ? 0
+    : 4 - (validLen % 4);
 
-	  // Trim off extra bytes after placeholder bytes are found
-	  // See: https://github.com/beatgammit/base64-js/issues/42
-	  var validLen = b64.indexOf('=');
-	  if (validLen === -1) validLen = len;
+  return [validLen, placeHoldersLen]
+}
 
-	  var placeHoldersLen = validLen === len
-	    ? 0
-	    : 4 - (validLen % 4);
+// base64 is 4/3 + up to two characters of the original data
+function byteLength (b64) {
+  var lens = getLens(b64);
+  var validLen = lens[0];
+  var placeHoldersLen = lens[1];
+  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
+}
 
-	  return [validLen, placeHoldersLen]
-	}
+function _byteLength (b64, validLen, placeHoldersLen) {
+  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
+}
 
-	// base64 is 4/3 + up to two characters of the original data
-	function byteLength (b64) {
-	  var lens = getLens(b64);
-	  var validLen = lens[0];
-	  var placeHoldersLen = lens[1];
-	  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
-	}
+function toByteArray (b64) {
+  var tmp;
+  var lens = getLens(b64);
+  var validLen = lens[0];
+  var placeHoldersLen = lens[1];
 
-	function _byteLength (b64, validLen, placeHoldersLen) {
-	  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
-	}
+  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));
 
-	function toByteArray (b64) {
-	  var tmp;
-	  var lens = getLens(b64);
-	  var validLen = lens[0];
-	  var placeHoldersLen = lens[1];
+  var curByte = 0;
 
-	  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));
+  // if there are placeholders, only get up to the last complete 4 chars
+  var len = placeHoldersLen > 0
+    ? validLen - 4
+    : validLen;
 
-	  var curByte = 0;
+  var i;
+  for (i = 0; i < len; i += 4) {
+    tmp =
+      (revLookup[b64.charCodeAt(i)] << 18) |
+      (revLookup[b64.charCodeAt(i + 1)] << 12) |
+      (revLookup[b64.charCodeAt(i + 2)] << 6) |
+      revLookup[b64.charCodeAt(i + 3)];
+    arr[curByte++] = (tmp >> 16) & 0xFF;
+    arr[curByte++] = (tmp >> 8) & 0xFF;
+    arr[curByte++] = tmp & 0xFF;
+  }
 
-	  // if there are placeholders, only get up to the last complete 4 chars
-	  var len = placeHoldersLen > 0
-	    ? validLen - 4
-	    : validLen;
+  if (placeHoldersLen === 2) {
+    tmp =
+      (revLookup[b64.charCodeAt(i)] << 2) |
+      (revLookup[b64.charCodeAt(i + 1)] >> 4);
+    arr[curByte++] = tmp & 0xFF;
+  }
 
-	  var i;
-	  for (i = 0; i < len; i += 4) {
-	    tmp =
-	      (revLookup[b64.charCodeAt(i)] << 18) |
-	      (revLookup[b64.charCodeAt(i + 1)] << 12) |
-	      (revLookup[b64.charCodeAt(i + 2)] << 6) |
-	      revLookup[b64.charCodeAt(i + 3)];
-	    arr[curByte++] = (tmp >> 16) & 0xFF;
-	    arr[curByte++] = (tmp >> 8) & 0xFF;
-	    arr[curByte++] = tmp & 0xFF;
-	  }
+  if (placeHoldersLen === 1) {
+    tmp =
+      (revLookup[b64.charCodeAt(i)] << 10) |
+      (revLookup[b64.charCodeAt(i + 1)] << 4) |
+      (revLookup[b64.charCodeAt(i + 2)] >> 2);
+    arr[curByte++] = (tmp >> 8) & 0xFF;
+    arr[curByte++] = tmp & 0xFF;
+  }
 
-	  if (placeHoldersLen === 2) {
-	    tmp =
-	      (revLookup[b64.charCodeAt(i)] << 2) |
-	      (revLookup[b64.charCodeAt(i + 1)] >> 4);
-	    arr[curByte++] = tmp & 0xFF;
-	  }
+  return arr
+}
 
-	  if (placeHoldersLen === 1) {
-	    tmp =
-	      (revLookup[b64.charCodeAt(i)] << 10) |
-	      (revLookup[b64.charCodeAt(i + 1)] << 4) |
-	      (revLookup[b64.charCodeAt(i + 2)] >> 2);
-	    arr[curByte++] = (tmp >> 8) & 0xFF;
-	    arr[curByte++] = tmp & 0xFF;
-	  }
+function tripletToBase64 (num) {
+  return lookup$1[num >> 18 & 0x3F] +
+    lookup$1[num >> 12 & 0x3F] +
+    lookup$1[num >> 6 & 0x3F] +
+    lookup$1[num & 0x3F]
+}
 
-	  return arr
-	}
+function encodeChunk (uint8, start, end) {
+  var tmp;
+  var output = [];
+  for (var i = start; i < end; i += 3) {
+    tmp =
+      ((uint8[i] << 16) & 0xFF0000) +
+      ((uint8[i + 1] << 8) & 0xFF00) +
+      (uint8[i + 2] & 0xFF);
+    output.push(tripletToBase64(tmp));
+  }
+  return output.join('')
+}
 
-	function tripletToBase64 (num) {
-	  return lookup[num >> 18 & 0x3F] +
-	    lookup[num >> 12 & 0x3F] +
-	    lookup[num >> 6 & 0x3F] +
-	    lookup[num & 0x3F]
-	}
+function fromByteArray (uint8) {
+  var tmp;
+  var len = uint8.length;
+  var extraBytes = len % 3; // if we have 1 byte left, pad 2 bytes
+  var parts = [];
+  var maxChunkLength = 16383; // must be multiple of 3
 
-	function encodeChunk (uint8, start, end) {
-	  var tmp;
-	  var output = [];
-	  for (var i = start; i < end; i += 3) {
-	    tmp =
-	      ((uint8[i] << 16) & 0xFF0000) +
-	      ((uint8[i + 1] << 8) & 0xFF00) +
-	      (uint8[i + 2] & 0xFF);
-	    output.push(tripletToBase64(tmp));
-	  }
-	  return output.join('')
-	}
+  // go through the array every three bytes, we'll deal with trailing stuff later
+  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
+    parts.push(encodeChunk(uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)));
+  }
 
-	function fromByteArray (uint8) {
-	  var tmp;
-	  var len = uint8.length;
-	  var extraBytes = len % 3; // if we have 1 byte left, pad 2 bytes
-	  var parts = [];
-	  var maxChunkLength = 16383; // must be multiple of 3
+  // pad the end with zeros, but make sure to not forget the extra bytes
+  if (extraBytes === 1) {
+    tmp = uint8[len - 1];
+    parts.push(
+      lookup$1[tmp >> 2] +
+      lookup$1[(tmp << 4) & 0x3F] +
+      '=='
+    );
+  } else if (extraBytes === 2) {
+    tmp = (uint8[len - 2] << 8) + uint8[len - 1];
+    parts.push(
+      lookup$1[tmp >> 10] +
+      lookup$1[(tmp >> 4) & 0x3F] +
+      lookup$1[(tmp << 2) & 0x3F] +
+      '='
+    );
+  }
 
-	  // go through the array every three bytes, we'll deal with trailing stuff later
-	  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
-	    parts.push(encodeChunk(uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)));
-	  }
-
-	  // pad the end with zeros, but make sure to not forget the extra bytes
-	  if (extraBytes === 1) {
-	    tmp = uint8[len - 1];
-	    parts.push(
-	      lookup[tmp >> 2] +
-	      lookup[(tmp << 4) & 0x3F] +
-	      '=='
-	    );
-	  } else if (extraBytes === 2) {
-	    tmp = (uint8[len - 2] << 8) + uint8[len - 1];
-	    parts.push(
-	      lookup[tmp >> 10] +
-	      lookup[(tmp >> 4) & 0x3F] +
-	      lookup[(tmp << 2) & 0x3F] +
-	      '='
-	    );
-	  }
-
-	  return parts.join('')
-	}
-	return base64Js;
+  return parts.join('')
 }
 
 var ieee754 = {};
 
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 
-var hasRequiredIeee754;
+ieee754.read = function (buffer, offset, isLE, mLen, nBytes) {
+  var e, m;
+  var eLen = (nBytes * 8) - mLen - 1;
+  var eMax = (1 << eLen) - 1;
+  var eBias = eMax >> 1;
+  var nBits = -7;
+  var i = isLE ? (nBytes - 1) : 0;
+  var d = isLE ? -1 : 1;
+  var s = buffer[offset + i];
 
-function requireIeee754 () {
-	if (hasRequiredIeee754) return ieee754;
-	hasRequiredIeee754 = 1;
-	ieee754.read = function (buffer, offset, isLE, mLen, nBytes) {
-	  var e, m;
-	  var eLen = (nBytes * 8) - mLen - 1;
-	  var eMax = (1 << eLen) - 1;
-	  var eBias = eMax >> 1;
-	  var nBits = -7;
-	  var i = isLE ? (nBytes - 1) : 0;
-	  var d = isLE ? -1 : 1;
-	  var s = buffer[offset + i];
+  i += d;
 
-	  i += d;
+  e = s & ((1 << (-nBits)) - 1);
+  s >>= (-nBits);
+  nBits += eLen;
+  for (; nBits > 0; e = (e * 256) + buffer[offset + i], i += d, nBits -= 8) {}
 
-	  e = s & ((1 << (-nBits)) - 1);
-	  s >>= (-nBits);
-	  nBits += eLen;
-	  for (; nBits > 0; e = (e * 256) + buffer[offset + i], i += d, nBits -= 8) {}
+  m = e & ((1 << (-nBits)) - 1);
+  e >>= (-nBits);
+  nBits += mLen;
+  for (; nBits > 0; m = (m * 256) + buffer[offset + i], i += d, nBits -= 8) {}
 
-	  m = e & ((1 << (-nBits)) - 1);
-	  e >>= (-nBits);
-	  nBits += mLen;
-	  for (; nBits > 0; m = (m * 256) + buffer[offset + i], i += d, nBits -= 8) {}
+  if (e === 0) {
+    e = 1 - eBias;
+  } else if (e === eMax) {
+    return m ? NaN : ((s ? -1 : 1) * Infinity)
+  } else {
+    m = m + Math.pow(2, mLen);
+    e = e - eBias;
+  }
+  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
+};
 
-	  if (e === 0) {
-	    e = 1 - eBias;
-	  } else if (e === eMax) {
-	    return m ? NaN : ((s ? -1 : 1) * Infinity)
-	  } else {
-	    m = m + Math.pow(2, mLen);
-	    e = e - eBias;
-	  }
-	  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
-	};
+ieee754.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+  var e, m, c;
+  var eLen = (nBytes * 8) - mLen - 1;
+  var eMax = (1 << eLen) - 1;
+  var eBias = eMax >> 1;
+  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0);
+  var i = isLE ? 0 : (nBytes - 1);
+  var d = isLE ? 1 : -1;
+  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
 
-	ieee754.write = function (buffer, value, offset, isLE, mLen, nBytes) {
-	  var e, m, c;
-	  var eLen = (nBytes * 8) - mLen - 1;
-	  var eMax = (1 << eLen) - 1;
-	  var eBias = eMax >> 1;
-	  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0);
-	  var i = isLE ? 0 : (nBytes - 1);
-	  var d = isLE ? 1 : -1;
-	  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
+  value = Math.abs(value);
 
-	  value = Math.abs(value);
+  if (isNaN(value) || value === Infinity) {
+    m = isNaN(value) ? 1 : 0;
+    e = eMax;
+  } else {
+    e = Math.floor(Math.log(value) / Math.LN2);
+    if (value * (c = Math.pow(2, -e)) < 1) {
+      e--;
+      c *= 2;
+    }
+    if (e + eBias >= 1) {
+      value += rt / c;
+    } else {
+      value += rt * Math.pow(2, 1 - eBias);
+    }
+    if (value * c >= 2) {
+      e++;
+      c /= 2;
+    }
 
-	  if (isNaN(value) || value === Infinity) {
-	    m = isNaN(value) ? 1 : 0;
-	    e = eMax;
-	  } else {
-	    e = Math.floor(Math.log(value) / Math.LN2);
-	    if (value * (c = Math.pow(2, -e)) < 1) {
-	      e--;
-	      c *= 2;
-	    }
-	    if (e + eBias >= 1) {
-	      value += rt / c;
-	    } else {
-	      value += rt * Math.pow(2, 1 - eBias);
-	    }
-	    if (value * c >= 2) {
-	      e++;
-	      c /= 2;
-	    }
+    if (e + eBias >= eMax) {
+      m = 0;
+      e = eMax;
+    } else if (e + eBias >= 1) {
+      m = ((value * c) - 1) * Math.pow(2, mLen);
+      e = e + eBias;
+    } else {
+      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
+      e = 0;
+    }
+  }
 
-	    if (e + eBias >= eMax) {
-	      m = 0;
-	      e = eMax;
-	    } else if (e + eBias >= 1) {
-	      m = ((value * c) - 1) * Math.pow(2, mLen);
-	      e = e + eBias;
-	    } else {
-	      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
-	      e = 0;
-	    }
-	  }
+  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
 
-	  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
+  e = (e << mLen) | m;
+  eLen += mLen;
+  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
 
-	  e = (e << mLen) | m;
-	  eLen += mLen;
-	  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
-
-	  buffer[offset + i - d] |= s * 128;
-	};
-	return ieee754;
-}
+  buffer[offset + i - d] |= s * 128;
+};
 
 /*!
  * The buffer module from node.js, for the browser.
@@ -9004,2110 +8989,2103 @@ function requireIeee754 () {
  * @license  MIT
  */
 
-var hasRequiredBuffer;
-
-function requireBuffer () {
-	if (hasRequiredBuffer) return buffer;
-	hasRequiredBuffer = 1;
-	(function (exports) {
-
-		const base64 = requireBase64Js();
-		const ieee754 = requireIeee754();
-		const customInspectSymbol =
-		  (typeof Symbol === 'function' && typeof Symbol['for'] === 'function') // eslint-disable-line dot-notation
-		    ? Symbol['for']('nodejs.util.inspect.custom') // eslint-disable-line dot-notation
-		    : null;
-
-		exports.Buffer = Buffer;
-		exports.SlowBuffer = SlowBuffer;
-		exports.INSPECT_MAX_BYTES = 50;
-
-		const K_MAX_LENGTH = 0x7fffffff;
-		exports.kMaxLength = K_MAX_LENGTH;
-
-		/**
-		 * If `Buffer.TYPED_ARRAY_SUPPORT`:
-		 *   === true    Use Uint8Array implementation (fastest)
-		 *   === false   Print warning and recommend using `buffer` v4.x which has an Object
-		 *               implementation (most compatible, even IE6)
-		 *
-		 * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
-		 * Opera 11.6+, iOS 4.2+.
-		 *
-		 * We report that the browser does not support typed arrays if the are not subclassable
-		 * using __proto__. Firefox 4-29 lacks support for adding new properties to `Uint8Array`
-		 * (See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438). IE 10 lacks support
-		 * for __proto__ and has a buggy typed array implementation.
-		 */
-		Buffer.TYPED_ARRAY_SUPPORT = typedArraySupport();
-
-		if (!Buffer.TYPED_ARRAY_SUPPORT && typeof console !== 'undefined' &&
-		    typeof console.error === 'function') {
-		  console.error(
-		    'This browser lacks typed array (Uint8Array) support which is required by ' +
-		    '`buffer` v5.x. Use `buffer` v4.x if you require old browser support.'
-		  );
-		}
-
-		function typedArraySupport () {
-		  // Can typed array instances can be augmented?
-		  try {
-		    const arr = new Uint8Array(1);
-		    const proto = { foo: function () { return 42 } };
-		    Object.setPrototypeOf(proto, Uint8Array.prototype);
-		    Object.setPrototypeOf(arr, proto);
-		    return arr.foo() === 42
-		  } catch (e) {
-		    return false
-		  }
-		}
-
-		Object.defineProperty(Buffer.prototype, 'parent', {
-		  enumerable: true,
-		  get: function () {
-		    if (!Buffer.isBuffer(this)) return undefined
-		    return this.buffer
-		  }
-		});
-
-		Object.defineProperty(Buffer.prototype, 'offset', {
-		  enumerable: true,
-		  get: function () {
-		    if (!Buffer.isBuffer(this)) return undefined
-		    return this.byteOffset
-		  }
-		});
-
-		function createBuffer (length) {
-		  if (length > K_MAX_LENGTH) {
-		    throw new RangeError('The value "' + length + '" is invalid for option "size"')
-		  }
-		  // Return an augmented `Uint8Array` instance
-		  const buf = new Uint8Array(length);
-		  Object.setPrototypeOf(buf, Buffer.prototype);
-		  return buf
-		}
-
-		/**
-		 * The Buffer constructor returns instances of `Uint8Array` that have their
-		 * prototype changed to `Buffer.prototype`. Furthermore, `Buffer` is a subclass of
-		 * `Uint8Array`, so the returned instances will have all the node `Buffer` methods
-		 * and the `Uint8Array` methods. Square bracket notation works as expected -- it
-		 * returns a single octet.
-		 *
-		 * The `Uint8Array` prototype remains unmodified.
-		 */
-
-		function Buffer (arg, encodingOrOffset, length) {
-		  // Common case.
-		  if (typeof arg === 'number') {
-		    if (typeof encodingOrOffset === 'string') {
-		      throw new TypeError(
-		        'The "string" argument must be of type string. Received type number'
-		      )
-		    }
-		    return allocUnsafe(arg)
-		  }
-		  return from(arg, encodingOrOffset, length)
-		}
-
-		Buffer.poolSize = 8192; // not used by this implementation
-
-		function from (value, encodingOrOffset, length) {
-		  if (typeof value === 'string') {
-		    return fromString(value, encodingOrOffset)
-		  }
-
-		  if (ArrayBuffer.isView(value)) {
-		    return fromArrayView(value)
-		  }
-
-		  if (value == null) {
-		    throw new TypeError(
-		      'The first argument must be one of type string, Buffer, ArrayBuffer, Array, ' +
-		      'or Array-like Object. Received type ' + (typeof value)
-		    )
-		  }
-
-		  if (isInstance(value, ArrayBuffer) ||
-		      (value && isInstance(value.buffer, ArrayBuffer))) {
-		    return fromArrayBuffer(value, encodingOrOffset, length)
-		  }
-
-		  if (typeof SharedArrayBuffer !== 'undefined' &&
-		      (isInstance(value, SharedArrayBuffer) ||
-		      (value && isInstance(value.buffer, SharedArrayBuffer)))) {
-		    return fromArrayBuffer(value, encodingOrOffset, length)
-		  }
-
-		  if (typeof value === 'number') {
-		    throw new TypeError(
-		      'The "value" argument must not be of type number. Received type number'
-		    )
-		  }
-
-		  const valueOf = value.valueOf && value.valueOf();
-		  if (valueOf != null && valueOf !== value) {
-		    return Buffer.from(valueOf, encodingOrOffset, length)
-		  }
-
-		  const b = fromObject(value);
-		  if (b) return b
-
-		  if (typeof Symbol !== 'undefined' && Symbol.toPrimitive != null &&
-		      typeof value[Symbol.toPrimitive] === 'function') {
-		    return Buffer.from(value[Symbol.toPrimitive]('string'), encodingOrOffset, length)
-		  }
-
-		  throw new TypeError(
-		    'The first argument must be one of type string, Buffer, ArrayBuffer, Array, ' +
-		    'or Array-like Object. Received type ' + (typeof value)
-		  )
-		}
-
-		/**
-		 * Functionally equivalent to Buffer(arg, encoding) but throws a TypeError
-		 * if value is a number.
-		 * Buffer.from(str[, encoding])
-		 * Buffer.from(array)
-		 * Buffer.from(buffer)
-		 * Buffer.from(arrayBuffer[, byteOffset[, length]])
-		 **/
-		Buffer.from = function (value, encodingOrOffset, length) {
-		  return from(value, encodingOrOffset, length)
-		};
-
-		// Note: Change prototype *after* Buffer.from is defined to workaround Chrome bug:
-		// https://github.com/feross/buffer/pull/148
-		Object.setPrototypeOf(Buffer.prototype, Uint8Array.prototype);
-		Object.setPrototypeOf(Buffer, Uint8Array);
-
-		function assertSize (size) {
-		  if (typeof size !== 'number') {
-		    throw new TypeError('"size" argument must be of type number')
-		  } else if (size < 0) {
-		    throw new RangeError('The value "' + size + '" is invalid for option "size"')
-		  }
-		}
-
-		function alloc (size, fill, encoding) {
-		  assertSize(size);
-		  if (size <= 0) {
-		    return createBuffer(size)
-		  }
-		  if (fill !== undefined) {
-		    // Only pay attention to encoding if it's a string. This
-		    // prevents accidentally sending in a number that would
-		    // be interpreted as a start offset.
-		    return typeof encoding === 'string'
-		      ? createBuffer(size).fill(fill, encoding)
-		      : createBuffer(size).fill(fill)
-		  }
-		  return createBuffer(size)
-		}
-
-		/**
-		 * Creates a new filled Buffer instance.
-		 * alloc(size[, fill[, encoding]])
-		 **/
-		Buffer.alloc = function (size, fill, encoding) {
-		  return alloc(size, fill, encoding)
-		};
-
-		function allocUnsafe (size) {
-		  assertSize(size);
-		  return createBuffer(size < 0 ? 0 : checked(size) | 0)
-		}
-
-		/**
-		 * Equivalent to Buffer(num), by default creates a non-zero-filled Buffer instance.
-		 * */
-		Buffer.allocUnsafe = function (size) {
-		  return allocUnsafe(size)
-		};
-		/**
-		 * Equivalent to SlowBuffer(num), by default creates a non-zero-filled Buffer instance.
-		 */
-		Buffer.allocUnsafeSlow = function (size) {
-		  return allocUnsafe(size)
-		};
-
-		function fromString (string, encoding) {
-		  if (typeof encoding !== 'string' || encoding === '') {
-		    encoding = 'utf8';
-		  }
-
-		  if (!Buffer.isEncoding(encoding)) {
-		    throw new TypeError('Unknown encoding: ' + encoding)
-		  }
-
-		  const length = byteLength(string, encoding) | 0;
-		  let buf = createBuffer(length);
-
-		  const actual = buf.write(string, encoding);
-
-		  if (actual !== length) {
-		    // Writing a hex string, for example, that contains invalid characters will
-		    // cause everything after the first invalid character to be ignored. (e.g.
-		    // 'abxxcd' will be treated as 'ab')
-		    buf = buf.slice(0, actual);
-		  }
-
-		  return buf
-		}
-
-		function fromArrayLike (array) {
-		  const length = array.length < 0 ? 0 : checked(array.length) | 0;
-		  const buf = createBuffer(length);
-		  for (let i = 0; i < length; i += 1) {
-		    buf[i] = array[i] & 255;
-		  }
-		  return buf
-		}
-
-		function fromArrayView (arrayView) {
-		  if (isInstance(arrayView, Uint8Array)) {
-		    const copy = new Uint8Array(arrayView);
-		    return fromArrayBuffer(copy.buffer, copy.byteOffset, copy.byteLength)
-		  }
-		  return fromArrayLike(arrayView)
-		}
-
-		function fromArrayBuffer (array, byteOffset, length) {
-		  if (byteOffset < 0 || array.byteLength < byteOffset) {
-		    throw new RangeError('"offset" is outside of buffer bounds')
-		  }
-
-		  if (array.byteLength < byteOffset + (length || 0)) {
-		    throw new RangeError('"length" is outside of buffer bounds')
-		  }
-
-		  let buf;
-		  if (byteOffset === undefined && length === undefined) {
-		    buf = new Uint8Array(array);
-		  } else if (length === undefined) {
-		    buf = new Uint8Array(array, byteOffset);
-		  } else {
-		    buf = new Uint8Array(array, byteOffset, length);
-		  }
-
-		  // Return an augmented `Uint8Array` instance
-		  Object.setPrototypeOf(buf, Buffer.prototype);
-
-		  return buf
-		}
-
-		function fromObject (obj) {
-		  if (Buffer.isBuffer(obj)) {
-		    const len = checked(obj.length) | 0;
-		    const buf = createBuffer(len);
-
-		    if (buf.length === 0) {
-		      return buf
-		    }
-
-		    obj.copy(buf, 0, 0, len);
-		    return buf
-		  }
-
-		  if (obj.length !== undefined) {
-		    if (typeof obj.length !== 'number' || numberIsNaN(obj.length)) {
-		      return createBuffer(0)
-		    }
-		    return fromArrayLike(obj)
-		  }
-
-		  if (obj.type === 'Buffer' && Array.isArray(obj.data)) {
-		    return fromArrayLike(obj.data)
-		  }
-		}
-
-		function checked (length) {
-		  // Note: cannot use `length < K_MAX_LENGTH` here because that fails when
-		  // length is NaN (which is otherwise coerced to zero.)
-		  if (length >= K_MAX_LENGTH) {
-		    throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
-		                         'size: 0x' + K_MAX_LENGTH.toString(16) + ' bytes')
-		  }
-		  return length | 0
-		}
-
-		function SlowBuffer (length) {
-		  if (+length != length) { // eslint-disable-line eqeqeq
-		    length = 0;
-		  }
-		  return Buffer.alloc(+length)
-		}
-
-		Buffer.isBuffer = function isBuffer (b) {
-		  return b != null && b._isBuffer === true &&
-		    b !== Buffer.prototype // so Buffer.isBuffer(Buffer.prototype) will be false
-		};
-
-		Buffer.compare = function compare (a, b) {
-		  if (isInstance(a, Uint8Array)) a = Buffer.from(a, a.offset, a.byteLength);
-		  if (isInstance(b, Uint8Array)) b = Buffer.from(b, b.offset, b.byteLength);
-		  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
-		    throw new TypeError(
-		      'The "buf1", "buf2" arguments must be one of type Buffer or Uint8Array'
-		    )
-		  }
-
-		  if (a === b) return 0
-
-		  let x = a.length;
-		  let y = b.length;
-
-		  for (let i = 0, len = Math.min(x, y); i < len; ++i) {
-		    if (a[i] !== b[i]) {
-		      x = a[i];
-		      y = b[i];
-		      break
-		    }
-		  }
-
-		  if (x < y) return -1
-		  if (y < x) return 1
-		  return 0
-		};
-
-		Buffer.isEncoding = function isEncoding (encoding) {
-		  switch (String(encoding).toLowerCase()) {
-		    case 'hex':
-		    case 'utf8':
-		    case 'utf-8':
-		    case 'ascii':
-		    case 'latin1':
-		    case 'binary':
-		    case 'base64':
-		    case 'ucs2':
-		    case 'ucs-2':
-		    case 'utf16le':
-		    case 'utf-16le':
-		      return true
-		    default:
-		      return false
-		  }
-		};
-
-		Buffer.concat = function concat (list, length) {
-		  if (!Array.isArray(list)) {
-		    throw new TypeError('"list" argument must be an Array of Buffers')
-		  }
-
-		  if (list.length === 0) {
-		    return Buffer.alloc(0)
-		  }
-
-		  let i;
-		  if (length === undefined) {
-		    length = 0;
-		    for (i = 0; i < list.length; ++i) {
-		      length += list[i].length;
-		    }
-		  }
-
-		  const buffer = Buffer.allocUnsafe(length);
-		  let pos = 0;
-		  for (i = 0; i < list.length; ++i) {
-		    let buf = list[i];
-		    if (isInstance(buf, Uint8Array)) {
-		      if (pos + buf.length > buffer.length) {
-		        if (!Buffer.isBuffer(buf)) buf = Buffer.from(buf);
-		        buf.copy(buffer, pos);
-		      } else {
-		        Uint8Array.prototype.set.call(
-		          buffer,
-		          buf,
-		          pos
-		        );
-		      }
-		    } else if (!Buffer.isBuffer(buf)) {
-		      throw new TypeError('"list" argument must be an Array of Buffers')
-		    } else {
-		      buf.copy(buffer, pos);
-		    }
-		    pos += buf.length;
-		  }
-		  return buffer
-		};
-
-		function byteLength (string, encoding) {
-		  if (Buffer.isBuffer(string)) {
-		    return string.length
-		  }
-		  if (ArrayBuffer.isView(string) || isInstance(string, ArrayBuffer)) {
-		    return string.byteLength
-		  }
-		  if (typeof string !== 'string') {
-		    throw new TypeError(
-		      'The "string" argument must be one of type string, Buffer, or ArrayBuffer. ' +
-		      'Received type ' + typeof string
-		    )
-		  }
-
-		  const len = string.length;
-		  const mustMatch = (arguments.length > 2 && arguments[2] === true);
-		  if (!mustMatch && len === 0) return 0
-
-		  // Use a for loop to avoid recursion
-		  let loweredCase = false;
-		  for (;;) {
-		    switch (encoding) {
-		      case 'ascii':
-		      case 'latin1':
-		      case 'binary':
-		        return len
-		      case 'utf8':
-		      case 'utf-8':
-		        return utf8ToBytes(string).length
-		      case 'ucs2':
-		      case 'ucs-2':
-		      case 'utf16le':
-		      case 'utf-16le':
-		        return len * 2
-		      case 'hex':
-		        return len >>> 1
-		      case 'base64':
-		        return base64ToBytes(string).length
-		      default:
-		        if (loweredCase) {
-		          return mustMatch ? -1 : utf8ToBytes(string).length // assume utf8
-		        }
-		        encoding = ('' + encoding).toLowerCase();
-		        loweredCase = true;
-		    }
-		  }
-		}
-		Buffer.byteLength = byteLength;
-
-		function slowToString (encoding, start, end) {
-		  let loweredCase = false;
-
-		  // No need to verify that "this.length <= MAX_UINT32" since it's a read-only
-		  // property of a typed array.
-
-		  // This behaves neither like String nor Uint8Array in that we set start/end
-		  // to their upper/lower bounds if the value passed is out of range.
-		  // undefined is handled specially as per ECMA-262 6th Edition,
-		  // Section 13.3.3.7 Runtime Semantics: KeyedBindingInitialization.
-		  if (start === undefined || start < 0) {
-		    start = 0;
-		  }
-		  // Return early if start > this.length. Done here to prevent potential uint32
-		  // coercion fail below.
-		  if (start > this.length) {
-		    return ''
-		  }
-
-		  if (end === undefined || end > this.length) {
-		    end = this.length;
-		  }
-
-		  if (end <= 0) {
-		    return ''
-		  }
-
-		  // Force coercion to uint32. This will also coerce falsey/NaN values to 0.
-		  end >>>= 0;
-		  start >>>= 0;
-
-		  if (end <= start) {
-		    return ''
-		  }
-
-		  if (!encoding) encoding = 'utf8';
-
-		  while (true) {
-		    switch (encoding) {
-		      case 'hex':
-		        return hexSlice(this, start, end)
-
-		      case 'utf8':
-		      case 'utf-8':
-		        return utf8Slice(this, start, end)
-
-		      case 'ascii':
-		        return asciiSlice(this, start, end)
-
-		      case 'latin1':
-		      case 'binary':
-		        return latin1Slice(this, start, end)
-
-		      case 'base64':
-		        return base64Slice(this, start, end)
-
-		      case 'ucs2':
-		      case 'ucs-2':
-		      case 'utf16le':
-		      case 'utf-16le':
-		        return utf16leSlice(this, start, end)
-
-		      default:
-		        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
-		        encoding = (encoding + '').toLowerCase();
-		        loweredCase = true;
-		    }
-		  }
-		}
-
-		// This property is used by `Buffer.isBuffer` (and the `is-buffer` npm package)
-		// to detect a Buffer instance. It's not possible to use `instanceof Buffer`
-		// reliably in a browserify context because there could be multiple different
-		// copies of the 'buffer' package in use. This method works even for Buffer
-		// instances that were created from another copy of the `buffer` package.
-		// See: https://github.com/feross/buffer/issues/154
-		Buffer.prototype._isBuffer = true;
-
-		function swap (b, n, m) {
-		  const i = b[n];
-		  b[n] = b[m];
-		  b[m] = i;
-		}
-
-		Buffer.prototype.swap16 = function swap16 () {
-		  const len = this.length;
-		  if (len % 2 !== 0) {
-		    throw new RangeError('Buffer size must be a multiple of 16-bits')
-		  }
-		  for (let i = 0; i < len; i += 2) {
-		    swap(this, i, i + 1);
-		  }
-		  return this
-		};
-
-		Buffer.prototype.swap32 = function swap32 () {
-		  const len = this.length;
-		  if (len % 4 !== 0) {
-		    throw new RangeError('Buffer size must be a multiple of 32-bits')
-		  }
-		  for (let i = 0; i < len; i += 4) {
-		    swap(this, i, i + 3);
-		    swap(this, i + 1, i + 2);
-		  }
-		  return this
-		};
-
-		Buffer.prototype.swap64 = function swap64 () {
-		  const len = this.length;
-		  if (len % 8 !== 0) {
-		    throw new RangeError('Buffer size must be a multiple of 64-bits')
-		  }
-		  for (let i = 0; i < len; i += 8) {
-		    swap(this, i, i + 7);
-		    swap(this, i + 1, i + 6);
-		    swap(this, i + 2, i + 5);
-		    swap(this, i + 3, i + 4);
-		  }
-		  return this
-		};
-
-		Buffer.prototype.toString = function toString () {
-		  const length = this.length;
-		  if (length === 0) return ''
-		  if (arguments.length === 0) return utf8Slice(this, 0, length)
-		  return slowToString.apply(this, arguments)
-		};
-
-		Buffer.prototype.toLocaleString = Buffer.prototype.toString;
-
-		Buffer.prototype.equals = function equals (b) {
-		  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
-		  if (this === b) return true
-		  return Buffer.compare(this, b) === 0
-		};
-
-		Buffer.prototype.inspect = function inspect () {
-		  let str = '';
-		  const max = exports.INSPECT_MAX_BYTES;
-		  str = this.toString('hex', 0, max).replace(/(.{2})/g, '$1 ').trim();
-		  if (this.length > max) str += ' ... ';
-		  return '<Buffer ' + str + '>'
-		};
-		if (customInspectSymbol) {
-		  Buffer.prototype[customInspectSymbol] = Buffer.prototype.inspect;
-		}
-
-		Buffer.prototype.compare = function compare (target, start, end, thisStart, thisEnd) {
-		  if (isInstance(target, Uint8Array)) {
-		    target = Buffer.from(target, target.offset, target.byteLength);
-		  }
-		  if (!Buffer.isBuffer(target)) {
-		    throw new TypeError(
-		      'The "target" argument must be one of type Buffer or Uint8Array. ' +
-		      'Received type ' + (typeof target)
-		    )
-		  }
-
-		  if (start === undefined) {
-		    start = 0;
-		  }
-		  if (end === undefined) {
-		    end = target ? target.length : 0;
-		  }
-		  if (thisStart === undefined) {
-		    thisStart = 0;
-		  }
-		  if (thisEnd === undefined) {
-		    thisEnd = this.length;
-		  }
-
-		  if (start < 0 || end > target.length || thisStart < 0 || thisEnd > this.length) {
-		    throw new RangeError('out of range index')
-		  }
-
-		  if (thisStart >= thisEnd && start >= end) {
-		    return 0
-		  }
-		  if (thisStart >= thisEnd) {
-		    return -1
-		  }
-		  if (start >= end) {
-		    return 1
-		  }
-
-		  start >>>= 0;
-		  end >>>= 0;
-		  thisStart >>>= 0;
-		  thisEnd >>>= 0;
-
-		  if (this === target) return 0
-
-		  let x = thisEnd - thisStart;
-		  let y = end - start;
-		  const len = Math.min(x, y);
-
-		  const thisCopy = this.slice(thisStart, thisEnd);
-		  const targetCopy = target.slice(start, end);
-
-		  for (let i = 0; i < len; ++i) {
-		    if (thisCopy[i] !== targetCopy[i]) {
-		      x = thisCopy[i];
-		      y = targetCopy[i];
-		      break
-		    }
-		  }
-
-		  if (x < y) return -1
-		  if (y < x) return 1
-		  return 0
-		};
-
-		// Finds either the first index of `val` in `buffer` at offset >= `byteOffset`,
-		// OR the last index of `val` in `buffer` at offset <= `byteOffset`.
-		//
-		// Arguments:
-		// - buffer - a Buffer to search
-		// - val - a string, Buffer, or number
-		// - byteOffset - an index into `buffer`; will be clamped to an int32
-		// - encoding - an optional encoding, relevant is val is a string
-		// - dir - true for indexOf, false for lastIndexOf
-		function bidirectionalIndexOf (buffer, val, byteOffset, encoding, dir) {
-		  // Empty buffer means no match
-		  if (buffer.length === 0) return -1
-
-		  // Normalize byteOffset
-		  if (typeof byteOffset === 'string') {
-		    encoding = byteOffset;
-		    byteOffset = 0;
-		  } else if (byteOffset > 0x7fffffff) {
-		    byteOffset = 0x7fffffff;
-		  } else if (byteOffset < -2147483648) {
-		    byteOffset = -2147483648;
-		  }
-		  byteOffset = +byteOffset; // Coerce to Number.
-		  if (numberIsNaN(byteOffset)) {
-		    // byteOffset: it it's undefined, null, NaN, "foo", etc, search whole buffer
-		    byteOffset = dir ? 0 : (buffer.length - 1);
-		  }
-
-		  // Normalize byteOffset: negative offsets start from the end of the buffer
-		  if (byteOffset < 0) byteOffset = buffer.length + byteOffset;
-		  if (byteOffset >= buffer.length) {
-		    if (dir) return -1
-		    else byteOffset = buffer.length - 1;
-		  } else if (byteOffset < 0) {
-		    if (dir) byteOffset = 0;
-		    else return -1
-		  }
-
-		  // Normalize val
-		  if (typeof val === 'string') {
-		    val = Buffer.from(val, encoding);
-		  }
-
-		  // Finally, search either indexOf (if dir is true) or lastIndexOf
-		  if (Buffer.isBuffer(val)) {
-		    // Special case: looking for empty string/buffer always fails
-		    if (val.length === 0) {
-		      return -1
-		    }
-		    return arrayIndexOf(buffer, val, byteOffset, encoding, dir)
-		  } else if (typeof val === 'number') {
-		    val = val & 0xFF; // Search for a byte value [0-255]
-		    if (typeof Uint8Array.prototype.indexOf === 'function') {
-		      if (dir) {
-		        return Uint8Array.prototype.indexOf.call(buffer, val, byteOffset)
-		      } else {
-		        return Uint8Array.prototype.lastIndexOf.call(buffer, val, byteOffset)
-		      }
-		    }
-		    return arrayIndexOf(buffer, [val], byteOffset, encoding, dir)
-		  }
-
-		  throw new TypeError('val must be string, number or Buffer')
-		}
-
-		function arrayIndexOf (arr, val, byteOffset, encoding, dir) {
-		  let indexSize = 1;
-		  let arrLength = arr.length;
-		  let valLength = val.length;
-
-		  if (encoding !== undefined) {
-		    encoding = String(encoding).toLowerCase();
-		    if (encoding === 'ucs2' || encoding === 'ucs-2' ||
-		        encoding === 'utf16le' || encoding === 'utf-16le') {
-		      if (arr.length < 2 || val.length < 2) {
-		        return -1
-		      }
-		      indexSize = 2;
-		      arrLength /= 2;
-		      valLength /= 2;
-		      byteOffset /= 2;
-		    }
-		  }
-
-		  function read (buf, i) {
-		    if (indexSize === 1) {
-		      return buf[i]
-		    } else {
-		      return buf.readUInt16BE(i * indexSize)
-		    }
-		  }
-
-		  let i;
-		  if (dir) {
-		    let foundIndex = -1;
-		    for (i = byteOffset; i < arrLength; i++) {
-		      if (read(arr, i) === read(val, foundIndex === -1 ? 0 : i - foundIndex)) {
-		        if (foundIndex === -1) foundIndex = i;
-		        if (i - foundIndex + 1 === valLength) return foundIndex * indexSize
-		      } else {
-		        if (foundIndex !== -1) i -= i - foundIndex;
-		        foundIndex = -1;
-		      }
-		    }
-		  } else {
-		    if (byteOffset + valLength > arrLength) byteOffset = arrLength - valLength;
-		    for (i = byteOffset; i >= 0; i--) {
-		      let found = true;
-		      for (let j = 0; j < valLength; j++) {
-		        if (read(arr, i + j) !== read(val, j)) {
-		          found = false;
-		          break
-		        }
-		      }
-		      if (found) return i
-		    }
-		  }
-
-		  return -1
-		}
-
-		Buffer.prototype.includes = function includes (val, byteOffset, encoding) {
-		  return this.indexOf(val, byteOffset, encoding) !== -1
-		};
-
-		Buffer.prototype.indexOf = function indexOf (val, byteOffset, encoding) {
-		  return bidirectionalIndexOf(this, val, byteOffset, encoding, true)
-		};
-
-		Buffer.prototype.lastIndexOf = function lastIndexOf (val, byteOffset, encoding) {
-		  return bidirectionalIndexOf(this, val, byteOffset, encoding, false)
-		};
-
-		function hexWrite (buf, string, offset, length) {
-		  offset = Number(offset) || 0;
-		  const remaining = buf.length - offset;
-		  if (!length) {
-		    length = remaining;
-		  } else {
-		    length = Number(length);
-		    if (length > remaining) {
-		      length = remaining;
-		    }
-		  }
-
-		  const strLen = string.length;
-
-		  if (length > strLen / 2) {
-		    length = strLen / 2;
-		  }
-		  let i;
-		  for (i = 0; i < length; ++i) {
-		    const parsed = parseInt(string.substr(i * 2, 2), 16);
-		    if (numberIsNaN(parsed)) return i
-		    buf[offset + i] = parsed;
-		  }
-		  return i
-		}
-
-		function utf8Write (buf, string, offset, length) {
-		  return blitBuffer(utf8ToBytes(string, buf.length - offset), buf, offset, length)
-		}
-
-		function asciiWrite (buf, string, offset, length) {
-		  return blitBuffer(asciiToBytes(string), buf, offset, length)
-		}
-
-		function base64Write (buf, string, offset, length) {
-		  return blitBuffer(base64ToBytes(string), buf, offset, length)
-		}
-
-		function ucs2Write (buf, string, offset, length) {
-		  return blitBuffer(utf16leToBytes(string, buf.length - offset), buf, offset, length)
-		}
-
-		Buffer.prototype.write = function write (string, offset, length, encoding) {
-		  // Buffer#write(string)
-		  if (offset === undefined) {
-		    encoding = 'utf8';
-		    length = this.length;
-		    offset = 0;
-		  // Buffer#write(string, encoding)
-		  } else if (length === undefined && typeof offset === 'string') {
-		    encoding = offset;
-		    length = this.length;
-		    offset = 0;
-		  // Buffer#write(string, offset[, length][, encoding])
-		  } else if (isFinite(offset)) {
-		    offset = offset >>> 0;
-		    if (isFinite(length)) {
-		      length = length >>> 0;
-		      if (encoding === undefined) encoding = 'utf8';
-		    } else {
-		      encoding = length;
-		      length = undefined;
-		    }
-		  } else {
-		    throw new Error(
-		      'Buffer.write(string, encoding, offset[, length]) is no longer supported'
-		    )
-		  }
-
-		  const remaining = this.length - offset;
-		  if (length === undefined || length > remaining) length = remaining;
-
-		  if ((string.length > 0 && (length < 0 || offset < 0)) || offset > this.length) {
-		    throw new RangeError('Attempt to write outside buffer bounds')
-		  }
-
-		  if (!encoding) encoding = 'utf8';
-
-		  let loweredCase = false;
-		  for (;;) {
-		    switch (encoding) {
-		      case 'hex':
-		        return hexWrite(this, string, offset, length)
-
-		      case 'utf8':
-		      case 'utf-8':
-		        return utf8Write(this, string, offset, length)
-
-		      case 'ascii':
-		      case 'latin1':
-		      case 'binary':
-		        return asciiWrite(this, string, offset, length)
-
-		      case 'base64':
-		        // Warning: maxLength not taken into account in base64Write
-		        return base64Write(this, string, offset, length)
-
-		      case 'ucs2':
-		      case 'ucs-2':
-		      case 'utf16le':
-		      case 'utf-16le':
-		        return ucs2Write(this, string, offset, length)
-
-		      default:
-		        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
-		        encoding = ('' + encoding).toLowerCase();
-		        loweredCase = true;
-		    }
-		  }
-		};
-
-		Buffer.prototype.toJSON = function toJSON () {
-		  return {
-		    type: 'Buffer',
-		    data: Array.prototype.slice.call(this._arr || this, 0)
-		  }
-		};
-
-		function base64Slice (buf, start, end) {
-		  if (start === 0 && end === buf.length) {
-		    return base64.fromByteArray(buf)
-		  } else {
-		    return base64.fromByteArray(buf.slice(start, end))
-		  }
-		}
-
-		function utf8Slice (buf, start, end) {
-		  end = Math.min(buf.length, end);
-		  const res = [];
-
-		  let i = start;
-		  while (i < end) {
-		    const firstByte = buf[i];
-		    let codePoint = null;
-		    let bytesPerSequence = (firstByte > 0xEF)
-		      ? 4
-		      : (firstByte > 0xDF)
-		          ? 3
-		          : (firstByte > 0xBF)
-		              ? 2
-		              : 1;
-
-		    if (i + bytesPerSequence <= end) {
-		      let secondByte, thirdByte, fourthByte, tempCodePoint;
-
-		      switch (bytesPerSequence) {
-		        case 1:
-		          if (firstByte < 0x80) {
-		            codePoint = firstByte;
-		          }
-		          break
-		        case 2:
-		          secondByte = buf[i + 1];
-		          if ((secondByte & 0xC0) === 0x80) {
-		            tempCodePoint = (firstByte & 0x1F) << 0x6 | (secondByte & 0x3F);
-		            if (tempCodePoint > 0x7F) {
-		              codePoint = tempCodePoint;
-		            }
-		          }
-		          break
-		        case 3:
-		          secondByte = buf[i + 1];
-		          thirdByte = buf[i + 2];
-		          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {
-		            tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | (thirdByte & 0x3F);
-		            if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {
-		              codePoint = tempCodePoint;
-		            }
-		          }
-		          break
-		        case 4:
-		          secondByte = buf[i + 1];
-		          thirdByte = buf[i + 2];
-		          fourthByte = buf[i + 3];
-		          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {
-		            tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | (fourthByte & 0x3F);
-		            if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {
-		              codePoint = tempCodePoint;
-		            }
-		          }
-		      }
-		    }
-
-		    if (codePoint === null) {
-		      // we did not generate a valid codePoint so insert a
-		      // replacement char (U+FFFD) and advance only 1 byte
-		      codePoint = 0xFFFD;
-		      bytesPerSequence = 1;
-		    } else if (codePoint > 0xFFFF) {
-		      // encode to utf16 (surrogate pair dance)
-		      codePoint -= 0x10000;
-		      res.push(codePoint >>> 10 & 0x3FF | 0xD800);
-		      codePoint = 0xDC00 | codePoint & 0x3FF;
-		    }
-
-		    res.push(codePoint);
-		    i += bytesPerSequence;
-		  }
-
-		  return decodeCodePointsArray(res)
-		}
-
-		// Based on http://stackoverflow.com/a/22747272/680742, the browser with
-		// the lowest limit is Chrome, with 0x10000 args.
-		// We go 1 magnitude less, for safety
-		const MAX_ARGUMENTS_LENGTH = 0x1000;
-
-		function decodeCodePointsArray (codePoints) {
-		  const len = codePoints.length;
-		  if (len <= MAX_ARGUMENTS_LENGTH) {
-		    return String.fromCharCode.apply(String, codePoints) // avoid extra slice()
-		  }
-
-		  // Decode in chunks to avoid "call stack size exceeded".
-		  let res = '';
-		  let i = 0;
-		  while (i < len) {
-		    res += String.fromCharCode.apply(
-		      String,
-		      codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH)
-		    );
-		  }
-		  return res
-		}
-
-		function asciiSlice (buf, start, end) {
-		  let ret = '';
-		  end = Math.min(buf.length, end);
-
-		  for (let i = start; i < end; ++i) {
-		    ret += String.fromCharCode(buf[i] & 0x7F);
-		  }
-		  return ret
-		}
-
-		function latin1Slice (buf, start, end) {
-		  let ret = '';
-		  end = Math.min(buf.length, end);
-
-		  for (let i = start; i < end; ++i) {
-		    ret += String.fromCharCode(buf[i]);
-		  }
-		  return ret
-		}
-
-		function hexSlice (buf, start, end) {
-		  const len = buf.length;
-
-		  if (!start || start < 0) start = 0;
-		  if (!end || end < 0 || end > len) end = len;
-
-		  let out = '';
-		  for (let i = start; i < end; ++i) {
-		    out += hexSliceLookupTable[buf[i]];
-		  }
-		  return out
-		}
-
-		function utf16leSlice (buf, start, end) {
-		  const bytes = buf.slice(start, end);
-		  let res = '';
-		  // If bytes.length is odd, the last 8 bits must be ignored (same as node.js)
-		  for (let i = 0; i < bytes.length - 1; i += 2) {
-		    res += String.fromCharCode(bytes[i] + (bytes[i + 1] * 256));
-		  }
-		  return res
-		}
-
-		Buffer.prototype.slice = function slice (start, end) {
-		  const len = this.length;
-		  start = ~~start;
-		  end = end === undefined ? len : ~~end;
-
-		  if (start < 0) {
-		    start += len;
-		    if (start < 0) start = 0;
-		  } else if (start > len) {
-		    start = len;
-		  }
-
-		  if (end < 0) {
-		    end += len;
-		    if (end < 0) end = 0;
-		  } else if (end > len) {
-		    end = len;
-		  }
-
-		  if (end < start) end = start;
-
-		  const newBuf = this.subarray(start, end);
-		  // Return an augmented `Uint8Array` instance
-		  Object.setPrototypeOf(newBuf, Buffer.prototype);
-
-		  return newBuf
-		};
-
-		/*
-		 * Need to make sure that buffer isn't trying to write out of bounds.
-		 */
-		function checkOffset (offset, ext, length) {
-		  if ((offset % 1) !== 0 || offset < 0) throw new RangeError('offset is not uint')
-		  if (offset + ext > length) throw new RangeError('Trying to access beyond buffer length')
-		}
-
-		Buffer.prototype.readUintLE =
-		Buffer.prototype.readUIntLE = function readUIntLE (offset, byteLength, noAssert) {
-		  offset = offset >>> 0;
-		  byteLength = byteLength >>> 0;
-		  if (!noAssert) checkOffset(offset, byteLength, this.length);
-
-		  let val = this[offset];
-		  let mul = 1;
-		  let i = 0;
-		  while (++i < byteLength && (mul *= 0x100)) {
-		    val += this[offset + i] * mul;
-		  }
-
-		  return val
-		};
-
-		Buffer.prototype.readUintBE =
-		Buffer.prototype.readUIntBE = function readUIntBE (offset, byteLength, noAssert) {
-		  offset = offset >>> 0;
-		  byteLength = byteLength >>> 0;
-		  if (!noAssert) {
-		    checkOffset(offset, byteLength, this.length);
-		  }
-
-		  let val = this[offset + --byteLength];
-		  let mul = 1;
-		  while (byteLength > 0 && (mul *= 0x100)) {
-		    val += this[offset + --byteLength] * mul;
-		  }
-
-		  return val
-		};
-
-		Buffer.prototype.readUint8 =
-		Buffer.prototype.readUInt8 = function readUInt8 (offset, noAssert) {
-		  offset = offset >>> 0;
-		  if (!noAssert) checkOffset(offset, 1, this.length);
-		  return this[offset]
-		};
-
-		Buffer.prototype.readUint16LE =
-		Buffer.prototype.readUInt16LE = function readUInt16LE (offset, noAssert) {
-		  offset = offset >>> 0;
-		  if (!noAssert) checkOffset(offset, 2, this.length);
-		  return this[offset] | (this[offset + 1] << 8)
-		};
-
-		Buffer.prototype.readUint16BE =
-		Buffer.prototype.readUInt16BE = function readUInt16BE (offset, noAssert) {
-		  offset = offset >>> 0;
-		  if (!noAssert) checkOffset(offset, 2, this.length);
-		  return (this[offset] << 8) | this[offset + 1]
-		};
-
-		Buffer.prototype.readUint32LE =
-		Buffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {
-		  offset = offset >>> 0;
-		  if (!noAssert) checkOffset(offset, 4, this.length);
-
-		  return ((this[offset]) |
-		      (this[offset + 1] << 8) |
-		      (this[offset + 2] << 16)) +
-		      (this[offset + 3] * 0x1000000)
-		};
-
-		Buffer.prototype.readUint32BE =
-		Buffer.prototype.readUInt32BE = function readUInt32BE (offset, noAssert) {
-		  offset = offset >>> 0;
-		  if (!noAssert) checkOffset(offset, 4, this.length);
-
-		  return (this[offset] * 0x1000000) +
-		    ((this[offset + 1] << 16) |
-		    (this[offset + 2] << 8) |
-		    this[offset + 3])
-		};
-
-		Buffer.prototype.readBigUInt64LE = defineBigIntMethod(function readBigUInt64LE (offset) {
-		  offset = offset >>> 0;
-		  validateNumber(offset, 'offset');
-		  const first = this[offset];
-		  const last = this[offset + 7];
-		  if (first === undefined || last === undefined) {
-		    boundsError(offset, this.length - 8);
-		  }
-
-		  const lo = first +
-		    this[++offset] * 2 ** 8 +
-		    this[++offset] * 2 ** 16 +
-		    this[++offset] * 2 ** 24;
-
-		  const hi = this[++offset] +
-		    this[++offset] * 2 ** 8 +
-		    this[++offset] * 2 ** 16 +
-		    last * 2 ** 24;
-
-		  return BigInt(lo) + (BigInt(hi) << BigInt(32))
-		});
-
-		Buffer.prototype.readBigUInt64BE = defineBigIntMethod(function readBigUInt64BE (offset) {
-		  offset = offset >>> 0;
-		  validateNumber(offset, 'offset');
-		  const first = this[offset];
-		  const last = this[offset + 7];
-		  if (first === undefined || last === undefined) {
-		    boundsError(offset, this.length - 8);
-		  }
-
-		  const hi = first * 2 ** 24 +
-		    this[++offset] * 2 ** 16 +
-		    this[++offset] * 2 ** 8 +
-		    this[++offset];
-
-		  const lo = this[++offset] * 2 ** 24 +
-		    this[++offset] * 2 ** 16 +
-		    this[++offset] * 2 ** 8 +
-		    last;
-
-		  return (BigInt(hi) << BigInt(32)) + BigInt(lo)
-		});
-
-		Buffer.prototype.readIntLE = function readIntLE (offset, byteLength, noAssert) {
-		  offset = offset >>> 0;
-		  byteLength = byteLength >>> 0;
-		  if (!noAssert) checkOffset(offset, byteLength, this.length);
-
-		  let val = this[offset];
-		  let mul = 1;
-		  let i = 0;
-		  while (++i < byteLength && (mul *= 0x100)) {
-		    val += this[offset + i] * mul;
-		  }
-		  mul *= 0x80;
-
-		  if (val >= mul) val -= Math.pow(2, 8 * byteLength);
-
-		  return val
-		};
-
-		Buffer.prototype.readIntBE = function readIntBE (offset, byteLength, noAssert) {
-		  offset = offset >>> 0;
-		  byteLength = byteLength >>> 0;
-		  if (!noAssert) checkOffset(offset, byteLength, this.length);
-
-		  let i = byteLength;
-		  let mul = 1;
-		  let val = this[offset + --i];
-		  while (i > 0 && (mul *= 0x100)) {
-		    val += this[offset + --i] * mul;
-		  }
-		  mul *= 0x80;
-
-		  if (val >= mul) val -= Math.pow(2, 8 * byteLength);
-
-		  return val
-		};
-
-		Buffer.prototype.readInt8 = function readInt8 (offset, noAssert) {
-		  offset = offset >>> 0;
-		  if (!noAssert) checkOffset(offset, 1, this.length);
-		  if (!(this[offset] & 0x80)) return (this[offset])
-		  return ((0xff - this[offset] + 1) * -1)
-		};
-
-		Buffer.prototype.readInt16LE = function readInt16LE (offset, noAssert) {
-		  offset = offset >>> 0;
-		  if (!noAssert) checkOffset(offset, 2, this.length);
-		  const val = this[offset] | (this[offset + 1] << 8);
-		  return (val & 0x8000) ? val | 0xFFFF0000 : val
-		};
-
-		Buffer.prototype.readInt16BE = function readInt16BE (offset, noAssert) {
-		  offset = offset >>> 0;
-		  if (!noAssert) checkOffset(offset, 2, this.length);
-		  const val = this[offset + 1] | (this[offset] << 8);
-		  return (val & 0x8000) ? val | 0xFFFF0000 : val
-		};
-
-		Buffer.prototype.readInt32LE = function readInt32LE (offset, noAssert) {
-		  offset = offset >>> 0;
-		  if (!noAssert) checkOffset(offset, 4, this.length);
-
-		  return (this[offset]) |
-		    (this[offset + 1] << 8) |
-		    (this[offset + 2] << 16) |
-		    (this[offset + 3] << 24)
-		};
-
-		Buffer.prototype.readInt32BE = function readInt32BE (offset, noAssert) {
-		  offset = offset >>> 0;
-		  if (!noAssert) checkOffset(offset, 4, this.length);
-
-		  return (this[offset] << 24) |
-		    (this[offset + 1] << 16) |
-		    (this[offset + 2] << 8) |
-		    (this[offset + 3])
-		};
-
-		Buffer.prototype.readBigInt64LE = defineBigIntMethod(function readBigInt64LE (offset) {
-		  offset = offset >>> 0;
-		  validateNumber(offset, 'offset');
-		  const first = this[offset];
-		  const last = this[offset + 7];
-		  if (first === undefined || last === undefined) {
-		    boundsError(offset, this.length - 8);
-		  }
-
-		  const val = this[offset + 4] +
-		    this[offset + 5] * 2 ** 8 +
-		    this[offset + 6] * 2 ** 16 +
-		    (last << 24); // Overflow
-
-		  return (BigInt(val) << BigInt(32)) +
-		    BigInt(first +
-		    this[++offset] * 2 ** 8 +
-		    this[++offset] * 2 ** 16 +
-		    this[++offset] * 2 ** 24)
-		});
-
-		Buffer.prototype.readBigInt64BE = defineBigIntMethod(function readBigInt64BE (offset) {
-		  offset = offset >>> 0;
-		  validateNumber(offset, 'offset');
-		  const first = this[offset];
-		  const last = this[offset + 7];
-		  if (first === undefined || last === undefined) {
-		    boundsError(offset, this.length - 8);
-		  }
-
-		  const val = (first << 24) + // Overflow
-		    this[++offset] * 2 ** 16 +
-		    this[++offset] * 2 ** 8 +
-		    this[++offset];
-
-		  return (BigInt(val) << BigInt(32)) +
-		    BigInt(this[++offset] * 2 ** 24 +
-		    this[++offset] * 2 ** 16 +
-		    this[++offset] * 2 ** 8 +
-		    last)
-		});
-
-		Buffer.prototype.readFloatLE = function readFloatLE (offset, noAssert) {
-		  offset = offset >>> 0;
-		  if (!noAssert) checkOffset(offset, 4, this.length);
-		  return ieee754.read(this, offset, true, 23, 4)
-		};
-
-		Buffer.prototype.readFloatBE = function readFloatBE (offset, noAssert) {
-		  offset = offset >>> 0;
-		  if (!noAssert) checkOffset(offset, 4, this.length);
-		  return ieee754.read(this, offset, false, 23, 4)
-		};
-
-		Buffer.prototype.readDoubleLE = function readDoubleLE (offset, noAssert) {
-		  offset = offset >>> 0;
-		  if (!noAssert) checkOffset(offset, 8, this.length);
-		  return ieee754.read(this, offset, true, 52, 8)
-		};
-
-		Buffer.prototype.readDoubleBE = function readDoubleBE (offset, noAssert) {
-		  offset = offset >>> 0;
-		  if (!noAssert) checkOffset(offset, 8, this.length);
-		  return ieee754.read(this, offset, false, 52, 8)
-		};
-
-		function checkInt (buf, value, offset, ext, max, min) {
-		  if (!Buffer.isBuffer(buf)) throw new TypeError('"buffer" argument must be a Buffer instance')
-		  if (value > max || value < min) throw new RangeError('"value" argument is out of bounds')
-		  if (offset + ext > buf.length) throw new RangeError('Index out of range')
-		}
-
-		Buffer.prototype.writeUintLE =
-		Buffer.prototype.writeUIntLE = function writeUIntLE (value, offset, byteLength, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  byteLength = byteLength >>> 0;
-		  if (!noAssert) {
-		    const maxBytes = Math.pow(2, 8 * byteLength) - 1;
-		    checkInt(this, value, offset, byteLength, maxBytes, 0);
-		  }
-
-		  let mul = 1;
-		  let i = 0;
-		  this[offset] = value & 0xFF;
-		  while (++i < byteLength && (mul *= 0x100)) {
-		    this[offset + i] = (value / mul) & 0xFF;
-		  }
-
-		  return offset + byteLength
-		};
-
-		Buffer.prototype.writeUintBE =
-		Buffer.prototype.writeUIntBE = function writeUIntBE (value, offset, byteLength, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  byteLength = byteLength >>> 0;
-		  if (!noAssert) {
-		    const maxBytes = Math.pow(2, 8 * byteLength) - 1;
-		    checkInt(this, value, offset, byteLength, maxBytes, 0);
-		  }
-
-		  let i = byteLength - 1;
-		  let mul = 1;
-		  this[offset + i] = value & 0xFF;
-		  while (--i >= 0 && (mul *= 0x100)) {
-		    this[offset + i] = (value / mul) & 0xFF;
-		  }
-
-		  return offset + byteLength
-		};
-
-		Buffer.prototype.writeUint8 =
-		Buffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0);
-		  this[offset] = (value & 0xff);
-		  return offset + 1
-		};
-
-		Buffer.prototype.writeUint16LE =
-		Buffer.prototype.writeUInt16LE = function writeUInt16LE (value, offset, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0);
-		  this[offset] = (value & 0xff);
-		  this[offset + 1] = (value >>> 8);
-		  return offset + 2
-		};
-
-		Buffer.prototype.writeUint16BE =
-		Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0);
-		  this[offset] = (value >>> 8);
-		  this[offset + 1] = (value & 0xff);
-		  return offset + 2
-		};
-
-		Buffer.prototype.writeUint32LE =
-		Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0);
-		  this[offset + 3] = (value >>> 24);
-		  this[offset + 2] = (value >>> 16);
-		  this[offset + 1] = (value >>> 8);
-		  this[offset] = (value & 0xff);
-		  return offset + 4
-		};
-
-		Buffer.prototype.writeUint32BE =
-		Buffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0);
-		  this[offset] = (value >>> 24);
-		  this[offset + 1] = (value >>> 16);
-		  this[offset + 2] = (value >>> 8);
-		  this[offset + 3] = (value & 0xff);
-		  return offset + 4
-		};
-
-		function wrtBigUInt64LE (buf, value, offset, min, max) {
-		  checkIntBI(value, min, max, buf, offset, 7);
-
-		  let lo = Number(value & BigInt(0xffffffff));
-		  buf[offset++] = lo;
-		  lo = lo >> 8;
-		  buf[offset++] = lo;
-		  lo = lo >> 8;
-		  buf[offset++] = lo;
-		  lo = lo >> 8;
-		  buf[offset++] = lo;
-		  let hi = Number(value >> BigInt(32) & BigInt(0xffffffff));
-		  buf[offset++] = hi;
-		  hi = hi >> 8;
-		  buf[offset++] = hi;
-		  hi = hi >> 8;
-		  buf[offset++] = hi;
-		  hi = hi >> 8;
-		  buf[offset++] = hi;
-		  return offset
-		}
-
-		function wrtBigUInt64BE (buf, value, offset, min, max) {
-		  checkIntBI(value, min, max, buf, offset, 7);
-
-		  let lo = Number(value & BigInt(0xffffffff));
-		  buf[offset + 7] = lo;
-		  lo = lo >> 8;
-		  buf[offset + 6] = lo;
-		  lo = lo >> 8;
-		  buf[offset + 5] = lo;
-		  lo = lo >> 8;
-		  buf[offset + 4] = lo;
-		  let hi = Number(value >> BigInt(32) & BigInt(0xffffffff));
-		  buf[offset + 3] = hi;
-		  hi = hi >> 8;
-		  buf[offset + 2] = hi;
-		  hi = hi >> 8;
-		  buf[offset + 1] = hi;
-		  hi = hi >> 8;
-		  buf[offset] = hi;
-		  return offset + 8
-		}
-
-		Buffer.prototype.writeBigUInt64LE = defineBigIntMethod(function writeBigUInt64LE (value, offset = 0) {
-		  return wrtBigUInt64LE(this, value, offset, BigInt(0), BigInt('0xffffffffffffffff'))
-		});
-
-		Buffer.prototype.writeBigUInt64BE = defineBigIntMethod(function writeBigUInt64BE (value, offset = 0) {
-		  return wrtBigUInt64BE(this, value, offset, BigInt(0), BigInt('0xffffffffffffffff'))
-		});
-
-		Buffer.prototype.writeIntLE = function writeIntLE (value, offset, byteLength, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  if (!noAssert) {
-		    const limit = Math.pow(2, (8 * byteLength) - 1);
-
-		    checkInt(this, value, offset, byteLength, limit - 1, -limit);
-		  }
-
-		  let i = 0;
-		  let mul = 1;
-		  let sub = 0;
-		  this[offset] = value & 0xFF;
-		  while (++i < byteLength && (mul *= 0x100)) {
-		    if (value < 0 && sub === 0 && this[offset + i - 1] !== 0) {
-		      sub = 1;
-		    }
-		    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF;
-		  }
-
-		  return offset + byteLength
-		};
-
-		Buffer.prototype.writeIntBE = function writeIntBE (value, offset, byteLength, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  if (!noAssert) {
-		    const limit = Math.pow(2, (8 * byteLength) - 1);
-
-		    checkInt(this, value, offset, byteLength, limit - 1, -limit);
-		  }
-
-		  let i = byteLength - 1;
-		  let mul = 1;
-		  let sub = 0;
-		  this[offset + i] = value & 0xFF;
-		  while (--i >= 0 && (mul *= 0x100)) {
-		    if (value < 0 && sub === 0 && this[offset + i + 1] !== 0) {
-		      sub = 1;
-		    }
-		    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF;
-		  }
-
-		  return offset + byteLength
-		};
-
-		Buffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -128);
-		  if (value < 0) value = 0xff + value + 1;
-		  this[offset] = (value & 0xff);
-		  return offset + 1
-		};
-
-		Buffer.prototype.writeInt16LE = function writeInt16LE (value, offset, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -32768);
-		  this[offset] = (value & 0xff);
-		  this[offset + 1] = (value >>> 8);
-		  return offset + 2
-		};
-
-		Buffer.prototype.writeInt16BE = function writeInt16BE (value, offset, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -32768);
-		  this[offset] = (value >>> 8);
-		  this[offset + 1] = (value & 0xff);
-		  return offset + 2
-		};
-
-		Buffer.prototype.writeInt32LE = function writeInt32LE (value, offset, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -2147483648);
-		  this[offset] = (value & 0xff);
-		  this[offset + 1] = (value >>> 8);
-		  this[offset + 2] = (value >>> 16);
-		  this[offset + 3] = (value >>> 24);
-		  return offset + 4
-		};
-
-		Buffer.prototype.writeInt32BE = function writeInt32BE (value, offset, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -2147483648);
-		  if (value < 0) value = 0xffffffff + value + 1;
-		  this[offset] = (value >>> 24);
-		  this[offset + 1] = (value >>> 16);
-		  this[offset + 2] = (value >>> 8);
-		  this[offset + 3] = (value & 0xff);
-		  return offset + 4
-		};
-
-		Buffer.prototype.writeBigInt64LE = defineBigIntMethod(function writeBigInt64LE (value, offset = 0) {
-		  return wrtBigUInt64LE(this, value, offset, -BigInt('0x8000000000000000'), BigInt('0x7fffffffffffffff'))
-		});
-
-		Buffer.prototype.writeBigInt64BE = defineBigIntMethod(function writeBigInt64BE (value, offset = 0) {
-		  return wrtBigUInt64BE(this, value, offset, -BigInt('0x8000000000000000'), BigInt('0x7fffffffffffffff'))
-		});
-
-		function checkIEEE754 (buf, value, offset, ext, max, min) {
-		  if (offset + ext > buf.length) throw new RangeError('Index out of range')
-		  if (offset < 0) throw new RangeError('Index out of range')
-		}
-
-		function writeFloat (buf, value, offset, littleEndian, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  if (!noAssert) {
-		    checkIEEE754(buf, value, offset, 4);
-		  }
-		  ieee754.write(buf, value, offset, littleEndian, 23, 4);
-		  return offset + 4
-		}
-
-		Buffer.prototype.writeFloatLE = function writeFloatLE (value, offset, noAssert) {
-		  return writeFloat(this, value, offset, true, noAssert)
-		};
-
-		Buffer.prototype.writeFloatBE = function writeFloatBE (value, offset, noAssert) {
-		  return writeFloat(this, value, offset, false, noAssert)
-		};
-
-		function writeDouble (buf, value, offset, littleEndian, noAssert) {
-		  value = +value;
-		  offset = offset >>> 0;
-		  if (!noAssert) {
-		    checkIEEE754(buf, value, offset, 8);
-		  }
-		  ieee754.write(buf, value, offset, littleEndian, 52, 8);
-		  return offset + 8
-		}
-
-		Buffer.prototype.writeDoubleLE = function writeDoubleLE (value, offset, noAssert) {
-		  return writeDouble(this, value, offset, true, noAssert)
-		};
-
-		Buffer.prototype.writeDoubleBE = function writeDoubleBE (value, offset, noAssert) {
-		  return writeDouble(this, value, offset, false, noAssert)
-		};
-
-		// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
-		Buffer.prototype.copy = function copy (target, targetStart, start, end) {
-		  if (!Buffer.isBuffer(target)) throw new TypeError('argument should be a Buffer')
-		  if (!start) start = 0;
-		  if (!end && end !== 0) end = this.length;
-		  if (targetStart >= target.length) targetStart = target.length;
-		  if (!targetStart) targetStart = 0;
-		  if (end > 0 && end < start) end = start;
-
-		  // Copy 0 bytes; we're done
-		  if (end === start) return 0
-		  if (target.length === 0 || this.length === 0) return 0
-
-		  // Fatal error conditions
-		  if (targetStart < 0) {
-		    throw new RangeError('targetStart out of bounds')
-		  }
-		  if (start < 0 || start >= this.length) throw new RangeError('Index out of range')
-		  if (end < 0) throw new RangeError('sourceEnd out of bounds')
-
-		  // Are we oob?
-		  if (end > this.length) end = this.length;
-		  if (target.length - targetStart < end - start) {
-		    end = target.length - targetStart + start;
-		  }
-
-		  const len = end - start;
-
-		  if (this === target && typeof Uint8Array.prototype.copyWithin === 'function') {
-		    // Use built-in when available, missing from IE11
-		    this.copyWithin(targetStart, start, end);
-		  } else {
-		    Uint8Array.prototype.set.call(
-		      target,
-		      this.subarray(start, end),
-		      targetStart
-		    );
-		  }
-
-		  return len
-		};
-
-		// Usage:
-		//    buffer.fill(number[, offset[, end]])
-		//    buffer.fill(buffer[, offset[, end]])
-		//    buffer.fill(string[, offset[, end]][, encoding])
-		Buffer.prototype.fill = function fill (val, start, end, encoding) {
-		  // Handle string cases:
-		  if (typeof val === 'string') {
-		    if (typeof start === 'string') {
-		      encoding = start;
-		      start = 0;
-		      end = this.length;
-		    } else if (typeof end === 'string') {
-		      encoding = end;
-		      end = this.length;
-		    }
-		    if (encoding !== undefined && typeof encoding !== 'string') {
-		      throw new TypeError('encoding must be a string')
-		    }
-		    if (typeof encoding === 'string' && !Buffer.isEncoding(encoding)) {
-		      throw new TypeError('Unknown encoding: ' + encoding)
-		    }
-		    if (val.length === 1) {
-		      const code = val.charCodeAt(0);
-		      if ((encoding === 'utf8' && code < 128) ||
-		          encoding === 'latin1') {
-		        // Fast path: If `val` fits into a single byte, use that numeric value.
-		        val = code;
-		      }
-		    }
-		  } else if (typeof val === 'number') {
-		    val = val & 255;
-		  } else if (typeof val === 'boolean') {
-		    val = Number(val);
-		  }
-
-		  // Invalid ranges are not set to a default, so can range check early.
-		  if (start < 0 || this.length < start || this.length < end) {
-		    throw new RangeError('Out of range index')
-		  }
-
-		  if (end <= start) {
-		    return this
-		  }
-
-		  start = start >>> 0;
-		  end = end === undefined ? this.length : end >>> 0;
-
-		  if (!val) val = 0;
-
-		  let i;
-		  if (typeof val === 'number') {
-		    for (i = start; i < end; ++i) {
-		      this[i] = val;
-		    }
-		  } else {
-		    const bytes = Buffer.isBuffer(val)
-		      ? val
-		      : Buffer.from(val, encoding);
-		    const len = bytes.length;
-		    if (len === 0) {
-		      throw new TypeError('The value "' + val +
-		        '" is invalid for argument "value"')
-		    }
-		    for (i = 0; i < end - start; ++i) {
-		      this[i + start] = bytes[i % len];
-		    }
-		  }
-
-		  return this
-		};
-
-		// CUSTOM ERRORS
-		// =============
-
-		// Simplified versions from Node, changed for Buffer-only usage
-		const errors = {};
-		function E (sym, getMessage, Base) {
-		  errors[sym] = class NodeError extends Base {
-		    constructor () {
-		      super();
-
-		      Object.defineProperty(this, 'message', {
-		        value: getMessage.apply(this, arguments),
-		        writable: true,
-		        configurable: true
-		      });
-
-		      // Add the error code to the name to include it in the stack trace.
-		      this.name = `${this.name} [${sym}]`;
-		      // Access the stack to generate the error message including the error code
-		      // from the name.
-		      this.stack; // eslint-disable-line no-unused-expressions
-		      // Reset the name to the actual name.
-		      delete this.name;
-		    }
-
-		    get code () {
-		      return sym
-		    }
-
-		    set code (value) {
-		      Object.defineProperty(this, 'code', {
-		        configurable: true,
-		        enumerable: true,
-		        value,
-		        writable: true
-		      });
-		    }
-
-		    toString () {
-		      return `${this.name} [${sym}]: ${this.message}`
-		    }
-		  };
-		}
-
-		E('ERR_BUFFER_OUT_OF_BOUNDS',
-		  function (name) {
-		    if (name) {
-		      return `${name} is outside of buffer bounds`
-		    }
-
-		    return 'Attempt to access memory outside buffer bounds'
-		  }, RangeError);
-		E('ERR_INVALID_ARG_TYPE',
-		  function (name, actual) {
-		    return `The "${name}" argument must be of type number. Received type ${typeof actual}`
-		  }, TypeError);
-		E('ERR_OUT_OF_RANGE',
-		  function (str, range, input) {
-		    let msg = `The value of "${str}" is out of range.`;
-		    let received = input;
-		    if (Number.isInteger(input) && Math.abs(input) > 2 ** 32) {
-		      received = addNumericalSeparator(String(input));
-		    } else if (typeof input === 'bigint') {
-		      received = String(input);
-		      if (input > BigInt(2) ** BigInt(32) || input < -(BigInt(2) ** BigInt(32))) {
-		        received = addNumericalSeparator(received);
-		      }
-		      received += 'n';
-		    }
-		    msg += ` It must be ${range}. Received ${received}`;
-		    return msg
-		  }, RangeError);
-
-		function addNumericalSeparator (val) {
-		  let res = '';
-		  let i = val.length;
-		  const start = val[0] === '-' ? 1 : 0;
-		  for (; i >= start + 4; i -= 3) {
-		    res = `_${val.slice(i - 3, i)}${res}`;
-		  }
-		  return `${val.slice(0, i)}${res}`
-		}
-
-		// CHECK FUNCTIONS
-		// ===============
-
-		function checkBounds (buf, offset, byteLength) {
-		  validateNumber(offset, 'offset');
-		  if (buf[offset] === undefined || buf[offset + byteLength] === undefined) {
-		    boundsError(offset, buf.length - (byteLength + 1));
-		  }
-		}
-
-		function checkIntBI (value, min, max, buf, offset, byteLength) {
-		  if (value > max || value < min) {
-		    const n = typeof min === 'bigint' ? 'n' : '';
-		    let range;
-		    {
-		      if (min === 0 || min === BigInt(0)) {
-		        range = `>= 0${n} and < 2${n} ** ${(byteLength + 1) * 8}${n}`;
-		      } else {
-		        range = `>= -(2${n} ** ${(byteLength + 1) * 8 - 1}${n}) and < 2 ** ` +
-		                `${(byteLength + 1) * 8 - 1}${n}`;
-		      }
-		    }
-		    throw new errors.ERR_OUT_OF_RANGE('value', range, value)
-		  }
-		  checkBounds(buf, offset, byteLength);
-		}
-
-		function validateNumber (value, name) {
-		  if (typeof value !== 'number') {
-		    throw new errors.ERR_INVALID_ARG_TYPE(name, 'number', value)
-		  }
-		}
-
-		function boundsError (value, length, type) {
-		  if (Math.floor(value) !== value) {
-		    validateNumber(value, type);
-		    throw new errors.ERR_OUT_OF_RANGE('offset', 'an integer', value)
-		  }
-
-		  if (length < 0) {
-		    throw new errors.ERR_BUFFER_OUT_OF_BOUNDS()
-		  }
-
-		  throw new errors.ERR_OUT_OF_RANGE('offset',
-		                                    `>= ${0} and <= ${length}`,
-		                                    value)
-		}
-
-		// HELPER FUNCTIONS
-		// ================
-
-		const INVALID_BASE64_RE = /[^+/0-9A-Za-z-_]/g;
-
-		function base64clean (str) {
-		  // Node takes equal signs as end of the Base64 encoding
-		  str = str.split('=')[0];
-		  // Node strips out invalid characters like \n and \t from the string, base64-js does not
-		  str = str.trim().replace(INVALID_BASE64_RE, '');
-		  // Node converts strings with length < 2 to ''
-		  if (str.length < 2) return ''
-		  // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not
-		  while (str.length % 4 !== 0) {
-		    str = str + '=';
-		  }
-		  return str
-		}
-
-		function utf8ToBytes (string, units) {
-		  units = units || Infinity;
-		  let codePoint;
-		  const length = string.length;
-		  let leadSurrogate = null;
-		  const bytes = [];
-
-		  for (let i = 0; i < length; ++i) {
-		    codePoint = string.charCodeAt(i);
-
-		    // is surrogate component
-		    if (codePoint > 0xD7FF && codePoint < 0xE000) {
-		      // last char was a lead
-		      if (!leadSurrogate) {
-		        // no lead yet
-		        if (codePoint > 0xDBFF) {
-		          // unexpected trail
-		          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
-		          continue
-		        } else if (i + 1 === length) {
-		          // unpaired lead
-		          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
-		          continue
-		        }
-
-		        // valid lead
-		        leadSurrogate = codePoint;
-
-		        continue
-		      }
-
-		      // 2 leads in a row
-		      if (codePoint < 0xDC00) {
-		        if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
-		        leadSurrogate = codePoint;
-		        continue
-		      }
-
-		      // valid surrogate pair
-		      codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000;
-		    } else if (leadSurrogate) {
-		      // valid bmp char, but last char was a lead
-		      if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
-		    }
-
-		    leadSurrogate = null;
-
-		    // encode utf8
-		    if (codePoint < 0x80) {
-		      if ((units -= 1) < 0) break
-		      bytes.push(codePoint);
-		    } else if (codePoint < 0x800) {
-		      if ((units -= 2) < 0) break
-		      bytes.push(
-		        codePoint >> 0x6 | 0xC0,
-		        codePoint & 0x3F | 0x80
-		      );
-		    } else if (codePoint < 0x10000) {
-		      if ((units -= 3) < 0) break
-		      bytes.push(
-		        codePoint >> 0xC | 0xE0,
-		        codePoint >> 0x6 & 0x3F | 0x80,
-		        codePoint & 0x3F | 0x80
-		      );
-		    } else if (codePoint < 0x110000) {
-		      if ((units -= 4) < 0) break
-		      bytes.push(
-		        codePoint >> 0x12 | 0xF0,
-		        codePoint >> 0xC & 0x3F | 0x80,
-		        codePoint >> 0x6 & 0x3F | 0x80,
-		        codePoint & 0x3F | 0x80
-		      );
-		    } else {
-		      throw new Error('Invalid code point')
-		    }
-		  }
-
-		  return bytes
-		}
-
-		function asciiToBytes (str) {
-		  const byteArray = [];
-		  for (let i = 0; i < str.length; ++i) {
-		    // Node's code seems to be doing this and not & 0x7F..
-		    byteArray.push(str.charCodeAt(i) & 0xFF);
-		  }
-		  return byteArray
-		}
-
-		function utf16leToBytes (str, units) {
-		  let c, hi, lo;
-		  const byteArray = [];
-		  for (let i = 0; i < str.length; ++i) {
-		    if ((units -= 2) < 0) break
-
-		    c = str.charCodeAt(i);
-		    hi = c >> 8;
-		    lo = c % 256;
-		    byteArray.push(lo);
-		    byteArray.push(hi);
-		  }
-
-		  return byteArray
-		}
-
-		function base64ToBytes (str) {
-		  return base64.toByteArray(base64clean(str))
-		}
-
-		function blitBuffer (src, dst, offset, length) {
-		  let i;
-		  for (i = 0; i < length; ++i) {
-		    if ((i + offset >= dst.length) || (i >= src.length)) break
-		    dst[i + offset] = src[i];
-		  }
-		  return i
-		}
-
-		// ArrayBuffer or Uint8Array objects from other contexts (i.e. iframes) do not pass
-		// the `instanceof` check but they should be treated as of that type.
-		// See: https://github.com/feross/buffer/issues/166
-		function isInstance (obj, type) {
-		  return obj instanceof type ||
-		    (obj != null && obj.constructor != null && obj.constructor.name != null &&
-		      obj.constructor.name === type.name)
-		}
-		function numberIsNaN (obj) {
-		  // For IE11 support
-		  return obj !== obj // eslint-disable-line no-self-compare
-		}
-
-		// Create lookup table for `toString('hex')`
-		// See: https://github.com/feross/buffer/issues/219
-		const hexSliceLookupTable = (function () {
-		  const alphabet = '0123456789abcdef';
-		  const table = new Array(256);
-		  for (let i = 0; i < 16; ++i) {
-		    const i16 = i * 16;
-		    for (let j = 0; j < 16; ++j) {
-		      table[i16 + j] = alphabet[i] + alphabet[j];
-		    }
-		  }
-		  return table
-		})();
-
-		// Return not function with Error if BigInt not supported
-		function defineBigIntMethod (fn) {
-		  return typeof BigInt === 'undefined' ? BufferBigIntNotDefined : fn
-		}
-
-		function BufferBigIntNotDefined () {
-		  throw new Error('BigInt not supported')
-		} 
-	} (buffer));
-	return buffer;
-}
+(function (exports) {
+
+	const base64 = base64Js;
+	const ieee754$1 = ieee754;
+	const customInspectSymbol =
+	  (typeof Symbol === 'function' && typeof Symbol['for'] === 'function') // eslint-disable-line dot-notation
+	    ? Symbol['for']('nodejs.util.inspect.custom') // eslint-disable-line dot-notation
+	    : null;
+
+	exports.Buffer = Buffer;
+	exports.SlowBuffer = SlowBuffer;
+	exports.INSPECT_MAX_BYTES = 50;
+
+	const K_MAX_LENGTH = 0x7fffffff;
+	exports.kMaxLength = K_MAX_LENGTH;
+
+	/**
+	 * If `Buffer.TYPED_ARRAY_SUPPORT`:
+	 *   === true    Use Uint8Array implementation (fastest)
+	 *   === false   Print warning and recommend using `buffer` v4.x which has an Object
+	 *               implementation (most compatible, even IE6)
+	 *
+	 * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
+	 * Opera 11.6+, iOS 4.2+.
+	 *
+	 * We report that the browser does not support typed arrays if the are not subclassable
+	 * using __proto__. Firefox 4-29 lacks support for adding new properties to `Uint8Array`
+	 * (See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438). IE 10 lacks support
+	 * for __proto__ and has a buggy typed array implementation.
+	 */
+	Buffer.TYPED_ARRAY_SUPPORT = typedArraySupport();
+
+	if (!Buffer.TYPED_ARRAY_SUPPORT && typeof console !== 'undefined' &&
+	    typeof console.error === 'function') {
+	  console.error(
+	    'This browser lacks typed array (Uint8Array) support which is required by ' +
+	    '`buffer` v5.x. Use `buffer` v4.x if you require old browser support.'
+	  );
+	}
+
+	function typedArraySupport () {
+	  // Can typed array instances can be augmented?
+	  try {
+	    const arr = new Uint8Array(1);
+	    const proto = { foo: function () { return 42 } };
+	    Object.setPrototypeOf(proto, Uint8Array.prototype);
+	    Object.setPrototypeOf(arr, proto);
+	    return arr.foo() === 42
+	  } catch (e) {
+	    return false
+	  }
+	}
+
+	Object.defineProperty(Buffer.prototype, 'parent', {
+	  enumerable: true,
+	  get: function () {
+	    if (!Buffer.isBuffer(this)) return undefined
+	    return this.buffer
+	  }
+	});
+
+	Object.defineProperty(Buffer.prototype, 'offset', {
+	  enumerable: true,
+	  get: function () {
+	    if (!Buffer.isBuffer(this)) return undefined
+	    return this.byteOffset
+	  }
+	});
+
+	function createBuffer (length) {
+	  if (length > K_MAX_LENGTH) {
+	    throw new RangeError('The value "' + length + '" is invalid for option "size"')
+	  }
+	  // Return an augmented `Uint8Array` instance
+	  const buf = new Uint8Array(length);
+	  Object.setPrototypeOf(buf, Buffer.prototype);
+	  return buf
+	}
+
+	/**
+	 * The Buffer constructor returns instances of `Uint8Array` that have their
+	 * prototype changed to `Buffer.prototype`. Furthermore, `Buffer` is a subclass of
+	 * `Uint8Array`, so the returned instances will have all the node `Buffer` methods
+	 * and the `Uint8Array` methods. Square bracket notation works as expected -- it
+	 * returns a single octet.
+	 *
+	 * The `Uint8Array` prototype remains unmodified.
+	 */
+
+	function Buffer (arg, encodingOrOffset, length) {
+	  // Common case.
+	  if (typeof arg === 'number') {
+	    if (typeof encodingOrOffset === 'string') {
+	      throw new TypeError(
+	        'The "string" argument must be of type string. Received type number'
+	      )
+	    }
+	    return allocUnsafe(arg)
+	  }
+	  return from(arg, encodingOrOffset, length)
+	}
+
+	Buffer.poolSize = 8192; // not used by this implementation
+
+	function from (value, encodingOrOffset, length) {
+	  if (typeof value === 'string') {
+	    return fromString(value, encodingOrOffset)
+	  }
+
+	  if (ArrayBuffer.isView(value)) {
+	    return fromArrayView(value)
+	  }
+
+	  if (value == null) {
+	    throw new TypeError(
+	      'The first argument must be one of type string, Buffer, ArrayBuffer, Array, ' +
+	      'or Array-like Object. Received type ' + (typeof value)
+	    )
+	  }
+
+	  if (isInstance(value, ArrayBuffer) ||
+	      (value && isInstance(value.buffer, ArrayBuffer))) {
+	    return fromArrayBuffer(value, encodingOrOffset, length)
+	  }
+
+	  if (typeof SharedArrayBuffer !== 'undefined' &&
+	      (isInstance(value, SharedArrayBuffer) ||
+	      (value && isInstance(value.buffer, SharedArrayBuffer)))) {
+	    return fromArrayBuffer(value, encodingOrOffset, length)
+	  }
+
+	  if (typeof value === 'number') {
+	    throw new TypeError(
+	      'The "value" argument must not be of type number. Received type number'
+	    )
+	  }
+
+	  const valueOf = value.valueOf && value.valueOf();
+	  if (valueOf != null && valueOf !== value) {
+	    return Buffer.from(valueOf, encodingOrOffset, length)
+	  }
+
+	  const b = fromObject(value);
+	  if (b) return b
+
+	  if (typeof Symbol !== 'undefined' && Symbol.toPrimitive != null &&
+	      typeof value[Symbol.toPrimitive] === 'function') {
+	    return Buffer.from(value[Symbol.toPrimitive]('string'), encodingOrOffset, length)
+	  }
+
+	  throw new TypeError(
+	    'The first argument must be one of type string, Buffer, ArrayBuffer, Array, ' +
+	    'or Array-like Object. Received type ' + (typeof value)
+	  )
+	}
+
+	/**
+	 * Functionally equivalent to Buffer(arg, encoding) but throws a TypeError
+	 * if value is a number.
+	 * Buffer.from(str[, encoding])
+	 * Buffer.from(array)
+	 * Buffer.from(buffer)
+	 * Buffer.from(arrayBuffer[, byteOffset[, length]])
+	 **/
+	Buffer.from = function (value, encodingOrOffset, length) {
+	  return from(value, encodingOrOffset, length)
+	};
+
+	// Note: Change prototype *after* Buffer.from is defined to workaround Chrome bug:
+	// https://github.com/feross/buffer/pull/148
+	Object.setPrototypeOf(Buffer.prototype, Uint8Array.prototype);
+	Object.setPrototypeOf(Buffer, Uint8Array);
+
+	function assertSize (size) {
+	  if (typeof size !== 'number') {
+	    throw new TypeError('"size" argument must be of type number')
+	  } else if (size < 0) {
+	    throw new RangeError('The value "' + size + '" is invalid for option "size"')
+	  }
+	}
+
+	function alloc (size, fill, encoding) {
+	  assertSize(size);
+	  if (size <= 0) {
+	    return createBuffer(size)
+	  }
+	  if (fill !== undefined) {
+	    // Only pay attention to encoding if it's a string. This
+	    // prevents accidentally sending in a number that would
+	    // be interpreted as a start offset.
+	    return typeof encoding === 'string'
+	      ? createBuffer(size).fill(fill, encoding)
+	      : createBuffer(size).fill(fill)
+	  }
+	  return createBuffer(size)
+	}
+
+	/**
+	 * Creates a new filled Buffer instance.
+	 * alloc(size[, fill[, encoding]])
+	 **/
+	Buffer.alloc = function (size, fill, encoding) {
+	  return alloc(size, fill, encoding)
+	};
+
+	function allocUnsafe (size) {
+	  assertSize(size);
+	  return createBuffer(size < 0 ? 0 : checked(size) | 0)
+	}
+
+	/**
+	 * Equivalent to Buffer(num), by default creates a non-zero-filled Buffer instance.
+	 * */
+	Buffer.allocUnsafe = function (size) {
+	  return allocUnsafe(size)
+	};
+	/**
+	 * Equivalent to SlowBuffer(num), by default creates a non-zero-filled Buffer instance.
+	 */
+	Buffer.allocUnsafeSlow = function (size) {
+	  return allocUnsafe(size)
+	};
+
+	function fromString (string, encoding) {
+	  if (typeof encoding !== 'string' || encoding === '') {
+	    encoding = 'utf8';
+	  }
+
+	  if (!Buffer.isEncoding(encoding)) {
+	    throw new TypeError('Unknown encoding: ' + encoding)
+	  }
+
+	  const length = byteLength(string, encoding) | 0;
+	  let buf = createBuffer(length);
+
+	  const actual = buf.write(string, encoding);
+
+	  if (actual !== length) {
+	    // Writing a hex string, for example, that contains invalid characters will
+	    // cause everything after the first invalid character to be ignored. (e.g.
+	    // 'abxxcd' will be treated as 'ab')
+	    buf = buf.slice(0, actual);
+	  }
+
+	  return buf
+	}
+
+	function fromArrayLike (array) {
+	  const length = array.length < 0 ? 0 : checked(array.length) | 0;
+	  const buf = createBuffer(length);
+	  for (let i = 0; i < length; i += 1) {
+	    buf[i] = array[i] & 255;
+	  }
+	  return buf
+	}
+
+	function fromArrayView (arrayView) {
+	  if (isInstance(arrayView, Uint8Array)) {
+	    const copy = new Uint8Array(arrayView);
+	    return fromArrayBuffer(copy.buffer, copy.byteOffset, copy.byteLength)
+	  }
+	  return fromArrayLike(arrayView)
+	}
+
+	function fromArrayBuffer (array, byteOffset, length) {
+	  if (byteOffset < 0 || array.byteLength < byteOffset) {
+	    throw new RangeError('"offset" is outside of buffer bounds')
+	  }
+
+	  if (array.byteLength < byteOffset + (length || 0)) {
+	    throw new RangeError('"length" is outside of buffer bounds')
+	  }
+
+	  let buf;
+	  if (byteOffset === undefined && length === undefined) {
+	    buf = new Uint8Array(array);
+	  } else if (length === undefined) {
+	    buf = new Uint8Array(array, byteOffset);
+	  } else {
+	    buf = new Uint8Array(array, byteOffset, length);
+	  }
+
+	  // Return an augmented `Uint8Array` instance
+	  Object.setPrototypeOf(buf, Buffer.prototype);
+
+	  return buf
+	}
+
+	function fromObject (obj) {
+	  if (Buffer.isBuffer(obj)) {
+	    const len = checked(obj.length) | 0;
+	    const buf = createBuffer(len);
+
+	    if (buf.length === 0) {
+	      return buf
+	    }
+
+	    obj.copy(buf, 0, 0, len);
+	    return buf
+	  }
+
+	  if (obj.length !== undefined) {
+	    if (typeof obj.length !== 'number' || numberIsNaN(obj.length)) {
+	      return createBuffer(0)
+	    }
+	    return fromArrayLike(obj)
+	  }
+
+	  if (obj.type === 'Buffer' && Array.isArray(obj.data)) {
+	    return fromArrayLike(obj.data)
+	  }
+	}
+
+	function checked (length) {
+	  // Note: cannot use `length < K_MAX_LENGTH` here because that fails when
+	  // length is NaN (which is otherwise coerced to zero.)
+	  if (length >= K_MAX_LENGTH) {
+	    throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
+	                         'size: 0x' + K_MAX_LENGTH.toString(16) + ' bytes')
+	  }
+	  return length | 0
+	}
+
+	function SlowBuffer (length) {
+	  if (+length != length) { // eslint-disable-line eqeqeq
+	    length = 0;
+	  }
+	  return Buffer.alloc(+length)
+	}
+
+	Buffer.isBuffer = function isBuffer (b) {
+	  return b != null && b._isBuffer === true &&
+	    b !== Buffer.prototype // so Buffer.isBuffer(Buffer.prototype) will be false
+	};
+
+	Buffer.compare = function compare (a, b) {
+	  if (isInstance(a, Uint8Array)) a = Buffer.from(a, a.offset, a.byteLength);
+	  if (isInstance(b, Uint8Array)) b = Buffer.from(b, b.offset, b.byteLength);
+	  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
+	    throw new TypeError(
+	      'The "buf1", "buf2" arguments must be one of type Buffer or Uint8Array'
+	    )
+	  }
+
+	  if (a === b) return 0
+
+	  let x = a.length;
+	  let y = b.length;
+
+	  for (let i = 0, len = Math.min(x, y); i < len; ++i) {
+	    if (a[i] !== b[i]) {
+	      x = a[i];
+	      y = b[i];
+	      break
+	    }
+	  }
+
+	  if (x < y) return -1
+	  if (y < x) return 1
+	  return 0
+	};
+
+	Buffer.isEncoding = function isEncoding (encoding) {
+	  switch (String(encoding).toLowerCase()) {
+	    case 'hex':
+	    case 'utf8':
+	    case 'utf-8':
+	    case 'ascii':
+	    case 'latin1':
+	    case 'binary':
+	    case 'base64':
+	    case 'ucs2':
+	    case 'ucs-2':
+	    case 'utf16le':
+	    case 'utf-16le':
+	      return true
+	    default:
+	      return false
+	  }
+	};
+
+	Buffer.concat = function concat (list, length) {
+	  if (!Array.isArray(list)) {
+	    throw new TypeError('"list" argument must be an Array of Buffers')
+	  }
+
+	  if (list.length === 0) {
+	    return Buffer.alloc(0)
+	  }
+
+	  let i;
+	  if (length === undefined) {
+	    length = 0;
+	    for (i = 0; i < list.length; ++i) {
+	      length += list[i].length;
+	    }
+	  }
+
+	  const buffer = Buffer.allocUnsafe(length);
+	  let pos = 0;
+	  for (i = 0; i < list.length; ++i) {
+	    let buf = list[i];
+	    if (isInstance(buf, Uint8Array)) {
+	      if (pos + buf.length > buffer.length) {
+	        if (!Buffer.isBuffer(buf)) buf = Buffer.from(buf);
+	        buf.copy(buffer, pos);
+	      } else {
+	        Uint8Array.prototype.set.call(
+	          buffer,
+	          buf,
+	          pos
+	        );
+	      }
+	    } else if (!Buffer.isBuffer(buf)) {
+	      throw new TypeError('"list" argument must be an Array of Buffers')
+	    } else {
+	      buf.copy(buffer, pos);
+	    }
+	    pos += buf.length;
+	  }
+	  return buffer
+	};
+
+	function byteLength (string, encoding) {
+	  if (Buffer.isBuffer(string)) {
+	    return string.length
+	  }
+	  if (ArrayBuffer.isView(string) || isInstance(string, ArrayBuffer)) {
+	    return string.byteLength
+	  }
+	  if (typeof string !== 'string') {
+	    throw new TypeError(
+	      'The "string" argument must be one of type string, Buffer, or ArrayBuffer. ' +
+	      'Received type ' + typeof string
+	    )
+	  }
+
+	  const len = string.length;
+	  const mustMatch = (arguments.length > 2 && arguments[2] === true);
+	  if (!mustMatch && len === 0) return 0
+
+	  // Use a for loop to avoid recursion
+	  let loweredCase = false;
+	  for (;;) {
+	    switch (encoding) {
+	      case 'ascii':
+	      case 'latin1':
+	      case 'binary':
+	        return len
+	      case 'utf8':
+	      case 'utf-8':
+	        return utf8ToBytes(string).length
+	      case 'ucs2':
+	      case 'ucs-2':
+	      case 'utf16le':
+	      case 'utf-16le':
+	        return len * 2
+	      case 'hex':
+	        return len >>> 1
+	      case 'base64':
+	        return base64ToBytes(string).length
+	      default:
+	        if (loweredCase) {
+	          return mustMatch ? -1 : utf8ToBytes(string).length // assume utf8
+	        }
+	        encoding = ('' + encoding).toLowerCase();
+	        loweredCase = true;
+	    }
+	  }
+	}
+	Buffer.byteLength = byteLength;
+
+	function slowToString (encoding, start, end) {
+	  let loweredCase = false;
+
+	  // No need to verify that "this.length <= MAX_UINT32" since it's a read-only
+	  // property of a typed array.
+
+	  // This behaves neither like String nor Uint8Array in that we set start/end
+	  // to their upper/lower bounds if the value passed is out of range.
+	  // undefined is handled specially as per ECMA-262 6th Edition,
+	  // Section 13.3.3.7 Runtime Semantics: KeyedBindingInitialization.
+	  if (start === undefined || start < 0) {
+	    start = 0;
+	  }
+	  // Return early if start > this.length. Done here to prevent potential uint32
+	  // coercion fail below.
+	  if (start > this.length) {
+	    return ''
+	  }
+
+	  if (end === undefined || end > this.length) {
+	    end = this.length;
+	  }
+
+	  if (end <= 0) {
+	    return ''
+	  }
+
+	  // Force coercion to uint32. This will also coerce falsey/NaN values to 0.
+	  end >>>= 0;
+	  start >>>= 0;
+
+	  if (end <= start) {
+	    return ''
+	  }
+
+	  if (!encoding) encoding = 'utf8';
+
+	  while (true) {
+	    switch (encoding) {
+	      case 'hex':
+	        return hexSlice(this, start, end)
+
+	      case 'utf8':
+	      case 'utf-8':
+	        return utf8Slice(this, start, end)
+
+	      case 'ascii':
+	        return asciiSlice(this, start, end)
+
+	      case 'latin1':
+	      case 'binary':
+	        return latin1Slice(this, start, end)
+
+	      case 'base64':
+	        return base64Slice(this, start, end)
+
+	      case 'ucs2':
+	      case 'ucs-2':
+	      case 'utf16le':
+	      case 'utf-16le':
+	        return utf16leSlice(this, start, end)
+
+	      default:
+	        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
+	        encoding = (encoding + '').toLowerCase();
+	        loweredCase = true;
+	    }
+	  }
+	}
+
+	// This property is used by `Buffer.isBuffer` (and the `is-buffer` npm package)
+	// to detect a Buffer instance. It's not possible to use `instanceof Buffer`
+	// reliably in a browserify context because there could be multiple different
+	// copies of the 'buffer' package in use. This method works even for Buffer
+	// instances that were created from another copy of the `buffer` package.
+	// See: https://github.com/feross/buffer/issues/154
+	Buffer.prototype._isBuffer = true;
+
+	function swap (b, n, m) {
+	  const i = b[n];
+	  b[n] = b[m];
+	  b[m] = i;
+	}
+
+	Buffer.prototype.swap16 = function swap16 () {
+	  const len = this.length;
+	  if (len % 2 !== 0) {
+	    throw new RangeError('Buffer size must be a multiple of 16-bits')
+	  }
+	  for (let i = 0; i < len; i += 2) {
+	    swap(this, i, i + 1);
+	  }
+	  return this
+	};
+
+	Buffer.prototype.swap32 = function swap32 () {
+	  const len = this.length;
+	  if (len % 4 !== 0) {
+	    throw new RangeError('Buffer size must be a multiple of 32-bits')
+	  }
+	  for (let i = 0; i < len; i += 4) {
+	    swap(this, i, i + 3);
+	    swap(this, i + 1, i + 2);
+	  }
+	  return this
+	};
+
+	Buffer.prototype.swap64 = function swap64 () {
+	  const len = this.length;
+	  if (len % 8 !== 0) {
+	    throw new RangeError('Buffer size must be a multiple of 64-bits')
+	  }
+	  for (let i = 0; i < len; i += 8) {
+	    swap(this, i, i + 7);
+	    swap(this, i + 1, i + 6);
+	    swap(this, i + 2, i + 5);
+	    swap(this, i + 3, i + 4);
+	  }
+	  return this
+	};
+
+	Buffer.prototype.toString = function toString () {
+	  const length = this.length;
+	  if (length === 0) return ''
+	  if (arguments.length === 0) return utf8Slice(this, 0, length)
+	  return slowToString.apply(this, arguments)
+	};
+
+	Buffer.prototype.toLocaleString = Buffer.prototype.toString;
+
+	Buffer.prototype.equals = function equals (b) {
+	  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
+	  if (this === b) return true
+	  return Buffer.compare(this, b) === 0
+	};
+
+	Buffer.prototype.inspect = function inspect () {
+	  let str = '';
+	  const max = exports.INSPECT_MAX_BYTES;
+	  str = this.toString('hex', 0, max).replace(/(.{2})/g, '$1 ').trim();
+	  if (this.length > max) str += ' ... ';
+	  return '<Buffer ' + str + '>'
+	};
+	if (customInspectSymbol) {
+	  Buffer.prototype[customInspectSymbol] = Buffer.prototype.inspect;
+	}
+
+	Buffer.prototype.compare = function compare (target, start, end, thisStart, thisEnd) {
+	  if (isInstance(target, Uint8Array)) {
+	    target = Buffer.from(target, target.offset, target.byteLength);
+	  }
+	  if (!Buffer.isBuffer(target)) {
+	    throw new TypeError(
+	      'The "target" argument must be one of type Buffer or Uint8Array. ' +
+	      'Received type ' + (typeof target)
+	    )
+	  }
+
+	  if (start === undefined) {
+	    start = 0;
+	  }
+	  if (end === undefined) {
+	    end = target ? target.length : 0;
+	  }
+	  if (thisStart === undefined) {
+	    thisStart = 0;
+	  }
+	  if (thisEnd === undefined) {
+	    thisEnd = this.length;
+	  }
+
+	  if (start < 0 || end > target.length || thisStart < 0 || thisEnd > this.length) {
+	    throw new RangeError('out of range index')
+	  }
+
+	  if (thisStart >= thisEnd && start >= end) {
+	    return 0
+	  }
+	  if (thisStart >= thisEnd) {
+	    return -1
+	  }
+	  if (start >= end) {
+	    return 1
+	  }
+
+	  start >>>= 0;
+	  end >>>= 0;
+	  thisStart >>>= 0;
+	  thisEnd >>>= 0;
+
+	  if (this === target) return 0
+
+	  let x = thisEnd - thisStart;
+	  let y = end - start;
+	  const len = Math.min(x, y);
+
+	  const thisCopy = this.slice(thisStart, thisEnd);
+	  const targetCopy = target.slice(start, end);
+
+	  for (let i = 0; i < len; ++i) {
+	    if (thisCopy[i] !== targetCopy[i]) {
+	      x = thisCopy[i];
+	      y = targetCopy[i];
+	      break
+	    }
+	  }
+
+	  if (x < y) return -1
+	  if (y < x) return 1
+	  return 0
+	};
+
+	// Finds either the first index of `val` in `buffer` at offset >= `byteOffset`,
+	// OR the last index of `val` in `buffer` at offset <= `byteOffset`.
+	//
+	// Arguments:
+	// - buffer - a Buffer to search
+	// - val - a string, Buffer, or number
+	// - byteOffset - an index into `buffer`; will be clamped to an int32
+	// - encoding - an optional encoding, relevant is val is a string
+	// - dir - true for indexOf, false for lastIndexOf
+	function bidirectionalIndexOf (buffer, val, byteOffset, encoding, dir) {
+	  // Empty buffer means no match
+	  if (buffer.length === 0) return -1
+
+	  // Normalize byteOffset
+	  if (typeof byteOffset === 'string') {
+	    encoding = byteOffset;
+	    byteOffset = 0;
+	  } else if (byteOffset > 0x7fffffff) {
+	    byteOffset = 0x7fffffff;
+	  } else if (byteOffset < -2147483648) {
+	    byteOffset = -2147483648;
+	  }
+	  byteOffset = +byteOffset; // Coerce to Number.
+	  if (numberIsNaN(byteOffset)) {
+	    // byteOffset: it it's undefined, null, NaN, "foo", etc, search whole buffer
+	    byteOffset = dir ? 0 : (buffer.length - 1);
+	  }
+
+	  // Normalize byteOffset: negative offsets start from the end of the buffer
+	  if (byteOffset < 0) byteOffset = buffer.length + byteOffset;
+	  if (byteOffset >= buffer.length) {
+	    if (dir) return -1
+	    else byteOffset = buffer.length - 1;
+	  } else if (byteOffset < 0) {
+	    if (dir) byteOffset = 0;
+	    else return -1
+	  }
+
+	  // Normalize val
+	  if (typeof val === 'string') {
+	    val = Buffer.from(val, encoding);
+	  }
+
+	  // Finally, search either indexOf (if dir is true) or lastIndexOf
+	  if (Buffer.isBuffer(val)) {
+	    // Special case: looking for empty string/buffer always fails
+	    if (val.length === 0) {
+	      return -1
+	    }
+	    return arrayIndexOf(buffer, val, byteOffset, encoding, dir)
+	  } else if (typeof val === 'number') {
+	    val = val & 0xFF; // Search for a byte value [0-255]
+	    if (typeof Uint8Array.prototype.indexOf === 'function') {
+	      if (dir) {
+	        return Uint8Array.prototype.indexOf.call(buffer, val, byteOffset)
+	      } else {
+	        return Uint8Array.prototype.lastIndexOf.call(buffer, val, byteOffset)
+	      }
+	    }
+	    return arrayIndexOf(buffer, [val], byteOffset, encoding, dir)
+	  }
+
+	  throw new TypeError('val must be string, number or Buffer')
+	}
+
+	function arrayIndexOf (arr, val, byteOffset, encoding, dir) {
+	  let indexSize = 1;
+	  let arrLength = arr.length;
+	  let valLength = val.length;
+
+	  if (encoding !== undefined) {
+	    encoding = String(encoding).toLowerCase();
+	    if (encoding === 'ucs2' || encoding === 'ucs-2' ||
+	        encoding === 'utf16le' || encoding === 'utf-16le') {
+	      if (arr.length < 2 || val.length < 2) {
+	        return -1
+	      }
+	      indexSize = 2;
+	      arrLength /= 2;
+	      valLength /= 2;
+	      byteOffset /= 2;
+	    }
+	  }
+
+	  function read (buf, i) {
+	    if (indexSize === 1) {
+	      return buf[i]
+	    } else {
+	      return buf.readUInt16BE(i * indexSize)
+	    }
+	  }
+
+	  let i;
+	  if (dir) {
+	    let foundIndex = -1;
+	    for (i = byteOffset; i < arrLength; i++) {
+	      if (read(arr, i) === read(val, foundIndex === -1 ? 0 : i - foundIndex)) {
+	        if (foundIndex === -1) foundIndex = i;
+	        if (i - foundIndex + 1 === valLength) return foundIndex * indexSize
+	      } else {
+	        if (foundIndex !== -1) i -= i - foundIndex;
+	        foundIndex = -1;
+	      }
+	    }
+	  } else {
+	    if (byteOffset + valLength > arrLength) byteOffset = arrLength - valLength;
+	    for (i = byteOffset; i >= 0; i--) {
+	      let found = true;
+	      for (let j = 0; j < valLength; j++) {
+	        if (read(arr, i + j) !== read(val, j)) {
+	          found = false;
+	          break
+	        }
+	      }
+	      if (found) return i
+	    }
+	  }
+
+	  return -1
+	}
+
+	Buffer.prototype.includes = function includes (val, byteOffset, encoding) {
+	  return this.indexOf(val, byteOffset, encoding) !== -1
+	};
+
+	Buffer.prototype.indexOf = function indexOf (val, byteOffset, encoding) {
+	  return bidirectionalIndexOf(this, val, byteOffset, encoding, true)
+	};
+
+	Buffer.prototype.lastIndexOf = function lastIndexOf (val, byteOffset, encoding) {
+	  return bidirectionalIndexOf(this, val, byteOffset, encoding, false)
+	};
+
+	function hexWrite (buf, string, offset, length) {
+	  offset = Number(offset) || 0;
+	  const remaining = buf.length - offset;
+	  if (!length) {
+	    length = remaining;
+	  } else {
+	    length = Number(length);
+	    if (length > remaining) {
+	      length = remaining;
+	    }
+	  }
+
+	  const strLen = string.length;
+
+	  if (length > strLen / 2) {
+	    length = strLen / 2;
+	  }
+	  let i;
+	  for (i = 0; i < length; ++i) {
+	    const parsed = parseInt(string.substr(i * 2, 2), 16);
+	    if (numberIsNaN(parsed)) return i
+	    buf[offset + i] = parsed;
+	  }
+	  return i
+	}
+
+	function utf8Write (buf, string, offset, length) {
+	  return blitBuffer(utf8ToBytes(string, buf.length - offset), buf, offset, length)
+	}
+
+	function asciiWrite (buf, string, offset, length) {
+	  return blitBuffer(asciiToBytes(string), buf, offset, length)
+	}
+
+	function base64Write (buf, string, offset, length) {
+	  return blitBuffer(base64ToBytes(string), buf, offset, length)
+	}
+
+	function ucs2Write (buf, string, offset, length) {
+	  return blitBuffer(utf16leToBytes(string, buf.length - offset), buf, offset, length)
+	}
+
+	Buffer.prototype.write = function write (string, offset, length, encoding) {
+	  // Buffer#write(string)
+	  if (offset === undefined) {
+	    encoding = 'utf8';
+	    length = this.length;
+	    offset = 0;
+	  // Buffer#write(string, encoding)
+	  } else if (length === undefined && typeof offset === 'string') {
+	    encoding = offset;
+	    length = this.length;
+	    offset = 0;
+	  // Buffer#write(string, offset[, length][, encoding])
+	  } else if (isFinite(offset)) {
+	    offset = offset >>> 0;
+	    if (isFinite(length)) {
+	      length = length >>> 0;
+	      if (encoding === undefined) encoding = 'utf8';
+	    } else {
+	      encoding = length;
+	      length = undefined;
+	    }
+	  } else {
+	    throw new Error(
+	      'Buffer.write(string, encoding, offset[, length]) is no longer supported'
+	    )
+	  }
+
+	  const remaining = this.length - offset;
+	  if (length === undefined || length > remaining) length = remaining;
+
+	  if ((string.length > 0 && (length < 0 || offset < 0)) || offset > this.length) {
+	    throw new RangeError('Attempt to write outside buffer bounds')
+	  }
+
+	  if (!encoding) encoding = 'utf8';
+
+	  let loweredCase = false;
+	  for (;;) {
+	    switch (encoding) {
+	      case 'hex':
+	        return hexWrite(this, string, offset, length)
+
+	      case 'utf8':
+	      case 'utf-8':
+	        return utf8Write(this, string, offset, length)
+
+	      case 'ascii':
+	      case 'latin1':
+	      case 'binary':
+	        return asciiWrite(this, string, offset, length)
+
+	      case 'base64':
+	        // Warning: maxLength not taken into account in base64Write
+	        return base64Write(this, string, offset, length)
+
+	      case 'ucs2':
+	      case 'ucs-2':
+	      case 'utf16le':
+	      case 'utf-16le':
+	        return ucs2Write(this, string, offset, length)
+
+	      default:
+	        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
+	        encoding = ('' + encoding).toLowerCase();
+	        loweredCase = true;
+	    }
+	  }
+	};
+
+	Buffer.prototype.toJSON = function toJSON () {
+	  return {
+	    type: 'Buffer',
+	    data: Array.prototype.slice.call(this._arr || this, 0)
+	  }
+	};
+
+	function base64Slice (buf, start, end) {
+	  if (start === 0 && end === buf.length) {
+	    return base64.fromByteArray(buf)
+	  } else {
+	    return base64.fromByteArray(buf.slice(start, end))
+	  }
+	}
+
+	function utf8Slice (buf, start, end) {
+	  end = Math.min(buf.length, end);
+	  const res = [];
+
+	  let i = start;
+	  while (i < end) {
+	    const firstByte = buf[i];
+	    let codePoint = null;
+	    let bytesPerSequence = (firstByte > 0xEF)
+	      ? 4
+	      : (firstByte > 0xDF)
+	          ? 3
+	          : (firstByte > 0xBF)
+	              ? 2
+	              : 1;
+
+	    if (i + bytesPerSequence <= end) {
+	      let secondByte, thirdByte, fourthByte, tempCodePoint;
+
+	      switch (bytesPerSequence) {
+	        case 1:
+	          if (firstByte < 0x80) {
+	            codePoint = firstByte;
+	          }
+	          break
+	        case 2:
+	          secondByte = buf[i + 1];
+	          if ((secondByte & 0xC0) === 0x80) {
+	            tempCodePoint = (firstByte & 0x1F) << 0x6 | (secondByte & 0x3F);
+	            if (tempCodePoint > 0x7F) {
+	              codePoint = tempCodePoint;
+	            }
+	          }
+	          break
+	        case 3:
+	          secondByte = buf[i + 1];
+	          thirdByte = buf[i + 2];
+	          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {
+	            tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | (thirdByte & 0x3F);
+	            if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {
+	              codePoint = tempCodePoint;
+	            }
+	          }
+	          break
+	        case 4:
+	          secondByte = buf[i + 1];
+	          thirdByte = buf[i + 2];
+	          fourthByte = buf[i + 3];
+	          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {
+	            tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | (fourthByte & 0x3F);
+	            if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {
+	              codePoint = tempCodePoint;
+	            }
+	          }
+	      }
+	    }
+
+	    if (codePoint === null) {
+	      // we did not generate a valid codePoint so insert a
+	      // replacement char (U+FFFD) and advance only 1 byte
+	      codePoint = 0xFFFD;
+	      bytesPerSequence = 1;
+	    } else if (codePoint > 0xFFFF) {
+	      // encode to utf16 (surrogate pair dance)
+	      codePoint -= 0x10000;
+	      res.push(codePoint >>> 10 & 0x3FF | 0xD800);
+	      codePoint = 0xDC00 | codePoint & 0x3FF;
+	    }
+
+	    res.push(codePoint);
+	    i += bytesPerSequence;
+	  }
+
+	  return decodeCodePointsArray(res)
+	}
+
+	// Based on http://stackoverflow.com/a/22747272/680742, the browser with
+	// the lowest limit is Chrome, with 0x10000 args.
+	// We go 1 magnitude less, for safety
+	const MAX_ARGUMENTS_LENGTH = 0x1000;
+
+	function decodeCodePointsArray (codePoints) {
+	  const len = codePoints.length;
+	  if (len <= MAX_ARGUMENTS_LENGTH) {
+	    return String.fromCharCode.apply(String, codePoints) // avoid extra slice()
+	  }
+
+	  // Decode in chunks to avoid "call stack size exceeded".
+	  let res = '';
+	  let i = 0;
+	  while (i < len) {
+	    res += String.fromCharCode.apply(
+	      String,
+	      codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH)
+	    );
+	  }
+	  return res
+	}
+
+	function asciiSlice (buf, start, end) {
+	  let ret = '';
+	  end = Math.min(buf.length, end);
+
+	  for (let i = start; i < end; ++i) {
+	    ret += String.fromCharCode(buf[i] & 0x7F);
+	  }
+	  return ret
+	}
+
+	function latin1Slice (buf, start, end) {
+	  let ret = '';
+	  end = Math.min(buf.length, end);
+
+	  for (let i = start; i < end; ++i) {
+	    ret += String.fromCharCode(buf[i]);
+	  }
+	  return ret
+	}
+
+	function hexSlice (buf, start, end) {
+	  const len = buf.length;
+
+	  if (!start || start < 0) start = 0;
+	  if (!end || end < 0 || end > len) end = len;
+
+	  let out = '';
+	  for (let i = start; i < end; ++i) {
+	    out += hexSliceLookupTable[buf[i]];
+	  }
+	  return out
+	}
+
+	function utf16leSlice (buf, start, end) {
+	  const bytes = buf.slice(start, end);
+	  let res = '';
+	  // If bytes.length is odd, the last 8 bits must be ignored (same as node.js)
+	  for (let i = 0; i < bytes.length - 1; i += 2) {
+	    res += String.fromCharCode(bytes[i] + (bytes[i + 1] * 256));
+	  }
+	  return res
+	}
+
+	Buffer.prototype.slice = function slice (start, end) {
+	  const len = this.length;
+	  start = ~~start;
+	  end = end === undefined ? len : ~~end;
+
+	  if (start < 0) {
+	    start += len;
+	    if (start < 0) start = 0;
+	  } else if (start > len) {
+	    start = len;
+	  }
+
+	  if (end < 0) {
+	    end += len;
+	    if (end < 0) end = 0;
+	  } else if (end > len) {
+	    end = len;
+	  }
+
+	  if (end < start) end = start;
+
+	  const newBuf = this.subarray(start, end);
+	  // Return an augmented `Uint8Array` instance
+	  Object.setPrototypeOf(newBuf, Buffer.prototype);
+
+	  return newBuf
+	};
+
+	/*
+	 * Need to make sure that buffer isn't trying to write out of bounds.
+	 */
+	function checkOffset (offset, ext, length) {
+	  if ((offset % 1) !== 0 || offset < 0) throw new RangeError('offset is not uint')
+	  if (offset + ext > length) throw new RangeError('Trying to access beyond buffer length')
+	}
+
+	Buffer.prototype.readUintLE =
+	Buffer.prototype.readUIntLE = function readUIntLE (offset, byteLength, noAssert) {
+	  offset = offset >>> 0;
+	  byteLength = byteLength >>> 0;
+	  if (!noAssert) checkOffset(offset, byteLength, this.length);
+
+	  let val = this[offset];
+	  let mul = 1;
+	  let i = 0;
+	  while (++i < byteLength && (mul *= 0x100)) {
+	    val += this[offset + i] * mul;
+	  }
+
+	  return val
+	};
+
+	Buffer.prototype.readUintBE =
+	Buffer.prototype.readUIntBE = function readUIntBE (offset, byteLength, noAssert) {
+	  offset = offset >>> 0;
+	  byteLength = byteLength >>> 0;
+	  if (!noAssert) {
+	    checkOffset(offset, byteLength, this.length);
+	  }
+
+	  let val = this[offset + --byteLength];
+	  let mul = 1;
+	  while (byteLength > 0 && (mul *= 0x100)) {
+	    val += this[offset + --byteLength] * mul;
+	  }
+
+	  return val
+	};
+
+	Buffer.prototype.readUint8 =
+	Buffer.prototype.readUInt8 = function readUInt8 (offset, noAssert) {
+	  offset = offset >>> 0;
+	  if (!noAssert) checkOffset(offset, 1, this.length);
+	  return this[offset]
+	};
+
+	Buffer.prototype.readUint16LE =
+	Buffer.prototype.readUInt16LE = function readUInt16LE (offset, noAssert) {
+	  offset = offset >>> 0;
+	  if (!noAssert) checkOffset(offset, 2, this.length);
+	  return this[offset] | (this[offset + 1] << 8)
+	};
+
+	Buffer.prototype.readUint16BE =
+	Buffer.prototype.readUInt16BE = function readUInt16BE (offset, noAssert) {
+	  offset = offset >>> 0;
+	  if (!noAssert) checkOffset(offset, 2, this.length);
+	  return (this[offset] << 8) | this[offset + 1]
+	};
+
+	Buffer.prototype.readUint32LE =
+	Buffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {
+	  offset = offset >>> 0;
+	  if (!noAssert) checkOffset(offset, 4, this.length);
+
+	  return ((this[offset]) |
+	      (this[offset + 1] << 8) |
+	      (this[offset + 2] << 16)) +
+	      (this[offset + 3] * 0x1000000)
+	};
+
+	Buffer.prototype.readUint32BE =
+	Buffer.prototype.readUInt32BE = function readUInt32BE (offset, noAssert) {
+	  offset = offset >>> 0;
+	  if (!noAssert) checkOffset(offset, 4, this.length);
+
+	  return (this[offset] * 0x1000000) +
+	    ((this[offset + 1] << 16) |
+	    (this[offset + 2] << 8) |
+	    this[offset + 3])
+	};
+
+	Buffer.prototype.readBigUInt64LE = defineBigIntMethod(function readBigUInt64LE (offset) {
+	  offset = offset >>> 0;
+	  validateNumber(offset, 'offset');
+	  const first = this[offset];
+	  const last = this[offset + 7];
+	  if (first === undefined || last === undefined) {
+	    boundsError(offset, this.length - 8);
+	  }
+
+	  const lo = first +
+	    this[++offset] * 2 ** 8 +
+	    this[++offset] * 2 ** 16 +
+	    this[++offset] * 2 ** 24;
+
+	  const hi = this[++offset] +
+	    this[++offset] * 2 ** 8 +
+	    this[++offset] * 2 ** 16 +
+	    last * 2 ** 24;
+
+	  return BigInt(lo) + (BigInt(hi) << BigInt(32))
+	});
+
+	Buffer.prototype.readBigUInt64BE = defineBigIntMethod(function readBigUInt64BE (offset) {
+	  offset = offset >>> 0;
+	  validateNumber(offset, 'offset');
+	  const first = this[offset];
+	  const last = this[offset + 7];
+	  if (first === undefined || last === undefined) {
+	    boundsError(offset, this.length - 8);
+	  }
+
+	  const hi = first * 2 ** 24 +
+	    this[++offset] * 2 ** 16 +
+	    this[++offset] * 2 ** 8 +
+	    this[++offset];
+
+	  const lo = this[++offset] * 2 ** 24 +
+	    this[++offset] * 2 ** 16 +
+	    this[++offset] * 2 ** 8 +
+	    last;
+
+	  return (BigInt(hi) << BigInt(32)) + BigInt(lo)
+	});
+
+	Buffer.prototype.readIntLE = function readIntLE (offset, byteLength, noAssert) {
+	  offset = offset >>> 0;
+	  byteLength = byteLength >>> 0;
+	  if (!noAssert) checkOffset(offset, byteLength, this.length);
+
+	  let val = this[offset];
+	  let mul = 1;
+	  let i = 0;
+	  while (++i < byteLength && (mul *= 0x100)) {
+	    val += this[offset + i] * mul;
+	  }
+	  mul *= 0x80;
+
+	  if (val >= mul) val -= Math.pow(2, 8 * byteLength);
+
+	  return val
+	};
+
+	Buffer.prototype.readIntBE = function readIntBE (offset, byteLength, noAssert) {
+	  offset = offset >>> 0;
+	  byteLength = byteLength >>> 0;
+	  if (!noAssert) checkOffset(offset, byteLength, this.length);
+
+	  let i = byteLength;
+	  let mul = 1;
+	  let val = this[offset + --i];
+	  while (i > 0 && (mul *= 0x100)) {
+	    val += this[offset + --i] * mul;
+	  }
+	  mul *= 0x80;
+
+	  if (val >= mul) val -= Math.pow(2, 8 * byteLength);
+
+	  return val
+	};
+
+	Buffer.prototype.readInt8 = function readInt8 (offset, noAssert) {
+	  offset = offset >>> 0;
+	  if (!noAssert) checkOffset(offset, 1, this.length);
+	  if (!(this[offset] & 0x80)) return (this[offset])
+	  return ((0xff - this[offset] + 1) * -1)
+	};
+
+	Buffer.prototype.readInt16LE = function readInt16LE (offset, noAssert) {
+	  offset = offset >>> 0;
+	  if (!noAssert) checkOffset(offset, 2, this.length);
+	  const val = this[offset] | (this[offset + 1] << 8);
+	  return (val & 0x8000) ? val | 0xFFFF0000 : val
+	};
+
+	Buffer.prototype.readInt16BE = function readInt16BE (offset, noAssert) {
+	  offset = offset >>> 0;
+	  if (!noAssert) checkOffset(offset, 2, this.length);
+	  const val = this[offset + 1] | (this[offset] << 8);
+	  return (val & 0x8000) ? val | 0xFFFF0000 : val
+	};
+
+	Buffer.prototype.readInt32LE = function readInt32LE (offset, noAssert) {
+	  offset = offset >>> 0;
+	  if (!noAssert) checkOffset(offset, 4, this.length);
+
+	  return (this[offset]) |
+	    (this[offset + 1] << 8) |
+	    (this[offset + 2] << 16) |
+	    (this[offset + 3] << 24)
+	};
+
+	Buffer.prototype.readInt32BE = function readInt32BE (offset, noAssert) {
+	  offset = offset >>> 0;
+	  if (!noAssert) checkOffset(offset, 4, this.length);
+
+	  return (this[offset] << 24) |
+	    (this[offset + 1] << 16) |
+	    (this[offset + 2] << 8) |
+	    (this[offset + 3])
+	};
+
+	Buffer.prototype.readBigInt64LE = defineBigIntMethod(function readBigInt64LE (offset) {
+	  offset = offset >>> 0;
+	  validateNumber(offset, 'offset');
+	  const first = this[offset];
+	  const last = this[offset + 7];
+	  if (first === undefined || last === undefined) {
+	    boundsError(offset, this.length - 8);
+	  }
+
+	  const val = this[offset + 4] +
+	    this[offset + 5] * 2 ** 8 +
+	    this[offset + 6] * 2 ** 16 +
+	    (last << 24); // Overflow
+
+	  return (BigInt(val) << BigInt(32)) +
+	    BigInt(first +
+	    this[++offset] * 2 ** 8 +
+	    this[++offset] * 2 ** 16 +
+	    this[++offset] * 2 ** 24)
+	});
+
+	Buffer.prototype.readBigInt64BE = defineBigIntMethod(function readBigInt64BE (offset) {
+	  offset = offset >>> 0;
+	  validateNumber(offset, 'offset');
+	  const first = this[offset];
+	  const last = this[offset + 7];
+	  if (first === undefined || last === undefined) {
+	    boundsError(offset, this.length - 8);
+	  }
+
+	  const val = (first << 24) + // Overflow
+	    this[++offset] * 2 ** 16 +
+	    this[++offset] * 2 ** 8 +
+	    this[++offset];
+
+	  return (BigInt(val) << BigInt(32)) +
+	    BigInt(this[++offset] * 2 ** 24 +
+	    this[++offset] * 2 ** 16 +
+	    this[++offset] * 2 ** 8 +
+	    last)
+	});
+
+	Buffer.prototype.readFloatLE = function readFloatLE (offset, noAssert) {
+	  offset = offset >>> 0;
+	  if (!noAssert) checkOffset(offset, 4, this.length);
+	  return ieee754$1.read(this, offset, true, 23, 4)
+	};
+
+	Buffer.prototype.readFloatBE = function readFloatBE (offset, noAssert) {
+	  offset = offset >>> 0;
+	  if (!noAssert) checkOffset(offset, 4, this.length);
+	  return ieee754$1.read(this, offset, false, 23, 4)
+	};
+
+	Buffer.prototype.readDoubleLE = function readDoubleLE (offset, noAssert) {
+	  offset = offset >>> 0;
+	  if (!noAssert) checkOffset(offset, 8, this.length);
+	  return ieee754$1.read(this, offset, true, 52, 8)
+	};
+
+	Buffer.prototype.readDoubleBE = function readDoubleBE (offset, noAssert) {
+	  offset = offset >>> 0;
+	  if (!noAssert) checkOffset(offset, 8, this.length);
+	  return ieee754$1.read(this, offset, false, 52, 8)
+	};
+
+	function checkInt (buf, value, offset, ext, max, min) {
+	  if (!Buffer.isBuffer(buf)) throw new TypeError('"buffer" argument must be a Buffer instance')
+	  if (value > max || value < min) throw new RangeError('"value" argument is out of bounds')
+	  if (offset + ext > buf.length) throw new RangeError('Index out of range')
+	}
+
+	Buffer.prototype.writeUintLE =
+	Buffer.prototype.writeUIntLE = function writeUIntLE (value, offset, byteLength, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  byteLength = byteLength >>> 0;
+	  if (!noAssert) {
+	    const maxBytes = Math.pow(2, 8 * byteLength) - 1;
+	    checkInt(this, value, offset, byteLength, maxBytes, 0);
+	  }
+
+	  let mul = 1;
+	  let i = 0;
+	  this[offset] = value & 0xFF;
+	  while (++i < byteLength && (mul *= 0x100)) {
+	    this[offset + i] = (value / mul) & 0xFF;
+	  }
+
+	  return offset + byteLength
+	};
+
+	Buffer.prototype.writeUintBE =
+	Buffer.prototype.writeUIntBE = function writeUIntBE (value, offset, byteLength, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  byteLength = byteLength >>> 0;
+	  if (!noAssert) {
+	    const maxBytes = Math.pow(2, 8 * byteLength) - 1;
+	    checkInt(this, value, offset, byteLength, maxBytes, 0);
+	  }
+
+	  let i = byteLength - 1;
+	  let mul = 1;
+	  this[offset + i] = value & 0xFF;
+	  while (--i >= 0 && (mul *= 0x100)) {
+	    this[offset + i] = (value / mul) & 0xFF;
+	  }
+
+	  return offset + byteLength
+	};
+
+	Buffer.prototype.writeUint8 =
+	Buffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0);
+	  this[offset] = (value & 0xff);
+	  return offset + 1
+	};
+
+	Buffer.prototype.writeUint16LE =
+	Buffer.prototype.writeUInt16LE = function writeUInt16LE (value, offset, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0);
+	  this[offset] = (value & 0xff);
+	  this[offset + 1] = (value >>> 8);
+	  return offset + 2
+	};
+
+	Buffer.prototype.writeUint16BE =
+	Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0);
+	  this[offset] = (value >>> 8);
+	  this[offset + 1] = (value & 0xff);
+	  return offset + 2
+	};
+
+	Buffer.prototype.writeUint32LE =
+	Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0);
+	  this[offset + 3] = (value >>> 24);
+	  this[offset + 2] = (value >>> 16);
+	  this[offset + 1] = (value >>> 8);
+	  this[offset] = (value & 0xff);
+	  return offset + 4
+	};
+
+	Buffer.prototype.writeUint32BE =
+	Buffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0);
+	  this[offset] = (value >>> 24);
+	  this[offset + 1] = (value >>> 16);
+	  this[offset + 2] = (value >>> 8);
+	  this[offset + 3] = (value & 0xff);
+	  return offset + 4
+	};
+
+	function wrtBigUInt64LE (buf, value, offset, min, max) {
+	  checkIntBI(value, min, max, buf, offset, 7);
+
+	  let lo = Number(value & BigInt(0xffffffff));
+	  buf[offset++] = lo;
+	  lo = lo >> 8;
+	  buf[offset++] = lo;
+	  lo = lo >> 8;
+	  buf[offset++] = lo;
+	  lo = lo >> 8;
+	  buf[offset++] = lo;
+	  let hi = Number(value >> BigInt(32) & BigInt(0xffffffff));
+	  buf[offset++] = hi;
+	  hi = hi >> 8;
+	  buf[offset++] = hi;
+	  hi = hi >> 8;
+	  buf[offset++] = hi;
+	  hi = hi >> 8;
+	  buf[offset++] = hi;
+	  return offset
+	}
+
+	function wrtBigUInt64BE (buf, value, offset, min, max) {
+	  checkIntBI(value, min, max, buf, offset, 7);
+
+	  let lo = Number(value & BigInt(0xffffffff));
+	  buf[offset + 7] = lo;
+	  lo = lo >> 8;
+	  buf[offset + 6] = lo;
+	  lo = lo >> 8;
+	  buf[offset + 5] = lo;
+	  lo = lo >> 8;
+	  buf[offset + 4] = lo;
+	  let hi = Number(value >> BigInt(32) & BigInt(0xffffffff));
+	  buf[offset + 3] = hi;
+	  hi = hi >> 8;
+	  buf[offset + 2] = hi;
+	  hi = hi >> 8;
+	  buf[offset + 1] = hi;
+	  hi = hi >> 8;
+	  buf[offset] = hi;
+	  return offset + 8
+	}
+
+	Buffer.prototype.writeBigUInt64LE = defineBigIntMethod(function writeBigUInt64LE (value, offset = 0) {
+	  return wrtBigUInt64LE(this, value, offset, BigInt(0), BigInt('0xffffffffffffffff'))
+	});
+
+	Buffer.prototype.writeBigUInt64BE = defineBigIntMethod(function writeBigUInt64BE (value, offset = 0) {
+	  return wrtBigUInt64BE(this, value, offset, BigInt(0), BigInt('0xffffffffffffffff'))
+	});
+
+	Buffer.prototype.writeIntLE = function writeIntLE (value, offset, byteLength, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  if (!noAssert) {
+	    const limit = Math.pow(2, (8 * byteLength) - 1);
+
+	    checkInt(this, value, offset, byteLength, limit - 1, -limit);
+	  }
+
+	  let i = 0;
+	  let mul = 1;
+	  let sub = 0;
+	  this[offset] = value & 0xFF;
+	  while (++i < byteLength && (mul *= 0x100)) {
+	    if (value < 0 && sub === 0 && this[offset + i - 1] !== 0) {
+	      sub = 1;
+	    }
+	    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF;
+	  }
+
+	  return offset + byteLength
+	};
+
+	Buffer.prototype.writeIntBE = function writeIntBE (value, offset, byteLength, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  if (!noAssert) {
+	    const limit = Math.pow(2, (8 * byteLength) - 1);
+
+	    checkInt(this, value, offset, byteLength, limit - 1, -limit);
+	  }
+
+	  let i = byteLength - 1;
+	  let mul = 1;
+	  let sub = 0;
+	  this[offset + i] = value & 0xFF;
+	  while (--i >= 0 && (mul *= 0x100)) {
+	    if (value < 0 && sub === 0 && this[offset + i + 1] !== 0) {
+	      sub = 1;
+	    }
+	    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF;
+	  }
+
+	  return offset + byteLength
+	};
+
+	Buffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -128);
+	  if (value < 0) value = 0xff + value + 1;
+	  this[offset] = (value & 0xff);
+	  return offset + 1
+	};
+
+	Buffer.prototype.writeInt16LE = function writeInt16LE (value, offset, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -32768);
+	  this[offset] = (value & 0xff);
+	  this[offset + 1] = (value >>> 8);
+	  return offset + 2
+	};
+
+	Buffer.prototype.writeInt16BE = function writeInt16BE (value, offset, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -32768);
+	  this[offset] = (value >>> 8);
+	  this[offset + 1] = (value & 0xff);
+	  return offset + 2
+	};
+
+	Buffer.prototype.writeInt32LE = function writeInt32LE (value, offset, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -2147483648);
+	  this[offset] = (value & 0xff);
+	  this[offset + 1] = (value >>> 8);
+	  this[offset + 2] = (value >>> 16);
+	  this[offset + 3] = (value >>> 24);
+	  return offset + 4
+	};
+
+	Buffer.prototype.writeInt32BE = function writeInt32BE (value, offset, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -2147483648);
+	  if (value < 0) value = 0xffffffff + value + 1;
+	  this[offset] = (value >>> 24);
+	  this[offset + 1] = (value >>> 16);
+	  this[offset + 2] = (value >>> 8);
+	  this[offset + 3] = (value & 0xff);
+	  return offset + 4
+	};
+
+	Buffer.prototype.writeBigInt64LE = defineBigIntMethod(function writeBigInt64LE (value, offset = 0) {
+	  return wrtBigUInt64LE(this, value, offset, -BigInt('0x8000000000000000'), BigInt('0x7fffffffffffffff'))
+	});
+
+	Buffer.prototype.writeBigInt64BE = defineBigIntMethod(function writeBigInt64BE (value, offset = 0) {
+	  return wrtBigUInt64BE(this, value, offset, -BigInt('0x8000000000000000'), BigInt('0x7fffffffffffffff'))
+	});
+
+	function checkIEEE754 (buf, value, offset, ext, max, min) {
+	  if (offset + ext > buf.length) throw new RangeError('Index out of range')
+	  if (offset < 0) throw new RangeError('Index out of range')
+	}
+
+	function writeFloat (buf, value, offset, littleEndian, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  if (!noAssert) {
+	    checkIEEE754(buf, value, offset, 4);
+	  }
+	  ieee754$1.write(buf, value, offset, littleEndian, 23, 4);
+	  return offset + 4
+	}
+
+	Buffer.prototype.writeFloatLE = function writeFloatLE (value, offset, noAssert) {
+	  return writeFloat(this, value, offset, true, noAssert)
+	};
+
+	Buffer.prototype.writeFloatBE = function writeFloatBE (value, offset, noAssert) {
+	  return writeFloat(this, value, offset, false, noAssert)
+	};
+
+	function writeDouble (buf, value, offset, littleEndian, noAssert) {
+	  value = +value;
+	  offset = offset >>> 0;
+	  if (!noAssert) {
+	    checkIEEE754(buf, value, offset, 8);
+	  }
+	  ieee754$1.write(buf, value, offset, littleEndian, 52, 8);
+	  return offset + 8
+	}
+
+	Buffer.prototype.writeDoubleLE = function writeDoubleLE (value, offset, noAssert) {
+	  return writeDouble(this, value, offset, true, noAssert)
+	};
+
+	Buffer.prototype.writeDoubleBE = function writeDoubleBE (value, offset, noAssert) {
+	  return writeDouble(this, value, offset, false, noAssert)
+	};
+
+	// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
+	Buffer.prototype.copy = function copy (target, targetStart, start, end) {
+	  if (!Buffer.isBuffer(target)) throw new TypeError('argument should be a Buffer')
+	  if (!start) start = 0;
+	  if (!end && end !== 0) end = this.length;
+	  if (targetStart >= target.length) targetStart = target.length;
+	  if (!targetStart) targetStart = 0;
+	  if (end > 0 && end < start) end = start;
+
+	  // Copy 0 bytes; we're done
+	  if (end === start) return 0
+	  if (target.length === 0 || this.length === 0) return 0
+
+	  // Fatal error conditions
+	  if (targetStart < 0) {
+	    throw new RangeError('targetStart out of bounds')
+	  }
+	  if (start < 0 || start >= this.length) throw new RangeError('Index out of range')
+	  if (end < 0) throw new RangeError('sourceEnd out of bounds')
+
+	  // Are we oob?
+	  if (end > this.length) end = this.length;
+	  if (target.length - targetStart < end - start) {
+	    end = target.length - targetStart + start;
+	  }
+
+	  const len = end - start;
+
+	  if (this === target && typeof Uint8Array.prototype.copyWithin === 'function') {
+	    // Use built-in when available, missing from IE11
+	    this.copyWithin(targetStart, start, end);
+	  } else {
+	    Uint8Array.prototype.set.call(
+	      target,
+	      this.subarray(start, end),
+	      targetStart
+	    );
+	  }
+
+	  return len
+	};
+
+	// Usage:
+	//    buffer.fill(number[, offset[, end]])
+	//    buffer.fill(buffer[, offset[, end]])
+	//    buffer.fill(string[, offset[, end]][, encoding])
+	Buffer.prototype.fill = function fill (val, start, end, encoding) {
+	  // Handle string cases:
+	  if (typeof val === 'string') {
+	    if (typeof start === 'string') {
+	      encoding = start;
+	      start = 0;
+	      end = this.length;
+	    } else if (typeof end === 'string') {
+	      encoding = end;
+	      end = this.length;
+	    }
+	    if (encoding !== undefined && typeof encoding !== 'string') {
+	      throw new TypeError('encoding must be a string')
+	    }
+	    if (typeof encoding === 'string' && !Buffer.isEncoding(encoding)) {
+	      throw new TypeError('Unknown encoding: ' + encoding)
+	    }
+	    if (val.length === 1) {
+	      const code = val.charCodeAt(0);
+	      if ((encoding === 'utf8' && code < 128) ||
+	          encoding === 'latin1') {
+	        // Fast path: If `val` fits into a single byte, use that numeric value.
+	        val = code;
+	      }
+	    }
+	  } else if (typeof val === 'number') {
+	    val = val & 255;
+	  } else if (typeof val === 'boolean') {
+	    val = Number(val);
+	  }
+
+	  // Invalid ranges are not set to a default, so can range check early.
+	  if (start < 0 || this.length < start || this.length < end) {
+	    throw new RangeError('Out of range index')
+	  }
+
+	  if (end <= start) {
+	    return this
+	  }
+
+	  start = start >>> 0;
+	  end = end === undefined ? this.length : end >>> 0;
+
+	  if (!val) val = 0;
+
+	  let i;
+	  if (typeof val === 'number') {
+	    for (i = start; i < end; ++i) {
+	      this[i] = val;
+	    }
+	  } else {
+	    const bytes = Buffer.isBuffer(val)
+	      ? val
+	      : Buffer.from(val, encoding);
+	    const len = bytes.length;
+	    if (len === 0) {
+	      throw new TypeError('The value "' + val +
+	        '" is invalid for argument "value"')
+	    }
+	    for (i = 0; i < end - start; ++i) {
+	      this[i + start] = bytes[i % len];
+	    }
+	  }
+
+	  return this
+	};
+
+	// CUSTOM ERRORS
+	// =============
+
+	// Simplified versions from Node, changed for Buffer-only usage
+	const errors = {};
+	function E (sym, getMessage, Base) {
+	  errors[sym] = class NodeError extends Base {
+	    constructor () {
+	      super();
+
+	      Object.defineProperty(this, 'message', {
+	        value: getMessage.apply(this, arguments),
+	        writable: true,
+	        configurable: true
+	      });
+
+	      // Add the error code to the name to include it in the stack trace.
+	      this.name = `${this.name} [${sym}]`;
+	      // Access the stack to generate the error message including the error code
+	      // from the name.
+	      this.stack; // eslint-disable-line no-unused-expressions
+	      // Reset the name to the actual name.
+	      delete this.name;
+	    }
+
+	    get code () {
+	      return sym
+	    }
+
+	    set code (value) {
+	      Object.defineProperty(this, 'code', {
+	        configurable: true,
+	        enumerable: true,
+	        value,
+	        writable: true
+	      });
+	    }
+
+	    toString () {
+	      return `${this.name} [${sym}]: ${this.message}`
+	    }
+	  };
+	}
+
+	E('ERR_BUFFER_OUT_OF_BOUNDS',
+	  function (name) {
+	    if (name) {
+	      return `${name} is outside of buffer bounds`
+	    }
+
+	    return 'Attempt to access memory outside buffer bounds'
+	  }, RangeError);
+	E('ERR_INVALID_ARG_TYPE',
+	  function (name, actual) {
+	    return `The "${name}" argument must be of type number. Received type ${typeof actual}`
+	  }, TypeError);
+	E('ERR_OUT_OF_RANGE',
+	  function (str, range, input) {
+	    let msg = `The value of "${str}" is out of range.`;
+	    let received = input;
+	    if (Number.isInteger(input) && Math.abs(input) > 2 ** 32) {
+	      received = addNumericalSeparator(String(input));
+	    } else if (typeof input === 'bigint') {
+	      received = String(input);
+	      if (input > BigInt(2) ** BigInt(32) || input < -(BigInt(2) ** BigInt(32))) {
+	        received = addNumericalSeparator(received);
+	      }
+	      received += 'n';
+	    }
+	    msg += ` It must be ${range}. Received ${received}`;
+	    return msg
+	  }, RangeError);
+
+	function addNumericalSeparator (val) {
+	  let res = '';
+	  let i = val.length;
+	  const start = val[0] === '-' ? 1 : 0;
+	  for (; i >= start + 4; i -= 3) {
+	    res = `_${val.slice(i - 3, i)}${res}`;
+	  }
+	  return `${val.slice(0, i)}${res}`
+	}
+
+	// CHECK FUNCTIONS
+	// ===============
+
+	function checkBounds (buf, offset, byteLength) {
+	  validateNumber(offset, 'offset');
+	  if (buf[offset] === undefined || buf[offset + byteLength] === undefined) {
+	    boundsError(offset, buf.length - (byteLength + 1));
+	  }
+	}
+
+	function checkIntBI (value, min, max, buf, offset, byteLength) {
+	  if (value > max || value < min) {
+	    const n = typeof min === 'bigint' ? 'n' : '';
+	    let range;
+	    {
+	      if (min === 0 || min === BigInt(0)) {
+	        range = `>= 0${n} and < 2${n} ** ${(byteLength + 1) * 8}${n}`;
+	      } else {
+	        range = `>= -(2${n} ** ${(byteLength + 1) * 8 - 1}${n}) and < 2 ** ` +
+	                `${(byteLength + 1) * 8 - 1}${n}`;
+	      }
+	    }
+	    throw new errors.ERR_OUT_OF_RANGE('value', range, value)
+	  }
+	  checkBounds(buf, offset, byteLength);
+	}
+
+	function validateNumber (value, name) {
+	  if (typeof value !== 'number') {
+	    throw new errors.ERR_INVALID_ARG_TYPE(name, 'number', value)
+	  }
+	}
+
+	function boundsError (value, length, type) {
+	  if (Math.floor(value) !== value) {
+	    validateNumber(value, type);
+	    throw new errors.ERR_OUT_OF_RANGE('offset', 'an integer', value)
+	  }
+
+	  if (length < 0) {
+	    throw new errors.ERR_BUFFER_OUT_OF_BOUNDS()
+	  }
+
+	  throw new errors.ERR_OUT_OF_RANGE('offset',
+	                                    `>= ${0} and <= ${length}`,
+	                                    value)
+	}
+
+	// HELPER FUNCTIONS
+	// ================
+
+	const INVALID_BASE64_RE = /[^+/0-9A-Za-z-_]/g;
+
+	function base64clean (str) {
+	  // Node takes equal signs as end of the Base64 encoding
+	  str = str.split('=')[0];
+	  // Node strips out invalid characters like \n and \t from the string, base64-js does not
+	  str = str.trim().replace(INVALID_BASE64_RE, '');
+	  // Node converts strings with length < 2 to ''
+	  if (str.length < 2) return ''
+	  // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not
+	  while (str.length % 4 !== 0) {
+	    str = str + '=';
+	  }
+	  return str
+	}
+
+	function utf8ToBytes (string, units) {
+	  units = units || Infinity;
+	  let codePoint;
+	  const length = string.length;
+	  let leadSurrogate = null;
+	  const bytes = [];
+
+	  for (let i = 0; i < length; ++i) {
+	    codePoint = string.charCodeAt(i);
+
+	    // is surrogate component
+	    if (codePoint > 0xD7FF && codePoint < 0xE000) {
+	      // last char was a lead
+	      if (!leadSurrogate) {
+	        // no lead yet
+	        if (codePoint > 0xDBFF) {
+	          // unexpected trail
+	          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
+	          continue
+	        } else if (i + 1 === length) {
+	          // unpaired lead
+	          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
+	          continue
+	        }
+
+	        // valid lead
+	        leadSurrogate = codePoint;
+
+	        continue
+	      }
+
+	      // 2 leads in a row
+	      if (codePoint < 0xDC00) {
+	        if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
+	        leadSurrogate = codePoint;
+	        continue
+	      }
+
+	      // valid surrogate pair
+	      codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000;
+	    } else if (leadSurrogate) {
+	      // valid bmp char, but last char was a lead
+	      if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
+	    }
+
+	    leadSurrogate = null;
+
+	    // encode utf8
+	    if (codePoint < 0x80) {
+	      if ((units -= 1) < 0) break
+	      bytes.push(codePoint);
+	    } else if (codePoint < 0x800) {
+	      if ((units -= 2) < 0) break
+	      bytes.push(
+	        codePoint >> 0x6 | 0xC0,
+	        codePoint & 0x3F | 0x80
+	      );
+	    } else if (codePoint < 0x10000) {
+	      if ((units -= 3) < 0) break
+	      bytes.push(
+	        codePoint >> 0xC | 0xE0,
+	        codePoint >> 0x6 & 0x3F | 0x80,
+	        codePoint & 0x3F | 0x80
+	      );
+	    } else if (codePoint < 0x110000) {
+	      if ((units -= 4) < 0) break
+	      bytes.push(
+	        codePoint >> 0x12 | 0xF0,
+	        codePoint >> 0xC & 0x3F | 0x80,
+	        codePoint >> 0x6 & 0x3F | 0x80,
+	        codePoint & 0x3F | 0x80
+	      );
+	    } else {
+	      throw new Error('Invalid code point')
+	    }
+	  }
+
+	  return bytes
+	}
+
+	function asciiToBytes (str) {
+	  const byteArray = [];
+	  for (let i = 0; i < str.length; ++i) {
+	    // Node's code seems to be doing this and not & 0x7F..
+	    byteArray.push(str.charCodeAt(i) & 0xFF);
+	  }
+	  return byteArray
+	}
+
+	function utf16leToBytes (str, units) {
+	  let c, hi, lo;
+	  const byteArray = [];
+	  for (let i = 0; i < str.length; ++i) {
+	    if ((units -= 2) < 0) break
+
+	    c = str.charCodeAt(i);
+	    hi = c >> 8;
+	    lo = c % 256;
+	    byteArray.push(lo);
+	    byteArray.push(hi);
+	  }
+
+	  return byteArray
+	}
+
+	function base64ToBytes (str) {
+	  return base64.toByteArray(base64clean(str))
+	}
+
+	function blitBuffer (src, dst, offset, length) {
+	  let i;
+	  for (i = 0; i < length; ++i) {
+	    if ((i + offset >= dst.length) || (i >= src.length)) break
+	    dst[i + offset] = src[i];
+	  }
+	  return i
+	}
+
+	// ArrayBuffer or Uint8Array objects from other contexts (i.e. iframes) do not pass
+	// the `instanceof` check but they should be treated as of that type.
+	// See: https://github.com/feross/buffer/issues/166
+	function isInstance (obj, type) {
+	  return obj instanceof type ||
+	    (obj != null && obj.constructor != null && obj.constructor.name != null &&
+	      obj.constructor.name === type.name)
+	}
+	function numberIsNaN (obj) {
+	  // For IE11 support
+	  return obj !== obj // eslint-disable-line no-self-compare
+	}
+
+	// Create lookup table for `toString('hex')`
+	// See: https://github.com/feross/buffer/issues/219
+	const hexSliceLookupTable = (function () {
+	  const alphabet = '0123456789abcdef';
+	  const table = new Array(256);
+	  for (let i = 0; i < 16; ++i) {
+	    const i16 = i * 16;
+	    for (let j = 0; j < 16; ++j) {
+	      table[i16 + j] = alphabet[i] + alphabet[j];
+	    }
+	  }
+	  return table
+	})();
+
+	// Return not function with Error if BigInt not supported
+	function defineBigIntMethod (fn) {
+	  return typeof BigInt === 'undefined' ? BufferBigIntNotDefined : fn
+	}
+
+	function BufferBigIntNotDefined () {
+	  throw new Error('BigInt not supported')
+	} 
+} (buffer));
 
 /** @type {{ textEncoder: TextEncoder, textDecoder: TextDecoder }|null} */
 let lazy = null;
@@ -11215,7 +11193,7 @@ let Encoding$2 = class Encoding {
 
 encoding.Encoding = Encoding$2;
 
-const { Buffer: Buffer$1 } = requireBuffer() || {};
+const { Buffer: Buffer$1 } = buffer || {};
 const { Encoding: Encoding$1 } = encoding;
 const textEndec = textEndec$1;
 
@@ -11320,7 +11298,7 @@ formats$2.BufferFormat = BufferFormat$2;
 formats$2.ViewFormat = ViewFormat$2;
 formats$2.UTF8Format = UTF8Format$2;
 
-const { Buffer } = requireBuffer() || { Buffer: { isBuffer: () => false } };
+const { Buffer } = buffer || { Buffer: { isBuffer: () => false } };
 const { textEncoder: textEncoder$1, textDecoder } = textEndec$1();
 const { BufferFormat: BufferFormat$1, ViewFormat: ViewFormat$1, UTF8Format: UTF8Format$1 } = formats$2;
 
@@ -13717,7 +13695,7 @@ function requireAbstractSublevel () {
 	hasRequiredAbstractSublevel = 1;
 
 	const ModuleError = moduleError;
-	const { Buffer } = requireBuffer() || {};
+	const { Buffer } = buffer || {};
 	const {
 	  AbstractSublevelIterator,
 	  AbstractSublevelKeyIterator,
