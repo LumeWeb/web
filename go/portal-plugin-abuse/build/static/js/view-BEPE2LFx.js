@@ -2776,7 +2776,7 @@ function CaseViewContent({ id }) {
               /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-4 w-4 text-muted-foreground" }),
               "Description"
             ] }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CardContent, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm whitespace-pre-line", children: record.description }) })
+            /* @__PURE__ */ jsxRuntimeExports.jsx(core_abuse__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CardContent, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm whitespace-pre-line break-all", children: record.description }) })
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(ClassificationScoresCard, { scores: record?.classificationScores })
         ] }),

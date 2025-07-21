@@ -1,6 +1,6 @@
 import { index_cjs } from './core_abuse__mf_v__runtimeInit__mf_v__-BhTJRpXJ.js';
 import { React, core_abuse__loadShare__react__loadShare__ } from './core_abuse__loadShare__react__loadShare__-BrHXNZXB.js';
-import { federationRuntime } from './virtual_mf-REMOTE_ENTRY_ID-iCelR6I3.js';
+import { federationRuntime } from './virtual_mf-REMOTE_ENTRY_ID-DOkggE-T.js';
 import { core_abuse__loadShare__react_mf_2_dom__loadShare__ } from './core_abuse__loadShare__react_mf_2_dom__loadShare__-CgnY3flI.js';
 import './index-C__1Ej_O.js';
 import { core_abuse__loadShare__react_mf_2_router__loadShare__ } from './core_abuse__loadShare__react_mf_2_router__loadShare__-D1HF2urY.js';
