@@ -7,10 +7,10 @@ import { commonjsGlobal, getDefaultExportFromCjs } from './_commonjsHelpers-BILi
 import { core_admin__loadShare__react_mf_2_dom__loadShare__ } from './core_admin__loadShare__react_mf_2_dom__loadShare__-sEWQaPcA.js';
 import { ReloadIcon, FontBoldIcon, FontItalicIcon, UnderlineIcon, get_1, _baseIsEqual, X as X$4, Calendar, ChevronLeft, ChevronRight } from './_baseIsEqual-sY0b6Dk9.js';
 import { core_admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__-CH-3AM6E.js';
-import { castPath, toKey, isLength, isIndex, isArray, isArguments, get, Dn as Dn$1 } from './index-BHrwmvBf.js';
+import { castPath, toKey, isLength, isIndex, isArray, isArguments, get, Dn as Dn$1 } from './index-DX6S3gkV.js';
 import { createLucideIcon } from './createLucideIcon-DUFhQ7bm.js';
 import { CircleAlert } from './circle-alert-O0BpBnLb.js';
-import { requireShim } from './index-G8NIHcqv.js';
+import { shimExports } from './index-CbhAMfLD.js';
 
 /**
  * @license lucide-react v0.511.0 - ISC
@@ -8243,7 +8243,7 @@ function requireWithSelector_production () {
 	if (hasRequiredWithSelector_production) return withSelector_production;
 	hasRequiredWithSelector_production = 1;
 	var React = core_admin__loadShare__react__loadShare__,
-	  shim = requireShim();
+	  shim = shimExports;
 	function is(x, y) {
 	  return (x === y && (0 !== x || 1 / x === 1 / y)) || (x !== x && y !== y);
 	}
@@ -8341,7 +8341,7 @@ function requireWithSelector_development () {
 	    return x === y && (0 !== x || 1 / x === 1 / y) || x !== x && y !== y;
 	  }
 	  "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(Error());
-	  var React = core_admin__loadShare__react__loadShare__, shim = requireShim(), objectIs = "function" === typeof Object.is ? Object.is : is, useSyncExternalStore = shim.useSyncExternalStore, useRef = React.useRef, useEffect = React.useEffect, useMemo = React.useMemo, useDebugValue = React.useDebugValue;
+	  var React = core_admin__loadShare__react__loadShare__, shim = shimExports, objectIs = "function" === typeof Object.is ? Object.is : is, useSyncExternalStore = shim.useSyncExternalStore, useRef = React.useRef, useEffect = React.useEffect, useMemo = React.useMemo, useDebugValue = React.useDebugValue;
 	  withSelector_development.useSyncExternalStoreWithSelector = function(subscribe, getSnapshot, getServerSnapshot, selector, isEqual) {
 	    var instRef = useRef(null);
 	    if (null === instRef.current) {
@@ -25607,8 +25607,8 @@ function DesktopSidebar() {
         "hidden md:flex",
         "flex flex-col fixed top-0 left-0 z-20 h-screen -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300",
         {
-          "sm:w-[20%]": !isCollapsed,
-          "sm:w-[10%]": isCollapsed
+          "md:w-[20%] 2xl:w-[10%]": !isCollapsed,
+          "md:w-[10%] 2xl:w-[5%]": isCollapsed
         }
       ),
       children: [
