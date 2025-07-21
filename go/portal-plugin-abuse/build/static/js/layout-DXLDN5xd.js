@@ -31,7 +31,7 @@ function useGlobalSearch(initialQuery = "", enabled = true) {
   const { data: casesData, isLoading: isLoadingCases } = core_abuse__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useList({
     filters: debouncedQuery ? [
       {
-        field: "search",
+        field: "q",
         operator: "contains",
         value: debouncedQuery
       }
@@ -91,10 +91,10 @@ function useGlobalSearch(initialQuery = "", enabled = true) {
         (caseItem) => ({
           id: caseItem.id,
           priority: caseItem.priority,
-          referenceNumber: caseItem.referenceNumber,
+          referenceNumber: caseItem.reference_number,
           status: caseItem.status,
           subtitle: caseItem.description.substring(0, 60) + (caseItem.description.length > 60 ? "..." : ""),
-          title: `Case ${caseItem.referenceNumber}`,
+          title: `Case ${caseItem.reference_number}`,
           type: "case"
         })
       );
