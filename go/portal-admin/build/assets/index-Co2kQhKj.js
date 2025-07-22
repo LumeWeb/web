@@ -1617,7 +1617,6 @@ function createRemoteComponent$1(info) {
     );
   });
 }
-const __vite_import_meta_env__ = { "BASE_URL": "/", "DEV": false, "MODE": "production", "PROD": true, "SSR": false, "VITE_PORTAL_APP_NAME": "admin", "VITE_PORTAL_APP_TITLE": "admin", "VITE_PORTAL_DOMAIN": "abuse-demo.lumeweb.com", "VITE_PORTAL_DOMAIN_IS_ROOT": "true" };
 const env = createEnv({
   client: {
     VITE_PORTAL_DOMAIN: z.string().includes(".").optional(),
@@ -1647,7 +1646,7 @@ const env = createEnv({
    * `process.env` or `import.meta.env`.
    */
   // @ts-ignore
-  runtimeEnv: __vite_import_meta_env__
+  runtimeEnv: window
 });
 var define_process_env_default = {};
 let currentLocation = window.location;
