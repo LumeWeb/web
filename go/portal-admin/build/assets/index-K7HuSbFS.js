@@ -1620,7 +1620,7 @@ function createRemoteComponent$1(info) {
 const env = createEnv({
   client: {
     VITE_PORTAL_DOMAIN: z.string().includes(".").optional(),
-    VITE_PORTAL_DOMAIN_IS_ROOT: z.string().optional()
+    VITE_PORTAL_DOMAIN_IS_ROOT: z.boolean().optional()
   },
   /**
    * The prefix that client-side variables must have. This is enforced both at
@@ -3790,7 +3790,7 @@ function getApiBaseUrl(options = {}) {
     currentUrl = getCurrentLocation().href,
     preserveSubdomain: explicitPreserveSubdomain
   } = options;
-  const preserveSubdomain = env.VITE_PORTAL_DOMAIN_IS_ROOT === "true" || explicitPreserveSubdomain;
+  const preserveSubdomain = env.VITE_PORTAL_DOMAIN_IS_ROOT || explicitPreserveSubdomain;
   const urlObject = new URL(
     currentUrl.startsWith("http") ? currentUrl : `https://${currentUrl}`
   );
@@ -4931,7 +4931,7 @@ function getAccountSubdomain(dashboardSubdomain, options = {}) {
   }
   return getProtocolDomain(dashboardSubdomain, options);
 }
-function getProtocolDomain(proto, { isRootDomain = env.VITE_PORTAL_DOMAIN_IS_ROOT === "true" } = {}) {
+function getProtocolDomain(proto, { isRootDomain = env.VITE_PORTAL_DOMAIN_IS_ROOT } = {}) {
   const cleanProto = proto.replace(/^https?:\/\//, "").replace(/\/+$/, "").replace(/\.+$/, "");
   const domain = getCurrentLocation().hostname;
   if (isRootDomain) {
