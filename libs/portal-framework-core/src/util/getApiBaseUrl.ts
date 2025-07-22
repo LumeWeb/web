@@ -18,7 +18,8 @@ export function getApiBaseUrl(options: ApiUrlOptions = {}): false | string {
   } = options;
 
   // Read from env
-  const preserveSubdomain = env.VITE_PORTAL_DOMAIN_IS_ROOT === "true" || explicitPreserveSubdomain;
+  const preserveSubdomain =
+    env.VITE_PORTAL_DOMAIN_IS_ROOT || explicitPreserveSubdomain;
 
   // Parse URL (use https as default for parsing if no protocol)
   const urlObject = new URL(
