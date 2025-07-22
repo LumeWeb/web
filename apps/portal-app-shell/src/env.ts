@@ -7,7 +7,6 @@ export const env = createEnv({
     VITE_PORTAL_APP_DISABLE_ROUTING: z.string().optional(),
     VITE_PORTAL_APP_NAME: z.string(),
     VITE_PORTAL_APP_TITLE: z.string(),
-    VITE_PORTAL_DOMAIN_IS_ROOT: z.string().optional(),
   },
 
   /**
