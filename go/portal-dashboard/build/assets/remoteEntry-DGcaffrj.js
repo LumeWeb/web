@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-B0OThK7f.js","assets/_commonjsHelpers-DWwsNxpa.js","assets/index-Domn_xjh.js","assets/dashboard__loadShare__react_mf_2_dom__loadShare__-CxucHwhd.js","assets/dashboard__loadShare__react__loadShare__-B-YtubD3.js","assets/dashboard__mf_v__runtimeInit__mf_v__-C0jw-Lkn.js","assets/circle-alert-bkU3ixL2.js","assets/createLucideIcon-Od_tcS2A.js","assets/_baseIsEqual-C0afv05f.js","assets/index-B90HCQcT.js","assets/index-aPZK1Msq.js","assets/index-Dq110QZ7.js","assets/index-CimZ0-bn.js","assets/index-D2vBlRLp.js","assets/index-BN8IXIiO.js","assets/index-Psk6eg-4.js","assets/index-CoPiY3dc.js","assets/index-ByaWsVWX.js","assets/index.esm-Bcaxk7r3.js","assets/index-DwqD0hK1.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-B0OThK7f.js","assets/_commonjsHelpers-DWwsNxpa.js","assets/index-BmMUPn21.js","assets/dashboard__loadShare__react_mf_2_dom__loadShare__-CxucHwhd.js","assets/dashboard__loadShare__react__loadShare__-B-YtubD3.js","assets/dashboard__mf_v__runtimeInit__mf_v__-C0jw-Lkn.js","assets/circle-alert-bkU3ixL2.js","assets/createLucideIcon-Od_tcS2A.js","assets/_baseIsEqual-C0afv05f.js","assets/index-B90HCQcT.js","assets/index-aPZK1Msq.js","assets/index-Dq110QZ7.js","assets/index-CimZ0-bn.js","assets/index-D9CzNBgN.js","assets/index-BN8IXIiO.js","assets/index-Psk6eg-4.js","assets/index-CoPiY3dc.js","assets/index-ByaWsVWX.js","assets/index.esm-Bcaxk7r3.js","assets/index-DwqD0hK1.js"])))=>i.map(i=>d[i]);
 import { i as index_cjs, d as dashboard__mf_v__runtimeInit__mf_v__ } from "./dashboard__mf_v__runtimeInit__mf_v__-C0jw-Lkn.js";
 import exposesMap from "./virtualExposes-Dff6wIYf.js";
 import { _ as __vitePreload } from "./preload-helper-BkSzTOHT.js";
@@ -8,7 +8,7 @@ const importMap = {
     return pkg;
   },
   "@lumeweb/portal-framework-ui": async () => {
-    let pkg = await __vitePreload(() => import("./index-Domn_xjh.js"), true ? __vite__mapDeps([2,3,4,1,5,6,7,8,9,10,11]) : void 0);
+    let pkg = await __vitePreload(() => import("./index-BmMUPn21.js"), true ? __vite__mapDeps([2,3,4,1,5,6,7,8,9,10,11]) : void 0);
     return pkg;
   },
   "react-dom": async () => {
@@ -16,7 +16,7 @@ const importMap = {
     return pkg;
   },
   "@lumeweb/portal-framework-core": async () => {
-    let pkg = await __vitePreload(() => import("./index-D2vBlRLp.js"), true ? __vite__mapDeps([13,5,4,1,3,14,6,7,15,11]) : void 0);
+    let pkg = await __vitePreload(() => import("./index-D9CzNBgN.js"), true ? __vite__mapDeps([13,5,4,1,3,14,6,7,15,11]) : void 0);
     return pkg;
   },
   "@lumeweb/portal-framework-ui-core": async () => {

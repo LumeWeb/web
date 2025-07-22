@@ -1617,11 +1617,10 @@ function createRemoteComponent$1(info) {
     );
   });
 }
-const __vite_import_meta_env__ = { "BASE_URL": "/", "DEV": false, "MODE": "production", "PROD": true, "SSR": false, "VITE_PORTAL_APP_NAME": "dashboard", "VITE_PORTAL_APP_TITLE": "Dashboard", "VITE_PORTAL_DOMAIN": "abuse-demo.lumeweb.com", "VITE_PORTAL_DOMAIN_IS_ROOT": "true" };
 const env = createEnv({
   client: {
     VITE_PORTAL_DOMAIN: z.string().includes(".").optional(),
-    VITE_PORTAL_DOMAIN_IS_ROOT: z.string().optional()
+    VITE_PORTAL_DOMAIN_IS_ROOT: z.boolean().optional()
   },
   /**
    * The prefix that client-side variables must have. This is enforced both at
@@ -1647,7 +1646,7 @@ const env = createEnv({
    * `process.env` or `import.meta.env`.
    */
   // @ts-ignore
-  runtimeEnv: __vite_import_meta_env__
+  runtimeEnv: window
 });
 var define_process_env_default = {};
 let currentLocation = window.location;
@@ -3791,7 +3790,7 @@ function getApiBaseUrl(options = {}) {
     currentUrl = getCurrentLocation().href,
     preserveSubdomain: explicitPreserveSubdomain
   } = options;
-  const preserveSubdomain = env.VITE_PORTAL_DOMAIN_IS_ROOT === "true" || explicitPreserveSubdomain;
+  const preserveSubdomain = env.VITE_PORTAL_DOMAIN_IS_ROOT || explicitPreserveSubdomain;
   const urlObject = new URL(
     currentUrl.startsWith("http") ? currentUrl : `https://${currentUrl}`
   );
@@ -4932,7 +4931,7 @@ function getAccountSubdomain(dashboardSubdomain, options = {}) {
   }
   return getProtocolDomain(dashboardSubdomain, options);
 }
-function getProtocolDomain(proto, { isRootDomain = env.VITE_PORTAL_DOMAIN_IS_ROOT === "true" } = {}) {
+function getProtocolDomain(proto, { isRootDomain = env.VITE_PORTAL_DOMAIN_IS_ROOT } = {}) {
   const cleanProto = proto.replace(/^https?:\/\//, "").replace(/\/+$/, "").replace(/\.+$/, "");
   const domain = getCurrentLocation().hostname;
   if (isRootDomain) {
