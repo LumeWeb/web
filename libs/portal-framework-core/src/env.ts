@@ -33,5 +33,5 @@ export const env = createEnv({
    * `process.env` or `import.meta.env`.
    */
   // @ts-ignore
-  runtimeEnv: import.meta.env,
+  runtimeEnv: window,
 });
