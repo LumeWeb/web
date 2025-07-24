@@ -22,12 +22,16 @@ export default defineConfig([
     ...commonOptions,
     clean: true,
     dts: false,
-    entry: ["src", "!**/*.stories.tsx"],
+    entry: ["src", "!**/*.stories.tsx", "!**/*.css"],
     format: ["esm", "cjs"],
     hash: false,
     outputOptions(options, format) {
       options.dir = format === "es" ? "dist/esm" : "dist/cjs";
     },
+    copy: [
+      { to: "dist/esm/tailwind.css", from: "src/tailwind.css" },
+      { to: "dist/esm/tailwind-plugin.css", from: "src/tailwind-plugin.css" },
+    ],
   },
   {
     ...commonOptions,

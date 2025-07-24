@@ -1,17 +1,12 @@
 import { Config } from "@lumeweb/portal-framework-core/vite";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-
 import * as sharedModules from "../../shared-modules";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import config from "./plugin.config";
 
 export default Config({
-  dir: __dirname,
-  exposes: {
-    ".": "./src/index",
-    "./NotFound": "./src/ui/routes/NotFound",
-  },
-  name: "core:core",
+  dir: config.dir,
+  name: config.name,
+  type: "plugin",
+  devPort: 4174,
+  exposes: config.exposes,
   sharedModules: sharedModules.getSharedModules(),
 });

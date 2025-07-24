@@ -13,7 +13,8 @@
     "./package.json": "./package.json",
     "./tailwind.config": "./dist/esm/config/tailwind.config.js",
     "./postcss.config": "./dist/cjs/config/postcss.config.cjs",
-    "./tailwind.css": "./dist/esm/tailwind.css"
+    "./tailwind.css": "./dist/esm/tailwind.css",
+    "./tailwind-plugin.css": "./dist/esm/tailwind-plugin.css"
   },
   "scripts": {
     "build": "tsdown",

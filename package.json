@@ -27,7 +27,7 @@
   "devDependencies": {
     "@eslint/compat": "^1.2.6",
     "@eslint/js": "^9.20.0",
-    "@module-federation/vite": "^1.4.0",
+    "@module-federation/vite": "^1.7.0",
     "@storybook/addon-essentials": "^8.6.12",
     "@storybook/addon-interactions": "^8.6.12",
     "@storybook/addon-links": "^8.6.12",
@@ -80,8 +80,7 @@
       "@tanstack/react-query-devtools": "4.36.1",
       "react-hook-form": "7.54.0",
       "zod": "3.24.2",
-      "vite": "6.1.6",
-      "tsdown": "^0.12.7"
+      "tsdown": "v0.13.0"
     }
   },
   "packageManager": "pnpm@10.11.0"

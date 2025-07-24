@@ -12,7 +12,7 @@ export interface ApiUrlOptions {
 
 export function getApiBaseUrl(options: ApiUrlOptions = {}): false | string {
   const {
-    allowLocalhost = false,
+    allowLocalhost = import.meta.env.DEV || env.VITE_PORTAL_ALLOW_LOCALHOST,
     currentUrl = getCurrentLocation().href,
     preserveSubdomain: explicitPreserveSubdomain,
   } = options;

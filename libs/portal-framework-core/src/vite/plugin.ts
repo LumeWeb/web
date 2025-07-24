@@ -1,26 +1,119 @@
 // @ts-nocheck
 
+import type { Plugin } from "vite";
+import { defineConfig } from "vite";
 import type { ModuleFederationOptions } from "@module-federation/vite/lib/utils/normalizeModuleFederationOptions";
 
 import { federation } from "@module-federation/vite";
 import react from "@vitejs/plugin-react";
-import * as fs from "fs";
 import { createRequire } from "node:module";
-import path, { dirname, resolve } from "path";
-import * as process from "process";
-import { AliasOptions, defineConfig, Plugin } from "vite";
+import { resolve } from "path";
 import tsconfigPaths from "vite-tsconfig-paths";
+import fs from "node:fs";
+import express from "express";
+import fetch from "node-fetch";
+
+interface BuildInfo {
+  version: string;
+  gitCommit: string;
+  gitBranch: string;
+  buildTime: string;
+  goVersion: string;
+  platform: string;
+  architecture: string;
+}
+
+interface PluginMeta extends Record<string, unknown> {}
+
+interface PortalPluginConfig {
+  build: BuildInfo;
+  meta: PluginMeta;
+  web_bundles: string[];
+}
+
+interface PortalMetaConfig {
+  domain: string;
+  plugins: Record<string, PortalPluginConfig>;
+  feature_flags: Record<string, boolean>;
+  build: BuildInfo;
+}
+
+const DEFAULT_PORTAL_DOMAIN = "default.lumeweb.com";
+
+function normalizePortalDomain(domain: string | undefined): string {
+  if (!domain) return DEFAULT_PORTAL_DOMAIN;
+  return domain.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+}
+
+function setupPluginRegistryConfig(opts: ConfigOptions) {
+  const configFile =
+    opts.pluginRegistryConfigFile ?? DEFAULT_PLUGIN_REGISTRY_FILE;
+  const configPath = resolve(opts.dir, configFile);
+
+  try {
+    const configFileContent = fs.readFileSync(configPath, "utf-8");
+    const proxyConfig = JSON.parse(configFileContent) as PortalPlugin[];
+
+    const portalConfig = {
+      domain: normalizePortalDomain(opts.portalServer),
+      plugins: proxyConfig.reduce((acc, route) => {
+        acc[route.name] = {
+          meta: {},
+          web_bundles: [`http://localhost:${route.port}/mf-manifest.json`],
+        };
+        return acc;
+      }, {}),
+      feature_flags: {},
+    };
+
+    return { portalConfig };
+  } catch (error) {
+    console.error("Error reading or parsing proxy config file:", error);
+    throw new Error(
+      `Failed to setup plugin registry config from ${configPath}: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
 
 const require = createRequire(import.meta.url);
 
 export interface ConfigOptions {
   dir: string;
-  exposes: ModuleFederationOptions["exposes"];
+  exposes?: ModuleFederationOptions["exposes"];
   name: string;
   sharedModules: ModuleFederationOptions["shared"];
+  type: "host" | "plugin";
+  pluginRegistryConfigFile?: string;
+  devPort?: number;
+  portalServer?: string;
+  plugins?: PluginConfig[];
+  /** Port number for react refresh host when type is "plugin" */
+  appPort?: number;
+}
+
+interface PortalPlugin {
+  name: string;
+  port: number;
+}
+
+export interface PluginConfig {
+  name: string;
+  dir: string;
+  exposes?: ModuleFederationOptions["exposes"];
+}
+
+const DEFAULT_PLUGIN_REGISTRY_FILE = "plugin.config.json";
+
+function normalizeConfigOptions(opts: ConfigOptions): ConfigOptions {
+  return {
+    ...opts,
+    devPort: opts.devPort ?? 4173,
+    appPort: opts.type === "plugin" ? (opts.appPort ?? 4173) : undefined,
+  };
 }
 
 export function Config(opts: ConfigOptions) {
+  const normalizedOpts = normalizeConfigOptions(opts);
   let resolvedRuntimePlugins: string[] = [];
   try {
     const bridgeReactPluginPath = require.resolve(
@@ -37,16 +130,121 @@ export function Config(opts: ConfigOptions) {
     );
   }
 
-  const sharedAliases = createSharedModuleAliases(opts);
+  function createBaseFederationConfig(
+    name: string,
+    runtimePlugins: string[],
+    sharedModules: ModuleFederationOptions["shared"],
+    devPort: number,
+    isPlugin: boolean,
+    configOverrides: Partial<ModuleFederationOptions> = {},
+  ) {
+    return federation({
+      name,
+      runtimePlugins,
+      shared: sharedModules,
+      remotePlugin: isPlugin,
+      manifest: true,
+      ignoreOrigin: true,
+      ...configOverrides,
+    });
+  }
 
-  return defineConfig({
-    base: "http://localhost:4173/",
-    build: {
-      lib: {
-        entry: resolve(opts.dir, "src/index.ts"),
-        fileName: "index",
-        formats: ["es"],
+  function createPluginFederationConfig(
+    plugin: PluginConfig,
+    runtimePlugins: string[],
+    sharedModules: ModuleFederationOptions["shared"],
+    devPort: number,
+  ) {
+    const resolvedExposes = plugin.exposes
+      ? Object.fromEntries(
+          Object.entries(plugin.exposes).map(([key, value]) => [
+            key,
+            resolve(plugin.dir, value),
+          ]),
+        )
+      : undefined;
+
+    return createBaseFederationConfig(
+      plugin.name,
+      runtimePlugins,
+      sharedModules,
+      devPort,
+      true,
+      {
+        filename: `${plugin.name}/remoteEntry-[hash].js`,
+        exposes: resolvedExposes,
+        virtualModuleDir: `__mf__virtual_${plugin.name.replace(".", "_")}`,
       },
+    );
+  }
+
+  function createHostFederationConfig(
+    opts: ConfigOptions,
+    runtimePlugins: string[],
+  ) {
+    const resolvedExposes = opts.exposes
+      ? Object.fromEntries(
+          Object.entries(opts.exposes).map(([key, value]) => [
+            key,
+            resolve(opts.dir, value),
+          ]),
+        )
+      : undefined;
+
+    return createBaseFederationConfig(
+      opts.name,
+      runtimePlugins,
+      opts.sharedModules,
+      opts.devPort!,
+      opts.type == "plugin",
+      {
+        filename: "remoteEntry-[hash].js",
+        exposes: resolvedExposes,
+        remotes:
+          opts.plugins?.reduce(
+            (acc, plugin) => {
+              acc[plugin.name] =
+                `http://localhost:${opts.devPort}/${plugin.name}/remoteEntry.js`;
+              return acc;
+            },
+            {} as Record<string, string>,
+          ) || {},
+      },
+    );
+  }
+
+  const corePlugins = [
+    normalizedOpts.type === "plugin"
+      ? react({
+          reactRefreshHost: `http://localhost:${normalizedOpts.appPort}`,
+        })
+      : react(),
+    tsconfigPaths(),
+    localhostAccessPlugin(),
+    createHostFederationConfig(normalizedOpts, resolvedRuntimePlugins),
+    ...(opts.plugins?.map((plugin) =>
+      createPluginFederationConfig(
+        plugin,
+        resolvedRuntimePlugins,
+        normalizedOpts.sharedModules,
+        normalizedOpts.devPort!,
+      ),
+    ) || []),
+  ];
+
+  const viteConfig = defineConfig({
+    // base: `http://localhost:${normalizedOpts.devPort}/`,
+    base: "",
+    build: {
+      ...(opts.type === "plugin"
+        ? {
+            lib: {
+              entry: resolve(opts.dir, "src/index.ts"),
+              fileName: "index",
+              formats: ["es"],
+            },
+          }
+        : {}),
       minify: false,
       rollupOptions: {
         output: {
@@ -61,361 +259,203 @@ export function Config(opts: ConfigOptions) {
     define: {
       "process.env": {},
     },
-    plugins: [
-      react(),
-      tsconfigPaths(),
-      overrideHtmlInjection(),
-      federation({
-        exposes: opts.exposes,
-        filename: "remoteEntry-[hash].js",
-        injectEntryCode: react.preambleCode.replace(
-          "__BASE__",
-          "http://localhost:4173",
-        ),
-        manifest: true,
-        name: opts.name,
-        remotes: {},
-        runtimePlugins: resolvedRuntimePlugins,
-        shared: opts.sharedModules,
-      }),
-    ],
+    plugins: [...corePlugins.filter(Boolean)],
     preview: {
       fs: {
         preserveSymlinks: true,
       },
-      port: 4173,
-    },
-    resolve: {
-      //  alias: { ...sharedAliases },
+      port: normalizedOpts.devPort,
     },
     server: {
       cors: true,
       fs: {
         preserveSymlinks: true,
       },
-      port: 4173,
+      port: normalizedOpts.devPort,
     },
+    ...(opts.type === "host" || opts.plugins?.length
+      ? {
+          optimizeDeps: {
+            include: Object.keys(opts.sharedModules),
+          },
+        }
+      : {}),
   });
-}
 
-function createSharedModuleAliases(opts: ConfigOptions): AliasOptions {
-  const sharedModuleNames = Object.keys(opts.sharedModules);
-  const allModulesToAlias = Array.from(
-    new Set([
-      "@lumeweb/portal-framework-ui/images",
-      "react-dom/client",
-      "react/jsx-dev-runtime",
-      "react/jsx-runtime",
-      ...sharedModuleNames.filter((item) => item !== "react-router"),
-    ]),
-  );
-  const aliases: Record<string, string> = {};
-  const projectRoot = process.cwd();
-
-  for (const moduleName of allModulesToAlias) {
-    const parts = moduleName.split("/");
-    const isScoped = moduleName.startsWith("@");
-    const isDeep = parts.length > (isScoped ? 2 : 1);
-
-    const resolvedPath = resolveModulePathForAlias(
-      moduleName,
-      projectRoot,
-      isDeep,
-    );
-
-    if (resolvedPath) {
-      aliases[moduleName] = resolvedPath;
-    } else {
-      if (
-        opts.sharedModules[moduleName] ||
-        ["@lumeweb/portal-framework-ui/images", "react-dom/client"].includes(
-          moduleName,
-        )
-      ) {
-        console.error(
-          `CRITICAL: Could not resolve required module/subpath for alias "${moduleName}". Build might fail or lead to unexpected behavior.`,
-        );
-        // Consider throwing an error here if resolution failure for required modules is unacceptable
-        // throw new Error(`Failed to resolve required module/subpath for alias: ${moduleName}`);
-      }
-      // Optional: Log a warning for potentially optional deep imports if necessary during debugging
-      // else { console.warn(`Could not resolve potentially optional deep import "${moduleName}" for alias.`); }
+  if (normalizedOpts.type === "host") {
+    const { portalConfig } = setupPluginRegistryConfig(normalizedOpts);
+    if (portalConfig) {
+      viteConfig.plugins.push(createExpressMiddlewarePlugin(portalConfig));
     }
   }
-  return aliases;
+
+  return viteConfig;
 }
 
-function findPackageJson(
-  moduleName: string,
-  searchRoot: string,
-): null | { packageDir: string; packageJsonPath: string } {
-  const resolveOptions = { paths: [searchRoot] };
-  const directJsonPathTarget = `${moduleName}/package.json`;
-
-  try {
-    const packageJsonPath = require.resolve(
-      directJsonPathTarget,
-      resolveOptions,
-    );
-    return { packageDir: dirname(packageJsonPath), packageJsonPath };
-  } catch (error) {
-    if (isExportsRestrictionError(error)) {
-      let mainEntryPath: string;
-      try {
-        mainEntryPath = require.resolve(moduleName, resolveOptions);
-      } catch (mainEntryError) {
-        console.error(
-          `Failed to resolve main entry point for "${moduleName}" during package.json search fallback. Error: ${(mainEntryError as Error).message}`,
-        );
-        return null;
-      }
-
-      let currentDir = dirname(mainEntryPath);
-      const rootPath = resolve(searchRoot, "/");
-      let iterations = 0;
-      const maxIterations = 15;
-
-      while (iterations < maxIterations) {
-        const potentialPath = path.join(currentDir, "package.json");
-        if (fs.existsSync(potentialPath)) {
-          return { packageDir: currentDir, packageJsonPath: potentialPath };
-        }
-        if (
-          currentDir === rootPath ||
-          currentDir === searchRoot ||
-          dirname(currentDir) === currentDir
-        ) {
-          break;
-        }
-        currentDir = dirname(currentDir);
-        iterations++;
-      }
-      console.error(
-        `Fallback package.json search failed for "${moduleName}" starting from ${dirname(mainEntryPath)}.`,
-      );
-      return null;
-    } else {
-      console.error(
-        `Failed to resolve "${directJsonPathTarget}" directly. Error: ${(error as Error).message}`,
-      );
-      return null;
-    }
-  }
-}
-
-function getPotentialEntryPointFromExports(
-  exportsField: any,
-  subpath: string,
-): null | string {
-  if (
-    !exportsField ||
-    typeof exportsField !== "object" ||
-    exportsField === null
-  ) {
-    return null;
-  }
-
-  let exportEntry = exportsField[subpath];
-  if (!exportEntry) return null;
-
-  if (typeof exportEntry === "string") {
-    return exportEntry;
-  } else if (typeof exportEntry === "object") {
-    // Prioritize 'import' condition
-    let importTarget = exportEntry.import;
-    if (typeof importTarget === "string") {
-      return importTarget;
-    } else if (
-      typeof importTarget === "object" &&
-      typeof importTarget.default === "string"
-    ) {
-      return importTarget.default;
-    }
-    // Fallback to 'default' condition if 'import' not found/suitable
-    if (typeof exportEntry.default === "string") {
-      return exportEntry.default;
-    }
-  }
-  return null;
-}
-
-function isExportsRestrictionError(error: unknown): boolean {
-  if (!(error instanceof Error)) return false;
-  return (
-    (error as any).code === "ERR_PACKAGE_PATH_NOT_EXPORTED" ||
-    error.message.includes('is not defined by "exports"')
-  );
-}
-
-function overrideHtmlInjection(): Plugin {
-  let root: string;
-  let virtualIndexPath: null | string = null;
-  let listenersAttached = false;
-
-  const cleanup = () => {
-    if (virtualIndexPath && fs.existsSync(virtualIndexPath)) {
-      const fileToDelete = virtualIndexPath;
-      virtualIndexPath = null; // Prevent immediate re-entry issues
-      try {
-        fs.unlinkSync(fileToDelete);
-      } catch (e) {
-        console.error(
-          `[overrideHtmlInjection] Failed to clean up virtual index.html: ${fileToDelete}`,
-          e,
-        );
-      }
-    }
-  };
-
-  const attachCleanupListeners = () => {
-    if (!listenersAttached && typeof process?.on === "function") {
-      process.on("exit", cleanup);
-      process.on("SIGINT", () => {
-        cleanup();
-        process.exit(0);
-      });
-      process.on("SIGTERM", () => {
-        cleanup();
-        process.exit(0);
-      });
-      listenersAttached = true;
-    } else if (!listenersAttached) {
-      console.error(
-        "[overrideHtmlInjection] CRITICAL: Could not attach cleanup listeners, process.on is not available!",
-      );
-    }
-  };
-
+function createExpressMiddlewarePlugin(portalConfig: PortalMetaConfig): Plugin {
   return {
-    configResolved(config) {
-      root = config.root;
-      const potentialIndexPath = path.join(root, "index.html");
-
-      if (!fs.existsSync(potentialIndexPath)) {
-        virtualIndexPath = potentialIndexPath;
-        try {
-          fs.writeFileSync(
-            virtualIndexPath,
-            `<!DOCTYPE html>
-<html><head><meta charset="utf-8"></head><body><!-- Virtual entry --></body></html>`,
-            "utf-8",
-          );
-          attachCleanupListeners(); // Attach listeners only if file was created
-        } catch (writeError) {
-          console.error(
-            `[overrideHtmlInjection] Failed to create virtual index.html at ${virtualIndexPath}:`,
-            writeError,
-          );
-          virtualIndexPath = null; // Reset path if creation failed
-        }
-      } else {
-        virtualIndexPath = null; // Ensure cleanup doesn't run if user provided the file
-      }
+    name: "portal-express-middleware",
+    apply: "serve",
+    configureServer(server) {
+      setupExpressMiddleware(server, portalConfig);
     },
-    enforce: "pre",
-    name: "override-html-injection",
-    // buildEnd hook might be slightly more reliable than process exit in some scenarios,
-    // but process exit handlers are crucial for dev server interrupts (SIGINT/SIGTERM).
-    // Let's keep the process handlers as they cover more cases.
+    configurePreviewServer(server) {
+      setupExpressMiddleware(server, portalConfig);
+    },
   };
 }
 
-function resolveModulePathForAlias(
-  moduleName: string,
-  searchRoot: string,
-  isDeepImport: boolean,
-): null | string {
-  const resolveOptions = { paths: [searchRoot] };
-  const baseModuleName = isDeepImport
-    ? moduleName.startsWith("@")
-      ? moduleName.split("/").slice(0, 2).join("/")
-      : moduleName.split("/")[0]
-    : moduleName;
+function setupExpressMiddleware(server: any, portalConfig: PortalMetaConfig) {
+  const expressApp = express();
+  expressApp.use(express.json());
 
-  const packageJsonInfo = findPackageJson(baseModuleName, searchRoot);
-  if (!packageJsonInfo) return null;
+  // Enhanced meta endpoint that merges upstream config
+  expressApp.get("/api/meta", async (req, res) => {
+    try {
+      let mergedConfig = { ...portalConfig };
 
-  let packageJson: any;
-  try {
-    packageJson = JSON.parse(
-      fs.readFileSync(packageJsonInfo.packageJsonPath, "utf-8"),
-    );
-  } catch (parseError) {
-    console.error(
-      `Error parsing package.json for "${baseModuleName}": ${parseError}`,
-    );
-    return null;
-  }
+      if (
+        portalConfig.domain &&
+        portalConfig.domain !== DEFAULT_PORTAL_DOMAIN
+      ) {
+        const url = new URL(`https://${portalConfig.domain}/api/meta`);
+        if (req.query.app) {
+          url.searchParams.set("app", req.query.app as string);
+        }
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        try {
+          const upstreamResponse = await fetch(url.toString(), {
+            signal: controller.signal
+          });
+          
+          if (!upstreamResponse.ok) {
+            throw new Error(`Upstream request failed with status ${upstreamResponse.status}`);
+          }
 
-  const subpath = isDeepImport
-    ? "./" + moduleName.substring(baseModuleName.length + 1)
-    : ".";
+          const upstreamConfig = await upstreamResponse.json().catch(err => {
+            throw new Error(`Failed to parse upstream config: ${err.message}`);
+          });
 
-  // Helper function to verify a potential path
-  const verifyPath = (
-    potentialEntryPoint: null | string | undefined,
-  ): null | string => {
-    if (typeof potentialEntryPoint === "string") {
-      try {
-        const potentialResolvedPath = resolve(
-          packageJsonInfo.packageDir,
-          potentialEntryPoint,
-        );
-        // Use require.resolve for definitive check, handles directory indexes etc.
-        return require.resolve(potentialResolvedPath);
-      } catch (_) {
-        // Error during verification is expected if path isn't resolvable
+          // Merge plugins while preserving our web_bundles
+          mergedConfig.plugins = Object.fromEntries(
+            Object.entries(upstreamConfig.plugins).map(
+              ([pluginName, upstreamPlugin]) => {
+                const localPlugin = portalConfig.plugins[pluginName];
+                return [
+                  pluginName,
+                  {
+                    ...upstreamPlugin,
+                    web_bundles: localPlugin?.web_bundles,
+                  },
+                ];
+              },
+            ),
+          );
+
+          // Merge feature flags
+          mergedConfig.feature_flags = {
+            ...mergedConfig.feature_flags,
+            ...upstreamConfig.feature_flags,
+          };
+
+          // Include build info
+          if (upstreamConfig.build) {
+            mergedConfig.build = upstreamConfig.build;
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch/process upstream meta config:', error);
+        // Continue with local config only
+      } finally {
+        clearTimeout(timeout);
       }
+
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify(mergedConfig));
+    } catch (error) {
+      console.error("Error fetching/merging meta config:", error);
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify(portalConfig));
     }
-    return null;
+  });
+
+  // Only setup mock auth endpoint if no portalServer is configured
+  if (!portalConfig.domain || portalConfig.domain === DEFAULT_PORTAL_DOMAIN) {
+    /**
+     * Mock authentication completion endpoint
+     *
+     * Handles the final redirect after successful authentication (password or social).
+     * Sets mock authentication cookies and redirects to the return URL.
+     *
+     * Query Parameters:
+     * - return: URL to redirect to after completion (optional)
+     * - token: Authentication token (required)
+     *
+     * Responses:
+     * - 302: Redirects to return URL if provided
+     * - 400: Bad request if token is missing
+     * - 200: Returns token and OTP status if no redirect URL
+     */
+    expressApp.get("/api/auth/complete", (req, res) => {
+      const { return: returnUrl, token } = req.query;
+
+      // Validate required token parameter
+      if (!token) {
+        return res.status(400).json({ error: "Token is required" });
+      }
+      
+      // Note: This mock endpoint intentionally skips token validation for development purposes.
+      // In production, this endpoint would be replaced by the real portal server's authentication.
+
+      // Handle redirect if return URL is provided
+      if (returnUrl) {
+        return res.redirect(302, returnUrl as string);
+      }
+
+      // Return authentication details if no redirect
+      res.status(200).json({
+        token: token,
+        Otp: false, // Mock OTP status (disabled for testing)
+      });
+    });
+  }
+
+  if (portalConfig.domain && portalConfig.domain !== DEFAULT_PORTAL_DOMAIN) {
+    // Configure Vite proxy for auth requests to real portal server while preserving existing proxy settings
+    server.config.server.proxy = {
+      ...server.config.server.proxy,
+      "/api/auth": {
+        target: `https://${portalConfig.domain}`,
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api\/auth/, ""),
+      },
+    };
+  }
+
+  server.middlewares.use(expressApp);
+}
+
+export function localhostAccessPlugin(): Plugin {
+  return {
+    name: "localhost-access-plugin",
+    transformIndexHtml() {
+      if (!process.env.VITE_PORTAL_ALLOW_LOCALHOST) {
+        return [];
+      }
+
+      return [
+        {
+          tag: "script",
+          attrs: {
+            type: "text/javascript",
+          },
+          children: `window.VITE_PORTAL_ALLOW_LOCALHOST = true;`,
+          injectTo: "body-prepend",
+        },
+      ];
+    },
   };
-
-  if (isDeepImport) {
-    // Attempt 1 (Deep): Direct require.resolve (Node's native handling)
-    try {
-      return require.resolve(moduleName, resolveOptions);
-    } catch (_) {
-      // If direct fails (e.g., exports restriction), proceed to manual check
-    }
-
-    // Attempt 2 (Deep): Manually check exports
-    const potentialEntryPoint = getPotentialEntryPointFromExports(
-      packageJson.exports,
-      subpath,
-    );
-    const verifiedPath = verifyPath(potentialEntryPoint);
-    if (verifiedPath) return verifiedPath;
-  } else {
-    // Attempt 1 (Base): Manually check exports
-    let potentialEntryPoint = getPotentialEntryPointFromExports(
-      packageJson.exports,
-      subpath, // subpath is "." for base
-    );
-    let verifiedPath = verifyPath(potentialEntryPoint);
-    if (verifiedPath) return verifiedPath;
-
-    // Attempt 2 (Base): Check 'module' field if exports didn't resolve
-    if (!verifiedPath && typeof packageJson.module === "string") {
-      verifiedPath = verifyPath(packageJson.module);
-      if (verifiedPath) return verifiedPath;
-    }
-
-    // Attempt 3 (Base): Fallback to direct require.resolve (likely CJS)
-    try {
-      return require.resolve(moduleName, resolveOptions);
-    } catch (finalError) {
-      // Log final failure if all attempts fail for base module
-      console.error(
-        `Failed to resolve base module "${moduleName}" via exports, module field, or direct resolution. Error: ${(finalError as Error).message}`,
-      );
-    }
-  }
-
-  // Final failure point for deep imports or if all base attempts failed
-  if (isDeepImport) {
-    console.error(
-      `Failed to resolve deep import "${moduleName}" via direct resolution or package.json exports.`,
-    );
-  }
-  return null;
 }

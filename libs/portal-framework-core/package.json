@@ -17,7 +17,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "dev": "tsup --watch",
     "lint": "eslint src --max-warnings 0",
     "test": "vitest run",
@@ -34,9 +34,12 @@
   "devDependencies": {
     "@lumeweb/portal-test-util": "workspace:*",
     "esbuild-fix-imports-plugin": "^1.0.14",
+    "express": "^4.21.2",
     "lucide-react": "^0.511.0",
     "memoizee": "^0.4.17",
-    "react-error-boundary": "^6.0.0"
+    "node-fetch": "^3.3.2",
+    "react-error-boundary": "^6.0.0",
+    "tsdown": "^0.12.7"
   },
   "peerDependencies": {
     "@module-federation/bridge-react": "^0.14.0",
