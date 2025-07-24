@@ -35,5 +35,11 @@ export const env = createEnv({
    * `process.env` or `import.meta.env`.
    */
   // @ts-ignore
-  runtimeEnv: import.meta.env,
+  runtimeEnv: {
+    VITE_PORTAL_APP_DISABLE_NAV: import.meta.env.VITE_PORTAL_APP_DISABLE_NAV,
+    VITE_PORTAL_APP_DISABLE_ROUTING: import.meta.env
+      .VITE_PORTAL_APP_DISABLE_ROUTING,
+    VITE_PORTAL_APP_NAME: import.meta.env.VITE_PORTAL_APP_NAME,
+    VITE_PORTAL_APP_TITLE: import.meta.env.VITE_PORTAL_APP_TITLE,
+  },
 });

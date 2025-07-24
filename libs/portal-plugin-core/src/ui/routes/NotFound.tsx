@@ -1,6 +1,6 @@
 import { withTheme } from "@lumeweb/portal-framework-ui";
 import React from "react";
-import "@lumeweb/portal-framework-ui-core/tailwind.css";
+import "@lumeweb/portal-framework-ui-core/tailwind-plugin.css";
 import { Link } from "react-router";
 
 function NotFound() {

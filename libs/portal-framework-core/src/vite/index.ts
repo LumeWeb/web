@@ -1,1 +1,1 @@
-export { Config, type ConfigOptions } from "./plugin";
+export { type PluginConfig, Config, type ConfigOptions } from "./plugin";

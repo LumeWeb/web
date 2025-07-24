@@ -16,7 +16,6 @@ import { Link } from "react-router";
 
 import { LoginForm } from "./LoginForm";
 import { SocialLogin } from "./SocialLogin";
-import "@lumeweb/portal-framework-ui-core/tailwind.css";
 
 function LoginIndex() {
   const showRegister = true;

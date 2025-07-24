@@ -1,34 +1,120 @@
 diff --git a/lib/index.cjs b/lib/index.cjs
-index 3dc7821b8bbd8ad417a95737ec4c588efa3fe0d8..c285ba12e11e7301f8333bb50915fa809ecf1a19 100644
+index f8307325e28295f62020a992ca4aab6c185b969e..dc085746412f9f212d0f1d8ab734893987ee81e0 100644
 --- a/lib/index.cjs
 +++ b/lib/index.cjs
-@@ -342,12 +342,9 @@ function searchPackageVersion(sharedName) {
-     var potentialPackageJsonDir = path__namespace.dirname(sharedPath);
-     var rootDir = path__namespace.parse(potentialPackageJsonDir).root;
-     while (path__namespace.parse(potentialPackageJsonDir).base !== 'node_modules' && potentialPackageJsonDir !== rootDir) {
--      var potentialPackageJsonPath = path__namespace.join(potentialPackageJsonDir, 'package.json');
--      if (fs__namespace.existsSync(potentialPackageJsonPath)) {
--        var potentialPackageJson = require(potentialPackageJsonPath);
--        if (typeof potentialPackageJson == 'object' && potentialPackageJson !== null && typeof potentialPackageJson.version === 'string' && potentialPackageJson.name === sharedName) {
--          return potentialPackageJson.version;
--        }
-+      var potentialPackageJson = path__namespace.join(potentialPackageJsonDir, 'package.json');
-+      if (fs__namespace.existsSync(potentialPackageJson)) {
-+        return require(potentialPackageJson).version;
+@@ -161,10 +161,14 @@ var addEntry = function addEntry(_ref) {
+  */
+ function PluginDevProxyModuleTopLevelAwait() {
+   var filterFunction = pluginutils.createFilter();
++  var processedFlag = '/* already-processed-by-dev-proxy-module-top-level-await */';
+   return {
+     name: 'dev-proxy-module-top-level-await',
+     apply: 'serve',
+     transform: function transform(code, id) {
++      if (code.includes(processedFlag)) {
++        return null;
++      }
+       if (!code.includes('/*mf top-level-await placeholder replacement mf*/')) {
+         return null;
        }
-       potentialPackageJsonDir = path__namespace.dirname(potentialPackageJsonDir);
+@@ -217,8 +221,9 @@ function PluginDevProxyModuleTopLevelAwait() {
+           }
+         }
+       });
++      var transformedCode = magicString.toString();
+       return {
+-        code: magicString.toString(),
++        code: processedFlag + "\n" + transformedCode,
+         map: magicString.generateMap({
+           hires: true
+         })
+@@ -438,6 +443,7 @@ function getNormalizeShareItem(key) {
+   return shareItem;
+ }
+ function normalizeModuleFederationOptions(options) {
++  var _options$remotePlugin;
+   if (options.getPublicPath) {
+     warn("We are ignoring the getPublicPath options because they are natively supported by Vite\nwith the \"experimental.renderBuiltUrl\" configuration https://vitejs.dev/guide/build#advanced-base-options");
+   }
+@@ -447,6 +453,7 @@ function normalizeModuleFederationOptions(options) {
+   return config = {
+     exposes: normalizeExposes(options.exposes),
+     filename: options.filename || 'remoteEntry-[hash]',
++    remotePlugin: (_options$remotePlugin = options.remotePlugin) != null ? _options$remotePlugin : false,
+     library: normalizeLibrary(options.library),
+     name: options.name,
+     // remoteType: options.remoteType,
+@@ -537,6 +544,14 @@ function getNodeModulesDir() {
+   }
+   return cachedNodeModulesDir;
+ }
++function getSuffix(name) {
++  var base = path.basename(name);
++  var dotIndex = base.lastIndexOf('.');
++  if (dotIndex > 0 && dotIndex < base.length - 1) {
++    return base.slice(dotIndex);
++  }
++  return '.js';
++}
+ var patternMap = {};
+ var cacheMap = {};
+ /**
+@@ -544,7 +559,6 @@ var cacheMap = {};
+  */
+ var VirtualModule = /*#__PURE__*/function () {
+   function VirtualModule(name, tag, suffix) {
+-    var _name$split$slice$pop;
+     if (tag === void 0) {
+       tag = '__mf_v__';
      }
-@@ -448,8 +445,7 @@ function normalizeModuleFederationOptions(options) {
-     dev: options.dev,
-     dts: options.dts,
-     getPublicPath: options.getPublicPath,
--    shareStrategy: options.shareStrategy || 'version-first',
--    ignoreOrigin: options.ignoreOrigin || false
-+    shareStrategy: options.shareStrategy || 'version-first'
-   };
+@@ -557,7 +571,7 @@ var VirtualModule = /*#__PURE__*/function () {
+     this.inited = false;
+     this.name = name;
+     this.tag = tag;
+-    this.suffix = suffix || ((_name$split$slice$pop = name.split('.').slice(1).pop()) == null ? void 0 : _name$split$slice$pop.replace(/(.)/, '.$1')) || '.js';
++    this.suffix = suffix || getSuffix(name);
+     if (!cacheMap[this.tag]) cacheMap[this.tag] = {};
+     cacheMap[this.tag][this.name] = this;
+   }
+@@ -682,7 +696,7 @@ function getLoadShareModulePath(pkg) {
+   return filepath;
+ }
+ function writeLoadShareModule(pkg, shareItem, command) {
+-  loadShareCacheMap[pkg].writeSync("\n    \n    ;() => import(" + JSON.stringify(getPreBuildLibImportId(pkg)) + ").catch(() => {});\n    // dev uses dynamic import to separate chunks\n    " + (command !== 'build' ? ";() => import(" + JSON.stringify(pkg) + ").catch(() => {});" : '') + "\n    const {loadShare} = require(\"@module-federation/runtime\")\n    const {initPromise} = require(\"" + virtualRuntimeInitStatus.getImportId() + "\")\n    const res = initPromise.then(_ => loadShare(" + JSON.stringify(pkg) + ", {\n    customShareInfo: {shareConfig:{\n      singleton: " + shareItem.shareConfig.singleton + ",\n      strictVersion: " + shareItem.shareConfig.strictVersion + ",\n      requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n    }}}))\n    const exportModule = " + (command !== 'build' ? '/*mf top-level-await placeholder replacement mf*/' : 'await ') + "res.then(factory => factory())\n    module.exports = exportModule\n  ");
++  loadShareCacheMap[pkg].writeSync("\n\n    ;() => import(" + JSON.stringify(getPreBuildLibImportId(pkg)) + ").catch(() => {});\n    // dev uses dynamic import to separate chunks\n    " + (command !== 'build' ? ";() => import(" + JSON.stringify(pkg) + ").catch(() => {});" : '') + "\n    const {loadShare} = require(\"@module-federation/runtime\")\n    const {initPromise} = require(\"" + virtualRuntimeInitStatus.getImportId() + "\")\n    const res = initPromise.then(_ => loadShare(" + JSON.stringify(pkg) + ", {\n    customShareInfo: {shareConfig:{\n      singleton: " + shareItem.shareConfig.singleton + ",\n      strictVersion: " + shareItem.shareConfig.strictVersion + ",\n      requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n    }}}))\n    const exportModule = " + (command !== 'build' ? '/*mf top-level-await placeholder replacement mf*/' : 'await ') + "res.then(factory => factory())\n    module.exports = exportModule\n  ");
  }
  
-@@ -764,6 +760,41 @@ var Manifest = function Manifest() {
+ var usedShares = new Set();
+@@ -709,15 +723,15 @@ function writeLocalSharedImportMap() {
+ }
+ function generateLocalSharedImportMap() {
+   var options = getNormalizeModuleFederationOptions();
+-  return "\n    const importMap = {\n      " + Array.from(getUsedShares()).map(function (pkg) {
++  return "\n    const importMap = {\n      " + (options.remotePlugin ? '' : Array.from(getUsedShares()).map(function (pkg) {
+     return "\n        " + JSON.stringify(pkg) + ": async () => {\n          let pkg = await import(\"" + getPreBuildLibImportId(pkg) + "\")\n          return pkg\n        }\n      ";
+-  }).join(',') + "\n    }\n      const usedShared = {\n      " + Array.from(getUsedShares()).map(function (key) {
++  }).join(',')) + "\n    }\n      const usedShared = {\n      " + (options.remotePlugin ? '' : Array.from(getUsedShares()).map(function (key) {
+     var shareItem = getNormalizeShareItem(key);
+     if (!shareItem) return null;
+-    return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap \n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n            }\n          }\n        ";
++    return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap\n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n            }\n          }\n        ";
+   }).filter(function (x) {
+     return x !== null;
+-  }).join(',') + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
++  }).join(',')) + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
+     var _JSON$stringify;
+     var remote = options.remotes[key];
+     if (!remote) return null;
+@@ -744,7 +758,7 @@ function generateRemoteEntry(options) {
+ var HOST_AUTO_INIT_TAG = '__H_A_I__';
+ var hostAutoInitModule = new VirtualModule('hostAutoInit', HOST_AUTO_INIT_TAG);
+ function writeHostAutoInit() {
+-  hostAutoInitModule.writeSync("\n    const remoteEntryPromise = import(\"" + REMOTE_ENTRY_ID + "\")\n    // __tla only serves as a hack for vite-plugin-top-level-await. \n    Promise.resolve(remoteEntryPromise)\n      .then(remoteEntry => {\n        return Promise.resolve(remoteEntry.__tla)\n          .then(remoteEntry.init).catch(remoteEntry.init)\n      })\n    ");
++  hostAutoInitModule.writeSync("\n    const remoteEntryPromise = import(\"" + REMOTE_ENTRY_ID + "\")\n    // __tla only serves as a hack for vite-plugin-top-level-await.\n    Promise.resolve(remoteEntryPromise)\n      .then(remoteEntry => {\n        return Promise.resolve(remoteEntry.__tla)\n          .then(remoteEntry.init).catch(remoteEntry.init)\n      })\n    ");
+ }
+ function getHostAutoInitImportId() {
+   return hostAutoInitModule.getImportId();
+@@ -779,6 +793,41 @@ var Manifest = function Manifest() {
    var _command;
    var _originalConfigBase;
    var viteConfig;
@@ -70,21 +156,7 @@ index 3dc7821b8bbd8ad417a95737ec4c588efa3fe0d8..c285ba12e11e7301f8333bb50915fa80
    return [{
      name: 'module-federation-manifest',
      apply: 'serve',
-@@ -772,12 +803,11 @@ var Manifest = function Manifest() {
-     },
-     configureServer: function configureServer(server) {
-       server.middlewares.use(function (req, res, next) {
--        var _req$url;
-         if (!mfManifestName) {
-           next();
-           return;
-         }
--        if (((_req$url = req.url) == null ? void 0 : _req$url.replace(/\?.*/, '')) === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
-+        if (req.url === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
-           res.setHeader('Content-Type', 'application/json');
-           res.setHeader('Access-Control-Allow-Origin', '*');
-           res.end(JSON.stringify(_extends({}, generateMFManifest({}), {
-@@ -820,7 +850,9 @@ var Manifest = function Manifest() {
+@@ -835,7 +884,9 @@ var Manifest = function Manifest() {
      config: function config(_config, _ref) {
        var command = _ref.command;
        if (!_config.build) _config.build = {};
@@ -95,7 +167,7 @@ index 3dc7821b8bbd8ad417a95737ec4c588efa3fe0d8..c285ba12e11e7301f8333bb50915fa80
        _command = command;
        _originalConfigBase = _config.base;
      },
-@@ -836,38 +868,10 @@ var Manifest = function Manifest() {
+@@ -851,38 +902,10 @@ var Manifest = function Manifest() {
      generateBundle: function generateBundle(options, bundle) {
        try {
          var _this = this;
@@ -137,7 +209,7 @@ index 3dc7821b8bbd8ad417a95737ec4c588efa3fe0d8..c285ba12e11e7301f8333bb50915fa80
          for (var _i = 0, _Object$entries = Object.entries(bundle); _i < _Object$entries.length; _i++) {
            var _Object$entries$_i = _Object$entries[_i],
              fileName = _Object$entries$_i[0],
-@@ -875,34 +879,58 @@ var Manifest = function Manifest() {
+@@ -890,34 +913,58 @@ var Manifest = function Manifest() {
            if (mfOptions.filename.replace(/[\[\]]/g, '_').replace(/\.[^/.]+$/, '') === fileData.name || fileData.name === 'remoteEntry') {
              remoteEntryFile = fileData.fileName;
            }
@@ -217,7 +289,7 @@ index 3dc7821b8bbd8ad417a95737ec4c588efa3fe0d8..c285ba12e11e7301f8333bb50915fa80
          var fileToShareKey = {};
          return Promise.resolve(Promise.all(Array.from(getUsedShares()).map(function (shareKey) {
            try {
-@@ -914,40 +942,49 @@ var Manifest = function Manifest() {
+@@ -929,40 +976,49 @@ var Manifest = function Manifest() {
              return Promise.reject(e);
            }
          }))).then(function () {
@@ -291,7 +363,7 @@ index 3dc7821b8bbd8ad417a95737ec4c588efa3fe0d8..c285ba12e11e7301f8333bb50915fa80
            });
          });
        } catch (e) {
-@@ -963,23 +1000,23 @@ var Manifest = function Manifest() {
+@@ -978,23 +1034,23 @@ var Manifest = function Manifest() {
        path: '',
        type: 'module'
      };
@@ -324,7 +396,7 @@ index 3dc7821b8bbd8ad417a95737ec4c588efa3fe0d8..c285ba12e11e7301f8333bb50915fa80
        return {
          id: name + ":" + shareKey,
          name: shareKey,
-@@ -987,42 +1024,40 @@ var Manifest = function Manifest() {
+@@ -1002,42 +1058,40 @@ var Manifest = function Manifest() {
          requiredVersion: shareItem.shareConfig.requiredVersion,
          assets: {
            js: {
@@ -385,7 +457,7 @@ index 3dc7821b8bbd8ad417a95737ec4c588efa3fe0d8..c285ba12e11e7301f8333bb50915fa80
        id: name,
        name: name,
        metaData: _extends({
-@@ -1037,8 +1072,6 @@ var Manifest = function Manifest() {
+@@ -1052,8 +1106,6 @@ var Manifest = function Manifest() {
          types: {
            path: '',
            name: ''
@@ -394,7 +466,7 @@ index 3dc7821b8bbd8ad417a95737ec4c588efa3fe0d8..c285ba12e11e7301f8333bb50915fa80
          },
          globalName: name,
          pluginVersion: '0.2.5'
-@@ -1051,7 +1084,6 @@ var Manifest = function Manifest() {
+@@ -1066,7 +1118,6 @@ var Manifest = function Manifest() {
        remotes: remotes,
        exposes: exposes
      };
@@ -402,46 +474,162 @@ index 3dc7821b8bbd8ad417a95737ec4c588efa3fe0d8..c285ba12e11e7301f8333bb50915fa80
    }
  };
  
-@@ -1155,7 +1187,7 @@ function pluginProxyRemoteEntry () {
-           if (_command === 'serve') {
-             var _viteConfig$server, _viteConfig$server2;
-             var host = typeof ((_viteConfig$server = viteConfig.server) == null ? void 0 : _viteConfig$server.host) === 'string' && viteConfig.server.host !== '0.0.0.0' ? viteConfig.server.host : 'localhost';
--            return Promise.resolve("\n          const origin = (window && " + !options.ignoreOrigin + ") ? window.origin : \"//" + host + ":" + ((_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port) + "\"\n          const remoteEntryPromise = await import(origin + \"" + (viteConfig.base + options.filename) + "\")\n          // __tla only serves as a hack for vite-plugin-top-level-await. \n          Promise.resolve(remoteEntryPromise)\n          .then(remoteEntry => {\n            return Promise.resolve(remoteEntry.__tla)\n              .then(remoteEntry.init).catch(remoteEntry.init)\n          })\n          ");
-+            return Promise.resolve("\n          const origin = window ? window.origin : \"//" + host + ":" + ((_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port) + "\"\n          const remoteEntryPromise = await import(origin + \"" + (viteConfig.base + options.filename) + "\")\n          // __tla only serves as a hack for vite-plugin-top-level-await. \n          Promise.resolve(remoteEntryPromise)\n          .then(remoteEntry => {\n            return Promise.resolve(remoteEntry.__tla)\n              .then(remoteEntry.init).catch(remoteEntry.init)\n          })\n          ");
+@@ -1283,8 +1334,10 @@ function proxySharedModule(options) {
+             var loadSharePath = getLoadShareModulePath(source);
+             writeLoadShareModule(source, shared[key], command);
+             writePreBuildLibPath(source);
++            //  if (!options.remotePlugin) {
+             addUsedShares(source);
+             writeLocalSharedImportMap();
++            //   }
+             return this.resolve(loadSharePath, importer);
            }
-           return Promise.resolve(code);
-         }
+         };
+@@ -1365,7 +1418,8 @@ function federation(mfUserOptions) {
+   var options = normalizeModuleFederationOptions(mfUserOptions);
+   var name = options.name,
+     shared = options.shared,
+-    filename = options.filename;
++    filename = options.filename,
++    remotePlugin = options.remotePlugin;
+   if (!name) throw new Error('name is required');
+   return [{
+     name: 'vite:module-federation-config',
+@@ -1381,7 +1435,7 @@ function federation(mfUserOptions) {
+     entryName: 'remoteEntry',
+     entryPath: REMOTE_ENTRY_ID,
+     fileName: filename
+-  }), addEntry({
++  }), remotePlugin ? [] : addEntry({
+     entryName: 'hostInit',
+     entryPath: getHostAutoInitPath(),
+     inject: 'html'
 diff --git a/lib/index.esm.js b/lib/index.esm.js
-index 3b7f52dbb436776d3c7f3084f6e7f34dc34bc001..eaa9a6c3af2a0f0871a463f77738b1c0868f5bb0 100644
+index 5f2e8633c41f0412e7d285bdac25a0c21c2c778d..12498d62959df77004ba172701a8e02d69620b17 100644
 --- a/lib/index.esm.js
 +++ b/lib/index.esm.js
-@@ -318,12 +318,9 @@ function searchPackageVersion(sharedName) {
-     var potentialPackageJsonDir = path.dirname(sharedPath);
-     var rootDir = path.parse(potentialPackageJsonDir).root;
-     while (path.parse(potentialPackageJsonDir).base !== 'node_modules' && potentialPackageJsonDir !== rootDir) {
--      var potentialPackageJsonPath = path.join(potentialPackageJsonDir, 'package.json');
--      if (fs.existsSync(potentialPackageJsonPath)) {
--        var potentialPackageJson = require(potentialPackageJsonPath);
--        if (typeof potentialPackageJson == 'object' && potentialPackageJson !== null && typeof potentialPackageJson.version === 'string' && potentialPackageJson.name === sharedName) {
--          return potentialPackageJson.version;
--        }
-+      var potentialPackageJson = path.join(potentialPackageJsonDir, 'package.json');
-+      if (fs.existsSync(potentialPackageJson)) {
-+        return require(potentialPackageJson).version;
+@@ -2,7 +2,7 @@ import defu from 'defu';
+ import * as fs from 'fs';
+ import { mkdirSync, writeFileSync, existsSync, writeFile } from 'fs';
+ import * as path from 'pathe';
+-import path__default, { resolve, parse, join, dirname, relative } from 'pathe';
++import path__default, { resolve, basename, parse, join, dirname, relative } from 'pathe';
+ import { createFilter } from '@rollup/pluginutils';
+ import { walk } from 'estree-walker';
+ import MagicString from 'magic-string';
+@@ -137,10 +137,14 @@ var addEntry = function addEntry(_ref) {
+  */
+ function PluginDevProxyModuleTopLevelAwait() {
+   var filterFunction = createFilter();
++  var processedFlag = '/* already-processed-by-dev-proxy-module-top-level-await */';
+   return {
+     name: 'dev-proxy-module-top-level-await',
+     apply: 'serve',
+     transform: function transform(code, id) {
++      if (code.includes(processedFlag)) {
++        return null;
++      }
+       if (!code.includes('/*mf top-level-await placeholder replacement mf*/')) {
+         return null;
        }
-       potentialPackageJsonDir = path.dirname(potentialPackageJsonDir);
+@@ -193,8 +197,9 @@ function PluginDevProxyModuleTopLevelAwait() {
+           }
+         }
+       });
++      var transformedCode = magicString.toString();
+       return {
+-        code: magicString.toString(),
++        code: processedFlag + "\n" + transformedCode,
+         map: magicString.generateMap({
+           hires: true
+         })
+@@ -414,6 +419,7 @@ function getNormalizeShareItem(key) {
+   return shareItem;
+ }
+ function normalizeModuleFederationOptions(options) {
++  var _options$remotePlugin;
+   if (options.getPublicPath) {
+     warn("We are ignoring the getPublicPath options because they are natively supported by Vite\nwith the \"experimental.renderBuiltUrl\" configuration https://vitejs.dev/guide/build#advanced-base-options");
+   }
+@@ -423,6 +429,7 @@ function normalizeModuleFederationOptions(options) {
+   return config = {
+     exposes: normalizeExposes(options.exposes),
+     filename: options.filename || 'remoteEntry-[hash]',
++    remotePlugin: (_options$remotePlugin = options.remotePlugin) != null ? _options$remotePlugin : false,
+     library: normalizeLibrary(options.library),
+     name: options.name,
+     // remoteType: options.remoteType,
+@@ -513,6 +520,14 @@ function getNodeModulesDir() {
+   }
+   return cachedNodeModulesDir;
+ }
++function getSuffix(name) {
++  var base = basename(name);
++  var dotIndex = base.lastIndexOf('.');
++  if (dotIndex > 0 && dotIndex < base.length - 1) {
++    return base.slice(dotIndex);
++  }
++  return '.js';
++}
+ var patternMap = {};
+ var cacheMap = {};
+ /**
+@@ -520,7 +535,6 @@ var cacheMap = {};
+  */
+ var VirtualModule = /*#__PURE__*/function () {
+   function VirtualModule(name, tag, suffix) {
+-    var _name$split$slice$pop;
+     if (tag === void 0) {
+       tag = '__mf_v__';
      }
-@@ -424,8 +421,7 @@ function normalizeModuleFederationOptions(options) {
-     dev: options.dev,
-     dts: options.dts,
-     getPublicPath: options.getPublicPath,
--    shareStrategy: options.shareStrategy || 'version-first',
--    ignoreOrigin: options.ignoreOrigin || false
-+    shareStrategy: options.shareStrategy || 'version-first'
-   };
+@@ -533,7 +547,7 @@ var VirtualModule = /*#__PURE__*/function () {
+     this.inited = false;
+     this.name = name;
+     this.tag = tag;
+-    this.suffix = suffix || ((_name$split$slice$pop = name.split('.').slice(1).pop()) == null ? void 0 : _name$split$slice$pop.replace(/(.)/, '.$1')) || '.js';
++    this.suffix = suffix || getSuffix(name);
+     if (!cacheMap[this.tag]) cacheMap[this.tag] = {};
+     cacheMap[this.tag][this.name] = this;
+   }
+@@ -658,7 +672,7 @@ function getLoadShareModulePath(pkg) {
+   return filepath;
+ }
+ function writeLoadShareModule(pkg, shareItem, command) {
+-  loadShareCacheMap[pkg].writeSync("\n    \n    ;() => import(" + JSON.stringify(getPreBuildLibImportId(pkg)) + ").catch(() => {});\n    // dev uses dynamic import to separate chunks\n    " + (command !== 'build' ? ";() => import(" + JSON.stringify(pkg) + ").catch(() => {});" : '') + "\n    const {loadShare} = require(\"@module-federation/runtime\")\n    const {initPromise} = require(\"" + virtualRuntimeInitStatus.getImportId() + "\")\n    const res = initPromise.then(_ => loadShare(" + JSON.stringify(pkg) + ", {\n    customShareInfo: {shareConfig:{\n      singleton: " + shareItem.shareConfig.singleton + ",\n      strictVersion: " + shareItem.shareConfig.strictVersion + ",\n      requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n    }}}))\n    const exportModule = " + (command !== 'build' ? '/*mf top-level-await placeholder replacement mf*/' : 'await ') + "res.then(factory => factory())\n    module.exports = exportModule\n  ");
++  loadShareCacheMap[pkg].writeSync("\n\n    ;() => import(" + JSON.stringify(getPreBuildLibImportId(pkg)) + ").catch(() => {});\n    // dev uses dynamic import to separate chunks\n    " + (command !== 'build' ? ";() => import(" + JSON.stringify(pkg) + ").catch(() => {});" : '') + "\n    const {loadShare} = require(\"@module-federation/runtime\")\n    const {initPromise} = require(\"" + virtualRuntimeInitStatus.getImportId() + "\")\n    const res = initPromise.then(_ => loadShare(" + JSON.stringify(pkg) + ", {\n    customShareInfo: {shareConfig:{\n      singleton: " + shareItem.shareConfig.singleton + ",\n      strictVersion: " + shareItem.shareConfig.strictVersion + ",\n      requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n    }}}))\n    const exportModule = " + (command !== 'build' ? '/*mf top-level-await placeholder replacement mf*/' : 'await ') + "res.then(factory => factory())\n    module.exports = exportModule\n  ");
  }
  
-@@ -740,6 +736,41 @@ var Manifest = function Manifest() {
+ var usedShares = new Set();
+@@ -685,15 +699,15 @@ function writeLocalSharedImportMap() {
+ }
+ function generateLocalSharedImportMap() {
+   var options = getNormalizeModuleFederationOptions();
+-  return "\n    const importMap = {\n      " + Array.from(getUsedShares()).map(function (pkg) {
++  return "\n    const importMap = {\n      " + (options.remotePlugin ? '' : Array.from(getUsedShares()).map(function (pkg) {
+     return "\n        " + JSON.stringify(pkg) + ": async () => {\n          let pkg = await import(\"" + getPreBuildLibImportId(pkg) + "\")\n          return pkg\n        }\n      ";
+-  }).join(',') + "\n    }\n      const usedShared = {\n      " + Array.from(getUsedShares()).map(function (key) {
++  }).join(',')) + "\n    }\n      const usedShared = {\n      " + (options.remotePlugin ? '' : Array.from(getUsedShares()).map(function (key) {
+     var shareItem = getNormalizeShareItem(key);
+     if (!shareItem) return null;
+-    return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap \n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n            }\n          }\n        ";
++    return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap\n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n            }\n          }\n        ";
+   }).filter(function (x) {
+     return x !== null;
+-  }).join(',') + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
++  }).join(',')) + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
+     var _JSON$stringify;
+     var remote = options.remotes[key];
+     if (!remote) return null;
+@@ -720,7 +734,7 @@ function generateRemoteEntry(options) {
+ var HOST_AUTO_INIT_TAG = '__H_A_I__';
+ var hostAutoInitModule = new VirtualModule('hostAutoInit', HOST_AUTO_INIT_TAG);
+ function writeHostAutoInit() {
+-  hostAutoInitModule.writeSync("\n    const remoteEntryPromise = import(\"" + REMOTE_ENTRY_ID + "\")\n    // __tla only serves as a hack for vite-plugin-top-level-await. \n    Promise.resolve(remoteEntryPromise)\n      .then(remoteEntry => {\n        return Promise.resolve(remoteEntry.__tla)\n          .then(remoteEntry.init).catch(remoteEntry.init)\n      })\n    ");
++  hostAutoInitModule.writeSync("\n    const remoteEntryPromise = import(\"" + REMOTE_ENTRY_ID + "\")\n    // __tla only serves as a hack for vite-plugin-top-level-await.\n    Promise.resolve(remoteEntryPromise)\n      .then(remoteEntry => {\n        return Promise.resolve(remoteEntry.__tla)\n          .then(remoteEntry.init).catch(remoteEntry.init)\n      })\n    ");
+ }
+ function getHostAutoInitImportId() {
+   return hostAutoInitModule.getImportId();
+@@ -755,6 +769,41 @@ var Manifest = function Manifest() {
    var _command;
    var _originalConfigBase;
    var viteConfig;
@@ -483,21 +671,7 @@ index 3b7f52dbb436776d3c7f3084f6e7f34dc34bc001..eaa9a6c3af2a0f0871a463f77738b1c0
    return [{
      name: 'module-federation-manifest',
      apply: 'serve',
-@@ -748,12 +779,11 @@ var Manifest = function Manifest() {
-     },
-     configureServer: function configureServer(server) {
-       server.middlewares.use(function (req, res, next) {
--        var _req$url;
-         if (!mfManifestName) {
-           next();
-           return;
-         }
--        if (((_req$url = req.url) == null ? void 0 : _req$url.replace(/\?.*/, '')) === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
-+        if (req.url === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
-           res.setHeader('Content-Type', 'application/json');
-           res.setHeader('Access-Control-Allow-Origin', '*');
-           res.end(JSON.stringify(_extends({}, generateMFManifest({}), {
-@@ -796,7 +826,9 @@ var Manifest = function Manifest() {
+@@ -811,7 +860,9 @@ var Manifest = function Manifest() {
      config: function config(_config, _ref) {
        var command = _ref.command;
        if (!_config.build) _config.build = {};
@@ -508,7 +682,7 @@ index 3b7f52dbb436776d3c7f3084f6e7f34dc34bc001..eaa9a6c3af2a0f0871a463f77738b1c0
        _command = command;
        _originalConfigBase = _config.base;
      },
-@@ -812,38 +844,10 @@ var Manifest = function Manifest() {
+@@ -827,38 +878,10 @@ var Manifest = function Manifest() {
      generateBundle: function generateBundle(options, bundle) {
        try {
          var _this = this;
@@ -550,7 +724,7 @@ index 3b7f52dbb436776d3c7f3084f6e7f34dc34bc001..eaa9a6c3af2a0f0871a463f77738b1c0
          for (var _i = 0, _Object$entries = Object.entries(bundle); _i < _Object$entries.length; _i++) {
            var _Object$entries$_i = _Object$entries[_i],
              fileName = _Object$entries$_i[0],
-@@ -851,34 +855,58 @@ var Manifest = function Manifest() {
+@@ -866,34 +889,58 @@ var Manifest = function Manifest() {
            if (mfOptions.filename.replace(/[\[\]]/g, '_').replace(/\.[^/.]+$/, '') === fileData.name || fileData.name === 'remoteEntry') {
              remoteEntryFile = fileData.fileName;
            }
@@ -630,7 +804,7 @@ index 3b7f52dbb436776d3c7f3084f6e7f34dc34bc001..eaa9a6c3af2a0f0871a463f77738b1c0
          var fileToShareKey = {};
          return Promise.resolve(Promise.all(Array.from(getUsedShares()).map(function (shareKey) {
            try {
-@@ -890,40 +918,49 @@ var Manifest = function Manifest() {
+@@ -905,40 +952,49 @@ var Manifest = function Manifest() {
              return Promise.reject(e);
            }
          }))).then(function () {
@@ -704,7 +878,7 @@ index 3b7f52dbb436776d3c7f3084f6e7f34dc34bc001..eaa9a6c3af2a0f0871a463f77738b1c0
            });
          });
        } catch (e) {
-@@ -939,23 +976,23 @@ var Manifest = function Manifest() {
+@@ -954,23 +1010,23 @@ var Manifest = function Manifest() {
        path: '',
        type: 'module'
      };
@@ -737,7 +911,7 @@ index 3b7f52dbb436776d3c7f3084f6e7f34dc34bc001..eaa9a6c3af2a0f0871a463f77738b1c0
        return {
          id: name + ":" + shareKey,
          name: shareKey,
-@@ -963,42 +1000,40 @@ var Manifest = function Manifest() {
+@@ -978,42 +1034,40 @@ var Manifest = function Manifest() {
          requiredVersion: shareItem.shareConfig.requiredVersion,
          assets: {
            js: {
@@ -798,7 +972,7 @@ index 3b7f52dbb436776d3c7f3084f6e7f34dc34bc001..eaa9a6c3af2a0f0871a463f77738b1c0
        id: name,
        name: name,
        metaData: _extends({
-@@ -1013,8 +1048,6 @@ var Manifest = function Manifest() {
+@@ -1028,8 +1082,6 @@ var Manifest = function Manifest() {
          types: {
            path: '',
            name: ''
@@ -807,7 +981,7 @@ index 3b7f52dbb436776d3c7f3084f6e7f34dc34bc001..eaa9a6c3af2a0f0871a463f77738b1c0
          },
          globalName: name,
          pluginVersion: '0.2.5'
-@@ -1027,7 +1060,6 @@ var Manifest = function Manifest() {
+@@ -1042,7 +1094,6 @@ var Manifest = function Manifest() {
        remotes: remotes,
        exposes: exposes
      };
@@ -815,46 +989,168 @@ index 3b7f52dbb436776d3c7f3084f6e7f34dc34bc001..eaa9a6c3af2a0f0871a463f77738b1c0
    }
  };
  
-@@ -1131,7 +1163,7 @@ function pluginProxyRemoteEntry () {
-           if (_command === 'serve') {
-             var _viteConfig$server, _viteConfig$server2;
-             var host = typeof ((_viteConfig$server = viteConfig.server) == null ? void 0 : _viteConfig$server.host) === 'string' && viteConfig.server.host !== '0.0.0.0' ? viteConfig.server.host : 'localhost';
--            return Promise.resolve("\n          const origin = (window && " + !options.ignoreOrigin + ") ? window.origin : \"//" + host + ":" + ((_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port) + "\"\n          const remoteEntryPromise = await import(origin + \"" + (viteConfig.base + options.filename) + "\")\n          // __tla only serves as a hack for vite-plugin-top-level-await. \n          Promise.resolve(remoteEntryPromise)\n          .then(remoteEntry => {\n            return Promise.resolve(remoteEntry.__tla)\n              .then(remoteEntry.init).catch(remoteEntry.init)\n          })\n          ");
-+            return Promise.resolve("\n          const origin = window ? window.origin : \"//" + host + ":" + ((_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port) + "\"\n          const remoteEntryPromise = await import(origin + \"" + (viteConfig.base + options.filename) + "\")\n          // __tla only serves as a hack for vite-plugin-top-level-await. \n          Promise.resolve(remoteEntryPromise)\n          .then(remoteEntry => {\n            return Promise.resolve(remoteEntry.__tla)\n              .then(remoteEntry.init).catch(remoteEntry.init)\n          })\n          ");
+@@ -1259,8 +1310,10 @@ function proxySharedModule(options) {
+             var loadSharePath = getLoadShareModulePath(source);
+             writeLoadShareModule(source, shared[key], command);
+             writePreBuildLibPath(source);
++            //  if (!options.remotePlugin) {
+             addUsedShares(source);
+             writeLocalSharedImportMap();
++            //   }
+             return this.resolve(loadSharePath, importer);
            }
-           return Promise.resolve(code);
-         }
+         };
+@@ -1341,7 +1394,8 @@ function federation(mfUserOptions) {
+   var options = normalizeModuleFederationOptions(mfUserOptions);
+   var name = options.name,
+     shared = options.shared,
+-    filename = options.filename;
++    filename = options.filename,
++    remotePlugin = options.remotePlugin;
+   if (!name) throw new Error('name is required');
+   return [{
+     name: 'vite:module-federation-config',
+@@ -1357,7 +1411,7 @@ function federation(mfUserOptions) {
+     entryName: 'remoteEntry',
+     entryPath: REMOTE_ENTRY_ID,
+     fileName: filename
+-  }), addEntry({
++  }), remotePlugin ? [] : addEntry({
+     entryName: 'hostInit',
+     entryPath: getHostAutoInitPath(),
+     inject: 'html'
 diff --git a/lib/index.modern.js b/lib/index.modern.js
-index aacb32d039cffa20235083f9fb7388a961d40546..010b1d554a18e25723d1c77ca0210ebc5774878c 100644
+index 73df799a484f46ff43b3ca383dbb28af1c007a92..c83de1d5dab3bf1cc2b41209eab8b4a6bf62d450 100644
 --- a/lib/index.modern.js
 +++ b/lib/index.modern.js
-@@ -291,12 +291,9 @@ function searchPackageVersion(sharedName) {
-     let potentialPackageJsonDir = path.dirname(sharedPath);
-     const rootDir = path.parse(potentialPackageJsonDir).root;
-     while (path.parse(potentialPackageJsonDir).base !== 'node_modules' && potentialPackageJsonDir !== rootDir) {
--      const potentialPackageJsonPath = path.join(potentialPackageJsonDir, 'package.json');
--      if (fs.existsSync(potentialPackageJsonPath)) {
--        const potentialPackageJson = require(potentialPackageJsonPath);
--        if (typeof potentialPackageJson == 'object' && potentialPackageJson !== null && typeof potentialPackageJson.version === 'string' && potentialPackageJson.name === sharedName) {
--          return potentialPackageJson.version;
--        }
-+      const potentialPackageJson = path.join(potentialPackageJsonDir, 'package.json');
-+      if (fs.existsSync(potentialPackageJson)) {
-+        return require(potentialPackageJson).version;
+@@ -2,7 +2,7 @@ import defu from 'defu';
+ import * as fs from 'fs';
+ import { mkdirSync, writeFileSync, existsSync, writeFile } from 'fs';
+ import * as path from 'pathe';
+-import path__default, { resolve, parse, join, dirname, relative } from 'pathe';
++import path__default, { resolve, basename, parse, join, dirname, relative } from 'pathe';
+ import { createFilter } from '@rollup/pluginutils';
+ import { walk } from 'estree-walker';
+ import MagicString from 'magic-string';
+@@ -138,10 +138,14 @@ const addEntry = ({
+  */
+ function PluginDevProxyModuleTopLevelAwait() {
+   const filterFunction = createFilter();
++  const processedFlag = '/* already-processed-by-dev-proxy-module-top-level-await */';
+   return {
+     name: 'dev-proxy-module-top-level-await',
+     apply: 'serve',
+     transform(code, id) {
++      if (code.includes(processedFlag)) {
++        return null;
++      }
+       if (!code.includes('/*mf top-level-await placeholder replacement mf*/')) {
+         return null;
        }
-       potentialPackageJsonDir = path.dirname(potentialPackageJsonDir);
-     }
-@@ -394,8 +391,7 @@ function normalizeModuleFederationOptions(options) {
-     dev: options.dev,
-     dts: options.dts,
-     getPublicPath: options.getPublicPath,
--    shareStrategy: options.shareStrategy || 'version-first',
--    ignoreOrigin: options.ignoreOrigin || false
-+    shareStrategy: options.shareStrategy || 'version-first'
-   };
+@@ -200,8 +204,9 @@ function PluginDevProxyModuleTopLevelAwait() {
+           }
+         }
+       });
++      const transformedCode = magicString.toString();
+       return {
+-        code: magicString.toString(),
++        code: `${processedFlag}\n${transformedCode}`,
+         map: magicString.generateMap({
+           hires: true
+         })
+@@ -384,6 +389,7 @@ function getNormalizeShareItem(key) {
+   return shareItem;
  }
- 
-@@ -842,6 +838,39 @@ const Manifest = () => {
+ function normalizeModuleFederationOptions(options) {
++  var _options$remotePlugin;
+   if (options.getPublicPath) {
+     warn(`We are ignoring the getPublicPath options because they are natively supported by Vite\nwith the "experimental.renderBuiltUrl" configuration https://vitejs.dev/guide/build#advanced-base-options`);
+   }
+@@ -393,6 +399,7 @@ function normalizeModuleFederationOptions(options) {
+   return config = {
+     exposes: normalizeExposes(options.exposes),
+     filename: options.filename || 'remoteEntry-[hash]',
++    remotePlugin: (_options$remotePlugin = options.remotePlugin) != null ? _options$remotePlugin : false,
+     library: normalizeLibrary(options.library),
+     name: options.name,
+     // remoteType: options.remoteType,
+@@ -481,6 +488,14 @@ function getNodeModulesDir() {
+   }
+   return cachedNodeModulesDir;
+ }
++function getSuffix(name) {
++  const base = basename(name);
++  const dotIndex = base.lastIndexOf('.');
++  if (dotIndex > 0 && dotIndex < base.length - 1) {
++    return base.slice(dotIndex);
++  }
++  return '.js';
++}
+ const patternMap = {};
+ const cacheMap = {};
+ /**
+@@ -521,14 +536,13 @@ class VirtualModule {
+     return undefined;
+   }
+   constructor(name, tag = '__mf_v__', suffix = '') {
+-    var _name$split$slice$pop;
+     this.name = void 0;
+     this.tag = void 0;
+     this.suffix = void 0;
+     this.inited = false;
+     this.name = name;
+     this.tag = tag;
+-    this.suffix = suffix || ((_name$split$slice$pop = name.split('.').slice(1).pop()) == null ? void 0 : _name$split$slice$pop.replace(/(.)/, '.$1')) || '.js';
++    this.suffix = suffix || getSuffix(name);
+     if (!cacheMap[this.tag]) cacheMap[this.tag] = {};
+     cacheMap[this.tag][this.name] = this;
+   }
+@@ -650,7 +664,7 @@ function getLoadShareModulePath(pkg) {
+ }
+ function writeLoadShareModule(pkg, shareItem, command) {
+   loadShareCacheMap[pkg].writeSync(`
+-    
++
+     ;() => import(${JSON.stringify(getPreBuildLibImportId(pkg))}).catch(() => {});
+     // dev uses dynamic import to separate chunks
+     ${command !== 'build' ? `;() => import(${JSON.stringify(pkg)}).catch(() => {});` : ''}
+@@ -693,7 +707,7 @@ function generateLocalSharedImportMap() {
+   const options = getNormalizeModuleFederationOptions();
+   return `
+     const importMap = {
+-      ${Array.from(getUsedShares()).map(pkg => `
++      ${options.remotePlugin ? '' : Array.from(getUsedShares()).map(pkg => `
+         ${JSON.stringify(pkg)}: async () => {
+           let pkg = await import("${getPreBuildLibImportId(pkg)}")
+           return pkg
+@@ -701,7 +715,7 @@ function generateLocalSharedImportMap() {
+       `).join(',')}
+     }
+       const usedShared = {
+-      ${Array.from(getUsedShares()).map(key => {
++      ${options.remotePlugin ? '' : Array.from(getUsedShares()).map(key => {
+     const shareItem = getNormalizeShareItem(key);
+     if (!shareItem) return null;
+     return `
+@@ -713,7 +727,7 @@ function generateLocalSharedImportMap() {
+             from: ${JSON.stringify(options.name)},
+             async get () {
+               usedShared[${JSON.stringify(key)}].loaded = true
+-              const {${JSON.stringify(key)}: pkgDynamicImport} = importMap 
++              const {${JSON.stringify(key)}: pkgDynamicImport} = importMap
+               const res = await pkgDynamicImport()
+               const exportModule = {...res}
+               // All npm packages pre-built by vite will be converted to esm
+@@ -815,7 +829,7 @@ const hostAutoInitModule = new VirtualModule('hostAutoInit', HOST_AUTO_INIT_TAG)
+ function writeHostAutoInit() {
+   hostAutoInitModule.writeSync(`
+     const remoteEntryPromise = import("${REMOTE_ENTRY_ID}")
+-    // __tla only serves as a hack for vite-plugin-top-level-await. 
++    // __tla only serves as a hack for vite-plugin-top-level-await.
+     Promise.resolve(remoteEntryPromise)
+       .then(remoteEntry => {
+         return Promise.resolve(remoteEntry.__tla)
+@@ -858,6 +872,39 @@ const Manifest = () => {
    let _command;
    let _originalConfigBase;
    let viteConfig;
@@ -894,21 +1190,7 @@ index aacb32d039cffa20235083f9fb7388a961d40546..010b1d554a18e25723d1c77ca0210ebc
    return [{
      name: 'module-federation-manifest',
      apply: 'serve',
-@@ -850,12 +879,11 @@ const Manifest = () => {
-     },
-     configureServer(server) {
-       server.middlewares.use((req, res, next) => {
--        var _req$url;
-         if (!mfManifestName) {
-           next();
-           return;
-         }
--        if (((_req$url = req.url) == null ? void 0 : _req$url.replace(/\?.*/, '')) === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
-+        if (req.url === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
-           res.setHeader('Content-Type', 'application/json');
-           res.setHeader('Access-Control-Allow-Origin', '*');
-           res.end(JSON.stringify(_extends({}, generateMFManifest({}), {
-@@ -899,7 +927,9 @@ const Manifest = () => {
+@@ -915,7 +962,9 @@ const Manifest = () => {
        command
      }) {
        if (!config.build) config.build = {};
@@ -919,7 +1201,7 @@ index aacb32d039cffa20235083f9fb7388a961d40546..010b1d554a18e25723d1c77ca0210ebc
        _command = command;
        _originalConfigBase = config.base;
      },
-@@ -914,97 +944,92 @@ const Manifest = () => {
+@@ -930,97 +979,92 @@ const Manifest = () => {
      },
      async generateBundle(options, bundle) {
        if (!mfManifestName) return;
@@ -1071,7 +1353,7 @@ index aacb32d039cffa20235083f9fb7388a961d40546..010b1d554a18e25723d1c77ca0210ebc
        });
      }
    }];
-@@ -1018,23 +1043,17 @@ const Manifest = () => {
+@@ -1034,23 +1078,17 @@ const Manifest = () => {
        path: '',
        type: 'module'
      };
@@ -1104,7 +1386,7 @@ index aacb32d039cffa20235083f9fb7388a961d40546..010b1d554a18e25723d1c77ca0210ebc
        return {
          id: `${name}:${shareKey}`,
          name: shareKey,
-@@ -1042,42 +1061,42 @@ const Manifest = () => {
+@@ -1058,42 +1096,42 @@ const Manifest = () => {
          requiredVersion: shareItem.shareConfig.requiredVersion,
          assets: {
            js: {
@@ -1165,7 +1447,7 @@ index aacb32d039cffa20235083f9fb7388a961d40546..010b1d554a18e25723d1c77ca0210ebc
          type: 'app',
          buildInfo: {
            buildVersion: '1.0.0',
-@@ -1088,8 +1107,6 @@ const Manifest = () => {
+@@ -1104,8 +1142,6 @@ const Manifest = () => {
          types: {
            path: '',
            name: ''
@@ -1174,7 +1456,7 @@ index aacb32d039cffa20235083f9fb7388a961d40546..010b1d554a18e25723d1c77ca0210ebc
          },
          globalName: name,
          pluginVersion: '0.2.5'
-@@ -1102,7 +1119,6 @@ const Manifest = () => {
+@@ -1118,7 +1154,6 @@ const Manifest = () => {
        remotes,
        exposes
      };
@@ -1182,46 +1464,158 @@ index aacb32d039cffa20235083f9fb7388a961d40546..010b1d554a18e25723d1c77ca0210ebc
    }
  };
  
-@@ -1203,7 +1219,7 @@ function pluginProxyRemoteEntry () {
-           var _viteConfig$server, _viteConfig$server2;
-           const host = typeof ((_viteConfig$server = viteConfig.server) == null ? void 0 : _viteConfig$server.host) === 'string' && viteConfig.server.host !== '0.0.0.0' ? viteConfig.server.host : 'localhost';
-           return `
--          const origin = (window && ${!options.ignoreOrigin}) ? window.origin : "//${host}:${(_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port}"
-+          const origin = window ? window.origin : "//${host}:${(_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port}"
-           const remoteEntryPromise = await import(origin + "${viteConfig.base + options.filename}")
-           // __tla only serves as a hack for vite-plugin-top-level-await. 
-           Promise.resolve(remoteEntryPromise)
+@@ -1335,8 +1370,10 @@ function proxySharedModule(options) {
+             const loadSharePath = getLoadShareModulePath(source);
+             writeLoadShareModule(source, shared[key], command);
+             writePreBuildLibPath(source);
++            //  if (!options.remotePlugin) {
+             addUsedShares(source);
+             writeLocalSharedImportMap();
++            //   }
+             return this.resolve(loadSharePath, importer);
+           }
+         };
+@@ -1412,7 +1449,8 @@ function federation(mfUserOptions) {
+     name,
+     remotes,
+     shared,
+-    filename
++    filename,
++    remotePlugin
+   } = options;
+   if (!name) throw new Error('name is required');
+   return [{
+@@ -1429,11 +1467,11 @@ function federation(mfUserOptions) {
+     entryName: 'remoteEntry',
+     entryPath: REMOTE_ENTRY_ID,
+     fileName: filename
+-  }), ...addEntry({
++  }), ...(remotePlugin ? [] : addEntry({
+     entryName: 'hostInit',
+     entryPath: getHostAutoInitPath(),
+     inject: 'html'
+-  }), ...addEntry({
++  })), ...addEntry({
+     entryName: 'virtualExposes',
+     entryPath: VIRTUAL_EXPOSES
+   }), pluginProxyRemoteEntry(), pluginProxyRemotes(options), ...pluginModuleParseEnd(id => {
 diff --git a/lib/index.umd.js b/lib/index.umd.js
-index 492c3c9fc35f244a5f4d1eb7f9f305b2da93eac6..8a22556a6ba355fbf55a863d749867506395e064 100644
+index 19d8ea95ec9024804cf213c8d034296a1027153d..9c1ff85b5f158fa91bc1c6c9ce82b59cac536479 100644
 --- a/lib/index.umd.js
 +++ b/lib/index.umd.js
-@@ -340,12 +340,9 @@
-       var potentialPackageJsonDir = path__namespace.dirname(sharedPath);
-       var rootDir = path__namespace.parse(potentialPackageJsonDir).root;
-       while (path__namespace.parse(potentialPackageJsonDir).base !== 'node_modules' && potentialPackageJsonDir !== rootDir) {
--        var potentialPackageJsonPath = path__namespace.join(potentialPackageJsonDir, 'package.json');
--        if (fs__namespace.existsSync(potentialPackageJsonPath)) {
--          var potentialPackageJson = require(potentialPackageJsonPath);
--          if (typeof potentialPackageJson == 'object' && potentialPackageJson !== null && typeof potentialPackageJson.version === 'string' && potentialPackageJson.name === sharedName) {
--            return potentialPackageJson.version;
--          }
-+        var potentialPackageJson = path__namespace.join(potentialPackageJsonDir, 'package.json');
-+        if (fs__namespace.existsSync(potentialPackageJson)) {
-+          return require(potentialPackageJson).version;
+@@ -159,10 +159,14 @@
+    */
+   function PluginDevProxyModuleTopLevelAwait() {
+     var filterFunction = pluginutils.createFilter();
++    var processedFlag = '/* already-processed-by-dev-proxy-module-top-level-await */';
+     return {
+       name: 'dev-proxy-module-top-level-await',
+       apply: 'serve',
+       transform: function transform(code, id) {
++        if (code.includes(processedFlag)) {
++          return null;
++        }
+         if (!code.includes('/*mf top-level-await placeholder replacement mf*/')) {
+           return null;
          }
-         potentialPackageJsonDir = path__namespace.dirname(potentialPackageJsonDir);
+@@ -215,8 +219,9 @@
+             }
+           }
+         });
++        var transformedCode = magicString.toString();
+         return {
+-          code: magicString.toString(),
++          code: processedFlag + "\n" + transformedCode,
+           map: magicString.generateMap({
+             hires: true
+           })
+@@ -436,6 +441,7 @@
+     return shareItem;
+   }
+   function normalizeModuleFederationOptions(options) {
++    var _options$remotePlugin;
+     if (options.getPublicPath) {
+       warn("We are ignoring the getPublicPath options because they are natively supported by Vite\nwith the \"experimental.renderBuiltUrl\" configuration https://vitejs.dev/guide/build#advanced-base-options");
+     }
+@@ -445,6 +451,7 @@
+     return config = {
+       exposes: normalizeExposes(options.exposes),
+       filename: options.filename || 'remoteEntry-[hash]',
++      remotePlugin: (_options$remotePlugin = options.remotePlugin) != null ? _options$remotePlugin : false,
+       library: normalizeLibrary(options.library),
+       name: options.name,
+       // remoteType: options.remoteType,
+@@ -535,6 +542,14 @@
+     }
+     return cachedNodeModulesDir;
+   }
++  function getSuffix(name) {
++    var base = path.basename(name);
++    var dotIndex = base.lastIndexOf('.');
++    if (dotIndex > 0 && dotIndex < base.length - 1) {
++      return base.slice(dotIndex);
++    }
++    return '.js';
++  }
+   var patternMap = {};
+   var cacheMap = {};
+   /**
+@@ -542,7 +557,6 @@
+    */
+   var VirtualModule = /*#__PURE__*/function () {
+     function VirtualModule(name, tag, suffix) {
+-      var _name$split$slice$pop;
+       if (tag === void 0) {
+         tag = '__mf_v__';
        }
-@@ -446,8 +443,7 @@
-       dev: options.dev,
-       dts: options.dts,
-       getPublicPath: options.getPublicPath,
--      shareStrategy: options.shareStrategy || 'version-first',
--      ignoreOrigin: options.ignoreOrigin || false
-+      shareStrategy: options.shareStrategy || 'version-first'
-     };
+@@ -555,7 +569,7 @@
+       this.inited = false;
+       this.name = name;
+       this.tag = tag;
+-      this.suffix = suffix || ((_name$split$slice$pop = name.split('.').slice(1).pop()) == null ? void 0 : _name$split$slice$pop.replace(/(.)/, '.$1')) || '.js';
++      this.suffix = suffix || getSuffix(name);
+       if (!cacheMap[this.tag]) cacheMap[this.tag] = {};
+       cacheMap[this.tag][this.name] = this;
+     }
+@@ -680,7 +694,7 @@
+     return filepath;
+   }
+   function writeLoadShareModule(pkg, shareItem, command) {
+-    loadShareCacheMap[pkg].writeSync("\n    \n    ;() => import(" + JSON.stringify(getPreBuildLibImportId(pkg)) + ").catch(() => {});\n    // dev uses dynamic import to separate chunks\n    " + (command !== 'build' ? ";() => import(" + JSON.stringify(pkg) + ").catch(() => {});" : '') + "\n    const {loadShare} = require(\"@module-federation/runtime\")\n    const {initPromise} = require(\"" + virtualRuntimeInitStatus.getImportId() + "\")\n    const res = initPromise.then(_ => loadShare(" + JSON.stringify(pkg) + ", {\n    customShareInfo: {shareConfig:{\n      singleton: " + shareItem.shareConfig.singleton + ",\n      strictVersion: " + shareItem.shareConfig.strictVersion + ",\n      requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n    }}}))\n    const exportModule = " + (command !== 'build' ? '/*mf top-level-await placeholder replacement mf*/' : 'await ') + "res.then(factory => factory())\n    module.exports = exportModule\n  ");
++    loadShareCacheMap[pkg].writeSync("\n\n    ;() => import(" + JSON.stringify(getPreBuildLibImportId(pkg)) + ").catch(() => {});\n    // dev uses dynamic import to separate chunks\n    " + (command !== 'build' ? ";() => import(" + JSON.stringify(pkg) + ").catch(() => {});" : '') + "\n    const {loadShare} = require(\"@module-federation/runtime\")\n    const {initPromise} = require(\"" + virtualRuntimeInitStatus.getImportId() + "\")\n    const res = initPromise.then(_ => loadShare(" + JSON.stringify(pkg) + ", {\n    customShareInfo: {shareConfig:{\n      singleton: " + shareItem.shareConfig.singleton + ",\n      strictVersion: " + shareItem.shareConfig.strictVersion + ",\n      requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n    }}}))\n    const exportModule = " + (command !== 'build' ? '/*mf top-level-await placeholder replacement mf*/' : 'await ') + "res.then(factory => factory())\n    module.exports = exportModule\n  ");
    }
  
-@@ -762,6 +758,41 @@
+   var usedShares = new Set();
+@@ -707,15 +721,15 @@
+   }
+   function generateLocalSharedImportMap() {
+     var options = getNormalizeModuleFederationOptions();
+-    return "\n    const importMap = {\n      " + Array.from(getUsedShares()).map(function (pkg) {
++    return "\n    const importMap = {\n      " + (options.remotePlugin ? '' : Array.from(getUsedShares()).map(function (pkg) {
+       return "\n        " + JSON.stringify(pkg) + ": async () => {\n          let pkg = await import(\"" + getPreBuildLibImportId(pkg) + "\")\n          return pkg\n        }\n      ";
+-    }).join(',') + "\n    }\n      const usedShared = {\n      " + Array.from(getUsedShares()).map(function (key) {
++    }).join(',')) + "\n    }\n      const usedShared = {\n      " + (options.remotePlugin ? '' : Array.from(getUsedShares()).map(function (key) {
+       var shareItem = getNormalizeShareItem(key);
+       if (!shareItem) return null;
+-      return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap \n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n            }\n          }\n        ";
++      return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap\n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n            }\n          }\n        ";
+     }).filter(function (x) {
+       return x !== null;
+-    }).join(',') + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
++    }).join(',')) + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
+       var _JSON$stringify;
+       var remote = options.remotes[key];
+       if (!remote) return null;
+@@ -742,7 +756,7 @@
+   var HOST_AUTO_INIT_TAG = '__H_A_I__';
+   var hostAutoInitModule = new VirtualModule('hostAutoInit', HOST_AUTO_INIT_TAG);
+   function writeHostAutoInit() {
+-    hostAutoInitModule.writeSync("\n    const remoteEntryPromise = import(\"" + REMOTE_ENTRY_ID + "\")\n    // __tla only serves as a hack for vite-plugin-top-level-await. \n    Promise.resolve(remoteEntryPromise)\n      .then(remoteEntry => {\n        return Promise.resolve(remoteEntry.__tla)\n          .then(remoteEntry.init).catch(remoteEntry.init)\n      })\n    ");
++    hostAutoInitModule.writeSync("\n    const remoteEntryPromise = import(\"" + REMOTE_ENTRY_ID + "\")\n    // __tla only serves as a hack for vite-plugin-top-level-await.\n    Promise.resolve(remoteEntryPromise)\n      .then(remoteEntry => {\n        return Promise.resolve(remoteEntry.__tla)\n          .then(remoteEntry.init).catch(remoteEntry.init)\n      })\n    ");
+   }
+   function getHostAutoInitImportId() {
+     return hostAutoInitModule.getImportId();
+@@ -777,6 +791,41 @@
      var _command;
      var _originalConfigBase;
      var viteConfig;
@@ -1263,21 +1657,7 @@ index 492c3c9fc35f244a5f4d1eb7f9f305b2da93eac6..8a22556a6ba355fbf55a863d74986750
      return [{
        name: 'module-federation-manifest',
        apply: 'serve',
-@@ -770,12 +801,11 @@
-       },
-       configureServer: function configureServer(server) {
-         server.middlewares.use(function (req, res, next) {
--          var _req$url;
-           if (!mfManifestName) {
-             next();
-             return;
-           }
--          if (((_req$url = req.url) == null ? void 0 : _req$url.replace(/\?.*/, '')) === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
-+          if (req.url === (viteConfig.base + mfManifestName).replace(/^\/?/, '/')) {
-             res.setHeader('Content-Type', 'application/json');
-             res.setHeader('Access-Control-Allow-Origin', '*');
-             res.end(JSON.stringify(_extends({}, generateMFManifest({}), {
-@@ -818,7 +848,9 @@
+@@ -833,7 +882,9 @@
        config: function config(_config, _ref) {
          var command = _ref.command;
          if (!_config.build) _config.build = {};
@@ -1288,7 +1668,7 @@ index 492c3c9fc35f244a5f4d1eb7f9f305b2da93eac6..8a22556a6ba355fbf55a863d74986750
          _command = command;
          _originalConfigBase = _config.base;
        },
-@@ -834,38 +866,10 @@
+@@ -849,38 +900,10 @@
        generateBundle: function generateBundle(options, bundle) {
          try {
            var _this = this;
@@ -1330,7 +1710,7 @@ index 492c3c9fc35f244a5f4d1eb7f9f305b2da93eac6..8a22556a6ba355fbf55a863d74986750
            for (var _i = 0, _Object$entries = Object.entries(bundle); _i < _Object$entries.length; _i++) {
              var _Object$entries$_i = _Object$entries[_i],
                fileName = _Object$entries$_i[0],
-@@ -873,34 +877,58 @@
+@@ -888,34 +911,58 @@
              if (mfOptions.filename.replace(/[\[\]]/g, '_').replace(/\.[^/.]+$/, '') === fileData.name || fileData.name === 'remoteEntry') {
                remoteEntryFile = fileData.fileName;
              }
@@ -1410,7 +1790,7 @@ index 492c3c9fc35f244a5f4d1eb7f9f305b2da93eac6..8a22556a6ba355fbf55a863d74986750
            var fileToShareKey = {};
            return Promise.resolve(Promise.all(Array.from(getUsedShares()).map(function (shareKey) {
              try {
-@@ -912,40 +940,49 @@
+@@ -927,40 +974,49 @@
                return Promise.reject(e);
              }
            }))).then(function () {
@@ -1484,7 +1864,7 @@ index 492c3c9fc35f244a5f4d1eb7f9f305b2da93eac6..8a22556a6ba355fbf55a863d74986750
              });
            });
          } catch (e) {
-@@ -961,23 +998,23 @@
+@@ -976,23 +1032,23 @@
          path: '',
          type: 'module'
        };
@@ -1517,7 +1897,7 @@ index 492c3c9fc35f244a5f4d1eb7f9f305b2da93eac6..8a22556a6ba355fbf55a863d74986750
          return {
            id: name + ":" + shareKey,
            name: shareKey,
-@@ -985,42 +1022,40 @@
+@@ -1000,42 +1056,40 @@
            requiredVersion: shareItem.shareConfig.requiredVersion,
            assets: {
              js: {
@@ -1578,7 +1958,7 @@ index 492c3c9fc35f244a5f4d1eb7f9f305b2da93eac6..8a22556a6ba355fbf55a863d74986750
          id: name,
          name: name,
          metaData: _extends({
-@@ -1035,8 +1070,6 @@
+@@ -1050,8 +1104,6 @@
            types: {
              path: '',
              name: ''
@@ -1587,7 +1967,7 @@ index 492c3c9fc35f244a5f4d1eb7f9f305b2da93eac6..8a22556a6ba355fbf55a863d74986750
            },
            globalName: name,
            pluginVersion: '0.2.5'
-@@ -1049,7 +1082,6 @@
+@@ -1064,7 +1116,6 @@
          remotes: remotes,
          exposes: exposes
        };
@@ -1595,15 +1975,36 @@ index 492c3c9fc35f244a5f4d1eb7f9f305b2da93eac6..8a22556a6ba355fbf55a863d74986750
      }
    };
  
-@@ -1153,7 +1185,7 @@
-             if (_command === 'serve') {
-               var _viteConfig$server, _viteConfig$server2;
-               var host = typeof ((_viteConfig$server = viteConfig.server) == null ? void 0 : _viteConfig$server.host) === 'string' && viteConfig.server.host !== '0.0.0.0' ? viteConfig.server.host : 'localhost';
--              return Promise.resolve("\n          const origin = (window && " + !options.ignoreOrigin + ") ? window.origin : \"//" + host + ":" + ((_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port) + "\"\n          const remoteEntryPromise = await import(origin + \"" + (viteConfig.base + options.filename) + "\")\n          // __tla only serves as a hack for vite-plugin-top-level-await. \n          Promise.resolve(remoteEntryPromise)\n          .then(remoteEntry => {\n            return Promise.resolve(remoteEntry.__tla)\n              .then(remoteEntry.init).catch(remoteEntry.init)\n          })\n          ");
-+              return Promise.resolve("\n          const origin = window ? window.origin : \"//" + host + ":" + ((_viteConfig$server2 = viteConfig.server) == null ? void 0 : _viteConfig$server2.port) + "\"\n          const remoteEntryPromise = await import(origin + \"" + (viteConfig.base + options.filename) + "\")\n          // __tla only serves as a hack for vite-plugin-top-level-await. \n          Promise.resolve(remoteEntryPromise)\n          .then(remoteEntry => {\n            return Promise.resolve(remoteEntry.__tla)\n              .then(remoteEntry.init).catch(remoteEntry.init)\n          })\n          ");
+@@ -1281,8 +1332,10 @@
+               var loadSharePath = getLoadShareModulePath(source);
+               writeLoadShareModule(source, shared[key], command);
+               writePreBuildLibPath(source);
++              //  if (!options.remotePlugin) {
+               addUsedShares(source);
+               writeLocalSharedImportMap();
++              //   }
+               return this.resolve(loadSharePath, importer);
              }
-             return Promise.resolve(code);
-           }
+           };
+@@ -1363,7 +1416,8 @@
+     var options = normalizeModuleFederationOptions(mfUserOptions);
+     var name = options.name,
+       shared = options.shared,
+-      filename = options.filename;
++      filename = options.filename,
++      remotePlugin = options.remotePlugin;
+     if (!name) throw new Error('name is required');
+     return [{
+       name: 'vite:module-federation-config',
+@@ -1379,7 +1433,7 @@
+       entryName: 'remoteEntry',
+       entryPath: REMOTE_ENTRY_ID,
+       fileName: filename
+-    }), addEntry({
++    }), remotePlugin ? [] : addEntry({
+       entryName: 'hostInit',
+       entryPath: getHostAutoInitPath(),
+       inject: 'html'
 diff --git a/lib/plugins/pluginMFManifest.d.ts b/lib/plugins/pluginMFManifest.d.ts
 index f3d07d0414f2ef5f02237d8faf5c9e11fb4f025a..b9748a39356f1ff9177e846109bdf08c4ddaf154 100644
 --- a/lib/plugins/pluginMFManifest.d.ts
@@ -1613,23 +2014,57 @@ index f3d07d0414f2ef5f02237d8faf5c9e11fb4f025a..b9748a39356f1ff9177e846109bdf08c
 +import { Plugin } from 'vite';
  declare const Manifest: () => Plugin[];
  export default Manifest;
+diff --git a/lib/utils/VirtualModule.d.ts b/lib/utils/VirtualModule.d.ts
+index 5a7695f2a1ed263c6868e0cf8e004cfd611ab70c..ac45955ac26175b78e0ac580b25e788a68d664f5 100644
+--- a/lib/utils/VirtualModule.d.ts
++++ b/lib/utils/VirtualModule.d.ts
+@@ -1,3 +1,4 @@
++export declare function getSuffix(name: string): string;
+ /**
+  * Physically generate files as virtual modules under node_modules/__mf__virtual/*
+  */
+diff --git a/lib/utils/__tests__/VirtualModule.test.d.ts b/lib/utils/__tests__/VirtualModule.test.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..cb0ff5c3b541f646105198ee23ac0fc3d805023e
+--- /dev/null
++++ b/lib/utils/__tests__/VirtualModule.test.d.ts
+@@ -0,0 +1 @@
++export {};
 diff --git a/lib/utils/normalizeModuleFederationOptions.d.ts b/lib/utils/normalizeModuleFederationOptions.d.ts
-index e60463ba0478f409a91440388030cdb10957ff49..f528339707a1764c3bb7a70a2e5d9751a2de711f 100644
+index e29a75a42287f5dd5be6ff33e1b3412988c03c46..f7c99052535f206def39929b1a8a4a8880f5e204 100644
 --- a/lib/utils/normalizeModuleFederationOptions.d.ts
 +++ b/lib/utils/normalizeModuleFederationOptions.d.ts
-@@ -51,7 +51,6 @@ export type ModuleFederationOptions = {
-     dev?: boolean | PluginDevOptions;
-     dts?: boolean | PluginDtsOptions;
+@@ -33,6 +33,10 @@ export type ModuleFederationOptions = {
+     filename?: string;
+     library?: any;
+     name: string;
++    /**
++     * When true, prevents shared modules from being bundled into remotes
++     * and makes them rely on host-provided shared modules at runtime
++     */
+     remotes?: Record<string, string | RemoteObjectConfig> | undefined;
+     runtime?: any;
+     shareScope?: string;
+@@ -53,12 +57,22 @@ export type ModuleFederationOptions = {
      shareStrategy?: ShareStrategy;
--    ignoreOrigin?: boolean;
+     ignoreOrigin?: boolean;
+     virtualModuleDir?: string;
++    /**
++     * When true, prevents shared modules from being bundled into remotes
++     * and makes them rely on host-provided shared modules at runtime
++     */
++    remotePlugin?: boolean;
  };
  export interface NormalizedModuleFederationOptions {
      exposes: Record<string, ExposesItem>;
-@@ -69,7 +68,6 @@ export interface NormalizedModuleFederationOptions {
-     dts?: boolean | PluginDtsOptions;
-     shareStrategy: ShareStrategy;
-     getPublicPath?: string;
--    ignoreOrigin?: boolean;
- }
- interface PluginDevOptions {
-     disableLiveReload?: boolean;
+     filename: string;
+     library: any;
+     name: string;
++    /**
++     * When true, prevents shared modules from being bundled into remotes
++     * and makes them rely on host-provided shared modules at runtime
++     */
++    remotePlugin: boolean;
+     remotes: Record<string, RemoteObjectConfig>;
+     runtime: any;
+     shareScope: string;

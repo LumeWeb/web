@@ -5,6 +5,7 @@ export const env = createEnv({
   client: {
     VITE_PORTAL_DOMAIN: z.string().includes(".").optional(),
     VITE_PORTAL_DOMAIN_IS_ROOT: z.boolean().optional(),
+    VITE_PORTAL_ALLOW_LOCALHOST: z.boolean().optional(),
   },
 
   /**

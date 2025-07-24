@@ -16,7 +16,6 @@ import {
 import { useRegister } from "@refinedev/core";
 import React from "react";
 import { Link } from "react-router";
-import "@lumeweb/portal-framework-ui-core/tailwind.css";
 
 import { RegisterFormRequest } from "../../../dataProviders/auth";
 import { RegisterSchema } from "./schema";
