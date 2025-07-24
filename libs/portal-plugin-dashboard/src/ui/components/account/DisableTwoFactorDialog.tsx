@@ -13,8 +13,8 @@ import {
   FormLabel,
   FormMessage,
   Input,
-  useApiUrl,
-} from "@lumeweb/portal-framework-ui";
+} from "@lumeweb/portal-framework-ui-core";
+import { useApiUrl } from "@lumeweb/portal-framework-ui";
 import {
   useCustomMutation,
   useInvalidateAuthStore,

@@ -9,7 +9,7 @@ import {
   AlertDescription,
   AlertTitle,
   Button,
-} from "@lumeweb/portal-framework-ui";
+} from "@lumeweb/portal-framework-ui-core";
 import { useGetIdentity } from "@refinedev/core";
 import { Mail } from "lucide-react";
 import React from "react";

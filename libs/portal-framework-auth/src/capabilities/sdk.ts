@@ -1,10 +1,8 @@
 import {
   env,
   Framework,
-  getAccountSubdomain,
   getApiBaseUrl,
   SdkCapability,
-  getPluginMeta,
 } from "@lumeweb/portal-framework-core";
 import { Sdk } from "@lumeweb/portal-sdk";
 
@@ -26,18 +24,10 @@ export class Capability implements SdkCapability {
 
   async initialize(framework: Framework) {
     try {
-      /*      // Get account subdomain using the resolved portal URL
-      const accountSubdomain = getAccountSubdomain(
-        getPluginMeta(framework.meta!, "dashboard", "subdomain"),
-        {
-          isRootDomain: env.VITE_PORTAL_DOMAIN_IS_ROOT === "true",
-        },
-      );*/
-
       const apiUrl = getApiBaseUrl({
         currentUrl: framework.portalUrl,
         allowLocalhost: process.env.NODE_ENV === "development",
-        preserveSubdomain: env.VITE_PORTAL_DOMAIN_IS_ROOT !== "true",
+        preserveSubdomain: env.VITE_PORTAL_DOMAIN_IS_ROOT,
       });
 
       if (apiUrl === false) {

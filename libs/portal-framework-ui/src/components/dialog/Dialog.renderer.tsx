@@ -20,9 +20,7 @@ import React from "react";
 import type { DialogConfig } from "./Dialog.types";
 
 import { ActionItemType, ActionListRenderer } from "../actions";
-import { SchemaForm } from "../form/SchemaForm";
-import { StepSchemaForm } from "../form/StepSchemaForm";
-import { isStepFormConfig } from "../form/types";
+import { SchemaForm, StepSchemaForm, isStepFormConfig } from "../form";
 import { useDialog } from "./Dialog.context";
 
 interface DialogFooterContentProps<T extends BaseRecord = any> {
@@ -228,9 +226,8 @@ const FormDialogFooter = <T extends BaseRecord, R extends BaseRecord = any>({
 };
 
 export function DialogRenderer() {
-  const { closeDialog, currentDialog } = useDialog();
+  const { closeDialog, currentDialog, formMethods } = useDialog();
   const { open: openNotification } = useNotification();
-  const { formMethods } = useDialog();
 
   if (!currentDialog) return null;
 
@@ -269,10 +266,7 @@ export function DialogRenderer() {
       open={!!currentDialog}>
       <DialogContent
         className={cn(
-          "data-[state=open]:animate-in data-[state=closed]:animate-out",
           currentDialog.type === "custom" && "flex flex-col",
-          "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-          "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
           currentDialog.size === "lg"
             ? "max-w-2xl"
             : currentDialog.size === "md"
@@ -312,7 +306,14 @@ export function DialogRenderer() {
         }}>
         <DialogHeader className={currentDialog.classNames?.header}>
           <div
-            className={`flex items-center gap-4 mb-4 justify-${currentDialog.iconLayout === "center" ? "center" : currentDialog.iconLayout === "right" ? "end" : "start"}`}>
+            className={cn(
+              "flex items-center gap-4 mb-4",
+              currentDialog.iconLayout === "center"
+                ? "justify-center"
+                : currentDialog.iconLayout === "right"
+                  ? "justify-end"
+                  : "justify-start",
+            )}>
             {(currentDialog.icon || currentDialog.status) && (
               <div className="shrink-0">
                 {currentDialog.icon || (
@@ -335,7 +336,9 @@ export function DialogRenderer() {
             )}
             <div className="flex-1">
               <DialogTitle
-                className={!currentDialog.title ? "sr-only" : ""}
+                className={cn({
+                  "sr-only": !currentDialog.title,
+                })}
                 id="dialog-title">
                 {currentDialog.title || "Dialog"}
               </DialogTitle>

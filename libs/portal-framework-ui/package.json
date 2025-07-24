@@ -26,10 +26,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-image": "^3.0.3",
-    "esbuild-fix-imports-plugin": "^1.0.20",
-    "esbuild-plugin-inline-image": "^0.0.9",
     "fake-indexeddb": "^6.0.1",
-    "tsdown": "https://pkg.pr.new/tsdown@246",
     "vite-tsconfig-paths": "^4.3.2"
   },
   "peerDependencies": {

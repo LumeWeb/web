@@ -19,9 +19,10 @@
   },
   "private": true,
   "dependencies": {
-    "@refinedev/core": "4.57.9",
+    "@refinedev/core": "4.57.10",
     "autoprefixer": "^10.4.18",
     "postcss": "8.4.49",
+    "qs-esm": "^7.0.2",
     "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
@@ -43,6 +44,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/browser": "^3.1.3",
     "@vitest/spy": "^3.1.3",
+    "error-stack-parser-es": "^1.0.5",
     "eslint": "~8.57.1",
     "eslint-plugin-perfectionist": "^4.8.0",
     "eslint-plugin-react": "7.34.2",
@@ -68,7 +70,12 @@
       "object-inspect": "patches/object-inspect.patch",
       "@module-federation/vite": "patches/@module-federation__vite.patch",
       "@vitejs/plugin-react": "patches/@vitejs__plugin-react.patch",
-      "@module-federation/bridge-react": "patches/@module-federation__bridge-react.patch"
+      "@module-federation/bridge-react": "patches/@module-federation__bridge-react.patch",
+      "@refinedev/core": "patches/@refinedev__core.patch",
+      "@refinedev/devtools-internal": "patches/@refinedev__devtools-internal.patch",
+      "warn-once": "patches/warn-once.patch",
+      "pluralize": "patches/pluralize.patch",
+      "papaparse": "patches/papaparse.patch"
     },
     "overrides": {
       "react": "18.3.1",
@@ -80,7 +87,7 @@
       "@tanstack/react-query-devtools": "4.36.1",
       "react-hook-form": "7.54.0",
       "zod": "3.24.2",
-      "tsdown": "v0.13.0"
+      "tsdown": "v0.13.1"
     }
   },
   "packageManager": "pnpm@10.11.0"

@@ -47,6 +47,7 @@ export interface AccountInfoResponse {
   last_name: string;
   otp: boolean;
   verified: boolean;
+  created_at: boolean;
 }
 
 export interface AccountPermissionsResponse {
@@ -159,13 +160,12 @@ export interface VerifyEmailRequest {
 }
 
 export type GetApiAccountKeysParams = {
-/**
- * Ending index of the items to return (exclusive). Defaults to 10.
- */
-_end?: number;
-/**
- * Starting index of the items to return (0-based). Defaults to 0.
- */
-_start?: number;
+  /**
+   * Ending index of the items to return (exclusive). Defaults to 10.
+   */
+  _end?: number;
+  /**
+   * Starting index of the items to return (0-based). Defaults to 0.
+   */
+  _start?: number;
 };
-

@@ -52,6 +52,7 @@ export type {
   PluginState,
   PluginInitStatus,
   PluginLoadStatus,
+  WidgetRegistration,
 } from "./types/plugin";
 export * from "./types/portal";
 export { getApiBaseUrl } from "./util/getApiBaseUrl";

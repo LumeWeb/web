@@ -17,7 +17,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ inputClassName, placeholder, onChange, type, value, ...props }, ref) => {
     return (
       <BaseInput
-        className={cn("border-none bg-modal-input h-14", inputClassName)}
+        className={cn("border-none bg-input h-14", inputClassName)}
         onChange={onChange}
         placeholder={placeholder}
         ref={ref}

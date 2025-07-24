@@ -1,4 +1,12 @@
-import { BaseRecord, HttpError, OpenNotificationParams } from "@refinedev/core";
+import {
+  BaseRecord,
+  HttpError,
+  OpenNotificationParams,
+  type AutoSaveProps,
+  type FormAction,
+  type BaseKey,
+  type AutoSaveIndicatorElements,
+} from "@refinedev/core";
 import { UseFormProps as RefineUseFormProps } from "@refinedev/react-hook-form";
 import { ComponentType } from "react";
 import { Path } from "react-hook-form";
@@ -49,11 +57,18 @@ export interface FormConfig<
     successNotification?: (data: any, values: any) => OpenNotificationParams;
   };
   resource?: string;
+  action?: FormAction;
+  id?: BaseKey;
   submitLabel?: string;
   /** Alias for refineCoreProps.successNotification */
   successNotification?: (data: any, values: any) => OpenNotificationParams;
   validationSchema?: z.ZodSchema<TRequest>;
+
+  autoSave?: FormAutosaveConfig<TRequest> | boolean;
+  autoSaveStates?: AutoSaveIndicatorElements;
 }
+
+export type FormAutosaveConfig<T> = AutoSaveProps<T>["autoSave"];
 
 export interface FormFieldConfig<TRequest extends BaseRecord = any> {
   className?: string;
@@ -93,7 +108,7 @@ export interface FormFieldConfig<TRequest extends BaseRecord = any> {
    * If used with 'requires', both must allow visibility (requires passes AND show returns true).
    */
   show?: (values: TRequest) => boolean | Promise<boolean>;
-  type: FormFieldType;
+  type: FormFieldType | string;
   validation?: z.ZodTypeAny;
 }
 

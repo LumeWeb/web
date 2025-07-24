@@ -38,11 +38,11 @@ export function FormRenderer<TRequest extends FieldValues = FieldValues>({
   }
 
   return (
-    <div className="form-renderer space-y-4">
+    <>
       {fields.map((field) => (
         <FieldRenderer field={field} key={field.name as string} />
       ))}
-    </div>
+    </>
   );
 }
 

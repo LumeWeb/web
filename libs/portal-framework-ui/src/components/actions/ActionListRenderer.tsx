@@ -30,7 +30,7 @@ export const ActionListRenderer: React.FC<ActionListRendererProps> = ({
         "flex w-full",
         layout === "vertical"
           ? "flex-col space-y-3"
-          : "flex-row flex-wrap justify-end items-center",
+          : "flex-row flex-wrap justify-end items-center gap-4",
         className,
       )}>
       {actions.map((action: ActionItemConfig, index) => {

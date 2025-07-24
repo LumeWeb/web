@@ -1,8 +1,4 @@
-import type {
-  BaseRecord,
-  DataProvider,
-  GetListResponse,
-} from "@refinedev/core";
+import type { BaseRecord, DataProvider } from "@refinedev/core";
 
 import { generateFilter } from "./utils/generateFilter";
 import { generateSort } from "./utils/generateSort";
@@ -28,7 +24,7 @@ const parseResponse = async (response: any) => {
   if (!responseText.trim()) {
     return null;
   }
-  
+
   try {
     return JSON.parse(responseText);
   } catch (e) {
@@ -51,12 +47,18 @@ const addParam = (
   }
 };
 
-export const dataProvider = (apiUrl: string): DataProvider => {
+export const dataProvider = (apiUrl: string): DataProvider & { setAuthToken: (token: string | null) => void } => {
+  let authToken: string | null = null;
+
+  const setAuthToken = (token: string | null) => {
+    authToken = token;
+  };
   const baseFetch = async (
     url: string,
     method: string,
     payload?: any,
     queryParams?: any,
+    headers?: Record<string, string>,
   ) => {
     const searchParams = queryParams ? `?${stringify(queryParams)}` : "";
     const fullUrl = `${url}${searchParams}`;
@@ -64,6 +66,8 @@ export const dataProvider = (apiUrl: string): DataProvider => {
     const options: Record<string, any> = {
       headers: {
         "Content-Type": "application/json",
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        ...headers,
       },
       ...(payload ? { json: payload } : {}),
       searchParams: queryParams,
@@ -112,9 +116,17 @@ export const dataProvider = (apiUrl: string): DataProvider => {
   };
 
   return {
+    setAuthToken,
     create: async ({ meta, resource, variables }) => {
       const url = generateNestedUrl({ apiBase: apiUrl, meta, resource });
-      const response = await baseFetch(url, "POST", variables);
+      const headers = meta?.headers ?? {};
+      const response = await baseFetch(
+        url,
+        "POST",
+        variables,
+        undefined,
+        headers,
+      );
       const data = await parseResponse(response);
       return { data };
     },
@@ -127,6 +139,7 @@ export const dataProvider = (apiUrl: string): DataProvider => {
       filters,
       sorters,
     }) => {
+      const headers = meta?.headers ?? {};
       const baseUrl = generateNestedUrl({
         apiBase: apiUrl,
         meta,
@@ -149,6 +162,7 @@ export const dataProvider = (apiUrl: string): DataProvider => {
         method.toUpperCase(),
         payload,
         queryParams,
+        headers,
       );
       const data = await parseResponse(response);
       return { data };
@@ -156,8 +170,15 @@ export const dataProvider = (apiUrl: string): DataProvider => {
 
     deleteOne: async ({ id, meta, resource, variables }) => {
       const url = generateNestedUrl({ apiBase: apiUrl, id, meta, resource });
-      const response = await baseFetch(url, "DELETE", variables);
-      
+      const headers = meta?.headers ?? {};
+      const response = await baseFetch(
+        url,
+        "DELETE",
+        variables,
+        undefined,
+        headers,
+      );
+
       if (response instanceof Response && !response.ok) {
         try {
           const errorBody = await response.json();
@@ -174,7 +195,7 @@ export const dataProvider = (apiUrl: string): DataProvider => {
       if (!responseText.trim()) {
         return { data: null };
       }
-      
+
       try {
         const data = JSON.parse(responseText);
         return { data };
@@ -245,14 +266,28 @@ export const dataProvider = (apiUrl: string): DataProvider => {
 
     getOne: async ({ id, meta, resource }) => {
       const url = generateNestedUrl({ apiBase: apiUrl, id, meta, resource });
-      const response = await baseFetch(url, "GET");
+      const headers = meta?.headers ?? {};
+      const response = await baseFetch(
+        url,
+        "GET",
+        undefined,
+        undefined,
+        headers,
+      );
       const data = await parseResponse(response);
       return { data };
     },
 
     update: async ({ id, meta, resource, variables }) => {
       const url = generateNestedUrl({ apiBase: apiUrl, id, meta, resource });
-      const response = await baseFetch(url, "PATCH", variables);
+      const headers = meta?.headers ?? {};
+      const response = await baseFetch(
+        url,
+        "PATCH",
+        variables,
+        undefined,
+        headers,
+      );
       const data = await parseResponse(response);
       return { data };
     },

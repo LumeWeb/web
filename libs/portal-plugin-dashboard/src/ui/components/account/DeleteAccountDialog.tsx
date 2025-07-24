@@ -8,7 +8,7 @@ import {
   DialogTitle,
   Input,
   Label,
-} from "@lumeweb/portal-framework-ui";
+} from "@lumeweb/portal-framework-ui-core";
 import { useDelete, useLogout, useNavigation } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import React, { useState } from "react";

@@ -5,18 +5,24 @@ import type {
 } from "react-hook-form";
 
 import {
-  Form as AdapterFormProvider,
   cn,
+  Form as AdapterFormProvider,
 } from "@lumeweb/portal-framework-ui-core";
-import { BaseRecord, useNotification } from "@refinedev/core";
+import {
+  AutoSaveIndicator,
+  BaseRecord,
+  useNotification,
+  type FormAction,
+} from "@refinedev/core";
 import React, { useEffect } from "react";
 
 import { ActionListRenderer } from "../actions";
 import { useDialog } from "../dialog";
-import { adapters, FormAdapter } from "./adapters";
+import { adapters, FormAdapter, UnifiedFormReturnType } from "./adapters";
 import { FormProvider } from "./context";
 import { FormRenderer } from "./FormRenderer";
-import { type FormConfig } from "./types";
+import { FormAutosaveConfig, type FormConfig } from "./types";
+import { UseFormReturnType } from "@refinedev/react-hook-form";
 
 const defaultFooterCss = "pt-4 mt-4 border-t";
 
@@ -28,11 +34,28 @@ export interface SchemaFormProps<
   config: FormConfig<TRequest, TResponse>;
 }
 
+function computeAutoSaveConfig<T extends FieldValues>(
+  autoSave: FormConfig<T>["autoSave"],
+): FormAutosaveConfig<T> | { enabled: false } {
+  if (autoSave === true) {
+    return { enabled: true, debounce: 1000 };
+  }
+
+  if (typeof autoSave === "object" && autoSave !== null && autoSave.enabled) {
+    return {
+      enabled: true,
+      debounce: autoSave.debounce ?? 1000,
+    };
+  }
+
+  return { enabled: false };
+}
+
 export function SchemaForm<T extends FieldValues = FieldValues>({
   closeDialog = () => void 0,
   config,
 }: SchemaFormProps<T>) {
-  const { currentDialog, setFormMethods } = useDialog();
+  const { currentDialog, setFormMethods: setFormInstance } = useDialog();
   const { open: openNotification } = useNotification();
   if (!config) throw new Error("SchemaForm requires a form config");
 
@@ -44,20 +67,33 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
   const adapterName = shouldUseRefine ? "refine" : (config.adapter ?? "rhf");
   const adapter = adapters[adapterName] as FormAdapter<T>;
 
-  const methods = adapter.useForm({
+  const autoSaveConfig = computeAutoSaveConfig(config.autoSave);
+
+  const formInstance = adapter.useForm({
     defaultValues: config.defaultValues as DefaultValues<T>,
     refineCoreProps: {
       ...config.refineCoreProps,
       resource: config.resource,
+      action: config.action,
+      id: (["edit", "clone"] as FormAction[]).includes(config.action!)
+        ? config.id
+        : undefined,
+      autoSave: autoSaveConfig,
     },
     validationSchema: config.validationSchema,
   });
 
+  const autoSaveProps = shouldUseRefine
+    ? "refineCore" in formInstance
+      ? (formInstance as UseFormReturnType<T>).refineCore.autoSaveProps
+      : undefined
+    : undefined;
+
   useEffect(() => {
-    if (setFormMethods) {
-      setFormMethods(methods);
+    if (setFormInstance) {
+      setFormInstance(formInstance);
     }
-  }, [methods, setFormMethods]);
+  }, [formInstance, setFormInstance]);
 
   const cConfig = { ...config };
 
@@ -69,21 +105,30 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
     cConfig.footerClassName = undefined;
   }
 
+  const isRefineWithAutosave = shouldUseRefine && autoSaveConfig?.enabled;
+
   return (
     <FormProvider<T>
       adapter={adapterName as keyof typeof adapters}
-      config={cConfig}>
-      <AdapterFormProvider {...(methods as UseFormReturn<FieldValues>)}>
+      autoSave={autoSaveProps}
+      config={cConfig}
+      formInstance={formInstance}>
+      <AdapterFormProvider
+        {...(formInstance as unknown as UnifiedFormReturnType<FieldValues>)}>
         <form
-          className={cn("space-y-4", cConfig.formClassName, {
+          className={cn(cConfig.formClassName, {
+            "space-y-4": cConfig.layout !== "grid",
             "flex flex-col space-y-4":
               cConfig.layout === "vertical" || !cConfig.layout,
             "flex flex-row gap-4 items-end": cConfig.layout === "horizontal",
             "grid gap-4": cConfig.layout === "grid",
           })}
-          onSubmit={methods.handleSubmit(async (data) => {
+          onSubmit={formInstance.handleSubmit(async () => {
             try {
-              const response = await adapter.submitHandler(cConfig, methods);
+              const response = await adapter.submitHandler(
+                cConfig,
+                formInstance,
+              );
               // Unwrap nested response data if present
               const responseData =
                 typeof response === "object" &&
@@ -92,10 +137,10 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
                   ? (response as Record<string, unknown>).data
                   : response;
               if (cConfig.onSuccess) {
-                cConfig.onSuccess(responseData, methods.getValues());
+                cConfig.onSuccess(responseData, formInstance.getValues());
               }
               if (currentDialog?.type === "form" && currentDialog.onSuccess) {
-                currentDialog.onSuccess(responseData, methods.getValues());
+                currentDialog.onSuccess(responseData, formInstance.getValues());
               }
 
               if (cConfig.closeOnSubmit ?? true) {
@@ -116,7 +161,7 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
           })}>
           <FormRenderer fields={cConfig.fields} />
           {cConfig.footer && typeof cConfig.footer === "function" ? (
-            cConfig.footer(methods, closeDialog)
+            cConfig.footer(formInstance, closeDialog)
           ) : (
             <div className={cConfig.footerClassName}>
               <ActionListRenderer
@@ -125,13 +170,19 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
                   (Array.isArray(cConfig.footer) ? cConfig.footer : [])
                 }
                 closeDialog={closeDialog}
-                isSubmitting={methods.formState.isSubmitting}
+                isSubmitting={formInstance.formState.isSubmitting}
                 layout={
                   cConfig.actionButtonsLayout ??
                   (cConfig.actionButtons ? "horizontal" : undefined)
                 }
               />
             </div>
+          )}
+          {isRefineWithAutosave && (
+            <AutoSaveIndicator
+              {...autoSaveProps!}
+              elements={cConfig.autoSaveStates}
+            />
           )}
         </form>
       </AdapterFormProvider>

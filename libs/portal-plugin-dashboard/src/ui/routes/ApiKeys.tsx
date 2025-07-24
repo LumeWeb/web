@@ -18,8 +18,8 @@ import {
   FormItem,
   FormLabel,
   Input,
-  withTheme,
-} from "@lumeweb/portal-framework-ui";
+} from "@lumeweb/portal-framework-ui-core";
+import { withTheme } from "@lumeweb/portal-framework-ui";
 import { DeleteOneResponse, useDelete } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import { createColumnHelper } from "@tanstack/react-table";

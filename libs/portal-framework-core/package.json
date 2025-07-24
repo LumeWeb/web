@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@lumeweb/portal-sdk": "workspace:*",
-    "binpackingjs": "^3.0.2"
+    "bin-pack": "^1.0.2"
   },
   "devDependencies": {
     "@lumeweb/portal-test-util": "workspace:*",
@@ -53,6 +53,7 @@
     "react-error-boundary": "^6.0.0",
     "react-router": "^7",
     "vite-tsconfig-paths": "^4.3.2",
-    "zod": "3.24.2"
+    "zod": "3.24.2",
+    "react-is": "^19.1.1"
   }
 }
