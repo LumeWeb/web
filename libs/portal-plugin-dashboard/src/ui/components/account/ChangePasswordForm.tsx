@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
   Input,
-} from "@lumeweb/portal-framework-ui";
+} from "@lumeweb/portal-framework-ui-core";
 import { useUpdatePassword } from "@refinedev/core";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";

@@ -1,12 +1,8 @@
-import {
-  type Identity,
-} from "@lumeweb/portal-framework-core";
-import {
-  Button,
-  logoPng,
-  lumeBgPng,
-  useSdk,
-} from "@lumeweb/portal-framework-ui";
+import { type Identity } from "@lumeweb/portal-framework-core";
+import { Button } from "@lumeweb/portal-framework-ui-core";
+import { logoPng, lumeBgPng } from "@lumeweb/portal-framework-ui/images";
+
+import { useSdk } from "@lumeweb/portal-framework-ui";
 import { Sdk } from "@lumeweb/portal-sdk";
 import { useGetIdentity, useGo, useIsAuthenticated } from "@refinedev/core";
 import { useQuery } from "@tanstack/react-query";

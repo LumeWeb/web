@@ -3,6 +3,7 @@ import { BaseRecord, HttpError, FormAction } from "@refinedev/core"; // Add Form
 import {
   type UseFormProps as RefineUseFormProps,
   useForm as useRefineForm,
+  UseFormReturnType,
 } from "@refinedev/react-hook-form";
 import {
   FieldValues,
@@ -16,14 +17,18 @@ import * as z from "zod";
 
 import type { FormConfig } from "./types";
 
+export type UnifiedFormReturnType<T extends FieldValues> =
+  | UseFormReturn<T, any>
+  | UseFormReturnType<T>;
+
 export interface FormAdapter<T extends FieldValues = FieldValues> {
   Controller: typeof RHFController;
   FormProvider: typeof RHFFormProvider<T>;
   submitHandler: (
     config: FormConfig<T>,
-    methods: UseFormReturn<T, any>,
+    methods: UnifiedFormReturnType<T>,
   ) => Promise<void>;
-  useForm: (options: BaseUseFormOptions<T>) => UseFormReturn<T, any>;
+  useForm: (options: BaseUseFormOptions<T>) => UnifiedFormReturnType<T>;
 }
 
 interface BaseUseFormOptions<TFieldValues extends FieldValues = FieldValues> {

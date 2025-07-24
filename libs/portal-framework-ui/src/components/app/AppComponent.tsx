@@ -270,6 +270,7 @@ function AppContent({
     <Refine {...options}>
       <DialogProvider>
         {router && <RouterProvider router={router} />}
+        <DialogRenderer />
       </DialogProvider>
       <Toaster />
     </Refine>
@@ -364,7 +365,6 @@ function withRouteContainer(element: React.ReactNode) {
     return (
       <>
         <HostContextBridge />
-        <DialogRenderer />
         {element}
       </>
     );

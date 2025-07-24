@@ -14,7 +14,7 @@ overrides:
   '@tanstack/react-query-devtools': 4.36.1
   react-hook-form: 7.54.0
   zod: 3.24.2
-  tsdown: v0.13.0
+  tsdown: v0.13.1
 
 patchedDependencies:
   '@module-federation/bridge-react':
@@ -23,26 +23,44 @@ patchedDependencies:
   '@module-federation/vite':
     hash: 2c5934ebee96651c4d0bd205cb76b9fd7fb1995d9bae5337cc8703bb4dc532c9
     path: patches/@module-federation__vite.patch
+  '@refinedev/core':
+    hash: 64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4
+    path: patches/@refinedev__core.patch
+  '@refinedev/devtools-internal':
+    hash: d3c7d5c7b45262bbaa53bef873e2663a3b41afea259747e9c67f840150ab842d
+    path: patches/@refinedev__devtools-internal.patch
   '@vitejs/plugin-react':
     hash: 806c4c1163047d94f0e19ed32edc55adc586255404c8d3e47cf7de1ec4c93e63
     path: patches/@vitejs__plugin-react.patch
   object-inspect:
     hash: 58d41550bac212c6dff14bd065070f98aa763f5cfcdd9bf73f9f83f728e19cd8
     path: patches/object-inspect.patch
+  papaparse:
+    hash: 8db42de1f1871890a205b993db193bd7914e8201801637ba4b6247c7604f7c56
+    path: patches/papaparse.patch
+  pluralize:
+    hash: f9ce3a8cfc7c13a1b425efc74ae21a8c1186b92f559bf0dd97cced355f882350
+    path: patches/pluralize.patch
+  warn-once:
+    hash: 5720ed82c72c077a0bf56dcede206d50538aa93a6bc2c943e8610ea924298b87
+    path: patches/warn-once.patch
 
 importers:
 
   .:
     dependencies:
       '@refinedev/core':
-        specifier: 4.57.9
-        version: 4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 4.57.10
+        version: 4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       autoprefixer:
         specifier: ^10.4.18
         version: 10.4.21(postcss@8.4.49)
       postcss:
         specifier: 8.4.49
         version: 8.4.49
+      qs-esm:
+        specifier: ^7.0.2
+        version: 7.0.2
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17(ts-node@10.9.1(@types/node@22.15.20)(typescript@5.8.3))
@@ -101,6 +119,9 @@ importers:
       '@vitest/spy':
         specifier: ^3.1.3
         version: 3.1.4
+      error-stack-parser-es:
+        specifier: ^1.0.5
+        version: 1.0.5
       eslint:
         specifier: ~8.57.1
         version: 8.57.1
@@ -135,8 +156,8 @@ importers:
         specifier: ^8.0.0
         version: 8.6.14(prettier@3.5.3)
       tsdown:
-        specifier: v0.13.0
-        version: 0.13.0(typescript@5.8.3)
+        specifier: v0.13.1
+        version: 0.13.1(typescript@5.8.3)
       tsup:
         specifier: ^8.4.0
         version: 8.5.0(jiti@2.4.2)(postcss@8.4.49)(typescript@5.8.3)(yaml@2.8.0)
@@ -282,8 +303,8 @@ importers:
   libs/advanced-rest:
     dependencies:
       '@refinedev/core':
-        specifier: ^4.57.9
-        version: 4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^4.57.10
+        version: 4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       ky:
         specifier: ^1.2.0
         version: 1.8.1
@@ -318,8 +339,8 @@ importers:
         specifier: workspace:*
         version: link:../portal-sdk
       '@refinedev/core':
-        specifier: ^4.57.9
-        version: 4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^4.57.10
+        version: 4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       lucide-react:
         specifier: ^0.511.0
         version: 0.511.0(react@18.3.1)
@@ -340,8 +361,8 @@ importers:
         version: 3.24.2
     devDependencies:
       tsdown:
-        specifier: v0.13.0
-        version: 0.13.0(typescript@5.8.3)
+        specifier: v0.13.1
+        version: 0.13.1(typescript@5.8.3)
 
   libs/portal-framework-core:
     dependencies:
@@ -356,16 +377,19 @@ importers:
         version: 0.14.0(@rspack/core@1.3.11(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
       '@refinedev/react-router':
         specifier: ^1.0.1
-        version: 1.0.1(@refinedev/core@4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-router@7.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 1.0.1(@refinedev/core@4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-router@7.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@t3-oss/env-core':
         specifier: ^0.12.0
         version: 0.12.0(typescript@5.8.3)(zod@3.24.2)
-      binpackingjs:
-        specifier: ^3.0.2
-        version: 3.0.2
+      bin-pack:
+        specifier: ^1.0.2
+        version: 1.0.2
       react:
         specifier: 18.3.1
         version: 18.3.1
+      react-is:
+        specifier: ^19.1.1
+        version: 19.1.1
       react-router:
         specifier: ^7
         version: 7.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -398,8 +422,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0(react@18.3.1)
       tsdown:
-        specifier: v0.13.0
-        version: 0.13.0(typescript@5.8.3)
+        specifier: v0.13.1
+        version: 0.13.1(typescript@5.8.3)
 
   libs/portal-framework-ui:
     dependencies:
@@ -450,13 +474,13 @@ importers:
         version: 1.3.2(react@18.3.1)
       '@refinedev/react-hook-form':
         specifier: ^4.9.3
-        version: 4.10.2(@refinedev/core@4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(react@18.3.1))(react@18.3.1)
+        version: 4.10.2(@refinedev/core@4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(react@18.3.1))(react@18.3.1)
       '@refinedev/react-router':
         specifier: ^1.0.1
-        version: 1.0.1(@refinedev/core@4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-router@7.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 1.0.1(@refinedev/core@4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-router@7.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@refinedev/react-table':
         specifier: ^5.6.15
-        version: 5.6.15(@refinedev/core@4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@tanstack/react-table@8.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 5.6.15(@refinedev/core@4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@tanstack/react-table@8.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-table':
         specifier: ^8.21.3
         version: 8.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -503,18 +527,9 @@ importers:
       '@rollup/plugin-image':
         specifier: ^3.0.3
         version: 3.0.3(rollup@4.41.0)
-      esbuild-fix-imports-plugin:
-        specifier: ^1.0.20
-        version: 1.0.20
-      esbuild-plugin-inline-image:
-        specifier: ^0.0.9
-        version: 0.0.9
       fake-indexeddb:
         specifier: ^6.0.1
         version: 6.0.1
-      tsdown:
-        specifier: v0.13.0
-        version: 0.13.0(typescript@5.8.3)
       vite-tsconfig-paths:
         specifier: ^4.3.2
         version: 4.3.2(typescript@5.8.3)(vite@6.3.5(@types/node@22.15.20)(jiti@2.4.2)(lightningcss@1.30.1)(yaml@2.8.0))
@@ -646,8 +661,8 @@ importers:
         version: 1.1.2(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       tsdown:
-        specifier: v0.13.0
-        version: 0.13.0(typescript@5.8.3)
+        specifier: v0.13.1
+        version: 0.13.1(typescript@5.8.3)
 
   libs/portal-plugin-abuse:
     dependencies:
@@ -667,17 +682,17 @@ importers:
         specifier: ^0.8.10
         version: 0.8.12(patch_hash=24e5a7a8eea712aadb8f904acbf6d777793c1a227eeffcbedff1ee4c99e1f5c5)(react-dom@18.3.1(react@18.3.1))(react-router-dom@7.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@refinedev/core':
-        specifier: ^4.57.9
-        version: 4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^4.57.10
+        version: 4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@refinedev/react-hook-form':
         specifier: ^4.9.3
-        version: 4.10.2(@refinedev/core@4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(react@18.3.1))(react@18.3.1)
+        version: 4.10.2(@refinedev/core@4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(react@18.3.1))(react@18.3.1)
       '@refinedev/react-router':
         specifier: ^1.0.1
-        version: 1.0.1(@refinedev/core@4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-router@7.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 1.0.1(@refinedev/core@4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-router@7.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@refinedev/react-table':
         specifier: ^5.6.15
-        version: 5.6.15(@refinedev/core@4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@tanstack/react-table@8.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 5.6.15(@refinedev/core@4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@tanstack/react-table@8.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-query':
         specifier: 4.36.1
         version: 4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -722,8 +737,8 @@ importers:
         specifier: ^7.9.0
         version: 7.10.0(openapi-types@12.1.3)
       tsdown:
-        specifier: v0.13.0
-        version: 0.13.0(typescript@5.8.3)
+        specifier: v0.13.1
+        version: 0.13.1(typescript@5.8.3)
 
   libs/portal-plugin-abuse-report:
     dependencies:
@@ -812,8 +827,8 @@ importers:
         specifier: workspace:*
         version: link:../portal-framework-ui-core
       '@refinedev/core':
-        specifier: ^4.57.9
-        version: 4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^4.57.10
+        version: 4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-query':
         specifier: 4.36.1
         version: 4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -864,7 +879,7 @@ importers:
         version: link:../portal-sdk
       '@refinedev/react-hook-form':
         specifier: ^4.9.3
-        version: 4.10.2(@refinedev/core@4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(react@18.3.1))(react@18.3.1)
+        version: 4.10.2(@refinedev/core@4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(react@18.3.1))(react@18.3.1)
       '@t3-oss/env-core':
         specifier: ^0.12.0
         version: 0.12.0(typescript@5.8.3)(zod@3.24.2)
@@ -911,6 +926,9 @@ importers:
       '@hookform/resolvers':
         specifier: 5.0.1
         version: 5.0.1(react-hook-form@7.54.0(react@18.3.1))
+      '@lumeweb/advanced-rest-provider':
+        specifier: workspace:*
+        version: link:../advanced-rest
       '@lumeweb/portal-framework-auth':
         specifier: workspace:*
         version: link:../portal-framework-auth
@@ -928,10 +946,13 @@ importers:
         version: link:../portal-sdk
       '@refinedev/react-hook-form':
         specifier: ^4.10.2
-        version: 4.10.2(@refinedev/core@4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(react@18.3.1))(react@18.3.1)
+        version: 4.10.2(@refinedev/core@4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(react@18.3.1))(react@18.3.1)
       '@tanstack/react-query':
         specifier: 4.36.1
         version: 4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
       lucide-react:
         specifier: ^0.525.0
         version: 0.525.0(react@18.3.1)
@@ -2823,8 +2844,8 @@ packages:
   '@radix-ui/rect@1.1.1':
     resolution: {integrity: sha512-HPwpGIzkl28mWyZqG52jiqDJ12waP11Pa1lGoiyUkIEuMLBP0oeK/C89esbXrxsky5we7dfd8U58nm0SgAWpVw==}
 
-  '@refinedev/core@4.57.9':
-    resolution: {integrity: sha512-Qa5xTJfvm9panUipLWQX7VXBFgDs1FiX9syOBsLlsXFiZEPto77EAI4pCq/l2k80u5KK2h7qDEwujWvRyuObKg==}
+  '@refinedev/core@4.57.10':
+    resolution: {integrity: sha512-axZwtgpX+XcWw1A+tJfpgjeU+DPmby8c+gOSvepVwiHVeFwCLsx5Pr3oV1qFtzCOoEbwRyEKHULSX3pt7KAoXQ==}
     peerDependencies:
       '@tanstack/react-query': 4.36.1
       '@types/react': 18.3.3
@@ -4214,12 +4235,12 @@ packages:
     resolution: {integrity: sha512-aVNobHnJqLiUelTaHat9DZ1qM2w0C0Eym4LPI/3JxOnSokGVdsl1T1kN7TFvsEAD8G47A6VKQ0TVHqbBnYMJlQ==}
     engines: {node: '>=12.0.0'}
 
+  bin-pack@1.0.2:
+    resolution: {integrity: sha512-aOk0SxEon5LF9cMxQFViSKb4qccG6rs7XKyMXIb1J8f8LA2acTIWnHdT0IOTe4gYBbqgjdbuTZ5f+UP+vlh4Mw==}
+
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
     engines: {node: '>=8'}
-
-  binpackingjs@3.0.2:
-    resolution: {integrity: sha512-Rq5CrfYr4K/MNdqlPZDJ7jpd+/Em7beypGOTSlHck8E2Bth0x+mxmFoSKFsasOjDmBOG/TMb4FI9gtsLjxqOIg==}
 
   birpc@2.5.0:
     resolution: {integrity: sha512-VSWO/W6nNQdyP520F1mhf+Lc2f8pjGQOtoHHm7Ze8Go1kX7akpVIrtTa0fn+HB0QJEDVacl6aO08YE0PgXfdnQ==}
@@ -4924,6 +4945,9 @@ packages:
     resolution: {integrity: sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==}
     engines: {node: '>=6'}
 
+  error-stack-parser-es@1.0.5:
+    resolution: {integrity: sha512-5qucVt2XcuGMcEGgWI7i+yZpmpByQ8J1lHhcL7PwqCwu9FPP3VUXzT4ltHe5i2z9dePwEHcDVOAfSnHsOlCXRA==}
+
   error-stack-parser@2.1.4:
     resolution: {integrity: sha512-Sk5V6wVazPhq5MhpO+AUxJn5x7XSXGl1R93Vn7i+zS15KDVxQijejNCrz8340/2bgLBjR9GtEG8ZVKONDjcqGQ==}
 
@@ -4988,9 +5012,6 @@ packages:
 
   esbuild-fix-imports-plugin@1.0.20:
     resolution: {integrity: sha512-kpxszoCMSDhLPjwK058HjG1MGnOWDF9qfn+FXYcjO2gGFpAP6B5UoO0A5SxK67ItghByHJIAkApEAdHsSz3GQw==}
-
-  esbuild-plugin-inline-image@0.0.9:
-    resolution: {integrity: sha512-pw3ZgN2phh32Z7BpKrhRDtmI+iVCl+Gc0BLOT9croXg1MnMjRuN7aXhIQirhLeK39erkIwfFlhy6xieroBGc1Q==}
 
   esbuild-register@3.6.0:
     resolution: {integrity: sha512-H2/S7Pm8a9CL1uhp9OvjwrBh5Pvx0H8qVOxNu8Wed9Y7qv56MPtq+GGM8RJpq6glYJn9Wspr8uw7l55uyinNeg==}
@@ -7140,6 +7161,10 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
 
+  qs-esm@7.0.2:
+    resolution: {integrity: sha512-D8NAthKSD7SGn748v+GLaaO6k08Mvpoqroa35PqIQC4gtUa8/Pb/k+r0m0NnGBVbHDP1gKZ2nVywqfMisRhV5A==}
+    engines: {node: '>=18'}
+
   qs@6.13.0:
     resolution: {integrity: sha512-+38qI9SOr8tfZ4QmJNplMUxqjbe7LKvvZgWdExBOmd+egZTtjLB67Gu0HRX3u/XOq7UU2Nx6nsjvS16Z9uwfpg==}
     engines: {node: '>=0.6'}
@@ -7236,6 +7261,9 @@ packages:
 
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
+
+  react-is@19.1.1:
+    resolution: {integrity: sha512-tr41fA15Vn8p4X9ntI+yCyeGSf1TlYaY5vlTZfQmeLBrFo3psOPX6HhTDnFNL9uj3EhP0KAQ80cugCl4b4BERA==}
 
   react-keybind@0.10.0:
     resolution: {integrity: sha512-/m57VzxwSJy/w6vipfsDfCHw6n4hrYpOnWuQicZraX0e4Cfffo42yccbLaU+/SANhm/bTiiTB6XtJJd0z22S/w==}
@@ -7488,8 +7516,8 @@ packages:
     resolution: {integrity: sha512-CHhPh+UNHD2GTXNYhPWLnU8ONHdI+5DI+4EYIAOaiD63rHeYlZvyh8P+in5999TTSFgUYuKUAjzRI4mdh/p+2A==}
     engines: {node: '>=8.0'}
 
-  rolldown-plugin-dts@0.14.1:
-    resolution: {integrity: sha512-M++jFiiI0dwd9jNnta5vfxc058wwoibgeBzNMZw0QRm8jPJYxy4P3nQYlBtwQagKUDQVR0LXHSrRgXTezELEhw==}
+  rolldown-plugin-dts@0.14.3:
+    resolution: {integrity: sha512-LsUPsPV2XpACe5wikxQzYBD0qg4nyxwUkLos5oF8v8qVO9jPpH6GRg2S5ZUELFry04Ab58C9Tibbi7dEbVLp2w==}
     engines: {node: '>=20.18.0'}
     peerDependencies:
       '@typescript/native-preview': '>=7.0.0-dev.20250601.1'
@@ -7719,6 +7747,7 @@ packages:
   source-map@0.8.0-beta.0:
     resolution: {integrity: sha512-2ymg6oRBpebeZi9UUNsgQ89bhx01TcTkmNTGnNO88imTmbSgy4nfujrgVEFKWpMTEGA11EDkTt7mqObTPdigIA==}
     engines: {node: '>= 8'}
+    deprecated: The work that was done in this beta branch won't be included in future versions
 
   space-separated-tokens@2.0.2:
     resolution: {integrity: sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q==}
@@ -8055,8 +8084,8 @@ packages:
     resolution: {integrity: sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg==}
     engines: {node: '>=6'}
 
-  tsdown@0.13.0:
-    resolution: {integrity: sha512-+1ZqbLIYDAiNxtAvq9RsTg55PRvaMxGmtvRFBW2J+i4GfDKiyHAkxez1eB3EPvHG1Z917nsf2madsSeblJS3GA==}
+  tsdown@0.13.1:
+    resolution: {integrity: sha512-+rdxvqZvRKh+OwuupdQmJ2XAM31gLsdqcoo1O3aIlaD+MEXw5OaCRaCalg5wA+0nNk97f0GJliGZyUi0QlcCmQ==}
     engines: {node: '>=20.19.0'}
     hasBin: true
     peerDependencies:
@@ -10772,25 +10801,25 @@ snapshots:
 
   '@radix-ui/rect@1.1.1': {}
 
-  '@refinedev/core@4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@refinedev/core@4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@refinedev/devtools-internal': 1.1.16(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@refinedev/devtools-internal': 1.1.16(patch_hash=d3c7d5c7b45262bbaa53bef873e2663a3b41afea259747e9c67f840150ab842d)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-query': 4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/react': 18.3.3
       '@types/react-dom': 18.3.0
       lodash: 4.17.21
       lodash-es: 4.17.21
-      papaparse: 5.5.3
-      pluralize: 8.0.0
+      papaparse: 5.5.3(patch_hash=8db42de1f1871890a205b993db193bd7914e8201801637ba4b6247c7604f7c56)
+      pluralize: 8.0.0(patch_hash=f9ce3a8cfc7c13a1b425efc74ae21a8c1186b92f559bf0dd97cced355f882350)
       qs: 6.14.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       tslib: 2.8.1
-      warn-once: 0.1.1
+      warn-once: 0.1.1(patch_hash=5720ed82c72c077a0bf56dcede206d50538aa93a6bc2c943e8610ea924298b87)
     transitivePeerDependencies:
       - react-native
 
-  '@refinedev/devtools-internal@1.1.16(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@refinedev/devtools-internal@1.1.16(patch_hash=d3c7d5c7b45262bbaa53bef873e2663a3b41afea259747e9c67f840150ab842d)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@refinedev/devtools-shared': 1.1.14(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-query': 4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -10813,9 +10842,9 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@refinedev/react-hook-form@4.10.2(@refinedev/core@4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(react@18.3.1))(react@18.3.1)':
+  '@refinedev/react-hook-form@4.10.2(@refinedev/core@4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.54.0(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@refinedev/core': 4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@refinedev/core': 4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/react': 18.3.3
       '@types/react-dom': 18.3.0
       lodash: 4.17.21
@@ -10824,9 +10853,9 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       react-hook-form: 7.54.0(react@18.3.1)
 
-  '@refinedev/react-router@1.0.1(@refinedev/core@4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-router@7.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+  '@refinedev/react-router@1.0.1(@refinedev/core@4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-router@7.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@refinedev/core': 4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@refinedev/core': 4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/react': 18.3.3
       '@types/react-dom': 18.3.0
       qs: 6.14.0
@@ -10834,9 +10863,9 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       react-router: 7.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
-  '@refinedev/react-table@5.6.15(@refinedev/core@4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@tanstack/react-table@8.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@refinedev/react-table@5.6.15(@refinedev/core@4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@tanstack/react-table@8.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@refinedev/core': 4.57.9(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@refinedev/core': 4.57.10(patch_hash=64536553a446926906c2d98837092379d65a51d155d32f35287686b3c664c5b4)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-table': 8.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       lodash: 4.17.21
       lodash-es: 4.17.21
@@ -12414,9 +12443,9 @@ snapshots:
     dependencies:
       open: 8.4.2
 
-  binary-extensions@2.3.0: {}
+  bin-pack@1.0.2: {}
 
-  binpackingjs@3.0.2: {}
+  binary-extensions@2.3.0: {}
 
   birpc@2.5.0: {}
 
@@ -13062,6 +13091,8 @@ snapshots:
 
   env-paths@2.2.1: {}
 
+  error-stack-parser-es@1.0.5: {}
+
   error-stack-parser@2.1.4:
     dependencies:
       stackframe: 1.3.4
@@ -13208,8 +13239,6 @@ snapshots:
       es6-symbol: 3.1.4
 
   esbuild-fix-imports-plugin@1.0.20: {}
-
-  esbuild-plugin-inline-image@0.0.9: {}
 
   esbuild-register@3.6.0(esbuild@0.25.4):
     dependencies:
@@ -15476,7 +15505,7 @@ snapshots:
       registry-url: 3.1.0
       semver: 5.7.2
 
-  papaparse@5.5.3: {}
+  papaparse@5.5.3(patch_hash=8db42de1f1871890a205b993db193bd7914e8201801637ba4b6247c7604f7c56): {}
 
   parent-module@1.0.1:
     dependencies:
@@ -15570,7 +15599,7 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.2
 
-  pluralize@8.0.0: {}
+  pluralize@8.0.0(patch_hash=f9ce3a8cfc7c13a1b425efc74ae21a8c1186b92f559bf0dd97cced355f882350): {}
 
   pngjs@5.0.0: {}
 
@@ -15724,6 +15753,8 @@ snapshots:
       pngjs: 5.0.0
       yargs: 15.4.1
 
+  qs-esm@7.0.2: {}
+
   qs@6.13.0:
     dependencies:
       side-channel: 1.1.0
@@ -15837,6 +15868,8 @@ snapshots:
   react-is@17.0.2: {}
 
   react-is@18.3.1: {}
+
+  react-is@19.1.1: {}
 
   react-keybind@0.10.0: {}
 
@@ -16179,7 +16212,7 @@ snapshots:
       sprintf-js: 1.1.3
     optional: true
 
-  rolldown-plugin-dts@0.14.1(rolldown@1.0.0-beta.11-commit.f051675)(typescript@5.8.3):
+  rolldown-plugin-dts@0.14.3(rolldown@1.0.0-beta.11-commit.f051675)(typescript@5.8.3):
     dependencies:
       '@babel/generator': 7.28.0
       '@babel/parser': 7.28.0
@@ -16863,7 +16896,7 @@ snapshots:
       minimist: 1.2.8
       strip-bom: 3.0.0
 
-  tsdown@0.13.0(typescript@5.8.3):
+  tsdown@0.13.1(typescript@5.8.3):
     dependencies:
       ansis: 4.1.0
       cac: 6.7.14
@@ -16873,10 +16906,11 @@ snapshots:
       empathic: 2.0.0
       hookable: 5.5.3
       rolldown: 1.0.0-beta.11-commit.f051675
-      rolldown-plugin-dts: 0.14.1(rolldown@1.0.0-beta.11-commit.f051675)(typescript@5.8.3)
+      rolldown-plugin-dts: 0.14.3(rolldown@1.0.0-beta.11-commit.f051675)(typescript@5.8.3)
       semver: 7.7.2
       tinyexec: 1.0.1
       tinyglobby: 0.2.14
+      tree-kill: 1.2.2
       unconfig: 7.3.2
     optionalDependencies:
       typescript: 5.8.3
@@ -17352,7 +17386,7 @@ snapshots:
       - tsx
       - yaml
 
-  warn-once@0.1.1: {}
+  warn-once@0.1.1(patch_hash=5720ed82c72c077a0bf56dcede206d50538aa93a6bc2c943e8610ea924298b87): {}
 
   web-namespaces@2.0.1: {}
 

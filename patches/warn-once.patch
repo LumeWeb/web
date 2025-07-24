@@ -1,0 +1,10 @@
+diff --git a/index.js b/index.js
+index c86a2166f9d4e564ce5b1d6a61776bc4c5280bac..ab8bb8b47744982599ae42570a43f9ef844c369f 100644
+--- a/index.js
++++ b/index.js
+@@ -15,4 +15,4 @@ function warnOnce(condition, ...rest) {
+   }
+ }
+ 
+-module.exports = warnOnce;
++export default warnOnce;

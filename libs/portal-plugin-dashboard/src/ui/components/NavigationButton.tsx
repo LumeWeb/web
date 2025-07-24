@@ -1,4 +1,4 @@
-import { Button, cn } from "@lumeweb/portal-framework-ui";
+import { Button, cn } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
 const NavigationButton = ({

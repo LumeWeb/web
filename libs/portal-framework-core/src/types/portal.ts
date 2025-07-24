@@ -5,6 +5,7 @@ export type Identity = {
   lastName: string;
   otp: boolean;
   verified: boolean;
+  created_at: string;
 };
 
 export interface PortalMeta {

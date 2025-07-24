@@ -4,7 +4,7 @@ import image from "@rollup/plugin-image";
 import { defineConfig } from "tsdown";
 
 const commonOptions: Options = {
-  external: [/node_modules/],
+  external: [/node_modules/, /@refinedev\/.*/],
   hash: false,
   minify: false,
   platform: "browser",
@@ -24,6 +24,7 @@ const configs: Options[] = [
       "!**/image*/**",
       "!**/*image*/**",
       "!**/*.{stories,spec}.{ts,tsx}",
+      "!**/*.{stories,spec}.disabled.{ts,tsx}",
       "!__mocks__/**",
       "!tests/**",
     ],

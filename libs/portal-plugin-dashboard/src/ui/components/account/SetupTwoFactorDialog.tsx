@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
   Input,
-} from "@lumeweb/portal-framework-ui";
+} from "@lumeweb/portal-framework-ui-core";
 import { useApiUrl, usePortalMeta } from "@lumeweb/portal-framework-ui";
 import {
   useCustomMutation,

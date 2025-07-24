@@ -9,7 +9,10 @@ export default {
   dir: __dirname,
   exposes: {
     ".": "./src/index",
-    "./Account": "./src/ui/routes/Account",
+    "./widgets/account/profile": "./src/ui/widgets/account/profile",
+    "./widgets/account/bio": "./src/ui/widgets/account/bio",
+    "./account/profile": "./src/ui/routes/account.profile",
+    "./account/layout": "./src/ui/routes/account.layout",
     "./AccountVerify": "./src/ui/routes/AccountVerify",
     "./Dashboard": "./src/ui/routes/Dashboard",
     "./Index": "./src/ui/routes/Index",

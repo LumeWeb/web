@@ -1,4 +1,4 @@
-import { Tabs } from "@lumeweb/portal-framework-ui";
+import { Tabs } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
 export default function Manager() {

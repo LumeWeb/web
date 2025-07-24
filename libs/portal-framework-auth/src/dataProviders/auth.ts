@@ -144,13 +144,15 @@ export const createAuthProvider = (sdk: Sdk): AuthProvider => {
         return null;
       }
 
-      const { email, first_name, id, last_name, verified } = response.data;
+      const { email, first_name, id, last_name, verified, created_at } =
+        response.data;
       return {
         email,
         firstName: first_name,
         id,
         lastName: last_name,
         verified,
+        created_at,
       };
     },
 

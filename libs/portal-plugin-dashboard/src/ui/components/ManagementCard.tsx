@@ -4,7 +4,7 @@ import {
   cn,
   EditIcon,
   FingerPrintIcon,
-} from "@lumeweb/portal-framework-ui";
+} from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
 const ManagementCardAvatar = ({
