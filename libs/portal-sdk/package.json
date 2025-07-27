@@ -17,22 +17,14 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "orval && tsup",
+    "build": "orval && tsdown",
     "lint": "eslint ."
   },
-  "repository": {
-    "type": "git",
-    "url": "gitea@git.lumeweb.com:LumeWeb/portal-sdk.git"
-  },
   "private": false,
-  "readme": "ERROR: No README data found!",
-  "_id": "@lumeweb/portal-sdk@0.0.0",
-  "dependencies": {
-    "@lumeweb/s5-js": "workspace:*"
-  },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
+    "orval": "^7.10.0"
   }
 }
