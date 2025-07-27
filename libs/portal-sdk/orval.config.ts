@@ -1,13 +1,16 @@
 import { defineConfig } from "orval";
-
 export default defineConfig({
-  account: {
+  default: {
     input: "./src/account/swagger.yaml",
     output: {
+      baseUrl: {
+        getBaseUrlFromSpecification: true,
+      },
+      indexFiles: true,
+      mode: "tags",
       client: "fetch",
-      mode: "split",
-      target: "openapi.ts",
-      workspace: "./src/account/generated",
+      target: "account/generated",
+      workspace: "./src",
     },
   },
 });

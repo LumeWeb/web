@@ -1,5 +1,11 @@
 import type { RequestInit } from "./types.js";
 import {
+  AccountError,
+  handleFetchError,
+  handleUnknownError,
+  Result,
+} from "./types.js";
+import {
   AccountInfoResponse,
   LoginRequest,
   LoginResponse,
@@ -9,28 +15,38 @@ import {
   OTPVerifyRequest,
   PasswordResetRequest,
   PasswordResetVerifyRequest,
-  PingResponse,
+  PongResponse,
   RegisterRequest,
   ResendVerifyEmailRequest,
   UploadLimitResponse,
   VerifyEmailRequest,
-} from "./account/generated/openapi.schemas.js";
-import { handleFetchError, handleUnknownError, Result } from "./types.js";
+} from "./account/generated";
 
 export class AccountApi {
   private _jwtToken?: string;
   private readonly apiUrl: string;
 
+  /**
+   * Gets the current JWT token
+   * @returns {string|undefined} The current JWT token or undefined if not set
+   */
   private get jwtToken(): string | undefined {
     return this._jwtToken;
   }
 
+  /**
+   * Creates a new AccountApi instance
+   * @param {string} apiUrl - The base API URL
+   */
   constructor(apiUrl: string) {
     const apiUrlParsed = new URL(apiUrl);
     apiUrlParsed.hostname = `account.${apiUrlParsed.hostname}`;
     this.apiUrl = apiUrlParsed.toString();
   }
 
+  /**
+   * Clears the current JWT token
+   */
   public clearToken(): void {
     this._jwtToken = undefined;
   }
@@ -123,8 +139,8 @@ export class AccountApi {
    * Check authentication status
    * @returns Result containing ping response
    */
-  public async ping(): Promise<Result<PingResponse>> {
-    const result = await this.fetchJson<PingResponse>("/api/auth/ping", {
+  public async ping(): Promise<Result<PongResponse>> {
+    const result = await this.fetchJson<PongResponse>("/api/auth/ping", {
       method: "POST",
     });
 
@@ -187,6 +203,10 @@ export class AccountApi {
     });
   }
 
+  /**
+   * Sets the JWT token for authentication
+   * @param {string} token - The JWT token to set
+   */
   public setToken(token: string): void {
     this._jwtToken = token;
   }
@@ -287,12 +307,18 @@ export class AccountApi {
     });
   }
 
+  /**
+   * Builds fetch options with authorization headers
+   * @param {RequestInit} [init] - Optional initial request options
+   * @returns {RequestInit} The constructed request options
+   * @private
+   */
   private buildOptions(init: RequestInit = {}): RequestInit {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       ...(init.headers as Record<string, string>),
     };
-    
+
     if (this.jwtToken) {
       headers["Authorization"] = `Bearer ${this.jwtToken}`;
     }
@@ -304,6 +330,14 @@ export class AccountApi {
     };
   }
 
+  /**
+   * Makes a JSON request to the API
+   * @template T
+   * @param {string} input - The API endpoint path
+   * @param {RequestInit} [init] - Optional request initialization
+   * @returns {Promise<Result<T>>} Promise resolving to the result
+   * @private
+   */
   private async fetchJson<T>(
     input: string,
     init: RequestInit = {},
@@ -321,9 +355,30 @@ export class AccountApi {
         };
       }
 
-      const data = await response.json();
+      const responseBody = await response.json();
+
+      // Convert backend response to our standard Result format
+      if (responseBody && typeof responseBody === "object") {
+        if ("error" in responseBody) {
+          return {
+            error: new AccountError(
+              responseBody.error?.message || "Unknown error",
+              response.status,
+            ),
+            success: false,
+          };
+        }
+        if ("data" in responseBody) {
+          return {
+            data: responseBody.data as T,
+            success: true,
+          };
+        }
+      }
+
+      // Handle unwrapped success case
       return {
-        data,
+        data: responseBody as T,
         success: true,
       };
     } catch (e) {
