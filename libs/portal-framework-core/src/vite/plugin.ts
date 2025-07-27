@@ -314,22 +314,19 @@ function setupExpressMiddleware(server: any, portalConfig: PortalMetaConfig) {
     try {
       let mergedConfig = { ...portalConfig };
 
-      if (
-        portalConfig.domain &&
-        portalConfig.domain !== DEFAULT_PORTAL_DOMAIN
-      ) {
+      if (portalConfig.domain && portalConfig.domain !== DEFAULT_PORTAL_DOMAIN) {
         const url = new URL(`https://${portalConfig.domain}/api/meta`);
         if (req.query.app) {
           url.searchParams.set("app", req.query.app as string);
         }
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-        
+
         try {
           const upstreamResponse = await fetch(url.toString(), {
             signal: controller.signal
           });
-          
+
           if (!upstreamResponse.ok) {
             throw new Error(`Upstream request failed with status ${upstreamResponse.status}`);
           }
@@ -364,20 +361,25 @@ function setupExpressMiddleware(server: any, portalConfig: PortalMetaConfig) {
           if (upstreamConfig.build) {
             mergedConfig.build = upstreamConfig.build;
           }
+        } catch (error) {
+          console.error('Failed to fetch/process upstream meta config:', error);
+          // Continue with local config only
+        } finally {
+          clearTimeout(timeout);
         }
-      } catch (error) {
-        console.error('Failed to fetch/process upstream meta config:', error);
-        // Continue with local config only
-      } finally {
-        clearTimeout(timeout);
       }
 
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify(mergedConfig));
+      try {
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify(mergedConfig));
+      } catch (error) {
+        console.error("Error sending response:", error);
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify(portalConfig));
+      }
     } catch (error) {
-      console.error("Error fetching/merging meta config:", error);
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify(portalConfig));
+      console.error("Error in meta endpoint handler:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
@@ -405,7 +407,7 @@ function setupExpressMiddleware(server: any, portalConfig: PortalMetaConfig) {
       if (!token) {
         return res.status(400).json({ error: "Token is required" });
       }
-      
+
       // Note: This mock endpoint intentionally skips token validation for development purposes.
       // In production, this endpoint would be replaced by the real portal server's authentication.
 
