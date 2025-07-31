@@ -14,12 +14,6 @@ export interface FeatureState {
   state: FeatureStateStatus;
 }
 
-export interface ModuleMapping {
-  moduleId: string; // The generated module ID we use internally
-  pluginId: NamespacedId; // The plugin this module belongs to
-  remoteEntry: string; // Original remote entry URL
-}
-
 // Type safety for namespaced IDs
 export type NamespacedId = `${string}:${string}`;
 
@@ -37,7 +31,11 @@ export interface Plugin {
   widgetRegistrations?: WidgetRegistration[];
 }
 
-export type PluginInitStatus = "failed" | "initialized" | "initializing" | "pending";
+export type PluginInitStatus =
+  | "failed"
+  | "initialized"
+  | "initializing"
+  | "pending";
 export type PluginLoadStatus = "failed" | "loaded" | "loading";
 
 export interface PluginDependency {
@@ -60,9 +58,18 @@ export interface PluginState {
 export interface WidgetRegistration {
   area: string;
   componentName: string;
+  /** Number of grid columns the widget should span (positive integer) */
+  cols?: number;
+  /** Number of grid rows the widget should span (positive integer) */
+  rows?: number;
+  /** Display order within the widget area (higher values appear later) */
+  order?: number;
 }
 
-export interface WidgetRegistrationInfo {
-  componentName: string;
+export interface WidgetRegistrationInfo extends WidgetRegistration {
   pluginId: NamespacedId;
+}
+
+export interface WidgetRegistrationEntity extends WidgetRegistration {
+  component: React.FC;
 }

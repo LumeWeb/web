@@ -18,7 +18,7 @@
   },
   "scripts": {
     "build": "tsdown",
-    "dev": "tsup --watch",
+    "dev": "tsdown --watch",
     "lint": "eslint src --max-warnings 0",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -29,7 +29,8 @@
     "test:browser:ui": "vitest --browser --ui"
   },
   "dependencies": {
-    "@lumeweb/portal-sdk": "workspace:*"
+    "@lumeweb/portal-sdk": "workspace:*",
+    "binpackingjs": "^3.0.2"
   },
   "devDependencies": {
     "@lumeweb/portal-test-util": "workspace:*",
