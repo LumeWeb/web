@@ -105,7 +105,7 @@ export class Framework {
         plugin.widgetRegistrations.forEach((reg) => {
           if (reg.area === area) {
             registrations.push({
-              componentName: reg.componentName,
+              ...reg,
               pluginId: plugin.id,
             });
           }
