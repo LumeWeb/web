@@ -136,7 +136,6 @@ export function WidgetArea({
     // Define aspect ratio (width / height)
 
     // Calculate bin dimensions with padding for better packing efficiency
-    const paddingFactor = paddingFactor;
     let binWidth = Math.ceil(
       Math.sqrt(totalArea * aspectRatio * paddingFactor),
     );
