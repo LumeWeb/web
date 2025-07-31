@@ -12,6 +12,7 @@ const commonOptions: Options = {
   sourcemap: true,
   target: "esnext",
   tsconfig: "./tsconfig.json",
+  unbundle: true,
 };
 
 const configs: Options[] = [
@@ -24,6 +25,7 @@ const configs: Options[] = [
       "!**/*image*/**",
       "!**/*.{stories,spec}.{ts,tsx}",
       "!__mocks__/**",
+      "!tests/**",
     ],
     format: ["esm", "cjs"],
     outputOptions(options, format) {
