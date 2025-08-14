@@ -11,7 +11,7 @@ import schema from "@/ui/forms/updateEmail.schema";
 type FormValues = z.infer<typeof schema>;
 
 export function updateEmailDialogConfig(
-  updatePasswordHook: UseCustomMutationReturnType<FormValues, any>,
+  updateEmailHook: UseCustomMutationReturnType<FormValues, any>,
   refetch?: () => any,
 ): DialogConfig<FormValues> {
   let onSuccess = async () => {};
@@ -27,7 +27,7 @@ export function updateEmailDialogConfig(
     title: "Change Email",
     formConfig: updateEmailForm(),
     onSubmit: (req) => {
-      return updatePasswordHook.mutateAsync({
+      return updateEmailHook.mutateAsync({
         url: "/account/update-email",
         method: "post",
         dataProviderName: "account",

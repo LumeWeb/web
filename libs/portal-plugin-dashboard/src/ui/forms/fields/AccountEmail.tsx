@@ -2,14 +2,13 @@ import {
   Input,
   registerFormComponent,
   useDialog,
+  useFormContext,
 } from "@lumeweb/portal-framework-ui";
 import { Button, cn } from "@lumeweb/portal-framework-ui-core";
 import { Mail } from "lucide-react";
 import { updateEmailDialogConfig } from "@/ui/dialogs/updateEmail";
 import React from "react";
 import { useCustomMutation } from "@refinedev/core";
-import { useFormContext } from "@lumeweb/portal-framework-ui";
-import { UseFormReturnType } from "@refinedev/react-hook-form";
 
 interface AccountEmailProps {
   value: string;

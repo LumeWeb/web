@@ -13,8 +13,8 @@ export default function Profile() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
-          <User className="w-5 h-5 text-[#adf0dd]" />
+        <CardTitle className="flex items-center gap-2">
+          <User className="w-5 h-5 text-primary" />
           Profile Information
         </CardTitle>
         <CardDescription>Update your personal information</CardDescription>

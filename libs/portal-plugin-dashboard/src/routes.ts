@@ -27,6 +27,11 @@ const routes = [
         path: "",
         index: true,
       },
+      {
+        component: "account/security",
+        id: "account_security",
+        path: "security",
+      },
     ],
   },
   {
