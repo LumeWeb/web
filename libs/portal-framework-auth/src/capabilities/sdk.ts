@@ -26,8 +26,6 @@ export class Capability implements SdkCapability {
     try {
       const apiUrl = getApiBaseUrl({
         currentUrl: framework.portalUrl,
-        allowLocalhost: process.env.NODE_ENV === "development",
-        preserveSubdomain: env.VITE_PORTAL_DOMAIN_IS_ROOT,
       });
 
       if (apiUrl === false) {

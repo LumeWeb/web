@@ -10,6 +10,8 @@ import type {
   AuthProvider,
   CheckResponse,
 } from "@refinedev/core";
+import { getApiBaseUrl } from "@lumeweb/portal-framework-core";
+
 export interface AuthFormRequest extends LoginRequest {
   redirectTo?: string;
 }
@@ -177,6 +179,16 @@ export const createAuthProvider = (sdk: Sdk): AuthProvider => {
 
           if (response.data.token) {
             sdk.setAuthToken(response.data.token);
+            const baseUrl = getApiBaseUrl();
+            if (baseUrl) {
+              try {
+                if (new URL(baseUrl).hostname === "localhost") {
+                  localStorage.setItem("jwt", response.data.token);
+                }
+              } catch {
+                // Silently ignore URL parse errors
+              }
+            }
             return createAuthResponse({
               redirectTo: params.redirectTo ?? "/dashboard",
               success: true,
@@ -215,6 +227,16 @@ export const createAuthProvider = (sdk: Sdk): AuthProvider => {
 
         if (response.data.token) {
           sdk.setAuthToken(response.data.token);
+          const baseUrl = getApiBaseUrl();
+          if (baseUrl) {
+            try {
+              if (new URL(baseUrl).hostname === "localhost") {
+                localStorage.setItem("jwt", response.data.token);
+              }
+            } catch {
+              // Silently ignore URL parse errors
+            }
+          }
           return createAuthResponse({
             redirectTo: params.redirectTo ?? "/dashboard",
             success: true,
@@ -241,9 +263,17 @@ export const createAuthProvider = (sdk: Sdk): AuthProvider => {
     async logout(): Promise<AuthActionResponse> {
       const response = await sdk.account().logout();
 
-      // @ts-ignore
-      if (response.success && import.meta.env.DEV) {
-        localStorage.removeItem("jwt");
+      if (response.success) {
+        const baseUrl = getApiBaseUrl();
+        if (baseUrl) {
+          try {
+            if (new URL(baseUrl).hostname === "localhost") {
+              localStorage.removeItem("jwt");
+            }
+          } catch {
+            // Silently ignore URL parse errors
+          }
+        }
       }
 
       return createAuthResponse({
