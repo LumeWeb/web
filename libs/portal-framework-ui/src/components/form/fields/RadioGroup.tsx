@@ -6,6 +6,7 @@ import React from "react";
 
 import { registerFormComponent } from ".";
 import { FormFieldType } from "../";
+
 interface RadioGroupProps {
   disabled?: boolean;
   label?: string;

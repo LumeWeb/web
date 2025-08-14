@@ -3,6 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { Select } from "./Select";
 
 // Mock the registerFormComponent to prevent side effects
 vi.mock("./index", () => ({
@@ -13,8 +14,8 @@ vi.mock("./index", () => ({
 const mocks = vi.hoisted(() => ({
   cn: vi.fn((...classes) => classes.filter(Boolean).join(" ")), // Simple mock for classnames
   Select: vi.fn(),
-  SelectItem: vi.fn(),
   SelectContent: vi.fn(),
+  SelectItem: vi.fn(),
   SelectTrigger: vi.fn(),
   SelectValue: vi.fn(),
 }));
@@ -88,8 +89,6 @@ mocks.SelectTrigger = vi.fn(({ children, ...props }) => (
 ));
 mocks.SelectValue = vi.fn((props) => <span data-testid="select-value" {...props} />)
 
-import { Select } from "./Select";
-
 describe("Select", () => {
   afterEach(cleanup);
 
@@ -100,7 +99,7 @@ describe("Select", () => {
   ];
 
   it("renders the base select component", () => {
-    render(<Select name="testSelect" options={options} onChange={vi.fn()} />); // Add dummy onChange
+    render(<Select name="testSelect" onChange={vi.fn()} options={options} />); // Add dummy onChange
     expect(screen.getByTestId("base-select")).toBeInTheDocument();
   });
 
@@ -109,14 +108,14 @@ describe("Select", () => {
   // of the mocked trigger/value elements as siblings or elsewhere in the rendered output.
 
   it("renders select items for each option", () => {
-    render(<Select name="testSelect" options={options} onChange={vi.fn()} />);
+    render(<Select name="testSelect" onChange={vi.fn()} options={options} />);
     expect(screen.getByTestId("select-item-option1")).toBeInTheDocument();
     expect(screen.getByTestId("select-item-option2")).toBeInTheDocument();
     expect(screen.getByTestId("select-item-option3")).toBeInTheDocument();
   });
 
   it("uses option value for item value and label for item text", () => {
-    render(<Select name="testSelect" options={options} onChange={vi.fn()} />); // Add dummy onChange
+    render(<Select name="testSelect" onChange={vi.fn()} options={options} />); // Add dummy onChange
     expect(screen.getByTestId("select-item-option1")).toHaveValue("option1");
     expect(screen.getByTestId("select-item-option1")).toHaveTextContent(
       "option1",
@@ -128,7 +127,7 @@ describe("Select", () => {
   });
 
   it("passes the correct value to the base select", () => {
-    render(<Select name="testSelect" options={options} value="option2" onChange={vi.fn()} />);
+    render(<Select name="testSelect" onChange={vi.fn()} options={options} value="option2" />);
     const select = screen.getByTestId("base-select");
     expect(select).toHaveValue("option2");
   });
@@ -152,7 +151,7 @@ describe("Select", () => {
   });
 
   it("marks the base select as required when required prop is true", () => {
-    render(<Select name="testSelect" options={options} required onChange={vi.fn()} />);
+    render(<Select name="testSelect" onChange={vi.fn()} options={options} required />);
     const select = screen.getByTestId("base-select");
     expect(select).toBeRequired();
   });

@@ -2,34 +2,35 @@ import { type FormConfig, FormFieldType } from "@lumeweb/portal-framework-ui";
 
 export default function editProfileForm(): FormConfig {
   return {
-    layout: "grid",
-    formClassName: "grid-cols-1 md:grid-cols-2 gap-4", // Add md:grid-cols-2 back
-    footerClassName: "",
+    action: "edit",
+    actionButtons: false,
     autoSave: true,
     autoSaveStates: {
       idle: <></>,
     },
-    resource: "account",
-    refine: true,
-    id: "",
-    action: "edit",
     fields: [
       {
+        label: "First Name",
         name: "first_name",
         type: FormFieldType.TEXT,
-        label: "First Name",
       },
       {
+        label: "Last Name",
         name: "last_name",
         type: FormFieldType.TEXT,
-        label: "Last Name",
       },
       {
+        className: "col-span-2",
+        label: "Email Address",
         name: "email",
         type: "core:dashboard:account.email",
-        label: "Email Address",
-        className: "col-span-2",
       },
     ],
+    footerClassName: "",
+    formClassName: "grid-cols-1 md:grid-cols-2 gap-4",
+    id: "",
+    layout: "grid",
+    refine: true,
+    resource: "account",
   };
 }

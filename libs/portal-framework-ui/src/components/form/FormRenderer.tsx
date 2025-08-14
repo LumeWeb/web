@@ -133,7 +133,7 @@ function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
     checkVisibility(); // Initial check
 
     return () => subscription.unsubscribe();
-  }, [dependencies, field, getValues, watch]);
+  }, [dependencies, field, getValues, isLoading, watch]);
 
   if (isLoading) {
     return (
@@ -187,6 +187,7 @@ function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
                 placeholder={field.placeholder}
                 required={field.required}
                 type={field.type}
+                {...field.inputProps}
               />
             ) : field.component ? (
               <field.component {...formFieldRenderProps} />

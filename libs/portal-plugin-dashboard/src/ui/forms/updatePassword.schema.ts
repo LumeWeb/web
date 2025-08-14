@@ -10,8 +10,8 @@ const schema = z
     if (data.new_password !== data.retype_password) {
       return ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["retype_password"],
         message: "Passwords do not match",
+        path: ["retype_password"],
       });
     }
     return true;

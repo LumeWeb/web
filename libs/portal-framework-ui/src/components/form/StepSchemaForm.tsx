@@ -1,14 +1,38 @@
 import type { FieldValues } from "react-hook-form";
 
-import { Button, Spinner } from "@lumeweb/portal-framework-ui-core";
 import { BaseRecord } from "@refinedev/core";
 import React, { useCallback, useMemo, useState } from "react";
 
-import type { FormConfig } from "./types";
+import type { FormConfig, StepFormFooterRenderer } from "./types";
 
 import { useDialog } from "../dialog/Dialog.context";
 import { SchemaForm } from "./SchemaForm";
+import { StepFormFooter } from "./StepFormFooter";
 import { type StepFormConfig } from "./types";
+
+const defaultStepFormFooter: StepFormFooterRenderer = (
+  stepMethods,
+  formMethods,
+  closeDialog,
+  currentDialog,
+) => (
+  <StepFormFooter
+    closeDialog={closeDialog}
+    currentStep={stepMethods.currentStep}
+    formMethods={formMethods}
+    handleNext={stepMethods.handleNext}
+    handlePrevious={stepMethods.handlePrevious}
+    handleSubmit={stepMethods.handleSubmit}
+    isFirstStep={stepMethods.isFirstStep}
+    isLastStep={stepMethods.isLastStep}
+    submitLabel={
+      currentDialog?.type === "form"
+        ? currentDialog.formConfig?.submitLabel
+        : undefined
+    }
+    totalSteps={stepMethods.totalSteps}
+  />
+);
 
 interface StepSchemaFormProps<
   TRequest extends FieldValues = FieldValues,
@@ -22,7 +46,7 @@ export function StepSchemaForm<
   TRequest extends FieldValues = FieldValues,
   TResponse extends BaseRecord = any,
 >({ closeDialog, config }: StepSchemaFormProps<TRequest, TResponse>) {
-  const { formMethods } = useDialog();
+  const { currentDialog, formMethods } = useDialog();
   const { defaultStep = 0, isBackValidate = false } = config.stepBehavior ?? {};
   const [currentStep, setCurrentStep] = useState(defaultStep);
   const totalSteps = config.steps.length;
@@ -47,19 +71,44 @@ export function StepSchemaForm<
   };
 
   const handleNext = useCallback(async () => {
-    if (isLastStep || !formMethods?.trigger) return;
+    if (isLastStep || !formMethods?.handleSubmit) return;
 
-    const fieldsToValidate = getFieldsForStep(currentStep);
-    if (fieldsToValidate.length === 0) {
-      go(currentStep + 1);
-      return;
-    }
+    const currentStepConfig = config.steps[currentStep];
 
-    const isValid = await formMethods.trigger(fieldsToValidate);
-    if (isValid) {
-      go(currentStep + 1);
-    }
-  }, [formMethods, currentStep, isLastStep, go, getFieldsForStep]);
+    await formMethods.handleSubmit(
+      async (data: Partial<TRequest>) => {
+        try {
+          let submitResult: any;
+          if (currentStepConfig.onStepSubmit) {
+            submitResult = await currentStepConfig.onStepSubmit(data);
+          }
+
+          // Call step success handler with both data and submit result
+          if (currentStepConfig.onStepSuccess) {
+            await currentStepConfig.onStepSuccess(submitResult, data);
+          }
+
+          // Only proceed to next step if submission succeeds
+          go(currentStep + 1);
+        } catch (error) {
+          if (currentStepConfig.onStepError) {
+            await currentStepConfig.onStepError(error as Error);
+          }
+          throw error;
+        }
+      },
+      (errors: any) => {
+        console.error("Validation errors:", errors);
+      },
+    )();
+  }, [
+    formMethods,
+    currentStep,
+    isLastStep,
+    go,
+    getFieldsForStep,
+    config.steps,
+  ]);
 
   const handlePrevious = useCallback(async () => {
     if (isFirstStep) return;
@@ -69,6 +118,18 @@ export function StepSchemaForm<
       const isValid = await formMethods.trigger(fieldsToValidate);
       if (!isValid) return;
     }
+
+    // Call onStepSubmit for previous step if going back
+    const prevStepConfig = config.steps[currentStep - 1];
+    if (prevStepConfig.onStepSubmit) {
+      const prevFields = getFieldsForStep(currentStep - 1);
+      const prevStepValues = prevFields.reduce((acc, field) => {
+        (acc as any)[field] = formMethods?.getValues(field);
+        return acc;
+      }, {} as Partial<TRequest>);
+      await prevStepConfig.onStepSubmit(prevStepValues);
+    }
+
     go(currentStep - 1);
   }, [
     formMethods,
@@ -77,29 +138,87 @@ export function StepSchemaForm<
     isBackValidate,
     go,
     getFieldsForStep,
+    config.steps,
   ]);
 
   const triggerSubmit = useCallback(() => {
     if (!formMethods?.handleSubmit) return;
 
+    const currentStepConfig = config.steps[currentStep];
+
     formMethods.handleSubmit(
-      async (data: TRequest) => {
-        console.log("Step form submitted", data);
+      async (data: Partial<TRequest>) => {
+        try {
+          if (currentStepConfig.onStepSubmit) {
+            await currentStepConfig.onStepSubmit(data);
+          }
+
+          if (isLastStep) {
+            const allValues = formMethods.getValues() as TRequest;
+            if (config.onFinish) {
+              await config.onFinish(allValues);
+            }
+            if (config.onSuccess) {
+              await config.onSuccess(allValues, allValues);
+            }
+            // Close dialog after successful final step submission if available
+            closeDialog?.();
+          }
+        } catch (error) {
+          if (currentStepConfig.onStepError) {
+            await currentStepConfig.onStepError(error as Error);
+          }
+          throw error;
+        }
       },
       (errors: any) => {
         console.error("Validation errors:", errors);
       },
     )();
-  }, [formMethods]);
+  }, [formMethods, config, currentStep, isLastStep, closeDialog]);
+
+  const getStepFooter = useCallback(
+    (methods: any, closeDlg: () => void, dialog: any) => {
+      const stepMethods = {
+        currentStep,
+        gotoStep: go,
+        handleNext,
+        handlePrevious,
+        isFirstStep,
+        isLastStep,
+        totalSteps,
+      };
+
+      const footerFn = config.footer ?? defaultStepFormFooter;
+      return footerFn(
+        { ...stepMethods, handleSubmit: triggerSubmit },
+        methods,
+        closeDlg,
+        dialog,
+      );
+    },
+    [
+      config.footer,
+      currentStep,
+      go,
+      handleNext,
+      handlePrevious,
+      isFirstStep,
+      isLastStep,
+      totalSteps,
+      triggerSubmit,
+    ],
+  );
 
   const schemaFormConfigForCurrentStep: FormConfig<TRequest, TResponse> =
     useMemo(
       () => ({
         ...config,
         fields: currentStepFields,
-        footer: null,
+        footer: config.footer === false ? false : getStepFooter,
+        validationSchema: config.steps[currentStep]?.validationSchema,
       }),
-      [config, currentStepFields],
+      [config, currentStepFields, currentStep, getStepFooter],
     );
 
   return (
@@ -108,53 +227,6 @@ export function StepSchemaForm<
         closeDialog={closeDialog}
         config={schemaFormConfigForCurrentStep}
       />
-
-      {config.footer && formMethods && typeof config.footer === "function" ? (
-        config.footer(
-          {
-            currentStep,
-            gotoStep: go,
-            handleNext,
-            handlePrevious,
-            isFirstStep,
-            isLastStep,
-            totalSteps,
-          },
-          formMethods,
-          closeDialog,
-        )
-      ) : formMethods ? (
-        <div className="flex justify-between items-center pt-4 mt-4 border-t">
-          <Button
-            disabled={isFirstStep || formMethods.formState?.isSubmitting}
-            onClick={handlePrevious}
-            type="button"
-            variant="outline">
-            Previous
-          </Button>
-          {isLastStep ? (
-            <Button
-              disabled={formMethods.formState?.isSubmitting}
-              onClick={triggerSubmit}
-              type="button">
-              {formMethods.formState?.isSubmitting ? (
-                <>
-                  <Spinner className="mr-2" size="small" /> Submitting...
-                </>
-              ) : (
-                config.submitLabel || "Submit"
-              )}
-            </Button>
-          ) : (
-            <Button
-              disabled={formMethods.formState?.isSubmitting}
-              onClick={handleNext}
-              type="button">
-              Next
-            </Button>
-          )}
-        </div>
-      ) : null}
     </>
   );
 }

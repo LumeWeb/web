@@ -1,4 +1,4 @@
-import { Input as BaseInput, cn } from "@lumeweb/portal-framework-ui-core";
+import { cn, Input as BaseInput } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
 import { registerFormComponent } from ".";
@@ -14,7 +14,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ inputClassName, placeholder, onChange, type, value, ...props }, ref) => {
+  ({ inputClassName, onChange, placeholder, type, value, ...props }, ref) => {
     return (
       <BaseInput
         className={cn("border-none bg-input h-14", inputClassName)}

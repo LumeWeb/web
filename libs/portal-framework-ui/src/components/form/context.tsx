@@ -7,12 +7,12 @@ import { FormConfig } from "./types";
 
 interface FormContextType<TFieldValues extends FieldValues = FieldValues> {
   adapter: keyof typeof adapters;
-  config: FormConfig<TFieldValues>;
   autoSave?: {
-    status: "loading" | "error" | "idle" | "success";
-    error: any;
     data: any;
+    error: any;
+    status: "error" | "idle" | "loading" | "success";
   };
+  config: FormConfig<TFieldValues>;
   formInstance: UnifiedFormReturnType<TFieldValues>;
 }
 
@@ -20,13 +20,13 @@ const FormContext = createContext<FormContextType<any> | undefined>(undefined);
 
 export function FormProvider<TFieldValues extends FieldValues = FieldValues>({
   adapter,
+  autoSave,
   children,
   config,
-  autoSave,
   formInstance,
 }: FormContextType & React.FC) {
   return (
-    <FormContext.Provider value={{ adapter, config, autoSave, formInstance }}>
+    <FormContext.Provider value={{ adapter, autoSave, config, formInstance }}>
       {children}
     </FormContext.Provider>
   );

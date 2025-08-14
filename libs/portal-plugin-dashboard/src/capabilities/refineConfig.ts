@@ -1,5 +1,7 @@
 import type { RefineProps } from "@refinedev/core";
 
+import dataProvider from "@lumeweb/advanced-rest-provider";
+import { DATA_PROVIDER_NAME } from "@lumeweb/portal-framework-auth";
 import {
   env,
   Framework,
@@ -7,7 +9,6 @@ import {
   getPluginMeta,
   RefineConfigCapability,
 } from "@lumeweb/portal-framework-core";
-import dataProvider from "@lumeweb/advanced-rest-provider";
 
 export class Capability implements RefineConfigCapability {
   readonly id: string = "core:dashboard:refine-config";
@@ -27,33 +28,51 @@ export class Capability implements RefineConfigCapability {
       acctProvider.setAuthToken(token);
     }
 
+    // Normalize dataProvider to always be a Record<string, any>
+    const existingDataProvider = existing?.dataProvider;
+    const normalizedDataProvider = 
+      typeof existingDataProvider === 'function' 
+        ? { default: existingDataProvider }
+        : typeof existingDataProvider === 'string'
+          ? { default: existingDataProvider }
+          : existingDataProvider || {};
+
+    // Merge resources without referencing `mergedConfig` during initialization
+    const existingResources = existing?.resources ?? [];
+    const hasAccountResource = existingResources.some((r) => r.name === DATA_PROVIDER_NAME);
+    const mergedResources = hasAccountResource
+      ? existingResources
+      : [
+          ...existingResources,
+          {
+            meta: {
+              dataProviderName: DATA_PROVIDER_NAME,
+              template: "/account",
+            },
+            name: DATA_PROVIDER_NAME,
+          },
+        ];
+
     const mergedConfig = {
       ...existing,
-      options: {},
-      resources: [
-        {
-          name: "account",
-          meta: {
-            template: "/account",
-            dataProviderName: "account",
-          },
-        },
-      ],
-      // @ts-ignore
       dataProvider: {
-        ...existing?.dataProvider,
-        account: acctProvider,
+        ...normalizedDataProvider,
+        [DATA_PROVIDER_NAME]: acctProvider,
       },
+      options: { ...(existing?.options ?? {}) },
+      resources: mergedResources,
     };
     return {
+      dataProvider: {
+        ...(mergedConfig.dataProvider || {}),
+        [DATA_PROVIDER_NAME]: acctProvider,
+      },
       options: {
-        ...mergedConfig?.options,
         syncWithLocation: true,
         warnWhenUnsavedChanges: true,
+        ...mergedConfig?.options,
       },
       resources: [...(mergedConfig.resources || [])],
-      // @ts-ignore
-      dataProvider: { ...(mergedConfig.dataProvider || {}) },
     } satisfies Partial<RefineProps>;
   }
 
@@ -73,7 +92,7 @@ export class Capability implements RefineConfigCapability {
     }
 
     try {
-      const apiDomain = new URL(apiUrl as string);
+      const apiDomain = new URL(apiUrl);
       this.#apiUrl = `${apiDomain.protocol}//${subdomain}.${apiDomain.hostname}/api`;
     } catch (error) {
       throw new Error(`Failed to construct API URL: ${error.message}`);

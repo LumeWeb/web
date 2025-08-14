@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   act,
   cleanup,
@@ -9,11 +8,12 @@ import {
   waitForElementToBeRemoved,
 } from "@testing-library/react";
 import React from "react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { ActionItemType } from "../actions";
 import { DialogProvider, useDialog } from "./Dialog.context";
 import { DialogRenderer } from "./Dialog.renderer";
 import { DialogConfig } from "./Dialog.types";
-import { ActionItemType } from "../actions";
 
 // Define spy before it's used in mock
 const openNotificationSpy = vi.fn();
@@ -24,8 +24,38 @@ vi.mock("@lumeweb/portal-framework-ui-core", async (importOriginal) => {
     await importOriginal<typeof import("@lumeweb/portal-framework-ui-core")>();
   return {
     ...actual,
+    // Fix: Ensure children are rendered correctly without extra comments
+    Button: ({ children, disabled, onClick, variant, ...props }: any) => {
+      // Debug logging removed
+      return (
+        <button
+          data-testid="mock-button"
+          data-variant={variant}
+          disabled={disabled}
+          onClick={onClick}
+          {...props}>
+          {children}
+        </button>
+      );
+    },
+    // More robust cn mock that handles objects
+    cn: (...args: any[]) => {
+      const classes: string[] = [];
+      args.forEach((arg) => {
+        if (typeof arg === "string") {
+          classes.push(arg);
+        } else if (typeof arg === "object" && arg !== null) {
+          Object.keys(arg).forEach((key) => {
+            if (arg[key]) {
+              classes.push(key);
+            }
+          });
+        }
+      });
+      return classes.filter(Boolean).join(" ");
+    },
     // Mocking key components to control their behavior in tests
-    Dialog: ({ open, onOpenChange, children, ...props }: any) => {
+    Dialog: ({ children, onOpenChange, open, ...props }: any) => {
       // Debug logging removed
       // Add a log to check the 'open' prop value after a potential state update
       React.useEffect(() => {
@@ -43,7 +73,7 @@ vi.mock("@lumeweb/portal-framework-ui-core", async (importOriginal) => {
 
       return (
         // Add a test helper button to trigger onOpenChange(false)
-        <div data-testid="mock-dialog" data-open={open} {...props}>
+        <div data-open={open} data-testid="mock-dialog" {...props}>
           {/* Conditionally render children based on the 'open' prop */}
           {open && childrenWithOpenProp} // Render childrenWithOpenProp here
           {/* Add a button outside the content to simulate outside click */}
@@ -56,12 +86,12 @@ vi.mock("@lumeweb/portal-framework-ui-core", async (importOriginal) => {
                   onOpenChange(false); // This simulates the dialog closing itself
                 }}
                 style={{
+                  height: "10px",
+                  left: 0,
+                  opacity: 0,
                   position: "fixed",
                   top: 0,
-                  left: 0,
                   width: "10px",
-                  height: "10px",
-                  opacity: 0,
                   zIndex: 9999,
                 }} // Make it invisible and ensure it's clickable
               />
@@ -71,10 +101,10 @@ vi.mock("@lumeweb/portal-framework-ui-core", async (importOriginal) => {
     },
     // Modify DialogContent to accept and use the 'open' prop, relying on conditional rendering
     DialogContent: ({
-      open,
       children,
       className,
       onInteractOutside,
+      open,
       ...props
     }: any) => {
       // Debug logging removed
@@ -99,7 +129,7 @@ vi.mock("@lumeweb/portal-framework-ui-core", async (importOriginal) => {
         return null; // Don't render anything if dialog is closed
       }
       return (
-        <div data-testid="mock-dialog-content" className={className} {...props}>
+        <div className={className} data-testid="mock-dialog-content" {...props}>
           {childrenWithOpenProp} {/* Render childrenWithOpenProp here */}
           {/* Add a button inside the content to explicitly trigger onInteractOutside */}
           {onInteractOutside && (
@@ -110,33 +140,17 @@ vi.mock("@lumeweb/portal-framework-ui-core", async (importOriginal) => {
                 onInteractOutside(e); // Pass the event
               }}
               style={{
-                position: "absolute",
-                top: 0,
-                right: 0,
-                width: "10px",
                 height: "10px",
                 opacity: 0,
+                position: "absolute",
+                right: 0,
+                top: 0,
+                width: "10px",
                 zIndex: 9999,
               }} // Make it invisible and ensure it's clickable
             />
           )}
         </div>
-      );
-    },
-    DialogHeader: ({ children, className, ...props }: any) => {
-      // Debug logging removed
-      return (
-        <div data-testid="mock-dialog-header" className={className} {...props}>
-          {children}
-        </div>
-      );
-    },
-    DialogTitle: ({ children, className, ...props }: any) => {
-      // Debug logging removed
-      return (
-        <h2 data-testid="mock-dialog-title" className={className} {...props}>
-          {children}
-        </h2>
       );
     },
     DialogDescription: ({ children, ...props }: any) => {
@@ -150,31 +164,25 @@ vi.mock("@lumeweb/portal-framework-ui-core", async (importOriginal) => {
     DialogFooter: ({ children, className, ...props }: any) => {
       // Debug logging removed
       return (
-        <div data-testid="mock-dialog-footer" className={className} {...props}>
+        <div className={className} data-testid="mock-dialog-footer" {...props}>
           {children}
         </div>
       );
     },
-    // Fix: Ensure children are rendered correctly without extra comments
-    Button: ({ children, onClick, variant, disabled, ...props }: any) => {
+    DialogHeader: ({ children, className, ...props }: any) => {
       // Debug logging removed
       return (
-        <button
-          data-testid="mock-button"
-          onClick={onClick}
-          data-variant={variant}
-          disabled={disabled}
-          {...props}>
+        <div className={className} data-testid="mock-dialog-header" {...props}>
           {children}
-        </button>
+        </div>
       );
     },
-    Spinner: ({ ...props }: any) => {
+    DialogTitle: ({ children, className, ...props }: any) => {
       // Debug logging removed
       return (
-        <span data-testid="mock-spinner" {...props}>
-          Loading...
-        </span>
+        <h2 className={className} data-testid="mock-dialog-title" {...props}>
+          {children}
+        </h2>
       );
     },
     // Mock DropdownMenu and its children with basic elements
@@ -192,32 +200,16 @@ vi.mock("@lumeweb/portal-framework-ui-core", async (importOriginal) => {
         return child;
       });
       return (
-        <div data-testid="mock-dropdown-menu" data-open={open} {...props}>
+        <div data-open={open} data-testid="mock-dropdown-menu" {...props}>
           {childrenWithOpenProp}
         </div>
       ); // Add data-open for debugging
     },
-    DropdownMenuTrigger: ({ children, asChild, ...props }: any) => {
-      // Debug logging removed
-      if (asChild) {
-        const child = React.Children.only(children);
-        return React.cloneElement(child, {
-          ...props,
-          ...child.props,
-          "data-testid": "mock-dropdown-trigger",
-        });
-      }
-      return (
-        <button data-testid="mock-dropdown-trigger" {...props}>
-          {children}
-        </button>
-      );
-    },
     // Modify DropdownMenuContent mock to accept and use the open prop from the dialog state
     DropdownMenuContent: ({
-      open, // Accept open prop passed from Mock DropdownMenu
       children,
       className,
+      open, // Accept open prop passed from Mock DropdownMenu
       // Removed closeDialog prop here as it's passed to children directly by DialogRenderer
       ...props
     }: any) => {
@@ -234,15 +226,15 @@ vi.mock("@lumeweb/portal-framework-ui-core", async (importOriginal) => {
       // is set up to receive it.
       return (
         <div
-          data-testid="mock-dropdown-content"
           className={className}
+          data-testid="mock-dropdown-content"
           {...props}>
           {children}
         </div>
       );
     },
     // Modify DropdownMenuItem mock to accept and use closeDialog
-    DropdownMenuItem: ({ children, onSelect, closeDialog, ...props }: any) => (
+    DropdownMenuItem: ({ children, closeDialog, onSelect, ...props }: any) => (
       <button
         data-testid="mock-dropdown-item"
         onClick={() => {
@@ -255,21 +247,29 @@ vi.mock("@lumeweb/portal-framework-ui-core", async (importOriginal) => {
         {children}
       </button>
     ),
-    // More robust cn mock that handles objects
-    cn: (...args: any[]) => {
-      const classes: string[] = [];
-      args.forEach((arg) => {
-        if (typeof arg === "string") {
-          classes.push(arg);
-        } else if (typeof arg === "object" && arg !== null) {
-          Object.keys(arg).forEach((key) => {
-            if (arg[key]) {
-              classes.push(key);
-            }
-          });
-        }
-      });
-      return classes.filter(Boolean).join(" ");
+    DropdownMenuTrigger: ({ asChild, children, ...props }: any) => {
+      // Debug logging removed
+      if (asChild) {
+        const child = React.Children.only(children);
+        return React.cloneElement(child, {
+          ...props,
+          ...child.props,
+          "data-testid": "mock-dropdown-trigger",
+        });
+      }
+      return (
+        <button data-testid="mock-dropdown-trigger" {...props}>
+          {children}
+        </button>
+      );
+    },
+    Spinner: ({ ...props }: any) => {
+      // Debug logging removed
+      return (
+        <span data-testid="mock-spinner" {...props}>
+          Loading...
+        </span>
+      );
     },
   };
 });
@@ -318,6 +318,16 @@ vi.mock("../form/types", () => ({
   isStepFormConfig: vi.fn((config) => !!config.steps),
 }));
 vi.mock("../actions", () => ({
+  // Ensure mock ActionItemType matches the real one including BUTTON
+  ActionItemType: {
+    BUTTON: "button",
+    CANCEL: "cancel",
+    CUSTOM: "custom",
+    DATE: "date",
+    FILE: "file",
+    LINK: "link",
+    SUBMIT: "submit",
+  },
   ActionListRenderer: ({
     actions,
     closeDialog,
@@ -327,16 +337,17 @@ vi.mock("../actions", () => ({
   }: any) => {
     // Debug logging removed
     return (
-      <div data-testid="mock-action-list" data-layout={layout} {...props}>
+      <div data-layout={layout} data-testid="mock-action-list" {...props}>
         {actions.map((action: any, index: number) => (
           <button
-            key={index}
             // Add data-testid for 'button' type actions
             data-testid={
               action.type === "button"
                 ? "mock-action-button"
                 : `mock-action-${action.type}`
             }
+            disabled={isSubmitting && action.type === "submit"}
+            key={index}
             onClick={() => {
               // Debug logging removed
               // Call closeDialog with 'user' source for cancel action
@@ -347,23 +358,12 @@ vi.mock("../actions", () => ({
               }
               // Call custom onClick if present
               if (action.onClick) action.onClick();
-            }}
-            disabled={isSubmitting && action.type === "submit"}>
+            }}>
             {action.label || action.type}
           </button>
         ))}
       </div>
     );
-  },
-  // Ensure mock ActionItemType matches the real one including BUTTON
-  ActionItemType: {
-    CANCEL: "cancel",
-    SUBMIT: "submit",
-    BUTTON: "button",
-    CUSTOM: "custom",
-    LINK: "link",
-    DATE: "date",
-    FILE: "file",
   },
 }));
 
@@ -391,7 +391,7 @@ describe("DialogRenderer", () => {
   it("should render a dialog when currentDialog is set", async () => {
     render(
       <DialogProvider>
-        <DialogTrigger config={{ type: "alert", title: "Test Dialog" }} />
+        <DialogTrigger config={{ title: "Test Dialog", type: "alert" }} />
         <DialogRenderer />
       </DialogProvider>,
     );
@@ -412,9 +412,9 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Test Title",
             description: "Test Description",
+            title: "Test Title",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -441,9 +441,9 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "custom",
-            title: "Custom Dialog",
             content: <CustomContent />,
+            title: "Custom Dialog",
+            type: "custom",
           }}
         />
         <DialogRenderer />
@@ -470,12 +470,12 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "confirm",
-            title: "Confirm Action",
             cancelText: "No",
             confirmText: "Yes",
-            onConfirm: onConfirmMock,
             onCancel: onCancelMock,
+            onConfirm: onConfirmMock,
+            title: "Confirm Action",
+            type: "confirm",
           }}
         />
         <DialogRenderer />
@@ -515,21 +515,21 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Action Dialog",
             actionButtons: [
               {
-                type: ActionItemType.BUTTON,
                 label: "Action 1",
                 onClick: action1Mock,
+                type: ActionItemType.BUTTON,
               },
               {
-                type: ActionItemType.BUTTON,
                 label: "Action 2",
                 onClick: action2Mock,
+                type: ActionItemType.BUTTON,
               },
             ],
             actionButtonsLayout: "vertical",
+            title: "Action Dialog",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -563,8 +563,6 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "form",
-            title: "Form Dialog",
             formConfig: {
               fields: [],
               onSubmit: onSubmitMock,
@@ -572,6 +570,8 @@ describe("DialogRenderer", () => {
             },
             onSubmit: onSubmitMock, // onSubmit is also required on DialogConfig for type 'form'
             onSuccess: onSuccessMock, // onSuccess is also required on DialogConfig for type 'form'
+            title: "Form Dialog",
+            type: "form",
           }}
         />
         <DialogRenderer />
@@ -603,15 +603,15 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "form",
-            title: "Step Form Dialog",
             formConfig: {
-              steps: [],
               onSubmit: onSubmitMock,
               onSuccess: onSuccessMock,
+              steps: [],
             },
             onSubmit: onSubmitMock, // onSubmit is also required on DialogConfig for type 'form'
             onSuccess: onSuccessMock, // onSuccess is also required on DialogConfig for type 'form'
+            title: "Step Form Dialog",
+            type: "form",
           }}
         />
         <DialogRenderer />
@@ -636,11 +636,11 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Dismissable Alert",
+            dismissable: true,
             // Alert type uses "Continue" by default if no confirmText is provided
             onConfirm: onConfirmMock,
-            dismissable: true,
+            title: "Dismissable Alert",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -666,11 +666,11 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Non-Dismissable Alert",
+            dismissable: false, // Explicitly not dismissable
             // Alert type uses "Continue" by default if no confirmText is provided
             onConfirm: onConfirmMock,
-            dismissable: false, // Explicitly not dismissable
+            title: "Non-Dismissable Alert",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -699,10 +699,10 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Prevent Close",
-            preventCloseOnOutsideClick: true,
             onCancel: onCancelMock, // onCancel should not be called
+            preventCloseOnOutsideClick: true,
+            title: "Prevent Close",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -734,10 +734,10 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Prevent Close Dirty",
-            preventCloseOnOutsideClick: "dirty",
             onCancel: onCancelMock, // onCancel should not be called
+            preventCloseOnOutsideClick: "dirty",
+            title: "Prevent Close Dirty",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -770,9 +770,9 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Success Alert",
             status: "success",
+            title: "Success Alert",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -788,9 +788,9 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Error Alert",
             status: "error",
+            title: "Error Alert",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -808,9 +808,9 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Icon Alert",
             icon: <CustomIcon />,
+            title: "Icon Alert",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -829,9 +829,9 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Large Dialog",
             size: "lg",
+            title: "Large Dialog",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -847,9 +847,9 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Medium Dialog",
             size: "md",
+            title: "Medium Dialog",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -865,9 +865,9 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Small Dialog",
             size: "sm",
+            title: "Small Dialog",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -884,9 +884,9 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Top Right Dialog",
             position: "top-right",
+            title: "Top Right Dialog",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -904,9 +904,9 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Bottom Left Dialog",
             position: "bottom-left",
+            title: "Bottom Left Dialog",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -925,15 +925,15 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Styled Dialog",
-            // Add confirmText to ensure the default footer is rendered for alert type
-            confirmText: "OK",
             classNames: {
-              header: "custom-header-class",
               content: "custom-content-class",
               footer: "custom-footer-class",
+              header: "custom-header-class",
             },
+            // Add confirmText to ensure the default footer is rendered for alert type
+            confirmText: "OK",
+            title: "Styled Dialog",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -965,9 +965,9 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Custom Footer Dialog",
             footer: <CustomFooter />,
+            title: "Custom Footer Dialog",
+            type: "alert",
           }}
         />
         <DialogRenderer />
@@ -997,16 +997,16 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "form",
-            title: "Form Dialog with Custom Footer",
             formConfig: {
               fields: [],
+              footer: CustomFormFooter,
               onSubmit: onSubmitMock,
               onSuccess: onSuccessMock,
-              footer: CustomFormFooter,
             },
             onSubmit: onSubmitMock,
             onSuccess: onSuccessMock,
+            title: "Form Dialog with Custom Footer",
+            type: "form",
           }}
         />
         <DialogRenderer />
@@ -1029,10 +1029,7 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            type: "alert",
-            title: "Actions Dialog",
             actions: {
-              triggerLabel: "Options",
               content: (
                 <button
                   data-testid="custom-action-item"
@@ -1040,9 +1037,12 @@ describe("DialogRenderer", () => {
                   Custom Action
                 </button>
               ),
+              triggerLabel: "Options",
             },
-            onConfirm: onConfirmMock,
             dismissable: true, // Explicitly set dismissable to true
+            onConfirm: onConfirmMock,
+            title: "Actions Dialog",
+            type: "alert",
           }}
         />
         <DialogRenderer />

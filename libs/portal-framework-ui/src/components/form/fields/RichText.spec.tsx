@@ -2,6 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { RichText } from "./RichText";
 
 // Mock the registerFormComponent to prevent side effects
 vi.mock("./index", () => ({
@@ -38,8 +39,6 @@ vi.mock("@/components/editor", () => ({
     },
   ),
 }));
-
-import { RichText } from "./RichText";
 
 describe("RichText", () => {
   afterEach(cleanup);

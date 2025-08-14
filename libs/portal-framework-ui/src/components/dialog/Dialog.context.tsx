@@ -1,6 +1,5 @@
 import { registerBridgedContext } from "@lumeweb/portal-framework-core";
 import React, {
-  createContext,
   useCallback,
   useContext,
   useEffect,
@@ -8,18 +7,10 @@ import React, {
   useState,
 } from "react";
 
-import type { DialogConfig, DialogContextType } from "./Dialog.types";
+import type { DialogConfig } from "./Dialog.types";
 
-const DialogContext = createContext<DialogContextType>({
-  closeDialog: () => {},
-  currentDialog: undefined,
-  formMethods: undefined,
-  openDialog: () => {},
-  replaceDialog: () => {},
-  setFormMethods: () => {},
-} as DialogContextType);
-
-registerBridgedContext(DialogContext);
+import { DialogActionsContext } from "./DialogActions.context";
+import { DialogStateContext } from "./DialogState.context";
 
 /**
  * Required provider that maintains dialog state and context.
@@ -47,6 +38,7 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
     // Debug logging removed
     setDialogStack((prev) => [...prev, config]);
   }, []);
+
   const closeDialog = useCallback(
     (source: "programmatic" | "user" = "programmatic") => {
       // Debug logging removed
@@ -77,22 +69,39 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const contextValue = useMemo(
+  const stateValue = useMemo(
+    () => ({
+      currentDialog,
+      formMethods: _formMethods,
+    }),
+    [currentDialog, _formMethods],
+  );
+
+  const actionsValue = useMemo(
     () => ({
       closeDialog,
-      currentDialog,
       openDialog,
       replaceDialog,
       setFormMethods,
     }),
-    [closeDialog, currentDialog, openDialog, setFormMethods, replaceDialog],
+    [openDialog, closeDialog, replaceDialog, setFormMethods],
   );
 
   return (
-    <DialogContext.Provider value={contextValue}>
-      {children}
-    </DialogContext.Provider>
+    <DialogStateContext.Provider value={stateValue}>
+      <DialogActionsContext.Provider value={actionsValue}>
+        {children}
+      </DialogActionsContext.Provider>
+    </DialogStateContext.Provider>
   );
 }
 
-export const useDialog = () => useContext(DialogContext);
+export const useDialogState = () => useContext(DialogStateContext);
+export const useDialogActions = () => useContext(DialogActionsContext);
+export const useDialog = () => ({
+  ...useDialogState(),
+  ...useDialogActions(),
+});
+
+registerBridgedContext(DialogStateContext);
+registerBridgedContext(DialogActionsContext);

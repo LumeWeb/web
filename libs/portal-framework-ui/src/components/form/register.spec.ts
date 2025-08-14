@@ -1,5 +1,5 @@
-import { describe, it, vi, expect } from 'vitest';
-import { registerAllFormComponents } from './register';
+import { describe, expect, it, vi } from "vitest";
+
 import { registerCheckbox } from "./fields/Checkbox";
 import { registerDatePicker } from "./fields/DatePicker";
 import { registerFileInput } from "./fields/FileInput";
@@ -10,21 +10,22 @@ import { registerSelect } from "./fields/Select";
 import { registerSlider } from "./fields/Slider";
 import { registerSwitch } from "./fields/Switch";
 import { registerTextarea } from "./fields/Textarea";
+import { registerAllFormComponents } from "./register";
 
 // Mock all individual registration functions
-vi.mock('./fields/Checkbox', () => ({ registerCheckbox: vi.fn() }));
-vi.mock('./fields/DatePicker', () => ({ registerDatePicker: vi.fn() }));
-vi.mock('./fields/FileInput', () => ({ registerFileInput: vi.fn() }));
-vi.mock('./fields/Input', () => ({ registerInput: vi.fn() }));
-vi.mock('./fields/RadioGroup', () => ({ registerRadioGroup: vi.fn() }));
-vi.mock('./fields/RichText', () => ({ registerRichText: vi.fn() }));
-vi.mock('./fields/Select', () => ({ registerSelect: vi.fn() }));
-vi.mock('./fields/Slider', () => ({ registerSlider: vi.fn() }));
-vi.mock('./fields/Switch', () => ({ registerSwitch: vi.fn() }));
-vi.mock('./fields/Textarea', () => ({ registerTextarea: vi.fn() }));
+vi.mock("./fields/Checkbox", () => ({ registerCheckbox: vi.fn() }));
+vi.mock("./fields/DatePicker", () => ({ registerDatePicker: vi.fn() }));
+vi.mock("./fields/FileInput", () => ({ registerFileInput: vi.fn() }));
+vi.mock("./fields/Input", () => ({ registerInput: vi.fn() }));
+vi.mock("./fields/RadioGroup", () => ({ registerRadioGroup: vi.fn() }));
+vi.mock("./fields/RichText", () => ({ registerRichText: vi.fn() }));
+vi.mock("./fields/Select", () => ({ registerSelect: vi.fn() }));
+vi.mock("./fields/Slider", () => ({ registerSlider: vi.fn() }));
+vi.mock("./fields/Switch", () => ({ registerSwitch: vi.fn() }));
+vi.mock("./fields/Textarea", () => ({ registerTextarea: vi.fn() }));
 
-describe('registerAllFormComponents', () => {
-  it('should call all individual component registration functions', () => {
+describe("registerAllFormComponents", () => {
+  it("should call all individual component registration functions", () => {
     registerAllFormComponents();
 
     expect(registerCheckbox).toHaveBeenCalledTimes(1);

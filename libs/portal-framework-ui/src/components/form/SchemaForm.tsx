@@ -1,28 +1,24 @@
-import type {
-  DefaultValues,
-  FieldValues,
-  UseFormReturn,
-} from "react-hook-form";
+import type { DefaultValues, FieldValues } from "react-hook-form";
 
 import {
-  cn,
   Form as AdapterFormProvider,
+  cn,
 } from "@lumeweb/portal-framework-ui-core";
 import {
   AutoSaveIndicator,
   BaseRecord,
-  useNotification,
   type FormAction,
+  useNotification,
 } from "@refinedev/core";
 import React, { useEffect } from "react";
 
-import { ActionListRenderer } from "../actions";
-import { useDialog } from "../dialog";
+import { FormDialogConfig, useDialog } from "../dialog";
 import { adapters, FormAdapter, UnifiedFormReturnType } from "./adapters";
 import { FormProvider } from "./context";
+import { FormFooter } from "./FormFooter";
 import { FormRenderer } from "./FormRenderer";
-import { FormAutosaveConfig, type FormConfig } from "./types";
-import { UseFormReturnType } from "@refinedev/react-hook-form";
+import { type FormConfig, isStepFormConfig } from "./types";
+import { computeAutoSaveConfig } from "./utils/autoSave";
 
 const defaultFooterCss = "pt-4 mt-4 border-t";
 
@@ -32,23 +28,6 @@ export interface SchemaFormProps<
 > {
   closeDialog?: () => void;
   config: FormConfig<TRequest, TResponse>;
-}
-
-function computeAutoSaveConfig<T extends FieldValues>(
-  autoSave: FormConfig<T>["autoSave"],
-): FormAutosaveConfig<T> | { enabled: false } {
-  if (autoSave === true) {
-    return { enabled: true, debounce: 1000 };
-  }
-
-  if (typeof autoSave === "object" && autoSave !== null && autoSave.enabled) {
-    return {
-      enabled: true,
-      debounce: autoSave.debounce ?? 1000,
-    };
-  }
-
-  return { enabled: false };
 }
 
 export function SchemaForm<T extends FieldValues = FieldValues>({
@@ -73,19 +52,19 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
     defaultValues: config.defaultValues as DefaultValues<T>,
     refineCoreProps: {
       ...config.refineCoreProps,
-      resource: config.resource,
       action: config.action,
+      autoSave: autoSaveConfig,
       id: (["edit", "clone"] as FormAction[]).includes(config.action!)
         ? config.id
         : undefined,
-      autoSave: autoSaveConfig,
+      resource: config.resource,
     },
     validationSchema: config.validationSchema,
   });
 
   const autoSaveProps = shouldUseRefine
     ? "refineCore" in formInstance
-      ? (formInstance as UseFormReturnType<T>).refineCore.autoSaveProps
+      ? formInstance.refineCore.autoSaveProps
       : undefined
     : undefined;
 
@@ -105,6 +84,10 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
     cConfig.footerClassName = undefined;
   }
 
+  const finalConfig: FormConfig<T> | FormDialogConfig<T> = currentDialog
+    ? { ...currentDialog, formConfig: cConfig }
+    : cConfig;
+
   const isRefineWithAutosave = shouldUseRefine && autoSaveConfig?.enabled;
 
   return (
@@ -117,11 +100,11 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
         {...(formInstance as unknown as UnifiedFormReturnType<FieldValues>)}>
         <form
           className={cn(cConfig.formClassName, {
-            "space-y-4": cConfig.layout !== "grid",
             "flex flex-col space-y-4":
               cConfig.layout === "vertical" || !cConfig.layout,
             "flex flex-row gap-4 items-end": cConfig.layout === "horizontal",
             "grid gap-4": cConfig.layout === "grid",
+            "space-y-4": cConfig.layout !== "grid",
           })}
           onSubmit={formInstance.handleSubmit(async () => {
             try {
@@ -136,7 +119,8 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
                 "data" in response
                   ? (response as Record<string, unknown>).data
                   : response;
-              if (cConfig.onSuccess) {
+
+              if (!isStepFormConfig(cConfig) && cConfig.onSuccess) {
                 cConfig.onSuccess(responseData, formInstance.getValues());
               }
               if (currentDialog?.type === "form" && currentDialog.onSuccess) {
@@ -160,23 +144,13 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
             }
           })}>
           <FormRenderer fields={cConfig.fields} />
-          {cConfig.footer && typeof cConfig.footer === "function" ? (
-            cConfig.footer(formInstance, closeDialog)
-          ) : (
-            <div className={cConfig.footerClassName}>
-              <ActionListRenderer
-                actions={
-                  cConfig.actionButtons ||
-                  (Array.isArray(cConfig.footer) ? cConfig.footer : [])
-                }
-                closeDialog={closeDialog}
-                isSubmitting={formInstance.formState.isSubmitting}
-                layout={
-                  cConfig.actionButtonsLayout ??
-                  (cConfig.actionButtons ? "horizontal" : undefined)
-                }
-              />
-            </div>
+          {cConfig.footer !== false && (
+            <FormFooter
+              className={cConfig.footerClassName}
+              closeDialog={closeDialog}
+              config={finalConfig}
+              formMethods={formInstance}
+            />
           )}
           {isRefineWithAutosave && (
             <AutoSaveIndicator
@@ -189,3 +163,4 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
     </FormProvider>
   );
 }
+

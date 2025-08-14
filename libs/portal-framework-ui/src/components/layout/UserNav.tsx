@@ -1,5 +1,7 @@
 "use client";
 
+import type { Identity } from "@lumeweb/portal-framework-core";
+
 import {
   Avatar,
   AvatarFallback,
@@ -18,7 +20,6 @@ import {
   TooltipTrigger,
 } from "@lumeweb/portal-framework-ui-core";
 import { Link, useGetIdentity, useLogout } from "@refinedev/core";
-import type { Identity } from "@lumeweb/portal-framework-core";
 import { LayoutGrid, LogOut, User } from "lucide-react";
 import React from "react";
 
@@ -38,10 +39,10 @@ export function UserNav() {
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="outline"
-                className="relative h-8 w-8 rounded-full">
+                className="relative h-8 w-8 rounded-full"
+                variant="outline">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="#" alt="Avatar" />
+                  <AvatarImage alt="Avatar" src="#" />
                   <AvatarFallback className="bg-transparent">
                     {firstName.charAt(0).toUpperCase()}
                     {lastName.charAt(0).toUpperCase()}
@@ -54,7 +55,7 @@ export function UserNav() {
         </Tooltip>
       </TooltipProvider>
 
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent align="end" className="w-56" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
@@ -67,14 +68,14 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem className="hover:cursor-pointer" asChild>
-            <Link to="/dashboard" className="flex items-center">
+          <DropdownMenuItem asChild className="hover:cursor-pointer">
+            <Link className="flex items-center" to="/dashboard">
               <LayoutGrid className="w-4 h-4 mr-3 text-muted-foreground" />
               Dashboard
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem className="hover:cursor-pointer" asChild>
-            <Link to="/account" className="flex items-center">
+          <DropdownMenuItem asChild className="hover:cursor-pointer">
+            <Link className="flex items-center" to="/account">
               <User className="w-4 h-4 mr-3 text-muted-foreground" />
               Account
             </Link>

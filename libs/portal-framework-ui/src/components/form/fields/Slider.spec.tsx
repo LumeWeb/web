@@ -1,7 +1,8 @@
-import { cleanup, render, screen, fireEvent } from "@testing-library/react"; // Import fireEvent
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"; // Import fireEvent
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { Slider } from "./Slider";
 
 // Mock the registerFormComponent to prevent side effects
 vi.mock("./index", () => ({
@@ -27,8 +28,6 @@ vi.mock("@lumeweb/portal-framework-ui-core", () => ({
     );
   }),
 }));
-
-import { Slider } from "./Slider";
 
 describe("Slider", () => {
   afterEach(cleanup);

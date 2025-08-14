@@ -1,5 +1,6 @@
-import { FormFieldOption } from "../types";
 import type { ComponentType } from "react";
+
+import { FormFieldOption } from "../types";
 
 export enum FormFieldType {
   CHECKBOX = "checkbox",
@@ -16,6 +17,11 @@ export enum FormFieldType {
   TEXTAREA = "textarea",
 }
 
+export interface FormComponentEntry {
+  component: ComponentType<FormComponentProps>;
+  handlesLabel?: boolean;
+}
+
 export interface FormComponentProps {
   [key: string]: any;
   className?: string;
@@ -24,9 +30,4 @@ export interface FormComponentProps {
   options?: FormFieldOption[];
   placeholder?: string;
   required?: boolean;
-}
-
-export interface FormComponentEntry {
-  component: ComponentType<FormComponentProps>;
-  handlesLabel?: boolean;
 }
