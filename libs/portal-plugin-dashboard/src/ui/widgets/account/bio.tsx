@@ -11,7 +11,6 @@ import { useGetIdentity } from "@refinedev/core";
 import { format } from "date-fns";
 import { Calendar, Camera, Check } from "lucide-react";
 import type { Identity } from "@lumeweb/portal-framework-core";
-
 export default function Bio() {
   const { data: identity } = useGetIdentity<Identity>();
 
@@ -32,7 +31,7 @@ export default function Bio() {
                 src={identity.avatar || "/placeholder.svg"}
                 alt={displayName}
               />
-              <AvatarFallback className="bg-[#426bff] text-white text-2xl">
+              <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
                 {identity.firstName?.charAt(0) ||
                   identity.lastName?.charAt(0) ||
                   "?"}
@@ -40,25 +39,26 @@ export default function Bio() {
             </Avatar>
             <Button
               size="sm"
-              className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-[#adf0dd] text-[#0d1514] hover:bg-[#adf0dd]/90 p-0">
+              variant="secondary"
+              className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full p-0">
               <Camera className="w-4 h-4" />
             </Button>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-white">
+              <h3 className="text-lg font-semibold text-foreground">
                 {displayName}
               </h3>
               {identity.verified && (
-                <div className="w-5 h-5 bg-[#adf0dd] rounded-full flex items-center justify-center">
-                  <Check className="w-3 h-3 text-background" />
+                <div className="w-5 h-5 bg-success rounded-full flex items-center justify-center">
+                  <Check className="w-3 h-3 text-success-foreground" />
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 mt-4 w-full text-sm text-gray-400">
+          <div className="flex flex-col gap-2 mt-4 w-full text-sm text-muted-foreground">
             {identity.created_at &&
               (() => {
                 try {

@@ -10,8 +10,10 @@ export default {
   exposes: {
     ".": "./src/index",
     "./widgets/account/profile": "./src/ui/widgets/account/profile",
+    "./widgets/account/password": "./src/ui/widgets/account/password",
     "./widgets/account/bio": "./src/ui/widgets/account/bio",
     "./account/profile": "./src/ui/routes/account.profile",
+    "./account/security": "./src/ui/routes/account.security",
     "./account/layout": "./src/ui/routes/account.layout",
     "./AccountVerify": "./src/ui/routes/AccountVerify",
     "./Dashboard": "./src/ui/routes/Dashboard",
