@@ -1,6 +1,7 @@
 export {
   type AuthFormRequest,
   createAuthProvider,
+  DATA_PROVIDER_NAME,
   type ForgotPasswordConfirmRequest,
   type ForgotPasswordRequest,
   type OPTGenerateResponse,

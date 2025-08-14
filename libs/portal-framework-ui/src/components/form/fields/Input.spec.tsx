@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { Input } from "./Input";
+
 // Mock the registerFormComponent to prevent side effects
 vi.mock("./index", () => ({
   registerFormComponent: vi.fn(),
@@ -12,14 +14,18 @@ vi.mock("./index", () => ({
 const mocks = vi.hoisted(() => ({
   cn: vi.fn((...classes) => classes.filter(Boolean).join(" ")), // Simple mock for classnames
   Input: vi.fn(({ onChange, value, ...props }) => (
-    <input data-testid="base-input" onChange={onChange ?? vi.fn()} value={value} readOnly={false} {...props} />
+    <input
+      data-testid="base-input"
+      onChange={onChange ?? vi.fn()}
+      readOnly={false}
+      value={value}
+      {...props}
+    />
   )),
 }));
 
 // Mock the base components from ui-core using the hoisted mocks
 vi.mock("@lumeweb/portal-framework-ui-core", () => mocks);
-
-import { Input } from "./Input";
 
 describe("Input", () => {
   afterEach(cleanup);
@@ -52,7 +58,13 @@ describe("Input", () => {
   });
 
   it("applies inputClassName to the base input", () => {
-    render(<Input inputClassName="custom-class" name="testInput" onChange={vi.fn()} />);
+    render(
+      <Input
+        inputClassName="custom-class"
+        name="testInput"
+        onChange={vi.fn()}
+      />,
+    );
     const input = screen.getByTestId("base-input");
     // The cn mock will just join classes, so we check for the custom class
     expect(input).toHaveClass("custom-class");

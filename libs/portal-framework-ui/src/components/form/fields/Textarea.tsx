@@ -9,16 +9,14 @@ import { FormFieldType } from "../";
 
 export const Textarea = React.forwardRef<
   HTMLTextAreaElement,
-  {
+  React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
     [key: string]: any; // Allow other props
     className?: string;
     inputClassName?: string; // Use inputClassName for the actual textarea element
     label?: string;
     placeholder?: string;
-    // onChange is included via React.TextareaHTMLAttributes
-    // value is included via React.TextareaHTMLAttributes
-  } & React.TextareaHTMLAttributes<HTMLTextAreaElement> // Include standard textarea props
->(({ inputClassName, placeholder, onChange, value, ...props }, ref) => {
+  }
+>(({ inputClassName, onChange, placeholder, value, ...props }, ref) => {
   return (
     <BaseTextarea
       className={cn(

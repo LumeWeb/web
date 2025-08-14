@@ -40,5 +40,7 @@ export const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
 Checkbox.displayName = "Checkbox";
 
 export function registerCheckbox() {
-  registerFormComponent(FormFieldType.CHECKBOX, Checkbox, { handlesLabel: true });
+  registerFormComponent(FormFieldType.CHECKBOX, Checkbox, {
+    handlesLabel: true,
+  });
 }

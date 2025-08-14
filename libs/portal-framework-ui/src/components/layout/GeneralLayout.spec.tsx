@@ -1,6 +1,6 @@
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mocking external dependencies and child components/hooks
 vi.mock("@/components/dialog", () => ({
@@ -56,8 +56,8 @@ vi.mock("@lumeweb/portal-framework-ui-core", () => ({
 }));
 
 vi.mock("@radix-ui/react-icons", () => ({
-  ExitIcon: () => <div data-testid="mock-exit-icon" />,
   ChevronDownIcon: () => <div data-testid="mock-radix-chevron-down-icon" />,
+  ExitIcon: () => <div data-testid="mock-exit-icon" />,
 }));
 
 const mockLogoutMutate = vi.fn();
@@ -68,7 +68,7 @@ vi.mock("@refinedev/core", () => ({
 }));
 
 vi.mock("react-router", () => ({
-  Link: ({ to, children, ...props }: any) => (
+  Link: ({ children, to, ...props }: any) => (
     <a href={to} {...props}>
       {children}
     </a>
@@ -84,9 +84,10 @@ vi.mock("./MobileSidebar", () => ({
   default: () => <div data-testid="mock-mobile-sidebar" />,
 }));
 
+import { useMobile } from "@lumeweb/portal-framework-ui-core";
+
 // Import the component to test
 import { GeneralLayout } from "./GeneralLayout";
-import { useMobile } from "@lumeweb/portal-framework-ui-core";
 
 describe("GeneralLayout", () => {
   const mockChildren = <div data-testid="mock-children">Layout Children</div>;
@@ -115,7 +116,9 @@ describe("GeneralLayout", () => {
       screen.getByText(`${mockIdentity.firstName} ${mockIdentity.lastName}`),
     ).toBeInTheDocument();
     expect(screen.getByTestId("mock-avatar")).toBeInTheDocument();
-    expect(screen.getByTestId("mock-radix-chevron-down-icon")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("mock-radix-chevron-down-icon"),
+    ).toBeInTheDocument();
 
     // Check for footer links
     const connectLinks = screen.getAllByRole("link", {

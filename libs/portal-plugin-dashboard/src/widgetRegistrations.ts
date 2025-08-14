@@ -23,6 +23,12 @@ export const widgetRegistrations = [
     cols: 2,
     rows: 2,
   },
+  {
+    area: "core:dashboard:security",
+    componentName: "widgets/account/2fa",
+    cols: 2,
+    rows: 2,
+  },
 ] satisfies WidgetRegistration[];
 
 export default widgetRegistrations;

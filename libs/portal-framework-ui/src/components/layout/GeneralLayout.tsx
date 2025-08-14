@@ -1,10 +1,12 @@
 import React from "react";
-import DesktopSidebar from "./DesktopSidebar";
-import { SidebarProvider } from "./SidebarContext";
-import { withTheme } from "@/hooks/useTheme";
+
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import { UserNav } from "./UserNav";
+import { withTheme } from "@/hooks/useTheme";
+
+import DesktopSidebar from "./DesktopSidebar";
 import { MobileMenu } from "./MobileMenu";
+import { SidebarProvider } from "./SidebarContext";
+import { UserNav } from "./UserNav";
 
 interface GeneralLayoutProps {
   children?: React.ReactNode;

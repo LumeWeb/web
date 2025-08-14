@@ -1,5 +1,6 @@
-import { Editor as BaseEditor, ToolbarOption } from "@/components/editor";
 import React, { forwardRef } from "react";
+
+import { Editor as BaseEditor, ToolbarOption } from "@/components/editor";
 
 import { registerFormComponent } from ".";
 import { FormFieldType } from "../";

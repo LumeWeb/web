@@ -8,7 +8,10 @@ import {
 } from "@testing-library/react";
 import React from "react";
 // Import real RHF FormProvider
-import { FormProvider as RHFFormProvider, UseFormReturn } from "react-hook-form";
+import {
+  FormProvider as RHFFormProvider,
+  UseFormReturn,
+} from "react-hook-form";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useDialog } from "../dialog";
@@ -84,18 +87,19 @@ vi.mock("@lumeweb/portal-framework-ui-core", async (importOriginal) => {
 });
 
 // Define a mock object that looks like UseFormReturn
-const createMockFormMethods = () => ({
-  formState: { isSubmitting: false },
-  getValues: vi.fn(() => ({})),
-  handleSubmit: vi.fn((onSubmit) => (e?: React.BaseSyntheticEvent) => {
-    e?.preventDefault(); // Prevent default form submission
-    return onSubmit({}); // Call onSubmit with mock data
-  }),
-  control: {}, // Add control as it's often needed
-  watch: vi.fn(() => ({ unsubscribe: vi.fn() })), // Add watch
-  trigger: vi.fn(), // Add trigger
-  // Add other methods if SchemaForm uses them directly
-} as unknown as UseFormReturn<any>); // Cast for type compatibility
+const createMockFormMethods = () =>
+  ({
+    control: {}, // Add control as it's often needed
+    formState: { isSubmitting: false },
+    getValues: vi.fn(() => ({})),
+    handleSubmit: vi.fn((onSubmit) => (e?: React.BaseSyntheticEvent) => {
+      e?.preventDefault(); // Prevent default form submission
+      return onSubmit({}); // Call onSubmit with mock data
+    }),
+    trigger: vi.fn(), // Add trigger
+    watch: vi.fn(() => ({ unsubscribe: vi.fn() })), // Add watch
+    // Add other methods if SchemaForm uses them directly
+  }) as unknown as UseFormReturn<any>; // Cast for type compatibility
 
 const mockUseDialog = useDialog as vi.Mock;
 const mockUseNotification = useNotification as vi.Mock;

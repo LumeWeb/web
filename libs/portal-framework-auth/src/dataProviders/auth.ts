@@ -10,7 +10,10 @@ import type {
   AuthProvider,
   CheckResponse,
 } from "@refinedev/core";
+
 import { getApiBaseUrl } from "@lumeweb/portal-framework-core";
+
+export const DATA_PROVIDER_NAME = "account";
 
 export interface AuthFormRequest extends LoginRequest {
   redirectTo?: string;
@@ -97,7 +100,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProvider => {
       try {
         if (params.password && params.token) {
           const response = await sdk.account().confirmPasswordReset({
-            email: params.email as string,
+            email: params.email!,
             password: params.password,
             token: params.token,
           });
@@ -116,7 +119,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProvider => {
         }
 
         const response = await sdk.account().requestPasswordReset({
-          email: params.email as string,
+          email: params.email!,
         });
 
         return createAuthResponse({
@@ -146,15 +149,16 @@ export const createAuthProvider = (sdk: Sdk): AuthProvider => {
         return null;
       }
 
-      const { email, first_name, id, last_name, verified, created_at } =
+      const { created_at, email, first_name, id, last_name, otp, verified } =
         response.data;
       return {
+        created_at,
         email,
         firstName: first_name,
         id,
         lastName: last_name,
+        otp,
         verified,
-        created_at,
       };
     },
 

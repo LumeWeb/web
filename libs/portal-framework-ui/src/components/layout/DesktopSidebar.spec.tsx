@@ -1,6 +1,6 @@
-import { render, screen, cleanup } from "@testing-library/react";
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
 import React from "react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 // Mocking child components
 vi.mock("../LumeLogo", () => ({

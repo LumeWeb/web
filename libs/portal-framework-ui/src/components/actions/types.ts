@@ -1,21 +1,24 @@
+import type { ComponentType, MouseEvent, ReactNode } from "react";
+import { BaseRecord } from "@refinedev/core";
+
 export enum ActionItemType {
+  BUTTON = "button",
   CANCEL = "cancel",
   CUSTOM = "custom",
   CUSTOM_COMPONENT = "custom-component",
   DATE = "date",
-  FILE = "file", 
+  FILE = "file",
   LINK = "link",
   SUBMIT = "submit",
-  BUTTON = "button",
 }
 
 export type ActionItemConfig =
+  | ButtonActionItemConfig
   | CancelActionItemConfig
   | CustomActionItemConfig
   | CustomComponentActionItemConfig
   | LinkActionItemConfig
-  | SubmitActionItemConfig
-  | ButtonActionItemConfig;
+  | SubmitActionItemConfig;
 
 export interface ActionItemProps<
   T extends ActionItemConfig = ActionItemConfig,
@@ -27,6 +30,12 @@ export interface ActionItemProps<
 
 export type ActionListLayout = "horizontal" | "vertical";
 
+// Added ButtonActionItemConfig
+export interface ButtonActionItemConfig extends BaseActionItemConfig {
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
+  type: ActionItemType.BUTTON;
+}
+
 export interface CancelActionItemConfig extends BaseActionItemConfig {
   onClick?: () => void;
   type: ActionItemType.CANCEL;
@@ -35,6 +44,12 @@ export interface CancelActionItemConfig extends BaseActionItemConfig {
 export interface CustomActionItemConfig extends BaseActionItemConfig {
   onClick: () => void;
   type: ActionItemType.CUSTOM;
+}
+
+export interface CustomComponentActionItemConfig extends BaseActionItemConfig {
+  component: ComponentType<any>;
+  props?: Record<string, any>;
+  type: ActionItemType.CUSTOM_COMPONENT;
 }
 
 export interface LinkActionItemConfig extends BaseActionItemConfig {
@@ -48,24 +63,11 @@ export interface SubmitActionItemConfig extends BaseActionItemConfig {
   type: ActionItemType.SUBMIT;
 }
 
-// Added ButtonActionItemConfig
-export interface ButtonActionItemConfig extends BaseActionItemConfig {
-  onClick?: () => void; // Buttons might have an onClick handler
-  type: ActionItemType.BUTTON;
-}
-
-
 interface BaseActionItemConfig {
-  children?: React.ReactNode;
+  children?: ReactNode;
   className?: string;
   disabled?: boolean;
   key?: number | string;
   label?: string;
   type: ActionItemType;
-}
-
-export interface CustomComponentActionItemConfig extends BaseActionItemConfig {
-  component: React.ComponentType<any>;
-  props?: Record<string, any>;
-  type: ActionItemType.CUSTOM_COMPONENT;
 }

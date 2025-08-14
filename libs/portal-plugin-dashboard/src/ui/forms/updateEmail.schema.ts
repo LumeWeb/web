@@ -10,8 +10,8 @@ const schema = z
     if (data.password !== data.password_confirm) {
       return ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["password_confirm"],
         message: "Passwords do not match",
+        path: ["password_confirm"],
       });
     }
     return true;

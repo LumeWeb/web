@@ -5,19 +5,20 @@ import {
   useFormContext,
 } from "@lumeweb/portal-framework-ui";
 import { Button, cn } from "@lumeweb/portal-framework-ui-core";
-import { Mail } from "lucide-react";
-import { updateEmailDialogConfig } from "@/ui/dialogs/updateEmail";
-import React from "react";
 import { useCustomMutation } from "@refinedev/core";
+import { Mail } from "lucide-react";
+import React from "react";
+
+import { updateEmailDialogConfig } from "@/ui/dialogs/updateEmail";
 
 interface AccountEmailProps {
-  value: string;
   className?: string;
   ref?: React.Ref<HTMLDivElement>;
+  value: string;
 }
 
 const AccountEmail = React.forwardRef<HTMLDivElement, AccountEmailProps>(
-  ({ value, className = "" }, ref) => {
+  ({ className = "", value }, ref) => {
     const { openDialog } = useDialog();
     const { formInstance } = useFormContext();
 
@@ -27,28 +28,28 @@ const AccountEmail = React.forwardRef<HTMLDivElement, AccountEmailProps>(
         ? formInstance.refineCore.queryResult.refetch
         : undefined;
 
-    const customHook = useCustomMutation();
+    const customHook = useCustomMutation<FormValues>();
 
     return (
       <div
-        ref={ref}
-        className={cn("flex items-center gap-2 w-full", className)}>
+        className={cn("flex items-center gap-2 w-full", className)}
+        ref={ref}>
         <Input
-          id="email"
-          type="email"
-          value={value}
-          readOnly
           className="text-white w-full"
           fullWidth={true}
+          id="email"
+          readOnly
+          type="email"
+          value={value}
         />
         <Button
-          size="sm"
-          variant="outline"
           className="hover:text-white bg-transparent"
           onClick={(e) => {
             e.preventDefault();
-            openDialog(updateEmailDialogConfig(customHook as any, refetch));
-          }}>
+            openDialog(updateEmailDialogConfig(customHook, refetch));
+          }}
+          size="sm"
+          variant="outline">
           <Mail className="w-4 h-4" />
         </Button>
       </div>

@@ -1,6 +1,3 @@
-import { registerAllActionItems } from "@/components/actions";
-import { registerAllFormComponents } from "@/components/form";
-import { useAppStore } from "@/store/appStore";
 import {
   Builder,
   createNamespacedId,
@@ -30,6 +27,10 @@ import {
   Route,
   RouterProvider,
 } from "react-router";
+
+import { registerAllActionItems } from "@/components/actions";
+import { registerAllFormComponents } from "@/components/form";
+import { useAppStore } from "@/store/appStore";
 import { useFrameworkSync } from "@/store/portalStore";
 
 import { DialogProvider, DialogRenderer } from "../dialog";
@@ -71,8 +72,8 @@ function AppContent({
   loadRoutes = true,
 }: AppContentProps) {
   const {
-    framework,
     error: frameworkError,
+    framework,
     isLoading: isFrameworkLoading,
   } = useFramework();
   const addMenuItems = useAppStore((state) => state.addMenuItems);
@@ -215,18 +216,18 @@ function AppContent({
   function createRouteElement(
     route: RouteDefinition,
     framework: Framework,
+    child = false,
   ): React.ReactNode {
     const LazyComponent = getLazyComponent(
       route.component ?? "",
       route.pluginId ?? createNamespacedId("core", "fallback"),
-      framework!,
+      framework,
       route.id!,
     );
 
     const jsxElement = LazyComponent ? <LazyComponent /> : null;
-
     const finalElement = jsxElement ? (
-      withRouteContainer(jsxElement)()
+      withRouteContainer(jsxElement, !child)()
     ) : (
       // Use RouteErrorBoundaryFallback directly when component loading fails
       <RouteErrorBoundaryFallback
@@ -235,7 +236,7 @@ function AppContent({
     );
 
     const childRoutes = route.children?.map((childRoute: RouteDefinition) =>
-      createRouteElement(childRoute, framework!),
+      createRouteElement(childRoute, framework, true),
     );
 
     return (
@@ -270,7 +271,7 @@ function AppContent({
     <Refine {...options}>
       <DialogProvider>
         {router && <RouterProvider router={router} />}
-        <DialogRenderer />
+        {!router && <DialogRenderer />}
       </DialogProvider>
       <Toaster />
     </Refine>
@@ -360,10 +361,11 @@ function LoadingSpinner() {
   );
 }
 
-function withRouteContainer(element: React.ReactNode) {
+function withRouteContainer(element: React.ReactNode, renderDialog: boolean) {
   return function RouteContainerHOC() {
     return (
       <>
+        {renderDialog && <DialogRenderer />}
         <HostContextBridge />
         {element}
       </>

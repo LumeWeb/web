@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { Textarea } from "./Textarea";
+
 // Mock the registerFormComponent to prevent side effects
 vi.mock("./index", () => ({
   registerFormComponent: vi.fn(),
@@ -12,14 +14,18 @@ vi.mock("./index", () => ({
 const mocks = vi.hoisted(() => ({
   cn: vi.fn((...classes) => classes.filter(Boolean).join(" ")), // Simple mock for classnames
   Textarea: vi.fn(({ onChange, value, ...props }) => (
-    <textarea data-testid="base-textarea" onChange={onChange ?? vi.fn()} value={value} readOnly={false} {...props} />
+    <textarea
+      data-testid="base-textarea"
+      onChange={onChange ?? vi.fn()}
+      readOnly={false}
+      value={value}
+      {...props}
+    />
   )),
 }));
 
 // Mock the base components from ui-core using the hoisted mocks
 vi.mock("@lumeweb/portal-framework-ui-core", () => mocks);
-
-import { Textarea } from "./Textarea";
 
 describe("Textarea", () => {
   afterEach(cleanup);
@@ -50,7 +56,13 @@ describe("Textarea", () => {
   });
 
   it("applies inputClassName to the base textarea", () => {
-    render(<Textarea inputClassName="custom-class" name="testTextarea" onChange={vi.fn()} />);
+    render(
+      <Textarea
+        inputClassName="custom-class"
+        name="testTextarea"
+        onChange={vi.fn()}
+      />,
+    );
     const textarea = screen.getByTestId("base-textarea");
     // The cn mock will just join classes, so we check for the custom class
     expect(textarea).toHaveClass("custom-class");

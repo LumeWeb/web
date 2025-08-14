@@ -1,6 +1,6 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { act, cleanup, render, screen, fireEvent } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DialogProvider, useDialog } from "./Dialog.context";
 import { DialogConfig } from "./Dialog.types";
@@ -16,14 +16,14 @@ const TestComponent = () => {
     <div>
       <button
         onClick={() =>
-          dialog.openDialog({ type: "alert", title: "Test Alert" })
+          dialog.openDialog({ title: "Test Alert", type: "alert" })
         }>
         Open Alert
       </button>
       <button onClick={() => dialog.closeDialog()}>Close Dialog</button>
       <button
         onClick={() =>
-          dialog.replaceDialog({ type: "alert", title: "Replaced Alert" })
+          dialog.replaceDialog({ title: "Replaced Alert", type: "alert" })
         }>
         Replace Dialog
       </button>
@@ -142,12 +142,12 @@ describe("DialogContext", () => {
         <button
           onClick={() =>
             dialog.openDialog({
-              type: "confirm",
-              title: "Confirm Dialog",
               cancelText: "Cancel",
               confirmText: "OK",
-              onConfirm: vi.fn(),
               onCancel: onCancelMock,
+              onConfirm: vi.fn(),
+              title: "Confirm Dialog",
+              type: "confirm",
             })
           }>
           Open Confirm
@@ -185,12 +185,12 @@ describe("DialogContext", () => {
         <button
           onClick={() =>
             dialog.openDialog({
-              type: "confirm",
-              title: "Confirm Dialog",
               cancelText: "Cancel",
               confirmText: "OK",
-              onConfirm: vi.fn(),
               onCancel: onCancelMock,
+              onConfirm: vi.fn(),
+              title: "Confirm Dialog",
+              type: "confirm",
             })
           }>
           Open Confirm

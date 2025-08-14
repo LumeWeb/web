@@ -1,25 +1,21 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BaseRecord, HttpError, FormAction } from "@refinedev/core"; // Add FormAction import
+import { BaseRecord, HttpError } from "@refinedev/core"; // Add FormAction import
 import {
-  type UseFormProps as RefineUseFormProps,
   useForm as useRefineForm,
+  type UseFormProps as RefineUseFormProps,
   UseFormReturnType,
 } from "@refinedev/react-hook-form";
 import {
-  FieldValues,
   Controller as RHFController,
+  FieldValues,
   FormProvider as RHFFormProvider,
+  useForm as useRHFForm,
   type UseFormProps as RHFUseFormProps,
   type UseFormReturn,
-  useForm as useRHFForm,
 } from "react-hook-form";
 import * as z from "zod";
 
 import type { FormConfig } from "./types";
-
-export type UnifiedFormReturnType<T extends FieldValues> =
-  | UseFormReturn<T, any>
-  | UseFormReturnType<T>;
 
 export interface FormAdapter<T extends FieldValues = FieldValues> {
   Controller: typeof RHFController;
@@ -30,6 +26,10 @@ export interface FormAdapter<T extends FieldValues = FieldValues> {
   ) => Promise<void>;
   useForm: (options: BaseUseFormOptions<T>) => UnifiedFormReturnType<T>;
 }
+
+export type UnifiedFormReturnType<T extends FieldValues> =
+  | UseFormReturn<T, any>
+  | UseFormReturnType<T>;
 
 interface BaseUseFormOptions<TFieldValues extends FieldValues = FieldValues> {
   defaultValues?: RHFUseFormProps<TFieldValues>["defaultValues"];

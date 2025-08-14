@@ -1,11 +1,8 @@
 import { DialogConfig } from "@lumeweb/portal-framework-ui";
-import updateEmailForm from "@/ui/forms/updateEmail";
-import {
-  UseCustomMutationReturnType,
-  UseLoadingOvertimeReturnType,
-  BaseRecord,
-} from "@refinedev/core";
+import { UseCustomMutationReturnType } from "@refinedev/core";
 import { z } from "zod";
+
+import updateEmailForm from "@/ui/forms/updateEmail";
 import schema from "@/ui/forms/updateEmail.schema";
 
 type FormValues = z.infer<typeof schema>;
@@ -23,35 +20,35 @@ export function updateEmailDialogConfig(
   }
 
   return {
-    type: "form",
-    title: "Change Email",
     formConfig: updateEmailForm(),
     onSubmit: (req) => {
       return updateEmailHook.mutateAsync({
-        url: "/account/update-email",
-        method: "post",
         dataProviderName: "account",
+        errorNotification: (error) => {
+          return {
+            description:
+              error?.message || "Please check your password and try again",
+            message: "Failed to Update Email",
+            type: "error",
+          };
+        },
+        method: "post",
+        successNotification: () => {
+          return {
+            description: "Your email address has been changed",
+            message: "Email Updated Successfully",
+            type: "success",
+          };
+        },
+        url: "/account/update-email",
         values: {
           email: req.email,
           password: req.password,
         },
-        successNotification: () => {
-          return {
-            message: "Email Updated Successfully",
-            description: "Your email address has been changed",
-            type: "success",
-          };
-        },
-        errorNotification: (error) => {
-          return {
-            message: "Failed to Update Email",
-            description:
-              error?.message || "Please check your password and try again",
-            type: "error",
-          };
-        },
       });
     },
     onSuccess,
+    title: "Change Email",
+    type: "form",
   };
 }

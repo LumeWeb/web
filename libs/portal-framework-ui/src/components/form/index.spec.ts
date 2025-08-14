@@ -1,9 +1,10 @@
-import { describe, it, expect } from 'vitest';
-// Import everything from the index file
-import * as FormExports from './index';
+import { describe, expect, it } from "vitest";
 
-describe('Form Package Exports', () => {
-  it('should export key components and types', () => {
+// Import everything from the index file
+import * as FormExports from "./index";
+
+describe("Form Package Exports", () => {
+  it("should export key components and types", () => {
     // Check for some expected exports
     expect(FormExports.SchemaForm).toBeDefined();
     expect(FormExports.FormRenderer).toBeDefined();

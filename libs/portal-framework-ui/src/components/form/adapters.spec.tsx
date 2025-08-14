@@ -1,21 +1,21 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { adapters } from "./adapters";
+import type { z } from "zod"; // Import zod type for importedZod variable
+
+import { useForm as useRefineForm } from "@refinedev/react-hook-form";
 import {
   Controller as RHFController,
   FormProvider as RHFFormProvider,
   useForm as useRHFForm,
 } from "react-hook-form";
-import { useForm as useRefineForm } from "@refinedev/react-hook-form";
+import { beforeEach, describe, expect, it, Mock, vi } from "vitest"; // Import Mock type
+
+import { adapters } from "./adapters";
 import { FormConfig } from "./types";
-import { Mock } from "vitest"; // Import Mock type
-import type { z } from "zod"; // Import zod type for importedZod variable
-import { FormAction } from "@refinedev/core"; // Import FormAction
 
 // Declare variables to hold dynamically imported mock exports
 let importedZodResolver: Mock; // Use vi.Mock type
-let importedZodResolverSymbol: Symbol;
-let importedMockZodSchema: Symbol;
-let importedMockZodString: Symbol;
+let importedZodResolverSymbol: symbol;
+let importedMockZodSchema: symbol;
+let importedMockZodString: symbol;
 let importedZod: typeof z; // Declare variable for the mocked z object
 
 // Mock external libraries
@@ -23,9 +23,9 @@ vi.mock("react-hook-form", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react-hook-form")>();
   return {
     ...actual,
-    useForm: vi.fn(),
-    FormProvider: vi.fn(({ children }) => <div>{children}</div>),
     Controller: vi.fn(({ render }) => render({ field: {} })),
+    FormProvider: vi.fn(({ children }) => <div>{children}</div>),
+    useForm: vi.fn(),
   };
 });
 vi.mock("@refinedev/react-hook-form", () => ({
@@ -49,14 +49,14 @@ vi.mock("zod", async (importOriginal) => {
   const mockZodString = Symbol("mockZodString");
   return {
     ...actual, // Keep all original exports
+    mockZodSchema: mockZodSchema, // Export symbol for assertions
+    mockZodString: mockZodString, // Export symbol for assertions
     z: {
       // Mock the 'z' export
       // Removed ...actual.z as it's not needed and causes TS error
       object: vi.fn((shape) => mockZodSchema), // Mock the 'object' function to return a symbol
       string: vi.fn(() => mockZodString), // Mock z.string to return a symbol
     },
-    mockZodSchema: mockZodSchema, // Export symbol for assertions
-    mockZodString: mockZodString, // Export symbol for assertions
   };
 });
 
@@ -82,17 +82,17 @@ describe("Form Adapters", () => {
 
     // Mock return values for useForm hooks
     mockUseRHFForm.mockReturnValue({
-      handleSubmit: vi.fn(),
-      getValues: vi.fn(),
-      formState: {},
       control: {},
+      formState: {},
+      getValues: vi.fn(),
+      handleSubmit: vi.fn(),
       // Add other RHF methods if adapters use them directly
     });
     mockUseRefineForm.mockReturnValue({
-      handleSubmit: vi.fn(),
-      getValues: vi.fn(),
-      formState: {},
       control: {},
+      formState: {},
+      getValues: vi.fn(),
+      handleSubmit: vi.fn(),
       refineCore: {
         onFinish: vi.fn(),
         // Add other refineCore methods if adapters use them directly
@@ -147,8 +147,8 @@ describe("Form Adapters", () => {
       const mockGetValues = vi.fn(() => ({ field1: "value1" }));
       const mockMethods = { getValues: mockGetValues } as any;
       const mockConfig: FormConfig<any> = {
-        onSubmit: mockOnSubmit,
         fields: [],
+        onSubmit: mockOnSubmit,
       };
 
       const result = await rhfAdapter.submitHandler(mockConfig, mockMethods);
@@ -179,8 +179,8 @@ describe("Form Adapters", () => {
     it("useForm should call @refinedev/react-hook-form useForm", () => {
       const options = {
         defaultValues: { name: "test" },
-        validationSchema: importedZod.object({ name: importedZod.string() }), // Use importedZod
         refineCoreProps: { resource: "posts" },
+        validationSchema: importedZod.object({ name: importedZod.string() }), // Use importedZod
       };
       refineAdapter.useForm(options);
 
@@ -210,8 +210,8 @@ describe("Form Adapters", () => {
       expect(mockUseRefineForm).toHaveBeenCalledWith(
         expect.objectContaining({
           refineCoreProps: {
-            autoSave: { enabled: false },
             action: "create",
+            autoSave: { enabled: false },
             meta: { foo: "bar" },
           },
         }),
@@ -248,8 +248,8 @@ describe("Form Adapters", () => {
         refineCore: { onFinish: mockOnFinish },
       } as any;
       const mockConfig: FormConfig<any> = {
-        onSubmit: mockOnSubmit,
         fields: [],
+        onSubmit: mockOnSubmit,
       };
 
       const result = await refineAdapter.submitHandler(mockConfig, mockMethods);
@@ -272,8 +272,8 @@ describe("Form Adapters", () => {
         refineCore: { onFinish: mockOnFinish },
       } as any;
       const mockConfig: FormConfig<any> = {
-        onSubmit: mockOnSubmit,
         fields: [],
+        onSubmit: mockOnSubmit,
       };
 
       const result = await refineAdapter.submitHandler(mockConfig, mockMethods);

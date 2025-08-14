@@ -2,6 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { FileInput } from "./FileInput";
 
 // Mock the registerFormComponent to prevent side effects
 vi.mock("./index", () => ({
@@ -12,8 +13,6 @@ vi.mock("./index", () => ({
 vi.mock("@lumeweb/portal-framework-ui-core", () => ({
   Input: vi.fn((props) => <input data-testid="base-input" {...props} />),
 }));
-
-import { FileInput } from "./FileInput";
 
 describe("FileInput", () => {
   afterEach(cleanup);

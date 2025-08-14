@@ -1,10 +1,8 @@
 import type {
-  NavigationItem as NavigationItemType,
   NavigationItemIconProps,
+  NavigationItem as NavigationItemType,
 } from "@lumeweb/portal-framework-core";
-import React from "react";
-import { useMatches } from "react-router";
-import { useSidebarContext } from "./layout/SidebarContext";
+
 import {
   Button,
   cn,
@@ -17,32 +15,38 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@lumeweb/portal-framework-ui-core";
-import { useMenuItems } from "@/hooks/useMenuItems";
-import { ChevronDown, Dot } from "lucide-react";
 import { Link } from "@refinedev/core";
+import { ChevronDown, Dot } from "lucide-react";
+import React from "react";
+import { useLocation } from "react-router";
 
-type Submenu = {
-  href: string;
-  label: string;
-  active?: boolean;
-};
+import { useMenuItems } from "@/hooks/useMenuItems";
+
+import { useSidebarContext } from "./layout/SidebarContext";
 
 interface CollapseMenuButtonProps {
-  icon?: React.FC<NavigationItemIconProps>;
-  label: string;
   active: boolean;
-  submenus: Submenu[];
+  icon?: React.FC<NavigationItemIconProps>;
   isOpen: boolean;
+  label: string;
+  submenus: Submenu[];
+}
+
+interface Submenu {
+  active?: boolean;
+  href: string;
+  label: string;
 }
 
 const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
-  icon: Icon,
-  label,
   active,
-  submenus,
+  icon: Icon,
   isOpen,
+  label,
+  submenus,
 }) => {
-  const pathname = useMatches()[0]?.pathname || ""; // Get current path
+  const location = useLocation();
+  const pathname = location.pathname; // Get current path
   const isSubmenuActive = submenus.some((submenu) =>
     submenu.active === undefined ? submenu.href === pathname : submenu.active,
   );
@@ -51,15 +55,15 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
 
   return (
     <Collapsible
-      open={isCollapsed}
+      className="w-full"
       onOpenChange={setIsCollapsed}
-      className="w-full">
+      open={isCollapsed}>
       <CollapsibleTrigger
-        className="[&[data-state=open]>div>div>svg]:rotate-180 mb-1"
-        asChild>
+        asChild
+        className="[&[data-state=open]>div>div>svg]:rotate-180 mb-1">
         <Button
-          variant={isSubmenuActive ? "secondary" : "ghost"}
-          className="w-full justify-start h-10">
+          className="w-full justify-start h-10"
+          variant={isSubmenuActive ? "secondary" : "ghost"}>
           <div className="w-full items-center flex justify-between">
             <div className="flex items-center">
               {Icon && (
@@ -71,8 +75,8 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
                 {/* Link only wraps the text */}
                 <p
                   className={cn({
-                    "translate-x-0 opacity-100": isOpen,
                     "-translate-x-96 opacity-0": !isOpen,
+                    "translate-x-0 opacity-100": isOpen,
                   })}>
                   {label}
                 </p>
@@ -86,32 +90,32 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
                   : "-translate-x-96 opacity-0",
               )}>
               <ChevronDown
-                size={18}
                 className="transition-transform duration-200"
+                size={18}
               />
             </div>
           </div>
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-        {submenus.map(({ href, label, active }, index) => (
+        {submenus.map(({ active, href, label }, index) => (
           <Button
+            asChild
+            className="w-full justify-start h-10 mb-1"
             key={index}
             variant={
               (active === undefined && pathname === href) || active
                 ? "secondary"
                 : "ghost"
-            }
-            className="w-full justify-start h-10 mb-1"
-            asChild>
+            }>
             <Link to={href}>
               <span className="mr-4 ml-2">
                 <Dot size={18} />
               </span>
               <p
                 className={cn({
-                  "translate-x-0 opacity-100": isOpen,
                   "-translate-x-96 opacity-0": !isOpen,
+                  "translate-x-0 opacity-100": isOpen,
                 })}>
                 {label}
               </p>
@@ -144,9 +148,9 @@ const NavItem: React.FC<{ active: boolean; item: NavigationItemType }> =
     return (
       <li ref={ref}>
         <Button
-          variant={active ? "secondary" : "ghost"}
+          asChild
           className="w-full justify-start h-10 mb-1"
-          asChild>
+          variant={active ? "secondary" : "ghost"}>
           <Link to={item.path || ""}>
             <div className="flex items-center">
               {IconComponent && (
@@ -165,27 +169,18 @@ NavItem.displayName = "NavItem";
 
 export const MainNavigation: React.FC<MenuProps> = ({ isOpen }) => {
   const menu = useMenuItems(); // Get menu data
-  const matches = useMatches();
-  const pathname = matches[0]?.pathname || "";
+  const location = useLocation();
+  const pathname = location.pathname;
 
   const renderMenuItem = (item: NavigationItemType) => {
-    const active = matches.some((match) => {
-      const isDirectMatch = match.pathname === item.path;
-      const isNestedMatch =
-        item.path &&
-        match.pathname.startsWith(`${item.path}/`) &&
-        match.pathname !== item.path;
-      if (item.path === "/" && (isDirectMatch || isNestedMatch)) {
-        return true;
-      }
-      return isDirectMatch || isNestedMatch;
-    });
+    const active = item.path === pathname || 
+                 (item.path && item.path !== "/" && pathname.startsWith(`${item.path}/`));
 
     if (item.children && item.children.length > 0) {
       const submenus: Submenu[] = item.children.map((child) => ({
+        active: child.path ? pathname.startsWith(child.path) : false,
         href: child.path || "",
         label: child.label,
-        active: child.path ? pathname.startsWith(child.path) : false,
       }));
 
       let CollapseMenuIcon: React.FC<NavigationItemIconProps> | undefined =
@@ -197,17 +192,17 @@ export const MainNavigation: React.FC<MenuProps> = ({ isOpen }) => {
 
       return (
         <CollapseMenuButton
-          key={item.id}
-          icon={CollapseMenuIcon}
-          label={item.label}
           active={active}
-          submenus={submenus}
+          icon={CollapseMenuIcon}
           isOpen={isOpen}
+          key={item.id}
+          label={item.label}
+          submenus={submenus}
         />
       );
     } else {
       return (
-        <TooltipProvider key={item.id} disableHoverableContent>
+        <TooltipProvider disableHoverableContent key={item.id}>
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>
               <NavItem active={active} item={item} />
