@@ -2,6 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { RadioGroup } from "./RadioGroup";
 
 // Mock the registerFormComponent to prevent side effects

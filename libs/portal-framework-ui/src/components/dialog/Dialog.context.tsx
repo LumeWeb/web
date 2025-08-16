@@ -69,7 +69,7 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const stateValue = useMemo(
+  const stateValue = useMemo<DialogStateContextValue>(
     () => ({
       currentDialog,
       formMethods: _formMethods,
@@ -77,7 +77,7 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
     [currentDialog, _formMethods],
   );
 
-  const actionsValue = useMemo(
+  const actionsValue = useMemo<DialogActionsContextValue>(
     () => ({
       closeDialog,
       openDialog,
@@ -98,10 +98,19 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
 
 export const useDialogState = () => useContext(DialogStateContext);
 export const useDialogActions = () => useContext(DialogActionsContext);
-export const useDialog = () => ({
-  ...useDialogState(),
-  ...useDialogActions(),
-});
+export const useDialog = () => {
+  const state = useDialogState();
+  const actions = useDialogActions();
+  
+  return {
+    ...state,
+    ...(state.currentDialog ? actions : {
+      closeDialog: actions.closeDialog,
+      openDialog: actions.openDialog,
+      replaceDialog: actions.replaceDialog
+    })
+  };
+};
 
 registerBridgedContext(DialogStateContext);
 registerBridgedContext(DialogActionsContext);

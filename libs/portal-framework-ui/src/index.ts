@@ -6,6 +6,7 @@ export * from "./components/form";
 export * from "./components/Forms";
 export * from "./components/InlineAuthLinkBanner";
 export * from "./components/layout/GeneralLayout";
+export * from "./components/layout/PageHeader";
 export * from "./components/LumeLogo";
 export * from "./components/SkeletonLoader";
 export * from "./components/TableContainer";

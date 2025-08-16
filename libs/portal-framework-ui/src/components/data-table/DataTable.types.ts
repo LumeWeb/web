@@ -34,7 +34,7 @@ export interface DataTableProps<
   /**
    * Configuration options for refine's useTable hook
    */
-  refineCoreProps: Omit<
+  refineCoreProps?: Omit<
     useTablePropsCore<TData, TError, TSearchVariables>,
     "columns" | "dataProviderName" | "resource"
   >;

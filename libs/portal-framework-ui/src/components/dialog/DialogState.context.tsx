@@ -2,10 +2,12 @@ import { createContext } from "react";
 
 import type { DialogConfig } from "./Dialog.types";
 
-export const DialogStateContext = createContext<{
+export interface DialogStateContextValue {
   currentDialog?: DialogConfig;
   formMethods?: any;
-}>({
+}
+
+export const DialogStateContext = createContext<DialogStateContextValue>({
   currentDialog: undefined,
   formMethods: undefined,
 });

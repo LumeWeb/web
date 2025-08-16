@@ -4,11 +4,11 @@ import { BaseRecord } from "@refinedev/core";
 import React, { useCallback, useMemo, useState } from "react";
 
 import type { FormConfig, StepFormFooterRenderer } from "./types";
+import { type StepFormConfig } from "./types";
 
 import { useDialog } from "../dialog/Dialog.context";
 import { SchemaForm } from "./SchemaForm";
 import { StepFormFooter } from "./StepFormFooter";
-import { type StepFormConfig } from "./types";
 
 const defaultStepFormFooter: StepFormFooterRenderer = (
   stepMethods,
@@ -124,7 +124,7 @@ export function StepSchemaForm<
     if (prevStepConfig.onStepSubmit) {
       const prevFields = getFieldsForStep(currentStep - 1);
       const prevStepValues = prevFields.reduce((acc, field) => {
-        (acc as any)[field] = formMethods?.getValues(field);
+        acc[field] = formMethods?.getValues(field);
         return acc;
       }, {} as Partial<TRequest>);
       await prevStepConfig.onStepSubmit(prevStepValues);

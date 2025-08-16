@@ -1,11 +1,11 @@
 import type { BaseRecord, DataProvider } from "@refinedev/core";
 
+import { stringify } from "querystring";
+
 import { generateFilter } from "./utils/generateFilter";
 import { generateSort } from "./utils/generateSort";
 import { generateNestedUrl } from "./utils/generateUrl";
 import { httpClient } from "./utils/kyInstance";
-
-import { stringify } from "querystring";
 
 const parseResponse = async (response: any) => {
   if (response instanceof Response && !response.ok) {
@@ -33,13 +33,11 @@ const parseResponse = async (response: any) => {
   }
 };
 
-type QueryParams = {
-  [key: string]: string | number | boolean;
-};
+type QueryParams = Record<string, boolean | number | string>;
 
 const addParam = (
   key: string,
-  value: string | number | boolean | undefined,
+  value: boolean | number | string | undefined,
   queryParams: QueryParams,
 ) => {
   if (value !== undefined) {
@@ -47,10 +45,12 @@ const addParam = (
   }
 };
 
-export const dataProvider = (apiUrl: string): DataProvider & { setAuthToken: (token: string | null) => void } => {
-  let authToken: string | null = null;
+export const dataProvider = (
+  apiUrl: string,
+): DataProvider & { setAuthToken: (token: null | string) => void } => {
+  let authToken: null | string = null;
 
-  const setAuthToken = (token: string | null) => {
+  const setAuthToken = (token: null | string) => {
     authToken = token;
   };
   const baseFetch = async (
@@ -77,20 +77,20 @@ export const dataProvider = (apiUrl: string): DataProvider & { setAuthToken: (to
     try {
       let response: any; // Type as any to avoid TS errors
       switch (method.toUpperCase()) {
+        case "DELETE":
+          response = await httpClient(apiUrl).delete(fullUrl, options);
+          break;
         case "GET":
           response = await httpClient(apiUrl).get(fullUrl, options);
+          break;
+        case "PATCH":
+          response = await httpClient(apiUrl).patch(fullUrl, options);
           break;
         case "POST":
           response = await httpClient(apiUrl).post(fullUrl, options);
           break;
         case "PUT":
           response = await httpClient(apiUrl).put(fullUrl, options);
-          break;
-        case "PATCH":
-          response = await httpClient(apiUrl).patch(fullUrl, options);
-          break;
-        case "DELETE":
-          response = await httpClient(apiUrl).delete(fullUrl, options);
           break;
         default:
           throw new Error(`Unsupported HTTP method: ${method}`);
@@ -116,7 +116,6 @@ export const dataProvider = (apiUrl: string): DataProvider & { setAuthToken: (to
   };
 
   return {
-    setAuthToken,
     create: async ({ meta, resource, variables }) => {
       const url = generateNestedUrl({ apiBase: apiUrl, meta, resource });
       const headers = meta?.headers ?? {};
@@ -130,14 +129,13 @@ export const dataProvider = (apiUrl: string): DataProvider & { setAuthToken: (to
       const data = await parseResponse(response);
       return { data };
     },
-
     custom: async ({
+      filters,
       meta,
       method,
       payload,
-      url: operation,
-      filters,
       sorters,
+      url: operation,
     }) => {
       const headers = meta?.headers ?? {};
       const baseUrl = generateNestedUrl({
@@ -219,6 +217,7 @@ export const dataProvider = (apiUrl: string): DataProvider & { setAuthToken: (to
         ? { ..._meta, params: _meta.paramsMap, paramsMap: undefined }
         : _meta;
       const url = generateNestedUrl({ apiBase: apiUrl, meta, resource });
+      const headers = meta?.headers ?? {};
 
       const filterParams = generateFilter(filters);
       const sortParams = generateSort(sorters);
@@ -232,36 +231,34 @@ export const dataProvider = (apiUrl: string): DataProvider & { setAuthToken: (to
       Object.entries(sortParams).forEach(([key, value]) =>
         addParam(key, value, queryParams),
       );
-      addParam("_page", pagination?.current, queryParams);
-      addParam("_per_page", pagination?.pageSize, queryParams);
-
-      try {
-        const response = await httpClient(apiUrl).get(url, {
-          searchParams: queryParams,
-        });
-
-        const data = await parseResponse(response);
-
-        let total = Number(response.headers.get("x-total-count"));
-
-        if (Number.isNaN(total) || total === 0) {
-          if (data && typeof data.total === "number") {
-            total = data.total;
-          } else {
-            total = 0;
-            console.warn("Total count not found in headers or data.");
-          }
-        }
-
-        if (data && Array.isArray(data.data)) {
-          return { data: data.data, total };
-        }
-
-        return { data: [], total: 0 };
-      } catch (error) {
-        console.error("Error fetching list:", error);
-        return Promise.reject(error);
+      if (pagination) {
+        const { current = 1, pageSize = 10 } = pagination;
+        const start = (current - 1) * pageSize;
+        const end = start + pageSize;
+        
+        addParam("_start", start, queryParams);
+        addParam("_end", end, queryParams);
       }
+
+      const response = await baseFetch(url, "GET", undefined, queryParams, headers);
+      const data = await parseResponse(response);
+
+      let total = Number(response.headers.get("x-total-count"));
+
+      if (Number.isNaN(total) || total === 0) {
+        if (data && typeof data.total === "number") {
+          total = data.total;
+        } else {
+          total = 0;
+          console.warn("Total count not found in headers or data.");
+        }
+      }
+
+      if (data && Array.isArray(data.data)) {
+        return { data: data.data, total };
+      }
+
+      return { data: [], total: 0 };
     },
 
     getOne: async ({ id, meta, resource }) => {
@@ -277,6 +274,8 @@ export const dataProvider = (apiUrl: string): DataProvider & { setAuthToken: (to
       const data = await parseResponse(response);
       return { data };
     },
+
+    setAuthToken,
 
     update: async ({ id, meta, resource, variables }) => {
       const url = generateNestedUrl({ apiBase: apiUrl, id, meta, resource });

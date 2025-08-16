@@ -1,41 +1,41 @@
 // @ts-nocheck
 
-import type { Plugin } from "vite";
-import { defineConfig } from "vite";
 import type { ModuleFederationOptions } from "@module-federation/vite/lib/utils/normalizeModuleFederationOptions";
+import type { Plugin } from "vite";
 
 import { federation } from "@module-federation/vite";
 import react from "@vitejs/plugin-react";
-import { createRequire } from "node:module";
-import { resolve } from "path";
-import tsconfigPaths from "vite-tsconfig-paths";
-import fs from "node:fs";
 import express from "express";
 import fetch from "node-fetch";
+import fs from "node:fs";
+import { createRequire } from "node:module";
+import { resolve } from "path";
+import { defineConfig } from "vite";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 interface BuildInfo {
-  version: string;
-  gitCommit: string;
-  gitBranch: string;
+  architecture: string;
   buildTime: string;
+  gitBranch: string;
+  gitCommit: string;
   goVersion: string;
   platform: string;
-  architecture: string;
+  version: string;
 }
 
-interface PluginMeta extends Record<string, unknown> {}
+type PluginMeta = Record<string, unknown>;
+
+interface PortalMetaConfig {
+  build: BuildInfo;
+  domain: string;
+  feature_flags: Record<string, boolean>;
+  plugins: Record<string, PortalPluginConfig>;
+}
 
 interface PortalPluginConfig {
   build: BuildInfo;
   meta: PluginMeta;
   web_bundles: string[];
-}
-
-interface PortalMetaConfig {
-  domain: string;
-  plugins: Record<string, PortalPluginConfig>;
-  feature_flags: Record<string, boolean>;
-  build: BuildInfo;
 }
 
 const DEFAULT_PORTAL_DOMAIN = "default.lumeweb.com";
@@ -56,6 +56,7 @@ function setupPluginRegistryConfig(opts: ConfigOptions) {
 
     const portalConfig = {
       domain: normalizePortalDomain(opts.portalServer),
+      feature_flags: {},
       plugins: proxyConfig.reduce((acc, route) => {
         acc[route.name] = {
           meta: {},
@@ -63,14 +64,13 @@ function setupPluginRegistryConfig(opts: ConfigOptions) {
         };
         return acc;
       }, {}),
-      feature_flags: {},
     };
 
     return { portalConfig };
   } catch (error) {
     console.error("Error reading or parsing proxy config file:", error);
     throw new Error(
-      `Failed to setup plugin registry config from ${configPath}: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to setup plugin registry config from ${configPath}: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }
@@ -78,17 +78,23 @@ function setupPluginRegistryConfig(opts: ConfigOptions) {
 const require = createRequire(import.meta.url);
 
 export interface ConfigOptions {
+  /** Port number for react refresh host when type is "plugin" */
+  appPort?: number;
+  devPort?: number;
   dir: string;
   exposes?: ModuleFederationOptions["exposes"];
   name: string;
+  pluginRegistryConfigFile?: string;
+  plugins?: PluginConfig[];
+  portalServer?: string;
   sharedModules: ModuleFederationOptions["shared"];
   type: "host" | "plugin";
-  pluginRegistryConfigFile?: string;
-  devPort?: number;
-  portalServer?: string;
-  plugins?: PluginConfig[];
-  /** Port number for react refresh host when type is "plugin" */
-  appPort?: number;
+}
+
+export interface PluginConfig {
+  dir: string;
+  exposes?: ModuleFederationOptions["exposes"];
+  name: string;
 }
 
 interface PortalPlugin {
@@ -96,25 +102,11 @@ interface PortalPlugin {
   port: number;
 }
 
-export interface PluginConfig {
-  name: string;
-  dir: string;
-  exposes?: ModuleFederationOptions["exposes"];
-}
-
 const DEFAULT_PLUGIN_REGISTRY_FILE = "plugin.config.json";
-
-function normalizeConfigOptions(opts: ConfigOptions): ConfigOptions {
-  return {
-    ...opts,
-    devPort: opts.devPort ?? 4173,
-    appPort: opts.type === "plugin" ? (opts.appPort ?? 4173) : undefined,
-  };
-}
 
 export function Config(opts: ConfigOptions) {
   const normalizedOpts = normalizeConfigOptions(opts);
-  let resolvedRuntimePlugins: string[] = [];
+  const resolvedRuntimePlugins: string[] = [];
   try {
     const bridgeReactPluginPath = require.resolve(
       "@module-federation/bridge-react/plugin",
@@ -139,12 +131,12 @@ export function Config(opts: ConfigOptions) {
     configOverrides: Partial<ModuleFederationOptions> = {},
   ) {
     return federation({
+      ignoreOrigin: true,
+      manifest: true,
       name,
+      remotePlugin: isPlugin,
       runtimePlugins,
       shared: sharedModules,
-      remotePlugin: isPlugin,
-      manifest: true,
-      ignoreOrigin: true,
       ...configOverrides,
     });
   }
@@ -171,8 +163,8 @@ export function Config(opts: ConfigOptions) {
       devPort,
       true,
       {
-        filename: `${plugin.name}/remoteEntry-[hash].js`,
         exposes: resolvedExposes,
+        filename: `${plugin.name}/remoteEntry-[hash].js`,
         virtualModuleDir: `__mf__virtual_${plugin.name.replace(".", "_")}`,
       },
     );
@@ -198,8 +190,8 @@ export function Config(opts: ConfigOptions) {
       opts.devPort!,
       opts.type == "plugin",
       {
-        filename: "remoteEntry-[hash].js",
         exposes: resolvedExposes,
+        filename: "remoteEntry-[hash].js",
         remotes:
           opts.plugins?.reduce(
             (acc, plugin) => {
@@ -220,8 +212,8 @@ export function Config(opts: ConfigOptions) {
         })
       : react(),
     tsconfigPaths(),
-    localhostAccessPlugin(),
     createHostFederationConfig(normalizedOpts, resolvedRuntimePlugins),
+    localhostAccessPlugin(),
     ...(opts.plugins?.map((plugin) =>
       createPluginFederationConfig(
         plugin,
@@ -233,7 +225,6 @@ export function Config(opts: ConfigOptions) {
   ];
 
   const viteConfig = defineConfig({
-    // base: `http://localhost:${normalizedOpts.devPort}/`,
     base: "",
     build: {
       ...(opts.type === "plugin"
@@ -292,16 +283,53 @@ export function Config(opts: ConfigOptions) {
   return viteConfig;
 }
 
+export function localhostAccessPlugin(): Plugin {
+  return {
+    name: "localhost-access-plugin",
+    transformIndexHtml() {
+      const scripts = [];
+
+      if (process.env.VITE_PORTAL_ALLOW_LOCALHOST) {
+        scripts.push({
+          attrs: { type: "text/javascript" },
+          children: `window.VITE_PORTAL_ALLOW_LOCALHOST = true;`,
+          injectTo: "head-prepend",
+          tag: "script",
+        });
+      }
+
+      if (process.env.VITE_PORTAL_DOMAIN_IS_ROOT) {
+        scripts.push({
+          attrs: { type: "text/javascript" },
+          children: `window.VITE_PORTAL_DOMAIN_IS_ROOT = ${process.env.VITE_PORTAL_DOMAIN_IS_ROOT};`,
+          injectTo: "head-prepend",
+          tag: "script",
+        });
+      }
+
+      return scripts;
+    },
+  };
+}
+
 function createExpressMiddlewarePlugin(portalConfig: PortalMetaConfig): Plugin {
   return {
-    name: "portal-express-middleware",
     apply: "serve",
-    configureServer(server) {
-      setupExpressMiddleware(server, portalConfig);
-    },
     configurePreviewServer(server) {
       setupExpressMiddleware(server, portalConfig);
     },
+    configureServer(server) {
+      setupExpressMiddleware(server, portalConfig);
+    },
+    name: "portal-express-middleware",
+  };
+}
+
+function normalizeConfigOptions(opts: ConfigOptions): ConfigOptions {
+  return {
+    ...opts,
+    appPort: opts.type === "plugin" ? (opts.appPort ?? 4173) : undefined,
+    devPort: opts.devPort ?? 4173,
   };
 }
 
@@ -312,9 +340,12 @@ function setupExpressMiddleware(server: any, portalConfig: PortalMetaConfig) {
   // Enhanced meta endpoint that merges upstream config
   expressApp.get("/api/meta", async (req, res) => {
     try {
-      let mergedConfig = { ...portalConfig };
+      const mergedConfig = { ...portalConfig };
 
-      if (portalConfig.domain && portalConfig.domain !== DEFAULT_PORTAL_DOMAIN) {
+      if (
+        portalConfig.domain &&
+        portalConfig.domain !== DEFAULT_PORTAL_DOMAIN
+      ) {
         const url = new URL(`https://${portalConfig.domain}/api/meta`);
         if (req.query.app) {
           url.searchParams.set("app", req.query.app as string);
@@ -324,14 +355,16 @@ function setupExpressMiddleware(server: any, portalConfig: PortalMetaConfig) {
 
         try {
           const upstreamResponse = await fetch(url.toString(), {
-            signal: controller.signal
+            signal: controller.signal,
           });
 
           if (!upstreamResponse.ok) {
-            throw new Error(`Upstream request failed with status ${upstreamResponse.status}`);
+            throw new Error(
+              `Upstream request failed with status ${upstreamResponse.status}`,
+            );
           }
 
-          const upstreamConfig = await upstreamResponse.json().catch(err => {
+          const upstreamConfig = await upstreamResponse.json().catch((err) => {
             throw new Error(`Failed to parse upstream config: ${err.message}`);
           });
 
@@ -362,7 +395,7 @@ function setupExpressMiddleware(server: any, portalConfig: PortalMetaConfig) {
             mergedConfig.build = upstreamConfig.build;
           }
         } catch (error) {
-          console.error('Failed to fetch/process upstream meta config:', error);
+          console.error("Failed to fetch/process upstream meta config:", error);
           // Continue with local config only
         } finally {
           clearTimeout(timeout);
@@ -418,8 +451,8 @@ function setupExpressMiddleware(server: any, portalConfig: PortalMetaConfig) {
 
       // Return authentication details if no redirect
       res.status(200).json({
-        token: token,
         Otp: false, // Mock OTP status (disabled for testing)
+        token: token,
       });
     });
   }
@@ -429,35 +462,13 @@ function setupExpressMiddleware(server: any, portalConfig: PortalMetaConfig) {
     server.config.server.proxy = {
       ...server.config.server.proxy,
       "/api/auth": {
-        target: `https://${portalConfig.domain}`,
         changeOrigin: true,
-        secure: false,
         rewrite: (path) => path.replace(/^\/api\/auth/, ""),
+        secure: false,
+        target: `https://${portalConfig.domain}`,
       },
     };
   }
 
   server.middlewares.use(expressApp);
-}
-
-export function localhostAccessPlugin(): Plugin {
-  return {
-    name: "localhost-access-plugin",
-    transformIndexHtml() {
-      if (!process.env.VITE_PORTAL_ALLOW_LOCALHOST) {
-        return [];
-      }
-
-      return [
-        {
-          tag: "script",
-          attrs: {
-            type: "text/javascript",
-          },
-          children: `window.VITE_PORTAL_ALLOW_LOCALHOST = true;`,
-          injectTo: "body-prepend",
-        },
-      ];
-    },
-  };
 }

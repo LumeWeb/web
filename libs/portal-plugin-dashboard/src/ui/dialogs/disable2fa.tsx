@@ -8,7 +8,7 @@ import {
 
 export function disable2faDialogConfig(
   otpHandler: OTPDisableHandler,
-  invalidateAuth: InvalidateAuthHamdler,
+  invalidateAuth: InvalidateAuthHandler,
 ): DialogConfig {
   return {
     formConfig: disable2faForm(),

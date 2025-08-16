@@ -1,10 +1,17 @@
-import { BaseRecord } from '@refinedev/core';
-import React from 'react';
-import { FormDialogConfig } from 'src/components/dialog';
+import { BaseRecord } from "@refinedev/core";
+import React from "react";
 
-import { ActionListRenderer } from '../actions';
-import { getDefaultFormActions } from '../dialog/utils/dialogActions';
-import { FormConfig } from './types';
+import { DialogConfig, FormDialogConfig } from "@/components/dialog";
+
+import { ActionItemConfig, ActionListRenderer } from "../actions";
+import { getDefaultFormActions } from "../dialog/utils/dialogActions";
+import { FormConfig } from "./types";
+
+type FooterContent<T extends BaseRecord = any> =
+  | ((methods: any, closeDialog: () => void) => React.ReactNode)
+  | ActionItemConfig[]
+  | false
+  | React.ReactNode;
 
 interface FormDialogFooterProps<T extends BaseRecord = any> {
   className?: string;
@@ -17,8 +24,13 @@ interface FormFooterProps<T extends BaseRecord = any> {
   className?: string;
   closeDialog?: () => void;
   config: FormConfig<T> | FormDialogConfig<T>;
+  currentDialog?: DialogConfig<T>;
   formMethods?: any;
 }
+
+type GetFooterFn<T extends BaseRecord = any> = (
+  config: FormConfig<T> | FormDialogConfig<T>,
+) => FooterContent<T> | undefined;
 
 interface RegularFormFooterProps<T extends BaseRecord = any> {
   className?: string;
@@ -27,54 +39,13 @@ interface RegularFormFooterProps<T extends BaseRecord = any> {
   formMethods?: any;
 }
 
-function renderFormFooter<T extends BaseRecord = any>(
-  config: FormConfig<T> | FormDialogConfig<T>,
-  getFooter: (config: FormConfig<T> | FormDialogConfig<T>) =>
-    | ((methods: any, closeDialog: () => void) => React.ReactNode)
-    | React.ReactNode
-    | undefined,
-  formMethods: any,
-  closeDialog: () => void,
-  className?: string,
-): React.ReactNode {
-  const footerValue = getFooter(config);
-  const defaultActions = getDefaultFormActions(
-    config,
-    formMethods?.formState?.isSubmitting,
-  );
-  const actions = config.actionButtons ?? defaultActions;
-
-  if (!footerValue && !actions.length) {
-    return null;
-  }
-
-  if (footerValue) {
-    const customFooter =
-      typeof footerValue === 'function'
-        ? footerValue(formMethods, closeDialog)
-        : footerValue;
-    return <div className={className}>{customFooter}</div>;
-  }
-
-  return (
-    <div className={className}>
-      <ActionListRenderer
-        actions={actions}
-        closeDialog={closeDialog}
-        isSubmitting={formMethods?.formState?.isSubmitting || false}
-        layout={config.actionButtonsLayout || 'horizontal'}
-      />
-    </div>
-  );
-}
-
 export function FormFooter<T extends BaseRecord = any>({
   className,
   closeDialog,
   config,
   formMethods,
 }: FormFooterProps<T>) {
-  if ('type' in config && config.type === 'form') {
+  if ("type" in config && config.type === "form") {
     return (
       <FormDialogFooter
         className={className}
@@ -122,5 +93,57 @@ function RegularFormFooter<T extends BaseRecord = any>({
     formMethods,
     closeDialog,
     className,
+  );
+}
+
+function renderFormFooter<T extends BaseRecord = any>(
+  config: FormConfig<T> | FormDialogConfig<T>,
+  getFooter: GetFooterFn<T>,
+  formMethods: any,
+  closeDialog: () => void,
+  className?: string,
+): React.ReactNode {
+  const footerValue = getFooter(config);
+  const defaultActions = getDefaultFormActions(
+    config,
+    formMethods?.formState?.isSubmitting,
+  );
+  const actions = config.actionButtons ?? defaultActions;
+
+  if (!footerValue && !actions.length) {
+    return null;
+  }
+
+  if (footerValue) {
+    const customFooter =
+      typeof footerValue === "function"
+        ? footerValue(formMethods, closeDialog)
+        : footerValue;
+
+    if (Array.isArray(customFooter)) {
+      return (
+        <div className={className}>
+          <ActionListRenderer
+            actions={customFooter}
+            closeDialog={closeDialog}
+            isSubmitting={formMethods?.formState?.isSubmitting || false}
+            layout={config.actionButtonsLayout || "horizontal"}
+          />
+        </div>
+      );
+    }
+
+    return <div className={className}>{customFooter}</div>;
+  }
+
+  return (
+    <div className={className}>
+      <ActionListRenderer
+        actions={actions}
+        closeDialog={closeDialog}
+        isSubmitting={formMethods?.formState?.isSubmitting || false}
+        layout={config.actionButtonsLayout || "horizontal"}
+      />
+    </div>
   );
 }

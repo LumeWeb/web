@@ -3,6 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { Select } from "./Select";
 
 // Mock the registerFormComponent to prevent side effects
@@ -37,35 +38,48 @@ mocks.Select = vi.fn(({ children, onValueChange, value, ...props }) => {
         data-testid="base-select"
         onChange={handleChange}
         // Use value for controlled behavior
-        value={value ?? ''} // Ensure value is never undefined for controlled component
+        value={value ?? ""} // Ensure value is never undefined for controlled component
         // Pass relevant props to the native select if needed for testing attributes
-        {...props}
-      >
+        {...props}>
         {/* Find SelectContent child and render its SelectItem children inside the select */}
         {React.Children.map(children, (child) => {
           // Cast child to React.ReactElement<any> to access props
           const typedChild = child as React.ReactElement<any>;
           // Cast typedChild.props to any to access children
-          if (React.isValidElement(typedChild) && typedChild.type === mocks.SelectContent && (typedChild.props as any).children) {
+          if (
+            React.isValidElement(typedChild) &&
+            typedChild.type === mocks.SelectContent &&
+            (typedChild.props as any).children
+          ) {
             // Cast children to React.ReactNode[] before mapping
-            return React.Children.map((typedChild.props as any).children as React.ReactNode[], (selectItemChild) => {
-              if (React.isValidElement(selectItemChild) && selectItemChild.type === mocks.SelectItem) {
-                return selectItemChild;
-              }
-              return null; // Ignore non-SelectItem children within SelectContent
-            });
+            return React.Children.map(
+              (typedChild.props as any).children as React.ReactNode[],
+              (selectItemChild) => {
+                if (
+                  React.isValidElement(selectItemChild) &&
+                  selectItemChild.type === mocks.SelectItem
+                ) {
+                  return selectItemChild;
+                }
+                return null; // Ignore non-SelectItem children within SelectContent
+              },
+            );
           }
           return null; // Ignore other top-level children for the native select
         })}
       </select>
       {/* Render SelectTrigger and SelectValue mocks as siblings */}
       {React.Children.map(children, (child) => {
-         // Cast child to React.ReactElement<any> to access props
-         const typedChild = child as React.ReactElement<any>;
-         if (React.isValidElement(typedChild) && (typedChild.type === mocks.SelectTrigger || typedChild.type === mocks.SelectValue)) {
-           return typedChild; // Render the mock component itself
-         }
-         return null; // Ignore other children at this level (including SelectContent)
+        // Cast child to React.ReactElement<any> to access props
+        const typedChild = child as React.ReactElement<any>;
+        if (
+          React.isValidElement(typedChild) &&
+          (typedChild.type === mocks.SelectTrigger ||
+            typedChild.type === mocks.SelectValue)
+        ) {
+          return typedChild; // Render the mock component itself
+        }
+        return null; // Ignore other children at this level (including SelectContent)
       })}
     </>
   );
@@ -81,13 +95,21 @@ mocks.SelectItem = vi.fn(({ children, value, ...props }) => (
 // Mock other components as simple divs or null if not needed for interaction
 // These mocks are still needed if the component being tested renders them,
 // but they don't need to be children of the native select in the mock.
-mocks.SelectContent = vi.fn((props) => ( // Remove children from props
-  <div data-testid="select-content" {...props}></div> // Do not render children
-));
+mocks.SelectContent = vi.fn(
+  (
+    props, // Remove children from props
+  ) => (
+    <div data-testid="select-content" {...props}></div> // Do not render children
+  ),
+);
 mocks.SelectTrigger = vi.fn(({ children, ...props }) => (
-  <button data-testid="select-trigger" {...props}>{children}</button>
+  <button data-testid="select-trigger" {...props}>
+    {children}
+  </button>
 ));
-mocks.SelectValue = vi.fn((props) => <span data-testid="select-value" {...props} />)
+mocks.SelectValue = vi.fn((props) => (
+  <span data-testid="select-value" {...props} />
+));
 
 describe("Select", () => {
   afterEach(cleanup);
@@ -127,7 +149,14 @@ describe("Select", () => {
   });
 
   it("passes the correct value to the base select", () => {
-    render(<Select name="testSelect" onChange={vi.fn()} options={options} value="option2" />);
+    render(
+      <Select
+        name="testSelect"
+        onChange={vi.fn()}
+        options={options}
+        value="option2"
+      />,
+    );
     const select = screen.getByTestId("base-select");
     expect(select).toHaveValue("option2");
   });
@@ -151,7 +180,14 @@ describe("Select", () => {
   });
 
   it("marks the base select as required when required prop is true", () => {
-    render(<Select name="testSelect" onChange={vi.fn()} options={options} required />);
+    render(
+      <Select
+        name="testSelect"
+        onChange={vi.fn()}
+        options={options}
+        required
+      />,
+    );
     const select = screen.getByTestId("base-select");
     expect(select).toBeRequired();
   });

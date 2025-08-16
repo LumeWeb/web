@@ -13,49 +13,71 @@ export interface ActionColumnDef<TData> extends ColumnDef<TData, unknown> {
   cell: (props: ActionColumnCellProps<TData>) => React.ReactNode;
 }
 
-export interface BaseTableCommonProps<TData> {
+export type BaseTableCommonProps<TData> = TableInteractionProps<TData> &
+  TablePaginationConfigProps &
+  TableStateProps<TData> &
+  TableStylingProps;
+
+export type BaseTablePaginationConfig = boolean | TablePaginationProps;
+
+export type BaseTableProps<TData> =
+  | BaseTableWithDataProps<TData>
+  | BaseTableWithTableProps<TData>;
+
+export type BaseTableWithDataProps<TData> = BaseTableCommonProps<TData> &
+  TableDataProps<TData> & {
+    table?: never;
+  };
+
+export type BaseTableWithTableProps<TData> = BaseTableCommonProps<TData> &
+  TableInstanceProps<TData> & {
+    actionColumn?: never;
+    columns?: never;
+    data?: never;
+  };
+
+export interface TableDataProps<TData> {
   /** Optional action column configuration */
   actionColumn?: ActionColumnDef<TData>;
-  className?: string;
   columns: ColumnDef<TData>[];
-  emptyState?: ((colSpan: number) => React.ReactNode) | React.ReactNode;
-  emptyStateMessage?: string;
-  footer?: React.ReactNode;
+  data: TData[];
+}
+
+export interface TableInstanceProps<TData> {
+  table: Table<TData>;
+}
+
+export interface TableInteractionProps<TData> {
   getCellProps?: (
     cell: Cell<TData, unknown>,
   ) => React.HTMLAttributes<HTMLTableCellElement>;
   getRowProps?: (row: Row<TData>) => React.HTMLAttributes<HTMLTableRowElement>;
-  header?: React.ReactNode;
-  /** Loading state content */
-  loadingState?: ((colSpan: number) => React.ReactNode) | React.ReactNode;
-  /** Loading state message */
-  loadingStateMessage?: string;
   onRowClick?: (row: Row<TData>) => void;
-  /** Pagination configuration */
-  pagination?: BaseTablePaginationConfig | boolean;
 }
 
-export interface BaseTablePaginationConfig {
+export interface TablePaginationConfigProps {
+  /** Pagination configuration */
+  pagination?: BaseTablePaginationConfig;
+}
+
+export interface TablePaginationProps {
   /** Custom pagination component */
   component?: React.ReactNode;
   /** Whether pagination is enabled */
   enabled?: boolean;
 }
 
-export type BaseTableProps<TData> =
-  | BaseTableWithDataProps<TData>
-  | BaseTableWithTableProps<TData>;
-
-export interface BaseTableWithDataProps<TData>
-  extends BaseTableCommonProps<TData> {
-  data: TData[];
-  table?: never;
+export interface TableStateProps<TData> {
+  emptyState?: ((colSpan: number) => React.ReactNode) | React.ReactNode;
+  emptyStateMessage?: string;
+  loadingState?: ((colSpan: number) => React.ReactNode) | React.ReactNode;
+  loadingStateMessage?: string;
 }
 
-export interface BaseTableWithTableProps<TData>
-  extends BaseTableCommonProps<TData> {
-  data?: never;
-  table?: Table<TData>;
+export interface TableStylingProps {
+  className?: string;
+  footer?: React.ReactNode;
+  header?: React.ReactNode;
 }
 
 function BaseTable<TData extends object>(props: BaseTableProps<TData>) {

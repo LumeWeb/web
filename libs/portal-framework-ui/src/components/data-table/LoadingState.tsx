@@ -1,9 +1,8 @@
 import { TableCell, TableRow } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
-import { useTable } from "./Table.context";
-
 import { SkeletonLoader } from "../SkeletonLoader";
+import { useTable } from "./Table.context";
 
 export interface TableLoadingStateProps {
   /** Custom loading content */

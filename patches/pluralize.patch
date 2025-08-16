@@ -1,11 +1,13 @@
 diff --git a/pluralize.js b/pluralize.js
-index b8f970adc84a99de69f316ac05358130dc7aa0ce..42484a163636ac56970d09758bb7261550fb1832 100644
+index b8f970adc84a99de69f316ac05358130dc7aa0ce..60dd23f1c4c8a66dff09f8583b8bbe33af24eb27 100644
 --- a/pluralize.js
 +++ b/pluralize.js
-@@ -1,20 +1,23 @@
+@@ -1,20 +1,22 @@
  /* global define */
  
 -(function (root, pluralize) {
++let tmp = this || {};
++
 +(function(root, pluralize) {
    /* istanbul ignore else */
    if (typeof require === 'function' && typeof exports === 'object' && typeof module === 'object') {
@@ -19,16 +21,21 @@ index b8f970adc84a99de69f316ac05358130dc7aa0ce..42484a163636ac56970d09758bb72615
 +    define(function() {
        return pluralize();
      });
-+  } else if (typeof import.meta !== 'undefined') {
-+    // ESM
-+    return pluralize();
    } else {
 -    // Browser global.
 +    // Browser global
      root.pluralize = pluralize();
    }
 -})(this, function () {
-+})(this, function() {
++})(tmp, function() {
    // Rule storage - pluralize and singularize need to be run sequentially,
    // while other rules can be optimized using an object for instant lookups.
    var pluralRules = [];
+@@ -501,3 +503,7 @@
+ 
+   return pluralize;
+ });
++
++const exports = tmp.pluralize
++
++export default exports;

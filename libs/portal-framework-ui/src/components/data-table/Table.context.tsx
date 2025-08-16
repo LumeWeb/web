@@ -35,6 +35,7 @@ export function CreateTableProvider<TData>({
         ...actionColumn,
         cell: (props) => actionColumn.cell(props),
         id: actionColumn.id || "actions",
+        size: actionColumn.size,
       });
     }
     return cols;

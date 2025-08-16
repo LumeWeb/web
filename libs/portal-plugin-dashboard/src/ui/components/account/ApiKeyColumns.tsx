@@ -14,10 +14,7 @@ export const apiKeyColumns = [
     header: "Name",
   }),
   columnHelper.accessor("created_at", {
-    cell: (info) => {
-      const date = new Date(info.getValue());
-      return date.toLocaleDateString();
-    },
+    cell: (info) => format(new Date(info.getValue()), "MMM d, yyyy, hh:mm a"),
     header: "Created",
   }),
 ];

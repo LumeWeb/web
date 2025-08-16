@@ -14,25 +14,30 @@ const routes = [
     path: "/dashboard",
   },
   {
-    component: "account/layout",
-    id: "account_layout",
-    path: "/account",
-    navigation: {
-      label: "My Account",
-    },
     children: [
       {
         component: "account/profile",
         id: "account_index",
-        path: "",
         index: true,
+        path: "",
       },
       {
         component: "account/security",
         id: "account_security",
         path: "security",
       },
+      {
+        component: "account/api-keys",
+        id: "account_api_keys",
+        path: "api-keys",
+      },
     ],
+    component: "account/layout",
+    id: "account_layout",
+    navigation: {
+      label: "My Account",
+    },
+    path: "/account",
   },
   {
     component: "AccountVerify",
