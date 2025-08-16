@@ -1,15 +1,8 @@
 import type { Identity } from "@lumeweb/portal-framework-core";
 
-import { DATA_PROVIDER_NAME, OTPEnableHandler } from "@lumeweb/portal-framework-auth";
+import { DATA_PROVIDER_NAME } from "@lumeweb/portal-framework-auth";
 import { useDialog } from "@lumeweb/portal-framework-ui";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@lumeweb/portal-framework-ui-core";
+import { Button } from "@lumeweb/portal-framework-ui-core";
 import { OTPDisableRequest, OTPVerifyRequest } from "@lumeweb/portal-sdk";
 import {
   useCustomMutation,
@@ -18,8 +11,11 @@ import {
 } from "@refinedev/core";
 import { Smartphone } from "lucide-react";
 
+import { Card } from "@/ui/components/Card";
 import { disable2faDialogConfig } from "@/ui/dialogs/disable2fa";
 import { enable2faDialogConfig } from "@/ui/dialogs/enable2fa";
+import { OTPDisableHandler } from "@/ui/forms/disable2fa";
+import { OTPEnableHandler } from "@/ui/forms/enable2fa";
 
 export default function TwoFA() {
   const { openDialog } = useDialog();
@@ -32,7 +28,7 @@ export default function TwoFA() {
     return disableOtp({
       dataProviderName: DATA_PROVIDER_NAME,
       errorNotification: {
-        description: "Failed to disable two-factor authentication", 
+        description: "Failed to disable two-factor authentication",
         message: "Error",
         type: "error",
       },
@@ -66,31 +62,24 @@ export default function TwoFA() {
     });
   };
   return (
-    <Card className="border-border">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Smartphone className="w-5 h-5 text-primary" />
-          Two-Factor Authentication
-        </CardTitle>
-        <CardDescription>
-          Add an extra layer of security to your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Button
-          className="w-full"
-          onClick={(e) => {
-            e.preventDefault();
-            openDialog(
-              identity?.otp
-                ? disable2faDialogConfig(handleDisableOtp, invalidateAuth)
-                : enable2faDialogConfig(handleVerifyOtp, invalidateAuth),
-            );
-          }}>
-          {identity?.otp && "Disable Two-Factor Authorization"}
-          {!identity?.otp && "Enable Two-Factor Authentication"}
-        </Button>
-      </CardContent>
+    <Card
+      border
+      description="Add an extra layer of security to your account"
+      icon={Smartphone}
+      title="Two-Factor Authentication">
+      <Button
+        className="w-full"
+        onClick={(e) => {
+          e.preventDefault();
+          openDialog(
+            identity?.otp
+              ? disable2faDialogConfig(handleDisableOtp, invalidateAuth)
+              : enable2faDialogConfig(handleVerifyOtp, invalidateAuth),
+          );
+        }}>
+        {identity?.otp && "Disable Two-Factor Authorization"}
+        {!identity?.otp && "Enable Two-Factor Authentication"}
+      </Button>
     </Card>
   );
 }

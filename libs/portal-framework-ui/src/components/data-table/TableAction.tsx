@@ -20,7 +20,6 @@ function TableAction<TData>({ items, row }: TableActionProps<TData>) {
       {items.map((item, index) => (
         <Button
           aria-label={item.tooltip || item.label}
-          title={item.tooltip || item.label}
           className="h-8 w-8 p-0"
           disabled={item.disabled}
           key={`action-${index}`}
@@ -28,6 +27,7 @@ function TableAction<TData>({ items, row }: TableActionProps<TData>) {
             e.stopPropagation();
             item.onClick(row);
           }}
+          title={item.tooltip || item.label}
           variant="ghost">
           {item.icon}
         </Button>

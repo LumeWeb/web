@@ -15,6 +15,7 @@ export const SubmitActionItem: React.FC<
     <Button
       className={config.className}
       disabled={isSubmitting || config.disabled}
+      onClick={config.onClick}
       type="submit">
       {isSubmitting && <Spinner className="mr-2" size="small" />}
       {config.label ?? config.children ?? "Submit"}

@@ -15,14 +15,14 @@ export function disable2faForm(): FormConfig {
     actionButtonsLayout: "horizontal",
     fields: [
       {
+        inputProps: {
+          autoComplete: "current-password",
+        },
         label: "Password",
-        name: "password", 
+        name: "password",
         placeholder: "Enter your password",
         required: true,
         type: FormFieldType.PASSWORD,
-        inputProps: {
-          autoComplete: "current-password"
-        }
       },
     ],
     validationSchema: schema,

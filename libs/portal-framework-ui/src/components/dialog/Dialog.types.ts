@@ -51,6 +51,7 @@ import { ActionItemConfig, ActionListLayout } from "../actions";
 export interface AlertDialogConfig extends DialogBaseConfig {
   cancelText?: string;
   confirmText?: string;
+  description?: string | React.ReactNode | React.FC;
   onCancel?: (source: "programmatic" | "user") => void;
   onConfirm?: () => Promise<void> | void;
   type: "alert";

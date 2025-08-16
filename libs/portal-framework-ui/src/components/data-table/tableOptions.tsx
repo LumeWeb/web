@@ -1,7 +1,7 @@
 import { Table } from "@tanstack/react-table";
 import React from "react";
 
-import { BaseTableCommonProps, BaseTablePaginationConfig } from "./BaseTable";
+import { BaseTableCommonProps, BaseTablePaginationConfig, TablePaginationProps } from "./BaseTable";
 import { DefaultPagination } from "./DefaultPagination";
 import { TableEmptyState } from "./EmptyState";
 import { TableLoadingState } from "./LoadingState";
@@ -16,7 +16,7 @@ export interface NormalizedTableOptions<TData> {
 }
 
 export function normalizeTableOptions<TData>(
-  pagination: BaseTablePaginationConfig | boolean | undefined,
+  pagination: BaseTablePaginationConfig | undefined,
   emptyState: BaseTableCommonProps<TData>["emptyState"],
   emptyStateMessage: BaseTableCommonProps<TData>["emptyStateMessage"],
   loadingState: BaseTableCommonProps<TData>["loadingState"],

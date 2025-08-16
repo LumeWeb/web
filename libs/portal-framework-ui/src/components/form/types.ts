@@ -1,3 +1,5 @@
+import type { ComponentType, ReactNode } from "react";
+
 import {
   type AutoSaveIndicatorElements,
   type AutoSaveProps,
@@ -8,12 +10,12 @@ import {
   OpenNotificationParams,
 } from "@refinedev/core";
 import { UseFormProps as RefineUseFormProps } from "@refinedev/react-hook-form";
-import type { ComponentType, ReactNode } from "react";
 import { Path } from "react-hook-form";
 import { z } from "zod";
 
-import { ActionItemConfig, ActionListLayout } from "../actions";
 import type { DialogConfig } from "../dialog/Dialog.types";
+
+import { ActionItemConfig, ActionListLayout } from "../actions";
 import { FormFieldType } from "./fields/types";
 
 export type FormAutosaveConfig<T> = AutoSaveProps<T>["autoSave"];
@@ -52,7 +54,7 @@ export interface FormConfig<
         methods: any,
         closeDialog: () => void,
         currentDialog?: DialogConfig<TRequest, TResponse>,
-      ) => ReactNode)
+      ) => ActionItemConfig[] | ReactNode)
     | ActionItemConfig[]
     | false
     | ReactNode;
@@ -99,6 +101,10 @@ export interface FormFieldConfig<TRequest extends BaseRecord = any> {
   description?: string;
   inputClassName?: string;
   /**
+   * Additional props to pass to the underlying input element
+   */
+  inputProps?: Record<string, any>;
+  /**
    * Class name applied to the FormItem wrapper component
    */
   itemClassName?: string;
@@ -108,10 +114,6 @@ export interface FormFieldConfig<TRequest extends BaseRecord = any> {
   options?: FormFieldOption[];
   placeholder?: string;
   required?: boolean;
-  /**
-   * Additional props to pass to the underlying input element
-   */
-  inputProps?: Record<string, any>;
   /**
    * Declaratively define dependencies for field visibility.
    * The field will only be shown if *all* conditions in this object are met.

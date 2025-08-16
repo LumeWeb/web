@@ -1,7 +1,4 @@
-import type { CreateResponse } from "@refinedev/core";
-import { z } from "zod";
-
-import { OTPEnableHandler, OPTGenerateResponse } from "@lumeweb/portal-framework-auth";
+import { OPTGenerateResponse } from "@lumeweb/portal-framework-auth";
 import { Identity } from "@lumeweb/portal-framework-core";
 import {
   FormFieldType,
@@ -10,18 +7,27 @@ import {
   usePortalMeta,
 } from "@lumeweb/portal-framework-ui";
 import { OTPVerifyRequest } from "@lumeweb/portal-sdk";
-import { useCustomMutation, useGetIdentity } from "@refinedev/core";
+import {
+  CreateResponse,
+  useCustomMutation,
+  useGetIdentity,
+} from "@refinedev/core";
 import * as OTPAuth from "otpauth";
 import { QRCodeSVG } from "qrcode.react";
 import { useCallback, useEffect } from "react";
+import { z } from "zod";
+export type { Enable2faFormValues as FormValues } from "./enable2fa.schema";
 
 export type InvalidateAuthHandler = () => Promise<void>;
+
+export type OTPEnableHandler = (
+  values: OTPVerifyRequest,
+) => Promise<CreateResponse<OTPVerifyRequest>>;
 
 interface QRCodeProps {
   name: string;
   value: string;
 }
-
 export function enable2faForm(
   otpHandler: OTPEnableHandler,
   invalidateAuth: InvalidateAuthHandler,
@@ -111,7 +117,6 @@ const QRCodeComponent = ({ name, value }: QRCodeProps) => {
   if (isGeneratingOtp || !generatedOtpCache) {
     return null;
   }
-
 
   return (
     <>

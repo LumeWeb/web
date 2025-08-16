@@ -17,8 +17,8 @@ describe("Nested REST Data Provider", () => {
         .get("/tenants/123/projects/456/cases")
         //.get("http://localhost:3000/tenants/123/projects/456/cases") // DEBUG: Check full URL
         .query({
-          "_page": 1,
-          "_per_page": 20,
+          "_start": 0,
+          "_end": 20,
           "name": "Critical",
           "status%5Bin%5D": "open%2Cpending",
         })

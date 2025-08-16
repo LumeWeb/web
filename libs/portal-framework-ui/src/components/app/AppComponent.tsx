@@ -6,6 +6,7 @@ import {
   ErrorDisplay,
   Framework,
   FrameworkProvider,
+  getDefaultRefineOptions,
   HostContextBridge,
   NamespacedId,
   NavigationFeature,
@@ -260,10 +261,7 @@ function AppContent({
 
   const options = {
     ...combinedPluginConfig,
-    options: {
-      disableTelemetry: true,
-      warnWhenUnsavedChanges: true,
-    },
+    options: getDefaultRefineOptions(),
     routerProvider,
   } satisfies Partial<RefineProps>;
 

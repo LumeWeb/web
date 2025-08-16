@@ -59,6 +59,7 @@ export { getApiBaseUrl } from "./util/getApiBaseUrl";
 // Utils
 export { getPortalPluginManifests } from "./util/pluginManifest";
 
+export * from "./util/refineConfig";
 export * from "./util/location";
 export * from "./util/namespace";
 export * from "./util/domain";

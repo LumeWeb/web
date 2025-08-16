@@ -57,6 +57,7 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
       id: (["edit", "clone"] as FormAction[]).includes(config.action!)
         ? config.id
         : undefined,
+      redirectOnSuccess: false,
       resource: config.resource,
     },
     validationSchema: config.validationSchema,
@@ -120,16 +121,19 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
                   ? (response as Record<string, unknown>).data
                   : response;
 
+              if (cConfig.closeOnSubmit ?? true) {
+                await closeDialog?.();
+              }
+
               if (!isStepFormConfig(cConfig) && cConfig.onSuccess) {
                 cConfig.onSuccess(responseData, formInstance.getValues());
-              }
-              if (currentDialog?.type === "form" && currentDialog.onSuccess) {
+              } else if (
+                currentDialog?.type === "form" &&
+                currentDialog.onSuccess
+              ) {
                 currentDialog.onSuccess(responseData, formInstance.getValues());
               }
 
-              if (cConfig.closeOnSubmit ?? true) {
-                closeDialog?.();
-              }
               await new Promise((resolve) => setTimeout(resolve, 100));
             } catch (error) {
               cConfig.onError?.(error as Error);
@@ -163,4 +167,3 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
     </FormProvider>
   );
 }
-

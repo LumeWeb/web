@@ -7,6 +7,7 @@ import {
   Framework,
   getApiBaseUrl,
   getPluginMeta,
+  mergeRefineConfig,
   RefineConfigCapability,
 } from "@lumeweb/portal-framework-core";
 
@@ -21,59 +22,25 @@ export class Capability implements RefineConfigCapability {
 
   getConfig(existing?: Partial<RefineProps>) {
     const token = localStorage.getItem("jwt");
-
     const acctProvider = dataProvider(this.#apiUrl);
 
     if (token) {
       acctProvider.setAuthToken(token);
     }
 
-    // Normalize dataProvider to always be a Record<string, any>
-    const existingDataProvider = existing?.dataProvider;
-    const normalizedDataProvider = 
-      typeof existingDataProvider === 'function' 
-        ? { default: existingDataProvider }
-        : typeof existingDataProvider === 'string'
-          ? { default: existingDataProvider }
-          : existingDataProvider || {};
-
-    // Merge resources without referencing `mergedConfig` during initialization
-    const existingResources = existing?.resources ?? [];
-    const hasAccountResource = existingResources.some((r) => r.name === DATA_PROVIDER_NAME);
-    const mergedResources = hasAccountResource
-      ? existingResources
-      : [
-          ...existingResources,
-          {
-            meta: {
-              dataProviderName: DATA_PROVIDER_NAME,
-              template: "/account",
-            },
-            name: DATA_PROVIDER_NAME,
-          },
-        ];
-
-    const mergedConfig = {
-      ...existing,
-      dataProvider: {
-        ...normalizedDataProvider,
-        [DATA_PROVIDER_NAME]: acctProvider,
+    return mergeRefineConfig(existing, { [DATA_PROVIDER_NAME]: acctProvider }, [
+      {
+        meta: { template: "/account" },
+        name: DATA_PROVIDER_NAME,
       },
-      options: { ...(existing?.options ?? {}) },
-      resources: mergedResources,
-    };
-    return {
-      dataProvider: {
-        ...(mergedConfig.dataProvider || {}),
-        [DATA_PROVIDER_NAME]: acctProvider,
+      {
+        meta: {
+          dataProviderName: DATA_PROVIDER_NAME,
+          template: "/account/keys",
+        },
+        name: "api-keys",
       },
-      options: {
-        syncWithLocation: true,
-        warnWhenUnsavedChanges: true,
-        ...mergedConfig?.options,
-      },
-      resources: [...(mergedConfig.resources || [])],
-    } satisfies Partial<RefineProps>;
+    ]);
   }
 
   async initialize(framework: Framework) {

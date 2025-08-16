@@ -5,11 +5,12 @@ import { useTable } from "./Table.context";
 import { normalizeTableOptions } from "./tableOptions";
 
 function BaseTableInner<TData extends object>(
-  props: BaseTableProps<TData>
+  props: BaseTableProps<TData>,
 ): React.JSX.Element {
   const {
     className,
     emptyState,
+    emptyStateMessage,
     footer,
     getCellProps,
     getRowProps,
@@ -19,7 +20,6 @@ function BaseTableInner<TData extends object>(
     loadingStateMessage,
     onRowClick,
     pagination,
-    emptyStateMessage,
   } = props;
 
   const { table } = useTable<TData>();
@@ -32,7 +32,6 @@ function BaseTableInner<TData extends object>(
     loadingStateMessage,
     table,
   );
-
 
   return (
     <BaseTableContent

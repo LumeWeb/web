@@ -49,7 +49,15 @@ function BaseTableContent<TData extends object>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead 
+                    key={header.id}
+                    style={{
+                      minWidth: header.column.columnDef.size,
+                      maxWidth: header.column.columnDef.size,
+                      width: header.column.columnDef.size,
+                    }}
+                    className={header.column.columnDef.meta?.headerClassName}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -80,7 +88,19 @@ function BaseTableContent<TData extends object>({
               return (
                 <TableRow key={row.id} {...rowProps}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} {...getCellProps?.(cell)}>
+                    <TableCell 
+                      key={cell.id} 
+                      style={{
+                        minWidth: cell.column.columnDef.size,
+                        maxWidth: cell.column.columnDef.size,
+                        width: cell.column.columnDef.size,
+                      }}
+                      className={[
+                        cell.column.columnDef.meta?.cellClassName,
+                        getCellProps?.(cell)?.className
+                      ].filter(Boolean).join(' ')}
+                      {...getCellProps?.(cell)}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -91,11 +111,7 @@ function BaseTableContent<TData extends object>({
               );
             })
           ) : (
-            <TableRow>
-              <TableCell colSpan={table.getAllColumns().length}>
-                {emptyState}
-              </TableCell>
-            </TableRow>
+            emptyState
           )}
         </TableBody>
       </UITable>

@@ -1,7 +1,11 @@
 import { DialogConfig } from "@lumeweb/portal-framework-ui";
-import { OTPEnableHandler } from "@lumeweb/portal-framework-auth";
 
-import { enable2faForm, InvalidateAuthHandler } from "@/ui/forms/enable2fa";
+import {
+  enable2faForm,
+  FormValues,
+  InvalidateAuthHandler,
+  OTPEnableHandler,
+} from "@/ui/forms/enable2fa";
 
 export function enable2faDialogConfig(
   otpHandler: OTPEnableHandler,

@@ -1,4 +1,5 @@
 import type { FieldValues } from "react-hook-form";
+
 import type { FormAutosaveConfig, FormConfig } from "../types";
 
 export function computeAutoSaveConfig<T extends FieldValues>(

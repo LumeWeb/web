@@ -1,4 +1,4 @@
-import { TableCell } from "@lumeweb/portal-framework-ui-core";
+import { TableCell, TableRow } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
 export interface TableEmptyStateProps {
@@ -16,8 +16,10 @@ export function TableEmptyState({
   message = "No data available",
 }: TableEmptyStateProps) {
   return (
-    <TableCell className="py-8 text-center" colSpan={colSpan}>
-      {children || message}
-    </TableCell>
+    <TableRow>
+      <TableCell className="py-8 text-center" colSpan={colSpan}>
+        {children || message}
+      </TableCell>
+    </TableRow>
   );
 }

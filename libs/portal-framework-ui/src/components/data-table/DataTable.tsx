@@ -21,24 +21,6 @@ function DataTable<
   resource,
   ...props
 }: DataTableProps<TData, TError, TSearchVariables>) {
-  const refineTable = useRefineTable<TData>({
-    columns,
-    // @ts-ignore
-    refineCoreProps: {
-      dataProviderName: dataProviderName ?? "default",
-      ...refineCoreProps,
-    },
-    resource,
-  });
-
-  const table: Table<TData> = {
-    ...refineTable,
-    options: {
-      ...refineTable.options,
-      refineCore: refineTable.refineCore,
-    },
-  } as unknown as Table<TData>;
-
   const actionColumn = actionMenu
     ? {
         cell: ({ row }: ActionColumnCellProps<TData>) => (
@@ -54,14 +36,30 @@ function DataTable<
       }
     : undefined;
 
-  return (
-    <BaseTable
-      actionColumn={actionColumn}
-      columns={columns}
-      table={table}
-      {...props}
-    />
-  );
+  const tableColumns = [...(columns || [])];
+  if (actionColumn) {
+    tableColumns.push(actionColumn);
+  }
+
+  const refineTable = useRefineTable<TData>({
+    columns: tableColumns,
+    // @ts-ignore
+    refineCoreProps: {
+      dataProviderName: dataProviderName ?? undefined,
+      resource,
+      ...refineCoreProps,
+    },
+  });
+
+  const table: Table<TData> = {
+    ...refineTable,
+    options: {
+      ...refineTable.options,
+      refineCore: refineTable.refineCore,
+    },
+  } as unknown as Table<TData>;
+
+  return <BaseTable table={table} {...props} />;
 }
 
 export { DataTable };
