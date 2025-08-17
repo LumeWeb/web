@@ -1,10 +1,5 @@
 import type { RequestInit } from "./types.js";
-import {
-  AccountError,
-  handleFetchError,
-  handleUnknownError,
-  Result,
-} from "./types.js";
+
 import {
   AccountInfoResponse,
   LoginRequest,
@@ -21,6 +16,12 @@ import {
   UploadLimitResponse,
   VerifyEmailRequest,
 } from "./account/generated";
+import {
+  AccountError,
+  handleFetchError,
+  handleUnknownError,
+  Result,
+} from "./types.js";
 
 export class AccountApi {
   private _jwtToken?: string;
@@ -112,7 +113,7 @@ export class AccountApi {
       method: "POST",
     });
 
-    if (result.success && result.data.token) {
+    if (result.success && result.data?.token) {
       this.setToken(result.data.token);
     }
 
@@ -144,7 +145,7 @@ export class AccountApi {
       method: "POST",
     });
 
-    if (result.success && result.data.token) {
+    if (result.success && result.data?.token) {
       this.setToken(result.data.token);
     }
 
@@ -272,7 +273,7 @@ export class AccountApi {
       },
     );
 
-    if (result.success && result.data.token) {
+    if (result.success && result.data?.token) {
       this.setToken(result.data.token);
     }
 
@@ -316,11 +317,11 @@ export class AccountApi {
   private buildOptions(init: RequestInit = {}): RequestInit {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      ...(init.headers as Record<string, string>),
+      ...init.headers!,
     };
 
     if (this.jwtToken) {
-      headers["Authorization"] = `Bearer ${this.jwtToken}`;
+      headers.Authorization = `Bearer ${this.jwtToken}`;
     }
 
     return {
@@ -355,15 +356,67 @@ export class AccountApi {
         };
       }
 
-      const responseBody = await response.json();
+      // Handle empty response
+      const contentLength = response.headers.get("content-length");
+      if (contentLength === "0" || response.status === 204) {
+        return {
+          data: undefined as unknown as T, // Cast to T since void responses expect this
+          success: true,
+        };
+      }
+
+      // Read raw body once. This is more robust across CORS/proxies that omit content-length.
+      const rawBody = await response.text();
+      if (!rawBody || rawBody.trim().length === 0) {
+        return {
+          data: undefined as unknown as T,
+          success: true,
+        };
+      }
+
+      let responseBody: any;
+      try {
+        responseBody = JSON.parse(rawBody);
+      } catch {
+        // Non-empty but invalid JSON on a 2xx response: surface as an error rather than silently succeeding.
+        const errorDetails: Record<string, unknown> = {
+          note: "invalid JSON response",
+          status: response.status,
+        };
+
+        // Only include debug info if explicitly enabled
+        if (import.meta.env.VITE_ACCOUNT_API_DEBUG === "true") {
+          errorDetails.debug = {
+            bodyPreview:
+              rawBody.length > 512
+                ? rawBody.substring(0, 512) + "..."
+                : rawBody,
+            contentLength: response.headers.get("content-length"),
+          };
+        }
+
+        return {
+          error: new AccountError(
+            "Failed to parse JSON response",
+            response.status,
+            errorDetails,
+          ),
+          success: false,
+        };
+      }
 
       // Convert backend response to our standard Result format
       if (responseBody && typeof responseBody === "object") {
         if ("error" in responseBody) {
+          const message =
+            typeof responseBody.error === "string"
+              ? responseBody.error
+              : responseBody.error?.message || "Unknown error";
           return {
             error: new AccountError(
-              responseBody.error?.message || "Unknown error",
+              message,
               response.status,
+              responseBody.error,
             ),
             success: false,
           };
