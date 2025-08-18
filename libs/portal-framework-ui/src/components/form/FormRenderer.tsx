@@ -170,7 +170,7 @@ function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
       render={({ field: formFieldRenderProps }) => (
         <FormItem className={cn(field.className, field.itemClassName)}>
           {field.label && !componentEntry?.handlesLabel && (
-            <FormLabel>
+            <FormLabel className={field.labelClassName}>
               {field.label}
               {field.required && isVisible && (
                 <span className="text-destructive">*</span>

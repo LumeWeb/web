@@ -6,6 +6,7 @@ export enum FormFieldType {
   CHECKBOX = "checkbox",
   CUSTOM = "custom",
   DATE = "date",
+  EMAIL = "email",
   FILE = "file",
   PASSWORD = "password",
   RADIO = "radio",
@@ -27,8 +28,8 @@ export interface FormComponentProps {
   className?: string;
   inputClassName?: string;
   label?: string;
+  labelClassName?: string;
   options?: FormFieldOption[];
   placeholder?: string;
-
   required?: boolean;
 }

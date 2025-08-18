@@ -1,10 +1,7 @@
-import { getFormProps, useForm } from "@conform-to/react";
-import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import {
-  Field,
-  FieldCheckbox,
   InlineAuthLinkBanner,
   LumeLogo,
+  SchemaForm,
   withTheme,
 } from "@lumeweb/portal-framework-ui";
 import { Button } from "@lumeweb/portal-framework-ui-core";
@@ -18,100 +15,28 @@ import React from "react";
 import { Link } from "react-router";
 
 import { RegisterFormRequest } from "../../../dataProviders/auth";
-import { RegisterSchema } from "./schema";
+import { getRegisterForm } from "../../forms/register";
 
 function RegisterIndex() {
   const register = useRegister<RegisterFormRequest>();
-  const [form, fields] = useForm({
-    constraint: getZodConstraint(RegisterSchema),
-    id: "register",
-    onSubmit(e) {
-      e.preventDefault();
 
-      // @ts-ignore
-      const data = Object.fromEntries(new FormData(e.currentTarget).entries());
-      register.mutate({
-        email: data.email.toString(),
-        firstName: data.firstName.toString(),
-        lastName: data.lastName.toString(),
-        password: data.password.toString(),
-      });
-    },
-    onValidate({ formData }) {
-      return parseWithZod(formData, { schema: RegisterSchema });
-    },
-  });
+  const onSubmit = async (values: any) => {
+    await register.mutateAsync({
+      email: values.email,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      password: values.password,
+    });
+  };
+
+  const finalRegisterFormConfig = getRegisterForm(onSubmit);
 
   return (
     <div className="p-4 h-screen relative">
       <header className="absolute top-4 left-4 sm:left-8">
         <LumeLogo />
       </header>
-      <form
-        className="w-full p-2 max-w-md space-y-4 mt-14 sm:bg-background"
-        {...getFormProps(form)}>
-        <span className=" space-y-2">
-          <h2 className="text-4xl sm:text-3xl">All Roads Lead to Lume</h2>
-        </span>
-        <InlineAuthLinkBanner label="Already have an account?" to="/login" />
-        <div className="mt-10">
-          <h3 className=" block  sm:hidden text-2xl text-foreground mb-10">
-            Create a New Account
-          </h3>
-          <div className="flex gap-4">
-            <Field
-              className="flex-1"
-              errors={fields.firstName.errors}
-              inputProps={{ name: fields.firstName.name }}
-              labelProps={{ children: "First Name" }}
-            />
-            <Field
-              className="flex-1"
-              errors={fields.lastName.errors}
-              inputProps={{ name: fields.lastName.name }}
-              labelProps={{ children: "Last Name" }}
-            />
-          </div>
-          <Field
-            errors={fields.email.errors}
-            inputProps={{ name: fields.email.name }}
-            labelProps={{ children: "Email" }}
-          />
-          <Field
-            errors={fields.password.errors}
-            inputProps={{ name: fields.password.name, type: "password" }}
-            labelProps={{ children: "Password" }}
-          />
-          <Field
-            errors={fields.confirmPassword.errors}
-            inputProps={{ name: fields.confirmPassword.name, type: "password" }}
-            labelProps={{ children: "Confirm Password" }}
-          />
-          <FieldCheckbox
-            errors={fields.termsOfService.errors}
-            inputProps={{ form: form.id, name: fields.termsOfService.name }}
-            labelProps={{
-              children: (
-                <span className="text-sm">
-                  I agree to the
-                  <Link
-                    className="text-foreground underline mx-1"
-                    to="/terms-of-service">
-                    Terms of Service
-                  </Link>
-                  and
-                  <Link
-                    className="text-foreground underline mx-1"
-                    to="/privacy-policy">
-                    Privacy Policy
-                  </Link>
-                </span>
-              ),
-            }}
-          />
-          <Button className=" w-full h-14">Create Account</Button>
-        </div>
-      </form>
+      <SchemaForm config={finalRegisterFormConfig} />
       <div className="h-1/3 sm:h-full fixed inset-0 -z-10 overflow-clip">
         <img
           alt="Lume background"

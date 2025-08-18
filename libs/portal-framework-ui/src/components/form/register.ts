@@ -1,3 +1,5 @@
+import { registerEmailInput } from "src/components/form/fields";
+
 import { registerCheckbox } from "./fields/Checkbox";
 import { registerDatePicker } from "./fields/DatePicker";
 import { registerFileInput } from "./fields/FileInput";
@@ -13,6 +15,7 @@ export function registerAllFormComponents() {
   registerCheckbox();
   registerDatePicker();
   registerFileInput();
+  registerEmailInput();
   registerInput();
   registerRadioGroup();
   registerSelect();

@@ -1,14 +1,18 @@
+import type { ComponentType, ReactNode } from "react";
+
 import {
   Checkbox as BaseCheckbox,
+  cn,
   Label,
 } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
 import { registerFormComponent } from ".";
 import { FormFieldType } from "../"; // Use barrel export
+
 interface CheckboxProps {
   disabled?: boolean;
-  label?: string;
+  label?: ComponentType<any> | ReactNode | string;
   name: string;
   onBlur?: () => void;
   onChange?: (checked: boolean) => void;
@@ -29,8 +33,10 @@ export const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
           ref={ref}
         />
         {label && (
-          <Label className="text-foreground" htmlFor={props.name}>
-            {label}
+          <Label
+            className={cn("text-foreground", props.labelClassName)}
+            htmlFor={props.name}>
+            {typeof label === "function" ? React.createElement(label) : label}
           </Label>
         )}
       </>

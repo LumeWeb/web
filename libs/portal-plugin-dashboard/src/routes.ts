@@ -1,6 +1,6 @@
 const routes = [
   {
-    component: "Index",
+    component: "index",
     id: "root",
     navigation: {
       label: "Home",
@@ -9,7 +9,7 @@ const routes = [
     path: "/",
   },
   {
-    component: "Dashboard",
+    component: "dashboard",
     id: "dashboard",
     path: "/dashboard",
   },
@@ -40,40 +40,40 @@ const routes = [
     path: "/account",
   },
   {
-    component: "AccountVerify",
+    component: "account/verify",
     id: "account_verify",
     path: "account/verify",
   },
   {
-    component: "LoginIndex",
+    component: "loginIndex",
     id: "login_index",
     path: "login",
   },
   {
-    component: "RegisterIndex",
+    component: "registerIndex",
     id: "register_index",
     path: "register",
   },
   {
     children: [
       {
-        component: "ResetPasswordReset",
+        component: "resetPassword/reset",
         id: "reset_password_index",
         index: true,
         path: "",
       },
       {
-        component: "ResetPasswordConfirm",
+        component: "resetPassword/confirm",
         id: "reset_password_confirm",
         path: "confirm",
       },
     ],
-    component: "ResetPasswordLayout",
+    component: "resetPassword/layout",
     id: "reset_password_layout",
     path: "reset-password",
   },
   {
-    component: "LoginOtp",
+    component: "loginOtp",
     id: "otp_login",
     path: "otp",
   },
