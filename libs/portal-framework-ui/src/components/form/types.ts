@@ -87,6 +87,10 @@ export interface FormConfig<
   /** Alias for refineCoreProps.successNotification */
   successNotification?: (data: any, values: any) => OpenNotificationParams;
   validationSchema?: z.ZodSchema<TRequest>;
+  /**
+   * Custom header content to render at the top of the form
+   */
+  header?: React.ReactNode | ((methods: any) => React.ReactNode);
 }
 
 export interface FormFieldConfig<TRequest extends BaseRecord = any> {
@@ -109,6 +113,7 @@ export interface FormFieldConfig<TRequest extends BaseRecord = any> {
    */
   itemClassName?: string;
   label?: string;
+  labelClassName?: string;
   /** Field name/path (using dot notation for nested fields) */
   name: Path<TRequest> | (string & {});
   options?: FormFieldOption[];

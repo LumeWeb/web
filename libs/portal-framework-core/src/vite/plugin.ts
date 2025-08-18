@@ -29,6 +29,7 @@ interface PortalMetaConfig {
   build: BuildInfo;
   domain: string;
   feature_flags: Record<string, boolean>;
+  meta?: Record<string, unknown>;
   plugins: Record<string, PortalPluginConfig>;
 }
 
@@ -389,6 +390,14 @@ function setupExpressMiddleware(server: any, portalConfig: PortalMetaConfig) {
             ...mergedConfig.feature_flags,
             ...upstreamConfig.feature_flags,
           };
+
+          // Merge meta data
+          if (upstreamConfig.meta) {
+            mergedConfig.meta = {
+              ...(mergedConfig.meta ?? {}),
+              ...upstreamConfig.meta,
+            };
+          }
 
           // Include build info
           if (upstreamConfig.build) {

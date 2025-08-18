@@ -10,11 +10,19 @@ import { FormFieldType } from "../";
 interface RadioGroupProps {
   disabled?: boolean;
   label?: string;
+  labelClassName?: string;
   name: string;
   onBlur?: () => void;
   onChange?: (value: string) => void;
   options: string[];
   value?: string;
+}
+
+function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
 export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
@@ -29,8 +37,10 @@ export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
         value={props.value}>
         {options.map((option) => (
           <div className="radio-option" key={option}>
-            <RadioGroupItem id={`${props.name}-${option}`} value={option} />
-            <label htmlFor={`${props.name}-${option}`}>{option}</label>
+            <RadioGroupItem id={`${props.name}-${slugify(option)}`} value={option} />
+            <label className={props.labelClassName} htmlFor={`${props.name}-${slugify(option)}`}>
+              {option}
+            </label>
           </div>
         ))}
       </BaseRadioGroup>

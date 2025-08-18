@@ -147,6 +147,13 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
               }
             }
           })}>
+          {cConfig.header && (
+            <div className="form-header">
+              {typeof cConfig.header === "function"
+                ? cConfig.header(formInstance)
+                : cConfig.header}
+            </div>
+          )}
           <FormRenderer fields={cConfig.fields} />
           {cConfig.footer !== false && (
             <FormFooter
