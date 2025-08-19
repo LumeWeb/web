@@ -18,6 +18,11 @@ import type { DialogConfig } from "../dialog/Dialog.types";
 import { ActionItemConfig, ActionListLayout } from "../actions";
 import { FormFieldType } from "./fields/types";
 
+export enum GroupOrder {
+  GROUPS_FIRST = "groups-first",
+  UNGROUPED_FIRST = "ungrouped-first",
+}
+
 export type FormAutosaveConfig<T> = AutoSaveProps<T>["autoSave"];
 
 export interface FormConfig<
@@ -65,6 +70,19 @@ export interface FormConfig<
    */
   footerClassName?: false | string;
   formClassName?: string;
+  /**
+   * Controls whether grouped or ungrouped fields are rendered first
+   * @default GroupOrder.UNGROUPED_FIRST
+   */
+  groupOrder?: GroupOrder;
+  /**
+   * Groups configuration for organizing fields
+   */
+  groups?: FormGroupType[];
+  /**
+   * Custom header content to render at the top of the form
+   */
+  header?: ((methods: any) => ReactNode) | ReactNode;
   id?: BaseKey;
   layout?: "grid" | "horizontal" | "vertical";
   onError?: (error: Error) => void;
@@ -82,15 +100,11 @@ export interface FormConfig<
     successNotification?: (data: any, values: any) => OpenNotificationParams;
   };
   resource?: string;
-  submitLabel?: string;
 
+  submitLabel?: string;
   /** Alias for refineCoreProps.successNotification */
   successNotification?: (data: any, values: any) => OpenNotificationParams;
   validationSchema?: z.ZodSchema<TRequest>;
-  /**
-   * Custom header content to render at the top of the form
-   */
-  header?: React.ReactNode | ((methods: any) => React.ReactNode);
 }
 
 export interface FormFieldConfig<TRequest extends BaseRecord = any> {
@@ -103,6 +117,10 @@ export interface FormFieldConfig<TRequest extends BaseRecord = any> {
    */
   dependencies?: string[];
   description?: string;
+  /**
+   * Group ID this field belongs to
+   */
+  group?: string;
   inputClassName?: string;
   /**
    * Additional props to pass to the underlying input element
@@ -141,6 +159,13 @@ export interface FormFieldConfig<TRequest extends BaseRecord = any> {
 }
 
 export type FormFieldOption = string | { label: string; value: string };
+
+export interface FormGroupType {
+  className?: string;
+  description?: string;
+  id: string;
+  title?: string;
+}
 
 /**
  * Defines the structure for a single step in a multi-step form.

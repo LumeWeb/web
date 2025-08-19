@@ -1,6 +1,7 @@
 import {
   type FormConfig,
   FormFieldType,
+  GroupOrder,
   InlineAuthLinkBanner,
 } from "@lumeweb/portal-framework-ui";
 
@@ -11,15 +12,19 @@ export const getRegisterForm = (
 ): FormConfig => ({
   fields: [
     {
-      className: "flex-1",
+      className: "space-y-2",
+      group: "name",
       inputClassName: "h-14",
+      itemClassName: "flex-1",
       label: "First Name",
       name: "firstName",
       type: FormFieldType.TEXT,
     },
     {
-      className: "flex-1",
+      className: "space-y-2",
+      group: "name",
       inputClassName: "h-14",
+      itemClassName: "flex-1",
       label: "Last Name",
       name: "lastName",
       type: FormFieldType.TEXT,
@@ -62,6 +67,13 @@ export const getRegisterForm = (
     },
   ],
   formClassName: "w-full p-2 max-w-md space-y-4 mt-14 sm:bg-background",
+  groupOrder: GroupOrder.GROUPS_FIRST,
+  groups: [
+    {
+      className: "flex gap-4",
+      id: "name",
+    },
+  ],
   header: (
     <>
       <InlineAuthLinkBanner label="Already have an account?" to="/login" />
