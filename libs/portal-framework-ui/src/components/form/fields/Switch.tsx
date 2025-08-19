@@ -1,4 +1,8 @@
-import { Label, Switch as BaseSwitch, cn } from "@lumeweb/portal-framework-ui-core";
+import {
+  Switch as BaseSwitch,
+  cn,
+  Label,
+} from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
 import { registerFormComponent } from ".";
@@ -28,7 +32,9 @@ export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
           ref={ref}
         />
         {label && (
-          <Label className={cn("text-foreground", props.labelClassName)} htmlFor={props.name}>
+          <Label
+            className={cn("text-foreground", props.labelClassName)}
+            htmlFor={props.name}>
             {label}
           </Label>
         )}

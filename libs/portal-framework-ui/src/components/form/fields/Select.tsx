@@ -1,6 +1,6 @@
 import {
-  cn,
   Select as BaseSelect,
+  cn,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -9,9 +9,9 @@ import {
 import React from "react";
 
 import type { FormFieldOption } from "../";
-import { FormFieldType } from "../";
 
 import { registerFormComponent } from ".";
+import { FormFieldType } from "../";
 
 export const Select = React.forwardRef<
   HTMLButtonElement,

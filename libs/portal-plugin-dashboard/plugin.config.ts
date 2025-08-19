@@ -24,6 +24,7 @@ export default {
     "./resetPassword/reset": "./src/ui/routes/resetPassword.reset",
     "./widgets/account/2fa": "./src/ui/widgets/account/2fa",
     "./widgets/account/bio": "./src/ui/widgets/account/bio",
+    "./widgets/account/delete": "./src/ui/widgets/account/delete",
     "./widgets/account/emailVerificationBanner":
       "./src/ui/widgets/account/emailVerificationBanner",
     "./widgets/account/password": "./src/ui/widgets/account/password",

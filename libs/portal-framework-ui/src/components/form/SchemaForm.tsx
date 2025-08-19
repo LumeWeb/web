@@ -17,6 +17,7 @@ import { adapters, FormAdapter, UnifiedFormReturnType } from "./adapters";
 import { FormProvider } from "./context";
 import { FormFooter } from "./FormFooter";
 import { FormRenderer } from "./FormRenderer";
+import { handleFormSubmission } from "./handlers/core";
 import { type FormConfig, isStepFormConfig } from "./types";
 import { computeAutoSaveConfig } from "./utils/autoSave";
 
@@ -26,14 +27,19 @@ export interface SchemaFormProps<
   TRequest extends FieldValues = FieldValues,
   TResponse extends BaseRecord = any,
 > {
+  active?: boolean;
   closeDialog?: () => void;
   config: FormConfig<TRequest, TResponse>;
 }
 
 export function SchemaForm<T extends FieldValues = FieldValues>({
+  active = true,
   closeDialog = () => void 0,
   config,
 }: SchemaFormProps<T>) {
+  if (!active) {
+    return null;
+  }
   const { currentDialog, setFormMethods: setFormInstance } = useDialog();
   const { open: openNotification } = useNotification();
   if (!config) throw new Error("SchemaForm requires a form config");
@@ -108,44 +114,24 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
             "space-y-4": cConfig.layout !== "grid",
           })}
           onSubmit={formInstance.handleSubmit(async () => {
-            try {
-              const response = await adapter.submitHandler(
-                cConfig,
-                formInstance,
-              );
-              // Unwrap nested response data if present
-              const responseData =
-                typeof response === "object" &&
-                response !== null &&
-                "data" in response
-                  ? (response as Record<string, unknown>).data
-                  : response;
-
-              if (cConfig.closeOnSubmit ?? true) {
-                await closeDialog?.();
-              }
-
-              if (!isStepFormConfig(cConfig) && cConfig.onSuccess) {
-                cConfig.onSuccess(responseData, formInstance.getValues());
-              } else if (
-                currentDialog?.type === "form" &&
-                currentDialog.onSuccess
-              ) {
-                currentDialog.onSuccess(responseData, formInstance.getValues());
-              }
-
-              await new Promise((resolve) => setTimeout(resolve, 100));
-            } catch (error) {
-              cConfig.onError?.(error as Error);
-
-              if (adapterName !== "refine" && cConfig.errorNotification) {
-                const notification =
-                  typeof cConfig.errorNotification === "function"
-                    ? cConfig.errorNotification(error)
-                    : cConfig.errorNotification;
-                openNotification?.(notification);
-              }
-            }
+            await handleFormSubmission({
+              closeDialog,
+              config: cConfig,
+              currentDialog,
+              formMethods: formInstance,
+              isStep: isStepFormConfig(cConfig),
+              onError: async (error) => {
+                if (adapterName !== "refine" && cConfig.errorNotification) {
+                  const notification =
+                    typeof cConfig.errorNotification === "function"
+                      ? cConfig.errorNotification(error)
+                      : cConfig.errorNotification;
+                  openNotification?.(notification);
+                }
+              },
+              onSubmit: async (data) =>
+                adapter.submitHandler(cConfig, formInstance),
+            });
           })}>
           {cConfig.header && (
             <div className="form-header">

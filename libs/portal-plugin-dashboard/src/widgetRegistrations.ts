@@ -18,6 +18,12 @@ export const widgetRegistrations = [
     rows: 2,
   },
   {
+    area: "core:dashboard:profile",
+    cols: 2,
+    componentName: "widgets/account/delete",
+    rows: 2,
+  },
+  {
     area: "core:dashboard:security",
     cols: 2,
     componentName: "widgets/account/password",

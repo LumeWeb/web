@@ -12,10 +12,11 @@ export const CancelActionItem: React.FC<
   ActionItemProps<CancelActionItemConfig>
 > = ({ closeDialog, config, isSubmitting }) => {
   const handleClick = () => {
+    if (closeDialog) {
+      closeDialog();
+    }
     if (config.onClick) {
       config.onClick?.();
-    } else if (closeDialog) {
-      closeDialog();
     }
   };
 

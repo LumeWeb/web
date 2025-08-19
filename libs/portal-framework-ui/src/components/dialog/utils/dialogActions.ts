@@ -82,6 +82,7 @@ function createCancelAction(
     // For alerts, we use confirmText but treat it as CANCEL type
     return {
       label: dialog.confirmText ?? "OK",
+      onClick: dialog.onConfirm,
       type: ActionItemType.CANCEL,
     };
   }
@@ -90,6 +91,7 @@ function createCancelAction(
   if (dialog.type === "confirm") {
     return {
       label: dialog.cancelText ?? "Cancel",
+      onClick: dialog.onConfirm,
       type: ActionItemType.CANCEL,
     };
   }
@@ -168,8 +170,8 @@ function getSubmitType(
     | FormDialogConfig<BaseRecord>,
 ): ActionItemType.BUTTON | ActionItemType.SUBMIT {
   switch (dialog.type) {
-    case "form":
     case "confirm":
+    case "form":
       return ActionItemType.SUBMIT;
     default:
       return ActionItemType.BUTTON;
