@@ -1,9 +1,7 @@
 import { type Identity } from "@lumeweb/portal-framework-core";
+import { useSdk, withTheme } from "@lumeweb/portal-framework-ui";
 import { Button } from "@lumeweb/portal-framework-ui-core";
 import { logoPng, lumeBgPng } from "@lumeweb/portal-framework-ui/images";
-
-import { useSdk } from "@lumeweb/portal-framework-ui";
-import { Sdk } from "@lumeweb/portal-sdk";
 import { useGetIdentity, useGo, useIsAuthenticated } from "@refinedev/core";
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
@@ -15,7 +13,7 @@ function AccountVerify() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
   const email = searchParams.get("email");
-  const sdk = useSdk() as Sdk;
+  const sdk = useSdk()!;
   const user = useGetIdentity<Identity>();
   const [isVerified, setIsVerified] = useState(false);
   const {
@@ -30,8 +28,8 @@ function AccountVerify() {
   const exchangeToken = useQuery({
     enabled: !isAuthLoading && !!userEmail && !!token,
     queryFn: async () => {
-      const ret = await sdk.account!().verifyEmail({
-        email: userEmail as string,
+      const ret = await sdk.account().verifyEmail({
+        email: userEmail!,
         token: token!,
       });
 
@@ -111,4 +109,4 @@ function AccountVerify() {
   );
 }
 
-export default AccountVerify;
+export default withTheme(AccountVerify);

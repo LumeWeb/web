@@ -1,6 +1,13 @@
 import { getApiBaseUrl } from "@lumeweb/portal-framework-core";
+import { useFramework } from "@lumeweb/portal-framework-core";
 
 export function useApiUrl() {
+  const { framework, isLoading } = useFramework();
+
+  if (!isLoading) {
+    return framework?.portalUrl ?? getApiBaseUrl({ allowLocalhost: true });
+  }
+
   // Use getApiBaseUrl from the core framework.
   // Pass allowLocalhost: true to enable localhost in dev environments.
   // preserveSubdomain defaults to respecting VITE_PORTAL_DOMAIN_IS_ROOT.

@@ -16,6 +16,7 @@ export { RefineConfigCapability, SdkCapability };
 
 import AuthedIndex from "./ui/components/index/AuthedIndex";
 import LoginIndex from "./ui/components/login/LoginIndex";
+import OtpForm from "./ui/components/login/OtpForm";
 import RegisterIndex from "./ui/components/register/RegisterIndex";
 import ResetPasswordConfirm from "./ui/components/reset-password/ResetPasswordConfirm";
 import ResetPasswordLayout from "./ui/components/reset-password/ResetPasswordLayout";
@@ -24,6 +25,7 @@ import ResetPasswordReset from "./ui/components/reset-password/ResetPasswordRese
 export {
   AuthedIndex,
   LoginIndex,
+  OtpForm,
   RegisterIndex,
   ResetPasswordConfirm,
   ResetPasswordLayout,

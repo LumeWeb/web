@@ -19,8 +19,8 @@ import {
 import { adapters } from "./adapters";
 import { useFormContext } from "./context";
 import { FormFieldType, getFormComponent } from "./fields";
-import { FormGroup as FormGroupComponent } from "./FormGroup";
-import type { FormGroupType, FormFieldConfig, GroupOrder } from "./types";
+import { FormGroup } from "./FormGroup";
+import { type FormFieldConfig, type FormGroupType, GroupOrder } from "./types";
 
 interface FieldRendererProps<TFieldValues extends FieldValues> {
   field: FormFieldConfig<TFieldValues>;
