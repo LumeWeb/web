@@ -154,7 +154,7 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
                 : cConfig.header}
             </div>
           )}
-          <FormRenderer fields={cConfig.fields} />
+          <FormRenderer fields={cConfig.fields} groups={cConfig.groups} />
           {cConfig.footer !== false && (
             <FormFooter
               className={cConfig.footerClassName}

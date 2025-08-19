@@ -263,6 +263,7 @@
  * - Individual component registrars (registerInput(), registerSelect(), etc)
  */
 export * from "./adapters";
+export * from "./FormGroup";
 export * from "./context";
 export * from "./fields";
 export * from "./FormRenderer";

@@ -19,7 +19,8 @@ import {
 import { adapters } from "./adapters";
 import { useFormContext } from "./context";
 import { FormFieldType, getFormComponent } from "./fields";
-import { type FormFieldConfig } from "./types";
+import { FormGroup as FormGroupComponent } from "./FormGroup";
+import type { FormGroupType, FormFieldConfig, GroupOrder } from "./types";
 
 interface FieldRendererProps<TFieldValues extends FieldValues> {
   field: FormFieldConfig<TFieldValues>;
@@ -27,21 +28,83 @@ interface FieldRendererProps<TFieldValues extends FieldValues> {
 
 export function FormRenderer<TRequest extends FieldValues = FieldValues>({
   fields = [],
+  groups = [],
 }: {
   fields?: FormFieldConfig<TRequest>[];
+  groups?: FormGroupType[];
 }) {
-  const { adapter: adapterName } = useFormContext();
+  // Group fields by their group ID
+  const { groupedFields, ungroupedFields } = React.useMemo(() => {
+    const grouped: Record<string, FormFieldConfig<TRequest>[]> = {};
+    const ungrouped: FormFieldConfig<TRequest>[] = [];
+
+    // Initialize groups
+    groups?.forEach((group) => {
+      grouped[group.id] = [];
+    });
+
+    // Distribute fields
+    fields.forEach((field) => {
+      if (field.group && grouped[field.group]) {
+        grouped[field.group].push(field);
+      } else {
+        ungrouped.push(field);
+      }
+    });
+
+    return { groupedFields: grouped, ungroupedFields: ungrouped };
+  }, [fields, groups]);
+  const { adapter: adapterName, config } = useFormContext();
   const adapter = adapters[adapterName];
 
   if (!adapter) {
     throw new Error(`Form adapter "${String(adapterName)}" is not registered`);
   }
 
-  return (
+  const groupOrder = config.groupOrder ?? GroupOrder.UNGROUPED_FIRST;
+
+  const renderGroups = () => (
     <>
-      {fields.map((field) => (
+      {groups?.map((group) => {
+        const groupFields = groupedFields[group.id];
+        if (!groupFields?.length) return null;
+
+        return (
+          <FormGroup
+            className={group.className}
+            description={group.description}
+            key={group.id}
+            title={group.title}>
+            {groupFields.map((field) => (
+              <FieldRenderer field={field} key={field.name as string} />
+            ))}
+          </FormGroup>
+        );
+      })}
+    </>
+  );
+
+  const renderUngrouped = () => (
+    <>
+      {ungroupedFields.map((field) => (
         <FieldRenderer field={field} key={field.name as string} />
       ))}
+    </>
+  );
+
+  return (
+    <>
+      {groupOrder === GroupOrder.GROUPS_FIRST ? (
+        <>
+          {renderGroups()}
+          {renderUngrouped()}
+        </>
+      ) : (
+        <>
+          {renderUngrouped()}
+          {renderGroups()}
+        </>
+      )}
     </>
   );
 }
