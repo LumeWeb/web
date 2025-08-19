@@ -1,6 +1,6 @@
 export * from "./Checkbox";
-export * from "./EmailInput";
 export * from "./DatePicker";
+export * from "./EmailInput";
 export * from "./FileInput";
 export * from "./Input";
 export * from "./RadioGroup";

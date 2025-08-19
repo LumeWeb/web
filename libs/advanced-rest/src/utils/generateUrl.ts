@@ -59,7 +59,7 @@ export function generateNestedUrl({
   } catch (error) {
     // Detect missing parameter errors and rethrow with correct type
     if (error instanceof Error && error.message.startsWith("Missing a value")) {
-      const paramMatch = error.message.match(/placeholder: (\w+)/);
+      const paramMatch = /placeholder: (\w+)/.exec(error.message);
       if (paramMatch) throw new NestedParamError(paramMatch[1]);
     }
     throw new TemplateResolutionError(template, error as Error);
@@ -81,8 +81,6 @@ export function generateNestedUrl({
     resolvedPath = `${resolvedPath}/${operation}`.replace(/\/\/+/g, "/");
   }
 
-  const finalPath = `${resolvedPath.replace(/^\/+/, "")}`;
-
   // Return relative path without leading slash for ky's prefixUrl
-  return finalPath;
+  return `${resolvedPath.replace(/^\/+/, "")}`;
 }

@@ -1,4 +1,4 @@
-import { cn, Input as BaseInput } from "@lumeweb/portal-framework-ui-core";
+import { Input as BaseInput, cn } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
 import { registerFormComponent } from ".";
