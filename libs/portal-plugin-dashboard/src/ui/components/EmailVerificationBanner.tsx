@@ -1,9 +1,4 @@
-import { useEmailVerification } from "@/ui/hooks/useEmailVerification";
-import {
-  createBridgeComponent,
-  Identity,
-  useFramework,
-} from "@lumeweb/portal-framework-core";
+import { Identity, useFramework } from "@lumeweb/portal-framework-core";
 import {
   Alert,
   AlertDescription,
@@ -14,12 +9,14 @@ import { useGetIdentity } from "@refinedev/core";
 import { Mail } from "lucide-react";
 import React from "react";
 
+import { useEmailVerification } from "@/ui/hooks/useEmailVerification";
+
 function EmailVerificationBanner() {
-  const framework = useFramework();
+  const { getAppName } = useFramework();
   const { data: identity } = useGetIdentity<Identity>();
   const { isLoading, resendVerification } = useEmailVerification();
 
-  if (framework.appName != "dashboard") {
+  if (getAppName() != "dashboard") {
     return null;
   }
   if (!identity) {
@@ -52,4 +49,4 @@ function EmailVerificationBanner() {
   return null;
 }
 
-export default createBridgeComponent(EmailVerificationBanner);
+export default EmailVerificationBanner;

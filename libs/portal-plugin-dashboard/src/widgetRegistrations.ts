@@ -2,31 +2,31 @@ import type { WidgetRegistration } from "@lumeweb/portal-framework-core";
 
 export const widgetRegistrations = [
   {
-    area: "core:header",
-    componentName: "EmailVerificationBanner",
+    area: "core:dashboard:header",
+    componentName: "widgets/account/emailVerificationBanner",
   },
   {
     area: "core:dashboard:profile",
-    componentName: "widgets/account/bio",
     cols: 1,
+    componentName: "widgets/account/bio",
     rows: 1,
   },
   {
     area: "core:dashboard:profile",
+    cols: 2,
     componentName: "widgets/account/profile",
-    cols: 2,
     rows: 2,
   },
   {
     area: "core:dashboard:security",
+    cols: 2,
     componentName: "widgets/account/password",
-    cols: 2,
     rows: 2,
   },
   {
     area: "core:dashboard:security",
-    componentName: "widgets/account/2fa",
     cols: 2,
+    componentName: "widgets/account/2fa",
     rows: 2,
   },
 ] satisfies WidgetRegistration[];
