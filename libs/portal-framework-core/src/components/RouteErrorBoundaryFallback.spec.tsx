@@ -1,5 +1,5 @@
-import { render, screen, cleanup } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { RouteErrorBoundaryFallback } from "./RouteErrorBoundaryFallback";
 
@@ -66,7 +66,9 @@ describe("RouteErrorBoundaryFallback", () => {
   });
 
   it("should handle unknown error format", () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const error = { some: "weird format" };
     render(<RouteErrorBoundaryFallback error={error} />);
 
@@ -74,7 +76,7 @@ describe("RouteErrorBoundaryFallback", () => {
     expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       "RouteErrorBoundaryFallback received an unhandled error format:",
-      error
+      error,
     );
     consoleErrorSpy.mockRestore();
   });

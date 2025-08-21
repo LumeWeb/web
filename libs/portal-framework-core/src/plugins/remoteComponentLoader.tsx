@@ -10,12 +10,12 @@ import React, {
   PropsWithoutRef,
   RefAttributes,
 } from "react";
+import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
 import type { Framework } from "../api/framework";
 import type { NamespacedId } from "../types/plugin";
 
 import { RemoteContextBridge, store } from "./context-bridge";
-import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
 export interface BridgeResult<T> {
   destroy(info: { dom: HTMLElement; moduleName: string }): void; // Change Promise<void> to void
@@ -45,8 +45,8 @@ export function createRemoteComponentLoader(
   framework: Framework,
   options: RemoteComponentOptions,
 ):
-  | React.ComponentType<RemoteComponentProps>
-  | (() => Promise<BridgeResult<any>>) {
+  | (() => Promise<BridgeResult<any>>)
+  | React.ComponentType<RemoteComponentProps> {
   const { componentPath, pluginId, strategy = "no-bridge" } = config;
 
   const LoadingElement = <options.LoadingComponent />;
@@ -65,7 +65,7 @@ export function createRemoteComponentLoader(
   if (strategy === "bridge") {
     return async () => {
       const module = await loadRemoteModule();
-      const Component = (module as any).default || module;
+      const Component = module.default || module;
       if (typeof Component !== "function" && typeof Component !== "object") {
         throw new Error(
           `Remote module ${pluginId}:${componentPath} did not export a valid React component.`,
@@ -79,7 +79,7 @@ export function createRemoteComponentLoader(
       fallback: ErrorFallback,
       loader: async (): Promise<{ default: React.ComponentType<any> }> => {
         const module = await loadRemoteModule();
-        const Component = (module as any).default;
+        const Component = module?.default ?? module;
         if (typeof Component !== "function" && typeof Component !== "object") {
           throw new Error(
             `Remote module ${pluginId}:${componentPath} did not export a default React component.`,
@@ -109,6 +109,40 @@ export const defaultRemoteOptions: RemoteComponentOptions = {
   ErrorComponent: DefaultErrorComponent,
   LoadingComponent: DefaultLoadingComponent,
 };
+
+export interface RemoteComponentParams<
+  T = Record<string, unknown>,
+  E extends keyof T = keyof T,
+> {
+  export?: E;
+  fallback: React.ComponentType<FallbackProps>;
+  loader: () => Promise<T>;
+  loading: React.ReactNode;
+  props?: T;
+}
+
+export interface RemoteComponentProps<T = Record<string, unknown>> {
+  [key: string]: unknown;
+  fallback?: React.ComponentType<FallbackProps>;
+  loading?: React.ReactNode;
+  props?: T;
+}
+
+export interface RenderFnParams extends ProviderParams {
+  dom: HTMLElement;
+}
+
+type LazyRemoteComponentInfo<T, E extends keyof T> = RemoteComponentParams<T>;
+
+interface RemoteModule {
+  [key: string]: any; // Allow indexing with any string key
+  [key: symbol]: any; // Allow indexing with any symbol key
+  provider?: () => {
+    destroy: (info: { dom: any }) => void;
+    // Make provider optional if not always present
+    render: (info: RenderFnParams) => void;
+  };
+}
 
 export function createBridgeComponent<T>(
   Component: ComponentType<T>,
@@ -151,8 +185,7 @@ export function createRemoteComponent<
     const { props: componentProps } = props;
 
     return (
-      <ErrorBoundary
-        FallbackComponent={info.fallback as React.ComponentType<FallbackProps>}>
+      <ErrorBoundary FallbackComponent={info.fallback}>
         <React.Suspense fallback={info.loading}>
           {componentProps !== undefined ? (
             //@ts-ignore
@@ -166,8 +199,6 @@ export function createRemoteComponent<
     );
   });
 }
-
-type LazyRemoteComponentInfo<T, E extends keyof T> = RemoteComponentParams<T>;
 
 function createLazyRemoteComponent<
   T extends { default: React.ComponentType<any> },
@@ -188,36 +219,4 @@ function createLazyRemoteComponent<
       `Remote module ${moduleName || "unknown"} did not export a valid React component for export "${String(exportName)}"`,
     );
   });
-}
-
-interface RemoteModule {
-  [key: string]: any; // Allow indexing with any string key
-  [key: symbol]: any; // Allow indexing with any symbol key
-  provider?: () => {
-    // Make provider optional if not always present
-    render: (info: RenderFnParams) => void;
-    destroy: (info: { dom: any }) => void;
-  };
-}
-
-export interface RemoteComponentParams<
-  T = Record<string, unknown>,
-  E extends keyof T = keyof T,
-> {
-  loader: () => Promise<T>;
-  loading: React.ReactNode;
-  fallback: React.ComponentType<{ error: Error }>;
-  export?: E;
-  props?: T;
-}
-
-export interface RenderFnParams extends ProviderParams {
-  dom: HTMLElement;
-}
-
-export interface RemoteComponentProps<T = Record<string, unknown>> {
-  props?: T;
-  fallback?: React.ComponentType<{ error: Error }>;
-  loading?: React.ReactNode;
-  [key: string]: unknown;
 }

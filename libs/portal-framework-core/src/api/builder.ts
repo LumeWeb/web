@@ -1,10 +1,10 @@
 import { loadRemote } from "@module-federation/enhanced/runtime";
 
 import type { NamespacedId, PluginModule } from "../types/plugin";
-import { Plugin } from "../types/plugin";
 
 import { CapabilityManager } from "../capabilities/manager";
 import { PluginManager } from "../plugins/manager";
+import { Plugin } from "../types/plugin";
 import { getPluginInfo } from "../util/getPluginInfo";
 import { Framework } from "./framework";
 
@@ -19,7 +19,7 @@ export class Builder {
 
   #capabilities?: CapabilityManager;
   #framework: null | Promise<Framework> = null;
-  #operations: Array<() => Promise<void>> = [];
+  #operations: (() => Promise<void>)[] = [];
   #plugins?: PluginManager;
   private readonly _appName: string;
 
@@ -57,7 +57,7 @@ export class Builder {
       if (!this.#plugins) throw new Error("Builder not initialized");
 
       try {
-        const mod = (await loadRemote(moduleId)) as PluginModule;
+        const mod = (await loadRemote(moduleId))!;
         const { id: pluginId } = getPluginInfo(mod);
 
         this.#plugins.registerRemoteModule(moduleId, remoteEntry, pluginId);

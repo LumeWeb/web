@@ -1,19 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getAccountSubdomain, getProtocolDomain } from "./domain";
+
 import { env } from "../env";
+import { getAccountSubdomain, getProtocolDomain } from "./domain";
 
 // Mock getCurrentLocation
 vi.mock("./location", () => ({
   getCurrentLocation: vi.fn(() => ({
-    hostname: "admin.dev.pinner.xyz"
-  }))
+    hostname: "admin.dev.pinner.xyz",
+  })),
 }));
 
 // Mock env
 vi.mock("../env", () => ({
   env: {
-    VITE_PORTAL_DOMAIN_IS_ROOT: undefined
-  }
+    VITE_PORTAL_DOMAIN_IS_ROOT: undefined,
+  },
 }));
 
 describe("domain utilities", () => {

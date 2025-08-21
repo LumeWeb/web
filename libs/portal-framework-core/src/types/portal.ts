@@ -1,12 +1,12 @@
-export type Identity = {
+export interface Identity {
+  created_at: string;
   email: string;
   firstName: string;
   id: string;
   lastName: string;
   otp: boolean;
   verified: boolean;
-  created_at: string;
-};
+}
 
 export interface PortalMeta {
   domain: string;

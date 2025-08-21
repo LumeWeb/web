@@ -139,13 +139,15 @@ describe("PluginManager", () => {
   });
 
   it("should detect missing feature dependencies", () => {
-    const pluginWithFeatureDep = createMockPlugin("test:plugin-with-feature-dep");
+    const pluginWithFeatureDep = createMockPlugin(
+      "test:plugin-with-feature-dep",
+    );
     pluginWithFeatureDep.features = [
       {
-        id: "test:my-feature" as NamespacedId,
         dependencies: [{ id: "test:missing-feature" as NamespacedId }],
-        initialize: vi.fn(),
         destroy: vi.fn(),
+        id: "test:my-feature" as NamespacedId,
+        initialize: vi.fn(),
       },
     ];
 
@@ -153,7 +155,6 @@ describe("PluginManager", () => {
       "Plugin test:plugin-with-feature-dep: Missing required feature dependency: test:missing-feature",
     );
   });
-
 
   // -- Feature Loading Tests --
   it("should load and track feature states", async () => {

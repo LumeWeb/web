@@ -3,8 +3,6 @@ import { RefineProps } from "@refinedev/core";
 
 import { Framework } from "../api/framework";
 
-export type CapabilityStatus = "active" | "error" | "inactive";
-
 export interface BaseCapability<
   TType extends string = string,
   TID extends string = string,
@@ -20,6 +18,8 @@ export interface BaseCapability<
   readonly status: CapabilityStatus;
   readonly type: TType;
 }
+
+export type CapabilityStatus = "active" | "error" | "inactive";
 
 export interface RefineConfigCapability
   extends BaseCapability<"core:refine-config"> {

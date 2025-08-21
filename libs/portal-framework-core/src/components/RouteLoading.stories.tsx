@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from "@storybook/react";
 
-import { RouteLoading } from './RouteLoading';
+import { RouteLoading } from "./RouteLoading";
 
 const meta: Meta<typeof RouteLoading> = {
-  title: 'Components/RouteLoading',
   component: RouteLoading,
-  tags: ['autodocs'],
+  tags: ["autodocs"],
+  title: "Components/RouteLoading",
 };
 
 export default meta;

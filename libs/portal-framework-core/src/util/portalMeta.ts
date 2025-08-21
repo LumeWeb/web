@@ -1,6 +1,8 @@
 import memoize from "memoizee";
+
+import type { PortalMeta } from "../types/portal";
+
 import { getApiBaseUrl } from "./getApiBaseUrl";
-import type { PortalMeta } from '../types/portal';
 
 const _fetchPortalMeta = memoize(
   async function (portalUrl?: string): Promise<PortalMeta> {
@@ -48,6 +50,11 @@ const _fetchPortalMeta = memoize(
   { promise: true },
 );
 
+// Test helper to clear memoization cache
+export async function __test_clearCache() {
+  await _fetchPortalMeta.clear?.();
+}
+
 export async function fetchPortalMeta(portalUrl?: string): Promise<PortalMeta> {
   return _fetchPortalMeta(portalUrl);
 }
@@ -55,16 +62,11 @@ export async function fetchPortalMeta(portalUrl?: string): Promise<PortalMeta> {
 export function getPluginMeta<T = Record<string, unknown>>(
   meta: PortalMeta | undefined,
   pluginName: string,
-  key?: string
+  key?: string,
 ): T | undefined {
   const pluginMeta = meta?.plugins?.[pluginName]?.meta;
   if (!pluginMeta) return undefined;
   if (!key) return pluginMeta as T;
-  
-  return key.split('.').reduce((acc, part) => acc?.[part], pluginMeta) as T;
-}
 
-// Test helper to clear memoization cache
-export async function __test_clearCache() {
-  await _fetchPortalMeta.clear?.();
+  return key.split(".").reduce((acc, part) => acc?.[part], pluginMeta) as T;
 }

@@ -1,15 +1,12 @@
-import { NamespacedId } from "libs/portal-framework-core/src/types/plugin";
-import { RouteObject } from "react-router";
 import type React from "react";
+
+import { RouteObject } from "react-router";
+
+import { NamespacedId } from "./plugin";
 
 export interface NavigationBadge {
   content: string;
   variant?: "default" | "destructive" | "outline" | "secondary";
-}
-
-export interface NavigationItemIconProps {
-  size?: number | string;
-  className?: string;
 }
 
 export interface NavigationItem {
@@ -21,9 +18,14 @@ export interface NavigationItem {
   id?: string;
   label: string;
   order?: number;
+  parentId?: NamespacedId;
   path?: string;
   show?: () => boolean;
-  parentId?: NamespacedId;
+}
+
+export interface NavigationItemIconProps {
+  className?: string;
+  size?: number | string;
 }
 
 export interface RouteDefinition extends Omit<RouteObject, "children"> {
@@ -43,15 +45,15 @@ export interface RouteDefinition extends Omit<RouteObject, "children"> {
   id?: string;
   index?: boolean;
   /**
-   * Namespaced ID of parent route. When set, this route will be nested under the parent.
-   */
-  parentId?: NamespacedId;
-  /**
    * If true, the component will be loaded lazily.
    * This is handled during route resolution.
    */
   lazyLoad?: boolean;
   navigation?: NavigationItem;
+  /**
+   * Namespaced ID of parent route. When set, this route will be nested under the parent.
+   */
+  parentId?: NamespacedId;
   pluginId?: NamespacedId;
   shouldRevalidate?: (args: { currentUrl: URL; nextUrl: URL }) => boolean;
 }

@@ -2,16 +2,27 @@ import { createRemoteComponent } from "@module-federation/bridge-react";
 import { loadRemote } from "@module-federation/enhanced/runtime";
 
 import type { BaseCapability } from "../types/capabilities";
-import type { NamespacedId, WidgetRegistrationInfo } from "../types/plugin";
+import type { NamespacedId } from "../types/plugin";
+import type {
+  WidgetAreaDefinition,
+  WidgetDefinition,
+  WidgetRegistration,
+  WidgetRegistrationWithComponent,
+} from "../types/widget";
 
 import { CapabilityManager } from "../capabilities/manager";
+import { env } from "../env";
 import { PluginManager } from "../plugins/manager";
+import {
+  createRemoteComponentLoader,
+  defaultRemoteOptions,
+} from "../plugins/remoteComponentLoader";
 import { CategoryError, FrameworkFeature } from "../types/api";
 import { PortalMeta } from "../types/portal";
-import { validateNamespacedId } from "../util/namespace";
-import { env } from "../env";
 import { getCurrentLocation } from "../util/location";
+import { validateNamespacedId } from "../util/namespace";
 import { fetchPortalMeta } from "../util/portalMeta";
+import { sortWidgets } from "../utils/widget";
 
 export class Framework {
   get appName() {
@@ -26,20 +37,29 @@ export class Framework {
   set framework(value: Framework) {
     this.#_framework = value;
   }
-  #_framework: Framework | null = null;
-  readonly #capabilities: CapabilityManager;
-
-  // Public getter for initialization status
-  isInitialized(): boolean {
-    return this.#isInitialized;
+  get meta(): null | PortalMeta {
+    return this.#meta;
+  }
+  get portalUrl(): string {
+    if (!this.#portalUrl) {
+      throw new Error("Portal URL not initialized. Call initialize() first.");
+    }
+    return this.#portalUrl;
   }
 
+  #_framework: Framework | null = null;
+
+  readonly #capabilities: CapabilityManager;
+
+  #isInitialized = false;
+  #meta: null | PortalMeta = null;
   readonly #plugins: PluginManager;
+  #portalUrl: null | string = null;
 
   private readonly _appName: string;
-  #isInitialized = false;
-  #meta: PortalMeta | null = null;
-  #portalUrl: string | null = null;
+
+  private widgetAreas = new Map<string, WidgetAreaDefinition>();
+  private widgets = new Map<string, WidgetDefinition>();
 
   constructor(
     capabilities: CapabilityManager,
@@ -56,6 +76,7 @@ export class Framework {
 
   _createRemoteComponent = (...args: any) =>
     createRemoteComponent.apply(null, args);
+
   _loadRemote = (...args: any) => loadRemote.apply(null, args);
 
   enablePlugin(id: NamespacedId): void {
@@ -92,53 +113,27 @@ export class Framework {
     return this.#plugins.getPlugins();
   }
 
-  /**
-   * Retrieves widget registrations for a given area from all enabled plugins.
-   * @param area The area to retrieve widget registrations for (e.g., "dashboard").
-   * @returns An array of objects containing the pluginId and componentName for each registration.
-   */
-  getWidgetRegistrations(area: string): WidgetRegistrationInfo[] {
-    const registrations: WidgetRegistrationInfo[] = [];
-
-    for (const plugin of this.getPlugins()) {
-      if (plugin.widgetRegistrations) {
-        plugin.widgetRegistrations.forEach((reg) => {
-          if (reg.area === area) {
-            registrations.push({
-              ...reg,
-              pluginId: plugin.id,
-            });
-          }
-        });
-      }
+  getWidgetArea(id: string): WidgetAreaDefinition {
+    const area = this.widgetAreas.get(id);
+    if (!area) {
+      throw new Error(`Widget area ${id} not found`);
     }
-    return registrations;
+    return area;
+  }
+
+  getWidgetsForArea(id: string): WidgetDefinition[] {
+    if (!this.widgetAreas.has(id)) {
+      throw new Error(`Widget area ${id} not found`);
+    }
+
+    return sortWidgets(
+      Array.from(this.widgets.values()).filter((w) => w.areaId === id),
+    );
   }
 
   hasCapability(type: string): boolean {
     validateNamespacedId(type);
     return this.#plugins.hasCapability(type);
-  }
-
-  async #fetchAndSetPortalMeta(): Promise<void> {
-    try {
-      const meta = await fetchPortalMeta();
-      if (!meta?.domain) {
-        throw new Error("Invalid portal meta: missing domain");
-      }
-
-      this.#meta = meta;
-      this.#portalUrl = meta.domain.startsWith("http")
-        ? meta.domain
-        : `https://${meta.domain}`;
-    } catch (error) {
-      console.error("Failed to fetch portal meta:", error);
-
-      // Fallback to env var or current location
-      const fallbackUrl = env.VITE_PORTAL_DOMAIN || getCurrentLocation().origin;
-      this.#portalUrl = fallbackUrl;
-      console.warn(`Using fallback portal URL: ${fallbackUrl}`);
-    }
   }
 
   async initialize(): Promise<{
@@ -148,6 +143,21 @@ export class Framework {
     if (this.#isInitialized) {
       console.warn(`Framework for ${this._appName} already initialized.`);
       return { success: true };
+    }
+
+    // Auto-register widget areas and widgets from plugins
+    for (const plugin of this.getPlugins()) {
+      if (plugin.widgets) {
+        // Register widget areas first
+        plugin.widgets.areas?.forEach((area) => {
+          this.registerWidgetArea(area);
+        });
+
+        // Register widgets using the dedicated method
+        if (plugin.widgets.widgets?.length) {
+          this.registerWidgetsFromPlugin(plugin.id, plugin.widgets.widgets);
+        }
+      }
     }
 
     // Ensure portal URL is set before initializing plugins
@@ -232,20 +242,14 @@ export class Framework {
     return state?.loadState === "loaded" && state?.initState === "initialized";
   }
 
+  // Public getter for initialization status
+  isInitialized(): boolean {
+    return this.#isInitialized;
+  }
+
   isPluginEnabled(id: NamespacedId): boolean {
     validateNamespacedId(id);
     return this.#plugins.isPluginEnabled(id);
-  }
-
-  get meta(): PortalMeta | null {
-    return this.#meta;
-  }
-
-  get portalUrl(): string {
-    if (!this.#portalUrl) {
-      throw new Error("Portal URL not initialized. Call initialize() first.");
-    }
-    return this.#portalUrl;
   }
 
   async loadFeature(id: NamespacedId) {
@@ -261,6 +265,57 @@ export class Framework {
     this.#capabilities.register(capability, pluginId);
   }
 
+  registerWidget(widget: WidgetRegistrationWithComponent): void {
+    if (this.widgets.has(widget.id)) {
+      throw new Error(`Widget with id ${widget.id} already registered`);
+    }
+
+    if (!this.widgetAreas.has(widget.areaId)) {
+      throw new Error(`Widget area ${widget.areaId} not registered`);
+    }
+
+    // Construct definition explicitly with only allowed fields
+    const definition: WidgetDefinition = {
+      areaId: widget.areaId,
+      component: createRemoteComponentLoader(
+        {
+          componentPath: widget.componentName,
+          pluginId: widget.pluginId,
+        },
+        this,
+        defaultRemoteOptions,
+      ),
+      description: widget.description,
+      id: widget.id,
+      label: widget.label,
+      order: widget.order,
+      position: widget.position,
+      title: widget.title,
+    };
+
+    this.widgets.set(widget.id, definition);
+  }
+
+  registerWidgetArea(area: WidgetAreaDefinition): void {
+    this.widgetAreas.set(area.id, area);
+  }
+
+  /**
+   * Registers all widgets from a plugin configuration
+   */
+  registerWidgetsFromPlugin(
+    pluginId: NamespacedId,
+    widgets: WidgetRegistration[],
+  ): void {
+    widgets.forEach((widget) => {
+      this.registerWidget({
+        ...widget,
+        componentName: widget.componentName,
+        pluginId,
+      });
+    });
+  }
+
   resolvePluginModule(pluginId: NamespacedId, exportName: string): string {
     // Find the module mapping for this plugin
     const mapping = this.#plugins.getRemoteModule(pluginId);
@@ -271,5 +326,26 @@ export class Framework {
 
     // Assume component is exported at root level
     return `${mapping.moduleId}/${exportName}`;
+  }
+
+  async #fetchAndSetPortalMeta(): Promise<void> {
+    try {
+      const meta = await fetchPortalMeta();
+      if (!meta?.domain) {
+        throw new Error("Invalid portal meta: missing domain");
+      }
+
+      this.#meta = meta;
+      this.#portalUrl = meta.domain.startsWith("http")
+        ? meta.domain
+        : `https://${meta.domain}`;
+    } catch (error) {
+      console.error("Failed to fetch portal meta:", error);
+
+      // Fallback to env var or current location
+      const fallbackUrl = env.VITE_PORTAL_DOMAIN || getCurrentLocation().origin;
+      this.#portalUrl = fallbackUrl;
+      console.warn(`Using fallback portal URL: ${fallbackUrl}`);
+    }
   }
 }

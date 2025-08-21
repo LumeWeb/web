@@ -3,9 +3,9 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { RouteErrorBoundary } from "./RouteErrorBoundary";
 
 const meta: Meta<typeof RouteErrorBoundary> = {
-  title: "Components/RouteErrorBoundary",
   component: RouteErrorBoundary,
   tags: ["autodocs"],
+  title: "Components/RouteErrorBoundary",
 };
 
 export default meta;

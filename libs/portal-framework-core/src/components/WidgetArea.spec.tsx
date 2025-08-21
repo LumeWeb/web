@@ -34,11 +34,11 @@ describe("WidgetArea", () => {
       "widgets": new Map(),
     };
     vi.mocked(useFramework).mockReturnValue({
-      framework: mockFramework as unknown as Framework,
       error: null,
+      framework: mockFramework as unknown as Framework,
+      getAppName: () => "test-app",
       isLoading: false,
       reinitialize: vi.fn(),
-      getAppName: () => "test-app"
     });
     vi.mocked(createRemoteComponentLoader).mockImplementation(
       () => vi.fn(() => <div data-testid="mock-widget" />) as any,
@@ -51,7 +51,7 @@ describe("WidgetArea", () => {
 
   it("should render no widgets when area not found", () => {
     mockFramework.getWidgetRegistrations.mockReturnValue([]);
-    render(<WidgetArea widgetAreaId="empty-area" />);
+    render(<WidgetArea id="empty-area" />);
 
     expect(screen.queryByTestId("mock-widget")).not.toBeInTheDocument();
   });
@@ -60,7 +60,7 @@ describe("WidgetArea", () => {
     mockFramework.getWidgetRegistrations.mockReturnValue([
       { componentName: "WidgetA", pluginId: "core:widgets" },
     ]);
-    render(<WidgetArea widgetAreaId="single-area" />);
+    render(<WidgetArea id="single-area" />);
 
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
   });
@@ -71,7 +71,7 @@ describe("WidgetArea", () => {
       { componentName: "WidgetB", pluginId: "core:widgets" },
       { componentName: "WidgetC", pluginId: "core:widgets" },
     ]);
-    render(<WidgetArea widgetAreaId="multi-area" />);
+    render(<WidgetArea id="multi-area" />);
 
     const widgets = screen.getAllByTestId("mock-widget");
     expect(widgets).toHaveLength(3);

@@ -15,6 +15,7 @@ interface CardProps {
   className?: string;
   contentClassName?: string;
   description?: string;
+  headerClassName?: string;
   icon?: LucideIcon;
   title?: string;
   titleClassName?: string;
@@ -26,13 +27,19 @@ export function Card({
   className = "",
   contentClassName = "",
   description,
+  headerClassName = "",
   icon: Icon,
   title,
   titleClassName = "",
 }: CardProps) {
   return (
-    <UICard className={cn(border && "border-border", className)}>
-      <CardHeader className={className}>
+    <UICard
+      className={cn(
+        border && "border-border",
+        "h-full flex flex-col",
+        className,
+      )}>
+      <CardHeader className={headerClassName}>
         {title && (
           <CardTitle className={cn("flex items-center gap-2", titleClassName)}>
             {Icon && <Icon className="w-5 h-5 text-primary" />}
@@ -41,7 +48,7 @@ export function Card({
         )}
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
-      <UICardContent className={cn("space-y-4", contentClassName)}>
+      <UICardContent className={cn("space-y-4 mt-auto", contentClassName)}>
         {children}
       </UICardContent>
     </UICard>

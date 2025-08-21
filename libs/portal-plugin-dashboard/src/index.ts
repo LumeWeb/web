@@ -8,13 +8,13 @@ import {
   SdkCapability,
 } from "@lumeweb/portal-framework-auth";
 import routes from "./routes";
-import widgetRegistrations from "./widgetRegistrations";
+import dashboardWidgets from "./widgetRegistrations";
 import { Capability as DashRefineConfigCapability } from "./capabilities/refineConfig";
 import { registerInput } from "@/ui/forms/fields/AccountEmail";
 
 export default function (): Plugin {
   return {
-    widgetRegistrations,
+    widgets: dashboardWidgets,
     capabilities: [
       new RefineConfigCapability(),
       new SdkCapability(),
