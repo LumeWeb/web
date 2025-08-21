@@ -140,5 +140,5 @@ export function shouldInitialize(
 ): boolean {
   // We need to initialize if we don't have a framework instance,
   // or if the existing framework instance is not initialized (using the public getter).
-  return !framework || !framework.isInitialized();
+  return !framework?.isInitialized();
 }

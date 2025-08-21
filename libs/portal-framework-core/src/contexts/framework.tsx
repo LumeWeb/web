@@ -7,7 +7,8 @@ import React, {
   useState,
 } from "react";
 
-import type { NamespacedId, WidgetRegistrationInfo } from "../types/plugin";
+import type { NamespacedId } from "../types/plugin";
+import type { WidgetAreaDefinition, WidgetDefinition } from "../types/widget";
 
 import { Builder } from "../api/builder";
 import { Framework } from "../api/framework";
@@ -25,9 +26,11 @@ export interface InitializationError extends Error {
 interface FrameworkContextValue {
   error: InitializationError | null;
   framework: Framework | null;
+  getAppName: () => string;
+  getWidgetArea: (id: string) => WidgetAreaDefinition;
+  getWidgetsForArea: (id: string) => WidgetDefinition[];
   isLoading: boolean;
   reinitialize: () => void;
-  getAppName: () => string;
 }
 
 export const FrameworkContext = createContext<FrameworkContextValue | null>(
@@ -117,9 +120,21 @@ export function FrameworkProvider({
   const contextValue: FrameworkContextValue = {
     error: state.error,
     framework: state.framework,
+    getAppName: () => appName,
+    getWidgetArea: (id: string) => {
+      if (!state.framework) {
+        throw new Error("Framework not initialized");
+      }
+      return state.framework.getWidgetArea(id);
+    },
+    getWidgetsForArea: (id: string) => {
+      if (!state.framework) {
+        throw new Error("Framework not initialized");
+      }
+      return state.framework.getWidgetsForArea(id);
+    },
     isLoading: state.isLoading,
     reinitialize: initializeFrameworkInstance,
-    getAppName: () => appName,
   };
 
   return (

@@ -1,7 +1,15 @@
-export class DependencyGraph<T extends string | number | symbol> {
-  #nodes = new Set<T>();
+export class DependencyGraph<T extends number | string | symbol> {
   #dependencies = new Map<T, Set<T>>();
+  #nodes = new Set<T>();
   #reverseLookup = new Map<T, Set<T>>();
+
+  addDependency(from: T, to: T): void {
+    this.addNode(from);
+    this.addNode(to);
+
+    this.#dependencies.get(from)!.add(to);
+    this.#reverseLookup.get(to)!.add(from);
+  }
 
   addNode(node: T): void {
     if (!this.#nodes.has(node)) {
@@ -9,14 +17,6 @@ export class DependencyGraph<T extends string | number | symbol> {
       this.#dependencies.set(node, new Set());
       this.#reverseLookup.set(node, new Set());
     }
-  }
-
-  addDependency(from: T, to: T): void {
-    this.addNode(from);
-    this.addNode(to);
-    
-    this.#dependencies.get(from)!.add(to);
-    this.#reverseLookup.get(to)!.add(from);
   }
 
   getDependencies(node: T): Set<T> {
@@ -34,12 +34,14 @@ export class DependencyGraph<T extends string | number | symbol> {
 
     const visit = (node: T) => {
       if (temp.has(node)) {
-        throw new Error(`Circular dependency detected involving ${String(node)}`);
+        throw new Error(
+          `Circular dependency detected involving ${String(node)}`,
+        );
       }
-      
+
       if (!visited.has(node)) {
         temp.add(node);
-        
+
         for (const dep of this.#dependencies.get(node)!) {
           visit(dep);
         }
@@ -52,9 +54,9 @@ export class DependencyGraph<T extends string | number | symbol> {
 
     // Start with nodes that have no dependents
     const rootNodes = Array.from(this.#nodes).filter(
-      node => this.#reverseLookup.get(node)!.size === 0
+      (node) => this.#reverseLookup.get(node)!.size === 0,
     );
-    
+
     for (const node of rootNodes) {
       visit(node);
     }

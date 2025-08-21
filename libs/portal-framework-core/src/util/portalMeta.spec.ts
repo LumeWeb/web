@@ -1,30 +1,36 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { __test_clearCache, fetchPortalMeta, getPluginMeta } from "./portalMeta";
+
 import type { PortalMeta } from "../types/portal";
+
+import {
+  __test_clearCache,
+  fetchPortalMeta,
+  getPluginMeta,
+} from "./portalMeta";
 
 const mockMeta: PortalMeta = {
   domain: "example.com",
   feature_flags: {},
   plugins: {
+    "other-plugin": {
+      meta: {
+        active: false,
+      },
+      web_bundles: [],
+    },
     "test-plugin": {
       meta: {
-        version: "1.0.0",
         settings: {
           enabled: true,
           nested: {
-            value: "deep"
-          }
-        }
+            value: "deep",
+          },
+        },
+        version: "1.0.0",
       },
-      web_bundles: []
+      web_bundles: [],
     },
-    "other-plugin": {
-      meta: {
-        active: false
-      },
-      web_bundles: []
-    }
-  }
+  },
 };
 
 describe("portalMeta utilities", () => {
@@ -104,13 +110,13 @@ describe("portalMeta utilities", () => {
     it("should return full plugin meta when no key is provided", () => {
       const result = getPluginMeta(mockMeta, "test-plugin");
       expect(result).toEqual({
-        version: "1.0.0",
         settings: {
           enabled: true,
           nested: {
-            value: "deep"
-          }
-        }
+            value: "deep",
+          },
+        },
+        version: "1.0.0",
       });
     });
 
@@ -120,12 +126,20 @@ describe("portalMeta utilities", () => {
     });
 
     it("should return nested property when path is provided", () => {
-      const result = getPluginMeta(mockMeta, "test-plugin", "settings.nested.value");
+      const result = getPluginMeta(
+        mockMeta,
+        "test-plugin",
+        "settings.nested.value",
+      );
       expect(result).toBe("deep");
     });
 
     it("should return undefined for invalid nested path", () => {
-      const result = getPluginMeta(mockMeta, "test-plugin", "settings.invalid.path");
+      const result = getPluginMeta(
+        mockMeta,
+        "test-plugin",
+        "settings.invalid.path",
+      );
       expect(result).toBeUndefined();
     });
 
@@ -135,10 +149,17 @@ describe("portalMeta utilities", () => {
     });
 
     it("should maintain type safety with generic type", () => {
-      const result = getPluginMeta<{ version: string }>(mockMeta, "test-plugin");
+      const result = getPluginMeta<{ version: string }>(
+        mockMeta,
+        "test-plugin",
+      );
       expect(result?.version).toBe("1.0.0");
-      
-      const nestedResult = getPluginMeta<boolean>(mockMeta, "test-plugin", "settings.enabled");
+
+      const nestedResult = getPluginMeta<boolean>(
+        mockMeta,
+        "test-plugin",
+        "settings.enabled",
+      );
       expect(nestedResult).toBe(true);
     });
 
@@ -149,9 +170,9 @@ describe("portalMeta utilities", () => {
         plugins: {
           "empty-plugin": {
             meta: {},
-            web_bundles: []
-          }
-        }
+            web_bundles: [],
+          },
+        },
       };
       expect(getPluginMeta(emptyMeta, "empty-plugin")).toEqual({});
     });

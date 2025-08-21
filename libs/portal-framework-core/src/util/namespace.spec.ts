@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import {
   createNamespacedId,
   isNamespacedId,
@@ -35,8 +36,8 @@ describe("namespace utils", () => {
   describe("parseNamespacedId", () => {
     it("should split valid IDs", () => {
       expect(parseNamespacedId("core:plugin")).toEqual({
-        namespace: "core",
         name: "plugin",
+        namespace: "core",
       });
     });
   });

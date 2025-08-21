@@ -31,7 +31,7 @@ class ContextBridgeStore {
     return this.values.get(id);
   }
 
-  register<T>(context: React.Context<T>, name: string = ""): symbol {
+  register<T>(context: React.Context<T>, name = ""): symbol {
     // Check if this context is already registered
     for (const [id, existingContext] of this.contextMap) {
       if (existingContext === context) {
@@ -110,9 +110,7 @@ export function ContextBridgeProvider({
     }
 
     if (name) {
-      console.debug(
-        `Setting up host context ${name} in ContextBridgeProvider`,
-      );
+      console.debug(`Setting up host context ${name} in ContextBridgeProvider`);
     }
   }, [context, value, contextId, name]);
 
@@ -167,7 +165,7 @@ export function RemoteContextBridge({
 
     if (name) {
       console.debug(
-        "Setting up remote context %s in RemoteContextBridge", 
+        "Setting up remote context %s in RemoteContextBridge",
         name,
       );
     }

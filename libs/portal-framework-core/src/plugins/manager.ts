@@ -89,10 +89,6 @@ export class PluginManager {
     return Array.from(this.#enabledPlugins);
   }
 
-  getFeatureState(id: NamespacedId): FeatureState | undefined {
-    return this.#featureStates.get(id);
-  }
-
   getFailedPlugins(): { error: Error; id: string }[] {
     return Array.from(this.#pluginStates.entries())
       .filter(
@@ -109,6 +105,10 @@ export class PluginManager {
     id: NamespacedId,
   ): Promise<T | undefined> {
     return this.#features.get(id) as Promise<T>;
+  }
+
+  getFeatureState(id: NamespacedId): FeatureState | undefined {
+    return this.#featureStates.get(id);
   }
 
   async getFeatureWithFallback<T extends FrameworkFeature>(
@@ -318,14 +318,14 @@ export class PluginManager {
         throw new Error(`Plugin ${plugin.id} does not provide feature ${id}`);
       }
 
-      const initializationPromise = feature.initialize(this.framework)
+      const initializationPromise = feature
+        .initialize(this.framework)
         .then(() => feature);
       this.#features.set(id, initializationPromise);
 
       const initializedFeature = await initializationPromise;
       this.#markFeatureLoaded(id);
       return initializedFeature;
-
     } catch (error) {
       const cause = error instanceof Error ? error : new Error(String(error));
       const featureError = new FeatureLoadError(id, cause);
@@ -474,9 +474,9 @@ export class PluginManager {
   }
 
   #markPluginFailed(
-    id: NamespacedId, 
+    id: NamespacedId,
     error: Error,
-    isInitFailure = false
+    isInitFailure = false,
   ): void {
     const state = this.#pluginStates.get(id);
     this.#pluginStates.set(id, {

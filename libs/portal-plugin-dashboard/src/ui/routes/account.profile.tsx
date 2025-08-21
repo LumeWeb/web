@@ -5,10 +5,10 @@ export default function AccountProfile() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Profile & Settings"
         description="Manage your account information and preferences"
+        title="Profile & Settings"
       />
-      <WidgetArea widgetAreaId={"core:dashboard:profile"}></WidgetArea>
+      <WidgetArea id={"core:dashboard:profile"}></WidgetArea>
     </div>
   );
 }

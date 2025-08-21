@@ -1,40 +1,105 @@
-import type { WidgetRegistration } from "@lumeweb/portal-framework-core";
+import type {
+  WidgetAreaDefinition,
+  WidgetRegistration,
+} from "@lumeweb/portal-framework-core";
 
-export const widgetRegistrations = [
+export const widgetAreas: WidgetAreaDefinition[] = [
   {
-    area: "core:dashboard:header",
+    grid: {
+      columns: 12,
+      gap: 16,
+      rowHeight: "auto",
+    },
+    id: "core:dashboard:header",
+  },
+  {
+    grid: {
+      columns: 12,
+      gap: 16,
+      rowHeight: "auto",
+    },
+    id: "core:dashboard:profile",
+  },
+  {
+    grid: {
+      columns: 12,
+      gap: 16,
+      rowHeight: "auto",
+    },
+    id: "core:dashboard:security",
+  },
+];
+
+export const widgetRegistrations: WidgetRegistration[] = [
+  {
+    areaId: "core:dashboard:header",
     componentName: "widgets/account/emailVerificationBanner",
+    id: "core:dashboard:email-verification",
+    position: {
+      size: {
+        height: 1,
+        width: 12,
+      },
+    },
   },
   {
-    area: "core:dashboard:profile",
-    cols: 1,
+    areaId: "core:dashboard:profile",
     componentName: "widgets/account/bio",
-    rows: 1,
+    id: "core:dashboard:bio",
+    position: {
+      size: {
+        height: 1,
+        width: 4,
+      },
+    },
   },
   {
-    area: "core:dashboard:profile",
-    cols: 2,
+    areaId: "core:dashboard:profile",
     componentName: "widgets/account/profile",
-    rows: 2,
+    id: "core:dashboard:profile",
+    position: {
+      size: {
+        height: 2,
+        width: 8,
+      },
+    },
   },
   {
-    area: "core:dashboard:profile",
-    cols: 2,
+    areaId: "core:dashboard:profile",
     componentName: "widgets/account/delete",
-    rows: 2,
+    id: "core:dashboard:delete",
+    position: {
+      size: {
+        height: 1,
+        width: 4,
+      },
+    },
   },
   {
-    area: "core:dashboard:security",
-    cols: 2,
+    areaId: "core:dashboard:security",
     componentName: "widgets/account/password",
-    rows: 2,
+    id: "core:dashboard:password",
+    position: {
+      size: {
+        height: 2,
+        width: 6,
+      },
+    },
   },
   {
-    area: "core:dashboard:security",
-    cols: 2,
+    areaId: "core:dashboard:security",
     componentName: "widgets/account/2fa",
-    rows: 2,
+    id: "core:dashboard:2fa",
+    position: {
+      size: {
+        height: 2,
+        width: 6,
+      },
+    },
   },
-] satisfies WidgetRegistration[];
+];
 
-export default widgetRegistrations;
+export default {
+  areas: widgetAreas,
+  widgets: widgetRegistrations,
+};

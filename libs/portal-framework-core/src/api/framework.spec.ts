@@ -23,7 +23,7 @@ describe("Framework", () => {
       "test-app",
     );
     // Spy on console.warn for all tests in this suite
-    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -51,19 +51,49 @@ describe("Framework", () => {
     expect(framework.getPluginManager()).toBe(mockPluginManager);
   });
 
-  it("should get widget registrations", () => {
-    const mockWidgets = [
-      { componentName: "WidgetA", pluginId: "core:widgets" },
-    ];
+  it("should auto-register widgets from plugins during initialization", async () => {
+    const mockWidget = {
+      areaId: "dashboard",
+      componentName: "TestWidget",
+      id: "test-widget",
+      pluginId: "test:plugin",
+      position: {
+        location: {
+          column: 1,
+        },
+        size: {
+          height: 1,
+          width: 2,
+        },
+      },
+    };
+
     mockPluginManager.getPlugins = vi.fn().mockReturnValue([
       {
-        id: "core:widgets",
-        widgetRegistrations: [{ area: "dashboard", componentName: "WidgetA" }],
+        features: [],
+        id: "test:plugin",
+        widgets: {
+          areas: [{ grid: { columns: 12 }, id: "dashboard" }],
+          widgets: [mockWidget],
+        },
       },
     ]);
 
-    const result = framework.getWidgetRegistrations("dashboard");
-    expect(result).toEqual(mockWidgets);
+    mockPluginManager.initializePlugins = vi.fn().mockResolvedValue(new Map());
+    mockCapabilityManager.initializeAll = vi.fn().mockResolvedValue(new Map());
+
+    await framework.initialize();
+
+    // Verify widget area was registered
+    expect(framework.getWidgetArea("dashboard")).toEqual({
+      grid: { columns: 12 },
+      id: "dashboard",
+    });
+
+    // Verify widget was registered
+    const widgets = framework.getWidgetsForArea("dashboard");
+    expect(widgets).toHaveLength(1);
+    expect(widgets[0].id).toBe("test-widget");
   });
 
   it("should check capability existence", () => {
@@ -114,30 +144,27 @@ describe("Framework", () => {
     const mockPluginInitialize = vi.fn().mockResolvedValue(undefined);
     const mockCapabilityInitialize = vi.fn().mockResolvedValue(undefined);
 
-    mockPluginManager.initializePlugins = vi
-      .fn()
-      .mockResolvedValue(new Map());
-    mockCapabilityManager.initializeAll = vi
-      .fn()
-      .mockResolvedValue(new Map());
+    mockPluginManager.initializePlugins = vi.fn().mockResolvedValue(new Map());
+    mockCapabilityManager.initializeAll = vi.fn().mockResolvedValue(new Map());
 
     // Mock getPlugins to return a plugin with initialize method
     mockPluginManager.getPlugins = vi.fn().mockReturnValue([
       {
+        features: [], // Add features array to avoid errors in Framework.initialize loop
         id: "test:plugin",
         initialize: mockPluginInitialize,
-        features: [], // Add features array to avoid errors in Framework.initialize loop
       },
     ]);
     // Mock getEnabledPlugins to include the test plugin
-    mockPluginManager.getEnabledPlugins = vi.fn().mockReturnValue(["test:plugin"]);
+    mockPluginManager.getEnabledPlugins = vi
+      .fn()
+      .mockReturnValue(["test:plugin"]);
     // Mock getOrActivatePlugin to return the test plugin
     mockPluginManager.getOrActivatePlugin = vi.fn().mockReturnValue({
-       id: "test:plugin",
-       initialize: mockPluginInitialize,
-       features: [],
+      features: [],
+      id: "test:plugin",
+      initialize: mockPluginInitialize,
     });
-
 
     // First initialization
     const result1 = await framework.initialize();
@@ -159,12 +186,11 @@ describe("Framework", () => {
     // Check console warning for re-initialization using the global spy
     await framework.initialize(); // Third attempt
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Framework for test-app already initialized.")
+      expect.stringContaining("Framework for test-app already initialized."),
     );
     // Also verify the public getter works as expected
     expect(framework.isInitialized()).toBe(true);
   });
-
 
   it("should resolve plugin modules", () => {
     const mockModule: any = {

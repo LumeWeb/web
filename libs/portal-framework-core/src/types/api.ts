@@ -13,14 +13,14 @@ export type ErrorCategory = "capability" | "feature" | "plugin" | "system";
 export interface FeatureDependency {
   id: NamespacedId;
 }
-export type FeatureStatus = "enabled" | "disabled" | "error";
+export type FeatureStatus = "disabled" | "enabled" | "error";
 
 export interface FrameworkFeature {
   dependencies?: FeatureDependency[];
   destroy(framework: Framework): Promise<void>;
-  status: FeatureStatus;
   id: NamespacedId;
   initialize(framework: Framework): Promise<void>;
+  status: FeatureStatus;
 }
 
 export interface InitializationResult {
