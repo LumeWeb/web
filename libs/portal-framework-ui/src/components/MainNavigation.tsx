@@ -30,6 +30,7 @@ interface CollapseMenuButtonProps {
   isOpen: boolean;
   label: string;
   submenus: Submenu[];
+  item: NavigationItemType;
 }
 
 interface Submenu {
@@ -44,26 +45,32 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
   isOpen,
   label,
   submenus,
+  item,
 }) => {
   const location = useLocation();
   const pathname = location.pathname; // Get current path
   const isSubmenuActive = submenus.some((submenu) =>
     submenu.active === undefined ? submenu.href === pathname : submenu.active,
   );
-  const [isCollapsed, setIsCollapsed] =
-    React.useState<boolean>(isSubmenuActive);
+  const [isOpenState, setIsOpenState] =
+    React.useState<boolean>(active || isSubmenuActive);
+  const headerHref = item.path || submenus[0]?.href;
+
+  React.useEffect(() => {
+    setIsOpenState(active || isSubmenuActive);
+  }, [active, isSubmenuActive]);
 
   return (
     <Collapsible
       className="w-full"
-      onOpenChange={setIsCollapsed}
-      open={isCollapsed}>
+      onOpenChange={setIsOpenState}
+      open={isOpenState}>
       <CollapsibleTrigger
         asChild
         className="[&[data-state=open]>div>div>svg]:rotate-180 mb-1">
         <Button
           className="w-full justify-start h-10"
-          variant={isSubmenuActive ? "secondary" : "ghost"}>
+          variant={active || isSubmenuActive ? "secondary" : "ghost"}>
           <div className="w-full items-center flex justify-between">
             <div className="flex items-center">
               {Icon && (
@@ -71,16 +78,41 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
                   <Icon size={18} />
                 </span>
               )}
-              <Link to={submenus[0]?.href || "#"}>
-                {/* Link only wraps the text */}
+              {headerHref ? (
+                <Link
+                  to={headerHref}
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => {
+                    if (e.key === " ") {
+                      e.preventDefault(); // avoid page scroll
+                      e.stopPropagation();
+                    }
+                    if (e.key === "Enter") {
+                      e.stopPropagation();
+                    }
+                  }}
+                  aria-label={label}
+                >
+                  <p
+                    className={cn({
+                      "-translate-x-96 opacity-0": !isOpen,
+                      "translate-x-0 opacity-100": isOpen,
+                    })}
+                  >
+                    {label}
+                  </p>
+                </Link>
+              ) : (
                 <p
                   className={cn({
                     "-translate-x-96 opacity-0": !isOpen,
                     "translate-x-0 opacity-100": isOpen,
-                  })}>
+                  })}
+                  aria-disabled="true"
+                >
                   {label}
                 </p>
-              </Link>
+              )}
             </div>
             <div
               className={cn(
@@ -198,6 +230,7 @@ export const MainNavigation: React.FC<MenuProps> = ({ isOpen }) => {
           key={item.id}
           label={item.label}
           submenus={submenus}
+          item={item}
         />
       );
     } else {
