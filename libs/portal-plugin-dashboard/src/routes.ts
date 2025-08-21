@@ -24,11 +24,17 @@ const routes = [
       {
         component: "account/security",
         id: "account_security",
+        navigation: {
+          label: "Security",
+        },
         path: "security",
       },
       {
         component: "account/api-keys",
         id: "account_api_keys",
+        navigation: {
+          label: "API Keys",
+        },
         path: "api-keys",
       },
     ],
