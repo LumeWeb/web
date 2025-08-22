@@ -46,6 +46,7 @@ export const widgetRegistrations: WidgetRegistration[] = [
     areaId: "core:dashboard:profile",
     componentName: "widgets/account/bio",
     id: "core:dashboard:bio",
+    order: 0,
     position: {
       size: {
         height: 1,
@@ -57,9 +58,10 @@ export const widgetRegistrations: WidgetRegistration[] = [
     areaId: "core:dashboard:profile",
     componentName: "widgets/account/profile",
     id: "core:dashboard:profile",
+    order: 1,
     position: {
       size: {
-        height: 2,
+        height: 1,
         width: 8,
       },
     },
@@ -68,6 +70,7 @@ export const widgetRegistrations: WidgetRegistration[] = [
     areaId: "core:dashboard:profile",
     componentName: "widgets/account/delete",
     id: "core:dashboard:delete",
+    order: 2,
     position: {
       size: {
         height: 1,

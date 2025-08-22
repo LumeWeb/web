@@ -1,32 +1,35 @@
 import {
+  RefineConfigCapability,
+  SdkCapability,
+} from "@lumeweb/portal-framework-auth";
+import {
   createNamespacedId,
   Framework,
   type Plugin,
 } from "@lumeweb/portal-framework-core";
-import {
-  RefineConfigCapability,
-  SdkCapability,
-} from "@lumeweb/portal-framework-auth";
+
+import { registerInput } from "@/ui/forms/fields/AccountEmail";
+
+import { Capability as DashRefineConfigCapability } from "./capabilities/refineConfig";
 import routes from "./routes";
 import dashboardWidgets from "./widgetRegistrations";
-import { Capability as DashRefineConfigCapability } from "./capabilities/refineConfig";
-import { registerInput } from "@/ui/forms/fields/AccountEmail";
 
 export default function (): Plugin {
   return {
-    widgets: dashboardWidgets,
     capabilities: [
       new RefineConfigCapability(),
       new SdkCapability(),
       new DashRefineConfigCapability(),
     ],
-    id: createNamespacedId("core", "dashboard"),
-    routes,
     async destroy(_framework: Framework) {
       console.log("Plugin Dashboard destroyed");
     },
+    id: createNamespacedId("core", "dashboard"),
     async initialize(_framework: Framework) {
+      console.log("Plugin Dashboard initialized");
       registerInput();
     },
+    routes,
+    widgets: dashboardWidgets,
   } satisfies Plugin;
 }
