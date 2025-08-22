@@ -46,6 +46,15 @@ function normalizePortalDomain(domain: string | undefined): string {
   return domain.replace(/^https?:\/\//, "").replace(/\/+$/, "");
 }
 
+function getBaseUrl(devPort: number, plugin?: PortalPlugin) {
+  const tunnelHost = plugin?.tunnelHost || process.env.VITE_TUNNEL_HOST;
+  if (!tunnelHost) {
+    return `http://localhost:${devPort}`;
+  }
+  const tunnelProtocol = process.env.VITE_TUNNEL_PROTOCOL || 'https';
+  return `${tunnelProtocol}://${tunnelHost}:${devPort}`;
+}
+
 function setupPluginRegistryConfig(opts: ConfigOptions) {
   const configFile =
     opts.pluginRegistryConfigFile ?? DEFAULT_PLUGIN_REGISTRY_FILE;
@@ -61,7 +70,9 @@ function setupPluginRegistryConfig(opts: ConfigOptions) {
       plugins: proxyConfig.reduce((acc, route) => {
         acc[route.name] = {
           meta: {},
-          web_bundles: [`http://localhost:${route.port}/mf-manifest.json`],
+          web_bundles: [
+            `${getBaseUrl(route.port, route)}/${route.name}/mf-manifest.json`
+          ],
         };
         return acc;
       }, {}),
@@ -101,6 +112,7 @@ export interface PluginConfig {
 interface PortalPlugin {
   name: string;
   port: number;
+  tunnelHost?: string;
 }
 
 const DEFAULT_PLUGIN_REGISTRY_FILE = "plugin.config.json";
@@ -194,14 +206,10 @@ export function Config(opts: ConfigOptions) {
         exposes: resolvedExposes,
         filename: "remoteEntry-[hash].js",
         remotes:
-          opts.plugins?.reduce(
-            (acc, plugin) => {
-              acc[plugin.name] =
-                `http://localhost:${opts.devPort}/${plugin.name}/remoteEntry.js`;
-              return acc;
-            },
-            {} as Record<string, string>,
-          ) || {},
+          opts.plugins?.reduce((acc, plugin) => {
+            acc[plugin.name] = `${getBaseUrl(opts.devPort!, plugin)}/${plugin.name}/remoteEntry.js`;
+            return acc;
+          }, {} as Record<string, string>) || {},
       },
     );
   }
@@ -263,7 +271,11 @@ export function Config(opts: ConfigOptions) {
       fs: {
         preserveSymlinks: true,
       },
+      host: true, // Required for tunnel access
       port: normalizedOpts.devPort,
+      origin: process.env.VITE_TUNNEL_HOST
+        ? `${process.env.VITE_TUNNEL_PROTOCOL || 'https'}://${process.env.VITE_TUNNEL_HOST}`
+        : undefined,
     },
     ...(opts.type === "host" || opts.plugins?.length
       ? {
