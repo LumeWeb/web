@@ -41,18 +41,18 @@ interface PortalPluginConfig {
 
 const DEFAULT_PORTAL_DOMAIN = "default.lumeweb.com";
 
-function normalizePortalDomain(domain: string | undefined): string {
-  if (!domain) return DEFAULT_PORTAL_DOMAIN;
-  return domain.replace(/^https?:\/\//, "").replace(/\/+$/, "");
-}
-
 function getBaseUrl(devPort: number, plugin?: PortalPlugin) {
   const tunnelHost = plugin?.tunnelHost || process.env.VITE_TUNNEL_HOST;
   if (!tunnelHost) {
     return `http://localhost:${devPort}`;
   }
-  const tunnelProtocol = process.env.VITE_TUNNEL_PROTOCOL || 'https';
+  const tunnelProtocol = process.env.VITE_TUNNEL_PROTOCOL || "https";
   return `${tunnelProtocol}://${tunnelHost}:${devPort}`;
+}
+
+function normalizePortalDomain(domain: string | undefined): string {
+  if (!domain) return DEFAULT_PORTAL_DOMAIN;
+  return domain.replace(/^https?:\/\//, "").replace(/\/+$/, "");
 }
 
 function setupPluginRegistryConfig(opts: ConfigOptions) {
@@ -70,9 +70,7 @@ function setupPluginRegistryConfig(opts: ConfigOptions) {
       plugins: proxyConfig.reduce((acc, route) => {
         acc[route.name] = {
           meta: {},
-          web_bundles: [
-            `${getBaseUrl(route.port, route)}/${route.name}/mf-manifest.json`
-          ],
+          web_bundles: [`${getBaseUrl(route.port, route)}/mf-manifest.json`],
         };
         return acc;
       }, {}),
@@ -168,7 +166,6 @@ export function Config(opts: ConfigOptions) {
           ]),
         )
       : undefined;
-
     return createBaseFederationConfig(
       plugin.name,
       runtimePlugins,
@@ -196,20 +193,41 @@ export function Config(opts: ConfigOptions) {
         )
       : undefined;
 
+    const importCfg = opts.type == "plugin" ? { import: false } : {};
+
+    const finalSharedModules = Object.fromEntries(
+      Object.entries(opts.sharedModules).map(([key, config]) => {
+        if (config === false) {
+          return [key, false];
+        }
+        if (typeof config === 'string') {
+          return [key, { requiredVersion: config, ...importCfg }];
+        }
+        if (typeof config === 'object') {
+          return [key, { ...config, ...importCfg }];
+        }
+        return [key, importCfg];
+      }),
+    );
+
     return createBaseFederationConfig(
       opts.name,
       runtimePlugins,
-      opts.sharedModules,
+      finalSharedModules,
       opts.devPort!,
       opts.type == "plugin",
       {
         exposes: resolvedExposes,
         filename: "remoteEntry-[hash].js",
         remotes:
-          opts.plugins?.reduce((acc, plugin) => {
-            acc[plugin.name] = `${getBaseUrl(opts.devPort!, plugin)}/${plugin.name}/remoteEntry.js`;
-            return acc;
-          }, {} as Record<string, string>) || {},
+          opts.plugins?.reduce(
+            (acc, plugin) => {
+              acc[plugin.name] =
+                `${getBaseUrl(opts.devPort!, plugin)}/${plugin.name}/remoteEntry.js`;
+              return acc;
+            },
+            {} as Record<string, string>,
+          ) || {},
       },
     );
   }
@@ -261,9 +279,13 @@ export function Config(opts: ConfigOptions) {
     },
     plugins: [...corePlugins.filter(Boolean)],
     preview: {
+      allowedHosts: process.env.VITE_TUNNEL_HOST
+        ? [process.env.VITE_TUNNEL_HOST]
+        : undefined,
       fs: {
         preserveSymlinks: true,
       },
+      host: true,
       port: normalizedOpts.devPort,
     },
     server: {
@@ -272,10 +294,10 @@ export function Config(opts: ConfigOptions) {
         preserveSymlinks: true,
       },
       host: true, // Required for tunnel access
-      port: normalizedOpts.devPort,
       origin: process.env.VITE_TUNNEL_HOST
-        ? `${process.env.VITE_TUNNEL_PROTOCOL || 'https'}://${process.env.VITE_TUNNEL_HOST}`
+        ? `${process.env.VITE_TUNNEL_PROTOCOL || "https"}://${process.env.VITE_TUNNEL_HOST}`
         : undefined,
+      port: normalizedOpts.devPort,
     },
     ...(opts.type === "host" || opts.plugins?.length
       ? {

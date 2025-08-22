@@ -1,5 +1,5 @@
 diff --git a/lib/index.cjs b/lib/index.cjs
-index f8307325e28295f62020a992ca4aab6c185b969e..dc085746412f9f212d0f1d8ab734893987ee81e0 100644
+index 3e3dd81fc3d66111ad62b12f86ffde36531b990b..c2dc3635438c7e1f218d1f8fe070027912e05c57 100644
 --- a/lib/index.cjs
 +++ b/lib/index.cjs
 @@ -161,10 +161,14 @@ var addEntry = function addEntry(_ref) {
@@ -28,84 +28,40 @@ index f8307325e28295f62020a992ca4aab6c185b969e..dc085746412f9f212d0f1d8ab7348939
          map: magicString.generateMap({
            hires: true
          })
-@@ -438,6 +443,7 @@ function getNormalizeShareItem(key) {
-   return shareItem;
- }
- function normalizeModuleFederationOptions(options) {
-+  var _options$remotePlugin;
-   if (options.getPublicPath) {
-     warn("We are ignoring the getPublicPath options because they are natively supported by Vite\nwith the \"experimental.renderBuiltUrl\" configuration https://vitejs.dev/guide/build#advanced-base-options");
-   }
-@@ -447,6 +453,7 @@ function normalizeModuleFederationOptions(options) {
-   return config = {
-     exposes: normalizeExposes(options.exposes),
-     filename: options.filename || 'remoteEntry-[hash]',
-+    remotePlugin: (_options$remotePlugin = options.remotePlugin) != null ? _options$remotePlugin : false,
-     library: normalizeLibrary(options.library),
-     name: options.name,
-     // remoteType: options.remoteType,
-@@ -537,6 +544,14 @@ function getNodeModulesDir() {
-   }
-   return cachedNodeModulesDir;
- }
-+function getSuffix(name) {
-+  var base = path.basename(name);
-+  var dotIndex = base.lastIndexOf('.');
-+  if (dotIndex > 0 && dotIndex < base.length - 1) {
-+    return base.slice(dotIndex);
-+  }
-+  return '.js';
-+}
- var patternMap = {};
- var cacheMap = {};
- /**
-@@ -544,7 +559,6 @@ var cacheMap = {};
-  */
- var VirtualModule = /*#__PURE__*/function () {
-   function VirtualModule(name, tag, suffix) {
--    var _name$split$slice$pop;
-     if (tag === void 0) {
-       tag = '__mf_v__';
-     }
-@@ -557,7 +571,7 @@ var VirtualModule = /*#__PURE__*/function () {
-     this.inited = false;
-     this.name = name;
-     this.tag = tag;
--    this.suffix = suffix || ((_name$split$slice$pop = name.split('.').slice(1).pop()) == null ? void 0 : _name$split$slice$pop.replace(/(.)/, '.$1')) || '.js';
-+    this.suffix = suffix || getSuffix(name);
-     if (!cacheMap[this.tag]) cacheMap[this.tag] = {};
-     cacheMap[this.tag][this.name] = this;
-   }
-@@ -682,7 +696,7 @@ function getLoadShareModulePath(pkg) {
-   return filepath;
- }
- function writeLoadShareModule(pkg, shareItem, command) {
--  loadShareCacheMap[pkg].writeSync("\n    \n    ;() => import(" + JSON.stringify(getPreBuildLibImportId(pkg)) + ").catch(() => {});\n    // dev uses dynamic import to separate chunks\n    " + (command !== 'build' ? ";() => import(" + JSON.stringify(pkg) + ").catch(() => {});" : '') + "\n    const {loadShare} = require(\"@module-federation/runtime\")\n    const {initPromise} = require(\"" + virtualRuntimeInitStatus.getImportId() + "\")\n    const res = initPromise.then(_ => loadShare(" + JSON.stringify(pkg) + ", {\n    customShareInfo: {shareConfig:{\n      singleton: " + shareItem.shareConfig.singleton + ",\n      strictVersion: " + shareItem.shareConfig.strictVersion + ",\n      requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n    }}}))\n    const exportModule = " + (command !== 'build' ? '/*mf top-level-await placeholder replacement mf*/' : 'await ') + "res.then(factory => factory())\n    module.exports = exportModule\n  ");
-+  loadShareCacheMap[pkg].writeSync("\n\n    ;() => import(" + JSON.stringify(getPreBuildLibImportId(pkg)) + ").catch(() => {});\n    // dev uses dynamic import to separate chunks\n    " + (command !== 'build' ? ";() => import(" + JSON.stringify(pkg) + ").catch(() => {});" : '') + "\n    const {loadShare} = require(\"@module-federation/runtime\")\n    const {initPromise} = require(\"" + virtualRuntimeInitStatus.getImportId() + "\")\n    const res = initPromise.then(_ => loadShare(" + JSON.stringify(pkg) + ", {\n    customShareInfo: {shareConfig:{\n      singleton: " + shareItem.shareConfig.singleton + ",\n      strictVersion: " + shareItem.shareConfig.strictVersion + ",\n      requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n    }}}))\n    const exportModule = " + (command !== 'build' ? '/*mf top-level-await placeholder replacement mf*/' : 'await ') + "res.then(factory => factory())\n    module.exports = exportModule\n  ");
- }
- 
- var usedShares = new Set();
-@@ -709,15 +723,15 @@ function writeLocalSharedImportMap() {
+@@ -378,6 +383,7 @@ function normalizeShareItem(key, shareItem) {
+       scope: 'default',
+       from: '',
+       shareConfig: {
++        "import": undefined,
+         singleton: false,
+         requiredVersion: version ? "^" + version : '*'
+       }
+@@ -389,6 +395,7 @@ function normalizeShareItem(key, shareItem) {
+     version: shareItem.version || version,
+     scope: shareItem.shareScope || 'default',
+     shareConfig: {
++      "import": typeof shareItem === 'object' ? shareItem["import"] : undefined,
+       singleton: shareItem.singleton || false,
+       requiredVersion: shareItem.requiredVersion || (version ? "^" + version : '*'),
+       strictVersion: !!shareItem.strictVersion
+@@ -716,12 +723,13 @@ function writeLocalSharedImportMap() {
  }
  function generateLocalSharedImportMap() {
    var options = getNormalizeModuleFederationOptions();
 -  return "\n    const importMap = {\n      " + Array.from(getUsedShares()).map(function (pkg) {
-+  return "\n    const importMap = {\n      " + (options.remotePlugin ? '' : Array.from(getUsedShares()).map(function (pkg) {
-     return "\n        " + JSON.stringify(pkg) + ": async () => {\n          let pkg = await import(\"" + getPreBuildLibImportId(pkg) + "\")\n          return pkg\n        }\n      ";
--  }).join(',') + "\n    }\n      const usedShared = {\n      " + Array.from(getUsedShares()).map(function (key) {
-+  }).join(',')) + "\n    }\n      const usedShared = {\n      " + (options.remotePlugin ? '' : Array.from(getUsedShares()).map(function (key) {
+-    return "\n        " + JSON.stringify(pkg) + ": async () => {\n          let pkg = await import(\"" + getPreBuildLibImportId(pkg) + "\")\n          return pkg\n        }\n      ";
++  return "\n    import {loadShare} from \"@module-federation/runtime\";\n    const importMap = {\n      " + Array.from(getUsedShares()).map(function (pkg) {
++    var shareItem = getNormalizeShareItem(pkg);
++    return "\n        " + JSON.stringify(pkg) + ": async () => {\n          " + ((shareItem == null ? void 0 : shareItem.shareConfig["import"]) === false ? "throw new Error(`Shared module '${" + JSON.stringify(pkg) + "}' must be provided by host`);" : "let pkg = await import(\"" + getPreBuildLibImportId(pkg) + "\");\n            return pkg;") + "\n        }\n      ";
+   }).join(',') + "\n    }\n      const usedShared = {\n      " + Array.from(getUsedShares()).map(function (key) {
      var shareItem = getNormalizeShareItem(key);
      if (!shareItem) return null;
 -    return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap \n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n            }\n          }\n        ";
-+    return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap\n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n            }\n          }\n        ";
++    return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              if (" + (shareItem.shareConfig["import"] === false) + ") {\n                const shared = await loadShare(" + JSON.stringify(key) + ");\n                if (shared) return () => shared;\n                throw new Error(`Shared module '${" + JSON.stringify(key) + "}' must be provided by host`);\n              }\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap\n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + ",\n              " + (shareItem.shareConfig["import"] === false ? 'import: false,' : '') + "\n            }\n          }\n        ";
    }).filter(function (x) {
      return x !== null;
--  }).join(',') + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
-+  }).join(',')) + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
-     var _JSON$stringify;
-     var remote = options.remotes[key];
-     if (!remote) return null;
-@@ -744,7 +758,7 @@ function generateRemoteEntry(options) {
+   }).join(',') + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
+@@ -751,7 +759,7 @@ function generateRemoteEntry(options) {
  var HOST_AUTO_INIT_TAG = '__H_A_I__';
  var hostAutoInitModule = new VirtualModule('hostAutoInit', HOST_AUTO_INIT_TAG);
  function writeHostAutoInit() {
@@ -114,38 +70,180 @@ index f8307325e28295f62020a992ca4aab6c185b969e..dc085746412f9f212d0f1d8ab7348939
  }
  function getHostAutoInitImportId() {
    return hostAutoInitModule.getImportId();
-@@ -779,6 +793,41 @@ var Manifest = function Manifest() {
+@@ -766,6 +774,154 @@ function initVirtualModules() {
+   writeRuntimeInitStatus();
+ }
+ 
++var ASSET_TYPES = ['js', 'css'];
++var LOAD_TIMINGS = ['sync', 'async'];
++var JS_EXTENSIONS = ['.ts', '.tsx', '.jsx', '.mjs', '.cjs'];
++/**
++ * Creates an empty asset map structure for tracking JS and CSS assets
++ * @returns Initialized asset map with sync/async arrays for JS and CSS
++ */
++var createEmptyAssetMap = function createEmptyAssetMap() {
++  return {
++    js: {
++      sync: [],
++      async: []
++    },
++    css: {
++      sync: [],
++      async: []
++    }
++  };
++};
++/**
++ * Tracks an asset in the preload map with deduplication
++ * @param map - The preload map to update
++ * @param key - The module key to track under
++ * @param fileName - The asset filename to track
++ * @param isAsync - Whether the asset is loaded async
++ * @param type - The asset type ('js' or 'css')
++ */
++var trackAsset = function trackAsset(map, key, fileName, isAsync, type) {
++  if (!map[key]) {
++    map[key] = createEmptyAssetMap();
++  }
++  var target = isAsync ? map[key][type].async : map[key][type].sync;
++  if (!target.includes(fileName)) {
++    target.push(fileName);
++  }
++};
++/**
++ * Checks if a file is a CSS file by extension
++ * @param fileName - The filename to check
++ * @returns True if file has a CSS extension (.css, .scss, .less)
++ */
++var isCSSFile = function isCSSFile(fileName) {
++  return fileName.endsWith('.css') || fileName.endsWith('.scss') || fileName.endsWith('.less');
++};
++/**
++ * Collects all CSS assets from the bundle
++ * @param bundle - The Rollup output bundle
++ * @returns Set of CSS asset filenames
++ */
++var collectCssAssets = function collectCssAssets(bundle) {
++  var cssAssets = new Set();
++  for (var _i = 0, _Object$entries = Object.entries(bundle); _i < _Object$entries.length; _i++) {
++    var _Object$entries$_i = _Object$entries[_i],
++      fileName = _Object$entries$_i[0],
++      fileData = _Object$entries$_i[1];
++    if (fileData.type === 'asset' && isCSSFile(fileName)) {
++      cssAssets.add(fileName);
++    }
++  }
++  return cssAssets;
++};
++/**
++ * Processes module assets and tracks them in the files map
++ * @param bundle - The Rollup output bundle
++ * @param filesMap - The preload map to populate
++ * @param moduleMatcher - Function that matches module paths to keys
++ */
++var processModuleAssets = function processModuleAssets(bundle, filesMap, moduleMatcher) {
++  for (var _i2 = 0, _Object$entries2 = Object.entries(bundle); _i2 < _Object$entries2.length; _i2++) {
++    var _Object$entries2$_i = _Object$entries2[_i2],
++      fileName = _Object$entries2$_i[0],
++      fileData = _Object$entries2$_i[1];
++    if (fileData.type !== 'chunk') continue;
++    if (!fileData.modules) continue;
++    for (var _i3 = 0, _Object$keys = Object.keys(fileData.modules); _i3 < _Object$keys.length; _i3++) {
++      var modulePath = _Object$keys[_i3];
++      var matchKey = moduleMatcher(modulePath);
++      if (!matchKey) continue;
++      // Track main JS chunk
++      trackAsset(filesMap, matchKey, fileName, false, 'js');
++      // Handle dynamic imports
++      if (fileData.dynamicImports) {
++        for (var _iterator = _createForOfIteratorHelperLoose(fileData.dynamicImports), _step; !(_step = _iterator()).done;) {
++          var dynamicImport = _step.value;
++          var importData = bundle[dynamicImport];
++          if (!importData) continue;
++          var isCss = isCSSFile(dynamicImport);
++          trackAsset(filesMap, matchKey, dynamicImport, true, isCss ? 'css' : 'js');
++        }
++      }
++    }
++  }
++};
++/**
++ * Deduplicates assets in the files map
++ * @param filesMap - The preload map to deduplicate
++ * @returns New deduplicated preload map
++ */
++var deduplicateAssets = function deduplicateAssets(filesMap) {
++  var result = {};
++  for (var _i4 = 0, _Object$entries3 = Object.entries(filesMap); _i4 < _Object$entries3.length; _i4++) {
++    var _Object$entries3$_i = _Object$entries3[_i4],
++      key = _Object$entries3$_i[0],
++      assetMaps = _Object$entries3$_i[1];
++    result[key] = createEmptyAssetMap();
++    for (var _i5 = 0, _ASSET_TYPES = ASSET_TYPES; _i5 < _ASSET_TYPES.length; _i5++) {
++      var type = _ASSET_TYPES[_i5];
++      for (var _i6 = 0, _LOAD_TIMINGS = LOAD_TIMINGS; _i6 < _LOAD_TIMINGS.length; _i6++) {
++        var timing = _LOAD_TIMINGS[_i6];
++        result[key][type][timing] = Array.from(new Set(assetMaps[type][timing]));
++      }
++    }
++  }
++  return result;
++};
++/**
++ * Builds a mapping between module files and their share keys
++ * @param shareKeys - Set of share keys to map
++ * @param resolveFn - Function to resolve module paths
++ * @returns Map of file paths to their corresponding share keys
++ */
++var buildFileToShareKeyMap = function buildFileToShareKeyMap(shareKeys, resolveFn) {
++  try {
++    var fileToShareKey = new Map();
++    return Promise.resolve(Promise.all(Array.from(shareKeys).map(function (shareKey) {
++      return resolveFn(getPreBuildLibImportId(shareKey)).then(function (resolution) {
++        var _resolution$id;
++        return {
++          shareKey: shareKey,
++          file: resolution == null || (_resolution$id = resolution.id) == null ? void 0 : _resolution$id.split('?')[0]
++        };
++      })["catch"](function () {
++        return null;
++      });
++    }))).then(function (resolutions) {
++      for (var _iterator2 = _createForOfIteratorHelperLoose(resolutions), _step2; !(_step2 = _iterator2()).done;) {
++        var resolution = _step2.value;
++        if (resolution != null && resolution.file) {
++          fileToShareKey.set(resolution.file, resolution.shareKey);
++        }
++      }
++      return fileToShareKey;
++    });
++  } catch (e) {
++    return Promise.reject(e);
++  }
++};
++
+ var Manifest = function Manifest() {
+   var mfOptions = getNormalizeModuleFederationOptions();
+   var name = mfOptions.name,
+@@ -777,21 +933,43 @@ var Manifest = function Manifest() {
+     mfManifestName = 'mf-manifest.json';
+   }
+   if (typeof manifestOptions !== 'boolean') {
+-    mfManifestName = path.join((manifestOptions == null ? void 0 : manifestOptions.filePath) || '', (manifestOptions == null ? void 0 : manifestOptions.fileName) || '');
++    mfManifestName = path__namespace.join((manifestOptions == null ? void 0 : manifestOptions.filePath) || '', (manifestOptions == null ? void 0 : manifestOptions.fileName) || '');
+   }
+-  var extensions;
+   var root;
+   var remoteEntryFile;
+   var publicPath;
    var _command;
    var _originalConfigBase;
    var viteConfig;
-+  // Helper function to initialize asset maps
-+  var createEmptyAssetMap = function createEmptyAssetMap() {
-+    return {
-+      js: {
-+        sync: [],
-+        async: []
-+      },
-+      css: {
-+        sync: [],
-+        async: []
-+      }
-+    };
-+  };
-+  // Helper function to track assets with deduplication
-+  var trackAsset = function trackAsset(map, key, fileName, isAsync, type) {
-+    if (!map[key]) {
-+      map[key] = createEmptyAssetMap();
-+    }
-+    var target = isAsync ? map[key][type].async : map[key][type].sync;
-+    if (!target.includes(fileName)) {
-+      target.push(fileName);
-+    }
-+  };
-+  // Helper function to check if a file is CSS
-+  var isCSSFile = function isCSSFile(fileName) {
-+    return fileName.endsWith('.css') || fileName.endsWith('.scss') || fileName.endsWith('.less');
-+  };
-+  // Helper function to add CSS assets to all exports
++  /**
++   * Adds global CSS assets to all module exports
++   * @param filesMap - The preload map to update
++   * @param cssAssets - Set of CSS asset filenames to add
++   */
 +  var addCssAssetsToAllExports = function addCssAssetsToAllExports(filesMap, cssAssets) {
 +    Object.keys(filesMap).forEach(function (key) {
 +      cssAssets.forEach(function (cssAsset) {
@@ -156,7 +254,32 @@ index f8307325e28295f62020a992ca4aab6c185b969e..dc085746412f9f212d0f1d8ab7348939
    return [{
      name: 'module-federation-manifest',
      apply: 'serve',
-@@ -835,7 +884,9 @@ var Manifest = function Manifest() {
++    /**
++     * Stores resolved Vite config for later use
++     */
++    /**
++     * Finalizes configuration after all plugins are resolved
++     * @param config - Fully resolved Vite config
++     */
+     configResolved: function configResolved(config) {
+       viteConfig = config;
+     },
++    /**
++     * Configures dev server middleware to handle manifest requests
++     * @param server - Vite dev server instance
++     */
+     configureServer: function configureServer(server) {
+       server.middlewares.use(function (req, res, next) {
+         var _req$url;
+@@ -839,137 +1017,85 @@ var Manifest = function Manifest() {
+   }, {
+     name: 'module-federation-manifest',
+     enforce: 'post',
++    /**
++     * Initial plugin configuration
++     * @param config - Vite config object
++     * @param command - Current Vite command (serve/build)
++     */
      config: function config(_config, _ref) {
        var command = _ref.command;
        if (!_config.build) _config.build = {};
@@ -167,7 +290,20 @@ index f8307325e28295f62020a992ca4aab6c185b969e..dc085746412f9f212d0f1d8ab7348939
        _command = command;
        _originalConfigBase = _config.base;
      },
-@@ -851,38 +902,10 @@ var Manifest = function Manifest() {
+     configResolved: function configResolved(config) {
+       root = config.root;
+-      extensions = config.resolve.extensions || ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'];
+       var base = config.base;
+       if (_command === 'serve') {
+         base = (config.server.origin || '') + config.base;
+       }
+       publicPath = _originalConfigBase === '' ? 'auto' : base ? base.replace(/\/?$/, '/') : 'auto';
+     },
++    /**
++     * Generates the module federation manifest file
++     * @param options - Rollup output options
++     * @param bundle - Generated bundle assets
++     */
      generateBundle: function generateBundle(options, bundle) {
        try {
          var _this = this;
@@ -204,37 +340,21 @@ index f8307325e28295f62020a992ca4aab6c185b969e..dc085746412f9f212d0f1d8ab7348939
 -        };
 -        // 遍历打包生成的每个文件
 +        var filesMap = {};
-+        var allCssAssets = new Set();
-+        // Find remoteEntry file
++        // First pass: Find remoteEntry file
          for (var _i = 0, _Object$entries = Object.entries(bundle); _i < _Object$entries.length; _i++) {
            var _Object$entries$_i = _Object$entries[_i],
-             fileName = _Object$entries$_i[0],
-@@ -890,34 +913,58 @@ var Manifest = function Manifest() {
+-            fileName = _Object$entries$_i[0],
++            _ = _Object$entries$_i[0],
+             fileData = _Object$entries$_i[1];
            if (mfOptions.filename.replace(/[\[\]]/g, '_').replace(/\.[^/.]+$/, '') === fileData.name || fileData.name === 'remoteEntry') {
              remoteEntryFile = fileData.fileName;
-           }
+-          }
 -          if (fileData.type === 'chunk') {
 -            // 遍历该文件的所有模块
 -            for (var _i2 = 0, _Object$keys = Object.keys(fileData.modules); _i2 < _Object$keys.length; _i2++) {
 -              var modulePath = _Object$keys[_i2];
 -              // 将绝对路径转换为相对于 Vite root 的相对路径
-+          // Collect all CSS assets
-+          if (fileData.type === 'asset' && isCSSFile(fileName)) {
-+            allCssAssets.add(fileName);
-+          }
-+        }
-+        var exposesModules = Object.keys(mfOptions.exposes).map(function (item) {
-+          return mfOptions.exposes[item]["import"];
-+        });
-+        // Process modules and their associated assets
-+        for (var _i2 = 0, _Object$entries2 = Object.entries(bundle); _i2 < _Object$entries2.length; _i2++) {
-+          var _Object$entries2$_i = _Object$entries2[_i2],
-+            _fileName = _Object$entries2$_i[0],
-+            _fileData = _Object$entries2$_i[1];
-+          if (_fileData.type === 'chunk') {
-+            var _loop = function _loop() {
-+              var modulePath = _Object$keys[_i3];
-               var relativeModulePath = path.relative(root, modulePath);
+-              var relativeModulePath = path.relative(root, modulePath);
 -              // 检查模块是否在 preloadModules 列表中
 -              for (var _iterator2 = _createForOfIteratorHelperLoose(exposesModules), _step2; !(_step2 = _iterator2()).done;) {
 -                var preloadModule = _step2.value;
@@ -246,53 +366,29 @@ index f8307325e28295f62020a992ca4aab6c185b969e..dc085746412f9f212d0f1d8ab7348939
 -                      sync: [],
 -                      async: []
 -                    };
-+              // Handle exposed modules
-+              var _loop2 = function _loop2() {
-+                var exposeModule = _step.value;
-+                var formatExposeModule = exposeModule.replace('./', '');
-+                if (relativeModulePath === formatExposeModule || extensions.some(function (ext) {
-+                  return relativeModulePath === "" + formatExposeModule + ext;
-+                })) {
-+                  // Track the JS chunk
-+                  trackAsset(filesMap, exposeModule, _fileName, false, 'js');
-+                  // Handle dynamic imports
-+                  if (_fileData.dynamicImports) {
-+                    for (var _iterator2 = _createForOfIteratorHelperLoose(_fileData.dynamicImports), _step2; !(_step2 = _iterator2()).done;) {
-+                      var dynamicImport = _step2.value;
-+                      var importData = bundle[dynamicImport];
-+                      if (importData) {
-+                        if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
-+                          trackAsset(filesMap, exposeModule, dynamicImport, true, 'css');
-+                        } else {
-+                          trackAsset(filesMap, exposeModule, dynamicImport, true, 'js');
-+                        }
-+                      }
-+                    }
-                   }
+-                  }
 -                  console.log(Object.keys(fileData.modules));
 -                  filesContainingModules[preloadModule].sync.push(fileName);
 -                  (_filesContainingModul = filesContainingModules[preloadModule].async).push.apply(_filesContainingModul, fileData.dynamicImports || []);
 -                  _findSynchronousImports(fileName, filesContainingModules[preloadModule].sync);
 -                  break; // 如果找到匹配，跳出循环
-                 }
-+              };
-+              for (var _iterator = _createForOfIteratorHelperLoose(exposesModules), _step; !(_step = _iterator()).done;) {
-+                _loop2();
-               }
-+            };
-+            for (var _i3 = 0, _Object$keys = Object.keys(_fileData.modules); _i3 < _Object$keys.length; _i3++) {
-+              _loop();
-             }
+-                }
+-              }
+-            }
++            break; // We can break early since we only need to find remoteEntry once
            }
          }
-+        // Process shared modules
-         var fileToShareKey = {};
-         return Promise.resolve(Promise.all(Array.from(getUsedShares()).map(function (shareKey) {
-           try {
-@@ -929,40 +976,49 @@ var Manifest = function Manifest() {
-             return Promise.reject(e);
-           }
-         }))).then(function () {
+-        var fileToShareKey = {};
+-        return Promise.resolve(Promise.all(Array.from(getUsedShares()).map(function (shareKey) {
+-          try {
+-            return Promise.resolve(_this.resolve(getPreBuildLibImportId(shareKey))).then(function (_this$resolve) {
+-              var file = _this$resolve.id.split('?')[0];
+-              fileToShareKey[file] = shareKey;
+-            });
+-          } catch (e) {
+-            return Promise.reject(e);
+-          }
+-        }))).then(function () {
 -          // 遍历打包生成的每个文件
 -          for (var _i3 = 0, _Object$entries2 = Object.entries(bundle); _i3 < _Object$entries2.length; _i3++) {
 -            var _Object$entries2$_i = _Object$entries2[_i3],
@@ -303,58 +399,57 @@ index f8307325e28295f62020a992ca4aab6c185b969e..dc085746412f9f212d0f1d8ab7348939
 -              for (var _i4 = 0, _Object$keys2 = Object.keys(_fileData.modules); _i4 < _Object$keys2.length; _i4++) {
 -                var _modulePath = _Object$keys2[_i4];
 -                var sharedKey = fileToShareKey[_modulePath];
-+          for (var _i4 = 0, _Object$entries3 = Object.entries(bundle); _i4 < _Object$entries3.length; _i4++) {
-+            var _Object$entries3$_i = _Object$entries3[_i4],
-+              _fileName2 = _Object$entries3$_i[0],
-+              _fileData2 = _Object$entries3$_i[1];
-+            if (_fileData2.type === 'chunk') {
-+              for (var _i5 = 0, _Object$keys2 = Object.keys(_fileData2.modules); _i5 < _Object$keys2.length; _i5++) {
-+                var modulePath = _Object$keys2[_i5];
-+                var sharedKey = fileToShareKey[modulePath];
-                 if (sharedKey) {
+-                if (sharedKey) {
 -                  var _filesContainingModul2;
 -                  if (!filesContainingModules[sharedKey]) {
 -                    filesContainingModules[sharedKey] = {
 -                      sync: [],
 -                      async: []
 -                    };
-+                  // Track the JS chunk
-+                  trackAsset(filesMap, sharedKey, _fileName2, false, 'js');
-+                  // Handle dynamic imports
-+                  if (_fileData2.dynamicImports) {
-+                    for (var _iterator3 = _createForOfIteratorHelperLoose(_fileData2.dynamicImports), _step3; !(_step3 = _iterator3()).done;) {
-+                      var dynamicImport = _step3.value;
-+                      var importData = bundle[dynamicImport];
-+                      if (importData) {
-+                        if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
-+                          trackAsset(filesMap, sharedKey, dynamicImport, true, 'css');
-+                        } else {
-+                          trackAsset(filesMap, sharedKey, dynamicImport, true, 'js');
-+                        }
-+                      }
-+                    }
-                   }
+-                  }
 -                  filesContainingModules[sharedKey].sync.push(_fileName);
 -                  (_filesContainingModul2 = filesContainingModules[sharedKey].async).push.apply(_filesContainingModul2, _fileData.dynamicImports || []);
 -                  _findSynchronousImports(_fileName, filesContainingModules[sharedKey].sync);
 -                  break; // 如果找到匹配，跳出循环
-                 }
-               }
+-                }
+-              }
++        // Second pass: Collect all CSS assets
++        var allCssAssets = collectCssAssets(bundle);
++        var exposesModules = Object.keys(mfOptions.exposes).map(function (item) {
++          return mfOptions.exposes[item]["import"];
++        });
++        // Process exposed modules
++        processModuleAssets(bundle, filesMap, function (modulePath) {
++          var absoluteModulePath = path__namespace.resolve(root, modulePath);
++          return exposesModules.find(function (exposeModule) {
++            var exposePath = path__namespace.resolve(root, exposeModule);
++            // First try exact path match
++            if (absoluteModulePath === exposePath) {
++              return true;
              }
-           }
+-          }
 -          Object.keys(filesContainingModules).forEach(function (key) {
 -            filesContainingModules[key].sync = Array.from(new Set(filesContainingModules[key].sync));
 -            filesContainingModules[key].async = Array.from(new Set(filesContainingModules[key].async));
-+          // Add all CSS assets to every export
-+          // Final deduplication of all arrays in the filesMap
-+          addCssAssetsToAllExports(filesMap, allCssAssets);
-+          Object.values(filesMap).forEach(function (assetMaps) {
-+            ['js', 'css'].forEach(function (type) {
-+              ['sync', 'async'].forEach(function (timing) {
-+                assetMaps[type][timing] = Array.from(new Set(assetMaps[type][timing]));
-+              });
-+            });
++            // Then try path match without known extensions
++            var getPathWithoutKnownExt = function getPathWithoutKnownExt(filePath) {
++              var ext = path__namespace.extname(filePath);
++              return JS_EXTENSIONS.includes(ext) ? path__namespace.join(path__namespace.dirname(filePath), path__namespace.basename(filePath, ext)) : filePath;
++            };
++            var modulePathNoExt = getPathWithoutKnownExt(absoluteModulePath);
++            var exposePathNoExt = getPathWithoutKnownExt(exposePath);
++            return modulePathNoExt === exposePathNoExt;
            });
++        });
++        // Process shared modules
++        return Promise.resolve(buildFileToShareKeyMap(getUsedShares(), _this.resolve.bind(_this))).then(function (fileToShareKey) {
++          processModuleAssets(bundle, filesMap, function (modulePath) {
++            return fileToShareKey.get(modulePath);
++          });
++          // Add all CSS assets to every export
++          addCssAssetsToAllExports(filesMap, allCssAssets);
++          // Final deduplication of all assets
++          filesMap = deduplicateAssets(filesMap);
            _this.emitFile({
              type: 'asset',
              fileName: mfManifestName,
@@ -363,7 +458,19 @@ index f8307325e28295f62020a992ca4aab6c185b969e..dc085746412f9f212d0f1d8ab7348939
            });
          });
        } catch (e) {
-@@ -978,23 +1034,23 @@ var Manifest = function Manifest() {
+@@ -977,6 +1103,11 @@ var Manifest = function Manifest() {
+       }
+     }
+   }];
++  /**
++   * Generates the final manifest JSON structure
++   * @param preloadMap - Map of module assets to include
++   * @returns Complete manifest object
++   */
+   function generateMFManifest(preloadMap) {
+     var options = getNormalizeModuleFederationOptions();
+     var name = options.name;
+@@ -985,23 +1116,23 @@ var Manifest = function Manifest() {
        path: '',
        type: 'module'
      };
@@ -396,7 +503,7 @@ index f8307325e28295f62020a992ca4aab6c185b969e..dc085746412f9f212d0f1d8ab7348939
        return {
          id: name + ":" + shareKey,
          name: shareKey,
-@@ -1002,42 +1058,40 @@ var Manifest = function Manifest() {
+@@ -1009,42 +1140,40 @@ var Manifest = function Manifest() {
          requiredVersion: shareItem.shareConfig.requiredVersion,
          assets: {
            js: {
@@ -457,7 +564,7 @@ index f8307325e28295f62020a992ca4aab6c185b969e..dc085746412f9f212d0f1d8ab7348939
        id: name,
        name: name,
        metaData: _extends({
-@@ -1052,8 +1106,6 @@ var Manifest = function Manifest() {
+@@ -1059,8 +1188,6 @@ var Manifest = function Manifest() {
          types: {
            path: '',
            name: ''
@@ -466,7 +573,7 @@ index f8307325e28295f62020a992ca4aab6c185b969e..dc085746412f9f212d0f1d8ab7348939
          },
          globalName: name,
          pluginVersion: '0.2.5'
-@@ -1066,7 +1118,6 @@ var Manifest = function Manifest() {
+@@ -1073,7 +1200,6 @@ var Manifest = function Manifest() {
        remotes: remotes,
        exposes: exposes
      };
@@ -474,46 +581,16 @@ index f8307325e28295f62020a992ca4aab6c185b969e..dc085746412f9f212d0f1d8ab7348939
    }
  };
  
-@@ -1283,8 +1334,10 @@ function proxySharedModule(options) {
-             var loadSharePath = getLoadShareModulePath(source);
-             writeLoadShareModule(source, shared[key], command);
-             writePreBuildLibPath(source);
-+            //  if (!options.remotePlugin) {
-             addUsedShares(source);
-             writeLocalSharedImportMap();
-+            //   }
-             return this.resolve(loadSharePath, importer);
-           }
-         };
-@@ -1365,7 +1418,8 @@ function federation(mfUserOptions) {
-   var options = normalizeModuleFederationOptions(mfUserOptions);
-   var name = options.name,
-     shared = options.shared,
--    filename = options.filename;
-+    filename = options.filename,
-+    remotePlugin = options.remotePlugin;
-   if (!name) throw new Error('name is required');
-   return [{
-     name: 'vite:module-federation-config',
-@@ -1381,7 +1435,7 @@ function federation(mfUserOptions) {
-     entryName: 'remoteEntry',
-     entryPath: REMOTE_ENTRY_ID,
-     fileName: filename
--  }), addEntry({
-+  }), remotePlugin ? [] : addEntry({
-     entryName: 'hostInit',
-     entryPath: getHostAutoInitPath(),
-     inject: 'html'
 diff --git a/lib/index.esm.js b/lib/index.esm.js
-index 5f2e8633c41f0412e7d285bdac25a0c21c2c778d..12498d62959df77004ba172701a8e02d69620b17 100644
+index 3f68e1e28b5163038ee59c51f00922d4880d27ed..86f68388bddddd77bd7c5f80868d461689fbaa15 100644
 --- a/lib/index.esm.js
 +++ b/lib/index.esm.js
 @@ -2,7 +2,7 @@ import defu from 'defu';
  import * as fs from 'fs';
  import { mkdirSync, writeFileSync, existsSync, writeFile } from 'fs';
  import * as path from 'pathe';
--import path__default, { resolve, parse, join, dirname, relative } from 'pathe';
-+import path__default, { resolve, basename, parse, join, dirname, relative } from 'pathe';
+-import path__default, { resolve, basename, parse, join, dirname, relative } from 'pathe';
++import path__default, { resolve, basename, parse, join, dirname } from 'pathe';
  import { createFilter } from '@rollup/pluginutils';
  import { walk } from 'estree-walker';
  import MagicString from 'magic-string';
@@ -543,84 +620,40 @@ index 5f2e8633c41f0412e7d285bdac25a0c21c2c778d..12498d62959df77004ba172701a8e02d
          map: magicString.generateMap({
            hires: true
          })
-@@ -414,6 +419,7 @@ function getNormalizeShareItem(key) {
-   return shareItem;
- }
- function normalizeModuleFederationOptions(options) {
-+  var _options$remotePlugin;
-   if (options.getPublicPath) {
-     warn("We are ignoring the getPublicPath options because they are natively supported by Vite\nwith the \"experimental.renderBuiltUrl\" configuration https://vitejs.dev/guide/build#advanced-base-options");
-   }
-@@ -423,6 +429,7 @@ function normalizeModuleFederationOptions(options) {
-   return config = {
-     exposes: normalizeExposes(options.exposes),
-     filename: options.filename || 'remoteEntry-[hash]',
-+    remotePlugin: (_options$remotePlugin = options.remotePlugin) != null ? _options$remotePlugin : false,
-     library: normalizeLibrary(options.library),
-     name: options.name,
-     // remoteType: options.remoteType,
-@@ -513,6 +520,14 @@ function getNodeModulesDir() {
-   }
-   return cachedNodeModulesDir;
- }
-+function getSuffix(name) {
-+  var base = basename(name);
-+  var dotIndex = base.lastIndexOf('.');
-+  if (dotIndex > 0 && dotIndex < base.length - 1) {
-+    return base.slice(dotIndex);
-+  }
-+  return '.js';
-+}
- var patternMap = {};
- var cacheMap = {};
- /**
-@@ -520,7 +535,6 @@ var cacheMap = {};
-  */
- var VirtualModule = /*#__PURE__*/function () {
-   function VirtualModule(name, tag, suffix) {
--    var _name$split$slice$pop;
-     if (tag === void 0) {
-       tag = '__mf_v__';
-     }
-@@ -533,7 +547,7 @@ var VirtualModule = /*#__PURE__*/function () {
-     this.inited = false;
-     this.name = name;
-     this.tag = tag;
--    this.suffix = suffix || ((_name$split$slice$pop = name.split('.').slice(1).pop()) == null ? void 0 : _name$split$slice$pop.replace(/(.)/, '.$1')) || '.js';
-+    this.suffix = suffix || getSuffix(name);
-     if (!cacheMap[this.tag]) cacheMap[this.tag] = {};
-     cacheMap[this.tag][this.name] = this;
-   }
-@@ -658,7 +672,7 @@ function getLoadShareModulePath(pkg) {
-   return filepath;
- }
- function writeLoadShareModule(pkg, shareItem, command) {
--  loadShareCacheMap[pkg].writeSync("\n    \n    ;() => import(" + JSON.stringify(getPreBuildLibImportId(pkg)) + ").catch(() => {});\n    // dev uses dynamic import to separate chunks\n    " + (command !== 'build' ? ";() => import(" + JSON.stringify(pkg) + ").catch(() => {});" : '') + "\n    const {loadShare} = require(\"@module-federation/runtime\")\n    const {initPromise} = require(\"" + virtualRuntimeInitStatus.getImportId() + "\")\n    const res = initPromise.then(_ => loadShare(" + JSON.stringify(pkg) + ", {\n    customShareInfo: {shareConfig:{\n      singleton: " + shareItem.shareConfig.singleton + ",\n      strictVersion: " + shareItem.shareConfig.strictVersion + ",\n      requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n    }}}))\n    const exportModule = " + (command !== 'build' ? '/*mf top-level-await placeholder replacement mf*/' : 'await ') + "res.then(factory => factory())\n    module.exports = exportModule\n  ");
-+  loadShareCacheMap[pkg].writeSync("\n\n    ;() => import(" + JSON.stringify(getPreBuildLibImportId(pkg)) + ").catch(() => {});\n    // dev uses dynamic import to separate chunks\n    " + (command !== 'build' ? ";() => import(" + JSON.stringify(pkg) + ").catch(() => {});" : '') + "\n    const {loadShare} = require(\"@module-federation/runtime\")\n    const {initPromise} = require(\"" + virtualRuntimeInitStatus.getImportId() + "\")\n    const res = initPromise.then(_ => loadShare(" + JSON.stringify(pkg) + ", {\n    customShareInfo: {shareConfig:{\n      singleton: " + shareItem.shareConfig.singleton + ",\n      strictVersion: " + shareItem.shareConfig.strictVersion + ",\n      requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n    }}}))\n    const exportModule = " + (command !== 'build' ? '/*mf top-level-await placeholder replacement mf*/' : 'await ') + "res.then(factory => factory())\n    module.exports = exportModule\n  ");
- }
- 
- var usedShares = new Set();
-@@ -685,15 +699,15 @@ function writeLocalSharedImportMap() {
+@@ -354,6 +359,7 @@ function normalizeShareItem(key, shareItem) {
+       scope: 'default',
+       from: '',
+       shareConfig: {
++        "import": undefined,
+         singleton: false,
+         requiredVersion: version ? "^" + version : '*'
+       }
+@@ -365,6 +371,7 @@ function normalizeShareItem(key, shareItem) {
+     version: shareItem.version || version,
+     scope: shareItem.shareScope || 'default',
+     shareConfig: {
++      "import": typeof shareItem === 'object' ? shareItem["import"] : undefined,
+       singleton: shareItem.singleton || false,
+       requiredVersion: shareItem.requiredVersion || (version ? "^" + version : '*'),
+       strictVersion: !!shareItem.strictVersion
+@@ -692,12 +699,13 @@ function writeLocalSharedImportMap() {
  }
  function generateLocalSharedImportMap() {
    var options = getNormalizeModuleFederationOptions();
 -  return "\n    const importMap = {\n      " + Array.from(getUsedShares()).map(function (pkg) {
-+  return "\n    const importMap = {\n      " + (options.remotePlugin ? '' : Array.from(getUsedShares()).map(function (pkg) {
-     return "\n        " + JSON.stringify(pkg) + ": async () => {\n          let pkg = await import(\"" + getPreBuildLibImportId(pkg) + "\")\n          return pkg\n        }\n      ";
--  }).join(',') + "\n    }\n      const usedShared = {\n      " + Array.from(getUsedShares()).map(function (key) {
-+  }).join(',')) + "\n    }\n      const usedShared = {\n      " + (options.remotePlugin ? '' : Array.from(getUsedShares()).map(function (key) {
+-    return "\n        " + JSON.stringify(pkg) + ": async () => {\n          let pkg = await import(\"" + getPreBuildLibImportId(pkg) + "\")\n          return pkg\n        }\n      ";
++  return "\n    import {loadShare} from \"@module-federation/runtime\";\n    const importMap = {\n      " + Array.from(getUsedShares()).map(function (pkg) {
++    var shareItem = getNormalizeShareItem(pkg);
++    return "\n        " + JSON.stringify(pkg) + ": async () => {\n          " + ((shareItem == null ? void 0 : shareItem.shareConfig["import"]) === false ? "throw new Error(`Shared module '${" + JSON.stringify(pkg) + "}' must be provided by host`);" : "let pkg = await import(\"" + getPreBuildLibImportId(pkg) + "\");\n            return pkg;") + "\n        }\n      ";
+   }).join(',') + "\n    }\n      const usedShared = {\n      " + Array.from(getUsedShares()).map(function (key) {
      var shareItem = getNormalizeShareItem(key);
      if (!shareItem) return null;
 -    return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap \n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n            }\n          }\n        ";
-+    return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap\n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n            }\n          }\n        ";
++    return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              if (" + (shareItem.shareConfig["import"] === false) + ") {\n                const shared = await loadShare(" + JSON.stringify(key) + ");\n                if (shared) return () => shared;\n                throw new Error(`Shared module '${" + JSON.stringify(key) + "}' must be provided by host`);\n              }\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap\n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + ",\n              " + (shareItem.shareConfig["import"] === false ? 'import: false,' : '') + "\n            }\n          }\n        ";
    }).filter(function (x) {
      return x !== null;
--  }).join(',') + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
-+  }).join(',')) + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
-     var _JSON$stringify;
-     var remote = options.remotes[key];
-     if (!remote) return null;
-@@ -720,7 +734,7 @@ function generateRemoteEntry(options) {
+   }).join(',') + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
+@@ -727,7 +735,7 @@ function generateRemoteEntry(options) {
  var HOST_AUTO_INIT_TAG = '__H_A_I__';
  var hostAutoInitModule = new VirtualModule('hostAutoInit', HOST_AUTO_INIT_TAG);
  function writeHostAutoInit() {
@@ -629,38 +662,180 @@ index 5f2e8633c41f0412e7d285bdac25a0c21c2c778d..12498d62959df77004ba172701a8e02d
  }
  function getHostAutoInitImportId() {
    return hostAutoInitModule.getImportId();
-@@ -755,6 +769,41 @@ var Manifest = function Manifest() {
+@@ -742,6 +750,154 @@ function initVirtualModules() {
+   writeRuntimeInitStatus();
+ }
+ 
++var ASSET_TYPES = ['js', 'css'];
++var LOAD_TIMINGS = ['sync', 'async'];
++var JS_EXTENSIONS = ['.ts', '.tsx', '.jsx', '.mjs', '.cjs'];
++/**
++ * Creates an empty asset map structure for tracking JS and CSS assets
++ * @returns Initialized asset map with sync/async arrays for JS and CSS
++ */
++var createEmptyAssetMap = function createEmptyAssetMap() {
++  return {
++    js: {
++      sync: [],
++      async: []
++    },
++    css: {
++      sync: [],
++      async: []
++    }
++  };
++};
++/**
++ * Tracks an asset in the preload map with deduplication
++ * @param map - The preload map to update
++ * @param key - The module key to track under
++ * @param fileName - The asset filename to track
++ * @param isAsync - Whether the asset is loaded async
++ * @param type - The asset type ('js' or 'css')
++ */
++var trackAsset = function trackAsset(map, key, fileName, isAsync, type) {
++  if (!map[key]) {
++    map[key] = createEmptyAssetMap();
++  }
++  var target = isAsync ? map[key][type].async : map[key][type].sync;
++  if (!target.includes(fileName)) {
++    target.push(fileName);
++  }
++};
++/**
++ * Checks if a file is a CSS file by extension
++ * @param fileName - The filename to check
++ * @returns True if file has a CSS extension (.css, .scss, .less)
++ */
++var isCSSFile = function isCSSFile(fileName) {
++  return fileName.endsWith('.css') || fileName.endsWith('.scss') || fileName.endsWith('.less');
++};
++/**
++ * Collects all CSS assets from the bundle
++ * @param bundle - The Rollup output bundle
++ * @returns Set of CSS asset filenames
++ */
++var collectCssAssets = function collectCssAssets(bundle) {
++  var cssAssets = new Set();
++  for (var _i = 0, _Object$entries = Object.entries(bundle); _i < _Object$entries.length; _i++) {
++    var _Object$entries$_i = _Object$entries[_i],
++      fileName = _Object$entries$_i[0],
++      fileData = _Object$entries$_i[1];
++    if (fileData.type === 'asset' && isCSSFile(fileName)) {
++      cssAssets.add(fileName);
++    }
++  }
++  return cssAssets;
++};
++/**
++ * Processes module assets and tracks them in the files map
++ * @param bundle - The Rollup output bundle
++ * @param filesMap - The preload map to populate
++ * @param moduleMatcher - Function that matches module paths to keys
++ */
++var processModuleAssets = function processModuleAssets(bundle, filesMap, moduleMatcher) {
++  for (var _i2 = 0, _Object$entries2 = Object.entries(bundle); _i2 < _Object$entries2.length; _i2++) {
++    var _Object$entries2$_i = _Object$entries2[_i2],
++      fileName = _Object$entries2$_i[0],
++      fileData = _Object$entries2$_i[1];
++    if (fileData.type !== 'chunk') continue;
++    if (!fileData.modules) continue;
++    for (var _i3 = 0, _Object$keys = Object.keys(fileData.modules); _i3 < _Object$keys.length; _i3++) {
++      var modulePath = _Object$keys[_i3];
++      var matchKey = moduleMatcher(modulePath);
++      if (!matchKey) continue;
++      // Track main JS chunk
++      trackAsset(filesMap, matchKey, fileName, false, 'js');
++      // Handle dynamic imports
++      if (fileData.dynamicImports) {
++        for (var _iterator = _createForOfIteratorHelperLoose(fileData.dynamicImports), _step; !(_step = _iterator()).done;) {
++          var dynamicImport = _step.value;
++          var importData = bundle[dynamicImport];
++          if (!importData) continue;
++          var isCss = isCSSFile(dynamicImport);
++          trackAsset(filesMap, matchKey, dynamicImport, true, isCss ? 'css' : 'js');
++        }
++      }
++    }
++  }
++};
++/**
++ * Deduplicates assets in the files map
++ * @param filesMap - The preload map to deduplicate
++ * @returns New deduplicated preload map
++ */
++var deduplicateAssets = function deduplicateAssets(filesMap) {
++  var result = {};
++  for (var _i4 = 0, _Object$entries3 = Object.entries(filesMap); _i4 < _Object$entries3.length; _i4++) {
++    var _Object$entries3$_i = _Object$entries3[_i4],
++      key = _Object$entries3$_i[0],
++      assetMaps = _Object$entries3$_i[1];
++    result[key] = createEmptyAssetMap();
++    for (var _i5 = 0, _ASSET_TYPES = ASSET_TYPES; _i5 < _ASSET_TYPES.length; _i5++) {
++      var type = _ASSET_TYPES[_i5];
++      for (var _i6 = 0, _LOAD_TIMINGS = LOAD_TIMINGS; _i6 < _LOAD_TIMINGS.length; _i6++) {
++        var timing = _LOAD_TIMINGS[_i6];
++        result[key][type][timing] = Array.from(new Set(assetMaps[type][timing]));
++      }
++    }
++  }
++  return result;
++};
++/**
++ * Builds a mapping between module files and their share keys
++ * @param shareKeys - Set of share keys to map
++ * @param resolveFn - Function to resolve module paths
++ * @returns Map of file paths to their corresponding share keys
++ */
++var buildFileToShareKeyMap = function buildFileToShareKeyMap(shareKeys, resolveFn) {
++  try {
++    var fileToShareKey = new Map();
++    return Promise.resolve(Promise.all(Array.from(shareKeys).map(function (shareKey) {
++      return resolveFn(getPreBuildLibImportId(shareKey)).then(function (resolution) {
++        var _resolution$id;
++        return {
++          shareKey: shareKey,
++          file: resolution == null || (_resolution$id = resolution.id) == null ? void 0 : _resolution$id.split('?')[0]
++        };
++      })["catch"](function () {
++        return null;
++      });
++    }))).then(function (resolutions) {
++      for (var _iterator2 = _createForOfIteratorHelperLoose(resolutions), _step2; !(_step2 = _iterator2()).done;) {
++        var resolution = _step2.value;
++        if (resolution != null && resolution.file) {
++          fileToShareKey.set(resolution.file, resolution.shareKey);
++        }
++      }
++      return fileToShareKey;
++    });
++  } catch (e) {
++    return Promise.reject(e);
++  }
++};
++
+ var Manifest = function Manifest() {
+   var mfOptions = getNormalizeModuleFederationOptions();
+   var name = mfOptions.name,
+@@ -753,21 +909,43 @@ var Manifest = function Manifest() {
+     mfManifestName = 'mf-manifest.json';
+   }
+   if (typeof manifestOptions !== 'boolean') {
+-    mfManifestName = join((manifestOptions == null ? void 0 : manifestOptions.filePath) || '', (manifestOptions == null ? void 0 : manifestOptions.fileName) || '');
++    mfManifestName = path.join((manifestOptions == null ? void 0 : manifestOptions.filePath) || '', (manifestOptions == null ? void 0 : manifestOptions.fileName) || '');
+   }
+-  var extensions;
+   var root;
+   var remoteEntryFile;
+   var publicPath;
    var _command;
    var _originalConfigBase;
    var viteConfig;
-+  // Helper function to initialize asset maps
-+  var createEmptyAssetMap = function createEmptyAssetMap() {
-+    return {
-+      js: {
-+        sync: [],
-+        async: []
-+      },
-+      css: {
-+        sync: [],
-+        async: []
-+      }
-+    };
-+  };
-+  // Helper function to track assets with deduplication
-+  var trackAsset = function trackAsset(map, key, fileName, isAsync, type) {
-+    if (!map[key]) {
-+      map[key] = createEmptyAssetMap();
-+    }
-+    var target = isAsync ? map[key][type].async : map[key][type].sync;
-+    if (!target.includes(fileName)) {
-+      target.push(fileName);
-+    }
-+  };
-+  // Helper function to check if a file is CSS
-+  var isCSSFile = function isCSSFile(fileName) {
-+    return fileName.endsWith('.css') || fileName.endsWith('.scss') || fileName.endsWith('.less');
-+  };
-+  // Helper function to add CSS assets to all exports
++  /**
++   * Adds global CSS assets to all module exports
++   * @param filesMap - The preload map to update
++   * @param cssAssets - Set of CSS asset filenames to add
++   */
 +  var addCssAssetsToAllExports = function addCssAssetsToAllExports(filesMap, cssAssets) {
 +    Object.keys(filesMap).forEach(function (key) {
 +      cssAssets.forEach(function (cssAsset) {
@@ -671,7 +846,32 @@ index 5f2e8633c41f0412e7d285bdac25a0c21c2c778d..12498d62959df77004ba172701a8e02d
    return [{
      name: 'module-federation-manifest',
      apply: 'serve',
-@@ -811,7 +860,9 @@ var Manifest = function Manifest() {
++    /**
++     * Stores resolved Vite config for later use
++     */
++    /**
++     * Finalizes configuration after all plugins are resolved
++     * @param config - Fully resolved Vite config
++     */
+     configResolved: function configResolved(config) {
+       viteConfig = config;
+     },
++    /**
++     * Configures dev server middleware to handle manifest requests
++     * @param server - Vite dev server instance
++     */
+     configureServer: function configureServer(server) {
+       server.middlewares.use(function (req, res, next) {
+         var _req$url;
+@@ -815,137 +993,85 @@ var Manifest = function Manifest() {
+   }, {
+     name: 'module-federation-manifest',
+     enforce: 'post',
++    /**
++     * Initial plugin configuration
++     * @param config - Vite config object
++     * @param command - Current Vite command (serve/build)
++     */
      config: function config(_config, _ref) {
        var command = _ref.command;
        if (!_config.build) _config.build = {};
@@ -682,7 +882,20 @@ index 5f2e8633c41f0412e7d285bdac25a0c21c2c778d..12498d62959df77004ba172701a8e02d
        _command = command;
        _originalConfigBase = _config.base;
      },
-@@ -827,38 +878,10 @@ var Manifest = function Manifest() {
+     configResolved: function configResolved(config) {
+       root = config.root;
+-      extensions = config.resolve.extensions || ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'];
+       var base = config.base;
+       if (_command === 'serve') {
+         base = (config.server.origin || '') + config.base;
+       }
+       publicPath = _originalConfigBase === '' ? 'auto' : base ? base.replace(/\/?$/, '/') : 'auto';
+     },
++    /**
++     * Generates the module federation manifest file
++     * @param options - Rollup output options
++     * @param bundle - Generated bundle assets
++     */
      generateBundle: function generateBundle(options, bundle) {
        try {
          var _this = this;
@@ -719,37 +932,21 @@ index 5f2e8633c41f0412e7d285bdac25a0c21c2c778d..12498d62959df77004ba172701a8e02d
 -        };
 -        // 遍历打包生成的每个文件
 +        var filesMap = {};
-+        var allCssAssets = new Set();
-+        // Find remoteEntry file
++        // First pass: Find remoteEntry file
          for (var _i = 0, _Object$entries = Object.entries(bundle); _i < _Object$entries.length; _i++) {
            var _Object$entries$_i = _Object$entries[_i],
-             fileName = _Object$entries$_i[0],
-@@ -866,34 +889,58 @@ var Manifest = function Manifest() {
+-            fileName = _Object$entries$_i[0],
++            _ = _Object$entries$_i[0],
+             fileData = _Object$entries$_i[1];
            if (mfOptions.filename.replace(/[\[\]]/g, '_').replace(/\.[^/.]+$/, '') === fileData.name || fileData.name === 'remoteEntry') {
              remoteEntryFile = fileData.fileName;
-           }
+-          }
 -          if (fileData.type === 'chunk') {
 -            // 遍历该文件的所有模块
 -            for (var _i2 = 0, _Object$keys = Object.keys(fileData.modules); _i2 < _Object$keys.length; _i2++) {
 -              var modulePath = _Object$keys[_i2];
 -              // 将绝对路径转换为相对于 Vite root 的相对路径
-+          // Collect all CSS assets
-+          if (fileData.type === 'asset' && isCSSFile(fileName)) {
-+            allCssAssets.add(fileName);
-+          }
-+        }
-+        var exposesModules = Object.keys(mfOptions.exposes).map(function (item) {
-+          return mfOptions.exposes[item]["import"];
-+        });
-+        // Process modules and their associated assets
-+        for (var _i2 = 0, _Object$entries2 = Object.entries(bundle); _i2 < _Object$entries2.length; _i2++) {
-+          var _Object$entries2$_i = _Object$entries2[_i2],
-+            _fileName = _Object$entries2$_i[0],
-+            _fileData = _Object$entries2$_i[1];
-+          if (_fileData.type === 'chunk') {
-+            var _loop = function _loop() {
-+              var modulePath = _Object$keys[_i3];
-               var relativeModulePath = relative(root, modulePath);
+-              var relativeModulePath = relative(root, modulePath);
 -              // 检查模块是否在 preloadModules 列表中
 -              for (var _iterator2 = _createForOfIteratorHelperLoose(exposesModules), _step2; !(_step2 = _iterator2()).done;) {
 -                var preloadModule = _step2.value;
@@ -761,53 +958,29 @@ index 5f2e8633c41f0412e7d285bdac25a0c21c2c778d..12498d62959df77004ba172701a8e02d
 -                      sync: [],
 -                      async: []
 -                    };
-+              // Handle exposed modules
-+              var _loop2 = function _loop2() {
-+                var exposeModule = _step.value;
-+                var formatExposeModule = exposeModule.replace('./', '');
-+                if (relativeModulePath === formatExposeModule || extensions.some(function (ext) {
-+                  return relativeModulePath === "" + formatExposeModule + ext;
-+                })) {
-+                  // Track the JS chunk
-+                  trackAsset(filesMap, exposeModule, _fileName, false, 'js');
-+                  // Handle dynamic imports
-+                  if (_fileData.dynamicImports) {
-+                    for (var _iterator2 = _createForOfIteratorHelperLoose(_fileData.dynamicImports), _step2; !(_step2 = _iterator2()).done;) {
-+                      var dynamicImport = _step2.value;
-+                      var importData = bundle[dynamicImport];
-+                      if (importData) {
-+                        if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
-+                          trackAsset(filesMap, exposeModule, dynamicImport, true, 'css');
-+                        } else {
-+                          trackAsset(filesMap, exposeModule, dynamicImport, true, 'js');
-+                        }
-+                      }
-+                    }
-                   }
+-                  }
 -                  console.log(Object.keys(fileData.modules));
 -                  filesContainingModules[preloadModule].sync.push(fileName);
 -                  (_filesContainingModul = filesContainingModules[preloadModule].async).push.apply(_filesContainingModul, fileData.dynamicImports || []);
 -                  _findSynchronousImports(fileName, filesContainingModules[preloadModule].sync);
 -                  break; // 如果找到匹配，跳出循环
-                 }
-+              };
-+              for (var _iterator = _createForOfIteratorHelperLoose(exposesModules), _step; !(_step = _iterator()).done;) {
-+                _loop2();
-               }
-+            };
-+            for (var _i3 = 0, _Object$keys = Object.keys(_fileData.modules); _i3 < _Object$keys.length; _i3++) {
-+              _loop();
-             }
+-                }
+-              }
+-            }
++            break; // We can break early since we only need to find remoteEntry once
            }
          }
-+        // Process shared modules
-         var fileToShareKey = {};
-         return Promise.resolve(Promise.all(Array.from(getUsedShares()).map(function (shareKey) {
-           try {
-@@ -905,40 +952,49 @@ var Manifest = function Manifest() {
-             return Promise.reject(e);
-           }
-         }))).then(function () {
+-        var fileToShareKey = {};
+-        return Promise.resolve(Promise.all(Array.from(getUsedShares()).map(function (shareKey) {
+-          try {
+-            return Promise.resolve(_this.resolve(getPreBuildLibImportId(shareKey))).then(function (_this$resolve) {
+-              var file = _this$resolve.id.split('?')[0];
+-              fileToShareKey[file] = shareKey;
+-            });
+-          } catch (e) {
+-            return Promise.reject(e);
+-          }
+-        }))).then(function () {
 -          // 遍历打包生成的每个文件
 -          for (var _i3 = 0, _Object$entries2 = Object.entries(bundle); _i3 < _Object$entries2.length; _i3++) {
 -            var _Object$entries2$_i = _Object$entries2[_i3],
@@ -818,58 +991,57 @@ index 5f2e8633c41f0412e7d285bdac25a0c21c2c778d..12498d62959df77004ba172701a8e02d
 -              for (var _i4 = 0, _Object$keys2 = Object.keys(_fileData.modules); _i4 < _Object$keys2.length; _i4++) {
 -                var _modulePath = _Object$keys2[_i4];
 -                var sharedKey = fileToShareKey[_modulePath];
-+          for (var _i4 = 0, _Object$entries3 = Object.entries(bundle); _i4 < _Object$entries3.length; _i4++) {
-+            var _Object$entries3$_i = _Object$entries3[_i4],
-+              _fileName2 = _Object$entries3$_i[0],
-+              _fileData2 = _Object$entries3$_i[1];
-+            if (_fileData2.type === 'chunk') {
-+              for (var _i5 = 0, _Object$keys2 = Object.keys(_fileData2.modules); _i5 < _Object$keys2.length; _i5++) {
-+                var modulePath = _Object$keys2[_i5];
-+                var sharedKey = fileToShareKey[modulePath];
-                 if (sharedKey) {
+-                if (sharedKey) {
 -                  var _filesContainingModul2;
 -                  if (!filesContainingModules[sharedKey]) {
 -                    filesContainingModules[sharedKey] = {
 -                      sync: [],
 -                      async: []
 -                    };
-+                  // Track the JS chunk
-+                  trackAsset(filesMap, sharedKey, _fileName2, false, 'js');
-+                  // Handle dynamic imports
-+                  if (_fileData2.dynamicImports) {
-+                    for (var _iterator3 = _createForOfIteratorHelperLoose(_fileData2.dynamicImports), _step3; !(_step3 = _iterator3()).done;) {
-+                      var dynamicImport = _step3.value;
-+                      var importData = bundle[dynamicImport];
-+                      if (importData) {
-+                        if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
-+                          trackAsset(filesMap, sharedKey, dynamicImport, true, 'css');
-+                        } else {
-+                          trackAsset(filesMap, sharedKey, dynamicImport, true, 'js');
-+                        }
-+                      }
-+                    }
-                   }
+-                  }
 -                  filesContainingModules[sharedKey].sync.push(_fileName);
 -                  (_filesContainingModul2 = filesContainingModules[sharedKey].async).push.apply(_filesContainingModul2, _fileData.dynamicImports || []);
 -                  _findSynchronousImports(_fileName, filesContainingModules[sharedKey].sync);
 -                  break; // 如果找到匹配，跳出循环
-                 }
-               }
+-                }
+-              }
++        // Second pass: Collect all CSS assets
++        var allCssAssets = collectCssAssets(bundle);
++        var exposesModules = Object.keys(mfOptions.exposes).map(function (item) {
++          return mfOptions.exposes[item]["import"];
++        });
++        // Process exposed modules
++        processModuleAssets(bundle, filesMap, function (modulePath) {
++          var absoluteModulePath = path.resolve(root, modulePath);
++          return exposesModules.find(function (exposeModule) {
++            var exposePath = path.resolve(root, exposeModule);
++            // First try exact path match
++            if (absoluteModulePath === exposePath) {
++              return true;
              }
-           }
+-          }
 -          Object.keys(filesContainingModules).forEach(function (key) {
 -            filesContainingModules[key].sync = Array.from(new Set(filesContainingModules[key].sync));
 -            filesContainingModules[key].async = Array.from(new Set(filesContainingModules[key].async));
-+          // Add all CSS assets to every export
-+          // Final deduplication of all arrays in the filesMap
-+          addCssAssetsToAllExports(filesMap, allCssAssets);
-+          Object.values(filesMap).forEach(function (assetMaps) {
-+            ['js', 'css'].forEach(function (type) {
-+              ['sync', 'async'].forEach(function (timing) {
-+                assetMaps[type][timing] = Array.from(new Set(assetMaps[type][timing]));
-+              });
-+            });
++            // Then try path match without known extensions
++            var getPathWithoutKnownExt = function getPathWithoutKnownExt(filePath) {
++              var ext = path.extname(filePath);
++              return JS_EXTENSIONS.includes(ext) ? path.join(path.dirname(filePath), path.basename(filePath, ext)) : filePath;
++            };
++            var modulePathNoExt = getPathWithoutKnownExt(absoluteModulePath);
++            var exposePathNoExt = getPathWithoutKnownExt(exposePath);
++            return modulePathNoExt === exposePathNoExt;
            });
++        });
++        // Process shared modules
++        return Promise.resolve(buildFileToShareKeyMap(getUsedShares(), _this.resolve.bind(_this))).then(function (fileToShareKey) {
++          processModuleAssets(bundle, filesMap, function (modulePath) {
++            return fileToShareKey.get(modulePath);
++          });
++          // Add all CSS assets to every export
++          addCssAssetsToAllExports(filesMap, allCssAssets);
++          // Final deduplication of all assets
++          filesMap = deduplicateAssets(filesMap);
            _this.emitFile({
              type: 'asset',
              fileName: mfManifestName,
@@ -878,7 +1050,19 @@ index 5f2e8633c41f0412e7d285bdac25a0c21c2c778d..12498d62959df77004ba172701a8e02d
            });
          });
        } catch (e) {
-@@ -954,23 +1010,23 @@ var Manifest = function Manifest() {
+@@ -953,6 +1079,11 @@ var Manifest = function Manifest() {
+       }
+     }
+   }];
++  /**
++   * Generates the final manifest JSON structure
++   * @param preloadMap - Map of module assets to include
++   * @returns Complete manifest object
++   */
+   function generateMFManifest(preloadMap) {
+     var options = getNormalizeModuleFederationOptions();
+     var name = options.name;
+@@ -961,23 +1092,23 @@ var Manifest = function Manifest() {
        path: '',
        type: 'module'
      };
@@ -911,7 +1095,7 @@ index 5f2e8633c41f0412e7d285bdac25a0c21c2c778d..12498d62959df77004ba172701a8e02d
        return {
          id: name + ":" + shareKey,
          name: shareKey,
-@@ -978,42 +1034,40 @@ var Manifest = function Manifest() {
+@@ -985,42 +1116,40 @@ var Manifest = function Manifest() {
          requiredVersion: shareItem.shareConfig.requiredVersion,
          assets: {
            js: {
@@ -972,7 +1156,7 @@ index 5f2e8633c41f0412e7d285bdac25a0c21c2c778d..12498d62959df77004ba172701a8e02d
        id: name,
        name: name,
        metaData: _extends({
-@@ -1028,8 +1082,6 @@ var Manifest = function Manifest() {
+@@ -1035,8 +1164,6 @@ var Manifest = function Manifest() {
          types: {
            path: '',
            name: ''
@@ -981,7 +1165,7 @@ index 5f2e8633c41f0412e7d285bdac25a0c21c2c778d..12498d62959df77004ba172701a8e02d
          },
          globalName: name,
          pluginVersion: '0.2.5'
-@@ -1042,7 +1094,6 @@ var Manifest = function Manifest() {
+@@ -1049,7 +1176,6 @@ var Manifest = function Manifest() {
        remotes: remotes,
        exposes: exposes
      };
@@ -989,46 +1173,16 @@ index 5f2e8633c41f0412e7d285bdac25a0c21c2c778d..12498d62959df77004ba172701a8e02d
    }
  };
  
-@@ -1259,8 +1310,10 @@ function proxySharedModule(options) {
-             var loadSharePath = getLoadShareModulePath(source);
-             writeLoadShareModule(source, shared[key], command);
-             writePreBuildLibPath(source);
-+            //  if (!options.remotePlugin) {
-             addUsedShares(source);
-             writeLocalSharedImportMap();
-+            //   }
-             return this.resolve(loadSharePath, importer);
-           }
-         };
-@@ -1341,7 +1394,8 @@ function federation(mfUserOptions) {
-   var options = normalizeModuleFederationOptions(mfUserOptions);
-   var name = options.name,
-     shared = options.shared,
--    filename = options.filename;
-+    filename = options.filename,
-+    remotePlugin = options.remotePlugin;
-   if (!name) throw new Error('name is required');
-   return [{
-     name: 'vite:module-federation-config',
-@@ -1357,7 +1411,7 @@ function federation(mfUserOptions) {
-     entryName: 'remoteEntry',
-     entryPath: REMOTE_ENTRY_ID,
-     fileName: filename
--  }), addEntry({
-+  }), remotePlugin ? [] : addEntry({
-     entryName: 'hostInit',
-     entryPath: getHostAutoInitPath(),
-     inject: 'html'
 diff --git a/lib/index.modern.js b/lib/index.modern.js
-index 73df799a484f46ff43b3ca383dbb28af1c007a92..c83de1d5dab3bf1cc2b41209eab8b4a6bf62d450 100644
+index 693e357c32d04ea18c6eba303e432e5a175e39a2..cb76559bf1739951e084b771836e0fc725978993 100644
 --- a/lib/index.modern.js
 +++ b/lib/index.modern.js
 @@ -2,7 +2,7 @@ import defu from 'defu';
  import * as fs from 'fs';
  import { mkdirSync, writeFileSync, existsSync, writeFile } from 'fs';
  import * as path from 'pathe';
--import path__default, { resolve, parse, join, dirname, relative } from 'pathe';
-+import path__default, { resolve, basename, parse, join, dirname, relative } from 'pathe';
+-import path__default, { resolve, basename, parse, join, dirname, relative } from 'pathe';
++import path__default, { resolve, basename, parse, join, dirname } from 'pathe';
  import { createFilter } from '@rollup/pluginutils';
  import { walk } from 'estree-walker';
  import MagicString from 'magic-string';
@@ -1058,90 +1212,70 @@ index 73df799a484f46ff43b3ca383dbb28af1c007a92..c83de1d5dab3bf1cc2b41209eab8b4a6
          map: magicString.generateMap({
            hires: true
          })
-@@ -384,6 +389,7 @@ function getNormalizeShareItem(key) {
-   return shareItem;
- }
- function normalizeModuleFederationOptions(options) {
-+  var _options$remotePlugin;
-   if (options.getPublicPath) {
-     warn(`We are ignoring the getPublicPath options because they are natively supported by Vite\nwith the "experimental.renderBuiltUrl" configuration https://vitejs.dev/guide/build#advanced-base-options`);
-   }
-@@ -393,6 +399,7 @@ function normalizeModuleFederationOptions(options) {
-   return config = {
-     exposes: normalizeExposes(options.exposes),
-     filename: options.filename || 'remoteEntry-[hash]',
-+    remotePlugin: (_options$remotePlugin = options.remotePlugin) != null ? _options$remotePlugin : false,
-     library: normalizeLibrary(options.library),
-     name: options.name,
-     // remoteType: options.remoteType,
-@@ -481,6 +488,14 @@ function getNodeModulesDir() {
-   }
-   return cachedNodeModulesDir;
- }
-+function getSuffix(name) {
-+  const base = basename(name);
-+  const dotIndex = base.lastIndexOf('.');
-+  if (dotIndex > 0 && dotIndex < base.length - 1) {
-+    return base.slice(dotIndex);
-+  }
-+  return '.js';
-+}
- const patternMap = {};
- const cacheMap = {};
- /**
-@@ -521,14 +536,13 @@ class VirtualModule {
-     return undefined;
-   }
-   constructor(name, tag = '__mf_v__', suffix = '') {
--    var _name$split$slice$pop;
-     this.name = void 0;
-     this.tag = void 0;
-     this.suffix = void 0;
-     this.inited = false;
-     this.name = name;
-     this.tag = tag;
--    this.suffix = suffix || ((_name$split$slice$pop = name.split('.').slice(1).pop()) == null ? void 0 : _name$split$slice$pop.replace(/(.)/, '.$1')) || '.js';
-+    this.suffix = suffix || getSuffix(name);
-     if (!cacheMap[this.tag]) cacheMap[this.tag] = {};
-     cacheMap[this.tag][this.name] = this;
-   }
-@@ -650,7 +664,7 @@ function getLoadShareModulePath(pkg) {
- }
- function writeLoadShareModule(pkg, shareItem, command) {
-   loadShareCacheMap[pkg].writeSync(`
--    
-+
-     ;() => import(${JSON.stringify(getPreBuildLibImportId(pkg))}).catch(() => {});
-     // dev uses dynamic import to separate chunks
-     ${command !== 'build' ? `;() => import(${JSON.stringify(pkg)}).catch(() => {});` : ''}
-@@ -693,7 +707,7 @@ function generateLocalSharedImportMap() {
+@@ -327,6 +332,7 @@ function normalizeShareItem(key, shareItem) {
+       scope: 'default',
+       from: '',
+       shareConfig: {
++        import: undefined,
+         singleton: false,
+         requiredVersion: version ? `^${version}` : '*'
+       }
+@@ -338,6 +344,7 @@ function normalizeShareItem(key, shareItem) {
+     version: shareItem.version || version,
+     scope: shareItem.shareScope || 'default',
+     shareConfig: {
++      import: typeof shareItem === 'object' ? shareItem.import : undefined,
+       singleton: shareItem.singleton || false,
+       requiredVersion: shareItem.requiredVersion || (version ? `^${version}` : '*'),
+       strictVersion: !!shareItem.strictVersion
+@@ -699,13 +706,17 @@ function writeLocalSharedImportMap() {
+ function generateLocalSharedImportMap() {
    const options = getNormalizeModuleFederationOptions();
    return `
++    import {loadShare} from "@module-federation/runtime";
      const importMap = {
 -      ${Array.from(getUsedShares()).map(pkg => `
-+      ${options.remotePlugin ? '' : Array.from(getUsedShares()).map(pkg => `
++      ${Array.from(getUsedShares()).map(pkg => {
++    const shareItem = getNormalizeShareItem(pkg);
++    return `
          ${JSON.stringify(pkg)}: async () => {
-           let pkg = await import("${getPreBuildLibImportId(pkg)}")
-           return pkg
-@@ -701,7 +715,7 @@ function generateLocalSharedImportMap() {
-       `).join(',')}
+-          let pkg = await import("${getPreBuildLibImportId(pkg)}")
+-          return pkg
++          ${(shareItem == null ? void 0 : shareItem.shareConfig.import) === false ? `throw new Error(\`Shared module '\${${JSON.stringify(pkg)}}' must be provided by host\`);` : `let pkg = await import("${getPreBuildLibImportId(pkg)}");
++            return pkg;`}
+         }
+-      `).join(',')}
++      `;
++  }).join(',')}
      }
        const usedShared = {
--      ${Array.from(getUsedShares()).map(key => {
-+      ${options.remotePlugin ? '' : Array.from(getUsedShares()).map(key => {
-     const shareItem = getNormalizeShareItem(key);
-     if (!shareItem) return null;
-     return `
-@@ -713,7 +727,7 @@ function generateLocalSharedImportMap() {
+       ${Array.from(getUsedShares()).map(key => {
+@@ -719,8 +730,13 @@ function generateLocalSharedImportMap() {
+             loaded: false,
              from: ${JSON.stringify(options.name)},
              async get () {
++              if (${shareItem.shareConfig.import === false}) {
++                const shared = await loadShare(${JSON.stringify(key)});
++                if (shared) return () => shared;
++                throw new Error(\`Shared module '\${${JSON.stringify(key)}}' must be provided by host\`);
++              }
                usedShared[${JSON.stringify(key)}].loaded = true
 -              const {${JSON.stringify(key)}: pkgDynamicImport} = importMap 
 +              const {${JSON.stringify(key)}: pkgDynamicImport} = importMap
                const res = await pkgDynamicImport()
                const exportModule = {...res}
                // All npm packages pre-built by vite will be converted to esm
-@@ -815,7 +829,7 @@ const hostAutoInitModule = new VirtualModule('hostAutoInit', HOST_AUTO_INIT_TAG)
+@@ -734,7 +750,8 @@ function generateLocalSharedImportMap() {
+             },
+             shareConfig: {
+               singleton: ${shareItem.shareConfig.singleton},
+-              requiredVersion: ${JSON.stringify(shareItem.shareConfig.requiredVersion)}
++              requiredVersion: ${JSON.stringify(shareItem.shareConfig.requiredVersion)},
++              ${shareItem.shareConfig.import === false ? 'import: false,' : ''}
+             }
+           }
+         `;
+@@ -822,7 +839,7 @@ const hostAutoInitModule = new VirtualModule('hostAutoInit', HOST_AUTO_INIT_TAG)
  function writeHostAutoInit() {
    hostAutoInitModule.writeSync(`
      const remoteEntryPromise = import("${REMOTE_ENTRY_ID}")
@@ -1150,36 +1284,155 @@ index 73df799a484f46ff43b3ca383dbb28af1c007a92..c83de1d5dab3bf1cc2b41209eab8b4a6
      Promise.resolve(remoteEntryPromise)
        .then(remoteEntry => {
          return Promise.resolve(remoteEntry.__tla)
-@@ -858,6 +872,39 @@ const Manifest = () => {
+@@ -843,6 +860,129 @@ function initVirtualModules() {
+   writeRuntimeInitStatus();
+ }
+ 
++const ASSET_TYPES = ['js', 'css'];
++const LOAD_TIMINGS = ['sync', 'async'];
++const JS_EXTENSIONS = ['.ts', '.tsx', '.jsx', '.mjs', '.cjs'];
++/**
++ * Creates an empty asset map structure for tracking JS and CSS assets
++ * @returns Initialized asset map with sync/async arrays for JS and CSS
++ */
++const createEmptyAssetMap = () => ({
++  js: {
++    sync: [],
++    async: []
++  },
++  css: {
++    sync: [],
++    async: []
++  }
++});
++/**
++ * Tracks an asset in the preload map with deduplication
++ * @param map - The preload map to update
++ * @param key - The module key to track under
++ * @param fileName - The asset filename to track
++ * @param isAsync - Whether the asset is loaded async
++ * @param type - The asset type ('js' or 'css')
++ */
++const trackAsset = (map, key, fileName, isAsync, type) => {
++  if (!map[key]) {
++    map[key] = createEmptyAssetMap();
++  }
++  const target = isAsync ? map[key][type].async : map[key][type].sync;
++  if (!target.includes(fileName)) {
++    target.push(fileName);
++  }
++};
++/**
++ * Checks if a file is a CSS file by extension
++ * @param fileName - The filename to check
++ * @returns True if file has a CSS extension (.css, .scss, .less)
++ */
++const isCSSFile = fileName => {
++  return fileName.endsWith('.css') || fileName.endsWith('.scss') || fileName.endsWith('.less');
++};
++/**
++ * Collects all CSS assets from the bundle
++ * @param bundle - The Rollup output bundle
++ * @returns Set of CSS asset filenames
++ */
++const collectCssAssets = bundle => {
++  const cssAssets = new Set();
++  for (const [fileName, fileData] of Object.entries(bundle)) {
++    if (fileData.type === 'asset' && isCSSFile(fileName)) {
++      cssAssets.add(fileName);
++    }
++  }
++  return cssAssets;
++};
++/**
++ * Processes module assets and tracks them in the files map
++ * @param bundle - The Rollup output bundle
++ * @param filesMap - The preload map to populate
++ * @param moduleMatcher - Function that matches module paths to keys
++ */
++const processModuleAssets = (bundle, filesMap, moduleMatcher) => {
++  for (const [fileName, fileData] of Object.entries(bundle)) {
++    if (fileData.type !== 'chunk') continue;
++    if (!fileData.modules) continue;
++    for (const modulePath of Object.keys(fileData.modules)) {
++      const matchKey = moduleMatcher(modulePath);
++      if (!matchKey) continue;
++      // Track main JS chunk
++      trackAsset(filesMap, matchKey, fileName, false, 'js');
++      // Handle dynamic imports
++      if (fileData.dynamicImports) {
++        for (const dynamicImport of fileData.dynamicImports) {
++          const importData = bundle[dynamicImport];
++          if (!importData) continue;
++          const isCss = isCSSFile(dynamicImport);
++          trackAsset(filesMap, matchKey, dynamicImport, true, isCss ? 'css' : 'js');
++        }
++      }
++    }
++  }
++};
++/**
++ * Deduplicates assets in the files map
++ * @param filesMap - The preload map to deduplicate
++ * @returns New deduplicated preload map
++ */
++const deduplicateAssets = filesMap => {
++  const result = {};
++  for (const [key, assetMaps] of Object.entries(filesMap)) {
++    result[key] = createEmptyAssetMap();
++    for (const type of ASSET_TYPES) {
++      for (const timing of LOAD_TIMINGS) {
++        result[key][type][timing] = Array.from(new Set(assetMaps[type][timing]));
++      }
++    }
++  }
++  return result;
++};
++/**
++ * Builds a mapping between module files and their share keys
++ * @param shareKeys - Set of share keys to map
++ * @param resolveFn - Function to resolve module paths
++ * @returns Map of file paths to their corresponding share keys
++ */
++const buildFileToShareKeyMap = async (shareKeys, resolveFn) => {
++  const fileToShareKey = new Map();
++  const resolutions = await Promise.all(Array.from(shareKeys).map(shareKey => resolveFn(getPreBuildLibImportId(shareKey)).then(resolution => {
++    var _resolution$id;
++    return {
++      shareKey,
++      file: resolution == null || (_resolution$id = resolution.id) == null ? void 0 : _resolution$id.split('?')[0]
++    };
++  }).catch(() => null)));
++  for (const resolution of resolutions) {
++    if (resolution != null && resolution.file) {
++      fileToShareKey.set(resolution.file, resolution.shareKey);
++    }
++  }
++  return fileToShareKey;
++};
++
+ const Manifest = () => {
+   const mfOptions = getNormalizeModuleFederationOptions();
+   const {
+@@ -856,21 +996,43 @@ const Manifest = () => {
+     mfManifestName = 'mf-manifest.json';
+   }
+   if (typeof manifestOptions !== 'boolean') {
+-    mfManifestName = join((manifestOptions == null ? void 0 : manifestOptions.filePath) || '', (manifestOptions == null ? void 0 : manifestOptions.fileName) || '');
++    mfManifestName = path.join((manifestOptions == null ? void 0 : manifestOptions.filePath) || '', (manifestOptions == null ? void 0 : manifestOptions.fileName) || '');
+   }
+-  let extensions;
+   let root;
+   let remoteEntryFile;
+   let publicPath;
    let _command;
    let _originalConfigBase;
    let viteConfig;
-+  // Helper function to initialize asset maps
-+  const createEmptyAssetMap = () => ({
-+    js: {
-+      sync: [],
-+      async: []
-+    },
-+    css: {
-+      sync: [],
-+      async: []
-+    }
-+  });
-+  // Helper function to track assets with deduplication
-+  const trackAsset = (map, key, fileName, isAsync, type) => {
-+    if (!map[key]) {
-+      map[key] = createEmptyAssetMap();
-+    }
-+    const target = isAsync ? map[key][type].async : map[key][type].sync;
-+    if (!target.includes(fileName)) {
-+      target.push(fileName);
-+    }
-+  };
-+  // Helper function to check if a file is CSS
-+  const isCSSFile = fileName => {
-+    return fileName.endsWith('.css') || fileName.endsWith('.scss') || fileName.endsWith('.less');
-+  };
-+  // Helper function to add CSS assets to all exports
++  /**
++   * Adds global CSS assets to all module exports
++   * @param filesMap - The preload map to update
++   * @param cssAssets - Set of CSS asset filenames to add
++   */
 +  const addCssAssetsToAllExports = (filesMap, cssAssets) => {
 +    Object.keys(filesMap).forEach(key => {
 +      cssAssets.forEach(cssAsset => {
@@ -1190,7 +1443,33 @@ index 73df799a484f46ff43b3ca383dbb28af1c007a92..c83de1d5dab3bf1cc2b41209eab8b4a6
    return [{
      name: 'module-federation-manifest',
      apply: 'serve',
-@@ -915,7 +962,9 @@ const Manifest = () => {
++    /**
++     * Stores resolved Vite config for later use
++     */
++    /**
++     * Finalizes configuration after all plugins are resolved
++     * @param config - Fully resolved Vite config
++     */
+     configResolved(config) {
+       viteConfig = config;
+     },
++    /**
++     * Configures dev server middleware to handle manifest requests
++     * @param server - Vite dev server instance
++     */
+     configureServer(server) {
+       server.middlewares.use((req, res, next) => {
+         var _req$url;
+@@ -918,119 +1080,85 @@ const Manifest = () => {
+   }, {
+     name: 'module-federation-manifest',
+     enforce: 'post',
++    /**
++     * Initial plugin configuration
++     * @param config - Vite config object
++     * @param command - Current Vite command (serve/build)
++     */
+     config(config, {
        command
      }) {
        if (!config.build) config.build = {};
@@ -1201,8 +1480,20 @@ index 73df799a484f46ff43b3ca383dbb28af1c007a92..c83de1d5dab3bf1cc2b41209eab8b4a6
        _command = command;
        _originalConfigBase = config.base;
      },
-@@ -930,97 +979,92 @@ const Manifest = () => {
+     configResolved(config) {
+       root = config.root;
+-      extensions = config.resolve.extensions || ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'];
+       let base = config.base;
+       if (_command === 'serve') {
+         base = (config.server.origin || '') + config.base;
+       }
+       publicPath = _originalConfigBase === '' ? 'auto' : base ? base.replace(/\/?$/, '/') : 'auto';
      },
++    /**
++     * Generates the module federation manifest file
++     * @param options - Rollup output options
++     * @param bundle - Generated bundle assets
++     */
      async generateBundle(options, bundle) {
        if (!mfManifestName) return;
 -      const exposesModules = Object.keys(mfOptions.exposes).map(item => mfOptions.exposes[item].import); // 获取你提供的 moduleIds
@@ -1220,26 +1511,18 @@ index 73df799a484f46ff43b3ca383dbb28af1c007a92..c83de1d5dab3bf1cc2b41209eab8b4a6
 -        return false;
 -      };
 -      // 遍历打包生成的每个文件
-+      const filesMap = {};
-+      const allCssAssets = new Set();
-+      // Find remoteEntry file
-       for (const [fileName, fileData] of Object.entries(bundle)) {
+-      for (const [fileName, fileData] of Object.entries(bundle)) {
++      let filesMap = {};
++      // First pass: Find remoteEntry file
++      for (const [_, fileData] of Object.entries(bundle)) {
          if (mfOptions.filename.replace(/[\[\]]/g, '_').replace(/\.[^/.]+$/, '') === fileData.name || fileData.name === 'remoteEntry') {
            remoteEntryFile = fileData.fileName;
-         }
-+        // Collect all CSS assets
-+        if (fileData.type === 'asset' && isCSSFile(fileName)) {
-+          allCssAssets.add(fileName);
-+        }
-+      }
-+      const exposesModules = Object.keys(mfOptions.exposes).map(item => mfOptions.exposes[item].import);
-+      // Process modules and their associated assets
-+      for (const [fileName, fileData] of Object.entries(bundle)) {
-         if (fileData.type === 'chunk') {
+-        }
+-        if (fileData.type === 'chunk') {
 -          // 遍历该文件的所有模块
-           for (const modulePath of Object.keys(fileData.modules)) {
+-          for (const modulePath of Object.keys(fileData.modules)) {
 -            // 将绝对路径转换为相对于 Vite root 的相对路径
-             const relativeModulePath = relative(root, modulePath);
+-            const relativeModulePath = relative(root, modulePath);
 -            // 检查模块是否在 preloadModules 列表中
 -            for (const preloadModule of exposesModules) {
 -              const formatPreloadModule = preloadModule.replace('./', '');
@@ -1249,35 +1532,17 @@ index 73df799a484f46ff43b3ca383dbb28af1c007a92..c83de1d5dab3bf1cc2b41209eab8b4a6
 -                    sync: [],
 -                    async: []
 -                  };
-+            // Handle exposed modules
-+            for (const exposeModule of exposesModules) {
-+              const formatExposeModule = exposeModule.replace('./', '');
-+              if (relativeModulePath === formatExposeModule || extensions.some(ext => relativeModulePath === `${formatExposeModule}${ext}`)) {
-+                // Track the JS chunk
-+                trackAsset(filesMap, exposeModule, fileName, false, 'js');
-+                // Handle dynamic imports
-+                if (fileData.dynamicImports) {
-+                  for (const dynamicImport of fileData.dynamicImports) {
-+                    const importData = bundle[dynamicImport];
-+                    if (importData) {
-+                      if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
-+                        trackAsset(filesMap, exposeModule, dynamicImport, true, 'css');
-+                      } else {
-+                        trackAsset(filesMap, exposeModule, dynamicImport, true, 'js');
-+                      }
-+                    }
-+                  }
-                 }
+-                }
 -                console.log(Object.keys(fileData.modules));
 -                filesContainingModules[preloadModule].sync.push(fileName);
 -                filesContainingModules[preloadModule].async.push(...(fileData.dynamicImports || []));
 -                findSynchronousImports(fileName, filesContainingModules[preloadModule].sync);
 -                break; // 如果找到匹配，跳出循环
-               }
-             }
-           }
-         }
-       }
+-              }
+-            }
+-          }
+-        }
+-      }
 -      // 递归查找模块的同步导入文件
 -      function findSynchronousImports(fileName, array) {
 -        const fileData = bundle[fileName];
@@ -1289,62 +1554,66 @@ index 73df799a484f46ff43b3ca383dbb28af1c007a92..c83de1d5dab3bf1cc2b41209eab8b4a6
 -              findSynchronousImports(importedFile, array); // 递归查找同步导入的文件
 -            }
 -          });
--        }
--      }
-+      // Process shared modules
-       const fileToShareKey = {};
-       await Promise.all(Array.from(getUsedShares()).map(async shareKey => {
-         const file = (await this.resolve(getPreBuildLibImportId(shareKey))).id.split('?')[0];
-         fileToShareKey[file] = shareKey;
-       }));
++          break; // We can break early since we only need to find remoteEntry once
+         }
+       }
+-      const fileToShareKey = {};
+-      await Promise.all(Array.from(getUsedShares()).map(async shareKey => {
+-        const file = (await this.resolve(getPreBuildLibImportId(shareKey))).id.split('?')[0];
+-        fileToShareKey[file] = shareKey;
+-      }));
 -      // 遍历打包生成的每个文件
-       for (const [fileName, fileData] of Object.entries(bundle)) {
-         if (fileData.type === 'chunk') {
+-      for (const [fileName, fileData] of Object.entries(bundle)) {
+-        if (fileData.type === 'chunk') {
 -          // 遍历该文件的所有模块
-           for (const modulePath of Object.keys(fileData.modules)) {
-             const sharedKey = fileToShareKey[modulePath];
-             if (sharedKey) {
+-          for (const modulePath of Object.keys(fileData.modules)) {
+-            const sharedKey = fileToShareKey[modulePath];
+-            if (sharedKey) {
 -              if (!filesContainingModules[sharedKey]) {
 -                filesContainingModules[sharedKey] = {
 -                  sync: [],
 -                  async: []
 -                };
-+              // Track the JS chunk
-+              trackAsset(filesMap, sharedKey, fileName, false, 'js');
-+              // Handle dynamic imports
-+              if (fileData.dynamicImports) {
-+                for (const dynamicImport of fileData.dynamicImports) {
-+                  const importData = bundle[dynamicImport];
-+                  if (importData) {
-+                    if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
-+                      trackAsset(filesMap, sharedKey, dynamicImport, true, 'css');
-+                    } else {
-+                      trackAsset(filesMap, sharedKey, dynamicImport, true, 'js');
-+                    }
-+                  }
-+                }
-               }
+-              }
 -              filesContainingModules[sharedKey].sync.push(fileName);
 -              filesContainingModules[sharedKey].async.push(...(fileData.dynamicImports || []));
 -              findSynchronousImports(fileName, filesContainingModules[sharedKey].sync);
 -              break; // 如果找到匹配，跳出循环
-             }
+-            }
++      // Second pass: Collect all CSS assets
++      const allCssAssets = collectCssAssets(bundle);
++      const exposesModules = Object.keys(mfOptions.exposes).map(item => mfOptions.exposes[item].import);
++      // Process exposed modules
++      processModuleAssets(bundle, filesMap, modulePath => {
++        const absoluteModulePath = path.resolve(root, modulePath);
++        return exposesModules.find(exposeModule => {
++          const exposePath = path.resolve(root, exposeModule);
++          // First try exact path match
++          if (absoluteModulePath === exposePath) {
++            return true;
            }
-         }
-       }
+-        }
+-      }
 -      Object.keys(filesContainingModules).forEach(key => {
 -        filesContainingModules[key].sync = Array.from(new Set(filesContainingModules[key].sync));
 -        filesContainingModules[key].async = Array.from(new Set(filesContainingModules[key].async));
-+      // Add all CSS assets to every export
-+      addCssAssetsToAllExports(filesMap, allCssAssets);
-+      // Final deduplication of all arrays in the filesMap
-+      Object.values(filesMap).forEach(assetMaps => {
-+        ['js', 'css'].forEach(type => {
-+          ['sync', 'async'].forEach(timing => {
-+            assetMaps[type][timing] = Array.from(new Set(assetMaps[type][timing]));
-+          });
++          // Then try path match without known extensions
++          const getPathWithoutKnownExt = filePath => {
++            const ext = path.extname(filePath);
++            return JS_EXTENSIONS.includes(ext) ? path.join(path.dirname(filePath), path.basename(filePath, ext)) : filePath;
++          };
++          const modulePathNoExt = getPathWithoutKnownExt(absoluteModulePath);
++          const exposePathNoExt = getPathWithoutKnownExt(exposePath);
++          return modulePathNoExt === exposePathNoExt;
 +        });
        });
++      // Process shared modules
++      const fileToShareKey = await buildFileToShareKeyMap(getUsedShares(), this.resolve.bind(this));
++      processModuleAssets(bundle, filesMap, modulePath => fileToShareKey.get(modulePath));
++      // Add all CSS assets to every export
++      addCssAssetsToAllExports(filesMap, allCssAssets);
++      // Final deduplication of all assets
++      filesMap = deduplicateAssets(filesMap);
        this.emitFile({
          type: 'asset',
          fileName: mfManifestName,
@@ -1353,7 +1622,15 @@ index 73df799a484f46ff43b3ca383dbb28af1c007a92..c83de1d5dab3bf1cc2b41209eab8b4a6
        });
      }
    }];
-@@ -1034,23 +1078,17 @@ const Manifest = () => {
++  /**
++   * Generates the final manifest JSON structure
++   * @param preloadMap - Map of module assets to include
++   * @returns Complete manifest object
++   */
+   function generateMFManifest(preloadMap) {
+     const options = getNormalizeModuleFederationOptions();
+     const {
+@@ -1041,23 +1169,17 @@ const Manifest = () => {
        path: '',
        type: 'module'
      };
@@ -1386,7 +1663,7 @@ index 73df799a484f46ff43b3ca383dbb28af1c007a92..c83de1d5dab3bf1cc2b41209eab8b4a6
        return {
          id: `${name}:${shareKey}`,
          name: shareKey,
-@@ -1058,42 +1096,42 @@ const Manifest = () => {
+@@ -1065,42 +1187,42 @@ const Manifest = () => {
          requiredVersion: shareItem.shareConfig.requiredVersion,
          assets: {
            js: {
@@ -1447,7 +1724,7 @@ index 73df799a484f46ff43b3ca383dbb28af1c007a92..c83de1d5dab3bf1cc2b41209eab8b4a6
          type: 'app',
          buildInfo: {
            buildVersion: '1.0.0',
-@@ -1104,8 +1142,6 @@ const Manifest = () => {
+@@ -1111,8 +1233,6 @@ const Manifest = () => {
          types: {
            path: '',
            name: ''
@@ -1456,7 +1733,7 @@ index 73df799a484f46ff43b3ca383dbb28af1c007a92..c83de1d5dab3bf1cc2b41209eab8b4a6
          },
          globalName: name,
          pluginVersion: '0.2.5'
-@@ -1118,7 +1154,6 @@ const Manifest = () => {
+@@ -1125,7 +1245,6 @@ const Manifest = () => {
        remotes,
        exposes
      };
@@ -1464,43 +1741,8 @@ index 73df799a484f46ff43b3ca383dbb28af1c007a92..c83de1d5dab3bf1cc2b41209eab8b4a6
    }
  };
  
-@@ -1335,8 +1370,10 @@ function proxySharedModule(options) {
-             const loadSharePath = getLoadShareModulePath(source);
-             writeLoadShareModule(source, shared[key], command);
-             writePreBuildLibPath(source);
-+            //  if (!options.remotePlugin) {
-             addUsedShares(source);
-             writeLocalSharedImportMap();
-+            //   }
-             return this.resolve(loadSharePath, importer);
-           }
-         };
-@@ -1412,7 +1449,8 @@ function federation(mfUserOptions) {
-     name,
-     remotes,
-     shared,
--    filename
-+    filename,
-+    remotePlugin
-   } = options;
-   if (!name) throw new Error('name is required');
-   return [{
-@@ -1429,11 +1467,11 @@ function federation(mfUserOptions) {
-     entryName: 'remoteEntry',
-     entryPath: REMOTE_ENTRY_ID,
-     fileName: filename
--  }), ...addEntry({
-+  }), ...(remotePlugin ? [] : addEntry({
-     entryName: 'hostInit',
-     entryPath: getHostAutoInitPath(),
-     inject: 'html'
--  }), ...addEntry({
-+  })), ...addEntry({
-     entryName: 'virtualExposes',
-     entryPath: VIRTUAL_EXPOSES
-   }), pluginProxyRemoteEntry(), pluginProxyRemotes(options), ...pluginModuleParseEnd(id => {
 diff --git a/lib/index.umd.js b/lib/index.umd.js
-index 19d8ea95ec9024804cf213c8d034296a1027153d..9c1ff85b5f158fa91bc1c6c9ce82b59cac536479 100644
+index 3eec878fff155fcf25c23e0aaced0602da1c515b..a8735cc3b304a6175202e92b38b6f75646725497 100644
 --- a/lib/index.umd.js
 +++ b/lib/index.umd.js
 @@ -159,10 +159,14 @@
@@ -1529,84 +1771,40 @@ index 19d8ea95ec9024804cf213c8d034296a1027153d..9c1ff85b5f158fa91bc1c6c9ce82b59c
            map: magicString.generateMap({
              hires: true
            })
-@@ -436,6 +441,7 @@
-     return shareItem;
-   }
-   function normalizeModuleFederationOptions(options) {
-+    var _options$remotePlugin;
-     if (options.getPublicPath) {
-       warn("We are ignoring the getPublicPath options because they are natively supported by Vite\nwith the \"experimental.renderBuiltUrl\" configuration https://vitejs.dev/guide/build#advanced-base-options");
-     }
-@@ -445,6 +451,7 @@
-     return config = {
-       exposes: normalizeExposes(options.exposes),
-       filename: options.filename || 'remoteEntry-[hash]',
-+      remotePlugin: (_options$remotePlugin = options.remotePlugin) != null ? _options$remotePlugin : false,
-       library: normalizeLibrary(options.library),
-       name: options.name,
-       // remoteType: options.remoteType,
-@@ -535,6 +542,14 @@
-     }
-     return cachedNodeModulesDir;
-   }
-+  function getSuffix(name) {
-+    var base = path.basename(name);
-+    var dotIndex = base.lastIndexOf('.');
-+    if (dotIndex > 0 && dotIndex < base.length - 1) {
-+      return base.slice(dotIndex);
-+    }
-+    return '.js';
-+  }
-   var patternMap = {};
-   var cacheMap = {};
-   /**
-@@ -542,7 +557,6 @@
-    */
-   var VirtualModule = /*#__PURE__*/function () {
-     function VirtualModule(name, tag, suffix) {
--      var _name$split$slice$pop;
-       if (tag === void 0) {
-         tag = '__mf_v__';
-       }
-@@ -555,7 +569,7 @@
-       this.inited = false;
-       this.name = name;
-       this.tag = tag;
--      this.suffix = suffix || ((_name$split$slice$pop = name.split('.').slice(1).pop()) == null ? void 0 : _name$split$slice$pop.replace(/(.)/, '.$1')) || '.js';
-+      this.suffix = suffix || getSuffix(name);
-       if (!cacheMap[this.tag]) cacheMap[this.tag] = {};
-       cacheMap[this.tag][this.name] = this;
-     }
-@@ -680,7 +694,7 @@
-     return filepath;
-   }
-   function writeLoadShareModule(pkg, shareItem, command) {
--    loadShareCacheMap[pkg].writeSync("\n    \n    ;() => import(" + JSON.stringify(getPreBuildLibImportId(pkg)) + ").catch(() => {});\n    // dev uses dynamic import to separate chunks\n    " + (command !== 'build' ? ";() => import(" + JSON.stringify(pkg) + ").catch(() => {});" : '') + "\n    const {loadShare} = require(\"@module-federation/runtime\")\n    const {initPromise} = require(\"" + virtualRuntimeInitStatus.getImportId() + "\")\n    const res = initPromise.then(_ => loadShare(" + JSON.stringify(pkg) + ", {\n    customShareInfo: {shareConfig:{\n      singleton: " + shareItem.shareConfig.singleton + ",\n      strictVersion: " + shareItem.shareConfig.strictVersion + ",\n      requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n    }}}))\n    const exportModule = " + (command !== 'build' ? '/*mf top-level-await placeholder replacement mf*/' : 'await ') + "res.then(factory => factory())\n    module.exports = exportModule\n  ");
-+    loadShareCacheMap[pkg].writeSync("\n\n    ;() => import(" + JSON.stringify(getPreBuildLibImportId(pkg)) + ").catch(() => {});\n    // dev uses dynamic import to separate chunks\n    " + (command !== 'build' ? ";() => import(" + JSON.stringify(pkg) + ").catch(() => {});" : '') + "\n    const {loadShare} = require(\"@module-federation/runtime\")\n    const {initPromise} = require(\"" + virtualRuntimeInitStatus.getImportId() + "\")\n    const res = initPromise.then(_ => loadShare(" + JSON.stringify(pkg) + ", {\n    customShareInfo: {shareConfig:{\n      singleton: " + shareItem.shareConfig.singleton + ",\n      strictVersion: " + shareItem.shareConfig.strictVersion + ",\n      requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n    }}}))\n    const exportModule = " + (command !== 'build' ? '/*mf top-level-await placeholder replacement mf*/' : 'await ') + "res.then(factory => factory())\n    module.exports = exportModule\n  ");
-   }
- 
-   var usedShares = new Set();
-@@ -707,15 +721,15 @@
+@@ -376,6 +381,7 @@
+         scope: 'default',
+         from: '',
+         shareConfig: {
++          "import": undefined,
+           singleton: false,
+           requiredVersion: version ? "^" + version : '*'
+         }
+@@ -387,6 +393,7 @@
+       version: shareItem.version || version,
+       scope: shareItem.shareScope || 'default',
+       shareConfig: {
++        "import": typeof shareItem === 'object' ? shareItem["import"] : undefined,
+         singleton: shareItem.singleton || false,
+         requiredVersion: shareItem.requiredVersion || (version ? "^" + version : '*'),
+         strictVersion: !!shareItem.strictVersion
+@@ -714,12 +721,13 @@
    }
    function generateLocalSharedImportMap() {
      var options = getNormalizeModuleFederationOptions();
 -    return "\n    const importMap = {\n      " + Array.from(getUsedShares()).map(function (pkg) {
-+    return "\n    const importMap = {\n      " + (options.remotePlugin ? '' : Array.from(getUsedShares()).map(function (pkg) {
-       return "\n        " + JSON.stringify(pkg) + ": async () => {\n          let pkg = await import(\"" + getPreBuildLibImportId(pkg) + "\")\n          return pkg\n        }\n      ";
--    }).join(',') + "\n    }\n      const usedShared = {\n      " + Array.from(getUsedShares()).map(function (key) {
-+    }).join(',')) + "\n    }\n      const usedShared = {\n      " + (options.remotePlugin ? '' : Array.from(getUsedShares()).map(function (key) {
+-      return "\n        " + JSON.stringify(pkg) + ": async () => {\n          let pkg = await import(\"" + getPreBuildLibImportId(pkg) + "\")\n          return pkg\n        }\n      ";
++    return "\n    import {loadShare} from \"@module-federation/runtime\";\n    const importMap = {\n      " + Array.from(getUsedShares()).map(function (pkg) {
++      var shareItem = getNormalizeShareItem(pkg);
++      return "\n        " + JSON.stringify(pkg) + ": async () => {\n          " + ((shareItem == null ? void 0 : shareItem.shareConfig["import"]) === false ? "throw new Error(`Shared module '${" + JSON.stringify(pkg) + "}' must be provided by host`);" : "let pkg = await import(\"" + getPreBuildLibImportId(pkg) + "\");\n            return pkg;") + "\n        }\n      ";
+     }).join(',') + "\n    }\n      const usedShared = {\n      " + Array.from(getUsedShares()).map(function (key) {
        var shareItem = getNormalizeShareItem(key);
        if (!shareItem) return null;
 -      return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap \n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n            }\n          }\n        ";
-+      return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap\n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + "\n            }\n          }\n        ";
++      return "\n          " + JSON.stringify(key) + ": {\n            name: " + JSON.stringify(key) + ",\n            version: " + JSON.stringify(shareItem.version) + ",\n            scope: [" + JSON.stringify(shareItem.scope) + "],\n            loaded: false,\n            from: " + JSON.stringify(options.name) + ",\n            async get () {\n              if (" + (shareItem.shareConfig["import"] === false) + ") {\n                const shared = await loadShare(" + JSON.stringify(key) + ");\n                if (shared) return () => shared;\n                throw new Error(`Shared module '${" + JSON.stringify(key) + "}' must be provided by host`);\n              }\n              usedShared[" + JSON.stringify(key) + "].loaded = true\n              const {" + JSON.stringify(key) + ": pkgDynamicImport} = importMap\n              const res = await pkgDynamicImport()\n              const exportModule = {...res}\n              // All npm packages pre-built by vite will be converted to esm\n              Object.defineProperty(exportModule, \"__esModule\", {\n                value: true,\n                enumerable: false\n              })\n              return function () {\n                return exportModule\n              }\n            },\n            shareConfig: {\n              singleton: " + shareItem.shareConfig.singleton + ",\n              requiredVersion: " + JSON.stringify(shareItem.shareConfig.requiredVersion) + ",\n              " + (shareItem.shareConfig["import"] === false ? 'import: false,' : '') + "\n            }\n          }\n        ";
      }).filter(function (x) {
        return x !== null;
--    }).join(',') + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
-+    }).join(',')) + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
-       var _JSON$stringify;
-       var remote = options.remotes[key];
-       if (!remote) return null;
-@@ -742,7 +756,7 @@
+     }).join(',') + "\n    }\n      const usedRemotes = [" + Object.keys(getUsedRemotesMap()).map(function (key) {
+@@ -749,7 +757,7 @@
    var HOST_AUTO_INIT_TAG = '__H_A_I__';
    var hostAutoInitModule = new VirtualModule('hostAutoInit', HOST_AUTO_INIT_TAG);
    function writeHostAutoInit() {
@@ -1615,38 +1813,180 @@ index 19d8ea95ec9024804cf213c8d034296a1027153d..9c1ff85b5f158fa91bc1c6c9ce82b59c
    }
    function getHostAutoInitImportId() {
      return hostAutoInitModule.getImportId();
-@@ -777,6 +791,41 @@
+@@ -764,6 +772,154 @@
+     writeRuntimeInitStatus();
+   }
+ 
++  var ASSET_TYPES = ['js', 'css'];
++  var LOAD_TIMINGS = ['sync', 'async'];
++  var JS_EXTENSIONS = ['.ts', '.tsx', '.jsx', '.mjs', '.cjs'];
++  /**
++   * Creates an empty asset map structure for tracking JS and CSS assets
++   * @returns Initialized asset map with sync/async arrays for JS and CSS
++   */
++  var createEmptyAssetMap = function createEmptyAssetMap() {
++    return {
++      js: {
++        sync: [],
++        async: []
++      },
++      css: {
++        sync: [],
++        async: []
++      }
++    };
++  };
++  /**
++   * Tracks an asset in the preload map with deduplication
++   * @param map - The preload map to update
++   * @param key - The module key to track under
++   * @param fileName - The asset filename to track
++   * @param isAsync - Whether the asset is loaded async
++   * @param type - The asset type ('js' or 'css')
++   */
++  var trackAsset = function trackAsset(map, key, fileName, isAsync, type) {
++    if (!map[key]) {
++      map[key] = createEmptyAssetMap();
++    }
++    var target = isAsync ? map[key][type].async : map[key][type].sync;
++    if (!target.includes(fileName)) {
++      target.push(fileName);
++    }
++  };
++  /**
++   * Checks if a file is a CSS file by extension
++   * @param fileName - The filename to check
++   * @returns True if file has a CSS extension (.css, .scss, .less)
++   */
++  var isCSSFile = function isCSSFile(fileName) {
++    return fileName.endsWith('.css') || fileName.endsWith('.scss') || fileName.endsWith('.less');
++  };
++  /**
++   * Collects all CSS assets from the bundle
++   * @param bundle - The Rollup output bundle
++   * @returns Set of CSS asset filenames
++   */
++  var collectCssAssets = function collectCssAssets(bundle) {
++    var cssAssets = new Set();
++    for (var _i = 0, _Object$entries = Object.entries(bundle); _i < _Object$entries.length; _i++) {
++      var _Object$entries$_i = _Object$entries[_i],
++        fileName = _Object$entries$_i[0],
++        fileData = _Object$entries$_i[1];
++      if (fileData.type === 'asset' && isCSSFile(fileName)) {
++        cssAssets.add(fileName);
++      }
++    }
++    return cssAssets;
++  };
++  /**
++   * Processes module assets and tracks them in the files map
++   * @param bundle - The Rollup output bundle
++   * @param filesMap - The preload map to populate
++   * @param moduleMatcher - Function that matches module paths to keys
++   */
++  var processModuleAssets = function processModuleAssets(bundle, filesMap, moduleMatcher) {
++    for (var _i2 = 0, _Object$entries2 = Object.entries(bundle); _i2 < _Object$entries2.length; _i2++) {
++      var _Object$entries2$_i = _Object$entries2[_i2],
++        fileName = _Object$entries2$_i[0],
++        fileData = _Object$entries2$_i[1];
++      if (fileData.type !== 'chunk') continue;
++      if (!fileData.modules) continue;
++      for (var _i3 = 0, _Object$keys = Object.keys(fileData.modules); _i3 < _Object$keys.length; _i3++) {
++        var modulePath = _Object$keys[_i3];
++        var matchKey = moduleMatcher(modulePath);
++        if (!matchKey) continue;
++        // Track main JS chunk
++        trackAsset(filesMap, matchKey, fileName, false, 'js');
++        // Handle dynamic imports
++        if (fileData.dynamicImports) {
++          for (var _iterator = _createForOfIteratorHelperLoose(fileData.dynamicImports), _step; !(_step = _iterator()).done;) {
++            var dynamicImport = _step.value;
++            var importData = bundle[dynamicImport];
++            if (!importData) continue;
++            var isCss = isCSSFile(dynamicImport);
++            trackAsset(filesMap, matchKey, dynamicImport, true, isCss ? 'css' : 'js');
++          }
++        }
++      }
++    }
++  };
++  /**
++   * Deduplicates assets in the files map
++   * @param filesMap - The preload map to deduplicate
++   * @returns New deduplicated preload map
++   */
++  var deduplicateAssets = function deduplicateAssets(filesMap) {
++    var result = {};
++    for (var _i4 = 0, _Object$entries3 = Object.entries(filesMap); _i4 < _Object$entries3.length; _i4++) {
++      var _Object$entries3$_i = _Object$entries3[_i4],
++        key = _Object$entries3$_i[0],
++        assetMaps = _Object$entries3$_i[1];
++      result[key] = createEmptyAssetMap();
++      for (var _i5 = 0, _ASSET_TYPES = ASSET_TYPES; _i5 < _ASSET_TYPES.length; _i5++) {
++        var type = _ASSET_TYPES[_i5];
++        for (var _i6 = 0, _LOAD_TIMINGS = LOAD_TIMINGS; _i6 < _LOAD_TIMINGS.length; _i6++) {
++          var timing = _LOAD_TIMINGS[_i6];
++          result[key][type][timing] = Array.from(new Set(assetMaps[type][timing]));
++        }
++      }
++    }
++    return result;
++  };
++  /**
++   * Builds a mapping between module files and their share keys
++   * @param shareKeys - Set of share keys to map
++   * @param resolveFn - Function to resolve module paths
++   * @returns Map of file paths to their corresponding share keys
++   */
++  var buildFileToShareKeyMap = function buildFileToShareKeyMap(shareKeys, resolveFn) {
++    try {
++      var fileToShareKey = new Map();
++      return Promise.resolve(Promise.all(Array.from(shareKeys).map(function (shareKey) {
++        return resolveFn(getPreBuildLibImportId(shareKey)).then(function (resolution) {
++          var _resolution$id;
++          return {
++            shareKey: shareKey,
++            file: resolution == null || (_resolution$id = resolution.id) == null ? void 0 : _resolution$id.split('?')[0]
++          };
++        })["catch"](function () {
++          return null;
++        });
++      }))).then(function (resolutions) {
++        for (var _iterator2 = _createForOfIteratorHelperLoose(resolutions), _step2; !(_step2 = _iterator2()).done;) {
++          var resolution = _step2.value;
++          if (resolution != null && resolution.file) {
++            fileToShareKey.set(resolution.file, resolution.shareKey);
++          }
++        }
++        return fileToShareKey;
++      });
++    } catch (e) {
++      return Promise.reject(e);
++    }
++  };
++
+   var Manifest = function Manifest() {
+     var mfOptions = getNormalizeModuleFederationOptions();
+     var name = mfOptions.name,
+@@ -775,21 +931,43 @@
+       mfManifestName = 'mf-manifest.json';
+     }
+     if (typeof manifestOptions !== 'boolean') {
+-      mfManifestName = path.join((manifestOptions == null ? void 0 : manifestOptions.filePath) || '', (manifestOptions == null ? void 0 : manifestOptions.fileName) || '');
++      mfManifestName = path__namespace.join((manifestOptions == null ? void 0 : manifestOptions.filePath) || '', (manifestOptions == null ? void 0 : manifestOptions.fileName) || '');
+     }
+-    var extensions;
+     var root;
+     var remoteEntryFile;
+     var publicPath;
      var _command;
      var _originalConfigBase;
      var viteConfig;
-+    // Helper function to initialize asset maps
-+    var createEmptyAssetMap = function createEmptyAssetMap() {
-+      return {
-+        js: {
-+          sync: [],
-+          async: []
-+        },
-+        css: {
-+          sync: [],
-+          async: []
-+        }
-+      };
-+    };
-+    // Helper function to track assets with deduplication
-+    var trackAsset = function trackAsset(map, key, fileName, isAsync, type) {
-+      if (!map[key]) {
-+        map[key] = createEmptyAssetMap();
-+      }
-+      var target = isAsync ? map[key][type].async : map[key][type].sync;
-+      if (!target.includes(fileName)) {
-+        target.push(fileName);
-+      }
-+    };
-+    // Helper function to check if a file is CSS
-+    var isCSSFile = function isCSSFile(fileName) {
-+      return fileName.endsWith('.css') || fileName.endsWith('.scss') || fileName.endsWith('.less');
-+    };
-+    // Helper function to add CSS assets to all exports
++    /**
++     * Adds global CSS assets to all module exports
++     * @param filesMap - The preload map to update
++     * @param cssAssets - Set of CSS asset filenames to add
++     */
 +    var addCssAssetsToAllExports = function addCssAssetsToAllExports(filesMap, cssAssets) {
 +      Object.keys(filesMap).forEach(function (key) {
 +        cssAssets.forEach(function (cssAsset) {
@@ -1657,7 +1997,32 @@ index 19d8ea95ec9024804cf213c8d034296a1027153d..9c1ff85b5f158fa91bc1c6c9ce82b59c
      return [{
        name: 'module-federation-manifest',
        apply: 'serve',
-@@ -833,7 +882,9 @@
++      /**
++       * Stores resolved Vite config for later use
++       */
++      /**
++       * Finalizes configuration after all plugins are resolved
++       * @param config - Fully resolved Vite config
++       */
+       configResolved: function configResolved(config) {
+         viteConfig = config;
+       },
++      /**
++       * Configures dev server middleware to handle manifest requests
++       * @param server - Vite dev server instance
++       */
+       configureServer: function configureServer(server) {
+         server.middlewares.use(function (req, res, next) {
+           var _req$url;
+@@ -837,137 +1015,85 @@
+     }, {
+       name: 'module-federation-manifest',
+       enforce: 'post',
++      /**
++       * Initial plugin configuration
++       * @param config - Vite config object
++       * @param command - Current Vite command (serve/build)
++       */
        config: function config(_config, _ref) {
          var command = _ref.command;
          if (!_config.build) _config.build = {};
@@ -1668,7 +2033,20 @@ index 19d8ea95ec9024804cf213c8d034296a1027153d..9c1ff85b5f158fa91bc1c6c9ce82b59c
          _command = command;
          _originalConfigBase = _config.base;
        },
-@@ -849,38 +900,10 @@
+       configResolved: function configResolved(config) {
+         root = config.root;
+-        extensions = config.resolve.extensions || ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'];
+         var base = config.base;
+         if (_command === 'serve') {
+           base = (config.server.origin || '') + config.base;
+         }
+         publicPath = _originalConfigBase === '' ? 'auto' : base ? base.replace(/\/?$/, '/') : 'auto';
+       },
++      /**
++       * Generates the module federation manifest file
++       * @param options - Rollup output options
++       * @param bundle - Generated bundle assets
++       */
        generateBundle: function generateBundle(options, bundle) {
          try {
            var _this = this;
@@ -1705,37 +2083,21 @@ index 19d8ea95ec9024804cf213c8d034296a1027153d..9c1ff85b5f158fa91bc1c6c9ce82b59c
 -          };
 -          // 遍历打包生成的每个文件
 +          var filesMap = {};
-+          var allCssAssets = new Set();
-+          // Find remoteEntry file
++          // First pass: Find remoteEntry file
            for (var _i = 0, _Object$entries = Object.entries(bundle); _i < _Object$entries.length; _i++) {
              var _Object$entries$_i = _Object$entries[_i],
-               fileName = _Object$entries$_i[0],
-@@ -888,34 +911,58 @@
+-              fileName = _Object$entries$_i[0],
++              _ = _Object$entries$_i[0],
+               fileData = _Object$entries$_i[1];
              if (mfOptions.filename.replace(/[\[\]]/g, '_').replace(/\.[^/.]+$/, '') === fileData.name || fileData.name === 'remoteEntry') {
                remoteEntryFile = fileData.fileName;
-             }
+-            }
 -            if (fileData.type === 'chunk') {
 -              // 遍历该文件的所有模块
 -              for (var _i2 = 0, _Object$keys = Object.keys(fileData.modules); _i2 < _Object$keys.length; _i2++) {
 -                var modulePath = _Object$keys[_i2];
 -                // 将绝对路径转换为相对于 Vite root 的相对路径
-+            // Collect all CSS assets
-+            if (fileData.type === 'asset' && isCSSFile(fileName)) {
-+              allCssAssets.add(fileName);
-+            }
-+          }
-+          var exposesModules = Object.keys(mfOptions.exposes).map(function (item) {
-+            return mfOptions.exposes[item]["import"];
-+          });
-+          // Process modules and their associated assets
-+          for (var _i2 = 0, _Object$entries2 = Object.entries(bundle); _i2 < _Object$entries2.length; _i2++) {
-+            var _Object$entries2$_i = _Object$entries2[_i2],
-+              _fileName = _Object$entries2$_i[0],
-+              _fileData = _Object$entries2$_i[1];
-+            if (_fileData.type === 'chunk') {
-+              var _loop = function _loop() {
-+                var modulePath = _Object$keys[_i3];
-                 var relativeModulePath = path.relative(root, modulePath);
+-                var relativeModulePath = path.relative(root, modulePath);
 -                // 检查模块是否在 preloadModules 列表中
 -                for (var _iterator2 = _createForOfIteratorHelperLoose(exposesModules), _step2; !(_step2 = _iterator2()).done;) {
 -                  var preloadModule = _step2.value;
@@ -1747,53 +2109,29 @@ index 19d8ea95ec9024804cf213c8d034296a1027153d..9c1ff85b5f158fa91bc1c6c9ce82b59c
 -                        sync: [],
 -                        async: []
 -                      };
-+                // Handle exposed modules
-+                var _loop2 = function _loop2() {
-+                  var exposeModule = _step.value;
-+                  var formatExposeModule = exposeModule.replace('./', '');
-+                  if (relativeModulePath === formatExposeModule || extensions.some(function (ext) {
-+                    return relativeModulePath === "" + formatExposeModule + ext;
-+                  })) {
-+                    // Track the JS chunk
-+                    trackAsset(filesMap, exposeModule, _fileName, false, 'js');
-+                    // Handle dynamic imports
-+                    if (_fileData.dynamicImports) {
-+                      for (var _iterator2 = _createForOfIteratorHelperLoose(_fileData.dynamicImports), _step2; !(_step2 = _iterator2()).done;) {
-+                        var dynamicImport = _step2.value;
-+                        var importData = bundle[dynamicImport];
-+                        if (importData) {
-+                          if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
-+                            trackAsset(filesMap, exposeModule, dynamicImport, true, 'css');
-+                          } else {
-+                            trackAsset(filesMap, exposeModule, dynamicImport, true, 'js');
-+                          }
-+                        }
-+                      }
-                     }
+-                    }
 -                    console.log(Object.keys(fileData.modules));
 -                    filesContainingModules[preloadModule].sync.push(fileName);
 -                    (_filesContainingModul = filesContainingModules[preloadModule].async).push.apply(_filesContainingModul, fileData.dynamicImports || []);
 -                    _findSynchronousImports(fileName, filesContainingModules[preloadModule].sync);
 -                    break; // 如果找到匹配，跳出循环
-                   }
-+                };
-+                for (var _iterator = _createForOfIteratorHelperLoose(exposesModules), _step; !(_step = _iterator()).done;) {
-+                  _loop2();
-                 }
-+              };
-+              for (var _i3 = 0, _Object$keys = Object.keys(_fileData.modules); _i3 < _Object$keys.length; _i3++) {
-+                _loop();
-               }
+-                  }
+-                }
+-              }
++              break; // We can break early since we only need to find remoteEntry once
              }
            }
-+          // Process shared modules
-           var fileToShareKey = {};
-           return Promise.resolve(Promise.all(Array.from(getUsedShares()).map(function (shareKey) {
-             try {
-@@ -927,40 +974,49 @@
-               return Promise.reject(e);
-             }
-           }))).then(function () {
+-          var fileToShareKey = {};
+-          return Promise.resolve(Promise.all(Array.from(getUsedShares()).map(function (shareKey) {
+-            try {
+-              return Promise.resolve(_this.resolve(getPreBuildLibImportId(shareKey))).then(function (_this$resolve) {
+-                var file = _this$resolve.id.split('?')[0];
+-                fileToShareKey[file] = shareKey;
+-              });
+-            } catch (e) {
+-              return Promise.reject(e);
+-            }
+-          }))).then(function () {
 -            // 遍历打包生成的每个文件
 -            for (var _i3 = 0, _Object$entries2 = Object.entries(bundle); _i3 < _Object$entries2.length; _i3++) {
 -              var _Object$entries2$_i = _Object$entries2[_i3],
@@ -1804,58 +2142,57 @@ index 19d8ea95ec9024804cf213c8d034296a1027153d..9c1ff85b5f158fa91bc1c6c9ce82b59c
 -                for (var _i4 = 0, _Object$keys2 = Object.keys(_fileData.modules); _i4 < _Object$keys2.length; _i4++) {
 -                  var _modulePath = _Object$keys2[_i4];
 -                  var sharedKey = fileToShareKey[_modulePath];
-+            for (var _i4 = 0, _Object$entries3 = Object.entries(bundle); _i4 < _Object$entries3.length; _i4++) {
-+              var _Object$entries3$_i = _Object$entries3[_i4],
-+                _fileName2 = _Object$entries3$_i[0],
-+                _fileData2 = _Object$entries3$_i[1];
-+              if (_fileData2.type === 'chunk') {
-+                for (var _i5 = 0, _Object$keys2 = Object.keys(_fileData2.modules); _i5 < _Object$keys2.length; _i5++) {
-+                  var modulePath = _Object$keys2[_i5];
-+                  var sharedKey = fileToShareKey[modulePath];
-                   if (sharedKey) {
+-                  if (sharedKey) {
 -                    var _filesContainingModul2;
 -                    if (!filesContainingModules[sharedKey]) {
 -                      filesContainingModules[sharedKey] = {
 -                        sync: [],
 -                        async: []
 -                      };
-+                    // Track the JS chunk
-+                    trackAsset(filesMap, sharedKey, _fileName2, false, 'js');
-+                    // Handle dynamic imports
-+                    if (_fileData2.dynamicImports) {
-+                      for (var _iterator3 = _createForOfIteratorHelperLoose(_fileData2.dynamicImports), _step3; !(_step3 = _iterator3()).done;) {
-+                        var dynamicImport = _step3.value;
-+                        var importData = bundle[dynamicImport];
-+                        if (importData) {
-+                          if (importData.type === 'asset' && isCSSFile(dynamicImport)) {
-+                            trackAsset(filesMap, sharedKey, dynamicImport, true, 'css');
-+                          } else {
-+                            trackAsset(filesMap, sharedKey, dynamicImport, true, 'js');
-+                          }
-+                        }
-+                      }
-                     }
+-                    }
 -                    filesContainingModules[sharedKey].sync.push(_fileName);
 -                    (_filesContainingModul2 = filesContainingModules[sharedKey].async).push.apply(_filesContainingModul2, _fileData.dynamicImports || []);
 -                    _findSynchronousImports(_fileName, filesContainingModules[sharedKey].sync);
 -                    break; // 如果找到匹配，跳出循环
-                   }
-                 }
+-                  }
+-                }
++          // Second pass: Collect all CSS assets
++          var allCssAssets = collectCssAssets(bundle);
++          var exposesModules = Object.keys(mfOptions.exposes).map(function (item) {
++            return mfOptions.exposes[item]["import"];
++          });
++          // Process exposed modules
++          processModuleAssets(bundle, filesMap, function (modulePath) {
++            var absoluteModulePath = path__namespace.resolve(root, modulePath);
++            return exposesModules.find(function (exposeModule) {
++              var exposePath = path__namespace.resolve(root, exposeModule);
++              // First try exact path match
++              if (absoluteModulePath === exposePath) {
++                return true;
                }
-             }
+-            }
 -            Object.keys(filesContainingModules).forEach(function (key) {
 -              filesContainingModules[key].sync = Array.from(new Set(filesContainingModules[key].sync));
 -              filesContainingModules[key].async = Array.from(new Set(filesContainingModules[key].async));
-+            // Add all CSS assets to every export
-+            // Final deduplication of all arrays in the filesMap
-+            addCssAssetsToAllExports(filesMap, allCssAssets);
-+            Object.values(filesMap).forEach(function (assetMaps) {
-+              ['js', 'css'].forEach(function (type) {
-+                ['sync', 'async'].forEach(function (timing) {
-+                  assetMaps[type][timing] = Array.from(new Set(assetMaps[type][timing]));
-+                });
-+              });
++              // Then try path match without known extensions
++              var getPathWithoutKnownExt = function getPathWithoutKnownExt(filePath) {
++                var ext = path__namespace.extname(filePath);
++                return JS_EXTENSIONS.includes(ext) ? path__namespace.join(path__namespace.dirname(filePath), path__namespace.basename(filePath, ext)) : filePath;
++              };
++              var modulePathNoExt = getPathWithoutKnownExt(absoluteModulePath);
++              var exposePathNoExt = getPathWithoutKnownExt(exposePath);
++              return modulePathNoExt === exposePathNoExt;
              });
++          });
++          // Process shared modules
++          return Promise.resolve(buildFileToShareKeyMap(getUsedShares(), _this.resolve.bind(_this))).then(function (fileToShareKey) {
++            processModuleAssets(bundle, filesMap, function (modulePath) {
++              return fileToShareKey.get(modulePath);
++            });
++            // Add all CSS assets to every export
++            addCssAssetsToAllExports(filesMap, allCssAssets);
++            // Final deduplication of all assets
++            filesMap = deduplicateAssets(filesMap);
              _this.emitFile({
                type: 'asset',
                fileName: mfManifestName,
@@ -1864,7 +2201,19 @@ index 19d8ea95ec9024804cf213c8d034296a1027153d..9c1ff85b5f158fa91bc1c6c9ce82b59c
              });
            });
          } catch (e) {
-@@ -976,23 +1032,23 @@
+@@ -975,6 +1101,11 @@
+         }
+       }
+     }];
++    /**
++     * Generates the final manifest JSON structure
++     * @param preloadMap - Map of module assets to include
++     * @returns Complete manifest object
++     */
+     function generateMFManifest(preloadMap) {
+       var options = getNormalizeModuleFederationOptions();
+       var name = options.name;
+@@ -983,23 +1114,23 @@
          path: '',
          type: 'module'
        };
@@ -1897,7 +2246,7 @@ index 19d8ea95ec9024804cf213c8d034296a1027153d..9c1ff85b5f158fa91bc1c6c9ce82b59c
          return {
            id: name + ":" + shareKey,
            name: shareKey,
-@@ -1000,42 +1056,40 @@
+@@ -1007,42 +1138,40 @@
            requiredVersion: shareItem.shareConfig.requiredVersion,
            assets: {
              js: {
@@ -1958,7 +2307,7 @@ index 19d8ea95ec9024804cf213c8d034296a1027153d..9c1ff85b5f158fa91bc1c6c9ce82b59c
          id: name,
          name: name,
          metaData: _extends({
-@@ -1050,8 +1104,6 @@
+@@ -1057,8 +1186,6 @@
            types: {
              path: '',
              name: ''
@@ -1967,7 +2316,7 @@ index 19d8ea95ec9024804cf213c8d034296a1027153d..9c1ff85b5f158fa91bc1c6c9ce82b59c
            },
            globalName: name,
            pluginVersion: '0.2.5'
-@@ -1064,7 +1116,6 @@
+@@ -1071,7 +1198,6 @@
          remotes: remotes,
          exposes: exposes
        };
@@ -1975,36 +2324,6 @@ index 19d8ea95ec9024804cf213c8d034296a1027153d..9c1ff85b5f158fa91bc1c6c9ce82b59c
      }
    };
  
-@@ -1281,8 +1332,10 @@
-               var loadSharePath = getLoadShareModulePath(source);
-               writeLoadShareModule(source, shared[key], command);
-               writePreBuildLibPath(source);
-+              //  if (!options.remotePlugin) {
-               addUsedShares(source);
-               writeLocalSharedImportMap();
-+              //   }
-               return this.resolve(loadSharePath, importer);
-             }
-           };
-@@ -1363,7 +1416,8 @@
-     var options = normalizeModuleFederationOptions(mfUserOptions);
-     var name = options.name,
-       shared = options.shared,
--      filename = options.filename;
-+      filename = options.filename,
-+      remotePlugin = options.remotePlugin;
-     if (!name) throw new Error('name is required');
-     return [{
-       name: 'vite:module-federation-config',
-@@ -1379,7 +1433,7 @@
-       entryName: 'remoteEntry',
-       entryPath: REMOTE_ENTRY_ID,
-       fileName: filename
--    }), addEntry({
-+    }), remotePlugin ? [] : addEntry({
-       entryName: 'hostInit',
-       entryPath: getHostAutoInitPath(),
-       inject: 'html'
 diff --git a/lib/plugins/pluginMFManifest.d.ts b/lib/plugins/pluginMFManifest.d.ts
 index f3d07d0414f2ef5f02237d8faf5c9e11fb4f025a..b9748a39356f1ff9177e846109bdf08c4ddaf154 100644
 --- a/lib/plugins/pluginMFManifest.d.ts
@@ -2014,57 +2333,118 @@ index f3d07d0414f2ef5f02237d8faf5c9e11fb4f025a..b9748a39356f1ff9177e846109bdf08c
 +import { Plugin } from 'vite';
  declare const Manifest: () => Plugin[];
  export default Manifest;
-diff --git a/lib/utils/VirtualModule.d.ts b/lib/utils/VirtualModule.d.ts
-index 5a7695f2a1ed263c6868e0cf8e004cfd611ab70c..ac45955ac26175b78e0ac580b25e788a68d664f5 100644
---- a/lib/utils/VirtualModule.d.ts
-+++ b/lib/utils/VirtualModule.d.ts
-@@ -1,3 +1,4 @@
-+export declare function getSuffix(name: string): string;
- /**
-  * Physically generate files as virtual modules under node_modules/__mf__virtual/*
-  */
-diff --git a/lib/utils/__tests__/VirtualModule.test.d.ts b/lib/utils/__tests__/VirtualModule.test.d.ts
+diff --git a/lib/utils/__tests__/cssModuleHelpers.test.d.ts b/lib/utils/__tests__/cssModuleHelpers.test.d.ts
 new file mode 100644
 index 0000000000000000000000000000000000000000..cb0ff5c3b541f646105198ee23ac0fc3d805023e
 --- /dev/null
-+++ b/lib/utils/__tests__/VirtualModule.test.d.ts
++++ b/lib/utils/__tests__/cssModuleHelpers.test.d.ts
 @@ -0,0 +1 @@
 +export {};
+diff --git a/lib/utils/cssModuleHelpers.d.ts b/lib/utils/cssModuleHelpers.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..f43440f1d827b94355d1529412422887e9dbf5bc
+--- /dev/null
++++ b/lib/utils/cssModuleHelpers.d.ts
+@@ -0,0 +1,75 @@
++export type OutputBundleItem = {
++    type: 'chunk' | 'asset';
++    name?: string;
++    fileName: string;
++    modules?: Record<string, unknown> | undefined;
++    dynamicImports?: string[] | undefined;
++};
++export declare const ASSET_TYPES: readonly ["js", "css"];
++export declare const LOAD_TIMINGS: readonly ["sync", "async"];
++export declare const JS_EXTENSIONS: readonly [".ts", ".tsx", ".jsx", ".mjs", ".cjs"];
++export type AssetType = (typeof ASSET_TYPES)[number];
++export type AssetMap = {
++    sync: string[];
++    async: string[];
++};
++export type PreloadMap = Record<string, {
++    [K in (typeof ASSET_TYPES)[number]]: AssetMap;
++}>;
++/**
++ * Creates an empty asset map structure for tracking JS and CSS assets
++ * @returns Initialized asset map with sync/async arrays for JS and CSS
++ */
++export declare const createEmptyAssetMap: () => {
++    js: AssetMap;
++    css: AssetMap;
++};
++/**
++ * Tracks an asset in the preload map with deduplication
++ * @param map - The preload map to update
++ * @param key - The module key to track under
++ * @param fileName - The asset filename to track
++ * @param isAsync - Whether the asset is loaded async
++ * @param type - The asset type ('js' or 'css')
++ */
++export declare const trackAsset: (map: PreloadMap, key: string, fileName: string, isAsync: boolean, type: AssetType) => void;
++/**
++ * Checks if a file is a CSS file by extension
++ * @param fileName - The filename to check
++ * @returns True if file has a CSS extension (.css, .scss, .less)
++ */
++export declare const isCSSFile: (fileName: string) => boolean;
++/**
++ * Collects all CSS assets from the bundle
++ * @param bundle - The Rollup output bundle
++ * @returns Set of CSS asset filenames
++ */
++export declare const collectCssAssets: (bundle: Record<string, OutputBundleItem>) => Set<string>;
++/**
++ * Processes module assets and tracks them in the files map
++ * @param bundle - The Rollup output bundle
++ * @param filesMap - The preload map to populate
++ * @param moduleMatcher - Function that matches module paths to keys
++ */
++export declare const processModuleAssets: (bundle: Record<string, OutputBundleItem>, filesMap: PreloadMap, moduleMatcher: (modulePath: string) => string | undefined) => void;
++/**
++ * Adds global CSS assets to all module exports
++ * @param filesMap - The preload map to update
++ * @param cssAssets - Set of CSS asset filenames to add
++ */
++export declare const addCssAssetsToAllExports: (filesMap: PreloadMap, cssAssets: Set<string>) => void;
++/**
++ * Deduplicates assets in the files map
++ * @param filesMap - The preload map to deduplicate
++ * @returns New deduplicated preload map
++ */
++export declare const deduplicateAssets: (filesMap: PreloadMap) => PreloadMap;
++/**
++ * Builds a mapping between module files and their share keys
++ * @param shareKeys - Set of share keys to map
++ * @param resolveFn - Function to resolve module paths
++ * @returns Map of file paths to their corresponding share keys
++ */
++export declare const buildFileToShareKeyMap: (shareKeys: Set<string>, resolveFn: (id: string) => Promise<{
++    id: string;
++} | null>) => Promise<Map<string, string>>;
 diff --git a/lib/utils/normalizeModuleFederationOptions.d.ts b/lib/utils/normalizeModuleFederationOptions.d.ts
-index e29a75a42287f5dd5be6ff33e1b3412988c03c46..f7c99052535f206def39929b1a8a4a8880f5e204 100644
+index e29a75a42287f5dd5be6ff33e1b3412988c03c46..10e6f26a78b9173f1527bb1ebd6c9f9edee7ef76 100644
 --- a/lib/utils/normalizeModuleFederationOptions.d.ts
 +++ b/lib/utils/normalizeModuleFederationOptions.d.ts
-@@ -33,6 +33,10 @@ export type ModuleFederationOptions = {
-     filename?: string;
-     library?: any;
-     name: string;
-+    /**
-+     * When true, prevents shared modules from being bundled into remotes
-+     * and makes them rely on host-provided shared modules at runtime
-+     */
-     remotes?: Record<string, string | RemoteObjectConfig> | undefined;
-     runtime?: any;
-     shareScope?: string;
-@@ -53,12 +57,22 @@ export type ModuleFederationOptions = {
-     shareStrategy?: ShareStrategy;
-     ignoreOrigin?: boolean;
-     virtualModuleDir?: string;
-+    /**
-+     * When true, prevents shared modules from being bundled into remotes
-+     * and makes them rely on host-provided shared modules at runtime
-+     */
-+    remotePlugin?: boolean;
- };
- export interface NormalizedModuleFederationOptions {
-     exposes: Record<string, ExposesItem>;
-     filename: string;
-     library: any;
-     name: string;
-+    /**
-+     * When true, prevents shared modules from being bundled into remotes
-+     * and makes them rely on host-provided shared modules at runtime
-+     */
-+    remotePlugin: boolean;
-     remotes: Record<string, RemoteObjectConfig>;
-     runtime: any;
-     shareScope: string;
+@@ -1,4 +1,5 @@
+ import { SharedConfig, ShareStrategy } from '@module-federation/runtime/types';
++import type { sharePlugin } from '@module-federation/sdk';
+ export type RemoteEntryType = 'var' | 'module' | 'assign' | 'assign-properties' | 'this' | 'window' | 'self' | 'global' | 'commonjs' | 'commonjs2' | 'commonjs-module' | 'commonjs-static' | 'amd' | 'amd-require' | 'umd' | 'umd2' | 'jsonp' | 'system' | string;
+ interface ExposesItem {
+     import: string;
+@@ -19,7 +20,7 @@ export interface ShareItem {
+     version: string | undefined;
+     scope: string;
+     from: string;
+-    shareConfig: SharedConfig;
++    shareConfig: SharedConfig & sharePlugin.SharedConfig;
+ }
+ interface ManifestOptions {
+     filePath?: string;
+@@ -43,6 +44,7 @@ export type ModuleFederationOptions = {
+         singleton?: boolean;
+         requiredVersion?: string;
+         strictVersion?: boolean;
++        import?: sharePlugin.SharedConfig['import'];
+     }> | undefined;
+     runtimePlugins?: string[];
+     getPublicPath?: string;
