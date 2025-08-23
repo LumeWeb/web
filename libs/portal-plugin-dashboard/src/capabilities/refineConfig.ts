@@ -1,7 +1,10 @@
 import type { RefineProps } from "@refinedev/core";
 
 import dataProvider from "@lumeweb/advanced-rest-provider";
-import { DATA_PROVIDER_NAME } from "@lumeweb/portal-framework-auth";
+import {
+  type AuthProviderWithEmitter,
+  DATA_PROVIDER_NAME,
+} from "@lumeweb/portal-framework-auth";
 import {
   env,
   Framework,
@@ -26,6 +29,15 @@ export class Capability implements RefineConfigCapability {
 
     if (token) {
       acctProvider.setAuthToken(token);
+    }
+
+    const authProvider = existing?.authProvider as
+      | AuthProviderWithEmitter
+      | undefined;
+    if (authProvider) {
+      authProvider.on("authCheckSuccess", (params) => {
+        acctProvider.setAuthToken(params.token);
+      });
     }
 
     return mergeRefineConfig(existing, { [DATA_PROVIDER_NAME]: acctProvider }, [

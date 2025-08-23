@@ -12,6 +12,7 @@ import type {
 } from "@refinedev/core";
 
 import { getApiBaseUrl } from "@lumeweb/portal-framework-core";
+import { createNanoEvents } from "nanoevents";
 
 export const DATA_PROVIDER_NAME = "account";
 
@@ -64,7 +65,31 @@ const createAuthResponse = (
   ...params,
 });
 
-export const createAuthProvider = (sdk: Sdk): AuthProvider => {
+export interface AuthCheckFailedEvent {
+  error: Error;
+}
+
+export interface AuthCheckSuccessEvent {
+  token: string;
+}
+
+export interface AuthEvents {
+  authCheckFailed: (params: AuthCheckFailedEvent) => void;
+  authCheckSuccess: (params: AuthCheckSuccessEvent) => void;
+  registerAttempt: (params: RegisterAttemptEvent) => void;
+}
+
+export interface Auth1ProviderWithEmitter extends AuthProvider {
+  on<E extends keyof AuthEvents>(event: E, callback: AuthEvents[E]): () => void;
+}
+
+export interface RegisterAttemptEvent {
+  email: string;
+  firstName: string;
+}
+
+export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
+  const emitter = createNanoEvents<AuthEvents>();
   const maybeSetupAuth = () => {
     const token = localStorage.getItem("jwt");
     if (token) {
@@ -78,6 +103,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProvider => {
       const response = await sdk.account().ping();
 
       if (isErrorResult(response)) {
+        emitter.emit("authCheckFailed", { error: response.error });
         return {
           authenticated: false,
           error: response.error,
@@ -87,13 +113,13 @@ export const createAuthProvider = (sdk: Sdk): AuthProvider => {
 
       if (response.data.token) {
         sdk.setAuthToken(response.data.token);
+        emitter.emit("authCheckSuccess", { token: response.data.token });
       }
 
       return {
         authenticated: true,
       };
     },
-
     async forgotPassword(
       params: ForgotPasswordRequest,
     ): Promise<AuthActionResponse> {
@@ -183,6 +209,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProvider => {
 
           if (response.data.token) {
             sdk.setAuthToken(response.data.token);
+            emitter.emit("authCheckSuccess", { token: response.data.token });
             const baseUrl = getApiBaseUrl();
             if (baseUrl) {
               try {
@@ -287,11 +314,19 @@ export const createAuthProvider = (sdk: Sdk): AuthProvider => {
       });
     },
 
+    on<E extends keyof AuthEvents>(event: E, callback: AuthEvents[E]) {
+      return emitter.on(event, callback);
+    },
+
     async onError(): Promise<{ logout?: boolean; redirectTo?: string }> {
       return {};
     },
 
     async register(params: RegisterFormRequest): Promise<AuthActionResponse> {
+      emitter.emit("registerAttempt", {
+        email: params.email,
+        firstName: params.firstName,
+      });
       const response = await sdk.account().register({
         email: params.email,
         first_name: params.firstName,
