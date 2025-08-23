@@ -20,7 +20,8 @@
     "@lumeweb/portal-framework-core": "workspace:*",
     "@lumeweb/portal-framework-ui": "workspace:*",
     "@lumeweb/portal-framework-ui-core": "workspace:*",
-    "@lumeweb/portal-sdk": "workspace:*"
+    "@lumeweb/portal-sdk": "workspace:*",
+    "nanoevents": "^9.1.0"
   },
   "devDependencies": {
     "tsdown": "^0.11.12"
