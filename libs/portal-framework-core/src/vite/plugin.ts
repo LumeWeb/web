@@ -1,6 +1,5 @@
 // @ts-nocheck
-
-import type { ModuleFederationOptions } from "@module-federation/vite/lib/utils/normalizeModuleFederationOptions";
+import type { ModuleFederationOptions } from "@module-federation/vite";
 import type { Plugin } from "vite";
 
 import { federation } from "@module-federation/vite";
@@ -200,10 +199,10 @@ export function Config(opts: ConfigOptions) {
         if (config === false) {
           return [key, false];
         }
-        if (typeof config === 'string') {
+        if (typeof config === "string") {
           return [key, { requiredVersion: config, ...importCfg }];
         }
-        if (typeof config === 'object') {
+        if (typeof config === "object") {
           return [key, { ...config, ...importCfg }];
         }
         return [key, importCfg];
