@@ -21,6 +21,7 @@ export const getResetPasswordForm = (
         type: FormFieldType.EMAIL,
       },
     ],
+    footerClassName: "",
     layout: "vertical",
     onSubmit: (values) => mutate(values),
     validationSchema: schema,
