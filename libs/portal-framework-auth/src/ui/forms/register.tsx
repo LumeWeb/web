@@ -1,10 +1,9 @@
 import {
+  ActionItemType,
   type FormConfig,
   FormFieldType,
   GroupOrder,
-  InlineAuthLinkBanner,
 } from "@lumeweb/portal-framework-ui";
-import { ActionItemType } from "@lumeweb/portal-framework-ui";
 
 import { schema } from "./register.schema";
 
@@ -75,7 +74,7 @@ export const getRegisterForm = (
     },
   ],
   footerClassName: "",
-  formClassName: "w-full max-w-md",
+  formClassName: "w-full m-auto",
   groupOrder: GroupOrder.GROUPS_FIRST,
   groups: [
     {

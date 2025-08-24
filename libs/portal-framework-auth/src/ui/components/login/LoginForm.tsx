@@ -28,7 +28,7 @@ export const LoginForm = () => {
   const formConfig = getLoginFormConfig(onSubmit);
 
   return (
-    <div className="w-full max-w-md">
+    <>
       <SchemaForm config={formConfig} />
       <p className="inline-block mt-4 text-input-placeholder">
         Forgot your password?{" "}
@@ -38,6 +38,6 @@ export const LoginForm = () => {
           Reset Password
         </Link>
       </p>
-    </div>
+    </>
   );
 };

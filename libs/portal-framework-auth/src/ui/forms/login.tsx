@@ -53,7 +53,7 @@ export const getLoginFormConfig = (
   ],
   footerClassName: false,
   // Update formClassName to match the target wrapper
-  formClassName: "w-full max-w-md",
+  formClassName: "w-full m-auto",
   onSubmit: (data) => {
     return login(data);
   },
