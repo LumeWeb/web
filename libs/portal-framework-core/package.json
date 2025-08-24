@@ -33,7 +33,6 @@
     "bin-pack": "^1.0.2"
   },
   "devDependencies": {
-    "@lumeweb/portal-test-util": "workspace:*",
     "esbuild-fix-imports-plugin": "^1.0.14",
     "express": "^4.21.2",
     "lucide-react": "^0.511.0",
