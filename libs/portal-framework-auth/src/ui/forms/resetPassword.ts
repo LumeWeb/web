@@ -9,7 +9,7 @@ export const getResetPasswordForm = (
   return {
     actionButtons: [
       {
-        label: "Reset Password",
+        label: "Continue",
         type: ActionItemType.SUBMIT,
       },
     ],

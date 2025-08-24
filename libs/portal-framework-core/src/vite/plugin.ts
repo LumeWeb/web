@@ -144,6 +144,7 @@ export function Config(opts: ConfigOptions) {
       ignoreOrigin: true,
       manifest: true,
       name,
+      publicPath: "auto",
       remotePlugin: isPlugin,
       runtimePlugins,
       shared: sharedModules,
@@ -251,7 +252,7 @@ export function Config(opts: ConfigOptions) {
   ].filter(Boolean);
 
   const viteConfig = defineConfig({
-    base: "",
+    base: "/",
     build: {
       ...(opts.type === "plugin"
         ? {

@@ -6,6 +6,7 @@ import {
 import React from "react";
 
 import { AuthPage } from "@/ui/components/common/AuthPage";
+import { AuthPageTitle } from "@/ui/components/common/AuthPageTitle";
 
 import { LoginForm } from "./LoginForm";
 import { SocialLogin } from "./SocialLogin";
@@ -16,9 +17,7 @@ function LoginIndex() {
 
   return (
     <AuthPage
-      beforeLink={
-        <h2 className="text-4xl sm:text-3xl font-bold mb-5">Welcome back</h2>
-      }
+      beforeLink={<AuthPageTitle>Welcome back 👋</AuthPageTitle>}
       linkLabel="New user?"
       linkText="Create an account →"
       linkUrl={registerUrl}

@@ -8,6 +8,7 @@ import React from "react";
 
 import { RegisterFormRequest } from "@/dataProviders/auth";
 import { AuthPage } from "@/ui/components/common/AuthPage";
+import { AuthPageTitle } from "@/ui/components/common/AuthPageTitle";
 import { getRegisterForm } from "@/ui/forms/register";
 
 function RegisterIndex() {
@@ -27,6 +28,7 @@ function RegisterIndex() {
 
   return (
     <AuthPage
+      beforeLink={<AuthPageTitle>All Roads Lead to Lume 🎉</AuthPageTitle>}
       linkLabel="Already have an account?"
       linkText="Login here →"
       linkUrl={loginUrl}

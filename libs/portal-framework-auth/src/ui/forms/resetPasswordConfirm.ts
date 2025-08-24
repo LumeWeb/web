@@ -7,6 +7,7 @@ export const getResetPasswordConfirmForm = (
   mutate: (values: { email: string; password: string; token: string }) => void,
 ): FormConfig => {
   return {
+    footerClassName: "",
     actionButtons: [
       {
         label: "Reset Password",
@@ -28,7 +29,7 @@ export const getResetPasswordConfirmForm = (
           readOnly: true,
           autoComplete: "off",
         },
-        label: "Reset Token", 
+        label: "Reset Token",
         name: "token",
         required: true,
         type: FormFieldType.PASSWORD,

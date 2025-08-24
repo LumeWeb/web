@@ -37,21 +37,12 @@ export function AuthPage({
             "flex flex-col items-start justify-start bg-background w-full sm:max-w-md z-10 relative"
           }
           role="main">
-          <div className="sm:mt-20 p-5">
+          <div className="sm:mt-20 p-5 w-full">
             {showBanner && (
-              <div className="absolute inset-0 flex sm:hidden flex-col items-start justify-center gap-2 text-left p-4 mt-60 sm:mt-10">
+              <div className="flex flex-col gap-2 mb-10">
                 {beforeLink}
                 <InlineAuthLinkBanner
-                  label={linkLabel}
-                  linkLabel={linkText}
-                  to={linkUrl}
-                />
-              </div>
-            )}
-            {showBanner && (
-              <div className="hidden sm:flex flex-col items-start justify-center gap-2 text-left mb-10">
-                {beforeLink}
-                <InlineAuthLinkBanner
+                  className={"m-auto md:m-0"}
                   label={linkLabel}
                   linkLabel={linkText}
                   to={linkUrl}
