@@ -4,6 +4,7 @@ import {
   GroupOrder,
   InlineAuthLinkBanner,
 } from "@lumeweb/portal-framework-ui";
+import { ActionItemType } from "@lumeweb/portal-framework-ui";
 
 import { schema } from "./register.schema";
 
@@ -11,6 +12,13 @@ export const getRegisterForm = (
   onSubmit: (values: any) => Promise<void>,
   loginUrl: string,
 ): FormConfig => ({
+  actionButtons: [
+    {
+      className: "w-full h-14",
+      label: "Create Account",
+      type: ActionItemType.SUBMIT,
+    },
+  ],
   fields: [
     {
       className: "space-y-2",
@@ -50,7 +58,7 @@ export const getRegisterForm = (
     },
     {
       label: (
-        <span className="text-sm">
+        <span className="text-sm pl-2">
           I agree to the
           <a
             className="text-foreground underline mx-1"
@@ -67,7 +75,8 @@ export const getRegisterForm = (
       type: FormFieldType.CHECKBOX,
     },
   ],
-  formClassName: "w-full p-2 max-w-md space-y-4 mt-14 sm:bg-background",
+  footerClassName: "",
+  formClassName: "w-full max-w-md",
   groupOrder: GroupOrder.GROUPS_FIRST,
   groups: [
     {
@@ -87,6 +96,5 @@ export const getRegisterForm = (
   ),
   layout: "vertical",
   onSubmit: onSubmit,
-  submitLabel: "Create Account",
   validationSchema: schema,
 });
