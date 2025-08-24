@@ -239,7 +239,7 @@ export function Config(opts: ConfigOptions) {
       : react(),
     tsconfigPaths(),
     createHostFederationConfig(normalizedOpts, resolvedRuntimePlugins),
-    opts.type === "plugin" && localhostAccessPlugin(),
+    opts.type === "host" ? localhostAccessPlugin() : undefined,
     ...(opts.plugins?.map((plugin) =>
       createPluginFederationConfig(
         plugin,
@@ -248,7 +248,7 @@ export function Config(opts: ConfigOptions) {
         normalizedOpts.devPort!,
       ),
     ) || []),
-  ];
+  ].filter(Boolean);
 
   const viteConfig = defineConfig({
     base: "",

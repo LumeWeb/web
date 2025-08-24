@@ -1,8 +1,9 @@
-// Import the mocked function after the mock is defined
-import { usePortalMeta } from "@/hooks/usePortalMeta";
 import { renderHook } from "@testing-library/react";
 import { createMockPortalMeta } from "src/tests/portalMetaMocks";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+// Import the mocked function after the mock is defined
+import { usePortalMeta } from "@/hooks/usePortalMeta";
 
 import { useFeatureFlag } from "./useFeatureFlag";
 
@@ -23,7 +24,7 @@ describe("useFeatureFlag", () => {
 
   it("should return false if feature_flags are missing in portalMeta", () => {
     vi.mocked(usePortalMeta).mockReturnValue(
-      createMockPortalMeta({ feature_flags: undefined })
+      createMockPortalMeta({ feature_flags: undefined }),
     );
     const { result } = renderHook(() => useFeatureFlag("myFeature"));
     expect(result.current).toBe(false);
@@ -37,7 +38,7 @@ describe("useFeatureFlag", () => {
 
   function mockFeatureFlags(flags: Record<string, any>) {
     vi.mocked(usePortalMeta).mockReturnValue(
-      createMockPortalMeta({ feature_flags: flags })
+      createMockPortalMeta({ feature_flags: flags }),
     );
   }
 
@@ -48,20 +49,32 @@ describe("useFeatureFlag", () => {
   });
 
   it("should handle feature flag casing and values correctly", () => {
-    mockFeatureFlags({ 
+    mockFeatureFlags({
+      ANOTHER_FLAG: true,
       MYFEATURE: false,
-      ANOTHER_FLAG: true 
     });
 
     // Test false flag with different casings
-    expect(renderHook(() => useFeatureFlag("myFeature")).result.current).toBe(false);
-    expect(renderHook(() => useFeatureFlag("MYFEATURE")).result.current).toBe(false);
-    expect(renderHook(() => useFeatureFlag("MyFeature")).result.current).toBe(false);
+    expect(renderHook(() => useFeatureFlag("myFeature")).result.current).toBe(
+      false,
+    );
+    expect(renderHook(() => useFeatureFlag("MYFEATURE")).result.current).toBe(
+      false,
+    );
+    expect(renderHook(() => useFeatureFlag("MyFeature")).result.current).toBe(
+      false,
+    );
 
     // Test true flag with different casings
-    expect(renderHook(() => useFeatureFlag("another_flag")).result.current).toBe(true);
-    expect(renderHook(() => useFeatureFlag("ANOTHER_FLAG")).result.current).toBe(true);
-    expect(renderHook(() => useFeatureFlag("aNoThEr_FlAg")).result.current).toBe(true);
+    expect(
+      renderHook(() => useFeatureFlag("another_flag")).result.current,
+    ).toBe(true);
+    expect(
+      renderHook(() => useFeatureFlag("ANOTHER_FLAG")).result.current,
+    ).toBe(true);
+    expect(
+      renderHook(() => useFeatureFlag("aNoThEr_FlAg")).result.current,
+    ).toBe(true);
   });
 
   it("should handle non-boolean values for feature flags (should treat as falsy/truthy)", () => {

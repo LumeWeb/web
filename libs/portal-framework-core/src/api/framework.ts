@@ -22,7 +22,7 @@ import { PortalMeta } from "../types/portal";
 import { getCurrentLocation } from "../util/location";
 import { validateNamespacedId } from "../util/namespace";
 import { fetchPortalMeta } from "../util/portalMeta";
-import { sortWidgets } from "../utils/widget";
+import { sortWidgets } from "../util/widget";
 
 export class Framework {
   get appName() {

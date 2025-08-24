@@ -1,7 +1,7 @@
 import {
-  InlineAuthLinkBanner,
   LumeLogo,
   SchemaForm,
+  useLoginUrl,
   withTheme,
 } from "@lumeweb/portal-framework-ui";
 import { Button } from "@lumeweb/portal-framework-ui-core";
@@ -19,6 +19,7 @@ import { getRegisterForm } from "../../forms/register";
 
 function RegisterIndex() {
   const register = useRegister<RegisterFormRequest>();
+  const loginUrl = useLoginUrl();
 
   const onSubmit = async (values: any) => {
     await register.mutateAsync({
@@ -29,7 +30,7 @@ function RegisterIndex() {
     });
   };
 
-  const finalRegisterFormConfig = getRegisterForm(onSubmit);
+  const finalRegisterFormConfig = getRegisterForm(onSubmit, loginUrl);
 
   return (
     <div className="p-4 h-screen relative">

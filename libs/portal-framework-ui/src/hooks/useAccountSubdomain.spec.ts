@@ -16,10 +16,11 @@ vi.mock("@/hooks/useProtocolDomain", () => {
   };
 });
 
-// Import the mocked functions after the mocks are defined
-import { useAccountSubdomain } from "./useAccountSubdomain";
 import { usePluginMeta as mockedUsePluginMeta } from "@/hooks/usePluginMeta";
 import { useProtocolDomain as mockedUseProtocolDomain } from "@/hooks/useProtocolDomain";
+
+// Import the mocked functions after the mocks are defined
+import { useAccountSubdomain } from "./useAccountSubdomain";
 
 describe("useAccountSubdomain", () => {
   beforeEach(() => {
@@ -29,7 +30,9 @@ describe("useAccountSubdomain", () => {
     vi.mocked(mockedUseProtocolDomain).mockReset();
     // Set default mock return values if needed for most tests
     vi.mocked(mockedUsePluginMeta).mockReturnValue("test-subdomain");
-    vi.mocked(mockedUseProtocolDomain).mockReturnValue("test-subdomain.example.com");
+    vi.mocked(mockedUseProtocolDomain).mockReturnValue(
+      "test-subdomain.example.com",
+    );
   });
 
   it("should get dashboard subdomain from plugin meta", () => {
@@ -45,7 +48,6 @@ describe("useAccountSubdomain", () => {
 
     expect(mockedUseProtocolDomain).toHaveBeenCalledWith(mockSubdomain);
   });
-
 
   it("should return the result from useProtocolDomain when subdomain is found", () => {
     const mockSubdomain = "myaccount";
@@ -72,7 +74,7 @@ describe("useAccountSubdomain", () => {
   });
 
   it("should return current hostname when plugin meta returns empty string for subdomain", () => {
-    vi.mocked(mockedUsePluginMeta).mockReturnValue('');
+    vi.mocked(mockedUsePluginMeta).mockReturnValue("");
     vi.mocked(mockedUseProtocolDomain).mockReset(); // Ensure useProtocolDomain is NOT called
 
     const { result } = renderHook(() => useAccountSubdomain());

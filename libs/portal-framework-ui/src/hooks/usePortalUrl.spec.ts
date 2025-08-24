@@ -22,21 +22,21 @@ vi.mock("@/store/portalStore", () => {
   // Mock the store instance with getState
   const portalStore = {
     getState: () => mockState,
-    // Add other store methods if needed by the hook or tests
-    subscribe: vi.fn(),
     setState: (newState: Partial<typeof mockState>) => {
       Object.assign(mockState, newState);
     },
+    // Add other store methods if needed by the hook or tests
+    subscribe: vi.fn(),
   };
 
   return {
-    usePortalStore: vi.fn((selector: any) => selector(mockState)),
-    portalStore: portalStore, // Export the mock store instance
-    // Export mock state and setters for tests to manipulate
-    __mockState: mockState,
     __mockSetIsMetaLoading: mockState.setIsMetaLoading,
     __mockSetMeta: mockState.setMeta,
     __mockSetPortalUrl: mockState.setPortalUrl,
+    // Export mock state and setters for tests to manipulate
+    __mockState: mockState,
+    portalStore: portalStore, // Export the mock store instance
+    usePortalStore: vi.fn((selector: any) => selector(mockState)),
   };
 });
 
@@ -105,16 +105,17 @@ describe("usePortalUrl", () => {
     };
     mockedFetchPortalMeta.mockResolvedValue(mockMeta);
 
-    const { result, rerender } = renderHook(() => usePortalUrl());
+    const { rerender, result } = renderHook(() => usePortalUrl());
 
     // Wait for the fetch and state updates to happen
     // Wait for the fetch and state updates to happen
     await waitFor(() => {
       expect(__mockSetIsMetaLoading).toHaveBeenCalledWith(true); // Check loading state starts
-      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(undefined, expect.any(Object)); // Initial fetch is with undefined URL and options
-      expect(__mockSetPortalUrl).toHaveBeenCalledWith(
-        "https://example.com",
-      ); // URL should be set from meta
+      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(
+        undefined,
+        expect.any(Object),
+      ); // Initial fetch is with undefined URL and options
+      expect(__mockSetPortalUrl).toHaveBeenCalledWith("https://example.com"); // URL should be set from meta
       expect(__mockSetMeta).toHaveBeenCalledWith(mockMeta);
       expect(__mockSetIsMetaLoading).toHaveBeenCalledWith(false); // Check loading state ends
       // Assert the final result inside the waitFor block
@@ -137,11 +138,12 @@ describe("usePortalUrl", () => {
 
     // Wait for the fetch and state updates to happen
     await waitFor(() => {
-      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(undefined, expect.any(Object));
-      // Fallback should use getCurrentLocation().origin
-      expect(__mockSetPortalUrl).toHaveBeenCalledWith(
-        "http://localhost:3000",
+      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(
+        undefined,
+        expect.any(Object),
       );
+      // Fallback should use getCurrentLocation().origin
+      expect(__mockSetPortalUrl).toHaveBeenCalledWith("http://localhost:3000");
       expect(__mockSetMeta).toHaveBeenCalledWith(mockMeta);
       expect(__mockSetIsMetaLoading).toHaveBeenCalledWith(false);
       // Assert the final result inside the waitFor block
@@ -149,7 +151,6 @@ describe("usePortalUrl", () => {
     });
     expect(consoleErrorSpy).not.toHaveBeenCalled(); // No error expected
   });
-
 
   it("should fetch meta using the existing valid portalUrl", async () => {
     const initialPortalUrl = "https://existing.com";
@@ -169,7 +170,10 @@ describe("usePortalUrl", () => {
     expect(__mockSetIsMetaLoading).toHaveBeenCalledWith(true); // Effect should set loading true
 
     await waitFor(() => {
-      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(initialPortalUrl, expect.any(Object));
+      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(
+        initialPortalUrl,
+        expect.any(Object),
+      );
       expect(__mockSetPortalUrl).not.toHaveBeenCalled(); // Should not set URL if already valid
       expect(__mockSetMeta).toHaveBeenCalledWith(mockMetaData);
       // Corrected assertion to check the spy function
@@ -190,11 +194,12 @@ describe("usePortalUrl", () => {
 
     // Wait for the fetch and state updates to happen
     await waitFor(() => {
-      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(undefined, expect.any(Object));
-      // Should fallback to origin on error if initial URL was invalid/empty
-      expect(__mockSetPortalUrl).toHaveBeenCalledWith(
-        "http://localhost:3000",
+      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(
+        undefined,
+        expect.any(Object),
       );
+      // Should fallback to origin on error if initial URL was invalid/empty
+      expect(__mockSetPortalUrl).toHaveBeenCalledWith("http://localhost:3000");
       expect(__mockSetMeta).toHaveBeenCalledWith(undefined); // Meta should be undefined on error
       // Corrected assertion to check the spy function
       expect(__mockSetIsMetaLoading).toHaveBeenCalledWith(false);
@@ -223,7 +228,10 @@ describe("usePortalUrl", () => {
     expect(__mockSetIsMetaLoading).toHaveBeenCalledWith(true); // Effect should set loading true
 
     await waitFor(() => {
-      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(initialPortalUrl, expect.any(Object));
+      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(
+        initialPortalUrl,
+        expect.any(Object),
+      );
       // Wait specifically for setMeta to be called with undefined on error
       expect(__mockSetMeta).toHaveBeenCalledWith(undefined);
       // Corrected assertion to check the spy function
@@ -269,7 +277,10 @@ describe("usePortalUrl", () => {
       // The fetch should happen with the potentially invalid URL from the store
       // The hook passes `isValidUrl(portalUrl) ? portalUrl : undefined` to fetchPortalMeta
       // So if portalUrl is 'test.com', effectiveUrl is undefined.
-      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(undefined, expect.any(Object));
+      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(
+        undefined,
+        expect.any(Object),
+      );
       // The URL should be set from the meta domain
       expect(__mockSetPortalUrl).toHaveBeenCalledWith("https://test.com");
       expect(__mockSetMeta).toHaveBeenCalledWith(mockMeta);
@@ -283,15 +294,22 @@ describe("usePortalUrl", () => {
   it("should not fetch again if initial fetch attempted and portalUrl is valid", async () => {
     const initialPortalUrl = "https://valid.com";
     __mockState.portalUrl = initialPortalUrl;
-    const mockMeta: PortalMeta = { domain: "valid.com", feature_flags: {}, plugins: {} };
+    const mockMeta: PortalMeta = {
+      domain: "valid.com",
+      feature_flags: {},
+      plugins: {},
+    };
     mockedFetchPortalMeta.mockResolvedValue(mockMeta);
 
     // First render: Simulates initial load, fetch happens
-    const { result, rerender } = renderHook(() => usePortalUrl());
+    const { rerender, result } = renderHook(() => usePortalUrl());
 
     await waitFor(() => {
       expect(mockedFetchPortalMeta).toHaveBeenCalledTimes(1);
-      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(initialPortalUrl, expect.any(Object));
+      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(
+        initialPortalUrl,
+        expect.any(Object),
+      );
       expect(__mockSetMeta).toHaveBeenCalledWith(mockMeta);
       expect(__mockSetPortalUrl).not.toHaveBeenCalled(); // URL was already valid
       // Check that the hook's returned value is the expected URL
@@ -302,7 +320,7 @@ describe("usePortalUrl", () => {
     rerender();
 
     // Wait a moment to ensure no new fetch is triggered
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     expect(mockedFetchPortalMeta).toHaveBeenCalledTimes(1); // Fetch should not be called again
     expect(result.current).toBe(initialPortalUrl);
@@ -311,20 +329,26 @@ describe("usePortalUrl", () => {
   it("should fetch again if initial fetch attempted but portalUrl is still invalid", async () => {
     const initialPortalUrl = "invalid-url"; // Invalid URL
     __mockState.portalUrl = initialPortalUrl;
-    const mockMeta: PortalMeta = { domain: "example.com", feature_flags: {}, plugins: {} };
+    const mockMeta: PortalMeta = {
+      domain: "example.com",
+      feature_flags: {},
+      plugins: {},
+    };
 
     // First fetch attempt fails or returns invalid meta
     mockedFetchPortalMeta.mockResolvedValueOnce({ domain: "" }); // Simulate invalid meta response
     // Second fetch attempt succeeds
     mockedFetchPortalMeta.mockResolvedValueOnce(mockMeta);
 
-
-    const { result, rerender } = renderHook(() => usePortalUrl());
+    const { rerender, result } = renderHook(() => usePortalUrl());
 
     // Wait for the first fetch attempt and state update (setting invalid URL/meta)
     await waitFor(() => {
       expect(mockedFetchPortalMeta).toHaveBeenCalledTimes(1);
-      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(undefined, expect.any(Object)); // Invalid initial URL -> fetch with undefined
+      expect(mockedFetchPortalMeta).toHaveBeenCalledWith(
+        undefined,
+        expect.any(Object),
+      ); // Invalid initial URL -> fetch with undefined
       expect(__mockSetPortalUrl).toHaveBeenCalledWith("http://localhost:3000"); // Fallback to origin
       expect(__mockSetMeta).toHaveBeenCalledWith({ domain: "" });
       expect(result.current).toBe("http://localhost:3000"); // Assert inside waitFor
@@ -343,14 +367,13 @@ describe("usePortalUrl", () => {
     rerender();
 
     // Wait a moment to ensure no new fetch is triggered
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     expect(mockedFetchPortalMeta).toHaveBeenCalledTimes(1); // Fetch should not be called again after the first attempt if URL becomes valid
     // The result.current should now reflect the manually updated state because renderHook
     // should pick up the state change from the mock store on re-render.
     expect(result.current).toBe("https://valid.com"); // Result should reflect the manually updated state
   });
-
 
   it("should clean up pending requests on unmount", async () => {
     const abortSpy = vi.spyOn(AbortController.prototype, "abort");

@@ -8,20 +8,20 @@ import { useMenuItems } from "./useMenuItems";
 
 // Mock the zustand store
 const mockStoreState = {
-  menuItems: [] as NavigationItem[],
   addMenuItem: vi.fn(),
+  menuItems: [] as NavigationItem[],
   removeMenuItem: vi.fn(),
   // Add other state/actions as needed by the hook's selectors
 };
 
 // Create a mock store object with a setState method for testing
 const mockAppStore = {
+  destroy: vi.fn(), // Mock destroy
   getState: () => mockStoreState,
   setState: (newState: Partial<typeof mockStoreState>) => {
     Object.assign(mockStoreState, newState);
   },
   subscribe: vi.fn(), // Mock subscribe as it's required by useStore
-  destroy: vi.fn(), // Mock destroy
 };
 
 vi.mock("@/store/appStore", () => {

@@ -1,6 +1,7 @@
+import React, { useEffect } from "react";
+
 import { useUIStore } from "@/store/uiStore";
 import { getThemeById } from "@/utils/theme";
-import React, { useEffect } from "react";
 
 // Import Theme from the new types file
 import type { Theme } from "../types/theme";

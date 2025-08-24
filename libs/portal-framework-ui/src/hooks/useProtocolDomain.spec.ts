@@ -17,11 +17,13 @@ vi.mock("@lumeweb/portal-app-shell/env", () => ({
   },
 }));
 
-// Import the hook under test *after* the mocks are defined
-import { useProtocolDomain } from "./useProtocolDomain";
+import { env as mockedEnv } from "@lumeweb/portal-app-shell/env";
+
 // Import the mocked function *after* the vi.mock call
 import { usePortalMeta as mockedUsePortalMeta } from "@/hooks/usePortalMeta";
-import { env as mockedEnv } from "@lumeweb/portal-app-shell/env";
+
+// Import the hook under test *after* the mocks are defined
+import { useProtocolDomain } from "./useProtocolDomain";
 
 describe("useProtocolDomain", () => {
   beforeEach(() => {
@@ -91,7 +93,7 @@ describe("useProtocolDomain", () => {
   it("should use root domain when VITE_PORTAL_DOMAIN_IS_ROOT is true", () => {
     mockedEnv.client.VITE_PORTAL_DOMAIN_IS_ROOT = "true";
     vi.mocked(mockedUsePortalMeta).mockReturnValue(
-      createMockPortalMeta({ domain: "admin.dev.pinner.xyz" })
+      createMockPortalMeta({ domain: "admin.dev.pinner.xyz" }),
     );
 
     const { result } = renderHook(() => useProtocolDomain("account"));
@@ -101,7 +103,7 @@ describe("useProtocolDomain", () => {
   it("should keep subdomains when VITE_PORTAL_DOMAIN_IS_ROOT is false", () => {
     mockedEnv.client.VITE_PORTAL_DOMAIN_IS_ROOT = undefined;
     vi.mocked(mockedUsePortalMeta).mockReturnValue(
-      createMockPortalMeta({ domain: "admin.dev.pinner.xyz" })
+      createMockPortalMeta({ domain: "admin.dev.pinner.xyz" }),
     );
 
     const { result } = renderHook(() => useProtocolDomain("account"));
@@ -111,7 +113,7 @@ describe("useProtocolDomain", () => {
   it("should handle single-level domains with VITE_PORTAL_DOMAIN_IS_ROOT", () => {
     mockedEnv.client.VITE_PORTAL_DOMAIN_IS_ROOT = "true";
     vi.mocked(mockedUsePortalMeta).mockReturnValue(
-      createMockPortalMeta({ domain: "localhost" })
+      createMockPortalMeta({ domain: "localhost" }),
     );
 
     const { result } = renderHook(() => useProtocolDomain("api"));

@@ -1,11 +1,21 @@
 import type { CSSProperties } from "react";
+
 import { DEFAULT_WIDGET_AREA_DEFINITION } from "../types/widget";
 
 export function getGridAutoRows(
-  rowHeight: "auto" | number | undefined = DEFAULT_WIDGET_AREA_DEFINITION.rowHeight,
+  rowHeight:
+    | "auto"
+    | number
+    | undefined = DEFAULT_WIDGET_AREA_DEFINITION.rowHeight,
 ): string {
   const resolved = rowHeight ?? DEFAULT_WIDGET_AREA_DEFINITION.rowHeight;
   return resolved === "auto" ? "auto" : `${resolved}px`;
+}
+
+export function getGridColumnSpan(column?: number, span?: number): string {
+  return column !== undefined && span !== undefined
+    ? `${column} / span ${span}`
+    : `auto / span ${span || 1}`;
 }
 
 export function getGridGap(
@@ -29,36 +39,25 @@ export function getGridStyles(area: {
   };
 }
 
-export function getWidgetStyles(
-  widget: {
-    position: {
-      location?: { column?: number };
-      size: { width: number; height: number };
-    };
-    minHeight?: string | number;
-    minWidth?: string | number;
-  }
-): CSSProperties {
+export function getGridTemplateColumns(columns: number): string {
+  return `repeat(${columns}, minmax(0, 1fr))`;
+}
+
+export function getWidgetStyles(widget: {
+  minHeight?: number | string;
+  minWidth?: number | string;
+  position: {
+    location?: { column?: number };
+    size: { height: number; width: number };
+  };
+}): CSSProperties {
   return {
     gridColumn: getGridColumnSpan(
       widget.position.location?.column,
-      widget.position.size.width
+      widget.position.size.width,
     ),
     gridRow: `span ${widget.position.size.height}`,
     minHeight: widget.minHeight,
     minWidth: widget.minWidth,
   };
-}
-
-export function getGridTemplateColumns(columns: number): string {
-  return `repeat(${columns}, minmax(0, 1fr))`;
-}
-
-export function getGridColumnSpan(
-  column?: number,
-  span?: number
-): string {
-  return column !== undefined && span !== undefined
-    ? `${column} / span ${span}`
-    : `auto / span ${span || 1}`;
 }
