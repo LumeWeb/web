@@ -47,9 +47,9 @@ export type getApiAccountResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type getApiAccountResponseComposite = getApiAccountResponse200 | getApiAccountResponse400;
-    
+
 export type getApiAccountResponse = getApiAccountResponseComposite & {
   headers: Headers;
 }
@@ -57,19 +57,19 @@ export type getApiAccountResponse = getApiAccountResponseComposite & {
 export const getGetApiAccountUrl = () => {
 
 
-  
+
 
   return `/api/api/account`
 }
 
 export const getApiAccount = async ( options?: RequestInit): Promise<getApiAccountResponse> => {
-  
+
   const res = await fetch(getGetApiAccountUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
@@ -93,9 +93,9 @@ export type deleteApiAccountDeleteResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type deleteApiAccountDeleteResponseComposite = deleteApiAccountDeleteResponse200 | deleteApiAccountDeleteResponse400;
-    
+
 export type deleteApiAccountDeleteResponse = deleteApiAccountDeleteResponseComposite & {
   headers: Headers;
 }
@@ -103,19 +103,19 @@ export type deleteApiAccountDeleteResponse = deleteApiAccountDeleteResponseCompo
 export const getDeleteApiAccountDeleteUrl = () => {
 
 
-  
+
 
   return `/api/api/account/delete`
 }
 
 export const deleteApiAccountDelete = async ( options?: RequestInit): Promise<deleteApiAccountDeleteResponse> => {
-  
+
   const res = await fetch(getDeleteApiAccountDeleteUrl(),
-  {      
+  {
     ...options,
     method: 'DELETE'
-    
-    
+
+
   }
 )
 
@@ -139,9 +139,9 @@ export type getApiAccountKeysResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type getApiAccountKeysResponseComposite = getApiAccountKeysResponse200 | getApiAccountKeysResponse400;
-    
+
 export type getApiAccountKeysResponse = getApiAccountKeysResponseComposite & {
   headers: Headers;
 }
@@ -150,7 +150,7 @@ export const getGetApiAccountKeysUrl = (params?: GetApiAccountKeysParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -162,13 +162,13 @@ export const getGetApiAccountKeysUrl = (params?: GetApiAccountKeysParams,) => {
 }
 
 export const getApiAccountKeys = async (params?: GetApiAccountKeysParams, options?: RequestInit): Promise<getApiAccountKeysResponse> => {
-  
+
   const res = await fetch(getGetApiAccountKeysUrl(params),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
@@ -192,9 +192,9 @@ export type postApiAccountKeysResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type postApiAccountKeysResponseComposite = postApiAccountKeysResponse200 | postApiAccountKeysResponse400;
-    
+
 export type postApiAccountKeysResponse = postApiAccountKeysResponseComposite & {
   headers: Headers;
 }
@@ -202,15 +202,15 @@ export type postApiAccountKeysResponse = postApiAccountKeysResponseComposite & {
 export const getPostApiAccountKeysUrl = () => {
 
 
-  
+
 
   return `/api/api/account/keys`
 }
 
 export const postApiAccountKeys = async (aPIKeyCreateRequest: APIKeyCreateRequest, options?: RequestInit): Promise<postApiAccountKeysResponse> => {
-  
+
   const res = await fetch(getPostApiAccountKeysUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -239,9 +239,9 @@ export type deleteApiAccountKeysKeyIDResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type deleteApiAccountKeysKeyIDResponseComposite = deleteApiAccountKeysKeyIDResponse200 | deleteApiAccountKeysKeyIDResponse400;
-    
+
 export type deleteApiAccountKeysKeyIDResponse = deleteApiAccountKeysKeyIDResponseComposite & {
   headers: Headers;
 }
@@ -249,19 +249,19 @@ export type deleteApiAccountKeysKeyIDResponse = deleteApiAccountKeysKeyIDRespons
 export const getDeleteApiAccountKeysKeyIDUrl = (keyID: Uuid,) => {
 
 
-  
+
 
   return `/api/api/account/keys/${keyID}`
 }
 
 export const deleteApiAccountKeysKeyID = async (keyID: Uuid, options?: RequestInit): Promise<deleteApiAccountKeysKeyIDResponse> => {
-  
+
   const res = await fetch(getDeleteApiAccountKeysKeyIDUrl(keyID),
-  {      
+  {
     ...options,
     method: 'DELETE'
-    
-    
+
+
   }
 )
 
@@ -285,9 +285,9 @@ export type postApiAccountPasswordResetConfirmResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type postApiAccountPasswordResetConfirmResponseComposite = postApiAccountPasswordResetConfirmResponse200 | postApiAccountPasswordResetConfirmResponse400;
-    
+
 export type postApiAccountPasswordResetConfirmResponse = postApiAccountPasswordResetConfirmResponseComposite & {
   headers: Headers;
 }
@@ -295,15 +295,15 @@ export type postApiAccountPasswordResetConfirmResponse = postApiAccountPasswordR
 export const getPostApiAccountPasswordResetConfirmUrl = () => {
 
 
-  
+
 
   return `/api/api/account/password-reset/confirm`
 }
 
 export const postApiAccountPasswordResetConfirm = async (passwordResetVerifyRequest: PasswordResetVerifyRequest, options?: RequestInit): Promise<postApiAccountPasswordResetConfirmResponse> => {
-  
+
   const res = await fetch(getPostApiAccountPasswordResetConfirmUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -332,9 +332,9 @@ export type postApiAccountPasswordResetRequestResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type postApiAccountPasswordResetRequestResponseComposite = postApiAccountPasswordResetRequestResponse200 | postApiAccountPasswordResetRequestResponse400;
-    
+
 export type postApiAccountPasswordResetRequestResponse = postApiAccountPasswordResetRequestResponseComposite & {
   headers: Headers;
 }
@@ -342,15 +342,15 @@ export type postApiAccountPasswordResetRequestResponse = postApiAccountPasswordR
 export const getPostApiAccountPasswordResetRequestUrl = () => {
 
 
-  
+
 
   return `/api/api/account/password-reset/request`
 }
 
 export const postApiAccountPasswordResetRequest = async (passwordResetRequest: PasswordResetRequest, options?: RequestInit): Promise<postApiAccountPasswordResetRequestResponse> => {
-  
+
   const res = await fetch(getPostApiAccountPasswordResetRequestUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -379,9 +379,9 @@ export type getApiAccountPermissionsResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type getApiAccountPermissionsResponseComposite = getApiAccountPermissionsResponse200 | getApiAccountPermissionsResponse400;
-    
+
 export type getApiAccountPermissionsResponse = getApiAccountPermissionsResponseComposite & {
   headers: Headers;
 }
@@ -389,19 +389,19 @@ export type getApiAccountPermissionsResponse = getApiAccountPermissionsResponseC
 export const getGetApiAccountPermissionsUrl = () => {
 
 
-  
+
 
   return `/api/api/account/permissions`
 }
 
 export const getApiAccountPermissions = async ( options?: RequestInit): Promise<getApiAccountPermissionsResponse> => {
-  
+
   const res = await fetch(getGetApiAccountPermissionsUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 
@@ -425,9 +425,9 @@ export type postApiAccountUpdateEmailResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type postApiAccountUpdateEmailResponseComposite = postApiAccountUpdateEmailResponse200 | postApiAccountUpdateEmailResponse400;
-    
+
 export type postApiAccountUpdateEmailResponse = postApiAccountUpdateEmailResponseComposite & {
   headers: Headers;
 }
@@ -435,15 +435,15 @@ export type postApiAccountUpdateEmailResponse = postApiAccountUpdateEmailRespons
 export const getPostApiAccountUpdateEmailUrl = () => {
 
 
-  
+
 
   return `/api/api/account/update-email`
 }
 
 export const postApiAccountUpdateEmail = async (updateEmailRequest: UpdateEmailRequest, options?: RequestInit): Promise<postApiAccountUpdateEmailResponse> => {
-  
+
   const res = await fetch(getPostApiAccountUpdateEmailUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -472,9 +472,9 @@ export type postApiAccountUpdatePasswordResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type postApiAccountUpdatePasswordResponseComposite = postApiAccountUpdatePasswordResponse200 | postApiAccountUpdatePasswordResponse400;
-    
+
 export type postApiAccountUpdatePasswordResponse = postApiAccountUpdatePasswordResponseComposite & {
   headers: Headers;
 }
@@ -482,15 +482,15 @@ export type postApiAccountUpdatePasswordResponse = postApiAccountUpdatePasswordR
 export const getPostApiAccountUpdatePasswordUrl = () => {
 
 
-  
+
 
   return `/api/api/account/update-password`
 }
 
 export const postApiAccountUpdatePassword = async (updatePasswordRequest: UpdatePasswordRequest, options?: RequestInit): Promise<postApiAccountUpdatePasswordResponse> => {
-  
+
   const res = await fetch(getPostApiAccountUpdatePasswordUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -519,9 +519,9 @@ export type postApiAccountVerifyEmailResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type postApiAccountVerifyEmailResponseComposite = postApiAccountVerifyEmailResponse200 | postApiAccountVerifyEmailResponse400;
-    
+
 export type postApiAccountVerifyEmailResponse = postApiAccountVerifyEmailResponseComposite & {
   headers: Headers;
 }
@@ -529,15 +529,15 @@ export type postApiAccountVerifyEmailResponse = postApiAccountVerifyEmailRespons
 export const getPostApiAccountVerifyEmailUrl = () => {
 
 
-  
+
 
   return `/api/api/account/verify-email`
 }
 
 export const postApiAccountVerifyEmail = async (verifyEmailRequest: VerifyEmailRequest, options?: RequestInit): Promise<postApiAccountVerifyEmailResponse> => {
-  
+
   const res = await fetch(getPostApiAccountVerifyEmailUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -566,9 +566,9 @@ export type postApiAccountVerifyEmailResendResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type postApiAccountVerifyEmailResendResponseComposite = postApiAccountVerifyEmailResendResponse200 | postApiAccountVerifyEmailResendResponse400;
-    
+
 export type postApiAccountVerifyEmailResendResponse = postApiAccountVerifyEmailResendResponseComposite & {
   headers: Headers;
 }
@@ -576,15 +576,15 @@ export type postApiAccountVerifyEmailResendResponse = postApiAccountVerifyEmailR
 export const getPostApiAccountVerifyEmailResendUrl = () => {
 
 
-  
+
 
   return `/api/api/account/verify-email/resend`
 }
 
 export const postApiAccountVerifyEmailResend = async (resendVerifyEmailRequest: ResendVerifyEmailRequest, options?: RequestInit): Promise<postApiAccountVerifyEmailResendResponse> => {
-  
+
   const res = await fetch(getPostApiAccountVerifyEmailResendUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -613,9 +613,9 @@ export type postApiAuthKeyResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type postApiAuthKeyResponseComposite = postApiAuthKeyResponse200 | postApiAuthKeyResponse400;
-    
+
 export type postApiAuthKeyResponse = postApiAuthKeyResponseComposite & {
   headers: Headers;
 }
@@ -623,19 +623,19 @@ export type postApiAuthKeyResponse = postApiAuthKeyResponseComposite & {
 export const getPostApiAuthKeyUrl = () => {
 
 
-  
+
 
   return `/api/api/auth/key`
 }
 
 export const postApiAuthKey = async ( options?: RequestInit): Promise<postApiAuthKeyResponse> => {
-  
+
   const res = await fetch(getPostApiAuthKeyUrl(),
-  {      
+  {
     ...options,
     method: 'POST'
-    
-    
+
+
   }
 )
 
@@ -669,9 +669,9 @@ export type postApiAuthLoginResponse401 = {
   data: Error
   status: 401
 }
-    
+
 export type postApiAuthLoginResponseComposite = postApiAuthLoginResponse200 | postApiAuthLoginResponse302 | postApiAuthLoginResponse400 | postApiAuthLoginResponse401;
-    
+
 export type postApiAuthLoginResponse = postApiAuthLoginResponseComposite & {
   headers: Headers;
 }
@@ -679,15 +679,15 @@ export type postApiAuthLoginResponse = postApiAuthLoginResponseComposite & {
 export const getPostApiAuthLoginUrl = () => {
 
 
-  
+
 
   return `/api/api/auth/login`
 }
 
 export const postApiAuthLogin = async (loginRequest: LoginRequest, options?: RequestInit): Promise<postApiAuthLoginResponse> => {
-  
+
   const res = await fetch(getPostApiAuthLoginUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -716,9 +716,9 @@ export type postApiAuthLogoutResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type postApiAuthLogoutResponseComposite = postApiAuthLogoutResponse200 | postApiAuthLogoutResponse400;
-    
+
 export type postApiAuthLogoutResponse = postApiAuthLogoutResponseComposite & {
   headers: Headers;
 }
@@ -726,19 +726,19 @@ export type postApiAuthLogoutResponse = postApiAuthLogoutResponseComposite & {
 export const getPostApiAuthLogoutUrl = () => {
 
 
-  
+
 
   return `/api/api/auth/logout`
 }
 
 export const postApiAuthLogout = async ( options?: RequestInit): Promise<postApiAuthLogoutResponse> => {
-  
+
   const res = await fetch(getPostApiAuthLogoutUrl(),
-  {      
+  {
     ...options,
     method: 'POST'
-    
-    
+
+
   }
 )
 
@@ -762,9 +762,9 @@ export type postApiAuthOtpDisableResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type postApiAuthOtpDisableResponseComposite = postApiAuthOtpDisableResponse200 | postApiAuthOtpDisableResponse400;
-    
+
 export type postApiAuthOtpDisableResponse = postApiAuthOtpDisableResponseComposite & {
   headers: Headers;
 }
@@ -772,15 +772,15 @@ export type postApiAuthOtpDisableResponse = postApiAuthOtpDisableResponseComposi
 export const getPostApiAuthOtpDisableUrl = () => {
 
 
-  
+
 
   return `/api/api/auth/otp/disable`
 }
 
 export const postApiAuthOtpDisable = async (oTPDisableRequest: OTPDisableRequest, options?: RequestInit): Promise<postApiAuthOtpDisableResponse> => {
-  
+
   const res = await fetch(getPostApiAuthOtpDisableUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -809,9 +809,9 @@ export type postApiAuthOtpGenerateResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type postApiAuthOtpGenerateResponseComposite = postApiAuthOtpGenerateResponse200 | postApiAuthOtpGenerateResponse400;
-    
+
 export type postApiAuthOtpGenerateResponse = postApiAuthOtpGenerateResponseComposite & {
   headers: Headers;
 }
@@ -819,19 +819,19 @@ export type postApiAuthOtpGenerateResponse = postApiAuthOtpGenerateResponseCompo
 export const getPostApiAuthOtpGenerateUrl = () => {
 
 
-  
+
 
   return `/api/api/auth/otp/generate`
 }
 
 export const postApiAuthOtpGenerate = async ( options?: RequestInit): Promise<postApiAuthOtpGenerateResponse> => {
-  
+
   const res = await fetch(getPostApiAuthOtpGenerateUrl(),
-  {      
+  {
     ...options,
     method: 'POST'
-    
-    
+
+
   }
 )
 
@@ -860,9 +860,9 @@ export type postApiAuthOtpValidateResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type postApiAuthOtpValidateResponseComposite = postApiAuthOtpValidateResponse200 | postApiAuthOtpValidateResponse302 | postApiAuthOtpValidateResponse400;
-    
+
 export type postApiAuthOtpValidateResponse = postApiAuthOtpValidateResponseComposite & {
   headers: Headers;
 }
@@ -870,15 +870,15 @@ export type postApiAuthOtpValidateResponse = postApiAuthOtpValidateResponseCompo
 export const getPostApiAuthOtpValidateUrl = () => {
 
 
-  
+
 
   return `/api/api/auth/otp/validate`
 }
 
 export const postApiAuthOtpValidate = async (oTPValidateRequest: OTPValidateRequest, options?: RequestInit): Promise<postApiAuthOtpValidateResponse> => {
-  
+
   const res = await fetch(getPostApiAuthOtpValidateUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -907,9 +907,9 @@ export type postApiAuthOtpVerifyResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type postApiAuthOtpVerifyResponseComposite = postApiAuthOtpVerifyResponse200 | postApiAuthOtpVerifyResponse400;
-    
+
 export type postApiAuthOtpVerifyResponse = postApiAuthOtpVerifyResponseComposite & {
   headers: Headers;
 }
@@ -917,15 +917,15 @@ export type postApiAuthOtpVerifyResponse = postApiAuthOtpVerifyResponseComposite
 export const getPostApiAuthOtpVerifyUrl = () => {
 
 
-  
+
 
   return `/api/api/auth/otp/verify`
 }
 
 export const postApiAuthOtpVerify = async (oTPVerifyRequest: OTPVerifyRequest, options?: RequestInit): Promise<postApiAuthOtpVerifyResponse> => {
-  
+
   const res = await fetch(getPostApiAuthOtpVerifyUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -959,9 +959,9 @@ export type postApiAuthPingResponse401 = {
   data: Error
   status: 401
 }
-    
+
 export type postApiAuthPingResponseComposite = postApiAuthPingResponse200 | postApiAuthPingResponse400 | postApiAuthPingResponse401;
-    
+
 export type postApiAuthPingResponse = postApiAuthPingResponseComposite & {
   headers: Headers;
 }
@@ -969,19 +969,19 @@ export type postApiAuthPingResponse = postApiAuthPingResponseComposite & {
 export const getPostApiAuthPingUrl = () => {
 
 
-  
+
 
   return `/api/api/auth/ping`
 }
 
 export const postApiAuthPing = async ( options?: RequestInit): Promise<postApiAuthPingResponse> => {
-  
+
   const res = await fetch(getPostApiAuthPingUrl(),
-  {      
+  {
     ...options,
     method: 'POST'
-    
-    
+
+
   }
 )
 
@@ -1010,9 +1010,9 @@ export type postApiAuthRegisterResponse409 = {
   data: Error
   status: 409
 }
-    
+
 export type postApiAuthRegisterResponseComposite = postApiAuthRegisterResponse200 | postApiAuthRegisterResponse400 | postApiAuthRegisterResponse409;
-    
+
 export type postApiAuthRegisterResponse = postApiAuthRegisterResponseComposite & {
   headers: Headers;
 }
@@ -1020,15 +1020,15 @@ export type postApiAuthRegisterResponse = postApiAuthRegisterResponseComposite &
 export const getPostApiAuthRegisterUrl = () => {
 
 
-  
+
 
   return `/api/api/auth/register`
 }
 
 export const postApiAuthRegister = async (registerRequest: RegisterRequest, options?: RequestInit): Promise<postApiAuthRegisterResponse> => {
-  
+
   const res = await fetch(getPostApiAuthRegisterUrl(),
-  {      
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -1057,9 +1057,9 @@ export type getApiUploadLimitResponse400 = {
   data: ErrorResponse
   status: 400
 }
-    
+
 export type getApiUploadLimitResponseComposite = getApiUploadLimitResponse200 | getApiUploadLimitResponse400;
-    
+
 export type getApiUploadLimitResponse = getApiUploadLimitResponseComposite & {
   headers: Headers;
 }
@@ -1067,19 +1067,19 @@ export type getApiUploadLimitResponse = getApiUploadLimitResponseComposite & {
 export const getGetApiUploadLimitUrl = () => {
 
 
-  
+
 
   return `/api/api/upload-limit`
 }
 
 export const getApiUploadLimit = async ( options?: RequestInit): Promise<getApiUploadLimitResponse> => {
-  
+
   const res = await fetch(getGetApiUploadLimitUrl(),
-  {      
+  {
     ...options,
     method: 'GET'
-    
-    
+
+
   }
 )
 

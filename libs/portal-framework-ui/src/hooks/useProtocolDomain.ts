@@ -1,9 +1,10 @@
-import { usePortalMeta } from "@/hooks/usePortalMeta";
 import {
   env,
-  getProtocolDomain,
   getCurrentLocation,
+  getProtocolDomain,
 } from "@lumeweb/portal-framework-core";
+
+import { usePortalMeta } from "@/hooks/usePortalMeta";
 
 export function useProtocolDomain(proto: string): string {
   const portalMeta = usePortalMeta();

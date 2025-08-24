@@ -1,11 +1,12 @@
+import { renderHook } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 // Import the mocked dependencies *after* the vi.mock calls
 import { usePortalMeta as mockedUsePortalMeta } from "@/hooks/usePortalMeta";
 import {
   createMockPlugin,
   createMockPortalMeta,
 } from "@/tests/portalMetaMocks";
-import { renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { usePluginMeta } from "./usePluginMeta";
 

@@ -9,6 +9,7 @@ import { schema } from "./register.schema";
 
 export const getRegisterForm = (
   onSubmit: (values: any) => Promise<void>,
+  loginUrl: string,
 ): FormConfig => ({
   fields: [
     {
@@ -76,7 +77,7 @@ export const getRegisterForm = (
   ],
   header: (
     <>
-      <InlineAuthLinkBanner label="Already have an account?" to="/login" />
+      <InlineAuthLinkBanner label="Already have an account?" to={loginUrl} />
       <div className="mt-10">
         <h3 className=" block  sm:hidden text-2xl text-foreground mb-10">
           Create a New Account

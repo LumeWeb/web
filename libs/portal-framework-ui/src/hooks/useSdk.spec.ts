@@ -40,7 +40,6 @@ describe("useSdk", () => {
     // Set a default return value for the mocked hook
     mockUseApiUrl.mockReturnValue("https://test.com");
 
-
     const sdkModule = await import("@lumeweb/portal-sdk");
     MockSdk = vi.mocked(sdkModule.Sdk);
 
@@ -61,10 +60,13 @@ describe("useSdk", () => {
 
     const { result } = renderHook(() => useSdk());
 
-    await waitFor(() => {
-      expect(MockSdk).toHaveBeenCalledTimes(1);
-      expect(MockSdk).toHaveBeenCalledWith(apiUrl); // Expect SDK initialized with apiUrl
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        expect(MockSdk).toHaveBeenCalledTimes(1);
+        expect(MockSdk).toHaveBeenCalledWith(apiUrl); // Expect SDK initialized with apiUrl
+      },
+      { timeout: 1000 },
+    );
     expect(result.current).toEqual(
       expect.objectContaining({
         __isMockSdkInstance: true,
@@ -92,15 +94,18 @@ describe("useSdk", () => {
     // First instance
     const { result: result1, unmount: unmount1 } = renderHook(() => useSdk());
 
-    await waitFor(() => {
-      expect(MockSdk).toHaveBeenCalledTimes(1);
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        expect(MockSdk).toHaveBeenCalledTimes(1);
+      },
+      { timeout: 1000 },
+    );
 
     const firstSdkInstance = portalStore.getState().sdk;
 
     // Second instance
     const { result: result2, unmount: unmount2 } = renderHook(() => useSdk());
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     expect(MockSdk).toHaveBeenCalledTimes(1);
     expect(result2.current).toBe(firstSdkInstance);
 
@@ -113,16 +118,19 @@ describe("useSdk", () => {
     const apiUrl = "https://api.test.com";
     mockUseApiUrl.mockReturnValue(apiUrl);
 
-    const { result, rerender, unmount } = renderHook(() => useSdk());
+    const { rerender, result, unmount } = renderHook(() => useSdk());
 
-    await waitFor(() => {
-      expect(MockSdk).toHaveBeenCalledTimes(1);
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        expect(MockSdk).toHaveBeenCalledTimes(1);
+      },
+      { timeout: 1000 },
+    );
     expect(MockSdk).toHaveBeenCalledTimes(1); // Assert initial call happened
     const firstSdkInstance = portalStore.getState().sdk; // Use portalStore
 
     rerender();
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     expect(MockSdk).toHaveBeenCalledTimes(1);
     expect(result.current).toBe(firstSdkInstance);

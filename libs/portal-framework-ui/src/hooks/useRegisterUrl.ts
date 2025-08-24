@@ -1,8 +1,5 @@
-import { useAccountSubdomain } from "@/hooks/useAccountSubdomain";
-import { getCurrentLocation } from "@lumeweb/portal-framework-core";
+import { useAccountUrl } from "@/hooks/useAccountUrl";
 
 export function useRegisterUrl() {
-  const accountSubdomain = useAccountSubdomain();
-  const { protocol } = getCurrentLocation();
-  return `${protocol}//${accountSubdomain}/register`;
+  return useAccountUrl("/register");
 }

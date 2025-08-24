@@ -1,7 +1,8 @@
-// Import the mocked useUIStore hook
-import { useUIStore as mockedUseUIStore } from "@/store/uiStore";
 import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+// Import the mocked useUIStore hook
+import { useUIStore as mockedUseUIStore } from "@/store/uiStore";
 
 // Import the hook we are actually testing from the source file
 // Import useThemeIdAndSetter and useTheme
@@ -28,27 +29,27 @@ vi.mock("@/store/uiStore", () => {
   });
 
   return {
-    // Export the mocked hook with the name it's expected to have
-    useUIStore: useUIStoreSpy,
+    __clearMockSetThemeSpy: () => {
+      mockSetTheme.mockClear();
+    },
+    __getMockUIStoreState: () => mockUIStoreState,
+    __mockSetTheme: mockSetTheme, // Export the spy itself for assertions
     // Export helper functions for tests to manage the internal state and spies
     __resetMockUIStoreState: (newState: { theme: string }) => {
       mockUIStoreState = newState;
     },
-    __getMockUIStoreState: () => mockUIStoreState,
-    __clearMockSetThemeSpy: () => {
-      mockSetTheme.mockClear();
-    },
-    __mockSetTheme: mockSetTheme, // Export the spy itself for assertions
+    // Export the mocked hook with the name it's expected to have
+    useUIStore: useUIStoreSpy,
   };
 });
 
 // Import the mocked functions and state helpers *after* the vi.mock call
 import {
-  useUIStore as mockedUseUIStore,
-  __resetMockUIStoreState,
-  __getMockUIStoreState,
   __clearMockSetThemeSpy,
+  __getMockUIStoreState,
   __mockSetTheme,
+  __resetMockUIStoreState,
+  useUIStore as mockedUseUIStore,
 } from "@/store/uiStore";
 
 // Mock usePluginMeta as it's used by the other hook (useTheme) in the same file
@@ -57,31 +58,32 @@ vi.mock("./usePluginMeta", () => {
   // Define the mock function inside the factory
   const mockUsePluginMeta = vi.fn();
   return {
-    usePluginMeta: mockUsePluginMeta,
     // Export the mock function reference for assertions
     __mockUsePluginMeta: mockUsePluginMeta,
+    usePluginMeta: mockUsePluginMeta,
   };
 });
 
 // Import the mocked function reference after the vi.mock call
-import { usePluginMeta as mockedUsePluginMeta, __mockUsePluginMeta as mockUsePluginMeta } from "./usePluginMeta";
-
+import {
+  usePluginMeta as mockedUsePluginMeta,
+  __mockUsePluginMeta as mockUsePluginMeta,
+} from "./usePluginMeta";
 
 // Mock the theme utility function
 vi.mock("../utils/theme", () => {
   // Declare the mock function inside the factory
   const mockGetThemeById = vi.fn();
   return {
-    getThemeById: mockGetThemeById,
-    applyThemeStyles: vi.fn(), // Mock applyThemeStyles as it's used by withTheme (not tested here)
     // Export the mock function reference if needed for assertions outside the factory
     __mockGetThemeById: mockGetThemeById,
+    applyThemeStyles: vi.fn(), // Mock applyThemeStyles as it's used by withTheme (not tested here)
+    getThemeById: mockGetThemeById,
   };
 });
 
 // Import the mocked function reference after the vi.mock call
 import { __mockGetThemeById as mockGetThemeById } from "../utils/theme";
-
 
 describe("useThemeIdAndSetter", () => {
   beforeEach(() => {
@@ -133,7 +135,7 @@ describe("useThemeIdAndSetter", () => {
 
 describe("useTheme", () => {
   const mockThemes = [
-    { id: "default", name: "Default", default: true },
+    { default: true, id: "default", name: "Default" },
     { id: "dark", name: "Dark" },
     { id: "custom", name: "Custom" },
   ];
@@ -149,7 +151,9 @@ describe("useTheme", () => {
     // Default mock implementations
     mockUsePluginMeta.mockReturnValue(mockThemes);
     // Default getThemeById to return the theme matching the ID
-    mockGetThemeById.mockImplementation((themes, id) => themes.find(t => t.id === id));
+    mockGetThemeById.mockImplementation((themes, id) =>
+      themes.find((t) => t.id === id),
+    );
   });
 
   it("should return the selected theme based on store state and available themes", () => {
@@ -171,19 +175,29 @@ describe("useTheme", () => {
 
     expect(mockGetThemeById).toHaveBeenCalledWith(mockThemes, "non-existent");
     // It should fallback to finding the default theme
-    expect(result.current).toEqual({ id: "default", name: "Default", default: true });
+    expect(result.current).toEqual({
+      default: true,
+      id: "default",
+      name: "Default",
+    });
   });
 
   it("should return the first theme if selected and default themes are not found", () => {
     __resetMockUIStoreState({ theme: "non-existent" });
     mockGetThemeById.mockReturnValue(undefined);
     // Remove default flag from mockThemes for this test
-    const themesWithoutDefault = mockThemes.map(t => ({ ...t, default: undefined }));
+    const themesWithoutDefault = mockThemes.map((t) => ({
+      ...t,
+      default: undefined,
+    }));
     mockUsePluginMeta.mockReturnValue(themesWithoutDefault);
 
     const { result } = renderHook(() => useTheme());
 
-    expect(mockGetThemeById).toHaveBeenCalledWith(themesWithoutDefault, "non-existent");
+    expect(mockGetThemeById).toHaveBeenCalledWith(
+      themesWithoutDefault,
+      "non-existent",
+    );
     // It should fallback to the first theme in the list
     expect(result.current).toEqual(themesWithoutDefault[0]); // Should be the 'default' theme object without the default flag
   });

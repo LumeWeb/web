@@ -1,6 +1,5 @@
-import { useAccountSubdomain } from "@/hooks/useAccountSubdomain";
+import { useAccountUrl } from "@/hooks/useAccountUrl";
 
 export function useResetPasswordUrl() {
-  const accountSubdomain = useAccountSubdomain();
-  return `https://${accountSubdomain}/reset-password`;
+  return useAccountUrl("/reset-password");
 }
