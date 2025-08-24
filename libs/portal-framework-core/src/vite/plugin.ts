@@ -239,7 +239,7 @@ export function Config(opts: ConfigOptions) {
       : react(),
     tsconfigPaths(),
     createHostFederationConfig(normalizedOpts, resolvedRuntimePlugins),
-    localhostAccessPlugin(),
+    opts.type === "plugin" && localhostAccessPlugin(),
     ...(opts.plugins?.map((plugin) =>
       createPluginFederationConfig(
         plugin,
