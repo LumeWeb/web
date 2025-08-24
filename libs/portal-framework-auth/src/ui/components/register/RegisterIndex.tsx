@@ -1,4 +1,8 @@
-import { SchemaForm, useLoginUrl, withTheme } from "@lumeweb/portal-framework-ui";
+import {
+  SchemaForm,
+  useLoginUrl,
+  withTheme,
+} from "@lumeweb/portal-framework-ui";
 import { useRegister } from "@refinedev/core";
 import React from "react";
 
@@ -19,10 +23,14 @@ function RegisterIndex() {
     });
   };
 
-  const finalRegisterFormConfig = getRegisterForm(onSubmit, loginUrl);
+  const finalRegisterFormConfig = getRegisterForm(onSubmit);
 
   return (
-    <AuthPage variant="register">
+    <AuthPage
+      linkLabel="Already have an account?"
+      linkText="Login here →"
+      linkUrl={loginUrl}
+      variant="register">
       <SchemaForm config={finalRegisterFormConfig} />
     </AuthPage>
   );
