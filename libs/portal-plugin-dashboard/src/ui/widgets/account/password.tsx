@@ -24,7 +24,7 @@ export default function Password() {
         <span>••••••••</span>
       </div>
       <Button
-        className="w-full"
+        className="w-full h-11 whitespace-normal md:h-9 md:whitespace-nowrap"
         onClick={(e) => {
           e.preventDefault();
           openDialog(updatePasswordDialogConfig(updatePassword));

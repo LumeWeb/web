@@ -1,6 +1,9 @@
 import type { Config } from "tailwindcss";
 
 import tailwindcss_animate from "tailwindcss-animate";
+import tailwindcss_scrollbar from "tailwind-scrollbar";
+
+import tailwindClassList from "./classlist";
 
 const config = {
   content: [
@@ -11,8 +14,9 @@ const config = {
     "node_modules/@lumeweb/portal-framework-auth/src/**/*.{js,jsx,ts,tsx}",
   ],
   darkMode: ["class"],
-  plugins: [tailwindcss_animate],
+  plugins: [tailwindcss_animate, tailwindcss_scrollbar],
   prefix: "",
+  safelist: tailwindClassList,
   theme: {
     container: {
       center: true,
@@ -99,6 +103,9 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+      },
+      screens: {
+        tablet: "1000px",
       },
     },
   },

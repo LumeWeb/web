@@ -60,11 +60,13 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
       ...config.refineCoreProps,
       action: config.action,
       autoSave: autoSaveConfig,
+      errorNotification: config.errorNotification,
       id: (["edit", "clone"] as FormAction[]).includes(config.action!)
         ? config.id
         : undefined,
       redirectOnSuccess: false,
       resource: config.resource,
+      successNotification: config.successNotification,
     },
     validationSchema: config.validationSchema,
   });

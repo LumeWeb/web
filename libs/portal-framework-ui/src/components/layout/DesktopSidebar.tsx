@@ -13,14 +13,14 @@ function DesktopSidebar() {
     <aside
       className={cn(
         "hidden md:flex",
-        "flex flex-col fixed top-0 left-0 z-20 h-screen -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300",
+        "flex flex-col fixed top-0 left-0 z-20 h-screen -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300 ",
         {
-          "md:w-[10%] 2xl:w-[5%]": isCollapsed,
-          "md:w-[20%] 2xl:w-[10%]": !isCollapsed,
+          "md:w-40 ": isCollapsed,
+          "md:w-72": !isCollapsed,
         },
       )}>
       <SidebarToggle isOpen={!isCollapsed} setIsOpen={toggleCollapsed} />
-      <div className="relative h-full flex flex-col px-3 py-4 overflow-y-auto  justify-between">
+      <div className="relative h-full flex flex-col px-3 py-4 justify-between">
         <div>
           <Button
             asChild

@@ -36,7 +36,7 @@ function DefaultPagination<TData>() {
       </div>
 
       <span className="text-sm font-medium">
-        Page {pageIndex + 1} of {pageCount}
+        {pageCount > 0 ? `Page ${pageIndex + 1} of ${pageCount}` : 'No pages'}
       </span>
 
       <div className="flex items-center gap-2">
@@ -51,7 +51,7 @@ function DefaultPagination<TData>() {
         <Button
           aria-label="Last page"
           disabled={!table.getCanNextPage()}
-          onClick={() => table.setPageIndex(pageCount - 1)}
+          onClick={() => table.setPageIndex(Math.max(0, pageCount - 1))}
           size="sm"
           variant="outline">
           <ChevronsRight className="h-4 w-4" />

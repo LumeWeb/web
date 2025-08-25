@@ -10,16 +10,61 @@ export interface NavigationBadge {
 }
 
 export interface NavigationItem {
+  /**
+   * Badge to display alongside the navigation item
+   */
   badge?: NavigationBadge;
+  /**
+   * Child navigation items for nested menus
+   */
   children?: NavigationItem[];
+  /**
+   * Whether the item is disabled (non-clickable)
+   */
   disabled?: boolean;
+  /**
+   * If true, will force this item to appear in navigation even if it's an index route
+   */
+  forceShowInNavigation?: boolean;
+  /**
+   * Whether the item is hidden from navigation
+   */
   hidden?: boolean;
+  /**
+   * Icon component to display before the label
+   */
   icon?: React.FC<NavigationItemIconProps>;
+  /**
+   * Unique identifier for the navigation item
+   */
   id?: string;
+  /**
+   * If true, this route is an index route
+   */
+  index?: boolean;
+  /**
+   * Display label for the navigation item
+   */
   label: string;
+  /**
+   * If false, will render the item without a link (default: true)
+   */
+  linkable?: boolean;
+  /**
+   * Sort order relative to sibling items (lower numbers come first)
+   */
   order?: number;
+  /**
+   * ID of parent navigation item for hierarchical structures
+   */
   parentId?: NamespacedId;
+  /**
+   * Route path this item links to
+   */
   path?: string;
+  /**
+   * Function to dynamically determine if item should be shown
+   */
   show?: () => boolean;
 }
 

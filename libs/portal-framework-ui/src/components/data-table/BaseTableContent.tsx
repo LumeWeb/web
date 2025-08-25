@@ -1,4 +1,5 @@
 import {
+  cn,
   TableBody,
   TableCell,
   TableHead,
@@ -41,80 +42,83 @@ function BaseTableContent<TData extends object>({
   table,
 }: BaseTableContentProps<TData>) {
   return (
-    <div className={className}>
+    <div className={cn(className)}>
       {header && <div className="mb-4">{header}</div>}
-      <UITable>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead 
-                    key={header.id}
-                    style={{
-                      minWidth: header.column.columnDef.size,
-                      maxWidth: header.column.columnDef.size,
-                      width: header.column.columnDef.size,
-                    }}
-                    className={header.column.columnDef.meta?.headerClassName}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {isLoading ? (
-            loadingState
-          ) : table.getRowModel().rows.length > 0 ? (
-            table.getRowModel().rows.map((row) => {
-              const rowProps = getRowProps?.(row) || {};
-              if (onRowClick) {
-                rowProps.onClick = () => onRowClick(row);
-                rowProps.className = [
-                  rowProps.className,
-                  "cursor-pointer hover:bg-muted",
-                ]
-                  .filter(Boolean)
-                  .join(" ");
-              }
-              return (
-                <TableRow key={row.id} {...rowProps}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell 
-                      key={cell.id} 
-                      style={{
-                        minWidth: cell.column.columnDef.size,
-                        maxWidth: cell.column.columnDef.size,
-                        width: cell.column.columnDef.size,
-                      }}
-                      className={[
-                        cell.column.columnDef.meta?.cellClassName,
-                        getCellProps?.(cell)?.className
-                      ].filter(Boolean).join(' ')}
-                      {...getCellProps?.(cell)}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
+      <div className={"sm:-mx-8 scrollbar -mx-4 flex overflow-auto"}>
+        <div className={"mx-4 grow sm:mx-8"}>
+          <UITable>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead
+                        className={
+                          header.column.columnDef.meta?.headerClassName
+                        }
+                        key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
-              );
-            })
-          ) : (
-            emptyState
-          )}
-        </TableBody>
-      </UITable>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {isLoading
+                ? loadingState
+                : table.getRowModel().rows.length > 0
+                  ? table.getRowModel().rows.map((row) => {
+                      const rowProps = getRowProps?.(row) || {};
+                      if (onRowClick) {
+                        rowProps.onClick = () => onRowClick(row);
+                        rowProps.tabIndex = 0;
+                        rowProps.role = "button";
+                        rowProps.onKeyDown = (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            if (e.key === " ") {
+                              e.preventDefault();
+                            }
+                            onRowClick(row);
+                          }
+                        };
+                        rowProps.className = [
+                          rowProps.className,
+                          "cursor-pointer hover:bg-muted",
+                        ]
+                          .filter(Boolean)
+                          .join(" ");
+                      }
+                      return (
+                        <TableRow key={row.id} {...rowProps}>
+                          {row.getVisibleCells().map((cell) => (
+                            <TableCell
+                              key={cell.id}
+                              className={[
+                                cell.column.columnDef.meta?.cellClassName,
+                              ]
+                                .filter(Boolean)
+                                .join(" ")}
+                              {...getCellProps?.(cell)}>
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext(),
+                              )}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      );
+                    })
+                  : emptyState}
+            </TableBody>
+          </UITable>
+        </div>
+      </div>
       {footer && <div className="mt-4">{footer}</div>}
       {pagination && <div className="mt-4">{pagination}</div>}
     </div>

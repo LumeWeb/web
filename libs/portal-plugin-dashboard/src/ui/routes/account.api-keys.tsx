@@ -1,9 +1,9 @@
 import { DataTable, PageHeader, useDialog } from "@lumeweb/portal-framework-ui";
 import { Button } from "@lumeweb/portal-framework-ui-core";
+import { useDelete } from "@refinedev/core";
 import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Plus, Trash2 } from "lucide-react";
-import { useDelete } from "@refinedev/core";
 
 import { createApiKeyDialogConfig } from "@/ui/dialogs/createApiKey";
 
@@ -56,12 +56,12 @@ export default function AccountApiKeys() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-col sm:flex-row">
         <PageHeader
           description="Manage your API keys for accessing your services"
           title="API Keys"
         />
-        <Button onClick={handleCreateClick}>
+        <Button className={"mt-2 sm:mt-0"} onClick={handleCreateClick}>
           <Plus className="w-4 h-4 mr-2" />
           Create API Key
         </Button>
@@ -74,22 +74,22 @@ export default function AccountApiKeys() {
               label: "Delete",
               onClick: (row) => {
                 openDialog({
-                  type: "confirm",
-                  title: "Delete API Key",
-                  description: `Are you sure you want to delete the API key "${row.name}"? This action cannot be undone.`,
                   confirmText: "Delete",
-                  variant: "destructive",
+                  description: `Are you sure you want to delete the API key "${row.name}"? This action cannot be undone.`,
                   onConfirm: async () => {
                     await deleteApiKey({
-                      resource: "api-keys",
                       id: row.uuid,
+                      resource: "api-keys",
                       successNotification: () => ({
-                        message: "API Key Deleted",
                         description: `The API key "${row.name}" has been deleted.`,
+                        message: "API Key Deleted",
                         type: "success",
                       }),
                     });
                   },
+                  title: "Delete API Key",
+                  type: "confirm",
+                  variant: "destructive",
                 });
               },
             },

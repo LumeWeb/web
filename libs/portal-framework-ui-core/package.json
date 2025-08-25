@@ -12,6 +12,11 @@
     },
     "./package.json": "./package.json",
     "./tailwind.config": "./dist/esm/config/tailwind.config.js",
+    "./config/classlist": {
+      "types": "./dist/esm/config/classlist.d.ts",
+      "import": "./dist/esm/config/classlist.js",
+      "require": "./dist/cjs/config/classlist.cjs"
+    },
     "./postcss.config": "./dist/cjs/config/postcss.config.cjs",
     "./tailwind.css": "./dist/esm/tailwind.css",
     "./tailwind-plugin.css": "./dist/esm/tailwind-plugin.css"
@@ -62,8 +67,14 @@
     "react-router": "^7.6.0",
     "recharts": "^2.15.3",
     "tailwind-merge": "^3.3.0",
+    "tailwind-scrollbar": "^4.0.2",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2"
+  },
+  "peerDependenciesMeta": {
+    "tailwind-scrollbar": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@radix-ui/react-collapsible": "^1.1.11"

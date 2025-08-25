@@ -1,4 +1,5 @@
 import { type FormConfig, FormFieldType } from "@lumeweb/portal-framework-ui";
+
 import schema from "./createApiKey.schema";
 
 export default function createApiKeyForm(): FormConfig {
@@ -7,7 +8,8 @@ export default function createApiKeyForm(): FormConfig {
     actionButtonsLayout: "horizontal",
     fields: [
       {
-        description: "Give your API key a descriptive name to help you identify its purpose",
+        description:
+          "Give your API key a descriptive name to help you identify its purpose",
         label: "Key Name",
         name: "name",
         placeholder: "e.g., Production API, Development Testing",
@@ -16,6 +18,11 @@ export default function createApiKeyForm(): FormConfig {
     ],
     refine: true,
     resource: "api-keys",
+    successNotification: () => ({
+      description: `The API key has been created.`,
+      message: "API Key Created",
+      type: "success",
+    }),
     validationSchema: schema,
   };
 }

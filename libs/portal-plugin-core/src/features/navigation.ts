@@ -15,6 +15,12 @@ import {
 } from "@lumeweb/portal-framework-core";
 import { createElement, ReactNode } from "react";
 
+// Define symbols for inclusion criteria
+const CHECK_TYPES = {
+  DEFINED: Symbol('defined'),
+  UNDEFINED_CHECK: Symbol('undefinedCheck')
+} as const;
+
 export function generateIdFromRoute(
   route: RouteDefinition,
   pluginId: NamespacedId | undefined,
@@ -125,24 +131,35 @@ export class Navigation implements NavigationFeature {
       id,
       label: route.navigation.label,
       path: route.path ?? "",
+      index: route.index ?? false,
     };
 
-    if (route.navigation.badge) item.badge = route.navigation.badge;
-    if (route.navigation.children) item.children = route.navigation.children;
-    if (route.navigation.disabled !== undefined)
-      item.disabled = route.navigation.disabled;
-    if (route.navigation.hidden !== undefined)
-      item.hidden = route.navigation.hidden;
-    if (route.navigation.icon) item.icon = route.navigation.icon;
-    if (route.navigation.order !== undefined)
-      item.order = route.navigation.order;
-    if (route.navigation.show) item.show = route.navigation.show;
+    // Define properties and their inclusion criteria
+    const propMap = {
+      badge: CHECK_TYPES.DEFINED,
+      disabled: CHECK_TYPES.UNDEFINED_CHECK,
+      hidden: CHECK_TYPES.UNDEFINED_CHECK,
+      icon: CHECK_TYPES.DEFINED,
+      order: CHECK_TYPES.UNDEFINED_CHECK,
+      linkable: CHECK_TYPES.UNDEFINED_CHECK,
+      show: CHECK_TYPES.DEFINED
+    } as const;
+
+    // Copy properties based on their inclusion criteria
+    Object.entries(propMap).forEach(([prop, checkType]) => {
+      const value = (route.navigation as any)[prop];
+      if (checkType === CHECK_TYPES.UNDEFINED_CHECK && value !== undefined) {
+        (item as any)[prop] = value;
+      } else if (checkType === CHECK_TYPES.DEFINED && value !== undefined) {
+        (item as any)[prop] = value;
+      }
+    });
 
     return item;
   }
 
   private shouldIncludeRouteInNavigation(route: RouteDefinition): boolean {
-    return !!route.navigation && !route.index;
+    return !!route.navigation && (!route.index || route.navigation.forceShowInNavigation);
   }
 
   private processRouteForNavigation(route: RouteDefinition, pluginId: NamespacedId): NavigationItem[] {
