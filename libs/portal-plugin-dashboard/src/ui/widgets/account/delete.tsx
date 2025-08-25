@@ -22,7 +22,7 @@ export default function DeleteAccount() {
       icon={AlertTriangle}
       title="Delete Account">
       <Button
-        className="w-full"
+        className="w-full h-11 whitespace-normal md:h-9 md:whitespace-nowrap"
         onClick={handleDeleteClick}
         variant="destructive">
         Delete Account

@@ -10,11 +10,13 @@ export default function editProfileForm(): FormConfig {
     },
     fields: [
       {
+        className: "col-span-2 md:col-span-1",
         label: "First Name",
         name: "first_name",
         type: FormFieldType.TEXT,
       },
       {
+        className: "col-span-2 md:col-span-1",
         label: "Last Name",
         name: "last_name",
         type: FormFieldType.TEXT,

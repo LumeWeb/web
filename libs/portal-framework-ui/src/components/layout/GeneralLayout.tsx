@@ -16,16 +16,16 @@ function GeneralLayoutComponent({ children }: GeneralLayoutProps) {
   return (
     <SidebarProvider>
       <DesktopSidebar />
-      <main className="transition-[margin-left] ease-in-out duration-300 lg:ml-72">
+      <main className="transition-[margin-left] duration-300 ease-in-out lg:ml-72">
         <div>
-          <header className="sticky top-0 z-10 w-full bg-background/95 shadow-md backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:shadow-secondary">
-            <div className="flex items-center gap-2 sm:mx-8 justify-end p-8">
+          <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 dark:shadow-secondary sticky top-0 z-10 w-full shadow-md backdrop-blur">
+            <div className="flex items-center justify-end gap-2 p-8 sm:mx-8">
               <ThemeSwitcher />
               <UserNav />
               <MobileMenu />
             </div>
           </header>
-          <div className="pt-8 pb-8 pl-4 sm:pl-8 sm:pr-16">{children}</div>
+          <div className="mx-4 my-8 sm:mx-8">{children}</div>
         </div>
       </main>
     </SidebarProvider>

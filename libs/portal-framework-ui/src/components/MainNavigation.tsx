@@ -24,18 +24,67 @@ import { useMenuItems } from "@/hooks/useMenuItems";
 
 import { useSidebarContext } from "./layout/SidebarContext";
 
+const isRouteActive = (item: NavigationItemType, currentPathname: string): boolean => {
+  const itemPath = item.path;
+  
+  if (!itemPath) return false;
+  
+  // Exact match
+  if (itemPath === currentPathname) return true;
+  
+  // Check if current path starts with item path + "/"
+  if (itemPath !== "/" && currentPathname.startsWith(`${itemPath}/`)) return true;
+  
+  return false;
+};
+
+const isChildRouteActive = (child: NavigationItemType, parent: NavigationItemType, currentPathname: string): boolean => {
+  // Special handling for index routes - they should be active when we're on the parent path
+  if (child.index && child.path === "" && parent.path === currentPathname) {
+    return true;
+  }
+  
+  return isRouteActive(child, currentPathname);
+};
+
+interface BaseNavItemProps {
+  active: boolean;
+  IconComponent: React.FC<NavigationItemIconProps> | undefined;
+  isCollapsed: boolean;
+  item: NavigationItemType;
+  onItemClick?: () => void;
+}
+
+const NavItemContent: React.FC<BaseNavItemProps> = ({
+  IconComponent,
+  isCollapsed,
+  item,
+}) => (
+  <div className="flex items-center">
+    {IconComponent && (
+      <span className="w-5 h-5 mr-2">
+        <IconComponent />
+      </span>
+    )}
+    <span className={cn({ hidden: isCollapsed })}>{item.label}</span>
+  </div>
+);
+
 interface CollapseMenuButtonProps {
   active: boolean;
   icon?: React.FC<NavigationItemIconProps>;
   isOpen: boolean;
-  label: string;
-  submenus: Submenu[];
   item: NavigationItemType;
+  label: string;
+  onItemClick?: () => void;
+  resetKey?: string;
+  submenus: Submenu[];
 }
 
 interface Submenu {
   active?: boolean;
   href: string;
+  icon?: React.FC<NavigationItemIconProps>;
   label: string;
 }
 
@@ -43,22 +92,32 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
   active,
   icon: Icon,
   isOpen,
-  label,
-  submenus,
   item,
+  label,
+  onItemClick,
+  resetKey,
+  submenus,
 }) => {
   const location = useLocation();
   const pathname = location.pathname; // Get current path
   const isSubmenuActive = submenus.some((submenu) =>
     submenu.active === undefined ? submenu.href === pathname : submenu.active,
   );
-  const [isOpenState, setIsOpenState] =
-    React.useState<boolean>(active || isSubmenuActive);
+  const [isOpenState, setIsOpenState] = React.useState<boolean>(
+    active || isSubmenuActive,
+  );
   const headerHref = item.path || submenus[0]?.href;
 
   React.useEffect(() => {
     setIsOpenState(active || isSubmenuActive);
   }, [active, isSubmenuActive]);
+
+  // Reset state when resetKey changes (mobile navigation)
+  React.useEffect(() => {
+    if (resetKey) {
+      setIsOpenState(false);
+    }
+  }, [resetKey]);
 
   return (
     <Collapsible
@@ -78,9 +137,9 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
                   <Icon size={18} />
                 </span>
               )}
-              {headerHref ? (
+              {headerHref && item.linkable !== false ? (
                 <Link
-                  to={headerHref}
+                  aria-label={label}
                   onClick={(e) => e.stopPropagation()}
                   onKeyDown={(e) => {
                     if (e.key === " ") {
@@ -91,25 +150,22 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
                       e.stopPropagation();
                     }
                   }}
-                  aria-label={label}
-                >
+                  to={headerHref}>
                   <p
                     className={cn({
                       "-translate-x-96 opacity-0": !isOpen,
                       "translate-x-0 opacity-100": isOpen,
-                    })}
-                  >
+                    })}>
                     {label}
                   </p>
                 </Link>
               ) : (
                 <p
+                  aria-disabled="true"
                   className={cn({
                     "-translate-x-96 opacity-0": !isOpen,
                     "translate-x-0 opacity-100": isOpen,
-                  })}
-                  aria-disabled="true"
-                >
+                  })}>
                   {label}
                 </p>
               )}
@@ -130,7 +186,7 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-        {submenus.map(({ active, href, label }, index) => (
+        {submenus.map(({ active, href, icon: Icon, label }, index) => (
           <Button
             asChild
             className="w-full justify-start h-10 mb-1"
@@ -140,9 +196,15 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
                 ? "secondary"
                 : "ghost"
             }>
-            <Link to={href}>
+            <Link
+              onClick={() => {
+                if (onItemClick) {
+                  onItemClick();
+                }
+              }}
+              to={href}>
               <span className="mr-4 ml-2">
-                <Dot size={18} />
+                {Icon ? <Icon size={18} /> : <Dot size={18} />}
               </span>
               <p
                 className={cn({
@@ -159,59 +221,111 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
   );
 };
 
+const LinkableNavItem: React.FC<BaseNavItemProps> = ({
+  active,
+  IconComponent,
+  isCollapsed,
+  item,
+  onItemClick,
+}) => (
+  <Button
+    asChild
+    className="w-full justify-start h-10 mb-1"
+    variant={active ? "secondary" : "ghost"}>
+    <Link onClick={onItemClick} to={item.path || ""}>
+      <NavItemContent
+        active={active}
+        IconComponent={IconComponent}
+        isCollapsed={isCollapsed}
+        item={item}
+        onItemClick={onItemClick}
+      />
+    </Link>
+  </Button>
+);
+
+const NonLinkableNavItem: React.FC<BaseNavItemProps> = ({
+  active,
+  IconComponent,
+  isCollapsed,
+  item,
+  onItemClick,
+}) => (
+  <Button
+    className="w-full justify-start h-10 mb-1"
+    onClick={onItemClick}
+    variant={active ? "secondary" : "ghost"}>
+    <NavItemContent
+      active={active}
+      IconComponent={IconComponent}
+      isCollapsed={isCollapsed}
+      item={item}
+      onItemClick={onItemClick}
+    />
+  </Button>
+);
+
 interface MenuProps {
   isOpen: boolean;
+  onItemClick?: () => void;
 }
 
-const NavItem: React.FC<{ active: boolean; item: NavigationItemType }> =
-  React.forwardRef<
-    HTMLLIElement,
-    { active: boolean; item: NavigationItemType }
-  >(({ active, item }, ref) => {
-    const { isCollapsed } = useSidebarContext();
+const NavItem: React.FC<{
+  active: boolean;
+  item: NavigationItemType;
+  onItemClick?: () => void;
+}> = React.forwardRef<
+  HTMLLIElement,
+  { active: boolean; item: NavigationItemType; onItemClick?: () => void }
+>(({ active, item, onItemClick }, ref) => {
+  const { isCollapsed } = useSidebarContext();
 
-    let IconComponent: React.FC<NavigationItemIconProps> | undefined =
-      undefined;
+  let IconComponent: React.FC<NavigationItemIconProps> | undefined = undefined;
 
-    if (item.icon) {
-      IconComponent = item.icon;
-    }
+  if (item.icon) {
+    IconComponent = item.icon;
+  }
 
-    return (
-      <li ref={ref}>
-        <Button
-          asChild
-          className="w-full justify-start h-10 mb-1"
-          variant={active ? "secondary" : "ghost"}>
-          <Link to={item.path || ""}>
-            <div className="flex items-center">
-              {IconComponent && (
-                <span className="w-5 h-5 mr-2">
-                  <IconComponent />
-                </span>
-              )}
-              <span className={cn({ hidden: isCollapsed })}>{item.label}</span>
-            </div>
-          </Link>
-        </Button>
-      </li>
-    );
-  });
+  return (
+    <li ref={ref}>
+      {item.linkable !== false && Boolean(item.path) ? (
+        <LinkableNavItem
+          active={active}
+          IconComponent={IconComponent}
+          isCollapsed={isCollapsed}
+          item={item}
+          onItemClick={onItemClick}
+        />
+      ) : (
+        <NonLinkableNavItem
+          active={active}
+          IconComponent={IconComponent}
+          isCollapsed={isCollapsed}
+          item={item}
+          onItemClick={onItemClick}
+        />
+      )}
+    </li>
+  );
+});
 NavItem.displayName = "NavItem";
 
-export const MainNavigation: React.FC<MenuProps> = ({ isOpen }) => {
+export const MainNavigation: React.FC<MenuProps> = ({
+  isOpen,
+  onItemClick,
+}) => {
   const menu = useMenuItems(); // Get menu data
   const location = useLocation();
   const pathname = location.pathname;
 
   const renderMenuItem = (item: NavigationItemType) => {
-    const active = item.path === pathname || 
-                 (item.path && item.path !== "/" && pathname.startsWith(`${item.path}/`));
+    const active = isRouteActive(item, pathname);
 
     if (item.children && item.children.length > 0) {
       const submenus: Submenu[] = item.children.map((child) => ({
-        active: child.path ? pathname.startsWith(child.path) : false,
+        active: isChildRouteActive(child, item, pathname),
         href: child.path || "",
+        icon: child.icon,
         label: child.label,
       }));
 
@@ -227,10 +341,12 @@ export const MainNavigation: React.FC<MenuProps> = ({ isOpen }) => {
           active={active}
           icon={CollapseMenuIcon}
           isOpen={isOpen}
+          item={item}
           key={item.id}
           label={item.label}
+          onItemClick={onItemClick}
+          resetKey={typeof onItemClick === 'function' ? pathname : undefined}
           submenus={submenus}
-          item={item}
         />
       );
     } else {
@@ -238,7 +354,7 @@ export const MainNavigation: React.FC<MenuProps> = ({ isOpen }) => {
         <TooltipProvider disableHoverableContent key={item.id}>
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>
-              <NavItem active={active} item={item} />
+              <NavItem active={active} item={item} onItemClick={onItemClick} />
             </TooltipTrigger>
             {isOpen === false && (
               <TooltipContent side="right">{item.label}</TooltipContent>
@@ -252,7 +368,7 @@ export const MainNavigation: React.FC<MenuProps> = ({ isOpen }) => {
   return (
     <ScrollArea className="[&>div>div[style]]:!block">
       <nav className="mt-8 h-full w-full flex flex-col">
-        <ul className="flex-1 flex flex-col items-start space-y-1 px-2 overflow-y-auto">
+        <ul className="flex-1 flex flex-col items-start space-y-1 px-2 overflow-y-auto overflow-x-hidden">
           {menu.getMenuItems().map(renderMenuItem)}
         </ul>
       </nav>

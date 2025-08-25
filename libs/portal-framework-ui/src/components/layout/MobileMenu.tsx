@@ -13,8 +13,10 @@ import React from "react";
 import { MainNavigation } from "@/components/MainNavigation";
 
 export function MobileMenu() {
+  const [open, setOpen] = React.useState(false);
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild className="lg:hidden ml-2">
         <Button className="h-8 w-8" size="icon" variant="outline">
           <MenuIcon size={18} />
@@ -31,7 +33,10 @@ export function MobileMenu() {
             </Link>
           </Button>
         </SheetHeader>
-        <MainNavigation isOpen />
+        <MainNavigation 
+          isOpen 
+          onItemClick={() => setOpen(false)} 
+        />
       </SheetContent>
     </Sheet>
   );

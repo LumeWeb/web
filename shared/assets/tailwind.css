@@ -64,6 +64,16 @@
     --ring: var(--theme-hovered-ui-element);
 
     --radius: 6px;
+
+    /* Scrollbar variables */
+    --scrollbar-track: hsl(var(--background));
+    --scrollbar-track-radius: var(--radius);
+    --scrollbar-thumb: hsl(var(--primary-2));
+    --scrollbar-thumb-radius: var(--radius);
+    --scrollbar-corner: hsl(var(--input));
+    --scrollbar-corner-radius: var(--radius);
+    --scrollbar-width: 16px;
+    --scrollbar-height: 16px;
   }
 }
 

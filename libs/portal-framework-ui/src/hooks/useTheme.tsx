@@ -48,12 +48,20 @@ export const useThemeIdAndSetter = () => {
  * Hook to get the full Theme object based on the selected theme ID and available themes from meta.
  */
 export const useTheme = (): Theme | undefined => {
-  const { theme: selectedThemeId } = useThemeIdAndSetter(); // Use the correct hook
-  const themes = usePluginMeta<Theme[]>("dashboard", "themes"); // Get available themes
+  const { theme: selectedThemeId } = useThemeIdAndSetter();
+  const themes = usePluginMeta<Theme[]>("dashboard", "themes");
 
-  // Find the theme object based on the selected ID or fallback logic
+  // First, try to use the persisted theme from the store
+  if (selectedThemeId && Array.isArray(themes) && themes.length > 0) {
+    const persistedTheme = getThemeById(themes, selectedThemeId);
+    if (persistedTheme) {
+      return persistedTheme;
+    }
+  }
+
+  // Fallback to original logic if no persisted theme found or selectedThemeId is not set yet
   if (!themes || themes.length === 0) {
-    return undefined; // No themes available yet or array is empty
+    return undefined;
   }
 
   let theme = getThemeById(themes, selectedThemeId);
@@ -66,7 +74,7 @@ export const useTheme = (): Theme | undefined => {
     theme = themes[0];
   }
 
-  return theme; // Return the found theme object
+  return theme;
 };
 
 export const withTheme = <P extends object>(
@@ -74,18 +82,27 @@ export const withTheme = <P extends object>(
 ) => {
   return function WithTheme(props: P) {
     const { theme: selectedThemeId } = useThemeIdAndSetter();
-
     const themes = usePluginMeta<Theme[]>("dashboard", "themes");
 
     useEffect(() => {
-      if (!themes) {
+      if (!themes || !Array.isArray(themes) || themes.length === 0) {
         return;
       }
 
+      // First, try to use the persisted theme
+      if (selectedThemeId) {
+        const persistedTheme = getThemeById(themes, selectedThemeId);
+        if (persistedTheme) {
+          applyThemeStyles(persistedTheme);
+          return;
+        }
+      }
+
+      // Fallback to original logic if no persisted theme found
       const themeToApply =
         getThemeById(themes, selectedThemeId) ||
         themes.find((t) => t.default) ||
-        (themes.length > 0 ? themes[0] : null);
+        themes[0];
 
       if (themeToApply) {
         applyThemeStyles(themeToApply);

@@ -9,8 +9,9 @@ interface SidebarToggleProps {
 
 export function SidebarToggle({ isOpen, setIsOpen }: SidebarToggleProps) {
   return (
-    <div className="invisible lg:visible absolute top-[12px] -right-[16px] z-20">
+    <div className="invisible lg:visible absolute top-[12px] -right-[20px] z-20">
       <Button
+        aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
         className="rounded-md w-8 h-8"
         onClick={() => setIsOpen?.()}
         size="icon"

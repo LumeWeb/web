@@ -6,7 +6,7 @@ import {
   Button,
 } from "@lumeweb/portal-framework-ui-core";
 import { useGetIdentity } from "@refinedev/core";
-import { Mail } from "lucide-react";
+import { Mail, Loader2 } from "lucide-react";
 import React from "react";
 
 import { useEmailVerification } from "@/ui/hooks/useEmailVerification";
@@ -39,7 +39,14 @@ function EmailVerificationBanner() {
             onClick={resendVerification}
             size="sm"
             variant="outline">
-            {isLoading ? "Sending..." : "Resend Verification Email"}
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              "Resend Verification Email"
+            )}
           </Button>
         </AlertDescription>
       </Alert>

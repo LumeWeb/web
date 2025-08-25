@@ -1,4 +1,5 @@
 import { SchemaForm, withTheme } from "@lumeweb/portal-framework-ui";
+import { useResetPasswordUrl } from "@lumeweb/portal-framework-ui";
 import {
   useGo,
   useIsAuthenticated,
@@ -6,6 +7,9 @@ import {
   useParsed,
 } from "@refinedev/core";
 import { useEffect } from "react";
+
+import { AuthPage } from "@/ui/components/common/AuthPage";
+import { AuthPageTitle } from "@/ui/components/common/AuthPageTitle";
 
 import { getOtpForm } from "../../forms/otp";
 
@@ -18,6 +22,7 @@ function OtpForm(): JSX.Element {
   const go = useGo();
   const parsed = useParsed<OtpParams>();
   const login = useLogin();
+  const resetPasswordUrl = useResetPasswordUrl();
 
   useEffect(() => {
     if (!isAuthLoading && authData?.authenticated) {
@@ -30,7 +35,16 @@ function OtpForm(): JSX.Element {
     parsed.params?.to,
   );
 
-  return <SchemaForm config={otpFormConfig} />;
+  return (
+    <AuthPage
+      beforeLink={<AuthPageTitle>Two-Factor Authentication</AuthPageTitle>}
+      linkLabel="Forgot your password?"
+      linkText="Reset password →"
+      linkUrl={resetPasswordUrl}
+      variant="login">
+      <SchemaForm config={otpFormConfig} />
+    </AuthPage>
+  );
 }
 
 export default withTheme(OtpForm);

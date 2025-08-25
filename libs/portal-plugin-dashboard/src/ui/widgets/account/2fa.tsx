@@ -68,7 +68,7 @@ export default function TwoFA() {
       icon={Smartphone}
       title="Two-Factor Authentication">
       <Button
-        className="w-full"
+        className="w-full h-11 whitespace-normal md:h-9 md:whitespace-nowrap"
         onClick={(e) => {
           e.preventDefault();
           openDialog(

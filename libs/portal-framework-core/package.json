@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@lumeweb/portal-sdk": "workspace:*",
+    "@lumeweb/portal-framework-ui-core": "workspace:*",
     "bin-pack": "^1.0.2"
   },
   "devDependencies": {

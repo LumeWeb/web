@@ -33,6 +33,11 @@ function DataTable<
         ),
         header: actionMenu.label ?? "Actions",
         id: "actions",
+        meta: {
+          cellClassName: "max-w-24 w-12",
+          headerClassName: "max-w-24 w-12",
+        },
+        size: 0,
       }
     : undefined;
 

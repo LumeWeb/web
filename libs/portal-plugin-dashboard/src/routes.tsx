@@ -1,16 +1,20 @@
+import type { RouteDefinition } from "@lumeweb/portal-framework-core";
+
+import { Key, LayoutDashboard, Shield, User, UserCog } from "lucide-react";
+
 const routes = [
   {
     component: "index",
     id: "root",
-    navigation: {
-      label: "Home",
-      order: 0,
-    },
     path: "/",
   },
   {
     component: "dashboard",
     id: "dashboard",
+    navigation: {
+      icon: LayoutDashboard,
+      label: "Dashboard",
+    },
     path: "/dashboard",
   },
   {
@@ -19,12 +23,18 @@ const routes = [
         component: "account/profile",
         id: "account_index",
         index: true,
+        navigation: {
+          forceShowInNavigation: true,
+          icon: User,
+          label: "Profile",
+        },
         path: "",
       },
       {
         component: "account/security",
         id: "account_security",
         navigation: {
+          icon: Shield,
           label: "Security",
         },
         path: "security",
@@ -33,6 +43,7 @@ const routes = [
         component: "account/api-keys",
         id: "account_api_keys",
         navigation: {
+          icon: Key,
           label: "API Keys",
         },
         path: "api-keys",
@@ -41,7 +52,9 @@ const routes = [
     component: "account/layout",
     id: "account_layout",
     navigation: {
+      icon: UserCog,
       label: "My Account",
+      linkable: false,
     },
     path: "/account",
   },
@@ -83,6 +96,6 @@ const routes = [
     id: "otp_login",
     path: "otp",
   },
-];
+] satisfies RouteDefinition[];
 
 export default routes;

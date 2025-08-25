@@ -6,10 +6,10 @@ const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
-  <div className="relative w-full overflow-auto">
+  <div className="scrollbar relative min-w-full overflow-auto">
     <table
       className={cn(
-        "w-full caption-bottom text-sm rounded-lg border-x-0",
+        "w-full caption-bottom rounded-lg border-x-0 text-sm",
         className,
       )}
       ref={ref}
@@ -33,7 +33,7 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tbody
     className={cn(
-      "[&_tr:last-child]:border-0  rounded-lg border-x-0",
+      "rounded-lg border-x-0 [&_tr:last-child]:border-0",
       className,
     )}
     ref={ref}
@@ -48,7 +48,7 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tfoot
     className={cn(
-      "h-14 border border-t-2 border-x-0 bg-secondary-2 font-medium",
+      "bg-secondary-2 h-14 border border-x-0 border-t-2 font-medium",
       className,
     )}
     ref={ref}
@@ -63,7 +63,7 @@ const TableRow = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tr
     className={cn(
-      "border-y-1 border-x-0 transition-colors text-foreground data-[state=selected]:text-ring ",
+      "border-y-1 text-foreground data-[state=selected]:text-ring border-x-0 transition-colors",
       className,
     )}
     ref={ref}
@@ -78,7 +78,7 @@ const TableHead = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <th
     className={cn(
-      "h-14 px-6 border-x-1 first:border-l-0 last:border-r-0 text-left align-middle font-bold text-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+      "border-x-1 text-foreground h-14 px-6 text-left align-middle font-bold first:border-l-0 last:border-r-0 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
       className,
     )}
     ref={ref}
@@ -93,7 +93,7 @@ const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <td
     className={cn(
-      "h-14 px-6 align-middle border-x-1 text-foreground first:border-l-0 last:border-r-0 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+      "border-x-1 text-foreground h-14 px-6 align-middle first:border-l-0 last:border-r-0 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
       className,
     )}
     ref={ref}
@@ -107,7 +107,7 @@ const TableCaption = React.forwardRef<
   React.HTMLAttributes<HTMLTableCaptionElement>
 >(({ className, ...props }, ref) => (
   <caption
-    className={cn("mt-4 text-sm text-foreground", className)}
+    className={cn("text-foreground mt-4 text-sm", className)}
     ref={ref}
     {...props}
   />

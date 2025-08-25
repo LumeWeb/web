@@ -1,13 +1,12 @@
 import { Identity } from "@lumeweb/portal-framework-core";
 import { useSdk } from "@lumeweb/portal-framework-ui";
-import { Sdk } from "@lumeweb/portal-sdk";
 import { useGetIdentity, useNotification } from "@refinedev/core";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 
 export function useEmailVerification() {
-  const sdk = useSdk() as Sdk;
+  const sdk = useSdk();
   const { open } = useNotification();
 
   const [alreadyVerified, setAlreadyVerified] = useState(false);
@@ -23,11 +22,32 @@ export function useEmailVerification() {
 
   const verifyAgain = useMutation({
     mutationFn: async () => {
-      let ret = await sdk.account!().requestEmailVerification({
-        email: user.data!.email || email!,
-      });
-      if (ret instanceof Error) {
-        throw ret;
+      const emailToVerify = user.data?.email ?? email;
+
+      if (!emailToVerify) {
+        open?.({
+          description: "No email address found",
+          message: "Email verification failed",
+          type: "error",
+        });
+        return;
+      }
+
+      try {
+        const ret = await sdk.account().requestEmailVerification({
+          email: emailToVerify,
+        });
+
+        if (ret instanceof Error) {
+          throw ret;
+        }
+      } catch (error) {
+        open?.({
+          description: "Please try again later",
+          message: "Failed to send email",
+          type: "error",
+        });
+        throw error;
       }
     },
     onError(error) {
@@ -40,11 +60,7 @@ export function useEmailVerification() {
         });
         return;
       }
-      open?.({
-        description: "Please try again later",
-        message: "Failed to send email",
-        type: "error",
-      });
+      // Error notification is handled in mutationFn, so we don't need to show it again here
     },
     onSuccess() {
       open?.({
@@ -55,11 +71,15 @@ export function useEmailVerification() {
     },
   });
 
+  if (!sdk) {
+    return {};
+  }
+
   const handleResendVerification = async () => verifyAgain.mutate();
 
   return {
     alreadyVerified,
-    isLoading: verifyAgain.isPending || user.isLoading,
+    isLoading: verifyAgain.isLoading || user.isLoading,
     resendVerification: handleResendVerification,
   };
 }
