@@ -31,9 +31,8 @@ export interface ForgotPasswordRequest
   token?: string;
 }
 
-export interface OPTGenerateResponse {
-  otp: string;
-}
+export type OTPGenerateResponse =
+  import("@lumeweb/portal-sdk").OTPGenerateResponse;
 
 export interface OTPFormRequest extends OTPValidateRequest {
   redirectTo?: string;
@@ -65,6 +64,59 @@ const createAuthResponse = (
   ...params,
 });
 
+// Helper function to wrap unknown errors with a custom name
+const wrapErrorWithName = (error: unknown, name: string): Error => {
+  const original = error instanceof Error ? error : new Error(String(error));
+  const e = new Error(original.message);
+  e.name = name;
+  e.stack = original.stack;
+  if ((original as any).cause) (e as any).cause = (original as any).cause;
+  Object.keys(original).forEach((key) => {
+    if (!(key in e)) (e as any)[key] = (original as any)[key];
+  });
+  return e;
+};
+
+// Error name constants
+const LOGIN_ERROR_NAME = "Login Error";
+const REGISTRATION_ERROR_NAME = "Registration Error";
+const LOGOUT_ERROR_NAME = "Logout Error";
+const PASSWORD_RESET_ERROR_NAME = "Password Reset Error";
+const UPDATE_PASSWORD_ERROR_NAME = "Update Password Error";
+
+// Redirect paths
+const LOGIN_PATH = "/login";
+const OTP_PATH = "/otp";
+const DASHBOARD_PATH = "/dashboard";
+
+// Utility to sanitize redirect URLs - only allow relative paths or specific allowed domains
+const sanitizeRedirectUrl = (url: string | undefined): string => {
+  if (!url) return DASHBOARD_PATH;
+  
+  try {
+    // If it's a relative path, allow it
+    if (url.startsWith("/")) {
+      return url;
+    }
+    
+    // If it's an absolute URL, only allow localhost for development
+    const parsedUrl = new URL(url);
+    if (parsedUrl.hostname === "localhost" || parsedUrl.hostname === "127.0.0.1") {
+      return url;
+    }
+    
+    // For any other domain, redirect to dashboard
+    return DASHBOARD_PATH;
+  } catch {
+    // If URL parsing fails, redirect to dashboard
+    return DASHBOARD_PATH;
+  }
+};
+
+export interface AuthProviderWithEmitter extends AuthProvider {
+  on<E extends keyof AuthEvents>(event: E, callback: AuthEvents[E]): () => void;
+}
+
 export interface AuthCheckFailedEvent {
   error: Error;
 }
@@ -79,10 +131,6 @@ export interface AuthEvents {
   registerAttempt: (params: RegisterAttemptEvent) => void;
 }
 
-export interface Auth1ProviderWithEmitter extends AuthProvider {
-  on<E extends keyof AuthEvents>(event: E, callback: AuthEvents[E]): () => void;
-}
-
 export interface RegisterAttemptEvent {
   email: string;
   firstName: string;
@@ -91,9 +139,15 @@ export interface RegisterAttemptEvent {
 export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
   const emitter = createNanoEvents<AuthEvents>();
   const maybeSetupAuth = () => {
-    const token = localStorage.getItem("jwt");
-    if (token) {
-      sdk.setAuthToken(token);
+    if (typeof window === "undefined") return;
+    try {
+      const baseUrl = getApiBaseUrl();
+      const isLocal = !!baseUrl && new URL(baseUrl).hostname === "localhost";
+      if (!isLocal) return;
+      const token = window.localStorage?.getItem("jwt");
+      if (token) sdk.setAuthToken(token);
+    } catch {
+      /* noop */
     }
   };
 
@@ -107,7 +161,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
         return {
           authenticated: false,
           error: response.error,
-          redirectTo: "/login",
+          redirectTo: LOGIN_PATH,
         };
       }
 
@@ -150,7 +204,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
 
         return createAuthResponse({
           success: response.success,
-          ...(isErrorResult(response) && { error: response.error }),
+          ...(isErrorResult(response) && { error: wrapErrorWithName(response.error, PASSWORD_RESET_ERROR_NAME) }),
           ...(response.success && {
             successNotification: {
               description:
@@ -161,7 +215,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
         });
       } catch (error) {
         return createAuthResponse({
-          error: error as Error,
+          error: wrapErrorWithName(error, PASSWORD_RESET_ERROR_NAME),
           success: false,
         });
       }
@@ -201,8 +255,12 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
 
           if (isErrorResult(response)) {
             return createAuthResponse({
-              error: response.error,
-              redirectTo: "/otp",
+              error: wrapErrorWithName(response.error, LOGIN_ERROR_NAME),
+              redirectTo: `${OTP_PATH}${
+                params.redirectTo
+                  ? `?to=${encodeURIComponent(sanitizeRedirectUrl(params.redirectTo))}`
+                  : ""
+              }`,
               success: false,
             });
           }
@@ -214,14 +272,16 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
             if (baseUrl) {
               try {
                 if (new URL(baseUrl).hostname === "localhost") {
-                  localStorage.setItem("jwt", response.data.token);
+                  if (typeof window !== "undefined") {
+                    window.localStorage?.setItem("jwt", response.data.token);
+                  }
                 }
               } catch {
                 // Silently ignore URL parse errors
               }
             }
             return createAuthResponse({
-              redirectTo: params.redirectTo ?? "/dashboard",
+              redirectTo: sanitizeRedirectUrl(params.redirectTo) ?? DASHBOARD_PATH,
               success: true,
               successNotification: {
                 description: "You have successfully logged in with 2FA.",
@@ -238,15 +298,15 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
 
         if (isErrorResult(response)) {
           return createAuthResponse({
-            error: response.error,
+            error: wrapErrorWithName(response.error, LOGIN_ERROR_NAME),
             success: false,
           });
         }
 
         if (response.data.otp) {
           return createAuthResponse({
-            redirectTo: `/otp?to=${encodeURIComponent(
-              params.redirectTo ?? "/dashboard",
+            redirectTo: `${OTP_PATH}?to=${encodeURIComponent(
+              sanitizeRedirectUrl(params.redirectTo) ?? DASHBOARD_PATH,
             )}`,
             success: true,
             successNotification: {
@@ -262,14 +322,16 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
           if (baseUrl) {
             try {
               if (new URL(baseUrl).hostname === "localhost") {
-                localStorage.setItem("jwt", response.data.token);
+                if (typeof window !== "undefined") {
+                  window.localStorage?.setItem("jwt", response.data.token);
+                }
               }
             } catch {
               // Silently ignore URL parse errors
             }
           }
           return createAuthResponse({
-            redirectTo: params.redirectTo ?? "/dashboard",
+            redirectTo: sanitizeRedirectUrl(params.redirectTo) ?? DASHBOARD_PATH,
             success: true,
             successNotification: {
               description: "You have successfully logged in.",
@@ -284,8 +346,8 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
         });
       } catch (error) {
         return createAuthResponse({
-          error: error as Error,
-          redirectTo: "/login",
+          error: wrapErrorWithName(error, LOGIN_ERROR_NAME),
+          redirectTo: LOGIN_PATH,
           success: false,
         });
       }
@@ -299,7 +361,9 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
         if (baseUrl) {
           try {
             if (new URL(baseUrl).hostname === "localhost") {
-              localStorage.removeItem("jwt");
+              if (typeof window !== "undefined") {
+                window.localStorage?.removeItem("jwt");
+              }
             }
           } catch {
             // Silently ignore URL parse errors
@@ -308,9 +372,11 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
       }
 
       return createAuthResponse({
-        redirectTo: "/login",
+        redirectTo: LOGIN_PATH,
         success: response.success,
-        ...(isErrorResult(response) && { error: response.error }),
+        ...(isErrorResult(response) && {
+          error: wrapErrorWithName(response.error, LOGOUT_ERROR_NAME),
+        }),
       });
     },
 
@@ -335,10 +401,12 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
       });
 
       return createAuthResponse({
-        redirectTo: "/login",
         success: response.success,
-        ...(isErrorResult(response) && { error: response.error }),
+        ...(isErrorResult(response) && {
+          error: wrapErrorWithName(response.error, REGISTRATION_ERROR_NAME),
+        }),
         ...(response.success && {
+          redirectTo: LOGIN_PATH,
           successNotification: {
             description:
               "You have successfully registered. Please check your email to verify your account.",
@@ -358,7 +426,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
 
       return createAuthResponse({
         success: response.success,
-        ...(isErrorResult(response) && { error: response.error }),
+        ...(isErrorResult(response) && { error: wrapErrorWithName(response.error, UPDATE_PASSWORD_ERROR_NAME) }),
         ...(response.success && {
           successNotification: {
             description: "Your password has been updated successfully.",

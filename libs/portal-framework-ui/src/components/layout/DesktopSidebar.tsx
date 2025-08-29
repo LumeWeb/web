@@ -13,19 +13,19 @@ function DesktopSidebar() {
     <aside
       className={cn(
         "hidden md:flex",
-        "flex flex-col fixed top-0 left-0 z-20 h-screen -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300 ",
+        "fixed left-0 top-0 z-20 flex h-screen -translate-x-full flex-col transition-[width] duration-300 ease-in-out lg:translate-x-0",
         {
-          "md:w-40 ": isCollapsed,
+          "md:w-32": isCollapsed,
           "md:w-72": !isCollapsed,
         },
       )}>
       <SidebarToggle isOpen={!isCollapsed} setIsOpen={toggleCollapsed} />
-      <div className="relative h-full flex flex-col px-3 py-4 justify-between">
+      <div className="relative flex h-full flex-col justify-between px-3 py-4">
         <div>
           <Button
             asChild
             className={cn(
-              "transition-transform ease-in-out duration-300 mb-1",
+              "mb-1 transition-transform duration-300 ease-in-out",
               !isCollapsed ? "translate-x-1" : "translate-x-0",
             )}
             variant="link">
@@ -39,7 +39,7 @@ function DesktopSidebar() {
         </div>
         <span
           className={cn(
-            "text-foreground/60 mb-3 space-y-1 transition-opacity duration-300 mb-4",
+            "text-foreground/60 mb-4 space-y-1 transition-opacity duration-300",
             {
               "opacity-0": isCollapsed,
               "opacity-100": !isCollapsed,
