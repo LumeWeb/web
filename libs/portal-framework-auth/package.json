@@ -21,6 +21,7 @@
     "@lumeweb/portal-framework-ui": "workspace:*",
     "@lumeweb/portal-framework-ui-core": "workspace:*",
     "@lumeweb/portal-sdk": "workspace:*",
+    "js-cookie": "^3.0.5",
     "nanoevents": "^9.1.0"
   },
   "devDependencies": {

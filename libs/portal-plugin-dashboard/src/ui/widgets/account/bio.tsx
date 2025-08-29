@@ -1,5 +1,6 @@
 import type { Identity } from "@lumeweb/portal-framework-core";
 
+import { useDialog } from "@lumeweb/portal-framework-ui";
 import {
   Avatar,
   AvatarFallback,
@@ -11,8 +12,11 @@ import { format } from "date-fns";
 import { Calendar, Camera, Check } from "lucide-react";
 
 import { Card } from "@/ui/components/Card";
+import { uploadAvatarDialogConfig } from "@/ui/dialogs/uploadAvatar";
+
 export default function Bio() {
-  const { data: identity } = useGetIdentity<Identity>();
+  const { data: identity, refetch } = useGetIdentity<Identity>();
+  const { closeDialog, openDialog } = useDialog();
 
   if (!identity) {
     return null;
@@ -21,11 +25,16 @@ export default function Bio() {
   const displayName =
     `${identity?.firstName || ""} ${identity?.lastName || ""}`.trim();
 
+  const handleAvatarUpdate = () => {
+    refetch?.();
+    closeDialog();
+  };
+
   return (
     <Card className="p-6">
       <div className="flex flex-col items-center text-center">
         <div className="relative mb-4">
-          <Avatar className="w-24 h-24">
+          <Avatar className="h-24 w-24">
             <AvatarImage
               alt={displayName}
               src={identity.avatar || "/placeholder.svg"}
@@ -37,27 +46,36 @@ export default function Bio() {
             </AvatarFallback>
           </Avatar>
           <Button
-            className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full p-0"
+            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
+            onClick={() =>
+              openDialog(
+                uploadAvatarDialogConfig(
+                  displayName,
+                  identity.avatar || "/placeholder.svg",
+                  handleAvatarUpdate,
+                ),
+              )
+            }
             size="sm"
             variant="secondary">
-            <Camera className="w-4 h-4" />
+            <Camera className="h-4 w-4" />
           </Button>
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold text-foreground">
+            <h3 className="text-foreground text-lg font-semibold">
               {displayName}
             </h3>
             {identity.verified && (
-              <div className="w-5 h-5 bg-success rounded-full flex items-center justify-center">
-                <Check className="w-3 h-3 text-success-foreground" />
+              <div className="bg-success flex h-5 w-5 items-center justify-center rounded-full">
+                <Check className="text-success-foreground h-3 w-3" />
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 mt-4 w-full text-sm text-muted-foreground">
+        <div className="text-muted-foreground mt-4 flex w-full flex-col gap-2 text-sm">
           {identity.created_at &&
             (() => {
               try {
@@ -65,7 +83,7 @@ export default function Bio() {
                 if (isNaN(createdDate.getTime())) return null;
                 return (
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
+                    <Calendar className="h-4 w-4" />
                     <span>
                       Account created {format(createdDate, "MMMM yyyy")}
                     </span>

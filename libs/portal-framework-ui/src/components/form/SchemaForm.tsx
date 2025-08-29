@@ -10,7 +10,7 @@ import {
   type FormAction,
   useNotification,
 } from "@refinedev/core";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 
 import { FormDialogConfig, useDialog } from "../dialog";
 import { adapters, FormAdapter, UnifiedFormReturnType } from "./adapters";
@@ -77,11 +77,18 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
       : undefined
     : undefined;
 
+  const isActiveDialog = !!currentDialog?.formConfig;
+
   useEffect(() => {
-    if (setFormInstance) {
+    if (!setFormInstance) return;
+    if (isActiveDialog) {
       setFormInstance(formInstance);
     }
-  }, [formInstance, setFormInstance]);
+    return () => {
+      // clear on unmount or when dialog closes
+      try { setFormInstance(undefined as any); } catch {}
+    };
+  }, [formInstance, setFormInstance, isActiveDialog]);
 
   const cConfig = { ...config };
 
@@ -93,9 +100,10 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
     cConfig.footerClassName = undefined;
   }
 
-  const finalConfig: FormConfig<T> | FormDialogConfig<T> = currentDialog
-    ? { ...currentDialog, formConfig: cConfig }
-    : cConfig;
+  const finalConfig: FormConfig<T> | FormDialogConfig<T> = useMemo(
+    () => (isActiveDialog ? { ...currentDialog!, formConfig: cConfig } : cConfig),
+    [isActiveDialog, currentDialog, cConfig],
+  );
 
   const isRefineWithAutosave = shouldUseRefine && autoSaveConfig?.enabled;
 
@@ -111,7 +119,7 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
           className={cn(cConfig.formClassName, {
             "flex flex-col space-y-4":
               cConfig.layout === "vertical" || !cConfig.layout,
-            "flex flex-row gap-4 items-end": cConfig.layout === "horizontal",
+            "flex flex-row items-end gap-4": cConfig.layout === "horizontal",
             "grid gap-4": cConfig.layout === "grid",
             "space-y-4": cConfig.layout !== "grid",
           })}

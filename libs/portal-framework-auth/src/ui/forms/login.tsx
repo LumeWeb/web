@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import Cookies from "js-cookie";
 
 import {
   ActionItemType,
@@ -15,6 +16,9 @@ export const getLoginFormConfig = (
 ): FormConfig<LoginFormValues> => ({
   adapter: "rhf",
   closeOnSubmit: false,
+  defaultValues: {
+    remember: Cookies.get("remember_me") === "true",
+  },
   fields: [
     {
       inputClassName: "mt-4 bg-input border placeholder-input-placeholder",
@@ -55,6 +59,10 @@ export const getLoginFormConfig = (
   // Update formClassName to match the target wrapper
   formClassName: "w-full m-auto",
   onSubmit: (data) => {
+    // Remove remember me cookie if unchecked
+    if (!data.remember) {
+      Cookies.remove("remember_me");
+    }
     return login(data);
   },
   validationSchema: schema,

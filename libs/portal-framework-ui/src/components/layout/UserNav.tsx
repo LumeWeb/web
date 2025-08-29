@@ -42,10 +42,14 @@ export function UserNav() {
                 className="relative h-8 w-8 rounded-full"
                 variant="outline">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage alt="Avatar" src="#" />
+                  <AvatarImage
+                    alt={(firstName || lastName ? `${firstName} ${lastName}`.trim() : email || "User avatar")}
+                    src={identity?.avatar || "/placeholder.svg"}
+                  />
                   <AvatarFallback className="bg-transparent">
-                    {firstName.charAt(0).toUpperCase()}
-                    {lastName.charAt(0).toUpperCase()}
+                    {(firstName || lastName
+                      ? (firstName || lastName).charAt(0).toUpperCase()
+                      : (email?.charAt(0)?.toUpperCase() || "?"))}
                   </AvatarFallback>
                 </Avatar>
               </Button>

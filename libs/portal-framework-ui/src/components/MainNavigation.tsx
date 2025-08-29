@@ -26,15 +26,15 @@ import { useSidebarContext } from "./layout/SidebarContext";
 
 const isRouteActive = (item: NavigationItemType, currentPathname: string): boolean => {
   const itemPath = item.path;
-  
+
   if (!itemPath) return false;
-  
+
   // Exact match
   if (itemPath === currentPathname) return true;
-  
+
   // Check if current path starts with item path + "/"
   if (itemPath !== "/" && currentPathname.startsWith(`${itemPath}/`)) return true;
-  
+
   return false;
 };
 
@@ -43,7 +43,7 @@ const isChildRouteActive = (child: NavigationItemType, parent: NavigationItemTyp
   if (child.index && child.path === "" && parent.path === currentPathname) {
     return true;
   }
-  
+
   return isRouteActive(child, currentPathname);
 };
 
@@ -324,7 +324,7 @@ export const MainNavigation: React.FC<MenuProps> = ({
     if (item.children && item.children.length > 0) {
       const submenus: Submenu[] = item.children.map((child) => ({
         active: isChildRouteActive(child, item, pathname),
-        href: child.path || "",
+        href: child.index ? item.path : (child.path || ""),
         icon: child.icon,
         label: child.label,
       }));
