@@ -17,10 +17,11 @@ interface CheckboxProps {
   onBlur?: () => void;
   onChange?: (checked: boolean) => void;
   value?: boolean;
+  autocomplete?: string;
 }
 
 export const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
-  ({ label, ...props }, ref) => {
+  ({ label, autocomplete, ...props }, ref) => {
     return (
       <>
         <BaseCheckbox
@@ -31,6 +32,7 @@ export const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
           onBlur={props.onBlur}
           onCheckedChange={props.onChange}
           ref={ref}
+          autoComplete={autocomplete}
         />
         {label && (
           <Label

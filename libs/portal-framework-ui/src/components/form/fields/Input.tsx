@@ -9,12 +9,13 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   inputClassName?: string; // Use inputClassName for the actual input element
   label?: string;
   placeholder?: string;
+  autocomplete?: string;
   // onChange is included via React.InputHTMLAttributes
   // value is included via React.InputHTMLAttributes
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ inputClassName, onChange, placeholder, type, value, ...props }, ref) => {
+  ({ inputClassName, onChange, placeholder, type, value, autocomplete, autoComplete: htmlAutoComplete, ...props }, ref) => {
     return (
       <BaseInput
         className={cn("border-none bg-input h-14", inputClassName)}
@@ -23,6 +24,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ref={ref}
         type={type}
         value={value ?? ""} // Use value prop directly, default to empty string
+        autoComplete={autocomplete ?? htmlAutoComplete}
         {...props}
       />
     );

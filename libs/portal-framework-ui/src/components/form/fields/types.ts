@@ -32,4 +32,5 @@ export interface FormComponentProps {
   options?: FormFieldOption[];
   placeholder?: string;
   required?: boolean;
+  autocomplete?: string;
 }

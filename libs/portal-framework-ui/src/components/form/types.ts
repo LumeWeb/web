@@ -25,6 +25,17 @@ export enum GroupOrder {
 
 export type FormAutosaveConfig<T> = AutoSaveProps<T>["autoSave"];
 
+export type AutocompleteToken =
+  | "on"
+  | "off"
+  | "username"
+  | "email"
+  | "current-password"
+  | "new-password"
+  | "one-time-code"
+  | "given-name"
+  | "family-name";
+
 export interface FormConfig<
   TRequest extends BaseRecord = any,
   TResponse extends BaseRecord = any,
@@ -137,6 +148,11 @@ export interface FormFieldConfig<TRequest extends BaseRecord = any> {
   options?: FormFieldOption[];
   placeholder?: string;
   required?: boolean;
+  /**
+   * The HTML autocomplete attribute value for the field.
+   * If provided, it will be passed to the underlying input component.
+   */
+  autocomplete?: AutocompleteToken;
   /**
    * Declaratively define dependencies for field visibility.
    * The field will only be shown if *all* conditions in this object are met.

@@ -26,6 +26,7 @@ export const getRegisterForm = (
       label: "First Name",
       name: "firstName",
       type: FormFieldType.TEXT,
+      autocomplete: "given-name",
     },
     {
       className: "space-y-2",
@@ -35,24 +36,28 @@ export const getRegisterForm = (
       label: "Last Name",
       name: "lastName",
       type: FormFieldType.TEXT,
+      autocomplete: "family-name",
     },
     {
       inputClassName: "h-14",
       label: "Email",
       name: "email",
       type: FormFieldType.EMAIL,
+      autocomplete: "email",
     },
     {
       inputClassName: "h-14",
       label: "Password",
       name: "password",
       type: FormFieldType.PASSWORD,
+      autocomplete: "new-password",
     },
     {
       inputClassName: "h-14",
       label: "Confirm Password",
       name: "confirmPassword",
       type: FormFieldType.PASSWORD,
+      autocomplete: "new-password",
     },
     {
       label: (
