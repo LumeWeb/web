@@ -1,5 +1,5 @@
 import { loadShare_1, init_1, core_dashboard__mf_v__runtimeInit__mf_v__ } from './core_dashboard__mf_v__runtimeInit__mf_v__-DeI6jfgm.js';
-import exposesMap from './virtualExposes-DcXON9pw.js';
+import exposesMap from './virtualExposes-BnlFTJwk.js';
 
 function BridgeReactPlugin() {
   return {
@@ -93,6 +93,26 @@ const usedShared = {
             }
           }
         ,
+          "react-router": {
+            name: "react-router",
+            version: "7.8.2",
+            scope: ["default"],
+            loaded: false,
+            from: "core:dashboard",
+            async get () {
+              {
+                const shared = await loadShare_1("react-router");
+                if (shared) return () => shared;
+                throw new Error(`Shared module '${"react-router"}' must be provided by host`);
+              }
+            },
+            shareConfig: {
+              singleton: true,
+              requiredVersion: "^7.8.2",
+              import: false,
+            }
+          }
+        ,
           "@tanstack/react-query": {
             name: "@tanstack/react-query",
             version: "4.36.1",
@@ -129,26 +149,6 @@ const usedShared = {
             shareConfig: {
               singleton: true,
               requiredVersion: "^18.3.1",
-              import: false,
-            }
-          }
-        ,
-          "react-router": {
-            name: "react-router",
-            version: "7.8.2",
-            scope: ["default"],
-            loaded: false,
-            from: "core:dashboard",
-            async get () {
-              {
-                const shared = await loadShare_1("react-router");
-                if (shared) return () => shared;
-                throw new Error(`Shared module '${"react-router"}' must be provided by host`);
-              }
-            },
-            shareConfig: {
-              singleton: true,
-              requiredVersion: "^7.8.2",
               import: false,
             }
           }
