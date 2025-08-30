@@ -1,8 +1,12 @@
-import { FormFieldType, FormFieldConfig, AutocompleteToken } from "../types";
+import { FormFieldType } from "../fields";
+import { AutocompleteToken, FormFieldConfig } from "../types";
 import { registerDefaultRules } from "./register";
 
 export interface AutocompleteRule {
-  evaluate: (fieldConfig: FormFieldConfig, context?: any) => AutocompleteToken | undefined;
+  evaluate: (
+    fieldConfig: FormFieldConfig,
+    context?: any,
+  ) => AutocompleteToken | undefined;
   name: string;
   priority: number;
 }
@@ -191,7 +195,10 @@ let autocompleteRules: AutocompleteRule[] = [
         }
         if (
           (name.includes("cc") || name.includes("card")) &&
-          (name.includes("csc") || name.includes("cvv") || name.includes("cvc") || name.includes("cvn"))
+          (name.includes("csc") ||
+            name.includes("cvv") ||
+            name.includes("cvc") ||
+            name.includes("cvn"))
         ) {
           return "cc-csc";
         }
@@ -229,10 +236,18 @@ let autocompleteRules: AutocompleteRule[] = [
         if (name.includes("city")) {
           return "address-level2";
         }
-        if (name.includes("state") || name.includes("province") || name.includes("region")) {
+        if (
+          name.includes("state") ||
+          name.includes("province") ||
+          name.includes("region")
+        ) {
           return "address-level1";
         }
-        if (name.includes("zip") || name.includes("postal") || name.includes("postcode")) {
+        if (
+          name.includes("zip") ||
+          name.includes("postal") ||
+          name.includes("postcode")
+        ) {
           return "postal-code";
         }
         if (name.includes("country")) {
@@ -252,7 +267,13 @@ let autocompleteRules: AutocompleteRule[] = [
   {
     evaluate: (fieldConfig: FormFieldConfig) => {
       const name = fieldConfig.name?.toString().toLowerCase();
-      if (name && (name.includes("phone") || name.includes("tel") || name.includes("mobile") || name.includes("cell"))) {
+      if (
+        name &&
+        (name.includes("phone") ||
+          name.includes("tel") ||
+          name.includes("mobile") ||
+          name.includes("cell"))
+      ) {
         return "tel";
       }
       return undefined;
@@ -264,7 +285,12 @@ let autocompleteRules: AutocompleteRule[] = [
   {
     evaluate: (fieldConfig: FormFieldConfig) => {
       const name = fieldConfig.name?.toString().toLowerCase();
-      if (name && (name.includes("bday") || name.includes("birth") || name.includes("dob"))) {
+      if (
+        name &&
+        (name.includes("bday") ||
+          name.includes("birth") ||
+          name.includes("dob"))
+      ) {
         return "bday";
       }
       return undefined;
@@ -276,7 +302,12 @@ let autocompleteRules: AutocompleteRule[] = [
   {
     evaluate: (fieldConfig: FormFieldConfig) => {
       const name = fieldConfig.name?.toString().toLowerCase();
-      if (name && (name.includes("company") || name.includes("organization") || name.includes("organisation"))) {
+      if (
+        name &&
+        (name.includes("company") ||
+          name.includes("organization") ||
+          name.includes("organisation"))
+      ) {
         return "organization";
       }
       return undefined;
@@ -288,7 +319,10 @@ let autocompleteRules: AutocompleteRule[] = [
   {
     evaluate: (fieldConfig: FormFieldConfig) => {
       const name = fieldConfig.name?.toString().toLowerCase();
-      if (name && (name === "name" || name.includes("full") && name.includes("name"))) {
+      if (
+        name &&
+        (name === "name" || (name.includes("full") && name.includes("name")))
+      ) {
         return "name";
       }
       return undefined;
@@ -343,7 +377,7 @@ export function getAutocompleteValue(
   return undefined;
 }
 
-export function getRegisteredAutocompleteRules(): ReadonlyArray<AutocompleteRule> {
+export function getRegisteredAutocompleteRules(): readonly AutocompleteRule[] {
   return sortedRules;
 }
 
