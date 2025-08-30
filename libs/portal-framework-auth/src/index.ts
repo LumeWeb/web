@@ -4,8 +4,8 @@ export {
   DATA_PROVIDER_NAME,
   type ForgotPasswordConfirmRequest,
   type ForgotPasswordRequest,
-  type OPTGenerateResponse,
   type OTPFormRequest,
+  type OTPGenerateResponse,
   type RegisterFormRequest,
   type UpdatePasswordFormRequest,
 } from "./dataProviders/auth";

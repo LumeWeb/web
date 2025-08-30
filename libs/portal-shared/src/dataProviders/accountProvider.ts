@@ -9,14 +9,8 @@ import type {
   UpdateParams,
   UpdateResponse,
 } from "@refinedev/core";
+
 import { Sdk } from "@lumeweb/portal-sdk";
-
-type AccountParams = {
-  email?: string;
-  password?: string;
-};
-
-type AccountData = AccountParams;
 
 export enum SubscriptionPlanPeriod {
   MONTH = "MONTH",
@@ -28,45 +22,52 @@ export enum SubscriptionPlanStatus {
   PENDING = "PENDING",
 }
 
+export interface OTPGenerateResponse {
+  otp: string;
+}
+
+export interface SubscriptionBillingInfo {
+  address: string;
+  city: string;
+  country: string;
+  name: string;
+  organization: string;
+  state: string;
+  zip: string;
+}
+
+export interface SubscriptionPlan {
+  download: number;
+  identifier: string;
+  is_free?: boolean;
+  name: string;
+  period: SubscriptionPlanPeriod;
+  price: number;
+  status: SubscriptionPlanStatus;
+  storage: number;
+  upload: number;
+}
+
 export interface SubscriptionPlansResponse {
   plans: SubscriptionPlan[];
 }
 
 export interface SubscriptionResponse {
-  plan: SubscriptionPlan;
   billing_info: SubscriptionBillingInfo;
   payment_info: {
-    payment_id: string;
-    payment_expires: string;
     client_secret: string;
+    payment_expires: string;
+    payment_id: string;
     publishable_key: string;
   };
+  plan: SubscriptionPlan;
 }
 
-export interface SubscriptionPlan {
-  name: string;
-  identifier: string;
-  status: SubscriptionPlanStatus;
-  price: number;
-  period: SubscriptionPlanPeriod;
-  storage: number;
-  upload: number;
-  download: number;
-  is_free?: boolean;
-}
+type AccountData = AccountParams;
 
-export interface SubscriptionBillingInfo {
-  name: string;
-  organization: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-}
-
-export interface OPTGenerateResponse {
-  otp: string;
+interface AccountParams {
+  email?: string;
+  password?: string;
 }
 
 export const createAccountProvider = (
@@ -75,6 +76,52 @@ export const createAccountProvider = (
 ): DataProvider => {
   return {
     ...restProvider,
+    custom: async <TData extends Record<string, any> = Record<string, any>>(
+      params: CustomParams,
+    ): Promise<CustomResponse<TData>> => {
+      const { headers, method, payload, url } = params;
+
+      if (
+        url.includes("/subscription") ||
+        url.includes("/otp") ||
+        url.includes("/usage") ||
+        url.includes("/key")
+      ) {
+        // Handle subscription operations using restProvider
+        return restProvider.custom({
+          headers: {
+            Authorization: `Bearer ${sdk.account().jwtToken}`,
+            ...headers,
+          },
+          method,
+          payload,
+          url,
+        });
+      }
+
+      // Handle other custom operations or throw an error for unsupported operations
+      throw new Error("Unsupported custom operation");
+    },
+
+    async deleteOne(
+      params: DeleteOneParams<TVariables>,
+    ): Promise<DeleteOneResponse<any>> {
+      if (params.resource === "account") {
+        const ret = await sdk?.account().requestAccountDeletion();
+
+        if (ret instanceof Error) {
+          return Promise.reject(ret as HttpError);
+        }
+
+        return {
+          data: {},
+        };
+      }
+
+      return restProvider.deleteOne(params);
+    },
+    getApiUrl: () => sdk.account().apiUrl,
+
     async update<TVariables extends AccountParams = AccountParams>(
       params: UpdateParams<TVariables>,
     ): Promise<UpdateResponse<AccountData>> {
@@ -101,52 +148,6 @@ export const createAccountProvider = (
       }
 
       return restProvider.update(params);
-    },
-
-    async deleteOne(
-      params: DeleteOneParams<TVariables>,
-    ): Promise<DeleteOneResponse<any>> {
-      if (params.resource === "account") {
-        const ret = await sdk?.account().requestAccountDeletion();
-
-        if (ret instanceof Error) {
-          return Promise.reject(ret as HttpError);
-        }
-
-        return {
-          data: {},
-        };
-      }
-
-      return restProvider.deleteOne(params);
-    },
-    getApiUrl: () => sdk.account().apiUrl,
-
-    custom: async <TData extends Record<string, any> = Record<string, any>>(
-      params: CustomParams,
-    ): Promise<CustomResponse<TData>> => {
-      const { url, method, payload, headers } = params;
-
-      if (
-        url.includes("/subscription") ||
-        url.includes("/otp") ||
-        url.includes("/usage") ||
-        url.includes("/key")
-      ) {
-        // Handle subscription operations using restProvider
-        return restProvider.custom({
-          url,
-          method,
-          payload,
-          headers: {
-            Authorization: `Bearer ${sdk.account().jwtToken}`,
-            ...headers,
-          },
-        });
-      }
-
-      // Handle other custom operations or throw an error for unsupported operations
-      throw new Error("Unsupported custom operation");
     },
   };
 };
