@@ -18,6 +18,7 @@ import {
 
 import { adapters } from "./adapters";
 import { useFormContext } from "./context";
+import { getAutocompleteValue } from "./autocomplete";
 import { FormFieldType, getFormComponent } from "./fields";
 import { FormGroup } from "./FormGroup";
 import { type FormFieldConfig, type FormGroupType, GroupOrder } from "./types";
@@ -244,13 +245,19 @@ function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
             {RegisteredComponent ? (
               <RegisteredComponent
                 {...formFieldRenderProps}
+                {...field.inputProps}
                 inputClassName={field.inputClassName}
                 label={componentEntry?.handlesLabel ? field.label : undefined}
                 options={field.options}
                 placeholder={field.placeholder}
                 required={field.required}
                 type={field.type}
-                {...field.inputProps}
+                // Derive and include autocomplete
+                autocomplete={useMemo(() => {
+                  return field.autocomplete ?? // Explicit field config wins
+                    getAutocompleteValue(field, { formPurpose: config.action }) ?? // Then try derivation
+                    field.inputProps?.autocomplete // Finally, any inputProps value
+                }, [field.autocomplete, field.name, field.type, field.inputProps?.autocomplete, field.inputProps?.autoComplete, config.action])}
               />
             ) : field.component ? (
               <field.component {...formFieldRenderProps} />

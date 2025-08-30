@@ -21,6 +21,7 @@ export const Select = React.forwardRef<
     label?: string;
     options: FormFieldOption[];
     placeholder?: string;
+    autocomplete?: string;
   }
 >(
   (
@@ -31,6 +32,7 @@ export const Select = React.forwardRef<
       placeholder = "Select...",
       required,
       value,
+      autocomplete,
       ...props
     },
     ref,
@@ -40,6 +42,7 @@ export const Select = React.forwardRef<
         onValueChange={onChange}
         required={required}
         value={value || ""}
+        {...(autocomplete ? { autoComplete: autocomplete } : {})}
         {...props}>
         <SelectTrigger
           className={cn(

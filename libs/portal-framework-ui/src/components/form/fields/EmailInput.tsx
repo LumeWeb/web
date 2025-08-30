@@ -9,11 +9,12 @@ interface EmailInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   inputClassName?: string;
   label?: string;
   placeholder?: string;
+  autocomplete?: string;
 }
 
 export const EmailInput = React.forwardRef<HTMLInputElement, EmailInputProps>(
-  (props, ref) => {
-    return <Input ref={ref} type="email" {...props} />;
+  ({ autocomplete, ...props }, ref) => {
+    return <Input ref={ref} type="email" autoComplete={autocomplete} {...props} />;
   },
 );
 EmailInput.displayName = "EmailInput";

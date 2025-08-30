@@ -16,10 +16,11 @@ interface SwitchProps {
   onBlur?: () => void;
   onChange?: (checked: boolean) => void;
   value?: boolean;
+  autocomplete?: string;
 }
 
 export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
-  ({ label, ...props }, ref) => {
+  ({ label, autocomplete, ...props }, ref) => {
     return (
       <>
         <BaseSwitch
@@ -30,6 +31,7 @@ export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
           onBlur={props.onBlur}
           onCheckedChange={props.onChange}
           ref={ref}
+          {...(autocomplete ? { autoComplete: autocomplete } : {})}
         />
         {label && (
           <Label

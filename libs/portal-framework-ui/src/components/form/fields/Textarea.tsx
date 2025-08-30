@@ -15,8 +15,9 @@ export const Textarea = React.forwardRef<
     inputClassName?: string; // Use inputClassName for the actual textarea element
     label?: string;
     placeholder?: string;
+    autocomplete?: string;
   }
->(({ inputClassName, onChange, placeholder, value, ...props }, ref) => {
+>(({ inputClassName, onChange, placeholder, value, autocomplete, autoComplete: htmlAutoComplete, ...props }, ref) => {
   return (
     <BaseTextarea
       className={cn(
@@ -27,6 +28,7 @@ export const Textarea = React.forwardRef<
       placeholder={placeholder}
       ref={ref}
       value={value ?? ""} // Use value prop directly, default to empty string
+      autoComplete={autocomplete ?? htmlAutoComplete}
       {...props}
     />
   );

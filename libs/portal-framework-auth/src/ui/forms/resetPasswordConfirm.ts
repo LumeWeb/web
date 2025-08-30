@@ -23,6 +23,7 @@ export const getResetPasswordConfirmForm = (
         name: "email",
         required: true,
         type: FormFieldType.TEXT,
+        autocomplete: "username",
       },
       {
         inputProps: {
@@ -39,12 +40,14 @@ export const getResetPasswordConfirmForm = (
         name: "password",
         required: true,
         type: FormFieldType.PASSWORD,
+        autocomplete: "new-password",
       },
       {
         label: "Confirm New Password",
         name: "confirmPassword",
         required: true,
         type: FormFieldType.PASSWORD,
+        autocomplete: "new-password",
       },
     ],
     layout: "vertical",

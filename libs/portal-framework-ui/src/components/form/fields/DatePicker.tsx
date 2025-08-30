@@ -11,10 +11,11 @@ interface DatePickerProps {
   onBlur?: () => void;
   onChange: (date: Date | undefined) => void;
   placeholder?: string;
+  autocomplete?: React.InputHTMLAttributes<HTMLInputElement>["autoComplete"];
 }
 
 export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
-  ({ ...props }, ref) => {
+  ({ autocomplete, ...props }, ref) => {
     return (
       <BaseDatePicker
         className="border-modal-input placeholder-modal-input placeholder:text-foreground/50 p-4"
@@ -24,6 +25,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
         placeholder={props.placeholder}
         ref={ref}
         setDate={props.onChange}
+        {...(autocomplete ? { autoComplete: autocomplete } : {})}
       />
     );
   },

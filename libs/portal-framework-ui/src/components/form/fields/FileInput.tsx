@@ -3,6 +3,7 @@ import React from "react";
 
 import { registerFormComponent } from ".";
 import { FormFieldType } from "../";
+import type { AutocompleteToken } from "../types";
 
 interface FileInputProps {
   disabled?: boolean;
@@ -10,12 +11,12 @@ interface FileInputProps {
   name: string;
   onBlur?: () => void;
   onChange?: (files: FileList | null) => void;
-  ref?: React.Ref<HTMLInputElement>;
   value?: FileList;
+  autocomplete?: AutocompleteToken;
 }
 
 export const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
-  ({ ...props }, ref) => {
+  ({ autocomplete, ...props }, ref) => {
     return (
       <Input
         disabled={props.disabled}
@@ -24,6 +25,7 @@ export const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
         onChange={(e) => props.onChange?.(e.target.files)}
         ref={ref}
         type="file"
+        autoComplete={autocomplete}
       />
     );
   },

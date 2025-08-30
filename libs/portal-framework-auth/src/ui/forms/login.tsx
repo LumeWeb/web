@@ -26,7 +26,8 @@ export const getLoginFormConfig = (
       labelClassName: "font-semibold text-sm text-secondary-foreground",
       name: "email",
       required: true,
-      type: FormFieldType.TEXT,
+      type: FormFieldType.EMAIL,
+      autocomplete: "username",
     },
     {
       inputClassName: "mt-4 bg-input border placeholder-input-placeholder",
@@ -35,6 +36,7 @@ export const getLoginFormConfig = (
       name: "password",
       required: true,
       type: FormFieldType.PASSWORD,
+      autocomplete: "current-password",
     },
     {
       itemClassName: "flex items-center space-x-2 text-foreground",

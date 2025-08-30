@@ -16,6 +16,7 @@ interface RadioGroupProps {
   onChange?: (value: string) => void;
   options: string[];
   value?: string;
+  autocomplete?: string;
 }
 
 function slugify(str: string): string {
@@ -26,7 +27,7 @@ function slugify(str: string): string {
 }
 
 export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
-  ({ options, ...props }, ref) => {
+  ({ options, autocomplete, ...props }, ref) => {
     return (
       <BaseRadioGroup
         disabled={props.disabled}
@@ -37,7 +38,11 @@ export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
         value={props.value}>
         {options.map((option) => (
           <div className="radio-option" key={option}>
-            <RadioGroupItem id={`${props.name}-${slugify(option)}`} value={option} />
+            <RadioGroupItem 
+              id={`${props.name}-${slugify(option)}`} 
+              value={option}
+              {...(autocomplete ? { autoComplete: autocomplete } : {})}
+            />
             <label className={props.labelClassName} htmlFor={`${props.name}-${slugify(option)}`}>
               {option}
             </label>
