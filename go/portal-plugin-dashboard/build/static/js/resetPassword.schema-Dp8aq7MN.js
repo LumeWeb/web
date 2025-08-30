@@ -269,7 +269,8 @@ const getLoginFormConfig = (login) => ({
 			labelClassName: "font-semibold text-sm text-secondary-foreground",
 			name: "email",
 			required: true,
-			type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.TEXT
+			type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.EMAIL,
+			autocomplete: "username"
 		},
 		{
 			inputClassName: "mt-4 bg-input border placeholder-input-placeholder",
@@ -277,7 +278,8 @@ const getLoginFormConfig = (login) => ({
 			labelClassName: "font-semibold text-sm text-secondary-foreground",
 			name: "password",
 			required: true,
-			type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.PASSWORD
+			type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.PASSWORD,
+			autocomplete: "current-password"
 		},
 		{
 			itemClassName: "flex items-center space-x-2 text-foreground",
@@ -1379,7 +1381,8 @@ const getRegisterForm = (onSubmit) => ({
 			itemClassName: "flex-1",
 			label: "First Name",
 			name: "firstName",
-			type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.TEXT
+			type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.TEXT,
+			autocomplete: "given-name"
 		},
 		{
 			className: "space-y-2",
@@ -1388,25 +1391,29 @@ const getRegisterForm = (onSubmit) => ({
 			itemClassName: "flex-1",
 			label: "Last Name",
 			name: "lastName",
-			type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.TEXT
+			type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.TEXT,
+			autocomplete: "family-name"
 		},
 		{
 			inputClassName: "h-14",
 			label: "Email",
 			name: "email",
-			type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.EMAIL
+			type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.EMAIL,
+			autocomplete: "email"
 		},
 		{
 			inputClassName: "h-14",
 			label: "Password",
 			name: "password",
-			type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.PASSWORD
+			type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.PASSWORD,
+			autocomplete: "new-password"
 		},
 		{
 			inputClassName: "h-14",
 			label: "Confirm Password",
 			name: "confirmPassword",
-			type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.PASSWORD
+			type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.PASSWORD,
+			autocomplete: "new-password"
 		},
 		{
 			label: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", {

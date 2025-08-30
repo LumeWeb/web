@@ -1,5 +1,5 @@
 import './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__-BjauFvDm.js';
-import { resetPasswordConfirm_schema_default } from './resetPassword.schema-BfzY6huN.js';
+import { resetPasswordConfirm_schema_default } from './resetPassword.schema-Dp8aq7MN.js';
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__, core_dashboard__loadShare__react__loadShare__, jsxRuntimeExports } from './jsx-runtime-D_0QkpWj.js';
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CFuxgGnQ.js';
 import { core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__-CUREaEX2.js';
@@ -19,7 +19,8 @@ const getResetPasswordConfirmForm = (mutate) => {
 				label: "Email Address",
 				name: "email",
 				required: true,
-				type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.TEXT
+				type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.TEXT,
+				autocomplete: "username"
 			},
 			{
 				inputProps: {
@@ -35,13 +36,15 @@ const getResetPasswordConfirmForm = (mutate) => {
 				label: "New Password",
 				name: "password",
 				required: true,
-				type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.PASSWORD
+				type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.PASSWORD,
+				autocomplete: "new-password"
 			},
 			{
 				label: "Confirm New Password",
 				name: "confirmPassword",
 				required: true,
-				type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.PASSWORD
+				type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.FormFieldType.PASSWORD,
+				autocomplete: "new-password"
 			}
 		],
 		layout: "vertical",
