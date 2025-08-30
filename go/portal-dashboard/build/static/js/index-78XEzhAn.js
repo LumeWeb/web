@@ -6614,10 +6614,10 @@ function FormRenderer({ fields = [], groups = [] }) {
 			ungroupedFields: ungrouped
 		};
 	}, [fields, groups]);
-	const { adapter: adapterName, config: config$1 } = useFormContext();
+	const { adapter: adapterName, config } = useFormContext();
 	const adapter = adapters[adapterName];
 	if (!adapter) throw new Error(`Form adapter "${String(adapterName)}" is not registered`);
-	const groupOrder = config$1.groupOrder ?? GroupOrder.UNGROUPED_FIRST;
+	const groupOrder = config.groupOrder ?? GroupOrder.UNGROUPED_FIRST;
 	const renderGroups = () => /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: groups?.map((group) => {
 		const groupFields = groupedFields[group.id];
 		if (!groupFields?.length) return null;
@@ -6636,7 +6636,9 @@ function FieldRenderer({ field }) {
 	const { control, getValues, watch } = rhfMethods;
 	const [isVisible, setIsVisible] = dashboard__loadShare__react__loadShare__.useState(true);
 	const [isLoading, setIsLoading] = dashboard__loadShare__react__loadShare__.useState(false);
+	const { config: formConfig } = useFormContext();
 	const dependencies = dashboard__loadShare__react__loadShare__.useMemo(() => field.dependencies || [], [field.dependencies]);
+	const autoCompleteValue = dashboard__loadShare__react__loadShare__.useMemo(() => getFieldAutocompleteValue(field, formConfig?.action), [field, formConfig?.action]);
 	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		const subscription = watch((values, { name }) => {
 			if (!dependencies.length || name && dependencies.includes(name)) checkVisibility();
@@ -6695,7 +6697,7 @@ function FieldRenderer({ field }) {
 		children: [
 			field.label && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormLabel, { children: field.label }),
 			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormControl, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-				className: "flex items-center justify-center h-14",
+				className: "flex h-14 items-center justify-center",
 				children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Spinner, { size: "small" })
 			}) }),
 			field.description && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormDescription, { children: field.description })
@@ -6724,28 +6726,22 @@ function FieldRenderer({ field }) {
 				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormControl, { children: RegisteredComponent ? /* @__PURE__ */ jsxRuntimeExports.jsx(RegisteredComponent, {
 					...formFieldRenderProps,
 					...field.inputProps,
+					autocomplete: autoCompleteValue,
 					inputClassName: field.inputClassName,
 					label: componentEntry?.handlesLabel ? field.label : void 0,
 					options: field.options,
 					placeholder: field.placeholder,
 					required: field.required,
-					type: field.type,
-					autocomplete: dashboard__loadShare__react__loadShare__.useMemo(() => {
-						return field.autocomplete ?? getAutocompleteValue(field, { formPurpose: config.action }) ?? field.inputProps?.autocomplete;
-					}, [
-						field.autocomplete,
-						field.name,
-						field.type,
-						field.inputProps?.autocomplete,
-						field.inputProps?.autoComplete,
-						config.action
-					])
+					type: field.type
 				}) : field.component ? /* @__PURE__ */ jsxRuntimeExports.jsx(field.component, { ...formFieldRenderProps }) : null }),
 				field.description && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormDescription, { children: field.description }),
 				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormMessage, {})
 			]
 		})
 	}, field.name);
+}
+function getFieldAutocompleteValue(field, formPurpose) {
+	return field.autocomplete ?? getAutocompleteValue(field, { formPurpose }) ?? field.inputProps?.autocomplete;
 }
 
 //#region src/components/form/fields/Switch.tsx
@@ -8398,7 +8394,7 @@ var objectInspect = function inspect_(obj, options, depth, seen) {
         var ys = arrObjKeys(obj, inspect);
         var isPlainObject = gPO ? gPO(obj) === Object.prototype : obj instanceof Object || obj.constructor === Object;
         var protoTag = obj instanceof Object ? '' : 'null prototype';
-        var stringTag = !isPlainObject && toStringTag && Object(obj) === obj && toStringTag in obj ? $slice.call(toStr$1(obj), 8, -1) : protoTag ? 'Object' : '';
+        var stringTag = !isPlainObject && toStringTag && Object(obj) === obj && toStringTag in obj ? $slice.call(toStr(obj), 8, -1) : protoTag ? 'Object' : '';
         var constructorTag = isPlainObject || typeof obj.constructor !== 'function' ? '' : obj.constructor.name ? obj.constructor.name + ' ' : '';
         var tag = constructorTag + (stringTag || protoTag ? '[' + $join.call($concat$1.call([], stringTag || [], protoTag || []), ': ') + '] ' : '');
         if (ys.length === 0) { return tag + '{}'; }
@@ -8423,13 +8419,13 @@ function quote(s) {
 function canTrustToString(obj) {
     return !toStringTag || !(typeof obj === 'object' && (toStringTag in obj || typeof obj[toStringTag] !== 'undefined'));
 }
-function isArray$3(obj) { return toStr$1(obj) === '[object Array]' && canTrustToString(obj); }
-function isDate(obj) { return toStr$1(obj) === '[object Date]' && canTrustToString(obj); }
-function isRegExp$1(obj) { return toStr$1(obj) === '[object RegExp]' && canTrustToString(obj); }
-function isError(obj) { return toStr$1(obj) === '[object Error]' && canTrustToString(obj); }
-function isString(obj) { return toStr$1(obj) === '[object String]' && canTrustToString(obj); }
-function isNumber(obj) { return toStr$1(obj) === '[object Number]' && canTrustToString(obj); }
-function isBoolean(obj) { return toStr$1(obj) === '[object Boolean]' && canTrustToString(obj); }
+function isArray$3(obj) { return toStr(obj) === '[object Array]' && canTrustToString(obj); }
+function isDate(obj) { return toStr(obj) === '[object Date]' && canTrustToString(obj); }
+function isRegExp$1(obj) { return toStr(obj) === '[object RegExp]' && canTrustToString(obj); }
+function isError(obj) { return toStr(obj) === '[object Error]' && canTrustToString(obj); }
+function isString(obj) { return toStr(obj) === '[object String]' && canTrustToString(obj); }
+function isNumber(obj) { return toStr(obj) === '[object Number]' && canTrustToString(obj); }
+function isBoolean(obj) { return toStr(obj) === '[object Boolean]' && canTrustToString(obj); }
 
 // Symbol and BigInt do have Symbol.toStringTag by spec, so that can't be used to eliminate false positives
 function isSymbol(obj) {
@@ -8465,7 +8461,7 @@ function has$3(obj, key) {
     return hasOwn$1.call(obj, key);
 }
 
-function toStr$1(obj) {
+function toStr(obj) {
     return objectToString.call(obj);
 }
 
@@ -8816,7 +8812,7 @@ var abs$1 = Math.abs;
 var floor$1 = Math.floor;
 
 /** @type {import('./max')} */
-var max$3 = Math.max;
+var max$2 = Math.max;
 
 /** @type {import('./min')} */
 var min$2 = Math.min;
@@ -8973,95 +8969,122 @@ function requireObject_getPrototypeOf () {
 	return Object_getPrototypeOf;
 }
 
-/* eslint no-invalid-this: 1 */
+var implementation;
+var hasRequiredImplementation;
 
-var ERROR_MESSAGE = 'Function.prototype.bind called on incompatible ';
-var toStr = Object.prototype.toString;
-var max$2 = Math.max;
-var funcType = '[object Function]';
+function requireImplementation () {
+	if (hasRequiredImplementation) return implementation;
+	hasRequiredImplementation = 1;
 
-var concatty = function concatty(a, b) {
-    var arr = [];
+	/* eslint no-invalid-this: 1 */
 
-    for (var i = 0; i < a.length; i += 1) {
-        arr[i] = a[i];
-    }
-    for (var j = 0; j < b.length; j += 1) {
-        arr[j + a.length] = b[j];
-    }
+	var ERROR_MESSAGE = 'Function.prototype.bind called on incompatible ';
+	var toStr = Object.prototype.toString;
+	var max = Math.max;
+	var funcType = '[object Function]';
 
-    return arr;
-};
+	var concatty = function concatty(a, b) {
+	    var arr = [];
 
-var slicy = function slicy(arrLike, offset) {
-    var arr = [];
-    for (var i = offset, j = 0; i < arrLike.length; i += 1, j += 1) {
-        arr[j] = arrLike[i];
-    }
-    return arr;
-};
+	    for (var i = 0; i < a.length; i += 1) {
+	        arr[i] = a[i];
+	    }
+	    for (var j = 0; j < b.length; j += 1) {
+	        arr[j + a.length] = b[j];
+	    }
 
-var joiny = function (arr, joiner) {
-    var str = '';
-    for (var i = 0; i < arr.length; i += 1) {
-        str += arr[i];
-        if (i + 1 < arr.length) {
-            str += joiner;
-        }
-    }
-    return str;
-};
+	    return arr;
+	};
 
-var implementation$1 = function bind(that) {
-    var target = this;
-    if (typeof target !== 'function' || toStr.apply(target) !== funcType) {
-        throw new TypeError(ERROR_MESSAGE + target);
-    }
-    var args = slicy(arguments, 1);
+	var slicy = function slicy(arrLike, offset) {
+	    var arr = [];
+	    for (var i = offset, j = 0; i < arrLike.length; i += 1, j += 1) {
+	        arr[j] = arrLike[i];
+	    }
+	    return arr;
+	};
 
-    var bound;
-    var binder = function () {
-        if (this instanceof bound) {
-            var result = target.apply(
-                this,
-                concatty(args, arguments)
-            );
-            if (Object(result) === result) {
-                return result;
-            }
-            return this;
-        }
-        return target.apply(
-            that,
-            concatty(args, arguments)
-        );
+	var joiny = function (arr, joiner) {
+	    var str = '';
+	    for (var i = 0; i < arr.length; i += 1) {
+	        str += arr[i];
+	        if (i + 1 < arr.length) {
+	            str += joiner;
+	        }
+	    }
+	    return str;
+	};
 
-    };
+	implementation = function bind(that) {
+	    var target = this;
+	    if (typeof target !== 'function' || toStr.apply(target) !== funcType) {
+	        throw new TypeError(ERROR_MESSAGE + target);
+	    }
+	    var args = slicy(arguments, 1);
 
-    var boundLength = max$2(0, target.length - args.length);
-    var boundArgs = [];
-    for (var i = 0; i < boundLength; i++) {
-        boundArgs[i] = '$' + i;
-    }
+	    var bound;
+	    var binder = function () {
+	        if (this instanceof bound) {
+	            var result = target.apply(
+	                this,
+	                concatty(args, arguments)
+	            );
+	            if (Object(result) === result) {
+	                return result;
+	            }
+	            return this;
+	        }
+	        return target.apply(
+	            that,
+	            concatty(args, arguments)
+	        );
 
-    bound = Function('binder', 'return function (' + joiny(boundArgs, ',') + '){ return binder.apply(this,arguments); }')(binder);
+	    };
 
-    if (target.prototype) {
-        var Empty = function Empty() {};
-        Empty.prototype = target.prototype;
-        bound.prototype = new Empty();
-        Empty.prototype = null;
-    }
+	    var boundLength = max(0, target.length - args.length);
+	    var boundArgs = [];
+	    for (var i = 0; i < boundLength; i++) {
+	        boundArgs[i] = '$' + i;
+	    }
 
-    return bound;
-};
+	    bound = Function('binder', 'return function (' + joiny(boundArgs, ',') + '){ return binder.apply(this,arguments); }')(binder);
 
-var implementation = implementation$1;
+	    if (target.prototype) {
+	        var Empty = function Empty() {};
+	        Empty.prototype = target.prototype;
+	        bound.prototype = new Empty();
+	        Empty.prototype = null;
+	    }
 
-var functionBind = Function.prototype.bind || implementation;
+	    return bound;
+	};
+	return implementation;
+}
 
-/** @type {import('./functionCall')} */
-var functionCall = Function.prototype.call;
+var functionBind;
+var hasRequiredFunctionBind;
+
+function requireFunctionBind () {
+	if (hasRequiredFunctionBind) return functionBind;
+	hasRequiredFunctionBind = 1;
+
+	var implementation = requireImplementation();
+
+	functionBind = Function.prototype.bind || implementation;
+	return functionBind;
+}
+
+var functionCall;
+var hasRequiredFunctionCall;
+
+function requireFunctionCall () {
+	if (hasRequiredFunctionCall) return functionCall;
+	hasRequiredFunctionCall = 1;
+
+	/** @type {import('./functionCall')} */
+	functionCall = Function.prototype.call;
+	return functionCall;
+}
 
 var functionApply;
 var hasRequiredFunctionApply;
@@ -9078,19 +9101,19 @@ function requireFunctionApply () {
 /** @type {import('./reflectApply')} */
 var reflectApply = typeof Reflect !== 'undefined' && Reflect && Reflect.apply;
 
-var bind$2 = functionBind;
+var bind$2 = requireFunctionBind();
 
 var $apply$1 = requireFunctionApply();
-var $call$2 = functionCall;
+var $call$2 = requireFunctionCall();
 var $reflectApply = reflectApply;
 
 /** @type {import('./actualApply')} */
 var actualApply = $reflectApply || bind$2.call($call$2, $apply$1);
 
-var bind$1 = functionBind;
+var bind$1 = requireFunctionBind();
 var $TypeError$4 = type;
 
-var $call$1 = functionCall;
+var $call$1 = requireFunctionCall();
 var $actualApply = actualApply;
 
 /** @type {(args: [Function, thisArg?: unknown, ...args: unknown[]]) => Function} TODO FIXME, find a way to use import('.') */
@@ -9183,7 +9206,7 @@ function requireHasown () {
 
 	var call = Function.prototype.call;
 	var $hasOwn = Object.prototype.hasOwnProperty;
-	var bind = functionBind;
+	var bind = requireFunctionBind();
 
 	/** @type {import('.')} */
 	hasown = bind.call(call, $hasOwn);
@@ -9204,7 +9227,7 @@ var $URIError = uri;
 
 var abs = abs$1;
 var floor = floor$1;
-var max$1 = max$3;
+var max$1 = max$2;
 var min$1 = min$2;
 var pow = pow$1;
 var round = round$1;
@@ -9249,7 +9272,7 @@ var $ObjectGPO = requireObject_getPrototypeOf();
 var $ReflectGPO = requireReflect_getPrototypeOf();
 
 var $apply = requireFunctionApply();
-var $call = functionCall;
+var $call = requireFunctionCall();
 
 var needsEval = {};
 
@@ -9430,7 +9453,7 @@ var LEGACY_ALIASES = {
 	'%WeakSetPrototype%': ['WeakSet', 'prototype']
 };
 
-var bind = functionBind;
+var bind = requireFunctionBind();
 var hasOwn = /*@__PURE__*/ requireHasown();
 var $concat = bind.call($call, Array.prototype.concat);
 var $spliceApply = bind.call($apply, Array.prototype.splice);

@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["static/js/index-ENp_rX1B.js","static/js/_commonjsHelpers-BILit0S-.js","static/js/index-DglYqv5Q.js","static/js/dashboard__loadShare__react_mf_2_router__loadShare__-GzYn9uIj.js","static/js/dashboard__mf_v__runtimeInit__mf_v__-CrvQyIUV.js","static/js/dashboard__loadShare__react__loadShare__-A-_ogCU6.js","static/js/jsx-runtime-Rqu4CMEU.js","static/js/_baseIsEqual-C0d_jX9e.js","static/js/createLucideIcon-CcrG3Oz3.js","static/js/isLength-BjcVZakP.js","static/js/dashboard__loadShare__react_mf_2_dom__loadShare__-sIXfFKrj.js","static/js/index-CAhUWRmj.js","static/js/index-DInJFyS3.js","static/js/index.esm-BoYzizlD.js","static/js/index-y_Q7ps8F.js","static/js/index-B1gglJBM.js","static/js/index-BQ-ueVeF.js","static/js/index-C__1Ej_O.js","static/js/virtualExposes-DwA08f_D.js","static/js/preload-helper-Dk3k6Zm1.js","static/js/index-DU8ChCWG.js","static/js/index-DSq851Hl.js","static/js/index-C_u9kIEf.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["static/js/index-ENp_rX1B.js","static/js/_commonjsHelpers-BILit0S-.js","static/js/index-78XEzhAn.js","static/js/dashboard__loadShare__react_mf_2_router__loadShare__-GzYn9uIj.js","static/js/dashboard__mf_v__runtimeInit__mf_v__-CrvQyIUV.js","static/js/dashboard__loadShare__react__loadShare__-A-_ogCU6.js","static/js/jsx-runtime-Rqu4CMEU.js","static/js/_baseIsEqual-C0d_jX9e.js","static/js/createLucideIcon-CcrG3Oz3.js","static/js/isLength-BjcVZakP.js","static/js/dashboard__loadShare__react_mf_2_dom__loadShare__-sIXfFKrj.js","static/js/index-CAhUWRmj.js","static/js/index-DInJFyS3.js","static/js/index-y_Q7ps8F.js","static/js/index.esm-BoYzizlD.js","static/js/index-DGhRpgkE.js","static/js/index-BQ-ueVeF.js","static/js/index-C__1Ej_O.js","static/js/virtualExposes-DwA08f_D.js","static/js/preload-helper-Dk3k6Zm1.js","static/js/index-DU8ChCWG.js","static/js/index-DSq851Hl.js","static/js/index-C_u9kIEf.js"])))=>i.map(i=>d[i]);
 import { init_1, dashboard__mf_v__runtimeInit__mf_v__ } from './dashboard__mf_v__runtimeInit__mf_v__-CrvQyIUV.js';
 import exposesMap from './virtualExposes-DwA08f_D.js';
 import { __vitePreload } from './preload-helper-Dk3k6Zm1.js';
@@ -22,7 +22,7 @@ const importMap = {
         }
       ,
         "@lumeweb/portal-framework-ui": async () => {
-          let pkg = await __vitePreload(() => import('./index-DglYqv5Q.js'),true              ?__vite__mapDeps([2,3,4,5,1,6,7,8,9,10,11]):void 0);
+          let pkg = await __vitePreload(() => import('./index-78XEzhAn.js'),true              ?__vite__mapDeps([2,3,4,5,1,6,7,8,9,10,11]):void 0);
             return pkg;
         }
       ,
@@ -31,18 +31,18 @@ const importMap = {
             return pkg;
         }
       ,
-        "react-hook-form": async () => {
-          let pkg = await __vitePreload(() => import('./index.esm-BoYzizlD.js'),true              ?__vite__mapDeps([13,5,1,4]):void 0);
+        "@lumeweb/portal-framework-ui-core": async () => {
+          let pkg = await __vitePreload(() => import('./index-y_Q7ps8F.js'),true              ?__vite__mapDeps([13,5,1,4,6,10,7,8,11]):void 0);
             return pkg;
         }
       ,
-        "@lumeweb/portal-framework-ui-core": async () => {
-          let pkg = await __vitePreload(() => import('./index-y_Q7ps8F.js'),true              ?__vite__mapDeps([14,5,1,4,6,10,7,8,11]):void 0);
+        "react-hook-form": async () => {
+          let pkg = await __vitePreload(() => import('./index.esm-BoYzizlD.js'),true              ?__vite__mapDeps([14,5,1,4]):void 0);
             return pkg;
         }
       ,
         "@lumeweb/portal-framework-core": async () => {
-          let pkg = await __vitePreload(() => import('./index-B1gglJBM.js'),true              ?__vite__mapDeps([15,16,10,1,4,5,6,17,3,8,18,19]):void 0);
+          let pkg = await __vitePreload(() => import('./index-DGhRpgkE.js'),true              ?__vite__mapDeps([15,16,10,1,4,5,6,17,3,8,18,19]):void 0);
             return pkg;
         }
       ,
@@ -145,33 +145,6 @@ const importMap = {
             }
           }
         ,
-          "react-hook-form": {
-            name: "react-hook-form",
-            version: "7.54.0",
-            scope: ["default"],
-            loaded: false,
-            from: "dashboard",
-            async get () {
-              usedShared["react-hook-form"].loaded = true;
-              const {"react-hook-form": pkgDynamicImport} = importMap;
-              const res = await pkgDynamicImport();
-              const exportModule = {...res};
-              // All npm packages pre-built by vite will be converted to esm
-              Object.defineProperty(exportModule, "__esModule", {
-                value: true,
-                enumerable: false
-              });
-              return function () {
-                return exportModule
-              }
-            },
-            shareConfig: {
-              singleton: true,
-              requiredVersion: "^7.54.0",
-              
-            }
-          }
-        ,
           "@lumeweb/portal-framework-ui-core": {
             name: "@lumeweb/portal-framework-ui-core",
             version: "0.0.0",
@@ -195,6 +168,33 @@ const importMap = {
             shareConfig: {
               singleton: true,
               requiredVersion: "^0.0.0",
+              
+            }
+          }
+        ,
+          "react-hook-form": {
+            name: "react-hook-form",
+            version: "7.54.0",
+            scope: ["default"],
+            loaded: false,
+            from: "dashboard",
+            async get () {
+              usedShared["react-hook-form"].loaded = true;
+              const {"react-hook-form": pkgDynamicImport} = importMap;
+              const res = await pkgDynamicImport();
+              const exportModule = {...res};
+              // All npm packages pre-built by vite will be converted to esm
+              Object.defineProperty(exportModule, "__esModule", {
+                value: true,
+                enumerable: false
+              });
+              return function () {
+                return exportModule
+              }
+            },
+            shareConfig: {
+              singleton: true,
+              requiredVersion: "^7.54.0",
               
             }
           }
