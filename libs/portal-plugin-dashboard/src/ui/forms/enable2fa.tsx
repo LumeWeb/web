@@ -1,4 +1,4 @@
-import { OPTGenerateResponse } from "@lumeweb/portal-framework-auth";
+import { OTPGenerateResponse } from "@lumeweb/portal-framework-auth";
 import { Identity } from "@lumeweb/portal-framework-core";
 import {
   FormFieldType,
@@ -82,7 +82,7 @@ const QRCodeComponent = ({ name, value }: QRCodeProps) => {
   const identity = useGetIdentity<Identity>();
   const formContext = useFormContext();
   const { isLoading: isGeneratingOtp, mutate: generateOtp } =
-    useCustomMutation<OPTGenerateResponse>({
+    useCustomMutation<OTPGenerateResponse>({
       mutationOptions: {},
     });
 
@@ -129,7 +129,7 @@ const QRCodeComponent = ({ name, value }: QRCodeProps) => {
           secret: generatedOtpCache,
         }).toString()}
       />
-      <div className="p-4 border text-center font-bold">
+      <div className="border p-4 text-center font-bold">
         {generatedOtpCache}
       </div>
     </>
