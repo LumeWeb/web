@@ -10,6 +10,10 @@ import {
 } from "@lumeweb/portal-framework-ui-core";
 import { get } from "lodash/get";
 import React, { useEffect, useMemo, useState } from "react";
+
+interface FieldRendererProps<TFieldValues extends FieldValues> {
+  field: FormFieldConfig<TFieldValues>;
+}
 import {
   FieldValues,
   Path as ReactHookFormPath,
@@ -17,15 +21,11 @@ import {
 } from "react-hook-form";
 
 import { adapters } from "./adapters";
-import { useFormContext } from "./context";
 import { getAutocompleteValue } from "./autocomplete";
+import { useFormContext } from "./context";
 import { FormFieldType, getFormComponent } from "./fields";
 import { FormGroup } from "./FormGroup";
 import { type FormFieldConfig, type FormGroupType, GroupOrder } from "./types";
-
-interface FieldRendererProps<TFieldValues extends FieldValues> {
-  field: FormFieldConfig<TFieldValues>;
-}
 
 export function FormRenderer<TRequest extends FieldValues = FieldValues>({
   fields = [],
@@ -117,11 +117,18 @@ function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
   const { control, getValues, watch } = rhfMethods;
   const [isVisible, setIsVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const { config: formConfig } = useFormContext();
 
   const dependencies = useMemo(
     () => field.dependencies || [],
     [field.dependencies],
   );
+
+  const autoCompleteValue = useMemo(
+    () => getFieldAutocompleteValue(field, formConfig?.action),
+    [field, formConfig?.action],
+  );
+
   useEffect(() => {
     // Subscribe to form changes and check visibility when relevant fields change
     const subscription = watch((values, { name }) => {
@@ -204,7 +211,7 @@ function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
       <FormItem className={cn(field.className, field.itemClassName)}>
         {field.label && <FormLabel>{field.label}</FormLabel>}
         <FormControl>
-          <div className="flex items-center justify-center h-14">
+          <div className="flex h-14 items-center justify-center">
             <Spinner size="small" />
           </div>
         </FormControl>
@@ -246,18 +253,14 @@ function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
               <RegisteredComponent
                 {...formFieldRenderProps}
                 {...field.inputProps}
+                // Derive and include autocomplete
+                autocomplete={autoCompleteValue}
                 inputClassName={field.inputClassName}
                 label={componentEntry?.handlesLabel ? field.label : undefined}
                 options={field.options}
                 placeholder={field.placeholder}
                 required={field.required}
                 type={field.type}
-                // Derive and include autocomplete
-                autocomplete={useMemo(() => {
-                  return field.autocomplete ?? // Explicit field config wins
-                    getAutocompleteValue(field, { formPurpose: config.action }) ?? // Then try derivation
-                    field.inputProps?.autocomplete // Finally, any inputProps value
-                }, [field.autocomplete, field.name, field.type, field.inputProps?.autocomplete, field.inputProps?.autoComplete, config.action])}
               />
             ) : field.component ? (
               <field.component {...formFieldRenderProps} />
@@ -270,5 +273,16 @@ function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
         </FormItem>
       )}
     />
+  );
+}
+
+function getFieldAutocompleteValue(
+  field: FormFieldConfig<any>,
+  formPurpose?: string,
+) {
+  return (
+    field.autocomplete ?? // Explicit field config wins
+    getAutocompleteValue(field, { formPurpose }) ?? // Then try derivation
+    field.inputProps?.autocomplete // Finally, any inputProps value
   );
 }
