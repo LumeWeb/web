@@ -1,10 +1,10 @@
 import { type FormConfig, FormFieldType } from "@lumeweb/portal-framework-ui";
+
 import schema from "./updateEmail.schema";
 
 export default function updateEmailForm(): FormConfig {
   return {
     actionButtonsLayout: "horizontal",
-    validationSchema: schema,
     fields: [
       {
         label: "New Email Address",
@@ -22,6 +22,6 @@ export default function updateEmailForm(): FormConfig {
         type: FormFieldType.PASSWORD,
       },
     ],
+    validationSchema: schema,
   };
 }
-

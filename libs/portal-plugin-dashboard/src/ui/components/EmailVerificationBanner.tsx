@@ -6,7 +6,7 @@ import {
   Button,
 } from "@lumeweb/portal-framework-ui-core";
 import { useGetIdentity } from "@refinedev/core";
-import { Mail, Loader2 } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
 import React from "react";
 
 import { useEmailVerification } from "@/ui/hooks/useEmailVerification";

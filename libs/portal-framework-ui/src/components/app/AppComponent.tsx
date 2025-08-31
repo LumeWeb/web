@@ -31,6 +31,7 @@ import {
 
 import { registerAllActionItems } from "@/components/actions";
 import { registerAllFormComponents } from "@/components/form";
+import { Loading } from "@/components/Loading";
 import { useAppStore } from "@/store/appStore";
 import { useFrameworkSync } from "@/store/portalStore";
 
@@ -328,7 +329,10 @@ function getLazyComponent(
     return createRemoteComponentLoader(
       { componentPath: componentName, pluginId: pluginId },
       framework,
-      defaultRemoteOptions, // Assuming defaultRemoteOptions is accessible or passed
+      {
+        ...defaultRemoteOptions,
+        LoadingComponent: Loading,
+      }, // Assuming defaultRemoteOptions is accessible or passed
     );
   } catch (e) {
     console.error(
@@ -349,10 +353,10 @@ function LoadingSpinner() {
   return (
     <div>
       <div className="animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-        <div className="space-y-3 mt-4">
-          <div className="h-4 bg-gray-200 rounded"></div>
-          <div className="h-4 bg-gray-200 rounded"></div>
+        <div className="h-4 w-3/4 rounded bg-gray-200"></div>
+        <div className="mt-4 space-y-3">
+          <div className="h-4 rounded bg-gray-200"></div>
+          <div className="h-4 rounded bg-gray-200"></div>
         </div>
       </div>
     </div>
