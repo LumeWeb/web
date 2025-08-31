@@ -362,89 +362,68 @@ export class AccountApi {
         };
       }
 
-      // Handle empty response
-      const contentLength = response.headers.get("content-length");
-      if (contentLength === "0" || response.status === 204) {
-        return {
-          data: undefined as unknown as T, // Cast to T since void responses expect this
-          success: true,
-        };
-      }
-
-      // Read raw body once. This is more robust across CORS/proxies that omit content-length.
-      const rawBody = await response.text();
-      if (!rawBody || rawBody.trim().length === 0) {
+      // Handle empty responses
+      if (this.isResponseEmpty(response)) {
         return {
           data: undefined as unknown as T,
           success: true,
         };
       }
 
-      let responseBody: any;
+      // Try to parse JSON, but handle cases where parsing fails due to empty body
       try {
-        responseBody = JSON.parse(rawBody);
-      } catch {
-        // Non-empty but invalid JSON on a 2xx response: surface as an error rather than silently succeeding.
-        const errorDetails: Record<string, unknown> = {
-          note: "invalid JSON response",
-          status: response.status,
-        };
-
-        // Only include debug info if explicitly enabled
-        if (import.meta.env.VITE_ACCOUNT_API_DEBUG === "true") {
-          errorDetails.debug = {
-            bodyPreview:
-              rawBody.length > 512
-                ? rawBody.substring(0, 512) + "..."
-                : rawBody,
-            contentLength: response.headers.get("content-length"),
-          };
-        }
-
+        const data = await response.json();
         return {
-          error: new AccountError(
-            "Failed to parse JSON response",
-            response.status,
-            errorDetails,
-          ),
-          success: false,
+          data: data as T,
+          success: true,
         };
-      }
-
-      // Convert backend response to our standard Result format
-      if (responseBody && typeof responseBody === "object") {
-        if ("error" in responseBody) {
-          const message =
-            typeof responseBody.error === "string"
-              ? responseBody.error
-              : responseBody.error?.message || "Unknown error";
+      } catch (parseError) {
+        // If JSON parsing fails (e.g., SyntaxError for empty body), treat as no content
+        // Also check for zero content-length header
+        if (this.isResponseEmpty(response)) {
           return {
-            error: new AccountError(
-              message,
-              response.status,
-              responseBody.error,
-            ),
-            success: false,
-          };
-        }
-        if ("data" in responseBody) {
-          return {
-            data: responseBody.data as T,
+            data: undefined as unknown as T,
             success: true,
           };
         }
+        // Re-throw other errors
+        throw parseError;
       }
-
-      // Handle unwrapped success case
-      return {
-        data: responseBody as T,
-        success: true,
-      };
     } catch (e) {
+      let error: AccountError;
+      if (e instanceof Response) {
+        error = await handleFetchError(e);
+      } else {
+        error = await handleUnknownError(e);
+      }
       return {
-        error: handleUnknownError(e),
+        error,
         success: false,
       };
     }
+  }
+
+  /**
+   * Checks if a response has an empty body based on status code or content-length header
+   * @param {Response} response - The response to check
+   * @returns {boolean} True if the response is empty, false otherwise
+   * @private
+   */
+  private isResponseEmpty(response: Response): boolean {
+    // Handle empty responses by status code
+    if (
+      response.status === 204 ||
+      response.status === 205 ||
+      response.status === 304
+    ) {
+      return true;
+    }
+
+    // Check content-length header for zero-length body
+    const contentLength = response.headers.get("content-length");
+    return (
+      contentLength === "0" ||
+      (contentLength && parseInt(contentLength, 10) === 0)
+    );
   }
 }
