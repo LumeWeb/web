@@ -64,7 +64,7 @@ const VerificationStatus = ({
 
 const VerificationLoading = () => (
   <div className="flex flex-col items-center">
-    <h1 className="text-2xl mb-4">Verifying your email</h1>
+    <h1 className="mb-4 text-2xl">Verifying your email</h1>
     <p className="opacity-60">Please wait while we verify your email...</p>
   </div>
 );
@@ -77,8 +77,8 @@ const NewVerificationSuccess = ({
   onRedirect: () => void;
 }) => (
   <div className="flex flex-col items-center">
-    <h1 className="text-2xl mb-4">Your email has been verified</h1>
-    <p className="opacity-60 mb-4">
+    <h1 className="mb-4 text-2xl">Your email has been verified</h1>
+    <p className="mb-4 opacity-60">
       Your email has been verified successfully.
     </p>
     <Button onClick={onRedirect}>
@@ -95,8 +95,8 @@ const AlreadyVerified = ({
   onRedirect: () => void;
 }) => (
   <div className="flex flex-col items-center">
-    <h1 className="text-2xl mb-4">Email already verified</h1>
-    <p className="opacity-60 mb-4">This email address was already verified.</p>
+    <h1 className="mb-4 text-2xl">Email already verified</h1>
+    <p className="mb-4 opacity-60">This email address was already verified.</p>
     <Button onClick={onRedirect}>
       {isAuthenticated ? "Go to Dashboard" : "Go to Login"}
     </Button>
@@ -113,11 +113,11 @@ const VerificationError = ({
   onResend: () => void;
 }) => (
   <div className="flex flex-col items-center">
-    <h1 className="text-2xl mb-4">Something went wrong</h1>
-    <p className="opacity-60 mb-4">
+    <h1 className="mb-4 text-2xl">Something went wrong</h1>
+    <p className="mb-4 opacity-60">
       {typeof error === "string"
         ? error
-        : (error as any)?.message ?? "An unexpected error occurred"}
+        : ((error as any)?.message ?? "An unexpected error occurred")}
     </p>
     <Button disabled={isResending} onClick={onResend}>
       {isResending ? "Sending..." : "Send verification email again"}
@@ -127,8 +127,8 @@ const VerificationError = ({
 
 const VerificationDefault = ({ onResend }: { onResend: () => void }) => (
   <div className="flex flex-col items-center">
-    <h1 className="text-2xl mb-4">Verify your email</h1>
-    <p className="opacity-60 mb-4">
+    <h1 className="mb-4 text-2xl">Verify your email</h1>
+    <p className="mb-4 opacity-60">
       Click below to receive a new verification email
     </p>
     <Button onClick={onResend}>Send verification email</Button>
@@ -137,12 +137,12 @@ const VerificationDefault = ({ onResend }: { onResend: () => void }) => (
 
 const MissingParametersError = ({
   email,
-  token,
   onResend,
+  token,
 }: {
   email: null | string;
-  token: null | string;
   onResend: () => void;
+  token: null | string;
 }) => {
   const go = useGo();
 
@@ -158,8 +158,8 @@ const MissingParametersError = ({
 
   return (
     <div className="flex flex-col items-center">
-      <h1 className="text-2xl mb-4">Invalid verification link</h1>
-      <p className="opacity-60 mb-4">{message}</p>
+      <h1 className="mb-4 text-2xl">Invalid verification link</h1>
+      <p className="mb-4 opacity-60">{message}</p>
       {!token && email ? (
         <Button onClick={onResend}>Resend Verification Email</Button>
       ) : (
@@ -191,9 +191,12 @@ function AccountVerify() {
       setAlreadyVerified(true);
     }
   }, [emailAlreadyVerified]);
-  const { data: isAuthenticated, isLoading: isAuthLoading } =
-    useIsAuthenticated();
-  const userEmail = user.data?.email || email;
+  const {
+    data: isAuthenticated,
+    isLoading: isAuthLoading,
+    refetch: refetchAuth,
+  } = useIsAuthenticated();
+  const userEmail = email || user.data?.email;
 
   const exchangeToken = useQuery({
     enabled:
@@ -206,7 +209,7 @@ function AccountVerify() {
       const ret = await sdk.account().verifyEmail({
         email: userEmail!,
         token: token!,
-      });
+      }, true);
 
       if (ret.error) {
         // Handle 409 Conflict as "already verified"
@@ -218,6 +221,8 @@ function AccountVerify() {
       }
 
       setIsVerified(true);
+      // Ensure SDK token and UI auth state are up-to-date post auto-login
+      await Promise.all([sdk.account().ping(), refetchAuth()]);
       setAlreadyVerified(false);
       return ret;
     },
@@ -238,21 +243,21 @@ function AccountVerify() {
 
   if (!userEmail || !token) {
     return (
-      <div className="p-10 h-screen relative">
+      <div className="relative h-screen p-10">
         <header>
           <img alt="Lume logo" className="h-10" src={logoPng} />
         </header>
-        <main className="flex flex-col items-center justify-center h-full">
+        <main className="flex h-full flex-col items-center justify-center">
           <MissingParametersError
             email={userEmail}
-            token={token}
             onResend={resendVerification}
+            token={token}
           />
         </main>
         <div className="fixed inset-0 -z-10 overflow-clip">
           <img
             alt="Lume background"
-            className="absolute top-0 left-0 right-0 object-cover z-[-1]"
+            className="absolute left-0 right-0 top-0 z-[-1] object-cover"
             src={lumeBgPng}
           />
         </div>
@@ -261,11 +266,11 @@ function AccountVerify() {
   }
 
   return (
-    <div className="p-10 h-screen relative">
+    <div className="relative h-screen p-10">
       <header>
         <img alt="Lume logo" className="h-10" src={logoPng} />
       </header>
-      <main className="flex flex-col items-center justify-center h-full">
+      <main className="flex h-full flex-col items-center justify-center">
         <VerificationStatus
           alreadyVerified={alreadyVerified}
           error={exchangeToken.error}
@@ -281,7 +286,7 @@ function AccountVerify() {
       <div className="fixed inset-0 -z-10 overflow-clip">
         <img
           alt="Lume background"
-          className="absolute top-0 left-0 right-0 object-cover z-[-1]"
+          className="absolute left-0 right-0 top-0 z-[-1] object-cover"
           src={lumeBgPng}
         />
       </div>

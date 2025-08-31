@@ -283,12 +283,18 @@ export class AccountApi {
   /**
    * Verify email address
    * @param verifyEmailRequest Email verification details
+   * @param login Optional flag to enable auto-login after verification
    * @returns Result indicating success or failure
    */
   public async verifyEmail(
     verifyEmailRequest: VerifyEmailRequest,
+    login?: boolean,
   ): Promise<Result<void>> {
-    return this.fetchJson<void>("/api/account/verify-email", {
+    const url = new URL("/api/account/verify-email", this.apiUrl);
+    if (login === true) {
+      url.searchParams.set("login", "true");
+    }
+    return this.fetchJson<void>(url.toString(), {
       body: JSON.stringify(verifyEmailRequest),
       method: "POST",
     });
@@ -334,7 +340,7 @@ export class AccountApi {
   /**
    * Makes a JSON request to the API
    * @template T
-   * @param {string} input - The API endpoint path
+   * @param {string} input - The API endpoint path or absolute URL
    * @param {RequestInit} [init] - Optional request initialization
    * @returns {Promise<Result<T>>} Promise resolving to the result
    * @private
