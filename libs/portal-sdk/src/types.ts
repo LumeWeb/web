@@ -16,31 +16,95 @@ export type Result<T> =
       success: false;
     };
 
-
 /**
  * Standard error type for account-related operations
  */
 export class AccountError extends Error {
   public details?: any;
+  public fields?: Record<string, string>;
 
   constructor(
     message: string,
     public readonly statusCode: number,
-    details?: any
+    details?: any,
+    fields?: Record<string, string>,
   ) {
     super(message);
     this.name = "AccountError";
     this.details = details;
+    this.fields = fields;
   }
 
   toJSON() {
     return {
-      name: this.name,
+      details: this.details,
+      fields: this.fields,
       message: this.message,
       statusCode: this.statusCode,
-      details: this.details
     };
   }
+}
+
+/**
+ * Helper function to normalize field values
+ */
+function normalizeFields(fields: Record<string, any>): Record<string, string> {
+  if (!fields) return undefined;
+  
+  const normalized: Record<string, string> = {};
+  for (const [key, value] of Object.entries(fields)) {
+    if (Array.isArray(value)) {
+      normalized[key] = value.join(', ');
+    } else if (value === null || value === undefined) {
+      normalized[key] = '';
+    } else if (typeof value === 'object') {
+      normalized[key] = JSON.stringify(value);
+    } else {
+      normalized[key] = String(value);
+    }
+  }
+  return normalized;
+}
+
+/**
+ * Extract error details from a response JSON object
+ */
+function extractErrorDetails(data: any): {
+  message: string;
+  details?: any;
+  fields?: Record<string, string>;
+} {
+  let result = {
+    message: '',
+    details: undefined,
+    fields: undefined
+  };
+
+  // Handle standard error format
+  if (data?.error) {
+    if (typeof data.error === 'string') {
+      result.message = data.error;
+    } else if (data.error?.message) {
+      result.message = data.error.message;
+      result.details = data.error.details;
+      result.fields = normalizeFields(data.error.fields);
+    }
+  } 
+  // Handle alternative error formats
+  else if (data?.message) {
+    result.message = data.message;
+    result.details = data.details;
+    result.fields = normalizeFields(data.fields);
+  } else {
+    result.message = JSON.stringify(data);
+  }
+
+  // Always include fields if they exist at any level
+  if (!result.fields) {
+    result.fields = normalizeFields(data?.fields) || normalizeFields(data?.error?.fields);
+  }
+
+  return result;
 }
 
 /**
@@ -51,50 +115,43 @@ export class AccountError extends Error {
 export async function handleFetchError(
   response: Response,
 ): Promise<AccountError> {
-  const statusCode = response.status;
-  let errorMessage: string;
-  let errorDetails: any = null;
-
   try {
-    const data = await response.json();
-    
-    // Handle different error response formats
-    if (data && typeof data === 'object') {
-      if (data.error) {
-        // Case 1: Error object with message
-        if (typeof data.error === 'string') {
-          errorMessage = data.error;
-        } else if (data.error.message) {
-          errorMessage = data.error.message;
-          errorDetails = data.error.details || null;
-        } else {
-          errorMessage = JSON.stringify(data.error);
-        }
-      } else if (data.message) {
-        // Case 2: Top-level message field
-        errorMessage = data.message;
-        errorDetails = data.details || null;
-      } else {
-        // Case 3: Fallback to stringify
-        errorMessage = JSON.stringify(data);
-      }
-    } else if (typeof data === 'string') {
-      // Case 4: Plain text error
-      errorMessage = data;
-    } else {
-      // Case 5: Unknown format
-      errorMessage = 'Unknown error occurred';
-    }
-  } catch (parseError) {
-    // Fallback to text if JSON parsing fails
-    errorMessage = (await response.text()) || response.statusText;
-  }
+    const contentType = response.headers.get('content-type');
+    const isJson = contentType?.toLowerCase()?.includes('json');
+    const clone = response.clone();
+    let errorData: any;
 
-  const error = new AccountError(errorMessage, statusCode);
-  if (errorDetails) {
-    error.details = errorDetails;
+    if (isJson) {
+      try {
+        errorData = await response.json();
+      } catch {
+        // Preserve status; fall back to text/statusText
+        const txt = await clone.text().catch(() => '');
+        errorData = txt || response.statusText;
+      }
+    } else {
+      errorData = await response.text();
+      if (!errorData) errorData = response.statusText;
+    }
+
+    const { message, details, fields } = typeof errorData === 'string' 
+      ? { message: errorData }
+      : extractErrorDetails(errorData);
+
+    return new AccountError(
+      message || 'Unknown error',
+      response.status,
+      details,
+      fields
+    );
+  } catch (e) {
+    // As a last resort, still preserve the HTTP status when possible
+    return new AccountError(
+      response.statusText || 'Unknown error',
+      response.status,
+      { cause: e }
+    );
   }
-  return error;
 }
 
 /**
@@ -103,12 +160,22 @@ export async function handleFetchError(
  * @returns A properly formatted AccountError
  */
 export function handleUnknownError(e: unknown): AccountError {
+  if (e instanceof AccountError) {
+    return e;
+  }
+
   if (e instanceof Error) {
-    return new AccountError(e.message, 500);
+    return new AccountError(e.message, 500, { cause: e });
   }
 
   if (typeof e === "object" && e !== null) {
-    return new AccountError(JSON.stringify(e), 500);
+    let msg: string;
+    try {
+      msg = JSON.stringify(e);
+    } catch {
+      msg = String(e);
+    }
+    return new AccountError(msg, 500, { cause: e });
   }
 
   return new AccountError(String(e), 500);

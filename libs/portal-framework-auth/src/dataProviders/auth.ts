@@ -64,8 +64,28 @@ const createAuthResponse = (
   ...params,
 });
 
-// Helper function to wrap unknown errors with a custom name
-const wrapErrorWithName = (error: unknown, name: string): Error => {
+// Helper function to process validation errors
+const processValidationError = (error: any): string | undefined => {
+  if (error?.message === VALIDATION_ERROR_NAME && error?.fields) {
+    const fields = error.fields;
+    // Use $first field if available, otherwise find first available field error
+    const candidate = fields.$first ?? Object.values(fields)[0];
+    const first = Array.isArray(candidate) ? candidate[0] : candidate;
+    if (typeof first === 'string') {
+      // Extract the message after the first colon (keep subsequent colons)
+      const idx = first.indexOf(':');
+      const errorMessage = idx >= 0 ? first.slice(idx + 1).trim() : first;
+      // Remove leading type tokens and capitalize first letter
+      const cleaned = errorMessage.replace(/^(string|bool|number|time|slice|struct)\s+/i, '');
+      const finalMsg = cleaned.length > 0 ? cleaned : errorMessage;
+      return finalMsg.charAt(0).toUpperCase() + finalMsg.slice(1);
+    }
+  }
+  return undefined;
+};
+
+// Helper function to create a standardized error with a custom name
+const createStandardError = (error: unknown, name: string): Error => {
   const original = error instanceof Error ? error : new Error(String(error));
   const e = new Error(original.message);
   e.name = name;
@@ -77,12 +97,27 @@ const wrapErrorWithName = (error: unknown, name: string): Error => {
   return e;
 };
 
+// Helper function to process API errors and create appropriate error messages
+const processApiError = (error: unknown, name: string): Error => {
+  // First check if it's a validation error
+  const validationMessage = processValidationError(error);
+  if (validationMessage) {
+    const e = createStandardError(error, name);
+    e.message = validationMessage;
+    return e;
+  }
+  
+  // Otherwise use standard error processing
+  return createStandardError(error, name);
+};
+
 // Error name constants
 const LOGIN_ERROR_NAME = "Login Error";
 const REGISTRATION_ERROR_NAME = "Registration Error";
 const LOGOUT_ERROR_NAME = "Logout Error";
 const PASSWORD_RESET_ERROR_NAME = "Password Reset Error";
 const UPDATE_PASSWORD_ERROR_NAME = "Update Password Error";
+const VALIDATION_ERROR_NAME = "validation failed";
 
 // Redirect paths
 const LOGIN_PATH = "/login";
@@ -204,7 +239,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
 
         return createAuthResponse({
           success: response.success,
-          ...(isErrorResult(response) && { error: wrapErrorWithName(response.error, PASSWORD_RESET_ERROR_NAME) }),
+          ...(isErrorResult(response) && { error: processApiError(response.error, PASSWORD_RESET_ERROR_NAME) }),
           ...(response.success && {
             successNotification: {
               description:
@@ -215,7 +250,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
         });
       } catch (error) {
         return createAuthResponse({
-          error: wrapErrorWithName(error, PASSWORD_RESET_ERROR_NAME),
+          error: processApiError(error, PASSWORD_RESET_ERROR_NAME),
           success: false,
         });
       }
@@ -255,7 +290,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
 
           if (isErrorResult(response)) {
             return createAuthResponse({
-              error: wrapErrorWithName(response.error, LOGIN_ERROR_NAME),
+              error: processApiError(response.error, LOGIN_ERROR_NAME),
               redirectTo: `${OTP_PATH}${
                 params.redirectTo
                   ? `?to=${encodeURIComponent(sanitizeRedirectUrl(params.redirectTo))}`
@@ -298,7 +333,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
 
         if (isErrorResult(response)) {
           return createAuthResponse({
-            error: wrapErrorWithName(response.error, LOGIN_ERROR_NAME),
+            error: processApiError(response.error, LOGIN_ERROR_NAME),
             success: false,
           });
         }
@@ -346,7 +381,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
         });
       } catch (error) {
         return createAuthResponse({
-          error: wrapErrorWithName(error, LOGIN_ERROR_NAME),
+          error: processApiError(error, LOGIN_ERROR_NAME),
           redirectTo: LOGIN_PATH,
           success: false,
         });
@@ -375,7 +410,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
         redirectTo: LOGIN_PATH,
         success: response.success,
         ...(isErrorResult(response) && {
-          error: wrapErrorWithName(response.error, LOGOUT_ERROR_NAME),
+          error: processApiError(response.error, LOGOUT_ERROR_NAME),
         }),
       });
     },
@@ -403,7 +438,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
       return createAuthResponse({
         success: response.success,
         ...(isErrorResult(response) && {
-          error: wrapErrorWithName(response.error, REGISTRATION_ERROR_NAME),
+          error: processApiError(response.error, REGISTRATION_ERROR_NAME),
         }),
         ...(response.success && {
           redirectTo: LOGIN_PATH,
@@ -426,7 +461,7 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
 
       return createAuthResponse({
         success: response.success,
-        ...(isErrorResult(response) && { error: wrapErrorWithName(response.error, UPDATE_PASSWORD_ERROR_NAME) }),
+        ...(isErrorResult(response) && { error: processApiError(response.error, UPDATE_PASSWORD_ERROR_NAME) }),
         ...(response.success && {
           successNotification: {
             description: "Your password has been updated successfully.",
