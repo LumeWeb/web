@@ -1,3 +1,5 @@
+import type { UppyFile } from "@uppy/core";
+
 import { useApiUrl } from "@lumeweb/portal-framework-ui";
 import {
   Avatar,
@@ -7,8 +9,8 @@ import {
   cn,
   Progress,
 } from "@lumeweb/portal-framework-ui-core";
+import { useNotification } from "@refinedev/core";
 import Uppy from "@uppy/core";
-import type { UppyFile } from "@uppy/core";
 import DropTarget from "@uppy/drop-target";
 import XHRUpload from "@uppy/xhr-upload";
 import { Check, Upload } from "lucide-react";
@@ -19,14 +21,13 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useNotification } from "@refinedev/core";
 
 const ENDPOINT = "/api/account/avatar";
 
 interface AvatarUploadContextType {
   containerRef: React.RefObject<HTMLDivElement>;
   fileInputRef: React.RefObject<HTMLInputElement>;
-  handleFileButtonClick: () => void;
+  handleFileButtonClick: (e: React.KeyboardEvent | React.MouseEvent) => void;
   handleFileInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
   previewUrl: null | string;
   uploading: boolean;
@@ -71,9 +72,12 @@ function AvatarDisplay({
   return (
     <div className="flex justify-center">
       <Avatar className="h-20 w-20">
-        <AvatarImage alt={userName || "User avatar"} src={previewUrl || currentAvatar} />
+        <AvatarImage
+          alt={userName || "User avatar"}
+          src={previewUrl || currentAvatar}
+        />
         <AvatarFallback className="bg-primary text-primary-foreground text-xl">
-          {(userName?.trim().charAt(0)?.toUpperCase() || "?")}
+          {userName?.trim().charAt(0)?.toUpperCase() || "?"}
         </AvatarFallback>
       </Avatar>
     </div>
@@ -90,7 +94,7 @@ function AvatarUploadProvider({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { open } = useNotification();
-  const successTimerRef = useRef<number | null>(null);
+  const successTimerRef = useRef<null | number>(null);
 
   const uppyRef = useRef<null | Uppy>(null);
 
@@ -107,7 +111,9 @@ function AvatarUploadProvider({
       fileInputRef.current.value = "";
     }
     if (previewUrl) {
-      try { URL.revokeObjectURL(previewUrl); } catch {}
+      try {
+        URL.revokeObjectURL(previewUrl);
+      } catch {}
     }
     setPreviewUrl(null);
     setUploadProgress(0);
@@ -117,7 +123,9 @@ function AvatarUploadProvider({
   useEffect(() => {
     return () => {
       if (previewUrl) {
-        try { URL.revokeObjectURL(previewUrl); } catch {}
+        try {
+          URL.revokeObjectURL(previewUrl);
+        } catch {}
       }
     };
   }, [previewUrl]);
@@ -126,7 +134,12 @@ function AvatarUploadProvider({
     uppyRef.current = new Uppy({
       autoProceed: true,
       restrictions: {
-        allowedFileTypes: ["image/png", "image/jpeg", "image/webp", "image/gif"],
+        allowedFileTypes: [
+          "image/png",
+          "image/jpeg",
+          "image/webp",
+          "image/gif",
+        ],
         maxFileSize: 5 * 1024 * 1024, // 5MB
         maxNumberOfFiles: 1,
       },
@@ -184,24 +197,24 @@ function AvatarUploadProvider({
           setUploading(false);
           resetState();
           onSuccess();
-          
+
           // Show success notification
           open?.({
-            type: "success",
-            message: "Profile Updated",
             description: "Your profile picture has been updated successfully",
+            message: "Profile Updated",
+            type: "success",
           });
         }, 500);
       } catch (err) {
         console.error("Upload success handler error:", err);
         setUploading(false);
         resetState();
-        
+
         // Show error notification
         open?.({
-          type: "error",
-          message: "Processing Error",
           description: "Failed to process profile picture. Please try again.",
+          message: "Processing Error",
+          type: "error",
         });
       }
     };
@@ -211,23 +224,25 @@ function AvatarUploadProvider({
       setUploading(false);
       setUploadProgress(0);
       resetState();
-      
+
       // Show error notification
       open?.({
-        type: "error",
+        description:
+          err.message ||
+          "An error occurred while uploading your profile picture",
         message: "Upload Failed",
-        description: err.message || "An error occurred while uploading your profile picture",
+        type: "error",
       });
     };
 
     const handleRestrictionFailed = (file: UppyFile, err: Error) => {
       resetState();
-      
+
       // Show error notification
       open?.({
-        type: "error",
-        message: "Invalid File",
         description: "The selected file is invalid: " + err.message,
+        message: "Invalid File",
+        type: "error",
       });
     };
 
@@ -255,21 +270,23 @@ function AvatarUploadProvider({
         uppyRef.current.addFile({
           data: file,
           name: file.name,
-          source: "file-input",
           type: file.type,
         });
       } catch (err) {
         console.error("Error adding file to Uppy:", err);
         open?.({
-          type: "error",
+          description:
+            "Error with the selected file: " + (err as Error).message,
           message: "File Error",
-          description: "Error with the selected file: " + (err as Error).message,
+          type: "error",
         });
       }
+      e.target.value = null;
     }
   };
 
-  const handleFileButtonClick = () => {
+  const handleFileButtonClick = (e: React.KeyboardEvent | React.MouseEvent) => {
+    e.stopPropagation();
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
@@ -318,21 +335,21 @@ function AvatarUploadUI({
 
       {!uploading ? (
         <div
+          aria-label="Upload profile picture. Press Enter, Space, or click to choose a file, or drag and drop an image."
           className={cn(
             "rounded-lg border-2 border-dashed p-8 text-center transition-colors",
             "border-muted hover:border-muted/50",
           )}
-          ref={containerRef}
-          role="button"
-          tabIndex={0}
-          aria-label="Upload profile picture. Press Enter, Space, or click to choose a file, or drag and drop an image."
           onClick={handleFileButtonClick}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              handleFileButtonClick();
+              handleFileButtonClick(e);
             }
-          }}>
+          }}
+          ref={containerRef}
+          role="button"
+          tabIndex={0}>
           <input
             accept="image/*"
             className="hidden"
@@ -343,9 +360,7 @@ function AvatarUploadUI({
           <Upload className="text-muted-foreground mx-auto mb-4 h-8 w-8" />
           <p className="text-foreground mb-2">Drag and drop your image here</p>
           <p className="text-muted-foreground mb-4 text-sm">or</p>
-          <Button onClick={handleFileButtonClick} variant="default">
-            Choose File
-          </Button>
+          <Button variant="default">Choose File</Button>
         </div>
       ) : (
         <UploadProgress uploadProgress={uploadProgress} />
