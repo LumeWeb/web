@@ -19,6 +19,7 @@ export const getRegisterForm = (
   ],
   fields: [
     {
+      autocomplete: "given-name",
       className: "space-y-2",
       group: "name",
       inputClassName: "h-14",
@@ -26,9 +27,9 @@ export const getRegisterForm = (
       label: "First Name",
       name: "firstName",
       type: FormFieldType.TEXT,
-      autocomplete: "given-name",
     },
     {
+      autocomplete: "family-name",
       className: "space-y-2",
       group: "name",
       inputClassName: "h-14",
@@ -36,40 +37,39 @@ export const getRegisterForm = (
       label: "Last Name",
       name: "lastName",
       type: FormFieldType.TEXT,
-      autocomplete: "family-name",
     },
     {
+      autocomplete: "email",
       inputClassName: "h-14",
       label: "Email",
       name: "email",
       type: FormFieldType.EMAIL,
-      autocomplete: "email",
     },
     {
+      autocomplete: "new-password",
       inputClassName: "h-14",
       label: "Password",
       name: "password",
       type: FormFieldType.PASSWORD,
-      autocomplete: "new-password",
     },
     {
+      autocomplete: "new-password",
       inputClassName: "h-14",
       label: "Confirm Password",
       name: "confirmPassword",
       type: FormFieldType.PASSWORD,
-      autocomplete: "new-password",
     },
     {
       label: (
-        <span className="text-sm pl-2">
+        <span className="pl-2 text-sm">
           I agree to the
           <a
-            className="text-foreground underline mx-1"
+            className="text-foreground mx-1 underline"
             href="/terms-of-service">
             Terms of Service
           </a>
           and
-          <a className="text-foreground underline mx-1" href="/privacy-policy">
+          <a className="text-foreground mx-1 underline" href="/privacy-policy">
             Privacy Policy
           </a>
         </span>

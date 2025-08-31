@@ -1,6 +1,7 @@
 import { DialogConfig } from "@lumeweb/portal-framework-ui";
-import updatePasswordForm from "@/ui/forms/updatePassword";
 import { z } from "zod";
+
+import updatePasswordForm from "@/ui/forms/updatePassword";
 import schema from "@/ui/forms/updatePassword.schema";
 
 type FormValues = z.infer<typeof schema>;
@@ -9,8 +10,6 @@ export function updatePasswordDialogConfig(
   updatePasswordHook: any,
 ): DialogConfig<FormValues> {
   return {
-    type: "form",
-    title: "Change Password",
     formConfig: updatePasswordForm(),
     onSubmit: (req) => {
       return updatePasswordHook({
@@ -19,5 +18,7 @@ export function updatePasswordDialogConfig(
       });
     },
     onSuccess: () => void 0,
+    title: "Change Password",
+    type: "form",
   };
 }

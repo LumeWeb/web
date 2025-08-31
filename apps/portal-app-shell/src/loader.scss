@@ -1,0 +1,41 @@
+:root.is-loading {
+  #root {
+    display: none;
+  }
+
+  --theme-background: 173, 24%, 7%;
+  --theme-subtle-background: 175, 24%, 9%;
+  --theme-ui-element-background: 174, 55%, 11%;
+  --theme-hovered-ui-element: 176, 93%, 12%;
+  --theme-active-ui-element: 175, 80%, 16%;
+  --theme-borders: 174, 63%, 21%;
+  --theme-ui-element-border: 174, 58%, 26%;
+  --theme-hovered-element-border: 173, 59%, 31%;
+  --theme-solid-background: 174, 80%, 36%;
+  --theme-hovered-solid-bg: 172, 85%, 38%;
+  --theme-low-contrast-text: 170, 90%, 45%;
+  --theme-high-contrast-text: 163, 69%, 81%;
+}
+
+:root:not(.is-loading) {
+  .loading-overlay {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease-out;
+  }
+}
+
+.progress-bar-container {
+  height: 0.5rem;
+  overflow: hidden;
+}
+
+.progress-bar {
+  animation-name: progress-animation;
+  animation: progress-animation 3s ease-in-out infinite;
+}
+
+@keyframes progress-animation {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

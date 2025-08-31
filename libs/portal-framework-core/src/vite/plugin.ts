@@ -269,9 +269,18 @@ export function Config(opts: ConfigOptions) {
           assetFileNames: "static/[ext]/[name]-[hash].[ext]",
           chunkFileNames: "static/js/[name]-[hash].js",
           entryFileNames: "static/js/[name]-[hash].js",
+          manualChunks:
+            opts.type === "host"
+              ? (id) => {
+                  if (id.includes("loader.ts")) {
+                    return "loader";
+                  }
+                }
+              : undefined,
           minifyInternalExports: false,
         },
       },
+
       target: "esnext",
     },
     define: {

@@ -1,5 +1,5 @@
 import type { DialogConfig } from "@lumeweb/portal-framework-ui";
-import type { HttpError, DeleteOneParams } from "@refinedev/core";
+import type { DeleteOneParams, HttpError } from "@refinedev/core";
 import type { UseMutationResult } from "@tanstack/react-query";
 
 import { DATA_PROVIDER_NAME } from "@lumeweb/portal-framework-auth";
@@ -20,8 +20,10 @@ export function deleteAccountDialogConfig(
           successNotification: false,
         });
       } catch (error) {
-        console.error('Failed to delete account:', error);
-        throw new Error('Failed to delete account. Please try again or contact support.');
+        console.error("Failed to delete account:", error);
+        throw new Error(
+          "Failed to delete account. Please try again or contact support.",
+        );
       }
     },
     onSuccess: () => {

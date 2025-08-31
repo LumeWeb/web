@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
-import tailwindcss_animate from "tailwindcss-animate";
 import tailwindcss_scrollbar from "tailwind-scrollbar";
+import tailwindcss_animate from "tailwindcss-animate";
 
 import tailwindClassList from "./classlist";
 
