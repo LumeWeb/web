@@ -2,7 +2,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 
 function Loading(
   { className, children, ...rest }: HTMLAttributes<HTMLDivElement> & { children?: ReactNode }
-) {
+): JSX.Element {
   return (
     <div
       {...rest}
