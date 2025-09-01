@@ -29714,7 +29714,8 @@ IndeterminateProgress.displayName = "IndeterminateProgress";
 const Input = dashboard__loadShare__react__loadShare__.forwardRef(({ className, fullWidth, leftIcon, type,...props }, ref) => {
 	const [showPassword, setShowPassword] = dashboard__loadShare__react__loadShare__.useState(false);
 	const [mask, setMask] = dashboard__loadShare__react__loadShare__.useState(false);
-	const toggleShowPassword = () => {
+	const toggleShowPassword = (e) => {
+		if (![" ", "Enter"].includes(e.key)) return;
 		setShowPassword((show) => !show);
 		setMask((mask$1) => !mask$1);
 	};
@@ -29726,13 +29727,13 @@ const Input = dashboard__loadShare__react__loadShare__.forwardRef(({ className, 
 				children: leftIcon
 			}),
 			/* @__PURE__ */ jsxRuntimeExports.jsx("input", {
-				className: cn$1("flex h-14 w-full bg-secondary rounded-md border border-input px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-input-placeholder focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50", className, leftIcon && "pl-10"),
+				className: cn$1("bg-secondary border-input placeholder:text-input-placeholder focus-visible:ring-ring flex h-14 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50", className, leftIcon && "pl-10"),
 				ref,
 				type: type && !mask ? type : "text",
 				...props
 			}),
 			type === "password" ? /* @__PURE__ */ jsxRuntimeExports.jsx("button", {
-				className: "absolute right-4 top-5 text-ring",
+				className: "text-ring absolute right-4 top-5",
 				onClick: toggleShowPassword,
 				onKeyDown: toggleShowPassword,
 				type: "button",
