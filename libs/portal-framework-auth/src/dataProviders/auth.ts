@@ -31,12 +31,12 @@ export interface ForgotPasswordRequest
   token?: string;
 }
 
-export type OTPGenerateResponse =
-  import("@lumeweb/portal-sdk").OTPGenerateResponse;
-
 export interface OTPFormRequest extends OTPValidateRequest {
   redirectTo?: string;
 }
+
+export type OTPGenerateResponse =
+  import("@lumeweb/portal-sdk").OTPGenerateResponse;
 
 export interface RegisterFormRequest
   extends Omit<RegisterRequest, "first_name" | "last_name"> {
@@ -71,12 +71,15 @@ const processValidationError = (error: any): string | undefined => {
     // Use $first field if available, otherwise find first available field error
     const candidate = fields.$first ?? Object.values(fields)[0];
     const first = Array.isArray(candidate) ? candidate[0] : candidate;
-    if (typeof first === 'string') {
+    if (typeof first === "string") {
       // Extract the message after the first colon (keep subsequent colons)
-      const idx = first.indexOf(':');
+      const idx = first.indexOf(":");
       const errorMessage = idx >= 0 ? first.slice(idx + 1).trim() : first;
       // Remove leading type tokens and capitalize first letter
-      const cleaned = errorMessage.replace(/^(string|bool|number|time|slice|struct)\s+/i, '');
+      const cleaned = errorMessage.replace(
+        /^(string|bool|number|time|slice|struct)\s+/i,
+        "",
+      );
       const finalMsg = cleaned.length > 0 ? cleaned : errorMessage;
       return finalMsg.charAt(0).toUpperCase() + finalMsg.slice(1);
     }
@@ -106,7 +109,7 @@ const processApiError = (error: unknown, name: string): Error => {
     e.message = validationMessage;
     return e;
   }
-  
+
   // Otherwise use standard error processing
   return createStandardError(error, name);
 };
@@ -127,19 +130,22 @@ const DASHBOARD_PATH = "/dashboard";
 // Utility to sanitize redirect URLs - only allow relative paths or specific allowed domains
 const sanitizeRedirectUrl = (url: string | undefined): string => {
   if (!url) return DASHBOARD_PATH;
-  
+
   try {
     // If it's a relative path, allow it
     if (url.startsWith("/")) {
       return url;
     }
-    
+
     // If it's an absolute URL, only allow localhost for development
     const parsedUrl = new URL(url);
-    if (parsedUrl.hostname === "localhost" || parsedUrl.hostname === "127.0.0.1") {
+    if (
+      parsedUrl.hostname === "localhost" ||
+      parsedUrl.hostname === "127.0.0.1"
+    ) {
       return url;
     }
-    
+
     // For any other domain, redirect to dashboard
     return DASHBOARD_PATH;
   } catch {
@@ -147,10 +153,6 @@ const sanitizeRedirectUrl = (url: string | undefined): string => {
     return DASHBOARD_PATH;
   }
 };
-
-export interface AuthProviderWithEmitter extends AuthProvider {
-  on<E extends keyof AuthEvents>(event: E, callback: AuthEvents[E]): () => void;
-}
 
 export interface AuthCheckFailedEvent {
   error: Error;
@@ -164,6 +166,10 @@ export interface AuthEvents {
   authCheckFailed: (params: AuthCheckFailedEvent) => void;
   authCheckSuccess: (params: AuthCheckSuccessEvent) => void;
   registerAttempt: (params: RegisterAttemptEvent) => void;
+}
+
+export interface AuthProviderWithEmitter extends AuthProvider {
+  on<E extends keyof AuthEvents>(event: E, callback: AuthEvents[E]): () => void;
 }
 
 export interface RegisterAttemptEvent {
@@ -239,7 +245,9 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
 
         return createAuthResponse({
           success: response.success,
-          ...(isErrorResult(response) && { error: processApiError(response.error, PASSWORD_RESET_ERROR_NAME) }),
+          ...(isErrorResult(response) && {
+            error: processApiError(response.error, PASSWORD_RESET_ERROR_NAME),
+          }),
           ...(response.success && {
             successNotification: {
               description:
@@ -264,9 +272,18 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
         return null;
       }
 
-      const { created_at, email, first_name, id, last_name, otp, verified } =
-        response.data;
+      const {
+        avatar,
+        created_at,
+        email,
+        first_name,
+        id,
+        last_name,
+        otp,
+        verified,
+      } = response.data;
       return {
+        avatar,
         created_at,
         email,
         firstName: first_name,
@@ -316,7 +333,8 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
               }
             }
             return createAuthResponse({
-              redirectTo: sanitizeRedirectUrl(params.redirectTo) ?? DASHBOARD_PATH,
+              redirectTo:
+                sanitizeRedirectUrl(params.redirectTo) ?? DASHBOARD_PATH,
               success: true,
               successNotification: {
                 description: "You have successfully logged in with 2FA.",
@@ -366,7 +384,8 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
             }
           }
           return createAuthResponse({
-            redirectTo: sanitizeRedirectUrl(params.redirectTo) ?? DASHBOARD_PATH,
+            redirectTo:
+              sanitizeRedirectUrl(params.redirectTo) ?? DASHBOARD_PATH,
             success: true,
             successNotification: {
               description: "You have successfully logged in.",
@@ -461,7 +480,9 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
 
       return createAuthResponse({
         success: response.success,
-        ...(isErrorResult(response) && { error: processApiError(response.error, UPDATE_PASSWORD_ERROR_NAME) }),
+        ...(isErrorResult(response) && {
+          error: processApiError(response.error, UPDATE_PASSWORD_ERROR_NAME),
+        }),
         ...(response.success && {
           successNotification: {
             description: "Your password has been updated successfully.",
