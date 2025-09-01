@@ -1991,6 +1991,13 @@ const widgetRegistrations = [
         height: 1,
         width: 12
       }
+    },
+    visibilityHook() {
+      const { data: identity } = core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useGetIdentity();
+      if (!identity) {
+        return false;
+      }
+      return !identity?.verified;
     }
   },
   {

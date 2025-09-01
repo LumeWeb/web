@@ -1,7 +1,7 @@
 import { createEnv, z, createRoot } from './index-BQ-ueVeF.js';
 import { dashboard__loadShare__react__loadShare__, React3 } from './dashboard__loadShare__react__loadShare__-A-_ogCU6.js';
 import { jsxRuntimeExports } from './jsx-runtime-Rqu4CMEU.js';
-import { federationRuntime } from './virtual_mf-REMOTE_ENTRY_ID-D9QGQLnq.js';
+import { federationRuntime } from './virtual_mf-REMOTE_ENTRY_ID-CclYViME.js';
 import { getDefaultExportFromCjs } from './_commonjsHelpers-BILit0S-.js';
 import { index_cjs } from './dashboard__mf_v__runtimeInit__mf_v__-CrvQyIUV.js';
 import { dashboard__loadShare__react_mf_2_dom__loadShare__ } from './dashboard__loadShare__react_mf_2_dom__loadShare__-sIXfFKrj.js';
@@ -11573,17 +11573,11 @@ var Framework = class {
 		if (this.widgets.has(widget.id)) throw new Error(`Widget with id ${widget.id} already registered`);
 		if (!this.widgetAreas.has(widget.areaId)) throw new Error(`Widget area ${widget.areaId} not registered`);
 		const definition = {
-			areaId: widget.areaId,
+			...widget,
 			component: createRemoteComponentLoader({
 				componentPath: widget.componentName,
 				pluginId: widget.pluginId
-			}, this, defaultRemoteOptions),
-			description: widget.description,
-			id: widget.id,
-			label: widget.label,
-			order: widget.order,
-			position: widget.position,
-			title: widget.title
+			}, this, defaultRemoteOptions)
 		};
 		this.widgets.set(widget.id, definition);
 	}
@@ -12317,13 +12311,18 @@ function WidgetArea({ id }) {
 	const { framework } = useFramework();
 	const area = framework.getWidgetArea(id);
 	const widgets = framework.getWidgetsForArea(id);
+	const visibilityResults = [];
+	for (const widget of widgets) if (widget.visibilityHook) visibilityResults.push(widget.visibilityHook());
+	else visibilityResults.push(true);
+	if (!visibilityResults.filter(Boolean).length) return null;
 	const sortedWidgets = React3.useMemo(() => sortWidgets(widgets), [widgets]);
 	const gridAutoRowsClass = getGridAutoRows(area.grid.rowHeight);
 	const gridGapClass = getGridGap(area.grid.gap);
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("grid", gridGapClass || "gap-5", getResponsiveGridTemplateColumnsClass(area.grid.columns), gridAutoRowsClass),
 		style: getGridStyles(area),
-		children: sortedWidgets.length === 0 ? null : sortedWidgets.map((widget) => {
+		children: sortedWidgets.length === 0 ? null : sortedWidgets.map((widget, index) => {
+			if (!visibilityResults[index]) return null;
 			const Widget = widget.component;
 			const columnSpanClass = getResponsiveGridColumnSpanClass(widget.position.location?.column, widget.position.size.width);
 			const rowSpanClass = getGridRowSpanClass(widget.position.size.height);
@@ -12341,7 +12340,7 @@ function WidgetArea({ id }) {
 				style: widgetStyles,
 				children: /* @__PURE__ */ jsxRuntimeExports.jsx(Widget, {})
 			}, widget.id);
-		})
+		}).filter(Boolean)
 	});
 }
 

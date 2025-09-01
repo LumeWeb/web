@@ -1,5 +1,5 @@
 import { loadShare_1, init_1, core_dashboard__mf_v__runtimeInit__mf_v__ } from './core_dashboard__mf_v__runtimeInit__mf_v__-DeI6jfgm.js';
-import exposesMap from './virtualExposes-lP78fgtG.js';
+import exposesMap from './virtualExposes-BrLZn8-H.js';
 
 function BridgeReactPlugin() {
   return {
@@ -13,26 +13,6 @@ function BridgeReactPlugin() {
 
 const usedShared = {
       
-          "@lumeweb/portal-framework-core": {
-            name: "@lumeweb/portal-framework-core",
-            version: "0.0.0",
-            scope: ["default"],
-            loaded: false,
-            from: "core:dashboard",
-            async get () {
-              {
-                const shared = await loadShare_1("@lumeweb/portal-framework-core");
-                if (shared) return () => shared;
-                throw new Error(`Shared module '${"@lumeweb/portal-framework-core"}' must be provided by host`);
-              }
-            },
-            shareConfig: {
-              singleton: true,
-              requiredVersion: "^0.0.0",
-              import: false,
-            }
-          }
-        ,
           "@lumeweb/portal-framework-ui": {
             name: "@lumeweb/portal-framework-ui",
             version: "0.0.0",
@@ -89,6 +69,26 @@ const usedShared = {
             shareConfig: {
               singleton: true,
               requiredVersion: "^4.57.10",
+              import: false,
+            }
+          }
+        ,
+          "@lumeweb/portal-framework-core": {
+            name: "@lumeweb/portal-framework-core",
+            version: "0.0.0",
+            scope: ["default"],
+            loaded: false,
+            from: "core:dashboard",
+            async get () {
+              {
+                const shared = await loadShare_1("@lumeweb/portal-framework-core");
+                if (shared) return () => shared;
+                throw new Error(`Shared module '${"@lumeweb/portal-framework-core"}' must be provided by host`);
+              }
+            },
+            shareConfig: {
+              singleton: true,
+              requiredVersion: "^0.0.0",
               import: false,
             }
           }
