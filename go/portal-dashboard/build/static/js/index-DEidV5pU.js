@@ -245,7 +245,7 @@ function has$4(object, path) {
     customShareInfo: {shareConfig:{
       singleton: true,
       strictVersion: false,
-      requiredVersion: "^4.57.11"
+      requiredVersion: "^4.57.10"
     }}}));
     const exportModule$1 = await res$1.then(factory => factory());
     var dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ = exportModule$1;
@@ -7057,11 +7057,39 @@ function CustomDialog({ classNames, content, title }) {
 }
 
 //#region src/components/form/handlers/core.ts
+const isErrorResponse = (response) => {
+	return typeof response === "object" && response !== null && "error" in response;
+};
+const processErrorResponse = (response) => {
+	if (response.error) return toSafeError(response.error);
+	return new Error("Unknown error occurred");
+};
+const toSafeError = (error) => {
+	if (error instanceof Error) return error;
+	if (typeof error === "object" && error !== null && "message" in error) {
+		const message = error.message;
+		if (typeof message === "string") return new Error(message, { cause: error });
+	}
+	return new Error(String(error), { cause: error });
+};
+const handleError = async (error, options) => {
+	const { config, currentDialog, onError } = options;
+	const err = toSafeError(error);
+	try {
+		if (onError) await onError(err);
+		else if (config.onError) await config.onError(err);
+		else if (currentDialog?.type === "form" && currentDialog.onError) await currentDialog.onError(err);
+	} catch (innerError) {
+		console.error("Error in form error handler:", innerError);
+	}
+	throw err;
+};
 async function handleFormSubmission(options) {
-	const { closeDialog, config, currentDialog, formMethods, isStep, onError, onSubmit, onSuccess } = options;
+	const { closeDialog, config, currentDialog, formMethods, isStep, onSubmit, onSuccess } = options;
 	try {
 		return await formMethods.handleSubmit(async (data) => {
 			const submitResponse = onSubmit ? await onSubmit(data) : await config.onSubmit?.(data);
+			if (isErrorResponse(submitResponse)) throw processErrorResponse(submitResponse);
 			const responseData = typeof submitResponse === "object" && submitResponse !== null && "data" in submitResponse ? submitResponse.data : submitResponse;
 			if (!isStep) {
 				if (config.closeOnSubmit ?? true) await closeDialog?.();
@@ -7072,15 +7100,7 @@ async function handleFormSubmission(options) {
 			return responseData;
 		})();
 	} catch (error) {
-		const err = error;
-		try {
-			if (onError) await onError(err);
-			else if (config.onError) await config.onError(err);
-			else if (currentDialog?.type === "form" && currentDialog.onError) await currentDialog.onError(err);
-		} catch (innerError) {
-			console.error("Error in form error handler:", innerError);
-		}
-		throw err;
+		await handleError(error, options);
 	}
 }
 
@@ -7681,6 +7701,39 @@ const Checkbox = React3.forwardRef(({ label, autocomplete,...props }, ref) => {
 Checkbox.displayName = "Checkbox";
 function registerCheckbox() {
 	registerFormComponent(FormFieldType.CHECKBOX, Checkbox, { handlesLabel: true });
+}
+
+//#region src/components/Loading.tsx
+function Loading({ className, children,...rest }) {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+		...rest,
+		role: "status",
+		"aria-busy": "true",
+		className: `bg-background fixed inset-0 z-50 transition-opacity duration-300 ${className ?? ""}`,
+		children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+			className: "flex min-h-screen flex-col items-center justify-center p-8",
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "mb-8",
+				children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+					className: "bg-primary flex h-16 w-16 items-center justify-center rounded-2xl",
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx("svg", {
+						"aria-hidden": "true",
+						focusable: "false",
+						className: "text-primary-foreground h-8 w-8 motion-safe:animate-spin motion-reduce:animate-none",
+						fill: "currentColor",
+						viewBox: "0 0 24 24",
+						children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z" })
+					})
+				})
+			}), /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "text-center",
+				children: children ?? /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
+					className: "text-muted-foreground",
+					children: "Loading page..."
+				})
+			})]
+		})
+	});
 }
 
 const createStoreImpl = (createState) => {
@@ -10921,7 +10974,10 @@ function getLazyComponent(componentString, pluginId, framework, routeId) {
 		return dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createRemoteComponentLoader({
 			componentPath: componentName,
 			pluginId
-		}, framework, dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.defaultRemoteOptions);
+		}, framework, {
+			...dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.defaultRemoteOptions,
+			LoadingComponent: Loading
+		});
 	} catch (e) {
 		console.error(`Route Error: Failed createRemoteComponentLoader for ${pluginId}:${componentName}`, e);
 		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: new Error(`Failed to create loader for ${pluginId}:${componentName}`) });
@@ -10930,9 +10986,9 @@ function getLazyComponent(componentString, pluginId, framework, routeId) {
 function LoadingSpinner() {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 		className: "animate-pulse",
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-4 bg-gray-200 rounded w-3/4" }), /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-			className: "space-y-3 mt-4",
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-4 bg-gray-200 rounded" }), /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-4 bg-gray-200 rounded" })]
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-4 w-3/4 rounded bg-gray-200" }), /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+			className: "mt-4 space-y-3",
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-4 rounded bg-gray-200" }), /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-4 rounded bg-gray-200" })]
 		})]
 	}) });
 }
@@ -16552,49 +16608,85 @@ function useResetPasswordUrl() {
 */
 var AccountError = class extends Error {
 	details;
-	constructor(message, statusCode, details) {
+	fields;
+	constructor(message, statusCode, details, fields) {
 		super(message);
 		this.statusCode = statusCode;
 		this.name = "AccountError";
 		this.details = details;
+		this.fields = fields;
 	}
 	toJSON() {
 		return {
-			name: this.name,
+			details: this.details,
+			fields: this.fields,
 			message: this.message,
-			statusCode: this.statusCode,
-			details: this.details
+			statusCode: this.statusCode
 		};
 	}
 };
+/**
+* Helper function to normalize field values
+*/
+function normalizeFields(fields) {
+	if (!fields) return void 0;
+	const normalized = {};
+	for (const [key, value] of Object.entries(fields)) if (Array.isArray(value)) normalized[key] = value.join(", ");
+	else if (value === null || value === void 0) normalized[key] = "";
+	else if (typeof value === "object") normalized[key] = JSON.stringify(value);
+	else normalized[key] = String(value);
+	return normalized;
+}
+/**
+* Extract error details from a response JSON object
+*/
+function extractErrorDetails(data) {
+	let result = {
+		message: "",
+		details: void 0,
+		fields: void 0
+	};
+	if (data?.error) {
+		if (typeof data.error === "string") result.message = data.error;
+		else if (data.error?.message) {
+			result.message = data.error.message;
+			result.details = data.error.details;
+			result.fields = normalizeFields(data.error.fields);
+		}
+	} else if (data?.message) {
+		result.message = data.message;
+		result.details = data.details;
+		result.fields = normalizeFields(data.fields);
+	} else result.message = JSON.stringify(data);
+	if (!result.fields) result.fields = normalizeFields(data?.fields) || normalizeFields(data?.error?.fields);
+	return result;
+}
 /**
 * Convert a failed fetch Response to an AccountError
 * @param response The failed Response object
 * @returns A properly formatted AccountError
 */
 async function handleFetchError(response) {
-	const statusCode = response.status;
-	let errorMessage;
-	let errorDetails = null;
 	try {
-		const data = await response.json();
-		if (data && typeof data === "object") if (data.error) if (typeof data.error === "string") errorMessage = data.error;
-		else if (data.error.message) {
-			errorMessage = data.error.message;
-			errorDetails = data.error.details || null;
-		} else errorMessage = JSON.stringify(data.error);
-		else if (data.message) {
-			errorMessage = data.message;
-			errorDetails = data.details || null;
-		} else errorMessage = JSON.stringify(data);
-		else if (typeof data === "string") errorMessage = data;
-		else errorMessage = "Unknown error occurred";
-	} catch (parseError) {
-		errorMessage = await response.text() || response.statusText;
+		const contentType = response.headers.get("content-type");
+		const isJson = contentType?.toLowerCase()?.includes("json");
+		const clone = response.clone();
+		let errorData;
+		if (isJson) try {
+			errorData = await response.json();
+		} catch {
+			const txt = await clone.text().catch(() => "");
+			errorData = txt || response.statusText;
+		}
+		else {
+			errorData = await response.text();
+			if (!errorData) errorData = response.statusText;
+		}
+		const { message, details, fields } = typeof errorData === "string" ? { message: errorData } : extractErrorDetails(errorData);
+		return new AccountError(message || "Unknown error", response.status, details, fields);
+	} catch (e) {
+		return new AccountError(response.statusText || "Unknown error", response.status, { cause: e });
 	}
-	const error = new AccountError(errorMessage, statusCode);
-	if (errorDetails) error.details = errorDetails;
-	return error;
 }
 /**
 * Convert an unknown error to an AccountError
@@ -16602,303 +16694,306 @@ async function handleFetchError(response) {
 * @returns A properly formatted AccountError
 */
 function handleUnknownError(e) {
-	if (e instanceof Error) return new AccountError(e.message, 500);
-	if (typeof e === "object" && e !== null) return new AccountError(JSON.stringify(e), 500);
+	if (e instanceof AccountError) return e;
+	if (e instanceof Error) return new AccountError(e.message, 500, { cause: e });
+	if (typeof e === "object" && e !== null) {
+		let msg;
+		try {
+			msg = JSON.stringify(e);
+		} catch {
+			msg = String(e);
+		}
+		return new AccountError(msg, 500, { cause: e });
+	}
 	return new AccountError(String(e), 500);
 }
 
+//#region src/account.ts
 var AccountApi = class {
-  _jwtToken;
-  apiUrl;
-  /**
-  * Gets the current JWT token
-  * @returns {string|undefined} The current JWT token or undefined if not set
-  */
-  get jwtToken() {
-    return this._jwtToken;
-  }
-  /**
-  * Creates a new AccountApi instance
-  * @param {string} apiUrl - The base API URL
-  */
-  constructor(apiUrl) {
-    const apiUrlParsed = new URL(apiUrl);
-    apiUrlParsed.hostname = `account.${apiUrlParsed.hostname}`;
-    this.apiUrl = apiUrlParsed.toString();
-  }
-  /**
-  * Clears the current JWT token
-  */
-  clearToken() {
-    this._jwtToken = void 0;
-  }
-  /**
-  * Confirm a password reset
-  * @param passwordResetVerifyRequest Password reset verification details
-  * @returns Result indicating success or failure
-  */
-  async confirmPasswordReset(passwordResetVerifyRequest) {
-    return this.fetchJson("/api/account/password-reset/confirm", {
-      body: JSON.stringify(passwordResetVerifyRequest),
-      method: "POST"
-    });
-  }
-  /**
-  * Disable OTP for two-factor authentication
-  * @param otpDisableRequest OTP disable request details
-  * @returns Result indicating success or failure
-  */
-  async disableOtp(otpDisableRequest) {
-    return this.fetchJson("/api/auth/otp/disable", {
-      body: JSON.stringify(otpDisableRequest),
-      method: "POST"
-    });
-  }
-  /**
-  * Generate OTP for two-factor authentication
-  * @returns Result containing OTP response
-  */
-  async generateOtp() {
-    return this.fetchJson("/api/auth/otp/generate", { method: "GET" });
-  }
-  /**
-  * Get account information
-  * @returns Result containing account info
-  */
-  async info() {
-    return this.fetchJson("/api/account", { method: "GET" });
-  }
-  /**
-  * Login to the account service
-  * @param loginRequest Login credentials
-  * @returns Result containing login response or error
-  */
-  async login(loginRequest) {
-    const result = await this.fetchJson("/api/auth/login", {
-      body: JSON.stringify(loginRequest),
-      method: "POST"
-    });
-    if (result.success && result.data?.token) this.setToken(result.data.token);
-    return result;
-  }
-  /**
-  * Logout from the account service
-  * @returns Result indicating success or failure
-  */
-  async logout() {
-    const result = await this.fetchJson("/api/auth/logout", { method: "POST" });
-    if (result.success) this.clearToken();
-    return result;
-  }
-  /**
-  * Check authentication status
-  * @returns Result containing ping response
-  */
-  async ping() {
-    const result = await this.fetchJson("/api/auth/ping", { method: "POST" });
-    if (result.success && result.data?.token) this.setToken(result.data.token);
-    return result;
-  }
-  /**
-  * Register a new account
-  * @param registerRequest Registration details
-  * @returns Result indicating success or failure
-  */
-  async register(registerRequest) {
-    return this.fetchJson("/api/auth/register", {
-      body: JSON.stringify(registerRequest),
-      method: "POST"
-    });
-  }
-  /**
-  * Request account deletion
-  * @returns Result indicating success or failure
-  */
-  async requestAccountDeletion() {
-    return this.fetchJson("/api/account/delete", { method: "DELETE" });
-  }
-  /**
-  * Request email verification to be resent
-  * @param resendRequest Email details for verification
-  * @returns Result indicating success or failure
-  */
-  async requestEmailVerification(resendRequest) {
-    return this.fetchJson("/api/account/verify-email/resend", {
-      body: JSON.stringify(resendRequest),
-      method: "POST"
-    });
-  }
-  /**
-  * Request a password reset
-  * @param passwordResetRequest Password reset request details
-  * @returns Result indicating success or failure
-  */
-  async requestPasswordReset(passwordResetRequest) {
-    return this.fetchJson("/api/account/password-reset/request", {
-      body: JSON.stringify(passwordResetRequest),
-      method: "POST"
-    });
-  }
-  /**
-  * Sets the JWT token for authentication
-  * @param {string} token - The JWT token to set
-  */
-  setToken(token) {
-    this._jwtToken = token;
-  }
-  /**
-  * Update account email address
-  * @param email New email address
-  * @param password Current password for verification
-  * @returns Result indicating success or failure
-  */
-  async updateEmail(email, password) {
-    return this.fetchJson("/api/account/update-email", {
-      body: JSON.stringify({
-        email,
-        password
-      }),
-      method: "POST"
-    });
-  }
-  /**
-  * Update account password
-  * @param currentPassword Current password for verification
-  * @param newPassword New password to set
-  * @returns Result indicating success or failure
-  */
-  async updatePassword(currentPassword, newPassword) {
-    return this.fetchJson("/api/account/update-password", {
-      body: JSON.stringify({
-        current_password: currentPassword,
-        new_password: newPassword
-      }),
-      method: "POST"
-    });
-  }
-  /**
-  * Get upload limit information
-  * @returns Result containing upload limit info
-  */
-  async uploadLimit() {
-    return this.fetchJson("/api/upload-limit", { method: "GET" });
-  }
-  /**
-  * Validate OTP for two-factor authentication login
-  * @param otpValidateRequest OTP validation details
-  * @returns Result containing login response
-  */
-  async validateOtp(otpValidateRequest) {
-    const result = await this.fetchJson("/api/auth/otp/validate", {
-      body: JSON.stringify(otpValidateRequest),
-      method: "POST"
-    });
-    if (result.success && result.data?.token) this.setToken(result.data.token);
-    return result;
-  }
-  /**
-  * Verify email address
-  * @param verifyEmailRequest Email verification details
-  * @returns Result indicating success or failure
-  */
-  async verifyEmail(verifyEmailRequest) {
-    return this.fetchJson("/api/account/verify-email", {
-      body: JSON.stringify(verifyEmailRequest),
-      method: "POST"
-    });
-  }
-  /**
-  * Verify OTP for enabling two-factor authentication
-  * @param otpVerifyRequest OTP verification details
-  * @returns Result indicating success or failure
-  */
-  async verifyOtp(otpVerifyRequest) {
-    return this.fetchJson("/api/auth/otp/verify", {
-      body: JSON.stringify(otpVerifyRequest),
-      method: "POST"
-    });
-  }
-  /**
-  * Builds fetch options with authorization headers
-  * @param {RequestInit} [init] - Optional initial request options
-  * @returns {RequestInit} The constructed request options
-  * @private
-  */
-  buildOptions(init = {}) {
-    const headers = {
-      "Content-Type": "application/json",
-      ...init.headers
-    };
-    if (this.jwtToken) headers.Authorization = `Bearer ${this.jwtToken}`;
-    return {
-      ...init,
-      credentials: "include",
-      headers
-    };
-  }
-  /**
-  * Makes a JSON request to the API
-  * @template T
-  * @param {string} input - The API endpoint path
-  * @param {RequestInit} [init] - Optional request initialization
-  * @returns {Promise<Result<T>>} Promise resolving to the result
-  * @private
-  */
-  async fetchJson(input, init = {}) {
-    try {
-      const response = await fetch(new URL(input, this.apiUrl).toString(), this.buildOptions(init));
-      if (!response.ok) return {
-        error: await handleFetchError(response),
-        success: false
-      };
-      const contentLength = response.headers.get("content-length");
-      if (contentLength === "0" || response.status === 204) return {
-        data: void 0,
-        success: true
-      };
-      const rawBody = await response.text();
-      if (!rawBody || rawBody.trim().length === 0) return {
-        data: void 0,
-        success: true
-      };
-      let responseBody;
-      try {
-        responseBody = JSON.parse(rawBody);
-      } catch {
-        const errorDetails = {
-          note: "invalid JSON response",
-          status: response.status
-        };
-        if (undefined                                       === "true") ;
-        return {
-          error: new AccountError("Failed to parse JSON response", response.status, errorDetails),
-          success: false
-        };
-      }
-      if (responseBody && typeof responseBody === "object") {
-        if ("error" in responseBody) {
-          const message = typeof responseBody.error === "string" ? responseBody.error : responseBody.error?.message || "Unknown error";
-          return {
-            error: new AccountError(message, response.status, responseBody.error),
-            success: false
-          };
-        }
-        if ("data" in responseBody) return {
-          data: responseBody.data,
-          success: true
-        };
-      }
-      return {
-        data: responseBody,
-        success: true
-      };
-    } catch (e) {
-      return {
-        error: handleUnknownError(e),
-        success: false
-      };
-    }
-  }
+	_jwtToken;
+	apiUrl;
+	/**
+	* Gets the current JWT token
+	* @returns {string|undefined} The current JWT token or undefined if not set
+	*/
+	get jwtToken() {
+		return this._jwtToken;
+	}
+	/**
+	* Creates a new AccountApi instance
+	* @param {string} apiUrl - The base API URL
+	*/
+	constructor(apiUrl) {
+		const apiUrlParsed = new URL(apiUrl);
+		apiUrlParsed.hostname = `account.${apiUrlParsed.hostname}`;
+		this.apiUrl = apiUrlParsed.toString();
+	}
+	/**
+	* Clears the current JWT token
+	*/
+	clearToken() {
+		this._jwtToken = void 0;
+	}
+	/**
+	* Confirm a password reset
+	* @param passwordResetVerifyRequest Password reset verification details
+	* @returns Result indicating success or failure
+	*/
+	async confirmPasswordReset(passwordResetVerifyRequest) {
+		return this.fetchJson("/api/account/password-reset/confirm", {
+			body: JSON.stringify(passwordResetVerifyRequest),
+			method: "POST"
+		});
+	}
+	/**
+	* Disable OTP for two-factor authentication
+	* @param otpDisableRequest OTP disable request details
+	* @returns Result indicating success or failure
+	*/
+	async disableOtp(otpDisableRequest) {
+		return this.fetchJson("/api/auth/otp/disable", {
+			body: JSON.stringify(otpDisableRequest),
+			method: "POST"
+		});
+	}
+	/**
+	* Generate OTP for two-factor authentication
+	* @returns Result containing OTP response
+	*/
+	async generateOtp() {
+		return this.fetchJson("/api/auth/otp/generate", { method: "GET" });
+	}
+	/**
+	* Get account information
+	* @returns Result containing account info
+	*/
+	async info() {
+		return this.fetchJson("/api/account", { method: "GET" });
+	}
+	/**
+	* Login to the account service
+	* @param loginRequest Login credentials
+	* @returns Result containing login response or error
+	*/
+	async login(loginRequest) {
+		const result = await this.fetchJson("/api/auth/login", {
+			body: JSON.stringify(loginRequest),
+			method: "POST"
+		});
+		if (result.success && result.data?.token) this.setToken(result.data.token);
+		return result;
+	}
+	/**
+	* Logout from the account service
+	* @returns Result indicating success or failure
+	*/
+	async logout() {
+		const result = await this.fetchJson("/api/auth/logout", { method: "POST" });
+		if (result.success) this.clearToken();
+		return result;
+	}
+	/**
+	* Check authentication status
+	* @returns Result containing ping response
+	*/
+	async ping() {
+		const result = await this.fetchJson("/api/auth/ping", { method: "POST" });
+		if (result.success && result.data?.token) this.setToken(result.data.token);
+		return result;
+	}
+	/**
+	* Register a new account
+	* @param registerRequest Registration details
+	* @returns Result indicating success or failure
+	*/
+	async register(registerRequest) {
+		return this.fetchJson("/api/auth/register", {
+			body: JSON.stringify(registerRequest),
+			method: "POST"
+		});
+	}
+	/**
+	* Request account deletion
+	* @returns Result indicating success or failure
+	*/
+	async requestAccountDeletion() {
+		return this.fetchJson("/api/account/delete", { method: "DELETE" });
+	}
+	/**
+	* Request email verification to be resent
+	* @param resendRequest Email details for verification
+	* @returns Result indicating success or failure
+	*/
+	async requestEmailVerification(resendRequest) {
+		return this.fetchJson("/api/account/verify-email/resend", {
+			body: JSON.stringify(resendRequest),
+			method: "POST"
+		});
+	}
+	/**
+	* Request a password reset
+	* @param passwordResetRequest Password reset request details
+	* @returns Result indicating success or failure
+	*/
+	async requestPasswordReset(passwordResetRequest) {
+		return this.fetchJson("/api/account/password-reset/request", {
+			body: JSON.stringify(passwordResetRequest),
+			method: "POST"
+		});
+	}
+	/**
+	* Sets the JWT token for authentication
+	* @param {string} token - The JWT token to set
+	*/
+	setToken(token) {
+		this._jwtToken = token;
+	}
+	/**
+	* Update account email address
+	* @param email New email address
+	* @param password Current password for verification
+	* @returns Result indicating success or failure
+	*/
+	async updateEmail(email, password) {
+		return this.fetchJson("/api/account/update-email", {
+			body: JSON.stringify({
+				email,
+				password
+			}),
+			method: "POST"
+		});
+	}
+	/**
+	* Update account password
+	* @param currentPassword Current password for verification
+	* @param newPassword New password to set
+	* @returns Result indicating success or failure
+	*/
+	async updatePassword(currentPassword, newPassword) {
+		return this.fetchJson("/api/account/update-password", {
+			body: JSON.stringify({
+				current_password: currentPassword,
+				new_password: newPassword
+			}),
+			method: "POST"
+		});
+	}
+	/**
+	* Get upload limit information
+	* @returns Result containing upload limit info
+	*/
+	async uploadLimit() {
+		return this.fetchJson("/api/upload-limit", { method: "GET" });
+	}
+	/**
+	* Validate OTP for two-factor authentication login
+	* @param otpValidateRequest OTP validation details
+	* @returns Result containing login response
+	*/
+	async validateOtp(otpValidateRequest) {
+		const result = await this.fetchJson("/api/auth/otp/validate", {
+			body: JSON.stringify(otpValidateRequest),
+			method: "POST"
+		});
+		if (result.success && result.data?.token) this.setToken(result.data.token);
+		return result;
+	}
+	/**
+	* Verify email address
+	* @param verifyEmailRequest Email verification details
+	* @param login Optional flag to enable auto-login after verification
+	* @returns Result indicating success or failure
+	*/
+	async verifyEmail(verifyEmailRequest, login) {
+		const url = new URL("/api/account/verify-email", this.apiUrl);
+		if (login === true) url.searchParams.set("login", "true");
+		return this.fetchJson(url.toString(), {
+			body: JSON.stringify(verifyEmailRequest),
+			method: "POST"
+		});
+	}
+	/**
+	* Verify OTP for enabling two-factor authentication
+	* @param otpVerifyRequest OTP verification details
+	* @returns Result indicating success or failure
+	*/
+	async verifyOtp(otpVerifyRequest) {
+		return this.fetchJson("/api/auth/otp/verify", {
+			body: JSON.stringify(otpVerifyRequest),
+			method: "POST"
+		});
+	}
+	/**
+	* Builds fetch options with authorization headers
+	* @param {RequestInit} [init] - Optional initial request options
+	* @returns {RequestInit} The constructed request options
+	* @private
+	*/
+	buildOptions(init = {}) {
+		const headers = {
+			"Content-Type": "application/json",
+			...init.headers
+		};
+		if (this.jwtToken) headers.Authorization = `Bearer ${this.jwtToken}`;
+		return {
+			...init,
+			credentials: "include",
+			headers
+		};
+	}
+	/**
+	* Makes a JSON request to the API
+	* @template T
+	* @param {string} input - The API endpoint path or absolute URL
+	* @param {RequestInit} [init] - Optional request initialization
+	* @returns {Promise<Result<T>>} Promise resolving to the result
+	* @private
+	*/
+	async fetchJson(input, init = {}) {
+		try {
+			const response = await fetch(new URL(input, this.apiUrl).toString(), this.buildOptions(init));
+			if (!response.ok) return {
+				error: await handleFetchError(response),
+				success: false
+			};
+			if (this.isResponseEmpty(response)) return {
+				data: void 0,
+				success: true
+			};
+			try {
+				const data = await response.json();
+				return {
+					data,
+					success: true
+				};
+			} catch (parseError) {
+				if (this.isResponseEmpty(response)) return {
+					data: void 0,
+					success: true
+				};
+				throw parseError;
+			}
+		} catch (e) {
+			let error;
+			if (e instanceof Response) error = await handleFetchError(e);
+			else error = await handleUnknownError(e);
+			return {
+				error,
+				success: false
+			};
+		}
+	}
+	/**
+	* Checks if a response has an empty body based on status code or content-length header
+	* @param {Response} response - The response to check
+	* @returns {boolean} True if the response is empty, false otherwise
+	* @private
+	*/
+	isResponseEmpty(response) {
+		if (response.status === 204 || response.status === 205 || response.status === 304) return true;
+		const contentLength = response.headers.get("content-length");
+		return contentLength === "0" || contentLength && parseInt(contentLength, 10) === 0;
+	}
 };
 
 //#region src/sdk.ts
@@ -16987,4 +17082,4 @@ function runWhenIdle(callback) {
 	else setTimeout(callback, 200);
 }
 
-export { ActionItemType, ActionListRenderer, AppComponent, BADGE_THEME, BaseTable, BaseTableContent, BaseTableInner, Checkbox, CreateTableProvider, DataTable, DatePicker, DefaultPagination, DialogProvider, DialogRenderer, EmailInput, ErrorList, Field, FieldCheckbox, FileInput, FormFieldType, FormGroup, FormProvider, FormRenderer, GeneralLayout, GroupOrder, InlineAuthLinkBanner, Input, LumeLogo, PageHeader, RadioGroup, RichText, SchemaForm, Select, SkeletonLoader, Slider, StepSchemaForm, TableAction, TableActionMenu, TableContainer, TableEmptyState, TableLoadingState, TableProvider, Textarea, TextareaField, ThemeSwitcher, ThemedBadge, adapters, adjustHue, appStore, applyThemeStyles, createDefaultSystemColors, createDefaultTheme, createZeroSystemColors, darkenColor, desaturateColor, ensureWcagContrast, generateThemeCSS, getActionItemComponent, getContrastRatio, getFormComponent, getThemeById, helpers, hexToHsl, hslToRawString, hslToRgb, hslToString, isAlertDialog, isConfirmDialog, isCustomDialog, isFormDialog, isStepFormConfig, isValidBackgroundImages, isValidColor, isValidSystemColors, lightenColor, meetsWcagContrast, meetsWcagNonTextContrast, meetsWcagTextContrast, mergeThemes, metaStore, normalizeTableOptions, portalStore, registerActionItemComponent, registerAllActionItems, registerAllFormComponents, registerCheckbox, registerDatePicker, registerEmailInput, registerFileInput, registerFormComponent, registerInput, registerRadioGroup, registerRichText, registerSelect, registerSlider, registerTextarea, resetGloballyInitialized, resetRegistryForTesting, rgbToHsl, rgbToLuminance, runWhenIdle, saturateColor, useAccountSubdomain, useAccountUrl, useApiUrl, useAppStore, useDialog, useDialogActions, useDialogState, useFeatureFlag, useFormContext, useFrameworkSync, useLoginUrl, useMenuItems, useMetaStore, usePluginMeta, usePortal, usePortalActions, usePortalMeta, usePortalStore, usePortalUrl, useProtocolDomain, useRegisterUrl, useResetPasswordUrl, useSdk, useTable, useTheme, useThemeIdAndSetter, useUIStore, validateTheme, withTheme };
+export { ActionItemType, ActionListRenderer, AppComponent, BADGE_THEME, BaseTable, BaseTableContent, BaseTableInner, Checkbox, CreateTableProvider, DataTable, DatePicker, DefaultPagination, DialogProvider, DialogRenderer, EmailInput, ErrorList, Field, FieldCheckbox, FileInput, FormFieldType, FormGroup, FormProvider, FormRenderer, GeneralLayout, GroupOrder, InlineAuthLinkBanner, Input, Loading, LumeLogo, PageHeader, RadioGroup, RichText, SchemaForm, Select, SkeletonLoader, Slider, StepSchemaForm, TableAction, TableActionMenu, TableContainer, TableEmptyState, TableLoadingState, TableProvider, Textarea, TextareaField, ThemeSwitcher, ThemedBadge, adapters, adjustHue, appStore, applyThemeStyles, createDefaultSystemColors, createDefaultTheme, createZeroSystemColors, darkenColor, desaturateColor, ensureWcagContrast, generateThemeCSS, getActionItemComponent, getContrastRatio, getFormComponent, getThemeById, helpers, hexToHsl, hslToRawString, hslToRgb, hslToString, isAlertDialog, isConfirmDialog, isCustomDialog, isFormDialog, isStepFormConfig, isValidBackgroundImages, isValidColor, isValidSystemColors, lightenColor, meetsWcagContrast, meetsWcagNonTextContrast, meetsWcagTextContrast, mergeThemes, metaStore, normalizeTableOptions, portalStore, registerActionItemComponent, registerAllActionItems, registerAllFormComponents, registerCheckbox, registerDatePicker, registerEmailInput, registerFileInput, registerFormComponent, registerInput, registerRadioGroup, registerRichText, registerSelect, registerSlider, registerTextarea, resetGloballyInitialized, resetRegistryForTesting, rgbToHsl, rgbToLuminance, runWhenIdle, saturateColor, useAccountSubdomain, useAccountUrl, useApiUrl, useAppStore, useDialog, useDialogActions, useDialogState, useFeatureFlag, useFormContext, useFrameworkSync, useLoginUrl, useMenuItems, useMetaStore, usePluginMeta, usePortal, usePortalActions, usePortalMeta, usePortalStore, usePortalUrl, useProtocolDomain, useRegisterUrl, useResetPasswordUrl, useSdk, useTable, useTheme, useThemeIdAndSetter, useUIStore, validateTheme, withTheme };

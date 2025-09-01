@@ -1,7 +1,7 @@
 import { createEnv, z, createRoot } from './index-BQ-ueVeF.js';
 import { dashboard__loadShare__react__loadShare__, React3 } from './dashboard__loadShare__react__loadShare__-A-_ogCU6.js';
 import { jsxRuntimeExports } from './jsx-runtime-Rqu4CMEU.js';
-import { federationRuntime } from './virtual_mf-REMOTE_ENTRY_ID-D4nWJCyp.js';
+import { federationRuntime } from './virtual_mf-REMOTE_ENTRY_ID-D9QGQLnq.js';
 import { getDefaultExportFromCjs } from './_commonjsHelpers-BILit0S-.js';
 import { index_cjs } from './dashboard__mf_v__runtimeInit__mf_v__-CrvQyIUV.js';
 import { dashboard__loadShare__react_mf_2_dom__loadShare__ } from './dashboard__loadShare__react_mf_2_dom__loadShare__-sIXfFKrj.js';
