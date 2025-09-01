@@ -13,6 +13,26 @@ function BridgeReactPlugin() {
 
 const usedShared = {
       
+          "@lumeweb/portal-framework-core": {
+            name: "@lumeweb/portal-framework-core",
+            version: "0.0.0",
+            scope: ["default"],
+            loaded: false,
+            from: "core:dashboard",
+            async get () {
+              {
+                const shared = await loadShare_1("@lumeweb/portal-framework-core");
+                if (shared) return () => shared;
+                throw new Error(`Shared module '${"@lumeweb/portal-framework-core"}' must be provided by host`);
+              }
+            },
+            shareConfig: {
+              singleton: true,
+              requiredVersion: "^0.0.0",
+              import: false,
+            }
+          }
+        ,
           "@lumeweb/portal-framework-ui": {
             name: "@lumeweb/portal-framework-ui",
             version: "0.0.0",
@@ -24,26 +44,6 @@ const usedShared = {
                 const shared = await loadShare_1("@lumeweb/portal-framework-ui");
                 if (shared) return () => shared;
                 throw new Error(`Shared module '${"@lumeweb/portal-framework-ui"}' must be provided by host`);
-              }
-            },
-            shareConfig: {
-              singleton: true,
-              requiredVersion: "^0.0.0",
-              import: false,
-            }
-          }
-        ,
-          "@lumeweb/portal-framework-ui-core": {
-            name: "@lumeweb/portal-framework-ui-core",
-            version: "0.0.0",
-            scope: ["default"],
-            loaded: false,
-            from: "core:dashboard",
-            async get () {
-              {
-                const shared = await loadShare_1("@lumeweb/portal-framework-ui-core");
-                if (shared) return () => shared;
-                throw new Error(`Shared module '${"@lumeweb/portal-framework-ui-core"}' must be provided by host`);
               }
             },
             shareConfig: {
@@ -73,17 +73,17 @@ const usedShared = {
             }
           }
         ,
-          "@lumeweb/portal-framework-core": {
-            name: "@lumeweb/portal-framework-core",
+          "@lumeweb/portal-framework-ui-core": {
+            name: "@lumeweb/portal-framework-ui-core",
             version: "0.0.0",
             scope: ["default"],
             loaded: false,
             from: "core:dashboard",
             async get () {
               {
-                const shared = await loadShare_1("@lumeweb/portal-framework-core");
+                const shared = await loadShare_1("@lumeweb/portal-framework-ui-core");
                 if (shared) return () => shared;
-                throw new Error(`Shared module '${"@lumeweb/portal-framework-core"}' must be provided by host`);
+                throw new Error(`Shared module '${"@lumeweb/portal-framework-ui-core"}' must be provided by host`);
               }
             },
             shareConfig: {
