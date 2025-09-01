@@ -1,5 +1,5 @@
 import { loadShare_1, init_1, core_dashboard__mf_v__runtimeInit__mf_v__ } from './core_dashboard__mf_v__runtimeInit__mf_v__-DeI6jfgm.js';
-import exposesMap from './virtualExposes-BT0DohP8.js';
+import exposesMap from './virtualExposes-lP78fgtG.js';
 
 function BridgeReactPlugin() {
   return {
@@ -53,26 +53,6 @@ const usedShared = {
             }
           }
         ,
-          "@refinedev/core": {
-            name: "@refinedev/core",
-            version: "4.57.10",
-            scope: ["default"],
-            loaded: false,
-            from: "core:dashboard",
-            async get () {
-              {
-                const shared = await loadShare_1("@refinedev/core");
-                if (shared) return () => shared;
-                throw new Error(`Shared module '${"@refinedev/core"}' must be provided by host`);
-              }
-            },
-            shareConfig: {
-              singleton: true,
-              requiredVersion: "^4.57.10",
-              import: false,
-            }
-          }
-        ,
           "@lumeweb/portal-framework-ui-core": {
             name: "@lumeweb/portal-framework-ui-core",
             version: "0.0.0",
@@ -89,6 +69,26 @@ const usedShared = {
             shareConfig: {
               singleton: true,
               requiredVersion: "^0.0.0",
+              import: false,
+            }
+          }
+        ,
+          "@refinedev/core": {
+            name: "@refinedev/core",
+            version: "4.57.10",
+            scope: ["default"],
+            loaded: false,
+            from: "core:dashboard",
+            async get () {
+              {
+                const shared = await loadShare_1("@refinedev/core");
+                if (shared) return () => shared;
+                throw new Error(`Shared module '${"@refinedev/core"}' must be provided by host`);
+              }
+            },
+            shareConfig: {
+              singleton: true,
+              requiredVersion: "^4.57.10",
               import: false,
             }
           }

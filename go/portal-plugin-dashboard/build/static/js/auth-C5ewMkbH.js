@@ -149,8 +149,9 @@ const createAuthProvider = (sdk) => {
 			maybeSetupAuth();
 			const response = await sdk.account().info();
 			if (isErrorResult(response)) return null;
-			const { created_at, email, first_name, id, last_name, otp, verified } = response.data;
+			const { avatar, created_at, email, first_name, id, last_name, otp, verified } = response.data;
 			return {
+				avatar,
 				created_at,
 				email,
 				firstName: first_name,
