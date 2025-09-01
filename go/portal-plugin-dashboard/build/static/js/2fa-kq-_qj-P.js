@@ -1,5 +1,5 @@
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__, React, jsxRuntimeExports, core_dashboard__loadShare__react__loadShare__ } from './jsx-runtime-D_0QkpWj.js';
-import { DATA_PROVIDER_NAME } from './auth-DEo7mq12.js';
+import { DATA_PROVIDER_NAME } from './auth-C5ewMkbH.js';
 import './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__-BjauFvDm.js';
 import './resetPassword.schema-D8Hy_NAM.js';
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CFuxgGnQ.js';

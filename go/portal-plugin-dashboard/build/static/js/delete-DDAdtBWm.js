@@ -2,7 +2,7 @@ import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CFuxgGnQ.js';
 import { core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__-DOYraqnS.js';
 import { Card } from './Card-BAALvr3c.js';
-import { DATA_PROVIDER_NAME } from './auth-DEo7mq12.js';
+import { DATA_PROVIDER_NAME } from './auth-C5ewMkbH.js';
 import './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__-BjauFvDm.js';
 import './resetPassword.schema-D8Hy_NAM.js';
 import './core_dashboard__loadShare__react_mf_2_router__loadShare__-CShhB-Ww.js';
