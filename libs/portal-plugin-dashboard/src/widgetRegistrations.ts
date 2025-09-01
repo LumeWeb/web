@@ -3,6 +3,9 @@ import type {
   WidgetRegistration,
 } from "@lumeweb/portal-framework-core";
 
+import { Identity, useFramework } from "@lumeweb/portal-framework-core";
+import { useGetIdentity } from "@refinedev/core";
+
 export const widgetAreas: WidgetAreaDefinition[] = [
   {
     grid: {
@@ -40,6 +43,14 @@ export const widgetRegistrations: WidgetRegistration[] = [
         height: 1,
         width: 12,
       },
+    },
+    visibilityHook() {
+      const { data: identity } = useGetIdentity<Identity>();
+      if (!identity) {
+        return false;
+      }
+
+      return !identity?.verified;
     },
   },
   {

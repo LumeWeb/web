@@ -32,22 +32,8 @@ export interface PluginWidgets {
   widgets?: WidgetRegistration[];
 }
 
-export interface WidgetDefinition {
-  areaId: string;
+export interface WidgetDefinition extends Omit<WidgetRegistration, 'componentName'> {
   component: React.ComponentType;
-  id: string;
-  minHeight?: number; // Minimum height in pixels
-  minWidth?: number; // Minimum width in pixels
-  order?: number; // Optional order for sorting widgets (lower numbers first)
-  position: {
-    location?: {
-      column?: number; // Optional grid column start (1-based)
-    };
-    size: {
-      height: number; // Rows to span (1-12)
-      width: number; // Columns to span (1-12)
-    };
-  };
 }
 
 export interface WidgetRegistration {
@@ -66,6 +52,10 @@ export interface WidgetRegistration {
       width: number;
     };
   };
+  /**
+   * Optional visibility hook that returns a boolean indicating whether the widget should be visible
+   */
+  visibilityHook?: () => boolean;
 }
 
 export interface WidgetRegistrationWithComponent extends WidgetRegistration {

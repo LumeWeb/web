@@ -276,7 +276,7 @@ export class Framework {
 
     // Construct definition explicitly with only allowed fields
     const definition: WidgetDefinition = {
-      areaId: widget.areaId,
+      ...widget,
       component: createRemoteComponentLoader(
         {
           componentPath: widget.componentName,
@@ -285,12 +285,6 @@ export class Framework {
         this,
         defaultRemoteOptions,
       ),
-      description: widget.description,
-      id: widget.id,
-      label: widget.label,
-      order: widget.order,
-      position: widget.position,
-      title: widget.title,
     };
 
     this.widgets.set(widget.id, definition);

@@ -6,6 +6,7 @@ import * as Module from "node:module";
 import { FrameworkFeature } from "../types/api";
 import { BaseCapability } from "./capabilities";
 import { RouteDefinition } from "./navigation";
+import { PluginWidgets } from "./widget";
 
 export interface FeatureState {
   error?: Error;
