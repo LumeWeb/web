@@ -16,6 +16,7 @@ export * from "./components/ThemeSwitcher";
 export * from "./hooks/useAccountSubdomain";
 export * from "./hooks/useAccountUrl";
 export * from "./hooks/useApiUrl";
+export * from "./hooks/useAvatar";
 export * from "./hooks/useFeatureFlag";
 export * from "./hooks/useLoginUrl";
 export * from "./hooks/useMenuItems";
