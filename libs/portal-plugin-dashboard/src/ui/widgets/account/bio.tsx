@@ -1,6 +1,6 @@
 import type { Identity } from "@lumeweb/portal-framework-core";
 
-import { useDialog } from "@lumeweb/portal-framework-ui";
+import { useAvatar, useDialog } from "@lumeweb/portal-framework-ui";
 import {
   Avatar,
   AvatarFallback,
@@ -16,14 +16,12 @@ import { uploadAvatarDialogConfig } from "@/ui/dialogs/uploadAvatar";
 
 export default function Bio() {
   const { data: identity, refetch } = useGetIdentity<Identity>();
+  const { avatarUrl, displayName } = useAvatar();
   const { closeDialog, openDialog } = useDialog();
 
   if (!identity) {
     return null;
   }
-
-  const displayName =
-    `${identity?.firstName || ""} ${identity?.lastName || ""}`.trim();
 
   const handleAvatarUpdate = () => {
     refetch?.();
@@ -35,10 +33,7 @@ export default function Bio() {
       <div className="flex flex-col items-center text-center">
         <div className="relative mb-4">
           <Avatar className="h-24 w-24">
-            <AvatarImage
-              alt={displayName}
-              src={identity.avatar || "/placeholder.svg"}
-            />
+            <AvatarImage alt={displayName} src={avatarUrl} />
             <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
               {identity.firstName?.charAt(0) ||
                 identity.lastName?.charAt(0) ||
@@ -51,7 +46,7 @@ export default function Bio() {
               openDialog(
                 uploadAvatarDialogConfig(
                   displayName,
-                  identity.avatar || "/placeholder.svg",
+                  avatarUrl,
                   handleAvatarUpdate,
                 ),
               )

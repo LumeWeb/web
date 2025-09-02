@@ -35,14 +35,14 @@ export function WidgetArea({ id }: WidgetAreaProps) {
     }
   }
 
+  const sortedWidgets = React.useMemo(() => sortWidgets(widgets), [widgets]);
+  const gridAutoRowsClass = getGridAutoRows(area.grid.rowHeight);
+  const gridGapClass = getGridGap(area.grid.gap);
+
   // If no widgets are visible, return null
   if (!visibilityResults.filter(Boolean).length) {
     return null;
   }
-
-  const sortedWidgets = React.useMemo(() => sortWidgets(widgets), [widgets]);
-  const gridAutoRowsClass = getGridAutoRows(area.grid.rowHeight);
-  const gridGapClass = getGridGap(area.grid.gap);
 
   return (
     <div

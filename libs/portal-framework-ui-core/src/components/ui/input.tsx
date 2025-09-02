@@ -14,10 +14,18 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, fullWidth, leftIcon, type, ...props }, ref) => {
     const [showPassword, setShowPassword] = React.useState<boolean>(false);
     const [mask, setMask] = React.useState<boolean>(false);
-    const toggleShowPassword = (e) => {
-      if (![" ", "Enter"].includes(e.key)) {
+    const toggleShowPassword = (e: React.KeyboardEvent | React.MouseEvent) => {
+      // Handle keyboard events
+      if ('key' in e) {
+        if (![" ", "Enter"].includes(e.key)) {
+          return;
+        }
+        // For keyboard events, toggle the state
+        setShowPassword((show) => !show);
+        setMask((mask) => !mask);
         return;
       }
+      // For mouse events, we always toggle (no condition needed)
       setShowPassword((show) => !show);
       setMask((mask) => !mask);
     };
@@ -43,7 +51,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className="text-ring absolute right-4 top-5"
             onClick={toggleShowPassword}
             onKeyDown={toggleShowPassword}
-            type="button">
+            type="button"
+            aria-pressed={showPassword}
+            aria-label={showPassword ? "Hide password" : "Show password"}>
             {showPassword ? <EyeOpenIcon /> : <EyeNoneIcon />}
           </button>
         ) : null}

@@ -23,14 +23,44 @@ import { Link, useGetIdentity, useLogout } from "@refinedev/core";
 import { LayoutGrid, LogOut, User } from "lucide-react";
 import React from "react";
 
+import { useAvatar } from "@/hooks/useAvatar";
+
 export function UserNav() {
   const { mutate: logout } = useLogout();
-
   const { data: identity } = useGetIdentity<Identity>();
+  const { avatarUrl, displayName, isLoading } = useAvatar();
 
   const firstName = identity?.firstName || "";
   const lastName = identity?.lastName || "";
   const email = identity?.email || "";
+
+  const getAvatarAltText = () => {
+    if (isLoading) {
+      return "User avatar";
+    }
+
+    if (displayName) {
+      return displayName;
+    }
+
+    return "";
+  };
+
+  const getAvatarFallback = () => {
+    if (isLoading) {
+      return "?";
+    }
+
+    if (firstName || lastName) {
+      return (firstName || lastName).charAt(0).toUpperCase();
+    }
+
+    if (email) {
+      return email.charAt(0).toUpperCase();
+    }
+
+    return "?";
+  };
 
   return (
     <DropdownMenu>
@@ -40,16 +70,12 @@ export function UserNav() {
             <DropdownMenuTrigger asChild>
               <Button
                 className="relative h-8 w-8 rounded-full"
-                variant="outline">
+                variant="outline"
+                aria-label={isLoading ? "User avatar" : displayName || "User profile"}>
                 <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    alt={(firstName || lastName ? `${firstName} ${lastName}`.trim() : email || "User avatar")}
-                    src={identity?.avatar || "/placeholder.svg"}
-                  />
+                  <AvatarImage alt={getAvatarAltText()} src={avatarUrl} />
                   <AvatarFallback className="bg-transparent">
-                    {(firstName || lastName
-                      ? (firstName || lastName).charAt(0).toUpperCase()
-                      : (email?.charAt(0)?.toUpperCase() || "?"))}
+                    {getAvatarFallback()}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -65,7 +91,7 @@ export function UserNav() {
             <p className="text-sm font-medium leading-none">
               {firstName} {lastName}
             </p>
-            <p className="text-xs leading-none text-muted-foreground">
+            <p className="text-muted-foreground text-xs leading-none">
               {email}
             </p>
           </div>
@@ -74,13 +100,13 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem asChild className="hover:cursor-pointer">
             <Link className="flex items-center" to="/dashboard">
-              <LayoutGrid className="w-4 h-4 mr-3 text-muted-foreground" />
+              <LayoutGrid className="text-muted-foreground mr-3 h-4 w-4" />
               Dashboard
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className="hover:cursor-pointer">
             <Link className="flex items-center" to="/account">
-              <User className="w-4 h-4 mr-3 text-muted-foreground" />
+              <User className="text-muted-foreground mr-3 h-4 w-4" />
               Account
             </Link>
           </DropdownMenuItem>
@@ -89,7 +115,7 @@ export function UserNav() {
         <DropdownMenuItem
           className="hover:cursor-pointer"
           onClick={() => logout()}>
-          <LogOut className="w-4 h-4 mr-3 text-muted-foreground" />
+          <LogOut className="text-muted-foreground mr-3 h-4 w-4" />
           Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
