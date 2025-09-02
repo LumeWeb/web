@@ -166,7 +166,7 @@ const exposesMap = {
         }
       ,
         "./widgets/account/bio": async () => {
-          const importModule = await import('./bio-DGpPb7yz.js');
+          const importModule = await import('./bio-BQhMKfWS.js');
           const exportModule = {};
           Object.assign(exportModule, importModule);
           Object.defineProperty(exportModule, "__esModule", {

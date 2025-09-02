@@ -4626,11 +4626,11 @@ function uploadAvatarDialogConfig(userName, currentAvatar, onSuccess) {
 
 function Bio() {
   const { data: identity, refetch } = core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useGetIdentity();
+  const { avatarUrl, displayName } = core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.useAvatar();
   const { closeDialog, openDialog } = core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.useDialog();
   if (!identity) {
     return null;
   }
-  const displayName = `${identity?.firstName || ""} ${identity?.lastName || ""}`.trim();
   const handleAvatarUpdate = () => {
     refetch?.();
     closeDialog();
@@ -4638,13 +4638,7 @@ function Bio() {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(Card, { className: "p-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center text-center", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative mb-4", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs(core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Avatar, { className: "h-24 w-24", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.AvatarImage,
-          {
-            alt: displayName,
-            src: identity.avatar || "/placeholder.svg"
-          }
-        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.AvatarImage, { alt: displayName, src: avatarUrl }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.AvatarFallback, { className: "bg-primary text-primary-foreground text-2xl", children: identity.firstName?.charAt(0) || identity.lastName?.charAt(0) || "?" })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -4654,7 +4648,7 @@ function Bio() {
           onClick: () => openDialog(
             uploadAvatarDialogConfig(
               displayName,
-              identity.avatar || "/placeholder.svg",
+              avatarUrl,
               handleAvatarUpdate
             )
           ),
