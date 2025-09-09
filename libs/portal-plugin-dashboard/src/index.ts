@@ -8,6 +8,7 @@ import {
   type Plugin,
 } from "@lumeweb/portal-framework-core";
 
+import { UploadFeature } from "@/features/upload";
 import { registerInput } from "@/ui/forms/fields/AccountEmail";
 
 import { Capability as DashRefineConfigCapability } from "./capabilities/refineConfig";
@@ -24,6 +25,7 @@ export default function (): Plugin {
     async destroy(_framework: Framework) {
       console.log("Plugin Dashboard destroyed");
     },
+    features: [new UploadFeature()],
     id: createNamespacedId("core", "dashboard"),
     async initialize(_framework: Framework) {
       console.log("Plugin Dashboard initialized");

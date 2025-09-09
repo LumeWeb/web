@@ -22,7 +22,7 @@ import { authProvider } from "../providers/auth-provider";
 
 export class Capability implements RefineConfigCapability {
   dependencies?: string[];
-  readonly id: string = "core:abuse-report:refine-config";
+  readonly id: string = "abuse-report:refine-config";
   status: "active" | "error" | "inactive";
   readonly type: "core:refine-config" = "core:refine-config";
 

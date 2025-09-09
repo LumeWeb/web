@@ -8,6 +8,7 @@ import { registerFormComponent } from ".";
 import { FormFieldType } from "../";
 
 interface RadioGroupProps {
+  autocomplete?: string;
   disabled?: boolean;
   label?: string;
   labelClassName?: string;
@@ -16,18 +17,17 @@ interface RadioGroupProps {
   onChange?: (value: string) => void;
   options: string[];
   value?: string;
-  autocomplete?: string;
 }
 
 function slugify(str: string): string {
   return str
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
-  ({ options, autocomplete, ...props }, ref) => {
+  ({ autocomplete, options, ...props }, ref) => {
     return (
       <BaseRadioGroup
         disabled={props.disabled}
@@ -38,12 +38,14 @@ export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
         value={props.value}>
         {options.map((option) => (
           <div className="radio-option" key={option}>
-            <RadioGroupItem 
-              id={`${props.name}-${slugify(option)}`} 
+            <RadioGroupItem
+              id={`${props.name}-${slugify(option)}`}
               value={option}
               {...(autocomplete ? { autoComplete: autocomplete } : {})}
             />
-            <label className={props.labelClassName} htmlFor={`${props.name}-${slugify(option)}`}>
+            <label
+              className={props.labelClassName}
+              htmlFor={`${props.name}-${slugify(option)}`}>
               {option}
             </label>
           </div>

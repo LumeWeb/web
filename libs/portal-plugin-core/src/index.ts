@@ -6,6 +6,7 @@ import {
 
 import { Capability as RefineNotifyConfigCapability } from "./capabilities/refineConfig";
 import { createNavigationFeature } from "./features/navigation";
+import widgets from "./widgetRegistrations";
 
 export default function (): Plugin {
   return {
@@ -18,5 +19,6 @@ export default function (): Plugin {
     async initialize(_framework: Framework) {
       console.log("Plugin Core initialized");
     },
+    widgets,
   } satisfies Plugin;
 }

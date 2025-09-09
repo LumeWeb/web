@@ -26,8 +26,16 @@ export function StepFormFooter({
   submitLabel,
   totalSteps,
 }: StepFormFooterProps) {
+  // Get the current step's dynamic submit label if available
+  const stepSubmitLabel =
+    formMethods.getValues &&
+    typeof formMethods.getValues === "function" &&
+    typeof submitLabel === "function"
+      ? submitLabel(formMethods.getValues())
+      : submitLabel;
+
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex items-center justify-between">
       <Button
         disabled={isFirstStep || formMethods.formState?.isSubmitting}
         onClick={handlePrevious}
@@ -45,7 +53,7 @@ export function StepFormFooter({
               <Spinner className="mr-2" size="small" /> Submitting...
             </>
           ) : (
-            (submitLabel ?? "Submit")
+            (stepSubmitLabel ?? "Submit")
           )}
         </Button>
       ) : (
@@ -53,7 +61,7 @@ export function StepFormFooter({
           disabled={formMethods.formState?.isSubmitting}
           onClick={handleNext}
           type="button">
-          Next
+          {stepSubmitLabel ?? "Next"}
         </Button>
       )}
     </div>

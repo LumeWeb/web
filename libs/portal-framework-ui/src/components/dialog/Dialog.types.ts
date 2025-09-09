@@ -1,9 +1,10 @@
 import { BaseRecord } from "@refinedev/core";
 import { ReactNode } from "react";
 
-import type { FormConfig, StepFormConfig } from "../form";
+import type { FormConfig, StepFormConfig, WizardFormConfig } from "../form";
 
 import { ActionItemConfig, ActionListLayout } from "../actions";
+import { COMPONENT_SIZE_CLASSES, ComponentSize } from "../sizing";
 
 /**
  * Dialog Configuration API
@@ -16,7 +17,7 @@ import { ActionItemConfig, ActionListLayout } from "../actions";
  *
  * // Simple alert
  * openDialog({
- *   type: 'alert',
+ *   type: DialogType.ALERT,
  *   title: 'Notification',
  *   description: 'Update successful',
  *   variant: 'success'
@@ -24,7 +25,7 @@ import { ActionItemConfig, ActionListLayout } from "../actions";
  *
  * // Confirmation dialog
  * openDialog({
- *   type: 'confirm',
+ *   type: DialogType.CONFIRM,
  *   title: 'Confirm Action',
  *   cancelText: 'Cancel',
  *   confirmText: 'Proceed',
@@ -33,28 +34,44 @@ import { ActionItemConfig, ActionListLayout } from "../actions";
  *
  * // Form dialog
  * openDialog({
- *   type: 'form',
+ *   type: DialogType.FORM,
  *   title: 'Create Item',
  *   formSchema: z.object({ name: z.string() }),
  *   onSubmit: handleSubmit
  * });
  *
+ * // Wizard form dialog
+ * openDialog({
+ *   type: DialogType.WIZARD_FORM,
+ *   title: 'Multi-step Form',
+ *   formConfig: wizardConfig,
+ *   onSubmit: handleSubmit
+ * });
+ *
  * // Custom dialog
  * openDialog({
- *   type: 'custom',
+ *   type: DialogType.CUSTOM,
  *   title: 'Custom Content',
  *   content: <MyComponent />,
  *   footer: <CustomFooter />
  * });
  */
 
+export enum DialogType {
+  ALERT = "alert",
+  CONFIRM = "confirm",
+  CUSTOM = "custom",
+  FORM = "form",
+  WIZARD_FORM = "wizard_form",
+}
+
 export interface AlertDialogConfig extends DialogBaseConfig {
   cancelText?: string;
   confirmText?: string;
-  description?: string | React.ReactNode | React.FC;
+  description?: React.FC | React.ReactNode | string;
   onCancel?: (source: "programmatic" | "user") => void;
   onConfirm?: () => Promise<void> | void;
-  type: "alert";
+  type: DialogType.ALERT;
 }
 
 export interface ConfirmDialogConfig extends DialogBaseConfig {
@@ -62,12 +79,12 @@ export interface ConfirmDialogConfig extends DialogBaseConfig {
   confirmText: string;
   onCancel?: (source: "programmatic" | "user") => void;
   onConfirm: () => Promise<void> | void;
-  type: "confirm";
+  type: DialogType.CONFIRM;
 }
 
 export interface CustomDialogConfig extends DialogBaseConfig {
   onCancel?: (source: "programmatic" | "user") => void;
-  type: "custom";
+  type: DialogType.CUSTOM;
 }
 
 export interface DialogActionsConfig {
@@ -137,9 +154,10 @@ export type DialogConfig<
   | AlertDialogConfig
   | ConfirmDialogConfig
   | CustomDialogConfig
-  | FormDialogConfig<TRequest, TResponse>;
+  | FormDialogConfig<TRequest, TResponse>
+  | WizardDialogConfig<TRequest, TResponse>;
 
-export type DialogFooterConfig<T extends BaseRecord = any> = 
+export type DialogFooterConfig<T extends BaseRecord = any> =
   | ((
       methods: any,
       closeDialog: () => void,
@@ -163,7 +181,21 @@ export type DialogPosition =
   | "top-left"
   | "top-right";
 
-export type DialogSize = "auto" | "lg" | "md" | "sm";
+export const DIALOG_SIZE_CLASSES = COMPONENT_SIZE_CLASSES;
+
+export const DIALOG_POSITION_CLASSES = {
+  "bottom": "bottom-4 inset-x-0 mx-auto",
+  "bottom-left": "bottom-4 left-4",
+  "bottom-right": "bottom-4 right-4",
+  "center": "",
+  "left": "left-4 top-1/2 -translate-y-1/2",
+  "right": "right-4 top-1/2 -translate-y-1/2",
+  "top": "top-4 inset-x-0 mx-auto",
+  "top-left": "top-4 left-4",
+  "top-right": "top-4 right-4",
+} as const;
+
+export type DialogSize = ComponentSize;
 
 export type DialogStatus = "error" | "success" | null;
 
@@ -191,29 +223,56 @@ export interface FormDialogConfig<
   onSubmit: (values: TRequest) => Promise<TResponse>;
   /** Callback when form submission succeeds - required for form dialogs */
   onSuccess: (response: TResponse, values: TRequest) => void;
-  type: "form";
+  type: DialogType.FORM;
+}
+
+export interface WizardDialogConfig<
+  TRequest extends BaseRecord = any,
+  TResponse extends BaseRecord = any,
+> extends DialogBaseConfig<TRequest> {
+  /**
+   * Whether to automatically close the dialog on successful form submission
+   * @default true
+   */
+  closeOnSubmit?: boolean;
+  footer?: DialogFooterConfig<TRequest>;
+  formConfig: WizardFormConfig<TRequest, TResponse>;
+  onCancel?: (source: "programmatic" | "user") => void;
+  onSubmit?: (values: TRequest) => Promise<TResponse>;
+  /** Callback when form submission succeeds */
+  onSuccess?: (response: TResponse, values: TRequest) => void;
+  type: DialogType.WIZARD_FORM;
 }
 
 export function isAlertDialog(
   config: DialogConfig,
 ): config is AlertDialogConfig {
-  return config.type === "alert";
+  return config.type === DialogType.ALERT;
 }
 export function isConfirmDialog(
   config: DialogConfig,
 ): config is ConfirmDialogConfig {
-  return config.type === "confirm";
+  return config.type === DialogType.CONFIRM;
 }
 
 export function isCustomDialog(
   config: DialogConfig,
 ): config is CustomDialogConfig {
-  return config.type === "custom";
+  return config.type === DialogType.CUSTOM;
 }
 
 export function isFormDialog<
   T extends BaseRecord = any,
   R extends BaseRecord = any,
 >(config: DialogConfig<T, R>): config is FormDialogConfig<T, R> {
-  return config.type === "form";
+  return config.type === DialogType.FORM;
+}
+
+export function isWizardDialogConfig<
+  TRequest extends BaseRecord = any,
+  TResponse extends BaseRecord = any,
+>(
+  config: DialogConfig<TRequest, TResponse>,
+): config is WizardDialogConfig<TRequest, TResponse> {
+  return config.type === DialogType.WIZARD_FORM;
 }

@@ -21,6 +21,7 @@ export type NamespacedId = `${string}:${string}`;
 export interface Plugin {
   // Capabilities also map to exposed modules
   capabilities?: BaseCapability[];
+  capabilityAssociations?: CapabilityAssociation[];
   dependencies?: PluginDependency[];
   destroy(framework: Framework): Promise<void>;
   exports?: PluginExports;
@@ -54,4 +55,15 @@ export interface PluginState {
   initState: PluginInitStatus;
   loadState: PluginLoadStatus;
   retryCount: number;
+}
+
+export interface CapabilityAssociation {
+  /**
+   * The primary capability that others are associated with
+   */
+  primary: string;
+  /**
+   * The associated capabilities
+   */
+  associated: string[];
 }

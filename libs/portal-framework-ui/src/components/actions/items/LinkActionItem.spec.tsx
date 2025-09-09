@@ -1,16 +1,16 @@
-import { render, screen, cleanup } from "@testing-library/react"; // Import cleanup
+import { cleanup, render, screen } from "@testing-library/react"; // Import cleanup
 import React from "react";
-import { describe, expect, it, vi, afterEach, beforeEach } from "vitest"; // Import afterEach and beforeEach
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"; // Import afterEach and beforeEach
 // We will mock react-router's Link, so we don't import the actual RouterLink here yet
 
-import { LinkActionItem, registerLinkActionItem } from "./LinkActionItem";
 import { ActionItemType } from "../types";
+import { LinkActionItem, registerLinkActionItem } from "./LinkActionItem";
 // We will mock the registry module, so we don't import the actual registerActionItemComponent here yet
 
 // Mock react-router's Link component *before* importing LinkActionItem
 vi.mock("react-router", () => ({
-  Link: vi.fn(({ to, children, ...props }) => (
-    <a href={to as string} data-testid="mock-router-link" {...props}>
+  Link: vi.fn(({ children, to, ...props }) => (
+    <a data-testid="mock-router-link" href={to as string} {...props}>
       {children}
     </a>
   )),
@@ -18,17 +18,22 @@ vi.mock("react-router", () => ({
 
 // Mock the core library components *before* importing LinkActionItem
 vi.mock("@lumeweb/portal-framework-ui-core", () => ({
+  Button: vi.fn(
+    (
+      { children, ...props }, // Also mock Button
+    ) => <button {...props}>{children}</button>,
+  ),
   cn: vi.fn((...classes) => classes.filter(Boolean).join(" ")), // Simple mock for class joining
-  Button: vi.fn(({ children, ...props }) => ( // Also mock Button
-    <button {...props}>{children}</button>
-  )),
-  Spinner: vi.fn(({ className, size }) => ( // Also mock Spinner
-    <span data-testid="spinner" className={className}>
-      Loading ({size})
-    </span>
-  )),
+  Spinner: vi.fn(
+    (
+      { className, size }, // Also mock Spinner
+    ) => (
+      <span className={className} data-testid="spinner">
+        Loading ({size})
+      </span>
+    ),
+  ),
 }));
-
 
 // Mock the registry module *before* importing registerLinkActionItem
 // Define the mock function *inside* the factory
@@ -37,11 +42,11 @@ vi.mock("../registry", () => ({
   resetRegistryForTesting: vi.fn(), // Mock this too if it were used here
 }));
 
-// Now import the component and its registration function AFTER the mocks
-import { LinkActionItem, registerLinkActionItem } from "./LinkActionItem";
 // Import the mocked Link component after its mock is defined
 import { Link as RouterLink } from "react-router";
 
+// Now import the component and its registration function AFTER the mocks
+import { LinkActionItem, registerLinkActionItem } from "./LinkActionItem";
 
 describe("LinkActionItem", () => {
   afterEach(() => {
@@ -52,7 +57,11 @@ describe("LinkActionItem", () => {
   it("renders as an <a> tag for external http links", () => {
     render(
       <LinkActionItem
-        config={{ type: ActionItemType.LINK, to: "http://example.com", label: "External" }}
+        config={{
+          label: "External",
+          to: "http://example.com",
+          type: ActionItemType.LINK,
+        }}
       />,
     );
     const link = screen.getByRole("link");
@@ -64,7 +73,11 @@ describe("LinkActionItem", () => {
   it("renders as an <a> tag for external https links", () => {
     render(
       <LinkActionItem
-        config={{ type: ActionItemType.LINK, to: "https://example.com", label: "External" }}
+        config={{
+          label: "External",
+          to: "https://example.com",
+          type: ActionItemType.LINK,
+        }}
       />,
     );
     const link = screen.getByRole("link");
@@ -75,7 +88,12 @@ describe("LinkActionItem", () => {
   it("renders as an <a> tag when target is _blank", () => {
     render(
       <LinkActionItem
-        config={{ type: ActionItemType.LINK, to: "/internal-path", target: "_blank", label: "New Tab" }}
+        config={{
+          label: "New Tab",
+          target: "_blank",
+          to: "/internal-path",
+          type: ActionItemType.LINK,
+        }}
       />,
     );
     const link = screen.getByRole("link");
@@ -88,7 +106,12 @@ describe("LinkActionItem", () => {
   it("renders as an <a> tag when reloadDocument is true", () => {
     render(
       <LinkActionItem
-        config={{ type: ActionItemType.LINK, to: "/internal-path", reloadDocument: true, label: "Reload" }}
+        config={{
+          label: "Reload",
+          reloadDocument: true,
+          to: "/internal-path",
+          type: ActionItemType.LINK,
+        }}
       />,
     );
     const link = screen.getByRole("link");
@@ -99,7 +122,11 @@ describe("LinkActionItem", () => {
   it("renders as RouterLink for internal paths by default", () => {
     render(
       <LinkActionItem
-        config={{ type: ActionItemType.LINK, to: "/dashboard", label: "Dashboard" }}
+        config={{
+          label: "Dashboard",
+          to: "/dashboard",
+          type: ActionItemType.LINK,
+        }}
       />,
     );
     const link = screen.getByTestId("mock-router-link"); // Should be the mocked RouterLink
@@ -107,23 +134,31 @@ describe("LinkActionItem", () => {
     expect(link).toHaveTextContent("Dashboard");
     expect(link).not.toHaveAttribute("target");
     expect(link).not.toHaveAttribute("rel");
-    expect(screen.queryByRole("link", { name: "Dashboard" })).toBeInTheDocument(); // Check the mock rendered an <a> with the correct text
+    expect(
+      screen.queryByRole("link", { name: "Dashboard" }),
+    ).toBeInTheDocument(); // Check the mock rendered an <a> with the correct text
   });
 
   it("renders with provided label", () => {
     render(
       <LinkActionItem
-        config={{ type: ActionItemType.LINK, to: "/path", label: "Click Here" }}
+        config={{ label: "Click Here", to: "/path", type: ActionItemType.LINK }}
       />,
     );
     // Query by role and text content is more robust than data-testid for user-facing elements
-    expect(screen.getByRole("link", { name: "Click Here" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Click Here" }),
+    ).toBeInTheDocument();
   });
 
   it("renders with provided children", () => {
     render(
       <LinkActionItem
-        config={{ type: ActionItemType.LINK, to: "/path", children: <span>Go</span> }}
+        config={{
+          children: <span>Go</span>,
+          to: "/path",
+          type: ActionItemType.LINK,
+        }}
       />,
     );
     // Query by role and text content (or part of it)
@@ -135,10 +170,10 @@ describe("LinkActionItem", () => {
     render(
       <LinkActionItem
         config={{
-          type: ActionItemType.LINK,
-          to: "/path",
-          label: "Preferred Label",
           children: <span>Ignored Children</span>,
+          label: "Preferred Label",
+          to: "/path",
+          type: ActionItemType.LINK,
         }}
       />,
     );
@@ -151,7 +186,12 @@ describe("LinkActionItem", () => {
   it("applies className from config", () => {
     render(
       <LinkActionItem
-        config={{ type: ActionItemType.LINK, to: "/path", className: "extra-class", label: "Link" }}
+        config={{
+          className: "extra-class",
+          label: "Link",
+          to: "/path",
+          type: ActionItemType.LINK,
+        }}
       />,
     );
     const link = screen.getByRole("link");
@@ -166,7 +206,12 @@ describe("LinkActionItem", () => {
   it("applies target attribute correctly for <a> tags", () => {
     render(
       <LinkActionItem
-        config={{ type: ActionItemType.LINK, to: "http://example.com", target: "_self", label: "Self" }}
+        config={{
+          label: "Self",
+          target: "_self",
+          to: "http://example.com",
+          type: ActionItemType.LINK,
+        }}
       />,
     );
     expect(screen.getByRole("link")).toHaveAttribute("target", "_self");
@@ -176,7 +221,12 @@ describe("LinkActionItem", () => {
   it("does not apply rel attribute for non-_blank targets", () => {
     render(
       <LinkActionItem
-        config={{ type: ActionItemType.LINK, to: "http://example.com", target: "_self", label: "Self" }}
+        config={{
+          label: "Self",
+          target: "_self",
+          to: "http://example.com",
+          type: ActionItemType.LINK,
+        }}
       />,
     );
     expect(screen.getByRole("link")).not.toHaveAttribute("rel");

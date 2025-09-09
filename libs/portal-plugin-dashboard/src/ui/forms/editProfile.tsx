@@ -25,7 +25,7 @@ export default function editProfileForm(): FormConfig {
         className: "col-span-2",
         label: "Email Address",
         name: "email",
-        type: "core:dashboard:account.email",
+        type: "dashboard:account.email",
       },
     ],
     footerClassName: "",

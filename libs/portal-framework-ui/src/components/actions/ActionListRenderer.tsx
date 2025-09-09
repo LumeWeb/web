@@ -1,9 +1,8 @@
 import { cn } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
-import { ActionItemConfig, ActionItemType, ActionListLayout } from "./types";
-
 import { getActionItemComponent } from "./registry";
+import { ActionItemConfig, ActionItemType, ActionListLayout } from "./types";
 
 interface ActionListRendererProps {
   actions: ActionItemConfig[];
@@ -30,7 +29,7 @@ export const ActionListRenderer: React.FC<ActionListRendererProps> = ({
         "flex w-full",
         layout === "vertical"
           ? "flex-col space-y-3"
-          : "flex-row flex-wrap justify-end items-center gap-4",
+          : "flex-row flex-wrap items-center justify-end gap-4",
         className,
       )}>
       {actions.map((action: ActionItemConfig, index) => {

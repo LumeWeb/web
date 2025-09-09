@@ -1,13 +1,15 @@
 import type { FieldValues } from "react-hook-form";
 
 import { BaseRecord } from "@refinedev/core";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 
 import type { FormConfig, StepFormFooterRenderer } from "./types";
 
 import { useDialog } from "../dialog/Dialog.context";
+import { FormProvider } from "./context";
 import { getStepOnSuccessHandler, handleStepSubmission } from "./handlers/step";
 import { SchemaForm } from "./SchemaForm";
+import { StepControlProvider, useStepControl } from "./StepControlContext";
 import { StepFormFooter } from "./StepFormFooter";
 import { type StepFormConfig } from "./types";
 
@@ -35,6 +37,16 @@ const defaultStepFormFooter: StepFormFooterRenderer = (
   />
 );
 
+interface StepSchemaFormContentProps<
+  TRequest extends FieldValues = FieldValues,
+  TResponse extends BaseRecord = any,
+> {
+  closeDialog: () => void;
+  config: StepFormConfig<TRequest, TResponse>;
+  currentDialog: any;
+  formMethods: any;
+}
+
 interface StepSchemaFormProps<
   TRequest extends FieldValues = FieldValues,
   TResponse extends BaseRecord = any,
@@ -48,104 +60,42 @@ export function StepSchemaForm<
   TResponse extends BaseRecord = any,
 >({ closeDialog, config }: StepSchemaFormProps<TRequest, TResponse>) {
   const { currentDialog, formMethods } = useDialog();
-  const { defaultStep = 0, isBackValidate = false } = config.stepBehavior ?? {};
-  const [currentStep, setCurrentStep] = useState(defaultStep);
-  const totalSteps = config.steps.length;
-  const isFirstStep = currentStep === 0;
-  const isLastStep = currentStep === totalSteps - 1;
+  const stepControl = useStepControl({
+    defaultStep: config.stepBehavior?.defaultStep,
+    isBackValidate: config.stepBehavior?.isBackValidate,
+    steps: config.steps,
+  });
 
-  const formInstances = useRef<Record<number, any>>({});
-
-  // Clean up form instances when steps change or component unmounts
-  useEffect(() => {
-    const currentSteps = config.steps;
-    return () => {
-      // On unmount or steps change, clear any instances that are no longer valid
-      const validStepIndices = new Set(currentSteps.map((_, index) => index));
-      Object.keys(formInstances.current).forEach((key) => {
-        const index = Number(key);
-        if (!validStepIndices.has(index)) {
-          delete formInstances.current[index];
-        }
-      });
-    };
-  }, [config.steps]);
-
-  const getFormInstance = useCallback(
-    (stepIndex: number) => {
-      if (!formInstances.current[stepIndex]) {
-        formInstances.current[stepIndex] = {
-          fields: config.steps[stepIndex]?.fields || [],
-          getFields: () =>
-            config.steps[stepIndex]?.fields.map((f) => f.name as string) || [],
-        };
-      }
-      return formInstances.current[stepIndex];
-    },
-    [config.steps],
+  return (
+    <StepControlProvider value={stepControl}>
+      <StepSchemaFormContent
+        closeDialog={closeDialog}
+        config={config}
+        currentDialog={currentDialog}
+        formMethods={formMethods}
+      />
+    </StepControlProvider>
   );
+}
 
-  const currentStepConfig = useMemo(() => {
-    return getFormInstance(currentStep);
-  }, [currentStep, getFormInstance]);
-
-  const go = (step: number) => {
-    const targetStep = Math.max(0, Math.min(step, totalSteps - 1));
-    setCurrentStep(targetStep);
-  };
-
-  const handleNext = useCallback(async () => {
-    if (!formMethods?.handleSubmit) return;
-
-    await handleStepSubmission({
-      closeDialog,
-      config: {
-        ...config,
-        onSuccess: getStepOnSuccessHandler(
-          config,
-          formMethods,
-          isLastStep,
-          closeDialog,
-        ),
-      },
-      currentStep,
-      formMethods,
-      goToNextStep: isLastStep ? undefined : () => go(currentStep + 1),
-      isLastStep,
-      stepConfig: config.steps[currentStep],
-    });
-  }, [formMethods, currentStep, isLastStep, go, closeDialog, config]);
-
-  const handlePrevious = useCallback(async () => {
-    if (isFirstStep) return;
-
-    if (isBackValidate && formMethods?.trigger) {
-      const currentForm = getFormInstance(currentStep);
-      const isValid = await formMethods.trigger(currentForm.getFields());
-      if (!isValid) return;
-    }
-
-    // Call onStepSubmit for previous step if going back
-    const prevStepConfig = config.steps[currentStep - 1];
-    if (prevStepConfig.onStepSubmit) {
-      const prevForm = getFormInstance(currentStep - 1);
-      const prevStepValues = prevForm.getFields().reduce((acc, field) => {
-        acc[field] = formMethods?.getValues(field);
-        return acc;
-      }, {} as Partial<TRequest>);
-      await prevStepConfig.onStepSubmit(prevStepValues);
-    }
-
-    go(currentStep - 1);
-  }, [
-    formMethods,
+function StepSchemaFormContent<
+  TRequest extends FieldValues = FieldValues,
+  TResponse extends BaseRecord = any,
+>({
+  closeDialog,
+  config,
+  currentDialog,
+  formMethods,
+}: StepSchemaFormContentProps<TRequest, TResponse>) {
+  const stepControl = useStepControl();
+  const {
     currentStep,
+    handleNext,
+    handlePrevious,
     isFirstStep,
-    isBackValidate,
-    go,
-    getFormInstance,
-    config.steps,
-  ]);
+    isLastStep,
+    totalSteps,
+  } = stepControl;
 
   const triggerSubmit = useCallback(() => {
     if (!formMethods?.handleSubmit) return;
@@ -172,7 +122,7 @@ export function StepSchemaForm<
     (methods: any, closeDlg: () => void, dialog: any) => {
       const stepMethods = {
         currentStep,
-        gotoStep: go,
+        gotoStep: stepControl.goToStep,
         handleNext,
         handlePrevious,
         isFirstStep,
@@ -191,7 +141,7 @@ export function StepSchemaForm<
     [
       config.footer,
       currentStep,
-      go,
+      stepControl.goToStep,
       handleNext,
       handlePrevious,
       isFirstStep,
@@ -205,20 +155,33 @@ export function StepSchemaForm<
     return config.steps.map((step, index) => {
       const formConfig: FormConfig<TRequest, TResponse> = {
         ...config,
-        fields: getFormInstance(index).fields,
+        fields: step.fields,
         footer: config.footer === false ? false : getStepFooter,
         validationSchema: step.validationSchema,
       };
       return (
-        <SchemaForm<TRequest>
-          active={currentStep === index}
-          closeDialog={closeDialog}
-          config={formConfig}
+        <FormProvider
+          adapter={config.adapter ?? "rhf"}
+          config={{ ...formConfig, steps: config.steps }}
+          formInstance={formMethods}
           key={`step-${index}`}
-        />
+          stepControl={stepControl}>
+          <SchemaForm<TRequest>
+            active={currentStep === index}
+            closeDialog={closeDialog}
+            config={formConfig}
+          />
+        </FormProvider>
       );
     });
-  }, [config, currentStep, getFormInstance, getStepFooter, closeDialog]);
+  }, [
+    config,
+    currentStep,
+    getStepFooter,
+    closeDialog,
+    formMethods,
+    stepControl,
+  ]);
 
   return <>{schemaForms}</>;
 }

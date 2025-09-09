@@ -1,5 +1,6 @@
-import { useScreenReaderAnnouncement } from "@/components/screen-reader/hooks/useScreenReaderAnnouncement";
 import React from "react";
+
+import { useScreenReaderAnnouncement } from "@/components/screen-reader/hooks/useScreenReaderAnnouncement";
 
 interface ScreenReaderAnnouncementProps {
   /**

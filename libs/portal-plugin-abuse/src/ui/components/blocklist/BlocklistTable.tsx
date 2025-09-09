@@ -158,7 +158,7 @@ export function BlocklistTable() {
             onClick: (row) => {
               openDialog({
                 content: <BlockDetailsContent block={row.original} />,
-                size: "lg",
+                size: "2xl",
                 title: "Block Details",
                 type: "custom",
               });

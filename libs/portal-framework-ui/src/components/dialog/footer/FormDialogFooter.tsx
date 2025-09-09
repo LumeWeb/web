@@ -14,6 +14,7 @@ export function FormDialogFooter<T extends BaseRecord = any>({
 }: FooterComponentProps<T>): React.JSX.Element {
   if (!currentDialog.formConfig) return null;
 
+  // Render regular FormFooter for non-wizard form dialogs
   return (
     <DialogFooter className={className}>
       <FormFooter

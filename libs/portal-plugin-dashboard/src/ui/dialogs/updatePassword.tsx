@@ -1,4 +1,4 @@
-import { DialogConfig } from "@lumeweb/portal-framework-ui";
+import { DialogConfig, DialogType } from "@lumeweb/portal-framework-ui";
 import { z } from "zod";
 
 import updatePasswordForm from "@/ui/forms/updatePassword";
@@ -19,6 +19,6 @@ export function updatePasswordDialogConfig(
     },
     onSuccess: () => void 0,
     title: "Change Password",
-    type: "form",
+    type: DialogType.FORM,
   };
 }

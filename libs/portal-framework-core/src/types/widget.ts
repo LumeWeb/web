@@ -3,7 +3,7 @@ import * as React from "react";
 import { NamespacedId } from "./plugin";
 
 export interface WidgetAreaDefinition {
-  grid: {
+  grid?: {
     columns: number; // Fixed column count
     /**
      * Gap between widgets in pixels
@@ -19,9 +19,8 @@ export interface WidgetAreaDefinition {
   id: string;
 }
 
-export const DEFAULT_WIDGET_AREA_DEFINITION: Pick<
-  WidgetAreaDefinition["grid"],
-  "gap" | "rowHeight"
+export const DEFAULT_WIDGET_AREA_DEFINITION: Required<
+  Pick<NonNullable<WidgetAreaDefinition["grid"]>, "gap" | "rowHeight">
 > = {
   gap: 16,
   rowHeight: 50,
@@ -32,7 +31,8 @@ export interface PluginWidgets {
   widgets?: WidgetRegistration[];
 }
 
-export interface WidgetDefinition extends Omit<WidgetRegistration, 'componentName'> {
+export interface WidgetDefinition
+  extends Omit<WidgetRegistration, "componentName"> {
   component: React.ComponentType;
 }
 

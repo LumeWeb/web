@@ -7,8 +7,8 @@ import {
 import { RefineResource } from "@/types/resources";
 
 export class Capability implements RefineConfigCapability {
-  dependencies = ["core:core:sdk"];
-  readonly id: string = "core:abuse:refine-config";
+  dependencies = ["core:sdk"];
+  readonly id: string = "abuse:refine-config";
   metadata: { description: string; name: string; provider: string };
   status: "active" | "error" | "inactive";
   readonly type = "core:refine-config";

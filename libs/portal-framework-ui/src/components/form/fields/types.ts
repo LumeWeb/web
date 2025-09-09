@@ -25,6 +25,7 @@ export interface FormComponentEntry {
 
 export interface FormComponentProps {
   [key: string]: any;
+  autocomplete?: string;
   className?: string;
   inputClassName?: string;
   label?: string;
@@ -32,5 +33,4 @@ export interface FormComponentProps {
   options?: FormFieldOption[];
   placeholder?: string;
   required?: boolean;
-  autocomplete?: string;
 }

@@ -5,10 +5,10 @@ import {
 } from "@lumeweb/portal-framework-core";
 import { Sdk } from "@lumeweb/portal-sdk";
 import { derive } from "derive-zustand";
+import { useEffect } from "react";
 import { createStore, useStore } from "zustand";
 import { shallow } from "zustand/shallow";
 import { useStoreWithEqualityFn } from "zustand/traditional";
-import { useEffect } from "react";
 
 export interface PortalActions {
   setIsMetaLoading: (isMetaLoading: boolean) => void;
@@ -84,7 +84,7 @@ export const useFrameworkSync = () => {
 export const usePortal = <T>(
   selector: (state: PortalState) => T,
   equalityFn?: (a: T, b: T) => boolean,
-): T & PortalActions => {
+): PortalActions & T => {
   const state = usePortalStore(selector, equalityFn);
   const actions = usePortalActions();
   return { ...state, ...actions };

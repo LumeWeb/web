@@ -1,4 +1,4 @@
-import type { DialogConfig } from "@lumeweb/portal-framework-ui";
+import type { DialogConfig, DialogType } from "@lumeweb/portal-framework-ui";
 import type { DeleteOneParams, HttpError } from "@refinedev/core";
 import type { UseMutationResult } from "@tanstack/react-query";
 
@@ -32,12 +32,12 @@ export function deleteAccountDialogConfig(
           "Your account will be deleted within 48 hours. If this is an error, please contact support immediately.",
         onConfirm: () => logout(),
         title: "Account Deletion Scheduled",
-        type: "alert",
+        type: DialogType.ALERT,
         variant: "success",
       });
       return true;
     },
     title: "Delete Account",
-    type: "form",
+    type: DialogType.FORM,
   };
 }

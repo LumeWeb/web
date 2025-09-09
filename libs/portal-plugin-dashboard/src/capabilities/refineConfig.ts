@@ -15,7 +15,7 @@ import {
 } from "@lumeweb/portal-framework-core";
 
 export class Capability implements RefineConfigCapability {
-  readonly id: string = "core:dashboard:refine-config";
+  readonly id: string = "dashboard:refine-config";
   status;
   readonly type = "core:refine-config";
   version: string;

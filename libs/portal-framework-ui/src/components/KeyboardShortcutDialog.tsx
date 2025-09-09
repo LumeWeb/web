@@ -1,7 +1,3 @@
-import React, { type FunctionComponent } from "react";
-
-import { X } from "lucide-react";
-
 import {
   Badge,
   Button,
@@ -10,6 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@lumeweb/portal-framework-ui-core";
+import { X } from "lucide-react";
+import React, { type FunctionComponent } from "react";
 
 interface KeyboardShortcutDialogProps {
   onOpenChange: (open: boolean) => void;
@@ -38,7 +36,7 @@ export const KeyboardShortcutDialog: FunctionComponent<
         <div className="grid gap-2">
           {Object.entries(shortcuts).map(([action, keys]) => (
             <div className="flex items-center justify-between" key={action}>
-              <span className="text-sm text-muted-foreground">{action}</span>
+              <span className="text-muted-foreground text-sm">{action}</span>
               <div className="flex gap-1">
                 {(Array.isArray(keys) ? keys : [keys]).map((key) => (
                   <Badge key={key} variant="outline">

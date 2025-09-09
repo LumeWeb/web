@@ -1,14 +1,15 @@
+// Import the mocked Button component after its mock is defined
+import { Button } from "@lumeweb/portal-framework-ui-core";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"; // Import cleanup
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"; // Import afterEach and beforeEach
+
+// Import the mocked registry function just before the suite that uses it
+import { registerActionItemComponent } from "../registry";
+import { ActionItemType } from "../types";
 // We will mock react-router's Link, so we don't import the actual RouterLink here yet
 // Now import the component and its registration function AFTER the mocks
 import { CancelActionItem, registerCancelActionItem } from "./CancelActionItem";
-import { ActionItemType } from "../types";
-// Import the mocked Button component after its mock is defined
-import { Button } from "@lumeweb/portal-framework-ui-core";
-// Import the mocked registry function just before the suite that uses it
-import { registerActionItemComponent } from "../registry";
 // We will mock the registry module, so we don't import the actual registerActionItemComponent here yet
 
 // Mock the Button component from the core library *before* importing CancelActionItem
@@ -16,16 +17,16 @@ vi.mock("@lumeweb/portal-framework-ui-core", () => ({
   Button: vi.fn(({ children, ...props }) => (
     <button {...props}>{children}</button>
   )),
+  cn: vi.fn((...classes) => classes.filter(Boolean).join(" ")), // Also mock cn
   Spinner: vi.fn(
     (
       { className, size }, // Also mock Spinner as it might be used in other item tests
     ) => (
-      <span data-testid="spinner" className={className}>
+      <span className={className} data-testid="spinner">
         Loading ({size})
       </span>
     ),
   ),
-  cn: vi.fn((...classes) => classes.filter(Boolean).join(" ")), // Also mock cn
 }));
 
 // Mock the registry module *before* importing registerCancelActionItem
@@ -50,7 +51,7 @@ describe("CancelActionItem", () => {
   it("renders with provided label", () => {
     render(
       <CancelActionItem
-        config={{ type: ActionItemType.CANCEL, label: "Close Dialog" }}
+        config={{ label: "Close Dialog", type: ActionItemType.CANCEL }}
       />,
     );
     expect(screen.getByRole("button")).toHaveTextContent("Close Dialog");
@@ -59,7 +60,7 @@ describe("CancelActionItem", () => {
   it("renders with provided children", () => {
     render(
       <CancelActionItem
-        config={{ type: ActionItemType.CANCEL, children: <span>Exit</span> }}
+        config={{ children: <span>Exit</span>, type: ActionItemType.CANCEL }}
       />,
     );
     expect(screen.getByRole("button")).toContainHTML("<span>Exit</span>");
@@ -69,9 +70,9 @@ describe("CancelActionItem", () => {
     render(
       <CancelActionItem
         config={{
-          type: ActionItemType.CANCEL,
-          label: "Preferred Label",
           children: <span>Ignored Children</span>,
+          label: "Preferred Label",
+          type: ActionItemType.CANCEL,
         }}
       />,
     );
@@ -85,8 +86,8 @@ describe("CancelActionItem", () => {
     const mockCloseDialog = vi.fn();
     render(
       <CancelActionItem
-        config={{ type: ActionItemType.CANCEL }}
         closeDialog={mockCloseDialog}
+        config={{ type: ActionItemType.CANCEL }}
       />,
     );
     fireEvent.click(screen.getByRole("button"));
@@ -98,8 +99,8 @@ describe("CancelActionItem", () => {
     const mockCloseDialog = vi.fn();
     render(
       <CancelActionItem
-        config={{ type: ActionItemType.CANCEL, onClick: mockOnClick }}
         closeDialog={mockCloseDialog}
+        config={{ onClick: mockOnClick, type: ActionItemType.CANCEL }}
       />,
     );
     fireEvent.click(screen.getByRole("button"));
@@ -110,7 +111,7 @@ describe("CancelActionItem", () => {
   it("is disabled when config.disabled is true", () => {
     render(
       <CancelActionItem
-        config={{ type: ActionItemType.CANCEL, disabled: true }}
+        config={{ disabled: true, type: ActionItemType.CANCEL }}
       />,
     );
     expect(screen.getByRole("button")).toBeDisabled();
@@ -129,7 +130,7 @@ describe("CancelActionItem", () => {
   it("is disabled when both config.disabled and isSubmitting are true", () => {
     render(
       <CancelActionItem
-        config={{ type: ActionItemType.CANCEL, disabled: true }}
+        config={{ disabled: true, type: ActionItemType.CANCEL }}
         isSubmitting={true}
       />,
     );
@@ -139,7 +140,7 @@ describe("CancelActionItem", () => {
   it("is not disabled when neither config.disabled nor isSubmitting are true", () => {
     render(
       <CancelActionItem
-        config={{ type: ActionItemType.CANCEL, disabled: false }}
+        config={{ disabled: false, type: ActionItemType.CANCEL }}
         isSubmitting={false}
       />,
     );
@@ -149,7 +150,7 @@ describe("CancelActionItem", () => {
   it("applies className from config", () => {
     render(
       <CancelActionItem
-        config={{ type: ActionItemType.CANCEL, className: "extra-class" }}
+        config={{ className: "extra-class", type: ActionItemType.CANCEL }}
       />,
     );
     expect(screen.getByRole("button")).toHaveClass("extra-class");

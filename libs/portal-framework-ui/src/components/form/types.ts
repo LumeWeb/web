@@ -16,6 +16,7 @@ import { z } from "zod";
 import type { DialogConfig } from "../dialog/Dialog.types";
 
 import { ActionItemConfig, ActionListLayout } from "../actions";
+import { ComponentSize } from "../sizing";
 import { FormFieldType } from "./fields/types";
 
 export enum GroupOrder {
@@ -23,18 +24,18 @@ export enum GroupOrder {
   UNGROUPED_FIRST = "ungrouped-first",
 }
 
-export type FormAutosaveConfig<T> = AutoSaveProps<T>["autoSave"];
-
 export type AutocompleteToken =
-  | "on"
-  | "off"
-  | "username"
-  | "email"
   | "current-password"
-  | "new-password"
-  | "one-time-code"
+  | "email"
+  | "family-name"
   | "given-name"
-  | "family-name";
+  | "new-password"
+  | "off"
+  | "on"
+  | "one-time-code"
+  | "username";
+
+export type FormAutosaveConfig<T> = AutoSaveProps<T>["autoSave"];
 
 export interface FormConfig<
   TRequest extends BaseRecord = any,
@@ -119,6 +120,11 @@ export interface FormConfig<
 }
 
 export interface FormFieldConfig<TRequest extends BaseRecord = any> {
+  /**
+   * The HTML autocomplete attribute value for the field.
+   * If provided, it will be passed to the underlying input component.
+   */
+  autocomplete?: AutocompleteToken;
   className?: string;
   component?: ComponentType<any>;
   /**
@@ -148,11 +154,6 @@ export interface FormFieldConfig<TRequest extends BaseRecord = any> {
   options?: FormFieldOption[];
   placeholder?: string;
   required?: boolean;
-  /**
-   * The HTML autocomplete attribute value for the field.
-   * If provided, it will be passed to the underlying input component.
-   */
-  autocomplete?: AutocompleteToken;
   /**
    * Declaratively define dependencies for field visibility.
    * The field will only be shown if *all* conditions in this object are met.
@@ -187,7 +188,15 @@ export interface FormGroupType {
  * Defines the structure for a single step in a multi-step form.
  */
 export interface StepDefinition<TRequest extends BaseRecord = any> {
+  /**
+   * Description for the step
+   */
+  description?: string;
   fields: FormFieldConfig<TRequest>[];
+  /**
+   * Icon for the step (used in wizard navigation)
+   */
+  icon?: React.ReactNode;
   meta?: Record<string, unknown>;
   /**
    * Callback when this step's submission fails
@@ -204,6 +213,15 @@ export interface StepDefinition<TRequest extends BaseRecord = any> {
     response: any,
     values: Partial<TRequest>,
   ) => Promise<void> | void;
+  /**
+   * Short title for the step (used in wizard navigation)
+   */
+  shortTitle?: string;
+  /**
+   * Dynamic submit label for this step
+   * Receives form values and returns a string label
+   */
+  submitLabel?: (values: Partial<TRequest>) => string;
   title: string;
   /**
    * Zod schema for validating this step's fields
@@ -250,6 +268,91 @@ export interface StepFormMethods {
   isLastStep: boolean;
   totalSteps: number;
 }
+
+/**
+ * Configuration for a wizard form that extends StepFormConfig with wizard-specific options
+ */
+export interface WizardFormConfig<
+  TRequest extends BaseRecord = any,
+  TResponse extends BaseRecord = any,
+> extends StepFormConfig<TRequest, TResponse> {
+  /**
+   * Whether to allow navigation to steps by clicking on progress indicator
+   * @default true
+   */
+  allowStepNavigation?: boolean;
+  /**
+   * Maximum width for step descriptions in the wizard header
+   * Uses standard component size classes (e.g., 'xs', 'sm', 'md', 'lg', 'xl', '2xl', etc.)
+   * @default 'xs'
+   */
+  descriptionMaxWidth?: ComponentSize;
+  /**
+   * Custom className for wizard footer
+   */
+  footerClassName?: string;
+  /**
+   * Custom className for wizard header
+   */
+  headerClassName?: string;
+  /**
+   * Style of progress indicator to use
+   * @default 'timeline'
+   */
+  progressStyle?: "dots" | "stepper" | "timeline";
+  /**
+   * Whether to show step descriptions in the progress indicator
+   * @default true
+   */
+  showStepDescriptions?: boolean;
+  /**
+   * Whether to show step progress indicator
+   * @default true
+   */
+  showStepProgress?: boolean;
+  /**
+   * Whether to show step titles in the progress indicator
+   * @default true
+   */
+  showStepTitles?: boolean;
+  /**
+   * Array of step indices that cannot be navigated to
+   * @default []
+   */
+  stepNavigationDisabled?:
+    | ((currentStep: number, data: any) => boolean[])
+    | boolean[];
+  /**
+   * Custom className for wizard wrapper
+   */
+  wizardClassName?: string;
+}
+/**
+ * Wizard-specific step definition that extends StepDefinition
+ * Wizard steps require UI properties (icon, shortTitle, description) that are optional in regular step forms
+ */
+export interface WizardStepDefinition<TRequest extends BaseRecord = any>
+  extends Omit<
+    StepDefinition<TRequest>,
+    "description" | "icon" | "shortTitle"
+  > {
+  /**
+   * Description for the step
+   * Required for wizard steps
+   */
+  description: string;
+  /**
+   * Icon for the step (used in wizard navigation)
+   * Required for wizard steps
+   */
+  icon: React.ReactNode;
+  /**
+   * Short title for the step (used in wizard navigation)
+   * Required for wizard steps
+   */
+  shortTitle: string;
+}
+
 /**
  * Type guard to differentiate between single-step and multi-step form configs.
  */

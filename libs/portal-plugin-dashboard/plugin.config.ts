@@ -29,6 +29,7 @@ export default {
       "./src/ui/widgets/account/emailVerificationBanner",
     "./widgets/account/password": "./src/ui/widgets/account/password",
     "./widgets/account/profile": "./src/ui/widgets/account/profile",
+    "./widgets/upload/button": "./src/ui/widgets/upload/button",
   },
   name: "core:dashboard",
 } satisfies PluginConfig;

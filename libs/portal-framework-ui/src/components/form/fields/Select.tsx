@@ -17,22 +17,22 @@ export const Select = React.forwardRef<
   HTMLButtonElement,
   {
     [key: string]: any;
+    autocomplete?: string;
     className?: string;
     label?: string;
     options: FormFieldOption[];
     placeholder?: string;
-    autocomplete?: string;
   }
 >(
   (
     {
+      autocomplete,
       inputClassName,
       onChange,
       options,
       placeholder = "Select...",
       required,
       value,
-      autocomplete,
       ...props
     },
     ref,
@@ -46,7 +46,7 @@ export const Select = React.forwardRef<
         {...props}>
         <SelectTrigger
           className={cn(
-            "w-full h-14 border-none bg-modal-input text-foreground placeholder:text-foreground/50",
+            "bg-modal-input text-foreground placeholder:text-foreground/50 h-14 w-full border-none",
             inputClassName,
             "data-[placeholder]:text-foreground/50",
           )}

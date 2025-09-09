@@ -1,23 +1,24 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock external dependencies first
 // Use factory functions to avoid issues with global mocks and default/named exports
 vi.mock("@lumeweb/portal-framework-core", async (importActual) => {
-  const actual = await importActual<typeof import("@lumeweb/portal-framework-core")>();
+  const actual =
+    await importActual<typeof import("@lumeweb/portal-framework-core")>();
   return {
     ...actual,
-    useFrameworkLoading: vi.fn(),
-    useFramework: vi.fn(),
-    FrameworkProvider: vi.fn(({ children }) => (
-      <div data-testid="mock-framework-provider">{children}</div>
-    )),
+    createNamespacedId: vi.fn((ns, name) => `${ns}:${name}`), // Keep actual logic for ID creation
+    createRemoteComponentLoader: vi.fn(),
     ErrorDisplay: vi.fn(({ error, onRetry }) => (
       <div data-testid="mock-error-display">
         Error: {error instanceof Error ? error.message : "Unknown Error"}
         {onRetry && <button onClick={onRetry}>Retry</button>}
       </div>
+    )),
+    FrameworkProvider: vi.fn(({ children }) => (
+      <div data-testid="mock-framework-provider">{children}</div>
     )),
     // Mock the internal LoadingSpinner component
     // Note: This component is defined *within* AppComponent.tsx, so mocking it here won't work directly.
@@ -28,16 +29,18 @@ vi.mock("@lumeweb/portal-framework-core", async (importActual) => {
     )),
     RouteErrorBoundaryFallback: vi.fn(({ error }) => (
       <div data-testid="mock-route-error-boundary-fallback">
-        Route Error: {error instanceof Error ? error.message : "Unknown Route Error"}
+        Route Error:{" "}
+        {error instanceof Error ? error.message : "Unknown Route Error"}
       </div>
     )),
-    createRemoteComponentLoader: vi.fn(),
-    createNamespacedId: vi.fn((ns, name) => `${ns}:${name}`), // Keep actual logic for ID creation
+    useFramework: vi.fn(),
+    useFrameworkLoading: vi.fn(),
   };
 });
 
 vi.mock("@lumeweb/portal-framework-ui-core", async (importActual) => {
-  const actual = await importActual<typeof import("@lumeweb/portal-framework-ui-core")>();
+  const actual =
+    await importActual<typeof import("@lumeweb/portal-framework-ui-core")>();
   return {
     ...actual,
     Toaster: vi.fn(() => <div data-testid="mock-toaster" />),
@@ -67,16 +70,16 @@ vi.mock("react-router", async (importActual) => {
   return {
     ...actual,
     createBrowserRouter: vi.fn((routes) => ({
-      // Mock router object
-      routes,
       // Add a dummy navigate function if needed by Refine or other components
       navigate: vi.fn(),
+      // Mock router object
+      routes,
       // Add other necessary router properties if tests require them
     })),
     createRoutesFromElements: vi.fn((elements) => elements), // Simply return the elements for inspection
-    Route: vi.fn(({ element, path, index, children, errorElement }) => (
+    Route: vi.fn(({ children, element, errorElement, index, path }) => (
       // Simple representation of a Route element for testing structure
-      <div data-testid="mock-route" data-path={path} data-index={index}>
+      <div data-index={index} data-path={path} data-testid="mock-route">
         {element}
         {errorElement && (
           <div data-testid="mock-route-error-element">{errorElement}</div>
@@ -89,7 +92,7 @@ vi.mock("react-router", async (importActual) => {
         {/* Render a representation of the routes */}
         {router?.routes && Array.isArray(router.routes)
           ? router.routes.map((route: any, i: number) => (
-              <div key={i} data-testid="rendered-route">
+              <div data-testid="rendered-route" key={i}>
                 {route}
               </div>
             ))
@@ -137,7 +140,9 @@ import { AppComponent } from "./AppComponent";
 // had one, or simply by checking the state of the hooks).
 
 // Let's create a simple mock for the internal LoadingSpinner
-const MockLoadingSpinner = () => <div data-testid="mock-loading-spinner">Loading...</div>;
+const MockLoadingSpinner = () => (
+  <div data-testid="mock-loading-spinner">Loading...</div>
+);
 
 // We need to find a way to replace the internal LoadingSpinner.
 // Since it's not exported, direct mocking is hard.
@@ -158,7 +163,9 @@ describe("AppComponent", () => {
   const mockRouterProvider = vi.mocked(require("react-router").RouterProvider);
   const mockDialogProvider = vi.mocked(require("../dialog").DialogProvider);
   const mockDialogRenderer = vi.mocked(require("../dialog").DialogRenderer);
-  const mockToaster = vi.mocked(require("@lumeweb/portal-framework-ui-core").Toaster);
+  const mockToaster = vi.mocked(
+    require("@lumeweb/portal-framework-ui-core").Toaster,
+  );
   const mockUseAppStore = vi.mocked(require("@/store/appStore").useAppStore);
   const mockCreateRemoteComponentLoader = vi.mocked(
     require("@lumeweb/portal-framework-core").createRemoteComponentLoader,
@@ -202,8 +209,8 @@ describe("AppComponent", () => {
       isLoading: false,
     });
     mockUseFramework.mockReturnValue({
-      getFeature: vi.fn(),
       getCapabilitiesByType: vi.fn(),
+      getFeature: vi.fn(),
       // Add other necessary framework methods if called by AppComponent
     } as any); // Cast to any to avoid complex type mocking
     mockUseAppStore.mockReturnValue(mockAppStoreState);
@@ -220,9 +227,7 @@ describe("AppComponent", () => {
 
   it("should render FrameworkProvider with default app name", () => {
     render(<AppComponent />);
-    expect(
-      screen.getByTestId("mock-framework-provider"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("mock-framework-provider")).toBeInTheDocument();
     // Check if FrameworkProvider was called with the correct props
     expect(
       require("@lumeweb/portal-framework-core").FrameworkProvider,
@@ -309,8 +314,8 @@ describe("AppComponent", () => {
     // Simulate the effect hook setting the error
     mockUseAppStore.mockImplementation(() => ({
       ...mockAppStoreState,
-      isLoading: false,
       error: appError,
+      isLoading: false,
       routes: [], // Ensure routes is not null to pass the initial null check
     }));
 
@@ -339,8 +344,8 @@ describe("AppComponent", () => {
     // Simulate the effect hook setting the error
     mockUseAppStore.mockImplementation(() => ({
       ...mockAppStoreState,
-      isLoading: false,
       error: appError,
+      isLoading: false,
       routes: [], // Ensure routes is not null to pass the initial null check
     }));
 
@@ -361,18 +366,18 @@ describe("AppComponent", () => {
     // Simulate successful data loading
     mockUseAppStore.mockImplementation(() => ({
       ...mockAppStoreState,
-      isLoading: false,
       error: null,
-      routes: [{ id: "home", path: "/", component: "HomePage" }], // Provide mock routes
+      isLoading: false,
       pluginConfigs: [{ dataProvider: {} }], // Provide mock configs
+      routes: [{ component: "HomePage", id: "home", path: "/" }], // Provide mock routes
     }));
     // Mock the framework instance returned by useFramework
     const mockFrameworkInstance = {
-      getFeature: vi.fn().mockResolvedValue({
-        getRoutes: vi.fn().mockResolvedValue([]),
-        getNavigation: vi.fn().mockResolvedValue([]),
-      }),
       getCapabilitiesByType: vi.fn().mockResolvedValue([]),
+      getFeature: vi.fn().mockResolvedValue({
+        getNavigation: vi.fn().mockResolvedValue([]),
+        getRoutes: vi.fn().mockResolvedValue([]),
+      }),
     };
     mockUseFramework.mockReturnValue(mockFrameworkInstance as any);
 
@@ -396,9 +401,9 @@ describe("AppComponent", () => {
     // Verify Refine was called with combined configs
     expect(mockRefine).toHaveBeenCalledWith(
       expect.objectContaining({
+        dataProvider: expect.any(Object), // From pluginConfigs
         options: expect.any(Object),
         routerProvider: expect.any(Object),
-        dataProvider: expect.any(Object), // From pluginConfigs
       }),
       expect.anything(),
     );
@@ -426,11 +431,11 @@ describe("AppComponent", () => {
     });
     // Mock the framework instance returned by useFramework
     const mockFrameworkInstance = {
-      getFeature: vi.fn().mockResolvedValue({
-        getRoutes: vi.fn().mockResolvedValue([]),
-        getNavigation: vi.fn().mockResolvedValue([]),
-      }),
       getCapabilitiesByType: vi.fn().mockResolvedValue([]),
+      getFeature: vi.fn().mockResolvedValue({
+        getNavigation: vi.fn().mockResolvedValue([]),
+        getRoutes: vi.fn().mockResolvedValue([]),
+      }),
     };
     mockUseFramework.mockReturnValue(mockFrameworkInstance as any);
 
@@ -443,11 +448,11 @@ describe("AppComponent", () => {
 
     mockUseAppStore.mockImplementation(() => ({
       ...mockAppStoreState,
-      setIsLoading: mockSetIsLoading,
-      setError: mockSetError,
-      setRoutes: mockSetRoutes,
       addMenuItems: mockAddMenuItems,
+      setError: mockSetError,
+      setIsLoading: mockSetIsLoading,
       setPluginConfigs: mockSetPluginConfigs,
+      setRoutes: mockSetRoutes,
     }));
 
     render(<AppComponent loadNavigation={true} loadRoutes={true} />);
@@ -483,8 +488,8 @@ describe("AppComponent", () => {
     });
     // Mock the framework instance returned by useFramework
     const mockFrameworkInstance = {
-      getFeature: vi.fn().mockResolvedValue(undefined), // Return undefined if feature not loaded
       getCapabilitiesByType: vi.fn().mockResolvedValue([]),
+      getFeature: vi.fn().mockResolvedValue(undefined), // Return undefined if feature not loaded
     };
     mockUseFramework.mockReturnValue(mockFrameworkInstance as any);
 
@@ -497,11 +502,11 @@ describe("AppComponent", () => {
 
     mockUseAppStore.mockImplementation(() => ({
       ...mockAppStoreState,
-      setIsLoading: mockSetIsLoading,
-      setError: mockSetError,
-      setRoutes: mockSetRoutes,
       addMenuItems: mockAddMenuItems,
+      setError: mockSetError,
+      setIsLoading: mockSetIsLoading,
       setPluginConfigs: mockSetPluginConfigs,
+      setRoutes: mockSetRoutes,
     }));
 
     render(<AppComponent loadNavigation={false} loadRoutes={false} />);
@@ -510,7 +515,9 @@ describe("AppComponent", () => {
     await waitFor(() => {
       // Framework methods should NOT be called
       expect(mockFrameworkInstance.getFeature).not.toHaveBeenCalled();
-      expect(mockFrameworkInstance.getCapabilitiesByType).not.toHaveBeenCalled();
+      expect(
+        mockFrameworkInstance.getCapabilitiesByType,
+      ).not.toHaveBeenCalled();
     });
 
     // App store actions should still be called to set initial state (e.g., routes to [])
@@ -532,17 +539,17 @@ describe("AppComponent", () => {
     // Simulate successful data loading but component loading failure
     mockUseAppStore.mockImplementation(() => ({
       ...mockAppStoreState,
-      isLoading: false,
       error: null,
-      routes: [{ id: "fail-route", path: "/fail", component: "BadComponent" }], // Provide a route
+      isLoading: false,
       pluginConfigs: [],
+      routes: [{ component: "BadComponent", id: "fail-route", path: "/fail" }], // Provide a route
     }));
     const mockFrameworkInstance = {
-      getFeature: vi.fn().mockResolvedValue({
-        getRoutes: vi.fn().mockResolvedValue([]),
-        getNavigation: vi.fn().mockResolvedValue([]),
-      }),
       getCapabilitiesByType: vi.fn().mockResolvedValue([]),
+      getFeature: vi.fn().mockResolvedValue({
+        getNavigation: vi.fn().mockResolvedValue([]),
+        getRoutes: vi.fn().mockResolvedValue([]),
+      }),
     };
     mockUseFramework.mockReturnValue(mockFrameworkInstance as any);
 
@@ -570,14 +577,14 @@ describe("AppComponent", () => {
       // Verify RouteErrorBoundaryFallback was used for the route element
       expect(mockRoute).toHaveBeenCalledWith(
         expect.objectContaining({
-          path: "/fail",
           element: expect.objectContaining({
-            // Check if the element is the fallback component
-            type: mockRouteErrorBoundaryFallback,
             props: expect.objectContaining({
               error: expect.any(Error), // Expect an Error object
             }),
+            // Check if the element is the fallback component
+            type: mockRouteErrorBoundaryFallback,
           }),
+          path: "/fail",
         }),
         expect.anything(),
       );
@@ -603,17 +610,17 @@ describe("AppComponent", () => {
     // Simulate successful data loading but component loading failure
     mockUseAppStore.mockImplementation(() => ({
       ...mockAppStoreState,
-      isLoading: false,
       error: null,
-      routes: [{ id: "fail-route", path: "/fail", component: "BadComponent" }], // Provide a route
+      isLoading: false,
       pluginConfigs: [],
+      routes: [{ component: "BadComponent", id: "fail-route", path: "/fail" }], // Provide a route
     }));
     const mockFrameworkInstance = {
-      getFeature: vi.fn().mockResolvedValue({
-        getRoutes: vi.fn().mockResolvedValue([]),
-        getNavigation: vi.fn().mockResolvedValue([]),
-      }),
       getCapabilitiesByType: vi.fn().mockResolvedValue([]),
+      getFeature: vi.fn().mockResolvedValue({
+        getNavigation: vi.fn().mockResolvedValue([]),
+        getRoutes: vi.fn().mockResolvedValue([]),
+      }),
     };
     mockUseFramework.mockReturnValue(mockFrameworkInstance as any);
 
@@ -626,13 +633,13 @@ describe("AppComponent", () => {
       // Verify RouteErrorBoundaryFallback was used for the route element
       expect(mockRoute).toHaveBeenCalledWith(
         expect.objectContaining({
-          path: "/fail",
           element: expect.objectContaining({
-            type: mockRouteErrorBoundaryFallback,
             props: expect.objectContaining({
               error: expect.any(Error), // Expect an Error object
             }),
+            type: mockRouteErrorBoundaryFallback,
           }),
+          path: "/fail",
         }),
         expect.anything(),
       );
@@ -658,30 +665,30 @@ describe("AppComponent", () => {
     // Simulate successful data loading but component loading failure for a child route
     mockUseAppStore.mockImplementation(() => ({
       ...mockAppStoreState,
-      isLoading: false,
       error: null,
+      isLoading: false,
+      pluginConfigs: [],
       routes: [
         {
-          id: "parent-route",
-          path: "/parent",
-          component: "ParentComponent",
           children: [
             {
+              component: "BadChildComponent",
               id: "fail-child-route",
               path: "child",
-              component: "BadChildComponent",
             },
           ],
+          component: "ParentComponent",
+          id: "parent-route",
+          path: "/parent",
         },
       ],
-      pluginConfigs: [],
     }));
     const mockFrameworkInstance = {
-      getFeature: vi.fn().mockResolvedValue({
-        getRoutes: vi.fn().mockResolvedValue([]),
-        getNavigation: vi.fn().mockResolvedValue([]),
-      }),
       getCapabilitiesByType: vi.fn().mockResolvedValue([]),
+      getFeature: vi.fn().mockResolvedValue({
+        getNavigation: vi.fn().mockResolvedValue([]),
+        getRoutes: vi.fn().mockResolvedValue([]),
+      }),
     };
     mockUseFramework.mockReturnValue(mockFrameworkInstance as any);
 
@@ -715,13 +722,13 @@ describe("AppComponent", () => {
       // Verify the child route element is the fallback component
       expect(mockRoute).toHaveBeenCalledWith(
         expect.objectContaining({
-          path: "child",
           element: expect.objectContaining({
-            type: mockRouteErrorBoundaryFallback,
             props: expect.objectContaining({
               error: expect.any(Error), // Expect an Error object
             }),
+            type: mockRouteErrorBoundaryFallback,
           }),
+          path: "child",
         }),
         expect.anything(),
       );
@@ -748,10 +755,10 @@ describe("AppComponent", () => {
     // Simulate data loading completing but routes remaining null (shouldn't happen in practice, but test the condition)
     mockUseAppStore.mockImplementation(() => ({
       ...mockAppStoreState,
-      isLoading: false,
       error: null,
-      routes: null, // Routes are still null
+      isLoading: false,
       pluginConfigs: [],
+      routes: null, // Routes are still null
     }));
 
     const { container } = render(<AppComponent />);
@@ -769,17 +776,17 @@ describe("AppComponent", () => {
     // Simulate successful data loading with an empty routes array
     mockUseAppStore.mockImplementation(() => ({
       ...mockAppStoreState,
-      isLoading: false,
       error: null,
-      routes: [], // Empty routes array
+      isLoading: false,
       pluginConfigs: [],
+      routes: [], // Empty routes array
     }));
     const mockFrameworkInstance = {
-      getFeature: vi.fn().mockResolvedValue({
-        getRoutes: vi.fn().mockResolvedValue([]),
-        getNavigation: vi.fn().mockResolvedValue([]),
-      }),
       getCapabilitiesByType: vi.fn().mockResolvedValue([]),
+      getFeature: vi.fn().mockResolvedValue({
+        getNavigation: vi.fn().mockResolvedValue([]),
+        getRoutes: vi.fn().mockResolvedValue([]),
+      }),
     };
     mockUseFramework.mockReturnValue(mockFrameworkInstance as any);
 

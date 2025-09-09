@@ -86,7 +86,9 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
     }
     return () => {
       // clear on unmount or when dialog closes
-      try { setFormInstance(undefined as any); } catch {}
+      try {
+        setFormInstance(undefined as any);
+      } catch {}
     };
   }, [formInstance, setFormInstance, isActiveDialog]);
 
@@ -101,7 +103,8 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
   }
 
   const finalConfig: FormConfig<T> | FormDialogConfig<T> = useMemo(
-    () => (isActiveDialog ? { ...currentDialog!, formConfig: cConfig } : cConfig),
+    () =>
+      isActiveDialog ? { ...currentDialog!, formConfig: cConfig } : cConfig,
     [isActiveDialog, currentDialog, cConfig],
   );
 

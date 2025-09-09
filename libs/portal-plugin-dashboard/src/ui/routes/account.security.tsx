@@ -8,7 +8,7 @@ export default function AccountProfile() {
         description="Manage your account security and authentication settings"
         title="Security"
       />
-      <GridWidgetArea id={"core:dashboard:security"} />
+      <GridWidgetArea id={"dashboard:security"} />
     </div>
   );
 }

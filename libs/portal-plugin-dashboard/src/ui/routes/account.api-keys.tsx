@@ -45,7 +45,7 @@ export default function AccountApiKeys() {
           actionButtonsLayout: "horizonal",
           confirmText: "I've Saved My Key",
           description: <ApiKeyAlertMessage apiKey={key} />,
-          size: "lg",
+          size: "2xl",
           status: "warning",
           title: "API Key Created",
           type: "alert",

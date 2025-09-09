@@ -1,7 +1,8 @@
-import { ThemedBadge } from "@/components/ThemedBadge";
-import { type BadgeConfig } from "@/types";
 import { Button, cn } from "@lumeweb/portal-framework-ui-core";
 import { X } from "lucide-react";
+
+import { ThemedBadge } from "@/components/ThemedBadge";
+import { type BadgeConfig } from "@/types";
 
 type FilterChipVariant = "date" | "default" | "numeric" | "text";
 
@@ -48,7 +49,7 @@ export function FilterChip({
       <span>{label}</span>
       <Button
         aria-label={`Remove ${label} filter`}
-        className="h-5 w-5 p-0 hover:bg-transparent ml-1"
+        className="ml-1 h-5 w-5 p-0 hover:bg-transparent"
         onClick={onRemove}
         variant="ghost">
         <X className="h-3.5 w-3.5" />

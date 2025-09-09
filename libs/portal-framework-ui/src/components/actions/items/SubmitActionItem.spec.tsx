@@ -1,9 +1,9 @@
-import { render, screen, cleanup } from "@testing-library/react"; // Import cleanup
+import { cleanup, render, screen } from "@testing-library/react"; // Import cleanup
 import React from "react";
-import { describe, expect, it, vi, afterEach, beforeEach } from "vitest"; // Import afterEach and beforeEach
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"; // Import afterEach and beforeEach
 
-import { SubmitActionItem, registerSubmitActionItem } from "./SubmitActionItem";
 import { ActionItemType } from "../types";
+import { registerSubmitActionItem, SubmitActionItem } from "./SubmitActionItem";
 // We will mock the registry module, so we don't import the actual registerActionItemComponent here yet
 
 // Mock the Button and Spinner components from the core library *before* importing SubmitActionItem
@@ -11,12 +11,12 @@ vi.mock("@lumeweb/portal-framework-ui-core", () => ({
   Button: vi.fn(({ children, ...props }) => (
     <button {...props}>{children}</button>
   )),
+  cn: vi.fn((...classes) => classes.filter(Boolean).join(" ")), // Also mock cn
   Spinner: vi.fn(({ className, size }) => (
-    <span data-testid="spinner" className={className}>
+    <span className={className} data-testid="spinner">
       Loading ({size})
     </span>
   )),
-  cn: vi.fn((...classes) => classes.filter(Boolean).join(" ")), // Also mock cn
 }));
 
 // Mock the registry module *before* importing registerSubmitActionItem
@@ -26,11 +26,11 @@ vi.mock("../registry", () => ({
   resetRegistryForTesting: vi.fn(), // Mock this too if it were used here
 }));
 
-// Now import the component and its registration function AFTER the mocks
-import { SubmitActionItem, registerSubmitActionItem } from "./SubmitActionItem";
 // Import the mocked Spinner component after its mock is defined
 import { Spinner } from "@lumeweb/portal-framework-ui-core";
 
+// Now import the component and its registration function AFTER the mocks
+import { registerSubmitActionItem, SubmitActionItem } from "./SubmitActionItem";
 
 describe("SubmitActionItem", () => {
   afterEach(() => {
@@ -46,7 +46,7 @@ describe("SubmitActionItem", () => {
   it("renders with provided label", () => {
     render(
       <SubmitActionItem
-        config={{ type: ActionItemType.SUBMIT, label: "Save Changes" }}
+        config={{ label: "Save Changes", type: ActionItemType.SUBMIT }}
       />,
     );
     expect(screen.getByRole("button")).toHaveTextContent("Save Changes");
@@ -55,7 +55,7 @@ describe("SubmitActionItem", () => {
   it("renders with provided children", () => {
     render(
       <SubmitActionItem
-        config={{ type: ActionItemType.SUBMIT, children: <span>Send</span> }}
+        config={{ children: <span>Send</span>, type: ActionItemType.SUBMIT }}
       />,
     );
     expect(screen.getByRole("button")).toContainHTML("<span>Send</span>");
@@ -65,9 +65,9 @@ describe("SubmitActionItem", () => {
     render(
       <SubmitActionItem
         config={{
-          type: ActionItemType.SUBMIT,
-          label: "Preferred Label",
           children: <span>Ignored Children</span>,
+          label: "Preferred Label",
+          type: ActionItemType.SUBMIT,
         }}
       />,
     );
@@ -79,20 +79,27 @@ describe("SubmitActionItem", () => {
 
   it("is disabled when config.disabled is true", () => {
     render(
-      <SubmitActionItem config={{ type: ActionItemType.SUBMIT, disabled: true }} />,
+      <SubmitActionItem
+        config={{ disabled: true, type: ActionItemType.SUBMIT }}
+      />,
     );
     expect(screen.getByRole("button")).toBeDisabled();
   });
 
   it("is disabled when isSubmitting is true", () => {
-    render(<SubmitActionItem config={{ type: ActionItemType.SUBMIT }} isSubmitting={true} />);
+    render(
+      <SubmitActionItem
+        config={{ type: ActionItemType.SUBMIT }}
+        isSubmitting={true}
+      />,
+    );
     expect(screen.getByRole("button")).toBeDisabled();
   });
 
   it("is disabled when both config.disabled and isSubmitting are true", () => {
     render(
       <SubmitActionItem
-        config={{ type: ActionItemType.SUBMIT, disabled: true }}
+        config={{ disabled: true, type: ActionItemType.SUBMIT }}
         isSubmitting={true}
       />,
     );
@@ -102,7 +109,7 @@ describe("SubmitActionItem", () => {
   it("is not disabled when neither config.disabled nor isSubmitting are true", () => {
     render(
       <SubmitActionItem
-        config={{ type: ActionItemType.SUBMIT, disabled: false }}
+        config={{ disabled: false, type: ActionItemType.SUBMIT }}
         isSubmitting={false}
       />,
     );
@@ -110,7 +117,12 @@ describe("SubmitActionItem", () => {
   });
 
   it("shows spinner and disables button when isSubmitting is true", () => {
-    render(<SubmitActionItem config={{ type: ActionItemType.SUBMIT }} isSubmitting={true} />);
+    render(
+      <SubmitActionItem
+        config={{ type: ActionItemType.SUBMIT }}
+        isSubmitting={true}
+      />,
+    );
     expect(screen.getByRole("button")).toBeDisabled();
     expect(screen.getByTestId("spinner")).toBeInTheDocument();
     expect(screen.getByTestId("spinner")).toHaveClass("mr-2");
@@ -122,14 +134,19 @@ describe("SubmitActionItem", () => {
   });
 
   it("does not show spinner when isSubmitting is false", () => {
-    render(<SubmitActionItem config={{ type: ActionItemType.SUBMIT }} isSubmitting={false} />);
+    render(
+      <SubmitActionItem
+        config={{ type: ActionItemType.SUBMIT }}
+        isSubmitting={false}
+      />,
+    );
     expect(screen.queryByTestId("spinner")).not.toBeInTheDocument();
   });
 
   it("applies className from config", () => {
     render(
       <SubmitActionItem
-        config={{ type: ActionItemType.SUBMIT, className: "extra-class" }}
+        config={{ className: "extra-class", type: ActionItemType.SUBMIT }}
       />,
     );
     expect(screen.getByRole("button")).toHaveClass("extra-class");

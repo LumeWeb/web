@@ -1,6 +1,7 @@
-import { storeResetFns } from "@/../__mocks__/zustand"; // Import the reset function set
 import { act } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
+
+import { storeResetFns } from "@/../__mocks__/zustand"; // Import the reset function set
 
 import { uiStore } from "./uiStore"; // Import the store
 

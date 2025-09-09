@@ -1,13 +1,15 @@
-import { storeResetFns } from "@/../__mocks__/zustand"; // Import the reset function set
 import type { PortalMeta } from "@lumeweb/portal-framework-core";
+
 import { Sdk } from "@lumeweb/portal-sdk";
 import { act } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { metaStore, portalStore } from "./portalStore"; // Import the stores
+import { storeResetFns } from "@/../__mocks__/zustand"; // Import the reset function set
 // Import Theme from the new types file
 import { Theme } from "@/types/theme";
 import { createDefaultTheme } from "@/utils/theme"; // createDefaultTheme is still in utils
+
+import { metaStore, portalStore } from "./portalStore"; // Import the stores
 
 // Mock the environment variable
 // Need to await importActual outside the mock factory
@@ -45,23 +47,23 @@ vi.mock("@lumeweb/portal-sdk", () => {
 vi.mock("@/utils/theme", () => {
   return {
     createDefaultTheme: () => ({
-      id: "mock-theme",
-      name: "Mock Theme",
       colors: {},
+      id: "mock-theme",
       images: {},
+      name: "Mock Theme",
     }),
   };
 });
 
 const createMockData = () => ({
-  // Pass a mock apiUrl to the Sdk constructor
-  mockSdk: new (vi.mocked(Sdk))("https://mock-portal.example.com"),
-  mockTheme: createDefaultTheme(),
   mockMeta: {
     domain: "mock-domain.com",
     feature_flags: {},
     plugins: {},
   } as PortalMeta, // Explicitly type mockMeta
+  // Pass a mock apiUrl to the Sdk constructor
+  mockSdk: new (vi.mocked(Sdk))("https://mock-portal.example.com"),
+  mockTheme: createDefaultTheme(),
 });
 
 // Define mockMeta outside the function so it's accessible to all tests
