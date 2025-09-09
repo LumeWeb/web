@@ -1,4 +1,4 @@
-import { WidgetArea } from "@lumeweb/portal-framework-core";
+import { GridWidgetArea } from "@lumeweb/portal-framework-core";
 import { GeneralLayout } from "@lumeweb/portal-framework-ui";
 import { Authenticated } from "@refinedev/core";
 import React from "react";
@@ -8,7 +8,7 @@ function Dashboard() {
   return (
     <Authenticated key="dashboard" v3LegacyAuthProviderCompatible={false}>
       <GeneralLayout>
-        <WidgetArea id={"core:dashboard:header"} />
+        <GridWidgetArea id={"core:dashboard:header"} />
       </GeneralLayout>
     </Authenticated>
   );

@@ -1,4 +1,4 @@
-import { WidgetArea } from "@lumeweb/portal-framework-core";
+import { GridWidgetArea } from "@lumeweb/portal-framework-core";
 import { PageHeader } from "@lumeweb/portal-framework-ui";
 
 export default function AccountProfile() {
@@ -8,7 +8,7 @@ export default function AccountProfile() {
         description="Manage your account information and preferences"
         title="Profile & Settings"
       />
-      <WidgetArea id={"core:dashboard:profile"}></WidgetArea>
+      <GridWidgetArea id={"core:dashboard:profile"} />
     </div>
   );
 }

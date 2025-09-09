@@ -1,10 +1,15 @@
+// API
 export { Builder } from "./api/builder";
 export { Framework } from "./api/framework";
+
+// Components
 export { ErrorDisplay } from "./components/ErrorDisplay";
+export { FlexWidgetArea } from "./components/FlexWidgetArea";
+export { GridWidgetArea } from "./components/GridWidgetArea";
 export { RouteErrorBoundary } from "./components/RouteErrorBoundary";
 export { RouteErrorBoundaryFallback } from "./components/RouteErrorBoundaryFallback";
 export { RouteLoading } from "./components/RouteLoading";
-export { WidgetArea } from "./components/WidgetArea";
+
 // Contexts
 export {
   FrameworkProvider,
@@ -12,24 +17,29 @@ export {
   useFramework,
   useFrameworkLoading,
 } from "./contexts/framework";
+
+// Environment
 export { env } from "./env";
-// API
+
+// Plugin Context Bridge
 export {
   HostContextBridge,
   registerBridgedContext,
   RemoteContextConsumer,
 } from "./plugins/context-bridge";
-// Plugins
-export { PluginManager } from "./plugins/manager";
 
+// Plugin Management
+export { PluginManager } from "./plugins/manager";
 export {
   createBridgeComponent,
   createRemoteComponentLoader,
   defaultRemoteOptions,
   type RemoteComponentOptions,
 } from "./plugins/remoteComponentLoader";
-// Test Utilities (exported for use in other packages like storybook)
+
+// Testing Utilities
 export { MockFrameworkProvider } from "./testing/MockFrameworkProvider";
+
 // Types
 export type { FeatureStatus, FrameworkFeature } from "./types/api";
 export type {
@@ -38,7 +48,6 @@ export type {
   RefineConfigCapability,
   SdkCapability,
 } from "./types/capabilities";
-
 export type { NavigationFeature } from "./types/features";
 export type {
   NavigationItem,
@@ -59,12 +68,12 @@ export type {
   WidgetDefinition,
   WidgetRegistration,
 } from "./types/widget";
+
+// Utilities
 export * from "./util/domain";
 export { getApiBaseUrl } from "./util/getApiBaseUrl";
-
 export * from "./util/location";
 export * from "./util/namespace";
-// Utils
 export { getPortalPluginManifests } from "./util/pluginManifest";
 export * from "./util/portalMeta";
 export * from "./util/refineConfig";
