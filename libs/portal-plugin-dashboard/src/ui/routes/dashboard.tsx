@@ -8,7 +8,7 @@ function Dashboard() {
   return (
     <Authenticated key="dashboard" v3LegacyAuthProviderCompatible={false}>
       <GeneralLayout>
-        <GridWidgetArea id={"core:dashboard:header"} />
+        <GridWidgetArea id={"dashboard:header"} />
       </GeneralLayout>
     </Authenticated>
   );

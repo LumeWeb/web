@@ -20,7 +20,7 @@ const toSafeError = (error: unknown): Error => {
   if (error instanceof Error) {
     return error;
   }
-  
+
   // If error is object-like and has a message property, use it
   if (typeof error === "object" && error !== null && "message" in error) {
     const message = (error as { message?: unknown }).message;
@@ -28,7 +28,7 @@ const toSafeError = (error: unknown): Error => {
       return new Error(message, { cause: error });
     }
   }
-  
+
   return new Error(String(error), { cause: error });
 };
 

@@ -8,7 +8,7 @@ export default function AccountProfile() {
         description="Manage your account information and preferences"
         title="Profile & Settings"
       />
-      <GridWidgetArea id={"core:dashboard:profile"} />
+      <GridWidgetArea id={"dashboard:profile"} />
     </div>
   );
 }

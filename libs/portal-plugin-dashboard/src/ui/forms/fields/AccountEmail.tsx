@@ -58,5 +58,5 @@ const AccountEmail = React.forwardRef<HTMLDivElement, AccountEmailProps>(
 );
 
 export function registerInput() {
-  registerFormComponent("core:dashboard:account.email", AccountEmail);
+  registerFormComponent("dashboard:account.email", AccountEmail);
 }

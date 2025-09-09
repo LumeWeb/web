@@ -1,5 +1,5 @@
-import { describe, afterEach, expect, it, vi, beforeEach } from "vitest";
 import { ComponentType } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   getActionItemComponent,
@@ -37,7 +37,9 @@ describe("Action Item Registry", () => {
   });
 
   it("should warn when overwriting an existing registration", () => {
-    const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const consoleWarnSpy = vi
+      .spyOn(console, "warn")
+      .mockImplementation(() => {});
 
     const MockComponent1: ComponentType<ActionItemProps<any>> = () => null;
     const MockComponent2: ComponentType<ActionItemProps<any>> = () => null;

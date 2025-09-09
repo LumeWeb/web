@@ -1,8 +1,9 @@
-// @ts-ignore
-import { logoPng } from "@/images";
+import { cn } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 import { Link } from "react-router";
-import { cn } from "@lumeweb/portal-framework-ui-core";
+
+// @ts-ignore
+import { logoPng } from "@/images";
 
 interface LumeLogoProps {
   className?: string;

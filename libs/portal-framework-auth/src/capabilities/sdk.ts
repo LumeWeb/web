@@ -7,7 +7,7 @@ import {
 import { Sdk } from "@lumeweb/portal-sdk";
 
 export class Capability implements SdkCapability {
-  readonly id: string = "core:core:sdk-auth";
+  readonly id: string = "core:sdk-auth";
   status: "active" | "error" | "inactive";
   readonly type: "core:sdk" = "core:sdk";
   #sdk?: Sdk;

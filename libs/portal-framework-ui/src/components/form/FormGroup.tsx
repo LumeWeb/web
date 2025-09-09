@@ -20,7 +20,7 @@ export const FormGroup = ({
         <>
           {title && <h3 className="text-lg font-medium">{title}</h3>}
           {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
+            <p className="text-muted-foreground text-sm">{description}</p>
           )}
           <div className="space-y-4">{children}</div>
         </>

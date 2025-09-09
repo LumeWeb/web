@@ -7,14 +7,22 @@ import { FormFieldType } from "../";
 import { FormComponentProps } from "./types";
 
 interface RichTextProps extends FormComponentProps {
+  autocomplete?: string;
   enablePreview?: boolean;
   toolbarOptions?: ToolbarOption[];
-  autocomplete?: string;
 }
 
 export const RichText = forwardRef<HTMLDivElement, RichTextProps>(
   (
-    { enablePreview, onChange, placeholder, required, toolbarOptions, value, autocomplete },
+    {
+      autocomplete,
+      enablePreview,
+      onChange,
+      placeholder,
+      required,
+      toolbarOptions,
+      value,
+    },
     ref,
   ) => {
     return (

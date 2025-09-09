@@ -22,7 +22,7 @@ export default function List() {
           /* onClick={() =>
             openDialog({
               content: <AddBlockForm />,
-              size: "lg",
+              size: "2xl",
               title: "Add Content to Blocklist",
               type: "custom",
             })

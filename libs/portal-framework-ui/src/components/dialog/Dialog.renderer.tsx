@@ -38,10 +38,7 @@ const DialogFooterContent = <T extends BaseRecord>({
     );
   }
 
-  if (currentDialog.type === "form") {
-    return null; // Form footer handled within form component
-  }
-
+  // For all dialog types including forms, use the footer registry
   const footerType = getFooterTypeForDialog(currentDialog);
   const FooterComponent = getFooterComponent<T>(footerType);
 

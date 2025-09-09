@@ -4,6 +4,7 @@ import React from "react";
 import { registerFormComponent } from ".";
 import { FormFieldType } from "../"; // Use barrel export
 interface DatePickerProps {
+  autocomplete?: React.InputHTMLAttributes<HTMLInputElement>["autoComplete"];
   date?: Date;
   disabled?: boolean;
   label?: string;
@@ -11,7 +12,6 @@ interface DatePickerProps {
   onBlur?: () => void;
   onChange: (date: Date | undefined) => void;
   placeholder?: string;
-  autocomplete?: React.InputHTMLAttributes<HTMLInputElement>["autoComplete"];
 }
 
 export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(

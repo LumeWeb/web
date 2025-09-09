@@ -1,8 +1,16 @@
+// Define the structure for background images within a theme
+export interface BackgroundImages {
+  login: string;
+  register: string;
+  reset_password: string;
+  // Add other potential background image keys here
+}
+
 // Define the structure for an HSL color
 export interface Color {
   hue: number; // 0-360
-  saturation: number; // 0-100
   lightness: number; // 0-100
+  saturation: number; // 0-100
 }
 
 // Define the structure for system colors within a theme
@@ -21,20 +29,12 @@ export interface SystemColors {
   ui_element_border: Color;
 }
 
-// Define the structure for background images within a theme
-export interface BackgroundImages {
-  login: string;
-  register: string;
-  reset_password: string;
-  // Add other potential background image keys here
-}
-
 // Define the overall Theme structure
 export interface Theme {
+  background_images: BackgroundImages;
+  default?: boolean;
   id: string;
   name: string;
   system_colors: SystemColors;
-  background_images: BackgroundImages;
-  default?: boolean;
   // Add other theme properties here if needed
 }

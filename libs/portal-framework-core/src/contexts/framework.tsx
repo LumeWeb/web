@@ -100,6 +100,13 @@ export function FrameworkProvider({
       });
     } catch (err) {
       isDev && console.error("[FrameworkProvider] Initialization error:", err);
+      
+      if (isDev && err && typeof err === 'object' && 'errors' in err) {
+        console.error("[FrameworkProvider] Individual errors:");
+        for (const [key, error] of Object.entries(err.errors)) {
+          console.error(`  ${key}:`, error);
+        }
+      }
 
       const error =
         err instanceof Error

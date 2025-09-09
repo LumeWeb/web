@@ -1,6 +1,7 @@
-import { storeResetFns } from "@/../__mocks__/zustand"; // Import the reset function set
 import { act } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
+
+import { storeResetFns } from "@/../__mocks__/zustand"; // Import the reset function set
 
 import { appStore } from "./appStore"; // Import the store
 
@@ -87,7 +88,7 @@ describe("appStore", () => {
       });
       expect(appStore.getState().menuItems).toContainEqual({
         ...item,
-        children: []
+        children: [],
       });
     });
 
@@ -97,20 +98,22 @@ describe("appStore", () => {
         appStore.getState().addMenuItem(item);
         appStore.getState().removeMenuItem("test");
       });
-      expect(appStore.getState().menuItems).not.toContainEqual(expect.objectContaining({id: "test"}));
+      expect(appStore.getState().menuItems).not.toContainEqual(
+        expect.objectContaining({ id: "test" }),
+      );
     });
 
     it("should batch add menu items", () => {
       const items = [
         { id: "test1", label: "Test 1" },
-        { id: "test2", label: "Test 2" }
+        { id: "test2", label: "Test 2" },
       ];
       act(() => {
         appStore.getState().addMenuItems(items);
       });
       expect(appStore.getState().menuItems).toEqual([
-        expect.objectContaining({id: "test1"}),
-        expect.objectContaining({id: "test2"})
+        expect.objectContaining({ id: "test1" }),
+        expect.objectContaining({ id: "test2" }),
       ]);
     });
   });
@@ -180,13 +183,13 @@ describe("appStore", () => {
         children: [
           {
             ...childItems[0],
-            children: []
+            children: [],
           },
           {
             ...childItems[1],
-            children: []
-          }
-        ]
+            children: [],
+          },
+        ],
       });
     });
   });
@@ -340,7 +343,9 @@ describe("appStore", () => {
     expect(state.menuItems[0].children![0].children).toHaveLength(1);
     expect(state.menuItems[0].children![0].children![0].id).toBe("child2");
     expect(state.menuItems[0].children![0].children![0].children).toBeDefined();
-    expect(state.menuItems[0].children![0].children![0].children).toHaveLength(1);
+    expect(state.menuItems[0].children![0].children![0].children).toHaveLength(
+      1,
+    );
     expect(state.menuItems[0].children![0].children![0].children![0]).toEqual({
       ...child3Item,
       children: [],
@@ -413,38 +418,38 @@ describe("appStore", () => {
       {
         id: "core:",
         label: "Home",
+        order: -1,
         path: "/",
-        order: -1
       },
       {
         id: "core:abuse",
         label: "Abuse",
-        path: "/abuse"
+        path: "/abuse",
       },
       {
         id: "core:cases",
         label: "Cases",
+        parentId: "core:abuse",
         path: "cases",
-        parentId: "core:abuse"
       },
       {
         id: "core:reporters",
         label: "Reporters",
+        parentId: "core:abuse",
         path: "reporters",
-        parentId: "core:abuse"
       },
       {
         id: "core:subjects",
         label: "Subjects",
+        parentId: "core:abuse",
         path: "subjects",
-        parentId: "core:abuse"
       },
       {
         id: "core:blocklist",
         label: "Blocklist",
+        parentId: "core:abuse",
         path: "blocklist",
-        parentId: "core:abuse"
-      }
+      },
     ];
 
     act(() => {
@@ -453,31 +458,31 @@ describe("appStore", () => {
 
     const state = appStore.getState();
     expect(state.menuItems).toHaveLength(2); // Home and Abuse
-    
-    const abuseItem = state.menuItems.find(item => item.id === "core:abuse");
+
+    const abuseItem = state.menuItems.find((item) => item.id === "core:abuse");
     expect(abuseItem).toBeDefined();
     expect(abuseItem?.children).toHaveLength(4);
-    
+
     // Verify child paths are properly prefixed with parent path
     expect(abuseItem?.children).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           id: "core:reporters",
-          path: "/abuse/reporters" // Should be prefixed with parent path
+          path: "/abuse/reporters", // Should be prefixed with parent path
         }),
         expect.objectContaining({
-          id: "core:cases", 
-          path: "/abuse/cases"
+          id: "core:cases",
+          path: "/abuse/cases",
         }),
         expect.objectContaining({
           id: "core:subjects",
-          path: "/abuse/subjects"
+          path: "/abuse/subjects",
         }),
         expect.objectContaining({
           id: "core:blocklist",
-          path: "/abuse/blocklist"
-        })
-      ])
+          path: "/abuse/blocklist",
+        }),
+      ]),
     );
   });
 });

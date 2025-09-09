@@ -1,6 +1,3 @@
-import { usePluginMeta } from "@/hooks/usePluginMeta";
-// Import the hook that provides the setter
-import { useThemeIdAndSetter } from "@/hooks/useTheme";
 import {
   Button,
   Popover,
@@ -9,6 +6,10 @@ import {
   ThemeIcon,
 } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
+
+import { usePluginMeta } from "@/hooks/usePluginMeta";
+// Import the hook that provides the setter
+import { useThemeIdAndSetter } from "@/hooks/useTheme";
 
 // Import Theme from the types file
 import type { Theme } from "../types/theme";

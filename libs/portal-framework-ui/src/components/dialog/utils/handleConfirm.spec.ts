@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { handleConfirm } from "./handleConfirm";
+
 import type { DialogConfig } from "../Dialog.types";
+
+import { handleConfirm } from "./handleConfirm";
 
 describe("handleConfirm", () => {
   it("should do nothing if no dialog provided", async () => {
@@ -13,9 +15,9 @@ describe("handleConfirm", () => {
     const onConfirmMock = vi.fn();
     const closeMock = vi.fn();
     const dialog = {
-      type: "confirm",
-      onConfirm: onConfirmMock,
       dismissable: true,
+      onConfirm: onConfirmMock,
+      type: "confirm",
     } as DialogConfig;
 
     await handleConfirm(dialog, closeMock);
@@ -27,9 +29,9 @@ describe("handleConfirm", () => {
     const onConfirmMock = vi.fn();
     const closeMock = vi.fn();
     const dialog = {
-      type: "custom",
-      onConfirm: onConfirmMock,
       dismissable: true,
+      onConfirm: onConfirmMock,
+      type: "custom",
     } as DialogConfig;
 
     await handleConfirm(dialog, closeMock);
@@ -41,9 +43,9 @@ describe("handleConfirm", () => {
     const onConfirmMock = vi.fn().mockRejectedValue(new Error("Failed"));
     const closeMock = vi.fn();
     const dialog = {
-      type: "confirm",
-      onConfirm: onConfirmMock,
       dismissable: false,
+      onConfirm: onConfirmMock,
+      type: "confirm",
     } as DialogConfig;
 
     await expect(handleConfirm(dialog, closeMock)).rejects.toThrow("Failed");
@@ -54,9 +56,9 @@ describe("handleConfirm", () => {
     const onConfirmMock = vi.fn().mockRejectedValue(new Error("Failed"));
     const closeMock = vi.fn();
     const dialog = {
-      type: "confirm",
-      onConfirm: onConfirmMock,
       dismissable: true,
+      onConfirm: onConfirmMock,
+      type: "confirm",
     } as DialogConfig;
 
     await handleConfirm(dialog, closeMock);

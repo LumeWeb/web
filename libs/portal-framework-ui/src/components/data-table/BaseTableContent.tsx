@@ -44,7 +44,7 @@ function BaseTableContent<TData extends object>({
   return (
     <div className={cn(className)}>
       {header && <div className="mb-4">{header}</div>}
-      <div className={"sm:-mx-8 scrollbar -mx-4 flex overflow-auto"}>
+      <div className={"scrollbar -mx-4 flex overflow-auto sm:-mx-8"}>
         <div className={"mx-4 grow sm:mx-8"}>
           <UITable>
             <TableHeader>
@@ -98,12 +98,12 @@ function BaseTableContent<TData extends object>({
                         <TableRow key={row.id} {...rowProps}>
                           {row.getVisibleCells().map((cell) => (
                             <TableCell
-                              key={cell.id}
                               className={[
                                 cell.column.columnDef.meta?.cellClassName,
                               ]
                                 .filter(Boolean)
                                 .join(" ")}
+                              key={cell.id}
                               {...getCellProps?.(cell)}>
                               {flexRender(
                                 cell.column.columnDef.cell,

@@ -11,20 +11,21 @@ import { registerFormComponent } from ".";
 import { FormFieldType } from "../"; // Use barrel export
 
 interface CheckboxProps {
+  autocomplete?: string;
   disabled?: boolean;
   label?: ComponentType<any> | ReactNode | string;
   name: string;
   onBlur?: () => void;
   onChange?: (checked: boolean) => void;
   value?: boolean;
-  autocomplete?: string;
 }
 
 export const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
-  ({ label, autocomplete, ...props }, ref) => {
+  ({ autocomplete, label, ...props }, ref) => {
     return (
       <>
         <BaseCheckbox
+          autoComplete={autocomplete}
           checked={props.value}
           disabled={props.disabled}
           id={props.name}
@@ -32,7 +33,6 @@ export const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
           onBlur={props.onBlur}
           onCheckedChange={props.onChange}
           ref={ref}
-          autoComplete={autocomplete}
         />
         {label && (
           <Label

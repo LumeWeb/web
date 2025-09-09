@@ -3,7 +3,7 @@ import type { FieldValues } from "react-hook-form";
 import React, { createContext, useContext } from "react";
 
 import { adapters, UnifiedFormReturnType } from "./adapters";
-import { FormConfig } from "./types";
+import { FormConfig, StepFormConfig } from "./types";
 
 interface FormContextType<TFieldValues extends FieldValues = FieldValues> {
   adapter: keyof typeof adapters;
@@ -12,7 +12,7 @@ interface FormContextType<TFieldValues extends FieldValues = FieldValues> {
     error: any;
     status: "error" | "idle" | "loading" | "success";
   };
-  config: FormConfig<TFieldValues>;
+  config: FormConfig<TFieldValues> | StepFormConfig<TFieldValues>;
   formInstance: UnifiedFormReturnType<TFieldValues>;
 }
 
@@ -24,7 +24,7 @@ export function FormProvider<TFieldValues extends FieldValues = FieldValues>({
   children,
   config,
   formInstance,
-}: FormContextType & React.FC) {
+}: FormContextType & { children: React.ReactNode }) {
   return (
     <FormContext.Provider value={{ adapter, autoSave, config, formInstance }}>
       {children}

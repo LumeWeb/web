@@ -9,6 +9,7 @@ import { registerFormComponent } from ".";
 import { FormFieldType } from "../";
 
 interface SwitchProps {
+  autocomplete?: string;
   disabled?: boolean;
   label?: string;
   labelClassName?: string;
@@ -16,11 +17,10 @@ interface SwitchProps {
   onBlur?: () => void;
   onChange?: (checked: boolean) => void;
   value?: boolean;
-  autocomplete?: string;
 }
 
 export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
-  ({ label, autocomplete, ...props }, ref) => {
+  ({ autocomplete, label, ...props }, ref) => {
     return (
       <>
         <BaseSwitch

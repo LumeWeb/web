@@ -1,6 +1,7 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 // libs/portal-framework-ui/src/utils/theme.spec.ts
 import { BackgroundImages, Color, SystemColors, Theme } from "@/types/theme";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   adjustHue,

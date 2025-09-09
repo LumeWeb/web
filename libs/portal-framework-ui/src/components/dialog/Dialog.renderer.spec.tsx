@@ -829,7 +829,7 @@ describe("DialogRenderer", () => {
       <DialogProvider>
         <DialogTrigger
           config={{
-            size: "lg",
+            size: "2xl",
             title: "Large Dialog",
             type: "alert",
           }}

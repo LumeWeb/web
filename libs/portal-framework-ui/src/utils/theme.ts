@@ -435,6 +435,15 @@ export function hexToHsl(hex: string): Color | undefined {
 }
 
 /**
+ * Converts a Color object to raw HSL values as a string.
+ * @param color The Color object.
+ * @returns A string in the format "hue, saturation%, lightness%".
+ */
+export function hslToRawString(color: Color): string {
+  return `${color.hue}, ${color.saturation}%, ${color.lightness}%`;
+}
+
+/**
  * Converts an HSL Color object to RGB values (0-255).
  * Needed for calculating luminance for contrast ratio.
  * @param color The HSL Color object.
@@ -468,15 +477,6 @@ export function hslToRgb(color: Color): [number, number, number] {
   }
 
   return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-}
-
-/**
- * Converts a Color object to raw HSL values as a string.
- * @param color The Color object.
- * @returns A string in the format "hue, saturation%, lightness%".
- */
-export function hslToRawString(color: Color): string {
-  return `${color.hue}, ${color.saturation}%, ${color.lightness}%`;
 }
 
 /**

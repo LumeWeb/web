@@ -1,4 +1,4 @@
-import { DialogConfig } from "@lumeweb/portal-framework-ui";
+import { DialogConfig, DialogType } from "@lumeweb/portal-framework-ui";
 
 import {
   enable2faForm,
@@ -14,6 +14,6 @@ export function enable2faDialogConfig(
   return {
     formConfig: enable2faForm(otpHandler, invalidateAuth),
     title: "Setup Two-Factor Authentication",
-    type: "form",
+    type: DialogType.FORM,
   };
 }

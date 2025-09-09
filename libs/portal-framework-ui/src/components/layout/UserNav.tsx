@@ -69,9 +69,11 @@ export function UserNav() {
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
               <Button
+                aria-label={
+                  isLoading ? "User avatar" : displayName || "User profile"
+                }
                 className="relative h-8 w-8 rounded-full"
-                variant="outline"
-                aria-label={isLoading ? "User avatar" : displayName || "User profile"}>
+                variant="outline">
                 <Avatar className="h-8 w-8">
                   <AvatarImage alt={getAvatarAltText()} src={avatarUrl} />
                   <AvatarFallback className="bg-transparent">

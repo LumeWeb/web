@@ -3,12 +3,14 @@ import { AlertDialog } from "./types/AlertDialog";
 import { ConfirmDialog } from "./types/ConfirmDialog";
 import { CustomDialog } from "./types/CustomDialog";
 import { FormDialog } from "./types/FormDialog";
+import { WizardDialog } from "./types/WizardDialog";
 
 export const dialogComponents = {
   alert: AlertDialog,
   confirm: ConfirmDialog,
   custom: CustomDialog,
   form: FormDialog,
+  wizard_form: WizardDialog,
 } as const;
 
 export type DialogType = keyof typeof dialogComponents;

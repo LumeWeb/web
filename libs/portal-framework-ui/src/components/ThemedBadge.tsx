@@ -1,10 +1,11 @@
-import { BadgeConfig } from "@/types";
 import {
   Badge,
   type BadgeVariant,
   cn,
 } from "@lumeweb/portal-framework-ui-core";
 import React, { type ReactNode } from "react";
+
+import { BadgeConfig } from "@/types";
 
 interface ThemedBadgeProps<T extends string> {
   children?: ReactNode;

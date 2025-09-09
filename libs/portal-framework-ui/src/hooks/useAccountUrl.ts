@@ -21,7 +21,7 @@ export function useAccountUrl(path: string) {
     return normalizedPath;
   }
 
-  let parsedApiUrl: URL | undefined;
+  let parsedApiUrl: undefined | URL;
 
   try {
     parsedApiUrl = new URL(apiUrl);
@@ -33,7 +33,7 @@ export function useAccountUrl(path: string) {
   }
 
   let host = cleanTrailingSlashes(accountSubdomain || currentHostname);
-  
+
   // If API URL host doesn't match expected account subdomain, use current host
   if (parsedApiUrl && parsedApiUrl.hostname !== accountSubdomain) {
     host = cleanTrailingSlashes(currentHostname);

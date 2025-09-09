@@ -1,24 +1,23 @@
-import { render, screen, cleanup } from "@testing-library/react"; // Import cleanup
+import { cleanup, render, screen } from "@testing-library/react"; // Import cleanup
 import React from "react";
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest"; // Import afterEach
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"; // Import afterEach
 
 import { ActionListRenderer } from "./ActionListRenderer";
-import { ActionItemType, ActionItemConfig } from "./types"; // Import ActionItemConfig
 import {
   registerActionItemComponent,
   resetRegistryForTesting, // Import the new reset function
 } from "./registry";
+import { ActionItemConfig, ActionItemType } from "./types"; // Import ActionItemConfig
 
 // Mock the individual action item components (keep definitions outside describe)
-const MockCancelActionItem = vi.fn(({ config, closeDialog, isSubmitting }) => (
+const MockCancelActionItem = vi.fn(({ closeDialog, config, isSubmitting }) => (
   <button
     data-testid="cancel-action"
     disabled={isSubmitting || config.disabled}
     onClick={() => {
       if (config.onClick) config.onClick();
       else if (closeDialog) closeDialog();
-    }}
-  >
+    }}>
     {config.label || config.children || "Mock Cancel"}
   </button>
 ));
@@ -26,8 +25,7 @@ const MockCustomActionItem = vi.fn(({ config, isSubmitting }) => (
   <button
     data-testid="custom-action"
     disabled={isSubmitting || config.disabled}
-    onClick={config.onClick}
-  >
+    onClick={config.onClick}>
     {config.label || config.children || "Mock Custom"}
   </button>
 ));
@@ -37,7 +35,10 @@ const MockLinkActionItem = vi.fn(({ config }) => (
   </a>
 ));
 const MockSubmitActionItem = vi.fn(({ config, isSubmitting }) => (
-  <button data-testid="submit-action" disabled={isSubmitting || config.disabled} type="submit">
+  <button
+    data-testid="submit-action"
+    disabled={isSubmitting || config.disabled}
+    type="submit">
     {isSubmitting && <span data-testid="spinner">Loading...</span>}
     {config.label || config.children || "Mock Submit"}
   </button>
@@ -64,14 +65,16 @@ describe("ActionListRenderer", () => {
   });
 
   it("renders null if actions is undefined", () => {
-    const { container } = render(<ActionListRenderer actions={undefined as any} />);
+    const { container } = render(
+      <ActionListRenderer actions={undefined as any} />,
+    );
     expect(container).toBeEmptyDOMElement();
   });
 
   it("renders action items based on the provided config", () => {
     const actions: ActionItemConfig[] = [
-      { type: ActionItemType.CANCEL, label: "Close" },
-      { type: ActionItemType.SUBMIT, label: "Save" },
+      { label: "Close", type: ActionItemType.CANCEL },
+      { label: "Save", type: ActionItemType.SUBMIT },
     ];
     render(<ActionListRenderer actions={actions} />);
 
@@ -81,7 +84,9 @@ describe("ActionListRenderer", () => {
 
   it("passes closeDialog and isSubmitting props to action items", () => {
     const mockCloseDialog = vi.fn();
-    const actions: ActionItemConfig[] = [{ type: ActionItemType.CANCEL, label: "Close" }];
+    const actions: ActionItemConfig[] = [
+      { label: "Close", type: ActionItemType.CANCEL },
+    ];
     render(
       <ActionListRenderer
         actions={actions}
@@ -101,8 +106,8 @@ describe("ActionListRenderer", () => {
 
   it("applies horizontal layout by default", () => {
     const actions: ActionItemConfig[] = [
-      { type: ActionItemType.CANCEL, label: "Close" },
-      { type: ActionItemType.SUBMIT, label: "Save" },
+      { label: "Close", type: ActionItemType.CANCEL },
+      { label: "Save", type: ActionItemType.SUBMIT },
     ];
     const { container } = render(<ActionListRenderer actions={actions} />);
     const div = container.firstChild;
@@ -113,8 +118,8 @@ describe("ActionListRenderer", () => {
 
   it("applies vertical layout when specified", () => {
     const actions: ActionItemConfig[] = [
-      { type: ActionItemType.CANCEL, label: "Close" },
-      { type: ActionItemType.SUBMIT, label: "Save" },
+      { label: "Close", type: ActionItemType.CANCEL },
+      { label: "Save", type: ActionItemType.SUBMIT },
     ];
     const { container } = render(
       <ActionListRenderer actions={actions} layout="vertical" />,
@@ -125,7 +130,9 @@ describe("ActionListRenderer", () => {
   });
 
   it("applies custom className", () => {
-    const actions: ActionItemConfig[] = [{ type: ActionItemType.CANCEL, label: "Close" }];
+    const actions: ActionItemConfig[] = [
+      { label: "Close", type: ActionItemType.CANCEL },
+    ];
     const { container } = render(
       <ActionListRenderer actions={actions} className="custom-class" />,
     );
@@ -135,8 +142,8 @@ describe("ActionListRenderer", () => {
 
   it("handles action items with keys", () => {
     const actions: ActionItemConfig[] = [
-      { type: ActionItemType.CANCEL, label: "Close", key: "cancel-key" },
-      { type: ActionItemType.SUBMIT, label: "Save", key: "submit-key" },
+      { key: "cancel-key", label: "Close", type: ActionItemType.CANCEL },
+      { key: "submit-key", label: "Save", type: ActionItemType.SUBMIT },
     ];
     render(<ActionListRenderer actions={actions} />);
     // Check if keys are applied to the rendered components (difficult directly with RTL,
@@ -148,10 +155,15 @@ describe("ActionListRenderer", () => {
   });
 
   it("warns and skips rendering for unregistered action types", () => {
-    const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const consoleWarnSpy = vi
+      .spyOn(console, "warn")
+      .mockImplementation(() => {});
     const actions: ActionItemConfig[] = [
       // Cast the object literal to ActionItemConfig using 'as'
-      { type: "unknown-type" as ActionItemType, label: "Unknown" } as ActionItemConfig,
+      {
+        label: "Unknown",
+        type: "unknown-type" as ActionItemType,
+      } as ActionItemConfig,
     ];
     render(<ActionListRenderer actions={actions} />);
 
@@ -164,13 +176,15 @@ describe("ActionListRenderer", () => {
   });
 
   it("renders custom components when type is CUSTOM_COMPONENT", () => {
-    const CustomComp = ({ text }: { text: string }) => <div data-testid="custom-comp">{text}</div>;
+    const CustomComp = ({ text }: { text: string }) => (
+      <div data-testid="custom-comp">{text}</div>
+    );
     const actions: ActionItemConfig[] = [
       {
-        type: ActionItemType.CUSTOM_COMPONENT,
         component: CustomComp,
-        props: { text: "Hello World" }
-      }
+        props: { text: "Hello World" },
+        type: ActionItemType.CUSTOM_COMPONENT,
+      },
     ];
     render(<ActionListRenderer actions={actions} />);
 
