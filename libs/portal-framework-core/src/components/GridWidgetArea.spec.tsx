@@ -1,10 +1,10 @@
 import { cleanup, render, screen } from "@testing-library/react";
+import { GridWidgetArea } from "libs/portal-framework-core/src/components/GridWidgetArea";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Framework } from "../api/framework";
 import { useFramework } from "../contexts/framework";
 import { createRemoteComponentLoader } from "../plugins/remoteComponentLoader";
-import { WidgetArea } from "./WidgetArea";
 
 // Mock framework hooks
 vi.mock("../contexts/framework");
@@ -51,7 +51,7 @@ describe("WidgetArea", () => {
 
   it("should render no widgets when area not found", () => {
     mockFramework.getWidgetRegistrations.mockReturnValue([]);
-    render(<WidgetArea id="empty-area" />);
+    render(<GridWidgetArea id="empty-area" />);
 
     expect(screen.queryByTestId("mock-widget")).not.toBeInTheDocument();
   });
@@ -60,7 +60,7 @@ describe("WidgetArea", () => {
     mockFramework.getWidgetRegistrations.mockReturnValue([
       { componentName: "WidgetA", pluginId: "core:widgets" },
     ]);
-    render(<WidgetArea id="single-area" />);
+    render(<GridWidgetArea id="single-area" />);
 
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
   });
@@ -71,7 +71,7 @@ describe("WidgetArea", () => {
       { componentName: "WidgetB", pluginId: "core:widgets" },
       { componentName: "WidgetC", pluginId: "core:widgets" },
     ]);
-    render(<WidgetArea id="multi-area" />);
+    render(<GridWidgetArea id="multi-area" />);
 
     const widgets = screen.getAllByTestId("mock-widget");
     expect(widgets).toHaveLength(3);

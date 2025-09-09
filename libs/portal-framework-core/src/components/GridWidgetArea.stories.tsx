@@ -1,18 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
+import { GridWidgetArea } from "libs/portal-framework-core/src/components/GridWidgetArea";
 import React from "react";
 
 import { Framework } from "../api/framework";
 import { MockFrameworkProvider } from "../testing/MockFrameworkProvider";
-import { WidgetArea } from "./WidgetArea";
 
-const MockWidget = () => <div className="p-4 border rounded">Mock Widget</div>;
+const MockWidget = () => <div className="rounded border p-4">Mock Widget</div>;
 
 // Create mock framework instance (similar to withFramework decorator)
 const mockFramework = {
   _createRemoteComponent: () => {
     const MockWidget = () => (
-      <div className="p-4 border rounded">Mock Widget</div>
+      <div className="rounded border p-4">Mock Widget</div>
     );
     return () => MockWidget;
   },
@@ -28,12 +28,12 @@ const mockFramework = {
   },
 } as unknown as Framework;
 
-const meta: Meta<typeof WidgetArea> = {
-  component: WidgetArea,
+const meta: Meta<typeof GridWidgetArea> = {
+  component: GridWidgetArea,
   // Add render function for Docs page
   render: (args) => (
     <MockFrameworkProvider appName="storybook" framework={mockFramework}>
-      <WidgetArea {...args} />
+      <GridWidgetArea {...args} />
     </MockFrameworkProvider>
   ),
   tags: ["autodocs"],
