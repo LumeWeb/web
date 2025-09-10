@@ -1,9 +1,12 @@
+import { UppyFileDefault } from "@/features/upload";
+
 export interface PluginConfig {
+  module: any; // The actual Uppy plugin
   options: object;
-  plugin: any; // The actual Uppy plugin
 }
 
 export interface ServiceConfig {
+  folderBundlerPlugin?: PluginConfig; // Optional folder bundler plugin
   id: string;
   largeFilePlugin: PluginConfig;
   name: string;
@@ -18,4 +21,42 @@ export interface UIServiceConfig {
   name: string;
 }
 
-export type UploadStatus = "completed" | "error" | "idle" | "uploading";
+export const UPLOAD_TYPE_MAIN = "main";
+export const UPLOAD_TYPE_AVATAR = "avatar";
+
+export enum FileStatus {
+  COMPLETE = "complete",
+  ERROR = "error",
+  PENDING = "pending",
+  UPLOADING = "uploading",
+}
+
+export enum UploadStatus {
+  COMPLETED = "completed",
+  ERROR = "error",
+  IDLE = "idle",
+  PENDING = "pending",
+  UPLOADING = "uploading",
+}
+
+// Interface that both UploadManager class and useUploadManager hook can satisfy
+export interface IUploadManager {
+  addFile: (file: File, serviceId?: string) => Promise<void> | void;
+  cancelAll: () => void;
+  clearErrors: () => void;
+  getFiles: () => any[] | Promise<any[]>;
+  getUploadedFiles: () => UppyFileDefault[];
+  getUploadErrors: () => Error[];
+  getUploadProgress: () => number;
+  getUploadStatus: () => UploadStatusType;
+  off: (event: string, callback: (...args: any[]) => void) => void;
+  // Expose Uppy's event system directly
+  on: (event: string, callback: (...args: any[]) => void) => () => void;
+
+  removeFile: (id: string) => Promise<void> | void;
+  start: () => any | Promise<any>;
+}
+
+export type UploadStatusType = `${UploadStatus}`;
+
+export type UploadType = typeof UPLOAD_TYPE_AVATAR | typeof UPLOAD_TYPE_MAIN;

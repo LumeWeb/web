@@ -21,7 +21,8 @@ describe("runWhenIdle", () => {
     });
 
     // Mock requestIdleCallback with proper typing
-    globalThis.requestIdleCallback = mockRequestIdleCallback as typeof requestIdleCallback;
+    globalThis.requestIdleCallback =
+      mockRequestIdleCallback as typeof requestIdleCallback;
 
     runWhenIdle(mockCallback);
 

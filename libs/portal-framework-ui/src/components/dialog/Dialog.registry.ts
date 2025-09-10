@@ -1,4 +1,4 @@
-import { DialogConfig } from "./Dialog.types";
+import { DialogConfig, DialogType } from "./Dialog.types";
 import { AlertDialog } from "./types/AlertDialog";
 import { ConfirmDialog } from "./types/ConfirmDialog";
 import { CustomDialog } from "./types/CustomDialog";
@@ -6,14 +6,12 @@ import { FormDialog } from "./types/FormDialog";
 import { WizardDialog } from "./types/WizardDialog";
 
 export const dialogComponents = {
-  alert: AlertDialog,
-  confirm: ConfirmDialog,
-  custom: CustomDialog,
-  form: FormDialog,
-  wizard_form: WizardDialog,
+  [DialogType.ALERT]: AlertDialog,
+  [DialogType.CONFIRM]: ConfirmDialog,
+  [DialogType.CUSTOM]: CustomDialog,
+  [DialogType.FORM]: FormDialog,
+  [DialogType.WIZARD_FORM]: WizardDialog,
 } as const;
-
-export type DialogType = keyof typeof dialogComponents;
 
 export function getDialogComponent(type: DialogType) {
   return dialogComponents[type];

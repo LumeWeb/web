@@ -2,6 +2,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// Import the component under test AFTER mocks
+import { AppComponent } from "./AppComponent";
+
 // Mock external dependencies first
 // Use factory functions to avoid issues with global mocks and default/named exports
 vi.mock("@lumeweb/portal-framework-core", async (importActual) => {
@@ -124,9 +127,6 @@ vi.mock("../form", () => ({
 vi.mock("@/store/appStore", () => ({
   useAppStore: vi.fn(),
 }));
-
-// Import the component under test AFTER mocks
-import { AppComponent } from "./AppComponent";
 
 // Mock the internal LoadingSpinner component by replacing its definition
 // This is a bit hacky but necessary because it's defined inside the module.

@@ -2,8 +2,19 @@ import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Import the mocked useUIStore hook
-import { useUIStore as mockedUseUIStore } from "@/store/uiStore";
+// Import the mocked functions and state helpers *after* the vi.mock call
+import {
+  __clearMockSetThemeSpy,
+  __getMockUIStoreState,
+  __mockSetTheme,
+  __resetMockUIStoreState,
+  useUIStore as mockedUseUIStore,
+} from "@/store/uiStore";
 
+// Import the mocked function reference after the vi.mock call
+import { __mockGetThemeById as mockGetThemeById } from "../utils/theme";
+// Import the mocked function reference after the vi.mock call
+import { __mockUsePluginMeta as mockUsePluginMeta } from "./usePluginMeta";
 // Import the hook we are actually testing from the source file
 // Import useThemeIdAndSetter and useTheme
 import { useTheme, useThemeIdAndSetter } from "./useTheme";
@@ -43,15 +54,6 @@ vi.mock("@/store/uiStore", () => {
   };
 });
 
-// Import the mocked functions and state helpers *after* the vi.mock call
-import {
-  __clearMockSetThemeSpy,
-  __getMockUIStoreState,
-  __mockSetTheme,
-  __resetMockUIStoreState,
-  useUIStore as mockedUseUIStore,
-} from "@/store/uiStore";
-
 // Mock usePluginMeta as it's used by the other hook (useTheme) in the same file
 // This is necessary because Vitest evaluates the entire module when importing.
 vi.mock("./usePluginMeta", () => {
@@ -64,12 +66,6 @@ vi.mock("./usePluginMeta", () => {
   };
 });
 
-// Import the mocked function reference after the vi.mock call
-import {
-  usePluginMeta as mockedUsePluginMeta,
-  __mockUsePluginMeta as mockUsePluginMeta,
-} from "./usePluginMeta";
-
 // Mock the theme utility function
 vi.mock("../utils/theme", () => {
   // Declare the mock function inside the factory
@@ -81,9 +77,6 @@ vi.mock("../utils/theme", () => {
     getThemeById: mockGetThemeById,
   };
 });
-
-// Import the mocked function reference after the vi.mock call
-import { __mockGetThemeById as mockGetThemeById } from "../utils/theme";
 
 describe("useThemeIdAndSetter", () => {
   beforeEach(() => {

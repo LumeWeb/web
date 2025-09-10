@@ -32,10 +32,10 @@ const AccountEmail = React.forwardRef<HTMLDivElement, AccountEmailProps>(
 
     return (
       <div
-        className={cn("flex items-center gap-2 w-full", className)}
+        className={cn("flex w-full items-center gap-2", className)}
         ref={ref}>
         <Input
-          className="text-white w-full"
+          className="w-full text-white"
           fullWidth={true}
           id="email"
           readOnly
@@ -43,14 +43,14 @@ const AccountEmail = React.forwardRef<HTMLDivElement, AccountEmailProps>(
           value={value}
         />
         <Button
-          className="hover:text-white bg-transparent"
+          className="bg-transparent hover:text-white"
           onClick={(e) => {
             e.preventDefault();
             openDialog(updateEmailDialogConfig(customHook, refetch));
           }}
           size="sm"
           variant="outline">
-          <Mail className="w-4 h-4" />
+          <Mail className="h-4 w-4" />
         </Button>
       </div>
     );

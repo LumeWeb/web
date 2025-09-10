@@ -1,5 +1,4 @@
 import {
-  env,
   Framework,
   getApiBaseUrl,
   SdkCapability,

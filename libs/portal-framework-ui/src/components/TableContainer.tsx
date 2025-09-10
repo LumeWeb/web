@@ -9,7 +9,7 @@ export function TableContainer({
   className?: string;
 }): React.JSX.Element {
   return (
-    <div className={cn("rounded-lg border shadow-sm p-6", className)}>
+    <div className={cn("rounded-lg border p-6 shadow-sm", className)}>
       {children}
     </div>
   );

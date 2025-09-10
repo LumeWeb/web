@@ -1,5 +1,8 @@
-import { type FormConfig, FormFieldType } from "@lumeweb/portal-framework-ui";
-import { ActionItemType } from "@lumeweb/portal-framework-ui";
+import {
+  ActionItemType,
+  type FormConfig,
+  FormFieldType,
+} from "@lumeweb/portal-framework-ui";
 
 import { schema } from "./resetPassword.schema";
 

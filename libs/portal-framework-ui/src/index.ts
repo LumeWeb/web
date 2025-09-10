@@ -9,6 +9,7 @@ export * from "./components/layout/GeneralLayout";
 export * from "./components/layout/PageHeader";
 export * from "./components/Loading";
 export * from "./components/LumeLogo";
+export * from "./components/shared";
 export * from "./components/SkeletonLoader";
 export * from "./components/TableContainer";
 export * from "./components/ThemedBadge";

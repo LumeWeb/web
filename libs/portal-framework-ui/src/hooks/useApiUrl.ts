@@ -1,5 +1,4 @@
-import { getApiBaseUrl } from "@lumeweb/portal-framework-core";
-import { useFramework } from "@lumeweb/portal-framework-core";
+import { getApiBaseUrl, useFramework } from "@lumeweb/portal-framework-core";
 
 export function useApiUrl() {
   const { framework, isLoading } = useFramework();

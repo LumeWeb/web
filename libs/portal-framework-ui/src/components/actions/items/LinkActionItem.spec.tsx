@@ -1,9 +1,13 @@
 import { cleanup, render, screen } from "@testing-library/react"; // Import cleanup
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"; // Import afterEach and beforeEach
-// We will mock react-router's Link, so we don't import the actual RouterLink here yet
 
+// Import the mocked Link component after its mock is defined
+// Import the mocked registry function just before the suite that uses it
+import { registerActionItemComponent } from "../registry";
+// We will mock react-router's Link, so we don't import the actual RouterLink here yet
 import { ActionItemType } from "../types";
+// Now import the component and its registration function AFTER the mocks
 import { LinkActionItem, registerLinkActionItem } from "./LinkActionItem";
 // We will mock the registry module, so we don't import the actual registerActionItemComponent here yet
 
@@ -41,12 +45,6 @@ vi.mock("../registry", () => ({
   registerActionItemComponent: vi.fn(), // Define mock here
   resetRegistryForTesting: vi.fn(), // Mock this too if it were used here
 }));
-
-// Import the mocked Link component after its mock is defined
-import { Link as RouterLink } from "react-router";
-
-// Now import the component and its registration function AFTER the mocks
-import { LinkActionItem, registerLinkActionItem } from "./LinkActionItem";
 
 describe("LinkActionItem", () => {
   afterEach(() => {
@@ -232,9 +230,6 @@ describe("LinkActionItem", () => {
     expect(screen.getByRole("link")).not.toHaveAttribute("rel");
   });
 });
-
-// Import the mocked registry function just before the suite that uses it
-import { registerActionItemComponent } from "../registry";
 
 describe("registerLinkActionItem", () => {
   // Clear the mock calls on the registry mock before this test suite

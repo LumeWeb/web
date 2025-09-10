@@ -99,10 +99,10 @@ export const Editor = forwardRef<HTMLDivElement, EditorProps>(
     );
 
     return (
-      <div className="border rounded-md bg-modal-input text-foreground">
+      <div className="bg-modal-input text-foreground rounded-md border">
         <LexicalComposer initialConfig={initialConfig}>
           <ToolbarProvider>
-            <div className="flex items-center justify-between gap-1 p-1 border-b border-border">
+            <div className="border-border flex items-center justify-between gap-1 border-b p-1">
               <ToolbarPlugin
                 isPreview={isPreview}
                 setIsPreview={setIsPreview}
@@ -115,7 +115,7 @@ export const Editor = forwardRef<HTMLDivElement, EditorProps>(
                   contentEditable={
                     <ContentEditable
                       aria-placeholder={placeholder ?? ""}
-                      className="w-full min-h-[150px] bg-transparent outline-none resize-none text-foreground"
+                      className="text-foreground min-h-[150px] w-full resize-none bg-transparent outline-none"
                       placeholder={
                         <div className="text-foreground/50">{placeholder}</div>
                       }

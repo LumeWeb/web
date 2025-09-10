@@ -1,6 +1,7 @@
 import dataProvider from "@lumeweb/advanced-rest-provider";
 import {
   CapabilityStatus,
+  createNamespacedId,
   env,
   type Framework,
   getApiBaseUrl,
@@ -12,7 +13,7 @@ import { notificationProvider } from "@/dataProviders/notificationProvider";
 
 export class Capability implements RefineConfigCapability {
   dependencies?: string[] | undefined;
-  id: string;
+  id = createNamespacedId("core", "refine-config");
   status: CapabilityStatus;
   readonly type: "core:refine-config" = "core:refine-config";
   version = "0.1.0";

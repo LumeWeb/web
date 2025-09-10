@@ -1,17 +1,18 @@
 import type { FieldValues } from "react-hook-form";
 
 import { BaseRecord } from "@refinedev/core";
-import React from "react";
+import React, { useMemo } from "react";
 
 import type { WizardFormConfig } from "./types";
 
 import { useDialog } from "../dialog/Dialog.context";
-import { useStepControl } from "./StepControlContext";
-import { StepControlProvider } from "./StepControlContext";
+import { useIsInDialog } from "../dialog/utils/dialogDetection";
+import { Environment, UnifiedFooter, UnifiedHeader } from "../shared";
+import { ProgressStyleType } from "../shared/types/header";
+import { resolveAllowStepNavigation } from "../shared/utils/stepState";
+import { StepControlProvider, useStepControl } from "./StepControlContext";
 import { StepSchemaForm } from "./StepSchemaForm";
-import { WizardFooter } from "./WizardFooter";
-import { WizardHeader } from "./WizardHeader";
-import { WizardStepContent } from "./WizardStepContent";
+import { createStepRetryHandler } from "./utils/stepRetry";
 
 interface WizardFormContentProps<
   TRequest extends FieldValues = FieldValues,
@@ -20,6 +21,7 @@ interface WizardFormContentProps<
   closeDialog: () => void;
   config: WizardFormConfig<TRequest, TResponse>;
   formMethods: any;
+  isInDialog: boolean;
 }
 
 interface WizardFormProps<
@@ -38,18 +40,32 @@ export function WizardForm<
   config,
 }: WizardFormProps<TRequest, TResponse>) {
   const { formMethods } = useDialog();
-  const stepControl = useStepControl({
-    defaultStep: config.stepBehavior?.defaultStep,
-    isBackValidate: config.stepBehavior?.isBackValidate,
-    steps: config.steps,
-  });
+  const existingStepControl = useStepControl();
+  const isInDialog = useIsInDialog();
 
-  return (
-    <StepControlProvider value={stepControl}>
+  // If we're already in a step control context, render content directly
+  if (existingStepControl && existingStepControl.totalSteps > 0) {
+    return (
       <WizardFormContent
         closeDialog={closeDialog}
         config={config}
         formMethods={formMethods}
+        isInDialog={isInDialog}
+      />
+    );
+  }
+
+  return (
+    <StepControlProvider
+      defaultStep={config.stepBehavior?.defaultStep}
+      isBackValidate={config.stepBehavior?.isBackValidate}
+      onStepRetry={createStepRetryHandler(config.steps)}
+      totalSteps={config.steps.length}>
+      <WizardFormContent
+        closeDialog={closeDialog}
+        config={config}
+        formMethods={formMethods}
+        isInDialog={isInDialog}
       />
     </StepControlProvider>
   );
@@ -62,38 +78,61 @@ function WizardFormContent<
   closeDialog,
   config,
   formMethods,
+  isInDialog,
 }: WizardFormContentProps<TRequest, TResponse>) {
+  const { currentDialog } = useDialog();
   const stepControl = useStepControl();
-  const {
-    currentStep,
-    goToStep,
-    handleNext,
-    handlePrevious,
-    isFirstStep,
-    isLastStep,
-    totalSteps,
-  } = stepControl;
-  const isSubmitting = formMethods?.formState?.isSubmitting || false;
+  const { currentStep, goToStep, isFirstStep, isLastStep, totalSteps } =
+    stepControl;
+  const isSubmitting = formMethods?.current?.formState?.isSubmitting || false;
+
+  // Helper function to evaluate allowStepNavigation (step-level takes precedence over wizard-level)
+  const isStepNavigationAllowed = useMemo(() => {
+    return resolveAllowStepNavigation(
+      config.allowStepNavigation,
+      config.steps,
+      currentStep,
+    );
+  }, [config.allowStepNavigation, config.steps, currentStep]);
+
+  // Create header environment
+  const currentStepConfig = config.steps[currentStep - 1];
+  const headerEnvironmentBuilder = Environment.header();
+
+  // Use dialog container if we're in a dialog, otherwise use standalone
+  if (isInDialog) {
+    headerEnvironmentBuilder.dialog({
+      dialogConfig: currentDialog || {},
+      onClose: closeDialog,
+    });
+  } else {
+    headerEnvironmentBuilder.standalone();
+  }
+
+  const headerEnvironment = headerEnvironmentBuilder
+    .content({
+      actions: undefined,
+      description: currentStepConfig?.description,
+      title: currentStepConfig?.title,
+    })
+    .wizardNavigation({
+      allowNavigation: isStepNavigationAllowed,
+      current: currentStep,
+      disabledSteps: config.stepNavigationDisabled,
+      onStepClick: goToStep,
+      progressStyle: ProgressStyleType.TIMELINE,
+      steps: config.steps,
+      total: totalSteps,
+    })
+    .build();
 
   return (
     <div className={config.wizardClassName || "space-y-6"}>
-      <WizardHeader
-        currentStep={currentStep}
-        descriptionMaxWidth={config.descriptionMaxWidth}
-        disabledSteps={config.stepNavigationDisabled}
-        onStepClick={
-          config.allowStepNavigation !== false ? goToStep : undefined
-        }
-        showDescriptions={config.showStepDescriptions !== false}
-        showTitles={config.showStepTitles !== false}
-        steps={config.steps}
-      />
+      {!isInDialog && (
+        <UnifiedHeader config={config} environment={headerEnvironment} />
+      )}
       <div className="space-y-4">
-        <WizardStepContent
-          description={config.steps[currentStep].description}
-          icon={config.steps[currentStep].icon}
-          isActive={true}
-          title={config.steps[currentStep].title}>
+        <div className="space-y-4">
           <StepSchemaForm
             closeDialog={closeDialog}
             config={{
@@ -103,26 +142,54 @@ function WizardFormContent<
                 formMethods,
                 closeDialog,
                 currentDialog,
-              ) => (
-                <WizardFooter
-                  currentStep={currentStep}
-                  formMethods={formMethods}
-                  isFirstStep={isFirstStep}
-                  isLastStep={isLastStep}
-                  isSubmitting={isSubmitting}
-                  onBack={handlePrevious}
-                  onNext={handleNext}
-                  onSubmit={stepMethods.handleSubmit}
-                  submitLabel={
-                    config.steps[currentStep].submitLabel || config.submitLabel
-                  }
-                  totalSteps={totalSteps}
-                />
-              ),
+              ) => {
+                const footerEnvironmentBuilder = Environment.footer();
+
+                // Use dialog container if we're in a dialog, otherwise use standalone
+                if (isInDialog) {
+                  footerEnvironmentBuilder.dialog({
+                    dialogConfig: currentDialog || {},
+                    onClose: closeDialog,
+                  });
+                } else {
+                  footerEnvironmentBuilder.standalone();
+                }
+
+                const footerEnvironment = footerEnvironmentBuilder
+                  .wizardForm({
+                    isSubmitting,
+                    methods: {
+                      ...formMethods?.current,
+                      handleSubmit: stepMethods.handleSubmit, // Override with step-specific handler
+                    },
+                  })
+                  .step({
+                    current: currentStep,
+                    isFirst: isFirstStep,
+                    isLast: isLastStep,
+                    jumpTo: stepControl.jumpTo,
+                    onNext: stepMethods.handleNext,
+                    onPrevious: stepMethods.handlePrevious,
+                    onRetry: stepMethods.handleRetry,
+                    retryCount: stepControl.retryCount,
+                    total: totalSteps,
+                  })
+                  .build();
+
+                // Pass the config with actionButtons to UnifiedFooter
+                // This allows UnifiedFooter to properly evaluate dynamic actionButtons callbacks
+                return (
+                  <UnifiedFooter
+                    config={config}
+                    environment={footerEnvironment}
+                  />
+                );
+              },
+              header: false, // Never render step headers in wizards
               stepBehavior: config.stepBehavior,
             }}
           />
-        </WizardStepContent>
+        </div>
       </div>
     </div>
   );

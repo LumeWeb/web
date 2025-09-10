@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"; // Imp
 import { ActionListRenderer } from "./ActionListRenderer";
 import {
   registerActionItemComponent,
-  resetRegistryForTesting, // Import the new reset function
+  resetRegistryForTesting,
 } from "./registry";
 import { ActionItemConfig, ActionItemType } from "./types"; // Import ActionItemConfig
 

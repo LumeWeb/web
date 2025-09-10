@@ -5,17 +5,15 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-  Button,
-  cn,
-  Progress,
 } from "@lumeweb/portal-framework-ui-core";
 import { useNotification } from "@refinedev/core";
 import Uppy from "@uppy/core";
 import XHRUpload from "@uppy/xhr-upload";
-import { Check, Upload } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
-import { Dropzone, type DropzoneFile } from "@/ui/components/Dropzone";
+import type { IUploadManager } from "@/types/upload";
+
+import { Dropzone } from "@/ui/components/Dropzone";
 
 import { UploadProgress } from "./UploadProgress";
 
@@ -43,6 +41,40 @@ export function AvatarUpload({
   const apiProto = new URL(apiUrl).protocol;
 
   const uppyRef = useRef<null | Uppy>(null);
+
+  // Create a simple upload manager interface for the avatar uploader
+  const avatarUploadManager: IUploadManager = {
+    addFile: (file: File) => {
+      if (uppyRef.current) {
+        try {
+          uppyRef.current.addFile({
+            data: file,
+            name: file.name,
+            type: file.type,
+          });
+        } catch (err) {
+          console.error("Error adding file to Uppy:", err);
+          throw err;
+        }
+      }
+    },
+    getFiles: () => {
+      if (uppyRef.current) {
+        return uppyRef.current.getFiles();
+      }
+      return [];
+    },
+    removeFile: (id: string) => {
+      if (uppyRef.current) {
+        uppyRef.current.removeFile(id);
+      }
+    },
+    start: () => {
+      if (uppyRef.current) {
+        return uppyRef.current.upload();
+      }
+    },
+  };
 
   const resetState = () => {
     // Clear Uppy and reset file input to prevent duplicate entries
@@ -101,7 +133,7 @@ export function AvatarUpload({
         uppyRef.current.destroy();
       }
     };
-  }, [apiProto, apiUrl]);
+  }, [apiDomain, apiProto, apiUrl]);
 
   useEffect(() => {
     if (!uppyRef.current) return;
@@ -198,46 +230,47 @@ export function AvatarUpload({
     };
   }, [onSuccess, open]);
 
-  const handleFileAdded = (file: DropzoneFile) => {
-    // Add file to Uppy instance
-    if (uppyRef.current) {
-      try {
-        uppyRef.current.addFile({
-          data: file.file,
-          name: file.file.name,
-          type: file.file.type,
-        });
-      } catch (err) {
-        console.error("Error adding file to Uppy:", err);
-        open?.({
-          description:
-            "Error with the selected file: " + (err as Error).message,
-          message: "File Error",
-          type: "error",
-        });
-      }
-    }
-  };
-
-  const handleUploadProgress = (file: DropzoneFile, progress: number) => {
-    // Progress is handled by Uppy event listeners
-  };
-
-  const handleUploadSuccess = (file: DropzoneFile, response: any) => {
-    // Success is handled by Uppy event listeners
-  };
-
-  const handleUploadError = (file: DropzoneFile, error: Error) => {
-    // Error is handled by Uppy event listeners
-  };
-
-  const handleValidationError = (error: Error) => {
-    // Show validation error notification
-    open?.({
-      description: "The selected file is invalid: " + error.message,
-      message: "Invalid File",
-      type: "error",
-    });
+  // Custom render function for avatar drop zone
+  const renderAvatarDropZone = (
+    isDragOver: boolean,
+    handleFileButtonClick: (e: React.KeyboardEvent | React.MouseEvent) => void,
+  ) => {
+    return (
+      <div
+        className={`flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 transition-colors ${
+          isDragOver
+            ? "border-primary bg-primary/5"
+            : "border-border hover:border-primary/50"
+        } cursor-pointer`}
+        onClick={handleFileButtonClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleFileButtonClick(e);
+          }
+        }}
+        role="button"
+        tabIndex={0}>
+        <div className="text-muted-foreground mb-2 flex h-8 w-8 items-center justify-center">
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+            />
+          </svg>
+        </div>
+        <p className="text-muted-foreground text-sm">
+          Drop your avatar image here or click to browse
+        </p>
+      </div>
+    );
   };
 
   // Component for displaying the user avatar
@@ -273,45 +306,16 @@ export function AvatarUpload({
             "image/gif",
           ]}
           autoProceed={true}
-          avatarMode={true}
           fieldName="file"
           maxFileSize={5 * 1024 * 1024} // 5MB
           maxNumberOfFiles={1}
           multiple={false}
-          onFileAdded={handleFileAdded}
-          onUploadError={handleUploadError}
-          onUploadProgress={handleUploadProgress}
-          onUploadSuccess={handleUploadSuccess}
-          onValidationError={handleValidationError}
-          renderDropZone={(isDragOver, handleFileButtonClick) => (
-            <div
-              aria-label="Upload profile picture. Press Enter, Space, or click to choose a file, or drag and drop an image."
-              className={cn(
-                "rounded-lg border-2 border-dashed p-8 text-center transition-colors",
-                "border-muted hover:border-muted/50",
-              )}
-              onClick={handleFileButtonClick}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleFileButtonClick(e);
-                }
-              }}
-              role="button"
-              tabIndex={0}>
-              <input accept="image/*" className="hidden" type="file" />
-              <Upload className="text-muted-foreground mx-auto mb-4 h-8 w-8" />
-              <p className="text-foreground mb-2">
-                Drag and drop your image here
-              </p>
-              <p className="text-muted-foreground mb-4 text-sm">or</p>
-              <Button variant="default">Choose File</Button>
-            </div>
-          )}
+          renderDropZone={renderAvatarDropZone}
           showFileList={false}
           timeout={30000}
           uploadEndpoint={`${apiProto}//account.${apiDomain}${ENDPOINT}`}
-          uppy={uppyRef.current || undefined}
+          uploadManager={avatarUploadManager}
+          userName={userName}
           withCredentials={true}
         />
       ) : (

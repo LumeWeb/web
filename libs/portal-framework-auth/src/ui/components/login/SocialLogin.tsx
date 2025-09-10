@@ -46,7 +46,7 @@ export function SocialLogin() {
     setIsExtraOpen(false);
     const queryParams = new URLSearchParams();
 
-    let toPath = parsed.params?.to || "/";
+    const toPath = parsed.params?.to || "/";
     const currentUrl = new URL(window.location.href);
     const currentProtocol = currentUrl.protocol;
     const currentDomain = currentUrl.hostname;
@@ -70,14 +70,14 @@ export function SocialLogin() {
   };
 
   return (
-    <div className="w-full max-w-[300px] space-y-3 mr-10">
+    <div className="mr-10 w-full max-w-[300px] space-y-3">
       {visibleProviders.map(({ bgColor, icon: Icon, key, name }) => (
         <Button
           className={`w-full ${bgColor} text-white hover:opacity-90`}
           key={key}
           onClick={() => handleLogin(key)}
           variant="outline">
-          <Icon className="w-5 h-5 mr-2" />
+          <Icon className="mr-2 h-5 w-5" />
           Continue with {name}
         </Button>
       ))}
@@ -86,10 +86,10 @@ export function SocialLogin() {
         <Sheet onOpenChange={setIsExtraOpen} open={isExtraOpen}>
           <SheetTrigger asChild>
             <Button
-              className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-300"
+              className="w-full border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200"
               variant="outline">
               More options
-              <MoreHorizontal className="w-5 h-5 m-2" />
+              <MoreHorizontal className="m-2 h-5 w-5" />
             </Button>
           </SheetTrigger>
           <SheetContent>
@@ -115,7 +115,7 @@ export function SocialLogin() {
                   key={key}
                   onClick={() => handleLogin(key)}
                   variant="outline">
-                  <Icon className="w-5 h-5 mr-2" />
+                  <Icon className="mr-2 h-5 w-5" />
                   Continue with {name}
                 </Button>
               ))}

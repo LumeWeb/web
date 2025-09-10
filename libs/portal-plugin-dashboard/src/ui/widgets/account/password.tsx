@@ -15,16 +15,16 @@ export default function Password() {
       description="Manage your account password"
       icon={Key}
       title="Password">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="text-muted-foreground flex items-center gap-2 text-sm">
         <div className="flex gap-1">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div className="w-2 h-2 bg-muted rounded-full" key={i} />
+            <div className="bg-muted h-2 w-2 rounded-full" key={i} />
           ))}
         </div>
         <span>••••••••</span>
       </div>
       <Button
-        className="w-full h-11 whitespace-normal md:h-9 md:whitespace-nowrap"
+        className="h-11 w-full whitespace-normal md:h-9 md:whitespace-nowrap"
         onClick={(e) => {
           e.preventDefault();
           openDialog(updatePasswordDialogConfig(updatePassword));

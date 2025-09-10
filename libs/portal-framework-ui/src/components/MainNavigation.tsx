@@ -24,7 +24,10 @@ import { useMenuItems } from "@/hooks/useMenuItems";
 
 import { useSidebarContext } from "./layout/SidebarContext";
 
-const isRouteActive = (item: NavigationItemType, currentPathname: string): boolean => {
+const isRouteActive = (
+  item: NavigationItemType,
+  currentPathname: string,
+): boolean => {
   const itemPath = item.path;
 
   if (!itemPath) return false;
@@ -33,12 +36,17 @@ const isRouteActive = (item: NavigationItemType, currentPathname: string): boole
   if (itemPath === currentPathname) return true;
 
   // Check if current path starts with item path + "/"
-  if (itemPath !== "/" && currentPathname.startsWith(`${itemPath}/`)) return true;
+  if (itemPath !== "/" && currentPathname.startsWith(`${itemPath}/`))
+    return true;
 
   return false;
 };
 
-const isChildRouteActive = (child: NavigationItemType, parent: NavigationItemType, currentPathname: string): boolean => {
+const isChildRouteActive = (
+  child: NavigationItemType,
+  parent: NavigationItemType,
+  currentPathname: string,
+): boolean => {
   // Special handling for index routes - they should be active when we're on the parent path
   if (child.index && child.path === "" && parent.path === currentPathname) {
     return true;
@@ -62,7 +70,7 @@ const NavItemContent: React.FC<BaseNavItemProps> = ({
 }) => (
   <div className="flex items-center">
     {IconComponent && (
-      <span className="w-5 h-5 mr-2">
+      <span className="mr-2 h-5 w-5">
         <IconComponent />
       </span>
     )}
@@ -126,11 +134,11 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
       open={isOpenState}>
       <CollapsibleTrigger
         asChild
-        className="[&[data-state=open]>div>div>svg]:rotate-180 mb-1">
+        className="mb-1 [&[data-state=open]>div>div>svg]:rotate-180">
         <Button
-          className="w-full justify-start h-10"
+          className="h-10 w-full justify-start"
           variant={active || isSubmenuActive ? "secondary" : "ghost"}>
-          <div className="w-full items-center flex justify-between">
+          <div className="flex w-full items-center justify-between">
             <div className="flex items-center">
               {Icon && (
                 <span className="mr-4">
@@ -185,11 +193,11 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
           </div>
         </Button>
       </CollapsibleTrigger>
-      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+      <CollapsibleContent className="data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down overflow-hidden">
         {submenus.map(({ active, href, icon: Icon, label }, index) => (
           <Button
             asChild
-            className="w-full justify-start h-10 mb-1"
+            className="mb-1 h-10 w-full justify-start"
             key={index}
             variant={
               (active === undefined && pathname === href) || active
@@ -203,7 +211,7 @@ const CollapseMenuButton: React.FC<CollapseMenuButtonProps> = ({
                 }
               }}
               to={href}>
-              <span className="mr-4 ml-2">
+              <span className="ml-2 mr-4">
                 {Icon ? <Icon size={18} /> : <Dot size={18} />}
               </span>
               <p
@@ -230,7 +238,7 @@ const LinkableNavItem: React.FC<BaseNavItemProps> = ({
 }) => (
   <Button
     asChild
-    className="w-full justify-start h-10 mb-1"
+    className="mb-1 h-10 w-full justify-start"
     variant={active ? "secondary" : "ghost"}>
     <Link onClick={onItemClick} to={item.path || ""}>
       <NavItemContent
@@ -252,7 +260,7 @@ const NonLinkableNavItem: React.FC<BaseNavItemProps> = ({
   onItemClick,
 }) => (
   <Button
-    className="w-full justify-start h-10 mb-1"
+    className="mb-1 h-10 w-full justify-start"
     onClick={onItemClick}
     variant={active ? "secondary" : "ghost"}>
     <NavItemContent
@@ -324,7 +332,7 @@ export const MainNavigation: React.FC<MenuProps> = ({
     if (item.children && item.children.length > 0) {
       const submenus: Submenu[] = item.children.map((child) => ({
         active: isChildRouteActive(child, item, pathname),
-        href: child.index ? item.path : (child.path || ""),
+        href: child.index ? item.path : child.path || "",
         icon: child.icon,
         label: child.label,
       }));
@@ -345,7 +353,7 @@ export const MainNavigation: React.FC<MenuProps> = ({
           key={item.id}
           label={item.label}
           onItemClick={onItemClick}
-          resetKey={typeof onItemClick === 'function' ? pathname : undefined}
+          resetKey={typeof onItemClick === "function" ? pathname : undefined}
           submenus={submenus}
         />
       );
@@ -367,8 +375,8 @@ export const MainNavigation: React.FC<MenuProps> = ({
 
   return (
     <ScrollArea className="[&>div>div[style]]:!block">
-      <nav className="mt-8 h-full w-full flex flex-col">
-        <ul className="flex-1 flex flex-col items-start space-y-1 px-2 overflow-y-auto overflow-x-hidden">
+      <nav className="mt-8 flex h-full w-full flex-col">
+        <ul className="flex flex-1 flex-col items-start space-y-1 overflow-y-auto overflow-x-hidden px-2">
           {menu.getMenuItems().map(renderMenuItem)}
         </ul>
       </nav>

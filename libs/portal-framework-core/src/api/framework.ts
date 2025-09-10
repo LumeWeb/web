@@ -2,7 +2,7 @@ import { createRemoteComponent } from "@module-federation/bridge-react";
 import { loadRemote } from "@module-federation/enhanced/runtime";
 
 import type { BaseCapability } from "../types/capabilities";
-import type { CapabilityAssociation, NamespacedId } from "../types/plugin";
+import type { NamespacedId } from "../types/plugin";
 import type {
   WidgetAreaDefinition,
   WidgetDefinition,
@@ -17,11 +17,16 @@ import {
   createRemoteComponentLoader,
   defaultRemoteOptions,
 } from "../plugins/remoteComponentLoader";
-import { CategoryError, FrameworkFeature } from "../types/api";
+import {
+  CategoryError,
+  ERROR_CATEGORIES,
+  FrameworkFeature,
+} from "../types/api";
 import { PortalMeta } from "../types/portal";
 import { getCurrentLocation } from "../util/location";
 import { validateNamespacedId } from "../util/namespace";
 import { fetchPortalMeta } from "../util/portalMeta";
+import { validateFeature, validatePlugin } from "../util/validation";
 import { sortWidgets } from "../util/widget";
 
 export class Framework {
@@ -84,6 +89,25 @@ export class Framework {
     this.#plugins.enablePlugin(id);
   }
 
+  getAssociatedCapabilities(primaryCapabilityId: string): string[] {
+    // Iterate through all plugins to find capability associations
+    for (const plugin of this.getPlugins()) {
+      if (plugin.capabilityAssociations) {
+        // Find associations where the primary capability matches
+        const associations = plugin.capabilityAssociations.find(
+          (assoc) => assoc.primary === primaryCapabilityId,
+        );
+
+        if (associations) {
+          return associations.associated;
+        }
+      }
+    }
+
+    // Return empty array if no associations found
+    return [];
+  }
+
   async getCapabilitiesByType<T extends BaseCapability>(
     type: string,
   ): Promise<T[]> {
@@ -111,6 +135,25 @@ export class Framework {
 
   getPlugins() {
     return this.#plugins.getPlugins();
+  }
+
+  getPrimaryCapability(associatedCapabilityId: string): null | string {
+    // Iterate through all plugins to find capability associations
+    for (const plugin of this.getPlugins()) {
+      if (plugin.capabilityAssociations) {
+        // Find associations where the associated capability is in the list
+        const associations = plugin.capabilityAssociations.find((assoc) =>
+          assoc.associated.includes(associatedCapabilityId),
+        );
+
+        if (associations) {
+          return associations.primary;
+        }
+      }
+    }
+
+    // Return null if no primary capability found
+    return null;
   }
 
   getWidgetArea(id: string): WidgetAreaDefinition {
@@ -171,7 +214,7 @@ export class Framework {
     const pluginFailures = await this.#plugins.initializePlugins();
     for (const [id, error] of pluginFailures) {
       errors.push({
-        category: "plugin",
+        category: ERROR_CATEGORIES.PLUGIN,
         error,
         id,
       });
@@ -185,11 +228,23 @@ export class Framework {
       const plugin = this.#plugins.getOrActivatePlugin(pluginId);
       if (!plugin) {
         errors.push({
-          category: "plugin",
+          category: ERROR_CATEGORIES.PLUGIN,
           error: new Error(`Failed to load plugin: ${pluginId}`),
           id: pluginId,
         });
       } else {
+        // Defensive check for plugin interface compliance
+        if (!validatePlugin(plugin)) {
+          errors.push({
+            category: ERROR_CATEGORIES.PLUGIN,
+            error: new Error(
+              `Plugin ${plugin.id} does not comply with Plugin interface`,
+            ),
+            id: plugin.id,
+          });
+          return;
+        }
+
         // Register capabilities from the plugin with plugin ID
         plugin.capabilities?.forEach((capability) => {
           this.#capabilities.register(capability, plugin.id);
@@ -201,7 +256,7 @@ export class Framework {
     const capabilityFailures = await this.#capabilities.initializeAll();
     for (const [id, error] of capabilityFailures) {
       errors.push({
-        category: "capability",
+        category: ERROR_CATEGORIES.CAPABILITY,
         error,
         id,
       });
@@ -211,11 +266,23 @@ export class Framework {
     for (const plugin of this.getPlugins()) {
       if (plugin.features) {
         for (const feature of plugin.features) {
+          // Defensive check for feature interface compliance
+          if (!validateFeature(feature)) {
+            errors.push({
+              category: ERROR_CATEGORIES.FEATURE,
+              error: new Error(
+                `Feature ${feature.id} does not comply with FrameworkFeature interface`,
+              ),
+              id: feature.id,
+            });
+            continue;
+          }
+
           try {
             await this.loadFeature(feature.id);
           } catch (error) {
             errors.push({
-              category: "feature",
+              category: ERROR_CATEGORIES.FEATURE,
               error: error instanceof Error ? error : new Error(String(error)),
               id: feature.id,
             });
@@ -263,44 +330,6 @@ export class Framework {
 
   registerCapability(capability: BaseCapability, pluginId: string): void {
     this.#capabilities.register(capability, pluginId);
-  }
-
-  getAssociatedCapabilities(primaryCapabilityId: string): string[] {
-    // Iterate through all plugins to find capability associations
-    for (const plugin of this.getPlugins()) {
-      if (plugin.capabilityAssociations) {
-        // Find associations where the primary capability matches
-        const associations = plugin.capabilityAssociations.find(
-          (assoc) => assoc.primary === primaryCapabilityId
-        );
-        
-        if (associations) {
-          return associations.associated;
-        }
-      }
-    }
-    
-    // Return empty array if no associations found
-    return [];
-  }
-
-  getPrimaryCapability(associatedCapabilityId: string): string | null {
-    // Iterate through all plugins to find capability associations
-    for (const plugin of this.getPlugins()) {
-      if (plugin.capabilityAssociations) {
-        // Find associations where the associated capability is in the list
-        const associations = plugin.capabilityAssociations.find(
-          (assoc) => assoc.associated.includes(associatedCapabilityId)
-        );
-        
-        if (associations) {
-          return associations.primary;
-        }
-      }
-    }
-    
-    // Return null if no primary capability found
-    return null;
   }
 
   registerWidget(widget: WidgetRegistrationWithComponent): void {

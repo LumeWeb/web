@@ -1,7 +1,7 @@
 import { Table } from "@tanstack/react-table";
 import React from "react";
 
-import { BaseTableCommonProps, BaseTablePaginationConfig, TablePaginationProps } from "./BaseTable";
+import { BaseTableCommonProps, BaseTablePaginationConfig } from "./BaseTable";
 import { DefaultPagination } from "./DefaultPagination";
 import { TableEmptyState } from "./EmptyState";
 import { TableLoadingState } from "./LoadingState";
@@ -26,7 +26,8 @@ export function normalizeTableOptions<TData>(
   let paginationComponent: React.ReactNode = null;
   const paginationEnabled =
     pagination !== false &&
-    (pagination === true || (typeof pagination === "object" && pagination.enabled === true));
+    (pagination === true ||
+      (typeof pagination === "object" && pagination.enabled === true));
   const colSpan = table.getAllColumns().length;
 
   if (paginationEnabled) {

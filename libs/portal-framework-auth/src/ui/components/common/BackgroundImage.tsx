@@ -25,10 +25,10 @@ export function BackgroundImage({
   };
 
   return (
-    <div className={cn("relative w-full h-full", className)}>
+    <div className={cn("relative h-full w-full", className)}>
       <img
         alt="Lume background"
-        className="w-full sm:h-full object-cover"
+        className="w-full object-cover sm:h-full"
         src={images[variant]}
       />
     </div>

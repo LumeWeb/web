@@ -36,19 +36,19 @@ export function Card({
     <UICard
       className={cn(
         border && "border-border",
-        "h-full flex flex-col",
+        "flex h-full flex-col",
         className,
       )}>
       <CardHeader className={headerClassName}>
         {title && (
           <CardTitle className={cn("flex items-center gap-2", titleClassName)}>
-            {Icon && <Icon className="w-5 h-5 text-primary" />}
+            {Icon && <Icon className="text-primary h-5 w-5" />}
             {title}
           </CardTitle>
         )}
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
-      <UICardContent className={cn("space-y-4 mt-auto", contentClassName)}>
+      <UICardContent className={cn("mt-auto space-y-4", contentClassName)}>
         {children}
       </UICardContent>
     </UICard>

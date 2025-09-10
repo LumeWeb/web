@@ -1,5 +1,8 @@
-import { SchemaForm, withTheme } from "@lumeweb/portal-framework-ui";
-import { useResetPasswordUrl } from "@lumeweb/portal-framework-ui";
+import {
+  SchemaForm,
+  useResetPasswordUrl,
+  withTheme,
+} from "@lumeweb/portal-framework-ui";
 import {
   useGo,
   useIsAuthenticated,

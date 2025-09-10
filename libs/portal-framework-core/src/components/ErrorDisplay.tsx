@@ -67,7 +67,7 @@ export function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
                     className="p-4 bg-red-50 rounded-lg border border-red-200"
                     key={error.id}
                   >
-                    <div className="font-medium text-red-900">{error.id}</div>
+                    <div className="font-medium text-red-900">{error.error.originalId || error.id}</div>
                     <div className="mt-1 text-sm text-red-800">
                       {error.error.message}
                     </div>

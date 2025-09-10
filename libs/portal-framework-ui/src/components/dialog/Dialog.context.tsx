@@ -5,10 +5,12 @@ import React, {
   useEffect,
   useMemo,
   useState,
+  useRef,
 } from "react";
 
 import type { DialogConfig } from "./Dialog.types";
 
+import { DialogType } from "./Dialog.types";
 import { DialogActionsContext } from "./DialogActions.context";
 import { DialogStateContext } from "./DialogState.context";
 
@@ -18,7 +20,7 @@ import { DialogStateContext } from "./DialogState.context";
  */
 export function DialogProvider({ children }: { children: React.ReactNode }) {
   const [dialogStack, setDialogStack] = useState<DialogConfig[]>([]);
-  const [_formMethods, _setFormMethods] = useState<any>();
+  const _formMethods = useRef<any>(undefined);
   const currentDialog = dialogStack[dialogStack.length - 1];
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
   // Stabilize setFormMethods
   const setFormMethods = useCallback((methods: any) => {
     // Debug logging removed
-    _setFormMethods(methods);
+    _formMethods.current = methods;
   }, []);
 
   const openDialog = useCallback((config: DialogConfig) => {
@@ -49,7 +51,8 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
         // Only call onCancel for user-initiated closures
         if (
           closedDialog &&
-          (closedDialog.type === "confirm" || closedDialog.type === "form")
+          (closedDialog.type === DialogType.CONFIRM ||
+            closedDialog.type === DialogType.FORM)
         ) {
           if (source === "user") {
             closedDialog.onCancel?.(source);
@@ -101,14 +104,16 @@ export const useDialogActions = () => useContext(DialogActionsContext);
 export const useDialog = () => {
   const state = useDialogState();
   const actions = useDialogActions();
-  
+
   return {
     ...state,
-    ...(state.currentDialog ? actions : {
-      closeDialog: actions.closeDialog,
-      openDialog: actions.openDialog,
-      replaceDialog: actions.replaceDialog
-    })
+    ...(state.currentDialog
+      ? actions
+      : {
+          closeDialog: actions.closeDialog,
+          openDialog: actions.openDialog,
+          replaceDialog: actions.replaceDialog,
+        }),
   };
 };
 

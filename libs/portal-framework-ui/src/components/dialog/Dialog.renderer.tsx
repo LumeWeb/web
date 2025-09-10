@@ -1,115 +1,90 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-} from "@lumeweb/portal-framework-ui-core";
-import { BaseRecord, useNotification } from "@refinedev/core";
+import { BaseRecord } from "@refinedev/core";
 import React from "react";
-
-import type { DialogConfig } from "./Dialog.types";
 
 import { useDialogActions, useDialogState } from "./Dialog.context";
 import { getDialogComponent, isRegisteredDialogType } from "./Dialog.registry";
 import {
-  getFooterComponent,
-  getFooterTypeForDialog,
-} from "./footer/DialogFooter.registry";
-import { getDialogContentClasses } from "./utils/dialogClasses";
-import { handleConfirm as handleConfirmUtil } from "./utils/handleConfirm";
+  contextProviders,
+  DialogConfig,
+  dialogContextRequirements,
+  getFormTypeFromDialog,
+  isFormDialog,
+  isWizardDialogConfig,
+} from "./Dialog.types";
+import { DialogContainer } from "./DialogContainer";
+import { DialogContent as DialogContentComponent } from "./DialogContent";
+import { DialogFooterContent } from "./DialogFooterContent";
+import { DialogHeaderContent } from "./DialogHeaderContent";
 
-interface DialogFooterContentProps<T extends BaseRecord = any> {
-  closeDialog: (source?: "programmatic" | "user") => void; // Allow source parameter
-  currentDialog: DialogConfig<T>;
-  formMethods?: any;
-  onConfirm: () => void;
-}
-
-const DialogFooterContent = <T extends BaseRecord>({
-  closeDialog,
-  currentDialog,
-  formMethods,
-  onConfirm,
-}: DialogFooterContentProps<T>) => {
-  if (currentDialog.footer) {
-    return (
-      <DialogFooter className={currentDialog.classNames?.footer}>
-        {currentDialog.footer}
-      </DialogFooter>
-    );
+export function DialogComponent<T extends BaseRecord = BaseRecord>(
+  props: DialogConfig<T>,
+) {
+  const DialogComp = getDialogComponent(props.type);
+  if (!DialogComp) {
+    console.warn(`No component registered for dialog type: ${props.type}`);
+    return null;
   }
-
-  // For all dialog types including forms, use the footer registry
-  const footerType = getFooterTypeForDialog(currentDialog);
-  const FooterComponent = getFooterComponent<T>(footerType);
-
-  return (
-    <DialogFooter className={currentDialog.classNames?.footer}>
-      <FooterComponent
-        closeDialog={closeDialog}
-        currentDialog={currentDialog}
-        formMethods={formMethods}
-        onConfirm={onConfirm}
-      />
-    </DialogFooter>
-  );
-};
+  return <DialogComp {...props} />;
+}
 
 export function DialogRenderer() {
   const { currentDialog, formMethods } = useDialogState();
-  const DialogComponent = currentDialog 
-    ? getDialogComponent(currentDialog.type)
-    : null;
   const { closeDialog } = useDialogActions();
-  const { open: openNotification } = useNotification();
 
   if (!currentDialog) return null;
 
-  const handleConfirm = async () => {
-    await handleConfirmUtil(currentDialog, closeDialog);
-  };
+  // Compute form type for form dialogs and include it in formConfig
+  let dialogWithFormType = currentDialog;
+  if (
+    isRegisteredDialogType(currentDialog) &&
+    (isFormDialog(currentDialog) || isWizardDialogConfig(currentDialog))
+  ) {
+    const formType = getFormTypeFromDialog(currentDialog);
+    dialogWithFormType = {
+      ...currentDialog,
+      formConfig: {
+        ...currentDialog.formConfig,
+        type: formType,
+      },
+    };
+  }
+
+  // Determine what contexts this dialog type needs
+  const requiredContexts =
+    dialogContextRequirements[dialogWithFormType.type] || [];
+
+  // Build the base dialog content
+  let dialogContent = (
+    <>
+      <DialogHeaderContent currentDialog={currentDialog} />
+      <DialogContentComponent
+        currentDialog={currentDialog}
+        dialogWithFormType={dialogWithFormType}
+      />
+      <DialogFooterContent
+        currentDialog={currentDialog}
+      />
+    </>
+  );
+
+  // Dynamically wrap with required context providers
+  // Process in reverse order to maintain proper nesting
+  requiredContexts.forEach((contextName) => {
+    const ProviderComponent = contextProviders[contextName];
+    if (ProviderComponent) {
+      dialogContent = (
+        <ProviderComponent
+          dialog={dialogWithFormType}
+          formMethods={formMethods}>
+          {dialogContent}
+        </ProviderComponent>
+      );
+    }
+  });
 
   return (
-    <Dialog
-      aria-describedby={
-        currentDialog.description ? "dialog-description" : undefined
-      }
-      aria-labelledby="dialog-title"
-      onOpenChange={(open) => !open && closeDialog("user")} // Close with 'user' source on outside/escape close
-      open={!!currentDialog}>
-      <DialogContent
-        className={getDialogContentClasses(currentDialog)}
-        data-has-title={!!currentDialog.title} // Add data attribute for testing
-        onInteractOutside={(e) => {
-          if (currentDialog.preventCloseOnOutsideClick === true) {
-            e.preventDefault();
-          } else if (currentDialog.preventCloseOnOutsideClick === "dirty") {
-            e.preventDefault();
-            openNotification?.({
-              description:
-                "You have unsaved changes. Are you sure you want to leave?",
-              message: "Unsaved Changes",
-              type: "error",
-            });
-          }
-          // Note: The actual Dialog component triggers onOpenChange(false)
-          // when onInteractOutside is not prevented. This is handled by the mock Dialog.
-        }}>
-        {isRegisteredDialogType(currentDialog) ? (
-          <DialogComponent
-            {...currentDialog}
-            onClose={() => closeDialog("user")}
-          />
-        ) : (
-          console.warn(`No component registered for dialog type: ${currentDialog.type}`)
-        )}
-
-        <DialogFooterContent
-          closeDialog={closeDialog}
-          currentDialog={currentDialog}
-          formMethods={formMethods}
-          onConfirm={handleConfirm}
-        />
-      </DialogContent>
-    </Dialog>
+    <DialogContainer currentDialog={currentDialog}>
+      {dialogContent}
+    </DialogContainer>
   );
 }

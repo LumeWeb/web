@@ -36,7 +36,7 @@ function DefaultPagination<TData>() {
       </div>
 
       <span className="text-sm font-medium">
-        {pageCount > 0 ? `Page ${pageIndex + 1} of ${pageCount}` : 'No pages'}
+        {pageCount > 0 ? `Page ${pageIndex + 1} of ${pageCount}` : "No pages"}
       </span>
 
       <div className="flex items-center gap-2">

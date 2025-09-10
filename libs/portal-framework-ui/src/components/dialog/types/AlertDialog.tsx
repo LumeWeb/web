@@ -6,19 +6,32 @@ import {
 import React from "react";
 
 import { ActionListRenderer } from "../../actions";
-import { DialogBaseConfig } from "../Dialog.types";
-import { getDefaultDialogActions } from "../utils/dialogActions";
+import { createDialogActions } from "../../actions/actionHelpers";
+import { AlertDialogConfig, DialogType } from "../Dialog.types";
+import { useDialogType } from "../utils/dialogDetection";
+import { useForceRerender } from "../../shared/hooks/useForceRerender";
+import type { ForceRerenderCallback } from "../../shared/types/form";
 
-interface AlertDialogProps extends DialogBaseConfig {
+interface AlertDialogProps extends AlertDialogConfig {
   description?: React.FC | React.ReactNode | string;
-  onClose: (source?: "programmatic" | "user") => void;
+  onClose?: (source?: "programmatic" | "user") => void;
+  forceRerender?: ForceRerenderCallback;
 }
 
 export function AlertDialog({
+  actions,
   classNames,
   description,
+  forceRerender,
+  onClose,
+  onConfirm,
   title,
 }: AlertDialogProps) {
+  const dialogType = useDialogType();
+  
+  // Implement forceRerender mechanism
+  useForceRerender(forceRerender);
+
   const renderDescription = () => {
     if (!description) return null;
 
@@ -33,12 +46,27 @@ export function AlertDialog({
       </DialogDescription>
     );
   };
+
+  // Generate default actions for alert dialogs
+  const defaultActions = createDialogActions({
+    confirmLabel: "Continue",
+    onConfirm,
+    type: dialogType || DialogType.ALERT,
+  });
+
+  const finalActions = actions || defaultActions;
+
   return (
     <>
       <DialogHeader className={classNames?.header}>
         <DialogTitle className={classNames?.title}>{title}</DialogTitle>
         {renderDescription()}
       </DialogHeader>
+      <ActionListRenderer
+        actions={finalActions}
+        closeDialog={onClose}
+        layout="horizontal"
+      />
     </>
   );
 }

@@ -1,5 +1,8 @@
-import { type FormConfig, FormFieldType } from "@lumeweb/portal-framework-ui";
-import { ActionItemType } from "@lumeweb/portal-framework-ui";
+import {
+  ActionItemType,
+  type FormConfig,
+  FormFieldType,
+} from "@lumeweb/portal-framework-ui";
 
 import schema from "./resetPasswordConfirm.schema";
 
@@ -7,7 +10,6 @@ export const getResetPasswordConfirmForm = (
   mutate: (values: { email: string; password: string; token: string }) => void,
 ): FormConfig => {
   return {
-    footerClassName: "",
     actionButtons: [
       {
         label: "Reset Password",
@@ -16,6 +18,7 @@ export const getResetPasswordConfirmForm = (
     ],
     fields: [
       {
+        autocomplete: "username",
         inputProps: {
           readOnly: true,
         },
@@ -23,12 +26,11 @@ export const getResetPasswordConfirmForm = (
         name: "email",
         required: true,
         type: FormFieldType.TEXT,
-        autocomplete: "username",
       },
       {
         inputProps: {
-          readOnly: true,
           autoComplete: "off",
+          readOnly: true,
         },
         label: "Reset Token",
         name: "token",
@@ -36,20 +38,21 @@ export const getResetPasswordConfirmForm = (
         type: FormFieldType.PASSWORD,
       },
       {
+        autocomplete: "new-password",
         label: "New Password",
         name: "password",
         required: true,
         type: FormFieldType.PASSWORD,
-        autocomplete: "new-password",
       },
       {
+        autocomplete: "new-password",
         label: "Confirm New Password",
         name: "confirmPassword",
         required: true,
         type: FormFieldType.PASSWORD,
-        autocomplete: "new-password",
       },
     ],
+    footerClassName: "",
     layout: "vertical",
     onSubmit: (values) => {
       // Remove confirmPassword before submitting

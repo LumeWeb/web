@@ -4,10 +4,10 @@ export const createMockPortalMeta = (overrides: Partial<PortalMeta> = {}) => ({
   domain: "example.com",
   feature_flags: {},
   plugins: {},
-  ...overrides
+  ...overrides,
 });
 
 export const createMockPlugin = (meta: any = {}) => ({
   meta,
-  web_bundles: []
+  web_bundles: [],
 });

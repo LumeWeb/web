@@ -1,107 +1,35 @@
 import type { BaseCapability } from "@lumeweb/portal-framework-core";
 
+import type { UploadConfig, UppyPlugin } from "../../src-lib";
+import type { BasePlugin } from "@uppy/core";
+
 export interface UploadCapability extends BaseCapability<"core:upload"> {
   /**
-   * Creates an Uppy plugin for large files
-   * @param config Upload configuration
-   * @returns Uppy plugin instance
+   * Gets the Uppy plugin for large files
+   * @returns Uppy plugin class
    */
-  createLargeFilePlugin(config: UploadConfig): UppyPlugin;
+  getLargeFilePlugin?(): typeof BasePlugin<any, any, any>;
 
   /**
-   * Creates an Uppy plugin for small files
-   * @param config Upload configuration
-   * @returns Uppy plugin instance
+   * Gets the Uppy plugin for small files
+   * @returns Uppy plugin class
    */
-  createSmallFilePlugin(config: UploadConfig): UppyPlugin;
+  getSmallFilePlugin?(): typeof BasePlugin<any, any, any>;
 
   /**
-   * Gets the upload configuration
+   * Gets the large file upload configuration
    * @returns Upload configuration
    */
-  getUploadConfig(): UploadConfig;
+  getLargeFileUploadConfig(): UploadConfig;
 
   /**
-   * Uploads a file
-   * @param file File to upload
-   * @param config Optional upload configuration override
-   * @returns Promise that resolves when upload is complete
+   * Gets the small file upload configuration
+   * @returns Upload configuration
    */
-  uploadFile(file: File, config?: UploadConfig): Promise<void>;
+  getSmallFileUploadConfig(): UploadConfig;
 
   /**
-   * Uploads multiple files
-   * @param files Files to upload
-   * @param config Optional upload configuration override
-   * @returns Promise that resolves when all uploads are complete
+   * Gets additional Uppy plugins to register
    */
-  uploadFiles(files: File[], config?: UploadConfig): Promise<void>;
-
-  /**
-   * Validates a file against the upload configuration
-   * @param file File to validate
-   * @returns Validation result
-   */
-  validateFile(file: File): ValidationResult;
-}
-
-export interface UploadConfig {
-  /**
-   * Allowed file types for upload
-   */
-  allowedFileTypes?: string[];
-
-  /**
-   * Additional headers to include in upload requests
-   */
-  headers?: Record<string, string>;
-
-  /**
-   * Maximum number of files that can be uploaded simultaneously
-   */
-  maxConcurrentUploads?: number;
-
-  /**
-   * Maximum file size allowed for upload in bytes
-   */
-  maxFileSize?: number;
-
-  /**
-   * Timeout for upload requests in milliseconds
-   */
-  timeout?: number;
-
-  /**
-   * Upload endpoint URL
-   */
-  uploadEndpoint?: string;
-}
-
-export interface UppyPlugin {
-  /**
-   * Plugin module
-   */
-  module: any;
-
-  /**
-   * Plugin name
-   */
-  name: string;
-
-  /**
-   * Plugin options
-   */
-  options?: Record<string, any>;
-}
-
-export interface ValidationResult {
-  /**
-   * Error message if validation failed
-   */
-  error?: string;
-
-  /**
-   * Whether the file is valid for upload
-   */
-  valid: boolean;
+  getAdditionalPlugins(): UppyPlugin[];
 }

@@ -1,5 +1,6 @@
 import { Button, cn } from "@lumeweb/portal-framework-ui-core";
 import { X } from "lucide-react";
+import React from "react";
 
 import { ThemedBadge } from "@/components/ThemedBadge";
 import { type BadgeConfig } from "@/types";
@@ -28,7 +29,6 @@ const FILTER_CHIP_THEME: BadgeConfig<FilterChipVariant> = {
     hover: "hover:bg-green-200/80 dark:hover:bg-green-800/80",
   },
 };
-import React from "react";
 
 export function FilterChip({
   className,

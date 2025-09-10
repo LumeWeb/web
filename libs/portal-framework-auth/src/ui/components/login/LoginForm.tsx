@@ -30,7 +30,7 @@ export const LoginForm = () => {
   return (
     <>
       <SchemaForm config={formConfig} />
-      <p className="inline-block mt-4 text-input-placeholder">
+      <p className="text-input-placeholder mt-4 inline-block">
         Forgot your password?{" "}
         <Link
           className="text-foreground text-md hover:underline hover:underline-offset-4"

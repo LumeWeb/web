@@ -7,7 +7,7 @@ import {
 } from "react-hook-form";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { FormProvider, useFormContext } from "./context";
+import { useFormContext } from "./context";
 import { FormFieldType, getFormComponent } from "./fields";
 import { FormRenderer } from "./FormRenderer";
 import { FormFieldConfig } from "./types";

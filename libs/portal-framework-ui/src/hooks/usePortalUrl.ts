@@ -2,7 +2,7 @@ import { usePortalStore } from "@/store/portalStore";
 
 export function usePortalUrl(): string {
   const portalUrl = usePortalStore((state) => state.portalUrl);
-  
+
   // Ensure valid URL format before returning
   return isValidUrl(portalUrl) ? portalUrl : `https://${portalUrl}`;
 }

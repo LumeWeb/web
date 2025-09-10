@@ -3,7 +3,7 @@ import { init, registerRemotes } from "@module-federation/enhanced/runtime";
 import { Builder } from "../api/builder";
 import { Framework } from "../api/framework";
 import { env } from "../env";
-import { CategoryError, InitializationResult } from "../types/api";
+import { CategoryError, InitializationResult, ERROR_CATEGORIES } from "../types/api";
 import { getPortalPluginManifests } from "./pluginManifest";
 
 // Track initialization state
@@ -57,7 +57,7 @@ export async function initializeFramework(
             await builder!.registerRemoteModule(manifestUrl, moduleId);
           } catch (err) {
             errors.push({
-              category: "plugin",
+              category: ERROR_CATEGORIES.PLUGIN,
               error: err instanceof Error ? err : new Error(String(err)),
               id: `plugin-load-${index}`,
             });
@@ -122,7 +122,7 @@ export async function initializeFramework(
       builder: builder,
       errors: [
         {
-          category: "system",
+          category: ERROR_CATEGORIES.SYSTEM,
           error: err instanceof Error ? err : new Error(String(err)),
           id: "system-initialization",
         },

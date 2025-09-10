@@ -9,7 +9,7 @@
     "start": "vite --mode production",
     "build": "run-s build:dashboard",
     "build:dashboard": "dotenv -e .env.dashboard -- pnpm build:dashboard:build",
-    "build:dashboard:build": "vite build",
+    "build:dashboard:build": "NODE_ENV=development vite build",
     "serve": "vite preview"
   },
   "dependencies": {

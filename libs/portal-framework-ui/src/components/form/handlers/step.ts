@@ -59,11 +59,11 @@ export async function handleStepSubmission<
       const { isLastStep } = options;
 
       if (stepConfig.onStepSubmit) {
-        return await stepConfig.onStepSubmit(data);
+        return stepConfig.onStepSubmit(data);
       }
 
       if (isLastStep && options.config.onSubmit) {
-        return await options.config.onSubmit(data);
+        return options.config.onSubmit(data);
       }
 
       // Default return when no submit handlers are defined

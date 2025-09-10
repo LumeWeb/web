@@ -2,6 +2,10 @@ import type { BaseCapability } from "../types/capabilities";
 
 import { Framework } from "../api/framework";
 import { DependencyGraph } from "../util/dependencyGraph";
+import {
+  validateCapability,
+  validateCapabilityDetailed,
+} from "../util/validation";
 
 export class CapabilityManager {
   set framework(framework: Framework) {
@@ -146,7 +150,7 @@ export class CapabilityManager {
       if (!this.#deferredPromises.has(cap.id)) {
         let resolveFn: () => void = () => {};
         let rejectFn: (reason?: any) => void = () => {};
-        
+
         const promise = new Promise<void>((resolve, reject) => {
           resolveFn = resolve;
           rejectFn = reject;
@@ -165,6 +169,19 @@ export class CapabilityManager {
       // Skip if already initialized
       if (this.#initialized.has(cap.id)) {
         console.warn(`Capability ${cap.id} already initialized`);
+        continue;
+      }
+
+      // Defensive check for capability interface compliance
+      if (!validateCapability(cap)) {
+        const validationResult = validateCapabilityDetailed(cap);
+        const errorMessage =
+          validationResult.missingProperties.length > 0
+            ? `Capability ${cap.id} validation failed: ${validationResult.missingProperties.join(", ")}`
+            : `Capability ${cap.id} validation failed: unknown validation issues`;
+        const err = new Error(errorMessage);
+        this.#deferredPromises.get(cap.id)?.reject(err);
+        failures.set(cap.id, err);
         continue;
       }
 

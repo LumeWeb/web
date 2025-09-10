@@ -206,10 +206,13 @@ function AccountVerify() {
       !alreadyVerified &&
       !emailAlreadyVerified,
     queryFn: async () => {
-      const ret = await sdk.account().verifyEmail({
-        email: userEmail!,
-        token: token!,
-      }, true);
+      const ret = await sdk.account().verifyEmail(
+        {
+          email: userEmail!,
+          token: token!,
+        },
+        true,
+      );
 
       if (ret.error) {
         // Handle 409 Conflict as "already verified"

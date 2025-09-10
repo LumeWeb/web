@@ -20,6 +20,11 @@ export interface StepControlContextType {
    */
   goToStep: (step: number) => void;
   /**
+   * Jump to a specific step without transition animation
+   * @param step - The step index to jump to
+   */
+  jumpTo: (step: number) => void;
+  /**
    * Navigate to the next step
    */
   handleNext: () => Promise<void>;
@@ -27,6 +32,14 @@ export interface StepControlContextType {
    * Navigate to the previous step
    */
   handlePrevious: () => Promise<void>;
+  /**
+   * Retry the current step
+   */
+  handleRetry: () => Promise<void>;
+  /**
+   * Number of times the current step has been retried
+   */
+  retryCount: number;
   /**
    * Whether the current step is the first step
    */
@@ -39,6 +52,14 @@ export interface StepControlContextType {
    * Total number of steps
    */
   totalSteps: number;
+  /**
+   * Transition state with navigation direction
+   */
+  transitionState: {
+    direction: "backward" | "forward" | null;
+    enteringStep: null | number;
+    exitingStep: null | number;
+  };
 }
 
 const StepControlContext = createContext<StepControlContextType | undefined>(
@@ -49,7 +70,6 @@ export interface StepControlProviderProps {
   children: React.ReactNode;
   /**
    * Default step to start on
-   * @default 0
    */
   defaultStep?: number;
   /**
@@ -58,7 +78,6 @@ export interface StepControlProviderProps {
   handleStepSubmit?: () => Promise<void>;
   /**
    * Whether to validate when going back steps
-   * @default false
    */
   isBackValidate?: boolean;
   /**
@@ -66,9 +85,13 @@ export interface StepControlProviderProps {
    */
   onStepChange?: (step: number) => void;
   /**
+   * Callback when step is retried
+   */
+  onStepRetry?: (step: number) => void;
+  /**
    * Total number of steps
    */
-  totalSteps: number;
+  totalSteps?: number;
   /**
    * Function to trigger validation for the current step
    */
@@ -82,7 +105,7 @@ export interface StepControlProviderProps {
 export interface UseCreateStepControlOptions {
   /**
    * Default step to start on
-   * @default 0
+   * @default 1
    */
   defaultStep?: number;
   /**
@@ -98,6 +121,10 @@ export interface UseCreateStepControlOptions {
    * Callback when step changes
    */
   onStepChange?: (step: number) => void;
+  /**
+   * Callback when step is retried
+   */
+  onStepRetry?: (step: number) => void;
   /**
    * Total number of steps
    */
@@ -114,19 +141,21 @@ export interface UseCreateStepControlOptions {
  */
 export function StepControlProvider({
   children,
-  defaultStep = 0,
+  defaultStep,
   handleStepSubmit,
-  isBackValidate = false,
+  isBackValidate,
   onStepChange,
-  totalSteps: totalStepsProp,
+  onStepRetry,
+  totalSteps,
   triggerValidation,
 }: StepControlProviderProps) {
   const stepControl = useCreateStepControl({
-    defaultStep,
+    defaultStep: defaultStep ?? 1,
     handleStepSubmit,
-    isBackValidate,
+    isBackValidate: isBackValidate ?? false,
     onStepChange,
-    totalSteps: totalStepsProp,
+    onStepRetry,
+    totalSteps: totalSteps ?? 1,
     triggerValidation,
   });
 
@@ -138,26 +167,99 @@ export function StepControlProvider({
 }
 
 export function useCreateStepControl({
-  defaultStep = 0,
+  defaultStep = 1,
   handleStepSubmit,
   isBackValidate = false,
   onStepChange,
+  onStepRetry,
   totalSteps: totalStepsProp,
   triggerValidation,
 }: UseCreateStepControlOptions): StepControlContextType {
   const [currentStep, setCurrentStep] = useState(defaultStep);
+  const [retryCount, setRetryCount] = useState(0);
+  const [transitionState, setTransitionState] = useState<{
+    direction: "backward" | "forward" | null;
+    enteringStep: null | number;
+    exitingStep: null | number;
+  }>({
+    direction: null,
+    enteringStep: null,
+    exitingStep: null,
+  });
 
-  const isFirstStep = currentStep === 0;
-  const isLastStep = currentStep === totalStepsProp - 1;
+  const isFirstStep = currentStep === 1;
+  const isLastStep = currentStep === totalStepsProp;
 
   const goToStep = useCallback(
     (step: number) => {
-      const targetStep = Math.max(0, Math.min(step, totalStepsProp - 1));
+      const targetStep = Math.max(1, Math.min(step, totalStepsProp));
+
+      if (targetStep === currentStep) return;
+
+      // Reset retry count when navigating to a different step
+      setRetryCount(0);
+
+      // Determine navigation direction
+      const direction = targetStep > currentStep ? "forward" : "backward";
+
+      setTransitionState({
+        direction,
+        enteringStep: targetStep,
+        exitingStep: currentStep,
+      });
+
+      // After transition duration, update the current step
+      setTimeout(() => {
+        setCurrentStep(targetStep);
+        setTransitionState({
+          direction: null,
+          enteringStep: null,
+          exitingStep: null,
+        });
+        onStepChange?.(targetStep);
+      }, 300);
+    },
+    [totalStepsProp, onStepChange, currentStep],
+  );
+
+  const jumpTo = useCallback(
+    (step: number) => {
+      const targetStep = Math.max(1, Math.min(step, totalStepsProp));
+      
+      if (targetStep === currentStep) return;
+      
+      // Reset retry count when jumping to a different step
+      setRetryCount(0);
+      
+      // Skip transition animation and directly set the step
       setCurrentStep(targetStep);
       onStepChange?.(targetStep);
     },
-    [totalStepsProp, onStepChange],
+    [totalStepsProp, onStepChange, currentStep],
   );
+
+  const handleRetry = useCallback(async () => {
+    // Increment retry count
+    setRetryCount(prev => prev + 1);
+    
+    // Trigger transition animation for retry
+    setTransitionState({
+      direction: null,
+      enteringStep: currentStep,
+      exitingStep: currentStep,
+    });
+
+    // After transition duration, reset transition state, set current step to force reprocessing, and trigger callback
+    setTimeout(() => {
+      setTransitionState({
+        direction: null,
+        enteringStep: null,
+        exitingStep: null,
+      });
+      setCurrentStep(currentStep);
+      onStepRetry?.(currentStep);
+    }, 300);
+  }, [currentStep, onStepRetry]);
 
   const handleNext = useCallback(async () => {
     if (isLastStep) return;
@@ -185,11 +287,15 @@ export function useCreateStepControl({
     () => ({
       currentStep,
       goToStep,
+      jumpTo,
       handleNext,
       handlePrevious,
+      handleRetry,
+      retryCount,
       isFirstStep,
       isLastStep,
       totalSteps: totalStepsProp,
+      transitionState,
     }),
     [
       currentStep,
@@ -197,10 +303,22 @@ export function useCreateStepControl({
       isFirstStep,
       isLastStep,
       goToStep,
+      jumpTo,
       handleNext,
       handlePrevious,
+      handleRetry,
+      retryCount,
+      transitionState,
     ],
   );
+}
+
+/**
+ * Hook to optionally consume the step control context
+ * @returns StepControlContextType | undefined - Step control methods and state, or undefined if not in context
+ */
+export function useOptionalStepControlContext() {
+  return useContext(StepControlContext);
 }
 
 /**

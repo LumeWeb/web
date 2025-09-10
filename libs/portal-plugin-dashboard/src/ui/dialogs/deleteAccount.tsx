@@ -1,4 +1,5 @@
-import type { DialogConfig, DialogType } from "@lumeweb/portal-framework-ui";
+import type { DialogConfig } from "@lumeweb/portal-framework-ui";
+import { DialogType } from "@lumeweb/portal-framework-ui";
 import type { DeleteOneParams, HttpError } from "@refinedev/core";
 import type { UseMutationResult } from "@tanstack/react-query";
 

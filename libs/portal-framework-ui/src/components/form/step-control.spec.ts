@@ -5,8 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StepControlProvider, useStepControl } from "./StepControlContext";
 import { WizardForm } from "./WizardForm";
 import { StepSchemaForm } from "./StepSchemaForm";
-import { FormConfig, StepFormConfig, WizardFormConfig } from "./types";
-import { UseFormReturn } from "react-hook-form";
+import { StepFormConfig, WizardFormConfig } from "./types";
 
 // Mock dependencies
 vi.mock("./StepSchemaForm", () => ({

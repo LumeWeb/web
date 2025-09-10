@@ -1,8 +1,8 @@
 import {
   CapabilityStatus,
   Framework,
+  getSdk,
   RefineConfigCapability,
-  SdkCapability,
 } from "@lumeweb/portal-framework-core";
 import { AuthProvider } from "@refinedev/core";
 
@@ -11,12 +11,13 @@ import { createAuthProvider } from "../dataProviders/auth";
 export class Capability implements RefineConfigCapability {
   dependencies = ["core:sdk-auth"];
   readonly id = "core:refine-config-auth";
-  status: CapabilityStatus;
+  status: CapabilityStatus = "inactive";
   readonly type = "core:refine-config";
   #authProvider?: AuthProvider;
 
   async destroy() {
     this.#authProvider = undefined;
+    this.status = "inactive";
   }
 
   getAuthProvider() {
@@ -32,15 +33,8 @@ export class Capability implements RefineConfigCapability {
 
   async initialize(framework: Framework) {
     // Initialize auth provider
-    const sdkCaps =
-      await framework.getCapabilitiesByType<SdkCapability>("core:sdk");
-
-    if (!sdkCaps?.length) {
-      throw new Error("SDK not found");
-    }
-
-    const sdk = sdkCaps.pop()!;
-
-    this.#authProvider = createAuthProvider(sdk.getSdk());
+    const sdk = await getSdk(framework);
+    this.#authProvider = createAuthProvider(sdk);
+    this.status = "active";
   }
 }
