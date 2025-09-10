@@ -1,6 +1,12 @@
 import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { usePluginMeta as mockedUsePluginMeta } from "@/hooks/usePluginMeta";
+import { useProtocolDomain as mockedUseProtocolDomain } from "@/hooks/useProtocolDomain";
+
+// Import the mocked functions after the mocks are defined
+import { useAccountSubdomain } from "./useAccountSubdomain";
+
 // Mock dependencies by defining the mock inside the factory
 vi.mock("@/hooks/usePluginMeta", () => {
   const usePluginMeta = vi.fn(); // Define the mock inside the factory
@@ -15,12 +21,6 @@ vi.mock("@/hooks/useProtocolDomain", () => {
     useProtocolDomain,
   };
 });
-
-import { usePluginMeta as mockedUsePluginMeta } from "@/hooks/usePluginMeta";
-import { useProtocolDomain as mockedUseProtocolDomain } from "@/hooks/useProtocolDomain";
-
-// Import the mocked functions after the mocks are defined
-import { useAccountSubdomain } from "./useAccountSubdomain";
 
 describe("useAccountSubdomain", () => {
   beforeEach(() => {

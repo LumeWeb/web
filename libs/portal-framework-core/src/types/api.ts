@@ -8,7 +8,14 @@ export interface CategoryError {
   id: string;
 }
 
-export type ErrorCategory = "capability" | "feature" | "plugin" | "system";
+export const ERROR_CATEGORIES = {
+  CAPABILITY: "capability",
+  FEATURE: "feature", 
+  PLUGIN: "plugin",
+  SYSTEM: "system",
+} as const;
+
+export type ErrorCategory = typeof ERROR_CATEGORIES[keyof typeof ERROR_CATEGORIES];
 
 export interface FeatureDependency {
   id: NamespacedId;

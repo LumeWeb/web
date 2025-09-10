@@ -28,14 +28,14 @@ export const Field = ({
     <div className={className}>
       <Label
         {...labelProps}
-        className="font-semibold text-sm text-secondary-foreground"
+        className="text-secondary-foreground text-sm font-semibold"
         htmlFor={id}
       />
       <Input
         {...inputProps}
         aria-describedby={errorId}
         aria-invalid={errorId ? true : undefined}
-        className="mt-4 bg-input border-border placeholder-input-placeholder"
+        className="bg-input border-border placeholder-input-placeholder mt-4"
         id={id}
       />
       <div className="min-h-[32px] px-4 pb-3 pt-1">
@@ -75,7 +75,7 @@ export const FieldCheckbox = ({
     <>
       <div
         className={cn(
-          "space-x-2 flex items-center text-foreground",
+          "text-foreground flex items-center space-x-2",
           className,
         )}>
         <Checkbox
@@ -121,7 +121,7 @@ export function ErrorList({
   return (
     <ul className="flex flex-col gap-1" id={id}>
       {errorsToRender.map((e) => (
-        <li className="text-[12px] text-destructive-foreground" key={e}>
+        <li className="text-destructive-foreground text-[12px]" key={e}>
           {e}
         </li>
       ))}

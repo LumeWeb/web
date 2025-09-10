@@ -1,6 +1,10 @@
+import { useMobile } from "@lumeweb/portal-framework-ui-core";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+// Import the component to test
+import { GeneralLayout } from "./GeneralLayout";
 
 // Mocking external dependencies and child components/hooks
 vi.mock("@/components/dialog", () => ({
@@ -83,11 +87,6 @@ vi.mock("./DesktopSidebar", () => ({
 vi.mock("./MobileSidebar", () => ({
   default: () => <div data-testid="mock-mobile-sidebar" />,
 }));
-
-import { useMobile } from "@lumeweb/portal-framework-ui-core";
-
-// Import the component to test
-import { GeneralLayout } from "./GeneralLayout";
 
 describe("GeneralLayout", () => {
   const mockChildren = <div data-testid="mock-children">Layout Children</div>;

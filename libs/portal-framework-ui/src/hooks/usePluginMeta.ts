@@ -1,5 +1,4 @@
 import { getPluginMeta } from "@lumeweb/portal-framework-core";
-import { shallow } from "zustand/shallow";
 
 import { usePortalStore } from "../store/portalStore";
 

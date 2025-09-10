@@ -1,5 +1,9 @@
+// Import the mocked function after the mock is defined
+import { getApiBaseUrl as mockedGetApiBaseUrl } from "@lumeweb/portal-framework-core";
 import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { useApiUrl } from "./useApiUrl";
 
 // Mock the dependency by defining the mock inside the factory
 vi.mock("@lumeweb/portal-framework-core", async (importOriginal) => {
@@ -10,11 +14,6 @@ vi.mock("@lumeweb/portal-framework-core", async (importOriginal) => {
     getApiBaseUrl: vi.fn(), // Mock getApiBaseUrl
   };
 });
-
-// Import the mocked function after the mock is defined
-import { getApiBaseUrl as mockedGetApiBaseUrl } from "@lumeweb/portal-framework-core";
-
-import { useApiUrl } from "./useApiUrl";
 
 describe("useApiUrl", () => {
   beforeEach(() => {

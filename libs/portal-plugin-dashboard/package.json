@@ -3,9 +3,20 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "main": "lib-dist/index.js",
+  "types": "lib-dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib-dist/esm/index.d.ts",
+      "import": "./lib-dist/esm/index.js",
+      "require": "./lib-dist/cjs/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:lib": "tsdown",
     "e2e": "dotenv -- run-s build e2e:playwright",
     "e2e:playwright": "playwright test",
     "e2e:playwright:ui": "playwright test --ui",
@@ -23,9 +34,11 @@
     "@refinedev/react-hook-form": "^4.10.2",
     "@tanstack/react-query": "4.36.1",
     "@tanstack/react-table": "^8.21.3",
-    "@uppy/core": "^4.5.3",
+    "@uppy/core": "5.0.2",
     "@uppy/drop-target": "^4.0.0",
-    "@uppy/xhr-upload": "^4.4.2",
+    "@uppy/tus": "5.0.1",
+    "@uppy/xhr-upload": "5.0.1",
+    "async-mutex": "^0.5.0",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.525.0",
     "otpauth": "^9.4.0",

@@ -20,7 +20,7 @@ function InlineAuthLinkBanner({
   return (
     <p
       className={cn(
-        "text-foreground text-sm w-fit flex items-center gap-2 text-left bg-secondary p-3 rounded-lg",
+        "text-foreground bg-secondary flex w-fit items-center gap-2 rounded-lg p-3 text-left text-sm",
         className,
       )}>
       <span className="text-foreground/80 whitespace-nowrap">{label}</span>

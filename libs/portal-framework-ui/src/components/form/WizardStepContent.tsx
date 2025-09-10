@@ -1,5 +1,9 @@
+import { cn } from "@lumeweb/portal-framework-ui-core";
 import React, { type ReactNode } from "react";
 import { isElement, isValidElementType } from "react-is";
+
+import { useOptionalStepControlContext } from "./StepControlContext";
+import { getStepAnimationClasses } from "./utils/animationUtils";
 
 interface StepContentProps {
   children: ReactNode;
@@ -7,6 +11,8 @@ interface StepContentProps {
   description?: string;
   icon?: ReactNode;
   isActive?: boolean;
+  isEntering?: boolean;
+  isExiting?: boolean;
   title?: string;
 }
 
@@ -15,16 +21,34 @@ export function WizardStepContent({
   className = "",
   description,
   icon,
-  isActive = true,
+  isActive = false,
+  isEntering = false,
+  isExiting = false,
   title,
 }: StepContentProps) {
-  if (!isActive) {
-    return null;
-  }
+  // Get transition direction from context
+  const stepControl = useOptionalStepControlContext();
+  const direction = stepControl?.transitionState?.direction || null;
+
+  // Determine animation classes using utility function
+  const animationClasses = getStepAnimationClasses(
+    isEntering,
+    isExiting,
+    isActive,
+    direction,
+  );
 
   return (
     <div
-      className={`space-y-6 transition-all duration-300 ease-in-out ${className}`}>
+      className={cn(
+        "transition-all duration-300 ease-in-out",
+        animationClasses,
+        className,
+      )}
+      style={{
+        gridColumn: 1,
+        gridRow: 1,
+      }}>
       {(title || description || icon) && (
         <div className="bg-muted flex items-start gap-4 rounded-lg p-4">
           {icon && (
@@ -55,7 +79,7 @@ export function WizardStepContent({
         </div>
       )}
 
-      <div className="pt-2">{children}</div>
+      <div className="pt-6">{children}</div>
     </div>
   );
 }

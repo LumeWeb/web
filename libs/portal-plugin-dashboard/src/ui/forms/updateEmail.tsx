@@ -4,6 +4,7 @@ import schema from "./updateEmail.schema";
 
 export default function updateEmailForm(): FormConfig {
   return {
+    formId: "update_email",
     actionButtonsLayout: "horizontal",
     fields: [
       {

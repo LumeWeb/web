@@ -269,5 +269,6 @@ export * from "./FormGroup";
 export * from "./FormRenderer";
 export * from "./register";
 export * from "./SchemaForm";
+export * from "./StepControlContext";
 export * from "./StepSchemaForm";
 export * from "./types";

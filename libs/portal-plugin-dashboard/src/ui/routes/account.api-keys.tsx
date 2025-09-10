@@ -56,13 +56,13 @@ export default function AccountApiKeys() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-col sm:flex-row">
+      <div className="flex flex-col items-center justify-between sm:flex-row">
         <PageHeader
           description="Manage your API keys for accessing your services"
           title="API Keys"
         />
         <Button className={"mt-2 sm:mt-0"} onClick={handleCreateClick}>
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Create API Key
         </Button>
       </div>
@@ -70,7 +70,7 @@ export default function AccountApiKeys() {
         actionMenu={{
           items: [
             {
-              icon: <Trash2 className="w-4 h-4 mr-2" />,
+              icon: <Trash2 className="mr-2 h-4 w-4" />,
               label: "Delete",
               onClick: (row) => {
                 openDialog({

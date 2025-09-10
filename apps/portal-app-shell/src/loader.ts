@@ -50,10 +50,39 @@ class AppLoader {
     // Start the loading sequence
     this.#startMessageCycling();
     this.#listenReady();
+    this.#listenBootComplete();
+  }
+
+  #listenBootComplete(): void {
+    // Listen for the portal boot completion event
+    document.addEventListener('portal:boot:complete', () => {
+      this.#handleBootComplete();
+    });
+  }
+
+  #handleBootComplete(): void {
+    if (this.#isComplete) return;
+    
+    this.#isComplete = true;
+    
+    // Clear the message cycling interval
+    if (this.#messageInterval) {
+      clearInterval(this.#messageInterval);
+      this.#messageInterval = null;
+    }
+    
+    // Remove the loading overlay
+    if (this.#loadingOverlay) {
+      this.#loadingOverlay.remove();
+      console.log("App loading complete - framework initialization finished");
+    }
+    
+    // Remove the is-loading class from the html element
+    document.documentElement.classList.remove('is-loading');
   }
 
   #listenReady(): void {
-    // Add transitionend listener to remove overlay from DOM
+    // Add transitionend listener as a fallback mechanism
     if (this.#loadingOverlay) {
       this.#loadingOverlay.addEventListener("transitionend", (event) => {
         if (
@@ -65,13 +94,8 @@ class AppLoader {
             return;
           }
 
-          this.#loadingOverlay.remove();
-
-          // Clear the message cycling interval
-          if (this.#messageInterval) {
-            clearInterval(this.#messageInterval);
-            this.#messageInterval = null;
-            console.log("App loading complete - transitioned to main content");
+          if (!this.#isComplete) {
+            this.#handleBootComplete();
           }
         }
       });

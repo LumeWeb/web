@@ -6,7 +6,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { storeResetFns } from "@/../__mocks__/zustand"; // Import the reset function set
 // Import Theme from the new types file
-import { Theme } from "@/types/theme";
 import { createDefaultTheme } from "@/utils/theme"; // createDefaultTheme is still in utils
 
 import { metaStore, portalStore } from "./portalStore"; // Import the stores

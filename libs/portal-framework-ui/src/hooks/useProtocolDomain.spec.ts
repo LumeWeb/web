@@ -1,7 +1,14 @@
+import { env as mockedEnv } from "@lumeweb/portal-app-shell/env";
 // Mock dependencies
 import { renderHook } from "@testing-library/react";
 import { createMockPortalMeta } from "src/tests/portalMetaMocks";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+// Import the mocked function *after* the vi.mock call
+import { usePortalMeta as mockedUsePortalMeta } from "@/hooks/usePortalMeta";
+
+// Import the hook under test *after* the mocks are defined
+import { useProtocolDomain } from "./useProtocolDomain";
 
 // Mock dependencies
 vi.mock("@/hooks/usePortalMeta", () => {
@@ -16,14 +23,6 @@ vi.mock("@lumeweb/portal-app-shell/env", () => ({
     },
   },
 }));
-
-import { env as mockedEnv } from "@lumeweb/portal-app-shell/env";
-
-// Import the mocked function *after* the vi.mock call
-import { usePortalMeta as mockedUsePortalMeta } from "@/hooks/usePortalMeta";
-
-// Import the hook under test *after* the mocks are defined
-import { useProtocolDomain } from "./useProtocolDomain";
 
 describe("useProtocolDomain", () => {
   beforeEach(() => {

@@ -1,5 +1,4 @@
-import { LumeLogo } from "@lumeweb/portal-framework-ui";
-import { InlineAuthLinkBanner } from "@lumeweb/portal-framework-ui";
+import { InlineAuthLinkBanner, LumeLogo } from "@lumeweb/portal-framework-ui";
 import React, { ReactNode } from "react";
 
 import { AuthFooter } from "./AuthFooter";
@@ -26,20 +25,20 @@ export function AuthPage({
   const showBanner = linkLabel && linkUrl && linkText;
 
   return (
-    <div className="h-screen relative sm:overflow-hidden">
-      <div className="flex flex-col sm:flex-row-reverse items-center justify-center w-full h-full">
-        <header className="absolute top-4 left-4 sm:left-8">
+    <div className="relative h-screen sm:overflow-hidden">
+      <div className="flex h-full w-full flex-col items-center justify-center sm:flex-row-reverse">
+        <header className="absolute left-4 top-4 sm:left-8">
           <LumeLogo />
         </header>
         <BackgroundImage variant={variant} />
         <div
           className={
-            "flex flex-col items-start justify-start bg-background w-full sm:max-w-md z-10 relative"
+            "bg-background relative z-10 flex w-full flex-col items-start justify-start sm:max-w-md"
           }
           role="main">
-          <div className="sm:mt-20 p-5 w-full">
+          <div className="w-full p-5 sm:mt-20">
             {showBanner && (
-              <div className="flex flex-col gap-2 mb-10">
+              <div className="mb-10 flex flex-col gap-2">
                 {beforeLink}
                 <InlineAuthLinkBanner
                   className={"m-auto md:m-0"}

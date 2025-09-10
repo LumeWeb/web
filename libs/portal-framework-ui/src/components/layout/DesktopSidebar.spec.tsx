@@ -2,6 +2,9 @@ import { cleanup, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+// Import the component to test
+import DesktopSidebar from "./DesktopSidebar";
+
 // Mocking child components
 vi.mock("../LumeLogo", () => ({
   LumeLogo: () => <div data-testid="mock-lume-logo" />,
@@ -10,9 +13,6 @@ vi.mock("../LumeLogo", () => ({
 vi.mock("../MainNavigation", () => ({
   MainNavigation: () => <div data-testid="mock-main-navigation" />,
 }));
-
-// Import the component to test
-import DesktopSidebar from "./DesktopSidebar";
 
 describe("DesktopSidebar", () => {
   afterEach(cleanup);

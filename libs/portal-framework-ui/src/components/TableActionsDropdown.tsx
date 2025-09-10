@@ -35,7 +35,7 @@ export function TableActionsDropdown({
         {actions.map((action, index) => (
           <DropdownMenuItem
             className={cn(
-              "transition-colors focus:bg-accent",
+              "focus:bg-accent transition-colors",
               action.destructive
                 ? "text-destructive hover:bg-destructive/10"
                 : "hover:bg-accent",

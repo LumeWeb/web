@@ -91,6 +91,7 @@ export interface ConfigOptions {
   appPort?: number;
   devPort?: number;
   dir: string;
+  entryFile?: string;
   exposes?: ModuleFederationOptions["exposes"];
   name: string;
   pluginRegistryConfigFile?: string;
@@ -257,7 +258,7 @@ export function Config(opts: ConfigOptions) {
       ...(opts.type === "plugin"
         ? {
             lib: {
-              entry: resolve(opts.dir, "src/index.ts"),
+              entry: resolve(opts.dir, opts.entryFile || "src/index.ts"),
               fileName: "index",
               formats: ["es"],
             },

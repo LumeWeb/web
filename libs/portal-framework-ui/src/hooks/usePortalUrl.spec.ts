@@ -6,6 +6,14 @@ import { fetchPortalMeta as mockedFetchPortalMetaImport } from "@lumeweb/portal-
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// Import the mocked functions and state *after* the vi.mock call
+import {
+  __mockSetIsMetaLoading,
+  __mockSetMeta,
+  __mockSetPortalUrl,
+  __mockState,
+} from "@/store/portalStore";
+
 import { usePortalUrl } from "./usePortalUrl";
 
 // Mock store state and actions inside the factory
@@ -39,15 +47,6 @@ vi.mock("@/store/portalStore", () => {
     usePortalStore: vi.fn((selector: any) => selector(mockState)),
   };
 });
-
-// Import the mocked functions and state *after* the vi.mock call
-import {
-  __mockSetIsMetaLoading,
-  __mockSetMeta,
-  __mockSetPortalUrl,
-  __mockState,
-  portalStore as mockedPortalStore, // Import the mocked store instance
-} from "@/store/portalStore";
 
 // Mock location helpers and fetchPortalMeta
 vi.mock("@lumeweb/portal-framework-core", async (importOriginal) => {

@@ -2,7 +2,7 @@ import { SchemaForm } from "@lumeweb/portal-framework-ui";
 import { Button } from "@lumeweb/portal-framework-ui-core";
 import { useForgotPassword, useGo } from "@refinedev/core";
 import React, { useState } from "react";
-import { Link, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 
 import { ForgotPasswordConfirmRequest } from "../../../dataProviders/auth";
 import { getResetPasswordConfirmForm } from "../../forms/resetPasswordConfirm";
@@ -37,7 +37,7 @@ function ResetPasswordConfirm() {
   if (isSuccess) {
     return (
       <div className="flex flex-col items-center">
-        <p className="opacity-60 mb-4">
+        <p className="mb-4 opacity-60">
           Your password has been reset successfully.
         </p>
         <Button onClick={handleGoToLogin}>Go to Login</Button>

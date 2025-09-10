@@ -2,6 +2,7 @@ import { type FormConfig, FormFieldType } from "@lumeweb/portal-framework-ui";
 
 export default function editProfileForm(): FormConfig {
   return {
+    formId: "edit_profile",
     action: "edit",
     actionButtons: false,
     autoSave: true,

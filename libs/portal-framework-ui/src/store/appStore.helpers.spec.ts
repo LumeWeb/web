@@ -1,8 +1,7 @@
 import { NavigationItem } from "@lumeweb/portal-framework-core";
 import { describe, expect, it } from "vitest";
 
-import { helpers } from "./appStore";
-import { appStore } from "./appStore";
+import { appStore, helpers } from "./appStore";
 
 describe("appStore helpers", () => {
   describe("addMenuItems", () => {

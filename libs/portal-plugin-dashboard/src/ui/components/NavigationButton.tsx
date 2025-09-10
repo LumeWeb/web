@@ -8,9 +8,9 @@ const NavigationButton = ({
   return (
     <Button
       className={cn(
-        "justify-start h-14 w-full text-foreground/70 hover:bg-secondary/80",
+        "text-foreground/70 hover:bg-secondary/80 h-14 w-full justify-start",
         active &&
-          "border border-border/30 font-semibold  text-foreground hover:bg-transparent",
+          "border-border/30 text-foreground border font-semibold hover:bg-transparent",
       )}
       variant="ghost">
       {children}

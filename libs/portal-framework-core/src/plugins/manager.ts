@@ -1,4 +1,3 @@
-import type { BaseCapability } from "../types/capabilities";
 import type { RouteDefinition } from "../types/navigation";
 import type {
   FeatureState,
@@ -12,6 +11,10 @@ import { FeatureLoadError, PluginInitError, PluginLoadError } from "../errors";
 import { FrameworkFeature } from "../types/api";
 import { DependencyGraph } from "../util/dependencyGraph";
 import { isNamespacedId, validateNamespacedId } from "../util/namespace";
+import {
+  validateFeatureDetailed,
+  validatePluginDetailed,
+} from "../util/validation";
 
 export interface RemoteModule {
   entry: string;
@@ -236,6 +239,20 @@ export class PluginManager {
       const plugin = this.#loadedPlugins.get(pluginId);
       if (!plugin?.initialize) continue;
 
+      // Defensive check for plugin interface compliance
+      const pluginValidationResult = validatePluginDetailed(plugin);
+      if (!pluginValidationResult.isValid) {
+        const error = new PluginLoadError(
+          pluginId,
+          new Error(
+            `Plugin ${pluginId} does not comply with Plugin interface. Missing: ${pluginValidationResult.missingProperties.join(", ")}`,
+          ),
+        );
+        failures.set(pluginId, error);
+        this.#markPluginFailed(pluginId, error);
+        continue;
+      }
+
       // Check if dependencies are initialized
       const deps = plugin.dependencies ?? [];
       const unreadyDeps = deps.filter((dep) => {
@@ -316,6 +333,14 @@ export class PluginManager {
       const feature = plugin.features?.find((f) => f.id === id);
       if (!feature) {
         throw new Error(`Plugin ${plugin.id} does not provide feature ${id}`);
+      }
+
+      // Defensive check for feature interface compliance
+      const validationResult = validateFeatureDetailed(feature);
+      if (!validationResult.isValid) {
+        throw new Error(
+          `Feature ${id} does not comply with FrameworkFeature interface. Missing: ${validationResult.missingProperties.join(", ")}`,
+        );
       }
 
       const initializationPromise = feature

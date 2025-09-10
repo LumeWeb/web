@@ -1,11 +1,11 @@
 import type { z } from "zod";
-import Cookies from "js-cookie";
 
 import {
   ActionItemType,
   FormConfig,
   FormFieldType,
 } from "@lumeweb/portal-framework-ui";
+import Cookies from "js-cookie";
 
 import { schema } from "./login.schema";
 
@@ -21,22 +21,22 @@ export const getLoginFormConfig = (
   },
   fields: [
     {
+      autocomplete: "username",
       inputClassName: "mt-4 bg-input border placeholder-input-placeholder",
       label: "Email",
       labelClassName: "font-semibold text-sm text-secondary-foreground",
       name: "email",
       required: true,
       type: FormFieldType.EMAIL,
-      autocomplete: "username",
     },
     {
+      autocomplete: "current-password",
       inputClassName: "mt-4 bg-input border placeholder-input-placeholder",
       label: "Password",
       labelClassName: "font-semibold text-sm text-secondary-foreground",
       name: "password",
       required: true,
       type: FormFieldType.PASSWORD,
-      autocomplete: "current-password",
     },
     {
       itemClassName: "flex items-center space-x-2 text-foreground",
@@ -47,7 +47,7 @@ export const getLoginFormConfig = (
   ],
   footer: [
     {
-      component: () => <div className="w-full min-h-[32px] px-4 pb-3 pt-1" />,
+      component: () => <div className="min-h-[32px] w-full px-4 pb-3 pt-1" />,
       type: ActionItemType.CUSTOM_COMPONENT,
     },
     {

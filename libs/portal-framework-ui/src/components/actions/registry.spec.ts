@@ -1,10 +1,10 @@
 import { ComponentType } from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   getActionItemComponent,
   registerActionItemComponent,
-  resetRegistryForTesting, // Import the new reset function
+  resetRegistryForTesting,
 } from "./registry";
 import { ActionItemProps, ActionItemType } from "./types";
 

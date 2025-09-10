@@ -2,21 +2,18 @@ import { useDialog } from "@lumeweb/portal-framework-ui";
 import { Button } from "@lumeweb/portal-framework-ui-core";
 import { Upload } from "lucide-react";
 
-import { useUploadManager } from "@/hooks/useUploadManager";
 import { uploadWizardDialogConfig } from "@/ui/dialogs/uploadWizard";
+import { useUploadManager } from "@/ui/hooks/useUploadManager";
 
 export default function UploadButton() {
   const { openDialog } = useDialog();
-  const {
-    addFile,
-    services,
-    start,
-  } = useUploadManager();
+  const uploadManager = useUploadManager();
 
   const handleUploadClick = () => {
     openDialog(
       uploadWizardDialogConfig(
-        services,
+        uploadManager.services,
+        uploadManager,
         () => {
           // Upload completed callback
           console.log("Upload process completed successfully");

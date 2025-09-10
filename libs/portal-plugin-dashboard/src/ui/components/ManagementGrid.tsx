@@ -10,7 +10,7 @@ export default function ManagementGrid({
   const grids = Math.ceil(React.Children.toArray(children).length / columns);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-4">
+    <div className="grid grid-cols-1 gap-x-8 gap-y-4 lg:grid-cols-3">
       {React.Children.map(children, (child, index) => (
         <div key={index}>{child}</div>
       ))}

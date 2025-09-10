@@ -1,8 +1,13 @@
+// Import the mocked Spinner component after its mock is defined
+import { Spinner } from "@lumeweb/portal-framework-ui-core";
 import { cleanup, render, screen } from "@testing-library/react"; // Import cleanup
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"; // Import afterEach and beforeEach
 
+// Import the mocked registry function just before the suite that uses it
+import { registerActionItemComponent } from "../registry";
 import { ActionItemType } from "../types";
+// Now import the component and its registration function AFTER the mocks
 import { registerSubmitActionItem, SubmitActionItem } from "./SubmitActionItem";
 // We will mock the registry module, so we don't import the actual registerActionItemComponent here yet
 
@@ -25,12 +30,6 @@ vi.mock("../registry", () => ({
   registerActionItemComponent: vi.fn(), // Define mock here
   resetRegistryForTesting: vi.fn(), // Mock this too if it were used here
 }));
-
-// Import the mocked Spinner component after its mock is defined
-import { Spinner } from "@lumeweb/portal-framework-ui-core";
-
-// Now import the component and its registration function AFTER the mocks
-import { registerSubmitActionItem, SubmitActionItem } from "./SubmitActionItem";
 
 describe("SubmitActionItem", () => {
   afterEach(() => {
@@ -157,9 +156,6 @@ describe("SubmitActionItem", () => {
     expect(screen.getByRole("button")).toHaveAttribute("type", "submit");
   });
 });
-
-// Import the mocked registry function just before the suite that uses it
-import { registerActionItemComponent } from "../registry";
 
 describe("registerSubmitActionItem", () => {
   // Clear the mock calls on the registry mock before this test suite

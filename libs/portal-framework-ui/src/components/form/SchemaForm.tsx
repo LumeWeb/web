@@ -11,15 +11,19 @@ import {
   useNotification,
 } from "@refinedev/core";
 import React, { useEffect, useMemo } from "react";
+import { isElement, isValidElementType } from "react-is";
 
-import { FormDialogConfig, useDialog } from "../dialog";
+import { createFormActions } from "../actions/actionHelpers";
+import { DialogConfig, FormDialogConfig, useDialog } from "../dialog";
+import { useIsFormDialog } from "../dialog/utils/dialogDetection";
+import { Environment, renderHeader, UnifiedFooter } from "../shared";
 import { adapters, FormAdapter, UnifiedFormReturnType } from "./adapters";
 import { FormProvider } from "./context";
-import { FormFooter } from "./FormFooter";
 import { FormRenderer } from "./FormRenderer";
 import { handleFormSubmission } from "./handlers/core";
-import { type FormConfig, isStepFormConfig } from "./types";
+import { AdapterType, type FormConfig, isStepFormConfig } from "./types";
 import { computeAutoSaveConfig } from "./utils/autoSave";
+import { useForceRerender as useSharedForceRerender } from "../shared/hooks/useForceRerender";
 
 const defaultFooterCss = "pt-4 mt-4 border-t";
 
@@ -40,16 +44,21 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
   if (!active) {
     return null;
   }
-  const { currentDialog, setFormMethods: setFormInstance } = useDialog();
+
+  const { currentDialog, setFormMethods: setFormInstance, formMethods } = useDialog();
   const { open: openNotification } = useNotification();
+  const isInDialog = useIsFormDialog();
+
   if (!config) throw new Error("SchemaForm requires a form config");
 
   // Determine adapter - prioritize explicit config, then refine resource presence
   const shouldUseRefine =
-    config.adapter === "refine" ||
+    config.adapter === AdapterType.REFINE ||
     config.refine ||
     Boolean(config.refineCoreProps?.resource);
-  const adapterName = shouldUseRefine ? "refine" : (config.adapter ?? "rhf");
+  const adapterName = shouldUseRefine
+    ? AdapterType.REFINE
+    : (config.adapter ?? AdapterType.RHF);
   const adapter = adapters[adapterName] as FormAdapter<T>;
 
   const autoSaveConfig = computeAutoSaveConfig(config.autoSave);
@@ -77,7 +86,14 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
       : undefined
     : undefined;
 
-  const isActiveDialog = !!currentDialog?.formConfig;
+  const isActiveDialog =
+    !!(
+      currentDialog?.formConfig &&
+      currentDialog.formConfig.formId === config.formId
+    ) && isInDialog;
+
+  // Implement forceRerender mechanism
+  useSharedForceRerender(config.forceRerender);
 
   useEffect(() => {
     if (!setFormInstance) return;
@@ -108,11 +124,14 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
     [isActiveDialog, currentDialog, cConfig],
   );
 
+  // Implement forceRerender mechanism
+  useSharedForceRerender(config.forceRerender);
+
   const isRefineWithAutosave = shouldUseRefine && autoSaveConfig?.enabled;
 
   return (
     <FormProvider<T>
-      adapter={adapterName as keyof typeof adapters}
+      adapter={adapterName}
       autoSave={autoSaveProps}
       config={cConfig}
       formInstance={formInstance}>
@@ -146,21 +165,26 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
                 adapter.submitHandler(cConfig, formInstance),
             });
           })}>
-          {cConfig.header && (
-            <div className="form-header">
-              {typeof cConfig.header === "function"
-                ? cConfig.header(formInstance)
-                : cConfig.header}
-            </div>
-          )}
+          {renderHeader({
+            actions: cConfig.actions,
+            className: "form-header",
+            description: cConfig.description,
+            header: cConfig.header,
+            isDialog: isActiveDialog,
+            title: cConfig.title,
+            unifiedHeaderConfig: cConfig,
+          })}
           <FormRenderer fields={cConfig.fields} groups={cConfig.groups} />
-          {cConfig.footer !== false && (
-            <FormFooter
-              className={cConfig.footerClassName}
-              closeDialog={closeDialog}
-              config={finalConfig}
-              formMethods={formInstance}
-            />
+          {renderFooter(
+            cConfig.footer,
+            {
+              className: cConfig.footerClassName,
+              closeDialog,
+              config: finalConfig,
+              formMethods: formInstance,
+            },
+            isActiveDialog,
+            currentDialog,
           )}
           {isRefineWithAutosave && (
             <AutoSaveIndicator
@@ -171,5 +195,76 @@ export function SchemaForm<T extends FieldValues = FieldValues>({
         </form>
       </AdapterFormProvider>
     </FormProvider>
+  );
+}
+
+// Helper function to render footer based on configuration
+function renderFooter(
+  footerConfig: any,
+  footerProps: any,
+  isInDialog: boolean,
+  currentDialog?: DialogConfig,
+): React.ReactNode {
+  // If footer is undefined, check if we're in a dialog context
+  if (footerConfig === undefined) {
+    const { config, formMethods, closeDialog } = footerProps;
+    const isSubmitting = formMethods?.formState?.isSubmitting || false;
+
+    const footerEnvironment = Environment.footer();
+
+    if (isInDialog) {
+      footerEnvironment.dialog({
+        dialogConfig: currentDialog,
+        onClose: config.onCancel || closeDialog,
+      });
+    } else {
+      footerEnvironment.standalone();
+    }
+    footerEnvironment.simpleForm({
+      isSubmitting,
+      methods: formMethods,
+    });
+
+    return (
+      <UnifiedFooter
+        className={footerProps.className}
+        config={{ ...config }}
+        environment={footerEnvironment.build()}
+      />
+    );
+  }
+
+  // If footer is false, render nothing
+  if (footerConfig === false) {
+    return null;
+  }
+
+  // If footer is a React element or functional component, render it
+  if (isElement(footerConfig) || isValidElementType(footerConfig)) {
+    // If it's a valid element, render it directly
+    if (isElement(footerConfig)) {
+      return footerConfig;
+    }
+    // If it's a valid component type, instantiate it with footerProps
+    if (isValidElementType(footerConfig)) {
+      const FooterComponent = footerConfig as React.ComponentType<any>;
+      return <FooterComponent {...footerProps} />;
+    }
+  }
+
+  // For any other case, render default unified footer
+  const footerEnvironment = Environment.footer()
+    .standalone()
+    .simpleForm({
+      isSubmitting: footerProps.formMethods?.formState?.isSubmitting || false,
+      methods: footerProps.formMethods,
+    })
+    .build();
+  return (
+    <UnifiedFooter
+      className={footerProps.className}
+      config={footerProps.config}
+      environment={footerEnvironment}
+    />
   );
 }

@@ -4,6 +4,7 @@ import { createMockSdkCapability } from "@lumeweb/portal-test-util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Framework } from "./framework";
+import { ERROR_CATEGORIES } from "../types/api";
 
 describe("Framework", () => {
   const mockSdkCapability = createMockSdkCapability();
@@ -131,9 +132,9 @@ describe("Framework", () => {
       const result = await framework.initialize();
       expect(result.success).toBe(false);
       expect(result.failures).toEqual([
-        expect.objectContaining({ category: "plugin", error: pluginError }),
+        expect.objectContaining({ category: ERROR_CATEGORIES.PLUGIN, error: pluginError }),
         expect.objectContaining({
-          category: "capability",
+          category: ERROR_CATEGORIES.CAPABILITY,
           error: capabilityError,
         }),
       ]);

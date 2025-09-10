@@ -15,6 +15,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useDialog } from "../dialog";
+import { DialogType } from "../dialog/Dialog.types";
 import { adapters } from "./adapters";
 // Import custom FormProvider (mocked below)
 import { FormProvider } from "./context";
@@ -123,7 +124,7 @@ describe("SchemaForm", () => {
 
     // Setup mocks for dependencies
     mockUseDialog.mockReturnValue({
-      currentDialog: { onSuccess: vi.fn(), type: "form" },
+      currentDialog: { onSuccess: vi.fn(), type: DialogType.FORM },
       setFormMethods: mockSetFormMethods,
     });
     mockUseNotification.mockReturnValue({
@@ -273,7 +274,7 @@ describe("SchemaForm", () => {
     mockAdapters.rhf.submitHandler.mockResolvedValue(submitResult);
     const mockDialogOnSuccess = vi.fn();
     mockUseDialog.mockReturnValue({
-      currentDialog: { onSuccess: mockDialogOnSuccess, type: "form" },
+      currentDialog: { onSuccess: mockDialogOnSuccess, type: DialogType.FORM },
       setFormMethods: mockSetFormMethods,
     });
 

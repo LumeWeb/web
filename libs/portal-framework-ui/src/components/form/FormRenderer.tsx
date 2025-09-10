@@ -10,10 +10,6 @@ import {
 } from "@lumeweb/portal-framework-ui-core";
 import { get } from "lodash/get";
 import React, { useEffect, useMemo, useState } from "react";
-
-interface FieldRendererProps<TFieldValues extends FieldValues> {
-  field: FormFieldConfig<TFieldValues>;
-}
 import {
   FieldValues,
   Path as ReactHookFormPath,
@@ -25,7 +21,12 @@ import { getAutocompleteValue } from "./autocomplete";
 import { useFormContext } from "./context";
 import { FormFieldType, getFormComponent } from "./fields";
 import { FormGroup } from "./FormGroup";
+import { useOptionalStepControlContext } from "./StepControlContext";
 import { type FormFieldConfig, type FormGroupType, GroupOrder } from "./types";
+
+interface FieldRendererProps<TFieldValues extends FieldValues> {
+  field: FormFieldConfig<TFieldValues>;
+}
 
 export function FormRenderer<TRequest extends FieldValues = FieldValues>({
   fields = [],
@@ -263,7 +264,30 @@ function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
                 type={field.type}
               />
             ) : field.component ? (
-              <field.component {...formFieldRenderProps} />
+              <field.component
+                {...formFieldRenderProps}
+                formMethods={rhfMethods}
+                stepEnvironment={
+                  useOptionalStepControlContext()
+                    ? {
+                        current:
+                          useOptionalStepControlContext()?.currentStep || 0,
+                        isFirst:
+                          useOptionalStepControlContext()?.isFirstStep || false,
+                        isLast:
+                          useOptionalStepControlContext()?.isLastStep || false,
+                        jumpTo: useOptionalStepControlContext()?.jumpTo,
+                        onNext: useOptionalStepControlContext()?.handleNext,
+                        onPrevious:
+                          useOptionalStepControlContext()?.handlePrevious,
+                        onRetry: useOptionalStepControlContext()?.handleRetry,
+                        retryCount:
+                          useOptionalStepControlContext()?.retryCount || 0,
+                        total: useOptionalStepControlContext()?.totalSteps || 0,
+                      }
+                    : undefined
+                }
+              />
             ) : null}
           </FormControl>
           {field.description && (

@@ -1,2 +1,2 @@
-export * from "./UploadFeature";
-export * from "./UploadManager";
+export * from "@/features/upload/Feature";
+export * from "@/features/upload/Manager";

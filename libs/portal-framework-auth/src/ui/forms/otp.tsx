@@ -27,7 +27,7 @@ export const getOtpForm = (
       },
     ],
     header: (
-      <div className="block mb-8 space-y-2">
+      <div className="mb-8 block space-y-2">
         <h3 className="font-bold">Enter your authenticator code</h3>
         <p className="text-primary">
           Please enter the 6-digit verification code from your authenticator

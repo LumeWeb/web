@@ -24,15 +24,6 @@ import {
 } from "lexical";
 import React, { useEffect, useState } from "react";
 
-export const defaultToolbarOptions: ToolbarOption[] = [
-  "bold",
-  "italic",
-  "underline",
-  "undo",
-  "redo",
-  "blockTypes",
-];
-
 import BlockTypeDropdown from "./BlockTypeDropdown";
 import { ToolbarOption } from "./Editor";
 import {
@@ -42,6 +33,15 @@ import {
   ToolbarStateValue,
   useToolbarState,
 } from "./ToolbarContext";
+
+export const defaultToolbarOptions: ToolbarOption[] = [
+  "bold",
+  "italic",
+  "underline",
+  "undo",
+  "redo",
+  "blockTypes",
+];
 
 const formatToStateKey = {
   bold: "isBold",
@@ -250,8 +250,8 @@ export function ToolbarPlugin({
   }, [editor]);
 
   return (
-    <div className="w-full border-b z-10 relative">
-      <div className="flex space-x-2 justify-center p-1">
+    <div className="relative z-10 w-full border-b">
+      <div className="flex justify-center space-x-2 p-1">
         {toolbarOptions.includes("clear") && (
           <ToolbarButton
             command={FORMAT_TEXT_COMMAND}
@@ -269,7 +269,7 @@ export function ToolbarPlugin({
             onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)}
             title="Undo (Ctrl+Z)"
             variant="ghost">
-            <ReloadIcon className="transform -scale-x-100" />
+            <ReloadIcon className="-scale-x-100 transform" />
           </Button>
         )}
 
@@ -305,7 +305,7 @@ export function ToolbarPlugin({
 
         {toolbarOptions.includes("blockTypes") && (
           <>
-            <Separator className="h-auto my-1" orientation="vertical" />
+            <Separator className="my-1 h-auto" orientation="vertical" />
             <BlockTypeDropdown blockType={toolbarState.blockType} />
           </>
         )}

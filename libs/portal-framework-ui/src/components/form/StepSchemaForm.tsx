@@ -4,38 +4,56 @@ import { BaseRecord } from "@refinedev/core";
 import React, { useCallback, useMemo } from "react";
 
 import type { FormConfig, StepFormFooterRenderer } from "./types";
+import { AdapterType, type StepFormConfig } from "./types";
 
 import { useDialog } from "../dialog/Dialog.context";
+import { isFormDialog, isWizardDialogConfig } from "../dialog/Dialog.types";
+import { Environment, isWizardForm, UnifiedFooter } from "../shared";
 import { FormProvider } from "./context";
 import { getStepOnSuccessHandler, handleStepSubmission } from "./handlers/step";
 import { SchemaForm } from "./SchemaForm";
-import { StepControlProvider, useStepControl } from "./StepControlContext";
-import { StepFormFooter } from "./StepFormFooter";
-import { type StepFormConfig } from "./types";
+import {
+  StepControlProvider,
+  useOptionalStepControlContext,
+  useStepControl,
+} from "./StepControlContext";
+import { createStepRetryHandler } from "./utils/stepRetry";
+import { WizardStepContent } from "./WizardStepContent";
 
 const defaultStepFormFooter: StepFormFooterRenderer = (
   stepMethods,
   formMethods,
-  closeDialog,
   currentDialog,
-) => (
-  <StepFormFooter
-    closeDialog={closeDialog}
-    currentStep={stepMethods.currentStep}
-    formMethods={formMethods}
-    handleNext={stepMethods.handleNext}
-    handlePrevious={stepMethods.handlePrevious}
-    handleSubmit={stepMethods.handleSubmit}
-    isFirstStep={stepMethods.isFirstStep}
-    isLastStep={stepMethods.isLastStep}
-    submitLabel={
-      currentDialog?.type === "form"
-        ? currentDialog.formConfig?.submitLabel
-        : undefined
-    }
-    totalSteps={stepMethods.totalSteps}
-  />
-);
+) => {
+  const footerEnvironment = Environment.footer()
+    .standalone()
+    .stepForm({
+      isSubmitting: formMethods?.formState?.isSubmitting || false,
+      methods: formMethods,
+    })
+    .step({
+      current: stepMethods.currentStep,
+      isFirst: stepMethods.isFirstStep,
+      isLast: stepMethods.isLastStep,
+      jumpTo: stepMethods.jumpTo,
+      onNext: stepMethods.handleSubmit || stepMethods.handleNext,
+      onPrevious: stepMethods.handlePrevious,
+      onRetry: stepMethods.handleRetry,
+      total: stepMethods.totalSteps,
+    })
+    .build();
+
+  return (
+    <UnifiedFooter
+      config={
+        isFormDialog(currentDialog) || isWizardDialogConfig(currentDialog)
+          ? currentDialog.formConfig
+          : currentDialog
+      }
+      environment={footerEnvironment}
+    />
+  );
+};
 
 interface StepSchemaFormContentProps<
   TRequest extends FieldValues = FieldValues,
@@ -60,14 +78,27 @@ export function StepSchemaForm<
   TResponse extends BaseRecord = any,
 >({ closeDialog, config }: StepSchemaFormProps<TRequest, TResponse>) {
   const { currentDialog, formMethods } = useDialog();
-  const stepControl = useStepControl({
-    defaultStep: config.stepBehavior?.defaultStep,
-    isBackValidate: config.stepBehavior?.isBackValidate,
-    steps: config.steps,
-  });
+  const existingStepControl = useOptionalStepControlContext();
 
+  // If we're already in a step control context, render content directly
+  if (existingStepControl && existingStepControl.totalSteps > 0) {
+    return (
+      <StepSchemaFormContent
+        closeDialog={closeDialog}
+        config={config}
+        currentDialog={currentDialog}
+        formMethods={formMethods}
+      />
+    );
+  }
+
+  // Otherwise, create a new step control context
   return (
-    <StepControlProvider value={stepControl}>
+    <StepControlProvider
+      defaultStep={config.stepBehavior?.defaultStep}
+      isBackValidate={config.stepBehavior?.isBackValidate}
+      onStepRetry={createStepRetryHandler(config.steps)}
+      totalSteps={config.steps.length}>
       <StepSchemaFormContent
         closeDialog={closeDialog}
         config={config}
@@ -78,27 +109,59 @@ export function StepSchemaForm<
   );
 }
 
+function getStepFooterConfig<
+  TRequest extends FieldValues,
+  TResponse extends BaseRecord,
+>(
+  isActive: boolean,
+  footerConfig: StepFormConfig<TRequest, TResponse>["footer"],
+  stepMethods: any,
+  triggerSubmit: () => void,
+): false | React.ComponentType<any> {
+  if (!isActive) {
+    return false;
+  }
+  if (footerConfig === false) {
+    return false;
+  }
+
+  // Return a Higher-Order Component that receives props and calls the original footer function
+  return function StepFooterComponent(props: any) {
+    const { closeDialog, currentDialog, formMethods } = props;
+    const footerFn = footerConfig ?? defaultStepFormFooter;
+    return footerFn(
+      { ...stepMethods, handleSubmit: triggerSubmit },
+      formMethods?.current,
+      closeDialog,
+      currentDialog,
+    );
+  };
+}
+
 function StepSchemaFormContent<
   TRequest extends FieldValues = FieldValues,
   TResponse extends BaseRecord = any,
 >({
   closeDialog,
   config,
-  currentDialog,
   formMethods,
 }: StepSchemaFormContentProps<TRequest, TResponse>) {
   const stepControl = useStepControl();
   const {
     currentStep,
+    goToStep, // Use context's goToStep which now has transitions
+    jumpTo,
     handleNext,
     handlePrevious,
+    handleRetry,
     isFirstStep,
     isLastStep,
     totalSteps,
+    transitionState, // Get transition state from context
   } = stepControl;
 
   const triggerSubmit = useCallback(() => {
-    if (!formMethods?.handleSubmit) return;
+    if (!formMethods?.current?.handleSubmit) return;
 
     handleStepSubmission({
       closeDialog,
@@ -106,82 +169,98 @@ function StepSchemaFormContent<
         ...config,
         onSuccess: getStepOnSuccessHandler(
           config,
-          formMethods,
+          formMethods?.current,
           isLastStep,
           closeDialog,
         ),
       },
-      currentStep,
-      formMethods,
+      currentStep, // Keep 1-based for external APIs
+      formMethods: formMethods?.current,
+      goToNextStep: handleNext, // Add the missing goToNextStep parameter
       isLastStep,
-      stepConfig: config.steps[currentStep],
+      stepConfig: config.steps[currentStep - 1], // Convert to 0-based index for array access
     });
-  }, [formMethods, config, currentStep, isLastStep, closeDialog]);
+  }, [formMethods?.current, config, currentStep, isLastStep, closeDialog, handleNext]);
 
-  const getStepFooter = useCallback(
-    (methods: any, closeDlg: () => void, dialog: any) => {
-      const stepMethods = {
-        currentStep,
-        gotoStep: stepControl.goToStep,
-        handleNext,
-        handlePrevious,
-        isFirstStep,
-        isLastStep,
-        totalSteps,
-      };
-
-      const footerFn = config.footer ?? defaultStepFormFooter;
-      return footerFn(
-        { ...stepMethods, handleSubmit: triggerSubmit },
-        methods,
-        closeDlg,
-        dialog,
-      );
-    },
-    [
-      config.footer,
-      currentStep,
-      stepControl.goToStep,
+  const schemaForms = useMemo(() => {
+    const stepMethods = {
+      currentStep, // Keep 1-based for external APIs
+      goToStep, // Use context's goToStep directly
+      jumpTo,
       handleNext,
       handlePrevious,
+      handleRetry,
       isFirstStep,
       isLastStep,
       totalSteps,
-      triggerSubmit,
-    ],
-  );
+    };
 
-  const schemaForms = useMemo(() => {
     return config.steps.map((step, index) => {
+      const isActive = currentStep === index + 1; // Compare 1-based currentStep with 0-based index
+      const isExiting = transitionState.exitingStep === index + 1;
+      const isEntering = transitionState.enteringStep === index + 1;
+
       const formConfig: FormConfig<TRequest, TResponse> = {
         ...config,
         fields: step.fields,
-        footer: config.footer === false ? false : getStepFooter,
+        footer: getStepFooterConfig(
+          isActive,
+          config.footer,
+          stepMethods,
+          triggerSubmit,
+        ),
         validationSchema: step.validationSchema,
       };
+
+      const schemaForm = (
+        <SchemaForm<TRequest>
+          active={isActive}
+          closeDialog={closeDialog}
+          config={formConfig}
+        />
+      );
+
+      const formContent = isWizardForm(config) ? (
+        <WizardStepContent
+          className="space-y-6"
+          description={step.description}
+          icon={step.icon}
+          isActive={isActive}
+          isEntering={isEntering}
+          isExiting={isExiting}
+          title={step.title}>
+          {schemaForm}
+        </WizardStepContent>
+      ) : (
+        schemaForm
+      );
+
       return (
         <FormProvider
-          adapter={config.adapter ?? "rhf"}
+          adapter={config.adapter ?? AdapterType.RHF}
           config={{ ...formConfig, steps: config.steps }}
           formInstance={formMethods}
-          key={`step-${index}`}
-          stepControl={stepControl}>
-          <SchemaForm<TRequest>
-            active={currentStep === index}
-            closeDialog={closeDialog}
-            config={formConfig}
-          />
+          key={`step-${index}`}>
+          {formContent}
         </FormProvider>
       );
     });
   }, [
     config,
     currentStep,
-    getStepFooter,
+    goToStep,
+    jumpTo,
+    handleNext,
+    handlePrevious,
+    handleRetry,
+    isFirstStep,
+    isLastStep,
+    totalSteps,
+    triggerSubmit,
     closeDialog,
     formMethods,
-    stepControl,
+    transitionState,
   ]);
 
-  return <>{schemaForms}</>;
+  return <div className="grid grid-cols-1 grid-rows-1">{schemaForms}</div>;
 }

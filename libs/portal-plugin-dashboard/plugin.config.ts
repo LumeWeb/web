@@ -8,7 +8,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 export default {
   dir: __dirname,
   exposes: {
-    ".": "./src/index",
+    ".": "./src/plugin",
     "./account/api-keys": "./src/ui/routes/account.api-keys",
     "./account/layout": "./src/ui/routes/account.layout",
     "./account/profile": "./src/ui/routes/account.profile",

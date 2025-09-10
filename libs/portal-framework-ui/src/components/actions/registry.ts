@@ -18,7 +18,9 @@ export function registerActionItemComponent(
   component: ComponentType<ActionItemProps<any>>,
 ) {
   if (actionItemRegistry.has(type)) {
-    console.warn(`ActionItemComponent type "${type}" is already registered. Overwriting.`);
+    console.warn(
+      `ActionItemComponent type "${type}" is already registered. Overwriting.`,
+    );
   }
   actionItemRegistry.set(type, component);
 }

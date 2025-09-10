@@ -15,7 +15,8 @@
     "build:portal-app-shell": "turbo build --filter=@lumeweb/portal-app-shell",
     "build:portal-plugin-dashboard": "turbo build --filter=@lumeweb/portal-plugin-dashboard",
     "e2e:portal-plugin-dashboard": "turbo run e2e --filter=@lumeweb/portal-plugin-dashboard",
-    "build:portal-plugin-core": "turbo build --filter=@lumeweb/portal-plugin-core"
+    "build:portal-plugin-core": "turbo build --filter=@lumeweb/portal-plugin-core",
+    "build:portal-plugin-ipfs": "turbo build --filter=@lumeweb/portal-plugin-ipfs"
   },
   "private": true,
   "dependencies": {
@@ -80,7 +81,8 @@
       "@refinedev/devtools-internal": "patches/@refinedev__devtools-internal.patch",
       "warn-once": "patches/warn-once.patch",
       "pluralize": "patches/pluralize.patch",
-      "papaparse": "patches/papaparse.patch"
+      "papaparse": "patches/papaparse.patch",
+      "@uppy/core": "patches/@uppy__core.patch"
     },
     "overrides": {
       "react": "18.3.1",

@@ -25,6 +25,7 @@ const configs: Options[] = [
       "!**/*image*/**",
       "!**/*.{stories,spec}.{ts,tsx}",
       "!**/*.{stories,spec}.disabled.{ts,tsx}",
+      "!**/*.md",
       "!__mocks__/**",
       "!tests/**",
     ],

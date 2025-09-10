@@ -1,9 +1,15 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DialogProvider, useDialog } from "./Dialog.context";
-import { DialogConfig } from "./Dialog.types";
+import { DialogType } from "./Dialog.types";
 
 // Mock console.log to reduce noise during tests - Removed as logs are removed from source
 // vi.spyOn(console, "log").mockImplementation(() => {});
@@ -16,14 +22,17 @@ const TestComponent = () => {
     <div>
       <button
         onClick={() =>
-          dialog.openDialog({ title: "Test Alert", type: "alert" })
+          dialog.openDialog({ title: "Test Alert", type: DialogType.ALERT })
         }>
         Open Alert
       </button>
       <button onClick={() => dialog.closeDialog()}>Close Dialog</button>
       <button
         onClick={() =>
-          dialog.replaceDialog({ title: "Replaced Alert", type: "alert" })
+          dialog.replaceDialog({
+            title: "Replaced Alert",
+            type: DialogType.ALERT,
+          })
         }>
         Replace Dialog
       </button>
@@ -38,12 +47,13 @@ const TestComponent = () => {
 const CloseDialogHelper = ({ source }: { source: "programmatic" | "user" }) => {
   const { closeDialog } = useDialog();
   return (
-    <button data-testid={`close-dialog-${source}`} onClick={() => closeDialog(source)}>
+    <button
+      data-testid={`close-dialog-${source}`}
+      onClick={() => closeDialog(source)}>
       Close Dialog ({source})
     </button>
   );
 };
-
 
 describe("DialogContext", () => {
   afterEach(() => {
@@ -147,7 +157,7 @@ describe("DialogContext", () => {
               onCancel: onCancelMock,
               onConfirm: vi.fn(),
               title: "Confirm Dialog",
-              type: "confirm",
+              type: DialogType.CONFIRM,
             })
           }>
           Open Confirm
@@ -190,7 +200,7 @@ describe("DialogContext", () => {
               onCancel: onCancelMock,
               onConfirm: vi.fn(),
               title: "Confirm Dialog",
-              type: "confirm",
+              type: DialogType.CONFIRM,
             })
           }>
           Open Confirm
@@ -211,7 +221,9 @@ describe("DialogContext", () => {
     });
 
     // Trigger programmatic close via the helper component
-    const closeProgrammaticButton = screen.getByTestId("close-dialog-programmatic");
+    const closeProgrammaticButton = screen.getByTestId(
+      "close-dialog-programmatic",
+    );
     act(() => {
       fireEvent.click(closeProgrammaticButton);
     });
