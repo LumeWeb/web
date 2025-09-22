@@ -6,10 +6,12 @@ export type ForceRerenderMethod = () => void;
 /**
  * Callback function type for receiving the force rerender method
  * This is a "reverse callback" where the framework calls this callback with a method
- * that can be stored locally and used to force a rerender when something outside 
+ * that can be stored locally and used to force a rerender when something outside
  * the render loop needs it
  */
-export type ForceRerenderCallback = (forceRerender: ForceRerenderMethod) => void;
+export type ForceRerenderCallback = (
+  forceRerender: ForceRerenderMethod,
+) => void;
 
 /**
  * Callback function type for receiving environment updates
@@ -43,8 +45,6 @@ export type AnyFormEnvironment =
   | SimpleFormEnvironment
   | StepFormEnvironment
   | WizardFormEnvironment;
-
-
 
 /**
  * Base interface for form environment
@@ -118,7 +118,7 @@ export interface WizardFormEnvironment extends FormEnvironment {
 export function isSimpleForm(
   ctx: AnyFormEnvironment,
 ): ctx is SimpleFormEnvironment {
-  return ctx.type === FormType.SIMPLE;
+  return ctx?.type === FormType.SIMPLE;
 }
 
 /**
@@ -129,7 +129,7 @@ export function isSimpleForm(
 export function isStepForm(
   ctx: AnyFormEnvironment,
 ): ctx is StepFormEnvironment {
-  return ctx.type === FormType.STEP;
+  return ctx?.type === FormType.STEP;
 }
 
 /**
@@ -140,5 +140,5 @@ export function isStepForm(
 export function isWizardForm(
   ctx: AnyFormEnvironment,
 ): ctx is WizardFormEnvironment {
-  return ctx.type === FormType.WIZARD;
+  return ctx?.type === FormType.WIZARD;
 }

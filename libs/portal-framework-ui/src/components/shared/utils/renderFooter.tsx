@@ -20,6 +20,8 @@ export interface FooterRenderConfig<T extends BaseRecord = any> {
   formMethods?: any;
   /** Whether this is rendered in a dialog context */
   isDialog?: boolean;
+  /** Callback function to handle cancel/close actions */
+  onCancel?: () => void;
   /** Configuration object for UnifiedFooter */
   unifiedFooterConfig?: any;
 }
@@ -45,6 +47,7 @@ export function renderFooter<T extends BaseRecord = any>(
     footer,
     formMethods,
     isDialog = false,
+    onCancel,
     unifiedFooterConfig,
   } = config;
 
@@ -60,6 +63,7 @@ export function renderFooter<T extends BaseRecord = any>(
       dialogConfig,
       formMethods,
       isDialog,
+      onCancel,
       stepControl,
     });
 
@@ -78,6 +82,7 @@ export function renderFooter<T extends BaseRecord = any>(
     dialogConfig,
     formMethods,
     isDialog,
+    onCancel,
     stepControl,
   });
 
@@ -96,33 +101,59 @@ function buildFooterEnvironment<T extends BaseRecord = any>({
   dialogConfig,
   formMethods,
   isDialog,
+  onCancel,
   stepControl,
 }: {
   dialogConfig?: DialogConfig<T>;
   formMethods?: any;
   isDialog: boolean;
+  onCancel?: () => void;
   stepControl?: any;
 }) {
-  if (!isDialog || !dialogConfig) {
-    // Standalone context
-    return Environment.footer()
-      .standalone()
+  // Handle standalone context (when not in dialog or dialogConfig is missing)
+  const isStandaloneContext = !isDialog || !dialogConfig;
+  if (isStandaloneContext) {
+    return buildStandaloneFooterEnvironment(formMethods, dialogConfig);
+  }
+
+  // Handle dialog context
+  return buildDialogFooterEnvironment(dialogConfig, formMethods, onCancel, stepControl);
+}
+
+/**
+ * Builds footer environment for standalone contexts
+ */
+function buildStandaloneFooterEnvironment(formMethods: any, dialogConfig: any) {
+  const builder = Environment.footer().standalone();
+  
+  // Add form context only if formMethods exists and dialogConfig.formConfig exists (when dialogConfig is provided)
+  const shouldIncludeFormContext = formMethods && (!dialogConfig || dialogConfig.formConfig);
+  if (shouldIncludeFormContext) {
+    return builder
       .simpleForm({
         isSubmitting: formMethods?.formState?.isSubmitting || false,
         methods: formMethods,
       })
       .build();
   }
+  
+  // Return basic standalone footer without form context
+  return builder.buildContainerOnly();
+}
 
-  const isWizardForm =
-    dialogConfig.formConfig && isWizardFormConfig(dialogConfig.formConfig);
-  const hasStepControl = !!stepControl;
-
+/**
+ * Builds footer environment for dialog contexts
+ */
+function buildDialogFooterEnvironment(dialogConfig: any, formMethods: any, onCancel: (() => void) | undefined, stepControl: any) {
   const builder = Environment.footer().dialog({
     dialogConfig,
-    onClose: dialogConfig.onClose,
+    onClose: onCancel || dialogConfig.onClose,
   });
 
+  // Check if this is a wizard form with step control
+  const isWizardForm = dialogConfig.formConfig && isWizardFormConfig(dialogConfig.formConfig);
+  const hasStepControl = !!stepControl;
+  
   if (isWizardForm && hasStepControl) {
     return builder
       .wizardForm({
@@ -142,10 +173,17 @@ function buildFooterEnvironment<T extends BaseRecord = any>({
       .build();
   }
 
-  return builder
-    .simpleForm({
-      isSubmitting: formMethods?.formState?.isSubmitting || false,
-      methods: formMethods,
-    })
-    .build();
+  // Add simple form context if formMethods and formConfig exist
+  const shouldIncludeSimpleFormContext = formMethods && dialogConfig.formConfig;
+  if (shouldIncludeSimpleFormContext) {
+    return builder
+      .simpleForm({
+        isSubmitting: formMethods?.formState?.isSubmitting || false,
+        methods: formMethods,
+      })
+      .build();
+  }
+
+  // Return dialog footer without form context
+  return builder.buildContainerOnly();
 }

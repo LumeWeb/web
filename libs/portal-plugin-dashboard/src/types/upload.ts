@@ -28,6 +28,7 @@ export enum FileStatus {
   COMPLETE = "complete",
   ERROR = "error",
   PENDING = "pending",
+  PREPROCESSING = "preprocessing",
   UPLOADING = "uploading",
 }
 

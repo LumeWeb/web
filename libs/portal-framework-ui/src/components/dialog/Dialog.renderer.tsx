@@ -63,6 +63,7 @@ export function DialogRenderer() {
       />
       <DialogFooterContent
         currentDialog={currentDialog}
+        onCancel={closeDialog}
       />
     </>
   );

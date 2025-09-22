@@ -7,6 +7,7 @@ import {
   ActionItemConfig,
   ActionItemType,
   createActionHelpers,
+  createDialogActions,
   createFormActions,
   createStepActions,
   createWizardActions,
@@ -15,7 +16,7 @@ import {
 } from "../actions";
 import {
   FooterContextProvider,
-  useFooterContext,
+  useOptionalFooterContext,
 } from "./context/FooterContext";
 import { footerRegistry } from "./registry/FooterRegistry";
 import {
@@ -68,18 +69,18 @@ const actionGeneratorRegistry = new ActionGeneratorRegistry();
 // Register wizard form navigation action generator (most specific)
 actionGeneratorRegistry.register({
   checker: (environment) =>
-    isWizardForm(environment.form) && !!environment.step,
+    isWizardForm(environment?.form) && !!environment?.step,
   generator: (environment, submitLabel) => {
-    const step = environment.step!;
+    const step = environment?.step;
 
     return createWizardActions({
-      isFirst: step.isFirst,
-      isLast: step.isLast,
-      isSubmitting: environment.form?.isSubmitting,
-      onClose: environment.container?.onClose,
-      onNext: environment.form?.methods?.handleSubmit,
-      onPrevious: step.onPrevious,
-      onSubmit: environment.form?.methods?.handleSubmit,
+      isFirst: step?.isFirst,
+      isLast: step?.isLast,
+      isSubmitting: environment?.form?.isSubmitting,
+      onClose: environment?.container?.onClose,
+      onNext: environment?.form?.methods?.handleSubmit,
+      onPrevious: step?.onPrevious,
+      onSubmit: environment?.form?.methods?.handleSubmit,
       submitLabel: submitLabel,
     });
   },
@@ -88,17 +89,18 @@ actionGeneratorRegistry.register({
 
 // Register step form navigation action generator
 actionGeneratorRegistry.register({
-  checker: (environment) => isStepForm(environment.form) && !!environment.step,
+  checker: (environment) =>
+    isStepForm(environment?.form) && !!environment?.step,
   generator: (environment, submitLabel) => {
-    const step = environment.step!;
+    const step = environment?.step;
 
     return createStepActions({
-      isFirst: step.isFirst,
-      isLast: step.isLast,
-      isSubmitting: environment.form?.isSubmitting,
-      onClose: environment.container?.onClose,
-      onNext: step.onNext,
-      onPrevious: step.onPrevious,
+      isFirst: step?.isFirst,
+      isLast: step?.isLast,
+      isSubmitting: environment?.form?.isSubmitting,
+      onClose: environment?.container?.onClose,
+      onNext: step?.onNext,
+      onPrevious: step?.onPrevious,
       submitLabel: submitLabel,
     });
   },
@@ -108,10 +110,14 @@ actionGeneratorRegistry.register({
 // Register dialog cancel action generator
 actionGeneratorRegistry.register({
   checker: (environment) =>
-    isDialogContainer(environment.container) && !isSimpleForm(environment.form),
-  generator: (environment) => {
-    const { cancel } = createActionHelpers();
-    return [cancel(environment.container?.onClose)];
+    isDialogContainer(environment?.container) &&
+    !isSimpleForm(environment?.form),
+  generator: (environment, submitLabel) => {
+    return createDialogActions({
+      cancelLabel: submitLabel || "Done",
+      onCancel: environment?.container?.onClose,
+      type: "confirm",
+    });
   },
   priority: 300,
 });
@@ -119,19 +125,19 @@ actionGeneratorRegistry.register({
 // Register form footer action generator
 actionGeneratorRegistry.register({
   checker: (environment) =>
-    !!environment.form &&
-    !isWizardForm(environment.form) &&
-    !isStepForm(environment.form),
+    !!environment?.form &&
+    !isWizardForm(environment?.form) &&
+    !isStepForm(environment?.form),
   generator: (environment, submitLabel) => {
     return createFormActions({
-      isSubmitting: environment.form?.isSubmitting,
-      onCancel: isDialogContainer(environment.container)
-        ? environment.container?.onClose
+      isSubmitting: environment?.form?.isSubmitting,
+      onCancel: isDialogContainer(environment?.container)
+        ? environment?.container?.onClose
         : undefined,
-      onSubmit: environment.form?.methods?.handleSubmit,
+      onSubmit: environment?.form?.methods?.handleSubmit,
       showCancel:
-        isDialogContainer(environment.container) &&
-        !!environment.container?.onClose,
+        isDialogContainer(environment?.container) &&
+        !!environment?.container?.onClose,
       submitLabel,
     });
   },
@@ -140,14 +146,14 @@ actionGeneratorRegistry.register({
 
 // Register simple form submit action generator (most broad)
 actionGeneratorRegistry.register({
-  checker: (environment) => !!environment.form,
+  checker: (environment) => !!environment?.form,
   generator: (environment, submitLabel) => {
     const { submit } = createActionHelpers();
     return [
       submit(
-        environment.form?.methods?.handleSubmit,
+        environment?.form?.methods?.handleSubmit,
         submitLabel,
-        environment.form?.isSubmitting,
+        environment?.form?.isSubmitting,
       ),
     ];
   },
@@ -166,7 +172,7 @@ export function UnifiedFooter<T extends BaseRecord = any>({
   environment,
 }: UnifiedFooterProps<T>) {
   // Implement environment sync mechanism
-  useEnvironmentSync(environment, config.environmentSync);
+  config && useEnvironmentSync(environment, config.environmentSync);
 
   return (
     <FooterContextProvider value={environment}>
@@ -186,10 +192,10 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
   className,
   config,
 }: Omit<UnifiedFooterProps<T>, "environment">) {
-  const environment = useFooterContext<T>();
+  const environment = useOptionalFooterContext<T>();
 
   // Implement environment sync mechanism
-  useEnvironmentSync(environment, config.environmentSync);
+  config && useEnvironmentSync(environment, config.environmentSync);
 
   const footerType = footerRegistry.resolveType(config, environment);
   const FooterComponent = footerRegistry.get(footerType);
@@ -197,7 +203,11 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
   // Smart submit label evaluation
   const submitLabel = useMemo(() => {
     // Check if we're in a step context and if the current step has a submitLabel
-    if (isWizardForm(environment.form) && environment.step) {
+    if (
+      environment.form &&
+      isWizardForm(environment?.form) &&
+      environment.step
+    ) {
       const currentStepIndex = environment.step.current - 1;
       const currentStep = config.steps?.[currentStepIndex];
 
@@ -224,7 +234,8 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
     }
 
     // Fallback to form-level submit label
-    const label = "submitLabel" in config ? config.submitLabel : undefined;
+    const label =
+      config && "submitLabel" in config ? config.submitLabel : undefined;
 
     // Create typed evaluation context
     const evaluationContext: SubmitLabelEvaluationContext = {
@@ -236,13 +247,15 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
           }
         : undefined,
       wizardConfig:
-        isWizardForm(environment.form) && environment.step ? config : undefined,
+        environment.form && isWizardForm(environment.form) && environment.step
+          ? config
+          : undefined,
     };
 
     // Use enhanced evaluateSubmitLabel helper with typed context
     const evaluatedLabel = evaluateSubmitLabel(label, evaluationContext);
 
-    return evaluatedLabel || "Submit";
+    return evaluatedLabel;
   }, [config, environment]);
 
   // Smart action mapping
@@ -250,7 +263,11 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
     let baseActions: any = undefined;
 
     // Check if we're in a step context and if the current step has actionButtons
-    if (isWizardForm(environment.form) && environment.step) {
+    if (
+      environment.form &&
+      isWizardForm(environment.form) &&
+      environment.step
+    ) {
       const currentStepIndex = environment.step.current - 1;
       const currentStep = config.steps?.[currentStepIndex];
 
@@ -262,11 +279,11 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
     // Fallback to form-level actionButtons if step doesn't have them
     if (baseActions === undefined) {
       baseActions =
-        "actionButtons" in config ? config.actionButtons : undefined;
+        config && "actionButtons" in config ? config.actionButtons : undefined;
     }
 
     // Check if the footer config has an actions array
-    if (Array.isArray(config.footer)) {
+    if (config && Array.isArray(config.footer)) {
       baseActions = config.footer;
     }
 
@@ -300,7 +317,7 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
     }
 
     // Check if the footer config has an actions array
-    if (Array.isArray(config.footer)) {
+    if (config && Array.isArray(config.footer)) {
       baseActions = config.footer;
     }
 
@@ -329,9 +346,10 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
     className,
     environment,
     isSubmitting: environment.form?.isSubmitting ?? false,
-    onClose: isDialogContainer(environment.container)
-      ? environment.container.onClose
-      : undefined,
+    onClose:
+      environment.container && isDialogContainer(environment.container)
+        ? environment.container.onClose
+        : undefined,
     onConfirm: environment.form?.methods?.handleSubmit,
     submitLabel,
   };

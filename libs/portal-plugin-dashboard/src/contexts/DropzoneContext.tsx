@@ -1,5 +1,3 @@
-"use client";
-
 import React, {
   createContext,
   useCallback,
@@ -11,6 +9,7 @@ import React, {
 import type { IUploadManager } from "@/types/upload";
 
 import { UploadStatus } from "@/types/upload";
+import { UppyFileDefault } from "@/features/upload";
 
 export interface DropzoneConfig {
   allowedFileTypes?: string[];
@@ -36,7 +35,9 @@ interface DropzoneContextType {
 
   handleFileButtonClick: (e: React.KeyboardEvent | React.MouseEvent) => void;
   handleFileInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleDirectoryButtonClick: (e: React.KeyboardEvent | React.MouseEvent) => void;
+  handleDirectoryButtonClick: (
+    e: React.KeyboardEvent | React.MouseEvent,
+  ) => void;
   handleDirectoryInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
 
   // State
@@ -63,10 +64,6 @@ export function DropzoneProvider({ children, config }: DropzoneProviderProps) {
   const directoryInputRef = useRef<HTMLInputElement>(null);
 
   const {
-    allowedFileTypes,
-    allowFolders,
-    maxFileSize,
-    maxNumberOfFiles,
     multiple = true,
     onDragLeave,
     onDragOver,
@@ -124,7 +121,7 @@ export function DropzoneProvider({ children, config }: DropzoneProviderProps) {
       if (e.target.files) {
         const selectedFiles = Array.from(e.target.files);
         addFiles(selectedFiles);
-        
+
         // Reset directory input value to allow selecting the same folder again
         if (directoryInputRef.current) {
           directoryInputRef.current.value = "";
