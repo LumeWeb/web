@@ -1,6 +1,6 @@
 import { CustomDialogConfig, DialogType } from "@lumeweb/portal-framework-ui";
 
-import { AvatarUpload } from "@/ui/components/AvatarUpload";
+import AvatarUpload from "@/ui/components/AvatarUpload";
 
 export function uploadAvatarDialogConfig(
   userName: string,

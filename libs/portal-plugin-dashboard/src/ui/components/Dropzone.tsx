@@ -42,7 +42,9 @@ interface DropzoneProps {
   renderDropZone?: (
     isDragOver: boolean,
     handleFileButtonClick: (e: React.KeyboardEvent | React.MouseEvent) => void,
-    handleDirectoryButtonClick: (e: React.KeyboardEvent | React.MouseEvent) => void,
+    handleDirectoryButtonClick: (
+      e: React.KeyboardEvent | React.MouseEvent,
+    ) => void,
     defaultProps: any,
   ) => React.ReactNode;
   renderFileItem?: (
@@ -178,6 +180,21 @@ function DropzoneContent({
       handleFilesChange,
     );
 
+    // Register for preprocess events
+    const cleanupPreprocessProgress = uploadManager.on(
+      "preprocess-progress",
+      () => {
+        forceUpdateCallback();
+      },
+    );
+
+    const cleanupPreprocessComplete = uploadManager.on(
+      "preprocess-complete",
+      () => {
+        forceUpdateCallback();
+      },
+    );
+
     // Cleanup function to remove all event callbacks
     return () => {
       cleanupFileAdded();
@@ -185,16 +202,19 @@ function DropzoneContent({
       cleanupUploadProgress();
       cleanupComplete();
       cleanupError();
+      cleanupPreprocessProgress();
+      cleanupPreprocessComplete();
       cleanupFilesAdded();
     };
   }, [uploadManager, onFilesChange]);
-
 
   // Default drop zone renderer
   const defaultRenderDropZone = (
     isDragOver: boolean,
     handleFileButtonClick: (e: React.KeyboardEvent | React.MouseEvent) => void,
-    handleDirectoryButtonClick: (e: React.KeyboardEvent | React.MouseEvent) => void,
+    handleDirectoryButtonClick: (
+      e: React.KeyboardEvent | React.MouseEvent,
+    ) => void,
   ) => {
     return (
       <div
@@ -234,20 +254,18 @@ function DropzoneContent({
           />
         )}
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-          <Button 
-            disabled={disabled} 
+          <Button
+            disabled={disabled}
             onClick={handleFileButtonClick}
-            type="button"
-          >
+            type="button">
             Upload Files
           </Button>
           {allowFolders && (
-            <Button 
-              disabled={disabled} 
+            <Button
+              disabled={disabled}
               onClick={handleDirectoryButtonClick}
               type="button"
-              variant="secondary"
-            >
+              variant="secondary">
               Upload Directory
             </Button>
           )}
@@ -256,24 +274,32 @@ function DropzoneContent({
     );
   };
 
-
   return (
     <Card className="border-0">
       <CardContent className="space-y-4">
         {/* Drop Zone */}
         {showDropZone &&
           (renderDropZone
-            ? renderDropZone(isDragOver, handleFileButtonClick, handleDirectoryButtonClick, {
-                containerRef,
-                directoryInputRef,
-                disabled,
-                dragLeaveClassName,
-                dragOverClassName,
-                dropZoneClassName,
-                fileInputRef,
-                multiple,
-              })
-            : defaultRenderDropZone(isDragOver, handleFileButtonClick, handleDirectoryButtonClick))}
+            ? renderDropZone(
+                isDragOver,
+                handleFileButtonClick,
+                handleDirectoryButtonClick,
+                {
+                  containerRef,
+                  directoryInputRef,
+                  disabled,
+                  dragLeaveClassName,
+                  dragOverClassName,
+                  dropZoneClassName,
+                  fileInputRef,
+                  multiple,
+                },
+              )
+            : defaultRenderDropZone(
+                isDragOver,
+                handleFileButtonClick,
+                handleDirectoryButtonClick,
+              ))}
 
         {/* File List */}
         {showFileList && files.length > 0 && (
@@ -283,22 +309,22 @@ function DropzoneContent({
             )}
             <div className="max-h-60 space-y-2 overflow-y-auto">
               {files.map((file) =>
-                renderFileItem
-                  ? renderFileItem(file as UppyFile, handleRemoveFile, {
-                      disabled,
-                      fileItemClassName,
-                    })
-                  : (
-                    <FileItem
-                      alwaysShowRemoveButton={alwaysShowRemoveButton}
-                      disabled={disabled}
-                      file={file as UppyFile}
-                      fileItemClassName={fileItemClassName}
-                      hideStatusIndicators={hideStatusIndicators}
-                      key={file.id}
-                      onRemove={handleRemoveFile}
-                    />
-                  ),
+                renderFileItem ? (
+                  renderFileItem(file as UppyFile, handleRemoveFile, {
+                    disabled,
+                    fileItemClassName,
+                  })
+                ) : (
+                  <FileItem
+                    alwaysShowRemoveButton={alwaysShowRemoveButton}
+                    disabled={disabled}
+                    file={file as UppyFile}
+                    fileItemClassName={fileItemClassName}
+                    hideStatusIndicators={hideStatusIndicators}
+                    key={file.id}
+                    onRemove={handleRemoveFile}
+                  />
+                ),
               )}
             </div>
           </div>

@@ -51,11 +51,6 @@ export function createFooterRegistry(): FooterRegistry {
       config: any,
       context: FooterEnvironment<T>,
     ): FooterType {
-      // Priority 1: Explicit footer configuration
-      if ("footer" in config && config.footer === false) {
-        return FooterType.CUSTOM;
-      }
-
       // Priority 2: Actions dropdown (dialog-specific)
       if (
         context.container.type === ContainerType.DIALOG &&
@@ -67,14 +62,14 @@ export function createFooterRegistry(): FooterRegistry {
       }
 
       // Priority 3: Form type based on context
-      switch (context.form.type) {
+      switch (context.form?.type) {
         case FormType.WIZARD:
           return FooterType.WIZARD_FORM;
         case FormType.STEP:
           return FooterType.STEP_FORM;
         case FormType.SIMPLE:
         default:
-          return FooterType.FORM;
+          return FooterType.DEFAULT;
       }
     },
   };

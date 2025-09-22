@@ -50,13 +50,13 @@ interface StorageInfo {
   usedPercentage: number;
 }
 
-const DEFAULT_MAIN_CONFIG: Partial<UploadManagerConfig> = {
+export const DEFAULT_MAIN_CONFIG: Partial<UploadManagerConfig> = {
   autoProceed: false,
   maxNumberOfFiles: undefined,
   type: UPLOAD_TYPE_MAIN,
 };
 
-const DEFAULT_AVATAR_CONFIG: Partial<UploadManagerConfig> = {
+export const DEFAULT_AVATAR_CONFIG: Partial<UploadManagerConfig> = {
   allowedFileTypes: ["image/*"],
   autoProceed: true,
   maxNumberOfFiles: 1,
@@ -186,7 +186,7 @@ export class Manager implements IUploadManager {
     // If upload limit isn't available, try to fetch it first
     if (this.#uploadLimit === null) {
       await this.#fetchUploadLimit();
-      
+
       // If still null after fetching, default to small file handling
       if (this.#uploadLimit === null) {
         return `${serviceId}${SMALL_PLUGIN_SUFFIX}`;
@@ -466,7 +466,7 @@ export class Manager implements IUploadManager {
         break;
       }
     }
-    
+
     // If CID wasn't found in response, check meta
     if (!cid) {
       cid = file.meta?.cid;

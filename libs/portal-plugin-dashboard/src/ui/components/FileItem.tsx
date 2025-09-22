@@ -89,6 +89,7 @@ export function FileItem({
           <div className="mt-1">
             <div className="flex items-center gap-2 text-xs">
               <Badge variant={getBadgeVariant(fileStatus)}>
+                {fileStatus === FileStatus.PREPROCESSING && "Processing..."}
                 {fileStatus === FileStatus.UPLOADING &&
                   (isFolderBundle(file)
                     ? "Processing folder..."
@@ -97,15 +98,27 @@ export function FileItem({
                 {fileStatus === FileStatus.ERROR && (file.error || "Error")}
               </Badge>
               {fileStatus !== FileStatus.COMPLETE &&
-                file.progress?.percentage !== undefined && (
-                  <span>{Math.round(file.progress.percentage)}%</span>
+                ((file.progress?.percentage !== undefined) || 
+                 (fileStatus === FileStatus.PREPROCESSING && file.progress?.preprocess?.value !== undefined)) && (
+                  <span>
+                    {Math.round(
+                      fileStatus === FileStatus.PREPROCESSING 
+                        ? file.progress?.preprocess?.value || 0
+                        : file.progress?.percentage || 0
+                    )}%
+                  </span>
                 )}
             </div>
             {fileStatus !== FileStatus.COMPLETE &&
-              file.progress?.percentage !== undefined && (
+              ((file.progress?.percentage !== undefined) || 
+               (fileStatus === FileStatus.PREPROCESSING && file.progress?.preprocess?.value !== undefined)) && (
                 <Progress
                   className="mt-1 h-1"
-                  value={file.progress.percentage}
+                  value={
+                    fileStatus === FileStatus.PREPROCESSING 
+                      ? file.progress?.preprocess?.value || 0
+                      : file.progress?.percentage || 0
+                  }
                 />
               )}
           </div>
@@ -146,6 +159,10 @@ function getFileStatus(file: UppyFile): FileStatus {
   }
   if (file.progress?.uploadStarted) {
     return FileStatus.UPLOADING;
+  }
+  // Check if file is in preprocessing state
+  if (file.progress?.preprocess) {
+    return FileStatus.PREPROCESSING;
   }
   return FileStatus.PENDING;
 }

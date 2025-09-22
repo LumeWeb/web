@@ -22,15 +22,10 @@ export function UploadManagerProvider({
   defaultConfig,
 }: UploadManagerProviderProps) {
   const uploadManagerRef = useRef<Manager | null>(null);
-  const [config, setConfig] = useState<undefined | UploadManagerConfig>(
-    defaultConfig,
-  );
+  const config = defaultConfig;
 
   const getUploadManager = (newConfig?: UploadManagerConfig) => {
-    if (!uploadManagerRef.current || newConfig) {
-      if (newConfig) {
-        setConfig(newConfig);
-      }
+    if (!uploadManagerRef.current) {
       uploadManagerRef.current = new Manager(
         config || newConfig || { type: "main" },
       );
