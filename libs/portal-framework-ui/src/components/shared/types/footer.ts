@@ -108,8 +108,8 @@ export function isDialogFooterEnvironment<T extends BaseRecord = any>(
  */
 export function isSimpleFooterEnvironment<T extends BaseRecord = any>(
   ctx: FooterEnvironment<T>,
-): ctx is FooterFooterEnvironment<T> & { form: SimpleFormEnvironment } {
-  return ctx.form.type === "simple";
+): ctx is FooterEnvironment<T> & { form: SimpleFormEnvironment } {
+  return ctx.form.type === FormType.SIMPLE;
 }
 
 /**
@@ -133,7 +133,7 @@ export function isStandaloneFooterEnvironment<T extends BaseRecord = any>(
 export function isStepFooterEnvironment<T extends BaseRecord = any>(
   ctx: FooterEnvironment<T>,
 ): ctx is FooterEnvironment<T> & { form: StepFormEnvironment } {
-  return ctx.form.type === "step";
+  return ctx.form.type === FormType.STEP;
 }
 
 /**
@@ -145,5 +145,5 @@ export function isStepFooterEnvironment<T extends BaseRecord = any>(
 export function isWizardFooterEnvironment<T extends BaseRecord = any>(
   ctx: FooterEnvironment<T>,
 ): ctx is FooterEnvironment<T> & { form: WizardFormEnvironment } {
-  return ctx.form.type === "wizard";
+  return ctx.form.type === FormType.WIZARD;
 }
