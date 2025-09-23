@@ -116,7 +116,7 @@ export interface WizardFormEnvironment extends FormEnvironment {
  * @returns True if the form environment is a simple form, false otherwise
  */
 export function isSimpleForm(
-  ctx: AnyFormEnvironment,
+  ctx: AnyFormEnvironment | undefined,
 ): ctx is SimpleFormEnvironment {
   return ctx?.type === FormType.SIMPLE;
 }
@@ -127,7 +127,7 @@ export function isSimpleForm(
  * @returns True if the form environment is a step form, false otherwise
  */
 export function isStepForm(
-  ctx: AnyFormEnvironment,
+  ctx: AnyFormEnvironment | undefined,
 ): ctx is StepFormEnvironment {
   return ctx?.type === FormType.STEP;
 }
@@ -138,7 +138,7 @@ export function isStepForm(
  * @returns True if the form environment is a wizard form, false otherwise
  */
 export function isWizardForm(
-  ctx: AnyFormEnvironment,
+  ctx: AnyFormEnvironment | undefined,
 ): ctx is WizardFormEnvironment {
   return ctx?.type === FormType.WIZARD;
 }
