@@ -9,7 +9,7 @@ export function DefaultFooter<T = any>({
   className,
   isSubmitting,
   onClose,
-}: BaseFooterProps<T>) {
+}: Pick<BaseFooterProps<T>, "actionButtons" | "className" | "isSubmitting" | "onClose">) {
   return (
     <ActionListRenderer
       actions={actionButtons}

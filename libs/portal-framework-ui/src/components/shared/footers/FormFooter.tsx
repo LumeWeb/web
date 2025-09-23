@@ -3,7 +3,7 @@ import React from "react";
 
 import { ActionListRenderer } from "../../actions";
 import { createFormActions } from "../../actions/actionHelpers";
-import { BaseFooterProps } from "../types/footer";
+import { FormFooterProps } from "../types/footer";
 
 export function FormFooter<T = any>({
   actionButtons,
@@ -13,7 +13,7 @@ export function FormFooter<T = any>({
   onClose,
   onConfirm,
   submitLabel = "Submit",
-}: BaseFooterProps<T>) {
+}: FormFooterProps<T>) {
   const formActions = createFormActions({
     isSubmitting,
     onCancel: onClose,
