@@ -39,14 +39,21 @@ export interface BaseFooterProps<T extends BaseRecord = any> {
    * Function to close the container
    */
   onClose?: () => void;
+}
+
+/**
+ * Interface representing the props for a form footer component
+ * @template T - The type of record being used
+ */
+export interface FormFooterProps<T extends BaseRecord = any> extends BaseFooterProps<T> {
   /**
    * Function to confirm the form submission
    */
   onConfirm?: () => void;
   /**
-   * Label for the submit button, either a string or a function that returns a string
+   * Label for the submit button
    */
-  submitLabel?: ((values: Partial<T>) => string) | string;
+  submitLabel?: string;
 }
 
 // createFooterEnvironment function is now in environment/builders.ts
@@ -101,7 +108,7 @@ export function isDialogFooterEnvironment<T extends BaseRecord = any>(
  */
 export function isSimpleFooterEnvironment<T extends BaseRecord = any>(
   ctx: FooterEnvironment<T>,
-): ctx is FooterEnvironment<T> & { form: SimpleFormEnvironment } {
+): ctx is FooterFooterEnvironment<T> & { form: SimpleFormEnvironment } {
   return ctx.form.type === "simple";
 }
 

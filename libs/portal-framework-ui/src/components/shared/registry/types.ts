@@ -1,4 +1,4 @@
-import { BaseFooterProps } from "../types/footer";
+import { BaseFooterProps, FormFooterProps } from "../types/footer";
 import { BaseHeaderProps } from "../types/header";
 
 export enum FooterType {
@@ -17,5 +17,5 @@ export enum HeaderType {
   WIZARD = "wizard",
 }
 
-export type FooterComponent<T = any> = React.ComponentType<BaseFooterProps<T>>;
+export type FooterComponent<T = any> = React.ComponentType<BaseFooterProps<T> | FormFooterProps<T>>;
 export type HeaderComponent<T = any> = React.ComponentType<BaseHeaderProps<T>>;

@@ -2,6 +2,8 @@ import type { BaseRecord } from "@refinedev/core";
 
 import React, { useMemo } from "react";
 
+import { FooterType } from "./registry/types";
+
 import { isActionButtonsFunction } from "../../components/form/types";
 import {
   ActionItemConfig,
@@ -222,13 +224,13 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
           wizardConfig: config,
         };
 
-        // Evaluate step-specific submit label
+        // Evaluate step-specific submit label and ensure it's a string
         const evaluatedLabel = evaluateSubmitLabel(
           currentStep.submitLabel,
           evaluationContext,
         );
-        if (evaluatedLabel) {
-          return evaluatedLabel;
+        if (evaluatedLabel !== undefined) {
+          return String(evaluatedLabel);
         }
       }
     }
@@ -255,7 +257,8 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
     // Use enhanced evaluateSubmitLabel helper with typed context
     const evaluatedLabel = evaluateSubmitLabel(label, evaluationContext);
 
-    return evaluatedLabel;
+    // Ensure submitLabel is always a string with a safe default
+    return String(evaluatedLabel || "Submit");
   }, [config, environment]);
 
   // Smart action mapping
@@ -341,7 +344,10 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
     }));
   }, [config, environment, submitLabel]);
 
-  const props: BaseFooterProps<T> = {
+  // Determine if footer type needs form-specific props
+  const needsFormProps = [FooterType.FORM, FooterType.STEP_FORM].includes(footerType);
+
+  const baseProps: BaseFooterProps<T> = {
     actionButtons: actions,
     className,
     environment,
@@ -350,9 +356,16 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
       environment.container && isDialogContainer(environment.container)
         ? environment.container.onClose
         : undefined,
-    onConfirm: environment.form?.methods?.handleSubmit,
-    submitLabel,
   };
+
+  // Explicitly handle props based on footer type
+  const props = needsFormProps 
+    ? {
+        ...baseProps,
+        onConfirm: environment.form?.methods?.handleSubmit,
+        submitLabel,
+      }
+    : baseProps;
 
   return <FooterComponent {...props} />;
 }

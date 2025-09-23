@@ -11,9 +11,7 @@ export function WizardFooter<T = any>({
   className,
   isSubmitting,
   onClose,
-  onConfirm,
-  submitLabel = "Continue",
-}: BaseFooterProps<T>) {
+}: Pick<BaseFooterProps<T>, "actionButtons" | "className" | "isSubmitting" | "onClose">) {
   const context = useFooterContext<T>();
 
   // Wizard footer requires step context
