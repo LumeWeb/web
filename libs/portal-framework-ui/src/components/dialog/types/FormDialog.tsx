@@ -2,12 +2,15 @@ import { DialogHeader, DialogTitle } from "@lumeweb/portal-framework-ui-core";
 import { BaseRecord } from "@refinedev/core";
 import React from "react";
 
-import { createFormActions } from "../../actions/actionHelpers";
-import { isStepFormConfig, SchemaForm, StepSchemaForm } from "../../form";
-import { FormDialogConfig } from "../Dialog.types";
-import { useIsFormDialog } from "../utils/dialogDetection";
-import { useForceRerender } from "../../shared/hooks/useForceRerender";
-import type { ForceRerenderCallback } from "../../shared/types/form";
+import {
+  createFormActions,
+  FormDialogConfig,
+  isStepFormConfig,
+  SchemaForm,
+  StepSchemaForm,
+  useForceRerender,
+  useIsFormDialog,
+} from "@/components";
 
 interface FormDialogProps<
   T extends BaseRecord = any,
@@ -32,7 +35,7 @@ export function FormDialog<
   title,
 }: FormDialogProps<T, R>) {
   const isInFormDialog = useIsFormDialog();
-  
+
   // Implement forceRerender mechanism
   useForceRerender(formConfig.forceRerender);
 

@@ -2,7 +2,7 @@ import { Input } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
 import { registerFormComponent } from ".";
-import { FormFieldType } from "../";
+import { FormFieldType } from "@/components";
 
 interface EmailInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   autocomplete?: string;

@@ -1,4 +1,4 @@
-import { CustomDialogConfig, DialogType } from "@lumeweb/portal-framework-ui";
+import { CustomDialogConfig, DialogType, DialogTypes } from "@lumeweb/portal-framework-ui";
 
 import AvatarUpload from "@/ui/components/AvatarUpload";
 
@@ -16,6 +16,6 @@ export function uploadAvatarDialogConfig(
       />
     ),
     title: "Update Profile Picture",
-    type: DialogType.CUSTOM,
+    type: DialogTypes.CUSTOM,
   };
 }

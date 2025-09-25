@@ -1,16 +1,17 @@
-import { DialogConfig, DialogType } from "./Dialog.types";
+import { DialogConfig, DialogType, DialogTypes } from "./Dialog.types";
 import { AlertDialog } from "./types/AlertDialog";
 import { ConfirmDialog } from "./types/ConfirmDialog";
 import { CustomDialog } from "./types/CustomDialog";
 import { FormDialog } from "./types/FormDialog";
 import { WizardDialog } from "./types/WizardDialog";
 
+// TODO: use DialogTypes enum after solving bundler ordering problem
 export const dialogComponents = {
-  [DialogType.ALERT]: AlertDialog,
-  [DialogType.CONFIRM]: ConfirmDialog,
-  [DialogType.CUSTOM]: CustomDialog,
-  [DialogType.FORM]: FormDialog,
-  [DialogType.WIZARD_FORM]: WizardDialog,
+  alert: AlertDialog,
+  confirm: ConfirmDialog,
+  custom: CustomDialog,
+  form: FormDialog,
+  wizard_form: WizardDialog,
 } as const;
 
 export function getDialogComponent(type: DialogType) {

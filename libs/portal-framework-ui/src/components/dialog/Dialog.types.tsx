@@ -1,16 +1,24 @@
 import { BaseRecord } from "@refinedev/core";
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 
-import type { FormConfig, StepFormConfig, WizardFormConfig } from "../form";
-import type { ForceRerenderCallback, EnvironmentSyncCallback } from "../shared/types/form";
-
-import { ActionItemConfig, ActionListLayout } from "../actions";
-import { FormProvider } from "../form/context";
-import { StepControlProvider } from "../form/StepControlContext";
-import { AdapterType, isStepFormConfig } from "../form/types";
-import { ProgressStyleType } from "../shared/types/header";
-import { COMPONENT_SIZE_CLASSES, ComponentSize } from "../sizing";
-import { createStepRetryHandler } from "../form/utils/stepRetry";
+import type {
+  EnvironmentSyncCallback,
+  ForceRerenderCallback,
+  FormConfig,
+  StepFormConfig,
+  WizardFormConfig
+} from "@/components";
+import {
+  ActionItemConfig,
+  ActionListLayout,
+  AdapterType,
+  COMPONENT_SIZE_CLASSES,
+  ComponentSize,
+  createStepRetryHandler,
+  FormProvider,
+  isStepFormConfig,
+  StepControlProvider
+} from "@/components";
 
 /**
  * Dialog Configuration API
@@ -23,7 +31,7 @@ import { createStepRetryHandler } from "../form/utils/stepRetry";
  *
  * // Simple alert
  * openDialog({
- *   type: DialogType.ALERT,
+ *   type: DialogTypes.ALERT,
  *   title: 'Notification',
  *   description: 'Update successful',
  *   variant: 'success'
@@ -31,7 +39,7 @@ import { createStepRetryHandler } from "../form/utils/stepRetry";
  *
  * // Confirmation dialog
  * openDialog({
- *   type: DialogType.CONFIRM,
+ *   type: DialogTypes.CONFIRM,
  *   title: 'Confirm Action',
  *   cancelText: 'Cancel',
  *   confirmText: 'Proceed',
@@ -40,7 +48,7 @@ import { createStepRetryHandler } from "../form/utils/stepRetry";
  *
  * // Form dialog
  * openDialog({
- *   type: DialogType.FORM,
+ *   type: DialogTypes.FORM,
  *   title: 'Create Item',
  *   formSchema: z.object({ name: z.string() }),
  *   onSubmit: handleSubmit
@@ -48,7 +56,7 @@ import { createStepRetryHandler } from "../form/utils/stepRetry";
  *
  * // Wizard form dialog
  * openDialog({
- *   type: DialogType.WIZARD_FORM,
+ *   type: DialogTypes.WIZARD_FORM,
  *   title: 'Multi-step Form',
  *   formConfig: wizardConfig,
  *   onSubmit: handleSubmit
@@ -56,7 +64,7 @@ import { createStepRetryHandler } from "../form/utils/stepRetry";
  *
  * // Custom dialog
  * openDialog({
- *   type: DialogType.CUSTOM,
+ *   type: DialogTypes.CUSTOM,
  *   title: 'Custom Content',
  *   content: <MyComponent />,
  *   footer: <CustomFooter />
@@ -67,7 +75,7 @@ import { createStepRetryHandler } from "../form/utils/stepRetry";
 // 1. TYPE ENUMS & CONSTANTS
 // =============================================================================
 
-export const DialogType = {
+export const DialogTypes = {
   ALERT: "alert",
   CONFIRM: "confirm",
   CUSTOM: "custom",
@@ -75,7 +83,7 @@ export const DialogType = {
   WIZARD_FORM: "wizard_form",
 } as const;
 
-export type DialogType = (typeof DialogType)[keyof typeof DialogType];
+export type DialogType = (typeof DialogTypes)[keyof typeof DialogTypes];
 
 export const DialogIconLayout = {
   CENTER: "center",
@@ -152,26 +160,26 @@ export const DIALOG_POSITION_CLASSES = {
 export function isAlertDialog(
   config: DialogConfig,
 ): config is AlertDialogConfig {
-  return config.type === DialogType.ALERT;
+  return config.type === DialogTypes.ALERT;
 }
 
 export function isConfirmDialog(
   config: DialogConfig,
 ): config is ConfirmDialogConfig {
-  return config.type === DialogType.CONFIRM;
+  return config.type === DialogTypes.CONFIRM;
 }
 
 export function isCustomDialog(
   config: DialogConfig,
 ): config is CustomDialogConfig {
-  return config.type === DialogType.CUSTOM;
+  return config.type === DialogTypes.CUSTOM;
 }
 
 export function isFormDialog<
   T extends BaseRecord = any,
   R extends BaseRecord = any,
 >(config: DialogConfig<T, R>): config is FormDialogConfig<T, R> {
-  return config.type === DialogType.FORM;
+  return config.type === DialogTypes.FORM;
 }
 
 export function isWizardDialogConfig<
@@ -180,18 +188,18 @@ export function isWizardDialogConfig<
 >(
   config: DialogConfig<TRequest, TResponse>,
 ): config is WizardDialogConfig<TRequest, TResponse> {
-  return config.type === DialogType.WIZARD_FORM;
+  return config.type === DialogTypes.WIZARD_FORM;
 }
 
 // Type checker functions for each dialog type
 const dialogTypeCheckers = {
-  alert: (config: DialogConfig): boolean => config.type === DialogType.ALERT,
+  alert: (config: DialogConfig): boolean => config.type === DialogTypes.ALERT,
   confirm: (config: DialogConfig): boolean =>
-    config.type === DialogType.CONFIRM,
-  custom: (config: DialogConfig): boolean => config.type === DialogType.CUSTOM,
-  form: (config: DialogConfig): boolean => config.type === DialogType.FORM,
+    config.type === DialogTypes.CONFIRM,
+  custom: (config: DialogConfig): boolean => config.type === DialogTypes.CUSTOM,
+  form: (config: DialogConfig): boolean => config.type === DialogTypes.FORM,
   wizard_form: (config: DialogConfig): boolean =>
-    config.type === DialogType.WIZARD_FORM,
+    config.type === DialogTypes.WIZARD_FORM,
 } as const;
 
 // Registry mapping function to determine the dialog type based on config
@@ -364,7 +372,7 @@ export interface AlertDialogConfig extends DialogBaseConfig {
   description?: React.FC | React.ReactNode | string;
   onCancel?: (source: "programmatic" | "user") => void;
   onConfirm?: () => Promise<void> | void;
-  type: typeof DialogType.ALERT;
+  type: typeof DialogTypes.ALERT;
 }
 
 export interface ConfirmDialogConfig extends DialogBaseConfig {
@@ -372,12 +380,12 @@ export interface ConfirmDialogConfig extends DialogBaseConfig {
   confirmText: string;
   onCancel?: (source: "programmatic" | "user") => void;
   onConfirm: () => Promise<void> | void;
-  type: typeof DialogType.CONFIRM;
+  type: typeof DialogTypes.CONFIRM;
 }
 
 export interface CustomDialogConfig extends DialogBaseConfig {
   onCancel?: (source: "programmatic" | "user") => void;
-  type: typeof DialogType.CUSTOM;
+  type: typeof DialogTypes.CUSTOM;
 }
 
 export interface DialogActionsConfig {
@@ -471,7 +479,7 @@ export interface FormDialogConfig<
   onSubmit: (values: TRequest) => Promise<TResponse>;
   /** Callback when form submission succeeds - required for form dialogs */
   onSuccess: (response: TResponse, values: TRequest) => void;
-  type: typeof DialogType.FORM;
+  type: typeof DialogTypes.FORM;
 }
 
 export interface WizardDialogConfig<
@@ -488,15 +496,15 @@ export interface WizardDialogConfig<
   onSubmit?: (values: TRequest) => Promise<TResponse>;
   /** Callback when form submission succeeds */
   onSuccess?: (response: TResponse, values: TRequest) => void;
-  type: typeof DialogType.WIZARD_FORM;
+  type: typeof DialogTypes.WIZARD_FORM;
 }
 
 export const dialogContextRequirements: Record<DialogType, string[]> = {
-  [DialogType.ALERT]: [],
-  [DialogType.CONFIRM]: [],
-  [DialogType.CUSTOM]: [],
-  [DialogType.FORM]: ["form"],
-  [DialogType.WIZARD_FORM]: ["form", "stepControl"],
+  [DialogTypes.ALERT]: [],
+  [DialogTypes.CONFIRM]: [],
+  [DialogTypes.CUSTOM]: [],
+  [DialogTypes.FORM]: ["form"],
+  [DialogTypes.WIZARD_FORM]: ["form", "stepControl"],
 };
 
 export type DialogConfig<

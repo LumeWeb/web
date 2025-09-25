@@ -2,7 +2,7 @@ import { Input as BaseInput, cn } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
 import { registerFormComponent } from ".";
-import { FormFieldType } from "../";
+import { FormFieldType } from "@/components";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   autocomplete?: string;

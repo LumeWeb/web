@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Account API
  * API endpoints for managing user accounts, authentication, and API keys.
- * OpenAPI spec version: unknown
+ * OpenAPI spec version: develop
  */
 import type {
   APIKeyCreateRequest,
@@ -14,24 +14,87 @@ import type {
   Error,
   ErrorResponse,
   GetApiAccountKeysParams,
+  GetApiOperationsParams,
   LoginRequest,
   LoginResponse,
   OTPDisableRequest,
   OTPGenerateResponse,
   OTPValidateRequest,
   OTPVerifyRequest,
+  OperationDetailResponse,
+  OperationFiltersResponseResponse,
+  OperationListItemResponse,
   PasswordResetRequest,
   PasswordResetVerifyRequest,
   PongResponse,
+  PostApiAccountAvatarBody,
+  PostApiAccountVerifyEmailParams,
   RegisterRequest,
   ResendVerifyEmailRequest,
   UpdateEmailRequest,
   UpdatePasswordRequest,
+  UpdateProfileRequest,
   UploadLimitResponse,
   Uuid,
   VerifyEmailRequest
 } from './accountAPI.schemas';
 
+
+
+/**
+ * Initiates the process to delete the authenticated user's account.
+ * @summary Request account deletion
+ */
+export type deleteApiAccountResponse200 = {
+  data: null
+  status: 200
+}
+
+export type deleteApiAccountResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type deleteApiAccountResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type deleteApiAccountResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+    
+export type deleteApiAccountResponseComposite = deleteApiAccountResponse200 | deleteApiAccountResponse400 | deleteApiAccountResponse404 | deleteApiAccountResponse500;
+    
+export type deleteApiAccountResponse = deleteApiAccountResponseComposite & {
+  headers: Headers;
+}
+
+export const getDeleteApiAccountUrl = () => {
+
+
+  
+
+  return `/api/api/account`
+}
+
+export const deleteApiAccount = async ( options?: RequestInit): Promise<deleteApiAccountResponse> => {
+  
+  const res = await fetch(getDeleteApiAccountUrl(),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: deleteApiAccountResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as deleteApiAccountResponse
+}
 
 
 /**
@@ -101,58 +164,189 @@ export const getApiAccount = async ( options?: RequestInit): Promise<getApiAccou
 
 
 /**
- * Initiates the process to delete the authenticated user's account.
- * @summary Request account deletion
+ * Updates the authenticated user's profile information. Email cannot be updated through this endpoint.
+ * @summary Update profile information
  */
-export type deleteApiAccountDeleteResponse200 = {
+export type patchApiAccountResponse200 = {
   data: null
   status: 200
 }
 
-export type deleteApiAccountDeleteResponse400 = {
+export type patchApiAccountResponse400 = {
   data: ErrorResponse
   status: 400
 }
 
-export type deleteApiAccountDeleteResponse404 = {
+export type patchApiAccountResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type patchApiAccountResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type patchApiAccountResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type patchApiAccountResponse500 = {
+  data: Error
+  status: 500
+}
+    
+export type patchApiAccountResponseComposite = patchApiAccountResponse200 | patchApiAccountResponse400 | patchApiAccountResponse401 | patchApiAccountResponse403 | patchApiAccountResponse404 | patchApiAccountResponse500;
+    
+export type patchApiAccountResponse = patchApiAccountResponseComposite & {
+  headers: Headers;
+}
+
+export const getPatchApiAccountUrl = () => {
+
+
+  
+
+  return `/api/api/account`
+}
+
+export const patchApiAccount = async (updateProfileRequest: UpdateProfileRequest, options?: RequestInit): Promise<patchApiAccountResponse> => {
+  
+  const res = await fetch(getPatchApiAccountUrl(),
+  {      
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updateProfileRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: patchApiAccountResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as patchApiAccountResponse
+}
+
+
+/**
+ * Retrieves the authenticated user's profile picture
+ * @summary Get Avatar
+ */
+export type getApiAccountAvatarResponse200 = {
+  data: null
+  status: 200
+}
+
+export type getApiAccountAvatarResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type getApiAccountAvatarResponse404 = {
   data: ErrorResponse
   status: 404
 }
 
-export type deleteApiAccountDeleteResponse500 = {
+export type getApiAccountAvatarResponse500 = {
   data: ErrorResponse
   status: 500
 }
     
-export type deleteApiAccountDeleteResponseComposite = deleteApiAccountDeleteResponse200 | deleteApiAccountDeleteResponse400 | deleteApiAccountDeleteResponse404 | deleteApiAccountDeleteResponse500;
+export type getApiAccountAvatarResponseComposite = getApiAccountAvatarResponse200 | getApiAccountAvatarResponse400 | getApiAccountAvatarResponse404 | getApiAccountAvatarResponse500;
     
-export type deleteApiAccountDeleteResponse = deleteApiAccountDeleteResponseComposite & {
+export type getApiAccountAvatarResponse = getApiAccountAvatarResponseComposite & {
   headers: Headers;
 }
 
-export const getDeleteApiAccountDeleteUrl = () => {
+export const getGetApiAccountAvatarUrl = () => {
 
 
   
 
-  return `/api/api/account/delete`
+  return `/api/api/account/avatar`
 }
 
-export const deleteApiAccountDelete = async ( options?: RequestInit): Promise<deleteApiAccountDeleteResponse> => {
+export const getApiAccountAvatar = async ( options?: RequestInit): Promise<getApiAccountAvatarResponse> => {
   
-  const res = await fetch(getDeleteApiAccountDeleteUrl(),
+  const res = await fetch(getGetApiAccountAvatarUrl(),
   {      
     ...options,
-    method: 'DELETE'
+    method: 'GET'
     
     
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text()
-  const data: deleteApiAccountDeleteResponse['data'] = body ? JSON.parse(body) : {}
+  const data: getApiAccountAvatarResponse['data'] = body ? JSON.parse(body) : {}
 
-  return { data, status: res.status, headers: res.headers } as deleteApiAccountDeleteResponse
+  return { data, status: res.status, headers: res.headers } as getApiAccountAvatarResponse
+}
+
+
+/**
+ * Uploads a profile picture/avatar
+ * @summary Upload Avatar
+ */
+export type postApiAccountAvatarResponse200 = {
+  data: ErrorResponse
+  status: 200
+}
+
+export type postApiAccountAvatarResponse204 = {
+  data: null
+  status: 204
+}
+
+export type postApiAccountAvatarResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type postApiAccountAvatarResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type postApiAccountAvatarResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+    
+export type postApiAccountAvatarResponseComposite = postApiAccountAvatarResponse200 | postApiAccountAvatarResponse204 | postApiAccountAvatarResponse400 | postApiAccountAvatarResponse404 | postApiAccountAvatarResponse500;
+    
+export type postApiAccountAvatarResponse = postApiAccountAvatarResponseComposite & {
+  headers: Headers;
+}
+
+export const getPostApiAccountAvatarUrl = () => {
+
+
+  
+
+  return `/api/api/account/avatar`
+}
+
+export const postApiAccountAvatar = async (postApiAccountAvatarBody: PostApiAccountAvatarBody, options?: RequestInit): Promise<postApiAccountAvatarResponse> => {
+    const formData = new FormData();
+formData.append(`file`, postApiAccountAvatarBody.file)
+
+  const res = await fetch(getPostApiAccountAvatarUrl(),
+  {      
+    ...options,
+    method: 'POST'
+    ,
+    body: 
+      formData,
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: postApiAccountAvatarResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as postApiAccountAvatarResponse
 }
 
 
@@ -627,7 +821,7 @@ export const postApiAccountUpdatePassword = async (updatePasswordRequest: Update
 
 
 /**
- * Verifies a user's email address using a token sent via email.
+ * Verifies a user's email address using a token sent via email. Optionally auto-login user if they don't have 2FA enabled.
  * @summary Verify email address
  */
 export type postApiAccountVerifyEmailResponse200 = {
@@ -656,17 +850,25 @@ export type postApiAccountVerifyEmailResponse = postApiAccountVerifyEmailRespons
   headers: Headers;
 }
 
-export const getPostApiAccountVerifyEmailUrl = () => {
+export const getPostApiAccountVerifyEmailUrl = (params?: PostApiAccountVerifyEmailParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
-  
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/api/account/verify-email`
+  return stringifiedParams.length > 0 ? `/api/api/account/verify-email?${stringifiedParams}` : `/api/api/account/verify-email`
 }
 
-export const postApiAccountVerifyEmail = async (verifyEmailRequest: VerifyEmailRequest, options?: RequestInit): Promise<postApiAccountVerifyEmailResponse> => {
+export const postApiAccountVerifyEmail = async (verifyEmailRequest: VerifyEmailRequest,
+    params?: PostApiAccountVerifyEmailParams, options?: RequestInit): Promise<postApiAccountVerifyEmailResponse> => {
   
-  const res = await fetch(getPostApiAccountVerifyEmailUrl(),
+  const res = await fetch(getPostApiAccountVerifyEmailUrl(params),
   {      
     ...options,
     method: 'POST',
@@ -949,8 +1151,13 @@ export const postApiAuthLogout = async ( options?: RequestInit): Promise<postApi
  * @summary Disable OTP
  */
 export type postApiAuthOtpDisableResponse200 = {
-  data: null
+  data: ErrorResponse
   status: 200
+}
+
+export type postApiAuthOtpDisableResponse204 = {
+  data: null
+  status: 204
 }
 
 export type postApiAuthOtpDisableResponse400 = {
@@ -968,7 +1175,7 @@ export type postApiAuthOtpDisableResponse500 = {
   status: 500
 }
     
-export type postApiAuthOtpDisableResponseComposite = postApiAuthOtpDisableResponse200 | postApiAuthOtpDisableResponse400 | postApiAuthOtpDisableResponse404 | postApiAuthOtpDisableResponse500;
+export type postApiAuthOtpDisableResponseComposite = postApiAuthOtpDisableResponse200 | postApiAuthOtpDisableResponse204 | postApiAuthOtpDisableResponse400 | postApiAuthOtpDisableResponse404 | postApiAuthOtpDisableResponse500;
     
 export type postApiAuthOtpDisableResponse = postApiAuthOtpDisableResponseComposite & {
   headers: Headers;
@@ -1144,8 +1351,13 @@ export const postApiAuthOtpValidate = async (oTPValidateRequest: OTPValidateRequ
  * @summary Verify and enable OTP
  */
 export type postApiAuthOtpVerifyResponse200 = {
-  data: null
+  data: ErrorResponse
   status: 200
+}
+
+export type postApiAuthOtpVerifyResponse204 = {
+  data: null
+  status: 204
 }
 
 export type postApiAuthOtpVerifyResponse400 = {
@@ -1163,7 +1375,7 @@ export type postApiAuthOtpVerifyResponse500 = {
   status: 500
 }
     
-export type postApiAuthOtpVerifyResponseComposite = postApiAuthOtpVerifyResponse200 | postApiAuthOtpVerifyResponse400 | postApiAuthOtpVerifyResponse404 | postApiAuthOtpVerifyResponse500;
+export type postApiAuthOtpVerifyResponseComposite = postApiAuthOtpVerifyResponse200 | postApiAuthOtpVerifyResponse204 | postApiAuthOtpVerifyResponse400 | postApiAuthOtpVerifyResponse404 | postApiAuthOtpVerifyResponse500;
     
 export type postApiAuthOtpVerifyResponse = postApiAuthOtpVerifyResponseComposite & {
   headers: Headers;
@@ -1331,6 +1543,181 @@ export const postApiAuthRegister = async (registerRequest: RegisterRequest, opti
   const data: postApiAuthRegisterResponse['data'] = body ? JSON.parse(body) : {}
 
   return { data, status: res.status, headers: res.headers } as postApiAuthRegisterResponse
+}
+
+
+/**
+ * Retrieve a list of operations, with filtering, searching, and pagination support.
+ * @summary List Operations
+ */
+export type getApiOperationsResponse200 = {
+  data: OperationListItemResponse
+  status: 200
+}
+
+export type getApiOperationsResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type getApiOperationsResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getApiOperationsResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+    
+export type getApiOperationsResponseComposite = getApiOperationsResponse200 | getApiOperationsResponse400 | getApiOperationsResponse404 | getApiOperationsResponse500;
+    
+export type getApiOperationsResponse = getApiOperationsResponseComposite & {
+  headers: Headers;
+}
+
+export const getGetApiOperationsUrl = (params?: GetApiOperationsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/api/operations?${stringifiedParams}` : `/api/api/operations`
+}
+
+export const getApiOperations = async (params?: GetApiOperationsParams, options?: RequestInit): Promise<getApiOperationsResponse> => {
+  
+  const res = await fetch(getGetApiOperationsUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: getApiOperationsResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as getApiOperationsResponse
+}
+
+
+/**
+ * Retrieve detailed information for a specific operation by its ID.
+ * @summary Get Operation Details
+ */
+export type getApiOperationsIdResponse200 = {
+  data: OperationDetailResponse
+  status: 200
+}
+
+export type getApiOperationsIdResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type getApiOperationsIdResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getApiOperationsIdResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+    
+export type getApiOperationsIdResponseComposite = getApiOperationsIdResponse200 | getApiOperationsIdResponse400 | getApiOperationsIdResponse404 | getApiOperationsIdResponse500;
+    
+export type getApiOperationsIdResponse = getApiOperationsIdResponseComposite & {
+  headers: Headers;
+}
+
+export const getGetApiOperationsIdUrl = (id: number,) => {
+
+
+  
+
+  return `/api/api/operations/${id}`
+}
+
+export const getApiOperationsId = async (id: number, options?: RequestInit): Promise<getApiOperationsIdResponse> => {
+  
+  const res = await fetch(getGetApiOperationsIdUrl(id),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: getApiOperationsIdResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as getApiOperationsIdResponse
+}
+
+
+/**
+ * Retrieves distinct filter values for operations (statuses, operations, protocols)
+ * @summary Get Operation Filters
+ */
+export type getApiOperationsFiltersResponse200 = {
+  data: OperationFiltersResponseResponse
+  status: 200
+}
+
+export type getApiOperationsFiltersResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type getApiOperationsFiltersResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getApiOperationsFiltersResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+    
+export type getApiOperationsFiltersResponseComposite = getApiOperationsFiltersResponse200 | getApiOperationsFiltersResponse400 | getApiOperationsFiltersResponse404 | getApiOperationsFiltersResponse500;
+    
+export type getApiOperationsFiltersResponse = getApiOperationsFiltersResponseComposite & {
+  headers: Headers;
+}
+
+export const getGetApiOperationsFiltersUrl = () => {
+
+
+  
+
+  return `/api/api/operations/filters`
+}
+
+export const getApiOperationsFilters = async ( options?: RequestInit): Promise<getApiOperationsFiltersResponse> => {
+  
+  const res = await fetch(getGetApiOperationsFiltersUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: getApiOperationsFiltersResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as getApiOperationsFiltersResponse
 }
 
 

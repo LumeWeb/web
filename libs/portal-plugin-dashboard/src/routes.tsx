@@ -1,6 +1,6 @@
 import type { RouteDefinition } from "@lumeweb/portal-framework-core";
 
-import { Key, LayoutDashboard, Shield, User, UserCog } from "lucide-react";
+import { Activity, Key, LayoutDashboard, Shield, User, UserCog } from "lucide-react";
 
 const routes = [
   {
@@ -16,6 +16,15 @@ const routes = [
       label: "Dashboard",
     },
     path: "/dashboard",
+  },
+  {
+    component: "operations",
+    id: "operations",
+    navigation: {
+      icon: Activity,
+      label: "Operations",
+    },
+    path: "/operations",
   },
   {
     children: [

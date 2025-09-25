@@ -13,7 +13,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ActionItemType } from "../actions";
 import { DialogProvider, useDialog } from "./Dialog.context";
 import { DialogRenderer } from "./Dialog.renderer";
-import { DialogConfig, DialogType } from "./Dialog.types";
+import { DialogConfig, DialogType, DialogTypes } from "./Dialog.types";
 
 // Define spy before it's used in mock
 const openNotificationSpy = vi.fn();
@@ -392,7 +392,7 @@ describe("DialogRenderer", () => {
     render(
       <DialogProvider>
         <DialogTrigger
-          config={{ title: "Test Dialog", type: DialogType.ALERT }}
+          config={{ title: "Test Dialog", type: DialogTypes.ALERT }}
         />
         <DialogRenderer />
       </DialogProvider>,
@@ -416,7 +416,7 @@ describe("DialogRenderer", () => {
           config={{
             description: "Test Description",
             title: "Test Title",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -445,7 +445,7 @@ describe("DialogRenderer", () => {
           config={{
             content: <CustomContent />,
             title: "Custom Dialog",
-            type: DialogType.CUSTOM,
+            type: DialogTypes.CUSTOM,
           }}
         />
         <DialogRenderer />
@@ -477,7 +477,7 @@ describe("DialogRenderer", () => {
             onCancel: onCancelMock,
             onConfirm: onConfirmMock,
             title: "Confirm Action",
-            type: DialogType.CONFIRM,
+            type: DialogTypes.CONFIRM,
           }}
         />
         <DialogRenderer />
@@ -531,7 +531,7 @@ describe("DialogRenderer", () => {
             ],
             actionButtonsLayout: "vertical",
             title: "Action Dialog",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -573,7 +573,7 @@ describe("DialogRenderer", () => {
             onSubmit: onSubmitMock, // onSubmit is also required on DialogConfig for type 'form'
             onSuccess: onSuccessMock, // onSuccess is also required on DialogConfig for type 'form'
             title: "Form Dialog",
-            type: DialogType.FORM,
+            type: DialogTypes.FORM,
           }}
         />
         <DialogRenderer />
@@ -613,7 +613,7 @@ describe("DialogRenderer", () => {
             onSubmit: onSubmitMock, // onSubmit is also required on DialogConfig for type 'form'
             onSuccess: onSuccessMock, // onSuccess is also required on DialogConfig for type 'form'
             title: "Step Form Dialog",
-            type: DialogType.FORM,
+            type: DialogTypes.FORM,
           }}
         />
         <DialogRenderer />
@@ -642,7 +642,7 @@ describe("DialogRenderer", () => {
             // Alert type uses "Continue" by default if no confirmText is provided
             onConfirm: onConfirmMock,
             title: "Dismissable Alert",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -672,7 +672,7 @@ describe("DialogRenderer", () => {
             // Alert type uses "Continue" by default if no confirmText is provided
             onConfirm: onConfirmMock,
             title: "Non-Dismissable Alert",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -704,7 +704,7 @@ describe("DialogRenderer", () => {
             onCancel: onCancelMock, // onCancel should not be called
             preventCloseOnOutsideClick: true,
             title: "Prevent Close",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -739,7 +739,7 @@ describe("DialogRenderer", () => {
             onCancel: onCancelMock, // onCancel should not be called
             preventCloseOnOutsideClick: "dirty",
             title: "Prevent Close Dirty",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -774,7 +774,7 @@ describe("DialogRenderer", () => {
           config={{
             status: "success",
             title: "Success Alert",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -792,7 +792,7 @@ describe("DialogRenderer", () => {
           config={{
             status: "error",
             title: "Error Alert",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -812,7 +812,7 @@ describe("DialogRenderer", () => {
           config={{
             icon: <CustomIcon />,
             title: "Icon Alert",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -833,7 +833,7 @@ describe("DialogRenderer", () => {
           config={{
             size: "2xl",
             title: "Large Dialog",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -851,7 +851,7 @@ describe("DialogRenderer", () => {
           config={{
             size: "md",
             title: "Medium Dialog",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -869,7 +869,7 @@ describe("DialogRenderer", () => {
           config={{
             size: "sm",
             title: "Small Dialog",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -888,7 +888,7 @@ describe("DialogRenderer", () => {
           config={{
             position: "top-right",
             title: "Top Right Dialog",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -908,7 +908,7 @@ describe("DialogRenderer", () => {
           config={{
             position: "bottom-left",
             title: "Bottom Left Dialog",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -935,7 +935,7 @@ describe("DialogRenderer", () => {
             // Add confirmText to ensure the default footer is rendered for alert type
             confirmText: "OK",
             title: "Styled Dialog",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -969,7 +969,7 @@ describe("DialogRenderer", () => {
           config={{
             footer: <CustomFooter />,
             title: "Custom Footer Dialog",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />
@@ -1008,7 +1008,7 @@ describe("DialogRenderer", () => {
             onSubmit: onSubmitMock,
             onSuccess: onSuccessMock,
             title: "Form Dialog with Custom Footer",
-            type: DialogType.FORM,
+            type: DialogTypes.FORM,
           }}
         />
         <DialogRenderer />
@@ -1044,7 +1044,7 @@ describe("DialogRenderer", () => {
             dismissable: true, // Explicitly set dismissable to true
             onConfirm: onConfirmMock,
             title: "Actions Dialog",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           }}
         />
         <DialogRenderer />

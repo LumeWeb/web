@@ -9,7 +9,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DialogProvider, useDialog } from "./Dialog.context";
-import { DialogType } from "./Dialog.types";
+import { DialogType, DialogTypes } from "./Dialog.types";
 
 // Mock console.log to reduce noise during tests - Removed as logs are removed from source
 // vi.spyOn(console, "log").mockImplementation(() => {});
@@ -22,7 +22,7 @@ const TestComponent = () => {
     <div>
       <button
         onClick={() =>
-          dialog.openDialog({ title: "Test Alert", type: DialogType.ALERT })
+          dialog.openDialog({ title: "Test Alert", type: DialogTypes.ALERT })
         }>
         Open Alert
       </button>
@@ -31,7 +31,7 @@ const TestComponent = () => {
         onClick={() =>
           dialog.replaceDialog({
             title: "Replaced Alert",
-            type: DialogType.ALERT,
+            type: DialogTypes.ALERT,
           })
         }>
         Replace Dialog

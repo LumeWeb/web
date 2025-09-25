@@ -5,12 +5,14 @@ import {
 } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
-import { ActionListRenderer } from "../../actions";
-import { createDialogActions } from "../../actions/actionHelpers";
-import { ConfirmDialogConfig, DialogType } from "../Dialog.types";
+import type { ForceRerenderCallback } from "@/components";
+import {
+  ActionListRenderer,
+  createDialogActions,
+  useForceRerender,
+} from "@/components";
+import { ConfirmDialogConfig, DialogTypes } from "../Dialog.types";
 import { useDialogType } from "../utils/dialogDetection";
-import { useForceRerender } from "../../shared/hooks/useForceRerender";
-import type { ForceRerenderCallback } from "../../shared/types/form";
 
 interface ConfirmDialogProps extends ConfirmDialogConfig {
   onClose?: () => void;
@@ -30,7 +32,7 @@ export function ConfirmDialog({
   title,
 }: ConfirmDialogProps) {
   const dialogType = useDialogType();
-  
+
   // Implement forceRerender mechanism
   useForceRerender(forceRerender);
 
@@ -40,7 +42,7 @@ export function ConfirmDialog({
     confirmLabel: confirmText || "Continue",
     onCancel: onCancel || onClose,
     onConfirm,
-    type: dialogType || DialogType.CONFIRM,
+    type: dialogType || DialogTypes.CONFIRM,
   });
 
   const finalActions = actions || defaultActions;

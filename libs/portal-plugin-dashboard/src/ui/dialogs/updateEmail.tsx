@@ -1,4 +1,4 @@
-import { DialogConfig, DialogType } from "@lumeweb/portal-framework-ui";
+import { DialogConfig, DialogType, DialogTypes } from "@lumeweb/portal-framework-ui";
 import { UseCustomMutationReturnType } from "@refinedev/core";
 import { z } from "zod";
 
@@ -49,6 +49,6 @@ export function updateEmailDialogConfig(
     },
     onSuccess,
     title: "Change Email",
-    type: DialogType.FORM,
+    type: DialogTypes.FORM,
   };
 }

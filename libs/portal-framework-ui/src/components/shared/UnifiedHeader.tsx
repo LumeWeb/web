@@ -6,8 +6,8 @@ import {
   DialogConfig,
   isFormDialog,
   isWizardDialogConfig,
-} from "../dialog/Dialog.types";
-import { isStepFormConfig } from "../form/types";
+} from "@/components";
+import { isStepFormConfig } from "@/components";
 import {
   HeaderContextProvider,
   useHeaderContext,

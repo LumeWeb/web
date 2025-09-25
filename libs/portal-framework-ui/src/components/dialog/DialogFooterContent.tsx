@@ -1,5 +1,5 @@
 import React from "react";
-import { renderFooter } from "../shared";
+import { renderFooter } from "@/components";
 import { DialogConfig } from "./Dialog.types";
 
 interface DialogFooterContentProps<T = any> {

@@ -9,6 +9,7 @@ import React, {
 
 import type { NamespacedId } from "../types/plugin";
 import type { WidgetAreaDefinition, WidgetDefinition } from "../types/widget";
+import type { BaseCapability } from "../types/capabilities";
 
 import { Builder } from "../api/builder";
 import { Framework } from "../api/framework";
@@ -185,4 +186,66 @@ export function useFrameworkLoading() {
     isLoading: context.isLoading,
     reinitialize: context.reinitialize,
   };
+}
+
+export function useFrameworkData<T>(
+  fetchData: () => Promise<T>,
+  deps: React.DependencyList = [],
+) {
+  const { framework, isLoading: frameworkLoading, error: frameworkError } = useFramework();
+  const [data, setData] = useState<T | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (frameworkLoading || frameworkError || !framework) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    fetchData()
+      .then((result) => {
+        setData(result);
+      })
+      .catch((err) => {
+        setError(err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [framework, frameworkLoading, frameworkError, ...deps]);
+
+  return {
+    data,
+    error,
+    isLoading,
+  };
+}
+
+
+
+export function useCapability<T extends BaseCapability>(id: string) {
+  const { framework } = useFramework();
+  return useFrameworkData<T>(
+    () => framework!.getCapability<T>(id),
+    [id]
+  );
+}
+
+export function useFeature<T extends FrameworkFeature>(id: NamespacedId) {
+  const { framework } = useFramework();
+  return useFrameworkData<T>(
+    () => framework!.getFeature<T>(id),
+    [id]
+  );
+}
+
+export function useCapabilitiesByType<T extends BaseCapability>(typeId: string) {
+  const { framework } = useFramework();
+  return useFrameworkData<T[]>(
+    () => framework!.getCapabilitiesByType<T>(typeId),
+    [typeId]
+  );
 }

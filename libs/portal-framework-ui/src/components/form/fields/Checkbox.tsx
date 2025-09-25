@@ -8,7 +8,7 @@ import {
 import React from "react";
 
 import { registerFormComponent } from ".";
-import { FormFieldType } from "../"; // Use barrel export
+import { FormFieldType } from "@/components"; // Use barrel export
 
 interface CheckboxProps {
   autocomplete?: string;

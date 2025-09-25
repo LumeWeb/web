@@ -1,4 +1,4 @@
-import { DialogConfig, DialogType } from "@lumeweb/portal-framework-ui";
+import { DialogConfig, DialogType, DialogTypes } from "@lumeweb/portal-framework-ui";
 
 import {
   disable2faForm,
@@ -19,6 +19,6 @@ export function disable2faDialogConfig(
       await invalidateAuth();
     },
     title: "Disable Two-Factor Authentication",
-    type: DialogType.FORM,
+    type: DialogTypes.FORM,
   };
 }

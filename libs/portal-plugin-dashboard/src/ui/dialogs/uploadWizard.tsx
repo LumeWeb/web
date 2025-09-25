@@ -1,4 +1,4 @@
-import { DialogType, WizardDialogConfig } from "@lumeweb/portal-framework-ui";
+import { DialogType, DialogTypes, WizardDialogConfig } from "@lumeweb/portal-framework-ui";
 import { createActionHelpers } from "@lumeweb/portal-framework-ui";
 
 import type { UIServiceConfig } from "@/types/upload";
@@ -32,6 +32,6 @@ export function uploadWizardDialogConfig(
     preventCloseOnOutsideClick: true,
     size: "6xl",
     title: "Upload Files",
-    type: DialogType.WIZARD_FORM,
+    type: DialogTypes.WIZARD_FORM,
   };
 }

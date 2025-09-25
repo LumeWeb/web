@@ -1,10 +1,10 @@
 import { Input } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
-import type { AutocompleteToken } from "../types";
+import type { AutocompleteToken } from "@/components";
 
 import { registerFormComponent } from ".";
-import { FormFieldType } from "../";
+import { FormFieldType } from "@/components";
 
 interface FileInputProps {
   autocomplete?: AutocompleteToken;

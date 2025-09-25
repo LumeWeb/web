@@ -35,7 +35,7 @@ import { Loading } from "@/components/Loading";
 import { useAppStore } from "@/store/appStore";
 import { useFrameworkSync } from "@/store/portalStore";
 
-import { DialogProvider, DialogRenderer } from "../dialog";
+import { DialogProvider, DialogRenderer } from "@/components";
 
 // Register all form components at module load time
 registerAllFormComponents();

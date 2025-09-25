@@ -6,39 +6,52 @@
 /**
  * Standard size options using Tailwind CSS conventions
  */
-export type ComponentSize =
-  | "2xl" // max-w-2xl (42rem / 672px)
-  | "3xl" // max-w-3xl (48rem / 768px)
-  | "4xl" // max-w-4xl (56rem / 896px)
-  | "5xl" // max-w-5xl (64rem / 1024px)
-  | "6xl" // max-w-6xl (72rem / 1152px)
-  | "7xl" // max-w-7xl (80rem / 1280px);
-  | "auto" // Responsive auto width
-  | "full" // 100%
-  | "lg" // max-w-lg (32rem / 512px)
-  | "md" // max-w-xl (36rem / 576px)
-  | "sm" // max-w-md (28rem / 448px)
-  | "xl" // max-w-xl (36rem / 576px)
-  | "xs"; // max-w-sm (24rem / 384px)
+export enum ComponentSize {
+  TWO_XL = "2xl", // max-w-2xl (42rem / 672px)
+  THREE_XL = "3xl", // max-w-3xl (48rem / 768px)
+  FOUR_XL = "4xl", // max-w-4xl (56rem / 896px)
+  FIVE_XL = "5xl", // max-w-5xl (64rem / 1024px)
+  SIX_XL = "6xl", // max-w-6xl (72rem / 1152px)
+  SEVEN_XL = "7xl", // max-w-7xl (80rem / 1280px)
+  AUTO = "auto", // Responsive auto width
+  FULL = "full", // 100%
+  LG = "lg", // max-w-lg (32rem / 512px)
+  MD = "md", // max-w-xl (36rem / 576px)
+  SM = "sm", // max-w-md (28rem / 448px)
+  XL = "xl", // max-w-xl (36rem / 576px)
+  XS = "xs", // max-w-sm (24rem / 384px)
+}
+
+/**
+ * Width categories for components
+ */
+export enum WidthCategory {
+  EXTRA_NARROW = "extra-narrow", // xs, sm
+  NARROW = "narrow", // md, lg
+  MEDIUM = "medium", // xl
+  WIDE = "wide", // 2xl, 3xl
+  EXTRA_WIDE = "extra-wide", // 4xl, 5xl, 6xl, 7xl
+  RESPONSIVE = "responsive", // auto, full
+}
 
 /**
  * Generic size classes mapping that can be used by different components
  * Each component can use the sizes that make sense for its context
  */
 export const COMPONENT_SIZE_CLASSES = {
-  "2xl": "max-w-2xl", // 42rem (672px)
-  "3xl": "max-w-3xl", // 48rem (768px)
-  "4xl": "max-w-4xl", // 56rem (896px)
-  "5xl": "max-w-5xl", // 64rem (1024px)
-  "6xl": "max-w-6xl", // 72rem (1152px)
-  "7xl": "max-w-7xl", // 80rem (1280px)
-  "auto": "max-w-[calc(100vw - 2rem)] sm:max-w-md", // Responsive auto
-  "full": "max-w-full", // 100%
-  "lg": "max-w-lg", // 32rem (512px)
-  "md": "max-w-xl", // 36rem (576px)
-  "sm": "max-w-md", // 28rem (448px)
-  "xl": "max-w-xl", // 36rem (576px)
-  "xs": "max-w-sm", // 24rem (384px)
+  [ComponentSize.TWO_XL]: "max-w-2xl", // 42rem (672px)
+  [ComponentSize.THREE_XL]: "max-w-3xl", // 48rem (768px)
+  [ComponentSize.FOUR_XL]: "max-w-4xl", // 56rem (896px)
+  [ComponentSize.FIVE_XL]: "max-w-5xl", // 64rem (1024px)
+  [ComponentSize.SIX_XL]: "max-w-6xl", // 72rem (1152px)
+  [ComponentSize.SEVEN_XL]: "max-w-7xl", // 80rem (1280px)
+  [ComponentSize.AUTO]: "max-w-[calc(100vw - 2rem)] sm:max-w-md", // Responsive auto
+  [ComponentSize.FULL]: "max-w-full", // 100%
+  [ComponentSize.LG]: "max-w-lg", // 32rem (512px)
+  [ComponentSize.MD]: "max-w-xl", // 36rem (576px)
+  [ComponentSize.SM]: "max-w-md", // 28rem (448px)
+  [ComponentSize.XL]: "max-w-xl", // 36rem (576px)
+  [ComponentSize.XS]: "max-w-sm", // 24rem (384px)
 } as const;
 
 /**
@@ -78,5 +91,5 @@ export function getSizeClass(config: SizeConfig): string | undefined {
  * Type guard to check if a string is a valid ComponentSize
  */
 export function isComponentSize(size: string): size is ComponentSize {
-  return size in COMPONENT_SIZE_CLASSES;
+  return Object.values(ComponentSize).includes(size as ComponentSize);
 }

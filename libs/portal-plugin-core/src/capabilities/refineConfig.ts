@@ -36,7 +36,7 @@ export class Capability implements RefineConfigCapability {
     return {
       dataProvider: {
         ...existing?.dataProvider,
-        default: dataProvider(this.#apiUrl),
+        default: dataProvider(this.#apiUrl, false),
       },
       notificationProvider: notificationProvider(),
     };

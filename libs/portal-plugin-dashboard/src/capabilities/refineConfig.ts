@@ -25,7 +25,7 @@ export class Capability implements RefineConfigCapability {
 
   getConfig(existing?: Partial<RefineProps>) {
     const token = localStorage.getItem("jwt");
-    const acctProvider = dataProvider(this.#apiUrl);
+    const acctProvider = dataProvider(this.#apiUrl, true);
 
     if (token) {
       acctProvider.setAuthToken(token);
@@ -51,6 +51,20 @@ export class Capability implements RefineConfigCapability {
           template: "/account/keys",
         },
         name: "api-keys",
+      },
+      {
+        meta: {
+          dataProviderName: DATA_PROVIDER_NAME,
+          template: "/operations",
+        },
+        name: "operations",
+      },
+      {
+        meta: {
+          dataProviderName: DATA_PROVIDER_NAME,
+          template: "operations/filters",
+        },
+        name: "operations.filters",
       },
     ]);
   }

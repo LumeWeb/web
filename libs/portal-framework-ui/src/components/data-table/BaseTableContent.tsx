@@ -10,7 +10,11 @@ import {
 import { Cell, flexRender, Row, Table } from "@tanstack/react-table";
 import React from "react";
 
-interface BaseTableContentProps<TData> {
+import { Toolbar } from "./Toolbar";
+import { BaseRecord } from "@refinedev/core";
+import { useTableConfigOptional } from "./contexts";
+
+interface BaseTableContentProps<TData extends BaseRecord> {
   className?: string;
   emptyState?: React.ReactNode;
   footer?: React.ReactNode;
@@ -41,9 +45,12 @@ function BaseTableContent<TData extends object>({
   pagination,
   table,
 }: BaseTableContentProps<TData>) {
+  const tableConfig = useTableConfigOptional<TData>();
+  const toolbarConfig = tableConfig?.toolbarConfig;
   return (
     <div className={cn(className)}>
       {header && <div className="mb-4">{header}</div>}
+      {toolbarConfig && <Toolbar table={table} />}
       <div className={"scrollbar -mx-4 flex overflow-auto sm:-mx-8"}>
         <div className={"mx-4 grow sm:mx-8"}>
           <UITable>

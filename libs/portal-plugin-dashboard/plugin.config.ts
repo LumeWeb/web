@@ -30,6 +30,7 @@ export default {
     "./widgets/account/password": "./src/ui/widgets/account/password",
     "./widgets/account/profile": "./src/ui/widgets/account/profile",
     "./widgets/upload/button": "./src/ui/widgets/upload/button",
+    "./operations": "./src/ui/routes/operations",
   },
   name: "core:dashboard",
 } satisfies PluginConfig;
