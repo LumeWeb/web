@@ -1,9 +1,7 @@
 import React from "react";
 
-import type { ForceRerenderCallback } from "../../shared/types/form";
-
-import { CustomDialogConfig } from "../Dialog.types";
-import { useForceRerender } from "../../shared/hooks/useForceRerender";
+import type { ForceRerenderCallback } from "@/components";
+import { CustomDialogConfig, useForceRerender } from "@/components";
 
 interface CustomDialogProps extends CustomDialogConfig {
   /**

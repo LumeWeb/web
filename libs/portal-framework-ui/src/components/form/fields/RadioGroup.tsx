@@ -5,7 +5,7 @@ import {
 import React from "react";
 
 import { registerFormComponent } from ".";
-import { FormFieldType } from "../";
+import { FormFieldType } from "@/components";
 
 interface RadioGroupProps {
   autocomplete?: string;

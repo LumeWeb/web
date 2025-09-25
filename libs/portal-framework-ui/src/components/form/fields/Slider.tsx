@@ -2,7 +2,7 @@ import { Slider as BaseSlider } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
 import { registerFormComponent } from ".";
-import { FormFieldType } from "../";
+import { FormFieldType } from "@/components";
 
 interface SliderProps {
   className?: string;

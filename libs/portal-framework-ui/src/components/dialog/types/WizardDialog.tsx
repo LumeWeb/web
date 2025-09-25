@@ -1,18 +1,21 @@
-"use client";
-
 import React from "react";
 
 import type { WizardDialogConfig } from "../Dialog.types";
 
-import { createWizardActions } from "../../actions/actionHelpers";
-import { useStepControl } from "../../form/StepControlContext";
-import { WizardForm } from "../../form/WizardForm";
-import { Environment, UnifiedHeader } from "../../shared";
-import { ProgressStyleType } from "../../shared/types/header";
+import {
+  Environment,
+  ProgressStyleType,
+  UnifiedHeader,
+  useStepControl,
+  WizardForm,
+} from "@/components";
 import { resolveAllowStepNavigation } from "../../shared/utils/stepState";
+import { BaseRecord } from "@refinedev/core";
 
-interface WizardDialogProps<TRequest, TResponse>
-  extends WizardDialogConfig<TRequest, TResponse> {
+interface WizardDialogProps<
+  TRequest extends BaseRecord,
+  TResponse extends BaseRecord,
+> extends WizardDialogConfig<TRequest, TResponse> {
   isFirst?: boolean;
   isLast?: boolean;
   isSubmitting?: boolean;
@@ -46,9 +49,9 @@ export function WizardDialog<
   const isStepNavigationAllowed = resolveAllowStepNavigation(
     formConfig.allowStepNavigation,
     formConfig.steps,
-    currentStep
+    currentStep,
   );
-  
+
   const headerEnvironment = Environment.header()
     .standalone()
     .content({

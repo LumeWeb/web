@@ -6,7 +6,7 @@ import {
 import React from "react";
 
 import { registerFormComponent } from ".";
-import { FormFieldType } from "../";
+import { FormFieldType } from "@/components";
 
 interface SwitchProps {
   autocomplete?: string;

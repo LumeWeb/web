@@ -34,7 +34,7 @@ export class Capability implements RefineConfigCapability {
     return {
       authProvider: authProvider,
       dataProvider: {
-        default: dataProvider("/api"),
+        default: dataProvider("/api", false),
       },
       options: {
         disableTelemetry: true,

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Account API
  * API endpoints for managing user accounts, authentication, and API keys.
- * OpenAPI spec version: unknown
+ * OpenAPI spec version: develop
  */
 export interface APIKeyCreateRequest {
   name: string;
@@ -41,6 +41,8 @@ export interface AccessPolicy {
 }
 
 export interface AccountInfoResponse {
+  avatar?: string;
+  created_at?: string;
   email: string;
   first_name: string;
   id: number;
@@ -63,6 +65,8 @@ export type BinUUID = number[];
 export interface BinaryUUID {
   BinUUID: BinUUID;
 }
+
+export interface Cid { [key: string]: unknown }
 
 export interface CreateAPIKeyResponse {
   name: string;
@@ -107,6 +111,70 @@ export interface OTPVerifyRequest {
   otp: string;
 }
 
+export interface OperationDetailResponse {
+  cid?: Cid;
+  current_step?: number;
+  error?: string;
+  estimated_completion_at?: string;
+  id: number;
+  operation: string;
+  operation_display_name: string;
+  progress_percent: number;
+  protocol: string;
+  protocol_display_name: string;
+  started_at: string;
+  status: string;
+  status_display_name: string;
+  status_message: string;
+  total_steps?: number;
+  updated_at: string;
+}
+
+export interface OperationFilterItem {
+  description?: string;
+  name: string;
+  value: string;
+}
+
+export interface OperationFiltersResponse {
+  data: OperationFiltersResponseData;
+}
+
+export interface OperationFiltersResponseData {
+  operations: OperationFilterItem[];
+  protocols: OperationFilterItem[];
+  statuses: OperationFilterItem[];
+}
+
+export interface OperationFiltersResponseResponse {
+  data: OperationFiltersResponse;
+  total: number;
+}
+
+export interface OperationListItem {
+  cid?: Cid;
+  current_step?: number;
+  error?: string;
+  estimated_completion_at?: string;
+  id: number;
+  operation: string;
+  operation_display_name: string;
+  progress_percent: number;
+  protocol: string;
+  protocol_display_name: string;
+  started_at: string;
+  status: string;
+  status_display_name: string;
+  status_message: string;
+  total_steps?: number;
+  updated_at: string;
+}
+
+export interface OperationListItemResponse {
+  data: OperationListItem;
+  total: number;
+}
+
 export interface PasswordResetRequest {
   email: string;
 }
@@ -149,6 +217,11 @@ export interface UpdatePasswordRequest {
   new_password: string;
 }
 
+export interface UpdateProfileRequest {
+  first_name?: string;
+  last_name?: string;
+}
+
 export interface UploadLimitResponse {
   limit: number;
 }
@@ -157,6 +230,10 @@ export interface VerifyEmailRequest {
   email: string;
   token: string;
 }
+
+export type PostApiAccountAvatarBody = {
+  file: string;
+};
 
 export type GetApiAccountKeysParams = {
 /**
@@ -167,5 +244,35 @@ _end?: number;
  * Starting index of the items to return (0-based). Defaults to 0.
  */
 _start?: number;
+};
+
+export type PostApiAccountVerifyEmailParams = {
+/**
+ * Auto-login user after verification (boolean: true/false; also accepts 1/0).
+ */
+login?: string;
+};
+
+export type GetApiOperationsParams = {
+/**
+ * Ending index of the items to return (exclusive). Defaults to 10.
+ */
+_end?: number;
+/**
+ * Comma-separated list of sort orders ('asc' or 'desc') corresponding to _sort fields. Defaults to 'asc'.
+ */
+_order?: string;
+/**
+ * Comma-separated list of fields to sort by. Available fields: id, operation, protocol, status, status_message, progress_percent, total_steps, current_step, error
+ */
+_sort?: string;
+/**
+ * Starting index of the items to return (0-based). Defaults to 0.
+ */
+_start?: number;
+/**
+ * Search term for filename or other relevant operation data
+ */
+search?: string;
 };
 

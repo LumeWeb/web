@@ -2,7 +2,7 @@ import { useFramework } from "@lumeweb/portal-framework-core";
 import { useNotification } from "@refinedev/core";
 import { useCallback, useEffect, useState } from "react";
 
-import type { ProtocolCapability } from "@/capabilities/protocol";
+import type { ProtocolCapability } from "@lib/types/capabilities/protocol";
 import type { Feature } from "@/features/upload";
 import type { UIServiceConfig, UploadStatusType } from "@/types/upload";
 

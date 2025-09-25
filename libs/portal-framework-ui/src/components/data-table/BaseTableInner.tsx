@@ -1,7 +1,7 @@
 import type { BaseTableProps } from "./BaseTable";
 
 import { BaseTableContent } from "./BaseTableContent";
-import { useTable } from "./Table.context";
+import { useTableInstance } from "./contexts";
 import { normalizeTableOptions } from "./tableOptions";
 
 function BaseTableInner<TData extends object>(
@@ -22,7 +22,7 @@ function BaseTableInner<TData extends object>(
     pagination,
   } = props;
 
-  const { table } = useTable<TData>();
+  const { table } = useTableInstance<TData>();
 
   const normalizedOptions = normalizeTableOptions(
     pagination,

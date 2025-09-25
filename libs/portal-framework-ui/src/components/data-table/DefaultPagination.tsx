@@ -1,4 +1,5 @@
 import { Button } from "@lumeweb/portal-framework-ui-core";
+import { BaseRecord } from "@refinedev/core";
 import {
   ChevronLeft,
   ChevronRight,
@@ -7,10 +8,10 @@ import {
 } from "lucide-react";
 import React from "react";
 
-import { useTable } from "./Table.context";
+import { useTableInstance } from "./contexts";
 
-function DefaultPagination<TData>() {
-  const { table } = useTable<TData>();
+function DefaultPagination<TData extends BaseRecord>() {
+  const { table } = useTableInstance<TData>();
   const pageIndex = table.getState().pagination.pageIndex;
   const pageCount = table.getPageCount();
 

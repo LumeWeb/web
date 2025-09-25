@@ -5,11 +5,11 @@ import React, { useMemo } from "react";
 
 import type { WizardFormConfig } from "./types";
 
-import { useDialog } from "../dialog/Dialog.context";
-import { useIsInDialog } from "../dialog/utils/dialogDetection";
-import { Environment, UnifiedFooter, UnifiedHeader } from "../shared";
-import { ProgressStyleType } from "../shared/types/header";
-import { resolveAllowStepNavigation } from "../shared/utils/stepState";
+import { useDialog } from "@/components";
+import { useIsInDialog } from "@/components";
+import { Environment, UnifiedFooter, UnifiedHeader } from "@/components";
+import { ProgressStyleType } from "@/components";
+import { resolveAllowStepNavigation } from "@/components";
 import { StepControlProvider, useStepControl } from "./StepControlContext";
 import { StepSchemaForm } from "./StepSchemaForm";
 import { createStepRetryHandler } from "./utils/stepRetry";

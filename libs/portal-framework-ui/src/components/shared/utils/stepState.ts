@@ -1,4 +1,4 @@
-import { WizardStepDefinition } from "../../../form/types";
+import { WizardStepDefinition } from "@/components";
 
 /**
  * Shared utility for calculating step state in wizard navigation
@@ -28,7 +28,7 @@ export function calculateStepState(
   const isActive = index === current - 1;
   const isCompleted = index < current - 1;
   const isDisabled = disabledSteps.includes(index + 1) || index + 1 > current;
-  
+
   const canNavigate = allowNavigation && !isDisabled && index + 1 <= current;
 
   return {
@@ -71,27 +71,27 @@ export function createStepClickHandler(
 export function resolveAllowStepNavigation(
   wizardLevelConfig: boolean | (() => boolean) | undefined,
   steps: WizardStepDefinition[],
-  currentStep: number
+  currentStep: number,
 ): boolean {
   // Check if current step has its own navigation configuration
   const currentStepDefinition = steps[currentStep - 1];
   if (currentStepDefinition?.allowStepNavigation !== undefined) {
     // If step-level config is a function, call it; otherwise use the boolean value
-    if (typeof currentStepDefinition.allowStepNavigation === 'function') {
+    if (typeof currentStepDefinition.allowStepNavigation === "function") {
       return currentStepDefinition.allowStepNavigation();
     }
     return currentStepDefinition.allowStepNavigation;
   }
-  
+
   // Fall back to wizard-level configuration
   if (wizardLevelConfig !== undefined) {
     // If wizard-level config is a function, call it; otherwise use the boolean value
-    if (typeof wizardLevelConfig === 'function') {
+    if (typeof wizardLevelConfig === "function") {
       return wizardLevelConfig();
     }
     return wizardLevelConfig;
   }
-  
+
   // Default to true if neither is configured
   return true;
 }

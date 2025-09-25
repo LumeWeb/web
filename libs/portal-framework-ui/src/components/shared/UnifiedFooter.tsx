@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 
 import { FooterType } from "./registry/types";
 
-import { isActionButtonsFunction } from "../../components/form/types";
+import { isActionButtonsFunction } from "@/components";
 import {
   ActionItemConfig,
   ActionItemType,
@@ -15,7 +15,7 @@ import {
   createWizardActions,
   evaluateSubmitLabel,
   type SubmitLabelEvaluationContext,
-} from "../actions";
+} from "@/components";
 import {
   FooterContextProvider,
   useOptionalFooterContext,

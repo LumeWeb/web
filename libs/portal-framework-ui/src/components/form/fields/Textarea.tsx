@@ -5,7 +5,7 @@ import {
 import React from "react";
 
 import { registerFormComponent } from ".";
-import { FormFieldType } from "../";
+import { FormFieldType } from "@/components";
 
 export const Textarea = React.forwardRef<
   HTMLTextAreaElement,

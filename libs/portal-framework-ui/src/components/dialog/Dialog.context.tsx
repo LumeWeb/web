@@ -1,18 +1,9 @@
 import { registerBridgedContext } from "@lumeweb/portal-framework-core";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  useRef,
-} from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState, } from "react";
 
-import type { DialogConfig } from "./Dialog.types";
-
-import { DialogType } from "./Dialog.types";
-import { DialogActionsContext } from "./DialogActions.context";
-import { DialogStateContext } from "./DialogState.context";
+import { DialogConfig, DialogType, DialogTypes } from "./Dialog.types";
+import { DialogActionsContext, DialogActionsContextValue, } from "./DialogActions.context";
+import { DialogStateContext, DialogStateContextValue, } from "./DialogState.context";
 
 /**
  * Required provider that maintains dialog state and context.
@@ -51,8 +42,8 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
         // Only call onCancel for user-initiated closures
         if (
           closedDialog &&
-          (closedDialog.type === DialogType.CONFIRM ||
-            closedDialog.type === DialogType.FORM)
+          (closedDialog.type === DialogTypes.CONFIRM ||
+            closedDialog.type === DialogTypes.FORM)
         ) {
           if (source === "user") {
             closedDialog.onCancel?.(source);

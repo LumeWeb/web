@@ -13,17 +13,17 @@ import {
 import React, { useEffect, useMemo } from "react";
 import { isElement, isValidElementType } from "react-is";
 
-import { createFormActions } from "../actions/actionHelpers";
-import { DialogConfig, FormDialogConfig, useDialog } from "../dialog";
-import { useIsFormDialog } from "../dialog/utils/dialogDetection";
-import { Environment, renderHeader, UnifiedFooter } from "../shared";
+import { createFormActions } from "@/components";
+import { DialogConfig, FormDialogConfig, useDialog } from "@/components";
+import { useIsFormDialog } from "@/components";
+import { Environment, renderHeader, UnifiedFooter } from "@/components";
 import { adapters, FormAdapter, UnifiedFormReturnType } from "./adapters";
 import { FormProvider } from "./context";
 import { FormRenderer } from "./FormRenderer";
 import { handleFormSubmission } from "./handlers/core";
 import { AdapterType, type FormConfig, isStepFormConfig } from "./types";
 import { computeAutoSaveConfig } from "./utils/autoSave";
-import { useForceRerender as useSharedForceRerender } from "../shared/hooks/useForceRerender";
+import { useForceRerender as useSharedForceRerender } from "@/components";
 
 const defaultFooterCss = "pt-4 mt-4 border-t";
 

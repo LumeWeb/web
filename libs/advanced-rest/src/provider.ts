@@ -6,6 +6,8 @@ import { generateFilter } from "./utils/generateFilter";
 import { generateSort } from "./utils/generateSort";
 import { generateNestedUrl } from "./utils/generateUrl";
 import { httpClient } from "./utils/kyInstance";
+import { parseListResponse } from "./utils/parseListResponse";
+import { parseSingleResponse } from "./utils/parseSingleResponse";
 
 const parseResponse = async (response: any) => {
   if (response instanceof Response && !response.ok) {
@@ -47,11 +49,48 @@ const addParam = (
 
 export const dataProvider = (
   apiUrl: string,
+  needsAuth: boolean = false,
 ): DataProvider & { setAuthToken: (token: null | string) => void } => {
   let authToken: null | string = null;
+  let tokenPromise: Promise<null | string> | null = null;
+  let tokenResolve: ((value: null | string) => void) | null = null;
 
   const setAuthToken = (token: null | string) => {
     authToken = token;
+    if (tokenResolve) {
+      tokenResolve(token);
+      tokenPromise = null;
+      tokenResolve = null;
+    }
+  };
+
+  const waitForToken = (): Promise<null | string> => {
+    if (authToken !== null) {
+      return Promise.resolve(authToken);
+    }
+
+    if (!tokenPromise) {
+      // @ts-ignore
+      tokenPromise = Promise.withResolvers
+        ? // @ts-ignore
+          Promise.withResolvers()
+        : (() => {
+            let resolve: (value: null | string) => void;
+            const promise = new Promise<null | string>((res) => {
+              resolve = res;
+            });
+            // @ts-ignore
+            return { promise, resolve };
+          })();
+
+      // @ts-ignore
+      tokenResolve = tokenPromise.resolve || tokenPromise[1];
+      // @ts-ignore
+      tokenPromise = tokenPromise.promise || tokenPromise[0];
+    }
+
+    // @ts-ignore
+    return tokenPromise;
   };
   const baseFetch = async (
     url: string,
@@ -59,14 +98,25 @@ export const dataProvider = (
     payload?: any,
     queryParams?: any,
     headers?: Record<string, string>,
+    needsAuthFlag: boolean = needsAuth,
   ) => {
     const searchParams = queryParams ? `?${stringify(queryParams)}` : "";
     const fullUrl = `${url}${searchParams}`;
 
+    let authHeader = {};
+    if (needsAuthFlag) {
+      const token = await waitForToken();
+      if (token) {
+        authHeader = { Authorization: `Bearer ${token}` };
+      }
+    } else if (authToken) {
+      authHeader = { Authorization: `Bearer ${authToken}` };
+    }
+
     const options: Record<string, any> = {
       headers: {
         "Content-Type": "application/json",
-        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        ...authHeader,
         ...headers,
       },
       ...(payload ? { json: payload } : {}),
@@ -125,9 +175,11 @@ export const dataProvider = (
         variables,
         undefined,
         headers,
+        meta?.needsAuth ?? needsAuth,
       );
       const data = await parseResponse(response);
-      return { data };
+      
+      return parseSingleResponse(data);
     },
     custom: async ({
       filters,
@@ -161,6 +213,7 @@ export const dataProvider = (
         payload,
         queryParams,
         headers,
+        meta?.needsAuth ?? needsAuth,
       );
       const data = await parseResponse(response);
       return { data };
@@ -175,6 +228,7 @@ export const dataProvider = (
         variables,
         undefined,
         headers,
+        meta?.needsAuth ?? needsAuth,
       );
 
       if (response instanceof Response && !response.ok) {
@@ -240,25 +294,11 @@ export const dataProvider = (
         addParam("_end", end, queryParams);
       }
 
-      const response = await baseFetch(url, "GET", undefined, queryParams, headers);
+      const response = await baseFetch(url, "GET", undefined, queryParams, headers, meta?.needsAuth ?? needsAuth);
       const data = await parseResponse(response);
 
-      let total = Number(response.headers.get("x-total-count"));
-
-      if (Number.isNaN(total) || total === 0) {
-        if (data && typeof data.total === "number") {
-          total = data.total;
-        } else {
-          total = 0;
-          console.warn("Total count not found in headers or data.");
-        }
-      }
-
-      if (data && Array.isArray(data.data)) {
-        return { data: data.data, total };
-      }
-
-      return { data: [], total: 0 };
+      const total = Number(response.headers.get("x-total-count"));
+      return parseListResponse(data, total);
     },
 
     getOne: async ({ id, meta, resource }) => {
@@ -270,9 +310,11 @@ export const dataProvider = (
         undefined,
         undefined,
         headers,
+        meta?.needsAuth ?? needsAuth,
       );
       const data = await parseResponse(response);
-      return { data };
+      
+      return parseSingleResponse(data);
     },
 
     setAuthToken,
@@ -286,9 +328,11 @@ export const dataProvider = (
         variables,
         undefined,
         headers,
+        meta?.needsAuth ?? needsAuth,
       );
       const data = await parseResponse(response);
-      return { data };
+      
+      return parseSingleResponse(data);
     },
   };
 };

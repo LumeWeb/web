@@ -1,5 +1,5 @@
 import { useDialog } from "../Dialog.context";
-import { DialogConfig, DialogType } from "../Dialog.types";
+import { DialogConfig, DialogType, DialogTypes } from "../Dialog.types";
 
 /**
  * Config-based detection for dialog type
@@ -26,7 +26,7 @@ export function useDialogType(): DialogType | null {
 export function useIsFormDialog(): boolean {
   const dialogType = useDialogType();
   return (
-    dialogType === DialogType.FORM || dialogType === DialogType.WIZARD_FORM
+    dialogType === DialogTypes.FORM || dialogType === DialogTypes.WIZARD_FORM
   );
 }
 
@@ -45,5 +45,5 @@ export function useIsInDialog(): boolean {
  */
 export function useIsWizardDialog(): boolean {
   const dialogType = useDialogType();
-  return dialogType === DialogType.WIZARD_FORM;
+  return dialogType === DialogTypes.WIZARD_FORM;
 }

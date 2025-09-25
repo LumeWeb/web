@@ -1,8 +1,9 @@
 import { TableCell, TableRow } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
-import { SkeletonLoader } from "../SkeletonLoader";
-import { useTable } from "./Table.context";
+import { SkeletonLoader } from "@/components";
+import { useTableInstance } from "./contexts";
+import type { UseTableReturnType } from "@refinedev/react-table";
 
 export interface TableLoadingStateProps {
   /** Custom loading content */
@@ -18,7 +19,14 @@ export function TableLoadingState({
   colSpan,
   message = "Loading data...",
 }: TableLoadingStateProps) {
-  const { table } = useTable();
+  const { table } = useTableInstance();
+
+  // Check if table has refineCore property to determine the correct type
+  const refineTable =
+    table && "refineCore" in table
+      ? (table as UseTableReturnType<any, any>)
+      : undefined;
+  const skeletonTable = refineTable ?? table;
 
   if (children) {
     return (
@@ -39,7 +47,10 @@ export function TableLoadingState({
       </TableRow>
       <TableRow>
         <TableCell className="py-8" colSpan={colSpan}>
-          <SkeletonLoader layout="table" table={table} />
+          <SkeletonLoader
+            layout="table"
+            table={skeletonTable as UseTableReturnType}
+          />
         </TableCell>
       </TableRow>
     </>

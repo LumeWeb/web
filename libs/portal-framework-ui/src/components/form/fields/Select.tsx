@@ -8,10 +8,10 @@ import {
 } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
-import type { FormFieldOption } from "../";
+import type { FormFieldOption } from "@/components";
 
 import { registerFormComponent } from ".";
-import { FormFieldType } from "../";
+import { FormFieldType } from "@/components";
 
 export const Select = React.forwardRef<
   HTMLButtonElement,

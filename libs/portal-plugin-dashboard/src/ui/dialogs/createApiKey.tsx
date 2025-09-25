@@ -1,4 +1,4 @@
-import { DialogConfig, DialogType } from "@lumeweb/portal-framework-ui";
+import { DialogConfig, DialogType, DialogTypes } from "@lumeweb/portal-framework-ui";
 import { z } from "zod";
 
 import createApiKeyForm from "@/ui/forms/createApiKey";
@@ -17,6 +17,6 @@ export function createApiKeyDialogConfig(
       }
     },
     title: "Create New API Key",
-    type: DialogType.FORM,
+    type: DialogTypes.FORM,
   };
 }

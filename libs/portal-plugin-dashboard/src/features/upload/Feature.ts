@@ -10,7 +10,7 @@ import {
 } from "@lumeweb/portal-framework-core";
 import { Meta, UppyEventMap } from "@uppy/core";
 
-import type { UploadCapability } from "@/capabilities/upload";
+import type { UploadCapability } from "@lib/types/capabilities/upload";
 
 import { Manager, UppyFileDefault } from "@/features/upload/Manager";
 import {

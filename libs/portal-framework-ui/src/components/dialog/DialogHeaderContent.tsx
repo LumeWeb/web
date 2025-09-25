@@ -1,4 +1,4 @@
-import { renderHeader } from "../shared";
+import { renderHeader } from "@/components";
 import { DialogConfig, isFormDialog, isWizardDialogConfig } from "./Dialog.types";
 
 interface DialogHeaderContentProps<T = any> {

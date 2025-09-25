@@ -2,7 +2,7 @@ import { DatePicker as BaseDatePicker } from "@lumeweb/portal-framework-ui-core"
 import React from "react";
 
 import { registerFormComponent } from ".";
-import { FormFieldType } from "../"; // Use barrel export
+import { FormFieldType } from "@/components"; // Use barrel export
 interface DatePickerProps {
   autocomplete?: React.InputHTMLAttributes<HTMLInputElement>["autoComplete"];
   date?: Date;

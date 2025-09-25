@@ -1,5 +1,5 @@
 import { ActionItemConfig, ActionItemType } from "./types";
-import { DialogType } from "@/components/dialog";
+import { DialogType, DialogTypes } from "@/components/dialog";
 
 // TypeScript interfaces for better type safety
 interface StepContext {
@@ -160,20 +160,20 @@ export function createDialogActions(config: {
   isSubmitting?: boolean;
   onCancel?: () => void;
   onConfirm?: () => void;
-  type?: "alert" | "confirm" | "form";
+  type?: DialogType;
 }): ActionItemConfig[] {
   const { button, cancel, submit } = createActionHelpers();
 
   const actions: ActionItemConfig[] = [];
 
   // For alert dialogs, we only want the confirm action (treated as OK/Continue)
-  if (config.type === DialogType.ALERT) {
+  if (config.type === DialogTypes.ALERT) {
     actions.push(button(config.onConfirm, config.confirmLabel || "OK"));
     return actions;
   }
 
   // For confirm and form dialogs, include both cancel and confirm actions
-  if (config.onCancel || config.type !== DialogType.ALERT) {
+  if (config.onCancel || config.type !== DialogTypes.ALERT) {
     actions.push(cancel(config.onCancel, config.cancelLabel));
   }
 

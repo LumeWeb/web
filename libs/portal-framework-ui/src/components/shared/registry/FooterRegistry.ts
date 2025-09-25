@@ -1,14 +1,17 @@
 import { BaseRecord } from "@refinedev/core";
 
-import { DialogType } from "../../dialog/Dialog.types";
-import { ActionsFooter } from "../footers/ActionsFooter";
-import { DefaultFooter } from "../footers/DefaultFooter";
-import { FormFooter } from "../footers/FormFooter";
-import { StepFormFooter } from "../footers/StepFormFooter";
-import { WizardFooter } from "../footers/WizardFooter";
-import { ContainerType } from "../types/container";
-import { FooterEnvironment } from "../types/footer";
-import { FormType } from "../types/form";
+import {
+  ActionsFooter,
+  ContainerType,
+  DefaultFooter,
+  DialogType,
+  DialogTypes,
+  FooterEnvironment,
+  FormFooter,
+  FormType,
+  StepFormFooter,
+  WizardFooter,
+} from "@/components";
 import { FooterComponent, FooterType } from "./types";
 
 export interface FooterRegistry {
@@ -54,7 +57,7 @@ export function createFooterRegistry(): FooterRegistry {
       // Priority 2: Actions dropdown (dialog-specific)
       if (
         context.container.type === ContainerType.DIALOG &&
-        config.type === DialogType.FORM &&
+        config.type === DialogTypes.FORM &&
         "actions" in config &&
         config.actions
       ) {

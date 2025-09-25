@@ -16,6 +16,9 @@ export {
   type InitializationError,
   useFramework,
   useFrameworkLoading,
+  useCapability,
+  useFeature,
+  useCapabilitiesByType,
 } from "./contexts/framework";
 
 // Environment

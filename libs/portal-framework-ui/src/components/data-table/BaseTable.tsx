@@ -1,40 +1,76 @@
-import { Cell, ColumnDef, Row, Table } from "@tanstack/react-table";
+import {
+  Cell,
+  ColumnDef,
+  getCoreRowModel,
+  Row,
+  Table,
+  useReactTable,
+} from "@tanstack/react-table";
 import React from "react";
+import { BaseRecord, useTableReturnType } from "@refinedev/core";
 
 import { BaseTableInner } from "./BaseTableInner";
-import { CreateTableProvider, TableProvider } from "./Table.context";
+import {
+  FilterHelpersProvider,
+  RefineTableProvider,
+  TableConfigProvider,
+  TableInstanceProvider,
+  useTableConfigOptional,
+} from "./contexts";
+import { ToolbarConfig } from "./DataTable.types";
+import {
+  getAvailableOperators,
+  getDefaultOperatorForFieldType,
+} from "./toolbarItems/filters/hooks/useFilterOperators";
 
 export interface ActionColumnCellProps<TData> {
   row: Row<TData>;
 }
 
-export interface ActionColumnDef<TData> extends ColumnDef<TData, unknown> {
+export type ActionColumnDef<TData> = ColumnDef<TData, unknown> & {
   /** Function to render cell content */
   cell: (props: ActionColumnCellProps<TData>) => React.ReactNode;
+};
+
+export interface BaseTableRefineProps<TData extends BaseRecord> {
+  /** Refine table instance */
+  refineTable?: useTableReturnType<TData, any>;
 }
 
-export type BaseTableCommonProps<TData> = TableInteractionProps<TData> &
-  TablePaginationConfigProps &
-  TableStateProps<TData> &
-  TableStylingProps;
+export interface BaseTableCommonProps<TData extends BaseRecord> {
+  /** Whether table is in loading state */
+  isLoading?: boolean;
+  /** Toolbar configuration */
+  toolbarConfig?: ToolbarConfig<TData>;
+}
+
+export type BaseTableCommonPropsType<TData extends BaseRecord> =
+  TableInteractionProps<TData> &
+    TablePaginationConfigProps &
+    TableStateProps<TData> &
+    TableStylingProps &
+    BaseTableRefineProps<TData> &
+    BaseTableCommonProps<TData>;
 
 export type BaseTablePaginationConfig = boolean | TablePaginationProps;
 
-export type BaseTableProps<TData> =
+export type BaseTableProps<TData extends BaseRecord> =
   | BaseTableWithDataProps<TData>
   | BaseTableWithTableProps<TData>;
 
-export type BaseTableWithDataProps<TData> = BaseTableCommonProps<TData> &
-  TableDataProps<TData> & {
-    table?: never;
-  };
+export type BaseTableWithDataProps<TData extends BaseRecord> =
+  BaseTableCommonPropsType<TData> &
+    TableDataProps<TData> & {
+      table?: never;
+    };
 
-export type BaseTableWithTableProps<TData> = BaseTableCommonProps<TData> &
-  TableInstanceProps<TData> & {
-    actionColumn?: never;
-    columns?: never;
-    data?: never;
-  };
+export type BaseTableWithTableProps<TData extends BaseRecord> =
+  BaseTableCommonPropsType<TData> &
+    TableInstanceProps<TData> & {
+      actionColumn?: never;
+      columns?: never;
+      data?: never;
+    };
 
 export interface TableDataProps<TData> {
   /** Optional action column configuration */
@@ -43,8 +79,9 @@ export interface TableDataProps<TData> {
   data: TData[];
 }
 
-export interface TableInstanceProps<TData> {
+export interface TableInstanceProps<TData extends BaseRecord> {
   table: Table<TData>;
+  refineTable?: useTableReturnType<TData, any>;
 }
 
 export interface TableInteractionProps<TData> {
@@ -80,6 +117,61 @@ export interface TableStylingProps {
   header?: React.ReactNode;
 }
 
+function BaseTableWithData<TData extends BaseRecord>(
+  props: BaseTableWithDataProps<TData>,
+) {
+  const table = useReactTable({
+    data: props.data,
+    columns: props.columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  // Safe check for existing TableConfigContext using the optional hook
+  const existingTableConfig = useTableConfigOptional<TData>();
+
+  // Only render TableConfigProvider if context doesn't already exist
+  const shouldRenderTableConfigProvider =
+    !existingTableConfig ||
+    (!existingTableConfig.toolbarConfig && !existingTableConfig.refineContext);
+
+  if (shouldRenderTableConfigProvider) {
+    return (
+      <TableInstanceProvider table={table}>
+        <FilterHelpersProvider
+          refineTable={props.refineTable}
+          getDefaultOperator={getDefaultOperatorForFieldType}
+          getAvailableOperators={getAvailableOperators}>
+          <TableConfigProvider
+            toolbarConfig={props.toolbarConfig}
+            refineContext={
+              props.refineTable
+                ? {
+                    tableInstance: props.refineTable,
+                    refetch: props.refineTable?.tableQuery?.refetch,
+                    isLoading: props.refineTable?.tableQuery?.isFetching,
+                    error: props.refineTable?.tableQuery?.error,
+                  }
+                : undefined
+            }>
+            <BaseTableInner {...props} />
+          </TableConfigProvider>
+        </FilterHelpersProvider>
+      </TableInstanceProvider>
+    );
+  }
+
+  return (
+    <TableInstanceProvider table={table}>
+      <FilterHelpersProvider
+        refineTable={props.refineTable}
+        getDefaultOperator={getDefaultOperatorForFieldType}
+        getAvailableOperators={getAvailableOperators}>
+        <BaseTableInner {...props} />
+      </FilterHelpersProvider>
+    </TableInstanceProvider>
+  );
+}
+
 function BaseTable<TData extends object>(props: BaseTableProps<TData>) {
   if ("table" in props && props.table && "data" in props && props.data) {
     throw new Error(
@@ -88,22 +180,54 @@ function BaseTable<TData extends object>(props: BaseTableProps<TData>) {
   }
 
   if ("table" in props && props.table) {
+    // Safe check for existing TableConfigContext using the optional hook
+    const existingTableConfig = useTableConfigOptional<TData>();
+
+    // Only render TableConfigProvider if context doesn't already exist
+    const shouldRenderTableConfigProvider =
+      !existingTableConfig ||
+      (!existingTableConfig.toolbarConfig && !existingTableConfig.refineContext);
+
+    if (shouldRenderTableConfigProvider) {
+      return (
+        <TableInstanceProvider table={props.table}>
+          <FilterHelpersProvider
+            refineTable={props.refineTable}
+            getDefaultOperator={getDefaultOperatorForFieldType}
+            getAvailableOperators={getAvailableOperators}>
+            <TableConfigProvider
+              toolbarConfig={props.toolbarConfig}
+              refineContext={
+                props.refineTable
+                  ? {
+                      tableInstance: props.refineTable,
+                      refetch: props.refineTable?.tableQuery?.refetch,
+                      isLoading: props.refineTable?.tableQuery?.isFetching,
+                      error: props.refineTable?.tableQuery?.error,
+                    }
+                  : undefined
+              }>
+              <BaseTableInner {...props} />
+            </TableConfigProvider>
+          </FilterHelpersProvider>
+        </TableInstanceProvider>
+      );
+    }
+
     return (
-      <TableProvider table={props.table}>
-        <BaseTableInner {...props} />
-      </TableProvider>
+      <TableInstanceProvider table={props.table}>
+        <FilterHelpersProvider
+          refineTable={props.refineTable}
+          getDefaultOperator={getDefaultOperatorForFieldType}
+          getAvailableOperators={getAvailableOperators}>
+          <BaseTableInner {...props} />
+        </FilterHelpersProvider>
+      </TableInstanceProvider>
     );
   }
 
   if ("data" in props && props.data) {
-    return (
-      <CreateTableProvider
-        actionColumn={props.actionColumn}
-        columns={props.columns}
-        data={props.data}>
-        <BaseTableInner {...props} />
-      </CreateTableProvider>
-    );
+    return <BaseTableWithData {...props} />;
   }
 
   throw new Error("BaseTable requires either table or data prop");

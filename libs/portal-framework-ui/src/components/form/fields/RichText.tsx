@@ -3,7 +3,7 @@ import React, { forwardRef } from "react";
 import { Editor as BaseEditor, ToolbarOption } from "@/components/editor";
 
 import { registerFormComponent } from ".";
-import { FormFieldType } from "../";
+import { FormFieldType } from "@/components";
 import { FormComponentProps } from "./types";
 
 interface RichTextProps extends FormComponentProps {

@@ -272,3 +272,5 @@ export * from "./SchemaForm";
 export * from "./StepControlContext";
 export * from "./StepSchemaForm";
 export * from "./types";
+export * from "./utils";
+export * from "./WizardForm";

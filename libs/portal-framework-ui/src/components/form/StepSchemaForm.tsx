@@ -6,9 +6,9 @@ import React, { useCallback, useMemo } from "react";
 import type { FormConfig, StepFormFooterRenderer } from "./types";
 import { AdapterType, type StepFormConfig } from "./types";
 
-import { useDialog } from "../dialog/Dialog.context";
-import { isFormDialog, isWizardDialogConfig } from "../dialog/Dialog.types";
-import { Environment, isWizardForm, UnifiedFooter } from "../shared";
+import { useDialog } from "@/components";
+import { isFormDialog, isWizardDialogConfig } from "@/components";
+import { Environment, isWizardForm, UnifiedFooter } from "@/components";
 import { FormProvider } from "./context";
 import { getStepOnSuccessHandler, handleStepSubmission } from "./handlers/step";
 import { SchemaForm } from "./SchemaForm";

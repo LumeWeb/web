@@ -2,8 +2,8 @@ import { FlexWidgetArea } from "@lumeweb/portal-framework-core";
 import { Button, cn } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
-import { LumeLogo } from "../LumeLogo";
-import { MainNavigation } from "../MainNavigation";
+import { LumeLogo } from "@/components";
+import { MainNavigation } from "@/components";
 import { useSidebarContext } from "./SidebarContext";
 import { SidebarToggle } from "./SidebarToggle";
 

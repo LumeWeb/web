@@ -85,6 +85,11 @@ components:
     AccountInfoResponse:
       additionalProperties: false
       properties:
+        avatar:
+          type: string
+        created_at:
+          format: date-time
+          type: string
         email:
           type: string
         first_name:
@@ -131,6 +136,9 @@ components:
           $ref: '#/components/schemas/BinUUID'
       required:
         - BinUUID
+      type: object
+    Cid:
+      additionalProperties: false
       type: object
     CreateAPIKeyResponse:
       additionalProperties: false
@@ -224,6 +232,171 @@ components:
       required:
         - otp
       type: object
+    OperationDetailResponse:
+      additionalProperties: false
+      properties:
+        cid:
+          $ref: '#/components/schemas/Cid'
+        current_step:
+          type: integer
+        error:
+          type: string
+        estimated_completion_at:
+          format: date-time
+          type: string
+        id:
+          type: integer
+        operation:
+          type: string
+        operation_display_name:
+          type: string
+        progress_percent:
+          type: number
+        protocol:
+          type: string
+        protocol_display_name:
+          type: string
+        started_at:
+          format: date-time
+          type: string
+        status:
+          type: string
+        status_display_name:
+          type: string
+        status_message:
+          type: string
+        total_steps:
+          type: integer
+        updated_at:
+          format: date-time
+          type: string
+      required:
+        - id
+        - operation
+        - operation_display_name
+        - protocol
+        - protocol_display_name
+        - status
+        - status_display_name
+        - status_message
+        - progress_percent
+        - started_at
+        - updated_at
+      type: object
+    OperationFilterItem:
+      additionalProperties: false
+      properties:
+        description:
+          type: string
+        name:
+          type: string
+        value:
+          type: string
+      required:
+        - value
+        - name
+      type: object
+    OperationFiltersResponse:
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/OperationFiltersResponseData'
+      required:
+        - data
+      type: object
+    OperationFiltersResponseData:
+      additionalProperties: false
+      properties:
+        operations:
+          items:
+            $ref: '#/components/schemas/OperationFilterItem'
+          type: array
+        protocols:
+          items:
+            $ref: '#/components/schemas/OperationFilterItem'
+          type: array
+        statuses:
+          items:
+            $ref: '#/components/schemas/OperationFilterItem'
+          type: array
+      required:
+        - statuses
+        - operations
+        - protocols
+      type: object
+    OperationFiltersResponseResponse:
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/OperationFiltersResponse'
+        total:
+          type: integer
+      required:
+        - data
+        - total
+      type: object
+    OperationListItem:
+      additionalProperties: false
+      properties:
+        cid:
+          $ref: '#/components/schemas/Cid'
+        current_step:
+          type: integer
+        error:
+          type: string
+        estimated_completion_at:
+          format: date-time
+          type: string
+        id:
+          type: integer
+        operation:
+          type: string
+        operation_display_name:
+          type: string
+        progress_percent:
+          type: number
+        protocol:
+          type: string
+        protocol_display_name:
+          type: string
+        started_at:
+          format: date-time
+          type: string
+        status:
+          type: string
+        status_display_name:
+          type: string
+        status_message:
+          type: string
+        total_steps:
+          type: integer
+        updated_at:
+          format: date-time
+          type: string
+      required:
+        - id
+        - operation
+        - operation_display_name
+        - protocol
+        - protocol_display_name
+        - status
+        - status_display_name
+        - status_message
+        - progress_percent
+        - started_at
+        - updated_at
+      type: object
+    OperationListItemResponse:
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/OperationListItem'
+        total:
+          type: integer
+      required:
+        - data
+        - total
+      type: object
     PasswordResetRequest:
       additionalProperties: false
       properties:
@@ -310,6 +483,14 @@ components:
         - current_password
         - new_password
       type: object
+    UpdateProfileRequest:
+      additionalProperties: false
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+      type: object
     UploadLimitResponse:
       additionalProperties: false
       properties:
@@ -332,10 +513,34 @@ components:
 info:
   description: API endpoints for managing user accounts, authentication, and API keys.
   title: Account API
-  version: unknown
+  version: develop
 openapi: 3.0.0
 paths:
   /api/account:
+    delete:
+      description: Initiates the process to delete the authenticated user's account.
+      responses:
+        "200":
+          description: Account deletion requested
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Request account deletion
     get:
       description: Retrieves information about the authenticated user's account.
       responses:
@@ -376,12 +581,56 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Failed to retrieve account info
       summary: Get account information
-  /api/account/delete:
-    delete:
-      description: Initiates the process to delete the authenticated user's account.
+    patch:
+      description: Updates the authenticated user's profile information. Email cannot
+        be updated through this endpoint.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+        description: Profile update data
+        required: true
       responses:
         "200":
-          description: Account deletion requested
+          description: Profile updated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The login credentials provided are invalid.
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The requested user was not found.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: A database operation failed.
+      summary: Update profile information
+  /api/account/avatar:
+    get:
+      description: Retrieves the authenticated user's profile picture
+      responses:
+        "200":
+          description: Avatar image
         "400":
           content:
             application/json:
@@ -400,7 +649,50 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Internal server error
-      summary: Request account deletion
+      summary: Get Avatar
+    post:
+      description: Uploads a profile picture/avatar
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              additionalProperties: false
+              properties:
+                file:
+                  type: string
+              required:
+                - file
+              type: object
+        description: Avatar file to upload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        "204":
+          description: Avatar uploaded
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Upload Avatar
   /api/account/keys:
     get:
       description: Retrieves a list of API keys for the authenticated user.
@@ -683,7 +975,15 @@ paths:
       summary: Update password
   /api/account/verify-email:
     post:
-      description: Verifies a user's email address using a token sent via email.
+      description: Verifies a user's email address using a token sent via email. Optionally
+        auto-login user if they don't have 2FA enabled.
+      parameters:
+        - description: 'Auto-login user after verification (boolean: true/false; also
+          accepts 1/0).'
+          in: query
+          name: login
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -896,6 +1196,12 @@ paths:
         required: true
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        "204":
           description: OTP disabled
         "400":
           content:
@@ -1024,6 +1330,12 @@ paths:
         required: true
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        "204":
           description: OTP verified and enabled
         "400":
           content:
@@ -1135,6 +1447,138 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: A database operation failed.
       summary: Register a new account
+  /api/operations:
+    get:
+      description: Retrieve a list of operations, with filtering, searching, and pagination
+        support.
+      parameters:
+        - description: Ending index of the items to return (exclusive). Defaults to
+            10.
+          in: query
+          name: _end
+          schema:
+            type: integer
+        - description: Comma-separated list of sort orders ('asc' or 'desc') corresponding
+            to _sort fields. Defaults to 'asc'.
+          in: query
+          name: _order
+          schema:
+            type: string
+        - description: 'Comma-separated list of fields to sort by. Available fields:
+          id, operation, protocol, status, status_message, progress_percent, total_steps,
+          current_step, error'
+          in: query
+          name: _sort
+          schema:
+            type: string
+        - description: Starting index of the items to return (0-based). Defaults to
+            0.
+          in: query
+          name: _start
+          schema:
+            type: integer
+        - description: Search term for filename or other relevant operation data
+          in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationListItemResponse'
+          description: A list of operations
+          headers:
+            X-Total-Count:
+              description: Total number of items
+              schema:
+                type: string
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: List Operations
+  /api/operations/{id}:
+    get:
+      description: Retrieve detailed information for a specific operation by its ID.
+      parameters:
+        - description: The unique identifier of the operation
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationDetailResponse'
+          description: Detailed information about the operation
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Get Operation Details
+  /api/operations/filters:
+    get:
+      description: Retrieves distinct filter values for operations (statuses, operations,
+        protocols)
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationFiltersResponseResponse'
+          description: Distinct filter values for operations
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Get Operation Filters
   /api/upload-limit:
     get:
       description: Retrieves the maximum allowed upload size.

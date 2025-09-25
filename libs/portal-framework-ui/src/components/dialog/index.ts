@@ -174,3 +174,4 @@
 export * from "./Dialog.context";
 export * from "./Dialog.renderer";
 export * from "./Dialog.types";
+export * from "./utils";
