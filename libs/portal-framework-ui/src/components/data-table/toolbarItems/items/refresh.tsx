@@ -51,7 +51,22 @@ function registerRefreshToolbarItem<TData extends BaseRecord>() {
     id: "refresh",
     label: "Refresh",
     icon: <RefreshCw className="h-4 w-4" />,
-    onClick: () => {}, // This will be overridden by the component logic
+    onClick: (refineContext, table) => {
+      // First try to refresh through Refine if available
+      if (refineContext) {
+        refineContext.refetch();
+        return;
+      }
+
+      // Fallback to React Table refresh if no Refine contexts
+      table.options.onStateChange?.({
+        ...table.getState(),
+        pagination: {
+          ...table.getState().pagination,
+          pageIndex: 0,
+        },
+      });
+    },
     tooltip: "Refresh data",
     variant: "outline",
     size: "sm",

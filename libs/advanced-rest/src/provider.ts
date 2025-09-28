@@ -1,7 +1,5 @@
 import type { BaseRecord, DataProvider } from "@refinedev/core";
 
-import { stringify } from "querystring";
-
 import { generateFilter } from "./utils/generateFilter";
 import { generateSort } from "./utils/generateSort";
 import { generateNestedUrl } from "./utils/generateUrl";
@@ -100,17 +98,15 @@ export const dataProvider = (
     headers?: Record<string, string>,
     needsAuthFlag: boolean = needsAuth,
   ) => {
-    const searchParams = queryParams ? `?${stringify(queryParams)}` : "";
-    const fullUrl = `${url}${searchParams}`;
+    const fullUrl = url;
 
     let authHeader = {};
     if (needsAuthFlag) {
       const token = await waitForToken();
-      if (token) {
-        authHeader = { Authorization: `Bearer ${token}` };
+      if (!token) {
+        throw new Error("Authentication required but no token available");
       }
-    } else if (authToken) {
-      authHeader = { Authorization: `Bearer ${authToken}` };
+      authHeader = { Authorization: `Bearer ${token}` };
     }
 
     const options: Record<string, any> = {
@@ -121,7 +117,7 @@ export const dataProvider = (
       },
       ...(payload ? { json: payload } : {}),
       searchParams: queryParams,
-      throwHttpErrors: false, // Disable ky's default error throwing
+      throwHttpErrors: false,
     };
 
     try {

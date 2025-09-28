@@ -1,4 +1,4 @@
-import { FilterOperator } from "src/components/data-table/toolbarItems/filters/types";
+import { FilterOperator } from "./types";
 import type { BaseRecord } from "@refinedev/core";
 
 /**
@@ -20,12 +20,17 @@ export function createFiltersFromValue(
 
   if (value !== undefined && value !== null && value !== "") {
     if (Array.isArray(value)) {
-      // For array values, create a filter with "in" operator
-      newFilters = value.map((v) => ({
-        field,
-        operator: FilterOperator.IN,
-        value: v,
-      }));
+      // For array values, create a single filter with "in" operator and the entire array as value
+      // Skip empty arrays
+      if (value.length > 0) {
+        newFilters = [
+          {
+            field,
+            operator: FilterOperator.IN,
+            value: value,
+          },
+        ];
+      }
     } else {
       // Get the operator to use - either from config or default based on field type
       const operator =

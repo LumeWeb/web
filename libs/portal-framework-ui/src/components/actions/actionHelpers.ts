@@ -172,17 +172,20 @@ export function createDialogActions(config: {
     return actions;
   }
 
-  // For confirm and form dialogs, include both cancel and confirm actions
-  if (config.onCancel || config.type !== DialogTypes.ALERT) {
+  // For confirm, form, wizard_form and custom dialogs, include cancel action
+  if (config.onCancel || (config.type !== DialogTypes.ALERT)) {
     actions.push(cancel(config.onCancel, config.cancelLabel));
   }
 
   if (config.onConfirm) {
     const submitType =
-      config.type === "form" ? ActionItemType.SUBMIT : ActionItemType.BUTTON;
+      (config.type === "form" || config.type === "wizard_form" || config.type === "custom") 
+        ? ActionItemType.SUBMIT 
+        : ActionItemType.BUTTON;
     actions.push({
       label:
-        config.confirmLabel || (config.type === "form" ? "Submit" : "Continue"),
+        config.confirmLabel || 
+        (config.type === "form" || config.type === "wizard_form" ? "Submit" : "Continue"),
       loading: config.isSubmitting,
       onClick: config.onConfirm,
       type: submitType,

@@ -44,6 +44,9 @@ function SelectFilter<TData extends BaseRecord>({
       ]
     : config.options || [];
 
+  // Map undefined value to "all" for controlled component
+  const controlledValue = value === undefined ? "all" : value;
+
   const handleChange = (val: string) => {
     if (onChange) {
       // If "all" option is selected, pass undefined to indicate no filter
@@ -53,11 +56,16 @@ function SelectFilter<TData extends BaseRecord>({
         onChange(val);
       }
     }
+    
+    // Close dropdown menu after selection when dropdownStyle is used
+    if (config.dropdownStyle) {
+      setIsExpanded(false);
+    }
   };
 
   // Get the selected option to show its description in the trigger
   // When "all" is selected, we want to show the special "all" option label
-  const selectedOption = options.find((option) => option.value === value);
+  const selectedOption = options.find((option) => option.value === controlledValue);
 
   // TODO: Reimplement tooltip functionality
   // const handleMouseEnter = (e: React.MouseEvent, optionValue: string) => {
@@ -72,6 +80,9 @@ function SelectFilter<TData extends BaseRecord>({
   //   handleItemLeave();
   // };
 
+  // Compute proper trigger label that displays "All …" when value is "all" or undefined
+  const triggerLabel = selectedOption?.label || itemLabel || config.placeholder || "Select option...";
+
   // If dropdownStyle is enabled, render as a dropdown menu
   if (config.dropdownStyle) {
     return (
@@ -85,7 +96,7 @@ function SelectFilter<TData extends BaseRecord>({
                   variant="ghost"
                   className="hover:bg-muted h-auto w-full justify-start p-3">
                   <span className="flex-1 text-left font-medium">
-                    {selectedOption?.label || itemLabel}
+                    {triggerLabel}
                   </span>
                   <ChevronDown
                     className={cn(
@@ -104,7 +115,7 @@ function SelectFilter<TData extends BaseRecord>({
                   align="start"
                   sideOffset={5}>
                   <Select
-                    value={value}
+                    value={controlledValue}
                     onValueChange={handleChange}
                     disabled={config.disabled || false}>
                     <SelectTrigger className="w-full">
@@ -141,7 +152,7 @@ function SelectFilter<TData extends BaseRecord>({
       <BaseFilter config={config} label={itemLabel}>
         <div ref={containerRef} className="relative">
           <Select
-            value={value}
+            value={controlledValue}
             onValueChange={handleChange}
             disabled={config.disabled || false}>
             <SelectTrigger
