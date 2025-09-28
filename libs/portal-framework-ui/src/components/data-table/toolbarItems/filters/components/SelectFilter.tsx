@@ -44,8 +44,8 @@ function SelectFilter<TData extends BaseRecord>({
       ]
     : config.options || [];
 
-  // Map undefined value to "all" for controlled component
-  const controlledValue = value === undefined ? "all" : value;
+  // Map undefined value to "all" for controlled component only when includeAllOption is true
+  const controlledValue = value === undefined && config.includeAllOption ? "all" : value;
 
   const handleChange = (val: string) => {
     if (onChange) {

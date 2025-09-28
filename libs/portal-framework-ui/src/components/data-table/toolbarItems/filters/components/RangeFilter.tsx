@@ -17,14 +17,16 @@ function RangeFilter<TData extends BaseRecord>({
   const rangeValue = value as RangeValue;
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const min = e.target.value === "" ? undefined : Number(e.target.value);
+    const parsed = Number(e.target.value);
+    const min = e.target.value === "" || isNaN(parsed) ? undefined : parsed;
     if (onChange) {
       onChange({ ...rangeValue, min });
     }
   };
 
   const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const max = e.target.value === "" ? undefined : Number(e.target.value);
+    const parsed = Number(e.target.value);
+    const max = e.target.value === "" || isNaN(parsed) ? undefined : parsed;
     if (onChange) {
       onChange({ ...rangeValue, max });
     }
