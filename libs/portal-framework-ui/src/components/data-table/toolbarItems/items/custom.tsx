@@ -13,12 +13,13 @@ interface ToolbarCustomItemComponentProps<TData extends BaseRecord>
 
 function ToolbarCustomItemComponent<TData extends BaseRecord>({
   item,
+  ...wrapperProps
 }: ToolbarCustomItemComponentProps<TData>) {
   if (!item.component) {
     return null;
   }
   
-  return <item.component {...item.props} />;
+  return <item.component {...wrapperProps} {...item.props} />;
 }
 
 function registerCustomToolbarItem<TData extends BaseRecord>(

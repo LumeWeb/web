@@ -200,16 +200,20 @@ export function useFrameworkData<T>(
   useEffect(() => {
     let mounted = true;
     
-    if (frameworkLoading || frameworkError || !framework) {
-      if (frameworkError && mounted) {
-        setError(frameworkError);
-      }
+    if (frameworkError) {
       if (mounted) {
+        setError(frameworkError);
         setIsLoading(false);
+      }
+      return;
+    } else if (frameworkLoading) {
+      if (mounted) {
+        setIsLoading(true);
       }
       return;
     }
 
+    // If we get here, framework is ready
     setIsLoading(true);
     setError(null);
 
@@ -243,24 +247,36 @@ export function useFrameworkData<T>(
 
 export function useCapability<T extends BaseCapability>(id: string) {
   const { framework } = useFramework();
-  return useFrameworkData<T>(
-    () => framework!.getCapability<T>(id),
-    [id]
-  );
+  const fetchCapability = useCallback(() => {
+    if (!framework) {
+      throw new Error("Framework not initialized");
+    }
+    return framework.getCapability<T>(id);
+  }, [framework, id]);
+
+  return useFrameworkData<T>(fetchCapability);
 }
 
 export function useFeature<T extends FrameworkFeature>(id: NamespacedId) {
   const { framework } = useFramework();
-  return useFrameworkData<T>(
-    () => framework!.getFeature<T>(id),
-    [id]
-  );
+  const fetchFeature = useCallback(() => {
+    if (!framework) {
+      throw new Error("Framework not initialized");
+    }
+    return framework.getFeature<T>(id);
+  }, [framework, id]);
+
+  return useFrameworkData<T>(fetchFeature);
 }
 
 export function useCapabilitiesByType<T extends BaseCapability>(typeId: string) {
   const { framework } = useFramework();
-  return useFrameworkData<T[]>(
-    () => framework!.getCapabilitiesByType<T>(typeId),
-    [typeId]
-  );
+  const fetchByType = useCallback(() => {
+    if (!framework) {
+      throw new Error("Framework not initialized");
+    }
+    return framework.getCapabilitiesByType<T>(typeId);
+  }, [framework, typeId]);
+
+  return useFrameworkData<T[]>(fetchByType);
 }

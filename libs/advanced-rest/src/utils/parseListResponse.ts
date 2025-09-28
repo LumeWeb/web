@@ -9,17 +9,7 @@
  * 6. Object responses without known array properties: return the object itself
  */
 export const parseListResponse = (data: any, totalCount: number) => {
-  let total = totalCount;
   let dataArray: any[] = [];
-
-  // Handle total count
-  if (Number.isNaN(total) || typeof total !== "number") {
-    if (data && typeof data.total === "number") {
-      total = data.total;
-    } else {
-      total = 0;
-    }
-  }
 
   // Handle different response patterns
   if (Array.isArray(data)) {
@@ -67,6 +57,11 @@ export const parseListResponse = (data: any, totalCount: number) => {
     // Handle non-object, non-array responses
     dataArray = [];
   }
+
+  // Compute total count after extracting dataArray
+  let total = typeof totalCount === "number" && !Number.isNaN(totalCount) 
+    ? totalCount 
+    : (typeof data?.total === "number" ? data.total : dataArray.length || 0);
 
   return { data: dataArray, total };
 };

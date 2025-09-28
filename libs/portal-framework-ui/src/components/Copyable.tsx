@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Copy, Check } from "lucide-react";
 import { cn, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@lumeweb/portal-framework-ui-core";
 
@@ -43,12 +43,31 @@ export function Copyable({
   showIcon = true,
 }: CopyableProps) {
   const [isCopied, setIsCopied] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(text);
       setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
+      
+      // Clear any existing timer before setting a new one
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      
+      // Set new timer and store its ID in the ref
+      timerRef.current = setTimeout(() => {
+        setIsCopied(false);
+        timerRef.current = null;
+      }, 2000);
     } catch (err) {
       console.error("Failed to copy text: ", err);
     }
@@ -66,7 +85,7 @@ export function Copyable({
           <button
             type="button"
             onClick={handleCopy}
-            aria-label="Copy text to clipboard"
+            aria-label={isCopied ? copiedTooltip : copyTooltip}
             className={cn(
               "inline-flex items-center gap-1 text-sm hover:bg-muted/50 rounded px-2 py-1 transition-colors",
               "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",

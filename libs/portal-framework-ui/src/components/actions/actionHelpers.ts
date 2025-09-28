@@ -173,7 +173,7 @@ export function createDialogActions(config: {
   }
 
   // For confirm, form, wizard_form and custom dialogs, include cancel action
-  if (config.onCancel || (config.type !== DialogTypes.ALERT)) {
+  if (config.onCancel) {
     actions.push(cancel(config.onCancel, config.cancelLabel));
   }
 
