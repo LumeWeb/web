@@ -198,7 +198,15 @@ export function useFrameworkData<T>(
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+    
     if (frameworkLoading || frameworkError || !framework) {
+      if (frameworkError && mounted) {
+        setError(frameworkError);
+      }
+      if (mounted) {
+        setIsLoading(false);
+      }
       return;
     }
 
@@ -207,15 +215,22 @@ export function useFrameworkData<T>(
 
     fetchData()
       .then((result) => {
-        setData(result);
+        if (mounted) {
+          setData(result);
+          setIsLoading(false);
+        }
       })
       .catch((err) => {
-        setError(err);
-      })
-      .finally(() => {
-        setIsLoading(false);
+        if (mounted) {
+          setError(err);
+          setIsLoading(false);
+        }
       });
-  }, [framework, frameworkLoading, frameworkError, ...deps]);
+
+    return () => {
+      mounted = false;
+    };
+  }, [framework, frameworkLoading, frameworkError, fetchData, ...deps]);
 
   return {
     data,

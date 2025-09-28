@@ -99,9 +99,11 @@ export function useFilterOperators<TData = any>(
     setOperator(getDefaultOperator(fieldType));
   };
 
-  // Update operator when fieldType changes
+  // Update operator when fieldType or initialOperator changes
   useEffect(() => {
-    if (!initialOperator) {
+    if (initialOperator !== undefined) {
+      setOperator(initialOperator);
+    } else {
       setOperator(getDefaultOperator(fieldType));
     }
   }, [fieldType, initialOperator]);

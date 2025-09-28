@@ -64,7 +64,9 @@ export function Copyable({
       <Tooltip>
         <TooltipTrigger asChild>
           <button
+            type="button"
             onClick={handleCopy}
+            aria-label="Copy text to clipboard"
             className={cn(
               "inline-flex items-center gap-1 text-sm hover:bg-muted/50 rounded px-2 py-1 transition-colors",
               "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",

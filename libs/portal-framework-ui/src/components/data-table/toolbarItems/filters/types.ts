@@ -28,9 +28,9 @@ export enum FilterOperator {
   STARTS_WITH = "startswith",
   ENDS_WITH = "endswith",
   BETWEEN = "between",
-  NOT_CONTAINS = "notcontains",
+  NOT_CONTAINS = "ncontains",
   NULL = "null",
-  NOT_NULL = "notnull",
+  NOT_NULL = "nnull",
 }
 
 /**

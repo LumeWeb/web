@@ -68,13 +68,11 @@ function registerSearchToolbarItem() {
       value,
       onChange,
       config,
-      table,
     }: ToolbarFilterComponentProps<any>) => (
       <SearchToolbarItem
         value={value}
         onChange={onChange}
         config={config}
-        table={table}
       />
     ),
     initialValue: "",

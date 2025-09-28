@@ -12,7 +12,7 @@ import { usePluginMeta } from "@/hooks/usePluginMeta";
 import { useThemeIdAndSetter } from "@/hooks/useTheme";
 
 // Import Theme from the types file
-import type { Theme } from "@/components";
+import type { Theme } from "@/types/theme";
 
 export const ThemeSwitcher: React.FC = () => {
   // Get setTheme from the correct hook

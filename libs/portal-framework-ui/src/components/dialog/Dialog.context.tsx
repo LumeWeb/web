@@ -1,7 +1,7 @@
 import { registerBridgedContext } from "@lumeweb/portal-framework-core";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState, } from "react";
 
-import { DialogConfig, DialogType, DialogTypes } from "./Dialog.types";
+import { DialogConfig, DialogTypes } from "./Dialog.types";
 import { DialogActionsContext, DialogActionsContextValue, } from "./DialogActions.context";
 import { DialogStateContext, DialogStateContextValue, } from "./DialogState.context";
 

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Checkbox, Label, Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@lumeweb/portal-framework-ui-core";
 import { BaseFilter } from "../BaseFilter";
 import type { BaseFilterComponentProps } from "@/components/data-table/toolbarItems/filters/types";
@@ -18,6 +18,11 @@ function MultiSelectFilter<TData extends BaseRecord>({
   const containerRef = useRef<HTMLDivElement>(null);
   // TODO: Reimplement tooltip functionality
   // const { activeTooltip, handleItemHover, handleItemLeave } = useFilterTooltip();
+
+  // Keep local state in sync with prop value
+  useEffect(() => {
+    setSelectedValues(value ?? []);
+  }, [value]);
 
   const handleCheckboxChange = (checked: boolean, optionValue: string) => {
     let newValues: string[];

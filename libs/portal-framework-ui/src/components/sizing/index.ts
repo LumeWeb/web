@@ -16,10 +16,10 @@ export enum ComponentSize {
   AUTO = "auto", // Responsive auto width
   FULL = "full", // 100%
   LG = "lg", // max-w-lg (32rem / 512px)
-  MD = "md", // max-w-xl (36rem / 576px)
-  SM = "sm", // max-w-md (28rem / 448px)
+  MD = "md", // max-w-md (28rem / 448px)
+  SM = "sm", // max-w-sm (24rem / 384px)
   XL = "xl", // max-w-xl (36rem / 576px)
-  XS = "xs", // max-w-sm (24rem / 384px)
+  XS = "xs", // max-w-xs (20rem / 320px)
 }
 
 /**
@@ -45,13 +45,13 @@ export const COMPONENT_SIZE_CLASSES = {
   [ComponentSize.FIVE_XL]: "max-w-5xl", // 64rem (1024px)
   [ComponentSize.SIX_XL]: "max-w-6xl", // 72rem (1152px)
   [ComponentSize.SEVEN_XL]: "max-w-7xl", // 80rem (1280px)
-  [ComponentSize.AUTO]: "max-w-[calc(100vw - 2rem)] sm:max-w-md", // Responsive auto
+  [ComponentSize.AUTO]: "max-w-[calc(100vw-2rem)] sm:max-w-md", // Responsive auto
   [ComponentSize.FULL]: "max-w-full", // 100%
   [ComponentSize.LG]: "max-w-lg", // 32rem (512px)
-  [ComponentSize.MD]: "max-w-xl", // 36rem (576px)
-  [ComponentSize.SM]: "max-w-md", // 28rem (448px)
+  [ComponentSize.MD]: "max-w-md", // 28rem (448px)
+  [ComponentSize.SM]: "max-w-sm", // 24rem (384px)
   [ComponentSize.XL]: "max-w-xl", // 36rem (576px)
-  [ComponentSize.XS]: "max-w-sm", // 24rem (384px)
+  [ComponentSize.XS]: "max-w-xs", // 20rem (320px)
 } as const;
 
 /**

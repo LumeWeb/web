@@ -32,21 +32,19 @@ function Toolbar<TData extends BaseRecord>({
   const { setFilters, setSorters, tableQuery, filters, sorters } =
     refineTable || {};
 
-  // If no toolbar config is provided through contexts, don't render anything
-  if (!config) {
-    return null;
-  }
-
-  // Sort items by order if specified
+  // Sort items by order if specified (compute regardless of config presence)
   const sortedItems = React.useMemo(() => {
+    if (!config) {
+      return [];
+    }
     return [...config.items].sort((a, b) => {
       const orderA = a.order ?? 0;
       const orderB = b.order ?? 0;
       return orderA - orderB;
     });
-  }, [config.items]);
+  }, [config?.items]);
 
-  // Create stable onChange handler using refs
+  // Create stable onChange handler using refs (compute regardless of config presence)
   const onChangeHandler = useCallback(
     (item: ToolbarItem<TData>) => {
       return createFilterOnChangeHandler(
@@ -63,7 +61,7 @@ function Toolbar<TData extends BaseRecord>({
     [setFilters, getDefaultOperator],
   );
 
-  // Create common props for all toolbar items
+  // Create common props for all toolbar items (compute regardless of config presence)
   const createCommonProps = useCallback(
     (item: ToolbarItem<TData>): ToolbarItemComponentProps<TData> => {
       const context: TableContext<TData> = {
@@ -118,6 +116,11 @@ function Toolbar<TData extends BaseRecord>({
       onChangeHandler,
     ],
   );
+
+  // If no toolbar config is provided through contexts, don't render anything
+  if (!config) {
+    return null;
+  }
 
   const containerClassName = cn(
     "flex flex-wrap items-center gap-2 p-4 border-b bg-background",

@@ -9,7 +9,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DialogProvider, useDialog } from "./Dialog.context";
-import { DialogType, DialogTypes } from "./Dialog.types";
+import { DialogTypes } from "./Dialog.types";
 
 // Mock console.log to reduce noise during tests - Removed as logs are removed from source
 // vi.spyOn(console, "log").mockImplementation(() => {});
@@ -157,7 +157,7 @@ describe("DialogContext", () => {
               onCancel: onCancelMock,
               onConfirm: vi.fn(),
               title: "Confirm Dialog",
-              type: DialogType.CONFIRM,
+              type: DialogTypes.CONFIRM,
             })
           }>
           Open Confirm
@@ -200,7 +200,7 @@ describe("DialogContext", () => {
               onCancel: onCancelMock,
               onConfirm: vi.fn(),
               title: "Confirm Dialog",
-              type: DialogType.CONFIRM,
+              type: DialogTypes.CONFIRM,
             })
           }>
           Open Confirm

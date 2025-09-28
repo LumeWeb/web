@@ -36,7 +36,7 @@ function RangeFilter<TData extends BaseRecord>({
         <Input
           type="number"
           placeholder={config.minPlaceholder || "Min"}
-          value={rangeValue.min || ""}
+          value={rangeValue.min ?? ""}
           onChange={handleMinChange}
           disabled={config.disabled || false}
           className="w-full"
@@ -47,7 +47,7 @@ function RangeFilter<TData extends BaseRecord>({
         <Input
           type="number"
           placeholder={config.maxPlaceholder || "Max"}
-          value={rangeValue.max || ""}
+          value={rangeValue.max ?? ""}
           onChange={handleMaxChange}
           disabled={config.disabled || false}
           className="w-full"

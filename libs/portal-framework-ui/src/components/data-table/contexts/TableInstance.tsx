@@ -3,9 +3,6 @@ import { Table } from "@tanstack/react-table";
 import React, {
   createContext,
   useContext,
-  useEffect,
-  useMemo,
-  useRef,
 } from "react";
 import type { BaseRecord } from "@refinedev/core";
 
@@ -26,19 +23,9 @@ export function TableInstanceProvider<TData extends BaseRecord>({
   children,
   table,
 }: TableInstanceProviderProps<TData>) {
-  // Use refs to stabilize references and prevent contexts thrashing
-  const tableRef = useRef(table);
-
-  // Update refs when values change
-  useEffect(() => {
-    tableRef.current = table;
-  }, [table]);
-
-  const value = useMemo(() => {
-    return {
-      table: tableRef.current,
-    };
-  }, []);
+  const value = {
+    table,
+  };
 
   return (
     <TableInstanceContext.Provider value={value}>

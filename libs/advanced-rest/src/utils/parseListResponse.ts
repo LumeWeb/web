@@ -13,12 +13,11 @@ export const parseListResponse = (data: any, totalCount: number) => {
   let dataArray: any[] = [];
 
   // Handle total count
-  if (Number.isNaN(total) || total === 0) {
+  if (Number.isNaN(total) || typeof total !== "number") {
     if (data && typeof data.total === "number") {
       total = data.total;
     } else {
       total = 0;
-      console.warn("Total count not found in headers or data.");
     }
   }
 
