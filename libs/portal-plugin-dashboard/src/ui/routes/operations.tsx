@@ -102,7 +102,17 @@ const OperationsContent = () => {
     }),
     columnHelper.accessor("cid", {
       cell: (info) => {
-        const cid = info.getValue();
+        const cidValue = info.getValue();
+        
+        // Handle CID object format { "/": "bafy..." } or string
+        const getSafeCidString = (cid: any): string | undefined => {
+          if (typeof cid === 'string') return cid;
+          if (cid && typeof cid === 'object' && cid['/']) return cid['/'];
+          return undefined;
+        };
+
+        const cid = getSafeCidString(cidValue);
+        
         if (!cid) {
           return <span className="text-gray-500">-</span>;
         }
