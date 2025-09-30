@@ -335,6 +335,9 @@ export const contextProviders: Record<
           isBackValidate={wizardDialog.formConfig?.stepBehavior?.isBackValidate}
           onStepChange={formMethods?.onStepChange}
           onStepRetry={createStepRetryHandler(wizardDialog.formConfig?.steps || [])}
+          onNavigationStart={wizardDialog.formConfig?.onNavigationStart}
+          onNavigationEnd={wizardDialog.formConfig?.onNavigationEnd}
+          onNavigationError={wizardDialog.formConfig?.onNavigationError}
           totalSteps={wizardDialog.formConfig?.steps?.length}
           triggerValidation={formMethods?.triggerValidation}>
           {children}
@@ -351,6 +354,9 @@ export const contextProviders: Record<
             defaultStep={formDialog.formConfig?.stepBehavior?.defaultStep}
             isBackValidate={formDialog.formConfig?.stepBehavior?.isBackValidate}
             onStepRetry={createStepRetryHandler(formDialog.formConfig?.steps || [])}
+            onNavigationStart={formDialog.formConfig?.onNavigationStart}
+            onNavigationEnd={formDialog.formConfig?.onNavigationEnd}
+            onNavigationError={formDialog.formConfig?.onNavigationError}
             totalSteps={formDialog.formConfig?.steps?.length}>
             {children}
           </StepControlProvider>

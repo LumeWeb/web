@@ -5,6 +5,7 @@ export * from "./BaseTableContent";
 export * from "./BaseTableInner";
 export * from "./DataTable";
 export * from "./DataTable.types";
+export * from "./DataTableController";
 export * from "./DefaultPagination";
 export * from "./EmptyState";
 export * from "./LoadingState";

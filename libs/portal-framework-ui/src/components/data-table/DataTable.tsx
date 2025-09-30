@@ -4,8 +4,10 @@ import { Table } from "@tanstack/react-table";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import type { DataTableProps } from "./DataTable.types";
+import type { DataTableControllerProps } from "./DataTableController";
 
 import { ActionColumnCellProps, BaseTable } from "./BaseTable";
+import { DataTableController } from "./DataTableController";
 import { TableAction } from "./TableAction";
 import { TableActionMenu } from "./TableActionMenu";
 import {
@@ -30,6 +32,7 @@ function DataTable<
 >({
   actionMenu,
   columns,
+  control,
   dataProviderName,
   refineCoreProps,
   resource,
@@ -124,6 +127,7 @@ function DataTable<
               isLoading: refineTable.refineCore.tableQuery.isFetching,
               error: refineTable.refineCore.tableQuery.error,
             }}>
+            {control}
             <BaseTable
               table={table}
               refineTable={refineTable.refineCore}

@@ -5,14 +5,11 @@ import {
 } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
-import { DialogTypes, ForceRerenderCallback } from "@/components";
+import { ForceRerenderCallback } from "@/components";
 import {
-  ActionListRenderer,
   AlertDialogConfig,
-  createDialogActions,
   useForceRerender,
 } from "@/components";
-import { useDialogType } from "../utils/dialogDetection";
 
 interface AlertDialogProps extends AlertDialogConfig {
   description?: React.FC | React.ReactNode | string;
@@ -21,16 +18,11 @@ interface AlertDialogProps extends AlertDialogConfig {
 }
 
 export function AlertDialog({
-  actions,
   classNames,
   description,
   forceRerender,
-  onClose,
-  onConfirm,
   title,
 }: AlertDialogProps) {
-  const dialogType = useDialogType();
-
   // Implement forceRerender mechanism
   useForceRerender(forceRerender);
 
@@ -49,26 +41,12 @@ export function AlertDialog({
     );
   };
 
-  // Generate default actions for alert dialogs
-  const defaultActions = createDialogActions({
-    confirmLabel: "Continue",
-    onConfirm,
-    type: dialogType || DialogTypes.ALERT,
-  });
-
-  const finalActions = actions || defaultActions;
-
   return (
     <>
       <DialogHeader className={classNames?.header}>
         <DialogTitle className={classNames?.title}>{title}</DialogTitle>
         {renderDescription()}
       </DialogHeader>
-      <ActionListRenderer
-        actions={finalActions}
-        closeDialog={onClose}
-        layout="horizontal"
-      />
     </>
   );
 }

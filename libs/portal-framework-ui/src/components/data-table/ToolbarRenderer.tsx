@@ -8,6 +8,7 @@ import type {
   ToolbarItemComponentProps, 
   ToolbarFilterItem,
   ToolbarFilterGroupItem,
+  ToolbarCustomItem,
   FilterConfig 
 } from "./DataTable.types";
 import { ToolbarItemType } from "./DataTable.types";
@@ -16,7 +17,6 @@ import { Filter } from "lucide-react";
 import {
   getAction,
   getFilter,
-  getCustom,
 } from "./ToolbarRegistry";
 
 // Registry for toolbar item renderers
@@ -77,15 +77,6 @@ function FilterGroupItemRenderer<TData extends BaseRecord>(
   );
 }
 
-function CustomItemRenderer<TData extends BaseRecord>(
-  item: ToolbarItem<TData>,
-  commonProps: ToolbarItemComponentProps<TData>
-) {
-  const customItem = getCustom<TData>(item.id);
-  if (!customItem) return null;
-  return <customItem.component {...commonProps} />;
-}
-
 function SeparatorItemRenderer<TData extends BaseRecord>(
   item: ToolbarItem<TData>,
   commonProps: ToolbarItemComponentProps<TData>
@@ -99,7 +90,6 @@ function registerDefaultRenderers() {
   toolbarItemRenderers.set(ToolbarItemType.ACTION, ActionItemRenderer);
   toolbarItemRenderers.set(ToolbarItemType.FILTER, FilterItemRenderer);
   toolbarItemRenderers.set(ToolbarItemType.FILTER_GROUP, FilterGroupItemRenderer);
-  toolbarItemRenderers.set(ToolbarItemType.CUSTOM, CustomItemRenderer);
 
   // Separator item renderer
   toolbarItemRenderers.set(ToolbarItemType.SEPARATOR, SeparatorItemRenderer);
@@ -156,7 +146,7 @@ export const ToolbarRendererRegistry = {
 
 interface ToolbarRendererProps<TData extends BaseRecord> {
   /** The toolbar item to render */
-  item: ToolbarItem<TData>;
+  item: ExtendedToolbarItem<TData>;
   /** Common props passed to all toolbar item components */
   commonProps: ToolbarItemComponentProps<TData>;
   /** Additional class name for the item container */
@@ -170,9 +160,25 @@ function ToolbarRenderer<TData extends BaseRecord>({
 }: ToolbarRendererProps<TData>) {
   const containerClassName = cn(
     "flex items-center",
-    item.type === "separator" && "mx-2",
+    item.type === ToolbarItemType.SEPARATOR && "mx-2",
     className
   );
+
+  // Handle CUSTOM type items directly
+  if (item.type === ToolbarItemType.CUSTOM) {
+    const customItem = item as ToolbarCustomItem<TData>;
+    const CustomComponent = customItem.component;
+    
+    if (CustomComponent) {
+      return (
+        <div className={containerClassName}>
+          <CustomComponent {...commonProps} />
+        </div>
+      );
+    }
+    
+    return null;
+  }
 
   const renderer = ToolbarRendererRegistry.get<TData>(item.type);
 

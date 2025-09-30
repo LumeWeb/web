@@ -4,7 +4,11 @@ import React, { useMemo } from "react";
 
 import { FooterType } from "./registry/types";
 
-import { isActionButtonsFunction } from "@/components";
+import {
+  ConfirmDialogConfig,
+  DialogContainerEnvironment,
+  isActionButtonsFunction,
+} from "@/components";
 import {
   ActionItemConfig,
   ActionItemType,
@@ -68,6 +72,41 @@ class ActionGeneratorRegistry<T extends BaseRecord = any> {
 // Create registry instance
 const actionGeneratorRegistry = new ActionGeneratorRegistry();
 
+// Register alert dialog action generator (highest priority)
+actionGeneratorRegistry.register({
+  checker: (environment) =>
+    isDialogContainer(environment?.container) &&
+    environment.container?.dialogConfig?.type === "alert",
+  generator: (environment, submitLabel) => {
+    return createDialogActions({
+      cancelLabel: submitLabel || "Continue",
+      onCancel: environment?.container?.onClose,
+      type: "alert",
+    });
+  },
+  priority: 350,
+});
+
+// Register confirm dialog action generator (high priority)
+actionGeneratorRegistry.register({
+  checker: (environment) =>
+    isDialogContainer(environment?.container) &&
+    environment.container?.dialogConfig?.type === "confirm",
+  generator: (environment, submitLabel) => {
+    return createDialogActions({
+      cancelLabel: submitLabel || "Cancel",
+      confirmLabel: submitLabel || "Continue",
+      onCancel: (environment?.container as DialogContainerEnvironment)?.onClose,
+      onConfirm: (
+        (environment?.container as DialogContainerEnvironment)
+          ?.dialogConfig as ConfirmDialogConfig
+      )?.onConfirm,
+      type: "confirm",
+    });
+  },
+  priority: 325,
+});
+
 // Register wizard form navigation action generator (most specific)
 actionGeneratorRegistry.register({
   checker: (environment) =>
@@ -83,7 +122,7 @@ actionGeneratorRegistry.register({
       onNext: environment?.form?.methods?.handleSubmit,
       onPrevious: step?.onPrevious,
       onSubmit: environment?.form?.methods?.handleSubmit,
-      submitLabel: submitLabel,
+      submitLabel: submitLabel || "Submit",
     });
   },
   priority: 500,
@@ -103,7 +142,7 @@ actionGeneratorRegistry.register({
       onClose: environment?.container?.onClose,
       onNext: step?.onNext,
       onPrevious: step?.onPrevious,
-      submitLabel: submitLabel,
+      submitLabel: submitLabel || "Submit",
     });
   },
   priority: 400,
@@ -258,7 +297,9 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
     const evaluatedLabel = evaluateSubmitLabel(label, evaluationContext);
 
     // Ensure submitLabel is always a string with a safe default
-    return String(evaluatedLabel || "Submit");
+    if (evaluatedLabel !== undefined) {
+      return String(evaluatedLabel);
+    }
   }, [config, environment]);
 
   // Smart action mapping
@@ -345,7 +386,9 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
   }, [config, environment, submitLabel]);
 
   // Determine if footer type needs form-specific props
-  const needsFormProps = [FooterType.FORM, FooterType.STEP_FORM].includes(footerType);
+  const needsFormProps = [FooterType.FORM, FooterType.STEP_FORM].includes(
+    footerType,
+  );
 
   const baseProps: BaseFooterProps<T> = {
     actionButtons: actions,
@@ -359,7 +402,7 @@ function UnifiedFooterInner<T extends BaseRecord = any>({
   };
 
   // Explicitly handle props based on footer type
-  const props = needsFormProps 
+  const props = needsFormProps
     ? {
         ...baseProps,
         onConfirm: environment.form?.methods?.handleSubmit,

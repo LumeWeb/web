@@ -8,6 +8,7 @@ import {
   useFormContext,
   WizardFormConfig,
   WizardStepDefinition,
+  type NavigationType,
 } from "@lumeweb/portal-framework-ui";
 import { cn } from "@lumeweb/portal-framework-ui-core";
 import { useNotification } from "@refinedev/core";
@@ -196,7 +197,7 @@ const ReviewComponent = ({
       </div>
 
       <div>
-        <h4 className="mb-2 font-medium">Selected Files ({fileCount})</h4>
+        <h4 className="mb-2 font-medium">Files to Upload ({fileCount})</h4>
         {fileCount > 0 ? (
           <div className="max-h-40 space-y-2 overflow-y-auto">
             {uppyFiles.map((file, index) => {
@@ -239,10 +240,13 @@ const ReviewComponent = ({
 };
 
 const createUploadErrorNotification = (open: any, error: unknown) => {
-  const message = error instanceof Error ? error.message : 
-                typeof error === 'string' ? error : 
-                'An unknown upload error occurred';
-  
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : "An unknown upload error occurred";
+
   open?.({
     description: message,
     message: "Upload Error",
@@ -322,7 +326,7 @@ const ProgressComponent = ({
 
   return (
     <UploadProgress
-      description={`Uploading ${fileCount} file(s) to ${service.name}`}
+      description={`Uploading ${fileCount} file(s) to ${service.name} (will be queued for processing)`}
       fileCount={fileCount}
       files={uppyFiles}
       progress={progress}
@@ -352,7 +356,7 @@ const UploadedFileItem = ({
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">{fileData.name}</p>
           <p className="text-muted-foreground text-xs">
-            {filesize(fileData.size)} • Saved to {serviceName}
+            {filesize(fileData.size)} • Queued in {serviceName}
           </p>
         </div>
       </div>
@@ -399,16 +403,16 @@ const CompleteComponent = ({
           <Check className="h-8 w-8 text-green-600" />
         </div>
         <h3 className="mb-2 text-lg font-semibold">
-          Files Successfully Uploaded
+          Files Uploaded and Queued
         </h3>
         <p className="text-muted-foreground">
-          {fileCount} {fileCount === 1 ? "file" : "files"} have been saved to{" "}
-          {service.name}
+          {fileCount} {fileCount === 1 ? "file" : "files"} have been uploaded and queued for processing in {service.name}.
+          Processing may take some time to complete.
         </p>
       </div>
 
       <div className="space-y-3">
-        <h4 className="font-medium">Your Files</h4>
+        <h4 className="font-medium">Uploaded Files</h4>
         <div className="max-h-48 space-y-2 overflow-y-auto">
           {uploadedFiles.map((fileData, index) => (
             <UploadedFileItem
@@ -423,49 +427,77 @@ const CompleteComponent = ({
   );
 };
 
-// Global event listener tracking
-const eventListeners = new Map<
-  IUploadManager,
-  Record<string, (() => void) | undefined>
->();
+export function uploadWizardForm(
+  services: ServiceConfig[],
+  uploadFeature: UploadFeature,
+): WizardFormConfig<UploadWizardFormData> {
+  const uploadManager = uploadFeature?.getManager();
+  // Determine if we have services available
+  const hasServices = services && services.length > 0;
 
-// Helper method to clean up existing event listeners
-const cleanupEventListeners = (uploadManager: IUploadManager) => {
-  if (uploadManager && eventListeners.has(uploadManager)) {
-    const listeners = eventListeners.get(uploadManager);
-    Object.values(listeners || {}).forEach((cleanup) => {
-      if (cleanup) cleanup();
-    });
-    eventListeners.delete(uploadManager);
-  }
-};
+  // Create force rerender receiver
+  const { forceRerender, forceRerenderCallback } =
+    createForceRerenderReceiver();
 
-// Helper method to setup event listeners
-const setupEventListeners = (
-  uploadManager: IUploadManager,
-  forceRerender: (() => void) | undefined,
-  environmentSync: (() => null | UnifiedEnvironment) | undefined,
-) => {
-  const handleError = () => {
-    // Force rerender on error
-    forceRerender?.();
-  };
+  // Create environment receiver for accessing environment state
+  const { environmentSync, environmentSyncCallback } =
+    createEnvironmentReceiver();
 
-  const handleComplete = (data: { failed?: any[] }) => {
-    // Jump to step 5 (complete step) when upload is finished
-    const env = environmentSync?.();
-    if (env?.step?.jumpTo && (!data.failed || data.failed.length === 0)) {
-      env.step.jumpTo(5);
+  // Clear any existing files from previous uploads
+  uploadManager.clearFiles();
+
+  // Navigation state variables
+  let isNavigating = false;
+  let pendingNavigation: {
+    fromStep: number;
+    toStep: number;
+    type: NavigationType;
+  } | null = null;
+
+  // Global event listener tracking
+  const eventListeners = new Map<
+    IUploadManager,
+    Record<string, (() => void) | undefined>
+  >();
+
+  // Helper method to clean up existing event listeners
+  const cleanupEventListeners = (uploadManager: IUploadManager) => {
+    if (uploadManager && eventListeners.has(uploadManager)) {
+      const listeners = eventListeners.get(uploadManager);
+      Object.values(listeners || {}).forEach((cleanup) => {
+        if (cleanup) cleanup();
+      });
+      eventListeners.delete(uploadManager);
     }
-    // Force rerender on complete
-    forceRerender?.();
   };
+
+  // Clean up any existing listeners before setting up new ones
+  cleanupEventListeners(uploadManager);
 
   // Define events to listen to
   const eventsToListen: { handler: () => void; name: string }[] = [
-    { handler: handleError, name: "error" },
-    { handler: handleError, name: "upload-error" },
-    { handler: handleComplete, name: "complete" },
+    { handler: forceRerender, name: "error" },
+    { handler: forceRerender, name: "upload-error" },
+    {
+      handler: () => {
+        // Jump to step 5 (complete step) when upload is finished
+        // If we're not currently navigating, jump directly, else queue the navigation
+        if (!isNavigating) {
+          const env = environmentSync();
+          if (env?.step?.jumpTo) {
+            env.step.jumpTo(5);
+          }
+        } else {
+          pendingNavigation = {
+            fromStep: 0,
+            toStep: 5,
+            type: "jumpTo",
+          };
+        }
+        forceRerender?.();
+      },
+      name: "complete",
+    },
   ];
 
   // Add event listeners and track them globally
@@ -478,34 +510,6 @@ const setupEventListeners = (
   if (uploadManager) {
     eventListeners.set(uploadManager, listeners);
   }
-
-  return listeners;
-};
-
-export function uploadWizardForm(
-  services: ServiceConfig[],
-  uploadFeature: UploadFeature,
-): WizardFormConfig<UploadWizardFormData> {
-  const uploadManager = uploadFeature?.getManager();
-  // Determine if we have services available
-  const hasServices = services && services.length > 0;
-
-  // Clean up any existing event listeners for this uploadManager
-  cleanupEventListeners(uploadManager);
-
-  // Create force rerender receiver
-  const { forceRerender, forceRerenderCallback } =
-    createForceRerenderReceiver();
-
-  // Create environment receiver for accessing environment state
-  const { environmentSync, environmentSyncCallback } =
-    createEnvironmentReceiver();
-
-  // Setup event listeners
-  setupEventListeners(uploadManager, forceRerender, environmentSync);
-
-  // Clear any existing files from previous uploads
-  uploadManager.clearFiles();
 
   const stepDefinitions: WizardStepDefinition<UploadWizardFormData>[] = [
     {
@@ -741,5 +745,27 @@ export function uploadWizardForm(
     forceRerender: forceRerenderCallback,
     steps: stepDefinitions,
     submitLabel: "Done",
+    onNavigationStart: () => {
+      isNavigating = true;
+    },
+    onNavigationEnd: () => {
+      isNavigating = false;
+
+      // If there was a pending navigation request, execute it now
+      if (pendingNavigation) {
+        const navigationRequest = pendingNavigation;
+        pendingNavigation = null;
+
+        // Execute pending navigation if it exists
+        const env = environmentSync();
+        if (env?.step?.jumpTo) {
+          env.step.jumpTo(navigationRequest.toStep);
+        }
+      }
+    },
+    onNavigationError: () => {
+      isNavigating = false;
+      pendingNavigation = null;
+    },
   };
 }

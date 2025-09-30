@@ -9,7 +9,7 @@ import { MoreHorizontal } from "lucide-react";
 import React from "react";
 
 export interface TableActionMenuItem<TData> {
-  disabled?: boolean;
+  disabled?: boolean | ((row: TData) => boolean);
   icon?: React.ReactNode;
   label: string;
   onClick: (row: TData) => void;
@@ -32,9 +32,9 @@ function TableActionMenu<TData>({ items, row }: TableActionMenuProps<TData>) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {items.map((item, index) => (
+        {items?.map((item, index) => (
           <DropdownMenuItem
-            disabled={item.disabled}
+            disabled={typeof item.disabled === 'function' ? item.disabled(row) : item.disabled}
             key={index}
             onClick={() => item.onClick(row)}>
             {item.icon && <span className="mr-2">{item.icon}</span>}

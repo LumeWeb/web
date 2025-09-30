@@ -63,6 +63,9 @@ interface StepSchemaFormContentProps<
   config: StepFormConfig<TRequest, TResponse>;
   currentDialog: any;
   formMethods: any;
+  onNavigationStart?: (fromStep: number, toStep: number, type: 'goTo' | 'jumpTo' | 'next' | 'previous' | 'retry') => void;
+  onNavigationEnd?: (fromStep: number, toStep: number, type: 'goTo' | 'jumpTo' | 'next' | 'previous' | 'retry') => void;
+  onNavigationError?: (fromStep: number, toStep: number, type: 'goTo' | 'jumpTo' | 'next' | 'previous' | 'retry', error: any) => void;
 }
 
 interface StepSchemaFormProps<
@@ -71,12 +74,15 @@ interface StepSchemaFormProps<
 > {
   closeDialog: () => void;
   config: StepFormConfig<TRequest, TResponse>;
+  onNavigationStart?: (fromStep: number, toStep: number, type: 'goTo' | 'jumpTo' | 'next' | 'previous' | 'retry') => void;
+  onNavigationEnd?: (fromStep: number, toStep: number, type: 'goTo' | 'jumpTo' | 'next' | 'previous' | 'retry') => void;
+  onNavigationError?: (fromStep: number, toStep: number, type: 'goTo' | 'jumpTo' | 'next' | 'previous' | 'retry', error: any) => void;
 }
 
 export function StepSchemaForm<
   TRequest extends FieldValues = FieldValues,
   TResponse extends BaseRecord = any,
->({ closeDialog, config }: StepSchemaFormProps<TRequest, TResponse>) {
+>({ closeDialog, config, onNavigationStart, onNavigationEnd, onNavigationError }: StepSchemaFormProps<TRequest, TResponse>) {
   const { currentDialog, formMethods } = useDialog();
   const existingStepControl = useOptionalStepControlContext();
 
@@ -88,6 +94,9 @@ export function StepSchemaForm<
         config={config}
         currentDialog={currentDialog}
         formMethods={formMethods}
+        onNavigationStart={onNavigationStart}
+        onNavigationEnd={onNavigationEnd}
+        onNavigationError={onNavigationError}
       />
     );
   }
@@ -98,12 +107,18 @@ export function StepSchemaForm<
       defaultStep={config.stepBehavior?.defaultStep}
       isBackValidate={config.stepBehavior?.isBackValidate}
       onStepRetry={createStepRetryHandler(config.steps)}
-      totalSteps={config.steps.length}>
+      totalSteps={config.steps.length}
+      onNavigationStart={onNavigationStart}
+      onNavigationEnd={onNavigationEnd}
+      onNavigationError={onNavigationError}>
       <StepSchemaFormContent
         closeDialog={closeDialog}
         config={config}
         currentDialog={currentDialog}
         formMethods={formMethods}
+        onNavigationStart={onNavigationStart}
+        onNavigationEnd={onNavigationEnd}
+        onNavigationError={onNavigationError}
       />
     </StepControlProvider>
   );
@@ -145,6 +160,9 @@ function StepSchemaFormContent<
   closeDialog,
   config,
   formMethods,
+  onNavigationStart,
+  onNavigationEnd,
+  onNavigationError,
 }: StepSchemaFormContentProps<TRequest, TResponse>) {
   const stepControl = useStepControl();
   const {
@@ -260,6 +278,9 @@ function StepSchemaFormContent<
     closeDialog,
     formMethods,
     transitionState,
+    onNavigationStart,
+    onNavigationEnd,
+    onNavigationError,
   ]);
 
   return <div className="grid grid-cols-1 grid-rows-1">{schemaForms}</div>;

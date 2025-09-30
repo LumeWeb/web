@@ -210,6 +210,18 @@ export interface FormConfig<
    * the normal flow updates the environment.
    */
   environmentSync?: EnvironmentSyncCallback;
+  /**
+   * Callback when navigation starts
+   */
+  onNavigationStart?: (fromStep: number, toStep: number, type: 'goTo' | 'jumpTo' | 'next' | 'previous' | 'retry') => void;
+  /**
+   * Callback when navigation ends successfully
+   */
+  onNavigationEnd?: (fromStep: number, toStep: number, type: 'goTo' | 'jumpTo' | 'next' | 'previous' | 'retry') => void;
+  /**
+   * Callback when navigation fails
+   */
+  onNavigationError?: (fromStep: number, toStep: number, type: 'goTo' | 'jumpTo' | 'next' | 'previous' | 'retry', error: any) => void;
 }
 
 /**

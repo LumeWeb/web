@@ -52,7 +52,7 @@ export function useUploadManager(): UseUploadManagerReturn {
         // Set up error handling for Uppy events
         const handleError = (file: any, error: Error) => {
           open?.({
-            description: error.message,
+            description: error?.message,
             message: "Upload Error",
             type: "error",
           });
@@ -60,7 +60,7 @@ export function useUploadManager(): UseUploadManagerReturn {
 
         const handleRestrictionFailed = (file: any, error: Error) => {
           open?.({
-            description: error.message,
+            description: error?.message,
             message: "Invalid File",
             type: "error",
           });

@@ -2,7 +2,7 @@ import type { ProtocolCapability } from "@lumeweb/portal-plugin-dashboard";
 
 import * as React from "react";
 
-import IpfsIcon from "@/Icon";
+import IpfsIcon from "@/ui/Icon";
 
 export class IpfsProtocol implements ProtocolCapability {
   readonly id = "ipfs:protocol";
