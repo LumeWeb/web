@@ -51,10 +51,10 @@ function registerRefreshToolbarItem<TData extends BaseRecord>() {
     id: "refresh",
     label: "Refresh",
     icon: <RefreshCw className="h-4 w-4" />,
-    onClick: (refineContext, table) => {
+    onClick: (ctx, table) => {
       // First try to refresh through Refine if available
-      if (refineContext) {
-        refineContext.refetch();
+      if (ctx) {
+        ctx.refineContext?.refetch();
         return;
       }
 

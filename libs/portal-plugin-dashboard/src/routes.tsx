@@ -1,6 +1,14 @@
 import type { RouteDefinition } from "@lumeweb/portal-framework-core";
 
-import { Activity, Key, LayoutDashboard, Shield, User, UserCog } from "lucide-react";
+import {
+  Activity,
+  Folder,
+  Key,
+  LayoutDashboard,
+  Shield,
+  User,
+  UserCog,
+} from "lucide-react";
 
 const routes = [
   {
@@ -14,6 +22,7 @@ const routes = [
     navigation: {
       icon: LayoutDashboard,
       label: "Dashboard",
+      order: 0,
     },
     path: "/dashboard",
   },
@@ -23,6 +32,7 @@ const routes = [
     navigation: {
       icon: Activity,
       label: "Operations",
+      order: 2,
     },
     path: "/operations",
   },
@@ -64,6 +74,7 @@ const routes = [
       icon: UserCog,
       label: "My Account",
       linkable: false,
+      order: 3,
     },
     path: "/account",
   },

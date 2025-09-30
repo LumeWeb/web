@@ -7,12 +7,12 @@ import { HeaderEnvironment, NavigationType } from "../types/header";
 import { HeaderComponent, HeaderType } from "./types";
 
 export interface HeaderRegistry {
-  get: (type: HeaderType) => HeaderComponent;
+  get: (type: HeaderType | null) => HeaderComponent | null;
   register: (type: HeaderType, component: HeaderComponent) => void;
   resolveType: <T extends BaseRecord>(
     config: any,
     context: HeaderEnvironment<T>,
-  ) => HeaderType;
+  ) => HeaderType | null;
 }
 
 export function createHeaderRegistry(): HeaderRegistry {
@@ -25,7 +25,11 @@ export function createHeaderRegistry(): HeaderRegistry {
   components.set(HeaderType.WIZARD, WizardHeader);
 
   return {
-    get(type: HeaderType): HeaderComponent {
+    get(type: HeaderType | null): HeaderComponent | null {
+      if (type === null) {
+        return null;
+      }
+      
       const component = components.get(type);
       if (!component) {
         console.warn(
@@ -43,7 +47,7 @@ export function createHeaderRegistry(): HeaderRegistry {
     resolveType<T extends BaseRecord>(
       config: any,
       context: HeaderEnvironment<T>,
-    ): HeaderType {
+    ): HeaderType | null {
       // Priority 1: Explicit header configuration
       if ("header" in config && config.header === false) {
         return HeaderType.CUSTOM;
@@ -54,6 +58,7 @@ export function createHeaderRegistry(): HeaderRegistry {
         case NavigationType.WIZARD:
           return HeaderType.WIZARD;
         case NavigationType.NONE:
+          return null;
         case NavigationType.STEP:
         default:
           return HeaderType.FORM;

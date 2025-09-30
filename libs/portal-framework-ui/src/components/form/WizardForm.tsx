@@ -60,7 +60,10 @@ export function WizardForm<
       defaultStep={config.stepBehavior?.defaultStep}
       isBackValidate={config.stepBehavior?.isBackValidate}
       onStepRetry={createStepRetryHandler(config.steps)}
-      totalSteps={config.steps.length}>
+      totalSteps={config.steps.length}
+      onNavigationStart={config.onNavigationStart}
+      onNavigationEnd={config.onNavigationEnd}
+      onNavigationError={config.onNavigationError}>
       <WizardFormContent
         closeDialog={closeDialog}
         config={config}

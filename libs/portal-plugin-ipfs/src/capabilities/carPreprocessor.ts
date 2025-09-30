@@ -7,6 +7,7 @@ import type {
   Uppy,
   UppyFile,
 } from "@uppy/core";
+import { BasePlugin } from "@uppy/core";
 import type { CID } from "multiformats/cid";
 import type { ProgressOptions } from "progress-events";
 
@@ -20,7 +21,7 @@ import {
   isDirectoryFile,
   isFolderBundle,
 } from "@lumeweb/portal-plugin-dashboard";
-import { BasePlugin } from "@uppy/core";
+import { streamToBlob, readableStreamToAsyncIterable } from "../utils/stream";
 
 type CarPreprocessorOpts<M extends Meta, B extends Body> = PluginOpts;
 
@@ -59,16 +60,16 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
 
   async processFile(file: UppyFile<M, B>) {
     try {
-      const [carStream] = await this.#createCarStream(file, (progress) => {
-        this.uppy.emit("preprocess-progress", file, {
-          message: "Processing file...",
-          mode: "determinate",
-          value: progress,
-        });
-      });
-
-      // Tee the stream so we can use it for both CarReader and streamToBlob
-      const [carStreamForReader, carStreamForBlob] = carStream.tee();
+      const [carStream, rootCid] = await this.#createCarStream(
+        file,
+        (progress) => {
+          this.uppy.emit("preprocess-progress", file, {
+            message: "Processing file...",
+            mode: "determinate",
+            value: progress,
+          });
+        },
+      );
 
       this.uppy.emit("preprocess-complete", file, {
         message: "Processing file...",
@@ -76,29 +77,8 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
         value: 100,
       });
 
-      // Convert ReadableStream to AsyncIterable for CarReader
-      const asyncIterableStream = {
-        [Symbol.asyncIterator]: async function* () {
-          const reader = carStreamForReader.getReader();
-          try {
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              yield value;
-            }
-          } finally {
-            reader.releaseLock();
-          }
-        }
-      };
-
-      // Extract the root CID from the CAR stream
-      const reader = await CarReader.fromIterable(asyncIterableStream);
-      const roots = await reader.getRoots();
-      const rootCid = roots[0];
-
-      // Create a new File from the second stream
-      const carBlob = await streamToBlob(carStreamForBlob, "application/vnd.ipld.car");
+      // Create a new File from the CAR stream
+      const carBlob = await streamToBlob(carStream, "application/vnd.ipld.car");
 
       // Preserve the original filename - don't replace it with cid.toString()
       file.data = new File([carBlob], file.name, {
@@ -112,7 +92,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
         meta: {
           ...file.meta,
           cid: rootCid.toString(),
-        }
+        },
       });
     } catch (error) {
       console.error("Error processing file:", error);
@@ -143,9 +123,9 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
   }
 
   async #createCarStream(
-    file: UppyFile<M, B>,
+    file: UuppyFile<M, B>,
     onProgress: (progress: number) => void,
-  ): Promise<[ReadableStream]> {
+  ): Promise<[ReadableStream, CID]> {
     const helia = await this.#createHelia();
     const fs = unixfs(helia);
     const c = car(helia);
@@ -154,77 +134,40 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
 
     let blocksCount = 0n;
 
-    // Handle directory uploads using helper functions
-    if (isDirectoryFile(file) || isFolderBundle(file)) {
-      let dirFiles: File[] = [];
-      if (isDirectoryFile(file)) {
-        // Regular directory upload with webkitRelativePath
-        dirFiles = Object.values(this.uppy.getFiles())
+    // Determine files array and wrapWithDirectory option based on file type
+    let files: File[] = [];
+    const wrapWithDirectory = isDirectoryFile(file) || isFolderBundle(file);
+
+    if (isFolderBundle(file)) {
+      // Bundle directory upload
+      const meta = file.meta as BundleMetadata;
+      files = meta.originalFiles || [];
+    } else if (isDirectoryFile(file)) {
+      // Regular directory upload with webkitRelativePath
+      // First check if this file has originalFiles in its metadata (from folder bundles)
+      const meta = file.meta as BundleMetadata;
+      if (meta.originalFiles && meta.originalFiles.length > 0) {
+        files = meta.originalFiles;
+      } else {
+        // Fall back to filtering uppy.getFiles() for regular directory uploads
+        files = Object.values(this.uppy.getFiles())
           .filter(isDirectoryFile)
           .map((f) => f.data as File);
-      } else if (isFolderBundle(file)) {
-        // Bundle directory upload
-        const meta = file.meta as BundleMetadata;
-        dirFiles = meta.originalFiles || [];
       }
-
-      const src = fileSource(dirFiles, (progress) => {
-        tracker.updateDataProgress("fileRead", BigInt(progress));
-        onProgress(tracker.getOverallProgress());
-      });
-
-      const addOptions = {
-        onProgress(event) {
-          if (event.type === "unixfs:importer:progress:file:read") {
-            tracker.updateDataProgress("fileRead", event.detail.bytesRead);
-          } else if (event.type === "unixfs:importer:progress:file:write") {
-            tracker.updateDataProgress(
-              "unixfsImport",
-              event.detail.bytesWritten,
-            );
-          } else if (event.type === "blocks:put:blockstore:put") {
-            blocksCount++;
-          }
-          onProgress(tracker.getOverallProgress());
-        },
-      };
-
-      // Add all files to UnixFS and get the root CID
-      let cid: CID;
-      for await (const result of fs.addAll(src, addOptions)) {
-        cid = result.cid;
-      }
-
-      if (!cid) {
-        throw new Error("Failed to import files to UnixFS");
-      }
-
-      let carBlocksWritten = 0n;
-      const options: AbortOptions & ProgressOptions<GetBlockProgressEvents> = {
-        onProgress(event: GetBlockProgressEvents) {
-          if (event.type === "blocks:get:blockstore:get") {
-            carBlocksWritten++;
-
-            if (blocksCount === 0n) {
-              return;
-            }
-
-            tracker.updateBlockProgress(
-              (carBlocksWritten * 100n) / blocksCount,
-            );
-
-            onProgress(tracker.getOverallProgress());
-          }
-        },
-      };
-
-      // Stream to CAR with progress tracking
-      const carStream = c.stream(cid, options);
-      return [asyncGeneratorToReadableStream(carStream)];
+    } else {
+      // Single file upload
+      files = [file.data as File];
     }
 
-    // Handle single file upload
-    const cid = await fs.addByteStream(file.data.stream() as any, {
+    const src = fileSource(files, (progress) => {
+      tracker.updateDataProgress("fileRead", BigInt(progress));
+      onProgress(tracker.getOverallProgress());
+    });
+
+    const addOptions = {
+      // Use protobuf format for all nodes to preserve metadata
+      cidVersion: 1,
+      rawLeaves: false,
       onProgress(event) {
         if (event.type === "unixfs:importer:progress:file:read") {
           tracker.updateDataProgress("fileRead", event.detail.bytesRead);
@@ -235,7 +178,19 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
         }
         onProgress(tracker.getOverallProgress());
       },
-    });
+    };
+
+    // Add all files to UnixFS and get the root CID
+    let cid: CID;
+
+    for await (const result of fs.addAll(src, addOptions)) {
+      // Store the last result which should be the root directory
+      cid = result.cid;
+    }
+
+    if (!cid) {
+      throw new Error("Failed to import files to UnixFS");
+    }
 
     let carBlocksWritten = 0n;
     const options: AbortOptions & ProgressOptions<GetBlockProgressEvents> = {
@@ -256,7 +211,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
 
     // Stream to CAR with progress tracking
     const carStream = c.stream(cid, options);
-    return [asyncGeneratorToReadableStream(carStream)];
+    return [asyncGeneratorToReadableStream(carStream), cid];
   }
 
   async #createHelia() {
@@ -290,16 +245,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
 
     try {
       // Create an async iterable from the file
-      const fileIterable = {
-        [Symbol.asyncIterator]: async function* () {
-          const reader = file.data.stream().getReader();
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            yield value;
-          }
-        },
-      };
+      const fileIterable = readableStreamToAsyncIterable(file.data.stream());
 
       const reader = asyncIterableReader(fileIterable);
       // Attempt to decode the CAR file
@@ -434,7 +380,6 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
   #shouldProcessFile(file: UppyFile<M, B>): boolean {
     return this.#isIPFSFile(file);
   }
-
 }
 
 class ProgressTracker {
@@ -489,33 +434,53 @@ async function* fileSource(
   let totalBytes = 0n;
   let processedBytes = 0n;
 
+  console.log("[fileSource] Starting to process files:", files.length);
+
   // Calculate total bytes for progress tracking
   files.forEach((file) => {
     totalBytes += BigInt(file.size);
+    console.log("[fileSource] File details:", {
+      name: file.name,
+      size: file.size,
+      webkitRelativePath: (file as any).webkitRelativePath,
+      type: file.type,
+    });
   });
+
+  console.log("[fileSource] Total bytes to process:", totalBytes);
 
   for (const file of files) {
     const fullPath = (file as any).webkitRelativePath ?? file.name;
+    console.log("[fileSource] Processing file with fullPath:", fullPath);
 
     // Skip hidden files if they're not explicitly allowed
     if (fullPath.includes("/.")) {
+      console.log("[fileSource] Skipping hidden file:", fullPath);
       continue;
     }
 
     // Yield intermediate directories
     const parts = fullPath.split("/").filter((part: string) => part.length > 0);
+    console.log("[fileSource] Path parts:", parts);
+
     for (let i = 1; i < parts.length; i++) {
       const dirPath = parts.slice(0, i).join("/");
+      console.log("[fileSource] Checking directory path:", dirPath);
+
       if (!seenDirs.has(dirPath)) {
+        console.log("[fileSource] Yielding intermediate directory:", dirPath);
         seenDirs.add(dirPath);
         yield {
           content: undefined,
           path: dirPath,
         };
+      } else {
+        console.log("[fileSource] Directory already seen, skipping:", dirPath);
       }
     }
 
     // Yield the file with its content stream
+    console.log("[fileSource] Yielding file with path:", fullPath);
     yield {
       content: file.stream(),
       path: fullPath,
@@ -524,21 +489,21 @@ async function* fileSource(
     // Update progress if callback provided
     if (onProgress && totalBytes > 0n) {
       processedBytes += BigInt(file.size);
-      onProgress(Number((processedBytes * 100n) / totalBytes));
+      const progressPercent = Number((processedBytes * 100n) / totalBytes);
+      console.log("[fileSource] Progress tracking:", {
+        processedBytes: processedBytes,
+        totalBytes: totalBytes,
+        progressPercent: progressPercent,
+      });
+      onProgress(progressPercent);
     } else if (onProgress) {
       // Fallback progress if totalBytes is 0 (shouldn't happen but just in case)
+      console.log("[fileSource] Fallback progress (100%)");
       onProgress(100);
     }
   }
-}
 
-async function streamToBlob(
-  readableStream: ReadableStream<any>,
-  mimeType?: string,
-): Promise<Blob> {
-  const response = new Response(readableStream);
-  const blob = await response.blob();
-  return mimeType !== undefined ? new Blob([blob], { type: mimeType }) : blob;
+  console.log("[fileSource] Finished processing all files");
 }
 
 export default CarPreprocessorPlugin;

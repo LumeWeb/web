@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  registerCustom,
+  registerAction,
   ToolbarItemComponentProps,
   ToolbarItemType,
   ToolbarSeparatorItem,
@@ -30,7 +30,7 @@ function registerSeparatorToolbarItem<TData extends BaseRecord>(
     component: ToolbarSeparatorItemComponent,
   } as any;
 
-  registerCustom(id, separatorItem);
+  registerAction(id, separatorItem);
 }
 
 export { ToolbarSeparatorItemComponent, registerSeparatorToolbarItem };

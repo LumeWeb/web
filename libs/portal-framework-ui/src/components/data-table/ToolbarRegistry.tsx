@@ -1,6 +1,5 @@
 import type {
   ToolbarActionItem,
-  ToolbarCustomItem,
   ToolbarFilterItem,
 } from "./";
 import { BaseRecord } from "@refinedev/core";
@@ -8,11 +7,6 @@ import { BaseRecord } from "@refinedev/core";
 interface RegisteredActionItem<TData extends BaseRecord> {
   id: string;
   item: ToolbarActionItem<TData>;
-}
-
-interface RegisteredCustomItem<TData extends BaseRecord> {
-  id: string;
-  item: ToolbarCustomItem<TData>;
 }
 
 interface RegisteredFilterItem<TData extends BaseRecord> {
@@ -23,7 +17,6 @@ interface RegisteredFilterItem<TData extends BaseRecord> {
 // Module-level private state
 const actions: Map<string, ToolbarActionItem<any>> = new Map();
 const filters: Map<string, ToolbarFilterItem<any>> = new Map();
-const customs: Map<string, ToolbarCustomItem<any>> = new Map();
 
 /**
  * Register a toolbar action item
@@ -33,16 +26,6 @@ function registerAction<TData extends BaseRecord>(
   item: ToolbarActionItem<TData>,
 ): void {
   actions.set(id, item);
-}
-
-/**
- * Register a toolbar custom item
- */
-function registerCustom<TData extends BaseRecord>(
-  id: string,
-  item: ToolbarCustomItem<TData>,
-): void {
-  customs.set(id, item);
 }
 
 /**
@@ -65,15 +48,6 @@ function getAction<TData extends BaseRecord>(
 }
 
 /**
- * Get a registered custom item by ID
- */
-function getCustom<TData extends BaseRecord>(
-  id: string,
-): ToolbarCustomItem<TData> | undefined {
-  return customs.get(id);
-}
-
-/**
  * Get a registered filter item by ID
  */
 function getFilter<TData extends BaseRecord>(
@@ -87,13 +61,6 @@ function getFilter<TData extends BaseRecord>(
  */
 function hasAction(id: string): boolean {
   return actions.has(id);
-}
-
-/**
- * Check if a custom item exists
- */
-function hasCustom(id: string): boolean {
-  return customs.has(id);
 }
 
 /**
@@ -116,18 +83,6 @@ function listActions<
 }
 
 /**
- * Get all registered custom items
- */
-function listCustoms<
-  TData extends BaseRecord,
->(): RegisteredCustomItem<TData>[] {
-  return Array.from(customs.entries()).map(([id, item]) => ({
-    id,
-    item: item as ToolbarCustomItem<TData>,
-  }));
-}
-
-/**
  * Get all registered filter items
  */
 function listFilters<
@@ -146,7 +101,6 @@ function listAll<TData extends BaseRecord>() {
   return {
     actions: listActions<TData>(),
     filters: listFilters<TData>(),
-    customs: listCustoms<TData>(),
   };
 }
 
@@ -156,7 +110,6 @@ function listAll<TData extends BaseRecord>() {
 function clear(): void {
   actions.clear();
   filters.clear();
-  customs.clear();
 }
 
 /**
@@ -164,13 +117,6 @@ function clear(): void {
  */
 function removeAction(id: string): boolean {
   return actions.delete(id);
-}
-
-/**
- * Remove a specific custom item
- */
-function removeCustom(id: string): boolean {
-  return customs.delete(id);
 }
 
 /**
@@ -183,25 +129,19 @@ function removeFilter(id: string): boolean {
 export {
   registerAction,
   getAction,
-  registerCustom,
-  getCustom,
   registerFilter,
   getFilter,
   hasAction,
-  hasCustom,
   hasFilter,
   listActions,
-  listCustoms,
   listFilters,
   listAll,
   clear,
   removeAction,
-  removeCustom,
   removeFilter,
 };
 
 export type {
   RegisteredActionItem,
   RegisteredFilterItem,
-  RegisteredCustomItem,
 };

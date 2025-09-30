@@ -167,29 +167,35 @@ export function createDialogActions(config: {
   const actions: ActionItemConfig[] = [];
 
   // For alert dialogs, we only want the confirm action (treated as OK/Continue)
-  if (config.type === DialogTypes.ALERT) {
-    actions.push(button(config.onConfirm, config.confirmLabel || "OK"));
+  const isAlert = config.type === DialogTypes.ALERT;
+  if (isAlert) {
+    actions.push(cancel(config.onConfirm, config.confirmLabel || "OK"));
     return actions;
   }
 
   // For confirm, form, wizard_form and custom dialogs, include cancel action
+  const isConfirm = config.type === "confirm";
+  const isForm = config.type === "form";
+  const isWizardForm = config.type === "wizard_form";
+  const isCustom = config.type === "custom";
+
   if (config.onCancel) {
     actions.push(cancel(config.onCancel, config.cancelLabel));
   }
 
   if (config.onConfirm) {
-    const submitType =
-      (config.type === "form" || config.type === "wizard_form" || config.type === "custom") 
-        ? ActionItemType.SUBMIT 
-        : ActionItemType.BUTTON;
-    actions.push({
-      label:
-        config.confirmLabel || 
-        (config.type === "form" || config.type === "wizard_form" ? "Submit" : "Continue"),
-      loading: config.isSubmitting,
-      onClick: config.onConfirm,
-      type: submitType,
-    });
+    const isFormType = isForm || isWizardForm || isCustom;
+    const isFormOrWizardForm = isForm || isWizardForm;
+    const defaultLabel = isFormOrWizardForm ? "Submit" : "Continue";
+    const label = config.confirmLabel || defaultLabel;
+
+    if (isConfirm) {
+      actions.push(cancel(config.onConfirm, label));
+    } else if (isFormType) {
+      actions.push(submit(config.onConfirm, label, config.isSubmitting));
+    } else {
+      actions.push(button(config.onConfirm, label));
+    }
   }
 
   return actions;

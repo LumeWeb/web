@@ -7,7 +7,7 @@ import type {
   ToolbarItem,
   ToolbarItemComponentProps,
 } from "./DataTable.types";
-import { ToolbarItemType } from "./DataTable.types";
+import { ToolbarItemAlignment, ToolbarItemType } from "./DataTable.types";
 import { BaseRecord } from "@refinedev/core";
 import { ToolbarRenderer } from "./ToolbarRenderer";
 import { useFilterHelpers, useRefineTable, useTableConfig } from "./contexts";
@@ -124,23 +124,52 @@ function Toolbar<TData extends BaseRecord>({
 
   const containerClassName = cn(
     "flex flex-wrap items-center gap-2 p-4 border-b bg-background",
+    config.justifyBetween ? "justify-between" : undefined,
     config.sticky && "sticky top-0 z-10",
     className,
   );
 
+  // Helper functions to determine item alignment (defined at component level, not inside hooks)
+  const getItemAlignment = (item: ToolbarItem<TData>): ToolbarItemAlignment => {
+    // If item has explicit alignment, use it
+    if (item.alignment) {
+      return item.alignment;
+    }
+    
+    // Otherwise use the default alignment from config
+    return config.defaultAlignment || ToolbarItemAlignment.LEFT;
+  };
+
+  const isLeftAligned = (item: ToolbarItem<TData>): boolean => {
+    return getItemAlignment(item) === ToolbarItemAlignment.LEFT;
+  };
+
+  const isRightAligned = (item: ToolbarItem<TData>): boolean => {
+    return getItemAlignment(item) === ToolbarItemAlignment.RIGHT;
+  };
+
+  const isCenterAligned = (item: ToolbarItem<TData>): boolean => {
+    return getItemAlignment(item) === ToolbarItemAlignment.CENTER;
+  };
+
+  // Simple approach: render all items in one container, use margin for positioning
   return (
     <div className={containerClassName}>
       {sortedItems.map((item) => {
         const commonProps = createCommonProps(item);
+        
+        // Add appropriate positioning classes based on alignment
+        const itemClassName = cn(
+          isRightAligned(item) && "ml-auto",
+          isCenterAligned(item) && "mx-auto"
+        );
 
         return (
           <ToolbarRenderer
             key={item.id}
             item={item}
             commonProps={commonProps}
-            className={
-              item.type === ToolbarItemType.SEPARATOR ? "mx-1" : undefined
-            }
+            className={itemClassName}
           />
         );
       })}

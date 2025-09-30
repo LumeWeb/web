@@ -82,5 +82,9 @@ function UnifiedHeaderInner<T extends BaseRecord = any>({
     title,
   };
 
+  if (!HeaderComponent) {
+    return null;
+  }
+
   return <HeaderComponent {...props} />;
 }

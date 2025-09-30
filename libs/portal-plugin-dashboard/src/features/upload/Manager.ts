@@ -514,7 +514,7 @@ export class Manager implements IUploadManager {
   async #fetchUploadLimit() {
     try {
       const uploadLimitResponse = await this.#sdk!.account().uploadLimit();
-      this.#uploadLimit = uploadLimitResponse.data.limit;
+      this.#uploadLimit = uploadLimitResponse?.data?.limit;
     } catch (error) {
       console.warn(
         "Failed to fetch upload limit, defaulting to small file handling:",
@@ -549,6 +549,14 @@ export class Manager implements IUploadManager {
           pluginId = await this.getFilePluginId(file, serviceId);
         }
 
+        // Calculate total size of all files belonging to this folder
+        const allFiles = this.#uppy.getFiles();
+        const folderFiles = allFiles.filter(f => {
+          const webkitRelativePath = (f.data as any).webkitRelativePath || '';
+          return webkitRelativePath.startsWith(`${folderName}/`);
+        });
+        const totalSize = folderFiles.reduce((sum, f) => sum + f.size, 0) + file.size;
+
         const bundleMeta: BundleMetadata = {
           bundleName: folderName,
           displayAsFolder: true,
@@ -556,13 +564,13 @@ export class Manager implements IUploadManager {
           originalFiles: [file],
         };
 
-        // Add the virtual folder bundle
+        // Add the virtual folder bundle with the calculated total size
         this.#uppy.addFile({
           data: new File([], folderName, { type: "" }),
           meta: bundleMeta,
           name: folderName,
           plugins: pluginId ? [pluginId] : undefined,
-          size: file.size, // Use the built-in size field
+          size: totalSize, // Use the calculated total size
           type: "application/x-folder-bundle",
         });
       } else {

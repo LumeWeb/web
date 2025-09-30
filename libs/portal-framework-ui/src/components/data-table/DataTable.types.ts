@@ -12,7 +12,17 @@ import type { BaseTableProps } from "./BaseTable";
 
 import { TableActionItem } from "./TableAction";
 import { TableActionMenuItem } from "./TableActionMenu";
-import { FilterConfig, LogicalFilterOperator } from "./toolbarItems/filters/types";
+import {
+  FilterConfig,
+  LogicalFilterOperator,
+} from "./toolbarItems/filters/types";
+
+// Alignment options for toolbar items
+export enum ToolbarItemAlignment {
+  LEFT = "left",
+  RIGHT = "right",
+  CENTER = "center",
+}
 
 // Base toolbar item interface
 export interface BaseToolbarItem {
@@ -22,14 +32,16 @@ export interface BaseToolbarItem {
   type: ToolbarItemType;
   /** Optional order for positioning items in toolbar */
   order?: number;
+  /** Alignment for this specific item */
+  alignment?: ToolbarItemAlignment;
 }
 
 // Toolbar item types
 export enum ToolbarItemType {
   ACTION = "action",
+  CUSTOM = "custom",
   FILTER = "filter",
   SEPARATOR = "separator",
-  CUSTOM = "custom",
   FILTER_GROUP = "filter-group",
 }
 
@@ -122,14 +134,6 @@ export interface ToolbarSeparatorItem extends BaseToolbarItem {
   type: ToolbarItemType.SEPARATOR;
 }
 
-// Custom item type
-export interface ToolbarCustomItem<TData extends BaseRecord = any>
-  extends BaseToolbarItem {
-  type: ToolbarItemType.CUSTOM;
-  /** The custom component to render */
-  component: React.ComponentType<ToolbarItemComponentProps<TData>>;
-}
-
 // Filter group item type
 export interface ToolbarFilterGroupItem<TData extends BaseRecord = any>
   extends BaseToolbarItem {
@@ -150,13 +154,30 @@ export interface ToolbarFilterGroupItem<TData extends BaseRecord = any>
   dropdownStyle?: boolean;
 }
 
+// Custom item type for toolbar
+export interface ToolbarCustomItem<TData extends BaseRecord = any>
+  extends BaseToolbarItem {
+  type: ToolbarItemType.CUSTOM;
+  /** Custom component to render */
+  component: React.ComponentType<ToolbarItemComponentProps<TData>>;
+  /** Optional class name for the container */
+  className?: string;
+}
+
+// Extended toolbar item type
+export type ExtendedToolbarItem<TData extends BaseRecord> =
+  | ToolbarItem<TData>
+  | (BaseToolbarItem & {
+      component?: React.ComponentType<ToolbarItemComponentProps<TData>>;
+    });
+
 // Union type for all toolbar items
 export type ToolbarItem<TData extends BaseRecord> =
   | ToolbarActionItem<TData>
   | ToolbarFilterItem<TData>
   | ToolbarSeparatorItem
-  | ToolbarCustomItem<TData>
-  | ToolbarFilterGroupItem<TData>;
+  | ToolbarFilterGroupItem<TData>
+  | ToolbarCustomItem<TData>;
 
 // Props for filter components (extends base interface)
 export interface ToolbarFilterComponentProps<TData extends BaseRecord>
@@ -179,10 +200,13 @@ export interface ToolbarConfig<TData extends BaseRecord> {
   sticky?: boolean;
   /** Custom class name for the toolbar container */
   className?: string;
+  /** Default alignment for all toolbar items */
+  defaultAlignment?: ToolbarItemAlignment;
+  /** Whether to automatically distribute space between left and right aligned items */
+  justifyBetween?: boolean;
 }
 
 export interface DataTableActionMenuProps<TData> {
-  actionItems?: TableActionItem<TData>[];
   items: TableActionMenuItem<TData>[];
   label?: string;
 }

@@ -6,6 +6,8 @@ import React, {
   useState,
 } from "react";
 
+import type { NavigationType } from "@/components";
+
 /**
  * Interface for step control context values
  */
@@ -89,6 +91,31 @@ export interface StepControlProviderProps {
    */
   onStepRetry?: (step: number) => void;
   /**
+   * Callback when navigation starts
+   */
+  onNavigationStart?: (
+    fromStep: number,
+    toStep: number,
+    type: NavigationType,
+  ) => void;
+  /**
+   * Callback when navigation ends successfully
+   */
+  onNavigationEnd?: (
+    fromStep: number,
+    toStep: number,
+    type: NavigationType,
+  ) => void;
+  /**
+   * Callback when navigation fails
+   */
+  onNavigationError?: (
+    fromStep: number,
+    toStep: number,
+    type: NavigationType,
+    error: any,
+  ) => void;
+  /**
    * Total number of steps
    */
   totalSteps?: number;
@@ -126,6 +153,31 @@ export interface UseCreateStepControlOptions {
    */
   onStepRetry?: (step: number) => void;
   /**
+   * Callback when navigation starts
+   */
+  onNavigationStart?: (
+    fromStep: number,
+    toStep: number,
+    type: NavigationType,
+  ) => void;
+  /**
+   * Callback when navigation ends successfully
+   */
+  onNavigationEnd?: (
+    fromStep: number,
+    toStep: number,
+    type: NavigationType,
+  ) => void;
+  /**
+   * Callback when navigation fails
+   */
+  onNavigationError?: (
+    fromStep: number,
+    toStep: number,
+    type: NavigationType,
+    error: any,
+  ) => void;
+  /**
    * Total number of steps
    */
   totalSteps: number;
@@ -146,6 +198,9 @@ export function StepControlProvider({
   isBackValidate,
   onStepChange,
   onStepRetry,
+  onNavigationStart,
+  onNavigationEnd,
+  onNavigationError,
   totalSteps,
   triggerValidation,
 }: StepControlProviderProps) {
@@ -155,6 +210,9 @@ export function StepControlProvider({
     isBackValidate: isBackValidate ?? false,
     onStepChange,
     onStepRetry,
+    onNavigationStart,
+    onNavigationEnd,
+    onNavigationError,
     totalSteps: totalSteps ?? 1,
     triggerValidation,
   });
@@ -172,6 +230,9 @@ export function useCreateStepControl({
   isBackValidate = false,
   onStepChange,
   onStepRetry,
+  onNavigationStart,
+  onNavigationEnd,
+  onNavigationError,
   totalSteps: totalStepsProp,
   triggerValidation,
 }: UseCreateStepControlOptions): StepControlContextType {
@@ -194,7 +255,18 @@ export function useCreateStepControl({
     (step: number) => {
       const targetStep = Math.max(1, Math.min(step, totalStepsProp));
 
-      if (targetStep === currentStep) return;
+      // Call navigation start callback
+      try {
+        onNavigationStart?.(currentStep, targetStep, "goTo");
+      } catch (error) {
+        onNavigationError?.(currentStep, targetStep, "goTo", error);
+        return;
+      }
+
+      if (targetStep === currentStep) {
+        onNavigationEnd?.(currentStep, targetStep, "goTo");
+        return;
+      }
 
       // Reset retry count when navigating to a different step
       setRetryCount(0);
@@ -210,38 +282,81 @@ export function useCreateStepControl({
 
       // After transition duration, update the current step
       setTimeout(() => {
-        setCurrentStep(targetStep);
-        setTransitionState({
-          direction: null,
-          enteringStep: null,
-          exitingStep: null,
-        });
-        onStepChange?.(targetStep);
+        try {
+          setCurrentStep(targetStep);
+          setTransitionState({
+            direction: null,
+            enteringStep: null,
+            exitingStep: null,
+          });
+          onStepChange?.(targetStep);
+          onNavigationEnd?.(currentStep, targetStep, "goTo");
+        } catch (error) {
+          onNavigationError?.(currentStep, targetStep, "goTo", error);
+        }
       }, 300);
     },
-    [totalStepsProp, onStepChange, currentStep],
+    [
+      totalStepsProp,
+      onStepChange,
+      currentStep,
+      onNavigationStart,
+      onNavigationEnd,
+      onNavigationError,
+    ],
   );
 
   const jumpTo = useCallback(
     (step: number) => {
       const targetStep = Math.max(1, Math.min(step, totalStepsProp));
-      
-      if (targetStep === currentStep) return;
-      
+
+      // Call navigation start callback
+      try {
+        onNavigationStart?.(currentStep, targetStep, "jumpTo");
+      } catch (error) {
+        onNavigationError?.(currentStep, targetStep, "jumpTo", error);
+        return;
+      }
+
+      if (targetStep === currentStep) {
+        onNavigationEnd?.(currentStep, targetStep, "jumpTo");
+        return;
+      }
+
       // Reset retry count when jumping to a different step
       setRetryCount(0);
-      
+
       // Skip transition animation and directly set the step
-      setCurrentStep(targetStep);
-      onStepChange?.(targetStep);
+      try {
+        setCurrentStep(targetStep);
+        onStepChange?.(targetStep);
+        onNavigationEnd?.(currentStep, targetStep, "jumpTo");
+      } catch (error) {
+        onNavigationError?.(currentStep, targetStep, "jumpTo", error);
+      }
     },
-    [totalStepsProp, onStepChange, currentStep],
+    [
+      totalStepsProp,
+      onStepChange,
+      currentStep,
+      onNavigationStart,
+      onNavigationEnd,
+      onNavigationError,
+    ],
   );
 
   const handleRetry = useCallback(async () => {
+    // Call navigation start callback
+    try {
+      onNavigationStart?.(currentStep, currentStep, "retry");
+    } catch (error) {
+      onNavigationError?.(currentStep, currentStep, "retry", error);
+      return;
+    }
+
     // Increment retry count
-    setRetryCount(prev => prev + 1);
-    
+    setRetryCount((prev) => prev + 1);
+
     // Trigger transition animation for retry
     setTransitionState({
       direction: null,
@@ -251,37 +366,103 @@ export function useCreateStepControl({
 
     // After transition duration, reset transition state, set current step to force reprocessing, and trigger callback
     setTimeout(() => {
-      setTransitionState({
-        direction: null,
-        enteringStep: null,
-        exitingStep: null,
-      });
-      setCurrentStep(currentStep);
-      onStepRetry?.(currentStep);
+      try {
+        setTransitionState({
+          direction: null,
+          enteringStep: null,
+          exitingStep: null,
+        });
+        setCurrentStep(currentStep);
+        onStepRetry?.(currentStep);
+        onNavigationEnd?.(currentStep, currentStep, "retry");
+      } catch (error) {
+        onNavigationError?.(currentStep, currentStep, "retry", error);
+      }
     }, 300);
-  }, [currentStep, onStepRetry]);
+  }, [
+    currentStep,
+    onStepRetry,
+    onNavigationStart,
+    onNavigationEnd,
+    onNavigationError,
+  ]);
 
   const handleNext = useCallback(async () => {
     if (isLastStep) return;
 
-    // Handle step submission if provided
-    if (handleStepSubmit) {
-      await handleStepSubmit();
+    const targetStep = currentStep + 1;
+
+    // Call navigation start callback
+    try {
+      onNavigationStart?.(currentStep, targetStep, "next");
+    } catch (error) {
+      onNavigationError?.(currentStep, targetStep, "next", error);
+      return;
     }
 
-    goToStep(currentStep + 1);
-  }, [currentStep, isLastStep, goToStep, handleStepSubmit]);
+    // Handle step submission if provided
+    if (handleStepSubmit) {
+      try {
+        await handleStepSubmit();
+      } catch (error) {
+        onNavigationError?.(currentStep, targetStep, "next", error);
+        return;
+      }
+    }
+
+    goToStep(targetStep);
+  }, [
+    currentStep,
+    isLastStep,
+    goToStep,
+    handleStepSubmit,
+    onNavigationStart,
+    onNavigationEnd,
+    onNavigationError,
+  ]);
 
   const handlePrevious = useCallback(async () => {
     if (isFirstStep) return;
 
-    if (isBackValidate && triggerValidation) {
-      const isValid = await triggerValidation();
-      if (!isValid) return;
+    const targetStep = currentStep - 1;
+
+    // Call navigation start callback
+    try {
+      onNavigationStart?.(currentStep, targetStep, "previous");
+    } catch (error) {
+      onNavigationError?.(currentStep, targetStep, "previous", error);
+      return;
     }
 
-    goToStep(currentStep - 1);
-  }, [currentStep, isFirstStep, isBackValidate, triggerValidation, goToStep]);
+    if (isBackValidate && triggerValidation) {
+      try {
+        const isValid = await triggerValidation();
+        if (!isValid) {
+          onNavigationError?.(
+            currentStep,
+            targetStep,
+            "previous",
+            new Error("Validation failed"),
+          );
+          return;
+        }
+      } catch (error) {
+        onNavigationError?.(currentStep, targetStep, "previous", error);
+        return;
+      }
+    }
+
+    goToStep(targetStep);
+  }, [
+    currentStep,
+    isFirstStep,
+    isBackValidate,
+    triggerValidation,
+    goToStep,
+    onNavigationStart,
+    onNavigationEnd,
+    onNavigationError,
+  ]);
 
   return useMemo(
     () => ({

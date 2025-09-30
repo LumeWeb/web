@@ -322,9 +322,6 @@ export class Framework {
   async loadFeature(id: NamespacedId) {
     validateNamespacedId(id);
     const feature = await this.#plugins.loadFeature(id);
-    if (feature) {
-      await feature.initialize(this);
-    }
     return feature;
   }
 

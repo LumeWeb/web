@@ -2,7 +2,7 @@ import { Button } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
 export interface TableActionItem<TData> {
-  disabled?: boolean;
+  disabled?: boolean | ((row: TData) => boolean);
   icon: React.ReactNode;
   label?: string;
   onClick: (row: TData) => void;
@@ -21,7 +21,7 @@ function TableAction<TData>({ items, row }: TableActionProps<TData>) {
         <Button
           aria-label={item.tooltip || item.label}
           className="h-8 w-8 p-0"
-          disabled={item.disabled}
+          disabled={typeof item.disabled === 'function' ? item.disabled(row) : item.disabled}
           key={`action-${index}`}
           onClick={(e) => {
             e.stopPropagation();
