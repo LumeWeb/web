@@ -97,13 +97,13 @@ function deleteAccountDialogConfig(deleteMutation, logout, openDialog) {
         description: "Your account will be deleted within 48 hours. If this is an error, please contact support immediately.",
         onConfirm: () => logout(),
         title: "Account Deletion Scheduled",
-        type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.DialogType.ALERT,
+        type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.DialogTypes.ALERT,
         variant: "success"
       });
       return true;
     },
     title: "Delete Account",
-    type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.DialogType.FORM
+    type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.DialogTypes.FORM
   };
 }
 

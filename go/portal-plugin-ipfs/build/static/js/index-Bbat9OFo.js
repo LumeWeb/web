@@ -1,957 +1,8 @@
-import { core_ipfs__mf_v__runtimeInit__mf_v__, index_cjs } from './core_ipfs__mf_v__runtimeInit__mf_v__-CAc0Zb6r.js';
+import { jsxRuntimeExports, CID, decode as decode$a, create as create$2, baseX, rfc4648, from as from$1, toString as toString$3, fromString as fromString$2, coerce, base58, base36, base32, base58btc, base32$1, base36$1, fromHex, core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__, Folder, base32upper } from './folder-BEVrBiCO.js';
 
 function getDefaultExportFromCjs (x) {
 	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
 }
-
-// dev uses dynamic import to separate chunks
-    
-    const {loadShare: loadShare$1} = index_cjs;
-    const {initPromise: initPromise$1} = core_ipfs__mf_v__runtimeInit__mf_v__;
-    const res$1 = initPromise$1.then(_ => loadShare$1("@lumeweb/portal-framework-core", {
-    customShareInfo: {shareConfig:{
-      singleton: true,
-      strictVersion: false,
-      requiredVersion: "^0.0.0"
-    }}}));
-    const exportModule$1 = await res$1.then(factory => factory());
-    var core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__ = exportModule$1;
-
-var jsxRuntime = {exports: {}};
-
-var reactJsxRuntime_production_min = {};
-
-// dev uses dynamic import to separate chunks
-    
-    const {loadShare} = index_cjs;
-    const {initPromise} = core_ipfs__mf_v__runtimeInit__mf_v__;
-    const res = initPromise.then(_ => loadShare("react", {
-    customShareInfo: {shareConfig:{
-      singleton: true,
-      strictVersion: false,
-      requiredVersion: "^18.3.1"
-    }}}));
-    const exportModule = await res.then(factory => factory());
-    var core_ipfs__loadShare__react__loadShare__ = exportModule;
-
-/**
- * @license React
- * react-jsx-runtime.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-var hasRequiredReactJsxRuntime_production_min;
-
-function requireReactJsxRuntime_production_min () {
-	if (hasRequiredReactJsxRuntime_production_min) return reactJsxRuntime_production_min;
-	hasRequiredReactJsxRuntime_production_min = 1;
-var f=core_ipfs__loadShare__react__loadShare__,k=Symbol.for("react.element"),l=Symbol.for("react.fragment"),m=Object.prototype.hasOwnProperty,n=f.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner,p={key:true,ref:true,__self:true,__source:true};
-	function q(c,a,g){var b,d={},e=null,h=null;void 0!==g&&(e=""+g);void 0!==a.key&&(e=""+a.key);void 0!==a.ref&&(h=a.ref);for(b in a)m.call(a,b)&&!p.hasOwnProperty(b)&&(d[b]=a[b]);if(c&&c.defaultProps)for(b in a=c.defaultProps,a) void 0===d[b]&&(d[b]=a[b]);return {$$typeof:k,type:c,key:e,ref:h,props:d,_owner:n.current}}reactJsxRuntime_production_min.Fragment=l;reactJsxRuntime_production_min.jsx=q;reactJsxRuntime_production_min.jsxs=q;
-	return reactJsxRuntime_production_min;
-}
-
-var reactJsxRuntime_development = {};
-
-var hasRequiredReactJsxRuntime_development;
-
-function requireReactJsxRuntime_development () {
-	if (hasRequiredReactJsxRuntime_development) return reactJsxRuntime_development;
-	hasRequiredReactJsxRuntime_development = 1;
-	var define_process_env_default = {};
-	/**
-	 * @license React
-	 * react-jsx-runtime.development.js
-	 *
-	 * Copyright (c) Facebook, Inc. and its affiliates.
-	 *
-	 * This source code is licensed under the MIT license found in the
-	 * LICENSE file in the root directory of this source tree.
-	 */
-	if (define_process_env_default.NODE_ENV !== "production") {
-	  (function() {
-	    var React = core_ipfs__loadShare__react__loadShare__;
-	    var REACT_ELEMENT_TYPE = Symbol.for("react.element");
-	    var REACT_PORTAL_TYPE = Symbol.for("react.portal");
-	    var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
-	    var REACT_STRICT_MODE_TYPE = Symbol.for("react.strict_mode");
-	    var REACT_PROFILER_TYPE = Symbol.for("react.profiler");
-	    var REACT_PROVIDER_TYPE = Symbol.for("react.provider");
-	    var REACT_CONTEXT_TYPE = Symbol.for("react.context");
-	    var REACT_FORWARD_REF_TYPE = Symbol.for("react.forward_ref");
-	    var REACT_SUSPENSE_TYPE = Symbol.for("react.suspense");
-	    var REACT_SUSPENSE_LIST_TYPE = Symbol.for("react.suspense_list");
-	    var REACT_MEMO_TYPE = Symbol.for("react.memo");
-	    var REACT_LAZY_TYPE = Symbol.for("react.lazy");
-	    var REACT_OFFSCREEN_TYPE = Symbol.for("react.offscreen");
-	    var MAYBE_ITERATOR_SYMBOL = Symbol.iterator;
-	    var FAUX_ITERATOR_SYMBOL = "@@iterator";
-	    function getIteratorFn(maybeIterable) {
-	      if (maybeIterable === null || typeof maybeIterable !== "object") {
-	        return null;
-	      }
-	      var maybeIterator = MAYBE_ITERATOR_SYMBOL && maybeIterable[MAYBE_ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL];
-	      if (typeof maybeIterator === "function") {
-	        return maybeIterator;
-	      }
-	      return null;
-	    }
-	    var ReactSharedInternals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
-	    function error(format) {
-	      {
-	        {
-	          for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-	            args[_key2 - 1] = arguments[_key2];
-	          }
-	          printWarning("error", format, args);
-	        }
-	      }
-	    }
-	    function printWarning(level, format, args) {
-	      {
-	        var ReactDebugCurrentFrame2 = ReactSharedInternals.ReactDebugCurrentFrame;
-	        var stack = ReactDebugCurrentFrame2.getStackAddendum();
-	        if (stack !== "") {
-	          format += "%s";
-	          args = args.concat([stack]);
-	        }
-	        var argsWithFormat = args.map(function(item) {
-	          return String(item);
-	        });
-	        argsWithFormat.unshift("Warning: " + format);
-	        Function.prototype.apply.call(console[level], console, argsWithFormat);
-	      }
-	    }
-	    var enableScopeAPI = false;
-	    var enableCacheElement = false;
-	    var enableTransitionTracing = false;
-	    var enableLegacyHidden = false;
-	    var enableDebugTracing = false;
-	    var REACT_MODULE_REFERENCE;
-	    {
-	      REACT_MODULE_REFERENCE = Symbol.for("react.module.reference");
-	    }
-	    function isValidElementType(type) {
-	      if (typeof type === "string" || typeof type === "function") {
-	        return true;
-	      }
-	      if (type === REACT_FRAGMENT_TYPE || type === REACT_PROFILER_TYPE || enableDebugTracing || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || type === REACT_SUSPENSE_LIST_TYPE || enableLegacyHidden || type === REACT_OFFSCREEN_TYPE || enableScopeAPI || enableCacheElement || enableTransitionTracing) {
-	        return true;
-	      }
-	      if (typeof type === "object" && type !== null) {
-	        if (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE || // This needs to include all possible module reference object
-	        // types supported by any Flight configuration anywhere since
-	        // we don't know which Flight build this will end up being used
-	        // with.
-	        type.$$typeof === REACT_MODULE_REFERENCE || type.getModuleId !== void 0) {
-	          return true;
-	        }
-	      }
-	      return false;
-	    }
-	    function getWrappedName(outerType, innerType, wrapperName) {
-	      var displayName = outerType.displayName;
-	      if (displayName) {
-	        return displayName;
-	      }
-	      var functionName = innerType.displayName || innerType.name || "";
-	      return functionName !== "" ? wrapperName + "(" + functionName + ")" : wrapperName;
-	    }
-	    function getContextName(type) {
-	      return type.displayName || "Context";
-	    }
-	    function getComponentNameFromType(type) {
-	      if (type == null) {
-	        return null;
-	      }
-	      {
-	        if (typeof type.tag === "number") {
-	          error("Received an unexpected object in getComponentNameFromType(). This is likely a bug in React. Please file an issue.");
-	        }
-	      }
-	      if (typeof type === "function") {
-	        return type.displayName || type.name || null;
-	      }
-	      if (typeof type === "string") {
-	        return type;
-	      }
-	      switch (type) {
-	        case REACT_FRAGMENT_TYPE:
-	          return "Fragment";
-	        case REACT_PORTAL_TYPE:
-	          return "Portal";
-	        case REACT_PROFILER_TYPE:
-	          return "Profiler";
-	        case REACT_STRICT_MODE_TYPE:
-	          return "StrictMode";
-	        case REACT_SUSPENSE_TYPE:
-	          return "Suspense";
-	        case REACT_SUSPENSE_LIST_TYPE:
-	          return "SuspenseList";
-	      }
-	      if (typeof type === "object") {
-	        switch (type.$$typeof) {
-	          case REACT_CONTEXT_TYPE:
-	            var context = type;
-	            return getContextName(context) + ".Consumer";
-	          case REACT_PROVIDER_TYPE:
-	            var provider = type;
-	            return getContextName(provider._context) + ".Provider";
-	          case REACT_FORWARD_REF_TYPE:
-	            return getWrappedName(type, type.render, "ForwardRef");
-	          case REACT_MEMO_TYPE:
-	            var outerName = type.displayName || null;
-	            if (outerName !== null) {
-	              return outerName;
-	            }
-	            return getComponentNameFromType(type.type) || "Memo";
-	          case REACT_LAZY_TYPE: {
-	            var lazyComponent = type;
-	            var payload = lazyComponent._payload;
-	            var init = lazyComponent._init;
-	            try {
-	              return getComponentNameFromType(init(payload));
-	            } catch (x) {
-	              return null;
-	            }
-	          }
-	        }
-	      }
-	      return null;
-	    }
-	    var assign = Object.assign;
-	    var disabledDepth = 0;
-	    var prevLog;
-	    var prevInfo;
-	    var prevWarn;
-	    var prevError;
-	    var prevGroup;
-	    var prevGroupCollapsed;
-	    var prevGroupEnd;
-	    function disabledLog() {
-	    }
-	    disabledLog.__reactDisabledLog = true;
-	    function disableLogs() {
-	      {
-	        if (disabledDepth === 0) {
-	          prevLog = console.log;
-	          prevInfo = console.info;
-	          prevWarn = console.warn;
-	          prevError = console.error;
-	          prevGroup = console.group;
-	          prevGroupCollapsed = console.groupCollapsed;
-	          prevGroupEnd = console.groupEnd;
-	          var props = {
-	            configurable: true,
-	            enumerable: true,
-	            value: disabledLog,
-	            writable: true
-	          };
-	          Object.defineProperties(console, {
-	            info: props,
-	            log: props,
-	            warn: props,
-	            error: props,
-	            group: props,
-	            groupCollapsed: props,
-	            groupEnd: props
-	          });
-	        }
-	        disabledDepth++;
-	      }
-	    }
-	    function reenableLogs() {
-	      {
-	        disabledDepth--;
-	        if (disabledDepth === 0) {
-	          var props = {
-	            configurable: true,
-	            enumerable: true,
-	            writable: true
-	          };
-	          Object.defineProperties(console, {
-	            log: assign({}, props, {
-	              value: prevLog
-	            }),
-	            info: assign({}, props, {
-	              value: prevInfo
-	            }),
-	            warn: assign({}, props, {
-	              value: prevWarn
-	            }),
-	            error: assign({}, props, {
-	              value: prevError
-	            }),
-	            group: assign({}, props, {
-	              value: prevGroup
-	            }),
-	            groupCollapsed: assign({}, props, {
-	              value: prevGroupCollapsed
-	            }),
-	            groupEnd: assign({}, props, {
-	              value: prevGroupEnd
-	            })
-	          });
-	        }
-	        if (disabledDepth < 0) {
-	          error("disabledDepth fell below zero. This is a bug in React. Please file an issue.");
-	        }
-	      }
-	    }
-	    var ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher;
-	    var prefix;
-	    function describeBuiltInComponentFrame(name, source, ownerFn) {
-	      {
-	        if (prefix === void 0) {
-	          try {
-	            throw Error();
-	          } catch (x) {
-	            var match = x.stack.trim().match(/\n( *(at )?)/);
-	            prefix = match && match[1] || "";
-	          }
-	        }
-	        return "\n" + prefix + name;
-	      }
-	    }
-	    var reentry = false;
-	    var componentFrameCache;
-	    {
-	      var PossiblyWeakMap = typeof WeakMap === "function" ? WeakMap : Map;
-	      componentFrameCache = new PossiblyWeakMap();
-	    }
-	    function describeNativeComponentFrame(fn, construct) {
-	      if (!fn || reentry) {
-	        return "";
-	      }
-	      {
-	        var frame = componentFrameCache.get(fn);
-	        if (frame !== void 0) {
-	          return frame;
-	        }
-	      }
-	      var control;
-	      reentry = true;
-	      var previousPrepareStackTrace = Error.prepareStackTrace;
-	      Error.prepareStackTrace = void 0;
-	      var previousDispatcher;
-	      {
-	        previousDispatcher = ReactCurrentDispatcher.current;
-	        ReactCurrentDispatcher.current = null;
-	        disableLogs();
-	      }
-	      try {
-	        if (construct) {
-	          var Fake = function() {
-	            throw Error();
-	          };
-	          Object.defineProperty(Fake.prototype, "props", {
-	            set: function() {
-	              throw Error();
-	            }
-	          });
-	          if (typeof Reflect === "object" && Reflect.construct) {
-	            try {
-	              Reflect.construct(Fake, []);
-	            } catch (x) {
-	              control = x;
-	            }
-	            Reflect.construct(fn, [], Fake);
-	          } else {
-	            try {
-	              Fake.call();
-	            } catch (x) {
-	              control = x;
-	            }
-	            fn.call(Fake.prototype);
-	          }
-	        } else {
-	          try {
-	            throw Error();
-	          } catch (x) {
-	            control = x;
-	          }
-	          fn();
-	        }
-	      } catch (sample) {
-	        if (sample && control && typeof sample.stack === "string") {
-	          var sampleLines = sample.stack.split("\n");
-	          var controlLines = control.stack.split("\n");
-	          var s = sampleLines.length - 1;
-	          var c = controlLines.length - 1;
-	          while (s >= 1 && c >= 0 && sampleLines[s] !== controlLines[c]) {
-	            c--;
-	          }
-	          for (; s >= 1 && c >= 0; s--, c--) {
-	            if (sampleLines[s] !== controlLines[c]) {
-	              if (s !== 1 || c !== 1) {
-	                do {
-	                  s--;
-	                  c--;
-	                  if (c < 0 || sampleLines[s] !== controlLines[c]) {
-	                    var _frame = "\n" + sampleLines[s].replace(" at new ", " at ");
-	                    if (fn.displayName && _frame.includes("<anonymous>")) {
-	                      _frame = _frame.replace("<anonymous>", fn.displayName);
-	                    }
-	                    {
-	                      if (typeof fn === "function") {
-	                        componentFrameCache.set(fn, _frame);
-	                      }
-	                    }
-	                    return _frame;
-	                  }
-	                } while (s >= 1 && c >= 0);
-	              }
-	              break;
-	            }
-	          }
-	        }
-	      } finally {
-	        reentry = false;
-	        {
-	          ReactCurrentDispatcher.current = previousDispatcher;
-	          reenableLogs();
-	        }
-	        Error.prepareStackTrace = previousPrepareStackTrace;
-	      }
-	      var name = fn ? fn.displayName || fn.name : "";
-	      var syntheticFrame = name ? describeBuiltInComponentFrame(name) : "";
-	      {
-	        if (typeof fn === "function") {
-	          componentFrameCache.set(fn, syntheticFrame);
-	        }
-	      }
-	      return syntheticFrame;
-	    }
-	    function describeFunctionComponentFrame(fn, source, ownerFn) {
-	      {
-	        return describeNativeComponentFrame(fn, false);
-	      }
-	    }
-	    function shouldConstruct(Component) {
-	      var prototype = Component.prototype;
-	      return !!(prototype && prototype.isReactComponent);
-	    }
-	    function describeUnknownElementTypeFrameInDEV(type, source, ownerFn) {
-	      if (type == null) {
-	        return "";
-	      }
-	      if (typeof type === "function") {
-	        {
-	          return describeNativeComponentFrame(type, shouldConstruct(type));
-	        }
-	      }
-	      if (typeof type === "string") {
-	        return describeBuiltInComponentFrame(type);
-	      }
-	      switch (type) {
-	        case REACT_SUSPENSE_TYPE:
-	          return describeBuiltInComponentFrame("Suspense");
-	        case REACT_SUSPENSE_LIST_TYPE:
-	          return describeBuiltInComponentFrame("SuspenseList");
-	      }
-	      if (typeof type === "object") {
-	        switch (type.$$typeof) {
-	          case REACT_FORWARD_REF_TYPE:
-	            return describeFunctionComponentFrame(type.render);
-	          case REACT_MEMO_TYPE:
-	            return describeUnknownElementTypeFrameInDEV(type.type, source, ownerFn);
-	          case REACT_LAZY_TYPE: {
-	            var lazyComponent = type;
-	            var payload = lazyComponent._payload;
-	            var init = lazyComponent._init;
-	            try {
-	              return describeUnknownElementTypeFrameInDEV(init(payload), source, ownerFn);
-	            } catch (x) {
-	            }
-	          }
-	        }
-	      }
-	      return "";
-	    }
-	    var hasOwnProperty = Object.prototype.hasOwnProperty;
-	    var loggedTypeFailures = {};
-	    var ReactDebugCurrentFrame = ReactSharedInternals.ReactDebugCurrentFrame;
-	    function setCurrentlyValidatingElement(element) {
-	      {
-	        if (element) {
-	          var owner = element._owner;
-	          var stack = describeUnknownElementTypeFrameInDEV(element.type, element._source, owner ? owner.type : null);
-	          ReactDebugCurrentFrame.setExtraStackFrame(stack);
-	        } else {
-	          ReactDebugCurrentFrame.setExtraStackFrame(null);
-	        }
-	      }
-	    }
-	    function checkPropTypes(typeSpecs, values, location, componentName, element) {
-	      {
-	        var has = Function.call.bind(hasOwnProperty);
-	        for (var typeSpecName in typeSpecs) {
-	          if (has(typeSpecs, typeSpecName)) {
-	            var error$1 = void 0;
-	            try {
-	              if (typeof typeSpecs[typeSpecName] !== "function") {
-	                var err = Error((componentName || "React class") + ": " + location + " type `" + typeSpecName + "` is invalid; it must be a function, usually from the `prop-types` package, but received `" + typeof typeSpecs[typeSpecName] + "`.This often happens because of typos such as `PropTypes.function` instead of `PropTypes.func`.");
-	                err.name = "Invariant Violation";
-	                throw err;
-	              }
-	              error$1 = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, "SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED");
-	            } catch (ex) {
-	              error$1 = ex;
-	            }
-	            if (error$1 && !(error$1 instanceof Error)) {
-	              setCurrentlyValidatingElement(element);
-	              error("%s: type specification of %s `%s` is invalid; the type checker function must return `null` or an `Error` but returned a %s. You may have forgotten to pass an argument to the type checker creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and shape all require an argument).", componentName || "React class", location, typeSpecName, typeof error$1);
-	              setCurrentlyValidatingElement(null);
-	            }
-	            if (error$1 instanceof Error && !(error$1.message in loggedTypeFailures)) {
-	              loggedTypeFailures[error$1.message] = true;
-	              setCurrentlyValidatingElement(element);
-	              error("Failed %s type: %s", location, error$1.message);
-	              setCurrentlyValidatingElement(null);
-	            }
-	          }
-	        }
-	      }
-	    }
-	    var isArrayImpl = Array.isArray;
-	    function isArray(a) {
-	      return isArrayImpl(a);
-	    }
-	    function typeName(value) {
-	      {
-	        var hasToStringTag = typeof Symbol === "function" && Symbol.toStringTag;
-	        var type = hasToStringTag && value[Symbol.toStringTag] || value.constructor.name || "Object";
-	        return type;
-	      }
-	    }
-	    function willCoercionThrow(value) {
-	      {
-	        try {
-	          testStringCoercion(value);
-	          return false;
-	        } catch (e) {
-	          return true;
-	        }
-	      }
-	    }
-	    function testStringCoercion(value) {
-	      return "" + value;
-	    }
-	    function checkKeyStringCoercion(value) {
-	      {
-	        if (willCoercionThrow(value)) {
-	          error("The provided key is an unsupported type %s. This value must be coerced to a string before before using it here.", typeName(value));
-	          return testStringCoercion(value);
-	        }
-	      }
-	    }
-	    var ReactCurrentOwner = ReactSharedInternals.ReactCurrentOwner;
-	    var RESERVED_PROPS = {
-	      key: true,
-	      ref: true,
-	      __self: true,
-	      __source: true
-	    };
-	    var specialPropKeyWarningShown;
-	    var specialPropRefWarningShown;
-	    function hasValidRef(config) {
-	      {
-	        if (hasOwnProperty.call(config, "ref")) {
-	          var getter = Object.getOwnPropertyDescriptor(config, "ref").get;
-	          if (getter && getter.isReactWarning) {
-	            return false;
-	          }
-	        }
-	      }
-	      return config.ref !== void 0;
-	    }
-	    function hasValidKey(config) {
-	      {
-	        if (hasOwnProperty.call(config, "key")) {
-	          var getter = Object.getOwnPropertyDescriptor(config, "key").get;
-	          if (getter && getter.isReactWarning) {
-	            return false;
-	          }
-	        }
-	      }
-	      return config.key !== void 0;
-	    }
-	    function warnIfStringRefCannotBeAutoConverted(config, self) {
-	      {
-	        if (typeof config.ref === "string" && ReactCurrentOwner.current && self) ;
-	      }
-	    }
-	    function defineKeyPropWarningGetter(props, displayName) {
-	      {
-	        var warnAboutAccessingKey = function() {
-	          if (!specialPropKeyWarningShown) {
-	            specialPropKeyWarningShown = true;
-	            error("%s: `key` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://reactjs.org/link/special-props)", displayName);
-	          }
-	        };
-	        warnAboutAccessingKey.isReactWarning = true;
-	        Object.defineProperty(props, "key", {
-	          get: warnAboutAccessingKey,
-	          configurable: true
-	        });
-	      }
-	    }
-	    function defineRefPropWarningGetter(props, displayName) {
-	      {
-	        var warnAboutAccessingRef = function() {
-	          if (!specialPropRefWarningShown) {
-	            specialPropRefWarningShown = true;
-	            error("%s: `ref` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://reactjs.org/link/special-props)", displayName);
-	          }
-	        };
-	        warnAboutAccessingRef.isReactWarning = true;
-	        Object.defineProperty(props, "ref", {
-	          get: warnAboutAccessingRef,
-	          configurable: true
-	        });
-	      }
-	    }
-	    var ReactElement = function(type, key, ref, self, source, owner, props) {
-	      var element = {
-	        // This tag allows us to uniquely identify this as a React Element
-	        $$typeof: REACT_ELEMENT_TYPE,
-	        // Built-in properties that belong on the element
-	        type,
-	        key,
-	        ref,
-	        props,
-	        // Record the component responsible for creating this element.
-	        _owner: owner
-	      };
-	      {
-	        element._store = {};
-	        Object.defineProperty(element._store, "validated", {
-	          configurable: false,
-	          enumerable: false,
-	          writable: true,
-	          value: false
-	        });
-	        Object.defineProperty(element, "_self", {
-	          configurable: false,
-	          enumerable: false,
-	          writable: false,
-	          value: self
-	        });
-	        Object.defineProperty(element, "_source", {
-	          configurable: false,
-	          enumerable: false,
-	          writable: false,
-	          value: source
-	        });
-	        if (Object.freeze) {
-	          Object.freeze(element.props);
-	          Object.freeze(element);
-	        }
-	      }
-	      return element;
-	    };
-	    function jsxDEV(type, config, maybeKey, source, self) {
-	      {
-	        var propName;
-	        var props = {};
-	        var key = null;
-	        var ref = null;
-	        if (maybeKey !== void 0) {
-	          {
-	            checkKeyStringCoercion(maybeKey);
-	          }
-	          key = "" + maybeKey;
-	        }
-	        if (hasValidKey(config)) {
-	          {
-	            checkKeyStringCoercion(config.key);
-	          }
-	          key = "" + config.key;
-	        }
-	        if (hasValidRef(config)) {
-	          ref = config.ref;
-	          warnIfStringRefCannotBeAutoConverted(config, self);
-	        }
-	        for (propName in config) {
-	          if (hasOwnProperty.call(config, propName) && !RESERVED_PROPS.hasOwnProperty(propName)) {
-	            props[propName] = config[propName];
-	          }
-	        }
-	        if (type && type.defaultProps) {
-	          var defaultProps = type.defaultProps;
-	          for (propName in defaultProps) {
-	            if (props[propName] === void 0) {
-	              props[propName] = defaultProps[propName];
-	            }
-	          }
-	        }
-	        if (key || ref) {
-	          var displayName = typeof type === "function" ? type.displayName || type.name || "Unknown" : type;
-	          if (key) {
-	            defineKeyPropWarningGetter(props, displayName);
-	          }
-	          if (ref) {
-	            defineRefPropWarningGetter(props, displayName);
-	          }
-	        }
-	        return ReactElement(type, key, ref, self, source, ReactCurrentOwner.current, props);
-	      }
-	    }
-	    var ReactCurrentOwner$1 = ReactSharedInternals.ReactCurrentOwner;
-	    var ReactDebugCurrentFrame$1 = ReactSharedInternals.ReactDebugCurrentFrame;
-	    function setCurrentlyValidatingElement$1(element) {
-	      {
-	        if (element) {
-	          var owner = element._owner;
-	          var stack = describeUnknownElementTypeFrameInDEV(element.type, element._source, owner ? owner.type : null);
-	          ReactDebugCurrentFrame$1.setExtraStackFrame(stack);
-	        } else {
-	          ReactDebugCurrentFrame$1.setExtraStackFrame(null);
-	        }
-	      }
-	    }
-	    var propTypesMisspellWarningShown;
-	    {
-	      propTypesMisspellWarningShown = false;
-	    }
-	    function isValidElement(object) {
-	      {
-	        return typeof object === "object" && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
-	      }
-	    }
-	    function getDeclarationErrorAddendum() {
-	      {
-	        if (ReactCurrentOwner$1.current) {
-	          var name = getComponentNameFromType(ReactCurrentOwner$1.current.type);
-	          if (name) {
-	            return "\n\nCheck the render method of `" + name + "`.";
-	          }
-	        }
-	        return "";
-	      }
-	    }
-	    function getSourceInfoErrorAddendum(source) {
-	      {
-	        return "";
-	      }
-	    }
-	    var ownerHasKeyUseWarning = {};
-	    function getCurrentComponentErrorInfo(parentType) {
-	      {
-	        var info = getDeclarationErrorAddendum();
-	        if (!info) {
-	          var parentName = typeof parentType === "string" ? parentType : parentType.displayName || parentType.name;
-	          if (parentName) {
-	            info = "\n\nCheck the top-level render call using <" + parentName + ">.";
-	          }
-	        }
-	        return info;
-	      }
-	    }
-	    function validateExplicitKey(element, parentType) {
-	      {
-	        if (!element._store || element._store.validated || element.key != null) {
-	          return;
-	        }
-	        element._store.validated = true;
-	        var currentComponentErrorInfo = getCurrentComponentErrorInfo(parentType);
-	        if (ownerHasKeyUseWarning[currentComponentErrorInfo]) {
-	          return;
-	        }
-	        ownerHasKeyUseWarning[currentComponentErrorInfo] = true;
-	        var childOwner = "";
-	        if (element && element._owner && element._owner !== ReactCurrentOwner$1.current) {
-	          childOwner = " It was passed a child from " + getComponentNameFromType(element._owner.type) + ".";
-	        }
-	        setCurrentlyValidatingElement$1(element);
-	        error('Each child in a list should have a unique "key" prop.%s%s See https://reactjs.org/link/warning-keys for more information.', currentComponentErrorInfo, childOwner);
-	        setCurrentlyValidatingElement$1(null);
-	      }
-	    }
-	    function validateChildKeys(node, parentType) {
-	      {
-	        if (typeof node !== "object") {
-	          return;
-	        }
-	        if (isArray(node)) {
-	          for (var i = 0; i < node.length; i++) {
-	            var child = node[i];
-	            if (isValidElement(child)) {
-	              validateExplicitKey(child, parentType);
-	            }
-	          }
-	        } else if (isValidElement(node)) {
-	          if (node._store) {
-	            node._store.validated = true;
-	          }
-	        } else if (node) {
-	          var iteratorFn = getIteratorFn(node);
-	          if (typeof iteratorFn === "function") {
-	            if (iteratorFn !== node.entries) {
-	              var iterator = iteratorFn.call(node);
-	              var step;
-	              while (!(step = iterator.next()).done) {
-	                if (isValidElement(step.value)) {
-	                  validateExplicitKey(step.value, parentType);
-	                }
-	              }
-	            }
-	          }
-	        }
-	      }
-	    }
-	    function validatePropTypes(element) {
-	      {
-	        var type = element.type;
-	        if (type === null || type === void 0 || typeof type === "string") {
-	          return;
-	        }
-	        var propTypes;
-	        if (typeof type === "function") {
-	          propTypes = type.propTypes;
-	        } else if (typeof type === "object" && (type.$$typeof === REACT_FORWARD_REF_TYPE || // Note: Memo only checks outer props here.
-	        // Inner props are checked in the reconciler.
-	        type.$$typeof === REACT_MEMO_TYPE)) {
-	          propTypes = type.propTypes;
-	        } else {
-	          return;
-	        }
-	        if (propTypes) {
-	          var name = getComponentNameFromType(type);
-	          checkPropTypes(propTypes, element.props, "prop", name, element);
-	        } else if (type.PropTypes !== void 0 && !propTypesMisspellWarningShown) {
-	          propTypesMisspellWarningShown = true;
-	          var _name = getComponentNameFromType(type);
-	          error("Component %s declared `PropTypes` instead of `propTypes`. Did you misspell the property assignment?", _name || "Unknown");
-	        }
-	        if (typeof type.getDefaultProps === "function" && !type.getDefaultProps.isReactClassApproved) {
-	          error("getDefaultProps is only used on classic React.createClass definitions. Use a static property named `defaultProps` instead.");
-	        }
-	      }
-	    }
-	    function validateFragmentProps(fragment) {
-	      {
-	        var keys = Object.keys(fragment.props);
-	        for (var i = 0; i < keys.length; i++) {
-	          var key = keys[i];
-	          if (key !== "children" && key !== "key") {
-	            setCurrentlyValidatingElement$1(fragment);
-	            error("Invalid prop `%s` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.", key);
-	            setCurrentlyValidatingElement$1(null);
-	            break;
-	          }
-	        }
-	        if (fragment.ref !== null) {
-	          setCurrentlyValidatingElement$1(fragment);
-	          error("Invalid attribute `ref` supplied to `React.Fragment`.");
-	          setCurrentlyValidatingElement$1(null);
-	        }
-	      }
-	    }
-	    var didWarnAboutKeySpread = {};
-	    function jsxWithValidation(type, props, key, isStaticChildren, source, self) {
-	      {
-	        var validType = isValidElementType(type);
-	        if (!validType) {
-	          var info = "";
-	          if (type === void 0 || typeof type === "object" && type !== null && Object.keys(type).length === 0) {
-	            info += " You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.";
-	          }
-	          var sourceInfo = getSourceInfoErrorAddendum();
-	          if (sourceInfo) {
-	            info += sourceInfo;
-	          } else {
-	            info += getDeclarationErrorAddendum();
-	          }
-	          var typeString;
-	          if (type === null) {
-	            typeString = "null";
-	          } else if (isArray(type)) {
-	            typeString = "array";
-	          } else if (type !== void 0 && type.$$typeof === REACT_ELEMENT_TYPE) {
-	            typeString = "<" + (getComponentNameFromType(type.type) || "Unknown") + " />";
-	            info = " Did you accidentally export a JSX literal instead of a component?";
-	          } else {
-	            typeString = typeof type;
-	          }
-	          error("React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: %s.%s", typeString, info);
-	        }
-	        var element = jsxDEV(type, props, key, source, self);
-	        if (element == null) {
-	          return element;
-	        }
-	        if (validType) {
-	          var children = props.children;
-	          if (children !== void 0) {
-	            if (isStaticChildren) {
-	              if (isArray(children)) {
-	                for (var i = 0; i < children.length; i++) {
-	                  validateChildKeys(children[i], type);
-	                }
-	                if (Object.freeze) {
-	                  Object.freeze(children);
-	                }
-	              } else {
-	                error("React.jsx: Static children should always be an array. You are likely explicitly calling React.jsxs or React.jsxDEV. Use the Babel transform instead.");
-	              }
-	            } else {
-	              validateChildKeys(children, type);
-	            }
-	          }
-	        }
-	        {
-	          if (hasOwnProperty.call(props, "key")) {
-	            var componentName = getComponentNameFromType(type);
-	            var keys = Object.keys(props).filter(function(k) {
-	              return k !== "key";
-	            });
-	            var beforeExample = keys.length > 0 ? "{key: someKey, " + keys.join(": ..., ") + ": ...}" : "{key: someKey}";
-	            if (!didWarnAboutKeySpread[componentName + beforeExample]) {
-	              var afterExample = keys.length > 0 ? "{" + keys.join(": ..., ") + ": ...}" : "{}";
-	              error('A props object containing a "key" prop is being spread into JSX:\n  let props = %s;\n  <%s {...props} />\nReact keys must be passed directly to JSX without using spread:\n  let props = %s;\n  <%s key={someKey} {...props} />', beforeExample, componentName, afterExample, componentName);
-	              didWarnAboutKeySpread[componentName + beforeExample] = true;
-	            }
-	          }
-	        }
-	        if (type === REACT_FRAGMENT_TYPE) {
-	          validateFragmentProps(element);
-	        } else {
-	          validatePropTypes(element);
-	        }
-	        return element;
-	      }
-	    }
-	    function jsxWithValidationStatic(type, props, key) {
-	      {
-	        return jsxWithValidation(type, props, key, true);
-	      }
-	    }
-	    function jsxWithValidationDynamic(type, props, key) {
-	      {
-	        return jsxWithValidation(type, props, key, false);
-	      }
-	    }
-	    var jsx = jsxWithValidationDynamic;
-	    var jsxs = jsxWithValidationStatic;
-	    reactJsxRuntime_development.Fragment = REACT_FRAGMENT_TYPE;
-	    reactJsxRuntime_development.jsx = jsx;
-	    reactJsxRuntime_development.jsxs = jsxs;
-	  })();
-	}
-	return reactJsxRuntime_development;
-}
-
-var define_process_env_default = {};
-if (define_process_env_default.NODE_ENV === "production") {
-  jsxRuntime.exports = requireReactJsxRuntime_production_min();
-} else {
-  jsxRuntime.exports = requireReactJsxRuntime_development();
-}
-
-var jsxRuntimeExports = jsxRuntime.exports;
 
 const IpfsIcon = ({ className }) => {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -1055,6 +106,210 @@ class IpfsProtocol {
   }
   async initialize() {
   }
+}
+
+function insertReplacement(source, rx, replacement) {
+    const newParts = [];
+    source.forEach((chunk) => {
+        // When the source contains multiple placeholders for interpolation,
+        // we should ignore chunks that are not strings, because those
+        // can be JSX objects and will be otherwise incorrectly turned into strings.
+        // Without this condition we’d get this: [object Object] hello [object Object] my <button>
+        if (typeof chunk !== 'string') {
+            return newParts.push(chunk);
+        }
+        return rx[Symbol.split](chunk).forEach((raw, i, list) => {
+            if (raw !== '') {
+                newParts.push(raw);
+            }
+            // Interlace with the `replacement` value
+            if (i < list.length - 1) {
+                newParts.push(replacement);
+            }
+        });
+    });
+    return newParts;
+}
+/**
+ * Takes a string with placeholder variables like `%{smart_count} file selected`
+ * and replaces it with values from options `{smart_count: 5}`
+ *
+ * @license https://github.com/airbnb/polyglot.js/blob/master/LICENSE
+ * taken from https://github.com/airbnb/polyglot.js/blob/master/lib/polyglot.js#L299
+ *
+ * @param phrase that needs interpolation, with placeholders
+ * @param options with values that will be used to replace placeholders
+ */
+function interpolate(phrase, options) {
+    const dollarRegex = /\$/g;
+    const dollarBillsYall = '$$$$';
+    let interpolated = [phrase];
+    if (options == null)
+        return interpolated;
+    for (const arg of Object.keys(options)) {
+        if (arg !== '_') {
+            // Ensure replacement value is escaped to prevent special $-prefixed
+            // regex replace tokens. the "$$$$" is needed because each "$" needs to
+            // be escaped with "$" itself, and we need two in the resulting output.
+            let replacement = options[arg];
+            if (typeof replacement === 'string') {
+                replacement = dollarRegex[Symbol.replace](replacement, dollarBillsYall);
+            }
+            // We create a new `RegExp` each time instead of using a more-efficient
+            // string replace so that the same argument can be replaced multiple times
+            // in the same phrase.
+            interpolated = insertReplacement(interpolated, new RegExp(`%\\{${arg}\\}`, 'g'), replacement);
+        }
+    }
+    return interpolated;
+}
+const defaultOnMissingKey = (key) => {
+    throw new Error(`missing string: ${key}`);
+};
+/**
+ * Translates strings with interpolation & pluralization support.
+ * Extensible with custom dictionaries and pluralization functions.
+ *
+ * Borrows heavily from and inspired by Polyglot https://github.com/airbnb/polyglot.js,
+ * basically a stripped-down version of it. Differences: pluralization functions are not hardcoded
+ * and can be easily added among with dictionaries, nested objects are used for pluralization
+ * as opposed to `||||` delimeter
+ *
+ * Usage example: `translator.translate('files_chosen', {smart_count: 3})`
+ */
+class Translator {
+    locale;
+    constructor(locales, { onMissingKey = defaultOnMissingKey } = {}) {
+        this.locale = {
+            strings: {},
+            pluralize(n) {
+                if (n === 1) {
+                    return 0;
+                }
+                return 1;
+            },
+        };
+        if (Array.isArray(locales)) {
+            locales.forEach(this.#apply, this);
+        }
+        else {
+            this.#apply(locales);
+        }
+        this.#onMissingKey = onMissingKey;
+    }
+    #onMissingKey;
+    #apply(locale) {
+        if (!locale?.strings) {
+            return;
+        }
+        const prevLocale = this.locale;
+        Object.assign(this.locale, {
+            strings: { ...prevLocale.strings, ...locale.strings },
+            pluralize: locale.pluralize || prevLocale.pluralize,
+        });
+    }
+    /**
+     * Public translate method
+     *
+     * @param key
+     * @param options with values that will be used later to replace placeholders in string
+     * @returns string translated (and interpolated)
+     */
+    translate(key, options) {
+        return this.translateArray(key, options).join('');
+    }
+    /**
+     * Get a translation and return the translated and interpolated parts as an array.
+     *
+     * @returns The translated and interpolated parts, in order.
+     */
+    translateArray(key, options) {
+        let string = this.locale.strings[key];
+        if (string == null) {
+            this.#onMissingKey(key);
+            string = key;
+        }
+        const hasPluralForms = typeof string === 'object';
+        if (hasPluralForms) {
+            if (options && typeof options.smart_count !== 'undefined') {
+                const plural = this.locale.pluralize(options.smart_count);
+                return interpolate(string[plural], options);
+            }
+            throw new Error('Attempted to use a string with plural forms, but no value was given for %{smart_count}');
+        }
+        if (typeof string !== 'string') {
+            throw new Error(`string was not a string`);
+        }
+        return interpolate(string, options);
+    }
+}
+
+/**
+ * Core plugin logic that all plugins share.
+ *
+ * BasePlugin does not contain DOM rendering so it can be used for plugins
+ * without a user interface.
+ *
+ * See `Plugin` for the extended version with Preact rendering for interfaces.
+ */
+class BasePlugin {
+    uppy;
+    opts;
+    id;
+    defaultLocale;
+    i18n;
+    i18nArray;
+    type;
+    VERSION;
+    constructor(uppy, opts) {
+        this.uppy = uppy;
+        this.opts = opts ?? {};
+    }
+    getPluginState() {
+        const { plugins } = this.uppy.getState();
+        return (plugins?.[this.id] || {});
+    }
+    setPluginState(update) {
+        const { plugins } = this.uppy.getState();
+        this.uppy.setState({
+            plugins: {
+                ...plugins,
+                [this.id]: {
+                    ...plugins[this.id],
+                    ...update,
+                },
+            },
+        });
+    }
+    setOptions(newOpts) {
+        this.opts = { ...this.opts, ...newOpts };
+        this.setPluginState(undefined); // so that UI re-renders with new options
+        this.i18nInit();
+    }
+    i18nInit() {
+        const translator = new Translator([
+            this.defaultLocale,
+            this.uppy.locale,
+            this.opts.locale,
+        ]);
+        this.i18n = translator.translate.bind(translator);
+        this.i18nArray = translator.translateArray.bind(translator);
+        this.setPluginState(undefined); // so that UI re-renders and we see the updated locale
+    }
+    /**
+     * Extendable methods
+     * ==================
+     * These methods are here to serve as an overview of the extendable methods as well as
+     * making them not conditional in use, such as `if (this.afterUpdate)`.
+     */
+    addTarget(plugin) {
+        throw new Error("Extend the addTarget method to add your plugin to another plugin's target");
+    }
+    install() { }
+    uninstall() { }
+    update(state) { }
+    // Called after every state update, after everything's mounted. Debounced.
+    afterUpdate() { }
 }
 
 // This is an unfortunate replacement for @sindresorhus/is that we need to
@@ -1266,7 +521,7 @@ function asU8A (buf) {
   return isBuffer(buf) ? new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength) : buf
 }
 
-const toString$3 = useBuffer
+const toString$2 = useBuffer
   ? // eslint-disable-line operator-linebreak
     /**
      * @param {Uint8Array} bytes
@@ -1293,7 +548,7 @@ const toString$3 = useBuffer
         : utf8Slice(bytes, start, end)
     };
 
-const fromString$2 = useBuffer
+const fromString$1 = useBuffer
   ? // eslint-disable-line operator-linebreak
     /**
      * @param {string} string
@@ -2129,7 +1384,7 @@ function decodeBytes64 (data, pos, _minor, options) {
  */
 function tokenBytes (token) {
   if (token.encodedBytes === undefined) {
-    token.encodedBytes = token.type === Type.string ? fromString$2(token.value) : token.value;
+    token.encodedBytes = token.type === Type.string ? fromString$1(token.value) : token.value;
   }
   // @ts-ignore c'mon
   return token.encodedBytes
@@ -2188,7 +1443,7 @@ function compareBytes (b1, b2) {
 function toToken$2 (data, pos, prefix, length, options) {
   const totLength = prefix + length;
   assertEnoughData(data, pos, totLength);
-  const tok = new Token(Type.string, toString$3(data, pos + prefix, pos + totLength), totLength);
+  const tok = new Token(Type.string, toString$2(data, pos + prefix, pos + totLength), totLength);
   if (options.retainStringBytes === true) {
     tok.byteValue = slice(data, pos + prefix, pos + totLength);
   }
@@ -3501,7 +2756,7 @@ function encodeCustom (data, encoders, options) {
  * @param {EncodeOptions} [options]
  * @returns {Uint8Array}
  */
-function encode$d (data, options) {
+function encode$b (data, options) {
   options = Object.assign({}, defaultEncodeOptions$1, options);
   return encodeCustom(data, cborEncoders, options)
 }
@@ -3702,1036 +2957,13 @@ function decodeFirst (data, options) {
  * @param {DecodeOptions} [options]
  * @returns {any}
  */
-function decode$d (data, options) {
+function decode$9 (data, options) {
   const [decoded, remainder] = decodeFirst(data, options);
   if (remainder.length > 0) {
     throw new Error(`${decodeErrPrefix} too many terminals, data makes no sense`)
   }
   return decoded
 }
-
-const empty = new Uint8Array(0);
-function fromHex(hex) {
-    const hexes = hex.match(/../g);
-    return hexes != null ? new Uint8Array(hexes.map(b => parseInt(b, 16))) : empty;
-}
-function equals$2(aa, bb) {
-    if (aa === bb) {
-        return true;
-    }
-    if (aa.byteLength !== bb.byteLength) {
-        return false;
-    }
-    for (let ii = 0; ii < aa.byteLength; ii++) {
-        if (aa[ii] !== bb[ii]) {
-            return false;
-        }
-    }
-    return true;
-}
-function coerce(o) {
-    if (o instanceof Uint8Array && o.constructor.name === 'Uint8Array') {
-        return o;
-    }
-    if (o instanceof ArrayBuffer) {
-        return new Uint8Array(o);
-    }
-    if (ArrayBuffer.isView(o)) {
-        return new Uint8Array(o.buffer, o.byteOffset, o.byteLength);
-    }
-    throw new Error('Unknown type, must be binary type');
-}
-function fromString$1(str) {
-    return new TextEncoder().encode(str);
-}
-function toString$2(b) {
-    return new TextDecoder().decode(b);
-}
-
-/* eslint-disable */
-// base-x encoding / decoding
-// Copyright (c) 2018 base-x contributors
-// Copyright (c) 2014-2018 The Bitcoin Core developers (base58.cpp)
-// Distributed under the MIT software license, see the accompanying
-// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
-/**
- * @param {string} ALPHABET
- * @param {any} name
- */
-function base(ALPHABET, name) {
-    if (ALPHABET.length >= 255) {
-        throw new TypeError('Alphabet too long');
-    }
-    var BASE_MAP = new Uint8Array(256);
-    for (var j = 0; j < BASE_MAP.length; j++) {
-        BASE_MAP[j] = 255;
-    }
-    for (var i = 0; i < ALPHABET.length; i++) {
-        var x = ALPHABET.charAt(i);
-        var xc = x.charCodeAt(0);
-        if (BASE_MAP[xc] !== 255) {
-            throw new TypeError(x + ' is ambiguous');
-        }
-        BASE_MAP[xc] = i;
-    }
-    var BASE = ALPHABET.length;
-    var LEADER = ALPHABET.charAt(0);
-    var FACTOR = Math.log(BASE) / Math.log(256); // log(BASE) / log(256), rounded up
-    var iFACTOR = Math.log(256) / Math.log(BASE); // log(256) / log(BASE), rounded up
-    /**
-     * @param {any[] | Iterable<number>} source
-     */
-    function encode(source) {
-        // @ts-ignore
-        if (source instanceof Uint8Array)
-            ;
-        else if (ArrayBuffer.isView(source)) {
-            source = new Uint8Array(source.buffer, source.byteOffset, source.byteLength);
-        }
-        else if (Array.isArray(source)) {
-            source = Uint8Array.from(source);
-        }
-        if (!(source instanceof Uint8Array)) {
-            throw new TypeError('Expected Uint8Array');
-        }
-        if (source.length === 0) {
-            return '';
-        }
-        // Skip & count leading zeroes.
-        var zeroes = 0;
-        var length = 0;
-        var pbegin = 0;
-        var pend = source.length;
-        while (pbegin !== pend && source[pbegin] === 0) {
-            pbegin++;
-            zeroes++;
-        }
-        // Allocate enough space in big-endian base58 representation.
-        var size = ((pend - pbegin) * iFACTOR + 1) >>> 0;
-        var b58 = new Uint8Array(size);
-        // Process the bytes.
-        while (pbegin !== pend) {
-            var carry = source[pbegin];
-            // Apply "b58 = b58 * 256 + ch".
-            var i = 0;
-            for (var it1 = size - 1; (carry !== 0 || i < length) && (it1 !== -1); it1--, i++) {
-                carry += (256 * b58[it1]) >>> 0;
-                b58[it1] = (carry % BASE) >>> 0;
-                carry = (carry / BASE) >>> 0;
-            }
-            if (carry !== 0) {
-                throw new Error('Non-zero carry');
-            }
-            length = i;
-            pbegin++;
-        }
-        // Skip leading zeroes in base58 result.
-        var it2 = size - length;
-        while (it2 !== size && b58[it2] === 0) {
-            it2++;
-        }
-        // Translate the result into a string.
-        var str = LEADER.repeat(zeroes);
-        for (; it2 < size; ++it2) {
-            str += ALPHABET.charAt(b58[it2]);
-        }
-        return str;
-    }
-    /**
-     * @param {string | string[]} source
-     */
-    function decodeUnsafe(source) {
-        if (typeof source !== 'string') {
-            throw new TypeError('Expected String');
-        }
-        if (source.length === 0) {
-            return new Uint8Array();
-        }
-        var psz = 0;
-        // Skip leading spaces.
-        if (source[psz] === ' ') {
-            return;
-        }
-        // Skip and count leading '1's.
-        var zeroes = 0;
-        var length = 0;
-        while (source[psz] === LEADER) {
-            zeroes++;
-            psz++;
-        }
-        // Allocate enough space in big-endian base256 representation.
-        var size = (((source.length - psz) * FACTOR) + 1) >>> 0; // log(58) / log(256), rounded up.
-        var b256 = new Uint8Array(size);
-        // Process the characters.
-        while (source[psz]) {
-            // Decode character
-            var carry = BASE_MAP[source.charCodeAt(psz)];
-            // Invalid character
-            if (carry === 255) {
-                return;
-            }
-            var i = 0;
-            for (var it3 = size - 1; (carry !== 0 || i < length) && (it3 !== -1); it3--, i++) {
-                carry += (BASE * b256[it3]) >>> 0;
-                b256[it3] = (carry % 256) >>> 0;
-                carry = (carry / 256) >>> 0;
-            }
-            if (carry !== 0) {
-                throw new Error('Non-zero carry');
-            }
-            length = i;
-            psz++;
-        }
-        // Skip trailing spaces.
-        if (source[psz] === ' ') {
-            return;
-        }
-        // Skip leading zeroes in b256.
-        var it4 = size - length;
-        while (it4 !== size && b256[it4] === 0) {
-            it4++;
-        }
-        var vch = new Uint8Array(zeroes + (size - it4));
-        var j = zeroes;
-        while (it4 !== size) {
-            vch[j++] = b256[it4++];
-        }
-        return vch;
-    }
-    /**
-     * @param {string | string[]} string
-     */
-    function decode(string) {
-        var buffer = decodeUnsafe(string);
-        if (buffer) {
-            return buffer;
-        }
-        throw new Error(`Non-${name} character`);
-    }
-    return {
-        encode: encode,
-        decodeUnsafe: decodeUnsafe,
-        decode: decode
-    };
-}
-var src = base;
-var _brrp__multiformats_scope_baseX = src;
-
-/**
- * Class represents both BaseEncoder and MultibaseEncoder meaning it
- * can be used to encode to multibase or base encode without multibase
- * prefix.
- */
-class Encoder {
-    name;
-    prefix;
-    baseEncode;
-    constructor(name, prefix, baseEncode) {
-        this.name = name;
-        this.prefix = prefix;
-        this.baseEncode = baseEncode;
-    }
-    encode(bytes) {
-        if (bytes instanceof Uint8Array) {
-            return `${this.prefix}${this.baseEncode(bytes)}`;
-        }
-        else {
-            throw Error('Unknown type, must be binary type');
-        }
-    }
-}
-/**
- * Class represents both BaseDecoder and MultibaseDecoder so it could be used
- * to decode multibases (with matching prefix) or just base decode strings
- * with corresponding base encoding.
- */
-class Decoder {
-    name;
-    prefix;
-    baseDecode;
-    prefixCodePoint;
-    constructor(name, prefix, baseDecode) {
-        this.name = name;
-        this.prefix = prefix;
-        const prefixCodePoint = prefix.codePointAt(0);
-        /* c8 ignore next 3 */
-        if (prefixCodePoint === undefined) {
-            throw new Error('Invalid prefix character');
-        }
-        this.prefixCodePoint = prefixCodePoint;
-        this.baseDecode = baseDecode;
-    }
-    decode(text) {
-        if (typeof text === 'string') {
-            if (text.codePointAt(0) !== this.prefixCodePoint) {
-                throw Error(`Unable to decode multibase string ${JSON.stringify(text)}, ${this.name} decoder only supports inputs prefixed with ${this.prefix}`);
-            }
-            return this.baseDecode(text.slice(this.prefix.length));
-        }
-        else {
-            throw Error('Can only multibase decode strings');
-        }
-    }
-    or(decoder) {
-        return or$1(this, decoder);
-    }
-}
-class ComposedDecoder {
-    decoders;
-    constructor(decoders) {
-        this.decoders = decoders;
-    }
-    or(decoder) {
-        return or$1(this, decoder);
-    }
-    decode(input) {
-        const prefix = input[0];
-        const decoder = this.decoders[prefix];
-        if (decoder != null) {
-            return decoder.decode(input);
-        }
-        else {
-            throw RangeError(`Unable to decode multibase string ${JSON.stringify(input)}, only inputs prefixed with ${Object.keys(this.decoders)} are supported`);
-        }
-    }
-}
-function or$1(left, right) {
-    return new ComposedDecoder({
-        ...(left.decoders ?? { [left.prefix]: left }),
-        ...(right.decoders ?? { [right.prefix]: right })
-    });
-}
-class Codec {
-    name;
-    prefix;
-    baseEncode;
-    baseDecode;
-    encoder;
-    decoder;
-    constructor(name, prefix, baseEncode, baseDecode) {
-        this.name = name;
-        this.prefix = prefix;
-        this.baseEncode = baseEncode;
-        this.baseDecode = baseDecode;
-        this.encoder = new Encoder(name, prefix, baseEncode);
-        this.decoder = new Decoder(name, prefix, baseDecode);
-    }
-    encode(input) {
-        return this.encoder.encode(input);
-    }
-    decode(input) {
-        return this.decoder.decode(input);
-    }
-}
-function from$1({ name, prefix, encode, decode }) {
-    return new Codec(name, prefix, encode, decode);
-}
-function baseX({ name, prefix, alphabet }) {
-    const { encode, decode } = _brrp__multiformats_scope_baseX(alphabet, name);
-    return from$1({
-        prefix,
-        name,
-        encode,
-        decode: (text) => coerce(decode(text))
-    });
-}
-function decode$c(string, alphabetIdx, bitsPerChar, name) {
-    // Count the padding bytes:
-    let end = string.length;
-    while (string[end - 1] === '=') {
-        --end;
-    }
-    // Allocate the output:
-    const out = new Uint8Array((end * bitsPerChar / 8) | 0);
-    // Parse the data:
-    let bits = 0; // Number of bits currently in the buffer
-    let buffer = 0; // Bits waiting to be written out, MSB first
-    let written = 0; // Next byte to write
-    for (let i = 0; i < end; ++i) {
-        // Read one character from the string:
-        const value = alphabetIdx[string[i]];
-        if (value === undefined) {
-            throw new SyntaxError(`Non-${name} character`);
-        }
-        // Append the bits to the buffer:
-        buffer = (buffer << bitsPerChar) | value;
-        bits += bitsPerChar;
-        // Write out some bits if the buffer has a byte's worth:
-        if (bits >= 8) {
-            bits -= 8;
-            out[written++] = 0xff & (buffer >> bits);
-        }
-    }
-    // Verify that we have received just enough bits:
-    if (bits >= bitsPerChar || (0xff & (buffer << (8 - bits))) !== 0) {
-        throw new SyntaxError('Unexpected end of data');
-    }
-    return out;
-}
-function encode$c(data, alphabet, bitsPerChar) {
-    const pad = alphabet[alphabet.length - 1] === '=';
-    const mask = (1 << bitsPerChar) - 1;
-    let out = '';
-    let bits = 0; // Number of bits currently in the buffer
-    let buffer = 0; // Bits waiting to be written out, MSB first
-    for (let i = 0; i < data.length; ++i) {
-        // Slurp data into the buffer:
-        buffer = (buffer << 8) | data[i];
-        bits += 8;
-        // Write out as much as we can:
-        while (bits > bitsPerChar) {
-            bits -= bitsPerChar;
-            out += alphabet[mask & (buffer >> bits)];
-        }
-    }
-    // Partial character:
-    if (bits !== 0) {
-        out += alphabet[mask & (buffer << (bitsPerChar - bits))];
-    }
-    // Add padding characters until we hit a byte boundary:
-    if (pad) {
-        while (((out.length * bitsPerChar) & 7) !== 0) {
-            out += '=';
-        }
-    }
-    return out;
-}
-function createAlphabetIdx(alphabet) {
-    // Build the character lookup table:
-    const alphabetIdx = {};
-    for (let i = 0; i < alphabet.length; ++i) {
-        alphabetIdx[alphabet[i]] = i;
-    }
-    return alphabetIdx;
-}
-/**
- * RFC4648 Factory
- */
-function rfc4648({ name, prefix, bitsPerChar, alphabet }) {
-    const alphabetIdx = createAlphabetIdx(alphabet);
-    return from$1({
-        prefix,
-        name,
-        encode(input) {
-            return encode$c(input, alphabet, bitsPerChar);
-        },
-        decode(input) {
-            return decode$c(input, alphabetIdx, bitsPerChar, name);
-        }
-    });
-}
-
-const base32 = rfc4648({
-    prefix: 'b',
-    name: 'base32',
-    alphabet: 'abcdefghijklmnopqrstuvwxyz234567',
-    bitsPerChar: 5
-});
-const base32upper = rfc4648({
-    prefix: 'B',
-    name: 'base32upper',
-    alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567',
-    bitsPerChar: 5
-});
-const base32pad = rfc4648({
-    prefix: 'c',
-    name: 'base32pad',
-    alphabet: 'abcdefghijklmnopqrstuvwxyz234567=',
-    bitsPerChar: 5
-});
-const base32padupper = rfc4648({
-    prefix: 'C',
-    name: 'base32padupper',
-    alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567=',
-    bitsPerChar: 5
-});
-const base32hex = rfc4648({
-    prefix: 'v',
-    name: 'base32hex',
-    alphabet: '0123456789abcdefghijklmnopqrstuv',
-    bitsPerChar: 5
-});
-const base32hexupper = rfc4648({
-    prefix: 'V',
-    name: 'base32hexupper',
-    alphabet: '0123456789ABCDEFGHIJKLMNOPQRSTUV',
-    bitsPerChar: 5
-});
-const base32hexpad = rfc4648({
-    prefix: 't',
-    name: 'base32hexpad',
-    alphabet: '0123456789abcdefghijklmnopqrstuv=',
-    bitsPerChar: 5
-});
-const base32hexpadupper = rfc4648({
-    prefix: 'T',
-    name: 'base32hexpadupper',
-    alphabet: '0123456789ABCDEFGHIJKLMNOPQRSTUV=',
-    bitsPerChar: 5
-});
-const base32z = rfc4648({
-    prefix: 'h',
-    name: 'base32z',
-    alphabet: 'ybndrfg8ejkmcpqxot1uwisza345h769',
-    bitsPerChar: 5
-});
-
-const base32$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
-	__proto__: null,
-	base32,
-	base32hex,
-	base32hexpad,
-	base32hexpadupper,
-	base32hexupper,
-	base32pad,
-	base32padupper,
-	base32upper,
-	base32z
-}, Symbol.toStringTag, { value: 'Module' }));
-
-const base36 = baseX({
-    prefix: 'k',
-    name: 'base36',
-    alphabet: '0123456789abcdefghijklmnopqrstuvwxyz'
-});
-const base36upper = baseX({
-    prefix: 'K',
-    name: 'base36upper',
-    alphabet: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-});
-
-const base36$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
-	__proto__: null,
-	base36,
-	base36upper
-}, Symbol.toStringTag, { value: 'Module' }));
-
-const base58btc = baseX({
-    name: 'base58btc',
-    prefix: 'z',
-    alphabet: '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-});
-const base58flickr = baseX({
-    name: 'base58flickr',
-    prefix: 'Z',
-    alphabet: '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ'
-});
-
-const base58 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
-	__proto__: null,
-	base58btc,
-	base58flickr
-}, Symbol.toStringTag, { value: 'Module' }));
-
-/* eslint-disable */
-var encode_1$1 = encode$b;
-var MSB$3 = 0x80, MSBALL$1 = -128, INT$1 = Math.pow(2, 31);
-/**
- * @param {number} num
- * @param {number[]} out
- * @param {number} offset
- */
-function encode$b(num, out, offset) {
-    out = out || [];
-    offset = offset || 0;
-    var oldOffset = offset;
-    while (num >= INT$1) {
-        out[offset++] = (num & 0xFF) | MSB$3;
-        num /= 128;
-    }
-    while (num & MSBALL$1) {
-        out[offset++] = (num & 0xFF) | MSB$3;
-        num >>>= 7;
-    }
-    out[offset] = num | 0;
-    // @ts-ignore
-    encode$b.bytes = offset - oldOffset + 1;
-    return out;
-}
-var decode$b = read$3;
-var MSB$1$1 = 0x80, REST$1$1 = 0x7F;
-/**
- * @param {string | any[]} buf
- * @param {number} offset
- */
-function read$3(buf, offset) {
-    var res = 0, offset = offset || 0, shift = 0, counter = offset, b, l = buf.length;
-    do {
-        if (counter >= l) {
-            // @ts-ignore
-            read$3.bytes = 0;
-            throw new RangeError('Could not decode varint');
-        }
-        b = buf[counter++];
-        res += shift < 28
-            ? (b & REST$1$1) << shift
-            : (b & REST$1$1) * Math.pow(2, shift);
-        shift += 7;
-    } while (b >= MSB$1$1);
-    // @ts-ignore
-    read$3.bytes = counter - offset;
-    return res;
-}
-var N1$2 = Math.pow(2, 7);
-var N2$2 = Math.pow(2, 14);
-var N3$2 = Math.pow(2, 21);
-var N4$2 = Math.pow(2, 28);
-var N5$2 = Math.pow(2, 35);
-var N6$2 = Math.pow(2, 42);
-var N7$2 = Math.pow(2, 49);
-var N8$1 = Math.pow(2, 56);
-var N9$1 = Math.pow(2, 63);
-var length$2 = function (/** @type {number} */ value) {
-    return (value < N1$2 ? 1
-        : value < N2$2 ? 2
-            : value < N3$2 ? 3
-                : value < N4$2 ? 4
-                    : value < N5$2 ? 5
-                        : value < N6$2 ? 6
-                            : value < N7$2 ? 7
-                                : value < N8$1 ? 8
-                                    : value < N9$1 ? 9
-                                        : 10);
-};
-var varint$2 = {
-    encode: encode_1$1,
-    decode: decode$b,
-    encodingLength: length$2
-};
-var _brrp_varint = varint$2;
-
-function decode$a(data, offset = 0) {
-    const code = _brrp_varint.decode(data, offset);
-    return [code, _brrp_varint.decode.bytes];
-}
-function encodeTo(int, target, offset = 0) {
-    _brrp_varint.encode(int, target, offset);
-    return target;
-}
-function encodingLength$1(int) {
-    return _brrp_varint.encodingLength(int);
-}
-
-/**
- * Creates a multihash digest.
- */
-function create$2(code, digest) {
-    const size = digest.byteLength;
-    const sizeOffset = encodingLength$1(code);
-    const digestOffset = sizeOffset + encodingLength$1(size);
-    const bytes = new Uint8Array(digestOffset + size);
-    encodeTo(code, bytes, 0);
-    encodeTo(size, bytes, sizeOffset);
-    bytes.set(digest, digestOffset);
-    return new Digest(code, size, digest, bytes);
-}
-/**
- * Turns bytes representation of multihash digest into an instance.
- */
-function decode$9(multihash) {
-    const bytes = coerce(multihash);
-    const [code, sizeOffset] = decode$a(bytes);
-    const [size, digestOffset] = decode$a(bytes.subarray(sizeOffset));
-    const digest = bytes.subarray(sizeOffset + digestOffset);
-    if (digest.byteLength !== size) {
-        throw new Error('Incorrect length');
-    }
-    return new Digest(code, size, digest, bytes);
-}
-function equals$1(a, b) {
-    if (a === b) {
-        return true;
-    }
-    else {
-        const data = b;
-        return (a.code === data.code &&
-            a.size === data.size &&
-            data.bytes instanceof Uint8Array &&
-            equals$2(a.bytes, data.bytes));
-    }
-}
-/**
- * Represents a multihash digest which carries information about the
- * hashing algorithm and an actual hash digest.
- */
-class Digest {
-    code;
-    size;
-    digest;
-    bytes;
-    /**
-     * Creates a multihash digest.
-     */
-    constructor(code, size, digest, bytes) {
-        this.code = code;
-        this.size = size;
-        this.digest = digest;
-        this.bytes = bytes;
-    }
-}
-
-function format$1(link, base) {
-    const { bytes, version } = link;
-    switch (version) {
-        case 0:
-            return toStringV0(bytes, baseCache(link), base ?? base58btc.encoder);
-        default:
-            return toStringV1(bytes, baseCache(link), (base ?? base32.encoder));
-    }
-}
-const cache$1 = new WeakMap();
-function baseCache(cid) {
-    const baseCache = cache$1.get(cid);
-    if (baseCache == null) {
-        const baseCache = new Map();
-        cache$1.set(cid, baseCache);
-        return baseCache;
-    }
-    return baseCache;
-}
-class CID {
-    code;
-    version;
-    multihash;
-    bytes;
-    '/';
-    /**
-     * @param version - Version of the CID
-     * @param code - Code of the codec content is encoded in, see https://github.com/multiformats/multicodec/blob/master/table.csv
-     * @param multihash - (Multi)hash of the of the content.
-     */
-    constructor(version, code, multihash, bytes) {
-        this.code = code;
-        this.version = version;
-        this.multihash = multihash;
-        this.bytes = bytes;
-        // flag to serializers that this is a CID and
-        // should be treated specially
-        this['/'] = bytes;
-    }
-    /**
-     * Signalling `cid.asCID === cid` has been replaced with `cid['/'] === cid.bytes`
-     * please either use `CID.asCID(cid)` or switch to new signalling mechanism
-     *
-     * @deprecated
-     */
-    get asCID() {
-        return this;
-    }
-    // ArrayBufferView
-    get byteOffset() {
-        return this.bytes.byteOffset;
-    }
-    // ArrayBufferView
-    get byteLength() {
-        return this.bytes.byteLength;
-    }
-    toV0() {
-        switch (this.version) {
-            case 0: {
-                return this;
-            }
-            case 1: {
-                const { code, multihash } = this;
-                if (code !== DAG_PB_CODE) {
-                    throw new Error('Cannot convert a non dag-pb CID to CIDv0');
-                }
-                // sha2-256
-                if (multihash.code !== SHA_256_CODE) {
-                    throw new Error('Cannot convert non sha2-256 multihash CID to CIDv0');
-                }
-                return (CID.createV0(multihash));
-            }
-            default: {
-                throw Error(`Can not convert CID version ${this.version} to version 0. This is a bug please report`);
-            }
-        }
-    }
-    toV1() {
-        switch (this.version) {
-            case 0: {
-                const { code, digest } = this.multihash;
-                const multihash = create$2(code, digest);
-                return (CID.createV1(this.code, multihash));
-            }
-            case 1: {
-                return this;
-            }
-            default: {
-                throw Error(`Can not convert CID version ${this.version} to version 1. This is a bug please report`);
-            }
-        }
-    }
-    equals(other) {
-        return CID.equals(this, other);
-    }
-    static equals(self, other) {
-        const unknown = other;
-        return (unknown != null &&
-            self.code === unknown.code &&
-            self.version === unknown.version &&
-            equals$1(self.multihash, unknown.multihash));
-    }
-    toString(base) {
-        return format$1(this, base);
-    }
-    toJSON() {
-        return { '/': format$1(this) };
-    }
-    link() {
-        return this;
-    }
-    [Symbol.toStringTag] = 'CID';
-    // Legacy
-    [Symbol.for('nodejs.util.inspect.custom')]() {
-        return `CID(${this.toString()})`;
-    }
-    /**
-     * Takes any input `value` and returns a `CID` instance if it was
-     * a `CID` otherwise returns `null`. If `value` is instanceof `CID`
-     * it will return value back. If `value` is not instance of this CID
-     * class, but is compatible CID it will return new instance of this
-     * `CID` class. Otherwise returns null.
-     *
-     * This allows two different incompatible versions of CID library to
-     * co-exist and interop as long as binary interface is compatible.
-     */
-    static asCID(input) {
-        if (input == null) {
-            return null;
-        }
-        const value = input;
-        if (value instanceof CID) {
-            // If value is instance of CID then we're all set.
-            return value;
-        }
-        else if ((value['/'] != null && value['/'] === value.bytes) || value.asCID === value) {
-            // If value isn't instance of this CID class but `this.asCID === this` or
-            // `value['/'] === value.bytes` is true it is CID instance coming from a
-            // different implementation (diff version or duplicate). In that case we
-            // rebase it to this `CID` implementation so caller is guaranteed to get
-            // instance with expected API.
-            const { version, code, multihash, bytes } = value;
-            return new CID(version, code, multihash, bytes ?? encodeCID(version, code, multihash.bytes));
-        }
-        else if (value[cidSymbol] === true) {
-            // If value is a CID from older implementation that used to be tagged via
-            // symbol we still rebase it to the this `CID` implementation by
-            // delegating that to a constructor.
-            const { version, multihash, code } = value;
-            const digest = decode$9(multihash);
-            return CID.create(version, code, digest);
-        }
-        else {
-            // Otherwise value is not a CID (or an incompatible version of it) in
-            // which case we return `null`.
-            return null;
-        }
-    }
-    /**
-     * @param version - Version of the CID
-     * @param code - Code of the codec content is encoded in, see https://github.com/multiformats/multicodec/blob/master/table.csv
-     * @param digest - (Multi)hash of the of the content.
-     */
-    static create(version, code, digest) {
-        if (typeof code !== 'number') {
-            throw new Error('String codecs are no longer supported');
-        }
-        if (!(digest.bytes instanceof Uint8Array)) {
-            throw new Error('Invalid digest');
-        }
-        switch (version) {
-            case 0: {
-                if (code !== DAG_PB_CODE) {
-                    throw new Error(`Version 0 CID must use dag-pb (code: ${DAG_PB_CODE}) block encoding`);
-                }
-                else {
-                    return new CID(version, code, digest, digest.bytes);
-                }
-            }
-            case 1: {
-                const bytes = encodeCID(version, code, digest.bytes);
-                return new CID(version, code, digest, bytes);
-            }
-            default: {
-                throw new Error('Invalid version');
-            }
-        }
-    }
-    /**
-     * Simplified version of `create` for CIDv0.
-     */
-    static createV0(digest) {
-        return CID.create(0, DAG_PB_CODE, digest);
-    }
-    /**
-     * Simplified version of `create` for CIDv1.
-     *
-     * @param code - Content encoding format code.
-     * @param digest - Multihash of the content.
-     */
-    static createV1(code, digest) {
-        return CID.create(1, code, digest);
-    }
-    /**
-     * Decoded a CID from its binary representation. The byte array must contain
-     * only the CID with no additional bytes.
-     *
-     * An error will be thrown if the bytes provided do not contain a valid
-     * binary representation of a CID.
-     */
-    static decode(bytes) {
-        const [cid, remainder] = CID.decodeFirst(bytes);
-        if (remainder.length !== 0) {
-            throw new Error('Incorrect length');
-        }
-        return cid;
-    }
-    /**
-     * Decoded a CID from its binary representation at the beginning of a byte
-     * array.
-     *
-     * Returns an array with the first element containing the CID and the second
-     * element containing the remainder of the original byte array. The remainder
-     * will be a zero-length byte array if the provided bytes only contained a
-     * binary CID representation.
-     */
-    static decodeFirst(bytes) {
-        const specs = CID.inspectBytes(bytes);
-        const prefixSize = specs.size - specs.multihashSize;
-        const multihashBytes = coerce(bytes.subarray(prefixSize, prefixSize + specs.multihashSize));
-        if (multihashBytes.byteLength !== specs.multihashSize) {
-            throw new Error('Incorrect length');
-        }
-        const digestBytes = multihashBytes.subarray(specs.multihashSize - specs.digestSize);
-        const digest = new Digest(specs.multihashCode, specs.digestSize, digestBytes, multihashBytes);
-        const cid = specs.version === 0
-            ? CID.createV0(digest)
-            : CID.createV1(specs.codec, digest);
-        return [cid, bytes.subarray(specs.size)];
-    }
-    /**
-     * Inspect the initial bytes of a CID to determine its properties.
-     *
-     * Involves decoding up to 4 varints. Typically this will require only 4 to 6
-     * bytes but for larger multicodec code values and larger multihash digest
-     * lengths these varints can be quite large. It is recommended that at least
-     * 10 bytes be made available in the `initialBytes` argument for a complete
-     * inspection.
-     */
-    static inspectBytes(initialBytes) {
-        let offset = 0;
-        const next = () => {
-            const [i, length] = decode$a(initialBytes.subarray(offset));
-            offset += length;
-            return i;
-        };
-        let version = next();
-        let codec = DAG_PB_CODE;
-        if (version === 18) {
-            // CIDv0
-            version = 0;
-            offset = 0;
-        }
-        else {
-            codec = next();
-        }
-        if (version !== 0 && version !== 1) {
-            throw new RangeError(`Invalid CID version ${version}`);
-        }
-        const prefixSize = offset;
-        const multihashCode = next(); // multihash code
-        const digestSize = next(); // multihash length
-        const size = offset + digestSize;
-        const multihashSize = size - prefixSize;
-        return { version, codec, multihashCode, digestSize, multihashSize, size };
-    }
-    /**
-     * Takes cid in a string representation and creates an instance. If `base`
-     * decoder is not provided will use a default from the configuration. It will
-     * throw an error if encoding of the CID is not compatible with supplied (or
-     * a default decoder).
-     */
-    static parse(source, base) {
-        const [prefix, bytes] = parseCIDtoBytes(source, base);
-        const cid = CID.decode(bytes);
-        if (cid.version === 0 && source[0] !== 'Q') {
-            throw Error('Version 0 CID string must not include multibase prefix');
-        }
-        // Cache string representation to avoid computing it on `this.toString()`
-        baseCache(cid).set(prefix, source);
-        return cid;
-    }
-}
-function parseCIDtoBytes(source, base) {
-    switch (source[0]) {
-        // CIDv0 is parsed differently
-        case 'Q': {
-            const decoder = base ?? base58btc;
-            return [
-                base58btc.prefix,
-                decoder.decode(`${base58btc.prefix}${source}`)
-            ];
-        }
-        case base58btc.prefix: {
-            const decoder = base ?? base58btc;
-            return [base58btc.prefix, decoder.decode(source)];
-        }
-        case base32.prefix: {
-            const decoder = base ?? base32;
-            return [base32.prefix, decoder.decode(source)];
-        }
-        case base36.prefix: {
-            const decoder = base ?? base36;
-            return [base36.prefix, decoder.decode(source)];
-        }
-        default: {
-            if (base == null) {
-                throw Error('To parse non base32, base36 or base58btc encoded CID multibase decoder must be provided');
-            }
-            return [source[0], base.decode(source)];
-        }
-    }
-}
-function toStringV0(bytes, cache, base) {
-    const { prefix } = base;
-    if (prefix !== base58btc.prefix) {
-        throw Error(`Cannot string encode V0 in ${base.name} encoding`);
-    }
-    const cid = cache.get(prefix);
-    if (cid == null) {
-        const cid = base.encode(bytes).slice(1);
-        cache.set(prefix, cid);
-        return cid;
-    }
-    else {
-        return cid;
-    }
-}
-function toStringV1(bytes, cache, base) {
-    const { prefix } = base;
-    const cid = cache.get(prefix);
-    if (cid == null) {
-        const cid = base.encode(bytes);
-        cache.set(prefix, cid);
-        return cid;
-    }
-    else {
-        return cid;
-    }
-}
-const DAG_PB_CODE = 0x70;
-const SHA_256_CODE = 0x12;
-function encodeCID(version, code, multihash) {
-    const codeOffset = encodingLength$1(version);
-    const hashOffset = codeOffset + encodingLength$1(code);
-    const bytes = new Uint8Array(hashOffset + multihash.byteLength);
-    encodeTo(version, bytes, 0);
-    encodeTo(code, bytes, codeOffset);
-    bytes.set(multihash, hashOffset);
-    return bytes;
-}
-const cidSymbol = Symbol.for('@ipld/js-cid/CID');
 
 // https://github.com/ipfs/go-ipfs/issues/3570#issuecomment-273931692
 const CID_CBOR_TAG = 42;
@@ -4883,14 +3115,14 @@ const code$6 = 0x71;
  * @param {T} node
  * @returns {ByteView<T>}
  */
-const encode$a = (node) => encode$d(node, _encodeOptions);
+const encode$a = (node) => encode$b(node, _encodeOptions);
 
 /**
  * @template T
  * @param {ByteView<T> | ArrayBufferView<T>} data
  * @returns {T}
  */
-const decode$8 = (data) => decode$d(toByteView$2(data), _decodeOptions);
+const decode$8 = (data) => decode$9(toByteView$2(data), _decodeOptions);
 
 const dagCbor = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
 	__proto__: null,
@@ -5401,7 +3633,7 @@ async function readCid (reader) {
   if (first[0] === CIDV0_BYTES.SHA2_256 && first[1] === CIDV0_BYTES.LENGTH) {
     // cidv0 32-byte sha2-256
     const bytes = await reader.exactly(34, true);
-    const multihash = decode$9(bytes);
+    const multihash = decode$a(bytes);
     return CID.create(0, CIDV0_BYTES.DAG_PB, multihash)
   }
 
@@ -5411,7 +3643,7 @@ async function readCid (reader) {
   }
   const codec = decodeVarint$1(await reader.upTo(8), reader);
   const bytes = await reader.exactly(getMultihashLength(await reader.upTo(8)), true);
-  const multihash = decode$9(bytes);
+  const multihash = decode$a(bytes);
   return CID.create(version, codec, multihash)
 }
 
@@ -5682,197 +3914,6 @@ function limitReader (reader, byteLimit) {
       return reader.pos
     }
   }
-}
-
-/**
- * @typedef {import('multiformats').CID} CID
- * @typedef {import('./api.js').Block} Block
- * @typedef {import('./api.js').CarReader} CarReaderIface
- * @typedef {import('./coding.js').BytesReader} BytesReader
- * @typedef {import('./coding.js').CarHeader} CarHeader
- * @typedef {import('./coding.js').CarV2Header} CarV2Header
- */
-
-/**
- * Provides blockstore-like access to a CAR.
- *
- * Implements the `RootsReader` interface:
- * {@link CarReader.getRoots `getRoots()`}. And the `BlockReader` interface:
- * {@link CarReader.get `get()`}, {@link CarReader.has `has()`},
- * {@link CarReader.blocks `blocks()`} (defined as a `BlockIterator`) and
- * {@link CarReader.cids `cids()`} (defined as a `CIDIterator`).
- *
- * Load this class with either `import { CarReader } from '@ipld/car/reader'`
- * (`const { CarReader } = require('@ipld/car/reader')`). Or
- * `import { CarReader } from '@ipld/car'` (`const { CarReader } = require('@ipld/car')`).
- * The former will likely result in smaller bundle sizes where this is
- * important.
- *
- * @name CarReader
- * @class
- * @implements {CarReaderIface}
- * @property {number} version The version number of the CAR referenced by this
- * reader (should be `1` or `2`).
- */
-class CarReader {
-  /**
-   * @constructs CarReader
-   * @param {CarHeader|CarV2Header} header
-   * @param {Block[]} blocks
-   */
-  constructor (header, blocks) {
-    this._header = header;
-    this._blocks = blocks;
-    this._keys = blocks.map((b) => b.cid.toString());
-  }
-
-  /**
-   * @property
-   * @memberof CarReader
-   * @instance
-   */
-  get version () {
-    return this._header.version
-  }
-
-  /**
-   * Get the list of roots defined by the CAR referenced by this reader. May be
-   * zero or more `CID`s.
-   *
-   * @function
-   * @memberof CarReader
-   * @instance
-   * @async
-   * @returns {Promise<CID[]>}
-   */
-  async getRoots () {
-    return this._header.roots
-  }
-
-  /**
-   * Check whether a given `CID` exists within the CAR referenced by this
-   * reader.
-   *
-   * @function
-   * @memberof CarReader
-   * @instance
-   * @async
-   * @param {CID} key
-   * @returns {Promise<boolean>}
-   */
-  async has (key) {
-    return this._keys.indexOf(key.toString()) > -1
-  }
-
-  /**
-   * Fetch a `Block` (a `{ cid:CID, bytes:Uint8Array }` pair) from the CAR
-   * referenced by this reader matching the provided `CID`. In the case where
-   * the provided `CID` doesn't exist within the CAR, `undefined` will be
-   * returned.
-   *
-   * @function
-   * @memberof CarReader
-   * @instance
-   * @async
-   * @param {CID} key
-   * @returns {Promise<Block | undefined>}
-   */
-  async get (key) {
-    const index = this._keys.indexOf(key.toString());
-    return index > -1 ? this._blocks[index] : undefined
-  }
-
-  /**
-   * Returns a `BlockIterator` (`AsyncIterable<Block>`) that iterates over all
-   * of the `Block`s (`{ cid:CID, bytes:Uint8Array }` pairs) contained within
-   * the CAR referenced by this reader.
-   *
-   * @function
-   * @memberof CarReader
-   * @instance
-   * @async
-   * @generator
-   * @returns {AsyncGenerator<Block>}
-   */
-  async * blocks () {
-    for (const block of this._blocks) {
-      yield block;
-    }
-  }
-
-  /**
-   * Returns a `CIDIterator` (`AsyncIterable<CID>`) that iterates over all of
-   * the `CID`s contained within the CAR referenced by this reader.
-   *
-   * @function
-   * @memberof CarReader
-   * @instance
-   * @async
-   * @generator
-   * @returns {AsyncGenerator<CID>}
-   */
-  async * cids () {
-    for (const block of this._blocks) {
-      yield block.cid;
-    }
-  }
-
-  /**
-   * Instantiate a {@link CarReader} from a `Uint8Array` blob. This performs a
-   * decode fully in memory and maintains the decoded state in memory for full
-   * access to the data via the `CarReader` API.
-   *
-   * @async
-   * @static
-   * @memberof CarReader
-   * @param {Uint8Array} bytes
-   * @returns {Promise<CarReader>}
-   */
-  static async fromBytes (bytes) {
-    if (!(bytes instanceof Uint8Array)) {
-      throw new TypeError('fromBytes() requires a Uint8Array')
-    }
-    return decodeReaderComplete(bytesReader(bytes))
-  }
-
-  /**
-   * Instantiate a {@link CarReader} from a `AsyncIterable<Uint8Array>`, such as
-   * a [modern Node.js stream](https://nodejs.org/api/stream.html#stream_streams_compatibility_with_async_generators_and_async_iterators).
-   * This performs a decode fully in memory and maintains the decoded state in
-   * memory for full access to the data via the `CarReader` API.
-   *
-   * Care should be taken for large archives; this API may not be appropriate
-   * where memory is a concern or the archive is potentially larger than the
-   * amount of memory that the runtime can handle.
-   *
-   * @async
-   * @static
-   * @memberof CarReader
-   * @param {AsyncIterable<Uint8Array>} asyncIterable
-   * @returns {Promise<CarReader>}
-   */
-  static async fromIterable (asyncIterable) {
-    if (!asyncIterable || !(typeof asyncIterable[Symbol.asyncIterator] === 'function')) {
-      throw new TypeError('fromIterable() requires an async iterable')
-    }
-    return decodeReaderComplete(asyncIterableReader(asyncIterable))
-  }
-}
-
-/**
- * @private
- * @param {BytesReader} reader
- * @returns {Promise<CarReader>}
- */
-async function decodeReaderComplete (reader) {
-  const decoder = createDecoder(reader);
-  const header = await decoder.header();
-  const blocks = [];
-  for await (const block of decoder.blocks()) {
-    blocks.push(block);
-  }
-
-  return new CarReader(header, blocks)
 }
 
 /**
@@ -7020,7 +5061,7 @@ var eventemitter3 = {exports: {}};
 var eventemitter3Exports = eventemitter3.exports;
 const EventEmitter = /*@__PURE__*/getDefaultExportFromCjs(eventemitter3Exports);
 
-let TimeoutError$1 = class TimeoutError extends Error {
+let TimeoutError$2 = class TimeoutError extends Error {
 	constructor(message) {
 		super(message);
 		this.name = 'TimeoutError';
@@ -7092,7 +5133,7 @@ function pTimeout(promise, options) {
 		}
 
 		// We create the error outside of `setTimeout` to preserve the stack trace.
-		const timeoutError = new TimeoutError$1();
+		const timeoutError = new TimeoutError$2();
 
 		timer = customTimers.setTimeout.call(undefined, () => {
 			if (fallback) {
@@ -7432,7 +5473,7 @@ class PQueue extends EventEmitter {
                     this.emit('completed', result);
                 }
                 catch (error) {
-                    if (error instanceof TimeoutError$1 && !options.throwOnTimeout) {
+                    if (error instanceof TimeoutError$2 && !options.throwOnTimeout) {
                         resolve();
                         return;
                     }
@@ -9593,8 +7634,8 @@ const base8$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
 const identity$1 = from$1({
     prefix: '\x00',
     name: 'identity',
-    encode: (buf) => toString$2(buf),
-    decode: (str) => fromString$1(str)
+    encode: (buf) => toString$3(buf),
+    decode: (str) => fromString$2(str)
 });
 
 const identityBase = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
@@ -9667,7 +7708,7 @@ const sha512$2 = from({
     encode: sha('SHA-512')
 });
 
-const bases = { ...identityBase, ...base2$1, ...base8$1, ...base10$1, ...base16$1, ...base32$1, ...base36$1, ...base58, ...base64$1, ...base256emoji$1 };
+const bases = { ...identityBase, ...base2$1, ...base8$1, ...base10$1, ...base16$1, ...base32, ...base36, ...base58, ...base64$1, ...base256emoji$1 };
 
 function createCodec$1(name, prefix, encode, decode) {
     return {
@@ -11084,13 +9125,13 @@ class InvalidMessageError extends Error {
 /**
  * Throw when an operation times out
  */
-class TimeoutError extends Error {
+let TimeoutError$1 = class TimeoutError extends Error {
     static name = 'TimeoutError';
     constructor(message = 'Timed out') {
         super(message);
         this.name = 'TimeoutError';
     }
-}
+};
 /**
  * Thrown when a startable component is interacted with but it has not been
  * started yet
@@ -11349,7 +9390,7 @@ async function start(...objs) {
  * )
  * ```
  */
-async function stop(...objs) {
+async function stop$1(...objs) {
     const startables = [];
     for (const obj of objs) {
         if (isStartable(obj)) {
@@ -12065,7 +10106,7 @@ let AbortError$1 = class AbortError extends Error {
 /**
  * Race a promise against an abort signal
  */
-async function raceSignal(promise, signal, opts) {
+async function raceSignal$1(promise, signal, opts) {
     if (signal == null) {
         return promise;
     }
@@ -12164,7 +10205,7 @@ let Job$1 = class Job {
         this.timeline.started = Date.now();
         try {
             this.controller.signal.throwIfAborted();
-            const result = await raceSignal(this.fn({
+            const result = await raceSignal$1(this.fn({
                 ...(this.options ?? {}),
                 signal: this.controller.signal
             }), this.controller.signal);
@@ -13279,7 +11320,7 @@ class QueuelessPushable {
         this.haveNext = pDefer();
         // wait for the consumer to have finished processing the value and requested
         // the next one or for the passed signal to abort the waiting
-        await raceSignal(this.readNext.promise, options?.signal, options);
+        await raceSignal$1(this.readNext.promise, options?.signal, options);
     }
 }
 function queuelessPushable() {
@@ -18902,7 +16943,7 @@ function peerIdFromString$1(str, decoder) {
     if (str.charAt(0) === '1' || str.charAt(0) === 'Q') {
         // identity hash ed25519/secp256k1 key or sha2-256 hash of
         // rsa public key - base58btc encoded either way
-        multihash = decode$9(base58btc.decode(`z${str}`));
+        multihash = decode$a(base58btc.decode(`z${str}`));
     }
     else if (str.startsWith('k51qzi5uqu5') || str.startsWith('kzwfwjn5ji4') || str.startsWith('k2k4r8') || str.startsWith('bafz')) {
         // base36 encoded CIDv1 with libp2p-key and identity hash (for ed25519/secp256k1/rsa) or base32 encoded CIDv1 with libp2p-key and identity hash (for ed25519/secp256k1/rsa)
@@ -19005,7 +17046,7 @@ function mapIterable(iter, map) {
     return iterator;
 }
 function peerIdFromString(str) {
-    const multihash = decode$9(base58btc.decode(`z${str}`));
+    const multihash = decode$a(base58btc.decode(`z${str}`));
     return peerIdFromMultihash(multihash);
 }
 
@@ -20270,7 +18311,7 @@ weald.formatters.b = (v) => {
 };
 // Add a formatter for converting to a base32 string
 weald.formatters.t = (v) => {
-    return v == null ? 'undefined' : base32.baseEncode(v);
+    return v == null ? 'undefined' : base32$1.baseEncode(v);
 };
 // Add a formatter for converting to a base64 string
 weald.formatters.m = (v) => {
@@ -21163,7 +19204,7 @@ function flatten(arr) {
 
 const DATASTORE_PIN_PREFIX = '/pin/';
 const DATASTORE_BLOCK_PREFIX = '/pinned-block/';
-const DATASTORE_ENCODING = base36;
+const DATASTORE_ENCODING = base36$1;
 const DAG_WALK_QUEUE_CONCURRENCY = 1;
 function toDSKey(cid) {
     if (cid.version === 0) {
@@ -21212,7 +19253,7 @@ class PinsImpl {
             depth,
             metadata: options.metadata ?? {}
         };
-        await this.datastore.put(pinKey, encode$d(pin), options);
+        await this.datastore.put(pinKey, encode$b(pin), options);
     }
     /**
      * Walk a DAG in an iterable fashion
@@ -21245,7 +19286,7 @@ class PinsImpl {
             pinnedBy: []
         };
         try {
-            pinnedBlock = decode$d(await this.datastore.get(blockKey, options));
+            pinnedBlock = decode$9(await this.datastore.get(blockKey, options));
         }
         catch (err) {
             if (err.name !== 'NotFoundError') {
@@ -21262,13 +19303,13 @@ class PinsImpl {
                 return;
             }
         }
-        await this.datastore.put(blockKey, encode$d(pinnedBlock), options);
+        await this.datastore.put(blockKey, encode$b(pinnedBlock), options);
         options.onProgress?.(new CustomProgressEvent('helia:pin:add', cid));
     }
     async *rm(cid, options = {}) {
         const pinKey = toDSKey(cid);
         const buf = await this.datastore.get(pinKey, options);
-        const pin = decode$d(buf);
+        const pin = decode$9(buf);
         await this.datastore.delete(pinKey, options);
         // use a queue to walk the DAG instead of recursion so we can traverse very large DAGs
         const queue = new Queue$1({
@@ -21291,10 +19332,10 @@ class PinsImpl {
     }
     async *ls(options = {}) {
         for await (const { key, value } of this.datastore.query({
-            prefix: DATASTORE_PIN_PREFIX + (options.cid != null ? `${options.cid.toString(base36)}` : '')
+            prefix: DATASTORE_PIN_PREFIX + (options.cid != null ? `${options.cid.toString(base36$1)}` : '')
         }, options)) {
-            const cid = CID.parse(key.toString().substring(5), base36);
-            const pin = decode$d(value);
+            const cid = CID.parse(key.toString().substring(5), base36$1);
+            const pin = decode$9(value);
             yield {
                 cid,
                 ...pin
@@ -21308,14 +19349,14 @@ class PinsImpl {
     async get(cid, options) {
         const pinKey = toDSKey(cid);
         const buf = await this.datastore.get(pinKey, options);
-        return decode$d(buf);
+        return decode$9(buf);
     }
     async setMetadata(cid, metadata, options) {
         const pinKey = toDSKey(cid);
         const buf = await this.datastore.get(pinKey, options);
-        const pin = decode$d(buf);
+        const pin = decode$9(buf);
         pin.metadata = metadata ?? {};
-        await this.datastore.put(pinKey, encode$d(pin), options);
+        await this.datastore.put(pinKey, encode$b(pin), options);
     }
 }
 
@@ -21386,7 +19427,7 @@ class Routing {
         await start(...this.routers);
     }
     async stop() {
-        await stop(...this.routers);
+        await stop$1(...this.routers);
     }
     /**
      * Iterates over all content routers in parallel to find providers of the
@@ -21599,7 +19640,7 @@ class Job {
         this.timeline.started = Date.now();
         try {
             this.controller.signal.throwIfAborted();
-            const result = await raceSignal(this.fn({
+            const result = await raceSignal$1(this.fn({
                 ...(this.options ?? {}),
                 signal: this.controller.signal
             }), this.controller.signal);
@@ -22483,7 +20524,7 @@ class BlockStorage {
         this.started = true;
     }
     async stop() {
-        await stop(this.child);
+        await stop$1(this.child);
         this.started = false;
     }
     unwrap() {
@@ -22698,7 +20739,7 @@ class JSONEncoder extends Array {
     // buf.push(34) // '"'
     // encodeUtf8(token.value, byts)
     // buf.push(34) // '"'
-    const byts = fromString$2(JSON.stringify(token.value));
+    const byts = fromString$1(JSON.stringify(token.value));
     buf.push(byts.length > 32 ? asU8A(byts) : byts);
   }
 
@@ -23367,7 +21408,7 @@ class Tokenizer {
  */
 function decode$1 (data, options) {
   options = Object.assign({ tokenizer: new Tokenizer(data, options) }, options);
-  return decode$d(data, options)
+  return decode$9(data, options)
 }
 
 /* eslint max-depth: ["error", 7] */
@@ -23731,6 +21772,42 @@ function getHasher(initialHashers = [], loadHasher) {
     };
 }
 
+class OpenFailedError extends Error {
+    static name = 'OpenFailedError';
+    static code = 'ERR_OPEN_FAILED';
+    name = OpenFailedError.name;
+    code = OpenFailedError.code;
+    constructor(message = 'Open failed') {
+        super(message);
+    }
+}
+class PutFailedError extends Error {
+    static name = 'PutFailedError';
+    static code = 'ERR_PUT_FAILED';
+    name = PutFailedError.name;
+    code = PutFailedError.code;
+    constructor(message = 'Put failed') {
+        super(message);
+    }
+}
+class GetFailedError extends Error {
+    static name = 'GetFailedError';
+    static code = 'ERR_GET_FAILED';
+    name = GetFailedError.name;
+    code = GetFailedError.code;
+    constructor(message = 'Get failed') {
+        super(message);
+    }
+}
+class DeleteFailedError extends Error {
+    static name = 'DeleteFailedError';
+    static code = 'ERR_DELETE_FAILED';
+    name = DeleteFailedError.name;
+    code = DeleteFailedError.code;
+    constructor(message = 'Delete failed') {
+        super(message);
+    }
+}
 let NotFoundError$1 = class NotFoundError extends Error {
     static name = 'NotFoundError';
     static code = 'ERR_NOT_FOUND';
@@ -24152,7 +22229,7 @@ class NetworkedStorage extends Storage {
         this.started = true;
     }
     async stop() {
-        await stop(this.child, ...this.components.blockBrokers);
+        await stop$1(this.child, ...this.components.blockBrokers);
         this.started = false;
     }
     unwrap() {
@@ -24696,7 +22773,7 @@ class Helia {
         await start(this.blockstore, this.datastore, this.routing, this.libp2p);
     }
     async stop() {
-        await stop(this.blockstore, this.datastore, this.routing, this.libp2p);
+        await stop$1(this.blockstore, this.datastore, this.routing, this.libp2p);
     }
     async gc(options = {}) {
         const releaseLock = await this.blockstore.lock.writeLock();
@@ -25125,7 +23202,7 @@ function onion32bytes(str) {
         throw new Error(`failed to parse onion addr: ${addr[0]} not a Tor onion3 address.`);
     }
     // onion addresses do not include the multibase prefix, add it before decoding
-    const buf = base32.decode(`b${addr[0]}`);
+    const buf = base32$1.decode(`b${addr[0]}`);
     // onion port number
     const port = parseInt(addr[1], 10);
     if (port < 1 || port > 65536) {
@@ -28202,14 +26279,14 @@ function multihashToIPNSRoutingKey(digest) {
     ]);
 }
 function multihashFromIPNSRoutingKey(key) {
-    const digest = decode$9(key.slice(IPNS_PREFIX$1.length));
+    const digest = decode$a(key.slice(IPNS_PREFIX$1.length));
     if (!isCodec(digest, IDENTITY_CODEC) && !isCodec(digest, SHA2_256_CODEC)) {
         throw new InvalidMultihashError('Multihash in IPNS key was not identity or sha2-256');
     }
     return digest;
 }
 function parseCborData(buf) {
-    const data = decode$d(buf);
+    const data = decode$9(buf);
     if (data.ValidityType === 0) {
         data.ValidityType = IpnsEntry.ValidityType.EOL;
     }
@@ -29335,12 +27412,12 @@ class MemoryBlockstore extends BaseBlockstore {
     }
     put(key, val, options) {
         options?.signal?.throwIfAborted();
-        this.data.set(base32.encode(key.multihash.bytes), val);
+        this.data.set(base32$1.encode(key.multihash.bytes), val);
         return key;
     }
     get(key, options) {
         options?.signal?.throwIfAborted();
-        const buf = this.data.get(base32.encode(key.multihash.bytes));
+        const buf = this.data.get(base32$1.encode(key.multihash.bytes));
         if (buf == null) {
             throw new NotFoundError$1();
         }
@@ -29348,17 +27425,17 @@ class MemoryBlockstore extends BaseBlockstore {
     }
     has(key, options) {
         options?.signal?.throwIfAborted();
-        return this.data.has(base32.encode(key.multihash.bytes));
+        return this.data.has(base32$1.encode(key.multihash.bytes));
     }
     async delete(key, options) {
         options?.signal?.throwIfAborted();
-        this.data.delete(base32.encode(key.multihash.bytes));
+        this.data.delete(base32$1.encode(key.multihash.bytes));
     }
     async *getAll(options) {
         options?.signal?.throwIfAborted();
         for (const [key, value] of this.data.entries()) {
             yield {
-                cid: CID.createV1(code$3, decode$9(base32.decode(key))),
+                cid: CID.createV1(code$3, decode$a(base32$1.decode(key))),
                 block: value
             };
             options?.signal?.throwIfAborted();
@@ -30208,7 +28285,7 @@ class PeerRecord {
      */
     static createFromProtobuf = (buf) => {
         const peerRecord = PeerRecord$1.decode(buf);
-        const peerId = peerIdFromMultihash(decode$9(peerRecord.peerId));
+        const peerId = peerIdFromMultihash(decode$a(peerRecord.peerId));
         const multiaddrs = (peerRecord.addresses ?? []).map((a) => multiaddr(a.multiaddr));
         const seqNumber = peerRecord.seq;
         return new PeerRecord({ peerId, multiaddrs, seqNumber });
@@ -30987,7 +29064,7 @@ function mapTag(key, tag) {
 function keyToPeerId(key) {
     // /peers/${peer-id-as-libp2p-key-cid-string-in-base-32}
     const base32Str = key.toString().split('/')[2];
-    const buf = CID.parse(base32Str, base32);
+    const buf = CID.parse(base32Str, base32$1);
     return peerIdFromCID(buf);
 }
 function decodePeer(key, value, maxAddressAge) {
@@ -32519,7 +30596,7 @@ function createDelay({clearTimeout: defaultClear, setTimeout: defaultSet} = {}) 
 	};
 }
 
-const delay = createDelay();
+const delay$1 = createDelay();
 
 class RateLimiter {
     memoryStorage;
@@ -32557,7 +30634,7 @@ class RateLimiter {
             if (delayMs < this.execEvenlyMinDelayMs) {
                 delayMs = res.consumedPoints * this.execEvenlyMinDelayMs;
             }
-            await delay(delayMs);
+            await delay$1(delayMs);
         }
         return res;
     }
@@ -33446,7 +31523,7 @@ class DialQueue {
                     }
                     // the user/dial timeout/shutdown controller signal aborted
                     if (signal.aborted) {
-                        throw new TimeoutError(err.message);
+                        throw new TimeoutError$1(err.message);
                     }
                     errors.push(err);
                 }
@@ -34294,7 +32371,7 @@ class DefaultConnectionManager {
     async stop() {
         this.events.removeEventListener('connection:open', this.onConnect);
         this.events.removeEventListener('connection:close', this.onDisconnect);
-        await stop(this.reconnectQueue, this.dialQueue, this.connectionPruner);
+        await stop$1(this.reconnectQueue, this.dialQueue, this.connectionPruner);
         // Close all connections we're tracking
         const tasks = [];
         for (const connectionList of this.connections.values()) {
@@ -34695,14 +32772,14 @@ function byteStream(duplex, opts) {
             options?.signal?.throwIfAborted();
             if (options?.bytes == null) {
                 // just read whatever arrives
-                const { done, value } = await raceSignal(source.next(), options?.signal);
+                const { done, value } = await raceSignal$1(source.next(), options?.signal);
                 if (done === true) {
                     return null;
                 }
                 return value;
             }
             while (readBuffer.byteLength < options.bytes) {
-                const { value, done } = await raceSignal(source.next(), options?.signal);
+                const { value, done } = await raceSignal$1(source.next(), options?.signal);
                 if (done === true) {
                     throw new UnexpectedEOFError('unexpected end of input');
                 }
@@ -35394,7 +33471,7 @@ class RandomWalk extends TypedEventEmitter {
                         // another random peer or they signal they are no longer interested
                         if (this.walkers === 1 && this.needNext != null) {
                             this.log('wait for need next');
-                            await raceSignal(this.needNext.promise, signal);
+                            await raceSignal$1(this.needNext.promise, signal);
                         }
                         s = Date.now();
                     }
@@ -36322,7 +34399,7 @@ function optimisticSelect(stream, protocol, options) {
             }
             if (tasks.length > 0) {
                 // let the in-flight protocol negotiation finish gracefully
-                await raceSignal(Promise.all(tasks), opts?.signal);
+                await raceSignal$1(Promise.all(tasks), opts?.signal);
             }
             else {
                 // no protocol negotiation attempt has occurred so don't start one
@@ -36771,11 +34848,11 @@ class Upgrader {
             this.metrics.dials?.increment({
                 inbound: true
             });
-            accepted = await raceSignal(this.components.connectionManager.acceptIncomingConnection(maConn), signal);
+            accepted = await raceSignal$1(this.components.connectionManager.acceptIncomingConnection(maConn), signal);
             if (!accepted) {
                 throw new ConnectionDeniedError('Connection denied');
             }
-            await raceSignal(this.shouldBlockConnection('denyInboundConnection', maConn), signal);
+            await raceSignal$1(this.shouldBlockConnection('denyInboundConnection', maConn), signal);
             await this._performUpgrade(maConn, 'inbound', {
                 ...opts,
                 signal
@@ -36809,7 +34886,7 @@ class Upgrader {
             let remotePeerId;
             if (idStr != null) {
                 remotePeerId = peerIdFromString$1(idStr);
-                await raceSignal(this.shouldBlockConnection('denyOutboundConnection', remotePeerId, maConn), opts.signal);
+                await raceSignal$1(this.shouldBlockConnection('denyOutboundConnection', remotePeerId, maConn), opts.signal);
             }
             let direction = 'outbound';
             // act as the multistream-select server if we are not to be the initiator
@@ -43441,7 +41518,7 @@ class Bucket {
         if (this._parent != null && this._popCount <= 1) {
             if (this._popCount === 1) {
                 // remove myself from parent, replacing me with my only child
-                const onlyChild = this._children.find(exists);
+                const onlyChild = this._children.find(exists$1);
                 if ((onlyChild != null) && !(onlyChild instanceof Bucket)) {
                     const hash = onlyChild.hash;
                     hash.untake(this._options.bits);
@@ -43462,7 +41539,7 @@ class Bucket {
         return this._children.get(index);
     }
 }
-function exists(o) {
+function exists$1(o) {
     return Boolean(o);
 }
 function mapNode(node, _) {
@@ -44620,7 +42697,7 @@ const resolve$4 = async (cid, name, path, toResolve, resolve, depth, blockstore,
     if (toResolve.length > 0) {
         throw new NotFoundError(`No link named ${path} found in raw node ${cid}`);
     }
-    const buf = decode$9(cid.multihash.bytes);
+    const buf = decode$a(cid.multihash.bytes);
     return {
         entry: {
             type: 'identity',
@@ -46884,208 +44961,26 @@ function isFolderBundle(file) {
 	return !!(meta?.isVirtualBundle && meta?.displayAsFolder);
 }
 
-function insertReplacement(source, rx, replacement) {
-    const newParts = [];
-    source.forEach((chunk) => {
-        // When the source contains multiple placeholders for interpolation,
-        // we should ignore chunks that are not strings, because those
-        // can be JSX objects and will be otherwise incorrectly turned into strings.
-        // Without this condition we’d get this: [object Object] hello [object Object] my <button>
-        if (typeof chunk !== 'string') {
-            return newParts.push(chunk);
-        }
-        return rx[Symbol.split](chunk).forEach((raw, i, list) => {
-            if (raw !== '') {
-                newParts.push(raw);
-            }
-            // Interlace with the `replacement` value
-            if (i < list.length - 1) {
-                newParts.push(replacement);
-            }
-        });
-    });
-    return newParts;
+async function streamToBlob(readableStream, mimeType) {
+  const response = new Response(readableStream);
+  const blob = await response.blob();
+  return mimeType !== void 0 ? new Blob([blob], { type: mimeType }) : blob;
 }
-/**
- * Takes a string with placeholder variables like `%{smart_count} file selected`
- * and replaces it with values from options `{smart_count: 5}`
- *
- * @license https://github.com/airbnb/polyglot.js/blob/master/LICENSE
- * taken from https://github.com/airbnb/polyglot.js/blob/master/lib/polyglot.js#L299
- *
- * @param phrase that needs interpolation, with placeholders
- * @param options with values that will be used to replace placeholders
- */
-function interpolate(phrase, options) {
-    const dollarRegex = /\$/g;
-    const dollarBillsYall = '$$$$';
-    let interpolated = [phrase];
-    if (options == null)
-        return interpolated;
-    for (const arg of Object.keys(options)) {
-        if (arg !== '_') {
-            // Ensure replacement value is escaped to prevent special $-prefixed
-            // regex replace tokens. the "$$$$" is needed because each "$" needs to
-            // be escaped with "$" itself, and we need two in the resulting output.
-            let replacement = options[arg];
-            if (typeof replacement === 'string') {
-                replacement = dollarRegex[Symbol.replace](replacement, dollarBillsYall);
-            }
-            // We create a new `RegExp` each time instead of using a more-efficient
-            // string replace so that the same argument can be replaced multiple times
-            // in the same phrase.
-            interpolated = insertReplacement(interpolated, new RegExp(`%\\{${arg}\\}`, 'g'), replacement);
+function readableStreamToAsyncIterable(readableStream) {
+  return {
+    [Symbol.asyncIterator]: async function* () {
+      const reader = readableStream.getReader();
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          yield value;
         }
+      } finally {
+        reader.releaseLock();
+      }
     }
-    return interpolated;
-}
-const defaultOnMissingKey = (key) => {
-    throw new Error(`missing string: ${key}`);
-};
-/**
- * Translates strings with interpolation & pluralization support.
- * Extensible with custom dictionaries and pluralization functions.
- *
- * Borrows heavily from and inspired by Polyglot https://github.com/airbnb/polyglot.js,
- * basically a stripped-down version of it. Differences: pluralization functions are not hardcoded
- * and can be easily added among with dictionaries, nested objects are used for pluralization
- * as opposed to `||||` delimeter
- *
- * Usage example: `translator.translate('files_chosen', {smart_count: 3})`
- */
-class Translator {
-    locale;
-    constructor(locales, { onMissingKey = defaultOnMissingKey } = {}) {
-        this.locale = {
-            strings: {},
-            pluralize(n) {
-                if (n === 1) {
-                    return 0;
-                }
-                return 1;
-            },
-        };
-        if (Array.isArray(locales)) {
-            locales.forEach(this.#apply, this);
-        }
-        else {
-            this.#apply(locales);
-        }
-        this.#onMissingKey = onMissingKey;
-    }
-    #onMissingKey;
-    #apply(locale) {
-        if (!locale?.strings) {
-            return;
-        }
-        const prevLocale = this.locale;
-        Object.assign(this.locale, {
-            strings: { ...prevLocale.strings, ...locale.strings },
-            pluralize: locale.pluralize || prevLocale.pluralize,
-        });
-    }
-    /**
-     * Public translate method
-     *
-     * @param key
-     * @param options with values that will be used later to replace placeholders in string
-     * @returns string translated (and interpolated)
-     */
-    translate(key, options) {
-        return this.translateArray(key, options).join('');
-    }
-    /**
-     * Get a translation and return the translated and interpolated parts as an array.
-     *
-     * @returns The translated and interpolated parts, in order.
-     */
-    translateArray(key, options) {
-        let string = this.locale.strings[key];
-        if (string == null) {
-            this.#onMissingKey(key);
-            string = key;
-        }
-        const hasPluralForms = typeof string === 'object';
-        if (hasPluralForms) {
-            if (options && typeof options.smart_count !== 'undefined') {
-                const plural = this.locale.pluralize(options.smart_count);
-                return interpolate(string[plural], options);
-            }
-            throw new Error('Attempted to use a string with plural forms, but no value was given for %{smart_count}');
-        }
-        if (typeof string !== 'string') {
-            throw new Error(`string was not a string`);
-        }
-        return interpolate(string, options);
-    }
-}
-
-/**
- * Core plugin logic that all plugins share.
- *
- * BasePlugin does not contain DOM rendering so it can be used for plugins
- * without a user interface.
- *
- * See `Plugin` for the extended version with Preact rendering for interfaces.
- */
-class BasePlugin {
-    uppy;
-    opts;
-    id;
-    defaultLocale;
-    i18n;
-    i18nArray;
-    type;
-    VERSION;
-    constructor(uppy, opts) {
-        this.uppy = uppy;
-        this.opts = opts ?? {};
-    }
-    getPluginState() {
-        const { plugins } = this.uppy.getState();
-        return (plugins?.[this.id] || {});
-    }
-    setPluginState(update) {
-        const { plugins } = this.uppy.getState();
-        this.uppy.setState({
-            plugins: {
-                ...plugins,
-                [this.id]: {
-                    ...plugins[this.id],
-                    ...update,
-                },
-            },
-        });
-    }
-    setOptions(newOpts) {
-        this.opts = { ...this.opts, ...newOpts };
-        this.setPluginState(undefined); // so that UI re-renders with new options
-        this.i18nInit();
-    }
-    i18nInit() {
-        const translator = new Translator([
-            this.defaultLocale,
-            this.uppy.locale,
-            this.opts.locale,
-        ]);
-        this.i18n = translator.translate.bind(translator);
-        this.i18nArray = translator.translateArray.bind(translator);
-        this.setPluginState(undefined); // so that UI re-renders and we see the updated locale
-    }
-    /**
-     * Extendable methods
-     * ==================
-     * These methods are here to serve as an overview of the extendable methods as well as
-     * making them not conditional in use, such as `if (this.afterUpdate)`.
-     */
-    addTarget(plugin) {
-        throw new Error("Extend the addTarget method to add your plugin to another plugin's target");
-    }
-    install() { }
-    uninstall() { }
-    update(state) { }
-    // Called after every state update, after everything's mounted. Debounced.
-    afterUpdate() { }
+  };
 }
 
 const defaultOptions = {};
@@ -47102,37 +44997,22 @@ class CarPreprocessorPlugin extends BasePlugin {
   }
   async processFile(file) {
     try {
-      const [carStream] = await this.#createCarStream(file, (progress) => {
-        this.uppy.emit("preprocess-progress", file, {
-          message: "Processing file...",
-          mode: "determinate",
-          value: progress
-        });
-      });
-      const [carStreamForReader, carStreamForBlob] = carStream.tee();
+      const [carStream, rootCid] = await this.#createCarStream(
+        file,
+        (progress) => {
+          this.uppy.emit("preprocess-progress", file, {
+            message: "Processing file...",
+            mode: "determinate",
+            value: progress
+          });
+        }
+      );
       this.uppy.emit("preprocess-complete", file, {
         message: "Processing file...",
         mode: "determinate",
         value: 100
       });
-      const asyncIterableStream = {
-        [Symbol.asyncIterator]: async function* () {
-          const reader2 = carStreamForReader.getReader();
-          try {
-            while (true) {
-              const { done, value } = await reader2.read();
-              if (done) break;
-              yield value;
-            }
-          } finally {
-            reader2.releaseLock();
-          }
-        }
-      };
-      const reader = await CarReader.fromIterable(asyncIterableStream);
-      const roots = await reader.getRoots();
-      const rootCid = roots[0];
-      const carBlob = await streamToBlob(carStreamForBlob, "application/vnd.ipld.car");
+      const carBlob = await streamToBlob(carStream, "application/vnd.ipld.car");
       file.data = new File([carBlob], file.name, {
         type: "application/vnd.ipld.car"
       });
@@ -47169,59 +45049,29 @@ class CarPreprocessorPlugin extends BasePlugin {
     const c = car(helia);
     const tracker = new ProgressTracker(BigInt(file.size || 0));
     let blocksCount = 0n;
-    if (isDirectoryFile(file) || isFolderBundle(file)) {
-      let dirFiles = [];
-      if (isDirectoryFile(file)) {
-        dirFiles = Object.values(this.uppy.getFiles()).filter(isDirectoryFile).map((f) => f.data);
-      } else if (isFolderBundle(file)) {
-        const meta = file.meta;
-        dirFiles = meta.originalFiles || [];
+    let files = [];
+    isDirectoryFile(file) || isFolderBundle(file);
+    if (isFolderBundle(file)) {
+      const meta = file.meta;
+      files = meta.originalFiles || [];
+    } else if (isDirectoryFile(file)) {
+      const meta = file.meta;
+      if (meta.originalFiles && meta.originalFiles.length > 0) {
+        files = meta.originalFiles;
+      } else {
+        files = Object.values(this.uppy.getFiles()).filter(isDirectoryFile).map((f) => f.data);
       }
-      const src = fileSource(dirFiles, (progress) => {
-        tracker.updateDataProgress("fileRead", BigInt(progress));
-        onProgress(tracker.getOverallProgress());
-      });
-      const addOptions = {
-        onProgress(event) {
-          if (event.type === "unixfs:importer:progress:file:read") {
-            tracker.updateDataProgress("fileRead", event.detail.bytesRead);
-          } else if (event.type === "unixfs:importer:progress:file:write") {
-            tracker.updateDataProgress(
-              "unixfsImport",
-              event.detail.bytesWritten
-            );
-          } else if (event.type === "blocks:put:blockstore:put") {
-            blocksCount++;
-          }
-          onProgress(tracker.getOverallProgress());
-        }
-      };
-      let cid2;
-      for await (const result of fs.addAll(src, addOptions)) {
-        cid2 = result.cid;
-      }
-      if (!cid2) {
-        throw new Error("Failed to import files to UnixFS");
-      }
-      let carBlocksWritten2 = 0n;
-      const options2 = {
-        onProgress(event) {
-          if (event.type === "blocks:get:blockstore:get") {
-            carBlocksWritten2++;
-            if (blocksCount === 0n) {
-              return;
-            }
-            tracker.updateBlockProgress(
-              carBlocksWritten2 * 100n / blocksCount
-            );
-            onProgress(tracker.getOverallProgress());
-          }
-        }
-      };
-      const carStream2 = c.stream(cid2, options2);
-      return [asyncGeneratorToReadableStream(carStream2)];
+    } else {
+      files = [file.data];
     }
-    const cid = await fs.addByteStream(file.data.stream(), {
+    const src = fileSource(files, (progress) => {
+      tracker.updateDataProgress("fileRead", BigInt(progress));
+      onProgress(tracker.getOverallProgress());
+    });
+    const addOptions = {
+      // Use protobuf format for all nodes to preserve metadata
+      cidVersion: 1,
+      rawLeaves: false,
       onProgress(event) {
         if (event.type === "unixfs:importer:progress:file:read") {
           tracker.updateDataProgress("fileRead", event.detail.bytesRead);
@@ -47232,7 +45082,14 @@ class CarPreprocessorPlugin extends BasePlugin {
         }
         onProgress(tracker.getOverallProgress());
       }
-    });
+    };
+    let cid;
+    for await (const result of fs.addAll(src, addOptions)) {
+      cid = result.cid;
+    }
+    if (!cid) {
+      throw new Error("Failed to import files to UnixFS");
+    }
     let carBlocksWritten = 0n;
     const options = {
       onProgress(event) {
@@ -47247,7 +45104,7 @@ class CarPreprocessorPlugin extends BasePlugin {
       }
     };
     const carStream = c.stream(cid, options);
-    return [asyncGeneratorToReadableStream(carStream)];
+    return [asyncGeneratorToReadableStream(carStream), cid];
   }
   async #createHelia() {
     if (this.#helia) {
@@ -47270,16 +45127,7 @@ class CarPreprocessorPlugin extends BasePlugin {
       return false;
     }
     try {
-      const fileIterable = {
-        [Symbol.asyncIterator]: async function* () {
-          const reader2 = file.data.stream().getReader();
-          while (true) {
-            const { done, value } = await reader2.read();
-            if (done) break;
-            yield value;
-          }
-        }
-      };
+      const fileIterable = readableStreamToAsyncIterable(file.data.stream());
       const reader = asyncIterableReader(fileIterable);
       const decoder = createDecoder(reader);
       let header;
@@ -47411,41 +45259,60 @@ async function* fileSource(files, onProgress) {
   const seenDirs = /* @__PURE__ */ new Set();
   let totalBytes = 0n;
   let processedBytes = 0n;
+  console.log("[fileSource] Starting to process files:", files.length);
   files.forEach((file) => {
     totalBytes += BigInt(file.size);
+    console.log("[fileSource] File details:", {
+      name: file.name,
+      size: file.size,
+      webkitRelativePath: file.webkitRelativePath,
+      type: file.type
+    });
   });
+  console.log("[fileSource] Total bytes to process:", totalBytes);
   for (const file of files) {
     const fullPath = file.webkitRelativePath ?? file.name;
+    console.log("[fileSource] Processing file with fullPath:", fullPath);
     if (fullPath.includes("/.")) {
+      console.log("[fileSource] Skipping hidden file:", fullPath);
       continue;
     }
     const parts = fullPath.split("/").filter((part) => part.length > 0);
+    console.log("[fileSource] Path parts:", parts);
     for (let i = 1; i < parts.length; i++) {
       const dirPath = parts.slice(0, i).join("/");
+      console.log("[fileSource] Checking directory path:", dirPath);
       if (!seenDirs.has(dirPath)) {
+        console.log("[fileSource] Yielding intermediate directory:", dirPath);
         seenDirs.add(dirPath);
         yield {
           content: void 0,
           path: dirPath
         };
+      } else {
+        console.log("[fileSource] Directory already seen, skipping:", dirPath);
       }
     }
+    console.log("[fileSource] Yielding file with path:", fullPath);
     yield {
       content: file.stream(),
       path: fullPath
     };
     if (onProgress && totalBytes > 0n) {
       processedBytes += BigInt(file.size);
-      onProgress(Number(processedBytes * 100n / totalBytes));
+      const progressPercent = Number(processedBytes * 100n / totalBytes);
+      console.log("[fileSource] Progress tracking:", {
+        processedBytes,
+        totalBytes,
+        progressPercent
+      });
+      onProgress(progressPercent);
     } else if (onProgress) {
+      console.log("[fileSource] Fallback progress (100%)");
       onProgress(100);
     }
   }
-}
-async function streamToBlob(readableStream, mimeType) {
-  const response = new Response(readableStream);
-  const blob = await response.blob();
-  return mimeType !== void 0 ? new Blob([blob], { type: mimeType }) : blob;
+  console.log("[fileSource] Finished processing all files");
 }
 
 class IpfsUpload {
@@ -47499,17 +45366,3189 @@ class IpfsUpload {
   }
 }
 
-const routes = [];
+//#region src/utils/mapOperator.ts
+const mapOperator = (operator) => {
+	const mapping = {
+		and: "and",
+		eq: "",
+		ne: "ne",
+		lt: "lt",
+		gt: "gt",
+		lte: "lte",
+		gte: "gte",
+		in: "in",
+		nin: "nin",
+		contains: "contains",
+		ncontains: "ncontains",
+		containss: "containss",
+		ncontainss: "ncontainss",
+		between: "between",
+		nbetween: "nbetween",
+		null: "null",
+		nnull: "nnull",
+		startswith: "startswith",
+		nstartswith: "nstartswith",
+		startswiths: "startswiths",
+		nstartswiths: "nstartswiths",
+		endswith: "endswith",
+		nendswith: "nendswith",
+		endswiths: "endswiths",
+		nendswiths: "nendswiths",
+		ina: "ina",
+		nina: "nina",
+		or: ""
+	};
+	const mapped = mapping[operator];
+	if (mapped === void 0) throw new Error(`Unsupported operator: ${operator}`);
+	return mapped;
+};
+
+//#region src/utils/generateFilter.ts
+const processCondition = (condition) => {
+	if (condition.field === "q") return {
+		path: ["q"],
+		value: encodeURIComponent(String(condition.value))
+	};
+	const operator = mapOperator(condition.operator);
+	let value = condition.value;
+	if (Array.isArray(value)) {
+		value = value.map((v) => String(v)).join(",");
+		value = encodeURIComponent(value);
+	} else if (condition.operator === "null" || condition.operator === "nnull") value = "";
+	else value = encodeURIComponent(String(value));
+	if (!condition.field) return null;
+	const path = [condition.field];
+	if (operator) path.push(operator);
+	return {
+		path,
+		value
+	};
+};
+const processOrCondition = (filter, basePath, query) => {
+	if (filter.operator === "or" && Array.isArray(filter.value)) filter.value.forEach((condition, index) => {
+		const conditionPath = [
+			...basePath,
+			"or",
+			String(index)
+		];
+		if ("operator" in condition && condition.operator === "and" && Array.isArray(condition.value)) condition.value.forEach((subCondition, subIndex) => {
+			const subConditionPath = [
+				...conditionPath,
+				"and",
+				String(subIndex)
+			];
+			const processedCondition = processCondition(subCondition);
+			if (processedCondition) {
+				const finalPath = [...subConditionPath, ...processedCondition.path];
+				const key = finalPath.reduce((acc, segment) => {
+					return acc ? `${acc}[${segment}]` : segment;
+				}, "");
+				query[key] = processedCondition.value;
+			}
+		});
+		else {
+			const processedCondition = processCondition(condition);
+			if (processedCondition) {
+				const finalPath = [...conditionPath, ...processedCondition.path];
+				const key = finalPath.reduce((acc, segment) => {
+					return acc ? `${acc}[${segment}]` : segment;
+				}, "");
+				query[key] = processedCondition.value;
+			}
+		}
+	});
+};
+const generateFilter = (filters) => {
+	const query = {};
+	let hasGlobalSearch = false;
+	filters?.forEach((filter) => {
+		if (filter.operator === "or") processOrCondition(filter, ["filters"], query);
+		else if ("field" in filter && filter.field === "q") {
+			if (hasGlobalSearch) {
+				console.warn("Only one global search (q) filter allowed");
+				return;
+			}
+			hasGlobalSearch = true;
+			const processedCondition = processCondition(filter);
+			if (processedCondition) query[processedCondition.path.join("")] = processedCondition.value;
+		} else {
+			const processedCondition = processCondition(filter);
+			if (processedCondition) {
+				const finalPath = ["filters", ...processedCondition.path];
+				const key = finalPath.reduce((acc, segment) => {
+					return acc ? `${acc}[${segment}]` : segment;
+				}, "");
+				query[key] = processedCondition.value;
+			}
+		}
+	});
+	return query;
+};
+
+//#region src/utils/generateSort.ts
+const generateSort = (sorters) => {
+	if (!sorters?.length) return {};
+	const validSorters = sorters.filter((s) => s.field && (s.order === void 0 || ["asc", "desc"].includes(s.order.toLowerCase())));
+	if (!validSorters.length) return {};
+	return {
+		_sort: validSorters.map((s) => encodeURIComponent(s.field)).join(","),
+		_order: validSorters.map((s) => encodeURIComponent(s.order?.toLowerCase() || "asc")).join(",")
+	};
+};
+
+const _htmlEscape = string => string
+	.replace(/&/g, '&amp;')
+	.replace(/"/g, '&quot;')
+	.replace(/'/g, '&#39;')
+	.replace(/</g, '&lt;')
+	.replace(/>/g, '&gt;');
+
+function htmlEscape(strings, ...values) {
+	if (typeof strings === 'string') {
+		return _htmlEscape(strings);
+	}
+
+	let output = strings[0];
+	for (const [index, value] of values.entries()) {
+		output = output + _htmlEscape(String(value)) + strings[index + 1];
+	}
+
+	return output;
+}
+
+class MissingValueError extends Error {
+	constructor(key) {
+		super(`Missing a value for ${key ? `the placeholder: ${key}` : 'a placeholder'}`, key);
+		this.name = 'MissingValueError';
+		this.key = key;
+	}
+}
+
+function pupa(template, data, {ignoreMissing = false, transform = ({value}) => value} = {}) {
+	if (typeof template !== 'string') {
+		throw new TypeError(`Expected a \`string\` in the first argument, got \`${typeof template}\``);
+	}
+
+	if (typeof data !== 'object') {
+		throw new TypeError(`Expected an \`object\` or \`Array\` in the second argument, got \`${typeof data}\``);
+	}
+
+	const replace = (placeholder, key) => {
+		let value = data;
+		for (const property of key.split('.')) {
+			value = value ? value[property] : undefined;
+		}
+
+		const transformedValue = transform({value, key});
+		if (transformedValue === undefined) {
+			if (ignoreMissing) {
+				return placeholder;
+			}
+
+			throw new MissingValueError(key);
+		}
+
+		return String(transformedValue);
+	};
+
+	const composeHtmlEscape = replacer => (...args) => htmlEscape(replacer(...args));
+
+	// The regex tries to match either a number inside `{{ }}` or a valid JS identifier or key path.
+	const doubleBraceRegex = /{{(\d+|[a-z$_][\w\-$]*?(?:\.[\w\-$]*?)*?)}}/gi;
+
+	if (doubleBraceRegex.test(template)) {
+		template = template.replace(doubleBraceRegex, composeHtmlEscape(replace));
+	}
+
+	const braceRegex = /{(\d+|[a-z$_][\w\-$]*?(?:\.[\w\-$]*?)*?)}/gi;
+
+	return template.replace(braceRegex, replace);
+}
+
+//#region src/utils/generateUrl.ts
+var NestedParamError = class extends Error {
+	constructor(missingParam) {
+		super(`Missing required "${missingParam}" in meta.params`);
+		this.name = "NestedParamError";
+	}
+};
+var TemplateResolutionError = class extends Error {
+	constructor(template, originalError) {
+		super(`Failed to resolve template '${template}': ${originalError?.message || "Invalid template syntax"}`);
+		this.name = "TemplateResolutionError";
+	}
+};
+function generateNestedUrl({ apiBase = "", id, meta = {}, operation, resource = meta.resource }) {
+	const template = meta?.template || (resource ? resource.split(".").map((part, index, arr) => index < arr.length - 1 ? `${part}/{${part}}` : part).join("/") : "");
+	const params = meta?.params || meta?.paramsMap || {};
+	if (meta?.paramsMap) console.warn("paramsMap is deprecated - use params instead");
+	let resolvedPath;
+	try {
+		const encodedParams = Object.fromEntries(Object.entries(params).map(([k, v]) => [k, encodeURIComponent(v)]));
+		resolvedPath = pupa(template, encodedParams);
+	} catch (error) {
+		if (error instanceof Error && error.message.startsWith("Missing a value")) {
+			const paramMatch = /placeholder: (\w+)/.exec(error.message);
+			if (paramMatch) throw new NestedParamError(paramMatch[1]);
+		}
+		throw new TemplateResolutionError(template, error);
+	}
+	const invalidMarkers = resolvedPath.match(/[{}]/g) || [];
+	if (invalidMarkers.length > 0) throw new TemplateResolutionError(template);
+	if (id) resolvedPath += `/${id}`;
+	if (operation) resolvedPath = `${resolvedPath}/${operation}`.replace(/\/\/+/g, "/");
+	return `${resolvedPath.replace(/^\/+/, "")}`;
+}
+
+class HTTPError extends Error {
+    response;
+    request;
+    options;
+    constructor(response, request, options) {
+        const code = (response.status || response.status === 0) ? response.status : '';
+        const title = response.statusText || '';
+        const status = `${code} ${title}`.trim();
+        const reason = status ? `status code ${status}` : 'an unknown error';
+        super(`Request failed with ${reason}: ${request.method} ${request.url}`);
+        this.name = 'HTTPError';
+        this.response = response;
+        this.request = request;
+        this.options = options;
+    }
+}
+
+class TimeoutError extends Error {
+    request;
+    constructor(request) {
+        super(`Request timed out: ${request.method} ${request.url}`);
+        this.name = 'TimeoutError';
+        this.request = request;
+    }
+}
+
+const supportsRequestStreams = (() => {
+    let duplexAccessed = false;
+    let hasContentType = false;
+    const supportsReadableStream = typeof globalThis.ReadableStream === 'function';
+    const supportsRequest = typeof globalThis.Request === 'function';
+    if (supportsReadableStream && supportsRequest) {
+        try {
+            hasContentType = new globalThis.Request('https://empty.invalid', {
+                body: new globalThis.ReadableStream(),
+                method: 'POST',
+                // @ts-expect-error - Types are outdated.
+                get duplex() {
+                    duplexAccessed = true;
+                    return 'half';
+                },
+            }).headers.has('Content-Type');
+        }
+        catch (error) {
+            // QQBrowser on iOS throws "unsupported BodyInit type" error (see issue #581)
+            if (error instanceof Error && error.message === 'unsupported BodyInit type') {
+                return false;
+            }
+            throw error;
+        }
+    }
+    return duplexAccessed && !hasContentType;
+})();
+const supportsAbortController = typeof globalThis.AbortController === 'function';
+const supportsAbortSignal = typeof globalThis.AbortSignal === 'function' && typeof globalThis.AbortSignal.any === 'function';
+const supportsResponseStreams = typeof globalThis.ReadableStream === 'function';
+const supportsFormData = typeof globalThis.FormData === 'function';
+const requestMethods = ['get', 'post', 'put', 'patch', 'head', 'delete'];
+const responseTypes = {
+    json: 'application/json',
+    text: 'text/*',
+    formData: 'multipart/form-data',
+    arrayBuffer: '*/*',
+    blob: '*/*',
+    // Supported in modern Fetch implementations (for example, browsers and recent Node.js/undici).
+    // We still feature-check at runtime before exposing the shortcut.
+    bytes: '*/*',
+};
+// The maximum value of a 32bit int (see issue #117)
+const maxSafeTimeout = 2_147_483_647;
+// Size in bytes of a typical form boundary, used to help estimate upload size
+const usualFormBoundarySize = new TextEncoder().encode('------WebKitFormBoundaryaxpyiPgbbPti10Rw').length;
+const stop = Symbol('stop');
+const kyOptionKeys = {
+    json: true,
+    parseJson: true,
+    stringifyJson: true,
+    searchParams: true,
+    prefixUrl: true,
+    retry: true,
+    timeout: true,
+    hooks: true,
+    throwHttpErrors: true,
+    onDownloadProgress: true,
+    onUploadProgress: true,
+    fetch: true,
+};
+const requestOptionsRegistry = {
+    method: true,
+    headers: true,
+    body: true,
+    mode: true,
+    credentials: true,
+    cache: true,
+    redirect: true,
+    referrer: true,
+    referrerPolicy: true,
+    integrity: true,
+    keepalive: true,
+    signal: true,
+    window: true,
+    dispatcher: true,
+    duplex: true,
+    priority: true,
+};
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+const getBodySize = (body) => {
+    if (!body) {
+        return 0;
+    }
+    if (body instanceof FormData) {
+        // This is an approximation, as FormData size calculation is not straightforward
+        let size = 0;
+        for (const [key, value] of body) {
+            size += usualFormBoundarySize;
+            size += new TextEncoder().encode(`Content-Disposition: form-data; name="${key}"`).length;
+            size += typeof value === 'string'
+                ? new TextEncoder().encode(value).length
+                : value.size;
+        }
+        return size;
+    }
+    if (body instanceof Blob) {
+        return body.size;
+    }
+    if (body instanceof ArrayBuffer) {
+        return body.byteLength;
+    }
+    if (typeof body === 'string') {
+        return new TextEncoder().encode(body).length;
+    }
+    if (body instanceof URLSearchParams) {
+        return new TextEncoder().encode(body.toString()).length;
+    }
+    if ('byteLength' in body) {
+        return (body).byteLength;
+    }
+    if (typeof body === 'object' && body !== null) {
+        try {
+            const jsonString = JSON.stringify(body);
+            return new TextEncoder().encode(jsonString).length;
+        }
+        catch {
+            return 0;
+        }
+    }
+    return 0; // Default case, unable to determine size
+};
+const streamResponse = (response, onDownloadProgress) => {
+    const totalBytes = Number(response.headers.get('content-length')) || 0;
+    let transferredBytes = 0;
+    if (response.status === 204) {
+        if (onDownloadProgress) {
+            onDownloadProgress({ percent: 1, totalBytes, transferredBytes }, new Uint8Array());
+        }
+        return new Response(null, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers,
+        });
+    }
+    return new Response(new ReadableStream({
+        async start(controller) {
+            const reader = response.body.getReader();
+            if (onDownloadProgress) {
+                onDownloadProgress({ percent: 0, transferredBytes: 0, totalBytes }, new Uint8Array());
+            }
+            async function read() {
+                const { done, value } = await reader.read();
+                if (done) {
+                    controller.close();
+                    return;
+                }
+                if (onDownloadProgress) {
+                    transferredBytes += value.byteLength;
+                    const percent = totalBytes === 0 ? 0 : transferredBytes / totalBytes;
+                    onDownloadProgress({ percent, transferredBytes, totalBytes }, value);
+                }
+                controller.enqueue(value);
+                await read();
+            }
+            await read();
+        },
+    }), {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+    });
+};
+const streamRequest = (request, onUploadProgress) => {
+    const totalBytes = getBodySize(request.body);
+    let transferredBytes = 0;
+    return new Request(request, {
+        // @ts-expect-error - Types are outdated.
+        duplex: 'half',
+        body: new ReadableStream({
+            async start(controller) {
+                const reader = request.body instanceof ReadableStream ? request.body.getReader() : new Response('').body.getReader();
+                async function read() {
+                    const { done, value } = await reader.read();
+                    if (done) {
+                        // Ensure 100% progress is reported when the upload is complete
+                        if (onUploadProgress) {
+                            onUploadProgress({ percent: 1, transferredBytes, totalBytes: Math.max(totalBytes, transferredBytes) }, new Uint8Array());
+                        }
+                        controller.close();
+                        return;
+                    }
+                    transferredBytes += value.byteLength;
+                    let percent = totalBytes === 0 ? 0 : transferredBytes / totalBytes;
+                    if (totalBytes < transferredBytes || percent === 1) {
+                        percent = 0.99;
+                    }
+                    if (onUploadProgress) {
+                        onUploadProgress({ percent: Number(percent.toFixed(2)), transferredBytes, totalBytes }, value);
+                    }
+                    controller.enqueue(value);
+                    await read();
+                }
+                await read();
+            },
+        }),
+    });
+};
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+const isObject = (value) => value !== null && typeof value === 'object';
+
+const validateAndMerge = (...sources) => {
+    for (const source of sources) {
+        if ((!isObject(source) || Array.isArray(source)) && source !== undefined) {
+            throw new TypeError('The `options` argument must be an object');
+        }
+    }
+    return deepMerge({}, ...sources);
+};
+const mergeHeaders = (source1 = {}, source2 = {}) => {
+    const result = new globalThis.Headers(source1);
+    const isHeadersInstance = source2 instanceof globalThis.Headers;
+    const source = new globalThis.Headers(source2);
+    for (const [key, value] of source.entries()) {
+        if ((isHeadersInstance && value === 'undefined') || value === undefined) {
+            result.delete(key);
+        }
+        else {
+            result.set(key, value);
+        }
+    }
+    return result;
+};
+function newHookValue(original, incoming, property) {
+    return (Object.hasOwn(incoming, property) && incoming[property] === undefined)
+        ? []
+        : deepMerge(original[property] ?? [], incoming[property] ?? []);
+}
+const mergeHooks = (original = {}, incoming = {}) => ({
+    beforeRequest: newHookValue(original, incoming, 'beforeRequest'),
+    beforeRetry: newHookValue(original, incoming, 'beforeRetry'),
+    afterResponse: newHookValue(original, incoming, 'afterResponse'),
+    beforeError: newHookValue(original, incoming, 'beforeError'),
+});
+// TODO: Make this strongly-typed (no `any`).
+const deepMerge = (...sources) => {
+    let returnValue = {};
+    let headers = {};
+    let hooks = {};
+    for (const source of sources) {
+        if (Array.isArray(source)) {
+            if (!Array.isArray(returnValue)) {
+                returnValue = [];
+            }
+            returnValue = [...returnValue, ...source];
+        }
+        else if (isObject(source)) {
+            for (let [key, value] of Object.entries(source)) {
+                if (isObject(value) && key in returnValue) {
+                    value = deepMerge(returnValue[key], value);
+                }
+                returnValue = { ...returnValue, [key]: value };
+            }
+            if (isObject(source.hooks)) {
+                hooks = mergeHooks(hooks, source.hooks);
+                returnValue.hooks = hooks;
+            }
+            if (isObject(source.headers)) {
+                headers = mergeHeaders(headers, source.headers);
+                returnValue.headers = headers;
+            }
+        }
+    }
+    return returnValue;
+};
+
+const normalizeRequestMethod = (input) => requestMethods.includes(input) ? input.toUpperCase() : input;
+const retryMethods = ['get', 'put', 'head', 'delete', 'options', 'trace'];
+const retryStatusCodes = [408, 413, 429, 500, 502, 503, 504];
+const retryAfterStatusCodes = [413, 429, 503];
+const defaultRetryOptions = {
+    limit: 2,
+    methods: retryMethods,
+    statusCodes: retryStatusCodes,
+    afterStatusCodes: retryAfterStatusCodes,
+    maxRetryAfter: Number.POSITIVE_INFINITY,
+    backoffLimit: Number.POSITIVE_INFINITY,
+    delay: attemptCount => 0.3 * (2 ** (attemptCount - 1)) * 1000,
+};
+const normalizeRetryOptions = (retry = {}) => {
+    if (typeof retry === 'number') {
+        return {
+            ...defaultRetryOptions,
+            limit: retry,
+        };
+    }
+    if (retry.methods && !Array.isArray(retry.methods)) {
+        throw new Error('retry.methods must be an array');
+    }
+    if (retry.statusCodes && !Array.isArray(retry.statusCodes)) {
+        throw new Error('retry.statusCodes must be an array');
+    }
+    return {
+        ...defaultRetryOptions,
+        ...retry,
+    };
+};
+
+// `Promise.race()` workaround (#91)
+async function timeout(request, init, abortController, options) {
+    return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+            if (abortController) {
+                abortController.abort();
+            }
+            reject(new TimeoutError(request));
+        }, options.timeout);
+        void options
+            .fetch(request, init)
+            .then(resolve)
+            .catch(reject)
+            .then(() => {
+            clearTimeout(timeoutId);
+        });
+    });
+}
+
+// https://github.com/sindresorhus/delay/tree/ab98ae8dfcb38e1593286c94d934e70d14a4e111
+async function delay(ms, { signal }) {
+    return new Promise((resolve, reject) => {
+        if (signal) {
+            signal.throwIfAborted();
+            signal.addEventListener('abort', abortHandler, { once: true });
+        }
+        function abortHandler() {
+            clearTimeout(timeoutId);
+            reject(signal.reason);
+        }
+        const timeoutId = setTimeout(() => {
+            signal?.removeEventListener('abort', abortHandler);
+            resolve();
+        }, ms);
+    });
+}
+
+const findUnknownOptions = (request, options) => {
+    const unknownOptions = {};
+    for (const key in options) {
+        if (!(key in requestOptionsRegistry) && !(key in kyOptionKeys) && !(key in request)) {
+            unknownOptions[key] = options[key];
+        }
+    }
+    return unknownOptions;
+};
+const hasSearchParameters = (search) => {
+    if (search === undefined) {
+        return false;
+    }
+    // The `typeof array` still gives "object", so we need different checking for array.
+    if (Array.isArray(search)) {
+        return search.length > 0;
+    }
+    if (search instanceof URLSearchParams) {
+        return search.size > 0;
+    }
+    // Record
+    if (typeof search === 'object') {
+        return Object.keys(search).length > 0;
+    }
+    if (typeof search === 'string') {
+        return search.trim().length > 0;
+    }
+    return Boolean(search);
+};
+
+class Ky {
+    static create(input, options) {
+        const ky = new Ky(input, options);
+        const function_ = async () => {
+            if (typeof ky._options.timeout === 'number' && ky._options.timeout > maxSafeTimeout) {
+                throw new RangeError(`The \`timeout\` option cannot be greater than ${maxSafeTimeout}`);
+            }
+            // Delay the fetch so that body method shortcuts can set the Accept header
+            await Promise.resolve();
+            // Before using ky.request, _fetch clones it and saves the clone for future retries to use.
+            // If retry is not needed, close the cloned request's ReadableStream for memory safety.
+            let response = await ky._fetch();
+            for (const hook of ky._options.hooks.afterResponse) {
+                // eslint-disable-next-line no-await-in-loop
+                const modifiedResponse = await hook(ky.request, ky._options, ky._decorateResponse(response.clone()));
+                if (modifiedResponse instanceof globalThis.Response) {
+                    response = modifiedResponse;
+                }
+            }
+            ky._decorateResponse(response);
+            if (!response.ok && ky._options.throwHttpErrors) {
+                let error = new HTTPError(response, ky.request, ky._options);
+                for (const hook of ky._options.hooks.beforeError) {
+                    // eslint-disable-next-line no-await-in-loop
+                    error = await hook(error);
+                }
+                throw error;
+            }
+            // If `onDownloadProgress` is passed, it uses the stream API internally
+            if (ky._options.onDownloadProgress) {
+                if (typeof ky._options.onDownloadProgress !== 'function') {
+                    throw new TypeError('The `onDownloadProgress` option must be a function');
+                }
+                if (!supportsResponseStreams) {
+                    throw new Error('Streams are not supported in your environment. `ReadableStream` is missing.');
+                }
+                return streamResponse(response.clone(), ky._options.onDownloadProgress);
+            }
+            return response;
+        };
+        const isRetriableMethod = ky._options.retry.methods.includes(ky.request.method.toLowerCase());
+        const result = (isRetriableMethod ? ky._retry(function_) : function_())
+            .finally(async () => {
+            // Now that we know a retry is not needed, close the ReadableStream of the cloned request.
+            if (!ky.request.bodyUsed) {
+                await ky.request.body?.cancel();
+            }
+        });
+        for (const [type, mimeType] of Object.entries(responseTypes)) {
+            // Only expose `.bytes()` when the environment implements it.
+            if (type === 'bytes'
+                && typeof globalThis.Response?.prototype?.bytes !== 'function') {
+                continue;
+            }
+            result[type] = async () => {
+                // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+                ky.request.headers.set('accept', ky.request.headers.get('accept') || mimeType);
+                const response = await result;
+                if (type === 'json') {
+                    if (response.status === 204) {
+                        return '';
+                    }
+                    const arrayBuffer = await response.clone().arrayBuffer();
+                    const responseSize = arrayBuffer.byteLength;
+                    if (responseSize === 0) {
+                        return '';
+                    }
+                    if (options.parseJson) {
+                        return options.parseJson(await response.text());
+                    }
+                }
+                return response[type]();
+            };
+        }
+        return result;
+    }
+    request;
+    abortController;
+    _retryCount = 0;
+    _input;
+    _options;
+    // eslint-disable-next-line complexity
+    constructor(input, options = {}) {
+        this._input = input;
+        this._options = {
+            ...options,
+            headers: mergeHeaders(this._input.headers, options.headers),
+            hooks: mergeHooks({
+                beforeRequest: [],
+                beforeRetry: [],
+                beforeError: [],
+                afterResponse: [],
+            }, options.hooks),
+            method: normalizeRequestMethod(options.method ?? this._input.method ?? 'GET'),
+            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+            prefixUrl: String(options.prefixUrl || ''),
+            retry: normalizeRetryOptions(options.retry),
+            throwHttpErrors: options.throwHttpErrors !== false,
+            timeout: options.timeout ?? 10_000,
+            fetch: options.fetch ?? globalThis.fetch.bind(globalThis),
+        };
+        if (typeof this._input !== 'string' && !(this._input instanceof URL || this._input instanceof globalThis.Request)) {
+            throw new TypeError('`input` must be a string, URL, or Request');
+        }
+        if (this._options.prefixUrl && typeof this._input === 'string') {
+            if (this._input.startsWith('/')) {
+                throw new Error('`input` must not begin with a slash when using `prefixUrl`');
+            }
+            if (!this._options.prefixUrl.endsWith('/')) {
+                this._options.prefixUrl += '/';
+            }
+            this._input = this._options.prefixUrl + this._input;
+        }
+        if (supportsAbortController && supportsAbortSignal) {
+            const originalSignal = this._options.signal ?? this._input.signal;
+            this.abortController = new globalThis.AbortController();
+            this._options.signal = originalSignal ? AbortSignal.any([originalSignal, this.abortController.signal]) : this.abortController.signal;
+        }
+        if (supportsRequestStreams) {
+            // @ts-expect-error - Types are outdated.
+            this._options.duplex = 'half';
+        }
+        if (this._options.json !== undefined) {
+            this._options.body = this._options.stringifyJson?.(this._options.json) ?? JSON.stringify(this._options.json);
+            this._options.headers.set('content-type', this._options.headers.get('content-type') ?? 'application/json');
+        }
+        this.request = new globalThis.Request(this._input, this._options);
+        if (hasSearchParameters(this._options.searchParams)) {
+            // eslint-disable-next-line unicorn/prevent-abbreviations
+            const textSearchParams = typeof this._options.searchParams === 'string'
+                ? this._options.searchParams.replace(/^\?/, '')
+                : new URLSearchParams(this._options.searchParams).toString();
+            // eslint-disable-next-line unicorn/prevent-abbreviations
+            const searchParams = '?' + textSearchParams;
+            const url = this.request.url.replace(/(?:\?.*?)?(?=#|$)/, searchParams);
+            // To provide correct form boundary, Content-Type header should be deleted each time when new Request instantiated from another one
+            if (((supportsFormData && this._options.body instanceof globalThis.FormData)
+                || this._options.body instanceof URLSearchParams) && !(this._options.headers && this._options.headers['content-type'])) {
+                this.request.headers.delete('content-type');
+            }
+            // The spread of `this.request` is required as otherwise it misses the `duplex` option for some reason and throws.
+            this.request = new globalThis.Request(new globalThis.Request(url, { ...this.request }), this._options);
+        }
+        // If `onUploadProgress` is passed, it uses the stream API internally
+        if (this._options.onUploadProgress) {
+            if (typeof this._options.onUploadProgress !== 'function') {
+                throw new TypeError('The `onUploadProgress` option must be a function');
+            }
+            if (!supportsRequestStreams) {
+                throw new Error('Request streams are not supported in your environment. The `duplex` option for `Request` is not available.');
+            }
+            const originalBody = this.request.body;
+            if (originalBody) {
+                this.request = streamRequest(this.request, this._options.onUploadProgress);
+            }
+        }
+    }
+    _calculateRetryDelay(error) {
+        this._retryCount++;
+        if (this._retryCount > this._options.retry.limit || error instanceof TimeoutError) {
+            throw error;
+        }
+        if (error instanceof HTTPError) {
+            if (!this._options.retry.statusCodes.includes(error.response.status)) {
+                throw error;
+            }
+            const retryAfter = error.response.headers.get('Retry-After')
+                ?? error.response.headers.get('RateLimit-Reset')
+                ?? error.response.headers.get('X-RateLimit-Reset') // GitHub
+                ?? error.response.headers.get('X-Rate-Limit-Reset'); // Twitter
+            if (retryAfter && this._options.retry.afterStatusCodes.includes(error.response.status)) {
+                let after = Number(retryAfter) * 1000;
+                if (Number.isNaN(after)) {
+                    after = Date.parse(retryAfter) - Date.now();
+                }
+                else if (after >= Date.parse('2024-01-01')) {
+                    // A large number is treated as a timestamp (fixed threshold protects against clock skew)
+                    after -= Date.now();
+                }
+                const max = this._options.retry.maxRetryAfter ?? after;
+                return after < max ? after : max;
+            }
+            if (error.response.status === 413) {
+                throw error;
+            }
+        }
+        const retryDelay = this._options.retry.delay(this._retryCount);
+        return Math.min(this._options.retry.backoffLimit, retryDelay);
+    }
+    _decorateResponse(response) {
+        if (this._options.parseJson) {
+            response.json = async () => this._options.parseJson(await response.text());
+        }
+        return response;
+    }
+    async _retry(function_) {
+        try {
+            return await function_();
+        }
+        catch (error) {
+            const ms = Math.min(this._calculateRetryDelay(error), maxSafeTimeout);
+            if (this._retryCount < 1) {
+                throw error;
+            }
+            await delay(ms, { signal: this._options.signal });
+            for (const hook of this._options.hooks.beforeRetry) {
+                // eslint-disable-next-line no-await-in-loop
+                const hookResult = await hook({
+                    request: this.request,
+                    options: this._options,
+                    error: error,
+                    retryCount: this._retryCount,
+                });
+                // If `stop` is returned from the hook, the retry process is stopped
+                if (hookResult === stop) {
+                    return;
+                }
+            }
+            return this._retry(function_);
+        }
+    }
+    async _fetch() {
+        for (const hook of this._options.hooks.beforeRequest) {
+            // eslint-disable-next-line no-await-in-loop
+            const result = await hook(this.request, this._options);
+            if (result instanceof Request) {
+                this.request = result;
+                break;
+            }
+            if (result instanceof Response) {
+                return result;
+            }
+        }
+        const nonRequestOptions = findUnknownOptions(this.request, this._options);
+        // Cloning is done here to prepare in advance for retries
+        const mainRequest = this.request;
+        this.request = mainRequest.clone();
+        if (this._options.timeout === false) {
+            return this._options.fetch(mainRequest, nonRequestOptions);
+        }
+        return timeout(mainRequest, nonRequestOptions, this.abortController, this._options);
+    }
+}
+
+/*! MIT License © Sindre Sorhus */
+const createInstance = (defaults) => {
+    // eslint-disable-next-line @typescript-eslint/promise-function-async
+    const ky = (input, options) => Ky.create(input, validateAndMerge(defaults, options));
+    for (const method of requestMethods) {
+        // eslint-disable-next-line @typescript-eslint/promise-function-async
+        ky[method] = (input, options) => Ky.create(input, validateAndMerge(defaults, options, { method }));
+    }
+    ky.create = (newDefaults) => createInstance(validateAndMerge(newDefaults));
+    ky.extend = (newDefaults) => {
+        if (typeof newDefaults === 'function') {
+            newDefaults = newDefaults(defaults ?? {});
+        }
+        return createInstance(validateAndMerge(defaults, newDefaults));
+    };
+    ky.stop = stop;
+    return ky;
+};
+const ky = createInstance();
+
+//#region src/utils/kyInstance.ts
+const httpClient = (apiBase) => ky.extend({
+	hooks: {
+		afterResponse: [async (request, options, response) => {
+			if (!response.ok) {
+				const errorBody = await response.clone().json().catch(() => ({}));
+				const error = {
+					message: errorBody.message || "An error occurred while processing the request",
+					statusCode: response.status
+				};
+				return new Response(JSON.stringify(error), { status: response.status });
+			}
+		}],
+		beforeRequest: [(request) => {
+			const url = new URL(request.url);
+			if (/{\w+}/.exec(url.pathname)) throw new NestedParamError(`Unresolved parameters in URL: ${url.pathname}`);
+		}]
+	},
+	prefixUrl: apiBase
+});
+
+//#region src/utils/parseListResponse.ts
+/**
+* Parse list response data and extract array and total count
+* Handles various response patterns:
+* 1. Direct array responses: { data: [...] }
+* 2. Nested array responses: { data: { data: [...] } }
+* 3. Object responses with array properties: { items: [...], total: 100 }
+* 4. Direct array as root: [...]
+* 5. Object with array at different property names
+* 6. Object responses without known array properties: return the object itself
+*/
+const parseListResponse = (data, totalCount) => {
+	let dataArray = [];
+	if (Array.isArray(data)) dataArray = data;
+	else if (data && typeof data === "object") if (Array.isArray(data.data)) dataArray = data.data;
+	else if (data.data && typeof data.data === "object" && Array.isArray(data.data.data)) dataArray = data.data.data;
+	else if (Array.isArray(data.items)) dataArray = data.items;
+	else if (Array.isArray(data.results)) dataArray = data.results;
+	else if (Array.isArray(data.records)) dataArray = data.records;
+	else {
+		let currentData = data;
+		while (currentData && typeof currentData === "object" && !Array.isArray(currentData) && currentData.data) currentData = currentData.data;
+		dataArray = currentData && typeof currentData !== "object" ? currentData : data;
+	}
+	else dataArray = [];
+	let total = typeof totalCount === "number" && !Number.isNaN(totalCount) ? totalCount : typeof data?.total === "number" ? data.total : dataArray.length || 0;
+	return {
+		data: dataArray,
+		total
+	};
+};
+
+//#region src/utils/parseSingleResponse.ts
+const parseSingleResponse = (data) => {
+	if (data && typeof data === "object" && data.data !== void 0) return { data: data.data };
+	return { data };
+};
+
+//#region src/provider.ts
+const parseResponse = async (response) => {
+	if (response instanceof Response && !response.ok) try {
+		const errorBody = await response.json();
+		throw new Error(errorBody.message || `HTTP error ${response.status}`);
+	} catch (jsonError) {
+		throw new Error(`HTTP error ${response.status}: Could not parse error body`);
+	}
+	const responseText = await response.text();
+	if (!responseText.trim()) return null;
+	try {
+		return JSON.parse(responseText);
+	} catch (e) {
+		return responseText;
+	}
+};
+const addParam = (key, value, queryParams) => {
+	if (value !== void 0) queryParams[key] = value;
+};
+const dataProvider = (apiUrl, needsAuth = false) => {
+	let authToken = null;
+	let tokenPromise = null;
+	let tokenResolve = null;
+	const setAuthToken = (token) => {
+		authToken = token;
+		if (tokenResolve) {
+			tokenResolve(token);
+			tokenPromise = null;
+			tokenResolve = null;
+		}
+	};
+	const waitForToken = () => {
+		if (authToken !== null) return Promise.resolve(authToken);
+		if (!tokenPromise) {
+			tokenPromise = Promise.withResolvers ? Promise.withResolvers() : (() => {
+				let resolve;
+				const promise = new Promise((res) => {
+					resolve = res;
+				});
+				return {
+					promise,
+					resolve
+				};
+			})();
+			tokenResolve = tokenPromise.resolve || tokenPromise[1];
+			tokenPromise = tokenPromise.promise || tokenPromise[0];
+		}
+		return tokenPromise;
+	};
+	const baseFetch = async (url, method, payload, queryParams, headers, needsAuthFlag = needsAuth) => {
+		const fullUrl = url;
+		let authHeader = {};
+		if (needsAuthFlag) {
+			const token = await waitForToken();
+			if (!token) throw new Error("Authentication required but no token available");
+			authHeader = { Authorization: `Bearer ${token}` };
+		}
+		const options = {
+			headers: {
+				"Content-Type": "application/json",
+				...authHeader,
+				...headers
+			},
+			...payload ? { json: payload } : {},
+			searchParams: queryParams,
+			throwHttpErrors: false
+		};
+		try {
+			let response;
+			switch (method.toUpperCase()) {
+				case "DELETE":
+					response = await httpClient(apiUrl).delete(fullUrl, options);
+					break;
+				case "GET":
+					response = await httpClient(apiUrl).get(fullUrl, options);
+					break;
+				case "PATCH":
+					response = await httpClient(apiUrl).patch(fullUrl, options);
+					break;
+				case "POST":
+					response = await httpClient(apiUrl).post(fullUrl, options);
+					break;
+				case "PUT":
+					response = await httpClient(apiUrl).put(fullUrl, options);
+					break;
+				default: throw new Error(`Unsupported HTTP method: ${method}`);
+			}
+			if (response instanceof Response && !response.ok) try {
+				const errorBody = await response.json();
+				throw new Error(errorBody.message || `HTTP error ${response.status}`);
+			} catch (jsonError) {
+				throw new Error(`HTTP error ${response.status}: Could not parse error body`);
+			}
+			return response;
+		} catch (error) {
+			console.error(`Fetch error for ${method} ${fullUrl}:`, error);
+			return Promise.reject(error);
+		}
+	};
+	return {
+		create: async ({ meta, resource, variables }) => {
+			const url = generateNestedUrl({
+				apiBase: apiUrl,
+				meta,
+				resource
+			});
+			const headers = meta?.headers ?? {};
+			const response = await baseFetch(url, "POST", variables, void 0, headers, meta?.needsAuth ?? needsAuth);
+			const data = await parseResponse(response);
+			return parseSingleResponse(data);
+		},
+		custom: async ({ filters, meta, method, payload, sorters, url: operation }) => {
+			const headers = meta?.headers ?? {};
+			const baseUrl = generateNestedUrl({
+				apiBase: apiUrl,
+				meta,
+				operation
+			});
+			const filterParams = generateFilter(filters);
+			const sortParams = generateSort(sorters);
+			const queryParams = {};
+			Object.entries(filterParams).forEach(([key, value]) => addParam(key, value, queryParams));
+			Object.entries(sortParams).forEach(([key, value]) => addParam(key, value, queryParams));
+			const response = await baseFetch(baseUrl, method.toUpperCase(), payload, queryParams, headers, meta?.needsAuth ?? needsAuth);
+			const data = await parseResponse(response);
+			return { data };
+		},
+		deleteOne: async ({ id, meta, resource, variables }) => {
+			const url = generateNestedUrl({
+				apiBase: apiUrl,
+				id,
+				meta,
+				resource
+			});
+			const headers = meta?.headers ?? {};
+			const response = await baseFetch(url, "DELETE", variables, void 0, headers, meta?.needsAuth ?? needsAuth);
+			if (response instanceof Response && !response.ok) try {
+				const errorBody = await response.json();
+				throw new Error(errorBody.message || `HTTP error ${response.status}`);
+			} catch (jsonError) {
+				throw new Error(`HTTP error ${response.status}: Could not parse error body`);
+			}
+			const responseText = await response.text();
+			if (!responseText.trim()) return { data: null };
+			try {
+				const data = JSON.parse(responseText);
+				return { data };
+			} catch (e) {
+				return { data: responseText };
+			}
+		},
+		getApiUrl: () => apiUrl,
+		getList: async ({ filters, meta: _meta, pagination, resource, sorters }) => {
+			const meta = _meta?.paramsMap ? {
+				..._meta,
+				params: _meta.paramsMap,
+				paramsMap: void 0
+			} : _meta;
+			const url = generateNestedUrl({
+				apiBase: apiUrl,
+				meta,
+				resource
+			});
+			const headers = meta?.headers ?? {};
+			const filterParams = generateFilter(filters);
+			const sortParams = generateSort(sorters);
+			const queryParams = {};
+			Object.entries(filterParams).forEach(([key, value]) => addParam(key, value, queryParams));
+			Object.entries(sortParams).forEach(([key, value]) => addParam(key, value, queryParams));
+			if (pagination) {
+				const { current = 1, pageSize = 10 } = pagination;
+				const start = (current - 1) * pageSize;
+				const end = start + pageSize;
+				addParam("_start", start, queryParams);
+				addParam("_end", end, queryParams);
+			}
+			const response = await baseFetch(url, "GET", void 0, queryParams, headers, meta?.needsAuth ?? needsAuth);
+			const data = await parseResponse(response);
+			const total = Number(response.headers.get("x-total-count"));
+			return parseListResponse(data, total);
+		},
+		getOne: async ({ id, meta, resource }) => {
+			const url = generateNestedUrl({
+				apiBase: apiUrl,
+				id,
+				meta,
+				resource
+			});
+			const headers = meta?.headers ?? {};
+			const response = await baseFetch(url, "GET", void 0, void 0, headers, meta?.needsAuth ?? needsAuth);
+			const data = await parseResponse(response);
+			return parseSingleResponse(data);
+		},
+		setAuthToken,
+		update: async ({ id, meta, resource, variables }) => {
+			const url = generateNestedUrl({
+				apiBase: apiUrl,
+				id,
+				meta,
+				resource
+			});
+			const headers = meta?.headers ?? {};
+			const response = await baseFetch(url, "PATCH", variables, void 0, headers, meta?.needsAuth ?? needsAuth);
+			const data = await parseResponse(response);
+			return parseSingleResponse(data);
+		}
+	};
+};
+
+//#region src/index.ts
+var src_default = dataProvider;
+
+let createNanoEvents = () => ({
+  emit(event, ...args) {
+    for (
+      let callbacks = this.events[event] || [],
+        i = 0,
+        length = callbacks.length;
+      i < length;
+      i++
+    ) {
+      callbacks[i](...args);
+    }
+  },
+  events: {},
+  on(event, cb) {
+(this.events[event] ||= []).push(cb);
+    return () => {
+      this.events[event] = this.events[event]?.filter(i => cb !== i);
+    }
+  }
+});
+
+const SUBDOMAIN = "ipfs";
+const DATA_PROVIDER_NAME = "ipfs";
+class Capability {
+  id = "ipfs:refine-config";
+  status;
+  type = "core:refine-config";
+  version;
+  #apiUrl;
+  #authToken = null;
+  #emitter;
+  #authUnbind = null;
+  /**
+   * Gets the API URL for this capability
+   */
+  getApiUrl() {
+    return this.#apiUrl;
+  }
+  /**
+   * Gets the current auth token
+   */
+  getAuthToken() {
+    return this.#authToken;
+  }
+  /**
+   * Gets the event emitter for this capability
+   */
+  getEmitter() {
+    return this.#emitter;
+  }
+  async destroy() {
+    if (this.#authUnbind) {
+      this.#authUnbind();
+      this.#authUnbind = null;
+    }
+  }
+  getConfig(existing) {
+    const acctProvider = src_default(this.#apiUrl, true);
+    const authProvider = existing?.authProvider;
+    if (authProvider) {
+      const currentToken = typeof authProvider.getToken === "function" ? authProvider.getToken() : authProvider.token || authProvider.currentToken || null;
+      if (currentToken) {
+        acctProvider.setAuthToken(currentToken);
+        this.#authToken = currentToken;
+        this.#emitter.emit("authTokenChanged", currentToken);
+      }
+      this.#authUnbind = authProvider.on("authCheckSuccess", (params) => {
+        acctProvider.setAuthToken(params.token);
+        this.#authToken = params.token;
+        this.#emitter.emit("authTokenChanged", params.token);
+      });
+    }
+    const providers = { [DATA_PROVIDER_NAME]: acctProvider };
+    const resources = [
+      {
+        meta: {
+          dataProviderName: DATA_PROVIDER_NAME,
+          template: "/files"
+        },
+        name: "ipfs/files"
+      },
+      {
+        meta: {
+          dataProviderName: DATA_PROVIDER_NAME,
+          template: "/files/directory"
+        },
+        name: "ipfs/files/directory"
+      },
+      {
+        meta: {
+          dataProviderName: DATA_PROVIDER_NAME,
+          template: "/files/breadcrumbs"
+        },
+        name: "ipfs/files/breadcrumbs"
+      }
+    ];
+    return core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.mergeRefineConfig(existing, providers, resources);
+  }
+  async initialize(framework) {
+    const apiUrl = core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getApiBaseUrl({
+      currentUrl: framework.portalUrl,
+      preserveSubdomain: !core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.env.VITE_PORTAL_DOMAIN_IS_ROOT
+    });
+    if (!apiUrl) {
+      throw new Error("Failed to get API base URL");
+    }
+    try {
+      const apiDomain = new URL(apiUrl);
+      const hostWithPort = apiDomain.port ? `${apiDomain.hostname}:${apiDomain.port}` : apiDomain.hostname;
+      this.#apiUrl = `${apiDomain.protocol}//${SUBDOMAIN}.${hostWithPort}/api`;
+    } catch (error) {
+      throw new Error(`Failed to construct API URL: ${error.message}`);
+    }
+    this.#emitter = createNanoEvents();
+  }
+}
+
+const routes = [
+  {
+    path: "/files",
+    component: "file-manager",
+    id: "ipfs:file-manager",
+    navigation: {
+      label: "File Manager",
+      icon: Folder,
+      order: 1
+    }
+  }
+];
+
+const instanceOfAny = (object, constructors) => constructors.some((c) => object instanceof c);
+
+let idbProxyableTypes;
+let cursorAdvanceMethods;
+// This is a function to prevent it throwing up in node environments.
+function getIdbProxyableTypes() {
+    return (idbProxyableTypes ||
+        (idbProxyableTypes = [
+            IDBDatabase,
+            IDBObjectStore,
+            IDBIndex,
+            IDBCursor,
+            IDBTransaction,
+        ]));
+}
+// This is a function to prevent it throwing up in node environments.
+function getCursorAdvanceMethods() {
+    return (cursorAdvanceMethods ||
+        (cursorAdvanceMethods = [
+            IDBCursor.prototype.advance,
+            IDBCursor.prototype.continue,
+            IDBCursor.prototype.continuePrimaryKey,
+        ]));
+}
+const transactionDoneMap = new WeakMap();
+const transformCache = new WeakMap();
+const reverseTransformCache = new WeakMap();
+function promisifyRequest(request) {
+    const promise = new Promise((resolve, reject) => {
+        const unlisten = () => {
+            request.removeEventListener('success', success);
+            request.removeEventListener('error', error);
+        };
+        const success = () => {
+            resolve(wrap(request.result));
+            unlisten();
+        };
+        const error = () => {
+            reject(request.error);
+            unlisten();
+        };
+        request.addEventListener('success', success);
+        request.addEventListener('error', error);
+    });
+    // This mapping exists in reverseTransformCache but doesn't exist in transformCache. This
+    // is because we create many promises from a single IDBRequest.
+    reverseTransformCache.set(promise, request);
+    return promise;
+}
+function cacheDonePromiseForTransaction(tx) {
+    // Early bail if we've already created a done promise for this transaction.
+    if (transactionDoneMap.has(tx))
+        return;
+    const done = new Promise((resolve, reject) => {
+        const unlisten = () => {
+            tx.removeEventListener('complete', complete);
+            tx.removeEventListener('error', error);
+            tx.removeEventListener('abort', error);
+        };
+        const complete = () => {
+            resolve();
+            unlisten();
+        };
+        const error = () => {
+            reject(tx.error || new DOMException('AbortError', 'AbortError'));
+            unlisten();
+        };
+        tx.addEventListener('complete', complete);
+        tx.addEventListener('error', error);
+        tx.addEventListener('abort', error);
+    });
+    // Cache it for later retrieval.
+    transactionDoneMap.set(tx, done);
+}
+let idbProxyTraps = {
+    get(target, prop, receiver) {
+        if (target instanceof IDBTransaction) {
+            // Special handling for transaction.done.
+            if (prop === 'done')
+                return transactionDoneMap.get(target);
+            // Make tx.store return the only store in the transaction, or undefined if there are many.
+            if (prop === 'store') {
+                return receiver.objectStoreNames[1]
+                    ? undefined
+                    : receiver.objectStore(receiver.objectStoreNames[0]);
+            }
+        }
+        // Else transform whatever we get back.
+        return wrap(target[prop]);
+    },
+    set(target, prop, value) {
+        target[prop] = value;
+        return true;
+    },
+    has(target, prop) {
+        if (target instanceof IDBTransaction &&
+            (prop === 'done' || prop === 'store')) {
+            return true;
+        }
+        return prop in target;
+    },
+};
+function replaceTraps(callback) {
+    idbProxyTraps = callback(idbProxyTraps);
+}
+function wrapFunction(func) {
+    // Due to expected object equality (which is enforced by the caching in `wrap`), we
+    // only create one new func per func.
+    // Cursor methods are special, as the behaviour is a little more different to standard IDB. In
+    // IDB, you advance the cursor and wait for a new 'success' on the IDBRequest that gave you the
+    // cursor. It's kinda like a promise that can resolve with many values. That doesn't make sense
+    // with real promises, so each advance methods returns a new promise for the cursor object, or
+    // undefined if the end of the cursor has been reached.
+    if (getCursorAdvanceMethods().includes(func)) {
+        return function (...args) {
+            // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
+            // the original object.
+            func.apply(unwrap(this), args);
+            return wrap(this.request);
+        };
+    }
+    return function (...args) {
+        // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
+        // the original object.
+        return wrap(func.apply(unwrap(this), args));
+    };
+}
+function transformCachableValue(value) {
+    if (typeof value === 'function')
+        return wrapFunction(value);
+    // This doesn't return, it just creates a 'done' promise for the transaction,
+    // which is later returned for transaction.done (see idbObjectHandler).
+    if (value instanceof IDBTransaction)
+        cacheDonePromiseForTransaction(value);
+    if (instanceOfAny(value, getIdbProxyableTypes()))
+        return new Proxy(value, idbProxyTraps);
+    // Return the same value back if we're not going to transform it.
+    return value;
+}
+function wrap(value) {
+    // We sometimes generate multiple promises from a single IDBRequest (eg when cursoring), because
+    // IDB is weird and a single IDBRequest can yield many responses, so these can't be cached.
+    if (value instanceof IDBRequest)
+        return promisifyRequest(value);
+    // If we've already transformed this value before, reuse the transformed value.
+    // This is faster, but it also provides object equality.
+    if (transformCache.has(value))
+        return transformCache.get(value);
+    const newValue = transformCachableValue(value);
+    // Not all types are transformed.
+    // These may be primitive types, so they can't be WeakMap keys.
+    if (newValue !== value) {
+        transformCache.set(value, newValue);
+        reverseTransformCache.set(newValue, value);
+    }
+    return newValue;
+}
+const unwrap = (value) => reverseTransformCache.get(value);
+
+/**
+ * Open a database.
+ *
+ * @param name Name of the database.
+ * @param version Schema version.
+ * @param callbacks Additional callbacks.
+ */
+function openDB(name, version, { blocked, upgrade, blocking, terminated } = {}) {
+    const request = indexedDB.open(name, version);
+    const openPromise = wrap(request);
+    if (upgrade) {
+        request.addEventListener('upgradeneeded', (event) => {
+            upgrade(wrap(request.result), event.oldVersion, event.newVersion, wrap(request.transaction), event);
+        });
+    }
+    if (blocked) {
+        request.addEventListener('blocked', (event) => blocked(
+        // Casting due to https://github.com/microsoft/TypeScript-DOM-lib-generator/pull/1405
+        event.oldVersion, event.newVersion, event));
+    }
+    openPromise
+        .then((db) => {
+        if (terminated)
+            db.addEventListener('close', () => terminated());
+        if (blocking) {
+            db.addEventListener('versionchange', (event) => blocking(event.oldVersion, event.newVersion, event));
+        }
+    })
+        .catch(() => { });
+    return openPromise;
+}
+/**
+ * Delete a database.
+ *
+ * @param name Name of the database.
+ */
+function deleteDB(name, { blocked } = {}) {
+    const request = indexedDB.deleteDatabase(name);
+    if (blocked) {
+        request.addEventListener('blocked', (event) => blocked(
+        // Casting due to https://github.com/microsoft/TypeScript-DOM-lib-generator/pull/1405
+        event.oldVersion, event));
+    }
+    return wrap(request).then(() => undefined);
+}
+
+const readMethods = ['get', 'getKey', 'getAll', 'getAllKeys', 'count'];
+const writeMethods = ['put', 'add', 'delete', 'clear'];
+const cachedMethods = new Map();
+function getMethod(target, prop) {
+    if (!(target instanceof IDBDatabase &&
+        !(prop in target) &&
+        typeof prop === 'string')) {
+        return;
+    }
+    if (cachedMethods.get(prop))
+        return cachedMethods.get(prop);
+    const targetFuncName = prop.replace(/FromIndex$/, '');
+    const useIndex = prop !== targetFuncName;
+    const isWrite = writeMethods.includes(targetFuncName);
+    if (
+    // Bail if the target doesn't exist on the target. Eg, getAll isn't in Edge.
+    !(targetFuncName in (useIndex ? IDBIndex : IDBObjectStore).prototype) ||
+        !(isWrite || readMethods.includes(targetFuncName))) {
+        return;
+    }
+    const method = async function (storeName, ...args) {
+        // isWrite ? 'readwrite' : undefined gzipps better, but fails in Edge :(
+        const tx = this.transaction(storeName, isWrite ? 'readwrite' : 'readonly');
+        let target = tx.store;
+        if (useIndex)
+            target = target.index(args.shift());
+        // Must reject if op rejects.
+        // If it's a write operation, must reject if tx.done rejects.
+        // Must reject with op rejection first.
+        // Must resolve with op value.
+        // Must handle both promises (no unhandled rejections)
+        return (await Promise.all([
+            target[targetFuncName](...args),
+            isWrite && tx.done,
+        ]))[0];
+    };
+    cachedMethods.set(prop, method);
+    return method;
+}
+replaceTraps((oldTraps) => ({
+    ...oldTraps,
+    get: (target, prop, receiver) => getMethod(target, prop) || oldTraps.get(target, prop, receiver),
+    has: (target, prop) => !!getMethod(target, prop) || oldTraps.has(target, prop),
+}));
+
+const advanceMethodProps = ['continue', 'continuePrimaryKey', 'advance'];
+const methodMap = {};
+const advanceResults = new WeakMap();
+const ittrProxiedCursorToOriginalProxy = new WeakMap();
+const cursorIteratorTraps = {
+    get(target, prop) {
+        if (!advanceMethodProps.includes(prop))
+            return target[prop];
+        let cachedFunc = methodMap[prop];
+        if (!cachedFunc) {
+            cachedFunc = methodMap[prop] = function (...args) {
+                advanceResults.set(this, ittrProxiedCursorToOriginalProxy.get(this)[prop](...args));
+            };
+        }
+        return cachedFunc;
+    },
+};
+async function* iterate(...args) {
+    // tslint:disable-next-line:no-this-assignment
+    let cursor = this;
+    if (!(cursor instanceof IDBCursor)) {
+        cursor = await cursor.openCursor(...args);
+    }
+    if (!cursor)
+        return;
+    cursor = cursor;
+    const proxiedCursor = new Proxy(cursor, cursorIteratorTraps);
+    ittrProxiedCursorToOriginalProxy.set(proxiedCursor, cursor);
+    // Map this double-proxy back to the original, so other cursor methods work.
+    reverseTransformCache.set(proxiedCursor, unwrap(cursor));
+    while (cursor) {
+        yield proxiedCursor;
+        // If one of the advancing methods was not called, call continue().
+        cursor = await (advanceResults.get(proxiedCursor) || cursor.continue());
+        advanceResults.delete(proxiedCursor);
+    }
+}
+function isIteratorProp(target, prop) {
+    return ((prop === Symbol.asyncIterator &&
+        instanceOfAny(target, [IDBIndex, IDBObjectStore, IDBCursor])) ||
+        (prop === 'iterate' && instanceOfAny(target, [IDBIndex, IDBObjectStore])));
+}
+replaceTraps((oldTraps) => ({
+    ...oldTraps,
+    get(target, prop, receiver) {
+        if (isIteratorProp(target, prop))
+            return iterate;
+        return oldTraps.get(target, prop, receiver);
+    },
+    has(target, prop) {
+        return isIteratorProp(target, prop) || oldTraps.has(target, prop);
+    },
+}));
+
+/**
+ * @packageDocumentation
+ *
+ * Pass a promise and an abort signal and await the result.
+ *
+ * @example Basic usage
+ *
+ * ```ts
+ * import { raceSignal } from 'race-signal'
+ *
+ * const controller = new AbortController()
+ *
+ * const promise = new Promise((resolve, reject) => {
+ *   setTimeout(() => {
+ *     resolve('a value')
+ *   }, 1000)
+ * })
+ *
+ * setTimeout(() => {
+ *   controller.abort()
+ * }, 500)
+ *
+ * // throws an AbortError
+ * const resolve = await raceSignal(promise, controller.signal)
+ * ```
+ *
+ * @example Overriding errors
+ *
+ * By default the thrown error is the `.reason` property of the signal but it's
+ * possible to override this behaviour with the `translateError` option:
+ *
+ * ```ts
+ * import { raceSignal } from 'race-signal'
+ *
+ * const controller = new AbortController()
+ *
+ * const promise = new Promise((resolve, reject) => {
+ *   setTimeout(() => {
+ *     resolve('a value')
+ *   }, 1000)
+ * })
+ *
+ * setTimeout(() => {
+ *   controller.abort()
+ * }, 500)
+ *
+ * // throws `Error('Oh no!')`
+ * const resolve = await raceSignal(promise, controller.signal, {
+ *   translateError: (signal) => {
+ *     // use `signal`, or don't
+ *     return new Error('Oh no!')
+ *   }
+ * })
+ * ```
+ */
+function defaultTranslate(signal) {
+    return signal.reason;
+}
+/**
+ * Race a promise against an abort signal
+ */
+async function raceSignal(promise, signal, opts) {
+    if (signal == null) {
+        return promise;
+    }
+    const translateError = defaultTranslate;
+    if (signal.aborted) {
+        // the passed promise may yet resolve or reject but the use has signalled
+        // they are no longer interested so smother the error
+        promise.catch(() => { });
+        return Promise.reject(translateError(signal));
+    }
+    let listener;
+    try {
+        return await Promise.race([
+            promise,
+            new Promise((resolve, reject) => {
+                listener = () => {
+                    reject(translateError(signal));
+                };
+                signal.addEventListener('abort', listener);
+            })
+        ]);
+    }
+    finally {
+        if (listener != null) {
+            signal.removeEventListener('abort', listener);
+        }
+    }
+}
+
+/**
+ * @packageDocumentation
+ *
+ * A Blockstore implementation for browsers that stores blocks in [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API).
+ *
+ * @example
+ *
+ * ```js
+ * import { IDBBlockstore } from 'blockstore-idb'
+ *
+ * const store = new IDBBlockstore('path/to/store')
+ * ```
+ */
+class IDBBlockstore extends BaseBlockstore {
+    location;
+    version;
+    db;
+    base;
+    constructor(location, init = {}) {
+        super();
+        this.location = `${init.prefix ?? ''}${location}`;
+        this.version = init.version ?? 1;
+        // this.transactionQueue = new PQueue({ concurrency: 1 })
+        this.base = init.base ?? base32upper;
+    }
+    #encode(cid) {
+        return `/${this.base.encoder.encode(cid.multihash.bytes)}`;
+    }
+    #decode(key) {
+        return CID.createV1(code$3, decode$a(this.base.decoder.decode(key.substring(1))));
+    }
+    async open() {
+        try {
+            const location = this.location;
+            this.db = await openDB(location, this.version, {
+                upgrade(db) {
+                    db.createObjectStore(location);
+                }
+            });
+        }
+        catch (err) {
+            throw new OpenFailedError(String(err));
+        }
+    }
+    async close() {
+        this.db?.close();
+    }
+    async put(key, val, options) {
+        if (this.db == null) {
+            throw new Error('Blockstore needs to be opened.');
+        }
+        try {
+            options?.signal?.throwIfAborted();
+            await raceSignal(this.db.put(this.location, val, this.#encode(key)), options?.signal);
+        }
+        catch (err) {
+            throw new PutFailedError(String(err));
+        }
+        return key;
+    }
+    async get(key, options) {
+        if (this.db == null) {
+            throw new Error('Blockstore needs to be opened.');
+        }
+        let val;
+        try {
+            options?.signal?.throwIfAborted();
+            val = await raceSignal(this.db.get(this.location, this.#encode(key)), options?.signal);
+        }
+        catch (err) {
+            throw new PutFailedError(String(err));
+        }
+        if (val === undefined) {
+            throw new NotFoundError$1();
+        }
+        return val;
+    }
+    async delete(key, options) {
+        if (this.db == null) {
+            throw new Error('Blockstore needs to be opened.');
+        }
+        try {
+            options?.signal?.throwIfAborted();
+            await raceSignal(this.db.delete(this.location, this.#encode(key)), options?.signal);
+        }
+        catch (err) {
+            throw new PutFailedError(String(err));
+        }
+    }
+    async has(key, options) {
+        if (this.db == null) {
+            throw new Error('Blockstore needs to be opened.');
+        }
+        try {
+            options?.signal?.throwIfAborted();
+            const result = await raceSignal(this.db.getKey(this.location, this.#encode(key)), options?.signal);
+            return Boolean(result);
+        }
+        catch (err) {
+            throw new PutFailedError(String(err));
+        }
+    }
+    async *getAll(options) {
+        if (this.db == null) {
+            throw new Error('Blockstore needs to be opened.');
+        }
+        options?.signal?.throwIfAborted();
+        for (const key of await this.db.getAllKeys(this.location)) {
+            options?.signal?.throwIfAborted();
+            const cid = this.#decode(key.toString());
+            const block = await this.get(cid, options);
+            yield { cid, block };
+            options?.signal?.throwIfAborted();
+        }
+    }
+    async destroy() {
+        await deleteDB(this.location);
+    }
+}
+
+/**
+ * @packageDocumentation
+ *
+ * A Datastore implementation for browsers that stores data in [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API).
+ *
+ * @example
+ *
+ * ```js
+ * import { IDBDatastore } from 'datastore-idb'
+ *
+ * const store = new IDBDatastore('path/to/store')
+ * ```
+ */
+class IDBDatastore extends BaseDatastore {
+    location;
+    version;
+    db;
+    constructor(location, init = {}) {
+        super();
+        this.location = `${init.prefix ?? ''}${location}`;
+        this.version = init.version ?? 1;
+    }
+    async open() {
+        try {
+            const location = this.location;
+            this.db = await openDB(location, this.version, {
+                upgrade(db) {
+                    db.createObjectStore(location);
+                }
+            });
+        }
+        catch (err) {
+            throw new OpenFailedError(String(err));
+        }
+    }
+    async close() {
+        this.db?.close();
+    }
+    async put(key, val, options) {
+        if (this.db == null) {
+            throw new Error('Datastore needs to be opened.');
+        }
+        try {
+            options?.signal?.throwIfAborted();
+            await raceSignal(this.db.put(this.location, val, key.toString()), options?.signal);
+        }
+        catch (err) {
+            throw new PutFailedError(String(err));
+        }
+        return key;
+    }
+    async get(key, options) {
+        if (this.db == null) {
+            throw new Error('Datastore needs to be opened.');
+        }
+        let val;
+        try {
+            options?.signal?.throwIfAborted();
+            val = await raceSignal(this.db.get(this.location, key.toString()), options?.signal);
+        }
+        catch (err) {
+            throw new GetFailedError(String(err));
+        }
+        if (val === undefined) {
+            throw new NotFoundError$1();
+        }
+        return val;
+    }
+    async has(key, options) {
+        if (this.db == null) {
+            throw new Error('Datastore needs to be opened.');
+        }
+        try {
+            options?.signal?.throwIfAborted();
+            const result = await raceSignal(this.db.getKey(this.location, key.toString()));
+            return Boolean(result);
+        }
+        catch (err) {
+            throw new GetFailedError(String(err));
+        }
+    }
+    async delete(key, options) {
+        if (this.db == null) {
+            throw new Error('Datastore needs to be opened.');
+        }
+        try {
+            options?.signal?.throwIfAborted();
+            await raceSignal(this.db.delete(this.location, key.toString()), options?.signal);
+        }
+        catch (err) {
+            throw new DeleteFailedError(String(err));
+        }
+    }
+    batch() {
+        const puts = [];
+        const dels = [];
+        return {
+            put(key, value) {
+                puts.push({ key, value });
+            },
+            delete(key) {
+                dels.push(key);
+            },
+            commit: async (options) => {
+                if (this.db == null) {
+                    throw new Error('Datastore needs to be opened.');
+                }
+                options?.signal?.throwIfAborted();
+                const tx = this.db.transaction(this.location, 'readwrite');
+                try {
+                    const ops = puts.filter(({ key }) => {
+                        // don't put a key we are about to delete
+                        return dels.find(delKey => delKey.toString() === key.toString()) == null;
+                    })
+                        .map(put => {
+                        return async () => {
+                            await tx.store.put(put.value, put.key.toString());
+                        };
+                    })
+                        .concat(dels.map(key => {
+                        return async () => {
+                            await tx.store.delete(key.toString());
+                        };
+                    }))
+                        .concat(async () => {
+                        await tx.done;
+                    });
+                    options?.signal?.throwIfAborted();
+                    await raceSignal(Promise.all(ops.map(async (op) => { await op(); })), options?.signal);
+                }
+                catch {
+                    tx.abort();
+                }
+            }
+        };
+    }
+    async *query(q, options) {
+        let it = this.#queryIt(q, (key, value) => {
+            return { key, value };
+        }, options);
+        if (Array.isArray(q.filters)) {
+            it = q.filters.reduce((it, f) => filter(it, f), it);
+        }
+        if (Array.isArray(q.orders)) {
+            it = q.orders.reduce((it, f) => sort(it, f), it);
+        }
+        yield* it;
+    }
+    async *queryKeys(q, options) {
+        let it = this.#queryIt(q, (key) => key, options);
+        if (Array.isArray(q.filters)) {
+            it = q.filters.reduce((it, f) => filter(it, f), it);
+        }
+        if (Array.isArray(q.orders)) {
+            it = q.orders.reduce((it, f) => sort(it, f), it);
+        }
+        yield* it;
+    }
+    async *#queryIt(q, transform, options) {
+        if (this.db == null) {
+            throw new Error('Datastore needs to be opened.');
+        }
+        let yielded = 0;
+        let index = -1;
+        options?.signal?.throwIfAborted();
+        for (const key of await this.db.getAllKeys(this.location)) {
+            options?.signal?.throwIfAborted();
+            if (q.prefix != null && !key.toString().startsWith(q.prefix)) {
+                continue;
+            }
+            if (q.limit != null && yielded === q.limit) {
+                return;
+            }
+            index++;
+            if (q.offset != null && index < q.offset) {
+                continue;
+            }
+            const k = new Key(key.toString());
+            let value;
+            try {
+                value = await this.get(k, options);
+            }
+            catch (err) {
+                if (err.name !== 'NotFoundError') {
+                    throw err;
+                }
+                continue;
+            }
+            if (value == null) {
+                continue;
+            }
+            yield transform(k, value);
+            options?.signal?.throwIfAborted();
+            yielded++;
+        }
+    }
+    async destroy() {
+        await deleteDB(this.location);
+    }
+}
+
+/* tslint:disable */
+/* eslint-disable */
+/**
+ * IPFS Pinning Service API
+ *   ## About this spec The IPFS Pinning Service API is intended to be an implementation-agnostic API&#x3a; - For use and implementation by pinning service providers - For use in client mode by IPFS nodes and GUI-based applications  > **Note**: while ready for implementation, this spec is still a work in progress! 🏗️  **Your input and feedback are welcome and valuable as we develop this API spec. Please join the design discussion at [github.com/ipfs/pinning-services-api-spec](https://github.com/ipfs/pinning-services-api-spec).**  # Schemas This section describes the most important object types and conventions.  A full list of fields and schemas can be found in the `schemas` section of the [YAML file](https://github.com/ipfs/pinning-services-api-spec/blob/master/ipfs-pinning-service.yaml).  ## Identifiers ### cid [Content Identifier (CID)](https://docs.ipfs.io/concepts/content-addressing/) points at the root of a DAG that is pinned recursively. ### requestid Unique identifier of a pin request.  When a pin is created, the service responds with unique `requestid` that can be later used for pin removal. When the same `cid` is pinned again, a different `requestid` is returned to differentiate between those pin requests.  Service implementation should use UUID, `hash(accessToken,Pin,PinStatus.created)`, or any other opaque identifier that provides equally strong protection against race conditions.  ## Objects ### Pin object  ![pin object](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/pin.png)  The `Pin` object is a representation of a pin request.  It includes the `cid` of data to be pinned, as well as optional metadata in `name`, `origins`, and `meta`.  ### Pin status response  ![pin status response object](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/pinstatus.png)  The `PinStatus` object is a representation of the current state of a pinning operation. It includes the original `pin` object, along with the current `status` and globally unique `requestid` of the entire pinning request, which can be used for future status checks and management. Addresses in the `delegates` array are peers delegated by the pinning service for facilitating direct file transfers (more details in the provider hints section). Any additional vendor-specific information is returned in optional `info`.  # The pin lifecycle  ![pinning service objects and lifecycle](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/lifecycle.png)  ## Creating a new pin object The user sends a `Pin` object to `POST /pins` and receives a `PinStatus` response: - `requestid` in `PinStatus` is the identifier of the pin operation, which can can be used for checking status, and removing the pin in the future - `status` in `PinStatus` indicates the current state of a pin  ## Checking status of in-progress pinning `status` (in `PinStatus`) may indicate a pending state (`queued` or `pinning`). This means the data behind `Pin.cid` was not found on the pinning service and is being fetched from the IPFS network at large, which may take time.  In this case, the user can periodically check pinning progress via `GET /pins/{requestid}` until pinning is successful, or the user decides to remove the pending pin.  ## Replacing an existing pin object The user can replace an existing pin object via `POST /pins/{requestid}`. This is a shortcut for removing a pin object identified by `requestid` and creating a new one in a single API call that protects against undesired garbage collection of blocks common to both pins. Useful when updating a pin representing a huge dataset where most of blocks did not change. The new pin object `requestid` is returned in the `PinStatus` response. The old pin object is deleted automatically.  ## Removing a pin object A pin object can be removed via `DELETE /pins/{requestid}`.   # Provider hints A pinning service will use the DHT and other discovery methods to locate pinned content; however, it is a good practice to provide additional provider hints to speed up the discovery phase and start the transfer immediately, especially if a client has the data in their own datastore or already knows of other providers.  The most common scenario is a client putting its own IPFS node\'s multiaddrs in `Pin.origins`,  and then attempt to connect to every multiaddr returned by a pinning service in `PinStatus.delegates` to initiate transfer.  At the same time, a pinning service will try to connect to multiaddrs provided by the client in `Pin.origins`.  This ensures data transfer starts immediately (without waiting for provider discovery over DHT), and mutual direct dial between a client and a service works around peer routing issues in restrictive network topologies, such as NATs, firewalls, etc.  **NOTE:** Connections to multiaddrs in `origins` and `delegates` arrays should be attempted in best-effort fashion, and dial failure should not fail the pinning operation. When unable to act on explicit provider hints, DHT and other discovery methods should be used as a fallback by a pinning service.  **NOTE:** All multiaddrs MUST end with `/p2p/{peerID}` and SHOULD be fully resolved and confirmed to be dialable from the public internet. Avoid sending addresses from local networks.  # Custom metadata Pinning services are encouraged to add support for additional features by leveraging the optional `Pin.meta` and `PinStatus.info` fields. While these attributes can be application- or vendor-specific, we encourage the community at large to leverage these attributes as a sandbox to come up with conventions that could become part of future revisions of this API. ## Pin metadata String keys and values passed in `Pin.meta` are persisted with the pin object.  Potential uses: - `Pin.meta[app_id]`: Attaching a unique identifier to pins created by an app enables filtering pins per app via `?meta={\"app_id\":<UUID>}` - `Pin.meta[vendor_policy]`: Vendor-specific policy (for example: which region to use, how many copies to keep)  Note that it is OK for a client to omit or ignore these optional attributes; doing so should not impact the basic pinning functionality.  ## Pin status info Additional `PinStatus.info` can be returned by pinning service.  Potential uses: - `PinStatus.info[status_details]`: more info about the current status (queue position, percentage of transferred data, summary of where data is stored, etc); when `PinStatus.status=failed`, it could provide a reason why a pin operation failed (e.g. lack of funds, DAG too big, etc.) - `PinStatus.info[dag_size]`: the size of pinned data, along with DAG overhead - `PinStatus.info[raw_size]`: the size of data without DAG overhead (eg. unixfs) - `PinStatus.info[pinned_until]`: if vendor supports time-bound pins, this could indicate when the pin will expire  # Pagination and filtering Pin objects can be listed by executing `GET /pins` with optional parameters:  - When no filters are provided, the endpoint will return a small batch of the 10 most recently created items, from the latest to the oldest. - The number of returned items can be adjusted with the `limit` parameter (implicit default is 10). - If the value in `PinResults.count` is bigger than the length of `PinResults.results`, the client can infer there are more results that can be queried. - To read more items, pass the `before` filter with the timestamp from `PinStatus.created` found in the oldest item in the current batch of results. Repeat to read all results. - Returned results can be fine-tuned by applying optional `after`, `cid`, `name`, `status`, or `meta` filters.  > **Note**: pagination by the `created` timestamp requires each value to be globally unique. Any future considerations to add support for bulk creation must account for this.
+ *
+ * The version of the OpenAPI document: 1.0.0
+ *
+ *
+ * NOTE: This class is auto generated by OpenAPI Generator (https://openapi-generator.tech).
+ * https://openapi-generator.tech
+ * Do not edit the class manually.
+ */
+const BASE_PATH = "https://pinning-service.example.com".replace(/\/+$/, "");
+const isBlob = (value) => typeof Blob !== 'undefined' && value instanceof Blob;
+/**
+ * This is the base class for all generated API classes.
+ */
+class BaseAPI {
+    constructor(configuration = new Configuration$1()) {
+        this.configuration = configuration;
+        this.fetchApi = async (url, init) => {
+            let fetchParams = { url, init };
+            for (const middleware of this.middleware) {
+                if (middleware.pre) {
+                    fetchParams = await middleware.pre({
+                        fetch: this.fetchApi,
+                        ...fetchParams,
+                    }) || fetchParams;
+                }
+            }
+            let response = await (this.configuration.fetchApi || fetch)(fetchParams.url, fetchParams.init);
+            for (const middleware of this.middleware) {
+                if (middleware.post) {
+                    response = await middleware.post({
+                        fetch: this.fetchApi,
+                        url: fetchParams.url,
+                        init: fetchParams.init,
+                        response: response.clone(),
+                    }) || response;
+                }
+            }
+            return response;
+        };
+        this.middleware = configuration.middleware;
+    }
+    withMiddleware(...middlewares) {
+        const next = this.clone();
+        next.middleware = next.middleware.concat(...middlewares);
+        return next;
+    }
+    withPreMiddleware(...preMiddlewares) {
+        const middlewares = preMiddlewares.map((pre) => ({ pre }));
+        return this.withMiddleware(...middlewares);
+    }
+    withPostMiddleware(...postMiddlewares) {
+        const middlewares = postMiddlewares.map((post) => ({ post }));
+        return this.withMiddleware(...middlewares);
+    }
+    async request(context, initOverrides) {
+        const { url, init } = this.createFetchParams(context, initOverrides);
+        const response = await this.fetchApi(url, init);
+        if (response.status >= 200 && response.status < 300) {
+            return response;
+        }
+        throw response;
+    }
+    createFetchParams(context, initOverrides) {
+        let url = this.configuration.basePath + context.path;
+        if (context.query !== undefined && Object.keys(context.query).length !== 0) {
+            // only add the querystring to the URL if there are query parameters.
+            // this is done to avoid urls ending with a "?" character which buggy webservers
+            // do not handle correctly sometimes.
+            url += '?' + this.configuration.queryParamsStringify(context.query);
+        }
+        const body = ((typeof FormData !== "undefined" && context.body instanceof FormData) || context.body instanceof URLSearchParams || isBlob(context.body))
+            ? context.body
+            : JSON.stringify(context.body);
+        const headers = Object.assign({}, this.configuration.headers, context.headers);
+        const init = {
+            method: context.method,
+            headers: headers,
+            body,
+            credentials: this.configuration.credentials,
+            ...initOverrides
+        };
+        return { url, init };
+    }
+    /**
+     * Create a shallow clone of `this` by constructing a new instance
+     * and then shallow cloning data members.
+     */
+    clone() {
+        const constructor = this.constructor;
+        const next = new constructor(this.configuration);
+        next.middleware = this.middleware.slice();
+        return next;
+    }
+}
+class RequiredError extends Error {
+    constructor(field, msg) {
+        super(msg);
+        this.field = field;
+        this.name = "RequiredError";
+    }
+}
+const COLLECTION_FORMATS = {
+    csv: ","};
+let Configuration$1 = class Configuration {
+    constructor(configuration = {}) {
+        this.configuration = configuration;
+    }
+    get basePath() {
+        return this.configuration.basePath != null ? this.configuration.basePath : BASE_PATH;
+    }
+    get fetchApi() {
+        return this.configuration.fetchApi;
+    }
+    get middleware() {
+        return this.configuration.middleware || [];
+    }
+    get queryParamsStringify() {
+        return this.configuration.queryParamsStringify || querystring;
+    }
+    get username() {
+        return this.configuration.username;
+    }
+    get password() {
+        return this.configuration.password;
+    }
+    get apiKey() {
+        const apiKey = this.configuration.apiKey;
+        if (apiKey) {
+            return typeof apiKey === 'function' ? apiKey : () => apiKey;
+        }
+        return undefined;
+    }
+    get accessToken() {
+        const accessToken = this.configuration.accessToken;
+        if (accessToken) {
+            return typeof accessToken === 'function' ? accessToken : async () => accessToken;
+        }
+        return undefined;
+    }
+    get headers() {
+        return this.configuration.headers;
+    }
+    get credentials() {
+        return this.configuration.credentials;
+    }
+};
+function exists(json, key) {
+    const value = json[key];
+    return value !== null && value !== undefined;
+}
+function querystring(params, prefix = '') {
+    return Object.keys(params)
+        .map((key) => {
+        const fullKey = prefix + (prefix.length ? `[${key}]` : key);
+        const value = params[key];
+        if (value instanceof Array) {
+            const multiValue = value.map(singleValue => encodeURIComponent(String(singleValue)))
+                .join(`&${encodeURIComponent(fullKey)}=`);
+            return `${encodeURIComponent(fullKey)}=${multiValue}`;
+        }
+        if (value instanceof Date) {
+            return `${encodeURIComponent(fullKey)}=${encodeURIComponent(value.toISOString())}`;
+        }
+        if (value instanceof Object) {
+            return querystring(value, fullKey);
+        }
+        return `${encodeURIComponent(fullKey)}=${encodeURIComponent(String(value))}`;
+    })
+        .filter(part => part.length > 0)
+        .join('&');
+}
+class JSONApiResponse {
+    constructor(raw, transformer = (jsonValue) => jsonValue) {
+        this.raw = raw;
+        this.transformer = transformer;
+    }
+    async value() {
+        return this.transformer(await this.raw.json());
+    }
+}
+class VoidApiResponse {
+    constructor(raw) {
+        this.raw = raw;
+    }
+    async value() {
+        return undefined;
+    }
+}
+
+/* tslint:disable */
+/* eslint-disable */
+/**
+ * IPFS Pinning Service API
+ *   ## About this spec The IPFS Pinning Service API is intended to be an implementation-agnostic API&#x3a; - For use and implementation by pinning service providers - For use in client mode by IPFS nodes and GUI-based applications  > **Note**: while ready for implementation, this spec is still a work in progress! 🏗️  **Your input and feedback are welcome and valuable as we develop this API spec. Please join the design discussion at [github.com/ipfs/pinning-services-api-spec](https://github.com/ipfs/pinning-services-api-spec).**  # Schemas This section describes the most important object types and conventions.  A full list of fields and schemas can be found in the `schemas` section of the [YAML file](https://github.com/ipfs/pinning-services-api-spec/blob/master/ipfs-pinning-service.yaml).  ## Identifiers ### cid [Content Identifier (CID)](https://docs.ipfs.io/concepts/content-addressing/) points at the root of a DAG that is pinned recursively. ### requestid Unique identifier of a pin request.  When a pin is created, the service responds with unique `requestid` that can be later used for pin removal. When the same `cid` is pinned again, a different `requestid` is returned to differentiate between those pin requests.  Service implementation should use UUID, `hash(accessToken,Pin,PinStatus.created)`, or any other opaque identifier that provides equally strong protection against race conditions.  ## Objects ### Pin object  ![pin object](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/pin.png)  The `Pin` object is a representation of a pin request.  It includes the `cid` of data to be pinned, as well as optional metadata in `name`, `origins`, and `meta`.  ### Pin status response  ![pin status response object](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/pinstatus.png)  The `PinStatus` object is a representation of the current state of a pinning operation. It includes the original `pin` object, along with the current `status` and globally unique `requestid` of the entire pinning request, which can be used for future status checks and management. Addresses in the `delegates` array are peers delegated by the pinning service for facilitating direct file transfers (more details in the provider hints section). Any additional vendor-specific information is returned in optional `info`.  # The pin lifecycle  ![pinning service objects and lifecycle](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/lifecycle.png)  ## Creating a new pin object The user sends a `Pin` object to `POST /pins` and receives a `PinStatus` response: - `requestid` in `PinStatus` is the identifier of the pin operation, which can can be used for checking status, and removing the pin in the future - `status` in `PinStatus` indicates the current state of a pin  ## Checking status of in-progress pinning `status` (in `PinStatus`) may indicate a pending state (`queued` or `pinning`). This means the data behind `Pin.cid` was not found on the pinning service and is being fetched from the IPFS network at large, which may take time.  In this case, the user can periodically check pinning progress via `GET /pins/{requestid}` until pinning is successful, or the user decides to remove the pending pin.  ## Replacing an existing pin object The user can replace an existing pin object via `POST /pins/{requestid}`. This is a shortcut for removing a pin object identified by `requestid` and creating a new one in a single API call that protects against undesired garbage collection of blocks common to both pins. Useful when updating a pin representing a huge dataset where most of blocks did not change. The new pin object `requestid` is returned in the `PinStatus` response. The old pin object is deleted automatically.  ## Removing a pin object A pin object can be removed via `DELETE /pins/{requestid}`.   # Provider hints A pinning service will use the DHT and other discovery methods to locate pinned content; however, it is a good practice to provide additional provider hints to speed up the discovery phase and start the transfer immediately, especially if a client has the data in their own datastore or already knows of other providers.  The most common scenario is a client putting its own IPFS node\'s multiaddrs in `Pin.origins`,  and then attempt to connect to every multiaddr returned by a pinning service in `PinStatus.delegates` to initiate transfer.  At the same time, a pinning service will try to connect to multiaddrs provided by the client in `Pin.origins`.  This ensures data transfer starts immediately (without waiting for provider discovery over DHT), and mutual direct dial between a client and a service works around peer routing issues in restrictive network topologies, such as NATs, firewalls, etc.  **NOTE:** Connections to multiaddrs in `origins` and `delegates` arrays should be attempted in best-effort fashion, and dial failure should not fail the pinning operation. When unable to act on explicit provider hints, DHT and other discovery methods should be used as a fallback by a pinning service.  **NOTE:** All multiaddrs MUST end with `/p2p/{peerID}` and SHOULD be fully resolved and confirmed to be dialable from the public internet. Avoid sending addresses from local networks.  # Custom metadata Pinning services are encouraged to add support for additional features by leveraging the optional `Pin.meta` and `PinStatus.info` fields. While these attributes can be application- or vendor-specific, we encourage the community at large to leverage these attributes as a sandbox to come up with conventions that could become part of future revisions of this API. ## Pin metadata String keys and values passed in `Pin.meta` are persisted with the pin object.  Potential uses: - `Pin.meta[app_id]`: Attaching a unique identifier to pins created by an app enables filtering pins per app via `?meta={\"app_id\":<UUID>}` - `Pin.meta[vendor_policy]`: Vendor-specific policy (for example: which region to use, how many copies to keep)  Note that it is OK for a client to omit or ignore these optional attributes; doing so should not impact the basic pinning functionality.  ## Pin status info Additional `PinStatus.info` can be returned by pinning service.  Potential uses: - `PinStatus.info[status_details]`: more info about the current status (queue position, percentage of transferred data, summary of where data is stored, etc); when `PinStatus.status=failed`, it could provide a reason why a pin operation failed (e.g. lack of funds, DAG too big, etc.) - `PinStatus.info[dag_size]`: the size of pinned data, along with DAG overhead - `PinStatus.info[raw_size]`: the size of data without DAG overhead (eg. unixfs) - `PinStatus.info[pinned_until]`: if vendor supports time-bound pins, this could indicate when the pin will expire  # Pagination and filtering Pin objects can be listed by executing `GET /pins` with optional parameters:  - When no filters are provided, the endpoint will return a small batch of the 10 most recently created items, from the latest to the oldest. - The number of returned items can be adjusted with the `limit` parameter (implicit default is 10). - If the value in `PinResults.count` is bigger than the length of `PinResults.results`, the client can infer there are more results that can be queried. - To read more items, pass the `before` filter with the timestamp from `PinStatus.created` found in the oldest item in the current batch of results. Repeat to read all results. - Returned results can be fine-tuned by applying optional `after`, `cid`, `name`, `status`, or `meta` filters.  > **Note**: pagination by the `created` timestamp requires each value to be globally unique. Any future considerations to add support for bulk creation must account for this.
+ *
+ * The version of the OpenAPI document: 1.0.0
+ *
+ *
+ * NOTE: This class is auto generated by OpenAPI Generator (https://openapi-generator.tech).
+ * https://openapi-generator.tech
+ * Do not edit the class manually.
+ */
+function PinFromJSON(json) {
+    return PinFromJSONTyped(json);
+}
+function PinFromJSONTyped(json, ignoreDiscriminator) {
+    if ((json === undefined) || (json === null)) {
+        return json;
+    }
+    return {
+        'cid': json['cid'],
+        'name': !exists(json, 'name') ? undefined : json['name'],
+        'origins': !exists(json, 'origins') ? undefined : json['origins'],
+        'meta': !exists(json, 'meta') ? undefined : json['meta'],
+    };
+}
+function PinToJSON(value) {
+    if (value === undefined) {
+        return undefined;
+    }
+    if (value === null) {
+        return null;
+    }
+    return {
+        'cid': value.cid,
+        'name': value.name,
+        'origins': value.origins,
+        'meta': value.meta,
+    };
+}
+
+/* tslint:disable */
+/* eslint-disable */
+/**
+ * IPFS Pinning Service API
+ *   ## About this spec The IPFS Pinning Service API is intended to be an implementation-agnostic API&#x3a; - For use and implementation by pinning service providers - For use in client mode by IPFS nodes and GUI-based applications  > **Note**: while ready for implementation, this spec is still a work in progress! 🏗️  **Your input and feedback are welcome and valuable as we develop this API spec. Please join the design discussion at [github.com/ipfs/pinning-services-api-spec](https://github.com/ipfs/pinning-services-api-spec).**  # Schemas This section describes the most important object types and conventions.  A full list of fields and schemas can be found in the `schemas` section of the [YAML file](https://github.com/ipfs/pinning-services-api-spec/blob/master/ipfs-pinning-service.yaml).  ## Identifiers ### cid [Content Identifier (CID)](https://docs.ipfs.io/concepts/content-addressing/) points at the root of a DAG that is pinned recursively. ### requestid Unique identifier of a pin request.  When a pin is created, the service responds with unique `requestid` that can be later used for pin removal. When the same `cid` is pinned again, a different `requestid` is returned to differentiate between those pin requests.  Service implementation should use UUID, `hash(accessToken,Pin,PinStatus.created)`, or any other opaque identifier that provides equally strong protection against race conditions.  ## Objects ### Pin object  ![pin object](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/pin.png)  The `Pin` object is a representation of a pin request.  It includes the `cid` of data to be pinned, as well as optional metadata in `name`, `origins`, and `meta`.  ### Pin status response  ![pin status response object](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/pinstatus.png)  The `PinStatus` object is a representation of the current state of a pinning operation. It includes the original `pin` object, along with the current `status` and globally unique `requestid` of the entire pinning request, which can be used for future status checks and management. Addresses in the `delegates` array are peers delegated by the pinning service for facilitating direct file transfers (more details in the provider hints section). Any additional vendor-specific information is returned in optional `info`.  # The pin lifecycle  ![pinning service objects and lifecycle](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/lifecycle.png)  ## Creating a new pin object The user sends a `Pin` object to `POST /pins` and receives a `PinStatus` response: - `requestid` in `PinStatus` is the identifier of the pin operation, which can can be used for checking status, and removing the pin in the future - `status` in `PinStatus` indicates the current state of a pin  ## Checking status of in-progress pinning `status` (in `PinStatus`) may indicate a pending state (`queued` or `pinning`). This means the data behind `Pin.cid` was not found on the pinning service and is being fetched from the IPFS network at large, which may take time.  In this case, the user can periodically check pinning progress via `GET /pins/{requestid}` until pinning is successful, or the user decides to remove the pending pin.  ## Replacing an existing pin object The user can replace an existing pin object via `POST /pins/{requestid}`. This is a shortcut for removing a pin object identified by `requestid` and creating a new one in a single API call that protects against undesired garbage collection of blocks common to both pins. Useful when updating a pin representing a huge dataset where most of blocks did not change. The new pin object `requestid` is returned in the `PinStatus` response. The old pin object is deleted automatically.  ## Removing a pin object A pin object can be removed via `DELETE /pins/{requestid}`.   # Provider hints A pinning service will use the DHT and other discovery methods to locate pinned content; however, it is a good practice to provide additional provider hints to speed up the discovery phase and start the transfer immediately, especially if a client has the data in their own datastore or already knows of other providers.  The most common scenario is a client putting its own IPFS node\'s multiaddrs in `Pin.origins`,  and then attempt to connect to every multiaddr returned by a pinning service in `PinStatus.delegates` to initiate transfer.  At the same time, a pinning service will try to connect to multiaddrs provided by the client in `Pin.origins`.  This ensures data transfer starts immediately (without waiting for provider discovery over DHT), and mutual direct dial between a client and a service works around peer routing issues in restrictive network topologies, such as NATs, firewalls, etc.  **NOTE:** Connections to multiaddrs in `origins` and `delegates` arrays should be attempted in best-effort fashion, and dial failure should not fail the pinning operation. When unable to act on explicit provider hints, DHT and other discovery methods should be used as a fallback by a pinning service.  **NOTE:** All multiaddrs MUST end with `/p2p/{peerID}` and SHOULD be fully resolved and confirmed to be dialable from the public internet. Avoid sending addresses from local networks.  # Custom metadata Pinning services are encouraged to add support for additional features by leveraging the optional `Pin.meta` and `PinStatus.info` fields. While these attributes can be application- or vendor-specific, we encourage the community at large to leverage these attributes as a sandbox to come up with conventions that could become part of future revisions of this API. ## Pin metadata String keys and values passed in `Pin.meta` are persisted with the pin object.  Potential uses: - `Pin.meta[app_id]`: Attaching a unique identifier to pins created by an app enables filtering pins per app via `?meta={\"app_id\":<UUID>}` - `Pin.meta[vendor_policy]`: Vendor-specific policy (for example: which region to use, how many copies to keep)  Note that it is OK for a client to omit or ignore these optional attributes; doing so should not impact the basic pinning functionality.  ## Pin status info Additional `PinStatus.info` can be returned by pinning service.  Potential uses: - `PinStatus.info[status_details]`: more info about the current status (queue position, percentage of transferred data, summary of where data is stored, etc); when `PinStatus.status=failed`, it could provide a reason why a pin operation failed (e.g. lack of funds, DAG too big, etc.) - `PinStatus.info[dag_size]`: the size of pinned data, along with DAG overhead - `PinStatus.info[raw_size]`: the size of data without DAG overhead (eg. unixfs) - `PinStatus.info[pinned_until]`: if vendor supports time-bound pins, this could indicate when the pin will expire  # Pagination and filtering Pin objects can be listed by executing `GET /pins` with optional parameters:  - When no filters are provided, the endpoint will return a small batch of the 10 most recently created items, from the latest to the oldest. - The number of returned items can be adjusted with the `limit` parameter (implicit default is 10). - If the value in `PinResults.count` is bigger than the length of `PinResults.results`, the client can infer there are more results that can be queried. - To read more items, pass the `before` filter with the timestamp from `PinStatus.created` found in the oldest item in the current batch of results. Repeat to read all results. - Returned results can be fine-tuned by applying optional `after`, `cid`, `name`, `status`, or `meta` filters.  > **Note**: pagination by the `created` timestamp requires each value to be globally unique. Any future considerations to add support for bulk creation must account for this.
+ *
+ * The version of the OpenAPI document: 1.0.0
+ *
+ *
+ * NOTE: This class is auto generated by OpenAPI Generator (https://openapi-generator.tech).
+ * https://openapi-generator.tech
+ * Do not edit the class manually.
+ */
+/**
+ * Status a pin object can have at a pinning service
+ * @export
+ * @enum {string}
+ */
+var Status;
+(function (Status) {
+    Status["Queued"] = "queued";
+    Status["Pinning"] = "pinning";
+    Status["Pinned"] = "pinned";
+    Status["Failed"] = "failed";
+})(Status || (Status = {}));
+function StatusFromJSON(json) {
+    return StatusFromJSONTyped(json);
+}
+function StatusFromJSONTyped(json, ignoreDiscriminator) {
+    return json;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+/**
+ * IPFS Pinning Service API
+ *   ## About this spec The IPFS Pinning Service API is intended to be an implementation-agnostic API&#x3a; - For use and implementation by pinning service providers - For use in client mode by IPFS nodes and GUI-based applications  > **Note**: while ready for implementation, this spec is still a work in progress! 🏗️  **Your input and feedback are welcome and valuable as we develop this API spec. Please join the design discussion at [github.com/ipfs/pinning-services-api-spec](https://github.com/ipfs/pinning-services-api-spec).**  # Schemas This section describes the most important object types and conventions.  A full list of fields and schemas can be found in the `schemas` section of the [YAML file](https://github.com/ipfs/pinning-services-api-spec/blob/master/ipfs-pinning-service.yaml).  ## Identifiers ### cid [Content Identifier (CID)](https://docs.ipfs.io/concepts/content-addressing/) points at the root of a DAG that is pinned recursively. ### requestid Unique identifier of a pin request.  When a pin is created, the service responds with unique `requestid` that can be later used for pin removal. When the same `cid` is pinned again, a different `requestid` is returned to differentiate between those pin requests.  Service implementation should use UUID, `hash(accessToken,Pin,PinStatus.created)`, or any other opaque identifier that provides equally strong protection against race conditions.  ## Objects ### Pin object  ![pin object](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/pin.png)  The `Pin` object is a representation of a pin request.  It includes the `cid` of data to be pinned, as well as optional metadata in `name`, `origins`, and `meta`.  ### Pin status response  ![pin status response object](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/pinstatus.png)  The `PinStatus` object is a representation of the current state of a pinning operation. It includes the original `pin` object, along with the current `status` and globally unique `requestid` of the entire pinning request, which can be used for future status checks and management. Addresses in the `delegates` array are peers delegated by the pinning service for facilitating direct file transfers (more details in the provider hints section). Any additional vendor-specific information is returned in optional `info`.  # The pin lifecycle  ![pinning service objects and lifecycle](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/lifecycle.png)  ## Creating a new pin object The user sends a `Pin` object to `POST /pins` and receives a `PinStatus` response: - `requestid` in `PinStatus` is the identifier of the pin operation, which can can be used for checking status, and removing the pin in the future - `status` in `PinStatus` indicates the current state of a pin  ## Checking status of in-progress pinning `status` (in `PinStatus`) may indicate a pending state (`queued` or `pinning`). This means the data behind `Pin.cid` was not found on the pinning service and is being fetched from the IPFS network at large, which may take time.  In this case, the user can periodically check pinning progress via `GET /pins/{requestid}` until pinning is successful, or the user decides to remove the pending pin.  ## Replacing an existing pin object The user can replace an existing pin object via `POST /pins/{requestid}`. This is a shortcut for removing a pin object identified by `requestid` and creating a new one in a single API call that protects against undesired garbage collection of blocks common to both pins. Useful when updating a pin representing a huge dataset where most of blocks did not change. The new pin object `requestid` is returned in the `PinStatus` response. The old pin object is deleted automatically.  ## Removing a pin object A pin object can be removed via `DELETE /pins/{requestid}`.   # Provider hints A pinning service will use the DHT and other discovery methods to locate pinned content; however, it is a good practice to provide additional provider hints to speed up the discovery phase and start the transfer immediately, especially if a client has the data in their own datastore or already knows of other providers.  The most common scenario is a client putting its own IPFS node\'s multiaddrs in `Pin.origins`,  and then attempt to connect to every multiaddr returned by a pinning service in `PinStatus.delegates` to initiate transfer.  At the same time, a pinning service will try to connect to multiaddrs provided by the client in `Pin.origins`.  This ensures data transfer starts immediately (without waiting for provider discovery over DHT), and mutual direct dial between a client and a service works around peer routing issues in restrictive network topologies, such as NATs, firewalls, etc.  **NOTE:** Connections to multiaddrs in `origins` and `delegates` arrays should be attempted in best-effort fashion, and dial failure should not fail the pinning operation. When unable to act on explicit provider hints, DHT and other discovery methods should be used as a fallback by a pinning service.  **NOTE:** All multiaddrs MUST end with `/p2p/{peerID}` and SHOULD be fully resolved and confirmed to be dialable from the public internet. Avoid sending addresses from local networks.  # Custom metadata Pinning services are encouraged to add support for additional features by leveraging the optional `Pin.meta` and `PinStatus.info` fields. While these attributes can be application- or vendor-specific, we encourage the community at large to leverage these attributes as a sandbox to come up with conventions that could become part of future revisions of this API. ## Pin metadata String keys and values passed in `Pin.meta` are persisted with the pin object.  Potential uses: - `Pin.meta[app_id]`: Attaching a unique identifier to pins created by an app enables filtering pins per app via `?meta={\"app_id\":<UUID>}` - `Pin.meta[vendor_policy]`: Vendor-specific policy (for example: which region to use, how many copies to keep)  Note that it is OK for a client to omit or ignore these optional attributes; doing so should not impact the basic pinning functionality.  ## Pin status info Additional `PinStatus.info` can be returned by pinning service.  Potential uses: - `PinStatus.info[status_details]`: more info about the current status (queue position, percentage of transferred data, summary of where data is stored, etc); when `PinStatus.status=failed`, it could provide a reason why a pin operation failed (e.g. lack of funds, DAG too big, etc.) - `PinStatus.info[dag_size]`: the size of pinned data, along with DAG overhead - `PinStatus.info[raw_size]`: the size of data without DAG overhead (eg. unixfs) - `PinStatus.info[pinned_until]`: if vendor supports time-bound pins, this could indicate when the pin will expire  # Pagination and filtering Pin objects can be listed by executing `GET /pins` with optional parameters:  - When no filters are provided, the endpoint will return a small batch of the 10 most recently created items, from the latest to the oldest. - The number of returned items can be adjusted with the `limit` parameter (implicit default is 10). - If the value in `PinResults.count` is bigger than the length of `PinResults.results`, the client can infer there are more results that can be queried. - To read more items, pass the `before` filter with the timestamp from `PinStatus.created` found in the oldest item in the current batch of results. Repeat to read all results. - Returned results can be fine-tuned by applying optional `after`, `cid`, `name`, `status`, or `meta` filters.  > **Note**: pagination by the `created` timestamp requires each value to be globally unique. Any future considerations to add support for bulk creation must account for this.
+ *
+ * The version of the OpenAPI document: 1.0.0
+ *
+ *
+ * NOTE: This class is auto generated by OpenAPI Generator (https://openapi-generator.tech).
+ * https://openapi-generator.tech
+ * Do not edit the class manually.
+ */
+function PinStatusFromJSON(json) {
+    return PinStatusFromJSONTyped(json);
+}
+function PinStatusFromJSONTyped(json, ignoreDiscriminator) {
+    if ((json === undefined) || (json === null)) {
+        return json;
+    }
+    return {
+        'requestid': json['requestid'],
+        'status': StatusFromJSON(json['status']),
+        'created': (new Date(json['created'])),
+        'pin': PinFromJSON(json['pin']),
+        'delegates': json['delegates'],
+        'info': !exists(json, 'info') ? undefined : json['info'],
+    };
+}
+
+/* tslint:disable */
+/* eslint-disable */
+/**
+ * IPFS Pinning Service API
+ *   ## About this spec The IPFS Pinning Service API is intended to be an implementation-agnostic API&#x3a; - For use and implementation by pinning service providers - For use in client mode by IPFS nodes and GUI-based applications  > **Note**: while ready for implementation, this spec is still a work in progress! 🏗️  **Your input and feedback are welcome and valuable as we develop this API spec. Please join the design discussion at [github.com/ipfs/pinning-services-api-spec](https://github.com/ipfs/pinning-services-api-spec).**  # Schemas This section describes the most important object types and conventions.  A full list of fields and schemas can be found in the `schemas` section of the [YAML file](https://github.com/ipfs/pinning-services-api-spec/blob/master/ipfs-pinning-service.yaml).  ## Identifiers ### cid [Content Identifier (CID)](https://docs.ipfs.io/concepts/content-addressing/) points at the root of a DAG that is pinned recursively. ### requestid Unique identifier of a pin request.  When a pin is created, the service responds with unique `requestid` that can be later used for pin removal. When the same `cid` is pinned again, a different `requestid` is returned to differentiate between those pin requests.  Service implementation should use UUID, `hash(accessToken,Pin,PinStatus.created)`, or any other opaque identifier that provides equally strong protection against race conditions.  ## Objects ### Pin object  ![pin object](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/pin.png)  The `Pin` object is a representation of a pin request.  It includes the `cid` of data to be pinned, as well as optional metadata in `name`, `origins`, and `meta`.  ### Pin status response  ![pin status response object](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/pinstatus.png)  The `PinStatus` object is a representation of the current state of a pinning operation. It includes the original `pin` object, along with the current `status` and globally unique `requestid` of the entire pinning request, which can be used for future status checks and management. Addresses in the `delegates` array are peers delegated by the pinning service for facilitating direct file transfers (more details in the provider hints section). Any additional vendor-specific information is returned in optional `info`.  # The pin lifecycle  ![pinning service objects and lifecycle](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/lifecycle.png)  ## Creating a new pin object The user sends a `Pin` object to `POST /pins` and receives a `PinStatus` response: - `requestid` in `PinStatus` is the identifier of the pin operation, which can can be used for checking status, and removing the pin in the future - `status` in `PinStatus` indicates the current state of a pin  ## Checking status of in-progress pinning `status` (in `PinStatus`) may indicate a pending state (`queued` or `pinning`). This means the data behind `Pin.cid` was not found on the pinning service and is being fetched from the IPFS network at large, which may take time.  In this case, the user can periodically check pinning progress via `GET /pins/{requestid}` until pinning is successful, or the user decides to remove the pending pin.  ## Replacing an existing pin object The user can replace an existing pin object via `POST /pins/{requestid}`. This is a shortcut for removing a pin object identified by `requestid` and creating a new one in a single API call that protects against undesired garbage collection of blocks common to both pins. Useful when updating a pin representing a huge dataset where most of blocks did not change. The new pin object `requestid` is returned in the `PinStatus` response. The old pin object is deleted automatically.  ## Removing a pin object A pin object can be removed via `DELETE /pins/{requestid}`.   # Provider hints A pinning service will use the DHT and other discovery methods to locate pinned content; however, it is a good practice to provide additional provider hints to speed up the discovery phase and start the transfer immediately, especially if a client has the data in their own datastore or already knows of other providers.  The most common scenario is a client putting its own IPFS node\'s multiaddrs in `Pin.origins`,  and then attempt to connect to every multiaddr returned by a pinning service in `PinStatus.delegates` to initiate transfer.  At the same time, a pinning service will try to connect to multiaddrs provided by the client in `Pin.origins`.  This ensures data transfer starts immediately (without waiting for provider discovery over DHT), and mutual direct dial between a client and a service works around peer routing issues in restrictive network topologies, such as NATs, firewalls, etc.  **NOTE:** Connections to multiaddrs in `origins` and `delegates` arrays should be attempted in best-effort fashion, and dial failure should not fail the pinning operation. When unable to act on explicit provider hints, DHT and other discovery methods should be used as a fallback by a pinning service.  **NOTE:** All multiaddrs MUST end with `/p2p/{peerID}` and SHOULD be fully resolved and confirmed to be dialable from the public internet. Avoid sending addresses from local networks.  # Custom metadata Pinning services are encouraged to add support for additional features by leveraging the optional `Pin.meta` and `PinStatus.info` fields. While these attributes can be application- or vendor-specific, we encourage the community at large to leverage these attributes as a sandbox to come up with conventions that could become part of future revisions of this API. ## Pin metadata String keys and values passed in `Pin.meta` are persisted with the pin object.  Potential uses: - `Pin.meta[app_id]`: Attaching a unique identifier to pins created by an app enables filtering pins per app via `?meta={\"app_id\":<UUID>}` - `Pin.meta[vendor_policy]`: Vendor-specific policy (for example: which region to use, how many copies to keep)  Note that it is OK for a client to omit or ignore these optional attributes; doing so should not impact the basic pinning functionality.  ## Pin status info Additional `PinStatus.info` can be returned by pinning service.  Potential uses: - `PinStatus.info[status_details]`: more info about the current status (queue position, percentage of transferred data, summary of where data is stored, etc); when `PinStatus.status=failed`, it could provide a reason why a pin operation failed (e.g. lack of funds, DAG too big, etc.) - `PinStatus.info[dag_size]`: the size of pinned data, along with DAG overhead - `PinStatus.info[raw_size]`: the size of data without DAG overhead (eg. unixfs) - `PinStatus.info[pinned_until]`: if vendor supports time-bound pins, this could indicate when the pin will expire  # Pagination and filtering Pin objects can be listed by executing `GET /pins` with optional parameters:  - When no filters are provided, the endpoint will return a small batch of the 10 most recently created items, from the latest to the oldest. - The number of returned items can be adjusted with the `limit` parameter (implicit default is 10). - If the value in `PinResults.count` is bigger than the length of `PinResults.results`, the client can infer there are more results that can be queried. - To read more items, pass the `before` filter with the timestamp from `PinStatus.created` found in the oldest item in the current batch of results. Repeat to read all results. - Returned results can be fine-tuned by applying optional `after`, `cid`, `name`, `status`, or `meta` filters.  > **Note**: pagination by the `created` timestamp requires each value to be globally unique. Any future considerations to add support for bulk creation must account for this.
+ *
+ * The version of the OpenAPI document: 1.0.0
+ *
+ *
+ * NOTE: This class is auto generated by OpenAPI Generator (https://openapi-generator.tech).
+ * https://openapi-generator.tech
+ * Do not edit the class manually.
+ */
+function PinResultsFromJSON(json) {
+    return PinResultsFromJSONTyped(json);
+}
+function PinResultsFromJSONTyped(json, ignoreDiscriminator) {
+    if ((json === undefined) || (json === null)) {
+        return json;
+    }
+    return {
+        'count': json['count'],
+        'results': (json['results'].map(PinStatusFromJSON)),
+    };
+}
+
+/* tslint:disable */
+/* eslint-disable */
+/**
+ * IPFS Pinning Service API
+ *   ## About this spec The IPFS Pinning Service API is intended to be an implementation-agnostic API&#x3a; - For use and implementation by pinning service providers - For use in client mode by IPFS nodes and GUI-based applications  > **Note**: while ready for implementation, this spec is still a work in progress! 🏗️  **Your input and feedback are welcome and valuable as we develop this API spec. Please join the design discussion at [github.com/ipfs/pinning-services-api-spec](https://github.com/ipfs/pinning-services-api-spec).**  # Schemas This section describes the most important object types and conventions.  A full list of fields and schemas can be found in the `schemas` section of the [YAML file](https://github.com/ipfs/pinning-services-api-spec/blob/master/ipfs-pinning-service.yaml).  ## Identifiers ### cid [Content Identifier (CID)](https://docs.ipfs.io/concepts/content-addressing/) points at the root of a DAG that is pinned recursively. ### requestid Unique identifier of a pin request.  When a pin is created, the service responds with unique `requestid` that can be later used for pin removal. When the same `cid` is pinned again, a different `requestid` is returned to differentiate between those pin requests.  Service implementation should use UUID, `hash(accessToken,Pin,PinStatus.created)`, or any other opaque identifier that provides equally strong protection against race conditions.  ## Objects ### Pin object  ![pin object](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/pin.png)  The `Pin` object is a representation of a pin request.  It includes the `cid` of data to be pinned, as well as optional metadata in `name`, `origins`, and `meta`.  ### Pin status response  ![pin status response object](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/pinstatus.png)  The `PinStatus` object is a representation of the current state of a pinning operation. It includes the original `pin` object, along with the current `status` and globally unique `requestid` of the entire pinning request, which can be used for future status checks and management. Addresses in the `delegates` array are peers delegated by the pinning service for facilitating direct file transfers (more details in the provider hints section). Any additional vendor-specific information is returned in optional `info`.  # The pin lifecycle  ![pinning service objects and lifecycle](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/lifecycle.png)  ## Creating a new pin object The user sends a `Pin` object to `POST /pins` and receives a `PinStatus` response: - `requestid` in `PinStatus` is the identifier of the pin operation, which can can be used for checking status, and removing the pin in the future - `status` in `PinStatus` indicates the current state of a pin  ## Checking status of in-progress pinning `status` (in `PinStatus`) may indicate a pending state (`queued` or `pinning`). This means the data behind `Pin.cid` was not found on the pinning service and is being fetched from the IPFS network at large, which may take time.  In this case, the user can periodically check pinning progress via `GET /pins/{requestid}` until pinning is successful, or the user decides to remove the pending pin.  ## Replacing an existing pin object The user can replace an existing pin object via `POST /pins/{requestid}`. This is a shortcut for removing a pin object identified by `requestid` and creating a new one in a single API call that protects against undesired garbage collection of blocks common to both pins. Useful when updating a pin representing a huge dataset where most of blocks did not change. The new pin object `requestid` is returned in the `PinStatus` response. The old pin object is deleted automatically.  ## Removing a pin object A pin object can be removed via `DELETE /pins/{requestid}`.   # Provider hints A pinning service will use the DHT and other discovery methods to locate pinned content; however, it is a good practice to provide additional provider hints to speed up the discovery phase and start the transfer immediately, especially if a client has the data in their own datastore or already knows of other providers.  The most common scenario is a client putting its own IPFS node\'s multiaddrs in `Pin.origins`,  and then attempt to connect to every multiaddr returned by a pinning service in `PinStatus.delegates` to initiate transfer.  At the same time, a pinning service will try to connect to multiaddrs provided by the client in `Pin.origins`.  This ensures data transfer starts immediately (without waiting for provider discovery over DHT), and mutual direct dial between a client and a service works around peer routing issues in restrictive network topologies, such as NATs, firewalls, etc.  **NOTE:** Connections to multiaddrs in `origins` and `delegates` arrays should be attempted in best-effort fashion, and dial failure should not fail the pinning operation. When unable to act on explicit provider hints, DHT and other discovery methods should be used as a fallback by a pinning service.  **NOTE:** All multiaddrs MUST end with `/p2p/{peerID}` and SHOULD be fully resolved and confirmed to be dialable from the public internet. Avoid sending addresses from local networks.  # Custom metadata Pinning services are encouraged to add support for additional features by leveraging the optional `Pin.meta` and `PinStatus.info` fields. While these attributes can be application- or vendor-specific, we encourage the community at large to leverage these attributes as a sandbox to come up with conventions that could become part of future revisions of this API. ## Pin metadata String keys and values passed in `Pin.meta` are persisted with the pin object.  Potential uses: - `Pin.meta[app_id]`: Attaching a unique identifier to pins created by an app enables filtering pins per app via `?meta={\"app_id\":<UUID>}` - `Pin.meta[vendor_policy]`: Vendor-specific policy (for example: which region to use, how many copies to keep)  Note that it is OK for a client to omit or ignore these optional attributes; doing so should not impact the basic pinning functionality.  ## Pin status info Additional `PinStatus.info` can be returned by pinning service.  Potential uses: - `PinStatus.info[status_details]`: more info about the current status (queue position, percentage of transferred data, summary of where data is stored, etc); when `PinStatus.status=failed`, it could provide a reason why a pin operation failed (e.g. lack of funds, DAG too big, etc.) - `PinStatus.info[dag_size]`: the size of pinned data, along with DAG overhead - `PinStatus.info[raw_size]`: the size of data without DAG overhead (eg. unixfs) - `PinStatus.info[pinned_until]`: if vendor supports time-bound pins, this could indicate when the pin will expire  # Pagination and filtering Pin objects can be listed by executing `GET /pins` with optional parameters:  - When no filters are provided, the endpoint will return a small batch of the 10 most recently created items, from the latest to the oldest. - The number of returned items can be adjusted with the `limit` parameter (implicit default is 10). - If the value in `PinResults.count` is bigger than the length of `PinResults.results`, the client can infer there are more results that can be queried. - To read more items, pass the `before` filter with the timestamp from `PinStatus.created` found in the oldest item in the current batch of results. Repeat to read all results. - Returned results can be fine-tuned by applying optional `after`, `cid`, `name`, `status`, or `meta` filters.  > **Note**: pagination by the `created` timestamp requires each value to be globally unique. Any future considerations to add support for bulk creation must account for this.
+ *
+ * The version of the OpenAPI document: 1.0.0
+ *
+ *
+ * NOTE: This class is auto generated by OpenAPI Generator (https://openapi-generator.tech).
+ * https://openapi-generator.tech
+ * Do not edit the class manually.
+ */
+/**
+ * Alternative text matching strategy
+ * @export
+ * @enum {string}
+ */
+var TextMatchingStrategy;
+(function (TextMatchingStrategy) {
+    TextMatchingStrategy["Exact"] = "exact";
+    TextMatchingStrategy["Iexact"] = "iexact";
+    TextMatchingStrategy["Partial"] = "partial";
+    TextMatchingStrategy["Ipartial"] = "ipartial";
+})(TextMatchingStrategy || (TextMatchingStrategy = {}));
+
+/* tslint:disable */
+/* eslint-disable */
+/**
+ * IPFS Pinning Service API
+ *   ## About this spec The IPFS Pinning Service API is intended to be an implementation-agnostic API&#x3a; - For use and implementation by pinning service providers - For use in client mode by IPFS nodes and GUI-based applications  > **Note**: while ready for implementation, this spec is still a work in progress! 🏗️  **Your input and feedback are welcome and valuable as we develop this API spec. Please join the design discussion at [github.com/ipfs/pinning-services-api-spec](https://github.com/ipfs/pinning-services-api-spec).**  # Schemas This section describes the most important object types and conventions.  A full list of fields and schemas can be found in the `schemas` section of the [YAML file](https://github.com/ipfs/pinning-services-api-spec/blob/master/ipfs-pinning-service.yaml).  ## Identifiers ### cid [Content Identifier (CID)](https://docs.ipfs.io/concepts/content-addressing/) points at the root of a DAG that is pinned recursively. ### requestid Unique identifier of a pin request.  When a pin is created, the service responds with unique `requestid` that can be later used for pin removal. When the same `cid` is pinned again, a different `requestid` is returned to differentiate between those pin requests.  Service implementation should use UUID, `hash(accessToken,Pin,PinStatus.created)`, or any other opaque identifier that provides equally strong protection against race conditions.  ## Objects ### Pin object  ![pin object](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/pin.png)  The `Pin` object is a representation of a pin request.  It includes the `cid` of data to be pinned, as well as optional metadata in `name`, `origins`, and `meta`.  ### Pin status response  ![pin status response object](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/pinstatus.png)  The `PinStatus` object is a representation of the current state of a pinning operation. It includes the original `pin` object, along with the current `status` and globally unique `requestid` of the entire pinning request, which can be used for future status checks and management. Addresses in the `delegates` array are peers delegated by the pinning service for facilitating direct file transfers (more details in the provider hints section). Any additional vendor-specific information is returned in optional `info`.  # The pin lifecycle  ![pinning service objects and lifecycle](https://bafybeideck2fchyxna4wqwc2mo67yriokehw3yujboc5redjdaajrk2fjq.ipfs.dweb.link/lifecycle.png)  ## Creating a new pin object The user sends a `Pin` object to `POST /pins` and receives a `PinStatus` response: - `requestid` in `PinStatus` is the identifier of the pin operation, which can can be used for checking status, and removing the pin in the future - `status` in `PinStatus` indicates the current state of a pin  ## Checking status of in-progress pinning `status` (in `PinStatus`) may indicate a pending state (`queued` or `pinning`). This means the data behind `Pin.cid` was not found on the pinning service and is being fetched from the IPFS network at large, which may take time.  In this case, the user can periodically check pinning progress via `GET /pins/{requestid}` until pinning is successful, or the user decides to remove the pending pin.  ## Replacing an existing pin object The user can replace an existing pin object via `POST /pins/{requestid}`. This is a shortcut for removing a pin object identified by `requestid` and creating a new one in a single API call that protects against undesired garbage collection of blocks common to both pins. Useful when updating a pin representing a huge dataset where most of blocks did not change. The new pin object `requestid` is returned in the `PinStatus` response. The old pin object is deleted automatically.  ## Removing a pin object A pin object can be removed via `DELETE /pins/{requestid}`.   # Provider hints A pinning service will use the DHT and other discovery methods to locate pinned content; however, it is a good practice to provide additional provider hints to speed up the discovery phase and start the transfer immediately, especially if a client has the data in their own datastore or already knows of other providers.  The most common scenario is a client putting its own IPFS node\'s multiaddrs in `Pin.origins`,  and then attempt to connect to every multiaddr returned by a pinning service in `PinStatus.delegates` to initiate transfer.  At the same time, a pinning service will try to connect to multiaddrs provided by the client in `Pin.origins`.  This ensures data transfer starts immediately (without waiting for provider discovery over DHT), and mutual direct dial between a client and a service works around peer routing issues in restrictive network topologies, such as NATs, firewalls, etc.  **NOTE:** Connections to multiaddrs in `origins` and `delegates` arrays should be attempted in best-effort fashion, and dial failure should not fail the pinning operation. When unable to act on explicit provider hints, DHT and other discovery methods should be used as a fallback by a pinning service.  **NOTE:** All multiaddrs MUST end with `/p2p/{peerID}` and SHOULD be fully resolved and confirmed to be dialable from the public internet. Avoid sending addresses from local networks.  # Custom metadata Pinning services are encouraged to add support for additional features by leveraging the optional `Pin.meta` and `PinStatus.info` fields. While these attributes can be application- or vendor-specific, we encourage the community at large to leverage these attributes as a sandbox to come up with conventions that could become part of future revisions of this API. ## Pin metadata String keys and values passed in `Pin.meta` are persisted with the pin object.  Potential uses: - `Pin.meta[app_id]`: Attaching a unique identifier to pins created by an app enables filtering pins per app via `?meta={\"app_id\":<UUID>}` - `Pin.meta[vendor_policy]`: Vendor-specific policy (for example: which region to use, how many copies to keep)  Note that it is OK for a client to omit or ignore these optional attributes; doing so should not impact the basic pinning functionality.  ## Pin status info Additional `PinStatus.info` can be returned by pinning service.  Potential uses: - `PinStatus.info[status_details]`: more info about the current status (queue position, percentage of transferred data, summary of where data is stored, etc); when `PinStatus.status=failed`, it could provide a reason why a pin operation failed (e.g. lack of funds, DAG too big, etc.) - `PinStatus.info[dag_size]`: the size of pinned data, along with DAG overhead - `PinStatus.info[raw_size]`: the size of data without DAG overhead (eg. unixfs) - `PinStatus.info[pinned_until]`: if vendor supports time-bound pins, this could indicate when the pin will expire  # Pagination and filtering Pin objects can be listed by executing `GET /pins` with optional parameters:  - When no filters are provided, the endpoint will return a small batch of the 10 most recently created items, from the latest to the oldest. - The number of returned items can be adjusted with the `limit` parameter (implicit default is 10). - If the value in `PinResults.count` is bigger than the length of `PinResults.results`, the client can infer there are more results that can be queried. - To read more items, pass the `before` filter with the timestamp from `PinStatus.created` found in the oldest item in the current batch of results. Repeat to read all results. - Returned results can be fine-tuned by applying optional `after`, `cid`, `name`, `status`, or `meta` filters.  > **Note**: pagination by the `created` timestamp requires each value to be globally unique. Any future considerations to add support for bulk creation must account for this.
+ *
+ * The version of the OpenAPI document: 1.0.0
+ *
+ *
+ * NOTE: This class is auto generated by OpenAPI Generator (https://openapi-generator.tech).
+ * https://openapi-generator.tech
+ * Do not edit the class manually.
+ */
+/**
+ *
+ */
+class PinsApi extends BaseAPI {
+    /**
+     * List all the pin objects, matching optional filters; when no filter is provided, only successful pins are returned
+     * List pin objects
+     */
+    async pinsGetRaw(requestParameters, initOverrides) {
+        const queryParameters = {};
+        if (requestParameters.cid) {
+            queryParameters['cid'] = requestParameters.cid.join(COLLECTION_FORMATS["csv"]);
+        }
+        if (requestParameters.name !== undefined) {
+            queryParameters['name'] = requestParameters.name;
+        }
+        if (requestParameters.match !== undefined) {
+            queryParameters['match'] = requestParameters.match;
+        }
+        if (requestParameters.status) {
+            queryParameters['status'] = requestParameters.status.join(COLLECTION_FORMATS["csv"]);
+        }
+        if (requestParameters.before !== undefined) {
+            queryParameters['before'] = requestParameters.before.toISOString();
+        }
+        if (requestParameters.after !== undefined) {
+            queryParameters['after'] = requestParameters.after.toISOString();
+        }
+        if (requestParameters.limit !== undefined) {
+            queryParameters['limit'] = requestParameters.limit;
+        }
+        if (requestParameters.meta !== undefined) {
+            queryParameters['meta'] = requestParameters.meta;
+        }
+        const headerParameters = {};
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("accessToken", []);
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/pins`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+        return new JSONApiResponse(response, (jsonValue) => PinResultsFromJSON(jsonValue));
+    }
+    /**
+     * List all the pin objects, matching optional filters; when no filter is provided, only successful pins are returned
+     * List pin objects
+     */
+    async pinsGet(requestParameters = {}, initOverrides) {
+        const response = await this.pinsGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+    /**
+     * Add a new pin object for the current access token
+     * Add pin object
+     */
+    async pinsPostRaw(requestParameters, initOverrides) {
+        if (requestParameters.pin === null || requestParameters.pin === undefined) {
+            throw new RequiredError('pin', 'Required parameter requestParameters.pin was null or undefined when calling pinsPost.');
+        }
+        const queryParameters = {};
+        const headerParameters = {};
+        headerParameters['Content-Type'] = 'application/json';
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("accessToken", []);
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/pins`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: PinToJSON(requestParameters.pin),
+        }, initOverrides);
+        return new JSONApiResponse(response, (jsonValue) => PinStatusFromJSON(jsonValue));
+    }
+    /**
+     * Add a new pin object for the current access token
+     * Add pin object
+     */
+    async pinsPost(requestParameters, initOverrides) {
+        const response = await this.pinsPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+    /**
+     * Remove a pin object
+     * Remove pin object
+     */
+    async pinsRequestidDeleteRaw(requestParameters, initOverrides) {
+        if (requestParameters.requestid === null || requestParameters.requestid === undefined) {
+            throw new RequiredError('requestid', 'Required parameter requestParameters.requestid was null or undefined when calling pinsRequestidDelete.');
+        }
+        const queryParameters = {};
+        const headerParameters = {};
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("accessToken", []);
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/pins/{requestid}`.replace(`{${"requestid"}}`, encodeURIComponent(String(requestParameters.requestid))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+        return new VoidApiResponse(response);
+    }
+    /**
+     * Remove a pin object
+     * Remove pin object
+     */
+    async pinsRequestidDelete(requestParameters, initOverrides) {
+        await this.pinsRequestidDeleteRaw(requestParameters, initOverrides);
+    }
+    /**
+     * Get a pin object and its status
+     * Get pin object
+     */
+    async pinsRequestidGetRaw(requestParameters, initOverrides) {
+        if (requestParameters.requestid === null || requestParameters.requestid === undefined) {
+            throw new RequiredError('requestid', 'Required parameter requestParameters.requestid was null or undefined when calling pinsRequestidGet.');
+        }
+        const queryParameters = {};
+        const headerParameters = {};
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("accessToken", []);
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/pins/{requestid}`.replace(`{${"requestid"}}`, encodeURIComponent(String(requestParameters.requestid))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+        return new JSONApiResponse(response, (jsonValue) => PinStatusFromJSON(jsonValue));
+    }
+    /**
+     * Get a pin object and its status
+     * Get pin object
+     */
+    async pinsRequestidGet(requestParameters, initOverrides) {
+        const response = await this.pinsRequestidGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+    /**
+     * Replace an existing pin object (shortcut for executing remove and add operations in one step to avoid unnecessary garbage collection of blocks present in both recursive pins)
+     * Replace pin object
+     */
+    async pinsRequestidPostRaw(requestParameters, initOverrides) {
+        if (requestParameters.requestid === null || requestParameters.requestid === undefined) {
+            throw new RequiredError('requestid', 'Required parameter requestParameters.requestid was null or undefined when calling pinsRequestidPost.');
+        }
+        if (requestParameters.pin === null || requestParameters.pin === undefined) {
+            throw new RequiredError('pin', 'Required parameter requestParameters.pin was null or undefined when calling pinsRequestidPost.');
+        }
+        const queryParameters = {};
+        const headerParameters = {};
+        headerParameters['Content-Type'] = 'application/json';
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("accessToken", []);
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/pins/{requestid}`.replace(`{${"requestid"}}`, encodeURIComponent(String(requestParameters.requestid))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: PinToJSON(requestParameters.pin),
+        }, initOverrides);
+        return new JSONApiResponse(response, (jsonValue) => PinStatusFromJSON(jsonValue));
+    }
+    /**
+     * Replace an existing pin object (shortcut for executing remove and add operations in one step to avoid unnecessary garbage collection of blocks present in both recursive pins)
+     * Replace pin object
+     */
+    async pinsRequestidPost(requestParameters, initOverrides) {
+        const response = await this.pinsRequestidPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+}
+
+class Configuration extends Configuration$1 {
+    constructor(options) {
+        const finalOptions = { ...options };
+        /**
+         * Prevent the need for everyone to have to override the fetch API...
+         */
+        if (options.fetchApi == null) {
+            finalOptions.fetchApi = fetch;
+        }
+        // @see https://github.com/ipfs-shipyard/js-pinning-service-http-client/issues/3
+        if (options.endpointUrl != null) {
+            finalOptions.basePath = options.endpointUrl;
+        }
+        super(finalOptions);
+    }
+}
+
+class HeliaService {
+  helia = null;
+  unixfs = null;
+  pinningClient = null;
+  config;
+  constructor(config) {
+    this.config = config;
+  }
+  async updateConfig(config) {
+    try {
+      await this.destroy();
+    } catch (error) {
+      console.error("Error during config update cleanup:", error);
+      throw error;
+    }
+    this.config = { ...this.config, ...config };
+  }
+  getConfig() {
+    return this.config;
+  }
+  async getHelia() {
+    if (this.helia) {
+      return this.helia;
+    }
+    if (!this.config.apiUrl) {
+      throw new Error("API URL is required");
+    }
+    let blockstore = null;
+    let datastore = null;
+    try {
+      blockstore = new IDBBlockstore("helia-blocks");
+      datastore = new IDBDatastore("helia-data");
+      await blockstore.open();
+      await datastore.open();
+    } catch (error) {
+      try {
+        if (blockstore) {
+          await blockstore.close();
+        }
+      } catch (closeError) {
+        console.error("Error closing blockstore:", closeError);
+      }
+      try {
+        if (datastore) {
+          await datastore.close();
+        }
+      } catch (closeError) {
+        console.error("Error closing datastore:", closeError);
+      }
+      throw new Error(`Failed to initialize stores: ${error}`);
+    }
+    const gatewayBlockBroker = trustlessGateway({
+      transformRequestInit: (init) => {
+        const headers = new Headers(init?.headers);
+        if (this.config.authToken) {
+          headers.set("Authorization", `Bearer ${this.config.authToken}`);
+        }
+        return {
+          ...init,
+          headers
+        };
+      }
+    });
+    const gatewayRouter = httpGatewayRouting({
+      gateways: [this.config.apiUrl]
+    });
+    this.helia = await createHeliaHTTP({
+      blockstore,
+      datastore,
+      blockBrokers: [gatewayBlockBroker],
+      routers: [gatewayRouter]
+    });
+    this.unixfs = unixfs(this.helia);
+    return this.helia;
+  }
+  async downloadFile(cid) {
+    await this.getHelia();
+    if (!this.unixfs) {
+      throw new Error("UnixFS not initialized");
+    }
+    const unixfs2 = this.unixfs;
+    const parsedCid = CID.parse(cid);
+    const abortController = new AbortController();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of unixfs2.cat(parsedCid, {
+            signal: abortController.signal
+          })) {
+            controller.enqueue(chunk);
+          }
+          controller.close();
+        } catch (error) {
+          controller.error(error);
+        }
+      }
+    });
+    const blob = await streamToBlob(stream);
+    try {
+      const stat = await unixfs2.stat(parsedCid, {
+        signal: abortController.signal
+      });
+      const name = stat.type === "directory" ? "directory" : stat.cid.toString();
+      const mimeType = stat.type === "directory" ? "application/x-directory" : "application/octet-stream";
+      return {
+        blob,
+        name,
+        mimeType
+      };
+    } catch (error) {
+      return {
+        blob,
+        name: cid,
+        mimeType: "application/octet-stream"
+      };
+    }
+  }
+  async getRemotePinningClient() {
+    if (this.pinningClient) {
+      return this.pinningClient;
+    }
+    if (!this.config.apiUrl) {
+      throw new Error("API URL is required for remote pinning");
+    }
+    if (!this.config.authToken) {
+      throw new Error("Auth token is required for remote pinning");
+    }
+    const config = new Configuration({
+      endpointUrl: this.config.apiUrl,
+      accessToken: this.config.authToken,
+      fetchApi: fetch
+    });
+    this.pinningClient = new PinsApi(config);
+    return this.pinningClient;
+  }
+  async pinCid(cid, name, metadata) {
+    const client = await this.getRemotePinningClient();
+    const pin = {
+      cid,
+      name,
+      meta: metadata
+    };
+    await client.pinsPost({ pin });
+  }
+  async unpinCid(cid) {
+    const client = await this.getRemotePinningClient();
+    const pins = await client.pinsGet({ cid: [cid] });
+    if (pins.results.length === 0) {
+      return;
+    }
+    const requestIds = pins.results.map((pin) => pin.requestid);
+    const results = await Promise.allSettled(
+      requestIds.map(
+        (requestId) => client.pinsRequestidDelete({ requestid: requestId })
+      )
+    );
+    const failures = results.map((result, index) => ({ result, requestId: requestIds[index] })).filter(({ result }) => result.status === "rejected").map(({ result, requestId }) => ({
+      requestId,
+      error: result.reason
+    }));
+    if (failures.length > 0) {
+      const errorMessages = failures.map(
+        ({ requestId, error: error2 }) => `Failed to unpin request ID ${requestId}: ${error2.message || error2}`
+      ).join("; ");
+      const error = new Error(
+        `Partial unpin failure for CID ${cid}: ${errorMessages}`
+      );
+      console.error(error.message);
+    }
+  }
+  async isPinned(cid) {
+    const client = await this.getRemotePinningClient();
+    try {
+      const pins = await client.pinsGet({
+        cid: [cid],
+        status: ["pinned"]
+      });
+      return pins.results.length > 0;
+    } catch (error) {
+      console.error(`Error checking pin status for CID ${cid}:`, error);
+      throw error;
+    }
+  }
+  async listPinned() {
+    const client = await this.getRemotePinningClient();
+    const pins = await client.pinsGet({});
+    return pins.results.map((result) => result.pin.cid);
+  }
+  async destroy() {
+    if (this.helia) {
+      const blockstore = this.helia.blockstore;
+      const datastore = this.helia.datastore;
+      try {
+        await this.helia.stop();
+      } catch (error) {
+        console.error("Error stopping Helia:", error);
+      }
+      try {
+        if (blockstore && typeof blockstore.close === "function") {
+          await blockstore.close();
+        }
+      } catch (error) {
+        console.error("Error closing blockstore:", error);
+      }
+      try {
+        if (datastore && typeof datastore.close === "function") {
+          await datastore.close();
+        }
+      } catch (error) {
+        console.error("Error closing datastore:", error);
+      }
+      this.helia = null;
+      this.unixfs = null;
+    }
+    this.pinningClient = null;
+  }
+}
+
+class FileManagerFeature {
+  id = core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createNamespacedId("ipfs", "file-manager");
+  status = "enabled";
+  version = "0.1.0";
+  #heliaService = null;
+  #config = {};
+  #apiUrl;
+  async initialize(framework) {
+    const refineConfigCapability = await framework.getCapability("ipfs:refine-config");
+    if (!refineConfigCapability) {
+      throw new Error("Failed to get IPFS RefineConfig capability");
+    }
+    this.#apiUrl = refineConfigCapability.getApiUrl();
+    const authToken = refineConfigCapability.getAuthToken();
+    const emitter = refineConfigCapability.getEmitter();
+    emitter.on("authTokenChanged", (token) => {
+      if (this.#heliaService) {
+        this.#heliaService.updateConfig({ authToken: token });
+      }
+    });
+    const heliaConfig = {
+      ...this.#config,
+      apiUrl: this.#apiUrl,
+      authToken: authToken || void 0
+    };
+    this.#heliaService = new HeliaService(heliaConfig);
+    await this.#heliaService.getHelia();
+  }
+  async destroy(framework) {
+    if (this.#heliaService) {
+      await this.#heliaService.destroy();
+      this.#heliaService = null;
+    }
+  }
+  getHeliaService() {
+    if (!this.#heliaService) {
+      throw new Error("Helia service not initialized");
+    }
+    return this.#heliaService;
+  }
+  getApiUrl() {
+    return this.#apiUrl;
+  }
+  updateConfig(config) {
+    this.#config = { ...this.#config, ...config };
+    if (this.#heliaService) {
+      this.#heliaService.destroy();
+      const heliaConfig = {
+        ...this.#config,
+        apiUrl: this.#apiUrl
+      };
+      this.#heliaService = new HeliaService(heliaConfig);
+    }
+  }
+}
+
+const getGetApiBlockMetaCidUrl = (cid) => {
+  return `/api/api/block/meta/${cid}`;
+};
+const getApiBlockMetaCid = async (cid, options) => {
+  const res = await fetch(
+    getGetApiBlockMetaCidUrl(cid),
+    {
+      ...options,
+      method: "GET"
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+const getPostApiBlockMetaBatchUrl = () => {
+  return `/api/api/block/meta/batch`;
+};
+const postApiBlockMetaBatch = async (getBlockMetaBatchRequest, options) => {
+  const res = await fetch(
+    getPostApiBlockMetaBatchUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(
+        getBlockMetaBatchRequest
+      )
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+const getGetApiInfoUrl = () => {
+  return `/api/api/info`;
+};
+const getApiInfo = async (options) => {
+  const res = await fetch(
+    getGetApiInfoUrl(),
+    {
+      ...options,
+      method: "GET"
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+const getGetApiIpfsCidUrl = (cid) => {
+  return `/api/api/ipfs/${cid}`;
+};
+const getApiIpfsCid = async (cid, options) => {
+  const res = await fetch(
+    getGetApiIpfsCidUrl(cid),
+    {
+      ...options,
+      method: "GET"
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+const getHeadApiIpfsCidUrl = (cid) => {
+  return `/api/api/ipfs/${cid}`;
+};
+const headApiIpfsCid = async (cid, options) => {
+  const res = await fetch(
+    getHeadApiIpfsCidUrl(cid),
+    {
+      ...options,
+      method: "HEAD"
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+const getPostApiUploadUrl = () => {
+  return `/api/api/upload`;
+};
+const postApiUpload = async (postApiUploadBody, options) => {
+  const formData = new FormData();
+  formData.append(`file`, postApiUploadBody.file);
+  const res = await fetch(
+    getPostApiUploadUrl(),
+    {
+      ...options,
+      method: "POST",
+      body: formData
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+
+const getGetApiFilesUrl = () => {
+  return `/api/api/files`;
+};
+const getApiFiles = async (options) => {
+  const res = await fetch(
+    getGetApiFilesUrl(),
+    {
+      ...options,
+      method: "GET"
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+const getGetApiFilesBreadcrumbsUrl = () => {
+  return `/api/api/files/breadcrumbs`;
+};
+const getApiFilesBreadcrumbs = async (options) => {
+  const res = await fetch(
+    getGetApiFilesBreadcrumbsUrl(),
+    {
+      ...options,
+      method: "GET"
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+const getGetApiFilesDirectoryUrl = () => {
+  return `/api/api/files/directory`;
+};
+const getApiFilesDirectory = async (options) => {
+  const res = await fetch(
+    getGetApiFilesDirectoryUrl(),
+    {
+      ...options,
+      method: "GET"
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+
+const getGetApiPinsUrl = (params) => {
+  const normalizedParams = new URLSearchParams();
+  Object.entries(params || {}).forEach(([key, value]) => {
+    const explodeParameters = ["cid", "status"];
+    if (Array.isArray(value) && explodeParameters.includes(key)) {
+      value.forEach((v) => normalizedParams.append(key, v === null ? "null" : v.toString()));
+      return;
+    }
+    if (value !== void 0) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+  const stringifiedParams = normalizedParams.toString();
+  return stringifiedParams.length > 0 ? `/api/api/pins?${stringifiedParams}` : `/api/api/pins`;
+};
+const getApiPins = async (params, options) => {
+  const res = await fetch(
+    getGetApiPinsUrl(params),
+    {
+      ...options,
+      method: "GET"
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+const getPostApiPinsUrl = () => {
+  return `/api/api/pins`;
+};
+const postApiPins = async (pinRequest, options) => {
+  const res = await fetch(
+    getPostApiPinsUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(
+        pinRequest
+      )
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+const getDeleteApiPinsRequestidUrl = (requestid) => {
+  return `/api/api/pins/${requestid}`;
+};
+const deleteApiPinsRequestid = async (requestid, options) => {
+  const res = await fetch(
+    getDeleteApiPinsRequestidUrl(requestid),
+    {
+      ...options,
+      method: "DELETE"
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+const getGetApiPinsRequestidUrl = (requestid) => {
+  return `/api/api/pins/${requestid}`;
+};
+const getApiPinsRequestid = async (requestid, options) => {
+  const res = await fetch(
+    getGetApiPinsRequestidUrl(requestid),
+    {
+      ...options,
+      method: "GET"
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+const getPostApiPinsRequestidUrl = (requestid) => {
+  return `/api/api/pins/${requestid}`;
+};
+const postApiPinsRequestid = async (requestid, pinRequest, options) => {
+  const res = await fetch(
+    getPostApiPinsRequestidUrl(requestid),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(
+        pinRequest
+      )
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+
+const getPostApiUploadTusUrl = () => {
+  return `/api/api/upload/tus`;
+};
+const postApiUploadTus = async (postApiUploadTusBody, options) => {
+  const res = await fetch(
+    getPostApiUploadTusUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/offset+octet-stream", ...options?.headers },
+      body: JSON.stringify(
+        postApiUploadTusBody
+      )
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+const getDeleteApiUploadTusIdUrl = (id) => {
+  return `/api/api/upload/tus/${id}`;
+};
+const deleteApiUploadTusId = async (id, options) => {
+  const res = await fetch(
+    getDeleteApiUploadTusIdUrl(id),
+    {
+      ...options,
+      method: "DELETE"
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+const getHeadApiUploadTusIdUrl = (id) => {
+  return `/api/api/upload/tus/${id}`;
+};
+const headApiUploadTusId = async (id, options) => {
+  const res = await fetch(
+    getHeadApiUploadTusIdUrl(id),
+    {
+      ...options,
+      method: "HEAD"
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
+const getPatchApiUploadTusIdUrl = (id) => {
+  return `/api/api/upload/tus/${id}`;
+};
+const patchApiUploadTusId = async (id, patchApiUploadTusIdBody, options) => {
+  const res = await fetch(
+    getPatchApiUploadTusIdUrl(id),
+    {
+      ...options,
+      method: "PATCH",
+      headers: { "Content-Type": "application/offset+octet-stream", ...options?.headers },
+      body: JSON.stringify(
+        patchApiUploadTusIdBody
+      )
+    }
+  );
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers };
+};
 
 function index() {
   return {
-    capabilities: [new IpfsProtocol(), new IpfsUpload()],
+    capabilities: [
+      new IpfsProtocol(),
+      new IpfsUpload(),
+      new Capability()
+    ],
     capabilityAssociations: [
       {
         associated: ["ipfs:upload"],
         primary: "ipfs:protocol"
       }
     ],
+    features: [new FileManagerFeature()],
     async destroy(_framework) {
       console.log("Plugin IPFS destroyed");
     },
@@ -47521,4 +48560,4 @@ function index() {
   };
 }
 
-export { index as default };
+export { index as default, deleteApiPinsRequestid, deleteApiUploadTusId, getApiBlockMetaCid, getApiFiles, getApiFilesBreadcrumbs, getApiFilesDirectory, getApiInfo, getApiIpfsCid, getApiPins, getApiPinsRequestid, getDeleteApiPinsRequestidUrl, getDeleteApiUploadTusIdUrl, getGetApiBlockMetaCidUrl, getGetApiFilesBreadcrumbsUrl, getGetApiFilesDirectoryUrl, getGetApiFilesUrl, getGetApiInfoUrl, getGetApiIpfsCidUrl, getGetApiPinsRequestidUrl, getGetApiPinsUrl, getHeadApiIpfsCidUrl, getHeadApiUploadTusIdUrl, getPatchApiUploadTusIdUrl, getPostApiBlockMetaBatchUrl, getPostApiPinsRequestidUrl, getPostApiPinsUrl, getPostApiUploadTusUrl, getPostApiUploadUrl, headApiIpfsCid, headApiUploadTusId, patchApiUploadTusId, postApiBlockMetaBatch, postApiPins, postApiPinsRequestid, postApiUpload, postApiUploadTus };

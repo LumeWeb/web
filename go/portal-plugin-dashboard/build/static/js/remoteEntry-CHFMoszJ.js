@@ -1,5 +1,5 @@
-import { loadShare_1, init_1, core_ipfs__mf_v__runtimeInit__mf_v__ } from './core_ipfs__mf_v__runtimeInit__mf_v__-CAc0Zb6r.js';
-import exposesMap from './virtualExposes-CNcYDY2V.js';
+import { loadShare_1, init_1, core_dashboard__mf_v__runtimeInit__mf_v__ } from './core_dashboard__mf_v__runtimeInit__mf_v__-DeI6jfgm.js';
+import exposesMap from './virtualExposes-BnICTVZN.js';
 
 function BridgeReactPlugin() {
   return {
@@ -18,7 +18,7 @@ const usedShared = {
             version: "0.0.0",
             scope: ["default"],
             loaded: false,
-            from: "core:ipfs",
+            from: "core:dashboard",
             async get () {
               {
                 const shared = await loadShare_1("@lumeweb/portal-framework-core");
@@ -33,22 +33,42 @@ const usedShared = {
             }
           }
         ,
-          "react": {
-            name: "react",
-            version: "18.3.1",
+          "@lumeweb/portal-framework-ui": {
+            name: "@lumeweb/portal-framework-ui",
+            version: "0.0.0",
             scope: ["default"],
             loaded: false,
-            from: "core:ipfs",
+            from: "core:dashboard",
             async get () {
               {
-                const shared = await loadShare_1("react");
+                const shared = await loadShare_1("@lumeweb/portal-framework-ui");
                 if (shared) return () => shared;
-                throw new Error(`Shared module '${"react"}' must be provided by host`);
+                throw new Error(`Shared module '${"@lumeweb/portal-framework-ui"}' must be provided by host`);
               }
             },
             shareConfig: {
               singleton: true,
-              requiredVersion: "^18.3.1",
+              requiredVersion: "^0.0.0",
+              import: false,
+            }
+          }
+        ,
+          "@refinedev/core": {
+            name: "@refinedev/core",
+            version: "4.57.10",
+            scope: ["default"],
+            loaded: false,
+            from: "core:dashboard",
+            async get () {
+              {
+                const shared = await loadShare_1("@refinedev/core");
+                if (shared) return () => shared;
+                throw new Error(`Shared module '${"@refinedev/core"}' must be provided by host`);
+              }
+            },
+            shareConfig: {
+              singleton: true,
+              requiredVersion: "^4.57.10",
               import: false,
             }
           }
@@ -58,7 +78,7 @@ const usedShared = {
             version: "0.0.0",
             scope: ["default"],
             loaded: false,
-            from: "core:ipfs",
+            from: "core:dashboard",
             async get () {
               {
                 const shared = await loadShare_1("@lumeweb/portal-framework-ui-core");
@@ -78,7 +98,7 @@ const usedShared = {
             version: "7.5.2",
             scope: ["default"],
             loaded: false,
-            from: "core:ipfs",
+            from: "core:dashboard",
             async get () {
               {
                 const shared = await loadShare_1("react-router");
@@ -93,17 +113,17 @@ const usedShared = {
             }
           }
         ,
-          "react-dom": {
-            name: "react-dom",
+          "react": {
+            name: "react",
             version: "18.3.1",
             scope: ["default"],
             loaded: false,
-            from: "core:ipfs",
+            from: "core:dashboard",
             async get () {
               {
-                const shared = await loadShare_1("react-dom");
+                const shared = await loadShare_1("react");
                 if (shared) return () => shared;
-                throw new Error(`Shared module '${"react-dom"}' must be provided by host`);
+                throw new Error(`Shared module '${"react"}' must be provided by host`);
               }
             },
             shareConfig: {
@@ -113,12 +133,32 @@ const usedShared = {
             }
           }
         ,
+          "@tanstack/react-query": {
+            name: "@tanstack/react-query",
+            version: "4.36.1",
+            scope: ["default"],
+            loaded: false,
+            from: "core:dashboard",
+            async get () {
+              {
+                const shared = await loadShare_1("@tanstack/react-query");
+                if (shared) return () => shared;
+                throw new Error(`Shared module '${"@tanstack/react-query"}' must be provided by host`);
+              }
+            },
+            shareConfig: {
+              singleton: true,
+              requiredVersion: "^4.36.1",
+              import: false,
+            }
+          }
+        ,
           "react-hook-form": {
             name: "react-hook-form",
             version: "7.54.0",
             scope: ["default"],
             loaded: false,
-            from: "core:ipfs",
+            from: "core:dashboard",
             async get () {
               {
                 const shared = await loadShare_1("react-hook-form");
@@ -132,6 +172,26 @@ const usedShared = {
               import: false,
             }
           }
+        ,
+          "react-dom": {
+            name: "react-dom",
+            version: "18.3.1",
+            scope: ["default"],
+            loaded: false,
+            from: "core:dashboard",
+            async get () {
+              {
+                const shared = await loadShare_1("react-dom");
+                if (shared) return () => shared;
+                throw new Error(`Shared module '${"react-dom"}' must be provided by host`);
+              }
+            },
+            shareConfig: {
+              singleton: true,
+              requiredVersion: "^18.3.1",
+              import: false,
+            }
+          }
         
     };
       const usedRemotes = [
@@ -139,7 +199,7 @@ const usedShared = {
 
 const initTokens = {};
   const shareScopeName = "default";
-  const mfName = "core:ipfs";
+  const mfName = "core:dashboard";
   async function init(shared = {}, initScope = []) {
     const initRes = init_1({
       name: mfName,
@@ -164,7 +224,7 @@ const initTokens = {};
     } catch (e) {
       console.error(e);
     }
-    core_ipfs__mf_v__runtimeInit__mf_v__.initResolve(initRes);
+    core_dashboard__mf_v__runtimeInit__mf_v__.initResolve(initRes);
     return initRes
   }
 

@@ -1,9 +1,9 @@
 import { jsxRuntimeExports, core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__, core_dashboard__loadShare__react__loadShare__ } from './jsx-runtime-D_0QkpWj.js';
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CFuxgGnQ.js';
-import { UploadStatus, isFolderBundle } from './upload-Dami3hzH.js';
+import { UploadStatus, isFolderBundle } from './upload-Cr_MDl4Y.js';
 import { core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__-DOYraqnS.js';
 import { z } from './index-DESmQ-Cl.js';
-import { Dropzone, FileText, Check, Folder, filesize, UploadProgress, Upload } from './UploadProgress-DV-AG4es.js';
+import { Dropzone, FileText, Check, Folder, filesize, UploadProgress, Upload } from './Dropzone-PZtk_gpk.js';
 import { createLucideIcon } from './createLucideIcon-BcyKBqCx.js';
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__-BjauFvDm.js';
 
@@ -211,7 +211,7 @@ const ReviewComponent = ({
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("h4", { className: "mb-2 font-medium", children: [
-        "Selected Files (",
+        "Files to Upload (",
         fileCount,
         ")"
       ] }),
@@ -290,7 +290,7 @@ const ProgressComponent = ({
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     UploadProgress,
     {
-      description: `Uploading ${fileCount} file(s) to ${service.name}`,
+      description: `Uploading ${fileCount} file(s) to ${service.name} (will be queued for processing)`,
       fileCount,
       files: uppyFiles,
       progress,
@@ -313,7 +313,7 @@ const UploadedFileItem = ({
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "truncate text-sm font-medium", children: fileData.name }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-muted-foreground text-xs", children: [
           filesize(fileData.size),
-          " • Saved to ",
+          " • Queued in ",
           serviceName
         ] })
       ] })
@@ -345,18 +345,18 @@ const CompleteComponent = ({
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "py-6 text-center", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "h-8 w-8 text-green-600" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "mb-2 text-lg font-semibold", children: "Files Successfully Uploaded" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "mb-2 text-lg font-semibold", children: "Files Uploaded and Queued" }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-muted-foreground", children: [
         fileCount,
         " ",
         fileCount === 1 ? "file" : "files",
-        " have been saved to",
-        " ",
-        service.name
+        " have been uploaded and queued for processing in ",
+        service.name,
+        ". Processing may take some time to complete."
       ] })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-medium", children: "Your Files" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-medium", children: "Uploaded Files" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-h-48 space-y-2 overflow-y-auto", children: uploadedFiles.map((fileData, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(
         UploadedFileItem,
         {
@@ -368,31 +368,46 @@ const CompleteComponent = ({
     ] })
   ] });
 };
-const eventListeners = /* @__PURE__ */ new Map();
-const cleanupEventListeners = (uploadManager) => {
-  if (uploadManager && eventListeners.has(uploadManager)) {
-    const listeners = eventListeners.get(uploadManager);
-    Object.values(listeners || {}).forEach((cleanup) => {
-      if (cleanup) cleanup();
-    });
-    eventListeners.delete(uploadManager);
-  }
-};
-const setupEventListeners = (uploadManager, forceRerender, environmentSync) => {
-  const handleError = () => {
-    forceRerender?.();
-  };
-  const handleComplete = (data) => {
-    const env = environmentSync?.();
-    if (env?.step?.jumpTo && (!data.failed || data.failed.length === 0)) {
-      env.step.jumpTo(5);
+function uploadWizardForm(services, uploadFeature) {
+  const uploadManager = uploadFeature?.getManager();
+  const hasServices = services && services.length > 0;
+  const { forceRerender, forceRerenderCallback } = core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.createForceRerenderReceiver();
+  const { environmentSync, environmentSyncCallback } = core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.createEnvironmentReceiver();
+  uploadManager.clearFiles();
+  let isNavigating = false;
+  let pendingNavigation = null;
+  const eventListeners = /* @__PURE__ */ new Map();
+  const cleanupEventListeners = (uploadManager2) => {
+    if (uploadManager2 && eventListeners.has(uploadManager2)) {
+      const listeners2 = eventListeners.get(uploadManager2);
+      Object.values(listeners2 || {}).forEach((cleanup) => {
+        if (cleanup) cleanup();
+      });
+      eventListeners.delete(uploadManager2);
     }
-    forceRerender?.();
   };
+  cleanupEventListeners(uploadManager);
   const eventsToListen = [
-    { handler: handleError, name: "error" },
-    { handler: handleError, name: "upload-error" },
-    { handler: handleComplete, name: "complete" }
+    { handler: forceRerender, name: "error" },
+    { handler: forceRerender, name: "upload-error" },
+    {
+      handler: () => {
+        if (!isNavigating) {
+          const env = environmentSync();
+          if (env?.step?.jumpTo) {
+            env.step.jumpTo(5);
+          }
+        } else {
+          pendingNavigation = {
+            fromStep: 0,
+            toStep: 5,
+            type: "jumpTo"
+          };
+        }
+        forceRerender?.();
+      },
+      name: "complete"
+    }
   ];
   const listeners = {};
   eventsToListen.forEach((event) => {
@@ -401,16 +416,6 @@ const setupEventListeners = (uploadManager, forceRerender, environmentSync) => {
   if (uploadManager) {
     eventListeners.set(uploadManager, listeners);
   }
-  return listeners;
-};
-function uploadWizardForm(services, uploadFeature) {
-  const uploadManager = uploadFeature?.getManager();
-  const hasServices = services && services.length > 0;
-  cleanupEventListeners(uploadManager);
-  const { forceRerender, forceRerenderCallback } = core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.createForceRerenderReceiver();
-  const { environmentSync, environmentSyncCallback } = core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.createEnvironmentReceiver();
-  setupEventListeners(uploadManager, forceRerender, environmentSync);
-  uploadManager.clearFiles();
   const stepDefinitions = [
     {
       description: "Select where you want to store your files",
@@ -620,7 +625,25 @@ function uploadWizardForm(services, uploadFeature) {
     environmentSync: environmentSyncCallback,
     forceRerender: forceRerenderCallback,
     steps: stepDefinitions,
-    submitLabel: "Done"
+    submitLabel: "Done",
+    onNavigationStart: () => {
+      isNavigating = true;
+    },
+    onNavigationEnd: () => {
+      isNavigating = false;
+      if (pendingNavigation) {
+        const navigationRequest = pendingNavigation;
+        pendingNavigation = null;
+        const env = environmentSync();
+        if (env?.step?.jumpTo) {
+          env.step.jumpTo(navigationRequest.toStep);
+        }
+      }
+    },
+    onNavigationError: () => {
+      isNavigating = false;
+      pendingNavigation = null;
+    }
   };
 }
 
@@ -641,7 +664,7 @@ function uploadWizardDialogConfig(services, uploadManager, onComplete, onCancel)
     preventCloseOnOutsideClick: true,
     size: "6xl",
     title: "Upload Files",
-    type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.DialogType.WIZARD_FORM
+    type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.DialogTypes.WIZARD_FORM
   };
 }
 
@@ -667,14 +690,14 @@ function useUploadManager() {
         setUploadManager(feature);
         const handleError = (file, error) => {
           open?.({
-            description: error.message,
+            description: error?.message,
             message: "Upload Error",
             type: "error"
           });
         };
         const handleRestrictionFailed = (file, error) => {
           open?.({
-            description: error.message,
+            description: error?.message,
             message: "Invalid File",
             type: "error"
           });

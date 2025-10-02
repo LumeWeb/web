@@ -55,7 +55,7 @@ function updatePasswordDialogConfig(updatePasswordHook) {
     },
     onSuccess: () => void 0,
     title: "Change Password",
-    type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.DialogType.FORM
+    type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.DialogTypes.FORM
   };
 }
 

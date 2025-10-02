@@ -12,6 +12,7 @@ var FileStatus = /* @__PURE__ */ ((FileStatus2) => {
   FileStatus2["COMPLETE"] = "complete";
   FileStatus2["ERROR"] = "error";
   FileStatus2["PENDING"] = "pending";
+  FileStatus2["PREPROCESSING"] = "preprocessing";
   FileStatus2["UPLOADING"] = "uploading";
   return FileStatus2;
 })(FileStatus || {});
