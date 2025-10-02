@@ -555,7 +555,7 @@ export class Manager implements IUploadManager {
           const webkitRelativePath = (f.data as any).webkitRelativePath || '';
           return webkitRelativePath.startsWith(`${folderName}/`);
         });
-        const totalSize = folderFiles.reduce((sum, f) => sum + f.size, 0) + file.size;
+        const totalSize = folderFiles.reduce((sum, f) => sum + (f.size ?? 0), 0) + (file.size ?? 0);
 
         const bundleMeta: BundleMetadata = {
           bundleName: folderName,

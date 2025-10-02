@@ -2,7 +2,6 @@ import type { RouteDefinition } from "@lumeweb/portal-framework-core";
 
 import {
   Activity,
-  Folder,
   Key,
   LayoutDashboard,
   Shield,

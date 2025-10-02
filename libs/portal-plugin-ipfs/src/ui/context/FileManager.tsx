@@ -47,8 +47,11 @@ export const FileManagerProvider: React.FC<{ children: React.ReactNode }> = ({
       // Construct the trustless gateway endpoint URL
       const gatewayUrl = `${apiUrl}/ipfs/${cid}`;
       
-      // Open the URL in a new tab
-      window.open(gatewayUrl, "_blank");
+      // Open the URL in a new tab with protection against reverse tabnabbing
+      const newWindow = window.open(gatewayUrl, "_blank", "noopener,noreferrer");
+      if (newWindow) {
+        newWindow.opener = null;
+      }
     } catch (error) {
       console.error("Failed to download file:", error);
       // Handle error appropriately - you might want to show a notification or alert

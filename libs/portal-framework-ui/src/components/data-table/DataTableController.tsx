@@ -12,7 +12,7 @@ export interface TableControls<TData extends BaseRecord = BaseRecord> {
   getCurrentSorters: () => any[];
 }
 
-interface DataTableControllerProps<TData extends BaseRecord = BaseRecord> {
+export interface DataTableControllerProps<TData extends BaseRecord = BaseRecord> {
   onControlsReady?: (controls: TableControls<TData>) => void;
 }
 
