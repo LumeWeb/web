@@ -1,7 +1,7 @@
 import { createEnv, z, createRoot } from './index-DRtNAoCS.js';
 import { dashboard__loadShare__react__loadShare__, React3 } from './dashboard__loadShare__react__loadShare__-A-_ogCU6.js';
 import { createLucideIcon, jsxRuntimeExports } from './createLucideIcon-DMX48tGS.js';
-import { federationRuntime } from './virtual_mf-REMOTE_ENTRY_ID-CdiOFrlK.js';
+import { federationRuntime } from './virtual_mf-REMOTE_ENTRY_ID-D6TTdSCM.js';
 import { getDefaultExportFromCjs } from './_commonjsHelpers-BILit0S-.js';
 import { index_cjs } from './dashboard__mf_v__runtimeInit__mf_v__-CrvQyIUV.js';
 import { dashboard__loadShare__react_mf_2_dom__loadShare__ } from './dashboard__loadShare__react_mf_2_dom__loadShare__-sIXfFKrj.js';
@@ -11674,7 +11674,6 @@ var Framework = class {
 	async loadFeature(id) {
 		validateNamespacedId(id);
 		const feature = await this.#plugins.loadFeature(id);
-		if (feature) await feature.initialize(this);
 		return feature;
 	}
 	registerCapability(capability, pluginId) {
@@ -12184,6 +12183,76 @@ function useFrameworkLoading() {
 		reinitialize: context.reinitialize
 	};
 }
+function useFrameworkData(fetchData, deps = []) {
+	const { framework, isLoading: frameworkLoading, error: frameworkError } = useFramework();
+	const [data, setData] = dashboard__loadShare__react__loadShare__.useState(null);
+	const [error, setError] = dashboard__loadShare__react__loadShare__.useState(null);
+	const [isLoading, setIsLoading] = dashboard__loadShare__react__loadShare__.useState(true);
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
+		let mounted = true;
+		if (frameworkError) {
+			if (mounted) {
+				setError(frameworkError);
+				setIsLoading(false);
+			}
+			return;
+		} else if (frameworkLoading) {
+			if (mounted) setIsLoading(true);
+			return;
+		}
+		setIsLoading(true);
+		setError(null);
+		fetchData().then((result) => {
+			if (mounted) {
+				setData(result);
+				setIsLoading(false);
+			}
+		}).catch((err) => {
+			if (mounted) {
+				setError(err);
+				setIsLoading(false);
+			}
+		});
+		return () => {
+			mounted = false;
+		};
+	}, [
+		framework,
+		frameworkLoading,
+		frameworkError,
+		fetchData,
+		...deps
+	]);
+	return {
+		data,
+		error,
+		isLoading
+	};
+}
+function useCapability(id) {
+	const { framework } = useFramework();
+	const fetchCapability = dashboard__loadShare__react__loadShare__.useCallback(() => {
+		if (!framework) throw new Error("Framework not initialized");
+		return framework.getCapability(id);
+	}, [framework, id]);
+	return useFrameworkData(fetchCapability);
+}
+function useFeature(id) {
+	const { framework } = useFramework();
+	const fetchFeature = dashboard__loadShare__react__loadShare__.useCallback(() => {
+		if (!framework) throw new Error("Framework not initialized");
+		return framework.getFeature(id);
+	}, [framework, id]);
+	return useFrameworkData(fetchFeature);
+}
+function useCapabilitiesByType(typeId) {
+	const { framework } = useFramework();
+	const fetchByType = dashboard__loadShare__react__loadShare__.useCallback(() => {
+		if (!framework) throw new Error("Framework not initialized");
+		return framework.getCapabilitiesByType(typeId);
+	}, [framework, typeId]);
+	return useFrameworkData(fetchByType);
+}
 
 //#region src/hooks/useWidgetArea.ts
 function useWidgetArea(id) {
@@ -12601,4 +12670,4 @@ function normalizeDataProvider(dataProvider) {
 	return dataProvider;
 }
 
-export { Builder, ErrorDisplay, FlexWidgetArea, Framework, FrameworkProvider, GridWidgetArea, HostContextBridge, MockFrameworkProvider, PluginManager, RemoteContextConsumer, RouteErrorBoundary, RouteErrorBoundaryFallback, RouteLoading, __test_clearCache, cleanProtocolString, cleanTrailingSlashes, createBridgeComponent, createNamespacedId, createRemoteComponentLoader, defaultRemoteOptions, ensureResource, env, fetchPortalMeta, getAccountSubdomain, getApiBaseUrl, getCurrentLocation, getDefaultRefineOptions, getPluginMeta, getPortalPluginManifests, getProtocolDomain, getSdk, isNamespacedId, mergeRefineConfig, normalizeDataProvider, normalizeId, parseNamespacedId, registerBridgedContext, resetCurrentLocation, setCurrentLocation, useFramework, useFrameworkLoading, validateCapability, validateCapabilityDetailed, validateFeature, validateFeatureDetailed, validateNamespacedId, validatePlugin, validatePluginDetailed };
+export { Builder, ErrorDisplay, FlexWidgetArea, Framework, FrameworkProvider, GridWidgetArea, HostContextBridge, MockFrameworkProvider, PluginManager, RemoteContextConsumer, RouteErrorBoundary, RouteErrorBoundaryFallback, RouteLoading, __test_clearCache, cleanProtocolString, cleanTrailingSlashes, createBridgeComponent, createNamespacedId, createRemoteComponentLoader, defaultRemoteOptions, ensureResource, env, fetchPortalMeta, getAccountSubdomain, getApiBaseUrl, getCurrentLocation, getDefaultRefineOptions, getPluginMeta, getPortalPluginManifests, getProtocolDomain, getSdk, isNamespacedId, mergeRefineConfig, normalizeDataProvider, normalizeId, parseNamespacedId, registerBridgedContext, resetCurrentLocation, setCurrentLocation, useCapabilitiesByType, useCapability, useFeature, useFramework, useFrameworkLoading, validateCapability, validateCapabilityDetailed, validateFeature, validateFeatureDetailed, validateNamespacedId, validatePlugin, validatePluginDetailed };

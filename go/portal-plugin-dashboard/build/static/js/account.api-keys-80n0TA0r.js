@@ -3,6 +3,7 @@ import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_
 import { core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__-DOYraqnS.js';
 import { z } from './index-DESmQ-Cl.js';
 import { createLucideIcon } from './createLucideIcon-BcyKBqCx.js';
+import { createColumnHelper } from './index-BGqH-Bku.js';
 import { format } from './format-CT9KiSuR.js';
 
 /**
@@ -35,32 +36,6 @@ const __iconNode = [
   ["line", { x1: "14", x2: "14", y1: "11", y2: "17", key: "xtxkd" }]
 ];
 const Trash2 = createLucideIcon("trash-2", __iconNode);
-
-/**
-   * table-core
-   *
-   * Copyright (c) TanStack
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE.md file in the root directory of this source tree.
-   *
-   * @license MIT
-   */
-function createColumnHelper() {
-  return {
-    accessor: (accessor, column) => {
-      return typeof accessor === "function" ? {
-        ...column,
-        accessorFn: accessor
-      } : {
-        ...column,
-        accessorKey: accessor
-      };
-    },
-    display: (column) => column,
-    group: (column) => column
-  };
-}
 
 const schema = z.object({
   name: z.string().min(1, "Name cannot be empty").max(100, "Name must be less than 100 characters").refine((val) => val.trim().length > 0, {
@@ -101,7 +76,7 @@ function createApiKeyDialogConfig(onSuccess) {
       }
     },
     title: "Create New API Key",
-    type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.DialogType.FORM
+    type: core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.DialogTypes.FORM
   };
 }
 

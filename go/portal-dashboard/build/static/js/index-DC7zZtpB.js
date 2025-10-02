@@ -1,9 +1,9 @@
-import { dashboard__loadShare__react__loadShare__, React3, React5 } from './dashboard__loadShare__react__loadShare__-A-_ogCU6.js';
+import { dashboard__loadShare__react__loadShare__, React3 } from './dashboard__loadShare__react__loadShare__-A-_ogCU6.js';
 import { createLucideIcon, jsxRuntimeExports } from './createLucideIcon-DMX48tGS.js';
-import { dashboard__loadShare__react_mf_2_dom__loadShare__, ReactDOM } from './dashboard__loadShare__react_mf_2_dom__loadShare__-sIXfFKrj.js';
-import { ChevronDownIcon as ChevronDownIcon$1, ChevronLeft, ChevronRight, ArrowRightIcon, ArrowLeftIcon, isObjectLike_1, isArray_1, _baseGetTag, isObject as isObject$7, isFunction as isFunction$2, toString_1, _Stack, _baseIsEqual, isObject_1, keys_1, _castPath, _toKey, isLength_1, _isIndex, isArguments_1, _isKey, get_1, _baseGet, _setToArray, _Set, _SetCache, _cacheHas, _Symbol, _arrayPush, isArrayLike_1, isSymbol_1, _arrayMap, _baseUnary, _getNative, eq_1, _root, CheckIcon, DotFilledIcon, ChevronRightIcon, dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__, EyeOpenIcon, EyeNoneIcon, ChevronUpIcon, CaretSortIcon, Cross2Icon } from './_baseIsEqual-B7GFR2Lt.js';
+import { useControllableState as useControllableState$1, createContextScope, useId, Primitive, Presence, composeEventHandlers, useComposedRefs as useComposedRefs$1, useLayoutEffect2, createCollection, useDirection, ChevronDownIcon as ChevronDownIcon$1, Slot as Slot$3, createSidecarMedium, __rest, useMergeRefs, __assign, zeroRightClassName, fullWidthClassName, styleSingleton, __spreadArray, RemoveScrollBar, exportSidecar, Portal as Portal$4, createContext2, hideOthers, createSlot, useFocusGuards, FocusScope, DismissableLayer, createSlottable, createPopperScope, Root2$1 as Root2$7, Anchor, Content as Content$4, Arrow, useCallbackRef as useCallbackRef$1, ChevronLeft, ChevronRight, ArrowRightIcon, ArrowLeftIcon, isObjectLike_1, isArray_1, _baseGetTag, isObject as isObject$7, isFunction as isFunction$1, toString_1, _Stack, _baseIsEqual, isObject_1, keys_1, _castPath, _toKey, isLength_1, _isIndex, isArguments_1, _isKey, get_1, _baseGet, _setToArray, _Set, _SetCache, _cacheHas, _Symbol, _arrayPush, isArrayLike_1, isSymbol_1, _arrayMap, _baseUnary, _getNative, eq_1, _root, useSize, CheckIcon, X as X$1, composeRefs as composeRefs$1, Search, Root2 as Root2$8, Group2, Portal2 as Portal2$1, RadioGroup2, Sub2, Trigger as Trigger$6, CheckboxItem2, ItemIndicator2, Content2 as Content2$5, Item2 as Item2$1, Label2, RadioItem2, DotFilledIcon, Separator2, SubContent2, SubTrigger2, ChevronRightIcon, dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__, EyeOpenIcon, EyeNoneIcon, createRovingFocusGroupScope, Root as Root$d, Item as Item$2, ChevronUpIcon, CaretSortIcon, Cross2Icon, Branch, Root$1 as Root$e, dispatchDiscreteCustomEvent } from './_baseIsEqual-4GdOyeRH.js';
 import { getDefaultExportFromCjs } from './_commonjsHelpers-BILit0S-.js';
 import { shimExports } from './index-C2B07oHK.js';
+import { dashboard__loadShare__react_mf_2_dom__loadShare__ } from './dashboard__loadShare__react_mf_2_dom__loadShare__-sIXfFKrj.js';
 import './dashboard__mf_v__runtimeInit__mf_v__-CrvQyIUV.js';
 
 /**
@@ -14,13 +14,13 @@ import './dashboard__mf_v__runtimeInit__mf_v__-CrvQyIUV.js';
  */
 
 
-const __iconNode$4 = [
+const __iconNode$2 = [
   ["path", { d: "M8 2v4", key: "1cmpym" }],
   ["path", { d: "M16 2v4", key: "4m81vk" }],
   ["rect", { width: "18", height: "18", x: "3", y: "4", rx: "2", key: "1hopcy" }],
   ["path", { d: "M3 10h18", key: "8toen8" }]
 ];
-const Calendar$1 = createLucideIcon("calendar", __iconNode$4);
+const Calendar$1 = createLucideIcon("calendar", __iconNode$2);
 
 /**
  * @license lucide-react v0.511.0 - ISC
@@ -30,8 +30,8 @@ const Calendar$1 = createLucideIcon("calendar", __iconNode$4);
  */
 
 
-const __iconNode$3 = [["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]];
-const Circle = createLucideIcon("circle", __iconNode$3);
+const __iconNode$1 = [["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]];
+const Circle = createLucideIcon("circle", __iconNode$1);
 
 /**
  * @license lucide-react v0.511.0 - ISC
@@ -41,36 +41,8 @@ const Circle = createLucideIcon("circle", __iconNode$3);
  */
 
 
-const __iconNode$2 = [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]];
-const LoaderCircle = createLucideIcon("loader-circle", __iconNode$2);
-
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-
-
-const __iconNode$1 = [
-  ["path", { d: "m21 21-4.34-4.34", key: "14j7rj" }],
-  ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
-];
-const Search = createLucideIcon("search", __iconNode$1);
-
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-
-
-const __iconNode = [
-  ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
-  ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
-];
-const X$1 = createLucideIcon("x", __iconNode);
+const __iconNode = [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]];
+const LoaderCircle = createLucideIcon("loader-circle", __iconNode);
 
 //#region src/components/icons.tsx
 const InfoIcon = ({ className }) => {
@@ -3658,527 +3630,6 @@ function cn$1(...inputs) {
 	return twMerge(clsx(inputs));
 }
 
-// packages/react/context/src/create-context.tsx
-function createContext2(rootComponentName, defaultContext) {
-  const Context = dashboard__loadShare__react__loadShare__.createContext(defaultContext);
-  const Provider = (props) => {
-    const { children, ...context } = props;
-    const value = dashboard__loadShare__react__loadShare__.useMemo(() => context, Object.values(context));
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Context.Provider, { value, children });
-  };
-  Provider.displayName = rootComponentName + "Provider";
-  function useContext2(consumerName) {
-    const context = dashboard__loadShare__react__loadShare__.useContext(Context);
-    if (context) return context;
-    if (defaultContext !== void 0) return defaultContext;
-    throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
-  }
-  return [Provider, useContext2];
-}
-function createContextScope(scopeName, createContextScopeDeps = []) {
-  let defaultContexts = [];
-  function createContext3(rootComponentName, defaultContext) {
-    const BaseContext = dashboard__loadShare__react__loadShare__.createContext(defaultContext);
-    const index = defaultContexts.length;
-    defaultContexts = [...defaultContexts, defaultContext];
-    const Provider = (props) => {
-      const { scope, children, ...context } = props;
-      const Context = scope?.[scopeName]?.[index] || BaseContext;
-      const value = dashboard__loadShare__react__loadShare__.useMemo(() => context, Object.values(context));
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(Context.Provider, { value, children });
-    };
-    Provider.displayName = rootComponentName + "Provider";
-    function useContext2(consumerName, scope) {
-      const Context = scope?.[scopeName]?.[index] || BaseContext;
-      const context = dashboard__loadShare__react__loadShare__.useContext(Context);
-      if (context) return context;
-      if (defaultContext !== void 0) return defaultContext;
-      throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
-    }
-    return [Provider, useContext2];
-  }
-  const createScope = () => {
-    const scopeContexts = defaultContexts.map((defaultContext) => {
-      return dashboard__loadShare__react__loadShare__.createContext(defaultContext);
-    });
-    return function useScope(scope) {
-      const contexts = scope?.[scopeName] || scopeContexts;
-      return dashboard__loadShare__react__loadShare__.useMemo(
-        () => ({ [`__scope${scopeName}`]: { ...scope, [scopeName]: contexts } }),
-        [scope, contexts]
-      );
-    };
-  };
-  createScope.scopeName = scopeName;
-  return [createContext3, composeContextScopes(createScope, ...createContextScopeDeps)];
-}
-function composeContextScopes(...scopes) {
-  const baseScope = scopes[0];
-  if (scopes.length === 1) return baseScope;
-  const createScope = () => {
-    const scopeHooks = scopes.map((createScope2) => ({
-      useScope: createScope2(),
-      scopeName: createScope2.scopeName
-    }));
-    return function useComposedScopes(overrideScopes) {
-      const nextScopes = scopeHooks.reduce((nextScopes2, { useScope, scopeName }) => {
-        const scopeProps = useScope(overrideScopes);
-        const currentScope = scopeProps[`__scope${scopeName}`];
-        return { ...nextScopes2, ...currentScope };
-      }, {});
-      return dashboard__loadShare__react__loadShare__.useMemo(() => ({ [`__scope${baseScope.scopeName}`]: nextScopes }), [nextScopes]);
-    };
-  };
-  createScope.scopeName = baseScope.scopeName;
-  return createScope;
-}
-
-// packages/react/compose-refs/src/compose-refs.tsx
-function setRef$1(ref, value) {
-  if (typeof ref === "function") {
-    return ref(value);
-  } else if (ref !== null && ref !== void 0) {
-    ref.current = value;
-  }
-}
-function composeRefs$1(...refs) {
-  return (node) => {
-    let hasCleanup = false;
-    const cleanups = refs.map((ref) => {
-      const cleanup = setRef$1(ref, node);
-      if (!hasCleanup && typeof cleanup == "function") {
-        hasCleanup = true;
-      }
-      return cleanup;
-    });
-    if (hasCleanup) {
-      return () => {
-        for (let i = 0; i < cleanups.length; i++) {
-          const cleanup = cleanups[i];
-          if (typeof cleanup == "function") {
-            cleanup();
-          } else {
-            setRef$1(refs[i], null);
-          }
-        }
-      };
-    }
-  };
-}
-function useComposedRefs$1(...refs) {
-  return dashboard__loadShare__react__loadShare__.useCallback(composeRefs$1(...refs), refs);
-}
-
-// src/slot.tsx
-// @__NO_SIDE_EFFECTS__
-function createSlot(ownerName) {
-  const SlotClone = /* @__PURE__ */ createSlotClone(ownerName);
-  const Slot2 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-    const { children, ...slotProps } = props;
-    const childrenArray = dashboard__loadShare__react__loadShare__.Children.toArray(children);
-    const slottable = childrenArray.find(isSlottable);
-    if (slottable) {
-      const newElement = slottable.props.children;
-      const newChildren = childrenArray.map((child) => {
-        if (child === slottable) {
-          if (dashboard__loadShare__react__loadShare__.Children.count(newElement) > 1) return dashboard__loadShare__react__loadShare__.Children.only(null);
-          return dashboard__loadShare__react__loadShare__.isValidElement(newElement) ? newElement.props.children : null;
-        } else {
-          return child;
-        }
-      });
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(SlotClone, { ...slotProps, ref: forwardedRef, children: dashboard__loadShare__react__loadShare__.isValidElement(newElement) ? dashboard__loadShare__react__loadShare__.cloneElement(newElement, void 0, newChildren) : null });
-    }
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(SlotClone, { ...slotProps, ref: forwardedRef, children });
-  });
-  Slot2.displayName = `${ownerName}.Slot`;
-  return Slot2;
-}
-var Slot$4 = /* @__PURE__ */ createSlot("Slot");
-// @__NO_SIDE_EFFECTS__
-function createSlotClone(ownerName) {
-  const SlotClone = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-    const { children, ...slotProps } = props;
-    if (dashboard__loadShare__react__loadShare__.isValidElement(children)) {
-      const childrenRef = getElementRef$1(children);
-      const props2 = mergeProps(slotProps, children.props);
-      if (children.type !== dashboard__loadShare__react__loadShare__.Fragment) {
-        props2.ref = forwardedRef ? composeRefs$1(forwardedRef, childrenRef) : childrenRef;
-      }
-      return dashboard__loadShare__react__loadShare__.cloneElement(children, props2);
-    }
-    return dashboard__loadShare__react__loadShare__.Children.count(children) > 1 ? dashboard__loadShare__react__loadShare__.Children.only(null) : null;
-  });
-  SlotClone.displayName = `${ownerName}.SlotClone`;
-  return SlotClone;
-}
-var SLOTTABLE_IDENTIFIER = Symbol("radix.slottable");
-// @__NO_SIDE_EFFECTS__
-function createSlottable(ownerName) {
-  const Slottable2 = ({ children }) => {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children });
-  };
-  Slottable2.displayName = `${ownerName}.Slottable`;
-  Slottable2.__radixId = SLOTTABLE_IDENTIFIER;
-  return Slottable2;
-}
-function isSlottable(child) {
-  return dashboard__loadShare__react__loadShare__.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER;
-}
-function mergeProps(slotProps, childProps) {
-  const overrideProps = { ...childProps };
-  for (const propName in childProps) {
-    const slotPropValue = slotProps[propName];
-    const childPropValue = childProps[propName];
-    const isHandler = /^on[A-Z]/.test(propName);
-    if (isHandler) {
-      if (slotPropValue && childPropValue) {
-        overrideProps[propName] = (...args) => {
-          const result = childPropValue(...args);
-          slotPropValue(...args);
-          return result;
-        };
-      } else if (slotPropValue) {
-        overrideProps[propName] = slotPropValue;
-      }
-    } else if (propName === "style") {
-      overrideProps[propName] = { ...slotPropValue, ...childPropValue };
-    } else if (propName === "className") {
-      overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(" ");
-    }
-  }
-  return { ...slotProps, ...overrideProps };
-}
-function getElementRef$1(element) {
-  let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
-  let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-  if (mayWarn) {
-    return element.ref;
-  }
-  getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
-  mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-  if (mayWarn) {
-    return element.props.ref;
-  }
-  return element.props.ref || element.ref;
-}
-
-function createCollection(name) {
-  const PROVIDER_NAME = name + "CollectionProvider";
-  const [createCollectionContext, createCollectionScope] = createContextScope(PROVIDER_NAME);
-  const [CollectionProviderImpl, useCollectionContext] = createCollectionContext(
-    PROVIDER_NAME,
-    { collectionRef: { current: null }, itemMap: /* @__PURE__ */ new Map() }
-  );
-  const CollectionProvider = (props) => {
-    const { scope, children } = props;
-    const ref = React3.useRef(null);
-    const itemMap = React3.useRef(/* @__PURE__ */ new Map()).current;
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(CollectionProviderImpl, { scope, itemMap, collectionRef: ref, children });
-  };
-  CollectionProvider.displayName = PROVIDER_NAME;
-  const COLLECTION_SLOT_NAME = name + "CollectionSlot";
-  const CollectionSlotImpl = createSlot(COLLECTION_SLOT_NAME);
-  const CollectionSlot = React3.forwardRef(
-    (props, forwardedRef) => {
-      const { scope, children } = props;
-      const context = useCollectionContext(COLLECTION_SLOT_NAME, scope);
-      const composedRefs = useComposedRefs$1(forwardedRef, context.collectionRef);
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(CollectionSlotImpl, { ref: composedRefs, children });
-    }
-  );
-  CollectionSlot.displayName = COLLECTION_SLOT_NAME;
-  const ITEM_SLOT_NAME = name + "CollectionItemSlot";
-  const ITEM_DATA_ATTR = "data-radix-collection-item";
-  const CollectionItemSlotImpl = createSlot(ITEM_SLOT_NAME);
-  const CollectionItemSlot = React3.forwardRef(
-    (props, forwardedRef) => {
-      const { scope, children, ...itemData } = props;
-      const ref = React3.useRef(null);
-      const composedRefs = useComposedRefs$1(forwardedRef, ref);
-      const context = useCollectionContext(ITEM_SLOT_NAME, scope);
-      React3.useEffect(() => {
-        context.itemMap.set(ref, { ref, ...itemData });
-        return () => void context.itemMap.delete(ref);
-      });
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(CollectionItemSlotImpl, { ...{ [ITEM_DATA_ATTR]: "" }, ref: composedRefs, children });
-    }
-  );
-  CollectionItemSlot.displayName = ITEM_SLOT_NAME;
-  function useCollection(scope) {
-    const context = useCollectionContext(name + "CollectionConsumer", scope);
-    const getItems = React3.useCallback(() => {
-      const collectionNode = context.collectionRef.current;
-      if (!collectionNode) return [];
-      const orderedNodes = Array.from(collectionNode.querySelectorAll(`[${ITEM_DATA_ATTR}]`));
-      const items = Array.from(context.itemMap.values());
-      const orderedItems = items.sort(
-        (a, b) => orderedNodes.indexOf(a.ref.current) - orderedNodes.indexOf(b.ref.current)
-      );
-      return orderedItems;
-    }, [context.collectionRef, context.itemMap]);
-    return getItems;
-  }
-  return [
-    { Provider: CollectionProvider, Slot: CollectionSlot, ItemSlot: CollectionItemSlot },
-    useCollection,
-    createCollectionScope
-  ];
-}
-
-// src/primitive.tsx
-function composeEventHandlers(originalEventHandler, ourEventHandler, { checkForDefaultPrevented = true } = {}) {
-  return function handleEvent(event) {
-    originalEventHandler?.(event);
-    if (checkForDefaultPrevented === false || !event.defaultPrevented) {
-      return ourEventHandler?.(event);
-    }
-  };
-}
-
-// packages/react/use-layout-effect/src/use-layout-effect.tsx
-var useLayoutEffect2 = globalThis?.document ? dashboard__loadShare__react__loadShare__.useLayoutEffect : () => {
-};
-
-// src/use-controllable-state.tsx
-var useInsertionEffect = React5[" useInsertionEffect ".trim().toString()] || useLayoutEffect2;
-function useControllableState$1({
-  prop,
-  defaultProp,
-  onChange = () => {
-  },
-  caller
-}) {
-  const [uncontrolledProp, setUncontrolledProp, onChangeRef] = useUncontrolledState$1({
-    defaultProp,
-    onChange
-  });
-  const isControlled = prop !== void 0;
-  const value = isControlled ? prop : uncontrolledProp;
-  {
-    const isControlledRef = dashboard__loadShare__react__loadShare__.useRef(prop !== void 0);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
-      const wasControlled = isControlledRef.current;
-      if (wasControlled !== isControlled) {
-        const from = wasControlled ? "controlled" : "uncontrolled";
-        const to = isControlled ? "controlled" : "uncontrolled";
-        console.warn(
-          `${caller} is changing from ${from} to ${to}. Components should not switch from controlled to uncontrolled (or vice versa). Decide between using a controlled or uncontrolled value for the lifetime of the component.`
-        );
-      }
-      isControlledRef.current = isControlled;
-    }, [isControlled, caller]);
-  }
-  const setValue = dashboard__loadShare__react__loadShare__.useCallback(
-    (nextValue) => {
-      if (isControlled) {
-        const value2 = isFunction$1(nextValue) ? nextValue(prop) : nextValue;
-        if (value2 !== prop) {
-          onChangeRef.current?.(value2);
-        }
-      } else {
-        setUncontrolledProp(nextValue);
-      }
-    },
-    [isControlled, prop, setUncontrolledProp, onChangeRef]
-  );
-  return [value, setValue];
-}
-function useUncontrolledState$1({
-  defaultProp,
-  onChange
-}) {
-  const [value, setValue] = dashboard__loadShare__react__loadShare__.useState(defaultProp);
-  const prevValueRef = dashboard__loadShare__react__loadShare__.useRef(value);
-  const onChangeRef = dashboard__loadShare__react__loadShare__.useRef(onChange);
-  useInsertionEffect(() => {
-    onChangeRef.current = onChange;
-  }, [onChange]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
-    if (prevValueRef.current !== value) {
-      onChangeRef.current?.(value);
-      prevValueRef.current = value;
-    }
-  }, [value, prevValueRef]);
-  return [value, setValue, onChangeRef];
-}
-function isFunction$1(value) {
-  return typeof value === "function";
-}
-
-// src/primitive.tsx
-var NODES = [
-  "a",
-  "button",
-  "div",
-  "form",
-  "h2",
-  "h3",
-  "img",
-  "input",
-  "label",
-  "li",
-  "nav",
-  "ol",
-  "p",
-  "select",
-  "span",
-  "svg",
-  "ul"
-];
-var Primitive = NODES.reduce((primitive, node) => {
-  const Slot = createSlot(`Primitive.${node}`);
-  const Node = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-    const { asChild, ...primitiveProps } = props;
-    const Comp = asChild ? Slot : node;
-    if (typeof window !== "undefined") {
-      window[Symbol.for("radix-ui")] = true;
-    }
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Comp, { ...primitiveProps, ref: forwardedRef });
-  });
-  Node.displayName = `Primitive.${node}`;
-  return { ...primitive, [node]: Node };
-}, {});
-function dispatchDiscreteCustomEvent(target, event) {
-  if (target) dashboard__loadShare__react_mf_2_dom__loadShare__.flushSync(() => target.dispatchEvent(event));
-}
-
-function useStateMachine$1(initialState, machine) {
-  return dashboard__loadShare__react__loadShare__.useReducer((state, event) => {
-    const nextState = machine[state][event];
-    return nextState ?? state;
-  }, initialState);
-}
-
-// src/presence.tsx
-var Presence = (props) => {
-  const { present, children } = props;
-  const presence = usePresence(present);
-  const child = typeof children === "function" ? children({ present: presence.isPresent }) : dashboard__loadShare__react__loadShare__.Children.only(children);
-  const ref = useComposedRefs$1(presence.ref, getElementRef(child));
-  const forceMount = typeof children === "function";
-  return forceMount || presence.isPresent ? dashboard__loadShare__react__loadShare__.cloneElement(child, { ref }) : null;
-};
-Presence.displayName = "Presence";
-function usePresence(present) {
-  const [node, setNode] = dashboard__loadShare__react__loadShare__.useState();
-  const stylesRef = dashboard__loadShare__react__loadShare__.useRef(null);
-  const prevPresentRef = dashboard__loadShare__react__loadShare__.useRef(present);
-  const prevAnimationNameRef = dashboard__loadShare__react__loadShare__.useRef("none");
-  const initialState = present ? "mounted" : "unmounted";
-  const [state, send] = useStateMachine$1(initialState, {
-    mounted: {
-      UNMOUNT: "unmounted",
-      ANIMATION_OUT: "unmountSuspended"
-    },
-    unmountSuspended: {
-      MOUNT: "mounted",
-      ANIMATION_END: "unmounted"
-    },
-    unmounted: {
-      MOUNT: "mounted"
-    }
-  });
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
-    const currentAnimationName = getAnimationName(stylesRef.current);
-    prevAnimationNameRef.current = state === "mounted" ? currentAnimationName : "none";
-  }, [state]);
-  useLayoutEffect2(() => {
-    const styles = stylesRef.current;
-    const wasPresent = prevPresentRef.current;
-    const hasPresentChanged = wasPresent !== present;
-    if (hasPresentChanged) {
-      const prevAnimationName = prevAnimationNameRef.current;
-      const currentAnimationName = getAnimationName(styles);
-      if (present) {
-        send("MOUNT");
-      } else if (currentAnimationName === "none" || styles?.display === "none") {
-        send("UNMOUNT");
-      } else {
-        const isAnimating = prevAnimationName !== currentAnimationName;
-        if (wasPresent && isAnimating) {
-          send("ANIMATION_OUT");
-        } else {
-          send("UNMOUNT");
-        }
-      }
-      prevPresentRef.current = present;
-    }
-  }, [present, send]);
-  useLayoutEffect2(() => {
-    if (node) {
-      let timeoutId;
-      const ownerWindow = node.ownerDocument.defaultView ?? window;
-      const handleAnimationEnd = (event) => {
-        const currentAnimationName = getAnimationName(stylesRef.current);
-        const isCurrentAnimation = currentAnimationName.includes(CSS.escape(event.animationName));
-        if (event.target === node && isCurrentAnimation) {
-          send("ANIMATION_END");
-          if (!prevPresentRef.current) {
-            const currentFillMode = node.style.animationFillMode;
-            node.style.animationFillMode = "forwards";
-            timeoutId = ownerWindow.setTimeout(() => {
-              if (node.style.animationFillMode === "forwards") {
-                node.style.animationFillMode = currentFillMode;
-              }
-            });
-          }
-        }
-      };
-      const handleAnimationStart = (event) => {
-        if (event.target === node) {
-          prevAnimationNameRef.current = getAnimationName(stylesRef.current);
-        }
-      };
-      node.addEventListener("animationstart", handleAnimationStart);
-      node.addEventListener("animationcancel", handleAnimationEnd);
-      node.addEventListener("animationend", handleAnimationEnd);
-      return () => {
-        ownerWindow.clearTimeout(timeoutId);
-        node.removeEventListener("animationstart", handleAnimationStart);
-        node.removeEventListener("animationcancel", handleAnimationEnd);
-        node.removeEventListener("animationend", handleAnimationEnd);
-      };
-    } else {
-      send("ANIMATION_END");
-    }
-  }, [node, send]);
-  return {
-    isPresent: ["mounted", "unmountSuspended"].includes(state),
-    ref: dashboard__loadShare__react__loadShare__.useCallback((node2) => {
-      stylesRef.current = node2 ? getComputedStyle(node2) : null;
-      setNode(node2);
-    }, [])
-  };
-}
-function getAnimationName(styles) {
-  return styles?.animationName || "none";
-}
-function getElementRef(element) {
-  let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
-  let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-  if (mayWarn) {
-    return element.ref;
-  }
-  getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
-  mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-  if (mayWarn) {
-    return element.props.ref;
-  }
-  return element.props.ref || element.ref;
-}
-
-// packages/react/id/src/id.tsx
-var useReactId = React5[" useId ".trim().toString()] || (() => void 0);
-var count$2 = 0;
-function useId(deterministicId) {
-  const [id, setId] = dashboard__loadShare__react__loadShare__.useState(useReactId());
-  useLayoutEffect2(() => {
-    setId((reactId) => reactId ?? String(count$2++));
-  }, [deterministicId]);
-  return deterministicId || (id ? `radix-${id}` : "");
-}
-
 var COLLAPSIBLE_NAME = "Collapsible";
 var [createCollapsibleContext, createCollapsibleScope] = createContextScope(COLLAPSIBLE_NAME);
 var [CollapsibleProvider, useCollapsibleContext] = createCollapsibleContext(COLLAPSIBLE_NAME);
@@ -4220,11 +3671,11 @@ var Collapsible$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   }
 );
 Collapsible$1.displayName = COLLAPSIBLE_NAME;
-var TRIGGER_NAME$9 = "CollapsibleTrigger";
+var TRIGGER_NAME$8 = "CollapsibleTrigger";
 var CollapsibleTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeCollapsible, ...triggerProps } = props;
-    const context = useCollapsibleContext(TRIGGER_NAME$9, __scopeCollapsible);
+    const context = useCollapsibleContext(TRIGGER_NAME$8, __scopeCollapsible);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       Primitive.button,
       {
@@ -4241,19 +3692,19 @@ var CollapsibleTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
     );
   }
 );
-CollapsibleTrigger$1.displayName = TRIGGER_NAME$9;
-var CONTENT_NAME$a = "CollapsibleContent";
+CollapsibleTrigger$1.displayName = TRIGGER_NAME$8;
+var CONTENT_NAME$7 = "CollapsibleContent";
 var CollapsibleContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { forceMount, ...contentProps } = props;
-    const context = useCollapsibleContext(CONTENT_NAME$a, props.__scopeCollapsible);
+    const context = useCollapsibleContext(CONTENT_NAME$7, props.__scopeCollapsible);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: ({ present }) => /* @__PURE__ */ jsxRuntimeExports.jsx(CollapsibleContentImpl, { ...contentProps, ref: forwardedRef, present }) });
   }
 );
-CollapsibleContent$1.displayName = CONTENT_NAME$a;
+CollapsibleContent$1.displayName = CONTENT_NAME$7;
 var CollapsibleContentImpl = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const { __scopeCollapsible, present, children, ...contentProps } = props;
-  const context = useCollapsibleContext(CONTENT_NAME$a, __scopeCollapsible);
+  const context = useCollapsibleContext(CONTENT_NAME$7, __scopeCollapsible);
   const [isPresent, setIsPresent] = dashboard__loadShare__react__loadShare__.useState(present);
   const ref = dashboard__loadShare__react__loadShare__.useRef(null);
   const composedRefs = useComposedRefs$1(forwardedRef, ref);
@@ -4308,22 +3759,15 @@ var CollapsibleContentImpl = dashboard__loadShare__react__loadShare__.forwardRef
 function getState$6(open) {
   return open ? "open" : "closed";
 }
-var Root$f = Collapsible$1;
-var Trigger$6 = CollapsibleTrigger$1;
-var Content$4 = CollapsibleContent$1;
-
-// packages/react/direction/src/direction.tsx
-var DirectionContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
-function useDirection(localDir) {
-  const globalDir = dashboard__loadShare__react__loadShare__.useContext(DirectionContext);
-  return localDir || globalDir || "ltr";
-}
+var Root$c = Collapsible$1;
+var Trigger$5 = CollapsibleTrigger$1;
+var Content$3 = CollapsibleContent$1;
 
 var ACCORDION_NAME = "Accordion";
 var ACCORDION_KEYS = ["Home", "End", "ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"];
-var [Collection$5, useCollection$5, createCollectionScope$5] = createCollection(ACCORDION_NAME);
+var [Collection$3, useCollection$3, createCollectionScope$3] = createCollection(ACCORDION_NAME);
 var [createAccordionContext, createAccordionScope] = createContextScope(ACCORDION_NAME, [
-  createCollectionScope$5,
+  createCollectionScope$3,
   createCollapsibleScope
 ]);
 var useCollapsibleScope = createCollapsibleScope();
@@ -4332,7 +3776,7 @@ var Accordion$1 = React3.forwardRef(
     const { type, ...accordionProps } = props;
     const singleProps = accordionProps;
     const multipleProps = accordionProps;
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$5.Provider, { scope: props.__scopeAccordion, children: type === "multiple" ? /* @__PURE__ */ jsxRuntimeExports.jsx(AccordionImplMultiple, { ...multipleProps, ref: forwardedRef }) : /* @__PURE__ */ jsxRuntimeExports.jsx(AccordionImplSingle, { ...singleProps, ref: forwardedRef }) });
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$3.Provider, { scope: props.__scopeAccordion, children: type === "multiple" ? /* @__PURE__ */ jsxRuntimeExports.jsx(AccordionImplMultiple, { ...multipleProps, ref: forwardedRef }) : /* @__PURE__ */ jsxRuntimeExports.jsx(AccordionImplSingle, { ...singleProps, ref: forwardedRef }) });
   }
 );
 Accordion$1.displayName = ACCORDION_NAME;
@@ -4408,7 +3852,7 @@ var AccordionImpl = React3.forwardRef(
     const { __scopeAccordion, disabled, dir, orientation = "vertical", ...accordionProps } = props;
     const accordionRef = React3.useRef(null);
     const composedRefs = useComposedRefs$1(accordionRef, forwardedRef);
-    const getItems = useCollection$5(__scopeAccordion);
+    const getItems = useCollection$3(__scopeAccordion);
     const direction = useDirection(dir);
     const isDirectionLTR = direction === "ltr";
     const handleKeyDown = composeEventHandlers(props.onKeyDown, (event) => {
@@ -4480,7 +3924,7 @@ var AccordionImpl = React3.forwardRef(
         disabled,
         direction: dir,
         orientation,
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$5.Slot, { scope: __scopeAccordion, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$3.Slot, { scope: __scopeAccordion, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
           Primitive.div,
           {
             ...accordionProps,
@@ -4493,13 +3937,13 @@ var AccordionImpl = React3.forwardRef(
     );
   }
 );
-var ITEM_NAME$5 = "AccordionItem";
-var [AccordionItemProvider, useAccordionItemContext] = createAccordionContext(ITEM_NAME$5);
+var ITEM_NAME$2 = "AccordionItem";
+var [AccordionItemProvider, useAccordionItemContext] = createAccordionContext(ITEM_NAME$2);
 var AccordionItem$1 = React3.forwardRef(
   (props, forwardedRef) => {
     const { __scopeAccordion, value, ...accordionItemProps } = props;
-    const accordionContext = useAccordionContext(ITEM_NAME$5, __scopeAccordion);
-    const valueContext = useAccordionValueContext(ITEM_NAME$5, __scopeAccordion);
+    const accordionContext = useAccordionContext(ITEM_NAME$2, __scopeAccordion);
+    const valueContext = useAccordionValueContext(ITEM_NAME$2, __scopeAccordion);
     const collapsibleScope = useCollapsibleScope(__scopeAccordion);
     const triggerId = useId();
     const open = value && valueContext.value.includes(value) || false;
@@ -4512,7 +3956,7 @@ var AccordionItem$1 = React3.forwardRef(
         disabled,
         triggerId,
         children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          Root$f,
+          Root$c,
           {
             "data-orientation": accordionContext.orientation,
             "data-state": getState$5(open),
@@ -4534,7 +3978,7 @@ var AccordionItem$1 = React3.forwardRef(
     );
   }
 );
-AccordionItem$1.displayName = ITEM_NAME$5;
+AccordionItem$1.displayName = ITEM_NAME$2;
 var HEADER_NAME = "AccordionHeader";
 var AccordionHeader = React3.forwardRef(
   (props, forwardedRef) => {
@@ -4554,16 +3998,16 @@ var AccordionHeader = React3.forwardRef(
   }
 );
 AccordionHeader.displayName = HEADER_NAME;
-var TRIGGER_NAME$8 = "AccordionTrigger";
+var TRIGGER_NAME$7 = "AccordionTrigger";
 var AccordionTrigger$1 = React3.forwardRef(
   (props, forwardedRef) => {
     const { __scopeAccordion, ...triggerProps } = props;
     const accordionContext = useAccordionContext(ACCORDION_NAME, __scopeAccordion);
-    const itemContext = useAccordionItemContext(TRIGGER_NAME$8, __scopeAccordion);
-    const collapsibleContext = useAccordionCollapsibleContext(TRIGGER_NAME$8, __scopeAccordion);
+    const itemContext = useAccordionItemContext(TRIGGER_NAME$7, __scopeAccordion);
+    const collapsibleContext = useAccordionCollapsibleContext(TRIGGER_NAME$7, __scopeAccordion);
     const collapsibleScope = useCollapsibleScope(__scopeAccordion);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$5.ItemSlot, { scope: __scopeAccordion, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Trigger$6,
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$3.ItemSlot, { scope: __scopeAccordion, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      Trigger$5,
       {
         "aria-disabled": itemContext.open && !collapsibleContext.collapsible || void 0,
         "data-orientation": accordionContext.orientation,
@@ -4575,16 +4019,16 @@ var AccordionTrigger$1 = React3.forwardRef(
     ) });
   }
 );
-AccordionTrigger$1.displayName = TRIGGER_NAME$8;
-var CONTENT_NAME$9 = "AccordionContent";
+AccordionTrigger$1.displayName = TRIGGER_NAME$7;
+var CONTENT_NAME$6 = "AccordionContent";
 var AccordionContent$1 = React3.forwardRef(
   (props, forwardedRef) => {
     const { __scopeAccordion, ...contentProps } = props;
     const accordionContext = useAccordionContext(ACCORDION_NAME, __scopeAccordion);
-    const itemContext = useAccordionItemContext(CONTENT_NAME$9, __scopeAccordion);
+    const itemContext = useAccordionItemContext(CONTENT_NAME$6, __scopeAccordion);
     const collapsibleScope = useCollapsibleScope(__scopeAccordion);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Content$4,
+      Content$3,
       {
         role: "region",
         "aria-labelledby": itemContext.triggerId,
@@ -4601,19 +4045,19 @@ var AccordionContent$1 = React3.forwardRef(
     );
   }
 );
-AccordionContent$1.displayName = CONTENT_NAME$9;
+AccordionContent$1.displayName = CONTENT_NAME$6;
 function getState$5(open) {
   return open ? "open" : "closed";
 }
-var Root2$8 = Accordion$1;
-var Item$2 = AccordionItem$1;
+var Root2$6 = Accordion$1;
+var Item$1 = AccordionItem$1;
 var Header = AccordionHeader;
 var Trigger2$1 = AccordionTrigger$1;
-var Content2$6 = AccordionContent$1;
+var Content2$4 = AccordionContent$1;
 
 //#region src/components/ui/accordion.tsx
-const Accordion = Root2$8;
-const AccordionItem = dashboard__loadShare__react__loadShare__.forwardRef(({ className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Item$2, {
+const Accordion = Root2$6;
+const AccordionItem = dashboard__loadShare__react__loadShare__.forwardRef(({ className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Item$1, {
 	className: cn$1("border-b", className),
 	ref,
 	...props
@@ -4629,7 +4073,7 @@ const AccordionTrigger = dashboard__loadShare__react__loadShare__.forwardRef(({ 
 	})
 }));
 AccordionTrigger.displayName = Trigger2$1.displayName;
-const AccordionContent = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$6, {
+const AccordionContent = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$4, {
 	className: "overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
 	ref,
 	...props,
@@ -4638,7 +4082,7 @@ const AccordionContent = dashboard__loadShare__react__loadShare__.forwardRef(({ 
 		children
 	})
 }));
-AccordionContent.displayName = Content2$6.displayName;
+AccordionContent.displayName = Content2$4.displayName;
 
 const falsyToString = (value)=>typeof value === "boolean" ? `${value}` : value === 0 ? "0" : value;
 const cx = clsx;
@@ -5507,7 +4951,7 @@ const buttonVariants = cva("inline-flex items-center justify-center whitespace-n
 	}
 });
 const Button$1 = dashboard__loadShare__react__loadShare__.forwardRef(({ asChild = false, className, size, variant,...props }, ref) => {
-	const Comp = asChild ? Slot$4 : "button";
+	const Comp = asChild ? Slot$3 : "button";
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(Comp, {
 		className: cn$1(buttonVariants({
 			className,
@@ -5526,959 +4970,64 @@ Button$1.propTypes = {
 	variant: PropTypes.string
 };
 
-// packages/react/use-callback-ref/src/use-callback-ref.tsx
-function useCallbackRef$2(callback) {
-  const callbackRef = dashboard__loadShare__react__loadShare__.useRef(callback);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
-    callbackRef.current = callback;
-  });
-  return dashboard__loadShare__react__loadShare__.useMemo(() => (...args) => callbackRef.current?.(...args), []);
-}
+var effectCar = createSidecarMedium();
 
-// packages/react/use-escape-keydown/src/use-escape-keydown.tsx
-function useEscapeKeydown(onEscapeKeyDownProp, ownerDocument = globalThis?.document) {
-  const onEscapeKeyDown = useCallbackRef$2(onEscapeKeyDownProp);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        onEscapeKeyDown(event);
-      }
-    };
-    ownerDocument.addEventListener("keydown", handleKeyDown, { capture: true });
-    return () => ownerDocument.removeEventListener("keydown", handleKeyDown, { capture: true });
-  }, [onEscapeKeyDown, ownerDocument]);
-}
-
-var DISMISSABLE_LAYER_NAME = "DismissableLayer";
-var CONTEXT_UPDATE = "dismissableLayer.update";
-var POINTER_DOWN_OUTSIDE = "dismissableLayer.pointerDownOutside";
-var FOCUS_OUTSIDE = "dismissableLayer.focusOutside";
-var originalBodyPointerEvents;
-var DismissableLayerContext = dashboard__loadShare__react__loadShare__.createContext({
-  layers: /* @__PURE__ */ new Set(),
-  layersWithOutsidePointerEventsDisabled: /* @__PURE__ */ new Set(),
-  branches: /* @__PURE__ */ new Set()
-});
-var DismissableLayer = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const {
-      disableOutsidePointerEvents = false,
-      onEscapeKeyDown,
-      onPointerDownOutside,
-      onFocusOutside,
-      onInteractOutside,
-      onDismiss,
-      ...layerProps
-    } = props;
-    const context = dashboard__loadShare__react__loadShare__.useContext(DismissableLayerContext);
-    const [node, setNode] = dashboard__loadShare__react__loadShare__.useState(null);
-    const ownerDocument = node?.ownerDocument ?? globalThis?.document;
-    const [, force] = dashboard__loadShare__react__loadShare__.useState({});
-    const composedRefs = useComposedRefs$1(forwardedRef, (node2) => setNode(node2));
-    const layers = Array.from(context.layers);
-    const [highestLayerWithOutsidePointerEventsDisabled] = [...context.layersWithOutsidePointerEventsDisabled].slice(-1);
-    const highestLayerWithOutsidePointerEventsDisabledIndex = layers.indexOf(highestLayerWithOutsidePointerEventsDisabled);
-    const index = node ? layers.indexOf(node) : -1;
-    const isBodyPointerEventsDisabled = context.layersWithOutsidePointerEventsDisabled.size > 0;
-    const isPointerEventsEnabled = index >= highestLayerWithOutsidePointerEventsDisabledIndex;
-    const pointerDownOutside = usePointerDownOutside((event) => {
-      const target = event.target;
-      const isPointerDownOnBranch = [...context.branches].some((branch) => branch.contains(target));
-      if (!isPointerEventsEnabled || isPointerDownOnBranch) return;
-      onPointerDownOutside?.(event);
-      onInteractOutside?.(event);
-      if (!event.defaultPrevented) onDismiss?.();
-    }, ownerDocument);
-    const focusOutside = useFocusOutside((event) => {
-      const target = event.target;
-      const isFocusInBranch = [...context.branches].some((branch) => branch.contains(target));
-      if (isFocusInBranch) return;
-      onFocusOutside?.(event);
-      onInteractOutside?.(event);
-      if (!event.defaultPrevented) onDismiss?.();
-    }, ownerDocument);
-    useEscapeKeydown((event) => {
-      const isHighestLayer = index === context.layers.size - 1;
-      if (!isHighestLayer) return;
-      onEscapeKeyDown?.(event);
-      if (!event.defaultPrevented && onDismiss) {
-        event.preventDefault();
-        onDismiss();
-      }
-    }, ownerDocument);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
-      if (!node) return;
-      if (disableOutsidePointerEvents) {
-        if (context.layersWithOutsidePointerEventsDisabled.size === 0) {
-          originalBodyPointerEvents = ownerDocument.body.style.pointerEvents;
-          ownerDocument.body.style.pointerEvents = "none";
-        }
-        context.layersWithOutsidePointerEventsDisabled.add(node);
-      }
-      context.layers.add(node);
-      dispatchUpdate();
-      return () => {
-        if (disableOutsidePointerEvents && context.layersWithOutsidePointerEventsDisabled.size === 1) {
-          ownerDocument.body.style.pointerEvents = originalBodyPointerEvents;
-        }
-      };
-    }, [node, ownerDocument, disableOutsidePointerEvents, context]);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
-      return () => {
-        if (!node) return;
-        context.layers.delete(node);
-        context.layersWithOutsidePointerEventsDisabled.delete(node);
-        dispatchUpdate();
-      };
-    }, [node, context]);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
-      const handleUpdate = () => force({});
-      document.addEventListener(CONTEXT_UPDATE, handleUpdate);
-      return () => document.removeEventListener(CONTEXT_UPDATE, handleUpdate);
-    }, []);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Primitive.div,
-      {
-        ...layerProps,
-        ref: composedRefs,
-        style: {
-          pointerEvents: isBodyPointerEventsDisabled ? isPointerEventsEnabled ? "auto" : "none" : void 0,
-          ...props.style
-        },
-        onFocusCapture: composeEventHandlers(props.onFocusCapture, focusOutside.onFocusCapture),
-        onBlurCapture: composeEventHandlers(props.onBlurCapture, focusOutside.onBlurCapture),
-        onPointerDownCapture: composeEventHandlers(
-          props.onPointerDownCapture,
-          pointerDownOutside.onPointerDownCapture
-        )
-      }
-    );
-  }
-);
-DismissableLayer.displayName = DISMISSABLE_LAYER_NAME;
-var BRANCH_NAME = "DismissableLayerBranch";
-var DismissableLayerBranch = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-  const context = dashboard__loadShare__react__loadShare__.useContext(DismissableLayerContext);
-  const ref = dashboard__loadShare__react__loadShare__.useRef(null);
-  const composedRefs = useComposedRefs$1(forwardedRef, ref);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
-    const node = ref.current;
-    if (node) {
-      context.branches.add(node);
-      return () => {
-        context.branches.delete(node);
-      };
-    }
-  }, [context.branches]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive.div, { ...props, ref: composedRefs });
-});
-DismissableLayerBranch.displayName = BRANCH_NAME;
-function usePointerDownOutside(onPointerDownOutside, ownerDocument = globalThis?.document) {
-  const handlePointerDownOutside = useCallbackRef$2(onPointerDownOutside);
-  const isPointerInsideReactTreeRef = dashboard__loadShare__react__loadShare__.useRef(false);
-  const handleClickRef = dashboard__loadShare__react__loadShare__.useRef(() => {
-  });
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
-    const handlePointerDown = (event) => {
-      if (event.target && !isPointerInsideReactTreeRef.current) {
-        let handleAndDispatchPointerDownOutsideEvent2 = function() {
-          handleAndDispatchCustomEvent$1(
-            POINTER_DOWN_OUTSIDE,
-            handlePointerDownOutside,
-            eventDetail,
-            { discrete: true }
-          );
-        };
-        const eventDetail = { originalEvent: event };
-        if (event.pointerType === "touch") {
-          ownerDocument.removeEventListener("click", handleClickRef.current);
-          handleClickRef.current = handleAndDispatchPointerDownOutsideEvent2;
-          ownerDocument.addEventListener("click", handleClickRef.current, { once: true });
-        } else {
-          handleAndDispatchPointerDownOutsideEvent2();
-        }
-      } else {
-        ownerDocument.removeEventListener("click", handleClickRef.current);
-      }
-      isPointerInsideReactTreeRef.current = false;
-    };
-    const timerId = window.setTimeout(() => {
-      ownerDocument.addEventListener("pointerdown", handlePointerDown);
-    }, 0);
-    return () => {
-      window.clearTimeout(timerId);
-      ownerDocument.removeEventListener("pointerdown", handlePointerDown);
-      ownerDocument.removeEventListener("click", handleClickRef.current);
-    };
-  }, [ownerDocument, handlePointerDownOutside]);
-  return {
-    // ensures we check React component tree (not just DOM tree)
-    onPointerDownCapture: () => isPointerInsideReactTreeRef.current = true
-  };
-}
-function useFocusOutside(onFocusOutside, ownerDocument = globalThis?.document) {
-  const handleFocusOutside = useCallbackRef$2(onFocusOutside);
-  const isFocusInsideReactTreeRef = dashboard__loadShare__react__loadShare__.useRef(false);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
-    const handleFocus = (event) => {
-      if (event.target && !isFocusInsideReactTreeRef.current) {
-        const eventDetail = { originalEvent: event };
-        handleAndDispatchCustomEvent$1(FOCUS_OUTSIDE, handleFocusOutside, eventDetail, {
-          discrete: false
-        });
-      }
-    };
-    ownerDocument.addEventListener("focusin", handleFocus);
-    return () => ownerDocument.removeEventListener("focusin", handleFocus);
-  }, [ownerDocument, handleFocusOutside]);
-  return {
-    onFocusCapture: () => isFocusInsideReactTreeRef.current = true,
-    onBlurCapture: () => isFocusInsideReactTreeRef.current = false
-  };
-}
-function dispatchUpdate() {
-  const event = new CustomEvent(CONTEXT_UPDATE);
-  document.dispatchEvent(event);
-}
-function handleAndDispatchCustomEvent$1(name, handler, detail, { discrete }) {
-  const target = detail.originalEvent.target;
-  const event = new CustomEvent(name, { bubbles: false, cancelable: true, detail });
-  if (handler) target.addEventListener(name, handler, { once: true });
-  if (discrete) {
-    dispatchDiscreteCustomEvent(target, event);
-  } else {
-    target.dispatchEvent(event);
-  }
-}
-var Root$e = DismissableLayer;
-var Branch = DismissableLayerBranch;
-
-var AUTOFOCUS_ON_MOUNT = "focusScope.autoFocusOnMount";
-var AUTOFOCUS_ON_UNMOUNT = "focusScope.autoFocusOnUnmount";
-var EVENT_OPTIONS$1 = { bubbles: false, cancelable: true };
-var FOCUS_SCOPE_NAME = "FocusScope";
-var FocusScope = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-  const {
-    loop = false,
-    trapped = false,
-    onMountAutoFocus: onMountAutoFocusProp,
-    onUnmountAutoFocus: onUnmountAutoFocusProp,
-    ...scopeProps
-  } = props;
-  const [container, setContainer] = dashboard__loadShare__react__loadShare__.useState(null);
-  const onMountAutoFocus = useCallbackRef$2(onMountAutoFocusProp);
-  const onUnmountAutoFocus = useCallbackRef$2(onUnmountAutoFocusProp);
-  const lastFocusedElementRef = dashboard__loadShare__react__loadShare__.useRef(null);
-  const composedRefs = useComposedRefs$1(forwardedRef, (node) => setContainer(node));
-  const focusScope = dashboard__loadShare__react__loadShare__.useRef({
-    paused: false,
-    pause() {
-      this.paused = true;
-    },
-    resume() {
-      this.paused = false;
-    }
-  }).current;
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
-    if (trapped) {
-      let handleFocusIn2 = function(event) {
-        if (focusScope.paused || !container) return;
-        const target = event.target;
-        if (container.contains(target)) {
-          lastFocusedElementRef.current = target;
-        } else {
-          focus(lastFocusedElementRef.current, { select: true });
-        }
-      }, handleFocusOut2 = function(event) {
-        if (focusScope.paused || !container) return;
-        const relatedTarget = event.relatedTarget;
-        if (relatedTarget === null) return;
-        if (!container.contains(relatedTarget)) {
-          focus(lastFocusedElementRef.current, { select: true });
-        }
-      }, handleMutations2 = function(mutations) {
-        const focusedElement = document.activeElement;
-        if (focusedElement !== document.body) return;
-        for (const mutation of mutations) {
-          if (mutation.removedNodes.length > 0) focus(container);
-        }
-      };
-      document.addEventListener("focusin", handleFocusIn2);
-      document.addEventListener("focusout", handleFocusOut2);
-      const mutationObserver = new MutationObserver(handleMutations2);
-      if (container) mutationObserver.observe(container, { childList: true, subtree: true });
-      return () => {
-        document.removeEventListener("focusin", handleFocusIn2);
-        document.removeEventListener("focusout", handleFocusOut2);
-        mutationObserver.disconnect();
-      };
-    }
-  }, [trapped, container, focusScope.paused]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
-    if (container) {
-      focusScopesStack.add(focusScope);
-      const previouslyFocusedElement = document.activeElement;
-      const hasFocusedCandidate = container.contains(previouslyFocusedElement);
-      if (!hasFocusedCandidate) {
-        const mountEvent = new CustomEvent(AUTOFOCUS_ON_MOUNT, EVENT_OPTIONS$1);
-        container.addEventListener(AUTOFOCUS_ON_MOUNT, onMountAutoFocus);
-        container.dispatchEvent(mountEvent);
-        if (!mountEvent.defaultPrevented) {
-          focusFirst$3(removeLinks(getTabbableCandidates$1(container)), { select: true });
-          if (document.activeElement === previouslyFocusedElement) {
-            focus(container);
-          }
-        }
-      }
-      return () => {
-        container.removeEventListener(AUTOFOCUS_ON_MOUNT, onMountAutoFocus);
-        setTimeout(() => {
-          const unmountEvent = new CustomEvent(AUTOFOCUS_ON_UNMOUNT, EVENT_OPTIONS$1);
-          container.addEventListener(AUTOFOCUS_ON_UNMOUNT, onUnmountAutoFocus);
-          container.dispatchEvent(unmountEvent);
-          if (!unmountEvent.defaultPrevented) {
-            focus(previouslyFocusedElement ?? document.body, { select: true });
-          }
-          container.removeEventListener(AUTOFOCUS_ON_UNMOUNT, onUnmountAutoFocus);
-          focusScopesStack.remove(focusScope);
-        }, 0);
-      };
-    }
-  }, [container, onMountAutoFocus, onUnmountAutoFocus, focusScope]);
-  const handleKeyDown = dashboard__loadShare__react__loadShare__.useCallback(
-    (event) => {
-      if (!loop && !trapped) return;
-      if (focusScope.paused) return;
-      const isTabKey = event.key === "Tab" && !event.altKey && !event.ctrlKey && !event.metaKey;
-      const focusedElement = document.activeElement;
-      if (isTabKey && focusedElement) {
-        const container2 = event.currentTarget;
-        const [first, last] = getTabbableEdges(container2);
-        const hasTabbableElementsInside = first && last;
-        if (!hasTabbableElementsInside) {
-          if (focusedElement === container2) event.preventDefault();
-        } else {
-          if (!event.shiftKey && focusedElement === last) {
-            event.preventDefault();
-            if (loop) focus(first, { select: true });
-          } else if (event.shiftKey && focusedElement === first) {
-            event.preventDefault();
-            if (loop) focus(last, { select: true });
-          }
-        }
-      }
-    },
-    [loop, trapped, focusScope.paused]
-  );
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive.div, { tabIndex: -1, ...scopeProps, ref: composedRefs, onKeyDown: handleKeyDown });
-});
-FocusScope.displayName = FOCUS_SCOPE_NAME;
-function focusFirst$3(candidates, { select = false } = {}) {
-  const previouslyFocusedElement = document.activeElement;
-  for (const candidate of candidates) {
-    focus(candidate, { select });
-    if (document.activeElement !== previouslyFocusedElement) return;
-  }
-}
-function getTabbableEdges(container) {
-  const candidates = getTabbableCandidates$1(container);
-  const first = findVisible(candidates, container);
-  const last = findVisible(candidates.reverse(), container);
-  return [first, last];
-}
-function getTabbableCandidates$1(container) {
-  const nodes = [];
-  const walker = document.createTreeWalker(container, NodeFilter.SHOW_ELEMENT, {
-    acceptNode: (node) => {
-      const isHiddenInput = node.tagName === "INPUT" && node.type === "hidden";
-      if (node.disabled || node.hidden || isHiddenInput) return NodeFilter.FILTER_SKIP;
-      return node.tabIndex >= 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
-    }
-  });
-  while (walker.nextNode()) nodes.push(walker.currentNode);
-  return nodes;
-}
-function findVisible(elements, container) {
-  for (const element of elements) {
-    if (!isHidden(element, { upTo: container })) return element;
-  }
-}
-function isHidden(node, { upTo }) {
-  if (getComputedStyle(node).visibility === "hidden") return true;
-  while (node) {
-    if (upTo !== void 0 && node === upTo) return false;
-    if (getComputedStyle(node).display === "none") return true;
-    node = node.parentElement;
-  }
-  return false;
-}
-function isSelectableInput(element) {
-  return element instanceof HTMLInputElement && "select" in element;
-}
-function focus(element, { select = false } = {}) {
-  if (element && element.focus) {
-    const previouslyFocusedElement = document.activeElement;
-    element.focus({ preventScroll: true });
-    if (element !== previouslyFocusedElement && isSelectableInput(element) && select)
-      element.select();
-  }
-}
-var focusScopesStack = createFocusScopesStack();
-function createFocusScopesStack() {
-  let stack = [];
-  return {
-    add(focusScope) {
-      const activeFocusScope = stack[0];
-      if (focusScope !== activeFocusScope) {
-        activeFocusScope?.pause();
-      }
-      stack = arrayRemove(stack, focusScope);
-      stack.unshift(focusScope);
-    },
-    remove(focusScope) {
-      stack = arrayRemove(stack, focusScope);
-      stack[0]?.resume();
-    }
-  };
-}
-function arrayRemove(array, item) {
-  const updatedArray = [...array];
-  const index = updatedArray.indexOf(item);
-  if (index !== -1) {
-    updatedArray.splice(index, 1);
-  }
-  return updatedArray;
-}
-function removeLinks(items) {
-  return items.filter((item) => item.tagName !== "A");
-}
-
-var PORTAL_NAME$7 = "Portal";
-var Portal$5 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-  const { container: containerProp, ...portalProps } = props;
-  const [mounted, setMounted] = dashboard__loadShare__react__loadShare__.useState(false);
-  useLayoutEffect2(() => setMounted(true), []);
-  const container = containerProp || mounted && globalThis?.document?.body;
-  return container ? ReactDOM.createPortal(/* @__PURE__ */ jsxRuntimeExports.jsx(Primitive.div, { ...portalProps, ref: forwardedRef }), container) : null;
-});
-Portal$5.displayName = PORTAL_NAME$7;
-
-var count$1 = 0;
-function useFocusGuards() {
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
-    const edgeGuards = document.querySelectorAll("[data-radix-focus-guard]");
-    document.body.insertAdjacentElement("afterbegin", edgeGuards[0] ?? createFocusGuard());
-    document.body.insertAdjacentElement("beforeend", edgeGuards[1] ?? createFocusGuard());
-    count$1++;
-    return () => {
-      if (count$1 === 1) {
-        document.querySelectorAll("[data-radix-focus-guard]").forEach((node) => node.remove());
-      }
-      count$1--;
-    };
-  }, []);
-}
-function createFocusGuard() {
-  const element = document.createElement("span");
-  element.setAttribute("data-radix-focus-guard", "");
-  element.tabIndex = 0;
-  element.style.outline = "none";
-  element.style.opacity = "0";
-  element.style.position = "fixed";
-  element.style.pointerEvents = "none";
-  return element;
-}
-
-/******************************************************************************
-Copyright (c) Microsoft Corporation.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
-***************************************************************************** */
-/* global Reflect, Promise, SuppressedError, Symbol, Iterator */
-
-
-var __assign = function() {
-  __assign = Object.assign || function __assign(t) {
-      for (var s, i = 1, n = arguments.length; i < n; i++) {
-          s = arguments[i];
-          for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-      }
-      return t;
-  };
-  return __assign.apply(this, arguments);
-};
-
-function __rest(s, e) {
-  var t = {};
-  for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-      t[p] = s[p];
-  if (s != null && typeof Object.getOwnPropertySymbols === "function")
-      for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-          if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-              t[p[i]] = s[p[i]];
-      }
-  return t;
-}
-
-function __spreadArray(to, from, pack) {
-  if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-      if (ar || !(i in from)) {
-          if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-          ar[i] = from[i];
-      }
-  }
-  return to.concat(ar || Array.prototype.slice.call(from));
-}
-
-typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
-  var e = new Error(message);
-  return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
-};
-
-var zeroRightClassName = 'right-scroll-bar-position';
-var fullWidthClassName = 'width-before-scroll-bar';
-var noScrollbarsClassName = 'with-scroll-bars-hidden';
-/**
- * Name of a CSS variable containing the amount of "hidden" scrollbar
- * ! might be undefined ! use will fallback!
- */
-var removedBarSizeVariable = '--removed-body-scroll-bar-size';
-
-/**
- * Assigns a value for a given ref, no matter of the ref format
- * @param {RefObject} ref - a callback function or ref object
- * @param value - a new value
- *
- * @see https://github.com/theKashey/use-callback-ref#assignref
- * @example
- * const refObject = useRef();
- * const refFn = (ref) => {....}
- *
- * assignRef(refObject, "refValue");
- * assignRef(refFn, "refValue");
- */
-function assignRef(ref, value) {
-    if (typeof ref === 'function') {
-        ref(value);
-    }
-    else if (ref) {
-        ref.current = value;
-    }
-    return ref;
-}
-
-/**
- * creates a MutableRef with ref change callback
- * @param initialValue - initial ref value
- * @param {Function} callback - a callback to run when value changes
- *
- * @example
- * const ref = useCallbackRef(0, (newValue, oldValue) => console.log(oldValue, '->', newValue);
- * ref.current = 1;
- * // prints 0 -> 1
- *
- * @see https://reactjs.org/docs/hooks-reference.html#useref
- * @see https://github.com/theKashey/use-callback-ref#usecallbackref---to-replace-reactuseref
- * @returns {MutableRefObject}
- */
-function useCallbackRef$1(initialValue, callback) {
-    var ref = dashboard__loadShare__react__loadShare__.useState(function () { return ({
-        // value
-        value: initialValue,
-        // last callback
-        callback: callback,
-        // "memoized" public interface
-        facade: {
-            get current() {
-                return ref.value;
-            },
-            set current(value) {
-                var last = ref.value;
-                if (last !== value) {
-                    ref.value = value;
-                    ref.callback(value, last);
-                }
-            },
-        },
-    }); })[0];
-    // update callback
-    ref.callback = callback;
-    return ref.facade;
-}
-
-var useIsomorphicLayoutEffect$1 = typeof window !== 'undefined' ? dashboard__loadShare__react__loadShare__.useLayoutEffect : dashboard__loadShare__react__loadShare__.useEffect;
-var currentValues = new WeakMap();
-/**
- * Merges two or more refs together providing a single interface to set their value
- * @param {RefObject|Ref} refs
- * @returns {MutableRefObject} - a new ref, which translates all changes to {refs}
- *
- * @see {@link mergeRefs} a version without buit-in memoization
- * @see https://github.com/theKashey/use-callback-ref#usemergerefs
- * @example
- * const Component = React.forwardRef((props, ref) => {
- *   const ownRef = useRef();
- *   const domRef = useMergeRefs([ref, ownRef]); // 👈 merge together
- *   return <div ref={domRef}>...</div>
- * }
- */
-function useMergeRefs(refs, defaultValue) {
-    var callbackRef = useCallbackRef$1(null, function (newValue) {
-        return refs.forEach(function (ref) { return assignRef(ref, newValue); });
-    });
-    // handle refs changes - added or removed
-    useIsomorphicLayoutEffect$1(function () {
-        var oldValue = currentValues.get(callbackRef);
-        if (oldValue) {
-            var prevRefs_1 = new Set(oldValue);
-            var nextRefs_1 = new Set(refs);
-            var current_1 = callbackRef.current;
-            prevRefs_1.forEach(function (ref) {
-                if (!nextRefs_1.has(ref)) {
-                    assignRef(ref, null);
-                }
-            });
-            nextRefs_1.forEach(function (ref) {
-                if (!prevRefs_1.has(ref)) {
-                    assignRef(ref, current_1);
-                }
-            });
-        }
-        currentValues.set(callbackRef, refs);
-    }, [refs]);
-    return callbackRef;
-}
-
-function ItoI(a) {
-    return a;
-}
-function innerCreateMedium(defaults, middleware) {
-    if (middleware === void 0) { middleware = ItoI; }
-    var buffer = [];
-    var assigned = false;
-    var medium = {
-        read: function () {
-            if (assigned) {
-                throw new Error('Sidecar: could not `read` from an `assigned` medium. `read` could be used only with `useMedium`.');
-            }
-            if (buffer.length) {
-                return buffer[buffer.length - 1];
-            }
-            return defaults;
-        },
-        useMedium: function (data) {
-            var item = middleware(data, assigned);
-            buffer.push(item);
-            return function () {
-                buffer = buffer.filter(function (x) { return x !== item; });
-            };
-        },
-        assignSyncMedium: function (cb) {
-            assigned = true;
-            while (buffer.length) {
-                var cbs = buffer;
-                buffer = [];
-                cbs.forEach(cb);
-            }
-            buffer = {
-                push: function (x) { return cb(x); },
-                filter: function () { return buffer; },
-            };
-        },
-        assignMedium: function (cb) {
-            assigned = true;
-            var pendingQueue = [];
-            if (buffer.length) {
-                var cbs = buffer;
-                buffer = [];
-                cbs.forEach(cb);
-                pendingQueue = buffer;
-            }
-            var executeQueue = function () {
-                var cbs = pendingQueue;
-                pendingQueue = [];
-                cbs.forEach(cb);
-            };
-            var cycle = function () { return Promise.resolve().then(executeQueue); };
-            cycle();
-            buffer = {
-                push: function (x) {
-                    pendingQueue.push(x);
-                    cycle();
-                },
-                filter: function (filter) {
-                    pendingQueue = pendingQueue.filter(filter);
-                    return buffer;
-                },
-            };
-        },
-    };
-    return medium;
-}
-// eslint-disable-next-line @typescript-eslint/ban-types
-function createSidecarMedium(options) {
-    if (options === void 0) { options = {}; }
-    var medium = innerCreateMedium(null);
-    medium.options = __assign({ async: true, ssr: false }, options);
-    return medium;
-}
-
-var SideCar$2 = function (_a) {
-    var sideCar = _a.sideCar, rest = __rest(_a, ["sideCar"]);
-    if (!sideCar) {
-        throw new Error('Sidecar: please provide `sideCar` property to import the right car');
-    }
-    var Target = sideCar.read();
-    if (!Target) {
-        throw new Error('Sidecar medium not found');
-    }
-    return dashboard__loadShare__react__loadShare__.createElement(Target, __assign({}, rest));
-};
-SideCar$2.isSideCarExport = true;
-function exportSidecar(medium, exported) {
-    medium.useMedium(exported);
-    return SideCar$2;
-}
-
-var effectCar$1 = createSidecarMedium();
-
-var nothing$1 = function () {
+var nothing = function () {
     return;
 };
 /**
  * Removes scrollbar from the page and contain the scroll within the Lock
  */
-var RemoveScroll$1 = dashboard__loadShare__react__loadShare__.forwardRef(function (props, parentRef) {
+var RemoveScroll = dashboard__loadShare__react__loadShare__.forwardRef(function (props, parentRef) {
     var ref = dashboard__loadShare__react__loadShare__.useRef(null);
     var _a = dashboard__loadShare__react__loadShare__.useState({
-        onScrollCapture: nothing$1,
-        onWheelCapture: nothing$1,
-        onTouchMoveCapture: nothing$1,
+        onScrollCapture: nothing,
+        onWheelCapture: nothing,
+        onTouchMoveCapture: nothing,
     }), callbacks = _a[0], setCallbacks = _a[1];
     var forwardProps = props.forwardProps, children = props.children, className = props.className, removeScrollBar = props.removeScrollBar, enabled = props.enabled, shards = props.shards, sideCar = props.sideCar, noRelative = props.noRelative, noIsolation = props.noIsolation, inert = props.inert, allowPinchZoom = props.allowPinchZoom, _b = props.as, Container = _b === void 0 ? 'div' : _b, gapMode = props.gapMode, rest = __rest(props, ["forwardProps", "children", "className", "removeScrollBar", "enabled", "shards", "sideCar", "noRelative", "noIsolation", "inert", "allowPinchZoom", "as", "gapMode"]);
     var SideCar = sideCar;
     var containerRef = useMergeRefs([ref, parentRef]);
     var containerProps = __assign(__assign({}, rest), callbacks);
     return (dashboard__loadShare__react__loadShare__.createElement(dashboard__loadShare__react__loadShare__.Fragment, null,
-        enabled && (dashboard__loadShare__react__loadShare__.createElement(SideCar, { sideCar: effectCar$1, removeScrollBar: removeScrollBar, shards: shards, noRelative: noRelative, noIsolation: noIsolation, inert: inert, setCallbacks: setCallbacks, allowPinchZoom: !!allowPinchZoom, lockRef: ref, gapMode: gapMode })),
+        enabled && (dashboard__loadShare__react__loadShare__.createElement(SideCar, { sideCar: effectCar, removeScrollBar: removeScrollBar, shards: shards, noRelative: noRelative, noIsolation: noIsolation, inert: inert, setCallbacks: setCallbacks, allowPinchZoom: !!allowPinchZoom, lockRef: ref, gapMode: gapMode })),
         forwardProps ? (dashboard__loadShare__react__loadShare__.cloneElement(dashboard__loadShare__react__loadShare__.Children.only(children), __assign(__assign({}, containerProps), { ref: containerRef }))) : (dashboard__loadShare__react__loadShare__.createElement(Container, __assign({}, containerProps, { className: className, ref: containerRef }), children))));
 });
-RemoveScroll$1.defaultProps = {
+RemoveScroll.defaultProps = {
     enabled: true,
     removeScrollBar: true,
     inert: false,
 };
-RemoveScroll$1.classNames = {
+RemoveScroll.classNames = {
     fullWidth: fullWidthClassName,
     zeroRight: zeroRightClassName,
 };
 
-var getNonce = function () {
-    if (typeof __webpack_nonce__ !== 'undefined') {
-        return __webpack_nonce__;
-    }
-    return undefined;
-};
-
-function makeStyleTag() {
-    if (!document)
-        return null;
-    var tag = document.createElement('style');
-    tag.type = 'text/css';
-    var nonce = getNonce();
-    if (nonce) {
-        tag.setAttribute('nonce', nonce);
-    }
-    return tag;
-}
-function injectStyles(tag, css) {
-    // @ts-ignore
-    if (tag.styleSheet) {
-        // @ts-ignore
-        tag.styleSheet.cssText = css;
-    }
-    else {
-        tag.appendChild(document.createTextNode(css));
-    }
-}
-function insertStyleTag(tag) {
-    var head = document.head || document.getElementsByTagName('head')[0];
-    head.appendChild(tag);
-}
-var stylesheetSingleton = function () {
-    var counter = 0;
-    var stylesheet = null;
-    return {
-        add: function (style) {
-            if (counter == 0) {
-                if ((stylesheet = makeStyleTag())) {
-                    injectStyles(stylesheet, style);
-                    insertStyleTag(stylesheet);
-                }
-            }
-            counter++;
-        },
-        remove: function () {
-            counter--;
-            if (!counter && stylesheet) {
-                stylesheet.parentNode && stylesheet.parentNode.removeChild(stylesheet);
-                stylesheet = null;
-            }
-        },
-    };
-};
-
-/**
- * creates a hook to control style singleton
- * @see {@link styleSingleton} for a safer component version
- * @example
- * ```tsx
- * const useStyle = styleHookSingleton();
- * ///
- * useStyle('body { overflow: hidden}');
- */
-var styleHookSingleton = function () {
-    var sheet = stylesheetSingleton();
-    return function (styles, isDynamic) {
-        dashboard__loadShare__react__loadShare__.useEffect(function () {
-            sheet.add(styles);
-            return function () {
-                sheet.remove();
-            };
-        }, [styles && isDynamic]);
-    };
-};
-
-/**
- * create a Component to add styles on demand
- * - styles are added when first instance is mounted
- * - styles are removed when the last instance is unmounted
- * - changing styles in runtime does nothing unless dynamic is set. But with multiple components that can lead to the undefined behavior
- */
-var styleSingleton = function () {
-    var useStyle = styleHookSingleton();
-    var Sheet = function (_a) {
-        var styles = _a.styles, dynamic = _a.dynamic;
-        useStyle(styles, dynamic);
-        return null;
-    };
-    return Sheet;
-};
-
-var zeroGap = {
-    left: 0,
-    top: 0,
-    right: 0,
-    gap: 0,
-};
-var parse = function (x) { return parseInt(x || '', 10) || 0; };
-var getOffset = function (gapMode) {
-    var cs = window.getComputedStyle(document.body);
-    var left = cs[gapMode === 'padding' ? 'paddingLeft' : 'marginLeft'];
-    var top = cs[gapMode === 'padding' ? 'paddingTop' : 'marginTop'];
-    var right = cs[gapMode === 'padding' ? 'paddingRight' : 'marginRight'];
-    return [parse(left), parse(top), parse(right)];
-};
-var getGapWidth = function (gapMode) {
-    if (gapMode === void 0) { gapMode = 'margin'; }
-    if (typeof window === 'undefined') {
-        return zeroGap;
-    }
-    var offsets = getOffset(gapMode);
-    var documentWidth = document.documentElement.clientWidth;
-    var windowWidth = window.innerWidth;
-    return {
-        left: offsets[0],
-        top: offsets[1],
-        right: offsets[2],
-        gap: Math.max(0, windowWidth - documentWidth + offsets[2] - offsets[0]),
-    };
-};
-
-var Style = styleSingleton();
-var lockAttribute = 'data-scroll-locked';
-// important tip - once we measure scrollBar width and remove them
-// we could not repeat this operation
-// thus we are using style-singleton - only the first "yet correct" style will be applied.
-var getStyles = function (_a, allowRelative, gapMode, important) {
-    var left = _a.left, top = _a.top, right = _a.right, gap = _a.gap;
-    if (gapMode === void 0) { gapMode = 'margin'; }
-    return "\n  .".concat(noScrollbarsClassName, " {\n   overflow: hidden ").concat(important, ";\n   padding-right: ").concat(gap, "px ").concat(important, ";\n  }\n  body[").concat(lockAttribute, "] {\n    overflow: hidden ").concat(important, ";\n    overscroll-behavior: contain;\n    ").concat([
-        allowRelative && "position: relative ".concat(important, ";"),
-        gapMode === 'margin' &&
-            "\n    padding-left: ".concat(left, "px;\n    padding-top: ").concat(top, "px;\n    padding-right: ").concat(right, "px;\n    margin-left:0;\n    margin-top:0;\n    margin-right: ").concat(gap, "px ").concat(important, ";\n    "),
-        gapMode === 'padding' && "padding-right: ".concat(gap, "px ").concat(important, ";"),
-    ]
-        .filter(Boolean)
-        .join(''), "\n  }\n  \n  .").concat(zeroRightClassName, " {\n    right: ").concat(gap, "px ").concat(important, ";\n  }\n  \n  .").concat(fullWidthClassName, " {\n    margin-right: ").concat(gap, "px ").concat(important, ";\n  }\n  \n  .").concat(zeroRightClassName, " .").concat(zeroRightClassName, " {\n    right: 0 ").concat(important, ";\n  }\n  \n  .").concat(fullWidthClassName, " .").concat(fullWidthClassName, " {\n    margin-right: 0 ").concat(important, ";\n  }\n  \n  body[").concat(lockAttribute, "] {\n    ").concat(removedBarSizeVariable, ": ").concat(gap, "px;\n  }\n");
-};
-var getCurrentUseCounter = function () {
-    var counter = parseInt(document.body.getAttribute(lockAttribute) || '0', 10);
-    return isFinite(counter) ? counter : 0;
-};
-var useLockAttribute = function () {
-    dashboard__loadShare__react__loadShare__.useEffect(function () {
-        document.body.setAttribute(lockAttribute, (getCurrentUseCounter() + 1).toString());
-        return function () {
-            var newCounter = getCurrentUseCounter() - 1;
-            if (newCounter <= 0) {
-                document.body.removeAttribute(lockAttribute);
-            }
-            else {
-                document.body.setAttribute(lockAttribute, newCounter.toString());
-            }
-        };
-    }, []);
-};
-/**
- * Removes page scrollbar and blocks page scroll when mounted
- */
-var RemoveScrollBar = function (_a) {
-    var noRelative = _a.noRelative, noImportant = _a.noImportant, _b = _a.gapMode, gapMode = _b === void 0 ? 'margin' : _b;
-    useLockAttribute();
-    /*
-     gap will be measured on every component mount
-     however it will be used only by the "first" invocation
-     due to singleton nature of <Style
-     */
-    var gap = dashboard__loadShare__react__loadShare__.useMemo(function () { return getGapWidth(gapMode); }, [gapMode]);
-    return dashboard__loadShare__react__loadShare__.createElement(Style, { styles: getStyles(gap, !noRelative, gapMode, !noImportant ? '!important' : '') });
-};
-
-var passiveSupported$1 = false;
+var passiveSupported = false;
 if (typeof window !== 'undefined') {
     try {
-        var options$1 = Object.defineProperty({}, 'passive', {
+        var options = Object.defineProperty({}, 'passive', {
             get: function () {
-                passiveSupported$1 = true;
+                passiveSupported = true;
                 return true;
             },
         });
         // @ts-ignore
-        window.addEventListener('test', options$1, options$1);
+        window.addEventListener('test', options, options);
         // @ts-ignore
-        window.removeEventListener('test', options$1, options$1);
+        window.removeEventListener('test', options, options);
     }
     catch (err) {
-        passiveSupported$1 = false;
+        passiveSupported = false;
     }
 }
-var nonPassive$1 = passiveSupported$1 ? { passive: false } : false;
+var nonPassive = passiveSupported ? { passive: false } : false;
 
-var alwaysContainsScroll$1 = function (node) {
+var alwaysContainsScroll = function (node) {
     // textarea will always _contain_ scroll inside self. It only can be hidden
     return node.tagName === 'TEXTAREA';
 };
-var elementCanBeScrolled$1 = function (node, overflow) {
+var elementCanBeScrolled = function (node, overflow) {
     if (!(node instanceof Element)) {
         return false;
     }
@@ -6487,11 +5036,11 @@ var elementCanBeScrolled$1 = function (node, overflow) {
     // not-not-scrollable
     styles[overflow] !== 'hidden' &&
         // contains scroll inside self
-        !(styles.overflowY === styles.overflowX && !alwaysContainsScroll$1(node) && styles[overflow] === 'visible'));
+        !(styles.overflowY === styles.overflowX && !alwaysContainsScroll(node) && styles[overflow] === 'visible'));
 };
-var elementCouldBeVScrolled$1 = function (node) { return elementCanBeScrolled$1(node, 'overflowY'); };
-var elementCouldBeHScrolled$1 = function (node) { return elementCanBeScrolled$1(node, 'overflowX'); };
-var locationCouldBeScrolled$1 = function (axis, node) {
+var elementCouldBeVScrolled = function (node) { return elementCanBeScrolled(node, 'overflowY'); };
+var elementCouldBeHScrolled = function (node) { return elementCanBeScrolled(node, 'overflowX'); };
+var locationCouldBeScrolled = function (axis, node) {
     var ownerDocument = node.ownerDocument;
     var current = node;
     do {
@@ -6499,9 +5048,9 @@ var locationCouldBeScrolled$1 = function (axis, node) {
         if (typeof ShadowRoot !== 'undefined' && current instanceof ShadowRoot) {
             current = current.host;
         }
-        var isScrollable = elementCouldBeScrolled$1(axis, current);
+        var isScrollable = elementCouldBeScrolled(axis, current);
         if (isScrollable) {
-            var _a = getScrollVariables$1(axis, current), scrollHeight = _a[1], clientHeight = _a[2];
+            var _a = getScrollVariables(axis, current), scrollHeight = _a[1], clientHeight = _a[2];
             if (scrollHeight > clientHeight) {
                 return true;
             }
@@ -6510,7 +5059,7 @@ var locationCouldBeScrolled$1 = function (axis, node) {
     } while (current && current !== ownerDocument.body);
     return false;
 };
-var getVScrollVariables$1 = function (_a) {
+var getVScrollVariables = function (_a) {
     var scrollTop = _a.scrollTop, scrollHeight = _a.scrollHeight, clientHeight = _a.clientHeight;
     return [
         scrollTop,
@@ -6518,7 +5067,7 @@ var getVScrollVariables$1 = function (_a) {
         clientHeight,
     ];
 };
-var getHScrollVariables$1 = function (_a) {
+var getHScrollVariables = function (_a) {
     var scrollLeft = _a.scrollLeft, scrollWidth = _a.scrollWidth, clientWidth = _a.clientWidth;
     return [
         scrollLeft,
@@ -6526,13 +5075,13 @@ var getHScrollVariables$1 = function (_a) {
         clientWidth,
     ];
 };
-var elementCouldBeScrolled$1 = function (axis, node) {
-    return axis === 'v' ? elementCouldBeVScrolled$1(node) : elementCouldBeHScrolled$1(node);
+var elementCouldBeScrolled = function (axis, node) {
+    return axis === 'v' ? elementCouldBeVScrolled(node) : elementCouldBeHScrolled(node);
 };
-var getScrollVariables$1 = function (axis, node) {
-    return axis === 'v' ? getVScrollVariables$1(node) : getHScrollVariables$1(node);
+var getScrollVariables = function (axis, node) {
+    return axis === 'v' ? getVScrollVariables(node) : getHScrollVariables(node);
 };
-var getDirectionFactor$1 = function (axis, direction) {
+var getDirectionFactor = function (axis, direction) {
     /**
      * If the element's direction is rtl (right-to-left), then scrollLeft is 0 when the scrollbar is at its rightmost position,
      * and then increasingly negative as you scroll towards the end of the content.
@@ -6540,8 +5089,8 @@ var getDirectionFactor$1 = function (axis, direction) {
      */
     return axis === 'h' && direction === 'rtl' ? -1 : 1;
 };
-var handleScroll$1 = function (axis, endTarget, event, sourceDelta, noOverscroll) {
-    var directionFactor = getDirectionFactor$1(axis, window.getComputedStyle(endTarget).direction);
+var handleScroll = function (axis, endTarget, event, sourceDelta, noOverscroll) {
+    var directionFactor = getDirectionFactor(axis, window.getComputedStyle(endTarget).direction);
     var delta = directionFactor * sourceDelta;
     // find scrollable target
     var target = event.target;
@@ -6551,10 +5100,10 @@ var handleScroll$1 = function (axis, endTarget, event, sourceDelta, noOverscroll
     var availableScroll = 0;
     var availableScrollTop = 0;
     do {
-        var _a = getScrollVariables$1(axis, target), position = _a[0], scroll_1 = _a[1], capacity = _a[2];
+        var _a = getScrollVariables(axis, target), position = _a[0], scroll_1 = _a[1], capacity = _a[2];
         var elementScroll = scroll_1 - capacity - directionFactor * position;
         if (position || elementScroll) {
-            if (elementCouldBeScrolled$1(axis, target)) {
+            if (elementCouldBeScrolled(axis, target)) {
                 availableScroll += elementScroll;
                 availableScrollTop += position;
             }
@@ -6579,22 +5128,22 @@ var handleScroll$1 = function (axis, endTarget, event, sourceDelta, noOverscroll
     return shouldCancelScroll;
 };
 
-var getTouchXY$1 = function (event) {
+var getTouchXY = function (event) {
     return 'changedTouches' in event ? [event.changedTouches[0].clientX, event.changedTouches[0].clientY] : [0, 0];
 };
-var getDeltaXY$1 = function (event) { return [event.deltaX, event.deltaY]; };
-var extractRef$1 = function (ref) {
+var getDeltaXY = function (event) { return [event.deltaX, event.deltaY]; };
+var extractRef = function (ref) {
     return ref && 'current' in ref ? ref.current : ref;
 };
-var deltaCompare$1 = function (x, y) { return x[0] === y[0] && x[1] === y[1]; };
-var generateStyle$1 = function (id) { return "\n  .block-interactivity-".concat(id, " {pointer-events: none;}\n  .allow-interactivity-").concat(id, " {pointer-events: all;}\n"); };
-var idCounter$1 = 0;
-var lockStack$1 = [];
-function RemoveScrollSideCar$1(props) {
+var deltaCompare = function (x, y) { return x[0] === y[0] && x[1] === y[1]; };
+var generateStyle = function (id) { return "\n  .block-interactivity-".concat(id, " {pointer-events: none;}\n  .allow-interactivity-").concat(id, " {pointer-events: all;}\n"); };
+var idCounter = 0;
+var lockStack = [];
+function RemoveScrollSideCar(props) {
     var shouldPreventQueue = dashboard__loadShare__react__loadShare__.useRef([]);
     var touchStartRef = dashboard__loadShare__react__loadShare__.useRef([0, 0]);
     var activeAxis = dashboard__loadShare__react__loadShare__.useRef();
-    var id = dashboard__loadShare__react__loadShare__.useState(idCounter$1++)[0];
+    var id = dashboard__loadShare__react__loadShare__.useState(idCounter++)[0];
     var Style = dashboard__loadShare__react__loadShare__.useState(styleSingleton)[0];
     var lastProps = dashboard__loadShare__react__loadShare__.useRef(props);
     dashboard__loadShare__react__loadShare__.useEffect(function () {
@@ -6603,7 +5152,7 @@ function RemoveScrollSideCar$1(props) {
     dashboard__loadShare__react__loadShare__.useEffect(function () {
         if (props.inert) {
             document.body.classList.add("block-interactivity-".concat(id));
-            var allow_1 = __spreadArray([props.lockRef.current], (props.shards || []).map(extractRef$1), true).filter(Boolean);
+            var allow_1 = __spreadArray([props.lockRef.current], (props.shards || []).map(extractRef), true).filter(Boolean);
             allow_1.forEach(function (el) { return el.classList.add("allow-interactivity-".concat(id)); });
             return function () {
                 document.body.classList.remove("block-interactivity-".concat(id));
@@ -6616,7 +5165,7 @@ function RemoveScrollSideCar$1(props) {
         if (('touches' in event && event.touches.length === 2) || (event.type === 'wheel' && event.ctrlKey)) {
             return !lastProps.current.allowPinchZoom;
         }
-        var touch = getTouchXY$1(event);
+        var touch = getTouchXY(event);
         var touchStart = touchStartRef.current;
         var deltaX = 'deltaX' in event ? event.deltaX : touchStart[0] - touch[0];
         var deltaY = 'deltaY' in event ? event.deltaY : touchStart[1] - touch[1];
@@ -6627,7 +5176,7 @@ function RemoveScrollSideCar$1(props) {
         if ('touches' in event && moveDirection === 'h' && target.type === 'range') {
             return false;
         }
-        var canBeScrolledInMainDirection = locationCouldBeScrolled$1(moveDirection, target);
+        var canBeScrolledInMainDirection = locationCouldBeScrolled(moveDirection, target);
         if (!canBeScrolledInMainDirection) {
             return true;
         }
@@ -6636,7 +5185,7 @@ function RemoveScrollSideCar$1(props) {
         }
         else {
             currentAxis = moveDirection === 'v' ? 'h' : 'v';
-            canBeScrolledInMainDirection = locationCouldBeScrolled$1(moveDirection, target);
+            canBeScrolledInMainDirection = locationCouldBeScrolled(moveDirection, target);
             // other axis might be not scrollable
         }
         if (!canBeScrolledInMainDirection) {
@@ -6649,16 +5198,16 @@ function RemoveScrollSideCar$1(props) {
             return true;
         }
         var cancelingAxis = activeAxis.current || currentAxis;
-        return handleScroll$1(cancelingAxis, parent, event, cancelingAxis === 'h' ? deltaX : deltaY);
+        return handleScroll(cancelingAxis, parent, event, cancelingAxis === 'h' ? deltaX : deltaY);
     }, []);
     var shouldPrevent = dashboard__loadShare__react__loadShare__.useCallback(function (_event) {
         var event = _event;
-        if (!lockStack$1.length || lockStack$1[lockStack$1.length - 1] !== Style) {
+        if (!lockStack.length || lockStack[lockStack.length - 1] !== Style) {
             // not the last active
             return;
         }
-        var delta = 'deltaY' in event ? getDeltaXY$1(event) : getTouchXY$1(event);
-        var sourceEvent = shouldPreventQueue.current.filter(function (e) { return e.name === event.type && (e.target === event.target || event.target === e.shadowParent) && deltaCompare$1(e.delta, delta); })[0];
+        var delta = 'deltaY' in event ? getDeltaXY(event) : getTouchXY(event);
+        var sourceEvent = shouldPreventQueue.current.filter(function (e) { return e.name === event.type && (e.target === event.target || event.target === e.shadowParent) && deltaCompare(e.delta, delta); })[0];
         // self event, and should be canceled
         if (sourceEvent && sourceEvent.should) {
             if (event.cancelable) {
@@ -6669,7 +5218,7 @@ function RemoveScrollSideCar$1(props) {
         // outside or shard event
         if (!sourceEvent) {
             var shardNodes = (lastProps.current.shards || [])
-                .map(extractRef$1)
+                .map(extractRef)
                 .filter(Boolean)
                 .filter(function (node) { return node.contains(event.target); });
             var shouldStop = shardNodes.length > 0 ? shouldCancelEvent(event, shardNodes[0]) : !lastProps.current.noIsolation;
@@ -6681,45 +5230,45 @@ function RemoveScrollSideCar$1(props) {
         }
     }, []);
     var shouldCancel = dashboard__loadShare__react__loadShare__.useCallback(function (name, delta, target, should) {
-        var event = { name: name, delta: delta, target: target, should: should, shadowParent: getOutermostShadowParent$1(target) };
+        var event = { name: name, delta: delta, target: target, should: should, shadowParent: getOutermostShadowParent(target) };
         shouldPreventQueue.current.push(event);
         setTimeout(function () {
             shouldPreventQueue.current = shouldPreventQueue.current.filter(function (e) { return e !== event; });
         }, 1);
     }, []);
     var scrollTouchStart = dashboard__loadShare__react__loadShare__.useCallback(function (event) {
-        touchStartRef.current = getTouchXY$1(event);
+        touchStartRef.current = getTouchXY(event);
         activeAxis.current = undefined;
     }, []);
     var scrollWheel = dashboard__loadShare__react__loadShare__.useCallback(function (event) {
-        shouldCancel(event.type, getDeltaXY$1(event), event.target, shouldCancelEvent(event, props.lockRef.current));
+        shouldCancel(event.type, getDeltaXY(event), event.target, shouldCancelEvent(event, props.lockRef.current));
     }, []);
     var scrollTouchMove = dashboard__loadShare__react__loadShare__.useCallback(function (event) {
-        shouldCancel(event.type, getTouchXY$1(event), event.target, shouldCancelEvent(event, props.lockRef.current));
+        shouldCancel(event.type, getTouchXY(event), event.target, shouldCancelEvent(event, props.lockRef.current));
     }, []);
     dashboard__loadShare__react__loadShare__.useEffect(function () {
-        lockStack$1.push(Style);
+        lockStack.push(Style);
         props.setCallbacks({
             onScrollCapture: scrollWheel,
             onWheelCapture: scrollWheel,
             onTouchMoveCapture: scrollTouchMove,
         });
-        document.addEventListener('wheel', shouldPrevent, nonPassive$1);
-        document.addEventListener('touchmove', shouldPrevent, nonPassive$1);
-        document.addEventListener('touchstart', scrollTouchStart, nonPassive$1);
+        document.addEventListener('wheel', shouldPrevent, nonPassive);
+        document.addEventListener('touchmove', shouldPrevent, nonPassive);
+        document.addEventListener('touchstart', scrollTouchStart, nonPassive);
         return function () {
-            lockStack$1 = lockStack$1.filter(function (inst) { return inst !== Style; });
-            document.removeEventListener('wheel', shouldPrevent, nonPassive$1);
-            document.removeEventListener('touchmove', shouldPrevent, nonPassive$1);
-            document.removeEventListener('touchstart', scrollTouchStart, nonPassive$1);
+            lockStack = lockStack.filter(function (inst) { return inst !== Style; });
+            document.removeEventListener('wheel', shouldPrevent, nonPassive);
+            document.removeEventListener('touchmove', shouldPrevent, nonPassive);
+            document.removeEventListener('touchstart', scrollTouchStart, nonPassive);
         };
     }, []);
     var removeScrollBar = props.removeScrollBar, inert = props.inert;
     return (dashboard__loadShare__react__loadShare__.createElement(dashboard__loadShare__react__loadShare__.Fragment, null,
-        inert ? dashboard__loadShare__react__loadShare__.createElement(Style, { styles: generateStyle$1(id) }) : null,
+        inert ? dashboard__loadShare__react__loadShare__.createElement(Style, { styles: generateStyle(id) }) : null,
         removeScrollBar ? dashboard__loadShare__react__loadShare__.createElement(RemoveScrollBar, { noRelative: props.noRelative, gapMode: props.gapMode }) : null));
 }
-function getOutermostShadowParent$1(node) {
+function getOutermostShadowParent(node) {
     var shadowParent = null;
     while (node !== null) {
         if (node instanceof ShadowRoot) {
@@ -6731,146 +5280,10 @@ function getOutermostShadowParent$1(node) {
     return shadowParent;
 }
 
-const SideCar$1 = exportSidecar(effectCar$1, RemoveScrollSideCar$1);
+const SideCar = exportSidecar(effectCar, RemoveScrollSideCar);
 
-var ReactRemoveScroll$1 = dashboard__loadShare__react__loadShare__.forwardRef(function (props, ref) { return (dashboard__loadShare__react__loadShare__.createElement(RemoveScroll$1, __assign({}, props, { ref: ref, sideCar: SideCar$1 }))); });
-ReactRemoveScroll$1.classNames = RemoveScroll$1.classNames;
-
-var getDefaultParent = function (originalTarget) {
-    if (typeof document === 'undefined') {
-        return null;
-    }
-    var sampleTarget = Array.isArray(originalTarget) ? originalTarget[0] : originalTarget;
-    return sampleTarget.ownerDocument.body;
-};
-var counterMap = new WeakMap();
-var uncontrolledNodes = new WeakMap();
-var markerMap = {};
-var lockCount = 0;
-var unwrapHost = function (node) {
-    return node && (node.host || unwrapHost(node.parentNode));
-};
-var correctTargets = function (parent, targets) {
-    return targets
-        .map(function (target) {
-        if (parent.contains(target)) {
-            return target;
-        }
-        var correctedTarget = unwrapHost(target);
-        if (correctedTarget && parent.contains(correctedTarget)) {
-            return correctedTarget;
-        }
-        console.error('aria-hidden', target, 'in not contained inside', parent, '. Doing nothing');
-        return null;
-    })
-        .filter(function (x) { return Boolean(x); });
-};
-/**
- * Marks everything except given node(or nodes) as aria-hidden
- * @param {Element | Element[]} originalTarget - elements to keep on the page
- * @param [parentNode] - top element, defaults to document.body
- * @param {String} [markerName] - a special attribute to mark every node
- * @param {String} [controlAttribute] - html Attribute to control
- * @return {Undo} undo command
- */
-var applyAttributeToOthers = function (originalTarget, parentNode, markerName, controlAttribute) {
-    var targets = correctTargets(parentNode, Array.isArray(originalTarget) ? originalTarget : [originalTarget]);
-    if (!markerMap[markerName]) {
-        markerMap[markerName] = new WeakMap();
-    }
-    var markerCounter = markerMap[markerName];
-    var hiddenNodes = [];
-    var elementsToKeep = new Set();
-    var elementsToStop = new Set(targets);
-    var keep = function (el) {
-        if (!el || elementsToKeep.has(el)) {
-            return;
-        }
-        elementsToKeep.add(el);
-        keep(el.parentNode);
-    };
-    targets.forEach(keep);
-    var deep = function (parent) {
-        if (!parent || elementsToStop.has(parent)) {
-            return;
-        }
-        Array.prototype.forEach.call(parent.children, function (node) {
-            if (elementsToKeep.has(node)) {
-                deep(node);
-            }
-            else {
-                try {
-                    var attr = node.getAttribute(controlAttribute);
-                    var alreadyHidden = attr !== null && attr !== 'false';
-                    var counterValue = (counterMap.get(node) || 0) + 1;
-                    var markerValue = (markerCounter.get(node) || 0) + 1;
-                    counterMap.set(node, counterValue);
-                    markerCounter.set(node, markerValue);
-                    hiddenNodes.push(node);
-                    if (counterValue === 1 && alreadyHidden) {
-                        uncontrolledNodes.set(node, true);
-                    }
-                    if (markerValue === 1) {
-                        node.setAttribute(markerName, 'true');
-                    }
-                    if (!alreadyHidden) {
-                        node.setAttribute(controlAttribute, 'true');
-                    }
-                }
-                catch (e) {
-                    console.error('aria-hidden: cannot operate on ', node, e);
-                }
-            }
-        });
-    };
-    deep(parentNode);
-    elementsToKeep.clear();
-    lockCount++;
-    return function () {
-        hiddenNodes.forEach(function (node) {
-            var counterValue = counterMap.get(node) - 1;
-            var markerValue = markerCounter.get(node) - 1;
-            counterMap.set(node, counterValue);
-            markerCounter.set(node, markerValue);
-            if (!counterValue) {
-                if (!uncontrolledNodes.has(node)) {
-                    node.removeAttribute(controlAttribute);
-                }
-                uncontrolledNodes.delete(node);
-            }
-            if (!markerValue) {
-                node.removeAttribute(markerName);
-            }
-        });
-        lockCount--;
-        if (!lockCount) {
-            // clear
-            counterMap = new WeakMap();
-            counterMap = new WeakMap();
-            uncontrolledNodes = new WeakMap();
-            markerMap = {};
-        }
-    };
-};
-/**
- * Marks everything except given node(or nodes) as aria-hidden
- * @param {Element | Element[]} originalTarget - elements to keep on the page
- * @param [parentNode] - top element, defaults to document.body
- * @param {String} [markerName] - a special attribute to mark every node
- * @return {Undo} undo command
- */
-var hideOthers = function (originalTarget, parentNode, markerName) {
-    if (markerName === void 0) { markerName = 'data-aria-hidden'; }
-    var targets = Array.from(Array.isArray(originalTarget) ? originalTarget : [originalTarget]);
-    var activeParentNode = getDefaultParent(originalTarget);
-    if (!activeParentNode) {
-        return function () { return null; };
-    }
-    // we should not hide aria-live elements - https://github.com/theKashey/aria-hidden/issues/10
-    // and script elements, as they have no impact on accessibility.
-    targets.push.apply(targets, Array.from(activeParentNode.querySelectorAll('[aria-live], script')));
-    return applyAttributeToOthers(targets, activeParentNode, markerName, 'aria-hidden');
-};
+var ReactRemoveScroll = dashboard__loadShare__react__loadShare__.forwardRef(function (props, ref) { return (dashboard__loadShare__react__loadShare__.createElement(RemoveScroll, __assign({}, props, { ref: ref, sideCar: SideCar }))); });
+ReactRemoveScroll.classNames = RemoveScroll.classNames;
 
 var DIALOG_NAME = "Dialog";
 var [createDialogContext, createDialogScope] = createContextScope(DIALOG_NAME);
@@ -6910,11 +5323,11 @@ var Dialog$1 = (props) => {
   );
 };
 Dialog$1.displayName = DIALOG_NAME;
-var TRIGGER_NAME$7 = "DialogTrigger";
+var TRIGGER_NAME$6 = "DialogTrigger";
 var DialogTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeDialog, ...triggerProps } = props;
-    const context = useDialogContext(TRIGGER_NAME$7, __scopeDialog);
+    const context = useDialogContext(TRIGGER_NAME$6, __scopeDialog);
     const composedTriggerRef = useComposedRefs$1(forwardedRef, context.triggerRef);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       Primitive.button,
@@ -6931,28 +5344,28 @@ var DialogTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
     );
   }
 );
-DialogTrigger$1.displayName = TRIGGER_NAME$7;
-var PORTAL_NAME$6 = "DialogPortal";
-var [PortalProvider$3, usePortalContext$3] = createDialogContext(PORTAL_NAME$6, {
+DialogTrigger$1.displayName = TRIGGER_NAME$6;
+var PORTAL_NAME$4 = "DialogPortal";
+var [PortalProvider$2, usePortalContext$2] = createDialogContext(PORTAL_NAME$4, {
   forceMount: void 0
 });
 var DialogPortal$1 = (props) => {
   const { __scopeDialog, forceMount, children, container } = props;
-  const context = useDialogContext(PORTAL_NAME$6, __scopeDialog);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(PortalProvider$3, { scope: __scopeDialog, forceMount, children: dashboard__loadShare__react__loadShare__.Children.map(children, (child) => /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$5, { asChild: true, container, children: child }) })) });
+  const context = useDialogContext(PORTAL_NAME$4, __scopeDialog);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(PortalProvider$2, { scope: __scopeDialog, forceMount, children: dashboard__loadShare__react__loadShare__.Children.map(children, (child) => /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$4, { asChild: true, container, children: child }) })) });
 };
-DialogPortal$1.displayName = PORTAL_NAME$6;
+DialogPortal$1.displayName = PORTAL_NAME$4;
 var OVERLAY_NAME$1 = "DialogOverlay";
 var DialogOverlay$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
-    const portalContext = usePortalContext$3(OVERLAY_NAME$1, props.__scopeDialog);
+    const portalContext = usePortalContext$2(OVERLAY_NAME$1, props.__scopeDialog);
     const { forceMount = portalContext.forceMount, ...overlayProps } = props;
     const context = useDialogContext(OVERLAY_NAME$1, props.__scopeDialog);
     return context.modal ? /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DialogOverlayImpl, { ...overlayProps, ref: forwardedRef }) }) : null;
   }
 );
 DialogOverlay$1.displayName = OVERLAY_NAME$1;
-var Slot$3 = createSlot("DialogOverlay.RemoveScroll");
+var Slot$2 = createSlot("DialogOverlay.RemoveScroll");
 var DialogOverlayImpl = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeDialog, ...overlayProps } = props;
@@ -6960,7 +5373,7 @@ var DialogOverlayImpl = dashboard__loadShare__react__loadShare__.forwardRef(
     return (
       // Make sure `Content` is scrollable even when it doesn't live inside `RemoveScroll`
       // ie. when `Overlay` and `Content` are siblings
-      /* @__PURE__ */ jsxRuntimeExports.jsx(ReactRemoveScroll$1, { as: Slot$3, allowPinchZoom: true, shards: [context.contentRef], children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ReactRemoveScroll, { as: Slot$2, allowPinchZoom: true, shards: [context.contentRef], children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         Primitive.div,
         {
           "data-state": getState$4(context.open),
@@ -6972,19 +5385,19 @@ var DialogOverlayImpl = dashboard__loadShare__react__loadShare__.forwardRef(
     );
   }
 );
-var CONTENT_NAME$8 = "DialogContent";
+var CONTENT_NAME$5 = "DialogContent";
 var DialogContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
-    const portalContext = usePortalContext$3(CONTENT_NAME$8, props.__scopeDialog);
+    const portalContext = usePortalContext$2(CONTENT_NAME$5, props.__scopeDialog);
     const { forceMount = portalContext.forceMount, ...contentProps } = props;
-    const context = useDialogContext(CONTENT_NAME$8, props.__scopeDialog);
+    const context = useDialogContext(CONTENT_NAME$5, props.__scopeDialog);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: context.modal ? /* @__PURE__ */ jsxRuntimeExports.jsx(DialogContentModal, { ...contentProps, ref: forwardedRef }) : /* @__PURE__ */ jsxRuntimeExports.jsx(DialogContentNonModal, { ...contentProps, ref: forwardedRef }) });
   }
 );
-DialogContent$1.displayName = CONTENT_NAME$8;
+DialogContent$1.displayName = CONTENT_NAME$5;
 var DialogContentModal = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
-    const context = useDialogContext(CONTENT_NAME$8, props.__scopeDialog);
+    const context = useDialogContext(CONTENT_NAME$5, props.__scopeDialog);
     const contentRef = dashboard__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(forwardedRef, context.contentRef, contentRef);
     dashboard__loadShare__react__loadShare__.useEffect(() => {
@@ -7018,7 +5431,7 @@ var DialogContentModal = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 var DialogContentNonModal = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
-    const context = useDialogContext(CONTENT_NAME$8, props.__scopeDialog);
+    const context = useDialogContext(CONTENT_NAME$5, props.__scopeDialog);
     const hasInteractedOutsideRef = dashboard__loadShare__react__loadShare__.useRef(false);
     const hasPointerDownOutsideRef = dashboard__loadShare__react__loadShare__.useRef(false);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -7059,7 +5472,7 @@ var DialogContentNonModal = dashboard__loadShare__react__loadShare__.forwardRef(
 var DialogContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeDialog, trapFocus, onOpenAutoFocus, onCloseAutoFocus, ...contentProps } = props;
-    const context = useDialogContext(CONTENT_NAME$8, __scopeDialog);
+    const context = useDialogContext(CONTENT_NAME$5, __scopeDialog);
     const contentRef = dashboard__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(forwardedRef, contentRef);
     useFocusGuards();
@@ -7134,7 +5547,7 @@ function getState$4(open) {
 }
 var TITLE_WARNING_NAME = "DialogTitleWarning";
 var [WarningProvider, useWarningContext] = createContext2(TITLE_WARNING_NAME, {
-  contentName: CONTENT_NAME$8,
+  contentName: CONTENT_NAME$5,
   titleName: TITLE_NAME$2,
   docsSlug: "dialog"
 });
@@ -7166,11 +5579,11 @@ var DescriptionWarning$1 = ({ contentRef, descriptionId }) => {
   }, [MESSAGE, contentRef, descriptionId]);
   return null;
 };
-var Root$d = Dialog$1;
-var Trigger$5 = DialogTrigger$1;
-var Portal$4 = DialogPortal$1;
+var Root$b = Dialog$1;
+var Trigger$4 = DialogTrigger$1;
+var Portal$3 = DialogPortal$1;
 var Overlay$1 = DialogOverlay$1;
-var Content$3 = DialogContent$1;
+var Content$2 = DialogContent$1;
 var Title$1 = DialogTitle$1;
 var Description$1 = DialogDescription$1;
 var Close$1 = DialogClose$1;
@@ -7183,25 +5596,25 @@ var useDialogScope = createDialogScope();
 var AlertDialog$1 = (props) => {
   const { __scopeAlertDialog, ...alertDialogProps } = props;
   const dialogScope = useDialogScope(__scopeAlertDialog);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Root$d, { ...dialogScope, ...alertDialogProps, modal: true });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Root$b, { ...dialogScope, ...alertDialogProps, modal: true });
 };
 AlertDialog$1.displayName = ROOT_NAME;
-var TRIGGER_NAME$6 = "AlertDialogTrigger";
+var TRIGGER_NAME$5 = "AlertDialogTrigger";
 var AlertDialogTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeAlertDialog, ...triggerProps } = props;
     const dialogScope = useDialogScope(__scopeAlertDialog);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Trigger$5, { ...dialogScope, ...triggerProps, ref: forwardedRef });
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(Trigger$4, { ...dialogScope, ...triggerProps, ref: forwardedRef });
   }
 );
-AlertDialogTrigger$1.displayName = TRIGGER_NAME$6;
-var PORTAL_NAME$5 = "AlertDialogPortal";
+AlertDialogTrigger$1.displayName = TRIGGER_NAME$5;
+var PORTAL_NAME$3 = "AlertDialogPortal";
 var AlertDialogPortal$1 = (props) => {
   const { __scopeAlertDialog, ...portalProps } = props;
   const dialogScope = useDialogScope(__scopeAlertDialog);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$4, { ...dialogScope, ...portalProps });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$3, { ...dialogScope, ...portalProps });
 };
-AlertDialogPortal$1.displayName = PORTAL_NAME$5;
+AlertDialogPortal$1.displayName = PORTAL_NAME$3;
 var OVERLAY_NAME = "AlertDialogOverlay";
 var AlertDialogOverlay$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
@@ -7211,8 +5624,8 @@ var AlertDialogOverlay$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   }
 );
 AlertDialogOverlay$1.displayName = OVERLAY_NAME;
-var CONTENT_NAME$7 = "AlertDialogContent";
-var [AlertDialogContentProvider, useAlertDialogContentContext] = createAlertDialogContext(CONTENT_NAME$7);
+var CONTENT_NAME$4 = "AlertDialogContent";
+var [AlertDialogContentProvider, useAlertDialogContentContext] = createAlertDialogContext(CONTENT_NAME$4);
 var Slottable$1 = createSlottable("AlertDialogContent");
 var AlertDialogContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
@@ -7224,11 +5637,11 @@ var AlertDialogContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       WarningProvider,
       {
-        contentName: CONTENT_NAME$7,
+        contentName: CONTENT_NAME$4,
         titleName: TITLE_NAME$1,
         docsSlug: "alert-dialog",
         children: /* @__PURE__ */ jsxRuntimeExports.jsx(AlertDialogContentProvider, { scope: __scopeAlertDialog, cancelRef, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          Content$3,
+          Content$2,
           {
             role: "alertdialog",
             ...dialogScope,
@@ -7250,7 +5663,7 @@ var AlertDialogContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
     );
   }
 );
-AlertDialogContent$1.displayName = CONTENT_NAME$7;
+AlertDialogContent$1.displayName = CONTENT_NAME$4;
 var TITLE_NAME$1 = "AlertDialogTitle";
 var AlertDialogTitle$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
@@ -7288,11 +5701,11 @@ var AlertDialogCancel$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 AlertDialogCancel$1.displayName = CANCEL_NAME;
 var DescriptionWarning = ({ contentRef }) => {
-  const MESSAGE = `\`${CONTENT_NAME$7}\` requires a description for the component to be accessible for screen reader users.
+  const MESSAGE = `\`${CONTENT_NAME$4}\` requires a description for the component to be accessible for screen reader users.
 
-You can add a description to the \`${CONTENT_NAME$7}\` by passing a \`${DESCRIPTION_NAME$1}\` component as a child, which also benefits sighted users by adding visible context to the dialog.
+You can add a description to the \`${CONTENT_NAME$4}\` by passing a \`${DESCRIPTION_NAME$1}\` component as a child, which also benefits sighted users by adding visible context to the dialog.
 
-Alternatively, you can use your own component as a description by assigning it an \`id\` and passing the same value to the \`aria-describedby\` prop in \`${CONTENT_NAME$7}\`. If the description is confusing or duplicative for sighted users, you can use the \`@radix-ui/react-visually-hidden\` primitive as a wrapper around your description component.
+Alternatively, you can use your own component as a description by assigning it an \`id\` and passing the same value to the \`aria-describedby\` prop in \`${CONTENT_NAME$4}\`. If the description is confusing or duplicative for sighted users, you can use the \`@radix-ui/react-visually-hidden\` primitive as a wrapper around your description component.
 
 For more information, see https://radix-ui.com/primitives/docs/components/alert-dialog`;
   dashboard__loadShare__react__loadShare__.useEffect(() => {
@@ -7303,32 +5716,32 @@ For more information, see https://radix-ui.com/primitives/docs/components/alert-
   }, [MESSAGE, contentRef]);
   return null;
 };
-var Root2$7 = AlertDialog$1;
+var Root2$5 = AlertDialog$1;
 var Trigger2 = AlertDialogTrigger$1;
-var Portal2$1 = AlertDialogPortal$1;
+var Portal2 = AlertDialogPortal$1;
 var Overlay2 = AlertDialogOverlay$1;
-var Content2$5 = AlertDialogContent$1;
+var Content2$3 = AlertDialogContent$1;
 var Action$1 = AlertDialogAction$1;
 var Cancel = AlertDialogCancel$1;
 var Title2 = AlertDialogTitle$1;
 var Description2 = AlertDialogDescription$1;
 
 //#region src/components/ui/alert-dialog.tsx
-const AlertDialog = Root2$7;
+const AlertDialog = Root2$5;
 const AlertDialogTrigger = Trigger2;
-const AlertDialogPortal = Portal2$1;
+const AlertDialogPortal = Portal2;
 const AlertDialogOverlay = dashboard__loadShare__react__loadShare__.forwardRef(({ className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Overlay2, {
 	className: cn$1("fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className),
 	...props,
 	ref
 }));
 AlertDialogOverlay.displayName = Overlay2.displayName;
-const AlertDialogContent = dashboard__loadShare__react__loadShare__.forwardRef(({ className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(AlertDialogPortal, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(AlertDialogOverlay, {}), /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$5, {
+const AlertDialogContent = dashboard__loadShare__react__loadShare__.forwardRef(({ className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(AlertDialogPortal, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(AlertDialogOverlay, {}), /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$3, {
 	className: cn$1("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg", className),
 	ref,
 	...props
 })] }));
-AlertDialogContent.displayName = Content2$5.displayName;
+AlertDialogContent.displayName = Content2$3.displayName;
 const AlertDialogHeader = ({ className,...props }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 	className: cn$1("flex flex-col space-y-2 text-center sm:text-left", className),
 	...props
@@ -7369,2533 +5782,11 @@ function cn(...inputs) {
 	return twMerge(clsx(inputs));
 }
 
-/**
- * Custom positioning reference element.
- * @see https://floating-ui.com/docs/virtual-elements
- */
-
-const sides = ['top', 'right', 'bottom', 'left'];
-const min$1 = Math.min;
-const max$1 = Math.max;
-const round = Math.round;
-const floor = Math.floor;
-const createCoords = v => ({
-  x: v,
-  y: v
-});
-const oppositeSideMap = {
-  left: 'right',
-  right: 'left',
-  bottom: 'top',
-  top: 'bottom'
-};
-const oppositeAlignmentMap = {
-  start: 'end',
-  end: 'start'
-};
-function clamp$1(start, value, end) {
-  return max$1(start, min$1(value, end));
-}
-function evaluate(value, param) {
-  return typeof value === 'function' ? value(param) : value;
-}
-function getSide(placement) {
-  return placement.split('-')[0];
-}
-function getAlignment(placement) {
-  return placement.split('-')[1];
-}
-function getOppositeAxis(axis) {
-  return axis === 'x' ? 'y' : 'x';
-}
-function getAxisLength(axis) {
-  return axis === 'y' ? 'height' : 'width';
-}
-const yAxisSides = /*#__PURE__*/new Set(['top', 'bottom']);
-function getSideAxis(placement) {
-  return yAxisSides.has(getSide(placement)) ? 'y' : 'x';
-}
-function getAlignmentAxis(placement) {
-  return getOppositeAxis(getSideAxis(placement));
-}
-function getAlignmentSides(placement, rects, rtl) {
-  if (rtl === void 0) {
-    rtl = false;
-  }
-  const alignment = getAlignment(placement);
-  const alignmentAxis = getAlignmentAxis(placement);
-  const length = getAxisLength(alignmentAxis);
-  let mainAlignmentSide = alignmentAxis === 'x' ? alignment === (rtl ? 'end' : 'start') ? 'right' : 'left' : alignment === 'start' ? 'bottom' : 'top';
-  if (rects.reference[length] > rects.floating[length]) {
-    mainAlignmentSide = getOppositePlacement(mainAlignmentSide);
-  }
-  return [mainAlignmentSide, getOppositePlacement(mainAlignmentSide)];
-}
-function getExpandedPlacements(placement) {
-  const oppositePlacement = getOppositePlacement(placement);
-  return [getOppositeAlignmentPlacement(placement), oppositePlacement, getOppositeAlignmentPlacement(oppositePlacement)];
-}
-function getOppositeAlignmentPlacement(placement) {
-  return placement.replace(/start|end/g, alignment => oppositeAlignmentMap[alignment]);
-}
-const lrPlacement = ['left', 'right'];
-const rlPlacement = ['right', 'left'];
-const tbPlacement = ['top', 'bottom'];
-const btPlacement = ['bottom', 'top'];
-function getSideList(side, isStart, rtl) {
-  switch (side) {
-    case 'top':
-    case 'bottom':
-      if (rtl) return isStart ? rlPlacement : lrPlacement;
-      return isStart ? lrPlacement : rlPlacement;
-    case 'left':
-    case 'right':
-      return isStart ? tbPlacement : btPlacement;
-    default:
-      return [];
-  }
-}
-function getOppositeAxisPlacements(placement, flipAlignment, direction, rtl) {
-  const alignment = getAlignment(placement);
-  let list = getSideList(getSide(placement), direction === 'start', rtl);
-  if (alignment) {
-    list = list.map(side => side + "-" + alignment);
-    if (flipAlignment) {
-      list = list.concat(list.map(getOppositeAlignmentPlacement));
-    }
-  }
-  return list;
-}
-function getOppositePlacement(placement) {
-  return placement.replace(/left|right|bottom|top/g, side => oppositeSideMap[side]);
-}
-function expandPaddingObject(padding) {
-  return {
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    ...padding
-  };
-}
-function getPaddingObject(padding) {
-  return typeof padding !== 'number' ? expandPaddingObject(padding) : {
-    top: padding,
-    right: padding,
-    bottom: padding,
-    left: padding
-  };
-}
-function rectToClientRect(rect) {
-  const {
-    x,
-    y,
-    width,
-    height
-  } = rect;
-  return {
-    width,
-    height,
-    top: y,
-    left: x,
-    right: x + width,
-    bottom: y + height,
-    x,
-    y
-  };
-}
-
-function computeCoordsFromPlacement(_ref, placement, rtl) {
-  let {
-    reference,
-    floating
-  } = _ref;
-  const sideAxis = getSideAxis(placement);
-  const alignmentAxis = getAlignmentAxis(placement);
-  const alignLength = getAxisLength(alignmentAxis);
-  const side = getSide(placement);
-  const isVertical = sideAxis === 'y';
-  const commonX = reference.x + reference.width / 2 - floating.width / 2;
-  const commonY = reference.y + reference.height / 2 - floating.height / 2;
-  const commonAlign = reference[alignLength] / 2 - floating[alignLength] / 2;
-  let coords;
-  switch (side) {
-    case 'top':
-      coords = {
-        x: commonX,
-        y: reference.y - floating.height
-      };
-      break;
-    case 'bottom':
-      coords = {
-        x: commonX,
-        y: reference.y + reference.height
-      };
-      break;
-    case 'right':
-      coords = {
-        x: reference.x + reference.width,
-        y: commonY
-      };
-      break;
-    case 'left':
-      coords = {
-        x: reference.x - floating.width,
-        y: commonY
-      };
-      break;
-    default:
-      coords = {
-        x: reference.x,
-        y: reference.y
-      };
-  }
-  switch (getAlignment(placement)) {
-    case 'start':
-      coords[alignmentAxis] -= commonAlign * (rtl && isVertical ? -1 : 1);
-      break;
-    case 'end':
-      coords[alignmentAxis] += commonAlign * (rtl && isVertical ? -1 : 1);
-      break;
-  }
-  return coords;
-}
-
-/**
- * Computes the `x` and `y` coordinates that will place the floating element
- * next to a given reference element.
- *
- * This export does not have any `platform` interface logic. You will need to
- * write one for the platform you are using Floating UI with.
- */
-const computePosition$1 = async (reference, floating, config) => {
-  const {
-    placement = 'bottom',
-    strategy = 'absolute',
-    middleware = [],
-    platform
-  } = config;
-  const validMiddleware = middleware.filter(Boolean);
-  const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(floating));
-  let rects = await platform.getElementRects({
-    reference,
-    floating,
-    strategy
-  });
-  let {
-    x,
-    y
-  } = computeCoordsFromPlacement(rects, placement, rtl);
-  let statefulPlacement = placement;
-  let middlewareData = {};
-  let resetCount = 0;
-  for (let i = 0; i < validMiddleware.length; i++) {
-    const {
-      name,
-      fn
-    } = validMiddleware[i];
-    const {
-      x: nextX,
-      y: nextY,
-      data,
-      reset
-    } = await fn({
-      x,
-      y,
-      initialPlacement: placement,
-      placement: statefulPlacement,
-      strategy,
-      middlewareData,
-      rects,
-      platform,
-      elements: {
-        reference,
-        floating
-      }
-    });
-    x = nextX != null ? nextX : x;
-    y = nextY != null ? nextY : y;
-    middlewareData = {
-      ...middlewareData,
-      [name]: {
-        ...middlewareData[name],
-        ...data
-      }
-    };
-    if (reset && resetCount <= 50) {
-      resetCount++;
-      if (typeof reset === 'object') {
-        if (reset.placement) {
-          statefulPlacement = reset.placement;
-        }
-        if (reset.rects) {
-          rects = reset.rects === true ? await platform.getElementRects({
-            reference,
-            floating,
-            strategy
-          }) : reset.rects;
-        }
-        ({
-          x,
-          y
-        } = computeCoordsFromPlacement(rects, statefulPlacement, rtl));
-      }
-      i = -1;
-    }
-  }
-  return {
-    x,
-    y,
-    placement: statefulPlacement,
-    strategy,
-    middlewareData
-  };
-};
-
-/**
- * Resolves with an object of overflow side offsets that determine how much the
- * element is overflowing a given clipping boundary on each side.
- * - positive = overflowing the boundary by that number of pixels
- * - negative = how many pixels left before it will overflow
- * - 0 = lies flush with the boundary
- * @see https://floating-ui.com/docs/detectOverflow
- */
-async function detectOverflow(state, options) {
-  var _await$platform$isEle;
-  if (options === void 0) {
-    options = {};
-  }
-  const {
-    x,
-    y,
-    platform,
-    rects,
-    elements,
-    strategy
-  } = state;
-  const {
-    boundary = 'clippingAncestors',
-    rootBoundary = 'viewport',
-    elementContext = 'floating',
-    altBoundary = false,
-    padding = 0
-  } = evaluate(options, state);
-  const paddingObject = getPaddingObject(padding);
-  const altContext = elementContext === 'floating' ? 'reference' : 'floating';
-  const element = elements[altBoundary ? altContext : elementContext];
-  const clippingClientRect = rectToClientRect(await platform.getClippingRect({
-    element: ((_await$platform$isEle = await (platform.isElement == null ? void 0 : platform.isElement(element))) != null ? _await$platform$isEle : true) ? element : element.contextElement || (await (platform.getDocumentElement == null ? void 0 : platform.getDocumentElement(elements.floating))),
-    boundary,
-    rootBoundary,
-    strategy
-  }));
-  const rect = elementContext === 'floating' ? {
-    x,
-    y,
-    width: rects.floating.width,
-    height: rects.floating.height
-  } : rects.reference;
-  const offsetParent = await (platform.getOffsetParent == null ? void 0 : platform.getOffsetParent(elements.floating));
-  const offsetScale = (await (platform.isElement == null ? void 0 : platform.isElement(offsetParent))) ? (await (platform.getScale == null ? void 0 : platform.getScale(offsetParent))) || {
-    x: 1,
-    y: 1
-  } : {
-    x: 1,
-    y: 1
-  };
-  const elementClientRect = rectToClientRect(platform.convertOffsetParentRelativeRectToViewportRelativeRect ? await platform.convertOffsetParentRelativeRectToViewportRelativeRect({
-    elements,
-    rect,
-    offsetParent,
-    strategy
-  }) : rect);
-  return {
-    top: (clippingClientRect.top - elementClientRect.top + paddingObject.top) / offsetScale.y,
-    bottom: (elementClientRect.bottom - clippingClientRect.bottom + paddingObject.bottom) / offsetScale.y,
-    left: (clippingClientRect.left - elementClientRect.left + paddingObject.left) / offsetScale.x,
-    right: (elementClientRect.right - clippingClientRect.right + paddingObject.right) / offsetScale.x
-  };
-}
-
-/**
- * Provides data to position an inner element of the floating element so that it
- * appears centered to the reference element.
- * @see https://floating-ui.com/docs/arrow
- */
-const arrow$3 = options => ({
-  name: 'arrow',
-  options,
-  async fn(state) {
-    const {
-      x,
-      y,
-      placement,
-      rects,
-      platform,
-      elements,
-      middlewareData
-    } = state;
-    // Since `element` is required, we don't Partial<> the type.
-    const {
-      element,
-      padding = 0
-    } = evaluate(options, state) || {};
-    if (element == null) {
-      return {};
-    }
-    const paddingObject = getPaddingObject(padding);
-    const coords = {
-      x,
-      y
-    };
-    const axis = getAlignmentAxis(placement);
-    const length = getAxisLength(axis);
-    const arrowDimensions = await platform.getDimensions(element);
-    const isYAxis = axis === 'y';
-    const minProp = isYAxis ? 'top' : 'left';
-    const maxProp = isYAxis ? 'bottom' : 'right';
-    const clientProp = isYAxis ? 'clientHeight' : 'clientWidth';
-    const endDiff = rects.reference[length] + rects.reference[axis] - coords[axis] - rects.floating[length];
-    const startDiff = coords[axis] - rects.reference[axis];
-    const arrowOffsetParent = await (platform.getOffsetParent == null ? void 0 : platform.getOffsetParent(element));
-    let clientSize = arrowOffsetParent ? arrowOffsetParent[clientProp] : 0;
-
-    // DOM platform can return `window` as the `offsetParent`.
-    if (!clientSize || !(await (platform.isElement == null ? void 0 : platform.isElement(arrowOffsetParent)))) {
-      clientSize = elements.floating[clientProp] || rects.floating[length];
-    }
-    const centerToReference = endDiff / 2 - startDiff / 2;
-
-    // If the padding is large enough that it causes the arrow to no longer be
-    // centered, modify the padding so that it is centered.
-    const largestPossiblePadding = clientSize / 2 - arrowDimensions[length] / 2 - 1;
-    const minPadding = min$1(paddingObject[minProp], largestPossiblePadding);
-    const maxPadding = min$1(paddingObject[maxProp], largestPossiblePadding);
-
-    // Make sure the arrow doesn't overflow the floating element if the center
-    // point is outside the floating element's bounds.
-    const min$1$1 = minPadding;
-    const max = clientSize - arrowDimensions[length] - maxPadding;
-    const center = clientSize / 2 - arrowDimensions[length] / 2 + centerToReference;
-    const offset = clamp$1(min$1$1, center, max);
-
-    // If the reference is small enough that the arrow's padding causes it to
-    // to point to nothing for an aligned placement, adjust the offset of the
-    // floating element itself. To ensure `shift()` continues to take action,
-    // a single reset is performed when this is true.
-    const shouldAddOffset = !middlewareData.arrow && getAlignment(placement) != null && center !== offset && rects.reference[length] / 2 - (center < min$1$1 ? minPadding : maxPadding) - arrowDimensions[length] / 2 < 0;
-    const alignmentOffset = shouldAddOffset ? center < min$1$1 ? center - min$1$1 : center - max : 0;
-    return {
-      [axis]: coords[axis] + alignmentOffset,
-      data: {
-        [axis]: offset,
-        centerOffset: center - offset - alignmentOffset,
-        ...(shouldAddOffset && {
-          alignmentOffset
-        })
-      },
-      reset: shouldAddOffset
-    };
-  }
-});
-
-/**
- * Optimizes the visibility of the floating element by flipping the `placement`
- * in order to keep it in view when the preferred placement(s) will overflow the
- * clipping boundary. Alternative to `autoPlacement`.
- * @see https://floating-ui.com/docs/flip
- */
-const flip$2 = function (options) {
-  if (options === void 0) {
-    options = {};
-  }
-  return {
-    name: 'flip',
-    options,
-    async fn(state) {
-      var _middlewareData$arrow, _middlewareData$flip;
-      const {
-        placement,
-        middlewareData,
-        rects,
-        initialPlacement,
-        platform,
-        elements
-      } = state;
-      const {
-        mainAxis: checkMainAxis = true,
-        crossAxis: checkCrossAxis = true,
-        fallbackPlacements: specifiedFallbackPlacements,
-        fallbackStrategy = 'bestFit',
-        fallbackAxisSideDirection = 'none',
-        flipAlignment = true,
-        ...detectOverflowOptions
-      } = evaluate(options, state);
-
-      // If a reset by the arrow was caused due to an alignment offset being
-      // added, we should skip any logic now since `flip()` has already done its
-      // work.
-      // https://github.com/floating-ui/floating-ui/issues/2549#issuecomment-1719601643
-      if ((_middlewareData$arrow = middlewareData.arrow) != null && _middlewareData$arrow.alignmentOffset) {
-        return {};
-      }
-      const side = getSide(placement);
-      const initialSideAxis = getSideAxis(initialPlacement);
-      const isBasePlacement = getSide(initialPlacement) === initialPlacement;
-      const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating));
-      const fallbackPlacements = specifiedFallbackPlacements || (isBasePlacement || !flipAlignment ? [getOppositePlacement(initialPlacement)] : getExpandedPlacements(initialPlacement));
-      const hasFallbackAxisSideDirection = fallbackAxisSideDirection !== 'none';
-      if (!specifiedFallbackPlacements && hasFallbackAxisSideDirection) {
-        fallbackPlacements.push(...getOppositeAxisPlacements(initialPlacement, flipAlignment, fallbackAxisSideDirection, rtl));
-      }
-      const placements = [initialPlacement, ...fallbackPlacements];
-      const overflow = await detectOverflow(state, detectOverflowOptions);
-      const overflows = [];
-      let overflowsData = ((_middlewareData$flip = middlewareData.flip) == null ? void 0 : _middlewareData$flip.overflows) || [];
-      if (checkMainAxis) {
-        overflows.push(overflow[side]);
-      }
-      if (checkCrossAxis) {
-        const sides = getAlignmentSides(placement, rects, rtl);
-        overflows.push(overflow[sides[0]], overflow[sides[1]]);
-      }
-      overflowsData = [...overflowsData, {
-        placement,
-        overflows
-      }];
-
-      // One or more sides is overflowing.
-      if (!overflows.every(side => side <= 0)) {
-        var _middlewareData$flip2, _overflowsData$filter;
-        const nextIndex = (((_middlewareData$flip2 = middlewareData.flip) == null ? void 0 : _middlewareData$flip2.index) || 0) + 1;
-        const nextPlacement = placements[nextIndex];
-        if (nextPlacement) {
-          const ignoreCrossAxisOverflow = checkCrossAxis === 'alignment' ? initialSideAxis !== getSideAxis(nextPlacement) : false;
-          if (!ignoreCrossAxisOverflow ||
-          // We leave the current main axis only if every placement on that axis
-          // overflows the main axis.
-          overflowsData.every(d => getSideAxis(d.placement) === initialSideAxis ? d.overflows[0] > 0 : true)) {
-            // Try next placement and re-run the lifecycle.
-            return {
-              data: {
-                index: nextIndex,
-                overflows: overflowsData
-              },
-              reset: {
-                placement: nextPlacement
-              }
-            };
-          }
-        }
-
-        // First, find the candidates that fit on the mainAxis side of overflow,
-        // then find the placement that fits the best on the main crossAxis side.
-        let resetPlacement = (_overflowsData$filter = overflowsData.filter(d => d.overflows[0] <= 0).sort((a, b) => a.overflows[1] - b.overflows[1])[0]) == null ? void 0 : _overflowsData$filter.placement;
-
-        // Otherwise fallback.
-        if (!resetPlacement) {
-          switch (fallbackStrategy) {
-            case 'bestFit':
-              {
-                var _overflowsData$filter2;
-                const placement = (_overflowsData$filter2 = overflowsData.filter(d => {
-                  if (hasFallbackAxisSideDirection) {
-                    const currentSideAxis = getSideAxis(d.placement);
-                    return currentSideAxis === initialSideAxis ||
-                    // Create a bias to the `y` side axis due to horizontal
-                    // reading directions favoring greater width.
-                    currentSideAxis === 'y';
-                  }
-                  return true;
-                }).map(d => [d.placement, d.overflows.filter(overflow => overflow > 0).reduce((acc, overflow) => acc + overflow, 0)]).sort((a, b) => a[1] - b[1])[0]) == null ? void 0 : _overflowsData$filter2[0];
-                if (placement) {
-                  resetPlacement = placement;
-                }
-                break;
-              }
-            case 'initialPlacement':
-              resetPlacement = initialPlacement;
-              break;
-          }
-        }
-        if (placement !== resetPlacement) {
-          return {
-            reset: {
-              placement: resetPlacement
-            }
-          };
-        }
-      }
-      return {};
-    }
-  };
-};
-
-function getSideOffsets(overflow, rect) {
-  return {
-    top: overflow.top - rect.height,
-    right: overflow.right - rect.width,
-    bottom: overflow.bottom - rect.height,
-    left: overflow.left - rect.width
-  };
-}
-function isAnySideFullyClipped(overflow) {
-  return sides.some(side => overflow[side] >= 0);
-}
-/**
- * Provides data to hide the floating element in applicable situations, such as
- * when it is not in the same clipping context as the reference element.
- * @see https://floating-ui.com/docs/hide
- */
-const hide$2 = function (options) {
-  if (options === void 0) {
-    options = {};
-  }
-  return {
-    name: 'hide',
-    options,
-    async fn(state) {
-      const {
-        rects
-      } = state;
-      const {
-        strategy = 'referenceHidden',
-        ...detectOverflowOptions
-      } = evaluate(options, state);
-      switch (strategy) {
-        case 'referenceHidden':
-          {
-            const overflow = await detectOverflow(state, {
-              ...detectOverflowOptions,
-              elementContext: 'reference'
-            });
-            const offsets = getSideOffsets(overflow, rects.reference);
-            return {
-              data: {
-                referenceHiddenOffsets: offsets,
-                referenceHidden: isAnySideFullyClipped(offsets)
-              }
-            };
-          }
-        case 'escaped':
-          {
-            const overflow = await detectOverflow(state, {
-              ...detectOverflowOptions,
-              altBoundary: true
-            });
-            const offsets = getSideOffsets(overflow, rects.floating);
-            return {
-              data: {
-                escapedOffsets: offsets,
-                escaped: isAnySideFullyClipped(offsets)
-              }
-            };
-          }
-        default:
-          {
-            return {};
-          }
-      }
-    }
-  };
-};
-
-const originSides = /*#__PURE__*/new Set(['left', 'top']);
-
-// For type backwards-compatibility, the `OffsetOptions` type was also
-// Derivable.
-
-async function convertValueToCoords(state, options) {
-  const {
-    placement,
-    platform,
-    elements
-  } = state;
-  const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating));
-  const side = getSide(placement);
-  const alignment = getAlignment(placement);
-  const isVertical = getSideAxis(placement) === 'y';
-  const mainAxisMulti = originSides.has(side) ? -1 : 1;
-  const crossAxisMulti = rtl && isVertical ? -1 : 1;
-  const rawValue = evaluate(options, state);
-
-  // eslint-disable-next-line prefer-const
-  let {
-    mainAxis,
-    crossAxis,
-    alignmentAxis
-  } = typeof rawValue === 'number' ? {
-    mainAxis: rawValue,
-    crossAxis: 0,
-    alignmentAxis: null
-  } : {
-    mainAxis: rawValue.mainAxis || 0,
-    crossAxis: rawValue.crossAxis || 0,
-    alignmentAxis: rawValue.alignmentAxis
-  };
-  if (alignment && typeof alignmentAxis === 'number') {
-    crossAxis = alignment === 'end' ? alignmentAxis * -1 : alignmentAxis;
-  }
-  return isVertical ? {
-    x: crossAxis * crossAxisMulti,
-    y: mainAxis * mainAxisMulti
-  } : {
-    x: mainAxis * mainAxisMulti,
-    y: crossAxis * crossAxisMulti
-  };
-}
-
-/**
- * Modifies the placement by translating the floating element along the
- * specified axes.
- * A number (shorthand for `mainAxis` or distance), or an axes configuration
- * object may be passed.
- * @see https://floating-ui.com/docs/offset
- */
-const offset$2 = function (options) {
-  if (options === void 0) {
-    options = 0;
-  }
-  return {
-    name: 'offset',
-    options,
-    async fn(state) {
-      var _middlewareData$offse, _middlewareData$arrow;
-      const {
-        x,
-        y,
-        placement,
-        middlewareData
-      } = state;
-      const diffCoords = await convertValueToCoords(state, options);
-
-      // If the placement is the same and the arrow caused an alignment offset
-      // then we don't need to change the positioning coordinates.
-      if (placement === ((_middlewareData$offse = middlewareData.offset) == null ? void 0 : _middlewareData$offse.placement) && (_middlewareData$arrow = middlewareData.arrow) != null && _middlewareData$arrow.alignmentOffset) {
-        return {};
-      }
-      return {
-        x: x + diffCoords.x,
-        y: y + diffCoords.y,
-        data: {
-          ...diffCoords,
-          placement
-        }
-      };
-    }
-  };
-};
-
-/**
- * Optimizes the visibility of the floating element by shifting it in order to
- * keep it in view when it will overflow the clipping boundary.
- * @see https://floating-ui.com/docs/shift
- */
-const shift$2 = function (options) {
-  if (options === void 0) {
-    options = {};
-  }
-  return {
-    name: 'shift',
-    options,
-    async fn(state) {
-      const {
-        x,
-        y,
-        placement
-      } = state;
-      const {
-        mainAxis: checkMainAxis = true,
-        crossAxis: checkCrossAxis = false,
-        limiter = {
-          fn: _ref => {
-            let {
-              x,
-              y
-            } = _ref;
-            return {
-              x,
-              y
-            };
-          }
-        },
-        ...detectOverflowOptions
-      } = evaluate(options, state);
-      const coords = {
-        x,
-        y
-      };
-      const overflow = await detectOverflow(state, detectOverflowOptions);
-      const crossAxis = getSideAxis(getSide(placement));
-      const mainAxis = getOppositeAxis(crossAxis);
-      let mainAxisCoord = coords[mainAxis];
-      let crossAxisCoord = coords[crossAxis];
-      if (checkMainAxis) {
-        const minSide = mainAxis === 'y' ? 'top' : 'left';
-        const maxSide = mainAxis === 'y' ? 'bottom' : 'right';
-        const min = mainAxisCoord + overflow[minSide];
-        const max = mainAxisCoord - overflow[maxSide];
-        mainAxisCoord = clamp$1(min, mainAxisCoord, max);
-      }
-      if (checkCrossAxis) {
-        const minSide = crossAxis === 'y' ? 'top' : 'left';
-        const maxSide = crossAxis === 'y' ? 'bottom' : 'right';
-        const min = crossAxisCoord + overflow[minSide];
-        const max = crossAxisCoord - overflow[maxSide];
-        crossAxisCoord = clamp$1(min, crossAxisCoord, max);
-      }
-      const limitedCoords = limiter.fn({
-        ...state,
-        [mainAxis]: mainAxisCoord,
-        [crossAxis]: crossAxisCoord
-      });
-      return {
-        ...limitedCoords,
-        data: {
-          x: limitedCoords.x - x,
-          y: limitedCoords.y - y,
-          enabled: {
-            [mainAxis]: checkMainAxis,
-            [crossAxis]: checkCrossAxis
-          }
-        }
-      };
-    }
-  };
-};
-/**
- * Built-in `limiter` that will stop `shift()` at a certain point.
- */
-const limitShift$2 = function (options) {
-  if (options === void 0) {
-    options = {};
-  }
-  return {
-    options,
-    fn(state) {
-      const {
-        x,
-        y,
-        placement,
-        rects,
-        middlewareData
-      } = state;
-      const {
-        offset = 0,
-        mainAxis: checkMainAxis = true,
-        crossAxis: checkCrossAxis = true
-      } = evaluate(options, state);
-      const coords = {
-        x,
-        y
-      };
-      const crossAxis = getSideAxis(placement);
-      const mainAxis = getOppositeAxis(crossAxis);
-      let mainAxisCoord = coords[mainAxis];
-      let crossAxisCoord = coords[crossAxis];
-      const rawOffset = evaluate(offset, state);
-      const computedOffset = typeof rawOffset === 'number' ? {
-        mainAxis: rawOffset,
-        crossAxis: 0
-      } : {
-        mainAxis: 0,
-        crossAxis: 0,
-        ...rawOffset
-      };
-      if (checkMainAxis) {
-        const len = mainAxis === 'y' ? 'height' : 'width';
-        const limitMin = rects.reference[mainAxis] - rects.floating[len] + computedOffset.mainAxis;
-        const limitMax = rects.reference[mainAxis] + rects.reference[len] - computedOffset.mainAxis;
-        if (mainAxisCoord < limitMin) {
-          mainAxisCoord = limitMin;
-        } else if (mainAxisCoord > limitMax) {
-          mainAxisCoord = limitMax;
-        }
-      }
-      if (checkCrossAxis) {
-        var _middlewareData$offse, _middlewareData$offse2;
-        const len = mainAxis === 'y' ? 'width' : 'height';
-        const isOriginSide = originSides.has(getSide(placement));
-        const limitMin = rects.reference[crossAxis] - rects.floating[len] + (isOriginSide ? ((_middlewareData$offse = middlewareData.offset) == null ? void 0 : _middlewareData$offse[crossAxis]) || 0 : 0) + (isOriginSide ? 0 : computedOffset.crossAxis);
-        const limitMax = rects.reference[crossAxis] + rects.reference[len] + (isOriginSide ? 0 : ((_middlewareData$offse2 = middlewareData.offset) == null ? void 0 : _middlewareData$offse2[crossAxis]) || 0) - (isOriginSide ? computedOffset.crossAxis : 0);
-        if (crossAxisCoord < limitMin) {
-          crossAxisCoord = limitMin;
-        } else if (crossAxisCoord > limitMax) {
-          crossAxisCoord = limitMax;
-        }
-      }
-      return {
-        [mainAxis]: mainAxisCoord,
-        [crossAxis]: crossAxisCoord
-      };
-    }
-  };
-};
-
-/**
- * Provides data that allows you to change the size of the floating element —
- * for instance, prevent it from overflowing the clipping boundary or match the
- * width of the reference element.
- * @see https://floating-ui.com/docs/size
- */
-const size$2 = function (options) {
-  if (options === void 0) {
-    options = {};
-  }
-  return {
-    name: 'size',
-    options,
-    async fn(state) {
-      var _state$middlewareData, _state$middlewareData2;
-      const {
-        placement,
-        rects,
-        platform,
-        elements
-      } = state;
-      const {
-        apply = () => {},
-        ...detectOverflowOptions
-      } = evaluate(options, state);
-      const overflow = await detectOverflow(state, detectOverflowOptions);
-      const side = getSide(placement);
-      const alignment = getAlignment(placement);
-      const isYAxis = getSideAxis(placement) === 'y';
-      const {
-        width,
-        height
-      } = rects.floating;
-      let heightSide;
-      let widthSide;
-      if (side === 'top' || side === 'bottom') {
-        heightSide = side;
-        widthSide = alignment === ((await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating))) ? 'start' : 'end') ? 'left' : 'right';
-      } else {
-        widthSide = side;
-        heightSide = alignment === 'end' ? 'top' : 'bottom';
-      }
-      const maximumClippingHeight = height - overflow.top - overflow.bottom;
-      const maximumClippingWidth = width - overflow.left - overflow.right;
-      const overflowAvailableHeight = min$1(height - overflow[heightSide], maximumClippingHeight);
-      const overflowAvailableWidth = min$1(width - overflow[widthSide], maximumClippingWidth);
-      const noShift = !state.middlewareData.shift;
-      let availableHeight = overflowAvailableHeight;
-      let availableWidth = overflowAvailableWidth;
-      if ((_state$middlewareData = state.middlewareData.shift) != null && _state$middlewareData.enabled.x) {
-        availableWidth = maximumClippingWidth;
-      }
-      if ((_state$middlewareData2 = state.middlewareData.shift) != null && _state$middlewareData2.enabled.y) {
-        availableHeight = maximumClippingHeight;
-      }
-      if (noShift && !alignment) {
-        const xMin = max$1(overflow.left, 0);
-        const xMax = max$1(overflow.right, 0);
-        const yMin = max$1(overflow.top, 0);
-        const yMax = max$1(overflow.bottom, 0);
-        if (isYAxis) {
-          availableWidth = width - 2 * (xMin !== 0 || xMax !== 0 ? xMin + xMax : max$1(overflow.left, overflow.right));
-        } else {
-          availableHeight = height - 2 * (yMin !== 0 || yMax !== 0 ? yMin + yMax : max$1(overflow.top, overflow.bottom));
-        }
-      }
-      await apply({
-        ...state,
-        availableWidth,
-        availableHeight
-      });
-      const nextDimensions = await platform.getDimensions(elements.floating);
-      if (width !== nextDimensions.width || height !== nextDimensions.height) {
-        return {
-          reset: {
-            rects: true
-          }
-        };
-      }
-      return {};
-    }
-  };
-};
-
-function hasWindow() {
-  return typeof window !== 'undefined';
-}
-function getNodeName(node) {
-  if (isNode(node)) {
-    return (node.nodeName || '').toLowerCase();
-  }
-  // Mocked nodes in testing environments may not be instances of Node. By
-  // returning `#document` an infinite loop won't occur.
-  // https://github.com/floating-ui/floating-ui/issues/2317
-  return '#document';
-}
-function getWindow(node) {
-  var _node$ownerDocument;
-  return (node == null || (_node$ownerDocument = node.ownerDocument) == null ? void 0 : _node$ownerDocument.defaultView) || window;
-}
-function getDocumentElement(node) {
-  var _ref;
-  return (_ref = (isNode(node) ? node.ownerDocument : node.document) || window.document) == null ? void 0 : _ref.documentElement;
-}
-function isNode(value) {
-  if (!hasWindow()) {
-    return false;
-  }
-  return value instanceof Node || value instanceof getWindow(value).Node;
-}
-function isElement(value) {
-  if (!hasWindow()) {
-    return false;
-  }
-  return value instanceof Element || value instanceof getWindow(value).Element;
-}
-function isHTMLElement$1(value) {
-  if (!hasWindow()) {
-    return false;
-  }
-  return value instanceof HTMLElement || value instanceof getWindow(value).HTMLElement;
-}
-function isShadowRoot(value) {
-  if (!hasWindow() || typeof ShadowRoot === 'undefined') {
-    return false;
-  }
-  return value instanceof ShadowRoot || value instanceof getWindow(value).ShadowRoot;
-}
-const invalidOverflowDisplayValues = /*#__PURE__*/new Set(['inline', 'contents']);
-function isOverflowElement(element) {
-  const {
-    overflow,
-    overflowX,
-    overflowY,
-    display
-  } = getComputedStyle$1(element);
-  return /auto|scroll|overlay|hidden|clip/.test(overflow + overflowY + overflowX) && !invalidOverflowDisplayValues.has(display);
-}
-const tableElements = /*#__PURE__*/new Set(['table', 'td', 'th']);
-function isTableElement(element) {
-  return tableElements.has(getNodeName(element));
-}
-const topLayerSelectors = [':popover-open', ':modal'];
-function isTopLayer(element) {
-  return topLayerSelectors.some(selector => {
-    try {
-      return element.matches(selector);
-    } catch (_e) {
-      return false;
-    }
-  });
-}
-const transformProperties = ['transform', 'translate', 'scale', 'rotate', 'perspective'];
-const willChangeValues = ['transform', 'translate', 'scale', 'rotate', 'perspective', 'filter'];
-const containValues = ['paint', 'layout', 'strict', 'content'];
-function isContainingBlock(elementOrCss) {
-  const webkit = isWebKit();
-  const css = isElement(elementOrCss) ? getComputedStyle$1(elementOrCss) : elementOrCss;
-
-  // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
-  // https://drafts.csswg.org/css-transforms-2/#individual-transforms
-  return transformProperties.some(value => css[value] ? css[value] !== 'none' : false) || (css.containerType ? css.containerType !== 'normal' : false) || !webkit && (css.backdropFilter ? css.backdropFilter !== 'none' : false) || !webkit && (css.filter ? css.filter !== 'none' : false) || willChangeValues.some(value => (css.willChange || '').includes(value)) || containValues.some(value => (css.contain || '').includes(value));
-}
-function getContainingBlock(element) {
-  let currentNode = getParentNode(element);
-  while (isHTMLElement$1(currentNode) && !isLastTraversableNode(currentNode)) {
-    if (isContainingBlock(currentNode)) {
-      return currentNode;
-    } else if (isTopLayer(currentNode)) {
-      return null;
-    }
-    currentNode = getParentNode(currentNode);
-  }
-  return null;
-}
-function isWebKit() {
-  if (typeof CSS === 'undefined' || !CSS.supports) return false;
-  return CSS.supports('-webkit-backdrop-filter', 'none');
-}
-const lastTraversableNodeNames = /*#__PURE__*/new Set(['html', 'body', '#document']);
-function isLastTraversableNode(node) {
-  return lastTraversableNodeNames.has(getNodeName(node));
-}
-function getComputedStyle$1(element) {
-  return getWindow(element).getComputedStyle(element);
-}
-function getNodeScroll(element) {
-  if (isElement(element)) {
-    return {
-      scrollLeft: element.scrollLeft,
-      scrollTop: element.scrollTop
-    };
-  }
-  return {
-    scrollLeft: element.scrollX,
-    scrollTop: element.scrollY
-  };
-}
-function getParentNode(node) {
-  if (getNodeName(node) === 'html') {
-    return node;
-  }
-  const result =
-  // Step into the shadow DOM of the parent of a slotted node.
-  node.assignedSlot ||
-  // DOM Element detected.
-  node.parentNode ||
-  // ShadowRoot detected.
-  isShadowRoot(node) && node.host ||
-  // Fallback.
-  getDocumentElement(node);
-  return isShadowRoot(result) ? result.host : result;
-}
-function getNearestOverflowAncestor(node) {
-  const parentNode = getParentNode(node);
-  if (isLastTraversableNode(parentNode)) {
-    return node.ownerDocument ? node.ownerDocument.body : node.body;
-  }
-  if (isHTMLElement$1(parentNode) && isOverflowElement(parentNode)) {
-    return parentNode;
-  }
-  return getNearestOverflowAncestor(parentNode);
-}
-function getOverflowAncestors(node, list, traverseIframes) {
-  var _node$ownerDocument2;
-  if (list === void 0) {
-    list = [];
-  }
-  if (traverseIframes === void 0) {
-    traverseIframes = true;
-  }
-  const scrollableAncestor = getNearestOverflowAncestor(node);
-  const isBody = scrollableAncestor === ((_node$ownerDocument2 = node.ownerDocument) == null ? void 0 : _node$ownerDocument2.body);
-  const win = getWindow(scrollableAncestor);
-  if (isBody) {
-    const frameElement = getFrameElement(win);
-    return list.concat(win, win.visualViewport || [], isOverflowElement(scrollableAncestor) ? scrollableAncestor : [], frameElement && traverseIframes ? getOverflowAncestors(frameElement) : []);
-  }
-  return list.concat(scrollableAncestor, getOverflowAncestors(scrollableAncestor, [], traverseIframes));
-}
-function getFrameElement(win) {
-  return win.parent && Object.getPrototypeOf(win.parent) ? win.frameElement : null;
-}
-
-function getCssDimensions(element) {
-  const css = getComputedStyle$1(element);
-  // In testing environments, the `width` and `height` properties are empty
-  // strings for SVG elements, returning NaN. Fallback to `0` in this case.
-  let width = parseFloat(css.width) || 0;
-  let height = parseFloat(css.height) || 0;
-  const hasOffset = isHTMLElement$1(element);
-  const offsetWidth = hasOffset ? element.offsetWidth : width;
-  const offsetHeight = hasOffset ? element.offsetHeight : height;
-  const shouldFallback = round(width) !== offsetWidth || round(height) !== offsetHeight;
-  if (shouldFallback) {
-    width = offsetWidth;
-    height = offsetHeight;
-  }
-  return {
-    width,
-    height,
-    $: shouldFallback
-  };
-}
-
-function unwrapElement(element) {
-  return !isElement(element) ? element.contextElement : element;
-}
-
-function getScale(element) {
-  const domElement = unwrapElement(element);
-  if (!isHTMLElement$1(domElement)) {
-    return createCoords(1);
-  }
-  const rect = domElement.getBoundingClientRect();
-  const {
-    width,
-    height,
-    $
-  } = getCssDimensions(domElement);
-  let x = ($ ? round(rect.width) : rect.width) / width;
-  let y = ($ ? round(rect.height) : rect.height) / height;
-
-  // 0, NaN, or Infinity should always fallback to 1.
-
-  if (!x || !Number.isFinite(x)) {
-    x = 1;
-  }
-  if (!y || !Number.isFinite(y)) {
-    y = 1;
-  }
-  return {
-    x,
-    y
-  };
-}
-
-const noOffsets = /*#__PURE__*/createCoords(0);
-function getVisualOffsets(element) {
-  const win = getWindow(element);
-  if (!isWebKit() || !win.visualViewport) {
-    return noOffsets;
-  }
-  return {
-    x: win.visualViewport.offsetLeft,
-    y: win.visualViewport.offsetTop
-  };
-}
-function shouldAddVisualOffsets(element, isFixed, floatingOffsetParent) {
-  if (isFixed === void 0) {
-    isFixed = false;
-  }
-  if (!floatingOffsetParent || isFixed && floatingOffsetParent !== getWindow(element)) {
-    return false;
-  }
-  return isFixed;
-}
-
-function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetParent) {
-  if (includeScale === void 0) {
-    includeScale = false;
-  }
-  if (isFixedStrategy === void 0) {
-    isFixedStrategy = false;
-  }
-  const clientRect = element.getBoundingClientRect();
-  const domElement = unwrapElement(element);
-  let scale = createCoords(1);
-  if (includeScale) {
-    if (offsetParent) {
-      if (isElement(offsetParent)) {
-        scale = getScale(offsetParent);
-      }
-    } else {
-      scale = getScale(element);
-    }
-  }
-  const visualOffsets = shouldAddVisualOffsets(domElement, isFixedStrategy, offsetParent) ? getVisualOffsets(domElement) : createCoords(0);
-  let x = (clientRect.left + visualOffsets.x) / scale.x;
-  let y = (clientRect.top + visualOffsets.y) / scale.y;
-  let width = clientRect.width / scale.x;
-  let height = clientRect.height / scale.y;
-  if (domElement) {
-    const win = getWindow(domElement);
-    const offsetWin = offsetParent && isElement(offsetParent) ? getWindow(offsetParent) : offsetParent;
-    let currentWin = win;
-    let currentIFrame = getFrameElement(currentWin);
-    while (currentIFrame && offsetParent && offsetWin !== currentWin) {
-      const iframeScale = getScale(currentIFrame);
-      const iframeRect = currentIFrame.getBoundingClientRect();
-      const css = getComputedStyle$1(currentIFrame);
-      const left = iframeRect.left + (currentIFrame.clientLeft + parseFloat(css.paddingLeft)) * iframeScale.x;
-      const top = iframeRect.top + (currentIFrame.clientTop + parseFloat(css.paddingTop)) * iframeScale.y;
-      x *= iframeScale.x;
-      y *= iframeScale.y;
-      width *= iframeScale.x;
-      height *= iframeScale.y;
-      x += left;
-      y += top;
-      currentWin = getWindow(currentIFrame);
-      currentIFrame = getFrameElement(currentWin);
-    }
-  }
-  return rectToClientRect({
-    width,
-    height,
-    x,
-    y
-  });
-}
-
-// If <html> has a CSS width greater than the viewport, then this will be
-// incorrect for RTL.
-function getWindowScrollBarX(element, rect) {
-  const leftScroll = getNodeScroll(element).scrollLeft;
-  if (!rect) {
-    return getBoundingClientRect(getDocumentElement(element)).left + leftScroll;
-  }
-  return rect.left + leftScroll;
-}
-
-function getHTMLOffset(documentElement, scroll) {
-  const htmlRect = documentElement.getBoundingClientRect();
-  const x = htmlRect.left + scroll.scrollLeft - getWindowScrollBarX(documentElement, htmlRect);
-  const y = htmlRect.top + scroll.scrollTop;
-  return {
-    x,
-    y
-  };
-}
-
-function convertOffsetParentRelativeRectToViewportRelativeRect(_ref) {
-  let {
-    elements,
-    rect,
-    offsetParent,
-    strategy
-  } = _ref;
-  const isFixed = strategy === 'fixed';
-  const documentElement = getDocumentElement(offsetParent);
-  const topLayer = elements ? isTopLayer(elements.floating) : false;
-  if (offsetParent === documentElement || topLayer && isFixed) {
-    return rect;
-  }
-  let scroll = {
-    scrollLeft: 0,
-    scrollTop: 0
-  };
-  let scale = createCoords(1);
-  const offsets = createCoords(0);
-  const isOffsetParentAnElement = isHTMLElement$1(offsetParent);
-  if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
-    if (getNodeName(offsetParent) !== 'body' || isOverflowElement(documentElement)) {
-      scroll = getNodeScroll(offsetParent);
-    }
-    if (isHTMLElement$1(offsetParent)) {
-      const offsetRect = getBoundingClientRect(offsetParent);
-      scale = getScale(offsetParent);
-      offsets.x = offsetRect.x + offsetParent.clientLeft;
-      offsets.y = offsetRect.y + offsetParent.clientTop;
-    }
-  }
-  const htmlOffset = documentElement && !isOffsetParentAnElement && !isFixed ? getHTMLOffset(documentElement, scroll) : createCoords(0);
-  return {
-    width: rect.width * scale.x,
-    height: rect.height * scale.y,
-    x: rect.x * scale.x - scroll.scrollLeft * scale.x + offsets.x + htmlOffset.x,
-    y: rect.y * scale.y - scroll.scrollTop * scale.y + offsets.y + htmlOffset.y
-  };
-}
-
-function getClientRects(element) {
-  return Array.from(element.getClientRects());
-}
-
-// Gets the entire size of the scrollable document area, even extending outside
-// of the `<html>` and `<body>` rect bounds if horizontally scrollable.
-function getDocumentRect(element) {
-  const html = getDocumentElement(element);
-  const scroll = getNodeScroll(element);
-  const body = element.ownerDocument.body;
-  const width = max$1(html.scrollWidth, html.clientWidth, body.scrollWidth, body.clientWidth);
-  const height = max$1(html.scrollHeight, html.clientHeight, body.scrollHeight, body.clientHeight);
-  let x = -scroll.scrollLeft + getWindowScrollBarX(element);
-  const y = -scroll.scrollTop;
-  if (getComputedStyle$1(body).direction === 'rtl') {
-    x += max$1(html.clientWidth, body.clientWidth) - width;
-  }
-  return {
-    width,
-    height,
-    x,
-    y
-  };
-}
-
-// Safety check: ensure the scrollbar space is reasonable in case this
-// calculation is affected by unusual styles.
-// Most scrollbars leave 15-18px of space.
-const SCROLLBAR_MAX = 25;
-function getViewportRect(element, strategy) {
-  const win = getWindow(element);
-  const html = getDocumentElement(element);
-  const visualViewport = win.visualViewport;
-  let width = html.clientWidth;
-  let height = html.clientHeight;
-  let x = 0;
-  let y = 0;
-  if (visualViewport) {
-    width = visualViewport.width;
-    height = visualViewport.height;
-    const visualViewportBased = isWebKit();
-    if (!visualViewportBased || visualViewportBased && strategy === 'fixed') {
-      x = visualViewport.offsetLeft;
-      y = visualViewport.offsetTop;
-    }
-  }
-  const windowScrollbarX = getWindowScrollBarX(html);
-  // <html> `overflow: hidden` + `scrollbar-gutter: stable` reduces the
-  // visual width of the <html> but this is not considered in the size
-  // of `html.clientWidth`.
-  if (windowScrollbarX <= 0) {
-    const doc = html.ownerDocument;
-    const body = doc.body;
-    const bodyStyles = getComputedStyle(body);
-    const bodyMarginInline = doc.compatMode === 'CSS1Compat' ? parseFloat(bodyStyles.marginLeft) + parseFloat(bodyStyles.marginRight) || 0 : 0;
-    const clippingStableScrollbarWidth = Math.abs(html.clientWidth - body.clientWidth - bodyMarginInline);
-    if (clippingStableScrollbarWidth <= SCROLLBAR_MAX) {
-      width -= clippingStableScrollbarWidth;
-    }
-  } else if (windowScrollbarX <= SCROLLBAR_MAX) {
-    // If the <body> scrollbar is on the left, the width needs to be extended
-    // by the scrollbar amount so there isn't extra space on the right.
-    width += windowScrollbarX;
-  }
-  return {
-    width,
-    height,
-    x,
-    y
-  };
-}
-
-const absoluteOrFixed = /*#__PURE__*/new Set(['absolute', 'fixed']);
-// Returns the inner client rect, subtracting scrollbars if present.
-function getInnerBoundingClientRect(element, strategy) {
-  const clientRect = getBoundingClientRect(element, true, strategy === 'fixed');
-  const top = clientRect.top + element.clientTop;
-  const left = clientRect.left + element.clientLeft;
-  const scale = isHTMLElement$1(element) ? getScale(element) : createCoords(1);
-  const width = element.clientWidth * scale.x;
-  const height = element.clientHeight * scale.y;
-  const x = left * scale.x;
-  const y = top * scale.y;
-  return {
-    width,
-    height,
-    x,
-    y
-  };
-}
-function getClientRectFromClippingAncestor(element, clippingAncestor, strategy) {
-  let rect;
-  if (clippingAncestor === 'viewport') {
-    rect = getViewportRect(element, strategy);
-  } else if (clippingAncestor === 'document') {
-    rect = getDocumentRect(getDocumentElement(element));
-  } else if (isElement(clippingAncestor)) {
-    rect = getInnerBoundingClientRect(clippingAncestor, strategy);
-  } else {
-    const visualOffsets = getVisualOffsets(element);
-    rect = {
-      x: clippingAncestor.x - visualOffsets.x,
-      y: clippingAncestor.y - visualOffsets.y,
-      width: clippingAncestor.width,
-      height: clippingAncestor.height
-    };
-  }
-  return rectToClientRect(rect);
-}
-function hasFixedPositionAncestor(element, stopNode) {
-  const parentNode = getParentNode(element);
-  if (parentNode === stopNode || !isElement(parentNode) || isLastTraversableNode(parentNode)) {
-    return false;
-  }
-  return getComputedStyle$1(parentNode).position === 'fixed' || hasFixedPositionAncestor(parentNode, stopNode);
-}
-
-// A "clipping ancestor" is an `overflow` element with the characteristic of
-// clipping (or hiding) child elements. This returns all clipping ancestors
-// of the given element up the tree.
-function getClippingElementAncestors(element, cache) {
-  const cachedResult = cache.get(element);
-  if (cachedResult) {
-    return cachedResult;
-  }
-  let result = getOverflowAncestors(element, [], false).filter(el => isElement(el) && getNodeName(el) !== 'body');
-  let currentContainingBlockComputedStyle = null;
-  const elementIsFixed = getComputedStyle$1(element).position === 'fixed';
-  let currentNode = elementIsFixed ? getParentNode(element) : element;
-
-  // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
-  while (isElement(currentNode) && !isLastTraversableNode(currentNode)) {
-    const computedStyle = getComputedStyle$1(currentNode);
-    const currentNodeIsContaining = isContainingBlock(currentNode);
-    if (!currentNodeIsContaining && computedStyle.position === 'fixed') {
-      currentContainingBlockComputedStyle = null;
-    }
-    const shouldDropCurrentNode = elementIsFixed ? !currentNodeIsContaining && !currentContainingBlockComputedStyle : !currentNodeIsContaining && computedStyle.position === 'static' && !!currentContainingBlockComputedStyle && absoluteOrFixed.has(currentContainingBlockComputedStyle.position) || isOverflowElement(currentNode) && !currentNodeIsContaining && hasFixedPositionAncestor(element, currentNode);
-    if (shouldDropCurrentNode) {
-      // Drop non-containing blocks.
-      result = result.filter(ancestor => ancestor !== currentNode);
-    } else {
-      // Record last containing block for next iteration.
-      currentContainingBlockComputedStyle = computedStyle;
-    }
-    currentNode = getParentNode(currentNode);
-  }
-  cache.set(element, result);
-  return result;
-}
-
-// Gets the maximum area that the element is visible in due to any number of
-// clipping ancestors.
-function getClippingRect(_ref) {
-  let {
-    element,
-    boundary,
-    rootBoundary,
-    strategy
-  } = _ref;
-  const elementClippingAncestors = boundary === 'clippingAncestors' ? isTopLayer(element) ? [] : getClippingElementAncestors(element, this._c) : [].concat(boundary);
-  const clippingAncestors = [...elementClippingAncestors, rootBoundary];
-  const firstClippingAncestor = clippingAncestors[0];
-  const clippingRect = clippingAncestors.reduce((accRect, clippingAncestor) => {
-    const rect = getClientRectFromClippingAncestor(element, clippingAncestor, strategy);
-    accRect.top = max$1(rect.top, accRect.top);
-    accRect.right = min$1(rect.right, accRect.right);
-    accRect.bottom = min$1(rect.bottom, accRect.bottom);
-    accRect.left = max$1(rect.left, accRect.left);
-    return accRect;
-  }, getClientRectFromClippingAncestor(element, firstClippingAncestor, strategy));
-  return {
-    width: clippingRect.right - clippingRect.left,
-    height: clippingRect.bottom - clippingRect.top,
-    x: clippingRect.left,
-    y: clippingRect.top
-  };
-}
-
-function getDimensions(element) {
-  const {
-    width,
-    height
-  } = getCssDimensions(element);
-  return {
-    width,
-    height
-  };
-}
-
-function getRectRelativeToOffsetParent(element, offsetParent, strategy) {
-  const isOffsetParentAnElement = isHTMLElement$1(offsetParent);
-  const documentElement = getDocumentElement(offsetParent);
-  const isFixed = strategy === 'fixed';
-  const rect = getBoundingClientRect(element, true, isFixed, offsetParent);
-  let scroll = {
-    scrollLeft: 0,
-    scrollTop: 0
-  };
-  const offsets = createCoords(0);
-
-  // If the <body> scrollbar appears on the left (e.g. RTL systems). Use
-  // Firefox with layout.scrollbar.side = 3 in about:config to test this.
-  function setLeftRTLScrollbarOffset() {
-    offsets.x = getWindowScrollBarX(documentElement);
-  }
-  if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
-    if (getNodeName(offsetParent) !== 'body' || isOverflowElement(documentElement)) {
-      scroll = getNodeScroll(offsetParent);
-    }
-    if (isOffsetParentAnElement) {
-      const offsetRect = getBoundingClientRect(offsetParent, true, isFixed, offsetParent);
-      offsets.x = offsetRect.x + offsetParent.clientLeft;
-      offsets.y = offsetRect.y + offsetParent.clientTop;
-    } else if (documentElement) {
-      setLeftRTLScrollbarOffset();
-    }
-  }
-  if (isFixed && !isOffsetParentAnElement && documentElement) {
-    setLeftRTLScrollbarOffset();
-  }
-  const htmlOffset = documentElement && !isOffsetParentAnElement && !isFixed ? getHTMLOffset(documentElement, scroll) : createCoords(0);
-  const x = rect.left + scroll.scrollLeft - offsets.x - htmlOffset.x;
-  const y = rect.top + scroll.scrollTop - offsets.y - htmlOffset.y;
-  return {
-    x,
-    y,
-    width: rect.width,
-    height: rect.height
-  };
-}
-
-function isStaticPositioned(element) {
-  return getComputedStyle$1(element).position === 'static';
-}
-
-function getTrueOffsetParent(element, polyfill) {
-  if (!isHTMLElement$1(element) || getComputedStyle$1(element).position === 'fixed') {
-    return null;
-  }
-  if (polyfill) {
-    return polyfill(element);
-  }
-  let rawOffsetParent = element.offsetParent;
-
-  // Firefox returns the <html> element as the offsetParent if it's non-static,
-  // while Chrome and Safari return the <body> element. The <body> element must
-  // be used to perform the correct calculations even if the <html> element is
-  // non-static.
-  if (getDocumentElement(element) === rawOffsetParent) {
-    rawOffsetParent = rawOffsetParent.ownerDocument.body;
-  }
-  return rawOffsetParent;
-}
-
-// Gets the closest ancestor positioned element. Handles some edge cases,
-// such as table ancestors and cross browser bugs.
-function getOffsetParent(element, polyfill) {
-  const win = getWindow(element);
-  if (isTopLayer(element)) {
-    return win;
-  }
-  if (!isHTMLElement$1(element)) {
-    let svgOffsetParent = getParentNode(element);
-    while (svgOffsetParent && !isLastTraversableNode(svgOffsetParent)) {
-      if (isElement(svgOffsetParent) && !isStaticPositioned(svgOffsetParent)) {
-        return svgOffsetParent;
-      }
-      svgOffsetParent = getParentNode(svgOffsetParent);
-    }
-    return win;
-  }
-  let offsetParent = getTrueOffsetParent(element, polyfill);
-  while (offsetParent && isTableElement(offsetParent) && isStaticPositioned(offsetParent)) {
-    offsetParent = getTrueOffsetParent(offsetParent, polyfill);
-  }
-  if (offsetParent && isLastTraversableNode(offsetParent) && isStaticPositioned(offsetParent) && !isContainingBlock(offsetParent)) {
-    return win;
-  }
-  return offsetParent || getContainingBlock(element) || win;
-}
-
-const getElementRects = async function (data) {
-  const getOffsetParentFn = this.getOffsetParent || getOffsetParent;
-  const getDimensionsFn = this.getDimensions;
-  const floatingDimensions = await getDimensionsFn(data.floating);
-  return {
-    reference: getRectRelativeToOffsetParent(data.reference, await getOffsetParentFn(data.floating), data.strategy),
-    floating: {
-      x: 0,
-      y: 0,
-      width: floatingDimensions.width,
-      height: floatingDimensions.height
-    }
-  };
-};
-
-function isRTL(element) {
-  return getComputedStyle$1(element).direction === 'rtl';
-}
-
-const platform = {
-  convertOffsetParentRelativeRectToViewportRelativeRect,
-  getDocumentElement,
-  getClippingRect,
-  getOffsetParent,
-  getElementRects,
-  getClientRects,
-  getDimensions,
-  getScale,
-  isElement,
-  isRTL
-};
-
-function rectsAreEqual(a, b) {
-  return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
-}
-
-// https://samthor.au/2021/observing-dom/
-function observeMove(element, onMove) {
-  let io = null;
-  let timeoutId;
-  const root = getDocumentElement(element);
-  function cleanup() {
-    var _io;
-    clearTimeout(timeoutId);
-    (_io = io) == null || _io.disconnect();
-    io = null;
-  }
-  function refresh(skip, threshold) {
-    if (skip === void 0) {
-      skip = false;
-    }
-    if (threshold === void 0) {
-      threshold = 1;
-    }
-    cleanup();
-    const elementRectForRootMargin = element.getBoundingClientRect();
-    const {
-      left,
-      top,
-      width,
-      height
-    } = elementRectForRootMargin;
-    if (!skip) {
-      onMove();
-    }
-    if (!width || !height) {
-      return;
-    }
-    const insetTop = floor(top);
-    const insetRight = floor(root.clientWidth - (left + width));
-    const insetBottom = floor(root.clientHeight - (top + height));
-    const insetLeft = floor(left);
-    const rootMargin = -insetTop + "px " + -insetRight + "px " + -insetBottom + "px " + -insetLeft + "px";
-    const options = {
-      rootMargin,
-      threshold: max$1(0, min$1(1, threshold)) || 1
-    };
-    let isFirstUpdate = true;
-    function handleObserve(entries) {
-      const ratio = entries[0].intersectionRatio;
-      if (ratio !== threshold) {
-        if (!isFirstUpdate) {
-          return refresh();
-        }
-        if (!ratio) {
-          // If the reference is clipped, the ratio is 0. Throttle the refresh
-          // to prevent an infinite loop of updates.
-          timeoutId = setTimeout(() => {
-            refresh(false, 1e-7);
-          }, 1000);
-        } else {
-          refresh(false, ratio);
-        }
-      }
-      if (ratio === 1 && !rectsAreEqual(elementRectForRootMargin, element.getBoundingClientRect())) {
-        // It's possible that even though the ratio is reported as 1, the
-        // element is not actually fully within the IntersectionObserver's root
-        // area anymore. This can happen under performance constraints. This may
-        // be a bug in the browser's IntersectionObserver implementation. To
-        // work around this, we compare the element's bounding rect now with
-        // what it was at the time we created the IntersectionObserver. If they
-        // are not equal then the element moved, so we refresh.
-        refresh();
-      }
-      isFirstUpdate = false;
-    }
-
-    // Older browsers don't support a `document` as the root and will throw an
-    // error.
-    try {
-      io = new IntersectionObserver(handleObserve, {
-        ...options,
-        // Handle <iframe>s
-        root: root.ownerDocument
-      });
-    } catch (_e) {
-      io = new IntersectionObserver(handleObserve, options);
-    }
-    io.observe(element);
-  }
-  refresh(true);
-  return cleanup;
-}
-
-/**
- * Automatically updates the position of the floating element when necessary.
- * Should only be called when the floating element is mounted on the DOM or
- * visible on the screen.
- * @returns cleanup function that should be invoked when the floating element is
- * removed from the DOM or hidden from the screen.
- * @see https://floating-ui.com/docs/autoUpdate
- */
-function autoUpdate(reference, floating, update, options) {
-  if (options === void 0) {
-    options = {};
-  }
-  const {
-    ancestorScroll = true,
-    ancestorResize = true,
-    elementResize = typeof ResizeObserver === 'function',
-    layoutShift = typeof IntersectionObserver === 'function',
-    animationFrame = false
-  } = options;
-  const referenceEl = unwrapElement(reference);
-  const ancestors = ancestorScroll || ancestorResize ? [...(referenceEl ? getOverflowAncestors(referenceEl) : []), ...getOverflowAncestors(floating)] : [];
-  ancestors.forEach(ancestor => {
-    ancestorScroll && ancestor.addEventListener('scroll', update, {
-      passive: true
-    });
-    ancestorResize && ancestor.addEventListener('resize', update);
-  });
-  const cleanupIo = referenceEl && layoutShift ? observeMove(referenceEl, update) : null;
-  let reobserveFrame = -1;
-  let resizeObserver = null;
-  if (elementResize) {
-    resizeObserver = new ResizeObserver(_ref => {
-      let [firstEntry] = _ref;
-      if (firstEntry && firstEntry.target === referenceEl && resizeObserver) {
-        // Prevent update loops when using the `size` middleware.
-        // https://github.com/floating-ui/floating-ui/issues/1740
-        resizeObserver.unobserve(floating);
-        cancelAnimationFrame(reobserveFrame);
-        reobserveFrame = requestAnimationFrame(() => {
-          var _resizeObserver;
-          (_resizeObserver = resizeObserver) == null || _resizeObserver.observe(floating);
-        });
-      }
-      update();
-    });
-    if (referenceEl && !animationFrame) {
-      resizeObserver.observe(referenceEl);
-    }
-    resizeObserver.observe(floating);
-  }
-  let frameId;
-  let prevRefRect = animationFrame ? getBoundingClientRect(reference) : null;
-  if (animationFrame) {
-    frameLoop();
-  }
-  function frameLoop() {
-    const nextRefRect = getBoundingClientRect(reference);
-    if (prevRefRect && !rectsAreEqual(prevRefRect, nextRefRect)) {
-      update();
-    }
-    prevRefRect = nextRefRect;
-    frameId = requestAnimationFrame(frameLoop);
-  }
-  update();
-  return () => {
-    var _resizeObserver2;
-    ancestors.forEach(ancestor => {
-      ancestorScroll && ancestor.removeEventListener('scroll', update);
-      ancestorResize && ancestor.removeEventListener('resize', update);
-    });
-    cleanupIo == null || cleanupIo();
-    (_resizeObserver2 = resizeObserver) == null || _resizeObserver2.disconnect();
-    resizeObserver = null;
-    if (animationFrame) {
-      cancelAnimationFrame(frameId);
-    }
-  };
-}
-
-/**
- * Modifies the placement by translating the floating element along the
- * specified axes.
- * A number (shorthand for `mainAxis` or distance), or an axes configuration
- * object may be passed.
- * @see https://floating-ui.com/docs/offset
- */
-const offset$1 = offset$2;
-
-/**
- * Optimizes the visibility of the floating element by shifting it in order to
- * keep it in view when it will overflow the clipping boundary.
- * @see https://floating-ui.com/docs/shift
- */
-const shift$1 = shift$2;
-
-/**
- * Optimizes the visibility of the floating element by flipping the `placement`
- * in order to keep it in view when the preferred placement(s) will overflow the
- * clipping boundary. Alternative to `autoPlacement`.
- * @see https://floating-ui.com/docs/flip
- */
-const flip$1 = flip$2;
-
-/**
- * Provides data that allows you to change the size of the floating element —
- * for instance, prevent it from overflowing the clipping boundary or match the
- * width of the reference element.
- * @see https://floating-ui.com/docs/size
- */
-const size$1 = size$2;
-
-/**
- * Provides data to hide the floating element in applicable situations, such as
- * when it is not in the same clipping context as the reference element.
- * @see https://floating-ui.com/docs/hide
- */
-const hide$1 = hide$2;
-
-/**
- * Provides data to position an inner element of the floating element so that it
- * appears centered to the reference element.
- * @see https://floating-ui.com/docs/arrow
- */
-const arrow$2 = arrow$3;
-
-/**
- * Built-in `limiter` that will stop `shift()` at a certain point.
- */
-const limitShift$1 = limitShift$2;
-
-/**
- * Computes the `x` and `y` coordinates that will place the floating element
- * next to a given reference element.
- */
-const computePosition = (reference, floating, options) => {
-  // This caches the expensive `getClippingElementAncestors` function so that
-  // multiple lifecycle resets re-use the same result. It only lives for a
-  // single call. If other functions become expensive, we can add them as well.
-  const cache = new Map();
-  const mergedOptions = {
-    platform,
-    ...options
-  };
-  const platformWithCache = {
-    ...mergedOptions.platform,
-    _c: cache
-  };
-  return computePosition$1(reference, floating, {
-    ...mergedOptions,
-    platform: platformWithCache
-  });
-};
-
-var isClient = typeof document !== 'undefined';
-
-var noop$3 = function noop() {};
-var index = isClient ? dashboard__loadShare__react__loadShare__.useLayoutEffect : noop$3;
-
-// Fork of `fast-deep-equal` that only does the comparisons we need and compares
-// functions
-function deepEqual(a, b) {
-  if (a === b) {
-    return true;
-  }
-  if (typeof a !== typeof b) {
-    return false;
-  }
-  if (typeof a === 'function' && a.toString() === b.toString()) {
-    return true;
-  }
-  let length;
-  let i;
-  let keys;
-  if (a && b && typeof a === 'object') {
-    if (Array.isArray(a)) {
-      length = a.length;
-      if (length !== b.length) return false;
-      for (i = length; i-- !== 0;) {
-        if (!deepEqual(a[i], b[i])) {
-          return false;
-        }
-      }
-      return true;
-    }
-    keys = Object.keys(a);
-    length = keys.length;
-    if (length !== Object.keys(b).length) {
-      return false;
-    }
-    for (i = length; i-- !== 0;) {
-      if (!{}.hasOwnProperty.call(b, keys[i])) {
-        return false;
-      }
-    }
-    for (i = length; i-- !== 0;) {
-      const key = keys[i];
-      if (key === '_owner' && a.$$typeof) {
-        continue;
-      }
-      if (!deepEqual(a[key], b[key])) {
-        return false;
-      }
-    }
-    return true;
-  }
-  return a !== a && b !== b;
-}
-
-function getDPR(element) {
-  if (typeof window === 'undefined') {
-    return 1;
-  }
-  const win = element.ownerDocument.defaultView || window;
-  return win.devicePixelRatio || 1;
-}
-
-function roundByDPR(element, value) {
-  const dpr = getDPR(element);
-  return Math.round(value * dpr) / dpr;
-}
-
-function useLatestRef(value) {
-  const ref = dashboard__loadShare__react__loadShare__.useRef(value);
-  index(() => {
-    ref.current = value;
-  });
-  return ref;
-}
-
-/**
- * Provides data to position a floating element.
- * @see https://floating-ui.com/docs/useFloating
- */
-function useFloating(options) {
-  if (options === void 0) {
-    options = {};
-  }
-  const {
-    placement = 'bottom',
-    strategy = 'absolute',
-    middleware = [],
-    platform,
-    elements: {
-      reference: externalReference,
-      floating: externalFloating
-    } = {},
-    transform = true,
-    whileElementsMounted,
-    open
-  } = options;
-  const [data, setData] = dashboard__loadShare__react__loadShare__.useState({
-    x: 0,
-    y: 0,
-    strategy,
-    placement,
-    middlewareData: {},
-    isPositioned: false
-  });
-  const [latestMiddleware, setLatestMiddleware] = dashboard__loadShare__react__loadShare__.useState(middleware);
-  if (!deepEqual(latestMiddleware, middleware)) {
-    setLatestMiddleware(middleware);
-  }
-  const [_reference, _setReference] = dashboard__loadShare__react__loadShare__.useState(null);
-  const [_floating, _setFloating] = dashboard__loadShare__react__loadShare__.useState(null);
-  const setReference = dashboard__loadShare__react__loadShare__.useCallback(node => {
-    if (node !== referenceRef.current) {
-      referenceRef.current = node;
-      _setReference(node);
-    }
-  }, []);
-  const setFloating = dashboard__loadShare__react__loadShare__.useCallback(node => {
-    if (node !== floatingRef.current) {
-      floatingRef.current = node;
-      _setFloating(node);
-    }
-  }, []);
-  const referenceEl = externalReference || _reference;
-  const floatingEl = externalFloating || _floating;
-  const referenceRef = dashboard__loadShare__react__loadShare__.useRef(null);
-  const floatingRef = dashboard__loadShare__react__loadShare__.useRef(null);
-  const dataRef = dashboard__loadShare__react__loadShare__.useRef(data);
-  const hasWhileElementsMounted = whileElementsMounted != null;
-  const whileElementsMountedRef = useLatestRef(whileElementsMounted);
-  const platformRef = useLatestRef(platform);
-  const openRef = useLatestRef(open);
-  const update = dashboard__loadShare__react__loadShare__.useCallback(() => {
-    if (!referenceRef.current || !floatingRef.current) {
-      return;
-    }
-    const config = {
-      placement,
-      strategy,
-      middleware: latestMiddleware
-    };
-    if (platformRef.current) {
-      config.platform = platformRef.current;
-    }
-    computePosition(referenceRef.current, floatingRef.current, config).then(data => {
-      const fullData = {
-        ...data,
-        // The floating element's position may be recomputed while it's closed
-        // but still mounted (such as when transitioning out). To ensure
-        // `isPositioned` will be `false` initially on the next open, avoid
-        // setting it to `true` when `open === false` (must be specified).
-        isPositioned: openRef.current !== false
-      };
-      if (isMountedRef.current && !deepEqual(dataRef.current, fullData)) {
-        dataRef.current = fullData;
-        dashboard__loadShare__react_mf_2_dom__loadShare__.flushSync(() => {
-          setData(fullData);
-        });
-      }
-    });
-  }, [latestMiddleware, placement, strategy, platformRef, openRef]);
-  index(() => {
-    if (open === false && dataRef.current.isPositioned) {
-      dataRef.current.isPositioned = false;
-      setData(data => ({
-        ...data,
-        isPositioned: false
-      }));
-    }
-  }, [open]);
-  const isMountedRef = dashboard__loadShare__react__loadShare__.useRef(false);
-  index(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-  index(() => {
-    if (referenceEl) referenceRef.current = referenceEl;
-    if (floatingEl) floatingRef.current = floatingEl;
-    if (referenceEl && floatingEl) {
-      if (whileElementsMountedRef.current) {
-        return whileElementsMountedRef.current(referenceEl, floatingEl, update);
-      }
-      update();
-    }
-  }, [referenceEl, floatingEl, update, whileElementsMountedRef, hasWhileElementsMounted]);
-  const refs = dashboard__loadShare__react__loadShare__.useMemo(() => ({
-    reference: referenceRef,
-    floating: floatingRef,
-    setReference,
-    setFloating
-  }), [setReference, setFloating]);
-  const elements = dashboard__loadShare__react__loadShare__.useMemo(() => ({
-    reference: referenceEl,
-    floating: floatingEl
-  }), [referenceEl, floatingEl]);
-  const floatingStyles = dashboard__loadShare__react__loadShare__.useMemo(() => {
-    const initialStyles = {
-      position: strategy,
-      left: 0,
-      top: 0
-    };
-    if (!elements.floating) {
-      return initialStyles;
-    }
-    const x = roundByDPR(elements.floating, data.x);
-    const y = roundByDPR(elements.floating, data.y);
-    if (transform) {
-      return {
-        ...initialStyles,
-        transform: "translate(" + x + "px, " + y + "px)",
-        ...(getDPR(elements.floating) >= 1.5 && {
-          willChange: 'transform'
-        })
-      };
-    }
-    return {
-      position: strategy,
-      left: x,
-      top: y
-    };
-  }, [strategy, transform, elements.floating, data.x, data.y]);
-  return dashboard__loadShare__react__loadShare__.useMemo(() => ({
-    ...data,
-    update,
-    refs,
-    elements,
-    floatingStyles
-  }), [data, update, refs, elements, floatingStyles]);
-}
-
-/**
- * Provides data to position an inner element of the floating element so that it
- * appears centered to the reference element.
- * This wraps the core `arrow` middleware to allow React refs as the element.
- * @see https://floating-ui.com/docs/arrow
- */
-const arrow$1 = options => {
-  function isRef(value) {
-    return {}.hasOwnProperty.call(value, 'current');
-  }
-  return {
-    name: 'arrow',
-    options,
-    fn(state) {
-      const {
-        element,
-        padding
-      } = typeof options === 'function' ? options(state) : options;
-      if (element && isRef(element)) {
-        if (element.current != null) {
-          return arrow$2({
-            element: element.current,
-            padding
-          }).fn(state);
-        }
-        return {};
-      }
-      if (element) {
-        return arrow$2({
-          element,
-          padding
-        }).fn(state);
-      }
-      return {};
-    }
-  };
-};
-
-/**
- * Modifies the placement by translating the floating element along the
- * specified axes.
- * A number (shorthand for `mainAxis` or distance), or an axes configuration
- * object may be passed.
- * @see https://floating-ui.com/docs/offset
- */
-const offset = (options, deps) => ({
-  ...offset$1(options),
-  options: [options, deps]
-});
-
-/**
- * Optimizes the visibility of the floating element by shifting it in order to
- * keep it in view when it will overflow the clipping boundary.
- * @see https://floating-ui.com/docs/shift
- */
-const shift = (options, deps) => ({
-  ...shift$1(options),
-  options: [options, deps]
-});
-
-/**
- * Built-in `limiter` that will stop `shift()` at a certain point.
- */
-const limitShift = (options, deps) => ({
-  ...limitShift$1(options),
-  options: [options, deps]
-});
-
-/**
- * Optimizes the visibility of the floating element by flipping the `placement`
- * in order to keep it in view when the preferred placement(s) will overflow the
- * clipping boundary. Alternative to `autoPlacement`.
- * @see https://floating-ui.com/docs/flip
- */
-const flip = (options, deps) => ({
-  ...flip$1(options),
-  options: [options, deps]
-});
-
-/**
- * Provides data that allows you to change the size of the floating element —
- * for instance, prevent it from overflowing the clipping boundary or match the
- * width of the reference element.
- * @see https://floating-ui.com/docs/size
- */
-const size = (options, deps) => ({
-  ...size$1(options),
-  options: [options, deps]
-});
-
-/**
- * Provides data to hide the floating element in applicable situations, such as
- * when it is not in the same clipping context as the reference element.
- * @see https://floating-ui.com/docs/hide
- */
-const hide = (options, deps) => ({
-  ...hide$1(options),
-  options: [options, deps]
-});
-
-/**
- * Provides data to position an inner element of the floating element so that it
- * appears centered to the reference element.
- * This wraps the core `arrow` middleware to allow React refs as the element.
- * @see https://floating-ui.com/docs/arrow
- */
-const arrow = (options, deps) => ({
-  ...arrow$1(options),
-  options: [options, deps]
-});
-
-// src/arrow.tsx
-var NAME$4 = "Arrow";
-var Arrow$1 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-  const { children, width = 10, height = 5, ...arrowProps } = props;
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    Primitive.svg,
-    {
-      ...arrowProps,
-      ref: forwardedRef,
-      width,
-      height,
-      viewBox: "0 0 30 10",
-      preserveAspectRatio: "none",
-      children: props.asChild ? children : /* @__PURE__ */ jsxRuntimeExports.jsx("polygon", { points: "0,0 30,0 15,10" })
-    }
-  );
-});
-Arrow$1.displayName = NAME$4;
-var Root$c = Arrow$1;
-
-// packages/react/use-size/src/use-size.tsx
-function useSize(element) {
-  const [size, setSize] = dashboard__loadShare__react__loadShare__.useState(void 0);
-  useLayoutEffect2(() => {
-    if (element) {
-      setSize({ width: element.offsetWidth, height: element.offsetHeight });
-      const resizeObserver = new ResizeObserver((entries) => {
-        if (!Array.isArray(entries)) {
-          return;
-        }
-        if (!entries.length) {
-          return;
-        }
-        const entry = entries[0];
-        let width;
-        let height;
-        if ("borderBoxSize" in entry) {
-          const borderSizeEntry = entry["borderBoxSize"];
-          const borderSize = Array.isArray(borderSizeEntry) ? borderSizeEntry[0] : borderSizeEntry;
-          width = borderSize["inlineSize"];
-          height = borderSize["blockSize"];
-        } else {
-          width = element.offsetWidth;
-          height = element.offsetHeight;
-        }
-        setSize({ width, height });
-      });
-      resizeObserver.observe(element, { box: "border-box" });
-      return () => resizeObserver.unobserve(element);
-    } else {
-      setSize(void 0);
-    }
-  }, [element]);
-  return size;
-}
-
-var POPPER_NAME = "Popper";
-var [createPopperContext, createPopperScope] = createContextScope(POPPER_NAME);
-var [PopperProvider, usePopperContext] = createPopperContext(POPPER_NAME);
-var Popper = (props) => {
-  const { __scopePopper, children } = props;
-  const [anchor, setAnchor] = dashboard__loadShare__react__loadShare__.useState(null);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(PopperProvider, { scope: __scopePopper, anchor, onAnchorChange: setAnchor, children });
-};
-Popper.displayName = POPPER_NAME;
-var ANCHOR_NAME$2 = "PopperAnchor";
-var PopperAnchor = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopePopper, virtualRef, ...anchorProps } = props;
-    const context = usePopperContext(ANCHOR_NAME$2, __scopePopper);
-    const ref = dashboard__loadShare__react__loadShare__.useRef(null);
-    const composedRefs = useComposedRefs$1(forwardedRef, ref);
-    const anchorRef = dashboard__loadShare__react__loadShare__.useRef(null);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
-      const previousAnchor = anchorRef.current;
-      anchorRef.current = virtualRef?.current || ref.current;
-      if (previousAnchor !== anchorRef.current) {
-        context.onAnchorChange(anchorRef.current);
-      }
-    });
-    return virtualRef ? null : /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive.div, { ...anchorProps, ref: composedRefs });
-  }
-);
-PopperAnchor.displayName = ANCHOR_NAME$2;
-var CONTENT_NAME$6 = "PopperContent";
-var [PopperContentProvider, useContentContext] = createPopperContext(CONTENT_NAME$6);
-var PopperContent = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const {
-      __scopePopper,
-      side = "bottom",
-      sideOffset = 0,
-      align = "center",
-      alignOffset = 0,
-      arrowPadding = 0,
-      avoidCollisions = true,
-      collisionBoundary = [],
-      collisionPadding: collisionPaddingProp = 0,
-      sticky = "partial",
-      hideWhenDetached = false,
-      updatePositionStrategy = "optimized",
-      onPlaced,
-      ...contentProps
-    } = props;
-    const context = usePopperContext(CONTENT_NAME$6, __scopePopper);
-    const [content, setContent] = dashboard__loadShare__react__loadShare__.useState(null);
-    const composedRefs = useComposedRefs$1(forwardedRef, (node) => setContent(node));
-    const [arrow$1, setArrow] = dashboard__loadShare__react__loadShare__.useState(null);
-    const arrowSize = useSize(arrow$1);
-    const arrowWidth = arrowSize?.width ?? 0;
-    const arrowHeight = arrowSize?.height ?? 0;
-    const desiredPlacement = side + (align !== "center" ? "-" + align : "");
-    const collisionPadding = typeof collisionPaddingProp === "number" ? collisionPaddingProp : { top: 0, right: 0, bottom: 0, left: 0, ...collisionPaddingProp };
-    const boundary = Array.isArray(collisionBoundary) ? collisionBoundary : [collisionBoundary];
-    const hasExplicitBoundaries = boundary.length > 0;
-    const detectOverflowOptions = {
-      padding: collisionPadding,
-      boundary: boundary.filter(isNotNull),
-      // with `strategy: 'fixed'`, this is the only way to get it to respect boundaries
-      altBoundary: hasExplicitBoundaries
-    };
-    const { refs, floatingStyles, placement, isPositioned, middlewareData } = useFloating({
-      // default to `fixed` strategy so users don't have to pick and we also avoid focus scroll issues
-      strategy: "fixed",
-      placement: desiredPlacement,
-      whileElementsMounted: (...args) => {
-        const cleanup = autoUpdate(...args, {
-          animationFrame: updatePositionStrategy === "always"
-        });
-        return cleanup;
-      },
-      elements: {
-        reference: context.anchor
-      },
-      middleware: [
-        offset({ mainAxis: sideOffset + arrowHeight, alignmentAxis: alignOffset }),
-        avoidCollisions && shift({
-          mainAxis: true,
-          crossAxis: false,
-          limiter: sticky === "partial" ? limitShift() : void 0,
-          ...detectOverflowOptions
-        }),
-        avoidCollisions && flip({ ...detectOverflowOptions }),
-        size({
-          ...detectOverflowOptions,
-          apply: ({ elements, rects, availableWidth, availableHeight }) => {
-            const { width: anchorWidth, height: anchorHeight } = rects.reference;
-            const contentStyle = elements.floating.style;
-            contentStyle.setProperty("--radix-popper-available-width", `${availableWidth}px`);
-            contentStyle.setProperty("--radix-popper-available-height", `${availableHeight}px`);
-            contentStyle.setProperty("--radix-popper-anchor-width", `${anchorWidth}px`);
-            contentStyle.setProperty("--radix-popper-anchor-height", `${anchorHeight}px`);
-          }
-        }),
-        arrow$1 && arrow({ element: arrow$1, padding: arrowPadding }),
-        transformOrigin({ arrowWidth, arrowHeight }),
-        hideWhenDetached && hide({ strategy: "referenceHidden", ...detectOverflowOptions })
-      ]
-    });
-    const [placedSide, placedAlign] = getSideAndAlignFromPlacement(placement);
-    const handlePlaced = useCallbackRef$2(onPlaced);
-    useLayoutEffect2(() => {
-      if (isPositioned) {
-        handlePlaced?.();
-      }
-    }, [isPositioned, handlePlaced]);
-    const arrowX = middlewareData.arrow?.x;
-    const arrowY = middlewareData.arrow?.y;
-    const cannotCenterArrow = middlewareData.arrow?.centerOffset !== 0;
-    const [contentZIndex, setContentZIndex] = dashboard__loadShare__react__loadShare__.useState();
-    useLayoutEffect2(() => {
-      if (content) setContentZIndex(window.getComputedStyle(content).zIndex);
-    }, [content]);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "div",
-      {
-        ref: refs.setFloating,
-        "data-radix-popper-content-wrapper": "",
-        style: {
-          ...floatingStyles,
-          transform: isPositioned ? floatingStyles.transform : "translate(0, -200%)",
-          // keep off the page when measuring
-          minWidth: "max-content",
-          zIndex: contentZIndex,
-          ["--radix-popper-transform-origin"]: [
-            middlewareData.transformOrigin?.x,
-            middlewareData.transformOrigin?.y
-          ].join(" "),
-          // hide the content if using the hide middleware and should be hidden
-          // set visibility to hidden and disable pointer events so the UI behaves
-          // as if the PopperContent isn't there at all
-          ...middlewareData.hide?.referenceHidden && {
-            visibility: "hidden",
-            pointerEvents: "none"
-          }
-        },
-        dir: props.dir,
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          PopperContentProvider,
-          {
-            scope: __scopePopper,
-            placedSide,
-            onArrowChange: setArrow,
-            arrowX,
-            arrowY,
-            shouldHideArrow: cannotCenterArrow,
-            children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-              Primitive.div,
-              {
-                "data-side": placedSide,
-                "data-align": placedAlign,
-                ...contentProps,
-                ref: composedRefs,
-                style: {
-                  ...contentProps.style,
-                  // if the PopperContent hasn't been placed yet (not all measurements done)
-                  // we prevent animations so that users's animation don't kick in too early referring wrong sides
-                  animation: !isPositioned ? "none" : void 0
-                }
-              }
-            )
-          }
-        )
-      }
-    );
-  }
-);
-PopperContent.displayName = CONTENT_NAME$6;
-var ARROW_NAME$5 = "PopperArrow";
-var OPPOSITE_SIDE = {
-  top: "bottom",
-  right: "left",
-  bottom: "top",
-  left: "right"
-};
-var PopperArrow = dashboard__loadShare__react__loadShare__.forwardRef(function PopperArrow2(props, forwardedRef) {
-  const { __scopePopper, ...arrowProps } = props;
-  const contentContext = useContentContext(ARROW_NAME$5, __scopePopper);
-  const baseSide = OPPOSITE_SIDE[contentContext.placedSide];
-  return (
-    // we have to use an extra wrapper because `ResizeObserver` (used by `useSize`)
-    // doesn't report size as we'd expect on SVG elements.
-    // it reports their bounding box which is effectively the largest path inside the SVG.
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "span",
-      {
-        ref: contentContext.onArrowChange,
-        style: {
-          position: "absolute",
-          left: contentContext.arrowX,
-          top: contentContext.arrowY,
-          [baseSide]: 0,
-          transformOrigin: {
-            top: "",
-            right: "0 0",
-            bottom: "center 0",
-            left: "100% 0"
-          }[contentContext.placedSide],
-          transform: {
-            top: "translateY(100%)",
-            right: "translateY(50%) rotate(90deg) translateX(-50%)",
-            bottom: `rotate(180deg)`,
-            left: "translateY(50%) rotate(-90deg) translateX(50%)"
-          }[contentContext.placedSide],
-          visibility: contentContext.shouldHideArrow ? "hidden" : void 0
-        },
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          Root$c,
-          {
-            ...arrowProps,
-            ref: forwardedRef,
-            style: {
-              ...arrowProps.style,
-              // ensures the element can be measured correctly (mostly for if SVG)
-              display: "block"
-            }
-          }
-        )
-      }
-    )
-  );
-});
-PopperArrow.displayName = ARROW_NAME$5;
-function isNotNull(value) {
-  return value !== null;
-}
-var transformOrigin = (options) => ({
-  name: "transformOrigin",
-  options,
-  fn(data) {
-    const { placement, rects, middlewareData } = data;
-    const cannotCenterArrow = middlewareData.arrow?.centerOffset !== 0;
-    const isArrowHidden = cannotCenterArrow;
-    const arrowWidth = isArrowHidden ? 0 : options.arrowWidth;
-    const arrowHeight = isArrowHidden ? 0 : options.arrowHeight;
-    const [placedSide, placedAlign] = getSideAndAlignFromPlacement(placement);
-    const noArrowAlign = { start: "0%", center: "50%", end: "100%" }[placedAlign];
-    const arrowXCenter = (middlewareData.arrow?.x ?? 0) + arrowWidth / 2;
-    const arrowYCenter = (middlewareData.arrow?.y ?? 0) + arrowHeight / 2;
-    let x = "";
-    let y = "";
-    if (placedSide === "bottom") {
-      x = isArrowHidden ? noArrowAlign : `${arrowXCenter}px`;
-      y = `${-arrowHeight}px`;
-    } else if (placedSide === "top") {
-      x = isArrowHidden ? noArrowAlign : `${arrowXCenter}px`;
-      y = `${rects.floating.height + arrowHeight}px`;
-    } else if (placedSide === "right") {
-      x = `${-arrowHeight}px`;
-      y = isArrowHidden ? noArrowAlign : `${arrowYCenter}px`;
-    } else if (placedSide === "left") {
-      x = `${rects.floating.width + arrowHeight}px`;
-      y = isArrowHidden ? noArrowAlign : `${arrowYCenter}px`;
-    }
-    return { data: { x, y } };
-  }
-});
-function getSideAndAlignFromPlacement(placement) {
-  const [side, align = "center"] = placement.split("-");
-  return [side, align];
-}
-var Root2$6 = Popper;
-var Anchor = PopperAnchor;
-var Content$2 = PopperContent;
-var Arrow = PopperArrow;
-
 var POPOVER_NAME = "Popover";
 var [createPopoverContext, createPopoverScope] = createContextScope(POPOVER_NAME, [
   createPopperScope
 ]);
-var usePopperScope$3 = createPopperScope();
+var usePopperScope$2 = createPopperScope();
 var [PopoverProvider, usePopoverContext] = createPopoverContext(POPOVER_NAME);
 var Popover$1 = (props) => {
   const {
@@ -9906,7 +5797,7 @@ var Popover$1 = (props) => {
     onOpenChange,
     modal = false
   } = props;
-  const popperScope = usePopperScope$3(__scopePopover);
+  const popperScope = usePopperScope$2(__scopePopover);
   const triggerRef = dashboard__loadShare__react__loadShare__.useRef(null);
   const [hasCustomAnchor, setHasCustomAnchor] = dashboard__loadShare__react__loadShare__.useState(false);
   const [open, setOpen] = useControllableState$1({
@@ -9915,7 +5806,7 @@ var Popover$1 = (props) => {
     onChange: onOpenChange,
     caller: POPOVER_NAME
   });
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Root2$6, { ...popperScope, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Root2$7, { ...popperScope, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
     PopoverProvider,
     {
       scope: __scopePopover,
@@ -9933,12 +5824,12 @@ var Popover$1 = (props) => {
   ) });
 };
 Popover$1.displayName = POPOVER_NAME;
-var ANCHOR_NAME$1 = "PopoverAnchor";
+var ANCHOR_NAME = "PopoverAnchor";
 var PopoverAnchor$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopePopover, ...anchorProps } = props;
-    const context = usePopoverContext(ANCHOR_NAME$1, __scopePopover);
-    const popperScope = usePopperScope$3(__scopePopover);
+    const context = usePopoverContext(ANCHOR_NAME, __scopePopover);
+    const popperScope = usePopperScope$2(__scopePopover);
     const { onCustomAnchorAdd, onCustomAnchorRemove } = context;
     dashboard__loadShare__react__loadShare__.useEffect(() => {
       onCustomAnchorAdd();
@@ -9947,13 +5838,13 @@ var PopoverAnchor$1 = dashboard__loadShare__react__loadShare__.forwardRef(
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Anchor, { ...popperScope, ...anchorProps, ref: forwardedRef });
   }
 );
-PopoverAnchor$1.displayName = ANCHOR_NAME$1;
-var TRIGGER_NAME$5 = "PopoverTrigger";
+PopoverAnchor$1.displayName = ANCHOR_NAME;
+var TRIGGER_NAME$4 = "PopoverTrigger";
 var PopoverTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopePopover, ...triggerProps } = props;
-    const context = usePopoverContext(TRIGGER_NAME$5, __scopePopover);
-    const popperScope = usePopperScope$3(__scopePopover);
+    const context = usePopoverContext(TRIGGER_NAME$4, __scopePopover);
+    const popperScope = usePopperScope$2(__scopePopover);
     const composedTriggerRef = useComposedRefs$1(forwardedRef, context.triggerRef);
     const trigger = /* @__PURE__ */ jsxRuntimeExports.jsx(
       Primitive.button,
@@ -9971,31 +5862,31 @@ var PopoverTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
     return context.hasCustomAnchor ? trigger : /* @__PURE__ */ jsxRuntimeExports.jsx(Anchor, { asChild: true, ...popperScope, children: trigger });
   }
 );
-PopoverTrigger$1.displayName = TRIGGER_NAME$5;
-var PORTAL_NAME$4 = "PopoverPortal";
-var [PortalProvider$2, usePortalContext$2] = createPopoverContext(PORTAL_NAME$4, {
+PopoverTrigger$1.displayName = TRIGGER_NAME$4;
+var PORTAL_NAME$2 = "PopoverPortal";
+var [PortalProvider$1, usePortalContext$1] = createPopoverContext(PORTAL_NAME$2, {
   forceMount: void 0
 });
 var PopoverPortal = (props) => {
   const { __scopePopover, forceMount, children, container } = props;
-  const context = usePopoverContext(PORTAL_NAME$4, __scopePopover);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(PortalProvider$2, { scope: __scopePopover, forceMount, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$5, { asChild: true, container, children }) }) });
+  const context = usePopoverContext(PORTAL_NAME$2, __scopePopover);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(PortalProvider$1, { scope: __scopePopover, forceMount, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$4, { asChild: true, container, children }) }) });
 };
-PopoverPortal.displayName = PORTAL_NAME$4;
-var CONTENT_NAME$5 = "PopoverContent";
+PopoverPortal.displayName = PORTAL_NAME$2;
+var CONTENT_NAME$3 = "PopoverContent";
 var PopoverContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
-    const portalContext = usePortalContext$2(CONTENT_NAME$5, props.__scopePopover);
+    const portalContext = usePortalContext$1(CONTENT_NAME$3, props.__scopePopover);
     const { forceMount = portalContext.forceMount, ...contentProps } = props;
-    const context = usePopoverContext(CONTENT_NAME$5, props.__scopePopover);
+    const context = usePopoverContext(CONTENT_NAME$3, props.__scopePopover);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: context.modal ? /* @__PURE__ */ jsxRuntimeExports.jsx(PopoverContentModal, { ...contentProps, ref: forwardedRef }) : /* @__PURE__ */ jsxRuntimeExports.jsx(PopoverContentNonModal, { ...contentProps, ref: forwardedRef }) });
   }
 );
-PopoverContent$1.displayName = CONTENT_NAME$5;
-var Slot$2 = createSlot("PopoverContent.RemoveScroll");
+PopoverContent$1.displayName = CONTENT_NAME$3;
+var Slot$1 = createSlot("PopoverContent.RemoveScroll");
 var PopoverContentModal = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
-    const context = usePopoverContext(CONTENT_NAME$5, props.__scopePopover);
+    const context = usePopoverContext(CONTENT_NAME$3, props.__scopePopover);
     const contentRef = dashboard__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(forwardedRef, contentRef);
     const isRightClickOutsideRef = dashboard__loadShare__react__loadShare__.useRef(false);
@@ -10003,7 +5894,7 @@ var PopoverContentModal = dashboard__loadShare__react__loadShare__.forwardRef(
       const content = contentRef.current;
       if (content) return hideOthers(content);
     }, []);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(ReactRemoveScroll$1, { as: Slot$2, allowPinchZoom: true, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(ReactRemoveScroll, { as: Slot$1, allowPinchZoom: true, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
       PopoverContentImpl,
       {
         ...props,
@@ -10035,7 +5926,7 @@ var PopoverContentModal = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 var PopoverContentNonModal = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
-    const context = usePopoverContext(CONTENT_NAME$5, props.__scopePopover);
+    const context = usePopoverContext(CONTENT_NAME$3, props.__scopePopover);
     const hasInteractedOutsideRef = dashboard__loadShare__react__loadShare__.useRef(false);
     const hasPointerDownOutsideRef = dashboard__loadShare__react__loadShare__.useRef(false);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -10087,8 +5978,8 @@ var PopoverContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
       onInteractOutside,
       ...contentProps
     } = props;
-    const context = usePopoverContext(CONTENT_NAME$5, __scopePopover);
-    const popperScope = usePopperScope$3(__scopePopover);
+    const context = usePopoverContext(CONTENT_NAME$3, __scopePopover);
+    const popperScope = usePopperScope$2(__scopePopover);
     useFocusGuards();
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       FocusScope,
@@ -10109,7 +6000,7 @@ var PopoverContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
             onFocusOutside,
             onDismiss: () => context.onOpenChange(false),
             children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-              Content$2,
+              Content$4,
               {
                 "data-state": getState$3(context.open),
                 role: "dialog",
@@ -10153,36 +6044,36 @@ var PopoverClose = dashboard__loadShare__react__loadShare__.forwardRef(
   }
 );
 PopoverClose.displayName = CLOSE_NAME$1;
-var ARROW_NAME$4 = "PopoverArrow";
+var ARROW_NAME$2 = "PopoverArrow";
 var PopoverArrow = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopePopover, ...arrowProps } = props;
-    const popperScope = usePopperScope$3(__scopePopover);
+    const popperScope = usePopperScope$2(__scopePopover);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Arrow, { ...popperScope, ...arrowProps, ref: forwardedRef });
   }
 );
-PopoverArrow.displayName = ARROW_NAME$4;
+PopoverArrow.displayName = ARROW_NAME$2;
 function getState$3(open) {
   return open ? "open" : "closed";
 }
-var Root2$5 = Popover$1;
-var Anchor2$1 = PopoverAnchor$1;
-var Trigger$4 = PopoverTrigger$1;
-var Portal$3 = PopoverPortal;
-var Content2$4 = PopoverContent$1;
+var Root2$4 = Popover$1;
+var Anchor2 = PopoverAnchor$1;
+var Trigger$3 = PopoverTrigger$1;
+var Portal$2 = PopoverPortal;
+var Content2$2 = PopoverContent$1;
 
 //#region src/components/ui/popover.tsx
-const Popover = Root2$5;
-const PopoverTrigger = Trigger$4;
-const PopoverAnchor = Anchor2$1;
-const PopoverContent = dashboard__loadShare__react__loadShare__.forwardRef(({ align = "center", className, sideOffset = 4,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$3, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$4, {
+const Popover = Root2$4;
+const PopoverTrigger = Trigger$3;
+const PopoverAnchor = Anchor2;
+const PopoverContent = dashboard__loadShare__react__loadShare__.forwardRef(({ align = "center", className, sideOffset = 4,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$2, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$2, {
 	align,
 	className: cn$1("z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2", className),
 	ref,
 	sideOffset,
 	...props
 }) }));
-PopoverContent.displayName = Content2$4.displayName;
+PopoverContent.displayName = Content2$2.displayName;
 
 //#region src/components/ui/autocomplete.tsx
 const Autocomplete = ({ allowDuplicates, autocompleteOptions, children, classStyleProps, inlineTags, maxTags, onTagAdd, onTagRemove, setInputValue, setTagCount, setTags, tags, usePortal }) => {
@@ -10418,7 +6309,7 @@ var AvatarImage$1 = dashboard__loadShare__react__loadShare__.forwardRef(
     }, ...imageProps } = props;
     const context = useAvatarContext(IMAGE_NAME, __scopeAvatar);
     const imageLoadingStatus = useImageLoadingStatus(src, imageProps);
-    const handleLoadingStatusChange = useCallbackRef$2((status) => {
+    const handleLoadingStatusChange = useCallbackRef$1((status) => {
       onLoadingStatusChange(status);
       context.onImageLoadingStatusChange(status);
     });
@@ -10497,17 +6388,17 @@ function useImageLoadingStatus(src, { referrerPolicy, crossOrigin }) {
   }, [image, crossOrigin, referrerPolicy]);
   return loadingStatus;
 }
-var Root$b = Avatar$1;
+var Root$a = Avatar$1;
 var Image = AvatarImage$1;
 var Fallback = AvatarFallback$1;
 
 //#region src/components/ui/avatar.tsx
-const Avatar = dashboard__loadShare__react__loadShare__.forwardRef(({ className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Root$b, {
+const Avatar = dashboard__loadShare__react__loadShare__.forwardRef(({ className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Root$a, {
 	className: cn$1("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className),
 	ref,
 	...props
 }));
-Avatar.displayName = Root$b.displayName;
+Avatar.displayName = Root$a.displayName;
 const AvatarImage = dashboard__loadShare__react__loadShare__.forwardRef(({ className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Image, {
 	className: cn$1("aspect-square h-full w-full", className),
 	ref,
@@ -15553,7 +11444,7 @@ function PreviousMonthButton(props) {
  * @group Components
  * @see https://daypicker.dev/guides/custom-components
  */
-function Root$a(props) {
+function Root$9(props) {
     const { rootRef, ...rest } = props;
     return React3.createElement("div", { ...rest, ref: rootRef });
 }
@@ -15661,7 +11552,7 @@ const components = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty
   NextMonthButton,
   Option,
   PreviousMonthButton,
-  Root: Root$a,
+  Root: Root$9,
   Select: Select$2,
   Week,
   WeekNumber,
@@ -20280,7 +16171,7 @@ var isValidSpreadableProp = function isValidSpreadableProp(property, key, includ
    * @todo Add an internal cjs version of https://github.com/wooorm/svg-element-attributes for full coverage.
    */
   var matchingElementTypeKeys = (_FilteredElementKeyMa = FilteredElementKeyMap === null || FilteredElementKeyMap === void 0 ? void 0 : FilteredElementKeyMap[svgElementType]) !== null && _FilteredElementKeyMa !== void 0 ? _FilteredElementKeyMa : [];
-  return key.startsWith('data-') || !isFunction$2(property) && (svgElementType && matchingElementTypeKeys.includes(key) || SVGElementPropKeys.includes(key)) || EventKeys.includes(key);
+  return key.startsWith('data-') || !isFunction$1(property) && (svgElementType && matchingElementTypeKeys.includes(key) || SVGElementPropKeys.includes(key)) || EventKeys.includes(key);
 };
 var filterProps = function filterProps(props, includeEvents, svgElementType) {
   if (!props || typeof props === 'function' || typeof props === 'boolean') {
@@ -21101,8 +16992,8 @@ var DefaultLegendContent = /*#__PURE__*/function (_PureComponent) {
         }
 
         // Do not render entry.value as functions. Always require static string properties.
-        var entryValue = !isFunction$2(entry.value) ? entry.value : null;
-        warn(!isFunction$2(entry.value), "The name property is also required when using a function for the dataKey of a chart's cartesian components. Ex: <Bar name=\"Name of my Data\"/>" // eslint-disable-line max-len
+        var entryValue = !isFunction$1(entry.value) ? entry.value : null;
+        warn(!isFunction$1(entry.value), "The name property is also required when using a function for the dataKey of a chart's cartesian components. Ex: <Bar name=\"Name of my Data\"/>" // eslint-disable-line max-len
         );
         var color = entry.inactive ? inactiveColor : entry.color;
         return /*#__PURE__*/React3.createElement("li", _extends$1({
@@ -21835,7 +17726,7 @@ function getUniqPayload(payload, option, defaultUniqBy) {
   if (option === true) {
     return uniqBy$1(payload, defaultUniqBy);
   }
-  if (isFunction$2(option)) {
+  if (isFunction$1(option)) {
     return uniqBy$1(payload, option);
   }
   return payload;
@@ -23912,7 +19803,7 @@ function CheckboxProvider(props) {
     value,
     hasConsumerStoppedPropagationRef,
     required,
-    defaultChecked: isIndeterminate$1(defaultChecked) ? false : defaultChecked,
+    defaultChecked: isIndeterminate(defaultChecked) ? false : defaultChecked,
     isFormControl,
     bubbleInput,
     setBubbleInput
@@ -23926,7 +19817,7 @@ function CheckboxProvider(props) {
     }
   );
 }
-var TRIGGER_NAME$4 = "CheckboxTrigger";
+var TRIGGER_NAME$3 = "CheckboxTrigger";
 var CheckboxTrigger = dashboard__loadShare__react__loadShare__.forwardRef(
   ({ __scopeCheckbox, onKeyDown, onClick, ...checkboxProps }, forwardedRef) => {
     const {
@@ -23940,7 +19831,7 @@ var CheckboxTrigger = dashboard__loadShare__react__loadShare__.forwardRef(
       hasConsumerStoppedPropagationRef,
       isFormControl,
       bubbleInput
-    } = useCheckboxContext(TRIGGER_NAME$4, __scopeCheckbox);
+    } = useCheckboxContext(TRIGGER_NAME$3, __scopeCheckbox);
     const composedRefs = useComposedRefs$1(forwardedRef, setControl);
     const initialCheckedStateRef = dashboard__loadShare__react__loadShare__.useRef(checked);
     dashboard__loadShare__react__loadShare__.useEffect(() => {
@@ -23956,7 +19847,7 @@ var CheckboxTrigger = dashboard__loadShare__react__loadShare__.forwardRef(
       {
         type: "button",
         role: "checkbox",
-        "aria-checked": isIndeterminate$1(checked) ? "mixed" : checked,
+        "aria-checked": isIndeterminate(checked) ? "mixed" : checked,
         "aria-required": required,
         "data-state": getState$2(checked),
         "data-disabled": disabled ? "" : void 0,
@@ -23968,7 +19859,7 @@ var CheckboxTrigger = dashboard__loadShare__react__loadShare__.forwardRef(
           if (event.key === "Enter") event.preventDefault();
         }),
         onClick: composeEventHandlers(onClick, (event) => {
-          setChecked((prevChecked) => isIndeterminate$1(prevChecked) ? true : !prevChecked);
+          setChecked((prevChecked) => isIndeterminate(prevChecked) ? true : !prevChecked);
           if (bubbleInput && isFormControl) {
             hasConsumerStoppedPropagationRef.current = event.isPropagationStopped();
             if (!hasConsumerStoppedPropagationRef.current) event.stopPropagation();
@@ -23978,7 +19869,7 @@ var CheckboxTrigger = dashboard__loadShare__react__loadShare__.forwardRef(
     );
   }
 );
-CheckboxTrigger.displayName = TRIGGER_NAME$4;
+CheckboxTrigger.displayName = TRIGGER_NAME$3;
 var Checkbox$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
@@ -24026,15 +19917,15 @@ var Checkbox$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   }
 );
 Checkbox$1.displayName = CHECKBOX_NAME;
-var INDICATOR_NAME$3 = "CheckboxIndicator";
+var INDICATOR_NAME$2 = "CheckboxIndicator";
 var CheckboxIndicator = dashboard__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeCheckbox, forceMount, ...indicatorProps } = props;
-    const context = useCheckboxContext(INDICATOR_NAME$3, __scopeCheckbox);
+    const context = useCheckboxContext(INDICATOR_NAME$2, __scopeCheckbox);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       Presence,
       {
-        present: forceMount || isIndeterminate$1(context.checked) || context.checked === true,
+        present: forceMount || isIndeterminate(context.checked) || context.checked === true,
         children: /* @__PURE__ */ jsxRuntimeExports.jsx(
           Primitive.span,
           {
@@ -24049,7 +19940,7 @@ var CheckboxIndicator = dashboard__loadShare__react__loadShare__.forwardRef(
     );
   }
 );
-CheckboxIndicator.displayName = INDICATOR_NAME$3;
+CheckboxIndicator.displayName = INDICATOR_NAME$2;
 var BUBBLE_INPUT_NAME$4 = "CheckboxBubbleInput";
 var CheckboxBubbleInput = dashboard__loadShare__react__loadShare__.forwardRef(
   ({ __scopeCheckbox, ...props }, forwardedRef) => {
@@ -24081,12 +19972,12 @@ var CheckboxBubbleInput = dashboard__loadShare__react__loadShare__.forwardRef(
       const bubbles = !hasConsumerStoppedPropagationRef.current;
       if (prevChecked !== checked && setChecked) {
         const event = new Event("click", { bubbles });
-        input.indeterminate = isIndeterminate$1(checked);
-        setChecked.call(input, isIndeterminate$1(checked) ? false : checked);
+        input.indeterminate = isIndeterminate(checked);
+        setChecked.call(input, isIndeterminate(checked) ? false : checked);
         input.dispatchEvent(event);
       }
     }, [bubbleInput, prevChecked, checked, hasConsumerStoppedPropagationRef]);
-    const defaultCheckedRef = dashboard__loadShare__react__loadShare__.useRef(isIndeterminate$1(checked) ? false : checked);
+    const defaultCheckedRef = dashboard__loadShare__react__loadShare__.useRef(isIndeterminate(checked) ? false : checked);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       Primitive.input,
       {
@@ -24121,11 +20012,11 @@ CheckboxBubbleInput.displayName = BUBBLE_INPUT_NAME$4;
 function isFunction(value) {
   return typeof value === "function";
 }
-function isIndeterminate$1(checked) {
+function isIndeterminate(checked) {
   return checked === "indeterminate";
 }
 function getState$2(checked) {
-  return isIndeterminate$1(checked) ? "indeterminate" : checked ? "checked" : "unchecked";
+  return isIndeterminate(checked) ? "indeterminate" : checked ? "checked" : "unchecked";
 }
 
 //#region src/components/ui/checkbox.tsx
@@ -24141,14 +20032,14 @@ const Checkbox = dashboard__loadShare__react__loadShare__.forwardRef(({ classNam
 Checkbox.displayName = Checkbox$1.displayName;
 
 //#region src/components/ui/collapsible.tsx
-const Collapsible = Root$f;
+const Collapsible = Root$c;
 const CollapsibleTrigger = CollapsibleTrigger$1;
 const CollapsibleContent = CollapsibleContent$1;
 
 //#region src/components/ui/dialog.tsx
-const Dialog = Root$d;
-const DialogTrigger = Trigger$5;
-const DialogPortal = Portal$4;
+const Dialog = Root$b;
+const DialogTrigger = Trigger$4;
+const DialogPortal = Portal$3;
 const DialogClose = Close$1;
 const DialogOverlay = dashboard__loadShare__react__loadShare__.forwardRef(({ className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Overlay$1, {
 	className: cn$1("fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className),
@@ -24156,7 +20047,7 @@ const DialogOverlay = dashboard__loadShare__react__loadShare__.forwardRef(({ cla
 	...props
 }));
 DialogOverlay.displayName = Overlay$1.displayName;
-const DialogContent = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogPortal, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(DialogOverlay, {}), /* @__PURE__ */ jsxRuntimeExports.jsxs(Content$3, {
+const DialogContent = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogPortal, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(DialogOverlay, {}), /* @__PURE__ */ jsxRuntimeExports.jsxs(Content$2, {
 	className: cn$1("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg", className),
 	ref,
 	...props,
@@ -24168,7 +20059,7 @@ const DialogContent = dashboard__loadShare__react__loadShare__.forwardRef(({ chi
 		})]
 	})]
 })] }));
-DialogContent.displayName = Content$3.displayName;
+DialogContent.displayName = Content$2.displayName;
 const DialogHeader = ({ className,...props }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 	className: cn$1("flex flex-col space-y-1.5 text-center sm:text-left", className),
 	...props
@@ -24194,7 +20085,7 @@ DialogDescription.displayName = Description$1.displayName;
 
 var U=1,Y$1=.9,H=.8,J=.17,p=.1,u=.999,$=.9999;var k$1=.99,m=/[\\\/_+.#"@\[\(\{&]/,B$1=/[\\\/_+.#"@\[\(\{&]/g,K$1=/[\s-]/,X=/[\s-]/g;function G(_,C,h,P,A,f,O){if(f===C.length)return A===_.length?U:k$1;var T=`${A},${f}`;if(O[T]!==void 0)return O[T];for(var L=P.charAt(f),c=h.indexOf(L,A),S=0,E,N,R,M;c>=0;)E=G(_,C,h,P,c+1,f+1,O),E>S&&(c===A?E*=U:m.test(_.charAt(c-1))?(E*=H,R=_.slice(A,c-1).match(B$1),R&&A>0&&(E*=Math.pow(u,R.length))):K$1.test(_.charAt(c-1))?(E*=Y$1,M=_.slice(A,c-1).match(X),M&&A>0&&(E*=Math.pow(u,M.length))):(E*=J,A>0&&(E*=Math.pow(u,c-A))),_.charAt(c)!==C.charAt(f)&&(E*=$)),(E<p&&h.charAt(c-1)===P.charAt(f+1)||P.charAt(f+1)===P.charAt(f)&&h.charAt(c-1)!==P.charAt(f))&&(N=G(_,C,h,P,c+1,f+2,O),N*p>E&&(E=N*p)),E>S&&(S=E),c=h.indexOf(L,c+1);return O[T]=S,S}function D(_){return _.toLowerCase().replace(X," ")}function W(_,C,h){return _=h&&h.length>0?`${_+" "+h.join(" ")}`:_,G(_,C,D(_),D(C),0,0,{})}
 
-var N='[cmdk-group=""]',Y='[cmdk-group-items=""]',be='[cmdk-group-heading=""]',le='[cmdk-item=""]',ce=`${le}:not([aria-disabled="true"])`,Z="cmdk-item-select",T="data-value",Re=(r,o,n)=>W(r,o,n),ue=dashboard__loadShare__react__loadShare__.createContext(void 0),K=()=>dashboard__loadShare__react__loadShare__.useContext(ue),de=dashboard__loadShare__react__loadShare__.createContext(void 0),ee=()=>dashboard__loadShare__react__loadShare__.useContext(de),fe=dashboard__loadShare__react__loadShare__.createContext(void 0),me=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let n=L(()=>{var e,a;return {search:"",value:(a=(e=r.value)!=null?e:r.defaultValue)!=null?a:"",selectedItemId:void 0,filtered:{count:0,items:new Map,groups:new Set}}}),u=L(()=>new Set),c=L(()=>new Map),d=L(()=>new Map),f=L(()=>new Set),p=pe(r),{label:b,children:m,value:R,onValueChange:x,filter:C,shouldFilter:S,loop:A,disablePointerSelection:ge=false,vimBindings:j=true,...O}=r,$=useId(),q=useId(),_=useId(),I=dashboard__loadShare__react__loadShare__.useRef(null),v=ke();k(()=>{if(R!==void 0){let e=R.trim();n.current.value=e,E.emit();}},[R]),k(()=>{v(6,ne);},[]);let E=dashboard__loadShare__react__loadShare__.useMemo(()=>({subscribe:e=>(f.current.add(e),()=>f.current.delete(e)),snapshot:()=>n.current,setState:(e,a,s)=>{var i,l,g,y;if(!Object.is(n.current[e],a)){if(n.current[e]=a,e==="search")J(),z(),v(1,W);else if(e==="value"){if(document.activeElement.hasAttribute("cmdk-input")||document.activeElement.hasAttribute("cmdk-root")){let h=document.getElementById(_);h?h.focus():(i=document.getElementById($))==null||i.focus();}if(v(7,()=>{var h;n.current.selectedItemId=(h=M())==null?void 0:h.id,E.emit();}),s||v(5,ne),((l=p.current)==null?void 0:l.value)!==void 0){let h=a!=null?a:"";(y=(g=p.current).onValueChange)==null||y.call(g,h);return}}E.emit();}},emit:()=>{f.current.forEach(e=>e());}}),[]),U=dashboard__loadShare__react__loadShare__.useMemo(()=>({value:(e,a,s)=>{var i;a!==((i=d.current.get(e))==null?void 0:i.value)&&(d.current.set(e,{value:a,keywords:s}),n.current.filtered.items.set(e,te(a,s)),v(2,()=>{z(),E.emit();}));},item:(e,a)=>(u.current.add(e),a&&(c.current.has(a)?c.current.get(a).add(e):c.current.set(a,new Set([e]))),v(3,()=>{J(),z(),n.current.value||W(),E.emit();}),()=>{d.current.delete(e),u.current.delete(e),n.current.filtered.items.delete(e);let s=M();v(4,()=>{J(),(s==null?void 0:s.getAttribute("id"))===e&&W(),E.emit();});}),group:e=>(c.current.has(e)||c.current.set(e,new Set),()=>{d.current.delete(e),c.current.delete(e);}),filter:()=>p.current.shouldFilter,label:b||r["aria-label"],getDisablePointerSelection:()=>p.current.disablePointerSelection,listId:$,inputId:_,labelId:q,listInnerRef:I}),[]);function te(e,a){var i,l;let s=(l=(i=p.current)==null?void 0:i.filter)!=null?l:Re;return e?s(e,n.current.search,a):0}function z(){if(!n.current.search||p.current.shouldFilter===false)return;let e=n.current.filtered.items,a=[];n.current.filtered.groups.forEach(i=>{let l=c.current.get(i),g=0;l.forEach(y=>{let h=e.get(y);g=Math.max(h,g);}),a.push([i,g]);});let s=I.current;V().sort((i,l)=>{var h,F;let g=i.getAttribute("id"),y=l.getAttribute("id");return ((h=e.get(y))!=null?h:0)-((F=e.get(g))!=null?F:0)}).forEach(i=>{let l=i.closest(Y);l?l.appendChild(i.parentElement===l?i:i.closest(`${Y} > *`)):s.appendChild(i.parentElement===s?i:i.closest(`${Y} > *`));}),a.sort((i,l)=>l[1]-i[1]).forEach(i=>{var g;let l=(g=I.current)==null?void 0:g.querySelector(`${N}[${T}="${encodeURIComponent(i[0])}"]`);l==null||l.parentElement.appendChild(l);});}function W(){let e=V().find(s=>s.getAttribute("aria-disabled")!=="true"),a=e==null?void 0:e.getAttribute(T);E.setState("value",a||void 0);}function J(){var a,s,i,l;if(!n.current.search||p.current.shouldFilter===false){n.current.filtered.count=u.current.size;return}n.current.filtered.groups=new Set;let e=0;for(let g of u.current){let y=(s=(a=d.current.get(g))==null?void 0:a.value)!=null?s:"",h=(l=(i=d.current.get(g))==null?void 0:i.keywords)!=null?l:[],F=te(y,h);n.current.filtered.items.set(g,F),F>0&&e++;}for(let[g,y]of c.current)for(let h of y)if(n.current.filtered.items.get(h)>0){n.current.filtered.groups.add(g);break}n.current.filtered.count=e;}function ne(){var a,s,i;let e=M();e&&(((a=e.parentElement)==null?void 0:a.firstChild)===e&&((i=(s=e.closest(N))==null?void 0:s.querySelector(be))==null||i.scrollIntoView({block:"nearest"})),e.scrollIntoView({block:"nearest"}));}function M(){var e;return (e=I.current)==null?void 0:e.querySelector(`${le}[aria-selected="true"]`)}function V(){var e;return Array.from(((e=I.current)==null?void 0:e.querySelectorAll(ce))||[])}function X(e){let s=V()[e];s&&E.setState("value",s.getAttribute(T));}function Q(e){var g;let a=M(),s=V(),i=s.findIndex(y=>y===a),l=s[i+e];(g=p.current)!=null&&g.loop&&(l=i+e<0?s[s.length-1]:i+e===s.length?s[0]:s[i+e]),l&&E.setState("value",l.getAttribute(T));}function re(e){let a=M(),s=a==null?void 0:a.closest(N),i;for(;s&&!i;)s=e>0?we(s,N):De(s,N),i=s==null?void 0:s.querySelector(ce);i?E.setState("value",i.getAttribute(T)):Q(e);}let oe=()=>X(V().length-1),ie=e=>{e.preventDefault(),e.metaKey?oe():e.altKey?re(1):Q(1);},se=e=>{e.preventDefault(),e.metaKey?X(0):e.altKey?re(-1):Q(-1);};return dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:o,tabIndex:-1,...O,"cmdk-root":"",onKeyDown:e=>{var s;(s=O.onKeyDown)==null||s.call(O,e);let a=e.nativeEvent.isComposing||e.keyCode===229;if(!(e.defaultPrevented||a))switch(e.key){case "n":case "j":{j&&e.ctrlKey&&ie(e);break}case "ArrowDown":{ie(e);break}case "p":case "k":{j&&e.ctrlKey&&se(e);break}case "ArrowUp":{se(e);break}case "Home":{e.preventDefault(),X(0);break}case "End":{e.preventDefault(),oe();break}case "Enter":{e.preventDefault();let i=M();if(i){let l=new Event(Z);i.dispatchEvent(l);}}}}},dashboard__loadShare__react__loadShare__.createElement("label",{"cmdk-label":"",htmlFor:U.inputId,id:U.labelId,style:Te},b),B(r,e=>dashboard__loadShare__react__loadShare__.createElement(de.Provider,{value:E},dashboard__loadShare__react__loadShare__.createElement(ue.Provider,{value:U},e))))}),he=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{var _,I;let n=useId(),u=dashboard__loadShare__react__loadShare__.useRef(null),c=dashboard__loadShare__react__loadShare__.useContext(fe),d=K(),f=pe(r),p=(I=(_=f.current)==null?void 0:_.forceMount)!=null?I:c==null?void 0:c.forceMount;k(()=>{if(!p)return d.item(n,c==null?void 0:c.id)},[p]);let b=ve(n,u,[r.value,r.children,u],r.keywords),m=ee(),R=P(v=>v.value&&v.value===b.current),x=P(v=>p||d.filter()===false?true:v.search?v.filtered.items.get(n)>0:true);dashboard__loadShare__react__loadShare__.useEffect(()=>{let v=u.current;if(!(!v||r.disabled))return v.addEventListener(Z,C),()=>v.removeEventListener(Z,C)},[x,r.onSelect,r.disabled]);function C(){var v,E;S(),(E=(v=f.current).onSelect)==null||E.call(v,b.current);}function S(){m.setState("value",b.current,true);}if(!x)return null;let{disabled:A,value:ge,onSelect:j,forceMount:O,keywords:$,...q}=r;return dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(u,o),...q,id:n,"cmdk-item":"",role:"option","aria-disabled":!!A,"aria-selected":!!R,"data-disabled":!!A,"data-selected":!!R,onPointerMove:A||d.getDisablePointerSelection()?void 0:S,onClick:A?void 0:C},r.children)}),Ee=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{heading:n,children:u,forceMount:c,...d}=r,f=useId(),p=dashboard__loadShare__react__loadShare__.useRef(null),b=dashboard__loadShare__react__loadShare__.useRef(null),m=useId(),R=K(),x=P(S=>c||R.filter()===false?true:S.search?S.filtered.groups.has(f):true);k(()=>R.group(f),[]),ve(f,p,[r.value,r.heading,b]);let C=dashboard__loadShare__react__loadShare__.useMemo(()=>({id:f,forceMount:c}),[c]);return dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(p,o),...d,"cmdk-group":"",role:"presentation",hidden:x?void 0:true},n&&dashboard__loadShare__react__loadShare__.createElement("div",{ref:b,"cmdk-group-heading":"","aria-hidden":true,id:m},n),B(r,S=>dashboard__loadShare__react__loadShare__.createElement("div",{"cmdk-group-items":"",role:"group","aria-labelledby":n?m:void 0},dashboard__loadShare__react__loadShare__.createElement(fe.Provider,{value:C},S))))}),ye=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{alwaysRender:n,...u}=r,c=dashboard__loadShare__react__loadShare__.useRef(null),d=P(f=>!f.search);return !n&&!d?null:dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(c,o),...u,"cmdk-separator":"",role:"separator"})}),Se=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{onValueChange:n,...u}=r,c=r.value!=null,d=ee(),f=P(m=>m.search),p=P(m=>m.selectedItemId),b=K();return dashboard__loadShare__react__loadShare__.useEffect(()=>{r.value!=null&&d.setState("search",r.value);},[r.value]),dashboard__loadShare__react__loadShare__.createElement(Primitive.input,{ref:o,...u,"cmdk-input":"",autoComplete:"off",autoCorrect:"off",spellCheck:false,"aria-autocomplete":"list",role:"combobox","aria-expanded":true,"aria-controls":b.listId,"aria-labelledby":b.labelId,"aria-activedescendant":p,id:b.inputId,type:"text",value:c?r.value:f,onChange:m=>{c||d.setState("search",m.target.value),n==null||n(m.target.value);}})}),Ce=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{children:n,label:u="Suggestions",...c}=r,d=dashboard__loadShare__react__loadShare__.useRef(null),f=dashboard__loadShare__react__loadShare__.useRef(null),p=P(m=>m.selectedItemId),b=K();return dashboard__loadShare__react__loadShare__.useEffect(()=>{if(f.current&&d.current){let m=f.current,R=d.current,x,C=new ResizeObserver(()=>{x=requestAnimationFrame(()=>{let S=m.offsetHeight;R.style.setProperty("--cmdk-list-height",S.toFixed(1)+"px");});});return C.observe(m),()=>{cancelAnimationFrame(x),C.unobserve(m);}}},[]),dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(d,o),...c,"cmdk-list":"",role:"listbox",tabIndex:-1,"aria-activedescendant":p,"aria-label":u,id:b.listId},B(r,m=>dashboard__loadShare__react__loadShare__.createElement("div",{ref:composeRefs$1(f,b.listInnerRef),"cmdk-list-sizer":""},m)))}),xe=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{open:n,onOpenChange:u,overlayClassName:c,contentClassName:d,container:f,...p}=r;return dashboard__loadShare__react__loadShare__.createElement(Root$d,{open:n,onOpenChange:u},dashboard__loadShare__react__loadShare__.createElement(Portal$4,{container:f},dashboard__loadShare__react__loadShare__.createElement(Overlay$1,{"cmdk-overlay":"",className:c}),dashboard__loadShare__react__loadShare__.createElement(Content$3,{"aria-label":r.label,"cmdk-dialog":"",className:d},dashboard__loadShare__react__loadShare__.createElement(me,{ref:o,...p}))))}),Ie=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>P(u=>u.filtered.count===0)?dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:o,...r,"cmdk-empty":"",role:"presentation"}):null),Pe=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{progress:n,children:u,label:c="Loading...",...d}=r;return dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:o,...d,"cmdk-loading":"",role:"progressbar","aria-valuenow":n,"aria-valuemin":0,"aria-valuemax":100,"aria-label":c},B(r,f=>dashboard__loadShare__react__loadShare__.createElement("div",{"aria-hidden":true},f)))}),_e=Object.assign(me,{List:Ce,Item:he,Input:Se,Group:Ee,Separator:ye,Dialog:xe,Empty:Ie,Loading:Pe});function we(r,o){let n=r.nextElementSibling;for(;n;){if(n.matches(o))return n;n=n.nextElementSibling;}}function De(r,o){let n=r.previousElementSibling;for(;n;){if(n.matches(o))return n;n=n.previousElementSibling;}}function pe(r){let o=dashboard__loadShare__react__loadShare__.useRef(r);return k(()=>{o.current=r;}),o}var k=typeof window=="undefined"?dashboard__loadShare__react__loadShare__.useEffect:dashboard__loadShare__react__loadShare__.useLayoutEffect;function L(r){let o=dashboard__loadShare__react__loadShare__.useRef();return o.current===void 0&&(o.current=r()),o}function P(r){let o=ee(),n=()=>r(o.snapshot());return dashboard__loadShare__react__loadShare__.useSyncExternalStore(o.subscribe,n,n)}function ve(r,o,n,u=[]){let c=dashboard__loadShare__react__loadShare__.useRef(),d=K();return k(()=>{var b;let f=(()=>{var m;for(let R of n){if(typeof R=="string")return R.trim();if(typeof R=="object"&&"current"in R)return R.current?(m=R.current.textContent)==null?void 0:m.trim():c.current}})(),p=u.map(m=>m.trim());d.value(r,f,p),(b=o.current)==null||b.setAttribute(T,f),c.current=f;}),c}var ke=()=>{let[r,o]=dashboard__loadShare__react__loadShare__.useState(),n=L(()=>new Map);return k(()=>{n.current.forEach(u=>u()),n.current=new Map;},[r]),(u,c)=>{n.current.set(u,c),o({});}};function Me(r){let o=r.type;return typeof o=="function"?o(r.props):"render"in o?o.render(r.props):r}function B({asChild:r,children:o},n){return r&&dashboard__loadShare__react__loadShare__.isValidElement(o)?dashboard__loadShare__react__loadShare__.cloneElement(Me(o),{ref:o.ref},n(o.props.children)):n(o)}var Te={position:"absolute",width:"1px",height:"1px",padding:"0",margin:"-1px",overflow:"hidden",clip:"rect(0, 0, 0, 0)",whiteSpace:"nowrap",borderWidth:"0"};
+var N='[cmdk-group=""]',Y='[cmdk-group-items=""]',be='[cmdk-group-heading=""]',le='[cmdk-item=""]',ce=`${le}:not([aria-disabled="true"])`,Z="cmdk-item-select",T="data-value",Re=(r,o,n)=>W(r,o,n),ue=dashboard__loadShare__react__loadShare__.createContext(void 0),K=()=>dashboard__loadShare__react__loadShare__.useContext(ue),de=dashboard__loadShare__react__loadShare__.createContext(void 0),ee=()=>dashboard__loadShare__react__loadShare__.useContext(de),fe=dashboard__loadShare__react__loadShare__.createContext(void 0),me=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let n=L(()=>{var e,a;return {search:"",value:(a=(e=r.value)!=null?e:r.defaultValue)!=null?a:"",selectedItemId:void 0,filtered:{count:0,items:new Map,groups:new Set}}}),u=L(()=>new Set),c=L(()=>new Map),d=L(()=>new Map),f=L(()=>new Set),p=pe(r),{label:b,children:m,value:R,onValueChange:x,filter:C,shouldFilter:S,loop:A,disablePointerSelection:ge=false,vimBindings:j=true,...O}=r,$=useId(),q=useId(),_=useId(),I=dashboard__loadShare__react__loadShare__.useRef(null),v=ke();k(()=>{if(R!==void 0){let e=R.trim();n.current.value=e,E.emit();}},[R]),k(()=>{v(6,ne);},[]);let E=dashboard__loadShare__react__loadShare__.useMemo(()=>({subscribe:e=>(f.current.add(e),()=>f.current.delete(e)),snapshot:()=>n.current,setState:(e,a,s)=>{var i,l,g,y;if(!Object.is(n.current[e],a)){if(n.current[e]=a,e==="search")J(),z(),v(1,W);else if(e==="value"){if(document.activeElement.hasAttribute("cmdk-input")||document.activeElement.hasAttribute("cmdk-root")){let h=document.getElementById(_);h?h.focus():(i=document.getElementById($))==null||i.focus();}if(v(7,()=>{var h;n.current.selectedItemId=(h=M())==null?void 0:h.id,E.emit();}),s||v(5,ne),((l=p.current)==null?void 0:l.value)!==void 0){let h=a!=null?a:"";(y=(g=p.current).onValueChange)==null||y.call(g,h);return}}E.emit();}},emit:()=>{f.current.forEach(e=>e());}}),[]),U=dashboard__loadShare__react__loadShare__.useMemo(()=>({value:(e,a,s)=>{var i;a!==((i=d.current.get(e))==null?void 0:i.value)&&(d.current.set(e,{value:a,keywords:s}),n.current.filtered.items.set(e,te(a,s)),v(2,()=>{z(),E.emit();}));},item:(e,a)=>(u.current.add(e),a&&(c.current.has(a)?c.current.get(a).add(e):c.current.set(a,new Set([e]))),v(3,()=>{J(),z(),n.current.value||W(),E.emit();}),()=>{d.current.delete(e),u.current.delete(e),n.current.filtered.items.delete(e);let s=M();v(4,()=>{J(),(s==null?void 0:s.getAttribute("id"))===e&&W(),E.emit();});}),group:e=>(c.current.has(e)||c.current.set(e,new Set),()=>{d.current.delete(e),c.current.delete(e);}),filter:()=>p.current.shouldFilter,label:b||r["aria-label"],getDisablePointerSelection:()=>p.current.disablePointerSelection,listId:$,inputId:_,labelId:q,listInnerRef:I}),[]);function te(e,a){var i,l;let s=(l=(i=p.current)==null?void 0:i.filter)!=null?l:Re;return e?s(e,n.current.search,a):0}function z(){if(!n.current.search||p.current.shouldFilter===false)return;let e=n.current.filtered.items,a=[];n.current.filtered.groups.forEach(i=>{let l=c.current.get(i),g=0;l.forEach(y=>{let h=e.get(y);g=Math.max(h,g);}),a.push([i,g]);});let s=I.current;V().sort((i,l)=>{var h,F;let g=i.getAttribute("id"),y=l.getAttribute("id");return ((h=e.get(y))!=null?h:0)-((F=e.get(g))!=null?F:0)}).forEach(i=>{let l=i.closest(Y);l?l.appendChild(i.parentElement===l?i:i.closest(`${Y} > *`)):s.appendChild(i.parentElement===s?i:i.closest(`${Y} > *`));}),a.sort((i,l)=>l[1]-i[1]).forEach(i=>{var g;let l=(g=I.current)==null?void 0:g.querySelector(`${N}[${T}="${encodeURIComponent(i[0])}"]`);l==null||l.parentElement.appendChild(l);});}function W(){let e=V().find(s=>s.getAttribute("aria-disabled")!=="true"),a=e==null?void 0:e.getAttribute(T);E.setState("value",a||void 0);}function J(){var a,s,i,l;if(!n.current.search||p.current.shouldFilter===false){n.current.filtered.count=u.current.size;return}n.current.filtered.groups=new Set;let e=0;for(let g of u.current){let y=(s=(a=d.current.get(g))==null?void 0:a.value)!=null?s:"",h=(l=(i=d.current.get(g))==null?void 0:i.keywords)!=null?l:[],F=te(y,h);n.current.filtered.items.set(g,F),F>0&&e++;}for(let[g,y]of c.current)for(let h of y)if(n.current.filtered.items.get(h)>0){n.current.filtered.groups.add(g);break}n.current.filtered.count=e;}function ne(){var a,s,i;let e=M();e&&(((a=e.parentElement)==null?void 0:a.firstChild)===e&&((i=(s=e.closest(N))==null?void 0:s.querySelector(be))==null||i.scrollIntoView({block:"nearest"})),e.scrollIntoView({block:"nearest"}));}function M(){var e;return (e=I.current)==null?void 0:e.querySelector(`${le}[aria-selected="true"]`)}function V(){var e;return Array.from(((e=I.current)==null?void 0:e.querySelectorAll(ce))||[])}function X(e){let s=V()[e];s&&E.setState("value",s.getAttribute(T));}function Q(e){var g;let a=M(),s=V(),i=s.findIndex(y=>y===a),l=s[i+e];(g=p.current)!=null&&g.loop&&(l=i+e<0?s[s.length-1]:i+e===s.length?s[0]:s[i+e]),l&&E.setState("value",l.getAttribute(T));}function re(e){let a=M(),s=a==null?void 0:a.closest(N),i;for(;s&&!i;)s=e>0?we(s,N):De(s,N),i=s==null?void 0:s.querySelector(ce);i?E.setState("value",i.getAttribute(T)):Q(e);}let oe=()=>X(V().length-1),ie=e=>{e.preventDefault(),e.metaKey?oe():e.altKey?re(1):Q(1);},se=e=>{e.preventDefault(),e.metaKey?X(0):e.altKey?re(-1):Q(-1);};return dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:o,tabIndex:-1,...O,"cmdk-root":"",onKeyDown:e=>{var s;(s=O.onKeyDown)==null||s.call(O,e);let a=e.nativeEvent.isComposing||e.keyCode===229;if(!(e.defaultPrevented||a))switch(e.key){case "n":case "j":{j&&e.ctrlKey&&ie(e);break}case "ArrowDown":{ie(e);break}case "p":case "k":{j&&e.ctrlKey&&se(e);break}case "ArrowUp":{se(e);break}case "Home":{e.preventDefault(),X(0);break}case "End":{e.preventDefault(),oe();break}case "Enter":{e.preventDefault();let i=M();if(i){let l=new Event(Z);i.dispatchEvent(l);}}}}},dashboard__loadShare__react__loadShare__.createElement("label",{"cmdk-label":"",htmlFor:U.inputId,id:U.labelId,style:Te},b),B(r,e=>dashboard__loadShare__react__loadShare__.createElement(de.Provider,{value:E},dashboard__loadShare__react__loadShare__.createElement(ue.Provider,{value:U},e))))}),he=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{var _,I;let n=useId(),u=dashboard__loadShare__react__loadShare__.useRef(null),c=dashboard__loadShare__react__loadShare__.useContext(fe),d=K(),f=pe(r),p=(I=(_=f.current)==null?void 0:_.forceMount)!=null?I:c==null?void 0:c.forceMount;k(()=>{if(!p)return d.item(n,c==null?void 0:c.id)},[p]);let b=ve(n,u,[r.value,r.children,u],r.keywords),m=ee(),R=P(v=>v.value&&v.value===b.current),x=P(v=>p||d.filter()===false?true:v.search?v.filtered.items.get(n)>0:true);dashboard__loadShare__react__loadShare__.useEffect(()=>{let v=u.current;if(!(!v||r.disabled))return v.addEventListener(Z,C),()=>v.removeEventListener(Z,C)},[x,r.onSelect,r.disabled]);function C(){var v,E;S(),(E=(v=f.current).onSelect)==null||E.call(v,b.current);}function S(){m.setState("value",b.current,true);}if(!x)return null;let{disabled:A,value:ge,onSelect:j,forceMount:O,keywords:$,...q}=r;return dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(u,o),...q,id:n,"cmdk-item":"",role:"option","aria-disabled":!!A,"aria-selected":!!R,"data-disabled":!!A,"data-selected":!!R,onPointerMove:A||d.getDisablePointerSelection()?void 0:S,onClick:A?void 0:C},r.children)}),Ee=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{heading:n,children:u,forceMount:c,...d}=r,f=useId(),p=dashboard__loadShare__react__loadShare__.useRef(null),b=dashboard__loadShare__react__loadShare__.useRef(null),m=useId(),R=K(),x=P(S=>c||R.filter()===false?true:S.search?S.filtered.groups.has(f):true);k(()=>R.group(f),[]),ve(f,p,[r.value,r.heading,b]);let C=dashboard__loadShare__react__loadShare__.useMemo(()=>({id:f,forceMount:c}),[c]);return dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(p,o),...d,"cmdk-group":"",role:"presentation",hidden:x?void 0:true},n&&dashboard__loadShare__react__loadShare__.createElement("div",{ref:b,"cmdk-group-heading":"","aria-hidden":true,id:m},n),B(r,S=>dashboard__loadShare__react__loadShare__.createElement("div",{"cmdk-group-items":"",role:"group","aria-labelledby":n?m:void 0},dashboard__loadShare__react__loadShare__.createElement(fe.Provider,{value:C},S))))}),ye=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{alwaysRender:n,...u}=r,c=dashboard__loadShare__react__loadShare__.useRef(null),d=P(f=>!f.search);return !n&&!d?null:dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(c,o),...u,"cmdk-separator":"",role:"separator"})}),Se=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{onValueChange:n,...u}=r,c=r.value!=null,d=ee(),f=P(m=>m.search),p=P(m=>m.selectedItemId),b=K();return dashboard__loadShare__react__loadShare__.useEffect(()=>{r.value!=null&&d.setState("search",r.value);},[r.value]),dashboard__loadShare__react__loadShare__.createElement(Primitive.input,{ref:o,...u,"cmdk-input":"",autoComplete:"off",autoCorrect:"off",spellCheck:false,"aria-autocomplete":"list",role:"combobox","aria-expanded":true,"aria-controls":b.listId,"aria-labelledby":b.labelId,"aria-activedescendant":p,id:b.inputId,type:"text",value:c?r.value:f,onChange:m=>{c||d.setState("search",m.target.value),n==null||n(m.target.value);}})}),Ce=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{children:n,label:u="Suggestions",...c}=r,d=dashboard__loadShare__react__loadShare__.useRef(null),f=dashboard__loadShare__react__loadShare__.useRef(null),p=P(m=>m.selectedItemId),b=K();return dashboard__loadShare__react__loadShare__.useEffect(()=>{if(f.current&&d.current){let m=f.current,R=d.current,x,C=new ResizeObserver(()=>{x=requestAnimationFrame(()=>{let S=m.offsetHeight;R.style.setProperty("--cmdk-list-height",S.toFixed(1)+"px");});});return C.observe(m),()=>{cancelAnimationFrame(x),C.unobserve(m);}}},[]),dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(d,o),...c,"cmdk-list":"",role:"listbox",tabIndex:-1,"aria-activedescendant":p,"aria-label":u,id:b.listId},B(r,m=>dashboard__loadShare__react__loadShare__.createElement("div",{ref:composeRefs$1(f,b.listInnerRef),"cmdk-list-sizer":""},m)))}),xe=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{open:n,onOpenChange:u,overlayClassName:c,contentClassName:d,container:f,...p}=r;return dashboard__loadShare__react__loadShare__.createElement(Root$b,{open:n,onOpenChange:u},dashboard__loadShare__react__loadShare__.createElement(Portal$3,{container:f},dashboard__loadShare__react__loadShare__.createElement(Overlay$1,{"cmdk-overlay":"",className:c}),dashboard__loadShare__react__loadShare__.createElement(Content$2,{"aria-label":r.label,"cmdk-dialog":"",className:d},dashboard__loadShare__react__loadShare__.createElement(me,{ref:o,...p}))))}),Ie=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>P(u=>u.filtered.count===0)?dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:o,...r,"cmdk-empty":"",role:"presentation"}):null),Pe=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{progress:n,children:u,label:c="Loading...",...d}=r;return dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:o,...d,"cmdk-loading":"",role:"progressbar","aria-valuenow":n,"aria-valuemin":0,"aria-valuemax":100,"aria-label":c},B(r,f=>dashboard__loadShare__react__loadShare__.createElement("div",{"aria-hidden":true},f)))}),_e=Object.assign(me,{List:Ce,Item:he,Input:Se,Group:Ee,Separator:ye,Dialog:xe,Empty:Ie,Loading:Pe});function we(r,o){let n=r.nextElementSibling;for(;n;){if(n.matches(o))return n;n=n.nextElementSibling;}}function De(r,o){let n=r.previousElementSibling;for(;n;){if(n.matches(o))return n;n=n.previousElementSibling;}}function pe(r){let o=dashboard__loadShare__react__loadShare__.useRef(r);return k(()=>{o.current=r;}),o}var k=typeof window=="undefined"?dashboard__loadShare__react__loadShare__.useEffect:dashboard__loadShare__react__loadShare__.useLayoutEffect;function L(r){let o=dashboard__loadShare__react__loadShare__.useRef();return o.current===void 0&&(o.current=r()),o}function P(r){let o=ee(),n=()=>r(o.snapshot());return dashboard__loadShare__react__loadShare__.useSyncExternalStore(o.subscribe,n,n)}function ve(r,o,n,u=[]){let c=dashboard__loadShare__react__loadShare__.useRef(),d=K();return k(()=>{var b;let f=(()=>{var m;for(let R of n){if(typeof R=="string")return R.trim();if(typeof R=="object"&&"current"in R)return R.current?(m=R.current.textContent)==null?void 0:m.trim():c.current}})(),p=u.map(m=>m.trim());d.value(r,f,p),(b=o.current)==null||b.setAttribute(T,f),c.current=f;}),c}var ke=()=>{let[r,o]=dashboard__loadShare__react__loadShare__.useState(),n=L(()=>new Map);return k(()=>{n.current.forEach(u=>u()),n.current=new Map;},[r]),(u,c)=>{n.current.set(u,c),o({});}};function Me(r){let o=r.type;return typeof o=="function"?o(r.props):"render"in o?o.render(r.props):r}function B({asChild:r,children:o},n){return r&&dashboard__loadShare__react__loadShare__.isValidElement(o)?dashboard__loadShare__react__loadShare__.cloneElement(Me(o),{ref:o.ref},n(o.props.children)):n(o)}var Te={position:"absolute",width:"1px",height:"1px",padding:"0",margin:"-1px",overflow:"hidden",clip:"rect(0, 0, 0, 0)",whiteSpace:"nowrap",borderWidth:"0"};
 
 //#region src/components/ui/command.tsx
 const Command$1 = dashboard__loadShare__react__loadShare__.forwardRef(({ className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(_e, {
@@ -27892,7 +23783,7 @@ let previousBodyPosition = null;
     };
 }
 
-function Root$9({ open: openProp, onOpenChange, children, onDrag: onDragProp, onRelease: onReleaseProp, snapPoints, shouldScaleBackground = false, setBackgroundColorOnScale = true, closeThreshold = CLOSE_THRESHOLD, scrollLockTimeout = SCROLL_LOCK_TIMEOUT, dismissible = true, handleOnly = false, fadeFromIndex = snapPoints && snapPoints.length - 1, activeSnapPoint: activeSnapPointProp, setActiveSnapPoint: setActiveSnapPointProp, fixed, modal = true, onClose, nested, noBodyStyles = false, direction = 'bottom', defaultOpen = false, disablePreventScroll = true, snapToSequentialPoint = false, preventScrollRestoration = false, repositionInputs = true, onAnimationEnd, container, autoFocus = false }) {
+function Root$8({ open: openProp, onOpenChange, children, onDrag: onDragProp, onRelease: onReleaseProp, snapPoints, shouldScaleBackground = false, setBackgroundColorOnScale = true, closeThreshold = CLOSE_THRESHOLD, scrollLockTimeout = SCROLL_LOCK_TIMEOUT, dismissible = true, handleOnly = false, fadeFromIndex = snapPoints && snapPoints.length - 1, activeSnapPoint: activeSnapPointProp, setActiveSnapPoint: setActiveSnapPointProp, fixed, modal = true, onClose, nested, noBodyStyles = false, direction = 'bottom', defaultOpen = false, disablePreventScroll = true, snapToSequentialPoint = false, preventScrollRestoration = false, repositionInputs = true, onAnimationEnd, container, autoFocus = false }) {
     var _drawerRef_current, _drawerRef_current1;
     const [isOpen = false, setIsOpen] = useControllableState({
         defaultProp: defaultOpen,
@@ -28354,7 +24245,7 @@ function Root$9({ open: openProp, onOpenChange, children, onDrag: onDragProp, on
     }, [
         modal
     ]);
-    return /*#__PURE__*/ React3.createElement(Root$d, {
+    return /*#__PURE__*/ React3.createElement(Root$b, {
         defaultOpen: defaultOpen,
         onOpenChange: (open)=>{
             if (!dismissible && !open) return;
@@ -28467,7 +24358,7 @@ const Content$1 = /*#__PURE__*/ React3.forwardRef(function({ onPointerDownOutsid
         wasBeyondThePointRef.current = false;
         onRelease(event);
     }
-    return /*#__PURE__*/ React3.createElement(Content$3, {
+    return /*#__PURE__*/ React3.createElement(Content$2, {
         "data-vaul-drawer-direction": direction,
         "data-vaul-drawer": "",
         "data-vaul-delayed-snap-points": delayedSnapPoints ? 'true' : 'false',
@@ -28622,20 +24513,20 @@ const Handle = /*#__PURE__*/ React3.forwardRef(function({ preventCycle = false, 
     }, children));
 });
 Handle.displayName = 'Drawer.Handle';
-function Portal$2(props) {
+function Portal$1(props) {
     const context = useDrawerContext();
     const { container = context.container, ...portalProps } = props;
-    return /*#__PURE__*/ React3.createElement(Portal$4, {
+    return /*#__PURE__*/ React3.createElement(Portal$3, {
         container: container,
         ...portalProps
     });
 }
 const Drawer = {
-    Root: Root$9,
+    Root: Root$8,
     Content: Content$1,
     Overlay,
-    Trigger: Trigger$5,
-    Portal: Portal$2,
+    Trigger: Trigger$4,
+    Portal: Portal$1,
     Close: Close$1,
     Title: Title$1,
     Description: Description$1
@@ -28686,1608 +24577,11 @@ const DrawerDescription = dashboard__loadShare__react__loadShare__.forwardRef(({
 }));
 DrawerDescription.displayName = Drawer.Description.displayName;
 
-var ENTRY_FOCUS = "rovingFocusGroup.onEntryFocus";
-var EVENT_OPTIONS = { bubbles: false, cancelable: true };
-var GROUP_NAME$3 = "RovingFocusGroup";
-var [Collection$4, useCollection$4, createCollectionScope$4] = createCollection(GROUP_NAME$3);
-var [createRovingFocusGroupContext, createRovingFocusGroupScope] = createContextScope(
-  GROUP_NAME$3,
-  [createCollectionScope$4]
-);
-var [RovingFocusProvider, useRovingFocusContext] = createRovingFocusGroupContext(GROUP_NAME$3);
-var RovingFocusGroup = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$4.Provider, { scope: props.__scopeRovingFocusGroup, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$4.Slot, { scope: props.__scopeRovingFocusGroup, children: /* @__PURE__ */ jsxRuntimeExports.jsx(RovingFocusGroupImpl, { ...props, ref: forwardedRef }) }) });
-  }
-);
-RovingFocusGroup.displayName = GROUP_NAME$3;
-var RovingFocusGroupImpl = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-  const {
-    __scopeRovingFocusGroup,
-    orientation,
-    loop = false,
-    dir,
-    currentTabStopId: currentTabStopIdProp,
-    defaultCurrentTabStopId,
-    onCurrentTabStopIdChange,
-    onEntryFocus,
-    preventScrollOnEntryFocus = false,
-    ...groupProps
-  } = props;
-  const ref = dashboard__loadShare__react__loadShare__.useRef(null);
-  const composedRefs = useComposedRefs$1(forwardedRef, ref);
-  const direction = useDirection(dir);
-  const [currentTabStopId, setCurrentTabStopId] = useControllableState$1({
-    prop: currentTabStopIdProp,
-    defaultProp: defaultCurrentTabStopId ?? null,
-    onChange: onCurrentTabStopIdChange,
-    caller: GROUP_NAME$3
-  });
-  const [isTabbingBackOut, setIsTabbingBackOut] = dashboard__loadShare__react__loadShare__.useState(false);
-  const handleEntryFocus = useCallbackRef$2(onEntryFocus);
-  const getItems = useCollection$4(__scopeRovingFocusGroup);
-  const isClickFocusRef = dashboard__loadShare__react__loadShare__.useRef(false);
-  const [focusableItemsCount, setFocusableItemsCount] = dashboard__loadShare__react__loadShare__.useState(0);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
-    const node = ref.current;
-    if (node) {
-      node.addEventListener(ENTRY_FOCUS, handleEntryFocus);
-      return () => node.removeEventListener(ENTRY_FOCUS, handleEntryFocus);
-    }
-  }, [handleEntryFocus]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    RovingFocusProvider,
-    {
-      scope: __scopeRovingFocusGroup,
-      orientation,
-      dir: direction,
-      loop,
-      currentTabStopId,
-      onItemFocus: dashboard__loadShare__react__loadShare__.useCallback(
-        (tabStopId) => setCurrentTabStopId(tabStopId),
-        [setCurrentTabStopId]
-      ),
-      onItemShiftTab: dashboard__loadShare__react__loadShare__.useCallback(() => setIsTabbingBackOut(true), []),
-      onFocusableItemAdd: dashboard__loadShare__react__loadShare__.useCallback(
-        () => setFocusableItemsCount((prevCount) => prevCount + 1),
-        []
-      ),
-      onFocusableItemRemove: dashboard__loadShare__react__loadShare__.useCallback(
-        () => setFocusableItemsCount((prevCount) => prevCount - 1),
-        []
-      ),
-      children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-        Primitive.div,
-        {
-          tabIndex: isTabbingBackOut || focusableItemsCount === 0 ? -1 : 0,
-          "data-orientation": orientation,
-          ...groupProps,
-          ref: composedRefs,
-          style: { outline: "none", ...props.style },
-          onMouseDown: composeEventHandlers(props.onMouseDown, () => {
-            isClickFocusRef.current = true;
-          }),
-          onFocus: composeEventHandlers(props.onFocus, (event) => {
-            const isKeyboardFocus = !isClickFocusRef.current;
-            if (event.target === event.currentTarget && isKeyboardFocus && !isTabbingBackOut) {
-              const entryFocusEvent = new CustomEvent(ENTRY_FOCUS, EVENT_OPTIONS);
-              event.currentTarget.dispatchEvent(entryFocusEvent);
-              if (!entryFocusEvent.defaultPrevented) {
-                const items = getItems().filter((item) => item.focusable);
-                const activeItem = items.find((item) => item.active);
-                const currentItem = items.find((item) => item.id === currentTabStopId);
-                const candidateItems = [activeItem, currentItem, ...items].filter(
-                  Boolean
-                );
-                const candidateNodes = candidateItems.map((item) => item.ref.current);
-                focusFirst$2(candidateNodes, preventScrollOnEntryFocus);
-              }
-            }
-            isClickFocusRef.current = false;
-          }),
-          onBlur: composeEventHandlers(props.onBlur, () => setIsTabbingBackOut(false))
-        }
-      )
-    }
-  );
-});
-var ITEM_NAME$4 = "RovingFocusGroupItem";
-var RovingFocusGroupItem = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const {
-      __scopeRovingFocusGroup,
-      focusable = true,
-      active = false,
-      tabStopId,
-      children,
-      ...itemProps
-    } = props;
-    const autoId = useId();
-    const id = tabStopId || autoId;
-    const context = useRovingFocusContext(ITEM_NAME$4, __scopeRovingFocusGroup);
-    const isCurrentTabStop = context.currentTabStopId === id;
-    const getItems = useCollection$4(__scopeRovingFocusGroup);
-    const { onFocusableItemAdd, onFocusableItemRemove, currentTabStopId } = context;
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
-      if (focusable) {
-        onFocusableItemAdd();
-        return () => onFocusableItemRemove();
-      }
-    }, [focusable, onFocusableItemAdd, onFocusableItemRemove]);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Collection$4.ItemSlot,
-      {
-        scope: __scopeRovingFocusGroup,
-        id,
-        focusable,
-        active,
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          Primitive.span,
-          {
-            tabIndex: isCurrentTabStop ? 0 : -1,
-            "data-orientation": context.orientation,
-            ...itemProps,
-            ref: forwardedRef,
-            onMouseDown: composeEventHandlers(props.onMouseDown, (event) => {
-              if (!focusable) event.preventDefault();
-              else context.onItemFocus(id);
-            }),
-            onFocus: composeEventHandlers(props.onFocus, () => context.onItemFocus(id)),
-            onKeyDown: composeEventHandlers(props.onKeyDown, (event) => {
-              if (event.key === "Tab" && event.shiftKey) {
-                context.onItemShiftTab();
-                return;
-              }
-              if (event.target !== event.currentTarget) return;
-              const focusIntent = getFocusIntent(event, context.orientation, context.dir);
-              if (focusIntent !== void 0) {
-                if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
-                event.preventDefault();
-                const items = getItems().filter((item) => item.focusable);
-                let candidateNodes = items.map((item) => item.ref.current);
-                if (focusIntent === "last") candidateNodes.reverse();
-                else if (focusIntent === "prev" || focusIntent === "next") {
-                  if (focusIntent === "prev") candidateNodes.reverse();
-                  const currentIndex = candidateNodes.indexOf(event.currentTarget);
-                  candidateNodes = context.loop ? wrapArray$2(candidateNodes, currentIndex + 1) : candidateNodes.slice(currentIndex + 1);
-                }
-                setTimeout(() => focusFirst$2(candidateNodes));
-              }
-            }),
-            children: typeof children === "function" ? children({ isCurrentTabStop, hasTabStop: currentTabStopId != null }) : children
-          }
-        )
-      }
-    );
-  }
-);
-RovingFocusGroupItem.displayName = ITEM_NAME$4;
-var MAP_KEY_TO_FOCUS_INTENT = {
-  ArrowLeft: "prev",
-  ArrowUp: "prev",
-  ArrowRight: "next",
-  ArrowDown: "next",
-  PageUp: "first",
-  Home: "first",
-  PageDown: "last",
-  End: "last"
-};
-function getDirectionAwareKey(key, dir) {
-  if (dir !== "rtl") return key;
-  return key === "ArrowLeft" ? "ArrowRight" : key === "ArrowRight" ? "ArrowLeft" : key;
-}
-function getFocusIntent(event, orientation, dir) {
-  const key = getDirectionAwareKey(event.key, dir);
-  if (orientation === "vertical" && ["ArrowLeft", "ArrowRight"].includes(key)) return void 0;
-  if (orientation === "horizontal" && ["ArrowUp", "ArrowDown"].includes(key)) return void 0;
-  return MAP_KEY_TO_FOCUS_INTENT[key];
-}
-function focusFirst$2(candidates, preventScroll = false) {
-  const PREVIOUSLY_FOCUSED_ELEMENT = document.activeElement;
-  for (const candidate of candidates) {
-    if (candidate === PREVIOUSLY_FOCUSED_ELEMENT) return;
-    candidate.focus({ preventScroll });
-    if (document.activeElement !== PREVIOUSLY_FOCUSED_ELEMENT) return;
-  }
-}
-function wrapArray$2(array, startIndex) {
-  return array.map((_, index) => array[(startIndex + index) % array.length]);
-}
-var Root$8 = RovingFocusGroup;
-var Item$1 = RovingFocusGroupItem;
-
-var effectCar = createSidecarMedium();
-
-var nothing = function () {
-    return;
-};
-/**
- * Removes scrollbar from the page and contain the scroll within the Lock
- */
-var RemoveScroll = dashboard__loadShare__react__loadShare__.forwardRef(function (props, parentRef) {
-    var ref = dashboard__loadShare__react__loadShare__.useRef(null);
-    var _a = dashboard__loadShare__react__loadShare__.useState({
-        onScrollCapture: nothing,
-        onWheelCapture: nothing,
-        onTouchMoveCapture: nothing,
-    }), callbacks = _a[0], setCallbacks = _a[1];
-    var forwardProps = props.forwardProps, children = props.children, className = props.className, removeScrollBar = props.removeScrollBar, enabled = props.enabled, shards = props.shards, sideCar = props.sideCar, noRelative = props.noRelative, noIsolation = props.noIsolation, inert = props.inert, allowPinchZoom = props.allowPinchZoom, _b = props.as, Container = _b === void 0 ? 'div' : _b, gapMode = props.gapMode, rest = __rest(props, ["forwardProps", "children", "className", "removeScrollBar", "enabled", "shards", "sideCar", "noRelative", "noIsolation", "inert", "allowPinchZoom", "as", "gapMode"]);
-    var SideCar = sideCar;
-    var containerRef = useMergeRefs([ref, parentRef]);
-    var containerProps = __assign(__assign({}, rest), callbacks);
-    return (dashboard__loadShare__react__loadShare__.createElement(dashboard__loadShare__react__loadShare__.Fragment, null,
-        enabled && (dashboard__loadShare__react__loadShare__.createElement(SideCar, { sideCar: effectCar, removeScrollBar: removeScrollBar, shards: shards, noRelative: noRelative, noIsolation: noIsolation, inert: inert, setCallbacks: setCallbacks, allowPinchZoom: !!allowPinchZoom, lockRef: ref, gapMode: gapMode })),
-        forwardProps ? (dashboard__loadShare__react__loadShare__.cloneElement(dashboard__loadShare__react__loadShare__.Children.only(children), __assign(__assign({}, containerProps), { ref: containerRef }))) : (dashboard__loadShare__react__loadShare__.createElement(Container, __assign({}, containerProps, { className: className, ref: containerRef }), children))));
-});
-RemoveScroll.defaultProps = {
-    enabled: true,
-    removeScrollBar: true,
-    inert: false,
-};
-RemoveScroll.classNames = {
-    fullWidth: fullWidthClassName,
-    zeroRight: zeroRightClassName,
-};
-
-var passiveSupported = false;
-if (typeof window !== 'undefined') {
-    try {
-        var options = Object.defineProperty({}, 'passive', {
-            get: function () {
-                passiveSupported = true;
-                return true;
-            },
-        });
-        // @ts-ignore
-        window.addEventListener('test', options, options);
-        // @ts-ignore
-        window.removeEventListener('test', options, options);
-    }
-    catch (err) {
-        passiveSupported = false;
-    }
-}
-var nonPassive = passiveSupported ? { passive: false } : false;
-
-var alwaysContainsScroll = function (node) {
-    // textarea will always _contain_ scroll inside self. It only can be hidden
-    return node.tagName === 'TEXTAREA';
-};
-var elementCanBeScrolled = function (node, overflow) {
-    if (!(node instanceof Element)) {
-        return false;
-    }
-    var styles = window.getComputedStyle(node);
-    return (
-    // not-not-scrollable
-    styles[overflow] !== 'hidden' &&
-        // contains scroll inside self
-        !(styles.overflowY === styles.overflowX && !alwaysContainsScroll(node) && styles[overflow] === 'visible'));
-};
-var elementCouldBeVScrolled = function (node) { return elementCanBeScrolled(node, 'overflowY'); };
-var elementCouldBeHScrolled = function (node) { return elementCanBeScrolled(node, 'overflowX'); };
-var locationCouldBeScrolled = function (axis, node) {
-    var ownerDocument = node.ownerDocument;
-    var current = node;
-    do {
-        // Skip over shadow root
-        if (typeof ShadowRoot !== 'undefined' && current instanceof ShadowRoot) {
-            current = current.host;
-        }
-        var isScrollable = elementCouldBeScrolled(axis, current);
-        if (isScrollable) {
-            var _a = getScrollVariables(axis, current), scrollHeight = _a[1], clientHeight = _a[2];
-            if (scrollHeight > clientHeight) {
-                return true;
-            }
-        }
-        current = current.parentNode;
-    } while (current && current !== ownerDocument.body);
-    return false;
-};
-var getVScrollVariables = function (_a) {
-    var scrollTop = _a.scrollTop, scrollHeight = _a.scrollHeight, clientHeight = _a.clientHeight;
-    return [
-        scrollTop,
-        scrollHeight,
-        clientHeight,
-    ];
-};
-var getHScrollVariables = function (_a) {
-    var scrollLeft = _a.scrollLeft, scrollWidth = _a.scrollWidth, clientWidth = _a.clientWidth;
-    return [
-        scrollLeft,
-        scrollWidth,
-        clientWidth,
-    ];
-};
-var elementCouldBeScrolled = function (axis, node) {
-    return axis === 'v' ? elementCouldBeVScrolled(node) : elementCouldBeHScrolled(node);
-};
-var getScrollVariables = function (axis, node) {
-    return axis === 'v' ? getVScrollVariables(node) : getHScrollVariables(node);
-};
-var getDirectionFactor = function (axis, direction) {
-    /**
-     * If the element's direction is rtl (right-to-left), then scrollLeft is 0 when the scrollbar is at its rightmost position,
-     * and then increasingly negative as you scroll towards the end of the content.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollLeft
-     */
-    return axis === 'h' && direction === 'rtl' ? -1 : 1;
-};
-var handleScroll = function (axis, endTarget, event, sourceDelta, noOverscroll) {
-    var directionFactor = getDirectionFactor(axis, window.getComputedStyle(endTarget).direction);
-    var delta = directionFactor * sourceDelta;
-    // find scrollable target
-    var target = event.target;
-    var targetInLock = endTarget.contains(target);
-    var shouldCancelScroll = false;
-    var isDeltaPositive = delta > 0;
-    var availableScroll = 0;
-    var availableScrollTop = 0;
-    do {
-        if (!target) {
-            break;
-        }
-        var _a = getScrollVariables(axis, target), position = _a[0], scroll_1 = _a[1], capacity = _a[2];
-        var elementScroll = scroll_1 - capacity - directionFactor * position;
-        if (position || elementScroll) {
-            if (elementCouldBeScrolled(axis, target)) {
-                availableScroll += elementScroll;
-                availableScrollTop += position;
-            }
-        }
-        var parent_1 = target.parentNode;
-        // we will "bubble" from ShadowDom in case we are, or just to the parent in normal case
-        // this is the same logic used in focus-lock
-        target = (parent_1 && parent_1.nodeType === Node.DOCUMENT_FRAGMENT_NODE ? parent_1.host : parent_1);
-    } while (
-    // portaled content
-    (!targetInLock && target !== document.body) ||
-        // self content
-        (targetInLock && (endTarget.contains(target) || endTarget === target)));
-    // handle epsilon around 0 (non standard zoom levels)
-    if (isDeltaPositive &&
-        ((Math.abs(availableScroll) < 1) || (false))) {
-        shouldCancelScroll = true;
-    }
-    else if (!isDeltaPositive &&
-        ((Math.abs(availableScrollTop) < 1) || (false))) {
-        shouldCancelScroll = true;
-    }
-    return shouldCancelScroll;
-};
-
-var getTouchXY = function (event) {
-    return 'changedTouches' in event ? [event.changedTouches[0].clientX, event.changedTouches[0].clientY] : [0, 0];
-};
-var getDeltaXY = function (event) { return [event.deltaX, event.deltaY]; };
-var extractRef = function (ref) {
-    return ref && 'current' in ref ? ref.current : ref;
-};
-var deltaCompare = function (x, y) { return x[0] === y[0] && x[1] === y[1]; };
-var generateStyle = function (id) { return "\n  .block-interactivity-".concat(id, " {pointer-events: none;}\n  .allow-interactivity-").concat(id, " {pointer-events: all;}\n"); };
-var idCounter = 0;
-var lockStack = [];
-function RemoveScrollSideCar(props) {
-    var shouldPreventQueue = dashboard__loadShare__react__loadShare__.useRef([]);
-    var touchStartRef = dashboard__loadShare__react__loadShare__.useRef([0, 0]);
-    var activeAxis = dashboard__loadShare__react__loadShare__.useRef();
-    var id = dashboard__loadShare__react__loadShare__.useState(idCounter++)[0];
-    var Style = dashboard__loadShare__react__loadShare__.useState(styleSingleton)[0];
-    var lastProps = dashboard__loadShare__react__loadShare__.useRef(props);
-    dashboard__loadShare__react__loadShare__.useEffect(function () {
-        lastProps.current = props;
-    }, [props]);
-    dashboard__loadShare__react__loadShare__.useEffect(function () {
-        if (props.inert) {
-            document.body.classList.add("block-interactivity-".concat(id));
-            var allow_1 = __spreadArray([props.lockRef.current], (props.shards || []).map(extractRef), true).filter(Boolean);
-            allow_1.forEach(function (el) { return el.classList.add("allow-interactivity-".concat(id)); });
-            return function () {
-                document.body.classList.remove("block-interactivity-".concat(id));
-                allow_1.forEach(function (el) { return el.classList.remove("allow-interactivity-".concat(id)); });
-            };
-        }
-        return;
-    }, [props.inert, props.lockRef.current, props.shards]);
-    var shouldCancelEvent = dashboard__loadShare__react__loadShare__.useCallback(function (event, parent) {
-        if (('touches' in event && event.touches.length === 2) || (event.type === 'wheel' && event.ctrlKey)) {
-            return !lastProps.current.allowPinchZoom;
-        }
-        var touch = getTouchXY(event);
-        var touchStart = touchStartRef.current;
-        var deltaX = 'deltaX' in event ? event.deltaX : touchStart[0] - touch[0];
-        var deltaY = 'deltaY' in event ? event.deltaY : touchStart[1] - touch[1];
-        var currentAxis;
-        var target = event.target;
-        var moveDirection = Math.abs(deltaX) > Math.abs(deltaY) ? 'h' : 'v';
-        // allow horizontal touch move on Range inputs. They will not cause any scroll
-        if ('touches' in event && moveDirection === 'h' && target.type === 'range') {
-            return false;
-        }
-        var canBeScrolledInMainDirection = locationCouldBeScrolled(moveDirection, target);
-        if (!canBeScrolledInMainDirection) {
-            return true;
-        }
-        if (canBeScrolledInMainDirection) {
-            currentAxis = moveDirection;
-        }
-        else {
-            currentAxis = moveDirection === 'v' ? 'h' : 'v';
-            canBeScrolledInMainDirection = locationCouldBeScrolled(moveDirection, target);
-            // other axis might be not scrollable
-        }
-        if (!canBeScrolledInMainDirection) {
-            return false;
-        }
-        if (!activeAxis.current && 'changedTouches' in event && (deltaX || deltaY)) {
-            activeAxis.current = currentAxis;
-        }
-        if (!currentAxis) {
-            return true;
-        }
-        var cancelingAxis = activeAxis.current || currentAxis;
-        return handleScroll(cancelingAxis, parent, event, cancelingAxis === 'h' ? deltaX : deltaY);
-    }, []);
-    var shouldPrevent = dashboard__loadShare__react__loadShare__.useCallback(function (_event) {
-        var event = _event;
-        if (!lockStack.length || lockStack[lockStack.length - 1] !== Style) {
-            // not the last active
-            return;
-        }
-        var delta = 'deltaY' in event ? getDeltaXY(event) : getTouchXY(event);
-        var sourceEvent = shouldPreventQueue.current.filter(function (e) { return e.name === event.type && (e.target === event.target || event.target === e.shadowParent) && deltaCompare(e.delta, delta); })[0];
-        // self event, and should be canceled
-        if (sourceEvent && sourceEvent.should) {
-            if (event.cancelable) {
-                event.preventDefault();
-            }
-            return;
-        }
-        // outside or shard event
-        if (!sourceEvent) {
-            var shardNodes = (lastProps.current.shards || [])
-                .map(extractRef)
-                .filter(Boolean)
-                .filter(function (node) { return node.contains(event.target); });
-            var shouldStop = shardNodes.length > 0 ? shouldCancelEvent(event, shardNodes[0]) : !lastProps.current.noIsolation;
-            if (shouldStop) {
-                if (event.cancelable) {
-                    event.preventDefault();
-                }
-            }
-        }
-    }, []);
-    var shouldCancel = dashboard__loadShare__react__loadShare__.useCallback(function (name, delta, target, should) {
-        var event = { name: name, delta: delta, target: target, should: should, shadowParent: getOutermostShadowParent(target) };
-        shouldPreventQueue.current.push(event);
-        setTimeout(function () {
-            shouldPreventQueue.current = shouldPreventQueue.current.filter(function (e) { return e !== event; });
-        }, 1);
-    }, []);
-    var scrollTouchStart = dashboard__loadShare__react__loadShare__.useCallback(function (event) {
-        touchStartRef.current = getTouchXY(event);
-        activeAxis.current = undefined;
-    }, []);
-    var scrollWheel = dashboard__loadShare__react__loadShare__.useCallback(function (event) {
-        shouldCancel(event.type, getDeltaXY(event), event.target, shouldCancelEvent(event, props.lockRef.current));
-    }, []);
-    var scrollTouchMove = dashboard__loadShare__react__loadShare__.useCallback(function (event) {
-        shouldCancel(event.type, getTouchXY(event), event.target, shouldCancelEvent(event, props.lockRef.current));
-    }, []);
-    dashboard__loadShare__react__loadShare__.useEffect(function () {
-        lockStack.push(Style);
-        props.setCallbacks({
-            onScrollCapture: scrollWheel,
-            onWheelCapture: scrollWheel,
-            onTouchMoveCapture: scrollTouchMove,
-        });
-        document.addEventListener('wheel', shouldPrevent, nonPassive);
-        document.addEventListener('touchmove', shouldPrevent, nonPassive);
-        document.addEventListener('touchstart', scrollTouchStart, nonPassive);
-        return function () {
-            lockStack = lockStack.filter(function (inst) { return inst !== Style; });
-            document.removeEventListener('wheel', shouldPrevent, nonPassive);
-            document.removeEventListener('touchmove', shouldPrevent, nonPassive);
-            document.removeEventListener('touchstart', scrollTouchStart, nonPassive);
-        };
-    }, []);
-    var removeScrollBar = props.removeScrollBar, inert = props.inert;
-    return (dashboard__loadShare__react__loadShare__.createElement(dashboard__loadShare__react__loadShare__.Fragment, null,
-        inert ? dashboard__loadShare__react__loadShare__.createElement(Style, { styles: generateStyle(id) }) : null,
-        removeScrollBar ? dashboard__loadShare__react__loadShare__.createElement(RemoveScrollBar, { noRelative: props.noRelative, gapMode: props.gapMode }) : null));
-}
-function getOutermostShadowParent(node) {
-    var shadowParent = null;
-    while (node !== null) {
-        if (node instanceof ShadowRoot) {
-            shadowParent = node.host;
-            node = node.host;
-        }
-        node = node.parentNode;
-    }
-    return shadowParent;
-}
-
-const SideCar = exportSidecar(effectCar, RemoveScrollSideCar);
-
-var ReactRemoveScroll = dashboard__loadShare__react__loadShare__.forwardRef(function (props, ref) { return (dashboard__loadShare__react__loadShare__.createElement(RemoveScroll, __assign({}, props, { ref: ref, sideCar: SideCar }))); });
-ReactRemoveScroll.classNames = RemoveScroll.classNames;
-
-var SELECTION_KEYS$1 = ["Enter", " "];
-var FIRST_KEYS = ["ArrowDown", "PageUp", "Home"];
-var LAST_KEYS = ["ArrowUp", "PageDown", "End"];
-var FIRST_LAST_KEYS = [...FIRST_KEYS, ...LAST_KEYS];
-var SUB_OPEN_KEYS = {
-  ltr: [...SELECTION_KEYS$1, "ArrowRight"],
-  rtl: [...SELECTION_KEYS$1, "ArrowLeft"]
-};
-var SUB_CLOSE_KEYS = {
-  ltr: ["ArrowLeft"],
-  rtl: ["ArrowRight"]
-};
-var MENU_NAME = "Menu";
-var [Collection$3, useCollection$3, createCollectionScope$3] = createCollection(MENU_NAME);
-var [createMenuContext, createMenuScope] = createContextScope(MENU_NAME, [
-  createCollectionScope$3,
-  createPopperScope,
-  createRovingFocusGroupScope
-]);
-var usePopperScope$2 = createPopperScope();
-var useRovingFocusGroupScope$2 = createRovingFocusGroupScope();
-var [MenuProvider, useMenuContext] = createMenuContext(MENU_NAME);
-var [MenuRootProvider, useMenuRootContext] = createMenuContext(MENU_NAME);
-var Menu = (props) => {
-  const { __scopeMenu, open = false, children, dir, onOpenChange, modal = true } = props;
-  const popperScope = usePopperScope$2(__scopeMenu);
-  const [content, setContent] = dashboard__loadShare__react__loadShare__.useState(null);
-  const isUsingKeyboardRef = dashboard__loadShare__react__loadShare__.useRef(false);
-  const handleOpenChange = useCallbackRef$2(onOpenChange);
-  const direction = useDirection(dir);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
-    const handleKeyDown = () => {
-      isUsingKeyboardRef.current = true;
-      document.addEventListener("pointerdown", handlePointer, { capture: true, once: true });
-      document.addEventListener("pointermove", handlePointer, { capture: true, once: true });
-    };
-    const handlePointer = () => isUsingKeyboardRef.current = false;
-    document.addEventListener("keydown", handleKeyDown, { capture: true });
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown, { capture: true });
-      document.removeEventListener("pointerdown", handlePointer, { capture: true });
-      document.removeEventListener("pointermove", handlePointer, { capture: true });
-    };
-  }, []);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Root2$6, { ...popperScope, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-    MenuProvider,
-    {
-      scope: __scopeMenu,
-      open,
-      onOpenChange: handleOpenChange,
-      content,
-      onContentChange: setContent,
-      children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-        MenuRootProvider,
-        {
-          scope: __scopeMenu,
-          onClose: dashboard__loadShare__react__loadShare__.useCallback(() => handleOpenChange(false), [handleOpenChange]),
-          isUsingKeyboardRef,
-          dir: direction,
-          modal,
-          children
-        }
-      )
-    }
-  ) });
-};
-Menu.displayName = MENU_NAME;
-var ANCHOR_NAME = "MenuAnchor";
-var MenuAnchor = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeMenu, ...anchorProps } = props;
-    const popperScope = usePopperScope$2(__scopeMenu);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Anchor, { ...popperScope, ...anchorProps, ref: forwardedRef });
-  }
-);
-MenuAnchor.displayName = ANCHOR_NAME;
-var PORTAL_NAME$3 = "MenuPortal";
-var [PortalProvider$1, usePortalContext$1] = createMenuContext(PORTAL_NAME$3, {
-  forceMount: void 0
-});
-var MenuPortal = (props) => {
-  const { __scopeMenu, forceMount, children, container } = props;
-  const context = useMenuContext(PORTAL_NAME$3, __scopeMenu);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(PortalProvider$1, { scope: __scopeMenu, forceMount, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$5, { asChild: true, container, children }) }) });
-};
-MenuPortal.displayName = PORTAL_NAME$3;
-var CONTENT_NAME$4 = "MenuContent";
-var [MenuContentProvider, useMenuContentContext] = createMenuContext(CONTENT_NAME$4);
-var MenuContent = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const portalContext = usePortalContext$1(CONTENT_NAME$4, props.__scopeMenu);
-    const { forceMount = portalContext.forceMount, ...contentProps } = props;
-    const context = useMenuContext(CONTENT_NAME$4, props.__scopeMenu);
-    const rootContext = useMenuRootContext(CONTENT_NAME$4, props.__scopeMenu);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$3.Provider, { scope: props.__scopeMenu, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$3.Slot, { scope: props.__scopeMenu, children: rootContext.modal ? /* @__PURE__ */ jsxRuntimeExports.jsx(MenuRootContentModal, { ...contentProps, ref: forwardedRef }) : /* @__PURE__ */ jsxRuntimeExports.jsx(MenuRootContentNonModal, { ...contentProps, ref: forwardedRef }) }) }) });
-  }
-);
-var MenuRootContentModal = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const context = useMenuContext(CONTENT_NAME$4, props.__scopeMenu);
-    const ref = dashboard__loadShare__react__loadShare__.useRef(null);
-    const composedRefs = useComposedRefs$1(forwardedRef, ref);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
-      const content = ref.current;
-      if (content) return hideOthers(content);
-    }, []);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      MenuContentImpl,
-      {
-        ...props,
-        ref: composedRefs,
-        trapFocus: context.open,
-        disableOutsidePointerEvents: context.open,
-        disableOutsideScroll: true,
-        onFocusOutside: composeEventHandlers(
-          props.onFocusOutside,
-          (event) => event.preventDefault(),
-          { checkForDefaultPrevented: false }
-        ),
-        onDismiss: () => context.onOpenChange(false)
-      }
-    );
-  }
-);
-var MenuRootContentNonModal = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-  const context = useMenuContext(CONTENT_NAME$4, props.__scopeMenu);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    MenuContentImpl,
-    {
-      ...props,
-      ref: forwardedRef,
-      trapFocus: false,
-      disableOutsidePointerEvents: false,
-      disableOutsideScroll: false,
-      onDismiss: () => context.onOpenChange(false)
-    }
-  );
-});
-var Slot$1 = createSlot("MenuContent.ScrollLock");
-var MenuContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const {
-      __scopeMenu,
-      loop = false,
-      trapFocus,
-      onOpenAutoFocus,
-      onCloseAutoFocus,
-      disableOutsidePointerEvents,
-      onEntryFocus,
-      onEscapeKeyDown,
-      onPointerDownOutside,
-      onFocusOutside,
-      onInteractOutside,
-      onDismiss,
-      disableOutsideScroll,
-      ...contentProps
-    } = props;
-    const context = useMenuContext(CONTENT_NAME$4, __scopeMenu);
-    const rootContext = useMenuRootContext(CONTENT_NAME$4, __scopeMenu);
-    const popperScope = usePopperScope$2(__scopeMenu);
-    const rovingFocusGroupScope = useRovingFocusGroupScope$2(__scopeMenu);
-    const getItems = useCollection$3(__scopeMenu);
-    const [currentItemId, setCurrentItemId] = dashboard__loadShare__react__loadShare__.useState(null);
-    const contentRef = dashboard__loadShare__react__loadShare__.useRef(null);
-    const composedRefs = useComposedRefs$1(forwardedRef, contentRef, context.onContentChange);
-    const timerRef = dashboard__loadShare__react__loadShare__.useRef(0);
-    const searchRef = dashboard__loadShare__react__loadShare__.useRef("");
-    const pointerGraceTimerRef = dashboard__loadShare__react__loadShare__.useRef(0);
-    const pointerGraceIntentRef = dashboard__loadShare__react__loadShare__.useRef(null);
-    const pointerDirRef = dashboard__loadShare__react__loadShare__.useRef("right");
-    const lastPointerXRef = dashboard__loadShare__react__loadShare__.useRef(0);
-    const ScrollLockWrapper = disableOutsideScroll ? ReactRemoveScroll : dashboard__loadShare__react__loadShare__.Fragment;
-    const scrollLockWrapperProps = disableOutsideScroll ? { as: Slot$1, allowPinchZoom: true } : void 0;
-    const handleTypeaheadSearch = (key) => {
-      const search = searchRef.current + key;
-      const items = getItems().filter((item) => !item.disabled);
-      const currentItem = document.activeElement;
-      const currentMatch = items.find((item) => item.ref.current === currentItem)?.textValue;
-      const values = items.map((item) => item.textValue);
-      const nextMatch = getNextMatch(values, search, currentMatch);
-      const newItem = items.find((item) => item.textValue === nextMatch)?.ref.current;
-      (function updateSearch(value) {
-        searchRef.current = value;
-        window.clearTimeout(timerRef.current);
-        if (value !== "") timerRef.current = window.setTimeout(() => updateSearch(""), 1e3);
-      })(search);
-      if (newItem) {
-        setTimeout(() => newItem.focus());
-      }
-    };
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
-      return () => window.clearTimeout(timerRef.current);
-    }, []);
-    useFocusGuards();
-    const isPointerMovingToSubmenu = dashboard__loadShare__react__loadShare__.useCallback((event) => {
-      const isMovingTowards = pointerDirRef.current === pointerGraceIntentRef.current?.side;
-      return isMovingTowards && isPointerInGraceArea(event, pointerGraceIntentRef.current?.area);
-    }, []);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      MenuContentProvider,
-      {
-        scope: __scopeMenu,
-        searchRef,
-        onItemEnter: dashboard__loadShare__react__loadShare__.useCallback(
-          (event) => {
-            if (isPointerMovingToSubmenu(event)) event.preventDefault();
-          },
-          [isPointerMovingToSubmenu]
-        ),
-        onItemLeave: dashboard__loadShare__react__loadShare__.useCallback(
-          (event) => {
-            if (isPointerMovingToSubmenu(event)) return;
-            contentRef.current?.focus();
-            setCurrentItemId(null);
-          },
-          [isPointerMovingToSubmenu]
-        ),
-        onTriggerLeave: dashboard__loadShare__react__loadShare__.useCallback(
-          (event) => {
-            if (isPointerMovingToSubmenu(event)) event.preventDefault();
-          },
-          [isPointerMovingToSubmenu]
-        ),
-        pointerGraceTimerRef,
-        onPointerGraceIntentChange: dashboard__loadShare__react__loadShare__.useCallback((intent) => {
-          pointerGraceIntentRef.current = intent;
-        }, []),
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollLockWrapper, { ...scrollLockWrapperProps, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          FocusScope,
-          {
-            asChild: true,
-            trapped: trapFocus,
-            onMountAutoFocus: composeEventHandlers(onOpenAutoFocus, (event) => {
-              event.preventDefault();
-              contentRef.current?.focus({ preventScroll: true });
-            }),
-            onUnmountAutoFocus: onCloseAutoFocus,
-            children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-              DismissableLayer,
-              {
-                asChild: true,
-                disableOutsidePointerEvents,
-                onEscapeKeyDown,
-                onPointerDownOutside,
-                onFocusOutside,
-                onInteractOutside,
-                onDismiss,
-                children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  Root$8,
-                  {
-                    asChild: true,
-                    ...rovingFocusGroupScope,
-                    dir: rootContext.dir,
-                    orientation: "vertical",
-                    loop,
-                    currentTabStopId: currentItemId,
-                    onCurrentTabStopIdChange: setCurrentItemId,
-                    onEntryFocus: composeEventHandlers(onEntryFocus, (event) => {
-                      if (!rootContext.isUsingKeyboardRef.current) event.preventDefault();
-                    }),
-                    preventScrollOnEntryFocus: true,
-                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      Content$2,
-                      {
-                        role: "menu",
-                        "aria-orientation": "vertical",
-                        "data-state": getOpenState(context.open),
-                        "data-radix-menu-content": "",
-                        dir: rootContext.dir,
-                        ...popperScope,
-                        ...contentProps,
-                        ref: composedRefs,
-                        style: { outline: "none", ...contentProps.style },
-                        onKeyDown: composeEventHandlers(contentProps.onKeyDown, (event) => {
-                          const target = event.target;
-                          const isKeyDownInside = target.closest("[data-radix-menu-content]") === event.currentTarget;
-                          const isModifierKey = event.ctrlKey || event.altKey || event.metaKey;
-                          const isCharacterKey = event.key.length === 1;
-                          if (isKeyDownInside) {
-                            if (event.key === "Tab") event.preventDefault();
-                            if (!isModifierKey && isCharacterKey) handleTypeaheadSearch(event.key);
-                          }
-                          const content = contentRef.current;
-                          if (event.target !== content) return;
-                          if (!FIRST_LAST_KEYS.includes(event.key)) return;
-                          event.preventDefault();
-                          const items = getItems().filter((item) => !item.disabled);
-                          const candidateNodes = items.map((item) => item.ref.current);
-                          if (LAST_KEYS.includes(event.key)) candidateNodes.reverse();
-                          focusFirst$1(candidateNodes);
-                        }),
-                        onBlur: composeEventHandlers(props.onBlur, (event) => {
-                          if (!event.currentTarget.contains(event.target)) {
-                            window.clearTimeout(timerRef.current);
-                            searchRef.current = "";
-                          }
-                        }),
-                        onPointerMove: composeEventHandlers(
-                          props.onPointerMove,
-                          whenMouse((event) => {
-                            const target = event.target;
-                            const pointerXHasChanged = lastPointerXRef.current !== event.clientX;
-                            if (event.currentTarget.contains(target) && pointerXHasChanged) {
-                              const newDir = event.clientX > lastPointerXRef.current ? "right" : "left";
-                              pointerDirRef.current = newDir;
-                              lastPointerXRef.current = event.clientX;
-                            }
-                          })
-                        )
-                      }
-                    )
-                  }
-                )
-              }
-            )
-          }
-        ) })
-      }
-    );
-  }
-);
-MenuContent.displayName = CONTENT_NAME$4;
-var GROUP_NAME$2 = "MenuGroup";
-var MenuGroup = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeMenu, ...groupProps } = props;
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive.div, { role: "group", ...groupProps, ref: forwardedRef });
-  }
-);
-MenuGroup.displayName = GROUP_NAME$2;
-var LABEL_NAME$2 = "MenuLabel";
-var MenuLabel = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeMenu, ...labelProps } = props;
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive.div, { ...labelProps, ref: forwardedRef });
-  }
-);
-MenuLabel.displayName = LABEL_NAME$2;
-var ITEM_NAME$3 = "MenuItem";
-var ITEM_SELECT = "menu.itemSelect";
-var MenuItem = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { disabled = false, onSelect, ...itemProps } = props;
-    const ref = dashboard__loadShare__react__loadShare__.useRef(null);
-    const rootContext = useMenuRootContext(ITEM_NAME$3, props.__scopeMenu);
-    const contentContext = useMenuContentContext(ITEM_NAME$3, props.__scopeMenu);
-    const composedRefs = useComposedRefs$1(forwardedRef, ref);
-    const isPointerDownRef = dashboard__loadShare__react__loadShare__.useRef(false);
-    const handleSelect = () => {
-      const menuItem = ref.current;
-      if (!disabled && menuItem) {
-        const itemSelectEvent = new CustomEvent(ITEM_SELECT, { bubbles: true, cancelable: true });
-        menuItem.addEventListener(ITEM_SELECT, (event) => onSelect?.(event), { once: true });
-        dispatchDiscreteCustomEvent(menuItem, itemSelectEvent);
-        if (itemSelectEvent.defaultPrevented) {
-          isPointerDownRef.current = false;
-        } else {
-          rootContext.onClose();
-        }
-      }
-    };
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      MenuItemImpl,
-      {
-        ...itemProps,
-        ref: composedRefs,
-        disabled,
-        onClick: composeEventHandlers(props.onClick, handleSelect),
-        onPointerDown: (event) => {
-          props.onPointerDown?.(event);
-          isPointerDownRef.current = true;
-        },
-        onPointerUp: composeEventHandlers(props.onPointerUp, (event) => {
-          if (!isPointerDownRef.current) event.currentTarget?.click();
-        }),
-        onKeyDown: composeEventHandlers(props.onKeyDown, (event) => {
-          const isTypingAhead = contentContext.searchRef.current !== "";
-          if (disabled || isTypingAhead && event.key === " ") return;
-          if (SELECTION_KEYS$1.includes(event.key)) {
-            event.currentTarget.click();
-            event.preventDefault();
-          }
-        })
-      }
-    );
-  }
-);
-MenuItem.displayName = ITEM_NAME$3;
-var MenuItemImpl = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeMenu, disabled = false, textValue, ...itemProps } = props;
-    const contentContext = useMenuContentContext(ITEM_NAME$3, __scopeMenu);
-    const rovingFocusGroupScope = useRovingFocusGroupScope$2(__scopeMenu);
-    const ref = dashboard__loadShare__react__loadShare__.useRef(null);
-    const composedRefs = useComposedRefs$1(forwardedRef, ref);
-    const [isFocused, setIsFocused] = dashboard__loadShare__react__loadShare__.useState(false);
-    const [textContent, setTextContent] = dashboard__loadShare__react__loadShare__.useState("");
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
-      const menuItem = ref.current;
-      if (menuItem) {
-        setTextContent((menuItem.textContent ?? "").trim());
-      }
-    }, [itemProps.children]);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Collection$3.ItemSlot,
-      {
-        scope: __scopeMenu,
-        disabled,
-        textValue: textValue ?? textContent,
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(Item$1, { asChild: true, ...rovingFocusGroupScope, focusable: !disabled, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          Primitive.div,
-          {
-            role: "menuitem",
-            "data-highlighted": isFocused ? "" : void 0,
-            "aria-disabled": disabled || void 0,
-            "data-disabled": disabled ? "" : void 0,
-            ...itemProps,
-            ref: composedRefs,
-            onPointerMove: composeEventHandlers(
-              props.onPointerMove,
-              whenMouse((event) => {
-                if (disabled) {
-                  contentContext.onItemLeave(event);
-                } else {
-                  contentContext.onItemEnter(event);
-                  if (!event.defaultPrevented) {
-                    const item = event.currentTarget;
-                    item.focus({ preventScroll: true });
-                  }
-                }
-              })
-            ),
-            onPointerLeave: composeEventHandlers(
-              props.onPointerLeave,
-              whenMouse((event) => contentContext.onItemLeave(event))
-            ),
-            onFocus: composeEventHandlers(props.onFocus, () => setIsFocused(true)),
-            onBlur: composeEventHandlers(props.onBlur, () => setIsFocused(false))
-          }
-        ) })
-      }
-    );
-  }
-);
-var CHECKBOX_ITEM_NAME$1 = "MenuCheckboxItem";
-var MenuCheckboxItem = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { checked = false, onCheckedChange, ...checkboxItemProps } = props;
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(ItemIndicatorProvider, { scope: props.__scopeMenu, checked, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      MenuItem,
-      {
-        role: "menuitemcheckbox",
-        "aria-checked": isIndeterminate(checked) ? "mixed" : checked,
-        ...checkboxItemProps,
-        ref: forwardedRef,
-        "data-state": getCheckedState(checked),
-        onSelect: composeEventHandlers(
-          checkboxItemProps.onSelect,
-          () => onCheckedChange?.(isIndeterminate(checked) ? true : !checked),
-          { checkForDefaultPrevented: false }
-        )
-      }
-    ) });
-  }
-);
-MenuCheckboxItem.displayName = CHECKBOX_ITEM_NAME$1;
-var RADIO_GROUP_NAME$2 = "MenuRadioGroup";
-var [RadioGroupProvider$1, useRadioGroupContext$1] = createMenuContext(
-  RADIO_GROUP_NAME$2,
-  { value: void 0, onValueChange: () => {
-  } }
-);
-var MenuRadioGroup = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { value, onValueChange, ...groupProps } = props;
-    const handleValueChange = useCallbackRef$2(onValueChange);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(RadioGroupProvider$1, { scope: props.__scopeMenu, value, onValueChange: handleValueChange, children: /* @__PURE__ */ jsxRuntimeExports.jsx(MenuGroup, { ...groupProps, ref: forwardedRef }) });
-  }
-);
-MenuRadioGroup.displayName = RADIO_GROUP_NAME$2;
-var RADIO_ITEM_NAME$1 = "MenuRadioItem";
-var MenuRadioItem = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { value, ...radioItemProps } = props;
-    const context = useRadioGroupContext$1(RADIO_ITEM_NAME$1, props.__scopeMenu);
-    const checked = value === context.value;
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(ItemIndicatorProvider, { scope: props.__scopeMenu, checked, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      MenuItem,
-      {
-        role: "menuitemradio",
-        "aria-checked": checked,
-        ...radioItemProps,
-        ref: forwardedRef,
-        "data-state": getCheckedState(checked),
-        onSelect: composeEventHandlers(
-          radioItemProps.onSelect,
-          () => context.onValueChange?.(value),
-          { checkForDefaultPrevented: false }
-        )
-      }
-    ) });
-  }
-);
-MenuRadioItem.displayName = RADIO_ITEM_NAME$1;
-var ITEM_INDICATOR_NAME$1 = "MenuItemIndicator";
-var [ItemIndicatorProvider, useItemIndicatorContext] = createMenuContext(
-  ITEM_INDICATOR_NAME$1,
-  { checked: false }
-);
-var MenuItemIndicator = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeMenu, forceMount, ...itemIndicatorProps } = props;
-    const indicatorContext = useItemIndicatorContext(ITEM_INDICATOR_NAME$1, __scopeMenu);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Presence,
-      {
-        present: forceMount || isIndeterminate(indicatorContext.checked) || indicatorContext.checked === true,
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          Primitive.span,
-          {
-            ...itemIndicatorProps,
-            ref: forwardedRef,
-            "data-state": getCheckedState(indicatorContext.checked)
-          }
-        )
-      }
-    );
-  }
-);
-MenuItemIndicator.displayName = ITEM_INDICATOR_NAME$1;
-var SEPARATOR_NAME$2 = "MenuSeparator";
-var MenuSeparator = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeMenu, ...separatorProps } = props;
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Primitive.div,
-      {
-        role: "separator",
-        "aria-orientation": "horizontal",
-        ...separatorProps,
-        ref: forwardedRef
-      }
-    );
-  }
-);
-MenuSeparator.displayName = SEPARATOR_NAME$2;
-var ARROW_NAME$3 = "MenuArrow";
-var MenuArrow = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeMenu, ...arrowProps } = props;
-    const popperScope = usePopperScope$2(__scopeMenu);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Arrow, { ...popperScope, ...arrowProps, ref: forwardedRef });
-  }
-);
-MenuArrow.displayName = ARROW_NAME$3;
-var SUB_NAME = "MenuSub";
-var [MenuSubProvider, useMenuSubContext] = createMenuContext(SUB_NAME);
-var MenuSub = (props) => {
-  const { __scopeMenu, children, open = false, onOpenChange } = props;
-  const parentMenuContext = useMenuContext(SUB_NAME, __scopeMenu);
-  const popperScope = usePopperScope$2(__scopeMenu);
-  const [trigger, setTrigger] = dashboard__loadShare__react__loadShare__.useState(null);
-  const [content, setContent] = dashboard__loadShare__react__loadShare__.useState(null);
-  const handleOpenChange = useCallbackRef$2(onOpenChange);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
-    if (parentMenuContext.open === false) handleOpenChange(false);
-    return () => handleOpenChange(false);
-  }, [parentMenuContext.open, handleOpenChange]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Root2$6, { ...popperScope, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-    MenuProvider,
-    {
-      scope: __scopeMenu,
-      open,
-      onOpenChange: handleOpenChange,
-      content,
-      onContentChange: setContent,
-      children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-        MenuSubProvider,
-        {
-          scope: __scopeMenu,
-          contentId: useId(),
-          triggerId: useId(),
-          trigger,
-          onTriggerChange: setTrigger,
-          children
-        }
-      )
-    }
-  ) });
-};
-MenuSub.displayName = SUB_NAME;
-var SUB_TRIGGER_NAME$1 = "MenuSubTrigger";
-var MenuSubTrigger = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const context = useMenuContext(SUB_TRIGGER_NAME$1, props.__scopeMenu);
-    const rootContext = useMenuRootContext(SUB_TRIGGER_NAME$1, props.__scopeMenu);
-    const subContext = useMenuSubContext(SUB_TRIGGER_NAME$1, props.__scopeMenu);
-    const contentContext = useMenuContentContext(SUB_TRIGGER_NAME$1, props.__scopeMenu);
-    const openTimerRef = dashboard__loadShare__react__loadShare__.useRef(null);
-    const { pointerGraceTimerRef, onPointerGraceIntentChange } = contentContext;
-    const scope = { __scopeMenu: props.__scopeMenu };
-    const clearOpenTimer = dashboard__loadShare__react__loadShare__.useCallback(() => {
-      if (openTimerRef.current) window.clearTimeout(openTimerRef.current);
-      openTimerRef.current = null;
-    }, []);
-    dashboard__loadShare__react__loadShare__.useEffect(() => clearOpenTimer, [clearOpenTimer]);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
-      const pointerGraceTimer = pointerGraceTimerRef.current;
-      return () => {
-        window.clearTimeout(pointerGraceTimer);
-        onPointerGraceIntentChange(null);
-      };
-    }, [pointerGraceTimerRef, onPointerGraceIntentChange]);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(MenuAnchor, { asChild: true, ...scope, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      MenuItemImpl,
-      {
-        id: subContext.triggerId,
-        "aria-haspopup": "menu",
-        "aria-expanded": context.open,
-        "aria-controls": subContext.contentId,
-        "data-state": getOpenState(context.open),
-        ...props,
-        ref: composeRefs$1(forwardedRef, subContext.onTriggerChange),
-        onClick: (event) => {
-          props.onClick?.(event);
-          if (props.disabled || event.defaultPrevented) return;
-          event.currentTarget.focus();
-          if (!context.open) context.onOpenChange(true);
-        },
-        onPointerMove: composeEventHandlers(
-          props.onPointerMove,
-          whenMouse((event) => {
-            contentContext.onItemEnter(event);
-            if (event.defaultPrevented) return;
-            if (!props.disabled && !context.open && !openTimerRef.current) {
-              contentContext.onPointerGraceIntentChange(null);
-              openTimerRef.current = window.setTimeout(() => {
-                context.onOpenChange(true);
-                clearOpenTimer();
-              }, 100);
-            }
-          })
-        ),
-        onPointerLeave: composeEventHandlers(
-          props.onPointerLeave,
-          whenMouse((event) => {
-            clearOpenTimer();
-            const contentRect = context.content?.getBoundingClientRect();
-            if (contentRect) {
-              const side = context.content?.dataset.side;
-              const rightSide = side === "right";
-              const bleed = rightSide ? -5 : 5;
-              const contentNearEdge = contentRect[rightSide ? "left" : "right"];
-              const contentFarEdge = contentRect[rightSide ? "right" : "left"];
-              contentContext.onPointerGraceIntentChange({
-                area: [
-                  // Apply a bleed on clientX to ensure that our exit point is
-                  // consistently within polygon bounds
-                  { x: event.clientX + bleed, y: event.clientY },
-                  { x: contentNearEdge, y: contentRect.top },
-                  { x: contentFarEdge, y: contentRect.top },
-                  { x: contentFarEdge, y: contentRect.bottom },
-                  { x: contentNearEdge, y: contentRect.bottom }
-                ],
-                side
-              });
-              window.clearTimeout(pointerGraceTimerRef.current);
-              pointerGraceTimerRef.current = window.setTimeout(
-                () => contentContext.onPointerGraceIntentChange(null),
-                300
-              );
-            } else {
-              contentContext.onTriggerLeave(event);
-              if (event.defaultPrevented) return;
-              contentContext.onPointerGraceIntentChange(null);
-            }
-          })
-        ),
-        onKeyDown: composeEventHandlers(props.onKeyDown, (event) => {
-          const isTypingAhead = contentContext.searchRef.current !== "";
-          if (props.disabled || isTypingAhead && event.key === " ") return;
-          if (SUB_OPEN_KEYS[rootContext.dir].includes(event.key)) {
-            context.onOpenChange(true);
-            context.content?.focus();
-            event.preventDefault();
-          }
-        })
-      }
-    ) });
-  }
-);
-MenuSubTrigger.displayName = SUB_TRIGGER_NAME$1;
-var SUB_CONTENT_NAME$1 = "MenuSubContent";
-var MenuSubContent = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const portalContext = usePortalContext$1(CONTENT_NAME$4, props.__scopeMenu);
-    const { forceMount = portalContext.forceMount, ...subContentProps } = props;
-    const context = useMenuContext(CONTENT_NAME$4, props.__scopeMenu);
-    const rootContext = useMenuRootContext(CONTENT_NAME$4, props.__scopeMenu);
-    const subContext = useMenuSubContext(SUB_CONTENT_NAME$1, props.__scopeMenu);
-    const ref = dashboard__loadShare__react__loadShare__.useRef(null);
-    const composedRefs = useComposedRefs$1(forwardedRef, ref);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$3.Provider, { scope: props.__scopeMenu, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$3.Slot, { scope: props.__scopeMenu, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      MenuContentImpl,
-      {
-        id: subContext.contentId,
-        "aria-labelledby": subContext.triggerId,
-        ...subContentProps,
-        ref: composedRefs,
-        align: "start",
-        side: rootContext.dir === "rtl" ? "left" : "right",
-        disableOutsidePointerEvents: false,
-        disableOutsideScroll: false,
-        trapFocus: false,
-        onOpenAutoFocus: (event) => {
-          if (rootContext.isUsingKeyboardRef.current) ref.current?.focus();
-          event.preventDefault();
-        },
-        onCloseAutoFocus: (event) => event.preventDefault(),
-        onFocusOutside: composeEventHandlers(props.onFocusOutside, (event) => {
-          if (event.target !== subContext.trigger) context.onOpenChange(false);
-        }),
-        onEscapeKeyDown: composeEventHandlers(props.onEscapeKeyDown, (event) => {
-          rootContext.onClose();
-          event.preventDefault();
-        }),
-        onKeyDown: composeEventHandlers(props.onKeyDown, (event) => {
-          const isKeyDownInside = event.currentTarget.contains(event.target);
-          const isCloseKey = SUB_CLOSE_KEYS[rootContext.dir].includes(event.key);
-          if (isKeyDownInside && isCloseKey) {
-            context.onOpenChange(false);
-            subContext.trigger?.focus();
-            event.preventDefault();
-          }
-        })
-      }
-    ) }) }) });
-  }
-);
-MenuSubContent.displayName = SUB_CONTENT_NAME$1;
-function getOpenState(open) {
-  return open ? "open" : "closed";
-}
-function isIndeterminate(checked) {
-  return checked === "indeterminate";
-}
-function getCheckedState(checked) {
-  return isIndeterminate(checked) ? "indeterminate" : checked ? "checked" : "unchecked";
-}
-function focusFirst$1(candidates) {
-  const PREVIOUSLY_FOCUSED_ELEMENT = document.activeElement;
-  for (const candidate of candidates) {
-    if (candidate === PREVIOUSLY_FOCUSED_ELEMENT) return;
-    candidate.focus();
-    if (document.activeElement !== PREVIOUSLY_FOCUSED_ELEMENT) return;
-  }
-}
-function wrapArray$1(array, startIndex) {
-  return array.map((_, index) => array[(startIndex + index) % array.length]);
-}
-function getNextMatch(values, search, currentMatch) {
-  const isRepeated = search.length > 1 && Array.from(search).every((char) => char === search[0]);
-  const normalizedSearch = isRepeated ? search[0] : search;
-  const currentMatchIndex = currentMatch ? values.indexOf(currentMatch) : -1;
-  let wrappedValues = wrapArray$1(values, Math.max(currentMatchIndex, 0));
-  const excludeCurrentMatch = normalizedSearch.length === 1;
-  if (excludeCurrentMatch) wrappedValues = wrappedValues.filter((v) => v !== currentMatch);
-  const nextMatch = wrappedValues.find(
-    (value) => value.toLowerCase().startsWith(normalizedSearch.toLowerCase())
-  );
-  return nextMatch !== currentMatch ? nextMatch : void 0;
-}
-function isPointInPolygon$1(point, polygon) {
-  const { x, y } = point;
-  let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const ii = polygon[i];
-    const jj = polygon[j];
-    const xi = ii.x;
-    const yi = ii.y;
-    const xj = jj.x;
-    const yj = jj.y;
-    const intersect = yi > y !== yj > y && x < (xj - xi) * (y - yi) / (yj - yi) + xi;
-    if (intersect) inside = !inside;
-  }
-  return inside;
-}
-function isPointerInGraceArea(event, area) {
-  if (!area) return false;
-  const cursorPos = { x: event.clientX, y: event.clientY };
-  return isPointInPolygon$1(cursorPos, area);
-}
-function whenMouse(handler) {
-  return (event) => event.pointerType === "mouse" ? handler(event) : void 0;
-}
-var Root3$1 = Menu;
-var Anchor2 = MenuAnchor;
-var Portal$1 = MenuPortal;
-var Content2$3 = MenuContent;
-var Group$1 = MenuGroup;
-var Label$3 = MenuLabel;
-var Item2$2 = MenuItem;
-var CheckboxItem = MenuCheckboxItem;
-var RadioGroup$2 = MenuRadioGroup;
-var RadioItem = MenuRadioItem;
-var ItemIndicator$1 = MenuItemIndicator;
-var Separator$3 = MenuSeparator;
-var Arrow2 = MenuArrow;
-var Sub = MenuSub;
-var SubTrigger = MenuSubTrigger;
-var SubContent = MenuSubContent;
-
-var DROPDOWN_MENU_NAME = "DropdownMenu";
-var [createDropdownMenuContext, createDropdownMenuScope] = createContextScope(
-  DROPDOWN_MENU_NAME,
-  [createMenuScope]
-);
-var useMenuScope = createMenuScope();
-var [DropdownMenuProvider, useDropdownMenuContext] = createDropdownMenuContext(DROPDOWN_MENU_NAME);
-var DropdownMenu$1 = (props) => {
-  const {
-    __scopeDropdownMenu,
-    children,
-    dir,
-    open: openProp,
-    defaultOpen,
-    onOpenChange,
-    modal = true
-  } = props;
-  const menuScope = useMenuScope(__scopeDropdownMenu);
-  const triggerRef = dashboard__loadShare__react__loadShare__.useRef(null);
-  const [open, setOpen] = useControllableState$1({
-    prop: openProp,
-    defaultProp: defaultOpen ?? false,
-    onChange: onOpenChange,
-    caller: DROPDOWN_MENU_NAME
-  });
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    DropdownMenuProvider,
-    {
-      scope: __scopeDropdownMenu,
-      triggerId: useId(),
-      triggerRef,
-      contentId: useId(),
-      open,
-      onOpenChange: setOpen,
-      onOpenToggle: dashboard__loadShare__react__loadShare__.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
-      modal,
-      children: /* @__PURE__ */ jsxRuntimeExports.jsx(Root3$1, { ...menuScope, open, onOpenChange: setOpen, dir, modal, children })
-    }
-  );
-};
-DropdownMenu$1.displayName = DROPDOWN_MENU_NAME;
-var TRIGGER_NAME$3 = "DropdownMenuTrigger";
-var DropdownMenuTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeDropdownMenu, disabled = false, ...triggerProps } = props;
-    const context = useDropdownMenuContext(TRIGGER_NAME$3, __scopeDropdownMenu);
-    const menuScope = useMenuScope(__scopeDropdownMenu);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Anchor2, { asChild: true, ...menuScope, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Primitive.button,
-      {
-        type: "button",
-        id: context.triggerId,
-        "aria-haspopup": "menu",
-        "aria-expanded": context.open,
-        "aria-controls": context.open ? context.contentId : void 0,
-        "data-state": context.open ? "open" : "closed",
-        "data-disabled": disabled ? "" : void 0,
-        disabled,
-        ...triggerProps,
-        ref: composeRefs$1(forwardedRef, context.triggerRef),
-        onPointerDown: composeEventHandlers(props.onPointerDown, (event) => {
-          if (!disabled && event.button === 0 && event.ctrlKey === false) {
-            context.onOpenToggle();
-            if (!context.open) event.preventDefault();
-          }
-        }),
-        onKeyDown: composeEventHandlers(props.onKeyDown, (event) => {
-          if (disabled) return;
-          if (["Enter", " "].includes(event.key)) context.onOpenToggle();
-          if (event.key === "ArrowDown") context.onOpenChange(true);
-          if (["Enter", " ", "ArrowDown"].includes(event.key)) event.preventDefault();
-        })
-      }
-    ) });
-  }
-);
-DropdownMenuTrigger$1.displayName = TRIGGER_NAME$3;
-var PORTAL_NAME$2 = "DropdownMenuPortal";
-var DropdownMenuPortal$1 = (props) => {
-  const { __scopeDropdownMenu, ...portalProps } = props;
-  const menuScope = useMenuScope(__scopeDropdownMenu);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$1, { ...menuScope, ...portalProps });
-};
-DropdownMenuPortal$1.displayName = PORTAL_NAME$2;
-var CONTENT_NAME$3 = "DropdownMenuContent";
-var DropdownMenuContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeDropdownMenu, ...contentProps } = props;
-    const context = useDropdownMenuContext(CONTENT_NAME$3, __scopeDropdownMenu);
-    const menuScope = useMenuScope(__scopeDropdownMenu);
-    const hasInteractedOutsideRef = dashboard__loadShare__react__loadShare__.useRef(false);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Content2$3,
-      {
-        id: context.contentId,
-        "aria-labelledby": context.triggerId,
-        ...menuScope,
-        ...contentProps,
-        ref: forwardedRef,
-        onCloseAutoFocus: composeEventHandlers(props.onCloseAutoFocus, (event) => {
-          if (!hasInteractedOutsideRef.current) context.triggerRef.current?.focus();
-          hasInteractedOutsideRef.current = false;
-          event.preventDefault();
-        }),
-        onInteractOutside: composeEventHandlers(props.onInteractOutside, (event) => {
-          const originalEvent = event.detail.originalEvent;
-          const ctrlLeftClick = originalEvent.button === 0 && originalEvent.ctrlKey === true;
-          const isRightClick = originalEvent.button === 2 || ctrlLeftClick;
-          if (!context.modal || isRightClick) hasInteractedOutsideRef.current = true;
-        }),
-        style: {
-          ...props.style,
-          // re-namespace exposed content custom properties
-          ...{
-            "--radix-dropdown-menu-content-transform-origin": "var(--radix-popper-transform-origin)",
-            "--radix-dropdown-menu-content-available-width": "var(--radix-popper-available-width)",
-            "--radix-dropdown-menu-content-available-height": "var(--radix-popper-available-height)",
-            "--radix-dropdown-menu-trigger-width": "var(--radix-popper-anchor-width)",
-            "--radix-dropdown-menu-trigger-height": "var(--radix-popper-anchor-height)"
-          }
-        }
-      }
-    );
-  }
-);
-DropdownMenuContent$1.displayName = CONTENT_NAME$3;
-var GROUP_NAME$1 = "DropdownMenuGroup";
-var DropdownMenuGroup$1 = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeDropdownMenu, ...groupProps } = props;
-    const menuScope = useMenuScope(__scopeDropdownMenu);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Group$1, { ...menuScope, ...groupProps, ref: forwardedRef });
-  }
-);
-DropdownMenuGroup$1.displayName = GROUP_NAME$1;
-var LABEL_NAME$1 = "DropdownMenuLabel";
-var DropdownMenuLabel$1 = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeDropdownMenu, ...labelProps } = props;
-    const menuScope = useMenuScope(__scopeDropdownMenu);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Label$3, { ...menuScope, ...labelProps, ref: forwardedRef });
-  }
-);
-DropdownMenuLabel$1.displayName = LABEL_NAME$1;
-var ITEM_NAME$2 = "DropdownMenuItem";
-var DropdownMenuItem$1 = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeDropdownMenu, ...itemProps } = props;
-    const menuScope = useMenuScope(__scopeDropdownMenu);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Item2$2, { ...menuScope, ...itemProps, ref: forwardedRef });
-  }
-);
-DropdownMenuItem$1.displayName = ITEM_NAME$2;
-var CHECKBOX_ITEM_NAME = "DropdownMenuCheckboxItem";
-var DropdownMenuCheckboxItem$1 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-  const { __scopeDropdownMenu, ...checkboxItemProps } = props;
-  const menuScope = useMenuScope(__scopeDropdownMenu);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(CheckboxItem, { ...menuScope, ...checkboxItemProps, ref: forwardedRef });
-});
-DropdownMenuCheckboxItem$1.displayName = CHECKBOX_ITEM_NAME;
-var RADIO_GROUP_NAME$1 = "DropdownMenuRadioGroup";
-var DropdownMenuRadioGroup$1 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-  const { __scopeDropdownMenu, ...radioGroupProps } = props;
-  const menuScope = useMenuScope(__scopeDropdownMenu);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(RadioGroup$2, { ...menuScope, ...radioGroupProps, ref: forwardedRef });
-});
-DropdownMenuRadioGroup$1.displayName = RADIO_GROUP_NAME$1;
-var RADIO_ITEM_NAME = "DropdownMenuRadioItem";
-var DropdownMenuRadioItem$1 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-  const { __scopeDropdownMenu, ...radioItemProps } = props;
-  const menuScope = useMenuScope(__scopeDropdownMenu);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(RadioItem, { ...menuScope, ...radioItemProps, ref: forwardedRef });
-});
-DropdownMenuRadioItem$1.displayName = RADIO_ITEM_NAME;
-var INDICATOR_NAME$2 = "DropdownMenuItemIndicator";
-var DropdownMenuItemIndicator = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-  const { __scopeDropdownMenu, ...itemIndicatorProps } = props;
-  const menuScope = useMenuScope(__scopeDropdownMenu);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ItemIndicator$1, { ...menuScope, ...itemIndicatorProps, ref: forwardedRef });
-});
-DropdownMenuItemIndicator.displayName = INDICATOR_NAME$2;
-var SEPARATOR_NAME$1 = "DropdownMenuSeparator";
-var DropdownMenuSeparator$1 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-  const { __scopeDropdownMenu, ...separatorProps } = props;
-  const menuScope = useMenuScope(__scopeDropdownMenu);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Separator$3, { ...menuScope, ...separatorProps, ref: forwardedRef });
-});
-DropdownMenuSeparator$1.displayName = SEPARATOR_NAME$1;
-var ARROW_NAME$2 = "DropdownMenuArrow";
-var DropdownMenuArrow = dashboard__loadShare__react__loadShare__.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeDropdownMenu, ...arrowProps } = props;
-    const menuScope = useMenuScope(__scopeDropdownMenu);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(Arrow2, { ...menuScope, ...arrowProps, ref: forwardedRef });
-  }
-);
-DropdownMenuArrow.displayName = ARROW_NAME$2;
-var DropdownMenuSub$1 = (props) => {
-  const { __scopeDropdownMenu, children, open: openProp, onOpenChange, defaultOpen } = props;
-  const menuScope = useMenuScope(__scopeDropdownMenu);
-  const [open, setOpen] = useControllableState$1({
-    prop: openProp,
-    defaultProp: defaultOpen ?? false,
-    onChange: onOpenChange,
-    caller: "DropdownMenuSub"
-  });
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Sub, { ...menuScope, open, onOpenChange: setOpen, children });
-};
-var SUB_TRIGGER_NAME = "DropdownMenuSubTrigger";
-var DropdownMenuSubTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-  const { __scopeDropdownMenu, ...subTriggerProps } = props;
-  const menuScope = useMenuScope(__scopeDropdownMenu);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(SubTrigger, { ...menuScope, ...subTriggerProps, ref: forwardedRef });
-});
-DropdownMenuSubTrigger$1.displayName = SUB_TRIGGER_NAME;
-var SUB_CONTENT_NAME = "DropdownMenuSubContent";
-var DropdownMenuSubContent$1 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
-  const { __scopeDropdownMenu, ...subContentProps } = props;
-  const menuScope = useMenuScope(__scopeDropdownMenu);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    SubContent,
-    {
-      ...menuScope,
-      ...subContentProps,
-      ref: forwardedRef,
-      style: {
-        ...props.style,
-        // re-namespace exposed content custom properties
-        ...{
-          "--radix-dropdown-menu-content-transform-origin": "var(--radix-popper-transform-origin)",
-          "--radix-dropdown-menu-content-available-width": "var(--radix-popper-available-width)",
-          "--radix-dropdown-menu-content-available-height": "var(--radix-popper-available-height)",
-          "--radix-dropdown-menu-trigger-width": "var(--radix-popper-anchor-width)",
-          "--radix-dropdown-menu-trigger-height": "var(--radix-popper-anchor-height)"
-        }
-      }
-    }
-  );
-});
-DropdownMenuSubContent$1.displayName = SUB_CONTENT_NAME;
-var Root2$4 = DropdownMenu$1;
-var Trigger$3 = DropdownMenuTrigger$1;
-var Portal2 = DropdownMenuPortal$1;
-var Content2$2 = DropdownMenuContent$1;
-var Group2 = DropdownMenuGroup$1;
-var Label2 = DropdownMenuLabel$1;
-var Item2$1 = DropdownMenuItem$1;
-var CheckboxItem2 = DropdownMenuCheckboxItem$1;
-var RadioGroup2 = DropdownMenuRadioGroup$1;
-var RadioItem2 = DropdownMenuRadioItem$1;
-var ItemIndicator2 = DropdownMenuItemIndicator;
-var Separator2 = DropdownMenuSeparator$1;
-var Sub2 = DropdownMenuSub$1;
-var SubTrigger2 = DropdownMenuSubTrigger$1;
-var SubContent2 = DropdownMenuSubContent$1;
-
 //#region src/components/ui/dropdown-menu.tsx
-const DropdownMenu = Root2$4;
-const DropdownMenuTrigger = Trigger$3;
+const DropdownMenu = Root2$8;
+const DropdownMenuTrigger = Trigger$6;
 const DropdownMenuGroup = Group2;
-const DropdownMenuPortal = Portal2;
+const DropdownMenuPortal = Portal2$1;
 const DropdownMenuSub = Sub2;
 const DropdownMenuRadioGroup = RadioGroup2;
 const DropdownMenuSubTrigger = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, inset,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(SubTrigger2, {
@@ -30303,13 +24597,13 @@ const DropdownMenuSubContent = dashboard__loadShare__react__loadShare__.forwardR
 	...props
 }));
 DropdownMenuSubContent.displayName = SubContent2.displayName;
-const DropdownMenuContent = dashboard__loadShare__react__loadShare__.forwardRef(({ className, sideOffset = 4,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Portal2, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$2, {
+const DropdownMenuContent = dashboard__loadShare__react__loadShare__.forwardRef(({ className, sideOffset = 4,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Portal2$1, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$5, {
 	className: cn$1("z-50 min-w-[8rem] overflow-hidden rounded-md border bg-background p-1 text-white shadow-md", "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2", className),
 	ref,
 	sideOffset,
 	...props
 }) }));
-DropdownMenuContent.displayName = Content2$2.displayName;
+DropdownMenuContent.displayName = Content2$5.displayName;
 const DropdownMenuItem = dashboard__loadShare__react__loadShare__.forwardRef(({ className, inset, variant,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Item2$1, {
 	className: cn$1("relative flex cursor-default select-none items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:cursor-pointer", inset && "pl-8", !variant && "focus:bg-secondary/50 focus:text-secondary-foreground", variant === "destructive" && "focus:bg-destructive/50 focus:text-white", className),
 	ref,
@@ -30435,7 +24729,7 @@ const FormLabel = dashboard__loadShare__react__loadShare__.forwardRef(({ classNa
 FormLabel.displayName = "FormLabel";
 const FormControl = dashboard__loadShare__react__loadShare__.forwardRef(({ ...props }, ref) => {
 	const { error, formDescriptionId, formItemId, formMessageId } = useFormField();
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(Slot$4, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(Slot$3, {
 		"aria-describedby": !error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`,
 		"aria-invalid": !!error,
 		id: formItemId,
@@ -30798,7 +25092,7 @@ var RadioGroup$1 = dashboard__loadShare__react__loadShare__.forwardRef(
         value,
         onValueChange: setValue,
         children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          Root$8,
+          Root$d,
           {
             asChild: true,
             ...rovingFocusGroupScope,
@@ -30851,7 +25145,7 @@ var RadioGroupItem$1 = dashboard__loadShare__react__loadShare__.forwardRef(
       };
     }, []);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Item$1,
+      Item$2,
       {
         asChild: true,
         ...rovingFocusGroupScope,
@@ -31363,8 +25657,8 @@ var ScrollAreaScrollbarImpl = dashboard__loadShare__react__loadShare__.forwardRe
   const prevWebkitUserSelectRef = dashboard__loadShare__react__loadShare__.useRef("");
   const viewport = context.viewport;
   const maxScrollPos = sizes.content - sizes.viewport;
-  const handleWheelScroll = useCallbackRef$2(onWheelScroll);
-  const handleThumbPositionChange = useCallbackRef$2(onThumbPositionChange);
+  const handleWheelScroll = useCallbackRef$1(onWheelScroll);
+  const handleThumbPositionChange = useCallbackRef$1(onThumbPositionChange);
   const handleResize = useDebounceCallback(onResize, 10);
   function handleDragScroll(event) {
     if (rectRef.current) {
@@ -31391,10 +25685,10 @@ var ScrollAreaScrollbarImpl = dashboard__loadShare__react__loadShare__.forwardRe
       scope: __scopeScrollArea,
       scrollbar,
       hasThumb,
-      onThumbChange: useCallbackRef$2(onThumbChange),
-      onThumbPointerUp: useCallbackRef$2(onThumbPointerUp),
+      onThumbChange: useCallbackRef$1(onThumbChange),
+      onThumbPointerUp: useCallbackRef$1(onThumbPointerUp),
       onThumbPositionChange: handleThumbPositionChange,
-      onThumbPointerDown: useCallbackRef$2(onThumbPointerDown),
+      onThumbPointerDown: useCallbackRef$1(onThumbPointerDown),
       children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         Primitive.div,
         {
@@ -31597,7 +25891,7 @@ var addUnlinkedScrollListener = (node, handler = () => {
   return () => window.cancelAnimationFrame(rAF);
 };
 function useDebounceCallback(callback, delay) {
-  const handleCallback = useCallbackRef$2(callback);
+  const handleCallback = useCallbackRef$1(callback);
   const debounceTimerRef = dashboard__loadShare__react__loadShare__.useRef(0);
   dashboard__loadShare__react__loadShare__.useEffect(() => () => window.clearTimeout(debounceTimerRef.current), []);
   return dashboard__loadShare__react__loadShare__.useCallback(() => {
@@ -31606,7 +25900,7 @@ function useDebounceCallback(callback, delay) {
   }, [handleCallback, delay]);
 }
 function useResizeObserver(element, onResize) {
-  const handleResize = useCallbackRef$2(onResize);
+  const handleResize = useCallbackRef$1(onResize);
   useLayoutEffect2(() => {
     let rAF = 0;
     if (element) {
@@ -31729,7 +26023,7 @@ var Select$1 = (props) => {
   const isFormControl = trigger ? form || !!trigger.closest("form") : true;
   const [nativeOptionsSet, setNativeOptionsSet] = dashboard__loadShare__react__loadShare__.useState(/* @__PURE__ */ new Set());
   const nativeSelectKey = Array.from(nativeOptionsSet).map((option) => option.props.value).join(";");
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Root2$6, { ...popperScope, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Root2$7, { ...popperScope, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
     SelectProvider,
     {
       required,
@@ -31901,7 +26195,7 @@ var SelectIcon = dashboard__loadShare__react__loadShare__.forwardRef(
 SelectIcon.displayName = ICON_NAME;
 var PORTAL_NAME$1 = "SelectPortal";
 var SelectPortal = (props) => {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$5, { asChild: true, ...props });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$4, { asChild: true, ...props });
 };
 SelectPortal.displayName = PORTAL_NAME$1;
 var CONTENT_NAME$2 = "SelectContent";
@@ -32089,7 +26383,7 @@ var SelectContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
         position,
         isPositioned,
         searchRef,
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(ReactRemoveScroll$1, { as: Slot, allowPinchZoom: true, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(ReactRemoveScroll, { as: Slot, allowPinchZoom: true, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
           FocusScope,
           {
             asChild: true,
@@ -32334,7 +26628,7 @@ var SelectPopperPosition = dashboard__loadShare__react__loadShare__.forwardRef((
   } = props;
   const popperScope = usePopperScope$1(__scopeSelect);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    Content$2,
+    Content$4,
     {
       ...popperScope,
       ...popperProps,
@@ -32755,7 +27049,7 @@ function shouldShowPlaceholder(value) {
   return value === "" || value === void 0;
 }
 function useTypeaheadSearch(onSearchChange) {
-  const handleSearchChange = useCallbackRef$2(onSearchChange);
+  const handleSearchChange = useCallbackRef$1(onSearchChange);
   const searchRef = dashboard__loadShare__react__loadShare__.useRef("");
   const timerRef = dashboard__loadShare__react__loadShare__.useRef(0);
   const handleTypeaheadSearch = dashboard__loadShare__react__loadShare__.useCallback(
@@ -32912,10 +27206,10 @@ const Separator = dashboard__loadShare__react__loadShare__.forwardRef(({ classNa
 Separator.displayName = Root$3.displayName;
 
 //#region src/components/ui/sheet.tsx
-const Sheet = Root$d;
-const SheetTrigger = Trigger$5;
+const Sheet = Root$b;
+const SheetTrigger = Trigger$4;
 const SheetClose = Close$1;
-const SheetPortal = Portal$4;
+const SheetPortal = Portal$3;
 const SheetOverlay = dashboard__loadShare__react__loadShare__.forwardRef(({ className,...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Overlay$1, {
 	className: cn$1("fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className),
 	...props,
@@ -32931,7 +27225,7 @@ const sheetVariants = cva("fixed z-50 gap-4 bg-background p-6 shadow-lg transiti
 		top: "inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top"
 	} }
 });
-const SheetContent = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, side = "right",...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(SheetPortal, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(SheetOverlay, {}), /* @__PURE__ */ jsxRuntimeExports.jsxs(Content$3, {
+const SheetContent = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, side = "right",...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(SheetPortal, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(SheetOverlay, {}), /* @__PURE__ */ jsxRuntimeExports.jsxs(Content$2, {
 	className: cn$1(sheetVariants({ side }), className),
 	ref,
 	onPointerDownOutside: (e) => {
@@ -32946,7 +27240,7 @@ const SheetContent = dashboard__loadShare__react__loadShare__.forwardRef(({ chil
 		})]
 	})]
 })] }));
-SheetContent.displayName = Content$3.displayName;
+SheetContent.displayName = Content$2.displayName;
 const SheetHeader = ({ className,...props }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 	className: cn$1("flex flex-col space-y-2 text-center sm:text-left", className),
 	...props
@@ -33812,7 +28106,7 @@ var TabsList$1 = dashboard__loadShare__react__loadShare__.forwardRef(
     const context = useTabsContext(TAB_LIST_NAME, __scopeTabs);
     const rovingFocusGroupScope = useRovingFocusGroupScope(__scopeTabs);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Root$8,
+      Root$d,
       {
         asChild: true,
         ...rovingFocusGroupScope,
@@ -33843,7 +28137,7 @@ var TabsTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
     const contentId = makeContentId(context.baseId, value);
     const isSelected = value === context.value;
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Item$1,
+      Item$2,
       {
         asChild: true,
         ...rovingFocusGroupScope,
@@ -35417,8 +29711,8 @@ var Toast$1 = dashboard__loadShare__react__loadShare__.forwardRef(
         ...toastProps,
         ref: forwardedRef,
         onClose: () => setOpen(false),
-        onPause: useCallbackRef$2(props.onPause),
-        onResume: useCallbackRef$2(props.onResume),
+        onPause: useCallbackRef$1(props.onPause),
+        onResume: useCallbackRef$1(props.onResume),
         onSwipeStart: composeEventHandlers(props.onSwipeStart, (event) => {
           event.currentTarget.setAttribute("data-swipe", "start");
         }),
@@ -35480,7 +29774,7 @@ var ToastImpl = dashboard__loadShare__react__loadShare__.forwardRef(
     const closeTimerRemainingTimeRef = dashboard__loadShare__react__loadShare__.useRef(duration);
     const closeTimerRef = dashboard__loadShare__react__loadShare__.useRef(0);
     const { onToastAdd, onToastRemove } = context;
-    const handleClose = useCallbackRef$2(() => {
+    const handleClose = useCallbackRef$1(() => {
       const isFocusInToast = node?.contains(document.activeElement);
       if (isFocusInToast) context.viewport?.focus();
       onClose();
@@ -35642,7 +29936,7 @@ var ToastAnnounce = (props) => {
     const timer = window.setTimeout(() => setIsAnnounced(true), 1e3);
     return () => window.clearTimeout(timer);
   }, []);
-  return isAnnounced ? null : /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$5, { asChild: true, children: /* @__PURE__ */ jsxRuntimeExports.jsx(VisuallyHidden$1, { ...announceProps, children: renderAnnounceText && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+  return isAnnounced ? null : /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$4, { asChild: true, children: /* @__PURE__ */ jsxRuntimeExports.jsx(VisuallyHidden$1, { ...announceProps, children: renderAnnounceText && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     context.label,
     " ",
     children
@@ -35749,7 +30043,7 @@ var isDeltaInDirection = (delta, direction, threshold = 0) => {
 };
 function useNextFrame(callback = () => {
 }) {
-  const fn = useCallbackRef$2(callback);
+  const fn = useCallbackRef$1(callback);
   useLayoutEffect2(() => {
     let raf1 = 0;
     let raf2 = 0;
@@ -36153,7 +30447,7 @@ var Tooltip$1 = (props) => {
       }
     };
   }, []);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Root2$6, { ...popperScope, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Root2$7, { ...popperScope, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
     TooltipContextProvider,
     {
       scope: __scopeTooltip,
@@ -36345,7 +30639,7 @@ var TooltipContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
         onFocusOutside: (event) => event.preventDefault(),
         onDismiss: onClose,
         children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          Content$2,
+          Content$4,
           {
             "data-state": context.stateAttribute,
             ...popperScope,
