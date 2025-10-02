@@ -18,7 +18,7 @@ import { getAction } from "./ToolbarRegistry";
 
 // Registry for toolbar item renderers
 type ToolbarItemRenderer<TData extends BaseRecord> = (
-  item: ToolbarItem<TData>,
+  item: ExtendedToolbarItem<TData>,
   commonProps: ToolbarItemComponentProps<TData>,
 ) => React.ReactNode;
 
@@ -26,7 +26,7 @@ const toolbarItemRenderers = new Map<string, ToolbarItemRenderer<any>>();
 
 // Internal renderer components
 function ActionItemRenderer<TData extends BaseRecord>(
-  item: ToolbarItem<TData>,
+  item: ExtendedToolbarItem<TData>,
   commonProps: ToolbarItemComponentProps<TData>,
 ) {
   const actionItem = getAction<TData>(item.id);
@@ -61,7 +61,7 @@ function FilterItemRenderer<TData extends BaseRecord>(
 }
 
 function FilterGroupItemRenderer<TData extends BaseRecord>(
-  item: ToolbarItem<TData>,
+  item: ExtendedToolbarItem<TData>,
   commonProps: ToolbarItemComponentProps<TData>,
 ) {
   const filterGroupItem = item as ToolbarFilterGroupItem<TData>;
@@ -70,7 +70,7 @@ function FilterGroupItemRenderer<TData extends BaseRecord>(
 }
 
 function SeparatorItemRenderer<TData extends BaseRecord>(
-  item: ToolbarItem<TData>,
+  item: ExtendedToolbarItem<TData>,
   commonProps: ToolbarItemComponentProps<TData>,
 ) {
   return <div className="h-6 w-px bg-gray-300" />;
