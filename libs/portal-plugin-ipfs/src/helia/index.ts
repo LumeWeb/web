@@ -10,6 +10,7 @@ import { streamToBlob } from "../utils/stream";
 import {
   Configuration,
   type Pin,
+  type PinResults,
   RemotePinningServiceClient,
 } from "@ipfs-shipyard/pinning-service-client";
 
@@ -92,6 +93,7 @@ export class HeliaService {
       throw new Error("UnixFS not initialized");
     }
 
+    const unixfs = this.unixfs;
     const parsedCid = CID.parse(cid);
     const abortController = new AbortController();
 
@@ -99,7 +101,7 @@ export class HeliaService {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of this.unixfs.cat(parsedCid, {
+          for await (const chunk of unixfs.cat(parsedCid, {
             signal: abortController.signal,
           })) {
             controller.enqueue(chunk);
@@ -116,7 +118,7 @@ export class HeliaService {
 
     // Try to get file name and mime type from unixfs metadata
     try {
-      const stat = await this.unixfs.stat(parsedCid, {
+      const stat = await unixfs.stat(parsedCid, {
         signal: abortController.signal,
       });
       const name =

@@ -100,7 +100,10 @@ export class Capability implements RefineConfigCapability {
 
     try {
       const apiDomain = new URL(apiUrl);
-      this.#apiUrl = `${apiDomain.protocol}//${SUBDOMAIN}.${apiDomain.hostname}/api`;
+      const hostWithPort = apiDomain.port
+        ? `${apiDomain.hostname}:${apiDomain.port}`
+        : apiDomain.hostname;
+      this.#apiUrl = `${apiDomain.protocol}//${SUBDOMAIN}.${hostWithPort}${apiDomain.pathname}`;
     } catch (error) {
       throw new Error(`Failed to construct API URL: ${error.message}`);
     }

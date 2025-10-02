@@ -120,7 +120,11 @@ const FileManagerInner: React.FC = () => {
       header: "Created On",
       cell: ({ row }) => {
         const item = row.original;
-        return new Date(item.created).toLocaleDateString();
+        if (!item.created) {
+          return "—";
+        }
+        const date = new Date(item.created);
+        return !isNaN(date.getTime()) ? date.toLocaleDateString() : "—";
       },
     },
   ];
