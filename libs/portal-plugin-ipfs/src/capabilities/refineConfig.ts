@@ -22,6 +22,7 @@ export class Capability implements RefineConfigCapability {
   #apiUrl: string;
   #authToken: string | null = null;
   #emitter: Emitter;
+  #authUnbind: (() => void) | null = null;
 
   /**
    * Gets the API URL for this capability
@@ -44,7 +45,12 @@ export class Capability implements RefineConfigCapability {
     return this.#emitter;
   }
 
-  async destroy() {}
+  async destroy() {
+    if (this.#authUnbind) {
+      this.#authUnbind();
+      this.#authUnbind = null;
+    }
+  }
 
   getConfig(existing?: Partial<RefineProps>) {
     const acctProvider = dataProvider(this.#apiUrl, true);
@@ -53,7 +59,20 @@ export class Capability implements RefineConfigCapability {
       | AuthProviderWithEmitter
       | undefined;
     if (authProvider) {
-      authProvider.on("authCheckSuccess", (params) => {
+      // Check if auth provider already has a token
+      const currentToken = 
+        typeof authProvider.getToken === 'function' 
+          ? authProvider.getToken() 
+          : (authProvider as any).token || (authProvider as any).currentToken || null;
+      
+      if (currentToken) {
+        acctProvider.setAuthToken(currentToken);
+        this.#authToken = currentToken;
+        this.#emitter.emit("authTokenChanged", currentToken);
+      }
+
+      // Save the unbind function for cleanup
+      this.#authUnbind = authProvider.on("authCheckSuccess", (params) => {
         acctProvider.setAuthToken(params.token);
         this.#authToken = params.token;
         this.#emitter.emit("authTokenChanged", params.token);

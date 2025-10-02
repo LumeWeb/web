@@ -3,26 +3,23 @@ import React from "react";
 import { FilterGroup } from "./toolbarItems/FilterGroup";
 import { FilterResolver } from "./toolbarItems/FilterResolver";
 
-import type { 
-  ToolbarItem, 
-  ToolbarItemComponentProps, 
-  ToolbarFilterItem,
-  ToolbarFilterGroupItem,
+import {
+  ExtendedToolbarItem,
+  FilterConfig,
   ToolbarCustomItem,
-  FilterConfig 
+  ToolbarFilterGroupItem,
+  ToolbarFilterItem,
+  ToolbarItem,
+  ToolbarItemComponentProps,
 } from "./DataTable.types";
 import { ToolbarItemType } from "./DataTable.types";
 import { BaseRecord } from "@refinedev/core";
-import { Filter } from "lucide-react";
-import {
-  getAction,
-  getFilter,
-} from "./ToolbarRegistry";
+import { getAction } from "./ToolbarRegistry";
 
 // Registry for toolbar item renderers
 type ToolbarItemRenderer<TData extends BaseRecord> = (
   item: ToolbarItem<TData>,
-  commonProps: ToolbarItemComponentProps<TData>
+  commonProps: ToolbarItemComponentProps<TData>,
 ) => React.ReactNode;
 
 const toolbarItemRenderers = new Map<string, ToolbarItemRenderer<any>>();
@@ -30,7 +27,7 @@ const toolbarItemRenderers = new Map<string, ToolbarItemRenderer<any>>();
 // Internal renderer components
 function ActionItemRenderer<TData extends BaseRecord>(
   item: ToolbarItem<TData>,
-  commonProps: ToolbarItemComponentProps<TData>
+  commonProps: ToolbarItemComponentProps<TData>,
 ) {
   const actionItem = getAction<TData>(item.id);
   if (!actionItem) return null;
@@ -50,11 +47,11 @@ function ActionItemRenderer<TData extends BaseRecord>(
 }
 
 function FilterItemRenderer<TData extends BaseRecord>(
-  item: ToolbarItem<TData>,
-  commonProps: ToolbarItemComponentProps<TData>
+  item: ExtendedToolbarItem<TData>,
+  commonProps: ToolbarItemComponentProps<TData>,
 ) {
   const filterItem = item as ToolbarFilterItem<TData>;
-  
+
   return (
     <div className="flex flex-col">
       <label className="text-sm font-medium">{filterItem.label}</label>
@@ -65,21 +62,16 @@ function FilterItemRenderer<TData extends BaseRecord>(
 
 function FilterGroupItemRenderer<TData extends BaseRecord>(
   item: ToolbarItem<TData>,
-  commonProps: ToolbarItemComponentProps<TData>
+  commonProps: ToolbarItemComponentProps<TData>,
 ) {
   const filterGroupItem = item as ToolbarFilterGroupItem<TData>;
-  
-  return (
-    <FilterGroup 
-      item={filterGroupItem} 
-      commonProps={commonProps} 
-    />
-  );
+
+  return <FilterGroup item={filterGroupItem} commonProps={commonProps} />;
 }
 
 function SeparatorItemRenderer<TData extends BaseRecord>(
   item: ToolbarItem<TData>,
-  commonProps: ToolbarItemComponentProps<TData>
+  commonProps: ToolbarItemComponentProps<TData>,
 ) {
   return <div className="h-6 w-px bg-gray-300" />;
 }
@@ -89,7 +81,10 @@ function registerDefaultRenderers() {
   // Action item renderer
   toolbarItemRenderers.set(ToolbarItemType.ACTION, ActionItemRenderer);
   toolbarItemRenderers.set(ToolbarItemType.FILTER, FilterItemRenderer);
-  toolbarItemRenderers.set(ToolbarItemType.FILTER_GROUP, FilterGroupItemRenderer);
+  toolbarItemRenderers.set(
+    ToolbarItemType.FILTER_GROUP,
+    FilterGroupItemRenderer,
+  );
 
   // Separator item renderer
   toolbarItemRenderers.set(ToolbarItemType.SEPARATOR, SeparatorItemRenderer);
@@ -105,7 +100,7 @@ export const ToolbarRendererRegistry = {
    */
   register<TData extends BaseRecord>(
     type: string,
-    renderer: ToolbarItemRenderer<TData>
+    renderer: ToolbarItemRenderer<TData>,
   ) {
     toolbarItemRenderers.set(type, renderer);
   },
@@ -113,7 +108,9 @@ export const ToolbarRendererRegistry = {
   /**
    * Get a registered renderer for a toolbar item type
    */
-  get<TData extends BaseRecord>(type: string): ToolbarItemRenderer<TData> | undefined {
+  get<TData extends BaseRecord>(
+    type: string,
+  ): ToolbarItemRenderer<TData> | undefined {
     return toolbarItemRenderers.get(type);
   },
 
@@ -156,19 +153,19 @@ interface ToolbarRendererProps<TData extends BaseRecord> {
 function ToolbarRenderer<TData extends BaseRecord>({
   item,
   commonProps,
-  className
+  className,
 }: ToolbarRendererProps<TData>) {
   const containerClassName = cn(
     "flex items-center",
     item.type === ToolbarItemType.SEPARATOR && "mx-2",
-    className
+    className,
   );
 
   // Handle CUSTOM type items directly
   if (item.type === ToolbarItemType.CUSTOM) {
     const customItem = item as ToolbarCustomItem<TData>;
     const CustomComponent = customItem.component;
-    
+
     if (CustomComponent) {
       return (
         <div className={containerClassName}>
@@ -176,7 +173,7 @@ function ToolbarRenderer<TData extends BaseRecord>({
         </div>
       );
     }
-    
+
     return null;
   }
 
@@ -189,11 +186,7 @@ function ToolbarRenderer<TData extends BaseRecord>({
 
   const renderedItem = renderer(item, commonProps);
 
-  return (
-    <div className={containerClassName}>
-      {renderedItem}
-    </div>
-  );
+  return <div className={containerClassName}>{renderedItem}</div>;
 }
 
 export { ToolbarRenderer };
