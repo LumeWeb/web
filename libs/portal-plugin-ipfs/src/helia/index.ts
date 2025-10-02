@@ -13,11 +13,7 @@ import {
   type PinResults,
   RemotePinningServiceClient,
 } from "@ipfs-shipyard/pinning-service-client";
-
-export interface HeliaServiceConfig {
-  apiUrl?: string;
-  authToken?: string;
-}
+import type { HeliaServiceConfig } from "@/types";
 
 export class HeliaService {
   private helia: Helia | null = null;
@@ -29,10 +25,16 @@ export class HeliaService {
     this.config = config;
   }
 
-  updateConfig(config: Partial<HeliaServiceConfig>): void {
+  async updateConfig(config: Partial<HeliaServiceConfig>): Promise<void> {
+    // Destroy existing instance before updating config
+    try {
+      await this.destroy();
+    } catch (error) {
+      console.error("Error during config update cleanup:", error);
+      throw error;
+    }
+
     this.config = { ...this.config, ...config };
-    // Recreate helia instance when config updates
-    this.destroy();
   }
 
   getConfig(): HeliaServiceConfig {
@@ -44,11 +46,40 @@ export class HeliaService {
       return this.helia;
     }
 
-    const blockstore = new IDBBlockstore("helia-blocks");
-    const datastore = new IDBDatastore("helia-data");
+    // Validate API URL first to prevent resource leaks
+    if (!this.config.apiUrl) {
+      throw new Error("API URL is required");
+    }
 
-    await blockstore.open();
-    await datastore.open();
+    let blockstore: IDBBlockstore | null = null;
+    let datastore: IDBDatastore | null = null;
+
+    try {
+      blockstore = new IDBBlockstore("helia-blocks");
+      datastore = new IDBDatastore("helia-data");
+
+      await blockstore.open();
+      await datastore.open();
+    } catch (error) {
+      // Cleanup any partially opened stores
+      try {
+        if (blockstore) {
+          await blockstore.close();
+        }
+      } catch (closeError) {
+        console.error("Error closing blockstore:", closeError);
+      }
+
+      try {
+        if (datastore) {
+          await datastore.close();
+        }
+      } catch (closeError) {
+        console.error("Error closing datastore:", closeError);
+      }
+
+      throw new Error(`Failed to initialize stores: ${error}`);
+    }
 
     // Create trustless gateway block broker with auth headers
     const gatewayBlockBroker = trustlessGateway({
@@ -67,9 +98,6 @@ export class HeliaService {
     });
 
     // Create HTTP gateway router using the IPFS API URL
-    if (!this.config.apiUrl) {
-      throw new Error("API URL is required");
-    }
     const gatewayRouter = httpGatewayRouting({
       gateways: [this.config.apiUrl],
     });
@@ -193,9 +221,38 @@ export class HeliaService {
       return;
     }
 
-    // Unpin all requests for this CID
-    for (const pin of pins.results) {
-      await client.pinsRequestidDelete({ requestid: pin.requestid });
+    // Get all request IDs
+    const requestIds = pins.results.map((pin) => pin.requestid);
+
+    // Attempt to unpin all requests concurrently
+    const results = await Promise.allSettled(
+      requestIds.map((requestId) =>
+        client.pinsRequestidDelete({ requestid: requestId }),
+      ),
+    );
+
+    // Collect any failures
+    const failures = results
+      .map((result, index) => ({ result, requestId: requestIds[index] }))
+      .filter(({ result }) => result.status === "rejected")
+      .map(({ result, requestId }) => ({
+        requestId,
+        error: (result as PromiseRejectedResult).reason,
+      }));
+
+    // If there were any failures, log them but don't throw
+    if (failures.length > 0) {
+      const errorMessages = failures
+        .map(
+          ({ requestId, error }) =>
+            `Failed to unpin request ID ${requestId}: ${error.message || error}`,
+        )
+        .join("; ");
+
+      const error = new Error(
+        `Partial unpin failure for CID ${cid}: ${errorMessages}`,
+      );
+      console.error(error.message);
     }
   }
 
@@ -209,7 +266,8 @@ export class HeliaService {
       });
       return pins.results.length > 0;
     } catch (error) {
-      return false;
+      console.error(`Error checking pin status for CID ${cid}:`, error);
+      throw error;
     }
   }
 
@@ -222,10 +280,40 @@ export class HeliaService {
 
   async destroy(): Promise<void> {
     if (this.helia) {
-      await this.helia.stop();
+      // Get references to blockstore and datastore before stopping helia
+      const blockstore = this.helia.blockstore;
+      const datastore = this.helia.datastore;
+
+      // Stop helia first
+      try {
+        await this.helia.stop();
+      } catch (error) {
+        console.error("Error stopping Helia:", error);
+      }
+
+      // Close blockstore and datastore explicitly
+      try {
+        if (blockstore && typeof blockstore.close === "function") {
+          await blockstore.close();
+        }
+      } catch (error) {
+        console.error("Error closing blockstore:", error);
+      }
+
+      try {
+        if (datastore && typeof datastore.close === "function") {
+          await datastore.close();
+        }
+      } catch (error) {
+        console.error("Error closing datastore:", error);
+      }
+
+      // Clear references
       this.helia = null;
       this.unixfs = null;
     }
+
+    // Always clear pinning client reference
     this.pinningClient = null;
   }
 }

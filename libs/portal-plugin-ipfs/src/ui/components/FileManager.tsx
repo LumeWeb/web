@@ -108,7 +108,7 @@ const FileManagerInner: React.FC = () => {
       header: "Size",
       cell: ({ row }) => {
         const item = row.original;
-        return item.size
+        return item.size != null
           ? formatFileSize(item.size)
           : item.is_directory
             ? "—"
