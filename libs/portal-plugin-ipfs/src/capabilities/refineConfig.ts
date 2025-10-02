@@ -60,11 +60,13 @@ export class Capability implements RefineConfigCapability {
       | undefined;
     if (authProvider) {
       // Check if auth provider already has a token
-      const currentToken = 
-        typeof authProvider.getToken === 'function' 
-          ? authProvider.getToken() 
-          : (authProvider as any).token || (authProvider as any).currentToken || null;
-      
+      const currentToken =
+        typeof authProvider.getToken === "function"
+          ? authProvider.getToken()
+          : (authProvider as any).token ||
+            (authProvider as any).currentToken ||
+            null;
+
       if (currentToken) {
         acctProvider.setAuthToken(currentToken);
         this.#authToken = currentToken;
@@ -122,7 +124,7 @@ export class Capability implements RefineConfigCapability {
       const hostWithPort = apiDomain.port
         ? `${apiDomain.hostname}:${apiDomain.port}`
         : apiDomain.hostname;
-      this.#apiUrl = `${apiDomain.protocol}//${SUBDOMAIN}.${hostWithPort}${apiDomain.pathname}`;
+      this.#apiUrl = `${apiDomain.protocol}//${SUBDOMAIN}.${hostWithPort}/api`;
     } catch (error) {
       throw new Error(`Failed to construct API URL: ${error.message}`);
     }
