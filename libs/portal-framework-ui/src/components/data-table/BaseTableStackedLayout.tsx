@@ -92,6 +92,18 @@ function BaseTableStackedLayout<TData extends BaseRecord>({
   // Use the shared hook for row handling
   const getTableRowProps = useTableRowHandlers({ onRowClick, getRowProps });
 
+  // Get all visible column IDs for mobile hiding hook
+  const visibleColumnIds = React.useMemo(() => {
+    return table.getAllLeafColumns().map(column => column.id);
+  }, [table]);
+
+  // Determine hidden columns at top level
+  const hiddenColumns = useMobileColumnHiding({
+    responsive,
+    hideColumnsOnMobile,
+    columnIds: visibleColumnIds,
+  });
+
   if (isLoading) {
     return (
       <div className={cn(className)}>
@@ -153,14 +165,8 @@ function BaseTableStackedLayout<TData extends BaseRecord>({
               <CardContent
                 className={cn("space-y-3", "[word-break:break-word]")}>
                 {row.getVisibleCells().map((cell) => {
-                  // Use the shared hook for mobile column hiding
-                  const isHidden = useMobileColumnHiding({
-                    responsive,
-                    hideColumnsOnMobile,
-                    columnId: cell.column.id,
-                  });
-
-                  if (isHidden) {
+                  // Check if column should be hidden using the precomputed set
+                  if (hiddenColumns.has(cell.column.id)) {
                     return null;
                   }
 

@@ -33,25 +33,10 @@ const coreSupported = new Set(["xs", "sm", "md", "lg", "xl", "2xl"]);
 function ActionItemRenderer<TData extends BaseRecord>(
   item: ExtendedToolbarItem<TData>,
   commonProps: ToolbarItemComponentProps<TData>,
+  isMobile: boolean,
 ) {
   const actionItem = getAction<TData>(item.id);
   if (!actionItem) return null;
-
-  // Validate mobileBreakpoint value
-  const mobileBreakpoint = commonProps.context?.toolbarConfig?.mobileBreakpoint;
-  const candidate = Object.values(ComponentSize).includes(mobileBreakpoint as ComponentSize)
-    ? mobileBreakpoint
-    : mobileBreakpoint;
-  
-  const breakpointName =
-    typeof candidate === "string" && !coreSupported.has(candidate)
-      ? ComponentSize.SM
-      : candidate;
-
-  // Check if we're on mobile to adjust button sizing
-  const { isMobile } = useMobileDetection({
-    breakpoint: breakpointName || ComponentSize.SM,
-  });
 
   // Use mobile size on small screens for better touch targets
   const buttonSize = isMobile ? "mobile" : actionItem.size;
@@ -179,6 +164,22 @@ function ToolbarRenderer<TData extends BaseRecord>({
   commonProps,
   className,
 }: ToolbarRendererProps<TData>) {
+  // Validate mobileBreakpoint value
+  const mobileBreakpoint = commonProps.context?.toolbarConfig?.mobileBreakpoint;
+  const candidate = Object.values(ComponentSize).includes(mobileBreakpoint as ComponentSize)
+    ? mobileBreakpoint
+    : mobileBreakpoint;
+  
+  const breakpointName =
+    typeof candidate === "string" && !coreSupported.has(candidate)
+      ? ComponentSize.SM
+      : candidate;
+
+  // Check if we're on mobile to adjust button sizing
+  const { isMobile } = useMobileDetection({
+    breakpoint: breakpointName || ComponentSize.SM,
+  });
+
   const containerClassName = cn(
     "flex items-center",
     item.type === ToolbarItemType.SEPARATOR && "mx-2",
@@ -208,7 +209,7 @@ function ToolbarRenderer<TData extends BaseRecord>({
     return null;
   }
 
-  const renderedItem = renderer(item, commonProps);
+  const renderedItem = renderer(item, commonProps, isMobile);
 
   return <div className={containerClassName}>{renderedItem}</div>;
 }
