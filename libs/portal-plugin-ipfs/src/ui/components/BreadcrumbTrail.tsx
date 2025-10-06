@@ -1,7 +1,7 @@
 import React from "react";
 import { Folder, ChevronRight } from "lucide-react";
 import { cn } from "@lumeweb/portal-framework-ui-core";
-import { BreadcrumbItem } from "./Breadcrumbs";
+import type { BreadcrumbItem } from "./Breadcrumbs";
 
 export interface BreadcrumbTrailProps {
   breadcrumbs: BreadcrumbItem[];
@@ -27,7 +27,7 @@ export const BreadcrumbTrail: React.FC<BreadcrumbTrailProps> = ({
     const lastItem = breadcrumbs[breadcrumbs.length - 1];
 
     return (
-      <div className="scrollbar-hide flex items-center overflow-x-auto">
+      <nav aria-label="Breadcrumb" className="scrollbar-hide flex items-center overflow-x-auto">
         {firstItems.map((crumb, index) => (
           <div key={crumb.path} className="flex flex-shrink-0 items-center">
             <button
@@ -71,6 +71,7 @@ export const BreadcrumbTrail: React.FC<BreadcrumbTrailProps> = ({
 
         <div className="flex flex-shrink-0 items-center">
           <span
+            aria-hidden="true"
             className={`text-muted-foreground ${isMobile ? "mx-0.5 text-xs" : "mx-1 text-sm"} `}>
             ...
           </span>
@@ -91,7 +92,7 @@ export const BreadcrumbTrail: React.FC<BreadcrumbTrailProps> = ({
                 navigateToPath(lastItem.path);
               }
             }}
-            aria-label={`Navigate to ${lastItem.name}`}
+            aria-label={`Current page: ${lastItem.name}`}
             aria-current="page"
             className={cn(
               "hover:bg-muted text-foreground flex min-h-[2.25em] min-w-[2.25em] items-center rounded font-medium transition-colors",
@@ -117,7 +118,7 @@ export const BreadcrumbTrail: React.FC<BreadcrumbTrailProps> = ({
             </span>
           </button>
         </div>
-      </div>
+      </nav>
     );
   };
 
@@ -129,7 +130,7 @@ export const BreadcrumbTrail: React.FC<BreadcrumbTrailProps> = ({
     isMobile = false,
   }) => {
     return (
-      <div className="scrollbar-hide flex items-center overflow-x-auto">
+      <nav aria-label="Breadcrumb" className="scrollbar-hide flex items-center overflow-x-auto">
         {breadcrumbs.map((crumb, index) => (
           <div key={crumb.path} className="flex flex-shrink-0 items-center">
             <button
@@ -180,7 +181,7 @@ export const BreadcrumbTrail: React.FC<BreadcrumbTrailProps> = ({
             )}
           </div>
         ))}
-      </div>
+      </nav>
     );
   };
 
