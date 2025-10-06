@@ -17,11 +17,13 @@ import {
   TableInstanceProvider,
   useTableConfigOptional,
 } from "./contexts";
-import { ToolbarConfig } from "./DataTable.types";
+import { ToolbarConfig, TableLayoutType } from "./DataTable.types";
 import {
   getAvailableOperators,
   getDefaultOperatorForFieldType,
 } from "./toolbarItems/filters/hooks/useFilterOperators";
+import { filterColumnsForMobile } from "./filterColumnsForMobile";
+import { ComponentSize } from "@lumeweb/portal-framework-ui-core";
 
 export interface ActionColumnCellProps<TData> {
   row: Row<TData>;
@@ -111,18 +113,51 @@ export interface TableStateProps<TData> {
   loadingStateMessage?: string;
 }
 
-export interface TableStylingProps {
-  className?: string;
-  footer?: React.ReactNode;
+export interface TableResponsiveProps {
+  responsive?: boolean;
+  layoutType?: TableLayoutType;
+  hideColumnsOnMobile?: string[];
+  mobileBreakpoint?: ComponentSize | string;
+}
+
+export interface TableHeaderFooterProps {
   header?: React.ReactNode;
+  footer?: React.ReactNode;
+}
+
+export interface TableStylingProps extends TableResponsiveProps, TableHeaderFooterProps {
+  className?: string;
+}
+
+export interface BaseTableLayoutPropsBase<TData extends BaseRecord> 
+  extends TableInteractionProps<TData>,
+    TableStateProps<TData>,
+    TableHeaderFooterProps,
+    TableStylingProps,
+    BaseTableCommonProps<TData>,
+    TablePaginationConfigProps {
+  table: Table<TData>;
 }
 
 function BaseTableWithData<TData extends BaseRecord>(
   props: BaseTableWithDataProps<TData>,
 ) {
+  const {
+    columns,
+    data,
+    hideColumnsOnMobile = [],
+    responsive = false,
+    ...restProps
+  } = props;
+
+  // Filter columns for mobile if responsive mode is enabled
+  const filteredColumns = responsive 
+    ? filterColumnsForMobile(columns, hideColumnsOnMobile) 
+    : columns;
+
   const table = useReactTable({
-    data: props.data,
-    columns: props.columns,
+    data,
+    columns: filteredColumns,
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -153,7 +188,7 @@ function BaseTableWithData<TData extends BaseRecord>(
                   }
                 : undefined
             }>
-            <BaseTableInner {...props} />
+            <BaseTableInner {...restProps} />
           </TableConfigProvider>
         </FilterHelpersProvider>
       </TableInstanceProvider>
@@ -166,13 +201,33 @@ function BaseTableWithData<TData extends BaseRecord>(
         refineTable={props.refineTable}
         getDefaultOperator={getDefaultOperatorForFieldType}
         getAvailableOperators={getAvailableOperators}>
-        <BaseTableInner {...props} />
+        <BaseTableInner {...restProps} />
       </FilterHelpersProvider>
     </TableInstanceProvider>
   );
 }
 
 function BaseTable<TData extends object>(props: BaseTableProps<TData>) {
+  const {
+    className,
+    emptyState,
+    emptyStateMessage,
+    footer,
+    getCellProps,
+    getRowProps,
+    header,
+    isLoading,
+    loadingState,
+    loadingStateMessage,
+    onRowClick,
+    pagination,
+    responsive = false,
+    layoutType = TableLayoutType.AUTO,
+    hideColumnsOnMobile = [],
+    mobileBreakpoint,
+    ...restProps
+  } = props;
+
   if ("table" in props && props.table && "data" in props && props.data) {
     throw new Error(
       "BaseTable cannot accept both table and data props - use one or the other",
@@ -207,7 +262,24 @@ function BaseTable<TData extends object>(props: BaseTableProps<TData>) {
                     }
                   : undefined
               }>
-              <BaseTableInner {...props} />
+              <BaseTableInner 
+                className={className}
+                emptyState={emptyState}
+                emptyStateMessage={emptyStateMessage}
+                footer={footer}
+                getCellProps={getCellProps}
+                getRowProps={getRowProps}
+                header={header}
+                isLoading={isLoading}
+                loadingState={loadingState}
+                loadingStateMessage={loadingStateMessage}
+                onRowClick={onRowClick}
+                pagination={pagination}
+                responsive={responsive}
+                layoutType={layoutType}
+                hideColumnsOnMobile={hideColumnsOnMobile}
+                mobileBreakpoint={mobileBreakpoint}
+              />
             </TableConfigProvider>
           </FilterHelpersProvider>
         </TableInstanceProvider>
@@ -220,7 +292,24 @@ function BaseTable<TData extends object>(props: BaseTableProps<TData>) {
           refineTable={props.refineTable}
           getDefaultOperator={getDefaultOperatorForFieldType}
           getAvailableOperators={getAvailableOperators}>
-          <BaseTableInner {...props} />
+          <BaseTableInner 
+            className={className}
+            emptyState={emptyState}
+            emptyStateMessage={emptyStateMessage}
+            footer={footer}
+            getCellProps={getCellProps}
+            getRowProps={getRowProps}
+            header={header}
+            isLoading={isLoading}
+            loadingState={loadingState}
+            loadingStateMessage={loadingStateMessage}
+            onRowClick={onRowClick}
+            pagination={pagination}
+            responsive={responsive}
+            layoutType={layoutType}
+            hideColumnsOnMobile={hideColumnsOnMobile}
+            mobileBreakpoint={mobileBreakpoint}
+          />
         </FilterHelpersProvider>
       </TableInstanceProvider>
     );

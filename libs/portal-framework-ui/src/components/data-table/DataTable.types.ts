@@ -45,6 +45,13 @@ export enum ToolbarItemType {
   FILTER_GROUP = "filter-group",
 }
 
+// Table layout types
+export enum TableLayoutType {
+  TABLE = "table",
+  STACKED = "stacked",
+  AUTO = "auto",
+}
+
 // Refine contexts for toolbar items
 export interface ToolbarRefineContext<TData extends BaseRecord> {
   /** The Refine table instance */
@@ -204,11 +211,17 @@ export interface ToolbarConfig<TData extends BaseRecord> {
   defaultAlignment?: ToolbarItemAlignment;
   /** Whether to automatically distribute space between left and right aligned items */
   justifyBetween?: boolean;
+  /** Mobile breakpoint configuration */
+  mobileBreakpoint?: string;
 }
 
 export interface DataTableActionMenuProps<TData> {
   items: TableActionMenuItem<TData>[];
   label?: string;
+  /**
+   * Action items to display as individual buttons
+   */
+  actionItems?: TableActionItem<TData>[];
 }
 
 export interface DataTableProps<
@@ -249,4 +262,9 @@ export interface DataTableProps<
    * This value gets passed to React Query through refineCoreProps
    */
   refetchInterval?: number;
+  /**
+   * Custom control elements to render above the table, typically used for DataTableController
+   * or other custom control components that need access to table controls
+   */
+  control?: React.ReactNode;
 }

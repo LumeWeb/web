@@ -15,6 +15,8 @@ import {
 import { ToolbarItemType } from "./DataTable.types";
 import { BaseRecord } from "@refinedev/core";
 import { getAction } from "./ToolbarRegistry";
+import { useMobileDetection } from "./useMobileDetection";
+import { ComponentSize } from "@lumeweb/portal-framework-ui-core";
 
 // Registry for toolbar item renderers
 type ToolbarItemRenderer<TData extends BaseRecord> = (
@@ -32,12 +34,20 @@ function ActionItemRenderer<TData extends BaseRecord>(
   const actionItem = getAction<TData>(item.id);
   if (!actionItem) return null;
 
+  // Check if we're on mobile to adjust button sizing
+  const { isMobile } = useMobileDetection({
+    mobileBreakpoint: commonProps.context?.toolbarConfig?.mobileBreakpoint || ComponentSize.SM,
+  });
+
+  // Use mobile size on small screens for better touch targets
+  const buttonSize = isMobile ? "mobile" : actionItem.size;
+
   return (
     <Button
       className={actionItem.className}
       disabled={actionItem.disabled}
       onClick={() => actionItem.onClick(commonProps)}
-      size={actionItem.size}
+      size={buttonSize}
       title={actionItem.tooltip}
       variant={actionItem.variant}>
       {actionItem.icon && <span className="mr-2">{actionItem.icon}</span>}

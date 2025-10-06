@@ -74,27 +74,23 @@ const OperationsContent = () => {
       cell: (info) => {
         const protocolId = info.getValue();
         const protocolDisplayName = info.row.original.protocol_display_name;
-
         const protocolCapability = protocolCapabilitiesMap.get(protocolId);
 
         if (!protocolCapability) {
           return (
             <span className="text-gray-400">
-              {protocolDisplayName || protocolId}
+              {protocolDisplayName || protocolId || "-"}
             </span>
           );
         }
 
         const IconComponent = protocolCapability.getIcon();
         const name = protocolCapability.getName();
-        const description = protocolCapability.getDescription();
 
         return (
           <div className="flex items-center gap-2">
             {IconComponent && <IconComponent className="h-4 w-4" />}
-            <span className="text-gray-400" title={description}>
-              {protocolDisplayName || name}
-            </span>
+            <span className="text-gray-400">{protocolDisplayName || name}</span>
           </div>
         );
       },
@@ -103,16 +99,15 @@ const OperationsContent = () => {
     columnHelper.accessor("cid", {
       cell: (info) => {
         const cidValue = info.getValue();
-        
-        // Handle CID object format { "/": "bafy..." } or string
-        const getSafeCidString = (cid: any): string | undefined => {
-          if (typeof cid === 'string') return cid;
-          if (cid && typeof cid === 'object' && cid['/']) return cid['/'];
-          return undefined;
-        };
 
-        const cid = getSafeCidString(cidValue);
-        
+        // Handle CID object format { "/": "bafy..." } or string
+        const cid =
+          typeof cidValue === "string"
+            ? cidValue
+            : cidValue && typeof cidValue === "object" && cidValue["/"]
+              ? cidValue["/"]
+              : undefined;
+
         if (!cid) {
           return <span className="text-gray-500">-</span>;
         }
@@ -132,6 +127,8 @@ const OperationsContent = () => {
       cell: (info) => {
         const status = info.getValue();
         const statusDisplayName = info.row.original.status_display_name;
+        const progress = info.row.original.progress_percent;
+
         const getStatusColor = (status: string) => {
           switch (status.toLowerCase()) {
             case "completed":
@@ -147,36 +144,46 @@ const OperationsContent = () => {
           }
         };
 
+        const statusColor = getStatusColor(status);
+
+        // For processing status, show progress percentage
+        if (status?.toLowerCase() === "processing" && progress !== undefined) {
+          return (
+            <div className="flex items-center gap-2">
+              <Badge className={`${statusColor} border-0 text-white`}>
+                {statusDisplayName || status}
+              </Badge>
+              <span className="text-sm text-gray-400">{progress}%</span>
+            </div>
+          );
+        }
+
+        // For failed status, show error if available
+        if (status?.toLowerCase() === "failed") {
+          const error = info.row.original.error;
+          return (
+            <div className="flex items-center gap-2">
+              <Badge className={`${statusColor} border-0 text-white`}>
+                {statusDisplayName || status}
+              </Badge>
+              {error && (
+                <span
+                  className="max-w-xs truncate text-sm text-red-400"
+                  title={error}>
+                  {error}
+                </span>
+              )}
+            </div>
+          );
+        }
+
         return (
-          <Badge className={`${getStatusColor(status)} border-0 text-white`}>
+          <Badge className={`${statusColor} border-0 text-white`}>
             {statusDisplayName || status}
           </Badge>
         );
       },
       header: "Status",
-    }),
-    columnHelper.accessor("progress_percent", {
-      cell: (info) => {
-        const progress = info.getValue();
-        const status = info.row.original.status;
-
-        if (status?.toLowerCase() === "failed") {
-          return <span className="text-sm text-gray-500">-</span>;
-        }
-
-        return (
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-16 rounded-full bg-gray-700">
-              <div
-                className="h-2 animate-pulse rounded-full bg-blue-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <span className="text-sm text-gray-400">{progress}%</span>
-          </div>
-        );
-      },
-      header: "Progress",
     }),
     columnHelper.accessor("started_at", {
       cell: (info) => (
@@ -188,20 +195,9 @@ const OperationsContent = () => {
     }),
     columnHelper.accessor("status_message", {
       cell: (info) => (
-        <span className="text-sm text-gray-400">{info.getValue()}</span>
+        <span className="text-sm text-gray-400">{info.getValue() || "-"}</span>
       ),
       header: "Status Message",
-    }),
-    columnHelper.accessor("error", {
-      cell: (info) => {
-        const error = info.getValue();
-        return error ? (
-          <span className="text-sm text-red-400">{error}</span>
-        ) : (
-          <span className="text-sm text-gray-500">-</span>
-        );
-      },
-      header: "Error",
     }),
   ];
 
@@ -224,7 +220,7 @@ const OperationsContent = () => {
     // Try to get description from protocol capability, fallback to filter data
     const protocolCapability = protocolCapabilitiesMap.get(option.value);
     const description =
-      protocolCapability?.getDescription() || option.description;
+      protocolCapability?.getDescription() || option.description || "";
 
     return {
       label: option.name,
@@ -247,6 +243,7 @@ const OperationsContent = () => {
             pagination={true}
             refetchInterval={5000}
             resource={"operations"}
+            responsive={true}
             toolbar={{
               items: isFiltersLoading
                 ? []
@@ -255,13 +252,17 @@ const OperationsContent = () => {
                       type: ToolbarItemType.FILTER_GROUP,
                       id: "operations-filters",
                       label: "Filters",
-                      size: ComponentSize.AUTO,
                       dropdownStyle: true,
                       items: [
                         {
+                          type: ToolbarItemType.FILTER,
                           id: "status",
+                          field: "status",
                           label: "Statuses",
                           config: {
+                            id: "status",
+                            label: "Statuses",
+                            field: "status",
                             type: FilterType.SELECT,
                             operator: FilterOperator.EQ,
                             options: statusOptions,
@@ -269,9 +270,14 @@ const OperationsContent = () => {
                           },
                         },
                         {
+                          type: ToolbarItemType.FILTER,
                           id: "protocol",
+                          field: "protocol",
                           label: "Services",
                           config: {
+                            id: "protocol",
+                            label: "Services",
+                            field: "protocol",
                             type: FilterType.SELECT,
                             operator: FilterOperator.EQ,
                             options: protocolOptions,
@@ -279,9 +285,14 @@ const OperationsContent = () => {
                           },
                         },
                         {
+                          type: ToolbarItemType.FILTER,
                           id: "operation",
+                          field: "operation",
                           label: "Operations",
                           config: {
+                            id: "operation",
+                            label: "Operations",
+                            field: "operation",
                             type: FilterType.SELECT,
                             operator: FilterOperator.EQ,
                             options: operationOptions,

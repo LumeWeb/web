@@ -1,10 +1,11 @@
 import { Table } from "@tanstack/react-table";
 import React from "react";
 
-import { BaseTableCommonProps, BaseTablePaginationConfig } from "./BaseTable";
+import { BaseTablePaginationConfig, TableStateProps } from "./BaseTable";
 import { DefaultPagination } from "./DefaultPagination";
 import { TableEmptyState } from "./EmptyState";
 import { TableLoadingState } from "./LoadingState";
+import { BaseRecord } from "@refinedev/core";
 
 export interface NormalizedTableOptions<TData> {
   emptyState: React.ReactNode;
@@ -15,12 +16,12 @@ export interface NormalizedTableOptions<TData> {
   };
 }
 
-export function normalizeTableOptions<TData>(
+export function normalizeTableOptions<TData extends BaseRecord>(
   pagination: BaseTablePaginationConfig | undefined,
-  emptyState: BaseTableCommonProps<TData>["emptyState"],
-  emptyStateMessage: BaseTableCommonProps<TData>["emptyStateMessage"],
-  loadingState: BaseTableCommonProps<TData>["loadingState"],
-  loadingStateMessage: BaseTableCommonProps<TData>["loadingStateMessage"],
+  emptyState: TableStateProps<TData>["emptyState"],
+  emptyStateMessage: TableStateProps<TData>["emptyStateMessage"],
+  loadingState: TableStateProps<TData>["loadingState"],
+  loadingStateMessage: TableStateProps<TData>["loadingStateMessage"],
   table: Table<TData>,
 ): NormalizedTableOptions<TData> {
   let paginationComponent: React.ReactNode = null;

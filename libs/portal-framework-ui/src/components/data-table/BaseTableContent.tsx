@@ -1,20 +1,15 @@
-import {
-  cn,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Table as UITable,
-} from "@lumeweb/portal-framework-ui-core";
-import { Cell, flexRender, Row, Table } from "@tanstack/react-table";
+import { cn } from "@lumeweb/portal-framework-ui-core";
+import { Cell, Row, Table } from "@tanstack/react-table";
 import React from "react";
 
 import { Toolbar } from "./Toolbar";
 import { BaseRecord } from "@refinedev/core";
 import { useTableConfigOptional } from "./contexts";
+import { TableLayoutRenderer } from "./TableLayoutRenderer";
+import { TableLayoutType } from "./DataTable.types";
+import { ComponentSize } from "@lumeweb/portal-framework-ui-core";
 
-interface BaseTableContentProps<TData extends BaseRecord> {
+export interface BaseTableContentProps<TData extends BaseRecord> {
   className?: string;
   emptyState?: React.ReactNode;
   footer?: React.ReactNode;
@@ -30,9 +25,14 @@ interface BaseTableContentProps<TData extends BaseRecord> {
   onRowClick?: (row: Row<TData>) => void;
   pagination?: React.ReactNode;
   table: Table<TData>;
+  responsive?: boolean;
+  layoutType?: TableLayoutType;
+  hideColumnsOnMobile?: string[];
+  mobileBreakpoint?: ComponentSize | string;
+  stackedHeaderColumn?: string;
 }
 
-function BaseTableContent<TData extends object>({
+function BaseTableContent<TData extends BaseRecord>({
   className,
   emptyState,
   footer,
@@ -44,88 +44,37 @@ function BaseTableContent<TData extends object>({
   onRowClick,
   pagination,
   table,
+  responsive = false,
+  layoutType = TableLayoutType.AUTO,
+  hideColumnsOnMobile = [],
+  mobileBreakpoint,
+  stackedHeaderColumn,
 }: BaseTableContentProps<TData>) {
   const tableConfig = useTableConfigOptional<TData>();
   const toolbarConfig = tableConfig?.toolbarConfig;
+
   return (
     <div className={cn(className)}>
       {header && <div className="mb-4">{header}</div>}
       {toolbarConfig && <Toolbar table={table} />}
-      <div className={"scrollbar -mx-4 flex overflow-auto sm:-mx-8"}>
-        <div className={"mx-4 grow sm:mx-8"}>
-          <UITable>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead
-                        className={
-                          header.column.columnDef.meta?.headerClassName
-                        }
-                        key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {isLoading
-                ? loadingState
-                : table.getRowModel().rows.length > 0
-                  ? table.getRowModel().rows.map((row) => {
-                      const rowProps = getRowProps?.(row) || {};
-                      if (onRowClick) {
-                        rowProps.onClick = () => onRowClick(row);
-                        rowProps.tabIndex = 0;
-                        rowProps.role = "button";
-                        rowProps.onKeyDown = (e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            if (e.key === " ") {
-                              e.preventDefault();
-                            }
-                            onRowClick(row);
-                          }
-                        };
-                        rowProps.className = [
-                          rowProps.className,
-                          "cursor-pointer hover:bg-muted",
-                        ]
-                          .filter(Boolean)
-                          .join(" ");
-                      }
-                      return (
-                        <TableRow key={row.id} {...rowProps}>
-                          {row.getVisibleCells().map((cell) => (
-                            <TableCell
-                              className={[
-                                cell.column.columnDef.meta?.cellClassName,
-                              ]
-                                .filter(Boolean)
-                                .join(" ")}
-                              key={cell.id}
-                              {...getCellProps?.(cell)}>
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext(),
-                              )}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      );
-                    })
-                  : emptyState}
-            </TableBody>
-          </UITable>
-        </div>
-      </div>
+      <TableLayoutRenderer
+        layoutType={layoutType}
+        table={table}
+        className={className}
+        emptyState={emptyState}
+        footer={footer}
+        getCellProps={getCellProps}
+        getRowProps={getRowProps}
+        header={header}
+        isLoading={isLoading}
+        loadingState={loadingState}
+        onRowClick={onRowClick}
+        pagination={pagination}
+        responsive={responsive}
+        hideColumnsOnMobile={hideColumnsOnMobile}
+        mobileBreakpoint={mobileBreakpoint || toolbarConfig?.mobileBreakpoint}
+        stackedHeaderColumn={stackedHeaderColumn}
+      />
       {footer && <div className="mt-4">{footer}</div>}
       {pagination && <div className="mt-4">{pagination}</div>}
     </div>
