@@ -42,7 +42,7 @@ export function useMobileDetection({
     // Convert breakpoint to pixel value if needed
     const breakpointValue = 
       typeof breakpoint === "string" 
-        ? tailwindBreakpoints[breakpoint] || tailwindBreakpoints.sm 
+        ? tailwindBreakpoints[breakpoint] ?? tailwindBreakpoints.sm 
         : breakpoint;
 
     // Function to determine current breakpoint based on viewport width

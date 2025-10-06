@@ -1,5 +1,4 @@
 import {
-  cn,
   TableBody,
   TableCell,
   TableHead,
@@ -8,17 +7,22 @@ import {
   Table as UITable,
 } from "@lumeweb/portal-framework-ui-core";
 import { flexRender, Table } from "@tanstack/react-table";
-import React from "react";
+import React, { useMemo } from "react";
 import { BaseRecord } from "@refinedev/core";
-import { 
-  useTableRowHandlers, 
-  useTableCellHandlers, 
+import {
+  useTableRowHandlers,
+  useTableCellHandlers,
   useMobileColumnHiding,
-  useTableHeaderCellHandlers
+  useTableHeaderCellHandlers,
 } from "./useTableHandlers";
 import { BaseTableLayoutPropsBase } from "./BaseTable";
+import { normalizeTableOptions } from "./tableOptions";
 
-interface DefaultTableLayoutProps<TData extends BaseRecord> extends BaseTableLayoutPropsBase<TData> {}
+interface DefaultTableLayoutProps<TData extends BaseRecord>
+  extends BaseTableLayoutPropsBase<TData> {
+  emptyStateMessage?: string;
+  loadingStateMessage?: string;
+}
 
 function DefaultTableLayout<TData extends BaseRecord>({
   table,
@@ -27,47 +31,79 @@ function DefaultTableLayout<TData extends BaseRecord>({
   onRowClick,
   className,
   emptyState,
+  emptyStateMessage,
   footer,
   header,
   isLoading,
   loadingState,
+  loadingStateMessage,
   pagination,
   responsive,
   hideColumnsOnMobile,
-  mobileBreakpoint,
 }: DefaultTableLayoutProps<TData>) {
   // Use the shared hooks for row and cell handling
   const getTableRowProps = useTableRowHandlers({ onRowClick, getRowProps });
   const getTableCellProps = useTableCellHandlers({ getCellProps });
   const getTableHeaderCellProps = useTableHeaderCellHandlers();
-  
+
+  // Normalize table options
+  const normalizedOptions = useMemo(
+    () =>
+      normalizeTableOptions(
+        pagination,
+        emptyState,
+        emptyStateMessage,
+        loadingState,
+        loadingStateMessage,
+        table,
+      ),
+    [
+      pagination,
+      emptyState,
+      emptyStateMessage,
+      loadingState,
+      loadingStateMessage,
+      table,
+    ]
+  );
+
+  // Compute hidden columns once to avoid calling hook inside loops
+  const hiddenColumns = useMemo(() => {
+    const hiddenSet = new Set<string>();
+    if (responsive) {
+      table.getAllLeafColumns().forEach((column) => {
+        if (
+          useMobileColumnHiding({
+            responsive,
+            hideColumnsOnMobile,
+            columnId: column.id,
+          })
+        ) {
+          hiddenSet.add(column.id);
+        }
+      });
+    }
+    return hiddenSet;
+  }, [table, responsive, hideColumnsOnMobile]);
+
   return (
     <div className={className}>
       {header && <div className="mb-4">{header}</div>}
-      <div className="border rounded-md">
+      <div className="rounded-md border">
         <UITable>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
-                  // Use the shared hook for mobile column hiding
-                  const isHidden = useMobileColumnHiding({
-                    responsive,
-                    hideColumnsOnMobile,
-                    columnId: header.id,
-                  });
-                  
-                  if (isHidden) {
+                  // Check if column should be hidden using the precomputed set
+                  if (hiddenColumns.has(header.id)) {
                     return null;
                   }
-                  
+
                   const headerProps = getTableHeaderCellProps(header);
-                  
+
                   return (
-                    <TableHead
-                      key={header.id}
-                      {...headerProps}
-                    >
+                    <TableHead key={header.id} {...headerProps}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -82,34 +118,25 @@ function DefaultTableLayout<TData extends BaseRecord>({
           </TableHeader>
           <TableBody>
             {isLoading
-              ? loadingState
+              ? normalizedOptions.loadingState
               : table.getRowModel().rows.length > 0
                 ? table.getRowModel().rows.map((row) => {
                     // Use the shared hook for row props
                     const rowProps = getTableRowProps(row);
-                    
+
                     return (
                       <TableRow key={row.id} {...rowProps}>
                         {row.getVisibleCells().map((cell) => {
-                          // Use the shared hook for mobile column hiding
-                          const isHidden = useMobileColumnHiding({
-                            responsive,
-                            hideColumnsOnMobile,
-                            columnId: cell.column.id,
-                          });
-                          
-                          if (isHidden) {
+                          // Check if column should be hidden using the precomputed set
+                          if (hiddenColumns.has(cell.column.id)) {
                             return null;
                           }
-                          
+
                           // Use the shared hook for cell props
                           const cellProps = getTableCellProps(cell);
-                          
+
                           return (
-                            <TableCell
-                              key={cell.id}
-                              {...cellProps}
-                            >
+                            <TableCell key={cell.id} {...cellProps}>
                               {flexRender(
                                 cell.column.columnDef.cell,
                                 cell.getContext(),
@@ -120,10 +147,13 @@ function DefaultTableLayout<TData extends BaseRecord>({
                       </TableRow>
                     );
                   })
-                : emptyState}
+                : normalizedOptions.emptyState}
           </TableBody>
         </UITable>
       </div>
+      {normalizedOptions.pagination.enabled && (
+        <div className="mt-4">{normalizedOptions.pagination.component}</div>
+      )}
       {footer && <div className="mt-4">{footer}</div>}
     </div>
   );

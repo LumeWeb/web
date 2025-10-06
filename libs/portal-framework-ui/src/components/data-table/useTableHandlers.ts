@@ -1,6 +1,7 @@
 import { Cell, Row } from "@tanstack/react-table";
 import { cn } from "@lumeweb/portal-framework-ui-core";
 import { BaseRecord } from "@refinedev/core";
+import React from "react";
 
 interface UseTableRowHandlersProps<TData extends BaseRecord> {
   onRowClick?: (row: Row<TData>) => void;
@@ -29,7 +30,7 @@ export function useTableRowHandlers<TData extends BaseRecord>({
   onRowClick,
   getRowProps,
 }: UseTableRowHandlersProps<TData>): (row: Row<TData>) => React.HTMLAttributes<HTMLTableRowElement> {
-  return (row: Row<TData>) => {
+  return React.useCallback((row: Row<TData>) => {
     const baseProps = getRowProps?.(row) || {};
     
     if (!onRowClick) {
@@ -54,7 +55,7 @@ export function useTableRowHandlers<TData extends BaseRecord>({
         baseProps.className,
       ),
     };
-  };
+  }, [onRowClick, getRowProps]);
 }
 
 /**

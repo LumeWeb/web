@@ -117,7 +117,7 @@ export interface TableResponsiveProps {
   responsive?: boolean;
   layoutType?: TableLayoutType;
   hideColumnsOnMobile?: string[];
-  mobileBreakpoint?: ComponentSize | string;
+  mobileBreakpoint?: ComponentSize | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
 export interface TableHeaderFooterProps {

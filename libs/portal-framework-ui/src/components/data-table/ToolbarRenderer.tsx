@@ -26,6 +26,9 @@ type ToolbarItemRenderer<TData extends BaseRecord> = (
 
 const toolbarItemRenderers = new Map<string, ToolbarItemRenderer<any>>();
 
+// Define core supported breakpoints
+const coreSupported = new Set(["xs", "sm", "md", "lg", "xl", "2xl"]);
+
 // Internal renderer components
 function ActionItemRenderer<TData extends BaseRecord>(
   item: ExtendedToolbarItem<TData>,
@@ -34,9 +37,20 @@ function ActionItemRenderer<TData extends BaseRecord>(
   const actionItem = getAction<TData>(item.id);
   if (!actionItem) return null;
 
+  // Validate mobileBreakpoint value
+  const mobileBreakpoint = commonProps.context?.toolbarConfig?.mobileBreakpoint;
+  const candidate = Object.values(ComponentSize).includes(mobileBreakpoint as ComponentSize)
+    ? mobileBreakpoint
+    : mobileBreakpoint;
+  
+  const breakpointName =
+    typeof candidate === "string" && !coreSupported.has(candidate)
+      ? ComponentSize.SM
+      : candidate;
+
   // Check if we're on mobile to adjust button sizing
   const { isMobile } = useMobileDetection({
-    mobileBreakpoint: commonProps.context?.toolbarConfig?.mobileBreakpoint || ComponentSize.SM,
+    breakpoint: breakpointName || ComponentSize.SM,
   });
 
   // Use mobile size on small screens for better touch targets

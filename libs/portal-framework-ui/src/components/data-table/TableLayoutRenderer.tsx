@@ -8,6 +8,7 @@ import { useTableLayoutSelector } from "./useTableLayoutSelector";
 import { useTableConfigOptional } from "./contexts";
 import { BaseTableContentProps } from "./BaseTableContent";
 import { TableLayoutType } from "./DataTable.types";
+import { ComponentSize } from "@/components";
 
 // Layout registry mapping layout types to components
 const layoutRegistry = {
@@ -17,7 +18,7 @@ const layoutRegistry = {
 
 // Type for layout components
 type LayoutComponent<TData extends BaseRecord> = React.ComponentType<
-  Omit<BaseTableContentProps<TData>, "table" | "layoutType" | "mobileBreakpoint">
+  Omit<BaseTableContentProps<TData>, "table" | "layoutType">
 >;
 
 interface TableLayoutRendererProps<TData extends BaseRecord> {
@@ -39,7 +40,7 @@ interface TableLayoutRendererProps<TData extends BaseRecord> {
   pagination?: React.ReactNode;
   responsive?: boolean;
   hideColumnsOnMobile?: string[];
-  mobileBreakpoint?: string;
+  mobileBreakpoint?: ComponentSize | string;
   stackedHeaderColumn?: string;
 }
 
@@ -63,17 +64,20 @@ function TableLayoutRenderer<TData extends BaseRecord>({
   stackedHeaderColumn,
 }: TableLayoutRendererProps<TData>) {
   const tableConfig = useTableConfigOptional<TData>();
-  
+
   // Determine the actual layout to render
   const actualLayoutType = useTableLayoutSelector({
     responsive,
     mobileLayout: layoutType,
-    mobileBreakpoint: mobileBreakpoint || tableConfig?.toolbarConfig?.mobileBreakpoint
+    mobileBreakpoint:
+      mobileBreakpoint || tableConfig?.toolbarConfig?.mobileBreakpoint,
   });
 
   // Get the layout component from registry
-  const LayoutComponent = layoutRegistry[actualLayoutType] as LayoutComponent<TData>;
-  
+  const LayoutComponent = layoutRegistry[
+    actualLayoutType
+  ] as LayoutComponent<TData>;
+
   if (!LayoutComponent) {
     throw new Error(`Unsupported layout type: ${actualLayoutType}`);
   }
@@ -94,6 +98,7 @@ function TableLayoutRenderer<TData extends BaseRecord>({
       table={table}
       responsive={responsive}
       hideColumnsOnMobile={hideColumnsOnMobile}
+      mobileBreakpoint={mobileBreakpoint}
       stackedHeaderColumn={stackedHeaderColumn}
     />
   );
