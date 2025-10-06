@@ -12,7 +12,7 @@ function useTableLayoutSelector({
   mobileLayout = TableLayoutType.AUTO,
   mobileBreakpoint = 'sm'
 }: UseTableLayoutSelectorProps) {
-  const { isMobile } = useMobileDetection({ mobileBreakpoint });
+  const { isMobile } = useMobileDetection({ breakpoint: mobileBreakpoint });
   
   // Determine if we should show stacked layout
   const shouldShowStackedLayout = 

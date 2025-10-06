@@ -198,9 +198,35 @@ function Toolbar<TData extends BaseRecord>({
   const { toolbarConfig: config, refineContext } = useTableConfig<TData>();
   const { getDefaultFilter, getDefaultOperator } = useFilterHelpers<TData>();
 
+  // Validate mobileBreakpoint value
+  const mobileBreakpoint = React.useMemo(() => {
+    const breakpoint = config?.mobileBreakpoint;
+    const validTokens = ["xs", "sm", "md", "lg", "xl", "2xl"];
+
+    // If it's a valid Tailwind token, use it as-is
+    if (typeof breakpoint === "string" && validTokens.includes(breakpoint)) {
+      return breakpoint;
+    }
+
+    // If it's a numeric string or number, parse it and use the numeric value
+    if (typeof breakpoint === "string" && /^\d+$/.test(breakpoint)) {
+      const parsed = parseInt(breakpoint, 10);
+      if (parsed > 0) {
+        return parsed;
+      }
+    }
+
+    if (typeof breakpoint === "number" && breakpoint > 0) {
+      return breakpoint;
+    }
+
+    // For any other value, fall back to ComponentSize.SM
+    return ComponentSize.SM;
+  }, [config?.mobileBreakpoint]);
+
   // Mobile detection with proper breakpoint
   const { isMobile } = useMobileDetection({
-    mobileBreakpoint: config?.mobileBreakpoint || ComponentSize.SM,
+    mobileBreakpoint: mobileBreakpoint,
   });
 
   // Access the rest of the properties from refineTable
@@ -273,7 +299,8 @@ function Toolbar<TData extends BaseRecord>({
         );
 
         // Only use initialValue for item types that support it
-        const initialValue = 'initialValue' in item ? item.initialValue : undefined;
+        const initialValue =
+          "initialValue" in item ? item.initialValue : undefined;
         baseProps.value = existingValue ?? initialValue;
         baseProps.onChange = onChangeHandler(item);
       }

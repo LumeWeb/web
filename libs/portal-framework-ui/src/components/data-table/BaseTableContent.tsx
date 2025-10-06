@@ -55,7 +55,6 @@ function BaseTableContent<TData extends BaseRecord>({
 
   return (
     <div className={cn(className)}>
-      {header && <div className="mb-4">{header}</div>}
       {toolbarConfig && <Toolbar table={table} />}
       <TableLayoutRenderer
         layoutType={layoutType}
@@ -75,8 +74,6 @@ function BaseTableContent<TData extends BaseRecord>({
         mobileBreakpoint={mobileBreakpoint || toolbarConfig?.mobileBreakpoint}
         stackedHeaderColumn={stackedHeaderColumn}
       />
-      {footer && <div className="mt-4">{footer}</div>}
-      {pagination && <div className="mt-4">{pagination}</div>}
     </div>
   );
 }

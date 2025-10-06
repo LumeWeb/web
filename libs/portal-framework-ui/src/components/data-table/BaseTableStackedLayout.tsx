@@ -10,6 +10,37 @@ import { useMobileColumnHiding, useTableRowHandlers } from "./useTableHandlers";
 import { normalizeTableOptions } from "./tableOptions";
 import { ComponentSize } from "@/components";
 
+// Define the known Tailwind breakpoint names
+type TailwindBreakpoint = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+
+// Helper function to validate breakpoint values
+const validateBreakpoint = (breakpoint: any): TailwindBreakpoint => {
+  const validBreakpoints: TailwindBreakpoint[] = [
+    "xs",
+    "sm",
+    "md",
+    "lg",
+    "xl",
+    "2xl",
+  ];
+
+  if (
+    typeof breakpoint === "string" &&
+    validBreakpoints.includes(breakpoint as TailwindBreakpoint)
+  ) {
+    return breakpoint as TailwindBreakpoint;
+  }
+
+  // Warn and fall back to a safe default for unknown values
+  if (typeof breakpoint === "string" && breakpoint !== "") {
+    console.warn(
+      `Unknown breakpoint value "${breakpoint}", falling back to "md"`,
+    );
+  }
+
+  return "md";
+};
+
 interface BaseTableStackedLayoutProps<TData extends BaseRecord>
   extends BaseTableLayoutPropsBase<TData> {
   getCellProps?: (
@@ -38,11 +69,14 @@ function BaseTableStackedLayout<TData extends BaseRecord>({
   stackedHeaderColumn,
 }: BaseTableStackedLayoutProps<TData>) {
   const tableConfig = useTableConfigOptional<TData>();
-  const { isMobile } = useMobileDetection({
-    mobileBreakpoint:
-      mobileBreakpoint ||
+  const validatedBreakpoint = validateBreakpoint(
+    mobileBreakpoint ||
       tableConfig?.toolbarConfig?.mobileBreakpoint ||
       ComponentSize.SM,
+  );
+
+  const { isMobile } = useMobileDetection({
+    mobileBreakpoint: validatedBreakpoint,
   });
 
   // Normalize table options including pagination
@@ -195,6 +229,9 @@ function BaseTableStackedLayout<TData extends BaseRecord>({
           );
         })}
       </div>
+      {normalizedOptions.pagination.enabled && (
+        <div className="mt-4">{normalizedOptions.pagination.component}</div>
+      )}
       {footer && <div className="mt-4">{footer}</div>}
     </div>
   );
