@@ -82,7 +82,8 @@
       "warn-once": "patches/warn-once.patch",
       "pluralize": "patches/pluralize.patch",
       "papaparse": "patches/papaparse.patch",
-      "@uppy/core": "patches/@uppy__core.patch"
+      "@uppy/core": "patches/@uppy__core.patch",
+      "@uppy/tus": "patches/@uppy__tus.patch"
     },
     "overrides": {
       "react": "18.3.1",

@@ -287,6 +287,18 @@ const ProgressComponent = ({
       handleProgress,
     );
 
+    // Add preprocess progress listener
+    const cleanupPreprocessProgress = uploadManager?.on(
+      "preprocess-progress",
+      handleProgress,
+    );
+
+    // Add preprocess complete listener
+    const cleanupPreprocessComplete = uploadManager?.on(
+      "preprocess-complete",
+      handleProgress,
+    );
+
     // Listen for upload errors and display notifications
     // Retrigger when retryCount changes
     const handleError = (error: unknown) => {
@@ -304,6 +316,8 @@ const ProgressComponent = ({
     // Cleanup listeners on component unmount or when retryCount changes
     return () => {
       if (cleanupProgress) cleanupProgress();
+      if (cleanupPreprocessProgress) cleanupPreprocessProgress();
+      if (cleanupPreprocessComplete) cleanupPreprocessComplete();
       if (cleanupError) cleanupError();
       if (cleanupUploadError) cleanupUploadError();
     };

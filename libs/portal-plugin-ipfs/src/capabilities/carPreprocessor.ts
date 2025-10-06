@@ -12,18 +12,29 @@ import type { CID } from "multiformats/cid";
 import type { ProgressOptions } from "progress-events";
 
 import { car } from "@helia/car";
-import { CarReader } from "@ipld/car";
-import { createHeliaHTTP, GetBlockProgressEvents } from "@helia/http";
+import { GetBlockProgressEvents } from "@helia/interface";
+import { createHeliaHTTP } from "@helia/http";
 import { unixfs } from "@helia/unixfs";
 import { asyncIterableReader, createDecoder } from "@ipld/car/decoder";
+import { IDBBlockstore } from "blockstore-idb";
+import { IDBDatastore } from "datastore-idb";
 import {
   BundleMetadata,
   isDirectoryFile,
   isFolderBundle,
 } from "@lumeweb/portal-plugin-dashboard";
-import { streamToBlob, readableStreamToAsyncIterable } from "../utils/stream";
+import {
+  asyncGeneratorToReadableStream,
+  calculateStreamSize,
+  readableStreamToAsyncIterable,
+} from "../utils/stream";
+import { Sdk } from "@lumeweb/portal-sdk";
+import { streamToBlob } from "../utils/stream";
 
-type CarPreprocessorOpts<M extends Meta, B extends Body> = PluginOpts;
+type CarPreprocessorOpts<M extends Meta, B extends Body> = PluginOpts & {
+  sdk?: Sdk;
+  uploadManager?: any;
+};
 
 const defaultOptions = {} satisfies Partial<CarPreprocessorOpts<any, any>>;
 
@@ -32,12 +43,13 @@ type Opts<M extends Meta, B extends Body> = DefinePluginOpts<
   keyof typeof defaultOptions
 >;
 
-type ProgressStage = "fileRead" | "unixfsImport";
+type ProgressStage = "fileRead" | "unixfsImport" | "sizeCalculation";
 
 interface ProgressState {
   carExport: number;
   fileRead: number;
   unixfsImport: number;
+  sizeCalculation: number;
 }
 
 class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
@@ -46,58 +58,160 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
   B
 > {
   #helia: any;
+  #blockstore: IDBBlockstore | null = null;
+  #datastore: IDBDatastore | null = null;
+  #abortControllers: Map<string, AbortController> = new Map();
+  #sdk: Sdk | undefined;
+  #uploadManager: any;
 
   constructor(uppy: Uppy<M, B>, opts: CarPreprocessorOpts<M, B>) {
     super(uppy, { ...defaultOptions, ...opts });
     this.id = this.opts.id || "CarPreprocessor";
     this.type = "preprocessor";
     this.#helia = null;
+    this.#sdk = opts.sdk;
+    this.#uploadManager = opts.uploadManager;
   }
 
   install(): void {
     this.uppy.addPreProcessor(this.#processor.bind(this));
+    // Listen for upload cancellation events
+    this.uppy.on("cancel-all", this.#handleCancelAll.bind(this));
+  }
+
+  uninstall(): void {
+    this.uppy.removePreProcessor(this.#processor.bind(this));
+    this.uppy.off("cancel-all", this.#handleCancelAll.bind(this));
+    // Clean up any remaining abort controllers
+    this.#abortControllers.forEach((controller) => controller.abort());
+    this.#abortControllers.clear();
+
+    // Close blockstore and datastore if they exist
+    if (this.#blockstore) {
+      this.#blockstore.close().catch((error) => {
+        console.error("Error closing blockstore:", error);
+      });
+      this.#blockstore = null;
+    }
+
+    if (this.#datastore) {
+      this.#datastore.close().catch((error) => {
+        console.error("Error closing datastore:", error);
+      });
+      this.#datastore = null;
+    }
+  }
+
+  #handleCancelAll(): void {
+    // Abort all ongoing operations when all uploads are cancelled
+    this.#abortControllers.forEach((controller) => {
+      controller.abort();
+    });
+    this.#abortControllers.clear();
   }
 
   async processFile(file: UppyFile<M, B>) {
+    // Create an abort controller for this file processing operation
+    const abortController = new AbortController();
+    this.#abortControllers.set(file.id, abortController);
+
     try {
+      const tracker = new ProgressTracker(BigInt(file.size || 0));
+      
       const [carStream, rootCid] = await this.#createCarStream(
         file,
         (progress) => {
+          // Check if operation was aborted
+          if (abortController.signal.aborted) {
+            throw new Error("File processing aborted");
+          }
+
           this.uppy.emit("preprocess-progress", file, {
             message: "Processing file...",
             mode: "determinate",
             value: progress,
           });
         },
+        abortController.signal,
+        tracker,
       );
 
-      this.uppy.emit("preprocess-complete", file, {
-        message: "Processing file...",
-        mode: "determinate",
-        value: 100,
+      // Check if operation was aborted after async operation
+      if (abortController.signal.aborted) {
+        throw new Error("File processing aborted");
+      }
+
+      // Use stream tee to create two identical streams - one for size calculation, one for processing
+      const [streamForSize, streamForProcessing] = carStream.tee();
+
+      // Calculate the stream size with progress tracking
+      const streamSize = await calculateStreamSize(streamForSize, (progress) => {
+        // Check if operation was aborted
+        if (abortController.signal.aborted) {
+          throw new Error("File processing aborted");
+        }
+        
+        tracker.updateDataProgress("sizeCalculation", BigInt(progress));
+        this.uppy.emit("preprocess-progress", file, {
+          message: "Calculating file size...",
+          mode: "determinate",
+          value: tracker.getOverallProgress(),
+        });
       });
 
-      // Create a new File from the CAR stream
-      const carBlob = await streamToBlob(carStream, "application/vnd.ipld.car");
+      // Get upload limit from upload manager
+      const uploadLimit = this.#uploadManager.getUploadLimit();
 
-      // Preserve the original filename - don't replace it with cid.toString()
-      file.data = new File([carBlob], file.name, {
-        type: "application/vnd.ipld.car",
-      });
+      // Conditionally handle large vs small files
+      if (streamSize >= uploadLimit) {
+        // Large file - use ReadableStream reader approach
+        // @ts-ignore
+        file.data = streamForProcessing.getReader();
+      } else {
+        // Small file - use File object approach
+        const carBlob = await streamToBlob(streamForProcessing, "application/vnd.ipld.car");
+        // @ts-ignore
+        file.data = new File([carBlob], file.name, {
+          type: "application/vnd.ipld.car",
+        });
+      }
 
-      // Update the file in Uppy's state with the CID in meta
+      // Update the file in Uppy's state with the CID in meta and tus upload size
       this.uppy.setFileState(file.id, {
-        car: true,
         data: file.data,
+        // @ts-ignore
+        tus: { uploadSize: Number(streamSize) },
         meta: {
           ...file.meta,
           cid: rootCid.toString(),
         },
       });
+      
+      // Signal preprocessing completion only after all steps are done
+      this.uppy.emit("preprocess-complete", file, {
+        message: "Processing file...",
+        mode: "determinate",
+        value: 100,
+      });
     } catch (error) {
+      // Clean up abort controller on error
+      this.#abortControllers.delete(file.id);
+
+      // If it's an abort error, emit preprocess-complete instead of throwing
+      if (
+        error instanceof Error &&
+        error.message === "File processing aborted"
+      ) {
+        this.uppy.emit("preprocess-complete", file);
+        return;
+      }
+
       console.error("Error processing file:", error);
       throw error;
     }
+
+    // Clean up abort controller on success
+    this.#abortControllers.delete(file.id);
   }
 
   #collectDirectoryFiles(
@@ -123,14 +237,14 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
   }
 
   async #createCarStream(
-    file: UuppyFile<M, B>,
+    file: UppyFile<M, B>,
     onProgress: (progress: number) => void,
+    abortSignal: AbortSignal,
+    tracker: ProgressTracker,
   ): Promise<[ReadableStream, CID]> {
     const helia = await this.#createHelia();
     const fs = unixfs(helia);
     const c = car(helia);
-
-    const tracker = new ProgressTracker(BigInt(file.size || 0));
 
     let blocksCount = 0n;
 
@@ -160,15 +274,25 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
     }
 
     const src = fileSource(files, (progress) => {
+      // Check if operation was aborted
+      if (abortSignal.aborted) {
+        throw new Error("File processing aborted");
+      }
+      
       tracker.updateDataProgress("fileRead", BigInt(progress));
       onProgress(tracker.getOverallProgress());
-    });
+    }, abortSignal);
 
     const addOptions = {
       // Use protobuf format for all nodes to preserve metadata
       cidVersion: 1,
       rawLeaves: false,
+      signal: abortSignal,
       onProgress(event) {
+        if (abortSignal.aborted) {
+          throw new Error("File processing aborted");
+        }
+        
         if (event.type === "unixfs:importer:progress:file:read") {
           tracker.updateDataProgress("fileRead", event.detail.bytesRead);
         } else if (event.type === "unixfs:importer:progress:file:write") {
@@ -183,9 +307,20 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
     // Add all files to UnixFS and get the root CID
     let cid: CID;
 
-    for await (const result of fs.addAll(src, addOptions)) {
-      // Store the last result which should be the root directory
-      cid = result.cid;
+    try {
+      for await (const result of fs.addAll(src, addOptions)) {
+        // Check for abort during async iteration
+        if (abortSignal.aborted) {
+          throw new Error("File processing aborted");
+        }
+        // Store the last result which should be the root directory
+        cid = result.cid;
+      }
+    } catch (error) {
+      if (abortSignal.aborted) {
+        throw new Error("File processing aborted");
+      }
+      throw error;
     }
 
     if (!cid) {
@@ -194,7 +329,12 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
 
     let carBlocksWritten = 0n;
     const options: AbortOptions & ProgressOptions<GetBlockProgressEvents> = {
+      signal: abortSignal,
       onProgress(event: GetBlockProgressEvents) {
+        if (abortSignal.aborted) {
+          throw new Error("File processing aborted");
+        }
+        
         if (event.type === "blocks:get:blockstore:get") {
           carBlocksWritten++;
 
@@ -220,12 +360,29 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
     }
 
     try {
-      // Create Helia HTTP instance without specifying servers
-      // This will use the default remote Helia server configuration
-      this.#helia = await createHeliaHTTP();
+      // Create IndexedDB blockstore and datastore
+      if (!this.#blockstore) {
+        this.#blockstore = new IDBBlockstore("helia-blocks");
+        await this.#blockstore.open();
+      }
+
+      if (!this.#datastore) {
+        this.#datastore = new IDBDatastore("helia-data");
+        await this.#datastore.open();
+      }
+
+      // Create Helia instance with IndexedDB stores
+      this.#helia = await createHeliaHTTP({
+        blockstore: this.#blockstore,
+        datastore: this.#datastore,
+      });
+
       return this.#helia;
     } catch (error) {
-      console.error("Error creating Helia HTTP instance:", error);
+      console.error(
+        "Error creating Helia instance with IndexedDB stores:",
+        error,
+      );
       throw error;
     }
   }
@@ -380,6 +537,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
   #shouldProcessFile(file: UppyFile<M, B>): boolean {
     return this.#isIPFSFile(file);
   }
+
 }
 
 class ProgressTracker {
@@ -388,6 +546,7 @@ class ProgressTracker {
     carExport: 0,
     fileRead: 0,
     unixfsImport: 0,
+    sizeCalculation: 0,
   };
 
   constructor(fileSize: bigint) {
@@ -395,8 +554,9 @@ class ProgressTracker {
   }
 
   getOverallProgress(): number {
-    const { carExport, fileRead, unixfsImport } = this.state;
-    return fileRead * 0.3 + unixfsImport * 0.4 + carExport * 0.3;
+    const { carExport, fileRead, unixfsImport, sizeCalculation } = this.state;
+    // Allocate 5% to size calculation, distribute the rest among other stages
+    return fileRead * 0.3 + unixfsImport * 0.36 + carExport * 0.3 + sizeCalculation * 0.05;
   }
 
   updateBlockProgress(value: bigint) {
@@ -408,27 +568,11 @@ class ProgressTracker {
   }
 }
 
-function asyncGeneratorToReadableStream<T>(
-  asyncGenerator: AsyncGenerator<T>,
-): ReadableStream<T> {
-  return new ReadableStream({
-    async start(controller) {
-      try {
-        for await (const chunk of asyncGenerator) {
-          controller.enqueue(chunk);
-        }
-        controller.close();
-      } catch (err) {
-        controller.error(err);
-      }
-    },
-  });
-}
-
 // File source for handling File objects with webkitRelativePath
 async function* fileSource(
   files: File[],
   onProgress?: (progress: number) => void,
+  abortSignal?: AbortSignal,
 ): AsyncGenerator<{ content: AsyncIterable<Uint8Array>; path: string }> {
   const seenDirs = new Set<string>();
   let totalBytes = 0n;
@@ -450,6 +594,11 @@ async function* fileSource(
   console.log("[fileSource] Total bytes to process:", totalBytes);
 
   for (const file of files) {
+    // Check if operation was aborted
+    if (abortSignal?.aborted) {
+      throw new Error("Operation aborted");
+    }
+
     const fullPath = (file as any).webkitRelativePath ?? file.name;
     console.log("[fileSource] Processing file with fullPath:", fullPath);
 
@@ -464,6 +613,11 @@ async function* fileSource(
     console.log("[fileSource] Path parts:", parts);
 
     for (let i = 1; i < parts.length; i++) {
+      // Check if operation was aborted
+      if (abortSignal?.aborted) {
+        throw new Error("Operation aborted");
+      }
+
       const dirPath = parts.slice(0, i).join("/");
       console.log("[fileSource] Checking directory path:", dirPath);
 
