@@ -64,7 +64,7 @@ export function useTableRowHandlers<TData extends BaseRecord>({
 export function useTableCellHandlers<TData extends BaseRecord>({
   getCellProps,
 }: UseTableCellHandlersProps<TData>): (cell: Cell<TData, unknown>) => React.HTMLAttributes<HTMLTableCellElement> {
-  return (cell: Cell<TData, unknown>) => {
+  return React.useCallback((cell: Cell<TData, unknown>) => {
     const baseProps = getCellProps?.(cell) || {};
     
     return {
@@ -74,7 +74,7 @@ export function useTableCellHandlers<TData extends BaseRecord>({
         baseProps.className,
       ),
     };
-  };
+  }, [getCellProps]);
 }
 
 /**
@@ -124,11 +124,11 @@ export function useMobileColumnHiding({
  * Hook to generate header cell props with meta class names
  */
 export function useTableHeaderCellHandlers(): HeaderCellHandler {
-  return (header) => {
+  return React.useCallback((header) => {
     return {
       className: cn(
         header.column.columnDef.meta?.headerClassName as string,
       ),
     };
-  };
+  }, []);
 }
