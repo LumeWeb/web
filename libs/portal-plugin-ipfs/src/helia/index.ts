@@ -81,7 +81,7 @@ export class HeliaService {
       throw new Error(`Failed to initialize stores: ${error}`);
     }
 
-    // Create trustless gateway block broker with auth headers
+    // Create trustless gateway block broker with auth headers and credentials
     const gatewayBlockBroker = trustlessGateway({
       transformRequestInit: (init?: RequestInit) => {
         const headers = new Headers(init?.headers);
@@ -93,6 +93,7 @@ export class HeliaService {
         return {
           ...init,
           headers,
+          credentials: 'include',
         };
       },
     });
@@ -125,36 +126,47 @@ export class HeliaService {
     const parsedCid = CID.parse(cid);
     const abortController = new AbortController();
 
-    // Create a readable stream from the IPFS content
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of unixfs.cat(parsedCid, {
-            signal: abortController.signal,
-          })) {
-            controller.enqueue(chunk);
-          }
-          controller.close();
-        } catch (error) {
-          controller.error(error);
-        }
-      },
-    });
-
-    // Convert stream to blob using utility function
-    const blob = await streamToBlob(stream);
-
-    // Try to get file name and mime type from unixfs metadata
     try {
+      // Get file stats to determine if it's a directory and get metadata
       const stat = await unixfs.stat(parsedCid, {
         signal: abortController.signal,
       });
+
       const name =
         stat.type === "directory" ? "directory" : stat.cid.toString();
       const mimeType =
         stat.type === "directory"
           ? "application/x-directory"
           : "application/octet-stream";
+
+      // For directories, we can't stream content directly, so return empty blob
+      if (stat.type === "directory") {
+        return {
+          blob: new Blob([], { type: mimeType }),
+          name,
+          mimeType,
+        };
+      }
+
+      // Create a readable stream from the IPFS content using unixfs.cat()
+      // This will automatically use our trustless gateway blockbroker
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const chunk of unixfs.cat(parsedCid, {
+              signal: abortController.signal,
+            })) {
+              controller.enqueue(chunk);
+            }
+            controller.close();
+          } catch (error) {
+            controller.error(error);
+          }
+        },
+      });
+
+      // Convert stream to blob using utility function
+      const blob = await streamToBlob(stream, mimeType);
 
       return {
         blob,
@@ -163,6 +175,23 @@ export class HeliaService {
       };
     } catch (error) {
       // Fallback if we can't get metadata
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const chunk of unixfs.cat(parsedCid, {
+              signal: abortController.signal,
+            })) {
+              controller.enqueue(chunk);
+            }
+            controller.close();
+          } catch (error) {
+            controller.error(error);
+          }
+        },
+      });
+
+      const blob = await streamToBlob(stream, "application/octet-stream");
+
       return {
         blob,
         name: cid,
