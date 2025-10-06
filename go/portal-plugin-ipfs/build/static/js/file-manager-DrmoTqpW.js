@@ -259,39 +259,71 @@ const FileManagerProvider = ({
 }) => {
   const { currentPath, navigateToPath } = useFileManagerNavigation();
   const [selectedFiles, setSelectedFiles] = core_ipfs__loadShare__react__loadShare__.useState([]);
-  const { getHeliaService, isInitialized, error: featureError } = useFileManagerFeature();
+  const {
+    getHeliaService,
+    isInitialized,
+    error: featureError
+  } = useFileManagerFeature();
   const refreshDataRef = core_ipfs__loadShare__react__loadShare__.useRef(void 0);
-  const handleDownload = core_ipfs__loadShare__react__loadShare__.useCallback((cid) => {
-    try {
-      const heliaService = getHeliaService?.();
-      if (!heliaService) {
-        throw new Error("Helia service not available");
+  const { open } = core_ipfs__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useNotification();
+  const handleDownload = core_ipfs__loadShare__react__loadShare__.useCallback(
+    async (cid) => {
+      open?.({
+        type: "success",
+        message: "Processing Download",
+        description: "Your file download is being processed. This may take some time."
+      });
+      try {
+        const heliaService = getHeliaService?.();
+        if (!heliaService) {
+          throw new Error("Helia service not available");
+        }
+        const { blob, name, mimeType } = await heliaService.downloadFile(cid);
+        const blobUrl = URL.createObjectURL(new Blob([blob], { type: mimeType }));
+        const anchor = document.createElement("a");
+        anchor.href = blobUrl;
+        anchor.download = name;
+        anchor.style.display = "none";
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        setTimeout(() => {
+          URL.revokeObjectURL(blobUrl);
+        }, 1e3);
+        open?.({
+          type: "success",
+          message: "Download Complete",
+          description: "Your file has been downloaded successfully."
+        });
+      } catch (error) {
+        console.error("Failed to download file:", error);
+        open?.({
+          type: "error",
+          message: "Download Failed",
+          description: error instanceof Error ? error.message : "Failed to download the file. Please try again."
+        });
       }
-      const apiUrl = heliaService.getConfig().apiUrl;
-      const gatewayUrl = `${apiUrl}/ipfs/${cid}`;
-      const newWindow = window.open(gatewayUrl, "_blank", "noopener,noreferrer");
-      if (newWindow) {
-        newWindow.opener = null;
+    },
+    [getHeliaService, open]
+  );
+  const handleUnpin = core_ipfs__loadShare__react__loadShare__.useCallback(
+    async (cid) => {
+      try {
+        const heliaService = getHeliaService?.();
+        if (!heliaService) {
+          throw new Error("Helia service not available");
+        }
+        await heliaService.unpinCid(cid);
+        console.log(`Successfully unpinned CID: ${cid}`);
+        if (refreshDataRef.current) {
+          refreshDataRef.current();
+        }
+      } catch (error) {
+        console.error("Failed to unpin CID:", error);
       }
-    } catch (error) {
-      console.error("Failed to download file:", error);
-    }
-  }, [getHeliaService]);
-  const handleUnpin = core_ipfs__loadShare__react__loadShare__.useCallback(async (cid) => {
-    try {
-      const heliaService = getHeliaService?.();
-      if (!heliaService) {
-        throw new Error("Helia service not available");
-      }
-      await heliaService.unpinCid(cid);
-      console.log(`Successfully unpinned CID: ${cid}`);
-      if (refreshDataRef.current) {
-        refreshDataRef.current();
-      }
-    } catch (error) {
-      console.error("Failed to unpin CID:", error);
-    }
-  }, [getHeliaService]);
+    },
+    [getHeliaService]
+  );
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     FileManagerContext.Provider,
     {
@@ -336,7 +368,9 @@ const useFileManagerNavigation = () => {
     }
     return normalized;
   };
-  const currentPath = normalizePath(new URLSearchParams(location.search).get("path") || "/");
+  const currentPath = normalizePath(
+    new URLSearchParams(location.search).get("path") || "/"
+  );
   const navigateToPath = core_ipfs__loadShare__react__loadShare__.useCallback(
     (path) => {
       const normalizedPath = normalizePath(path);

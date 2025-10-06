@@ -1,5 +1,5 @@
 import { loadShare_1, init_1, core_ipfs__mf_v__runtimeInit__mf_v__ } from './core_ipfs__mf_v__runtimeInit__mf_v__-CAc0Zb6r.js';
-import exposesMap from './virtualExposes-CdW-bC7n.js';
+import exposesMap from './virtualExposes-N_Ppvlid.js';
 
 function BridgeReactPlugin() {
   return {
