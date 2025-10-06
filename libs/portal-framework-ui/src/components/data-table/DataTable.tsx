@@ -1,13 +1,11 @@
 import { BaseRecord } from "@refinedev/core";
 import { useTable as useRefineTable } from "@refinedev/react-table";
 import { Table } from "@tanstack/react-table";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef } from "react";
 
 import type { DataTableProps } from "./DataTable.types";
-import type { DataTableControllerProps } from "./DataTableController";
 
 import { ActionColumnCellProps, BaseTable } from "./BaseTable";
-import { DataTableController } from "./DataTableController";
 import { TableAction } from "./TableAction";
 import { TableActionMenu } from "./TableActionMenu";
 import {
@@ -40,20 +38,19 @@ function DataTable<
   refetchInterval,
   ...props
 }: DataTableProps<TData, TError, TSearchVariables>) {
-  // Create unique instance ID for this component
-  const instanceId = useRef(++instanceCounter);
-  const renderCount = useRef(0);
-
   const tableColumns = useMemo(() => {
     const cols = [...(columns || [])];
-    
+
     // Create actionColumn inside useMemo to avoid unnecessary recreations
     const actionColumn = actionMenu
       ? {
           cell: ({ row }: ActionColumnCellProps<TData>) => (
             <div className="flex items-center gap-1">
               {actionMenu.actionItems && (
-                <TableAction items={actionMenu.actionItems} row={row.original} />
+                <TableAction
+                  items={actionMenu.actionItems}
+                  row={row.original}
+                />
               )}
               <TableActionMenu items={actionMenu.items} row={row.original} />
             </div>
@@ -67,22 +64,25 @@ function DataTable<
           size: 0,
         }
       : undefined;
-    
+
     if (actionColumn) {
       cols.push(actionColumn);
     }
     return cols;
   }, [columns, actionMenu]);
 
-  const memoizedRefineCoreProps = useMemo(() => ({
-    dataProviderName: dataProviderName ?? undefined,
-    resource,
-    ...refineCoreProps,
-    queryOptions: {
-      ...refineCoreProps?.queryOptions,
-      refetchInterval,
-    },
-  }), [dataProviderName, resource, refineCoreProps, refetchInterval]);
+  const memoizedRefineCoreProps = useMemo(
+    () => ({
+      dataProviderName: dataProviderName ?? undefined,
+      resource,
+      ...refineCoreProps,
+      queryOptions: {
+        ...refineCoreProps?.queryOptions,
+        refetchInterval,
+      },
+    }),
+    [dataProviderName, resource, refineCoreProps, refetchInterval],
+  );
 
   const refineTable = useRefineTable<TData>({
     columns: tableColumns,

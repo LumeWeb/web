@@ -1,24 +1,10 @@
-import { useEffect, useState } from "react";
+import { useMobileDetection } from "./useMobileDetection";
 
-const MOBILE_BREAKPOINT = 640; // Define a breakpoint for mobile devices
-
-export function useMobile(breakpoint = MOBILE_BREAKPOINT) {
-  const [mobile, setMobile] = useState<boolean>(
-    window.innerWidth <= breakpoint,
-  );
-
-  useEffect(() => {
-    const handleResize = () => {
-      setMobile(window.innerWidth <= breakpoint);
-    };
-
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Initial check
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [breakpoint]);
-
-  return mobile;
+/**
+ * Simple hook to detect mobile viewport
+ * @deprecated Use useMobileDetection instead for more features and better performance
+ */
+export function useMobile(breakpoint?: number) {
+  const { isMobile } = useMobileDetection({ breakpoint });
+  return isMobile;
 }

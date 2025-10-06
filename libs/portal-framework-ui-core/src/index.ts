@@ -45,5 +45,6 @@ export * from "@/components/ui/tooltip";
 export * from "@/components/ui/visually-hidden";
 export * from "@/hooks/useDebounce";
 export * from "@/hooks/useMobile";
+export * from "@/hooks/useMobileDetection";
 export * from "@/hooks/useToast";
 export * from "@/util/cn";

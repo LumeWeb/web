@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import { cn } from "@lumeweb/portal-framework-ui-core";
 import { Table } from "@tanstack/react-table";
+import { ComponentSize } from "@/components";
 
 import type {
   TableContext,
@@ -12,12 +13,181 @@ import { BaseRecord } from "@refinedev/core";
 import { ToolbarRenderer } from "./ToolbarRenderer";
 import { useFilterHelpers, useRefineTable, useTableConfig } from "./contexts";
 import { createFilterOnChangeHandler, FilterOperator } from "./toolbarItems";
+import { useMobileDetection } from "./useMobileDetection";
 
 interface ToolbarProps<TData extends BaseRecord> {
   /** The table instance */
   table: Table<TData>;
   /** Additional class name for the toolbar container */
   className?: string;
+}
+
+function MobileToolbarLayout<TData extends BaseRecord>({
+  table,
+  className,
+  config,
+  refineContext,
+  sortedItems,
+  createCommonProps,
+}: {
+  table: Table<TData>;
+  className?: string;
+  config: any;
+  refineContext: any;
+  sortedItems: ToolbarItem<TData>[];
+  createCommonProps: (
+    item: ToolbarItem<TData>,
+  ) => ToolbarItemComponentProps<TData>;
+}) {
+  const containerClassName = cn(
+    "flex flex-col gap-3 p-3 border-b bg-background",
+    config.sticky && "sticky top-0 z-10",
+    className,
+  );
+
+  // Helper functions to determine item alignment (defined at component level, not inside hooks)
+  const getItemAlignment = (item: ToolbarItem<TData>): ToolbarItemAlignment => {
+    // If item has explicit alignment, use it
+    if (item.alignment) {
+      return item.alignment;
+    }
+
+    // Otherwise use the default alignment from config
+    return config.defaultAlignment || ToolbarItemAlignment.LEFT;
+  };
+
+  const isLeftAligned = (item: ToolbarItem<TData>): boolean => {
+    return getItemAlignment(item) === ToolbarItemAlignment.LEFT;
+  };
+
+  const isRightAligned = (item: ToolbarItem<TData>): boolean => {
+    return getItemAlignment(item) === ToolbarItemAlignment.RIGHT;
+  };
+
+  const isCenterAligned = (item: ToolbarItem<TData>): boolean => {
+    return getItemAlignment(item) === ToolbarItemAlignment.CENTER;
+  };
+
+  // Group items by alignment for mobile
+  const leftItems = sortedItems.filter(isLeftAligned);
+  const centerItems = sortedItems.filter(isCenterAligned);
+  const rightItems = sortedItems.filter(isRightAligned);
+
+  return (
+    <div className={containerClassName}>
+      {leftItems.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {leftItems.map((item) => {
+            const commonProps = createCommonProps(item);
+            return (
+              <ToolbarRenderer
+                key={item.id}
+                item={item}
+                commonProps={commonProps}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {centerItems.length > 0 && (
+        <div className="flex flex-wrap justify-center gap-2">
+          {centerItems.map((item) => {
+            const commonProps = createCommonProps(item);
+            return (
+              <ToolbarRenderer
+                key={item.id}
+                item={item}
+                commonProps={commonProps}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {rightItems.length > 0 && (
+        <div className="flex flex-wrap justify-end gap-2">
+          {rightItems.map((item) => {
+            const commonProps = createCommonProps(item);
+            return (
+              <ToolbarRenderer
+                key={item.id}
+                item={item}
+                commonProps={commonProps}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DesktopToolbarLayout<TData extends BaseRecord>({
+  table,
+  className,
+  config,
+  refineContext,
+  sortedItems,
+  createCommonProps,
+}: {
+  table: Table<TData>;
+  className?: string;
+  config: any;
+  refineContext: any;
+  sortedItems: ToolbarItem<TData>[];
+  createCommonProps: (
+    item: ToolbarItem<TData>,
+  ) => ToolbarItemComponentProps<TData>;
+}) {
+  // Helper functions to determine item alignment (defined at component level, not inside hooks)
+  const getItemAlignment = (item: ToolbarItem<TData>): ToolbarItemAlignment => {
+    // If item has explicit alignment, use it
+    if (item.alignment) {
+      return item.alignment;
+    }
+
+    // Otherwise use the default alignment from config
+    return config.defaultAlignment || ToolbarItemAlignment.LEFT;
+  };
+
+  const isRightAligned = (item: ToolbarItem<TData>): boolean => {
+    return getItemAlignment(item) === ToolbarItemAlignment.RIGHT;
+  };
+
+  const isCenterAligned = (item: ToolbarItem<TData>): boolean => {
+    return getItemAlignment(item) === ToolbarItemAlignment.CENTER;
+  };
+
+  const containerClassName = cn(
+    "flex flex-wrap items-center gap-2 p-4 border-b bg-background",
+    config.justifyBetween ? "justify-between" : undefined,
+    config.sticky && "sticky top-0 z-10",
+    className,
+  );
+
+  return (
+    <div className={containerClassName}>
+      {sortedItems.map((item) => {
+        const commonProps = createCommonProps(item);
+
+        // Add appropriate positioning classes based on alignment
+        const itemClassName = cn(
+          isRightAligned(item) && "ml-auto",
+          isCenterAligned(item) && "mx-auto",
+        );
+
+        return (
+          <ToolbarRenderer
+            key={item.id}
+            item={item}
+            commonProps={commonProps}
+            className={itemClassName}
+          />
+        );
+      })}
+    </div>
+  );
 }
 
 function Toolbar<TData extends BaseRecord>({
@@ -27,6 +197,11 @@ function Toolbar<TData extends BaseRecord>({
   const { refineTable } = useRefineTable<TData>();
   const { toolbarConfig: config, refineContext } = useTableConfig<TData>();
   const { getDefaultFilter, getDefaultOperator } = useFilterHelpers<TData>();
+
+  // Mobile detection with proper breakpoint
+  const { isMobile } = useMobileDetection({
+    mobileBreakpoint: config?.mobileBreakpoint || ComponentSize.SM,
+  });
 
   // Access the rest of the properties from refineTable
   const { setFilters, setSorters, tableQuery, filters, sorters } =
@@ -97,7 +272,9 @@ function Toolbar<TData extends BaseRecord>({
           operator,
         );
 
-        baseProps.value = existingValue ?? item.initialValue;
+        // Only use initialValue for item types that support it
+        const initialValue = 'initialValue' in item ? item.initialValue : undefined;
+        baseProps.value = existingValue ?? initialValue;
         baseProps.onChange = onChangeHandler(item);
       }
 
@@ -122,58 +299,30 @@ function Toolbar<TData extends BaseRecord>({
     return null;
   }
 
-  const containerClassName = cn(
-    "flex flex-wrap items-center gap-2 p-4 border-b bg-background",
-    config.justifyBetween ? "justify-between" : undefined,
-    config.sticky && "sticky top-0 z-10",
-    className,
-  );
+  // For mobile, we want a more vertical layout with appropriate spacing
+  if (isMobile) {
+    return (
+      <MobileToolbarLayout
+        table={table}
+        className={className}
+        config={config}
+        refineContext={refineContext}
+        sortedItems={sortedItems}
+        createCommonProps={createCommonProps}
+      />
+    );
+  }
 
-  // Helper functions to determine item alignment (defined at component level, not inside hooks)
-  const getItemAlignment = (item: ToolbarItem<TData>): ToolbarItemAlignment => {
-    // If item has explicit alignment, use it
-    if (item.alignment) {
-      return item.alignment;
-    }
-    
-    // Otherwise use the default alignment from config
-    return config.defaultAlignment || ToolbarItemAlignment.LEFT;
-  };
-
-  const isLeftAligned = (item: ToolbarItem<TData>): boolean => {
-    return getItemAlignment(item) === ToolbarItemAlignment.LEFT;
-  };
-
-  const isRightAligned = (item: ToolbarItem<TData>): boolean => {
-    return getItemAlignment(item) === ToolbarItemAlignment.RIGHT;
-  };
-
-  const isCenterAligned = (item: ToolbarItem<TData>): boolean => {
-    return getItemAlignment(item) === ToolbarItemAlignment.CENTER;
-  };
-
-  // Simple approach: render all items in one container, use margin for positioning
+  // Desktop layout
   return (
-    <div className={containerClassName}>
-      {sortedItems.map((item) => {
-        const commonProps = createCommonProps(item);
-        
-        // Add appropriate positioning classes based on alignment
-        const itemClassName = cn(
-          isRightAligned(item) && "ml-auto",
-          isCenterAligned(item) && "mx-auto"
-        );
-
-        return (
-          <ToolbarRenderer
-            key={item.id}
-            item={item}
-            commonProps={commonProps}
-            className={itemClassName}
-          />
-        );
-      })}
-    </div>
+    <DesktopToolbarLayout
+      table={table}
+      className={className}
+      config={config}
+      refineContext={refineContext}
+      sortedItems={sortedItems}
+      createCommonProps={createCommonProps}
+    />
   );
 }
 

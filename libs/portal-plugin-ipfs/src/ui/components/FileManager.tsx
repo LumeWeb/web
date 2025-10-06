@@ -9,7 +9,7 @@ const generateInitialFilters = (path: string | null) => {
   return [
     {
       field: "parent_path",
-      operator: "eq",
+      operator: "eq" as const,
       value: path,
     },
   ];
@@ -21,7 +21,7 @@ import {
   DataTableController,
   formatFileSize,
   SkeletonLoader,
-  type TableActionItem,
+  type TableActionMenuItem,
   type TableControls,
   type ToolbarConfig,
   ToolbarItemAlignment,
@@ -182,6 +182,7 @@ const FileManagerInner: React.FC = () => {
             refetchInterval={5000}
             resource="ipfs/files/directory"
             emptyStateMessage="No files found in this folder"
+            responsive={true}
             control={
               <DataTableController
                 onControlsReady={(controls) => {
@@ -197,7 +198,6 @@ const FileManagerInner: React.FC = () => {
                   icon: <Download className="h-4 w-4" />,
                   label: "Download",
                   onClick: (row) => handleDownload(row.cid),
-                  tooltip: "Download file",
                   disabled: (row) => row.is_directory,
                 },
                 {
@@ -211,10 +211,9 @@ const FileManagerInner: React.FC = () => {
                     );
                     openDialog(dialogConfig);
                   },
-                  tooltip: "Unpin file or directory",
                   disabled: (row) => row?.unpinnable,
                 },
-              ] as TableActionItem<FileManagerItem>[],
+              ] as TableActionMenuItem<FileManagerItem>[],
             }}
             refineCoreProps={{
               syncWithLocation: false,

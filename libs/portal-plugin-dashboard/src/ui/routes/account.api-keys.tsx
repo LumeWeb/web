@@ -99,6 +99,7 @@ export default function AccountApiKeys() {
         emptyStateMessage="No API keys found. Create your first key to get started."
         pagination={true}
         resource={"api-keys"}
+        responsive={true}
       />
     </div>
   );
