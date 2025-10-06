@@ -83,7 +83,10 @@ export function useMobileColumnHiding({
   responsive = false,
   hideColumnsOnMobile = [],
 }: UseMobileColumnHidingProps): Set<string> {
-  const [isMobile, setIsMobile] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(() => {
+    if (typeof window === 'undefined' || !responsive) return false;
+    return window.matchMedia('(max-width: 768px)').matches;
+  });
 
   React.useEffect(() => {
     if (!responsive) return;
@@ -97,25 +100,26 @@ export function useMobileColumnHiding({
     return () => mediaQuery.removeEventListener('change', handler);
   }, [responsive]);
 
-  if (!responsive) {
-    return new Set();
-  }
+  return React.useMemo(() => {
+    if (!responsive) {
+      return new Set();
+    }
 
-  const hiddenColumns = new Set<string>();
-  
-  if (isMobile) {
-    if (typeof responsive === 'boolean') {
-      // If responsive is true, hide all columns in hideColumnsOnMobile
-      hideColumnsOnMobile.forEach(id => hiddenColumns.add(id));
-    } else {
-      // If responsive is an object with hideOnMobile property
-      if (responsive.hideOnMobile) {
+    const hiddenColumns = new Set<string>();
+    
+    if (isMobile) {
+      if (typeof responsive === 'boolean') {
+        // If responsive is true, hide all columns in hideColumnsOnMobile
         hideColumnsOnMobile.forEach(id => hiddenColumns.add(id));
+      } else {
+        // If responsive is an object with hideOnMobile property
+        if (responsive.hideOnMobile) {
+          hideColumnsOnMobile.forEach(id => hiddenColumns.add(id));
+        }
       }
     }
-  }
-
-  return hiddenColumns;
+    return hiddenColumns;
+  }, [responsive, isMobile, hideColumnsOnMobile]);
 }
 
 /**
