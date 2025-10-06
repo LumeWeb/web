@@ -26,7 +26,7 @@ type ToolbarItemRenderer<TData extends BaseRecord> = (
 const toolbarItemRenderers = new Map<string, ToolbarItemRenderer<any>>();
 
 // Define core supported breakpoints
-const coreSupported = new Set(["xs", "sm", "md", "lg", "xl", "2xl"]);
+const coreSupported = new Set(["xs", "sm", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl", "auto", "full"]);
 
 // Internal renderer components
 function ActionItemRenderer<TData extends BaseRecord>(
