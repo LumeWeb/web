@@ -1,5 +1,5 @@
 import { loadShare_1, init_1, core_ipfs__mf_v__runtimeInit__mf_v__ } from './core_ipfs__mf_v__runtimeInit__mf_v__-CAc0Zb6r.js';
-import exposesMap from './virtualExposes-BT6EZwsS.js';
+import exposesMap from './virtualExposes-CdW-bC7n.js';
 
 function BridgeReactPlugin() {
   return {
@@ -13,26 +13,6 @@ function BridgeReactPlugin() {
 
 const usedShared = {
       
-          "@lumeweb/portal-framework-core": {
-            name: "@lumeweb/portal-framework-core",
-            version: "0.0.0",
-            scope: ["default"],
-            loaded: false,
-            from: "core:ipfs",
-            async get () {
-              {
-                const shared = await loadShare_1("@lumeweb/portal-framework-core");
-                if (shared) return () => shared;
-                throw new Error(`Shared module '${"@lumeweb/portal-framework-core"}' must be provided by host`);
-              }
-            },
-            shareConfig: {
-              singleton: true,
-              requiredVersion: "^0.0.0",
-              import: false,
-            }
-          }
-        ,
           "@refinedev/core": {
             name: "@refinedev/core",
             version: "4.57.10",
@@ -64,6 +44,26 @@ const usedShared = {
                 const shared = await loadShare_1("@lumeweb/portal-framework-ui");
                 if (shared) return () => shared;
                 throw new Error(`Shared module '${"@lumeweb/portal-framework-ui"}' must be provided by host`);
+              }
+            },
+            shareConfig: {
+              singleton: true,
+              requiredVersion: "^0.0.0",
+              import: false,
+            }
+          }
+        ,
+          "@lumeweb/portal-framework-core": {
+            name: "@lumeweb/portal-framework-core",
+            version: "0.0.0",
+            scope: ["default"],
+            loaded: false,
+            from: "core:ipfs",
+            async get () {
+              {
+                const shared = await loadShare_1("@lumeweb/portal-framework-core");
+                if (shared) return () => shared;
+                throw new Error(`Shared module '${"@lumeweb/portal-framework-core"}' must be provided by host`);
               }
             },
             shareConfig: {

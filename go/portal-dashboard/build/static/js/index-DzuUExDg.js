@@ -33207,6 +33207,12 @@ let ToolbarItemType = /* @__PURE__ */ function(ToolbarItemType$1) {
 	ToolbarItemType$1["FILTER_GROUP"] = "filter-group";
 	return ToolbarItemType$1;
 }({});
+let TableLayoutType = /* @__PURE__ */ function(TableLayoutType$1) {
+	TableLayoutType$1["TABLE"] = "table";
+	TableLayoutType$1["STACKED"] = "stacked";
+	TableLayoutType$1["AUTO"] = "auto";
+	return TableLayoutType$1;
+}({});
 
 //#region src/components/data-table/ToolbarRegistry.tsx
 const actions = /* @__PURE__ */ new Map();
@@ -33958,16 +33964,58 @@ function FilterGroup({ item, commonProps, size }) {
 	});
 }
 
+//#region src/components/data-table/useMobileDetection.ts
+const breakpointSizeMap = {
+	[ComponentSize.TWO_XL]: "2xl",
+	[ComponentSize.THREE_XL]: "3xl",
+	[ComponentSize.FOUR_XL]: "4xl",
+	[ComponentSize.FIVE_XL]: "5xl",
+	[ComponentSize.SIX_XL]: "6xl",
+	[ComponentSize.SEVEN_XL]: "7xl",
+	[ComponentSize.AUTO]: "auto",
+	[ComponentSize.FULL]: "full",
+	[ComponentSize.LG]: "lg",
+	[ComponentSize.MD]: "md",
+	[ComponentSize.SM]: "sm",
+	[ComponentSize.XL]: "xl",
+	[ComponentSize.XS]: "xs"
+};
+/**
+* Hook to detect mobile viewport based on Tailwind CSS breakpoints
+* @param props.mobileBreakpoint - The breakpoint at which to consider the viewport mobile
+* @returns isMobile state and current breakpoint
+*/
+function useMobileDetection({ mobileBreakpoint = ComponentSize.SM } = {}) {
+	const breakpointName = Object.values(ComponentSize).includes(mobileBreakpoint) ? breakpointSizeMap[mobileBreakpoint] : mobileBreakpoint;
+	return dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.useMobileDetection({ breakpoint: breakpointName });
+}
+
 //#region src/components/data-table/ToolbarRenderer.tsx
 const toolbarItemRenderers = /* @__PURE__ */ new Map();
-function ActionItemRenderer(item, commonProps) {
+const coreSupported = new Set([
+	"xs",
+	"sm",
+	"md",
+	"lg",
+	"xl",
+	"2xl",
+	"3xl",
+	"4xl",
+	"5xl",
+	"6xl",
+	"7xl",
+	"auto",
+	"full"
+]);
+function ActionItemRenderer(item, commonProps, isMobile) {
 	const actionItem = getAction(item.id);
 	if (!actionItem) return null;
+	const buttonSize = isMobile ? "mobile" : actionItem.size;
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 		className: actionItem.className,
 		disabled: actionItem.disabled,
 		onClick: () => actionItem.onClick(commonProps),
-		size: actionItem.size,
+		size: buttonSize,
 		title: actionItem.tooltip,
 		variant: actionItem.variant,
 		children: [actionItem.icon && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
@@ -34028,6 +34076,10 @@ const ToolbarRendererRegistry = {
 	}
 };
 function ToolbarRenderer({ item, commonProps, className }) {
+	const mobileBreakpoint = commonProps.context?.toolbarConfig?.mobileBreakpoint;
+	const candidate = mobileBreakpoint && Object.values(ComponentSize).includes(mobileBreakpoint) ? mobileBreakpoint : ComponentSize.SM;
+	const breakpointName = typeof candidate === "string" && !coreSupported.has(candidate) ? ComponentSize.SM : candidate;
+	const { isMobile } = useMobileDetection({ mobileBreakpoint: breakpointName || ComponentSize.SM });
 	const containerClassName = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center", item.type === ToolbarItemType.SEPARATOR && "mx-2", className);
 	if (item.type === ToolbarItemType.CUSTOM) {
 		const customItem = item;
@@ -34043,7 +34095,7 @@ function ToolbarRenderer({ item, commonProps, className }) {
 		console.warn(`No renderer registered for toolbar item type: ${item.type}`);
 		return null;
 	}
-	const renderedItem = renderer(item, commonProps);
+	const renderedItem = renderer(item, commonProps, isMobile);
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 		className: containerClassName,
 		children: renderedItem
@@ -34284,10 +34336,108 @@ function registerCustomToolbarItem(id, item) {
 }
 
 //#region src/components/data-table/Toolbar.tsx
+function MobileToolbarLayout({ table, className, config, refineContext, sortedItems, createCommonProps }) {
+	const containerClassName = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col gap-3 p-3 border-b bg-background", config.sticky && "sticky top-0 z-10", className);
+	const getItemAlignment = (item) => {
+		if (item.alignment) return item.alignment;
+		return config.defaultAlignment || ToolbarItemAlignment.LEFT;
+	};
+	const isLeftAligned = (item) => {
+		return getItemAlignment(item) === ToolbarItemAlignment.LEFT;
+	};
+	const isRightAligned = (item) => {
+		return getItemAlignment(item) === ToolbarItemAlignment.RIGHT;
+	};
+	const isCenterAligned = (item) => {
+		return getItemAlignment(item) === ToolbarItemAlignment.CENTER;
+	};
+	const leftItems = sortedItems.filter(isLeftAligned);
+	const centerItems = sortedItems.filter(isCenterAligned);
+	const rightItems = sortedItems.filter(isRightAligned);
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+		className: containerClassName,
+		children: [
+			leftItems.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "flex flex-wrap gap-2",
+				children: leftItems.map((item) => {
+					const commonProps = createCommonProps(item);
+					return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolbarRenderer, {
+						item,
+						commonProps
+					}, item.id);
+				})
+			}),
+			centerItems.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "flex flex-wrap justify-center gap-2",
+				children: centerItems.map((item) => {
+					const commonProps = createCommonProps(item);
+					return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolbarRenderer, {
+						item,
+						commonProps
+					}, item.id);
+				})
+			}),
+			rightItems.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "flex flex-wrap justify-end gap-2",
+				children: rightItems.map((item) => {
+					const commonProps = createCommonProps(item);
+					return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolbarRenderer, {
+						item,
+						commonProps
+					}, item.id);
+				})
+			})
+		]
+	});
+}
+function DesktopToolbarLayout({ table, className, config, refineContext, sortedItems, createCommonProps }) {
+	const getItemAlignment = (item) => {
+		if (item.alignment) return item.alignment;
+		return config.defaultAlignment || ToolbarItemAlignment.LEFT;
+	};
+	const isRightAligned = (item) => {
+		return getItemAlignment(item) === ToolbarItemAlignment.RIGHT;
+	};
+	const isCenterAligned = (item) => {
+		return getItemAlignment(item) === ToolbarItemAlignment.CENTER;
+	};
+	const containerClassName = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-wrap items-center gap-2 p-4 border-b bg-background", config.justifyBetween ? "justify-between" : void 0, config.sticky && "sticky top-0 z-10", className);
+	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+		className: containerClassName,
+		children: sortedItems.map((item) => {
+			const commonProps = createCommonProps(item);
+			const itemClassName = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(isRightAligned(item) && "ml-auto", isCenterAligned(item) && "mx-auto");
+			return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolbarRenderer, {
+				item,
+				commonProps,
+				className: itemClassName
+			}, item.id);
+		})
+	});
+}
 function Toolbar({ table, className }) {
 	const { refineTable } = useRefineTable();
 	const { toolbarConfig: config, refineContext } = useTableConfig();
 	const { getDefaultFilter, getDefaultOperator } = useFilterHelpers();
+	const mobileBreakpoint = React3.useMemo(() => {
+		const breakpoint = config?.mobileBreakpoint;
+		const validTokens = [
+			"xs",
+			"sm",
+			"md",
+			"lg",
+			"xl",
+			"2xl"
+		];
+		if (typeof breakpoint === "string" && validTokens.includes(breakpoint)) return breakpoint;
+		if (typeof breakpoint === "string" && /^\d+$/.test(breakpoint)) {
+			const parsed = parseInt(breakpoint, 10);
+			if (parsed > 0) return parsed;
+		}
+		if (typeof breakpoint === "number" && breakpoint > 0) return breakpoint;
+		return ComponentSize.SM;
+	}, [config?.mobileBreakpoint]);
+	const { isMobile } = useMobileDetection({ mobileBreakpoint });
 	const { setFilters, setSorters, tableQuery, filters, sorters } = refineTable || {};
 	const sortedItems = React3.useMemo(() => {
 		if (!config) return [];
@@ -34318,7 +34468,8 @@ function Toolbar({ table, className }) {
 		if ([ToolbarItemType.FILTER, ToolbarItemType.FILTER_GROUP].includes(item.type)) {
 			const operator = item.config?.operator || (item.config?.type ? getDefaultOperator?.(item.config.type) : FilterOperator.EQ);
 			const existingValue = getDefaultFilter?.(item.config?.field, operator);
-			baseProps.value = existingValue ?? item.initialValue;
+			const initialValue = "initialValue" in item ? item.initialValue : void 0;
+			baseProps.value = existingValue ?? initialValue;
 			baseProps.onChange = onChangeHandler(item);
 		}
 		return baseProps;
@@ -34335,29 +34486,83 @@ function Toolbar({ table, className }) {
 		onChangeHandler
 	]);
 	if (!config) return null;
-	const containerClassName = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-wrap items-center gap-2 p-4 border-b bg-background", config.justifyBetween ? "justify-between" : void 0, config.sticky && "sticky top-0 z-10", className);
-	const getItemAlignment = (item) => {
-		if (item.alignment) return item.alignment;
-		return config.defaultAlignment || ToolbarItemAlignment.LEFT;
-	};
-	const isRightAligned = (item) => {
-		return getItemAlignment(item) === ToolbarItemAlignment.RIGHT;
-	};
-	const isCenterAligned = (item) => {
-		return getItemAlignment(item) === ToolbarItemAlignment.CENTER;
-	};
-	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-		className: containerClassName,
-		children: sortedItems.map((item) => {
-			const commonProps = createCommonProps(item);
-			const itemClassName = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(isRightAligned(item) && "ml-auto", isCenterAligned(item) && "mx-auto");
-			return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolbarRenderer, {
-				item,
-				commonProps,
-				className: itemClassName
-			}, item.id);
-		})
+	if (isMobile) return /* @__PURE__ */ jsxRuntimeExports.jsx(MobileToolbarLayout, {
+		table,
+		className,
+		config,
+		refineContext,
+		sortedItems,
+		createCommonProps
 	});
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(DesktopToolbarLayout, {
+		table,
+		className,
+		config,
+		refineContext,
+		sortedItems,
+		createCommonProps
+	});
+}
+
+//#region src/components/data-table/DefaultPagination.tsx
+function DefaultPagination() {
+	const { table } = useTableInstance();
+	const pageIndex = table.getState().pagination.pageIndex;
+	const pageCount = table.getPageCount();
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+		className: "flex items-center justify-center gap-4",
+		children: [
+			/* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+				className: "flex items-center gap-2",
+				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+					"aria-label": "First page",
+					disabled: !table.getCanPreviousPage(),
+					onClick: () => table.setPageIndex(0),
+					size: "sm",
+					variant: "outline",
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronsLeft, { className: "h-4 w-4" })
+				}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+					"aria-label": "Previous page",
+					disabled: !table.getCanPreviousPage(),
+					onClick: () => table.previousPage(),
+					size: "sm",
+					variant: "outline",
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronLeft, { className: "h-4 w-4" })
+				})]
+			}),
+			/* @__PURE__ */ jsxRuntimeExports.jsx("span", {
+				className: "text-sm font-medium",
+				children: pageCount > 0 ? `Page ${pageIndex + 1} of ${pageCount}` : "No pages"
+			}),
+			/* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+				className: "flex items-center gap-2",
+				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+					"aria-label": "Next page",
+					disabled: !table.getCanNextPage(),
+					onClick: () => table.nextPage(),
+					size: "sm",
+					variant: "outline",
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronRight, { className: "h-4 w-4" })
+				}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+					"aria-label": "Last page",
+					disabled: !table.getCanNextPage(),
+					onClick: () => table.setPageIndex(Math.max(0, pageCount - 1)),
+					size: "sm",
+					variant: "outline",
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronsRight, { className: "h-4 w-4" })
+				})]
+			})
+		]
+	});
+}
+
+//#region src/components/data-table/EmptyState.tsx
+function TableEmptyState({ children, colSpan, message = "No data available" }) {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
+		className: "py-8 text-center",
+		colSpan,
+		children: children || message
+	}) });
 }
 
 /**
@@ -37303,125 +37508,6 @@ function useReactTable(options) {
   return tableRef.current;
 }
 
-//#region src/components/data-table/BaseTableContent.tsx
-function BaseTableContent({ className, emptyState, footer, getCellProps, getRowProps, header, isLoading, loadingState, onRowClick, pagination, table }) {
-	const tableConfig = useTableConfigOptional();
-	const toolbarConfig = tableConfig?.toolbarConfig;
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
-		children: [
-			header && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-				className: "mb-4",
-				children: header
-			}),
-			toolbarConfig && /* @__PURE__ */ jsxRuntimeExports.jsx(Toolbar, { table }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-				className: "scrollbar -mx-4 flex overflow-auto sm:-mx-8",
-				children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-					className: "mx-4 grow sm:mx-8",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Table, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHeader, { children: table.getHeaderGroups().map((headerGroup) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: headerGroup.headers.map((header$1) => {
-						return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHead, {
-							className: header$1.column.columnDef.meta?.headerClassName,
-							children: header$1.isPlaceholder ? null : flexRender(header$1.column.columnDef.header, header$1.getContext())
-						}, header$1.id);
-					}) }, headerGroup.id)) }), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableBody, { children: isLoading ? loadingState : table.getRowModel().rows.length > 0 ? table.getRowModel().rows.map((row) => {
-						const rowProps = getRowProps?.(row) || {};
-						if (onRowClick) {
-							rowProps.onClick = () => onRowClick(row);
-							rowProps.tabIndex = 0;
-							rowProps.role = "button";
-							rowProps.onKeyDown = (e) => {
-								if (e.key === "Enter" || e.key === " ") {
-									if (e.key === " ") e.preventDefault();
-									onRowClick(row);
-								}
-							};
-							rowProps.className = [rowProps.className, "cursor-pointer hover:bg-muted"].filter(Boolean).join(" ");
-						}
-						return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, {
-							...rowProps,
-							children: row.getVisibleCells().map((cell) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
-								className: [cell.column.columnDef.meta?.cellClassName].filter(Boolean).join(" "),
-								...getCellProps?.(cell),
-								children: flexRender(cell.column.columnDef.cell, cell.getContext())
-							}, cell.id))
-						}, row.id);
-					}) : emptyState })] })
-				})
-			}),
-			footer && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-				className: "mt-4",
-				children: footer
-			}),
-			pagination && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-				className: "mt-4",
-				children: pagination
-			})
-		]
-	});
-}
-
-//#region src/components/data-table/DefaultPagination.tsx
-function DefaultPagination() {
-	const { table } = useTableInstance();
-	const pageIndex = table.getState().pagination.pageIndex;
-	const pageCount = table.getPageCount();
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: "flex items-center justify-center gap-4",
-		children: [
-			/* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-				className: "flex items-center gap-2",
-				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-					"aria-label": "First page",
-					disabled: !table.getCanPreviousPage(),
-					onClick: () => table.setPageIndex(0),
-					size: "sm",
-					variant: "outline",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronsLeft, { className: "h-4 w-4" })
-				}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-					"aria-label": "Previous page",
-					disabled: !table.getCanPreviousPage(),
-					onClick: () => table.previousPage(),
-					size: "sm",
-					variant: "outline",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronLeft, { className: "h-4 w-4" })
-				})]
-			}),
-			/* @__PURE__ */ jsxRuntimeExports.jsx("span", {
-				className: "text-sm font-medium",
-				children: pageCount > 0 ? `Page ${pageIndex + 1} of ${pageCount}` : "No pages"
-			}),
-			/* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-				className: "flex items-center gap-2",
-				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-					"aria-label": "Next page",
-					disabled: !table.getCanNextPage(),
-					onClick: () => table.nextPage(),
-					size: "sm",
-					variant: "outline",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronRight, { className: "h-4 w-4" })
-				}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-					"aria-label": "Last page",
-					disabled: !table.getCanNextPage(),
-					onClick: () => table.setPageIndex(Math.max(0, pageCount - 1)),
-					size: "sm",
-					variant: "outline",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronsRight, { className: "h-4 w-4" })
-				})]
-			})
-		]
-	});
-}
-
-//#region src/components/data-table/EmptyState.tsx
-function TableEmptyState({ children, colSpan, message = "No data available" }) {
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
-		className: "py-8 text-center",
-		colSpan,
-		children: children || message
-	}) });
-}
-
 //#region src/components/SkeletonLoader.tsx
 function SkeletonLoader({ className, cols = 3, layout = "default", rows = 3, showHeader = true, table }) {
 	const renderTableSkeleton = () => {
@@ -37547,9 +37633,326 @@ function normalizeTableOptions(pagination, emptyState, emptyStateMessage, loadin
 	};
 }
 
+//#region src/components/data-table/useTableHandlers.ts
+/**
+* Hook to generate row props with click handling and accessibility
+*/
+function useTableRowHandlers({ onRowClick, getRowProps }) {
+	return React3.useCallback((row) => {
+		const baseProps = getRowProps?.(row) || {};
+		if (!onRowClick) return baseProps;
+		return {
+			...baseProps,
+			onClick: () => onRowClick(row),
+			tabIndex: 0,
+			role: "button",
+			onKeyDown: (e) => {
+				if (e.key === "Enter" || e.key === " ") {
+					if (e.key === " ") e.preventDefault();
+					onRowClick(row);
+				}
+			},
+			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("cursor-pointer hover:bg-muted", baseProps.className)
+		};
+	}, [onRowClick, getRowProps]);
+}
+/**
+* Hook to generate cell props with meta class names
+*/
+function useTableCellHandlers({ getCellProps }) {
+	return React3.useCallback((cell) => {
+		const baseProps = getCellProps?.(cell) || {};
+		return {
+			...baseProps,
+			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(cell.column.columnDef.meta?.cellClassName, baseProps.className)
+		};
+	}, [getCellProps]);
+}
+/**
+* Hook to determine which columns should be hidden on mobile
+*/
+function useMobileColumnHiding({ responsive = false, hideColumnsOnMobile = [] }) {
+	const isMobile = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.useMobileDetection();
+	return React3.useMemo(() => {
+		if (!responsive) return /* @__PURE__ */ new Set();
+		const hiddenColumns = /* @__PURE__ */ new Set();
+		if (isMobile) {
+			if (typeof responsive === "boolean") hideColumnsOnMobile.forEach((id) => hiddenColumns.add(id));
+			else if (responsive.hideOnMobile) hideColumnsOnMobile.forEach((id) => hiddenColumns.add(id));
+		}
+		return hiddenColumns;
+	}, [
+		responsive,
+		isMobile,
+		hideColumnsOnMobile
+	]);
+}
+/**
+* Hook to generate header cell props with meta class names
+*/
+function useTableHeaderCellHandlers() {
+	return React3.useCallback((header) => {
+		return { className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(header.column.columnDef.meta?.headerClassName) };
+	}, []);
+}
+
+//#region src/components/data-table/BaseTableStackedLayout.tsx
+const validateBreakpoint = (breakpoint) => {
+	const validBreakpoints = [
+		"xs",
+		"sm",
+		"md",
+		"lg",
+		"xl",
+		"2xl"
+	];
+	if (typeof breakpoint === "string" && validBreakpoints.includes(breakpoint)) return breakpoint;
+	if (typeof breakpoint === "string" && breakpoint !== "") console.warn(`Unknown breakpoint value "${breakpoint}", falling back to "md"`);
+	return "md";
+};
+function BaseTableStackedLayout({ className, emptyState, emptyStateMessage, footer, getCellProps, getRowProps, header, isLoading, loadingState, loadingStateMessage, onRowClick, pagination, table, responsive, hideColumnsOnMobile, mobileBreakpoint, stackedHeaderColumn }) {
+	const tableConfig = useTableConfigOptional();
+	const validatedBreakpoint = validateBreakpoint(mobileBreakpoint || tableConfig?.toolbarConfig?.mobileBreakpoint || ComponentSize.SM);
+	const { isMobile } = useMobileDetection({ mobileBreakpoint: validatedBreakpoint });
+	const normalizedOptions = normalizeTableOptions(pagination, emptyState, emptyStateMessage, loadingState, loadingStateMessage, table);
+	const getTableRowProps = useTableRowHandlers({
+		onRowClick,
+		getRowProps
+	});
+	React3.useMemo(() => {
+		return table.getAllLeafColumns().map((column) => column.id);
+	}, [table]);
+	const hiddenColumns = useMobileColumnHiding({
+		responsive,
+		hideColumnsOnMobile});
+	if (isLoading) return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
+		children: [
+			header && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "mb-4",
+				children: header
+			}),
+			normalizedOptions.loadingState,
+			footer && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "mt-4",
+				children: footer
+			})
+		]
+	});
+	const rows = table.getRowModel().rows;
+	if (rows.length === 0) return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
+		children: [
+			header && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "mb-4",
+				children: header
+			}),
+			normalizedOptions.emptyState,
+			footer && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "mt-4",
+				children: footer
+			})
+		]
+	});
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
+		children: [
+			header && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "mb-4",
+				children: header
+			}),
+			/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "space-y-4",
+				children: rows.map((row) => {
+					const rowProps = getTableRowProps(row);
+					return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Card, {
+						...rowProps,
+						children: [stackedHeaderColumn && (() => {
+							const headerCell = row.getVisibleCells().find((cell) => cell.column.id === stackedHeaderColumn);
+							if (headerCell) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+								className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("border-b p-4", "[word-break:break-word]"),
+								children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+									className: "text-lg font-semibold",
+									children: flexRender(headerCell.column.columnDef.cell, headerCell.getContext())
+								})
+							});
+							return null;
+						})(), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CardContent, {
+							className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-3", "[word-break:break-word]"),
+							children: row.getVisibleCells().map((cell) => {
+								if (hiddenColumns.has(cell.column.id)) return null;
+								if (cell.column.id === "actions") return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+									className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end border-t pt-3", isMobile && "pt-4"),
+									...getCellProps?.(cell),
+									children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+										className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex min-h-10 items-center"),
+										children: flexRender(cell.column.columnDef.cell, cell.getContext())
+									})
+								}, cell.id);
+								if (cell.column.id === stackedHeaderColumn) return null;
+								const header$1 = cell.column.columnDef.header;
+								const headerText = typeof header$1 === "string" ? header$1 : void 0;
+								return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+									className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col space-y-1", isMobile && "space-y-2", !stackedHeaderColumn && "pt-4"),
+									...getCellProps?.(cell),
+									children: [headerText && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
+										className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground text-sm font-medium", isMobile && "text-base"),
+										children: headerText
+									}), /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+										className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex min-h-6 items-center text-base", isMobile && "min-h-8 text-lg"),
+										children: flexRender(cell.column.columnDef.cell, cell.getContext())
+									})]
+								}, cell.id);
+							})
+						})]
+					}, row.id);
+				})
+			}),
+			normalizedOptions.pagination.enabled && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "mt-4",
+				children: normalizedOptions.pagination.component
+			}),
+			footer && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "mt-4",
+				children: footer
+			})
+		]
+	});
+}
+
+//#region src/components/data-table/DefaultTableLayout.tsx
+function DefaultTableLayout({ table, getCellProps, getRowProps, onRowClick, className, emptyState, emptyStateMessage, footer, header, isLoading, loadingState, loadingStateMessage, pagination, responsive, hideColumnsOnMobile }) {
+	const getTableRowProps = useTableRowHandlers({
+		onRowClick,
+		getRowProps
+	});
+	const getTableCellProps = useTableCellHandlers({ getCellProps });
+	const getTableHeaderCellProps = useTableHeaderCellHandlers();
+	const hiddenColumns = useMobileColumnHiding({
+		responsive,
+		hideColumnsOnMobile
+	});
+	const normalizedOptions = dashboard__loadShare__react__loadShare__.useMemo(() => normalizeTableOptions(pagination, emptyState, emptyStateMessage, loadingState, loadingStateMessage, table), [
+		pagination,
+		emptyState,
+		emptyStateMessage,
+		loadingState,
+		loadingStateMessage,
+		table
+	]);
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+		className,
+		children: [
+			header && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "mb-4",
+				children: header
+			}),
+			/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "rounded-md border",
+				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Table, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHeader, { children: table.getHeaderGroups().map((headerGroup) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: headerGroup.headers.map((header$1) => {
+					if (hiddenColumns.has(header$1.id)) return null;
+					const headerProps = getTableHeaderCellProps(header$1);
+					return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHead, {
+						...headerProps,
+						children: header$1.isPlaceholder ? null : flexRender(header$1.column.columnDef.header, header$1.getContext())
+					}, header$1.id);
+				}) }, headerGroup.id)) }), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableBody, { children: isLoading ? normalizedOptions.loadingState : table.getRowModel().rows.length > 0 ? table.getRowModel().rows.map((row) => {
+					const rowProps = getTableRowProps(row);
+					return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, {
+						...rowProps,
+						children: row.getVisibleCells().map((cell) => {
+							if (hiddenColumns.has(cell.column.id)) return null;
+							const cellProps = getTableCellProps(cell);
+							return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
+								...cellProps,
+								children: flexRender(cell.column.columnDef.cell, cell.getContext())
+							}, cell.id);
+						})
+					}, row.id);
+				}) : normalizedOptions.emptyState })] })
+			}),
+			normalizedOptions.pagination.enabled && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "mt-4",
+				children: normalizedOptions.pagination.component
+			}),
+			footer && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "mt-4",
+				children: footer
+			})
+		]
+	});
+}
+
+//#region src/components/data-table/useTableLayoutSelector.ts
+function useTableLayoutSelector({ responsive = false, mobileLayout = TableLayoutType.AUTO, mobileBreakpoint = "sm" }) {
+	const { isMobile } = useMobileDetection({ });
+	const shouldShowStackedLayout = responsive && isMobile && (mobileLayout === TableLayoutType.STACKED || mobileLayout === TableLayoutType.AUTO);
+	return shouldShowStackedLayout ? TableLayoutType.STACKED : TableLayoutType.TABLE;
+}
+
+//#region src/components/data-table/TableLayoutRenderer.tsx
+const layoutRegistry = {
+	[TableLayoutType.TABLE]: DefaultTableLayout,
+	[TableLayoutType.STACKED]: BaseTableStackedLayout
+};
+function TableLayoutRenderer({ layoutType, table, refineTable, className, emptyState, footer, getCellProps, getRowProps, header, isLoading, loadingState, onRowClick, pagination, responsive = false, hideColumnsOnMobile = [], mobileBreakpoint, stackedHeaderColumn }) {
+	const tableConfig = useTableConfigOptional();
+	const actualLayoutType = useTableLayoutSelector({
+		responsive,
+		mobileLayout: layoutType,
+		mobileBreakpoint: mobileBreakpoint || tableConfig?.toolbarConfig?.mobileBreakpoint
+	});
+	const LayoutComponent = layoutRegistry[actualLayoutType];
+	if (!LayoutComponent) throw new Error(`Unsupported layout type: ${actualLayoutType}`);
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(LayoutComponent, {
+		className,
+		emptyState,
+		footer,
+		getCellProps,
+		getRowProps,
+		header,
+		isLoading,
+		loadingState,
+		onRowClick,
+		pagination,
+		table,
+		responsive,
+		hideColumnsOnMobile,
+		mobileBreakpoint,
+		stackedHeaderColumn
+	});
+}
+
+//#region src/components/data-table/BaseTableContent.tsx
+function BaseTableContent({ className, emptyState, footer, getCellProps, getRowProps, header, isLoading, loadingState, onRowClick, pagination, table, responsive = false, layoutType = TableLayoutType.AUTO, hideColumnsOnMobile = [], mobileBreakpoint, stackedHeaderColumn }) {
+	const tableConfig = useTableConfigOptional();
+	const toolbarConfig = tableConfig?.toolbarConfig;
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
+		children: [toolbarConfig && /* @__PURE__ */ jsxRuntimeExports.jsx(Toolbar, { table }), /* @__PURE__ */ jsxRuntimeExports.jsx(TableLayoutRenderer, {
+			layoutType,
+			table,
+			className,
+			emptyState,
+			footer,
+			getCellProps,
+			getRowProps,
+			header,
+			isLoading,
+			loadingState,
+			onRowClick,
+			pagination,
+			responsive,
+			hideColumnsOnMobile,
+			mobileBreakpoint: mobileBreakpoint || toolbarConfig?.mobileBreakpoint,
+			stackedHeaderColumn
+		})]
+	});
+}
+
 //#region src/components/data-table/BaseTableInner.tsx
 function BaseTableInner(props) {
-	const { className, emptyState, emptyStateMessage, footer, getCellProps, getRowProps, header, isLoading, loadingState, loadingStateMessage, onRowClick, pagination } = props;
+	const { className, emptyState, emptyStateMessage, footer, getCellProps, getRowProps, header, isLoading, loadingState, loadingStateMessage, onRowClick, pagination, responsive, layoutType, hideColumnsOnMobile, mobileBreakpoint, stackedHeaderColumn } = props;
 	const { table } = useTableInstance();
 	const normalizedOptions = normalizeTableOptions(pagination, emptyState, emptyStateMessage, loadingState, loadingStateMessage, table);
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(BaseTableContent, {
@@ -37563,15 +37966,50 @@ function BaseTableInner(props) {
 		loadingState: normalizedOptions.loadingState,
 		onRowClick,
 		pagination: normalizedOptions.pagination.enabled ? normalizedOptions.pagination.component : void 0,
-		table
+		table,
+		responsive,
+		layoutType,
+		hideColumnsOnMobile,
+		mobileBreakpoint,
+		stackedHeaderColumn
+	});
+}
+
+//#region src/components/data-table/filterColumnsForMobile.ts
+/**
+* Filters columns for mobile display by adding responsive hiding classes
+* to specified columns while preserving order and functionality
+* 
+* @param columns - Array of column definitions
+* @param hideColumnsOnMobile - Array of column IDs to hide on mobile
+* @returns Filtered array of column definitions with responsive CSS classes
+*/
+function filterColumnsForMobile(columns, hideColumnsOnMobile = []) {
+	if (!hideColumnsOnMobile.length) return columns;
+	return columns.map((column) => {
+		if (hideColumnsOnMobile.includes(column.id)) {
+			const existingClassName = column.meta?.headerClassName || "";
+			const existingCellClassName = column.meta?.cellClassName || "";
+			return {
+				...column,
+				meta: {
+					...column.meta,
+					headerClassName: `${existingClassName} hidden sm:table-cell`.trim(),
+					cellClassName: `${existingCellClassName} hidden sm:table-cell`.trim()
+				}
+			};
+		}
+		return column;
 	});
 }
 
 //#region src/components/data-table/BaseTable.tsx
 function BaseTableWithData(props) {
+	const { columns, data, hideColumnsOnMobile = [], responsive = false,...restProps } = props;
+	const filteredColumns = responsive ? filterColumnsForMobile(columns, hideColumnsOnMobile) : columns;
 	const table = useReactTable({
-		data: props.data,
-		columns: props.columns,
+		data,
+		columns: filteredColumns,
 		getCoreRowModel: getCoreRowModel()
 	});
 	const existingTableConfig = useTableConfigOptional();
@@ -37590,7 +38028,7 @@ function BaseTableWithData(props) {
 					isLoading: props.refineTable?.tableQuery?.isFetching,
 					error: props.refineTable?.tableQuery?.error
 				} : void 0,
-				children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseTableInner, { ...props })
+				children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseTableInner, { ...restProps })
 			})
 		})
 	});
@@ -37600,11 +38038,12 @@ function BaseTableWithData(props) {
 			refineTable: props.refineTable,
 			getDefaultOperator: getDefaultOperatorForFieldType,
 			getAvailableOperators,
-			children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseTableInner, { ...props })
+			children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseTableInner, { ...restProps })
 		})
 	});
 }
 function BaseTable(props) {
+	const { className, emptyState, emptyStateMessage, footer, getCellProps, getRowProps, header, isLoading, loadingState, loadingStateMessage, onRowClick, pagination, responsive = false, layoutType = TableLayoutType.AUTO, hideColumnsOnMobile = [], mobileBreakpoint,...restProps } = props;
 	if ("table" in props && props.table && "data" in props && props.data) throw new Error("BaseTable cannot accept both table and data props - use one or the other");
 	if ("table" in props && props.table) {
 		const existingTableConfig = useTableConfigOptional();
@@ -37623,7 +38062,24 @@ function BaseTable(props) {
 						isLoading: props.refineTable?.tableQuery?.isFetching,
 						error: props.refineTable?.tableQuery?.error
 					} : void 0,
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseTableInner, { ...props })
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseTableInner, {
+						className,
+						emptyState,
+						emptyStateMessage,
+						footer,
+						getCellProps,
+						getRowProps,
+						header,
+						isLoading,
+						loadingState,
+						loadingStateMessage,
+						onRowClick,
+						pagination,
+						responsive,
+						layoutType,
+						hideColumnsOnMobile,
+						mobileBreakpoint
+					})
 				})
 			})
 		});
@@ -37633,7 +38089,24 @@ function BaseTable(props) {
 				refineTable: props.refineTable,
 				getDefaultOperator: getDefaultOperatorForFieldType,
 				getAvailableOperators,
-				children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseTableInner, { ...props })
+				children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseTableInner, {
+					className,
+					emptyState,
+					emptyStateMessage,
+					footer,
+					getCellProps,
+					getRowProps,
+					header,
+					isLoading,
+					loadingState,
+					loadingStateMessage,
+					onRowClick,
+					pagination,
+					responsive,
+					layoutType,
+					hideColumnsOnMobile,
+					mobileBreakpoint
+				})
 			})
 		});
 	}
@@ -37724,10 +38197,7 @@ const isEqual$1 = /*@__PURE__*/getDefaultExportFromCjs(isEqual_1);
 var A=Object.defineProperty;var n=(t,o)=>A(t,"name",{value:o,configurable:true});var P=n(()=>{let t=dashboard__loadShare__react__loadShare__.useRef(true);return dashboard__loadShare__react__loadShare__.useEffect(()=>{t.current=false;},[]),t.current},"useIsFirstRender");var k=n(({columns:t,columnFilters:o})=>(o==null?void 0:o.map(e=>{var a,d,c,u;let r=e.operator??((d=(a=t.find(m=>m.id===e.id))==null?void 0:a.meta)==null?void 0:d.filterOperator);if((r==="and"||r==="or")&&Array.isArray(e.value))return {key:((u=(c=t.find(y=>y.id===e.id))==null?void 0:c.meta)==null?void 0:u.filterKey)??e.id,operator:r,value:e.value};let i=Array.isArray(e.value)?"in":"eq";return {field:e.id,operator:r??i,value:e.value}}))??[],"columnFiltersToCrudFilters");var O=n(({nextFilters:t,coreFilters:o})=>o.filter(r=>!t.some(s=>{let i=r.operator==="and"||r.operator==="or",a=s.operator==="and"||s.operator==="or",d=r.operator===s.operator,c=i&&a&&r.key===s.key,u=!i&&!a&&r.field===s.field;return d&&(c||u)})).map(r=>r.operator==="and"||r.operator==="or"?{key:r.key,operator:r.operator,value:[]}:{field:r.field,operator:r.operator,value:void 0}),"getRemovedFilters");var B=n(({columns:t,crudFilters:o})=>o.map(e=>{var r;return e.operator==="and"||e.operator==="or"?e.key?{id:((r=t.find(i=>{var a;return ((a=i.meta)==null?void 0:a.filterKey)===e.key}))==null?void 0:r.id)??e.key,operator:e.operator,value:e.value}:void 0:{id:e.field,operator:e.operator,value:e.value}}).filter(Boolean),"crudFiltersToColumnFilters");function X({refineCoreProps:{hasPagination:t=true,...o}={},initialState:e={},...r}){var D,E,x;let s=P(),i=dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useTable({...o,hasPagination:t}),a=(((D=o.filters)==null?void 0:D.mode)||"server")==="server",d=(((E=o.sorters)==null?void 0:E.mode)||"server")==="server",c=t===false?"off":"server",u=(((x=o.pagination)==null?void 0:x.mode)??c)!=="off",{tableQuery:{data:m},current:y,setCurrent:f,pageSize:Q,setPageSize:w,sorters:v,setSorters:H,filters:C,setFilters:K,pageCount:h}=i,g=useReactTable({data:(m==null?void 0:m.data)??[],getCoreRowModel:getCoreRowModel(),getSortedRowModel:d?void 0:getSortedRowModel(),getFilteredRowModel:a?void 0:getFilteredRowModel(),initialState:{pagination:{pageIndex:y-1,pageSize:Q},sorting:v.map(p=>({id:p.field,desc:p.order==="desc"})),columnFilters:B({columns:r.columns,crudFilters:C}),...e},pageCount:h,manualPagination:true,manualSorting:d,manualFiltering:a,...r}),{state:z,columns:I}=g.options,{pagination:M,sorting:F,columnFilters:S}=z,{pageIndex:R,pageSize:b}=M??{};return dashboard__loadShare__react__loadShare__.useEffect(()=>{R!==void 0&&f(R+1);},[R]),dashboard__loadShare__react__loadShare__.useEffect(()=>{b!==void 0&&w(b);},[b]),dashboard__loadShare__react__loadShare__.useEffect(()=>{if(F!==void 0){let p=F.map(l=>({field:l.id,order:l.desc?"desc":"asc"}));isEqual$1(v,p)||H(p),F.length>0&&u&&!s&&f(1);}},[F]),dashboard__loadShare__react__loadShare__.useEffect(()=>{let p=g.getAllColumns().map(U=>U.columnDef),l=k({columns:p,columnFilters:S});l.push(...O({nextFilters:l,coreFilters:C})),isEqual$1(l,C)||K(l),l.length>0&&u&&!s&&f(1);},[S,I]),{...g,refineCore:i}}n(X,"useTable");
 
 //#region src/components/data-table/DataTable.tsx
-let instanceCounter = 0;
 function DataTable({ actionMenu, columns, control, dataProviderName, refineCoreProps, resource, toolbar, refetchInterval,...props }) {
-	dashboard__loadShare__react__loadShare__.useRef(++instanceCounter);
-	dashboard__loadShare__react__loadShare__.useRef(0);
 	const tableColumns = dashboard__loadShare__react__loadShare__.useMemo(() => {
 		const cols = [...columns || []];
 		const actionColumn = actionMenu ? {
@@ -48603,4 +49073,4 @@ function formatFileSize(bytes) {
 	return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
-export { ActionItemType, ActionListRenderer, ActionType, ActionsFooter, AdapterType, AppComponent, BADGE_THEME, BaseTable, BaseTableContent, BaseTableInner, BooleanFilter, COMPONENT_SIZE_CLASSES, Checkbox, ComponentSize, ContainerType, Copyable, DIALOG_POSITION_CLASSES, DIALOG_SIZE_CLASSES, DataTable, DataTableController, DateFilter, DatePicker, DefaultFooter, DefaultHeader, DefaultPagination, DialogComponent, DialogIconLayout, DialogPosition, DialogProvider, DialogRenderer, DialogStatus, DialogTypes, DialogVariant, Editor, EmailInput, Environment, EnvironmentBuilder, ErrorList, Field, FieldCheckbox, FileInput, FilterChip, FilterGroup, FilterHelpersProvider, FilterOperator, FilterType, FooterContextProvider, FooterEnvironmentBuilder, FooterType, FormDialogType, FormFieldType, FormFooter, FormGroup, FormHeader, FormProvider, FormRenderer, FormType$1 as FormType, GeneralLayout, GroupOrder, HeaderContextProvider, HeaderEnvironmentBuilder, HeaderType, InlineAuthLinkBanner, Input, KeyboardShortcutDialog, LayoutType, Loading, LumeLogo, MainNavigation, MobileMenu, MultiSelectFilter, NavigationType, NumberFilter, PageHeader, ProgressStyleType, RadioGroup, RangeFilter, RefineTableProvider, RichText, SchemaForm, ScreenReaderAnnouncement, SearchFilter, Select, SelectFilter, SidebarProvider, SidebarToggle, SkeletonLoader, Slider, StepControlProvider, StepFormFooter, StepSchemaForm, TableAction, TableActionMenu, TableActionsDropdown, TableConfigProvider, TableContainer, TableEmptyState, TableInstanceProvider, TableLoadingState, TextFilter, Textarea, TextareaField, ThemeSwitcher, ThemedBadge, Toolbar, ToolbarCustomItemComponent, ToolbarItemAlignment, ToolbarItemType, ToolbarRenderer, ToolbarRendererRegistry, ToolbarSeparatorItemComponent, UnifiedFooter, UnifiedHeader, UserNav, WidthCategory, WizardFooter, WizardForm, WizardHeader, adapters, adjustHue, appStore, applyFilterAtom, applyThemeStyles, calculateStepState, clear$2 as clear, clearSelectedFilterAtom, computeAutoSaveConfig, contextProviders, createActionHelpers, createDefaultSystemColors, createDefaultTheme, createDialogActions, createEnvironmentReceiver, createFilterOnChangeHandler, createFiltersFromValue, createFooterRegistry, createForceRerenderReceiver, createFormActions, createHeaderRegistry, createStepActions, createStepClickHandler, createStepEnvironment, createStepKeyHandler, createStepRetryHandler, createWizardActions, createZeroSystemColors, darkenColor, deleteFilterAtom, desaturateColor, dialogContextRequirements, ensureWcagContrast, evaluateSubmitLabel, footerRegistry, formatFileSize, generateHash, generateStorageKey, generateThemeCSS, getAction, getActionItemComponent, getComponentSizeClass, getContrastRatio, getDialogContentClasses, getDialogType, getDialogTypeFromConfig, getEffectiveAllowNavigation, getFilter, getFormComponent, getFormTypeFromDialog, getResourceFiltersAtom, getSizeClass, getStepAnimationClasses, getThemeById, hasAction, hasFilter, hasNavigation, hasStepEnvironment, headerRegistry, helpers, hexToHsl, hslToRawString, hslToRgb, hslToString, isActionButtonsFunction, isAlertDialog, isComponentSize, isConfirmDialog, isCustomDialog, isDialogContainer, isDialogFooterEnvironment, isDialogFooterFunction, isDialogHeaderFunction, isFooterFunction, isFormDialog, isHeaderFunction, isNoneNavigation, isSimpleFooterEnvironment, isSimpleForm, isStandaloneContainer, isStandaloneFooterEnvironment, isStepFooterEnvironment, isStepForm, isStepFormConfig, isStepHeaderEnvironment, isStepNavigation, isSubmitLabelFunction, isValidBackgroundImages, isValidColor, isValidSystemColors, isWizardDialogConfig, isWizardFooterEnvironment, isWizardForm, isWizardFormConfig, isWizardHeaderEnvironment, isWizardNavigation, lightenColor, listActions, listAll, listFilters, meetsWcagContrast, meetsWcagNonTextContrast, meetsWcagTextContrast, mergeThemes, metaStore, normalizeTableOptions, portalStore, registerAction, registerActionItemComponent, registerAllActionItems, registerAllFormComponents, registerCheckbox, registerCustomToolbarItem, registerDatePicker, registerEmailInput, registerFileInput, registerFilter, registerFormComponent, registerInput, registerRadioGroup, registerRefreshToolbarItem, registerRichText, registerSearchToolbarItem, registerSelect, registerSeparatorToolbarItem, registerSlider, registerTextarea, removeAction, removeFilter, renderFooter, renderHeader, resetGloballyInitialized, resetRegistryForTesting, resolveAllowStepNavigation, resourceFiltersAtom, rgbToHsl, rgbToLuminance, runWhenIdle, saturateColor, saveFilterAtom, savedFiltersAtom, selectedFilterAtom, updateFilterAtom, useAccountSubdomain, useAccountUrl, useApiUrl, useAppStore, useAvatar, useCreateStepControl, useDefaultFilter, useDialog, useDialogActions, useDialogState, useDialogType, useEnvironmentSync, useFeatureFlag, useFilterHelpers, useFooterContext, useForceRerender, useFormContext, useFrameworkSync, useHeaderContext, useIsFormDialog, useIsInDialog, useIsWizardDialog, useLoginUrl, useMenuItems, useMetaStore, useOptionalFooterContext, useOptionalHeaderContext, useOptionalStepControlContext, usePluginMeta, usePortal, usePortalActions, usePortalMeta, usePortalStore, usePortalUrl, useProtocolDomain, useRefineTable, useRegisterUrl, useResetPasswordUrl, useScreenReaderAnnouncement, useSdk, useSidebarContext, useStepControl, useStepControlContext, useTableConfig, useTableConfigOptional, useTableInstance, useTheme, useThemeIdAndSetter, useUIStore, validateTheme, withTheme };
+export { ActionItemType, ActionListRenderer, ActionType, ActionsFooter, AdapterType, AppComponent, BADGE_THEME, BaseTable, BaseTableContent, BaseTableInner, BooleanFilter, COMPONENT_SIZE_CLASSES, Checkbox, ComponentSize, ContainerType, Copyable, DIALOG_POSITION_CLASSES, DIALOG_SIZE_CLASSES, DataTable, DataTableController, DateFilter, DatePicker, DefaultFooter, DefaultHeader, DefaultPagination, DialogComponent, DialogIconLayout, DialogPosition, DialogProvider, DialogRenderer, DialogStatus, DialogTypes, DialogVariant, Editor, EmailInput, Environment, EnvironmentBuilder, ErrorList, Field, FieldCheckbox, FileInput, FilterChip, FilterGroup, FilterHelpersProvider, FilterOperator, FilterType, FooterContextProvider, FooterEnvironmentBuilder, FooterType, FormDialogType, FormFieldType, FormFooter, FormGroup, FormHeader, FormProvider, FormRenderer, FormType$1 as FormType, GeneralLayout, GroupOrder, HeaderContextProvider, HeaderEnvironmentBuilder, HeaderType, InlineAuthLinkBanner, Input, KeyboardShortcutDialog, LayoutType, Loading, LumeLogo, MainNavigation, MobileMenu, MultiSelectFilter, NavigationType, NumberFilter, PageHeader, ProgressStyleType, RadioGroup, RangeFilter, RefineTableProvider, RichText, SchemaForm, ScreenReaderAnnouncement, SearchFilter, Select, SelectFilter, SidebarProvider, SidebarToggle, SkeletonLoader, Slider, StepControlProvider, StepFormFooter, StepSchemaForm, TableAction, TableActionMenu, TableActionsDropdown, TableConfigProvider, TableContainer, TableEmptyState, TableInstanceProvider, TableLayoutType, TableLoadingState, TextFilter, Textarea, TextareaField, ThemeSwitcher, ThemedBadge, Toolbar, ToolbarCustomItemComponent, ToolbarItemAlignment, ToolbarItemType, ToolbarRenderer, ToolbarRendererRegistry, ToolbarSeparatorItemComponent, UnifiedFooter, UnifiedHeader, UserNav, WidthCategory, WizardFooter, WizardForm, WizardHeader, adapters, adjustHue, appStore, applyFilterAtom, applyThemeStyles, calculateStepState, clear$2 as clear, clearSelectedFilterAtom, computeAutoSaveConfig, contextProviders, createActionHelpers, createDefaultSystemColors, createDefaultTheme, createDialogActions, createEnvironmentReceiver, createFilterOnChangeHandler, createFiltersFromValue, createFooterRegistry, createForceRerenderReceiver, createFormActions, createHeaderRegistry, createStepActions, createStepClickHandler, createStepEnvironment, createStepKeyHandler, createStepRetryHandler, createWizardActions, createZeroSystemColors, darkenColor, deleteFilterAtom, desaturateColor, dialogContextRequirements, ensureWcagContrast, evaluateSubmitLabel, footerRegistry, formatFileSize, generateHash, generateStorageKey, generateThemeCSS, getAction, getActionItemComponent, getComponentSizeClass, getContrastRatio, getDialogContentClasses, getDialogType, getDialogTypeFromConfig, getEffectiveAllowNavigation, getFilter, getFormComponent, getFormTypeFromDialog, getResourceFiltersAtom, getSizeClass, getStepAnimationClasses, getThemeById, hasAction, hasFilter, hasNavigation, hasStepEnvironment, headerRegistry, helpers, hexToHsl, hslToRawString, hslToRgb, hslToString, isActionButtonsFunction, isAlertDialog, isComponentSize, isConfirmDialog, isCustomDialog, isDialogContainer, isDialogFooterEnvironment, isDialogFooterFunction, isDialogHeaderFunction, isFooterFunction, isFormDialog, isHeaderFunction, isNoneNavigation, isSimpleFooterEnvironment, isSimpleForm, isStandaloneContainer, isStandaloneFooterEnvironment, isStepFooterEnvironment, isStepForm, isStepFormConfig, isStepHeaderEnvironment, isStepNavigation, isSubmitLabelFunction, isValidBackgroundImages, isValidColor, isValidSystemColors, isWizardDialogConfig, isWizardFooterEnvironment, isWizardForm, isWizardFormConfig, isWizardHeaderEnvironment, isWizardNavigation, lightenColor, listActions, listAll, listFilters, meetsWcagContrast, meetsWcagNonTextContrast, meetsWcagTextContrast, mergeThemes, metaStore, normalizeTableOptions, portalStore, registerAction, registerActionItemComponent, registerAllActionItems, registerAllFormComponents, registerCheckbox, registerCustomToolbarItem, registerDatePicker, registerEmailInput, registerFileInput, registerFilter, registerFormComponent, registerInput, registerRadioGroup, registerRefreshToolbarItem, registerRichText, registerSearchToolbarItem, registerSelect, registerSeparatorToolbarItem, registerSlider, registerTextarea, removeAction, removeFilter, renderFooter, renderHeader, resetGloballyInitialized, resetRegistryForTesting, resolveAllowStepNavigation, resourceFiltersAtom, rgbToHsl, rgbToLuminance, runWhenIdle, saturateColor, saveFilterAtom, savedFiltersAtom, selectedFilterAtom, updateFilterAtom, useAccountSubdomain, useAccountUrl, useApiUrl, useAppStore, useAvatar, useCreateStepControl, useDefaultFilter, useDialog, useDialogActions, useDialogState, useDialogType, useEnvironmentSync, useFeatureFlag, useFilterHelpers, useFooterContext, useForceRerender, useFormContext, useFrameworkSync, useHeaderContext, useIsFormDialog, useIsInDialog, useIsWizardDialog, useLoginUrl, useMenuItems, useMetaStore, useOptionalFooterContext, useOptionalHeaderContext, useOptionalStepControlContext, usePluginMeta, usePortal, usePortalActions, usePortalMeta, usePortalStore, usePortalUrl, useProtocolDomain, useRefineTable, useRegisterUrl, useResetPasswordUrl, useScreenReaderAnnouncement, useSdk, useSidebarContext, useStepControl, useStepControlContext, useTableConfig, useTableConfigOptional, useTableInstance, useTheme, useThemeIdAndSetter, useUIStore, validateTheme, withTheme };
