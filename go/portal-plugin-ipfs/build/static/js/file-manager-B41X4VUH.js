@@ -356,12 +356,442 @@ const useFileManagerNavigation = () => {
   };
 };
 
+const HomeButton = ({
+  currentPath,
+  navigateToPath,
+  isMobile = false
+}) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center flex-shrink-0", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "button",
+      {
+        onClick: () => {
+          if (ROOT_PATH !== currentPath) {
+            navigateToPath(ROOT_PATH);
+          }
+        },
+        "aria-label": "Navigate to Home",
+        className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
+          "hover:bg-muted flex items-center rounded transition-colors min-h-[2.75em] min-w-[2.75em]",
+          {
+            "px-2 py-2 text-sm font-medium": isMobile,
+            "px-3 py-3 text-base font-semibold": !isMobile
+          }
+        ),
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            House,
+            {
+              "aria-hidden": "true",
+              className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground", {
+                "mr-1 h-4 w-4": isMobile,
+                "mr-2 h-5 w-5": !isMobile
+              })
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: isMobile ? "hidden" : "hidden sm:inline", children: "Home" })
+        ]
+      }
+    ),
+    currentPath !== ROOT_PATH && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ChevronRight,
+      {
+        "aria-hidden": "true",
+        className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground", {
+          "mx-0.5 h-3 w-3": isMobile,
+          "mx-1 h-4 w-4": !isMobile
+        })
+      }
+    )
+  ] });
+};
+
+const BreadcrumbTrail = ({
+  breadcrumbs,
+  currentPath,
+  navigateToPath,
+  isMobile = false
+}) => {
+  const MobileCollapsedBreadcrumbs = ({
+    breadcrumbs: breadcrumbs2,
+    currentPath: currentPath2,
+    navigateToPath: navigateToPath2,
+    isMobile: isMobile2 = false
+  }) => {
+    const firstItems = breadcrumbs2.slice(0, 1);
+    const lastItem = breadcrumbs2[breadcrumbs2.length - 1];
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("nav", { "aria-label": "Breadcrumb", className: "scrollbar-hide flex items-center overflow-x-auto", children: [
+      firstItems.map((crumb, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-shrink-0 items-center", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            type: "button",
+            onClick: () => {
+              if (crumb.path !== currentPath2) {
+                navigateToPath2(crumb.path);
+              }
+            },
+            "aria-label": `Navigate to ${crumb.name}`,
+            className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
+              "hover:bg-muted flex min-h-[2.25em] min-w-[2.25em] items-center rounded transition-colors",
+              {
+                "px-1.5 py-1.5 text-xs": isMobile2,
+                "px-2 py-2 text-sm": !isMobile2
+              },
+              "text-muted-foreground hover:text-foreground"
+            ),
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Folder,
+                {
+                  "aria-hidden": "true",
+                  className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground", {
+                    "mr-1 h-3 w-3": isMobile2,
+                    "mr-1 h-4 w-4": !isMobile2
+                  })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "span",
+                {
+                  className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("truncate", {
+                    "max-w-56": isMobile2,
+                    "max-w-full": !isMobile2
+                  }),
+                  title: crumb.name,
+                  children: crumb.name
+                }
+              )
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          ChevronRight,
+          {
+            "aria-hidden": "true",
+            className: "text-muted-foreground mx-1 h-4 w-4"
+          }
+        )
+      ] }, crumb.path)),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-shrink-0 items-center", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "span",
+          {
+            "aria-hidden": "true",
+            className: `text-muted-foreground ${isMobile2 ? "mx-0.5 text-xs" : "mx-1 text-sm"} `,
+            children: "..."
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          ChevronRight,
+          {
+            "aria-hidden": "true",
+            className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground", {
+              "mx-0.5 h-3 w-3": isMobile2,
+              "mx-1 h-4 w-4": !isMobile2
+            })
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-shrink-0 items-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "button",
+        {
+          type: "button",
+          onClick: () => {
+            if (lastItem.path !== currentPath2) {
+              navigateToPath2(lastItem.path);
+            }
+          },
+          "aria-label": `Current page: ${lastItem.name}`,
+          "aria-current": "page",
+          className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
+            "hover:bg-muted text-foreground flex min-h-[2.25em] min-w-[2.25em] items-center rounded font-medium transition-colors",
+            {
+              "px-1.5 py-1.5 text-xs": isMobile2,
+              "px-2 py-2 text-sm": !isMobile2
+            }
+          ),
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Folder,
+              {
+                "aria-hidden": "true",
+                className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground", {
+                  "mr-1 h-3 w-3": isMobile2,
+                  "mr-1 h-4 w-4": !isMobile2
+                })
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "span",
+              {
+                className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("truncate", {
+                  "max-w-56": isMobile2,
+                  "max-w-full": !isMobile2
+                }),
+                title: lastItem.name,
+                children: lastItem.name
+              }
+            )
+          ]
+        }
+      ) })
+    ] });
+  };
+  const FullBreadcrumbs = ({
+    breadcrumbs: breadcrumbs2,
+    currentPath: currentPath2,
+    navigateToPath: navigateToPath2,
+    isMobile: isMobile2 = false
+  }) => {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("nav", { "aria-label": "Breadcrumb", className: "scrollbar-hide flex items-center overflow-x-auto", children: breadcrumbs2.map((crumb, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-shrink-0 items-center", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "button",
+        {
+          type: "button",
+          onClick: () => {
+            if (crumb.path !== currentPath2) {
+              navigateToPath2(crumb.path);
+            }
+          },
+          "aria-label": `Navigate to ${crumb.name}`,
+          "aria-current": index === breadcrumbs2.length - 1 ? "page" : void 0,
+          className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
+            "hover:bg-muted flex min-h-[2.75em] min-w-[2.75em] items-center rounded transition-colors",
+            {
+              "px-2 py-2 text-sm": isMobile2,
+              "px-3 py-3 text-base": !isMobile2
+            },
+            {
+              "text-foreground font-medium": index === breadcrumbs2.length - 1,
+              "text-muted-foreground hover:text-foreground": index !== breadcrumbs2.length - 1
+            }
+          ),
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Folder,
+              {
+                "aria-hidden": "true",
+                className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground", {
+                  "mr-1.5 h-3.5 w-3.5": isMobile2,
+                  "mr-2 h-4 w-4": !isMobile2
+                })
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "span",
+              {
+                className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("truncate", {
+                  "max-w-56": isMobile2,
+                  "max-w-full": !isMobile2
+                }),
+                title: crumb.name,
+                children: crumb.name
+              }
+            )
+          ]
+        }
+      ),
+      index < breadcrumbs2.length - 1 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        ChevronRight,
+        {
+          "aria-hidden": "true",
+          className: `text-muted-foreground ${isMobile2 ? "mx-0.5 h-3 w-3" : "mx-1 h-4 w-4"} `
+        }
+      )
+    ] }, crumb.path)) });
+  };
+  if (isMobile && breadcrumbs.length > 3) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      MobileCollapsedBreadcrumbs,
+      {
+        breadcrumbs,
+        currentPath,
+        navigateToPath,
+        isMobile
+      }
+    );
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    FullBreadcrumbs,
+    {
+      breadcrumbs,
+      currentPath,
+      navigateToPath,
+      isMobile
+    }
+  );
+};
+
+const HistoryDropdown = ({
+  history,
+  currentPath,
+  navigateToPath,
+  formatPathName,
+  isMobile = false
+}) => {
+  const ROOT_PATH = "/";
+  if (history.length <= 1) {
+    return null;
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center flex-shrink-0", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenu, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuTrigger, { asChild: true, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button,
+      {
+        variant: "ghost",
+        size: "sm",
+        className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
+          "text-muted-foreground hover:text-foreground hover:bg-muted min-h-[2.75em] min-w-[2.75em]",
+          {
+            "px-1 py-2 text-xs": isMobile,
+            "px-2 py-3 text-sm": !isMobile
+          }
+        ),
+        title: "View history",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          ChevronDown,
+          {
+            className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
+              "h-3 w-3": isMobile,
+              "h-4 w-4": !isMobile
+            })
+          }
+        )
+      }
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuContent,
+      {
+        align: "end",
+        className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
+          "bg-background border-border max-w-[90vw]",
+          {
+            "w-48 py-1 text-xs": isMobile,
+            "w-64 p-2 text-sm": !isMobile
+          }
+        ),
+        children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({ "px-2 py-1": isMobile, "p-2": !isMobile }), children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
+            "font-medium uppercase tracking-wide text-gray-400",
+            {
+              "mb-1 px-2 text-[10px]": isMobile,
+              "mb-2 px-2 text-xs": !isMobile
+            }
+          ), children: "Navigation History" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
+            "overflow-auto",
+            {
+              "max-h-48 space-y-0": isMobile,
+              "max-h-64 space-y-1": !isMobile
+            }
+          ), children: history.slice(0, 10).map((path, index) => {
+            const isCurrent = path === currentPath;
+            return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem,
+              {
+                onClick: () => {
+                  if (path !== currentPath) {
+                    navigateToPath(path);
+                  }
+                },
+                className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
+                  "flex cursor-pointer items-center min-w-[0]",
+                  {
+                    "px-2 py-1.5 text-xs gap-1": isMobile,
+                    "px-2 py-3 text-sm gap-2": !isMobile
+                  },
+                  {
+                    "bg-muted text-accent font-medium": isCurrent,
+                    "text-foreground hover:bg-muted": !isCurrent
+                  }
+                ),
+                children: [
+                  path === ROOT_PATH ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    House,
+                    {
+                      className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
+                        "flex-shrink-0",
+                        {
+                          "h-3 w-3": isMobile,
+                          "h-4 w-4": !isMobile
+                        }
+                      )
+                    }
+                  ) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    Folder,
+                    {
+                      className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
+                        "flex-shrink-0",
+                        {
+                          "h-3 w-3": isMobile,
+                          "h-4 w-4": !isMobile
+                        }
+                      )
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0 flex-1", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "div",
+                      {
+                        className: "truncate",
+                        title: formatPathName(path),
+                        children: formatPathName(path)
+                      }
+                    ),
+                    path !== ROOT_PATH && /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "div",
+                      {
+                        className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
+                          "text-muted-foreground truncate",
+                          {
+                            "text-[9px] mt-0.5": isMobile,
+                            "text-xs": !isMobile
+                          }
+                        ),
+                        title: path,
+                        children: path
+                      }
+                    )
+                  ] }),
+                  isCurrent && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
+                    "bg-accent text-foreground flex-shrink-0 rounded text-xs",
+                    {
+                      "px-1 py-0.5": isMobile,
+                      "px-1.5 py-0.5": !isMobile
+                    }
+                  ), children: "Current" })
+                ]
+              },
+              `${path}-${index}`
+            );
+          }) }),
+          history.length > 10 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(
+            "text-muted-foreground text-center",
+            {
+              "mt-1 px-2 text-[9px]": isMobile,
+              "mt-2 px-2 text-xs": !isMobile
+            }
+          ), children: [
+            "Showing recent ",
+            Math.min(10, history.length),
+            " of",
+            " ",
+            history.length,
+            " locations"
+          ] })
+        ] })
+      }
+    )
+  ] }) });
+};
+
 const ROOT_PATH = "/";
 const Breadcrumbs = () => {
   const { currentPath, navigateToPath } = useFileManagerContext();
   const { breadcrumbs, isLoading, error } = useBreadcrumbs({
     path: currentPath
   });
+  const { isMobile: isMobileView } = core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.useMobileDetection({ breakpoint: 768 });
   const [history, setHistory] = core_ipfs__loadShare__react__loadShare__.useState([]);
   core_ipfs__loadShare__react__loadShare__.useEffect(() => {
     if (currentPath) {
@@ -377,16 +807,6 @@ const Breadcrumbs = () => {
       });
     }
   }, [currentPath]);
-  const getVisibleHistory = () => {
-    const uniqueHistory = history.filter(
-      (path, index) => history.indexOf(path) === index
-    );
-    return uniqueHistory.slice(0, 10).map((path, index) => ({
-      path,
-      index,
-      isCurrent: path === currentPath
-    }));
-  };
   const formatPathName = (path) => {
     if (path === ROOT_PATH) return "Home";
     return path.split("/").pop() || path;
@@ -398,128 +818,40 @@ const Breadcrumbs = () => {
     return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-muted-foreground", children: "Failed to load breadcrumbs" });
   }
   const displayBreadcrumbs = breadcrumbs && breadcrumbs.length > 0 ? breadcrumbs : [{ path: ROOT_PATH, name: "Home" }];
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
     "nav",
     {
       "aria-label": "Breadcrumb navigation",
       className: "flex items-center space-x-1 text-sm",
-      children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("ol", { "aria-label": "Breadcrumbs", className: "flex items-center", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs(
-              "button",
-              {
-                onClick: () => {
-                  if (ROOT_PATH !== currentPath) {
-                    navigateToPath(ROOT_PATH);
-                  }
-                },
-                "aria-label": "Navigate to Home",
-                className: "hover:bg-muted flex items-center rounded px-3 py-1.5 text-base font-semibold transition-colors",
-                children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(
-                    House,
-                    {
-                      "aria-hidden": "true",
-                      className: "text-muted-foreground mr-2 h-5 w-5"
-                    }
-                  ),
-                  "Home"
-                ]
-              }
-            ),
-            currentPath !== ROOT_PATH && /* @__PURE__ */ jsxRuntimeExports.jsx(
-              ChevronRight,
-              {
-                "aria-hidden": "true",
-                className: "text-muted-foreground mx-1 h-4 w-4"
-              }
-            )
-          ] }),
-          currentPath !== ROOT_PATH && displayBreadcrumbs.map((crumb, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs(
-              "button",
-              {
-                onClick: () => {
-                  if (crumb.path !== currentPath) {
-                    navigateToPath(crumb.path);
-                  }
-                },
-                "aria-label": `Navigate to ${crumb.name}`,
-                "aria-current": index === displayBreadcrumbs.length - 1 ? "page" : void 0,
-                className: `hover:bg-muted flex items-center rounded px-3 py-1.5 transition-colors ${index === displayBreadcrumbs.length - 1 ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"}`,
-                children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(
-                    Folder,
-                    {
-                      "aria-hidden": "true",
-                      className: "text-muted-foreground mr-2 h-4 w-4"
-                    }
-                  ),
-                  crumb.name
-                ]
-              }
-            ),
-            index < displayBreadcrumbs.length - 1 && /* @__PURE__ */ jsxRuntimeExports.jsx(
-              ChevronRight,
-              {
-                "aria-hidden": "true",
-                className: "text-muted-foreground mx-1 h-4 w-4"
-              }
-            )
-          ] }, crumb.path))
-        ] }),
-        history.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsxs(core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenu, { children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuTrigger, { asChild: true, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-            core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button,
-            {
-              variant: "ghost",
-              size: "sm",
-              className: "text-muted-foreground hover:text-foreground hover:bg-muted px-2",
-              title: "View history",
-              children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: "h-3 w-3" })
-            }
-          ) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuContent,
-            {
-              align: "start",
-              className: "bg-background border-border w-64",
-              children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-2", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mb-2 px-2 text-xs font-medium uppercase tracking-wide text-gray-400", children: "Navigation History" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-h-64 space-y-1 overflow-auto", children: getVisibleHistory().map(({ path, index, isCurrent }) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                  core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem,
-                  {
-                    onClick: () => {
-                      if (path !== currentPath) {
-                        navigateToPath(path);
-                      }
-                    },
-                    className: `flex cursor-pointer items-center gap-2 px-2 py-2 ${isCurrent ? "bg-muted text-accent font-medium" : "text-foreground hover:bg-muted"}`,
-                    children: [
-                      path === ROOT_PATH ? /* @__PURE__ */ jsxRuntimeExports.jsx(House, { className: "h-4 w-4 flex-shrink-0" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Folder, { className: "h-4 w-4 flex-shrink-0" }),
-                      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0 flex-1", children: [
-                        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "truncate", children: formatPathName(path) }),
-                        path !== ROOT_PATH && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-muted-foreground truncate text-xs", children: path })
-                      ] }),
-                      isCurrent && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-accent text-foreground flex-shrink-0 rounded px-1.5 py-0.5 text-xs", children: "Current" })
-                    ]
-                  },
-                  `${path}-${index}`
-                )) }),
-                history.length > 10 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-muted-foreground mt-2 px-2 text-center text-xs", children: [
-                  "Showing recent ",
-                  Math.min(10, history.length),
-                  " of",
-                  " ",
-                  history.length,
-                  " locations"
-                ] })
-              ] })
-            }
-          )
-        ] })
-      ]
+      children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center w-full", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          HomeButton,
+          {
+            currentPath,
+            navigateToPath,
+            isMobile: isMobileView
+          }
+        ),
+        currentPath !== ROOT_PATH && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          BreadcrumbTrail,
+          {
+            breadcrumbs: displayBreadcrumbs,
+            currentPath,
+            navigateToPath,
+            isMobile: isMobileView
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          HistoryDropdown,
+          {
+            history,
+            currentPath,
+            navigateToPath,
+            formatPathName,
+            isMobile: isMobileView
+          }
+        )
+      ] })
     }
   );
 };
@@ -5322,6 +5654,7 @@ const FileManagerInner = () => {
         refetchInterval: 5e3,
         resource: "ipfs/files/directory",
         emptyStateMessage: "No files found in this folder",
+        responsive: true,
         control: /* @__PURE__ */ jsxRuntimeExports.jsx(
           core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__.DataTableController,
           {
@@ -5337,7 +5670,6 @@ const FileManagerInner = () => {
               icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Download, { className: "h-4 w-4" }),
               label: "Download",
               onClick: (row) => handleDownload(row.cid),
-              tooltip: "Download file",
               disabled: (row) => row.is_directory
             },
             {
@@ -5351,7 +5683,6 @@ const FileManagerInner = () => {
                 );
                 openDialog(dialogConfig);
               },
-              tooltip: "Unpin file or directory",
               disabled: (row) => row?.unpinnable
             }
           ]

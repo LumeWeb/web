@@ -30837,21 +30837,74 @@ function useDebounce(value, delay = 500) {
 	return debouncedValue;
 }
 
-//#region src/hooks/useMobile.ts
-const MOBILE_BREAKPOINT = 640;
-function useMobile(breakpoint = MOBILE_BREAKPOINT) {
-	const [mobile, setMobile] = dashboard__loadShare__react__loadShare__.useState(window.innerWidth <= breakpoint);
+//#region src/hooks/useMobileDetection.ts
+const tailwindBreakpoints = {
+	"xs": 0,
+	"sm": 640,
+	"md": 768,
+	"lg": 1024,
+	"xl": 1280,
+	"2xl": 1536
+};
+/**
+* Hook to detect mobile viewport based on breakpoints
+* @param props.breakpoint - The breakpoint at which to consider the viewport mobile (default: "sm")
+* @param props.useMatchMedia - Whether to use matchMedia API for better performance (default: true)
+* @returns isMobile state, current breakpoint name, and current viewport width
+*/
+function useMobileDetection({ breakpoint = "sm", useMatchMedia = true } = {}) {
+	const [isMobile, setIsMobile] = dashboard__loadShare__react__loadShare__.useState(false);
+	const [currentBreakpoint, setCurrentBreakpoint] = dashboard__loadShare__react__loadShare__.useState("xs");
+	const [currentWidth, setCurrentWidth] = dashboard__loadShare__react__loadShare__.useState(0);
 	dashboard__loadShare__react__loadShare__.useEffect(() => {
-		const handleResize = () => {
-			setMobile(window.innerWidth <= breakpoint);
+		const breakpointValue = typeof breakpoint === "string" ? tailwindBreakpoints[breakpoint] ?? tailwindBreakpoints.sm : breakpoint;
+		const getCurrentBreakpoint = (width) => {
+			let breakpoint$1 = "xs";
+			for (const [bp, value] of Object.entries(tailwindBreakpoints)) if (width >= value) breakpoint$1 = bp;
+			return breakpoint$1;
 		};
-		window.addEventListener("resize", handleResize);
-		handleResize();
-		return () => {
-			window.removeEventListener("resize", handleResize);
+		const checkIsMobile = () => {
+			const width = window.innerWidth;
+			setCurrentWidth(width);
+			setCurrentBreakpoint(getCurrentBreakpoint(width));
+			setIsMobile(width < breakpointValue);
 		};
-	}, [breakpoint]);
-	return mobile;
+		checkIsMobile();
+		if (useMatchMedia && window.matchMedia) {
+			const mq = window.matchMedia(`(max-width: ${breakpointValue - 1}px)`);
+			const handleChange = () => {
+				setIsMobile(mq.matches);
+				const width = window.innerWidth;
+				setCurrentWidth(width);
+				setCurrentBreakpoint(getCurrentBreakpoint(width));
+			};
+			mq.addEventListener("change", handleChange);
+			setIsMobile(mq.matches);
+			return () => {
+				mq.removeEventListener("change", handleChange);
+			};
+		} else {
+			window.addEventListener("resize", checkIsMobile);
+			return () => {
+				window.removeEventListener("resize", checkIsMobile);
+			};
+		}
+	}, [breakpoint, useMatchMedia]);
+	return {
+		isMobile,
+		currentBreakpoint,
+		currentWidth
+	};
 }
 
-export { Accordion, AccordionContent, AccordionItem, AccordionTrigger, AddIcon, Alert, AlertDescription, AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, AlertDialogPortal, AlertDialogTitle, AlertDialogTrigger, AlertTitle, Autocomplete, Avatar, AvatarFallback, AvatarImage, Badge, BoxCheckedIcon, Button$1 as Button, Calendar, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, ChartContainer, ChartLegend, ChartLegendContent, ChartStyle, ChartTooltip, ChartTooltipContent, CheckRoundedIcon, Checkbox, ChevronDownIcon, CircleLockIcon, ClockIcon, CloudCheckIcon, CloudDownloadIcon, CloudIcon, CloudSelectIcon, CloudUploadIcon, CloudUploadSolidIcon, Collapsible, CollapsibleContent, CollapsibleTrigger, Command$1 as Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut, CrownIcon, CurrentUsageIcon, DatePicker, Delimiter, Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger, DownloadIcon, Drawer$1 as Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerOverlay, DrawerPortal, DrawerTitle, DrawerTrigger, DriveIcon, DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger, EditIcon, ExclamationCircleIcon, FileIcon, FilesIcon, FingerPrintIcon, FolderIcon, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, HamburgerMenuIcon, IndeterminateProgress, InfoIcon, Input, Label$1 as Label, MoreIcon, PageIcon, PersonIcon, PictureIcon, Popover, PopoverAnchor, PopoverContent, PopoverTrigger, Progress, RadioGroup, RadioGroupItem, RecentIcon, RemoveIcon, ScrollArea, ScrollBar, Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectScrollDownButton, SelectScrollUpButton, SelectSeparator, SelectTrigger, SelectValue, Separator, Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetOverlay, SheetPortal, SheetTitle, SheetTrigger, Skeleton, Slider, Spinner, Switch, Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow, Tabs, TabsContent, TabsList, TabsTrigger, TagInput, TagList, TagPopover, Textarea, ThemeIcon, Toast, ToastAction, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport, Toaster, Toggle, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TrashIcon, VisuallyHidden, XlsxIcon, badgeVariants, buttonVariants, cn, reducer, toast, toggleVariants, useChart, useDebounce, useFormField, useMobile, useToast };
+//#region src/hooks/useMobile.ts
+/**
+* Simple hook to detect mobile viewport
+* @deprecated Use useMobileDetection instead for more features and better performance
+*/
+function useMobile(breakpoint) {
+	const { isMobile } = useMobileDetection({ breakpoint });
+	return isMobile;
+}
+
+export { Accordion, AccordionContent, AccordionItem, AccordionTrigger, AddIcon, Alert, AlertDescription, AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, AlertDialogPortal, AlertDialogTitle, AlertDialogTrigger, AlertTitle, Autocomplete, Avatar, AvatarFallback, AvatarImage, Badge, BoxCheckedIcon, Button$1 as Button, Calendar, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, ChartContainer, ChartLegend, ChartLegendContent, ChartStyle, ChartTooltip, ChartTooltipContent, CheckRoundedIcon, Checkbox, ChevronDownIcon, CircleLockIcon, ClockIcon, CloudCheckIcon, CloudDownloadIcon, CloudIcon, CloudSelectIcon, CloudUploadIcon, CloudUploadSolidIcon, Collapsible, CollapsibleContent, CollapsibleTrigger, Command$1 as Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut, CrownIcon, CurrentUsageIcon, DatePicker, Delimiter, Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger, DownloadIcon, Drawer$1 as Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerOverlay, DrawerPortal, DrawerTitle, DrawerTrigger, DriveIcon, DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger, EditIcon, ExclamationCircleIcon, FileIcon, FilesIcon, FingerPrintIcon, FolderIcon, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, HamburgerMenuIcon, IndeterminateProgress, InfoIcon, Input, Label$1 as Label, MoreIcon, PageIcon, PersonIcon, PictureIcon, Popover, PopoverAnchor, PopoverContent, PopoverTrigger, Progress, RadioGroup, RadioGroupItem, RecentIcon, RemoveIcon, ScrollArea, ScrollBar, Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectScrollDownButton, SelectScrollUpButton, SelectSeparator, SelectTrigger, SelectValue, Separator, Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetOverlay, SheetPortal, SheetTitle, SheetTrigger, Skeleton, Slider, Spinner, Switch, Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow, Tabs, TabsContent, TabsList, TabsTrigger, TagInput, TagList, TagPopover, Textarea, ThemeIcon, Toast, ToastAction, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport, Toaster, Toggle, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TrashIcon, VisuallyHidden, XlsxIcon, badgeVariants, buttonVariants, cn, reducer, toast, toggleVariants, useChart, useDebounce, useFormField, useMobile, useMobileDetection, useToast };
