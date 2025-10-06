@@ -227,6 +227,10 @@ export class Manager implements IUploadManager {
     return this.#uploadErrors;
   }
 
+  public getUploadLimit(): number | null {
+    return this.#uploadLimit;
+  }
+
   public getUploadProgress(): number {
     const files = this.#uppy.getFiles();
 
@@ -325,6 +329,7 @@ export class Manager implements IUploadManager {
     this.#uppy.use<any>(plugin.module as any, {
       ...plugin.options,
       id: plugin.name,
+      uploadManager: this, // Pass upload manager instance
     });
   }
 
