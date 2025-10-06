@@ -43,12 +43,7 @@ export const BreadcrumbTrail: React.FC<BreadcrumbTrailProps> = ({
                   "px-1.5 py-1.5 text-xs": isMobile,
                   "px-2 py-2 text-sm": !isMobile,
                 },
-                {
-                  "text-foreground font-medium":
-                    crumb.path === breadcrumbs[breadcrumbs.length - 1].path,
-                  "text-muted-foreground hover:text-foreground":
-                    crumb.path !== breadcrumbs[breadcrumbs.length - 1].path,
-                },
+                "text-muted-foreground hover:text-foreground",
               )}>
               <Folder
                 aria-hidden="true"
