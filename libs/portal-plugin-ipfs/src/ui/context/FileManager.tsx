@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from "react-router";
 import { useCallback } from "react";
 import type { HeliaService } from "@/helia";
 import { useFileManagerFeature } from "@/ui/hooks/useFileManagerFeature";
+import { useNotification } from "@refinedev/core";
 
 interface FileManagerContextType {
   currentPath: string;
@@ -31,51 +32,92 @@ export const FileManagerProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { currentPath, navigateToPath } = useFileManagerNavigation();
   const [selectedFiles, setSelectedFiles] = useState<FileManagerItem[]>([]);
-  const { getHeliaService, isInitialized, error: featureError } = useFileManagerFeature();
+  const {
+    getHeliaService,
+    isInitialized,
+    error: featureError,
+  } = useFileManagerFeature();
   const refreshDataRef = useRef<(() => void) | undefined>(undefined);
+  const { open } = useNotification();
 
-  const handleDownload = useCallback((cid: string) => {
-    try {
-      const heliaService = getHeliaService?.();
-      if (!heliaService) {
-        throw new Error("Helia service not available");
-      }
+  const handleDownload = useCallback(
+    async (cid: string) => {
+      // Show processing notification
+      open?.({
+        type: "success",
+        message: "Processing Download",
+        description:
+          "Your file download is being processed. This may take some time.",
+      });
 
-      // Get the API URL from the HeliaService config
-      const apiUrl = heliaService.getConfig().apiUrl;
-      
-      // Construct the trustless gateway endpoint URL
-      const gatewayUrl = `${apiUrl}/ipfs/${cid}`;
-      
-      // Open the URL in a new tab with protection against reverse tabnabbing
-      const newWindow = window.open(gatewayUrl, "_blank", "noopener,noreferrer");
-      if (newWindow) {
-        newWindow.opener = null;
-      }
-    } catch (error) {
-      console.error("Failed to download file:", error);
-      // Handle error appropriately - you might want to show a notification or alert
-    }
-  }, [getHeliaService]);
+      try {
+        const heliaService = getHeliaService?.();
+        if (!heliaService) {
+          throw new Error("Helia service not available");
+        }
 
-  const handleUnpin = useCallback(async (cid: string) => {
-    try {
-      const heliaService = getHeliaService?.();
-      if (!heliaService) {
-        throw new Error("Helia service not available");
-      }
+        // Download the file using HeliaService
+        const { blob, name, mimeType } = await heliaService.downloadFile(cid);
 
-      await heliaService.unpinCid(cid);
-      console.log(`Successfully unpinned CID: ${cid}`);
-      // Trigger refresh if available
-      if (refreshDataRef.current) {
-        refreshDataRef.current();
+        // Create a blob URL for the downloaded content
+        const blobUrl = URL.createObjectURL(blob);
+
+        // Create a temporary anchor element for download
+        const anchor = document.createElement("a");
+        anchor.href = blobUrl;
+        anchor.download = name;
+        anchor.style.display = "none";
+        
+        // Append to document, click, and remove
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+
+        // Clean up the blob URL after a delay to allow for download
+        setTimeout(() => {
+          URL.revokeObjectURL(blobUrl);
+        }, 1000);
+
+        // Show success notification
+        open?.({
+          type: "success",
+          message: "Download Complete",
+          description: "Your file has been downloaded successfully.",
+        });
+      } catch (error) {
+        console.error("Failed to download file:", error);
+        // Show error notification
+        open?.({
+          type: "error",
+          message: "Download Failed",
+          description: "Failed to download the file. Please try again.",
+        });
       }
-    } catch (error) {
-      console.error("Failed to unpin CID:", error);
-      // Handle error appropriately - you might want to show a notification or alert
-    }
-  }, [getHeliaService]);
+    },
+    [getHeliaService, open],
+  );
+
+  const handleUnpin = useCallback(
+    async (cid: string) => {
+      try {
+        const heliaService = getHeliaService?.();
+        if (!heliaService) {
+          throw new Error("Helia service not available");
+        }
+
+        await heliaService.unpinCid(cid);
+        console.log(`Successfully unpinned CID: ${cid}`);
+        // Trigger refresh if available
+        if (refreshDataRef.current) {
+          refreshDataRef.current();
+        }
+      } catch (error) {
+        console.error("Failed to unpin CID:", error);
+        // Handle error appropriately - you might want to show a notification or alert
+      }
+    },
+    [getHeliaService],
+  );
 
   return (
     <FileManagerContext.Provider
@@ -117,28 +159,30 @@ const useFileManagerNavigation = () => {
   const normalizePath = (path: string): string => {
     // Trim leading and trailing whitespace
     let normalized = path.trim();
-    
+
     // Ensure path starts with "/"
     if (!normalized.startsWith("/")) {
       normalized = "/" + normalized;
     }
-    
+
     // Remove trailing slash except for root path
     if (normalized.length > 1 && normalized.endsWith("/")) {
       normalized = normalized.slice(0, -1);
     }
-    
+
     return normalized;
   };
 
   // Extract path from URL search params or default to "/"
-  const currentPath = normalizePath(new URLSearchParams(location.search).get("path") || "/");
+  const currentPath = normalizePath(
+    new URLSearchParams(location.search).get("path") || "/",
+  );
 
   const navigateToPath = useCallback(
     (path: string) => {
       // Normalize the path to remove any trailing spaces
       const normalizedPath = normalizePath(path);
-      
+
       // Update URL search params without triggering full route re-render
       const searchParams = new URLSearchParams(location.search);
       if (normalizedPath === "/") {
