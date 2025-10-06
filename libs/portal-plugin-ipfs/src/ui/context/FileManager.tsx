@@ -60,7 +60,7 @@ export const FileManagerProvider: React.FC<{ children: React.ReactNode }> = ({
         const { blob, name, mimeType } = await heliaService.downloadFile(cid);
 
         // Create a blob URL for the downloaded content
-        const blobUrl = URL.createObjectURL(blob);
+        const blobUrl = URL.createObjectURL(new Blob([blob], { type: mimeType }));
 
         // Create a temporary anchor element for download
         const anchor = document.createElement("a");
@@ -86,11 +86,11 @@ export const FileManagerProvider: React.FC<{ children: React.ReactNode }> = ({
         });
       } catch (error) {
         console.error("Failed to download file:", error);
-        // Show error notification
+        // Show error notification with specific error message
         open?.({
           type: "error",
           message: "Download Failed",
-          description: "Failed to download the file. Please try again.",
+          description: error instanceof Error ? error.message : "Failed to download the file. Please try again.",
         });
       }
     },

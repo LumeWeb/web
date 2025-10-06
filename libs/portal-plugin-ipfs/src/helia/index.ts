@@ -132,21 +132,13 @@ export class HeliaService {
         signal: abortController.signal,
       });
 
-      const name =
-        stat.type === "directory" ? "directory" : stat.cid.toString();
-      const mimeType =
-        stat.type === "directory"
-          ? "application/x-directory"
-          : "application/octet-stream";
-
-      // For directories, we can't stream content directly, so return empty blob
+      // For directories, throw an error since we can't stream content directly
       if (stat.type === "directory") {
-        return {
-          blob: new Blob([], { type: mimeType }),
-          name,
-          mimeType,
-        };
+        throw new Error(`Cannot download directory ${cid} directly. Please use a specific file path or implement directory archiving.`);
       }
+
+      const name = stat.cid.toString();
+      const mimeType = "application/octet-stream";
 
       // Create a readable stream from the IPFS content using unixfs.cat()
       // This will automatically use our trustless gateway blockbroker
