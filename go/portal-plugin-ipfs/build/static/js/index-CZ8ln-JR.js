@@ -48011,7 +48011,8 @@ class HeliaService {
         }
         return {
           ...init,
-          headers
+          headers,
+          credentials: "include"
         };
       }
     });
@@ -48035,33 +48036,51 @@ class HeliaService {
     const unixfs2 = this.unixfs;
     const parsedCid = CID.parse(cid);
     const abortController = new AbortController();
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of unixfs2.cat(parsedCid, {
-            signal: abortController.signal
-          })) {
-            controller.enqueue(chunk);
-          }
-          controller.close();
-        } catch (error) {
-          controller.error(error);
-        }
-      }
-    });
-    const blob = await streamToBlob(stream);
     try {
       const stat = await unixfs2.stat(parsedCid, {
         signal: abortController.signal
       });
-      const name = stat.type === "directory" ? "directory" : stat.cid.toString();
-      const mimeType = stat.type === "directory" ? "application/x-directory" : "application/octet-stream";
+      if (stat.type === "directory") {
+        throw new Error(`Cannot download directory ${cid} directly. Please use a specific file path or implement directory archiving.`);
+      }
+      const name = stat.cid.toString();
+      const mimeType = "application/octet-stream";
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const chunk of unixfs2.cat(parsedCid, {
+              signal: abortController.signal
+            })) {
+              controller.enqueue(chunk);
+            }
+            controller.close();
+          } catch (error) {
+            controller.error(error);
+          }
+        }
+      });
+      const blob = await streamToBlob(stream, mimeType);
       return {
         blob,
         name,
         mimeType
       };
     } catch (error) {
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const chunk of unixfs2.cat(parsedCid, {
+              signal: abortController.signal
+            })) {
+              controller.enqueue(chunk);
+            }
+            controller.close();
+          } catch (error2) {
+            controller.error(error2);
+          }
+        }
+      });
+      const blob = await streamToBlob(stream, "application/octet-stream");
       return {
         blob,
         name: cid,
