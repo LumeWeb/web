@@ -23,7 +23,7 @@ export const BreadcrumbTrail: React.FC<BreadcrumbTrailProps> = ({
     navigateToPath,
     isMobile = false,
   }) => {
-    const firstItems = breadcrumbs.slice(0, isMobile ? 1 : 2);
+    const firstItems = breadcrumbs.slice(0, 1);
     const lastItem = breadcrumbs[breadcrumbs.length - 1];
 
     return (
@@ -37,11 +37,6 @@ export const BreadcrumbTrail: React.FC<BreadcrumbTrailProps> = ({
                 }
               }}
               aria-label={`Navigate to ${crumb.name}`}
-              aria-current={
-                crumb.path === breadcrumbs[breadcrumbs.length - 1].path
-                  ? "page"
-                  : undefined
-              }
               className={cn(
                 "hover:bg-muted flex min-h-[2.25em] min-w-[2.25em] items-center rounded transition-colors",
                 {

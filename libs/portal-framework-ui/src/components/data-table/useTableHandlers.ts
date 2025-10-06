@@ -13,9 +13,9 @@ interface UseTableCellHandlersProps<TData extends BaseRecord> {
 }
 
 interface UseMobileColumnHidingProps {
-  responsive?: boolean;
+  responsive?: boolean | { hideOnMobile?: boolean };
   hideColumnsOnMobile?: string[];
-  columnId: string;
+  columnIds: string[];
 }
 
 /**
@@ -78,14 +78,46 @@ export function useTableCellHandlers<TData extends BaseRecord>({
 }
 
 /**
- * Hook to determine if a column should be hidden on mobile
+ * Hook to determine which columns should be hidden on mobile
  */
 export function useMobileColumnHiding({
   responsive = false,
   hideColumnsOnMobile = [],
-  columnId,
-}: UseMobileColumnHidingProps) {
-  return responsive && hideColumnsOnMobile.includes(columnId);
+  columnIds,
+}: Omit<UseMobileColumnHidingProps, 'columnId'> & { columnIds: string[] }): Set<string> {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!responsive) return;
+    
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    setIsMobile(mediaQuery.matches);
+    
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, [responsive]);
+
+  if (!responsive) {
+    return new Set();
+  }
+
+  const hiddenColumns = new Set<string>();
+  
+  if (isMobile) {
+    if (typeof responsive === 'boolean') {
+      // If responsive is true, hide all columns in hideColumnsOnMobile
+      hideColumnsOnMobile.forEach(id => hiddenColumns.add(id));
+    } else {
+      // If responsive is an object with hideOnMobile property
+      if (responsive.hideOnMobile) {
+        hideColumnsOnMobile.forEach(id => hiddenColumns.add(id));
+      }
+    }
+  }
+
+  return hiddenColumns;
 }
 
 /**
