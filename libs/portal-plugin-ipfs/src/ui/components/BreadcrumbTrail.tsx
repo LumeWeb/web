@@ -31,6 +31,7 @@ export const BreadcrumbTrail: React.FC<BreadcrumbTrailProps> = ({
         {firstItems.map((crumb, index) => (
           <div key={crumb.path} className="flex flex-shrink-0 items-center">
             <button
+              type="button"
               onClick={() => {
                 if (crumb.path !== currentPath) {
                   navigateToPath(crumb.path);
@@ -84,6 +85,7 @@ export const BreadcrumbTrail: React.FC<BreadcrumbTrailProps> = ({
 
         <div className="flex flex-shrink-0 items-center">
           <button
+            type="button"
             onClick={() => {
               if (lastItem.path !== currentPath) {
                 navigateToPath(lastItem.path);
@@ -131,6 +133,7 @@ export const BreadcrumbTrail: React.FC<BreadcrumbTrailProps> = ({
         {breadcrumbs.map((crumb, index) => (
           <div key={crumb.path} className="flex flex-shrink-0 items-center">
             <button
+              type="button"
               onClick={() => {
                 if (crumb.path !== currentPath) {
                   navigateToPath(crumb.path);
