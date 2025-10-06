@@ -15,7 +15,6 @@ interface UseTableCellHandlersProps<TData extends BaseRecord> {
 interface UseMobileColumnHidingProps {
   responsive?: boolean | { hideOnMobile?: boolean };
   hideColumnsOnMobile?: string[];
-  columnIds: string[];
 }
 
 /**
@@ -83,8 +82,7 @@ export function useTableCellHandlers<TData extends BaseRecord>({
 export function useMobileColumnHiding({
   responsive = false,
   hideColumnsOnMobile = [],
-  columnIds,
-}: Omit<UseMobileColumnHidingProps, 'columnId'> & { columnIds: string[] }): Set<string> {
+}: UseMobileColumnHidingProps): Set<string> {
   const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {
