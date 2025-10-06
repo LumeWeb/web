@@ -45,6 +45,12 @@ function DefaultTableLayout<TData extends BaseRecord>({
   const getTableRowProps = useTableRowHandlers({ onRowClick, getRowProps });
   const getTableCellProps = useTableCellHandlers({ getCellProps });
   const getTableHeaderCellProps = useTableHeaderCellHandlers();
+  
+  // Get hidden columns at top level to avoid hooks violation
+  const hiddenColumns = useMobileColumnHiding({
+    responsive,
+    hideColumnsOnMobile,
+  });
 
   // Normalize table options
   const normalizedOptions = useMemo(
@@ -66,25 +72,6 @@ function DefaultTableLayout<TData extends BaseRecord>({
       table,
     ]
   );
-
-  // Compute hidden columns once to avoid calling hook inside loops
-  const hiddenColumns = useMemo(() => {
-    const hiddenSet = new Set<string>();
-    if (responsive) {
-      table.getAllLeafColumns().forEach((column) => {
-        if (
-          useMobileColumnHiding({
-            responsive,
-            hideColumnsOnMobile,
-            columnId: column.id,
-          })
-        ) {
-          hiddenSet.add(column.id);
-        }
-      });
-    }
-    return hiddenSet;
-  }, [table, responsive, hideColumnsOnMobile]);
 
   return (
     <div className={className}>

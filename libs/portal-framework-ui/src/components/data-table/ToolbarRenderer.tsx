@@ -9,14 +9,13 @@ import {
   ToolbarCustomItem,
   ToolbarFilterGroupItem,
   ToolbarFilterItem,
-  ToolbarItem,
   ToolbarItemComponentProps,
+  ToolbarItemType,
 } from "./DataTable.types";
-import { ToolbarItemType } from "./DataTable.types";
 import { BaseRecord } from "@refinedev/core";
 import { getAction } from "./ToolbarRegistry";
 import { useMobileDetection } from "./useMobileDetection";
-import { ComponentSize } from "@lumeweb/portal-framework-ui-core";
+import { ComponentSize } from "@/components";
 
 // Registry for toolbar item renderers
 type ToolbarItemRenderer<TData extends BaseRecord> = (
@@ -166,10 +165,12 @@ function ToolbarRenderer<TData extends BaseRecord>({
 }: ToolbarRendererProps<TData>) {
   // Validate mobileBreakpoint value
   const mobileBreakpoint = commonProps.context?.toolbarConfig?.mobileBreakpoint;
-  const candidate = Object.values(ComponentSize).includes(mobileBreakpoint as ComponentSize)
-    ? mobileBreakpoint
-    : mobileBreakpoint;
-  
+  const candidate =
+    mobileBreakpoint &&
+    Object.values(ComponentSize).includes(mobileBreakpoint as ComponentSize)
+      ? mobileBreakpoint
+      : ComponentSize.SM;
+
   const breakpointName =
     typeof candidate === "string" && !coreSupported.has(candidate)
       ? ComponentSize.SM
@@ -177,7 +178,7 @@ function ToolbarRenderer<TData extends BaseRecord>({
 
   // Check if we're on mobile to adjust button sizing
   const { isMobile } = useMobileDetection({
-    breakpoint: breakpointName || ComponentSize.SM,
+    mobileBreakpoint: breakpointName || ComponentSize.SM,
   });
 
   const containerClassName = cn(
