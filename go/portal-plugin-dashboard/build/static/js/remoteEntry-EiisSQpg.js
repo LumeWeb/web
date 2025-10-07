@@ -1,5 +1,5 @@
 import { loadShare_1, init_1, core_dashboard__mf_v__runtimeInit__mf_v__ } from './core_dashboard__mf_v__runtimeInit__mf_v__-DeI6jfgm.js';
-import exposesMap from './virtualExposes-kzSFoFSW.js';
+import exposesMap from './virtualExposes-BSkTVn8c.js';
 
 function BridgeReactPlugin() {
   return {
@@ -53,26 +53,6 @@ const usedShared = {
             }
           }
         ,
-          "@lumeweb/portal-framework-ui-core": {
-            name: "@lumeweb/portal-framework-ui-core",
-            version: "0.0.0",
-            scope: ["default"],
-            loaded: false,
-            from: "core:dashboard",
-            async get () {
-              {
-                const shared = await loadShare_1("@lumeweb/portal-framework-ui-core");
-                if (shared) return () => shared;
-                throw new Error(`Shared module '${"@lumeweb/portal-framework-ui-core"}' must be provided by host`);
-              }
-            },
-            shareConfig: {
-              singleton: true,
-              requiredVersion: "^0.0.0",
-              import: false,
-            }
-          }
-        ,
           "@refinedev/core": {
             name: "@refinedev/core",
             version: "4.57.10",
@@ -93,9 +73,29 @@ const usedShared = {
             }
           }
         ,
+          "@lumeweb/portal-framework-ui-core": {
+            name: "@lumeweb/portal-framework-ui-core",
+            version: "0.0.0",
+            scope: ["default"],
+            loaded: false,
+            from: "core:dashboard",
+            async get () {
+              {
+                const shared = await loadShare_1("@lumeweb/portal-framework-ui-core");
+                if (shared) return () => shared;
+                throw new Error(`Shared module '${"@lumeweb/portal-framework-ui-core"}' must be provided by host`);
+              }
+            },
+            shareConfig: {
+              singleton: true,
+              requiredVersion: "^0.0.0",
+              import: false,
+            }
+          }
+        ,
           "react-router": {
             name: "react-router",
-            version: "7.5.2",
+            version: "7.8.2",
             scope: ["default"],
             loaded: false,
             from: "core:dashboard",
@@ -108,7 +108,7 @@ const usedShared = {
             },
             shareConfig: {
               singleton: true,
-              requiredVersion: "^7.5.2",
+              requiredVersion: "^7.8.2",
               import: false,
             }
           }

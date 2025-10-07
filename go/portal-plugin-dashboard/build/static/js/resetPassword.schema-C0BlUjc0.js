@@ -1,6 +1,6 @@
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__, jsxRuntimeExports, core_dashboard__loadShare__react__loadShare__, React } from './jsx-runtime-D_0QkpWj.js';
 import { core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__-DOYraqnS.js';
-import { core_dashboard__loadShare__react_mf_2_router__loadShare__ } from './core_dashboard__loadShare__react_mf_2_router__loadShare__-BAqyw0OF.js';
+import { core_dashboard__loadShare__react_mf_2_router__loadShare__ } from './core_dashboard__loadShare__react_mf_2_router__loadShare__-CShhB-Ww.js';
 import { z } from './index-DESmQ-Cl.js';
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CFuxgGnQ.js';
 import { discordLogoPng, lumeColorLogoPng, lumeBgPng, lumeBgRegisterPng, lumeBgLoginPng } from './images-D17WGACk.js';

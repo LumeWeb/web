@@ -4,8 +4,8 @@ import { core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } fro
 import { Card } from './Card-Dhqiz4WT.js';
 import { DATA_PROVIDER_NAME } from './auth-C5ewMkbH.js';
 import './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__-BjauFvDm.js';
-import './resetPassword.schema-BdPzDz_P.js';
-import './core_dashboard__loadShare__react_mf_2_router__loadShare__-BAqyw0OF.js';
+import './resetPassword.schema-C0BlUjc0.js';
+import './core_dashboard__loadShare__react_mf_2_router__loadShare__-CShhB-Ww.js';
 import { z } from './index-DESmQ-Cl.js';
 import { createLucideIcon } from './createLucideIcon-BcyKBqCx.js';
 

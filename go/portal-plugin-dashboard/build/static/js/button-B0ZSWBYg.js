@@ -264,6 +264,14 @@ const ProgressComponent = ({
       "upload-progress",
       handleProgress
     );
+    const cleanupPreprocessProgress = uploadManager?.on(
+      "preprocess-progress",
+      handleProgress
+    );
+    const cleanupPreprocessComplete = uploadManager?.on(
+      "preprocess-complete",
+      handleProgress
+    );
     const handleError = (error) => {
       createUploadErrorNotification(open, error);
       forceRerender?.();
@@ -272,6 +280,8 @@ const ProgressComponent = ({
     const cleanupUploadError = uploadManager?.on("upload-error", handleError);
     return () => {
       if (cleanupProgress) cleanupProgress();
+      if (cleanupPreprocessProgress) cleanupPreprocessProgress();
+      if (cleanupPreprocessComplete) cleanupPreprocessComplete();
       if (cleanupError) cleanupError();
       if (cleanupUploadError) cleanupUploadError();
     };

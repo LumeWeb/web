@@ -2,7 +2,7 @@ import { jsxRuntimeExports } from './jsx-runtime-D_0QkpWj.js';
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__-BjauFvDm.js';
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CFuxgGnQ.js';
 import { core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__-DOYraqnS.js';
-import { useEmailVerification } from './useEmailVerification-BIuNhWnG.js';
+import { useEmailVerification } from './useEmailVerification-5rK04xrw.js';
 import { Mail } from './mail-CUVyKsOG.js';
 import { createLucideIcon } from './createLucideIcon-BcyKBqCx.js';
 

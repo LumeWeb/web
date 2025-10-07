@@ -7868,6 +7868,9 @@ class Manager {
   getUploadErrors() {
     return this.#uploadErrors;
   }
+  getUploadLimit() {
+    return this.#uploadLimit;
+  }
   getUploadProgress() {
     const files = this.#uppy.getFiles();
     let totalBytes = 0;
@@ -7940,7 +7943,9 @@ class Manager {
     this.#additionalPlugins.push(plugin);
     this.#uppy.use(plugin.module, {
       ...plugin.options,
-      id: plugin.name
+      id: plugin.name,
+      uploadManager: this
+      // Pass upload manager instance
     });
   }
   registerService(config) {

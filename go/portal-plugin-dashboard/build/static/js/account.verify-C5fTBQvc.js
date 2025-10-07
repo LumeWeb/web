@@ -2,8 +2,8 @@ import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CFuxgGnQ.js';
 import { logoPng, lumeBgPng } from './images-D17WGACk.js';
 import { core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__-DOYraqnS.js';
-import { useEmailVerification, core_dashboard__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__ } from './useEmailVerification-BIuNhWnG.js';
-import { core_dashboard__loadShare__react_mf_2_router__loadShare__ } from './core_dashboard__loadShare__react_mf_2_router__loadShare__-BAqyw0OF.js';
+import { useEmailVerification, core_dashboard__loadShare___mf_0_tanstack_mf_1_react_mf_2_query__loadShare__ } from './useEmailVerification-5rK04xrw.js';
+import { core_dashboard__loadShare__react_mf_2_router__loadShare__ } from './core_dashboard__loadShare__react_mf_2_router__loadShare__-CShhB-Ww.js';
 
 const VerificationStatus = ({
   alreadyVerified,

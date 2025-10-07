@@ -1,11 +1,11 @@
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__-BjauFvDm.js';
 import { createAuthProvider, DATA_PROVIDER_NAME } from './auth-C5ewMkbH.js';
-import './resetPassword.schema-BdPzDz_P.js';
+import './resetPassword.schema-C0BlUjc0.js';
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui__loadShare__, React, jsxRuntimeExports } from './jsx-runtime-D_0QkpWj.js';
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CFuxgGnQ.js';
 import { core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__-DOYraqnS.js';
-import './core_dashboard__loadShare__react_mf_2_router__loadShare__-BAqyw0OF.js';
-import { Manager, createSmallFilePlugin, createLargeFilePlugin } from './Manager-DBSNcAFZ.js';
+import './core_dashboard__loadShare__react_mf_2_router__loadShare__-CShhB-Ww.js';
+import { Manager, createSmallFilePlugin, createLargeFilePlugin } from './Manager-BotPTYRU.js';
 import { UPLOAD_TYPE_MAIN } from './upload-Cr_MDl4Y.js';
 import { z } from './index-DESmQ-Cl.js';
 import { Mail } from './mail-CUVyKsOG.js';
