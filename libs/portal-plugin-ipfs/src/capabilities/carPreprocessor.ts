@@ -63,6 +63,8 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
   #abortControllers: Map<string, AbortController> = new Map();
   #sdk: Sdk | undefined;
   #uploadManager: any;
+  #boundProcessor: (fileIDs: string[], uploadID: string) => Promise<void>;
+  #boundCancelAll: () => void;
 
   constructor(uppy: Uppy<M, B>, opts: CarPreprocessorOpts<M, B>) {
     super(uppy, { ...defaultOptions, ...opts });
@@ -71,17 +73,19 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
     this.#helia = null;
     this.#sdk = opts.sdk;
     this.#uploadManager = opts.uploadManager;
+    this.#boundProcessor = this.#processor.bind(this);
+    this.#boundCancelAll = this.#handleCancelAll.bind(this);
   }
 
   install(): void {
-    this.uppy.addPreProcessor(this.#processor.bind(this));
+    this.uppy.addPreProcessor(this.#boundProcessor);
     // Listen for upload cancellation events
-    this.uppy.on("cancel-all", this.#handleCancelAll.bind(this));
+    this.uppy.on("cancel-all", this.#boundCancelAll);
   }
 
   uninstall(): void {
-    this.uppy.removePreProcessor(this.#processor.bind(this));
-    this.uppy.off("cancel-all", this.#handleCancelAll.bind(this));
+    this.uppy.removePreProcessor(this.#boundProcessor);
+    this.uppy.off("cancel-all", this.#boundCancelAll);
     // Clean up any remaining abort controllers
     this.#abortControllers.forEach((controller) => controller.abort());
     this.#abortControllers.clear();
@@ -157,13 +161,13 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
           mode: "determinate",
           value: tracker.getOverallProgress(),
         });
-      });
+      }, abortController.signal);
 
       // Get upload limit from upload manager
-      const uploadLimit = this.#uploadManager.getUploadLimit();
+      const uploadLimit = this.#uploadManager?.getUploadLimit?.();
 
       // Conditionally handle large vs small files
-      if (streamSize >= uploadLimit) {
+      if (uploadLimit !== null && uploadLimit !== undefined && streamSize >= BigInt(uploadLimit)) {
         // Large file - use ReadableStream reader approach
         // @ts-ignore
         file.data = streamForProcessing.getReader();
