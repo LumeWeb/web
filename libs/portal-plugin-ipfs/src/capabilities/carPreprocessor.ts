@@ -90,19 +90,30 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
     this.#abortControllers.forEach((controller) => controller.abort());
     this.#abortControllers.clear();
 
-    // Close blockstore and datastore if they exist
-    if (this.#blockstore) {
-      this.#blockstore.close().catch((error) => {
-        console.error("Error closing blockstore:", error);
-      });
-      this.#blockstore = null;
-    }
+    // Initiate async teardown without awaiting (since uppy doesn't await uninstall)
+    this.teardown().catch((error) => {
+      console.error("Error during carPreprocessor teardown:", error);
+    });
 
-    if (this.#datastore) {
-      this.#datastore.close().catch((error) => {
-        console.error("Error closing datastore:", error);
-      });
-      this.#datastore = null;
+    // Set fields to null immediately
+    this.#blockstore = null;
+    this.#datastore = null;
+  }
+
+  /**
+   * Async teardown method to properly close resources.
+   * This should be called by the host environment when needed.
+   */
+  async teardown(): Promise<void> {
+    try {
+      // Close the blockstore and datastore concurrently
+      await Promise.all([
+        this.#blockstore?.close(),
+        this.#datastore?.close()
+      ]);
+    } catch (error) {
+      console.error("Error closing stores:", error);
+      throw error;
     }
   }
 
@@ -560,7 +571,7 @@ class ProgressTracker {
   getOverallProgress(): number {
     const { carExport, fileRead, unixfsImport, sizeCalculation } = this.state;
     // Allocate 5% to size calculation, distribute the rest among other stages
-    return fileRead * 0.3 + unixfsImport * 0.36 + carExport * 0.3 + sizeCalculation * 0.05;
+    return fileRead * 0.3 + unixfsImport * 0.35 + carExport * 0.3 + sizeCalculation * 0.05;
   }
 
   updateBlockProgress(value: bigint) {
