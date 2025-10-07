@@ -173,7 +173,8 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
           throw new Error("File processing aborted");
         }
         
-        tracker.updateDataProgress("sizeCalculation", BigInt(progress));
+        // progress is a percent [0..100]
+        tracker.setStagePercent("sizeCalculation", progress);
         this.uppy.emit("preprocess-progress", file, {
           message: "Calculating file size...",
           mode: "determinate",
@@ -592,7 +593,14 @@ class ProgressTracker {
   }
 
   updateDataProgress(stage: ProgressStage, value: bigint) {
-    this.state[stage] = Number((value * 100n) / this.fileSize);
+    const denom = this.fileSize > 0n ? this.fileSize : 1n; // avoid div-by-zero
+    this.state[stage] = Number((value * 100n) / denom);
+  }
+
+  setStagePercent(stage: ProgressStage, percent: number) {
+    // clamp 0..100 and floor
+    const p = Math.max(0, Math.min(100, Math.floor(percent)));
+    this.state[stage] = p;
   }
 }
 
@@ -601,7 +609,7 @@ async function* fileSource(
   files: File[],
   onProgress?: (progress: number) => void,
   abortSignal?: AbortSignal,
-): AsyncGenerator<{ content: AsyncIterable<Uint8Array>; path: string }> {
+): AsyncGenerator<{ content: AsyncIterable<Uint8Array> | undefined; path: string }> {
   const seenDirs = new Set<string>();
   let totalBytes = 0n;
   let processedBytes = 0n;
@@ -653,7 +661,9 @@ async function* fileSource(
         console.log("[fileSource] Yielding intermediate directory:", dirPath);
         seenDirs.add(dirPath);
         yield {
-          content: undefined,
+          content: (async function* () {
+            // Empty async iterable for directory entries
+          })(),
           path: dirPath,
         };
       } else {
@@ -664,7 +674,7 @@ async function* fileSource(
     // Yield the file with its content stream
     console.log("[fileSource] Yielding file with path:", fullPath);
     yield {
-      content: file.stream(),
+      content: readableStreamToAsyncIterable(file.stream()),
       path: fullPath,
     };
 
