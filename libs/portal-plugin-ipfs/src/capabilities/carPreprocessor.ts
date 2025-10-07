@@ -97,6 +97,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
     // Set fields to null immediately to prevent further usage
     this.#blockstore = null;
     this.#datastore = null;
+    this.#helia = null;
 
     // Initiate async teardown with the captured references
     this.teardown(blockstore, datastore).catch((error) => {
@@ -183,10 +184,16 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
       }, abortController.signal);
 
       // Get upload limit from upload manager
-      const uploadLimit = this.#uploadManager?.getUploadLimit?.();
+      const rawLimit = this.#uploadManager?.getUploadLimit?.();
+      const uploadLimitBigInt =
+        rawLimit == null
+          ? null
+          : typeof rawLimit === "bigint"
+          ? rawLimit
+          : BigInt(rawLimit);
 
       // Conditionally handle large vs small files
-      if (uploadLimit !== null && uploadLimit !== undefined && streamSize >= BigInt(uploadLimit)) {
+      if (uploadLimitBigInt !== null && streamSize >= uploadLimitBigInt) {
         // Large file - use ReadableStream reader approach
         // @ts-ignore
         file.data = streamForProcessing.getReader();
@@ -218,7 +225,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
       
       // Signal preprocessing completion only after all steps are done
       this.uppy.emit("preprocess-complete", file, {
-        message: "Processing file...",
+        message: "Preprocessing complete",
         mode: "determinate",
         value: 100,
       });
@@ -308,7 +315,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
         throw new Error("File processing aborted");
       }
       
-      tracker.updateDataProgress("fileRead", BigInt(progress));
+      // UnixFS importer updates fileRead; this just emits overall progress
       onProgress(tracker.getOverallProgress());
     }, abortSignal);
 
@@ -390,15 +397,9 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
 
     try {
       // Create IndexedDB blockstore and datastore
-      if (!this.#blockstore) {
-        this.#blockstore = new IDBBlockstore("helia-blocks");
-        await this.#blockstore.open();
-      }
-
-      if (!this.#datastore) {
-        this.#datastore = new IDBDatastore("helia-data");
-        await this.#datastore.open();
-      }
+      if (!this.#blockstore) this.#blockstore = new IDBBlockstore("helia-blocks");
+      if (!this.#datastore) this.#datastore = new IDBDatastore("helia-data");
+      await Promise.all([this.#blockstore.open(), this.#datastore.open()]);
 
       // Create Helia instance with IndexedDB stores
       this.#helia = await createHeliaHTTP({
@@ -504,7 +505,7 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
     }
 
     // Then process remaining non-directory files
-    let processedCount = directoryCount;
+    let processedCount = 0;
     const remainingFiles = files.filter(
       (file) =>
         !isFolderBundle(file) &&
@@ -614,12 +615,12 @@ async function* fileSource(
   let totalBytes = 0n;
   let processedBytes = 0n;
 
-  console.log("[fileSource] Starting to process files:", files.length);
+  console.debug("[fileSource] Starting to process files:", files.length);
 
   // Calculate total bytes for progress tracking
   files.forEach((file) => {
     totalBytes += BigInt(file.size);
-    console.log("[fileSource] File details:", {
+    console.debug("[fileSource] File details:", {
       name: file.name,
       size: file.size,
       webkitRelativePath: (file as any).webkitRelativePath,
@@ -627,7 +628,7 @@ async function* fileSource(
     });
   });
 
-  console.log("[fileSource] Total bytes to process:", totalBytes);
+  console.debug("[fileSource] Total bytes to process:", totalBytes);
 
   for (const file of files) {
     // Check if operation was aborted
@@ -636,17 +637,17 @@ async function* fileSource(
     }
 
     const fullPath = (file as any).webkitRelativePath ?? file.name;
-    console.log("[fileSource] Processing file with fullPath:", fullPath);
+    console.debug("[fileSource] Processing file with fullPath:", fullPath);
 
     // Skip hidden files if they're not explicitly allowed
     if (fullPath.includes("/.")) {
-      console.log("[fileSource] Skipping hidden file:", fullPath);
+      console.debug("[fileSource] Skipping hidden file:", fullPath);
       continue;
     }
 
     // Yield intermediate directories
     const parts = fullPath.split("/").filter((part: string) => part.length > 0);
-    console.log("[fileSource] Path parts:", parts);
+    console.debug("[fileSource] Path parts:", parts);
 
     for (let i = 1; i < parts.length; i++) {
       // Check if operation was aborted
@@ -655,10 +656,10 @@ async function* fileSource(
       }
 
       const dirPath = parts.slice(0, i).join("/");
-      console.log("[fileSource] Checking directory path:", dirPath);
+      console.debug("[fileSource] Checking directory path:", dirPath);
 
       if (!seenDirs.has(dirPath)) {
-        console.log("[fileSource] Yielding intermediate directory:", dirPath);
+        console.debug("[fileSource] Yielding intermediate directory:", dirPath);
         seenDirs.add(dirPath);
         yield {
           content: (async function* () {
@@ -667,12 +668,12 @@ async function* fileSource(
           path: dirPath,
         };
       } else {
-        console.log("[fileSource] Directory already seen, skipping:", dirPath);
+        console.debug("[fileSource] Directory already seen, skipping:", dirPath);
       }
     }
 
     // Yield the file with its content stream
-    console.log("[fileSource] Yielding file with path:", fullPath);
+    console.debug("[fileSource] Yielding file with path:", fullPath);
     yield {
       content: readableStreamToAsyncIterable(file.stream()),
       path: fullPath,
@@ -682,7 +683,7 @@ async function* fileSource(
     if (onProgress && totalBytes > 0n) {
       processedBytes += BigInt(file.size);
       const progressPercent = Number((processedBytes * 100n) / totalBytes);
-      console.log("[fileSource] Progress tracking:", {
+      console.debug("[fileSource] Progress tracking:", {
         processedBytes: processedBytes,
         totalBytes: totalBytes,
         progressPercent: progressPercent,
@@ -690,12 +691,12 @@ async function* fileSource(
       onProgress(progressPercent);
     } else if (onProgress) {
       // Fallback progress if totalBytes is 0 (shouldn't happen but just in case)
-      console.log("[fileSource] Fallback progress (100%)");
+      console.debug("[fileSource] Fallback progress (100%)");
       onProgress(100);
     }
   }
 
-  console.log("[fileSource] Finished processing all files");
+  console.debug("[fileSource] Finished processing all files");
 }
 
 export default CarPreprocessorPlugin;
