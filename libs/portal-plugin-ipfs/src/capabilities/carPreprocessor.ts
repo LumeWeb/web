@@ -90,26 +90,33 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
     this.#abortControllers.forEach((controller) => controller.abort());
     this.#abortControllers.clear();
 
-    // Initiate async teardown without awaiting (since uppy doesn't await uninstall)
-    this.teardown().catch((error) => {
-      console.error("Error during carPreprocessor teardown:", error);
-    });
+    // Capture store references before initiating async teardown
+    const blockstore = this.#blockstore;
+    const datastore = this.#datastore;
 
-    // Set fields to null immediately
+    // Set fields to null immediately to prevent further usage
     this.#blockstore = null;
     this.#datastore = null;
+
+    // Initiate async teardown with the captured references
+    this.teardown(blockstore, datastore).catch((error) => {
+      console.error("Error during carPreprocessor teardown:", error);
+    });
   }
 
   /**
    * Async teardown method to properly close resources.
    * This should be called by the host environment when needed.
    */
-  async teardown(): Promise<void> {
+  async teardown(
+    blockstore: IDBBlockstore | null = this.#blockstore,
+    datastore: IDBDatastore | null = this.#datastore
+  ): Promise<void> {
     try {
       // Close the blockstore and datastore concurrently
       await Promise.all([
-        this.#blockstore?.close(),
-        this.#datastore?.close()
+        blockstore?.close(),
+        datastore?.close()
       ]);
     } catch (error) {
       console.error("Error closing stores:", error);
@@ -192,6 +199,12 @@ class CarPreprocessorPlugin<M extends Meta, B extends Body> extends BasePlugin<
       }
 
       // Update the file in Uppy's state with the CID in meta and tus upload size
+      // Validate streamSize is within safe integer range for Number conversion
+      // This limits uploads to approximately 9 PB, which should be sufficient for most use cases
+      if (streamSize > BigInt(Number.MAX_SAFE_INTEGER)) {
+        throw new Error(`File size ${streamSize.toString()} bytes exceeds maximum safe integer for upload. Please use a smaller file.`);
+      }
+      
       this.uppy.setFileState(file.id, {
         data: file.data,
         // @ts-ignore
