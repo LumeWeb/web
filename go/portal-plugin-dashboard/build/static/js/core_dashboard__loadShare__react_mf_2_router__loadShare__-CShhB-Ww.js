@@ -8,7 +8,7 @@ import { core_dashboard__mf_v__runtimeInit__mf_v__, index_cjs } from './core_das
     customShareInfo: {shareConfig:{
       singleton: true,
       strictVersion: false,
-      requiredVersion: "^7.5.2"
+      requiredVersion: "^7.8.2"
     }}}));
     const exportModule = await res.then(factory => factory());
     var core_dashboard__loadShare__react_mf_2_router__loadShare__ = exportModule;

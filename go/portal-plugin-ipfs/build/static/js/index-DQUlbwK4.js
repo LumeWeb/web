@@ -1,4 +1,4 @@
-import { jsxRuntimeExports, CID, decode as decode$a, create as create$2, baseX, rfc4648, from as from$1, toString as toString$3, fromString as fromString$2, coerce, base58, base36, base32, base58btc, base32$1, base36$1, fromHex, core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__, Folder, base32upper } from './folder-BEVrBiCO.js';
+import { jsxRuntimeExports, CID, decode as decode$a, create as create$2, baseX, rfc4648, from as from$1, toString as toString$3, fromString as fromString$2, coerce, base58, base36, base32, base58btc, base32$1, base36$1, fromHex, base32upper, core_ipfs__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__, Folder } from './folder-BEVrBiCO.js';
 
 function getDefaultExportFromCjs (x) {
 	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
@@ -44952,6 +44952,722 @@ function unixfs(helia) {
     return new UnixFS(helia);
 }
 
+const instanceOfAny = (object, constructors) => constructors.some((c) => object instanceof c);
+
+let idbProxyableTypes;
+let cursorAdvanceMethods;
+// This is a function to prevent it throwing up in node environments.
+function getIdbProxyableTypes() {
+    return (idbProxyableTypes ||
+        (idbProxyableTypes = [
+            IDBDatabase,
+            IDBObjectStore,
+            IDBIndex,
+            IDBCursor,
+            IDBTransaction,
+        ]));
+}
+// This is a function to prevent it throwing up in node environments.
+function getCursorAdvanceMethods() {
+    return (cursorAdvanceMethods ||
+        (cursorAdvanceMethods = [
+            IDBCursor.prototype.advance,
+            IDBCursor.prototype.continue,
+            IDBCursor.prototype.continuePrimaryKey,
+        ]));
+}
+const transactionDoneMap = new WeakMap();
+const transformCache = new WeakMap();
+const reverseTransformCache = new WeakMap();
+function promisifyRequest(request) {
+    const promise = new Promise((resolve, reject) => {
+        const unlisten = () => {
+            request.removeEventListener('success', success);
+            request.removeEventListener('error', error);
+        };
+        const success = () => {
+            resolve(wrap(request.result));
+            unlisten();
+        };
+        const error = () => {
+            reject(request.error);
+            unlisten();
+        };
+        request.addEventListener('success', success);
+        request.addEventListener('error', error);
+    });
+    // This mapping exists in reverseTransformCache but doesn't exist in transformCache. This
+    // is because we create many promises from a single IDBRequest.
+    reverseTransformCache.set(promise, request);
+    return promise;
+}
+function cacheDonePromiseForTransaction(tx) {
+    // Early bail if we've already created a done promise for this transaction.
+    if (transactionDoneMap.has(tx))
+        return;
+    const done = new Promise((resolve, reject) => {
+        const unlisten = () => {
+            tx.removeEventListener('complete', complete);
+            tx.removeEventListener('error', error);
+            tx.removeEventListener('abort', error);
+        };
+        const complete = () => {
+            resolve();
+            unlisten();
+        };
+        const error = () => {
+            reject(tx.error || new DOMException('AbortError', 'AbortError'));
+            unlisten();
+        };
+        tx.addEventListener('complete', complete);
+        tx.addEventListener('error', error);
+        tx.addEventListener('abort', error);
+    });
+    // Cache it for later retrieval.
+    transactionDoneMap.set(tx, done);
+}
+let idbProxyTraps = {
+    get(target, prop, receiver) {
+        if (target instanceof IDBTransaction) {
+            // Special handling for transaction.done.
+            if (prop === 'done')
+                return transactionDoneMap.get(target);
+            // Make tx.store return the only store in the transaction, or undefined if there are many.
+            if (prop === 'store') {
+                return receiver.objectStoreNames[1]
+                    ? undefined
+                    : receiver.objectStore(receiver.objectStoreNames[0]);
+            }
+        }
+        // Else transform whatever we get back.
+        return wrap(target[prop]);
+    },
+    set(target, prop, value) {
+        target[prop] = value;
+        return true;
+    },
+    has(target, prop) {
+        if (target instanceof IDBTransaction &&
+            (prop === 'done' || prop === 'store')) {
+            return true;
+        }
+        return prop in target;
+    },
+};
+function replaceTraps(callback) {
+    idbProxyTraps = callback(idbProxyTraps);
+}
+function wrapFunction(func) {
+    // Due to expected object equality (which is enforced by the caching in `wrap`), we
+    // only create one new func per func.
+    // Cursor methods are special, as the behaviour is a little more different to standard IDB. In
+    // IDB, you advance the cursor and wait for a new 'success' on the IDBRequest that gave you the
+    // cursor. It's kinda like a promise that can resolve with many values. That doesn't make sense
+    // with real promises, so each advance methods returns a new promise for the cursor object, or
+    // undefined if the end of the cursor has been reached.
+    if (getCursorAdvanceMethods().includes(func)) {
+        return function (...args) {
+            // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
+            // the original object.
+            func.apply(unwrap(this), args);
+            return wrap(this.request);
+        };
+    }
+    return function (...args) {
+        // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
+        // the original object.
+        return wrap(func.apply(unwrap(this), args));
+    };
+}
+function transformCachableValue(value) {
+    if (typeof value === 'function')
+        return wrapFunction(value);
+    // This doesn't return, it just creates a 'done' promise for the transaction,
+    // which is later returned for transaction.done (see idbObjectHandler).
+    if (value instanceof IDBTransaction)
+        cacheDonePromiseForTransaction(value);
+    if (instanceOfAny(value, getIdbProxyableTypes()))
+        return new Proxy(value, idbProxyTraps);
+    // Return the same value back if we're not going to transform it.
+    return value;
+}
+function wrap(value) {
+    // We sometimes generate multiple promises from a single IDBRequest (eg when cursoring), because
+    // IDB is weird and a single IDBRequest can yield many responses, so these can't be cached.
+    if (value instanceof IDBRequest)
+        return promisifyRequest(value);
+    // If we've already transformed this value before, reuse the transformed value.
+    // This is faster, but it also provides object equality.
+    if (transformCache.has(value))
+        return transformCache.get(value);
+    const newValue = transformCachableValue(value);
+    // Not all types are transformed.
+    // These may be primitive types, so they can't be WeakMap keys.
+    if (newValue !== value) {
+        transformCache.set(value, newValue);
+        reverseTransformCache.set(newValue, value);
+    }
+    return newValue;
+}
+const unwrap = (value) => reverseTransformCache.get(value);
+
+/**
+ * Open a database.
+ *
+ * @param name Name of the database.
+ * @param version Schema version.
+ * @param callbacks Additional callbacks.
+ */
+function openDB(name, version, { blocked, upgrade, blocking, terminated } = {}) {
+    const request = indexedDB.open(name, version);
+    const openPromise = wrap(request);
+    if (upgrade) {
+        request.addEventListener('upgradeneeded', (event) => {
+            upgrade(wrap(request.result), event.oldVersion, event.newVersion, wrap(request.transaction), event);
+        });
+    }
+    if (blocked) {
+        request.addEventListener('blocked', (event) => blocked(
+        // Casting due to https://github.com/microsoft/TypeScript-DOM-lib-generator/pull/1405
+        event.oldVersion, event.newVersion, event));
+    }
+    openPromise
+        .then((db) => {
+        if (terminated)
+            db.addEventListener('close', () => terminated());
+        if (blocking) {
+            db.addEventListener('versionchange', (event) => blocking(event.oldVersion, event.newVersion, event));
+        }
+    })
+        .catch(() => { });
+    return openPromise;
+}
+/**
+ * Delete a database.
+ *
+ * @param name Name of the database.
+ */
+function deleteDB(name, { blocked } = {}) {
+    const request = indexedDB.deleteDatabase(name);
+    if (blocked) {
+        request.addEventListener('blocked', (event) => blocked(
+        // Casting due to https://github.com/microsoft/TypeScript-DOM-lib-generator/pull/1405
+        event.oldVersion, event));
+    }
+    return wrap(request).then(() => undefined);
+}
+
+const readMethods = ['get', 'getKey', 'getAll', 'getAllKeys', 'count'];
+const writeMethods = ['put', 'add', 'delete', 'clear'];
+const cachedMethods = new Map();
+function getMethod(target, prop) {
+    if (!(target instanceof IDBDatabase &&
+        !(prop in target) &&
+        typeof prop === 'string')) {
+        return;
+    }
+    if (cachedMethods.get(prop))
+        return cachedMethods.get(prop);
+    const targetFuncName = prop.replace(/FromIndex$/, '');
+    const useIndex = prop !== targetFuncName;
+    const isWrite = writeMethods.includes(targetFuncName);
+    if (
+    // Bail if the target doesn't exist on the target. Eg, getAll isn't in Edge.
+    !(targetFuncName in (useIndex ? IDBIndex : IDBObjectStore).prototype) ||
+        !(isWrite || readMethods.includes(targetFuncName))) {
+        return;
+    }
+    const method = async function (storeName, ...args) {
+        // isWrite ? 'readwrite' : undefined gzipps better, but fails in Edge :(
+        const tx = this.transaction(storeName, isWrite ? 'readwrite' : 'readonly');
+        let target = tx.store;
+        if (useIndex)
+            target = target.index(args.shift());
+        // Must reject if op rejects.
+        // If it's a write operation, must reject if tx.done rejects.
+        // Must reject with op rejection first.
+        // Must resolve with op value.
+        // Must handle both promises (no unhandled rejections)
+        return (await Promise.all([
+            target[targetFuncName](...args),
+            isWrite && tx.done,
+        ]))[0];
+    };
+    cachedMethods.set(prop, method);
+    return method;
+}
+replaceTraps((oldTraps) => ({
+    ...oldTraps,
+    get: (target, prop, receiver) => getMethod(target, prop) || oldTraps.get(target, prop, receiver),
+    has: (target, prop) => !!getMethod(target, prop) || oldTraps.has(target, prop),
+}));
+
+const advanceMethodProps = ['continue', 'continuePrimaryKey', 'advance'];
+const methodMap = {};
+const advanceResults = new WeakMap();
+const ittrProxiedCursorToOriginalProxy = new WeakMap();
+const cursorIteratorTraps = {
+    get(target, prop) {
+        if (!advanceMethodProps.includes(prop))
+            return target[prop];
+        let cachedFunc = methodMap[prop];
+        if (!cachedFunc) {
+            cachedFunc = methodMap[prop] = function (...args) {
+                advanceResults.set(this, ittrProxiedCursorToOriginalProxy.get(this)[prop](...args));
+            };
+        }
+        return cachedFunc;
+    },
+};
+async function* iterate(...args) {
+    // tslint:disable-next-line:no-this-assignment
+    let cursor = this;
+    if (!(cursor instanceof IDBCursor)) {
+        cursor = await cursor.openCursor(...args);
+    }
+    if (!cursor)
+        return;
+    cursor = cursor;
+    const proxiedCursor = new Proxy(cursor, cursorIteratorTraps);
+    ittrProxiedCursorToOriginalProxy.set(proxiedCursor, cursor);
+    // Map this double-proxy back to the original, so other cursor methods work.
+    reverseTransformCache.set(proxiedCursor, unwrap(cursor));
+    while (cursor) {
+        yield proxiedCursor;
+        // If one of the advancing methods was not called, call continue().
+        cursor = await (advanceResults.get(proxiedCursor) || cursor.continue());
+        advanceResults.delete(proxiedCursor);
+    }
+}
+function isIteratorProp(target, prop) {
+    return ((prop === Symbol.asyncIterator &&
+        instanceOfAny(target, [IDBIndex, IDBObjectStore, IDBCursor])) ||
+        (prop === 'iterate' && instanceOfAny(target, [IDBIndex, IDBObjectStore])));
+}
+replaceTraps((oldTraps) => ({
+    ...oldTraps,
+    get(target, prop, receiver) {
+        if (isIteratorProp(target, prop))
+            return iterate;
+        return oldTraps.get(target, prop, receiver);
+    },
+    has(target, prop) {
+        return isIteratorProp(target, prop) || oldTraps.has(target, prop);
+    },
+}));
+
+/**
+ * @packageDocumentation
+ *
+ * Pass a promise and an abort signal and await the result.
+ *
+ * @example Basic usage
+ *
+ * ```ts
+ * import { raceSignal } from 'race-signal'
+ *
+ * const controller = new AbortController()
+ *
+ * const promise = new Promise((resolve, reject) => {
+ *   setTimeout(() => {
+ *     resolve('a value')
+ *   }, 1000)
+ * })
+ *
+ * setTimeout(() => {
+ *   controller.abort()
+ * }, 500)
+ *
+ * // throws an AbortError
+ * const resolve = await raceSignal(promise, controller.signal)
+ * ```
+ *
+ * @example Overriding errors
+ *
+ * By default the thrown error is the `.reason` property of the signal but it's
+ * possible to override this behaviour with the `translateError` option:
+ *
+ * ```ts
+ * import { raceSignal } from 'race-signal'
+ *
+ * const controller = new AbortController()
+ *
+ * const promise = new Promise((resolve, reject) => {
+ *   setTimeout(() => {
+ *     resolve('a value')
+ *   }, 1000)
+ * })
+ *
+ * setTimeout(() => {
+ *   controller.abort()
+ * }, 500)
+ *
+ * // throws `Error('Oh no!')`
+ * const resolve = await raceSignal(promise, controller.signal, {
+ *   translateError: (signal) => {
+ *     // use `signal`, or don't
+ *     return new Error('Oh no!')
+ *   }
+ * })
+ * ```
+ */
+function defaultTranslate(signal) {
+    return signal.reason;
+}
+/**
+ * Race a promise against an abort signal
+ */
+async function raceSignal(promise, signal, opts) {
+    if (signal == null) {
+        return promise;
+    }
+    const translateError = defaultTranslate;
+    if (signal.aborted) {
+        // the passed promise may yet resolve or reject but the use has signalled
+        // they are no longer interested so smother the error
+        promise.catch(() => { });
+        return Promise.reject(translateError(signal));
+    }
+    let listener;
+    try {
+        return await Promise.race([
+            promise,
+            new Promise((resolve, reject) => {
+                listener = () => {
+                    reject(translateError(signal));
+                };
+                signal.addEventListener('abort', listener);
+            })
+        ]);
+    }
+    finally {
+        if (listener != null) {
+            signal.removeEventListener('abort', listener);
+        }
+    }
+}
+
+/**
+ * @packageDocumentation
+ *
+ * A Blockstore implementation for browsers that stores blocks in [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API).
+ *
+ * @example
+ *
+ * ```js
+ * import { IDBBlockstore } from 'blockstore-idb'
+ *
+ * const store = new IDBBlockstore('path/to/store')
+ * ```
+ */
+class IDBBlockstore extends BaseBlockstore {
+    location;
+    version;
+    db;
+    base;
+    constructor(location, init = {}) {
+        super();
+        this.location = `${init.prefix ?? ''}${location}`;
+        this.version = init.version ?? 1;
+        // this.transactionQueue = new PQueue({ concurrency: 1 })
+        this.base = init.base ?? base32upper;
+    }
+    #encode(cid) {
+        return `/${this.base.encoder.encode(cid.multihash.bytes)}`;
+    }
+    #decode(key) {
+        return CID.createV1(code$3, decode$a(this.base.decoder.decode(key.substring(1))));
+    }
+    async open() {
+        try {
+            const location = this.location;
+            this.db = await openDB(location, this.version, {
+                upgrade(db) {
+                    db.createObjectStore(location);
+                }
+            });
+        }
+        catch (err) {
+            throw new OpenFailedError(String(err));
+        }
+    }
+    async close() {
+        this.db?.close();
+    }
+    async put(key, val, options) {
+        if (this.db == null) {
+            throw new Error('Blockstore needs to be opened.');
+        }
+        try {
+            options?.signal?.throwIfAborted();
+            await raceSignal(this.db.put(this.location, val, this.#encode(key)), options?.signal);
+        }
+        catch (err) {
+            throw new PutFailedError(String(err));
+        }
+        return key;
+    }
+    async get(key, options) {
+        if (this.db == null) {
+            throw new Error('Blockstore needs to be opened.');
+        }
+        let val;
+        try {
+            options?.signal?.throwIfAborted();
+            val = await raceSignal(this.db.get(this.location, this.#encode(key)), options?.signal);
+        }
+        catch (err) {
+            throw new PutFailedError(String(err));
+        }
+        if (val === undefined) {
+            throw new NotFoundError$1();
+        }
+        return val;
+    }
+    async delete(key, options) {
+        if (this.db == null) {
+            throw new Error('Blockstore needs to be opened.');
+        }
+        try {
+            options?.signal?.throwIfAborted();
+            await raceSignal(this.db.delete(this.location, this.#encode(key)), options?.signal);
+        }
+        catch (err) {
+            throw new PutFailedError(String(err));
+        }
+    }
+    async has(key, options) {
+        if (this.db == null) {
+            throw new Error('Blockstore needs to be opened.');
+        }
+        try {
+            options?.signal?.throwIfAborted();
+            const result = await raceSignal(this.db.getKey(this.location, this.#encode(key)), options?.signal);
+            return Boolean(result);
+        }
+        catch (err) {
+            throw new PutFailedError(String(err));
+        }
+    }
+    async *getAll(options) {
+        if (this.db == null) {
+            throw new Error('Blockstore needs to be opened.');
+        }
+        options?.signal?.throwIfAborted();
+        for (const key of await this.db.getAllKeys(this.location)) {
+            options?.signal?.throwIfAborted();
+            const cid = this.#decode(key.toString());
+            const block = await this.get(cid, options);
+            yield { cid, block };
+            options?.signal?.throwIfAborted();
+        }
+    }
+    async destroy() {
+        await deleteDB(this.location);
+    }
+}
+
+/**
+ * @packageDocumentation
+ *
+ * A Datastore implementation for browsers that stores data in [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API).
+ *
+ * @example
+ *
+ * ```js
+ * import { IDBDatastore } from 'datastore-idb'
+ *
+ * const store = new IDBDatastore('path/to/store')
+ * ```
+ */
+class IDBDatastore extends BaseDatastore {
+    location;
+    version;
+    db;
+    constructor(location, init = {}) {
+        super();
+        this.location = `${init.prefix ?? ''}${location}`;
+        this.version = init.version ?? 1;
+    }
+    async open() {
+        try {
+            const location = this.location;
+            this.db = await openDB(location, this.version, {
+                upgrade(db) {
+                    db.createObjectStore(location);
+                }
+            });
+        }
+        catch (err) {
+            throw new OpenFailedError(String(err));
+        }
+    }
+    async close() {
+        this.db?.close();
+    }
+    async put(key, val, options) {
+        if (this.db == null) {
+            throw new Error('Datastore needs to be opened.');
+        }
+        try {
+            options?.signal?.throwIfAborted();
+            await raceSignal(this.db.put(this.location, val, key.toString()), options?.signal);
+        }
+        catch (err) {
+            throw new PutFailedError(String(err));
+        }
+        return key;
+    }
+    async get(key, options) {
+        if (this.db == null) {
+            throw new Error('Datastore needs to be opened.');
+        }
+        let val;
+        try {
+            options?.signal?.throwIfAborted();
+            val = await raceSignal(this.db.get(this.location, key.toString()), options?.signal);
+        }
+        catch (err) {
+            throw new GetFailedError(String(err));
+        }
+        if (val === undefined) {
+            throw new NotFoundError$1();
+        }
+        return val;
+    }
+    async has(key, options) {
+        if (this.db == null) {
+            throw new Error('Datastore needs to be opened.');
+        }
+        try {
+            options?.signal?.throwIfAborted();
+            const result = await raceSignal(this.db.getKey(this.location, key.toString()));
+            return Boolean(result);
+        }
+        catch (err) {
+            throw new GetFailedError(String(err));
+        }
+    }
+    async delete(key, options) {
+        if (this.db == null) {
+            throw new Error('Datastore needs to be opened.');
+        }
+        try {
+            options?.signal?.throwIfAborted();
+            await raceSignal(this.db.delete(this.location, key.toString()), options?.signal);
+        }
+        catch (err) {
+            throw new DeleteFailedError(String(err));
+        }
+    }
+    batch() {
+        const puts = [];
+        const dels = [];
+        return {
+            put(key, value) {
+                puts.push({ key, value });
+            },
+            delete(key) {
+                dels.push(key);
+            },
+            commit: async (options) => {
+                if (this.db == null) {
+                    throw new Error('Datastore needs to be opened.');
+                }
+                options?.signal?.throwIfAborted();
+                const tx = this.db.transaction(this.location, 'readwrite');
+                try {
+                    const ops = puts.filter(({ key }) => {
+                        // don't put a key we are about to delete
+                        return dels.find(delKey => delKey.toString() === key.toString()) == null;
+                    })
+                        .map(put => {
+                        return async () => {
+                            await tx.store.put(put.value, put.key.toString());
+                        };
+                    })
+                        .concat(dels.map(key => {
+                        return async () => {
+                            await tx.store.delete(key.toString());
+                        };
+                    }))
+                        .concat(async () => {
+                        await tx.done;
+                    });
+                    options?.signal?.throwIfAborted();
+                    await raceSignal(Promise.all(ops.map(async (op) => { await op(); })), options?.signal);
+                }
+                catch {
+                    tx.abort();
+                }
+            }
+        };
+    }
+    async *query(q, options) {
+        let it = this.#queryIt(q, (key, value) => {
+            return { key, value };
+        }, options);
+        if (Array.isArray(q.filters)) {
+            it = q.filters.reduce((it, f) => filter(it, f), it);
+        }
+        if (Array.isArray(q.orders)) {
+            it = q.orders.reduce((it, f) => sort(it, f), it);
+        }
+        yield* it;
+    }
+    async *queryKeys(q, options) {
+        let it = this.#queryIt(q, (key) => key, options);
+        if (Array.isArray(q.filters)) {
+            it = q.filters.reduce((it, f) => filter(it, f), it);
+        }
+        if (Array.isArray(q.orders)) {
+            it = q.orders.reduce((it, f) => sort(it, f), it);
+        }
+        yield* it;
+    }
+    async *#queryIt(q, transform, options) {
+        if (this.db == null) {
+            throw new Error('Datastore needs to be opened.');
+        }
+        let yielded = 0;
+        let index = -1;
+        options?.signal?.throwIfAborted();
+        for (const key of await this.db.getAllKeys(this.location)) {
+            options?.signal?.throwIfAborted();
+            if (q.prefix != null && !key.toString().startsWith(q.prefix)) {
+                continue;
+            }
+            if (q.limit != null && yielded === q.limit) {
+                return;
+            }
+            index++;
+            if (q.offset != null && index < q.offset) {
+                continue;
+            }
+            const k = new Key(key.toString());
+            let value;
+            try {
+                value = await this.get(k, options);
+            }
+            catch (err) {
+                if (err.name !== 'NotFoundError') {
+                    throw err;
+                }
+                continue;
+            }
+            if (value == null) {
+                continue;
+            }
+            yield transform(k, value);
+            options?.signal?.throwIfAborted();
+            yielded++;
+        }
+    }
+    async destroy() {
+        await deleteDB(this.location);
+    }
+}
+
 //#region src-lib/util/file.ts
 function isDirectoryFile(file) {
 	return file.data.webkitRelativePath || isFolderBundle(file);
@@ -44982,52 +45698,182 @@ function readableStreamToAsyncIterable(readableStream) {
     }
   };
 }
+async function calculateStreamSize(stream, onProgress, abortSignal) {
+  let size = 0n;
+  const reader = stream.getReader();
+  try {
+    if (onProgress) {
+      onProgress(0);
+    }
+    while (true) {
+      if (abortSignal?.aborted) {
+        throw new Error("Operation aborted");
+      }
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += BigInt(value.byteLength);
+    }
+    if (onProgress) {
+      onProgress(100);
+    }
+  } catch (err) {
+    throw err;
+  } finally {
+    reader.releaseLock();
+  }
+  return size;
+}
+function asyncGeneratorToReadableStream(asyncGenerator, abortSignal) {
+  return new ReadableStream({
+    async start(controller) {
+      try {
+        for await (const chunk of asyncGenerator) {
+          if (abortSignal?.aborted) ;
+          controller.enqueue(chunk);
+        }
+        if (abortSignal?.aborted) ; else {
+          controller.close();
+        }
+      } catch (err) {
+        {
+          controller.error(err);
+        }
+      }
+    }
+  });
+}
 
 const defaultOptions = {};
 class CarPreprocessorPlugin extends BasePlugin {
   #helia;
+  #blockstore = null;
+  #datastore = null;
+  #abortControllers = /* @__PURE__ */ new Map();
+  #sdk;
+  #uploadManager;
+  #boundProcessor;
+  #boundCancelAll;
   constructor(uppy, opts) {
     super(uppy, { ...defaultOptions, ...opts });
     this.id = this.opts.id || "CarPreprocessor";
     this.type = "preprocessor";
     this.#helia = null;
+    this.#sdk = opts.sdk;
+    this.#uploadManager = opts.uploadManager;
+    this.#boundProcessor = this.#processor.bind(this);
+    this.#boundCancelAll = this.#handleCancelAll.bind(this);
   }
   install() {
-    this.uppy.addPreProcessor(this.#processor.bind(this));
+    this.uppy.addPreProcessor(this.#boundProcessor);
+    this.uppy.on("cancel-all", this.#boundCancelAll);
+  }
+  uninstall() {
+    this.uppy.removePreProcessor(this.#boundProcessor);
+    this.uppy.off("cancel-all", this.#boundCancelAll);
+    this.#abortControllers.forEach((controller) => controller.abort());
+    this.#abortControllers.clear();
+    const blockstore = this.#blockstore;
+    const datastore = this.#datastore;
+    this.#blockstore = null;
+    this.#datastore = null;
+    this.#helia = null;
+    this.teardown(blockstore, datastore).catch((error) => {
+      console.error("Error during carPreprocessor teardown:", error);
+    });
+  }
+  /**
+   * Async teardown method to properly close resources.
+   * This should be called by the host environment when needed.
+   */
+  async teardown(blockstore = this.#blockstore, datastore = this.#datastore) {
+    try {
+      await Promise.all([
+        blockstore?.close(),
+        datastore?.close()
+      ]);
+    } catch (error) {
+      console.error("Error closing stores:", error);
+      throw error;
+    }
+  }
+  #handleCancelAll() {
+    this.#abortControllers.forEach((controller) => {
+      controller.abort();
+    });
+    this.#abortControllers.clear();
   }
   async processFile(file) {
+    const abortController = new AbortController();
+    this.#abortControllers.set(file.id, abortController);
     try {
+      const tracker = new ProgressTracker(BigInt(file.size || 0));
       const [carStream, rootCid] = await this.#createCarStream(
         file,
         (progress) => {
+          if (abortController.signal.aborted) {
+            throw new Error("File processing aborted");
+          }
           this.uppy.emit("preprocess-progress", file, {
             message: "Processing file...",
             mode: "determinate",
             value: progress
           });
-        }
+        },
+        abortController.signal,
+        tracker
       );
-      this.uppy.emit("preprocess-complete", file, {
-        message: "Processing file...",
-        mode: "determinate",
-        value: 100
-      });
-      const carBlob = await streamToBlob(carStream, "application/vnd.ipld.car");
-      file.data = new File([carBlob], file.name, {
-        type: "application/vnd.ipld.car"
-      });
+      if (abortController.signal.aborted) {
+        throw new Error("File processing aborted");
+      }
+      const [streamForSize, streamForProcessing] = carStream.tee();
+      const streamSize = await calculateStreamSize(streamForSize, (progress) => {
+        if (abortController.signal.aborted) {
+          throw new Error("File processing aborted");
+        }
+        tracker.setStagePercent("sizeCalculation", progress);
+        this.uppy.emit("preprocess-progress", file, {
+          message: "Calculating file size...",
+          mode: "determinate",
+          value: tracker.getOverallProgress()
+        });
+      }, abortController.signal);
+      const rawLimit = this.#uploadManager?.getUploadLimit?.();
+      const uploadLimitBigInt = rawLimit == null ? null : typeof rawLimit === "bigint" ? rawLimit : BigInt(rawLimit);
+      if (uploadLimitBigInt !== null && streamSize >= uploadLimitBigInt) {
+        file.data = streamForProcessing.getReader();
+      } else {
+        const carBlob = await streamToBlob(streamForProcessing, "application/vnd.ipld.car");
+        file.data = new File([carBlob], file.name, {
+          type: "application/vnd.ipld.car"
+        });
+      }
+      if (streamSize > BigInt(Number.MAX_SAFE_INTEGER)) {
+        throw new Error(`File size ${streamSize.toString()} bytes exceeds maximum safe integer for upload. Please use a smaller file.`);
+      }
       this.uppy.setFileState(file.id, {
-        car: true,
         data: file.data,
+        // @ts-ignore
+        tus: { uploadSize: Number(streamSize) },
         meta: {
           ...file.meta,
           cid: rootCid.toString()
         }
       });
+      this.uppy.emit("preprocess-complete", file, {
+        message: "Preprocessing complete",
+        mode: "determinate",
+        value: 100
+      });
     } catch (error) {
+      this.#abortControllers.delete(file.id);
+      if (error instanceof Error && error.message === "File processing aborted") {
+        this.uppy.emit("preprocess-complete", file);
+        return;
+      }
       console.error("Error processing file:", error);
       throw error;
     }
+    this.#abortControllers.delete(file.id);
   }
   #collectDirectoryFiles(rootDir, fileID) {
     const dirFiles = Object.values(this.uppy.getFiles()).filter((f) => {
@@ -45043,11 +45889,10 @@ class CarPreprocessorPlugin extends BasePlugin {
     const childFileIDs = dirFiles.filter((f) => f.id !== fileID).map((f) => f.id);
     return { childFileIDs, dirFiles };
   }
-  async #createCarStream(file, onProgress) {
+  async #createCarStream(file, onProgress, abortSignal, tracker) {
     const helia = await this.#createHelia();
     const fs = unixfs(helia);
     const c = car(helia);
-    const tracker = new ProgressTracker(BigInt(file.size || 0));
     let blocksCount = 0n;
     let files = [];
     isDirectoryFile(file) || isFolderBundle(file);
@@ -45065,14 +45910,20 @@ class CarPreprocessorPlugin extends BasePlugin {
       files = [file.data];
     }
     const src = fileSource(files, (progress) => {
-      tracker.updateDataProgress("fileRead", BigInt(progress));
+      if (abortSignal.aborted) {
+        throw new Error("File processing aborted");
+      }
       onProgress(tracker.getOverallProgress());
-    });
+    }, abortSignal);
     const addOptions = {
       // Use protobuf format for all nodes to preserve metadata
       cidVersion: 1,
       rawLeaves: false,
+      signal: abortSignal,
       onProgress(event) {
+        if (abortSignal.aborted) {
+          throw new Error("File processing aborted");
+        }
         if (event.type === "unixfs:importer:progress:file:read") {
           tracker.updateDataProgress("fileRead", event.detail.bytesRead);
         } else if (event.type === "unixfs:importer:progress:file:write") {
@@ -45084,15 +45935,29 @@ class CarPreprocessorPlugin extends BasePlugin {
       }
     };
     let cid;
-    for await (const result of fs.addAll(src, addOptions)) {
-      cid = result.cid;
+    try {
+      for await (const result of fs.addAll(src, addOptions)) {
+        if (abortSignal.aborted) {
+          throw new Error("File processing aborted");
+        }
+        cid = result.cid;
+      }
+    } catch (error) {
+      if (abortSignal.aborted) {
+        throw new Error("File processing aborted");
+      }
+      throw error;
     }
     if (!cid) {
       throw new Error("Failed to import files to UnixFS");
     }
     let carBlocksWritten = 0n;
     const options = {
+      signal: abortSignal,
       onProgress(event) {
+        if (abortSignal.aborted) {
+          throw new Error("File processing aborted");
+        }
         if (event.type === "blocks:get:blockstore:get") {
           carBlocksWritten++;
           if (blocksCount === 0n) {
@@ -45111,10 +45976,19 @@ class CarPreprocessorPlugin extends BasePlugin {
       return this.#helia;
     }
     try {
-      this.#helia = await createHeliaHTTP();
+      if (!this.#blockstore) this.#blockstore = new IDBBlockstore("helia-blocks");
+      if (!this.#datastore) this.#datastore = new IDBDatastore("helia-data");
+      await Promise.all([this.#blockstore.open(), this.#datastore.open()]);
+      this.#helia = await createHeliaHTTP({
+        blockstore: this.#blockstore,
+        datastore: this.#datastore
+      });
       return this.#helia;
     } catch (error) {
-      console.error("Error creating Helia HTTP instance:", error);
+      console.error(
+        "Error creating Helia instance with IndexedDB stores:",
+        error
+      );
       throw error;
     }
   }
@@ -45173,7 +46047,7 @@ class CarPreprocessorPlugin extends BasePlugin {
       directoryCount++;
       await this.processFile(file);
     }
-    let processedCount = directoryCount;
+    let processedCount = 0;
     const remainingFiles = files.filter(
       (file) => !isFolderBundle(file) && !isDirectoryFile(file) && this.#shouldProcessFile(file) && !processedDirs.has(
         file.data?.webkitRelativePath?.split("/")[0]
@@ -45225,94 +46099,93 @@ class ProgressTracker {
   state = {
     carExport: 0,
     fileRead: 0,
-    unixfsImport: 0
+    unixfsImport: 0,
+    sizeCalculation: 0
   };
   constructor(fileSize) {
     this.fileSize = fileSize;
   }
   getOverallProgress() {
-    const { carExport, fileRead, unixfsImport } = this.state;
-    return fileRead * 0.3 + unixfsImport * 0.4 + carExport * 0.3;
+    const { carExport, fileRead, unixfsImport, sizeCalculation } = this.state;
+    return fileRead * 0.3 + unixfsImport * 0.35 + carExport * 0.3 + sizeCalculation * 0.05;
   }
   updateBlockProgress(value) {
     this.state.carExport = Number(value);
   }
   updateDataProgress(stage, value) {
-    this.state[stage] = Number(value * 100n / this.fileSize);
+    const denom = this.fileSize > 0n ? this.fileSize : 1n;
+    this.state[stage] = Number(value * 100n / denom);
+  }
+  setStagePercent(stage, percent) {
+    const p = Math.max(0, Math.min(100, Math.floor(percent)));
+    this.state[stage] = p;
   }
 }
-function asyncGeneratorToReadableStream(asyncGenerator) {
-  return new ReadableStream({
-    async start(controller) {
-      try {
-        for await (const chunk of asyncGenerator) {
-          controller.enqueue(chunk);
-        }
-        controller.close();
-      } catch (err) {
-        controller.error(err);
-      }
-    }
-  });
-}
-async function* fileSource(files, onProgress) {
+async function* fileSource(files, onProgress, abortSignal) {
   const seenDirs = /* @__PURE__ */ new Set();
   let totalBytes = 0n;
   let processedBytes = 0n;
-  console.log("[fileSource] Starting to process files:", files.length);
+  console.debug("[fileSource] Starting to process files:", files.length);
   files.forEach((file) => {
     totalBytes += BigInt(file.size);
-    console.log("[fileSource] File details:", {
+    console.debug("[fileSource] File details:", {
       name: file.name,
       size: file.size,
       webkitRelativePath: file.webkitRelativePath,
       type: file.type
     });
   });
-  console.log("[fileSource] Total bytes to process:", totalBytes);
+  console.debug("[fileSource] Total bytes to process:", totalBytes);
   for (const file of files) {
+    if (abortSignal?.aborted) {
+      throw new Error("Operation aborted");
+    }
     const fullPath = file.webkitRelativePath ?? file.name;
-    console.log("[fileSource] Processing file with fullPath:", fullPath);
+    console.debug("[fileSource] Processing file with fullPath:", fullPath);
     if (fullPath.includes("/.")) {
-      console.log("[fileSource] Skipping hidden file:", fullPath);
+      console.debug("[fileSource] Skipping hidden file:", fullPath);
       continue;
     }
     const parts = fullPath.split("/").filter((part) => part.length > 0);
-    console.log("[fileSource] Path parts:", parts);
+    console.debug("[fileSource] Path parts:", parts);
     for (let i = 1; i < parts.length; i++) {
+      if (abortSignal?.aborted) {
+        throw new Error("Operation aborted");
+      }
       const dirPath = parts.slice(0, i).join("/");
-      console.log("[fileSource] Checking directory path:", dirPath);
+      console.debug("[fileSource] Checking directory path:", dirPath);
       if (!seenDirs.has(dirPath)) {
-        console.log("[fileSource] Yielding intermediate directory:", dirPath);
+        console.debug("[fileSource] Yielding intermediate directory:", dirPath);
         seenDirs.add(dirPath);
         yield {
-          content: void 0,
+          content: async function* () {
+          }(),
           path: dirPath
         };
       } else {
-        console.log("[fileSource] Directory already seen, skipping:", dirPath);
+        console.debug("[fileSource] Directory already seen, skipping:", dirPath);
       }
     }
-    console.log("[fileSource] Yielding file with path:", fullPath);
+    console.debug("[fileSource] Yielding file with path:", fullPath);
     yield {
-      content: file.stream(),
+      content: readableStreamToAsyncIterable(file.stream()),
       path: fullPath
     };
     if (onProgress && totalBytes > 0n) {
       processedBytes += BigInt(file.size);
       const progressPercent = Number(processedBytes * 100n / totalBytes);
-      console.log("[fileSource] Progress tracking:", {
+      console.debug("[fileSource] Progress tracking:", {
         processedBytes,
         totalBytes,
         progressPercent
       });
       onProgress(progressPercent);
     } else if (onProgress) {
-      console.log("[fileSource] Fallback progress (100%)");
+      console.debug("[fileSource] Fallback progress (100%)");
       onProgress(100);
     }
   }
-  console.log("[fileSource] Finished processing all files");
+  console.debug("[fileSource] Finished processing all files");
 }
 
 class IpfsUpload {
@@ -46657,722 +47530,6 @@ const routes = [
     }
   }
 ];
-
-const instanceOfAny = (object, constructors) => constructors.some((c) => object instanceof c);
-
-let idbProxyableTypes;
-let cursorAdvanceMethods;
-// This is a function to prevent it throwing up in node environments.
-function getIdbProxyableTypes() {
-    return (idbProxyableTypes ||
-        (idbProxyableTypes = [
-            IDBDatabase,
-            IDBObjectStore,
-            IDBIndex,
-            IDBCursor,
-            IDBTransaction,
-        ]));
-}
-// This is a function to prevent it throwing up in node environments.
-function getCursorAdvanceMethods() {
-    return (cursorAdvanceMethods ||
-        (cursorAdvanceMethods = [
-            IDBCursor.prototype.advance,
-            IDBCursor.prototype.continue,
-            IDBCursor.prototype.continuePrimaryKey,
-        ]));
-}
-const transactionDoneMap = new WeakMap();
-const transformCache = new WeakMap();
-const reverseTransformCache = new WeakMap();
-function promisifyRequest(request) {
-    const promise = new Promise((resolve, reject) => {
-        const unlisten = () => {
-            request.removeEventListener('success', success);
-            request.removeEventListener('error', error);
-        };
-        const success = () => {
-            resolve(wrap(request.result));
-            unlisten();
-        };
-        const error = () => {
-            reject(request.error);
-            unlisten();
-        };
-        request.addEventListener('success', success);
-        request.addEventListener('error', error);
-    });
-    // This mapping exists in reverseTransformCache but doesn't exist in transformCache. This
-    // is because we create many promises from a single IDBRequest.
-    reverseTransformCache.set(promise, request);
-    return promise;
-}
-function cacheDonePromiseForTransaction(tx) {
-    // Early bail if we've already created a done promise for this transaction.
-    if (transactionDoneMap.has(tx))
-        return;
-    const done = new Promise((resolve, reject) => {
-        const unlisten = () => {
-            tx.removeEventListener('complete', complete);
-            tx.removeEventListener('error', error);
-            tx.removeEventListener('abort', error);
-        };
-        const complete = () => {
-            resolve();
-            unlisten();
-        };
-        const error = () => {
-            reject(tx.error || new DOMException('AbortError', 'AbortError'));
-            unlisten();
-        };
-        tx.addEventListener('complete', complete);
-        tx.addEventListener('error', error);
-        tx.addEventListener('abort', error);
-    });
-    // Cache it for later retrieval.
-    transactionDoneMap.set(tx, done);
-}
-let idbProxyTraps = {
-    get(target, prop, receiver) {
-        if (target instanceof IDBTransaction) {
-            // Special handling for transaction.done.
-            if (prop === 'done')
-                return transactionDoneMap.get(target);
-            // Make tx.store return the only store in the transaction, or undefined if there are many.
-            if (prop === 'store') {
-                return receiver.objectStoreNames[1]
-                    ? undefined
-                    : receiver.objectStore(receiver.objectStoreNames[0]);
-            }
-        }
-        // Else transform whatever we get back.
-        return wrap(target[prop]);
-    },
-    set(target, prop, value) {
-        target[prop] = value;
-        return true;
-    },
-    has(target, prop) {
-        if (target instanceof IDBTransaction &&
-            (prop === 'done' || prop === 'store')) {
-            return true;
-        }
-        return prop in target;
-    },
-};
-function replaceTraps(callback) {
-    idbProxyTraps = callback(idbProxyTraps);
-}
-function wrapFunction(func) {
-    // Due to expected object equality (which is enforced by the caching in `wrap`), we
-    // only create one new func per func.
-    // Cursor methods are special, as the behaviour is a little more different to standard IDB. In
-    // IDB, you advance the cursor and wait for a new 'success' on the IDBRequest that gave you the
-    // cursor. It's kinda like a promise that can resolve with many values. That doesn't make sense
-    // with real promises, so each advance methods returns a new promise for the cursor object, or
-    // undefined if the end of the cursor has been reached.
-    if (getCursorAdvanceMethods().includes(func)) {
-        return function (...args) {
-            // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
-            // the original object.
-            func.apply(unwrap(this), args);
-            return wrap(this.request);
-        };
-    }
-    return function (...args) {
-        // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
-        // the original object.
-        return wrap(func.apply(unwrap(this), args));
-    };
-}
-function transformCachableValue(value) {
-    if (typeof value === 'function')
-        return wrapFunction(value);
-    // This doesn't return, it just creates a 'done' promise for the transaction,
-    // which is later returned for transaction.done (see idbObjectHandler).
-    if (value instanceof IDBTransaction)
-        cacheDonePromiseForTransaction(value);
-    if (instanceOfAny(value, getIdbProxyableTypes()))
-        return new Proxy(value, idbProxyTraps);
-    // Return the same value back if we're not going to transform it.
-    return value;
-}
-function wrap(value) {
-    // We sometimes generate multiple promises from a single IDBRequest (eg when cursoring), because
-    // IDB is weird and a single IDBRequest can yield many responses, so these can't be cached.
-    if (value instanceof IDBRequest)
-        return promisifyRequest(value);
-    // If we've already transformed this value before, reuse the transformed value.
-    // This is faster, but it also provides object equality.
-    if (transformCache.has(value))
-        return transformCache.get(value);
-    const newValue = transformCachableValue(value);
-    // Not all types are transformed.
-    // These may be primitive types, so they can't be WeakMap keys.
-    if (newValue !== value) {
-        transformCache.set(value, newValue);
-        reverseTransformCache.set(newValue, value);
-    }
-    return newValue;
-}
-const unwrap = (value) => reverseTransformCache.get(value);
-
-/**
- * Open a database.
- *
- * @param name Name of the database.
- * @param version Schema version.
- * @param callbacks Additional callbacks.
- */
-function openDB(name, version, { blocked, upgrade, blocking, terminated } = {}) {
-    const request = indexedDB.open(name, version);
-    const openPromise = wrap(request);
-    if (upgrade) {
-        request.addEventListener('upgradeneeded', (event) => {
-            upgrade(wrap(request.result), event.oldVersion, event.newVersion, wrap(request.transaction), event);
-        });
-    }
-    if (blocked) {
-        request.addEventListener('blocked', (event) => blocked(
-        // Casting due to https://github.com/microsoft/TypeScript-DOM-lib-generator/pull/1405
-        event.oldVersion, event.newVersion, event));
-    }
-    openPromise
-        .then((db) => {
-        if (terminated)
-            db.addEventListener('close', () => terminated());
-        if (blocking) {
-            db.addEventListener('versionchange', (event) => blocking(event.oldVersion, event.newVersion, event));
-        }
-    })
-        .catch(() => { });
-    return openPromise;
-}
-/**
- * Delete a database.
- *
- * @param name Name of the database.
- */
-function deleteDB(name, { blocked } = {}) {
-    const request = indexedDB.deleteDatabase(name);
-    if (blocked) {
-        request.addEventListener('blocked', (event) => blocked(
-        // Casting due to https://github.com/microsoft/TypeScript-DOM-lib-generator/pull/1405
-        event.oldVersion, event));
-    }
-    return wrap(request).then(() => undefined);
-}
-
-const readMethods = ['get', 'getKey', 'getAll', 'getAllKeys', 'count'];
-const writeMethods = ['put', 'add', 'delete', 'clear'];
-const cachedMethods = new Map();
-function getMethod(target, prop) {
-    if (!(target instanceof IDBDatabase &&
-        !(prop in target) &&
-        typeof prop === 'string')) {
-        return;
-    }
-    if (cachedMethods.get(prop))
-        return cachedMethods.get(prop);
-    const targetFuncName = prop.replace(/FromIndex$/, '');
-    const useIndex = prop !== targetFuncName;
-    const isWrite = writeMethods.includes(targetFuncName);
-    if (
-    // Bail if the target doesn't exist on the target. Eg, getAll isn't in Edge.
-    !(targetFuncName in (useIndex ? IDBIndex : IDBObjectStore).prototype) ||
-        !(isWrite || readMethods.includes(targetFuncName))) {
-        return;
-    }
-    const method = async function (storeName, ...args) {
-        // isWrite ? 'readwrite' : undefined gzipps better, but fails in Edge :(
-        const tx = this.transaction(storeName, isWrite ? 'readwrite' : 'readonly');
-        let target = tx.store;
-        if (useIndex)
-            target = target.index(args.shift());
-        // Must reject if op rejects.
-        // If it's a write operation, must reject if tx.done rejects.
-        // Must reject with op rejection first.
-        // Must resolve with op value.
-        // Must handle both promises (no unhandled rejections)
-        return (await Promise.all([
-            target[targetFuncName](...args),
-            isWrite && tx.done,
-        ]))[0];
-    };
-    cachedMethods.set(prop, method);
-    return method;
-}
-replaceTraps((oldTraps) => ({
-    ...oldTraps,
-    get: (target, prop, receiver) => getMethod(target, prop) || oldTraps.get(target, prop, receiver),
-    has: (target, prop) => !!getMethod(target, prop) || oldTraps.has(target, prop),
-}));
-
-const advanceMethodProps = ['continue', 'continuePrimaryKey', 'advance'];
-const methodMap = {};
-const advanceResults = new WeakMap();
-const ittrProxiedCursorToOriginalProxy = new WeakMap();
-const cursorIteratorTraps = {
-    get(target, prop) {
-        if (!advanceMethodProps.includes(prop))
-            return target[prop];
-        let cachedFunc = methodMap[prop];
-        if (!cachedFunc) {
-            cachedFunc = methodMap[prop] = function (...args) {
-                advanceResults.set(this, ittrProxiedCursorToOriginalProxy.get(this)[prop](...args));
-            };
-        }
-        return cachedFunc;
-    },
-};
-async function* iterate(...args) {
-    // tslint:disable-next-line:no-this-assignment
-    let cursor = this;
-    if (!(cursor instanceof IDBCursor)) {
-        cursor = await cursor.openCursor(...args);
-    }
-    if (!cursor)
-        return;
-    cursor = cursor;
-    const proxiedCursor = new Proxy(cursor, cursorIteratorTraps);
-    ittrProxiedCursorToOriginalProxy.set(proxiedCursor, cursor);
-    // Map this double-proxy back to the original, so other cursor methods work.
-    reverseTransformCache.set(proxiedCursor, unwrap(cursor));
-    while (cursor) {
-        yield proxiedCursor;
-        // If one of the advancing methods was not called, call continue().
-        cursor = await (advanceResults.get(proxiedCursor) || cursor.continue());
-        advanceResults.delete(proxiedCursor);
-    }
-}
-function isIteratorProp(target, prop) {
-    return ((prop === Symbol.asyncIterator &&
-        instanceOfAny(target, [IDBIndex, IDBObjectStore, IDBCursor])) ||
-        (prop === 'iterate' && instanceOfAny(target, [IDBIndex, IDBObjectStore])));
-}
-replaceTraps((oldTraps) => ({
-    ...oldTraps,
-    get(target, prop, receiver) {
-        if (isIteratorProp(target, prop))
-            return iterate;
-        return oldTraps.get(target, prop, receiver);
-    },
-    has(target, prop) {
-        return isIteratorProp(target, prop) || oldTraps.has(target, prop);
-    },
-}));
-
-/**
- * @packageDocumentation
- *
- * Pass a promise and an abort signal and await the result.
- *
- * @example Basic usage
- *
- * ```ts
- * import { raceSignal } from 'race-signal'
- *
- * const controller = new AbortController()
- *
- * const promise = new Promise((resolve, reject) => {
- *   setTimeout(() => {
- *     resolve('a value')
- *   }, 1000)
- * })
- *
- * setTimeout(() => {
- *   controller.abort()
- * }, 500)
- *
- * // throws an AbortError
- * const resolve = await raceSignal(promise, controller.signal)
- * ```
- *
- * @example Overriding errors
- *
- * By default the thrown error is the `.reason` property of the signal but it's
- * possible to override this behaviour with the `translateError` option:
- *
- * ```ts
- * import { raceSignal } from 'race-signal'
- *
- * const controller = new AbortController()
- *
- * const promise = new Promise((resolve, reject) => {
- *   setTimeout(() => {
- *     resolve('a value')
- *   }, 1000)
- * })
- *
- * setTimeout(() => {
- *   controller.abort()
- * }, 500)
- *
- * // throws `Error('Oh no!')`
- * const resolve = await raceSignal(promise, controller.signal, {
- *   translateError: (signal) => {
- *     // use `signal`, or don't
- *     return new Error('Oh no!')
- *   }
- * })
- * ```
- */
-function defaultTranslate(signal) {
-    return signal.reason;
-}
-/**
- * Race a promise against an abort signal
- */
-async function raceSignal(promise, signal, opts) {
-    if (signal == null) {
-        return promise;
-    }
-    const translateError = defaultTranslate;
-    if (signal.aborted) {
-        // the passed promise may yet resolve or reject but the use has signalled
-        // they are no longer interested so smother the error
-        promise.catch(() => { });
-        return Promise.reject(translateError(signal));
-    }
-    let listener;
-    try {
-        return await Promise.race([
-            promise,
-            new Promise((resolve, reject) => {
-                listener = () => {
-                    reject(translateError(signal));
-                };
-                signal.addEventListener('abort', listener);
-            })
-        ]);
-    }
-    finally {
-        if (listener != null) {
-            signal.removeEventListener('abort', listener);
-        }
-    }
-}
-
-/**
- * @packageDocumentation
- *
- * A Blockstore implementation for browsers that stores blocks in [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API).
- *
- * @example
- *
- * ```js
- * import { IDBBlockstore } from 'blockstore-idb'
- *
- * const store = new IDBBlockstore('path/to/store')
- * ```
- */
-class IDBBlockstore extends BaseBlockstore {
-    location;
-    version;
-    db;
-    base;
-    constructor(location, init = {}) {
-        super();
-        this.location = `${init.prefix ?? ''}${location}`;
-        this.version = init.version ?? 1;
-        // this.transactionQueue = new PQueue({ concurrency: 1 })
-        this.base = init.base ?? base32upper;
-    }
-    #encode(cid) {
-        return `/${this.base.encoder.encode(cid.multihash.bytes)}`;
-    }
-    #decode(key) {
-        return CID.createV1(code$3, decode$a(this.base.decoder.decode(key.substring(1))));
-    }
-    async open() {
-        try {
-            const location = this.location;
-            this.db = await openDB(location, this.version, {
-                upgrade(db) {
-                    db.createObjectStore(location);
-                }
-            });
-        }
-        catch (err) {
-            throw new OpenFailedError(String(err));
-        }
-    }
-    async close() {
-        this.db?.close();
-    }
-    async put(key, val, options) {
-        if (this.db == null) {
-            throw new Error('Blockstore needs to be opened.');
-        }
-        try {
-            options?.signal?.throwIfAborted();
-            await raceSignal(this.db.put(this.location, val, this.#encode(key)), options?.signal);
-        }
-        catch (err) {
-            throw new PutFailedError(String(err));
-        }
-        return key;
-    }
-    async get(key, options) {
-        if (this.db == null) {
-            throw new Error('Blockstore needs to be opened.');
-        }
-        let val;
-        try {
-            options?.signal?.throwIfAborted();
-            val = await raceSignal(this.db.get(this.location, this.#encode(key)), options?.signal);
-        }
-        catch (err) {
-            throw new PutFailedError(String(err));
-        }
-        if (val === undefined) {
-            throw new NotFoundError$1();
-        }
-        return val;
-    }
-    async delete(key, options) {
-        if (this.db == null) {
-            throw new Error('Blockstore needs to be opened.');
-        }
-        try {
-            options?.signal?.throwIfAborted();
-            await raceSignal(this.db.delete(this.location, this.#encode(key)), options?.signal);
-        }
-        catch (err) {
-            throw new PutFailedError(String(err));
-        }
-    }
-    async has(key, options) {
-        if (this.db == null) {
-            throw new Error('Blockstore needs to be opened.');
-        }
-        try {
-            options?.signal?.throwIfAborted();
-            const result = await raceSignal(this.db.getKey(this.location, this.#encode(key)), options?.signal);
-            return Boolean(result);
-        }
-        catch (err) {
-            throw new PutFailedError(String(err));
-        }
-    }
-    async *getAll(options) {
-        if (this.db == null) {
-            throw new Error('Blockstore needs to be opened.');
-        }
-        options?.signal?.throwIfAborted();
-        for (const key of await this.db.getAllKeys(this.location)) {
-            options?.signal?.throwIfAborted();
-            const cid = this.#decode(key.toString());
-            const block = await this.get(cid, options);
-            yield { cid, block };
-            options?.signal?.throwIfAborted();
-        }
-    }
-    async destroy() {
-        await deleteDB(this.location);
-    }
-}
-
-/**
- * @packageDocumentation
- *
- * A Datastore implementation for browsers that stores data in [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API).
- *
- * @example
- *
- * ```js
- * import { IDBDatastore } from 'datastore-idb'
- *
- * const store = new IDBDatastore('path/to/store')
- * ```
- */
-class IDBDatastore extends BaseDatastore {
-    location;
-    version;
-    db;
-    constructor(location, init = {}) {
-        super();
-        this.location = `${init.prefix ?? ''}${location}`;
-        this.version = init.version ?? 1;
-    }
-    async open() {
-        try {
-            const location = this.location;
-            this.db = await openDB(location, this.version, {
-                upgrade(db) {
-                    db.createObjectStore(location);
-                }
-            });
-        }
-        catch (err) {
-            throw new OpenFailedError(String(err));
-        }
-    }
-    async close() {
-        this.db?.close();
-    }
-    async put(key, val, options) {
-        if (this.db == null) {
-            throw new Error('Datastore needs to be opened.');
-        }
-        try {
-            options?.signal?.throwIfAborted();
-            await raceSignal(this.db.put(this.location, val, key.toString()), options?.signal);
-        }
-        catch (err) {
-            throw new PutFailedError(String(err));
-        }
-        return key;
-    }
-    async get(key, options) {
-        if (this.db == null) {
-            throw new Error('Datastore needs to be opened.');
-        }
-        let val;
-        try {
-            options?.signal?.throwIfAborted();
-            val = await raceSignal(this.db.get(this.location, key.toString()), options?.signal);
-        }
-        catch (err) {
-            throw new GetFailedError(String(err));
-        }
-        if (val === undefined) {
-            throw new NotFoundError$1();
-        }
-        return val;
-    }
-    async has(key, options) {
-        if (this.db == null) {
-            throw new Error('Datastore needs to be opened.');
-        }
-        try {
-            options?.signal?.throwIfAborted();
-            const result = await raceSignal(this.db.getKey(this.location, key.toString()));
-            return Boolean(result);
-        }
-        catch (err) {
-            throw new GetFailedError(String(err));
-        }
-    }
-    async delete(key, options) {
-        if (this.db == null) {
-            throw new Error('Datastore needs to be opened.');
-        }
-        try {
-            options?.signal?.throwIfAborted();
-            await raceSignal(this.db.delete(this.location, key.toString()), options?.signal);
-        }
-        catch (err) {
-            throw new DeleteFailedError(String(err));
-        }
-    }
-    batch() {
-        const puts = [];
-        const dels = [];
-        return {
-            put(key, value) {
-                puts.push({ key, value });
-            },
-            delete(key) {
-                dels.push(key);
-            },
-            commit: async (options) => {
-                if (this.db == null) {
-                    throw new Error('Datastore needs to be opened.');
-                }
-                options?.signal?.throwIfAborted();
-                const tx = this.db.transaction(this.location, 'readwrite');
-                try {
-                    const ops = puts.filter(({ key }) => {
-                        // don't put a key we are about to delete
-                        return dels.find(delKey => delKey.toString() === key.toString()) == null;
-                    })
-                        .map(put => {
-                        return async () => {
-                            await tx.store.put(put.value, put.key.toString());
-                        };
-                    })
-                        .concat(dels.map(key => {
-                        return async () => {
-                            await tx.store.delete(key.toString());
-                        };
-                    }))
-                        .concat(async () => {
-                        await tx.done;
-                    });
-                    options?.signal?.throwIfAborted();
-                    await raceSignal(Promise.all(ops.map(async (op) => { await op(); })), options?.signal);
-                }
-                catch {
-                    tx.abort();
-                }
-            }
-        };
-    }
-    async *query(q, options) {
-        let it = this.#queryIt(q, (key, value) => {
-            return { key, value };
-        }, options);
-        if (Array.isArray(q.filters)) {
-            it = q.filters.reduce((it, f) => filter(it, f), it);
-        }
-        if (Array.isArray(q.orders)) {
-            it = q.orders.reduce((it, f) => sort(it, f), it);
-        }
-        yield* it;
-    }
-    async *queryKeys(q, options) {
-        let it = this.#queryIt(q, (key) => key, options);
-        if (Array.isArray(q.filters)) {
-            it = q.filters.reduce((it, f) => filter(it, f), it);
-        }
-        if (Array.isArray(q.orders)) {
-            it = q.orders.reduce((it, f) => sort(it, f), it);
-        }
-        yield* it;
-    }
-    async *#queryIt(q, transform, options) {
-        if (this.db == null) {
-            throw new Error('Datastore needs to be opened.');
-        }
-        let yielded = 0;
-        let index = -1;
-        options?.signal?.throwIfAborted();
-        for (const key of await this.db.getAllKeys(this.location)) {
-            options?.signal?.throwIfAborted();
-            if (q.prefix != null && !key.toString().startsWith(q.prefix)) {
-                continue;
-            }
-            if (q.limit != null && yielded === q.limit) {
-                return;
-            }
-            index++;
-            if (q.offset != null && index < q.offset) {
-                continue;
-            }
-            const k = new Key(key.toString());
-            let value;
-            try {
-                value = await this.get(k, options);
-            }
-            catch (err) {
-                if (err.name !== 'NotFoundError') {
-                    throw err;
-                }
-                continue;
-            }
-            if (value == null) {
-                continue;
-            }
-            yield transform(k, value);
-            options?.signal?.throwIfAborted();
-            yielded++;
-        }
-    }
-    async destroy() {
-        await deleteDB(this.location);
-    }
-}
 
 /* tslint:disable */
 /* eslint-disable */

@@ -2,7 +2,7 @@ import { core_dashboard__loadShare__react__loadShare__, jsxRuntimeExports, core_
 import { core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__ } from './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__-CFuxgGnQ.js';
 import { core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ } from './core_dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__-DOYraqnS.js';
 import { Card } from './Card-Dhqiz4WT.js';
-import { Manager, DEFAULT_AVATAR_CONFIG, createLargeFilePlugin, XHRUpload, createSmallFilePlugin } from './Manager-DBSNcAFZ.js';
+import { Manager, DEFAULT_AVATAR_CONFIG, createLargeFilePlugin, XHRUpload, createSmallFilePlugin } from './Manager-BotPTYRU.js';
 import { UploadStatus } from './upload-Cr_MDl4Y.js';
 import { UploadProgress, Dropzone, useDropzoneContext, Upload, Check } from './Dropzone-PZtk_gpk.js';
 import './core_dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__-BjauFvDm.js';

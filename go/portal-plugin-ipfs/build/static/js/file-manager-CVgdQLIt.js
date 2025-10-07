@@ -191,7 +191,7 @@ const X = createLucideIcon("x", __iconNode);
     customShareInfo: {shareConfig:{
       singleton: true,
       strictVersion: false,
-      requiredVersion: "^7.5.2"
+      requiredVersion: "^7.8.2"
     }}}));
     const exportModule$1 = await res$1.then(factory => factory());
     var core_ipfs__loadShare__react_mf_2_router__loadShare__ = exportModule$1;
