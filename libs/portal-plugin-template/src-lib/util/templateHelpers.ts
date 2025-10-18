@@ -49,9 +49,32 @@ export function formatTemplateData(data: unknown): string {
   }
 
   try {
-    return JSON.stringify(data, null, 2);
+    const seen = new WeakSet();
+    const safeReplacer = (key: string, value: unknown): unknown => {
+      // Handle circular references
+      if (typeof value === "object" && value !== null) {
+        if (seen.has(value)) {
+          return "[Circular]";
+        }
+        seen.add(value);
+      }
+      
+      // Handle BigInt values
+      if (typeof value === "bigint") {
+        return value.toString() + "n";
+      }
+      
+      return value;
+    };
+    
+    return JSON.stringify(data, safeReplacer, 2);
   } catch {
-    return String(data);
+    // Fallback to safe string representation
+    try {
+      return JSON.stringify(String(data));
+    } catch {
+      return '"[unserializable]"';
+    }
   }
 }
 

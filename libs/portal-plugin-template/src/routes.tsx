@@ -4,7 +4,7 @@ import { Home, Settings } from "lucide-react";
 const routes = [
   {
     path: "/template",
-    component: "dashboard",
+    component: "./dashboard",
     id: "template-dashboard",
     navigation: {
       label: "Template Dashboard",
@@ -14,7 +14,7 @@ const routes = [
   },
   {
     path: "/template/settings",
-    component: "settings",
+    component: "./settings",
     id: "template-settings",
     navigation: {
       label: "Template Settings",
