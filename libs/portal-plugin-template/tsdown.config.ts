@@ -8,7 +8,7 @@ export default defineConfig({
   format: ["esm", "cjs"],
   minify: false,
   outputOptions(options, format) {
-    options.dir = format === "es" ? "lib-dist/esm" : "lib-dist/cjs";
+    options.dir = format === "esm" ? "lib-dist/esm" : "lib-dist/cjs";
   },
   platform: "node",
   sourcemap: true,
