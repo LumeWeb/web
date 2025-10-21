@@ -210,6 +210,9 @@ importers:
       '@fontsource-variable/manrope':
         specifier: ^5.2.5
         version: 5.2.6
+      '@lumeweb/advanced-rest-provider':
+        specifier: workspace:*
+        version: link:../../libs/advanced-rest
       '@lumeweb/portal-framework-core':
         specifier: workspace:*
         version: link:../../libs/portal-framework-core
@@ -902,6 +905,51 @@ importers:
         specifier: 3.24.2
         version: 3.24.2
 
+  libs/portal-plugin-billing:
+    dependencies:
+      '@lumeweb/advanced-rest-provider':
+        specifier: workspace:*
+        version: link:../advanced-rest
+      '@lumeweb/portal-framework-auth':
+        specifier: workspace:*
+        version: link:../portal-framework-auth
+      '@lumeweb/portal-framework-core':
+        specifier: workspace:*
+        version: link:../portal-framework-core
+      '@lumeweb/portal-framework-ui':
+        specifier: workspace:*
+        version: link:../portal-framework-ui
+      '@lumeweb/portal-framework-ui-core':
+        specifier: workspace:*
+        version: link:../portal-framework-ui-core
+      '@lumeweb/portal-plugin-dashboard':
+        specifier: workspace:*
+        version: link:../portal-plugin-dashboard
+      '@refinedev/core':
+        specifier: ^4.47.0
+        version: 4.57.10(patch_hash=dd77179754d9c0ec947ca9c6fff854acf119afb5b0fee50b1125f5d34f838104)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react-native@0.81.4(@babel/core@7.28.3)(@types/react@18.3.3)(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.4(@babel/core@7.28.3)(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
+      '@refinedev/react-router':
+        specifier: ^2.0.2
+        version: 2.0.2(@refinedev/core@4.57.10(patch_hash=dd77179754d9c0ec947ca9c6fff854acf119afb5b0fee50b1125f5d34f838104)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react-native@0.81.4(@babel/core@7.28.3)(@types/react@18.3.3)(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.4(@babel/core@7.28.3)(@types/react@18.3.3)(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-router@7.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+      '@tanstack/react-query':
+        specifier: 4.36.1
+        version: 4.36.1(react-dom@18.3.1(react@18.3.1))(react-native@0.81.4(@babel/core@7.28.3)(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
+      lucide-react:
+        specifier: ^0.543.0
+        version: 0.543.0(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+      react-hook-form:
+        specifier: 7.54.0
+        version: 7.54.0(react@18.3.1)
+      react-router:
+        specifier: 7.5.2
+        version: 7.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+
   libs/portal-plugin-core:
     dependencies:
       '@conform-to/react':
@@ -1151,6 +1199,37 @@ importers:
       zod:
         specifier: 3.24.2
         version: 3.24.2
+
+  libs/portal-plugin-template:
+    dependencies:
+      '@lumeweb/portal-framework-core':
+        specifier: workspace:*
+        version: link:../portal-framework-core
+      '@lumeweb/portal-framework-ui':
+        specifier: workspace:*
+        version: link:../portal-framework-ui
+      '@lumeweb/portal-framework-ui-core':
+        specifier: workspace:*
+        version: link:../portal-framework-ui-core
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+      react-router:
+        specifier: 7.5.2
+        version: 7.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+    devDependencies:
+      '@types/react':
+        specifier: 18.3.3
+        version: 18.3.3
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.2
 
   libs/portal-sdk:
     devDependencies:
@@ -3697,6 +3776,17 @@ packages:
 
   '@refinedev/react-router@2.0.1':
     resolution: {integrity: sha512-DaBx8D8uc/G9whBV8reerjPpExCxaFgGzbYuQ32T/OAUX05RDp5WrIqEJqOOsWjNpm0YIN4I2e2wnZCSN9gbFw==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@refinedev/core': ^5.0.0
+      '@types/react': 18.3.3
+      '@types/react-dom': 18.3.0
+      react: 18.3.1
+      react-dom: 18.3.1
+      react-router: ^7.0.2
+
+  '@refinedev/react-router@2.0.2':
+    resolution: {integrity: sha512-EERz4+wXGsBRkVpbRvFS/5echhmPqhF8968nSdA5EecnxFpOg3Auh2joEFoIS7AysxdYSR7rguQ0husirFBvJw==}
     engines: {node: '>=20'}
     peerDependencies:
       '@refinedev/core': ^5.0.0
@@ -14142,6 +14232,16 @@ snapshots:
       react-router: 7.8.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   '@refinedev/react-router@2.0.1(@refinedev/core@4.57.10(patch_hash=dd77179754d9c0ec947ca9c6fff854acf119afb5b0fee50b1125f5d34f838104)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react-native@0.81.4(@babel/core@7.28.3)(@types/react@18.3.3)(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.4(@babel/core@7.28.3)(@types/react@18.3.3)(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-router@7.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@refinedev/core': 4.57.10(patch_hash=dd77179754d9c0ec947ca9c6fff854acf119afb5b0fee50b1125f5d34f838104)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react-native@0.81.4(@babel/core@7.28.3)(@types/react@18.3.3)(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.4(@babel/core@7.28.3)(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
+      '@types/react': 18.3.3
+      '@types/react-dom': 18.3.0
+      qs: 6.14.0
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      react-router: 7.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+
+  '@refinedev/react-router@2.0.2(@refinedev/core@4.57.10(patch_hash=dd77179754d9c0ec947ca9c6fff854acf119afb5b0fee50b1125f5d34f838104)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react-native@0.81.4(@babel/core@7.28.3)(@types/react@18.3.3)(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.4(@babel/core@7.28.3)(@types/react@18.3.3)(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-router@7.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@refinedev/core': 4.57.10(patch_hash=dd77179754d9c0ec947ca9c6fff854acf119afb5b0fee50b1125f5d34f838104)(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react-native@0.81.4(@babel/core@7.28.3)(@types/react@18.3.3)(react@18.3.1))(react@18.3.1))(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.4(@babel/core@7.28.3)(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
       '@types/react': 18.3.3

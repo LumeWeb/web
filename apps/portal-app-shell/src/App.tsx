@@ -1,6 +1,7 @@
 import { AppComponent, AppComponentProps } from "@lumeweb/portal-framework-ui";
 import "@fontsource-variable/manrope";
 import "@lumeweb/portal-framework-ui-core/tailwind.css";
+import "@lumeweb/advanced-rest-provider";
 import React from "react";
 
 import { env } from "./env";

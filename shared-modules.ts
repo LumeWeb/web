@@ -4,6 +4,7 @@ const modules = [
   "@lumeweb/portal-framework-core",
   "@lumeweb/portal-framework-ui",
   "@lumeweb/portal-framework-ui-core",
+  "@lumeweb/advanced-rest-provider",
   "@refinedev/core",
   "@tanstack/react-query",
   "react",
