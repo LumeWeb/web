@@ -29,31 +29,31 @@
     "test:browser:ui": "vitest --browser --ui"
   },
   "dependencies": {
-    "@lumeweb/portal-sdk": "workspace:*",
     "@lumeweb/portal-framework-ui-core": "workspace:*",
+    "@lumeweb/portal-sdk": "workspace:*",
     "bin-pack": "^1.0.2"
   },
   "devDependencies": {
-    "esbuild-fix-imports-plugin": "^1.0.14",
-    "express": "^4.21.2",
-    "lucide-react": "^0.511.0",
+    "esbuild-fix-imports-plugin": "^1.0.23",
+    "express": "^4.22.1",
+    "lucide-react": "^0.556.0",
     "memoizee": "^0.4.17",
     "node-fetch": "^3.3.2",
     "react-error-boundary": "^6.0.0",
-    "tsdown": "^0.12.7"
+    "tsdown": "^0.17.0"
   },
   "peerDependencies": {
-    "@module-federation/bridge-react": "^0.14.0",
-    "@module-federation/enhanced": "^0.14.0",
-    "@refinedev/react-router": "^1.0.1",
-    "@t3-oss/env-core": "^0.12.0",
-    "lucide-react": "^0.511.0",
+    "@module-federation/bridge-react": "^0.21.6",
+    "@module-federation/enhanced": "^0.21.6",
+    "@refinedev/react-router": "^2.0.3",
+    "@t3-oss/env-core": "^0.13.8",
+    "lucide-react": "^0.556.0",
     "memoizee": "^0.4.17",
-    "react": "^18.3.1",
+    "react": "^19.0.1",
     "react-error-boundary": "^6.0.0",
-    "react-router": "^7",
-    "vite-tsconfig-paths": "^4.3.2",
-    "zod": "3.24.2",
-    "react-is": "^19.1.1"
+    "react-is": "^19.1.2",
+    "react-router": "^7.10.1",
+    "vite-tsconfig-paths": "^5.1.4",
+    "zod": "3.24.2"
   }
 }

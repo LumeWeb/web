@@ -1,10 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import React, {
-  ComponentType,
-  createContext,
-  forwardRef,
-  useContext,
-} from "react";
+import React, { ComponentType, createContext, useContext } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Import necessary parts from context-bridge
@@ -159,9 +154,14 @@ describe("remoteComponentLoader", () => {
     });
 
     it("should forward refs to the wrapped component", () => {
-      const MockComponent = forwardRef<HTMLDivElement, { label: string }>(
-        ({ label }, ref) => <div ref={ref}>{label}</div>,
-      );
+      const MockComponent = (
+        {
+          ref,
+          label
+        }: { label: string } & {
+          ref: React.RefObject<HTMLDivElement>;
+        }
+      ) => <div ref={ref}>{label}</div>;
       MockComponent.displayName = "MockComponentWithRef";
 
       const bridgeFactory = createBridgeComponent(MockComponent);

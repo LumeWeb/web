@@ -7,13 +7,13 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils";
 
-const Dialog = DialogPrimitive.Root;
+const Dialog: typeof DialogPrimitive.Root = DialogPrimitive.Root;
 
-const DialogTrigger = DialogPrimitive.Trigger;
+const DialogTrigger: typeof DialogPrimitive.Trigger = DialogPrimitive.Trigger;
 
-const DialogPortal = DialogPrimitive.Portal;
+const DialogPortal: typeof DialogPrimitive.Portal = DialogPrimitive.Portal;
 
-const DialogClose = DialogPrimitive.Close;
+const DialogClose: typeof DialogPrimitive.Close = DialogPrimitive.Close;
 
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,

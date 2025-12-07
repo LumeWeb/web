@@ -23,6 +23,5 @@
   "dependencies": {
     "@lumeweb/portal-framework-core": "workspace:*"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

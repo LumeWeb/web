@@ -3,13 +3,7 @@ import {
   type ProviderParams,
   type RenderParams,
 } from "@module-federation/bridge-react/v18";
-import React, {
-  ComponentType,
-  forwardRef,
-  ForwardRefExoticComponent,
-  PropsWithoutRef,
-  RefAttributes,
-} from "react";
+import React, { ComponentType, ForwardRefExoticComponent, PropsWithoutRef, RefAttributes } from "react";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
 import type { Framework } from "../api/framework";
@@ -149,20 +143,21 @@ export function createBridgeComponent<T>(
 ): () => BridgeResult<T> {
   type ComponentRef = React.ElementRef<typeof Component>;
 
-  const WrappedComponent: BridgeableComponent<T> = forwardRef<ComponentRef, T>(
-    (props, ref) => {
-      return store
-        .getRegisteredContextIds()
-        .reduce(
-          (children, contextId) => (
-            <RemoteContextBridge contextId={contextId}>
-              {children}
-            </RemoteContextBridge>
-          ),
-          <Component {...props} ref={ref} />,
-        );
-    },
-  );
+  const WrappedComponent: BridgeableComponent<T> = React.forwardRef<
+    ComponentRef,
+    T
+  >((props, ref) => {
+    return store
+      .getRegisteredContextIds()
+      .reduce(
+        (children, contextId) => (
+          <RemoteContextBridge key={contextId.toString()} contextId={contextId}>
+            {children}
+          </RemoteContextBridge>
+        ),
+        <Component {...props} ref={ref} />,
+      );
+  });
 
   WrappedComponent.displayName = `Bridge(${
     (Component.displayName ?? Component.name) || "Component"
@@ -180,24 +175,31 @@ export function createRemoteComponent<
   E extends keyof T = keyof T,
 >(info: LazyRemoteComponentInfo<T, E>) {
   const LazyComponent = createLazyRemoteComponent(info);
-  return forwardRef<HTMLDivElement, RemoteComponentProps>((props, ref) => {
+  return (
+    {
+      ref,
+      ...props
+    }: RemoteComponentProps & {
+      ref: React.RefObject<HTMLDivElement>;
+    }
+  ) => {
     // Destructure to separate wrapper props from component props
     const { props: componentProps } = props;
 
     return (
-      <ErrorBoundary FallbackComponent={info.fallback}>
+      (<ErrorBoundary FallbackComponent={info.fallback}>
         <React.Suspense fallback={info.loading}>
           {componentProps !== undefined ? (
             //@ts-ignore
-            <LazyComponent {...componentProps} />
+            (<LazyComponent {...componentProps} />)
           ) : (
             //@ts-ignore
-            <LazyComponent />
+            (<LazyComponent />)
           )}
         </React.Suspense>
-      </ErrorBoundary>
+      </ErrorBoundary>)
     );
-  });
+  };
 }
 
 function createLazyRemoteComponent<

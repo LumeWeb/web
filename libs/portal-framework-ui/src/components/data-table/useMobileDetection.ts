@@ -1,4 +1,4 @@
-import { useMobileDetection as useCoreMobileDetection } from "@lumeweb/portal-framework-ui-core";
+import { useMobileDetection as useCoreMobileDetection, type UseMobileDetectionReturn } from "@lumeweb/portal-framework-ui-core";
 import { ComponentSize } from "@/components";
 
 interface UseMobileDetectionProps {
@@ -29,7 +29,7 @@ const breakpointSizeMap: Record<ComponentSize, string> = {
  */
 function useMobileDetection({
   mobileBreakpoint = ComponentSize.SM,
-}: UseMobileDetectionProps = {}) {
+}: UseMobileDetectionProps = {}): UseMobileDetectionReturn {
   // Convert ComponentSize to Tailwind breakpoint name if needed
   const breakpointName = Object.values(ComponentSize).includes(
     mobileBreakpoint as ComponentSize,

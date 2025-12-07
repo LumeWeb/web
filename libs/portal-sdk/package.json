@@ -25,6 +25,6 @@
     "access": "public"
   },
   "devDependencies": {
-    "orval": "^7.10.0"
+    "orval": "^7.17.0"
   }
 }

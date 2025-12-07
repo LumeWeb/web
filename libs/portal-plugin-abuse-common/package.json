@@ -23,7 +23,7 @@
     "./package.json": "./package.json"
   },
   "devDependencies": {
-    "orval": "^7.9.0",
-    "tsdown": "^0.12.7"
+    "orval": "^7.17.0",
+    "tsdown": "^0.17.0"
   }
 }
