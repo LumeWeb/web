@@ -18,7 +18,7 @@ import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { $getRoot } from "lexical";
-import React, { forwardRef, useState } from "react";
+import React, { useState } from "react";
 
 import { Preview } from "./Preview";
 import { ToolbarProvider } from "./ToolbarContext";
@@ -45,102 +45,111 @@ export type ToolbarOption =
   | "underline"
   | "undo";
 
-export const Editor = forwardRef<HTMLDivElement, EditorProps>(
-  ({ enablePreview, onChange, placeholder, toolbarOptions, value }, ref) => {
-    const [isPreview, setIsPreview] = useState(false);
+export const Editor = (
+  {
+    ref,
+    enablePreview,
+    onChange,
+    placeholder,
+    toolbarOptions,
+    value
+  }: EditorProps & {
+    ref: React.RefObject<HTMLDivElement>;
+  }
+) => {
+  const [isPreview, setIsPreview] = useState(false);
 
-    const handleChange = React.useCallback(
-      (editorState) => {
-        const content = editorState.read(() => $getRoot().getTextContent());
-        onChange?.(content);
-      },
-      [onChange],
-    );
+  const handleChange = React.useCallback(
+    (editorState) => {
+      const content = editorState.read(() => $getRoot().getTextContent());
+      onChange?.(content);
+    },
+    [onChange],
+  );
 
-    const initialConfig = React.useMemo(
-      () =>
-        ({
-          editable: !isPreview,
-          editorState: () => {
-            $convertFromMarkdownString(value ?? "", TRANSFORMERS);
+  const initialConfig = React.useMemo(
+    () =>
+      ({
+        editable: !isPreview,
+        editorState: () => {
+          $convertFromMarkdownString(value ?? "", TRANSFORMERS);
+        },
+        namespace: "MarkdownEditor",
+        nodes: [
+          HorizontalRuleNode,
+          CodeNode,
+          LinkNode,
+          ListNode,
+          ListItemNode,
+          HeadingNode,
+          QuoteNode,
+        ],
+        onError: (error: Error) => {
+          throw error;
+        },
+        theme: {
+          heading: {
+            h1: "text-2xl font-bold",
+            h2: "text-xl font-bold",
+            h3: "text-lg font-semibold",
+            h4: "text-base font-semibold",
+            h5: "text-sm font-semibold",
+            h6: "text-xs font-semibold",
           },
-          namespace: "MarkdownEditor",
-          nodes: [
-            HorizontalRuleNode,
-            CodeNode,
-            LinkNode,
-            ListNode,
-            ListItemNode,
-            HeadingNode,
-            QuoteNode,
-          ],
-          onError: (error: Error) => {
-            throw error;
+          link: "cursor-pointer",
+          root: "p-3 border rounded-md bg-modal-input text-foreground",
+          text: {
+            bold: "font-semibold",
+            italic: "italic",
+            underline: "underline",
           },
-          theme: {
-            heading: {
-              h1: "text-2xl font-bold",
-              h2: "text-xl font-bold",
-              h3: "text-lg font-semibold",
-              h4: "text-base font-semibold",
-              h5: "text-sm font-semibold",
-              h6: "text-xs font-semibold",
-            },
-            link: "cursor-pointer",
-            root: "p-3 border rounded-md bg-modal-input text-foreground",
-            text: {
-              bold: "font-semibold",
-              italic: "italic",
-              underline: "underline",
-            },
-          },
-        }) satisfies InitialConfigType,
-      [isPreview, value],
-    );
+        },
+      }) satisfies InitialConfigType,
+    [isPreview, value],
+  );
 
-    return (
-      <div className="bg-modal-input text-foreground rounded-md border">
-        <LexicalComposer initialConfig={initialConfig}>
-          <ToolbarProvider>
-            <div className="border-border flex items-center justify-between gap-1 border-b p-1">
-              <ToolbarPlugin
-                isPreview={isPreview}
-                setIsPreview={setIsPreview}
-                toolbarOptions={toolbarOptions}
+  return (
+    <div className="bg-modal-input text-foreground rounded-md border">
+      <LexicalComposer initialConfig={initialConfig}>
+        <ToolbarProvider>
+          <div className="border-border flex items-center justify-between gap-1 border-b p-1">
+            <ToolbarPlugin
+              isPreview={isPreview}
+              setIsPreview={setIsPreview}
+              toolbarOptions={toolbarOptions}
+            />
+          </div>
+          {!isPreview ? (
+            <>
+              <RichTextPlugin
+                contentEditable={
+                  <ContentEditable
+                    aria-placeholder={placeholder ?? ""}
+                    className="text-foreground min-h-[150px] w-full resize-none bg-transparent outline-none"
+                    placeholder={
+                      <div className="text-foreground/50">{placeholder}</div>
+                    }
+                  />
+                }
+                ErrorBoundary={LexicalErrorBoundary}
               />
-            </div>
-            {!isPreview ? (
-              <>
-                <RichTextPlugin
-                  contentEditable={
-                    <ContentEditable
-                      aria-placeholder={placeholder ?? ""}
-                      className="text-foreground min-h-[150px] w-full resize-none bg-transparent outline-none"
-                      placeholder={
-                        <div className="text-foreground/50">{placeholder}</div>
-                      }
-                    />
-                  }
-                  ErrorBoundary={LexicalErrorBoundary}
-                />
-                <HistoryPlugin />
-                <ListPlugin />
-                <CheckListPlugin />
-                <LinkPlugin />
-                <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-                <OnChangePlugin
-                  ignoreHistoryMergeTagChange={true}
-                  ignoreSelectionChange={true}
-                  onChange={handleChange}
-                />
-              </>
-            ) : (
-              <Preview />
-            )}
-          </ToolbarProvider>
-        </LexicalComposer>
-      </div>
-    );
-  },
-);
+              <HistoryPlugin />
+              <ListPlugin />
+              <CheckListPlugin />
+              <LinkPlugin />
+              <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+              <OnChangePlugin
+                ignoreHistoryMergeTagChange={true}
+                ignoreSelectionChange={true}
+                onChange={handleChange}
+              />
+            </>
+          ) : (
+            <Preview />
+          )}
+        </ToolbarProvider>
+      </LexicalComposer>
+    </div>
+  );
+};
 Editor.displayName = "Markdown";

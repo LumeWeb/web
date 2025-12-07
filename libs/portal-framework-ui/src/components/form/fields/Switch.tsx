@@ -19,31 +19,38 @@ interface SwitchProps {
   value?: boolean;
 }
 
-export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
-  ({ autocomplete, label, ...props }, ref) => {
-    return (
-      <>
-        <BaseSwitch
-          checked={props.value}
-          disabled={props.disabled}
-          id={props.name}
-          name={props.name}
-          onBlur={props.onBlur}
-          onCheckedChange={props.onChange}
-          ref={ref}
-          {...(autocomplete ? { autoComplete: autocomplete } : {})}
-        />
-        {label && (
-          <Label
-            className={cn("text-foreground", props.labelClassName)}
-            htmlFor={props.name}>
-            {label}
-          </Label>
-        )}
-      </>
-    );
-  },
-);
+export const Switch = (
+  {
+    ref,
+    autocomplete,
+    label,
+    ...props
+  }: SwitchProps & {
+    ref: React.RefObject<HTMLButtonElement>;
+  }
+) => {
+  return (
+    <>
+      <BaseSwitch
+        checked={props.value}
+        disabled={props.disabled}
+        id={props.name}
+        name={props.name}
+        onBlur={props.onBlur}
+        onCheckedChange={props.onChange}
+        ref={ref}
+        {...(autocomplete ? { autoComplete: autocomplete } : {})}
+      />
+      {label && (
+        <Label
+          className={cn("text-foreground", props.labelClassName)}
+          htmlFor={props.name}>
+          {label}
+        </Label>
+      )}
+    </>
+  );
+};
 Switch.displayName = "Switch";
 
 export function registerSwitch() {

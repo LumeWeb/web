@@ -282,10 +282,16 @@ const NavItem: React.FC<{
   active: boolean;
   item: NavigationItemType;
   onItemClick?: () => void;
-}> = React.forwardRef<
-  HTMLLIElement,
-  { active: boolean; item: NavigationItemType; onItemClick?: () => void }
->(({ active, item, onItemClick }, ref) => {
+}> = (
+  {
+    ref,
+    active,
+    item,
+    onItemClick
+  }: { active: boolean; item: NavigationItemType; onItemClick?: () => void } & {
+    ref: React.RefObject<HTMLLIElement>;
+  }
+) => {
   const { isCollapsed } = useSidebarContext();
 
   let IconComponent: React.FC<NavigationItemIconProps> | undefined = undefined;
@@ -315,7 +321,7 @@ const NavItem: React.FC<{
       )}
     </li>
   );
-});
+};
 NavItem.displayName = "NavItem";
 
 export const MainNavigation: React.FC<MenuProps> = ({

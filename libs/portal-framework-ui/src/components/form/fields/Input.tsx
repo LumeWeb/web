@@ -14,34 +14,34 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   // value is included via React.InputHTMLAttributes
 }
 
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  (
-    {
-      autocomplete,
-      autoComplete: htmlAutoComplete,
-      inputClassName,
-      onChange,
-      placeholder,
-      type,
-      value,
-      ...props
-    },
+export const Input = (
+  {
     ref,
-  ) => {
-    return (
-      <BaseInput
-        autoComplete={autocomplete ?? htmlAutoComplete}
-        className={cn("bg-input h-14 border-none", inputClassName)}
-        onChange={onChange}
-        placeholder={placeholder}
-        ref={ref}
-        type={type}
-        value={value ?? ""} // Use value prop directly, default to empty string
-        {...props}
-      />
-    );
-  },
-);
+    autocomplete,
+    autoComplete: htmlAutoComplete,
+    inputClassName,
+    onChange,
+    placeholder,
+    type,
+    value,
+    ...props
+  }: InputProps & {
+    ref: React.RefObject<HTMLInputElement>;
+  }
+) => {
+  return (
+    <BaseInput
+      autoComplete={autocomplete ?? htmlAutoComplete}
+      className={cn("bg-input h-14 border-none", inputClassName)}
+      onChange={onChange}
+      placeholder={placeholder}
+      ref={ref}
+      type={type}
+      value={value ?? ""} // Use value prop directly, default to empty string
+      {...props}
+    />
+  );
+};
 Input.displayName = "Input";
 
 export function registerInput() {

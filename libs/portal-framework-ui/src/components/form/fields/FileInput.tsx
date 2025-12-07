@@ -16,21 +16,27 @@ interface FileInputProps {
   value?: FileList;
 }
 
-export const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
-  ({ autocomplete, ...props }, ref) => {
-    return (
-      <Input
-        autoComplete={autocomplete}
-        disabled={props.disabled}
-        name={props.name}
-        onBlur={props.onBlur}
-        onChange={(e) => props.onChange?.(e.target.files)}
-        ref={ref}
-        type="file"
-      />
-    );
-  },
-);
+export const FileInput = (
+  {
+    ref,
+    autocomplete,
+    ...props
+  }: FileInputProps & {
+    ref: React.RefObject<HTMLInputElement>;
+  }
+) => {
+  return (
+    <Input
+      autoComplete={autocomplete}
+      disabled={props.disabled}
+      name={props.name}
+      onBlur={props.onBlur}
+      onChange={(e) => props.onChange?.(e.target.files)}
+      ref={ref}
+      type="file"
+    />
+  );
+};
 FileInput.displayName = "FileInput";
 
 export function registerFileInput() {

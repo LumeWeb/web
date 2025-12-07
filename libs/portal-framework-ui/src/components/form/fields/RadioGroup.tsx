@@ -26,34 +26,41 @@ function slugify(str: string): string {
     .replace(/^-|-$/g, "");
 }
 
-export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
-  ({ autocomplete, options, ...props }, ref) => {
-    return (
-      <BaseRadioGroup
-        disabled={props.disabled}
-        name={props.name}
-        onBlur={props.onBlur}
-        onValueChange={props.onChange}
-        ref={ref}
-        value={props.value}>
-        {options.map((option) => (
-          <div className="radio-option" key={option}>
-            <RadioGroupItem
-              id={`${props.name}-${slugify(option)}`}
-              value={option}
-              {...(autocomplete ? { autoComplete: autocomplete } : {})}
-            />
-            <label
-              className={props.labelClassName}
-              htmlFor={`${props.name}-${slugify(option)}`}>
-              {option}
-            </label>
-          </div>
-        ))}
-      </BaseRadioGroup>
-    );
-  },
-);
+export const RadioGroup = (
+  {
+    ref,
+    autocomplete,
+    options,
+    ...props
+  }: RadioGroupProps & {
+    ref: React.RefObject<HTMLDivElement>;
+  }
+) => {
+  return (
+    <BaseRadioGroup
+      disabled={props.disabled}
+      name={props.name}
+      onBlur={props.onBlur}
+      onValueChange={props.onChange}
+      ref={ref}
+      value={props.value}>
+      {options.map((option) => (
+        <div className="radio-option" key={option}>
+          <RadioGroupItem
+            id={`${props.name}-${slugify(option)}`}
+            value={option}
+            {...(autocomplete ? { autoComplete: autocomplete } : {})}
+          />
+          <label
+            className={props.labelClassName}
+            htmlFor={`${props.name}-${slugify(option)}`}>
+            {option}
+          </label>
+        </div>
+      ))}
+    </BaseRadioGroup>
+  );
+};
 RadioGroup.displayName = "RadioGroup";
 
 export function registerRadioGroup() {

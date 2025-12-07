@@ -17,22 +17,32 @@ interface SliderProps {
   value?: number;
 }
 
-export const Slider = React.forwardRef<HTMLSpanElement, SliderProps>(
-  ({ max = 100, min = 0, onChange, step = 1, value, ...props }, ref) => {
-    return (
-      <BaseSlider
-        disabled={props.disabled}
-        max={max}
-        min={min}
-        onBlur={props.onBlur}
-        onValueChange={(vals) => onChange?.(vals[0])}
-        ref={ref}
-        step={step}
-        value={[value || min]}
-      />
-    );
-  },
-);
+export const Slider = (
+  {
+    ref,
+    max = 100,
+    min = 0,
+    onChange,
+    step = 1,
+    value,
+    ...props
+  }: SliderProps & {
+    ref: React.RefObject<HTMLSpanElement>;
+  }
+) => {
+  return (
+    <BaseSlider
+      disabled={props.disabled}
+      max={max}
+      min={min}
+      onBlur={props.onBlur}
+      onValueChange={(vals) => onChange?.(vals[0])}
+      ref={ref}
+      step={step}
+      value={[value || min]}
+    />
+  );
+};
 Slider.displayName = "Slider";
 
 export function registerSlider() {

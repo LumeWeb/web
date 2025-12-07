@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React from "react";
 
 import { Editor as BaseEditor, ToolbarOption } from "@/components/editor";
 
@@ -12,33 +12,33 @@ interface RichTextProps extends FormComponentProps {
   toolbarOptions?: ToolbarOption[];
 }
 
-export const RichText = forwardRef<HTMLDivElement, RichTextProps>(
-  (
-    {
-      autocomplete,
-      enablePreview,
-      onChange,
-      placeholder,
-      required,
-      toolbarOptions,
-      value,
-    },
+export const RichText = (
+  {
     ref,
-  ) => {
-    return (
-      <BaseEditor
-        enablePreview={enablePreview}
-        onChange={onChange}
-        placeholder={placeholder}
-        ref={ref}
-        required={required}
-        toolbarOptions={toolbarOptions}
-        value={value}
-        {...(autocomplete ? { autoComplete: autocomplete } : {})}
-      />
-    );
-  },
-);
+    autocomplete,
+    enablePreview,
+    onChange,
+    placeholder,
+    required,
+    toolbarOptions,
+    value
+  }: RichTextProps & {
+    ref: React.RefObject<HTMLDivElement>;
+  }
+) => {
+  return (
+    <BaseEditor
+      enablePreview={enablePreview}
+      onChange={onChange}
+      placeholder={placeholder}
+      ref={ref}
+      required={required}
+      toolbarOptions={toolbarOptions}
+      value={value}
+      {...(autocomplete ? { autoComplete: autocomplete } : {})}
+    />
+  );
+};
 RichText.displayName = "MarkdownEditor";
 
 export function registerRichText() {

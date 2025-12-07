@@ -14,22 +14,28 @@ interface DatePickerProps {
   placeholder?: string;
 }
 
-export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
-  ({ autocomplete, ...props }, ref) => {
-    return (
-      <BaseDatePicker
-        className="border-modal-input placeholder-modal-input placeholder:text-foreground/50 p-4"
-        date={props.date}
-        disabled={props.disabled}
-        onBlur={props.onBlur}
-        placeholder={props.placeholder}
-        ref={ref}
-        setDate={props.onChange}
-        {...(autocomplete ? { autoComplete: autocomplete } : {})}
-      />
-    );
-  },
-);
+export const DatePicker = (
+  {
+    ref,
+    autocomplete,
+    ...props
+  }: DatePickerProps & {
+    ref: React.RefObject<HTMLDivElement>;
+  }
+) => {
+  return (
+    <BaseDatePicker
+      className="border-modal-input placeholder-modal-input placeholder:text-foreground/50 p-4"
+      date={props.date}
+      disabled={props.disabled}
+      onBlur={props.onBlur}
+      placeholder={props.placeholder}
+      ref={ref}
+      setDate={props.onChange}
+      {...(autocomplete ? { autoComplete: autocomplete } : {})}
+    />
+  );
+};
 DatePicker.displayName = "DatePicker";
 
 export function registerDatePicker() {
