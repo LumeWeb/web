@@ -2,7 +2,11 @@ import { defineConfig } from "tsdown";
 export default defineConfig({
   clean: true,
   dts: true,
-  entry: ["src", "!src/**/*.{spec,stories}.{ts,tsx}"],
+  entry: [
+    "./src/index.ts",
+    "./src/vite/index.ts",
+    "!src/**/*.{spec,stories}.{ts,tsx}",
+  ],
   external: [
     /node_modules/,
     "fs",
@@ -17,11 +21,21 @@ export default defineConfig({
     "@module-federation/vite",
     "vite",
   ],
-  format: ["cjs", "esm"],
+  format: {
+    esm: {
+      outputOptions: {
+        dir: "dist/esm",
+      },
+    },
+    cjs: {
+      outputOptions: {
+        dir: "dist/cjs",
+      },
+    },
+  },
   hash: false,
-  outputOptions(options, format) {
-    options.dir = format === "es" ? "dist/esm" : "dist/cjs";
-    options.exports = "named";
+  outputOptions: {
+    exports: "named",
   },
   platform: "browser",
   sourcemap: true,
