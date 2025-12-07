@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils";
 
-const Tabs = TabsPrimitive.Root;
+const Tabs: typeof TabsPrimitive.Root = TabsPrimitive.Root;
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,

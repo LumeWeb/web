@@ -4,7 +4,7 @@ import * as ToastPrimitives from "@radix-ui/react-toast";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
-const ToastProvider = ToastPrimitives.Provider;
+const ToastProvider: typeof ToastPrimitives.Provider = ToastPrimitives.Provider;
 
 const ToastViewport = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Viewport>,

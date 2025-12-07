@@ -9,11 +9,11 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils";
 
-const Select = SelectPrimitive.Root;
+const Select: typeof SelectPrimitive.Root = SelectPrimitive.Root;
 
-const SelectGroup = SelectPrimitive.Group;
+const SelectGroup: typeof SelectPrimitive.Group = SelectPrimitive.Group;
 
-const SelectValue = SelectPrimitive.Value;
+const SelectValue: typeof SelectPrimitive.Value = SelectPrimitive.Value;
 
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
