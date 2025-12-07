@@ -4,17 +4,20 @@ import * as React from "react";
 import { cn } from "../../lib/utils";
 import { Progress } from "./progress";
 
-const IndeterminateProgress = React.forwardRef<
-  React.ElementRef<typeof ProgressPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <Progress className={cn("indeterminate", className)} ref={ref} {...props}>
-    <ProgressPrimitive.Indicator
-      className="h-full w-full flex-1 bg-primary bg-striped-indeterminate"
-      style={{ transform: "translateX(-75%)" }}
-    />
-  </Progress>
-));
+const IndeterminateProgress = (
+  {
+    ref,
+    className,
+    ...props
+  }: React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> & {
+    ref: React.RefObject<React.ElementRef<typeof ProgressPrimitive.Root>>;
+  }
+) => (<Progress className={cn("indeterminate", className)} ref={ref} {...props}>
+  <ProgressPrimitive.Indicator
+    className="h-full w-full flex-1 bg-primary bg-striped-indeterminate"
+    style={{ transform: "translateX(-75%)" }}
+  />
+</Progress>);
 
 IndeterminateProgress.displayName = "IndeterminateProgress";
 

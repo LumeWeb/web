@@ -1,44 +1,33 @@
-import { useToast } from "@/hooks/useToast";
-import React from "react";
-
+import { useToast } from "@/hooks/use-toast"
 import {
   Toast,
-  ToastAction,
   ToastClose,
   ToastDescription,
   ToastProvider,
   ToastTitle,
   ToastViewport,
-} from "./toast";
+} from "@/components/ui/toast"
 
 export function Toaster() {
-  const { toasts } = useToast();
+  const { toasts } = useToast()
 
   return (
     <ToastProvider>
-      {toasts.map(
-        ({ action, cancelMutation, description, id, title, ...props }) => {
-          const undoButton = cancelMutation ? (
-            <ToastAction altText="Undo" onClick={cancelMutation}>
-              Undo
-            </ToastAction>
-          ) : undefined;
-          return (
-            <Toast key={id} {...props} variant={"default"}>
-              <div className="grid gap-1">
-                {title && <ToastTitle>{title}</ToastTitle>}
-                {description && (
-                  <ToastDescription>{description}</ToastDescription>
-                )}
-              </div>
-              {action}
-              {undoButton}
-              <ToastClose />
-            </Toast>
-          );
-        },
-      )}
+      {toasts.map(function ({ id, title, description, action, ...props }) {
+        return (
+          <Toast key={id} {...props}>
+            <div className="grid gap-1">
+              {title && <ToastTitle>{title}</ToastTitle>}
+              {description && (
+                <ToastDescription>{description}</ToastDescription>
+              )}
+            </div>
+            {action}
+            <ToastClose />
+          </Toast>
+        )
+      })}
       <ToastViewport />
     </ToastProvider>
-  );
+  )
 }

@@ -77,6 +77,8 @@
     }
   },
   "dependencies": {
-    "@radix-ui/react-collapsible": "^1.1.12"
+    "@hookform/resolvers": "5.0.1",
+    "@radix-ui/react-collapsible": "^1.1.12",
+    "zod": "3.24.2"
   }
 }
