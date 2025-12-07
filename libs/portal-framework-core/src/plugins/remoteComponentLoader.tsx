@@ -143,25 +143,21 @@ export function createBridgeComponent<T>(
 ): () => BridgeResult<T> {
   type ComponentRef = React.ElementRef<typeof Component>;
 
-  const WrappedComponent: BridgeableComponent<T> = (
-    {
-      ref,
-      ...props
-    }: T & {
-      ref: React.RefObject<ComponentRef>;
-    }
-  ) => {
+  const WrappedComponent: BridgeableComponent<T> = React.forwardRef<
+    ComponentRef,
+    T
+  >((props, ref) => {
     return store
       .getRegisteredContextIds()
       .reduce(
         (children, contextId) => (
-          <RemoteContextBridge contextId={contextId}>
+          <RemoteContextBridge key={contextId.toString()} contextId={contextId}>
             {children}
           </RemoteContextBridge>
         ),
         <Component {...props} ref={ref} />,
       );
-  };
+  });
 
   WrappedComponent.displayName = `Bridge(${
     (Component.displayName ?? Component.name) || "Component"

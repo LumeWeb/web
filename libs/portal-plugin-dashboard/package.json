@@ -32,9 +32,9 @@
     "@lumeweb/portal-framework-ui-core": "workspace:*",
     "@lumeweb/portal-sdk": "workspace:*",
     "@refinedev/react-hook-form": "^5.0.3",
-    "@tanstack/react-query": "4.36.1",
+    "@tanstack/react-query": "^5.90.12",
     "@tanstack/react-table": "^8.21.3",
-    "@uppy/core": "5.0.2",
+    "@uppy/core": "^5.2.0",
     "@uppy/drop-target": "^4.1.0",
     "@uppy/tus": "5.0.1",
     "@uppy/xhr-upload": "5.0.1",
@@ -46,8 +46,8 @@
     "qrcode.react": "^4.2.0",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
-    "react-hook-form": "7.54.0",
-    "react-router": "7.5.2",
+    "react-hook-form": "^7.55.0",
+    "react-router": "^7.10.1",
     "zod": "3.24.2"
   }
 }
