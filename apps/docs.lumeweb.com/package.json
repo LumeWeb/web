@@ -7,8 +7,7 @@
     "build": "vocs build",
     "preview": "vocs preview"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {},
   "peerDependencies": {}
 }

@@ -16,9 +16,7 @@
     "melli-init": "bun run scripts/melli-init.mts",
     "db-init": "prisma db push"
   },
-  "dependencies": {
-  },
-  "devDependencies": {
-  },
+  "dependencies": {},
+  "devDependencies": {},
   "peerDependencies": {}
 }

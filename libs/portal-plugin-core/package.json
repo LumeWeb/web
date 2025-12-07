@@ -17,24 +17,24 @@
     "@lumeweb/portal-sdk": "workspace:*"
   },
   "peerDependencies": {
-    "@conform-to/react": "^1.2.2",
-    "@conform-to/zod": "^1.2.2",
-    "@hookform/resolvers": "^3.9.0",
-    "@refinedev/react-hook-form": "^4.9.3",
-    "@tanstack/react-query": "^5.66.0",
-    "@tanstack/react-table": "^8.21.2",
-    "otpauth": "^9.3.4",
+    "@conform-to/react": "^1.14.1",
+    "@conform-to/zod": "^1.14.1",
+    "@hookform/resolvers": "^5.2.2",
+    "@refinedev/react-hook-form": "^5.0.3",
+    "@t3-oss/env-core": "^0.13.8",
+    "@tanstack/react-query": "^5.90.12",
+    "@tanstack/react-table": "^8.21.3",
+    "otpauth": "^9.4.1",
     "qrcode": "^1.5.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-hook-form": "^7.53.0",
-    "react-icons": "^5.3.0",
-    "react-router": "^7",
-    "@t3-oss/env-core": "^0.12.0",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "react-hook-form": "^7.68.0",
+    "react-icons": "^5.5.0",
+    "react-router": "^7.10.1",
     "zod": "3.24.2"
   },
   "devDependencies": {
-    "@module-federation/bridge-react": "^0.8.10",
-    "vite-tsconfig-paths": "^4.3.2"
+    "@module-federation/bridge-react": "^0.21.6",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }
