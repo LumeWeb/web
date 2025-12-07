@@ -8,8 +8,6 @@
     "build": "astro build",
     "start": "astro start"
   },
-  "dependencies": {
-  },
-  "devDependencies": {
-  }
+  "dependencies": {},
+  "devDependencies": {}
 }

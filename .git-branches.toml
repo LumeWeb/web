@@ -12,17 +12,8 @@
 # More info at https://www.git-town.com/preferences/push-hook.
 push-hook = true
 
-# Should Git Town push the new branches it creates
-# immediately to origin even if they are empty?
-#
-# When enabled, you can run "git push" right away
-# but creating new branches is slower and
-# it triggers an unnecessary CI run on the empty branch.
-#
-# When disabled, many Git Town commands execute faster
-# and Git Town will create the missing tracking branch
-# on the first run of "git sync".
-push-new-branches = false
+
+share-new-branches = "push"
 
 # Should "git ship" delete the tracking branch?
 # You want to disable this if your code hosting platform
@@ -51,7 +42,7 @@ sync-before-ship = false
 #
 # This is useful if the repository you work on is a fork,
 # and you want to keep it in sync with the repo it was forked from.
-sync-upstream = true
+sync-upstream = false
 
 [branches]
 
