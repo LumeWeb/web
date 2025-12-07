@@ -3,11 +3,11 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils";
 
-const TooltipProvider = TooltipPrimitive.Provider;
+const TooltipProvider: typeof TooltipPrimitive.Provider = TooltipPrimitive.Provider;
 
-const Tooltip = TooltipPrimitive.Root;
+const Tooltip: typeof TooltipPrimitive.Root = TooltipPrimitive.Root;
 
-const TooltipTrigger = TooltipPrimitive.Trigger;
+const TooltipTrigger: typeof TooltipPrimitive.Trigger = TooltipPrimitive.Trigger;
 
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,

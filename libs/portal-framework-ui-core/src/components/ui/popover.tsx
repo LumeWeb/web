@@ -3,11 +3,11 @@ import * as React from "react";
 
 import { cn } from "../../lib/utils";
 
-const Popover = PopoverPrimitive.Root;
+const Popover: typeof PopoverPrimitive.Root = PopoverPrimitive.Root;
 
-const PopoverTrigger = PopoverPrimitive.Trigger;
+const PopoverTrigger: typeof PopoverPrimitive.Trigger = PopoverPrimitive.Trigger;
 
-const PopoverAnchor = PopoverPrimitive.Anchor;
+const PopoverAnchor: typeof PopoverPrimitive.Anchor = PopoverPrimitive.Anchor;
 
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,

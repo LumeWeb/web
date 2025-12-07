@@ -1,7 +1,3 @@
-if (import.meta.env.NODE_ENV == "development") {
-  await import("react-devtools");
-}
-
 import React from "react";
 import { createRoot } from "react-dom/client";
 
