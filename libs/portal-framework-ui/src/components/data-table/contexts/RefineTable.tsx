@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import type { UseTableReturnType } from "@refinedev/react-table";
 import type { BaseRecord } from "@refinedev/core";
@@ -28,15 +29,11 @@ export interface RefineTableProviderProps<TData extends BaseRecord> {
   refineTable?: UseTableReturnType<TData, any>;
 }
 
-// Generate unique instance ID for tracking multiple provider instances
-const generateInstanceId = () => Math.random().toString(36).substr(2, 9);
-
 export function RefineTableProvider<TData extends BaseRecord>({
   children,
   refineTable,
 }: RefineTableProviderProps<TData>) {
-  // Create unique instance identifier
-  const instanceId = useMemo(() => generateInstanceId(), []);
+  const [version, setVersion] = useState(0);
 
   // Use refs to stabilize references and prevent contexts thrashing
   const refineTableRef = useRef(refineTable);
@@ -82,6 +79,9 @@ export function RefineTableProvider<TData extends BaseRecord>({
     // Always update these refs as they may change reference without content change
     refineTableRef.current = refineTable;
     tableQueryRef.current = refineTable?.refineCore?.tableQuery;
+
+    // Signal that refs have been updated
+    setVersion((v) => v + 1);
   }, [refineTable]);
 
   // Create stable context value that only changes when refs are updated
@@ -94,14 +94,7 @@ export function RefineTableProvider<TData extends BaseRecord>({
       filters: filtersRef.current,
       sorters: sortersRef.current,
     };
-  }, [
-    refineTableRef.current,
-    setFiltersRef.current,
-    setSortersRef.current,
-    tableQueryRef.current,
-    filtersRef.current,
-    sortersRef.current,
-  ]);
+  }, [version]);
 
   return (
     <RefineTableContext.Provider value={value}>
