@@ -119,9 +119,8 @@ export function Config(opts: ConfigOptions) {
   const normalizedOpts = normalizeConfigOptions(opts);
   const resolvedRuntimePlugins: string[] = [];
   try {
-    const bridgeReactPluginPath = require.resolve(
-      "@module-federation/bridge-react/plugin",
-    );
+    const bridgeReactPluginPath =
+      require.resolve("@module-federation/bridge-react/plugin");
     resolvedRuntimePlugins.push(bridgeReactPluginPath);
   } catch (error) {
     console.error(
@@ -149,6 +148,7 @@ export function Config(opts: ConfigOptions) {
       remotePlugin: isPlugin,
       runtimePlugins,
       shared: sharedModules,
+      bundleAllCSS: true,
       ...configOverrides,
     });
   }
