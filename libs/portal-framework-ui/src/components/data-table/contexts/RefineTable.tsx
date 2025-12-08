@@ -99,12 +99,12 @@ export function RefineTableProvider<TData extends BaseRecord>({
   // Create stable context value that only changes when refs are updated
   const value = useMemo(() => {
     return {
-      refineTable: refineTableRef.current,
-      setFilters: setFiltersRef.current,
-      setSorters: setSortersRef.current,
-      tableQuery: tableQueryRef.current,
-      filters: filtersRef.current,
-      sorters: sortersRef.current,
+      refineTable: refineTable,
+      setFilters: refineTable?.refineCore?.setFilters,
+      setSorters: refineTable?.refineCore?.setSorters,
+      tableQuery: refineTable?.refineCore?.tableQuery,
+      filters: refineTable?.refineCore?.filters,
+      sorters: refineTable?.refineCore?.sorters,
     };
   }, [refineTable]);
 
