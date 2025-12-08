@@ -66,12 +66,6 @@ export function RefineTableProvider<TData extends BaseRecord>({
     const filtersChanged = !deepEqual(prevFiltersRef.current, newFilters);
 
     if (filtersChanged) {
-      // Check for filter state reset
-      const oldFilters = prevFiltersRef.current || [];
-      if (oldFilters.length > 0 && newFilters.length === 0) {
-        // Filter state reset detected
-      }
-
       filtersRef.current = newFilters;
       prevFiltersRef.current = newFilters;
     }
@@ -81,12 +75,6 @@ export function RefineTableProvider<TData extends BaseRecord>({
     const sortersChanged = !deepEqual(prevSortersRef.current, newSorters);
 
     if (sortersChanged) {
-      // Check for sorter state reset
-      const oldSorters = prevSortersRef.current || [];
-      if (oldSorters.length > 0 && newSorters.length === 0) {
-        // Sorter state reset detected
-      }
-
       sortersRef.current = newSorters;
       prevSortersRef.current = newSorters;
     }
@@ -94,19 +82,26 @@ export function RefineTableProvider<TData extends BaseRecord>({
     // Always update these refs as they may change reference without content change
     refineTableRef.current = refineTable;
     tableQueryRef.current = refineTable?.refineCore?.tableQuery;
-  }, [refineTable, instanceId]);
+  }, [refineTable]);
 
   // Create stable context value that only changes when refs are updated
   const value = useMemo(() => {
     return {
-      refineTable: refineTable,
-      setFilters: refineTable?.refineCore?.setFilters,
-      setSorters: refineTable?.refineCore?.setSorters,
-      tableQuery: refineTable?.refineCore?.tableQuery,
-      filters: refineTable?.refineCore?.filters,
-      sorters: refineTable?.refineCore?.sorters,
+      refineTable: refineTableRef.current,
+      setFilters: setFiltersRef.current,
+      setSorters: setSortersRef.current,
+      tableQuery: tableQueryRef.current,
+      filters: filtersRef.current,
+      sorters: sortersRef.current,
     };
-  }, [refineTable]);
+  }, [
+    refineTableRef.current,
+    setFiltersRef.current,
+    setSortersRef.current,
+    tableQueryRef.current,
+    filtersRef.current,
+    sortersRef.current,
+  ]);
 
   return (
     <RefineTableContext.Provider value={value}>
