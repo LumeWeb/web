@@ -7,7 +7,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import React from "react";
-import { BaseRecord, useTableReturnType } from "@refinedev/core";
+import { BaseRecord } from "@refinedev/core";
+import type { UseTableReturnType } from "@refinedev/react-table";
 
 import { BaseTableInner } from "./BaseTableInner";
 import {
@@ -36,7 +37,7 @@ export type ActionColumnDef<TData> = ColumnDef<TData, unknown> & {
 
 export interface BaseTableRefineProps<TData extends BaseRecord> {
   /** Refine table instance */
-  refineTable?: useTableReturnType<TData, any>;
+  refineTable?: UseTableReturnType<TData, any>["refineCore"];
 }
 
 export interface BaseTableCommonProps<TData extends BaseRecord> {
@@ -83,7 +84,7 @@ export interface TableDataProps<TData> {
 
 export interface TableInstanceProps<TData extends BaseRecord> {
   table: Table<TData>;
-  refineTable?: useTableReturnType<TData, any>;
+  refineTable?: UseTableReturnType<TData, any>["refineCore"];
 }
 
 export interface TableInteractionProps<TData> {

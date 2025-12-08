@@ -194,7 +194,7 @@ function Toolbar<TData extends BaseRecord>({
   table,
   className,
 }: ToolbarProps<TData>) {
-  const { refineTable } = useRefineTable<TData>();
+  const { setFilters, setSorters, tableQuery, filters, sorters } = useRefineTable<TData>();
   const { toolbarConfig: config, refineContext } = useTableConfig<TData>();
   const { getDefaultFilter, getDefaultOperator } = useFilterHelpers<TData>();
 
@@ -229,9 +229,7 @@ function Toolbar<TData extends BaseRecord>({
     mobileBreakpoint: mobileBreakpoint,
   });
 
-  // Access the rest of the properties from refineTable
-  const { setFilters, setSorters, tableQuery, filters, sorters } =
-    refineTable || {};
+
 
   // Sort items by order if specified (compute regardless of config presence)
   const sortedItems = React.useMemo(() => {

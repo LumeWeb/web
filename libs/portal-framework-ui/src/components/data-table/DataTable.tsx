@@ -1,7 +1,10 @@
-import { BaseRecord } from "@refinedev/core";
+import {
+  BaseRecord,
+  getDefaultFilter as refineGetDefaultFilter,
+} from "@refinedev/core";
 import { useTable as useRefineTable } from "@refinedev/react-table";
 import { Table } from "@tanstack/react-table";
-import React, { useMemo, useRef } from "react";
+import React, { useMemo } from "react";
 
 import type { DataTableProps } from "./DataTable.types";
 
@@ -14,14 +17,10 @@ import {
   TableConfigProvider,
   TableInstanceProvider,
 } from "./contexts";
-import { getDefaultFilter as refineGetDefaultFilter } from "@refinedev/core";
 import {
   getAvailableOperators as getAvailableOperatorsHelper,
   getDefaultOperatorForFieldType,
 } from "./toolbarItems/filters/hooks/useFilterOperators";
-
-// Instance counter to track component creations
-let instanceCounter = 0;
 
 function DataTable<
   TData extends BaseRecord = BaseRecord,
@@ -91,9 +90,9 @@ function DataTable<
   });
 
   const table: Table<TData> = {
-    ...refineTable,
+    ...refineTable.reactTable,
     options: {
-      ...refineTable.options,
+      ...refineTable.reactTable.options,
       refineCore: refineTable.refineCore,
     },
   } as unknown as Table<TData>;
@@ -112,7 +111,7 @@ function DataTable<
     getAvailableOperatorsHelper(fieldType);
 
   return (
-    <RefineTableProvider refineTable={refineTable.refineCore}>
+    <RefineTableProvider refineTable={refineTable}>
       <TableInstanceProvider table={table}>
         <FilterHelpersProvider
           refineTable={refineTable}
