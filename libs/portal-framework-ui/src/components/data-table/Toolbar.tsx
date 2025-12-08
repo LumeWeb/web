@@ -231,7 +231,7 @@ function Toolbar<TData extends BaseRecord>({
 
   // Access the rest of the properties from refineTable
   const { setFilters, setSorters, tableQuery, filters, sorters } =
-    refineTable || {};
+    refineTable?.refineCore || {};
 
   // Sort items by order if specified (compute regardless of config presence)
   const sortedItems = React.useMemo(() => {

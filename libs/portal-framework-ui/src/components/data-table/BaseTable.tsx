@@ -7,7 +7,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import React from "react";
-import { BaseRecord, useTableReturnType } from "@refinedev/core";
+import { BaseRecord } from "@refinedev/core";
+import type { UseTableReturnType } from "@refinedev/react-table";
 
 import { BaseTableInner } from "./BaseTableInner";
 import {
@@ -36,7 +37,7 @@ export type ActionColumnDef<TData> = ColumnDef<TData, unknown> & {
 
 export interface BaseTableRefineProps<TData extends BaseRecord> {
   /** Refine table instance */
-  refineTable?: useTableReturnType<TData, any>;
+  refineTable?: UseTableReturnType<TData, any>["refineCore"];
 }
 
 export interface BaseTableCommonProps<TData extends BaseRecord> {
@@ -83,7 +84,7 @@ export interface TableDataProps<TData> {
 
 export interface TableInstanceProps<TData extends BaseRecord> {
   table: Table<TData>;
-  refineTable?: useTableReturnType<TData, any>;
+  refineTable?: UseTableReturnType<TData, any>["refineCore"];
 }
 
 export interface TableInteractionProps<TData> {
@@ -182,9 +183,9 @@ function BaseTableWithData<TData extends BaseRecord>(
               props.refineTable
                 ? {
                     tableInstance: props.refineTable,
-                    refetch: props.refineTable?.tableQuery?.refetch,
-                    isLoading: props.refineTable?.tableQuery?.isFetching,
-                    error: props.refineTable?.tableQuery?.error,
+                    refetch: props.refineTable?.refineCore?.tableQuery?.refetch,
+                    isLoading: props.refineTable?.refineCore?.tableQuery?.isFetching,
+                    error: props.refineTable?.refineCore?.tableQuery?.error,
                   }
                 : undefined
             }>
@@ -256,9 +257,9 @@ function BaseTable<TData extends object>(props: BaseTableProps<TData>) {
                 props.refineTable
                   ? {
                       tableInstance: props.refineTable,
-                      refetch: props.refineTable?.tableQuery?.refetch,
-                      isLoading: props.refineTable?.tableQuery?.isFetching,
-                      error: props.refineTable?.tableQuery?.error,
+                      refetch: props.refineTable?.refineCore?.tableQuery?.refetch,
+                      isLoading: props.refineTable?.refineCore?.tableQuery?.isFetching,
+                      error: props.refineTable?.refineCore?.tableQuery?.error,
                     }
                   : undefined
               }>
