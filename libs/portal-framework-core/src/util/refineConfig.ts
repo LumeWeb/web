@@ -1,4 +1,4 @@
-import type { RefineProps } from "@refinedev/core";
+import type { RefineProps, DataProviders } from "@refinedev/core";
 
 export function ensureResource(
   resources: RefineProps["resources"] = [],
@@ -23,6 +23,7 @@ export function ensureResource(
 export function getDefaultRefineOptions(): RefineProps["options"] {
   return {
     disableTelemetry: true,
+    disableRouteChangeHandler: true,
     mutationMode: "pessimistic",
     syncWithLocation: true,
     warnWhenUnsavedChanges: true,
@@ -39,7 +40,7 @@ export function mergeRefineConfig(
 ): Partial<RefineProps> {
   const dataProvider = {
     ...normalizeDataProvider(existing.dataProvider),
-    ...customDataProviders,
+    ...(customDataProviders as DataProviders),
   };
 
   let resources = existing.resources || [];
