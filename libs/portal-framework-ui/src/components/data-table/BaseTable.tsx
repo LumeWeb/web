@@ -183,9 +183,9 @@ function BaseTableWithData<TData extends BaseRecord>(
               props.refineTable
                 ? {
                     tableInstance: props.refineTable,
-                    refetch: props.refineTable?.refineCore?.tableQuery?.refetch,
-                    isLoading: props.refineTable?.refineCore?.tableQuery?.isFetching,
-                    error: props.refineTable?.refineCore?.tableQuery?.error,
+                    refetch: props.refineTable?.tableQuery?.refetch,
+                    isLoading: props.refineTable?.tableQuery?.isFetching,
+                    error: props.refineTable?.tableQuery?.error,
                   }
                 : undefined
             }>
@@ -257,9 +257,9 @@ function BaseTable<TData extends object>(props: BaseTableProps<TData>) {
                 props.refineTable
                   ? {
                       tableInstance: props.refineTable,
-                      refetch: props.refineTable?.refineCore?.tableQuery?.refetch,
-                      isLoading: props.refineTable?.refineCore?.tableQuery?.isFetching,
-                      error: props.refineTable?.refineCore?.tableQuery?.error,
+                      refetch: props.refineTable?.tableQuery?.refetch,
+                      isLoading: props.refineTable?.tableQuery?.isFetching,
+                      error: props.refineTable?.tableQuery?.error,
                     }
                   : undefined
               }>

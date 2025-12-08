@@ -106,7 +106,7 @@ export function RefineTableProvider<TData extends BaseRecord>({
       filters: filtersRef.current,
       sorters: sortersRef.current,
     };
-  }, [refineTable, filtersRef.current, sortersRef.current]);
+  }, [refineTable]);
 
   return (
     <RefineTableContext.Provider value={value}>
