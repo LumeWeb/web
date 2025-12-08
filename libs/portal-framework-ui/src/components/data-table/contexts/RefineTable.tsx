@@ -49,13 +49,17 @@ export function RefineTableProvider<TData extends BaseRecord>({
 
   // Update refs when values change (only update if actual data changed)
   useEffect(() => {
+    let hasChanges = false;
+
     // Update function refs if they've changed
     if (refineTable?.refineCore?.setFilters !== setFiltersRef.current) {
       setFiltersRef.current = refineTable?.refineCore?.setFilters;
+      hasChanges = true;
     }
 
     if (refineTable?.refineCore?.setSorters !== setSortersRef.current) {
       setSortersRef.current = refineTable?.refineCore?.setSorters;
+      hasChanges = true;
     }
 
     // Deep compare filters to prevent false positives
@@ -65,6 +69,7 @@ export function RefineTableProvider<TData extends BaseRecord>({
     if (filtersChanged) {
       filtersRef.current = newFilters;
       prevFiltersRef.current = newFilters;
+      hasChanges = true;
     }
 
     // Deep compare sorters to prevent false positives
@@ -74,14 +79,22 @@ export function RefineTableProvider<TData extends BaseRecord>({
     if (sortersChanged) {
       sortersRef.current = newSorters;
       prevSortersRef.current = newSorters;
+      hasChanges = true;
     }
 
     // Always update these refs as they may change reference without content change
+    const prevRefineTable = refineTableRef.current;
+    const prevTableQuery = tableQueryRef.current;
     refineTableRef.current = refineTable;
     tableQueryRef.current = refineTable?.refineCore?.tableQuery;
+    if (prevRefineTable !== refineTable || prevTableQuery !== refineTable?.refineCore?.tableQuery) {
+      hasChanges = true;
+    }
 
-    // Signal that refs have been updated
-    setVersion((v) => v + 1);
+    // Signal that refs have been updated only if changes occurred
+    if (hasChanges) {
+      setVersion((v) => v + 1);
+    }
   }, [refineTable]);
 
   // Create stable context value that only changes when refs are updated
