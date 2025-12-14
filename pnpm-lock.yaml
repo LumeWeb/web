@@ -1021,7 +1021,7 @@ importers:
     dependencies:
       '@helia/block-brokers':
         specifier: ^5.0.10
-        version: 5.0.10
+        version: 5.0.12
       '@helia/car':
         specifier: ^5.3.0
         version: 5.3.0
@@ -1927,14 +1927,14 @@ packages:
   '@helia/bitswap@2.2.0':
     resolution: {integrity: sha512-fYHjXM8SZpgRkGRM7qq8VVpBsrSLHlRGTLUEesfKZ+wYBYHZaqpn0mT9KbdLZowLrooz0qaUUiF6OIZBNmArcw==}
 
-  '@helia/bitswap@3.0.10':
-    resolution: {integrity: sha512-lWSkkpnzsoop0jccIHCFIMJSj2oQrPcjJjf5a+T/HC7oqjvpIevnJVjBc++kxl2SMunI7Byblf41yzczAdJKmw==}
+  '@helia/bitswap@3.0.12':
+    resolution: {integrity: sha512-g4DFsIIxDJHLIygcSD+1qxV5M5B9V3eiw96VMd6YnBy0PMeIvKUQ97JLOCnFsbwXbhY4P/379O7eIPl4tB+xxQ==}
 
   '@helia/block-brokers@4.2.4':
     resolution: {integrity: sha512-Xz7JyRIprbldi5bxfvuj5xTDijkfndgLPKoK/AUVeFOBD0n04Cb6RzqYGVQN6of8a6hfL6tD0fO4RVUFh/Jl6A==}
 
-  '@helia/block-brokers@5.0.10':
-    resolution: {integrity: sha512-rV6IC5EnAvSi8xavfdiE1pshU0S58otr6kqsGnVYN/97oK81KUpUx/GNGSQHRAYnrj5/Qb3QWynQFFSDNYFiPA==}
+  '@helia/block-brokers@5.0.12':
+    resolution: {integrity: sha512-LYmwAp/JIhTqeeOlk6b+/yjXTwp65IioR4PAxykqrgmMD6ZwRpNruJHAolsf40V2zPwiHqr3atdm+J+B2ChbkA==}
 
   '@helia/car@5.3.0':
     resolution: {integrity: sha512-uKQjInpUmn8qATac7GX5OcxgL+KvvlLQDGdEyhFHlHU/dEbMQfRVHEvDVPDqnzgg32UZO0ILPlCpEuciuiqIEw==}
@@ -1971,6 +1971,9 @@ packages:
 
   '@helia/utils@2.3.0':
     resolution: {integrity: sha512-R0uqo02BqAzoF5ZbiHAWck7iIAH+rH+a+BbRJ/ELiI91C94S3R5dXnSebH7dV+9pkB58ENdY6soFLQ3WBO5iPg==}
+
+  '@helia/utils@2.3.2':
+    resolution: {integrity: sha512-aHzD6gJ4vpKahUAiwDchObElz26RTXDZGIZ8ZoJ88l/PTpoGml1Vjdq1VbPihoV1pZQdbrehFBW/UCB3v9zgQw==}
 
   '@hookform/resolvers@5.0.1':
     resolution: {integrity: sha512-u/+Jp83luQNx9AdyW2fIPGY6Y7NG68eN2ZW8FOJYL+M0i4s49+refdJdOp/A9n9HFQtQs3HIDHQvX3ZET2o7YA==}
@@ -2621,6 +2624,9 @@ packages:
   '@mswjs/interceptors@0.39.6':
     resolution: {integrity: sha512-bndDP83naYYkfayr/qhBHMhk0YGwS1iv6vaEGcr0SQbO0IZtbOPqjKjds/WcG+bJA+1T5vCx6kprKOzn5Bg+Vw==}
     engines: {node: '>=18'}
+
+  '@multiformats/dns@1.0.11':
+    resolution: {integrity: sha512-KnT4gX71zas8br5OO2mArwBgRqTx78FvK193VL8/bP8T1ydDuWUilevZlPug9Azufos+ioHd8pHAVY3v7U41tQ==}
 
   '@multiformats/dns@1.0.9':
     resolution: {integrity: sha512-Ja4hevWI9p96ICx11K3suFvFirnMmXILzS7FpsR2KG3FoKF/XJijm8ylf3vY6kRFGr98yfZYM+zIn18KaINs3A==}
@@ -5398,6 +5404,10 @@ packages:
     resolution: {integrity: sha512-T+YVPemWyXcBVQdp0k61lQp2hJniRNmul0lAwTj2DTS/6dI4eCq/MRMucGqqvFqMBfmnD8tJ9aFtPu5dEGAbgw==}
     hasBin: true
 
+  cborg@4.3.2:
+    resolution: {integrity: sha512-l+QzebEAG0vb09YKkaOrMi2zmm80UNjmbvocMIeW5hO7JOXWdrQ/H49yOKfYX0MBgrj/KWgatBnEgRXyNyKD+A==}
+    hasBin: true
+
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
 
@@ -7151,6 +7161,9 @@ packages:
 
   it-foreach@2.1.4:
     resolution: {integrity: sha512-gFntBbNLpVK9uDmaHusugICD8/Pp+OCqbF5q1Z8K+B8WaG20YgMePWbMxI1I25+JmNWWr3hk0ecKyiI9pOLgeA==}
+
+  it-foreach@2.1.5:
+    resolution: {integrity: sha512-9tIp+NFVODmGV/49JUKVxW3+8RrPkYrmUaXUM4W6lMC5POM/1gegckNjBmDe5xgBa7+RE9HKBmRTAdY5V+bWSQ==}
 
   it-glob@3.0.4:
     resolution: {integrity: sha512-73PbGBTK/dHp5PX4l8pkQH1ozCONP0U+PB3qMqltxPonRJQNomINE3Hn9p02m2GOu95VoeVvSZdHI2N+qub0pw==}
@@ -11659,10 +11672,10 @@ snapshots:
       uint8arraylist: 2.4.8
       uint8arrays: 5.1.0
 
-  '@helia/bitswap@3.0.10':
+  '@helia/bitswap@3.0.12':
     dependencies:
       '@helia/interface': 6.0.2
-      '@helia/utils': 2.3.0
+      '@helia/utils': 2.3.2
       '@libp2p/interface': 3.1.0
       '@libp2p/logger': 6.2.2
       '@libp2p/peer-collections': 7.0.9
@@ -11702,11 +11715,11 @@ snapshots:
       progress-events: 1.0.1
       uint8arraylist: 2.4.8
 
-  '@helia/block-brokers@5.0.10':
+  '@helia/block-brokers@5.0.12':
     dependencies:
-      '@helia/bitswap': 3.0.10
+      '@helia/bitswap': 3.0.12
       '@helia/interface': 6.0.2
-      '@helia/utils': 2.3.0
+      '@helia/utils': 2.3.2
       '@libp2p/interface': 3.1.0
       '@libp2p/utils': 7.0.9
       '@multiformats/multiaddr': 13.0.1
@@ -11773,7 +11786,7 @@ snapshots:
 
   '@helia/http@3.0.11':
     dependencies:
-      '@helia/block-brokers': 5.0.10
+      '@helia/block-brokers': 5.0.12
       '@helia/delegated-routing-v1-http-api-client': 5.1.4
       '@helia/interface': 6.0.2
       '@helia/routers': 4.0.4
@@ -11930,6 +11943,37 @@ snapshots:
       it-drain: 3.0.10
       it-filter: 3.1.4
       it-foreach: 2.1.4
+      it-merge: 3.0.12
+      it-to-buffer: 4.0.10
+      libp2p: 3.1.2
+      mortice: 3.3.1
+      multiformats: 13.4.1
+      p-defer: 4.0.1
+      progress-events: 1.0.1
+      race-signal: 2.0.0
+      uint8arrays: 5.1.0
+
+  '@helia/utils@2.3.2':
+    dependencies:
+      '@helia/interface': 6.0.2
+      '@ipld/dag-cbor': 9.2.5
+      '@ipld/dag-json': 10.2.5
+      '@ipld/dag-pb': 4.1.5
+      '@libp2p/interface': 3.1.0
+      '@libp2p/keychain': 6.0.9
+      '@libp2p/logger': 6.2.2
+      '@libp2p/utils': 7.0.9
+      '@multiformats/dns': 1.0.11
+      '@multiformats/multiaddr': 13.0.1
+      any-signal: 4.1.1
+      blockstore-core: 6.1.1
+      cborg: 4.3.2
+      interface-blockstore: 6.0.1
+      interface-datastore: 9.0.2
+      interface-store: 7.0.1
+      it-drain: 3.0.10
+      it-filter: 3.1.4
+      it-foreach: 2.1.5
       it-merge: 3.0.12
       it-to-buffer: 4.0.10
       libp2p: 3.1.2
@@ -13210,6 +13254,15 @@ snapshots:
       is-node-process: 1.2.0
       outvariant: 1.4.3
       strict-event-emitter: 0.5.1
+
+  '@multiformats/dns@1.0.11':
+    dependencies:
+      buffer: 6.0.3
+      dns-packet: 5.6.1
+      hashlru: 2.3.0
+      p-queue: 9.0.1
+      progress-events: 1.0.1
+      uint8arrays: 5.1.0
 
   '@multiformats/dns@1.0.9':
     dependencies:
@@ -16528,6 +16581,8 @@ snapshots:
 
   cborg@4.2.15: {}
 
+  cborg@4.3.2: {}
+
   ccount@2.0.1: {}
 
   chai@5.2.0:
@@ -18606,6 +18661,10 @@ snapshots:
   it-first@3.0.9: {}
 
   it-foreach@2.1.4:
+    dependencies:
+      it-peekable: 3.0.8
+
+  it-foreach@2.1.5:
     dependencies:
       it-peekable: 3.0.8
 
