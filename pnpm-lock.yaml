@@ -1039,7 +1039,7 @@ importers:
         version: 4.0.4
       '@helia/unixfs':
         specifier: ^6.0.3
-        version: 6.0.3
+        version: 6.0.4
       '@ipfs-shipyard/pinning-service-client':
         specifier: ^3.0.0
         version: 3.0.0
@@ -1970,14 +1970,11 @@ packages:
   '@helia/routers@4.0.5':
     resolution: {integrity: sha512-oaXOFsrFWMngi6PVIunr34tCxKTQJx2VETOB4Jq2sKGr7S1aHXrtDePMLYAE95KeP2MpOtSd73WwwuTREoW4hQ==}
 
-  '@helia/unixfs@6.0.3':
-    resolution: {integrity: sha512-LTlZc0StvfpRg0JI71bWNVNeva1g9WZBo/6GJoA+qDMDx5SBw5wYHs7VEtwxUr0F99UHARMV+BQsbk8KuVQNww==}
+  '@helia/unixfs@6.0.4':
+    resolution: {integrity: sha512-/6Irfs1z7I2Wl8szLx5dqmUb9dCRYigCsS2EKBd9gKRzHffqcwmYSNNJpzoK/rOg/zMl56dzzhBLcxrdncs96g==}
 
   '@helia/utils@1.4.0':
     resolution: {integrity: sha512-xXwhQbfSQEC5uHd6HVwdGXksZayy5xnYB5aOk0TU1fDnwbaeJz46o/GdWcxkTxnbfGyxqs9hyK5NqHw1B58yAw==}
-
-  '@helia/utils@2.3.0':
-    resolution: {integrity: sha512-R0uqo02BqAzoF5ZbiHAWck7iIAH+rH+a+BbRJ/ELiI91C94S3R5dXnSebH7dV+9pkB58ENdY6soFLQ3WBO5iPg==}
 
   '@helia/utils@2.3.2':
     resolution: {integrity: sha512-aHzD6gJ4vpKahUAiwDchObElz26RTXDZGIZ8ZoJ88l/PTpoGml1Vjdq1VbPihoV1pZQdbrehFBW/UCB3v9zgQw==}
@@ -6914,9 +6911,6 @@ packages:
     resolution: {integrity: sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==}
     engines: {node: '>= 0.10'}
 
-  ipfs-unixfs-exporter@14.0.1:
-    resolution: {integrity: sha512-VW5jRNeuiUxdOv+PNTn4hqxKRbpaAOdsm6mO5VpWmvi2GSy/8ERGSHtE8tfdTkU3gnW7Sgg1gVcQ/oKqb96EZw==}
-
   ipfs-unixfs-exporter@14.0.2:
     resolution: {integrity: sha512-f8XeDrpPS2YNsSHI3aT9IcsVBHcaExLAuEafZTXCWqMk/vJnwAkna6trGPlUXjf+8gaYwCoIaS0gUGlTz45UUQ==}
 
@@ -7179,9 +7173,6 @@ packages:
 
   it-first@3.0.9:
     resolution: {integrity: sha512-ZWYun273Gbl7CwiF6kK5xBtIKR56H1NoRaiJek2QzDirgen24u8XZ0Nk+jdnJSuCTPxC2ul1TuXKxu/7eK6NuA==}
-
-  it-foreach@2.1.4:
-    resolution: {integrity: sha512-gFntBbNLpVK9uDmaHusugICD8/Pp+OCqbF5q1Z8K+B8WaG20YgMePWbMxI1I25+JmNWWr3hk0ecKyiI9pOLgeA==}
 
   it-foreach@2.1.5:
     resolution: {integrity: sha512-9tIp+NFVODmGV/49JUKVxW3+8RrPkYrmUaXUM4W6lMC5POM/1gegckNjBmDe5xgBa7+RE9HKBmRTAdY5V+bWSQ==}
@@ -11907,7 +11898,7 @@ snapshots:
       multiformats: 13.4.1
       uint8arrays: 5.1.0
 
-  '@helia/unixfs@6.0.3':
+  '@helia/unixfs@6.0.4':
     dependencies:
       '@helia/interface': 6.0.2
       '@ipld/dag-pb': 4.1.5
@@ -11918,7 +11909,7 @@ snapshots:
       hamt-sharding: 3.0.6
       interface-blockstore: 6.0.1
       ipfs-unixfs: 12.0.0
-      ipfs-unixfs-exporter: 14.0.1
+      ipfs-unixfs-exporter: 14.0.2
       ipfs-unixfs-importer: 16.0.1
       it-all: 3.0.9
       it-first: 3.0.9
@@ -11961,37 +11952,6 @@ snapshots:
       multiformats: 13.4.1
       p-defer: 4.0.1
       progress-events: 1.0.1
-      uint8arrays: 5.1.0
-
-  '@helia/utils@2.3.0':
-    dependencies:
-      '@helia/interface': 6.0.2
-      '@ipld/dag-cbor': 9.2.5
-      '@ipld/dag-json': 10.2.5
-      '@ipld/dag-pb': 4.1.5
-      '@libp2p/interface': 3.1.0
-      '@libp2p/keychain': 6.0.9
-      '@libp2p/logger': 6.2.2
-      '@libp2p/utils': 7.0.9
-      '@multiformats/dns': 1.0.9
-      '@multiformats/multiaddr': 13.0.1
-      any-signal: 4.1.1
-      blockstore-core: 6.1.1
-      cborg: 4.2.15
-      interface-blockstore: 6.0.1
-      interface-datastore: 9.0.2
-      interface-store: 7.0.1
-      it-drain: 3.0.10
-      it-filter: 3.1.4
-      it-foreach: 2.1.4
-      it-merge: 3.0.12
-      it-to-buffer: 4.0.10
-      libp2p: 3.1.2
-      mortice: 3.3.1
-      multiformats: 13.4.1
-      p-defer: 4.0.1
-      progress-events: 1.0.1
-      race-signal: 2.0.0
       uint8arrays: 5.1.0
 
   '@helia/utils@2.3.2':
@@ -18426,26 +18386,6 @@ snapshots:
 
   ipaddr.js@1.9.1: {}
 
-  ipfs-unixfs-exporter@14.0.1:
-    dependencies:
-      '@ipld/dag-cbor': 9.2.5
-      '@ipld/dag-json': 10.2.5
-      '@ipld/dag-pb': 4.1.5
-      '@multiformats/murmur3': 2.1.8
-      hamt-sharding: 3.0.6
-      interface-blockstore: 6.0.1
-      ipfs-unixfs: 12.0.0
-      it-filter: 3.1.4
-      it-last: 3.0.9
-      it-map: 3.1.4
-      it-parallel: 3.0.13
-      it-pipe: 3.0.1
-      it-pushable: 3.2.3
-      it-to-buffer: 4.0.10
-      multiformats: 13.4.1
-      p-queue: 9.0.1
-      progress-events: 1.0.1
-
   ipfs-unixfs-exporter@14.0.2:
     dependencies:
       '@ipld/dag-cbor': 9.2.5
@@ -18741,10 +18681,6 @@ snapshots:
       it-peekable: 3.0.8
 
   it-first@3.0.9: {}
-
-  it-foreach@2.1.4:
-    dependencies:
-      it-peekable: 3.0.8
 
   it-foreach@2.1.5:
     dependencies:
