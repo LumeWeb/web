@@ -20,7 +20,7 @@
   },
   "private": true,
   "dependencies": {
-    "@refinedev/core": "5.0.6",
+    "@refinedev/core": "5.0.7",
     "autoprefixer": "^10.4.22",
     "postcss": "8.4.49",
     "qs-esm": "^7.0.2",
