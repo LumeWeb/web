@@ -1021,7 +1021,7 @@ importers:
     dependencies:
       '@helia/block-brokers':
         specifier: ^5.0.10
-        version: 5.0.12
+        version: 5.0.13
       '@helia/car':
         specifier: ^5.3.0
         version: 5.3.2
@@ -1926,8 +1926,8 @@ packages:
   '@helia/bitswap@2.2.0':
     resolution: {integrity: sha512-fYHjXM8SZpgRkGRM7qq8VVpBsrSLHlRGTLUEesfKZ+wYBYHZaqpn0mT9KbdLZowLrooz0qaUUiF6OIZBNmArcw==}
 
-  '@helia/bitswap@3.0.12':
-    resolution: {integrity: sha512-g4DFsIIxDJHLIygcSD+1qxV5M5B9V3eiw96VMd6YnBy0PMeIvKUQ97JLOCnFsbwXbhY4P/379O7eIPl4tB+xxQ==}
+  '@helia/bitswap@3.0.13':
+    resolution: {integrity: sha512-Y14mVQ8caylx3ZXLpzLTt17Ul0Qt4N4B50uebSU3z8x6F0LrW4bSKdC8ppnOw0Oox5UUjXaoxu9KAV+NtcFaig==}
 
   '@helia/bitswap@3.0.13':
     resolution: {integrity: sha512-Y14mVQ8caylx3ZXLpzLTt17Ul0Qt4N4B50uebSU3z8x6F0LrW4bSKdC8ppnOw0Oox5UUjXaoxu9KAV+NtcFaig==}
@@ -1935,8 +1935,8 @@ packages:
   '@helia/block-brokers@4.2.4':
     resolution: {integrity: sha512-Xz7JyRIprbldi5bxfvuj5xTDijkfndgLPKoK/AUVeFOBD0n04Cb6RzqYGVQN6of8a6hfL6tD0fO4RVUFh/Jl6A==}
 
-  '@helia/block-brokers@5.0.12':
-    resolution: {integrity: sha512-LYmwAp/JIhTqeeOlk6b+/yjXTwp65IioR4PAxykqrgmMD6ZwRpNruJHAolsf40V2zPwiHqr3atdm+J+B2ChbkA==}
+  '@helia/block-brokers@5.0.13':
+    resolution: {integrity: sha512-dFHmPv6P6rbPO7woTxW/dLTD4z32HckuQWN2HjTZiBIqxUp12QjgD/WGU8BDLF3c18OoHhy56ZYjjum9tNU0gw==}
 
   '@helia/block-brokers@5.0.13':
     resolution: {integrity: sha512-dFHmPv6P6rbPO7woTxW/dLTD4z32HckuQWN2HjTZiBIqxUp12QjgD/WGU8BDLF3c18OoHhy56ZYjjum9tNU0gw==}
@@ -11728,16 +11728,16 @@ snapshots:
       uint8arraylist: 2.4.8
       uint8arrays: 5.1.0
 
-  '@helia/bitswap@3.0.12':
+  '@helia/bitswap@3.0.13':
     dependencies:
       '@helia/interface': 6.0.2
-      '@helia/utils': 2.3.2
+      '@helia/utils': 2.3.3
       '@libp2p/interface': 3.1.0
       '@libp2p/logger': 6.2.2
       '@libp2p/peer-collections': 7.0.9
       '@libp2p/utils': 7.0.9
       '@multiformats/multiaddr': 13.0.1
-      any-signal: 4.1.1
+      any-signal: 4.2.0
       interface-blockstore: 6.0.1
       interface-store: 7.0.1
       it-drain: 3.0.10
@@ -11798,11 +11798,11 @@ snapshots:
       progress-events: 1.0.1
       uint8arraylist: 2.4.8
 
-  '@helia/block-brokers@5.0.12':
+  '@helia/block-brokers@5.0.13':
     dependencies:
-      '@helia/bitswap': 3.0.12
+      '@helia/bitswap': 3.0.13
       '@helia/interface': 6.0.2
-      '@helia/utils': 2.3.2
+      '@helia/utils': 2.3.3
       '@libp2p/interface': 3.1.0
       '@libp2p/utils': 7.0.9
       '@multiformats/multiaddr': 13.0.1
