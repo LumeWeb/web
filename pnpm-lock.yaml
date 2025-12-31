@@ -1027,7 +1027,7 @@ importers:
         version: 5.3.2
       '@helia/http':
         specifier: ^3.0.11
-        version: 3.0.13
+        version: 3.0.14
       '@helia/interface':
         specifier: ^6.0.2
         version: 6.0.2
@@ -1929,11 +1929,17 @@ packages:
   '@helia/bitswap@3.0.12':
     resolution: {integrity: sha512-g4DFsIIxDJHLIygcSD+1qxV5M5B9V3eiw96VMd6YnBy0PMeIvKUQ97JLOCnFsbwXbhY4P/379O7eIPl4tB+xxQ==}
 
+  '@helia/bitswap@3.0.13':
+    resolution: {integrity: sha512-Y14mVQ8caylx3ZXLpzLTt17Ul0Qt4N4B50uebSU3z8x6F0LrW4bSKdC8ppnOw0Oox5UUjXaoxu9KAV+NtcFaig==}
+
   '@helia/block-brokers@4.2.4':
     resolution: {integrity: sha512-Xz7JyRIprbldi5bxfvuj5xTDijkfndgLPKoK/AUVeFOBD0n04Cb6RzqYGVQN6of8a6hfL6tD0fO4RVUFh/Jl6A==}
 
   '@helia/block-brokers@5.0.12':
     resolution: {integrity: sha512-LYmwAp/JIhTqeeOlk6b+/yjXTwp65IioR4PAxykqrgmMD6ZwRpNruJHAolsf40V2zPwiHqr3atdm+J+B2ChbkA==}
+
+  '@helia/block-brokers@5.0.13':
+    resolution: {integrity: sha512-dFHmPv6P6rbPO7woTxW/dLTD4z32HckuQWN2HjTZiBIqxUp12QjgD/WGU8BDLF3c18OoHhy56ZYjjum9tNU0gw==}
 
   '@helia/car@5.3.2':
     resolution: {integrity: sha512-4rapIvGfQ52w7bJy8Worl/QdrDzxZM0WbvlS5Y+Q9hSHLJprf+RAg1yG+WOCastWG8BsLcM2L0JndKuQmcLAFw==}
@@ -1944,8 +1950,8 @@ packages:
   '@helia/delegated-routing-v1-http-api-client@5.1.4':
     resolution: {integrity: sha512-O/gK4KarekZZUztFIV2pCbt4/2OR0/a1qT0CMJf7R1htcuMsIfxhBcxbzyGwiLpY5Lr2JRevCl+3iSZE5vCCmw==}
 
-  '@helia/http@3.0.13':
-    resolution: {integrity: sha512-C+ypUwVpa/0a6SqfrhCtNh2W0/dPlbppoSiRmPddqs6vzDx9xp601w6lMwMRSh113fDHPucLTkoOS5PgmxALnQ==}
+  '@helia/http@3.0.14':
+    resolution: {integrity: sha512-mG1X+K7FlC98dSg01whqapYpQiVffU1eRDqA1w9wVQqw+DrEdaomEZ6vIljJPhKAcKDoJtsvHYHn2wVqt7ZICg==}
 
   '@helia/interface@5.4.0':
     resolution: {integrity: sha512-UfY/Xa2qYJ6Bh4XUUSgwU3s2VY69cKwRznkS9Ab0C3ciU+dUeyz3IPIn5qqRGVfNVM9SD2wISXmwA7FJvhdRAQ==}
@@ -1970,6 +1976,9 @@ packages:
 
   '@helia/utils@2.3.2':
     resolution: {integrity: sha512-aHzD6gJ4vpKahUAiwDchObElz26RTXDZGIZ8ZoJ88l/PTpoGml1Vjdq1VbPihoV1pZQdbrehFBW/UCB3v9zgQw==}
+
+  '@helia/utils@2.3.3':
+    resolution: {integrity: sha512-1jen0FvJ6K5HtP4BZiT0NwyaDZ+aGjYuIxpVsb7vV8EmBn//57nyd59ElpXTwM8Npid624RuDRsqtgKVowHDOA==}
 
   '@hookform/resolvers@5.0.1':
     resolution: {integrity: sha512-u/+Jp83luQNx9AdyW2fIPGY6Y7NG68eN2ZW8FOJYL+M0i4s49+refdJdOp/A9n9HFQtQs3HIDHQvX3ZET2o7YA==}
@@ -5077,6 +5086,10 @@ packages:
 
   any-signal@4.1.1:
     resolution: {integrity: sha512-iADenERppdC+A2YKbOXXB2WUeABLaM6qnpZ70kZbPZ1cZMMJ7eF+3CaYm+/PhBizgkzlvssC7QuHS30oOiQYWA==}
+    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
+
+  any-signal@4.2.0:
+    resolution: {integrity: sha512-LndMvYuAPf4rC195lk7oSFuHOYFpOszIYrNYv0gHAvz+aEhE9qPZLhmrIz5pXP2BSsPOXvsuHDXEGaiQhIh9wA==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
 
   anymatch@3.1.3:
@@ -8346,6 +8359,10 @@ packages:
 
   p-event@7.0.1:
     resolution: {integrity: sha512-SI8GHTMMv6dAIMMHBG0g6PyZIEal+CCaKCje24NxkgEJrPvfdfEP0xXVoDC3OGxlfjM8qqSs/luTaobCkGdEUA==}
+    engines: {node: '>=20'}
+
+  p-event@7.0.2:
+    resolution: {integrity: sha512-nDq4JpyYnNPDrndgY3z9vQsB0X1bdsOcDmMFbLvewcnt38Geda9x+gULX3+RiGzwJ1QvzqTwNB4EQp+OwMOVAA==}
     engines: {node: '>=20'}
 
   p-limit@2.3.0:
@@ -11694,7 +11711,7 @@ snapshots:
       '@libp2p/peer-collections': 6.0.35
       '@libp2p/utils': 6.7.2
       '@multiformats/multiaddr': 12.5.1
-      any-signal: 4.1.1
+      any-signal: 4.2.0
       interface-blockstore: 5.3.2
       interface-store: 6.0.3
       it-drain: 3.0.10
@@ -11738,6 +11755,33 @@ snapshots:
       uint8arraylist: 2.4.8
       uint8arrays: 5.1.0
 
+  '@helia/bitswap@3.0.13':
+    dependencies:
+      '@helia/interface': 6.0.2
+      '@helia/utils': 2.3.3
+      '@libp2p/interface': 3.1.0
+      '@libp2p/logger': 6.2.2
+      '@libp2p/peer-collections': 7.0.9
+      '@libp2p/utils': 7.0.9
+      '@multiformats/multiaddr': 13.0.1
+      any-signal: 4.2.0
+      interface-blockstore: 6.0.1
+      interface-store: 7.0.1
+      it-drain: 3.0.10
+      it-length-prefixed: 10.0.1
+      it-map: 3.1.4
+      it-pushable: 3.2.3
+      it-take: 3.0.9
+      it-to-buffer: 4.0.10
+      multiformats: 13.4.1
+      p-defer: 4.0.1
+      progress-events: 1.0.1
+      protons-runtime: 5.6.0
+      race-event: 1.6.1
+      uint8-varint: 2.0.4
+      uint8arraylist: 2.4.8
+      uint8arrays: 5.1.0
+
   '@helia/block-brokers@4.2.4':
     dependencies:
       '@helia/bitswap': 2.2.0
@@ -11759,6 +11803,22 @@ snapshots:
       '@helia/bitswap': 3.0.12
       '@helia/interface': 6.0.2
       '@helia/utils': 2.3.2
+      '@libp2p/interface': 3.1.0
+      '@libp2p/utils': 7.0.9
+      '@multiformats/multiaddr': 13.0.1
+      '@multiformats/multiaddr-matcher': 3.0.1
+      '@multiformats/multiaddr-to-uri': 12.0.0
+      interface-blockstore: 6.0.1
+      interface-store: 7.0.1
+      multiformats: 13.4.1
+      progress-events: 1.0.1
+      uint8arraylist: 2.4.8
+
+  '@helia/block-brokers@5.0.13':
+    dependencies:
+      '@helia/bitswap': 3.0.13
+      '@helia/interface': 6.0.2
+      '@helia/utils': 2.3.3
       '@libp2p/interface': 3.1.0
       '@libp2p/utils': 7.0.9
       '@multiformats/multiaddr': 13.0.1
@@ -11812,7 +11872,7 @@ snapshots:
       '@libp2p/logger': 6.2.2
       '@libp2p/peer-id': 6.0.4
       '@multiformats/multiaddr': 13.0.1
-      any-signal: 4.1.1
+      any-signal: 4.2.0
       browser-readablestream-to-it: 2.0.10
       ipns: 10.1.3
       it-first: 3.0.9
@@ -11823,13 +11883,13 @@ snapshots:
       p-queue: 9.0.1
       uint8arrays: 5.1.0
 
-  '@helia/http@3.0.13':
+  '@helia/http@3.0.14':
     dependencies:
-      '@helia/block-brokers': 5.0.12
+      '@helia/block-brokers': 5.0.13
       '@helia/delegated-routing-v1-http-api-client': 5.1.4
       '@helia/interface': 6.0.2
       '@helia/routers': 4.0.5
-      '@helia/utils': 2.3.2
+      '@helia/utils': 2.3.3
       '@libp2p/config': 1.1.24
       '@libp2p/interface': 3.1.0
       '@libp2p/keychain': 6.0.9
@@ -11974,6 +12034,37 @@ snapshots:
       '@multiformats/dns': 1.0.11
       '@multiformats/multiaddr': 13.0.1
       any-signal: 4.1.1
+      blockstore-core: 6.1.1
+      cborg: 4.3.2
+      interface-blockstore: 6.0.1
+      interface-datastore: 9.0.2
+      interface-store: 7.0.1
+      it-drain: 3.0.10
+      it-filter: 3.1.4
+      it-foreach: 2.1.5
+      it-merge: 3.0.12
+      it-to-buffer: 4.0.10
+      libp2p: 3.1.2
+      mortice: 3.3.1
+      multiformats: 13.4.1
+      p-defer: 4.0.1
+      progress-events: 1.0.1
+      race-signal: 2.0.0
+      uint8arrays: 5.1.0
+
+  '@helia/utils@2.3.3':
+    dependencies:
+      '@helia/interface': 6.0.2
+      '@ipld/dag-cbor': 9.2.5
+      '@ipld/dag-json': 10.2.5
+      '@ipld/dag-pb': 4.1.5
+      '@libp2p/interface': 3.1.0
+      '@libp2p/keychain': 6.0.9
+      '@libp2p/logger': 6.2.2
+      '@libp2p/utils': 7.0.9
+      '@multiformats/dns': 1.0.11
+      '@multiformats/multiaddr': 13.0.1
+      any-signal: 4.2.0
       blockstore-core: 6.1.1
       cborg: 4.3.2
       interface-blockstore: 6.0.1
@@ -16064,6 +16155,8 @@ snapshots:
 
   any-signal@4.1.1: {}
 
+  any-signal@4.2.0: {}
+
   anymatch@3.1.3:
     dependencies:
       normalize-path: 3.0.0
@@ -19068,7 +19161,7 @@ snapshots:
       '@multiformats/dns': 1.0.11
       '@multiformats/multiaddr': 13.0.1
       '@multiformats/multiaddr-matcher': 3.0.1
-      any-signal: 4.1.1
+      any-signal: 4.2.0
       datastore-core: 11.0.2
       interface-datastore: 9.0.2
       it-merge: 3.0.12
@@ -19076,7 +19169,7 @@ snapshots:
       main-event: 1.0.1
       multiformats: 13.4.1
       p-defer: 4.0.1
-      p-event: 7.0.1
+      p-event: 7.0.2
       p-retry: 7.1.1
       progress-events: 1.0.1
       race-signal: 2.0.0
@@ -20277,6 +20370,10 @@ snapshots:
       p-timeout: 6.1.4
 
   p-event@7.0.1:
+    dependencies:
+      p-timeout: 6.1.4
+
+  p-event@7.0.2:
     dependencies:
       p-timeout: 6.1.4
 
