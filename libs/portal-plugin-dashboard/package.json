@@ -24,7 +24,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@hookform/resolvers": "5.0.1",
+    "@hookform/resolvers": "5.2.2",
     "@lumeweb/advanced-rest-provider": "workspace:*",
     "@lumeweb/portal-framework-auth": "workspace:*",
     "@lumeweb/portal-framework-core": "workspace:*",
