@@ -434,8 +434,8 @@ importers:
         specifier: ^1.14.1
         version: 1.15.1(react@19.2.3)
       '@hookform/resolvers':
-        specifier: 5.0.1
-        version: 5.0.1(react-hook-form@7.69.0(react@19.2.3))
+        specifier: 5.2.2
+        version: 5.2.2(react-hook-form@7.69.0(react@19.2.3))
       '@lexical/code':
         specifier: ^0.38.2 || ^0.39.0
         version: 0.39.0
@@ -942,8 +942,8 @@ importers:
   libs/portal-plugin-dashboard:
     dependencies:
       '@hookform/resolvers':
-        specifier: 5.0.1
-        version: 5.0.1(react-hook-form@7.69.0(react@19.2.3))
+        specifier: 5.2.2
+        version: 5.2.2(react-hook-form@7.69.0(react@19.2.3))
       '@lumeweb/advanced-rest-provider':
         specifier: workspace:*
         version: link:../advanced-rest
