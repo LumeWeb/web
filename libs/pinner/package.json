@@ -53,6 +53,7 @@
     "interface-blockstore": "^6.0.1",
     "interface-datastore": "^9.0.2",
     "interface-store": "^7.0.1",
+    "ipaddr.js": "^2.3.0",
     "ky": "^1.14.2",
     "multiformats": "^13.4.2",
     "p-defer": "^4.0.1",

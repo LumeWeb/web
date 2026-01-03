@@ -3,8 +3,31 @@
  */
 
 import { ValidationError } from "@/errors";
+import ipaddr from "ipaddr.js";
 
 export { ValidationError };
+
+// IPv4 ranges to block
+const BLOCKED_IPV4_RANGES = new Set([
+  "private", // 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
+  "loopback", // 127.0.0.0/8
+  "linkLocal", // 169.254.0.0/16
+  "reserved",
+  "broadcast",
+  "carrierGradeNat", // 100.64.0.0/10
+  "unspecified", // 0.0.0.0/8
+]);
+
+// IPv6 ranges to block
+const BLOCKED_IPV6_RANGES = new Set([
+  "uniqueLocal", // fc00::/7
+  "loopback", // ::1
+  "linkLocal", // fe80::/10
+  "reserved",
+  "multicast", // ff00::/8
+  "ipv4Mapped", // ::ffff:0:0/96
+  "unspecified", // ::
+]);
 
 /**
  * Validates a URL string to ensure it's safe to fetch.
@@ -33,29 +56,50 @@ export function validateUrl(urlString: string): void {
       );
     }
 
-    // Prevent localhost and private IP addresses in server environments
     const hostname = url.hostname.toLowerCase();
 
-    // Block localhost variants
-    if (
-      hostname === "localhost" ||
-      hostname === "127.0.0.1" ||
-      hostname === "::1" ||
-      hostname === "[::1]" ||
-      hostname.startsWith("127.")
-    ) {
+    // Block localhost (case-insensitive)
+    if (hostname === "localhost") {
       throw new ValidationError(
         "Access to localhost addresses is not allowed",
         "url",
       );
     }
 
-    // Block private IP ranges
-    if (isPrivateIpAddress(hostname)) {
-      throw new ValidationError(
-        "Access to private IP addresses is not allowed",
-        "url",
-      );
+    // Strip brackets from IPv6 addresses for ipaddr.js
+    const cleanHostname = hostname.replace(/^\[|\]$/g, "");
+
+    // Block IP addresses using ipaddr.js
+    // This library handles alternative notations (decimal, octal, hex)
+    // and comprehensive private range detection for both IPv4 and IPv6
+    if (ipaddr.isValid(cleanHostname)) {
+      const addr = ipaddr.parse(cleanHostname);
+
+      // Check for IPv4 private ranges
+      if (addr.kind() === "ipv4") {
+        const ipv4Addr = addr as ipaddr.IPv4;
+        const range = ipv4Addr.range();
+
+        if (BLOCKED_IPV4_RANGES.has(range)) {
+          throw new ValidationError(
+            "Access to private IP addresses is not allowed",
+            "url",
+          );
+        }
+      }
+
+      // Check for IPv6 private ranges
+      if (addr.kind() === "ipv6") {
+        const ipv6Addr = addr as ipaddr.IPv6;
+        const range = ipv6Addr.range();
+
+        if (BLOCKED_IPV6_RANGES.has(range)) {
+          throw new ValidationError(
+            "Access to private IP addresses is not allowed",
+            "url",
+          );
+        }
+      }
     }
   } catch (error) {
     if (error instanceof ValidationError) {
@@ -67,29 +111,6 @@ export function validateUrl(urlString: string): void {
       error as Error,
     );
   }
-}
-
-/**
- * Check if a hostname is a private IP address.
- * This is a basic check that handles common IPv4 patterns.
- */
-function isPrivateIpAddress(hostname: string): boolean {
-  // IPv4 private ranges
-  const ipv4PrivatePatterns = [
-    /^10\./,
-    /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
-    /^192\.168\./,
-    /^169\.254\./, // Link-local
-    /^0\./, // Current network
-  ];
-
-  for (const pattern of ipv4PrivatePatterns) {
-    if (pattern.test(hostname)) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 /**

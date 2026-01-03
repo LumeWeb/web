@@ -49,9 +49,11 @@ describe("validateUrl", () => {
   });
 
   describe("SSRF protection - localhost", () => {
-    it("should reject localhost hostname", () => {
+    it("should reject localhost hostname case-insensitively", () => {
       expect(() => validateUrl("http://localhost")).toThrow(ValidationError);
       expect(() => validateUrl("https://localhost")).toThrow(ValidationError);
+      expect(() => validateUrl("http://LOCALHOST")).toThrow(ValidationError);
+      expect(() => validateUrl("http://lOcAlHoSt")).toThrow(ValidationError);
     });
 
     it("should reject 127.0.0.1", () => {
@@ -62,6 +64,7 @@ describe("validateUrl", () => {
     it("should reject 127.x.x.x addresses", () => {
       expect(() => validateUrl("http://127.0.0.2")).toThrow(ValidationError);
       expect(() => validateUrl("http://127.1.1.1")).toThrow(ValidationError);
+      expect(() => validateUrl("http://127.255.255.255")).toThrow(ValidationError);
     });
 
     it("should reject IPv6 localhost", () => {
@@ -69,7 +72,7 @@ describe("validateUrl", () => {
     });
   });
 
-  describe("SSRF protection - private IP ranges", () => {
+  describe("SSRF protection - private IP ranges (IPv4)", () => {
     it("should reject 10.0.0.0/8 range", () => {
       expect(() => validateUrl("http://10.0.0.1")).toThrow(ValidationError);
       expect(() => validateUrl("http://10.255.255.255")).toThrow(ValidationError);
@@ -92,6 +95,64 @@ describe("validateUrl", () => {
     it("should reject 0.0.0.0/8 range", () => {
       expect(() => validateUrl("http://0.0.0.0")).toThrow(ValidationError);
       expect(() => validateUrl("http://0.1.2.3")).toThrow(ValidationError);
+    });
+  });
+
+  describe("SSRF protection - alternative IP notations", () => {
+    it("should reject decimal notation (bypass attempt)", () => {
+      // 2130706433 = 127.0.0.1 in decimal
+      expect(() => validateUrl("http://2130706433")).toThrow(ValidationError);
+      // 3232235777 = 192.168.1.1 in decimal
+      expect(() => validateUrl("http://3232235777")).toThrow(ValidationError);
+    });
+
+    it("should reject octal notation", () => {
+      // 0177.0.0.1 = 127.0.0.1 in octal
+      expect(() => validateUrl("http://0177.0.0.1")).toThrow(ValidationError);
+      // 0300.0250.0.1 = 192.168.0.1 in octal
+      expect(() => validateUrl("http://0300.0250.0.1")).toThrow(ValidationError);
+    });
+
+    it("should reject hexadecimal notation", () => {
+      // 0x7f.0.0.1 = 127.0.0.1 in hex
+      expect(() => validateUrl("http://0x7f.0.0.1")).toThrow(ValidationError);
+      // 0xc0.0xa8.0.0.1 = 192.168.0.1 in hex
+      expect(() => validateUrl("http://0xc0.0xa8.0.0.1")).toThrow(ValidationError);
+    });
+
+    it("should reject mixed notation", () => {
+      expect(() => validateUrl("http://0x7f.0.0.1")).toThrow(ValidationError);
+      expect(() => validateUrl("http://0177.0.0.1")).toThrow(ValidationError);
+    });
+  });
+
+  describe("SSRF protection - IPv6 private ranges", () => {
+    it("should reject IPv6 loopback", () => {
+      expect(() => validateUrl("http://[::1]")).toThrow(ValidationError);
+    });
+
+    it("should reject IPv6 unspecified address", () => {
+      expect(() => validateUrl("http://[::]")).toThrow(ValidationError);
+    });
+
+    it("should reject IPv6 unique local addresses (fc00::/7)", () => {
+      expect(() => validateUrl("http://[fc00::1]")).toThrow(ValidationError);
+      expect(() => validateUrl("http://[fd00::1]")).toThrow(ValidationError);
+      expect(() => validateUrl("http://[fde4:8dba:82e1::1]")).toThrow(ValidationError);
+    });
+
+    it("should reject IPv6 link-local addresses (fe80::/10)", () => {
+      expect(() => validateUrl("http://[fe80::1]")).toThrow(ValidationError);
+      expect(() => validateUrl("http://[fe80::1%eth0]")).toThrow(ValidationError);
+    });
+
+    it("should reject IPv6 multicast addresses (ff00::/8)", () => {
+      expect(() => validateUrl("http://[ff02::1]")).toThrow(ValidationError);
+    });
+
+    it("should reject IPv4-mapped IPv6 addresses", () => {
+      expect(() => validateUrl("http://[::ffff:127.0.0.1]")).toThrow(ValidationError);
+      expect(() => validateUrl("http://[::ffff:192.168.1.1]")).toThrow(ValidationError);
     });
   });
 
