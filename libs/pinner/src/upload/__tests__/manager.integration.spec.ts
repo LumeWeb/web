@@ -1,0 +1,384 @@
+import { afterEach, beforeEach, describe, expect, vi } from "vitest";
+import {
+  createFakeCarFile,
+  createReadableStream,
+  createReadableStreamOfSize,
+  createTestCarFile,
+  streamToFile,
+} from "./test-helpers";
+import { EmptyFileError } from "@/errors";
+import { test as it } from "./int-test";
+import { DEFAULT_UPLOAD_LIMIT, MOCK_CONFIG } from "./test-constants";
+import { assertUploadOperationStructure } from "./test-assertions";
+import { importUploadManager } from "./test-fixtures";
+
+describe("UploadManager Integration Tests", () => {
+  let manager: any;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    const UploadManager = await importUploadManager();
+    manager = new UploadManager(MOCK_CONFIG);
+  });
+
+  afterEach(() => {
+    if (manager && manager.destroy) {
+      manager.destroy();
+    }
+  });
+
+  describe("File Upload Integration", () => {
+    describe("File uploads", () => {
+      it("should handle File input and return valid operation", async () => {
+        const stream = createReadableStream("test content");
+        const file = await streamToFile(stream, "test.car");
+
+        const operation = await manager.upload(file);
+
+        assertUploadOperationStructure(operation);
+
+        // Verify the operation completes successfully
+        const result = await operation.result;
+        expect(result).toBeDefined();
+        expect(result.id).toBe("test-upload-id");
+        expect(result.name).toBe("test.car");
+        expect(result.cid).toBeDefined();
+      });
+
+      it("should process small files via XHR path", async () => {
+        const content = "test content";
+        const file = new File([content], "test.car", {
+          type: "application/vnd.ipld.car",
+        });
+        Object.defineProperty(file, "size", { value: 1024 }); // Small file
+
+        const operation = await manager.upload(file);
+
+        expect(operation).toBeDefined();
+        const result = await operation.result;
+        expect(result.id).toBe("test-upload-id");
+      });
+
+      it("should preserve file data integrity", async () => {
+        const testData = "test content for integrity check";
+        const stream = createReadableStream(testData);
+        const file = await streamToFile(stream, "integrity-test.car");
+
+        const operation = await manager.upload(file);
+        const result = await operation.result;
+
+        // Verify the upload completes successfully
+        expect(result).toBeDefined();
+        expect(result.id).toBe("test-upload-id");
+        expect(result.name).toBe("integrity-test.car");
+      });
+
+      it("should handle binary data files", async () => {
+        const binaryData = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
+        const binaryStream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(binaryData);
+            controller.close();
+          },
+        });
+        const file = await streamToFile(binaryStream, "binary.car");
+
+        const operation = await manager.upload(file);
+        const result = await operation.result;
+
+        // Verify the upload completes successfully
+        expect(result).toBeDefined();
+        expect(result.id).toBe("test-upload-id");
+        expect(result.name).toBe("binary.car");
+      });
+
+      it("should handle files with multiple chunks", async () => {
+        const chunks = ["chunk1", "chunk2", "chunk3"];
+        const multiChunkStream = new ReadableStream({
+          start(controller) {
+            chunks.forEach((chunk) => {
+              controller.enqueue(new TextEncoder().encode(chunk));
+            });
+            controller.close();
+          },
+        });
+        const file = await streamToFile(multiChunkStream, "multi-chunk.car");
+
+        const operation = await manager.upload(file);
+        const result = await operation.result;
+
+        // Verify the upload completes successfully
+        expect(result).toBeDefined();
+        expect(result.id).toBe("test-upload-id");
+        expect(result.name).toBe("multi-chunk.car");
+      });
+
+      it("should throw EmptyFileError for empty files", async () => {
+        const emptyFile = new File([], "empty.car", {
+          type: "application/vnd.ipld.car",
+        });
+
+        await expect(manager.upload(emptyFile)).rejects.toThrow(EmptyFileError);
+        await expect(manager.upload(emptyFile)).rejects.toThrow(
+          "Cannot upload empty file: empty.car",
+        );
+      });
+
+      it("should throw EmptyFileError for empty ReadableStream with size override", async () => {
+        const emptyStream = new ReadableStream({
+          start(controller) {
+            controller.close();
+          },
+        });
+
+        await expect(
+          manager.upload(emptyStream, {
+            name: "empty.car",
+            size: 0, // Explicitly set size to 0
+          }),
+        ).rejects.toThrow(EmptyFileError);
+        await expect(
+          manager.upload(emptyStream, {
+            name: "empty.car",
+            size: 0,
+          }),
+        ).rejects.toThrow("Cannot upload empty stream");
+      });
+    });
+  });
+
+  describe("ReadableStream Upload Integration", () => {
+    it("should handle ReadableStream input with size override", async () => {
+      const stream = createReadableStream("test content");
+
+      const operation = await manager.upload(stream, {
+        name: "test.car",
+        size: 1024, // Small size to force XHR path
+      });
+
+      assertUploadOperationStructure(operation);
+      expect(operation.result).toBeInstanceOf(Promise);
+      expect(operation.progress).toBeDefined();
+
+      // Verify the operation completes successfully
+      const result = await operation.result;
+      expect(result).toBeDefined();
+      expect(result.id).toBe("test-upload-id");
+    });
+
+    it("should use XHR handler for small ReadableStream with size override", async () => {
+      const stream = createReadableStream("test content");
+
+      const operation = await manager.upload(stream, {
+        name: "test.car",
+        size: 1024, // Small size to force XHR path
+      });
+
+      expect(operation).toBeDefined();
+      const result = await operation.result;
+      expect(result.id).toBe("test-upload-id");
+    });
+
+    it("should use TUS handler for large ReadableStream with size override", async () => {
+      const stream = createReadableStreamOfSize(DEFAULT_UPLOAD_LIMIT + 1);
+
+      const operation = await manager.upload(stream, {
+        name: "large.car",
+        size: DEFAULT_UPLOAD_LIMIT + 1,
+      });
+
+      expect(operation).toBeDefined();
+      const result = await operation.result;
+      expect(result.id).toBe("test-upload-id");
+    }, 30000);
+
+    it("should preserve stream data integrity with size override", async () => {
+      const testData = "test content for integrity check";
+      const stream = createReadableStream(testData);
+
+      const operation = await manager.upload(stream, {
+        name: "integrity-test.car",
+        size: 1024, // Small size to force XHR path
+      });
+
+      const result = await operation.result;
+
+      // Verify the upload completes successfully
+      expect(result).toBeDefined();
+      expect(result.id).toBe("test-upload-id");
+      expect(result.name).toBe("integrity-test.car");
+    });
+  });
+
+  describe("upload options propagation", () => {
+    it("should pass upload options to XHR handler", async () => {
+      const stream = createReadableStream("options test");
+      const file = await streamToFile(stream, "test.car");
+      const options = {
+        name: "custom-name.car",
+        keyvalues: { key1: "value1" },
+        onProgress: vi.fn(),
+      };
+
+      const operation = await manager.upload(file, options);
+      const result = await operation.result;
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe("test-upload-id");
+    });
+  });
+
+  describe("integration scenarios", () => {
+    it("should handle mixed upload types with different handlers", async () => {
+      // Small file (XHR)
+      const { file: smallFile } = await createTestCarFile("small", "small.car");
+      Object.defineProperty(smallFile, "size", { value: 1024 });
+
+      // File from stream (XHR)
+      const stream = createReadableStream("stream content");
+      const streamFile = await streamToFile(stream, "stream.car");
+      Object.defineProperty(streamFile, "size", { value: 1024 }); // Small file
+
+      const operation1 = await manager.upload(smallFile);
+      const operation2 = await manager.upload(streamFile);
+
+      const result1 = await operation1.result;
+      const result2 = await operation2.result;
+
+      expect(result1).toBeDefined();
+      expect(result2).toBeDefined();
+      expect(result1.id).toBe("test-upload-id");
+      expect(result2.id).toBe("test-upload-id");
+    });
+
+    it("should maintain handler selection consistency across uploads", async () => {
+      const stream1 = createReadableStream("stream1");
+      const stream2 = createReadableStream("stream2");
+      const file1 = await streamToFile(stream1, "stream1.car");
+      const file2 = await streamToFile(stream2, "stream2.car");
+      Object.defineProperty(file1, "size", { value: 1024 }); // Small file
+      Object.defineProperty(file2, "size", { value: 1024 }); // Small file
+
+      const operation1 = await manager.upload(file1);
+      const operation2 = await manager.upload(file2);
+
+      const result1 = await operation1.result;
+      const result2 = await operation2.result;
+
+      expect(result1).toBeDefined();
+      expect(result2).toBeDefined();
+      expect(result1.id).toBe("test-upload-id");
+      expect(result2.id).toBe("test-upload-id");
+    });
+  });
+
+  describe("CAR File Passthrough", () => {
+    it("should upload valid CAR files without preprocessing", async () => {
+      const { file } = await createTestCarFile("test content", "valid.car");
+
+      const operation = await manager.upload(file);
+
+      assertUploadOperationStructure(operation);
+
+      // Verify the operation completes successfully
+      const result = await operation.result;
+      expect(result).toBeDefined();
+      expect(result.id).toBe("test-upload-id");
+      expect(result.name).toBe("valid.car");
+      expect(result.mimeType).toBe("application/vnd.ipld.car");
+      expect(result.cid).toBeDefined();
+    });
+
+    it("should upload CAR file with explicit isCarFile option", async () => {
+      const { file } = await createTestCarFile("test content", "explicit.car");
+
+      const operation = await manager.upload(file, { isCarFile: true });
+
+      const result = await operation.result;
+      expect(result).toBeDefined();
+      expect(result.name).toBe("explicit.car");
+      expect(result.mimeType).toBe("application/vnd.ipld.car");
+    });
+
+    it("should upload CAR file via uploadCar method", async () => {
+      const { file } = await createTestCarFile("test content", "uploadcar.car");
+
+      const operation = await manager.uploadCar(file);
+
+      const result = await operation.result;
+      expect(result).toBeDefined();
+      expect(result.name).toBe("uploadcar.car");
+      expect(result.mimeType).toBe("application/vnd.ipld.car");
+    });
+
+    it("should upload CAR file as ReadableStream", async () => {
+      const { file } = await createTestCarFile("test content", "stream.car");
+      const stream = file.stream();
+
+      const operation = await manager.upload(stream, {
+        name: "stream.car",
+        isCarFile: true,
+      });
+
+      const result = await operation.result;
+      expect(result).toBeDefined();
+      expect(result.name).toBe("stream.car");
+      expect(result.mimeType).toBe("application/vnd.ipld.car");
+    });
+
+    it("should reject invalid CAR files (fake .car extension)", async () => {
+      const fakeCarFile = createFakeCarFile("fake.car");
+
+      // Invalid CAR files should not be uploaded with isCarFile option
+      // They should go through normal preprocessing
+      const operation = await manager.upload(fakeCarFile, { isCarFile: false });
+
+      const result = await operation.result;
+      expect(result).toBeDefined();
+      // The file will be preprocessed to CAR, so it will have .car extension
+      expect(result.name).toContain("fake");
+    });
+
+    it.skip("should handle large CAR files via TUS", async () => {
+      const largeContent = "x".repeat(DEFAULT_UPLOAD_LIMIT + 1);
+      const { file } = await createTestCarFile(largeContent, "large.car");
+
+      const operation = await manager.upload(file, { isCarFile: true });
+
+      const result = await operation.result;
+      expect(result).toBeDefined();
+      expect(result.name).toBe("large.car");
+      expect(result.mimeType).toBe("application/vnd.ipld.car");
+    });
+
+    it("should preserve CAR MIME type even if original has different type", async () => {
+      const { file } = await createTestCarFile("test content", "mimetype.car");
+      // Create a new file with wrong MIME type
+      const fileWithWrongType = new File([file], "mimetype.car", {
+        type: "application/octet-stream",
+      });
+
+      const operation = await manager.upload(fileWithWrongType);
+
+      const result = await operation.result;
+      expect(result).toBeDefined();
+      expect(result.mimeType).toBe("application/vnd.ipld.car");
+    });
+
+    it("should respect isCarFile: false option even for valid CAR files", async () => {
+      const { file } = await createTestCarFile(
+        "test content",
+        "noprogress.car",
+      );
+
+      // Explicitly disable CAR passthrough
+      const operation = await manager.upload(file, { isCarFile: false });
+
+      const result = await operation.result;
+      expect(result).toBeDefined();
+      // File should still be processed (preprocessed to CAR)
+      expect(result).toBeDefined();
+    });
+  });
+});

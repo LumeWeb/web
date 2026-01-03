@@ -1,0 +1,85 @@
+{
+  "name": "@lumeweb/pinner",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./adapters/pinata": {
+      "types": "./dist/esm/adapters/pinata.d.ts",
+      "import": "./dist/esm/adapters/pinata.js"
+    },
+    "./blockstore": {
+      "types": "./dist/esm/blockstore/index.d.ts",
+      "browser": {
+        "types": "./dist/esm/blockstore/unstorage.browser.d.ts",
+        "import": "./dist/esm/blockstore/unstorage.browser.js"
+      },
+      "node": {
+        "types": "./dist/esm/blockstore/unstorage.node.d.ts",
+        "import": "./dist/esm/blockstore/unstorage.node.js"
+      },
+      "default": {
+        "types": "./dist/esm/blockstore/unstorage.node.d.ts",
+        "import": "./dist/esm/blockstore/unstorage.node.js"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest",
+    "lint": "tsc --noEmit",
+    "coverage": "vitest --coverage"
+  },
+  "dependencies": {
+    "@helia/car": "^5.3.3",
+    "@helia/http": "^3.0.14",
+    "@helia/unixfs": "^6.0.4",
+    "@ipfs-shipyard/pinning-service-client": "^3.0.0",
+    "@ipld/car": "^5.4.2",
+    "@lumeweb/portal-sdk": "workspace:*",
+    "@lumeweb/uppy-post-upload": "workspace:*",
+    "@uppy/core": "^5.2.0",
+    "@uppy/tus": "^5.1.0",
+    "blockstore-idb": "^1.1.8",
+    "datastore-idb": "^1.1.0",
+    "idb-keyval": "^6.2.2",
+    "interface-blockstore": "^6.0.1",
+    "interface-datastore": "^9.0.2",
+    "interface-store": "^7.0.1",
+    "ky": "^1.14.2",
+    "multiformats": "^13.4.2",
+    "p-defer": "^4.0.1",
+    "progress-events": "^1.0.1",
+    "tsdown": "0.19.0-beta.2",
+    "tus-js-client": "4.3.1",
+    "unstorage": "^1.17.3"
+  },
+  "devDependencies": {
+    "@mswjs/interceptors": "^0.40.0",
+    "@types/uuid": "^11.0.0",
+    "@vitest/browser-playwright": "^4.0.16",
+    "@vitest/ui": "4.0.15",
+    "blockstore-core": "^6.1.1",
+    "datastore-core": "^11.0.2",
+    "happy-dom": "^20.0.11",
+    "msw": "^2.12.7",
+    "playwright": "^1.57.0",
+    "tus-node-server": "^0.9.0",
+    "typescript": "^5.9.3",
+    "uuid": "^13.0.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^4.0.16"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}

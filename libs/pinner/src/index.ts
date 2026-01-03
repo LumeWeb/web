@@ -1,0 +1,64 @@
+// Core exports
+export { Pinner } from "./pinner";
+export type { PinnerConfig } from "./config";
+
+// Upload exports
+export type {
+  UploadResult,
+  UploadOptions,
+  UploadProgress,
+  UploadOperation,
+  UploadInput,
+} from "@/types/upload";
+export { UploadManager } from "./upload/manager";
+export {
+  preprocessToCar,
+  isCarFile,
+  destroyCarPreprocessor,
+  type CarPreprocessOptions,
+  type CarPreprocessResult,
+} from "./upload/car";
+
+// Pin exports
+export type {
+  RemotePins,
+  RemotePin,
+  RemoteAddOptions,
+  RemoteLsOptions,
+} from "@/types/pin";
+
+// Error exports
+export {
+  PinnerError,
+  ConfigurationError,
+  AuthenticationError,
+  UploadError,
+  NetworkError,
+  ValidationError,
+  EmptyFileError,
+  TimeoutError,
+  PinError,
+  NotFoundError,
+  RateLimitError,
+} from "./errors";
+
+// Type guards
+export { isRetryable, isAuthenticationError } from "./types/type-guards";
+
+// MIME type constants
+export { MIME_TYPE_CAR, MIME_TYPE_OCTET_STREAM, FILE_EXTENSION_CAR } from "./types/mime-types";
+
+// Blockstore exports
+export { createBlockstore, createDatastore, setDriverFactory } from "./blockstore";
+export type { UnstorageBlockstoreOptions } from "./blockstore";
+
+// Stream utilities
+export {
+  streamToBlob,
+  calculateStreamSize,
+  asyncGeneratorToReadableStream,
+  readableStreamToAsyncIterable,
+} from "./utils/stream";
+
+// Pinata adapter
+export { pinataAdapter } from "./adapters/pinata";
