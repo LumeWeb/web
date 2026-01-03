@@ -4,12 +4,15 @@ import type { CsvFormatterOptions } from "./csv-options";
  * Escape special regex characters in a string.
  */
 function escapeRegExp(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\import type { CsvFormatterOptions } from "./csv-options";');
+  return str.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    '\\import type { CsvFormatterOptions } from "./csv-options";',
+  );
 }
 
 /**
  * Handles formatting of individual CSV fields including quoting and escaping.
- * 
+ *
  * This implementation is derived from @fast-csv/format (https://github.com/C2FO/fast-csv)
  * Copyright (c) 2011 C2FO Labs, LLC
  * Licensed under the MIT License
@@ -29,11 +32,16 @@ export class FieldFormatter {
       this._headers = null;
     }
 
-    const quote = options.quote === true ? '"' : (options.quote === false ? '' : options.quote ?? '"');
-    this.quoteReplaceRegExp = new RegExp(quote, 'g');
+    const quote =
+      options.quote === true
+        ? '"'
+        : options.quote === false
+          ? ""
+          : (options.quote ?? '"');
+    this.quoteReplaceRegExp = new RegExp(quote, "g");
 
     // Use lodash.escapeRegExp pattern for delimiter and row delimiter
-    const escapePattern = `[${escapeRegExp(options.delimiter ?? ',')}${escapeRegExp(options.rowDelimiter ?? '\n')}|\r|\n]`;
+    const escapePattern = `[${escapeRegExp(options.delimiter ?? ",")}${escapeRegExp(options.rowDelimiter ?? "\n")}|\r|\n]`;
     this.escapePatternRegExp = new RegExp(escapePattern);
   }
 
@@ -49,18 +57,18 @@ export class FieldFormatter {
    * Escape special regex characters in a string.
    */
   #escapeRegExpString(str: string): string {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   /**
    * Determine if a field should be quoted.
    */
   private shouldQuote(fieldIndex: number, isHeader: boolean): boolean {
-    const quoteConfig = isHeader 
-      ? this.options.quoteHeaders 
+    const quoteConfig = isHeader
+      ? this.options.quoteHeaders
       : this.options.quoteColumns;
 
-    if (typeof quoteConfig === 'boolean') {
+    if (typeof quoteConfig === "boolean") {
       return quoteConfig;
     }
 
@@ -68,7 +76,7 @@ export class FieldFormatter {
       return quoteConfig[fieldIndex] === true;
     }
 
-    if (this._headers !== null && typeof quoteConfig === 'object') {
+    if (this._headers !== null && typeof quoteConfig === "object") {
       return quoteConfig[this._headers[fieldIndex]] === true;
     }
 
@@ -79,22 +87,30 @@ export class FieldFormatter {
    * Format a single field value.
    */
   format(field: unknown, fieldIndex: number, isHeader: boolean): string {
-    const quote = this.options.quote === true ? '"' : (this.options.quote === false ? '' : this.options.quote ?? '"');
+    const quote =
+      this.options.quote === true
+        ? '"'
+        : this.options.quote === false
+          ? ""
+          : (this.options.quote ?? '"');
     const escape = this.options.escape ?? quote;
 
     // Convert to string, handle null/undefined
-    const preparedField = `${field == null ? '' : field}`.replace(/\0/g, '');
+    const preparedField = `${field == null ? "" : field}`.replace(/\0/g, "");
 
     // Handle quote escaping
-    if (quote !== '') {
+    if (quote !== "") {
       const shouldEscape = preparedField.indexOf(quote) !== -1;
       if (shouldEscape) {
-        return this.quoteField(preparedField.replace(this.quoteReplaceRegExp, `${escape}${quote}`));
+        return this.quoteField(
+          preparedField.replace(this.quoteReplaceRegExp, `${escape}${quote}`),
+        );
       }
     }
 
     // Check if field needs quoting (contains delimiter, row delimiter, etc.)
-    const hasEscapeCharacters = preparedField.search(this.escapePatternRegExp) !== -1;
+    const hasEscapeCharacters =
+      preparedField.search(this.escapePatternRegExp) !== -1;
     if (hasEscapeCharacters || this.shouldQuote(fieldIndex, isHeader)) {
       return this.quoteField(preparedField);
     }
@@ -106,7 +122,12 @@ export class FieldFormatter {
    * Quote a field value.
    */
   private quoteField(field: string): string {
-    const quote = this.options.quote === true ? '"' : (this.options.quote === false ? '' : this.options.quote ?? '"');
+    const quote =
+      this.options.quote === true
+        ? '"'
+        : this.options.quote === false
+          ? ""
+          : (this.options.quote ?? '"');
     return `${quote}${field}${quote}`;
   }
 }

@@ -1,12 +1,14 @@
 import type { PinnerConfig } from "./config";
 import { UploadManager } from "./upload";
 import { PinClient } from "./pin";
+import type { UploadMethodAndBuilder } from "@/upload/builder";
 import { createUploadBuilderNamespace } from "@/upload/builder";
 import type {
   UploadOperation,
   UploadOptions,
   UploadResult,
 } from "@/types/upload";
+import type { OperationPollingOptions } from "@lumeweb/portal-sdk";
 import type {
   AbortOptions,
   RemoteAddOptions,
@@ -15,7 +17,6 @@ import type {
   RemotePins,
 } from "@/types/pin";
 import { CID } from "multiformats/cid";
-import type { UploadMethodAndBuilder } from "@/upload/builder";
 
 export class Pinner {
   private uploadManager: UploadManager;
@@ -72,6 +73,19 @@ export class Pinner {
   ): Promise<UploadResult> {
     const operation = await this.upload(file, options);
     return operation.result;
+  }
+
+  /**
+   * Wait for an operation to complete or reach a settled state.
+   * @param input Either an operation ID (number) or an UploadResult
+   * @param options Polling options (interval, timeout, settledStates)
+   * @returns UploadResult with operation status merged in
+   */
+  async waitForOperation(
+    input: number | UploadResult,
+    options?: OperationPollingOptions,
+  ): Promise<UploadResult> {
+    return this.uploadManager.waitForOperation(input, options);
   }
 
   /**

@@ -1,3 +1,10 @@
+import type { OperationPollingOptions } from "@lumeweb/portal-sdk";
+
+/**
+ * Symbol used to brand UploadResult for type checking
+ */
+export const UploadResultSymbol = Symbol("UploadResult");
+
 export interface UploadResult {
   /**
    * Unique identifier for this upload operation.
@@ -50,9 +57,33 @@ export interface UploadResult {
    * Useful for passthrough of pre-generated CAR files.
    */
   isCarFile?: boolean;
+
+  /**
+   * Portal operation ID for tracking the pinning operation.
+   * Can be used with waitForOperation() to wait for the operation to complete.
+   */
+  operationId?: number;
+
+  /**
+   * Symbol brand for type checking - used to identify UploadResult objects
+   */
+  [UploadResultSymbol]?: true;
 }
 
 export type UploadInput = File | ReadableStream<Uint8Array>;
+
+/**
+ * Type guard to check if a value is an UploadResult
+ * Uses the UploadResultSymbol for reliable type checking
+ */
+export function isUploadResult(value: unknown): value is UploadResult {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    UploadResultSymbol in value &&
+    value[UploadResultSymbol] === true
+  );
+}
 
 export interface UploadOptions {
   /**
@@ -102,6 +133,19 @@ export interface UploadOptions {
    * Useful for passthrough of pre-generated CAR files.
    */
   isCarFile?: boolean;
+
+  /**
+   * Whether to wait for the pinning operation to complete/fail.
+   * When true, the upload will block until the operation reaches a settled state
+   * (completed, failed, or error). Default is false (upload only).
+   */
+  waitForOperation?: boolean;
+
+  /**
+   * Polling options for waiting on operation completion.
+   * Only used when waitForOperation is true.
+   */
+  operationPollingOptions?: OperationPollingOptions;
 }
 
 export interface UploadProgress {
@@ -172,6 +216,18 @@ export interface PinnerUploadBuilder {
    * Set custom key-value metadata.
    */
   keyvalues(kv: Record<string, string>): this;
+
+  /**
+   * Whether to wait for the pinning operation to complete/fail.
+   * When true, the upload will block until the operation reaches a settled state.
+   */
+  waitForOperation(wait: boolean): this;
+
+  /**
+   * Set polling options for waiting on operation completion.
+   * Only used when waitForOperation is true.
+   */
+  operationPollingOptions(options: OperationPollingOptions): this;
 
   /**
    * Start the upload and return UploadOperation with controls.

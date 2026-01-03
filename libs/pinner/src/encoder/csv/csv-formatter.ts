@@ -6,7 +6,7 @@ export type { CsvFormatterOptions };
 /**
  * Simple CSV formatter without streaming support.
  * Converts arrays of objects or arrays to CSV strings.
- * 
+ *
  * This implementation is derived from @fast-csv/format (https://github.com/C2FO/fast-csv)
  * Copyright (c) 2011 C2FO Labs, LLC
  * Licensed under the MIT License
@@ -19,8 +19,8 @@ export class CsvFormatter {
   constructor(options: CsvFormatterOptions = {}) {
     this.options = {
       objectMode: true,
-      delimiter: ',',
-      rowDelimiter: '\n',
+      delimiter: ",",
+      rowDelimiter: "\n",
       quote: '"',
       escape: undefined,
       quoteColumns: false,
@@ -30,18 +30,19 @@ export class CsvFormatter {
       includeEndRowDelimiter: false,
       transform: undefined,
       writeBOM: false,
-      BOM: '\ufeff',
+      BOM: "\ufeff",
       alwaysWriteHeaders: false,
       ...options,
     };
 
     // Set escape to quote if not provided
-    if (typeof this.options.escape !== 'string') {
-      this.options.escape = this.options.quote === true ? '"' : (this.options.quote as string);
+    if (typeof this.options.escape !== "string") {
+      this.options.escape =
+        this.options.quote === true ? '"' : (this.options.quote as string);
     }
 
     // Set quoteHeaders to quoteColumns if not provided
-    if (typeof this.options.quoteHeaders === 'undefined') {
+    if (typeof this.options.quoteHeaders === "undefined") {
       this.options.quoteHeaders = this.options.quoteColumns;
     }
 
@@ -49,7 +50,7 @@ export class CsvFormatter {
     if (this.options.quote === true) {
       this.options.quote = '"';
     } else if (this.options.quote === false) {
-      this.options.quote = '';
+      this.options.quote = "";
     }
 
     this.rowFormatter = new RowFormatter(this.options);
@@ -64,7 +65,7 @@ export class CsvFormatter {
 
     // Write BOM if configured
     if (!this.hasWrittenBOM) {
-      chunks.push(this.options.BOM || '\ufeff');
+      chunks.push(this.options.BOM || "\ufeff");
       this.hasWrittenBOM = true;
     }
 
@@ -78,7 +79,7 @@ export class CsvFormatter {
     const finishRows = this.rowFormatter.finish();
     chunks.push(...finishRows);
 
-    return chunks.join('');
+    return chunks.join("");
   }
 
   /**
@@ -89,20 +90,22 @@ export class CsvFormatter {
 
     // Write BOM if configured
     if (!this.hasWrittenBOM) {
-      chunks.push(this.options.BOM || '\ufeff');
+      chunks.push(this.options.BOM || "\ufeff");
       this.hasWrittenBOM = true;
     }
 
     const formattedRows = this.rowFormatter.format(row);
     chunks.push(...formattedRows);
 
-    return chunks.join('');
+    return chunks.join("");
   }
 }
 
 /**
  * Create a CSV formatter with the given options.
  */
-export function createCsvFormatter(options?: CsvFormatterOptions): CsvFormatter {
+export function createCsvFormatter(
+  options?: CsvFormatterOptions,
+): CsvFormatter {
   return new CsvFormatter(options);
 }

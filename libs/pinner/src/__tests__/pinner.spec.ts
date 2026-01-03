@@ -16,6 +16,7 @@ const mockUploadManagerInstance = {
   upload: vi.fn(),
   uploadDirectory: vi.fn(),
   uploadCar: vi.fn(),
+  waitForOperation: vi.fn(),
   destroy: vi.fn(),
 };
 
@@ -304,6 +305,235 @@ describe("Pinner", () => {
     });
   });
 
+  describe("waitForOperation", () => {
+    describe("with operation ID", () => {
+      it("should wait for operation by ID", async () => {
+        const mockCid = await createMockCID(10);
+        const mockResult: UploadResult = {
+          id: "12345",
+          cid: mockCid,
+          name: "test",
+          size: 0,
+          mimeType: "",
+          createdAt: new Date(),
+          numberOfFiles: 1,
+          operationId: 12345,
+        };
+
+        mockUploadManagerInstance.waitForOperation.mockResolvedValue(
+          mockResult,
+        );
+
+        const result = await pinner.waitForOperation(12345);
+
+        expect(mockUploadManagerInstance.waitForOperation).toHaveBeenCalledWith(
+          12345,
+          undefined,
+        );
+        expect(result).toBe(mockResult);
+      });
+
+      it("should pass polling options", async () => {
+        const mockCid = await createMockCID(11);
+        const mockResult: UploadResult = {
+          id: "12345",
+          cid: mockCid,
+          name: "test",
+          size: 0,
+          mimeType: "",
+          createdAt: new Date(),
+          numberOfFiles: 1,
+          operationId: 12345,
+        };
+
+        mockUploadManagerInstance.waitForOperation.mockResolvedValue(
+          mockResult,
+        );
+
+        const pollingOptions = {
+          interval: 1000,
+          timeout: 60000,
+          settledStates: ["completed"],
+        };
+
+        const result = await pinner.waitForOperation(12345, pollingOptions);
+
+        expect(mockUploadManagerInstance.waitForOperation).toHaveBeenCalledWith(
+          12345,
+          pollingOptions,
+        );
+        expect(result).toBe(mockResult);
+      });
+    });
+
+    describe("with UploadResult", () => {
+      it("should wait for operation using UploadResult", async () => {
+        const mockCid = await createMockCID(12);
+        const uploadResult: UploadResult = {
+          id: "upload-123",
+          cid: mockCid,
+          name: "original.txt",
+          size: 1024,
+          mimeType: "text/plain",
+          createdAt: new Date(),
+          numberOfFiles: 1,
+          operationId: 12345,
+        };
+
+        const finalResult: UploadResult = {
+          id: "upload-123",
+          cid: mockCid,
+          name: "original.txt",
+          size: 1024,
+          mimeType: "text/plain",
+          createdAt: new Date(),
+          numberOfFiles: 1,
+          operationId: 12345,
+        };
+
+        mockUploadManagerInstance.waitForOperation.mockResolvedValue(
+          finalResult,
+        );
+
+        const result = await pinner.waitForOperation(uploadResult);
+
+        expect(mockUploadManagerInstance.waitForOperation).toHaveBeenCalledWith(
+          uploadResult,
+          undefined,
+        );
+        expect(result).toBe(finalResult);
+      });
+
+      it("should pass polling options with UploadResult", async () => {
+        const mockCid = await createMockCID(13);
+        const uploadResult: UploadResult = {
+          id: "upload-123",
+          cid: mockCid,
+          name: "original.txt",
+          size: 1024,
+          mimeType: "text/plain",
+          createdAt: new Date(),
+          numberOfFiles: 1,
+          operationId: 12345,
+        };
+
+        const finalResult: UploadResult = {
+          id: "upload-123",
+          cid: mockCid,
+          name: "original.txt",
+          size: 1024,
+          mimeType: "text/plain",
+          createdAt: new Date(),
+          numberOfFiles: 1,
+          operationId: 12345,
+        };
+
+        mockUploadManagerInstance.waitForOperation.mockResolvedValue(
+          finalResult,
+        );
+
+        const pollingOptions = { interval: 2000 };
+
+        const result = await pinner.waitForOperation(
+          uploadResult,
+          pollingOptions,
+        );
+
+        expect(mockUploadManagerInstance.waitForOperation).toHaveBeenCalledWith(
+          uploadResult,
+          pollingOptions,
+        );
+        expect(result).toBe(finalResult);
+      });
+    });
+  });
+
+  describe("upload with waitForOperation option", () => {
+    const mockFile = new File(["test content"], "test.txt", {
+      type: "text/plain",
+    });
+    let mockUploadResult: UploadResult;
+    let mockOperation: UploadOperation;
+
+    beforeEach(async () => {
+      const mockCid = await createMockCID(14);
+      mockUploadResult = createMockUploadResult(
+        "upload-123",
+        mockCid,
+        "test.txt",
+        12,
+        "text/plain",
+      );
+      mockUploadResult.operationId = 12345;
+      mockOperation = await createMockOperation(mockUploadResult);
+      mockUploadManagerInstance.upload.mockResolvedValue(mockOperation);
+    });
+
+    it("should pass waitForOperation option to UploadManager", async () => {
+      const options: UploadOptions = {
+        waitForOperation: true,
+      };
+
+      const operation = await pinner.upload(mockFile, options);
+
+      expect(mockUploadManagerInstance.upload).toHaveBeenCalledWith(
+        mockFile,
+        options,
+      );
+      expect(operation).toBe(mockOperation);
+    });
+
+    it("should pass operationPollingOptions to UploadManager", async () => {
+      const options: UploadOptions = {
+        waitForOperation: true,
+        operationPollingOptions: {
+          interval: 1000,
+          timeout: 60000,
+          settledStates: ["completed"],
+        },
+      };
+
+      const operation = await pinner.upload(mockFile, options);
+
+      expect(mockUploadManagerInstance.upload).toHaveBeenCalledWith(
+        mockFile,
+        options,
+      );
+      expect(operation).toBe(mockOperation);
+    });
+
+    it("should work with upload builder", async () => {
+      const operation = await pinner.upload
+        .file(mockFile)
+        .waitForOperation(true)
+        .pin();
+
+      expect(mockUploadManagerInstance.upload).toHaveBeenCalledWith(mockFile, {
+        waitForOperation: true,
+      });
+      expect(operation).toBe(mockOperation);
+    });
+
+    it("should work with upload builder and polling options", async () => {
+      const pollingOptions = {
+        interval: 2000,
+        timeout: 120000,
+      };
+
+      const operation = await pinner.upload
+        .file(mockFile)
+        .waitForOperation(true)
+        .operationPollingOptions(pollingOptions)
+        .pin();
+
+      expect(mockUploadManagerInstance.upload).toHaveBeenCalledWith(mockFile, {
+        waitForOperation: true,
+        operationPollingOptions: pollingOptions,
+      });
+      expect(operation).toBe(mockOperation);
+    });
+  });
+
   describe("uploadDirectory", () => {
     const mockFiles = [
       new File(["file1"], "file1.txt"),
@@ -391,32 +621,33 @@ describe("Pinner", () => {
         keyvalues: { type: "file" },
       });
 
-      expect(mockUploadManagerInstance.upload).toHaveBeenCalledWith(
-        mockFile,
-        {
-          name: "custom.txt",
-          keyvalues: { type: "file" },
-        },
-      );
+      expect(mockUploadManagerInstance.upload).toHaveBeenCalledWith(mockFile, {
+        name: "custom.txt",
+        keyvalues: { type: "file" },
+      });
       expect(operation).toBe(mockOperation);
     });
 
     it("should support upload.file() builder", async () => {
-      const operation = await pinner.upload.file(mockFile).name("custom.txt").keyvalues({ type: "file" }).pin();
+      const operation = await pinner.upload
+        .file(mockFile)
+        .name("custom.txt")
+        .keyvalues({ type: "file" })
+        .pin();
 
-      expect(mockUploadManagerInstance.upload).toHaveBeenCalledWith(
-        mockFile,
-        {
-          name: "custom.txt",
-          keyvalues: { type: "file" },
-        },
-      );
+      expect(mockUploadManagerInstance.upload).toHaveBeenCalledWith(mockFile, {
+        name: "custom.txt",
+        keyvalues: { type: "file" },
+      });
       expect(operation).toBe(mockOperation);
     });
 
     it("should support upload.json() builder", async () => {
       const jsonData = { foo: "bar", nested: { value: 123 } };
-      const operation = await pinner.upload.json(jsonData).name("data.json").pin();
+      const operation = await pinner.upload
+        .json(jsonData)
+        .name("data.json")
+        .pin();
 
       expect(mockUploadManagerInstance.upload).toHaveBeenCalled();
       const uploadCall = mockUploadManagerInstance.upload.mock.calls[0];
@@ -432,7 +663,10 @@ describe("Pinner", () => {
 
     it("should support upload.base64() builder", async () => {
       const base64Data = "SGVsbG8gV29ybGQ=";
-      const operation = await pinner.upload.base64(base64Data).name("hello.txt").pin();
+      const operation = await pinner.upload
+        .base64(base64Data)
+        .name("hello.txt")
+        .pin();
 
       expect(mockUploadManagerInstance.upload).toHaveBeenCalled();
       const uploadCall = mockUploadManagerInstance.upload.mock.calls[0];
@@ -447,7 +681,10 @@ describe("Pinner", () => {
 
     it("should support upload.url() builder", async () => {
       const url = "https://httpbin.org/robots.txt";
-      const operation = await pinner.upload.url(url).name("remote-file.txt").pin();
+      const operation = await pinner.upload
+        .url(url)
+        .name("remote-file.txt")
+        .pin();
 
       expect(mockUploadManagerInstance.upload).toHaveBeenCalled();
       const uploadCall = mockUploadManagerInstance.upload.mock.calls[0];
@@ -462,7 +699,10 @@ describe("Pinner", () => {
 
     it("should support upload.csv() builder with string", async () => {
       const csvData = "name,age\nJohn,30\nJane,25";
-      const operation = await pinner.upload.csv(csvData).name("users.csv").pin();
+      const operation = await pinner.upload
+        .csv(csvData)
+        .name("users.csv")
+        .pin();
 
       expect(mockUploadManagerInstance.upload).toHaveBeenCalled();
       const uploadCall = mockUploadManagerInstance.upload.mock.calls[0];
@@ -481,7 +721,10 @@ describe("Pinner", () => {
         { name: "John", age: 30 },
         { name: "Jane", age: 25 },
       ];
-      const operation = await pinner.upload.csv(csvData).name("users.csv").pin();
+      const operation = await pinner.upload
+        .csv(csvData)
+        .name("users.csv")
+        .pin();
 
       expect(mockUploadManagerInstance.upload).toHaveBeenCalled();
       const uploadCall = mockUploadManagerInstance.upload.mock.calls[0];
@@ -497,7 +740,10 @@ describe("Pinner", () => {
         ["John", 30],
         ["Jane", 25],
       ];
-      const operation = await pinner.upload.csv(csvData).name("users.csv").pin();
+      const operation = await pinner.upload
+        .csv(csvData)
+        .name("users.csv")
+        .pin();
 
       expect(mockUploadManagerInstance.upload).toHaveBeenCalled();
       const uploadCall = mockUploadManagerInstance.upload.mock.calls[0];
@@ -509,7 +755,10 @@ describe("Pinner", () => {
 
     it("should support upload.text() builder", async () => {
       const textData = "Hello, World!";
-      const operation = await pinner.upload.text(textData).name("hello.txt").pin();
+      const operation = await pinner.upload
+        .text(textData)
+        .name("hello.txt")
+        .pin();
 
       expect(mockUploadManagerInstance.upload).toHaveBeenCalled();
       const uploadCall = mockUploadManagerInstance.upload.mock.calls[0];
@@ -525,7 +774,11 @@ describe("Pinner", () => {
 
     it("should support upload.content() as alias for text()", async () => {
       const textData = "Sample content";
-      const operation = await pinner.upload.content(textData).name("sample.txt").keyvalues({ type: "text" }).pin();
+      const operation = await pinner.upload
+        .content(textData)
+        .name("sample.txt")
+        .keyvalues({ type: "text" })
+        .pin();
 
       expect(mockUploadManagerInstance.upload).toHaveBeenCalled();
       const uploadCall = mockUploadManagerInstance.upload.mock.calls[0];
@@ -544,7 +797,10 @@ describe("Pinner", () => {
         type: "application/vnd.ipld.car",
       });
 
-      const operation = await pinner.upload.raw(mockCarFile).name("my-data.car").pin();
+      const operation = await pinner.upload
+        .raw(mockCarFile)
+        .name("my-data.car")
+        .pin();
 
       expect(mockUploadManagerInstance.uploadCar).toHaveBeenCalledWith(
         mockCarFile,
@@ -564,7 +820,11 @@ describe("Pinner", () => {
         },
       });
 
-      const operation = await pinner.upload.raw(carStream).name("stream-data.car").keyvalues({ source: "stream" }).pin();
+      const operation = await pinner.upload
+        .raw(carStream)
+        .name("stream-data.car")
+        .keyvalues({ source: "stream" })
+        .pin();
 
       expect(mockUploadManagerInstance.uploadCar).toHaveBeenCalledWith(
         carStream,
@@ -604,13 +864,10 @@ describe("Pinner", () => {
         .keyvalues({ key1: "value1", key2: "value2" })
         .pin();
 
-      expect(mockUploadManagerInstance.upload).toHaveBeenCalledWith(
-        mockFile,
-        {
-          name: "my-file.txt",
-          keyvalues: { key1: "value1", key2: "value2" },
-        },
-      );
+      expect(mockUploadManagerInstance.upload).toHaveBeenCalledWith(mockFile, {
+        name: "my-file.txt",
+        keyvalues: { key1: "value1", key2: "value2" },
+      });
       expect(operation).toBe(mockOperation);
     });
 

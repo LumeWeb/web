@@ -1,13 +1,13 @@
 import type {
   CsvFormatterOptions,
-  RowTransformCallback,
   RowTransform,
+  RowTransformCallback,
 } from "./csv-options";
 import { FieldFormatter } from "./field-formatter";
 
 /**
  * Handles formatting of CSV rows including headers and column extraction.
- * 
+ *
  * This implementation is derived from @fast-csv/format (https://github.com/C2FO/fast-csv)
  * Copyright (c) 2011 C2FO Labs, LLC
  * Licensed under the MIT License
@@ -25,7 +25,9 @@ export class RowFormatter {
     this.options = options;
     this.fieldFormatter = new FieldFormatter(options);
     this.headers = Array.isArray(options.headers) ? options.headers : null;
-    this.shouldWriteHeaders = options.writeHeaders ?? (Array.isArray(options.headers) || options.headers === true);
+    this.shouldWriteHeaders =
+      options.writeHeaders ??
+      (Array.isArray(options.headers) || options.headers === true);
 
     if (this.headers !== null) {
       this.fieldFormatter.headers = this.headers;
@@ -44,7 +46,9 @@ export class RowFormatter {
     if (transformFn.length === 1) {
       return (row: unknown, cb: RowTransformCallback) => {
         try {
-          const transformedRow = (transformFn as (row: unknown) => unknown)(row);
+          const transformedRow = (transformFn as (row: unknown) => unknown)(
+            row,
+          );
           cb(null, transformedRow);
         } catch (e) {
           cb(e instanceof Error ? e : new Error(String(e)));
@@ -121,7 +125,9 @@ export class RowFormatter {
       }
     }
 
-    throw new Error('Async transforms are not supported in synchronous CSV formatting');
+    throw new Error(
+      "Async transforms are not supported in synchronous CSV formatting",
+    );
   }
 
   /**
@@ -133,14 +139,16 @@ export class RowFormatter {
     // Write headers if alwaysWriteHeaders is true and no rows were written
     if (this.options.alwaysWriteHeaders && this.rowCount === 0) {
       if (!this.headers) {
-        throw new Error('`alwaysWriteHeaders` option is set to true but `headers` option not provided.');
+        throw new Error(
+          "`alwaysWriteHeaders` option is set to true but `headers` option not provided.",
+        );
       }
       rows.push(this.formatColumns(this.headers, true));
     }
 
     // Add end row delimiter if configured
     if (this.options.includeEndRowDelimiter) {
-      rows.push(this.options.rowDelimiter || '\n');
+      rows.push(this.options.rowDelimiter || "\n");
     }
 
     return rows;
@@ -149,7 +157,10 @@ export class RowFormatter {
   /**
    * Check if headers need to be written.
    */
-  private checkHeaders(row: unknown): { shouldFormatColumns: boolean; headers: string[] | null } {
+  private checkHeaders(row: unknown): {
+    shouldFormatColumns: boolean;
+    headers: string[] | null;
+  } {
     if (this.headers) {
       return { shouldFormatColumns: true, headers: this.headers };
     }
@@ -163,8 +174,7 @@ export class RowFormatter {
     }
 
     // If the row is equal to headers, don't format (it's the header row itself)
-    if (Array.isArray(row) &&
-        headers.every((header, i) => header === row[i])) {
+    if (Array.isArray(row) && headers.every((header, i) => header === row[i])) {
       return { shouldFormatColumns: false, headers };
     }
 
@@ -202,19 +212,21 @@ export class RowFormatter {
    */
   private gatherColumns(row: unknown): unknown[] {
     if (this.headers === null) {
-      throw new Error('Headers is currently null');
+      throw new Error("Headers is currently null");
     }
 
     if (!Array.isArray(row)) {
       // Object: use headers to get values
-      return this.headers.map((header) => (row as Record<string, unknown>)[header]);
+      return this.headers.map(
+        (header) => (row as Record<string, unknown>)[header],
+      );
     }
 
     if (this.isRowHashArray(row)) {
       // Hash array: extract values
       return this.headers.map((header, i) => {
         const col = (row as unknown[][])[i];
-        return col ? col[1] : '';
+        return col ? col[1] : "";
       });
     }
 
@@ -234,14 +246,14 @@ export class RowFormatter {
   private formatColumns(columns: unknown[], isHeadersRow: boolean): string {
     const formattedCols = columns
       .map((field, i) => this.fieldFormatter.format(field, i, isHeadersRow))
-      .join(this.options.delimiter || ',');
+      .join(this.options.delimiter || ",");
 
     const { rowCount } = this;
     this.rowCount += 1;
 
     // Add row delimiter before all rows except the first
     if (rowCount > 0) {
-      return [this.options.rowDelimiter || '\n', formattedCols].join('');
+      return [this.options.rowDelimiter || "\n", formattedCols].join("");
     }
 
     return formattedCols;

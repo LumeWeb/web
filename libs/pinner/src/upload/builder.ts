@@ -1,7 +1,17 @@
 import type { Pinner } from "@/pinner";
-import type { PinnerUploadBuilder } from "@/types/upload";
-import type { UploadOptions, UploadOperation } from "@/types/upload";
-import { jsonToFile, base64ToFile, urlToFile, csvToFile, textToFile } from "@/encoder";
+import type {
+  PinnerUploadBuilder,
+  UploadOperation,
+  UploadOptions,
+} from "@/types/upload";
+import type { OperationPollingOptions } from "@lumeweb/portal-sdk";
+import {
+  base64ToFile,
+  csvToFile,
+  jsonToFile,
+  textToFile,
+  urlToFile,
+} from "@/encoder";
 import { validateUrl } from "@/utils/validation";
 
 /**
@@ -10,6 +20,8 @@ import { validateUrl } from "@/utils/validation";
 abstract class BaseUploadBuilder implements PinnerUploadBuilder {
   protected _name?: string;
   protected _keyvalues?: Record<string, string>;
+  protected _waitForOperation?: boolean;
+  protected _operationPollingOptions?: OperationPollingOptions;
 
   constructor(protected pinner: Pinner) {}
 
@@ -23,6 +35,16 @@ abstract class BaseUploadBuilder implements PinnerUploadBuilder {
     return this;
   }
 
+  waitForOperation(wait: boolean = true): this {
+    this._waitForOperation = wait;
+    return this;
+  }
+
+  operationPollingOptions(options: OperationPollingOptions): this {
+    this._operationPollingOptions = options;
+    return this;
+  }
+
   abstract pin(): Promise<UploadOperation>;
 
   protected buildOptions(): UploadOptions {
@@ -32,6 +54,12 @@ abstract class BaseUploadBuilder implements PinnerUploadBuilder {
     }
     if (this._keyvalues !== undefined) {
       options.keyvalues = this._keyvalues;
+    }
+    if (this._waitForOperation !== undefined) {
+      options.waitForOperation = this._waitForOperation;
+    }
+    if (this._operationPollingOptions !== undefined) {
+      options.operationPollingOptions = this._operationPollingOptions;
     }
     return options;
   }
@@ -186,9 +214,11 @@ export function createUploadBuilderNamespace(
 /**
  * Combined interface for upload that works as both a method and a builder namespace.
  */
-export type UploadMethodAndBuilder =
-  & ((file: File, options?: UploadOptions) => Promise<UploadOperation>)
-  & UploadBuilderNamespace;
+export type UploadMethodAndBuilder = ((
+  file: File,
+  options?: UploadOptions,
+) => Promise<UploadOperation>) &
+  UploadBuilderNamespace;
 
 /**
  * Export PinnerUploadBuilder for external use.

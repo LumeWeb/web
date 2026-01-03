@@ -55,6 +55,7 @@ export async function createMockUploadResult(
     numberOfFiles: overrides.numberOfFiles || 1,
     keyvalues: overrides.keyvalues,
     isDirectory: overrides.isDirectory,
+    operationId: overrides.operationId,
   };
 }
 

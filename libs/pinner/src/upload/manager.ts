@@ -1,11 +1,19 @@
-import { Sdk } from "@lumeweb/portal-sdk";
+import type { OperationPollingOptions } from "@lumeweb/portal-sdk";
+import {
+  OPERATION_STATUS,
+  type OperationsQueryParams,
+  Sdk,
+} from "@lumeweb/portal-sdk";
+import { createEqFilter } from "@lumeweb/query-builder";
 
 import type { PinnerConfig } from "../config";
 import type {
   UploadInput,
   UploadOperation,
   UploadOptions,
+  UploadResult,
 } from "@/types/upload";
+import { isUploadResult } from "@/types/upload";
 import { XHRUploadHandler } from "./xhr-upload";
 import { TUSUploadHandler } from "./tus-upload";
 import { DEFAULT_ENDPOINT, TUS_SIZE_THRESHOLD } from "@/types/constants";
@@ -81,6 +89,167 @@ export class UploadManager {
     return this.#uploadCarFile(input, options);
   }
 
+  /**
+   * Wait for an operation to complete or reach a settled state.
+   *
+   * Handles two scenarios:
+   * 1. If an operationId is provided (in UploadResult), uses it directly
+   * 2. If only CID is available, lists operations filtered by CID and polls the first result
+   *
+   * @param input Either an operation ID (number) or an UploadResult
+   * @param options Polling options (interval, timeout, settledStates)
+   * @returns UploadResult with operation status merged in
+   */
+  async waitForOperation(
+    input: number | UploadResult,
+    options?: OperationPollingOptions,
+  ): Promise<UploadResult> {
+    // Scenario 1: UploadResult with operationId - use it directly
+    if (isUploadResult(input) && input.operationId) {
+      const result = await this.portalSdk
+        .account()
+        .waitForOperation(input.operationId, options);
+
+      if (!result.success) {
+        throw new Error(
+          result.error?.message || `Operation ${input.operationId} failed`,
+        );
+      }
+
+      const operation = result.data;
+      if (!operation.cid) {
+        throw new Error(`Operation ${input.operationId} completed without CID`);
+      }
+
+      if (
+        operation.status?.toLowerCase() === OPERATION_STATUS.FAILED ||
+        operation.status?.toLowerCase() === OPERATION_STATUS.ERROR
+      ) {
+        throw new Error(
+          `Operation ${input.operationId} failed: ${operation.error || operation.status_message || "Unknown error"}`,
+        );
+      }
+
+      // Merge operation data into the original upload result
+      return {
+        ...input,
+        cid: operation.cid,
+        operationId: operation.id,
+      };
+    }
+
+    // Scenario 2: UploadResult with CID but no operationId - find by CID
+    if (isUploadResult(input) && input.cid) {
+      return await this.#waitForOperationByCid(input, options);
+    }
+
+    // Scenario 3: Only operation ID provided
+    const operationId = typeof input === "number" ? input : undefined;
+    if (operationId) {
+      const result = await this.portalSdk
+        .account()
+        .waitForOperation(operationId, options);
+
+      if (!result.success) {
+        throw new Error(
+          result.error?.message || `Operation ${operationId} failed`,
+        );
+      }
+
+      const operation = result.data;
+      if (!operation.cid) {
+        throw new Error(`Operation ${operationId} completed without CID`);
+      }
+
+      if (
+        operation.status?.toLowerCase() === OPERATION_STATUS.FAILED ||
+        operation.status?.toLowerCase() === OPERATION_STATUS.ERROR
+      ) {
+        throw new Error(
+          `Operation ${operationId} failed: ${operation.error || operation.status_message || "Unknown error"}`,
+        );
+      }
+
+      return {
+        id: operationId.toString(),
+        cid: operation.cid,
+        name: operation.operation_display_name || "Unknown",
+        size: 0,
+        mimeType: "",
+        createdAt: new Date(operation.started_at),
+        numberOfFiles: 1,
+        operationId: operation.id,
+      };
+    }
+
+    throw new Error(
+      "No operation ID or CID provided, cannot wait for operation",
+    );
+  }
+
+  /**
+   * Wait for an operation by CID.
+   *
+   * This is used when we have a CID from an upload but no operation ID.
+   * We list operations filtered by CID to find the operation ID,
+   * then use the SDK's waitForOperation for polling.
+   *
+   * @param uploadResult UploadResult with CID
+   * @param options Polling options (interval, timeout, settledStates)
+   * @returns UploadResult with operation status merged in
+   */
+  async #waitForOperationByCid(
+    uploadResult: UploadResult,
+    options?: OperationPollingOptions,
+  ): Promise<UploadResult> {
+    // List operations filtered by CID
+    const params: OperationsQueryParams = {
+      filters: [createEqFilter("cid", uploadResult.cid)],
+      pagination: { start: 0, end: 1 },
+    };
+
+    const result = await this.portalSdk.account().listOperations(params);
+
+    if (!result.success || !result.data || !result.data.data) {
+      throw new Error(`Failed to find operation with CID ${uploadResult.cid}`);
+    }
+
+    const operation = result.data.data;
+    const operationId = operation.id;
+
+    // Use SDK's waitForOperation for polling
+    const waitResult = await this.portalSdk
+      .account()
+      .waitForOperation(operationId, options);
+
+    if (!waitResult.success) {
+      throw new Error(
+        waitResult.error?.message || `Operation ${operationId} failed`,
+      );
+    }
+
+    const finalOperation = waitResult.data;
+    if (!finalOperation.cid) {
+      throw new Error(`Operation ${operationId} completed without CID`);
+    }
+
+    if (
+      finalOperation.status?.toLowerCase() === OPERATION_STATUS.FAILED ||
+      finalOperation.status?.toLowerCase() === OPERATION_STATUS.ERROR
+    ) {
+      throw new Error(
+        `Operation ${operationId} failed: ${finalOperation.error || finalOperation.status_message || "Unknown error"}`,
+      );
+    }
+
+    // Return merged result
+    return {
+      ...uploadResult,
+      cid: finalOperation.cid,
+      operationId: finalOperation.id,
+    };
+  }
+
   #validateInput(input: UploadInput, options?: UploadOptions): void {
     if (input instanceof File) {
       if (input.size === 0) {
@@ -111,11 +280,21 @@ export class UploadManager {
       signal: options?.signal,
     });
 
-    return this.#uploadCarResult(
+    const operation = await this.#uploadCarResult(
       carResult,
       options?.name || "directory",
       options,
     );
+
+    if (options?.waitForOperation && operation.result) {
+      const uploadResult = await operation.result;
+      operation.result = this.waitForOperation(
+        { ...uploadResult, isDirectory: true, numberOfFiles: files.length },
+        options.operationPollingOptions,
+      );
+    }
+
+    return operation;
   }
 
   async #uploadInput(
@@ -193,7 +372,10 @@ export class UploadManager {
     }
 
     // For ReadableStream, rely on explicit isCarFile option or name extension
-    if (input instanceof ReadableStream && options?.name?.endsWith(FILE_EXTENSION_CAR)) {
+    if (
+      input instanceof ReadableStream &&
+      options?.name?.endsWith(FILE_EXTENSION_CAR)
+    ) {
       // We can't verify stream content without consuming it,
       // so we trust the explicit isCarFile option or extension
       return options?.isCarFile !== false;
@@ -288,11 +470,19 @@ export class UploadManager {
       isLargeFile = true;
     }
 
-    if (isLargeFile) {
-      return this.tusHandler.upload(input, options);
+    const operation = await (isLargeFile
+      ? this.tusHandler.upload(input, options)
+      : this.xhrHandler.upload(input, options));
+
+    if (options?.waitForOperation && operation.result) {
+      const uploadResult = await operation.result;
+      operation.result = this.waitForOperation(
+        uploadResult,
+        options.operationPollingOptions,
+      );
     }
 
-    return this.xhrHandler.upload(input, options);
+    return operation;
   }
 
   destroy(): void {

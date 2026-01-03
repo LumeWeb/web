@@ -112,9 +112,7 @@ describe("CsvEncoder", () => {
     });
 
     it("should handle newlines in values", async () => {
-      const data = [
-        { name: "John", description: "Line 1\nLine 2" },
-      ];
+      const data = [{ name: "John", description: "Line 1\nLine 2" }];
       const result = await csvToFile(data);
 
       const content = await result.file.text();

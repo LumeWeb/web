@@ -342,6 +342,9 @@ importers:
       '@lumeweb/portal-sdk':
         specifier: workspace:*
         version: link:../portal-sdk
+      '@lumeweb/query-builder':
+        specifier: workspace:*
+        version: link:../query-builder
       '@lumeweb/uppy-post-upload':
         specifier: workspace:*
         version: link:../uppy-post-upload

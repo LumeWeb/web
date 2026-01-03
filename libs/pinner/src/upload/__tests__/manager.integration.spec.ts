@@ -381,4 +381,133 @@ describe("UploadManager Integration Tests", () => {
       expect(result).toBeDefined();
     });
   });
+
+  describe("waitForOperation", () => {
+    it("should wait for operation by ID and return result", async () => {
+      const operationId = 12345;
+      const result = await manager.waitForOperation(operationId);
+
+      expect(result).toBeDefined();
+      expect(result.operationId).toBe(operationId);
+      expect(result.cid).toBeDefined();
+      expect(result.id).toBe(String(operationId));
+    });
+
+    it("should wait for operation with UploadResult and preserve metadata", async () => {
+      const stream = createReadableStream("test content");
+      const file = await streamToFile(stream, "test.car");
+
+      // First upload to get a result with operationId
+      const operation = await manager.upload(file);
+      const uploadResult = await operation.result;
+
+      expect(uploadResult.operationId).toBeDefined();
+      expect(uploadResult.size).toBeGreaterThan(0);
+      expect(uploadResult.name).toBe("test.car");
+
+      // Wait for operation using the upload result
+      const finalResult = await manager.waitForOperation(uploadResult);
+
+      // Verify original metadata is preserved
+      expect(finalResult.size).toBe(uploadResult.size);
+      expect(finalResult.name).toBe(uploadResult.name);
+      expect(finalResult.mimeType).toBe(uploadResult.mimeType);
+      expect(finalResult.numberOfFiles).toBe(uploadResult.numberOfFiles);
+      expect(finalResult.operationId).toBe(uploadResult.operationId);
+    });
+
+    it("should support custom polling options", async () => {
+      const operationId = 12346;
+      const pollingOptions = {
+        interval: 1000,
+        timeout: 60000,
+        settledStates: ["completed"] as string[],
+      };
+
+      const result = await manager.waitForOperation(
+        operationId,
+        pollingOptions,
+      );
+
+      expect(result).toBeDefined();
+      expect(result.operationId).toBe(operationId);
+    });
+
+    it("should throw error when operation fails", async () => {
+      const operationId = 99999;
+
+      await expect(manager.waitForOperation(operationId)).rejects.toThrow();
+    });
+  });
+
+  describe("upload with waitForOperation option", () => {
+    it("should wait for operation when waitForOperation is true", async () => {
+      const stream = createReadableStream("test content");
+      const file = await streamToFile(stream, "test.car");
+
+      const operation = await manager.upload(file, {
+        waitForOperation: true,
+      });
+
+      const result = await operation.result;
+
+      expect(result).toBeDefined();
+      expect(result.operationId).toBeDefined();
+      expect(result.cid).toBeDefined();
+    });
+
+    it("should pass custom polling options", async () => {
+      const stream = createReadableStream("test content");
+      const file = await streamToFile(stream, "test.car");
+
+      const operation = await manager.upload(file, {
+        waitForOperation: true,
+        operationPollingOptions: {
+          interval: 1000,
+          timeout: 60000,
+        },
+      });
+
+      const result = await operation.result;
+
+      expect(result).toBeDefined();
+      expect(result.operationId).toBeDefined();
+    });
+
+    it("should preserve upload metadata after waiting for operation", async () => {
+      const stream = createReadableStream("test content for metadata");
+      const file = await streamToFile(stream, "metadata-test.car");
+
+      const operation = await manager.upload(file, {
+        name: "custom-name.car",
+        waitForOperation: true,
+      });
+
+      const result = await operation.result;
+
+      expect(result).toBeDefined();
+      expect(result.operationId).toBeDefined();
+      expect(result.size).toBeGreaterThan(0);
+      expect(result.name).toBe("metadata-test.car");
+      expect(result.mimeType).toBe("application/vnd.ipld.car");
+    });
+
+    it("should work with directory upload", async () => {
+      const file1 = new File(["content1"], "file1.txt");
+      const file2 = new File(["content2"], "file2.txt");
+
+      const operation = await manager.uploadDirectory([file1, file2], {
+        name: "test-dir",
+        waitForOperation: true,
+      });
+
+      const result = await operation.result;
+
+      expect(result).toBeDefined();
+      expect(result.operationId).toBeDefined();
+      expect(result.cid).toBeDefined();
+      expect(result.isDirectory).toBe(true);
+      expect(result.numberOfFiles).toBe(2);
+    });
+  });
 });

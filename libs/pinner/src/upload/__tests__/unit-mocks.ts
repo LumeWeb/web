@@ -8,6 +8,7 @@ import { getMockCID } from "./test-helpers";
 const { mockSdkInstance, mockXhrHandler, mockTusHandler, mockUploadResult } =
   await vi.hoisted(async () => {
     const getMockCID = (await import("./test-helpers")).getMockCID;
+    const { OPERATION_STATUS } = await import("@lumeweb/portal-sdk");
     const mockCid = getMockCID(0);
     const mockUploadResult: UploadResult = {
       id: "test-id",
@@ -17,6 +18,7 @@ const { mockSdkInstance, mockXhrHandler, mockTusHandler, mockUploadResult } =
       mimeType: "application/vnd.ipld.car",
       createdAt: new Date(),
       numberOfFiles: 1,
+      operationId: 12345,
     };
     const sdkInstance = {
       account: vi.fn().mockReturnValue({
@@ -25,6 +27,39 @@ const { mockSdkInstance, mockXhrHandler, mockTusHandler, mockUploadResult } =
             success: true,
             data: { limit: 104857600 }, // 100 MB in bytes
           });
+        }),
+        listOperations: vi.fn().mockResolvedValue({
+          success: true,
+          data: {
+            data: {
+              id: 12345,
+              cid: mockCid,
+              status: OPERATION_STATUS.COMPLETED,
+              operation: "upload",
+              operation_display_name: "Upload",
+              protocol: "ipfs",
+              protocol_display_name: "IPFS",
+              progress_percent: 100,
+              started_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+            total: 1,
+          },
+        }),
+        waitForOperation: vi.fn().mockResolvedValue({
+          success: true,
+          data: {
+            id: 12345,
+            cid: mockCid,
+            status: OPERATION_STATUS.COMPLETED,
+            operation: "upload",
+            operation_display_name: "Upload",
+            protocol: "ipfs",
+            protocol_display_name: "IPFS",
+            progress_percent: 100,
+            started_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
         }),
       }),
     };
@@ -136,6 +171,7 @@ export function setupUppyMocks() {
             mimeType: "application/vnd.ipld.car",
             createdAt: new Date().toISOString(),
             numberOfFiles: 1,
+            operationId: 12345,
           },
         };
 
@@ -235,6 +271,8 @@ export function setupMockSdkInstance(
     success: true,
     data: { limit: uploadLimit },
   });
+  mockSdkInstance.account().listOperations.mockClear();
+  mockSdkInstance.account().waitForOperation.mockClear();
   return mockSdkInstance;
 }
 

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createBlockstore, createDatastore } from "../unstorage";
 import { Key } from "interface-datastore";
 import { collectAsyncIterable } from "@/utils/stream";
@@ -27,8 +27,12 @@ describe("Unstorage Factory", () => {
       await blockstore2.put(testData2.cid, testData2.block);
 
       // Verify each blockstore has its own data
-      const result1 = await collectAsyncIterable(blockstore1.get(testData1.cid));
-      const result2 = await collectAsyncIterable(blockstore2.get(testData2.cid));
+      const result1 = await collectAsyncIterable(
+        blockstore1.get(testData1.cid),
+      );
+      const result2 = await collectAsyncIterable(
+        blockstore2.get(testData2.cid),
+      );
 
       expect(Array.from(result1)).toEqual(Array.from(testData1.block));
       expect(Array.from(result2)).toEqual(Array.from(testData2.block));
@@ -36,7 +40,9 @@ describe("Unstorage Factory", () => {
       // Verify they don't share data
       let result1From2: Uint8Array | null = null;
       try {
-        result1From2 = await collectAsyncIterable(blockstore2.get(testData1.cid));
+        result1From2 = await collectAsyncIterable(
+          blockstore2.get(testData1.cid),
+        );
       } catch {}
       expect(result1From2).toBeNull();
     });
@@ -56,8 +62,12 @@ describe("Unstorage Factory", () => {
       await blockstore1.put(testData1.cid, testData1.block);
       await blockstore2.put(testData2.cid, testData2.block);
 
-      const result1 = await collectAsyncIterable(blockstore1.get(testData1.cid));
-      const result2 = await collectAsyncIterable(blockstore2.get(testData2.cid));
+      const result1 = await collectAsyncIterable(
+        blockstore1.get(testData1.cid),
+      );
+      const result2 = await collectAsyncIterable(
+        blockstore2.get(testData2.cid),
+      );
 
       expect(Array.from(result1)).toEqual(Array.from(testData1.block));
       expect(Array.from(result2)).toEqual(Array.from(testData2.block));
