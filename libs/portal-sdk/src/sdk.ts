@@ -1,4 +1,4 @@
-import { AccountApi } from "./account.js";
+import { AccountApi } from "@/account";
 
 export class Sdk {
   private readonly accountApi: AccountApi;

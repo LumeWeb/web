@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
-import { isEmptyResponse, parseResponse, fetchWithHandling } from "../http-utils.js";
+import { isEmptyResponse, parseResponse, fetchWithHandling, delay, poll } from "@/http-utils";
 
 // Helper function to create mock Response objects with various status codes
 function createMockResponse(
@@ -133,6 +133,71 @@ describe("parseResponse", () => {
     });
     const result = await parseResponse<string>(response);
     expect(result).toBe("test");
+  });
+});
+
+describe("delay", () => {
+  it("should resolve after specified milliseconds", async () => {
+    const start = Date.now();
+    await delay(100);
+    const elapsed = Date.now() - start;
+    expect(elapsed).toBeGreaterThanOrEqual(90);
+    expect(elapsed).toBeLessThan(150);
+  });
+
+  it("should resolve immediately for 0ms delay", async () => {
+    const start = Date.now();
+    await delay(0);
+    const elapsed = Date.now() - start;
+    expect(elapsed).toBeLessThan(20);
+  });
+});
+
+describe("poll", () => {
+  it("should stop when condition is met", async () => {
+    let counter = 0;
+    const mockFetch = vi.fn().mockImplementation(async () => {
+      counter++;
+      return { success: true, data: counter };
+    });
+
+    const result = await poll(mockFetch, (data) => data >= 3, { interval: 10 });
+    expect(result.data).toBe(3);
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+  });
+
+  it("should timeout after specified time", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      success: true,
+      data: { status: "pending" },
+    });
+
+    const result = await poll(mockFetch, () => false, { interval: 10, timeout: 50 });
+    expect(result.success).toBe(false);
+    expect(result.error).toBeInstanceOf(Error);
+    expect(result.error?.message).toContain("Polling timed out");
+  });
+
+  it("should return error result if fetch fails", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      success: false,
+      error: new Error("Fetch failed"),
+    });
+
+    const result = await poll(mockFetch, () => true);
+    expect(result.success).toBe(false);
+    expect(result.error?.message).toBe("Fetch failed");
+  });
+
+  it("should use default interval and timeout", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      success: true,
+      data: { status: "completed" },
+    });
+
+    const result = await poll(mockFetch, (data) => data.status === "completed");
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual({ status: "completed" });
   });
 });
 

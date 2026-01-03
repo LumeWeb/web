@@ -1,4 +1,70 @@
-import type { RequestInit } from "./types.js";
+import type { RequestInit, Result } from "@/types";
+import { AccountError } from "@/types";
+
+/**
+ * Creates a promise that resolves after a specified delay
+ * @param ms Delay in milliseconds
+ * @returns Promise that resolves after the delay
+ */
+export function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Options for polling a condition
+ */
+export interface PollOptions<T> {
+  /** Polling interval in milliseconds (default: 2000) */
+  interval?: number;
+  /** Maximum time to wait in milliseconds (default: 300000 = 5 minutes) */
+  timeout?: number;
+}
+
+/**
+ * Polls a fetch function until a condition is met or timeout occurs
+ * @template T The type of data returned by the fetch function
+ * @param fetchFn Function that fetches the current state
+ * @param shouldStop Predicate function that determines when to stop polling
+ * @param options Polling options (interval, timeout)
+ * @returns Promise resolving to the final fetch result
+ */
+export async function poll<T>(
+  fetchFn: () => Promise<Result<T>>,
+  shouldStop: (value: T) => boolean,
+  options: PollOptions<T> = {},
+): Promise<Result<T>> {
+  const { interval = 2000, timeout = 300000 } = options;
+  const startTime = Date.now();
+  const timeoutMs = timeout;
+
+  const pollInternal = async (): Promise<Result<T>> => {
+    const elapsed = Date.now() - startTime;
+    
+    if (elapsed >= timeoutMs) {
+      return {
+        error: new AccountError(`Polling timed out after ${timeout}ms`, 408),
+        success: false,
+      };
+    }
+
+    const result = await fetchFn();
+
+    if (!result.success) {
+      return result;
+    }
+
+    if (result.data && shouldStop(result.data)) {
+      return result;
+    }
+
+    const remainingTime = timeoutMs - elapsed;
+    const nextInterval = Math.min(interval, remainingTime);
+    await delay(nextInterval);
+    return pollInternal();
+  };
+
+  return pollInternal();
+}
 
 /**
  * Checks if a response has an empty body based on status code or content-length header
