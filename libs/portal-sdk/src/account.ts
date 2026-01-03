@@ -1,4 +1,10 @@
 import type { RequestInit } from "./types.js";
+import {
+  AccountError,
+  handleFetchError,
+  handleUnknownError,
+  Result,
+} from "./types.js";
 
 import {
   AccountInfoResponse,
@@ -16,12 +22,7 @@ import {
   UploadLimitResponse,
   VerifyEmailRequest,
 } from "./account/generated";
-import {
-  AccountError,
-  handleFetchError,
-  handleUnknownError,
-  Result,
-} from "./types.js";
+import { parseResponse } from "./http-utils.js";
 
 export class AccountApi {
   private _jwtToken?: string;
@@ -362,33 +363,11 @@ export class AccountApi {
         };
       }
 
-      // Handle empty responses
-      if (this.isResponseEmpty(response)) {
-        return {
-          data: undefined as unknown as T,
-          success: true,
-        };
-      }
-
-      // Try to parse JSON, but handle cases where parsing fails due to empty body
-      try {
-        const data = await response.json();
-        return {
-          data: data as T,
-          success: true,
-        };
-      } catch (parseError) {
-        // If JSON parsing fails (e.g., SyntaxError for empty body), treat as no content
-        // Also check for zero content-length header
-        if (this.isResponseEmpty(response)) {
-          return {
-            data: undefined as unknown as T,
-            success: true,
-          };
-        }
-        // Re-throw other errors
-        throw parseError;
-      }
+      const data = await parseResponse<T>(response);
+      return {
+        data,
+        success: true,
+      };
     } catch (e) {
       let error: AccountError;
       if (e instanceof Response) {
@@ -401,29 +380,5 @@ export class AccountApi {
         success: false,
       };
     }
-  }
-
-  /**
-   * Checks if a response has an empty body based on status code or content-length header
-   * @param {Response} response - The response to check
-   * @returns {boolean} True if the response is empty, false otherwise
-   * @private
-   */
-  private isResponseEmpty(response: Response): boolean {
-    // Handle empty responses by status code
-    if (
-      response.status === 204 ||
-      response.status === 205 ||
-      response.status === 304
-    ) {
-      return true;
-    }
-
-    // Check content-length header for zero-length body
-    const contentLength = response.headers.get("content-length");
-    return <boolean>(
-      (contentLength === "0" ||
-        (contentLength && parseInt(contentLength, 10) === 0))
-    );
   }
 }

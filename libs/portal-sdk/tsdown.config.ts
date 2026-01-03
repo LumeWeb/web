@@ -1,8 +1,6 @@
-import type { Options } from "tsdown";
+import { defineConfig, UserConfig } from "tsdown";
 
-import { defineConfig } from "tsdown";
-
-const commonOptions: Options = {
+const commonOptions: UserConfig = {
   external: [/node_modules/],
   hash: false,
   minify: false,
@@ -13,14 +11,22 @@ const commonOptions: Options = {
   unbundle: true,
 };
 
-const configs: Options[] = [
+const configs: UserConfig[] = [
   {
     ...commonOptions,
     clean: true,
     entry: ["src/**/*", "!src/**/*.yaml"],
-    format: ["esm", "cjs"],
-    outputOptions(options, format) {
-      options.dir = format === "es" ? "dist/esm" : "dist/cjs";
+    format: {
+      esm: {
+        outputOptions: {
+          dir: "dist/esm",
+        },
+      },
+      cjs: {
+        outputOptions: {
+          dir: "dist/cjs",
+        },
+      },
     },
   },
 ];

@@ -184,3 +184,10 @@ export function handleUnknownError(e: unknown): AccountError {
 
   return new AccountError(String(e), 500);
 }
+
+// Re-export HTTP utilities for convenience
+export {
+  isEmptyResponse,
+  parseResponse,
+  fetchWithHandling,
+} from "./http-utils.js";
