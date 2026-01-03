@@ -18,7 +18,7 @@ export class TUSUploadHandler extends BaseUploadHandler {
       headers: {
         Authorization: `Bearer ${this.config.jwt}`,
       },
-      chunkSize: 100 * 1024, // 10MB chunks
+      chunkSize: 10 * 1024 * 1024, // 10MB chunks
       retryDelays: [0, 1000, 3000, 5000],
     });
   }

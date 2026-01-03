@@ -2,6 +2,7 @@ import type { Pinner } from "@/pinner";
 import type { PinnerUploadBuilder } from "@/types/upload";
 import type { UploadOptions, UploadOperation } from "@/types/upload";
 import { jsonToFile, base64ToFile, urlToFile, csvToFile, textToFile } from "@/encoder";
+import { validateUrl } from "@/utils/validation";
 
 /**
  * Base upload builder with common name/keyvalues functionality.
@@ -128,6 +129,9 @@ export class UploadBuilderNamespace {
    * Returns a builder for chaining name/keyvalues.
    */
   url(urlString: string): PinnerUploadBuilder {
+    // Validate URL to prevent SSRF attacks
+    validateUrl(urlString);
+
     return new EncodedUploadBuilder(this.pinner, (name, keyvalues) =>
       urlToFile(urlString, { name, keyvalues }),
     );

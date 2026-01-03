@@ -11,8 +11,8 @@ import {
 } from "@/types/constants";
 
 export function createBlockstore(options?: UnstorageBlockstoreOptions) {
-  const BlockstoreClass = createUnstorageBlockstore(() =>
-    fsLiteDriver({ base: options?.base ?? DEFAULT_BLOCKSTORE_FS_BASE }),
+  const BlockstoreClass = createUnstorageBlockstore((base) =>
+    fsLiteDriver({ base: base ?? DEFAULT_BLOCKSTORE_FS_BASE }),
   );
   return class extends BlockstoreClass {
     constructor(instanceOptions?: UnstorageBlockstoreOptions) {
@@ -22,8 +22,8 @@ export function createBlockstore(options?: UnstorageBlockstoreOptions) {
 }
 
 export function createDatastore(options?: UnstorageBlockstoreOptions) {
-  const DatastoreClass = createUnstorageDatastore(() =>
-    fsLiteDriver({ base: options?.base ?? DEFAULT_DATASTORE_FS_BASE }),
+  const DatastoreClass = createUnstorageDatastore((base) =>
+    fsLiteDriver({ base: base ?? DEFAULT_DATASTORE_FS_BASE }),
   );
   return class extends DatastoreClass {
     constructor(instanceOptions?: UnstorageBlockstoreOptions) {

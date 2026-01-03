@@ -1,6 +1,13 @@
 import type { CsvFormatterOptions } from "./csv-options";
 
 /**
+ * Escape special regex characters in a string.
+ */
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\import type { CsvFormatterOptions } from "./csv-options";');
+}
+
+/**
  * Handles formatting of individual CSV fields including quoting and escaping.
  * 
  * This implementation is derived from @fast-csv/format (https://github.com/C2FO/fast-csv)
@@ -25,7 +32,8 @@ export class FieldFormatter {
     const quote = options.quote === true ? '"' : (options.quote === false ? '' : options.quote ?? '"');
     this.quoteReplaceRegExp = new RegExp(quote, 'g');
 
-    const escapePattern = `[${options.delimiter || ','}${this.#escapeRegExpString(options.rowDelimiter || '\n')}|\r|\n]`;
+    // Use lodash.escapeRegExp pattern for delimiter and row delimiter
+    const escapePattern = `[${escapeRegExp(options.delimiter ?? ',')}${escapeRegExp(options.rowDelimiter ?? '\n')}|\r|\n]`;
     this.escapePatternRegExp = new RegExp(escapePattern);
   }
 

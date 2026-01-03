@@ -215,6 +215,7 @@ export class UploadManager {
           data: carResult.carStream,
           name: `${name}${FILE_EXTENSION_CAR}`,
           type: MIME_TYPE_CAR,
+          size: Number(carResult.size),
         },
         options,
       );

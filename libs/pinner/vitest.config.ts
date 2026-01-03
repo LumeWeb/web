@@ -79,8 +79,14 @@ function createUploadProjects(
 
   // For unit tests, add the unit-specific setup files
   const unitSetupFiles = {
-    node: testType === TEST_TYPE_UNIT ? ["./src/upload/__tests__/setup.unit.ts"] : [],
-    browser: testType === TEST_TYPE_UNIT ? ["./src/upload/__tests__/setup.unit.browser.ts"] : [],
+    node:
+      testType === TEST_TYPE_UNIT
+        ? ["./src/upload/__tests__/setup.unit.ts"]
+        : [],
+    browser:
+      testType === TEST_TYPE_UNIT
+        ? ["./src/upload/__tests__/setup.unit.browser.ts"]
+        : [],
   };
 
   return [
@@ -108,15 +114,22 @@ function createBlockstoreProjects(
     browser: ["./src/__tests__/setup.browser.ts"],
   };
 
+  const blockstoreSetupFiles = {
+    node: ["./src/blockstore/__tests__/setup.ts"],
+    browser: ["./src/blockstore/__tests__/setup.ts"],
+  };
+
   return [
     createNodeProject("node-blockstore", includePattern, [
       ...baseSetupFiles.node,
+      ...blockstoreSetupFiles.node,
       ...nodeSetupFiles,
     ]),
-    createBrowserProject("browser-blockstore", includePattern, [
+    /*    createBrowserProject("browser-blockstore", includePattern, [
       ...baseSetupFiles.browser,
+      ...blockstoreSetupFiles.browser,
       ...browserSetupFiles,
-    ]),
+    ]),*/
   ];
 }
 

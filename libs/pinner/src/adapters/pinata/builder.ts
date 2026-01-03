@@ -7,6 +7,7 @@ import type {
 import type { UploadOptions } from "@/encoder/types";
 import { CID } from "multiformats/cid";
 import { base64ToFile, jsonToFile, urlToFile } from "@/encoder";
+import { validateUrl } from "@/utils/validation";
 
 /**
  * Error wrapper for Pinata adapter operations.
@@ -254,6 +255,9 @@ export function createUrlUploadBuilder(
   urlString: string,
   options?: UrlUploadBuilderOptions,
 ): PinataUploadBuilder<PinataUploadResult> {
+  // Validate URL to prevent SSRF attacks
+  validateUrl(urlString);
+
   return new EncodedUploadBuilder(pinner, (name, keyvalues) =>
     urlToFile(urlString, { name, keyvalues, fetch: options?.fetch }),
   );

@@ -8,8 +8,8 @@ import indexedDbDriver from "unstorage/drivers/indexedb";
 import { DEFAULT_BLOCKSTORE_BASE } from "@/types/constants";
 
 export function createBlockstore(options?: UnstorageBlockstoreOptions) {
-  const BlockstoreClass = createUnstorageBlockstore(() =>
-    indexedDbDriver({ base: options?.base ?? DEFAULT_BLOCKSTORE_BASE }),
+  const BlockstoreClass = createUnstorageBlockstore((base) =>
+    indexedDbDriver({ base: base ?? DEFAULT_BLOCKSTORE_BASE }),
   );
   return class extends BlockstoreClass {
     constructor(instanceOptions?: UnstorageBlockstoreOptions) {
@@ -19,8 +19,8 @@ export function createBlockstore(options?: UnstorageBlockstoreOptions) {
 }
 
 export function createDatastore(options?: UnstorageBlockstoreOptions) {
-  const DatastoreClass = createUnstorageDatastore(() =>
-    indexedDbDriver({ base: options?.base ?? DEFAULT_BLOCKSTORE_BASE }),
+  const DatastoreClass = createUnstorageDatastore((base) =>
+    indexedDbDriver({ base: base ?? DEFAULT_BLOCKSTORE_BASE }),
   );
   return class extends DatastoreClass {
     constructor(instanceOptions?: UnstorageBlockstoreOptions) {
