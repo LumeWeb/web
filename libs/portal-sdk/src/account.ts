@@ -1,15 +1,20 @@
-import type { RequestInit } from "./types.js";
+import type { RequestInit } from "@/types";
 import {
   AccountError,
   handleFetchError,
   handleUnknownError,
+  OperationPollingOptions,
   Result,
-} from "./types.js";
+} from "@/types";
 
 import {
   AccountInfoResponse,
+  GetApiOperationsParams,
   LoginRequest,
   LoginResponse,
+  OperationDetailResponse,
+  OperationFiltersResponseResponse,
+  OperationListItemResponse,
   OTPDisableRequest,
   OTPGenerateResponse,
   OTPValidateRequest,
@@ -21,8 +26,32 @@ import {
   ResendVerifyEmailRequest,
   UploadLimitResponse,
   VerifyEmailRequest,
-} from "./account/generated";
-import { parseResponse } from "./http-utils.js";
+} from "@/account/generated";
+import { delay, parseResponse, poll } from "@/http-utils";
+
+/**
+ * Operation status constants
+ */
+const OPERATION_STATUS = {
+  COMPLETED: "completed",
+  FAILED: "failed",
+  ERROR: "error",
+  PENDING: "pending",
+  RUNNING: "running",
+} as const;
+
+/**
+ * Default settled states for operations
+ */
+const DEFAULT_SETTLED_STATES = [
+  OPERATION_STATUS.COMPLETED,
+  OPERATION_STATUS.FAILED,
+  OPERATION_STATUS.ERROR,
+] as const;
+
+type SettledState = typeof DEFAULT_SETTLED_STATES[number];
+
+export { DEFAULT_SETTLED_STATES, OPERATION_STATUS, type SettledState };
 
 export class AccountApi {
   private _jwtToken?: string;
@@ -313,6 +342,79 @@ export class AccountApi {
       body: JSON.stringify(otpVerifyRequest),
       method: "POST",
     });
+  }
+
+  /**
+   * List operations with filtering, searching, and pagination
+   * @param params Query parameters for filtering and pagination
+   * @returns Result containing list of operations
+   */
+  public async listOperations(
+    params?: GetApiOperationsParams,
+  ): Promise<Result<OperationListItemResponse>> {
+    const url = new URL("/api/operations", this.apiUrl);
+    
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== null) {
+          url.searchParams.set(key, String(value));
+        }
+      }
+    }
+    
+    return this.fetchJson<OperationListItemResponse>(url.toString(), {
+      method: "GET",
+    });
+  }
+
+  /**
+   * Get detailed information for a specific operation
+   * @param id The operation ID
+   * @returns Result containing operation details
+   */
+  public async getOperation(
+    id: number,
+  ): Promise<Result<OperationDetailResponse>> {
+    return this.fetchJson<OperationDetailResponse>(`/api/operations/${id}`, {
+      method: "GET",
+    });
+  }
+
+  /**
+   * Get available filter values for operations
+   * @returns Result containing filter options
+   */
+  public async getOperationFilters(): Promise<Result<OperationFiltersResponseResponse>> {
+    return this.fetchJson<OperationFiltersResponseResponse>("/api/operations/filters", {
+      method: "GET",
+    });
+  }
+
+  /**
+   * Wait for an operation to complete or reach a settled state
+   * @param id The operation ID to wait for
+   * @param options Polling options (interval, timeout, settledStates)
+   * @returns Result containing the final operation details
+   */
+  public async waitForOperation(
+    id: number,
+    options: OperationPollingOptions = {},
+  ): Promise<Result<OperationDetailResponse>> {
+    const {
+      interval = 2000,
+      timeout = 300000,
+      settledStates = DEFAULT_SETTLED_STATES,
+    } = options;
+
+    const settledStatesSet = new Set(settledStates);
+
+    return poll(
+      () => this.getOperation(id),
+      (operation) => {
+        return !!(operation.status && settledStatesSet.has(operation.status.toLowerCase()));
+      },
+      { interval, timeout },
+    );
   }
 
   /**

@@ -185,9 +185,24 @@ export function handleUnknownError(e: unknown): AccountError {
   return new AccountError(String(e), 500);
 }
 
+/**
+ * Options for polling/waiting for an operation to complete
+ */
+export interface OperationPollingOptions {
+  /** Polling interval in milliseconds (default: 2000) */
+  interval?: number;
+  /** Maximum time to wait in milliseconds (default: 300000 = 5 minutes) */
+  timeout?: number;
+  /** Operation statuses that are considered "settled" (default: ['completed', 'failed', 'error']) */
+  settledStates?: string[];
+}
+
 // Re-export HTTP utilities for convenience
 export {
+  delay,
   isEmptyResponse,
   parseResponse,
   fetchWithHandling,
-} from "./http-utils.js";
+  poll,
+  type PollOptions,
+} from "@/http-utils";
