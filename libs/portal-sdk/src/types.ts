@@ -48,7 +48,7 @@ export class AccountError extends Error {
 /**
  * Helper function to normalize field values
  */
-function normalizeFields(fields: Record<string, any>): Record<string, string> {
+function normalizeFields(fields: Record<string, any>): Record<string, string> | undefined {
   if (!fields) return undefined;
   
   const normalized: Record<string, string> = {};
@@ -74,7 +74,11 @@ function extractErrorDetails(data: any): {
   details?: any;
   fields?: Record<string, string>;
 } {
-  let result = {
+  let result: {
+    message: string;
+    details?: any;
+    fields?: Record<string, string>;
+  } = {
     message: '',
     details: undefined,
     fields: undefined
@@ -180,3 +184,10 @@ export function handleUnknownError(e: unknown): AccountError {
 
   return new AccountError(String(e), 500);
 }
+
+// Re-export HTTP utilities for convenience
+export {
+  isEmptyResponse,
+  parseResponse,
+  fetchWithHandling,
+} from "./http-utils.js";
