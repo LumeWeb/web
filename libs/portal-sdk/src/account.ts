@@ -421,9 +421,9 @@ export class AccountApi {
 
     // Check content-length header for zero-length body
     const contentLength = response.headers.get("content-length");
-    return (
-      contentLength === "0" ||
-      (contentLength && parseInt(contentLength, 10) === 0)
+    return <boolean>(
+      (contentLength === "0" ||
+        (contentLength && parseInt(contentLength, 10) === 0))
     );
   }
 }

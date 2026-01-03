@@ -137,9 +137,6 @@ components:
       required:
         - BinUUID
       type: object
-    Cid:
-      additionalProperties: false
-      type: object
     CreateAPIKeyResponse:
       additionalProperties: false
       properties:
@@ -236,7 +233,7 @@ components:
       additionalProperties: false
       properties:
         cid:
-          $ref: '#/components/schemas/Cid'
+          type: string
         current_step:
           type: integer
         error:
@@ -339,7 +336,7 @@ components:
       additionalProperties: false
       properties:
         cid:
-          $ref: '#/components/schemas/Cid'
+          type: string
         current_step:
           type: integer
         error:
@@ -1465,8 +1462,8 @@ paths:
           schema:
             type: string
         - description: 'Comma-separated list of fields to sort by. Available fields:
-          id, operation, protocol, status, status_message, progress_percent, total_steps,
-          current_step, error'
+          id, operation, protocol, status, status_message, progress_percent, cid,
+          total_steps, current_step, error'
           in: query
           name: _sort
           schema:
