@@ -57,7 +57,9 @@ export async function poll<T>(
       return result;
     }
 
-    const remainingTime = timeoutMs - elapsed;
+    // Recalculate elapsed time after fetchFn completes to account for network latency
+    const currentElapsed = Date.now() - startTime;
+    const remainingTime = timeoutMs - currentElapsed;
     const nextInterval = Math.min(interval, remainingTime);
     await delay(nextInterval);
     return pollInternal();

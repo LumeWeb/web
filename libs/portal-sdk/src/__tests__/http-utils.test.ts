@@ -199,6 +199,29 @@ describe("poll", () => {
     expect(result.success).toBe(true);
     expect(result.data).toEqual({ status: "completed" });
   });
+
+  it("should account for network latency when calculating timeout", async () => {
+    const startTime = Date.now();
+    let callCount = 0;
+    
+    // Simulate a fetch that takes 30ms to complete
+    const mockFetch = vi.fn().mockImplementation(async () => {
+      await delay(30);
+      callCount++;
+      return { success: true, data: { status: "pending" } };
+    });
+
+    // With a 50ms timeout and 30ms network latency per call,
+    // only 1 fetch should complete before timeout
+    const result = await poll(mockFetch, () => false, { interval: 10, timeout: 50 });
+    const elapsed = Date.now() - startTime;
+
+    expect(result.success).toBe(false);
+    expect(result.error?.message).toContain("Polling timed out");
+    expect(callCount).toBeLessThanOrEqual(2); // Should only fit 1-2 calls due to latency
+    // Total time should be close to timeout, not significantly longer
+    expect(elapsed).toBeLessThan(80); // Allow some margin for test execution
+  });
 });
 
 describe("fetchWithHandling", () => {
