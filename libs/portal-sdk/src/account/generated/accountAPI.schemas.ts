@@ -169,7 +169,7 @@ export interface OperationListItem {
 }
 
 export interface OperationListItemResponse {
-  data: OperationListItem;
+  data: OperationListItem[];
   total: number;
 }
 

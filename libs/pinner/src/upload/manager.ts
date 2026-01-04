@@ -210,11 +210,15 @@ export class UploadManager {
 
     const result = await this.portalSdk.account().listOperations(params);
 
-    if (!result.success || !result.data || !result.data.data) {
+    if (!result.success) {
       throw new Error(`Failed to find operation with CID ${uploadResult.cid}`);
     }
 
-    const operation = result.data.data;
+    const operation = result.data.data?.[0];
+    if (!operation) {
+      throw new Error(`Failed to find operation with CID ${uploadResult.cid}`);
+    }
+
     const operationId = operation.id;
 
     // Use SDK's waitForOperation for polling

@@ -4,10 +4,7 @@ import type { CsvFormatterOptions } from "./csv-options";
  * Escape special regex characters in a string.
  */
 function escapeRegExp(str: string): string {
-  return str.replace(
-    /[.*+?^${}()|[\]\\]/g,
-    '\\import type { CsvFormatterOptions } from "./csv-options";',
-  );
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
