@@ -1,7 +1,9 @@
 import type { BaseRecord, DataProvider } from "@refinedev/core";
 
-import { generateFilter } from "./utils/generateFilter";
-import { generateSort } from "./utils/generateSort";
+import {
+  calculatePagination,
+  serializeQueryParams,
+} from "@lumeweb/query-builder";
 import { generateNestedUrl } from "./utils/generateUrl";
 import { httpClient } from "./utils/kyInstance";
 import { parseListResponse } from "./utils/parseListResponse";
@@ -30,18 +32,6 @@ const parseResponse = async (response: any) => {
   } catch (e) {
     // Return raw text if not JSON
     return responseText;
-  }
-};
-
-type QueryParams = Record<string, boolean | number | string>;
-
-const addParam = (
-  key: string,
-  value: boolean | number | string | undefined,
-  queryParams: QueryParams,
-) => {
-  if (value !== undefined) {
-    queryParams[key] = value;
   }
 };
 
@@ -174,7 +164,7 @@ export const dataProvider = (
         meta?.needsAuth ?? needsAuth,
       );
       const data = await parseResponse(response);
-      
+
       return parseSingleResponse(data);
     },
     custom: async ({
@@ -192,17 +182,8 @@ export const dataProvider = (
         operation,
       });
 
-      const filterParams = generateFilter(filters);
-      const sortParams = generateSort(sorters);
+      const queryParams = serializeQueryParams({ filters, sorters });
 
-      const queryParams: QueryParams = {};
-
-      Object.entries(filterParams).forEach(([key, value]) =>
-        addParam(key, value, queryParams),
-      );
-      Object.entries(sortParams).forEach(([key, value]) =>
-        addParam(key, value, queryParams),
-      );
       const response = await baseFetch(
         baseUrl,
         method.toUpperCase(),
@@ -269,28 +250,27 @@ export const dataProvider = (
       const url = generateNestedUrl({ apiBase: apiUrl, meta, resource });
       const headers = meta?.headers ?? {};
 
-      const filterParams = generateFilter(filters);
-      const sortParams = generateSort(sorters);
+      const paginationParams = pagination
+        ? calculatePagination(
+            pagination.currentPage || 1,
+            pagination.pageSize || 10,
+          )
+        : undefined;
 
-      const queryParams: QueryParams = {};
+      const queryParams = serializeQueryParams({
+        filters,
+        sorters,
+        pagination: paginationParams,
+      });
 
-      // Add parameters
-      Object.entries(filterParams).forEach(([key, value]) =>
-        addParam(key, value, queryParams),
+      const response = await baseFetch(
+        url,
+        "GET",
+        undefined,
+        queryParams,
+        headers,
+        meta?.needsAuth ?? needsAuth,
       );
-      Object.entries(sortParams).forEach(([key, value]) =>
-        addParam(key, value, queryParams),
-      );
-      if (pagination) {
-        const { current = 1, pageSize = 10 } = pagination;
-        const start = (current - 1) * pageSize;
-        const end = start + pageSize;
-        
-        addParam("_start", start, queryParams);
-        addParam("_end", end, queryParams);
-      }
-
-      const response = await baseFetch(url, "GET", undefined, queryParams, headers, meta?.needsAuth ?? needsAuth);
       const data = await parseResponse(response);
 
       const total = Number(response.headers.get("x-total-count"));
@@ -309,7 +289,7 @@ export const dataProvider = (
         meta?.needsAuth ?? needsAuth,
       );
       const data = await parseResponse(response);
-      
+
       return parseSingleResponse(data);
     },
 
@@ -327,7 +307,7 @@ export const dataProvider = (
         meta?.needsAuth ?? needsAuth,
       );
       const data = await parseResponse(response);
-      
+
       return parseSingleResponse(data);
     },
   };

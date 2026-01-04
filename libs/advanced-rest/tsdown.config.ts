@@ -1,38 +1,33 @@
-import type { Options } from "tsdown";
+import { defineConfig, UserConfig } from "tsdown";
 
-import { defineConfig } from "tsdown";
-
-const commonOptions: Omit<
-  Options,
-  "clean" | "dts" | "entry" | "format" | "outDir" | "outExtensions"
-> = {
+const commonOptions: UserConfig = {
   external: [/node_modules/],
+  hash: false,
   minify: false,
-  outputOptions: {
-    chunkFileNames: "[name].js",
-    entryFileNames: "[name].js",
-  },
+  platform: "browser",
   sourcemap: true,
   target: "esnext",
   tsconfig: "./tsconfig.json",
+  unbundle: true,
 };
 
-const configs: Options[] = [
+const configs: UserConfig[] = [
   {
     ...commonOptions,
     clean: true,
-    entry: ["src/**/*", "!src/**/*.spec.ts"],
-    format: "cjs",
-    outDir: "dist/cjs",
-    outExtensions: () => ({ js: ".cjs" }),
-  },
-  {
-    ...commonOptions,
-    clean: true,
-    dts: true,
-    entry: ["src/**/*", "!src/**/*.spec.ts"],
-    format: "esm",
-    outDir: "dist/esm",
+    entry: ["src/**/*"],
+    format: {
+      esm: {
+        outputOptions: {
+          dir: "dist/esm",
+        },
+      },
+      cjs: {
+        outputOptions: {
+          dir: "dist/cjs",
+        },
+      },
+    },
   },
 ];
 

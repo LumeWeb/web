@@ -97,8 +97,6 @@
 import { dataProvider } from "./provider";
 
 export { dataProvider } from "./provider";
-export { generateFilter } from "./utils/generateFilter";
-export { generateSort } from "./utils/generateSort";
 /**
  * Error Classes
  *
