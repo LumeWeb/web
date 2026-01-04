@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createBlockstore, setDriverFactory } from "@/blockstore";
 import { runCommonBlockstoreTests } from "./shared-blockstore-tests";
+import memoryDriver from "unstorage/drivers/memory";
 
 describe("createBlockstore (factory)", () => {
   const mockDriver = vi.fn() as any;
@@ -90,6 +91,38 @@ describe("createBlockstore (factory)", () => {
       const blockstore = new BlockstoreClass({ storage: mockStorage as any });
 
       expect(blockstore).toBeDefined();
+    });
+
+    it("should bypass driverFactory when storage option is provided", async () => {
+      const factorySpy = vi.fn(() => memoryDriver());
+      setDriverFactory(factorySpy);
+
+      const mockStorage = {
+        hasItem: vi.fn().mockResolvedValue(false),
+        setItemRaw: vi.fn().mockResolvedValue(undefined),
+        getItemRaw: vi.fn().mockResolvedValue(new Uint8Array([])),
+        removeItem: vi.fn().mockResolvedValue(undefined),
+        getKeys: vi.fn().mockResolvedValue([]),
+      };
+
+      const BlockstoreClass = createBlockstore();
+      const blockstore = new BlockstoreClass({ storage: mockStorage as any });
+
+      expect(blockstore).toBeDefined();
+      expect(factorySpy).not.toHaveBeenCalled();
+    });
+
+    it("should bypass driverFactory when driver option is provided", async () => {
+      const factorySpy = vi.fn(() => memoryDriver());
+      setDriverFactory(factorySpy);
+
+      const customDriver = memoryDriver();
+
+      const BlockstoreClass = createBlockstore();
+      const blockstore = new BlockstoreClass({ driver: customDriver });
+
+      expect(blockstore).toBeDefined();
+      expect(factorySpy).not.toHaveBeenCalled();
     });
   });
 
