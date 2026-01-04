@@ -1,11 +1,14 @@
 import type { Encoder, EncoderResult, UploadOptions } from "./types";
 import { EncoderError } from "./error";
-import { createCsvFormatter, type CsvFormatterOptions } from "./csv/csv-formatter";
+import {
+  createCsvFormatter,
+  type CsvFormatterOptions,
+} from "./csv/csv-formatter";
 
 /**
  * CSV encoder - converts CSV strings, arrays of objects, or arrays of arrays to File objects.
  * Uses a simplified CSV formatter without streaming support.
- * 
+ *
  * This implementation is derived from @fast-csv/format (https://github.com/C2FO/fast-csv)
  * Copyright (c) 2011 C2FO Labs, LLC
  * Licensed under the MIT License

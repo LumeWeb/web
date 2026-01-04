@@ -25,4 +25,5 @@ export const MOCK_UPLOAD_RESULT: UploadResult = {
   mimeType: "application/vnd.ipld.car",
   createdAt: new Date(),
   numberOfFiles: 1,
+  operationId: 12345,
 };

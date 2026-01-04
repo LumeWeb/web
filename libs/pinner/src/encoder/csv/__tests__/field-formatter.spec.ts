@@ -58,17 +58,26 @@ describe("FieldFormatter", () => {
       });
 
       it("should quote the header if quoteHeaders is an object and quoteHeaders object has true for the column name", () => {
-        const formatter = createFormatter({ quoteHeaders: { header: true }, headers: ["header"] });
+        const formatter = createFormatter({
+          quoteHeaders: { header: true },
+          headers: ["header"],
+        });
         expect(formatter.format("header", 0, true)).toBe('"header"');
       });
 
       it("should not quote the header if quoteHeaders is an object and quoteHeaders object has false for the column name", () => {
-        const formatter = createFormatter({ quoteHeaders: { header: false }, headers: ["header"] });
+        const formatter = createFormatter({
+          quoteHeaders: { header: false },
+          headers: ["header"],
+        });
         expect(formatter.format("header", 0, true)).toBe("header");
       });
 
       it("should not quote the header if quoteHeaders is an object and quoteHeaders object does not contain the header", () => {
-        const formatter = createFormatter({ quoteHeaders: { header2: true }, headers: ["header"] });
+        const formatter = createFormatter({
+          quoteHeaders: { header2: true },
+          headers: ["header"],
+        });
         expect(formatter.format("header", 0, true)).toBe("header");
       });
     });
@@ -105,17 +114,26 @@ describe("FieldFormatter", () => {
       });
 
       it("should quote the header if quoteColumns is an object and quoteColumns object has true for the column name", () => {
-        const formatter = createFormatter({ quoteColumns: { header: true }, headers: ["header"] });
+        const formatter = createFormatter({
+          quoteColumns: { header: true },
+          headers: ["header"],
+        });
         expect(formatter.format("col", 0, false)).toBe('"col"');
       });
 
       it("should not quote the header if quoteColumns is an object and quoteColumns object has false for the column name", () => {
-        const formatter = createFormatter({ quoteColumns: { header: false }, headers: ["header"] });
+        const formatter = createFormatter({
+          quoteColumns: { header: false },
+          headers: ["header"],
+        });
         expect(formatter.format("col", 0, false)).toBe("col");
       });
 
       it("should not quote the header if quoteColumns is an object and quoteColumns object does not contain the header", () => {
-        const formatter = createFormatter({ quoteColumns: { header2: true }, headers: ["header"] });
+        const formatter = createFormatter({
+          quoteColumns: { header2: true },
+          headers: ["header"],
+        });
         expect(formatter.format("col", 0, false)).toBe("col");
       });
     });

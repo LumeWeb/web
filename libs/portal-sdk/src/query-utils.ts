@@ -39,15 +39,10 @@ import {
 // Re-export types
 export type { ParsedQuery, QueryParams, SerializeInput };
 
-// Re-export functions
+// Re-export functions from query-builder
 export {
   serializeQueryParams,
   calculatePagination,
-  createEqFilter,
-  createNeFilter,
-  createContainsFilter,
-  createInFilter,
-  createBetweenFilter,
   createSort,
   createAscSort,
   createDescSort,
@@ -63,7 +58,7 @@ export {
   COMPARISON_OPERATORS,
   OPERATORS,
   ARRAY_OPERATORS,
-};
+} from "@lumeweb/query-builder";
 
 /**
  * Operations query parameters for the operations API

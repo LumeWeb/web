@@ -44,6 +44,7 @@
     "@ipfs-shipyard/pinning-service-client": "^3.0.0",
     "@ipld/car": "^5.4.2",
     "@lumeweb/portal-sdk": "workspace:*",
+    "@lumeweb/query-builder": "workspace:*",
     "@lumeweb/uppy-post-upload": "workspace:*",
     "@uppy/core": "^5.2.0",
     "@uppy/tus": "^5.1.0",

@@ -2,6 +2,7 @@
 // This file provides mock handlers for all upload-related API operations
 
 import { http, HttpResponse } from "msw";
+import { OPERATION_STATUS } from "@lumeweb/portal-sdk";
 import {
   createMockCID,
   getAccountApiUrl,
@@ -12,6 +13,9 @@ import { applyMockDelay, createMockUploadResult } from "./msw-helpers";
 
 // Counter for TUS upload IDs
 let tusUploadCounter = 0;
+
+// Counter for operation IDs
+let operationCounter = 0;
 
 export function resetTusUploadCounter(): void {
   tusUploadCounter = 0;
@@ -399,6 +403,7 @@ export const xhrUploadHandler = http.post(
       name: filename,
       cid: await createMockCID(getNextRequestId()),
       size: fileSize,
+      operationId: ++operationCounter,
     });
 
     return HttpResponse.json(result, {
@@ -464,6 +469,110 @@ export const accountInfoHandler = http.get(
 export const accountHandlers = [accountUploadLimitHandler, accountInfoHandler];
 
 // ============================================================================
+// OPERATION HANDLERS
+// ============================================================================
+
+// Helper function to create a mock operation
+async function createMockOperation(
+  operationId: number,
+  overrides: Partial<{
+    status: string;
+    error?: string;
+    cid?: string;
+    operation?: string;
+    operation_display_name?: string;
+  }> = {},
+) {
+  const mockCid = overrides.cid || (await createMockCID(operationId));
+
+  return {
+    id: operationId,
+    operation: overrides.operation || "pin",
+    operation_display_name: overrides.operation_display_name || "Pin Content",
+    cid: mockCid,
+    status: overrides.status || OPERATION_STATUS.COMPLETED,
+    status_display_name:
+      overrides.status === OPERATION_STATUS.FAILED ? "Failed" : "Completed",
+    status_message:
+      overrides.status === OPERATION_STATUS.FAILED
+        ? "Pinning failed"
+        : "Pinning completed successfully",
+    error: overrides.error,
+    progress_percent: overrides.status === OPERATION_STATUS.FAILED ? 0 : 100,
+    protocol: "ipfs",
+    protocol_display_name: "IPFS",
+    started_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    current_step: overrides.status === OPERATION_STATUS.FAILED ? 0 : 1,
+    total_steps: 1,
+  };
+}
+
+// List operations
+export const listOperationsHandler = http.get(
+  `${getAccountApiUrl()}/api/operations`,
+  async ({ request }) => {
+    await applyMockDelay();
+
+    const url = new URL(request.url);
+    const cidFilter = url.searchParams.get("filters[cid][eq]");
+
+    const result = await createMockOperation(12345, {
+      operation: "upload",
+      operation_display_name: "Upload",
+      cid: cidFilter || undefined,
+    });
+
+    return HttpResponse.json(
+      { data: result, total: 1 },
+      {
+        status: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+      },
+    );
+  },
+);
+
+// Get operation details
+export const operationHandler = http.get(
+  `${getAccountApiUrl()}/api/operations/:id`,
+  async ({ params }) => {
+    await applyMockDelay();
+
+    const operationId = parseInt(params.id as string, 10);
+
+    // Special case: operation ID 99999 should fail
+    if (operationId === 99999) {
+      const result = await createMockOperation(operationId, {
+        status: OPERATION_STATUS.FAILED,
+        error: "Simulated failure",
+      });
+
+      return HttpResponse.json(result, {
+        status: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+    }
+
+    const result = await createMockOperation(operationId);
+
+    return HttpResponse.json(result, {
+      status: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+  },
+);
+
+// Combined operation handlers
+export const operationHandlers = [listOperationsHandler, operationHandler];
+
+// ============================================================================
 // COMBINED UPLOAD HANDLERS
 // ============================================================================
 
@@ -472,4 +581,5 @@ export const uploadHandlers = [
   ...tusUploadHandlers,
   ...xhrUploadHandlers,
   ...accountHandlers,
+  ...operationHandlers,
 ];

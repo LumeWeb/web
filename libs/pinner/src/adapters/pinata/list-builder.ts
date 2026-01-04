@@ -4,7 +4,7 @@ import type { RemoteLsOptions } from "@/types/pin";
 
 /**
  * List builder for listing pins.
- * 
+ *
  * Note: .pageToken() provides Pinata SDK API compatibility for easier migration.
  * The token is passed through to the underlying IPFS Pinning Service cursor parameter.
  * The server handles the actual pagination logic according to the IPFS Pinning Service spec.

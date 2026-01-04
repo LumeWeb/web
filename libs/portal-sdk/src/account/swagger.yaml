@@ -387,7 +387,9 @@ components:
       additionalProperties: false
       properties:
         data:
-          $ref: '#/components/schemas/OperationListItem'
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationListItem'
         total:
           type: integer
       required:

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { validateUrl, ValidationError } from "../validation";
 
 describe("validateUrl", () => {
@@ -6,13 +6,17 @@ describe("validateUrl", () => {
     it("should allow valid HTTP URLs", () => {
       expect(() => validateUrl("http://example.com")).not.toThrow();
       expect(() => validateUrl("http://example.com/path")).not.toThrow();
-      expect(() => validateUrl("http://example.com/path?query=value")).not.toThrow();
+      expect(() =>
+        validateUrl("http://example.com/path?query=value"),
+      ).not.toThrow();
     });
 
     it("should allow valid HTTPS URLs", () => {
       expect(() => validateUrl("https://example.com")).not.toThrow();
       expect(() => validateUrl("https://example.com/path")).not.toThrow();
-      expect(() => validateUrl("https://example.com/path?query=value")).not.toThrow();
+      expect(() =>
+        validateUrl("https://example.com/path?query=value"),
+      ).not.toThrow();
     });
 
     it("should allow URLs with subdomains", () => {
@@ -36,7 +40,9 @@ describe("validateUrl", () => {
     });
 
     it("should reject data: URLs", () => {
-      expect(() => validateUrl("data:text/plain,hello")).toThrow(ValidationError);
+      expect(() => validateUrl("data:text/plain,hello")).toThrow(
+        ValidationError,
+      );
     });
 
     it("should reject javascript: URLs", () => {
@@ -44,7 +50,9 @@ describe("validateUrl", () => {
     });
 
     it("should reject mailto: URLs", () => {
-      expect(() => validateUrl("mailto:test@example.com")).toThrow(ValidationError);
+      expect(() => validateUrl("mailto:test@example.com")).toThrow(
+        ValidationError,
+      );
     });
   });
 
@@ -64,7 +72,9 @@ describe("validateUrl", () => {
     it("should reject 127.x.x.x addresses", () => {
       expect(() => validateUrl("http://127.0.0.2")).toThrow(ValidationError);
       expect(() => validateUrl("http://127.1.1.1")).toThrow(ValidationError);
-      expect(() => validateUrl("http://127.255.255.255")).toThrow(ValidationError);
+      expect(() => validateUrl("http://127.255.255.255")).toThrow(
+        ValidationError,
+      );
     });
 
     it("should reject IPv6 localhost", () => {
@@ -75,17 +85,23 @@ describe("validateUrl", () => {
   describe("SSRF protection - private IP ranges (IPv4)", () => {
     it("should reject 10.0.0.0/8 range", () => {
       expect(() => validateUrl("http://10.0.0.1")).toThrow(ValidationError);
-      expect(() => validateUrl("http://10.255.255.255")).toThrow(ValidationError);
+      expect(() => validateUrl("http://10.255.255.255")).toThrow(
+        ValidationError,
+      );
     });
 
     it("should reject 172.16.0.0/12 range", () => {
       expect(() => validateUrl("http://172.16.0.1")).toThrow(ValidationError);
-      expect(() => validateUrl("http://172.31.255.255")).toThrow(ValidationError);
+      expect(() => validateUrl("http://172.31.255.255")).toThrow(
+        ValidationError,
+      );
     });
 
     it("should reject 192.168.0.0/16 range", () => {
       expect(() => validateUrl("http://192.168.0.1")).toThrow(ValidationError);
-      expect(() => validateUrl("http://192.168.255.255")).toThrow(ValidationError);
+      expect(() => validateUrl("http://192.168.255.255")).toThrow(
+        ValidationError,
+      );
     });
 
     it("should reject link-local 169.254.0.0/16 range", () => {
@@ -110,14 +126,18 @@ describe("validateUrl", () => {
       // 0177.0.0.1 = 127.0.0.1 in octal
       expect(() => validateUrl("http://0177.0.0.1")).toThrow(ValidationError);
       // 0300.0250.0.1 = 192.168.0.1 in octal
-      expect(() => validateUrl("http://0300.0250.0.1")).toThrow(ValidationError);
+      expect(() => validateUrl("http://0300.0250.0.1")).toThrow(
+        ValidationError,
+      );
     });
 
     it("should reject hexadecimal notation", () => {
       // 0x7f.0.0.1 = 127.0.0.1 in hex
       expect(() => validateUrl("http://0x7f.0.0.1")).toThrow(ValidationError);
       // 0xc0.0xa8.0.0.1 = 192.168.0.1 in hex
-      expect(() => validateUrl("http://0xc0.0xa8.0.0.1")).toThrow(ValidationError);
+      expect(() => validateUrl("http://0xc0.0xa8.0.0.1")).toThrow(
+        ValidationError,
+      );
     });
 
     it("should reject mixed notation", () => {
@@ -138,12 +158,16 @@ describe("validateUrl", () => {
     it("should reject IPv6 unique local addresses (fc00::/7)", () => {
       expect(() => validateUrl("http://[fc00::1]")).toThrow(ValidationError);
       expect(() => validateUrl("http://[fd00::1]")).toThrow(ValidationError);
-      expect(() => validateUrl("http://[fde4:8dba:82e1::1]")).toThrow(ValidationError);
+      expect(() => validateUrl("http://[fde4:8dba:82e1::1]")).toThrow(
+        ValidationError,
+      );
     });
 
     it("should reject IPv6 link-local addresses (fe80::/10)", () => {
       expect(() => validateUrl("http://[fe80::1]")).toThrow(ValidationError);
-      expect(() => validateUrl("http://[fe80::1%eth0]")).toThrow(ValidationError);
+      expect(() => validateUrl("http://[fe80::1%eth0]")).toThrow(
+        ValidationError,
+      );
     });
 
     it("should reject IPv6 multicast addresses (ff00::/8)", () => {
@@ -151,8 +175,12 @@ describe("validateUrl", () => {
     });
 
     it("should reject IPv4-mapped IPv6 addresses", () => {
-      expect(() => validateUrl("http://[::ffff:127.0.0.1]")).toThrow(ValidationError);
-      expect(() => validateUrl("http://[::ffff:192.168.1.1]")).toThrow(ValidationError);
+      expect(() => validateUrl("http://[::ffff:127.0.0.1]")).toThrow(
+        ValidationError,
+      );
+      expect(() => validateUrl("http://[::ffff:192.168.1.1]")).toThrow(
+        ValidationError,
+      );
     });
   });
 

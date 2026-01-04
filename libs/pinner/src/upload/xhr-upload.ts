@@ -1,6 +1,7 @@
 import Uppy from "@uppy/core";
 import XHRUpload from "@lumeweb/uppy-post-upload";
 import type { UploadResult } from "@/types/upload";
+import { UploadResultSymbol } from "@/types/upload";
 import { BaseUploadHandler } from "./base-upload";
 import { UPLOAD_SOURCE_XHR } from "./constants";
 
@@ -28,6 +29,7 @@ export class XHRUploadHandler extends BaseUploadHandler {
         createdAt: string;
         numberOfFiles: number;
         keyvalues?: Record<string, string>;
+        operationId?: number;
       };
     };
 
@@ -42,6 +44,8 @@ export class XHRUploadHandler extends BaseUploadHandler {
       createdAt: new Date(response.createdAt),
       numberOfFiles: response.numberOfFiles,
       keyvalues: response.keyvalues,
+      operationId: response.operationId,
+      [UploadResultSymbol]: true,
     };
   }
 

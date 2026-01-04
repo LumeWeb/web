@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { RowFormatter } from "../row-formatter";
-import type { CsvFormatterOptions, HeadersConfig, RowTransform } from "../csv-options";
+import type { CsvFormatterOptions, HeadersConfig } from "../csv-options";
 
 describe("RowFormatter", () => {
   const createFormatter = (options: CsvFormatterOptions = {}) => {
@@ -19,12 +19,21 @@ describe("RowFormatter", () => {
       const syncError = () => {
         throw new Error("Expected Error");
       };
-      const asyncTransform = (row: string[], cb: (err: Error | null, row?: string[]) => void) => {
+      const asyncTransform = (
+        row: string[],
+        cb: (err: Error | null, row?: string[]) => void,
+      ) => {
         setTimeout(() => {
-          cb(null, row.map((col) => col.toUpperCase()));
+          cb(
+            null,
+            row.map((col) => col.toUpperCase()),
+          );
         }, 0);
       };
-      const asyncErrorTransform = (_row: unknown, cb: (err: Error | null, row?: unknown) => void) => {
+      const asyncErrorTransform = (
+        _row: unknown,
+        cb: (err: Error | null, row?: unknown) => void,
+      ) => {
         setTimeout(() => {
           cb(new Error("Expected Error"));
         }, 0);
@@ -42,17 +51,26 @@ describe("RowFormatter", () => {
       });
 
       it("should support a sync transform", () => {
-        const formatter = createFormatter({ headers: true as HeadersConfig, transform: syncTransform });
+        const formatter = createFormatter({
+          headers: true as HeadersConfig,
+          transform: syncTransform,
+        });
         expect(formatter.format(headerRow)).toEqual(["A,B"]);
       });
 
       it("should catch a sync transform thrown error", () => {
-        const formatter = createFormatter({ headers: true as HeadersConfig, transform: syncError });
+        const formatter = createFormatter({
+          headers: true as HeadersConfig,
+          transform: syncError,
+        });
         expect(() => formatter.format(headerRow)).toThrow("Expected Error");
       });
 
       it("should support an async transform", async () => {
-        const formatter = createFormatter({ headers: true as HeadersConfig, transform: asyncTransform });
+        const formatter = createFormatter({
+          headers: true as HeadersConfig,
+          transform: asyncTransform,
+        });
         const result = formatter.format(headerRow);
         // Note: Our implementation uses Promise.all internally for async transforms
         // The result may be empty if the transform hasn't completed yet
@@ -61,7 +79,10 @@ describe("RowFormatter", () => {
       });
 
       it("should support an async transform with error", async () => {
-        const formatter = createFormatter({ headers: true as HeadersConfig, transform: asyncErrorTransform });
+        const formatter = createFormatter({
+          headers: true as HeadersConfig,
+          transform: asyncErrorTransform,
+        });
         expect(() => formatter.format(headerRow)).toThrow();
       });
 
@@ -75,13 +96,17 @@ describe("RowFormatter", () => {
           it("should still format all rows without headers", () => {
             const formatter = createFormatter({ headers: false });
             expect(formatter.format([])).toEqual([""]);
-            expect(formatter.format(headerRow)).toEqual([`\n${headerRow.join(",")}`]);
+            expect(formatter.format(headerRow)).toEqual([
+              `\n${headerRow.join(",")}`,
+            ]);
           });
         });
 
         describe("with headers=true", () => {
           it("should only write the first row", () => {
-            const formatter = createFormatter({ headers: true as HeadersConfig });
+            const formatter = createFormatter({
+              headers: true as HeadersConfig,
+            });
             expect(formatter.format(headerRow)).toEqual([headerRow.join(",")]);
           });
         });
@@ -96,8 +121,13 @@ describe("RowFormatter", () => {
           });
 
           it("should append an additional column for new fields", () => {
-            const formatter = createFormatter({ headers: ["A", "B", "no_field"] });
-            expect(formatter.format(columnsRow)).toEqual(["A,B,no_field", "\na1,b1,"]);
+            const formatter = createFormatter({
+              headers: ["A", "B", "no_field"],
+            });
+            expect(formatter.format(columnsRow)).toEqual([
+              "A,B,no_field",
+              "\na1,b1,",
+            ]);
           });
 
           it("should exclude columns that do not have a header", () => {
@@ -109,7 +139,10 @@ describe("RowFormatter", () => {
 
       describe("rowDelimiter option", () => {
         it("should support specifying an alternate row delimiter", () => {
-          const formatter = createFormatter({ headers: true as HeadersConfig, rowDelimiter: "\r\n" });
+          const formatter = createFormatter({
+            headers: true as HeadersConfig,
+            rowDelimiter: "\r\n",
+          });
           expect(formatter.format(headerRow)).toEqual(["a,b"]);
           expect(formatter.format(columnsRow)).toEqual(["\r\na1,b1"]);
         });
@@ -123,18 +156,30 @@ describe("RowFormatter", () => {
       ];
 
       const syncTransform = (rowToTransform: string[][]) => {
-        return rowToTransform.map(([header, col]) => [header, col.toUpperCase()]);
+        return rowToTransform.map(([header, col]) => [
+          header,
+          col.toUpperCase(),
+        ]);
       };
       const syncError = () => {
         throw new Error("Expected Error");
       };
-      const asyncTransform = (rowToTransform: string[][], cb: (err: Error | null, row?: string[][]) => void) => {
-        const transformed = rowToTransform.map(([header, col]) => [header, col.toUpperCase()]);
+      const asyncTransform = (
+        rowToTransform: string[][],
+        cb: (err: Error | null, row?: string[][]) => void,
+      ) => {
+        const transformed = rowToTransform.map(([header, col]) => [
+          header,
+          col.toUpperCase(),
+        ]);
         setTimeout(() => {
           cb(null, transformed);
         }, 0);
       };
-      const asyncErrorTransform = (rowToTransform: unknown, cb: (err: Error | null, row?: unknown) => void) => {
+      const asyncErrorTransform = (
+        rowToTransform: unknown,
+        cb: (err: Error | null, row?: unknown) => void,
+      ) => {
         return setTimeout(() => {
           cb(new Error("Expected Error"));
         }, 0);
@@ -151,23 +196,35 @@ describe("RowFormatter", () => {
       });
 
       it("should support a sync transform", () => {
-        const formatter = createFormatter({ headers: true as HeadersConfig, transform: syncTransform });
+        const formatter = createFormatter({
+          headers: true as HeadersConfig,
+          transform: syncTransform,
+        });
         expect(formatter.format(row)).toEqual(["a,b", "\nA1,B1"]);
       });
 
       it("should catch a sync transform thrown error", () => {
-        const formatter = createFormatter({ headers: true as HeadersConfig, transform: syncError });
+        const formatter = createFormatter({
+          headers: true as HeadersConfig,
+          transform: syncError,
+        });
         expect(() => formatter.format(row)).toThrow("Expected Error");
       });
 
       it("should support an async transform", () => {
-        const formatter = createFormatter({ headers: true as HeadersConfig, transform: asyncTransform });
+        const formatter = createFormatter({
+          headers: true as HeadersConfig,
+          transform: asyncTransform,
+        });
         const result = formatter.format(row);
         expect(Array.isArray(result)).toBe(true);
       });
 
       it("should support an async transform with error", () => {
-        const formatter = createFormatter({ headers: true as HeadersConfig, transform: asyncErrorTransform });
+        const formatter = createFormatter({
+          headers: true as HeadersConfig,
+          transform: asyncErrorTransform,
+        });
         expect(() => formatter.format(row)).toThrow();
       });
 
@@ -181,7 +238,9 @@ describe("RowFormatter", () => {
 
         describe("with headers=true", () => {
           it("should only write the first row", () => {
-            const formatter = createFormatter({ headers: true as HeadersConfig });
+            const formatter = createFormatter({
+              headers: true as HeadersConfig,
+            });
             expect(formatter.format(row)).toEqual(["a,b", "\na1,b1"]);
           });
         });
@@ -193,7 +252,9 @@ describe("RowFormatter", () => {
           });
 
           it("should append an additional column for new fields", () => {
-            const formatter = createFormatter({ headers: ["A", "B", "no_field"] });
+            const formatter = createFormatter({
+              headers: ["A", "B", "no_field"],
+            });
             expect(formatter.format(row)).toEqual(["A,B,no_field", "\na1,b1,"]);
           });
 
@@ -206,7 +267,10 @@ describe("RowFormatter", () => {
 
       describe("rowDelimiter option", () => {
         it("should support specifying an alternate row delimiter", () => {
-          const formatter = createFormatter({ headers: true as HeadersConfig, rowDelimiter: "\r\n" });
+          const formatter = createFormatter({
+            headers: true as HeadersConfig,
+            rowDelimiter: "\r\n",
+          });
           expect(formatter.format(row)).toEqual(["a,b", "\r\na1,b1"]);
         });
       });
@@ -224,12 +288,18 @@ describe("RowFormatter", () => {
       const syncError = () => {
         throw new Error("Expected Error");
       };
-      const asyncTransform = (rowToTransform: Record<string, string>, cb: (err: Error | null, row?: Record<string, string>) => void) => {
+      const asyncTransform = (
+        rowToTransform: Record<string, string>,
+        cb: (err: Error | null, row?: Record<string, string>) => void,
+      ) => {
         return setTimeout(() => {
           cb(null, syncTransform(rowToTransform));
         }, 0);
       };
-      const asyncErrorTransform = (rowToTransform: unknown, cb: (err: Error | null, row?: unknown) => void) => {
+      const asyncErrorTransform = (
+        rowToTransform: unknown,
+        cb: (err: Error | null, row?: unknown) => void,
+      ) => {
         return setTimeout(() => {
           cb(new Error("Expected Error"));
         }, 0);
@@ -246,23 +316,35 @@ describe("RowFormatter", () => {
       });
 
       it("should support a sync transform", () => {
-        const formatter = createFormatter({ headers: true as HeadersConfig, transform: syncTransform });
+        const formatter = createFormatter({
+          headers: true as HeadersConfig,
+          transform: syncTransform,
+        });
         expect(formatter.format(row)).toEqual(["a,b", "\nA1,B1"]);
       });
 
       it("should catch a sync transform thrown error", () => {
-        const formatter = createFormatter({ headers: true as HeadersConfig, transform: syncError });
+        const formatter = createFormatter({
+          headers: true as HeadersConfig,
+          transform: syncError,
+        });
         expect(() => formatter.format(row)).toThrow("Expected Error");
       });
 
       it("should support an async transform", () => {
-        const formatter = createFormatter({ headers: true as HeadersConfig, transform: asyncTransform });
+        const formatter = createFormatter({
+          headers: true as HeadersConfig,
+          transform: asyncTransform,
+        });
         const result = formatter.format(row);
         expect(Array.isArray(result)).toBe(true);
       });
 
       it("should support an async transform with error", () => {
-        const formatter = createFormatter({ headers: true as HeadersConfig, transform: asyncErrorTransform });
+        const formatter = createFormatter({
+          headers: true as HeadersConfig,
+          transform: asyncErrorTransform,
+        });
         expect(() => formatter.format(row)).toThrow();
       });
 
@@ -276,12 +358,17 @@ describe("RowFormatter", () => {
 
         describe("with headers=true", () => {
           it("should only write the first row", () => {
-            const formatter = createFormatter({ headers: true as HeadersConfig });
+            const formatter = createFormatter({
+              headers: true as HeadersConfig,
+            });
             expect(formatter.format(row)).toEqual(["a,b", "\na1,b1"]);
           });
 
           it("should not write the first row if writeHeaders is false", () => {
-            const formatter = createFormatter({ headers: true as HeadersConfig, writeHeaders: false });
+            const formatter = createFormatter({
+              headers: true as HeadersConfig,
+              writeHeaders: false,
+            });
             expect(formatter.format(row)).toEqual(["a1,b1"]);
           });
         });
@@ -293,7 +380,10 @@ describe("RowFormatter", () => {
           });
 
           it("should not write the header row if writeHeaders is false", () => {
-            const formatter = createFormatter({ headers: ["a", "b"], writeHeaders: false });
+            const formatter = createFormatter({
+              headers: ["a", "b"],
+              writeHeaders: false,
+            });
             expect(formatter.format(row)).toEqual(["a1,b1"]);
           });
 
@@ -303,12 +393,17 @@ describe("RowFormatter", () => {
           });
 
           it("should append an additional column for new fields", () => {
-            const formatter = createFormatter({ headers: ["a", "b", "no_field"] });
+            const formatter = createFormatter({
+              headers: ["a", "b", "no_field"],
+            });
             expect(formatter.format(row)).toEqual(["a,b,no_field", "\na1,b1,"]);
           });
 
           it("should respect the order of the columns and not write the headers if writeHeaders is false", () => {
-            const formatter = createFormatter({ headers: ["b", "a"], writeHeaders: false });
+            const formatter = createFormatter({
+              headers: ["b", "a"],
+              writeHeaders: false,
+            });
             expect(formatter.format(row)).toEqual(["b1,a1"]);
           });
         });
@@ -316,7 +411,10 @@ describe("RowFormatter", () => {
 
       describe("rowDelimiter option", () => {
         it("should support specifying an alternate row delimiter", () => {
-          const formatter = createFormatter({ headers: true as HeadersConfig, rowDelimiter: "\r\n" });
+          const formatter = createFormatter({
+            headers: true as HeadersConfig,
+            rowDelimiter: "\r\n",
+          });
           expect(formatter.format(row)).toEqual(["a,b", "\r\na1,b1"]);
         });
       });
@@ -327,13 +425,19 @@ describe("RowFormatter", () => {
     describe("alwaysWriteHeaders option", () => {
       it("should return a headers row if no rows have been written", () => {
         const headers = ["h1", "h2"];
-        const formatter = createFormatter({ headers, alwaysWriteHeaders: true });
+        const formatter = createFormatter({
+          headers,
+          alwaysWriteHeaders: true,
+        });
         expect(formatter.finish()).toEqual([headers.join(",")]);
       });
 
       it("should not return a headers row if rows have been written", () => {
         const headers = ["h1", "h2"];
-        const formatter = createFormatter({ headers, alwaysWriteHeaders: true });
+        const formatter = createFormatter({
+          headers,
+          alwaysWriteHeaders: true,
+        });
         formatter.format(["c1", "c2"]);
         expect(formatter.finish()).toEqual([]);
       });

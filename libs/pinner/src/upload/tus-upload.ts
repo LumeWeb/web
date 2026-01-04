@@ -1,6 +1,7 @@
 import Uppy from "@uppy/core";
 import TusPlugin from "@uppy/tus";
 import type { UploadResult } from "@/types/upload";
+import { UploadResultSymbol } from "@/types/upload";
 import { BaseUploadHandler } from "./base-upload";
 import { patchTusNodeHttpStack } from "@/utils/tus-patch";
 import type { PinnerConfig } from "@/config";
@@ -41,6 +42,7 @@ export class TUSUploadHandler extends BaseUploadHandler {
         createdAt: new Date(),
         numberOfFiles: 1,
         isDirectory: false,
+        [UploadResultSymbol]: true,
       };
     }
 
@@ -57,6 +59,8 @@ export class TUSUploadHandler extends BaseUploadHandler {
         numberOfFiles: response.numberOfFiles,
         isDirectory: response.isDirectory ?? false,
         keyvalues: response.keyvalues,
+        operationId: response.operationId,
+        [UploadResultSymbol]: true,
       };
     }
 
@@ -71,6 +75,7 @@ export class TUSUploadHandler extends BaseUploadHandler {
       createdAt: new Date(),
       numberOfFiles: 1,
       isDirectory: false,
+      [UploadResultSymbol]: true,
     };
   }
 
