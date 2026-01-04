@@ -1,6 +1,7 @@
 import {
   createUnstorageBlockstore,
   createUnstorageDatastore,
+  driverFactory,
   setDriverFactory,
   type UnstorageBlockstoreOptions,
 } from "./unstorage-base";
@@ -16,6 +17,11 @@ function isBrowser(): boolean {
 }
 
 async function getDefaultDriver(base?: string) {
+  // Use driverFactory override if set (typically by tests to inject in-memory driver)
+  if (driverFactory) {
+    return await driverFactory();
+  }
+
   if (isBrowser()) {
     return (await import("unstorage/drivers/indexedb")).default({
       base: base ?? DEFAULT_BLOCKSTORE_BASE,

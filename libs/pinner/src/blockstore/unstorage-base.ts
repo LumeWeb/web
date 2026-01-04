@@ -52,7 +52,7 @@ export interface UnstorageBlockstoreOptions {
 
 type DriverFactory = () => Driver | Promise<Driver>;
 
-let driverFactory: DriverFactory | null = null;
+export let driverFactory: DriverFactory | null = null;
 
 export function setDriverFactory(factory: DriverFactory | null): void {
   driverFactory = factory;
