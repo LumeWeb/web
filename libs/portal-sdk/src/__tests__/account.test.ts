@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { AccountApi, OPERATION_STATUS } from "@/account";
-import { createEqFilter, calculatePagination } from "@/query-utils";
+import { createEqFilter, calculatePagination } from "@lumeweb/query-builder";
 import { expectSuccess, expectFailure, expectOperationStatus, getPrivateProperty, setPrivateProperty } from "./test-helpers";
 
 // Mock types for testing
