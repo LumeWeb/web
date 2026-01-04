@@ -23,7 +23,7 @@
   },
   "scripts": {
     "build": "orval && tsdown",
-    "lint": "eslint .",
+    "lint": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage"
@@ -31,6 +31,9 @@
   "private": false,
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "@lumeweb/query-builder": "workspace:*"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.16",

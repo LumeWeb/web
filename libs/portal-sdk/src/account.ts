@@ -27,6 +27,10 @@ import {
   UploadLimitResponse,
   VerifyEmailRequest,
 } from "@/account/generated";
+import type {
+  OperationsListParams,
+} from "@/query-utils";
+import { buildOperationsQueryParams } from "@/query-utils";
 import { delay, parseResponse, poll } from "@/http-utils";
 
 /**
@@ -346,20 +350,31 @@ export class AccountApi {
 
   /**
    * List operations with filtering, searching, and pagination
-   * @param params Query parameters for filtering and pagination
+   * 
+   * @param params Query parameters using query-builder helpers
    * @returns Result containing list of operations
+   * 
+   * @example
+   * ```ts
+   * const result = await accountApi.listOperations({
+   *   filters: [
+   *     { field: "status", operator: "eq", value: "completed" },
+   *     { field: "operation", operator: "in", value: ["upload", "download"] }
+   *   ],
+   *   sorters: [{ field: "id", order: "desc" }],
+   *   pagination: { start: 0, end: 20, page: 1, pageSize: 20 },
+   *   search: "myfile"
+   * });
+   * ```
    */
   public async listOperations(
-    params?: GetApiOperationsParams,
+    params?: OperationsListParams,
   ): Promise<Result<OperationListItemResponse>> {
     const url = new URL("/api/operations", this.apiUrl);
     
     if (params) {
-      for (const [key, value] of Object.entries(params)) {
-        if (value !== undefined && value !== null) {
-          url.searchParams.set(key, String(value));
-        }
-      }
+      const searchParams = buildOperationsQueryParams(params);
+      url.search = searchParams.toString();
     }
     
     return this.fetchJson<OperationListItemResponse>(url.toString(), {

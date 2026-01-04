@@ -1,5 +1,7 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
 import { isEmptyResponse, parseResponse, fetchWithHandling, delay, poll } from "@/http-utils";
+import type { Result } from "@/types";
+import { expectSuccess, expectFailure, createMockSuccess } from "./test-helpers";
 
 // Helper function to create mock Response objects with various status codes
 function createMockResponse(
@@ -158,10 +160,11 @@ describe("poll", () => {
     let counter = 0;
     const mockFetch = vi.fn().mockImplementation(async () => {
       counter++;
-      return { success: true, data: counter };
+      return createMockSuccess(counter);
     });
 
-    const result = await poll(mockFetch, (data) => data >= 3, { interval: 10 });
+    const result = await poll(mockFetch, (data: number) => data >= 3, { interval: 10 });
+    expectSuccess(result);
     expect(result.data).toBe(3);
     expect(mockFetch).toHaveBeenCalledTimes(3);
   });
@@ -173,9 +176,9 @@ describe("poll", () => {
     });
 
     const result = await poll(mockFetch, () => false, { interval: 10, timeout: 50 });
-    expect(result.success).toBe(false);
+    expectFailure(result);
     expect(result.error).toBeInstanceOf(Error);
-    expect(result.error?.message).toContain("Polling timed out");
+    expect(result.error.message).toContain("Polling timed out");
   });
 
   it("should return error result if fetch fails", async () => {
@@ -185,18 +188,17 @@ describe("poll", () => {
     });
 
     const result = await poll(mockFetch, () => true);
-    expect(result.success).toBe(false);
-    expect(result.error?.message).toBe("Fetch failed");
+    expectFailure(result);
+    expect(result.error.message).toBe("Fetch failed");
   });
 
   it("should use default interval and timeout", async () => {
-    const mockFetch = vi.fn().mockResolvedValue({
-      success: true,
-      data: { status: "completed" },
-    });
+    const mockFetch = vi.fn().mockResolvedValue(
+      createMockSuccess({ status: "completed" })
+    );
 
-    const result = await poll(mockFetch, (data) => data.status === "completed");
-    expect(result.success).toBe(true);
+    const result = await poll(mockFetch, (data: { status: string }) => data.status === "completed");
+    expectSuccess(result);
     expect(result.data).toEqual({ status: "completed" });
   });
 
@@ -216,8 +218,8 @@ describe("poll", () => {
     const result = await poll(mockFetch, () => false, { interval: 10, timeout: 50 });
     const elapsed = Date.now() - startTime;
 
-    expect(result.success).toBe(false);
-    expect(result.error?.message).toContain("Polling timed out");
+    expectFailure(result);
+    expect(result.error.message).toContain("Polling timed out");
     expect(callCount).toBeLessThanOrEqual(2); // Should only fit 1-2 calls due to latency
     // Total time should be close to timeout, not significantly longer
     expect(elapsed).toBeLessThan(80); // Allow some margin for test execution
