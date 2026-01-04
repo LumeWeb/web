@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { AccountApi } from "@/account";
-import type { Result } from "@/types";
+import { AccountApi, OPERATION_STATUS } from "@/account";
+import { createEqFilter, calculatePagination } from "@/query-utils";
+import { expectSuccess, expectFailure, expectOperationStatus, getPrivateProperty, setPrivateProperty } from "./test-helpers";
 
 // Mock types for testing
 interface MockResponse {
@@ -53,15 +54,15 @@ describe("AccountApi", () => {
   describe("setToken and clearToken", () => {
     it("should set JWT token", () => {
       accountApi.setToken("test-token");
-      const api = accountApi as any;
-      expect(api._jwtToken).toBe("test-token");
+      const jwtToken = getPrivateProperty(accountApi, "_jwtToken");
+      expect(jwtToken).toBe("test-token");
     });
 
     it("should clear JWT token", () => {
       accountApi.setToken("test-token");
       accountApi.clearToken();
-      const api = accountApi as any;
-      expect(api._jwtToken).toBeUndefined();
+      const jwtToken = getPrivateProperty(accountApi, "_jwtToken");
+      expect(jwtToken).toBeUndefined();
     });
   });
 
@@ -78,10 +79,11 @@ describe("AccountApi", () => {
       const result = await accountApi.login({
         email: "test@test.com",
         password: "password",
+        remember: false,
       });
 
-      expect(result.success).toBe(true);
-      expect(result.data?.token).toBe("jwt-token-123");
+      expectSuccess(result);
+      expect(result.data.token).toBe("jwt-token-123");
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining("https://account.test.com/api/auth/login"),
         expect.objectContaining({
@@ -102,9 +104,10 @@ describe("AccountApi", () => {
       const result = await accountApi.login({
         email: "test@test.com",
         password: "wrong",
+        remember: false,
       });
 
-      expect(result.success).toBe(false);
+      expectFailure(result);
       expect(result.error).toBeDefined();
     });
   });
@@ -116,9 +119,9 @@ describe("AccountApi", () => {
 
       const result = await accountApi.logout();
 
-      expect(result.success).toBe(true);
-      const api = accountApi as any;
-      expect(api._jwtToken).toBeUndefined();
+      expectSuccess(result);
+      const jwtToken = getPrivateProperty(accountApi, "_jwtToken");
+      expect(jwtToken).toBeUndefined();
     });
 
     it("should handle logout failure", async () => {
@@ -129,9 +132,9 @@ describe("AccountApi", () => {
 
       const result = await accountApi.logout();
 
-      expect(result.success).toBe(false);
-      const api = accountApi as any;
-      expect(api._jwtToken).toBe("test-token"); // Token should not be cleared on error
+      expectFailure(result);
+      const jwtToken = getPrivateProperty(accountApi, "_jwtToken");
+      expect(jwtToken).toBe("test-token"); // Token should not be cleared on error
     });
   });
 
@@ -142,6 +145,8 @@ describe("AccountApi", () => {
       const result = await accountApi.register({
         email: "test@test.com",
         password: "password",
+        first_name: "Test",
+        last_name: "User",
       });
 
       expect(result.success).toBe(true);
@@ -159,6 +164,8 @@ describe("AccountApi", () => {
       const result = await accountApi.register({
         email: "existing@test.com",
         password: "password",
+        first_name: "Test",
+        last_name: "User",
       });
 
       expect(result.success).toBe(false);
@@ -177,7 +184,9 @@ describe("AccountApi", () => {
       const result = await accountApi.info();
 
       expect(result.success).toBe(true);
-      expect(result.data).toEqual(mockData);
+      if (result.success) {
+        expect(result.data).toEqual(mockData);
+      }
     });
 
     it("should handle unauthorized access", async () => {
@@ -198,10 +207,10 @@ describe("AccountApi", () => {
 
       const result = await accountApi.ping();
 
-      expect(result.success).toBe(true);
-      expect(result.data?.token).toBe("new-token");
-      const api = accountApi as any;
-      expect(api._jwtToken).toBe("new-token");
+      expectSuccess(result);
+      expect(result.data.token).toBe("new-token");
+      const jwtToken = getPrivateProperty(accountApi, "_jwtToken");
+      expect(jwtToken).toBe("new-token");
     });
   });
 
@@ -225,10 +234,11 @@ describe("AccountApi", () => {
 
       const result = await accountApi.confirmPasswordReset({
         token: "reset-token",
-        new_password: "newpassword",
+        password: "newpassword",
+        email: "test@test.com",
       });
 
-      expect(result.success).toBe(true);
+      expectSuccess(result);
     });
   });
 
@@ -248,6 +258,7 @@ describe("AccountApi", () => {
 
       const result = await accountApi.verifyEmail({
         token: "verify-token",
+        email: "test@test.com",
       });
 
       expect(result.success).toBe(true);
@@ -268,7 +279,7 @@ describe("AccountApi", () => {
       mockFetch.mockResolvedValue(mockResponse);
 
       const result = await accountApi.verifyEmail(
-        { token: "verify-token" },
+        { token: "verify-token", email: "test@test.com" },
         true
       );
 
@@ -306,21 +317,21 @@ describe("AccountApi", () => {
 
   describe("OTP methods", () => {
     it("should generate OTP", async () => {
-      const mockData = { secret: "ABC123", qr_code: "data:image/png;base64,..." };
+      const mockData = { otp: "ABC123" };
       mockFetch.mockResolvedValue(createMockFetchResponse(mockData, 200));
 
       const result = await accountApi.generateOtp();
 
-      expect(result.success).toBe(true);
-      expect(result.data?.secret).toBe("ABC123");
+      expectSuccess(result);
+      expect(result.data.otp).toBe("ABC123");
     });
 
     it("should verify OTP", async () => {
       mockFetch.mockResolvedValue(createMockFetchResponse({}, 200));
 
-      const result = await accountApi.verifyOtp({ code: "123456" });
+      const result = await accountApi.verifyOtp({ otp: "123456" });
 
-      expect(result.success).toBe(true);
+      expectSuccess(result);
     });
 
     it("should validate OTP for login", async () => {
@@ -329,21 +340,20 @@ describe("AccountApi", () => {
 
       const result = await accountApi.validateOtp({
         otp: "123456",
-        login_token: "login-token",
       });
 
-      expect(result.success).toBe(true);
-      expect(result.data?.token).toBe("jwt-token");
-      const api = accountApi as any;
-      expect(api._jwtToken).toBe("jwt-token");
+      expectSuccess(result);
+      expect(result.data.token).toBe("jwt-token");
+      const jwtToken = getPrivateProperty(accountApi, "_jwtToken");
+      expect(jwtToken).toBe("jwt-token");
     });
 
     it("should disable OTP", async () => {
       mockFetch.mockResolvedValue(createMockFetchResponse({}, 200));
 
-      const result = await accountApi.disableOtp({ code: "123456" });
+      const result = await accountApi.disableOtp({ password: "testpassword" });
 
-      expect(result.success).toBe(true);
+      expectSuccess(result);
     });
   });
 
@@ -358,8 +368,8 @@ describe("AccountApi", () => {
 
       const result = await accountApi.uploadLimit();
 
-      expect(result.success).toBe(true);
-      expect(result.data?.limit).toBe(10485760);
+      expectSuccess(result);
+      expect(result.data.limit).toBe(10485760);
     });
   });
 
@@ -380,81 +390,127 @@ describe("AccountApi", () => {
   describe("operations", () => {
     it("should list operations", async () => {
       const mockData = {
-        items: [
-          { id: 1, status: "completed" },
-          { id: 2, status: "pending" },
-        ],
-        total: 2,
+        data: [{
+          id: 1,
+          status: OPERATION_STATUS.COMPLETED,
+          operation: "upload",
+        }],
+        total: 1,
       };
       mockFetch.mockResolvedValue(createMockFetchResponse(mockData, 200));
 
       const result = await accountApi.listOperations();
 
-      expect(result.success).toBe(true);
-      expect(result.data?.items).toHaveLength(2);
+      expectSuccess(result);
+      expect(result.data.data[0].id).toBe(1);
     });
 
     it("should list operations with filters", async () => {
-      const mockData = { items: [], total: 0 };
+      const mockData = {
+        data: {
+          id: 1,
+          status: OPERATION_STATUS.COMPLETED,
+          operation: "upload",
+        },
+        total: 1,
+      };
       mockFetch.mockResolvedValue(createMockFetchResponse(mockData, 200));
 
       const result = await accountApi.listOperations({
-        status: "completed",
-        limit: 10,
+        filters: [createEqFilter("status", OPERATION_STATUS.COMPLETED)],
+        pagination: { start: 0, end: 10 },
       });
 
-      expect(result.success).toBe(true);
+      expectSuccess(result);
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining("status=completed"),
+        expect.stringContaining("filters"),
         expect.anything()
       );
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining("status"),
+        expect.anything()
+      );
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining(OPERATION_STATUS.COMPLETED),
+        expect.anything()
+      );
+    });
+
+    it("should serialize array filters with indexed keys", async () => {
+      const mockData = { data: [], total: 0 };
+      mockFetch.mockResolvedValue(createMockFetchResponse(mockData, 200));
+
+      await accountApi.listOperations({
+        filters: [
+          { field: "operation", operator: "in", value: ["upload", "download"] }
+        ],
+      });
+
+      const callArgs = mockFetch.mock.calls[0];
+      const url = callArgs[0] as string;
+      const urlObj = new URL(url);
+
+      // Verify indexed array format: filters[operation][in][0]=upload&filters[operation][in][1]=download
+      expect(urlObj.searchParams.get("filters[operation][in][0]")).toBe("upload");
+      expect(urlObj.searchParams.get("filters[operation][in][1]")).toBe("download");
+      // Ensure non-indexed format is NOT used (no direct filters[operation][in]=value)
+      expect(urlObj.searchParams.get("filters[operation][in]")).toBeNull();
     });
 
     it("should get operation details", async () => {
       const mockData = {
         id: 1,
-        status: "completed",
+        status: OPERATION_STATUS.COMPLETED,
         result: { success: true },
       };
       mockFetch.mockResolvedValue(createMockFetchResponse(mockData, 200));
 
       const result = await accountApi.getOperation(1);
 
-      expect(result.success).toBe(true);
-      expect(result.data?.id).toBe(1);
+      expectSuccess(result);
+      expect(result.data.id).toBe(1);
     });
 
     it("should get operation filters", async () => {
       const mockData = {
-        statuses: ["completed", "pending", "failed"],
-        types: ["upload", "download"],
+        data: {
+          data: {
+            statuses: [
+              { id: OPERATION_STATUS.COMPLETED, name: "Completed" },
+              { id: OPERATION_STATUS.PENDING, name: "Pending" },
+              { id: OPERATION_STATUS.FAILED, name: "Failed" },
+            ],
+            operations: [],
+            protocols: [],
+          },
+        },
+        total: 3,
       };
       mockFetch.mockResolvedValue(createMockFetchResponse(mockData, 200));
 
       const result = await accountApi.getOperationFilters();
 
-      expect(result.success).toBe(true);
-      expect(result.data?.statuses).toContain("completed");
+      expectSuccess(result);
+      expect(result.data.data.data.statuses).toHaveLength(3);
     });
 
     it("should wait for operation to complete", async () => {
       const mockData = {
         id: 1,
-        status: "completed",
+        status: OPERATION_STATUS.COMPLETED,
         result: { success: true },
       };
       mockFetch.mockResolvedValue(createMockFetchResponse(mockData, 200));
 
       const result = await accountApi.waitForOperation(1, { interval: 10 });
 
-      expect(result.success).toBe(true);
-      expect(result.data?.status).toBe("completed");
+      expectOperationStatus(result, OPERATION_STATUS.COMPLETED);
     });
 
     it("should timeout when waiting for operation", async () => {
       mockFetch.mockImplementation(() =>
         Promise.resolve(
-          createMockFetchResponse({ id: 1, status: "pending" }, 200)
+          createMockFetchResponse({ id: 1, status: OPERATION_STATUS.PENDING }, 200)
         )
       );
 
@@ -463,8 +519,8 @@ describe("AccountApi", () => {
         timeout: 50,
       });
 
-      expect(result.success).toBe(false);
-      expect(result.error?.message).toContain("Polling timed out");
+      expectFailure(result);
+      expect(result.error.message).toContain("Polling timed out");
     });
   });
 
@@ -502,7 +558,7 @@ describe("AccountApi", () => {
 
       const result = await accountApi.info();
 
-      expect(result.success).toBe(false);
+      expectFailure(result);
       expect(result.error).toBeDefined();
     });
 

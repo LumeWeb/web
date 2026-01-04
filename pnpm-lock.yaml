@@ -1270,6 +1270,10 @@ importers:
         version: 5.9.3
 
   libs/portal-sdk:
+    dependencies:
+      '@lumeweb/query-builder':
+        specifier: workspace:*
+        version: link:../query-builder
     devDependencies:
       '@vitest/coverage-v8':
         specifier: ^4.0.16
