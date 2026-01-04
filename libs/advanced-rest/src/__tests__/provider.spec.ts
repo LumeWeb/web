@@ -1,5 +1,5 @@
-import { dataProvider } from "libs/advanced-rest/src/provider";
-import { NestedParamError } from "libs/advanced-rest/src/utils/generateUrl";
+import { dataProvider } from "@/provider";
+import { NestedParamError } from "@/utils/generateUrl";
 import nock from "nock";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -15,12 +15,12 @@ describe("Nested REST Data Provider", () => {
     it("should handle nested resource with filters and pagination", async () => {
       nock(API_URL)
         .get("/tenants/123/projects/456/cases")
-        //.get("http://localhost:3000/tenants/123/projects/456/cases") // DEBUG: Check full URL
         .query({
-          "_start": 0,
-          "_end": 20,
-          "name": "Critical",
-          "status%5Bin%5D": "open%2Cpending",
+          "_start": "0",
+          "_end": "20",
+          "filters[name]": "Critical",
+          "filters[status][in][0]": "open",
+          "filters[status][in][1]": "pending",
         })
         .reply(200, [{ id: 1 }], { "x-total-count": "100" });
 
@@ -30,10 +30,10 @@ describe("Nested REST Data Provider", () => {
           { field: "status", operator: "in", value: ["open", "pending"] },
         ],
         meta: {
-          paramsMap: { project: "456", tenant: "123" },
+          params: { project: "456", tenant: "123" },
           template: "tenants/{tenant}/projects/{project}/cases",
         },
-        pagination: { current: 1, pageSize: 20 },
+        pagination: { currentPage: 1, pageSize: 20 },
         resource: "tenant.project.case",
       });
 
@@ -45,7 +45,7 @@ describe("Nested REST Data Provider", () => {
       await expect(
         dp.getList({
           meta: {
-            paramsMap: { tenant: "123" }, // Missing project
+            params: { tenant: "123" }, // Missing project
             template: "tenants/{tenant}/projects/{project}/cases",
           },
           resource: "tenant.project.case",
@@ -63,7 +63,7 @@ describe("Nested REST Data Provider", () => {
       const response = await dp.getOne({
         id: "789",
         meta: {
-          paramsMap: { company: "101112", project: "456", tenant: "123" },
+          params: { company: "101112", project: "456", tenant: "123" },
           template:
             "companies/{company}/tenants/{tenant}/projects/{project}/cases",
         },
@@ -82,7 +82,7 @@ describe("Nested REST Data Provider", () => {
 
       const response = await dp.create({
         meta: {
-          paramsMap: { tenant: "123" },
+          params: { tenant: "123" },
           template: "tenants/{tenant}/projects",
         },
         resource: "tenant.project",
@@ -102,7 +102,7 @@ describe("Nested REST Data Provider", () => {
       const response = await dp.update({
         id: "789",
         meta: {
-          paramsMap: { project: "456" },
+          params: { project: "456" },
           template: "projects/{project}/cases",
         },
         resource: "project.case",
@@ -120,7 +120,7 @@ describe("Nested REST Data Provider", () => {
       const response = await dp.deleteOne({
         id: "456",
         meta: {
-          paramsMap: { tenant: "123" },
+          params: { tenant: "123" },
           template: "tenants/{tenant}/projects",
         },
         resource: "tenant.project",
@@ -138,7 +138,7 @@ describe("Nested REST Data Provider", () => {
 
       const response = await dp.custom?.({
         meta: {
-          paramsMap: { id: "789" },
+          params: { id: "789" },
           template: "cases/{id}",
         },
         method: "post",

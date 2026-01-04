@@ -11,7 +11,10 @@ export const httpClient = (apiBase?: string) =>
         async (request, options, response) => {
           if (!response.ok) {
             // Clone response before reading body to avoid locking the stream
-            const errorBody = await response.clone().json().catch(() => ({}));
+            const errorBody = await response
+              .clone()
+              .json()
+              .catch(() => ({}));
             const error: HttpError = {
               message:
                 errorBody.message ||

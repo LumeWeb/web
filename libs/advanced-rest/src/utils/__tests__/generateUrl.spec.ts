@@ -2,14 +2,14 @@ import {
   generateNestedUrl,
   NestedParamError,
   TemplateResolutionError,
-} from "./generateUrl";
+} from "../generateUrl";
 import { describe, expect, test } from "vitest";
 
 describe("generateNestedUrl", () => {
   test("basic template substitution", () => {
     const result = generateNestedUrl({
       meta: {
-        paramsMap: {
+        params: {
           project: "456",
           tenant: "123",
         },
@@ -24,7 +24,7 @@ describe("generateNestedUrl", () => {
     const result = generateNestedUrl({
       id: "789",
       meta: {
-        paramsMap: {
+        params: {
           project: "456",
           tenant: "123",
         },
@@ -38,7 +38,7 @@ describe("generateNestedUrl", () => {
   test("with operation", () => {
     const result = generateNestedUrl({
       meta: {
-        paramsMap: {
+        params: {
           project: "456",
           tenant: "123",
         },
@@ -53,7 +53,7 @@ describe("generateNestedUrl", () => {
   test("resource dot notation", () => {
     const result = generateNestedUrl({
       meta: {
-        paramsMap: {
+        params: {
           case: "789",
           project: "456",
           tenant: "123",
@@ -67,7 +67,7 @@ describe("generateNestedUrl", () => {
   test("complex template with multiple params", () => {
     const result = generateNestedUrl({
       meta: {
-        paramsMap: {
+        params: {
           company: "101112",
           project: "456",
           tenant: "123",
@@ -84,7 +84,7 @@ describe("generateNestedUrl", () => {
     expect(() =>
       generateNestedUrl({
         meta: {
-          paramsMap: {}, // Missing tenant
+          params: {}, // Missing tenant
           template: "tenants/{tenant}/cases",
         },
         resource: "cases",
@@ -96,7 +96,7 @@ describe("generateNestedUrl", () => {
     expect(() =>
       generateNestedUrl({
         meta: {
-          paramsMap: { tenant: "123" },
+          params: { tenant: "123" },
           template: "tenants/{missingParam{}", // Invalid template syntax with malformed param
         },
         resource: "cases",
@@ -104,23 +104,22 @@ describe("generateNestedUrl", () => {
     ).toThrow(TemplateResolutionError);
   });
 
-  test("ignores apiBase - returns relative path for ky's prefixUrl", () => {
+  test("with apiBase prefix", () => {
     const result = generateNestedUrl({
       apiBase: "https://api.example.com",
       meta: {
-        paramsMap: {},
+        params: {},
         template: "cases",
       },
       resource: "cases",
     });
-    // apiBase is ignored because ky uses prefixUrl configuration
     expect(result).toBe("cases");
   });
 
   test("encoded parameter values", () => {
     const result = generateNestedUrl({
       meta: {
-        paramsMap: {
+        params: {
           tenant: "test tenant",
         },
         template: "tenants/{tenant}/cases",
