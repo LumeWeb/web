@@ -78,8 +78,7 @@
       "warn-once": "patches/warn-once.patch",
       "pluralize": "patches/pluralize.patch",
       "papaparse": "patches/papaparse.patch",
-      "@uppy/core": "patches/@uppy__core.patch",
-      "@refinedev/core": "patches/@refinedev__core.patch"
+      "@uppy/core": "patches/@uppy__core.patch"
     }
   },
   "packageManager": "pnpm@10.24.0"
