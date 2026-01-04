@@ -17,11 +17,6 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@lumeweb/portal-dashboard/*": ["libs/portal-dashboard/src/*"],
-      "@lumeweb/portal-admin/*": ["libs/portal-admin/src/*"],
-      "@lumeweb/portal-framework-plugin-core/*": [
-        "libs/portal-framework-plugin-core/src/*"
-      ],
       "@shared-assets/*": ["shared/assets/*"]
     }
   },

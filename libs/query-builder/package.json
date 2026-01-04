@@ -23,7 +23,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@refinedev/core": "^4.46.0"
+    "@refinedev/core": "^5.0.7"
   },
   "devDependencies": {
     "tsdown": "0.19.0-beta.2",

@@ -104,7 +104,7 @@ describe("generateNestedUrl", () => {
     ).toThrow(TemplateResolutionError);
   });
 
-  test("with apiBase prefix", () => {
+  test("ignores apiBase - returns relative path for ky's prefixUrl", () => {
     const result = generateNestedUrl({
       apiBase: "https://api.example.com",
       meta: {
@@ -113,6 +113,7 @@ describe("generateNestedUrl", () => {
       },
       resource: "cases",
     });
+    // apiBase is ignored because ky uses prefixUrl configuration
     expect(result).toBe("cases");
   });
 
