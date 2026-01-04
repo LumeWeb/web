@@ -66,6 +66,30 @@ describe("operators", () => {
       );
     });
 
+    test("maps startswith to startswith", () => {
+      expect(mapOperatorFromParam("startswith")).toBe(
+        COMPARISON_OPERATORS.STARTSWITH,
+      );
+    });
+
+    test("maps nstartswith to nstartswith", () => {
+      expect(mapOperatorFromParam("nstartswith")).toBe(
+        COMPARISON_OPERATORS.NSTARTSWITH,
+      );
+    });
+
+    test("maps endswith to endswith", () => {
+      expect(mapOperatorFromParam("endswith")).toBe(
+        COMPARISON_OPERATORS.ENDSWITH,
+      );
+    });
+
+    test("maps nendswith to nendswith", () => {
+      expect(mapOperatorFromParam("nendswith")).toBe(
+        COMPARISON_OPERATORS.NENDSWITH,
+      );
+    });
+
     test("maps null to null", () => {
       expect(mapOperatorFromParam("null")).toBe(COMPARISON_OPERATORS.NULL);
     });

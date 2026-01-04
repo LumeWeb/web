@@ -20,6 +20,9 @@ export function calculatePageFromPagination(start: number, end: number): {
   pageSize: number;
 } {
   const pageSize = end - start;
+  if (pageSize <= 0) {
+    return { page: 1, pageSize: 10 };
+  }
   const page = Math.floor(start / pageSize) + 1;
   return { page, pageSize };
 }

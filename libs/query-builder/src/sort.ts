@@ -106,8 +106,15 @@ export function setSorter(
   field: string,
   order: "asc" | "desc",
 ): CrudSort[] {
-  const withoutField = removeSorter(sorters, field);
-  return [...withoutField, { field, order }];
+  const existingIndex = sorters.findIndex((s) => s.field === field);
+  if (existingIndex !== -1) {
+    // Update existing sorter in place to preserve ordering
+    return sorters.map((s, index) =>
+      index === existingIndex ? { ...s, order } : s
+    );
+  }
+  // Add new sorter at the end
+  return [...sorters, { field, order }];
 }
 
 /**

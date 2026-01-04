@@ -383,6 +383,18 @@ function parseArrayValue(value: any, operator: string, field: string): any {
         `operator "${operator}" on field "${field}" requires non-empty array values`,
       );
     }
+
+    // Validate between/nbetween has exactly 2 values for array inputs
+    if (
+      (operator === COMPARISON_OPERATORS.BETWEEN ||
+        operator === COMPARISON_OPERATORS.NBETWEEN) &&
+      value.length !== 2
+    ) {
+      throw new Error(
+        `operator "${operator}" on field "${field}" requires exactly 2 values, got ${value.length}`,
+      );
+    }
+
     // Check for single string with commas (comma-separated values)
     if (
       value.length === 1 &&
@@ -592,9 +604,25 @@ function parsePagination(
     return undefined;
   }
 
+  const parsedStart = start !== undefined ? parseInt(String(start), 10) : 0;
+  const parsedEnd = end !== undefined ? parseInt(String(end), 10) : 10;
+
+  if (start !== undefined && isNaN(parsedStart)) {
+    throw new Error("_start must be a valid integer");
+  }
+  if (end !== undefined && isNaN(parsedEnd)) {
+    throw new Error("_end must be a valid integer");
+  }
+  if (parsedStart < 0) {
+    throw new Error("_start must be non-negative");
+  }
+  if (end !== undefined && parsedEnd <= parsedStart) {
+    throw new Error("_end must be greater than _start");
+  }
+
   const pagination = {
-    start: start !== undefined ? parseInt(String(start), 10) : 0,
-    end: end !== undefined ? parseInt(String(end), 10) : 10,
+    start: parsedStart,
+    end: parsedEnd,
   };
 
   return pagination;

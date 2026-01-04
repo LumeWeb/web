@@ -66,6 +66,8 @@ function serializeFilters(filters: CrudFilters): QueryParams {
       serializeOrCondition(filter, params);
     } else if (filter.operator === LOGICAL_OPERATORS.AND) {
       serializeAndCondition(filter, params);
+    } else if (filter.operator === LOGICAL_OPERATORS.NOT) {
+      serializeNotCondition(filter, params);
     } else if ("field" in filter) {
       if (filter.field === "q") {
         if (hasGlobalSearch) {

@@ -49,7 +49,26 @@ export function removeFiltersByField(
   filters: CrudFilters,
   field: string,
 ): CrudFilters {
-  return filters.filter((f) => !("field" in f) || f.field !== field);
+  const newFilters: CrudFilter[] = [];
+
+  for (const filter of filters) {
+    if (isFieldFilter(filter)) {
+      if (filter.field !== field) {
+        newFilters.push(filter);
+      }
+    } else if (isLogicalFilter(filter)) {
+      const nestedFilters = removeFiltersByField(filter.value, field);
+      // Only keep the logical filter if it still contains nested filters
+      if (nestedFilters.length > 0) {
+        newFilters.push({
+          ...filter,
+          value: nestedFilters,
+        });
+      }
+    }
+  }
+
+  return newFilters;
 }
 
 /**
