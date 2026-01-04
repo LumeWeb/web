@@ -1,12 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { OperationsQueryParams } from "@/query-utils";
-import {
-  buildOperationsQueryParams,
-  createEqFilter,
-  createInFilter,
-  createDescSort,
-  calculatePagination,
-} from "@/query-utils";
+import { buildOperationsQueryParams } from "@/query-utils";
+import { createEqFilter, createInFilter, createDescSort, calculatePagination } from "@lumeweb/query-builder";
 
 describe("buildOperationsQueryParams", () => {
   describe("search parameter", () => {
