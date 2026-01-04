@@ -374,7 +374,9 @@ export class AccountApi {
     
     if (params) {
       const searchParams = buildOperationsQueryParams(params);
-      url.search = searchParams.toString();
+      searchParams.forEach((value, key) => {
+        url.searchParams.append(key, value);
+      });
     }
     
     return this.fetchJson<OperationListItemResponse>(url.toString(), {

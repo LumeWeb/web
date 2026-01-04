@@ -125,24 +125,13 @@ export type OperationsListParams = OperationsQueryParams;
  * ```
  */
 export function buildOperationsQueryParams(params: OperationsQueryParams): URLSearchParams {
-  const queryParams = serializeQueryParams({
+  const queryString = serializeQueryParams({
     filters: params.filters,
     sorters: params.sorters,
     pagination: params.pagination,
   });
 
-  const searchParams = new URLSearchParams();
-
-  // Add serialized query parameters
-  for (const [key, value] of Object.entries(queryParams)) {
-    if (Array.isArray(value)) {
-      for (const v of value) {
-        searchParams.append(key, v);
-      }
-    } else {
-      searchParams.set(key, value);
-    }
-  }
+  const searchParams = new URLSearchParams(queryString);
 
   // Add search parameter if provided
   if (params.search) {

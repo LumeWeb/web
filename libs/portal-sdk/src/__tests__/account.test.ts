@@ -390,11 +390,11 @@ describe("AccountApi", () => {
   describe("operations", () => {
     it("should list operations", async () => {
       const mockData = {
-        data: {
+        data: [{
           id: 1,
           status: OPERATION_STATUS.COMPLETED,
           operation: "upload",
-        },
+        }],
         total: 1,
       };
       mockFetch.mockResolvedValue(createMockFetchResponse(mockData, 200));
@@ -402,7 +402,7 @@ describe("AccountApi", () => {
       const result = await accountApi.listOperations();
 
       expectSuccess(result);
-      expect(result.data.data.id).toBe(1);
+      expect(result.data.data[0].id).toBe(1);
     });
 
     it("should list operations with filters", async () => {
@@ -434,6 +434,27 @@ describe("AccountApi", () => {
         expect.stringContaining(OPERATION_STATUS.COMPLETED),
         expect.anything()
       );
+    });
+
+    it("should serialize array filters with indexed keys", async () => {
+      const mockData = { data: [], total: 0 };
+      mockFetch.mockResolvedValue(createMockFetchResponse(mockData, 200));
+
+      await accountApi.listOperations({
+        filters: [
+          { field: "operation", operator: "in", value: ["upload", "download"] }
+        ],
+      });
+
+      const callArgs = mockFetch.mock.calls[0];
+      const url = callArgs[0] as string;
+      const urlObj = new URL(url);
+
+      // Verify indexed array format: filters[operation][in][0]=upload&filters[operation][in][1]=download
+      expect(urlObj.searchParams.get("filters[operation][in][0]")).toBe("upload");
+      expect(urlObj.searchParams.get("filters[operation][in][1]")).toBe("download");
+      // Ensure non-indexed format is NOT used (no direct filters[operation][in]=value)
+      expect(urlObj.searchParams.get("filters[operation][in]")).toBeNull();
     });
 
     it("should get operation details", async () => {
