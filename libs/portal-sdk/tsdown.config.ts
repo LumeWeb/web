@@ -15,7 +15,13 @@ const configs: UserConfig[] = [
   {
     ...commonOptions,
     clean: true,
-    entry: ["src/**/*", "!src/**/*.yaml"],
+    entry: [
+      "src/**/*",
+      "!**/__tests__/**",
+      "!**/*.test.ts",
+      "!**/*.spec.ts",
+      "!src/**/*.yaml",
+    ],
     format: {
       esm: {
         outputOptions: {
