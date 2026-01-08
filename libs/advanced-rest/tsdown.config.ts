@@ -15,11 +15,12 @@ const configs: UserConfig[] = [
   {
     ...commonOptions,
     clean: true,
-    entry: ["src/**/*"],
+    entry: ["src/**/*", "!**/__tests__/**", "!**/*.test.ts", "!**/*.spec.ts"],
     format: {
       esm: {
         outputOptions: {
           dir: "dist/esm",
+          entryFileNames: "[name].js",
         },
       },
       cjs: {
