@@ -15,7 +15,7 @@
     "@lumeweb/portal-framework-ui": "workspace:*",
     "@lumeweb/portal-framework-ui-core": "workspace:*",
     "@lumeweb/portal-plugin-abuse-common": "workspace:*",
-    "@tanstack/react-query": "^5.90.12",
+    "@tanstack/react-query": "^5.90.16",
     "@uppy/compressor": "3.0.1",
     "@uppy/core": "5.2.0",
     "@uppy/dashboard": "5.0.2",
@@ -26,12 +26,12 @@
     "@uppy/xhr-upload": "5.0.1",
     "axios": "1.12.0",
     "date-fns": "^4.1.0",
-    "lucide-react": "^0.556.0",
-    "react": "^19.0.1",
-    "react-dom": "^19.0.1",
+    "lucide-react": "^0.562.0",
+    "react": "^19.0.3",
+    "react-dom": "^19.0.3",
     "react-hook-form": "7.54.0",
     "react-markdown": "^10.1.0",
     "react-router": "7.5.2",
-    "zod": "3.24.2"
+    "zod": "4.3.5"
   }
 }
