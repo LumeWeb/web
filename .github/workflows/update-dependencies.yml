@@ -22,7 +22,11 @@ jobs:
         uses: ./.github/actions/setup-js
 
       - name: Run taze
-        run: pnpm taze major -r -w
+        run: pnpm taze major -r -w --install false
+        shell: bash
+
+      - name: Update lockfile
+        run: pnpm install --no-frozen-lockfile
         shell: bash
 
       - name: Create Pull Request
