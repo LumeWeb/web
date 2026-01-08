@@ -23,6 +23,7 @@ import type {
   ForceRerenderCallback,
   EnvironmentSyncCallback,
 } from "../shared/types/form";
+import type { AllowStepNavigation } from "../shared/types/navigation";
 
 /**
  * Enum defining the adapter types for form handling
@@ -321,7 +322,7 @@ export interface StepDefinition<TRequest extends BaseRecord = any> {
    * Whether to allow navigation to this step by clicking on progress indicator
    * Takes precedence over the wizard-level allowStepNavigation config
    */
-  allowStepNavigation?: boolean | (() => boolean);
+  allowStepNavigation?: AllowStepNavigation;
   /**
    * Description for the step
    */
@@ -550,7 +551,7 @@ export interface WizardStepDefinition<TRequest extends BaseRecord = any>
    * Whether to allow navigation to this step by clicking on progress indicator
    * Takes precedence over the wizard-level allowStepNavigation config
    */
-  allowStepNavigation?: boolean | (() => boolean);
+  allowStepNavigation?: AllowStepNavigation;
   /**
    * Description for the step
    * Required for wizard steps
