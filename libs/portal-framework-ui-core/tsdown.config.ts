@@ -29,8 +29,8 @@ export default defineConfig([
       },
     },
     copy: [
-      { to: "dist/esm/tailwind.css", from: "src/tailwind.css" },
-      { to: "dist/esm/tailwind-plugin.css", from: "src/tailwind-plugin.css" },
+      { to: "dist/esm", from: "src/tailwind.css" },
+      { to: "dist/esm", from: "src/tailwind-plugin.css" },
     ],
   },
   {
