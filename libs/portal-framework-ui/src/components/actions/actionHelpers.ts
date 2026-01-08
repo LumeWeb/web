@@ -84,7 +84,7 @@ export function createActionHelpers<T = any>() {
      */
     button: (
       onClick?: () => void,
-      label: string,
+      label = "Button",
       disabled = false,
     ): ActionItemConfig => ({
       disabled,
@@ -108,7 +108,7 @@ export function createActionHelpers<T = any>() {
     custom: (
       type: ActionItemType,
       onClick?: () => void,
-      label: string,
+      label = "Custom",
       options: Partial<ActionItemConfig> = {},
     ): ActionItemConfig => ({
       label,
