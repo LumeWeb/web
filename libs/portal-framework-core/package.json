@@ -45,7 +45,7 @@
   },
   "peerDependencies": {
     "@module-federation/bridge-react": "^0.21.6",
-    "@module-federation/enhanced": "^0.21.6",
+    "@module-federation/enhanced": "^0.21.6 || ^0.22.0",
     "@refinedev/react-router": "^2.0.3",
     "@t3-oss/env-core": "^0.13.8",
     "lucide-react": "^0.556.0",
