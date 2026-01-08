@@ -4,7 +4,7 @@
   "description": "An advanced rest data provider using KY for refine",
   "dependencies": {
     "@lumeweb/query-builder": "workspace:*",
-    "@refinedev/core": "^5.0.7",
+    "@refinedev/core": "^5.0.8",
     "ky": "^1.14.2",
     "pupa": "^3.3.0",
     "querystring": "^0.2.1"
