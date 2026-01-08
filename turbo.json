@@ -6,6 +6,16 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", "build/**"]
     },
+    "build:dashboard": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/dashboard/**"]
+    },
+    "build:admin": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/admin/**"]
+    },
     "build:lib": {
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["lib-dist/**"]

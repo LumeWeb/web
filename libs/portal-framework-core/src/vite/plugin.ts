@@ -261,6 +261,7 @@ export function Config(opts: ConfigOptions) {
   const viteConfig = defineConfig({
     base: "/",
     build: {
+      outDir: process.env.VITE_OUTPUT_DIR || "dist",
       ...(opts.type === "plugin"
         ? {
             lib: {
