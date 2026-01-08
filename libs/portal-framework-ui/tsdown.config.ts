@@ -1,9 +1,9 @@
-import type { Options } from "tsdown";
+import type { UserConfig } from "tsdown";
 
 import image from "@rollup/plugin-image";
 import { defineConfig } from "tsdown";
 
-const commonOptions: Options = {
+const commonOptions: Partial<UserConfig> = {
   external: [/node_modules/, /@refinedev\/.*/],
   hash: false,
   minify: false,
@@ -15,7 +15,7 @@ const commonOptions: Options = {
   unbundle: true,
 };
 
-const configs: Options[] = [
+const configs: UserConfig[] = [
   {
     ...commonOptions,
     clean: true,
@@ -29,9 +29,17 @@ const configs: Options[] = [
       "!__mocks__/**",
       "!tests/**",
     ],
-    format: ["esm", "cjs"],
-    outputOptions(options, format) {
-      options.dir = format === "es" ? "dist/esm" : "dist/cjs";
+    format: {
+      esm: {
+        outputOptions: {
+          dir: "dist/esm",
+        },
+      },
+      cjs: {
+        outputOptions: {
+          dir: "dist/cjs",
+        },
+      },
     },
   },
   {
