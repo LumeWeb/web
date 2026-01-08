@@ -28,7 +28,6 @@
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
     "tsdown": "catalog:",
-    "tsup": "catalog:",
     "typescript": "catalog:"
   },
   "publishConfig": {

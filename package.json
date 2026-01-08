@@ -64,7 +64,6 @@
     "storybook": "10.1.10",
     "taze": "^19.9.2",
     "tsdown": "catalog:",
-    "tsup": "catalog:",
     "turbo": "^2.7.3",
     "typescript": "catalog:",
     "typescript-eslint": "^8.52.0",
