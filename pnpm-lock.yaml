@@ -823,8 +823,8 @@ importers:
         specifier: ^0.38.2 || ^0.39.0
         version: 0.39.0
       '@lexical/html':
-        specifier: ^0.38.2
-        version: 0.38.2
+        specifier: ^0.38.2 || ^0.39.0
+        version: 0.39.0
       '@lexical/link':
         specifier: ^0.38.2
         version: 0.38.2
