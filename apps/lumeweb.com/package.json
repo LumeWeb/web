@@ -6,8 +6,21 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "start": "astro start"
+    "preview": "astro preview"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "@astrojs/react": "^4.4.2",
+    "@astrojs/sitemap": "^3.6.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "astro": "^5.16.7",
+    "qrcode": "^1.5.4",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "typewriter-effect": "^2.22.0"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "tailwindcss": "^4.1.18"
+  }
 }

@@ -17,9 +17,9 @@ $screen-default: 96rem; // 1536px
   $min-font-size: calc($font-size * 0.75);
   $max-font-size: calc($font-size * 2.5);
 
-  $u1: unit($min-vw);
-  $u2: unit($max-vw);
-  $u3: unit($font-size);
+  $u1: math.unit($min-vw);
+  $u2: math.unit($max-vw);
+  $u3: math.unit($font-size);
 
   @if $u1 == $u2 and $u1 == $u3 {
     & {
@@ -41,9 +41,9 @@ $screen-default: 96rem; // 1536px
   $medium-font-size: calc($font-size * 0.75);
   $max-font-size: calc($font-size * 2.5);
 
-  $u1: unit($min-vw);
-  $u2: unit($max-vw);
-  $u3: unit($font-size);
+  $u1: math.unit($min-vw);
+  $u2: math.unit($max-vw);
+  $u3: math.unit($font-size);
 
   @if $u1 == $u2 and $u1 == $u3 {
     & {
@@ -69,9 +69,9 @@ $screen-default: 96rem; // 1536px
   $medium-font-size: calc($font-size * 0.75);
   $max-font-size: calc($font-size * 2.5);
 
-  $u1: unit($min-vw);
-  $u2: unit($max-vw);
-  $u3: unit($font-size);
+  $u1: math.unit($min-vw);
+  $u2: math.unit($max-vw);
+  $u3: math.unit($font-size);
 
   @if $u1 == $u2 and $u1 == $u3 {
     & {
@@ -99,10 +99,10 @@ $screen-default: 96rem; // 1536px
   $min-height: calc($height * 0.75);
   $max-height: calc($height * 2.5);
 
-  $u1: unit($min-vw);
-  $u2: unit($max-vw);
-  $u3: unit($width);
-  $u4: unit($height);
+  $u1: math.unit($min-vw);
+  $u2: math.unit($max-vw);
+  $u3: math.unit($width);
+  $u4: math.unit($height);
 
   @if $u1 == $u2 and $u1 == $u3 and $u1 == $u4 {
     & {
@@ -126,9 +126,9 @@ $screen-default: 96rem; // 1536px
   $min-width: calc($width * 0.75);
   $max-width: calc($width * 2.5);
 
-  $u1: unit($min-vw);
-  $u2: unit($max-vw);
-  $u3: unit($width);
+  $u1: math.unit($min-vw);
+  $u2: math.unit($max-vw);
+  $u3: math.unit($width);
 
   @if $u1 == $u2 and $u1 == $u3 {
     & {
@@ -149,9 +149,9 @@ $screen-default: 96rem; // 1536px
   $min-height: calc($height * 0.75);
   $max-height: calc($height * 2.5);
 
-  $u1: unit($min-vw);
-  $u2: unit($max-vw);
-  $u3: unit($height);
+  $u1: math.unit($min-vw);
+  $u2: math.unit($max-vw);
+  $u3: math.unit($height);
 
   @if $u1 == $u2 and $u1 == $u3 {
     & {
@@ -175,10 +175,10 @@ $screen-default: 96rem; // 1536px
   $min-height: calc($height * 0.75);
   $max-height: calc($height * 2.5);
 
-  $u1: unit($min-vw);
-  $u2: unit($max-vw);
-  $u3: unit($width);
-  $u4: unit($height);
+  $u1: math.unit($min-vw);
+  $u2: math.unit($max-vw);
+  $u3: math.unit($width);
+  $u4: math.unit($height);
 
   @if $u1 == $u2 and $u1 == $u3 and $u1 == $u4 {
     & {
@@ -226,9 +226,9 @@ $screen-default: 96rem; // 1536px
   $min-margin: calc($margin * 0.75);
   $max-margin: calc($margin * 2.5);
 
-  $u1: unit($min-vw);
-  $u2: unit($max-vw);
-  $u3: unit($margin);
+  $u1: math.unit($min-vw);
+  $u2: math.unit($max-vw);
+  $u3: math.unit($margin);
 
   @if $u1 == $u2 and $u1 == $u3 {
     & {
