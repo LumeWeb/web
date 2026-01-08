@@ -36,11 +36,11 @@
   "devDependencies": {
     "esbuild-fix-imports-plugin": "^1.0.23",
     "express": "^4.22.1",
-    "lucide-react": "^0.556.0",
+    "lucide-react": "^0.562.0",
     "memoizee": "^0.4.17",
     "node-fetch": "^3.3.2",
-    "react-error-boundary": "^6.0.0",
-    "tsdown": "^0.17.0"
+    "react-error-boundary": "^6.0.2",
+    "tsdown": "^0.18.4"
   },
   "peerDependencies": {
     "@module-federation/bridge-react": "^0.21.6",

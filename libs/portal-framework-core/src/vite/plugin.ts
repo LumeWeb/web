@@ -59,6 +59,12 @@ function setupPluginRegistryConfig(opts: ConfigOptions) {
     opts.pluginRegistryConfigFile ?? DEFAULT_PLUGIN_REGISTRY_FILE;
   const configPath = resolve(opts.dir, configFile);
 
+  if (!fs.existsSync(configPath)) {
+    throw new Error(
+      `Plugin registry config file not found at ${configPath}. This file is required for dev/preview mode. Create it or disable the plugin registry.`,
+    );
+  }
+
   try {
     const configFileContent = fs.readFileSync(configPath, "utf-8");
     const proxyConfig = JSON.parse(configFileContent) as PortalPlugin[];
@@ -319,10 +325,12 @@ export function Config(opts: ConfigOptions) {
   });
 
   if (normalizedOpts.type === "host") {
-    const { portalConfig } = setupPluginRegistryConfig(normalizedOpts);
-    if (portalConfig) {
-      viteConfig.plugins.push(createExpressMiddlewarePlugin(portalConfig));
-    }
+    viteConfig.plugins.push(
+      createExpressMiddlewarePlugin(() => {
+        const { portalConfig } = setupPluginRegistryConfig(normalizedOpts);
+        return portalConfig;
+      }),
+    );
   }
 
   return viteConfig;
@@ -357,13 +365,15 @@ export function localhostAccessPlugin(): Plugin {
   };
 }
 
-function createExpressMiddlewarePlugin(portalConfig: PortalMetaConfig): Plugin {
+function createExpressMiddlewarePlugin(configLoader: () => PortalMetaConfig): Plugin {
   return {
     apply: "serve",
     configurePreviewServer(server) {
+      const portalConfig = configLoader();
       setupExpressMiddleware(server, portalConfig);
     },
     configureServer(server) {
+      const portalConfig = configLoader();
       setupExpressMiddleware(server, portalConfig);
     },
     name: "portal-express-middleware",
