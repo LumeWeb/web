@@ -2,9 +2,8 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "dependsOn": ["orval"]
+      "dependsOn": ["$TURBO_EXTENDS$", "orval"]
     },
-    "orval": {
-    }
+    "orval": {}
   }
 }

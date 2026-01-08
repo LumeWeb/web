@@ -1,28 +1,33 @@
 {
   "$schema": "https://turborepo.org/schema.json",
   "tasks": {
+    "build:config": {
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"]
+    },
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["@lumeweb/tsdown-config#build:config", "^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", "build/**", "docs/dist/**"]
     },
     "build:dashboard": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["@lumeweb/tsdown-config#build:config", "^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/dashboard/**"]
     },
     "build:admin": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["@lumeweb/tsdown-config#build:config", "^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/admin/**"]
     },
     "build:lib": {
+      "dependsOn": ["@lumeweb/tsdown-config#build:config"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["lib-dist/**"]
     },
 
     "build-dev": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["@lumeweb/tsdown-config#build:config", "^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", "build/**"]
     },
@@ -35,14 +40,14 @@
     },
     "lint": {},
     "test": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["@lumeweb/tsdown-config#build:config", "^build"]
     },
     "storybook": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["@lumeweb/tsdown-config#build:config", "^build"],
       "persistent": true
     },
     "build-storybook": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["@lumeweb/tsdown-config#build:config", "^build"]
     }
   }
 }

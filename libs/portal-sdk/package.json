@@ -22,7 +22,8 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "orval && tsdown",
+    "build": "tsdown",
+    "orval": "orval",
     "lint": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
