@@ -10,13 +10,13 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "build:docs.lumeweb.com": "turbo build --filter=@lumeweb/docs.lumeweb.com",
-    "build:lumeweb.com": "turbo build --filter=@lumeweb/lumeweb.com",
+    "build:portal-frontend": "turbo build --filter=@lumeweb/portal-frontend",
     "build:portal-app-shell": "turbo build --filter=@lumeweb/portal-app-shell",
     "build:portal-plugin-dashboard": "turbo build --filter=@lumeweb/portal-plugin-dashboard",
-    "e2e:portal-plugin-dashboard": "turbo run e2e --filter=@lumeweb/portal-plugin-dashboard",
+    "build:portal-plugin-admin": "turbo build --filter=@lumeweb/portal-plugin-admin",
     "build:portal-plugin-core": "turbo build --filter=@lumeweb/portal-plugin-core",
-    "build:portal-plugin-ipfs": "turbo build --filter=@lumeweb/portal-plugin-ipfs"
+    "build:portal-plugin-ipfs": "turbo build --filter=@lumeweb/portal-plugin-ipfs",
+    "e2e:portal-plugin-dashboard": "turbo run e2e --filter=@lumeweb/portal-plugin-dashboard"
   },
   "private": true,
   "dependencies": {
