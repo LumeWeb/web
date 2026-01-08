@@ -1,15 +1,17 @@
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
-import tailwind from "@astrojs/tailwind";
 import { defineConfig } from "astro/config";
+
+import tailwindcss from "@tailwindcss/vite";
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [
-    tailwind({ config: { applyBaseStyles: false } }),
-    react(),
-    sitemap(),
-  ],
-  outDir: "../../dist/apps/lumeweb.com",
+  integrations: [react(), sitemap()],
+
+  outDir: "./dist",
   site: "https://lumeweb.com",
+
+  vite: {
+    plugins: [tailwindcss()],
+  },
 });

@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-blue-charcoal: var(--color-blue-charcoal);
+  --color-body: var(--color-gray);
+  --color-charcoal: var(--color-charcoal);
+  --color-dark-aquamarine: var(--color-dark-aquamarine);
+  --color-primary: var(--color-aquamarine);
+
+  /* Background Image / Gradients */
+  --background-image-gradient-aqua: linear-gradient(
+    to right,
+    var(--color-dark-aquamarine),
+    var(--color-aquamarine)
+  );
+
+  /* Font Families */
+  --font-body: "Jaldi", sans-serif;
+  --font-display: "JetBrains Mono", monospace;
+  --font-display2: "IBM Plex Sans Devanagari", monospace;
+  --font-inter: "Inter", sans-serif;
+}
+

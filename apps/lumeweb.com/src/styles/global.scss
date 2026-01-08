@@ -1,5 +1,5 @@
-@import "./mixins.scss";
-@import "./vars.scss";
+@use "mixins.scss";
+@use "vars.scss";
 
 @font-face {
   font-family: 'Jaldi';
@@ -41,9 +41,7 @@
   src: url("/fonts/Inter-VariableFont.ttf") format('ttf');
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
 
 :root {
   --color-aquamarine: #7afcbb;
@@ -65,9 +63,9 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  font-family: $font-family-jetbrains-mono;
-  background: $color-blue-charcoal-2;
-  color: $color-white;
+  font-family: vars.$font-family-jetbrains-mono;
+  background: vars.$color-blue-charcoal-2;
+  color: vars.$color-white;
   overflow-x: hidden;
   overflow-y: scroll;
 
@@ -87,7 +85,7 @@ body {
     bottom: 0;
     left: -5%;
     margin: 2% 0;
-    background: $color-blue-charcoal;
+    background: vars.$color-blue-charcoal;
     transform: matrix(1, -0.04, 0.04, 1, 0, 0);
     z-index: -1;
   }
@@ -104,63 +102,63 @@ body {
     bottom: 0;
     left: -5%;
     margin: 2% 0;
-    background: $color-blue-charcoal;
+    background: vars.$color-blue-charcoal;
     transform: matrix(1, 0.04, -0.04, 1, 0, 0);
     z-index: -1;
   }
 }
 
 main {
-  @include fluid-font-size(0.625rem);
+  @include mixins.fluid-font-size(0.625rem);
   flex-grow: 1;
 }
 
 a, button {
-  transition: color $transition-duration;
+  transition: color vars.$transition-duration;
 }
 
 .btn-main {
     display: inline-block;
     padding: 0.5em 0.8em;
-    color: $color-black;
-    background: $color-aquamarine;
-    border: 0.05em solid $color-aquamarine;
+    color: vars.$color-black;
+    background: vars.$color-aquamarine;
+    border: 0.05em solid vars.$color-aquamarine;
     border-radius: 0.25em;
-    transition: color $transition-duration, background $transition-duration;
+    transition: color vars.$transition-duration, background vars.$transition-duration;
     white-space: nowrap;
 
     &:hover {
-        color: $color-white;
-        background: $color-blue-charcoal;
+        color: vars.$color-white;
+        background: vars.$color-blue-charcoal;
     }
 }
 
 .feature-group {
   h2 {
     margin-bottom: 1em;
-    @include fluid-font-size(1.5625rem);
+    @include mixins.fluid-font-size(1.5625rem);
     font-weight: 700;
     line-height: 100%;
     text-transform: uppercase;
-    color: $color-aquamarine;
+    color: vars.$color-aquamarine;
   }
 
   h3 {
     margin-bottom: 0.65em;
-    @include fluid-font-size(2.8125rem);
+    @include mixins.fluid-font-size(2.8125rem);
     line-height: 109%;
   }
 
   h2, h3 {
-    text-shadow: 0.017em 0.017em 0.034em rgba($color-blue-charcoal, 0.65);
+    text-shadow: 0.017em 0.017em 0.034em rgba(vars.$color-blue-charcoal, 0.65);
   }
 
   p, ul {
-    @include fluid-font-size(1.5rem);
-    font-family: $font-family-jaldi;
+    @include mixins.fluid-font-size(1.5rem);
+    font-family: vars.$font-family-jaldi;
     line-height: 148%;
-    color: $color-cloud;
-    transition: background $transition-duration;
+    color: vars.$color-cloud;
+    transition: background vars.$transition-duration;
   }
 
   p + p, ul + p {
@@ -173,8 +171,8 @@ a, button {
   }
 
   .btn-main {
-    font-family: $font-family-jaldi;
-    @include fluid-font-size(1.5rem);
+    font-family: vars.$font-family-jaldi;
+    @include mixins.fluid-font-size(1.5rem);
     margin-top: 1.57em;
   }
 }
@@ -184,7 +182,7 @@ a, button {
   grid-template-columns: repeat(1, 1fr);
   gap: 0.9em;
   padding: 0 7.5%;
-  @include fluid-font-size(1.25rem);
+  @include mixins.fluid-font-size(1.25rem);
 
   @media screen and (min-width: 48rem) {
     grid-template-columns: repeat(2, 1fr);
@@ -200,61 +198,27 @@ a, button {
     flex-direction: column;
     justify-content: center;
     padding: 2.95em 1.95em;
-    background: $color-blue-charcoal;
+    background: vars.$color-blue-charcoal;
     border: 0.05em solid transparent;
     border-radius: 0.5em;
-    font-family: $font-family-jaldi;
-    transition: border-color $transition-duration;
+    font-family: vars.$font-family-jaldi;
+    transition: border-color vars.$transition-duration;
 
     &:hover {
-      border-color: $color-aquamarine;
+      border-color: vars.$color-aquamarine;
     }
   }
 
   h3 {
-    @include fluid-font-size(2rem);
+    @include mixins.fluid-font-size(2rem);
     line-height: 109%;
   }
 
   p {
-    @include fluid-font-size(1.375rem);
+    @include mixins.fluid-font-size(1.375rem);
     margin-top: 0.67em;
     line-height: 124%;
-    color: $color-cloud;
-  }
-}
-
-.tilted-bg {
-  position: relative;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: -5%;
-    bottom: 0;
-    left: -5%;
-    margin: 2% 0;
-    background: $color-blue-charcoal;
-    transform: matrix(1, -0.04, 0.04, 1, 0, 0);
-    z-index: -1;
-  }
-}
-
-.tilted-bg-r {
-  position: relative;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: -5%;
-    bottom: 0;
-    left: -5%;
-    margin: 2% 0;
-    background: $color-blue-charcoal;
-    transform: matrix(1, 0.04, -0.04, 1, 0, 0);
-    z-index: -1;
+    color: vars.$color-cloud;
   }
 }
 
