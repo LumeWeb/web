@@ -1,9 +1,9 @@
 packages:
-- apps/*
-- libs/*
+  - apps/*
+  - libs/*
 catalog:
   '@astrojs/react': ^4.4.2
-  '@conform-to/react': ^1.14.1
+  '@conform-to/react': ^1.15.1
   '@helia/car': ^5.3.3
   '@helia/http': ^3.0.14
   '@helia/unixfs': ^6.0.4
@@ -32,7 +32,7 @@ catalog:
   '@uppy/xhr-upload': 5.1.1
   '@vitest/browser-playwright': ^4.0.16
   astro: ^5.16.7
-  blockstore-core: ^6.1.1
+  blockstore-core: ^6.1.2
   blockstore-idb: ^3.0.1
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
@@ -59,7 +59,7 @@ catalog:
   react-icons: ^5.5.0
   react-is: ^19.1.4
   react-router: ^7.12.0
-  recharts: ^3.5.1
+  recharts: ^3.6.0
   tailwind-merge: ^3.4.0
   tailwindcss: ^4.1.18
   tailwindcss-animate: ^1.0.7
