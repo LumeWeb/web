@@ -1,9 +1,10 @@
 import type { BaseRecord } from "@refinedev/core";
 
-import type { WizardStepDefinition } from "../../../form/types";
+import type { WizardStepDefinition } from "../../form/types";
 
-import { ActionItemConfig } from "../../../actions";
+import { ActionItemConfig } from "../../actions";
 import { AnyContainerEnvironment } from "./container";
+import type { AllowStepNavigation } from "./navigation";
 
 export enum NavigationType {
   NONE = "none",
@@ -64,7 +65,7 @@ export interface StepNavigationEnvironment extends NavigationEnvironment {
 // createHeaderContext function is now in context/builders.ts
 
 export interface WizardNavigationEnvironment extends NavigationEnvironment {
-  allowNavigation?: boolean | (() => boolean);
+  allowNavigation?: AllowStepNavigation;
   current: number;
   descriptionMaxWidth?: string;
   disabledSteps?: number[];
