@@ -20,7 +20,7 @@ runs:
       name: Install pnpm
       with:
         run_install: false
-        version: 9.11.0
+        version: 10.27.0
     - name: Get pnpm store directory
       shell: bash
       run: |
