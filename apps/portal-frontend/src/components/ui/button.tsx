@@ -9,10 +9,10 @@ const buttonVariants = cva(
     variants: {
       style: {
         default: "text-[#F8F8F8] bg-[#0D2D2A] hover:bg-white hover:text-[#0D1D1C]",
-        outline: "border !border-[#F8F8F8] text-[#f8f8f8] bg-transparent hover:!bg-[#0D2D2A] hover:text-[#F8F8F8] hover:!border-[#0D2D2A]",
-        "outline-dark": "border !border-[#0D1D1C] !text-[#0D1D1C] bg-transparent hover:!bg-[#0D1D1C] hover:!text-white hover:!border-[#0D1D1C]",
-        "btn-light": "!bg-white !text-[#0D1D1C] hover:!bg-transparent hover:!text-white !border-white",
-        gray: "bg-[#E4E0D4] !text-[#0D1D1C] hover:!bg-[#0D2D2A] hover:!text-white",
+        outline: "border border-[#F8F8F8]! text-[#f8f8f8] bg-transparent hover:bg-[#0D2D2A]! hover:text-[#F8F8F8] hover:border-[#0D2D2A]!",
+        "outline-dark": "border border-[#0D1D1C]! text-[#0D1D1C]! bg-transparent hover:bg-[#0D1D1C]! hover:text-white! hover:border-[#0D1D1C]!",
+        "btn-light": "bg-white! text-[#0D1D1C]! hover:bg-transparent! hover:text-white! border-white!",
+        gray: "bg-[#E4E0D4] text-[#0D1D1C]! hover:bg-[#0D2D2A]! hover:text-white!",
         light: "bg-white text-[#0D1D1C] hover:bg-[#0D2D2A] hover:text-white",
       },
       size: {
