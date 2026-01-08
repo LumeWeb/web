@@ -7,7 +7,8 @@
     "build": "vocs build",
     "preview": "vocs preview"
   },
-  "dependencies": {},
-  "devDependencies": {},
-  "peerDependencies": {}
+  "devDependencies": {
+    "react": "^19.2.3",
+    "vocs": "^1.4.1"
+  }
 }
