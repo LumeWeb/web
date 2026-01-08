@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
-    "orval": "^7.17.2",
+    "orval": "catalog:",
     "tsdown": "catalog:"
   }
 }

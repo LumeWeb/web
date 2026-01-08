@@ -8,7 +8,7 @@
     "preview": "vocs preview"
   },
   "devDependencies": {
-    "react": "^19.2.3",
+    "react": "catalog:",
     "vocs": "^1.4.1"
   }
 }
