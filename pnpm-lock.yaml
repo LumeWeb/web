@@ -1141,6 +1141,10 @@ importers:
       zod:
         specifier: 4.3.5
         version: 4.3.5
+    devDependencies:
+      tsdown:
+        specifier: 0.19.0-beta.5
+        version: 0.19.0-beta.5(typescript@5.9.3)
 
   libs/portal-plugin-ipfs:
     dependencies:

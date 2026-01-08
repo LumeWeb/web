@@ -4,12 +4,19 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**","build/**"]
+      "outputs": ["dist/**", "build/**"]
+    },
+    "build:lib": {
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["lib-dist/**"]
+    },
+    "@lumeweb/portal-plugin-ipfs#build": {
+      "dependsOn": ["@lumeweb/portal-plugin-dashboard#build:lib"]
     },
     "build-dev": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**","build/**"]
+      "outputs": ["dist/**", "build/**"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]

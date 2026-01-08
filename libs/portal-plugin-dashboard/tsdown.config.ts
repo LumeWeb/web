@@ -5,10 +5,19 @@ export default defineConfig({
   dts: true,
   entry: ["./src-lib/index.ts"],
   external: [/node_modules/],
-  format: ["esm", "cjs"],
   minify: false,
-  outputOptions(options, format) {
-    options.dir = format === "es" ? "lib-dist/esm" : "lib-dist/cjs";
+  format: {
+    esm: {
+      outputOptions: {
+        dir: "lib-dist/esm",
+        entryFileNames: "[name].js",
+      },
+    },
+    cjs: {
+      outputOptions: {
+        dir: "lib-dist/cjs",
+      },
+    },
   },
   platform: "node",
   sourcemap: true,
