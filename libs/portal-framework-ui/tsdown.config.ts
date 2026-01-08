@@ -1,13 +1,13 @@
 import type { UserConfig } from "tsdown";
+import { defineConfig } from "tsdown";
+import { createLibraryConfigWithPlugins } from "@lumeweb/tsdown-config";
 
 import image from "@rollup/plugin-image";
-import { defineConfig } from "tsdown";
 
-const commonOptions: Partial<UserConfig> = {
+const baseOptions: Partial<UserConfig> = {
   external: [/node_modules/, /@refinedev\/.*/],
-  hash: false,
   minify: false,
-  platform: "browser",
+  platform: "neutral",
   plugins: [image() as any],
   sourcemap: true,
   target: "esnext",
@@ -15,9 +15,9 @@ const commonOptions: Partial<UserConfig> = {
   unbundle: true,
 };
 
-const configs: UserConfig[] = [
+export default defineConfig([
   {
-    ...commonOptions,
+    ...baseOptions,
     clean: true,
     entry: [
       "src/**/*",
@@ -43,26 +43,11 @@ const configs: UserConfig[] = [
     },
   },
   {
-    ...commonOptions,
+    ...baseOptions,
     clean: false,
     dts: true,
     entry: ["src/images.ts"],
     format: "esm",
     outDir: "dist/esm",
   },
-  /*  {
-    ...commonOptions,
-    clean: true,
-    dts: false,
-    entry: ["src/!**!/!*.stories.tsx"],
-    format: "esm",
-    outDir: "stories-dist",
-    outputOptions: {
-      chunkFileNames: "[name].js",
-      entryFileNames: "[name].js",
-    },
-    target: "esnext",
-  },*/
-];
-
-export default defineConfig(configs);
+]);

@@ -29,6 +29,7 @@
     "uppy-plugin"
   ],
   "devDependencies": {
+    "@lumeweb/tsdown-config": "workspace:*",
     "@mswjs/interceptors": "^0.40.0",
     "@uppy/core": "^5.2.0",
     "@vitest/browser-playwright": "^4.0.16",
@@ -36,7 +37,7 @@
     "msw": "^2.12.7",
     "nock": "^14.0.10",
     "playwright": "^1.57.0",
-    "tsdown": "0.19.0-beta.1",
+    "tsdown": "catalog:",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^6.0.3",
     "vitest": "^4.0.16"

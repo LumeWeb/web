@@ -1,26 +1,9 @@
 import { defineConfig } from "tsdown";
+import { createLibraryConfigWithExternals } from "@lumeweb/tsdown-config";
 
-export default defineConfig({
-  clean: true,
-  dts: true,
-  entry: ["./src/index.ts"],
-  external: [/node_modules/],
-  format: {
-    esm: {
-      outputOptions: {
-        dir: "dist/esm",
-      },
-    },
-    cjs: {
-      outputOptions: {
-        dir: "dist/cjs",
-      },
-    },
-  },
-  minify: false,
-  platform: "neutral",
-  sourcemap: true,
-  target: "esnext",
-  tsconfig: "./tsconfig.json",
-  unbundle: true,
-});
+export default defineConfig(
+  createLibraryConfigWithExternals(
+    "./src/index.ts",
+    [/node_modules/, "@uppy/core", "@uppy/tus", "stream"]
+  )
+);

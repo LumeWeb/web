@@ -1,17 +1,19 @@
-import { defineConfig, type UserConfig } from "tsdown";
+import type { UserConfig } from "tsdown";
+import { defineConfig } from "tsdown";
 
-const commonOptions = {
+const baseOptions: Partial<UserConfig> = {
   external: [/node_modules/],
   minify: false,
-  platform: "node",
+  platform: "neutral",
   sourcemap: true,
+  target: "esnext",
   tsconfig: "./tsconfig.json",
   unbundle: true,
-} satisfies UserConfig;
+};
 
 export default defineConfig([
   {
-    ...commonOptions,
+    ...baseOptions,
     clean: true,
     dts: false,
     entry: ["./src/index.ts", "!**/*.stories.tsx", "!**/*.css"],
@@ -34,7 +36,7 @@ export default defineConfig([
     ],
   },
   {
-    ...commonOptions,
+    ...baseOptions,
     clean: false,
     dts: { resolve: true },
     entry: ["./config/*"],

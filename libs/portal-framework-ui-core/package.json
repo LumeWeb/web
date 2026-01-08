@@ -26,7 +26,8 @@
     "lint": "eslint ."
   },
   "devDependencies": {
-    "tsdown": "^0.18.4"
+    "@lumeweb/tsdown-config": "workspace:*",
+    "tsdown": "catalog:"
   },
   "peerDependencies": {
     "@radix-ui/react-accordion": "^1.2.12",

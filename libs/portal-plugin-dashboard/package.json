@@ -51,6 +51,7 @@
     "zod": "4.3.5"
   },
   "devDependencies": {
-    "tsdown": "0.19.0-beta.5"
+    "@lumeweb/tsdown-config": "workspace:*",
+    "tsdown": "catalog:"
   }
 }

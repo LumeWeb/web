@@ -26,7 +26,8 @@
     "@refinedev/core": "^5.0.8"
   },
   "devDependencies": {
-    "tsdown": "0.19.0-beta.2",
+    "@lumeweb/tsdown-config": "workspace:*",
+    "tsdown": "catalog:",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },
