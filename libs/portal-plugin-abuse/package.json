@@ -16,24 +16,24 @@
     "@lumeweb/portal-plugin-abuse-common": "workspace:*"
   },
   "devDependencies": {
-    "@module-federation/vite": "^1.9.4",
-    "vite-tsconfig-paths": "^6.0.3"
+    "@module-federation/vite": "catalog:",
+    "vite-tsconfig-paths": "catalog:"
   },
   "peerDependencies": {
-    "@module-federation/bridge-react": "^0.21.6",
-    "@refinedev/core": "^5.0.6",
-    "@refinedev/react-hook-form": "^5.0.3",
-    "@refinedev/react-router": "^2.0.3",
-    "@refinedev/react-table": "^6.0.1",
-    "@tanstack/react-query": "^5.90.12",
-    "@tanstack/react-table": "^8.21.3",
-    "date-fns": "^4.1.0",
-    "lucide-react": "^0.556.0",
-    "react": "^19.0.1",
-    "react-dom": "^19.0.1",
-    "react-hook-form": "^7.68.0",
-    "react-router": "^7.10.1",
-    "recharts": "^3.5.1",
-    "zod": "^4.1.13"
+    "@module-federation/bridge-react": "catalog:",
+    "@refinedev/core": "catalog:",
+    "@refinedev/react-hook-form": "catalog:",
+    "@refinedev/react-router": "catalog:",
+    "@refinedev/react-table": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-table": "catalog:",
+    "date-fns": "catalog:",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-hook-form": "catalog:",
+    "react-router": "catalog:",
+    "recharts": "catalog:",
+    "zod": "catalog:"
   }
 }

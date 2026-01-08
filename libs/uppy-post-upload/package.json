@@ -30,24 +30,24 @@
   ],
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
-    "@mswjs/interceptors": "^0.40.0",
-    "@uppy/core": "^5.2.0",
-    "@vitest/browser-playwright": "^4.0.16",
+    "@mswjs/interceptors": "catalog:",
+    "@uppy/core": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
     "jsdom": "^27.4.0",
-    "msw": "^2.12.7",
-    "nock": "^14.0.10",
-    "playwright": "^1.57.0",
+    "msw": "catalog:",
+    "nock": "catalog:",
+    "playwright": "catalog:",
     "tsdown": "catalog:",
-    "typescript": "^5.9.3",
-    "vite-tsconfig-paths": "^6.0.3",
-    "vitest": "^4.0.16"
+    "typescript": "catalog:",
+    "vite-tsconfig-paths": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
-    "@uppy/core": "^5.2.0"
+    "@uppy/core": "catalog:"
   },
   "dependencies": {
     "@uppy/companion-client": "^5.1.1",
     "@uppy/utils": "^7.1.5",
-    "ky": "^1.14.2"
+    "ky": "catalog:"
   }
 }

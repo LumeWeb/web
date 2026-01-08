@@ -23,13 +23,13 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@refinedev/core": "^5.0.8"
+    "@refinedev/core": "catalog:"
   },
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
     "tsdown": "catalog:",
-    "tsup": "^8.5.1",
-    "typescript": "^5.9.3"
+    "tsup": "catalog:",
+    "typescript": "catalog:"
   },
   "publishConfig": {
     "access": "public"

@@ -37,24 +37,24 @@
     "@lumeweb/tsdown-config": "workspace:*",
     "esbuild-fix-imports-plugin": "^1.0.23",
     "express": "^4.22.1",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "catalog:",
     "memoizee": "^0.4.17",
     "node-fetch": "^3.3.2",
     "react-error-boundary": "^6.0.2",
     "tsdown": "catalog:"
   },
   "peerDependencies": {
-    "@module-federation/bridge-react": "^0.21.6",
+    "@module-federation/bridge-react": "catalog:",
     "@module-federation/enhanced": "^0.21.6",
-    "@refinedev/react-router": "^2.0.3",
-    "@t3-oss/env-core": "^0.13.8",
-    "lucide-react": "^0.556.0",
+    "@refinedev/react-router": "catalog:",
+    "@t3-oss/env-core": "catalog:",
+    "lucide-react": "catalog:",
     "memoizee": "^0.4.17",
-    "react": "^19.0.1",
+    "react": "catalog:",
     "react-error-boundary": "^6.0.0",
-    "react-is": "^19.1.2",
-    "react-router": "^7.10.1",
-    "vite-tsconfig-paths": "^5.1.4",
-    "zod": "3.24.2"
+    "react-is": "catalog:",
+    "react-router": "catalog:",
+    "vite-tsconfig-paths": "catalog:",
+    "zod": "catalog:"
   }
 }
