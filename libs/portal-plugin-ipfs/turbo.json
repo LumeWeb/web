@@ -1,8 +1,15 @@
 {
   "extends": ["//"],
   "tasks": {
+    "orval": {
+      "outputs": ["src/client/generated/**"]
+    },
     "build": {
-      "dependsOn": ["$TURBO_EXTENDS$", "@lumeweb/portal-plugin-dashboard#build:lib"]
+      "dependsOn": [
+        "$TURBO_EXTENDS$",
+        "@lumeweb/portal-plugin-dashboard#build:lib",
+        "orval"
+      ]
     }
   }
 }
