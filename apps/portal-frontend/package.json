@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@astrojs/react": "catalog:",
-    "@astrojs/tailwind": "^6.0.2",
     "@radix-ui/react-navigation-menu": "catalog:",
     "@radix-ui/react-progress": "catalog:",
     "@radix-ui/react-slot": "catalog:",
@@ -20,7 +19,6 @@
     "astro": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
-    "i": "^0.3.7",
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
@@ -29,6 +27,7 @@
     "tailwindcss": "catalog:",
     "tailwindcss-animate": "catalog:"
   },
-  "devDependencies": {},
-  "peerDependencies": {}
+  "devDependencies": {
+    "@tailwindcss/vite": "catalog:"
+  }
 }

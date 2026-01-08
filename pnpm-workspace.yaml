@@ -1,6 +1,6 @@
 packages:
-  - apps/*
-  - libs/*
+- apps/*
+- libs/*
 catalog:
   '@astrojs/react': ^4.4.2
   '@conform-to/react': ^1.15.1
@@ -23,6 +23,7 @@ catalog:
   '@refinedev/react-router': ^2.0.3
   '@refinedev/react-table': ^6.0.1
   '@t3-oss/env-core': ^0.13.10
+  '@tailwindcss/vite': ^4.1.18
   '@tanstack/react-query': ^5.90.16
   '@tanstack/react-table': ^8.21.3
   '@types/react': ^19.2.7

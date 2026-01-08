@@ -20,7 +20,7 @@
     "typewriter-effect": "^2.22.0"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.18",
+    "@tailwindcss/vite": "catalog:",
     "tailwindcss": "catalog:"
   }
 }

@@ -62,7 +62,7 @@ const AboutSection = ({
               )}
 
               {description && (
-                <p className="text-[#485453] text-[13px] md:text-base lg:text-lg !leading-[21px] lg:!leading-[35px] md:!leading-[26px] lg:text-xl mb-6 lg:mb-[26px] max-w-[600px]">
+                <p className="text-[#485453] text-[13px] md:text-base lg:text-lg leading-[21px]! lg:leading-[35px]! md:leading-[26px]! lg:text-xl mb-6 lg:mb-[26px] max-w-[600px]">
                   {description}
                 </p>
               )}

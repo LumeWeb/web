@@ -35,7 +35,7 @@ const Hero = () => {
             </div>
           </div>
 
-          <div className="lg:w-[480px] !translate-y-11 lg:translate-y-0">
+          <div className="lg:w-[480px] translate-y-11! lg:translate-y-0">
             <div className="hidden lg:block">
               <ProgressCard
                 value="25"
@@ -74,7 +74,7 @@ const Hero = () => {
                 title="project-backup"
                 description="1 file (1.2 MB)"
                 day="7 days ago"
-                style="bg-[#0D2D2A] border-none mb-8 opacity-100 max-w-[342px] !mb-[-60px]"
+                style="bg-[#0D2D2A] border-none mb-8 opacity-100 max-w-[342px] mb-[-60px]!"
               />
             </div>
           </div>
