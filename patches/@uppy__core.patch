@@ -300,7 +300,7 @@ index 0000000000000000000000000000000000000000..aac43deb7f18619320a66e33a418809c
 \ No newline at end of file
 diff --git a/lib/supportsUploadProgress.js.map b/lib/supportsUploadProgress.js.map
 new file mode 100644
-index 0000000000000000000000000000000000000000..53b3d6c04eb1e1a1c040f27254817fcc73fe2c66
+index 0000000000000000000000000000000000000000..6a506a4ae8e598649ba1ddcaa90c56de74689fc6
 --- /dev/null
 +++ b/lib/supportsUploadProgress.js.map
 @@ -0,0 +1 @@
