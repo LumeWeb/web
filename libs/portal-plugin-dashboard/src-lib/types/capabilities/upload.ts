@@ -1,7 +1,6 @@
 import type { BaseCapability } from "@lumeweb/portal-framework-core";
 
-import type { UploadConfig } from "../upload";
-import type { UppyPlugin } from "../uppy";
+import type { UploadConfig, UppyPlugin } from "../upload";
 import type { BasePlugin } from "@uppy/core";
 
 export interface UploadCapability extends BaseCapability<"core:upload"> {
