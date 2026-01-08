@@ -1,0 +1,43 @@
+name: Update Dependencies
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 * * 0'
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout all commits
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup JS
+        uses: ./.github/actions/setup-js
+
+      - name: Run taze
+        run: pnpm taze major -r -w
+        shell: bash
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(deps): update dependencies"
+          title: "chore(deps): update dependencies"
+          body: |
+            ## Dependency Updates
+
+            This PR updates dependencies across all packages using taze.
+          branch: chore/update-dependencies
+          delete-branch: true
+          labels: |
+            dependencies
+            chore
+          draft: false
