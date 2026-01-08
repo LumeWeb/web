@@ -9,9 +9,6 @@ catalogs:
     '@astrojs/react':
       specifier: ^4.4.2
       version: 4.4.2
-    '@conform-to/react':
-      specifier: ^1.14.1
-      version: 1.15.1
     '@helia/car':
       specifier: ^5.3.3
       version: 5.3.3
@@ -42,9 +39,6 @@ catalogs:
     '@radix-ui/react-dropdown-menu':
       specifier: ^2.1.16
       version: 2.1.16
-    '@radix-ui/react-icons':
-      specifier: ^1.3.2
-      version: 1.3.2
     '@radix-ui/react-navigation-menu':
       specifier: ^1.2.14
       version: 1.2.14
@@ -63,9 +57,6 @@ catalogs:
     '@refinedev/react-router':
       specifier: ^2.0.3
       version: 2.0.3
-    '@refinedev/react-table':
-      specifier: ^6.0.1
-      version: 6.0.1
     '@t3-oss/env-core':
       specifier: ^0.13.10
       version: 0.13.10
@@ -96,9 +87,6 @@ catalogs:
     astro:
       specifier: ^5.16.7
       version: 5.16.7
-    blockstore-core:
-      specifier: ^6.1.1
-      version: 6.1.1
     blockstore-idb:
       specifier: ^3.0.1
       version: 3.0.1
@@ -168,18 +156,12 @@ catalogs:
     react-hook-form:
       specifier: ^7.70.0
       version: 7.70.0
-    react-icons:
-      specifier: ^5.5.0
-      version: 5.5.0
     react-is:
       specifier: ^19.1.4
       version: 19.2.3
     react-router:
       specifier: ^7.12.0
       version: 7.12.0
-    recharts:
-      specifier: ^3.5.1
-      version: 3.6.0
     tailwind-merge:
       specifier: ^3.4.0
       version: 3.4.0
@@ -663,7 +645,7 @@ importers:
         version: 4.0.15(vitest@4.0.16)
       blockstore-core:
         specifier: 'catalog:'
-        version: 6.1.1
+        version: 6.1.2
       datastore-core:
         specifier: 'catalog:'
         version: 11.0.2
@@ -1483,7 +1465,7 @@ importers:
         version: 5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)
       blockstore-core:
         specifier: 'catalog:'
-        version: 6.1.1
+        version: 6.1.2
       blockstore-idb:
         specifier: 'catalog:'
         version: 3.0.1
@@ -6128,8 +6110,8 @@ packages:
   blockstore-core@5.0.4:
     resolution: {integrity: sha512-v7wtBEpW2J/kKljN7Z2u4Tnwr7qwnOvW1aPVfynIxEdejlVC7gg4z9k6iJt7n5XMGkdNnH4HOmVcjYcaMnu7yg==}
 
-  blockstore-core@6.1.1:
-    resolution: {integrity: sha512-swHp4vMywzPbsfDQiPzaAHL2A/5Qz5exlh69LNoPRv+tg23wD6N8IWDFdzXw34RsRQKXm+UWQIRcde+uppMRuA==}
+  blockstore-core@6.1.2:
+    resolution: {integrity: sha512-yWU38RM8DJ6C7Y2shIeTNVgGiJX/ko2RXqDyNlxMakOc+aVS7k1SCiakMlh6ix0juRNPtj0ySMTXU8UBDXXRCQ==}
 
   blockstore-idb@3.0.1:
     resolution: {integrity: sha512-4QSrT/ceQi3AhLFfm67SVCjfsjZD3p+Z7ocpW8bUlXK5WCD3yuWD3VBEqYSbDlkdOBYWD1B4q7zKhpY6v7C5/Q==}
@@ -13351,7 +13333,7 @@ snapshots:
       '@libp2p/interface': 3.1.0
       '@libp2p/keychain': 6.0.9
       '@multiformats/dns': 1.0.11
-      blockstore-core: 6.1.1
+      blockstore-core: 6.1.2
       datastore-core: 11.0.2
       interface-datastore: 9.0.2
       libp2p: 3.1.2
@@ -13491,7 +13473,7 @@ snapshots:
       '@multiformats/dns': 1.0.11
       '@multiformats/multiaddr': 13.0.1
       any-signal: 4.2.0
-      blockstore-core: 6.1.1
+      blockstore-core: 6.1.2
       cborg: 4.3.2
       interface-blockstore: 6.0.1
       interface-datastore: 9.0.2
@@ -18420,7 +18402,7 @@ snapshots:
       it-merge: 3.0.12
       multiformats: 13.4.2
 
-  blockstore-core@6.1.1:
+  blockstore-core@6.1.2:
     dependencies:
       '@libp2p/logger': 6.2.2
       interface-blockstore: 6.0.1
@@ -18432,7 +18414,7 @@ snapshots:
 
   blockstore-idb@3.0.1:
     dependencies:
-      blockstore-core: 6.1.1
+      blockstore-core: 6.1.2
       idb: 8.0.3
       interface-blockstore: 6.0.1
       interface-store: 7.0.1
