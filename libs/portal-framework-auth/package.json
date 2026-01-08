@@ -25,7 +25,8 @@
     "nanoevents": "^9.1.0"
   },
   "devDependencies": {
-    "tsdown": "^0.18.4"
+    "@lumeweb/tsdown-config": "workspace:*",
+    "tsdown": "catalog:"
   },
   "peerDependencies": {
     "@hookform/resolvers": "^5.0.1",

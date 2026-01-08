@@ -25,6 +25,7 @@
     "@lumeweb/portal-framework-core": "workspace:*"
   },
   "devDependencies": {
-    "tsdown": "0.19.0-beta.5"
+    "@lumeweb/tsdown-config": "workspace:*",
+    "tsdown": "catalog:"
   }
 }
