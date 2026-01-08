@@ -40,7 +40,7 @@
     "@hookform/resolvers": "catalog:",
     "@lexical/code": "^0.38.2 || ^0.39.0",
     "@lexical/html": "^0.38.2",
-    "@lexical/link": "^0.38.2",
+    "@lexical/link": "^0.38.2 || ^0.39.0",
     "@lexical/list": "^0.38.2",
     "@lexical/markdown": "^0.38.2",
     "@lexical/react": "^0.38.2",
