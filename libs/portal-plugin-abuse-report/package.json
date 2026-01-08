@@ -16,7 +16,7 @@
     "@lumeweb/portal-framework-ui-core": "workspace:*",
     "@lumeweb/portal-plugin-abuse-common": "workspace:*",
     "@tanstack/react-query": "catalog:",
-    "@uppy/compressor": "3.0.1",
+    "@uppy/compressor": "3.1.0",
     "@uppy/core": "catalog:",
     "@uppy/dashboard": "5.0.2",
     "@uppy/image-editor": "4.0.1",
