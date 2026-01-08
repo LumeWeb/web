@@ -1,6 +1,6 @@
 import type { BaseRecord } from "@refinedev/core";
 
-import { ActionItemConfig } from "../../../actions";
+import { ActionItemConfig } from "../../actions";
 import {
   AnyContainerEnvironment,
   DialogContainerEnvironment,

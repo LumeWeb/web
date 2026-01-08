@@ -16,7 +16,7 @@ import type {
   HeaderContent,
   HeaderEnvironment,
 } from "../types/header";
-import type { AllowStepNavigation } from "../types/navigation";
+
 import type { ForceRerenderCallback, EnvironmentSyncCallback } from "../types/form";
 
 import { ContainerType } from "../types/container";
@@ -255,7 +255,7 @@ export class HeaderEnvironmentBuilder<
   }
 
   wizardNavigation(options: {
-    allowNavigation?: AllowStepNavigation;
+    allowNavigation?: boolean | (() => boolean);
     current: number;
     descriptionMaxWidth?: string;
     disabledSteps?: number[];

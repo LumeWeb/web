@@ -1,8 +1,8 @@
 import type { BaseRecord } from "@refinedev/core";
 
-import type { WizardStepDefinition } from "../../../form/types";
+import type { WizardStepDefinition } from "../../form/types";
 
-import { ActionItemConfig } from "../../../actions";
+import { ActionItemConfig } from "../../actions";
 import { AnyContainerEnvironment } from "./container";
 
 export enum NavigationType {
