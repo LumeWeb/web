@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.16",
-    "orval": "^7.17.0",
+    "orval": "^7.17.2",
     "tsdown": "0.19.0-beta.2"
   }
 }

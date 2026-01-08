@@ -16,8 +16,8 @@
     "@lumeweb/portal-plugin-abuse-common": "workspace:*"
   },
   "devDependencies": {
-    "@module-federation/vite": "^1.9.2",
-    "vite-tsconfig-paths": "^5.1.4"
+    "@module-federation/vite": "^1.9.4",
+    "vite-tsconfig-paths": "^6.0.3"
   },
   "peerDependencies": {
     "@module-federation/bridge-react": "^0.21.6",

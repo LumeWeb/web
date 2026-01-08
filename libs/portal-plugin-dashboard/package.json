@@ -32,7 +32,7 @@
     "@lumeweb/portal-framework-ui-core": "workspace:*",
     "@lumeweb/portal-sdk": "workspace:*",
     "@refinedev/react-hook-form": "^5.0.3",
-    "@tanstack/react-query": "^5.90.12",
+    "@tanstack/react-query": "^5.90.16",
     "@tanstack/react-table": "^8.21.3",
     "@uppy/core": "^5.2.0",
     "@uppy/drop-target": "^4.1.0",
@@ -40,14 +40,14 @@
     "@uppy/xhr-upload": "5.0.1",
     "async-mutex": "^0.5.0",
     "date-fns": "^4.1.0",
-    "lucide-react": "^0.556.0",
+    "lucide-react": "^0.562.0",
     "otpauth": "^9.4.1",
     "qrcode": "^1.5.4",
     "qrcode.react": "^4.2.0",
-    "react": "^19.0.1",
-    "react-dom": "^19.0.1",
-    "react-hook-form": "^7.55.0",
-    "react-router": "^7.10.1",
-    "zod": "3.24.2"
+    "react": "^19.0.3",
+    "react-dom": "^19.0.3",
+    "react-hook-form": "^7.70.0",
+    "react-router": "^7.12.0",
+    "zod": "4.3.5"
   }
 }

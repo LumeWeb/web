@@ -27,8 +27,8 @@
     "@lumeweb/portal-framework-core": "workspace:*",
     "@lumeweb/portal-framework-ui": "workspace:*",
     "@lumeweb/portal-framework-ui-core": "workspace:*",
-    "react": "^19.0.1",
-    "react-dom": "^19.0.1",
+    "react": "^19.0.3",
+    "react-dom": "^19.0.3",
     "react-router": "7.5.2"
   },
   "devDependencies": {
