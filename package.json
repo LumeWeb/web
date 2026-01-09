@@ -61,7 +61,7 @@
     "playwright": "catalog:",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "storybook": "10.1.10",
+    "storybook": "10.1.11",
     "taze": "^19.9.2",
     "tsdown": "catalog:",
     "turbo": "^2.7.3",
