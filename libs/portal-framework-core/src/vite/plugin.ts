@@ -245,7 +245,7 @@ export function Config(opts: ConfigOptions) {
           reactRefreshHost: `http://localhost:${normalizedOpts.appPort}`,
         })
       : react(),
-    tsconfigPaths(),
+    tsconfigPaths({ projects: [resolve(opts.dir, "./tsconfig.json")] }),
     createHostFederationConfig(normalizedOpts, resolvedRuntimePlugins),
     opts.type === "host" ? localhostAccessPlugin() : undefined,
     ...(opts.plugins?.map((plugin) =>
