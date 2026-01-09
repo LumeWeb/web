@@ -57,7 +57,7 @@
     "derive-zustand": "^0.2.0",
     "dompurify": "^3.3.0",
     "jotai": "^2.15.2",
-    "lexical": "^0.38.2",
+    "lexical": "^0.38.2 || ^0.39.0",
     "lodash": "^4.17.21",
     "lucide-react": "catalog:",
     "react": "catalog:",
