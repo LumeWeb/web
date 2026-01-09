@@ -1190,13 +1190,13 @@ importers:
         version: 4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
       '@uppy/react':
         specifier: 5.0.3
-        version: 5.0.3(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))(@uppy/dashboard@5.0.2(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/image-editor@4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/screen-capture@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/webcam@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        version: 5.0.3(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))(@uppy/dashboard@5.0.2(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/image-editor@4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/screen-capture@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/webcam@5.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@uppy/screen-capture':
         specifier: 5.0.1
         version: 5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
       '@uppy/webcam':
-        specifier: 5.0.1
-        version: 5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
+        specifier: 5.1.0
+        version: 5.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
       '@uppy/xhr-upload':
         specifier: 'catalog:'
         version: 5.1.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
@@ -5675,10 +5675,10 @@ packages:
   '@uppy/utils@7.1.5':
     resolution: {integrity: sha512-Vz4WGTjef6WebECGur4clWjpkET4o3bdvPMj1m2sD5cL+dTt69m+FIE5h5JD3HBMLEPTXPVkrXGMIFcbOYC12Q==}
 
-  '@uppy/webcam@5.0.1':
-    resolution: {integrity: sha512-zjt3g5E6g5NbufEtYBnK6IS5uBABQnuVixAiwfTYe9of1GkZJpOAe6qeg+zoRad0K/twt2YGqkGyhwzVL9ipuQ==}
+  '@uppy/webcam@5.1.0':
+    resolution: {integrity: sha512-SHI+yiNrD4JrTFhQPyt7Mi9nL5r5YDwyXtYXuSRM3URB0etKes6u02MKY5GEn2LEpCSqSceXUi84Prig7UWYIw==}
     peerDependencies:
-      '@uppy/core': ^5.0.2
+      '@uppy/core': ^5.2.0
 
   '@uppy/xhr-upload@5.1.1':
     resolution: {integrity: sha512-Vp0HWVA8o+niC2uISxPt0pZ+95bHHkk9HzNaUTrff/vq+20Ln68BS2auJhc9ecJzI6SKAlGZ342dcTQ/onw0nA==}
@@ -17602,7 +17602,7 @@ snapshots:
       namespace-emitter: 2.0.1
       p-retry: 6.2.1
 
-  '@uppy/components@1.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))(@uppy/image-editor@4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/screen-capture@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/webcam@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))':
+  '@uppy/components@1.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))(@uppy/image-editor@4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/screen-capture@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/webcam@5.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))':
     dependencies:
       '@uppy/core': 5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)
       clsx: 2.1.1
@@ -17612,7 +17612,7 @@ snapshots:
     optionalDependencies:
       '@uppy/image-editor': 4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
       '@uppy/screen-capture': 5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
-      '@uppy/webcam': 5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
+      '@uppy/webcam': 5.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
 
   '@uppy/compressor@3.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))':
     dependencies:
@@ -17669,9 +17669,9 @@ snapshots:
       p-queue: 8.1.1
       preact: 10.28.1
 
-  '@uppy/react@5.0.3(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))(@uppy/dashboard@5.0.2(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/image-editor@4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/screen-capture@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/webcam@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+  '@uppy/react@5.0.3(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))(@uppy/dashboard@5.0.2(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/image-editor@4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/screen-capture@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/webcam@5.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:
-      '@uppy/components': 1.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))(@uppy/image-editor@4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/screen-capture@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/webcam@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))
+      '@uppy/components': 1.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))(@uppy/image-editor@4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/screen-capture@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/webcam@5.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))
       '@uppy/core': 5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)
       '@uppy/utils': 7.1.5
       preact: 10.28.1
@@ -17681,7 +17681,7 @@ snapshots:
     optionalDependencies:
       '@uppy/dashboard': 5.0.2(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
       '@uppy/screen-capture': 5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
-      '@uppy/webcam': 5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
+      '@uppy/webcam': 5.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
     transitivePeerDependencies:
       - '@uppy/image-editor'
 
@@ -17711,7 +17711,7 @@ snapshots:
       lodash: 4.17.21
       preact: 10.28.1
 
-  '@uppy/webcam@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))':
+  '@uppy/webcam@5.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))':
     dependencies:
       '@uppy/core': 5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)
       '@uppy/utils': 7.1.5
