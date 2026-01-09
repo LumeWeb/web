@@ -18,6 +18,6 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup
-        uses: ./.github/actions/setup-all
+        uses: LumeWeb/workflows/.github/actions/setup-all@develop
       - name: Build
         run: pnpm build

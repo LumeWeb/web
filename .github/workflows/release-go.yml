@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup
-        uses: ./.github/actions/setup-all
+        uses: LumeWeb/workflows/.github/actions/setup-all@develop
         with:
           node_version: 20.10.0
           go_version: 1.23.0

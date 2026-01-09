@@ -36,10 +36,17 @@ jobs:
       - name: Setup Git
         uses: LumeWeb/workflows/.github/actions/setup-git@develop
 
+      - name: Setup JS
+        uses: LumeWeb/workflows/.github/actions/setup-js@develop
+
       - name: Create Release
         run: knope release --verbose
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
+
+      - name: Publish to npm
+        run: pnpm -r publish --publish-branch develop
+        env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # Check for portal-frontend changes and notify template repo
