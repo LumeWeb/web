@@ -209,7 +209,7 @@ catalogs:
       version: 4.3.5
   framework:
     vite:
-      specifier: 6.4.1
+      specifier: ^6.4.1
       version: 6.4.1
   websites:
     tailwindcss:
