@@ -18,7 +18,7 @@
     "@tanstack/react-query": "catalog:",
     "@uppy/compressor": "3.0.1",
     "@uppy/core": "catalog:",
-    "@uppy/dashboard": "5.0.2",
+    "@uppy/dashboard": "5.1.0",
     "@uppy/image-editor": "4.0.1",
     "@uppy/react": "5.0.3",
     "@uppy/screen-capture": "5.0.1",

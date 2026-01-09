@@ -1175,14 +1175,14 @@ importers:
         specifier: 'catalog:'
         version: 5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)
       '@uppy/dashboard':
-        specifier: 5.0.2
-        version: 5.0.2(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
+        specifier: 5.1.0
+        version: 5.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
       '@uppy/image-editor':
         specifier: 4.0.1
         version: 4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
       '@uppy/react':
         specifier: 5.0.3
-        version: 5.0.3(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))(@uppy/dashboard@5.0.2(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/image-editor@4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/screen-capture@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/webcam@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        version: 5.0.3(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))(@uppy/dashboard@5.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/image-editor@4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/screen-capture@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/webcam@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@uppy/screen-capture':
         specifier: 5.0.1
         version: 5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
@@ -5584,10 +5584,10 @@ packages:
   '@uppy/core@5.2.0':
     resolution: {integrity: sha512-uvfNyz4cnaplt7LYJmEZHuqOuav0tKp4a9WKJIaH6iIj7XiqYvS2J5SEByexAlUFlzefOAyjzj4Ja2dd/8aMrw==}
 
-  '@uppy/dashboard@5.0.2':
-    resolution: {integrity: sha512-mW/bl4w1W3AUFpNHup0jJG+rAdavROyvVdLjXIr3az1Q2Hzu2IN0HgCpeVD4YEUhdLB6ToRYY4z91gyoRSZdQg==}
+  '@uppy/dashboard@5.1.0':
+    resolution: {integrity: sha512-TCuDbsAWokPO2LzubDoXyBskY/DHFB9tyDeHJe1FGBHrm0sY2zd+yEW7c4HNMDiIYCs/AdFJWAjQosCT07rD6Q==}
     peerDependencies:
-      '@uppy/core': ^5.0.2
+      '@uppy/core': ^5.2.0
 
   '@uppy/drop-target@4.1.0':
     resolution: {integrity: sha512-QPOwlOfYlf4gOzdj75Mx0YxM0d6Jv1ui2aCERse1pwtIeQGQ0QPe5lmTi0o3p8dTnqACUmoM6SJOpAHQozCSkA==}
@@ -17444,7 +17444,7 @@ snapshots:
       nanoid: 5.1.6
       preact: 10.28.1
 
-  '@uppy/dashboard@5.0.2(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))':
+  '@uppy/dashboard@5.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))':
     dependencies:
       '@transloadit/prettier-bytes': 0.3.5
       '@uppy/core': 5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)
@@ -17479,7 +17479,7 @@ snapshots:
       p-queue: 8.1.1
       preact: 10.28.1
 
-  '@uppy/react@5.0.3(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))(@uppy/dashboard@5.0.2(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/image-editor@4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/screen-capture@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/webcam@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+  '@uppy/react@5.0.3(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))(@uppy/dashboard@5.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/image-editor@4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/screen-capture@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/webcam@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:
       '@uppy/components': 1.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))(@uppy/image-editor@4.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/screen-capture@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))(@uppy/webcam@5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)))
       '@uppy/core': 5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)
@@ -17489,7 +17489,7 @@ snapshots:
       react-dom: 19.2.3(react@19.2.3)
       use-sync-external-store: 1.6.0(react@19.2.3)
     optionalDependencies:
-      '@uppy/dashboard': 5.0.2(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
+      '@uppy/dashboard': 5.1.0(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
       '@uppy/screen-capture': 5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
       '@uppy/webcam': 5.0.1(@uppy/core@5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8))
     transitivePeerDependencies:
