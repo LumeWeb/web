@@ -5,8 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "turbo build",
-    "publish": "changeset publish",
-    "changeset:publish": "pnpm -r publish --publish-branch develop; pnpm changeset tag && git push --follow-tags",
+    "publish": "pnpm -r publish --publish-branch develop; knope release",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
