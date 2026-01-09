@@ -24,7 +24,7 @@
     "@uppy/screen-capture": "5.0.1",
     "@uppy/webcam": "5.0.1",
     "@uppy/xhr-upload": "catalog:",
-    "axios": "1.12.0",
+    "axios": "1.13.2",
     "date-fns": "catalog:",
     "lucide-react": "catalog:",
     "react": "catalog:",
