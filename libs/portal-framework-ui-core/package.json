@@ -68,7 +68,7 @@
     "react-router": "catalog:",
     "recharts": "catalog:",
     "tailwind-merge": "catalog:",
-    "tailwind-scrollbar": "^3.0.0",
+    "tailwind-scrollbar": "^3.0.0 || ^4.0.0",
     "tailwindcss-animate": "catalog:",
     "vaul": "^1.1.2"
   },
