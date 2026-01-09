@@ -48,5 +48,8 @@
   "peerDependencies": {
     "react": "catalog:",
     "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "vite": "catalog:framework"
   }
 }

@@ -24,5 +24,8 @@
     "react-hook-form": "catalog:",
     "react-router": "catalog:",
     "zod": "catalog:"
+  },
+  "devDependencies": {
+    "vite": "catalog:framework"
   }
 }

@@ -33,5 +33,8 @@
     "react-markdown": "^10.1.0",
     "react-router": "catalog:",
     "zod": "catalog:"
+  },
+  "devDependencies": {
+    "vite": "catalog:framework"
   }
 }

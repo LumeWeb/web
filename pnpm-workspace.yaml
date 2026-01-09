@@ -62,7 +62,7 @@ catalog:
   react-router: ^7.12.0
   recharts: ^3.6.0
   tailwind-merge: ^3.4.0
-  tailwindcss: ^4.1.18
+  tailwindcss: ^3.4.19
   tailwindcss-animate: ^1.0.7
   tsdown: v0.19.0-beta.5
   typescript: ^5.9.3
@@ -70,3 +70,8 @@ catalog:
   vite-tsconfig-paths: ^6.0.3
   vitest: ^4.0.16
   zod: 4.3.5
+catalogs:
+  websites:
+    tailwindcss: ^4.1.18
+  framework:
+    vite: ^6.4.1

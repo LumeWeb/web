@@ -21,6 +21,6 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "catalog:",
-    "tailwindcss": "catalog:"
+    "tailwindcss": "catalog:websites"
   }
 }

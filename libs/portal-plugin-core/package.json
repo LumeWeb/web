@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@module-federation/bridge-react": "catalog:",
+    "vite": "catalog:framework",
     "vite-tsconfig-paths": "catalog:"
   }
 }
