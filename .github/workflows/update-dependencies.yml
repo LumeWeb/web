@@ -19,7 +19,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup JS
-        uses: ./.github/actions/setup-js
+        uses: LumeWeb/workflows/.github/actions/setup-js@develop
 
       - name: Run taze
         run: pnpm taze major -r -w --install false
