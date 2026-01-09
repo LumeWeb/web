@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@module-federation/vite": "catalog:",
+    "vite": "catalog:framework",
     "vite-tsconfig-paths": "catalog:"
   },
   "peerDependencies": {
