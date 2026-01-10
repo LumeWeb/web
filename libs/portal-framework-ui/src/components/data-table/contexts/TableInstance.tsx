@@ -1,4 +1,3 @@
-import { registerBridgedContext } from "@lumeweb/portal-framework-core";
 import { Table } from "@tanstack/react-table";
 import React, {
   createContext,
@@ -43,5 +42,3 @@ export const useTableInstance = <TData extends BaseRecord>() => {
   }
   return context as TableInstanceContextValue<TData>;
 };
-
-registerBridgedContext(TableInstanceContext);

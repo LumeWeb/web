@@ -124,19 +124,6 @@ const DEFAULT_PLUGIN_REGISTRY_FILE = "plugin.config.json";
 export function Config(opts: ConfigOptions) {
   const normalizedOpts = normalizeConfigOptions(opts);
   const resolvedRuntimePlugins: string[] = [];
-  try {
-    const bridgeReactPluginPath =
-      require.resolve("@module-federation/bridge-react/plugin");
-    resolvedRuntimePlugins.push(bridgeReactPluginPath);
-  } catch (error) {
-    console.error(
-      "CRITICAL: Failed to resolve runtime plugin '@module-federation/bridge-react/plugin'. Make sure it's installed.",
-      error,
-    );
-    throw new Error(
-      "Failed to resolve required runtime plugin '@module-federation/bridge-react/plugin'.",
-    );
-  }
 
   function createBaseFederationConfig(
     name: string,

@@ -44,7 +44,6 @@
     "tsdown": "catalog:"
   },
   "peerDependencies": {
-    "@module-federation/bridge-react": "catalog:",
     "@module-federation/enhanced": "^0.21.6",
     "@refinedev/react-router": "catalog:",
     "@t3-oss/env-core": "catalog:",

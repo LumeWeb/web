@@ -1,6 +1,5 @@
 import { AbuseReportResponse } from "@/types";
 import { Home } from "@/ui/components/Home";
-import { createBridgeComponent } from "@lumeweb/portal-framework-core";
 import { useDialog } from "@lumeweb/portal-framework-ui";
 import { useGo } from "@refinedev/core";
 import { FlagIcon } from "lucide-react";

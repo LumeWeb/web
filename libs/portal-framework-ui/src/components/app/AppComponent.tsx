@@ -7,7 +7,6 @@ import {
   Framework,
   FrameworkProvider,
   getDefaultRefineOptions,
-  HostContextBridge,
   NamespacedId,
   NavigationFeature,
   NavigationItem,
@@ -368,7 +367,6 @@ function withRouteContainer(element: React.ReactNode, renderDialog: boolean) {
     return (
       <>
         {renderDialog && <DialogRenderer />}
-        <HostContextBridge />
         {element}
       </>
     );

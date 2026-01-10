@@ -1,4 +1,3 @@
-import { registerBridgedContext } from "@lumeweb/portal-framework-core";
 import React, {
   createContext,
   useCallback,
@@ -130,5 +129,3 @@ export const useFilterHelpers = <TData extends BaseRecord>() => {
   }
   return context as FilterHelpersContextValue<TData>;
 };
-
-registerBridgedContext(FilterHelpersContext);

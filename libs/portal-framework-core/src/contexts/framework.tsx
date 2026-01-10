@@ -13,7 +13,6 @@ import type { BaseCapability } from "../types/capabilities";
 
 import { Builder } from "../api/builder";
 import { Framework } from "../api/framework";
-import { registerBridgedContext } from "../plugins/context-bridge";
 import { FrameworkFeature } from "../types/api";
 import {
   initializeFramework,
@@ -37,8 +36,6 @@ interface FrameworkContextValue {
 export const FrameworkContext = createContext<FrameworkContextValue | null>(
   null,
 );
-
-registerBridgedContext(FrameworkContext);
 
 interface FrameworkProviderProps {
   appName: string;

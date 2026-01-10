@@ -11,7 +11,9 @@
     "build:dashboard": "dotenv -e .env.dashboard -- pnpm build:build",
     "build:admin": "dotenv -e .env.admin -- pnpm build:build",
     "build:build": "NODE_ENV=development vite build",
-    "serve": "vite preview"
+    "serve": "run-s serve:dashboard",
+    "serve:dashboard": "dotenv -e .env.dashboard -- vite preview",
+    "serve:admin": "dotenv -e .env.admin -- vite preview"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",
