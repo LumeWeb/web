@@ -24,17 +24,9 @@ export {
 // Environment
 export { env } from "./env";
 
-// Plugin Context Bridge
-export {
-  HostContextBridge,
-  registerBridgedContext,
-  RemoteContextConsumer,
-} from "./plugins/context-bridge";
-
 // Plugin Management
 export { PluginManager } from "./plugins/manager";
 export {
-  createBridgeComponent,
   createRemoteComponentLoader,
   defaultRemoteOptions,
   type RemoteComponentOptions,

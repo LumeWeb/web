@@ -1,4 +1,3 @@
-import { registerBridgedContext } from "@lumeweb/portal-framework-core";
 import React, {
   createContext,
   useContext,
@@ -53,5 +52,3 @@ export const useTableConfigOptional = <TData extends BaseRecord>() => {
   const context = useContext(TableConfigContext);
   return context as TableConfigContextValue<TData> | undefined;
 };
-
-registerBridgedContext(TableConfigContext);

@@ -1,4 +1,3 @@
-import { registerBridgedContext } from "@lumeweb/portal-framework-core";
 import React, {
   createContext,
   ReactNode,
@@ -49,8 +48,6 @@ interface ContextShape {
 }
 
 const Context = createContext<ContextShape | undefined>(undefined);
-
-registerBridgedContext(Context, "MarkdownToolbarContext");
 
 export const ToolbarProvider = ({ children }: { children: ReactNode }) => {
   const [toolbarState, setToolbarState] = useState<ToolbarState>({

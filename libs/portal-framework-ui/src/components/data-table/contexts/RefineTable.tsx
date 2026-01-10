@@ -1,4 +1,3 @@
-import { registerBridgedContext } from "@lumeweb/portal-framework-core";
 import React, {
   createContext,
   useContext,
@@ -125,5 +124,3 @@ export const useRefineTable = <TData extends BaseRecord>() => {
 
   return context as RefineTableContextValue<TData>;
 };
-
-registerBridgedContext(RefineTableContext);

@@ -21,7 +21,6 @@
     "vite-tsconfig-paths": "catalog:"
   },
   "peerDependencies": {
-    "@module-federation/bridge-react": "catalog:",
     "@refinedev/core": "catalog:",
     "@refinedev/react-hook-form": "catalog:",
     "@refinedev/react-router": "catalog:",

@@ -1,4 +1,3 @@
-import { createRemoteComponent } from "@module-federation/bridge-react";
 import { loadRemote } from "@module-federation/enhanced/runtime";
 
 import type { BaseCapability } from "../types/capabilities";
@@ -78,9 +77,6 @@ export class Framework {
     plugins.framework = this;
     capabilities.framework = this;
   }
-
-  _createRemoteComponent = (...args: any) =>
-    createRemoteComponent.apply(null, args);
 
   _loadRemote = (...args: any) => loadRemote.apply(null, args);
 
