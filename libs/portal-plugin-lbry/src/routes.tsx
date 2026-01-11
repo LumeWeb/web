@@ -1,5 +1,5 @@
 import type { RouteDefinition } from "@lumeweb/portal-framework-core";
-import { Monitor, Anchor } from "lucide-react";
+import { Anchor, Monitor } from "lucide-react";
 
 const routes = [
   {

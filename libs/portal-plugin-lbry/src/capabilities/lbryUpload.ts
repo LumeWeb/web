@@ -5,8 +5,8 @@ import type {
 
 import {
   CapabilityStatus,
-  Framework,
   cleanTrailingSlashes,
+  Framework,
   getApiBaseUrl,
 } from "@lumeweb/portal-framework-core";
 
