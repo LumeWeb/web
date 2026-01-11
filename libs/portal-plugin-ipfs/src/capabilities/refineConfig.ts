@@ -1,13 +1,13 @@
 import type { RefineProps } from "@refinedev/core";
 
 import dataProvider from "@lumeweb/advanced-rest-provider";
-import { type AuthProviderWithEmitter } from "@lumeweb/portal-framework-auth";
 import {
   env,
   Framework,
   getApiBaseUrl,
   mergeRefineConfig,
   RefineConfigCapability,
+  syncAuthProviderWithDataProvider,
 } from "@lumeweb/portal-framework-core";
 import { createNanoEvents, Emitter } from "nanoevents";
 
@@ -55,31 +55,16 @@ export class Capability implements RefineConfigCapability {
   getConfig(existing?: Partial<RefineProps>) {
     const acctProvider = dataProvider(this.#apiUrl, true);
 
-    const authProvider = existing?.authProvider as
-      | AuthProviderWithEmitter
-      | undefined;
-    if (authProvider) {
-      // Check if auth provider already has a token
-      const currentToken =
-        typeof authProvider.getToken === "function"
-          ? authProvider.getToken()
-          : (authProvider as any).token ||
-            (authProvider as any).currentToken ||
-            null;
-
-      if (currentToken) {
-        acctProvider.setAuthToken(currentToken);
-        this.#authToken = currentToken;
-        this.#emitter.emit("authTokenChanged", currentToken);
-      }
-
-      // Save the unbind function for cleanup
-      this.#authUnbind = authProvider.on("authCheckSuccess", (params) => {
-        acctProvider.setAuthToken(params.token);
-        this.#authToken = params.token;
-        this.#emitter.emit("authTokenChanged", params.token);
-      });
-    }
+    this.#authUnbind = syncAuthProviderWithDataProvider(
+      acctProvider,
+      existing?.authProvider,
+      {
+        onTokenChange: (token) => {
+          this.#authToken = token;
+          this.#emitter.emit("authTokenChanged", token);
+        },
+      },
+    );
 
     const providers = { [DATA_PROVIDER_NAME]: acctProvider };
     const resources = [
