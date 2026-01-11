@@ -29,7 +29,7 @@
     "tailwindcss": "catalog:"
   },
   "devDependencies": {
-    "@eslint/compat": "^2.0.0",
+    "@eslint/compat": "^2.0.1",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
     "@module-federation/vite": "catalog:",
@@ -45,7 +45,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^25.0.3",
+    "@types/node": "^25.0.6",
     "@vitejs/plugin-react": "^5.1.2",
     "@vitest/browser": "^4.0.16",
     "@vitest/spy": "^4.0.16",
@@ -82,5 +82,5 @@
       "@uppy/core": "patches/@uppy__core.patch"
     }
   },
-  "packageManager": "pnpm@10.27.0"
+  "packageManager": "pnpm@10.28.0"
 }
