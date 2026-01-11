@@ -16,13 +16,12 @@ import { useNotification } from "@refinedev/core";
 export function PinItem<
   TData extends BaseRecord = any,
 >(): ToolbarCustomItem<TData> {
-  const { openDialog } = useDialog();
-  const { open } = useNotification();
-
   return {
     id: "add-pin",
     type: ToolbarItemType.CUSTOM,
     component: () => {
+      const { openDialog } = useDialog();
+      const { open } = useNotification();
       const { getHeliaService } = useFileManagerFeature();
 
       const handleClick = () => {

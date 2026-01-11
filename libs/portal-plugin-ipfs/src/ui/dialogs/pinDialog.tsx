@@ -7,7 +7,7 @@ import {
   useFormContext,
 } from "@lumeweb/portal-framework-ui";
 import { AlertCircle, CheckCircle, Pin, X } from "lucide-react";
-import { forwardRef, useState } from "react";
+import { forwardRef, useState, useMemo, useCallback } from "react";
 import {
   Badge,
   Button,
@@ -17,7 +17,7 @@ import {
   ScrollArea,
 } from "@lumeweb/portal-framework-ui-core";
 import { CID } from "multiformats/cid";
-// Schema for pin dialog
+
 const pinSchema = z.object({
   cids: z.array(z.string()).min(1, "At least one CID is required"),
 });
@@ -43,80 +43,103 @@ const CidInputComponent = forwardRef<
   const [inputValue, setInputValue] = useState("");
   const [cidTags, setCidTags] = useState<CidTag[]>([]);
 
+  // Convert existing CIDs to Set for O(1) lookup
+  const existingPinnedSet = useMemo(
+    () => new Set(existingPinnedCids),
+    [existingPinnedCids],
+  );
+
   // Validate CID format using multiformats CID library
-  const isValidCid = (cid: string): boolean => {
+  const isValidCid = useCallback((cid: string): boolean => {
     try {
       CID.parse(cid.trim());
       return true;
     } catch (error) {
       return false;
     }
-  };
-
-  // Add CID tag
-  const addCidTag = (cid: string) => {
-    const trimmedCid = cid.trim();
-    if (!trimmedCid) return;
-
-    if (cidTags.some((tag) => tag.cid === trimmedCid)) return;
-
-    const newTag: CidTag = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      cid: trimmedCid,
-      isValid: isValidCid(trimmedCid),
-      isAlreadyPinned: existingPinnedCids.includes(trimmedCid),
-    };
-
-    setCidTags((prev) => [...prev, newTag]);
-
-    // Update form with valid CIDs
-    const validCids = cidTags
-      .filter((tag) => tag.isValid && !tag.isAlreadyPinned)
-      .map((tag) => tag.cid);
-
-    if (newTag.isValid && !newTag.isAlreadyPinned) {
-      formInstance.setValue("cids", [...validCids, newTag.cid]);
-    }
-
-    setInputValue("");
-  };
-
-  // Remove CID tag
-  const removeCidTag = (tagId: string) => {
-    const updatedTags = cidTags.filter((tag) => tag.id !== tagId);
-    setCidTags(updatedTags);
-
-    // Update form with remaining valid CIDs
-    const validCids = updatedTags
-      .filter((tag) => tag.isValid && !tag.isAlreadyPinned)
-      .map((tag) => tag.cid);
-
-    formInstance.setValue("cids", validCids);
-  };
-
-  // Handle input key press
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      addCidTag(inputValue);
-    }
-  };
+  }, []);
 
   // Format CID for display
-  const formatCidForDisplay = (cid: string): string => {
+  const formatCidForDisplay = useCallback((cid: string): string => {
     if (cid.length <= 20) return cid;
     return `${cid.slice(0, 8)}...${cid.slice(-8)}`;
-  };
+  }, []);
 
-  // Get stats
-  const stats = {
-    total: cidTags.length,
-    valid: cidTags.filter((tag) => tag.isValid).length,
-    invalid: cidTags.filter((tag) => !tag.isValid).length,
-    alreadyPinned: cidTags.filter((tag) => tag.isAlreadyPinned).length,
-    newToPin: cidTags.filter((tag) => tag.isValid && !tag.isAlreadyPinned)
-      .length,
-  };
+  // Add CID tag
+  const addCidTag = useCallback(
+    (cid: string) => {
+      const trimmedCid = cid.trim();
+      if (!trimmedCid) return;
+
+      // Check for duplicates
+      if (cidTags.some((tag) => tag.cid === trimmedCid)) return;
+
+      const newTag: CidTag = {
+        id: crypto.randomUUID(),
+        cid: trimmedCid,
+        isValid: isValidCid(trimmedCid),
+        isAlreadyPinned: existingPinnedSet.has(trimmedCid),
+      };
+
+      setCidTags((prev) => [...prev, newTag]);
+
+      // Update form with valid CIDs
+      const validCids = cidTags
+        .filter((tag) => tag.isValid && !tag.isAlreadyPinned)
+        .map((tag) => tag.cid);
+
+      if (newTag.isValid && !newTag.isAlreadyPinned) {
+        formInstance.setValue("cids", [...validCids, newTag.cid]);
+      }
+
+      setInputValue("");
+    },
+    [cidTags, existingPinnedSet, formInstance, isValidCid],
+  );
+
+  // Remove CID tag
+  const removeCidTag = useCallback(
+    (tagId: string) => {
+      const updatedTags = cidTags.filter((tag) => tag.id !== tagId);
+      setCidTags(updatedTags);
+
+      // Update form with remaining valid CIDs
+      const validCids = updatedTags
+        .filter((tag) => tag.isValid && !tag.isAlreadyPinned)
+        .map((tag) => tag.cid);
+
+      formInstance.setValue("cids", validCids);
+    },
+    [cidTags, formInstance],
+  );
+
+  // Handle input key press
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addCidTag(inputValue);
+      }
+    },
+    [inputValue, addCidTag],
+  );
+
+  // Clear all tags
+  const clearAllTags = useCallback(() => {
+    setCidTags([]);
+    formInstance.setValue("cids", []);
+  }, [formInstance]);
+
+  // Memoize stats calculation
+  const stats = useMemo(() => {
+    const total = cidTags.length;
+    const valid = cidTags.filter((tag) => tag.isValid).length;
+    const invalid = total - valid;
+    const alreadyPinned = cidTags.filter((tag) => tag.isAlreadyPinned).length;
+    const newToPin = valid - alreadyPinned;
+
+    return { total, valid, invalid, alreadyPinned, newToPin };
+  }, [cidTags]);
 
   return (
     <div ref={ref} className="space-y-4">
@@ -139,14 +162,16 @@ const CidInputComponent = forwardRef<
           Enter CID
         </Label>
         <div className="flex gap-2">
-          <Input
-            id="cid-input"
-            placeholder="QmXxXx... or bafXxXx..."
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            className="border-border bg-background text-foreground placeholder:text-muted-foreground h-10"
-          />
+          <div className="flex-1">
+            <Input
+              id="cid-input"
+              placeholder="QmXxXx... or bafXxXx..."
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyPress}
+              className="border-border bg-background text-foreground placeholder:text-muted-foreground h-10 w-full"
+            />
+          </div>
           <Button
             onClick={() => addCidTag(inputValue)}
             disabled={!inputValue.trim()}
@@ -167,10 +192,7 @@ const CidInputComponent = forwardRef<
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  setCidTags([]);
-                  formInstance.setValue("cids", []);
-                }}
+                onClick={clearAllTags}
                 className="text-muted-foreground hover:text-foreground">
                 Clear All
               </Button>
@@ -313,7 +335,6 @@ export function createPinDialogConfig(
         message: "Content pinning queued",
         description: "The content has been queued for pinning to your account",
       });
-      // Dialog will close automatically
     },
     size: ComponentSize.TWO_XL,
   };
