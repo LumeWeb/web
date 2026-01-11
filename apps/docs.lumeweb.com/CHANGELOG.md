@@ -1,5 +1,11 @@
 # @lumeweb/docs.lumeweb.com
 
+## 0.5.1 (2026-01-11)
+
+### Features
+
+- add folder upload detection and conditional UI based on service support
+
 ## 0.5.0 (2026-01-09)
 
 ### Breaking Changes
