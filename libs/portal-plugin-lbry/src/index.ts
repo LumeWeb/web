@@ -7,14 +7,11 @@ import {
 import { LbryProtocol } from "./capabilities/lbryProtocol";
 import { LbryUpload } from "./capabilities/lbryUpload";
 import { RefineConfig as LbryRefineConfig } from "./capabilities/refineConfig";
+import routes from "./routes";
 
 export default function (): Plugin {
   return {
-    capabilities: [
-      new LbryProtocol(),
-      new LbryUpload(),
-      new LbryRefineConfig(),
-    ],
+    capabilities: [new LbryProtocol(), new LbryUpload(), new LbryRefineConfig()],
     capabilityAssociations: [
       {
         associated: ["lbry:upload"],
@@ -28,9 +25,11 @@ export default function (): Plugin {
     async initialize(_framework: Framework) {
       console.log("Plugin LBRY initialized");
     },
+    routes,
   } satisfies Plugin;
 }
 
-export * from "./client/default";
-export * from "./client/lBRYStreamAPI.schemas";
-export * from "./client/tus";
+export * from "./types";
+export * from './client/default';
+export * from './client/lBRYStreamAPI.schemas';
+export * from './client/tus';
