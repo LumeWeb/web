@@ -2,10 +2,17 @@ import {
   DataTable,
   formatFileSize,
   GeneralLayout,
+  ToolbarConfig,
+  ToolbarItemAlignment,
+  useDialog,
 } from "@lumeweb/portal-framework-ui";
 import { format } from "date-fns";
+import { Trash2 } from "lucide-react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { Authenticated } from "@refinedev/core";
+import { Authenticated, useDelete } from "@refinedev/core";
+
+import { createUnpinDialogConfig } from "@/ui/dialogs";
+import { PinItem } from "@/ui/components/toolbar";
 import type { StreamResponse } from "@/client";
 
 const columnHelper = createColumnHelper<StreamResponse>();
@@ -44,7 +51,16 @@ const columns = [
   }),
 ];
 
+const toolbarConfig: ToolbarConfig<StreamResponse> = {
+  defaultAlignment: ToolbarItemAlignment.RIGHT,
+  justifyBetween: true,
+  items: [PinItem()],
+};
+
 export default function StreamsPage() {
+  const { openDialog } = useDialog();
+  const { mutate: deletePin } = useDelete();
+
   return (
     <Authenticated key="lbry-streams">
       <GeneralLayout>
@@ -63,11 +79,42 @@ export default function StreamsPage() {
               {/* Streams Table */}
               <div className="bg-background border-border rounded-lg border">
                 <DataTable
+                  actionMenu={{
+                    items: [
+                      {
+                        icon: <Trash2 className="mr-2 h-4 w-4" />,
+                        label: "Unpin",
+                        onClick: (row) => {
+                          openDialog(
+                            createUnpinDialogConfig(
+                              row.sd_hash,
+                              row.stream_name,
+                              async (sdHash) => {
+                                const displayName =
+                                  row.stream_name || row.sd_hash;
+                                await deletePin({
+                                  id: sdHash,
+                                  resource: "lbry/streams",
+                                  successNotification: () => ({
+                                    description: `The stream "${displayName}" has been unpinned.`,
+                                    message: "Stream Unpinned",
+                                    type: "success",
+                                  }),
+                                });
+                              },
+                              openDialog,
+                            ),
+                          );
+                        },
+                      },
+                    ],
+                  }}
                   columns={columns}
                   emptyStateMessage="No streams found. Pin your first stream to get started."
                   pagination={true}
                   resource="lbry/streams"
                   responsive={true}
+                  toolbar={toolbarConfig}
                 />
               </div>
             </div>
