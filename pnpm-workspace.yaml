@@ -1,6 +1,6 @@
 packages:
-- apps/*
-- libs/*
+  - apps/*
+  - libs/*
 catalog:
   '@astrojs/react': ^4.4.2
   '@conform-to/react': ^1.15.1
@@ -25,13 +25,13 @@ catalog:
   '@tailwindcss/vite': ^4.1.18
   '@tanstack/react-query': ^5.90.16
   '@tanstack/react-table': ^8.21.3
-  '@types/react': ^19.2.7
+  '@types/react': ^19.2.8
   '@types/react-dom': ^19.2.3
   '@uppy/core': ^5.2.0
   '@uppy/tus': 5.1.0
   '@uppy/xhr-upload': 5.1.1
   '@vitest/browser-playwright': ^4.0.16
-  astro: ^5.16.7
+  astro: ^5.16.8
   blockstore-core: ^6.1.2
   blockstore-idb: ^3.0.1
   class-variance-authority: ^0.7.1
@@ -48,14 +48,14 @@ catalog:
   nanoevents: ^9.1.0
   nock: ^14.0.10
   npm-run-all: ^4.1.5
-  orval: ^7.17.2
+  orval: ^7.18.0
   otpauth: ^9.4.1
   playwright: ^1.57.0
   progress-events: ^1.0.1
   qrcode: ^1.5.4
   react: ^19.2.3
   react-dom: ^19.2.3
-  react-hook-form: ^7.70.0
+  react-hook-form: ^7.71.0
   react-icons: ^5.5.0
   react-is: ^19.1.4
   react-router: ^7.12.0
@@ -66,7 +66,7 @@ catalog:
   tsdown: v0.19.0-beta.5
   typescript: ^5.9.3
   vite: 7.1.11
-  vite-tsconfig-paths: ^6.0.3
+  vite-tsconfig-paths: ^6.0.4
   vitest: ^4.0.16
   zod: 4.3.5
 catalogs:
