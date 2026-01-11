@@ -8,13 +8,14 @@ import {
   getSdk,
   NamespacedId,
 } from "@lumeweb/portal-framework-core";
-import { Meta, UppyEventMap } from "@uppy/core";
+import { Body, Meta, UppyEventMap } from "@uppy/core";
 
 import type { UploadCapability } from "@lib/types/capabilities/upload";
 
 import { Manager, UppyFileDefault } from "@/features/upload/Manager";
 import {
   IUploadManager,
+  PluginConfig,
   ServiceConfig,
   UPLOAD_TYPE_MAIN,
   UploadStatusType,
@@ -99,6 +100,10 @@ export class Feature implements FrameworkFeature, IUploadManager {
     return this.#uploadManager.getServices();
   }
 
+  serviceSupportsFolderUpload(serviceId: string): boolean {
+    return this.#uploadManager.serviceSupportsFolderUpload(serviceId);
+  }
+
   /**
    * Get upload capabilities associated with a specific protocol
    */
@@ -153,27 +158,40 @@ export class Feature implements FrameworkFeature, IUploadManager {
         // Use the first upload capability found
         const uploadCapability = uploadCapabilities[0] as UploadCapability;
 
+        // Get additional plugins and check if there's a folder bundler plugin
+        const additionalPlugins = uploadCapability.getAdditionalPlugins();
+        const folderBundlerPlugin = additionalPlugins.find(
+          (plugin) => plugin.name === "FolderBundler",
+        );
+
         const serviceConfig: ServiceConfig = {
           id: protocol.id,
           largeFilePlugin: createLargeFilePlugin(
             uploadCapability.getLargeFileUploadConfig(),
             protocol.id,
             uploadCapability.getLargeFilePlugin?.(),
-          ),
-          name: protocol.getName(),
+          ) as PluginConfig,
+          name: protocol.id,
           smallFilePlugin: createSmallFilePlugin(
             uploadCapability.getSmallFileUploadConfig(),
             protocol.id,
             uploadCapability.getSmallFilePlugin?.(),
-          ),
+          ) as PluginConfig,
+          ...(folderBundlerPlugin && {
+            folderBundlerPlugin: {
+              module: folderBundlerPlugin.module,
+              options: folderBundlerPlugin.options || {},
+            },
+          }),
         };
 
         this.#uploadManager.registerService(serviceConfig);
 
-        // Register additional plugins from the upload capability
-        const additionalPlugins = uploadCapability.getAdditionalPlugins();
+        // Register additional plugins from the upload capability (excluding folder bundler)
         for (const plugin of additionalPlugins) {
-          this.#uploadManager.registerAdditionalPlugin(plugin);
+          if (plugin.name !== "FolderBundler") {
+            this.#uploadManager.registerAdditionalPlugin(plugin);
+          }
         }
       }
     }

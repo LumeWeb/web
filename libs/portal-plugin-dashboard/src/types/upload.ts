@@ -46,8 +46,10 @@ export interface IUploadManager {
   cancelAll: () => void;
   clearErrors: () => void;
   getFiles: () => any[] | Promise<any[]>;
+  getServices: () => ServiceConfig[];
   getUploadedFiles: () => UppyFileDefault[];
   getUploadErrors: () => Error[];
+  serviceSupportsFolderUpload: (serviceId: string) => boolean;
   getUploadProgress: () => number;
   getUploadStatus: () => UploadStatusType;
   off: (event: string, callback: (...args: any[]) => void) => void;
