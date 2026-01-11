@@ -39,6 +39,6 @@ export function createUnpinDialogConfig(
         throw error;
       }
     },
-    size: ComponentSize.DEFAULT,
+    size: ComponentSize.MD,
   };
 }
