@@ -586,20 +586,23 @@ export function uploadWizardForm(
               };
             }, [formMethods]);
 
+            const selectedServiceId = formMethods.getValues().storage;
+            const allowFolders = uploadManager?.serviceSupportsFolderUpload(selectedServiceId) ?? false;
+
             return (
               <FileUploadZone
-                allowFolders={true}
+                allowFolders={allowFolders}
                 disabled={false}
                 onFilesChange={async (files) => {
                   // Sync form with uploadManager's complete file list
                   formMethods.setValue("files", files);
                 }}
-                serviceId={formMethods.getValues().storage}
+                serviceId={selectedServiceId}
                 uploadManager={uploadManager}
               />
             );
           },
-          label: "Files or Folders",
+          label: "Files",
           name: "files",
           required: true,
           type: "custom",
@@ -608,7 +611,7 @@ export function uploadWizardForm(
       icon: FileText,
       shortTitle: "Files",
       submitLabel: "Next",
-      title: "Select Files or Folders",
+      title: "Select Files",
       validationSchema: filesSchema,
     },
     {

@@ -209,6 +209,11 @@ export class Manager implements IUploadManager {
     return Array.from(this.#services.values());
   }
 
+  public serviceSupportsFolderUpload(serviceId: string): boolean {
+    const service = this.#services.get(serviceId);
+    return !!service?.folderBundlerPlugin;
+  }
+
   public getStorageInfo(): null | StorageInfo {
     return this.#storageInfo;
   }
