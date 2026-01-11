@@ -12,6 +12,7 @@ import {
   getPluginMeta,
   mergeRefineConfig,
   RefineConfigCapability,
+  syncAuthProviderWithDataProvider,
 } from "@lumeweb/portal-framework-core";
 
 export class Capability implements RefineConfigCapability {
@@ -31,14 +32,7 @@ export class Capability implements RefineConfigCapability {
       acctProvider.setAuthToken(token);
     }
 
-    const authProvider = existing?.authProvider as
-      | AuthProviderWithEmitter
-      | undefined;
-    if (authProvider) {
-      authProvider.on("authCheckSuccess", (params) => {
-        acctProvider.setAuthToken(params.token);
-      });
-    }
+    syncAuthProviderWithDataProvider(acctProvider, existing?.authProvider);
 
     return mergeRefineConfig(existing, { [DATA_PROVIDER_NAME]: acctProvider }, [
       {
