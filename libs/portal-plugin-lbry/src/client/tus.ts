@@ -8,322 +8,370 @@
 import type {
   ErrorResponse,
   PatchApiStreamsUploadTusIdBody,
-  PostApiStreamsUploadTusBody
-} from './lBRYStreamAPI.schemas';
-
-
+  PostApiStreamsUploadTusBody,
+} from "./lBRYStreamAPI.schemas";
 
 /**
  * TUS protocol POST handler for /api/streams/upload/tus
  * @summary TUS POST /api/streams/upload/tus
  */
 export type postApiStreamsUploadTusResponse200 = {
-  data: ErrorResponse
-  status: 200
-}
+  data: ErrorResponse;
+  status: 200;
+};
 
 export type postApiStreamsUploadTusResponse201 = {
-  data: void
-  status: 201
-}
+  data: void;
+  status: 201;
+};
 
 export type postApiStreamsUploadTusResponse400 = {
-  data: void
-  status: 400
-}
+  data: void;
+  status: 400;
+};
 
 export type postApiStreamsUploadTusResponse401 = {
-  data: string
-  status: 401
-}
+  data: string;
+  status: 401;
+};
 
 export type postApiStreamsUploadTusResponse403 = {
-  data: string
-  status: 403
-}
+  data: string;
+  status: 403;
+};
 
 export type postApiStreamsUploadTusResponse412 = {
-  data: void
-  status: 412
-}
+  data: void;
+  status: 412;
+};
 
 export type postApiStreamsUploadTusResponse413 = {
-  data: void
-  status: 413
-}
+  data: void;
+  status: 413;
+};
 
 export type postApiStreamsUploadTusResponse415 = {
-  data: void
-  status: 415
-}
+  data: void;
+  status: 415;
+};
 
 export type postApiStreamsUploadTusResponse460 = {
-  data: void
-  status: 460
-}
-    
-export type postApiStreamsUploadTusResponseSuccess = (postApiStreamsUploadTusResponse200 | postApiStreamsUploadTusResponse201) & {
+  data: void;
+  status: 460;
+};
+
+export type postApiStreamsUploadTusResponseSuccess = (
+  | postApiStreamsUploadTusResponse200
+  | postApiStreamsUploadTusResponse201
+) & {
   headers: Headers;
 };
-export type postApiStreamsUploadTusResponseError = (postApiStreamsUploadTusResponse400 | postApiStreamsUploadTusResponse401 | postApiStreamsUploadTusResponse403 | postApiStreamsUploadTusResponse412 | postApiStreamsUploadTusResponse413 | postApiStreamsUploadTusResponse415 | postApiStreamsUploadTusResponse460) & {
+export type postApiStreamsUploadTusResponseError = (
+  | postApiStreamsUploadTusResponse400
+  | postApiStreamsUploadTusResponse401
+  | postApiStreamsUploadTusResponse403
+  | postApiStreamsUploadTusResponse412
+  | postApiStreamsUploadTusResponse413
+  | postApiStreamsUploadTusResponse415
+  | postApiStreamsUploadTusResponse460
+) & {
   headers: Headers;
 };
 
-export type postApiStreamsUploadTusResponse = (postApiStreamsUploadTusResponseSuccess | postApiStreamsUploadTusResponseError)
+export type postApiStreamsUploadTusResponse =
+  | postApiStreamsUploadTusResponseSuccess
+  | postApiStreamsUploadTusResponseError;
 
 export const getPostApiStreamsUploadTusUrl = () => {
+  return `/api/api/streams/upload/tus`;
+};
 
 
-  
-
-  return `/api/api/streams/upload/tus`
-}
-
-export const postApiStreamsUploadTus = async (postApiStreamsUploadTusBody: PostApiStreamsUploadTusBody, options?: RequestInit): Promise<postApiStreamsUploadTusResponse> => {
-  
-  const res = await fetch(getPostApiStreamsUploadTusUrl(),
-  {      
+export const postApiStreamsUploadTus = async (
+  postApiStreamsUploadTusBody: PostApiStreamsUploadTusBody,
+  options?: RequestInit,
+): Promise<postApiStreamsUploadTusResponse> => {
+  const res = await fetch(getPostApiStreamsUploadTusUrl(), {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/offset+octet-stream', ...options?.headers },
-    body: JSON.stringify(
-      postApiStreamsUploadTusBody,)
-  }
-)
+    method: "POST",
+    headers: {
+      "Content-Type": "application/offset+octet-stream",
+      ...options?.headers,
+    },
+    body: JSON.stringify(postApiStreamsUploadTusBody),
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: postApiStreamsUploadTusResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as postApiStreamsUploadTusResponse
-}
 
+  const data: postApiStreamsUploadTusResponse["data"] = body
+    ? JSON.parse(body)
+    : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as postApiStreamsUploadTusResponse;
+};
 
 /**
  * TUS protocol DELETE handler for /api/streams/upload/tus/:id
  * @summary TUS DELETE /api/streams/upload/tus/:id
  */
 export type deleteApiStreamsUploadTusIdResponse200 = {
-  data: ErrorResponse
-  status: 200
-}
+  data: ErrorResponse;
+  status: 200;
+};
 
 export type deleteApiStreamsUploadTusIdResponse204 = {
-  data: void
-  status: 204
-}
+  data: void;
+  status: 204;
+};
 
 export type deleteApiStreamsUploadTusIdResponse401 = {
-  data: string
-  status: 401
-}
+  data: string;
+  status: 401;
+};
 
 export type deleteApiStreamsUploadTusIdResponse403 = {
-  data: string
-  status: 403
-}
+  data: string;
+  status: 403;
+};
 
 export type deleteApiStreamsUploadTusIdResponse412 = {
-  data: void
-  status: 412
-}
-    
-export type deleteApiStreamsUploadTusIdResponseSuccess = (deleteApiStreamsUploadTusIdResponse200 | deleteApiStreamsUploadTusIdResponse204) & {
-  headers: Headers;
-};
-export type deleteApiStreamsUploadTusIdResponseError = (deleteApiStreamsUploadTusIdResponse401 | deleteApiStreamsUploadTusIdResponse403 | deleteApiStreamsUploadTusIdResponse412) & {
-  headers: Headers;
+  data: void;
+  status: 412;
 };
 
-export type deleteApiStreamsUploadTusIdResponse = (deleteApiStreamsUploadTusIdResponseSuccess | deleteApiStreamsUploadTusIdResponseError)
+export type deleteApiStreamsUploadTusIdResponseSuccess = (
+  | deleteApiStreamsUploadTusIdResponse200
+  | deleteApiStreamsUploadTusIdResponse204
+) & {
+  headers: Headers;
+};
+export type deleteApiStreamsUploadTusIdResponseError = (
+  | deleteApiStreamsUploadTusIdResponse401
+  | deleteApiStreamsUploadTusIdResponse403
+  | deleteApiStreamsUploadTusIdResponse412
+) & {
+  headers: Headers;
+};
 
-export const getDeleteApiStreamsUploadTusIdUrl = (id: string,) => {
+export type deleteApiStreamsUploadTusIdResponse =
+  | deleteApiStreamsUploadTusIdResponseSuccess
+  | deleteApiStreamsUploadTusIdResponseError;
 
+export const getDeleteApiStreamsUploadTusIdUrl = (id: string) => {
+  return `/api/api/streams/upload/tus/${id}`;
+};
 
-  
-
-  return `/api/api/streams/upload/tus/${id}`
-}
-
-export const deleteApiStreamsUploadTusId = async (id: string, options?: RequestInit): Promise<deleteApiStreamsUploadTusIdResponse> => {
-  
-  const res = await fetch(getDeleteApiStreamsUploadTusIdUrl(id),
-  {      
+export const deleteApiStreamsUploadTusId = async (
+  id: string,
+  options?: RequestInit,
+): Promise<deleteApiStreamsUploadTusIdResponse> => {
+  const res = await fetch(getDeleteApiStreamsUploadTusIdUrl(id), {
     ...options,
-    method: 'DELETE'
-    
-    
-  }
-)
+    method: "DELETE",
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: deleteApiStreamsUploadTusIdResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as deleteApiStreamsUploadTusIdResponse
-}
 
+  const data: deleteApiStreamsUploadTusIdResponse["data"] = body
+    ? JSON.parse(body)
+    : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as deleteApiStreamsUploadTusIdResponse;
+};
 
 /**
  * TUS protocol HEAD handler for /api/streams/upload/tus/:id
  * @summary TUS HEAD /api/streams/upload/tus/:id
  */
 export type headApiStreamsUploadTusIdResponse200 = {
-  data: void
-  status: 200
-}
+  data: void;
+  status: 200;
+};
 
 export type headApiStreamsUploadTusIdResponse401 = {
-  data: string
-  status: 401
-}
+  data: string;
+  status: 401;
+};
 
 export type headApiStreamsUploadTusIdResponse403 = {
-  data: string
-  status: 403
-}
+  data: string;
+  status: 403;
+};
 
 export type headApiStreamsUploadTusIdResponse404 = {
-  data: void
-  status: 404
-}
+  data: void;
+  status: 404;
+};
 
 export type headApiStreamsUploadTusIdResponse410 = {
-  data: void
-  status: 410
-}
+  data: void;
+  status: 410;
+};
 
 export type headApiStreamsUploadTusIdResponse412 = {
-  data: void
-  status: 412
-}
-    
-export type headApiStreamsUploadTusIdResponseSuccess = (headApiStreamsUploadTusIdResponse200) & {
-  headers: Headers;
-};
-export type headApiStreamsUploadTusIdResponseError = (headApiStreamsUploadTusIdResponse401 | headApiStreamsUploadTusIdResponse403 | headApiStreamsUploadTusIdResponse404 | headApiStreamsUploadTusIdResponse410 | headApiStreamsUploadTusIdResponse412) & {
-  headers: Headers;
+  data: void;
+  status: 412;
 };
 
-export type headApiStreamsUploadTusIdResponse = (headApiStreamsUploadTusIdResponseSuccess | headApiStreamsUploadTusIdResponseError)
+export type headApiStreamsUploadTusIdResponseSuccess =
+  headApiStreamsUploadTusIdResponse200 & {
+    headers: Headers;
+  };
+export type headApiStreamsUploadTusIdResponseError = (
+  | headApiStreamsUploadTusIdResponse401
+  | headApiStreamsUploadTusIdResponse403
+  | headApiStreamsUploadTusIdResponse404
+  | headApiStreamsUploadTusIdResponse410
+  | headApiStreamsUploadTusIdResponse412
+) & {
+  headers: Headers;
+};
 
-export const getHeadApiStreamsUploadTusIdUrl = (id: string,) => {
+export type headApiStreamsUploadTusIdResponse =
+  | headApiStreamsUploadTusIdResponseSuccess
+  | headApiStreamsUploadTusIdResponseError;
 
+export const getHeadApiStreamsUploadTusIdUrl = (id: string) => {
+  return `/api/api/streams/upload/tus/${id}`;
+};
 
-  
-
-  return `/api/api/streams/upload/tus/${id}`
-}
-
-export const headApiStreamsUploadTusId = async (id: string, options?: RequestInit): Promise<headApiStreamsUploadTusIdResponse> => {
-  
-  const res = await fetch(getHeadApiStreamsUploadTusIdUrl(id),
-  {      
+export const headApiStreamsUploadTusId = async (
+  id: string,
+  options?: RequestInit,
+): Promise<headApiStreamsUploadTusIdResponse> => {
+  const res = await fetch(getHeadApiStreamsUploadTusIdUrl(id), {
     ...options,
-    method: 'HEAD'
-    
-    
-  }
-)
+    method: "HEAD",
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: headApiStreamsUploadTusIdResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as headApiStreamsUploadTusIdResponse
-}
 
+  const data: headApiStreamsUploadTusIdResponse["data"] = body
+    ? JSON.parse(body)
+    : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as headApiStreamsUploadTusIdResponse;
+};
 
 /**
  * TUS protocol PATCH handler for /api/streams/upload/tus/:id
  * @summary TUS PATCH /api/streams/upload/tus/:id
  */
 export type patchApiStreamsUploadTusIdResponse200 = {
-  data: ErrorResponse
-  status: 200
-}
+  data: ErrorResponse;
+  status: 200;
+};
 
 export type patchApiStreamsUploadTusIdResponse204 = {
-  data: void
-  status: 204
-}
+  data: void;
+  status: 204;
+};
 
 export type patchApiStreamsUploadTusIdResponse400 = {
-  data: void
-  status: 400
-}
+  data: void;
+  status: 400;
+};
 
 export type patchApiStreamsUploadTusIdResponse401 = {
-  data: string
-  status: 401
-}
+  data: string;
+  status: 401;
+};
 
 export type patchApiStreamsUploadTusIdResponse403 = {
-  data: string
-  status: 403
-}
+  data: string;
+  status: 403;
+};
 
 export type patchApiStreamsUploadTusIdResponse404 = {
-  data: void
-  status: 404
-}
+  data: void;
+  status: 404;
+};
 
 export type patchApiStreamsUploadTusIdResponse409 = {
-  data: void
-  status: 409
-}
+  data: void;
+  status: 409;
+};
 
 export type patchApiStreamsUploadTusIdResponse410 = {
-  data: void
-  status: 410
-}
+  data: void;
+  status: 410;
+};
 
 export type patchApiStreamsUploadTusIdResponse412 = {
-  data: void
-  status: 412
-}
+  data: void;
+  status: 412;
+};
 
 export type patchApiStreamsUploadTusIdResponse415 = {
-  data: void
-  status: 415
-}
+  data: void;
+  status: 415;
+};
 
 export type patchApiStreamsUploadTusIdResponse460 = {
-  data: void
-  status: 460
-}
-    
-export type patchApiStreamsUploadTusIdResponseSuccess = (patchApiStreamsUploadTusIdResponse200 | patchApiStreamsUploadTusIdResponse204) & {
-  headers: Headers;
-};
-export type patchApiStreamsUploadTusIdResponseError = (patchApiStreamsUploadTusIdResponse400 | patchApiStreamsUploadTusIdResponse401 | patchApiStreamsUploadTusIdResponse403 | patchApiStreamsUploadTusIdResponse404 | patchApiStreamsUploadTusIdResponse409 | patchApiStreamsUploadTusIdResponse410 | patchApiStreamsUploadTusIdResponse412 | patchApiStreamsUploadTusIdResponse415 | patchApiStreamsUploadTusIdResponse460) & {
-  headers: Headers;
+  data: void;
+  status: 460;
 };
 
-export type patchApiStreamsUploadTusIdResponse = (patchApiStreamsUploadTusIdResponseSuccess | patchApiStreamsUploadTusIdResponseError)
+export type patchApiStreamsUploadTusIdResponseSuccess = (
+  | patchApiStreamsUploadTusIdResponse200
+  | patchApiStreamsUploadTusIdResponse204
+) & {
+  headers: Headers;
+};
+export type patchApiStreamsUploadTusIdResponseError = (
+  | patchApiStreamsUploadTusIdResponse400
+  | patchApiStreamsUploadTusIdResponse401
+  | patchApiStreamsUploadTusIdResponse403
+  | patchApiStreamsUploadTusIdResponse404
+  | patchApiStreamsUploadTusIdResponse409
+  | patchApiStreamsUploadTusIdResponse410
+  | patchApiStreamsUploadTusIdResponse412
+  | patchApiStreamsUploadTusIdResponse415
+  | patchApiStreamsUploadTusIdResponse460
+) & {
+  headers: Headers;
+};
 
-export const getPatchApiStreamsUploadTusIdUrl = (id: string,) => {
+export type patchApiStreamsUploadTusIdResponse =
+  | patchApiStreamsUploadTusIdResponseSuccess
+  | patchApiStreamsUploadTusIdResponseError;
 
+export const getPatchApiStreamsUploadTusIdUrl = (id: string) => {
+  return `/api/api/streams/upload/tus/${id}`;
+};
 
-  
-
-  return `/api/api/streams/upload/tus/${id}`
-}
-
-export const patchApiStreamsUploadTusId = async (id: string,
-    patchApiStreamsUploadTusIdBody: PatchApiStreamsUploadTusIdBody, options?: RequestInit): Promise<patchApiStreamsUploadTusIdResponse> => {
-  
-  const res = await fetch(getPatchApiStreamsUploadTusIdUrl(id),
-  {      
+export const patchApiStreamsUploadTusId = async (
+  id: string,
+  patchApiStreamsUploadTusIdBody: PatchApiStreamsUploadTusIdBody,
+  options?: RequestInit,
+): Promise<patchApiStreamsUploadTusIdResponse> => {
+  const res = await fetch(getPatchApiStreamsUploadTusIdUrl(id), {
     ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/offset+octet-stream', ...options?.headers },
-    body: JSON.stringify(
-      patchApiStreamsUploadTusIdBody,)
-  }
-)
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/offset+octet-stream",
+      ...options?.headers,
+    },
+    body: JSON.stringify(patchApiStreamsUploadTusIdBody),
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: patchApiStreamsUploadTusIdResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as patchApiStreamsUploadTusIdResponse
-}
 
-
+  const data: patchApiStreamsUploadTusIdResponse["data"] = body
+    ? JSON.parse(body)
+    : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as patchApiStreamsUploadTusIdResponse;
+};

@@ -11,7 +11,11 @@ import routes from "./routes";
 
 export default function (): Plugin {
   return {
-    capabilities: [new LbryProtocol(), new LbryUpload(), new LbryRefineConfig()],
+    capabilities: [
+      new LbryProtocol(),
+      new LbryUpload(),
+      new LbryRefineConfig(),
+    ],
     capabilityAssociations: [
       {
         associated: ["lbry:upload"],
@@ -30,6 +34,6 @@ export default function (): Plugin {
 }
 
 export * from "./types";
-export * from './client/default';
-export * from './client/lBRYStreamAPI.schemas';
-export * from './client/tus';
+export * from "./client/default";
+export * from "./client/lBRYStreamAPI.schemas";
+export * from "./client/tus";

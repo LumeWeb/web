@@ -9,6 +9,8 @@ export default {
   dir: __dirname,
   exposes: {
     ".": "./src/index",
+    "./devices": "./src/ui/routes/devices",
+    "./streams": "./src/ui/routes/streams",
   },
   name: "core:lbry",
 } satisfies PluginConfig;

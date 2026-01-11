@@ -14,661 +14,728 @@ import type {
   PostStreamUploadResponse,
   StreamPinRequest,
   StreamResponseResponse,
-  UpdateDeviceRequest
-} from './lBRYStreamAPI.schemas';
-
-
+  UpdateDeviceRequest,
+} from "./lBRYStreamAPI.schemas";
 
 /**
  * List all devices in the whitelist with pagination, filtering, and sorting support.
  * @summary List devices
  */
 export type getApiDevicesResponse200 = {
-  data: DeviceResponseResponse
-  status: 200
-}
+  data: DeviceResponseResponse;
+  status: 200;
+};
 
 export type getApiDevicesResponse400 = {
-  data: ErrorResponse
-  status: 400
-}
+  data: ErrorResponse;
+  status: 400;
+};
 
 export type getApiDevicesResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
+  data: ErrorResponse;
+  status: 401;
+};
 
 export type getApiDevicesResponse403 = {
-  data: ErrorResponse
-  status: 403
-}
+  data: ErrorResponse;
+  status: 403;
+};
 
 export type getApiDevicesResponse404 = {
-  data: ErrorResponse
-  status: 404
-}
+  data: ErrorResponse;
+  status: 404;
+};
 
 export type getApiDevicesResponse500 = {
-  data: ErrorResponse
-  status: 500
-}
-    
-export type getApiDevicesResponseSuccess = (getApiDevicesResponse200) & {
+  data: ErrorResponse;
+  status: 500;
+};
+
+export type getApiDevicesResponseSuccess = getApiDevicesResponse200 & {
   headers: Headers;
 };
-export type getApiDevicesResponseError = (getApiDevicesResponse400 | getApiDevicesResponse401 | getApiDevicesResponse403 | getApiDevicesResponse404 | getApiDevicesResponse500) & {
+export type getApiDevicesResponseError = (
+  | getApiDevicesResponse400
+  | getApiDevicesResponse401
+  | getApiDevicesResponse403
+  | getApiDevicesResponse404
+  | getApiDevicesResponse500
+) & {
   headers: Headers;
 };
 
-export type getApiDevicesResponse = (getApiDevicesResponseSuccess | getApiDevicesResponseError)
+export type getApiDevicesResponse =
+  | getApiDevicesResponseSuccess
+  | getApiDevicesResponseError;
 
 export const getGetApiDevicesUrl = () => {
+  return `/api/api/devices`;
+};
 
 
-  
-
-  return `/api/api/devices`
-}
-
-export const getApiDevices = async ( options?: RequestInit): Promise<getApiDevicesResponse> => {
-  
-  const res = await fetch(getGetApiDevicesUrl(),
-  {      
+export const getApiDevices = async (
+  options?: RequestInit,
+): Promise<getApiDevicesResponse> => {
+  const res = await fetch(getGetApiDevicesUrl(), {
     ...options,
-    method: 'GET'
-    
-    
-  }
-)
+    method: "GET",
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getApiDevicesResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getApiDevicesResponse
-}
 
+  const data: getApiDevicesResponse["data"] = body ? JSON.parse(body) : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as getApiDevicesResponse;
+};
 
 /**
  * Create a new device in the whitelist. This endpoint requires authentication.
  * @summary Create a device
  */
 export type postApiDevicesResponse200 = {
-  data: ErrorResponse
-  status: 200
-}
+  data: ErrorResponse;
+  status: 200;
+};
 
 export type postApiDevicesResponse201 = {
-  data: DeviceResponse
-  status: 201
-}
+  data: DeviceResponse;
+  status: 201;
+};
 
 export type postApiDevicesResponse400 = {
-  data: ErrorResponse
-  status: 400
-}
+  data: ErrorResponse;
+  status: 400;
+};
 
 export type postApiDevicesResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
+  data: ErrorResponse;
+  status: 401;
+};
 
 export type postApiDevicesResponse403 = {
-  data: ErrorResponse
-  status: 403
-}
+  data: ErrorResponse;
+  status: 403;
+};
 
 export type postApiDevicesResponse404 = {
-  data: ErrorResponse
-  status: 404
-}
+  data: ErrorResponse;
+  status: 404;
+};
 
 export type postApiDevicesResponse500 = {
-  data: ErrorResponse
-  status: 500
-}
-    
-export type postApiDevicesResponseSuccess = (postApiDevicesResponse200 | postApiDevicesResponse201) & {
+  data: ErrorResponse;
+  status: 500;
+};
+
+export type postApiDevicesResponseSuccess = (
+  | postApiDevicesResponse200
+  | postApiDevicesResponse201
+) & {
   headers: Headers;
 };
-export type postApiDevicesResponseError = (postApiDevicesResponse400 | postApiDevicesResponse401 | postApiDevicesResponse403 | postApiDevicesResponse404 | postApiDevicesResponse500) & {
+export type postApiDevicesResponseError = (
+  | postApiDevicesResponse400
+  | postApiDevicesResponse401
+  | postApiDevicesResponse403
+  | postApiDevicesResponse404
+  | postApiDevicesResponse500
+) & {
   headers: Headers;
 };
 
-export type postApiDevicesResponse = (postApiDevicesResponseSuccess | postApiDevicesResponseError)
+export type postApiDevicesResponse =
+  | postApiDevicesResponseSuccess
+  | postApiDevicesResponseError;
 
 export const getPostApiDevicesUrl = () => {
+  return `/api/api/devices`;
+};
 
 
-  
-
-  return `/api/api/devices`
-}
-
-export const postApiDevices = async (createDeviceRequest: CreateDeviceRequest, options?: RequestInit): Promise<postApiDevicesResponse> => {
-  
-  const res = await fetch(getPostApiDevicesUrl(),
-  {      
+export const postApiDevices = async (
+  createDeviceRequest: CreateDeviceRequest,
+  options?: RequestInit,
+): Promise<postApiDevicesResponse> => {
+  const res = await fetch(getPostApiDevicesUrl(), {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      createDeviceRequest,)
-  }
-)
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createDeviceRequest),
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: postApiDevicesResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as postApiDevicesResponse
-}
 
+  const data: postApiDevicesResponse["data"] = body ? JSON.parse(body) : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as postApiDevicesResponse;
+};
 
 /**
  * Delete a device from the whitelist. This endpoint requires authentication and is idempotent.
  * @summary Delete a device
  */
 export type deleteApiDevicesIdResponse200 = {
-  data: ErrorResponse
-  status: 200
-}
+  data: ErrorResponse;
+  status: 200;
+};
 
 export type deleteApiDevicesIdResponse204 = {
-  data: void
-  status: 204
-}
+  data: void;
+  status: 204;
+};
 
 export type deleteApiDevicesIdResponse400 = {
-  data: ErrorResponse
-  status: 400
-}
+  data: ErrorResponse;
+  status: 400;
+};
 
 export type deleteApiDevicesIdResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
+  data: ErrorResponse;
+  status: 401;
+};
 
 export type deleteApiDevicesIdResponse403 = {
-  data: ErrorResponse
-  status: 403
-}
+  data: ErrorResponse;
+  status: 403;
+};
 
 export type deleteApiDevicesIdResponse404 = {
-  data: ErrorResponse
-  status: 404
-}
+  data: ErrorResponse;
+  status: 404;
+};
 
 export type deleteApiDevicesIdResponse500 = {
-  data: ErrorResponse
-  status: 500
-}
-    
-export type deleteApiDevicesIdResponseSuccess = (deleteApiDevicesIdResponse200 | deleteApiDevicesIdResponse204) & {
-  headers: Headers;
-};
-export type deleteApiDevicesIdResponseError = (deleteApiDevicesIdResponse400 | deleteApiDevicesIdResponse401 | deleteApiDevicesIdResponse403 | deleteApiDevicesIdResponse404 | deleteApiDevicesIdResponse500) & {
-  headers: Headers;
+  data: ErrorResponse;
+  status: 500;
 };
 
-export type deleteApiDevicesIdResponse = (deleteApiDevicesIdResponseSuccess | deleteApiDevicesIdResponseError)
+export type deleteApiDevicesIdResponseSuccess = (
+  | deleteApiDevicesIdResponse200
+  | deleteApiDevicesIdResponse204
+) & {
+  headers: Headers;
+};
+export type deleteApiDevicesIdResponseError = (
+  | deleteApiDevicesIdResponse400
+  | deleteApiDevicesIdResponse401
+  | deleteApiDevicesIdResponse403
+  | deleteApiDevicesIdResponse404
+  | deleteApiDevicesIdResponse500
+) & {
+  headers: Headers;
+};
 
-export const getDeleteApiDevicesIdUrl = (id: string,) => {
+export type deleteApiDevicesIdResponse =
+  | deleteApiDevicesIdResponseSuccess
+  | deleteApiDevicesIdResponseError;
 
+export const getDeleteApiDevicesIdUrl = (id: string) => {
+  return `/api/api/devices/${id}`;
+};
 
-  
-
-  return `/api/api/devices/${id}`
-}
-
-export const deleteApiDevicesId = async (id: string, options?: RequestInit): Promise<deleteApiDevicesIdResponse> => {
-  
-  const res = await fetch(getDeleteApiDevicesIdUrl(id),
-  {      
+export const deleteApiDevicesId = async (
+  id: string,
+  options?: RequestInit,
+): Promise<deleteApiDevicesIdResponse> => {
+  const res = await fetch(getDeleteApiDevicesIdUrl(id), {
     ...options,
-    method: 'DELETE'
-    
-    
-  }
-)
+    method: "DELETE",
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: deleteApiDevicesIdResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as deleteApiDevicesIdResponse
-}
 
+  const data: deleteApiDevicesIdResponse["data"] = body ? JSON.parse(body) : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as deleteApiDevicesIdResponse;
+};
 
 /**
  * Get a specific device from the whitelist by ID.
  * @summary Get a device
  */
 export type getApiDevicesIdResponse200 = {
-  data: DeviceResponse
-  status: 200
-}
+  data: DeviceResponse;
+  status: 200;
+};
 
 export type getApiDevicesIdResponse400 = {
-  data: ErrorResponse
-  status: 400
-}
+  data: ErrorResponse;
+  status: 400;
+};
 
 export type getApiDevicesIdResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
+  data: ErrorResponse;
+  status: 401;
+};
 
 export type getApiDevicesIdResponse403 = {
-  data: ErrorResponse
-  status: 403
-}
+  data: ErrorResponse;
+  status: 403;
+};
 
 export type getApiDevicesIdResponse404 = {
-  data: ErrorResponse
-  status: 404
-}
+  data: ErrorResponse;
+  status: 404;
+};
 
 export type getApiDevicesIdResponse500 = {
-  data: ErrorResponse
-  status: 500
-}
-    
-export type getApiDevicesIdResponseSuccess = (getApiDevicesIdResponse200) & {
-  headers: Headers;
-};
-export type getApiDevicesIdResponseError = (getApiDevicesIdResponse400 | getApiDevicesIdResponse401 | getApiDevicesIdResponse403 | getApiDevicesIdResponse404 | getApiDevicesIdResponse500) & {
-  headers: Headers;
+  data: ErrorResponse;
+  status: 500;
 };
 
-export type getApiDevicesIdResponse = (getApiDevicesIdResponseSuccess | getApiDevicesIdResponseError)
+export type getApiDevicesIdResponseSuccess = getApiDevicesIdResponse200 & {
+  headers: Headers;
+};
+export type getApiDevicesIdResponseError = (
+  | getApiDevicesIdResponse400
+  | getApiDevicesIdResponse401
+  | getApiDevicesIdResponse403
+  | getApiDevicesIdResponse404
+  | getApiDevicesIdResponse500
+) & {
+  headers: Headers;
+};
 
-export const getGetApiDevicesIdUrl = (id: string,) => {
+export type getApiDevicesIdResponse =
+  | getApiDevicesIdResponseSuccess
+  | getApiDevicesIdResponseError;
 
+export const getGetApiDevicesIdUrl = (id: string) => {
+  return `/api/api/devices/${id}`;
+};
 
-  
-
-  return `/api/api/devices/${id}`
-}
-
-export const getApiDevicesId = async (id: string, options?: RequestInit): Promise<getApiDevicesIdResponse> => {
-  
-  const res = await fetch(getGetApiDevicesIdUrl(id),
-  {      
+export const getApiDevicesId = async (
+  id: string,
+  options?: RequestInit,
+): Promise<getApiDevicesIdResponse> => {
+  const res = await fetch(getGetApiDevicesIdUrl(id), {
     ...options,
-    method: 'GET'
-    
-    
-  }
-)
+    method: "GET",
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getApiDevicesIdResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getApiDevicesIdResponse
-}
 
+  const data: getApiDevicesIdResponse["data"] = body ? JSON.parse(body) : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as getApiDevicesIdResponse;
+};
 
 /**
  * Update an existing device in the whitelist. This endpoint requires authentication and is idempotent.
  * @summary Update a device
  */
 export type putApiDevicesIdResponse200 = {
-  data: DeviceResponse
-  status: 200
-}
+  data: DeviceResponse;
+  status: 200;
+};
 
 export type putApiDevicesIdResponse400 = {
-  data: ErrorResponse
-  status: 400
-}
+  data: ErrorResponse;
+  status: 400;
+};
 
 export type putApiDevicesIdResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
+  data: ErrorResponse;
+  status: 401;
+};
 
 export type putApiDevicesIdResponse403 = {
-  data: ErrorResponse
-  status: 403
-}
+  data: ErrorResponse;
+  status: 403;
+};
 
 export type putApiDevicesIdResponse404 = {
-  data: ErrorResponse
-  status: 404
-}
+  data: ErrorResponse;
+  status: 404;
+};
 
 export type putApiDevicesIdResponse500 = {
-  data: ErrorResponse
-  status: 500
-}
-    
-export type putApiDevicesIdResponseSuccess = (putApiDevicesIdResponse200) & {
-  headers: Headers;
-};
-export type putApiDevicesIdResponseError = (putApiDevicesIdResponse400 | putApiDevicesIdResponse401 | putApiDevicesIdResponse403 | putApiDevicesIdResponse404 | putApiDevicesIdResponse500) & {
-  headers: Headers;
+  data: ErrorResponse;
+  status: 500;
 };
 
-export type putApiDevicesIdResponse = (putApiDevicesIdResponseSuccess | putApiDevicesIdResponseError)
+export type putApiDevicesIdResponseSuccess = putApiDevicesIdResponse200 & {
+  headers: Headers;
+};
+export type putApiDevicesIdResponseError = (
+  | putApiDevicesIdResponse400
+  | putApiDevicesIdResponse401
+  | putApiDevicesIdResponse403
+  | putApiDevicesIdResponse404
+  | putApiDevicesIdResponse500
+) & {
+  headers: Headers;
+};
 
-export const getPutApiDevicesIdUrl = (id: string,) => {
+export type putApiDevicesIdResponse =
+  | putApiDevicesIdResponseSuccess
+  | putApiDevicesIdResponseError;
 
+export const getPutApiDevicesIdUrl = (id: string) => {
+  return `/api/api/devices/${id}`;
+};
 
-  
-
-  return `/api/api/devices/${id}`
-}
-
-export const putApiDevicesId = async (id: string,
-    updateDeviceRequest: UpdateDeviceRequest, options?: RequestInit): Promise<putApiDevicesIdResponse> => {
-  
-  const res = await fetch(getPutApiDevicesIdUrl(id),
-  {      
+export const putApiDevicesId = async (
+  id: string,
+  updateDeviceRequest: UpdateDeviceRequest,
+  options?: RequestInit,
+): Promise<putApiDevicesIdResponse> => {
+  const res = await fetch(getPutApiDevicesIdUrl(id), {
     ...options,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      updateDeviceRequest,)
-  }
-)
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateDeviceRequest),
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: putApiDevicesIdResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as putApiDevicesIdResponse
-}
 
+  const data: putApiDevicesIdResponse["data"] = body ? JSON.parse(body) : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as putApiDevicesIdResponse;
+};
 
 /**
  * List all streams for the authenticated user with pagination, filtering, and sorting support.
  * @summary List streams
  */
 export type getApiStreamsResponse200 = {
-  data: StreamResponseResponse
-  status: 200
-}
+  data: StreamResponseResponse;
+  status: 200;
+};
 
 export type getApiStreamsResponse400 = {
-  data: ErrorResponse
-  status: 400
-}
+  data: ErrorResponse;
+  status: 400;
+};
 
 export type getApiStreamsResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
+  data: ErrorResponse;
+  status: 401;
+};
 
 export type getApiStreamsResponse403 = {
-  data: ErrorResponse
-  status: 403
-}
+  data: ErrorResponse;
+  status: 403;
+};
 
 export type getApiStreamsResponse404 = {
-  data: ErrorResponse
-  status: 404
-}
+  data: ErrorResponse;
+  status: 404;
+};
 
 export type getApiStreamsResponse500 = {
-  data: ErrorResponse
-  status: 500
-}
-    
-export type getApiStreamsResponseSuccess = (getApiStreamsResponse200) & {
+  data: ErrorResponse;
+  status: 500;
+};
+
+export type getApiStreamsResponseSuccess = getApiStreamsResponse200 & {
   headers: Headers;
 };
-export type getApiStreamsResponseError = (getApiStreamsResponse400 | getApiStreamsResponse401 | getApiStreamsResponse403 | getApiStreamsResponse404 | getApiStreamsResponse500) & {
+export type getApiStreamsResponseError = (
+  | getApiStreamsResponse400
+  | getApiStreamsResponse401
+  | getApiStreamsResponse403
+  | getApiStreamsResponse404
+  | getApiStreamsResponse500
+) & {
   headers: Headers;
 };
 
-export type getApiStreamsResponse = (getApiStreamsResponseSuccess | getApiStreamsResponseError)
+export type getApiStreamsResponse =
+  | getApiStreamsResponseSuccess
+  | getApiStreamsResponseError;
 
 export const getGetApiStreamsUrl = () => {
+  return `/api/api/streams`;
+};
 
 
-  
-
-  return `/api/api/streams`
-}
-
-export const getApiStreams = async ( options?: RequestInit): Promise<getApiStreamsResponse> => {
-  
-  const res = await fetch(getGetApiStreamsUrl(),
-  {      
+export const getApiStreams = async (
+  options?: RequestInit,
+): Promise<getApiStreamsResponse> => {
+  const res = await fetch(getGetApiStreamsUrl(), {
     ...options,
-    method: 'GET'
-    
-    
-  }
-)
+    method: "GET",
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getApiStreamsResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getApiStreamsResponse
-}
 
+  const data: getApiStreamsResponse["data"] = body ? JSON.parse(body) : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as getApiStreamsResponse;
+};
 
 /**
  * Delete a stream and all associated data. Only streams owned by the authenticated user can be deleted.
  * @summary Delete a stream
  */
 export type deleteApiStreamsSdHashResponse200 = {
-  data: ErrorResponse
-  status: 200
-}
+  data: ErrorResponse;
+  status: 200;
+};
 
 export type deleteApiStreamsSdHashResponse204 = {
-  data: void
-  status: 204
-}
+  data: void;
+  status: 204;
+};
 
 export type deleteApiStreamsSdHashResponse400 = {
-  data: ErrorResponse
-  status: 400
-}
+  data: ErrorResponse;
+  status: 400;
+};
 
 export type deleteApiStreamsSdHashResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
+  data: ErrorResponse;
+  status: 401;
+};
 
 export type deleteApiStreamsSdHashResponse403 = {
-  data: ErrorResponse
-  status: 403
-}
+  data: ErrorResponse;
+  status: 403;
+};
 
 export type deleteApiStreamsSdHashResponse404 = {
-  data: ErrorResponse
-  status: 404
-}
+  data: ErrorResponse;
+  status: 404;
+};
 
 export type deleteApiStreamsSdHashResponse500 = {
-  data: ErrorResponse
-  status: 500
-}
-    
-export type deleteApiStreamsSdHashResponseSuccess = (deleteApiStreamsSdHashResponse200 | deleteApiStreamsSdHashResponse204) & {
-  headers: Headers;
-};
-export type deleteApiStreamsSdHashResponseError = (deleteApiStreamsSdHashResponse400 | deleteApiStreamsSdHashResponse401 | deleteApiStreamsSdHashResponse403 | deleteApiStreamsSdHashResponse404 | deleteApiStreamsSdHashResponse500) & {
-  headers: Headers;
+  data: ErrorResponse;
+  status: 500;
 };
 
-export type deleteApiStreamsSdHashResponse = (deleteApiStreamsSdHashResponseSuccess | deleteApiStreamsSdHashResponseError)
+export type deleteApiStreamsSdHashResponseSuccess = (
+  | deleteApiStreamsSdHashResponse200
+  | deleteApiStreamsSdHashResponse204
+) & {
+  headers: Headers;
+};
+export type deleteApiStreamsSdHashResponseError = (
+  | deleteApiStreamsSdHashResponse400
+  | deleteApiStreamsSdHashResponse401
+  | deleteApiStreamsSdHashResponse403
+  | deleteApiStreamsSdHashResponse404
+  | deleteApiStreamsSdHashResponse500
+) & {
+  headers: Headers;
+};
 
-export const getDeleteApiStreamsSdHashUrl = (sdHash: string,) => {
+export type deleteApiStreamsSdHashResponse =
+  | deleteApiStreamsSdHashResponseSuccess
+  | deleteApiStreamsSdHashResponseError;
 
+export const getDeleteApiStreamsSdHashUrl = (sdHash: string) => {
+  return `/api/api/streams/${sdHash}`;
+};
 
-  
-
-  return `/api/api/streams/${sdHash}`
-}
-
-export const deleteApiStreamsSdHash = async (sdHash: string, options?: RequestInit): Promise<deleteApiStreamsSdHashResponse> => {
-  
-  const res = await fetch(getDeleteApiStreamsSdHashUrl(sdHash),
-  {      
+export const deleteApiStreamsSdHash = async (
+  sdHash: string,
+  options?: RequestInit,
+): Promise<deleteApiStreamsSdHashResponse> => {
+  const res = await fetch(getDeleteApiStreamsSdHashUrl(sdHash), {
     ...options,
-    method: 'DELETE'
-    
-    
-  }
-)
+    method: "DELETE",
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: deleteApiStreamsSdHashResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as deleteApiStreamsSdHashResponse
-}
 
+  const data: deleteApiStreamsSdHashResponse["data"] = body
+    ? JSON.parse(body)
+    : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as deleteApiStreamsSdHashResponse;
+};
 
 /**
  * Pin a stream to keep it available on the LBRY network. This endpoint requires authentication.
  * @summary Pin a stream
  */
 export type postApiStreamsPinResponse200 = {
-  data: ErrorResponse
-  status: 200
-}
+  data: ErrorResponse;
+  status: 200;
+};
 
 export type postApiStreamsPinResponse201 = {
-  data: void
-  status: 201
-}
+  data: void;
+  status: 201;
+};
 
 export type postApiStreamsPinResponse400 = {
-  data: ErrorResponse
-  status: 400
-}
+  data: ErrorResponse;
+  status: 400;
+};
 
 export type postApiStreamsPinResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
+  data: ErrorResponse;
+  status: 401;
+};
 
 export type postApiStreamsPinResponse403 = {
-  data: ErrorResponse
-  status: 403
-}
+  data: ErrorResponse;
+  status: 403;
+};
 
 export type postApiStreamsPinResponse404 = {
-  data: ErrorResponse
-  status: 404
-}
+  data: ErrorResponse;
+  status: 404;
+};
 
 export type postApiStreamsPinResponse500 = {
-  data: ErrorResponse
-  status: 500
-}
-    
-export type postApiStreamsPinResponseSuccess = (postApiStreamsPinResponse200 | postApiStreamsPinResponse201) & {
+  data: ErrorResponse;
+  status: 500;
+};
+
+export type postApiStreamsPinResponseSuccess = (
+  | postApiStreamsPinResponse200
+  | postApiStreamsPinResponse201
+) & {
   headers: Headers;
 };
-export type postApiStreamsPinResponseError = (postApiStreamsPinResponse400 | postApiStreamsPinResponse401 | postApiStreamsPinResponse403 | postApiStreamsPinResponse404 | postApiStreamsPinResponse500) & {
+export type postApiStreamsPinResponseError = (
+  | postApiStreamsPinResponse400
+  | postApiStreamsPinResponse401
+  | postApiStreamsPinResponse403
+  | postApiStreamsPinResponse404
+  | postApiStreamsPinResponse500
+) & {
   headers: Headers;
 };
 
-export type postApiStreamsPinResponse = (postApiStreamsPinResponseSuccess | postApiStreamsPinResponseError)
+export type postApiStreamsPinResponse =
+  | postApiStreamsPinResponseSuccess
+  | postApiStreamsPinResponseError;
 
 export const getPostApiStreamsPinUrl = () => {
+  return `/api/api/streams/pin`;
+};
 
 
-  
-
-  return `/api/api/streams/pin`
-}
-
-export const postApiStreamsPin = async (streamPinRequest: StreamPinRequest, options?: RequestInit): Promise<postApiStreamsPinResponse> => {
-  
-  const res = await fetch(getPostApiStreamsPinUrl(),
-  {      
+export const postApiStreamsPin = async (
+  streamPinRequest: StreamPinRequest,
+  options?: RequestInit,
+): Promise<postApiStreamsPinResponse> => {
+  const res = await fetch(getPostApiStreamsPinUrl(), {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      streamPinRequest,)
-  }
-)
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(streamPinRequest),
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: postApiStreamsPinResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as postApiStreamsPinResponse
-}
 
+  const data: postApiStreamsPinResponse["data"] = body ? JSON.parse(body) : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as postApiStreamsPinResponse;
+};
 
 /**
  * Upload a stream to the LBRY network. This endpoint requires authentication and supports file uploads up to the configured limit.
  * @summary Upload a stream
  */
 export type postApiStreamsUploadResponse200 = {
-  data: ErrorResponse
-  status: 200
-}
+  data: ErrorResponse;
+  status: 200;
+};
 
 export type postApiStreamsUploadResponse201 = {
-  data: PostStreamUploadResponse
-  status: 201
-}
+  data: PostStreamUploadResponse;
+  status: 201;
+};
 
 export type postApiStreamsUploadResponse400 = {
-  data: ErrorResponse
-  status: 400
-}
+  data: ErrorResponse;
+  status: 400;
+};
 
 export type postApiStreamsUploadResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
+  data: ErrorResponse;
+  status: 401;
+};
 
 export type postApiStreamsUploadResponse403 = {
-  data: ErrorResponse
-  status: 403
-}
+  data: ErrorResponse;
+  status: 403;
+};
 
 export type postApiStreamsUploadResponse404 = {
-  data: ErrorResponse
-  status: 404
-}
+  data: ErrorResponse;
+  status: 404;
+};
 
 export type postApiStreamsUploadResponse500 = {
-  data: ErrorResponse
-  status: 500
-}
-    
-export type postApiStreamsUploadResponseSuccess = (postApiStreamsUploadResponse200 | postApiStreamsUploadResponse201) & {
+  data: ErrorResponse;
+  status: 500;
+};
+
+export type postApiStreamsUploadResponseSuccess = (
+  | postApiStreamsUploadResponse200
+  | postApiStreamsUploadResponse201
+) & {
   headers: Headers;
 };
-export type postApiStreamsUploadResponseError = (postApiStreamsUploadResponse400 | postApiStreamsUploadResponse401 | postApiStreamsUploadResponse403 | postApiStreamsUploadResponse404 | postApiStreamsUploadResponse500) & {
+export type postApiStreamsUploadResponseError = (
+  | postApiStreamsUploadResponse400
+  | postApiStreamsUploadResponse401
+  | postApiStreamsUploadResponse403
+  | postApiStreamsUploadResponse404
+  | postApiStreamsUploadResponse500
+) & {
   headers: Headers;
 };
 
-export type postApiStreamsUploadResponse = (postApiStreamsUploadResponseSuccess | postApiStreamsUploadResponseError)
+export type postApiStreamsUploadResponse =
+  | postApiStreamsUploadResponseSuccess
+  | postApiStreamsUploadResponseError;
 
 export const getPostApiStreamsUploadUrl = () => {
+  return `/api/api/streams/upload`;
+};
 
+export const postApiStreamsUpload = async (
+  postApiStreamsUploadBody: PostApiStreamsUploadBody,
+  options?: RequestInit,
+): Promise<postApiStreamsUploadResponse> => {
+  const formData = new FormData();
+  formData.append(`file`, postApiStreamsUploadBody.file);
 
-  
-
-  return `/api/api/streams/upload`
-}
-
-export const postApiStreamsUpload = async (postApiStreamsUploadBody: PostApiStreamsUploadBody, options?: RequestInit): Promise<postApiStreamsUploadResponse> => {
-    const formData = new FormData();
-formData.append(`file`, postApiStreamsUploadBody.file)
-
-  const res = await fetch(getPostApiStreamsUploadUrl(),
-  {      
+  const res = await fetch(getPostApiStreamsUploadUrl(), {
     ...options,
-    method: 'POST'
-    ,
-    body: 
-      formData,
-  }
-)
+    method: "POST",
+    body: formData,
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: postApiStreamsUploadResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as postApiStreamsUploadResponse
-}
 
-
+  const data: postApiStreamsUploadResponse["data"] = body
+    ? JSON.parse(body)
+    : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as postApiStreamsUploadResponse;
+};
