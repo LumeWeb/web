@@ -3,6 +3,16 @@ import { Monitor, Anchor } from "lucide-react";
 
 const routes = [
   {
+    path: "/lbry/devices",
+    component: "devices",
+    id: "lbry_devices",
+    navigation: {
+      label: "Devices",
+      icon: Monitor,
+      order: 3,
+    },
+  },
+  {
     path: "/lbry/streams",
     component: "streams",
     id: "lbry_streams",
