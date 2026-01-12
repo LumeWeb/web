@@ -10,7 +10,7 @@ services:
         volumes:
             - ./data/app.db:/app/prisma/dev.db
     melli:
-        image: getmeili/meilisearch:v1.5
+        image: getmeili/meilisearch:v1.32
         volumes:
             - ./melli_data:/meili_data
     caddy:
