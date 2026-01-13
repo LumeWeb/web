@@ -1,0 +1,39 @@
+{
+  "name": "@lumeweb/rego",
+  "version": "0.0.0",
+  "description": "React components that compile to Go templates for email generation - combining React/Tailwind DX with Go native templating",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "lint": "tsc --noEmit",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@lumeweb/tsdown-config": "workspace:*",
+    "@react-email/preview-server": "5.2.2",
+    "react-email": "5.2.2",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@react-email/components": "1.0.4",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  }
+}
