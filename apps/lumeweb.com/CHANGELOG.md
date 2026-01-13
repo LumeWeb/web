@@ -256,6 +256,17 @@
 * rework several sections on home page, some refactoring ([4935177](https://git.lumeweb.com/LumeWeb/lumeweb.com/commit/4935177908f9411de0999048367cc384592f198a))
 * sass support, mixins for fluid design, refactoring, work on components ([9701291](https://git.lumeweb.com/LumeWeb/lumeweb.com/commit/97012911aab8659d0ddb268a9bc54d72e1c37b6f))
 * svg icons, donation methods ([63e0c57](https://git.lumeweb.com/LumeWeb/lumeweb.com/commit/63e0c57b0329f76609f6d9a55a37585dfce7f45d))
+## 0.3.3 (2026-01-13)
+
+### Features
+
+- add core LBRY plugin structure with protocol, upload, and data provider capabilities
+- add streams page and route
+- add devices management page
+- add stream pinning/unpinning functionality
+- add portal-generators package with scaffolding templates
+- add React-to-Go Template DSL for email generation
+
 ## 0.3.2 (2026-01-11)
 
 ### Features

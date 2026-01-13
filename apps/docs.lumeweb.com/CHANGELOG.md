@@ -1,5 +1,16 @@
 # @lumeweb/docs.lumeweb.com
 
+## 0.5.2 (2026-01-13)
+
+### Features
+
+- add core LBRY plugin structure with protocol, upload, and data provider capabilities
+- add streams page and route
+- add devices management page
+- add stream pinning/unpinning functionality
+- add portal-generators package with scaffolding templates
+- add React-to-Go Template DSL for email generation
+
 ## 0.5.1 (2026-01-11)
 
 ### Features

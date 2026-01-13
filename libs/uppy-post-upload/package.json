@@ -1,6 +1,6 @@
 {
   "name": "@lumeweb/uppy-post-upload",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Plain and simple classic HTML multipart form uploads with Uppy, as well as uploads using the HTTP PUT method.",
   "author": "Derrick Hammer",
