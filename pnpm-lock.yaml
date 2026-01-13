@@ -1530,6 +1530,66 @@ importers:
         specifier: catalog:framework
         version: 6.4.1(@types/node@25.0.6)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.44.1)(yaml@2.8.2)
 
+  libs/portal-plugin-lbry:
+    dependencies:
+      '@lumeweb/advanced-rest-provider':
+        specifier: workspace:*
+        version: link:../advanced-rest
+      '@lumeweb/portal-framework-auth':
+        specifier: workspace:*
+        version: link:../portal-framework-auth
+      '@lumeweb/portal-framework-core':
+        specifier: workspace:*
+        version: link:../portal-framework-core
+      '@lumeweb/portal-framework-ui':
+        specifier: workspace:*
+        version: link:../portal-framework-ui
+      '@lumeweb/portal-framework-ui-core':
+        specifier: workspace:*
+        version: link:../portal-framework-ui-core
+      '@lumeweb/portal-plugin-dashboard':
+        specifier: workspace:*
+        version: link:../portal-plugin-dashboard
+      '@lumeweb/portal-sdk':
+        specifier: workspace:*
+        version: link:../portal-sdk
+      '@refinedev/core':
+        specifier: 'catalog:'
+        version: 5.0.8(@tanstack/react-query@5.90.16(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@refinedev/react-router':
+        specifier: 'catalog:'
+        version: 2.0.3(@refinedev/core@5.0.8(@tanstack/react-query@5.90.16(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
+      '@tanstack/react-query':
+        specifier: 'catalog:'
+        version: 5.90.16(react@19.2.3)
+      '@tanstack/react-table':
+        specifier: 'catalog:'
+        version: 8.21.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@uppy/core':
+        specifier: 'catalog:'
+        version: 5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)
+      date-fns:
+        specifier: 'catalog:'
+        version: 4.1.0
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.562.0(react@19.2.3)
+      react:
+        specifier: 'catalog:'
+        version: 19.2.3
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.3(react@19.2.3)
+      react-hook-form:
+        specifier: 'catalog:'
+        version: 7.71.0(react@19.2.3)
+      react-router:
+        specifier: 'catalog:'
+        version: 7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.5
+
   libs/portal-plugin-template:
     dependencies:
       '@lumeweb/portal-framework-core':
