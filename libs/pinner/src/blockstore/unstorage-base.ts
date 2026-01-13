@@ -13,26 +13,7 @@ import type { Batch, Datastore, KeyQuery, Query } from "interface-datastore";
 import { Key, Pair } from "interface-datastore";
 import { collectAsyncIterable } from "@/utils/stream";
 
-/**
- * Helper to safely yield a Promise or value from a sync generator.
- * Converts Promise rejection to a thrown error to maintain Await<T> contract.
- *
- * WHY: We use sync generators (* get) instead of async generators (async * get) here.
- * This is because blockstore-core@6.1.1's IdentityBlockstore uses sync generators
- * with yield*, which cannot properly delegate to async generators. This causes:
- * TypeError: yield* (intermediate value) is not iterable
- *
- * TODO: Remove yieldSafe and convert to async generators after
- * https://github.com/ipfs/js-stores/pull/364 is merged and released.
- */
-function yieldSafe<T>(value: Await<T>, errorMessage: string): Await<T> {
-  if (value instanceof Promise) {
-    return value.catch(() => {
-      throw new Error(errorMessage);
-    }) as Await<T>;
-  }
-  return value;
-}
+
 
 export interface UnstorageBlockstoreOptions {
   storage?: Storage;
@@ -175,18 +156,11 @@ export function createUnstorageBlockstore(
       }
     }
 
-    *get(key: CID, _?: AbortOptions): AwaitGenerator<Uint8Array> {
+    async *get(key: CID, _?: AbortOptions): AsyncGenerator<Uint8Array> {
       const storageKey = this.keyToStorageKey(key);
-      const value = this.base.getItem(storageKey);
-
-      if (value === null || value === undefined) {
-        throw new Error(`Block not found: ${key.toString()}`);
-      }
-
-      // @ts-ignore
-      yield yieldSafe(value, `Block not found: ${key.toString()}`);
+      const value = await this.base.getItem(storageKey);
+      yield value;
     }
-    // TODO: Change to async *get after https://github.com/ipfs/js-stores/pull/364 is merged
 
     async *getMany(
       source: AwaitIterable<CID>,
@@ -195,9 +169,9 @@ export function createUnstorageBlockstore(
       for await (const cid of source) {
         yield {
           cid,
-          bytes: async function* () {
+          bytes: (async function* () {
             yield* await this.get(cid, options);
-          }.call(this),
+          }.call(this)),
         };
       }
     }
