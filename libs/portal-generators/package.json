@@ -13,10 +13,12 @@
   },
   "scripts": {
     "build": "tsdown",
-    "prepare": "pnpm run build"
+    "prepare": "turbo build --filter=@lumeweb/portal-generators"
+  },
+  "dependencies": {
+    "@lumeweb/tsdown-config": "workspace:*"
   },
   "devDependencies": {
-    "@lumeweb/tsdown-config": "workspace:*",
     "@turbo/gen": "catalog:",
     "@types/node": "catalog:",
     "tsdown": "catalog:",
