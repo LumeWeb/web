@@ -1,8 +1,11 @@
 {
   "name": "@lumeweb/portal-plugin-dashboard",
   "version": "0.1.2",
-  "private": true,
   "type": "module",
+  "files": [
+    "lib-dist",
+    "package.json"
+  ],
   "main": "lib-dist/index.js",
   "types": "lib-dist/index.d.ts",
   "exports": {

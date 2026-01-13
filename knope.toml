@@ -1,70 +1,97 @@
-[packages."@lumeweb/lumeweb.com"]
-versioned_files = ["apps/lumeweb.com/package.json"]
-changelog = "apps/lumeweb.com/CHANGELOG.md"
-
-[packages."@lumeweb/portal-frontend"]
-versioned_files = ["apps/portal-frontend/package.json"]
-changelog = "apps/portal-frontend/CHANGELOG.md"
+[packages."@lumeweb/advanced-rest"]
+versioned_files = ["libs/advanced-rest/package.json"]
+changelog = "libs/advanced-rest/CHANGELOG.md"
+ignore_conventional_commits = true
 
 [packages."@lumeweb/docs.lumeweb.com"]
 versioned_files = ["apps/docs.lumeweb.com/package.json"]
 changelog = "apps/docs.lumeweb.com/CHANGELOG.md"
+ignore_conventional_commits = true
 
-[packages."@lumeweb/portal-app-shell"]
-versioned_files = ["apps/portal-app-shell/package.json"]
-changelog = "apps/portal-app-shell/CHANGELOG.md"
-
-[packages."@lumeweb/portal-sdk"]
-versioned_files = ["libs/portal-sdk/package.json"]
-changelog = "libs/portal-sdk/CHANGELOG.md"
-
-[packages."@lumeweb/portal-framework-core"]
-versioned_files = ["libs/portal-framework-core/package.json"]
-changelog = "libs/portal-framework-core/CHANGELOG.md"
-
-[packages."@lumeweb/portal-framework-ui-core"]
-versioned_files = ["libs/portal-framework-ui-core/package.json"]
-changelog = "libs/portal-framework-ui-core/CHANGELOG.md"
-
-[packages."@lumeweb/portal-framework-ui"]
-versioned_files = ["libs/portal-framework-ui/package.json"]
-changelog = "libs/portal-framework-ui/CHANGELOG.md"
-
-[packages."@lumeweb/portal-framework-auth"]
-versioned_files = ["libs/portal-framework-auth/package.json"]
-changelog = "libs/portal-framework-auth/CHANGELOG.md"
-
-[packages."@lumeweb/portal-plugin-dashboard"]
-versioned_files = ["libs/portal-plugin-dashboard/package.json"]
-changelog = "libs/portal-plugin-dashboard/CHANGELOG.md"
-
-[packages."@lumeweb/portal-plugin-admin"]
-versioned_files = ["libs/portal-plugin-admin/package.json"]
-changelog = "libs/portal-plugin-admin/CHANGELOG.md"
-
-[packages."@lumeweb/portal-plugin-core"]
-versioned_files = ["libs/portal-plugin-core/package.json"]
-changelog = "libs/portal-plugin-core/CHANGELOG.md"
-
-[packages."@lumeweb/portal-plugin-ipfs"]
-versioned_files = ["libs/portal-plugin-ipfs/package.json"]
-changelog = "libs/portal-plugin-ipfs/CHANGELOG.md"
+[packages."@lumeweb/lumeweb.com"]
+versioned_files = ["apps/lumeweb.com/package.json"]
+changelog = "apps/lumeweb.com/CHANGELOG.md"
+ignore_conventional_commits = true
 
 [packages."@lumeweb/pinner"]
 versioned_files = ["libs/pinner/package.json"]
 changelog = "libs/pinner/CHANGELOG.md"
+ignore_conventional_commits = true
 
-[packages."@lumeweb/uppy-post-upload"]
-versioned_files = ["libs/uppy-post-upload/package.json"]
-changelog = "libs/uppy-post-upload/CHANGELOG.md"
+[packages."@lumeweb/portal-app-shell"]
+versioned_files = ["apps/portal-app-shell/package.json"]
+changelog = "apps/portal-app-shell/CHANGELOG.md"
+ignore_conventional_commits = true
+
+[packages."@lumeweb/portal-framework-auth"]
+versioned_files = ["libs/portal-framework-auth/package.json"]
+changelog = "libs/portal-framework-auth/CHANGELOG.md"
+ignore_conventional_commits = true
+
+[packages."@lumeweb/portal-framework-core"]
+versioned_files = ["libs/portal-framework-core/package.json"]
+changelog = "libs/portal-framework-core/CHANGELOG.md"
+ignore_conventional_commits = true
+
+[packages."@lumeweb/portal-framework-ui"]
+versioned_files = ["libs/portal-framework-ui/package.json"]
+changelog = "libs/portal-framework-ui/CHANGELOG.md"
+ignore_conventional_commits = true
+
+[packages."@lumeweb/portal-framework-ui-core"]
+versioned_files = ["libs/portal-framework-ui-core/package.json"]
+changelog = "libs/portal-framework-ui-core/CHANGELOG.md"
+ignore_conventional_commits = true
+
+[packages."@lumeweb/portal-frontend"]
+versioned_files = ["apps/portal-frontend/package.json"]
+changelog = "apps/portal-frontend/CHANGELOG.md"
+ignore_conventional_commits = true
+
+[packages."@lumeweb/portal-generators"]
+versioned_files = ["libs/portal-generators/package.json"]
+changelog = "libs/portal-generators/CHANGELOG.md"
+ignore_conventional_commits = true
+
+[packages."@lumeweb/portal-plugin-admin"]
+versioned_files = ["libs/portal-plugin-admin/package.json"]
+changelog = "libs/portal-plugin-admin/CHANGELOG.md"
+ignore_conventional_commits = true
+
+[packages."@lumeweb/portal-plugin-core"]
+versioned_files = ["libs/portal-plugin-core/package.json"]
+changelog = "libs/portal-plugin-core/CHANGELOG.md"
+ignore_conventional_commits = true
+
+[packages."@lumeweb/portal-plugin-dashboard"]
+versioned_files = ["libs/portal-plugin-dashboard/package.json"]
+changelog = "libs/portal-plugin-dashboard/CHANGELOG.md"
+ignore_conventional_commits = true
+
+[packages."@lumeweb/portal-plugin-ipfs"]
+versioned_files = ["libs/portal-plugin-ipfs/package.json"]
+changelog = "libs/portal-plugin-ipfs/CHANGELOG.md"
+ignore_conventional_commits = true
+
+[packages."@lumeweb/portal-sdk"]
+versioned_files = ["libs/portal-sdk/package.json"]
+changelog = "libs/portal-sdk/CHANGELOG.md"
+ignore_conventional_commits = true
 
 [packages."@lumeweb/query-builder"]
 versioned_files = ["libs/query-builder/package.json"]
 changelog = "libs/query-builder/CHANGELOG.md"
+ignore_conventional_commits = true
 
-[packages."@lumeweb/advanced-rest"]
-versioned_files = ["libs/advanced-rest/package.json"]
-changelog = "libs/advanced-rest/CHANGELOG.md"
+[packages."@lumeweb/rego"]
+versioned_files = ["libs/rego/package.json"]
+changelog = "libs/rego/CHANGELOG.md"
+ignore_conventional_commits = true
+
+[packages."@lumeweb/uppy-post-upload"]
+versioned_files = ["libs/uppy-post-upload/package.json"]
+changelog = "libs/uppy-post-upload/CHANGELOG.md"
+ignore_conventional_commits = true
 
 [github]
 owner = "LumeWeb"

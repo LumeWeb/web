@@ -1,53 +1,21 @@
-import type { UserConfig } from "tsdown";
 import { defineConfig } from "tsdown";
-import { createLibraryConfigWithPlugins } from "@lumeweb/tsdown-config";
+import { createLibraryConfigWithPlugins, entryPatterns } from "@lumeweb/tsdown-config";
 
 import image from "@rollup/plugin-image";
 
-const baseOptions: Partial<UserConfig> = {
-  external: [/node_modules/, /@refinedev\/.*/],
-  minify: false,
-  platform: "neutral",
-  plugins: [image() as any],
-  sourcemap: true,
-  target: "esnext",
-  tsconfig: "./tsconfig.json",
-  unbundle: true,
-};
-
 export default defineConfig([
   {
-    ...baseOptions,
-    clean: true,
-    entry: [
-      "src/**/*",
-      "!**/image*/**",
-      "!**/*image*/**",
-      "!**/*.{stories,spec}.{ts,tsx}",
-      "!**/*.{stories,spec}.disabled.{ts,tsx}",
-      "!**/*.md",
-      "!__mocks__/**",
-      "!tests/**",
-    ],
-    format: {
-      esm: {
-        outputOptions: {
-          dir: "dist/esm",
-        },
-      },
-      cjs: {
-        outputOptions: {
-          dir: "dist/cjs",
-        },
-      },
-    },
+    ...createLibraryConfigWithPlugins(entryPatterns.withoutTests, [image() as any], {
+      external: [/node_modules/, /@refinedev\/.*/],
+      unbundle: true,
+    }),
   },
   {
-    ...baseOptions,
-    clean: false,
-    dts: true,
-    entry: ["src/images.ts"],
-    format: "esm",
+    ...createLibraryConfigWithPlugins(["src/images.ts"], [image()], {
+      clean: false,
+      dts: true,
+      format: "esm",
+    }),
     outDir: "dist/esm",
   },
 ]);

@@ -6,6 +6,7 @@
   "scripts": {
     "build": "turbo build",
     "release": "knope release",
+    "release:changesets": "node scripts/generate-changesets-from-release.js",
     "publish:npm": "pnpm -r publish --publish-branch develop",
     "dev": "turbo dev",
     "lint": "turbo lint",
@@ -29,6 +30,7 @@
     "tailwindcss": "catalog:"
   },
   "devDependencies": {
+    "@changesets/write": "^0.4.0",
     "@eslint/compat": "^2.0.1",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
@@ -57,12 +59,16 @@
     "eslint-plugin-react-hooks": "~7.0.1",
     "globals": "^17.0.0",
     "happy-dom": "catalog:",
+    "meow": "^13.2.0",
     "nock": "catalog:",
     "npm-run-all": "catalog:",
     "orval": "catalog:",
+    "p-queue": "^9.1.0",
     "playwright": "catalog:",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "simple-git": "^3.30.0",
+    "smol-toml": "^1.6.0",
     "storybook": "10.1.10",
     "taze": "^19.9.2",
     "tsdown": "catalog:",
