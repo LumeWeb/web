@@ -1,0 +1,29 @@
+import type { RouteConfig } from "@lumeweb/portal-framework-core";
+
+const routes: RouteConfig[] = [
+  // Add your routes here
+  // {
+  //   path: "/your-route",
+  //   component: "yourComponent",
+  //   id: "{{ pluginNamespace }}:{{ name }}-your-route",
+  //   navigation: {
+  //     label: "Your Route",
+  //     icon: null,
+  //     order: 1,
+  //   },
+  // },
+{{#each routes}}
+  {
+    path: "/{{ this }}",
+    component: "{{ this }}",
+    id: "{{ ../pluginNamespace }}:{{ ../name }}-{{ this }}",
+    navigation: {
+      label: "{{ titleCase this }}",
+      icon: null,
+      order: {{ @index }},
+    },
+  },
+{{/each}}
+];
+
+export default routes;

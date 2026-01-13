@@ -1,0 +1,24 @@
+import {
+  createNamespacedId,
+  Framework,
+  type Plugin,
+} from "@lumeweb/portal-framework-core";
+
+import { Capability as RefineConfigCapability } from "./capabilities/refineConfig";
+import routes from "./routes";
+import widgets from "./widgetRegistrations";
+
+export default function (): Plugin {
+  return {
+    capabilities: [new RefineConfigCapability()],
+    async destroy(_framework: Framework) {
+      console.log("{{ pascalCase name }} Plugin destroyed");
+    },
+    id: createNamespacedId("{{ pluginNamespace }}", "{{ name }}"),
+    async initialize(_framework: Framework) {
+      console.log("{{ pascalCase name }} Plugin initialized");
+    },
+    routes{{#if hasWidgets}},
+    widgets{{/if}},
+  } satisfies Plugin;
+}

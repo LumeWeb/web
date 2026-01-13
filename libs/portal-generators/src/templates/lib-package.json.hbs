@@ -1,0 +1,36 @@
+{
+  "name": "@lumeweb/{{ name }}",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "lint": "tsc --noEmit",
+    "test": "vitest"{{#if hasCoverage}},
+    "test:coverage": "vitest run --coverage"{{/if}}
+  },
+  "dependencies": {
+    {{#each dependencies}}
+    "{{this}}": "catalog:"{{#unless @last}},{{/unless}}
+    {{/each}}
+  },
+  "devDependencies": {
+    "@lumeweb/tsdown-config": "workspace:*",
+    "tsdown": "catalog:",
+    "typescript": "catalog:"{{#if hasTests}},
+    "vitest": "catalog:"{{/if}}
+  }
+}

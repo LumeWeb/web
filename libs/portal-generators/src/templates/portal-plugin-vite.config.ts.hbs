@@ -1,0 +1,8 @@
+import Config from "@lumeweb/portal-framework-core/vite/config";
+
+export default Config({
+  devPort: {{ devPort }},
+  {{#if hasOrval}}
+  orvalConfig: "./orval.config.ts",
+  {{/if}}
+});

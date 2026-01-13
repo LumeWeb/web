@@ -16,8 +16,10 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
+    "allowImportingTsExtensions": true,
     "paths": {
-      "@shared-assets/*": ["shared/assets/*"]
+      "@shared-assets/*": ["shared/assets/*"],
+      "@lumeweb/portal-generators": ["libs/portal-generators/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
