@@ -1,0 +1,7 @@
+{{#if hasExports}}
+{{#each exports}}
+export * from "./{{ this }}";
+{{/each}}
+{{else}}
+// Add your exports here
+{{/if}}

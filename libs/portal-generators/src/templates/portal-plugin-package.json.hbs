@@ -1,0 +1,40 @@
+{
+  "name": "@lumeweb/portal-plugin-{{ name }}",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "lib-dist/index.js",
+  "types": "lib-dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib-dist/esm/index.d.ts",
+      "import": "./lib-dist/esm/index.js",
+      "require": "./lib-dist/cjs/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:lib": "tsdown",
+    "serve": "vite preview",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@lumeweb/portal-framework-core": "workspace:*",
+    "@lumeweb/portal-framework-ui": "workspace:*",
+    "@lumeweb/portal-framework-ui-core": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-router": "catalog:"{{#if hasOrval}},
+    "openapi-types": "catalog:",
+    "orval": "catalog:"{{/if}}
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:framework"{{#if hasOrval}},
+    "orval": "catalog:"{{/if}}
+  }
+}

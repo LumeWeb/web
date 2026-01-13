@@ -1,0 +1,13 @@
+import type { Capability } from "@lumeweb/portal-framework-core";
+import type { RefineConfig } from "@refinedev/core";
+
+export class Capability implements Capability {
+  readonly id = "{{ pluginNamespace }}:{{ name }}:refine-config";
+  readonly type = "refine-config";
+
+  async refineConfig(): Promise<Partial<RefineConfig>> {
+    return {
+      // Add your refine configuration here
+    };
+  }
+}

@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - libs/*
+
 catalog:
   '@astrojs/react': ^4.4.2
   '@conform-to/react': ^1.15.1
@@ -25,6 +26,8 @@ catalog:
   '@tailwindcss/vite': ^4.1.18
   '@tanstack/react-query': ^5.90.16
   '@tanstack/react-table': ^8.21.3
+  '@turbo/gen': ^2.7.4
+  '@types/node': ^25.0.6
   '@types/react': ^19.2.8
   '@types/react-dom': ^19.2.3
   '@uppy/core': ^5.2.0
@@ -69,8 +72,9 @@ catalog:
   vite-tsconfig-paths: ^6.0.4
   vitest: ^4.0.16
   zod: 4.3.5
+
 catalogs:
-  websites:
-    tailwindcss: ^4.1.18
   framework:
     vite: ^6.4.1
+  websites:
+    tailwindcss: ^4.1.18

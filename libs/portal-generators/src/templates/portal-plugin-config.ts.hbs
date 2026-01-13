@@ -1,0 +1,16 @@
+import type { PluginConfig } from "@lumeweb/portal-framework-core/vite";
+
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+export default {
+  name: "{{ pluginNamespace }}:{{ name }}",
+  dir: __dirname,
+  exposes: {
+    ".": "./src/index"{{#if hasRoutes}}{{#each routes}},
+    "./{{this}}": "./src/ui/routes/{{this}}"{{/each}}{{/if}}{{#if hasSrcLib}},
+    "./types": "./src-lib/types/index"{{/if}}
+  },
+} satisfies PluginConfig;
