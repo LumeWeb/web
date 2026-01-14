@@ -55,7 +55,7 @@ jobs:
               repo="portal-plugin-$base_name"
             fi
             jq -n --arg app "$app" --arg repo "$repo" '{app: $app, repo: $repo}'
-          done < /tmp/modified_apps.txt | jq -s '{include: .}' | tr -d '\n' > /tmp/matrix.json
+          done < /tmp/modified_apps.txt | jq -s 'unique_by(.repo) | {include: .}' | tr -d '\n' > /tmp/matrix.json
 
           echo "matrix=$(cat /tmp/matrix.json)" >> "$GITHUB_OUTPUT"
           echo "has_changes=true" >> "$GITHUB_OUTPUT"
