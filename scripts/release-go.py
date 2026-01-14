@@ -310,7 +310,7 @@ def build_packages(
             print(f"Will build plugin: {package_name}")
 
     # Build all packages in a single turbo command with all tasks
-    cmd = ["turbo", "run"] + tasks + filters
+    cmd = ["pnpm", "turbo", "run"] + tasks + filters
 
     if verbose:
         print(f"Running: {' '.join(cmd)}")
