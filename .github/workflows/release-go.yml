@@ -47,8 +47,13 @@ jobs:
             # Map app names to repository names
             # portal-frontend -> portal-plugin-frontend
             # portal-app-shell -> portal-plugin-app-shell
-            base_name=${app#portal-}
-            repo="portal-plugin-$base_name"
+            # portal-plugin-dashboard -> portal-plugin-dashboard (already correct)
+            if [[ "$app" == portal-plugin-* ]]; then
+              repo="$app"
+            else
+              base_name=${app#portal-}
+              repo="portal-plugin-$base_name"
+            fi
             jq -n --arg app "$app" --arg repo "$repo" '{app: $app, repo: $repo}'
           done < /tmp/modified_apps.txt | jq -s '{include: .}' | tr -d '\n' > /tmp/matrix.json
 
