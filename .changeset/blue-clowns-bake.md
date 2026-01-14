@@ -1,5 +1,5 @@
 ---
-"@lumeweb/portal-app-shell": minor
+"@lumeweb/portal-app-shell": major
 ---
 
 ## Features

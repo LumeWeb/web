@@ -1,5 +1,5 @@
 ---
-"@lumeweb/query-builder": minor
+"@lumeweb/query-builder": major
 ---
 
 ## Features

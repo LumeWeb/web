@@ -1,5 +1,5 @@
 ---
-"web3.news": minor
+"web3.news": major
 ---
 
 ## Features

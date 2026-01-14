@@ -1,5 +1,5 @@
 ---
-"@lumeweb/portal-plugin-abuse": minor
+"@lumeweb/portal-plugin-abuse": major
 ---
 
 ## Features

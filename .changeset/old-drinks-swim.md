@@ -1,5 +1,5 @@
 ---
-"@lumeweb/portal-plugin-admin": minor
+"@lumeweb/portal-plugin-admin": major
 ---
 
 ## Features

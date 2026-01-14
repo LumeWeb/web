@@ -1,5 +1,5 @@
 ---
-"@lumeweb/portal-sdk": minor
+"@lumeweb/portal-sdk": major
 ---
 
 ## Features

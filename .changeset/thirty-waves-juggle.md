@@ -1,5 +1,5 @@
 ---
-"@lumeweb/lumeweb.com": minor
+"@lumeweb/lumeweb.com": major
 ---
 
 ## Features

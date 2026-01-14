@@ -1,5 +1,5 @@
 ---
-"@lumeweb/portal-framework-ui": minor
+"@lumeweb/portal-framework-ui": major
 ---
 
 ## Features

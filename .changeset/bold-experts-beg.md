@@ -1,10 +1,9 @@
 ---
-"@lumeweb/portal-plugin-lbry": minor
+"@lumeweb/portal-plugin-lbry": major
 ---
 
 ## Features
-
 - add core LBRY plugin structure with protocol, upload, and data provider capabilities
-- add streams page and route
 - add devices management page
 - add stream pinning/unpinning functionality
+- add streams page and route
