@@ -1,5 +1,5 @@
 ---
-"@lumeweb/uppy-post-upload": minor
+"@lumeweb/uppy-post-upload": major
 ---
 
 ## Features

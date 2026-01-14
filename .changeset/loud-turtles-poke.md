@@ -1,5 +1,5 @@
 ---
-"@lumeweb/pinner": minor
+"@lumeweb/pinner": major
 ---
 
 ## Features

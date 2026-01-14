@@ -1,5 +1,5 @@
 ---
-"@lumeweb/advanced-rest-provider": minor
+"@lumeweb/advanced-rest-provider": major
 ---
 
 ## Features

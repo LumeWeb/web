@@ -1,5 +1,5 @@
 ---
-"@lumeweb/portal-framework-auth": minor
+"@lumeweb/portal-framework-auth": major
 ---
 
 ## Features

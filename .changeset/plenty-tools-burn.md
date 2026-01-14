@@ -1,5 +1,5 @@
 ---
-"@lumeweb/portal-plugin-ipfs": minor
+"@lumeweb/portal-plugin-ipfs": major
 ---
 
 ## Features
