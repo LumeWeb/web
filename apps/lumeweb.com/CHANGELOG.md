@@ -256,6 +256,677 @@
 * rework several sections on home page, some refactoring ([4935177](https://git.lumeweb.com/LumeWeb/lumeweb.com/commit/4935177908f9411de0999048367cc384592f198a))
 * sass support, mixins for fluid design, refactoring, work on components ([9701291](https://git.lumeweb.com/LumeWeb/lumeweb.com/commit/97012911aab8659d0ddb268a9bc54d72e1c37b6f))
 * svg icons, donation methods ([63e0c57](https://git.lumeweb.com/LumeWeb/lumeweb.com/commit/63e0c57b0329f76609f6d9a55a37585dfce7f45d))
+## 0.4.0 (2026-01-14)
+
+### Breaking Changes
+
+- Relocated shared code from portal-dashboard to new portal-shared library
+
+- Moved components, hooks, utilities, and types to libs/portal-shared/src
+- Updated import paths across portal-dashboard to use new shared library
+- Refactored app store into baseStore and dashboardStore
+- Removed duplicate files and consolidated shared logic
+- Updated tsconfig paths to include new shared library
+- remove patch dependencies and update lockfile
+
+### Features
+
+- sass support, mixins for fluid design, refactoring, work on components
+- rework several sections on home page, some refactoring
+- pure css tilted background
+- mobile menu, css cleanup, component details
+- svg icons, donation methods
+- copy to clipboard, qr code generation, further donation methods
+- create two remaining components, optimize layout and existing components (wip)
+- local fonts
+- meme grid is now responsive
+- finish all new design implementations
+- refactor message component and footer
+- add analytics
+- add grid feature for NFT's
+- add sitemap
+- initial version
+- port listen method
+- add BOOTSTRAP_NODES constant
+- add eventemitter support on p2p service and have the handshakedone message emit peerConnected
+- add const groups of the different set of types
+- initial version
+- add welcome
+- initial extension docs
+- add CID class
+- add CID.fromHash
+- add more s5 constants
+- add fromRegistry to CID
+- add valid to CID
+- add fromRegistryPublicKey helper
+- add matomo
+- add page for webapp
+- add AI generated summary to the homepage
+- initial components
+- add results page
+- site is pretty much done now, all functionality is cover just losing some details
+- all features are covered
+- add roadmap
+- add getCachedStorageLocations method
+- add StorageLocationProvider
+- add encrypted_cid.ts
+- add metadata structures and ser/der functions
+- add getMetadataByCID and downloadBytesByHash
+- add hashQuery protocol method
+- fix feeds and add dynamic fetching
+- some interactivity to the searchbar
+- initial database implementation with api route
+- add script to create dummy seed data
+- added graphics
+- static pages are up
+- select and combobox components
+- connect the combobox to the api (sortof)
+- initial version
+- add subscribeToEntry
+- add downloadData method
+- initial s5 network bridge
+- initial site update webhook
+- add uploadWebapp
+- add publishEntry
+- add createEntry
+- add fromSignedRegistryEntry
+- add getEntry and update createEntry to use it
+- initial search
+- implement real search
+- implement site filter
+- implement time filter
+- implement filtering in search page
+- implement article page
+- initial docker support
+- add melli support in docker
+- add melli db init to docker services
+- add db init
+- initial about page content
+- initial donate page content
+- add caddy to docker compose
+- initial seo efforts
+- add sitemap
+- add twitter:card
+- add analytics
+- add first site
+- add simple helper script to create a seed and pubkey for adding a site
+- add downloadProof method
+- add downloadBlob method
+- sign-up route
+- initial version
+- wiring of the authentication pages
+- add dashboard layout
+- (wip) added support for TUS file uploaded. Still missing support for resetting the uppy state plus handling uppy errors
+- completed Dashboard View
+- add ping account api
+- add logout
+- setup auth provider and refine with login, check and logout methods
+- add first and last name to register form
+- add setAuthToken
+- implement register
+- add cookie support for auth
+- Added user dropdown and active navbar item state
+- Allow usageCard button to be replaced for another one
+- Added My Account route
+- add account info endpoint
+- implement identity api
+- Integrated Refine into Data Table
+- Integrated Refine to Account modals and User DropDownMenu
+- add account pins api
+- implement logout method
+- add uploadLimit endpoint
+- add onUploadProgress to CustomUploadOptions
+- add clientOptions setter
+- implement protocol support, starting with s5
+- add sdk context and useSdk
+- add initial plugin for a post file upload via s5 sdk
+- add onHashProgress
+- add callback and emit to track hashing progress
+- Added Notification provided and toast to verify email and recovery password
+- Added Dialog to Edit Avatar Card on Account View
+- add updateEmail
+- initial update email support
+- add updatePassword api
+- implement updatePassword
+- Mocked PinningProvider
+- Created PinningContext and PinningProvider to abstract logic from frontend components
+- Created Pinning banner to show inprogress and completed PinningProcess
+- add DIRECTORY to CID_TYPES
+- initial very basic file listing
+- add httpConfig to CustomClientOptions and allow it to override anything via optionsToConfig
+- add pinning modal
+- connecting the pinning thingy
+- add pin and unpin api
+- add pinStatus api
+- initial wiring of the pinning system
+- access api endpoint relatively to get the portal domain if VITE_PORTAL_URL is not set
+- closes #7. Adds a verify screen
+- if dev mode is enabled store jwt to local storage and fetch it as needed
+- add requestEmailVerification
+- closes #21
+- implement download file
+- add verification bannner
+- add build script for mono repo and use it in ci
+- implement t3-env
+- add MVP community notice and link to the forums
+- add forum link to menu
+- new library libs5-encoding
+- add byte types
+- add multibase
+- add multihash
+- add ed25519
+- add endian encoding utils
+- add types starting with SignedRegistryEntry
+- add cid
+- add EncryptedCID
+- registry encoding
+- nodeId
+- export modules
+- add bones of libs5-metadata library
+- add msgpack encode/decode libraries
+- add metadata utility class and interfaces
+- add web_app metadata
+- add maybeConvertObjectToIntMap
+- add to/fromJSON to extra
+- add to/fromJSON to WebApp
+- add fromJSON to WebAppFile
+- add media metadata support
+- add libs5-crypto package
+- add skeleton for shared library between portal admin and dashboard
+- add skeleton for portal admin app
+- add theming support
+- adds NavigationMenu components to create 2-layer-deep nested navigation components
+- initial iteration of subscriptions
+- initial file manager support
+- implement social login functionality
+- implement 2FA flows and login
+- implement API keys support
+- implement account deletion functionality
+- implement usage tracking and display
+- add settings and cron pages, refactor shared components
+- UI improvements and replace GSAP animation
+- convert SVG to HTML5
+- implement portal framework with module federation, Refine integration, and abuse management
+- refactor portal app shell and core libraries for improved module federation and configuration
+- Implement widget area layout using bin packing
+- add form grouping functionality
+- implement remember me functionality and various UI enhancements
+- add autocomplete support to forms and fields
+- add auto-login option after email verification
+- implement bootup and page loading screens with animations
+- add visibility hook and simplify widget definition
+- replace file with stream to enable large file uploads
+- add a portal plugin template as an example and scaffolding reference
+- add new isomorphic Uppy upload plugin
+- implement core pinning and upload library
+- add operations API, polling utilities, and comprehensive test suite
+- add new query builder library for Refine integration
+- add query builder integration and update tests
+- add folder upload detection and conditional UI based on service support
+- add core LBRY plugin structure with protocol, upload, and data provider capabilities
+- add streams page and route
+- add devices management page
+- add stream pinning/unpinning functionality
+- add portal-generators package with scaffolding templates
+- add React-to-Go Template DSL for email generation
+
+### Fixes
+
+- responsive is now all over the page :)
+- small improvement on 4k screens
+- switch to experimental image support and import missing images
+- bg image invalid, and update name
+- grammer error
+- typo
+- wording change
+- meme misalignment
+- update copy
+- set url for download extension button
+- mobile layout on footer and message component
+- contrast on 'ourvision' section
+- revert copy for meme section
+- remove scroll bars and add padding to contrast box
+- update socials
+- update download url
+- update learn more link
+- overall improvements of the responsive layout
+- bring back ibm font
+- revert global styles to unbreak site
+- gridcell style
+- grid cell style closer to design by centering the text
+- incorrect font choice on gridcell
+- add opengraph seo
+- wrong color on 'How.astro' Component
+- last minute details
+- layout shifting and showing overflow
+- improved hero image
+- update gitcoin url
+- spacing issues
+- add badges
+- add missing image
+- grammar
+- meme headline and donate button
+- spacing, button getting cutoff again :(
+- _newBuf needs to reset offset to 0
+- need a getter for id
+- import websocket
+- pass the event data, not the event itself
+- add registry to services object in interface
+- remove unneeded getPublicKey call
+- update import
+- update level imports
+- do a truthy check on networkId
+- unsupported url needs to be a real but dummy one
+- check protocol with colon
+- we dont need to strip out auth
+- fix retry logic
+- add some exports
+- add main to package.json
+- missing p2p object on S5Config
+- add getter for networkId and hashQueryRoutingTable
+- ed25519.sign arguments are wrong order
+- need to store peer, set the id the pass it to onNewPeer
+- fix object references
+- need to use unpacked data from signed message
+- update registered messages
+- add createKeyPair factory that defaults to a random key
+- use URL type from url package not global URL
+- fix imports
+- only set socket if passed
+- make uris optional
+- add support for browser WS by checking if we are in node
+- missing uri argument for node WS
+- browser returns a Blob, so convert to a buffer if we have a blob
+- export S5Node type
+- await not needed
+- fix import
+- set node registry service in service constructor
+- add try/catch on db.get
+- correct argument order on ed25519.verify
+- fix iteration of peers
+- need to use close not end on WS transport
+- add started state on node and check it on connectToNode
+- convert binary string to uint8array
+- set sublevel valueEncoding to buffer
+- set sublevel valueEncoding to buffer
+- utf8ToBytes no longer needed
+- if a peer completed the handshake, but our node is stopped, end the peer and abort
+- freeze REGISTRY_TYPES
+- fix outdated reads. port of s5 08c4bda5c1109673fba907ba119c9855fc3fcf68 0d2bf39845b37dd0b2ebe06be34c5d51e7060280
+- export util functions
+- update menus
+- add clarification
+- change index document id
+- rename title
+- export KeyPairEd25519 as a type
+- don't prefix base58 since encoder already does it
+- if the registry entry hash type is not ed25519, return a new cid with the type set to raw
+- signRegistryEntry accidentally recursive
+- bad base32 encoding, multiformats handles the prefix
+- add forward slash
+- typo
+- update footer menu
+- grammar
+- add missing link
+- broken link
+- bad redirect
+- ensure trailing slashes get a redirect
+- formatting and header size changes
+- need to store NodeId not the string form of it
+- export StorageLocationProvider
+- bad import
+- convert paths to an object
+- wrap db.get in a try/catch
+- hashQueryRoutingTable is on the p2p service
+- hashQueryRoutingTable is a map not object
+- storage locations are in cacheDb
+- update how maps are packed and add missing serialization for media, directory, and files
+- unpack int checks missing possible types
+- need to use Object.entries
+- value is a map
+- ensure axios returns binary data
+- don't strip u
+- use base64urlpad
+- base64urlpad requires a "U" prefix
+- more base64urlpad fixes
+- replace u with U in decodeString, and strip U in toBase64Url
+- improved searchbar
+- install proper fonts
+- db seeding
+- use the proper filters on all instances of search
+- import js files not ts
+- import js
+- import js
+- add module to package.json
+- add main to package.json
+- missing mime dep
+- add header menu
+- clickable logo
+- cid needs to be unique
+- generate a random dumber for cid in seed
+- use base64urlpad
+- Revert "fix: use base64urlpad"
+- need to strip off multiformats prefix
+- need to use toRegistryEntry
+- use get not post
+- need to pass as query, not data
+- ensure we prefix the CID ed22519 type to the registry pubkey
+- on existing entry, need to update the entry data
+- need to pass endpointPath
+- return GetMetadataResponse
+- ensure model table is lowercase, plural
+- add missing types
+- types and getAvailableSites return val
+- update start command
+- ensure we are using a ws protocol
+- add the siteUpdateReceived back in
+- only check fetcher if we are greater than page 0
+- set module config to ES2022
+- we need to read json, not form data
+- return http 200
+- use a initialLoad state and activeContent to better track when we should be fetching data
+- need to parse search query from request
+- get search results working
+- wrong tag name
+- selectedSite doesn't need to be in useCallback deps
+- update build and run scripts
+- use vite css side effects
+- remove use client
+- add missing pubkey to SiteList
+- bad import
+- missing cid field
+- bad import
+- need to set binaryTargets for docker
+- update scripts
+- need to patch remix serve due to sourcemap bug https://github.com/remix-run/remix/issues/8309#issuecomment-1868402299
+- update import path
+- need to copy scripts folder
+- need to copy prisma folder
+- need to add depends_on for melli_init to melli
+- ensure a static port
+- update port
+- wrong caddy command
+- add Caddyfile mapping back
+- need to pass config to caddy explicitly
+- add dot
+- need to add fonts back in
+- need to set title tag
+- ensure parent meta is merged properly
+- prevent duplicate tags
+- update SEO descriptions, need to be shorter
+- update homepage title
+- add image alt tag
+- add twitter:title
+- need to copy sites.json
+- wrong url to app
+- use on, once is not available in all environments
+- wrong rss path
+- don't force override cid type
+- use addEventListener, on is not available in all environments
+- set binaryType
+- append auth token to url
+- use DEFAULT_DOWNLOAD_OPTIONS
+- dont pass responseType, as we want a blob
+- add download methods to client
+- state and rendering
+- added cleanup when component unmount
+- prevent nav scrolling when main wiew height surpass viewport
+- update import
+- change package to a module
+- bad import
+- add patch for tsc-alias
+- if jwt is not set, don't send it
+- prefix api endpoint with account subdomain
+- normalize icons. fix some spacing and UI issues
+- update submit button name
+- return the full response
+- login needs to return bool
+- use URL.URL
+- use _jwtToken
+- Styled input and field components acording to design
+- formatting
+- icons and reove package.json
+- Applied Composition pattern to ManagementCard
+- Adapted File-provider to be default dataProvider
+- export CustomClientOptions
+- update imports
+- update imports
+- add patch for uppy tus to filter on files with a custom uploader property set to tus
+- update imports
+- dont use hash imports
+- dont use hash imports
+- remove the backup key card from my account
+- dont use hash imports
+- dont use hash imports
+- need to patch tsc-alias
+- uppy requires a type
+- put plugin logic inside setInputProps onChange
+- set auth token globally on sdk after login
+- bind handleUpload to current instance
+- only call registerDefaults when registry isn't init'ed
+- cid is lowercase
+- Added Row Skeletons with loading table data
+- disable refine telemetry
+- need to merge tus metadata to file meta
+- strip out the multibase prefix on encode, add it back if its not there on decode
+- export HashProgressEvent
+- add ?.
+- pass password to updateEmail
+- missing await
+- use ChangePasswordSchema
+- update password needs the correct data sent to the mutation
+- don't validate as email
+- wrong login schema
+- wrap page in Authenticated component
+- Added cancelMutation to toast
+- Fixed Dialog not reseting state
+- route redirection issue
+- typo
+- need to pass currentPassword
+- set pins as required
+- Added resurce and dataProvider props to data-table, fixed UI
+- set hash and mime_type as required
+- don't use hash import
+- remove hash imports
+- @noble/curves imports
+- don't use hash imports
+- pass all providers
+- update resource name
+- use Authenticated component
+- remove more S5Client param references
+- size is missing
+- wrong accessorKey
+- Removed PinningProvider and used react-query directly
+- UX changes regarding showing dates on table and actions pannel
+- closes #8
+- closes #9
+- closes #10
+- Moved useQuery to PinningProvider and moved mutations into usePinning
+- small fixes
+- don't use hash import
+- notifications now are not transparent. Modals for my account now close whe nfinished
+- textarea for pinning modal. small refactor to the api exposed by the hook
+- pinned items in progress cannot be cancelled
+- only completed items can be unpinned. Maybe cross iscon is not the best
+- every time in progress query is fetched, we check the results for atleast one complete query and this invalidates the query results for the files data provider on the list query
+- if no portalUrl, return a loading tag
+- prefix with https
+- wrong property
+- error state for file upload
+- ensure we don't have a nested array-like object with the data
+- don't cache/store the providers, we only use in 1 place currently and we can memo it
+- reverse array before popping to get the 1st element
+- only run when we have both the email and token
+- adds proper filesize formatting
+- remove unusued type
+- filesize lib was buggy. removed selection options as we dont use thos
+- properly invalidate file resource when uploading and pinning finishes
+- add extra invalidate after pinning and unpinning request
+- pass file directly, not as a json payload
+- cannot upload if there are no files
+- add patch for tus on parallel uploads to ensure it sends the meta
+- update tus patch to patch lib.es5 as well
+- update tus patch to patch lib as well
+- pinning progress bar is now fully working
+- a tiny bit better upload ui
+- progress bar not being rendered due to progress not being tracked
+- fixing the bar
+- jiji forgot to add the progress bar on pre process
+- pre-progress bar fixes
+- add preprocess-progress event as uploading state
+- preprocess-progress needs to just be passed the preprocess object
+- remove hash import
+- bad hash progress calc
+- temporarily disable parallelUploads
+- change limits
+- set chunk size to 1 mb
+- disable local storage by using NoopUrlStorage
+- add a queued tab to the pinning accordion
+- add override modifier
+- value is a map
+- streams is a map, not object
+- add return type
+- add type hint
+- hack: disable ts errors on ws
+- update beforeRedirect arg types
+- import EventEmitter as a default package export
+- update task pipelines
+- need to use pnpm nx
+- need to use double wildcard in quotes to fix workflow
+- update actions
+- need to use pnpm nx
+- orval needs to run twice due to quirks
+- pnpm not fully installing and adding patches
+- use default export for EventEmitter
+- pnpm/action-setup needs to run the install directly for the patches to work
+- allow to create a pull request
+- allow to manage git
+- need to use our custom token
+- need to create the changeset-release origin
+- access vars under env
+- use remote add, not set-url
+- use bash vars, not workflow vars
+- wrong var
+- wrong usage of steps output var syntax
+- use import.meta.env not process as this is client side
+- wrong usage of steps output var syntax
+- need to set deployments perm and contents for good measure
+- run node setup before pnpm
+- run pnpm setup before and after node setup
+- bad build command
+- wrong dir
+- make VITE_PORTAL_URL optional
+- update remix vite plugin import
+- siteKey is now site
+- change slug to cid
+- update isbot import
+- set path of patch-package to monorepo root
+- use list not br tags
+- wrong editUrl
+- wrong editUrl, again
+- remove text from ai help
+- update cid hash bytes import
+- use base64url not base64urlpad
+- don't replace u with U internally for base64url
+- ensure CID size is always set
+- add details const to metadata bytes, and start with media
+- add extensions const to metadata bytes
+- update preprocess logic
+- base64url test case should not have = padding
+- don't use a forward slash in fs.Sub
+- update Tailwind theme colors and resolve component conflicts
+- resolve color inconsistencies, typos and enhance user interface experience
+- Adjust component colors to align with theme
+- finalize mobile responsiveness and component updates
+- last color updates
+- theme for file upload and add horizontal scroll snap
+- last color updates
+- conflicts and styles
+- lock file
+- issues with reavt
+- more issues with react
+- now auth checking should properly work
+- solves #113. Proper spacing on verification screen
+- done setting up theme switcher for images too. now images are also themeable
+- need to pass withCredentials to all account requests
+- final styling for the table
+- trash icon
+- wrong imports
+- wrong imports
+- resolve upload management issues and improve error handling
+- add missing reset password route
+- only prefix https if portalUrl is set but not starting with a proto
+- pass buildOptions to login to ensure withCredentials is set
+- bad parsing of FQDN in getApiBaseUrl, need to better handle subdomains
+- adjust condition for payment skeleton display
+- fresh install required fixed versions
+- new layout for billing
+- using tabs for different parts of the billing
+- proper navigation highlight
+- need to use arrayMoveImmutable
+- hero banner animation repeating issue fixed
+- resolve responsive issues and replace SVG logo, heart icon with PNG
+- need to import routes for plugin registration
+- add missing auth capabilities
+- fix typo in subjects blocked endpoint
+- subjects blocked endpoint is inverted
+- subjects blocked endpoint missing abuse prefix
+- fix UserInfoCard data query access
+- correct case priority and status enum casing
+- use apiUrl for blocklist endpoints
+- update case status checks to use lowercase values
+- access view doesn't need to be nested in ReportLayout since we are using nested routes
+- update search field and case response field names
+- correct link handling in collapsible menu
+- correct link handling in collapsible menu
+- adjust sidebar widths
+- adjust sidebar widths
+- adjust sidebar widths
+- fix block API URLs and reason value
+- blocklist created at is snake case
+- replace ComplexBadge with ThemedBadge and update imports
+- use ThemedBadge not ComplexBadge
+- fix word break formatting on description
+- don't compare to a string true
+- don't compare to a string true
+- correct syntax errors in meta endpoint middleware
+- remove redundant paddingFactor declaration in WidgetArea
+- improve response handling and error parsing in AccountApi
+- fix type import
+- typo on OTPGenerateResponse
+- correct invalid import in autocomplete rules
+- add explicit JSX.Element return type to Loading component
+- only allow space and enter to toggle the password visibility
+- improve footer environment type guards and handle undefined form context
+- safely handle CID object format in operations UI, as future proofing
+- widen toolbar renderer types to accept ExtendedToolbarItem
+- fix api url
+- add missing button type attributes to breadcrumb components
+- prevent layout shift and memoize hidden columns Set
+- move mobile column hiding logic to top level and update toolbar renderer
+- expand coreSupported breakpoints to include all ComponentSize values
+- fix file download handling with credentials support
+- handle directory download errors and improve file download logic
+- bind processor and cancelAll methods in constructor
+- correct format check in tsdown.config.ts to use "esm" instead of "es"
+- add explicit type annotations to UI component primitives
+- add return type to `useMobileDetection` hook
+- correct VisuallyHidden component implementation
+- refine data provider configuration and disable route change handler
+- bundle all CSS in module federation builds
+- simplify RefineTable context and update property access
+- enhance SSRF protection with comprehensive IP validation
+- recalculate elapsed time after fetch to account for network latency
+- improve robustness and handle edge cases
+- update provider and tests for @refinedev/core v5 compatibility
+- correctly serialize array filters with indexed keys
+- correct operation list response handling and csv formatter
+- make setDriverFactory actually work
+- add default values to required label parameters
+- use type-only import for UserConfig
+- configure tsconfig-paths to use project's tsconfig.json
+- exclude non-code files from build entry patterns
+
 ## 0.3.3 (2026-01-13)
 
 ### Features
