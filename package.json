@@ -7,7 +7,7 @@
     "build": "turbo build",
     "release": "knope release",
     "release:changesets": "node scripts/generate-changesets-from-release.js",
-    "publish:npm": "pnpm -r publish",
+    "publish:npm": "pnpm -r publish --provenance",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

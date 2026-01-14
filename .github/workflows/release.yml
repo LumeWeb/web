@@ -45,6 +45,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 
+
+      - run: unset NODE_AUTH_TOKEN
+
       - name: Publish to npm
         run: pnpm publish:npm
 
