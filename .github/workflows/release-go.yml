@@ -42,19 +42,9 @@ jobs:
             exit 0
           fi
 
-          # Read modified apps and create matrix JSON
+          # Read modified apps and create matrix JSON (just repos now)
           while IFS= read -r app; do
-            # Map app names to repository names
-            # portal-frontend -> portal-plugin-frontend
-            # portal-app-shell -> portal-plugin-app-shell
-            # portal-plugin-dashboard -> portal-plugin-dashboard (already correct)
-            if [[ "$app" == portal-plugin-* ]]; then
-              repo="$app"
-            else
-              base_name=${app#portal-}
-              repo="portal-plugin-$base_name"
-            fi
-            jq -n --arg app "$app" --arg repo "$repo" '{app: $app, repo: $repo}'
+            jq -n --arg repo "$app" '{repo: $repo}'
           done < /tmp/modified_apps.txt | jq -s 'unique_by(.repo) | {include: .}' | tr -d '\n' > /tmp/matrix.json
 
           echo "matrix=$(cat /tmp/matrix.json)" >> "$GITHUB_OUTPUT"
@@ -76,7 +66,5 @@ jobs:
           client-payload: |
             {
               "commit_hash": "${{ needs.prepare.outputs.commit_hash }}",
-              "app_name": "${{ matrix.app }}",
-              "repository": "${{ github.repository }}",
-              "ref": "${{ github.ref }}"
+              "repository": "${{ github.repository }}"
             }
