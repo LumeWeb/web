@@ -78,3 +78,5 @@ catalogs:
     vite: ^6.4.1
   websites:
     tailwindcss: ^4.1.18
+gitChecks: false
+publishBranch: develop
