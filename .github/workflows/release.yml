@@ -45,11 +45,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 
-
-      - run: unset NODE_AUTH_TOKEN
-
       - name: Publish to npm
-        run: pnpm publish:npm
+        run: NODE_AUTH_TOKEN="" pnpm publish:npm
 
       # Check for portal-frontend changes and notify template repo
       - name: Check portal-frontend changes and notify
