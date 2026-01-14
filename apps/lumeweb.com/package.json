@@ -1,7 +1,7 @@
 {
   "name": "@lumeweb/lumeweb.com",
   "type": "module",
-  "version": "0.4.0",
+  "version": "0.3.3",
   "private": true,
   "scripts": {
     "dev": "astro dev",
@@ -22,5 +22,9 @@
   "dependencies": {
     "@tailwindcss/vite": "catalog:",
     "tailwindcss": "catalog:websites"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }

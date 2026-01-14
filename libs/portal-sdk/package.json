@@ -1,6 +1,6 @@
 {
   "name": "@lumeweb/portal-sdk",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "type": "module",
   "description": "",
   "files": [
@@ -41,5 +41,9 @@
     "@vitest/coverage-v8": "^4.0.16",
     "orval": "catalog:",
     "tsdown": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }

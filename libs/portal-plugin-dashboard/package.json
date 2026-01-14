@@ -1,6 +1,6 @@
 {
   "name": "@lumeweb/portal-plugin-dashboard",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "type": "module",
   "files": [
     "lib-dist",
@@ -57,5 +57,9 @@
     "@lumeweb/tsdown-config": "workspace:*",
     "tsdown": "catalog:",
     "vite": "catalog:framework"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }

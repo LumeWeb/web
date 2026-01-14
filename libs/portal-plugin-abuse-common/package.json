@@ -26,5 +26,9 @@
     "@lumeweb/tsdown-config": "workspace:*",
     "orval": "catalog:",
     "tsdown": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }

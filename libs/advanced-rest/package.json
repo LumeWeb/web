@@ -1,6 +1,6 @@
 {
   "name": "@lumeweb/advanced-rest-provider",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "An advanced rest data provider using KY for refine",
   "dependencies": {
     "@lumeweb/query-builder": "workspace:*",
@@ -26,5 +26,9 @@
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
     "tsdown": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }

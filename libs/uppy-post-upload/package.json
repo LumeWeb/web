@@ -1,6 +1,6 @@
 {
   "name": "@lumeweb/uppy-post-upload",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "type": "module",
   "main": "./dist/cjs/index.cjs",
   "types": "./dist/esm/index.d.ts",
@@ -56,5 +56,9 @@
     "@uppy/companion-client": "^5.1.1",
     "@uppy/utils": "^7.1.5",
     "ky": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }

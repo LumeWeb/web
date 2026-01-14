@@ -1,6 +1,6 @@
 {
   "name": "@lumeweb/portal-framework-auth",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "type": "module",
   "files": [
     "dist",
@@ -41,5 +41,9 @@
     "react-icons": "catalog:",
     "react-router": "catalog:",
     "zod": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }
