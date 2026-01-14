@@ -22,9 +22,6 @@ jobs:
 
       - name: Setup
         uses: LumeWeb/workflows/.github/actions/setup-all@develop
-        with:
-          node_version: 20.10.0
-          go_version: 1.23.0
 
       - name: Configure Git
         run: |
@@ -54,7 +51,7 @@ jobs:
             repo="portal-plugin-$base_name"
             jq -n --arg app "$app" --arg repo "$repo" '{app: $app, repo: $repo}'
           done < /tmp/modified_apps.txt | jq -s '{include: .}' | tr -d '\n' > /tmp/matrix.json
-          
+
           echo "matrix=$(cat /tmp/matrix.json)" >> "$GITHUB_OUTPUT"
           echo "has_changes=true" >> "$GITHUB_OUTPUT"
 
