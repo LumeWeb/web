@@ -57,5 +57,9 @@
     "@lumeweb/tsdown-config": "workspace:*",
     "tsdown": "catalog:",
     "vite": "catalog:framework"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }

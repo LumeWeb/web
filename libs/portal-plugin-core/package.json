@@ -36,5 +36,9 @@
   "devDependencies": {
     "vite": "catalog:framework",
     "vite-tsconfig-paths": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }

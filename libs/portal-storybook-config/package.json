@@ -23,5 +23,9 @@
   "dependencies": {
     "@lumeweb/portal-framework-core": "workspace:*"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
+  }
 }

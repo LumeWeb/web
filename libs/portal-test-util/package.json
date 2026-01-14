@@ -28,5 +28,9 @@
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
     "tsdown": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }

@@ -7,5 +7,9 @@
     "build": "echo 'Build skipped' && exit 0"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
+  }
 }

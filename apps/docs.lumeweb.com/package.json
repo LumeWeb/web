@@ -11,5 +11,9 @@
   "devDependencies": {
     "react": "catalog:",
     "vocs": "^1.4.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }

@@ -22,5 +22,9 @@
   "dependencies": {
     "@tailwindcss/vite": "catalog:",
     "tailwindcss": "catalog:websites"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }

@@ -37,5 +37,9 @@
     "sass-embedded": "^1.97.2",
     "vite": "catalog:framework",
     "vite-tsconfig-paths": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }

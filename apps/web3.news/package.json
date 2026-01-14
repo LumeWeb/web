@@ -18,5 +18,9 @@
   },
   "dependencies": {},
   "devDependencies": {},
-  "peerDependencies": {}
+  "peerDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
+  }
 }

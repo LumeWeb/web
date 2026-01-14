@@ -36,5 +36,9 @@
   },
   "devDependencies": {
     "vite": "catalog:framework"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }

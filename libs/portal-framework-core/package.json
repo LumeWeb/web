@@ -59,5 +59,9 @@
     "react-router": "catalog:",
     "vite-tsconfig-paths": "catalog:",
     "zod": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   }
 }
