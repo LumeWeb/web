@@ -1,38 +1,4 @@
-# @lumeweb/portal-frontend
-
-## 0.1.2 (2026-01-14)
-
-### Features
-
-- add core LBRY plugin structure with protocol, upload, and data provider capabilities
-- add streams page and route
-- add devices management page
-- add stream pinning/unpinning functionality
-- add portal-generators package with scaffolding templates
-- add React-to-Go Template DSL for email generation
-
-### Fixes
-
-- exclude non-code files from build entry patterns
-
-## 0.1.2 (2026-01-13)
-
-### Features
-
-- add core LBRY plugin structure with protocol, upload, and data provider capabilities
-- add streams page and route
-- add devices management page
-- add stream pinning/unpinning functionality
-- add portal-generators package with scaffolding templates
-- add React-to-Go Template DSL for email generation
-
-## 0.1.1 (2026-01-11)
-
-### Features
-
-- add folder upload detection and conditional UI based on service support
-
-## 0.1.0 (2026-01-09)
+## 0.1.0 (2026-01-14)
 
 ### Breaking Changes
 
@@ -238,6 +204,13 @@
 - add operations API, polling utilities, and comprehensive test suite
 - add new query builder library for Refine integration
 - add query builder integration and update tests
+- add folder upload detection and conditional UI based on service support
+- add core LBRY plugin structure with protocol, upload, and data provider capabilities
+- add streams page and route
+- add devices management page
+- add stream pinning/unpinning functionality
+- add portal-generators package with scaffolding templates
+- add React-to-Go Template DSL for email generation
 
 ### Fixes
 
@@ -694,15 +667,4 @@
 - add default values to required label parameters
 - use type-only import for UserConfig
 - configure tsconfig-paths to use project's tsconfig.json
-
-## 0.0.2
-
-### Patch Changes
-
-- 87a8e92: Update links and pricing info
-
-## 0.0.1
-
-### Patch Changes
-
-- 1179d00: Initial WIP frontend website
+- exclude non-code files from build entry patterns
