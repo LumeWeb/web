@@ -1,9 +1,6 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - develop
   workflow_dispatch:
     inputs:
       knope_version:
@@ -38,6 +35,9 @@ jobs:
 
       - name: Setup JS
         uses: LumeWeb/workflows/.github/actions/setup-js@develop
+
+      - name: Build
+        run: pnpm build
 
       - name: Create Release
         run: knope release --verbose
