@@ -1,5 +1,5 @@
 # Builder stage
-FROM node:18.17.0 AS builder
+FROM node:25.3.0 AS builder
 
 # Set working directory
 WORKDIR /app
@@ -15,7 +15,7 @@ COPY . .
 RUN npm run build
 
 # Runtime stage
-FROM node:18.17.0-slim
+FROM node:25.3.0-slim
 
 # Set working directory
 WORKDIR /app
