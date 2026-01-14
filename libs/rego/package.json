@@ -1,6 +1,6 @@
 {
   "name": "@lumeweb/rego",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "React components that compile to Go templates for email generation - combining React/Tailwind DX with Go native templating",
   "type": "module",
   "main": "./dist/index.js",
