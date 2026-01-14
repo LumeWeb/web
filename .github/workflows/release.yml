@@ -46,9 +46,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 
       - name: Publish to npm
-        run: pnpm -r publish --publish-branch develop
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish:npm
 
       # Check for portal-frontend changes and notify template repo
       - name: Check portal-frontend changes and notify
