@@ -14,7 +14,7 @@
   },
   "files": [
     "dist",
-    "src"
+    "package.json"
   ],
   "scripts": {
     "build": "tsdown",

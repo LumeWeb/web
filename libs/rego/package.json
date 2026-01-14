@@ -15,7 +15,8 @@
   },
   "files": [
     "dist",
-    "src"
+    "package.json",
+    "README.md"
   ],
   "scripts": {
     "build": "tsdown",

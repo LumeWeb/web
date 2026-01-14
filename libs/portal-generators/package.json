@@ -1,6 +1,10 @@
 {
   "name": "@lumeweb/portal-generators",
   "version": "0.0.0",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "main": "./dist/cjs/index.cjs",
   "types": "./dist/esm/index.d.ts",
   "exports": {

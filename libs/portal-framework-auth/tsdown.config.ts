@@ -1,8 +1,8 @@
 import { defineConfig } from "tsdown";
-import { createLibraryConfig } from "@lumeweb/tsdown-config";
+import { createLibraryConfig, entryPatterns } from "@lumeweb/tsdown-config";
 
 export default defineConfig(
-  createLibraryConfig(["src/**/*"], {
+  createLibraryConfig(entryPatterns.withoutTests, {
     external: /node_modules/,
     format: ["cjs", "esm"],
     outputOptions(options, format) {

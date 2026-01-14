@@ -1,6 +1,7 @@
 {
   "name": "@lumeweb/docs.lumeweb.com",
   "version": "0.5.2",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vocs dev",
