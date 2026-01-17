@@ -79,7 +79,14 @@ class ChangesetGenerator {
     this.originalKnopeConfig = configContent;
     const config = parse(configContent);
     modifier(config);
-    const newContent = stringify(config);
+    const newContent = stringify(config, { 
+      indent: 2,
+      arrayIndent: 2,
+      align: false,
+      keyQuote: false,
+      inlineTuples: false,
+      sortKeys: false
+    });
     fs.copyFileSync(this.knopeConfigFile, `${this.knopeConfigFile}.bak`);
     fs.writeFileSync(this.knopeConfigFile, newContent, "utf-8");
   }
@@ -338,10 +345,21 @@ class ChangesetGenerator {
       return "dry-run-" + Date.now();
     }
 
-    return await writeChangeset(
+    const changesetID = await writeChangeset(
       { summary: summary.trim(), releases },
       this.packagesDir,
     );
+
+    // Remove quotes from package names in the generated changeset file
+    const changesetPath = path.join(this.changesetsDir, `${changesetID}.md`);
+    let changesetContent = fs.readFileSync(changesetPath, "utf-8");
+    
+    // Remove quotes around package names (but keep quotes for other values if any)
+    changesetContent = changesetContent.replace(/^"([^"]+)":/gm, "$1:");
+    
+    fs.writeFileSync(changesetPath, changesetContent, "utf-8");
+    
+    return changesetID;
   }
 
   async generate() {
@@ -354,8 +372,12 @@ class ChangesetGenerator {
     try {
       console.log("Temporarily modifying knope.toml...");
       await this.modifyKnopeConfig((config) => {
-        for (const pkgKey of Object.keys(config.packages || {})) {
-          config.packages[pkgKey].ignore_conventional_commits = false;
+        for (const workflow of config.workflows || []) {
+          for (const step of workflow.steps || []) {
+            if (step.type === "PrepareRelease") {
+              step.ignore_conventional_commits = false;
+            }
+          }
         }
       });
 
