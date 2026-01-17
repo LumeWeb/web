@@ -1,3 +1,12 @@
+## 0.1.1 (2026-01-17)
+
+### Features
+
+#### Features
+
+- update default endpoint and gateway URLs
+- restructure adapters with v2 and legacy implementations
+
 ## 0.1.0 (2026-01-14)
 
 ### Breaking Changes
