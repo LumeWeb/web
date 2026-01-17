@@ -170,6 +170,13 @@ export class Pinner {
   }
 
   /**
+   * Remove a pin by request ID. The block may be deleted when garbage collection is run.
+   */
+  async unpinByRequestId(requestId: string, options?: AbortOptions): Promise<void> {
+    return this.pins.rmByRequestId(requestId, options);
+  }
+
+  /**
    * Destroy the client and cleanup resources.
    */
   destroy(): void {

@@ -82,4 +82,9 @@ export interface RemotePins {
    * Remove a pin. The block may be deleted when garbage collection is run.
    */
   rm(cid: CID, options?: AbortOptions): AsyncGenerator<CID, void, undefined>;
+
+  /**
+   * Remove a pin by request ID. The block may be deleted when garbage collection is run.
+   */
+  rmByRequestId(requestId: string, options?: AbortOptions): Promise<void>;
 }
