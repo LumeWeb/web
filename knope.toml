@@ -17,7 +17,6 @@ ignore_conventional_commits = true
 versioned_files = ["libs/pinner/package.json"]
 changelog = "libs/pinner/CHANGELOG.md"
 ignore_conventional_commits = true
-scopes = ["pinata"]
 
 [packages."@lumeweb/portal-app-shell"]
 versioned_files = ["apps/portal-app-shell/package.json"]
