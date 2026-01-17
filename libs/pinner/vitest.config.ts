@@ -230,7 +230,7 @@ function createAdapterProjects(
   nodeSetupFiles: string[] = [],
   browserSetupFiles: string[] = [],
 ) {
-  const includePattern = ["src/adapters/pinata/__tests__/**/*.spec.ts"];
+  const includePattern = ["src/adapters/pinata/**/__tests__/**/*.spec.ts"];
 
   const baseSetupFiles = {
     node: ["./src/__tests__/setup.node.ts"],

@@ -293,22 +293,39 @@ See [blockstore/README.md](./src/blockstore/README.md) for detailed blockstore d
 
 ## Adapters
 
-### Pinata Adapter
+### Pinata Adapters
 
-The Pinata adapter provides a Pinata SDK-compatible interface for the Pinner client, making it easy to migrate from Pinata SDK with minimal code changes.
+The Pinata adapters provide Pinata SDK API compatibility for the Pinner client, allowing applications written for the Pinata SDK to work with Lume's IPFS pinning infrastructure with minimal code changes.
+
+**Attribution**: These adapters include TypeScript type definitions and API interfaces adapted from the Pinata SDK for compatibility purposes. The original Pinata SDK is available at:
+- **Pinata SDK 2.x**: https://github.com/PinataCloud/pinata/commit/cdc0c06116aaadaf7c4b287a2673cd23b6ba1125
+- **Pinata SDK 1.x**: https://github.com/PinataCloud/pinata/commit/c141177ff3036e46fa7b95fcc68c159b58817836
+
+The adapters provide Pinata SDK API compatibility but route all operations through Lume's IPFS pinning infrastructure. They do NOT use Pinata's servers or services.
+
+#### Available Adapters
+
+- **V2 Adapter** (`pinataAdapter`): Compatible with Pinata SDK 2.x API (recommended, latest)
+- **Legacy Adapter** (`pinataLegacyAdapter`): Compatible with Pinata SDK 1.x API
+
+See [adapters/README.md](./src/adapters/README.md) for comprehensive documentation including migration guides, feature support tables, and detailed examples.
 
 #### Setup
 
 ```typescript
-import { Pinner, pinataAdapter } from "@lumeweb/pinner";
+import { Pinner, pinataAdapter, pinataLegacyAdapter } from "@lumeweb/pinner";
 
 // Initialize Pinner
 const pinner = new Pinner({
-  jwt: "your-jwt-token"
+  jwt: "your-jwt-token",
+  endpoint: "https://your-pinning-service-endpoint.com"
 });
 
-// Create Pinata adapter
+// Create Pinata V2 adapter (recommended)
 const pinata = pinataAdapter(pinner);
+
+// Or use the legacy adapter
+const pinataLegacy = pinataLegacyAdapter(pinner);
 ```
 
 #### Upload Methods
@@ -319,12 +336,12 @@ The Pinata adapter provides multiple upload methods with a fluent builder patter
 
 ```typescript
 // Simple file upload
-const result = await pinata.upload.file(file).execute();
+const result = await pinata.upload.public.file(file).execute();
 console.log("CID:", result.IpfsHash);
 console.log("Size:", result.PinSize);
 
 // Upload with metadata
-const result = await pinata.upload.file(file)
+const result = await pinata.upload.public.file(file)
   .name("My File")
   .keyvalues({ key: "value" })
   .execute();
@@ -338,7 +355,7 @@ const files = [
   new File(["content2"], "file2.txt")
 ];
 
-const result = await pinata.upload.fileArray(files)
+const result = await pinata.upload.public.fileArray(files)
   .name("My Directory")
   .keyvalues({ type: "directory" })
   .execute();
@@ -349,7 +366,7 @@ const result = await pinata.upload.fileArray(files)
 ```typescript
 const data = { foo: "bar", number: 42 };
 
-const result = await pinata.upload.json(data)
+const result = await pinata.upload.public.json(data)
   .name("data.json")
   .keyvalues({ format: "json" })
   .execute();
@@ -360,7 +377,7 @@ const result = await pinata.upload.json(data)
 ```typescript
 const base64String = "SGVsbG8sIHdvcmxkIQ==";
 
-const result = await pinata.upload.base64(base64String)
+const result = await pinata.upload.public.base64(base64String)
   .name("base64-file.txt")
   .execute();
 ```
@@ -368,7 +385,7 @@ const result = await pinata.upload.base64(base64String)
 ##### Upload from URL
 
 ```typescript
-const result = await pinata.upload.url("https://example.com/data.json")
+const result = await pinata.upload.public.url("https://example.com/data.json")
   .name("downloaded-file.json")
   .execute();
 ```
@@ -377,10 +394,10 @@ const result = await pinata.upload.url("https://example.com/data.json")
 
 ```typescript
 // Pin existing content
-await pinata.upload.cid("Qm...").execute();
+await pinata.upload.public.cid("Qm...").execute();
 
 // Pin with metadata
-await pinata.upload.cid("Qm...")
+await pinata.upload.public.cid("Qm...")
   .name("Existing Content")
   .keyvalues({ source: "external" })
   .execute();
@@ -438,10 +455,10 @@ await pinata.setPinMetadata("Qm...", {
 
 ```typescript
 // List all files
-const files = await pinata.files.list().execute();
+const files = await pinata.files.public.list().execute();
 
 // List with pagination
-const files = await pinata.files.list()
+const files = await pinata.files.public.list()
   .limit(10)
   .pageToken("next-page-token")
   .execute();
@@ -458,7 +475,7 @@ files.forEach(file => {
 ##### Get File by ID
 
 ```typescript
-const file = await pinata.files.get("Qm...");
+const file = await pinata.files.public.get("Qm...");
 console.log("File details:", file);
 ```
 
@@ -484,7 +501,7 @@ import { Pinner, pinataAdapter } from '@lumeweb/pinner';
 const pinner = new Pinner({ jwt: 'your-jwt-token' });
 const pinata = pinataAdapter(pinner);
 
-const result = await pinata.upload.file(file)
+const result = await pinata.upload.public.file(file)
   .name('My File')
   .execute();
 ```
@@ -690,7 +707,7 @@ import {
 } from "@lumeweb/pinner";
 
 // Adapters
-import { pinataAdapter } from "@lumeweb/pinner/adapters/pinata";
+import { pinataAdapter, pinataLegacyAdapter } from "@lumeweb/pinner";
 
 // Blockstore module
 import { UnstorageBlockstore } from "@lumeweb/pinner/blockstore";

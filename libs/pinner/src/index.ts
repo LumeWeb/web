@@ -25,6 +25,7 @@ export type {
   RemotePin,
   RemoteAddOptions,
   RemoteLsOptions,
+  AbortOptions,
 } from "@/types/pin";
 
 // Error exports
@@ -60,5 +61,13 @@ export {
   readableStreamToAsyncIterable,
 } from "./utils/stream";
 
-// Pinata adapter
-export { pinataAdapter } from "./adapters/pinata";
+// Pinata adapters
+export {
+  pinataAdapter,       // v2.x (recommended)
+  pinataLegacyAdapter, // v1.10.1 (legacy)
+} from "./adapters/pinata";
+
+export type {
+  PinataAdapter,       // v2.x
+  PinataLegacyAdapter, // v1.10.1
+} from "./adapters/pinata";

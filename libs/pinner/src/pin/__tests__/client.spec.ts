@@ -6,12 +6,20 @@ import { CID } from "multiformats/cid";
 import type { RemotePinningServiceClient } from "@ipfs-shipyard/pinning-service-client";
 import { Status } from "@ipfs-shipyard/pinning-service-client";
 import type { RemotePin } from "@/types/pin";
+import type { AbortOptions } from "@/types/pin";
 import { createMockCID } from "@/__tests__/setup";
 
 // Test helper class to expose protected method for testing
 class TestPinClient extends PinClient {
   public override getClient(): RemotePinningServiceClient {
     return super.getClient();
+  }
+
+  public override rmByRequestId(
+    requestId: string,
+    options?: AbortOptions,
+  ): Promise<void> {
+    return super.rmByRequestId(requestId, options);
   }
 }
 
@@ -1026,6 +1034,63 @@ describe("PinClient", () => {
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual(cid);
       expect(mockPinningClient.pinsRequestidDelete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("rmByRequestId", () => {
+    it("should successfully remove a pin by request ID", async () => {
+      const mockPinningClient = {
+        pinsRequestidDelete: vi.fn().mockResolvedValue({
+          status: "deleted",
+        }),
+      };
+
+      const client = new TestPinClient(mockConfig);
+      vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
+
+      await client.rmByRequestId("req-123");
+
+      expect(mockPinningClient.pinsRequestidDelete).toHaveBeenCalledWith(
+        {
+          requestid: "req-123",
+        },
+        { signal: undefined },
+      );
+    });
+
+    it("should remove a pin by request ID with options", async () => {
+      const mockPinningClient = {
+        pinsRequestidDelete: vi.fn().mockResolvedValue({
+          status: "deleted",
+        }),
+      };
+
+      const client = new TestPinClient(mockConfig);
+      vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
+
+      const abortController = new AbortController();
+
+      await client.rmByRequestId("req-123", {
+        signal: abortController.signal,
+      });
+
+      expect(mockPinningClient.pinsRequestidDelete).toHaveBeenCalledWith(
+        {
+          requestid: "req-123",
+        },
+        { signal: abortController.signal },
+      );
+    });
+
+    it("should propagate errors from the pinning service", async () => {
+      const mockPinningClient = {
+        pinsRequestidDelete: vi.fn().mockRejectedValue(new Error("Failed to delete pin")),
+      };
+
+      const client = new TestPinClient(mockConfig);
+      vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
+
+      await expect(client.rmByRequestId("req-123")).rejects.toThrow("Failed to delete pin");
     });
   });
 });

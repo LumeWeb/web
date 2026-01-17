@@ -140,16 +140,22 @@ export class PinClient implements RemotePins {
       { signal: options?.signal },
     );
 
+    // Delete all pins for this CID by their request IDs
     await Promise.all(
       [...response.results].map(async (result) => {
-        return client.pinsRequestidDelete(
-          { requestid: result.requestid },
-          { signal: options?.signal },
-        );
+        return this.rmByRequestId(result.requestid, options);
       }),
     );
 
     yield cid;
+  }
+
+  async rmByRequestId(requestId: string, options?: AbortOptions): Promise<void> {
+    const client = this.getClient();
+    await client.pinsRequestidDelete(
+      { requestid: requestId },
+      { signal: options?.signal },
+    );
   }
 
   private mapResponse(response: PinStatus): RemotePin {
