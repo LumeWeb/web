@@ -1,12 +1,12 @@
 /**
  * Default API endpoint URL for the pinning service.
  */
-export const DEFAULT_ENDPOINT = "https://api.lumeweb.com";
+export const DEFAULT_ENDPOINT = "https://ipfs.pinner.xyz";
 
 /**
  * Default IPFS gateway URL for content retrieval.
  */
-export const DEFAULT_GATEWAY = "https://gateway.lumeweb.com";
+export const DEFAULT_GATEWAY = "https://dweb.link";
 
 /**
  * Default TUS upload size threshold (100MB).
