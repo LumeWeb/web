@@ -377,7 +377,7 @@ describe("PinataLegacyAdapter", () => {
         expires: 3600,
       });
 
-      expect(result).toBe("https://gateway.lumeweb.com/ipfs/QmHash");
+      expect(result).toBe("https://dweb.link/ipfs/QmHash");
     });
 
     it("should create signed URL with config gateway", async () => {
