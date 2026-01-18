@@ -65,7 +65,7 @@
     "p-defer": "^4.0.1",
     "progress-events": "catalog:",
     "tus-js-client": "4.3.1",
-    "unstorage": "^1.17.3"
+    "unstorage": "^1.17.4"
   },
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",

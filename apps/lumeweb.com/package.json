@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@astrojs/react": "catalog:",
-    "@astrojs/sitemap": "^3.6.1",
+    "@astrojs/sitemap": "^3.7.0",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "astro": "catalog:",
