@@ -68,14 +68,14 @@ catalog:
   tailwindcss-animate: ^1.0.7
   tsdown: v0.19.0-beta.5
   typescript: ^5.9.3
-  vite: 7.1.11
+  vite: 7.3.1
   vite-tsconfig-paths: ^6.0.4
   vitest: ^4.0.17
   zod: 4.3.5
 
 catalogs:
   framework:
-    vite: ^6.4.1
+    vite: ^7.0.0
   websites:
     tailwindcss: ^4.1.18
 gitChecks: false
