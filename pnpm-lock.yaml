@@ -196,8 +196,8 @@ catalogs:
       specifier: ^1.0.7
       version: 1.0.7
     tsdown:
-      specifier: v0.19.0-beta.5
-      version: 0.19.0-beta.5
+      specifier: 0.19.0
+      version: 0.19.0
     typescript:
       specifier: ^5.9.3
       version: 5.9.3
@@ -381,7 +381,7 @@ importers:
         version: 19.9.2
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
       turbo:
         specifier: ^2.7.5
         version: 2.7.5
@@ -414,7 +414,7 @@ importers:
     dependencies:
       '@tailwindcss/vite':
         specifier: 'catalog:'
-        version: 4.1.18(vite@7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.44.1)(yaml@2.8.2))
+        version: 4.1.18(vite@6.4.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.44.1)(yaml@2.8.2))
       tailwindcss:
         specifier: catalog:websites
         version: 4.1.18
@@ -561,7 +561,7 @@ importers:
     devDependencies:
       '@tailwindcss/vite':
         specifier: 'catalog:'
-        version: 4.1.18(vite@7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.44.1)(yaml@2.8.2))
+        version: 4.1.18(vite@6.4.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.44.1)(yaml@2.8.2))
 
   apps/portal-storybook: {}
 
@@ -590,7 +590,7 @@ importers:
         version: link:../tsdown-config
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
 
   libs/pinner:
     dependencies:
@@ -696,7 +696,7 @@ importers:
         version: 1.57.0
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
       tus-node-server:
         specifier: ^0.9.0
         version: 0.9.0
@@ -763,7 +763,7 @@ importers:
         version: link:../tsdown-config
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
 
   libs/portal-framework-core:
     dependencies:
@@ -824,7 +824,7 @@ importers:
         version: 6.1.0(react@19.2.3)
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
 
   libs/portal-framework-ui:
     dependencies:
@@ -948,7 +948,7 @@ importers:
         version: 6.2.5
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
       vite-tsconfig-paths:
         specifier: 'catalog:'
         version: 6.0.4(typescript@5.9.3)(vite@7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.44.1)(yaml@2.8.2))
@@ -1087,7 +1087,7 @@ importers:
         version: link:../tsdown-config
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
 
   libs/portal-generators:
     dependencies:
@@ -1103,7 +1103,7 @@ importers:
         version: 25.0.9
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1185,7 +1185,7 @@ importers:
         version: 8.0.1(typescript@5.9.3)
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
 
   libs/portal-plugin-abuse-report:
     dependencies:
@@ -1459,7 +1459,7 @@ importers:
         version: link:../tsdown-config
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
       vite:
         specifier: catalog:framework
         version: 6.4.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.44.1)(yaml@2.8.2)
@@ -1681,7 +1681,7 @@ importers:
         version: 8.0.1(typescript@5.9.3)
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
 
   libs/portal-storybook-config:
     dependencies:
@@ -1700,7 +1700,7 @@ importers:
         version: link:../tsdown-config
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
 
   libs/query-builder:
     dependencies:
@@ -1713,7 +1713,7 @@ importers:
         version: link:../tsdown-config
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1741,7 +1741,7 @@ importers:
         version: 5.2.2
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1753,7 +1753,7 @@ importers:
     devDependencies:
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
 
   libs/uppy-post-upload:
     dependencies:
@@ -1793,7 +1793,7 @@ importers:
         version: 1.57.0
       tsdown:
         specifier: 'catalog:'
-        version: 0.19.0-beta.5(typescript@5.9.3)
+        version: 0.19.0(typescript@5.9.3)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -12292,8 +12292,8 @@ packages:
     resolution: {integrity: sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg==}
     engines: {node: '>=6'}
 
-  tsdown@0.19.0-beta.5:
-    resolution: {integrity: sha512-2/Mn1jqkJS65tD1oXqld7cShhx/Gg8etv4Oy1eEm0Cl+hEbYmXVQtsV9OL75X4ObbYu42U0vO7g6KyuAaEwklg==}
+  tsdown@0.19.0:
+    resolution: {integrity: sha512-uqg8yzlS7GemFWcM6aCp/sptF4bJiJbWUibuHTRLLCBEsGCgJxuqxPhuVTqyHXqoEkh9ohwAdlyDKli5MEWCyQ==}
     engines: {node: '>=20.19.0'}
     hasBin: true
     peerDependencies:
@@ -18082,12 +18082,12 @@ snapshots:
       tailwindcss: 4.1.15
       vite: 7.1.11(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.44.1)(yaml@2.8.2)
 
-  '@tailwindcss/vite@4.1.18(vite@7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.44.1)(yaml@2.8.2))':
+  '@tailwindcss/vite@4.1.18(vite@6.4.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.44.1)(yaml@2.8.2))':
     dependencies:
       '@tailwindcss/node': 4.1.18
       '@tailwindcss/oxide': 4.1.18
       tailwindcss: 4.1.18
-      vite: 7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.44.1)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.44.1)(yaml@2.8.2)
 
   '@tanstack/query-core@5.90.16': {}
 
@@ -26825,7 +26825,7 @@ snapshots:
       minimist: 1.2.8
       strip-bom: 3.0.0
 
-  tsdown@0.19.0-beta.5(typescript@5.9.3):
+  tsdown@0.19.0(typescript@5.9.3):
     dependencies:
       ansis: 4.2.0
       cac: 6.7.14
