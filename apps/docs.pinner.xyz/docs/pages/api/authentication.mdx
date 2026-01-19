@@ -1,0 +1,59 @@
+---
+title: Authentication
+description: API authentication using Bearer tokens
+---
+
+import ApiTokenSetup from "../../partials/_api-token-setup.mdx";
+
+# Authentication
+
+All API requests require authentication using Bearer tokens.
+
+## Authorization Header
+
+Include your API token in the `Authorization` header:
+
+| Header | Value | Description |
+|--------|-------|-------------|
+| `Authorization` | `Bearer TOKEN` | Your API token |
+
+## Example
+
+```bash
+curl "https://api.pinner.xyz/api/upload-limit" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+<ApiTokenSetup />
+
+## Token Security
+
+- Keep your token secure and never expose it in client-side code
+- Use environment variables to store tokens
+- Rotate tokens if they are compromised
+
+## Error Responses
+
+**401 Unauthorized:**
+
+```json
+{
+  "error": "unauthorized",
+  "message": "Invalid or missing API token"
+}
+```
+
+**403 Forbidden:**
+
+```json
+{
+  "error": "forbidden",
+  "message": "Insufficient permissions"
+}
+```
+
+## See Also
+
+- [Small File Uploads](/api/small-uploads)
+- [Large File Uploads](/api/large-uploads)
+- [Archive Uploads](/api/archives)

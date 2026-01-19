@@ -1,0 +1,33 @@
+---
+title: Authentication
+description: Authenticate with Pinner using API tokens
+---
+
+import ApiTokenSetup from "../partials/_api-token-setup.mdx";
+
+# Authentication
+
+Pinner uses API tokens for authentication.
+
+<ApiTokenSetup />
+
+## Config File
+
+Store your token in the config file:
+
+```bash
+pinner config set auth_token "your-api-token"
+```
+
+## CLI Authentication
+
+```bash
+# Login with existing account
+pinner auth login
+
+# Register a new account
+pinner auth register
+
+# Check current auth status
+pinner auth status
+```

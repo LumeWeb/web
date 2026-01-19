@@ -1,0 +1,73 @@
+---
+title: Command Overview
+description: Overview of all CLI commands
+---
+
+# Command Overview
+
+The Pinner CLI provides commands for all operations.
+
+## Command Structure
+
+```
+pinner [global options] <command> [command options] [arguments...]
+```
+
+## Global Flags
+
+| Flag | Description |
+|------|-------------|
+| `--json` | Output in JSON format |
+| `--verbose, -v` | Enable verbose logging |
+| `--quiet, -q` | Suppress non-error output |
+| `--unmask` | Show sensitive data unmasked |
+| `--auth-token` | Auth token (env: PINNER_AUTH_TOKEN) |
+| `--secure` | Use HTTPS for API connections (default: true, env: PINNER_SECURE) |
+
+## Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `setup` | Interactive first-time setup wizard |
+| `auth` | Authenticate with Pinner.xyz |
+| `register` | Create a new account |
+| `confirm-email` | Confirm your email address |
+| `account` | Manage account settings (2FA) |
+| `upload` | Upload files/directories to IPFS |
+| `pin` | Pin existing content by CID |
+| `list` | List pinned content |
+| `status` | Get pin status for CID |
+| `unpin` | Remove a pin |
+| `metadata` | Update pin metadata |
+| `config` | View/set configuration |
+| `doctor` | Display diagnostic information |
+
+## Getting Help
+
+```bash
+# General help
+pinner --help
+
+# Command-specific help
+pinner upload --help
+
+# Subcommand help
+pinner account otp --help
+```
+
+## Tutorial Commands
+
+The CLI includes a tutorial mode that shows common workflows:
+
+```bash
+# Show tutorial
+pinner --help
+
+# Tutorial shows commands in priority order:
+# 1. pinner upload myfile.txt
+# 2. pinner pin <cid>
+# 3. pinner list
+# 4. pinner status <cid>
+# 5. pinner unpin <cid>
+# 6. pinner doctor
+```

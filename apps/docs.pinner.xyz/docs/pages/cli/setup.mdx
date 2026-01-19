@@ -1,0 +1,66 @@
+---
+title: CLI Setup
+description: Interactive setup wizard
+---
+
+# CLI Setup
+
+Use the interactive setup wizard to configure the CLI.
+
+## setup command
+
+```bash
+pinner setup
+```
+
+The setup wizard guides you through:
+- Authentication (login or register)
+- Configuration settings (API endpoint, memory limits, etc.)
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--skip-auth` | Skip authentication step |
+| `--skip-config` | Skip configuration step |
+| `--reset` | Reset configuration and start fresh |
+| `--non-interactive` | Run in non-interactive mode (not recommended - use `pinner auth` and `pinner config` instead) |
+
+## Interactive Mode
+
+```bash
+pinner setup
+
+# Welcome to Pinner CLI Setup
+# ? Would you like to authenticate? (Y/n):
+# ? Would you like to configure settings? (Y/n):
+```
+
+## Non-Interactive Mode
+
+For scripted environments, use the individual commands instead:
+
+```bash
+# Authenticate first
+pinner auth --email user@example.com
+
+# Then configure settings
+pinner config set memory_limit 256
+pinner config set secure true
+```
+
+## Reset Configuration
+
+To start fresh with configuration:
+
+```bash
+pinner setup --reset
+```
+
+## What Gets Configured
+
+The setup wizard helps configure:
+- API endpoint (base domain)
+- Secure connection (HTTPS)
+- Memory limit for CAR generation
+- Authentication token

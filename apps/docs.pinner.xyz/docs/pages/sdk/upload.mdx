@@ -1,0 +1,366 @@
+---
+title: Upload Files
+description: Upload files, directories, and CAR archives to Pinner
+---
+
+import { CodeGroup } from '@/components';
+import UploadCodeExamples from "../../partials/_upload-code-examples.mdx";
+
+# Upload Files
+
+Upload various content types to Pinner.
+
+## Basic File Upload
+
+<UploadCodeExamples />
+
+## Upload with Options
+
+<CodeGroup>
+  ```typescript title="Browser"
+  const result = await pinner.upload(file, {
+    name: "my-file",
+    keyvalues: {
+      customKey: "customValue"
+    }
+  });
+  ```
+
+  ```typescript title="Node.js"
+  const result = await pinner.upload(file, {
+    name: "my-file",
+    keyvalues: {
+      customKey: "customValue"
+    }
+  });
+  ```
+</CodeGroup>
+
+## Directory Upload
+
+<CodeGroup>
+  ```typescript title="Browser"
+  import { Pinner } from "@lumeweb/pinner";
+
+  const pinner = new Pinner({ jwt: "YOUR_API_TOKEN" });
+
+  const files = [
+    new File(["Hello, Pinner!"], "hello.txt"),
+    new File([JSON.stringify({ name: "config" })], "config.json"),
+  ];
+  const operation = await pinner.uploadDirectory(files);
+  const result = await operation.result;
+
+  console.log("CID:", result.cid);
+  ```
+
+  ```typescript title="Node.js"
+  import { Pinner } from "@lumeweb/pinner";
+  import fs from "fs";
+
+  const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY });
+
+  const files = [
+    new File([fs.readFileSync("data/hello.txt")], "hello.txt"),
+    new File([fs.readFileSync("data/config.json")], "config.json"),
+  ];
+  const operation = await pinner.uploadDirectory(files);
+  const result = await operation.result;
+
+  console.log("CID:", result.cid);
+  ```
+</CodeGroup>
+
+## CAR Upload
+
+<CodeGroup>
+  ```typescript title="Browser"
+  import { Pinner } from "@lumeweb/pinner";
+
+  const pinner = new Pinner({ jwt: "YOUR_API_TOKEN" });
+
+  const response = await fetch("/path/to/data.car");
+  const carData = response.body;
+  const operation = await pinner.uploadCar(carData);
+  const result = await operation.result;
+
+  console.log("CID:", result.cid);
+  ```
+
+  ```typescript title="Node.js"
+  import { Pinner } from "@lumeweb/pinner";
+  import fs from "fs";
+
+  const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY });
+
+  const carData = fs.readFileSync("/path/to/data.car");
+  const carFile = new File([carData], "data.car", { type: "application/vnd.ipld.car" });
+  const operation = await pinner.uploadCar(carFile);
+  const result = await operation.result;
+
+  console.log("CID:", result.cid);
+  ```
+</CodeGroup>
+
+## Encoders
+
+Choose how content is encoded before upload.
+
+<CodeGroup>
+  ```typescript title="Browser"
+  import { Pinner } from "@lumeweb/pinner";
+
+  const pinner = new Pinner({ jwt: "YOUR_API_TOKEN" });
+
+  // JSON encoder
+  const jsonResult = await pinner.upload.json({ name: "test" });
+  const result = await jsonResult.result;
+
+  // Base64 encoder
+  const base64Result = await pinner.upload.base64("SGVsbG8sIFBpbm5lciE=");
+  const base64Upload = await base64Result.result;
+
+  // Text encoder
+  const textResult = await pinner.upload.text("Hello, Pinner!");
+  const textUpload = await textResult.result;
+
+  // CSV encoder
+  const csvResult = await pinner.upload.csv("name,age\nJohn,30\nJane,25");
+  const csvUpload = await csvResult.result;
+
+  // URL encoder (fetches and uploads)
+  const urlResult = await pinner.upload.url("https://example.com/data.json");
+  const urlUpload = await urlResult.result;
+  ```
+
+  ```typescript title="Node.js"
+  import { Pinner } from "@lumeweb/pinner";
+
+  const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY });
+
+  // JSON encoder
+  const jsonResult = await pinner.upload.json({ name: "test" });
+  const result = await jsonResult.result;
+
+  // Base64 encoder
+  const base64Result = await pinner.upload.base64("SGVsbG8sIFBpbm5lciE=");
+  const base64Upload = await base64Result.result;
+
+  // Text encoder
+  const textResult = await pinner.upload.text("Hello, Pinner!");
+  const textUpload = await textResult.result;
+
+  // CSV encoder
+  const csvResult = await pinner.upload.csv("name,age\nJohn,30\nJane,25");
+  const csvUpload = await csvResult.result;
+
+  // URL encoder (fetches and uploads)
+  const urlResult = await pinner.upload.url("https://example.com/data.json");
+  const urlUpload = await urlResult.result;
+  ```
+</CodeGroup>
+
+## Upload Options
+
+Control upload behavior with options:
+
+<CodeGroup>
+  ```typescript title="Browser"
+  const operation = await pinner.upload(file, {
+    name: "my-file",
+    keyvalues: {
+      project: "demo",
+      version: "1.0"
+    },
+    onProgress: (progress) => {
+      console.log(`${progress.percentage.toFixed(2)}% complete`);
+    },
+    onComplete: (result) => {
+      console.log("Upload complete:", result.cid);
+    },
+    onError: (error) => {
+      console.error("Upload failed:", error);
+    },
+    signal: abortController.signal,
+    waitForOperation: true,
+    operationPollingOptions: {
+      interval: 1000,
+      timeout: 60000
+    }
+  });
+  ```
+
+  ```typescript title="Node.js"
+  const operation = await pinner.upload(file, {
+    name: "my-file",
+    keyvalues: {
+      project: "demo",
+      version: "1.0"
+    },
+    onProgress: (progress) => {
+      console.log(`${progress.percentage.toFixed(2)}% complete`);
+    },
+    onComplete: (result) => {
+      console.log("Upload complete:", result.cid);
+    },
+    onError: (error) => {
+      console.error("Upload failed:", error);
+    },
+    signal: abortController.signal,
+    waitForOperation: true,
+    operationPollingOptions: {
+      interval: 1000,
+      timeout: 60000
+    }
+  });
+  ```
+</CodeGroup>
+
+### Option Details
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `name` | `string` | Custom name for the content |
+| `keyvalues` | `Record<string, string>` | Custom metadata |
+| `onProgress` | `(progress) => void` | Progress callback |
+| `onComplete` | `(result) => void` | Success callback |
+| `onError` | `(error) => void` | Error callback |
+| `signal` | `AbortSignal` | Cancel upload with AbortController |
+| `size` | `number` | Size override for ReadableStream inputs |
+| `isDirectory` | `boolean` | Whether upload is a directory |
+| `isCarFile` | `boolean` | Whether input is already a valid CAR file |
+| `waitForOperation` | `boolean` | Wait for pinning to complete |
+| `operationPollingOptions` | `OperationPollingOptions` | Polling configuration |
+
+### Type Guard
+
+Check if a value is an `UploadResult`:
+
+```typescript
+import { isUploadResult } from "@lumeweb/pinner";
+
+const result = await operation.result;
+
+if (isUploadResult(result)) {
+  console.log("Upload ID:", result.id);
+  console.log("CID:", result.cid);
+}
+```
+
+## Builder Pattern
+
+Use the builder pattern for fluent, chainable uploads:
+
+<CodeGroup>
+  ```typescript title="Browser"
+  import { Pinner } from "@lumeweb/pinner";
+
+  const pinner = new Pinner({ jwt: "YOUR_API_TOKEN" });
+
+  // File upload with builder
+  const operation = await pinner.upload.file(file)
+    .name("my-file.txt")
+    .keyvalues({ project: "demo", version: "1.0" })
+    .waitForOperation(true)
+    .operationPollingOptions({ interval: 1000, timeout: 60000 })
+    .pin();
+
+  const result = await operation.result;
+
+  // JSON upload with builder
+  const jsonOp = await pinner.upload.json({ data: "test" })
+    .name("config.json")
+    .keyvalues({ type: "config" })
+    .pin();
+
+  // Text upload with builder
+  const textOp = await pinner.upload.text("Hello, world!")
+    .name("greeting.txt")
+    .pin();
+
+  // CSV upload with builder
+  const csvOp = await pinner.upload.csv("name,age\nJohn,30")
+    .name("users.csv")
+    .pin();
+
+  // Raw CAR upload with builder
+  const carOp = await pinner.upload.raw(carFile)
+    .name("data.car")
+    .pin();
+
+  // Text upload using content alias
+  const contentOp = await pinner.upload.content("Hello, world!")
+    .name("greeting.txt")
+    .pin();
+  ```
+
+  ```typescript title="Node.js"
+  import { Pinner } from "@lumeweb/pinner";
+
+  const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY });
+
+  // File upload with builder
+  const operation = await pinner.upload.file(file)
+    .name("my-file.txt")
+    .keyvalues({ project: "demo", version: "1.0" })
+    .waitForOperation(true)
+    .operationPollingOptions({ interval: 1000, timeout: 60000 })
+    .pin();
+
+  const result = await operation.result;
+
+  // JSON upload with builder
+  const jsonOp = await pinner.upload.json({ data: "test" })
+    .name("config.json")
+    .keyvalues({ type: "config" })
+    .pin();
+
+  // Text upload with builder
+  const textOp = await pinner.upload.text("Hello, world!")
+    .name("greeting.txt")
+    .pin();
+
+  // CSV upload with builder
+  const csvOp = await pinner.upload.csv("name,age\nJohn,30")
+    .name("users.csv")
+    .pin();
+
+  // Raw CAR upload with builder
+  const carOp = await pinner.upload.raw(carFile)
+    .name("data.car")
+    .pin();
+
+  // Text upload using content alias
+  const contentOp = await pinner.upload.content("Hello, world!")
+    .name("greeting.txt")
+    .pin();
+  ```
+</CodeGroup>
+
+### Builder Methods
+
+All builder methods support chaining:
+
+| Method | Description |
+|--------|-------------|
+| `.name(string)` | Set the content name |
+| `.keyvalues(object)` | Set custom metadata |
+| `.waitForOperation(boolean)` | Wait for pinning completion |
+| `.operationPollingOptions(object)` | Configure polling behavior |
+| `.pin()` | Start the upload and return operation |
+
+### Builder Namespace Methods
+
+The `upload` interface also works as a namespace with these methods:
+
+| Method | Input Type | Description |
+|--------|------------|-------------|
+| `.file(file)` | `File` | Upload a File object |
+| `.json(data)` | `object` | Upload JSON as a file |
+| `.text(text)` | `string` | Upload text content |
+| `.content(text)` | `string` | Alias for `.text()` |
+| `.base64(data)` | `string` | Upload Base64 decoded content |
+| `.csv(data)` | `string \| object[] \| any[][]` | Upload CSV data |
+| `.url(url)` | `string` | Upload from URL |
+| `.raw(car)` | `File \| ReadableStream` | Upload raw CAR file |
+

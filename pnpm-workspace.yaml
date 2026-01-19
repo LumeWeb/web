@@ -71,6 +71,7 @@ catalog:
   vite: 7.1.11
   vite-tsconfig-paths: ^6.0.4
   vitest: ^4.0.17
+  vocs: ^1.4.1
   zod: 4.3.5
 
 catalogs:
@@ -78,5 +79,7 @@ catalogs:
     vite: ^6.4.1
   websites:
     tailwindcss: ^4.1.18
+
 gitChecks: false
+
 publishBranch: develop
