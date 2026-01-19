@@ -1,0 +1,114 @@
+---
+title: SDK Utilities
+description: Utility functions and helpers for the Pinner SDK
+---
+
+import { CodeGroup } from '@/components';
+
+# SDK Utilities
+
+Utility functions for stream manipulation, type guards, and CAR preprocessing.
+
+## Type Guards
+
+### isUploadResult
+
+Type guard to check if a value is an `UploadResult`. Useful when receiving unknown values from callbacks or event handlers:
+
+```typescript
+import { isUploadResult } from "@lumeweb/pinner";
+
+// Check a value from a callback or event handler
+function handleUploadResult(value: unknown) {
+  if (isUploadResult(value)) {
+    // TypeScript now knows value is UploadResult
+    console.log("Upload ID:", value.id);
+    console.log("CID:", value.cid);
+    console.log("Created:", value.createdAt);
+  } else {
+    console.log("Not an UploadResult");
+  }
+}
+```
+
+### isRetryable
+
+Check if an error is retryable:
+
+```typescript
+import { isRetryable } from "@lumeweb/pinner";
+
+async function uploadWithRetry(file, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await pinner.upload(file);
+    } catch (error) {
+      if (!isRetryable(error)) {
+        throw error; // Non-retryable, give up
+      }
+      console.log(`Retry attempt ${attempt}/${maxRetries}`);
+    }
+  }
+}
+```
+
+### isAuthenticationError
+
+Check if an error is an authentication error:
+
+```typescript
+import { isAuthenticationError } from "@lumeweb/pinner";
+
+try {
+  await pinner.upload(file);
+} catch (error) {
+  if (isAuthenticationError(error)) {
+    console.log("Token expired, please re-authenticate");
+    // Trigger re-authentication flow
+  }
+}
+```
+
+## MIME Type Constants
+
+Export constants for common MIME types used with CAR files:
+
+```typescript
+import { MIME_TYPE_CAR, MIME_TYPE_OCTET_STREAM, FILE_EXTENSION_CAR } from "@lumeweb/pinner";
+
+console.log(MIME_TYPE_CAR);       // "application/vnd.ipld.car"
+console.log(MIME_TYPE_OCTET_STREAM); // "application/octet-stream"
+console.log(FILE_EXTENSION_CAR);  // ".car"
+```
+
+## Pinata Adapters
+
+### pinataAdapter
+
+Create a Pinata SDK v2.x compatible adapter:
+
+```typescript
+import { pinataAdapter } from "@lumeweb/pinner";
+
+const adapter = pinataAdapter(pinner, {
+  pinataGateway: "example.mypinata.cloud"
+});
+
+// Use like Pinata SDK
+const result = await adapter.upload.public.file(file);
+```
+
+### pinataLegacyAdapter
+
+Create a Pinata SDK v1.x compatible adapter:
+
+```typescript
+import { pinataLegacyAdapter } from "@lumeweb/pinner";
+
+const adapter = pinataLegacyAdapter(pinner);
+
+// Use like legacy Pinata SDK
+const result = await adapter.pinFileToIPFS(file);
+```
+
+See the [Pinata Adapter Reference](/sdk/adapters) for detailed documentation.

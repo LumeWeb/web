@@ -1,0 +1,76 @@
+---
+title: CLI List
+description: List pinned content using the CLI
+---
+
+# CLI List
+
+List your pinned content.
+
+## list command
+
+```bash
+pinner list
+```
+
+## Filter by Name
+
+```bash
+# Filter pins by name
+pinner list --name "backup"
+
+# From stdin
+echo "backup" | pinner list
+```
+
+## Filter by Status
+
+```bash
+# List only pinned content
+pinner list --status pinned
+
+# List queued content
+pinner list --status queued
+
+# List pinning content
+pinner list --status pinning
+
+# List failed content
+pinner list --status failed
+```
+
+## Limit Results
+
+```bash
+# Maximum number of results (default: 10)
+pinner list --limit 20
+
+# Combined filters
+pinner list --name backup --status failed --limit 50
+```
+
+## Watch Mode
+
+Continuously monitor and update pin status:
+
+```bash
+pinner list --watch
+```
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--name` | Filter by name (supports stdin) |
+| `--status` | Filter by status (queued, pinning, pinned, failed) |
+| `--limit` | Maximum number of results (default: 10) |
+| `--watch` | Continuously monitor and update |
+
+## Output Fields
+
+| Field | Description |
+|-------|-------------|
+| CID | Content identifier |
+| NAME | User-provided name |
+| STATUS | Pin status (queued, pinning, pinned, failed) |
+| CREATED | Creation timestamp |

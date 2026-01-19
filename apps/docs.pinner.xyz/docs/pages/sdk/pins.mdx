@@ -1,0 +1,129 @@
+---
+title: Pin Management
+description: Manage pins using the SDK
+---
+
+import { CodeGroup } from '@/components';
+import UploadCodeExamples from "../../partials/_upload-code-examples.mdx";
+import PinStatusCheck from "../../partials/_pin-status-check.mdx";
+
+# Pin Management
+
+Manage content pins using the Pinner SDK.
+
+## Pin by CID
+
+<UploadCodeExamples />
+
+## List Pins
+
+<CodeGroup>
+  ```typescript title="Browser"
+  const pins = await pinner.listPins();
+
+  for (const pin of pins) {
+    console.log(pin.cid, pin.status);
+  }
+  ```
+
+  ```typescript title="Node.js"
+  const pins = await pinner.listPins();
+
+  for (const pin of pins) {
+    console.log(pin.cid, pin.status);
+  }
+  ```
+</CodeGroup>
+
+## Get Pin Status
+
+<PinStatusCheck />
+
+## Check if Content is Pinned
+
+<CodeGroup>
+  ```typescript title="Browser"
+  const isPinned = await pinner.isPinned("bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq");
+
+  console.log("Is pinned:", isPinned);
+  ```
+
+  ```typescript title="Node.js"
+  const isPinned = await pinner.isPinned("bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq");
+
+  console.log("Is pinned:", isPinned);
+  ```
+</CodeGroup>
+
+## Update Metadata
+
+<CodeGroup>
+  ```typescript title="Browser"
+  await pinner.setPinMetadata("bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq", {
+    name: "updated-name",
+    customKey: "custom-value"
+  });
+  ```
+
+  ```typescript title="Node.js"
+  await pinner.setPinMetadata("bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq", {
+    name: "updated-name",
+    customKey: "custom-value"
+  });
+  ```
+</CodeGroup>
+
+## Unpin
+
+<CodeGroup>
+  ```typescript title="Browser"
+  await pinner.unpin("bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq");
+  ```
+
+  ```typescript title="Node.js"
+  await pinner.unpin("bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq");
+  ```
+</CodeGroup>
+
+## Unpin by Request ID
+
+Remove a pin using a known request ID. The request ID (`requestid`) is the pinning service's identifier for a specific pin operation:
+
+<CodeGroup>
+  ```typescript title="Browser"
+  import { Pinner } from "@lumeweb/pinner";
+
+  const pinner = new Pinner({ jwt: "YOUR_API_TOKEN" });
+
+  // Unpin using a known request ID (obtained from your pinning service)
+  await pinner.unpinByRequestId("your-request-id-here");
+  ```
+
+  ```typescript title="Node.js"
+  import { Pinner } from "@lumeweb/pinner";
+
+  const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY });
+
+  // Unpin using a known request ID (obtained from your pinning service)
+  await pinner.unpinByRequestId("your-request-id-here");
+  ```
+</CodeGroup>
+
+### Using with Pinata Adapter
+
+If you're using the Pinata adapter, you can delete pins by CID directly:
+
+```typescript
+import { pinataAdapter } from "@lumeweb/pinner";
+
+const adapter = pinataAdapter(pinner, {
+  pinataGateway: "example.mypinata.cloud"
+});
+
+// Delete by CID (adapter handles request ID internally)
+await adapter.files.public.delete(["bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq"]);
+```
+
+:::info
+The request ID (`requestid`) is typically returned by the pinning service when content is pinned. For Pinata, you can use the adapter's `delete()` method which accepts CIDs and handles the request ID lookup internally.
+:::

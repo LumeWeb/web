@@ -1,0 +1,184 @@
+---
+title: Progress Tracking
+description: Track upload and pin progress
+---
+
+import { CodeGroup } from '@/components';
+
+# Progress Tracking
+
+Monitor the progress of uploads and pin operations.
+
+## UploadOperation Interface
+
+The `upload()` method returns an `UploadOperation` with control methods:
+
+<CodeGroup>
+  ```typescript title="Browser"
+  import { Pinner } from "@lumeweb/pinner";
+
+  const pinner = new Pinner({ jwt: "YOUR_API_TOKEN" });
+
+  const operation = await pinner.upload(file);
+
+  // Access the result promise
+  const result = await operation.result;
+  console.log("CID:", result.cid);
+  console.log("Upload ID:", result.id);
+
+  // Control the upload
+  operation.pause();    // Pause (TUS only)
+  operation.resume();   // Resume (TUS only)
+  operation.cancel();   // Cancel the upload
+  ```
+
+  ```typescript title="Node.js"
+  import { Pinner } from "@lumeweb/pinner";
+
+  const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY });
+
+  const operation = await pinner.upload(file);
+
+  // Access the result promise
+  const result = await operation.result;
+  console.log("CID:", result.cid);
+  console.log("Upload ID:", result.id);
+
+  // Control the upload
+  operation.pause();    // Pause (TUS only)
+  operation.resume();   // Resume (TUS only)
+  operation.cancel();   // Cancel the upload
+  ```
+</CodeGroup>
+
+### UploadOperation Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `result` | `Promise<UploadResult>` | Promise resolving when upload completes |
+| `progress` | `Readonly<UploadProgress>` | Current upload progress |
+| `cancel()` | `() => void` | Cancel the ongoing upload |
+| `pause()` | `() => void` | Pause the upload (TUS protocol) |
+| `resume()` | `() => void` | Resume a paused upload (TUS protocol) |
+
+## Progress Tracking
+
+<CodeGroup>
+  ```typescript title="Browser"
+  import { Pinner } from "@lumeweb/pinner";
+
+  const pinner = new Pinner({ jwt: "YOUR_API_TOKEN" });
+
+  const operation = await pinner.upload(file, {
+    onProgress: (progress) => {
+      console.log(`Progress: ${progress.percentage.toFixed(2)}%`);
+      console.log(`Uploaded: ${progress.bytesUploaded} / ${progress.bytesTotal} bytes`);
+      console.log(`Speed: ${progress.speed} bytes/sec`);
+      console.log(`ETA: ${progress.eta} seconds`);
+    }
+  });
+
+  const result = await operation.result;
+  console.log("Complete:", result.cid);
+  ```
+
+  ```typescript title="Node.js"
+  import { Pinner } from "@lumeweb/pinner";
+
+  const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY });
+
+  const operation = await pinner.upload(file, {
+    onProgress: (progress) => {
+      console.log(`Progress: ${progress.percentage.toFixed(2)}%`);
+      console.log(`Uploaded: ${progress.bytesUploaded} / ${progress.bytesTotal} bytes`);
+      console.log(`Speed: ${progress.speed} bytes/sec`);
+      console.log(`ETA: ${progress.eta} seconds`);
+    }
+  });
+
+  const result = await operation.result;
+  console.log("Complete:", result.cid);
+  ```
+</CodeGroup>
+
+### UploadProgress Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `percentage` | `number` | Percentage complete (0-100) |
+| `bytesUploaded` | `number` | Number of bytes uploaded |
+| `bytesTotal` | `number` | Total bytes to upload |
+| `speed` | `number` | Upload speed in bytes per second |
+| `eta` | `number` | Estimated time remaining in seconds |
+
+## WaitForOperation
+
+Wait for an operation to complete:
+
+<CodeGroup>
+  ```typescript title="Browser"
+  import { Pinner } from "@lumeweb/pinner";
+
+  const pinner = new Pinner({ jwt: "YOUR_API_TOKEN" });
+
+  const operation = await pinner.upload(file);
+
+  // Get the result first
+  const uploadResult = await operation.result;
+
+  // Wait for the pinning operation to complete
+  const result = await pinner.waitForOperation(uploadResult, {
+    interval: 1000,  // Poll every 1 second
+    timeout: 60000   // Timeout after 60 seconds
+  });
+
+  console.log("Status:", result);
+  console.log("CID:", result.cid);
+  ```
+
+  ```typescript title="Node.js"
+  import { Pinner } from "@lumeweb/pinner";
+
+  const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY });
+
+  const operation = await pinner.upload(file);
+
+  // Get the result first
+  const uploadResult = await operation.result;
+
+  // Wait for the pinning operation to complete
+  const result = await pinner.waitForOperation(uploadResult, {
+    interval: 1000,  // Poll every 1 second
+    timeout: 60000   // Timeout after 60 seconds
+  });
+
+  console.log("Status:", result);
+  console.log("CID:", result.cid);
+  ```
+</CodeGroup>
+
+### waitForOperation Scenarios
+
+The `waitForOperation` method accepts either an operation ID (number) or an `UploadResult`:
+
+**Scenario 1: Wait with UploadResult (recommended)**
+```typescript
+const operation = await pinner.upload(file);
+const uploadResult = await operation.result;
+const result = await pinner.waitForOperation(uploadResult);
+```
+
+**Scenario 2: Wait with operation ID from UploadResult**
+```typescript
+const operation = await pinner.upload(file);
+const uploadResult = await operation.result;
+const result = await pinner.waitForOperation(uploadResult.operationId);
+```
+
+### Operation Polling Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `interval` | `number` | 2000 | Polling interval in milliseconds |
+| `timeout` | `number` | 300000 | Maximum wait time in milliseconds |
+| `settledStates` | `string[]` | `["completed", "failed", "error"]` | States considered settled |

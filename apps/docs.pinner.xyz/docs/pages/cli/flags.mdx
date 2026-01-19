@@ -1,0 +1,62 @@
+---
+title: CLI Global Flags
+description: Reference for global CLI flags
+---
+
+# CLI Global Flags
+
+Flags available on all commands.
+
+## Available Flags
+
+| Flag | Description |
+|------|-------------|
+| `--json` | Output in JSON format |
+| `--verbose, -v` | Enable verbose logging |
+| `--quiet, -q` | Suppress non-error output |
+| `--unmask` | Show sensitive data (tokens, passwords) unmasked |
+| `--auth-token` | Auth token to override config (env: PINNER_AUTH_TOKEN) |
+| `--secure` | Use HTTPS for API connections (default: true, env: PINNER_SECURE) |
+
+## Examples
+
+```bash
+# JSON output
+pinner list --json
+
+# Verbose logging
+pinner upload file.txt --verbose
+
+# Suppress output
+pinner upload file.txt --quiet
+
+# Show unmasked tokens
+pinner config --unmask
+
+# Override auth token
+pinner upload file.txt --auth-token "YOUR_TOKEN"
+
+# Use HTTP instead of HTTPS
+pinner status bafy... --secure false
+```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `PINNER_AUTH_TOKEN` | API authentication token |
+| `PINNER_SECURE` | Use HTTPS (true/false, default: true) |
+| `PINNER_EMAIL` | Email address for authentication |
+| `PINNER_PASSWORD` | Password for authentication |
+| `PINNER_OTP` | 6-digit OTP code for 2FA |
+| `PINNER_MEMORY_LIMIT` | Memory limit for CAR generation in MB |
+
+## Output Modes
+
+The CLI supports different output modes:
+
+- **Default**: Human-readable colored output
+- `--json`: Machine-readable JSON output
+- `--quiet`: Minimal output (errors only)
+- `--verbose`: Detailed output with debug information
+- `--unmask`: Show sensitive values (tokens, passwords)

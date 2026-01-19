@@ -33,7 +33,7 @@ This monorepo uses **pnpm workspaces** and **Turbo** for build orchestration, fe
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 20+ 
 - pnpm 10.15.0+
 - Git
 

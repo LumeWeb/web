@@ -1,5 +1,5 @@
 {
-  "name": "@lumeweb/docs.lumeweb.com",
+  "name": "@lumeweb/docs.pinner.xyz",
   "version": "0.6.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,12 @@
     "preview": "vocs preview"
   },
   "devDependencies": {
+    "@radix-ui/react-tabs": "^1.1.13",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "clsx": "catalog:",
     "react": "catalog:",
+    "tailwindcss": "catalog:websites",
     "vocs": "catalog:"
   },
   "repository": {

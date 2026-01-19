@@ -1,0 +1,112 @@
+---
+title: Migrate from Pinata
+description: Step-by-step guide to migrate from Pinata SDK to Pinner
+---
+
+import { HomePage } from "vocs/components";
+import SdkInstallation from "../../partials/_sdk-installation.mdx";
+
+# Migrate from Pinata
+
+A step-by-step guide to migrate your application from Pinata SDK to Pinner.
+
+## Why Migrate?
+
+- ✅ **Privacy-focused infrastructure** - Your data, your control
+- ✅ **Competitive pricing** - Better value for your storage needs
+- ✅ **Multi-Network Access** - Support for multiple storage networks through one service
+- ✅ **Drop-in compatibility** - Minimal code changes required
+
+## Migration Strategy
+
+Pinner offers two approaches:
+
+| Approach | Best For | Effort |
+|----------|----------|--------|
+| **Pinata Adapter** | Quick migration, minimal changes | Low |
+| **Native Pinner API** | Long-term projects, better features | Medium |
+
+:::tip
+Start with the adapter for quick migration, then gradually transition to the native API for better performance and features.
+:::
+
+## Quick Migration (Using Adapter)
+
+### Step 1: Install Pinner
+
+<SdkInstallation />
+
+### Step 2: Configure Adapter
+
+Choose the appropriate adapter and configure it. See [Pinata Adapter Reference](/sdk/adapters#quick-setup) for detailed setup instructions.
+
+**For Pinata SDK 2.x:**
+```typescript
+import { pinataAdapter } from "@lumeweb/pinner";
+```
+
+**For Pinata SDK 1.x:**
+```typescript
+import { pinataLegacyAdapter } from "@lumeweb/pinner";
+```
+
+### Step 3: Replace Initialization
+
+Replace your Pinata SDK initialization with the Pinner adapter. See [Adapter Quick Setup](/sdk/adapters#quick-setup) for detailed examples.
+
+The adapter provides the same API as Pinata SDK. See the [API Comparison](/sdk/adapters#api-comparison-tables) for a complete mapping.
+
+See [Code Examples](/migration/examples) for comprehensive side-by-side code comparisons.
+
+## Migration Checklist
+
+- [ ] Install `@lumeweb/pinner` package
+- [ ] Update imports and initialization
+- [ ] Replace API calls with adapter calls
+- [ ] Add `.execute()` to builder methods (v2 adapter)
+- [ ] Test file uploads
+- [ ] Test file listing and deletion
+- [ ] Update error handling (see [Code Examples](/migration/examples))
+- [ ] Remove Pinata SDK dependency
+- [ ] Deploy and monitor
+
+## Common Patterns
+
+See [Code Examples](/migration/examples) for comprehensive side-by-side comparisons of:
+- File uploads
+- Directory uploads
+- JSON uploads
+- Base64 uploads
+- Pinning by CID
+- Listing files
+- Deleting files
+- And more
+
+## Handling Differences
+
+### Builder Pattern (v2 Adapter)
+
+The v2 adapter uses a builder pattern. Chain methods and call `.execute()`. See [Builder Patterns](/sdk/adapters#builder-patterns) for detailed examples.
+
+### Error Handling
+
+Pinner errors follow a different structure. See [Error Handling Examples](/migration/examples#error-handling).
+
+### Unsupported Features
+
+Some Pinata features are not supported. See [Unsupported Features](/sdk/adapters#unsupported-features) for details and alternatives.
+
+## Testing Your Migration
+
+1. **Test in development** - Verify all upload operations work
+2. **Check file listings** - Ensure metadata is preserved
+3. **Verify deletions** - Test unpin operations
+4. **Monitor performance** - Compare upload speeds
+5. **Check costs** - Review your billing
+
+## Next Steps
+
+- 📖 [API Reference](/sdk/adapters) - Complete adapter documentation
+- 💻 [Code Examples](/migration/examples) - Detailed code comparisons
+- 🚀 [Native API](/sdk/upload) - Using Pinner without adapter
+- 📚 [Concepts](/concepts/cids) - Understanding CIDs and IPFS

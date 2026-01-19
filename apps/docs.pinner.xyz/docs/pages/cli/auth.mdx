@@ -1,0 +1,30 @@
+---
+title: CLI Authentication
+description: Authenticate using the CLI
+---
+
+import CliAuthCommands from "../../partials/_cli-auth-commands.mdx";
+
+# CLI Authentication
+
+Manage authentication from the command line.
+
+<CliAuthCommands />
+
+## account
+
+Manage your Pinner.xyz account settings:
+
+```bash
+# Enable 2FA
+pinner account otp enable
+
+# Enable 2FA with OTP code (non-interactive)
+pinner account otp enable --otp 123456
+
+# Disable 2FA
+pinner account otp disable
+
+# Disable 2FA with password (non-interactive)
+pinner account otp disable --password mypassword
+```

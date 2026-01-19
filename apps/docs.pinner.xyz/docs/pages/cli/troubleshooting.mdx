@@ -1,0 +1,354 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for the Pinner CLI
+---
+
+# Troubleshooting
+
+Common issues and solutions for the Pinner CLI. If you can't find your issue here, run `pinner doctor` to gather diagnostic information.
+
+## Quick Fixes
+
+### Authentication Issues
+
+**"Not authenticated" error when running commands**
+
+```bash
+# Check authentication status
+pinner doctor
+```
+
+If you're not authenticated:
+```bash
+# Interactive login
+pinner auth --email your@email.com
+
+# Or provide token directly
+pinner auth YOUR_API_TOKEN
+```
+
+**"Authentication expired or invalid"**
+
+Your session token has expired. Re-authenticate:
+```bash
+pinner auth --email your@email.com
+```
+
+### Connection Issues
+
+**"Connection failed" or "Network timeout"**
+
+1. Check your internet connection
+2. Verify the API endpoint is accessible:
+```bash
+ping pinner.xyz
+```
+3. Check if you're behind a firewall or proxy
+4. Try with `--secure=false` to use HTTP (not recommended for production):
+```bash
+pinner --secure=false upload myfile.txt
+```
+
+### File Issues
+
+**"File not found"**
+
+1. Verify the file path is correct
+2. Check file permissions:
+```bash
+ls -la /path/to/your/file
+```
+3. Use absolute paths:
+```bash
+pinner upload /absolute/path/to/file.txt
+```
+
+**"Permission denied"**
+
+1. Check file ownership:
+```bash
+ls -la /path/to/file
+```
+2. Change permissions if needed:
+```bash
+chmod 644 /path/to/file
+```
+
+## Authentication Errors
+
+### Not Authenticated
+
+**Cause:** No authentication token is configured.
+
+**Solution:**
+```bash
+# Method 1: Interactive login
+pinner auth --email your@email.com
+
+# Method 2: Provide token directly
+pinner auth YOUR_API_TOKEN
+
+# Method 3: Use environment variables
+export PINNER_EMAIL="your@email.com"
+export PINNER_PASSWORD="yourpassword"
+pinner auth
+```
+
+**Environment variables for authentication:**
+- `PINNER_EMAIL` - Email address
+- `PINNER_PASSWORD` - Password
+- `PINNER_OTP` - 2FA code (if enabled)
+- `PINNER_AUTH_TOKEN` - API token (alternative to login)
+
+### Registration Issues
+
+**"Registration failed"**
+
+1. Verify your email format is correct
+2. Check password meets requirements (usually 8+ characters)
+3. Ensure you're not using an already registered email:
+```bash
+pinner register --email new@email.com
+```
+
+**Email confirmation issues**
+
+After registration, you must confirm your email:
+```bash
+pinner confirm-email --email your@email.com --token VERIFICATION_TOKEN
+```
+
+Check your email for the verification token. If you didn't receive it:
+1. Check spam folder
+2. Verify the email address is correct
+3. Try registering again
+
+## Upload Errors
+
+### Upload Failed
+
+**Cause:** The upload operation could not complete.
+
+**Solutions:**
+1. Check your internet connection
+2. Verify file is readable:
+```bash
+cat /path/to/file > /dev/null && echo "File is readable"
+```
+3. Try with a smaller file first
+4. Check available disk space
+5. Increase memory limit for large files:
+```bash
+pinner upload largefile.dat --memory-limit 1024
+```
+
+### Upload Interrupted
+
+**Cause:** Upload was interrupted (Ctrl+C or network issue).
+
+**Solution:**
+The CLI supports resume for TUS uploads. Try uploading again:
+```bash
+pinner upload file.dat --wait
+```
+
+### Invalid CID
+
+**Cause:** The content identifier (CID) format is invalid.
+
+**Solution:**
+1. Verify the CID is correct
+2. CIDs should start with `Qm`, `bafy`, or similar multiformat prefix
+3. Example valid CID: `bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq`
+
+## Pinning Errors
+
+### Pin Not Found
+
+**Cause:** The specified CID is not pinned in your account.
+
+**Solution:**
+1. List your pins to verify:
+```bash
+pinner list
+```
+2. Check if the CID is correct
+3. Pin the content if not already pinned:
+```bash
+pinner pin bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq
+```
+
+### Pinning Failed
+
+**Cause:** The pinning operation could not complete.
+
+**Solutions:**
+1. Verify the CID exists on IPFS
+2. Check your network connection
+3. Try again later
+4. Check pin status:
+```bash
+pinner status bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq
+```
+
+## Configuration Issues
+
+### Configuration Not Found
+
+**Cause:** No configuration file exists.
+
+**Solution:**
+Run setup to create configuration:
+```bash
+pinner setup
+```
+
+Configuration is stored at `~/.config/pinner/config.toml` (Linux/macOS) or `%APPDATA%\pinner\config.toml` (Windows).
+
+### Configuration Invalid
+
+**Cause:** Configuration file contains invalid values.
+
+**Solution:**
+1. Check configuration:
+```bash
+pinner config get
+```
+2. Reset configuration:
+```bash
+pinner setup --reset
+```
+3. Edit config manually or delete and re-run setup
+
+## Network Errors
+
+### Connection Failed
+
+**Cause:** Cannot connect to the Pinner API.
+
+**Solutions:**
+1. Check internet connection:
+```bash
+curl -I https://pinner.xyz
+```
+2. Check firewall/proxy settings
+3. Try with verbose output:
+```bash
+pinner --verbose upload file.txt
+```
+
+### Network Timeout
+
+**Cause:** Request timed out.
+
+**Solutions:**
+1. Try again (may be temporary)
+2. Use a more stable network connection
+3. Increase timeout by retrying the operation
+
+## Input Validation Errors
+
+### Path Required
+
+**Cause:** No file path provided for upload.
+
+**Solution:**
+```bash
+pinner upload /path/to/file.txt
+```
+
+### CID Required
+
+**Cause:** No CID provided for pin/status operations.
+
+**Solution:**
+```bash
+pinner pin bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq
+```
+
+### Invalid CID Format
+
+**Cause:** CID format is not recognized.
+
+**Solution:**
+1. Verify the CID is correct
+2. CIDs are case-sensitive
+3. Example valid CID: `bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq`
+
+### No CIDs Provided
+
+**Cause:** No CIDs specified for batch operation.
+
+**Solution:**
+Provide CIDs directly or use a file:
+```bash
+# Direct CIDs
+pinner pin bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco
+
+# From file (one CID per line)
+pinner pin --file cids.txt
+```
+
+## Getting Help
+
+### Run Diagnostics
+
+Use the `doctor` command to gather diagnostic information:
+```bash
+pinner doctor
+```
+
+For JSON output (useful for bug reports):
+```bash
+pinner doctor --json
+```
+
+### Verbose Output
+
+Enable verbose mode to see detailed logs:
+```bash
+pinner --verbose upload file.txt
+```
+
+### Check Configuration
+
+View your current configuration:
+```bash
+pinner config get
+```
+
+### Still Need Help?
+
+1. Run `pinner doctor` to gather diagnostic info
+2. Search [existing issues](https://github.com/lumeweb/pinner-cli/issues)
+3. Open a new issue with:
+   - Error message
+   - Steps to reproduce
+   - Configuration output (`pinner doctor`)
+   - Operating system and version
+
+## Environment Variables Reference
+
+| Variable | Description |
+|----------|-------------|
+| `PINNER_EMAIL` | Email for authentication |
+| `PINNER_PASSWORD` | Password for authentication |
+| `PINNER_OTP` | 2FA code for authentication |
+| `PINNER_AUTH_TOKEN` | API token (alternative to login) |
+| `PINNER_SECURE` | Use HTTPS (true/false) |
+| `PINNER_MEMORY_LIMIT` | Memory limit for CAR generation in MB |
+
+## Shell Completion
+
+If shell completion isn't working:
+
+```bash
+# Setup bash completion
+echo 'source <(pinner completion bash)' >> ~/.bashrc
+
+# Setup zsh completion
+echo 'source <(pinner completion zsh)' >> ~/.zshrc
+
+# Setup fish completion
+pinner completion fish > ~/.config/fish/completions/pinner.fish
+```

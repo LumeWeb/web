@@ -1,0 +1,69 @@
+---
+title: Quickstart
+description: Upload your first file to Pinner in under 5 minutes
+---
+
+import { HomePage, Callout } from "vocs/components";
+import PinnerDefinition from "../partials/_pinner-definition.mdx";
+import Prerequisites from "../partials/_prerequisites.mdx";
+import ApiTokenSetup from "../partials/_api-token-setup.mdx";
+import SdkInstallation from "../partials/_sdk-installation.mdx";
+import GatewayQuickInfo from "../partials/_gateway-quick-info.mdx";
+import GatewayAlternatives from "../partials/_gateway-alternatives.mdx";
+
+# Quickstart
+
+Get started with Pinner in 5 minutes. But first, a quick overview...
+
+<PinnerDefinition />
+
+<Callout type="info">
+  **Pinner ≠ Gateway**
+
+  Pinner is a pinning service, not a gateway. We ensure your content stays available on decentralized networks, but we don't provide HTTP gateways for content retrieval. [Learn more](/about) or [contact us](/) about custom gateway solutions.
+</Callout>
+
+<Prerequisites />
+
+<ApiTokenSetup />
+
+## Step 2: Install the SDK
+
+<SdkInstallation />
+
+## Step 3: Upload Your First File
+
+```typescript
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: "YOUR_API_TOKEN" });
+
+// Upload and pin a simple message
+const operation = await pinner.upload.json({ message: "Hello, Pinner!" }).pin();
+console.log("CID:", operation.result.cid);
+```
+
+**What just happened?**
+
+1. You created content (a JSON object)
+2. Pinner generated a **CID** (Content Identifier) - a unique address for your content
+3. Pinner **pinned** your content, ensuring it stays available on the decentralized network
+
+## Understanding the Result
+
+The `CID` (Content Identifier) is a unique fingerprint for your content. You can use it to:
+
+- Retrieve your content from any IPFS gateway
+- Share it with others
+- Pin it again in the future
+
+## What Next?
+
+<GatewayQuickInfo />
+
+<GatewayAlternatives />
+
+- [Learn about CIDs](/concepts/cids) - Understand content identifiers
+- [Upload more file types](/sdk/upload) - Directories, CAR files, and more
+- [Explore the CLI](/cli/getting-started) - Command-line interface
+- [What is Pinner?](/about) - Product overview and scope

@@ -6,6 +6,10 @@ changelog = "libs/advanced-rest/CHANGELOG.md"
 versioned_files = ["apps/docs.lumeweb.com/package.json"]
 changelog = "apps/docs.lumeweb.com/CHANGELOG.md"
 
+[packages."@lumeweb/docs.pinner.xyz"]
+versioned_files = ["apps/docs.pinner.xyz/package.json"]
+changelog = "apps/docs.pinner.xyz/CHANGELOG.md"
+
 [packages."@lumeweb/lumeweb.com"]
 versioned_files = ["apps/lumeweb.com/package.json"]
 changelog = "apps/lumeweb.com/CHANGELOG.md"

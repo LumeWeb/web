@@ -1,0 +1,149 @@
+---
+title: Shell Completions
+description: Enable tab completion for the Pinner CLI
+---
+
+import { CodeGroup } from '@/components';
+
+# Shell Completions
+
+Enable tab completion for the Pinner CLI in your shell.
+
+## Overview
+
+The Pinner CLI supports programmable completion for:
+- **bash**
+- **zsh**
+- **fish**
+- **PowerShell (pwsh)**
+
+## Generate Completion Script
+
+Generate the completion script for your shell:
+
+<CodeGroup>
+  ```bash title="Bash"
+  pinner completion bash > ~/.bash_completion.d/pinner
+  ```
+
+  ```bash title="ZSH"
+  pinner completion zsh > ~/.zsh/completion/_pinner
+  ```
+
+  ```bash title="Fish"
+  pinner completion fish > ~/.config/fish/completions/pinner.fish
+  ```
+
+  ```powershell title="PowerShell"
+  pinner completion pwsh > pinner.ps1
+  ```
+</CodeGroup>
+
+## Setup per Shell
+
+### Bash
+
+Add to your shell profile:
+
+```bash
+# Option 1: Source directly
+source <(pinner completion bash)
+
+# Option 2: Save to bash_completion.d (requires setup)
+pinner completion bash > ~/.bash_completion.d/pinner
+```
+
+The completion script will be automatically sourced in new bash shells if saved to `~/.bash_completion.d/pinner`.
+
+### ZSH
+
+Add to your `.zshrc`:
+
+```bash
+# Generate completion function
+PROG=pinner
+source <(pinner completion zsh)
+```
+
+Or save to your completions directory:
+
+```bash
+pinner completion zsh > ~/.zsh/completion/_pinner
+```
+
+Make sure your `.zshrc` includes the completions directory:
+
+```bash
+fpath+=~/.zsh/completion
+autoload -Uz compinit
+compinit
+```
+
+### Fish
+
+Save to fish completions directory:
+
+```bash
+pinner completion fish > ~/.config/fish/completions/pinner.fish
+```
+
+Completions are automatically loaded in new fish shells.
+
+### PowerShell
+
+Generate and source the completion script:
+
+```powershell
+# Generate completion script
+pinner completion pwsh > pinner.ps1
+
+# Source for current session
+. ./pinner.ps1
+
+# Persist across sessions - add to profile
+code $profile
+# Add: . ./pinner.ps1
+```
+
+## Verify Installation
+
+```bash
+# Test completion is working
+pinner <TAB><TAB>
+# Should show: auth  config  doctor  help  list  pin  setup  status  unpin  upload
+
+# Test command completion
+pinner auth <TAB><TAB>
+# Should show available auth options
+```
+
+## Completion Features
+
+The completion script provides:
+- Command completion (`pinner <TAB>`)
+- Subcommand completion (`pinner auth <TAB>`)
+- Flag completion (`pinner upload --<TAB>`)
+- File/path completion for file arguments
+
+## Troubleshooting
+
+### Completion not working in new shell
+
+Ensure the completion script is sourced in your shell profile:
+- **Bash**: `~/.bashrc` or `~/.bash_profile`
+- **ZSH**: `~/.zshrc`
+- **Fish**: `~/.config/fish/config.fish`
+- **PowerShell**: `$PROFILE`
+
+### Regenerate completions
+
+If you update the CLI, regenerate completions:
+
+```bash
+pinner completion bash > ~/.bash_completion.d/pinner
+```
+
+## Related Commands
+
+- [`pinner --help`](/cli/commands) - General help
+- [`pinner doctor`](/cli/doctor) - Diagnostic checks
