@@ -13,6 +13,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "build:lumeweb.com": "turbo build --filter=@lumeweb/lumeweb.com",
     "build:docs.lumeweb.com": "turbo build --filter=@lumeweb/docs.lumeweb.com",
+    "build:docs.pinner.xyz": "turbo build --filter=@lumeweb/docs.pinner.xyz",
     "build:portal-frontend": "turbo build --filter=@lumeweb/portal-frontend",
     "build:portal-app-shell": "turbo build --filter=@lumeweb/portal-app-shell",
     "build:portal-plugin-dashboard": "turbo build --filter=@lumeweb/portal-plugin-dashboard",
