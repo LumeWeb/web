@@ -31,17 +31,16 @@ jobs:
         uses: LumeWeb/workflows/.github/actions/setup-all@develop
       - name: Build
         run: pnpm build:lumeweb.com
-      - name: Publish to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages
         id: deploy_cf
-        uses: cloudflare/pages-action@v1
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          projectName: lumeweb-com
-          directory: apps/lumeweb.com/dist
+          command: pages deploy apps/lumeweb.com/dist --project-name=lumeweb-com
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
       - uses: mshick/add-pr-comment@v2
         if: github.event_name == 'pull_request'
         with:
           message: |
-            lumeweb.com has been deployed to [Staging](${{ steps.deploy_cf.outputs.url }}).
+            lumeweb.com has been deployed to [Staging](${{ steps.deploy_cf.outputs.deployment-url }}).
