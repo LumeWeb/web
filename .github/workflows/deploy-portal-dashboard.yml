@@ -29,9 +29,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup
         uses: LumeWeb/workflows/.github/actions/setup-all@develop
-        with:
-          node_version: 20.10.0
-          go_version: 1.23.0
       - name: Make envfile
         uses: SpicyPizza/create-envfile@v2.0
         with:
