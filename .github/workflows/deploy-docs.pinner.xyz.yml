@@ -1,0 +1,50 @@
+name: Deploy docs.pinner.xyz
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'apps/docs.pinner.xyz/**'
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'apps/docs.pinner.xyz/**'
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+permissions:
+  pull-requests: write
+  deployments: write
+  contents: read
+
+
+jobs:
+  build:
+    name: Deploy docs.pinner.xyz
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: LumeWeb/workflows/.github/actions/setup-all@develop
+        with:
+          node_version: 20.10.0
+          go_version: 1.23.0
+      - name: Build
+        run: pnpm build:docs.pinner.xyz
+      - name: Publish to Cloudflare Pages
+        id: deploy_cf
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          projectName: docs-pinner-xyz
+          directory: apps/docs.pinner.xyz/docs/dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - uses: mshick/add-pr-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          message: |
+            The docs.pinner.xyz has been deployed to [Staging](${{ steps.deploy_cf.outputs.url }}).
