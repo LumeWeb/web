@@ -38,7 +38,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           projectName: lumeweb-com
-          directory: dist/apps/lumeweb.com
+          directory: apps/lumeweb.com/dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
       - uses: mshick/add-pr-comment@v2
         if: github.event_name == 'pull_request'
