@@ -977,8 +977,9 @@ paths:
       description: Verifies a user's email address using a token sent via email. Optionally
         auto-login user if they don't have 2FA enabled.
       parameters:
-        - description: 'Auto-login user after verification (boolean: true/false; also
-          accepts 1/0).'
+        - description: >-
+            Auto-login user after verification (boolean: true/false; also
+            accepts 1/0).
           in: query
           name: login
           schema:
@@ -1463,9 +1464,10 @@ paths:
           name: _order
           schema:
             type: string
-        - description: 'Comma-separated list of fields to sort by. Available fields:
-          id, operation, protocol, status, status_message, progress_percent, cid,
-          total_steps, current_step, error'
+        - description: >-
+            Comma-separated list of fields to sort by. Available fields:
+            id, operation, protocol, status, status_message, progress_percent, cid,
+            total_steps, current_step, error
           in: query
           name: _sort
           schema:
