@@ -37,17 +37,16 @@ jobs:
           directory: apps/portal-dashboard
       - name: Build
         run: pnpm build:portal-dashboard
-      - name: Publish to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages
         id: deploy_cf
-        uses: cloudflare/pages-action@v1
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          projectName: lume-web-portal-dashboard-staging
-          directory: apps/portal-dashboard/build/client
+          command: pages deploy apps/portal-dashboard/build/client --project-name=lume-web-portal-dashboard-staging
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
       - uses: mshick/add-pr-comment@v2
         if: github.event_name == 'pull_request'
         with:
           message: |
-            The Portal Dashboard has been deployed to [Staging](${{ steps.deploy_cf.outputs.url }}).
+            The Portal Dashboard has been deployed to [Staging](${{ steps.deploy_cf.outputs.deployment-url }}).
