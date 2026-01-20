@@ -78,7 +78,8 @@
     "typescript-eslint": "^8.53.0",
     "vite": "catalog:framework",
     "vitest": "catalog:",
-    "vitest-browser-react": "^2.0.2"
+    "vitest-browser-react": "^2.0.2",
+    "wrangler": "^4.59.2"
   },
   "pnpm": {
     "patchedDependencies": {
