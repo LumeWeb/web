@@ -901,7 +901,7 @@ Examples:
                 logger.debug(f"Build directory: {build_dir}")
 
             # Copy to Go directory (always replace)
-            copy_build_to_go(f"{PLUGIN_PREFIX}{plugin_name}", build_dir, repo_root, args.verbose)
+            copy_build_to_go(f"{PLUGIN_PREFIX}{plugin_name}", build_dir, repo_root)
 
         except Exception as e:
             logger.error(f"Error processing plugin {plugin_name}: {e}")
