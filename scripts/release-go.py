@@ -484,6 +484,16 @@ class SafeBuildCopier:
         for repo_target, group_targets in repo_groups.items():
             self._copy_repo_group(repo_target, group_targets)
     
+    def get_modified_apps_list(self, targets: List[BuildTarget]) -> List[str]:
+        """Get list of modified app names for metadata"""
+        modified_apps = []
+        for target in targets:
+            if target.context.type == BuildContextType.APP_SHELL:
+                modified_apps.append(f"portal-app-shell")
+            else:
+                modified_apps.append(f"portal-plugin-{target.name}")
+        return modified_apps
+    
     def _copy_repo_group(self, repo_target: str, targets: List[BuildTarget]) -> None:
         """Copy a group of targets that merge to the same repo"""
         if repo_target in self.copied_repos:
@@ -748,6 +758,26 @@ def filter_targets(registry: BuildRegistry, target_filter: str) -> List[BuildTar
     return filtered_targets
 
 
+def write_metadata_files(modified_apps: List[str], verbose: bool = False) -> None:
+    """
+    Write metadata files for downstream workflow steps.
+    
+    Args:
+        modified_apps: List of modified app names
+        verbose: Whether to print verbose output
+    """
+    tmp_dir = Path("/tmp")
+    
+    # Write modified apps
+    modified_apps_file = tmp_dir / "modified_apps.txt"
+    content = "\n".join(modified_apps)
+    
+    modified_apps_file.write_text(content)
+    
+    if verbose and modified_apps:
+        logger.debug(f"Writing metadata for dispatch: {', '.join(modified_apps)}")
+
+
 def main():
     """Main entry point"""
     args = parse_arguments()
@@ -801,6 +831,10 @@ def main():
         # Copy to Go directories
         copier = SafeBuildCopier(repo_root, args.verbose)
         copier.copy_targets(targets)
+        
+        # Write metadata for downstream workflows
+        modified_apps = copier.get_modified_apps_list(targets)
+        write_metadata_files(modified_apps, args.verbose)
         
         # Git operations
         if not args.no_push:
