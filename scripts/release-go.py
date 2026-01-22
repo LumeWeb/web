@@ -490,20 +490,12 @@ class SafeBuildCopier:
         self.repo_root = repo_root
         self.verbose = verbose
         self.copied_repos = set()  # Track which repos have been copied
+        self.successfully_copied = []  # Track successfully copied repo targets
     
     def copy_targets(self, targets: List[BuildTarget]) -> None:
-        """Copy all targets safely with merge support"""
-        # Group targets by repo_target for merging
-        repo_groups = {}
+        """Copy all targets to their destinations"""
         for target in targets:
-            repo_target = target.repo_target
-            if repo_target not in repo_groups:
-                repo_groups[repo_target] = []
-            repo_groups[repo_target].append(target)
-        
-        # Copy each repo group (merged if multiple targets)
-        for repo_target, group_targets in repo_groups.items():
-            self._copy_repo_group(repo_target, group_targets)
+            self._copy_target(target)
     
     def get_modified_apps_list(self, targets: List[BuildTarget]) -> List[str]:
         """Get list of modified app names for metadata"""
@@ -531,30 +523,22 @@ class SafeBuildCopier:
         
         return unique_apps
     
-    def _copy_repo_group(self, repo_target: str, targets: List[BuildTarget]) -> None:
-        """Copy a group of targets that merge to the same repo"""
-        if repo_target in self.copied_repos:
-            return  # Already copied this repo
-        
+    def _copy_target(self, target: BuildTarget) -> None:
+        """Copy a single target to its destination"""
         if self.verbose:
-            if len(targets) > 1:
-                logger.info(f"Merging {len(targets)} targets to {repo_target}")
-                for target in targets:
-                    logger.debug(f"  {target.name} ({target.context.type.value})")
-            else:
-                logger.info(f"Copying single target {targets[0].name} to {repo_target}")
+            logger.info(f"Copying {target.name} to {target.target_path}")
         
-        # Merge all targets to same destination
-        for target in targets:
-            self._copy_merge_target(target)
+        if not self._copy_merge_target(target):
+            return
         
-        self.copied_repos.add(repo_target)
+        # Track successful copies for metadata
+        self.successfully_copied.append(target.repo_target)
     
-    def _copy_merge_target(self, target: BuildTarget) -> None:
+    def _copy_merge_target(self, target: BuildTarget) -> bool:
         """Copy target with merge support"""
         if not target.source_path.exists():
             logger.warning(f"Source path does not exist: {target.source_path}")
-            return
+            return False
         
         target_dir = self.repo_root / target.target_path
         if self.verbose:
@@ -582,6 +566,8 @@ class SafeBuildCopier:
             shutil.rmtree(vite_dir)
             if self.verbose:
                 logger.debug(f"  Removed .vite directory from {target.name}")
+        
+        return True
 
 
 # ============================================================================
