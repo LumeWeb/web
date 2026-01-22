@@ -13,6 +13,7 @@ import os
 import shutil
 import subprocess
 import sys
+import traceback
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
@@ -840,7 +841,7 @@ Examples:
 
     # Build all apps and plugins in a single turbo command
     try:
-        build_packages(apps_to_build, plugins_to_build, repo_root, args.verbose)
+        build_packages(apps_to_build, plugins_to_build, repo_root)
     except Exception as e:
         logger.error(f"Error building packages: {e}")
         if args.verbose:
