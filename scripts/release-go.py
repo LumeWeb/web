@@ -8,6 +8,7 @@ Uses git revision as version identifier instead of tags.
 
 import argparse
 import json
+import logging
 import os
 import shutil
 import subprocess
@@ -16,14 +17,39 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
 
+def setup_logging(verbose: bool = False) -> logging.Logger:
+    """
+    Configure logging for the script.
+
+    Args:
+        verbose: Whether to enable DEBUG level logging
+
+    Returns:
+        Configured logger instance
+    """
+    level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(
+        level=level,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    return logging.getLogger(__name__)
+
+
+# Global logger instance (set in main())
+logger = logging.getLogger(__name__)
+
+
 # App shell app name (has multiple build variations)
 APP_SHELL = "portal-app-shell"
 
 # App shell variations (each built to a separate dist subdirectory)
-# Maps variation names to their target Go repository names
+# Maps variation names to (local_go_folder, ci_dispatch_target)
+# Local folder: path under go/ (e.g., go/portal-dashboard/build)
+# CI dispatch: target repository name for downstream workflows
 APP_SHELL_VARIATIONS = {
-    "dashboard": "portal-plugin-dashboard",
-    "admin": "portal-plugin-admin"
+    "dashboard": ("portal-dashboard", "portal-plugin-dashboard"),
+    "admin": ("portal-admin", "portal-plugin-admin")
 }
 
 # Apps that map to plugin repositories instead of app repositories
@@ -106,7 +132,7 @@ def parse_csv_list(value: Optional[str]) -> List[str]:
             # Reject potentially dangerous characters (path traversal, shell metacharacters)
             dangerous_chars = ['/', '\\', '..', '|', '&', ';', '$', '`', '(', ')', '<', '>']
             if any(char in item for char in dangerous_chars):
-                print(f"Warning: Invalid characters in '{item}' - skipping", file=sys.stderr)
+                logger.warning(f"Invalid characters in '{item}' - skipping")
                 continue
 
             # Reject empty strings after stripping
@@ -161,7 +187,7 @@ def validate_package_name(name: str, repo_root: Path, directory: str, prefix: st
 
 
 def sanitize_package_names(names: List[str], repo_root: Path, directory: str, 
-                           prefix: str = "", verbose: bool = False) -> List[str]:
+                           prefix: str = "") -> List[str]:
     """
     Sanitize and validate a list of package names.
 
@@ -180,9 +206,8 @@ def sanitize_package_names(names: List[str], repo_root: Path, directory: str,
         if validate_package_name(name, repo_root, directory, prefix):
             valid_names.append(name)
         else:
-            print(f"Warning: Invalid package name '{name}' - skipping", file=sys.stderr)
-            if verbose:
-                print(f"  Expected directory: {repo_root / directory / f'{prefix}{name}'}")
+            logger.warning(f"Invalid package name '{name}' - skipping")
+            logger.info(f"  Expected directory: {repo_root / directory / f'{prefix}{name}'}")
     return valid_names
 
 
@@ -269,12 +294,12 @@ def run_command(cmd: List[str], cwd: Path = None, check: bool = True) -> subproc
         return result
     except subprocess.CalledProcessError as e:
         if check:
-            print(f"Command failed: {' '.join(cmd)}", file=sys.stderr)
-            print(f"Exit code: {e.returncode}", file=sys.stderr)
+            logger.error(f"Command failed: {' '.join(cmd)}")
+            logger.error(f"Exit code: {e.returncode}")
             if e.stdout:
-                print(f"STDOUT:\n{e.stdout}", file=sys.stderr)
+                logger.error(f"STDOUT:\n{e.stdout}")
             if e.stderr:
-                print(f"STDERR:\n{e.stderr}", file=sys.stderr)
+                logger.error(f"STDERR:\n{e.stderr}")
             raise AppReleaseError(f"Command failed: {' '.join(cmd)}")
         return e
 
@@ -418,8 +443,7 @@ def get_app_version(app_name: str, repo_root: Path) -> str:
 def build_packages(
     app_names: List[str],
     plugin_names: List[str],
-    repo_root: Path,
-    verbose: bool = False
+    repo_root: Path
 ) -> None:
     """
     Build multiple apps and plugins using a single turbo command for maximum caching.
@@ -444,32 +468,28 @@ def build_packages(
     for app_name in app_names:
         package_name = get_package_name(app_name)
         filters.extend(["--filter", package_name])
-        if verbose:
-            print(f"Will build app: {package_name}")
+        logger.debug(f"Will build app: {package_name}")
 
     for plugin_name in plugin_names:
         package_name = get_package_name(plugin_name, PLUGIN_PREFIX)
         filters.extend(["--filter", package_name])
-        if verbose:
-            print(f"Will build plugin: {package_name}")
+        logger.debug(f"Will build plugin: {package_name}")
 
     # Build all packages in a single turbo command with all tasks
     cmd = ["pnpm", "turbo", "run"] + tasks + filters
 
-    if verbose:
-        print(f"Running: {' '.join(cmd)}")
+    logger.debug(f"Running: {' '.join(cmd)}")
 
     result = run_command(cmd, cwd=repo_root)
 
-    if verbose and result.stdout:
-        print(result.stdout)
+    if result.stdout:
+        logger.debug(result.stdout)
 
 
 def copy_build_to_go(
     app_name: str,
     build_dir: Path,
-    repo_root: Path,
-    verbose: bool = False
+    repo_root: Path
 ) -> None:
     """
     Copy build output to Go module directory (always replace).
@@ -482,8 +502,7 @@ def copy_build_to_go(
     """
     go_build_dir = repo_root / "go" / app_name / "build"
 
-    if verbose:
-        print(f"Copying {app_name} build to Go directory...")
+    logger.debug(f"Copying {app_name} build to Go directory...")
 
     # Remove existing build directory
     if go_build_dir.exists():
@@ -501,8 +520,7 @@ def copy_build_to_go(
     # Prune .vite directories
     vite_dir = go_build_dir / ".vite"
     if vite_dir.exists() and vite_dir.is_dir():
-        if verbose:
-            print(f"  Removing .vite directory from {app_name}")
+        logger.debug(f"  Removing .vite directory from {app_name}")
         shutil.rmtree(vite_dir)
 
 
@@ -519,18 +537,16 @@ def git_add_and_commit_modified(
         modified_apps: List of modified app names
         versions: Dictionary mapping app names to version strings
         repo_root: Path to the repository root
-        verbose: Whether to print verbose output
+        verbose: Whether to print verbose output (deprecated, use logging level instead)
 
     Returns:
         Tuple of (success: bool, commit_hash: str)
     """
     if not modified_apps:
-        if verbose:
-            print("No modified apps to commit")
+        logger.debug("No modified apps to commit")
         return False, ""
 
-    if verbose:
-        print(f"Modified apps: {', '.join(modified_apps)}")
+    logger.debug(f"Modified apps: {', '.join(modified_apps)}")
 
     # Create commit message with versions
     commit_lines = ["chore: export app and plugin builds", ""]
@@ -540,8 +556,7 @@ def git_add_and_commit_modified(
 
     commit_message = "\n".join(commit_lines)
 
-    if verbose:
-        print(f"Commit message:\n{commit_message}")
+    logger.debug(f"Commit message:\n{commit_message}")
 
     # Create commit
     result = run_command(["git", "commit", "-m", commit_message], cwd=repo_root)
@@ -550,8 +565,7 @@ def git_add_and_commit_modified(
     commit_result = run_command(["git", "rev-parse", "HEAD"], cwd=repo_root)
     commit_hash = commit_result.stdout.strip()
 
-    if verbose:
-        print(f"Commit created: {commit_hash}")
+    logger.debug(f"Commit created: {commit_hash}")
 
     return True, commit_hash
 
@@ -574,18 +588,18 @@ def write_metadata_files(modified_apps: List[str], repo_root: Path, verbose: boo
     modified_apps_file.write_text(content)
     
     if verbose and modified_apps:
-        print(f"Writing metadata for dispatch: {', '.join(modified_apps)}")
+        logger.debug(f"Writing metadata for dispatch: {', '.join(modified_apps)}")
 
 
 def collect_versions(apps_to_build: List[str], plugins_to_build: List[str], 
-                     app_shell_variations: List[str], repo_root: Path) -> Dict[str, str]:
+                     app_shell_variations: List[Tuple[str, str]], repo_root: Path) -> Dict[str, str]:
     """
     Collect versions from package.json for all built packages.
 
     Args:
         apps_to_build: List of app names to build
         plugins_to_build: List of plugin names to build
-        app_shell_variations: List of app-shell variation names
+        app_shell_variations: List of (local_folder, ci_target) tuples for app-shell variations
         repo_root: Path to the repository root
 
     Returns:
@@ -601,11 +615,11 @@ def collect_versions(apps_to_build: List[str], plugins_to_build: List[str],
         target_repo = APP_TO_PLUGIN_MAPPING.get(app_name, app_name)
         versions[target_repo] = version
 
-    # Add versions for app-shell variations
+    # Add versions for app-shell variations (use ci_target for version mapping)
     if app_shell_variations:
         app_shell_version = get_app_version(APP_SHELL, repo_root)
-        for variation in app_shell_variations:
-            versions[variation] = app_shell_version
+        for _, ci_target in app_shell_variations:
+            versions[ci_target] = app_shell_version
 
     for plugin_name in plugins_to_build:
         full_plugin_name = f"{PLUGIN_PREFIX}{plugin_name}"
@@ -616,14 +630,14 @@ def collect_versions(apps_to_build: List[str], plugins_to_build: List[str],
 
 
 def get_modified_apps_list(apps_to_build: List[str], plugins_to_build: List[str],
-                          app_shell_variations: List[str]) -> List[str]:
+                          app_shell_variations: List[Tuple[str, str]]) -> List[str]:
     """
     Build the list of modified apps for commit message.
 
     Args:
         apps_to_build: List of app names to build
         plugins_to_build: List of plugin names to build
-        app_shell_variations: List of app-shell variation names
+        app_shell_variations: List of (local_folder, ci_target) tuples for app-shell variations
 
     Returns:
         List of modified app names (mapped to target repositories)
@@ -637,20 +651,21 @@ def get_modified_apps_list(apps_to_build: List[str], plugins_to_build: List[str]
             modified_apps.append(APP_TO_PLUGIN_MAPPING[app_name])
         else:
             modified_apps.append(app_name)
-    modified_apps.extend(app_shell_variations)
+    # Extract ci_target from tuples for commit message
+    modified_apps.extend([ci_target for _, ci_target in app_shell_variations])
     modified_apps.extend([f"{PLUGIN_PREFIX}{p}" for p in plugins_to_build])
     return modified_apps
 
 
 def collect_go_paths(apps_to_build: List[str], plugins_to_build: List[str],
-                     app_shell_variations: List[str]) -> List[str]:
+                     app_shell_variations: List[Tuple[str, str]]) -> List[str]:
     """
     Build the list of Go build paths to stage.
 
     Args:
         apps_to_build: List of app names to build
         plugins_to_build: List of plugin names to build
-        app_shell_variations: List of app-shell variation names
+        app_shell_variations: List of (local_folder, ci_target) tuples for app-shell variations
 
     Returns:
         List of Go build paths
@@ -662,7 +677,8 @@ def collect_go_paths(apps_to_build: List[str], plugins_to_build: List[str],
         # Map apps to plugin repos if they have a mapping
         target_repo = APP_TO_PLUGIN_MAPPING.get(app_name, app_name)
         go_paths.append(f"go/{target_repo}/build")
-    go_paths.extend([f"go/{variation}/build" for variation in app_shell_variations])
+    # Extract local_folder from tuples for path construction
+    go_paths.extend([f"go/{local_folder}/build" for local_folder, _ in app_shell_variations])
     go_paths.extend([f"go/{PLUGIN_PREFIX}{plugin_name}/build" for plugin_name in plugins_to_build])
     return go_paths
 
@@ -754,8 +770,13 @@ Examples:
 
     args = parser.parse_args()
 
+    # Setup logging
+    logger = setup_logging(args.verbose)
+    logger.info("Starting Go module release script")
+
     # Get repository root (needed for validation)
     repo_root = Path(__file__).parent.parent.resolve()
+    logger.info(f"Repository root: {repo_root}")
 
     # Parse apps and plugins arguments
     apps_arg = normalize_arg_value(args.apps)
@@ -766,7 +787,7 @@ Examples:
     else:
         apps_to_build = parse_csv_list(args.apps)
         # Validate app names
-        apps_to_build = sanitize_package_names(apps_to_build, repo_root, APPS_DIR, verbose=args.verbose)
+        apps_to_build = sanitize_package_names(apps_to_build, repo_root, APPS_DIR)
 
     plugins_arg = normalize_arg_value(args.plugins)
     if plugins_arg == VALUE_ALL:
@@ -776,12 +797,15 @@ Examples:
     else:
         plugins_to_build = parse_csv_list(args.plugins)
         # Validate plugin names
-        plugins_to_build = sanitize_package_names(plugins_to_build, repo_root, LIBS_DIR, PLUGIN_PREFIX, args.verbose)
+        plugins_to_build = sanitize_package_names(plugins_to_build, repo_root, LIBS_DIR, PLUGIN_PREFIX)
+
+    logger.info(f"Apps to build: {', '.join(apps_to_build) if apps_to_build else 'none'}")
+    logger.info(f"Plugins to build: {', '.join(plugins_to_build) if plugins_to_build else 'none'}")
 
     if args.verbose:
-        print(f"Repository root: {repo_root}")
-        print(f"Apps to build: {', '.join(apps_to_build) if apps_to_build else 'none'}")
-        print(f"Plugins to build: {', '.join(plugins_to_build) if plugins_to_build else 'none'}")
+        logger.debug(f"Repository root: {repo_root}")
+        logger.debug(f"Apps to build: {', '.join(apps_to_build) if apps_to_build else 'none'}")
+        logger.debug(f"Plugins to build: {', '.join(plugins_to_build) if plugins_to_build else 'none'}")
 
     # Handle --commit-hash flag
     if args.commit_hash:
@@ -800,50 +824,49 @@ Examples:
 
     # Early exit if nothing to build (unless --commit-hash)
     if not apps_to_build and not plugins_to_build:
-        print("No valid apps or plugins to build. All provided names were invalid or skipped.", file=sys.stderr)
-        print(f"Available apps: {', '.join(list_available_apps(repo_root))}", file=sys.stderr)
-        print(f"Available plugins: {', '.join(list_available_plugins(repo_root))}", file=sys.stderr)
+        logger.error("No valid apps or plugins to build. All provided names were invalid or skipped.")
+        logger.error(f"Available apps: {', '.join(list_available_apps(repo_root))}")
+        logger.error(f"Available plugins: {', '.join(list_available_plugins(repo_root))}")
         sys.exit(1)
 
     # Get current git revision (version)
     try:
         git_revision = get_git_revision(repo_root)
         if args.verbose:
-            print(f"Git revision: {git_revision}")
+            logger.debug(f"Git revision: {git_revision}")
     except Exception as e:
-        print(f"Error getting git revision: {e}", file=sys.stderr)
+        logger.error(f"Error getting git revision: {e}")
         sys.exit(1)
 
     # Build all apps and plugins in a single turbo command
     try:
         build_packages(apps_to_build, plugins_to_build, repo_root, args.verbose)
     except Exception as e:
-        print(f"Error building packages: {e}", file=sys.stderr)
+        logger.error(f"Error building packages: {e}")
         if args.verbose:
-            import traceback
-            traceback.print_exc()
+            logger.debug(traceback.format_exc())
         sys.exit(1)
 
     # Special handling for portal-app-shell variations
+    # List of (local_folder, ci_target) tuples for each variation
     app_shell_variations = []
     if APP_SHELL in apps_to_build:
         try:
             app_shell_path = repo_root / "apps" / APP_SHELL
 
             # Copy each variation to its corresponding Go directory
-            for variation, go_target in APP_SHELL_VARIATIONS.items():
+            for variation, (local_folder, ci_target) in APP_SHELL_VARIATIONS.items():
                 variation_build_dir = app_shell_path / "dist" / variation
                 if variation_build_dir.exists() and variation_build_dir.is_dir():
                     if args.verbose:
-                        print(f"Copying {APP_SHELL} {variation} build to go/{go_target}/build...")
-                    copy_build_to_go(go_target, variation_build_dir, repo_root, args.verbose)
-                    app_shell_variations.append(go_target)
+                        logger.debug(f"Copying {APP_SHELL} {variation} build to go/{local_folder}/build...")
+                    copy_build_to_go(local_folder, variation_build_dir, repo_root)
+                    app_shell_variations.append((local_folder, ci_target))
 
         except Exception as e:
-            print(f"Error processing {APP_SHELL} variations: {e}", file=sys.stderr)
+            logger.error(f"Error processing {APP_SHELL} variations: {e}")
             if args.verbose:
-                import traceback
-                traceback.print_exc()
+                logger.debug(traceback.format_exc())
 
     # Copy each app's build output to Go directory (excluding portal-app-shell)
     for app_name in apps_to_build:
@@ -854,19 +877,18 @@ Examples:
             # Get build output directory
             build_dir = get_build_output_dir(app_name, repo_root, APPS_DIR)
             if args.verbose:
-                print(f"Build directory: {build_dir}")
+                logger.debug(f"Build directory: {build_dir}")
 
             # Map apps to plugin repos if they have a mapping
             target_repo = APP_TO_PLUGIN_MAPPING.get(app_name, app_name)
             
             # Copy to Go directory (always replace)
-            copy_build_to_go(target_repo, build_dir, repo_root, args.verbose)
+            copy_build_to_go(target_repo, build_dir, repo_root)
 
         except Exception as e:
-            print(f"Error processing {app_name}: {e}", file=sys.stderr)
+            logger.error(f"Error processing {app_name}: {e}")
             if args.verbose:
-                import traceback
-                traceback.print_exc()
+                logger.debug(traceback.format_exc())
             continue
 
     # Copy each plugin's build output to Go directory
@@ -875,19 +897,18 @@ Examples:
             # Get build output directory
             build_dir = get_build_output_dir(plugin_name, repo_root, LIBS_DIR, PLUGIN_PREFIX)
             if args.verbose:
-                print(f"Build directory: {build_dir}")
+                logger.debug(f"Build directory: {build_dir}")
 
             # Copy to Go directory (always replace)
             copy_build_to_go(f"{PLUGIN_PREFIX}{plugin_name}", build_dir, repo_root, args.verbose)
 
         except Exception as e:
-            print(f"Error processing plugin {plugin_name}: {e}", file=sys.stderr)
+            logger.error(f"Error processing plugin {plugin_name}: {e}")
             if args.verbose:
-                import traceback
-                traceback.print_exc()
+                logger.debug(traceback.format_exc())
             continue
 
-    print()  # Empty line for readability
+    logger.debug("")  # Empty line for readability
 
     # Stage all Go build directories (apps and plugins, including app-shell variations)
     go_paths = collect_go_paths(apps_to_build, plugins_to_build, app_shell_variations)
@@ -900,7 +921,7 @@ Examples:
             run_command(["git", "add", str(go_dir)], cwd=repo_root)
             staged_paths.append(go_path)
         elif args.force:
-            print(f"Warning: {go_path} does not exist, but --force is set", file=sys.stderr)
+            logger.warning(f"{go_path} does not exist, but --force is set")
 
     # Check if there are actual changes via git diff
     has_changes = get_git_diff(repo_root, go_paths)
@@ -918,20 +939,20 @@ Examples:
     modified_apps = get_modified_apps_list(apps_to_build, plugins_to_build, app_shell_variations)
     
     if args.verbose:
-        print(f"Modified apps list to commit: {modified_apps}")
+        logger.debug(f"Modified apps list to commit: {modified_apps}")
 
     if has_changes or (args.force and has_staged):
         if args.force and not has_changes:
-            print(f"Warning: --force flag set, proceeding despite no git changes detected", file=sys.stderr)
+            logger.warning("--force flag set, proceeding despite no git changes detected")
         
         # Get list of changed files for reporting
         changed_files = get_git_diff_files(repo_root, go_paths)
         if args.verbose and changed_files:
-            print(f"Changed files ({len(changed_files)}):")
+            logger.debug(f"Changed files ({len(changed_files)}):")
             for file in changed_files[:10]:  # Show first 10
-                print(f"  - {file}")
+                logger.debug(f"  - {file}")
             if len(changed_files) > 10:
-                print(f"  ... and {len(changed_files) - 10} more")
+                logger.debug(f"  ... and {len(changed_files) - 10} more")
 
         try:
             success, commit_hash = git_add_and_commit_modified(
@@ -947,31 +968,31 @@ Examples:
 
                 # Handle dry-run and no-push flags
                 if args.dry_run:
-                    print("Dry run - skipping push", file=sys.stderr)
+                    logger.info("Dry run - skipping push")
                     return
                 if args.no_push:
-                    print("No-push flag set - skipping push", file=sys.stderr)
+                    logger.info("No-push flag set - skipping push")
                     return
 
                 # Push changes
                 try:
                     run_command(["git", "push", "origin", "HEAD"], cwd=repo_root)
                     if args.verbose:
-                        print("Changes pushed successfully")
+                        logger.debug("Changes pushed successfully")
                 except Exception as e:
-                    print(f"Error pushing changes: {e}", file=sys.stderr)
+                    logger.error(f"Error pushing changes: {e}")
                     sys.exit(1)
             else:
-                print("No commit created", file=sys.stderr)
+                logger.error("No commit created")
                 sys.exit(1)
         except Exception as e:
-            print(f"Error creating commit: {e}", file=sys.stderr)
+            logger.error(f"Error creating commit: {e}")
             sys.exit(1)
     elif args.force and not has_staged:
-        print("Warning: --force flag set but nothing was staged (no build outputs found)", file=sys.stderr)
+        logger.warning("--force flag set but nothing was staged (no build outputs found)")
         write_metadata_files(modified_apps, repo_root, args.verbose)
     else:
-        print("No changes detected in any apps")
+        logger.info("No changes detected in any apps")
         # Still write metadata so downstream workflows know what was processed
         write_metadata_files(modified_apps, repo_root, args.verbose)
 
