@@ -32,6 +32,12 @@ JS_FILE_PATTERN = "**/*.js"
 DASHBOARD_VARIANT = "dashboard"
 ADMIN_VARIANT = "admin"
 
+# Plugin discovery constants
+VITE_CONFIG_FILENAME = "vite.config.ts"
+PACKAGE_JSON_FILENAME = "package.json"
+BUILD_SCRIPT_NAME = "build"
+SKIP_KEYWORDS = ["skip", "placeholder", "echo"]
+
 
 # ============================================================================
 # Core Data Structures
@@ -132,19 +138,29 @@ def discover_plugins() -> Dict[str, Dict[str, Any]]:
             
         plugin_name = plugin_dir.name.replace("portal-plugin-", "")
         
-        # Check if this is a buildable frontend plugin (has package.json with build script)
-        package_json_path = plugin_dir / "package.json"
-        if not package_json_path.exists():
-            continue
-            
-        # Read package.json to check if it has build script
+        # Check if this has vite config (buildable frontend plugin)
+        vite_config = plugin_dir / VITE_CONFIG_FILENAME
+        if not vite_config.exists():
+            continue  # Skip if no vite config (not a frontend plugin)
+        
+        # Read package.json to check build script
+        package_json_path = plugin_dir / PACKAGE_JSON_FILENAME
         try:
             import json
             with open(package_json_path, 'r') as f:
                 package_data = json.load(f)
             scripts = package_data.get('scripts', {})
-            if 'build' not in scripts:
+            if BUILD_SCRIPT_NAME not in scripts:
                 continue
+            
+            # Skip templates and directories with placeholder build scripts
+            build_script = scripts[BUILD_SCRIPT_NAME]
+            build_script_lower = build_script.lower()
+            
+            # Skip if build script contains any skip indicators
+            if any(keyword in build_script_lower for keyword in SKIP_KEYWORDS):
+                continue
+                
         except:
             continue
             
