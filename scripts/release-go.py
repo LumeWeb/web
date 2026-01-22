@@ -50,6 +50,10 @@ DEFAULT_APPS = ["portal-frontend", APP_SHELL]
 # Note: dashboard and admin are built via APP_SHELL variations, not standalone plugins
 DEFAULT_PLUGINS = ["ipfs", "core", "lbry"]
 
+# Special values for apps/plugins arguments
+VALUE_ALL = "all"
+VALUE_NONE = "none"
+
 
 def parse_csv_list(value: Optional[str]) -> List[str]:
     """
@@ -728,15 +732,19 @@ Examples:
     repo_root = Path(__file__).parent.parent.resolve()
 
     # Parse apps and plugins arguments
-    if args.apps.lower() == "all":
+    if args.apps.lower() == VALUE_ALL:
         apps_to_build = DEFAULT_APPS
+    elif args.apps.lower() == VALUE_NONE:
+        apps_to_build = []
     else:
         apps_to_build = parse_csv_list(args.apps)
         # Validate app names
         apps_to_build = sanitize_package_names(apps_to_build, repo_root, APPS_DIR, verbose=args.verbose)
 
-    if args.plugins.lower() == "all":
+    if args.plugins.lower() == VALUE_ALL:
         plugins_to_build = DEFAULT_PLUGINS
+    elif args.plugins.lower() == VALUE_NONE:
+        plugins_to_build = []
     else:
         plugins_to_build = parse_csv_list(args.plugins)
         # Validate plugin names
