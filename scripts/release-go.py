@@ -37,7 +37,7 @@ DEFAULT_APPS = ["portal-frontend", APP_SHELL]
 
 # Default plugins to build and release
 # Used when --plugins=all is specified
-DEFAULT_PLUGINS = ["dashboard", "admin", "ipfs", "core"]
+DEFAULT_PLUGINS = ["dashboard", "admin", "ipfs", "core", "lbry"]
 
 
 def parse_csv_list(value: Optional[str]) -> List[str]:
