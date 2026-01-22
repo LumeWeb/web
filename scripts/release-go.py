@@ -768,7 +768,6 @@ def main():
         # Git operations
         if not args.no_push:
             # Stage and commit changes
-            import subprocess
             result = subprocess.run(
                 ["git", "add", "go/"],
                 cwd=repo_root,
