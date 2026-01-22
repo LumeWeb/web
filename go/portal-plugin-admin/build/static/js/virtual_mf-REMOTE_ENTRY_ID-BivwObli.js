@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["static/js/index-DnJJe5Zt.js","static/js/schemas-CA767HQ5.js","static/js/parse-owPI_Zlz.js","static/js/admin__loadShare__react__loadShare__-BY1INpNu.js","static/js/_commonjsHelpers-BILit0S-.js","static/js/admin__mf_v__runtimeInit__mf_v__-B2PJI9hS.js","static/js/admin__loadShare__react_mf_2_router__loadShare__-CwtF7zsV.js","static/js/jsx-runtime-BOqW7N1v.js","static/js/createLucideIcon-KUE0P9TA.js","static/js/virtualExposes-DwA08f_D.js","static/js/preload-helper-Dk3k6Zm1.js","static/js/index-CTBkVQPS.js","static/js/admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__-QB1_Htv_.js","static/js/admin__loadShare__react_mf_2_dom__loadShare__-BykLpcnn.js","static/js/index-BnQpHTKV.js","static/js/index-CoAtoh5x.js","static/js/index-D6eUxOCJ.js","static/js/index-DzwsUQYN.js","static/js/index-BKmzfUwO.js","static/js/index-CrWsS64Z.js","static/js/index.esm-BlTOZQ5S.js","static/js/index-CeQzhlXt.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["static/js/index-DPq9NhAt.js","static/js/schemas-CA767HQ5.js","static/js/parse-owPI_Zlz.js","static/js/admin__loadShare__react__loadShare__-BY1INpNu.js","static/js/_commonjsHelpers-BILit0S-.js","static/js/admin__mf_v__runtimeInit__mf_v__-B2PJI9hS.js","static/js/admin__loadShare__react_mf_2_router__loadShare__-CwtF7zsV.js","static/js/jsx-runtime-BOqW7N1v.js","static/js/createLucideIcon-KUE0P9TA.js","static/js/virtualExposes-DwA08f_D.js","static/js/preload-helper-Dk3k6Zm1.js","static/js/index-D3OMCTow.js","static/js/admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__-QB1_Htv_.js","static/js/admin__loadShare__react_mf_2_dom__loadShare__-BykLpcnn.js","static/js/index-BnQpHTKV.js","static/js/index-CwFE135t.js","static/js/index-D6eUxOCJ.js","static/js/index-DzwsUQYN.js","static/js/index-BKmzfUwO.js","static/js/index-CrWsS64Z.js","static/js/index.esm-BlTOZQ5S.js","static/js/index-CeQzhlXt.js"])))=>i.map(i=>d[i]);
 import exposesMap from './virtualExposes-DwA08f_D.js';
 import { __vitePreload } from './preload-helper-Dk3k6Zm1.js';
 import { admin__mf_v__runtimeInit__mf_v__ } from './admin__mf_v__runtimeInit__mf_v__-B2PJI9hS.js';
@@ -4359,17 +4359,17 @@ index_cjs$3.registerShared = registerShared;
 const importMap = {
       
         "@lumeweb/portal-framework-core": async () => {
-          let pkg = await __vitePreload(() => import('./index-DnJJe5Zt.js'),true              ?__vite__mapDeps([0,1,2,3,4,5,6,7,8,9,10]):void 0);
+          let pkg = await __vitePreload(() => import('./index-DPq9NhAt.js'),true              ?__vite__mapDeps([0,1,2,3,4,5,6,7,8,9,10]):void 0);
             return pkg;
         }
       ,
         "@lumeweb/portal-framework-ui": async () => {
-          let pkg = await __vitePreload(() => import('./index-CTBkVQPS.js'),true              ?__vite__mapDeps([11,3,4,5,7,6,12,8,13,2,14]):void 0);
+          let pkg = await __vitePreload(() => import('./index-D3OMCTow.js'),true              ?__vite__mapDeps([11,3,4,5,7,6,12,8,13,2,14]):void 0);
             return pkg;
         }
       ,
         "@lumeweb/portal-framework-ui-core": async () => {
-          let pkg = await __vitePreload(() => import('./index-CoAtoh5x.js'),true              ?__vite__mapDeps([15,3,4,5,7,12,8,13]):void 0);
+          let pkg = await __vitePreload(() => import('./index-CwFE135t.js'),true              ?__vite__mapDeps([15,3,4,5,7,12,8,13]):void 0);
             return pkg;
         }
       ,
