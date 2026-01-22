@@ -61,7 +61,12 @@ def parse_csv_list(value: Optional[str]) -> List[str]:
     Returns:
         List of trimmed strings, or empty list if value is None or "none"
     """
-    if not value or value.lower() == "none":
+    # Strip whitespace first, then check for "none"
+    if not value:
+        return []
+    
+    value = value.strip()
+    if value.lower() == "none":
         return []
 
     # Split by comma, strip whitespace, and remove surrounding quotes
@@ -89,124 +94,72 @@ def parse_csv_list(value: Optional[str]) -> List[str]:
 
 
 
-def get_app_package_name(app_name: str) -> str:
+def get_package_name(name: str, prefix: str = "") -> str:
     """
-    Get the package name for an app using the @lumeweb naming convention.
+    Get the package name using the @lumeweb naming convention.
 
     Args:
-        app_name: Name of the app (e.g., portal-frontend, portal-app-shell)
+        name: Name of the package (e.g., portal-frontend, ipfs)
+        prefix: Optional prefix to add (e.g., "portal-plugin-")
 
     Returns:
         Package name for turbo --filter (e.g., @lumeweb/portal-frontend)
     """
-    return f"{LUMEWEB_SCOPE}{app_name}"
+    return f"{LUMEWEB_SCOPE}{prefix}{name}"
 
 
-def get_plugin_package_name(plugin_name: str) -> str:
+def validate_package_name(name: str, repo_root: Path, directory: str, prefix: str = "") -> bool:
     """
-    Get the package name for a plugin using the @lumeweb naming convention.
+    Validate that a package name exists and is valid.
 
     Args:
-        plugin_name: Name of the plugin (without portal-plugin- prefix)
-
-    Returns:
-        Package name for turbo --filter (e.g., @lumeweb/portal-plugin-dashboard)
-    """
-    return f"{LUMEWEB_SCOPE}{PLUGIN_PREFIX}{plugin_name}"
-
-
-def validate_app_name(app_name: str, repo_root: Path) -> bool:
-    """
-    Validate that an app name exists and is valid.
-
-    Args:
-        app_name: Name of the app to validate
+        name: Name of the package to validate
         repo_root: Path to the repository root
+        directory: Directory to check (APPS_DIR or LIBS_DIR)
+        prefix: Optional prefix to add to name for path lookup
 
     Returns:
-        True if the app is valid, False otherwise
+        True if the package is valid, False otherwise
     """
     # Allow portal-app-shell
-    if app_name == APP_SHELL:
+    if name == APP_SHELL:
         return True
 
-    # Check if app directory exists
-    app_path = repo_root / APPS_DIR / app_name
-    if app_path.exists() and app_path.is_dir():
+    # Check if directory exists
+    package_path = repo_root / directory / f"{prefix}{name}"
+    if package_path.exists() and package_path.is_dir():
         # Verify it has a package.json
-        package_json = app_path / "package.json"
+        package_json = package_path / "package.json"
         if package_json.exists():
             return True
 
     return False
 
 
-def validate_plugin_name(plugin_name: str, repo_root: Path) -> bool:
+def sanitize_package_names(names: List[str], repo_root: Path, directory: str, 
+                           prefix: str = "", verbose: bool = False) -> List[str]:
     """
-    Validate that a plugin name exists and is valid.
+    Sanitize and validate a list of package names.
 
     Args:
-        plugin_name: Name of the plugin (without portal-plugin- prefix)
+        names: List of package names to validate
         repo_root: Path to the repository root
-
-    Returns:
-        True if the plugin is valid, False otherwise
-    """
-    # Check if plugin directory exists
-    plugin_path = repo_root / LIBS_DIR / f"{PLUGIN_PREFIX}{plugin_name}"
-    if plugin_path.exists() and plugin_path.is_dir():
-        # Verify it has a package.json
-        package_json = plugin_path / "package.json"
-        if package_json.exists():
-            return True
-
-    return False
-
-
-def sanitize_app_names(app_names: List[str], repo_root: Path, verbose: bool = False) -> List[str]:
-    """
-    Sanitize and validate a list of app names.
-
-    Args:
-        app_names: List of app names to validate
-        repo_root: Path to the repository root
+        directory: Directory to check (APPS_DIR or LIBS_DIR)
+        prefix: Optional prefix to add to name for path lookup
         verbose: Whether to print verbose output
 
     Returns:
-        List of valid app names
+        List of valid package names
     """
-    valid_apps = []
-    for app_name in app_names:
-        if validate_app_name(app_name, repo_root):
-            valid_apps.append(app_name)
+    valid_names = []
+    for name in names:
+        if validate_package_name(name, repo_root, directory, prefix):
+            valid_names.append(name)
         else:
-            print(f"Warning: Invalid app name '{app_name}' - skipping", file=sys.stderr)
+            print(f"Warning: Invalid package name '{name}' - skipping", file=sys.stderr)
             if verbose:
-                print(f"  Expected directory: {repo_root / APPS_DIR / app_name}")
-    return valid_apps
-
-
-def sanitize_plugin_names(plugin_names: List[str], repo_root: Path, verbose: bool = False) -> List[str]:
-    """
-    Sanitize and validate a list of plugin names.
-
-    Args:
-        plugin_names: List of plugin names to validate (without portal-plugin- prefix)
-        repo_root: Path to the repository root
-        verbose: Whether to print verbose output
-
-    Returns:
-        List of valid plugin names
-    """
-    valid_plugins = []
-    for plugin_name in plugin_names:
-        if validate_plugin_name(plugin_name, repo_root):
-            valid_plugins.append(plugin_name)
-        else:
-            print(f"Warning: Invalid plugin name '{plugin_name}' - skipping", file=sys.stderr)
-            if verbose:
-                print(f"  Expected directory: {repo_root / LIBS_DIR / f'{PLUGIN_PREFIX}{plugin_name}'}")
-    return valid_plugins
+                print(f"  Expected directory: {repo_root / directory / f'{prefix}{name}'}")
+    return valid_names
 
 
 def list_available_apps(repo_root: Path) -> List[str]:
@@ -371,13 +324,15 @@ def get_git_diff_files(repo_root: Path, paths: List[str]) -> List[str]:
         return []
 
 
-def get_build_output_dir(app_name: str, repo_root: Path) -> Path:
+def get_build_output_dir(name: str, repo_root: Path, directory: str = APPS_DIR, prefix: str = "") -> Path:
     """
-    Determine the build output directory for an app.
+    Determine the build output directory for an app or plugin.
 
     Args:
-        app_name: Name of the app
+        name: Name of the app or plugin
         repo_root: Path to the repository root
+        directory: Directory to check (APPS_DIR or LIBS_DIR)
+        prefix: Optional prefix to add to name for path lookup
 
     Returns:
         Path to the build output directory
@@ -386,18 +341,18 @@ def get_build_output_dir(app_name: str, repo_root: Path) -> Path:
         AppReleaseError: If no valid build directory is found
     """
     # Check possible build directories
-    app_path = repo_root / "apps" / app_name
+    package_path = repo_root / directory / f"{prefix}{name}"
 
     possible_dirs = [
-        app_path / "build" / "client",
-        app_path / "dist",
+        package_path / "dist",
+        package_path / "build" / "client",
     ]
 
     for build_dir in possible_dirs:
         if build_dir.exists() and build_dir.is_dir():
             return build_dir
 
-    raise AppReleaseError(f"No build output directory found for {app_name}")
+    raise AppReleaseError(f"No build output directory found for {prefix}{name}")
 
 
 def get_app_version(app_name: str, repo_root: Path) -> str:
@@ -463,13 +418,13 @@ def build_packages(
     filters = []
 
     for app_name in app_names:
-        package_name = get_app_package_name(app_name)
+        package_name = get_package_name(app_name)
         filters.extend(["--filter", package_name])
         if verbose:
             print(f"Will build app: {package_name}")
 
     for plugin_name in plugin_names:
-        package_name = get_plugin_package_name(plugin_name)
+        package_name = get_package_name(plugin_name, PLUGIN_PREFIX)
         filters.extend(["--filter", package_name])
         if verbose:
             print(f"Will build plugin: {package_name}")
@@ -484,35 +439,6 @@ def build_packages(
 
     if verbose and result.stdout:
         print(result.stdout)
-
-
-def get_plugin_build_output_dir(plugin_name: str, repo_root: Path) -> Path:
-    """
-    Determine the build output directory for a plugin.
-
-    Args:
-        plugin_name: Name of the plugin (without portal-plugin- prefix)
-        repo_root: Path to the repository root
-
-    Returns:
-        Path to the build output directory
-
-    Raises:
-        AppReleaseError: If no valid build directory is found
-    """
-    # Check possible build directories
-    plugin_path = repo_root / LIBS_DIR / f"{PLUGIN_PREFIX}{plugin_name}"
-
-    possible_dirs = [
-        plugin_path / "dist",
-        plugin_path / "build" / "client",
-    ]
-
-    for build_dir in possible_dirs:
-        if build_dir.exists() and build_dir.is_dir():
-            return build_dir
-
-    raise AppReleaseError(f"No build output directory found for plugin {plugin_name}")
 
 
 def copy_build_to_go(
@@ -621,6 +547,96 @@ def write_metadata_files(modified_apps: List[str], repo_root: Path) -> None:
     modified_apps_file.write_text("\n".join(modified_apps))
 
 
+def collect_versions(apps_to_build: List[str], plugins_to_build: List[str], 
+                     app_shell_variations: List[str], repo_root: Path) -> Dict[str, str]:
+    """
+    Collect versions from package.json for all built packages.
+
+    Args:
+        apps_to_build: List of app names to build
+        plugins_to_build: List of plugin names to build
+        app_shell_variations: List of app-shell variation names
+        repo_root: Path to the repository root
+
+    Returns:
+        Dictionary mapping package names to version strings
+    """
+    versions = {}
+    for app_name in apps_to_build:
+        if app_name == APP_SHELL:
+            # Skip portal-app-shell in versions, use variations instead
+            continue
+        version = get_app_version(app_name, repo_root)
+        # Map apps to plugin repos if they have a mapping
+        target_repo = APP_TO_PLUGIN_MAPPING.get(app_name, app_name)
+        versions[target_repo] = version
+
+    # Add versions for app-shell variations
+    if app_shell_variations:
+        app_shell_version = get_app_version(APP_SHELL, repo_root)
+        for variation in app_shell_variations:
+            versions[variation] = app_shell_version
+
+    for plugin_name in plugins_to_build:
+        full_plugin_name = f"{PLUGIN_PREFIX}{plugin_name}"
+        version = get_app_version(full_plugin_name, repo_root)
+        versions[full_plugin_name] = version
+
+    return versions
+
+
+def get_modified_apps_list(apps_to_build: List[str], plugins_to_build: List[str],
+                          app_shell_variations: List[str]) -> List[str]:
+    """
+    Build the list of modified apps for commit message.
+
+    Args:
+        apps_to_build: List of app names to build
+        plugins_to_build: List of plugin names to build
+        app_shell_variations: List of app-shell variation names
+
+    Returns:
+        List of modified app names (mapped to target repositories)
+    """
+    modified_apps = []
+    for app_name in apps_to_build:
+        if app_name == APP_SHELL:
+            continue
+        # Map apps to plugin repos if they have a mapping
+        if app_name in APP_TO_PLUGIN_MAPPING:
+            modified_apps.append(APP_TO_PLUGIN_MAPPING[app_name])
+        else:
+            modified_apps.append(app_name)
+    modified_apps.extend(app_shell_variations)
+    modified_apps.extend([f"{PLUGIN_PREFIX}{p}" for p in plugins_to_build])
+    return modified_apps
+
+
+def collect_go_paths(apps_to_build: List[str], plugins_to_build: List[str],
+                     app_shell_variations: List[str]) -> List[str]:
+    """
+    Build the list of Go build paths to stage.
+
+    Args:
+        apps_to_build: List of app names to build
+        plugins_to_build: List of plugin names to build
+        app_shell_variations: List of app-shell variation names
+
+    Returns:
+        List of Go build paths
+    """
+    go_paths = []
+    for app_name in apps_to_build:
+        if app_name == APP_SHELL:
+            continue
+        # Map apps to plugin repos if they have a mapping
+        target_repo = APP_TO_PLUGIN_MAPPING.get(app_name, app_name)
+        go_paths.append(f"go/{target_repo}/build")
+    go_paths.extend([f"go/{variation}/build" for variation in app_shell_variations])
+    go_paths.extend([f"go/{PLUGIN_PREFIX}{plugin_name}/build" for plugin_name in plugins_to_build])
+    return go_paths
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Build and release portal apps and plugins to Go modules",
@@ -717,14 +733,14 @@ Examples:
     else:
         apps_to_build = parse_csv_list(args.apps)
         # Validate app names
-        apps_to_build = sanitize_app_names(apps_to_build, repo_root, args.verbose)
+        apps_to_build = sanitize_package_names(apps_to_build, repo_root, APPS_DIR, verbose=args.verbose)
 
     if args.plugins.lower() == "all":
         plugins_to_build = DEFAULT_PLUGINS
     else:
         plugins_to_build = parse_csv_list(args.plugins)
         # Validate plugin names
-        plugins_to_build = sanitize_plugin_names(plugins_to_build, repo_root, args.verbose)
+        plugins_to_build = sanitize_package_names(plugins_to_build, repo_root, LIBS_DIR, PLUGIN_PREFIX, args.verbose)
 
     if args.verbose:
         print(f"Repository root: {repo_root}")
@@ -800,7 +816,7 @@ Examples:
 
         try:
             # Get build output directory
-            build_dir = get_build_output_dir(app_name, repo_root)
+            build_dir = get_build_output_dir(app_name, repo_root, APPS_DIR)
             if args.verbose:
                 print(f"Build directory: {build_dir}")
 
@@ -821,7 +837,7 @@ Examples:
     for plugin_name in plugins_to_build:
         try:
             # Get build output directory
-            build_dir = get_plugin_build_output_dir(plugin_name, repo_root)
+            build_dir = get_build_output_dir(plugin_name, repo_root, LIBS_DIR, PLUGIN_PREFIX)
             if args.verbose:
                 print(f"Build directory: {build_dir}")
 
@@ -838,15 +854,7 @@ Examples:
     print()  # Empty line for readability
 
     # Stage all Go build directories (apps and plugins, including app-shell variations)
-    go_paths = []
-    for app_name in apps_to_build:
-        if app_name == APP_SHELL:
-            continue
-        # Map apps to plugin repos if they have a mapping
-        target_repo = APP_TO_PLUGIN_MAPPING.get(app_name, app_name)
-        go_paths.append(f"go/{target_repo}/build")
-    go_paths.extend([f"go/{variation}/build" for variation in app_shell_variations])
-    go_paths.extend([f"go/{PLUGIN_PREFIX}{plugin_name}/build" for plugin_name in plugins_to_build])
+    go_paths = collect_go_paths(apps_to_build, plugins_to_build, app_shell_variations)
     
     # Track which paths were actually staged for --force warning
     staged_paths = []
@@ -861,7 +869,15 @@ Examples:
     # Check if there are actual changes via git diff
     has_changes = get_git_diff(repo_root, go_paths)
 
-    if has_changes or args.force:
+    # Check if anything is actually staged (needed for --force case)
+    has_staged = False
+    try:
+        result = run_command(["git", "diff", "--cached", "--quiet"], cwd=repo_root, check=False)
+        has_staged = result.returncode == 1  # 1 means there are staged changes
+    except Exception:
+        pass
+
+    if has_changes or (args.force and has_staged):
         if args.force and not has_changes:
             print(f"Warning: --force flag set, proceeding despite no git changes detected", file=sys.stderr)
         
@@ -875,39 +891,10 @@ Examples:
                 print(f"  ... and {len(changed_files) - 10} more")
 
         # Get versions from package.json for commit message
-        versions = {}
-        for app_name in apps_to_build:
-            if app_name == APP_SHELL:
-                # Skip portal-app-shell in versions, use variations instead
-                continue
-            version = get_app_version(app_name, repo_root)
-            # Map apps to plugin repos if they have a mapping
-            target_repo = APP_TO_PLUGIN_MAPPING.get(app_name, app_name)
-            versions[target_repo] = version
-
-        # Add versions for app-shell variations
-        if app_shell_variations:
-            app_shell_version = get_app_version(APP_SHELL, repo_root)
-            for variation in app_shell_variations:
-                versions[variation] = app_shell_version
-
-        for plugin_name in plugins_to_build:
-            full_plugin_name = f"{PLUGIN_PREFIX}{plugin_name}"
-            version = get_app_version(full_plugin_name, repo_root)
-            versions[full_plugin_name] = version
+        versions = collect_versions(apps_to_build, plugins_to_build, app_shell_variations, repo_root)
 
         # Create commit (map apps to their target repositories)
-        modified_apps = []
-        for app_name in apps_to_build:
-            if app_name == APP_SHELL:
-                continue
-            # Map apps to plugin repos if they have a mapping
-            if app_name in APP_TO_PLUGIN_MAPPING:
-                modified_apps.append(APP_TO_PLUGIN_MAPPING[app_name])
-            else:
-                modified_apps.append(app_name)
-        modified_apps.extend(app_shell_variations)
-        modified_apps.extend([f"{PLUGIN_PREFIX}{p}" for p in plugins_to_build])
+        modified_apps = get_modified_apps_list(apps_to_build, plugins_to_build, app_shell_variations)
 
         try:
             success, commit_hash = git_add_and_commit_modified(
@@ -924,13 +911,13 @@ Examples:
                 if args.verbose:
                     print(f"Commit created: {commit_hash}")
 
+                # Handle dry-run and no-push flags
                 if args.dry_run:
                     print("Dry run - skipping push", file=sys.stderr)
-                    sys.exit(0)
-
+                    return
                 if args.no_push:
                     print("No-push flag set - skipping push", file=sys.stderr)
-                    sys.exit(0)
+                    return
 
                 # Push changes
                 try:
@@ -940,18 +927,18 @@ Examples:
                 except Exception as e:
                     print(f"Error pushing changes: {e}", file=sys.stderr)
                     sys.exit(1)
-
-                sys.exit(0)
             else:
                 print("No commit created", file=sys.stderr)
                 sys.exit(1)
         except Exception as e:
             print(f"Error creating commit: {e}", file=sys.stderr)
             sys.exit(1)
+    elif args.force and not has_staged:
+        print("Warning: --force flag set but nothing was staged (no build outputs found)", file=sys.stderr)
+        write_metadata_files([], repo_root)
     else:
         print("No changes detected in any apps")
         write_metadata_files([], repo_root)
-        sys.exit(0)
 
 
 if __name__ == "__main__":
