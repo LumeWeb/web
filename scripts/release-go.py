@@ -541,7 +541,7 @@ def git_add_and_commit_modified(
     commit_message = "\n".join(commit_lines)
 
     if verbose:
-        print(f"Commit message: {commit_message}")
+        print(f"Commit message:\n{commit_message}")
 
     # Create commit
     result = run_command(["git", "commit", "-m", commit_message], cwd=repo_root)
@@ -556,19 +556,25 @@ def git_add_and_commit_modified(
     return True, commit_hash
 
 
-def write_metadata_files(modified_apps: List[str], repo_root: Path) -> None:
+def write_metadata_files(modified_apps: List[str], repo_root: Path, verbose: bool = False) -> None:
     """
     Write metadata files for downstream workflow steps.
 
     Args:
         modified_apps: List of modified app names
         repo_root: Path to the repository root
+        verbose: Whether to print verbose output
     """
     tmp_dir = Path("/tmp")
 
     # Write modified apps
     modified_apps_file = tmp_dir / "modified_apps.txt"
-    modified_apps_file.write_text("\n".join(modified_apps))
+    content = "\n".join(modified_apps)
+    
+    modified_apps_file.write_text(content)
+    
+    if verbose and modified_apps:
+        print(f"Writing metadata for dispatch: {', '.join(modified_apps)}")
 
 
 def collect_versions(apps_to_build: List[str], plugins_to_build: List[str], 
@@ -624,7 +630,7 @@ def get_modified_apps_list(apps_to_build: List[str], plugins_to_build: List[str]
     """
     modified_apps = []
     for app_name in apps_to_build:
-        if app_name == APP_SHELL:
+        if app_name == APP_SHELL or app_name == "none":
             continue
         # Map apps to plugin repos if they have a mapping
         if app_name in APP_TO_PLUGIN_MAPPING:
@@ -651,7 +657,7 @@ def collect_go_paths(apps_to_build: List[str], plugins_to_build: List[str],
     """
     go_paths = []
     for app_name in apps_to_build:
-        if app_name == APP_SHELL:
+        if app_name == APP_SHELL or app_name == "none":
             continue
         # Map apps to plugin repos if they have a mapping
         target_repo = APP_TO_PLUGIN_MAPPING.get(app_name, app_name)
@@ -907,24 +913,25 @@ Examples:
     except Exception:
         pass
 
+    # Get versions and modified apps list for metadata (needed regardless of changes)
+    versions = collect_versions(apps_to_build, plugins_to_build, app_shell_variations, repo_root)
+    modified_apps = get_modified_apps_list(apps_to_build, plugins_to_build, app_shell_variations)
+    
+    if args.verbose:
+        print(f"Modified apps list to commit: {modified_apps}")
+
     if has_changes or (args.force and has_staged):
         if args.force and not has_changes:
             print(f"Warning: --force flag set, proceeding despite no git changes detected", file=sys.stderr)
         
         # Get list of changed files for reporting
         changed_files = get_git_diff_files(repo_root, go_paths)
-        if args.verbose:
-            print(f"Changed files: {len(changed_files)}")
+        if args.verbose and changed_files:
+            print(f"Changed files ({len(changed_files)}):")
             for file in changed_files[:10]:  # Show first 10
                 print(f"  - {file}")
             if len(changed_files) > 10:
                 print(f"  ... and {len(changed_files) - 10} more")
-
-        # Get versions from package.json for commit message
-        versions = collect_versions(apps_to_build, plugins_to_build, app_shell_variations, repo_root)
-
-        # Create commit (map apps to their target repositories)
-        modified_apps = get_modified_apps_list(apps_to_build, plugins_to_build, app_shell_variations)
 
         try:
             success, commit_hash = git_add_and_commit_modified(
@@ -935,11 +942,8 @@ Examples:
             )
 
             if success:
-                write_metadata_files(modified_apps, repo_root)
+                write_metadata_files(modified_apps, repo_root, args.verbose)
                 set_github_output("commit_hash", commit_hash)
-
-                if args.verbose:
-                    print(f"Commit created: {commit_hash}")
 
                 # Handle dry-run and no-push flags
                 if args.dry_run:
@@ -965,10 +969,11 @@ Examples:
             sys.exit(1)
     elif args.force and not has_staged:
         print("Warning: --force flag set but nothing was staged (no build outputs found)", file=sys.stderr)
-        write_metadata_files([], repo_root)
+        write_metadata_files(modified_apps, repo_root, args.verbose)
     else:
         print("No changes detected in any apps")
-        write_metadata_files([], repo_root)
+        # Still write metadata so downstream workflows know what was processed
+        write_metadata_files(modified_apps, repo_root, args.verbose)
 
 
 if __name__ == "__main__":
