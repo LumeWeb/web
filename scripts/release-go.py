@@ -67,8 +67,20 @@ def parse_csv_list(value: Optional[str]) -> List[str]:
             if (item.startswith("'") and item.endswith("'")) or \
                (item.startswith('"') and item.endswith('"')):
                 item = item[1:-1]
+
+            # Reject potentially dangerous characters (path traversal, shell metacharacters)
+            dangerous_chars = ['/', '\\', '..', '|', '&', ';', '$', '`', '(', ')', '<', '>']
+            if any(char in item for char in dangerous_chars):
+                print(f"Warning: Invalid characters in '{item}' - skipping", file=sys.stderr)
+                continue
+
+            # Reject empty strings after stripping
+            if not item:
+                continue
+
             items.append(item)
     return items
+
 
 
 def get_app_package_name(app_name: str) -> str:
@@ -95,6 +107,138 @@ def get_plugin_package_name(plugin_name: str) -> str:
         Package name for turbo --filter (e.g., @lumeweb/portal-plugin-dashboard)
     """
     return f"{LUMEWEB_SCOPE}{PLUGIN_PREFIX}{plugin_name}"
+
+
+def validate_app_name(app_name: str, repo_root: Path) -> bool:
+    """
+    Validate that an app name exists and is valid.
+
+    Args:
+        app_name: Name of the app to validate
+        repo_root: Path to the repository root
+
+    Returns:
+        True if the app is valid, False otherwise
+    """
+    # Allow portal-app-shell
+    if app_name == APP_SHELL:
+        return True
+
+    # Check if app directory exists
+    app_path = repo_root / APPS_DIR / app_name
+    if app_path.exists() and app_path.is_dir():
+        # Verify it has a package.json
+        package_json = app_path / "package.json"
+        if package_json.exists():
+            return True
+
+    return False
+
+
+def validate_plugin_name(plugin_name: str, repo_root: Path) -> bool:
+    """
+    Validate that a plugin name exists and is valid.
+
+    Args:
+        plugin_name: Name of the plugin (without portal-plugin- prefix)
+        repo_root: Path to the repository root
+
+    Returns:
+        True if the plugin is valid, False otherwise
+    """
+    # Check if plugin directory exists
+    plugin_path = repo_root / LIBS_DIR / f"{PLUGIN_PREFIX}{plugin_name}"
+    if plugin_path.exists() and plugin_path.is_dir():
+        # Verify it has a package.json
+        package_json = plugin_path / "package.json"
+        if package_json.exists():
+            return True
+
+    return False
+
+
+def sanitize_app_names(app_names: List[str], repo_root: Path, verbose: bool = False) -> List[str]:
+    """
+    Sanitize and validate a list of app names.
+
+    Args:
+        app_names: List of app names to validate
+        repo_root: Path to the repository root
+        verbose: Whether to print verbose output
+
+    Returns:
+        List of valid app names
+    """
+    valid_apps = []
+    for app_name in app_names:
+        if validate_app_name(app_name, repo_root):
+            valid_apps.append(app_name)
+        else:
+            print(f"Warning: Invalid app name '{app_name}' - skipping", file=sys.stderr)
+            if verbose:
+                print(f"  Expected directory: {repo_root / APPS_DIR / app_name}")
+    return valid_apps
+
+
+def sanitize_plugin_names(plugin_names: List[str], repo_root: Path, verbose: bool = False) -> List[str]:
+    """
+    Sanitize and validate a list of plugin names.
+
+    Args:
+        plugin_names: List of plugin names to validate (without portal-plugin- prefix)
+        repo_root: Path to the repository root
+        verbose: Whether to print verbose output
+
+    Returns:
+        List of valid plugin names
+    """
+    valid_plugins = []
+    for plugin_name in plugin_names:
+        if validate_plugin_name(plugin_name, repo_root):
+            valid_plugins.append(plugin_name)
+        else:
+            print(f"Warning: Invalid plugin name '{plugin_name}' - skipping", file=sys.stderr)
+            if verbose:
+                print(f"  Expected directory: {repo_root / LIBS_DIR / f'{PLUGIN_PREFIX}{plugin_name}'}")
+    return valid_plugins
+
+
+def list_available_apps(repo_root: Path) -> List[str]:
+    """
+    List all available apps in the repository.
+
+    Args:
+        repo_root: Path to the repository root
+
+    Returns:
+        List of app names
+    """
+    apps_dir = repo_root / APPS_DIR
+    apps = []
+    if apps_dir.exists() and apps_dir.is_dir():
+        for item in apps_dir.iterdir():
+            if item.is_dir() and (item / "package.json").exists():
+                apps.append(item.name)
+    return sorted(apps)
+
+
+def list_available_plugins(repo_root: Path) -> List[str]:
+    """
+    List all available plugins in the repository.
+
+    Args:
+        repo_root: Path to the repository root
+
+    Returns:
+        List of plugin names (without portal-plugin- prefix)
+    """
+    libs_dir = repo_root / LIBS_DIR
+    plugins = []
+    if libs_dir.exists() and libs_dir.is_dir():
+        for item in libs_dir.iterdir():
+            if item.is_dir() and item.name.startswith(PLUGIN_PREFIX) and (item / "package.json").exists():
+                plugins.append(item.name[len(PLUGIN_PREFIX):])
+    return sorted(plugins)
 
 
 def set_github_output(name: str, value: str) -> None:
@@ -558,19 +702,23 @@ Examples:
 
     args = parser.parse_args()
 
+    # Get repository root (needed for validation)
+    repo_root = Path(__file__).parent.parent.resolve()
+
     # Parse apps and plugins arguments
     if args.apps.lower() == "all":
         apps_to_build = DEFAULT_APPS
     else:
         apps_to_build = parse_csv_list(args.apps)
+        # Validate app names
+        apps_to_build = sanitize_app_names(apps_to_build, repo_root, args.verbose)
 
     if args.plugins.lower() == "all":
         plugins_to_build = DEFAULT_PLUGINS
     else:
         plugins_to_build = parse_csv_list(args.plugins)
-
-    # Get repository root
-    repo_root = Path(__file__).parent.parent.resolve()
+        # Validate plugin names
+        plugins_to_build = sanitize_plugin_names(plugins_to_build, repo_root, args.verbose)
 
     if args.verbose:
         print(f"Repository root: {repo_root}")
@@ -594,7 +742,9 @@ Examples:
 
     # Early exit if nothing to build (unless --commit-hash)
     if not apps_to_build and not plugins_to_build:
-        print("No apps or plugins specified to build", file=sys.stderr)
+        print("No valid apps or plugins to build. All provided names were invalid or skipped.", file=sys.stderr)
+        print(f"Available apps: {', '.join(list_available_apps(repo_root))}", file=sys.stderr)
+        print(f"Available plugins: {', '.join(list_available_plugins(repo_root))}", file=sys.stderr)
         sys.exit(1)
 
     # Get current git revision (version)
