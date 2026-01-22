@@ -1,5 +1,9 @@
-import exposesMap from './virtualExposes-Uc6rYKCq.js';
-import { core_admin__mf_v__runtimeInit__mf_v__ } from './core_admin__mf_v__runtimeInit__mf_v__-C5CzKrI4.js';
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["static/js/index-DnJJe5Zt.js","static/js/schemas-CA767HQ5.js","static/js/parse-owPI_Zlz.js","static/js/admin__loadShare__react__loadShare__-BY1INpNu.js","static/js/_commonjsHelpers-BILit0S-.js","static/js/admin__mf_v__runtimeInit__mf_v__-B2PJI9hS.js","static/js/admin__loadShare__react_mf_2_router__loadShare__-CwtF7zsV.js","static/js/jsx-runtime-BOqW7N1v.js","static/js/createLucideIcon-KUE0P9TA.js","static/js/virtualExposes-DwA08f_D.js","static/js/preload-helper-Dk3k6Zm1.js","static/js/index-CTBkVQPS.js","static/js/admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__-QB1_Htv_.js","static/js/admin__loadShare__react_mf_2_dom__loadShare__-BykLpcnn.js","static/js/index-BnQpHTKV.js","static/js/index-CoAtoh5x.js","static/js/index-D6eUxOCJ.js","static/js/index-DzwsUQYN.js","static/js/index-BKmzfUwO.js","static/js/index-CrWsS64Z.js","static/js/index.esm-BlTOZQ5S.js","static/js/index-CeQzhlXt.js"])))=>i.map(i=>d[i]);
+import exposesMap from './virtualExposes-DwA08f_D.js';
+import { __vitePreload } from './preload-helper-Dk3k6Zm1.js';
+import { admin__mf_v__runtimeInit__mf_v__ } from './admin__mf_v__runtimeInit__mf_v__-B2PJI9hS.js';
+
+var index_cjs$3 = {};
 
 var index_cjs$2 = {};
 
@@ -986,7 +990,7 @@ index_cjs.runtimeDescMap = runtimeDescMap;
 index_cjs.typeDescMap = typeDescMap;
 
 var sdk = index_cjs$1;
-var errorCodes = index_cjs;
+var errorCodes$1 = index_cjs;
 
 const LOG_CATEGORY = '[ Federation Runtime ]';
 // FIXME: pre-bundle ?
@@ -2076,7 +2080,7 @@ function matchRemote(remotes, nameOrAlias) {
     return;
 }
 
-function registerPlugins(plugins, instance) {
+function registerPlugins$1(plugins, instance) {
     const globalPlugins = getGlobalHostPlugins();
     const hookInstances = [
         instance.hooks,
@@ -2154,7 +2158,7 @@ async function loadSystemJsEntry({ entry, remoteEntryExports, }) {
 }
 function handleRemoteEntryLoaded(name, globalName, entry) {
     const { remoteEntryKey, entryExports } = getRemoteEntryExports(name, globalName);
-    assert(entryExports, errorCodes.getShortErrorMsg(errorCodes.RUNTIME_001, errorCodes.runtimeDescMap, {
+    assert(entryExports, errorCodes$1.getShortErrorMsg(errorCodes$1.RUNTIME_001, errorCodes$1.runtimeDescMap, {
         remoteName: name,
         remoteEntryUrl: entry,
         remoteEntryKey,
@@ -2187,7 +2191,7 @@ async function loadEntryScript({ name, globalName, entry, loaderHook, getEntryUr
         return handleRemoteEntryLoaded(name, globalName, entry);
     })
         .catch((e) => {
-        assert(undefined, errorCodes.getShortErrorMsg(errorCodes.RUNTIME_008, errorCodes.runtimeDescMap, {
+        assert(undefined, errorCodes$1.getShortErrorMsg(errorCodes$1.RUNTIME_008, errorCodes$1.runtimeDescMap, {
             remoteName: name,
             resourceUrl: entry,
         }));
@@ -2277,7 +2281,7 @@ async function getRemoteEntry(params) {
         })
             .catch(async (err) => {
             const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
-            const isScriptLoadError = err instanceof Error && err.message.includes(errorCodes.RUNTIME_008);
+            const isScriptLoadError = err instanceof Error && err.message.includes(errorCodes$1.RUNTIME_008);
             if (isScriptLoadError && !_inErrorHandling) {
                 const wrappedGetRemoteEntry = (params) => {
                     return getRemoteEntry({ ...params, _inErrorHandling: true });
@@ -2574,7 +2578,7 @@ class Module {
                 origin: this.host,
             });
             if (typeof remoteEntryExports?.init === 'undefined') {
-                error(errorCodes.getShortErrorMsg(errorCodes.RUNTIME_002, errorCodes.runtimeDescMap, {
+                error(errorCodes$1.getShortErrorMsg(errorCodes$1.RUNTIME_002, errorCodes$1.runtimeDescMap, {
                     hostName: this.host.name,
                     remoteName: this.remoteInfo.name,
                     remoteEntryUrl: this.remoteInfo.entry,
@@ -3253,7 +3257,7 @@ class SnapshotHandler {
                 gSnapshot = globalSnapshotRes;
             }
             else {
-                error(errorCodes.getShortErrorMsg(errorCodes.RUNTIME_007, errorCodes.runtimeDescMap, {
+                error(errorCodes$1.getShortErrorMsg(errorCodes$1.RUNTIME_007, errorCodes$1.runtimeDescMap, {
                     hostName: moduleInfo.name,
                     hostVersion: moduleInfo.version,
                     globalSnapshot: JSON.stringify(globalSnapshotRes),
@@ -3299,7 +3303,7 @@ class SnapshotHandler {
                     }));
                 if (!manifestJson) {
                     delete this.manifestLoading[manifestUrl];
-                    error(errorCodes.getShortErrorMsg(errorCodes.RUNTIME_003, errorCodes.runtimeDescMap, {
+                    error(errorCodes$1.getShortErrorMsg(errorCodes$1.RUNTIME_003, errorCodes$1.runtimeDescMap, {
                         manifestUrl,
                         moduleName: moduleInfo.name,
                         hostName: this.HostInstance.options.name,
@@ -3624,8 +3628,8 @@ class SharedHandler {
         if (shareOptions.get) {
             const module = shareOptions.get();
             if (module instanceof Promise) {
-                const errorCode = extraOptions?.from === 'build' ? errorCodes.RUNTIME_005 : errorCodes.RUNTIME_006;
-                throw new Error(errorCodes.getShortErrorMsg(errorCode, errorCodes.runtimeDescMap, {
+                const errorCode = extraOptions?.from === 'build' ? errorCodes$1.RUNTIME_005 : errorCodes$1.RUNTIME_006;
+                throw new Error(errorCodes$1.getShortErrorMsg(errorCode, errorCodes$1.runtimeDescMap, {
                     hostName: host.options.name,
                     sharedPkgName: pkgName,
                 }));
@@ -3640,7 +3644,7 @@ class SharedHandler {
             });
             return shareOptions.lib;
         }
-        throw new Error(errorCodes.getShortErrorMsg(errorCodes.RUNTIME_006, errorCodes.runtimeDescMap, {
+        throw new Error(errorCodes$1.getShortErrorMsg(errorCodes$1.RUNTIME_006, errorCodes$1.runtimeDescMap, {
             hostName: host.options.name,
             sharedPkgName: pkgName,
         }));
@@ -3855,7 +3859,7 @@ class RemoteHandler {
         }
         const { id: idRes } = loadRemoteArgs;
         const remoteSplitInfo = matchRemoteWithNameAndExpose(host.options.remotes, idRes);
-        assert(remoteSplitInfo, errorCodes.getShortErrorMsg(errorCodes.RUNTIME_004, errorCodes.runtimeDescMap, {
+        assert(remoteSplitInfo, errorCodes$1.getShortErrorMsg(errorCodes$1.RUNTIME_004, errorCodes$1.runtimeDescMap, {
             hostName: host.options.name,
             requestId: idRes,
         }));
@@ -4174,7 +4178,7 @@ class ModuleFederation {
         return optionsRes;
     }
     registerPlugins(plugins) {
-        const pluginRes = registerPlugins(plugins, this);
+        const pluginRes = registerPlugins$1(plugins, this);
         // Merge plugin
         this.options.plugins = this.options.plugins.reduce((res, plugin) => {
             if (!plugin)
@@ -4260,6 +4264,7 @@ function getGlobalFederationInstance(name, version) {
 utils_cjs.getGlobalFederationInstance = getGlobalFederationInstance;
 
 var runtimeCore = index_cjs$2;
+var errorCodes = index_cjs;
 var utils = utils_cjs;
 
 function createInstance(options) {
@@ -4289,35 +4294,142 @@ function init$1(options) {
         return instance;
     }
 }
+function loadRemote(...args) {
+    runtimeCore.assert(FederationInstance, errorCodes.getShortErrorMsg(errorCodes.RUNTIME_009, errorCodes.runtimeDescMap));
+    const loadRemote = FederationInstance.loadRemote;
+    // eslint-disable-next-line prefer-spread
+    return loadRemote.apply(FederationInstance, args);
+}
+function loadShare(...args) {
+    runtimeCore.assert(FederationInstance, errorCodes.getShortErrorMsg(errorCodes.RUNTIME_009, errorCodes.runtimeDescMap));
+    // eslint-disable-next-line prefer-spread
+    const loadShare = FederationInstance.loadShare;
+    return loadShare.apply(FederationInstance, args);
+}
+function loadShareSync(...args) {
+    runtimeCore.assert(FederationInstance, errorCodes.getShortErrorMsg(errorCodes.RUNTIME_009, errorCodes.runtimeDescMap));
+    const loadShareSync = FederationInstance.loadShareSync;
+    // eslint-disable-next-line prefer-spread
+    return loadShareSync.apply(FederationInstance, args);
+}
+function preloadRemote(...args) {
+    runtimeCore.assert(FederationInstance, errorCodes.getShortErrorMsg(errorCodes.RUNTIME_009, errorCodes.runtimeDescMap));
+    // eslint-disable-next-line prefer-spread
+    return FederationInstance.preloadRemote.apply(FederationInstance, args);
+}
+function registerRemotes(...args) {
+    runtimeCore.assert(FederationInstance, errorCodes.getShortErrorMsg(errorCodes.RUNTIME_009, errorCodes.runtimeDescMap));
+    // eslint-disable-next-line prefer-spread
+    return FederationInstance.registerRemotes.apply(FederationInstance, args);
+}
+function registerPlugins(...args) {
+    runtimeCore.assert(FederationInstance, errorCodes.getShortErrorMsg(errorCodes.RUNTIME_009, errorCodes.runtimeDescMap));
+    // eslint-disable-next-line prefer-spread
+    return FederationInstance.registerPlugins.apply(FederationInstance, args);
+}
+function getInstance() {
+    return FederationInstance;
+}
+function registerShared(...args) {
+    runtimeCore.assert(FederationInstance, errorCodes.getShortErrorMsg(errorCodes.RUNTIME_009, errorCodes.runtimeDescMap));
+    // eslint-disable-next-line prefer-spread
+    return FederationInstance.registerShared.apply(FederationInstance, args);
+}
 // Inject for debug
 runtimeCore.setGlobalFederationConstructor(runtimeCore.ModuleFederation);
 
-runtimeCore.Module;
-runtimeCore.ModuleFederation;
-runtimeCore.getRemoteEntry;
-runtimeCore.getRemoteInfo;
-runtimeCore.loadScript;
-runtimeCore.loadScriptNode;
-runtimeCore.registerGlobalPlugins;
-var init_1 = init$1;
+index_cjs$3.Module = runtimeCore.Module;
+index_cjs$3.ModuleFederation = runtimeCore.ModuleFederation;
+index_cjs$3.getRemoteEntry = runtimeCore.getRemoteEntry;
+index_cjs$3.getRemoteInfo = runtimeCore.getRemoteInfo;
+index_cjs$3.loadScript = runtimeCore.loadScript;
+index_cjs$3.loadScriptNode = runtimeCore.loadScriptNode;
+index_cjs$3.registerGlobalPlugins = runtimeCore.registerGlobalPlugins;
+index_cjs$3.createInstance = createInstance;
+index_cjs$3.getInstance = getInstance;
+var init_1 = index_cjs$3.init = init$1;
+index_cjs$3.loadRemote = loadRemote;
+index_cjs$3.loadShare = loadShare;
+index_cjs$3.loadShareSync = loadShareSync;
+index_cjs$3.preloadRemote = preloadRemote;
+index_cjs$3.registerPlugins = registerPlugins;
+index_cjs$3.registerRemotes = registerRemotes;
+index_cjs$3.registerShared = registerShared;
 
-const usedShared = {
+const importMap = {
+      
+        "@lumeweb/portal-framework-core": async () => {
+          let pkg = await __vitePreload(() => import('./index-DnJJe5Zt.js'),true              ?__vite__mapDeps([0,1,2,3,4,5,6,7,8,9,10]):void 0);
+            return pkg;
+        }
+      ,
+        "@lumeweb/portal-framework-ui": async () => {
+          let pkg = await __vitePreload(() => import('./index-CTBkVQPS.js'),true              ?__vite__mapDeps([11,3,4,5,7,6,12,8,13,2,14]):void 0);
+            return pkg;
+        }
+      ,
+        "@lumeweb/portal-framework-ui-core": async () => {
+          let pkg = await __vitePreload(() => import('./index-CoAtoh5x.js'),true              ?__vite__mapDeps([15,3,4,5,7,12,8,13]):void 0);
+            return pkg;
+        }
+      ,
+        "@refinedev/core": async () => {
+          let pkg = await __vitePreload(() => import('./index-D6eUxOCJ.js'),true              ?__vite__mapDeps([16,3,4,5,14]):void 0);
+            return pkg;
+        }
+      ,
+        "@tanstack/react-query": async () => {
+          let pkg = await __vitePreload(() => import('./index-DzwsUQYN.js'),true              ?__vite__mapDeps([17,3,4,5,7]):void 0);
+            return pkg;
+        }
+      ,
+        "react": async () => {
+          let pkg = await __vitePreload(() => import('./index-BKmzfUwO.js').then(n => n.index),true              ?__vite__mapDeps([18,4]):void 0);
+            return pkg;
+        }
+      ,
+        "react-dom": async () => {
+          let pkg = await __vitePreload(() => import('./index-CrWsS64Z.js').then(n => n.index),true              ?__vite__mapDeps([19,4,3,5]):void 0);
+            return pkg;
+        }
+      ,
+        "react-hook-form": async () => {
+          let pkg = await __vitePreload(() => import('./index.esm-BlTOZQ5S.js'),true              ?__vite__mapDeps([20,3,4,5]):void 0);
+            return pkg;
+        }
+      ,
+        "react-router": async () => {
+          let pkg = await __vitePreload(() => import('./index-CeQzhlXt.js'),true              ?__vite__mapDeps([21,3,4,5]):void 0);
+            return pkg;
+        }
+      
+    };
+      const usedShared = {
       
           "@lumeweb/portal-framework-core": {
             name: "@lumeweb/portal-framework-core",
             version: "0.1.0",
             scope: ["default"],
             loaded: false,
-            from: "core:admin",
+            from: "admin",
             async get () {
-              {
-                throw new Error(`Shared module '${"@lumeweb/portal-framework-core"}' must be provided by host`);
+              usedShared["@lumeweb/portal-framework-core"].loaded = true;
+              const {"@lumeweb/portal-framework-core": pkgDynamicImport} = importMap;
+              const res = await pkgDynamicImport();
+              const exportModule = {...res};
+              // All npm packages pre-built by vite will be converted to esm
+              Object.defineProperty(exportModule, "__esModule", {
+                value: true,
+                enumerable: false
+              });
+              return function () {
+                return exportModule
               }
             },
             shareConfig: {
               singleton: true,
               requiredVersion: "^0.1.0",
-              import: false,
+              
             }
           }
         ,
@@ -4326,16 +4438,25 @@ const usedShared = {
             version: "0.1.0",
             scope: ["default"],
             loaded: false,
-            from: "core:admin",
+            from: "admin",
             async get () {
-              {
-                throw new Error(`Shared module '${"@lumeweb/portal-framework-ui"}' must be provided by host`);
+              usedShared["@lumeweb/portal-framework-ui"].loaded = true;
+              const {"@lumeweb/portal-framework-ui": pkgDynamicImport} = importMap;
+              const res = await pkgDynamicImport();
+              const exportModule = {...res};
+              // All npm packages pre-built by vite will be converted to esm
+              Object.defineProperty(exportModule, "__esModule", {
+                value: true,
+                enumerable: false
+              });
+              return function () {
+                return exportModule
               }
             },
             shareConfig: {
               singleton: true,
               requiredVersion: "^0.1.0",
-              import: false,
+              
             }
           }
         ,
@@ -4344,16 +4465,25 @@ const usedShared = {
             version: "0.1.0",
             scope: ["default"],
             loaded: false,
-            from: "core:admin",
+            from: "admin",
             async get () {
-              {
-                throw new Error(`Shared module '${"@lumeweb/portal-framework-ui-core"}' must be provided by host`);
+              usedShared["@lumeweb/portal-framework-ui-core"].loaded = true;
+              const {"@lumeweb/portal-framework-ui-core": pkgDynamicImport} = importMap;
+              const res = await pkgDynamicImport();
+              const exportModule = {...res};
+              // All npm packages pre-built by vite will be converted to esm
+              Object.defineProperty(exportModule, "__esModule", {
+                value: true,
+                enumerable: false
+              });
+              return function () {
+                return exportModule
               }
             },
             shareConfig: {
               singleton: true,
               requiredVersion: "^0.1.0",
-              import: false,
+              
             }
           }
         ,
@@ -4362,16 +4492,25 @@ const usedShared = {
             version: "5.0.8",
             scope: ["default"],
             loaded: false,
-            from: "core:admin",
+            from: "admin",
             async get () {
-              {
-                throw new Error(`Shared module '${"@refinedev/core"}' must be provided by host`);
+              usedShared["@refinedev/core"].loaded = true;
+              const {"@refinedev/core": pkgDynamicImport} = importMap;
+              const res = await pkgDynamicImport();
+              const exportModule = {...res};
+              // All npm packages pre-built by vite will be converted to esm
+              Object.defineProperty(exportModule, "__esModule", {
+                value: true,
+                enumerable: false
+              });
+              return function () {
+                return exportModule
               }
             },
             shareConfig: {
               singleton: true,
               requiredVersion: "^5.0.8",
-              import: false,
+              
             }
           }
         ,
@@ -4380,16 +4519,25 @@ const usedShared = {
             version: "5.90.19",
             scope: ["default"],
             loaded: false,
-            from: "core:admin",
+            from: "admin",
             async get () {
-              {
-                throw new Error(`Shared module '${"@tanstack/react-query"}' must be provided by host`);
+              usedShared["@tanstack/react-query"].loaded = true;
+              const {"@tanstack/react-query": pkgDynamicImport} = importMap;
+              const res = await pkgDynamicImport();
+              const exportModule = {...res};
+              // All npm packages pre-built by vite will be converted to esm
+              Object.defineProperty(exportModule, "__esModule", {
+                value: true,
+                enumerable: false
+              });
+              return function () {
+                return exportModule
               }
             },
             shareConfig: {
               singleton: true,
               requiredVersion: "^5.90.19",
-              import: false,
+              
             }
           }
         ,
@@ -4398,16 +4546,25 @@ const usedShared = {
             version: "19.2.3",
             scope: ["default"],
             loaded: false,
-            from: "core:admin",
+            from: "admin",
             async get () {
-              {
-                throw new Error(`Shared module '${"react"}' must be provided by host`);
+              usedShared["react"].loaded = true;
+              const {"react": pkgDynamicImport} = importMap;
+              const res = await pkgDynamicImport();
+              const exportModule = {...res};
+              // All npm packages pre-built by vite will be converted to esm
+              Object.defineProperty(exportModule, "__esModule", {
+                value: true,
+                enumerable: false
+              });
+              return function () {
+                return exportModule
               }
             },
             shareConfig: {
               singleton: true,
               requiredVersion: "^19.2.3",
-              import: false,
+              
             }
           }
         ,
@@ -4416,16 +4573,25 @@ const usedShared = {
             version: "19.2.3",
             scope: ["default"],
             loaded: false,
-            from: "core:admin",
+            from: "admin",
             async get () {
-              {
-                throw new Error(`Shared module '${"react-dom"}' must be provided by host`);
+              usedShared["react-dom"].loaded = true;
+              const {"react-dom": pkgDynamicImport} = importMap;
+              const res = await pkgDynamicImport();
+              const exportModule = {...res};
+              // All npm packages pre-built by vite will be converted to esm
+              Object.defineProperty(exportModule, "__esModule", {
+                value: true,
+                enumerable: false
+              });
+              return function () {
+                return exportModule
               }
             },
             shareConfig: {
               singleton: true,
               requiredVersion: "^19.2.3",
-              import: false,
+              
             }
           }
         ,
@@ -4434,16 +4600,25 @@ const usedShared = {
             version: "7.71.1",
             scope: ["default"],
             loaded: false,
-            from: "core:admin",
+            from: "admin",
             async get () {
-              {
-                throw new Error(`Shared module '${"react-hook-form"}' must be provided by host`);
+              usedShared["react-hook-form"].loaded = true;
+              const {"react-hook-form": pkgDynamicImport} = importMap;
+              const res = await pkgDynamicImport();
+              const exportModule = {...res};
+              // All npm packages pre-built by vite will be converted to esm
+              Object.defineProperty(exportModule, "__esModule", {
+                value: true,
+                enumerable: false
+              });
+              return function () {
+                return exportModule
               }
             },
             shareConfig: {
               singleton: true,
               requiredVersion: "^7.71.1",
-              import: false,
+              
             }
           }
         ,
@@ -4452,16 +4627,25 @@ const usedShared = {
             version: "7.12.0",
             scope: ["default"],
             loaded: false,
-            from: "core:admin",
+            from: "admin",
             async get () {
-              {
-                throw new Error(`Shared module '${"react-router"}' must be provided by host`);
+              usedShared["react-router"].loaded = true;
+              const {"react-router": pkgDynamicImport} = importMap;
+              const res = await pkgDynamicImport();
+              const exportModule = {...res};
+              // All npm packages pre-built by vite will be converted to esm
+              Object.defineProperty(exportModule, "__esModule", {
+                value: true,
+                enumerable: false
+              });
+              return function () {
+                return exportModule
               }
             },
             shareConfig: {
               singleton: true,
               requiredVersion: "^7.12.0",
-              import: false,
+              
             }
           }
         
@@ -4471,7 +4655,7 @@ const usedShared = {
 
 const initTokens = {};
   const shareScopeName = "default";
-  const mfName = "core:admin";
+  const mfName = "admin";
   async function init(shared = {}, initScope = []) {
     const initRes = init_1({
       name: mfName,
@@ -4496,7 +4680,7 @@ const initTokens = {};
     } catch (e) {
       console.error(e);
     }
-    core_admin__mf_v__runtimeInit__mf_v__.initResolve(initRes);
+    admin__mf_v__runtimeInit__mf_v__.initResolve(initRes);
     return initRes
   }
 
@@ -4505,4 +4689,4 @@ const initTokens = {};
     return (exposesMap[moduleName])().then(res => () => res)
   }
 
-export { getExposes as get, init };
+export { getExposes, index_cjs$3 as index_cjs, init };

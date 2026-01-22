@@ -1,4 +1,4 @@
-const globalKey = "__mf_init____mf__virtual/core:admin__mf_v__runtimeInit__mf_v__.js__";
+const globalKey = "__mf_init____mf__virtual/admin__mf_v__runtimeInit__mf_v__.js__";
     if (!globalThis[globalKey]) {
       let initResolve, initReject;
       const initPromise = new Promise((re, rj) => {
@@ -11,6 +11,6 @@ const globalKey = "__mf_init____mf__virtual/core:admin__mf_v__runtimeInit__mf_v_
         initReject
       };
     }
-    var core_admin__mf_v__runtimeInit__mf_v__ = globalThis[globalKey];
+    var admin__mf_v__runtimeInit__mf_v__ = globalThis[globalKey];
 
-export { core_admin__mf_v__runtimeInit__mf_v__ };
+export { admin__mf_v__runtimeInit__mf_v__ };
