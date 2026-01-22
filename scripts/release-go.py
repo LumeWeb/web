@@ -47,7 +47,7 @@ DEFAULT_PLUGINS = ["ipfs", "core", "lbry"]
 
 def parse_csv_list(value: Optional[str]) -> List[str]:
     """
-    Parse a comma-separated string into a list, trimming whitespace.
+    Parse a comma-separated string into a list, trimming whitespace and quotes.
 
     Args:
         value: CSV string or None
@@ -58,7 +58,17 @@ def parse_csv_list(value: Optional[str]) -> List[str]:
     if not value or value.lower() == "none":
         return []
 
-    return [item.strip() for item in value.split(",") if item.strip()]
+    # Split by comma, strip whitespace, and remove surrounding quotes
+    items = []
+    for item in value.split(","):
+        item = item.strip()
+        if item:
+            # Remove surrounding quotes (single or double)
+            if (item.startswith("'") and item.endswith("'")) or \
+               (item.startswith('"') and item.endswith('"')):
+                item = item[1:-1]
+            items.append(item)
+    return items
 
 
 def get_app_package_name(app_name: str) -> str:
