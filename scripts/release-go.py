@@ -22,7 +22,7 @@ APP_SHELL = "portal-app-shell"
 # App shell variations (each built to a separate dist subdirectory)
 # Maps variation names to their target Go repository names
 APP_SHELL_VARIATIONS = {
-    "dashboard": "portal-dashboard",
+    "dashboard": "portal-plugin-dashboard",
     "admin": "portal-plugin-admin"
 }
 
@@ -496,6 +496,9 @@ Examples:
 
   # Create commit but don't push
   python scripts/release-go.py --no-push
+
+  # Force release even if no changes detected (useful for initial releases)
+  python scripts/release-go.py --plugins lbry --force
         """
     )
 
@@ -535,6 +538,12 @@ Examples:
         "--no-push",
         action="store_true",
         help="Create commit but do not push to remote"
+    )
+
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Force release even if no git changes detected (useful for initial releases)"
     )
 
     args = parser.parse_args()
@@ -663,15 +672,24 @@ Examples:
     go_paths = [f"go/{app_name}/build" for app_name in apps_to_build if app_name != APP_SHELL]
     go_paths.extend([f"go/{variation}/build" for variation in app_shell_variations])
     go_paths.extend([f"go/{PLUGIN_PREFIX}{plugin_name}/build" for plugin_name in plugins_to_build])
+    
+    # Track which paths were actually staged for --force warning
+    staged_paths = []
     for go_path in go_paths:
         go_dir = repo_root / go_path
         if go_dir.exists():
             run_command(["git", "add", str(go_dir)], cwd=repo_root)
+            staged_paths.append(go_path)
+        elif args.force:
+            print(f"Warning: {go_path} does not exist, but --force is set", file=sys.stderr)
 
     # Check if there are actual changes via git diff
     has_changes = get_git_diff(repo_root, go_paths)
 
-    if has_changes:
+    if has_changes or args.force:
+        if args.force and not has_changes:
+            print(f"Warning: --force flag set, proceeding despite no git changes detected", file=sys.stderr)
+        
         # Get list of changed files for reporting
         changed_files = get_git_diff_files(repo_root, go_paths)
         if args.verbose:
