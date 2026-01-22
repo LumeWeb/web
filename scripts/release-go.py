@@ -26,6 +26,12 @@ APP_SHELL_VARIATIONS = {
     "admin": "portal-plugin-admin"
 }
 
+# Apps that map to plugin repositories instead of app repositories
+# Format: {app_name: plugin_repo_name}
+APP_TO_PLUGIN_MAPPING = {
+    "portal-frontend": "portal-plugin-frontend"
+}
+
 # Package name prefixes
 PLUGIN_PREFIX = "portal-plugin-"
 APP_PREFIX = "portal-"
@@ -798,8 +804,11 @@ Examples:
             if args.verbose:
                 print(f"Build directory: {build_dir}")
 
+            # Map apps to plugin repos if they have a mapping
+            target_repo = APP_TO_PLUGIN_MAPPING.get(app_name, app_name)
+            
             # Copy to Go directory (always replace)
-            copy_build_to_go(app_name, build_dir, repo_root, args.verbose)
+            copy_build_to_go(target_repo, build_dir, repo_root, args.verbose)
 
         except Exception as e:
             print(f"Error processing {app_name}: {e}", file=sys.stderr)
@@ -829,7 +838,13 @@ Examples:
     print()  # Empty line for readability
 
     # Stage all Go build directories (apps and plugins, including app-shell variations)
-    go_paths = [f"go/{app_name}/build" for app_name in apps_to_build if app_name != APP_SHELL]
+    go_paths = []
+    for app_name in apps_to_build:
+        if app_name == APP_SHELL:
+            continue
+        # Map apps to plugin repos if they have a mapping
+        target_repo = APP_TO_PLUGIN_MAPPING.get(app_name, app_name)
+        go_paths.append(f"go/{target_repo}/build")
     go_paths.extend([f"go/{variation}/build" for variation in app_shell_variations])
     go_paths.extend([f"go/{PLUGIN_PREFIX}{plugin_name}/build" for plugin_name in plugins_to_build])
     
@@ -866,7 +881,9 @@ Examples:
                 # Skip portal-app-shell in versions, use variations instead
                 continue
             version = get_app_version(app_name, repo_root)
-            versions[app_name] = version
+            # Map apps to plugin repos if they have a mapping
+            target_repo = APP_TO_PLUGIN_MAPPING.get(app_name, app_name)
+            versions[target_repo] = version
 
         # Add versions for app-shell variations
         if app_shell_variations:
@@ -879,8 +896,17 @@ Examples:
             version = get_app_version(full_plugin_name, repo_root)
             versions[full_plugin_name] = version
 
-        # Create commit
-        modified_apps = [name for name in apps_to_build if name != APP_SHELL] + app_shell_variations
+        # Create commit (map apps to their target repositories)
+        modified_apps = []
+        for app_name in apps_to_build:
+            if app_name == APP_SHELL:
+                continue
+            # Map apps to plugin repos if they have a mapping
+            if app_name in APP_TO_PLUGIN_MAPPING:
+                modified_apps.append(APP_TO_PLUGIN_MAPPING[app_name])
+            else:
+                modified_apps.append(app_name)
+        modified_apps.extend(app_shell_variations)
         modified_apps.extend([f"{PLUGIN_PREFIX}{p}" for p in plugins_to_build])
 
         try:
