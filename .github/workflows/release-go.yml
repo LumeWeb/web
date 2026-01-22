@@ -89,16 +89,18 @@ jobs:
             exit 0
           fi
           
-          jq -nR '[inputs | select(length > 0) | {repo: .}] | if length > 0 then unique_by(.repo) | {include: .} else {include: [{repo: "__placeholder__"}]} end' < /tmp/modified_apps.txt > /tmp/matrix.json
-
+          # Generate matrix JSON and check for placeholder
+          matrix_json=$(jq -nR '[inputs | select(length > 0) | {repo: .}] | if length > 0 then unique_by(.repo) | {include: .} else {include: [{repo: "__placeholder__"}]} end' < /tmp/modified_apps.txt)
+          
           # Check if we have actual repos (not just placeholder)
-          if grep -q '"__placeholder__"' /tmp/matrix.json; then
+          if echo "$matrix_json" | grep -q '"__placeholder__"'; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
           
-          echo "matrix=$(cat /tmp/matrix.json)" >> "$GITHUB_OUTPUT"
+          # Output matrix as a single line (compact JSON)
+          echo "matrix=$(echo "$matrix_json" | jq -c)" >> "$GITHUB_OUTPUT"
 
   dispatch:
     needs: prepare
