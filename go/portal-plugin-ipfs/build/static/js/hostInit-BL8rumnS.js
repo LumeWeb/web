@@ -1,4 +1,4 @@
-const remoteEntryPromise = import('./remoteEntry-b1p2zIVF.js');
+const remoteEntryPromise = import('./remoteEntry-CJRlLj79.js');
     // __tla only serves as a hack for vite-plugin-top-level-await.
     Promise.resolve(remoteEntryPromise)
       .then(remoteEntry => {

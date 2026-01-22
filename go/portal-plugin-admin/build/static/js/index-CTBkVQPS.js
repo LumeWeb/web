@@ -1,13 +1,13 @@
-import { dashboard__loadShare__react__loadShare__, React } from './dashboard__loadShare__react__loadShare__-CpgLq0wn.js';
-import { jsxRuntimeExports } from './jsx-runtime-DIQgdeXv.js';
-import { dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__, m, dashboard__loadShare__react_mf_2_router__loadShare__ } from './dashboard__loadShare__react_mf_2_router__loadShare__-Bi31I4AN.js';
-import { dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__, ReloadIcon, FontBoldIcon, FontItalicIcon, UnderlineIcon, useSyncExternalStoreExports, Search, Root2, Trigger, Portal2, Content2, ChevronLeft, ChevronRight, X } from './dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__-72sVvfNy.js';
+import { admin__loadShare__react__loadShare__, React } from './admin__loadShare__react__loadShare__-BY1INpNu.js';
+import { jsxRuntimeExports } from './jsx-runtime-BOqW7N1v.js';
+import { admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__, m, admin__loadShare__react_mf_2_router__loadShare__ } from './admin__loadShare__react_mf_2_router__loadShare__-CwtF7zsV.js';
+import { admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__, ReloadIcon, FontBoldIcon, FontItalicIcon, UnderlineIcon, useSyncExternalStoreExports, Search, Root2, Trigger, Portal2, Content2, ChevronLeft, ChevronRight, X } from './admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__-QB1_Htv_.js';
 import { parse, parseAsync, $ZodError } from './parse-owPI_Zlz.js';
 import { castPath as castPath$2, toKey as toKey$2, isLength as isLength$3, isIndex as isIndex$2, isArray as isArray$7, isArguments as isArguments$2, get as get$1, qs } from './index-BnQpHTKV.js';
-import { dashboard__mf_v__runtimeInit__mf_v__ } from './dashboard__mf_v__runtimeInit__mf_v__-BgQBwuY5.js';
+import { admin__mf_v__runtimeInit__mf_v__ } from './admin__mf_v__runtimeInit__mf_v__-B2PJI9hS.js';
 import { commonjsGlobal, getDefaultExportFromCjs } from './_commonjsHelpers-BILit0S-.js';
-import { dashboard__loadShare__react_mf_2_dom__loadShare__ } from './dashboard__loadShare__react_mf_2_dom__loadShare__-B-V2HJ2Z.js';
-import { createLucideIcon } from './createLucideIcon-BGXC8EXb.js';
+import { admin__loadShare__react_mf_2_dom__loadShare__ } from './admin__loadShare__react_mf_2_dom__loadShare__-BykLpcnn.js';
+import { createLucideIcon } from './createLucideIcon-KUE0P9TA.js';
 
 //#region rolldown:runtime
 var __esmMin = (fn, res) => () => (fn && (res = fn(fn = 0)), res);
@@ -54,13 +54,13 @@ function FormProvider({ adapter, autoSave, children, config, formInstance }) {
 	});
 }
 function useFormContext() {
-	const context = dashboard__loadShare__react__loadShare__.useContext(FormContext);
+	const context = admin__loadShare__react__loadShare__.useContext(FormContext);
 	if (context === void 0) throw new Error("useFormContext must be used within a FormProvider");
 	return context;
 }
 var FormContext;
 var init_context$1 = __esmMin(() => {
-	FormContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
+	FormContext = admin__loadShare__react__loadShare__.createContext(void 0);
 });
 
 //#endregion
@@ -90,16 +90,16 @@ function StepControlProvider({ children, defaultStep, handleStepSubmit, isBackVa
 	});
 }
 function useCreateStepControl({ defaultStep = 1, handleStepSubmit, isBackValidate = false, onStepChange, onStepRetry, onNavigationStart, onNavigationEnd, onNavigationError, totalSteps: totalStepsProp, triggerValidation }) {
-	const [currentStep, setCurrentStep] = dashboard__loadShare__react__loadShare__.useState(defaultStep);
-	const [retryCount, setRetryCount] = dashboard__loadShare__react__loadShare__.useState(0);
-	const [transitionState, setTransitionState] = dashboard__loadShare__react__loadShare__.useState({
+	const [currentStep, setCurrentStep] = admin__loadShare__react__loadShare__.useState(defaultStep);
+	const [retryCount, setRetryCount] = admin__loadShare__react__loadShare__.useState(0);
+	const [transitionState, setTransitionState] = admin__loadShare__react__loadShare__.useState({
 		direction: null,
 		enteringStep: null,
 		exitingStep: null
 	});
 	const isFirstStep = currentStep === 1;
 	const isLastStep = currentStep === totalStepsProp;
-	const goToStep = dashboard__loadShare__react__loadShare__.useCallback((step) => {
+	const goToStep = admin__loadShare__react__loadShare__.useCallback((step) => {
 		const targetStep = Math.max(1, Math.min(step, totalStepsProp));
 		try {
 			onNavigationStart?.(currentStep, targetStep, "goTo");
@@ -139,7 +139,7 @@ function useCreateStepControl({ defaultStep = 1, handleStepSubmit, isBackValidat
 		onNavigationEnd,
 		onNavigationError
 	]);
-	const jumpTo = dashboard__loadShare__react__loadShare__.useCallback((step) => {
+	const jumpTo = admin__loadShare__react__loadShare__.useCallback((step) => {
 		const targetStep = Math.max(1, Math.min(step, totalStepsProp));
 		try {
 			onNavigationStart?.(currentStep, targetStep, "jumpTo");
@@ -167,7 +167,7 @@ function useCreateStepControl({ defaultStep = 1, handleStepSubmit, isBackValidat
 		onNavigationEnd,
 		onNavigationError
 	]);
-	const handleRetry = dashboard__loadShare__react__loadShare__.useCallback(async () => {
+	const handleRetry = admin__loadShare__react__loadShare__.useCallback(async () => {
 		try {
 			onNavigationStart?.(currentStep, currentStep, "retry");
 		} catch (error) {
@@ -201,7 +201,7 @@ function useCreateStepControl({ defaultStep = 1, handleStepSubmit, isBackValidat
 		onNavigationEnd,
 		onNavigationError
 	]);
-	const handleNext = dashboard__loadShare__react__loadShare__.useCallback(async () => {
+	const handleNext = admin__loadShare__react__loadShare__.useCallback(async () => {
 		if (isLastStep) return;
 		const targetStep = currentStep + 1;
 		try {
@@ -226,7 +226,7 @@ function useCreateStepControl({ defaultStep = 1, handleStepSubmit, isBackValidat
 		onNavigationEnd,
 		onNavigationError
 	]);
-	const handlePrevious = dashboard__loadShare__react__loadShare__.useCallback(async () => {
+	const handlePrevious = admin__loadShare__react__loadShare__.useCallback(async () => {
 		if (isFirstStep) return;
 		const targetStep = currentStep - 1;
 		try {
@@ -255,7 +255,7 @@ function useCreateStepControl({ defaultStep = 1, handleStepSubmit, isBackValidat
 		onNavigationEnd,
 		onNavigationError
 	]);
-	return dashboard__loadShare__react__loadShare__.useMemo(() => ({
+	return admin__loadShare__react__loadShare__.useMemo(() => ({
 		currentStep,
 		goToStep,
 		jumpTo,
@@ -286,7 +286,7 @@ function useCreateStepControl({ defaultStep = 1, handleStepSubmit, isBackValidat
 * @returns StepControlContextType | undefined - Step control methods and state, or undefined if not in context
 */
 function useOptionalStepControlContext() {
-	return dashboard__loadShare__react__loadShare__.useContext(StepControlContext);
+	return admin__loadShare__react__loadShare__.useContext(StepControlContext);
 }
 /**
 * Backward compatibility hook
@@ -303,13 +303,13 @@ function useStepControl(options) {
 * @throws Error if used outside StepControlProvider
 */
 function useStepControlContext() {
-	const context = dashboard__loadShare__react__loadShare__.useContext(StepControlContext);
+	const context = admin__loadShare__react__loadShare__.useContext(StepControlContext);
 	if (context === void 0) throw new Error("useStepControl must be used within a StepControlProvider");
 	return context;
 }
 var StepControlContext;
 var init_StepControlContext = __esmMin(() => {
-	StepControlContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
+	StepControlContext = admin__loadShare__react__loadShare__.createContext(void 0);
 });
 
 //#endregion
@@ -466,7 +466,7 @@ init_sizing();
 //#region src/components/dialog/DialogActions.context.tsx
 var DialogActionsContext;
 var init_DialogActions_context = __esmMin(() => {
-	DialogActionsContext = dashboard__loadShare__react__loadShare__.createContext({
+	DialogActionsContext = admin__loadShare__react__loadShare__.createContext({
 		closeDialog: () => {},
 		openDialog: () => {},
 		replaceDialog: () => {},
@@ -480,7 +480,7 @@ init_DialogActions_context();
 //#region src/components/dialog/DialogState.context.tsx
 var DialogStateContext;
 var init_DialogState_context = __esmMin(() => {
-	DialogStateContext = dashboard__loadShare__react__loadShare__.createContext({
+	DialogStateContext = admin__loadShare__react__loadShare__.createContext({
 		currentDialog: void 0,
 		formMethods: void 0
 	});
@@ -495,19 +495,19 @@ init_DialogState_context();
 * Must wrap any components that will use dialogs.
 */
 function DialogProvider({ children }) {
-	const [dialogStack, setDialogStack] = dashboard__loadShare__react__loadShare__.useState([]);
-	const _formMethods = dashboard__loadShare__react__loadShare__.useRef(void 0);
+	const [dialogStack, setDialogStack] = admin__loadShare__react__loadShare__.useState([]);
+	const _formMethods = admin__loadShare__react__loadShare__.useRef(void 0);
 	const currentDialog = dialogStack[dialogStack.length - 1];
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		return () => {};
 	}, []);
-	const setFormMethods = dashboard__loadShare__react__loadShare__.useCallback((methods) => {
+	const setFormMethods = admin__loadShare__react__loadShare__.useCallback((methods) => {
 		_formMethods.current = methods;
 	}, []);
-	const openDialog = dashboard__loadShare__react__loadShare__.useCallback((config) => {
+	const openDialog = admin__loadShare__react__loadShare__.useCallback((config) => {
 		setDialogStack((prev) => [...prev, config]);
 	}, []);
-	const closeDialog = dashboard__loadShare__react__loadShare__.useCallback((source = "programmatic") => {
+	const closeDialog = admin__loadShare__react__loadShare__.useCallback((source = "programmatic") => {
 		setDialogStack((prev) => {
 			const newStack = prev.slice(0, -1);
 			const closedDialog = prev[prev.length - 1];
@@ -517,16 +517,16 @@ function DialogProvider({ children }) {
 			return newStack;
 		});
 	}, []);
-	const replaceDialog = dashboard__loadShare__react__loadShare__.useCallback((newDialog) => {
+	const replaceDialog = admin__loadShare__react__loadShare__.useCallback((newDialog) => {
 		setDialogStack((prev) => {
 			return [...prev.slice(0, -1), newDialog];
 		});
 	}, []);
-	const stateValue = dashboard__loadShare__react__loadShare__.useMemo(() => ({
+	const stateValue = admin__loadShare__react__loadShare__.useMemo(() => ({
 		currentDialog,
 		formMethods: _formMethods
 	}), [currentDialog, _formMethods]);
-	const actionsValue = dashboard__loadShare__react__loadShare__.useMemo(() => ({
+	const actionsValue = admin__loadShare__react__loadShare__.useMemo(() => ({
 		closeDialog,
 		openDialog,
 		replaceDialog,
@@ -550,8 +550,8 @@ var init_Dialog_context = __esmMin(() => {
 	init_Dialog_types();
 	init_DialogActions_context();
 	init_DialogState_context();
-	useDialogState = () => dashboard__loadShare__react__loadShare__.useContext(DialogStateContext);
-	useDialogActions = () => dashboard__loadShare__react__loadShare__.useContext(DialogActionsContext);
+	useDialogState = () => admin__loadShare__react__loadShare__.useContext(DialogStateContext);
+	useDialogActions = () => admin__loadShare__react__loadShare__.useContext(DialogActionsContext);
 	useDialog = () => {
 		const state = useDialogState();
 		const actions = useDialogActions();
@@ -927,7 +927,7 @@ function getDialogContentClasses(currentDialog) {
 	const baseClasses = [currentDialog.type === "custom" && "flex flex-col", currentDialog.classNames?.content];
 	const sizeClasses = DIALOG_SIZE_CLASSES[currentDialog.size || "auto"];
 	const positionClasses = DIALOG_POSITION_CLASSES[currentDialog.position || "center"];
-	return dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(baseClasses, sizeClasses, positionClasses);
+	return admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(baseClasses, sizeClasses, positionClasses);
 }
 var init_dialogClasses = __esmMin(() => {
 	init_Dialog_types();
@@ -948,11 +948,11 @@ init_dialogClasses();
 * @param forceRerenderCallback - Optional callback that receives the force rerender method
 */
 function useForceRerender(forceRerenderCallback) {
-	const [, setCounter] = dashboard__loadShare__react__loadShare__.useState(0);
-	const forceRerender = dashboard__loadShare__react__loadShare__.useCallback(() => {
+	const [, setCounter] = admin__loadShare__react__loadShare__.useState(0);
+	const forceRerender = admin__loadShare__react__loadShare__.useCallback(() => {
 		setCounter((prev) => prev + 1);
 	}, []);
-	dashboard__loadShare__react__loadShare__.useCallback(() => {
+	admin__loadShare__react__loadShare__.useCallback(() => {
 		if (forceRerenderCallback) forceRerenderCallback(forceRerender);
 	}, [forceRerender, forceRerenderCallback])();
 }
@@ -967,14 +967,14 @@ function AlertDialog({ classNames, description, forceRerender, title }) {
 	const renderDescription = () => {
 		if (!description) return null;
 		const content = typeof description === "function" ? React.createElement(description) : description;
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogDescription, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogDescription, {
 			className: classNames?.description,
 			children: content
 		});
 	};
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, {
 		className: classNames?.header,
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, {
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, {
 			className: classNames?.title,
 			children: title
 		}), renderDescription()]
@@ -990,13 +990,13 @@ init_AlertDialog();
 //#region src/components/dialog/types/ConfirmDialog.tsx
 function ConfirmDialog({ classNames, description, forceRerender, title }) {
 	useForceRerender(forceRerender);
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, {
 		className: classNames?.header,
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, {
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, {
 			className: classNames?.title,
 			children: title
-		}), description && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogDescription, {
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("[word-break:break-word]", classNames?.description),
+		}), description && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogDescription, {
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("[word-break:break-word]", classNames?.description),
 			children: description
 		})]
 	}) });
@@ -1274,9 +1274,9 @@ var init_actionHelpers = __esmMin(() => {
 //#endregion
 init_actionHelpers();
 
-const r$1=(t,r,o)=>{if(t&&"reportValidity"in t){const s=dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(o,r);t.setCustomValidity(s&&s.message||""),t.reportValidity();}},o=(e,t)=>{for(const o in t.fields){const s=t.fields[o];s&&s.ref&&"reportValidity"in s.ref?r$1(s.ref,o,e):s&&s.refs&&s.refs.forEach(t=>r$1(t,o,e));}},s$2=(r,s)=>{s.shouldUseNativeValidation&&o(r,s);const n={};for(const o in r){const f=dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(s.fields,o),c=Object.assign(r[o]||{},{ref:f&&f.ref});if(i$4(s.names||Object.keys(r),o)){const r=Object.assign({},dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(n,o));dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(r,"root",c),dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(n,o,r);}else dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(n,o,c);}return n},i$4=(e,t)=>{const r=n$1(t);return e.some(e=>n$1(e).match(`^${r}\\.\\d+`))};function n$1(e){return e.replace(/\]|\[/g,"")}
+const r$1=(t,r,o)=>{if(t&&"reportValidity"in t){const s=admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(o,r);t.setCustomValidity(s&&s.message||""),t.reportValidity();}},o=(e,t)=>{for(const o in t.fields){const s=t.fields[o];s&&s.ref&&"reportValidity"in s.ref?r$1(s.ref,o,e):s&&s.refs&&s.refs.forEach(t=>r$1(t,o,e));}},s$2=(r,s)=>{s.shouldUseNativeValidation&&o(r,s);const n={};for(const o in r){const f=admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(s.fields,o),c=Object.assign(r[o]||{},{ref:f&&f.ref});if(i$3(s.names||Object.keys(r),o)){const r=Object.assign({},admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(n,o));admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(r,"root",c),admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(n,o,r);}else admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(n,o,c);}return n},i$3=(e,t)=>{const r=n$1(t);return e.some(e=>n$1(e).match(`^${r}\\.\\d+`))};function n$1(e){return e.replace(/\]|\[/g,"")}
 
-function t$1(r,e){try{var o=r();}catch(r){return e(r)}return o&&o.then?o.then(void 0,e):o}function s$1(r,e){for(var n={};r.length;){var t=r[0],s=t.code,i=t.message,a=t.path.join(".");if(!n[a])if("unionErrors"in t){var u=t.unionErrors[0].errors[0];n[a]={message:u.message,type:u.code};}else n[a]={message:i,type:s};if("unionErrors"in t&&t.unionErrors.forEach(function(e){return e.errors.forEach(function(e){return r.push(e)})}),e){var c=n[a].types,f=c&&c[t.code];n[a]=dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.appendErrors(a,e,n,s,f?[].concat(f,t.message):t.message);}r.shift();}return n}function i$3(r,e){for(var n={};r.length;){var t=r[0],s=t.code,i=t.message,a=t.path.join(".");if(!n[a])if("invalid_union"===t.code&&t.errors.length>0){var u=t.errors[0][0];n[a]={message:u.message,type:u.code};}else n[a]={message:i,type:s};if("invalid_union"===t.code&&t.errors.forEach(function(e){return e.forEach(function(e){return r.push(e)})}),e){var c=n[a].types,f=c&&c[t.code];n[a]=dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.appendErrors(a,e,n,s,f?[].concat(f,t.message):t.message);}r.shift();}return n}function a$1(o$1,a,u){if(void 0===u&&(u={}),function(r){return "_def"in r&&"object"==typeof r._def&&"typeName"in r._def}(o$1))return function(n,i,c){try{return Promise.resolve(t$1(function(){return Promise.resolve(o$1["sync"===u.mode?"parse":"parseAsync"](n,a)).then(function(e){return c.shouldUseNativeValidation&&o({},c),{errors:{},values:u.raw?Object.assign({},n):e}})},function(r){if(function(r){return Array.isArray(null==r?void 0:r.issues)}(r))return {values:{},errors:s$2(s$1(r.errors,!c.shouldUseNativeValidation&&"all"===c.criteriaMode),c)};throw r}))}catch(r){return Promise.reject(r)}};if(function(r){return "_zod"in r&&"object"==typeof r._zod}(o$1))return function(s,c,f){try{return Promise.resolve(t$1(function(){return Promise.resolve(("sync"===u.mode?parse:parseAsync)(o$1,s,a)).then(function(e){return f.shouldUseNativeValidation&&o({},f),{errors:{},values:u.raw?Object.assign({},s):e}})},function(r){if(function(r){return r instanceof $ZodError}(r))return {values:{},errors:s$2(i$3(r.issues,!f.shouldUseNativeValidation&&"all"===f.criteriaMode),f)};throw r}))}catch(r){return Promise.reject(r)}};throw new Error("Invalid input: not a Zod schema")}
+function t$1(r,e){try{var o=r();}catch(r){return e(r)}return o&&o.then?o.then(void 0,e):o}function s$1(r,e){for(var n={};r.length;){var t=r[0],s=t.code,i=t.message,a=t.path.join(".");if(!n[a])if("unionErrors"in t){var u=t.unionErrors[0].errors[0];n[a]={message:u.message,type:u.code};}else n[a]={message:i,type:s};if("unionErrors"in t&&t.unionErrors.forEach(function(e){return e.errors.forEach(function(e){return r.push(e)})}),e){var c=n[a].types,f=c&&c[t.code];n[a]=admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.appendErrors(a,e,n,s,f?[].concat(f,t.message):t.message);}r.shift();}return n}function i$2(r,e){for(var n={};r.length;){var t=r[0],s=t.code,i=t.message,a=t.path.join(".");if(!n[a])if("invalid_union"===t.code&&t.errors.length>0){var u=t.errors[0][0];n[a]={message:u.message,type:u.code};}else n[a]={message:i,type:s};if("invalid_union"===t.code&&t.errors.forEach(function(e){return e.forEach(function(e){return r.push(e)})}),e){var c=n[a].types,f=c&&c[t.code];n[a]=admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.appendErrors(a,e,n,s,f?[].concat(f,t.message):t.message);}r.shift();}return n}function a$1(o$1,a,u){if(void 0===u&&(u={}),function(r){return "_def"in r&&"object"==typeof r._def&&"typeName"in r._def}(o$1))return function(n,i,c){try{return Promise.resolve(t$1(function(){return Promise.resolve(o$1["sync"===u.mode?"parse":"parseAsync"](n,a)).then(function(e){return c.shouldUseNativeValidation&&o({},c),{errors:{},values:u.raw?Object.assign({},n):e}})},function(r){if(function(r){return Array.isArray(null==r?void 0:r.issues)}(r))return {values:{},errors:s$2(s$1(r.errors,!c.shouldUseNativeValidation&&"all"===c.criteriaMode),c)};throw r}))}catch(r){return Promise.reject(r)}};if(function(r){return "_zod"in r&&"object"==typeof r._zod}(o$1))return function(s,c,f){try{return Promise.resolve(t$1(function(){return Promise.resolve(("sync"===u.mode?parse:parseAsync)(o$1,s,a)).then(function(e){return f.shouldUseNativeValidation&&o({},f),{errors:{},values:u.raw?Object.assign({},s):e}})},function(r){if(function(r){return r instanceof $ZodError}(r))return {values:{},errors:s$2(i$2(r.issues,!f.shouldUseNativeValidation&&"all"===f.criteriaMode),f)};throw r}))}catch(r){return Promise.reject(r)}};throw new Error("Invalid input: not a Zod schema")}
 
 /** Used for built-in method references. */
 var objectProto$c = Object.prototype;
@@ -1360,7 +1360,7 @@ function has(object, path) {
 
 // dev uses dynamic import to separate chunks
     
-    const {initPromise: initPromise$1} = dashboard__mf_v__runtimeInit__mf_v__;
+    const {initPromise: initPromise$1} = admin__mf_v__runtimeInit__mf_v__;
     const res$1 = initPromise$1.then(runtime => runtime.loadShare("@refinedev/core", {
       customShareInfo: {shareConfig:{
         singleton: true,
@@ -1369,7 +1369,7 @@ function has(object, path) {
       }}
     }));
     const exportModule$1 = await res$1.then(factory => factory());
-    var dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ = exportModule$1;
+    var admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__ = exportModule$1;
 
 var __defProp$1 = Object.defineProperty;
 var __name$1 = (target, value) => __defProp$1(target, "name", { value, configurable: true });
@@ -1379,12 +1379,12 @@ var useForm = /* @__PURE__ */ __name$1(({
   disableServerSideValidation: disableServerSideValidationProp = false,
   ...rest
 } = {}) => {
-  const { options } = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useRefineContext();
+  const { options } = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useRefineContext();
   const disableServerSideValidation = (options == null ? void 0 : options.disableServerSideValidation) || disableServerSideValidationProp;
-  const translate = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useTranslate();
-  const { warnWhenUnsavedChanges: warnWhenUnsavedChangesRefine, setWarnWhen } = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useWarnAboutChange();
+  const translate = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useTranslate();
+  const { warnWhenUnsavedChanges: warnWhenUnsavedChangesRefine, setWarnWhen } = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useWarnAboutChange();
   const warnWhenUnsavedChanges = warnWhenUnsavedChangesProp ?? warnWhenUnsavedChangesRefine;
-  const useHookFormResult = dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.useForm({
+  const useHookFormResult = admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.useForm({
     ...rest
   });
   const {
@@ -1399,7 +1399,7 @@ var useForm = /* @__PURE__ */ __name$1(({
   const queryDataRef = React.useRef(void 0);
   const syncedFieldsRef = React.useRef(/* @__PURE__ */ new Set());
   const mountedFieldsRef = React.useRef(/* @__PURE__ */ new Set());
-  const useFormCoreResult = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useForm({
+  const useFormCoreResult = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useForm({
     ...refineCoreProps,
     onMutationError: (error, _variables, _context) => {
       var _a, _b;
@@ -1410,7 +1410,7 @@ var useForm = /* @__PURE__ */ __name$1(({
       const errors = error == null ? void 0 : error.errors;
       for (const key in errors) {
         const isKeyInVariables = Object.keys(
-          dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.flattenObjectKeys(_variables)
+          admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.flattenObjectKeys(_variables)
         ).includes(key);
         if (!isKeyInVariables) {
           continue;
@@ -1451,7 +1451,7 @@ var useForm = /* @__PURE__ */ __name$1(({
     const mounted = getMountedFields();
     mounted.forEach((name) => registeredFields.add(name));
     const values = getValues();
-    Object.keys(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.flattenObjectKeys(values)).forEach((path) => {
+    Object.keys(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.flattenObjectKeys(values)).forEach((path) => {
       registeredFields.add(path);
     });
     return registeredFields;
@@ -1471,7 +1471,7 @@ var useForm = /* @__PURE__ */ __name$1(({
       }
     });
   }, "applyValuesToFields");
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     var _a;
     const data = (_a = query == null ? void 0 : query.data) == null ? void 0 : _a.data;
     if (!data) {
@@ -1498,7 +1498,7 @@ var useForm = /* @__PURE__ */ __name$1(({
       isActive = false;
     };
   }, [query == null ? void 0 : query.data, setValue, getValues]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     const subscription = watch((values, { type }) => {
       if (type === "change") {
         onValuesChange(values);
@@ -1506,7 +1506,7 @@ var useForm = /* @__PURE__ */ __name$1(({
     });
     return () => subscription.unsubscribe();
   }, [watch]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     const data = queryDataRef.current;
     if (!data) {
       return;
@@ -1568,8 +1568,8 @@ var adapters;
 var init_adapters = __esmMin(() => {
 	adapters = {
 		refine: {
-			Controller: dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.Controller,
-			FormProvider: dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.FormProvider,
+			Controller: admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.Controller,
+			FormProvider: admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.FormProvider,
 			submitHandler: async (config, methods) => {
 				const values = methods.getValues();
 				const refineResult = await methods.refineCore.onFinish({ ...values });
@@ -1588,13 +1588,13 @@ var init_adapters = __esmMin(() => {
 			}
 		},
 		rhf: {
-			Controller: dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.Controller,
-			FormProvider: dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.FormProvider,
+			Controller: admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.Controller,
+			FormProvider: admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.FormProvider,
 			submitHandler: async (config, methods) => {
 				if (!config.onSubmit) throw new Error("onSubmit required for RHF adapter");
 				return await config.onSubmit(methods.getValues());
 			},
-			useForm: (options) => dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.useForm({
+			useForm: (options) => admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.useForm({
 				defaultValues: options.defaultValues,
 				resolver: options.validationSchema ? a$1(options.validationSchema) : void 0
 			})
@@ -1656,7 +1656,7 @@ var init_Checkbox = __esmMin(() => {
 	init_fields();
 	init_components();
 	Checkbox = React.forwardRef(({ autocomplete, label, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Checkbox, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Checkbox, {
 			autoComplete: autocomplete,
 			checked: props.value,
 			disabled: props.disabled,
@@ -1665,8 +1665,8 @@ var init_Checkbox = __esmMin(() => {
 			onBlur: props.onBlur,
 			onCheckedChange: props.onChange,
 			ref
-		}), label && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground", props.labelClassName),
+		}), label && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground", props.labelClassName),
 			htmlFor: props.name,
 			children: typeof label === "function" ? React.createElement(label) : label
 		})] });
@@ -1686,7 +1686,7 @@ var init_DatePicker = __esmMin(() => {
 	init_fields();
 	init_components();
 	DatePicker = React.forwardRef(({ autocomplete, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DatePicker, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DatePicker, {
 			className: "border-modal-input placeholder-modal-input placeholder:text-foreground/50 p-4",
 			date: props.date,
 			disabled: props.disabled,
@@ -1712,7 +1712,7 @@ var init_EmailInput = __esmMin(() => {
 	init_fields();
 	init_components();
 	EmailInput = React.forwardRef(({ autocomplete, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 			autoComplete: autocomplete,
 			ref,
 			type: "email",
@@ -1734,7 +1734,7 @@ var init_FileInput = __esmMin(() => {
 	init_fields();
 	init_components();
 	FileInput = React.forwardRef(({ autocomplete, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 			autoComplete: autocomplete,
 			disabled: props.disabled,
 			name: props.name,
@@ -1760,9 +1760,9 @@ var init_Input = __esmMin(() => {
 	init_fields();
 	init_components();
 	Input = React.forwardRef(({ autocomplete, autoComplete: htmlAutoComplete, inputClassName, onChange, placeholder, type, value, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 			autoComplete: autocomplete ?? htmlAutoComplete,
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("bg-input h-14 border-none", inputClassName),
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("bg-input h-14 border-none", inputClassName),
 			onChange,
 			placeholder,
 			ref,
@@ -1789,7 +1789,7 @@ var init_RadioGroup = __esmMin(() => {
 	init_fields();
 	init_components();
 	RadioGroup = React.forwardRef(({ autocomplete, options, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.RadioGroup, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.RadioGroup, {
 			disabled: props.disabled,
 			name: props.name,
 			onBlur: props.onBlur,
@@ -1798,7 +1798,7 @@ var init_RadioGroup = __esmMin(() => {
 			value: props.value,
 			children: options.map((option) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 				className: "radio-option",
-				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.RadioGroupItem, {
+				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.RadioGroupItem, {
 					id: `${props.name}-${slugify(option)}`,
 					value: option,
 					...autocomplete ? { autoComplete: autocomplete } : {}
@@ -16301,7 +16301,7 @@ function formatDevErrorMessage$7(message) {
   throw new Error(message);
 }
 
-const LexicalComposerContext = /*#__PURE__*/dashboard__loadShare__react__loadShare__.createContext(null);
+const LexicalComposerContext = /*#__PURE__*/admin__loadShare__react__loadShare__.createContext(null);
 function createLexicalComposerContext(parent, theme) {
   function getTheme() {
     if (theme != null) {
@@ -16314,7 +16314,7 @@ function createLexicalComposerContext(parent, theme) {
   };
 }
 function useLexicalComposerContext() {
-  const composerContext = dashboard__loadShare__react__loadShare__.useContext(LexicalComposerContext);
+  const composerContext = admin__loadShare__react__loadShare__.useContext(LexicalComposerContext);
   if (composerContext == null) {
     {
       formatDevErrorMessage$7(`LexicalComposerContext.useLexicalComposerContext: cannot find a LexicalComposerContext`);
@@ -17730,9 +17730,9 @@ var init_ToolbarContext = __esmMin(() => {
 		paragraph: "Normal",
 		quote: "Quote"
 	};
-	Context = dashboard__loadShare__react__loadShare__.createContext(void 0);
+	Context = admin__loadShare__react__loadShare__.createContext(void 0);
 	ToolbarProvider = ({ children }) => {
-		const [toolbarState, setToolbarState] = dashboard__loadShare__react__loadShare__.useState({
+		const [toolbarState, setToolbarState] = admin__loadShare__react__loadShare__.useState({
 			blockType: "paragraph",
 			isBold: false,
 			isClear: false,
@@ -17742,13 +17742,13 @@ var init_ToolbarContext = __esmMin(() => {
 			isSuperscript: false,
 			isUnderline: false
 		});
-		const updateToolbarState = dashboard__loadShare__react__loadShare__.useCallback((key, value) => {
+		const updateToolbarState = admin__loadShare__react__loadShare__.useCallback((key, value) => {
 			setToolbarState((prev) => ({
 				...prev,
 				[key]: value
 			}));
 		}, []);
-		const contextValue = dashboard__loadShare__react__loadShare__.useMemo(() => ({
+		const contextValue = admin__loadShare__react__loadShare__.useMemo(() => ({
 			toolbarState,
 			updateToolbarState
 		}), [toolbarState, updateToolbarState]);
@@ -17758,7 +17758,7 @@ var init_ToolbarContext = __esmMin(() => {
 		});
 	};
 	useToolbarState = () => {
-		const context = dashboard__loadShare__react__loadShare__.useContext(Context);
+		const context = admin__loadShare__react__loadShare__.useContext(Context);
 		if (context === void 0) throw new Error("useToolbarState must be used within a ToolbarProvider");
 		return context;
 	};
@@ -34085,7 +34085,7 @@ function $getFirstCodeNodeOfLine$1(anchor) {
  */
 
 
-const i$2=Symbol.for("preact-signals");function t(){if(r>1){r--;return}let i,t=false;while(void 0!==s){let o=s;s=void 0;f++;while(void 0!==o){const n=o.o;o.o=void 0;o.f&=-3;if(!(8&o.f)&&v(o))try{o.c();}catch(o){if(!t){i=o;t=true;}}o=n;}}f=0;r--;if(t)throw i}let n,s;function h(i){const t=n;n=void 0;try{return i()}finally{n=t;}}let r=0,f=0,e=0;function u(i){if(void 0===n)return;let t=i.n;if(void 0===t||t.t!==n){t={i:0,S:i,p:n.s,n:void 0,t:n,e:void 0,x:void 0,r:t};if(void 0!==n.s)n.s.n=t;n.s=t;i.n=t;if(32&n.f)i.S(t);return t}else if(-1===t.i){t.i=0;if(void 0!==t.n){t.n.p=t.p;if(void 0!==t.p)t.p.n=t.n;t.p=n.s;t.n=void 0;n.s.n=t;n.s=t;}return t}}function c$1(i,t){this.v=i;this.i=0;this.n=void 0;this.t=void 0;this.W=null==t?void 0:t.watched;this.Z=null==t?void 0:t.unwatched;this.name=null==t?void 0:t.name;}c$1.prototype.brand=i$2;c$1.prototype.h=function(){return  true};c$1.prototype.S=function(i){const t=this.t;if(t!==i&&void 0===i.e){i.x=t;this.t=i;if(void 0!==t)t.e=i;else h(()=>{var i;null==(i=this.W)||i.call(this);});}};c$1.prototype.U=function(i){if(void 0!==this.t){const t=i.e,o=i.x;if(void 0!==t){t.x=o;i.e=void 0;}if(void 0!==o){o.e=t;i.x=void 0;}if(i===this.t){this.t=o;if(void 0===o)h(()=>{var i;null==(i=this.Z)||i.call(this);});}}};c$1.prototype.subscribe=function(i){return E(()=>{const t=this.value,o=n;n=void 0;try{i(t);}finally{n=o;}},{name:"sub"})};c$1.prototype.valueOf=function(){return this.value};c$1.prototype.toString=function(){return this.value+""};c$1.prototype.toJSON=function(){return this.value};c$1.prototype.peek=function(){const i=n;n=void 0;try{return this.value}finally{n=i;}};Object.defineProperty(c$1.prototype,"value",{get(){const i=u(this);if(void 0!==i)i.i=this.i;return this.v},set(i){if(i!==this.v){if(f>100)throw new Error("Cycle detected");this.v=i;this.i++;e++;r++;try{for(let i=this.t;void 0!==i;i=i.x)i.t.N();}finally{t();}}}});function d(i,t){return new c$1(i,t)}function v(i){for(let t=i.s;void 0!==t;t=t.n)if(t.S.i!==t.i||!t.S.h()||t.S.i!==t.i)return  true;return  false}function l$1(i){for(let t=i.s;void 0!==t;t=t.n){const o=t.S.n;if(void 0!==o)t.r=o;t.S.n=t;t.i=-1;if(void 0===t.n){i.s=t;break}}}function y(i){let t,o=i.s;while(void 0!==o){const i=o.p;if(-1===o.i){o.S.U(o);if(void 0!==i)i.n=o.n;if(void 0!==o.n)o.n.p=i;}else t=o;o.S.n=o.r;if(void 0!==o.r)o.r=void 0;o=i;}i.s=t;}function a(i,t){c$1.call(this,void 0);this.x=i;this.s=void 0;this.g=e-1;this.f=4;this.W=null==t?void 0:t.watched;this.Z=null==t?void 0:t.unwatched;this.name=null==t?void 0:t.name;}a.prototype=new c$1;a.prototype.h=function(){this.f&=-3;if(1&this.f)return  false;if(32==(36&this.f))return  true;this.f&=-5;if(this.g===e)return  true;this.g=e;this.f|=1;if(this.i>0&&!v(this)){this.f&=-2;return  true}const i=n;try{l$1(this);n=this;const i=this.x();if(16&this.f||this.v!==i||0===this.i){this.v=i;this.f&=-17;this.i++;}}catch(i){this.v=i;this.f|=16;this.i++;}n=i;y(this);this.f&=-2;return  true};a.prototype.S=function(i){if(void 0===this.t){this.f|=36;for(let i=this.s;void 0!==i;i=i.n)i.S.S(i);}c$1.prototype.S.call(this,i);};a.prototype.U=function(i){if(void 0!==this.t){c$1.prototype.U.call(this,i);if(void 0===this.t){this.f&=-33;for(let i=this.s;void 0!==i;i=i.n)i.S.U(i);}}};a.prototype.N=function(){if(!(2&this.f)){this.f|=6;for(let i=this.t;void 0!==i;i=i.x)i.t.N();}};Object.defineProperty(a.prototype,"value",{get(){if(1&this.f)throw new Error("Cycle detected");const i=u(this);this.h();if(void 0!==i)i.i=this.i;if(16&this.f)throw this.v;return this.v}});function _(i){const o=i.u;i.u=void 0;if("function"==typeof o){r++;const s=n;n=void 0;try{o();}catch(t){i.f&=-2;i.f|=8;b(i);throw t}finally{n=s;t();}}}function b(i){for(let t=i.s;void 0!==t;t=t.n)t.S.U(t);i.x=void 0;i.s=void 0;_(i);}function g(i){if(n!==this)throw new Error("Out-of-order effect");y(this);n=i;this.f&=-2;if(8&this.f)b(this);t();}function p(i,t){this.x=i;this.u=void 0;this.s=void 0;this.o=void 0;this.f=32;this.name=null==t?void 0:t.name;}p.prototype.c=function(){const i=this.S();try{if(8&this.f)return;if(void 0===this.x)return;const t=this.x();if("function"==typeof t)this.u=t;}finally{i();}};p.prototype.S=function(){if(1&this.f)throw new Error("Cycle detected");this.f|=1;this.f&=-9;_(this);l$1(this);r++;const i=n;n=this;return g.bind(this,i)};p.prototype.N=function(){if(!(2&this.f)){this.f|=2;this.o=s;s=this;}};p.prototype.d=function(){this.f|=8;if(!(1&this.f))b(this);};p.prototype.dispose=function(){this.d();};function E(i,t){const o=new p(i,t);try{o.c();}catch(i){o.d();throw i}const n=o.d.bind(o);n[Symbol.dispose]=n;return n}
+const i$1=Symbol.for("preact-signals");function t(){if(r>1){r--;return}let i,t=false;while(void 0!==s){let o=s;s=void 0;f++;while(void 0!==o){const n=o.o;o.o=void 0;o.f&=-3;if(!(8&o.f)&&v(o))try{o.c();}catch(o){if(!t){i=o;t=true;}}o=n;}}f=0;r--;if(t)throw i}let n,s;function h(i){const t=n;n=void 0;try{return i()}finally{n=t;}}let r=0,f=0,e=0;function u(i){if(void 0===n)return;let t=i.n;if(void 0===t||t.t!==n){t={i:0,S:i,p:n.s,n:void 0,t:n,e:void 0,x:void 0,r:t};if(void 0!==n.s)n.s.n=t;n.s=t;i.n=t;if(32&n.f)i.S(t);return t}else if(-1===t.i){t.i=0;if(void 0!==t.n){t.n.p=t.p;if(void 0!==t.p)t.p.n=t.n;t.p=n.s;t.n=void 0;n.s.n=t;n.s=t;}return t}}function c$1(i,t){this.v=i;this.i=0;this.n=void 0;this.t=void 0;this.W=null==t?void 0:t.watched;this.Z=null==t?void 0:t.unwatched;this.name=null==t?void 0:t.name;}c$1.prototype.brand=i$1;c$1.prototype.h=function(){return  true};c$1.prototype.S=function(i){const t=this.t;if(t!==i&&void 0===i.e){i.x=t;this.t=i;if(void 0!==t)t.e=i;else h(()=>{var i;null==(i=this.W)||i.call(this);});}};c$1.prototype.U=function(i){if(void 0!==this.t){const t=i.e,o=i.x;if(void 0!==t){t.x=o;i.e=void 0;}if(void 0!==o){o.e=t;i.x=void 0;}if(i===this.t){this.t=o;if(void 0===o)h(()=>{var i;null==(i=this.Z)||i.call(this);});}}};c$1.prototype.subscribe=function(i){return E(()=>{const t=this.value,o=n;n=void 0;try{i(t);}finally{n=o;}},{name:"sub"})};c$1.prototype.valueOf=function(){return this.value};c$1.prototype.toString=function(){return this.value+""};c$1.prototype.toJSON=function(){return this.value};c$1.prototype.peek=function(){const i=n;n=void 0;try{return this.value}finally{n=i;}};Object.defineProperty(c$1.prototype,"value",{get(){const i=u(this);if(void 0!==i)i.i=this.i;return this.v},set(i){if(i!==this.v){if(f>100)throw new Error("Cycle detected");this.v=i;this.i++;e++;r++;try{for(let i=this.t;void 0!==i;i=i.x)i.t.N();}finally{t();}}}});function d(i,t){return new c$1(i,t)}function v(i){for(let t=i.s;void 0!==t;t=t.n)if(t.S.i!==t.i||!t.S.h()||t.S.i!==t.i)return  true;return  false}function l$1(i){for(let t=i.s;void 0!==t;t=t.n){const o=t.S.n;if(void 0!==o)t.r=o;t.S.n=t;t.i=-1;if(void 0===t.n){i.s=t;break}}}function y(i){let t,o=i.s;while(void 0!==o){const i=o.p;if(-1===o.i){o.S.U(o);if(void 0!==i)i.n=o.n;if(void 0!==o.n)o.n.p=i;}else t=o;o.S.n=o.r;if(void 0!==o.r)o.r=void 0;o=i;}i.s=t;}function a(i,t){c$1.call(this,void 0);this.x=i;this.s=void 0;this.g=e-1;this.f=4;this.W=null==t?void 0:t.watched;this.Z=null==t?void 0:t.unwatched;this.name=null==t?void 0:t.name;}a.prototype=new c$1;a.prototype.h=function(){this.f&=-3;if(1&this.f)return  false;if(32==(36&this.f))return  true;this.f&=-5;if(this.g===e)return  true;this.g=e;this.f|=1;if(this.i>0&&!v(this)){this.f&=-2;return  true}const i=n;try{l$1(this);n=this;const i=this.x();if(16&this.f||this.v!==i||0===this.i){this.v=i;this.f&=-17;this.i++;}}catch(i){this.v=i;this.f|=16;this.i++;}n=i;y(this);this.f&=-2;return  true};a.prototype.S=function(i){if(void 0===this.t){this.f|=36;for(let i=this.s;void 0!==i;i=i.n)i.S.S(i);}c$1.prototype.S.call(this,i);};a.prototype.U=function(i){if(void 0!==this.t){c$1.prototype.U.call(this,i);if(void 0===this.t){this.f&=-33;for(let i=this.s;void 0!==i;i=i.n)i.S.U(i);}}};a.prototype.N=function(){if(!(2&this.f)){this.f|=6;for(let i=this.t;void 0!==i;i=i.x)i.t.N();}};Object.defineProperty(a.prototype,"value",{get(){if(1&this.f)throw new Error("Cycle detected");const i=u(this);this.h();if(void 0!==i)i.i=this.i;if(16&this.f)throw this.v;return this.v}});function _(i){const o=i.u;i.u=void 0;if("function"==typeof o){r++;const s=n;n=void 0;try{o();}catch(t){i.f&=-2;i.f|=8;b(i);throw t}finally{n=s;t();}}}function b(i){for(let t=i.s;void 0!==t;t=t.n)t.S.U(t);i.x=void 0;i.s=void 0;_(i);}function g(i){if(n!==this)throw new Error("Out-of-order effect");y(this);n=i;this.f&=-2;if(8&this.f)b(this);t();}function p(i,t){this.x=i;this.u=void 0;this.s=void 0;this.o=void 0;this.f=32;this.name=null==t?void 0:t.name;}p.prototype.c=function(){const i=this.S();try{if(8&this.f)return;if(void 0===this.x)return;const t=this.x();if("function"==typeof t)this.u=t;}finally{i();}};p.prototype.S=function(){if(1&this.f)throw new Error("Cycle detected");this.f|=1;this.f&=-9;_(this);l$1(this);r++;const i=n;n=this;return g.bind(this,i)};p.prototype.N=function(){if(!(2&this.f)){this.f|=2;this.o=s;s=this;}};p.prototype.d=function(){this.f|=8;if(!(1&this.f))b(this);};p.prototype.dispose=function(){this.d();};function E(i,t){const o=new p(i,t);try{o.c();}catch(i){o.d();throw i}const n=o.d.bind(o);n[Symbol.dispose]=n;return n}
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -37933,13 +37933,13 @@ function BlockTypeDropdown({ blockType }) {
 				break;
 		}
 	};
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
 		onValueChange: handleSelect,
 		value: blockType,
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
 			className: "w-40",
-			children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder: "Block Type" })
-		}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, { children: Object.keys(blockTypeToBlockName).map((type) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
+			children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder: "Block Type" })
+		}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, { children: Object.keys(blockTypeToBlockName).map((type) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
 			value: type,
 			children: blockTypeToBlockName[type]
 		}, type)) })]
@@ -37957,8 +37957,8 @@ init_BlockTypeDropdown();
 function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarOptions = defaultToolbarOptions }) {
 	const [editor] = useLexicalComposerContext();
 	const { toolbarState, updateToolbarState } = useToolbarState();
-	const [canUndo, setCanUndo] = dashboard__loadShare__react__loadShare__.useState(false);
-	const [canRedo, setCanRedo] = dashboard__loadShare__react__loadShare__.useState(false);
+	const [canUndo, setCanUndo] = admin__loadShare__react__loadShare__.useState(false);
+	const [canRedo, setCanRedo] = admin__loadShare__react__loadShare__.useState(false);
 	const $updateToolbar = React.useCallback(() => {
 		const selection = $getSelection$1();
 		if ($isRangeSelection$1(selection)) {
@@ -37988,7 +37988,7 @@ function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarO
 			});
 		}));
 	}, [editor, $updateToolbar]);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		if (!enablePreview) setIsPreview(false);
 		if (enablePreview) editor.setEditable(!isPreview);
 	}, [
@@ -37997,7 +37997,7 @@ function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarO
 		isPreview,
 		setIsPreview
 	]);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		return mergeRegister(editor.registerCommand(CAN_UNDO_COMMAND, (payload) => {
 			setCanUndo(payload);
 			return false;
@@ -38018,7 +38018,7 @@ function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarO
 					title: "Clear Formatting",
 					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ReloadIcon, { className: "text-muted-foreground" })
 				}),
-				toolbarOptions.includes("undo") && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				toolbarOptions.includes("undo") && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					className: "h-8 px-2",
 					disabled: !canUndo || isPreview,
 					onClick: () => editor.dispatchCommand(UNDO_COMMAND, void 0),
@@ -38026,7 +38026,7 @@ function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarO
 					variant: "ghost",
 					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ReloadIcon, { className: "-scale-x-100 transform" })
 				}),
-				toolbarOptions.includes("redo") && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				toolbarOptions.includes("redo") && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					className: "h-8 px-2",
 					disabled: !canRedo || isPreview,
 					onClick: () => editor.dispatchCommand(REDO_COMMAND, void 0),
@@ -38036,13 +38036,13 @@ function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarO
 				}),
 				enablePreview && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 					className: "flex items-center gap-1 pr-2",
-					children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+					children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 						onClick: () => setIsPreview(false),
 						size: "sm",
 						type: "button",
 						variant: !isPreview ? "secondary" : "ghost",
 						children: "Write"
-					}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+					}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 						onClick: () => setIsPreview(true),
 						size: "sm",
 						type: "button",
@@ -38050,7 +38050,7 @@ function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarO
 						children: "Preview"
 					})]
 				}),
-				toolbarOptions.includes("blockTypes") && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Separator, {
+				toolbarOptions.includes("blockTypes") && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Separator, {
 					className: "my-1 h-auto",
 					orientation: "vertical"
 				}), /* @__PURE__ */ jsxRuntimeExports.jsx(BlockTypeDropdown, { blockType: toolbarState.blockType })] }),
@@ -38109,7 +38109,7 @@ var init_ToolbarPlugin = __esmMin(() => {
 		};
 		if (command === FORMAT_TEXT_COMMAND) {
 			const stateKey = formatToStateKey[payload];
-			return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Toggle, {
+			return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Toggle, {
 				"aria-label": title,
 				disabled,
 				onPressedChange: (pressed) => {
@@ -38125,7 +38125,7 @@ var init_ToolbarPlugin = __esmMin(() => {
 				children
 			});
 		}
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			className: isActive ? "bg-gray-200" : "",
 			disabled,
 			onClick: handleClick,
@@ -40585,7 +40585,7 @@ function $convertFromMarkdownString(markdown, transformers = TRANSFORMERS, node,
 
 function CheckListPlugin() {
   const [editor] = useLexicalComposerContext();
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     return registerCheckList(editor);
   }, [editor]);
   return null;
@@ -40622,7 +40622,7 @@ const CAN_USE_DOM$4 = typeof window !== 'undefined' && typeof window.document !=
 // This workaround is no longer necessary in React 19,
 // but we currently support React >=17.x
 // https://github.com/facebook/react/pull/26395
-const useLayoutEffectImpl$4 = CAN_USE_DOM$4 ? dashboard__loadShare__react__loadShare__.useLayoutEffect : dashboard__loadShare__react__loadShare__.useEffect;
+const useLayoutEffectImpl$4 = CAN_USE_DOM$4 ? admin__loadShare__react__loadShare__.useLayoutEffect : admin__loadShare__react__loadShare__.useEffect;
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -40639,7 +40639,7 @@ function LexicalComposer({
   initialConfig,
   children
 }) {
-  const composerContext = dashboard__loadShare__react__loadShare__.useMemo(() => {
+  const composerContext = admin__loadShare__react__loadShare__.useMemo(() => {
     const {
       theme,
       namespace,
@@ -40858,7 +40858,7 @@ const CAN_USE_DOM$3 = typeof window !== 'undefined' && typeof window.document !=
 // This workaround is no longer necessary in React 19,
 // but we currently support React >=17.x
 // https://github.com/facebook/react/pull/26395
-const useLayoutEffectImpl$3 = CAN_USE_DOM$3 ? dashboard__loadShare__react__loadShare__.useLayoutEffect : dashboard__loadShare__react__loadShare__.useEffect;
+const useLayoutEffectImpl$3 = CAN_USE_DOM$3 ? admin__loadShare__react__loadShare__.useLayoutEffect : admin__loadShare__react__loadShare__.useEffect;
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -40912,8 +40912,8 @@ function ContentEditableElementImpl({
   'data-testid': testid,
   ...rest
 }, ref) {
-  const [isEditable, setEditable] = dashboard__loadShare__react__loadShare__.useState(editor.isEditable());
-  const handleRef = dashboard__loadShare__react__loadShare__.useCallback(rootElement => {
+  const [isEditable, setEditable] = admin__loadShare__react__loadShare__.useState(editor.isEditable());
+  const handleRef = admin__loadShare__react__loadShare__.useCallback(rootElement => {
     // defaultView is required for a root element.
     // In multi-window setups, the defaultView may not exist at certain points.
     if (rootElement && rootElement.ownerDocument && rootElement.ownerDocument.defaultView) {
@@ -40922,7 +40922,7 @@ function ContentEditableElementImpl({
       editor.setRootElement(null);
     }
   }, [editor]);
-  const mergedRefs = dashboard__loadShare__react__loadShare__.useMemo(() => mergeRefs(ref, handleRef), [handleRef, ref]);
+  const mergedRefs = admin__loadShare__react__loadShare__.useMemo(() => mergeRefs(ref, handleRef), [handleRef, ref]);
   useLayoutEffectImpl$3(() => {
     setEditable(editor.isEditable());
     return editor.registerEditableListener(currentIsEditable => {
@@ -40964,7 +40964,7 @@ function ContentEditableElementImpl({
     ...rest
   });
 }
-const ContentEditableElement = /*#__PURE__*/dashboard__loadShare__react__loadShare__.forwardRef(ContentEditableElementImpl);
+const ContentEditableElement = /*#__PURE__*/admin__loadShare__react__loadShare__.forwardRef(ContentEditableElementImpl);
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -40979,7 +40979,7 @@ function canShowPlaceholderFromCurrentEditorState$1(editor) {
   return currentCanShowPlaceholder;
 }
 function useCanShowPlaceholder$1(editor) {
-  const [canShowPlaceholder, setCanShowPlaceholder] = dashboard__loadShare__react__loadShare__.useState(() => canShowPlaceholderFromCurrentEditorState$1(editor));
+  const [canShowPlaceholder, setCanShowPlaceholder] = admin__loadShare__react__loadShare__.useState(() => canShowPlaceholderFromCurrentEditorState$1(editor));
   useLayoutEffectImpl$3(() => {
     function resetCanShowPlaceholder() {
       const currentCanShowPlaceholder = canShowPlaceholderFromCurrentEditorState$1(editor);
@@ -41012,7 +41012,7 @@ function useCanShowPlaceholder$1(editor) {
  * Please update your codebase to use `ContentEditableProps` to ensure long-term maintainability.
  */
 
-const ContentEditable = /*#__PURE__*/dashboard__loadShare__react__loadShare__.forwardRef(ContentEditableImpl);
+const ContentEditable = /*#__PURE__*/admin__loadShare__react__loadShare__.forwardRef(ContentEditableImpl);
 function ContentEditableImpl(props, ref) {
   const {
     placeholder,
@@ -41035,8 +41035,8 @@ function Placeholder$1({
   editor
 }) {
   const showPlaceholder = useCanShowPlaceholder$1(editor);
-  const [isEditable, setEditable] = dashboard__loadShare__react__loadShare__.useState(editor.isEditable());
-  dashboard__loadShare__react__loadShare__.useLayoutEffect(() => {
+  const [isEditable, setEditable] = admin__loadShare__react__loadShare__.useState(editor.isEditable());
+  admin__loadShare__react__loadShare__.useLayoutEffect(() => {
     setEditable(editor.isEditable());
     return editor.registerEditableListener(currentIsEditable => {
       setEditable(currentIsEditable);
@@ -41407,8 +41407,8 @@ function createEmptyHistoryState() {
  */
 
 function useHistory(editor, externalHistoryState, delay = 1000) {
-  const historyState = dashboard__loadShare__react__loadShare__.useMemo(() => externalHistoryState || createEmptyHistoryState(), [externalHistoryState]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  const historyState = admin__loadShare__react__loadShare__.useMemo(() => externalHistoryState || createEmptyHistoryState(), [externalHistoryState]);
+  admin__loadShare__react__loadShare__.useEffect(() => {
     return registerHistory(editor, historyState, delay);
   }, [delay, editor, historyState]);
 }
@@ -41486,8 +41486,8 @@ function useLexicalNodeSelection(key) {
   const [editor] = useLexicalComposerContext();
 
   // State to track whether the node is currently selected.
-  const [isSelected, setIsSelected] = dashboard__loadShare__react__loadShare__.useState(() => isNodeSelected(editor, key));
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  const [isSelected, setIsSelected] = admin__loadShare__react__loadShare__.useState(() => isNodeSelected(editor, key));
+  admin__loadShare__react__loadShare__.useEffect(() => {
     let isMounted = true;
     const unregister = editor.registerUpdateListener(() => {
       if (isMounted) {
@@ -41499,7 +41499,7 @@ function useLexicalNodeSelection(key) {
       unregister();
     };
   }, [editor, key]);
-  const setSelected = dashboard__loadShare__react__loadShare__.useCallback(selected => {
+  const setSelected = admin__loadShare__react__loadShare__.useCallback(selected => {
     editor.update(() => {
       let selection = $getSelection$1();
       if (!$isNodeSelection$1(selection)) {
@@ -41515,7 +41515,7 @@ function useLexicalNodeSelection(key) {
       }
     });
   }, [editor, key]);
-  const clearSelected = dashboard__loadShare__react__loadShare__.useCallback(() => {
+  const clearSelected = admin__loadShare__react__loadShare__.useCallback(() => {
     editor.update(() => {
       const selection = $getSelection$1();
       if ($isNodeSelection$1(selection)) {
@@ -41548,7 +41548,7 @@ function HorizontalRuleComponent({
 }) {
   const [editor] = useLexicalComposerContext();
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     return mergeRegister(editor.registerCommand(CLICK_COMMAND$1, event => {
       const hrElem = editor.getElementByKey(nodeKey);
       if (event.target === hrElem) {
@@ -41561,7 +41561,7 @@ function HorizontalRuleComponent({
       return false;
     }, COMMAND_PRIORITY_LOW));
   }, [clearSelection, editor, isSelected, nodeKey, setSelected]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     const hrElem = editor.getElementByKey(nodeKey);
     const isSelectedClassName = editor._config.theme.hrSelected ?? 'selected';
     if (hrElem !== null) {
@@ -41637,12 +41637,12 @@ function LinkPlugin({
   attributes
 }) {
   const [editor] = useLexicalComposerContext();
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (!editor.hasNodes([LinkNode])) {
       throw new Error('LinkPlugin: LinkNode not registered on editor');
     }
   });
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     return registerLink(editor, namedSignals({
       attributes,
       validateUrl
@@ -41669,7 +41669,7 @@ function LinkPlugin({
  */
 
 function useList(editor) {
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     return registerList(editor);
   }, [editor]);
 }
@@ -41686,12 +41686,12 @@ function ListPlugin({
   hasStrictIndent = false
 }) {
   const [editor] = useLexicalComposerContext();
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (!editor.hasNodes([ListNode, ListItemNode])) {
       throw new Error('ListPlugin: ListNode and/or ListItemNode not registered on editor');
     }
   }, [editor]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (!hasStrictIndent) {
       return;
     }
@@ -41742,7 +41742,7 @@ function MarkdownShortcutPlugin({
   transformers = DEFAULT_TRANSFORMERS
 }) {
   const [editor] = useLexicalComposerContext();
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     return registerMarkdownShortcuts(editor, transformers);
   }, [editor, transformers]);
   return null;
@@ -41779,7 +41779,7 @@ const CAN_USE_DOM$2 = typeof window !== 'undefined' && typeof window.document !=
 // This workaround is no longer necessary in React 19,
 // but we currently support React >=17.x
 // https://github.com/facebook/react/pull/26395
-const useLayoutEffectImpl$2 = CAN_USE_DOM$2 ? dashboard__loadShare__react__loadShare__.useLayoutEffect : dashboard__loadShare__react__loadShare__.useEffect;
+const useLayoutEffectImpl$2 = CAN_USE_DOM$2 ? admin__loadShare__react__loadShare__.useLayoutEffect : admin__loadShare__react__loadShare__.useEffect;
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -41845,7 +41845,7 @@ const CAN_USE_DOM$1 = typeof window !== 'undefined' && typeof window.document !=
 // This workaround is no longer necessary in React 19,
 // but we currently support React >=17.x
 // https://github.com/facebook/react/pull/26395
-const useLayoutEffectImpl$1 = CAN_USE_DOM$1 ? dashboard__loadShare__react__loadShare__.useLayoutEffect : dashboard__loadShare__react__loadShare__.useEffect;
+const useLayoutEffectImpl$1 = CAN_USE_DOM$1 ? admin__loadShare__react__loadShare__.useLayoutEffect : admin__loadShare__react__loadShare__.useEffect;
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -41861,9 +41861,9 @@ const useLayoutEffectImpl$1 = CAN_USE_DOM$1 ? dashboard__loadShare__react__loadS
  */
 function useLexicalSubscription(subscription) {
   const [editor] = useLexicalComposerContext();
-  const initializedSubscription = dashboard__loadShare__react__loadShare__.useMemo(() => subscription(editor), [editor, subscription]);
-  const [value, setValue] = dashboard__loadShare__react__loadShare__.useState(() => initializedSubscription.initialValueFn());
-  const valueRef = dashboard__loadShare__react__loadShare__.useRef(value);
+  const initializedSubscription = admin__loadShare__react__loadShare__.useMemo(() => subscription(editor), [editor, subscription]);
+  const [value, setValue] = admin__loadShare__react__loadShare__.useState(() => initializedSubscription.initialValueFn());
+  const valueRef = admin__loadShare__react__loadShare__.useRef(value);
   useLayoutEffectImpl$1(() => {
     const {
       initialValueFn,
@@ -41985,7 +41985,7 @@ const CAN_USE_DOM = typeof window !== 'undefined' && typeof window.document !== 
 // This workaround is no longer necessary in React 19,
 // but we currently support React >=17.x
 // https://github.com/facebook/react/pull/26395
-const useLayoutEffectImpl = CAN_USE_DOM ? dashboard__loadShare__react__loadShare__.useLayoutEffect : dashboard__loadShare__react__loadShare__.useEffect;
+const useLayoutEffectImpl = CAN_USE_DOM ? admin__loadShare__react__loadShare__.useLayoutEffect : admin__loadShare__react__loadShare__.useEffect;
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -41996,17 +41996,17 @@ const useLayoutEffectImpl = CAN_USE_DOM ? dashboard__loadShare__react__loadShare
  */
 
 function useDecorators(editor, ErrorBoundary) {
-  const [decorators, setDecorators] = dashboard__loadShare__react__loadShare__.useState(() => editor.getDecorators());
+  const [decorators, setDecorators] = admin__loadShare__react__loadShare__.useState(() => editor.getDecorators());
 
   // Subscribe to changes
   useLayoutEffectImpl(() => {
     return editor.registerDecoratorListener(nextDecorators => {
-      dashboard__loadShare__react_mf_2_dom__loadShare__.flushSync(() => {
+      admin__loadShare__react_mf_2_dom__loadShare__.flushSync(() => {
         setDecorators(nextDecorators);
       });
     });
   }, [editor]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     // If the content editable mounts before the subscription is added, then
     // nothing will be rendered on initial pass. We can get around that by
     // ensuring that we set the value.
@@ -42014,21 +42014,21 @@ function useDecorators(editor, ErrorBoundary) {
   }, [editor]);
 
   // Return decorators defined as React Portals
-  return dashboard__loadShare__react__loadShare__.useMemo(() => {
+  return admin__loadShare__react__loadShare__.useMemo(() => {
     const decoratedPortals = [];
     const decoratorKeys = Object.keys(decorators);
     for (let i = 0; i < decoratorKeys.length; i++) {
       const nodeKey = decoratorKeys[i];
       const reactDecorator = /*#__PURE__*/jsxRuntimeExports.jsx(ErrorBoundary, {
         onError: e => editor._onError(e),
-        children: /*#__PURE__*/jsxRuntimeExports.jsx(dashboard__loadShare__react__loadShare__.Suspense, {
+        children: /*#__PURE__*/jsxRuntimeExports.jsx(admin__loadShare__react__loadShare__.Suspense, {
           fallback: null,
           children: decorators[nodeKey]
         })
       });
       const element = editor.getElementByKey(nodeKey);
       if (element !== null) {
-        decoratedPortals.push(/*#__PURE__*/dashboard__loadShare__react_mf_2_dom__loadShare__.createPortal(reactDecorator, element, nodeKey));
+        decoratedPortals.push(/*#__PURE__*/admin__loadShare__react_mf_2_dom__loadShare__.createPortal(reactDecorator, element, nodeKey));
       }
     }
     return decoratedPortals;
@@ -42085,7 +42085,7 @@ function canShowPlaceholderFromCurrentEditorState(editor) {
   return currentCanShowPlaceholder;
 }
 function useCanShowPlaceholder(editor) {
-  const [canShowPlaceholder, setCanShowPlaceholder] = dashboard__loadShare__react__loadShare__.useState(() => canShowPlaceholderFromCurrentEditorState(editor));
+  const [canShowPlaceholder, setCanShowPlaceholder] = admin__loadShare__react__loadShare__.useState(() => canShowPlaceholderFromCurrentEditorState(editor));
   useLayoutEffectImpl(() => {
     function resetCanShowPlaceholder() {
       const currentCanShowPlaceholder = canShowPlaceholderFromCurrentEditorState(editor);
@@ -42167,8 +42167,8 @@ var init_Editor = __esmMin(() => {
 	init_Preview();
 	init_ToolbarContext();
 	init_ToolbarPlugin();
-	Editor = dashboard__loadShare__react__loadShare__.forwardRef(({ enablePreview, onChange, placeholder, toolbarOptions, value }, ref) => {
-		const [isPreview, setIsPreview] = dashboard__loadShare__react__loadShare__.useState(false);
+	Editor = admin__loadShare__react__loadShare__.forwardRef(({ enablePreview, onChange, placeholder, toolbarOptions, value }, ref) => {
+		const [isPreview, setIsPreview] = admin__loadShare__react__loadShare__.useState(false);
 		const handleChange = React.useCallback((editorState) => {
 			const content = editorState.read(() => $getRoot$1().getTextContent());
 			onChange?.(content);
@@ -42268,7 +42268,7 @@ var init_RichText = __esmMin(() => {
 	init_editor();
 	init_fields();
 	init_components();
-	RichText = dashboard__loadShare__react__loadShare__.forwardRef(({ autocomplete, enablePreview, onChange, placeholder, required, toolbarOptions, value }, ref) => {
+	RichText = admin__loadShare__react__loadShare__.forwardRef(({ autocomplete, enablePreview, onChange, placeholder, required, toolbarOptions, value }, ref) => {
 		return /* @__PURE__ */ jsxRuntimeExports.jsx(Editor, {
 			enablePreview,
 			onChange,
@@ -42295,19 +42295,19 @@ var init_Select = __esmMin(() => {
 	init_fields();
 	init_components();
 	Select = React.forwardRef(({ autocomplete, inputClassName, onChange, options, placeholder = "Select...", required, value, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
 			onValueChange: onChange,
 			required,
 			value: value || "",
 			...autocomplete ? { autoComplete: autocomplete } : {},
 			...props,
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
-				className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("bg-modal-input text-foreground placeholder:text-foreground/50 h-14 w-full border-none", inputClassName, "data-[placeholder]:text-foreground/50"),
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
+				className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("bg-modal-input text-foreground placeholder:text-foreground/50 h-14 w-full border-none", inputClassName, "data-[placeholder]:text-foreground/50"),
 				ref,
-				children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder })
-			}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, { children: (options || []).map((option) => {
+				children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder })
+			}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, { children: (options || []).map((option) => {
 				const value$1 = typeof option === "string" ? option : option.value;
-				return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
+				return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
 					value: value$1,
 					children: typeof option === "string" ? option : option.label
 				}, value$1);
@@ -42329,7 +42329,7 @@ var init_Slider = __esmMin(() => {
 	init_fields();
 	init_components();
 	Slider = React.forwardRef(({ max = 100, min = 0, onChange, step = 1, value, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Slider, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Slider, {
 			disabled: props.disabled,
 			max,
 			min,
@@ -42355,9 +42355,9 @@ var init_Textarea = __esmMin(() => {
 	init_fields();
 	init_components();
 	Textarea = React.forwardRef(({ autocomplete, autoComplete: htmlAutoComplete, inputClassName, onChange, placeholder, value, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Textarea, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Textarea, {
 			autoComplete: autocomplete ?? htmlAutoComplete,
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[60px] w-full rounded-md border px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50", inputClassName),
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[60px] w-full rounded-md border px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50", inputClassName),
 			onChange,
 			placeholder,
 			ref,
@@ -42396,7 +42396,7 @@ var FormGroup;
 var init_FormGroup = __esmMin(() => {
 	FormGroup = ({ children, className, description, title }) => {
 		return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
 			children: title || description ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
 				title && /* @__PURE__ */ jsxRuntimeExports.jsx("h3", {
 					className: "text-lg font-medium",
@@ -44112,14 +44112,14 @@ function FormRenderer({ fields = [], groups = [] }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: groupOrder === GroupOrder.GROUPS_FIRST ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [renderGroups(), renderUngrouped()] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [renderUngrouped(), renderGroups()] }) });
 }
 function FieldRenderer({ field }) {
-	const rhfMethods = dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.useFormContext();
+	const rhfMethods = admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.useFormContext();
 	const { control, getValues, watch } = rhfMethods;
-	const [isVisible, setIsVisible] = dashboard__loadShare__react__loadShare__.useState(true);
-	const [isLoading, setIsLoading] = dashboard__loadShare__react__loadShare__.useState(false);
+	const [isVisible, setIsVisible] = admin__loadShare__react__loadShare__.useState(true);
+	const [isLoading, setIsLoading] = admin__loadShare__react__loadShare__.useState(false);
 	const { config: formConfig } = useFormContext();
-	const dependencies = dashboard__loadShare__react__loadShare__.useMemo(() => field.dependencies || [], [field.dependencies]);
-	const autoCompleteValue = dashboard__loadShare__react__loadShare__.useMemo(() => getFieldAutocompleteValue(field, formConfig?.action), [field, formConfig?.action]);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	const dependencies = admin__loadShare__react__loadShare__.useMemo(() => field.dependencies || [], [field.dependencies]);
+	const autoCompleteValue = admin__loadShare__react__loadShare__.useMemo(() => getFieldAutocompleteValue(field, formConfig?.action), [field, formConfig?.action]);
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		const subscription = watch((values, { name }) => {
 			if (!dependencies.length || name && dependencies.includes(name)) checkVisibility();
 		});
@@ -44172,15 +44172,15 @@ function FieldRenderer({ field }) {
 		isLoading,
 		watch
 	]);
-	if (isLoading) return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormItem, {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(field.className, field.itemClassName),
+	if (isLoading) return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormItem, {
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(field.className, field.itemClassName),
 		children: [
-			field.label && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormLabel, { children: field.label }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormControl, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+			field.label && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormLabel, { children: field.label }),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormControl, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 				className: "flex h-14 items-center justify-center",
-				children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Spinner, { size: "small" })
+				children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Spinner, { size: "small" })
 			}) }),
-			field.description && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormDescription, { children: field.description })
+			field.description && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormDescription, { children: field.description })
 		]
 	});
 	if (!isVisible) return null;
@@ -44190,20 +44190,20 @@ function FieldRenderer({ field }) {
 		console.warn(`No component registered for form field type: ${field.type}`);
 		return null;
 	}
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormField, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormField, {
 		control,
 		name: field.name,
-		render: ({ field: formFieldRenderProps }) => /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormItem, {
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(field.className, field.itemClassName),
+		render: ({ field: formFieldRenderProps }) => /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormItem, {
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(field.className, field.itemClassName),
 			children: [
-				field.label && !componentEntry?.handlesLabel && /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormLabel, {
+				field.label && !componentEntry?.handlesLabel && /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormLabel, {
 					className: field.labelClassName,
 					children: [field.label, field.required && isVisible && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
 						className: "text-destructive",
 						children: "*"
 					})]
 				}),
-				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormControl, { children: RegisteredComponent ? /* @__PURE__ */ jsxRuntimeExports.jsx(RegisteredComponent, {
+				/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormControl, { children: RegisteredComponent ? /* @__PURE__ */ jsxRuntimeExports.jsx(RegisteredComponent, {
 					...formFieldRenderProps,
 					...field.inputProps,
 					autocomplete: autoCompleteValue,
@@ -44228,8 +44228,8 @@ function FieldRenderer({ field }) {
 						total: useOptionalStepControlContext()?.totalSteps || 0
 					} : void 0
 				}) : null }),
-				field.description && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormDescription, { children: field.description }),
-				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormMessage, {})
+				field.description && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormDescription, { children: field.description }),
+				/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormMessage, {})
 			]
 		})
 	}, field.name);
@@ -44618,17 +44618,17 @@ function FooterContextProvider({ children, value }) {
 	});
 }
 function useFooterContext() {
-	const context = dashboard__loadShare__react__loadShare__.useContext(FooterContextInternal);
+	const context = admin__loadShare__react__loadShare__.useContext(FooterContextInternal);
 	if (!context) throw new Error("useFooterContext must be used within a FooterContextProvider");
 	if (!context.container || !context.form) throw new Error("FooterContext requires both container and form to be provided");
 	return context;
 }
 function useOptionalFooterContext() {
-	return dashboard__loadShare__react__loadShare__.useContext(FooterContextInternal);
+	return admin__loadShare__react__loadShare__.useContext(FooterContextInternal);
 }
 var FooterContextInternal;
 var init_FooterContext = __esmMin(() => {
-	FooterContextInternal = dashboard__loadShare__react__loadShare__.createContext(void 0);
+	FooterContextInternal = admin__loadShare__react__loadShare__.createContext(void 0);
 });
 
 //#endregion
@@ -44689,7 +44689,7 @@ var init_ActionListRenderer = __esmMin(() => {
 	ActionListRenderer = ({ actions = [], className, closeDialog, isSubmitting, layout = "horizontal" }) => {
 		if (!actions || actions.length === 0) return null;
 		return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex w-full", layout === "vertical" ? "flex-col space-y-3" : "flex-row flex-wrap items-center justify-end gap-4", className),
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex w-full", layout === "vertical" ? "flex-col space-y-3" : "flex-row flex-wrap items-center justify-end gap-4", className),
 			children: actions.map((action, index) => {
 				if (action.type === ActionItemType.CUSTOM_COMPONENT) {
 					const CustomComponent = action.component;
@@ -44727,7 +44727,7 @@ var init_ButtonActionItem = __esmMin(() => {
 	init_registry$1();
 	init_types$5();
 	ButtonActionItem = ({ config, isSubmitting }) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			className: config.className,
 			disabled: isSubmitting || config.disabled,
 			onClick: config.onClick,
@@ -44753,7 +44753,7 @@ var init_CancelActionItem = __esmMin(() => {
 			if (closeDialog) closeDialog();
 			if (config.onClick) config.onClick?.();
 		};
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			className: config.className,
 			disabled: isSubmitting ?? config.disabled,
 			onClick: handleClick,
@@ -44780,7 +44780,7 @@ var init_CustomActionItem = __esmMin(() => {
 			console.error("CustomActionItem requires an onClick handler in its config.", config);
 			return null;
 		}
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			className: config.className,
 			disabled: isSubmitting || config.disabled,
 			onClick: config.onClick,
@@ -44804,7 +44804,7 @@ var init_LinkActionItem = __esmMin(() => {
 	LinkActionItem = ({ config }) => {
 		const commonProps = {
 			children: config.label || config.children,
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50", "text-primary underline-offset-4 hover:underline", config.className),
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50", "text-primary underline-offset-4 hover:underline", config.className),
 			target: config.target
 		};
 		if (config.target === "_blank" || config.reloadDocument || config.to.startsWith("http")) return /* @__PURE__ */ jsxRuntimeExports.jsx("a", {
@@ -44813,7 +44813,7 @@ var init_LinkActionItem = __esmMin(() => {
 			rel: config.target === "_blank" ? "noopener noreferrer" : void 0,
 			children: commonProps.children
 		});
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare__react_mf_2_router__loadShare__.Link, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare__react_mf_2_router__loadShare__.Link, {
 			to: config.to,
 			...commonProps,
 			children: commonProps.children
@@ -44833,12 +44833,12 @@ var init_SubmitActionItem = __esmMin(() => {
 	init_registry$1();
 	init_types$5();
 	SubmitActionItem = ({ config, isSubmitting }) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			className: config.className,
 			disabled: isSubmitting || config.disabled,
 			onClick: config.onClick,
 			type: "submit",
-			children: [isSubmitting && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Spinner, {
+			children: [isSubmitting && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Spinner, {
 				className: "mr-2",
 				size: "small"
 			}), config.label ?? config.children ?? "Submit"]
@@ -44858,7 +44858,7 @@ var init_RetryActionItem = __esmMin(() => {
 	init_registry$1();
 	init_types$5();
 	RetryActionItem = ({ config }) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			className: config.className,
 			disabled: config.disabled,
 			onClick: config.onClick,
@@ -44908,7 +44908,7 @@ function ActionsFooter({ actionButtons, className, environment }) {
 	if (!actionButtons || actionButtons.length === 0) return null;
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(ActionListRenderer, {
 		actions: actionButtons,
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end gap-2", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end gap-2", className),
 		layout: "horizontal"
 	});
 }
@@ -44923,7 +44923,7 @@ init_ActionsFooter();
 function DefaultFooter({ actionButtons, className, environment, isSubmitting, onClose }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(ActionListRenderer, {
 		actions: actionButtons || [],
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end gap-2", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end gap-2", className),
 		closeDialog: onClose,
 		isSubmitting,
 		layout: "horizontal"
@@ -44947,7 +44947,7 @@ function FormFooter({ actionButtons, className, environment, isSubmitting, onClo
 	});
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(ActionListRenderer, {
 		actions: actionButtons || formActions,
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end gap-2", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end gap-2", className),
 		closeDialog: onClose,
 		isSubmitting,
 		layout: "horizontal"
@@ -44972,7 +44972,7 @@ function StepFormFooter({ actionButtons, className, environment, isSubmitting, o
 	});
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(ActionListRenderer, {
 		actions: actionButtons || formActions,
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-between gap-2", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-between gap-2", className),
 		closeDialog: onClose,
 		isSubmitting,
 		layout: "horizontal"
@@ -45007,7 +45007,7 @@ function WizardFooter({ actionButtons, className, isSubmitting, onClose }) {
 		return action;
 	});
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("mt-4 border-t pt-4", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("mt-4 border-t pt-4", className),
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 			className: "mx-auto max-w-4xl",
 			children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
@@ -45250,7 +45250,7 @@ function UnifiedFooterInner({ className, config }) {
 	config && useEnvironmentSync(environment, config.environmentSync);
 	const footerType = footerRegistry.resolveType(config, environment);
 	const FooterComponent = footerRegistry.get(footerType);
-	const submitLabel = dashboard__loadShare__react__loadShare__.useMemo(() => {
+	const submitLabel = admin__loadShare__react__loadShare__.useMemo(() => {
 		if (environment.form && isWizardForm(environment?.form) && environment.step) {
 			const currentStepIndex = environment.step.current - 1;
 			const currentStep = config.steps?.[currentStepIndex];
@@ -45277,7 +45277,7 @@ function UnifiedFooterInner({ className, config }) {
 		});
 		if (evaluatedLabel !== void 0) return String(evaluatedLabel);
 	}, [config, environment]);
-	const actions = dashboard__loadShare__react__loadShare__.useMemo(() => {
+	const actions = admin__loadShare__react__loadShare__.useMemo(() => {
 		let baseActions = void 0;
 		if (environment.form && isWizardForm(environment.form) && environment.step) {
 			const currentStepIndex = environment.step.current - 1;
@@ -45445,16 +45445,16 @@ function HeaderContextProvider({ children, value }) {
 	});
 }
 function useHeaderContext() {
-	const context = dashboard__loadShare__react__loadShare__.useContext(HeaderContextInternal);
+	const context = admin__loadShare__react__loadShare__.useContext(HeaderContextInternal);
 	if (!context) throw new Error("useHeaderContext must be used within a HeaderContextProvider");
 	return context;
 }
 function useOptionalHeaderContext() {
-	return dashboard__loadShare__react__loadShare__.useContext(HeaderContextInternal);
+	return admin__loadShare__react__loadShare__.useContext(HeaderContextInternal);
 }
 var HeaderContextInternal;
 var init_HeaderContext = __esmMin(() => {
-	HeaderContextInternal = dashboard__loadShare__react__loadShare__.createContext(void 0);
+	HeaderContextInternal = admin__loadShare__react__loadShare__.createContext(void 0);
 });
 
 //#endregion
@@ -45463,7 +45463,7 @@ init_HeaderContext();
 //#region src/components/shared/headers/DefaultHeader.tsx
 function DefaultHeader({ actionButtons, className, description, environment, title }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-2", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-2", className),
 		children: [(title || description) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 			className: "space-y-1",
 			children: [title && /* @__PURE__ */ jsxRuntimeExports.jsx("h2", {
@@ -45491,7 +45491,7 @@ init_DefaultHeader();
 function FormHeader({ actionButtons, className, description, title }) {
 	if (!title && !description && (!actionButtons || actionButtons.length === 0)) return null;
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-4", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-4", className),
 		children: [(title || description) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 			className: "space-y-2",
 			children: [title && /* @__PURE__ */ jsxRuntimeExports.jsx("h2", {
@@ -45523,7 +45523,7 @@ function WizardHeader({ className }) {
 		return null;
 	}
 	const { allowNavigation, current, descriptionMaxWidth = "xs", disabledSteps = [], iconSize = "sm", onStepClick, showStepDescriptions = true, showStepTitles = true, steps = [], total } = context.navigation;
-	const resolvedAllowNavigation = dashboard__loadShare__react__loadShare__.useMemo(() => {
+	const resolvedAllowNavigation = admin__loadShare__react__loadShare__.useMemo(() => {
 		if (typeof allowNavigation === "function") return allowNavigation();
 		return allowNavigation;
 	}, [allowNavigation]);
@@ -45534,7 +45534,7 @@ function WizardHeader({ className }) {
 			children: Array.from({ length: total }, (_, index) => {
 				const stepState = calculateStepState(index, current, total, resolvedAllowNavigation, disabledSteps, steps);
 				return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-					className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-full flex-1 transition-all duration-300", {
+					className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-full flex-1 transition-all duration-300", {
 						"bg-accent": stepState.isCompleted,
 						"bg-muted": !stepState.isCompleted && !stepState.isActive,
 						"bg-primary": stepState.isActive && !stepState.isCompleted,
@@ -45593,7 +45593,7 @@ function WizardHeader({ className }) {
 							children: stepState.step.shortTitle || stepState.step.title
 						}),
 						showStepDescriptions && stepState.step.description && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
-							className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground mt-2 text-center text-xs", getComponentSizeClass(descriptionMaxWidth)),
+							className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground mt-2 text-center text-xs", getComponentSizeClass(descriptionMaxWidth)),
 							children: stepState.step.description
 						})
 					]
@@ -45602,7 +45602,7 @@ function WizardHeader({ className }) {
 		})
 	});
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-6", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-6", className),
 		children: [renderMobileProgressBars(), renderDesktopTimeline()]
 	});
 }
@@ -45613,7 +45613,7 @@ function renderIcon$1(icon, size = "sm") {
 		md: "h-5 w-5",
 		sm: "h-4 w-4"
 	};
-	if (reactIsExports.isElement(icon)) return React.cloneElement(icon, { className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(icon.props.className, sizeClasses[size]) });
+	if (reactIsExports.isElement(icon)) return React.cloneElement(icon, { className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(icon.props.className, sizeClasses[size]) });
 	if (reactIsExports.isValidElementType(icon)) return /* @__PURE__ */ jsxRuntimeExports.jsx(icon, { className: sizeClasses[size] });
 	return null;
 }
@@ -45685,16 +45685,16 @@ function UnifiedHeaderInner({ className, config }) {
 	const environment = useHeaderContext();
 	const headerType = headerRegistry.resolveType(config, environment);
 	const HeaderComponent = headerRegistry.get(headerType);
-	const title = dashboard__loadShare__react__loadShare__.useMemo(() => {
+	const title = admin__loadShare__react__loadShare__.useMemo(() => {
 		if (isFormDialog(config) || isWizardDialogConfig(config)) return (isStepFormConfig(config.formConfig) ? config.formConfig.title : config.title) || environment.content.title;
 		return config.title || environment.content.title;
 	}, [config, environment]);
-	const description = dashboard__loadShare__react__loadShare__.useMemo(() => {
+	const description = admin__loadShare__react__loadShare__.useMemo(() => {
 		if (isFormDialog(config) || isWizardDialogConfig(config)) return (isStepFormConfig(config.formConfig) ? config.formConfig.description : config.description) || environment.content.description;
 		return config.description || environment.content.description;
 	}, [config, environment]);
 	const props = {
-		actionButtons: dashboard__loadShare__react__loadShare__.useMemo(() => {
+		actionButtons: admin__loadShare__react__loadShare__.useMemo(() => {
 			return config.actions || environment.content.actions;
 		}, [config, environment]),
 		className,
@@ -45838,7 +45838,7 @@ init_renderHeader();
 function SchemaForm({ active = true, closeDialog = () => void 0, config }) {
 	if (!active) return null;
 	const { currentDialog, setFormMethods: setFormInstance, formMethods } = useDialog();
-	const { open: openNotification } = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useNotification();
+	const { open: openNotification } = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useNotification();
 	const isInDialog = useIsFormDialog();
 	if (!config) throw new Error("SchemaForm requires a form config");
 	const shouldUseRefine = config.adapter === AdapterType.REFINE || config.refine || Boolean(config.refineCoreProps?.resource);
@@ -45862,7 +45862,7 @@ function SchemaForm({ active = true, closeDialog = () => void 0, config }) {
 	const autoSaveProps = shouldUseRefine ? "refineCore" in formInstance ? formInstance.refineCore.autoSaveProps : void 0 : void 0;
 	const isActiveDialog = !!(currentDialog?.formConfig && currentDialog.formConfig.formId === config.formId) && isInDialog;
 	useForceRerender(config.forceRerender);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		if (!setFormInstance) return;
 		if (isActiveDialog) setFormInstance(formInstance);
 		return () => {
@@ -45878,7 +45878,7 @@ function SchemaForm({ active = true, closeDialog = () => void 0, config }) {
 	const cConfig = { ...config };
 	if (cConfig.footerClassName === void 0) cConfig.footerClassName = defaultFooterCss;
 	if (cConfig.footerClassName === false) cConfig.footerClassName = void 0;
-	const finalConfig = dashboard__loadShare__react__loadShare__.useMemo(() => isActiveDialog ? {
+	const finalConfig = admin__loadShare__react__loadShare__.useMemo(() => isActiveDialog ? {
 		...currentDialog,
 		formConfig: cConfig
 	} : cConfig, [
@@ -45893,10 +45893,10 @@ function SchemaForm({ active = true, closeDialog = () => void 0, config }) {
 		autoSave: autoSaveProps,
 		config: cConfig,
 		formInstance,
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Form, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Form, {
 			...formInstance,
 			children: /* @__PURE__ */ jsxRuntimeExports.jsxs("form", {
-				className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(cConfig.formClassName, {
+				className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(cConfig.formClassName, {
 					"flex flex-col space-y-4": cConfig.layout === "vertical" || !cConfig.layout,
 					"flex flex-row items-end gap-4": cConfig.layout === "horizontal",
 					"grid gap-4": cConfig.layout === "grid",
@@ -45938,7 +45938,7 @@ function SchemaForm({ active = true, closeDialog = () => void 0, config }) {
 						config: finalConfig,
 						formMethods: formInstance
 					}, isActiveDialog, currentDialog),
-					isRefineWithAutosave && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.AutoSaveIndicator, {
+					isRefineWithAutosave && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.AutoSaveIndicator, {
 						...autoSaveProps,
 						elements: cConfig.autoSaveStates
 					})
@@ -46062,7 +46062,7 @@ init_animationUtils();
 //#region src/components/form/WizardStepContent.tsx
 function WizardStepContent({ children, className = "", description, icon, isActive = false, isEntering = false, isExiting = false, title }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("transition-all duration-300 ease-in-out", getStepAnimationClasses(isEntering, isExiting, isActive, useOptionalStepControlContext()?.transitionState?.direction || null), className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("transition-all duration-300 ease-in-out", getStepAnimationClasses(isEntering, isExiting, isActive, useOptionalStepControlContext()?.transitionState?.direction || null), className),
 		style: {
 			gridColumn: 1,
 			gridRow: 1
@@ -46147,7 +46147,7 @@ function getStepFooterConfig(isActive, footerConfig, stepMethods, triggerSubmit)
 }
 function StepSchemaFormContent({ closeDialog, config, formMethods, onNavigationStart, onNavigationEnd, onNavigationError }) {
 	const { currentStep, goToStep, jumpTo, handleNext, handlePrevious, handleRetry, isFirstStep, isLastStep, totalSteps, transitionState } = useStepControl();
-	const triggerSubmit = dashboard__loadShare__react__loadShare__.useCallback(() => {
+	const triggerSubmit = admin__loadShare__react__loadShare__.useCallback(() => {
 		if (!formMethods?.current?.handleSubmit) return;
 		handleStepSubmission({
 			closeDialog,
@@ -46171,7 +46171,7 @@ function StepSchemaFormContent({ closeDialog, config, formMethods, onNavigationS
 	]);
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 		className: "grid grid-cols-1 grid-rows-1",
-		children: dashboard__loadShare__react__loadShare__.useMemo(() => {
+		children: admin__loadShare__react__loadShare__.useMemo(() => {
 			const stepMethods = {
 				currentStep,
 				goToStep,
@@ -46286,7 +46286,7 @@ function FormDialog({ actions, formConfig, isSubmitting, onClose, onSubmit, onSu
 		submitLabel
 	});
 	const finalActions = actions || defaultActions;
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, { children: title }) }), isStepFormConfig(formConfig) ? /* @__PURE__ */ jsxRuntimeExports.jsx(StepSchemaForm, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, { children: title }) }), isStepFormConfig(formConfig) ? /* @__PURE__ */ jsxRuntimeExports.jsx(StepSchemaForm, {
 		closeDialog: onClose,
 		config: {
 			...formConfig,
@@ -46343,7 +46343,7 @@ function WizardFormContent({ closeDialog, config, formMethods, isInDialog }) {
 	const stepControl = useStepControl();
 	const { currentStep, goToStep, isFirstStep, isLastStep, totalSteps } = stepControl;
 	const isSubmitting = formMethods?.current?.formState?.isSubmitting || false;
-	const isStepNavigationAllowed = dashboard__loadShare__react__loadShare__.useMemo(() => {
+	const isStepNavigationAllowed = admin__loadShare__react__loadShare__.useMemo(() => {
 		return resolveAllowStepNavigation(config.allowStepNavigation, config.steps, currentStep);
 	}, [
 		config.allowStepNavigation,
@@ -46495,13 +46495,13 @@ init_Dialog_registry();
 //#region src/components/dialog/DialogContainer.tsx
 function DialogContainer({ children, currentDialog }) {
 	const { closeDialog } = useDialogActions();
-	const { open: openNotification } = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useNotification();
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Dialog, {
+	const { open: openNotification } = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useNotification();
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Dialog, {
 		"aria-describedby": currentDialog.description ? "dialog-description" : void 0,
 		"aria-labelledby": "dialog-title",
 		onOpenChange: (open) => !open && closeDialog("user"),
 		open: !!currentDialog,
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogContent, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogContent, {
 			className: getDialogContentClasses(currentDialog),
 			onInteractOutside: (e) => {
 				if (currentDialog.preventCloseOnOutsideClick === true) e.preventDefault();
@@ -46559,7 +46559,7 @@ init_DialogContent();
 function renderFooter(config) {
 	const { className, dialogConfig, footer, formMethods, isDialog = false, onCancel, unifiedFooterConfig } = config;
 	if (footer === false) return null;
-	if (footer && isDialogFooterFunction(footer)) return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogFooter, {
+	if (footer && isDialogFooterFunction(footer)) return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogFooter, {
 		className,
 		children: footer(buildFooterEnvironment({
 			dialogConfig,
@@ -46569,7 +46569,7 @@ function renderFooter(config) {
 			stepControl: useOptionalStepControlContext()
 		}))
 	});
-	if (footer) return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogFooter, {
+	if (footer) return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogFooter, {
 		className,
 		children: footer
 	});
@@ -46580,7 +46580,7 @@ function renderFooter(config) {
 		onCancel,
 		stepControl: useOptionalStepControlContext()
 	});
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogFooter, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogFooter, {
 		className,
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx(UnifiedFooter, {
 			config: unifiedFooterConfig || dialogConfig?.formConfig || dialogConfig,
@@ -46753,7 +46753,7 @@ var init_Switch = __esmMin(() => {
 	init_fields();
 	init_components();
 	Switch = React.forwardRef(({ autocomplete, label, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Switch, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Switch, {
 			checked: props.value,
 			disabled: props.disabled,
 			id: props.name,
@@ -46762,8 +46762,8 @@ var init_Switch = __esmMin(() => {
 			onCheckedChange: props.onChange,
 			ref,
 			...autocomplete ? { autoComplete: autocomplete } : {}
-		}), label && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground", props.labelClassName),
+		}), label && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground", props.labelClassName),
 			htmlFor: props.name,
 			children: label
 		})] });
@@ -47027,7 +47027,7 @@ init_appStore();
 
 // dev uses dynamic import to separate chunks
     
-    const {initPromise} = dashboard__mf_v__runtimeInit__mf_v__;
+    const {initPromise} = admin__mf_v__runtimeInit__mf_v__;
     const res = initPromise.then(runtime => runtime.loadShare("@lumeweb/portal-framework-core", {
       customShareInfo: {shareConfig:{
         singleton: true,
@@ -47036,7 +47036,7 @@ init_appStore();
       }}
     }));
     const exportModule = await res.then(factory => factory());
-    var dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__ = exportModule;
+    var admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__ = exportModule;
 
 function derive(deriveFn) {
     const listeners = new Set();
@@ -47201,7 +47201,7 @@ var init_portalStore = __esmMin(() => {
 	portalStore = createStore((set) => ({
 		isMetaLoading: false,
 		meta: void 0,
-		portalUrl: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.env.VITE_PORTAL_DOMAIN ?? "",
+		portalUrl: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.env.VITE_PORTAL_DOMAIN ?? "",
 		sdk: null,
 		setIsMetaLoading: (isMetaLoading) => set({ isMetaLoading }),
 		setMeta: (meta) => set({ meta }),
@@ -47220,9 +47220,9 @@ var init_portalStore = __esmMin(() => {
 		return useStoreWithEqualityFn(portalStore, selector, equalityFn);
 	};
 	useFrameworkSync = () => {
-		const framework = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.useFramework();
+		const framework = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.useFramework();
 		const actions = usePortalActions();
-		dashboard__loadShare__react__loadShare__.useEffect(() => {
+		admin__loadShare__react__loadShare__.useEffect(() => {
 			if (!framework) return;
 			if (!framework?.framework) return;
 			if (framework?.framework) actions.setPortalUrl(framework.framework.portalUrl);
@@ -47273,9 +47273,9 @@ var stringifyConfig = {
 };
 var routerProvider = {
   go: () => {
-    const { search: existingSearch, hash: existingHash } = dashboard__loadShare__react_mf_2_router__loadShare__.useLocation();
-    const navigate = dashboard__loadShare__react_mf_2_router__loadShare__.useNavigate();
-    const fn = dashboard__loadShare__react__loadShare__.useCallback(
+    const { search: existingSearch, hash: existingHash } = admin__loadShare__react_mf_2_router__loadShare__.useLocation();
+    const navigate = admin__loadShare__react_mf_2_router__loadShare__.useNavigate();
+    const fn = admin__loadShare__react__loadShare__.useCallback(
       ({
         to,
         type,
@@ -47311,24 +47311,24 @@ var routerProvider = {
     return fn;
   },
   back: () => {
-    const navigate = dashboard__loadShare__react_mf_2_router__loadShare__.useNavigate();
-    const fn = dashboard__loadShare__react__loadShare__.useCallback(() => {
+    const navigate = admin__loadShare__react_mf_2_router__loadShare__.useNavigate();
+    const fn = admin__loadShare__react__loadShare__.useCallback(() => {
       navigate(-1);
     }, [navigate]);
     return fn;
   },
   parse: () => {
     var _a;
-    let params = dashboard__loadShare__react_mf_2_router__loadShare__.useParams();
-    const { pathname, search } = dashboard__loadShare__react_mf_2_router__loadShare__.useLocation();
-    const { resources } = dashboard__loadShare__react__loadShare__.useContext(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.ResourceContext);
+    let params = admin__loadShare__react_mf_2_router__loadShare__.useParams();
+    const { pathname, search } = admin__loadShare__react_mf_2_router__loadShare__.useLocation();
+    const { resources } = admin__loadShare__react__loadShare__.useContext(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.ResourceContext);
     const { resource, action, matchedRoute } = React.useMemo(() => {
-      return dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.matchResourceFromRoute(pathname, resources);
+      return admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.matchResourceFromRoute(pathname, resources);
     }, [resources, pathname]);
     if (Object.entries(params).length === 0 && matchedRoute) {
-      params = ((_a = dashboard__loadShare__react_mf_2_router__loadShare__.matchPath(matchedRoute, pathname)) == null ? void 0 : _a.params) || {};
+      params = ((_a = admin__loadShare__react_mf_2_router__loadShare__.matchPath(matchedRoute, pathname)) == null ? void 0 : _a.params) || {};
     }
-    const fn = dashboard__loadShare__react__loadShare__.useCallback(() => {
+    const fn = admin__loadShare__react__loadShare__.useCallback(() => {
       const parsedSearch = qs.parse(search, { ignoreQueryPrefix: true });
       const combinedParams = {
         ...params,
@@ -47356,15 +47356,15 @@ var routerProvider = {
     return fn;
   },
   Link: React.forwardRef(function RefineLink(props, ref) {
-    return /* @__PURE__ */ React.createElement(dashboard__loadShare__react_mf_2_router__loadShare__.Link, { to: props.to, ...props, ref });
+    return /* @__PURE__ */ React.createElement(admin__loadShare__react_mf_2_router__loadShare__.Link, { to: props.to, ...props, ref });
   })
 };
 
 //#region src/components/app/AppComponent.tsx
 function AppComponent({ loadNavigation = true, loadRoutes = true, name = "app" }) {
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.FrameworkProvider, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.FrameworkProvider, {
 		appName: name,
-		configure: dashboard__loadShare__react__loadShare__.useCallback((builder) => {
+		configure: admin__loadShare__react__loadShare__.useCallback((builder) => {
 			return builder;
 		}, []),
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx(AppContent, {
@@ -47374,7 +47374,7 @@ function AppComponent({ loadNavigation = true, loadRoutes = true, name = "app" }
 	});
 }
 function AppContent({ loadNavigation = true, loadRoutes = true }) {
-	const { error: frameworkError, framework, isLoading: isFrameworkLoading } = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.useFramework();
+	const { error: frameworkError, framework, isLoading: isFrameworkLoading } = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.useFramework();
 	const addMenuItems = useAppStore((state) => state.addMenuItems);
 	const error = useAppStore((state) => state.error);
 	const isLoading = useAppStore((state) => state.isLoading);
@@ -47385,7 +47385,7 @@ function AppContent({ loadNavigation = true, loadRoutes = true }) {
 	const setPluginConfigs = useAppStore((state) => state.setPluginConfigs);
 	const setRoutes = useAppStore((state) => state.setRoutes);
 	useFrameworkSync();
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		if (!framework || isFrameworkLoading) return;
 		let mounted = true;
 		async function loadData() {
@@ -47396,7 +47396,7 @@ function AppContent({ loadNavigation = true, loadRoutes = true }) {
 				let capabilities = [];
 				let routes$1 = [];
 				let navigation = [];
-				if (loadNavigation) navigationFeature = await framework.getFeature(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createNamespacedId("core", "navigation"));
+				if (loadNavigation) navigationFeature = await framework.getFeature(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createNamespacedId("core", "navigation"));
 				if (loadRoutes) capabilities = await framework.getCapabilitiesByType("core:refine-config");
 				if (navigationFeature) [routes$1, navigation] = await Promise.all([navigationFeature.getRoutes(), navigationFeature.getNavigation()]);
 				const configs = loadRoutes ? (() => {
@@ -47436,67 +47436,67 @@ function AppContent({ loadNavigation = true, loadRoutes = true }) {
 		addMenuItems
 	]);
 	if (isFrameworkLoading || isLoading) return /* @__PURE__ */ jsxRuntimeExports.jsx(LoadingSpinner, {});
-	if (frameworkError) return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.ErrorDisplay, {
+	if (frameworkError) return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.ErrorDisplay, {
 		error: frameworkError,
 		onRetry: () => window.location.reload()
 	});
-	if (error && (loadNavigation || loadRoutes)) return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.ErrorDisplay, {
+	if (error && (loadNavigation || loadRoutes)) return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.ErrorDisplay, {
 		error,
 		onRetry: () => window.location.reload()
 	});
 	if (!routes) return null;
 	const combinedPluginConfig = Object.assign({}, ...pluginConfigs);
-	const routerRoutes = dashboard__loadShare__react_mf_2_router__loadShare__.createRoutesFromElements(Array.isArray(routes) ? routes.map((route) => createRouteElement(route, framework)) : []);
+	const routerRoutes = admin__loadShare__react_mf_2_router__loadShare__.createRoutesFromElements(Array.isArray(routes) ? routes.map((route) => createRouteElement(route, framework)) : []);
 	function createRouteElement(route, framework$1, child = false) {
-		const LazyComponent = getLazyComponent(route.component ?? "", route.pluginId ?? dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createNamespacedId("core", "fallback"), framework$1, route.id);
+		const LazyComponent = getLazyComponent(route.component ?? "", route.pluginId ?? admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createNamespacedId("core", "fallback"), framework$1, route.id);
 		const jsxElement = LazyComponent ? /* @__PURE__ */ jsxRuntimeExports.jsx(LazyComponent, {}) : null;
-		const finalElement = jsxElement ? withRouteContainer(jsxElement, !child)() : /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Failed to load element for route ${route.id}`) });
+		const finalElement = jsxElement ? withRouteContainer(jsxElement, !child)() : /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Failed to load element for route ${route.id}`) });
 		const childRoutes = route.children?.map((childRoute) => createRouteElement(childRoute, framework$1, true));
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare__react_mf_2_router__loadShare__.Route, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare__react_mf_2_router__loadShare__.Route, {
 			element: finalElement,
-			errorElement: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundary, {}),
+			errorElement: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundary, {}),
 			index: route.index,
 			path: route.path,
 			children: childRoutes
 		}, route.id);
 	}
 	let router;
-	if (routerRoutes.length > 0) router = dashboard__loadShare__react_mf_2_router__loadShare__.createBrowserRouter(routerRoutes);
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Refine, {
+	if (routerRoutes.length > 0) router = admin__loadShare__react_mf_2_router__loadShare__.createBrowserRouter(routerRoutes);
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Refine, {
 		...combinedPluginConfig,
-		options: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getDefaultRefineOptions(),
+		options: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getDefaultRefineOptions(),
 		routerProvider,
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsxs(DialogProvider, { children: [router && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare__react_mf_2_router__loadShare__.RouterProvider, { router }), !router && /* @__PURE__ */ jsxRuntimeExports.jsx(DialogRenderer, {})] }), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Toaster, {})]
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsxs(DialogProvider, { children: [router && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare__react_mf_2_router__loadShare__.RouterProvider, { router }), !router && /* @__PURE__ */ jsxRuntimeExports.jsx(DialogRenderer, {})] }), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Toaster, {})]
 	});
 }
 function getLazyComponent(componentString, pluginId, framework, routeId) {
 	if (!componentString || !pluginId) {
 		console.error(`Route Error: Missing component string or pluginId for route id ${routeId}`);
-		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Missing component/pluginId for route ${routeId}`) });
+		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Missing component/pluginId for route ${routeId}`) });
 	}
 	let componentName;
 	try {
-		if (componentString.includes(":")) componentName = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.parseNamespacedId(componentString).name;
+		if (componentString.includes(":")) componentName = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.parseNamespacedId(componentString).name;
 		else componentName = componentString;
 	} catch (e) {
 		console.error(`Route Error: Failed to parse component string "${componentString}" for route id ${routeId}`, e);
-		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Invalid component string format: ${componentString}`) });
+		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Invalid component string format: ${componentString}`) });
 	}
 	if (!componentName) {
 		console.error(`Route Error: Could not extract componentName from "${componentString}" for route id ${routeId}`);
-		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Invalid component name from: ${componentString}`) });
+		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Invalid component name from: ${componentString}`) });
 	}
 	try {
-		return dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createRemoteComponentLoader({
+		return admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createRemoteComponentLoader({
 			componentPath: componentName,
 			pluginId
 		}, framework, {
-			...dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.defaultRemoteOptions,
+			...admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.defaultRemoteOptions,
 			LoadingComponent: Loading
 		});
 	} catch (e) {
 		console.error(`Route Error: Failed createRemoteComponentLoader for ${pluginId}:${componentName}`, e);
-		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Failed to create loader for ${pluginId}:${componentName}`) });
+		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Failed to create loader for ${pluginId}:${componentName}`) });
 	}
 }
 function LoadingSpinner() {
@@ -47709,7 +47709,7 @@ init_types();
 function BaseFilter({ label, children, className, config }) {
 	const filterLabel = config?.label || label;
 	if (filterLabel) return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col space-y-2", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col space-y-2", className),
 		children: [/* @__PURE__ */ jsxRuntimeExports.jsx("label", {
 			className: "text-sm font-medium",
 			children: filterLabel
@@ -47719,7 +47719,7 @@ function BaseFilter({ label, children, className, config }) {
 		})]
 	});
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center", className),
 		children
 	});
 }
@@ -47739,7 +47739,7 @@ function BooleanFilter({ value, onChange, config }) {
 		config,
 		children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 			className: "flex items-center space-x-2",
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Switch, {
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Switch, {
 				id: switchId,
 				checked: value === true,
 				onCheckedChange: handleChange,
@@ -47767,7 +47767,7 @@ function DateFilter({ value, onChange, config }) {
 	};
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
 		config,
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 			type: "date",
 			placeholder: config.placeholder || "Select date...",
 			value: value || "",
@@ -47785,9 +47785,9 @@ init_DateFilter();
 
 //#region src/components/data-table/toolbarItems/filters/components/MultiSelectFilter.tsx
 function MultiSelectFilter({ value = [], onChange, config }) {
-	const [selectedValues, setSelectedValues] = dashboard__loadShare__react__loadShare__.useState(value);
-	const containerRef = dashboard__loadShare__react__loadShare__.useRef(null);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	const [selectedValues, setSelectedValues] = admin__loadShare__react__loadShare__.useState(value);
+	const containerRef = admin__loadShare__react__loadShare__.useRef(null);
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		setSelectedValues(value ?? []);
 	}, [value]);
 	const handleCheckboxChange = (checked, optionValue) => {
@@ -47797,19 +47797,19 @@ function MultiSelectFilter({ value = [], onChange, config }) {
 		setSelectedValues(newValues);
 		if (onChange) onChange(newValues);
 	};
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
 		config,
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 			ref: containerRef,
 			className: "space-y-2",
 			children: config.options?.map((option) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 				className: "flex items-center space-x-2",
-				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Checkbox, {
+				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Checkbox, {
 					id: `checkbox-${config.id}-${option.value}`,
 					checked: selectedValues.includes(option.value),
 					onCheckedChange: (checked) => handleCheckboxChange(checked, option.value),
 					disabled: config.disabled || false
-				}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
+				}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
 					htmlFor: `checkbox-${config.id}-${option.value}`,
 					className: "cursor-help text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
 					children: option.label
@@ -47833,7 +47833,7 @@ function NumberFilter({ value, onChange, config }) {
 	};
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
 		config,
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 			type: "number",
 			placeholder: config.placeholder || "Enter number...",
 			value: value || "",
@@ -47876,7 +47876,7 @@ function RangeFilter({ value = {}, onChange, config }) {
 		children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 			className: "flex items-center space-x-2",
 			children: [
-				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+				/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 					type: "number",
 					placeholder: config.minPlaceholder || "Min",
 					value: rangeValue.min ?? "",
@@ -47890,7 +47890,7 @@ function RangeFilter({ value = {}, onChange, config }) {
 					className: "text-sm font-medium",
 					children: "to"
 				}),
-				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+				/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 					type: "number",
 					placeholder: config.maxPlaceholder || "Max",
 					value: rangeValue.max ?? "",
@@ -47923,7 +47923,7 @@ function SearchFilter({ value, onChange, config }) {
 			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(Search, {
 				className: "absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400",
 				"aria-hidden": "true"
-			}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+			}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 				type: "text",
 				placeholder: config.placeholder || "Search...",
 				value: value || "",
@@ -47943,10 +47943,10 @@ init_SearchFilter();
 
 //#region src/components/data-table/toolbarItems/filters/components/SelectFilter.tsx
 function SelectFilter({ value, onChange, config, itemLabel }) {
-	const [isExpanded, setIsExpanded] = dashboard__loadShare__react__loadShare__.useState(false);
-	const selectContentRef = dashboard__loadShare__react__loadShare__.useRef(null);
-	const selectTriggerRef = dashboard__loadShare__react__loadShare__.useRef(null);
-	const containerRef = dashboard__loadShare__react__loadShare__.useRef(null);
+	const [isExpanded, setIsExpanded] = admin__loadShare__react__loadShare__.useState(false);
+	const selectContentRef = admin__loadShare__react__loadShare__.useRef(null);
+	const selectTriggerRef = admin__loadShare__react__loadShare__.useRef(null);
+	const containerRef = admin__loadShare__react__loadShare__.useRef(null);
 	const options = config.includeAllOption ? [{
 		label: `All ${itemLabel || "Items"}`,
 		value: "all"
@@ -47958,7 +47958,7 @@ function SelectFilter({ value, onChange, config, itemLabel }) {
 		if (config.dropdownStyle) setIsExpanded(false);
 	};
 	const triggerLabel = options.find((option) => option.value === controlledValue)?.label || itemLabel || config.placeholder || "Select option...";
-	if (config.dropdownStyle) return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
+	if (config.dropdownStyle) return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
 		config,
 		label: itemLabel,
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
@@ -47969,14 +47969,14 @@ function SelectFilter({ value, onChange, config, itemLabel }) {
 				onOpenChange: setIsExpanded,
 				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(Trigger, {
 					asChild: true,
-					children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+					children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 						ref: selectTriggerRef,
 						variant: "ghost",
 						className: "hover:bg-muted h-auto w-full justify-start p-3",
 						children: [/* @__PURE__ */ jsxRuntimeExports.jsx("span", {
 							className: "flex-1 text-left font-medium",
 							children: triggerLabel
-						}), /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-4 w-4 transition-transform duration-200 ease-in-out", isExpanded ? "rotate-180" : "rotate-0") })]
+						}), /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-4 w-4 transition-transform duration-200 ease-in-out", isExpanded ? "rotate-180" : "rotate-0") })]
 					})
 				}), /* @__PURE__ */ jsxRuntimeExports.jsx(Portal2, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Content2, {
 					ref: selectContentRef,
@@ -47984,14 +47984,14 @@ function SelectFilter({ value, onChange, config, itemLabel }) {
 					side: "bottom",
 					align: "start",
 					sideOffset: 5,
-					children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
+					children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
 						value: controlledValue,
 						onValueChange: handleChange,
 						disabled: config.disabled || false,
-						children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
+						children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
 							className: "w-full",
-							children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder: config.placeholder || "Select option..." })
-						}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, { children: options.map((option) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
+							children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder: config.placeholder || "Select option..." })
+						}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, { children: options.map((option) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
 							value: option.value,
 							children: option.label
 						}, option.value)) })]
@@ -48000,23 +48000,23 @@ function SelectFilter({ value, onChange, config, itemLabel }) {
 			})
 		})
 	}) });
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
 		config,
 		label: itemLabel,
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 			ref: containerRef,
 			className: "relative",
-			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
+			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
 				value: controlledValue,
 				onValueChange: handleChange,
 				disabled: config.disabled || false,
-				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
+				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
 					ref: selectTriggerRef,
 					className: "w-full",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder: config.placeholder || "Select option..." })
-				}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, {
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder: config.placeholder || "Select option..." })
+				}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, {
 					ref: selectContentRef,
-					children: options.map((option) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
+					children: options.map((option) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
 						value: option.value,
 						children: option.label
 					}, option.value))
@@ -48039,7 +48039,7 @@ function TextFilter({ value, onChange, config }) {
 	};
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
 		config,
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 			type: "text",
 			placeholder: config.placeholder || "Enter text...",
 			value: value || "",
@@ -48151,18 +48151,18 @@ init_useFilterOperators();
 function FilterHelpersProvider({ children, refineTable, getDefaultFilter: getDefaultFilter$1, getDefaultOperator, getAvailableOperators: getAvailableOperators$1 }) {
 	const defaultGetDefaultFilter = useDefaultFilter(refineTable);
 	const finalGetDefaultFilter = getDefaultFilter$1 || defaultGetDefaultFilter;
-	const defaultGetDefaultOperator = dashboard__loadShare__react__loadShare__.useCallback((fieldType) => {
+	const defaultGetDefaultOperator = admin__loadShare__react__loadShare__.useCallback((fieldType) => {
 		return getDefaultOperatorForFieldType(fieldType);
 	}, []);
 	const finalGetDefaultOperator = getDefaultOperator || defaultGetDefaultOperator;
-	const defaultGetAvailableOperators = dashboard__loadShare__react__loadShare__.useCallback((fieldType) => {
+	const defaultGetAvailableOperators = admin__loadShare__react__loadShare__.useCallback((fieldType) => {
 		return getAvailableOperators(fieldType);
 	}, []);
 	const finalGetAvailableOperators = getAvailableOperators$1 || defaultGetAvailableOperators;
-	const finalGetDefaultFilterRef = dashboard__loadShare__react__loadShare__.useRef(finalGetDefaultFilter);
-	const finalGetDefaultOperatorRef = dashboard__loadShare__react__loadShare__.useRef(finalGetDefaultOperator);
-	const finalGetAvailableOperatorsRef = dashboard__loadShare__react__loadShare__.useRef(finalGetAvailableOperators);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	const finalGetDefaultFilterRef = admin__loadShare__react__loadShare__.useRef(finalGetDefaultFilter);
+	const finalGetDefaultOperatorRef = admin__loadShare__react__loadShare__.useRef(finalGetDefaultOperator);
+	const finalGetAvailableOperatorsRef = admin__loadShare__react__loadShare__.useRef(finalGetAvailableOperators);
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		finalGetDefaultFilterRef.current = finalGetDefaultFilter;
 		finalGetDefaultOperatorRef.current = finalGetDefaultOperator;
 		finalGetAvailableOperatorsRef.current = finalGetAvailableOperators;
@@ -48171,7 +48171,7 @@ function FilterHelpersProvider({ children, refineTable, getDefaultFilter: getDef
 		finalGetDefaultOperator,
 		finalGetAvailableOperators
 	]);
-	const value = dashboard__loadShare__react__loadShare__.useMemo(() => {
+	const value = admin__loadShare__react__loadShare__.useMemo(() => {
 		return {
 			getDefaultFilter: finalGetDefaultFilterRef.current,
 			getDefaultOperator: finalGetDefaultOperatorRef.current,
@@ -48186,18 +48186,18 @@ function FilterHelpersProvider({ children, refineTable, getDefaultFilter: getDef
 var FilterHelpersContext, useDefaultFilter, useFilterHelpers;
 var init_FilterHelpers = __esmMin(() => {
 	init_useFilterOperators();
-	FilterHelpersContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
+	FilterHelpersContext = admin__loadShare__react__loadShare__.createContext(void 0);
 	useDefaultFilter = (refineTable) => {
-		const filtersRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.filters);
-		dashboard__loadShare__react__loadShare__.useEffect(() => {
+		const filtersRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.filters);
+		admin__loadShare__react__loadShare__.useEffect(() => {
 			filtersRef.current = refineTable?.refineCore?.filters;
 		}, [refineTable?.refineCore?.filters]);
-		return dashboard__loadShare__react__loadShare__.useCallback((columnName, operatorType = "eq") => {
-			return dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.getDefaultFilter(columnName, filtersRef.current, operatorType);
+		return admin__loadShare__react__loadShare__.useCallback((columnName, operatorType = "eq") => {
+			return admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.getDefaultFilter(columnName, filtersRef.current, operatorType);
 		}, []);
 	};
 	useFilterHelpers = () => {
-		const context = dashboard__loadShare__react__loadShare__.useContext(FilterHelpersContext);
+		const context = admin__loadShare__react__loadShare__.useContext(FilterHelpersContext);
 		if (context === void 0) throw new Error("useFilterHelpers must be used within a FilterHelpersProvider");
 		return context;
 	};
@@ -48215,15 +48215,15 @@ init_FilterHelpers();
 * 3. Inferred components based on config.type
 */
 function FilterResolver({ filterItem, commonProps }) {
-	const [isLoading, setIsLoading] = dashboard__loadShare__react__loadShare__.useState(true);
-	const [notFound, setNotFound] = dashboard__loadShare__react__loadShare__.useState(false);
-	const filterComponentRef = dashboard__loadShare__react__loadShare__.useRef(null);
-	const filterItemRef = dashboard__loadShare__react__loadShare__.useRef(filterItem);
+	const [isLoading, setIsLoading] = admin__loadShare__react__loadShare__.useState(true);
+	const [notFound, setNotFound] = admin__loadShare__react__loadShare__.useState(false);
+	const filterComponentRef = admin__loadShare__react__loadShare__.useRef(null);
+	const filterItemRef = admin__loadShare__react__loadShare__.useRef(filterItem);
 	const { getAvailableOperators } = useFilterHelpers();
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		filterItemRef.current = filterItem;
 	}, [filterItem]);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		const resolveFilterComponent = async () => {
 			const currentFilterItem = filterItemRef.current;
 			setIsLoading(true);
@@ -48305,9 +48305,9 @@ init_filters();
 
 //#region src/components/data-table/toolbarItems/FilterGroup.tsx
 function FilterGroup({ item, commonProps, size }) {
-	const [isExpanded, setIsExpanded] = dashboard__loadShare__react__loadShare__.useState(item.initiallyExpanded ?? false);
+	const [isExpanded, setIsExpanded] = admin__loadShare__react__loadShare__.useState(item.initiallyExpanded ?? false);
 	const layout = item.layout ?? "horizontal";
-	const createChildOnChangeHandler = dashboard__loadShare__react__loadShare__.useCallback((childItem) => {
+	const createChildOnChangeHandler = admin__loadShare__react__loadShare__.useCallback((childItem) => {
 		return createFilterOnChangeHandler(childItem, (filters) => {
 			if (commonProps.context?.setFilters) commonProps.context.setFilters(filters);
 		}, commonProps.context?.getDefaultOperator, {
@@ -48315,7 +48315,7 @@ function FilterGroup({ item, commonProps, size }) {
 			childItemId: childItem.id
 		});
 	}, [commonProps.context, item.id]);
-	const createChildCommonProps = dashboard__loadShare__react__loadShare__.useCallback((childItem) => {
+	const createChildCommonProps = admin__loadShare__react__loadShare__.useCallback((childItem) => {
 		return {
 			...commonProps,
 			value: commonProps.context?.getDefaultFilter?.(childItem.config?.field, childItem.config?.operator || (commonProps.context?.getDefaultOperator ? commonProps.context.getDefaultOperator(childItem.config?.type) : FilterOperator.EQ)) ?? childItem.initialValue,
@@ -48336,7 +48336,7 @@ function FilterGroup({ item, commonProps, size }) {
 		onOpenChange: setIsExpanded,
 		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(Trigger, {
 			asChild: true,
-			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 				variant: "ghost",
 				className: "hover:bg-muted h-auto justify-start p-3",
 				children: [
@@ -48345,11 +48345,11 @@ function FilterGroup({ item, commonProps, size }) {
 						className: "flex-1 text-left font-medium",
 						children: item.label
 					}),
-					/* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("ml-2 h-4 w-4 transition-transform duration-200 ease-in-out", isExpanded ? "rotate-180" : "rotate-0") })
+					/* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("ml-2 h-4 w-4 transition-transform duration-200 ease-in-out", isExpanded ? "rotate-180" : "rotate-0") })
 				]
 			})
 		}), /* @__PURE__ */ jsxRuntimeExports.jsx(Portal2, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Content2, {
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(dropdownContentClasses, layout === "vertical" ? "space-y-3" : "grid grid-cols-2 gap-3 md:grid-cols-3", size ? getSizeClass({ size }) : void 0, "animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200"),
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(dropdownContentClasses, layout === "vertical" ? "space-y-3" : "grid grid-cols-2 gap-3 md:grid-cols-3", size ? getSizeClass({ size }) : void 0, "animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200"),
 			side: "bottom",
 			align: "start",
 			sideOffset: 5,
@@ -48365,8 +48365,8 @@ function FilterGroup({ item, commonProps, size }) {
 		}) })]
 	});
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("bg-background rounded-lg border", item.className),
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("bg-background rounded-lg border", item.className),
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			variant: "ghost",
 			className: "hover:bg-muted h-auto w-full justify-start p-3",
 			onClick: toggleExpanded,
@@ -48376,10 +48376,10 @@ function FilterGroup({ item, commonProps, size }) {
 					className: "flex-1 text-left font-medium",
 					children: item.label
 				}),
-				/* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-4 w-4 transition-transform duration-200 ease-in-out", isExpanded ? "rotate-0" : "-rotate-90") })
+				/* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-4 w-4 transition-transform duration-200 ease-in-out", isExpanded ? "rotate-0" : "-rotate-90") })
 			]
 		}), /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("overflow-hidden border-t transition-all duration-300 ease-in-out", isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0", layout === "vertical" ? "space-y-3" : "grid grid-cols-2 gap-3 md:grid-cols-3", "p-3", size ? getSizeClass({ size }) : void 0),
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("overflow-hidden border-t transition-all duration-300 ease-in-out", isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0", layout === "vertical" ? "space-y-3" : "grid grid-cols-2 gap-3 md:grid-cols-3", "p-3", size ? getSizeClass({ size }) : void 0),
 			children: item.items.map((filterItem) => {
 				return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 					className: "flex flex-col",
@@ -48411,7 +48411,7 @@ init_FilterGroup();
 * @returns isMobile state and current breakpoint
 */
 function useMobileDetection({ mobileBreakpoint = ComponentSize.SM } = {}) {
-	return dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.useMobileDetection({ breakpoint: Object.values(ComponentSize).includes(mobileBreakpoint) ? breakpointSizeMap[mobileBreakpoint] : mobileBreakpoint });
+	return admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.useMobileDetection({ breakpoint: Object.values(ComponentSize).includes(mobileBreakpoint) ? breakpointSizeMap[mobileBreakpoint] : mobileBreakpoint });
 }
 var breakpointSizeMap;
 var init_useMobileDetection = __esmMin(() => {
@@ -48441,7 +48441,7 @@ function ActionItemRenderer(item, commonProps, isMobile) {
 	const actionItem = getAction(item.id);
 	if (!actionItem) return null;
 	const buttonSize = isMobile ? "mobile" : actionItem.size;
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 		className: actionItem.className,
 		disabled: actionItem.disabled,
 		onClick: () => actionItem.onClick(commonProps),
@@ -48486,7 +48486,7 @@ function ToolbarRenderer({ item, commonProps, className }) {
 	const mobileBreakpoint = commonProps.context?.toolbarConfig?.mobileBreakpoint;
 	const candidate = mobileBreakpoint && Object.values(ComponentSize).includes(mobileBreakpoint) ? mobileBreakpoint : ComponentSize.SM;
 	const { isMobile } = useMobileDetection({ mobileBreakpoint: (typeof candidate === "string" && !coreSupported.has(candidate) ? ComponentSize.SM : candidate) || ComponentSize.SM });
-	const containerClassName = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center", item.type === ToolbarItemType.SEPARATOR && "mx-2", className);
+	const containerClassName = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center", item.type === ToolbarItemType.SEPARATOR && "mx-2", className);
 	if (item.type === ToolbarItemType.CUSTOM) {
 		const CustomComponent = item.component;
 		if (CustomComponent) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
@@ -48605,16 +48605,16 @@ const deepEqual = /*@__PURE__*/getDefaultExportFromCjs(fastDeepEqual);
 
 //#region src/components/data-table/contexts/RefineTable.tsx
 function RefineTableProvider({ children, refineTable }) {
-	const [version, setVersion] = dashboard__loadShare__react__loadShare__.useState(0);
-	const refineTableRef = dashboard__loadShare__react__loadShare__.useRef(refineTable);
-	const setFiltersRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.setFilters);
-	const setSortersRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.setSorters);
-	const tableQueryRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.tableQuery);
-	const filtersRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.filters);
-	const sortersRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.sorters);
-	const prevFiltersRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.filters);
-	const prevSortersRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.sorters);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	const [version, setVersion] = admin__loadShare__react__loadShare__.useState(0);
+	const refineTableRef = admin__loadShare__react__loadShare__.useRef(refineTable);
+	const setFiltersRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.setFilters);
+	const setSortersRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.setSorters);
+	const tableQueryRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.tableQuery);
+	const filtersRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.filters);
+	const sortersRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.sorters);
+	const prevFiltersRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.filters);
+	const prevSortersRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.sorters);
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		let hasChanges = false;
 		if (refineTable?.refineCore?.setFilters !== setFiltersRef.current) {
 			setFiltersRef.current = refineTable?.refineCore?.setFilters;
@@ -48643,7 +48643,7 @@ function RefineTableProvider({ children, refineTable }) {
 		if (prevRefineTable !== refineTable || prevTableQuery !== refineTable?.refineCore?.tableQuery) hasChanges = true;
 		if (hasChanges) setVersion((v) => v + 1);
 	}, [refineTable]);
-	const value = dashboard__loadShare__react__loadShare__.useMemo(() => {
+	const value = admin__loadShare__react__loadShare__.useMemo(() => {
 		return {
 			refineTable: refineTableRef.current,
 			setFilters: setFiltersRef.current,
@@ -48660,9 +48660,9 @@ function RefineTableProvider({ children, refineTable }) {
 }
 var RefineTableContext, useRefineTable;
 var init_RefineTable = __esmMin(() => {
-	RefineTableContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
+	RefineTableContext = admin__loadShare__react__loadShare__.createContext(void 0);
 	useRefineTable = () => {
-		const context = dashboard__loadShare__react__loadShare__.useContext(RefineTableContext);
+		const context = admin__loadShare__react__loadShare__.useContext(RefineTableContext);
 		if (context === void 0) throw new Error("useRefineTable must be used within a RefineTableProvider");
 		return context;
 	};
@@ -48673,7 +48673,7 @@ init_RefineTable();
 
 //#region src/components/data-table/contexts/TableConfig.tsx
 function TableConfigProvider({ children, toolbarConfig, refineContext }) {
-	const value = dashboard__loadShare__react__loadShare__.useMemo(() => {
+	const value = admin__loadShare__react__loadShare__.useMemo(() => {
 		return {
 			toolbarConfig,
 			refineContext
@@ -48686,14 +48686,14 @@ function TableConfigProvider({ children, toolbarConfig, refineContext }) {
 }
 var TableConfigContext, useTableConfig, useTableConfigOptional;
 var init_TableConfig = __esmMin(() => {
-	TableConfigContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
+	TableConfigContext = admin__loadShare__react__loadShare__.createContext(void 0);
 	useTableConfig = () => {
-		const context = dashboard__loadShare__react__loadShare__.useContext(TableConfigContext);
+		const context = admin__loadShare__react__loadShare__.useContext(TableConfigContext);
 		if (context === void 0) throw new Error("useTableConfig must be used within a TableConfigProvider");
 		return context;
 	};
 	useTableConfigOptional = () => {
-		return dashboard__loadShare__react__loadShare__.useContext(TableConfigContext);
+		return admin__loadShare__react__loadShare__.useContext(TableConfigContext);
 	};
 });
 
@@ -48710,9 +48710,9 @@ function TableInstanceProvider({ children, table }) {
 }
 var TableInstanceContext, useTableInstance;
 var init_TableInstance = __esmMin(() => {
-	TableInstanceContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
+	TableInstanceContext = admin__loadShare__react__loadShare__.createContext(void 0);
 	useTableInstance = () => {
-		const context = dashboard__loadShare__react__loadShare__.useContext(TableInstanceContext);
+		const context = admin__loadShare__react__loadShare__.useContext(TableInstanceContext);
 		if (context === void 0) throw new Error("useTableInstance must be used within a TableInstanceProvider");
 		return context;
 	};
@@ -48732,14 +48732,14 @@ var init_contexts = __esmMin(() => {
 //#endregion
 init_contexts();
 
-function c(e,u,c,i){var l=this,a=dashboard__loadShare__react__loadShare__.useRef(null),o=dashboard__loadShare__react__loadShare__.useRef(0),f=dashboard__loadShare__react__loadShare__.useRef(0),v=dashboard__loadShare__react__loadShare__.useRef(null),d=dashboard__loadShare__react__loadShare__.useRef([]),m=dashboard__loadShare__react__loadShare__.useRef(),s=dashboard__loadShare__react__loadShare__.useRef(),g=dashboard__loadShare__react__loadShare__.useRef(e),h=dashboard__loadShare__react__loadShare__.useRef(true),x=dashboard__loadShare__react__loadShare__.useRef(),E=dashboard__loadShare__react__loadShare__.useRef();g.current=e;var b="undefined"!=typeof window,p=!u&&0!==u&&b;if("function"!=typeof e)throw new TypeError("Expected a function");u=+u||0;var y=!!(c=c||{}).leading,w=!("trailing"in c)||!!c.trailing,O=!!c.flushOnExit&&w,F="maxWait"in c,L="debounceOnServer"in c&&!!c.debounceOnServer,A=F?Math.max(+c.maxWait||0,u):null,D=dashboard__loadShare__react__loadShare__.useMemo(function(){var r=function(r){var n=d.current,t=m.current;return d.current=m.current=null,o.current=r,f.current=f.current||r,s.current=g.current.apply(t,n)},n=function(r,n){p&&cancelAnimationFrame(v.current),v.current=p?requestAnimationFrame(r):setTimeout(r,n);},t=function(r){if(!h.current)return  false;var n=r-a.current;return !a.current||n>=u||n<0||F&&r-o.current>=A},e=function(n){return v.current=null,w&&d.current?r(n):(d.current=m.current=null,s.current)},c=function r(){var c=Date.now();if(y&&f.current===o.current&&D(),t(c))return e(c);if(h.current){var i=u-(c-a.current),l=F?Math.min(i,A-(c-o.current)):i;n(r,l);}},D=function(){i&&i({});},S=function(){if(b||L){var e,i=Date.now(),f=t(i);if(d.current=[].slice.call(arguments),m.current=l,a.current=i,O&&!x.current&&(x.current=function(){var r;"hidden"===(null==(r=global.document)?void 0:r.visibilityState)&&E.current.flush();},null==(e=global.document)||null==e.addEventListener||e.addEventListener("visibilitychange",x.current)),f){if(!v.current&&h.current)return o.current=a.current,n(c,u),y?r(a.current):s.current;if(F)return n(c,u),r(a.current)}return v.current||n(c,u),s.current}};return S.cancel=function(){var r=v.current;r&&(p?cancelAnimationFrame(v.current):clearTimeout(v.current)),o.current=0,d.current=a.current=m.current=v.current=null,r&&i&&i({});},S.isPending=function(){return !!v.current},S.flush=function(){return v.current?e(Date.now()):s.current},S},[y,F,u,A,w,O,p,b,L,i]);return E.current=D,dashboard__loadShare__react__loadShare__.useEffect(function(){return h.current=true,function(){var r;O&&E.current.flush(),x.current&&(null==(r=global.document)||null==r.removeEventListener||r.removeEventListener("visibilitychange",x.current),x.current=null),h.current=false;}},[O]),D}function i$1(r,n){return r===n}function l(n,t,l){var a=i$1,o=dashboard__loadShare__react__loadShare__.useRef(n),f=dashboard__loadShare__react__loadShare__.useState({})[1],v=c(dashboard__loadShare__react__loadShare__.useCallback(function(r){o.current=r,f({});},[f]),t,l,f),d=dashboard__loadShare__react__loadShare__.useRef(n);return a(d.current,n)||(v(n),d.current=n),[o.current,v]}
+function c(e,u,c,i){var l=this,a=admin__loadShare__react__loadShare__.useRef(null),o=admin__loadShare__react__loadShare__.useRef(0),f=admin__loadShare__react__loadShare__.useRef(0),v=admin__loadShare__react__loadShare__.useRef(null),d=admin__loadShare__react__loadShare__.useRef([]),m=admin__loadShare__react__loadShare__.useRef(),s=admin__loadShare__react__loadShare__.useRef(),g=admin__loadShare__react__loadShare__.useRef(e),h=admin__loadShare__react__loadShare__.useRef(true),x=admin__loadShare__react__loadShare__.useRef(),E=admin__loadShare__react__loadShare__.useRef();g.current=e;var b="undefined"!=typeof window,p=!u&&0!==u&&b;if("function"!=typeof e)throw new TypeError("Expected a function");u=+u||0;var y=!!(c=c||{}).leading,w=!("trailing"in c)||!!c.trailing,O=!!c.flushOnExit&&w,F="maxWait"in c,L="debounceOnServer"in c&&!!c.debounceOnServer,A=F?Math.max(+c.maxWait||0,u):null,D=admin__loadShare__react__loadShare__.useMemo(function(){var r=function(r){var n=d.current,t=m.current;return d.current=m.current=null,o.current=r,f.current=f.current||r,s.current=g.current.apply(t,n)},n=function(r,n){p&&cancelAnimationFrame(v.current),v.current=p?requestAnimationFrame(r):setTimeout(r,n);},t=function(r){if(!h.current)return  false;var n=r-a.current;return !a.current||n>=u||n<0||F&&r-o.current>=A},e=function(n){return v.current=null,w&&d.current?r(n):(d.current=m.current=null,s.current)},c=function r(){var c=Date.now();if(y&&f.current===o.current&&D(),t(c))return e(c);if(h.current){var i=u-(c-a.current),l=F?Math.min(i,A-(c-o.current)):i;n(r,l);}},D=function(){i&&i({});},S=function(){if(b||L){var e,i=Date.now(),f=t(i);if(d.current=[].slice.call(arguments),m.current=l,a.current=i,O&&!x.current&&(x.current=function(){var r;"hidden"===(null==(r=global.document)?void 0:r.visibilityState)&&E.current.flush();},null==(e=global.document)||null==e.addEventListener||e.addEventListener("visibilitychange",x.current)),f){if(!v.current&&h.current)return o.current=a.current,n(c,u),y?r(a.current):s.current;if(F)return n(c,u),r(a.current)}return v.current||n(c,u),s.current}};return S.cancel=function(){var r=v.current;r&&(p?cancelAnimationFrame(v.current):clearTimeout(v.current)),o.current=0,d.current=a.current=m.current=v.current=null,r&&i&&i({});},S.isPending=function(){return !!v.current},S.flush=function(){return v.current?e(Date.now()):s.current},S},[y,F,u,A,w,O,p,b,L,i]);return E.current=D,admin__loadShare__react__loadShare__.useEffect(function(){return h.current=true,function(){var r;O&&E.current.flush(),x.current&&(null==(r=global.document)||null==r.removeEventListener||r.removeEventListener("visibilitychange",x.current),x.current=null),h.current=false;}},[O]),D}function i(r,n){return r===n}function l(n,t,l){var a=i,o=admin__loadShare__react__loadShare__.useRef(n),f=admin__loadShare__react__loadShare__.useState({})[1],v=c(admin__loadShare__react__loadShare__.useCallback(function(r){o.current=r,f({});},[f]),t,l,f),d=admin__loadShare__react__loadShare__.useRef(n);return a(d.current,n)||(v(n),d.current=n),[o.current,v]}
 
 //#region src/components/data-table/toolbarItems/items/search.tsx
 function SearchToolbarItem({ value, onChange, config }) {
 	const [debouncedValue] = l(value, 300);
 	const { setFilters } = useRefineTable();
 	const placeholder = config?.placeholder || "Search...";
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		if (setFilters && debouncedValue !== void 0) setFilters(debouncedValue ? [{
 			field: String(config?.field || "q"),
 			operator: config?.operator || "contains",
@@ -48845,7 +48845,7 @@ init_toolbarItems();
 
 //#region src/components/data-table/Toolbar.tsx
 function MobileToolbarLayout({ table, className, config, refineContext, sortedItems, createCommonProps }) {
-	const containerClassName = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col gap-3 p-3 border-b bg-background", config.sticky && "sticky top-0 z-10", className);
+	const containerClassName = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col gap-3 p-3 border-b bg-background", config.sticky && "sticky top-0 z-10", className);
 	const getItemAlignment = (item) => {
 		if (item.alignment) return item.alignment;
 		return config.defaultAlignment || ToolbarItemAlignment.LEFT;
@@ -48907,12 +48907,12 @@ function DesktopToolbarLayout({ table, className, config, refineContext, sortedI
 		return getItemAlignment(item) === ToolbarItemAlignment.CENTER;
 	};
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-wrap items-center gap-2 p-4 border-b bg-background", config.justifyBetween ? "justify-between" : void 0, config.sticky && "sticky top-0 z-10", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-wrap items-center gap-2 p-4 border-b bg-background", config.justifyBetween ? "justify-between" : void 0, config.sticky && "sticky top-0 z-10", className),
 		children: sortedItems.map((item) => {
 			return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolbarRenderer, {
 				item,
 				commonProps: createCommonProps(item),
-				className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(isRightAligned(item) && "ml-auto", isCenterAligned(item) && "mx-auto")
+				className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(isRightAligned(item) && "ml-auto", isCenterAligned(item) && "mx-auto")
 			}, item.id);
 		})
 	});
@@ -48944,12 +48944,12 @@ function Toolbar({ table, className }) {
 			return (a.order ?? 0) - (b.order ?? 0);
 		});
 	}, [config?.items]);
-	const onChangeHandler = dashboard__loadShare__react__loadShare__.useCallback((item) => {
+	const onChangeHandler = admin__loadShare__react__loadShare__.useCallback((item) => {
 		return createFilterOnChangeHandler(item, (filters$1) => {
 			if (setFilters) setFilters(filters$1);
 		}, getDefaultOperator, { itemId: item.id });
 	}, [setFilters, getDefaultOperator]);
-	const createCommonProps = dashboard__loadShare__react__loadShare__.useCallback((item) => {
+	const createCommonProps = admin__loadShare__react__loadShare__.useCallback((item) => {
 		const baseProps = {
 			table,
 			refineContext,
@@ -49021,14 +49021,14 @@ function DefaultPagination() {
 		children: [
 			/* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 				className: "flex items-center gap-2",
-				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					"aria-label": "First page",
 					disabled: !table.getCanPreviousPage(),
 					onClick: () => table.setPageIndex(0),
 					size: "sm",
 					variant: "outline",
 					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronsLeft, { className: "h-4 w-4" })
-				}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					"aria-label": "Previous page",
 					disabled: !table.getCanPreviousPage(),
 					onClick: () => table.previousPage(),
@@ -49043,14 +49043,14 @@ function DefaultPagination() {
 			}),
 			/* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 				className: "flex items-center gap-2",
-				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					"aria-label": "Next page",
 					disabled: !table.getCanNextPage(),
 					onClick: () => table.nextPage(),
 					size: "sm",
 					variant: "outline",
 					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronRight, { className: "h-4 w-4" })
-				}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					"aria-label": "Last page",
 					disabled: !table.getCanNextPage(),
 					onClick: () => table.setPageIndex(Math.max(0, pageCount - 1)),
@@ -49071,7 +49071,7 @@ init_DefaultPagination();
 
 //#region src/components/data-table/EmptyState.tsx
 function TableEmptyState({ children, colSpan, message = "No data available" }) {
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
 		className: "py-8 text-center",
 		colSpan,
 		children: children || message
@@ -51973,7 +51973,7 @@ function getSortedRowModel() {
  * If rendering headers, cells, or footers with custom markup, use flexRender instead of `cell.getValue()` or `cell.renderValue()`.
  */
 function flexRender(Comp, props) {
-  return !Comp ? null : isReactComponent(Comp) ? /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(Comp, props) : Comp;
+  return !Comp ? null : isReactComponent(Comp) ? /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(Comp, props) : Comp;
 }
 function isReactComponent(component) {
   return isClassComponent(component) || typeof component === 'function' || isExoticComponent(component);
@@ -51999,12 +51999,12 @@ function useReactTable(options) {
   };
 
   // Create a new table and store it in state
-  const [tableRef] = dashboard__loadShare__react__loadShare__.useState(() => ({
+  const [tableRef] = admin__loadShare__react__loadShare__.useState(() => ({
     current: createTable(resolvedOptions)
   }));
 
   // By default, manage table state here using the table's initial state
-  const [state, setState] = dashboard__loadShare__react__loadShare__.useState(() => tableRef.current.initialState);
+  const [state, setState] = admin__loadShare__react__loadShare__.useState(() => tableRef.current.initialState);
 
   // Compose the default state above with any user state. This will allow the user
   // to only control a subset of the state if desired.
@@ -52032,57 +52032,57 @@ function SkeletonLoader({ className, cols = 3, layout = "default", rows = 3, sho
 			console.warn("Table object is required for table layout");
 			return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, {});
 		}
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Table, {
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("w-full border-collapse", className),
-			children: [showHeader && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHeader, { children: table.getHeaderGroups().map((headerGroup) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Table, {
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("w-full border-collapse", className),
+			children: [showHeader && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHeader, { children: table.getHeaderGroups().map((headerGroup) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, {
 				className: "border-none",
-				children: headerGroup.headers.map((header) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHead, {
+				children: headerGroup.headers.map((header) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHead, {
 					className: "border-none",
 					style: { width: header.getSize() },
-					children: header.isPlaceholder ? /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" }) : flexRender(header.column.columnDef.header, header.getContext())
+					children: header.isPlaceholder ? /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" }) : flexRender(header.column.columnDef.header, header.getContext())
 				}, header.id))
-			}, headerGroup.id)) }), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableBody, { children: Array.from({ length: rows }).map((_, rowIndex) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, {
+			}, headerGroup.id)) }), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableBody, { children: Array.from({ length: rows }).map((_, rowIndex) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, {
 				className: "border-none",
-				children: table.getAllColumns().map((column) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
+				children: table.getAllColumns().map((column) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
 					className: "border-none",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" })
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" })
 				}, column.id))
 			}, rowIndex)) })]
 		});
 	};
 	const renderCardSkeleton = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-2", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-2", className),
 		children: [
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-40 w-full" }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-3/4" }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-1/2" })
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-40 w-full" }),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-3/4" }),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-1/2" })
 		]
 	});
 	const renderListSkeleton = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center space-x-4", className),
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-12 w-12 rounded-full" }), /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center space-x-4", className),
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-12 w-12 rounded-full" }), /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 			className: "space-y-2",
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[200px]" }), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[150px]" })]
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[200px]" }), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[150px]" })]
 		})]
 	});
 	const renderProfileSkeleton = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-4", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-4", className),
 		children: [
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-20 w-20 rounded-full" }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[150px]" }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[200px]" })
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-20 w-20 rounded-full" }),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[150px]" }),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[200px]" })
 		]
 	});
 	const renderCustomSkeleton = () => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(`grid grid-cols-${cols} gap-4`, className),
-		children: Array.from({ length: cols * rows }).map((_, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" }, index))
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(`grid grid-cols-${cols} gap-4`, className),
+		children: Array.from({ length: cols * rows }).map((_, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" }, index))
 	});
 	const renderDefaultSkeleton = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-2", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-2", className),
 		children: [
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-5/6" }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-4/6" })
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" }),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-5/6" }),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-4/6" })
 		]
 	});
 	switch (layout) {
@@ -52103,16 +52103,16 @@ init_SkeletonLoader();
 function TableLoadingState({ children, colSpan, message = "Loading data..." }) {
 	const { table } = useTableInstance();
 	const skeletonTable = (table && "refineCore" in table ? table : void 0) ?? table;
-	if (children) return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
+	if (children) return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
 		className: "py-8 text-center",
 		colSpan,
 		children
 	}) });
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
 		className: "pb-4 text-center",
 		colSpan,
 		children: message
-	}) }), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
+	}) }), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
 		className: "py-8",
 		colSpan,
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx(SkeletonLoader, {
@@ -52187,7 +52187,7 @@ function useTableRowHandlers({ onRowClick, getRowProps }) {
 					onRowClick(row);
 				}
 			},
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("cursor-pointer hover:bg-muted", baseProps.className)
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("cursor-pointer hover:bg-muted", baseProps.className)
 		};
 	}, [onRowClick, getRowProps]);
 }
@@ -52199,7 +52199,7 @@ function useTableCellHandlers({ getCellProps }) {
 		const baseProps = getCellProps?.(cell) || {};
 		return {
 			...baseProps,
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(cell.column.columnDef.meta?.cellClassName, baseProps.className)
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(cell.column.columnDef.meta?.cellClassName, baseProps.className)
 		};
 	}, [getCellProps]);
 }
@@ -52207,7 +52207,7 @@ function useTableCellHandlers({ getCellProps }) {
 * Hook to determine which columns should be hidden on mobile
 */
 function useMobileColumnHiding({ responsive = false, hideColumnsOnMobile = [] }) {
-	const isMobile = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.useMobileDetection();
+	const isMobile = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.useMobileDetection();
 	return React.useMemo(() => {
 		if (!responsive) return /* @__PURE__ */ new Set();
 		const hiddenColumns = /* @__PURE__ */ new Set();
@@ -52227,7 +52227,7 @@ function useMobileColumnHiding({ responsive = false, hideColumnsOnMobile = [] })
 */
 function useTableHeaderCellHandlers() {
 	return React.useCallback((header) => {
-		return { className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(header.column.columnDef.meta?.headerClassName) };
+		return { className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(header.column.columnDef.meta?.headerClassName) };
 	}, []);
 }
 var init_useTableHandlers = __esmMin(() => {});
@@ -52252,7 +52252,7 @@ function BaseTableStackedLayout({ className, emptyState, emptyStateMessage, foot
 		}, [table])
 	});
 	if (isLoading) return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
 		children: [
 			header && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 				className: "mb-4",
@@ -52267,7 +52267,7 @@ function BaseTableStackedLayout({ className, emptyState, emptyStateMessage, foot
 	});
 	const rows = table.getRowModel().rows;
 	if (rows.length === 0) return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
 		children: [
 			header && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 				className: "mb-4",
@@ -52281,7 +52281,7 @@ function BaseTableStackedLayout({ className, emptyState, emptyStateMessage, foot
 		]
 	});
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
 		children: [
 			header && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 				className: "mb-4",
@@ -52290,27 +52290,27 @@ function BaseTableStackedLayout({ className, emptyState, emptyStateMessage, foot
 			/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 				className: "space-y-4",
 				children: rows.map((row) => {
-					return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Card, {
+					return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Card, {
 						...getTableRowProps(row),
 						children: [stackedHeaderColumn && (() => {
 							const headerCell = row.getVisibleCells().find((cell) => cell.column.id === stackedHeaderColumn);
 							if (headerCell) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-								className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("border-b p-4", "[word-break:break-word]"),
+								className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("border-b p-4", "[word-break:break-word]"),
 								children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 									className: "text-lg font-semibold",
 									children: flexRender(headerCell.column.columnDef.cell, headerCell.getContext())
 								})
 							});
 							return null;
-						})(), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CardContent, {
-							className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-3", "[word-break:break-word]"),
+						})(), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CardContent, {
+							className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-3", "[word-break:break-word]"),
 							children: row.getVisibleCells().map((cell) => {
 								if (hiddenColumns.has(cell.column.id)) return null;
 								if (cell.column.id === "actions") return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-									className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end border-t pt-3", isMobile && "pt-4"),
+									className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end border-t pt-3", isMobile && "pt-4"),
 									...getCellProps?.(cell),
 									children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-										className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex min-h-10 items-center"),
+										className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex min-h-10 items-center"),
 										children: flexRender(cell.column.columnDef.cell, cell.getContext())
 									})
 								}, cell.id);
@@ -52318,13 +52318,13 @@ function BaseTableStackedLayout({ className, emptyState, emptyStateMessage, foot
 								const header$1 = cell.column.columnDef.header;
 								const headerText = typeof header$1 === "string" ? header$1 : void 0;
 								return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-									className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col space-y-1", isMobile && "space-y-2", !stackedHeaderColumn && "pt-4"),
+									className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col space-y-1", isMobile && "space-y-2", !stackedHeaderColumn && "pt-4"),
 									...getCellProps?.(cell),
 									children: [headerText && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
-										className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground text-sm font-medium", isMobile && "text-base"),
+										className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground text-sm font-medium", isMobile && "text-base"),
 										children: headerText
 									}), /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-										className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex min-h-6 items-center text-base", isMobile && "min-h-8 text-lg"),
+										className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex min-h-6 items-center text-base", isMobile && "min-h-8 text-lg"),
 										children: flexRender(cell.column.columnDef.cell, cell.getContext())
 									})]
 								}, cell.id);
@@ -52380,7 +52380,7 @@ function DefaultTableLayout({ table, getCellProps, getRowProps, onRowClick, clas
 		responsive,
 		hideColumnsOnMobile
 	});
-	const normalizedOptions = dashboard__loadShare__react__loadShare__.useMemo(() => normalizeTableOptions(pagination, emptyState, emptyStateMessage, loadingState, loadingStateMessage, table), [
+	const normalizedOptions = admin__loadShare__react__loadShare__.useMemo(() => normalizeTableOptions(pagination, emptyState, emptyStateMessage, loadingState, loadingStateMessage, table), [
 		pagination,
 		emptyState,
 		emptyStateMessage,
@@ -52397,18 +52397,18 @@ function DefaultTableLayout({ table, getCellProps, getRowProps, onRowClick, clas
 			}),
 			/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 				className: "rounded-md border",
-				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Table, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHeader, { children: table.getHeaderGroups().map((headerGroup) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: headerGroup.headers.map((header$1) => {
+				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Table, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHeader, { children: table.getHeaderGroups().map((headerGroup) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: headerGroup.headers.map((header$1) => {
 					if (hiddenColumns.has(header$1.id)) return null;
-					return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHead, {
+					return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHead, {
 						...getTableHeaderCellProps(header$1),
 						children: header$1.isPlaceholder ? null : flexRender(header$1.column.columnDef.header, header$1.getContext())
 					}, header$1.id);
-				}) }, headerGroup.id)) }), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableBody, { children: isLoading ? normalizedOptions.loadingState : table.getRowModel().rows.length > 0 ? table.getRowModel().rows.map((row) => {
-					return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, {
+				}) }, headerGroup.id)) }), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableBody, { children: isLoading ? normalizedOptions.loadingState : table.getRowModel().rows.length > 0 ? table.getRowModel().rows.map((row) => {
+					return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, {
 						...getTableRowProps(row),
 						children: row.getVisibleCells().map((cell) => {
 							if (hiddenColumns.has(cell.column.id)) return null;
-							return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
+							return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
 								...getTableCellProps(cell),
 								children: flexRender(cell.column.columnDef.cell, cell.getContext())
 							}, cell.id);
@@ -52496,7 +52496,7 @@ init_TableLayoutRenderer();
 function BaseTableContent({ className, emptyState, footer, getCellProps, getRowProps, header, isLoading, loadingState, onRowClick, pagination, table, responsive = false, layoutType = TableLayoutType.AUTO, hideColumnsOnMobile = [], mobileBreakpoint, stackedHeaderColumn }) {
 	const toolbarConfig = useTableConfigOptional()?.toolbarConfig;
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
 		children: [toolbarConfig && /* @__PURE__ */ jsxRuntimeExports.jsx(Toolbar, { table }), /* @__PURE__ */ jsxRuntimeExports.jsx(TableLayoutRenderer, {
 			layoutType,
 			table,
@@ -52714,7 +52714,7 @@ init_BaseTable();
 function TableAction({ items, row }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 		className: "flex items-center gap-1",
-		children: items.map((item, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		children: items.map((item, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			"aria-label": item.tooltip || item.label,
 			className: "h-8 w-8 p-0",
 			disabled: typeof item.disabled === "function" ? item.disabled(row) : item.disabled,
@@ -52735,17 +52735,17 @@ init_TableAction();
 
 //#region src/components/data-table/TableActionMenu.tsx
 function TableActionMenu({ items, row }) {
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenu, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuTrigger, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenu, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuTrigger, {
 		asChild: true,
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			"aria-label": "Open actions menu",
 			className: "h-8 w-8 p-0",
 			variant: "ghost",
 			children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ellipsis, { className: "h-4 w-4" })
 		})
-	}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuContent, {
+	}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuContent, {
 		align: "end",
-		children: items?.map((item, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
+		children: items?.map((item, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
 			disabled: typeof item.disabled === "function" ? item.disabled(row) : item.disabled,
 			onClick: () => item.onClick(row),
 			children: [item.icon && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
@@ -54270,8 +54270,8 @@ const isEqual$1 = /*@__PURE__*/getDefaultExportFromCjs(isEqual_1);
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 var useIsFirstRender = /* @__PURE__ */ __name(() => {
-  const firstRender = dashboard__loadShare__react__loadShare__.useRef(true);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  const firstRender = admin__loadShare__react__loadShare__.useRef(true);
+  admin__loadShare__react__loadShare__.useEffect(() => {
     firstRender.current = false;
   }, []);
   return firstRender.current;
@@ -54373,7 +54373,7 @@ function useTable({
 }) {
   var _a, _b, _c;
   const isFirstRender = useIsFirstRender();
-  const useTableResult = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useTable(
+  const useTableResult = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useTable(
     refineCoreProps
   );
   const isServerSideFilteringEnabled = (((_a = refineCoreProps.filters) == null ? void 0 : _a.mode) || "server") === "server";
@@ -54420,17 +54420,17 @@ function useTable({
   const { state, columns } = reactTableResult.options;
   const { pagination, sorting, columnFilters } = state;
   const { pageIndex, pageSize } = pagination ?? {};
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (pageIndex !== void 0) {
       setCurrentPage(pageIndex + 1);
     }
   }, [pageIndex]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (pageSize !== void 0) {
       setPageSizeCore(pageSize);
     }
   }, [pageSize]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (sorting !== void 0) {
       const newSorters = sorting.map((sorting2) => ({
         field: sorting2.id,
@@ -54444,7 +54444,7 @@ function useTable({
       }
     }
   }, [sorting]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     const allColumns = reactTableResult.getAllColumns().map((col) => col.columnDef);
     const crudFilters = columnFiltersToCrudFilters({
       columns: allColumns,
@@ -54473,7 +54473,7 @@ __name(useTable, "useTable");
 //#region src/components/data-table/DataTable.tsx
 function DataTable({ actionMenu, columns, control, dataProviderName, refineCoreProps, resource, toolbar, refetchInterval, ...props }) {
 	const refineTable = useTable({
-		columns: dashboard__loadShare__react__loadShare__.useMemo(() => {
+		columns: admin__loadShare__react__loadShare__.useMemo(() => {
 			const cols = [...columns || []];
 			const actionColumn = actionMenu ? {
 				cell: ({ row }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
@@ -54497,7 +54497,7 @@ function DataTable({ actionMenu, columns, control, dataProviderName, refineCoreP
 			if (actionColumn) cols.push(actionColumn);
 			return cols;
 		}, [columns, actionMenu]),
-		refineCoreProps: dashboard__loadShare__react__loadShare__.useMemo(() => ({
+		refineCoreProps: admin__loadShare__react__loadShare__.useMemo(() => ({
 			dataProviderName: dataProviderName ?? void 0,
 			resource,
 			...refineCoreProps,
@@ -54519,7 +54519,7 @@ function DataTable({ actionMenu, columns, control, dataProviderName, refineCoreP
 			refineCore: refineTable.refineCore
 		}
 	};
-	const getDefaultFilter$1 = (columnName, operatorType) => dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.getDefaultFilter(columnName, refineTable.refineCore?.filters, operatorType);
+	const getDefaultFilter$1 = (columnName, operatorType) => admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.getDefaultFilter(columnName, refineTable.refineCore?.filters, operatorType);
 	const getDefaultOperator = (fieldType) => getDefaultOperatorForFieldType(fieldType);
 	const getAvailableOperators$1 = (fieldType) => getAvailableOperators(fieldType);
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(RefineTableProvider, {
@@ -54563,7 +54563,7 @@ init_DataTable();
 //#region src/components/data-table/DataTableController.tsx
 function DataTableController({ onControlsReady }) {
 	const { setFilters, setSorters, tableQuery, filters, sorters } = useRefineTable();
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		if (setFilters && setSorters && tableQuery?.refetch && onControlsReady) onControlsReady({
 			setFilters,
 			setSorters,
@@ -54748,9 +54748,9 @@ init_refresh();
 //#region src/components/layout/SidebarContext.tsx
 var SidebarContext, SidebarProvider, useSidebarContext;
 var init_SidebarContext = __esmMin(() => {
-	SidebarContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
+	SidebarContext = admin__loadShare__react__loadShare__.createContext(void 0);
 	SidebarProvider = ({ children }) => {
-		const [isCollapsed, setIsCollapsed] = dashboard__loadShare__react__loadShare__.useState(false);
+		const [isCollapsed, setIsCollapsed] = admin__loadShare__react__loadShare__.useState(false);
 		const toggleCollapsed = () => {
 			setIsCollapsed(!isCollapsed);
 		};
@@ -54763,7 +54763,7 @@ var init_SidebarContext = __esmMin(() => {
 		});
 	};
 	useSidebarContext = () => {
-		const context = dashboard__loadShare__react__loadShare__.useContext(SidebarContext);
+		const context = admin__loadShare__react__loadShare__.useContext(SidebarContext);
 		if (!context) throw new Error("useSidebarContext must be used within a SidebarProvider");
 		return context;
 	};
@@ -54776,13 +54776,13 @@ init_SidebarContext();
 function SidebarToggle({ isOpen, setIsOpen }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 		className: "invisible absolute -right-[20px] top-[12px] z-20 lg:visible",
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			"aria-label": isOpen ? "Close sidebar" : "Open sidebar",
 			className: "h-8 w-8 rounded-md",
 			onClick: () => setIsOpen?.(),
 			size: "icon",
 			variant: "outline",
-			children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronLeft, { className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-4 w-4 transition-transform duration-700 ease-in-out", isOpen === false ? "rotate-180" : "rotate-0") })
+			children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronLeft, { className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-4 w-4 transition-transform duration-700 ease-in-out", isOpen === false ? "rotate-180" : "rotate-0") })
 		})
 	});
 }
@@ -54795,7 +54795,7 @@ init_SidebarToggle();
 var useAvatar;
 var init_useAvatar = __esmMin(() => {
 	useAvatar = () => {
-		const { data: identity, isLoading } = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useGetIdentity();
+		const { data: identity, isLoading } = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useGetIdentity();
 		if (isLoading) return {
 			avatarUrl: "/placeholder.svg",
 			displayName: "",
@@ -54814,8 +54814,8 @@ init_useAvatar();
 
 //#region src/components/layout/UserNav.tsx
 function UserNav() {
-	const { mutate: logout } = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useLogout();
-	const { data: identity } = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useGetIdentity();
+	const { mutate: logout } = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useLogout();
+	const { data: identity } = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useGetIdentity();
 	const { avatarUrl, displayName, isLoading } = useAvatar();
 	const firstName = identity?.firstName || "";
 	const lastName = identity?.lastName || "";
@@ -54831,41 +54831,41 @@ function UserNav() {
 		if (email) return email.charAt(0).toUpperCase();
 		return "?";
 	};
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenu, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenu, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, {
 		disableHoverableContent: true,
-		children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Tooltip, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Tooltip, {
 			delayDuration: 100,
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipTrigger, {
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipTrigger, {
 				asChild: true,
-				children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuTrigger, {
+				children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuTrigger, {
 					asChild: true,
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 						"aria-label": isLoading ? "User avatar" : displayName || "User profile",
 						className: "relative h-8 w-8 rounded-full",
 						variant: "outline",
-						children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Avatar, {
+						children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Avatar, {
 							className: "h-8 w-8",
-							children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.AvatarImage, {
+							children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.AvatarImage, {
 								alt: getAvatarAltText(),
 								src: avatarUrl
-							}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.AvatarFallback, {
+							}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.AvatarFallback, {
 								className: "bg-transparent",
 								children: getAvatarFallback()
 							})]
 						})
 					})
 				})
-			}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipContent, {
+			}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipContent, {
 				side: "bottom",
 				children: "Profile"
 			})]
 		})
-	}), /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuContent, {
+	}), /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuContent, {
 		align: "end",
 		className: "w-56",
 		forceMount: true,
 		children: [
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuLabel, {
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuLabel, {
 				className: "font-normal",
 				children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 					className: "flex flex-col space-y-1",
@@ -54882,26 +54882,26 @@ function UserNav() {
 					})]
 				})
 			}),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuSeparator, {}),
-			/* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuGroup, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuSeparator, {}),
+			/* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuGroup, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
 				asChild: true,
 				className: "hover:cursor-pointer",
-				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
+				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
 					className: "flex items-center",
 					to: "/dashboard",
 					children: [/* @__PURE__ */ jsxRuntimeExports.jsx(LayoutGrid, { className: "text-muted-foreground mr-3 h-4 w-4" }), "Dashboard"]
 				})
-			}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
+			}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
 				asChild: true,
 				className: "hover:cursor-pointer",
-				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
+				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
 					className: "flex items-center",
 					to: "/account",
 					children: [/* @__PURE__ */ jsxRuntimeExports.jsx(User, { className: "text-muted-foreground mr-3 h-4 w-4" }), "Account"]
 				})
 			})] }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuSeparator, {}),
-			/* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuSeparator, {}),
+			/* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
 				className: "hover:cursor-pointer",
 				onClick: () => logout(),
 				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(LogOut, { className: "text-muted-foreground mr-3 h-4 w-4" }), "Sign out"]
@@ -54955,12 +54955,12 @@ var init_MainNavigation = __esmMin(() => {
 			className: "mr-2 h-5 w-5",
 			children: /* @__PURE__ */ jsxRuntimeExports.jsx(IconComponent, {})
 		}), /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({ hidden: isCollapsed }),
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({ hidden: isCollapsed }),
 			children: item.label
 		})]
 	});
 	CollapseMenuButton = ({ active, icon: Icon, isOpen, item, label, onItemClick, resetKey, submenus }) => {
-		const pathname = dashboard__loadShare__react_mf_2_router__loadShare__.useLocation().pathname;
+		const pathname = admin__loadShare__react_mf_2_router__loadShare__.useLocation().pathname;
 		const isSubmenuActive = submenus.some((submenu) => submenu.active === void 0 ? submenu.href === pathname : submenu.active);
 		const [isOpenState, setIsOpenState] = React.useState(active || isSubmenuActive);
 		const headerHref = item.path || submenus[0]?.href;
@@ -54970,14 +54970,14 @@ var init_MainNavigation = __esmMin(() => {
 		React.useEffect(() => {
 			if (resetKey) setIsOpenState(false);
 		}, [resetKey]);
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Collapsible, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Collapsible, {
 			className: "w-full",
 			onOpenChange: setIsOpenState,
 			open: isOpenState,
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CollapsibleTrigger, {
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CollapsibleTrigger, {
 				asChild: true,
 				className: "mb-1 [&[data-state=open]>div>div>svg]:rotate-180",
-				children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					className: "h-10 w-full justify-start",
 					variant: active || isSubmenuActive ? "secondary" : "ghost",
 					children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
@@ -54987,7 +54987,7 @@ var init_MainNavigation = __esmMin(() => {
 							children: [Icon && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
 								className: "mr-4",
 								children: /* @__PURE__ */ jsxRuntimeExports.jsx(Icon, { size: 18 })
-							}), headerHref && item.linkable !== false ? /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
+							}), headerHref && item.linkable !== false ? /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
 								"aria-label": label,
 								onClick: (e) => e.stopPropagation(),
 								onKeyDown: (e) => {
@@ -54999,7 +54999,7 @@ var init_MainNavigation = __esmMin(() => {
 								},
 								to: headerHref,
 								children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
-									className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
+									className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
 										"-translate-x-96 opacity-0": !isOpen,
 										"translate-x-0 opacity-100": isOpen
 									}),
@@ -55007,14 +55007,14 @@ var init_MainNavigation = __esmMin(() => {
 								})
 							}) : /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
 								"aria-disabled": "true",
-								className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
+								className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
 									"-translate-x-96 opacity-0": !isOpen,
 									"translate-x-0 opacity-100": isOpen
 								}),
 								children: label
 							})]
 						}), /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-							className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("whitespace-nowrap", isOpen ? "translate-x-0 opacity-100" : "-translate-x-96 opacity-0"),
+							className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("whitespace-nowrap", isOpen ? "translate-x-0 opacity-100" : "-translate-x-96 opacity-0"),
 							children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, {
 								className: "transition-transform duration-200",
 								size: 18
@@ -55022,13 +55022,13 @@ var init_MainNavigation = __esmMin(() => {
 						})]
 					})
 				})
-			}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CollapsibleContent, {
+			}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CollapsibleContent, {
 				className: "data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down overflow-hidden",
-				children: submenus.map(({ active: active$1, href, icon: Icon$1, label: label$1 }, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				children: submenus.map(({ active: active$1, href, icon: Icon$1, label: label$1 }, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					asChild: true,
 					className: "mb-1 h-10 w-full justify-start",
 					variant: active$1 === void 0 && pathname === href || active$1 ? "secondary" : "ghost",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
+					children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
 						onClick: () => {
 							if (onItemClick) onItemClick();
 						},
@@ -55037,7 +55037,7 @@ var init_MainNavigation = __esmMin(() => {
 							className: "ml-2 mr-4",
 							children: Icon$1 ? /* @__PURE__ */ jsxRuntimeExports.jsx(Icon$1, { size: 18 }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Dot, { size: 18 })
 						}), /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
-							className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
+							className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
 								"-translate-x-96 opacity-0": !isOpen,
 								"translate-x-0 opacity-100": isOpen
 							}),
@@ -55048,11 +55048,11 @@ var init_MainNavigation = __esmMin(() => {
 			})]
 		});
 	};
-	LinkableNavItem = ({ active, IconComponent, isCollapsed, item, onItemClick }) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+	LinkableNavItem = ({ active, IconComponent, isCollapsed, item, onItemClick }) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 		asChild: true,
 		className: "mb-1 h-10 w-full justify-start",
 		variant: active ? "secondary" : "ghost",
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
 			onClick: onItemClick,
 			to: item.path || "",
 			children: /* @__PURE__ */ jsxRuntimeExports.jsx(NavItemContent, {
@@ -55064,7 +55064,7 @@ var init_MainNavigation = __esmMin(() => {
 			})
 		})
 	});
-	NonLinkableNavItem = ({ active, IconComponent, isCollapsed, item, onItemClick }) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+	NonLinkableNavItem = ({ active, IconComponent, isCollapsed, item, onItemClick }) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 		className: "mb-1 h-10 w-full justify-start",
 		onClick: onItemClick,
 		variant: active ? "secondary" : "ghost",
@@ -55100,7 +55100,7 @@ var init_MainNavigation = __esmMin(() => {
 	NavItem.displayName = "NavItem";
 	MainNavigation = ({ isOpen, onItemClick }) => {
 		const menu = useMenuItems();
-		const pathname = dashboard__loadShare__react_mf_2_router__loadShare__.useLocation().pathname;
+		const pathname = admin__loadShare__react_mf_2_router__loadShare__.useLocation().pathname;
 		const renderMenuItem = (item) => {
 			const active = isRouteActive(item, pathname);
 			if (item.children && item.children.length > 0) {
@@ -55122,25 +55122,25 @@ var init_MainNavigation = __esmMin(() => {
 					resetKey: typeof onItemClick === "function" ? pathname : void 0,
 					submenus
 				}, item.id);
-			} else return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, {
+			} else return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, {
 				disableHoverableContent: true,
-				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Tooltip, {
+				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Tooltip, {
 					delayDuration: 100,
-					children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipTrigger, {
+					children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipTrigger, {
 						asChild: true,
 						children: /* @__PURE__ */ jsxRuntimeExports.jsx(NavItem, {
 							active,
 							item,
 							onItemClick
 						})
-					}), isOpen === false && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipContent, {
+					}), isOpen === false && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipContent, {
 						side: "right",
 						children: item.label
 					})]
 				})
 			}, item.id);
 		};
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.ScrollArea, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.ScrollArea, {
 			className: "[&>div>div[style]]:!block",
 			children: /* @__PURE__ */ jsxRuntimeExports.jsx("nav", {
 				className: "mt-8 flex h-full w-full flex-col",
@@ -55159,29 +55159,29 @@ init_MainNavigation();
 //#region src/components/layout/MobileMenu.tsx
 function MobileMenu() {
 	const [open, setOpen] = React.useState(false);
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Sheet, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Sheet, {
 		onOpenChange: setOpen,
 		open,
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetTrigger, {
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetTrigger, {
 			asChild: true,
 			className: "ml-2 lg:hidden",
-			children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+			children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 				className: "h-8 w-8",
 				size: "icon",
 				variant: "outline",
 				children: /* @__PURE__ */ jsxRuntimeExports.jsx(Menu, { size: 18 })
 			})
-		}), /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetContent, {
+		}), /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetContent, {
 			className: "flex h-full flex-col px-3 sm:w-72",
 			side: "right",
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 				asChild: true,
 				className: "flex items-center justify-center pb-2 pt-1",
 				variant: "link",
-				children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
+				children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
 					className: "flex items-center gap-2",
 					to: "/dashboard",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetTitle, {
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetTitle, {
 						className: "text-lg font-bold",
 						children: "Portal"
 					})
@@ -55220,7 +55220,7 @@ init_PageHeader();
 
 //#region src/hooks/usePluginMeta.ts
 function usePluginMeta(pluginName, key) {
-	return dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getPluginMeta(usePortalStore((state) => state.meta), pluginName, key);
+	return admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getPluginMeta(usePortalStore((state) => state.meta), pluginName, key);
 }
 var init_usePluginMeta = __esmMin(() => {
 	init_portalStore();
@@ -56152,7 +56152,7 @@ var init_useTheme = __esmMin(() => {
 		return function WithTheme(props) {
 			const { theme: selectedThemeId } = useThemeIdAndSetter();
 			const themes = usePluginMeta("dashboard", "themes");
-			dashboard__loadShare__react__loadShare__.useEffect(() => {
+			admin__loadShare__react__loadShare__.useEffect(() => {
 				if (!themes || !Array.isArray(themes) || themes.length === 0) return;
 				if (selectedThemeId) {
 					const persistedTheme = getThemeById(themes, selectedThemeId);
@@ -56182,21 +56182,21 @@ var init_ThemeSwitcher = __esmMin(() => {
 		const { setTheme } = useThemeIdAndSetter();
 		const themes = usePluginMeta("dashboard", "themes");
 		if (!themes) return null;
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Popover, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.PopoverTrigger, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Popover, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.PopoverTrigger, {
 			asChild: true,
-			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 				size: "icon",
 				variant: "ghost",
-				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.ThemeIcon, { className: "h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" }), /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
+				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.ThemeIcon, { className: "h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" }), /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
 					className: "sr-only",
 					children: "Toggle theme"
 				})]
 			})
-		}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.PopoverContent, {
+		}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.PopoverContent, {
 			className: "w-56",
 			children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 				className: "flex flex-col space-y-2",
-				children: themes.map((t) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				children: themes.map((t) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					className: "text-left",
 					onClick: () => setTheme(t.id),
 					variant: "ghost",
@@ -56267,12 +56267,12 @@ init_images();
 
 //#region src/components/LumeLogo.tsx
 function LumeLogo({ className, imageClassName }) {
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare__react_mf_2_router__loadShare__.Link, {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center space-x-2", className),
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare__react_mf_2_router__loadShare__.Link, {
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center space-x-2", className),
 		to: "/",
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", {
 			alt: "Lume logo",
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-10", imageClassName),
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-10", imageClassName),
 			src: logoPng
 		})
 	});
@@ -56288,7 +56288,7 @@ init_LumeLogo();
 function DesktopSidebar() {
 	const { isCollapsed, toggleCollapsed } = useSidebarContext();
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("aside", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("hidden md:flex", "fixed left-0 top-0 z-20 flex h-screen -translate-x-full flex-col transition-[width] duration-300 ease-in-out lg:translate-x-0", {
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("hidden md:flex", "fixed left-0 top-0 z-20 flex h-screen -translate-x-full flex-col transition-[width] duration-300 ease-in-out lg:translate-x-0", {
 			"md:w-32": isCollapsed,
 			"md:w-72": !isCollapsed
 		}),
@@ -56298,15 +56298,15 @@ function DesktopSidebar() {
 		}), /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 			className: "relative flex h-full flex-col justify-between px-3 py-4",
 			children: [
-				/* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				/* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					asChild: true,
-					className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("mb-1 transition-transform duration-300 ease-in-out", !isCollapsed ? "translate-x-1" : "translate-x-0"),
+					className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("mb-1 transition-transform duration-300 ease-in-out", !isCollapsed ? "translate-x-1" : "translate-x-0"),
 					variant: "link",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(LumeLogo, { imageClassName: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("transition transition-all", { "h-5": isCollapsed }) })
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(LumeLogo, { imageClassName: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("transition transition-all", { "h-5": isCollapsed }) })
 				}), /* @__PURE__ */ jsxRuntimeExports.jsx(MainNavigation, { isOpen: !isCollapsed })] }),
-				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.FlexWidgetArea, { id: "core:desktop-sidebar" }),
+				/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.FlexWidgetArea, { id: "core:desktop-sidebar" }),
 				/* @__PURE__ */ jsxRuntimeExports.jsxs("span", {
-					className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground/60 mb-4 space-y-1 transition-opacity duration-300", {
+					className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground/60 mb-4 space-y-1 transition-opacity duration-300", {
 						"opacity-0": isCollapsed,
 						"opacity-100": !isCollapsed,
 						"text-sm": isCollapsed
@@ -56523,9 +56523,9 @@ init_shared();
 
 //#region src/components/Copyable.tsx
 function Copyable({ text, displayText, maxLength = 20, className, copyTooltip = "Copy", copiedTooltip = "Copied!", showIcon = true }) {
-	const [isCopied, setIsCopied] = dashboard__loadShare__react__loadShare__.useState(false);
-	const timerRef = dashboard__loadShare__react__loadShare__.useRef(null);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	const [isCopied, setIsCopied] = admin__loadShare__react__loadShare__.useState(false);
+	const timerRef = admin__loadShare__react__loadShare__.useRef(null);
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		return () => {
 			if (timerRef.current) clearTimeout(timerRef.current);
 		};
@@ -56545,13 +56545,13 @@ function Copyable({ text, displayText, maxLength = 20, className, copyTooltip = 
 	};
 	const textToDisplay = displayText || text;
 	const truncatedText = textToDisplay.length > maxLength ? `${textToDisplay.substring(0, maxLength)}...` : textToDisplay;
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Tooltip, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipTrigger, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Tooltip, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipTrigger, {
 		asChild: true,
 		children: /* @__PURE__ */ jsxRuntimeExports.jsxs("button", {
 			type: "button",
 			onClick: handleCopy,
 			"aria-label": isCopied ? copiedTooltip : copyTooltip,
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("inline-flex items-center gap-1 text-sm hover:bg-muted/50 rounded px-2 py-1 transition-colors", "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", className),
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("inline-flex items-center gap-1 text-sm hover:bg-muted/50 rounded px-2 py-1 transition-colors", "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", className),
 			children: [/* @__PURE__ */ jsxRuntimeExports.jsx("span", {
 				className: "font-mono",
 				children: truncatedText
@@ -56560,7 +56560,7 @@ function Copyable({ text, displayText, maxLength = 20, className, copyTooltip = 
 				children: isCopied ? /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "h-3 w-3" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Copy, { className: "h-3 w-3" })
 			})]
 		})
-	}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipContent, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: isCopied ? copiedTooltip : copyTooltip }) })] }) });
+	}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipContent, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: isCopied ? copiedTooltip : copyTooltip }) })] }) });
 }
 var init_Copyable = __esmMin(() => {});
 
@@ -56571,8 +56571,8 @@ init_Copyable();
 function ThemedBadge({ children, className, config, value, variant, ...restCoreProps }) {
 	const { base = "", dark = "", hover = "", label } = config[value] || {};
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", base, hover, dark, className),
-		children: children ? children : /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Badge, {
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", base, hover, dark, className),
+		children: children ? children : /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Badge, {
 			variant,
 			...restCoreProps,
 			children: label || value.replace(/_/g, " ")
@@ -56587,10 +56587,10 @@ init_ThemedBadge();
 //#region src/components/FilterChip.tsx
 function FilterChip({ className, label, onRemove, variant = "default" }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs(ThemedBadge, {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("gap-1 pr-1.5", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("gap-1 pr-1.5", className),
 		config: FILTER_CHIP_THEME,
 		value: variant,
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: label }), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: label }), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			"aria-label": `Remove ${label} filter`,
 			className: "ml-1 h-5 w-5 p-0 hover:bg-transparent",
 			onClick: onRemove,
@@ -56867,14 +56867,14 @@ function getInputValue(element) {
   return element.value;
 }
 function useInputEvent(onUpdate) {
-  var ref = dashboard__loadShare__react__loadShare__.useRef(null);
-  var observerRef = dashboard__loadShare__react__loadShare__.useRef(null);
-  var eventDispatched = dashboard__loadShare__react__loadShare__.useRef({
+  var ref = admin__loadShare__react__loadShare__.useRef(null);
+  var observerRef = admin__loadShare__react__loadShare__.useRef(null);
+  var eventDispatched = admin__loadShare__react__loadShare__.useRef({
     change: false,
     focus: false,
     blur: false
   });
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     var createEventListener = listener => {
       return event => {
         var element = ref.current;
@@ -56895,7 +56895,7 @@ function useInputEvent(onUpdate) {
       document.removeEventListener('focusout', blurHandler, true);
     };
   }, [ref]);
-  return dashboard__loadShare__react__loadShare__.useMemo(() => {
+  return admin__loadShare__react__loadShare__.useMemo(() => {
     return {
       change(value) {
         if (!eventDispatched.current.change) {
@@ -56991,8 +56991,8 @@ function useInputValue(options) {
     // @ts-expect-error Same as above
     return (_options$initialValue = options.initialValue) === null || _options$initialValue === void 0 ? void 0 : _options$initialValue.map(value => value !== null && value !== void 0 ? value : '');
   };
-  var [key, setKey] = dashboard__loadShare__react__loadShare__.useState(options.key);
-  var [value, setValue] = dashboard__loadShare__react__loadShare__.useState(initializeValue);
+  var [key, setKey] = admin__loadShare__react__loadShare__.useState(options.key);
+  var [value, setValue] = admin__loadShare__react__loadShare__.useState(initializeValue);
   if (key !== options.key) {
     setValue(initializeValue);
     setKey(options.key);
@@ -57001,7 +57001,7 @@ function useInputValue(options) {
 }
 function useInputControl(meta) {
   var [value, setValue] = useInputValue(meta);
-  var initializedRef = dashboard__loadShare__react__loadShare__.useRef(false);
+  var initializedRef = admin__loadShare__react__loadShare__.useRef(false);
   var {
     register,
     change,
@@ -57010,7 +57010,7 @@ function useInputControl(meta) {
   } = useInputEvent(
   // @ts-expect-error We will fix the type when stabilizing the API
   setValue);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     var form = getFormElement(meta.formId);
     if (!form) {
       // eslint-disable-next-line no-console
@@ -57059,17 +57059,17 @@ function ErrorList({ errors, id }) {
 	});
 }
 function TextareaField({ className, errors, labelProps, textareaProps }) {
-	const fallbackId = dashboard__loadShare__react__loadShare__.useId();
+	const fallbackId = admin__loadShare__react__loadShare__.useId();
 	const id = textareaProps.id ?? textareaProps.name ?? fallbackId;
 	const errorId = errors?.length ? `${id}-error` : void 0;
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 		className,
 		children: [
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
 				htmlFor: id,
 				...labelProps
 			}),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Textarea, {
+			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Textarea, {
 				"aria-describedby": errorId,
 				"aria-invalid": errorId ? true : void 0,
 				id,
@@ -57088,18 +57088,18 @@ function TextareaField({ className, errors, labelProps, textareaProps }) {
 var Field, FieldCheckbox;
 var init_Forms = __esmMin(() => {
 	Field = ({ className, errors, inputProps, labelProps }) => {
-		const fallbackId = dashboard__loadShare__react__loadShare__.useId();
+		const fallbackId = admin__loadShare__react__loadShare__.useId();
 		const id = inputProps.id ?? fallbackId;
 		const errorId = errors?.length ? `${id}-error` : void 0;
 		return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 			className,
 			children: [
-				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
+				/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
 					...labelProps,
 					className: "text-secondary-foreground text-sm font-semibold",
 					htmlFor: id
 				}),
-				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+				/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 					...inputProps,
 					"aria-describedby": errorId,
 					"aria-invalid": errorId ? true : void 0,
@@ -57125,12 +57125,12 @@ var init_Forms = __esmMin(() => {
 			key,
 			name: inputProps.name
 		});
-		const fallbackId = dashboard__loadShare__react__loadShare__.useId();
+		const fallbackId = admin__loadShare__react__loadShare__.useId();
 		const id = inputProps.id ?? fallbackId;
 		const errorId = errors?.length ? `${id}-error` : void 0;
 		return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground flex items-center space-x-2", className),
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Checkbox, {
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground flex items-center space-x-2", className),
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Checkbox, {
 				...checkboxProps,
 				"aria-describedby": errorId,
 				"aria-invalid": errorId ? true : void 0,
@@ -57149,7 +57149,7 @@ var init_Forms = __esmMin(() => {
 					inputProps.onFocus?.(event);
 				},
 				type: "button"
-			}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
+			}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
 				...labelProps,
 				htmlFor: id
 			})]
@@ -57169,12 +57169,12 @@ init_Forms();
 //#region src/components/InlineAuthLinkBanner.tsx
 function InlineAuthLinkBanner({ className, label, linkClassName, linkLabel, to }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("p", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground bg-secondary flex w-fit items-center gap-2 rounded-lg p-3 text-left text-sm", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground bg-secondary flex w-fit items-center gap-2 rounded-lg p-3 text-left text-sm", className),
 		children: [/* @__PURE__ */ jsxRuntimeExports.jsx("span", {
 			className: "text-foreground/80 whitespace-nowrap",
 			children: label
-		}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare__react_mf_2_router__loadShare__.Link, {
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground mx-auto whitespace-nowrap hover:underline hover:underline-offset-4", linkClassName),
+		}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare__react_mf_2_router__loadShare__.Link, {
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground mx-auto whitespace-nowrap hover:underline hover:underline-offset-4", linkClassName),
 			to,
 			children: linkLabel ?? "Login here →"
 		})]
@@ -57189,15 +57189,15 @@ init_InlineAuthLinkBanner();
 var KeyboardShortcutDialog;
 var init_KeyboardShortcutDialog = __esmMin(() => {
 	KeyboardShortcutDialog = ({ onOpenChange, open, shortcuts }) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Dialog, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Dialog, {
 			onOpenChange,
 			open,
-			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogContent, {
+			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogContent, {
 				className: "max-w-md",
 				children: [
 					/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 						className: "absolute right-4 top-4",
-						children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+						children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 							className: "h-8 w-8",
 							onClick: () => onOpenChange(false),
 							size: "icon",
@@ -57205,7 +57205,7 @@ var init_KeyboardShortcutDialog = __esmMin(() => {
 							children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "h-4 w-4" })
 						})
 					}),
-					/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, { children: "Keyboard Shortcuts" }) }),
+					/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, { children: "Keyboard Shortcuts" }) }),
 					/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 						className: "grid gap-2",
 						children: Object.entries(shortcuts).map(([action, keys]) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
@@ -57215,7 +57215,7 @@ var init_KeyboardShortcutDialog = __esmMin(() => {
 								children: action
 							}), /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 								className: "flex gap-1",
-								children: (Array.isArray(keys) ? keys : [keys]).map((key) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Badge, {
+								children: (Array.isArray(keys) ? keys : [keys]).map((key) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Badge, {
 									variant: "outline",
 									children: key
 								}, key))
@@ -57233,9 +57233,9 @@ init_KeyboardShortcutDialog();
 
 //#region src/components/TableActionsDropdown.tsx
 function TableActionsDropdown({ actions, children }) {
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenu, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuTrigger, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenu, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuTrigger, {
 		asChild: true,
-		children: children ?? /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		children: children ?? /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			className: "h-8 w-8",
 			size: "icon",
 			variant: "ghost",
@@ -57244,10 +57244,10 @@ function TableActionsDropdown({ actions, children }) {
 				children: "Open menu"
 			})]
 		})
-	}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuContent, {
+	}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuContent, {
 		align: "end",
-		children: actions.map((action, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
-			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("focus:bg-accent transition-colors", action.destructive ? "text-destructive hover:bg-destructive/10" : "hover:bg-accent"),
+		children: actions.map((action, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
+			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("focus:bg-accent transition-colors", action.destructive ? "text-destructive hover:bg-destructive/10" : "hover:bg-accent"),
 			onClick: action.onClick,
 			children: [action.icon, /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
 				className: "ml-1.5",
@@ -57264,7 +57264,7 @@ init_TableActionsDropdown();
 //#region src/components/TableContainer.tsx
 function TableContainer({ children, className }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("rounded-lg border p-6 shadow-sm", className),
+		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("rounded-lg border p-6 shadow-sm", className),
 		children
 	});
 }
@@ -57544,14 +57544,14 @@ init_Dialog_types();
 //#region src/hooks/useAccountSubdomain.ts
 init_usePluginMeta();
 function useAccountSubdomain() {
-	return dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getAccountSubdomain(usePluginMeta("dashboard", "subdomain"));
+	return admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getAccountSubdomain(usePluginMeta("dashboard", "subdomain"));
 }
 
 //#region src/hooks/useApiUrl.ts
 function useApiUrl() {
-	const { framework, isLoading } = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.useFramework();
-	if (!isLoading) return framework?.portalUrl ?? dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getApiBaseUrl({ allowLocalhost: true });
-	const apiUrl = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getApiBaseUrl({ allowLocalhost: true });
+	const { framework, isLoading } = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.useFramework();
+	if (!isLoading) return framework?.portalUrl ?? admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getApiBaseUrl({ allowLocalhost: true });
+	const apiUrl = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getApiBaseUrl({ allowLocalhost: true });
 	if (apiUrl === false) return "";
 	return apiUrl;
 }
@@ -57561,7 +57561,7 @@ const LEADING_SLASHES_REGEX = /^\/+/;
 function useAccountUrl(path) {
 	const accountSubdomain = useAccountSubdomain();
 	const apiUrl = useApiUrl();
-	const { hostname: currentHostname, protocol } = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getCurrentLocation();
+	const { hostname: currentHostname, protocol } = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getCurrentLocation();
 	const normalizedPath = `/${String(path ?? "").replace(LEADING_SLASHES_REGEX, "").replace(/\/+$/, "")}`;
 	if (!apiUrl) return normalizedPath;
 	let parsedApiUrl;
@@ -57571,8 +57571,8 @@ function useAccountUrl(path) {
 	} catch {
 		return normalizedPath;
 	}
-	let host = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.cleanTrailingSlashes(accountSubdomain || currentHostname);
-	if (parsedApiUrl && parsedApiUrl.hostname !== accountSubdomain) host = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.cleanTrailingSlashes(currentHostname);
+	let host = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.cleanTrailingSlashes(accountSubdomain || currentHostname);
+	if (parsedApiUrl && parsedApiUrl.hostname !== accountSubdomain) host = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.cleanTrailingSlashes(currentHostname);
 	return new URL(normalizedPath, `${protocol}//${host}`).toString();
 }
 
@@ -57620,8 +57620,8 @@ function isValidUrl(url) {
 
 //#region src/hooks/useProtocolDomain.ts
 function useProtocolDomain(proto) {
-	usePortalMeta()?.domain || dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getCurrentLocation().hostname;
-	return dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getProtocolDomain(proto, { isRootDomain: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.env.VITE_PORTAL_DOMAIN_IS_ROOT === "true" });
+	usePortalMeta()?.domain || admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getCurrentLocation().hostname;
+	return admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getProtocolDomain(proto, { isRootDomain: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.env.VITE_PORTAL_DOMAIN_IS_ROOT === "true" });
 }
 
 //#region src/types.ts
@@ -58483,8 +58483,8 @@ function useSdk() {
 	const apiUrl = useApiUrl();
 	const { sdk } = usePortalStore((state) => ({ sdk: state.sdk }));
 	const { setSdk } = usePortalActions();
-	const initializationAttempted = dashboard__loadShare__react__loadShare__.useRef(false);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	const initializationAttempted = admin__loadShare__react__loadShare__.useRef(false);
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		if (apiUrl && !isGloballyInitialized && !initializationAttempted.current) {
 			initializationAttempted.current = true;
 			const initializeSdk = () => {
@@ -58565,243 +58565,258 @@ var buffer = {};
 
 var base64Js = {};
 
-base64Js.byteLength = byteLength;
-base64Js.toByteArray = toByteArray;
-base64Js.fromByteArray = fromByteArray;
+var hasRequiredBase64Js;
 
-var lookup$1 = [];
-var revLookup = [];
-var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
+function requireBase64Js () {
+	if (hasRequiredBase64Js) return base64Js;
+	hasRequiredBase64Js = 1;
 
-var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-for (var i = 0, len = code.length; i < len; ++i) {
-  lookup$1[i] = code[i];
-  revLookup[code.charCodeAt(i)] = i;
-}
+	base64Js.byteLength = byteLength;
+	base64Js.toByteArray = toByteArray;
+	base64Js.fromByteArray = fromByteArray;
 
-// Support decoding URL-safe base64 strings, as Node.js does.
-// See: https://en.wikipedia.org/wiki/Base64#URL_applications
-revLookup['-'.charCodeAt(0)] = 62;
-revLookup['_'.charCodeAt(0)] = 63;
+	var lookup = [];
+	var revLookup = [];
+	var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
 
-function getLens (b64) {
-  var len = b64.length;
+	var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+	for (var i = 0, len = code.length; i < len; ++i) {
+	  lookup[i] = code[i];
+	  revLookup[code.charCodeAt(i)] = i;
+	}
 
-  if (len % 4 > 0) {
-    throw new Error('Invalid string. Length must be a multiple of 4')
-  }
+	// Support decoding URL-safe base64 strings, as Node.js does.
+	// See: https://en.wikipedia.org/wiki/Base64#URL_applications
+	revLookup['-'.charCodeAt(0)] = 62;
+	revLookup['_'.charCodeAt(0)] = 63;
 
-  // Trim off extra bytes after placeholder bytes are found
-  // See: https://github.com/beatgammit/base64-js/issues/42
-  var validLen = b64.indexOf('=');
-  if (validLen === -1) validLen = len;
+	function getLens (b64) {
+	  var len = b64.length;
 
-  var placeHoldersLen = validLen === len
-    ? 0
-    : 4 - (validLen % 4);
+	  if (len % 4 > 0) {
+	    throw new Error('Invalid string. Length must be a multiple of 4')
+	  }
 
-  return [validLen, placeHoldersLen]
-}
+	  // Trim off extra bytes after placeholder bytes are found
+	  // See: https://github.com/beatgammit/base64-js/issues/42
+	  var validLen = b64.indexOf('=');
+	  if (validLen === -1) validLen = len;
 
-// base64 is 4/3 + up to two characters of the original data
-function byteLength (b64) {
-  var lens = getLens(b64);
-  var validLen = lens[0];
-  var placeHoldersLen = lens[1];
-  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
-}
+	  var placeHoldersLen = validLen === len
+	    ? 0
+	    : 4 - (validLen % 4);
 
-function _byteLength (b64, validLen, placeHoldersLen) {
-  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
-}
+	  return [validLen, placeHoldersLen]
+	}
 
-function toByteArray (b64) {
-  var tmp;
-  var lens = getLens(b64);
-  var validLen = lens[0];
-  var placeHoldersLen = lens[1];
+	// base64 is 4/3 + up to two characters of the original data
+	function byteLength (b64) {
+	  var lens = getLens(b64);
+	  var validLen = lens[0];
+	  var placeHoldersLen = lens[1];
+	  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
+	}
 
-  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));
+	function _byteLength (b64, validLen, placeHoldersLen) {
+	  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
+	}
 
-  var curByte = 0;
+	function toByteArray (b64) {
+	  var tmp;
+	  var lens = getLens(b64);
+	  var validLen = lens[0];
+	  var placeHoldersLen = lens[1];
 
-  // if there are placeholders, only get up to the last complete 4 chars
-  var len = placeHoldersLen > 0
-    ? validLen - 4
-    : validLen;
+	  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));
 
-  var i;
-  for (i = 0; i < len; i += 4) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 18) |
-      (revLookup[b64.charCodeAt(i + 1)] << 12) |
-      (revLookup[b64.charCodeAt(i + 2)] << 6) |
-      revLookup[b64.charCodeAt(i + 3)];
-    arr[curByte++] = (tmp >> 16) & 0xFF;
-    arr[curByte++] = (tmp >> 8) & 0xFF;
-    arr[curByte++] = tmp & 0xFF;
-  }
+	  var curByte = 0;
 
-  if (placeHoldersLen === 2) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 2) |
-      (revLookup[b64.charCodeAt(i + 1)] >> 4);
-    arr[curByte++] = tmp & 0xFF;
-  }
+	  // if there are placeholders, only get up to the last complete 4 chars
+	  var len = placeHoldersLen > 0
+	    ? validLen - 4
+	    : validLen;
 
-  if (placeHoldersLen === 1) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 10) |
-      (revLookup[b64.charCodeAt(i + 1)] << 4) |
-      (revLookup[b64.charCodeAt(i + 2)] >> 2);
-    arr[curByte++] = (tmp >> 8) & 0xFF;
-    arr[curByte++] = tmp & 0xFF;
-  }
+	  var i;
+	  for (i = 0; i < len; i += 4) {
+	    tmp =
+	      (revLookup[b64.charCodeAt(i)] << 18) |
+	      (revLookup[b64.charCodeAt(i + 1)] << 12) |
+	      (revLookup[b64.charCodeAt(i + 2)] << 6) |
+	      revLookup[b64.charCodeAt(i + 3)];
+	    arr[curByte++] = (tmp >> 16) & 0xFF;
+	    arr[curByte++] = (tmp >> 8) & 0xFF;
+	    arr[curByte++] = tmp & 0xFF;
+	  }
 
-  return arr
-}
+	  if (placeHoldersLen === 2) {
+	    tmp =
+	      (revLookup[b64.charCodeAt(i)] << 2) |
+	      (revLookup[b64.charCodeAt(i + 1)] >> 4);
+	    arr[curByte++] = tmp & 0xFF;
+	  }
 
-function tripletToBase64 (num) {
-  return lookup$1[num >> 18 & 0x3F] +
-    lookup$1[num >> 12 & 0x3F] +
-    lookup$1[num >> 6 & 0x3F] +
-    lookup$1[num & 0x3F]
-}
+	  if (placeHoldersLen === 1) {
+	    tmp =
+	      (revLookup[b64.charCodeAt(i)] << 10) |
+	      (revLookup[b64.charCodeAt(i + 1)] << 4) |
+	      (revLookup[b64.charCodeAt(i + 2)] >> 2);
+	    arr[curByte++] = (tmp >> 8) & 0xFF;
+	    arr[curByte++] = tmp & 0xFF;
+	  }
 
-function encodeChunk (uint8, start, end) {
-  var tmp;
-  var output = [];
-  for (var i = start; i < end; i += 3) {
-    tmp =
-      ((uint8[i] << 16) & 0xFF0000) +
-      ((uint8[i + 1] << 8) & 0xFF00) +
-      (uint8[i + 2] & 0xFF);
-    output.push(tripletToBase64(tmp));
-  }
-  return output.join('')
-}
+	  return arr
+	}
 
-function fromByteArray (uint8) {
-  var tmp;
-  var len = uint8.length;
-  var extraBytes = len % 3; // if we have 1 byte left, pad 2 bytes
-  var parts = [];
-  var maxChunkLength = 16383; // must be multiple of 3
+	function tripletToBase64 (num) {
+	  return lookup[num >> 18 & 0x3F] +
+	    lookup[num >> 12 & 0x3F] +
+	    lookup[num >> 6 & 0x3F] +
+	    lookup[num & 0x3F]
+	}
 
-  // go through the array every three bytes, we'll deal with trailing stuff later
-  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
-    parts.push(encodeChunk(uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)));
-  }
+	function encodeChunk (uint8, start, end) {
+	  var tmp;
+	  var output = [];
+	  for (var i = start; i < end; i += 3) {
+	    tmp =
+	      ((uint8[i] << 16) & 0xFF0000) +
+	      ((uint8[i + 1] << 8) & 0xFF00) +
+	      (uint8[i + 2] & 0xFF);
+	    output.push(tripletToBase64(tmp));
+	  }
+	  return output.join('')
+	}
 
-  // pad the end with zeros, but make sure to not forget the extra bytes
-  if (extraBytes === 1) {
-    tmp = uint8[len - 1];
-    parts.push(
-      lookup$1[tmp >> 2] +
-      lookup$1[(tmp << 4) & 0x3F] +
-      '=='
-    );
-  } else if (extraBytes === 2) {
-    tmp = (uint8[len - 2] << 8) + uint8[len - 1];
-    parts.push(
-      lookup$1[tmp >> 10] +
-      lookup$1[(tmp >> 4) & 0x3F] +
-      lookup$1[(tmp << 2) & 0x3F] +
-      '='
-    );
-  }
+	function fromByteArray (uint8) {
+	  var tmp;
+	  var len = uint8.length;
+	  var extraBytes = len % 3; // if we have 1 byte left, pad 2 bytes
+	  var parts = [];
+	  var maxChunkLength = 16383; // must be multiple of 3
 
-  return parts.join('')
+	  // go through the array every three bytes, we'll deal with trailing stuff later
+	  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
+	    parts.push(encodeChunk(uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)));
+	  }
+
+	  // pad the end with zeros, but make sure to not forget the extra bytes
+	  if (extraBytes === 1) {
+	    tmp = uint8[len - 1];
+	    parts.push(
+	      lookup[tmp >> 2] +
+	      lookup[(tmp << 4) & 0x3F] +
+	      '=='
+	    );
+	  } else if (extraBytes === 2) {
+	    tmp = (uint8[len - 2] << 8) + uint8[len - 1];
+	    parts.push(
+	      lookup[tmp >> 10] +
+	      lookup[(tmp >> 4) & 0x3F] +
+	      lookup[(tmp << 2) & 0x3F] +
+	      '='
+	    );
+	  }
+
+	  return parts.join('')
+	}
+	return base64Js;
 }
 
 var ieee754 = {};
 
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 
-ieee754.read = function (buffer, offset, isLE, mLen, nBytes) {
-  var e, m;
-  var eLen = (nBytes * 8) - mLen - 1;
-  var eMax = (1 << eLen) - 1;
-  var eBias = eMax >> 1;
-  var nBits = -7;
-  var i = isLE ? (nBytes - 1) : 0;
-  var d = isLE ? -1 : 1;
-  var s = buffer[offset + i];
+var hasRequiredIeee754;
 
-  i += d;
+function requireIeee754 () {
+	if (hasRequiredIeee754) return ieee754;
+	hasRequiredIeee754 = 1;
+	ieee754.read = function (buffer, offset, isLE, mLen, nBytes) {
+	  var e, m;
+	  var eLen = (nBytes * 8) - mLen - 1;
+	  var eMax = (1 << eLen) - 1;
+	  var eBias = eMax >> 1;
+	  var nBits = -7;
+	  var i = isLE ? (nBytes - 1) : 0;
+	  var d = isLE ? -1 : 1;
+	  var s = buffer[offset + i];
 
-  e = s & ((1 << (-nBits)) - 1);
-  s >>= (-nBits);
-  nBits += eLen;
-  for (; nBits > 0; e = (e * 256) + buffer[offset + i], i += d, nBits -= 8) {}
+	  i += d;
 
-  m = e & ((1 << (-nBits)) - 1);
-  e >>= (-nBits);
-  nBits += mLen;
-  for (; nBits > 0; m = (m * 256) + buffer[offset + i], i += d, nBits -= 8) {}
+	  e = s & ((1 << (-nBits)) - 1);
+	  s >>= (-nBits);
+	  nBits += eLen;
+	  for (; nBits > 0; e = (e * 256) + buffer[offset + i], i += d, nBits -= 8) {}
 
-  if (e === 0) {
-    e = 1 - eBias;
-  } else if (e === eMax) {
-    return m ? NaN : ((s ? -1 : 1) * Infinity)
-  } else {
-    m = m + Math.pow(2, mLen);
-    e = e - eBias;
-  }
-  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
-};
+	  m = e & ((1 << (-nBits)) - 1);
+	  e >>= (-nBits);
+	  nBits += mLen;
+	  for (; nBits > 0; m = (m * 256) + buffer[offset + i], i += d, nBits -= 8) {}
 
-ieee754.write = function (buffer, value, offset, isLE, mLen, nBytes) {
-  var e, m, c;
-  var eLen = (nBytes * 8) - mLen - 1;
-  var eMax = (1 << eLen) - 1;
-  var eBias = eMax >> 1;
-  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0);
-  var i = isLE ? 0 : (nBytes - 1);
-  var d = isLE ? 1 : -1;
-  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
+	  if (e === 0) {
+	    e = 1 - eBias;
+	  } else if (e === eMax) {
+	    return m ? NaN : ((s ? -1 : 1) * Infinity)
+	  } else {
+	    m = m + Math.pow(2, mLen);
+	    e = e - eBias;
+	  }
+	  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
+	};
 
-  value = Math.abs(value);
+	ieee754.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+	  var e, m, c;
+	  var eLen = (nBytes * 8) - mLen - 1;
+	  var eMax = (1 << eLen) - 1;
+	  var eBias = eMax >> 1;
+	  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0);
+	  var i = isLE ? 0 : (nBytes - 1);
+	  var d = isLE ? 1 : -1;
+	  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
 
-  if (isNaN(value) || value === Infinity) {
-    m = isNaN(value) ? 1 : 0;
-    e = eMax;
-  } else {
-    e = Math.floor(Math.log(value) / Math.LN2);
-    if (value * (c = Math.pow(2, -e)) < 1) {
-      e--;
-      c *= 2;
-    }
-    if (e + eBias >= 1) {
-      value += rt / c;
-    } else {
-      value += rt * Math.pow(2, 1 - eBias);
-    }
-    if (value * c >= 2) {
-      e++;
-      c /= 2;
-    }
+	  value = Math.abs(value);
 
-    if (e + eBias >= eMax) {
-      m = 0;
-      e = eMax;
-    } else if (e + eBias >= 1) {
-      m = ((value * c) - 1) * Math.pow(2, mLen);
-      e = e + eBias;
-    } else {
-      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
-      e = 0;
-    }
-  }
+	  if (isNaN(value) || value === Infinity) {
+	    m = isNaN(value) ? 1 : 0;
+	    e = eMax;
+	  } else {
+	    e = Math.floor(Math.log(value) / Math.LN2);
+	    if (value * (c = Math.pow(2, -e)) < 1) {
+	      e--;
+	      c *= 2;
+	    }
+	    if (e + eBias >= 1) {
+	      value += rt / c;
+	    } else {
+	      value += rt * Math.pow(2, 1 - eBias);
+	    }
+	    if (value * c >= 2) {
+	      e++;
+	      c /= 2;
+	    }
 
-  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
+	    if (e + eBias >= eMax) {
+	      m = 0;
+	      e = eMax;
+	    } else if (e + eBias >= 1) {
+	      m = ((value * c) - 1) * Math.pow(2, mLen);
+	      e = e + eBias;
+	    } else {
+	      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
+	      e = 0;
+	    }
+	  }
 
-  e = (e << mLen) | m;
-  eLen += mLen;
-  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
+	  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
 
-  buffer[offset + i - d] |= s * 128;
-};
+	  e = (e << mLen) | m;
+	  eLen += mLen;
+	  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
+
+	  buffer[offset + i - d] |= s * 128;
+	};
+	return ieee754;
+}
 
 /*!
  * The buffer module from node.js, for the browser.
@@ -58810,2103 +58825,2110 @@ ieee754.write = function (buffer, value, offset, isLE, mLen, nBytes) {
  * @license  MIT
  */
 
-(function (exports$1) {
-
-	const base64 = base64Js;
-	const ieee754$1 = ieee754;
-	const customInspectSymbol =
-	  (typeof Symbol === 'function' && typeof Symbol['for'] === 'function') // eslint-disable-line dot-notation
-	    ? Symbol['for']('nodejs.util.inspect.custom') // eslint-disable-line dot-notation
-	    : null;
-
-	exports$1.Buffer = Buffer;
-	exports$1.SlowBuffer = SlowBuffer;
-	exports$1.INSPECT_MAX_BYTES = 50;
-
-	const K_MAX_LENGTH = 0x7fffffff;
-	exports$1.kMaxLength = K_MAX_LENGTH;
-
-	/**
-	 * If `Buffer.TYPED_ARRAY_SUPPORT`:
-	 *   === true    Use Uint8Array implementation (fastest)
-	 *   === false   Print warning and recommend using `buffer` v4.x which has an Object
-	 *               implementation (most compatible, even IE6)
-	 *
-	 * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
-	 * Opera 11.6+, iOS 4.2+.
-	 *
-	 * We report that the browser does not support typed arrays if the are not subclassable
-	 * using __proto__. Firefox 4-29 lacks support for adding new properties to `Uint8Array`
-	 * (See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438). IE 10 lacks support
-	 * for __proto__ and has a buggy typed array implementation.
-	 */
-	Buffer.TYPED_ARRAY_SUPPORT = typedArraySupport();
-
-	if (!Buffer.TYPED_ARRAY_SUPPORT && typeof console !== 'undefined' &&
-	    typeof console.error === 'function') {
-	  console.error(
-	    'This browser lacks typed array (Uint8Array) support which is required by ' +
-	    '`buffer` v5.x. Use `buffer` v4.x if you require old browser support.'
-	  );
-	}
-
-	function typedArraySupport () {
-	  // Can typed array instances can be augmented?
-	  try {
-	    const arr = new Uint8Array(1);
-	    const proto = { foo: function () { return 42 } };
-	    Object.setPrototypeOf(proto, Uint8Array.prototype);
-	    Object.setPrototypeOf(arr, proto);
-	    return arr.foo() === 42
-	  } catch (e) {
-	    return false
-	  }
-	}
-
-	Object.defineProperty(Buffer.prototype, 'parent', {
-	  enumerable: true,
-	  get: function () {
-	    if (!Buffer.isBuffer(this)) return undefined
-	    return this.buffer
-	  }
-	});
-
-	Object.defineProperty(Buffer.prototype, 'offset', {
-	  enumerable: true,
-	  get: function () {
-	    if (!Buffer.isBuffer(this)) return undefined
-	    return this.byteOffset
-	  }
-	});
-
-	function createBuffer (length) {
-	  if (length > K_MAX_LENGTH) {
-	    throw new RangeError('The value "' + length + '" is invalid for option "size"')
-	  }
-	  // Return an augmented `Uint8Array` instance
-	  const buf = new Uint8Array(length);
-	  Object.setPrototypeOf(buf, Buffer.prototype);
-	  return buf
-	}
-
-	/**
-	 * The Buffer constructor returns instances of `Uint8Array` that have their
-	 * prototype changed to `Buffer.prototype`. Furthermore, `Buffer` is a subclass of
-	 * `Uint8Array`, so the returned instances will have all the node `Buffer` methods
-	 * and the `Uint8Array` methods. Square bracket notation works as expected -- it
-	 * returns a single octet.
-	 *
-	 * The `Uint8Array` prototype remains unmodified.
-	 */
-
-	function Buffer (arg, encodingOrOffset, length) {
-	  // Common case.
-	  if (typeof arg === 'number') {
-	    if (typeof encodingOrOffset === 'string') {
-	      throw new TypeError(
-	        'The "string" argument must be of type string. Received type number'
-	      )
-	    }
-	    return allocUnsafe(arg)
-	  }
-	  return from(arg, encodingOrOffset, length)
-	}
-
-	Buffer.poolSize = 8192; // not used by this implementation
-
-	function from (value, encodingOrOffset, length) {
-	  if (typeof value === 'string') {
-	    return fromString(value, encodingOrOffset)
-	  }
-
-	  if (ArrayBuffer.isView(value)) {
-	    return fromArrayView(value)
-	  }
-
-	  if (value == null) {
-	    throw new TypeError(
-	      'The first argument must be one of type string, Buffer, ArrayBuffer, Array, ' +
-	      'or Array-like Object. Received type ' + (typeof value)
-	    )
-	  }
-
-	  if (isInstance(value, ArrayBuffer) ||
-	      (value && isInstance(value.buffer, ArrayBuffer))) {
-	    return fromArrayBuffer(value, encodingOrOffset, length)
-	  }
-
-	  if (typeof SharedArrayBuffer !== 'undefined' &&
-	      (isInstance(value, SharedArrayBuffer) ||
-	      (value && isInstance(value.buffer, SharedArrayBuffer)))) {
-	    return fromArrayBuffer(value, encodingOrOffset, length)
-	  }
-
-	  if (typeof value === 'number') {
-	    throw new TypeError(
-	      'The "value" argument must not be of type number. Received type number'
-	    )
-	  }
-
-	  const valueOf = value.valueOf && value.valueOf();
-	  if (valueOf != null && valueOf !== value) {
-	    return Buffer.from(valueOf, encodingOrOffset, length)
-	  }
-
-	  const b = fromObject(value);
-	  if (b) return b
-
-	  if (typeof Symbol !== 'undefined' && Symbol.toPrimitive != null &&
-	      typeof value[Symbol.toPrimitive] === 'function') {
-	    return Buffer.from(value[Symbol.toPrimitive]('string'), encodingOrOffset, length)
-	  }
-
-	  throw new TypeError(
-	    'The first argument must be one of type string, Buffer, ArrayBuffer, Array, ' +
-	    'or Array-like Object. Received type ' + (typeof value)
-	  )
-	}
-
-	/**
-	 * Functionally equivalent to Buffer(arg, encoding) but throws a TypeError
-	 * if value is a number.
-	 * Buffer.from(str[, encoding])
-	 * Buffer.from(array)
-	 * Buffer.from(buffer)
-	 * Buffer.from(arrayBuffer[, byteOffset[, length]])
-	 **/
-	Buffer.from = function (value, encodingOrOffset, length) {
-	  return from(value, encodingOrOffset, length)
-	};
-
-	// Note: Change prototype *after* Buffer.from is defined to workaround Chrome bug:
-	// https://github.com/feross/buffer/pull/148
-	Object.setPrototypeOf(Buffer.prototype, Uint8Array.prototype);
-	Object.setPrototypeOf(Buffer, Uint8Array);
-
-	function assertSize (size) {
-	  if (typeof size !== 'number') {
-	    throw new TypeError('"size" argument must be of type number')
-	  } else if (size < 0) {
-	    throw new RangeError('The value "' + size + '" is invalid for option "size"')
-	  }
-	}
-
-	function alloc (size, fill, encoding) {
-	  assertSize(size);
-	  if (size <= 0) {
-	    return createBuffer(size)
-	  }
-	  if (fill !== undefined) {
-	    // Only pay attention to encoding if it's a string. This
-	    // prevents accidentally sending in a number that would
-	    // be interpreted as a start offset.
-	    return typeof encoding === 'string'
-	      ? createBuffer(size).fill(fill, encoding)
-	      : createBuffer(size).fill(fill)
-	  }
-	  return createBuffer(size)
-	}
-
-	/**
-	 * Creates a new filled Buffer instance.
-	 * alloc(size[, fill[, encoding]])
-	 **/
-	Buffer.alloc = function (size, fill, encoding) {
-	  return alloc(size, fill, encoding)
-	};
-
-	function allocUnsafe (size) {
-	  assertSize(size);
-	  return createBuffer(size < 0 ? 0 : checked(size) | 0)
-	}
-
-	/**
-	 * Equivalent to Buffer(num), by default creates a non-zero-filled Buffer instance.
-	 * */
-	Buffer.allocUnsafe = function (size) {
-	  return allocUnsafe(size)
-	};
-	/**
-	 * Equivalent to SlowBuffer(num), by default creates a non-zero-filled Buffer instance.
-	 */
-	Buffer.allocUnsafeSlow = function (size) {
-	  return allocUnsafe(size)
-	};
-
-	function fromString (string, encoding) {
-	  if (typeof encoding !== 'string' || encoding === '') {
-	    encoding = 'utf8';
-	  }
-
-	  if (!Buffer.isEncoding(encoding)) {
-	    throw new TypeError('Unknown encoding: ' + encoding)
-	  }
-
-	  const length = byteLength(string, encoding) | 0;
-	  let buf = createBuffer(length);
-
-	  const actual = buf.write(string, encoding);
-
-	  if (actual !== length) {
-	    // Writing a hex string, for example, that contains invalid characters will
-	    // cause everything after the first invalid character to be ignored. (e.g.
-	    // 'abxxcd' will be treated as 'ab')
-	    buf = buf.slice(0, actual);
-	  }
-
-	  return buf
-	}
-
-	function fromArrayLike (array) {
-	  const length = array.length < 0 ? 0 : checked(array.length) | 0;
-	  const buf = createBuffer(length);
-	  for (let i = 0; i < length; i += 1) {
-	    buf[i] = array[i] & 255;
-	  }
-	  return buf
-	}
-
-	function fromArrayView (arrayView) {
-	  if (isInstance(arrayView, Uint8Array)) {
-	    const copy = new Uint8Array(arrayView);
-	    return fromArrayBuffer(copy.buffer, copy.byteOffset, copy.byteLength)
-	  }
-	  return fromArrayLike(arrayView)
-	}
-
-	function fromArrayBuffer (array, byteOffset, length) {
-	  if (byteOffset < 0 || array.byteLength < byteOffset) {
-	    throw new RangeError('"offset" is outside of buffer bounds')
-	  }
-
-	  if (array.byteLength < byteOffset + (length || 0)) {
-	    throw new RangeError('"length" is outside of buffer bounds')
-	  }
-
-	  let buf;
-	  if (byteOffset === undefined && length === undefined) {
-	    buf = new Uint8Array(array);
-	  } else if (length === undefined) {
-	    buf = new Uint8Array(array, byteOffset);
-	  } else {
-	    buf = new Uint8Array(array, byteOffset, length);
-	  }
-
-	  // Return an augmented `Uint8Array` instance
-	  Object.setPrototypeOf(buf, Buffer.prototype);
-
-	  return buf
-	}
-
-	function fromObject (obj) {
-	  if (Buffer.isBuffer(obj)) {
-	    const len = checked(obj.length) | 0;
-	    const buf = createBuffer(len);
-
-	    if (buf.length === 0) {
-	      return buf
-	    }
-
-	    obj.copy(buf, 0, 0, len);
-	    return buf
-	  }
-
-	  if (obj.length !== undefined) {
-	    if (typeof obj.length !== 'number' || numberIsNaN(obj.length)) {
-	      return createBuffer(0)
-	    }
-	    return fromArrayLike(obj)
-	  }
-
-	  if (obj.type === 'Buffer' && Array.isArray(obj.data)) {
-	    return fromArrayLike(obj.data)
-	  }
-	}
-
-	function checked (length) {
-	  // Note: cannot use `length < K_MAX_LENGTH` here because that fails when
-	  // length is NaN (which is otherwise coerced to zero.)
-	  if (length >= K_MAX_LENGTH) {
-	    throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
-	                         'size: 0x' + K_MAX_LENGTH.toString(16) + ' bytes')
-	  }
-	  return length | 0
-	}
-
-	function SlowBuffer (length) {
-	  if (+length != length) { // eslint-disable-line eqeqeq
-	    length = 0;
-	  }
-	  return Buffer.alloc(+length)
-	}
-
-	Buffer.isBuffer = function isBuffer (b) {
-	  return b != null && b._isBuffer === true &&
-	    b !== Buffer.prototype // so Buffer.isBuffer(Buffer.prototype) will be false
-	};
-
-	Buffer.compare = function compare (a, b) {
-	  if (isInstance(a, Uint8Array)) a = Buffer.from(a, a.offset, a.byteLength);
-	  if (isInstance(b, Uint8Array)) b = Buffer.from(b, b.offset, b.byteLength);
-	  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
-	    throw new TypeError(
-	      'The "buf1", "buf2" arguments must be one of type Buffer or Uint8Array'
-	    )
-	  }
-
-	  if (a === b) return 0
-
-	  let x = a.length;
-	  let y = b.length;
-
-	  for (let i = 0, len = Math.min(x, y); i < len; ++i) {
-	    if (a[i] !== b[i]) {
-	      x = a[i];
-	      y = b[i];
-	      break
-	    }
-	  }
-
-	  if (x < y) return -1
-	  if (y < x) return 1
-	  return 0
-	};
-
-	Buffer.isEncoding = function isEncoding (encoding) {
-	  switch (String(encoding).toLowerCase()) {
-	    case 'hex':
-	    case 'utf8':
-	    case 'utf-8':
-	    case 'ascii':
-	    case 'latin1':
-	    case 'binary':
-	    case 'base64':
-	    case 'ucs2':
-	    case 'ucs-2':
-	    case 'utf16le':
-	    case 'utf-16le':
-	      return true
-	    default:
-	      return false
-	  }
-	};
-
-	Buffer.concat = function concat (list, length) {
-	  if (!Array.isArray(list)) {
-	    throw new TypeError('"list" argument must be an Array of Buffers')
-	  }
-
-	  if (list.length === 0) {
-	    return Buffer.alloc(0)
-	  }
-
-	  let i;
-	  if (length === undefined) {
-	    length = 0;
-	    for (i = 0; i < list.length; ++i) {
-	      length += list[i].length;
-	    }
-	  }
-
-	  const buffer = Buffer.allocUnsafe(length);
-	  let pos = 0;
-	  for (i = 0; i < list.length; ++i) {
-	    let buf = list[i];
-	    if (isInstance(buf, Uint8Array)) {
-	      if (pos + buf.length > buffer.length) {
-	        if (!Buffer.isBuffer(buf)) buf = Buffer.from(buf);
-	        buf.copy(buffer, pos);
-	      } else {
-	        Uint8Array.prototype.set.call(
-	          buffer,
-	          buf,
-	          pos
-	        );
-	      }
-	    } else if (!Buffer.isBuffer(buf)) {
-	      throw new TypeError('"list" argument must be an Array of Buffers')
-	    } else {
-	      buf.copy(buffer, pos);
-	    }
-	    pos += buf.length;
-	  }
-	  return buffer
-	};
-
-	function byteLength (string, encoding) {
-	  if (Buffer.isBuffer(string)) {
-	    return string.length
-	  }
-	  if (ArrayBuffer.isView(string) || isInstance(string, ArrayBuffer)) {
-	    return string.byteLength
-	  }
-	  if (typeof string !== 'string') {
-	    throw new TypeError(
-	      'The "string" argument must be one of type string, Buffer, or ArrayBuffer. ' +
-	      'Received type ' + typeof string
-	    )
-	  }
-
-	  const len = string.length;
-	  const mustMatch = (arguments.length > 2 && arguments[2] === true);
-	  if (!mustMatch && len === 0) return 0
-
-	  // Use a for loop to avoid recursion
-	  let loweredCase = false;
-	  for (;;) {
-	    switch (encoding) {
-	      case 'ascii':
-	      case 'latin1':
-	      case 'binary':
-	        return len
-	      case 'utf8':
-	      case 'utf-8':
-	        return utf8ToBytes(string).length
-	      case 'ucs2':
-	      case 'ucs-2':
-	      case 'utf16le':
-	      case 'utf-16le':
-	        return len * 2
-	      case 'hex':
-	        return len >>> 1
-	      case 'base64':
-	        return base64ToBytes(string).length
-	      default:
-	        if (loweredCase) {
-	          return mustMatch ? -1 : utf8ToBytes(string).length // assume utf8
-	        }
-	        encoding = ('' + encoding).toLowerCase();
-	        loweredCase = true;
-	    }
-	  }
-	}
-	Buffer.byteLength = byteLength;
-
-	function slowToString (encoding, start, end) {
-	  let loweredCase = false;
-
-	  // No need to verify that "this.length <= MAX_UINT32" since it's a read-only
-	  // property of a typed array.
-
-	  // This behaves neither like String nor Uint8Array in that we set start/end
-	  // to their upper/lower bounds if the value passed is out of range.
-	  // undefined is handled specially as per ECMA-262 6th Edition,
-	  // Section 13.3.3.7 Runtime Semantics: KeyedBindingInitialization.
-	  if (start === undefined || start < 0) {
-	    start = 0;
-	  }
-	  // Return early if start > this.length. Done here to prevent potential uint32
-	  // coercion fail below.
-	  if (start > this.length) {
-	    return ''
-	  }
-
-	  if (end === undefined || end > this.length) {
-	    end = this.length;
-	  }
-
-	  if (end <= 0) {
-	    return ''
-	  }
-
-	  // Force coercion to uint32. This will also coerce falsey/NaN values to 0.
-	  end >>>= 0;
-	  start >>>= 0;
-
-	  if (end <= start) {
-	    return ''
-	  }
-
-	  if (!encoding) encoding = 'utf8';
-
-	  while (true) {
-	    switch (encoding) {
-	      case 'hex':
-	        return hexSlice(this, start, end)
-
-	      case 'utf8':
-	      case 'utf-8':
-	        return utf8Slice(this, start, end)
-
-	      case 'ascii':
-	        return asciiSlice(this, start, end)
-
-	      case 'latin1':
-	      case 'binary':
-	        return latin1Slice(this, start, end)
-
-	      case 'base64':
-	        return base64Slice(this, start, end)
-
-	      case 'ucs2':
-	      case 'ucs-2':
-	      case 'utf16le':
-	      case 'utf-16le':
-	        return utf16leSlice(this, start, end)
-
-	      default:
-	        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
-	        encoding = (encoding + '').toLowerCase();
-	        loweredCase = true;
-	    }
-	  }
-	}
-
-	// This property is used by `Buffer.isBuffer` (and the `is-buffer` npm package)
-	// to detect a Buffer instance. It's not possible to use `instanceof Buffer`
-	// reliably in a browserify context because there could be multiple different
-	// copies of the 'buffer' package in use. This method works even for Buffer
-	// instances that were created from another copy of the `buffer` package.
-	// See: https://github.com/feross/buffer/issues/154
-	Buffer.prototype._isBuffer = true;
-
-	function swap (b, n, m) {
-	  const i = b[n];
-	  b[n] = b[m];
-	  b[m] = i;
-	}
-
-	Buffer.prototype.swap16 = function swap16 () {
-	  const len = this.length;
-	  if (len % 2 !== 0) {
-	    throw new RangeError('Buffer size must be a multiple of 16-bits')
-	  }
-	  for (let i = 0; i < len; i += 2) {
-	    swap(this, i, i + 1);
-	  }
-	  return this
-	};
-
-	Buffer.prototype.swap32 = function swap32 () {
-	  const len = this.length;
-	  if (len % 4 !== 0) {
-	    throw new RangeError('Buffer size must be a multiple of 32-bits')
-	  }
-	  for (let i = 0; i < len; i += 4) {
-	    swap(this, i, i + 3);
-	    swap(this, i + 1, i + 2);
-	  }
-	  return this
-	};
-
-	Buffer.prototype.swap64 = function swap64 () {
-	  const len = this.length;
-	  if (len % 8 !== 0) {
-	    throw new RangeError('Buffer size must be a multiple of 64-bits')
-	  }
-	  for (let i = 0; i < len; i += 8) {
-	    swap(this, i, i + 7);
-	    swap(this, i + 1, i + 6);
-	    swap(this, i + 2, i + 5);
-	    swap(this, i + 3, i + 4);
-	  }
-	  return this
-	};
-
-	Buffer.prototype.toString = function toString () {
-	  const length = this.length;
-	  if (length === 0) return ''
-	  if (arguments.length === 0) return utf8Slice(this, 0, length)
-	  return slowToString.apply(this, arguments)
-	};
-
-	Buffer.prototype.toLocaleString = Buffer.prototype.toString;
-
-	Buffer.prototype.equals = function equals (b) {
-	  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
-	  if (this === b) return true
-	  return Buffer.compare(this, b) === 0
-	};
-
-	Buffer.prototype.inspect = function inspect () {
-	  let str = '';
-	  const max = exports$1.INSPECT_MAX_BYTES;
-	  str = this.toString('hex', 0, max).replace(/(.{2})/g, '$1 ').trim();
-	  if (this.length > max) str += ' ... ';
-	  return '<Buffer ' + str + '>'
-	};
-	if (customInspectSymbol) {
-	  Buffer.prototype[customInspectSymbol] = Buffer.prototype.inspect;
-	}
-
-	Buffer.prototype.compare = function compare (target, start, end, thisStart, thisEnd) {
-	  if (isInstance(target, Uint8Array)) {
-	    target = Buffer.from(target, target.offset, target.byteLength);
-	  }
-	  if (!Buffer.isBuffer(target)) {
-	    throw new TypeError(
-	      'The "target" argument must be one of type Buffer or Uint8Array. ' +
-	      'Received type ' + (typeof target)
-	    )
-	  }
-
-	  if (start === undefined) {
-	    start = 0;
-	  }
-	  if (end === undefined) {
-	    end = target ? target.length : 0;
-	  }
-	  if (thisStart === undefined) {
-	    thisStart = 0;
-	  }
-	  if (thisEnd === undefined) {
-	    thisEnd = this.length;
-	  }
-
-	  if (start < 0 || end > target.length || thisStart < 0 || thisEnd > this.length) {
-	    throw new RangeError('out of range index')
-	  }
-
-	  if (thisStart >= thisEnd && start >= end) {
-	    return 0
-	  }
-	  if (thisStart >= thisEnd) {
-	    return -1
-	  }
-	  if (start >= end) {
-	    return 1
-	  }
-
-	  start >>>= 0;
-	  end >>>= 0;
-	  thisStart >>>= 0;
-	  thisEnd >>>= 0;
-
-	  if (this === target) return 0
-
-	  let x = thisEnd - thisStart;
-	  let y = end - start;
-	  const len = Math.min(x, y);
-
-	  const thisCopy = this.slice(thisStart, thisEnd);
-	  const targetCopy = target.slice(start, end);
-
-	  for (let i = 0; i < len; ++i) {
-	    if (thisCopy[i] !== targetCopy[i]) {
-	      x = thisCopy[i];
-	      y = targetCopy[i];
-	      break
-	    }
-	  }
-
-	  if (x < y) return -1
-	  if (y < x) return 1
-	  return 0
-	};
-
-	// Finds either the first index of `val` in `buffer` at offset >= `byteOffset`,
-	// OR the last index of `val` in `buffer` at offset <= `byteOffset`.
-	//
-	// Arguments:
-	// - buffer - a Buffer to search
-	// - val - a string, Buffer, or number
-	// - byteOffset - an index into `buffer`; will be clamped to an int32
-	// - encoding - an optional encoding, relevant is val is a string
-	// - dir - true for indexOf, false for lastIndexOf
-	function bidirectionalIndexOf (buffer, val, byteOffset, encoding, dir) {
-	  // Empty buffer means no match
-	  if (buffer.length === 0) return -1
-
-	  // Normalize byteOffset
-	  if (typeof byteOffset === 'string') {
-	    encoding = byteOffset;
-	    byteOffset = 0;
-	  } else if (byteOffset > 0x7fffffff) {
-	    byteOffset = 0x7fffffff;
-	  } else if (byteOffset < -2147483648) {
-	    byteOffset = -2147483648;
-	  }
-	  byteOffset = +byteOffset; // Coerce to Number.
-	  if (numberIsNaN(byteOffset)) {
-	    // byteOffset: it it's undefined, null, NaN, "foo", etc, search whole buffer
-	    byteOffset = dir ? 0 : (buffer.length - 1);
-	  }
-
-	  // Normalize byteOffset: negative offsets start from the end of the buffer
-	  if (byteOffset < 0) byteOffset = buffer.length + byteOffset;
-	  if (byteOffset >= buffer.length) {
-	    if (dir) return -1
-	    else byteOffset = buffer.length - 1;
-	  } else if (byteOffset < 0) {
-	    if (dir) byteOffset = 0;
-	    else return -1
-	  }
-
-	  // Normalize val
-	  if (typeof val === 'string') {
-	    val = Buffer.from(val, encoding);
-	  }
-
-	  // Finally, search either indexOf (if dir is true) or lastIndexOf
-	  if (Buffer.isBuffer(val)) {
-	    // Special case: looking for empty string/buffer always fails
-	    if (val.length === 0) {
-	      return -1
-	    }
-	    return arrayIndexOf(buffer, val, byteOffset, encoding, dir)
-	  } else if (typeof val === 'number') {
-	    val = val & 0xFF; // Search for a byte value [0-255]
-	    if (typeof Uint8Array.prototype.indexOf === 'function') {
-	      if (dir) {
-	        return Uint8Array.prototype.indexOf.call(buffer, val, byteOffset)
-	      } else {
-	        return Uint8Array.prototype.lastIndexOf.call(buffer, val, byteOffset)
-	      }
-	    }
-	    return arrayIndexOf(buffer, [val], byteOffset, encoding, dir)
-	  }
-
-	  throw new TypeError('val must be string, number or Buffer')
-	}
-
-	function arrayIndexOf (arr, val, byteOffset, encoding, dir) {
-	  let indexSize = 1;
-	  let arrLength = arr.length;
-	  let valLength = val.length;
-
-	  if (encoding !== undefined) {
-	    encoding = String(encoding).toLowerCase();
-	    if (encoding === 'ucs2' || encoding === 'ucs-2' ||
-	        encoding === 'utf16le' || encoding === 'utf-16le') {
-	      if (arr.length < 2 || val.length < 2) {
-	        return -1
-	      }
-	      indexSize = 2;
-	      arrLength /= 2;
-	      valLength /= 2;
-	      byteOffset /= 2;
-	    }
-	  }
-
-	  function read (buf, i) {
-	    if (indexSize === 1) {
-	      return buf[i]
-	    } else {
-	      return buf.readUInt16BE(i * indexSize)
-	    }
-	  }
-
-	  let i;
-	  if (dir) {
-	    let foundIndex = -1;
-	    for (i = byteOffset; i < arrLength; i++) {
-	      if (read(arr, i) === read(val, foundIndex === -1 ? 0 : i - foundIndex)) {
-	        if (foundIndex === -1) foundIndex = i;
-	        if (i - foundIndex + 1 === valLength) return foundIndex * indexSize
-	      } else {
-	        if (foundIndex !== -1) i -= i - foundIndex;
-	        foundIndex = -1;
-	      }
-	    }
-	  } else {
-	    if (byteOffset + valLength > arrLength) byteOffset = arrLength - valLength;
-	    for (i = byteOffset; i >= 0; i--) {
-	      let found = true;
-	      for (let j = 0; j < valLength; j++) {
-	        if (read(arr, i + j) !== read(val, j)) {
-	          found = false;
-	          break
-	        }
-	      }
-	      if (found) return i
-	    }
-	  }
-
-	  return -1
-	}
-
-	Buffer.prototype.includes = function includes (val, byteOffset, encoding) {
-	  return this.indexOf(val, byteOffset, encoding) !== -1
-	};
-
-	Buffer.prototype.indexOf = function indexOf (val, byteOffset, encoding) {
-	  return bidirectionalIndexOf(this, val, byteOffset, encoding, true)
-	};
-
-	Buffer.prototype.lastIndexOf = function lastIndexOf (val, byteOffset, encoding) {
-	  return bidirectionalIndexOf(this, val, byteOffset, encoding, false)
-	};
-
-	function hexWrite (buf, string, offset, length) {
-	  offset = Number(offset) || 0;
-	  const remaining = buf.length - offset;
-	  if (!length) {
-	    length = remaining;
-	  } else {
-	    length = Number(length);
-	    if (length > remaining) {
-	      length = remaining;
-	    }
-	  }
-
-	  const strLen = string.length;
-
-	  if (length > strLen / 2) {
-	    length = strLen / 2;
-	  }
-	  let i;
-	  for (i = 0; i < length; ++i) {
-	    const parsed = parseInt(string.substr(i * 2, 2), 16);
-	    if (numberIsNaN(parsed)) return i
-	    buf[offset + i] = parsed;
-	  }
-	  return i
-	}
-
-	function utf8Write (buf, string, offset, length) {
-	  return blitBuffer(utf8ToBytes(string, buf.length - offset), buf, offset, length)
-	}
-
-	function asciiWrite (buf, string, offset, length) {
-	  return blitBuffer(asciiToBytes(string), buf, offset, length)
-	}
-
-	function base64Write (buf, string, offset, length) {
-	  return blitBuffer(base64ToBytes(string), buf, offset, length)
-	}
-
-	function ucs2Write (buf, string, offset, length) {
-	  return blitBuffer(utf16leToBytes(string, buf.length - offset), buf, offset, length)
-	}
-
-	Buffer.prototype.write = function write (string, offset, length, encoding) {
-	  // Buffer#write(string)
-	  if (offset === undefined) {
-	    encoding = 'utf8';
-	    length = this.length;
-	    offset = 0;
-	  // Buffer#write(string, encoding)
-	  } else if (length === undefined && typeof offset === 'string') {
-	    encoding = offset;
-	    length = this.length;
-	    offset = 0;
-	  // Buffer#write(string, offset[, length][, encoding])
-	  } else if (isFinite(offset)) {
-	    offset = offset >>> 0;
-	    if (isFinite(length)) {
-	      length = length >>> 0;
-	      if (encoding === undefined) encoding = 'utf8';
-	    } else {
-	      encoding = length;
-	      length = undefined;
-	    }
-	  } else {
-	    throw new Error(
-	      'Buffer.write(string, encoding, offset[, length]) is no longer supported'
-	    )
-	  }
-
-	  const remaining = this.length - offset;
-	  if (length === undefined || length > remaining) length = remaining;
-
-	  if ((string.length > 0 && (length < 0 || offset < 0)) || offset > this.length) {
-	    throw new RangeError('Attempt to write outside buffer bounds')
-	  }
-
-	  if (!encoding) encoding = 'utf8';
-
-	  let loweredCase = false;
-	  for (;;) {
-	    switch (encoding) {
-	      case 'hex':
-	        return hexWrite(this, string, offset, length)
-
-	      case 'utf8':
-	      case 'utf-8':
-	        return utf8Write(this, string, offset, length)
-
-	      case 'ascii':
-	      case 'latin1':
-	      case 'binary':
-	        return asciiWrite(this, string, offset, length)
-
-	      case 'base64':
-	        // Warning: maxLength not taken into account in base64Write
-	        return base64Write(this, string, offset, length)
-
-	      case 'ucs2':
-	      case 'ucs-2':
-	      case 'utf16le':
-	      case 'utf-16le':
-	        return ucs2Write(this, string, offset, length)
-
-	      default:
-	        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
-	        encoding = ('' + encoding).toLowerCase();
-	        loweredCase = true;
-	    }
-	  }
-	};
-
-	Buffer.prototype.toJSON = function toJSON () {
-	  return {
-	    type: 'Buffer',
-	    data: Array.prototype.slice.call(this._arr || this, 0)
-	  }
-	};
-
-	function base64Slice (buf, start, end) {
-	  if (start === 0 && end === buf.length) {
-	    return base64.fromByteArray(buf)
-	  } else {
-	    return base64.fromByteArray(buf.slice(start, end))
-	  }
-	}
-
-	function utf8Slice (buf, start, end) {
-	  end = Math.min(buf.length, end);
-	  const res = [];
-
-	  let i = start;
-	  while (i < end) {
-	    const firstByte = buf[i];
-	    let codePoint = null;
-	    let bytesPerSequence = (firstByte > 0xEF)
-	      ? 4
-	      : (firstByte > 0xDF)
-	          ? 3
-	          : (firstByte > 0xBF)
-	              ? 2
-	              : 1;
-
-	    if (i + bytesPerSequence <= end) {
-	      let secondByte, thirdByte, fourthByte, tempCodePoint;
-
-	      switch (bytesPerSequence) {
-	        case 1:
-	          if (firstByte < 0x80) {
-	            codePoint = firstByte;
-	          }
-	          break
-	        case 2:
-	          secondByte = buf[i + 1];
-	          if ((secondByte & 0xC0) === 0x80) {
-	            tempCodePoint = (firstByte & 0x1F) << 0x6 | (secondByte & 0x3F);
-	            if (tempCodePoint > 0x7F) {
-	              codePoint = tempCodePoint;
-	            }
-	          }
-	          break
-	        case 3:
-	          secondByte = buf[i + 1];
-	          thirdByte = buf[i + 2];
-	          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {
-	            tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | (thirdByte & 0x3F);
-	            if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {
-	              codePoint = tempCodePoint;
-	            }
-	          }
-	          break
-	        case 4:
-	          secondByte = buf[i + 1];
-	          thirdByte = buf[i + 2];
-	          fourthByte = buf[i + 3];
-	          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {
-	            tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | (fourthByte & 0x3F);
-	            if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {
-	              codePoint = tempCodePoint;
-	            }
-	          }
-	      }
-	    }
-
-	    if (codePoint === null) {
-	      // we did not generate a valid codePoint so insert a
-	      // replacement char (U+FFFD) and advance only 1 byte
-	      codePoint = 0xFFFD;
-	      bytesPerSequence = 1;
-	    } else if (codePoint > 0xFFFF) {
-	      // encode to utf16 (surrogate pair dance)
-	      codePoint -= 0x10000;
-	      res.push(codePoint >>> 10 & 0x3FF | 0xD800);
-	      codePoint = 0xDC00 | codePoint & 0x3FF;
-	    }
-
-	    res.push(codePoint);
-	    i += bytesPerSequence;
-	  }
-
-	  return decodeCodePointsArray(res)
-	}
-
-	// Based on http://stackoverflow.com/a/22747272/680742, the browser with
-	// the lowest limit is Chrome, with 0x10000 args.
-	// We go 1 magnitude less, for safety
-	const MAX_ARGUMENTS_LENGTH = 0x1000;
-
-	function decodeCodePointsArray (codePoints) {
-	  const len = codePoints.length;
-	  if (len <= MAX_ARGUMENTS_LENGTH) {
-	    return String.fromCharCode.apply(String, codePoints) // avoid extra slice()
-	  }
-
-	  // Decode in chunks to avoid "call stack size exceeded".
-	  let res = '';
-	  let i = 0;
-	  while (i < len) {
-	    res += String.fromCharCode.apply(
-	      String,
-	      codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH)
-	    );
-	  }
-	  return res
-	}
-
-	function asciiSlice (buf, start, end) {
-	  let ret = '';
-	  end = Math.min(buf.length, end);
-
-	  for (let i = start; i < end; ++i) {
-	    ret += String.fromCharCode(buf[i] & 0x7F);
-	  }
-	  return ret
-	}
-
-	function latin1Slice (buf, start, end) {
-	  let ret = '';
-	  end = Math.min(buf.length, end);
-
-	  for (let i = start; i < end; ++i) {
-	    ret += String.fromCharCode(buf[i]);
-	  }
-	  return ret
-	}
-
-	function hexSlice (buf, start, end) {
-	  const len = buf.length;
-
-	  if (!start || start < 0) start = 0;
-	  if (!end || end < 0 || end > len) end = len;
-
-	  let out = '';
-	  for (let i = start; i < end; ++i) {
-	    out += hexSliceLookupTable[buf[i]];
-	  }
-	  return out
-	}
-
-	function utf16leSlice (buf, start, end) {
-	  const bytes = buf.slice(start, end);
-	  let res = '';
-	  // If bytes.length is odd, the last 8 bits must be ignored (same as node.js)
-	  for (let i = 0; i < bytes.length - 1; i += 2) {
-	    res += String.fromCharCode(bytes[i] + (bytes[i + 1] * 256));
-	  }
-	  return res
-	}
-
-	Buffer.prototype.slice = function slice (start, end) {
-	  const len = this.length;
-	  start = ~~start;
-	  end = end === undefined ? len : ~~end;
-
-	  if (start < 0) {
-	    start += len;
-	    if (start < 0) start = 0;
-	  } else if (start > len) {
-	    start = len;
-	  }
-
-	  if (end < 0) {
-	    end += len;
-	    if (end < 0) end = 0;
-	  } else if (end > len) {
-	    end = len;
-	  }
-
-	  if (end < start) end = start;
-
-	  const newBuf = this.subarray(start, end);
-	  // Return an augmented `Uint8Array` instance
-	  Object.setPrototypeOf(newBuf, Buffer.prototype);
-
-	  return newBuf
-	};
-
-	/*
-	 * Need to make sure that buffer isn't trying to write out of bounds.
-	 */
-	function checkOffset (offset, ext, length) {
-	  if ((offset % 1) !== 0 || offset < 0) throw new RangeError('offset is not uint')
-	  if (offset + ext > length) throw new RangeError('Trying to access beyond buffer length')
-	}
-
-	Buffer.prototype.readUintLE =
-	Buffer.prototype.readUIntLE = function readUIntLE (offset, byteLength, noAssert) {
-	  offset = offset >>> 0;
-	  byteLength = byteLength >>> 0;
-	  if (!noAssert) checkOffset(offset, byteLength, this.length);
-
-	  let val = this[offset];
-	  let mul = 1;
-	  let i = 0;
-	  while (++i < byteLength && (mul *= 0x100)) {
-	    val += this[offset + i] * mul;
-	  }
-
-	  return val
-	};
-
-	Buffer.prototype.readUintBE =
-	Buffer.prototype.readUIntBE = function readUIntBE (offset, byteLength, noAssert) {
-	  offset = offset >>> 0;
-	  byteLength = byteLength >>> 0;
-	  if (!noAssert) {
-	    checkOffset(offset, byteLength, this.length);
-	  }
-
-	  let val = this[offset + --byteLength];
-	  let mul = 1;
-	  while (byteLength > 0 && (mul *= 0x100)) {
-	    val += this[offset + --byteLength] * mul;
-	  }
-
-	  return val
-	};
-
-	Buffer.prototype.readUint8 =
-	Buffer.prototype.readUInt8 = function readUInt8 (offset, noAssert) {
-	  offset = offset >>> 0;
-	  if (!noAssert) checkOffset(offset, 1, this.length);
-	  return this[offset]
-	};
-
-	Buffer.prototype.readUint16LE =
-	Buffer.prototype.readUInt16LE = function readUInt16LE (offset, noAssert) {
-	  offset = offset >>> 0;
-	  if (!noAssert) checkOffset(offset, 2, this.length);
-	  return this[offset] | (this[offset + 1] << 8)
-	};
-
-	Buffer.prototype.readUint16BE =
-	Buffer.prototype.readUInt16BE = function readUInt16BE (offset, noAssert) {
-	  offset = offset >>> 0;
-	  if (!noAssert) checkOffset(offset, 2, this.length);
-	  return (this[offset] << 8) | this[offset + 1]
-	};
-
-	Buffer.prototype.readUint32LE =
-	Buffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {
-	  offset = offset >>> 0;
-	  if (!noAssert) checkOffset(offset, 4, this.length);
-
-	  return ((this[offset]) |
-	      (this[offset + 1] << 8) |
-	      (this[offset + 2] << 16)) +
-	      (this[offset + 3] * 0x1000000)
-	};
-
-	Buffer.prototype.readUint32BE =
-	Buffer.prototype.readUInt32BE = function readUInt32BE (offset, noAssert) {
-	  offset = offset >>> 0;
-	  if (!noAssert) checkOffset(offset, 4, this.length);
-
-	  return (this[offset] * 0x1000000) +
-	    ((this[offset + 1] << 16) |
-	    (this[offset + 2] << 8) |
-	    this[offset + 3])
-	};
-
-	Buffer.prototype.readBigUInt64LE = defineBigIntMethod(function readBigUInt64LE (offset) {
-	  offset = offset >>> 0;
-	  validateNumber(offset, 'offset');
-	  const first = this[offset];
-	  const last = this[offset + 7];
-	  if (first === undefined || last === undefined) {
-	    boundsError(offset, this.length - 8);
-	  }
-
-	  const lo = first +
-	    this[++offset] * 2 ** 8 +
-	    this[++offset] * 2 ** 16 +
-	    this[++offset] * 2 ** 24;
-
-	  const hi = this[++offset] +
-	    this[++offset] * 2 ** 8 +
-	    this[++offset] * 2 ** 16 +
-	    last * 2 ** 24;
-
-	  return BigInt(lo) + (BigInt(hi) << BigInt(32))
-	});
-
-	Buffer.prototype.readBigUInt64BE = defineBigIntMethod(function readBigUInt64BE (offset) {
-	  offset = offset >>> 0;
-	  validateNumber(offset, 'offset');
-	  const first = this[offset];
-	  const last = this[offset + 7];
-	  if (first === undefined || last === undefined) {
-	    boundsError(offset, this.length - 8);
-	  }
-
-	  const hi = first * 2 ** 24 +
-	    this[++offset] * 2 ** 16 +
-	    this[++offset] * 2 ** 8 +
-	    this[++offset];
-
-	  const lo = this[++offset] * 2 ** 24 +
-	    this[++offset] * 2 ** 16 +
-	    this[++offset] * 2 ** 8 +
-	    last;
-
-	  return (BigInt(hi) << BigInt(32)) + BigInt(lo)
-	});
-
-	Buffer.prototype.readIntLE = function readIntLE (offset, byteLength, noAssert) {
-	  offset = offset >>> 0;
-	  byteLength = byteLength >>> 0;
-	  if (!noAssert) checkOffset(offset, byteLength, this.length);
-
-	  let val = this[offset];
-	  let mul = 1;
-	  let i = 0;
-	  while (++i < byteLength && (mul *= 0x100)) {
-	    val += this[offset + i] * mul;
-	  }
-	  mul *= 0x80;
-
-	  if (val >= mul) val -= Math.pow(2, 8 * byteLength);
-
-	  return val
-	};
-
-	Buffer.prototype.readIntBE = function readIntBE (offset, byteLength, noAssert) {
-	  offset = offset >>> 0;
-	  byteLength = byteLength >>> 0;
-	  if (!noAssert) checkOffset(offset, byteLength, this.length);
-
-	  let i = byteLength;
-	  let mul = 1;
-	  let val = this[offset + --i];
-	  while (i > 0 && (mul *= 0x100)) {
-	    val += this[offset + --i] * mul;
-	  }
-	  mul *= 0x80;
-
-	  if (val >= mul) val -= Math.pow(2, 8 * byteLength);
-
-	  return val
-	};
-
-	Buffer.prototype.readInt8 = function readInt8 (offset, noAssert) {
-	  offset = offset >>> 0;
-	  if (!noAssert) checkOffset(offset, 1, this.length);
-	  if (!(this[offset] & 0x80)) return (this[offset])
-	  return ((0xff - this[offset] + 1) * -1)
-	};
-
-	Buffer.prototype.readInt16LE = function readInt16LE (offset, noAssert) {
-	  offset = offset >>> 0;
-	  if (!noAssert) checkOffset(offset, 2, this.length);
-	  const val = this[offset] | (this[offset + 1] << 8);
-	  return (val & 0x8000) ? val | 0xFFFF0000 : val
-	};
-
-	Buffer.prototype.readInt16BE = function readInt16BE (offset, noAssert) {
-	  offset = offset >>> 0;
-	  if (!noAssert) checkOffset(offset, 2, this.length);
-	  const val = this[offset + 1] | (this[offset] << 8);
-	  return (val & 0x8000) ? val | 0xFFFF0000 : val
-	};
-
-	Buffer.prototype.readInt32LE = function readInt32LE (offset, noAssert) {
-	  offset = offset >>> 0;
-	  if (!noAssert) checkOffset(offset, 4, this.length);
-
-	  return (this[offset]) |
-	    (this[offset + 1] << 8) |
-	    (this[offset + 2] << 16) |
-	    (this[offset + 3] << 24)
-	};
-
-	Buffer.prototype.readInt32BE = function readInt32BE (offset, noAssert) {
-	  offset = offset >>> 0;
-	  if (!noAssert) checkOffset(offset, 4, this.length);
-
-	  return (this[offset] << 24) |
-	    (this[offset + 1] << 16) |
-	    (this[offset + 2] << 8) |
-	    (this[offset + 3])
-	};
-
-	Buffer.prototype.readBigInt64LE = defineBigIntMethod(function readBigInt64LE (offset) {
-	  offset = offset >>> 0;
-	  validateNumber(offset, 'offset');
-	  const first = this[offset];
-	  const last = this[offset + 7];
-	  if (first === undefined || last === undefined) {
-	    boundsError(offset, this.length - 8);
-	  }
-
-	  const val = this[offset + 4] +
-	    this[offset + 5] * 2 ** 8 +
-	    this[offset + 6] * 2 ** 16 +
-	    (last << 24); // Overflow
-
-	  return (BigInt(val) << BigInt(32)) +
-	    BigInt(first +
-	    this[++offset] * 2 ** 8 +
-	    this[++offset] * 2 ** 16 +
-	    this[++offset] * 2 ** 24)
-	});
-
-	Buffer.prototype.readBigInt64BE = defineBigIntMethod(function readBigInt64BE (offset) {
-	  offset = offset >>> 0;
-	  validateNumber(offset, 'offset');
-	  const first = this[offset];
-	  const last = this[offset + 7];
-	  if (first === undefined || last === undefined) {
-	    boundsError(offset, this.length - 8);
-	  }
-
-	  const val = (first << 24) + // Overflow
-	    this[++offset] * 2 ** 16 +
-	    this[++offset] * 2 ** 8 +
-	    this[++offset];
-
-	  return (BigInt(val) << BigInt(32)) +
-	    BigInt(this[++offset] * 2 ** 24 +
-	    this[++offset] * 2 ** 16 +
-	    this[++offset] * 2 ** 8 +
-	    last)
-	});
-
-	Buffer.prototype.readFloatLE = function readFloatLE (offset, noAssert) {
-	  offset = offset >>> 0;
-	  if (!noAssert) checkOffset(offset, 4, this.length);
-	  return ieee754$1.read(this, offset, true, 23, 4)
-	};
-
-	Buffer.prototype.readFloatBE = function readFloatBE (offset, noAssert) {
-	  offset = offset >>> 0;
-	  if (!noAssert) checkOffset(offset, 4, this.length);
-	  return ieee754$1.read(this, offset, false, 23, 4)
-	};
-
-	Buffer.prototype.readDoubleLE = function readDoubleLE (offset, noAssert) {
-	  offset = offset >>> 0;
-	  if (!noAssert) checkOffset(offset, 8, this.length);
-	  return ieee754$1.read(this, offset, true, 52, 8)
-	};
-
-	Buffer.prototype.readDoubleBE = function readDoubleBE (offset, noAssert) {
-	  offset = offset >>> 0;
-	  if (!noAssert) checkOffset(offset, 8, this.length);
-	  return ieee754$1.read(this, offset, false, 52, 8)
-	};
-
-	function checkInt (buf, value, offset, ext, max, min) {
-	  if (!Buffer.isBuffer(buf)) throw new TypeError('"buffer" argument must be a Buffer instance')
-	  if (value > max || value < min) throw new RangeError('"value" argument is out of bounds')
-	  if (offset + ext > buf.length) throw new RangeError('Index out of range')
-	}
-
-	Buffer.prototype.writeUintLE =
-	Buffer.prototype.writeUIntLE = function writeUIntLE (value, offset, byteLength, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  byteLength = byteLength >>> 0;
-	  if (!noAssert) {
-	    const maxBytes = Math.pow(2, 8 * byteLength) - 1;
-	    checkInt(this, value, offset, byteLength, maxBytes, 0);
-	  }
-
-	  let mul = 1;
-	  let i = 0;
-	  this[offset] = value & 0xFF;
-	  while (++i < byteLength && (mul *= 0x100)) {
-	    this[offset + i] = (value / mul) & 0xFF;
-	  }
-
-	  return offset + byteLength
-	};
-
-	Buffer.prototype.writeUintBE =
-	Buffer.prototype.writeUIntBE = function writeUIntBE (value, offset, byteLength, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  byteLength = byteLength >>> 0;
-	  if (!noAssert) {
-	    const maxBytes = Math.pow(2, 8 * byteLength) - 1;
-	    checkInt(this, value, offset, byteLength, maxBytes, 0);
-	  }
-
-	  let i = byteLength - 1;
-	  let mul = 1;
-	  this[offset + i] = value & 0xFF;
-	  while (--i >= 0 && (mul *= 0x100)) {
-	    this[offset + i] = (value / mul) & 0xFF;
-	  }
-
-	  return offset + byteLength
-	};
-
-	Buffer.prototype.writeUint8 =
-	Buffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0);
-	  this[offset] = (value & 0xff);
-	  return offset + 1
-	};
-
-	Buffer.prototype.writeUint16LE =
-	Buffer.prototype.writeUInt16LE = function writeUInt16LE (value, offset, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0);
-	  this[offset] = (value & 0xff);
-	  this[offset + 1] = (value >>> 8);
-	  return offset + 2
-	};
-
-	Buffer.prototype.writeUint16BE =
-	Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0);
-	  this[offset] = (value >>> 8);
-	  this[offset + 1] = (value & 0xff);
-	  return offset + 2
-	};
-
-	Buffer.prototype.writeUint32LE =
-	Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0);
-	  this[offset + 3] = (value >>> 24);
-	  this[offset + 2] = (value >>> 16);
-	  this[offset + 1] = (value >>> 8);
-	  this[offset] = (value & 0xff);
-	  return offset + 4
-	};
-
-	Buffer.prototype.writeUint32BE =
-	Buffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0);
-	  this[offset] = (value >>> 24);
-	  this[offset + 1] = (value >>> 16);
-	  this[offset + 2] = (value >>> 8);
-	  this[offset + 3] = (value & 0xff);
-	  return offset + 4
-	};
-
-	function wrtBigUInt64LE (buf, value, offset, min, max) {
-	  checkIntBI(value, min, max, buf, offset, 7);
-
-	  let lo = Number(value & BigInt(0xffffffff));
-	  buf[offset++] = lo;
-	  lo = lo >> 8;
-	  buf[offset++] = lo;
-	  lo = lo >> 8;
-	  buf[offset++] = lo;
-	  lo = lo >> 8;
-	  buf[offset++] = lo;
-	  let hi = Number(value >> BigInt(32) & BigInt(0xffffffff));
-	  buf[offset++] = hi;
-	  hi = hi >> 8;
-	  buf[offset++] = hi;
-	  hi = hi >> 8;
-	  buf[offset++] = hi;
-	  hi = hi >> 8;
-	  buf[offset++] = hi;
-	  return offset
-	}
-
-	function wrtBigUInt64BE (buf, value, offset, min, max) {
-	  checkIntBI(value, min, max, buf, offset, 7);
-
-	  let lo = Number(value & BigInt(0xffffffff));
-	  buf[offset + 7] = lo;
-	  lo = lo >> 8;
-	  buf[offset + 6] = lo;
-	  lo = lo >> 8;
-	  buf[offset + 5] = lo;
-	  lo = lo >> 8;
-	  buf[offset + 4] = lo;
-	  let hi = Number(value >> BigInt(32) & BigInt(0xffffffff));
-	  buf[offset + 3] = hi;
-	  hi = hi >> 8;
-	  buf[offset + 2] = hi;
-	  hi = hi >> 8;
-	  buf[offset + 1] = hi;
-	  hi = hi >> 8;
-	  buf[offset] = hi;
-	  return offset + 8
-	}
-
-	Buffer.prototype.writeBigUInt64LE = defineBigIntMethod(function writeBigUInt64LE (value, offset = 0) {
-	  return wrtBigUInt64LE(this, value, offset, BigInt(0), BigInt('0xffffffffffffffff'))
-	});
-
-	Buffer.prototype.writeBigUInt64BE = defineBigIntMethod(function writeBigUInt64BE (value, offset = 0) {
-	  return wrtBigUInt64BE(this, value, offset, BigInt(0), BigInt('0xffffffffffffffff'))
-	});
-
-	Buffer.prototype.writeIntLE = function writeIntLE (value, offset, byteLength, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  if (!noAssert) {
-	    const limit = Math.pow(2, (8 * byteLength) - 1);
-
-	    checkInt(this, value, offset, byteLength, limit - 1, -limit);
-	  }
-
-	  let i = 0;
-	  let mul = 1;
-	  let sub = 0;
-	  this[offset] = value & 0xFF;
-	  while (++i < byteLength && (mul *= 0x100)) {
-	    if (value < 0 && sub === 0 && this[offset + i - 1] !== 0) {
-	      sub = 1;
-	    }
-	    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF;
-	  }
-
-	  return offset + byteLength
-	};
-
-	Buffer.prototype.writeIntBE = function writeIntBE (value, offset, byteLength, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  if (!noAssert) {
-	    const limit = Math.pow(2, (8 * byteLength) - 1);
-
-	    checkInt(this, value, offset, byteLength, limit - 1, -limit);
-	  }
-
-	  let i = byteLength - 1;
-	  let mul = 1;
-	  let sub = 0;
-	  this[offset + i] = value & 0xFF;
-	  while (--i >= 0 && (mul *= 0x100)) {
-	    if (value < 0 && sub === 0 && this[offset + i + 1] !== 0) {
-	      sub = 1;
-	    }
-	    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF;
-	  }
-
-	  return offset + byteLength
-	};
-
-	Buffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -128);
-	  if (value < 0) value = 0xff + value + 1;
-	  this[offset] = (value & 0xff);
-	  return offset + 1
-	};
-
-	Buffer.prototype.writeInt16LE = function writeInt16LE (value, offset, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -32768);
-	  this[offset] = (value & 0xff);
-	  this[offset + 1] = (value >>> 8);
-	  return offset + 2
-	};
-
-	Buffer.prototype.writeInt16BE = function writeInt16BE (value, offset, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -32768);
-	  this[offset] = (value >>> 8);
-	  this[offset + 1] = (value & 0xff);
-	  return offset + 2
-	};
-
-	Buffer.prototype.writeInt32LE = function writeInt32LE (value, offset, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -2147483648);
-	  this[offset] = (value & 0xff);
-	  this[offset + 1] = (value >>> 8);
-	  this[offset + 2] = (value >>> 16);
-	  this[offset + 3] = (value >>> 24);
-	  return offset + 4
-	};
-
-	Buffer.prototype.writeInt32BE = function writeInt32BE (value, offset, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -2147483648);
-	  if (value < 0) value = 0xffffffff + value + 1;
-	  this[offset] = (value >>> 24);
-	  this[offset + 1] = (value >>> 16);
-	  this[offset + 2] = (value >>> 8);
-	  this[offset + 3] = (value & 0xff);
-	  return offset + 4
-	};
-
-	Buffer.prototype.writeBigInt64LE = defineBigIntMethod(function writeBigInt64LE (value, offset = 0) {
-	  return wrtBigUInt64LE(this, value, offset, -BigInt('0x8000000000000000'), BigInt('0x7fffffffffffffff'))
-	});
-
-	Buffer.prototype.writeBigInt64BE = defineBigIntMethod(function writeBigInt64BE (value, offset = 0) {
-	  return wrtBigUInt64BE(this, value, offset, -BigInt('0x8000000000000000'), BigInt('0x7fffffffffffffff'))
-	});
-
-	function checkIEEE754 (buf, value, offset, ext, max, min) {
-	  if (offset + ext > buf.length) throw new RangeError('Index out of range')
-	  if (offset < 0) throw new RangeError('Index out of range')
-	}
-
-	function writeFloat (buf, value, offset, littleEndian, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  if (!noAssert) {
-	    checkIEEE754(buf, value, offset, 4);
-	  }
-	  ieee754$1.write(buf, value, offset, littleEndian, 23, 4);
-	  return offset + 4
-	}
-
-	Buffer.prototype.writeFloatLE = function writeFloatLE (value, offset, noAssert) {
-	  return writeFloat(this, value, offset, true, noAssert)
-	};
-
-	Buffer.prototype.writeFloatBE = function writeFloatBE (value, offset, noAssert) {
-	  return writeFloat(this, value, offset, false, noAssert)
-	};
-
-	function writeDouble (buf, value, offset, littleEndian, noAssert) {
-	  value = +value;
-	  offset = offset >>> 0;
-	  if (!noAssert) {
-	    checkIEEE754(buf, value, offset, 8);
-	  }
-	  ieee754$1.write(buf, value, offset, littleEndian, 52, 8);
-	  return offset + 8
-	}
-
-	Buffer.prototype.writeDoubleLE = function writeDoubleLE (value, offset, noAssert) {
-	  return writeDouble(this, value, offset, true, noAssert)
-	};
-
-	Buffer.prototype.writeDoubleBE = function writeDoubleBE (value, offset, noAssert) {
-	  return writeDouble(this, value, offset, false, noAssert)
-	};
-
-	// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
-	Buffer.prototype.copy = function copy (target, targetStart, start, end) {
-	  if (!Buffer.isBuffer(target)) throw new TypeError('argument should be a Buffer')
-	  if (!start) start = 0;
-	  if (!end && end !== 0) end = this.length;
-	  if (targetStart >= target.length) targetStart = target.length;
-	  if (!targetStart) targetStart = 0;
-	  if (end > 0 && end < start) end = start;
-
-	  // Copy 0 bytes; we're done
-	  if (end === start) return 0
-	  if (target.length === 0 || this.length === 0) return 0
-
-	  // Fatal error conditions
-	  if (targetStart < 0) {
-	    throw new RangeError('targetStart out of bounds')
-	  }
-	  if (start < 0 || start >= this.length) throw new RangeError('Index out of range')
-	  if (end < 0) throw new RangeError('sourceEnd out of bounds')
-
-	  // Are we oob?
-	  if (end > this.length) end = this.length;
-	  if (target.length - targetStart < end - start) {
-	    end = target.length - targetStart + start;
-	  }
-
-	  const len = end - start;
-
-	  if (this === target && typeof Uint8Array.prototype.copyWithin === 'function') {
-	    // Use built-in when available, missing from IE11
-	    this.copyWithin(targetStart, start, end);
-	  } else {
-	    Uint8Array.prototype.set.call(
-	      target,
-	      this.subarray(start, end),
-	      targetStart
-	    );
-	  }
-
-	  return len
-	};
-
-	// Usage:
-	//    buffer.fill(number[, offset[, end]])
-	//    buffer.fill(buffer[, offset[, end]])
-	//    buffer.fill(string[, offset[, end]][, encoding])
-	Buffer.prototype.fill = function fill (val, start, end, encoding) {
-	  // Handle string cases:
-	  if (typeof val === 'string') {
-	    if (typeof start === 'string') {
-	      encoding = start;
-	      start = 0;
-	      end = this.length;
-	    } else if (typeof end === 'string') {
-	      encoding = end;
-	      end = this.length;
-	    }
-	    if (encoding !== undefined && typeof encoding !== 'string') {
-	      throw new TypeError('encoding must be a string')
-	    }
-	    if (typeof encoding === 'string' && !Buffer.isEncoding(encoding)) {
-	      throw new TypeError('Unknown encoding: ' + encoding)
-	    }
-	    if (val.length === 1) {
-	      const code = val.charCodeAt(0);
-	      if ((encoding === 'utf8' && code < 128) ||
-	          encoding === 'latin1') {
-	        // Fast path: If `val` fits into a single byte, use that numeric value.
-	        val = code;
-	      }
-	    }
-	  } else if (typeof val === 'number') {
-	    val = val & 255;
-	  } else if (typeof val === 'boolean') {
-	    val = Number(val);
-	  }
-
-	  // Invalid ranges are not set to a default, so can range check early.
-	  if (start < 0 || this.length < start || this.length < end) {
-	    throw new RangeError('Out of range index')
-	  }
-
-	  if (end <= start) {
-	    return this
-	  }
-
-	  start = start >>> 0;
-	  end = end === undefined ? this.length : end >>> 0;
-
-	  if (!val) val = 0;
-
-	  let i;
-	  if (typeof val === 'number') {
-	    for (i = start; i < end; ++i) {
-	      this[i] = val;
-	    }
-	  } else {
-	    const bytes = Buffer.isBuffer(val)
-	      ? val
-	      : Buffer.from(val, encoding);
-	    const len = bytes.length;
-	    if (len === 0) {
-	      throw new TypeError('The value "' + val +
-	        '" is invalid for argument "value"')
-	    }
-	    for (i = 0; i < end - start; ++i) {
-	      this[i + start] = bytes[i % len];
-	    }
-	  }
-
-	  return this
-	};
-
-	// CUSTOM ERRORS
-	// =============
-
-	// Simplified versions from Node, changed for Buffer-only usage
-	const errors = {};
-	function E (sym, getMessage, Base) {
-	  errors[sym] = class NodeError extends Base {
-	    constructor () {
-	      super();
-
-	      Object.defineProperty(this, 'message', {
-	        value: getMessage.apply(this, arguments),
-	        writable: true,
-	        configurable: true
-	      });
-
-	      // Add the error code to the name to include it in the stack trace.
-	      this.name = `${this.name} [${sym}]`;
-	      // Access the stack to generate the error message including the error code
-	      // from the name.
-	      this.stack; // eslint-disable-line no-unused-expressions
-	      // Reset the name to the actual name.
-	      delete this.name;
-	    }
-
-	    get code () {
-	      return sym
-	    }
-
-	    set code (value) {
-	      Object.defineProperty(this, 'code', {
-	        configurable: true,
-	        enumerable: true,
-	        value,
-	        writable: true
-	      });
-	    }
-
-	    toString () {
-	      return `${this.name} [${sym}]: ${this.message}`
-	    }
-	  };
-	}
-
-	E('ERR_BUFFER_OUT_OF_BOUNDS',
-	  function (name) {
-	    if (name) {
-	      return `${name} is outside of buffer bounds`
-	    }
-
-	    return 'Attempt to access memory outside buffer bounds'
-	  }, RangeError);
-	E('ERR_INVALID_ARG_TYPE',
-	  function (name, actual) {
-	    return `The "${name}" argument must be of type number. Received type ${typeof actual}`
-	  }, TypeError);
-	E('ERR_OUT_OF_RANGE',
-	  function (str, range, input) {
-	    let msg = `The value of "${str}" is out of range.`;
-	    let received = input;
-	    if (Number.isInteger(input) && Math.abs(input) > 2 ** 32) {
-	      received = addNumericalSeparator(String(input));
-	    } else if (typeof input === 'bigint') {
-	      received = String(input);
-	      if (input > BigInt(2) ** BigInt(32) || input < -(BigInt(2) ** BigInt(32))) {
-	        received = addNumericalSeparator(received);
-	      }
-	      received += 'n';
-	    }
-	    msg += ` It must be ${range}. Received ${received}`;
-	    return msg
-	  }, RangeError);
-
-	function addNumericalSeparator (val) {
-	  let res = '';
-	  let i = val.length;
-	  const start = val[0] === '-' ? 1 : 0;
-	  for (; i >= start + 4; i -= 3) {
-	    res = `_${val.slice(i - 3, i)}${res}`;
-	  }
-	  return `${val.slice(0, i)}${res}`
-	}
-
-	// CHECK FUNCTIONS
-	// ===============
-
-	function checkBounds (buf, offset, byteLength) {
-	  validateNumber(offset, 'offset');
-	  if (buf[offset] === undefined || buf[offset + byteLength] === undefined) {
-	    boundsError(offset, buf.length - (byteLength + 1));
-	  }
-	}
-
-	function checkIntBI (value, min, max, buf, offset, byteLength) {
-	  if (value > max || value < min) {
-	    const n = typeof min === 'bigint' ? 'n' : '';
-	    let range;
-	    {
-	      if (min === 0 || min === BigInt(0)) {
-	        range = `>= 0${n} and < 2${n} ** ${(byteLength + 1) * 8}${n}`;
-	      } else {
-	        range = `>= -(2${n} ** ${(byteLength + 1) * 8 - 1}${n}) and < 2 ** ` +
-	                `${(byteLength + 1) * 8 - 1}${n}`;
-	      }
-	    }
-	    throw new errors.ERR_OUT_OF_RANGE('value', range, value)
-	  }
-	  checkBounds(buf, offset, byteLength);
-	}
-
-	function validateNumber (value, name) {
-	  if (typeof value !== 'number') {
-	    throw new errors.ERR_INVALID_ARG_TYPE(name, 'number', value)
-	  }
-	}
-
-	function boundsError (value, length, type) {
-	  if (Math.floor(value) !== value) {
-	    validateNumber(value, type);
-	    throw new errors.ERR_OUT_OF_RANGE('offset', 'an integer', value)
-	  }
-
-	  if (length < 0) {
-	    throw new errors.ERR_BUFFER_OUT_OF_BOUNDS()
-	  }
-
-	  throw new errors.ERR_OUT_OF_RANGE('offset',
-	                                    `>= ${0} and <= ${length}`,
-	                                    value)
-	}
-
-	// HELPER FUNCTIONS
-	// ================
-
-	const INVALID_BASE64_RE = /[^+/0-9A-Za-z-_]/g;
-
-	function base64clean (str) {
-	  // Node takes equal signs as end of the Base64 encoding
-	  str = str.split('=')[0];
-	  // Node strips out invalid characters like \n and \t from the string, base64-js does not
-	  str = str.trim().replace(INVALID_BASE64_RE, '');
-	  // Node converts strings with length < 2 to ''
-	  if (str.length < 2) return ''
-	  // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not
-	  while (str.length % 4 !== 0) {
-	    str = str + '=';
-	  }
-	  return str
-	}
-
-	function utf8ToBytes (string, units) {
-	  units = units || Infinity;
-	  let codePoint;
-	  const length = string.length;
-	  let leadSurrogate = null;
-	  const bytes = [];
-
-	  for (let i = 0; i < length; ++i) {
-	    codePoint = string.charCodeAt(i);
-
-	    // is surrogate component
-	    if (codePoint > 0xD7FF && codePoint < 0xE000) {
-	      // last char was a lead
-	      if (!leadSurrogate) {
-	        // no lead yet
-	        if (codePoint > 0xDBFF) {
-	          // unexpected trail
-	          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
-	          continue
-	        } else if (i + 1 === length) {
-	          // unpaired lead
-	          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
-	          continue
-	        }
-
-	        // valid lead
-	        leadSurrogate = codePoint;
-
-	        continue
-	      }
-
-	      // 2 leads in a row
-	      if (codePoint < 0xDC00) {
-	        if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
-	        leadSurrogate = codePoint;
-	        continue
-	      }
-
-	      // valid surrogate pair
-	      codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000;
-	    } else if (leadSurrogate) {
-	      // valid bmp char, but last char was a lead
-	      if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
-	    }
-
-	    leadSurrogate = null;
-
-	    // encode utf8
-	    if (codePoint < 0x80) {
-	      if ((units -= 1) < 0) break
-	      bytes.push(codePoint);
-	    } else if (codePoint < 0x800) {
-	      if ((units -= 2) < 0) break
-	      bytes.push(
-	        codePoint >> 0x6 | 0xC0,
-	        codePoint & 0x3F | 0x80
-	      );
-	    } else if (codePoint < 0x10000) {
-	      if ((units -= 3) < 0) break
-	      bytes.push(
-	        codePoint >> 0xC | 0xE0,
-	        codePoint >> 0x6 & 0x3F | 0x80,
-	        codePoint & 0x3F | 0x80
-	      );
-	    } else if (codePoint < 0x110000) {
-	      if ((units -= 4) < 0) break
-	      bytes.push(
-	        codePoint >> 0x12 | 0xF0,
-	        codePoint >> 0xC & 0x3F | 0x80,
-	        codePoint >> 0x6 & 0x3F | 0x80,
-	        codePoint & 0x3F | 0x80
-	      );
-	    } else {
-	      throw new Error('Invalid code point')
-	    }
-	  }
-
-	  return bytes
-	}
-
-	function asciiToBytes (str) {
-	  const byteArray = [];
-	  for (let i = 0; i < str.length; ++i) {
-	    // Node's code seems to be doing this and not & 0x7F..
-	    byteArray.push(str.charCodeAt(i) & 0xFF);
-	  }
-	  return byteArray
-	}
-
-	function utf16leToBytes (str, units) {
-	  let c, hi, lo;
-	  const byteArray = [];
-	  for (let i = 0; i < str.length; ++i) {
-	    if ((units -= 2) < 0) break
-
-	    c = str.charCodeAt(i);
-	    hi = c >> 8;
-	    lo = c % 256;
-	    byteArray.push(lo);
-	    byteArray.push(hi);
-	  }
-
-	  return byteArray
-	}
-
-	function base64ToBytes (str) {
-	  return base64.toByteArray(base64clean(str))
-	}
-
-	function blitBuffer (src, dst, offset, length) {
-	  let i;
-	  for (i = 0; i < length; ++i) {
-	    if ((i + offset >= dst.length) || (i >= src.length)) break
-	    dst[i + offset] = src[i];
-	  }
-	  return i
-	}
-
-	// ArrayBuffer or Uint8Array objects from other contexts (i.e. iframes) do not pass
-	// the `instanceof` check but they should be treated as of that type.
-	// See: https://github.com/feross/buffer/issues/166
-	function isInstance (obj, type) {
-	  return obj instanceof type ||
-	    (obj != null && obj.constructor != null && obj.constructor.name != null &&
-	      obj.constructor.name === type.name)
-	}
-	function numberIsNaN (obj) {
-	  // For IE11 support
-	  return obj !== obj // eslint-disable-line no-self-compare
-	}
-
-	// Create lookup table for `toString('hex')`
-	// See: https://github.com/feross/buffer/issues/219
-	const hexSliceLookupTable = (function () {
-	  const alphabet = '0123456789abcdef';
-	  const table = new Array(256);
-	  for (let i = 0; i < 16; ++i) {
-	    const i16 = i * 16;
-	    for (let j = 0; j < 16; ++j) {
-	      table[i16 + j] = alphabet[i] + alphabet[j];
-	    }
-	  }
-	  return table
-	})();
-
-	// Return not function with Error if BigInt not supported
-	function defineBigIntMethod (fn) {
-	  return typeof BigInt === 'undefined' ? BufferBigIntNotDefined : fn
-	}
-
-	function BufferBigIntNotDefined () {
-	  throw new Error('BigInt not supported')
-	} 
-} (buffer));
+var hasRequiredBuffer;
+
+function requireBuffer () {
+	if (hasRequiredBuffer) return buffer;
+	hasRequiredBuffer = 1;
+	(function (exports$1) {
+
+		const base64 = requireBase64Js();
+		const ieee754 = requireIeee754();
+		const customInspectSymbol =
+		  (typeof Symbol === 'function' && typeof Symbol['for'] === 'function') // eslint-disable-line dot-notation
+		    ? Symbol['for']('nodejs.util.inspect.custom') // eslint-disable-line dot-notation
+		    : null;
+
+		exports$1.Buffer = Buffer;
+		exports$1.SlowBuffer = SlowBuffer;
+		exports$1.INSPECT_MAX_BYTES = 50;
+
+		const K_MAX_LENGTH = 0x7fffffff;
+		exports$1.kMaxLength = K_MAX_LENGTH;
+
+		/**
+		 * If `Buffer.TYPED_ARRAY_SUPPORT`:
+		 *   === true    Use Uint8Array implementation (fastest)
+		 *   === false   Print warning and recommend using `buffer` v4.x which has an Object
+		 *               implementation (most compatible, even IE6)
+		 *
+		 * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
+		 * Opera 11.6+, iOS 4.2+.
+		 *
+		 * We report that the browser does not support typed arrays if the are not subclassable
+		 * using __proto__. Firefox 4-29 lacks support for adding new properties to `Uint8Array`
+		 * (See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438). IE 10 lacks support
+		 * for __proto__ and has a buggy typed array implementation.
+		 */
+		Buffer.TYPED_ARRAY_SUPPORT = typedArraySupport();
+
+		if (!Buffer.TYPED_ARRAY_SUPPORT && typeof console !== 'undefined' &&
+		    typeof console.error === 'function') {
+		  console.error(
+		    'This browser lacks typed array (Uint8Array) support which is required by ' +
+		    '`buffer` v5.x. Use `buffer` v4.x if you require old browser support.'
+		  );
+		}
+
+		function typedArraySupport () {
+		  // Can typed array instances can be augmented?
+		  try {
+		    const arr = new Uint8Array(1);
+		    const proto = { foo: function () { return 42 } };
+		    Object.setPrototypeOf(proto, Uint8Array.prototype);
+		    Object.setPrototypeOf(arr, proto);
+		    return arr.foo() === 42
+		  } catch (e) {
+		    return false
+		  }
+		}
+
+		Object.defineProperty(Buffer.prototype, 'parent', {
+		  enumerable: true,
+		  get: function () {
+		    if (!Buffer.isBuffer(this)) return undefined
+		    return this.buffer
+		  }
+		});
+
+		Object.defineProperty(Buffer.prototype, 'offset', {
+		  enumerable: true,
+		  get: function () {
+		    if (!Buffer.isBuffer(this)) return undefined
+		    return this.byteOffset
+		  }
+		});
+
+		function createBuffer (length) {
+		  if (length > K_MAX_LENGTH) {
+		    throw new RangeError('The value "' + length + '" is invalid for option "size"')
+		  }
+		  // Return an augmented `Uint8Array` instance
+		  const buf = new Uint8Array(length);
+		  Object.setPrototypeOf(buf, Buffer.prototype);
+		  return buf
+		}
+
+		/**
+		 * The Buffer constructor returns instances of `Uint8Array` that have their
+		 * prototype changed to `Buffer.prototype`. Furthermore, `Buffer` is a subclass of
+		 * `Uint8Array`, so the returned instances will have all the node `Buffer` methods
+		 * and the `Uint8Array` methods. Square bracket notation works as expected -- it
+		 * returns a single octet.
+		 *
+		 * The `Uint8Array` prototype remains unmodified.
+		 */
+
+		function Buffer (arg, encodingOrOffset, length) {
+		  // Common case.
+		  if (typeof arg === 'number') {
+		    if (typeof encodingOrOffset === 'string') {
+		      throw new TypeError(
+		        'The "string" argument must be of type string. Received type number'
+		      )
+		    }
+		    return allocUnsafe(arg)
+		  }
+		  return from(arg, encodingOrOffset, length)
+		}
+
+		Buffer.poolSize = 8192; // not used by this implementation
+
+		function from (value, encodingOrOffset, length) {
+		  if (typeof value === 'string') {
+		    return fromString(value, encodingOrOffset)
+		  }
+
+		  if (ArrayBuffer.isView(value)) {
+		    return fromArrayView(value)
+		  }
+
+		  if (value == null) {
+		    throw new TypeError(
+		      'The first argument must be one of type string, Buffer, ArrayBuffer, Array, ' +
+		      'or Array-like Object. Received type ' + (typeof value)
+		    )
+		  }
+
+		  if (isInstance(value, ArrayBuffer) ||
+		      (value && isInstance(value.buffer, ArrayBuffer))) {
+		    return fromArrayBuffer(value, encodingOrOffset, length)
+		  }
+
+		  if (typeof SharedArrayBuffer !== 'undefined' &&
+		      (isInstance(value, SharedArrayBuffer) ||
+		      (value && isInstance(value.buffer, SharedArrayBuffer)))) {
+		    return fromArrayBuffer(value, encodingOrOffset, length)
+		  }
+
+		  if (typeof value === 'number') {
+		    throw new TypeError(
+		      'The "value" argument must not be of type number. Received type number'
+		    )
+		  }
+
+		  const valueOf = value.valueOf && value.valueOf();
+		  if (valueOf != null && valueOf !== value) {
+		    return Buffer.from(valueOf, encodingOrOffset, length)
+		  }
+
+		  const b = fromObject(value);
+		  if (b) return b
+
+		  if (typeof Symbol !== 'undefined' && Symbol.toPrimitive != null &&
+		      typeof value[Symbol.toPrimitive] === 'function') {
+		    return Buffer.from(value[Symbol.toPrimitive]('string'), encodingOrOffset, length)
+		  }
+
+		  throw new TypeError(
+		    'The first argument must be one of type string, Buffer, ArrayBuffer, Array, ' +
+		    'or Array-like Object. Received type ' + (typeof value)
+		  )
+		}
+
+		/**
+		 * Functionally equivalent to Buffer(arg, encoding) but throws a TypeError
+		 * if value is a number.
+		 * Buffer.from(str[, encoding])
+		 * Buffer.from(array)
+		 * Buffer.from(buffer)
+		 * Buffer.from(arrayBuffer[, byteOffset[, length]])
+		 **/
+		Buffer.from = function (value, encodingOrOffset, length) {
+		  return from(value, encodingOrOffset, length)
+		};
+
+		// Note: Change prototype *after* Buffer.from is defined to workaround Chrome bug:
+		// https://github.com/feross/buffer/pull/148
+		Object.setPrototypeOf(Buffer.prototype, Uint8Array.prototype);
+		Object.setPrototypeOf(Buffer, Uint8Array);
+
+		function assertSize (size) {
+		  if (typeof size !== 'number') {
+		    throw new TypeError('"size" argument must be of type number')
+		  } else if (size < 0) {
+		    throw new RangeError('The value "' + size + '" is invalid for option "size"')
+		  }
+		}
+
+		function alloc (size, fill, encoding) {
+		  assertSize(size);
+		  if (size <= 0) {
+		    return createBuffer(size)
+		  }
+		  if (fill !== undefined) {
+		    // Only pay attention to encoding if it's a string. This
+		    // prevents accidentally sending in a number that would
+		    // be interpreted as a start offset.
+		    return typeof encoding === 'string'
+		      ? createBuffer(size).fill(fill, encoding)
+		      : createBuffer(size).fill(fill)
+		  }
+		  return createBuffer(size)
+		}
+
+		/**
+		 * Creates a new filled Buffer instance.
+		 * alloc(size[, fill[, encoding]])
+		 **/
+		Buffer.alloc = function (size, fill, encoding) {
+		  return alloc(size, fill, encoding)
+		};
+
+		function allocUnsafe (size) {
+		  assertSize(size);
+		  return createBuffer(size < 0 ? 0 : checked(size) | 0)
+		}
+
+		/**
+		 * Equivalent to Buffer(num), by default creates a non-zero-filled Buffer instance.
+		 * */
+		Buffer.allocUnsafe = function (size) {
+		  return allocUnsafe(size)
+		};
+		/**
+		 * Equivalent to SlowBuffer(num), by default creates a non-zero-filled Buffer instance.
+		 */
+		Buffer.allocUnsafeSlow = function (size) {
+		  return allocUnsafe(size)
+		};
+
+		function fromString (string, encoding) {
+		  if (typeof encoding !== 'string' || encoding === '') {
+		    encoding = 'utf8';
+		  }
+
+		  if (!Buffer.isEncoding(encoding)) {
+		    throw new TypeError('Unknown encoding: ' + encoding)
+		  }
+
+		  const length = byteLength(string, encoding) | 0;
+		  let buf = createBuffer(length);
+
+		  const actual = buf.write(string, encoding);
+
+		  if (actual !== length) {
+		    // Writing a hex string, for example, that contains invalid characters will
+		    // cause everything after the first invalid character to be ignored. (e.g.
+		    // 'abxxcd' will be treated as 'ab')
+		    buf = buf.slice(0, actual);
+		  }
+
+		  return buf
+		}
+
+		function fromArrayLike (array) {
+		  const length = array.length < 0 ? 0 : checked(array.length) | 0;
+		  const buf = createBuffer(length);
+		  for (let i = 0; i < length; i += 1) {
+		    buf[i] = array[i] & 255;
+		  }
+		  return buf
+		}
+
+		function fromArrayView (arrayView) {
+		  if (isInstance(arrayView, Uint8Array)) {
+		    const copy = new Uint8Array(arrayView);
+		    return fromArrayBuffer(copy.buffer, copy.byteOffset, copy.byteLength)
+		  }
+		  return fromArrayLike(arrayView)
+		}
+
+		function fromArrayBuffer (array, byteOffset, length) {
+		  if (byteOffset < 0 || array.byteLength < byteOffset) {
+		    throw new RangeError('"offset" is outside of buffer bounds')
+		  }
+
+		  if (array.byteLength < byteOffset + (length || 0)) {
+		    throw new RangeError('"length" is outside of buffer bounds')
+		  }
+
+		  let buf;
+		  if (byteOffset === undefined && length === undefined) {
+		    buf = new Uint8Array(array);
+		  } else if (length === undefined) {
+		    buf = new Uint8Array(array, byteOffset);
+		  } else {
+		    buf = new Uint8Array(array, byteOffset, length);
+		  }
+
+		  // Return an augmented `Uint8Array` instance
+		  Object.setPrototypeOf(buf, Buffer.prototype);
+
+		  return buf
+		}
+
+		function fromObject (obj) {
+		  if (Buffer.isBuffer(obj)) {
+		    const len = checked(obj.length) | 0;
+		    const buf = createBuffer(len);
+
+		    if (buf.length === 0) {
+		      return buf
+		    }
+
+		    obj.copy(buf, 0, 0, len);
+		    return buf
+		  }
+
+		  if (obj.length !== undefined) {
+		    if (typeof obj.length !== 'number' || numberIsNaN(obj.length)) {
+		      return createBuffer(0)
+		    }
+		    return fromArrayLike(obj)
+		  }
+
+		  if (obj.type === 'Buffer' && Array.isArray(obj.data)) {
+		    return fromArrayLike(obj.data)
+		  }
+		}
+
+		function checked (length) {
+		  // Note: cannot use `length < K_MAX_LENGTH` here because that fails when
+		  // length is NaN (which is otherwise coerced to zero.)
+		  if (length >= K_MAX_LENGTH) {
+		    throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
+		                         'size: 0x' + K_MAX_LENGTH.toString(16) + ' bytes')
+		  }
+		  return length | 0
+		}
+
+		function SlowBuffer (length) {
+		  if (+length != length) { // eslint-disable-line eqeqeq
+		    length = 0;
+		  }
+		  return Buffer.alloc(+length)
+		}
+
+		Buffer.isBuffer = function isBuffer (b) {
+		  return b != null && b._isBuffer === true &&
+		    b !== Buffer.prototype // so Buffer.isBuffer(Buffer.prototype) will be false
+		};
+
+		Buffer.compare = function compare (a, b) {
+		  if (isInstance(a, Uint8Array)) a = Buffer.from(a, a.offset, a.byteLength);
+		  if (isInstance(b, Uint8Array)) b = Buffer.from(b, b.offset, b.byteLength);
+		  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
+		    throw new TypeError(
+		      'The "buf1", "buf2" arguments must be one of type Buffer or Uint8Array'
+		    )
+		  }
+
+		  if (a === b) return 0
+
+		  let x = a.length;
+		  let y = b.length;
+
+		  for (let i = 0, len = Math.min(x, y); i < len; ++i) {
+		    if (a[i] !== b[i]) {
+		      x = a[i];
+		      y = b[i];
+		      break
+		    }
+		  }
+
+		  if (x < y) return -1
+		  if (y < x) return 1
+		  return 0
+		};
+
+		Buffer.isEncoding = function isEncoding (encoding) {
+		  switch (String(encoding).toLowerCase()) {
+		    case 'hex':
+		    case 'utf8':
+		    case 'utf-8':
+		    case 'ascii':
+		    case 'latin1':
+		    case 'binary':
+		    case 'base64':
+		    case 'ucs2':
+		    case 'ucs-2':
+		    case 'utf16le':
+		    case 'utf-16le':
+		      return true
+		    default:
+		      return false
+		  }
+		};
+
+		Buffer.concat = function concat (list, length) {
+		  if (!Array.isArray(list)) {
+		    throw new TypeError('"list" argument must be an Array of Buffers')
+		  }
+
+		  if (list.length === 0) {
+		    return Buffer.alloc(0)
+		  }
+
+		  let i;
+		  if (length === undefined) {
+		    length = 0;
+		    for (i = 0; i < list.length; ++i) {
+		      length += list[i].length;
+		    }
+		  }
+
+		  const buffer = Buffer.allocUnsafe(length);
+		  let pos = 0;
+		  for (i = 0; i < list.length; ++i) {
+		    let buf = list[i];
+		    if (isInstance(buf, Uint8Array)) {
+		      if (pos + buf.length > buffer.length) {
+		        if (!Buffer.isBuffer(buf)) buf = Buffer.from(buf);
+		        buf.copy(buffer, pos);
+		      } else {
+		        Uint8Array.prototype.set.call(
+		          buffer,
+		          buf,
+		          pos
+		        );
+		      }
+		    } else if (!Buffer.isBuffer(buf)) {
+		      throw new TypeError('"list" argument must be an Array of Buffers')
+		    } else {
+		      buf.copy(buffer, pos);
+		    }
+		    pos += buf.length;
+		  }
+		  return buffer
+		};
+
+		function byteLength (string, encoding) {
+		  if (Buffer.isBuffer(string)) {
+		    return string.length
+		  }
+		  if (ArrayBuffer.isView(string) || isInstance(string, ArrayBuffer)) {
+		    return string.byteLength
+		  }
+		  if (typeof string !== 'string') {
+		    throw new TypeError(
+		      'The "string" argument must be one of type string, Buffer, or ArrayBuffer. ' +
+		      'Received type ' + typeof string
+		    )
+		  }
+
+		  const len = string.length;
+		  const mustMatch = (arguments.length > 2 && arguments[2] === true);
+		  if (!mustMatch && len === 0) return 0
+
+		  // Use a for loop to avoid recursion
+		  let loweredCase = false;
+		  for (;;) {
+		    switch (encoding) {
+		      case 'ascii':
+		      case 'latin1':
+		      case 'binary':
+		        return len
+		      case 'utf8':
+		      case 'utf-8':
+		        return utf8ToBytes(string).length
+		      case 'ucs2':
+		      case 'ucs-2':
+		      case 'utf16le':
+		      case 'utf-16le':
+		        return len * 2
+		      case 'hex':
+		        return len >>> 1
+		      case 'base64':
+		        return base64ToBytes(string).length
+		      default:
+		        if (loweredCase) {
+		          return mustMatch ? -1 : utf8ToBytes(string).length // assume utf8
+		        }
+		        encoding = ('' + encoding).toLowerCase();
+		        loweredCase = true;
+		    }
+		  }
+		}
+		Buffer.byteLength = byteLength;
+
+		function slowToString (encoding, start, end) {
+		  let loweredCase = false;
+
+		  // No need to verify that "this.length <= MAX_UINT32" since it's a read-only
+		  // property of a typed array.
+
+		  // This behaves neither like String nor Uint8Array in that we set start/end
+		  // to their upper/lower bounds if the value passed is out of range.
+		  // undefined is handled specially as per ECMA-262 6th Edition,
+		  // Section 13.3.3.7 Runtime Semantics: KeyedBindingInitialization.
+		  if (start === undefined || start < 0) {
+		    start = 0;
+		  }
+		  // Return early if start > this.length. Done here to prevent potential uint32
+		  // coercion fail below.
+		  if (start > this.length) {
+		    return ''
+		  }
+
+		  if (end === undefined || end > this.length) {
+		    end = this.length;
+		  }
+
+		  if (end <= 0) {
+		    return ''
+		  }
+
+		  // Force coercion to uint32. This will also coerce falsey/NaN values to 0.
+		  end >>>= 0;
+		  start >>>= 0;
+
+		  if (end <= start) {
+		    return ''
+		  }
+
+		  if (!encoding) encoding = 'utf8';
+
+		  while (true) {
+		    switch (encoding) {
+		      case 'hex':
+		        return hexSlice(this, start, end)
+
+		      case 'utf8':
+		      case 'utf-8':
+		        return utf8Slice(this, start, end)
+
+		      case 'ascii':
+		        return asciiSlice(this, start, end)
+
+		      case 'latin1':
+		      case 'binary':
+		        return latin1Slice(this, start, end)
+
+		      case 'base64':
+		        return base64Slice(this, start, end)
+
+		      case 'ucs2':
+		      case 'ucs-2':
+		      case 'utf16le':
+		      case 'utf-16le':
+		        return utf16leSlice(this, start, end)
+
+		      default:
+		        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
+		        encoding = (encoding + '').toLowerCase();
+		        loweredCase = true;
+		    }
+		  }
+		}
+
+		// This property is used by `Buffer.isBuffer` (and the `is-buffer` npm package)
+		// to detect a Buffer instance. It's not possible to use `instanceof Buffer`
+		// reliably in a browserify context because there could be multiple different
+		// copies of the 'buffer' package in use. This method works even for Buffer
+		// instances that were created from another copy of the `buffer` package.
+		// See: https://github.com/feross/buffer/issues/154
+		Buffer.prototype._isBuffer = true;
+
+		function swap (b, n, m) {
+		  const i = b[n];
+		  b[n] = b[m];
+		  b[m] = i;
+		}
+
+		Buffer.prototype.swap16 = function swap16 () {
+		  const len = this.length;
+		  if (len % 2 !== 0) {
+		    throw new RangeError('Buffer size must be a multiple of 16-bits')
+		  }
+		  for (let i = 0; i < len; i += 2) {
+		    swap(this, i, i + 1);
+		  }
+		  return this
+		};
+
+		Buffer.prototype.swap32 = function swap32 () {
+		  const len = this.length;
+		  if (len % 4 !== 0) {
+		    throw new RangeError('Buffer size must be a multiple of 32-bits')
+		  }
+		  for (let i = 0; i < len; i += 4) {
+		    swap(this, i, i + 3);
+		    swap(this, i + 1, i + 2);
+		  }
+		  return this
+		};
+
+		Buffer.prototype.swap64 = function swap64 () {
+		  const len = this.length;
+		  if (len % 8 !== 0) {
+		    throw new RangeError('Buffer size must be a multiple of 64-bits')
+		  }
+		  for (let i = 0; i < len; i += 8) {
+		    swap(this, i, i + 7);
+		    swap(this, i + 1, i + 6);
+		    swap(this, i + 2, i + 5);
+		    swap(this, i + 3, i + 4);
+		  }
+		  return this
+		};
+
+		Buffer.prototype.toString = function toString () {
+		  const length = this.length;
+		  if (length === 0) return ''
+		  if (arguments.length === 0) return utf8Slice(this, 0, length)
+		  return slowToString.apply(this, arguments)
+		};
+
+		Buffer.prototype.toLocaleString = Buffer.prototype.toString;
+
+		Buffer.prototype.equals = function equals (b) {
+		  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
+		  if (this === b) return true
+		  return Buffer.compare(this, b) === 0
+		};
+
+		Buffer.prototype.inspect = function inspect () {
+		  let str = '';
+		  const max = exports$1.INSPECT_MAX_BYTES;
+		  str = this.toString('hex', 0, max).replace(/(.{2})/g, '$1 ').trim();
+		  if (this.length > max) str += ' ... ';
+		  return '<Buffer ' + str + '>'
+		};
+		if (customInspectSymbol) {
+		  Buffer.prototype[customInspectSymbol] = Buffer.prototype.inspect;
+		}
+
+		Buffer.prototype.compare = function compare (target, start, end, thisStart, thisEnd) {
+		  if (isInstance(target, Uint8Array)) {
+		    target = Buffer.from(target, target.offset, target.byteLength);
+		  }
+		  if (!Buffer.isBuffer(target)) {
+		    throw new TypeError(
+		      'The "target" argument must be one of type Buffer or Uint8Array. ' +
+		      'Received type ' + (typeof target)
+		    )
+		  }
+
+		  if (start === undefined) {
+		    start = 0;
+		  }
+		  if (end === undefined) {
+		    end = target ? target.length : 0;
+		  }
+		  if (thisStart === undefined) {
+		    thisStart = 0;
+		  }
+		  if (thisEnd === undefined) {
+		    thisEnd = this.length;
+		  }
+
+		  if (start < 0 || end > target.length || thisStart < 0 || thisEnd > this.length) {
+		    throw new RangeError('out of range index')
+		  }
+
+		  if (thisStart >= thisEnd && start >= end) {
+		    return 0
+		  }
+		  if (thisStart >= thisEnd) {
+		    return -1
+		  }
+		  if (start >= end) {
+		    return 1
+		  }
+
+		  start >>>= 0;
+		  end >>>= 0;
+		  thisStart >>>= 0;
+		  thisEnd >>>= 0;
+
+		  if (this === target) return 0
+
+		  let x = thisEnd - thisStart;
+		  let y = end - start;
+		  const len = Math.min(x, y);
+
+		  const thisCopy = this.slice(thisStart, thisEnd);
+		  const targetCopy = target.slice(start, end);
+
+		  for (let i = 0; i < len; ++i) {
+		    if (thisCopy[i] !== targetCopy[i]) {
+		      x = thisCopy[i];
+		      y = targetCopy[i];
+		      break
+		    }
+		  }
+
+		  if (x < y) return -1
+		  if (y < x) return 1
+		  return 0
+		};
+
+		// Finds either the first index of `val` in `buffer` at offset >= `byteOffset`,
+		// OR the last index of `val` in `buffer` at offset <= `byteOffset`.
+		//
+		// Arguments:
+		// - buffer - a Buffer to search
+		// - val - a string, Buffer, or number
+		// - byteOffset - an index into `buffer`; will be clamped to an int32
+		// - encoding - an optional encoding, relevant is val is a string
+		// - dir - true for indexOf, false for lastIndexOf
+		function bidirectionalIndexOf (buffer, val, byteOffset, encoding, dir) {
+		  // Empty buffer means no match
+		  if (buffer.length === 0) return -1
+
+		  // Normalize byteOffset
+		  if (typeof byteOffset === 'string') {
+		    encoding = byteOffset;
+		    byteOffset = 0;
+		  } else if (byteOffset > 0x7fffffff) {
+		    byteOffset = 0x7fffffff;
+		  } else if (byteOffset < -2147483648) {
+		    byteOffset = -2147483648;
+		  }
+		  byteOffset = +byteOffset; // Coerce to Number.
+		  if (numberIsNaN(byteOffset)) {
+		    // byteOffset: it it's undefined, null, NaN, "foo", etc, search whole buffer
+		    byteOffset = dir ? 0 : (buffer.length - 1);
+		  }
+
+		  // Normalize byteOffset: negative offsets start from the end of the buffer
+		  if (byteOffset < 0) byteOffset = buffer.length + byteOffset;
+		  if (byteOffset >= buffer.length) {
+		    if (dir) return -1
+		    else byteOffset = buffer.length - 1;
+		  } else if (byteOffset < 0) {
+		    if (dir) byteOffset = 0;
+		    else return -1
+		  }
+
+		  // Normalize val
+		  if (typeof val === 'string') {
+		    val = Buffer.from(val, encoding);
+		  }
+
+		  // Finally, search either indexOf (if dir is true) or lastIndexOf
+		  if (Buffer.isBuffer(val)) {
+		    // Special case: looking for empty string/buffer always fails
+		    if (val.length === 0) {
+		      return -1
+		    }
+		    return arrayIndexOf(buffer, val, byteOffset, encoding, dir)
+		  } else if (typeof val === 'number') {
+		    val = val & 0xFF; // Search for a byte value [0-255]
+		    if (typeof Uint8Array.prototype.indexOf === 'function') {
+		      if (dir) {
+		        return Uint8Array.prototype.indexOf.call(buffer, val, byteOffset)
+		      } else {
+		        return Uint8Array.prototype.lastIndexOf.call(buffer, val, byteOffset)
+		      }
+		    }
+		    return arrayIndexOf(buffer, [val], byteOffset, encoding, dir)
+		  }
+
+		  throw new TypeError('val must be string, number or Buffer')
+		}
+
+		function arrayIndexOf (arr, val, byteOffset, encoding, dir) {
+		  let indexSize = 1;
+		  let arrLength = arr.length;
+		  let valLength = val.length;
+
+		  if (encoding !== undefined) {
+		    encoding = String(encoding).toLowerCase();
+		    if (encoding === 'ucs2' || encoding === 'ucs-2' ||
+		        encoding === 'utf16le' || encoding === 'utf-16le') {
+		      if (arr.length < 2 || val.length < 2) {
+		        return -1
+		      }
+		      indexSize = 2;
+		      arrLength /= 2;
+		      valLength /= 2;
+		      byteOffset /= 2;
+		    }
+		  }
+
+		  function read (buf, i) {
+		    if (indexSize === 1) {
+		      return buf[i]
+		    } else {
+		      return buf.readUInt16BE(i * indexSize)
+		    }
+		  }
+
+		  let i;
+		  if (dir) {
+		    let foundIndex = -1;
+		    for (i = byteOffset; i < arrLength; i++) {
+		      if (read(arr, i) === read(val, foundIndex === -1 ? 0 : i - foundIndex)) {
+		        if (foundIndex === -1) foundIndex = i;
+		        if (i - foundIndex + 1 === valLength) return foundIndex * indexSize
+		      } else {
+		        if (foundIndex !== -1) i -= i - foundIndex;
+		        foundIndex = -1;
+		      }
+		    }
+		  } else {
+		    if (byteOffset + valLength > arrLength) byteOffset = arrLength - valLength;
+		    for (i = byteOffset; i >= 0; i--) {
+		      let found = true;
+		      for (let j = 0; j < valLength; j++) {
+		        if (read(arr, i + j) !== read(val, j)) {
+		          found = false;
+		          break
+		        }
+		      }
+		      if (found) return i
+		    }
+		  }
+
+		  return -1
+		}
+
+		Buffer.prototype.includes = function includes (val, byteOffset, encoding) {
+		  return this.indexOf(val, byteOffset, encoding) !== -1
+		};
+
+		Buffer.prototype.indexOf = function indexOf (val, byteOffset, encoding) {
+		  return bidirectionalIndexOf(this, val, byteOffset, encoding, true)
+		};
+
+		Buffer.prototype.lastIndexOf = function lastIndexOf (val, byteOffset, encoding) {
+		  return bidirectionalIndexOf(this, val, byteOffset, encoding, false)
+		};
+
+		function hexWrite (buf, string, offset, length) {
+		  offset = Number(offset) || 0;
+		  const remaining = buf.length - offset;
+		  if (!length) {
+		    length = remaining;
+		  } else {
+		    length = Number(length);
+		    if (length > remaining) {
+		      length = remaining;
+		    }
+		  }
+
+		  const strLen = string.length;
+
+		  if (length > strLen / 2) {
+		    length = strLen / 2;
+		  }
+		  let i;
+		  for (i = 0; i < length; ++i) {
+		    const parsed = parseInt(string.substr(i * 2, 2), 16);
+		    if (numberIsNaN(parsed)) return i
+		    buf[offset + i] = parsed;
+		  }
+		  return i
+		}
+
+		function utf8Write (buf, string, offset, length) {
+		  return blitBuffer(utf8ToBytes(string, buf.length - offset), buf, offset, length)
+		}
+
+		function asciiWrite (buf, string, offset, length) {
+		  return blitBuffer(asciiToBytes(string), buf, offset, length)
+		}
+
+		function base64Write (buf, string, offset, length) {
+		  return blitBuffer(base64ToBytes(string), buf, offset, length)
+		}
+
+		function ucs2Write (buf, string, offset, length) {
+		  return blitBuffer(utf16leToBytes(string, buf.length - offset), buf, offset, length)
+		}
+
+		Buffer.prototype.write = function write (string, offset, length, encoding) {
+		  // Buffer#write(string)
+		  if (offset === undefined) {
+		    encoding = 'utf8';
+		    length = this.length;
+		    offset = 0;
+		  // Buffer#write(string, encoding)
+		  } else if (length === undefined && typeof offset === 'string') {
+		    encoding = offset;
+		    length = this.length;
+		    offset = 0;
+		  // Buffer#write(string, offset[, length][, encoding])
+		  } else if (isFinite(offset)) {
+		    offset = offset >>> 0;
+		    if (isFinite(length)) {
+		      length = length >>> 0;
+		      if (encoding === undefined) encoding = 'utf8';
+		    } else {
+		      encoding = length;
+		      length = undefined;
+		    }
+		  } else {
+		    throw new Error(
+		      'Buffer.write(string, encoding, offset[, length]) is no longer supported'
+		    )
+		  }
+
+		  const remaining = this.length - offset;
+		  if (length === undefined || length > remaining) length = remaining;
+
+		  if ((string.length > 0 && (length < 0 || offset < 0)) || offset > this.length) {
+		    throw new RangeError('Attempt to write outside buffer bounds')
+		  }
+
+		  if (!encoding) encoding = 'utf8';
+
+		  let loweredCase = false;
+		  for (;;) {
+		    switch (encoding) {
+		      case 'hex':
+		        return hexWrite(this, string, offset, length)
+
+		      case 'utf8':
+		      case 'utf-8':
+		        return utf8Write(this, string, offset, length)
+
+		      case 'ascii':
+		      case 'latin1':
+		      case 'binary':
+		        return asciiWrite(this, string, offset, length)
+
+		      case 'base64':
+		        // Warning: maxLength not taken into account in base64Write
+		        return base64Write(this, string, offset, length)
+
+		      case 'ucs2':
+		      case 'ucs-2':
+		      case 'utf16le':
+		      case 'utf-16le':
+		        return ucs2Write(this, string, offset, length)
+
+		      default:
+		        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
+		        encoding = ('' + encoding).toLowerCase();
+		        loweredCase = true;
+		    }
+		  }
+		};
+
+		Buffer.prototype.toJSON = function toJSON () {
+		  return {
+		    type: 'Buffer',
+		    data: Array.prototype.slice.call(this._arr || this, 0)
+		  }
+		};
+
+		function base64Slice (buf, start, end) {
+		  if (start === 0 && end === buf.length) {
+		    return base64.fromByteArray(buf)
+		  } else {
+		    return base64.fromByteArray(buf.slice(start, end))
+		  }
+		}
+
+		function utf8Slice (buf, start, end) {
+		  end = Math.min(buf.length, end);
+		  const res = [];
+
+		  let i = start;
+		  while (i < end) {
+		    const firstByte = buf[i];
+		    let codePoint = null;
+		    let bytesPerSequence = (firstByte > 0xEF)
+		      ? 4
+		      : (firstByte > 0xDF)
+		          ? 3
+		          : (firstByte > 0xBF)
+		              ? 2
+		              : 1;
+
+		    if (i + bytesPerSequence <= end) {
+		      let secondByte, thirdByte, fourthByte, tempCodePoint;
+
+		      switch (bytesPerSequence) {
+		        case 1:
+		          if (firstByte < 0x80) {
+		            codePoint = firstByte;
+		          }
+		          break
+		        case 2:
+		          secondByte = buf[i + 1];
+		          if ((secondByte & 0xC0) === 0x80) {
+		            tempCodePoint = (firstByte & 0x1F) << 0x6 | (secondByte & 0x3F);
+		            if (tempCodePoint > 0x7F) {
+		              codePoint = tempCodePoint;
+		            }
+		          }
+		          break
+		        case 3:
+		          secondByte = buf[i + 1];
+		          thirdByte = buf[i + 2];
+		          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {
+		            tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | (thirdByte & 0x3F);
+		            if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {
+		              codePoint = tempCodePoint;
+		            }
+		          }
+		          break
+		        case 4:
+		          secondByte = buf[i + 1];
+		          thirdByte = buf[i + 2];
+		          fourthByte = buf[i + 3];
+		          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {
+		            tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | (fourthByte & 0x3F);
+		            if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {
+		              codePoint = tempCodePoint;
+		            }
+		          }
+		      }
+		    }
+
+		    if (codePoint === null) {
+		      // we did not generate a valid codePoint so insert a
+		      // replacement char (U+FFFD) and advance only 1 byte
+		      codePoint = 0xFFFD;
+		      bytesPerSequence = 1;
+		    } else if (codePoint > 0xFFFF) {
+		      // encode to utf16 (surrogate pair dance)
+		      codePoint -= 0x10000;
+		      res.push(codePoint >>> 10 & 0x3FF | 0xD800);
+		      codePoint = 0xDC00 | codePoint & 0x3FF;
+		    }
+
+		    res.push(codePoint);
+		    i += bytesPerSequence;
+		  }
+
+		  return decodeCodePointsArray(res)
+		}
+
+		// Based on http://stackoverflow.com/a/22747272/680742, the browser with
+		// the lowest limit is Chrome, with 0x10000 args.
+		// We go 1 magnitude less, for safety
+		const MAX_ARGUMENTS_LENGTH = 0x1000;
+
+		function decodeCodePointsArray (codePoints) {
+		  const len = codePoints.length;
+		  if (len <= MAX_ARGUMENTS_LENGTH) {
+		    return String.fromCharCode.apply(String, codePoints) // avoid extra slice()
+		  }
+
+		  // Decode in chunks to avoid "call stack size exceeded".
+		  let res = '';
+		  let i = 0;
+		  while (i < len) {
+		    res += String.fromCharCode.apply(
+		      String,
+		      codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH)
+		    );
+		  }
+		  return res
+		}
+
+		function asciiSlice (buf, start, end) {
+		  let ret = '';
+		  end = Math.min(buf.length, end);
+
+		  for (let i = start; i < end; ++i) {
+		    ret += String.fromCharCode(buf[i] & 0x7F);
+		  }
+		  return ret
+		}
+
+		function latin1Slice (buf, start, end) {
+		  let ret = '';
+		  end = Math.min(buf.length, end);
+
+		  for (let i = start; i < end; ++i) {
+		    ret += String.fromCharCode(buf[i]);
+		  }
+		  return ret
+		}
+
+		function hexSlice (buf, start, end) {
+		  const len = buf.length;
+
+		  if (!start || start < 0) start = 0;
+		  if (!end || end < 0 || end > len) end = len;
+
+		  let out = '';
+		  for (let i = start; i < end; ++i) {
+		    out += hexSliceLookupTable[buf[i]];
+		  }
+		  return out
+		}
+
+		function utf16leSlice (buf, start, end) {
+		  const bytes = buf.slice(start, end);
+		  let res = '';
+		  // If bytes.length is odd, the last 8 bits must be ignored (same as node.js)
+		  for (let i = 0; i < bytes.length - 1; i += 2) {
+		    res += String.fromCharCode(bytes[i] + (bytes[i + 1] * 256));
+		  }
+		  return res
+		}
+
+		Buffer.prototype.slice = function slice (start, end) {
+		  const len = this.length;
+		  start = ~~start;
+		  end = end === undefined ? len : ~~end;
+
+		  if (start < 0) {
+		    start += len;
+		    if (start < 0) start = 0;
+		  } else if (start > len) {
+		    start = len;
+		  }
+
+		  if (end < 0) {
+		    end += len;
+		    if (end < 0) end = 0;
+		  } else if (end > len) {
+		    end = len;
+		  }
+
+		  if (end < start) end = start;
+
+		  const newBuf = this.subarray(start, end);
+		  // Return an augmented `Uint8Array` instance
+		  Object.setPrototypeOf(newBuf, Buffer.prototype);
+
+		  return newBuf
+		};
+
+		/*
+		 * Need to make sure that buffer isn't trying to write out of bounds.
+		 */
+		function checkOffset (offset, ext, length) {
+		  if ((offset % 1) !== 0 || offset < 0) throw new RangeError('offset is not uint')
+		  if (offset + ext > length) throw new RangeError('Trying to access beyond buffer length')
+		}
+
+		Buffer.prototype.readUintLE =
+		Buffer.prototype.readUIntLE = function readUIntLE (offset, byteLength, noAssert) {
+		  offset = offset >>> 0;
+		  byteLength = byteLength >>> 0;
+		  if (!noAssert) checkOffset(offset, byteLength, this.length);
+
+		  let val = this[offset];
+		  let mul = 1;
+		  let i = 0;
+		  while (++i < byteLength && (mul *= 0x100)) {
+		    val += this[offset + i] * mul;
+		  }
+
+		  return val
+		};
+
+		Buffer.prototype.readUintBE =
+		Buffer.prototype.readUIntBE = function readUIntBE (offset, byteLength, noAssert) {
+		  offset = offset >>> 0;
+		  byteLength = byteLength >>> 0;
+		  if (!noAssert) {
+		    checkOffset(offset, byteLength, this.length);
+		  }
+
+		  let val = this[offset + --byteLength];
+		  let mul = 1;
+		  while (byteLength > 0 && (mul *= 0x100)) {
+		    val += this[offset + --byteLength] * mul;
+		  }
+
+		  return val
+		};
+
+		Buffer.prototype.readUint8 =
+		Buffer.prototype.readUInt8 = function readUInt8 (offset, noAssert) {
+		  offset = offset >>> 0;
+		  if (!noAssert) checkOffset(offset, 1, this.length);
+		  return this[offset]
+		};
+
+		Buffer.prototype.readUint16LE =
+		Buffer.prototype.readUInt16LE = function readUInt16LE (offset, noAssert) {
+		  offset = offset >>> 0;
+		  if (!noAssert) checkOffset(offset, 2, this.length);
+		  return this[offset] | (this[offset + 1] << 8)
+		};
+
+		Buffer.prototype.readUint16BE =
+		Buffer.prototype.readUInt16BE = function readUInt16BE (offset, noAssert) {
+		  offset = offset >>> 0;
+		  if (!noAssert) checkOffset(offset, 2, this.length);
+		  return (this[offset] << 8) | this[offset + 1]
+		};
+
+		Buffer.prototype.readUint32LE =
+		Buffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {
+		  offset = offset >>> 0;
+		  if (!noAssert) checkOffset(offset, 4, this.length);
+
+		  return ((this[offset]) |
+		      (this[offset + 1] << 8) |
+		      (this[offset + 2] << 16)) +
+		      (this[offset + 3] * 0x1000000)
+		};
+
+		Buffer.prototype.readUint32BE =
+		Buffer.prototype.readUInt32BE = function readUInt32BE (offset, noAssert) {
+		  offset = offset >>> 0;
+		  if (!noAssert) checkOffset(offset, 4, this.length);
+
+		  return (this[offset] * 0x1000000) +
+		    ((this[offset + 1] << 16) |
+		    (this[offset + 2] << 8) |
+		    this[offset + 3])
+		};
+
+		Buffer.prototype.readBigUInt64LE = defineBigIntMethod(function readBigUInt64LE (offset) {
+		  offset = offset >>> 0;
+		  validateNumber(offset, 'offset');
+		  const first = this[offset];
+		  const last = this[offset + 7];
+		  if (first === undefined || last === undefined) {
+		    boundsError(offset, this.length - 8);
+		  }
+
+		  const lo = first +
+		    this[++offset] * 2 ** 8 +
+		    this[++offset] * 2 ** 16 +
+		    this[++offset] * 2 ** 24;
+
+		  const hi = this[++offset] +
+		    this[++offset] * 2 ** 8 +
+		    this[++offset] * 2 ** 16 +
+		    last * 2 ** 24;
+
+		  return BigInt(lo) + (BigInt(hi) << BigInt(32))
+		});
+
+		Buffer.prototype.readBigUInt64BE = defineBigIntMethod(function readBigUInt64BE (offset) {
+		  offset = offset >>> 0;
+		  validateNumber(offset, 'offset');
+		  const first = this[offset];
+		  const last = this[offset + 7];
+		  if (first === undefined || last === undefined) {
+		    boundsError(offset, this.length - 8);
+		  }
+
+		  const hi = first * 2 ** 24 +
+		    this[++offset] * 2 ** 16 +
+		    this[++offset] * 2 ** 8 +
+		    this[++offset];
+
+		  const lo = this[++offset] * 2 ** 24 +
+		    this[++offset] * 2 ** 16 +
+		    this[++offset] * 2 ** 8 +
+		    last;
+
+		  return (BigInt(hi) << BigInt(32)) + BigInt(lo)
+		});
+
+		Buffer.prototype.readIntLE = function readIntLE (offset, byteLength, noAssert) {
+		  offset = offset >>> 0;
+		  byteLength = byteLength >>> 0;
+		  if (!noAssert) checkOffset(offset, byteLength, this.length);
+
+		  let val = this[offset];
+		  let mul = 1;
+		  let i = 0;
+		  while (++i < byteLength && (mul *= 0x100)) {
+		    val += this[offset + i] * mul;
+		  }
+		  mul *= 0x80;
+
+		  if (val >= mul) val -= Math.pow(2, 8 * byteLength);
+
+		  return val
+		};
+
+		Buffer.prototype.readIntBE = function readIntBE (offset, byteLength, noAssert) {
+		  offset = offset >>> 0;
+		  byteLength = byteLength >>> 0;
+		  if (!noAssert) checkOffset(offset, byteLength, this.length);
+
+		  let i = byteLength;
+		  let mul = 1;
+		  let val = this[offset + --i];
+		  while (i > 0 && (mul *= 0x100)) {
+		    val += this[offset + --i] * mul;
+		  }
+		  mul *= 0x80;
+
+		  if (val >= mul) val -= Math.pow(2, 8 * byteLength);
+
+		  return val
+		};
+
+		Buffer.prototype.readInt8 = function readInt8 (offset, noAssert) {
+		  offset = offset >>> 0;
+		  if (!noAssert) checkOffset(offset, 1, this.length);
+		  if (!(this[offset] & 0x80)) return (this[offset])
+		  return ((0xff - this[offset] + 1) * -1)
+		};
+
+		Buffer.prototype.readInt16LE = function readInt16LE (offset, noAssert) {
+		  offset = offset >>> 0;
+		  if (!noAssert) checkOffset(offset, 2, this.length);
+		  const val = this[offset] | (this[offset + 1] << 8);
+		  return (val & 0x8000) ? val | 0xFFFF0000 : val
+		};
+
+		Buffer.prototype.readInt16BE = function readInt16BE (offset, noAssert) {
+		  offset = offset >>> 0;
+		  if (!noAssert) checkOffset(offset, 2, this.length);
+		  const val = this[offset + 1] | (this[offset] << 8);
+		  return (val & 0x8000) ? val | 0xFFFF0000 : val
+		};
+
+		Buffer.prototype.readInt32LE = function readInt32LE (offset, noAssert) {
+		  offset = offset >>> 0;
+		  if (!noAssert) checkOffset(offset, 4, this.length);
+
+		  return (this[offset]) |
+		    (this[offset + 1] << 8) |
+		    (this[offset + 2] << 16) |
+		    (this[offset + 3] << 24)
+		};
+
+		Buffer.prototype.readInt32BE = function readInt32BE (offset, noAssert) {
+		  offset = offset >>> 0;
+		  if (!noAssert) checkOffset(offset, 4, this.length);
+
+		  return (this[offset] << 24) |
+		    (this[offset + 1] << 16) |
+		    (this[offset + 2] << 8) |
+		    (this[offset + 3])
+		};
+
+		Buffer.prototype.readBigInt64LE = defineBigIntMethod(function readBigInt64LE (offset) {
+		  offset = offset >>> 0;
+		  validateNumber(offset, 'offset');
+		  const first = this[offset];
+		  const last = this[offset + 7];
+		  if (first === undefined || last === undefined) {
+		    boundsError(offset, this.length - 8);
+		  }
+
+		  const val = this[offset + 4] +
+		    this[offset + 5] * 2 ** 8 +
+		    this[offset + 6] * 2 ** 16 +
+		    (last << 24); // Overflow
+
+		  return (BigInt(val) << BigInt(32)) +
+		    BigInt(first +
+		    this[++offset] * 2 ** 8 +
+		    this[++offset] * 2 ** 16 +
+		    this[++offset] * 2 ** 24)
+		});
+
+		Buffer.prototype.readBigInt64BE = defineBigIntMethod(function readBigInt64BE (offset) {
+		  offset = offset >>> 0;
+		  validateNumber(offset, 'offset');
+		  const first = this[offset];
+		  const last = this[offset + 7];
+		  if (first === undefined || last === undefined) {
+		    boundsError(offset, this.length - 8);
+		  }
+
+		  const val = (first << 24) + // Overflow
+		    this[++offset] * 2 ** 16 +
+		    this[++offset] * 2 ** 8 +
+		    this[++offset];
+
+		  return (BigInt(val) << BigInt(32)) +
+		    BigInt(this[++offset] * 2 ** 24 +
+		    this[++offset] * 2 ** 16 +
+		    this[++offset] * 2 ** 8 +
+		    last)
+		});
+
+		Buffer.prototype.readFloatLE = function readFloatLE (offset, noAssert) {
+		  offset = offset >>> 0;
+		  if (!noAssert) checkOffset(offset, 4, this.length);
+		  return ieee754.read(this, offset, true, 23, 4)
+		};
+
+		Buffer.prototype.readFloatBE = function readFloatBE (offset, noAssert) {
+		  offset = offset >>> 0;
+		  if (!noAssert) checkOffset(offset, 4, this.length);
+		  return ieee754.read(this, offset, false, 23, 4)
+		};
+
+		Buffer.prototype.readDoubleLE = function readDoubleLE (offset, noAssert) {
+		  offset = offset >>> 0;
+		  if (!noAssert) checkOffset(offset, 8, this.length);
+		  return ieee754.read(this, offset, true, 52, 8)
+		};
+
+		Buffer.prototype.readDoubleBE = function readDoubleBE (offset, noAssert) {
+		  offset = offset >>> 0;
+		  if (!noAssert) checkOffset(offset, 8, this.length);
+		  return ieee754.read(this, offset, false, 52, 8)
+		};
+
+		function checkInt (buf, value, offset, ext, max, min) {
+		  if (!Buffer.isBuffer(buf)) throw new TypeError('"buffer" argument must be a Buffer instance')
+		  if (value > max || value < min) throw new RangeError('"value" argument is out of bounds')
+		  if (offset + ext > buf.length) throw new RangeError('Index out of range')
+		}
+
+		Buffer.prototype.writeUintLE =
+		Buffer.prototype.writeUIntLE = function writeUIntLE (value, offset, byteLength, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  byteLength = byteLength >>> 0;
+		  if (!noAssert) {
+		    const maxBytes = Math.pow(2, 8 * byteLength) - 1;
+		    checkInt(this, value, offset, byteLength, maxBytes, 0);
+		  }
+
+		  let mul = 1;
+		  let i = 0;
+		  this[offset] = value & 0xFF;
+		  while (++i < byteLength && (mul *= 0x100)) {
+		    this[offset + i] = (value / mul) & 0xFF;
+		  }
+
+		  return offset + byteLength
+		};
+
+		Buffer.prototype.writeUintBE =
+		Buffer.prototype.writeUIntBE = function writeUIntBE (value, offset, byteLength, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  byteLength = byteLength >>> 0;
+		  if (!noAssert) {
+		    const maxBytes = Math.pow(2, 8 * byteLength) - 1;
+		    checkInt(this, value, offset, byteLength, maxBytes, 0);
+		  }
+
+		  let i = byteLength - 1;
+		  let mul = 1;
+		  this[offset + i] = value & 0xFF;
+		  while (--i >= 0 && (mul *= 0x100)) {
+		    this[offset + i] = (value / mul) & 0xFF;
+		  }
+
+		  return offset + byteLength
+		};
+
+		Buffer.prototype.writeUint8 =
+		Buffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0);
+		  this[offset] = (value & 0xff);
+		  return offset + 1
+		};
+
+		Buffer.prototype.writeUint16LE =
+		Buffer.prototype.writeUInt16LE = function writeUInt16LE (value, offset, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0);
+		  this[offset] = (value & 0xff);
+		  this[offset + 1] = (value >>> 8);
+		  return offset + 2
+		};
+
+		Buffer.prototype.writeUint16BE =
+		Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0);
+		  this[offset] = (value >>> 8);
+		  this[offset + 1] = (value & 0xff);
+		  return offset + 2
+		};
+
+		Buffer.prototype.writeUint32LE =
+		Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0);
+		  this[offset + 3] = (value >>> 24);
+		  this[offset + 2] = (value >>> 16);
+		  this[offset + 1] = (value >>> 8);
+		  this[offset] = (value & 0xff);
+		  return offset + 4
+		};
+
+		Buffer.prototype.writeUint32BE =
+		Buffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0);
+		  this[offset] = (value >>> 24);
+		  this[offset + 1] = (value >>> 16);
+		  this[offset + 2] = (value >>> 8);
+		  this[offset + 3] = (value & 0xff);
+		  return offset + 4
+		};
+
+		function wrtBigUInt64LE (buf, value, offset, min, max) {
+		  checkIntBI(value, min, max, buf, offset, 7);
+
+		  let lo = Number(value & BigInt(0xffffffff));
+		  buf[offset++] = lo;
+		  lo = lo >> 8;
+		  buf[offset++] = lo;
+		  lo = lo >> 8;
+		  buf[offset++] = lo;
+		  lo = lo >> 8;
+		  buf[offset++] = lo;
+		  let hi = Number(value >> BigInt(32) & BigInt(0xffffffff));
+		  buf[offset++] = hi;
+		  hi = hi >> 8;
+		  buf[offset++] = hi;
+		  hi = hi >> 8;
+		  buf[offset++] = hi;
+		  hi = hi >> 8;
+		  buf[offset++] = hi;
+		  return offset
+		}
+
+		function wrtBigUInt64BE (buf, value, offset, min, max) {
+		  checkIntBI(value, min, max, buf, offset, 7);
+
+		  let lo = Number(value & BigInt(0xffffffff));
+		  buf[offset + 7] = lo;
+		  lo = lo >> 8;
+		  buf[offset + 6] = lo;
+		  lo = lo >> 8;
+		  buf[offset + 5] = lo;
+		  lo = lo >> 8;
+		  buf[offset + 4] = lo;
+		  let hi = Number(value >> BigInt(32) & BigInt(0xffffffff));
+		  buf[offset + 3] = hi;
+		  hi = hi >> 8;
+		  buf[offset + 2] = hi;
+		  hi = hi >> 8;
+		  buf[offset + 1] = hi;
+		  hi = hi >> 8;
+		  buf[offset] = hi;
+		  return offset + 8
+		}
+
+		Buffer.prototype.writeBigUInt64LE = defineBigIntMethod(function writeBigUInt64LE (value, offset = 0) {
+		  return wrtBigUInt64LE(this, value, offset, BigInt(0), BigInt('0xffffffffffffffff'))
+		});
+
+		Buffer.prototype.writeBigUInt64BE = defineBigIntMethod(function writeBigUInt64BE (value, offset = 0) {
+		  return wrtBigUInt64BE(this, value, offset, BigInt(0), BigInt('0xffffffffffffffff'))
+		});
+
+		Buffer.prototype.writeIntLE = function writeIntLE (value, offset, byteLength, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  if (!noAssert) {
+		    const limit = Math.pow(2, (8 * byteLength) - 1);
+
+		    checkInt(this, value, offset, byteLength, limit - 1, -limit);
+		  }
+
+		  let i = 0;
+		  let mul = 1;
+		  let sub = 0;
+		  this[offset] = value & 0xFF;
+		  while (++i < byteLength && (mul *= 0x100)) {
+		    if (value < 0 && sub === 0 && this[offset + i - 1] !== 0) {
+		      sub = 1;
+		    }
+		    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF;
+		  }
+
+		  return offset + byteLength
+		};
+
+		Buffer.prototype.writeIntBE = function writeIntBE (value, offset, byteLength, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  if (!noAssert) {
+		    const limit = Math.pow(2, (8 * byteLength) - 1);
+
+		    checkInt(this, value, offset, byteLength, limit - 1, -limit);
+		  }
+
+		  let i = byteLength - 1;
+		  let mul = 1;
+		  let sub = 0;
+		  this[offset + i] = value & 0xFF;
+		  while (--i >= 0 && (mul *= 0x100)) {
+		    if (value < 0 && sub === 0 && this[offset + i + 1] !== 0) {
+		      sub = 1;
+		    }
+		    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF;
+		  }
+
+		  return offset + byteLength
+		};
+
+		Buffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -128);
+		  if (value < 0) value = 0xff + value + 1;
+		  this[offset] = (value & 0xff);
+		  return offset + 1
+		};
+
+		Buffer.prototype.writeInt16LE = function writeInt16LE (value, offset, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -32768);
+		  this[offset] = (value & 0xff);
+		  this[offset + 1] = (value >>> 8);
+		  return offset + 2
+		};
+
+		Buffer.prototype.writeInt16BE = function writeInt16BE (value, offset, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -32768);
+		  this[offset] = (value >>> 8);
+		  this[offset + 1] = (value & 0xff);
+		  return offset + 2
+		};
+
+		Buffer.prototype.writeInt32LE = function writeInt32LE (value, offset, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -2147483648);
+		  this[offset] = (value & 0xff);
+		  this[offset + 1] = (value >>> 8);
+		  this[offset + 2] = (value >>> 16);
+		  this[offset + 3] = (value >>> 24);
+		  return offset + 4
+		};
+
+		Buffer.prototype.writeInt32BE = function writeInt32BE (value, offset, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -2147483648);
+		  if (value < 0) value = 0xffffffff + value + 1;
+		  this[offset] = (value >>> 24);
+		  this[offset + 1] = (value >>> 16);
+		  this[offset + 2] = (value >>> 8);
+		  this[offset + 3] = (value & 0xff);
+		  return offset + 4
+		};
+
+		Buffer.prototype.writeBigInt64LE = defineBigIntMethod(function writeBigInt64LE (value, offset = 0) {
+		  return wrtBigUInt64LE(this, value, offset, -BigInt('0x8000000000000000'), BigInt('0x7fffffffffffffff'))
+		});
+
+		Buffer.prototype.writeBigInt64BE = defineBigIntMethod(function writeBigInt64BE (value, offset = 0) {
+		  return wrtBigUInt64BE(this, value, offset, -BigInt('0x8000000000000000'), BigInt('0x7fffffffffffffff'))
+		});
+
+		function checkIEEE754 (buf, value, offset, ext, max, min) {
+		  if (offset + ext > buf.length) throw new RangeError('Index out of range')
+		  if (offset < 0) throw new RangeError('Index out of range')
+		}
+
+		function writeFloat (buf, value, offset, littleEndian, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  if (!noAssert) {
+		    checkIEEE754(buf, value, offset, 4);
+		  }
+		  ieee754.write(buf, value, offset, littleEndian, 23, 4);
+		  return offset + 4
+		}
+
+		Buffer.prototype.writeFloatLE = function writeFloatLE (value, offset, noAssert) {
+		  return writeFloat(this, value, offset, true, noAssert)
+		};
+
+		Buffer.prototype.writeFloatBE = function writeFloatBE (value, offset, noAssert) {
+		  return writeFloat(this, value, offset, false, noAssert)
+		};
+
+		function writeDouble (buf, value, offset, littleEndian, noAssert) {
+		  value = +value;
+		  offset = offset >>> 0;
+		  if (!noAssert) {
+		    checkIEEE754(buf, value, offset, 8);
+		  }
+		  ieee754.write(buf, value, offset, littleEndian, 52, 8);
+		  return offset + 8
+		}
+
+		Buffer.prototype.writeDoubleLE = function writeDoubleLE (value, offset, noAssert) {
+		  return writeDouble(this, value, offset, true, noAssert)
+		};
+
+		Buffer.prototype.writeDoubleBE = function writeDoubleBE (value, offset, noAssert) {
+		  return writeDouble(this, value, offset, false, noAssert)
+		};
+
+		// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
+		Buffer.prototype.copy = function copy (target, targetStart, start, end) {
+		  if (!Buffer.isBuffer(target)) throw new TypeError('argument should be a Buffer')
+		  if (!start) start = 0;
+		  if (!end && end !== 0) end = this.length;
+		  if (targetStart >= target.length) targetStart = target.length;
+		  if (!targetStart) targetStart = 0;
+		  if (end > 0 && end < start) end = start;
+
+		  // Copy 0 bytes; we're done
+		  if (end === start) return 0
+		  if (target.length === 0 || this.length === 0) return 0
+
+		  // Fatal error conditions
+		  if (targetStart < 0) {
+		    throw new RangeError('targetStart out of bounds')
+		  }
+		  if (start < 0 || start >= this.length) throw new RangeError('Index out of range')
+		  if (end < 0) throw new RangeError('sourceEnd out of bounds')
+
+		  // Are we oob?
+		  if (end > this.length) end = this.length;
+		  if (target.length - targetStart < end - start) {
+		    end = target.length - targetStart + start;
+		  }
+
+		  const len = end - start;
+
+		  if (this === target && typeof Uint8Array.prototype.copyWithin === 'function') {
+		    // Use built-in when available, missing from IE11
+		    this.copyWithin(targetStart, start, end);
+		  } else {
+		    Uint8Array.prototype.set.call(
+		      target,
+		      this.subarray(start, end),
+		      targetStart
+		    );
+		  }
+
+		  return len
+		};
+
+		// Usage:
+		//    buffer.fill(number[, offset[, end]])
+		//    buffer.fill(buffer[, offset[, end]])
+		//    buffer.fill(string[, offset[, end]][, encoding])
+		Buffer.prototype.fill = function fill (val, start, end, encoding) {
+		  // Handle string cases:
+		  if (typeof val === 'string') {
+		    if (typeof start === 'string') {
+		      encoding = start;
+		      start = 0;
+		      end = this.length;
+		    } else if (typeof end === 'string') {
+		      encoding = end;
+		      end = this.length;
+		    }
+		    if (encoding !== undefined && typeof encoding !== 'string') {
+		      throw new TypeError('encoding must be a string')
+		    }
+		    if (typeof encoding === 'string' && !Buffer.isEncoding(encoding)) {
+		      throw new TypeError('Unknown encoding: ' + encoding)
+		    }
+		    if (val.length === 1) {
+		      const code = val.charCodeAt(0);
+		      if ((encoding === 'utf8' && code < 128) ||
+		          encoding === 'latin1') {
+		        // Fast path: If `val` fits into a single byte, use that numeric value.
+		        val = code;
+		      }
+		    }
+		  } else if (typeof val === 'number') {
+		    val = val & 255;
+		  } else if (typeof val === 'boolean') {
+		    val = Number(val);
+		  }
+
+		  // Invalid ranges are not set to a default, so can range check early.
+		  if (start < 0 || this.length < start || this.length < end) {
+		    throw new RangeError('Out of range index')
+		  }
+
+		  if (end <= start) {
+		    return this
+		  }
+
+		  start = start >>> 0;
+		  end = end === undefined ? this.length : end >>> 0;
+
+		  if (!val) val = 0;
+
+		  let i;
+		  if (typeof val === 'number') {
+		    for (i = start; i < end; ++i) {
+		      this[i] = val;
+		    }
+		  } else {
+		    const bytes = Buffer.isBuffer(val)
+		      ? val
+		      : Buffer.from(val, encoding);
+		    const len = bytes.length;
+		    if (len === 0) {
+		      throw new TypeError('The value "' + val +
+		        '" is invalid for argument "value"')
+		    }
+		    for (i = 0; i < end - start; ++i) {
+		      this[i + start] = bytes[i % len];
+		    }
+		  }
+
+		  return this
+		};
+
+		// CUSTOM ERRORS
+		// =============
+
+		// Simplified versions from Node, changed for Buffer-only usage
+		const errors = {};
+		function E (sym, getMessage, Base) {
+		  errors[sym] = class NodeError extends Base {
+		    constructor () {
+		      super();
+
+		      Object.defineProperty(this, 'message', {
+		        value: getMessage.apply(this, arguments),
+		        writable: true,
+		        configurable: true
+		      });
+
+		      // Add the error code to the name to include it in the stack trace.
+		      this.name = `${this.name} [${sym}]`;
+		      // Access the stack to generate the error message including the error code
+		      // from the name.
+		      this.stack; // eslint-disable-line no-unused-expressions
+		      // Reset the name to the actual name.
+		      delete this.name;
+		    }
+
+		    get code () {
+		      return sym
+		    }
+
+		    set code (value) {
+		      Object.defineProperty(this, 'code', {
+		        configurable: true,
+		        enumerable: true,
+		        value,
+		        writable: true
+		      });
+		    }
+
+		    toString () {
+		      return `${this.name} [${sym}]: ${this.message}`
+		    }
+		  };
+		}
+
+		E('ERR_BUFFER_OUT_OF_BOUNDS',
+		  function (name) {
+		    if (name) {
+		      return `${name} is outside of buffer bounds`
+		    }
+
+		    return 'Attempt to access memory outside buffer bounds'
+		  }, RangeError);
+		E('ERR_INVALID_ARG_TYPE',
+		  function (name, actual) {
+		    return `The "${name}" argument must be of type number. Received type ${typeof actual}`
+		  }, TypeError);
+		E('ERR_OUT_OF_RANGE',
+		  function (str, range, input) {
+		    let msg = `The value of "${str}" is out of range.`;
+		    let received = input;
+		    if (Number.isInteger(input) && Math.abs(input) > 2 ** 32) {
+		      received = addNumericalSeparator(String(input));
+		    } else if (typeof input === 'bigint') {
+		      received = String(input);
+		      if (input > BigInt(2) ** BigInt(32) || input < -(BigInt(2) ** BigInt(32))) {
+		        received = addNumericalSeparator(received);
+		      }
+		      received += 'n';
+		    }
+		    msg += ` It must be ${range}. Received ${received}`;
+		    return msg
+		  }, RangeError);
+
+		function addNumericalSeparator (val) {
+		  let res = '';
+		  let i = val.length;
+		  const start = val[0] === '-' ? 1 : 0;
+		  for (; i >= start + 4; i -= 3) {
+		    res = `_${val.slice(i - 3, i)}${res}`;
+		  }
+		  return `${val.slice(0, i)}${res}`
+		}
+
+		// CHECK FUNCTIONS
+		// ===============
+
+		function checkBounds (buf, offset, byteLength) {
+		  validateNumber(offset, 'offset');
+		  if (buf[offset] === undefined || buf[offset + byteLength] === undefined) {
+		    boundsError(offset, buf.length - (byteLength + 1));
+		  }
+		}
+
+		function checkIntBI (value, min, max, buf, offset, byteLength) {
+		  if (value > max || value < min) {
+		    const n = typeof min === 'bigint' ? 'n' : '';
+		    let range;
+		    {
+		      if (min === 0 || min === BigInt(0)) {
+		        range = `>= 0${n} and < 2${n} ** ${(byteLength + 1) * 8}${n}`;
+		      } else {
+		        range = `>= -(2${n} ** ${(byteLength + 1) * 8 - 1}${n}) and < 2 ** ` +
+		                `${(byteLength + 1) * 8 - 1}${n}`;
+		      }
+		    }
+		    throw new errors.ERR_OUT_OF_RANGE('value', range, value)
+		  }
+		  checkBounds(buf, offset, byteLength);
+		}
+
+		function validateNumber (value, name) {
+		  if (typeof value !== 'number') {
+		    throw new errors.ERR_INVALID_ARG_TYPE(name, 'number', value)
+		  }
+		}
+
+		function boundsError (value, length, type) {
+		  if (Math.floor(value) !== value) {
+		    validateNumber(value, type);
+		    throw new errors.ERR_OUT_OF_RANGE('offset', 'an integer', value)
+		  }
+
+		  if (length < 0) {
+		    throw new errors.ERR_BUFFER_OUT_OF_BOUNDS()
+		  }
+
+		  throw new errors.ERR_OUT_OF_RANGE('offset',
+		                                    `>= ${0} and <= ${length}`,
+		                                    value)
+		}
+
+		// HELPER FUNCTIONS
+		// ================
+
+		const INVALID_BASE64_RE = /[^+/0-9A-Za-z-_]/g;
+
+		function base64clean (str) {
+		  // Node takes equal signs as end of the Base64 encoding
+		  str = str.split('=')[0];
+		  // Node strips out invalid characters like \n and \t from the string, base64-js does not
+		  str = str.trim().replace(INVALID_BASE64_RE, '');
+		  // Node converts strings with length < 2 to ''
+		  if (str.length < 2) return ''
+		  // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not
+		  while (str.length % 4 !== 0) {
+		    str = str + '=';
+		  }
+		  return str
+		}
+
+		function utf8ToBytes (string, units) {
+		  units = units || Infinity;
+		  let codePoint;
+		  const length = string.length;
+		  let leadSurrogate = null;
+		  const bytes = [];
+
+		  for (let i = 0; i < length; ++i) {
+		    codePoint = string.charCodeAt(i);
+
+		    // is surrogate component
+		    if (codePoint > 0xD7FF && codePoint < 0xE000) {
+		      // last char was a lead
+		      if (!leadSurrogate) {
+		        // no lead yet
+		        if (codePoint > 0xDBFF) {
+		          // unexpected trail
+		          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
+		          continue
+		        } else if (i + 1 === length) {
+		          // unpaired lead
+		          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
+		          continue
+		        }
+
+		        // valid lead
+		        leadSurrogate = codePoint;
+
+		        continue
+		      }
+
+		      // 2 leads in a row
+		      if (codePoint < 0xDC00) {
+		        if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
+		        leadSurrogate = codePoint;
+		        continue
+		      }
+
+		      // valid surrogate pair
+		      codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000;
+		    } else if (leadSurrogate) {
+		      // valid bmp char, but last char was a lead
+		      if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD);
+		    }
+
+		    leadSurrogate = null;
+
+		    // encode utf8
+		    if (codePoint < 0x80) {
+		      if ((units -= 1) < 0) break
+		      bytes.push(codePoint);
+		    } else if (codePoint < 0x800) {
+		      if ((units -= 2) < 0) break
+		      bytes.push(
+		        codePoint >> 0x6 | 0xC0,
+		        codePoint & 0x3F | 0x80
+		      );
+		    } else if (codePoint < 0x10000) {
+		      if ((units -= 3) < 0) break
+		      bytes.push(
+		        codePoint >> 0xC | 0xE0,
+		        codePoint >> 0x6 & 0x3F | 0x80,
+		        codePoint & 0x3F | 0x80
+		      );
+		    } else if (codePoint < 0x110000) {
+		      if ((units -= 4) < 0) break
+		      bytes.push(
+		        codePoint >> 0x12 | 0xF0,
+		        codePoint >> 0xC & 0x3F | 0x80,
+		        codePoint >> 0x6 & 0x3F | 0x80,
+		        codePoint & 0x3F | 0x80
+		      );
+		    } else {
+		      throw new Error('Invalid code point')
+		    }
+		  }
+
+		  return bytes
+		}
+
+		function asciiToBytes (str) {
+		  const byteArray = [];
+		  for (let i = 0; i < str.length; ++i) {
+		    // Node's code seems to be doing this and not & 0x7F..
+		    byteArray.push(str.charCodeAt(i) & 0xFF);
+		  }
+		  return byteArray
+		}
+
+		function utf16leToBytes (str, units) {
+		  let c, hi, lo;
+		  const byteArray = [];
+		  for (let i = 0; i < str.length; ++i) {
+		    if ((units -= 2) < 0) break
+
+		    c = str.charCodeAt(i);
+		    hi = c >> 8;
+		    lo = c % 256;
+		    byteArray.push(lo);
+		    byteArray.push(hi);
+		  }
+
+		  return byteArray
+		}
+
+		function base64ToBytes (str) {
+		  return base64.toByteArray(base64clean(str))
+		}
+
+		function blitBuffer (src, dst, offset, length) {
+		  let i;
+		  for (i = 0; i < length; ++i) {
+		    if ((i + offset >= dst.length) || (i >= src.length)) break
+		    dst[i + offset] = src[i];
+		  }
+		  return i
+		}
+
+		// ArrayBuffer or Uint8Array objects from other contexts (i.e. iframes) do not pass
+		// the `instanceof` check but they should be treated as of that type.
+		// See: https://github.com/feross/buffer/issues/166
+		function isInstance (obj, type) {
+		  return obj instanceof type ||
+		    (obj != null && obj.constructor != null && obj.constructor.name != null &&
+		      obj.constructor.name === type.name)
+		}
+		function numberIsNaN (obj) {
+		  // For IE11 support
+		  return obj !== obj // eslint-disable-line no-self-compare
+		}
+
+		// Create lookup table for `toString('hex')`
+		// See: https://github.com/feross/buffer/issues/219
+		const hexSliceLookupTable = (function () {
+		  const alphabet = '0123456789abcdef';
+		  const table = new Array(256);
+		  for (let i = 0; i < 16; ++i) {
+		    const i16 = i * 16;
+		    for (let j = 0; j < 16; ++j) {
+		      table[i16 + j] = alphabet[i] + alphabet[j];
+		    }
+		  }
+		  return table
+		})();
+
+		// Return not function with Error if BigInt not supported
+		function defineBigIntMethod (fn) {
+		  return typeof BigInt === 'undefined' ? BufferBigIntNotDefined : fn
+		}
+
+		function BufferBigIntNotDefined () {
+		  throw new Error('BigInt not supported')
+		} 
+	} (buffer));
+	return buffer;
+}
 
 /** @type {{ textEncoder: TextEncoder, textDecoder: TextDecoder }|null} */
 let lazy = null;
@@ -61014,7 +61036,7 @@ let Encoding$2 = class Encoding {
 
 encoding.Encoding = Encoding$2;
 
-const { Buffer: Buffer$1 } = buffer || {};
+const { Buffer: Buffer$1 } = requireBuffer() || {};
 const { Encoding: Encoding$1 } = encoding;
 const textEndec = textEndec$1;
 
@@ -61119,7 +61141,7 @@ formats$2.BufferFormat = BufferFormat$2;
 formats$2.ViewFormat = ViewFormat$2;
 formats$2.UTF8Format = UTF8Format$2;
 
-const { Buffer } = buffer || { Buffer: { isBuffer: () => false } };
+const { Buffer } = requireBuffer() || { Buffer: { isBuffer: () => false } };
 const { textEncoder: textEncoder$1, textDecoder } = textEndec$1();
 const { BufferFormat: BufferFormat$1, ViewFormat: ViewFormat$1, UTF8Format: UTF8Format$1 } = formats$2;
 
@@ -63516,7 +63538,7 @@ function requireAbstractSublevel () {
 	hasRequiredAbstractSublevel = 1;
 
 	const ModuleError = moduleError;
-	const { Buffer } = buffer || {};
+	const { Buffer } = requireBuffer() || {};
 	const {
 	  AbstractSublevelIterator,
 	  AbstractSublevelKeyIterator,
