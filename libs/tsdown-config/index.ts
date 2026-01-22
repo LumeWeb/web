@@ -181,5 +181,5 @@ export const entryPatterns = {
     "!**/*.webp",
     "!**/*.gif",
   ],
-  withoutTests: ["src/**/*", "!**/__tests__/**", "!**/*.test.ts", "!**/*.spec.ts", "!**/*.md", "!**/*.png", "!**/*.jpg", "!**/*.jpeg", "!**/*.svg", "!**/*.webp", "!**/*.gif"],
+  withoutTests: ["src/**/*", "!**/__tests__/**", "!**/*.test.{ts,tsx}", "!**/*.spec.{ts,tsx}", "!**/*.spec.disabled.{ts,tsx}", "!**/*.md", "!**/*.png", "!**/*.jpg", "!**/*.jpeg", "!**/*.svg", "!**/*.webp", "!**/*.gif"],
 };
