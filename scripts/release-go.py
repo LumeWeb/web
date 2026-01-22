@@ -18,6 +18,9 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Any, Union
 from enum import Enum
 
+# Constants
+PORTAL_APP_SHELL_PACKAGE = "@lumeweb/portal-app-shell"
+
 
 # ============================================================================
 # Core Data Structures
@@ -168,9 +171,8 @@ class BuildRegistryBuilder:
         for name, config in app_shell_config.items():
             if config.get("type") == "ui_application":
                 target = self._build_ui_app_target(name, config)
-                # Use unique name to avoid collision with plugins
-                unique_name = f"{name}-app-shell"
-                self.targets[unique_name] = target
+                # Use the target name as the key for consistency
+                self.targets[target.name] = target
                 
     
     def _build_plugin_targets(self):
@@ -393,7 +395,7 @@ class ContextAwareBuilder:
             logger.info(f"Building {len(targets)} app shell targets")
         
         # Run turbo build for app shell
-        cmd = ["pnpm", "run", "build", "--filter=portal-app-shell"]
+        cmd = ["pnpm", "run", "build", f"--filter={PORTAL_APP_SHELL_PACKAGE}"]
         self._run_command(cmd)
     
     def _build_plugin_targets(self, targets: List[BuildTarget]) -> None:
