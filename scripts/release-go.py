@@ -28,6 +28,10 @@ INDEX_FILENAME = "index.html"
 STATIC_DIRNAME = "static"
 JS_FILE_PATTERN = "**/*.js"
 
+# App shell variant mapping constants
+DASHBOARD_VARIANT = "dashboard"
+ADMIN_VARIANT = "admin"
+
 
 # ============================================================================
 # Core Data Structures
@@ -489,10 +493,26 @@ class SafeBuildCopier:
         modified_apps = []
         for target in targets:
             if target.context.type == BuildContextType.APP_SHELL:
-                modified_apps.append(f"portal-app-shell")
+                # Map app shell variants to their plugin repo equivalents
+                if target.context.identifier == DASHBOARD_VARIANT:
+                    modified_apps.append("portal-plugin-dashboard")
+                elif target.context.identifier == ADMIN_VARIANT:
+                    modified_apps.append("portal-plugin-admin")
+                else:
+                    # Fallback for unknown variants
+                    modified_apps.append(f"portal-plugin-{target.context.identifier}")
             else:
                 modified_apps.append(f"portal-plugin-{target.name}")
-        return modified_apps
+        
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_apps = []
+        for app in modified_apps:
+            if app not in seen:
+                seen.add(app)
+                unique_apps.append(app)
+        
+        return unique_apps
     
     def _copy_repo_group(self, repo_target: str, targets: List[BuildTarget]) -> None:
         """Copy a group of targets that merge to the same repo"""
