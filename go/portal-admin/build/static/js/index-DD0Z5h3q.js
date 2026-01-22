@@ -3,7 +3,7 @@ import { React, admin__loadShare__react__loadShare__ } from './admin__loadShare_
 import { m, admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__, admin__loadShare__react_mf_2_router__loadShare__ } from './admin__loadShare__react_mf_2_router__loadShare__-CwtF7zsV.js';
 import { jsxRuntimeExports } from './jsx-runtime-BOqW7N1v.js';
 import { getDefaultExportFromCjs } from './_commonjsHelpers-BILit0S-.js';
-import { index_cjs } from './virtual_mf-REMOTE_ENTRY_ID-B4bJO9ip.js';
+import { index_cjs } from './virtual_mf-REMOTE_ENTRY_ID-qk0JJJnP.js';
 import { createLucideIcon } from './createLucideIcon-KUE0P9TA.js';
 import './parse-owPI_Zlz.js';
 import './admin__mf_v__runtimeInit__mf_v__-B2PJI9hS.js';

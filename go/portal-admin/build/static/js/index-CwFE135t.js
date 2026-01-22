@@ -1,10 +1,10 @@
-import { dashboard__loadShare__react__loadShare__, React, React4 } from './dashboard__loadShare__react__loadShare__-CpgLq0wn.js';
-import { jsxRuntimeExports } from './jsx-runtime-DIQgdeXv.js';
-import { useControllableState as useControllableState$1, createContextScope as createContextScope$1, useId, Primitive as Primitive$1, Presence, composeEventHandlers, useComposedRefs as useComposedRefs$1, useLayoutEffect2, createCollection, useDirection, ChevronDownIcon as ChevronDownIcon$1, composeRefs as composeRefs$1, Portal as Portal$4, createContext2, hideOthers, ReactRemoveScroll, createSlot as createSlot$1, useFocusGuards, FocusScope, DismissableLayer, createSlottable, createPopperScope, Root2$1 as Root2$7, Anchor, Content as Content$4, Arrow, shimExports, useCallbackRef as useCallbackRef$1, ChevronLeft, ChevronRight, ArrowRightIcon, ArrowLeftIcon, withSelectorExports, useSize, CheckIcon, X as X$1, Search, Root2 as Root2$8, Group2, Portal2 as Portal2$1, RadioGroup2, Sub2, Trigger as Trigger$6, CheckboxItem2, ItemIndicator2, Content2 as Content2$5, Item2 as Item2$1, Label2, RadioItem2, DotFilledIcon, Separator2, SubContent2, SubTrigger2, ChevronRightIcon, dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__, EyeOpenIcon, EyeNoneIcon, createRovingFocusGroupScope, Root as Root$e, Item as Item$2, ChevronUpIcon, CaretSortIcon, Cross2Icon, Branch, Root$1 as Root$f, dispatchDiscreteCustomEvent } from './dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__-72sVvfNy.js';
+import { admin__loadShare__react__loadShare__, React, React4 } from './admin__loadShare__react__loadShare__-BY1INpNu.js';
+import { jsxRuntimeExports } from './jsx-runtime-BOqW7N1v.js';
+import { useControllableState as useControllableState$1, createContextScope as createContextScope$1, useId, Primitive as Primitive$1, Presence, composeEventHandlers, useComposedRefs as useComposedRefs$1, useLayoutEffect2, createCollection, useDirection, ChevronDownIcon as ChevronDownIcon$1, composeRefs as composeRefs$1, Portal as Portal$4, createContext2, hideOthers, ReactRemoveScroll, createSlot as createSlot$1, useFocusGuards, FocusScope, DismissableLayer, createSlottable, createPopperScope, Root2$1 as Root2$7, Anchor, Content as Content$4, Arrow, shimExports, useCallbackRef as useCallbackRef$1, ChevronLeft, ChevronRight, ArrowRightIcon, ArrowLeftIcon, withSelectorExports, useSize, CheckIcon, X as X$1, Search, Root2 as Root2$8, Group2, Portal2 as Portal2$1, RadioGroup2, Sub2, Trigger as Trigger$6, CheckboxItem2, ItemIndicator2, Content2 as Content2$5, Item2 as Item2$1, Label2, RadioItem2, DotFilledIcon, Separator2, SubContent2, SubTrigger2, ChevronRightIcon, admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__, EyeOpenIcon, EyeNoneIcon, createRovingFocusGroupScope, Root as Root$e, Item as Item$2, ChevronUpIcon, CaretSortIcon, Cross2Icon, Branch, Root$1 as Root$f, dispatchDiscreteCustomEvent } from './admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__-QB1_Htv_.js';
 import { getDefaultExportFromCjs } from './_commonjsHelpers-BILit0S-.js';
-import { dashboard__loadShare__react_mf_2_dom__loadShare__ } from './dashboard__loadShare__react_mf_2_dom__loadShare__-B-V2HJ2Z.js';
-import { createLucideIcon } from './createLucideIcon-BGXC8EXb.js';
-import './dashboard__mf_v__runtimeInit__mf_v__-BgQBwuY5.js';
+import { admin__loadShare__react_mf_2_dom__loadShare__ } from './admin__loadShare__react_mf_2_dom__loadShare__-BykLpcnn.js';
+import { createLucideIcon } from './createLucideIcon-KUE0P9TA.js';
+import './admin__mf_v__runtimeInit__mf_v__-B2PJI9hS.js';
 
 //#region src/components/icons.tsx
 const InfoIcon = ({ className }) => {
@@ -3674,7 +3674,7 @@ function cn$1(...inputs) {
 var COLLAPSIBLE_NAME = "Collapsible";
 var [createCollapsibleContext, createCollapsibleScope] = createContextScope$1(COLLAPSIBLE_NAME);
 var [CollapsibleProvider, useCollapsibleContext] = createCollapsibleContext(COLLAPSIBLE_NAME);
-var Collapsible$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var Collapsible$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopeCollapsible,
@@ -3697,7 +3697,7 @@ var Collapsible$1 = dashboard__loadShare__react__loadShare__.forwardRef(
         disabled,
         contentId: useId(),
         open,
-        onOpenToggle: dashboard__loadShare__react__loadShare__.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
+        onOpenToggle: admin__loadShare__react__loadShare__.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
         children: /* @__PURE__ */ jsxRuntimeExports.jsx(
           Primitive$1.div,
           {
@@ -3713,7 +3713,7 @@ var Collapsible$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 Collapsible$1.displayName = COLLAPSIBLE_NAME;
 var TRIGGER_NAME$8 = "CollapsibleTrigger";
-var CollapsibleTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var CollapsibleTrigger$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeCollapsible, ...triggerProps } = props;
     const context = useCollapsibleContext(TRIGGER_NAME$8, __scopeCollapsible);
@@ -3735,7 +3735,7 @@ var CollapsibleTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 CollapsibleTrigger$1.displayName = TRIGGER_NAME$8;
 var CONTENT_NAME$7 = "CollapsibleContent";
-var CollapsibleContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var CollapsibleContent$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { forceMount, ...contentProps } = props;
     const context = useCollapsibleContext(CONTENT_NAME$7, props.__scopeCollapsible);
@@ -3743,20 +3743,20 @@ var CollapsibleContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   }
 );
 CollapsibleContent$1.displayName = CONTENT_NAME$7;
-var CollapsibleContentImpl = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var CollapsibleContentImpl = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const { __scopeCollapsible, present, children, ...contentProps } = props;
   const context = useCollapsibleContext(CONTENT_NAME$7, __scopeCollapsible);
-  const [isPresent, setIsPresent] = dashboard__loadShare__react__loadShare__.useState(present);
-  const ref = dashboard__loadShare__react__loadShare__.useRef(null);
+  const [isPresent, setIsPresent] = admin__loadShare__react__loadShare__.useState(present);
+  const ref = admin__loadShare__react__loadShare__.useRef(null);
   const composedRefs = useComposedRefs$1(forwardedRef, ref);
-  const heightRef = dashboard__loadShare__react__loadShare__.useRef(0);
+  const heightRef = admin__loadShare__react__loadShare__.useRef(0);
   const height = heightRef.current;
-  const widthRef = dashboard__loadShare__react__loadShare__.useRef(0);
+  const widthRef = admin__loadShare__react__loadShare__.useRef(0);
   const width = widthRef.current;
   const isOpen = context.open || isPresent;
-  const isMountAnimationPreventedRef = dashboard__loadShare__react__loadShare__.useRef(isOpen);
-  const originalStylesRef = dashboard__loadShare__react__loadShare__.useRef(void 0);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  const isMountAnimationPreventedRef = admin__loadShare__react__loadShare__.useRef(isOpen);
+  const originalStylesRef = admin__loadShare__react__loadShare__.useRef(void 0);
+  admin__loadShare__react__loadShare__.useEffect(() => {
     const rAF = requestAnimationFrame(() => isMountAnimationPreventedRef.current = false);
     return () => cancelAnimationFrame(rAF);
   }, []);
@@ -4098,13 +4098,13 @@ var Content2$4 = AccordionContent$1;
 
 //#region src/components/ui/accordion.tsx
 const Accordion = Root2$6;
-const AccordionItem = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Item$1, {
+const AccordionItem = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Item$1, {
 	className: cn$1("border-b", className),
 	ref,
 	...props
 }));
 AccordionItem.displayName = "AccordionItem";
-const AccordionTrigger = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Header, {
+const AccordionTrigger = admin__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Header, {
 	className: "flex",
 	children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Trigger2$1, {
 		className: cn$1("flex flex-1 items-center justify-between py-4 text-sm font-medium transition-all [&[data-state=open]>svg]:rotate-180", className),
@@ -4114,7 +4114,7 @@ const AccordionTrigger = dashboard__loadShare__react__loadShare__.forwardRef(({ 
 	})
 }));
 AccordionTrigger.displayName = Trigger2$1.displayName;
-const AccordionContent = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$4, {
+const AccordionContent = admin__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$4, {
 	className: "overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
 	ref,
 	...props,
@@ -4174,20 +4174,20 @@ const alertVariants = cva("relative w-full rounded-lg border px-4 py-3 text-sm [
 		destructive: "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive"
 	} }
 });
-const Alert = dashboard__loadShare__react__loadShare__.forwardRef(({ className, variant, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+const Alert = admin__loadShare__react__loadShare__.forwardRef(({ className, variant, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 	className: cn$1(alertVariants({ variant }), className),
 	ref,
 	role: "alert",
 	...props
 }));
 Alert.displayName = "Alert";
-const AlertTitle = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("h5", {
+const AlertTitle = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("h5", {
 	className: cn$1("mb-1 font-medium leading-none tracking-tight", className),
 	ref,
 	...props
 }));
 AlertTitle.displayName = "AlertTitle";
-const AlertDescription = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+const AlertDescription = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 	className: cn$1("text-sm [&_p]:leading-relaxed", className),
 	ref,
 	...props
@@ -4206,24 +4206,24 @@ function isLazyComponent(element) {
 // @__NO_SIDE_EFFECTS__
 function createSlot(ownerName) {
   const SlotClone = /* @__PURE__ */ createSlotClone(ownerName);
-  const Slot2 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+  const Slot2 = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
     let { children, ...slotProps } = props;
     if (isLazyComponent(children) && typeof use === "function") {
       children = use(children._payload);
     }
-    const childrenArray = dashboard__loadShare__react__loadShare__.Children.toArray(children);
+    const childrenArray = admin__loadShare__react__loadShare__.Children.toArray(children);
     const slottable = childrenArray.find(isSlottable);
     if (slottable) {
       const newElement = slottable.props.children;
       const newChildren = childrenArray.map((child) => {
         if (child === slottable) {
-          if (dashboard__loadShare__react__loadShare__.Children.count(newElement) > 1) return dashboard__loadShare__react__loadShare__.Children.only(null);
-          return dashboard__loadShare__react__loadShare__.isValidElement(newElement) ? newElement.props.children : null;
+          if (admin__loadShare__react__loadShare__.Children.count(newElement) > 1) return admin__loadShare__react__loadShare__.Children.only(null);
+          return admin__loadShare__react__loadShare__.isValidElement(newElement) ? newElement.props.children : null;
         } else {
           return child;
         }
       });
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(SlotClone, { ...slotProps, ref: forwardedRef, children: dashboard__loadShare__react__loadShare__.isValidElement(newElement) ? dashboard__loadShare__react__loadShare__.cloneElement(newElement, void 0, newChildren) : null });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(SlotClone, { ...slotProps, ref: forwardedRef, children: admin__loadShare__react__loadShare__.isValidElement(newElement) ? admin__loadShare__react__loadShare__.cloneElement(newElement, void 0, newChildren) : null });
     }
     return /* @__PURE__ */ jsxRuntimeExports.jsx(SlotClone, { ...slotProps, ref: forwardedRef, children });
   });
@@ -4233,27 +4233,27 @@ function createSlot(ownerName) {
 var Slot$3 = /* @__PURE__ */ createSlot("Slot");
 // @__NO_SIDE_EFFECTS__
 function createSlotClone(ownerName) {
-  const SlotClone = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+  const SlotClone = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
     let { children, ...slotProps } = props;
     if (isLazyComponent(children) && typeof use === "function") {
       children = use(children._payload);
     }
-    if (dashboard__loadShare__react__loadShare__.isValidElement(children)) {
+    if (admin__loadShare__react__loadShare__.isValidElement(children)) {
       const childrenRef = getElementRef(children);
       const props2 = mergeProps(slotProps, children.props);
-      if (children.type !== dashboard__loadShare__react__loadShare__.Fragment) {
+      if (children.type !== admin__loadShare__react__loadShare__.Fragment) {
         props2.ref = forwardedRef ? composeRefs$1(forwardedRef, childrenRef) : childrenRef;
       }
-      return dashboard__loadShare__react__loadShare__.cloneElement(children, props2);
+      return admin__loadShare__react__loadShare__.cloneElement(children, props2);
     }
-    return dashboard__loadShare__react__loadShare__.Children.count(children) > 1 ? dashboard__loadShare__react__loadShare__.Children.only(null) : null;
+    return admin__loadShare__react__loadShare__.Children.count(children) > 1 ? admin__loadShare__react__loadShare__.Children.only(null) : null;
   });
   SlotClone.displayName = `${ownerName}.SlotClone`;
   return SlotClone;
 }
 var SLOTTABLE_IDENTIFIER = Symbol("radix.slottable");
 function isSlottable(child) {
-  return dashboard__loadShare__react__loadShare__.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER;
+  return admin__loadShare__react__loadShare__.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER;
 }
 function mergeProps(slotProps, childProps) {
   const overrideProps = { ...childProps };
@@ -5090,7 +5090,7 @@ const buttonVariants = cva("inline-flex items-center justify-center whitespace-n
 		}
 	}
 });
-const Button$1 = dashboard__loadShare__react__loadShare__.forwardRef(({ asChild = false, className, size, variant, ...props }, ref) => {
+const Button$1 = admin__loadShare__react__loadShare__.forwardRef(({ asChild = false, className, size, variant, ...props }, ref) => {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(asChild ? Slot$3 : "button", {
 		className: cn$1(buttonVariants({
 			className,
@@ -5121,8 +5121,8 @@ var Dialog$1 = (props) => {
     onOpenChange,
     modal = true
   } = props;
-  const triggerRef = dashboard__loadShare__react__loadShare__.useRef(null);
-  const contentRef = dashboard__loadShare__react__loadShare__.useRef(null);
+  const triggerRef = admin__loadShare__react__loadShare__.useRef(null);
+  const contentRef = admin__loadShare__react__loadShare__.useRef(null);
   const [open, setOpen] = useControllableState$1({
     prop: openProp,
     defaultProp: defaultOpen ?? false,
@@ -5140,7 +5140,7 @@ var Dialog$1 = (props) => {
       descriptionId: useId(),
       open,
       onOpenChange: setOpen,
-      onOpenToggle: dashboard__loadShare__react__loadShare__.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
+      onOpenToggle: admin__loadShare__react__loadShare__.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
       modal,
       children
     }
@@ -5148,7 +5148,7 @@ var Dialog$1 = (props) => {
 };
 Dialog$1.displayName = DIALOG_NAME;
 var TRIGGER_NAME$6 = "DialogTrigger";
-var DialogTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var DialogTrigger$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeDialog, ...triggerProps } = props;
     const context = useDialogContext(TRIGGER_NAME$6, __scopeDialog);
@@ -5176,11 +5176,11 @@ var [PortalProvider$2, usePortalContext$2] = createDialogContext(PORTAL_NAME$4, 
 var DialogPortal$1 = (props) => {
   const { __scopeDialog, forceMount, children, container } = props;
   const context = useDialogContext(PORTAL_NAME$4, __scopeDialog);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(PortalProvider$2, { scope: __scopeDialog, forceMount, children: dashboard__loadShare__react__loadShare__.Children.map(children, (child) => /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$4, { asChild: true, container, children: child }) })) });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(PortalProvider$2, { scope: __scopeDialog, forceMount, children: admin__loadShare__react__loadShare__.Children.map(children, (child) => /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$4, { asChild: true, container, children: child }) })) });
 };
 DialogPortal$1.displayName = PORTAL_NAME$4;
 var OVERLAY_NAME$1 = "DialogOverlay";
-var DialogOverlay$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var DialogOverlay$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const portalContext = usePortalContext$2(OVERLAY_NAME$1, props.__scopeDialog);
     const { forceMount = portalContext.forceMount, ...overlayProps } = props;
@@ -5190,7 +5190,7 @@ var DialogOverlay$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 DialogOverlay$1.displayName = OVERLAY_NAME$1;
 var Slot$2 = createSlot$1("DialogOverlay.RemoveScroll");
-var DialogOverlayImpl = dashboard__loadShare__react__loadShare__.forwardRef(
+var DialogOverlayImpl = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeDialog, ...overlayProps } = props;
     const context = useDialogContext(OVERLAY_NAME$1, __scopeDialog);
@@ -5210,7 +5210,7 @@ var DialogOverlayImpl = dashboard__loadShare__react__loadShare__.forwardRef(
   }
 );
 var CONTENT_NAME$5 = "DialogContent";
-var DialogContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var DialogContent$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const portalContext = usePortalContext$2(CONTENT_NAME$5, props.__scopeDialog);
     const { forceMount = portalContext.forceMount, ...contentProps } = props;
@@ -5219,12 +5219,12 @@ var DialogContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   }
 );
 DialogContent$1.displayName = CONTENT_NAME$5;
-var DialogContentModal = dashboard__loadShare__react__loadShare__.forwardRef(
+var DialogContentModal = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const context = useDialogContext(CONTENT_NAME$5, props.__scopeDialog);
-    const contentRef = dashboard__loadShare__react__loadShare__.useRef(null);
+    const contentRef = admin__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(forwardedRef, context.contentRef, contentRef);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const content = contentRef.current;
       if (content) return hideOthers(content);
     }, []);
@@ -5253,11 +5253,11 @@ var DialogContentModal = dashboard__loadShare__react__loadShare__.forwardRef(
     );
   }
 );
-var DialogContentNonModal = dashboard__loadShare__react__loadShare__.forwardRef(
+var DialogContentNonModal = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const context = useDialogContext(CONTENT_NAME$5, props.__scopeDialog);
-    const hasInteractedOutsideRef = dashboard__loadShare__react__loadShare__.useRef(false);
-    const hasPointerDownOutsideRef = dashboard__loadShare__react__loadShare__.useRef(false);
+    const hasInteractedOutsideRef = admin__loadShare__react__loadShare__.useRef(false);
+    const hasPointerDownOutsideRef = admin__loadShare__react__loadShare__.useRef(false);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       DialogContentImpl,
       {
@@ -5293,11 +5293,11 @@ var DialogContentNonModal = dashboard__loadShare__react__loadShare__.forwardRef(
     );
   }
 );
-var DialogContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
+var DialogContentImpl = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeDialog, trapFocus, onOpenAutoFocus, onCloseAutoFocus, ...contentProps } = props;
     const context = useDialogContext(CONTENT_NAME$5, __scopeDialog);
-    const contentRef = dashboard__loadShare__react__loadShare__.useRef(null);
+    const contentRef = admin__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(forwardedRef, contentRef);
     useFocusGuards();
     return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
@@ -5332,7 +5332,7 @@ var DialogContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
   }
 );
 var TITLE_NAME$2 = "DialogTitle";
-var DialogTitle$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var DialogTitle$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeDialog, ...titleProps } = props;
     const context = useDialogContext(TITLE_NAME$2, __scopeDialog);
@@ -5341,7 +5341,7 @@ var DialogTitle$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 DialogTitle$1.displayName = TITLE_NAME$2;
 var DESCRIPTION_NAME$2 = "DialogDescription";
-var DialogDescription$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var DialogDescription$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeDialog, ...descriptionProps } = props;
     const context = useDialogContext(DESCRIPTION_NAME$2, __scopeDialog);
@@ -5350,7 +5350,7 @@ var DialogDescription$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 DialogDescription$1.displayName = DESCRIPTION_NAME$2;
 var CLOSE_NAME$2 = "DialogClose";
-var DialogClose$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var DialogClose$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeDialog, ...closeProps } = props;
     const context = useDialogContext(CLOSE_NAME$2, __scopeDialog);
@@ -5382,7 +5382,7 @@ var TitleWarning = ({ titleId }) => {
 If you want to hide the \`${titleWarningContext.titleName}\`, you can wrap it with our VisuallyHidden component.
 
 For more information, see https://radix-ui.com/primitives/docs/components/${titleWarningContext.docsSlug}`;
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (titleId) {
       const hasTitle = document.getElementById(titleId);
       if (!hasTitle) console.error(MESSAGE);
@@ -5394,7 +5394,7 @@ var DESCRIPTION_WARNING_NAME = "DialogDescriptionWarning";
 var DescriptionWarning$1 = ({ contentRef, descriptionId }) => {
   const descriptionWarningContext = useWarningContext(DESCRIPTION_WARNING_NAME);
   const MESSAGE = `Warning: Missing \`Description\` or \`aria-describedby={undefined}\` for {${descriptionWarningContext.contentName}}.`;
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     const describedById = contentRef.current?.getAttribute("aria-describedby");
     if (descriptionId && describedById) {
       const hasDescription = document.getElementById(descriptionId);
@@ -5424,7 +5424,7 @@ var AlertDialog$1 = (props) => {
 };
 AlertDialog$1.displayName = ROOT_NAME;
 var TRIGGER_NAME$5 = "AlertDialogTrigger";
-var AlertDialogTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var AlertDialogTrigger$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeAlertDialog, ...triggerProps } = props;
     const dialogScope = useDialogScope(__scopeAlertDialog);
@@ -5440,7 +5440,7 @@ var AlertDialogPortal$1 = (props) => {
 };
 AlertDialogPortal$1.displayName = PORTAL_NAME$3;
 var OVERLAY_NAME = "AlertDialogOverlay";
-var AlertDialogOverlay$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var AlertDialogOverlay$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeAlertDialog, ...overlayProps } = props;
     const dialogScope = useDialogScope(__scopeAlertDialog);
@@ -5451,13 +5451,13 @@ AlertDialogOverlay$1.displayName = OVERLAY_NAME;
 var CONTENT_NAME$4 = "AlertDialogContent";
 var [AlertDialogContentProvider, useAlertDialogContentContext] = createAlertDialogContext(CONTENT_NAME$4);
 var Slottable$1 = createSlottable("AlertDialogContent");
-var AlertDialogContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var AlertDialogContent$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeAlertDialog, children, ...contentProps } = props;
     const dialogScope = useDialogScope(__scopeAlertDialog);
-    const contentRef = dashboard__loadShare__react__loadShare__.useRef(null);
+    const contentRef = admin__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(forwardedRef, contentRef);
-    const cancelRef = dashboard__loadShare__react__loadShare__.useRef(null);
+    const cancelRef = admin__loadShare__react__loadShare__.useRef(null);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       WarningProvider,
       {
@@ -5489,7 +5489,7 @@ var AlertDialogContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 AlertDialogContent$1.displayName = CONTENT_NAME$4;
 var TITLE_NAME$1 = "AlertDialogTitle";
-var AlertDialogTitle$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var AlertDialogTitle$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeAlertDialog, ...titleProps } = props;
     const dialogScope = useDialogScope(__scopeAlertDialog);
@@ -5498,14 +5498,14 @@ var AlertDialogTitle$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 AlertDialogTitle$1.displayName = TITLE_NAME$1;
 var DESCRIPTION_NAME$1 = "AlertDialogDescription";
-var AlertDialogDescription$1 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var AlertDialogDescription$1 = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const { __scopeAlertDialog, ...descriptionProps } = props;
   const dialogScope = useDialogScope(__scopeAlertDialog);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(Description$1, { ...dialogScope, ...descriptionProps, ref: forwardedRef });
 });
 AlertDialogDescription$1.displayName = DESCRIPTION_NAME$1;
 var ACTION_NAME$1 = "AlertDialogAction";
-var AlertDialogAction$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var AlertDialogAction$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeAlertDialog, ...actionProps } = props;
     const dialogScope = useDialogScope(__scopeAlertDialog);
@@ -5514,7 +5514,7 @@ var AlertDialogAction$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 AlertDialogAction$1.displayName = ACTION_NAME$1;
 var CANCEL_NAME = "AlertDialogCancel";
-var AlertDialogCancel$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var AlertDialogCancel$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeAlertDialog, ...cancelProps } = props;
     const { cancelRef } = useAlertDialogContentContext(CANCEL_NAME, __scopeAlertDialog);
@@ -5532,7 +5532,7 @@ You can add a description to the \`${CONTENT_NAME$4}\` by passing a \`${DESCRIPT
 Alternatively, you can use your own component as a description by assigning it an \`id\` and passing the same value to the \`aria-describedby\` prop in \`${CONTENT_NAME$4}\`. If the description is confusing or duplicative for sighted users, you can use the \`@radix-ui/react-visually-hidden\` primitive as a wrapper around your description component.
 
 For more information, see https://radix-ui.com/primitives/docs/components/alert-dialog`;
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     const hasDescription = document.getElementById(
       contentRef.current?.getAttribute("aria-describedby")
     );
@@ -5554,13 +5554,13 @@ var Description2 = AlertDialogDescription$1;
 const AlertDialog = Root2$5;
 const AlertDialogTrigger = Trigger2;
 const AlertDialogPortal = Portal2;
-const AlertDialogOverlay = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Overlay2, {
+const AlertDialogOverlay = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Overlay2, {
 	className: cn$1("fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className),
 	...props,
 	ref
 }));
 AlertDialogOverlay.displayName = Overlay2.displayName;
-const AlertDialogContent = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(AlertDialogPortal, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(AlertDialogOverlay, {}), /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$3, {
+const AlertDialogContent = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(AlertDialogPortal, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(AlertDialogOverlay, {}), /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$3, {
 	className: cn$1("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg", className),
 	ref,
 	...props
@@ -5576,25 +5576,25 @@ const AlertDialogFooter = ({ className, ...props }) => /* @__PURE__ */ jsxRuntim
 	...props
 });
 AlertDialogFooter.displayName = "AlertDialogFooter";
-const AlertDialogTitle = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Title2, {
+const AlertDialogTitle = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Title2, {
 	className: cn$1("text-lg font-semibold", className),
 	ref,
 	...props
 }));
 AlertDialogTitle.displayName = Title2.displayName;
-const AlertDialogDescription = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Description2, {
+const AlertDialogDescription = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Description2, {
 	className: cn$1("text-sm text-muted-foreground", className),
 	ref,
 	...props
 }));
 AlertDialogDescription.displayName = Description2.displayName;
-const AlertDialogAction = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Action$1, {
+const AlertDialogAction = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Action$1, {
 	className: cn$1(buttonVariants(), className),
 	ref,
 	...props
 }));
 AlertDialogAction.displayName = Action$1.displayName;
-const AlertDialogCancel = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Cancel, {
+const AlertDialogCancel = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Cancel, {
 	className: cn$1(buttonVariants({ variant: "outline" }), "mt-2 sm:mt-0", className),
 	ref,
 	...props
@@ -5622,8 +5622,8 @@ var Popover$1 = (props) => {
     modal = false
   } = props;
   const popperScope = usePopperScope$2(__scopePopover);
-  const triggerRef = dashboard__loadShare__react__loadShare__.useRef(null);
-  const [hasCustomAnchor, setHasCustomAnchor] = dashboard__loadShare__react__loadShare__.useState(false);
+  const triggerRef = admin__loadShare__react__loadShare__.useRef(null);
+  const [hasCustomAnchor, setHasCustomAnchor] = admin__loadShare__react__loadShare__.useState(false);
   const [open, setOpen] = useControllableState$1({
     prop: openProp,
     defaultProp: defaultOpen ?? false,
@@ -5638,10 +5638,10 @@ var Popover$1 = (props) => {
       triggerRef,
       open,
       onOpenChange: setOpen,
-      onOpenToggle: dashboard__loadShare__react__loadShare__.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
+      onOpenToggle: admin__loadShare__react__loadShare__.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
       hasCustomAnchor,
-      onCustomAnchorAdd: dashboard__loadShare__react__loadShare__.useCallback(() => setHasCustomAnchor(true), []),
-      onCustomAnchorRemove: dashboard__loadShare__react__loadShare__.useCallback(() => setHasCustomAnchor(false), []),
+      onCustomAnchorAdd: admin__loadShare__react__loadShare__.useCallback(() => setHasCustomAnchor(true), []),
+      onCustomAnchorRemove: admin__loadShare__react__loadShare__.useCallback(() => setHasCustomAnchor(false), []),
       modal,
       children
     }
@@ -5649,13 +5649,13 @@ var Popover$1 = (props) => {
 };
 Popover$1.displayName = POPOVER_NAME;
 var ANCHOR_NAME = "PopoverAnchor";
-var PopoverAnchor$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var PopoverAnchor$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopePopover, ...anchorProps } = props;
     const context = usePopoverContext(ANCHOR_NAME, __scopePopover);
     const popperScope = usePopperScope$2(__scopePopover);
     const { onCustomAnchorAdd, onCustomAnchorRemove } = context;
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       onCustomAnchorAdd();
       return () => onCustomAnchorRemove();
     }, [onCustomAnchorAdd, onCustomAnchorRemove]);
@@ -5664,7 +5664,7 @@ var PopoverAnchor$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 PopoverAnchor$1.displayName = ANCHOR_NAME;
 var TRIGGER_NAME$4 = "PopoverTrigger";
-var PopoverTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var PopoverTrigger$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopePopover, ...triggerProps } = props;
     const context = usePopoverContext(TRIGGER_NAME$4, __scopePopover);
@@ -5698,7 +5698,7 @@ var PopoverPortal = (props) => {
 };
 PopoverPortal.displayName = PORTAL_NAME$2;
 var CONTENT_NAME$3 = "PopoverContent";
-var PopoverContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var PopoverContent$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const portalContext = usePortalContext$1(CONTENT_NAME$3, props.__scopePopover);
     const { forceMount = portalContext.forceMount, ...contentProps } = props;
@@ -5708,13 +5708,13 @@ var PopoverContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 PopoverContent$1.displayName = CONTENT_NAME$3;
 var Slot$1 = createSlot$1("PopoverContent.RemoveScroll");
-var PopoverContentModal = dashboard__loadShare__react__loadShare__.forwardRef(
+var PopoverContentModal = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const context = usePopoverContext(CONTENT_NAME$3, props.__scopePopover);
-    const contentRef = dashboard__loadShare__react__loadShare__.useRef(null);
+    const contentRef = admin__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(forwardedRef, contentRef);
-    const isRightClickOutsideRef = dashboard__loadShare__react__loadShare__.useRef(false);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    const isRightClickOutsideRef = admin__loadShare__react__loadShare__.useRef(false);
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const content = contentRef.current;
       if (content) return hideOthers(content);
     }, []);
@@ -5748,11 +5748,11 @@ var PopoverContentModal = dashboard__loadShare__react__loadShare__.forwardRef(
     ) });
   }
 );
-var PopoverContentNonModal = dashboard__loadShare__react__loadShare__.forwardRef(
+var PopoverContentNonModal = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const context = usePopoverContext(CONTENT_NAME$3, props.__scopePopover);
-    const hasInteractedOutsideRef = dashboard__loadShare__react__loadShare__.useRef(false);
-    const hasPointerDownOutsideRef = dashboard__loadShare__react__loadShare__.useRef(false);
+    const hasInteractedOutsideRef = admin__loadShare__react__loadShare__.useRef(false);
+    const hasPointerDownOutsideRef = admin__loadShare__react__loadShare__.useRef(false);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       PopoverContentImpl,
       {
@@ -5788,7 +5788,7 @@ var PopoverContentNonModal = dashboard__loadShare__react__loadShare__.forwardRef
     );
   }
 );
-var PopoverContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
+var PopoverContentImpl = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopePopover,
@@ -5852,7 +5852,7 @@ var PopoverContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
   }
 );
 var CLOSE_NAME$1 = "PopoverClose";
-var PopoverClose = dashboard__loadShare__react__loadShare__.forwardRef(
+var PopoverClose = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopePopover, ...closeProps } = props;
     const context = usePopoverContext(CLOSE_NAME$1, __scopePopover);
@@ -5869,7 +5869,7 @@ var PopoverClose = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 PopoverClose.displayName = CLOSE_NAME$1;
 var ARROW_NAME$2 = "PopoverArrow";
-var PopoverArrow = dashboard__loadShare__react__loadShare__.forwardRef(
+var PopoverArrow = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopePopover, ...arrowProps } = props;
     const popperScope = usePopperScope$2(__scopePopover);
@@ -5890,7 +5890,7 @@ var Content2$2 = PopoverContent$1;
 const Popover = Root2$4;
 const PopoverTrigger = Trigger$3;
 const PopoverAnchor = Anchor2;
-const PopoverContent = dashboard__loadShare__react__loadShare__.forwardRef(({ align = "center", className, sideOffset = 4, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$2, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$2, {
+const PopoverContent = admin__loadShare__react__loadShare__.forwardRef(({ align = "center", className, sideOffset = 4, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Portal$2, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$2, {
 	align,
 	className: cn$1("z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2", className),
 	ref,
@@ -5901,20 +5901,20 @@ PopoverContent.displayName = Content2$2.displayName;
 
 //#region src/components/ui/autocomplete.tsx
 const Autocomplete = ({ allowDuplicates, autocompleteOptions, children, classStyleProps, inlineTags, maxTags, onTagAdd, onTagRemove, setInputValue, setTagCount, setTags, tags, usePortal }) => {
-	const triggerContainerRef = dashboard__loadShare__react__loadShare__.useRef(null);
-	const triggerRef = dashboard__loadShare__react__loadShare__.useRef(null);
-	const inputRef = dashboard__loadShare__react__loadShare__.useRef(null);
-	const popoverContentRef = dashboard__loadShare__react__loadShare__.useRef(null);
-	const [popoverWidth, setPopoverWidth] = dashboard__loadShare__react__loadShare__.useState(0);
-	const [isPopoverOpen, setIsPopoverOpen] = dashboard__loadShare__react__loadShare__.useState(false);
-	const [, setInputFocused] = dashboard__loadShare__react__loadShare__.useState(false);
-	const [popooverContentTop, setPopoverContentTop] = dashboard__loadShare__react__loadShare__.useState(0);
-	const [selectedIndex, setSelectedIndex] = dashboard__loadShare__react__loadShare__.useState(-1);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	const triggerContainerRef = admin__loadShare__react__loadShare__.useRef(null);
+	const triggerRef = admin__loadShare__react__loadShare__.useRef(null);
+	const inputRef = admin__loadShare__react__loadShare__.useRef(null);
+	const popoverContentRef = admin__loadShare__react__loadShare__.useRef(null);
+	const [popoverWidth, setPopoverWidth] = admin__loadShare__react__loadShare__.useState(0);
+	const [isPopoverOpen, setIsPopoverOpen] = admin__loadShare__react__loadShare__.useState(false);
+	const [, setInputFocused] = admin__loadShare__react__loadShare__.useState(false);
+	const [popooverContentTop, setPopoverContentTop] = admin__loadShare__react__loadShare__.useState(0);
+	const [selectedIndex, setSelectedIndex] = admin__loadShare__react__loadShare__.useState(-1);
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		if (!triggerContainerRef.current || !triggerRef.current) return;
 		setPopoverContentTop(triggerContainerRef.current?.getBoundingClientRect().bottom - triggerRef.current?.getBoundingClientRect().bottom);
 	}, [tags]);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		const handleOutsideClick = (event) => {
 			if (isPopoverOpen && triggerContainerRef.current && popoverContentRef.current && !triggerContainerRef.current.contains(event.target) && !popoverContentRef.current.contains(event.target)) setIsPopoverOpen(false);
 		};
@@ -5923,7 +5923,7 @@ const Autocomplete = ({ allowDuplicates, autocompleteOptions, children, classSty
 			document.removeEventListener("mousedown", handleOutsideClick);
 		};
 	}, [isPopoverOpen]);
-	const handleOpenChange = dashboard__loadShare__react__loadShare__.useCallback((open) => {
+	const handleOpenChange = admin__loadShare__react__loadShare__.useCallback((open) => {
 		if (open && triggerContainerRef.current) {
 			const { width } = triggerContainerRef.current.getBoundingClientRect();
 			setPopoverWidth(width);
@@ -6097,20 +6097,20 @@ const Autocomplete = ({ allowDuplicates, autocompleteOptions, children, classSty
 function createContextScope(scopeName, createContextScopeDeps = []) {
   let defaultContexts = [];
   function createContext3(rootComponentName, defaultContext) {
-    const BaseContext = dashboard__loadShare__react__loadShare__.createContext(defaultContext);
+    const BaseContext = admin__loadShare__react__loadShare__.createContext(defaultContext);
     BaseContext.displayName = rootComponentName + "Context";
     const index = defaultContexts.length;
     defaultContexts = [...defaultContexts, defaultContext];
     const Provider = (props) => {
       const { scope, children, ...context } = props;
       const Context = scope?.[scopeName]?.[index] || BaseContext;
-      const value = dashboard__loadShare__react__loadShare__.useMemo(() => context, Object.values(context));
+      const value = admin__loadShare__react__loadShare__.useMemo(() => context, Object.values(context));
       return /* @__PURE__ */ jsxRuntimeExports.jsx(Context.Provider, { value, children });
     };
     Provider.displayName = rootComponentName + "Provider";
     function useContext2(consumerName, scope) {
       const Context = scope?.[scopeName]?.[index] || BaseContext;
-      const context = dashboard__loadShare__react__loadShare__.useContext(Context);
+      const context = admin__loadShare__react__loadShare__.useContext(Context);
       if (context) return context;
       if (defaultContext !== void 0) return defaultContext;
       throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
@@ -6119,11 +6119,11 @@ function createContextScope(scopeName, createContextScopeDeps = []) {
   }
   const createScope = () => {
     const scopeContexts = defaultContexts.map((defaultContext) => {
-      return dashboard__loadShare__react__loadShare__.createContext(defaultContext);
+      return admin__loadShare__react__loadShare__.createContext(defaultContext);
     });
     return function useScope(scope) {
       const contexts = scope?.[scopeName] || scopeContexts;
-      return dashboard__loadShare__react__loadShare__.useMemo(
+      return admin__loadShare__react__loadShare__.useMemo(
         () => ({ [`__scope${scopeName}`]: { ...scope, [scopeName]: contexts } }),
         [scope, contexts]
       );
@@ -6146,7 +6146,7 @@ function composeContextScopes(...scopes) {
         const currentScope = scopeProps[`__scope${scopeName}`];
         return { ...nextScopes2, ...currentScope };
       }, {});
-      return dashboard__loadShare__react__loadShare__.useMemo(() => ({ [`__scope${baseScope.scopeName}`]: nextScopes }), [nextScopes]);
+      return admin__loadShare__react__loadShare__.useMemo(() => ({ [`__scope${baseScope.scopeName}`]: nextScopes }), [nextScopes]);
     };
   };
   createScope.scopeName = baseScope.scopeName;
@@ -6175,7 +6175,7 @@ var NODES = [
 ];
 var Primitive = NODES.reduce((primitive, node) => {
   const Slot = createSlot(`Primitive.${node}`);
-  const Node = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+  const Node = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
     const { asChild, ...primitiveProps } = props;
     const Comp = asChild ? Slot : node;
     if (typeof window !== "undefined") {
@@ -6203,10 +6203,10 @@ function subscribe() {
 var AVATAR_NAME = "Avatar";
 var [createAvatarContext] = createContextScope(AVATAR_NAME);
 var [AvatarProvider, useAvatarContext] = createAvatarContext(AVATAR_NAME);
-var Avatar$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var Avatar$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeAvatar, ...avatarProps } = props;
-    const [imageLoadingStatus, setImageLoadingStatus] = dashboard__loadShare__react__loadShare__.useState("idle");
+    const [imageLoadingStatus, setImageLoadingStatus] = admin__loadShare__react__loadShare__.useState("idle");
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       AvatarProvider,
       {
@@ -6220,7 +6220,7 @@ var Avatar$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 Avatar$1.displayName = AVATAR_NAME;
 var IMAGE_NAME = "AvatarImage";
-var AvatarImage$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var AvatarImage$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeAvatar, src, onLoadingStatusChange = () => {
     }, ...imageProps } = props;
@@ -6240,12 +6240,12 @@ var AvatarImage$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 AvatarImage$1.displayName = IMAGE_NAME;
 var FALLBACK_NAME = "AvatarFallback";
-var AvatarFallback$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var AvatarFallback$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeAvatar, delayMs, ...fallbackProps } = props;
     const context = useAvatarContext(FALLBACK_NAME, __scopeAvatar);
-    const [canRender, setCanRender] = dashboard__loadShare__react__loadShare__.useState(delayMs === void 0);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    const [canRender, setCanRender] = admin__loadShare__react__loadShare__.useState(delayMs === void 0);
+    admin__loadShare__react__loadShare__.useEffect(() => {
       if (delayMs !== void 0) {
         const timerId = window.setTimeout(() => setCanRender(true), delayMs);
         return () => window.clearTimeout(timerId);
@@ -6269,7 +6269,7 @@ function resolveLoadingStatus(image, src) {
 }
 function useImageLoadingStatus(src, { referrerPolicy, crossOrigin }) {
   const isHydrated = useIsHydrated();
-  const imageRef = dashboard__loadShare__react__loadShare__.useRef(null);
+  const imageRef = admin__loadShare__react__loadShare__.useRef(null);
   const image = (() => {
     if (!isHydrated) return null;
     if (!imageRef.current) {
@@ -6277,7 +6277,7 @@ function useImageLoadingStatus(src, { referrerPolicy, crossOrigin }) {
     }
     return imageRef.current;
   })();
-  const [loadingStatus, setLoadingStatus] = dashboard__loadShare__react__loadShare__.useState(
+  const [loadingStatus, setLoadingStatus] = admin__loadShare__react__loadShare__.useState(
     () => resolveLoadingStatus(image, src)
   );
   useLayoutEffect2(() => {
@@ -6310,19 +6310,19 @@ var Image = AvatarImage$1;
 var Fallback = AvatarFallback$1;
 
 //#region src/components/ui/avatar.tsx
-const Avatar = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Root$b, {
+const Avatar = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Root$b, {
 	className: cn$1("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className),
 	ref,
 	...props
 }));
 Avatar.displayName = Root$b.displayName;
-const AvatarImage = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Image, {
+const AvatarImage = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Image, {
 	className: cn$1("aspect-square h-full w-full", className),
 	ref,
 	...props
 }));
 AvatarImage.displayName = Image.displayName;
-const AvatarFallback = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Fallback, {
+const AvatarFallback = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Fallback, {
 	className: cn$1("flex h-full w-full items-center justify-center rounded-full bg-muted", className),
 	ref,
 	...props
@@ -11511,7 +11511,7 @@ function Months(props) {
 }
 
 /** @ignore */
-const dayPickerContext = dashboard__loadShare__react__loadShare__.createContext(undefined);
+const dayPickerContext = admin__loadShare__react__loadShare__.createContext(undefined);
 /**
  * Provides access to the DayPicker context, which includes properties and
  * methods to interact with the DayPicker component. This hook must be used
@@ -11525,7 +11525,7 @@ const dayPickerContext = dashboard__loadShare__react__loadShare__.createContext(
  * @see https://daypicker.dev/guides/custom-components
  */
 function useDayPicker() {
-    const context = dashboard__loadShare__react__loadShare__.useContext(dayPickerContext);
+    const context = admin__loadShare__react__loadShare__.useContext(dayPickerContext);
     if (context === undefined) {
         throw new Error("useDayPicker() must be used within a custom component.");
     }
@@ -11552,12 +11552,12 @@ function MonthsDropdown(props) {
 function Nav(props) {
     const { onPreviousClick, onNextClick, previousMonth, nextMonth, ...navProps } = props;
     const { components, classNames, labels: { labelPrevious, labelNext }, } = useDayPicker();
-    const handleNextClick = dashboard__loadShare__react__loadShare__.useCallback((e) => {
+    const handleNextClick = admin__loadShare__react__loadShare__.useCallback((e) => {
         if (nextMonth) {
             onNextClick?.(e);
         }
     }, [nextMonth, onNextClick]);
-    const handlePreviousClick = dashboard__loadShare__react__loadShare__.useCallback((e) => {
+    const handlePreviousClick = admin__loadShare__react__loadShare__.useCallback((e) => {
         if (previousMonth) {
             onPreviousClick?.(e);
         }
@@ -12759,10 +12759,10 @@ const queryWeekdaysEl = (element) => asHtmlElement(element.querySelector("[data-
  *   names, months, focused day, and the date utility library.
  */
 function useAnimation(rootElRef, enabled, { classNames, months, focused, dateLib, }) {
-    const previousRootElSnapshotRef = dashboard__loadShare__react__loadShare__.useRef(null);
-    const previousMonthsRef = dashboard__loadShare__react__loadShare__.useRef(months);
-    const animatingRef = dashboard__loadShare__react__loadShare__.useRef(false);
-    dashboard__loadShare__react__loadShare__.useLayoutEffect(() => {
+    const previousRootElSnapshotRef = admin__loadShare__react__loadShare__.useRef(null);
+    const previousMonthsRef = admin__loadShare__react__loadShare__.useRef(months);
+    const animatingRef = admin__loadShare__react__loadShare__.useRef(false);
+    admin__loadShare__react__loadShare__.useLayoutEffect(() => {
         // get previous months before updating the previous months ref
         const previousMonths = previousMonthsRef.current;
         // update previous months ref for next effect trigger
@@ -13250,7 +13250,7 @@ function getWeeks(months) {
  *   update the value.
  */
 function useControlledValue(defaultValue, controlledValue) {
-    const [uncontrolledValue, setValue] = dashboard__loadShare__react__loadShare__.useState(defaultValue);
+    const [uncontrolledValue, setValue] = admin__loadShare__react__loadShare__.useState(defaultValue);
     const value = controlledValue === undefined ? uncontrolledValue : controlledValue;
     return [value, setValue];
 }
@@ -13272,13 +13272,13 @@ function useCalendar(props, dateLib) {
     // initialMonth is always computed from props.month if provided
     props.month ? initialMonth : undefined);
     // biome-ignore lint/correctness/useExhaustiveDependencies: change the initial month when the time zone changes.
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
         const newInitialMonth = getInitialMonth(props, navStart, navEnd, dateLib);
         setFirstMonth(newInitialMonth);
     }, [props.timeZone]);
     /** The months displayed in the calendar. */
     // biome-ignore lint/correctness/useExhaustiveDependencies: We want to recompute only when specific props change.
-    const { months, weeks, days, previousMonth, nextMonth } = dashboard__loadShare__react__loadShare__.useMemo(() => {
+    const { months, weeks, days, previousMonth, nextMonth } = admin__loadShare__react__loadShare__.useMemo(() => {
         const displayMonths = getDisplayMonths(firstMonth, navEnd, { numberOfMonths: props.numberOfMonths }, dateLib);
         const dates = getDates(displayMonths, props.endMonth ? endOfMonth(props.endMonth) : undefined, {
             ISOWeek: props.ISOWeek,
@@ -13521,9 +13521,9 @@ function getNextFocus(moveBy, moveDir, refDay, calendarStartMonth, calendarEndMo
  */
 function useFocus(props, calendar, getModifiers, isSelected, dateLib) {
     const { autoFocus } = props;
-    const [lastFocused, setLastFocused] = dashboard__loadShare__react__loadShare__.useState();
+    const [lastFocused, setLastFocused] = admin__loadShare__react__loadShare__.useState();
     const focusTarget = calculateFocusTarget(calendar.days, getModifiers, isSelected || (() => false), lastFocused);
-    const [focusedDay, setFocused] = dashboard__loadShare__react__loadShare__.useState(autoFocus ? focusTarget : undefined);
+    const [focusedDay, setFocused] = admin__loadShare__react__loadShare__.useState(autoFocus ? focusTarget : undefined);
     const blur = () => {
         setLastFocused(focusedDay);
         setFocused(undefined);
@@ -14047,7 +14047,7 @@ function DayPicker(initialProps) {
             props.modifiers = nextModifiers;
         }
     }
-    const { components, formatters, labels, dateLib, locale, classNames } = dashboard__loadShare__react__loadShare__.useMemo(() => {
+    const { components, formatters, labels, dateLib, locale, classNames } = admin__loadShare__react__loadShare__.useMemo(() => {
         const locale = { ...enUS, ...props.locale };
         const weekStartsOn = props.broadcastCalendar ? 1 : props.weekStartsOn;
         const noonOverrides = props.noonSafe && props.timeZone
@@ -14103,21 +14103,21 @@ function DayPicker(initialProps) {
     const { isSelected, select, selected: selectedValue, } = useSelection(props, dateLib) ?? {};
     const { blur, focused, isFocusTarget, moveFocus, setFocused } = useFocus(props, calendar, getModifiers, isSelected ?? (() => false), dateLib);
     const { labelDayButton, labelGridcell, labelGrid, labelMonthDropdown, labelNav, labelPrevious, labelNext, labelWeekday, labelWeekNumber, labelWeekNumberHeader, labelYearDropdown, } = labels;
-    const weekdays = dashboard__loadShare__react__loadShare__.useMemo(() => getWeekdays(dateLib, props.ISOWeek, props.broadcastCalendar, props.today), [dateLib, props.ISOWeek, props.broadcastCalendar, props.today]);
+    const weekdays = admin__loadShare__react__loadShare__.useMemo(() => getWeekdays(dateLib, props.ISOWeek, props.broadcastCalendar, props.today), [dateLib, props.ISOWeek, props.broadcastCalendar, props.today]);
     const isInteractive = mode !== undefined || onDayClick !== undefined;
-    const handlePreviousClick = dashboard__loadShare__react__loadShare__.useCallback(() => {
+    const handlePreviousClick = admin__loadShare__react__loadShare__.useCallback(() => {
         if (!previousMonth)
             return;
         goToMonth(previousMonth);
         onPrevClick?.(previousMonth);
     }, [previousMonth, goToMonth, onPrevClick]);
-    const handleNextClick = dashboard__loadShare__react__loadShare__.useCallback(() => {
+    const handleNextClick = admin__loadShare__react__loadShare__.useCallback(() => {
         if (!nextMonth)
             return;
         goToMonth(nextMonth);
         onNextClick?.(nextMonth);
     }, [goToMonth, nextMonth, onNextClick]);
-    const handleDayClick = dashboard__loadShare__react__loadShare__.useCallback((day, m) => (e) => {
+    const handleDayClick = admin__loadShare__react__loadShare__.useCallback((day, m) => (e) => {
         e.preventDefault();
         e.stopPropagation();
         setFocused(day);
@@ -14127,15 +14127,15 @@ function DayPicker(initialProps) {
         select?.(day.date, m, e);
         onDayClick?.(day.date, m, e);
     }, [select, onDayClick, setFocused]);
-    const handleDayFocus = dashboard__loadShare__react__loadShare__.useCallback((day, m) => (e) => {
+    const handleDayFocus = admin__loadShare__react__loadShare__.useCallback((day, m) => (e) => {
         setFocused(day);
         onDayFocus?.(day.date, m, e);
     }, [onDayFocus, setFocused]);
-    const handleDayBlur = dashboard__loadShare__react__loadShare__.useCallback((day, m) => (e) => {
+    const handleDayBlur = admin__loadShare__react__loadShare__.useCallback((day, m) => (e) => {
         blur();
         onDayBlur?.(day.date, m, e);
     }, [blur, onDayBlur]);
-    const handleDayKeyDown = dashboard__loadShare__react__loadShare__.useCallback((day, modifiers) => (e) => {
+    const handleDayKeyDown = admin__loadShare__react__loadShare__.useCallback((day, modifiers) => (e) => {
         const keyMap = {
             ArrowLeft: [
                 e.shiftKey ? "month" : "day",
@@ -14160,30 +14160,30 @@ function DayPicker(initialProps) {
         }
         onDayKeyDown?.(day.date, modifiers, e);
     }, [moveFocus, onDayKeyDown, props.dir]);
-    const handleDayMouseEnter = dashboard__loadShare__react__loadShare__.useCallback((day, modifiers) => (e) => {
+    const handleDayMouseEnter = admin__loadShare__react__loadShare__.useCallback((day, modifiers) => (e) => {
         onDayMouseEnter?.(day.date, modifiers, e);
     }, [onDayMouseEnter]);
-    const handleDayMouseLeave = dashboard__loadShare__react__loadShare__.useCallback((day, modifiers) => (e) => {
+    const handleDayMouseLeave = admin__loadShare__react__loadShare__.useCallback((day, modifiers) => (e) => {
         onDayMouseLeave?.(day.date, modifiers, e);
     }, [onDayMouseLeave]);
-    const handleMonthChange = dashboard__loadShare__react__loadShare__.useCallback((date) => (e) => {
+    const handleMonthChange = admin__loadShare__react__loadShare__.useCallback((date) => (e) => {
         const selectedMonth = Number(e.target.value);
         const month = dateLib.setMonth(dateLib.startOfMonth(date), selectedMonth);
         goToMonth(month);
     }, [dateLib, goToMonth]);
-    const handleYearChange = dashboard__loadShare__react__loadShare__.useCallback((date) => (e) => {
+    const handleYearChange = admin__loadShare__react__loadShare__.useCallback((date) => (e) => {
         const selectedYear = Number(e.target.value);
         const month = dateLib.setYear(dateLib.startOfMonth(date), selectedYear);
         goToMonth(month);
     }, [dateLib, goToMonth]);
-    const { className, style } = dashboard__loadShare__react__loadShare__.useMemo(() => ({
+    const { className, style } = admin__loadShare__react__loadShare__.useMemo(() => ({
         className: [classNames[UI.Root], props.className]
             .filter(Boolean)
             .join(" "),
         style: { ...styles?.[UI.Root], ...props.style },
     }), [classNames, props.className, props.style, styles]);
     const dataAttributes = getDataAttributes(props);
-    const rootElRef = dashboard__loadShare__react__loadShare__.useRef(null);
+    const rootElRef = admin__loadShare__react__loadShare__.useRef(null);
     useAnimation(rootElRef, Boolean(props.animate), {
         classNames,
         months,
@@ -14335,37 +14335,37 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }) {
 Calendar.displayName = "Calendar";
 
 //#region src/components/ui/card.tsx
-const Card = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+const Card = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 	className: cn$1("rounded-xl border bg-card/30 text-card-foreground shadow", className),
 	ref,
 	...props
 }));
 Card.displayName = "Card";
-const CardHeader = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+const CardHeader = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 	className: cn$1("flex flex-col space-y-1.5 p-6", className),
 	ref,
 	...props
 }));
 CardHeader.displayName = "CardHeader";
-const CardTitle = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("h3", {
+const CardTitle = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("h3", {
 	className: cn$1("font-semibold leading-none tracking-tight", className),
 	ref,
 	...props
 }));
 CardTitle.displayName = "CardTitle";
-const CardDescription = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
+const CardDescription = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
 	className: cn$1("text-sm text-muted-foreground", className),
 	ref,
 	...props
 }));
 CardDescription.displayName = "CardDescription";
-const CardContent = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+const CardContent = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 	className: cn$1("p-6 pt-0", className),
 	ref,
 	...props
 }));
 CardContent.displayName = "CardContent";
-const CardFooter = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+const CardFooter = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 	className: cn$1("flex items-center p-6 pt-0", className),
 	ref,
 	...props
@@ -16078,24 +16078,24 @@ function EmblaCarousel(root, userOptions, userPlugins) {
 EmblaCarousel.globalOptions = undefined;
 
 function useEmblaCarousel(options = {}, plugins = []) {
-  const storedOptions = dashboard__loadShare__react__loadShare__.useRef(options);
-  const storedPlugins = dashboard__loadShare__react__loadShare__.useRef(plugins);
-  const [emblaApi, setEmblaApi] = dashboard__loadShare__react__loadShare__.useState();
-  const [viewport, setViewport] = dashboard__loadShare__react__loadShare__.useState();
-  const reInit = dashboard__loadShare__react__loadShare__.useCallback(() => {
+  const storedOptions = admin__loadShare__react__loadShare__.useRef(options);
+  const storedPlugins = admin__loadShare__react__loadShare__.useRef(plugins);
+  const [emblaApi, setEmblaApi] = admin__loadShare__react__loadShare__.useState();
+  const [viewport, setViewport] = admin__loadShare__react__loadShare__.useState();
+  const reInit = admin__loadShare__react__loadShare__.useCallback(() => {
     if (emblaApi) emblaApi.reInit(storedOptions.current, storedPlugins.current);
   }, [emblaApi]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (areOptionsEqual(storedOptions.current, options)) return;
     storedOptions.current = options;
     reInit();
   }, [options, reInit]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (arePluginsEqual(storedPlugins.current, plugins)) return;
     storedPlugins.current = plugins;
     reInit();
   }, [plugins, reInit]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (canUseDOM() && viewport) {
       EmblaCarousel.globalOptions = useEmblaCarousel.globalOptions;
       const newEmblaApi = EmblaCarousel(viewport, storedOptions.current, storedPlugins.current);
@@ -16110,31 +16110,31 @@ function useEmblaCarousel(options = {}, plugins = []) {
 useEmblaCarousel.globalOptions = undefined;
 
 //#region src/components/ui/carousel.tsx
-const CarouselContext = dashboard__loadShare__react__loadShare__.createContext(null);
+const CarouselContext = admin__loadShare__react__loadShare__.createContext(null);
 function useCarousel() {
-	const context = dashboard__loadShare__react__loadShare__.useContext(CarouselContext);
+	const context = admin__loadShare__react__loadShare__.useContext(CarouselContext);
 	if (!context) throw new Error("useCarousel must be used within a <Carousel />");
 	return context;
 }
-const Carousel = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, opts, orientation = "horizontal", plugins, setApi, ...props }, ref) => {
+const Carousel = admin__loadShare__react__loadShare__.forwardRef(({ children, className, opts, orientation = "horizontal", plugins, setApi, ...props }, ref) => {
 	const [carouselRef, api] = useEmblaCarousel({
 		...opts,
 		axis: orientation === "horizontal" ? "x" : "y"
 	}, plugins);
-	const [canScrollPrev, setCanScrollPrev] = dashboard__loadShare__react__loadShare__.useState(false);
-	const [canScrollNext, setCanScrollNext] = dashboard__loadShare__react__loadShare__.useState(false);
-	const onSelect = dashboard__loadShare__react__loadShare__.useCallback((api$1) => {
+	const [canScrollPrev, setCanScrollPrev] = admin__loadShare__react__loadShare__.useState(false);
+	const [canScrollNext, setCanScrollNext] = admin__loadShare__react__loadShare__.useState(false);
+	const onSelect = admin__loadShare__react__loadShare__.useCallback((api$1) => {
 		if (!api$1) return;
 		setCanScrollPrev(api$1.canScrollPrev());
 		setCanScrollNext(api$1.canScrollNext());
 	}, []);
-	const scrollPrev = dashboard__loadShare__react__loadShare__.useCallback(() => {
+	const scrollPrev = admin__loadShare__react__loadShare__.useCallback(() => {
 		api?.scrollPrev();
 	}, [api]);
-	const scrollNext = dashboard__loadShare__react__loadShare__.useCallback(() => {
+	const scrollNext = admin__loadShare__react__loadShare__.useCallback(() => {
 		api?.scrollNext();
 	}, [api]);
-	const handleKeyDown = dashboard__loadShare__react__loadShare__.useCallback((event) => {
+	const handleKeyDown = admin__loadShare__react__loadShare__.useCallback((event) => {
 		if (event.key === "ArrowLeft") {
 			event.preventDefault();
 			scrollPrev();
@@ -16143,11 +16143,11 @@ const Carousel = dashboard__loadShare__react__loadShare__.forwardRef(({ children
 			scrollNext();
 		}
 	}, [scrollPrev, scrollNext]);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		if (!api || !setApi) return;
 		setApi(api);
 	}, [api, setApi]);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		if (!api) return;
 		onSelect(api);
 		api.on("reInit", onSelect);
@@ -16179,7 +16179,7 @@ const Carousel = dashboard__loadShare__react__loadShare__.forwardRef(({ children
 	});
 });
 Carousel.displayName = "Carousel";
-const CarouselContent = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
+const CarouselContent = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
 	const { carouselRef, orientation } = useCarousel();
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 		className: "overflow-hidden",
@@ -16192,7 +16192,7 @@ const CarouselContent = dashboard__loadShare__react__loadShare__.forwardRef(({ c
 	});
 });
 CarouselContent.displayName = "CarouselContent";
-const CarouselItem = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
+const CarouselItem = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
 	const { orientation } = useCarousel();
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 		"aria-roledescription": "slide",
@@ -16203,7 +16203,7 @@ const CarouselItem = dashboard__loadShare__react__loadShare__.forwardRef(({ clas
 	});
 });
 CarouselItem.displayName = "CarouselItem";
-const CarouselPrevious = dashboard__loadShare__react__loadShare__.forwardRef(({ className, size = "icon", variant = "outline", ...props }, ref) => {
+const CarouselPrevious = admin__loadShare__react__loadShare__.forwardRef(({ className, size = "icon", variant = "outline", ...props }, ref) => {
 	const { canScrollPrev, orientation, scrollPrev } = useCarousel();
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs(Button$1, {
 		className: cn$1("absolute  h-8 w-8 rounded-full", orientation === "horizontal" ? "-left-12 top-1/2 -translate-y-1/2" : "-top-12 left-1/2 -translate-x-1/2 rotate-90", className),
@@ -16220,7 +16220,7 @@ const CarouselPrevious = dashboard__loadShare__react__loadShare__.forwardRef(({ 
 	});
 });
 CarouselPrevious.displayName = "CarouselPrevious";
-const CarouselNext = dashboard__loadShare__react__loadShare__.forwardRef(({ className, size = "icon", variant = "outline", ...props }, ref) => {
+const CarouselNext = admin__loadShare__react__loadShare__.forwardRef(({ className, size = "icon", variant = "outline", ...props }, ref) => {
 	const { canScrollNext, orientation, scrollNext } = useCarousel();
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs(Button$1, {
 		className: cn$1("absolute h-8 w-8 rounded-full", orientation === "horizontal" ? "-right-12 top-1/2 -translate-y-1/2" : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90", className),
@@ -16311,7 +16311,7 @@ function svgPropertiesNoEventsFromUnknown(input) {
   if (input == null) {
     return null;
   }
-  if (/*#__PURE__*/dashboard__loadShare__react__loadShare__.isValidElement(input) && typeof input.props === 'object' && input.props !== null) {
+  if (/*#__PURE__*/admin__loadShare__react__loadShare__.isValidElement(input) && typeof input.props === 'object' && input.props !== null) {
     var p = input.props;
     return svgPropertiesNoEvents(p);
   }
@@ -16344,7 +16344,14 @@ var _excluded$4 = ["children", "width", "height", "viewBox", "className", "style
 function _extends$a() { return _extends$a = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends$a.apply(null, arguments); }
 function _objectWithoutProperties$4(e, t) { if (null == e) return {}; var o, r, i = _objectWithoutPropertiesLoose$4(e, t); if (Object.getOwnPropertySymbols) { var n = Object.getOwnPropertySymbols(e); for (r = 0; r < n.length; r++) o = n[r], -1 === t.indexOf(o) && {}.propertyIsEnumerable.call(e, o) && (i[o] = e[o]); } return i; }
 function _objectWithoutPropertiesLoose$4(r, e) { if (null == r) return {}; var t = {}; for (var n in r) if ({}.hasOwnProperty.call(r, n)) { if (-1 !== e.indexOf(n)) continue; t[n] = r[n]; } return t; }
-var Surface = /*#__PURE__*/dashboard__loadShare__react__loadShare__.forwardRef((props, ref) => {
+/**
+ * Renders an SVG element.
+ *
+ * All charts already include a Surface component, so you would not normally use this directly.
+ *
+ * @link https://developer.mozilla.org/en-US/docs/Web/SVG/Element/svg
+ */
+var Surface = /*#__PURE__*/admin__loadShare__react__loadShare__.forwardRef((props, ref) => {
   var {
       children,
       width,
@@ -16363,18 +16370,18 @@ var Surface = /*#__PURE__*/dashboard__loadShare__react__loadShare__.forwardRef((
     y: 0
   };
   var layerClass = clsx('recharts-surface', className);
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("svg", _extends$a({}, svgPropertiesAndEvents(others), {
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("svg", _extends$a({}, svgPropertiesAndEvents(others), {
     className: layerClass,
     width: width,
     height: height,
     style: style,
     viewBox: "".concat(svgView.x, " ").concat(svgView.y, " ").concat(svgView.width, " ").concat(svgView.height),
     ref: ref
-  }), /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("title", null, title), /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("desc", null, desc), children);
+  }), /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("title", null, title), /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("desc", null, desc), children);
 });
 
-var LegendPortalContext = /*#__PURE__*/dashboard__loadShare__react__loadShare__.createContext(null);
-var useLegendPortal = () => dashboard__loadShare__react__loadShare__.useContext(LegendPortalContext);
+var LegendPortalContext = /*#__PURE__*/admin__loadShare__react__loadShare__.createContext(null);
+var useLegendPortal = () => admin__loadShare__react__loadShare__.useContext(LegendPortalContext);
 
 function constant$1(x) {
   return function constant() {
@@ -17857,11 +17864,11 @@ function noop$3() {}
 
 var _excluded$3 = ["type", "size", "sizeType"];
 function _extends$9() { return _extends$9 = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends$9.apply(null, arguments); }
-function ownKeys$k(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$k(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$k(Object(t), true).forEach(function (r) { _defineProperty$k(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$k(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty$k(e, r, t) { return (r = _toPropertyKey$k(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
-function _toPropertyKey$k(t) { var i = _toPrimitive$k(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive$k(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function ownKeys$l(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$l(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$l(Object(t), true).forEach(function (r) { _defineProperty$l(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$l(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$l(e, r, t) { return (r = _toPropertyKey$l(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$l(t) { var i = _toPrimitive$l(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$l(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function _objectWithoutProperties$3(e, t) { if (null == e) return {}; var o, r, i = _objectWithoutPropertiesLoose$3(e, t); if (Object.getOwnPropertySymbols) { var n = Object.getOwnPropertySymbols(e); for (r = 0; r < n.length; r++) o = n[r], -1 === t.indexOf(o) && {}.propertyIsEnumerable.call(e, o) && (i[o] = e[o]); } return i; }
 function _objectWithoutPropertiesLoose$3(r, e) { if (null == r) return {}; var t = {}; for (var n in r) if ({}.hasOwnProperty.call(r, n)) { if (-1 !== e.indexOf(n)) continue; t[n] = r[n]; } return t; }
 var symbolFactories = {
@@ -17905,6 +17912,10 @@ var calculateAreaSize = (size, sizeType, type) => {
 var registerSymbol = (key, factory) => {
   symbolFactories["symbol".concat(upperFirst(key))] = factory;
 };
+
+/**
+ * Renders a symbol from a set of predefined shapes.
+ */
 var Symbols = _ref => {
   var {
       type = 'circle',
@@ -17912,7 +17923,7 @@ var Symbols = _ref => {
       sizeType = 'area'
     } = _ref,
     rest = _objectWithoutProperties$3(_ref, _excluded$3);
-  var props = _objectSpread$k(_objectSpread$k({}, rest), {}, {
+  var props = _objectSpread$l(_objectSpread$l({}, rest), {}, {
     type,
     size,
     sizeType
@@ -17949,7 +17960,7 @@ var Symbols = _ref => {
   } = props;
   var filteredProps = svgPropertiesAndEvents(props);
   if (isNumber$1(cx) && isNumber$1(cy) && isNumber$1(size)) {
-    return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("path", _extends$9({}, filteredProps, {
+    return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("path", _extends$9({}, filteredProps, {
       className: clsx('recharts-symbols', className),
       transform: "translate(".concat(cx, ", ").concat(cy, ")"),
       d: getPath()
@@ -17968,14 +17979,39 @@ Symbols.registerSymbol = registerSymbol;
  * - `sign` stacks positive values above zero and negative values below zero. Similar to `none` but handles negatives.
  * - `positive` ignores all negative values, and then behaves like \`none\`.
  *
- * Also see https://d3js.org/d3-shape/stack#stack-offsets
+ * @see {@link https://d3js.org/d3-shape/stack#stack-offsets}
  * (note that the `diverging` offset in d3 is named `sign` in recharts)
+ *
+ * @inline
  */
 
 /**
  * @deprecated use either `CartesianLayout` or `PolarLayout` instead.
  * Mixing both charts families leads to ambiguity in the type system.
  * These two layouts share very few properties, so it is best to keep them separate.
+ */
+
+/**
+ * The type of axis.
+ *
+ * `category`: Treats data as distinct values.
+ * Each value is in the same distance from its neighbors, regardless of their actual numeric difference.
+ *
+ * `number`: Treats data as continuous range.
+ * Values that are numerically closer are placed closer together on the axis.
+ *
+ * `auto`: the type is inferred based on the chart layout.
+ *
+ * This is external type - users will provide this type in props.
+ * Internally we will evaluate it to either 'category' or 'number' based on the layout,
+ * before sending it to the store.
+ *
+ * @inline
+ */
+
+/**
+ * Individual axes are responsible for resolving the 'auto' type to either 'number' or 'category',
+ * based on the chart layout and axis kind. Then they can start using this type.
  */
 
 /**
@@ -18000,6 +18036,12 @@ Symbols.registerSymbol = registerSymbol;
 var isPolarCoordinate = c => {
   return 'radius' in c && 'startAngle' in c && 'endAngle' in c;
 };
+
+/**
+ * String shortcuts for scale types.
+ * In case none of these does what you want you can also provide your own scale function
+ * @see {@link CustomScaleDefinition}
+ */
 
 //
 // Event Handler Types -- Copied from @types/react/index.d.ts and adapted for Props.
@@ -18046,7 +18088,10 @@ var isPolarCoordinate = c => {
  * There are also `category` axes that have different things than numbers in their domain.
  */
 
-/** The props definition of base axis */
+/**
+ * Props shared in all renderable axes - meaning the ones that are drawn on the chart,
+ * can have ticks, axis line, etc.
+ */
 
 /** Defines how ticks are placed and whether / how tick collisions are handled.
  * 'preserveStart' keeps the left tick on collision and ensures that the first tick is always shown.
@@ -18066,12 +18111,16 @@ var isPolarCoordinate = c => {
  * @inline
  */
 
+/**
+ * @inline
+ */
+
 var adaptEventHandlers = (props, newHandler) => {
   if (!props || typeof props === 'function' || typeof props === 'boolean') {
     return null;
   }
   var inputProps = props;
-  if (/*#__PURE__*/dashboard__loadShare__react__loadShare__.isValidElement(props)) {
+  if (/*#__PURE__*/admin__loadShare__react__loadShare__.isValidElement(props)) {
     inputProps = props.props;
   }
   if (typeof inputProps !== 'object' && typeof inputProps !== 'function') {
@@ -18104,11 +18153,11 @@ var adaptEventsOfChild = (props, data, index) => {
   return out;
 };
 
-function ownKeys$j(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$j(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$j(Object(t), true).forEach(function (r) { _defineProperty$j(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$j(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty$j(e, r, t) { return (r = _toPropertyKey$j(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
-function _toPropertyKey$j(t) { var i = _toPrimitive$j(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive$j(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function ownKeys$k(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$k(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$k(Object(t), true).forEach(function (r) { _defineProperty$k(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$k(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$k(e, r, t) { return (r = _toPropertyKey$k(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$k(t) { var i = _toPrimitive$k(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$k(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 /**
  * This function mimics the behavior of the `defaultProps` static property in React.
  * Functional components do not have a defaultProps property, so this function is useful to resolve default props.
@@ -18129,7 +18178,7 @@ function resolveDefaultProps(realProps, defaultProps) {
    * To avoid mutating the original `realProps` object passed to the function, create a shallow copy of it.
    * `resolvedProps` will be modified directly with the defaults.
    */
-  var resolvedProps = _objectSpread$j({}, realProps);
+  var resolvedProps = _objectSpread$k({}, realProps);
   /*
    * Since the function guarantees `D extends Partial<T>`, this assignment is safe.
    * It allows TypeScript to work with the well-defined `Partial<T>` type inside the loop,
@@ -18191,11 +18240,11 @@ function resolveDefaultProps(realProps, defaultProps) {
  */
 
 function _extends$8() { return _extends$8 = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends$8.apply(null, arguments); }
-function ownKeys$i(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$i(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$i(Object(t), true).forEach(function (r) { _defineProperty$i(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$i(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty$i(e, r, t) { return (r = _toPropertyKey$i(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
-function _toPropertyKey$i(t) { var i = _toPrimitive$i(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive$i(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function ownKeys$j(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$j(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$j(Object(t), true).forEach(function (r) { _defineProperty$j(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$j(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$j(e, r, t) { return (r = _toPropertyKey$j(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$j(t) { var i = _toPrimitive$j(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$j(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 var SIZE = 32;
 var defaultLegendContentDefaultProps = {
   align: 'center',
@@ -18220,7 +18269,7 @@ function Icon$1(_ref) {
   }
   if (preferredIcon === 'plainline') {
     var _data$payload;
-    return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("line", {
+    return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("line", {
       strokeWidth: 4,
       fill: "none",
       stroke: color,
@@ -18233,7 +18282,7 @@ function Icon$1(_ref) {
     });
   }
   if (preferredIcon === 'line') {
-    return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("path", {
+    return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("path", {
       strokeWidth: 4,
       fill: "none",
       stroke: color,
@@ -18242,19 +18291,19 @@ function Icon$1(_ref) {
     });
   }
   if (preferredIcon === 'rect') {
-    return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("path", {
+    return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("path", {
       stroke: "none",
       fill: color,
       d: "M0,".concat(SIZE / 8, "h").concat(SIZE, "v").concat(SIZE * 3 / 4, "h").concat(-SIZE, "z"),
       className: "recharts-legend-icon"
     });
   }
-  if (/*#__PURE__*/dashboard__loadShare__react__loadShare__.isValidElement(data.legendIcon)) {
-    var iconProps = _objectSpread$i({}, data);
+  if (/*#__PURE__*/admin__loadShare__react__loadShare__.isValidElement(data.legendIcon)) {
+    var iconProps = _objectSpread$j({}, data);
     delete iconProps.legendIcon;
-    return /*#__PURE__*/dashboard__loadShare__react__loadShare__.cloneElement(data.legendIcon, iconProps);
+    return /*#__PURE__*/admin__loadShare__react__loadShare__.cloneElement(data.legendIcon, iconProps);
   }
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(Symbols, {
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(Symbols, {
     fill: color,
     cx: halfSize,
     cy: halfSize,
@@ -18299,21 +18348,21 @@ function Items(props) {
     }
     var color = entry.inactive ? inactiveColor : entry.color;
     var finalValue = finalFormatter ? finalFormatter(entry.value, entry, i) : entry.value;
-    return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("li", _extends$8({
+    return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("li", _extends$8({
       className: className,
       style: itemStyle,
       key: "legend-item-".concat(i)
-    }, adaptEventsOfChild(props, entry, i)), /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(Surface, {
+    }, adaptEventsOfChild(props, entry, i)), /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(Surface, {
       width: iconSize,
       height: iconSize,
       viewBox: viewBox,
       style: svgStyle,
       "aria-label": "".concat(finalValue, " legend icon")
-    }, /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(Icon$1, {
+    }, /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(Icon$1, {
       data: entry,
       iconType: iconType,
       inactiveColor: inactiveColor
-    })), /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("span", {
+    })), /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("span", {
       className: "recharts-legend-item-text",
       style: {
         color
@@ -18321,6 +18370,13 @@ function Items(props) {
     }, finalValue));
   });
 }
+
+/**
+ * This component is by default rendered inside the {@link Legend} component. You would not use it directly.
+ *
+ * You can use this component to customize the content of the legend,
+ * or you can provide your own completely independent content.
+ */
 var DefaultLegendContent = outsideProps => {
   var props = resolveDefaultProps(outsideProps, defaultLegendContentDefaultProps);
   var {
@@ -18336,10 +18392,10 @@ var DefaultLegendContent = outsideProps => {
     margin: 0,
     textAlign: layout === 'horizontal' ? align : 'left'
   };
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("ul", {
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("ul", {
     className: "recharts-default-legend",
     style: finalStyle
-  }, /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(Items, _extends$8({}, props, {
+  }, /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(Items, _extends$8({}, props, {
     payload: payload
   })));
 };
@@ -18367,7 +18423,7 @@ var uniqBy$2 = {};
 	exports$1.uniqBy = uniqBy; 
 } (uniqBy$2));
 
-var identity$4 = {};
+var identity$3 = {};
 
 (function (exports$1) {
 
@@ -18378,7 +18434,7 @@ var identity$4 = {};
 	}
 
 	exports$1.identity = identity; 
-} (identity$4));
+} (identity$3));
 
 var isArrayLikeObject = {};
 
@@ -19171,7 +19227,7 @@ var isArguments = {};
 
 	Object.defineProperty(exports$1, Symbol.toStringTag, { value: 'Module' });
 
-	const identity = identity$4;
+	const identity = identity$3;
 	const property$1 = property;
 	const matches$1 = matches;
 	const matchesProperty$1 = matchesProperty;
@@ -19206,7 +19262,7 @@ var isArguments = {};
 	Object.defineProperty(exports$1, Symbol.toStringTag, { value: 'Module' });
 
 	const uniqBy$1 = uniqBy$2;
-	const identity = identity$4;
+	const identity = identity$3;
 	const isArrayLikeObject$1 = isArrayLikeObject;
 	const iteratee$1 = iteratee;
 
@@ -19256,11 +19312,11 @@ function getUniqPayload(payload, option, defaultUniqBy) {
  *
  * https://react-redux.js.org/using-react-redux/accessing-store#providing-custom-context
  */
-var RechartsReduxContext = /*#__PURE__*/dashboard__loadShare__react__loadShare__.createContext(null);
+var RechartsReduxContext = /*#__PURE__*/admin__loadShare__react__loadShare__.createContext(null);
 
 var noopDispatch = a => a;
 var useAppDispatch = () => {
-  var context = dashboard__loadShare__react__loadShare__.useContext(RechartsReduxContext);
+  var context = admin__loadShare__react__loadShare__.useContext(RechartsReduxContext);
   if (context) {
     return context.store.dispatch;
   }
@@ -19287,8 +19343,19 @@ var refEquality = (a, b) => a === b;
  * @return whatever the selector returned; or undefined when outside of Redux store
  */
 function useAppSelector(selector) {
-  var context = dashboard__loadShare__react__loadShare__.useContext(RechartsReduxContext);
-  return withSelectorExports.useSyncExternalStoreWithSelector(context ? context.subscription.addNestedSub : addNestedSubNoop, context ? context.store.getState : noop$2, context ? context.store.getState : noop$2, context ? selector : noop$2, refEquality);
+  var context = admin__loadShare__react__loadShare__.useContext(RechartsReduxContext);
+  var outOfContextSelector = admin__loadShare__react__loadShare__.useMemo(() => {
+    if (!context) {
+      return noop$2;
+    }
+    return state => {
+      if (state == null) {
+        return undefined;
+      }
+      return selector(state);
+    };
+  }, [context, selector]);
+  return withSelectorExports.useSyncExternalStoreWithSelector(context ? context.subscription.addNestedSub : addNestedSubNoop, context ? context.store.getState : noop$2, context ? context.store.getState : noop$2, outOfContextSelector, refEquality);
 }
 
 var runIdentityFunctionCheck = (resultFunc, inputSelectorsResults, outputSelectorResult) => {
@@ -19863,7 +19930,7 @@ function useLegendPayload() {
   return useAppSelector(selectLegendPayload);
 }
 
-var EPS$1 = 1;
+var EPS = 1;
 
 /**
  * TODO this documentation does not reflect what this hook is doing, update it.
@@ -19880,13 +19947,13 @@ var EPS$1 = 1;
  */
 function useElementOffset() {
   var extraDependencies = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-  var [lastBoundingBox, setLastBoundingBox] = dashboard__loadShare__react__loadShare__.useState({
+  var [lastBoundingBox, setLastBoundingBox] = admin__loadShare__react__loadShare__.useState({
     height: 0,
     left: 0,
     top: 0,
     width: 0
   });
-  var updateBoundingBox = dashboard__loadShare__react__loadShare__.useCallback(node => {
+  var updateBoundingBox = admin__loadShare__react__loadShare__.useCallback(node => {
     if (node != null) {
       var rect = node.getBoundingClientRect();
       var box = {
@@ -19895,7 +19962,7 @@ function useElementOffset() {
         top: rect.top,
         width: rect.width
       };
-      if (Math.abs(box.height - lastBoundingBox.height) > EPS$1 || Math.abs(box.left - lastBoundingBox.left) > EPS$1 || Math.abs(box.top - lastBoundingBox.top) > EPS$1 || Math.abs(box.width - lastBoundingBox.width) > EPS$1) {
+      if (Math.abs(box.height - lastBoundingBox.height) > EPS || Math.abs(box.left - lastBoundingBox.left) > EPS || Math.abs(box.top - lastBoundingBox.top) > EPS || Math.abs(box.width - lastBoundingBox.width) > EPS) {
         setLastBoundingBox({
           height: box.height,
           left: box.left,
@@ -21195,11 +21262,11 @@ function isPositiveNumber(n) {
   return typeof n === 'number' && n > 0 && Number.isFinite(n);
 }
 
-function ownKeys$h(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$h(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$h(Object(t), true).forEach(function (r) { _defineProperty$h(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$h(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty$h(e, r, t) { return (r = _toPropertyKey$h(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
-function _toPropertyKey$h(t) { var i = _toPrimitive$h(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive$h(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function ownKeys$i(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$i(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$i(Object(t), true).forEach(function (r) { _defineProperty$i(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$i(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$i(e, r, t) { return (r = _toPropertyKey$i(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$i(t) { var i = _toPrimitive$i(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$i(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function getValueByDataKey(obj, dataKey, defaultValue) {
   if (isNullish(obj) || isNullish(dataKey)) {
     return defaultValue;
@@ -21224,12 +21291,12 @@ var appendOffsetOfLegend = (offset, legendSettings, legendSize) => {
       layout
     } = legendSettings;
     if ((layout === 'vertical' || layout === 'horizontal' && verticalAlign === 'middle') && align !== 'center' && isNumber$1(offset[align])) {
-      return _objectSpread$h(_objectSpread$h({}, offset), {}, {
+      return _objectSpread$i(_objectSpread$i({}, offset), {}, {
         [align]: offset[align] + (boxWidth || 0)
       });
     }
     if ((layout === 'horizontal' || layout === 'vertical' && align === 'center') && verticalAlign !== 'middle' && isNumber$1(offset[verticalAlign])) {
-      return _objectSpread$h(_objectSpread$h({}, offset), {}, {
+      return _objectSpread$i(_objectSpread$i({}, offset), {}, {
         [verticalAlign]: offset[verticalAlign] + (boxHeight || 0)
       });
     }
@@ -21237,22 +21304,6 @@ var appendOffsetOfLegend = (offset, legendSettings, legendSize) => {
   return offset;
 };
 var isCategoricalAxis = (layout, axisType) => layout === 'horizontal' && axisType === 'xAxis' || layout === 'vertical' && axisType === 'yAxis' || layout === 'centric' && axisType === 'angleAxis' || layout === 'radial' && axisType === 'radiusAxis';
-var EPS = 1e-4;
-var checkDomainOfScale = scale => {
-  var domain = scale.domain();
-  if (!domain || domain.length <= 2) {
-    return;
-  }
-  var len = domain.length;
-  var range = scale.range();
-  var minValue = Math.min(range[0], range[1]) - EPS;
-  var maxValue = Math.max(range[0], range[1]) + EPS;
-  var first = scale(domain[0]);
-  var last = scale(domain[len - 1]);
-  if (first < minValue || first > maxValue || last < minValue || last > maxValue) {
-    scale.domain([domain[0], domain[len - 1]]);
-  }
-};
 
 /**
  * Stacks all positive numbers above zero and all negative numbers below zero.
@@ -21286,12 +21337,12 @@ var offsetSign = series => {
       var value = isNan(series1) ? series0 : series1;
       if (value >= 0) {
         col[0] = positive;
-        col[1] = positive + value;
-        positive = series1;
+        positive += value;
+        col[1] = positive;
       } else {
         col[0] = negative;
-        col[1] = negative + value;
-        negative = series1;
+        negative += value;
+        col[1] = negative;
       }
     }
   }
@@ -21326,9 +21377,8 @@ var offsetPositive = series => {
       var value = isNan(col[1]) ? col[0] : col[1];
       if (value >= 0) {
         col[0] = positive;
-        col[1] = positive + value;
-        // eslint-disable-next-line prefer-destructuring
-        positive = col[1];
+        positive += value;
+        col[1] = positive;
       } else {
         col[0] = 0;
         col[1] = 0;
@@ -21453,7 +21503,7 @@ function getTooltipEntry(_ref4) {
     value,
     name
   } = _ref4;
-  return _objectSpread$h(_objectSpread$h({}, tooltipEntrySettings), {}, {
+  return _objectSpread$i(_objectSpread$i({}, tooltipEntrySettings), {}, {
     dataKey,
     payload,
     value,
@@ -21474,11 +21524,11 @@ var selectAllYAxes = createSelector(state => state.cartesianAxis.yAxis, yAxisMap
 
 var DEFAULT_Y_AXIS_WIDTH = 60;
 
-function ownKeys$g(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$g(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$g(Object(t), true).forEach(function (r) { _defineProperty$g(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$g(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty$g(e, r, t) { return (r = _toPropertyKey$g(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
-function _toPropertyKey$g(t) { var i = _toPrimitive$g(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive$g(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function ownKeys$h(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$h(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$h(Object(t), true).forEach(function (r) { _defineProperty$h(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$h(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$h(e, r, t) { return (r = _toPropertyKey$h(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$h(t) { var i = _toPrimitive$h(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$h(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 var selectBrushHeight = state => state.brush.height;
 function selectLeftAxesOffset(state) {
   var yAxes = selectAllYAxes(state);
@@ -21534,13 +21584,13 @@ var selectChartOffsetInternal = createSelector([selectChartWidth, selectChartHei
     top: (margin.top || 0) + topAxesOffset,
     bottom: (margin.bottom || 0) + bottomAxesOffset
   };
-  var offset = _objectSpread$g(_objectSpread$g({}, offsetV), offsetH);
+  var offset = _objectSpread$h(_objectSpread$h({}, offsetV), offsetH);
   var brushBottom = offset.bottom;
   offset.bottom += brushHeight;
   offset = appendOffsetOfLegend(offset, legendSettings, legendSize);
   var offsetWidth = chartWidth - offset.left - offset.right;
   var offsetHeight = chartHeight - offset.top - offset.bottom;
-  return _objectSpread$g(_objectSpread$g({
+  return _objectSpread$h(_objectSpread$h({
     brushBottom
   }, offset), {}, {
     // never return negative values for height and width
@@ -21561,8 +21611,8 @@ createSelector(selectChartWidth, selectChartHeight, (width, height) => ({
   height
 }));
 
-var PanoramaContext = /*#__PURE__*/dashboard__loadShare__react__loadShare__.createContext(null);
-var useIsPanorama = () => dashboard__loadShare__react__loadShare__.useContext(PanoramaContext) != null;
+var PanoramaContext = /*#__PURE__*/admin__loadShare__react__loadShare__.createContext(null);
+var useIsPanorama = () => admin__loadShare__react__loadShare__.useContext(PanoramaContext) != null;
 
 var selectBrushSettings = state => state.brush;
 var selectBrushDimensions = createSelector([selectBrushSettings, selectChartOffsetInternal, selectMargin], (brushSettings, offset, margin) => ({
@@ -21740,10 +21790,20 @@ var warn = function warn(condition, format) {
   }
 };
 
+var defaultResponsiveContainerProps = {
+  width: '100%',
+  height: '100%',
+  debounce: 0,
+  minWidth: 0,
+  initialDimension: {
+    width: -1,
+    height: -1
+  }
+};
 var calculateChartDimensions = (containerWidth, containerHeight, props) => {
   var {
-    width = '100%',
-    height = '100%',
+    width = defaultResponsiveContainerProps.width,
+    height = defaultResponsiveContainerProps.height,
     aspect,
     maxHeight
   } = props;
@@ -21830,12 +21890,12 @@ function getDefaultWidthAndHeight(_ref) {
   var calculatedWidth = width;
   var calculatedHeight = height;
   if (calculatedWidth === undefined && calculatedHeight === undefined) {
-    calculatedWidth = '100%';
-    calculatedHeight = '100%';
+    calculatedWidth = defaultResponsiveContainerProps.width;
+    calculatedHeight = defaultResponsiveContainerProps.height;
   } else if (calculatedWidth === undefined) {
-    calculatedWidth = aspect && aspect > 0 ? undefined : '100%';
+    calculatedWidth = aspect && aspect > 0 ? undefined : defaultResponsiveContainerProps.width;
   } else if (calculatedHeight === undefined) {
-    calculatedHeight = aspect && aspect > 0 ? undefined : '100%';
+    calculatedHeight = aspect && aspect > 0 ? undefined : defaultResponsiveContainerProps.height;
   }
   return {
     width: calculatedWidth,
@@ -21844,15 +21904,12 @@ function getDefaultWidthAndHeight(_ref) {
 }
 
 function _extends$7() { return _extends$7 = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends$7.apply(null, arguments); }
-function ownKeys$f(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$f(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$f(Object(t), true).forEach(function (r) { _defineProperty$f(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$f(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty$f(e, r, t) { return (r = _toPropertyKey$f(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
-function _toPropertyKey$f(t) { var i = _toPrimitive$f(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive$f(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-var ResponsiveContainerContext = /*#__PURE__*/dashboard__loadShare__react__loadShare__.createContext({
-  width: -1,
-  height: -1
-});
+function ownKeys$g(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$g(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$g(Object(t), true).forEach(function (r) { _defineProperty$g(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$g(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$g(e, r, t) { return (r = _toPropertyKey$g(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$g(t) { var i = _toPrimitive$g(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$g(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+var ResponsiveContainerContext = /*#__PURE__*/admin__loadShare__react__loadShare__.createContext(defaultResponsiveContainerProps.initialDimension);
 function isAcceptableSize(size) {
   return isPositiveNumber(size.width) && isPositiveNumber(size.height);
 }
@@ -21862,7 +21919,7 @@ function ResponsiveContainerContextProvider(_ref) {
     width,
     height
   } = _ref;
-  var size = dashboard__loadShare__react__loadShare__.useMemo(() => ({
+  var size = admin__loadShare__react__loadShare__.useMemo(() => ({
     width,
     height
   }), [width, height]);
@@ -21874,47 +21931,44 @@ function ResponsiveContainerContextProvider(_ref) {
      */
     return null;
   }
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(ResponsiveContainerContext.Provider, {
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(ResponsiveContainerContext.Provider, {
     value: size
   }, children);
 }
-var useResponsiveContainerContext = () => dashboard__loadShare__react__loadShare__.useContext(ResponsiveContainerContext);
-var SizeDetectorContainer = /*#__PURE__*/dashboard__loadShare__react__loadShare__.forwardRef((_ref2, ref) => {
+var useResponsiveContainerContext = () => admin__loadShare__react__loadShare__.useContext(ResponsiveContainerContext);
+var SizeDetectorContainer = /*#__PURE__*/admin__loadShare__react__loadShare__.forwardRef((_ref2, ref) => {
   var {
     aspect,
-    initialDimension = {
-      width: -1,
-      height: -1
-    },
+    initialDimension = defaultResponsiveContainerProps.initialDimension,
     width,
     height,
     /*
      * default min-width to 0 if not specified - 'auto' causes issues with flexbox
      * https://github.com/recharts/recharts/issues/172
      */
-    minWidth = 0,
+    minWidth = defaultResponsiveContainerProps.minWidth,
     minHeight,
     maxHeight,
     children,
-    debounce = 0,
+    debounce = defaultResponsiveContainerProps.debounce,
     id,
     className,
     onResize,
     style = {}
   } = _ref2;
-  var containerRef = dashboard__loadShare__react__loadShare__.useRef(null);
+  var containerRef = admin__loadShare__react__loadShare__.useRef(null);
   /*
    * We are using a ref to avoid re-creating the ResizeObserver when the onResize function changes.
    * The ref is updated on every render, so the latest onResize function is always available in the effect.
    */
-  var onResizeRef = dashboard__loadShare__react__loadShare__.useRef();
+  var onResizeRef = admin__loadShare__react__loadShare__.useRef();
   onResizeRef.current = onResize;
-  dashboard__loadShare__react__loadShare__.useImperativeHandle(ref, () => containerRef.current);
-  var [sizes, setSizes] = dashboard__loadShare__react__loadShare__.useState({
+  admin__loadShare__react__loadShare__.useImperativeHandle(ref, () => containerRef.current);
+  var [sizes, setSizes] = admin__loadShare__react__loadShare__.useState({
     containerWidth: initialDimension.width,
     containerHeight: initialDimension.height
   });
-  var setContainerSize = dashboard__loadShare__react__loadShare__.useCallback((newWidth, newHeight) => {
+  var setContainerSize = admin__loadShare__react__loadShare__.useCallback((newWidth, newHeight) => {
     setSizes(prevState => {
       var roundedWidth = Math.round(newWidth);
       var roundedHeight = Math.round(newHeight);
@@ -21927,16 +21981,20 @@ var SizeDetectorContainer = /*#__PURE__*/dashboard__loadShare__react__loadShare_
       };
     });
   }, []);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (containerRef.current == null || typeof ResizeObserver === 'undefined') {
       return noop$3;
     }
     var callback = entries => {
       var _onResizeRef$current;
+      var entry = entries[0];
+      if (entry == null) {
+        return;
+      }
       var {
         width: containerWidth,
         height: containerHeight
-      } = entries[0].contentRect;
+      } = entry.contentRect;
       setContainerSize(containerWidth, containerHeight);
       (_onResizeRef$current = onResizeRef.current) === null || _onResizeRef$current === void 0 || _onResizeRef$current.call(onResizeRef, containerWidth, containerHeight);
     };
@@ -21972,10 +22030,10 @@ var SizeDetectorContainer = /*#__PURE__*/dashboard__loadShare__react__loadShare_
     maxHeight
   });
   warn(calculatedWidth != null && calculatedWidth > 0 || calculatedHeight != null && calculatedHeight > 0, "The width(%s) and height(%s) of chart should be greater than 0,\n       please check the style of container, or the props width(%s) and height(%s),\n       or add a minWidth(%s) or minHeight(%s) or use aspect(%s) to control the\n       height and width.", calculatedWidth, calculatedHeight, width, height, minWidth, minHeight, aspect);
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("div", {
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("div", {
     id: id ? "".concat(id) : undefined,
     className: clsx('recharts-responsive-container', className),
-    style: _objectSpread$f(_objectSpread$f({}, style), {}, {
+    style: _objectSpread$g(_objectSpread$g({}, style), {}, {
       width,
       height,
       minWidth,
@@ -21983,12 +22041,12 @@ var SizeDetectorContainer = /*#__PURE__*/dashboard__loadShare__react__loadShare_
       maxHeight
     }),
     ref: containerRef
-  }, /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("div", {
+  }, /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("div", {
     style: getInnerDivStyle({
       width,
       height
     })
-  }, /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(ResponsiveContainerContextProvider, {
+  }, /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(ResponsiveContainerContextProvider, {
     width: calculatedWidth,
     height: calculatedHeight
   }, children)));
@@ -21998,12 +22056,14 @@ var SizeDetectorContainer = /*#__PURE__*/dashboard__loadShare__react__loadShare_
  * The `ResponsiveContainer` component is a container that adjusts its width and height based on the size of its parent element.
  * It is used to create responsive charts that adapt to different screen sizes.
  *
- * This component uses the `ResizeObserver` API to monitor changes to the size of its parent element.
+ * This component uses the {@link https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver ResizeObserver} API to monitor changes to the size of its parent element.
  * If you need to support older browsers that do not support this API, you may need to include a polyfill.
  *
- * @see https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
+ * @see {@link https://recharts.github.io/en-US/guide/sizes/ Chart size guide}
+ *
+ * @provides ResponsiveContainerContext
  */
-var ResponsiveContainer = /*#__PURE__*/dashboard__loadShare__react__loadShare__.forwardRef((props, ref) => {
+var ResponsiveContainer = /*#__PURE__*/admin__loadShare__react__loadShare__.forwardRef((props, ref) => {
   var responsiveContainerContext = useResponsiveContainerContext();
   if (isPositiveNumber(responsiveContainerContext.width) && isPositiveNumber(responsiveContainerContext.height)) {
     /*
@@ -22044,7 +22104,7 @@ var ResponsiveContainer = /*#__PURE__*/dashboard__loadShare__react__loadShare__.
      * if the user provides a zero or negative width/height, we will just pass that along
      * as whatever size we detect won't be helping anyway.
      */
-    return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(ResponsiveContainerContextProvider, {
+    return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(ResponsiveContainerContextProvider, {
       width: calculatedWidth,
       height: calculatedHeight
     }, props.children);
@@ -22053,7 +22113,7 @@ var ResponsiveContainer = /*#__PURE__*/dashboard__loadShare__react__loadShare__.
    * Static analysis did not produce fixed dimensions,
    * so we need to render a special div and monitor its size.
    */
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(SizeDetectorContainer, _extends$7({}, props, {
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(SizeDetectorContainer, _extends$7({}, props, {
     width: width,
     height: height,
     ref: ref
@@ -22147,7 +22207,7 @@ var useChartHeight = () => {
  * Margin is the empty space around the chart. Excludes axes and legend and brushes and the like.
  * This is declared by the user in the chart props.
  * If you are interested in the space occupied by axes, legend, or brushes,
- * use `useOffset` instead.
+ * use {@link useOffset} instead, which also includes calculated widths and heights of axes and legends.
  *
  * Returns `undefined` if used outside a chart context.
  *
@@ -22158,6 +22218,13 @@ var useMargin = () => {
 };
 var selectChartLayout = state => state.layout.layoutType;
 var useChartLayout = () => useAppSelector(selectChartLayout);
+var selectPolarChartLayout = state => {
+  var layout = state.layout.layoutType;
+  if (layout === 'centric' || layout === 'radial') {
+    return layout;
+  }
+  return undefined;
+};
 
 /**
  * Returns true if the component is rendered inside a chart context.
@@ -22977,11 +23044,11 @@ var {
 
 var _excluded$2 = ["contextPayload"];
 function _extends$6() { return _extends$6 = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends$6.apply(null, arguments); }
-function ownKeys$e(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$e(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$e(Object(t), true).forEach(function (r) { _defineProperty$e(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$e(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty$e(e, r, t) { return (r = _toPropertyKey$e(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
-function _toPropertyKey$e(t) { var i = _toPrimitive$e(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive$e(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function ownKeys$f(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$f(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$f(Object(t), true).forEach(function (r) { _defineProperty$f(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$f(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$f(e, r, t) { return (r = _toPropertyKey$f(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$f(t) { var i = _toPrimitive$f(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$f(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function _objectWithoutProperties$2(e, t) { if (null == e) return {}; var o, r, i = _objectWithoutPropertiesLoose$2(e, t); if (Object.getOwnPropertySymbols) { var n = Object.getOwnPropertySymbols(e); for (r = 0; r < n.length; r++) o = n[r], -1 === t.indexOf(o) && {}.propertyIsEnumerable.call(e, o) && (i[o] = e[o]); } return i; }
 function _objectWithoutPropertiesLoose$2(r, e) { if (null == r) return {}; var t = {}; for (var n in r) if ({}.hasOwnProperty.call(r, n)) { if (-1 !== e.indexOf(n)) continue; t[n] = r[n]; } return t; }
 function defaultUniqBy$1(entry) {
@@ -22993,16 +23060,16 @@ function LegendContent(props) {
     } = props,
     otherProps = _objectWithoutProperties$2(props, _excluded$2);
   var finalPayload = getUniqPayload(contextPayload, props.payloadUniqBy, defaultUniqBy$1);
-  var contentProps = _objectSpread$e(_objectSpread$e({}, otherProps), {}, {
+  var contentProps = _objectSpread$f(_objectSpread$f({}, otherProps), {}, {
     payload: finalPayload
   });
-  if (/*#__PURE__*/dashboard__loadShare__react__loadShare__.isValidElement(props.content)) {
-    return /*#__PURE__*/dashboard__loadShare__react__loadShare__.cloneElement(props.content, contentProps);
+  if (/*#__PURE__*/admin__loadShare__react__loadShare__.isValidElement(props.content)) {
+    return /*#__PURE__*/admin__loadShare__react__loadShare__.cloneElement(props.content, contentProps);
   }
   if (typeof props.content === 'function') {
-    return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(props.content, contentProps);
+    return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(props.content, contentProps);
   }
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(DefaultLegendContent, contentProps);
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(DefaultLegendContent, contentProps);
 }
 function getDefaultPosition(style, props, margin, chartWidth, chartHeight, box) {
   var {
@@ -23037,18 +23104,18 @@ function getDefaultPosition(style, props, margin, chartWidth, chartHeight, box) 
       };
     }
   }
-  return _objectSpread$e(_objectSpread$e({}, hPos), vPos);
+  return _objectSpread$f(_objectSpread$f({}, hPos), vPos);
 }
 function LegendSettingsDispatcher(props) {
   var dispatch = useAppDispatch();
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     dispatch(setLegendSettings(props));
   }, [dispatch, props]);
   return null;
 }
 function LegendSizeDispatcher(props) {
   var dispatch = useAppDispatch();
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     dispatch(setLegendSize(props));
     return () => {
       dispatch(setLegendSize({
@@ -23060,7 +23127,7 @@ function LegendSizeDispatcher(props) {
   return null;
 }
 function getWidthOrHeight(layout, height, width, maxWidth) {
-  if (layout === 'vertical' && isNumber$1(height)) {
+  if (layout === 'vertical' && height != null) {
     return {
       height
     };
@@ -23075,10 +23142,16 @@ function getWidthOrHeight(layout, height, width, maxWidth) {
 var legendDefaultProps = {
   align: 'center',
   iconSize: 14,
+  inactiveColor: '#ccc',
   itemSorter: 'value',
   layout: 'horizontal',
   verticalAlign: 'bottom'
 };
+
+/**
+ * @consumes CartesianChartContext
+ * @consumes PolarChartContext
+ */
 function Legend(outsideProps) {
   var props = resolveDefaultProps(outsideProps, legendDefaultProps);
   var contextPayload = useLegendPayload();
@@ -23101,7 +23174,7 @@ function Legend(outsideProps) {
   var maxWidth = chartWidth - ((margin === null || margin === void 0 ? void 0 : margin.left) || 0) - ((margin === null || margin === void 0 ? void 0 : margin.right) || 0);
   var widthOrHeight = getWidthOrHeight(props.layout, heightFromProps, widthFromProps, maxWidth);
   // if the user supplies their own portal, only use their defined wrapper styles
-  var outerStyle = portalFromProps ? wrapperStyle : _objectSpread$e(_objectSpread$e({
+  var outerStyle = portalFromProps ? wrapperStyle : _objectSpread$f(_objectSpread$f({
     position: 'absolute',
     width: (widthOrHeight === null || widthOrHeight === void 0 ? void 0 : widthOrHeight.width) || widthFromProps || 'auto',
     height: (widthOrHeight === null || widthOrHeight === void 0 ? void 0 : widthOrHeight.height) || heightFromProps || 'auto'
@@ -23110,43 +23183,68 @@ function Legend(outsideProps) {
   if (legendPortal == null || contextPayload == null) {
     return null;
   }
-  var legendElement = /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("div", {
+  var legendElement = /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("div", {
     className: "recharts-legend-wrapper",
     style: outerStyle,
     ref: updateBoundingBox
-  }, /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(LegendSettingsDispatcher, {
+  }, /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(LegendSettingsDispatcher, {
     layout: props.layout,
     align: props.align,
     verticalAlign: props.verticalAlign,
     itemSorter: props.itemSorter
-  }), !portalFromProps && /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(LegendSizeDispatcher, {
+  }), !portalFromProps && /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(LegendSizeDispatcher, {
     width: lastBoundingBox.width,
     height: lastBoundingBox.height
-  }), /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(LegendContent, _extends$6({}, props, widthOrHeight, {
+  }), /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(LegendContent, _extends$6({}, props, widthOrHeight, {
     margin: margin,
     chartWidth: chartWidth,
     chartHeight: chartHeight,
     contextPayload: contextPayload
   })));
-  return /*#__PURE__*/dashboard__loadShare__react_mf_2_dom__loadShare__.createPortal(legendElement, legendPortal);
+  return /*#__PURE__*/admin__loadShare__react_mf_2_dom__loadShare__.createPortal(legendElement, legendPortal);
 }
 Legend.displayName = 'Legend';
 
 function _extends$5() { return _extends$5 = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends$5.apply(null, arguments); }
-function ownKeys$d(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$d(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$d(Object(t), true).forEach(function (r) { _defineProperty$d(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$d(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty$d(e, r, t) { return (r = _toPropertyKey$d(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
-function _toPropertyKey$d(t) { var i = _toPrimitive$d(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive$d(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function ownKeys$e(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$e(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$e(Object(t), true).forEach(function (r) { _defineProperty$e(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$e(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$e(e, r, t) { return (r = _toPropertyKey$e(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$e(t) { var i = _toPrimitive$e(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$e(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function defaultFormatter(value) {
   return Array.isArray(value) && isNumOrStr(value[0]) && isNumOrStr(value[1]) ? value.join(' ~ ') : value;
 }
+var defaultDefaultTooltipContentProps = {
+  separator: ' : ',
+  contentStyle: {
+    margin: 0,
+    padding: 10,
+    backgroundColor: '#fff',
+    border: '1px solid #ccc',
+    whiteSpace: 'nowrap'
+  },
+  itemStyle: {
+    display: 'block',
+    paddingTop: 4,
+    paddingBottom: 4,
+    color: '#000'
+  },
+  labelStyle: {},
+  accessibilityLayer: false
+};
+
+/**
+ * This component is by default rendered inside the {@link Tooltip} component. You would not use it directly.
+ *
+ * You can use this component to customize the content of the tooltip,
+ * or you can provide your own completely independent content.
+ */
 var DefaultTooltipContent = props => {
   var {
-    separator = ' : ',
-    contentStyle = {},
-    itemStyle = {},
-    labelStyle = {},
+    separator = defaultDefaultTooltipContentProps.separator,
+    contentStyle,
+    itemStyle,
+    labelStyle = defaultDefaultTooltipContentProps.labelStyle,
     payload,
     formatter,
     itemSorter,
@@ -23154,7 +23252,7 @@ var DefaultTooltipContent = props => {
     labelClassName,
     label,
     labelFormatter,
-    accessibilityLayer = false
+    accessibilityLayer = defaultDefaultTooltipContentProps.accessibilityLayer
   } = props;
   var renderContent = () => {
     if (payload && payload.length) {
@@ -23183,41 +23281,32 @@ var DefaultTooltipContent = props => {
             return null;
           }
         }
-        var finalItemStyle = _objectSpread$d({
-          display: 'block',
-          paddingTop: 4,
-          paddingBottom: 4,
-          color: entry.color || '#000'
+        var finalItemStyle = _objectSpread$e(_objectSpread$e({}, defaultDefaultTooltipContentProps.itemStyle), {}, {
+          color: entry.color || defaultDefaultTooltipContentProps.itemStyle.color
         }, itemStyle);
-        return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("li", {
+        return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("li", {
           className: "recharts-tooltip-item",
           key: "tooltip-item-".concat(i),
           style: finalItemStyle
-        }, isNumOrStr(finalName) ? /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("span", {
+        }, isNumOrStr(finalName) ? /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("span", {
           className: "recharts-tooltip-item-name"
-        }, finalName) : null, isNumOrStr(finalName) ? /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("span", {
+        }, finalName) : null, isNumOrStr(finalName) ? /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("span", {
           className: "recharts-tooltip-item-separator"
-        }, separator) : null, /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("span", {
+        }, separator) : null, /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("span", {
           className: "recharts-tooltip-item-value"
-        }, finalValue), /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("span", {
+        }, finalValue), /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("span", {
           className: "recharts-tooltip-item-unit"
         }, entry.unit || ''));
       });
-      return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("ul", {
+      return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("ul", {
         className: "recharts-tooltip-item-list",
         style: listStyle
       }, items);
     }
     return null;
   };
-  var finalStyle = _objectSpread$d({
-    margin: 0,
-    padding: 10,
-    backgroundColor: '#fff',
-    border: '1px solid #ccc',
-    whiteSpace: 'nowrap'
-  }, contentStyle);
-  var finalLabelStyle = _objectSpread$d({
+  var finalStyle = _objectSpread$e(_objectSpread$e({}, defaultDefaultTooltipContentProps.contentStyle), contentStyle);
+  var finalLabelStyle = _objectSpread$e({
     margin: 0
   }, labelStyle);
   var hasLabel = !isNullish(label);
@@ -23231,13 +23320,13 @@ var DefaultTooltipContent = props => {
     role: 'status',
     'aria-live': 'assertive'
   } : {};
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("div", _extends$5({
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("div", _extends$5({
     className: wrapperCN,
     style: finalStyle
-  }, accessibilityAttributes), /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("p", {
+  }, accessibilityAttributes), /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("p", {
     className: labelCN,
     style: finalLabelStyle
-  }, /*#__PURE__*/dashboard__loadShare__react__loadShare__.isValidElement(finalLabel) ? finalLabel : "".concat(finalLabel)), renderContent());
+  }, /*#__PURE__*/admin__loadShare__react__loadShare__.isValidElement(finalLabel) ? finalLabel : "".concat(finalLabel)), renderContent());
 };
 
 var CSS_CLASS_PREFIX = 'recharts-tooltip-wrapper';
@@ -23262,7 +23351,7 @@ function getTooltipTranslateXY(_ref2) {
     allowEscapeViewBox,
     coordinate,
     key,
-    offsetTopLeft,
+    offset,
     position,
     reverseDirection,
     tooltipDimension,
@@ -23272,8 +23361,8 @@ function getTooltipTranslateXY(_ref2) {
   if (position && isNumber$1(position[key])) {
     return position[key];
   }
-  var negative = coordinate[key] - tooltipDimension - (offsetTopLeft > 0 ? offsetTopLeft : 0);
-  var positive = coordinate[key] + offsetTopLeft;
+  var negative = coordinate[key] - tooltipDimension - (offset > 0 ? offset : 0);
+  var positive = coordinate[key] + offset;
   if (allowEscapeViewBox[key]) {
     return reverseDirection[key] ? negative : positive;
   }
@@ -23313,7 +23402,8 @@ function getTooltipTranslate(_ref4) {
   var {
     allowEscapeViewBox,
     coordinate,
-    offsetTopLeft,
+    offsetTop,
+    offsetLeft,
     position,
     reverseDirection,
     tooltipBox,
@@ -23326,7 +23416,7 @@ function getTooltipTranslate(_ref4) {
       allowEscapeViewBox,
       coordinate,
       key: 'x',
-      offsetTopLeft,
+      offset: offsetLeft,
       position,
       reverseDirection,
       tooltipDimension: tooltipBox.width,
@@ -23337,7 +23427,7 @@ function getTooltipTranslate(_ref4) {
       allowEscapeViewBox,
       coordinate,
       key: 'y',
-      offsetTopLeft,
+      offset: offsetTop,
       position,
       reverseDirection,
       tooltipDimension: tooltipBox.height,
@@ -23362,22 +23452,22 @@ function getTooltipTranslate(_ref4) {
   };
 }
 
-function ownKeys$c(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$c(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$c(Object(t), true).forEach(function (r) { _defineProperty$c(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$c(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty$c(e, r, t) { return (r = _toPropertyKey$c(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
-function _toPropertyKey$c(t) { var i = _toPrimitive$c(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive$c(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-class TooltipBoundingBox extends dashboard__loadShare__react__loadShare__.PureComponent {
+function ownKeys$d(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$d(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$d(Object(t), true).forEach(function (r) { _defineProperty$d(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$d(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$d(e, r, t) { return (r = _toPropertyKey$d(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$d(t) { var i = _toPrimitive$d(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$d(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+class TooltipBoundingBox extends admin__loadShare__react__loadShare__.PureComponent {
   constructor() {
     super(...arguments);
-    _defineProperty$c(this, "state", {
+    _defineProperty$d(this, "state", {
       dismissed: false,
       dismissedAtCoordinate: {
         x: 0,
         y: 0
       }
     });
-    _defineProperty$c(this, "handleKeyDown", event => {
+    _defineProperty$d(this, "handleKeyDown", event => {
       if (event.key === 'Escape') {
         var _this$props$coordinat, _this$props$coordinat2, _this$props$coordinat3, _this$props$coordinat4;
         this.setState({
@@ -23425,13 +23515,16 @@ class TooltipBoundingBox extends dashboard__loadShare__react__loadShare__.PureCo
       innerRef,
       hasPortalFromProps
     } = this.props;
+    var offsetLeft = typeof offset === 'number' ? offset : offset.x;
+    var offsetTop = typeof offset === 'number' ? offset : offset.y;
     var {
       cssClasses,
       cssProperties
     } = getTooltipTranslate({
       allowEscapeViewBox,
       coordinate,
-      offsetTopLeft: offset,
+      offsetLeft,
+      offsetTop,
       position,
       reverseDirection,
       tooltipBox: {
@@ -23443,7 +23536,7 @@ class TooltipBoundingBox extends dashboard__loadShare__react__loadShare__.PureCo
     });
 
     // do not use absolute styles if the user has passed a custom portal prop
-    var positionStyles = hasPortalFromProps ? {} : _objectSpread$c(_objectSpread$c({
+    var positionStyles = hasPortalFromProps ? {} : _objectSpread$d(_objectSpread$d({
       transition: isAnimationActive && active ? "transform ".concat(animationDuration, "ms ").concat(animationEasing) : undefined
     }, cssProperties), {}, {
       pointerEvents: 'none',
@@ -23452,13 +23545,13 @@ class TooltipBoundingBox extends dashboard__loadShare__react__loadShare__.PureCo
       top: 0,
       left: 0
     });
-    var outerStyle = _objectSpread$c(_objectSpread$c({}, positionStyles), {}, {
+    var outerStyle = _objectSpread$d(_objectSpread$d({}, positionStyles), {}, {
       visibility: !this.state.dismissed && active && hasPayload ? 'visible' : 'hidden'
     }, wrapperStyle);
     return (
       /*#__PURE__*/
       // This element allow listening to the `Escape` key. See https://github.com/recharts/recharts/pull/2925
-      dashboard__loadShare__react__loadShare__.createElement("div", {
+      admin__loadShare__react__loadShare__.createElement("div", {
         // @ts-expect-error typescript library does not recognize xmlns attribute, but it's required for an HTML chunk inside SVG.
         xmlns: "http://www.w3.org/1999/xhtml",
         tabIndex: -1,
@@ -23476,11 +23569,11 @@ var useAccessibilityLayer = () => {
 };
 
 function _extends$4() { return _extends$4 = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends$4.apply(null, arguments); }
-function ownKeys$b(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$b(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$b(Object(t), true).forEach(function (r) { _defineProperty$b(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$b(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty$b(e, r, t) { return (r = _toPropertyKey$b(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
-function _toPropertyKey$b(t) { var i = _toPrimitive$b(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive$b(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function ownKeys$c(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$c(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$c(Object(t), true).forEach(function (r) { _defineProperty$c(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$c(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$c(e, r, t) { return (r = _toPropertyKey$c(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$c(t) { var i = _toPrimitive$c(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$c(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 var CURVE_FACTORIES = {
   curveBasisClosed,
   curveBasisOpen,
@@ -23511,12 +23604,20 @@ var getCurveFactory = (type, layout) => {
   }
   var name = "curve".concat(upperFirst(type));
   if ((name === 'curveMonotone' || name === 'curveBump') && layout) {
-    return CURVE_FACTORIES["".concat(name).concat(layout === 'vertical' ? 'Y' : 'X')];
+    var factory = CURVE_FACTORIES["".concat(name).concat(layout === 'vertical' ? 'Y' : 'X')];
+    if (factory) {
+      return factory;
+    }
   }
   return CURVE_FACTORIES[name] || curveLinear;
 };
 
 // Mouse event handlers receive the full Props, including the event handlers themselves.
+
+var defaultCurveProps = {
+  connectNulls: false,
+  type: 'linear'
+};
 
 /**
  * Calculate the path of curve. Returns null if points is an empty array.
@@ -23524,28 +23625,28 @@ var getCurveFactory = (type, layout) => {
  */
 var getPath$1 = _ref => {
   var {
-    type = 'linear',
+    type = defaultCurveProps.type,
     points = [],
     baseLine,
     layout,
-    connectNulls = false
+    connectNulls = defaultCurveProps.connectNulls
   } = _ref;
   var curveFactory = getCurveFactory(type, layout);
   var formatPoints = connectNulls ? points.filter(defined) : points;
-  var lineFunction;
 
   // When dealing with an area chart (where `baseLine` is an array),
   // we need to pair points with their corresponding `baseLine` points first.
   // This is to ensure that we filter points and their baseline counterparts together,
   // preventing errors from mismatched array lengths and ensuring `defined` checks both.
   if (Array.isArray(baseLine)) {
-    var areaPoints = points.map((entry, index) => _objectSpread$b(_objectSpread$b({}, entry), {}, {
+    var _lineFunction;
+    var areaPoints = points.map((entry, index) => _objectSpread$c(_objectSpread$c({}, entry), {}, {
       base: baseLine[index]
     }));
     if (layout === 'vertical') {
-      lineFunction = shapeArea().y(getY).x1(getX).x0(d => d.base.x);
+      _lineFunction = shapeArea().y(getY).x1(getX).x0(d => d.base.x);
     } else {
-      lineFunction = shapeArea().x(getX).y1(getY).y0(d => d.base.y);
+      _lineFunction = shapeArea().x(getX).y1(getY).y0(d => d.base.y);
     }
     /*
      * What happens here is that the `.defined()` call will make it so that this function can accept
@@ -23556,10 +23657,12 @@ var getPath$1 = _ref => {
      * However. d3 types are mutable, but we can pretend that they are not, and we can pretend
      * that calling defined() returns a new function with a different generic type.
      */
-    var _nullableLineFunction = lineFunction.defined(areaDefined).curve(curveFactory);
+    // @ts-expect-error the defined call changes the generic type internally but d3 types don't reflect that
+    var _nullableLineFunction = _lineFunction.defined(areaDefined).curve(curveFactory);
     var finalPoints = connectNulls ? areaPoints.filter(areaDefined) : areaPoints;
     return _nullableLineFunction(finalPoints);
   }
+  var lineFunction;
   if (layout === 'vertical' && isNumber$1(baseLine)) {
     lineFunction = shapeArea().y(getY).x1(getX).x0(baseLine);
   } else if (isNumber$1(baseLine)) {
@@ -23567,6 +23670,8 @@ var getPath$1 = _ref => {
   } else {
     lineFunction = shapeLine().x(getX).y(getY);
   }
+
+  // @ts-expect-error the defined call changes the generic type internally but d3 types don't reflect that
   var nullableLineFunction = lineFunction.defined(defined).curve(curveFactory);
   return nullableLineFunction(formatPoints);
 };
@@ -23589,7 +23694,7 @@ var Curve = props => {
     connectNulls: props.connectNulls
   };
   var realPath = points && points.length ? getPath$1(getPathInput) : path;
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("path", _extends$4({}, svgPropertiesNoEvents(props), adaptEventHandlers(props), {
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("path", _extends$4({}, svgPropertiesNoEvents(props), adaptEventHandlers(props), {
     className: clsx('recharts-curve', className),
     d: realPath === null ? undefined : realPath,
     ref: pathRef
@@ -23598,11 +23703,11 @@ var Curve = props => {
 
 var _excluded$1 = ["x", "y", "top", "left", "width", "height", "className"];
 function _extends$3() { return _extends$3 = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends$3.apply(null, arguments); }
-function ownKeys$a(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$a(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$a(Object(t), true).forEach(function (r) { _defineProperty$a(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$a(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty$a(e, r, t) { return (r = _toPropertyKey$a(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
-function _toPropertyKey$a(t) { var i = _toPrimitive$a(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive$a(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function ownKeys$b(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$b(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$b(Object(t), true).forEach(function (r) { _defineProperty$b(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$b(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$b(e, r, t) { return (r = _toPropertyKey$b(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$b(t) { var i = _toPrimitive$b(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$b(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function _objectWithoutProperties$1(e, t) { if (null == e) return {}; var o, r, i = _objectWithoutPropertiesLoose$1(e, t); if (Object.getOwnPropertySymbols) { var n = Object.getOwnPropertySymbols(e); for (r = 0; r < n.length; r++) o = n[r], -1 === t.indexOf(o) && {}.propertyIsEnumerable.call(e, o) && (i[o] = e[o]); } return i; }
 function _objectWithoutPropertiesLoose$1(r, e) { if (null == r) return {}; var t = {}; for (var n in r) if ({}.hasOwnProperty.call(r, n)) { if (-1 !== e.indexOf(n)) continue; t[n] = r[n]; } return t; }
 var getPath = (x, y, width, height, top, left) => {
@@ -23619,7 +23724,7 @@ var Cross = _ref => {
       className
     } = _ref,
     rest = _objectWithoutProperties$1(_ref, _excluded$1);
-  var props = _objectSpread$a({
+  var props = _objectSpread$b({
     x,
     y,
     top,
@@ -23630,7 +23735,7 @@ var Cross = _ref => {
   if (!isNumber$1(x) || !isNumber$1(y) || !isNumber$1(width) || !isNumber$1(height) || !isNumber$1(top) || !isNumber$1(left)) {
     return null;
   }
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("path", _extends$3({}, svgPropertiesAndEvents(props), {
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("path", _extends$3({}, svgPropertiesAndEvents(props), {
     className: clsx('recharts-cross', className),
     d: getPath(x, y, width, height, top, left)
   }));
@@ -23648,11 +23753,11 @@ function getCursorRectangle(layout, activeCoordinate, offset, tooltipAxisBandSiz
   };
 }
 
-function ownKeys$9(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$9(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$9(Object(t), true).forEach(function (r) { _defineProperty$9(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$9(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty$9(e, r, t) { return (r = _toPropertyKey$9(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
-function _toPropertyKey$9(t) { var i = _toPrimitive$9(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive$9(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function ownKeys$a(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$a(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$a(Object(t), true).forEach(function (r) { _defineProperty$a(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$a(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$a(e, r, t) { return (r = _toPropertyKey$a(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$a(t) { var i = _toPrimitive$a(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$a(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 /*
  * @description: convert camel case to dash case
  * string => string
@@ -23674,15 +23779,15 @@ var getIntersectionKeys = (preObj, nextObj) => [Object.keys(preObj), Object.keys
  * @param {object} obj object to map
  * @returns mapped object
  */
-var mapObject = (fn, obj) => Object.keys(obj).reduce((res, key) => _objectSpread$9(_objectSpread$9({}, res), {}, {
+var mapObject = (fn, obj) => Object.keys(obj).reduce((res, key) => _objectSpread$a(_objectSpread$a({}, res), {}, {
   [key]: fn(key, obj[key])
 }), {});
 
-function ownKeys$8(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$8(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$8(Object(t), true).forEach(function (r) { _defineProperty$8(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$8(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty$8(e, r, t) { return (r = _toPropertyKey$8(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
-function _toPropertyKey$8(t) { var i = _toPrimitive$8(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive$8(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function ownKeys$9(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$9(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$9(Object(t), true).forEach(function (r) { _defineProperty$9(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$9(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$9(e, r, t) { return (r = _toPropertyKey$9(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$9(t) { var i = _toPrimitive$9(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$9(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 var alpha = (begin, end, k) => begin + (end - begin) * k;
 var needContinue = _ref => {
   var {
@@ -23699,7 +23804,7 @@ var calStepperVals = (easing, preVals, steps) => {
   var nextStepVals = mapObject((key, val) => {
     if (needContinue(val)) {
       var [newX, newV] = easing(val.from, val.to, val.velocity);
-      return _objectSpread$8(_objectSpread$8({}, val), {}, {
+      return _objectSpread$9(_objectSpread$9({}, val), {}, {
         from: newX,
         velocity: newV
       });
@@ -23709,7 +23814,7 @@ var calStepperVals = (easing, preVals, steps) => {
   if (steps < 1) {
     return mapObject((key, val) => {
       if (needContinue(val) && nextStepVals[key] != null) {
-        return _objectSpread$8(_objectSpread$8({}, val), {}, {
+        return _objectSpread$9(_objectSpread$9({}, val), {}, {
           velocity: alpha(val.velocity, nextStepVals[key].velocity, steps),
           from: alpha(val.from, nextStepVals[key].from, steps)
         });
@@ -23721,7 +23826,7 @@ var calStepperVals = (easing, preVals, steps) => {
 };
 function createStepperUpdate(from, to, easing, interKeys, render, timeoutController) {
   var preTime;
-  var stepperStyle = interKeys.reduce((res, key) => _objectSpread$8(_objectSpread$8({}, res), {}, {
+  var stepperStyle = interKeys.reduce((res, key) => _objectSpread$9(_objectSpread$9({}, res), {}, {
     [key]: {
       from: from[key],
       velocity: 0,
@@ -23739,7 +23844,7 @@ function createStepperUpdate(from, to, easing, interKeys, render, timeoutControl
     var steps = deltaTime / easing.dt;
     stepperStyle = calStepperVals(easing, stepperStyle, steps);
     // get union set and add compatible prefix
-    render(_objectSpread$8(_objectSpread$8(_objectSpread$8({}, from), to), getCurrStyle()));
+    render(_objectSpread$9(_objectSpread$9(_objectSpread$9({}, from), to), getCurrStyle()));
     preTime = now;
     if (!shouldStopAnimation()) {
       stopAnimation = timeoutController.setTimeout(stepperUpdate);
@@ -23765,7 +23870,7 @@ function createTimingUpdate(from, to, easing, duration, interKeys, render, timeo
     if (fromElement == null || toElement == null) {
       return res;
     }
-    return _objectSpread$8(_objectSpread$8({}, res), {}, {
+    return _objectSpread$9(_objectSpread$9({}, res), {}, {
       [key]: [fromElement, toElement]
     });
   }, {});
@@ -23778,12 +23883,12 @@ function createTimingUpdate(from, to, easing, duration, interKeys, render, timeo
     var currStyle = mapObject((key, val) => alpha(...val, easing(t)), timingStyle);
 
     // get union set and add compatible prefix
-    render(_objectSpread$8(_objectSpread$8(_objectSpread$8({}, from), to), currStyle));
+    render(_objectSpread$9(_objectSpread$9(_objectSpread$9({}, from), to), currStyle));
     if (t < 1) {
       stopAnimation = timeoutController.setTimeout(timingUpdate);
     } else {
       var finalStyle = mapObject((key, val) => alpha(...val, easing(1)), timingStyle);
-      render(_objectSpread$8(_objectSpread$8(_objectSpread$8({}, from), to), finalStyle));
+      render(_objectSpread$9(_objectSpread$9(_objectSpread$9({}, from), to), finalStyle));
     }
   };
 
@@ -23806,7 +23911,7 @@ const configUpdate = (from, to, easing, duration, render, timeoutController) => 
   if (easing == null) {
     // no animation, just set to final state
     return () => {
-      render(_objectSpread$8(_objectSpread$8({}, from), to));
+      render(_objectSpread$9(_objectSpread$9({}, from), to));
       return () => {};
     };
   }
@@ -24052,10 +24157,10 @@ function createDefaultAnimationManager() {
   return createAnimateManager(new RequestAnimationFrameTimeoutController());
 }
 
-var AnimationManagerContext = /*#__PURE__*/dashboard__loadShare__react__loadShare__.createContext(createDefaultAnimationManager);
+var AnimationManagerContext = /*#__PURE__*/admin__loadShare__react__loadShare__.createContext(createDefaultAnimationManager);
 function useAnimationManager(animationId, animationManagerFromProps) {
-  var contextAnimationManager = dashboard__loadShare__react__loadShare__.useContext(AnimationManagerContext);
-  return dashboard__loadShare__react__loadShare__.useMemo(() => animationManagerFromProps !== null && animationManagerFromProps !== void 0 ? animationManagerFromProps : contextAnimationManager(animationId), [animationId, animationManagerFromProps, contextAnimationManager]);
+  var contextAnimationManager = admin__loadShare__react__loadShare__.useContext(AnimationManagerContext);
+  return admin__loadShare__react__loadShare__.useMemo(() => animationManagerFromProps !== null && animationManagerFromProps !== void 0 ? animationManagerFromProps : contextAnimationManager(animationId), [animationId, animationManagerFromProps, contextAnimationManager]);
 }
 
 var parseIsSsrByDefault = () => !(typeof window !== 'undefined' && window.document && Boolean(window.document.createElement) && window.setTimeout);
@@ -24092,14 +24197,14 @@ function JavascriptAnimate(outsideProps) {
   } = props;
   var isActive = isActiveProp === 'auto' ? !Global.isSsr : isActiveProp;
   var animationManager = useAnimationManager(props.animationId, props.animationManager);
-  var [style, setStyle] = dashboard__loadShare__react__loadShare__.useState(isActive ? from : to);
-  var stopJSAnimation = dashboard__loadShare__react__loadShare__.useRef(null);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  var [style, setStyle] = admin__loadShare__react__loadShare__.useState(isActive ? from : to);
+  var stopJSAnimation = admin__loadShare__react__loadShare__.useRef(null);
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (!isActive) {
       setStyle(to);
     }
   }, [isActive]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (!isActive || !canBegin) {
       return noop$3;
     }
@@ -24135,8 +24240,8 @@ function JavascriptAnimate(outsideProps) {
  */
 function useAnimationId(input) {
   var prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'animation-';
-  var animationId = dashboard__loadShare__react__loadShare__.useRef(uniqueId(prefix));
-  var prevProps = dashboard__loadShare__react__loadShare__.useRef(input);
+  var animationId = admin__loadShare__react__loadShare__.useRef(uniqueId(prefix));
+  var prevProps = admin__loadShare__react__loadShare__.useRef(input);
   if (prevProps.current !== input) {
     animationId.current = uniqueId(prefix);
     prevProps.current = input;
@@ -24147,11 +24252,11 @@ function useAnimationId(input) {
 var _excluded = ["radius"],
   _excluded2 = ["radius"];
 var _templateObject$1, _templateObject2$1, _templateObject3$1, _templateObject4$1, _templateObject5$1, _templateObject6$1, _templateObject7$1, _templateObject8, _templateObject9, _templateObject0;
-function ownKeys$7(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$7(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$7(Object(t), true).forEach(function (r) { _defineProperty$7(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$7(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty$7(e, r, t) { return (r = _toPropertyKey$7(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
-function _toPropertyKey$7(t) { var i = _toPrimitive$7(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive$7(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function ownKeys$8(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$8(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$8(Object(t), true).forEach(function (r) { _defineProperty$8(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$8(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$8(e, r, t) { return (r = _toPropertyKey$8(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$8(t) { var i = _toPrimitive$8(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$8(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function _extends$2() { return _extends$2 = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends$2.apply(null, arguments); }
 function _objectWithoutProperties(e, t) { if (null == e) return {}; var o, r, i = _objectWithoutPropertiesLoose(e, t); if (Object.getOwnPropertySymbols) { var n = Object.getOwnPropertySymbols(e); for (r = 0; r < n.length; r++) o = n[r], -1 === t.indexOf(o) && {}.propertyIsEnumerable.call(e, o) && (i[o] = e[o]); } return i; }
 function _objectWithoutPropertiesLoose(r, e) { if (null == r) return {}; var t = {}; for (var n in r) if ({}.hasOwnProperty.call(r, n)) { if (-1 !== e.indexOf(n)) continue; t[n] = r[n]; } return t; }
@@ -24169,10 +24274,12 @@ var getRectanglePath = (x, y, width, height, radius) => {
   var xSign = roundedWidth >= 0 ? 1 : -1;
   var clockWise = roundedHeight >= 0 && roundedWidth >= 0 || roundedHeight < 0 && roundedWidth < 0 ? 1 : 0;
   var path;
-  if (maxRadius > 0 && radius instanceof Array) {
+  if (maxRadius > 0 && Array.isArray(radius)) {
     var newRadius = [0, 0, 0, 0];
     for (var i = 0, len = 4; i < len; i++) {
-      newRadius[i] = radius[i] > maxRadius ? maxRadius : radius[i];
+      var _radius$i;
+      var r = (_radius$i = radius[i]) !== null && _radius$i !== void 0 ? _radius$i : 0;
+      newRadius[i] = r > maxRadius ? maxRadius : r;
     }
     path = roundTemplateLiteral(_templateObject$1 || (_templateObject$1 = _taggedTemplateLiteral$1(["M", ",", ""])), x, y + ySign * newRadius[0]);
     if (newRadius[0] > 0) {
@@ -24204,9 +24311,6 @@ var defaultRectangleProps = {
   y: 0,
   width: 0,
   height: 0,
-  // The radius of border
-  // The radius of four corners when radius is a number
-  // The radius of left-top, right-top, right-bottom, left-bottom when radius is an array
   radius: 0,
   isAnimationActive: false,
   isUpdateAnimationActive: false,
@@ -24214,11 +24318,23 @@ var defaultRectangleProps = {
   animationDuration: 1500,
   animationEasing: 'ease'
 };
+
+/**
+ * Renders a rectangle element. Unlike the {@link https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/rect rect SVG element}, this component supports rounded corners
+ * and animation.
+ *
+ * This component accepts X and Y coordinates in pixels.
+ * If you need to position the rectangle based on your chart's data,
+ * consider using the {@link ReferenceArea} component instead.
+ *
+ * @param rectangleProps
+ * @constructor
+ */
 var Rectangle = rectangleProps => {
   var props = resolveDefaultProps(rectangleProps, defaultRectangleProps);
-  var pathRef = dashboard__loadShare__react__loadShare__.useRef(null);
-  var [totalLength, setTotalLength] = dashboard__loadShare__react__loadShare__.useState(-1);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  var pathRef = admin__loadShare__react__loadShare__.useRef(null);
+  var [totalLength, setTotalLength] = admin__loadShare__react__loadShare__.useState(-1);
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (pathRef.current && pathRef.current.getTotalLength) {
       try {
         var pathTotalLength = pathRef.current.getTotalLength();
@@ -24245,11 +24361,11 @@ var Rectangle = rectangleProps => {
     isAnimationActive,
     isUpdateAnimationActive
   } = props;
-  var prevWidthRef = dashboard__loadShare__react__loadShare__.useRef(width);
-  var prevHeightRef = dashboard__loadShare__react__loadShare__.useRef(height);
-  var prevXRef = dashboard__loadShare__react__loadShare__.useRef(x);
-  var prevYRef = dashboard__loadShare__react__loadShare__.useRef(y);
-  var animationIdInput = dashboard__loadShare__react__loadShare__.useMemo(() => ({
+  var prevWidthRef = admin__loadShare__react__loadShare__.useRef(width);
+  var prevHeightRef = admin__loadShare__react__loadShare__.useRef(height);
+  var prevXRef = admin__loadShare__react__loadShare__.useRef(x);
+  var prevYRef = admin__loadShare__react__loadShare__.useRef(y);
+  var animationIdInput = admin__loadShare__react__loadShare__.useMemo(() => ({
     x,
     y,
     width,
@@ -24267,7 +24383,7 @@ var Rectangle = rectangleProps => {
         radius: _
       } = _svgPropertiesAndEven,
       otherPathProps = _objectWithoutProperties(_svgPropertiesAndEven, _excluded);
-    return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("path", _extends$2({}, otherPathProps, {
+    return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("path", _extends$2({}, otherPathProps, {
       x: round$1(x),
       y: round$1(y),
       width: round$1(width),
@@ -24284,7 +24400,7 @@ var Rectangle = rectangleProps => {
   var from = "0px ".concat(totalLength === -1 ? 1 : totalLength, "px");
   var to = "".concat(totalLength, "px 0px");
   var transition = getTransitionVal(['strokeDasharray'], animationDuration, typeof animationEasing === 'string' ? animationEasing : defaultRectangleProps.animationEasing);
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(JavascriptAnimate, {
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(JavascriptAnimate, {
     animationId: animationId,
     key: animationId,
     canBegin: totalLength > 0,
@@ -24323,12 +24439,12 @@ var Rectangle = rectangleProps => {
         radius: _
       } = _svgPropertiesAndEven2,
       otherPathProps = _objectWithoutProperties(_svgPropertiesAndEven2, _excluded2);
-    return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("path", _extends$2({}, otherPathProps, {
+    return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("path", _extends$2({}, otherPathProps, {
       radius: typeof radius === 'number' ? radius : undefined,
       className: layerClass,
       d: getRectanglePath(currX, currY, currWidth, currHeight, radius),
       ref: pathRef,
-      style: _objectSpread$7(_objectSpread$7({}, animationStyle), props.style)
+      style: _objectSpread$8(_objectSpread$8({}, animationStyle), props.style)
     }));
   });
 };
@@ -24585,7 +24701,7 @@ var Sector = sectorProps => {
       endAngle
     });
   }
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement("path", _extends$1({}, svgPropertiesAndEvents(props), {
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement("path", _extends$1({}, svgPropertiesAndEvents(props), {
     className: layerClass,
     d: path
   }));
@@ -24634,7 +24750,7 @@ function getCursorPoints(layout, activeCoordinate, offset) {
   return undefined;
 }
 
-var range$4 = {};
+var range$3 = {};
 
 var toFinite = {};
 
@@ -24707,11 +24823,11 @@ var toNumber = {};
 	}
 
 	exports$1.range = range; 
-} (range$4));
+} (range$3));
 
-var range$2 = range$4.range;
+var range$1 = range$3.range;
 
-const range$3 = /*@__PURE__*/getDefaultExportFromCjs(range$2);
+const range$2 = /*@__PURE__*/getDefaultExportFromCjs(range$1);
 
 function ascending(a, b) {
   return a == null || b == null ? NaN : a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
@@ -25015,7 +25131,7 @@ function quantileSorted(values, p, valueof = number$2) {
   return value0 + (value1 - value0) * (i - i0);
 }
 
-function range$1(start, stop, step) {
+function range(start, stop, step) {
   start = +start, stop = +stop, step = (n = arguments.length) < 2 ? (stop = start, start = 0, 1) : n < 3 ? 1 : +step;
 
   var i = -1,
@@ -25125,7 +25241,7 @@ function band() {
     start += (stop - start - step * (n - paddingInner)) * align;
     bandwidth = step * (1 - paddingInner);
     if (round) start = Math.round(start), bandwidth = Math.round(bandwidth);
-    var values = range$1(n).map(function(i) { return start + step * i; });
+    var values = range(n).map(function(i) { return start + step * i; });
     return ordinalRange(reverse ? values.reverse() : values);
   }
 
@@ -25821,7 +25937,7 @@ function number$1(x) {
 
 var unit = [0, 1];
 
-function identity$3(x) {
+function identity$2(x) {
   return x;
 }
 
@@ -25885,14 +26001,14 @@ function transformer$2() {
       transform,
       untransform,
       unknown,
-      clamp = identity$3,
+      clamp = identity$2,
       piecewise,
       output,
       input;
 
   function rescale() {
     var n = Math.min(domain.length, range.length);
-    if (clamp !== identity$3) clamp = clamper(domain[0], domain[n - 1]);
+    if (clamp !== identity$2) clamp = clamper(domain[0], domain[n - 1]);
     piecewise = n > 2 ? polymap : bimap;
     output = input = null;
     return scale;
@@ -25919,7 +26035,7 @@ function transformer$2() {
   };
 
   scale.clamp = function(_) {
-    return arguments.length ? (clamp = _ ? true : identity$3, rescale()) : clamp !== identity$3;
+    return arguments.length ? (clamp = _ ? true : identity$2, rescale()) : clamp !== identity$2;
   };
 
   scale.interpolate = function(_) {
@@ -25937,7 +26053,7 @@ function transformer$2() {
 }
 
 function continuous() {
-  return transformer$2()(identity$3, identity$3);
+  return transformer$2()(identity$2, identity$2);
 }
 
 function formatDecimal(x) {
@@ -26093,19 +26209,19 @@ const formatTypes = {
   "x": (x) => Math.round(x).toString(16)
 };
 
-function identity$2(x) {
+function identity$1(x) {
   return x;
 }
 
-var map$1 = Array.prototype.map,
+var map = Array.prototype.map,
     prefixes = ["y","z","a","f","p","n","µ","m","","k","M","G","T","P","E","Z","Y"];
 
 function formatLocale$1(locale) {
-  var group = locale.grouping === undefined || locale.thousands === undefined ? identity$2 : formatGroup(map$1.call(locale.grouping, Number), locale.thousands + ""),
+  var group = locale.grouping === undefined || locale.thousands === undefined ? identity$1 : formatGroup(map.call(locale.grouping, Number), locale.thousands + ""),
       currencyPrefix = locale.currency === undefined ? "" : locale.currency[0] + "",
       currencySuffix = locale.currency === undefined ? "" : locale.currency[1] + "",
       decimal = locale.decimal === undefined ? "." : locale.decimal + "",
-      numerals = locale.numerals === undefined ? identity$2 : formatNumerals(map$1.call(locale.numerals, String)),
+      numerals = locale.numerals === undefined ? identity$1 : formatNumerals(map.call(locale.numerals, String)),
       percent = locale.percent === undefined ? "%" : locale.percent + "",
       minus = locale.minus === undefined ? "−" : locale.minus + "",
       nan = locale.nan === undefined ? "NaN" : locale.nan + "";
@@ -26360,7 +26476,7 @@ function linear() {
   return linearish(scale);
 }
 
-function identity$1(domain) {
+function identity(domain) {
   var unknown;
 
   function scale(x) {
@@ -26378,7 +26494,7 @@ function identity$1(domain) {
   };
 
   scale.copy = function() {
-    return identity$1(domain).unknown(unknown);
+    return identity(domain).unknown(unknown);
   };
 
   domain = arguments.length ? Array.from(domain, number$1) : [0, 1];
@@ -26587,11 +26703,11 @@ function transformSquare(x) {
 }
 
 function powish(transform) {
-  var scale = transform(identity$3, identity$3),
+  var scale = transform(identity$2, identity$2),
       exponent = 1;
 
   function rescale() {
-    return exponent === 1 ? transform(identity$3, identity$3)
+    return exponent === 1 ? transform(identity$2, identity$2)
         : exponent === 0.5 ? transform(transformSqrt, transformSquare)
         : transform(transformPow(exponent), transformPow(1 / exponent));
   }
@@ -27978,7 +28094,7 @@ function transformer$1() {
       t1,
       k10,
       transform,
-      interpolator = identity$3,
+      interpolator = identity$2,
       clamp = false,
       unknown;
 
@@ -28028,7 +28144,7 @@ function copy(source, target) {
 }
 
 function sequential() {
-  var scale = linearish(transformer$1()(identity$3));
+  var scale = linearish(transformer$1()(identity$2));
 
   scale.copy = function() {
     return copy(scale, sequential());
@@ -28073,7 +28189,7 @@ function sequentialSqrt() {
 
 function sequentialQuantile() {
   var domain = [],
-      interpolator = identity$3;
+      interpolator = identity$2;
 
   function scale(x) {
     if (x != null && !isNaN(x = +x)) return interpolator((bisectRight(domain, x, 1) - 1) / (domain.length - 1));
@@ -28116,7 +28232,7 @@ function transformer() {
       t2,
       k10,
       k21,
-      interpolator = identity$3,
+      interpolator = identity$2,
       transform,
       clamp = false,
       unknown;
@@ -28159,7 +28275,7 @@ function transformer() {
 }
 
 function diverging() {
-  var scale = linearish(transformer()(identity$3));
+  var scale = linearish(transformer()(identity$2));
 
   scale.copy = function() {
     return copy(scale, diverging());
@@ -28210,7 +28326,7 @@ const d3Scales = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
 	scaleDivergingPow: divergingPow,
 	scaleDivergingSqrt: divergingSqrt,
 	scaleDivergingSymlog: divergingSymlog,
-	scaleIdentity: identity$1,
+	scaleIdentity: identity,
 	scaleImplicit: implicit,
 	scaleLinear: linear,
 	scaleLog: log,
@@ -30428,67 +30544,6 @@ ONE = new Decimal(1);
 
 const Decimal$1 = Decimal;
 
-var identity = i => i;
-var PLACE_HOLDER = {
-  };
-var isPlaceHolder = val => val === PLACE_HOLDER;
-var curry0 = fn => function _curried() {
-  if (arguments.length === 0 || arguments.length === 1 && isPlaceHolder(arguments.length <= 0 ? undefined : arguments[0])) {
-    return _curried;
-  }
-  return fn(...arguments);
-};
-var curryN = (n, fn) => {
-  if (n === 1) {
-    return fn;
-  }
-  return curry0(function () {
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-    var argsLength = args.filter(arg => arg !== PLACE_HOLDER).length;
-    if (argsLength >= n) {
-      return fn(...args);
-    }
-    return curryN(n - argsLength, curry0(function () {
-      for (var _len2 = arguments.length, restArgs = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-        restArgs[_key2] = arguments[_key2];
-      }
-      var newArgs = args.map(arg => isPlaceHolder(arg) ? restArgs.shift() : arg);
-      return fn(...newArgs, ...restArgs);
-    }));
-  });
-};
-var curry = fn => curryN(fn.length, fn);
-var range = (begin, end) => {
-  var arr = [];
-  for (var i = begin; i < end; ++i) {
-    arr[i - begin] = i;
-  }
-  return arr;
-};
-var map = curry((fn, arr) => {
-  if (Array.isArray(arr)) {
-    return arr.map(fn);
-  }
-  return Object.keys(arr).map(key => arr[key]).map(fn);
-});
-var compose = function compose() {
-  for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-    args[_key3] = arguments[_key3];
-  }
-  if (!args.length) {
-    return identity;
-  }
-  var fns = args.reverse();
-  // first function can receive multiply arguments
-  var firstFn = fns[0];
-  var tailsFn = fns.slice(1);
-  return function () {
-    return tailsFn.reduce((res, fn) => fn(res), firstFn(...arguments));
-  };
-};
-
 /**
  * @fileOverview Some common arithmetic methods
  * @author xile611
@@ -30612,8 +30667,11 @@ var getTickOfSingleValue = (value, tickCount, allowDecimals) => {
     middle = new Decimal$1(Math.floor(value));
   }
   var middleIndex = Math.floor((tickCount - 1) / 2);
-  var fn = compose(map(n => middle.add(new Decimal$1(n - middleIndex).mul(step)).toNumber()), range);
-  return fn(0, tickCount);
+  var ticks = [];
+  for (var i = 0; i < tickCount; i++) {
+    ticks.push(middle.add(new Decimal$1(i - middleIndex).mul(step)).toNumber());
+  }
+  return ticks;
 };
 
 /**
@@ -30678,7 +30736,7 @@ var getNiceTickValues = function getNiceTickValues(_ref2) {
   var count = Math.max(tickCount, 2);
   var [cormin, cormax] = getValidInterval([min, max]);
   if (cormin === -Infinity || cormax === Infinity) {
-    var _values = cormax === Infinity ? [cormin, ...range(0, tickCount - 1).map(() => Infinity)] : [...range(0, tickCount - 1).map(() => -Infinity), cormax];
+    var _values = cormax === Infinity ? [cormin, ...Array(tickCount - 1).fill(Infinity)] : [...Array(tickCount - 1).fill(-Infinity), cormax];
     return min > max ? _values.reverse() : _values;
   }
   if (cormin === cormax) {
@@ -30739,7 +30797,9 @@ var selectSyncMethod = state => state.rootProps.syncMethod;
 var selectEventEmitter = state => state.options.eventEmitter;
 
 /**
- * A collection of all default zIndex values used throughout the library.
+ * A collection of all default zIndex values used by Recharts.
+ *
+ * You can reuse these, or you can define your own.
  */
 var DefaultZIndexes = {
   /**
@@ -30811,22 +30871,26 @@ var DefaultZIndexes = {
 };
 
 var defaultPolarAngleAxisProps = {
-  allowDuplicatedCategory: true,
+  allowDecimals: false,
   // if I set this to false then Tooltip synchronisation stops working in Radar, wtf
+  allowDataOverflow: false,
   angleAxisId: 0,
   reversed: false,
   scale: 'auto',
   tick: true,
-  type: 'category'};
+  type: 'auto'};
 
 var defaultPolarRadiusAxisProps = {
   allowDataOverflow: false,
+  allowDecimals: false,
   allowDuplicatedCategory: true,
+  includeHidden: false,
   radiusAxisId: 0,
+  reversed: false,
   scale: 'auto',
   tick: true,
   tickCount: 5,
-  type: 'number'};
+  type: 'auto'};
 
 var combineAxisRangeWithReverse = (axisSettings, axisRange) => {
   if (!axisSettings || !axisRange) {
@@ -30838,9 +30902,28 @@ var combineAxisRangeWithReverse = (axisSettings, axisRange) => {
   return axisRange;
 };
 
+/**
+ * This function evaluates the "auto" axis domain type based on the chart layout and axis type.
+ * It outputs a definitive axis domain type that can be used for further processing.
+ */
+function getAxisTypeBasedOnLayout(layout, axisType, axisDomainType) {
+  if (axisDomainType !== 'auto') {
+    return axisDomainType;
+  }
+  if (layout == null) {
+    return undefined;
+  }
+  return isCategoricalAxis(layout, axisType) ? 'category' : 'number';
+}
+
+function ownKeys$7(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$7(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$7(Object(t), true).forEach(function (r) { _defineProperty$7(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$7(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty$7(e, r, t) { return (r = _toPropertyKey$7(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
+function _toPropertyKey$7(t) { var i = _toPrimitive$7(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive$7(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 var implicitAngleAxis = {
-  allowDataOverflow: false,
-  allowDecimals: false,
+  allowDataOverflow: defaultPolarAngleAxisProps.allowDataOverflow,
+  allowDecimals: defaultPolarAngleAxisProps.allowDecimals,
   allowDuplicatedCategory: false,
   // defaultPolarAngleAxisProps.allowDuplicatedCategory has it set to true but the actual axis rendering ignores the prop because reasons,
   dataKey: undefined,
@@ -30858,14 +30941,14 @@ var implicitAngleAxis = {
 };
 var implicitRadiusAxis = {
   allowDataOverflow: defaultPolarRadiusAxisProps.allowDataOverflow,
-  allowDecimals: false,
+  allowDecimals: defaultPolarRadiusAxisProps.allowDecimals,
   allowDuplicatedCategory: defaultPolarRadiusAxisProps.allowDuplicatedCategory,
   dataKey: undefined,
   domain: undefined,
   id: defaultPolarRadiusAxisProps.radiusAxisId,
-  includeHidden: false,
+  includeHidden: defaultPolarRadiusAxisProps.includeHidden,
   name: undefined,
-  reversed: false,
+  reversed: defaultPolarRadiusAxisProps.reversed,
   scale: defaultPolarRadiusAxisProps.scale,
   tick: defaultPolarRadiusAxisProps.tick,
   tickCount: defaultPolarRadiusAxisProps.tickCount,
@@ -30873,58 +30956,35 @@ var implicitRadiusAxis = {
   type: defaultPolarRadiusAxisProps.type,
   unit: undefined
 };
-var implicitRadialBarAngleAxis = {
-  allowDataOverflow: false,
-  allowDecimals: false,
-  allowDuplicatedCategory: defaultPolarAngleAxisProps.allowDuplicatedCategory,
-  dataKey: undefined,
-  domain: undefined,
-  id: defaultPolarAngleAxisProps.angleAxisId,
-  includeHidden: false,
-  name: undefined,
-  reversed: false,
-  scale: defaultPolarAngleAxisProps.scale,
-  tick: defaultPolarAngleAxisProps.tick,
-  tickCount: undefined,
-  ticks: undefined,
-  type: 'number',
-  unit: undefined
-};
-var implicitRadialBarRadiusAxis = {
-  allowDataOverflow: defaultPolarRadiusAxisProps.allowDataOverflow,
-  allowDecimals: false,
-  allowDuplicatedCategory: defaultPolarRadiusAxisProps.allowDuplicatedCategory,
-  dataKey: undefined,
-  domain: undefined,
-  id: defaultPolarRadiusAxisProps.radiusAxisId,
-  includeHidden: false,
-  name: undefined,
-  reversed: false,
-  scale: defaultPolarRadiusAxisProps.scale,
-  tick: defaultPolarRadiusAxisProps.tick,
-  tickCount: defaultPolarRadiusAxisProps.tickCount,
-  ticks: undefined,
-  type: 'category',
-  unit: undefined
-};
-var selectAngleAxis = (state, angleAxisId) => {
-  if (state.polarAxis.angleAxis[angleAxisId] != null) {
-    return state.polarAxis.angleAxis[angleAxisId];
+var selectAngleAxisNoDefaults = (state, angleAxisId) => {
+  if (angleAxisId == null) {
+    return undefined;
   }
-  if (state.layout.layoutType === 'radial') {
-    return implicitRadialBarAngleAxis;
-  }
-  return implicitAngleAxis;
+  return state.polarAxis.angleAxis[angleAxisId];
 };
-var selectRadiusAxis = (state, radiusAxisId) => {
-  if (state.polarAxis.radiusAxis[radiusAxisId] != null) {
-    return state.polarAxis.radiusAxis[radiusAxisId];
+var selectAngleAxis = createSelector([selectAngleAxisNoDefaults, selectPolarChartLayout], (angleAxisSettings, layout) => {
+  var _getAxisTypeBasedOnLa;
+  if (angleAxisSettings != null) {
+    return angleAxisSettings;
   }
-  if (state.layout.layoutType === 'radial') {
-    return implicitRadialBarRadiusAxis;
-  }
-  return implicitRadiusAxis;
+  var evaluatedType = (_getAxisTypeBasedOnLa = getAxisTypeBasedOnLayout(layout, 'angleAxis', implicitAngleAxis.type)) !== null && _getAxisTypeBasedOnLa !== void 0 ? _getAxisTypeBasedOnLa : 'category';
+  return _objectSpread$7(_objectSpread$7({}, implicitAngleAxis), {}, {
+    type: evaluatedType
+  });
+});
+var selectRadiusAxisNoDefaults = (state, radiusAxisId) => {
+  return state.polarAxis.radiusAxis[radiusAxisId];
 };
+var selectRadiusAxis = createSelector([selectRadiusAxisNoDefaults, selectPolarChartLayout], (radiusAxisSettings, layout) => {
+  var _getAxisTypeBasedOnLa2;
+  if (radiusAxisSettings != null) {
+    return radiusAxisSettings;
+  }
+  var evaluatedType = (_getAxisTypeBasedOnLa2 = getAxisTypeBasedOnLayout(layout, 'radiusAxis', implicitRadiusAxis.type)) !== null && _getAxisTypeBasedOnLa2 !== void 0 ? _getAxisTypeBasedOnLa2 : 'category';
+  return _objectSpread$7(_objectSpread$7({}, implicitRadiusAxis), {}, {
+    type: evaluatedType
+  });
+});
 var selectPolarOptions = state => state.polarOptions;
 var selectMaxRadius = createSelector([selectChartWidth, selectChartHeight, selectChartOffsetInternal], getMaxRadius);
 var selectInnerRadius = createSelector([selectPolarOptions, selectMaxRadius], (polarChartOptions, maxRadius) => {
@@ -31121,6 +31181,142 @@ var selectTooltipAxisType = state => {
 
 var selectTooltipAxisId = state => state.tooltip.settings.axisId;
 
+/**
+ * This is internal representation of scale used in Recharts.
+ * Users will provide CustomScaleDefinition or a string, which we will parse into RechartsScale.
+ * Most importantly, RechartsScale is fully immutable - there are no setters that mutate the scale in place.
+ * This is important for React integration - if the scale changes, we want to trigger re-renders.
+ * Mutating the scale in place would not trigger re-renders, leading to stale UI.
+ */
+
+/**
+ * Position within a band for banded scales.
+ * In scales that are not banded, this parameter is ignored.
+ *
+ * @inline
+ */
+
+function getD3ScaleFromType(realScaleType) {
+  if (realScaleType in d3Scales) {
+    // @ts-expect-error we should do better type verification here
+    return d3Scales[realScaleType]();
+  }
+  var name = "scale".concat(upperFirst(realScaleType));
+  if (name in d3Scales) {
+    // @ts-expect-error we should do better type verification here
+    return d3Scales[name]();
+  }
+  return undefined;
+}
+function d3ScaleToRechartsScale(d3Scale) {
+  var ticksFn = d3Scale.ticks;
+  var bandwidthFn = d3Scale.bandwidth;
+  var d3Range = d3Scale.range();
+  var range = [Math.min(...d3Range), Math.max(...d3Range)];
+  return {
+    domain: () => d3Scale.domain(),
+    range: function (_range) {
+      function range() {
+        return _range.apply(this, arguments);
+      }
+      range.toString = function () {
+        return _range.toString();
+      };
+      return range;
+    }(() => range),
+    rangeMin: () => range[0],
+    rangeMax: () => range[1],
+    isInRange(value) {
+      var first = range[0];
+      var last = range[1];
+      return first <= last ? value >= first && value <= last : value >= last && value <= first;
+    },
+    bandwidth: bandwidthFn ? () => bandwidthFn.call(d3Scale) : undefined,
+    ticks: ticksFn ? count => ticksFn.call(d3Scale, count) : undefined,
+    map: (input, options) => {
+      var baseValue = d3Scale(input);
+      if (baseValue == null) {
+        return undefined;
+      }
+      if (d3Scale.bandwidth && options !== null && options !== void 0 && options.position) {
+        var bandWidth = d3Scale.bandwidth();
+        switch (options.position) {
+          case 'middle':
+            baseValue += bandWidth / 2;
+            break;
+          case 'end':
+            baseValue += bandWidth;
+            break;
+        }
+      }
+      return baseValue;
+    }
+  };
+}
+
+/**
+ * Converts external scale definition into internal RechartsScale definition.
+ * @param scale custom function scale - if you have the string, use `combineRealScaleType` first
+ * @param axisDomain
+ * @param axisRange
+ */
+
+function rechartsScaleFactory(scale, axisDomain, axisRange) {
+  if (typeof scale === 'function') {
+    return d3ScaleToRechartsScale(scale.copy().domain(axisDomain).range(axisRange));
+  }
+  if (scale == null) {
+    return undefined;
+  }
+  var d3ScaleFunction = getD3ScaleFromType(scale);
+  if (d3ScaleFunction == null) {
+    return undefined;
+  }
+  d3ScaleFunction.domain(axisDomain).range(axisRange);
+  return d3ScaleToRechartsScale(d3ScaleFunction);
+}
+
+/**
+ * This function validates and transforms the axis domain so that it is safe to use in the provided scale.
+ */
+var combineCheckedDomain = (realScaleType, axisDomain) => {
+  if (axisDomain == null) {
+    return undefined;
+  }
+  switch (realScaleType) {
+    case 'linear':
+      {
+        /*
+         * linear scale only reads the first two numbers in the domain, and ignores everything else.
+         * So if it happens that someone somehow gave us a bigger domain,
+         * let's pick the min and max from it.
+         */
+        if (!isWellFormedNumberDomain(axisDomain)) {
+          var min, max;
+          for (var i = 0; i < axisDomain.length; i++) {
+            var value = axisDomain[i];
+            if (!isWellBehavedNumber(value)) {
+              continue;
+            }
+            if (min === undefined || value < min) {
+              min = value;
+            }
+            if (max === undefined || value > max) {
+              max = value;
+            }
+          }
+          if (min !== undefined && max !== undefined) {
+            return [min, max];
+          }
+          return undefined;
+        }
+        return axisDomain;
+      }
+    default:
+      return axisDomain;
+  }
+};
+
 function ownKeys$6(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread$6(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$6(Object(t), true).forEach(function (r) { _defineProperty$6(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$6(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty$6(e, r, t) { return (r = _toPropertyKey$6(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e; }
@@ -31285,7 +31481,7 @@ var selectCartesianAxisSettings = (state, axisType, axisId) => {
  * @param axisId xAxisId | yAxisId
  * @returns axis settings object
  */
-var selectAxisSettings = (state, axisType, axisId) => {
+var selectRenderableAxisSettings = (state, axisType, axisId) => {
   switch (axisType) {
     case 'xAxis':
       {
@@ -31441,17 +31637,6 @@ function isErrorBarRelevantForAxisType(axisType, errorBar) {
       return false;
   }
 }
-
-/**
- * This is type of "error" in chart. It is set by using ErrorBar, and it can represent confidence interval,
- * or gap in the data, or standard deviation, or quartiles in boxplot, or whiskers or whatever.
- *
- * We will internally represent it as a tuple of two numbers, where the first number is the lower bound and the second number is the upper bound.
- *
- * It is also true that the first number should be lower than or equal to the associated "main value",
- * and the second number should be higher than or equal to the associated "main value".
- */
-
 function makeNumber(val) {
   if (isNumOrStr(val) || val instanceof Date) {
     var n = Number(val);
@@ -31509,7 +31694,7 @@ function getErrorDomainByDataKey(entry, appliedValue, relevantErrorBars) {
 var selectTooltipAxis = state => {
   var axisType = selectTooltipAxisType(state);
   var axisId = selectTooltipAxisId(state);
-  return selectAxisSettings(state, axisType, axisId);
+  return selectRenderableAxisSettings(state, axisType, axisId);
 };
 var selectTooltipAxisDataKey = createSelector([selectTooltipAxis], axis => axis === null || axis === void 0 ? void 0 : axis.dataKey);
 var selectDisplayedStackedData = createSelector([selectStackedCartesianItemsSettings, selectChartDataWithIndexesIfNotInPanoramaPosition4, selectTooltipAxis], combineDisplayedStackedData);
@@ -31688,7 +31873,7 @@ var computeDomainOfTypeCategory = (allDataSquished, axisSettings, isCategorical)
      * 1. In an absence of dataKey, Recharts will use array indexes as its categorical domain
      * 2. When category axis has duplicated text, serial numbers are used to generate scale
      */
-    return range$3(0, allDataSquished.length);
+    return range$2(0, allDataSquished.length);
   }
   if (axisSettings.allowDuplicatedCategory) {
     return categoricalDomain;
@@ -31799,7 +31984,7 @@ var combineAxisDomain = (axisSettings, layout, displayedData, allAppliedValues, 
   var isCategorical = isCategoricalAxis(layout, axisType);
   if (isCategorical && dataKey == null) {
     var _displayedData$length;
-    return range$3(0, (_displayedData$length = displayedData === null || displayedData === void 0 ? void 0 : displayedData.length) !== null && _displayedData$length !== void 0 ? _displayedData$length : 0);
+    return range$2(0, (_displayedData$length = displayedData === null || displayedData === void 0 ? void 0 : displayedData.length) !== null && _displayedData$length !== void 0 ? _displayedData$length : 0);
   }
   if (type === 'category') {
     return computeDomainOfTypeCategory(allAppliedValues, axisSettings, isCategorical);
@@ -31810,7 +31995,10 @@ var combineAxisDomain = (axisSettings, layout, displayedData, allAppliedValues, 
   return numericalDomain;
 };
 var selectAxisDomain = createSelector([selectBaseAxis, selectChartLayout, selectDisplayedData, selectAllAppliedValues, selectStackOffsetType, pickAxisType, selectNumericalDomain], combineAxisDomain);
-var combineRealScaleType = (axisConfig, layout, hasBar, chartType, axisType) => {
+function isSupportedScaleName(name) {
+  return name in d3Scales;
+}
+var combineRealScaleType = (axisConfig, hasBar, chartType) => {
   if (axisConfig == null) {
     return undefined;
   }
@@ -31819,12 +32007,6 @@ var combineRealScaleType = (axisConfig, layout, hasBar, chartType, axisType) => 
     type
   } = axisConfig;
   if (scale === 'auto') {
-    if (layout === 'radial' && axisType === 'radiusAxis') {
-      return 'band';
-    }
-    if (layout === 'radial' && axisType === 'angleAxis') {
-      return 'linear';
-    }
     if (type === 'category' && chartType && (chartType.indexOf('LineChart') >= 0 || chartType.indexOf('AreaChart') >= 0 || chartType.indexOf('ComposedChart') >= 0 && !hasBar)) {
       return 'point';
     }
@@ -31835,42 +32017,19 @@ var combineRealScaleType = (axisConfig, layout, hasBar, chartType, axisType) => 
   }
   if (typeof scale === 'string') {
     var name = "scale".concat(upperFirst(scale));
-    return name in d3Scales ? name : 'point';
+    return isSupportedScaleName(name) ? name : 'point';
   }
   return undefined;
 };
-var selectRealScaleType = createSelector([selectBaseAxis, selectChartLayout, selectHasBar, selectChartName, pickAxisType], combineRealScaleType);
-function getD3ScaleFromType(realScaleType) {
-  if (realScaleType == null) {
-    return undefined;
-  }
-  if (realScaleType in d3Scales) {
-    // @ts-expect-error we should do better type verification here
-    return d3Scales[realScaleType]();
-  }
-  var name = "scale".concat(upperFirst(realScaleType));
-  if (name in d3Scales) {
-    // @ts-expect-error we should do better type verification here
-    return d3Scales[name]();
-  }
-  return undefined;
-}
+var selectRealScaleType = createSelector([selectBaseAxis, selectHasBar, selectChartName], combineRealScaleType);
 function combineScaleFunction(axis, realScaleType, axisDomain, axisRange) {
   if (axisDomain == null || axisRange == null) {
     return undefined;
   }
   if (typeof axis.scale === 'function') {
-    // @ts-expect-error we're going to assume here that if axis.scale is a function then it is a d3Scale function
-    return axis.scale.copy().domain(axisDomain).range(axisRange);
+    return rechartsScaleFactory(axis.scale, axisDomain, axisRange);
   }
-  var d3ScaleFunction = getD3ScaleFromType(realScaleType);
-  if (d3ScaleFunction == null) {
-    return undefined;
-  }
-  var scale = d3ScaleFunction.domain(axisDomain).range(axisRange);
-  // I don't like this function because it mutates the scale. We should come up with a way to compute the domain up front.
-  checkDomainOfScale(scale);
-  return scale;
+  return rechartsScaleFactory(realScaleType, axisDomain, axisRange);
 }
 var combineNiceTicks = (axisDomain, axisSettings, realScaleType) => {
   var domainDefinition = getDomainDefinition(axisSettings);
@@ -31885,7 +32044,7 @@ var combineNiceTicks = (axisDomain, axisSettings, realScaleType) => {
   }
   return undefined;
 };
-var selectNiceTicks = createSelector([selectAxisDomain, selectAxisSettings, selectRealScaleType], combineNiceTicks);
+var selectNiceTicks = createSelector([selectAxisDomain, selectRenderableAxisSettings, selectRealScaleType], combineNiceTicks);
 var combineAxisDomainWithNiceTicks = (axisSettings, domain, niceTicks, axisType) => {
   if (
   /*
@@ -31895,10 +32054,11 @@ var combineAxisDomainWithNiceTicks = (axisSettings, domain, niceTicks, axisType)
    * or is it just because someone added support for nice ticks to the other axes and forgot this one?
    */
   axisType !== 'angleAxis' && (axisSettings === null || axisSettings === void 0 ? void 0 : axisSettings.type) === 'number' && isWellFormedNumberDomain(domain) && Array.isArray(niceTicks) && niceTicks.length > 0) {
+    var _niceTicks$, _niceTicks;
     var minFromDomain = domain[0];
-    var minFromTicks = niceTicks[0];
+    var minFromTicks = (_niceTicks$ = niceTicks[0]) !== null && _niceTicks$ !== void 0 ? _niceTicks$ : 0;
     var maxFromDomain = domain[1];
-    var maxFromTicks = niceTicks[niceTicks.length - 1];
+    var maxFromTicks = (_niceTicks = niceTicks[niceTicks.length - 1]) !== null && _niceTicks !== void 0 ? _niceTicks : 0;
     return [Math.min(minFromDomain, minFromTicks), Math.max(maxFromDomain, maxFromTicks)];
   }
   return domain;
@@ -32050,7 +32210,8 @@ var selectAxisRange = (state, axisType, axisId, isPanorama) => {
   }
 };
 var selectAxisRangeWithReverse = createSelector([selectBaseAxis, selectAxisRange], combineAxisRangeWithReverse);
-var selectAxisScale = createSelector([selectBaseAxis, selectRealScaleType, selectAxisDomainIncludingNiceTicks, selectAxisRangeWithReverse], combineScaleFunction);
+var selectCheckedAxisDomain = createSelector([selectRealScaleType, selectAxisDomainIncludingNiceTicks], combineCheckedDomain);
+var selectAxisScale = createSelector([selectBaseAxis, selectRealScaleType, selectCheckedAxisDomain, selectAxisRangeWithReverse], combineScaleFunction);
 createSelector([selectCartesianItemsSettings, selectAllErrorBarSettings, pickAxisType], combineRelevantErrorBarSettings);
 function compareIds(a, b) {
   if (a.id < b.id) {
@@ -32211,7 +32372,7 @@ var combineCategoricalDomain = (layout, appliedValues, axis, axisType) => {
   }
   return undefined;
 };
-var selectCategoricalDomain = createSelector([selectChartLayout, selectAllAppliedValues, selectAxisSettings, pickAxisType], combineCategoricalDomain);
+var selectCategoricalDomain = createSelector([selectChartLayout, selectAllAppliedValues, selectRenderableAxisSettings, pickAxisType], combineCategoricalDomain);
 createSelector([selectChartLayout, selectCartesianAxisSettings, selectRealScaleType, selectAxisScale, selectDuplicateDomain, selectCategoricalDomain, selectAxisRange, selectNiceTicks, pickAxisType], (layout, axis, realScaleType, scale, duplicateDomain, categoricalDomain, axisRange, niceTicks, axisType) => {
   if (axis == null) {
     return undefined;
@@ -32238,6 +32399,15 @@ createSelector([selectChartLayout, selectCartesianAxisSettings, selectRealScaleT
     scale
   };
 });
+
+/**
+ * Of on four almost identical implementations of tick generation.
+ * The four horsemen of tick generation are:
+ * - {@link selectTooltipAxisTicks}
+ * - {@link combineAxisTicks}
+ * - {@link getTicksOfAxis}.
+ * - {@link combineGraphicalItemTicks}
+ */
 var combineAxisTicks = (layout, axis, realScaleType, scale, niceTicks, axisRange, duplicateDomain, categoricalDomain, axisType) => {
   if (axis == null || scale == null) {
     return undefined;
@@ -32248,57 +32418,85 @@ var combineAxisTicks = (layout, axis, realScaleType, scale, niceTicks, axisRange
     ticks,
     tickCount
   } = axis;
-
-  // This is testing for `scaleBand` but for band axis the type is reported as `band` so this looks like a dead code with a workaround elsewhere?
-  var offsetForBand = realScaleType === 'scaleBand' && typeof scale.bandwidth === 'function' ? scale.bandwidth() / 2 : 2;
+  var offsetForBand =
+  // @ts-expect-error This is testing for `scaleBand` but for band axis the type is reported as `band` so this looks like a dead code with a workaround elsewhere?
+  realScaleType === 'scaleBand' && typeof scale.bandwidth === 'function' ? scale.bandwidth() / 2 : 2;
   var offset = type === 'category' && scale.bandwidth ? scale.bandwidth() / offsetForBand : 0;
   offset = axisType === 'angleAxis' && axisRange != null && axisRange.length >= 2 ? mathSign(axisRange[0] - axisRange[1]) * 2 * offset : offset;
 
   // The ticks set by user should only affect the ticks adjacent to axis line
   var ticksOrNiceTicks = ticks || niceTicks;
   if (ticksOrNiceTicks) {
-    var result = ticksOrNiceTicks.map((entry, index) => {
+    return ticksOrNiceTicks.map((entry, index) => {
       var scaleContent = duplicateDomain ? duplicateDomain.indexOf(entry) : entry;
+      var scaled = scale.map(scaleContent);
+      if (!isWellBehavedNumber(scaled)) {
+        return null;
+      }
       return {
         index,
-        // If the scaleContent is not a number, the coordinate will be NaN.
-        // That could be the case for example with a PointScale and a string as domain.
-        coordinate: scale(scaleContent) + offset,
+        coordinate: scaled + offset,
         value: entry,
         offset
       };
-    });
-    return result.filter(row => isWellBehavedNumber(row.coordinate));
+    }).filter(isNotNil);
   }
 
   // When axis is a categorical axis, but the type of axis is number or the scale of axis is not "auto"
   if (isCategorical && categoricalDomain) {
-    return categoricalDomain.map((entry, index) => ({
-      coordinate: scale(entry) + offset,
-      value: entry,
-      index,
-      offset
-    })).filter(row => isWellBehavedNumber(row.coordinate));
+    return categoricalDomain.map((entry, index) => {
+      var scaled = scale.map(entry);
+      if (!isWellBehavedNumber(scaled)) {
+        return null;
+      }
+      return {
+        coordinate: scaled + offset,
+        value: entry,
+        index,
+        offset
+      };
+    }).filter(isNotNil);
   }
   if (scale.ticks) {
-    return scale.ticks(tickCount)
-    // @ts-expect-error why does the offset go here? The type does not require it
-    .map(entry => ({
-      coordinate: scale(entry) + offset,
-      value: entry,
-      offset
-    }));
+    return scale.ticks(tickCount).map((entry, index) => {
+      var scaled = scale.map(entry);
+      if (!isWellBehavedNumber(scaled)) {
+        return null;
+      }
+      return {
+        coordinate: scaled + offset,
+        value: entry,
+        index,
+        offset
+      };
+    }).filter(isNotNil);
   }
 
   // When axis has duplicated text, serial numbers are used to generate scale
-  return scale.domain().map((entry, index) => ({
-    coordinate: scale(entry) + offset,
-    value: duplicateDomain ? duplicateDomain[entry] : entry,
-    index,
-    offset
-  }));
+  return scale.domain().map((entry, index) => {
+    var scaled = scale.map(entry);
+    if (!isWellBehavedNumber(scaled)) {
+      return null;
+    }
+    return {
+      coordinate: scaled + offset,
+      // @ts-expect-error can't use Date as index
+      value: duplicateDomain ? duplicateDomain[entry] : entry,
+      index,
+      offset
+    };
+  }).filter(isNotNil);
 };
-createSelector([selectChartLayout, selectAxisSettings, selectRealScaleType, selectAxisScale, selectNiceTicks, selectAxisRange, selectDuplicateDomain, selectCategoricalDomain, pickAxisType], combineAxisTicks);
+createSelector([selectChartLayout, selectRenderableAxisSettings, selectRealScaleType, selectAxisScale, selectNiceTicks, selectAxisRange, selectDuplicateDomain, selectCategoricalDomain, pickAxisType], combineAxisTicks);
+
+/**
+ * Of on four almost identical implementations of tick generation.
+ * The four horsemen of tick generation are:
+ * - {@link selectTooltipAxisTicks}
+ * - {@link combineAxisTicks}
+ * - {@link getTicksOfAxis}.
+ * - {@link combineGraphicalItemTicks}
+ */
 var combineGraphicalItemTicks = (layout, axis, scale, axisRange, duplicateDomain, categoricalDomain, axisType) => {
   if (axis == null || scale == null || axisRange == null || axisRange[0] === axisRange[1]) {
     return undefined;
@@ -32312,32 +32510,57 @@ var combineGraphicalItemTicks = (layout, axis, scale, axisRange, duplicateDomain
 
   // When axis is a categorical axis, but the type of axis is number or the scale of axis is not "auto"
   if (isCategorical && categoricalDomain) {
-    return categoricalDomain.map((entry, index) => ({
-      coordinate: scale(entry) + offset,
-      value: entry,
-      index,
-      offset
-    }));
+    return categoricalDomain.map((entry, index) => {
+      var scaled = scale.map(entry);
+      if (!isWellBehavedNumber(scaled)) {
+        return null;
+      }
+      return {
+        coordinate: scaled + offset,
+        value: entry,
+        index,
+        offset
+      };
+    }).filter(isNotNil);
   }
   if (scale.ticks) {
-    return scale.ticks(tickCount)
-    // @ts-expect-error why does the offset go here? The type does not require it
-    .map(entry => ({
-      coordinate: scale(entry) + offset,
-      value: entry,
-      offset
-    }));
+    return scale.ticks(tickCount).map((entry, index) => {
+      var scaled = scale.map(entry);
+      if (!isWellBehavedNumber(scaled)) {
+        return null;
+      }
+      return {
+        coordinate: scaled + offset,
+        value: entry,
+        index,
+        offset
+      };
+    }).filter(isNotNil);
   }
 
   // When axis has duplicated text, serial numbers are used to generate scale
-  return scale.domain().map((entry, index) => ({
-    coordinate: scale(entry) + offset,
-    value: duplicateDomain ? duplicateDomain[entry] : entry,
-    index,
-    offset
-  }));
+  return scale.domain().map((entry, index) => {
+    var scaled = scale.map(entry);
+    if (!isWellBehavedNumber(scaled)) {
+      return null;
+    }
+    return {
+      coordinate: scaled + offset,
+      // @ts-expect-error can't use unknown as index
+      value: duplicateDomain ? duplicateDomain[entry] : entry,
+      index,
+      offset
+    };
+  }).filter(isNotNil);
 };
-createSelector([selectChartLayout, selectAxisSettings, selectAxisScale, selectAxisRange, selectDuplicateDomain, selectCategoricalDomain, pickAxisType], combineGraphicalItemTicks);
+createSelector([selectChartLayout, selectRenderableAxisSettings, selectAxisScale, selectAxisRange, selectDuplicateDomain, selectCategoricalDomain, pickAxisType], combineGraphicalItemTicks);
+
+/**
+ * This is the internal representation of an axis along with its scale function.
+ * Here we have already computed the scale function for the axis,
+ * and replaced the union type of scale (string | function) with just the function type.
+ */
+
 createSelector(selectBaseAxis, selectAxisScale, (axis, scale) => {
   if (axis == null || scale == null) {
     return undefined;
@@ -32758,14 +32981,17 @@ var combineActiveTooltipIndex = (tooltipInteraction, chartData, axisDataKey, dom
   return String(clampedIndex);
 };
 
-var combineCoordinateForDefaultIndex = (width, height, layout, offset, tooltipTicks, defaultIndex, tooltipConfigurations, tooltipPayloadSearcher) => {
-  if (defaultIndex == null || tooltipPayloadSearcher == null) {
+var combineCoordinateForDefaultIndex = (width, height, layout, offset, tooltipTicks, defaultIndex, tooltipConfigurations) => {
+  if (defaultIndex == null) {
     return undefined;
   }
-  // With defaultIndex alone, we don't have enough information to decide _which_ of the multiple tooltips to display. So we choose the first one.
+  /*
+   * With defaultIndex alone, we don't have enough information to decide _which_ of the multiple tooltips to display.
+   * Maybe one day we could add new prop `activeGraphicalItemId` to the chart to help with that.
+   * Until then, we choose the first one.
+   */
   var firstConfiguration = tooltipConfigurations[0];
-  // @ts-expect-error we need to rethink the tooltipPayloadSearcher type
-  var maybePosition = firstConfiguration == null ? undefined : tooltipPayloadSearcher(firstConfiguration.positions, defaultIndex);
+  var maybePosition = firstConfiguration === null || firstConfiguration === void 0 ? void 0 : firstConfiguration.getPosition(defaultIndex);
   if (maybePosition != null) {
     return maybePosition;
   }
@@ -32946,7 +33172,7 @@ var combineTooltipPayload = (tooltipPayloadConfigurations, activeIndex, chartDat
   }, init);
 };
 
-var selectTooltipAxisRealScaleType = createSelector([selectTooltipAxis, selectChartLayout, selectHasBar, selectChartName, selectTooltipAxisType], combineRealScaleType);
+var selectTooltipAxisRealScaleType = createSelector([selectTooltipAxis, selectHasBar, selectChartName], combineRealScaleType);
 var selectAllUnfilteredGraphicalItems = createSelector([state => state.graphicalItems.cartesianItems, state => state.graphicalItems.polarItems], (cartesianItems, polarItems) => [...cartesianItems, ...polarItems]);
 var selectTooltipAxisPredicate = createSelector([selectTooltipAxisType, selectTooltipAxisId], itemAxisPredicate);
 var selectAllGraphicalItemsSettings = createSelector([selectAllUnfilteredGraphicalItems, selectTooltipAxis, selectTooltipAxisPredicate], combineGraphicalItemsSettings, {
@@ -33020,22 +33246,44 @@ var combineTicksOfTooltipAxis = (layout, axis, realScaleType, scale, range, dupl
 
   // When axis is a categorical axis, but the type of axis is number or the scale of axis is not "auto"
   if (isCategorical && categoricalDomain) {
-    return categoricalDomain.map((entry, index) => ({
-      coordinate: scale(entry) + offset,
-      value: entry,
-      index,
-      offset
-    }));
+    return categoricalDomain.map((entry, index) => {
+      var scaled = scale.map(entry);
+      if (!isWellBehavedNumber(scaled)) {
+        return null;
+      }
+      return {
+        coordinate: scaled + offset,
+        value: entry,
+        index,
+        offset
+      };
+    }).filter(isNotNil);
   }
 
   // When axis has duplicated text, serial numbers are used to generate scale
-  return scale.domain().map((entry, index) => ({
-    coordinate: scale(entry) + offset,
-    value: duplicateDomain ? duplicateDomain[entry] : entry,
-    index,
-    offset
-  }));
+  return scale.domain().map((entry, index) => {
+    var scaled = scale.map(entry);
+    if (!isWellBehavedNumber(scaled)) {
+      return null;
+    }
+    return {
+      coordinate: scaled + offset,
+      // @ts-expect-error can't use Date as an index
+      value: duplicateDomain ? duplicateDomain[entry] : entry,
+      index,
+      offset
+    };
+  }).filter(isNotNil);
 };
+
+/**
+ * Of on four almost identical implementations of tick generation.
+ * The four horsemen of tick generation are:
+ * - {@link selectTooltipAxisTicks}
+ * - {@link combineAxisTicks}
+ * - {@link getTicksOfAxis}.
+ * - {@link combineGraphicalItemTicks}
+ */
 var selectTooltipAxisTicks = createSelector([selectChartLayout, selectTooltipAxis, selectTooltipAxisRealScaleType, selectTooltipAxisScale, selectTooltipAxisRange, selectTooltipDuplicateDomain, selectTooltipCategoricalDomain, selectTooltipAxisType], combineTicksOfTooltipAxis);
 var selectTooltipEventType = createSelector([selectDefaultTooltipEventType, selectValidateTooltipEventTypes, selectTooltipSettings], (defaultTooltipEventType, validateTooltipEventType, settings) => combineTooltipEventType(settings.shared, defaultTooltipEventType, validateTooltipEventType));
 var selectTooltipTrigger = state => state.tooltip.settings.trigger;
@@ -33056,7 +33304,7 @@ createSelector([selectTooltipInteractionState$1], tooltipInteraction => {
   return tooltipInteraction.graphicalItemId;
 });
 var selectTooltipPayloadConfigurations$1 = createSelector([selectTooltipState, selectTooltipEventType, selectTooltipTrigger, selectDefaultIndex], combineTooltipPayloadConfigurations);
-var selectTooltipCoordinateForDefaultIndex = createSelector([selectChartWidth, selectChartHeight, selectChartLayout, selectChartOffsetInternal, selectTooltipAxisTicks, selectDefaultIndex, selectTooltipPayloadConfigurations$1, selectTooltipPayloadSearcher], combineCoordinateForDefaultIndex);
+var selectTooltipCoordinateForDefaultIndex = createSelector([selectChartWidth, selectChartHeight, selectChartLayout, selectChartOffsetInternal, selectTooltipAxisTicks, selectDefaultIndex, selectTooltipPayloadConfigurations$1], combineCoordinateForDefaultIndex);
 createSelector([selectTooltipInteractionState$1, selectTooltipCoordinateForDefaultIndex], (tooltipInteractionState, defaultIndexCoordinate) => {
   if (tooltipInteractionState !== null && tooltipInteractionState !== void 0 && tooltipInteractionState.coordinate) {
     return tooltipInteractionState.coordinate;
@@ -33120,7 +33368,7 @@ var selectTooltipDataKey = (state, tooltipEventType, trigger) => {
   return tooltipState.itemInteraction.click.dataKey;
 };
 var selectTooltipPayloadConfigurations = createSelector([selectTooltipState, pickTooltipEventType, pickTrigger, pickDefaultIndex], combineTooltipPayloadConfigurations);
-var selectCoordinateForDefaultIndex = createSelector([selectChartWidth, selectChartHeight, selectChartLayout, selectChartOffsetInternal, selectTooltipAxisTicks, pickDefaultIndex, selectTooltipPayloadConfigurations, selectTooltipPayloadSearcher], combineCoordinateForDefaultIndex);
+var selectCoordinateForDefaultIndex = createSelector([selectChartWidth, selectChartHeight, selectChartLayout, selectChartOffsetInternal, selectTooltipAxisTicks, pickDefaultIndex, selectTooltipPayloadConfigurations], combineCoordinateForDefaultIndex);
 var selectActiveCoordinate = createSelector([selectTooltipInteractionState, selectCoordinateForDefaultIndex], (tooltipInteractionState, defaultIndexCoordinate) => {
   var _tooltipInteractionSt;
   return (_tooltipInteractionSt = tooltipInteractionState.coordinate) !== null && _tooltipInteractionSt !== void 0 ? _tooltipInteractionSt : defaultIndexCoordinate;
@@ -33306,7 +33554,7 @@ function ZIndexLayer(_ref) {
   var shouldRenderInPortal = isInChartContext && zIndex !== undefined && zIndex !== 0;
   var isPanorama = useIsPanorama();
   var dispatch = useAppDispatch();
-  dashboard__loadShare__react__loadShare__.useLayoutEffect(() => {
+  admin__loadShare__react__loadShare__.useLayoutEffect(() => {
     if (!shouldRenderInPortal) {
       // Nothing to do. We have to call the hook because of the rules of hooks.
       return noop$3;
@@ -33339,7 +33587,7 @@ function ZIndexLayer(_ref) {
      */
     return null;
   }
-  return /*#__PURE__*/dashboard__loadShare__react_mf_2_dom__loadShare__.createPortal(children, portalElement);
+  return /*#__PURE__*/admin__loadShare__react_mf_2_dom__loadShare__.createPortal(children, portalElement);
 }
 
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
@@ -33361,10 +33609,10 @@ function RenderCursor(_ref) {
     cursorComp,
     cursorProps
   } = _ref;
-  if (/*#__PURE__*/dashboard__loadShare__react__loadShare__.isValidElement(cursor)) {
-    return /*#__PURE__*/dashboard__loadShare__react__loadShare__.cloneElement(cursor, cursorProps);
+  if (/*#__PURE__*/admin__loadShare__react__loadShare__.isValidElement(cursor)) {
+    return /*#__PURE__*/admin__loadShare__react__loadShare__.cloneElement(cursor, cursorProps);
   }
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(cursorComp, cursorProps);
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(cursorComp, cursorProps);
 }
 function CursorInternal(props) {
   var _props$zIndex;
@@ -33430,9 +33678,9 @@ function CursorInternal(props) {
     payloadIndex: activeTooltipIndex,
     className: clsx('recharts-tooltip-cursor', extraClassName)
   });
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(ZIndexLayer, {
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(ZIndexLayer, {
     zIndex: (_props$zIndex = props.zIndex) !== null && _props$zIndex !== void 0 ? _props$zIndex : preferredZIndex
-  }, /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(RenderCursor, {
+  }, /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(RenderCursor, {
     cursor: cursor,
     cursorComp: cursorComp,
     cursorProps: cursorProps
@@ -33455,7 +33703,7 @@ function Cursor(props) {
   if (tooltipAxisBandSize == null || offset == null || layout == null || chartName == null) {
     return null;
   }
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(CursorInternal, _extends({}, props, {
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(CursorInternal, _extends({}, props, {
     offset: offset,
     layout: layout,
     tooltipAxisBandSize: tooltipAxisBandSize,
@@ -33463,8 +33711,8 @@ function Cursor(props) {
   }));
 }
 
-var TooltipPortalContext = /*#__PURE__*/dashboard__loadShare__react__loadShare__.createContext(null);
-var useTooltipPortal = () => dashboard__loadShare__react__loadShare__.useContext(TooltipPortalContext);
+var TooltipPortalContext = /*#__PURE__*/admin__loadShare__react__loadShare__.createContext(null);
+var useTooltipPortal = () => admin__loadShare__react__loadShare__.useContext(TooltipPortalContext);
 
 var eventemitter3 = {exports: {}};
 
@@ -33838,7 +34086,7 @@ function useTooltipChartSynchronisation(tooltipEventType, trigger, activeCoordin
   var tooltipState = useAppSelector(selectSynchronisedTooltipState);
   var isReceivingSynchronisation = tooltipState === null || tooltipState === void 0 ? void 0 : tooltipState.active;
   var viewBox = useViewBox();
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (isReceivingSynchronisation) {
       /*
        * This chart currently has active tooltip, synchronised from another chart.
@@ -33883,13 +34131,13 @@ function defaultUniqBy(entry) {
   return entry.dataKey;
 }
 function renderContent(content, props) {
-  if (/*#__PURE__*/dashboard__loadShare__react__loadShare__.isValidElement(content)) {
-    return /*#__PURE__*/dashboard__loadShare__react__loadShare__.cloneElement(content, props);
+  if (/*#__PURE__*/admin__loadShare__react__loadShare__.isValidElement(content)) {
+    return /*#__PURE__*/admin__loadShare__react__loadShare__.cloneElement(content, props);
   }
   if (typeof content === 'function') {
-    return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(content, props);
+    return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(content, props);
   }
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(DefaultTooltipContent, props);
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(DefaultTooltipContent, props);
 }
 var emptyPayload = [];
 var defaultTooltipProps = {
@@ -33918,6 +34166,20 @@ var defaultTooltipProps = {
   useTranslate3d: false,
   wrapperStyle: {}
 };
+
+/**
+ * The Tooltip component displays a floating box with data values when hovering over or clicking on chart elements.
+ *
+ * It can be configured to show information for individual data points or for all points at a specific axis coordinate.
+ * The appearance and content of the tooltip can be customized via props.
+ *
+ * @see {@link https://github.com/recharts/recharts/wiki/Tooltip-event-type-and-shared-prop Tooltip event type and shared prop wiki page}
+ * @see {@link https://recharts.github.io/en-US/guide/activeIndex/ Active index replacement when migrating from Recharts v2 to v3}
+ *
+ * @consumes CartesianChartContext
+ * @consumes PolarChartContext
+ * @consumes TooltipEntrySettings
+ */
 function Tooltip$2(outsideProps) {
   var _useAppSelector, _ref;
   var props = resolveDefaultProps(outsideProps, defaultTooltipProps);
@@ -33944,7 +34206,7 @@ function Tooltip$2(outsideProps) {
   } = props;
   var dispatch = useAppDispatch();
   var defaultIndexAsString = typeof defaultIndex === 'number' ? String(defaultIndex) : defaultIndex;
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     dispatch(setTooltipSettingsState({
       shared,
       trigger,
@@ -33987,7 +34249,7 @@ function Tooltip$2(outsideProps) {
     finalPayload = getUniqPayload(finalPayload.filter(entry => entry.value != null && (entry.hide !== true || props.includeHidden)), payloadUniqBy, defaultUniqBy);
   }
   var hasPayload = finalPayload.length > 0;
-  var tooltipElement = /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(TooltipBoundingBox, {
+  var tooltipElement = /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(TooltipBoundingBox, {
     allowEscapeViewBox: allowEscapeViewBox,
     animationDuration: animationDuration,
     animationEasing: animationEasing,
@@ -34012,7 +34274,7 @@ function Tooltip$2(outsideProps) {
     coordinate,
     accessibilityLayer
   })));
-  return /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(dashboard__loadShare__react__loadShare__.Fragment, null, /*#__PURE__*/dashboard__loadShare__react_mf_2_dom__loadShare__.createPortal(tooltipElement, tooltipPortal), finalIsActive && /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(Cursor, {
+  return /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(admin__loadShare__react__loadShare__.Fragment, null, /*#__PURE__*/admin__loadShare__react_mf_2_dom__loadShare__.createPortal(tooltipElement, tooltipPortal), finalIsActive && /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(Cursor, {
     cursor: cursor,
     tooltipEventType: tooltipEventType,
     coordinate: coordinate,
@@ -34026,14 +34288,14 @@ const THEMES = {
 	dark: ".dark",
 	light: ""
 };
-const ChartContext = dashboard__loadShare__react__loadShare__.createContext(null);
+const ChartContext = admin__loadShare__react__loadShare__.createContext(null);
 function useChart() {
-	const context = dashboard__loadShare__react__loadShare__.useContext(ChartContext);
+	const context = admin__loadShare__react__loadShare__.useContext(ChartContext);
 	if (!context) throw new Error("useChart must be used within a <ChartContainer />");
 	return context;
 }
-const ChartContainer = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, config, id, ...props }, ref) => {
-	const uniqueId = dashboard__loadShare__react__loadShare__.useId();
+const ChartContainer = admin__loadShare__react__loadShare__.forwardRef(({ children, className, config, id, ...props }, ref) => {
+	const uniqueId = admin__loadShare__react__loadShare__.useId();
 	const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(ChartContext.Provider, {
 		value: { config },
@@ -34063,9 +34325,9 @@ ${colorConfig.map(([key, itemConfig]) => {
 `).join("\n") } });
 };
 const ChartTooltip = Tooltip$2;
-const ChartTooltipContent = dashboard__loadShare__react__loadShare__.forwardRef(({ active, className, color, formatter, hideIndicator = false, hideLabel = false, indicator = "dot", label, labelClassName, labelFormatter, labelKey, nameKey, payload }, ref) => {
+const ChartTooltipContent = admin__loadShare__react__loadShare__.forwardRef(({ active, className, color, formatter, hideIndicator = false, hideLabel = false, indicator = "dot", label, labelClassName, labelFormatter, labelKey, nameKey, payload }, ref) => {
 	const { config } = useChart();
-	const tooltipLabel = dashboard__loadShare__react__loadShare__.useMemo(() => {
+	const tooltipLabel = admin__loadShare__react__loadShare__.useMemo(() => {
 		if (hideLabel || !payload?.length) return null;
 		const [item] = payload;
 		const itemConfig = getPayloadConfigFromPayload(config, item, `${labelKey || item.dataKey || item.name || "value"}`);
@@ -34131,7 +34393,7 @@ const ChartTooltipContent = dashboard__loadShare__react__loadShare__.forwardRef(
 });
 ChartTooltipContent.displayName = "ChartTooltip";
 const ChartLegend = Legend;
-const ChartLegendContent = dashboard__loadShare__react__loadShare__.forwardRef(({ className, hideIcon = false, nameKey, payload, verticalAlign = "bottom" }, ref) => {
+const ChartLegendContent = admin__loadShare__react__loadShare__.forwardRef(({ className, hideIcon = false, nameKey, payload, verticalAlign = "bottom" }, ref) => {
 	const { config } = useChart();
 	if (!payload?.length) return null;
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
@@ -34161,8 +34423,8 @@ function getPayloadConfigFromPayload(config, payload, key) {
 
 // packages/react/use-previous/src/use-previous.tsx
 function usePrevious(value) {
-  const ref = dashboard__loadShare__react__loadShare__.useRef({ value, previous: value });
-  return dashboard__loadShare__react__loadShare__.useMemo(() => {
+  const ref = admin__loadShare__react__loadShare__.useRef({ value, previous: value });
+  return admin__loadShare__react__loadShare__.useMemo(() => {
     if (ref.current.value !== value) {
       ref.current.previous = ref.current.value;
       ref.current.value = value;
@@ -34195,9 +34457,9 @@ function CheckboxProvider(props) {
     onChange: onCheckedChange,
     caller: CHECKBOX_NAME
   });
-  const [control, setControl] = dashboard__loadShare__react__loadShare__.useState(null);
-  const [bubbleInput, setBubbleInput] = dashboard__loadShare__react__loadShare__.useState(null);
-  const hasConsumerStoppedPropagationRef = dashboard__loadShare__react__loadShare__.useRef(false);
+  const [control, setControl] = admin__loadShare__react__loadShare__.useState(null);
+  const [bubbleInput, setBubbleInput] = admin__loadShare__react__loadShare__.useState(null);
+  const hasConsumerStoppedPropagationRef = admin__loadShare__react__loadShare__.useRef(false);
   const isFormControl = control ? !!form || !!control.closest("form") : (
     // We set this to true by default so that events bubble to forms without JS (SSR)
     true
@@ -34228,7 +34490,7 @@ function CheckboxProvider(props) {
   );
 }
 var TRIGGER_NAME$3 = "CheckboxTrigger";
-var CheckboxTrigger = dashboard__loadShare__react__loadShare__.forwardRef(
+var CheckboxTrigger = admin__loadShare__react__loadShare__.forwardRef(
   ({ __scopeCheckbox, onKeyDown, onClick, ...checkboxProps }, forwardedRef) => {
     const {
       control,
@@ -34243,8 +34505,8 @@ var CheckboxTrigger = dashboard__loadShare__react__loadShare__.forwardRef(
       bubbleInput
     } = useCheckboxContext(TRIGGER_NAME$3, __scopeCheckbox);
     const composedRefs = useComposedRefs$1(forwardedRef, setControl);
-    const initialCheckedStateRef = dashboard__loadShare__react__loadShare__.useRef(checked);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    const initialCheckedStateRef = admin__loadShare__react__loadShare__.useRef(checked);
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const form = control?.form;
       if (form) {
         const reset = () => setChecked(initialCheckedStateRef.current);
@@ -34280,7 +34542,7 @@ var CheckboxTrigger = dashboard__loadShare__react__loadShare__.forwardRef(
   }
 );
 CheckboxTrigger.displayName = TRIGGER_NAME$3;
-var Checkbox$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var Checkbox$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopeCheckbox,
@@ -34328,7 +34590,7 @@ var Checkbox$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 Checkbox$1.displayName = CHECKBOX_NAME;
 var INDICATOR_NAME$2 = "CheckboxIndicator";
-var CheckboxIndicator = dashboard__loadShare__react__loadShare__.forwardRef(
+var CheckboxIndicator = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeCheckbox, forceMount, ...indicatorProps } = props;
     const context = useCheckboxContext(INDICATOR_NAME$2, __scopeCheckbox);
@@ -34352,7 +34614,7 @@ var CheckboxIndicator = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 CheckboxIndicator.displayName = INDICATOR_NAME$2;
 var BUBBLE_INPUT_NAME$4 = "CheckboxBubbleInput";
-var CheckboxBubbleInput = dashboard__loadShare__react__loadShare__.forwardRef(
+var CheckboxBubbleInput = admin__loadShare__react__loadShare__.forwardRef(
   ({ __scopeCheckbox, ...props }, forwardedRef) => {
     const {
       control,
@@ -34370,7 +34632,7 @@ var CheckboxBubbleInput = dashboard__loadShare__react__loadShare__.forwardRef(
     const composedRefs = useComposedRefs$1(forwardedRef, setBubbleInput);
     const prevChecked = usePrevious(checked);
     const controlSize = useSize(control);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const input = bubbleInput;
       if (!input) return;
       const inputProto = window.HTMLInputElement.prototype;
@@ -34387,7 +34649,7 @@ var CheckboxBubbleInput = dashboard__loadShare__react__loadShare__.forwardRef(
         input.dispatchEvent(event);
       }
     }, [bubbleInput, prevChecked, checked, hasConsumerStoppedPropagationRef]);
-    const defaultCheckedRef = dashboard__loadShare__react__loadShare__.useRef(isIndeterminate(checked) ? false : checked);
+    const defaultCheckedRef = admin__loadShare__react__loadShare__.useRef(isIndeterminate(checked) ? false : checked);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       Primitive$1.input,
       {
@@ -34430,7 +34692,7 @@ function getState$2(checked) {
 }
 
 //#region src/components/ui/checkbox.tsx
-const Checkbox = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Checkbox$1, {
+const Checkbox = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Checkbox$1, {
 	className: cn$1("peer h-4 w-4 shrink-0 rounded-sm border border-border shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-border data-[state=checked]:text-primary-foreground", className),
 	ref,
 	...props,
@@ -34451,13 +34713,13 @@ const Dialog = Root$c;
 const DialogTrigger = Trigger$4;
 const DialogPortal = Portal$3;
 const DialogClose = Close$1;
-const DialogOverlay = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Overlay$1, {
+const DialogOverlay = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Overlay$1, {
 	className: cn$1("fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className),
 	ref,
 	...props
 }));
 DialogOverlay.displayName = Overlay$1.displayName;
-const DialogContent = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogPortal, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(DialogOverlay, {}), /* @__PURE__ */ jsxRuntimeExports.jsxs(Content$2, {
+const DialogContent = admin__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogPortal, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(DialogOverlay, {}), /* @__PURE__ */ jsxRuntimeExports.jsxs(Content$2, {
 	className: cn$1("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg", className),
 	ref,
 	...props,
@@ -34480,13 +34742,13 @@ const DialogFooter = ({ className, ...props }) => /* @__PURE__ */ jsxRuntimeExpo
 	...props
 });
 DialogFooter.displayName = "DialogFooter";
-const DialogTitle = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Title$1, {
+const DialogTitle = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Title$1, {
 	className: cn$1("text-lg font-semibold leading-none tracking-tight", className),
 	ref,
 	...props
 }));
 DialogTitle.displayName = Title$1.displayName;
-const DialogDescription = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Description$1, {
+const DialogDescription = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Description$1, {
 	className: cn$1("text-sm text-muted-foreground", className),
 	ref,
 	...props
@@ -34495,10 +34757,10 @@ DialogDescription.displayName = Description$1.displayName;
 
 var U=1,Y$1=.9,H=.8,J=.17,p=.1,u=.999,$=.9999;var k$1=.99,m=/[\\\/_+.#"@\[\(\{&]/,B$1=/[\\\/_+.#"@\[\(\{&]/g,K$1=/[\s-]/,X=/[\s-]/g;function G(_,C,h,P,A,f,O){if(f===C.length)return A===_.length?U:k$1;var T=`${A},${f}`;if(O[T]!==void 0)return O[T];for(var L=P.charAt(f),c=h.indexOf(L,A),S=0,E,N,R,M;c>=0;)E=G(_,C,h,P,c+1,f+1,O),E>S&&(c===A?E*=U:m.test(_.charAt(c-1))?(E*=H,R=_.slice(A,c-1).match(B$1),R&&A>0&&(E*=Math.pow(u,R.length))):K$1.test(_.charAt(c-1))?(E*=Y$1,M=_.slice(A,c-1).match(X),M&&A>0&&(E*=Math.pow(u,M.length))):(E*=J,A>0&&(E*=Math.pow(u,c-A))),_.charAt(c)!==C.charAt(f)&&(E*=$)),(E<p&&h.charAt(c-1)===P.charAt(f+1)||P.charAt(f+1)===P.charAt(f)&&h.charAt(c-1)!==P.charAt(f))&&(N=G(_,C,h,P,c+1,f+2,O),N*p>E&&(E=N*p)),E>S&&(S=E),c=h.indexOf(L,c+1);return O[T]=S,S}function D(_){return _.toLowerCase().replace(X," ")}function W(_,C,h){return _=h&&h.length>0?`${_+" "+h.join(" ")}`:_,G(_,C,D(_),D(C),0,0,{})}
 
-var N='[cmdk-group=""]',Y='[cmdk-group-items=""]',be='[cmdk-group-heading=""]',le='[cmdk-item=""]',ce=`${le}:not([aria-disabled="true"])`,Z="cmdk-item-select",T="data-value",Re=(r,o,n)=>W(r,o,n),ue=dashboard__loadShare__react__loadShare__.createContext(void 0),K=()=>dashboard__loadShare__react__loadShare__.useContext(ue),de=dashboard__loadShare__react__loadShare__.createContext(void 0),ee=()=>dashboard__loadShare__react__loadShare__.useContext(de),fe=dashboard__loadShare__react__loadShare__.createContext(void 0),me=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let n=L(()=>{var e,a;return {search:"",value:(a=(e=r.value)!=null?e:r.defaultValue)!=null?a:"",selectedItemId:void 0,filtered:{count:0,items:new Map,groups:new Set}}}),u=L(()=>new Set),c=L(()=>new Map),d=L(()=>new Map),f=L(()=>new Set),p=pe(r),{label:b,children:m,value:R,onValueChange:x,filter:C,shouldFilter:S,loop:A,disablePointerSelection:ge=false,vimBindings:j=true,...O}=r,$=useId(),q=useId(),_=useId(),I=dashboard__loadShare__react__loadShare__.useRef(null),v=ke();k(()=>{if(R!==void 0){let e=R.trim();n.current.value=e,E.emit();}},[R]),k(()=>{v(6,ne);},[]);let E=dashboard__loadShare__react__loadShare__.useMemo(()=>({subscribe:e=>(f.current.add(e),()=>f.current.delete(e)),snapshot:()=>n.current,setState:(e,a,s)=>{var i,l,g,y;if(!Object.is(n.current[e],a)){if(n.current[e]=a,e==="search")J(),z(),v(1,W);else if(e==="value"){if(document.activeElement.hasAttribute("cmdk-input")||document.activeElement.hasAttribute("cmdk-root")){let h=document.getElementById(_);h?h.focus():(i=document.getElementById($))==null||i.focus();}if(v(7,()=>{var h;n.current.selectedItemId=(h=M())==null?void 0:h.id,E.emit();}),s||v(5,ne),((l=p.current)==null?void 0:l.value)!==void 0){let h=a!=null?a:"";(y=(g=p.current).onValueChange)==null||y.call(g,h);return}}E.emit();}},emit:()=>{f.current.forEach(e=>e());}}),[]),U=dashboard__loadShare__react__loadShare__.useMemo(()=>({value:(e,a,s)=>{var i;a!==((i=d.current.get(e))==null?void 0:i.value)&&(d.current.set(e,{value:a,keywords:s}),n.current.filtered.items.set(e,te(a,s)),v(2,()=>{z(),E.emit();}));},item:(e,a)=>(u.current.add(e),a&&(c.current.has(a)?c.current.get(a).add(e):c.current.set(a,new Set([e]))),v(3,()=>{J(),z(),n.current.value||W(),E.emit();}),()=>{d.current.delete(e),u.current.delete(e),n.current.filtered.items.delete(e);let s=M();v(4,()=>{J(),(s==null?void 0:s.getAttribute("id"))===e&&W(),E.emit();});}),group:e=>(c.current.has(e)||c.current.set(e,new Set),()=>{d.current.delete(e),c.current.delete(e);}),filter:()=>p.current.shouldFilter,label:b||r["aria-label"],getDisablePointerSelection:()=>p.current.disablePointerSelection,listId:$,inputId:_,labelId:q,listInnerRef:I}),[]);function te(e,a){var i,l;let s=(l=(i=p.current)==null?void 0:i.filter)!=null?l:Re;return e?s(e,n.current.search,a):0}function z(){if(!n.current.search||p.current.shouldFilter===false)return;let e=n.current.filtered.items,a=[];n.current.filtered.groups.forEach(i=>{let l=c.current.get(i),g=0;l.forEach(y=>{let h=e.get(y);g=Math.max(h,g);}),a.push([i,g]);});let s=I.current;V().sort((i,l)=>{var h,F;let g=i.getAttribute("id"),y=l.getAttribute("id");return ((h=e.get(y))!=null?h:0)-((F=e.get(g))!=null?F:0)}).forEach(i=>{let l=i.closest(Y);l?l.appendChild(i.parentElement===l?i:i.closest(`${Y} > *`)):s.appendChild(i.parentElement===s?i:i.closest(`${Y} > *`));}),a.sort((i,l)=>l[1]-i[1]).forEach(i=>{var g;let l=(g=I.current)==null?void 0:g.querySelector(`${N}[${T}="${encodeURIComponent(i[0])}"]`);l==null||l.parentElement.appendChild(l);});}function W(){let e=V().find(s=>s.getAttribute("aria-disabled")!=="true"),a=e==null?void 0:e.getAttribute(T);E.setState("value",a||void 0);}function J(){var a,s,i,l;if(!n.current.search||p.current.shouldFilter===false){n.current.filtered.count=u.current.size;return}n.current.filtered.groups=new Set;let e=0;for(let g of u.current){let y=(s=(a=d.current.get(g))==null?void 0:a.value)!=null?s:"",h=(l=(i=d.current.get(g))==null?void 0:i.keywords)!=null?l:[],F=te(y,h);n.current.filtered.items.set(g,F),F>0&&e++;}for(let[g,y]of c.current)for(let h of y)if(n.current.filtered.items.get(h)>0){n.current.filtered.groups.add(g);break}n.current.filtered.count=e;}function ne(){var a,s,i;let e=M();e&&(((a=e.parentElement)==null?void 0:a.firstChild)===e&&((i=(s=e.closest(N))==null?void 0:s.querySelector(be))==null||i.scrollIntoView({block:"nearest"})),e.scrollIntoView({block:"nearest"}));}function M(){var e;return (e=I.current)==null?void 0:e.querySelector(`${le}[aria-selected="true"]`)}function V(){var e;return Array.from(((e=I.current)==null?void 0:e.querySelectorAll(ce))||[])}function X(e){let s=V()[e];s&&E.setState("value",s.getAttribute(T));}function Q(e){var g;let a=M(),s=V(),i=s.findIndex(y=>y===a),l=s[i+e];(g=p.current)!=null&&g.loop&&(l=i+e<0?s[s.length-1]:i+e===s.length?s[0]:s[i+e]),l&&E.setState("value",l.getAttribute(T));}function re(e){let a=M(),s=a==null?void 0:a.closest(N),i;for(;s&&!i;)s=e>0?we(s,N):De(s,N),i=s==null?void 0:s.querySelector(ce);i?E.setState("value",i.getAttribute(T)):Q(e);}let oe=()=>X(V().length-1),ie=e=>{e.preventDefault(),e.metaKey?oe():e.altKey?re(1):Q(1);},se=e=>{e.preventDefault(),e.metaKey?X(0):e.altKey?re(-1):Q(-1);};return dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:o,tabIndex:-1,...O,"cmdk-root":"",onKeyDown:e=>{var s;(s=O.onKeyDown)==null||s.call(O,e);let a=e.nativeEvent.isComposing||e.keyCode===229;if(!(e.defaultPrevented||a))switch(e.key){case "n":case "j":{j&&e.ctrlKey&&ie(e);break}case "ArrowDown":{ie(e);break}case "p":case "k":{j&&e.ctrlKey&&se(e);break}case "ArrowUp":{se(e);break}case "Home":{e.preventDefault(),X(0);break}case "End":{e.preventDefault(),oe();break}case "Enter":{e.preventDefault();let i=M();if(i){let l=new Event(Z);i.dispatchEvent(l);}}}}},dashboard__loadShare__react__loadShare__.createElement("label",{"cmdk-label":"",htmlFor:U.inputId,id:U.labelId,style:Te},b),B(r,e=>dashboard__loadShare__react__loadShare__.createElement(de.Provider,{value:E},dashboard__loadShare__react__loadShare__.createElement(ue.Provider,{value:U},e))))}),he=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{var _,I;let n=useId(),u=dashboard__loadShare__react__loadShare__.useRef(null),c=dashboard__loadShare__react__loadShare__.useContext(fe),d=K(),f=pe(r),p=(I=(_=f.current)==null?void 0:_.forceMount)!=null?I:c==null?void 0:c.forceMount;k(()=>{if(!p)return d.item(n,c==null?void 0:c.id)},[p]);let b=ve(n,u,[r.value,r.children,u],r.keywords),m=ee(),R=P(v=>v.value&&v.value===b.current),x=P(v=>p||d.filter()===false?true:v.search?v.filtered.items.get(n)>0:true);dashboard__loadShare__react__loadShare__.useEffect(()=>{let v=u.current;if(!(!v||r.disabled))return v.addEventListener(Z,C),()=>v.removeEventListener(Z,C)},[x,r.onSelect,r.disabled]);function C(){var v,E;S(),(E=(v=f.current).onSelect)==null||E.call(v,b.current);}function S(){m.setState("value",b.current,true);}if(!x)return null;let{disabled:A,value:ge,onSelect:j,forceMount:O,keywords:$,...q}=r;return dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(u,o),...q,id:n,"cmdk-item":"",role:"option","aria-disabled":!!A,"aria-selected":!!R,"data-disabled":!!A,"data-selected":!!R,onPointerMove:A||d.getDisablePointerSelection()?void 0:S,onClick:A?void 0:C},r.children)}),Ee=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{heading:n,children:u,forceMount:c,...d}=r,f=useId(),p=dashboard__loadShare__react__loadShare__.useRef(null),b=dashboard__loadShare__react__loadShare__.useRef(null),m=useId(),R=K(),x=P(S=>c||R.filter()===false?true:S.search?S.filtered.groups.has(f):true);k(()=>R.group(f),[]),ve(f,p,[r.value,r.heading,b]);let C=dashboard__loadShare__react__loadShare__.useMemo(()=>({id:f,forceMount:c}),[c]);return dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(p,o),...d,"cmdk-group":"",role:"presentation",hidden:x?void 0:true},n&&dashboard__loadShare__react__loadShare__.createElement("div",{ref:b,"cmdk-group-heading":"","aria-hidden":true,id:m},n),B(r,S=>dashboard__loadShare__react__loadShare__.createElement("div",{"cmdk-group-items":"",role:"group","aria-labelledby":n?m:void 0},dashboard__loadShare__react__loadShare__.createElement(fe.Provider,{value:C},S))))}),ye=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{alwaysRender:n,...u}=r,c=dashboard__loadShare__react__loadShare__.useRef(null),d=P(f=>!f.search);return !n&&!d?null:dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(c,o),...u,"cmdk-separator":"",role:"separator"})}),Se=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{onValueChange:n,...u}=r,c=r.value!=null,d=ee(),f=P(m=>m.search),p=P(m=>m.selectedItemId),b=K();return dashboard__loadShare__react__loadShare__.useEffect(()=>{r.value!=null&&d.setState("search",r.value);},[r.value]),dashboard__loadShare__react__loadShare__.createElement(Primitive.input,{ref:o,...u,"cmdk-input":"",autoComplete:"off",autoCorrect:"off",spellCheck:false,"aria-autocomplete":"list",role:"combobox","aria-expanded":true,"aria-controls":b.listId,"aria-labelledby":b.labelId,"aria-activedescendant":p,id:b.inputId,type:"text",value:c?r.value:f,onChange:m=>{c||d.setState("search",m.target.value),n==null||n(m.target.value);}})}),Ce=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{children:n,label:u="Suggestions",...c}=r,d=dashboard__loadShare__react__loadShare__.useRef(null),f=dashboard__loadShare__react__loadShare__.useRef(null),p=P(m=>m.selectedItemId),b=K();return dashboard__loadShare__react__loadShare__.useEffect(()=>{if(f.current&&d.current){let m=f.current,R=d.current,x,C=new ResizeObserver(()=>{x=requestAnimationFrame(()=>{let S=m.offsetHeight;R.style.setProperty("--cmdk-list-height",S.toFixed(1)+"px");});});return C.observe(m),()=>{cancelAnimationFrame(x),C.unobserve(m);}}},[]),dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(d,o),...c,"cmdk-list":"",role:"listbox",tabIndex:-1,"aria-activedescendant":p,"aria-label":u,id:b.listId},B(r,m=>dashboard__loadShare__react__loadShare__.createElement("div",{ref:composeRefs$1(f,b.listInnerRef),"cmdk-list-sizer":""},m)))}),xe=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{open:n,onOpenChange:u,overlayClassName:c,contentClassName:d,container:f,...p}=r;return dashboard__loadShare__react__loadShare__.createElement(Root$c,{open:n,onOpenChange:u},dashboard__loadShare__react__loadShare__.createElement(Portal$3,{container:f},dashboard__loadShare__react__loadShare__.createElement(Overlay$1,{"cmdk-overlay":"",className:c}),dashboard__loadShare__react__loadShare__.createElement(Content$2,{"aria-label":r.label,"cmdk-dialog":"",className:d},dashboard__loadShare__react__loadShare__.createElement(me,{ref:o,...p}))))}),Ie=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>P(u=>u.filtered.count===0)?dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:o,...r,"cmdk-empty":"",role:"presentation"}):null),Pe=dashboard__loadShare__react__loadShare__.forwardRef((r,o)=>{let{progress:n,children:u,label:c="Loading...",...d}=r;return dashboard__loadShare__react__loadShare__.createElement(Primitive.div,{ref:o,...d,"cmdk-loading":"",role:"progressbar","aria-valuenow":n,"aria-valuemin":0,"aria-valuemax":100,"aria-label":c},B(r,f=>dashboard__loadShare__react__loadShare__.createElement("div",{"aria-hidden":true},f)))}),_e=Object.assign(me,{List:Ce,Item:he,Input:Se,Group:Ee,Separator:ye,Dialog:xe,Empty:Ie,Loading:Pe});function we(r,o){let n=r.nextElementSibling;for(;n;){if(n.matches(o))return n;n=n.nextElementSibling;}}function De(r,o){let n=r.previousElementSibling;for(;n;){if(n.matches(o))return n;n=n.previousElementSibling;}}function pe(r){let o=dashboard__loadShare__react__loadShare__.useRef(r);return k(()=>{o.current=r;}),o}var k=typeof window=="undefined"?dashboard__loadShare__react__loadShare__.useEffect:dashboard__loadShare__react__loadShare__.useLayoutEffect;function L(r){let o=dashboard__loadShare__react__loadShare__.useRef();return o.current===void 0&&(o.current=r()),o}function P(r){let o=ee(),n=()=>r(o.snapshot());return dashboard__loadShare__react__loadShare__.useSyncExternalStore(o.subscribe,n,n)}function ve(r,o,n,u=[]){let c=dashboard__loadShare__react__loadShare__.useRef(),d=K();return k(()=>{var b;let f=(()=>{var m;for(let R of n){if(typeof R=="string")return R.trim();if(typeof R=="object"&&"current"in R)return R.current?(m=R.current.textContent)==null?void 0:m.trim():c.current}})(),p=u.map(m=>m.trim());d.value(r,f,p),(b=o.current)==null||b.setAttribute(T,f),c.current=f;}),c}var ke=()=>{let[r,o]=dashboard__loadShare__react__loadShare__.useState(),n=L(()=>new Map);return k(()=>{n.current.forEach(u=>u()),n.current=new Map;},[r]),(u,c)=>{n.current.set(u,c),o({});}};function Me(r){let o=r.type;return typeof o=="function"?o(r.props):"render"in o?o.render(r.props):r}function B({asChild:r,children:o},n){return r&&dashboard__loadShare__react__loadShare__.isValidElement(o)?dashboard__loadShare__react__loadShare__.cloneElement(Me(o),{ref:o.ref},n(o.props.children)):n(o)}var Te={position:"absolute",width:"1px",height:"1px",padding:"0",margin:"-1px",overflow:"hidden",clip:"rect(0, 0, 0, 0)",whiteSpace:"nowrap",borderWidth:"0"};
+var N='[cmdk-group=""]',Y='[cmdk-group-items=""]',be='[cmdk-group-heading=""]',le='[cmdk-item=""]',ce=`${le}:not([aria-disabled="true"])`,Z="cmdk-item-select",T="data-value",Re=(r,o,n)=>W(r,o,n),ue=admin__loadShare__react__loadShare__.createContext(void 0),K=()=>admin__loadShare__react__loadShare__.useContext(ue),de=admin__loadShare__react__loadShare__.createContext(void 0),ee=()=>admin__loadShare__react__loadShare__.useContext(de),fe=admin__loadShare__react__loadShare__.createContext(void 0),me=admin__loadShare__react__loadShare__.forwardRef((r,o)=>{let n=L(()=>{var e,a;return {search:"",value:(a=(e=r.value)!=null?e:r.defaultValue)!=null?a:"",selectedItemId:void 0,filtered:{count:0,items:new Map,groups:new Set}}}),u=L(()=>new Set),c=L(()=>new Map),d=L(()=>new Map),f=L(()=>new Set),p=pe(r),{label:b,children:m,value:R,onValueChange:x,filter:C,shouldFilter:S,loop:A,disablePointerSelection:ge=false,vimBindings:j=true,...O}=r,$=useId(),q=useId(),_=useId(),I=admin__loadShare__react__loadShare__.useRef(null),v=ke();k(()=>{if(R!==void 0){let e=R.trim();n.current.value=e,E.emit();}},[R]),k(()=>{v(6,ne);},[]);let E=admin__loadShare__react__loadShare__.useMemo(()=>({subscribe:e=>(f.current.add(e),()=>f.current.delete(e)),snapshot:()=>n.current,setState:(e,a,s)=>{var i,l,g,y;if(!Object.is(n.current[e],a)){if(n.current[e]=a,e==="search")J(),z(),v(1,W);else if(e==="value"){if(document.activeElement.hasAttribute("cmdk-input")||document.activeElement.hasAttribute("cmdk-root")){let h=document.getElementById(_);h?h.focus():(i=document.getElementById($))==null||i.focus();}if(v(7,()=>{var h;n.current.selectedItemId=(h=M())==null?void 0:h.id,E.emit();}),s||v(5,ne),((l=p.current)==null?void 0:l.value)!==void 0){let h=a!=null?a:"";(y=(g=p.current).onValueChange)==null||y.call(g,h);return}}E.emit();}},emit:()=>{f.current.forEach(e=>e());}}),[]),U=admin__loadShare__react__loadShare__.useMemo(()=>({value:(e,a,s)=>{var i;a!==((i=d.current.get(e))==null?void 0:i.value)&&(d.current.set(e,{value:a,keywords:s}),n.current.filtered.items.set(e,te(a,s)),v(2,()=>{z(),E.emit();}));},item:(e,a)=>(u.current.add(e),a&&(c.current.has(a)?c.current.get(a).add(e):c.current.set(a,new Set([e]))),v(3,()=>{J(),z(),n.current.value||W(),E.emit();}),()=>{d.current.delete(e),u.current.delete(e),n.current.filtered.items.delete(e);let s=M();v(4,()=>{J(),(s==null?void 0:s.getAttribute("id"))===e&&W(),E.emit();});}),group:e=>(c.current.has(e)||c.current.set(e,new Set),()=>{d.current.delete(e),c.current.delete(e);}),filter:()=>p.current.shouldFilter,label:b||r["aria-label"],getDisablePointerSelection:()=>p.current.disablePointerSelection,listId:$,inputId:_,labelId:q,listInnerRef:I}),[]);function te(e,a){var i,l;let s=(l=(i=p.current)==null?void 0:i.filter)!=null?l:Re;return e?s(e,n.current.search,a):0}function z(){if(!n.current.search||p.current.shouldFilter===false)return;let e=n.current.filtered.items,a=[];n.current.filtered.groups.forEach(i=>{let l=c.current.get(i),g=0;l.forEach(y=>{let h=e.get(y);g=Math.max(h,g);}),a.push([i,g]);});let s=I.current;V().sort((i,l)=>{var h,F;let g=i.getAttribute("id"),y=l.getAttribute("id");return ((h=e.get(y))!=null?h:0)-((F=e.get(g))!=null?F:0)}).forEach(i=>{let l=i.closest(Y);l?l.appendChild(i.parentElement===l?i:i.closest(`${Y} > *`)):s.appendChild(i.parentElement===s?i:i.closest(`${Y} > *`));}),a.sort((i,l)=>l[1]-i[1]).forEach(i=>{var g;let l=(g=I.current)==null?void 0:g.querySelector(`${N}[${T}="${encodeURIComponent(i[0])}"]`);l==null||l.parentElement.appendChild(l);});}function W(){let e=V().find(s=>s.getAttribute("aria-disabled")!=="true"),a=e==null?void 0:e.getAttribute(T);E.setState("value",a||void 0);}function J(){var a,s,i,l;if(!n.current.search||p.current.shouldFilter===false){n.current.filtered.count=u.current.size;return}n.current.filtered.groups=new Set;let e=0;for(let g of u.current){let y=(s=(a=d.current.get(g))==null?void 0:a.value)!=null?s:"",h=(l=(i=d.current.get(g))==null?void 0:i.keywords)!=null?l:[],F=te(y,h);n.current.filtered.items.set(g,F),F>0&&e++;}for(let[g,y]of c.current)for(let h of y)if(n.current.filtered.items.get(h)>0){n.current.filtered.groups.add(g);break}n.current.filtered.count=e;}function ne(){var a,s,i;let e=M();e&&(((a=e.parentElement)==null?void 0:a.firstChild)===e&&((i=(s=e.closest(N))==null?void 0:s.querySelector(be))==null||i.scrollIntoView({block:"nearest"})),e.scrollIntoView({block:"nearest"}));}function M(){var e;return (e=I.current)==null?void 0:e.querySelector(`${le}[aria-selected="true"]`)}function V(){var e;return Array.from(((e=I.current)==null?void 0:e.querySelectorAll(ce))||[])}function X(e){let s=V()[e];s&&E.setState("value",s.getAttribute(T));}function Q(e){var g;let a=M(),s=V(),i=s.findIndex(y=>y===a),l=s[i+e];(g=p.current)!=null&&g.loop&&(l=i+e<0?s[s.length-1]:i+e===s.length?s[0]:s[i+e]),l&&E.setState("value",l.getAttribute(T));}function re(e){let a=M(),s=a==null?void 0:a.closest(N),i;for(;s&&!i;)s=e>0?we(s,N):De(s,N),i=s==null?void 0:s.querySelector(ce);i?E.setState("value",i.getAttribute(T)):Q(e);}let oe=()=>X(V().length-1),ie=e=>{e.preventDefault(),e.metaKey?oe():e.altKey?re(1):Q(1);},se=e=>{e.preventDefault(),e.metaKey?X(0):e.altKey?re(-1):Q(-1);};return admin__loadShare__react__loadShare__.createElement(Primitive.div,{ref:o,tabIndex:-1,...O,"cmdk-root":"",onKeyDown:e=>{var s;(s=O.onKeyDown)==null||s.call(O,e);let a=e.nativeEvent.isComposing||e.keyCode===229;if(!(e.defaultPrevented||a))switch(e.key){case "n":case "j":{j&&e.ctrlKey&&ie(e);break}case "ArrowDown":{ie(e);break}case "p":case "k":{j&&e.ctrlKey&&se(e);break}case "ArrowUp":{se(e);break}case "Home":{e.preventDefault(),X(0);break}case "End":{e.preventDefault(),oe();break}case "Enter":{e.preventDefault();let i=M();if(i){let l=new Event(Z);i.dispatchEvent(l);}}}}},admin__loadShare__react__loadShare__.createElement("label",{"cmdk-label":"",htmlFor:U.inputId,id:U.labelId,style:Te},b),B(r,e=>admin__loadShare__react__loadShare__.createElement(de.Provider,{value:E},admin__loadShare__react__loadShare__.createElement(ue.Provider,{value:U},e))))}),he=admin__loadShare__react__loadShare__.forwardRef((r,o)=>{var _,I;let n=useId(),u=admin__loadShare__react__loadShare__.useRef(null),c=admin__loadShare__react__loadShare__.useContext(fe),d=K(),f=pe(r),p=(I=(_=f.current)==null?void 0:_.forceMount)!=null?I:c==null?void 0:c.forceMount;k(()=>{if(!p)return d.item(n,c==null?void 0:c.id)},[p]);let b=ve(n,u,[r.value,r.children,u],r.keywords),m=ee(),R=P(v=>v.value&&v.value===b.current),x=P(v=>p||d.filter()===false?true:v.search?v.filtered.items.get(n)>0:true);admin__loadShare__react__loadShare__.useEffect(()=>{let v=u.current;if(!(!v||r.disabled))return v.addEventListener(Z,C),()=>v.removeEventListener(Z,C)},[x,r.onSelect,r.disabled]);function C(){var v,E;S(),(E=(v=f.current).onSelect)==null||E.call(v,b.current);}function S(){m.setState("value",b.current,true);}if(!x)return null;let{disabled:A,value:ge,onSelect:j,forceMount:O,keywords:$,...q}=r;return admin__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(u,o),...q,id:n,"cmdk-item":"",role:"option","aria-disabled":!!A,"aria-selected":!!R,"data-disabled":!!A,"data-selected":!!R,onPointerMove:A||d.getDisablePointerSelection()?void 0:S,onClick:A?void 0:C},r.children)}),Ee=admin__loadShare__react__loadShare__.forwardRef((r,o)=>{let{heading:n,children:u,forceMount:c,...d}=r,f=useId(),p=admin__loadShare__react__loadShare__.useRef(null),b=admin__loadShare__react__loadShare__.useRef(null),m=useId(),R=K(),x=P(S=>c||R.filter()===false?true:S.search?S.filtered.groups.has(f):true);k(()=>R.group(f),[]),ve(f,p,[r.value,r.heading,b]);let C=admin__loadShare__react__loadShare__.useMemo(()=>({id:f,forceMount:c}),[c]);return admin__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(p,o),...d,"cmdk-group":"",role:"presentation",hidden:x?void 0:true},n&&admin__loadShare__react__loadShare__.createElement("div",{ref:b,"cmdk-group-heading":"","aria-hidden":true,id:m},n),B(r,S=>admin__loadShare__react__loadShare__.createElement("div",{"cmdk-group-items":"",role:"group","aria-labelledby":n?m:void 0},admin__loadShare__react__loadShare__.createElement(fe.Provider,{value:C},S))))}),ye=admin__loadShare__react__loadShare__.forwardRef((r,o)=>{let{alwaysRender:n,...u}=r,c=admin__loadShare__react__loadShare__.useRef(null),d=P(f=>!f.search);return !n&&!d?null:admin__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(c,o),...u,"cmdk-separator":"",role:"separator"})}),Se=admin__loadShare__react__loadShare__.forwardRef((r,o)=>{let{onValueChange:n,...u}=r,c=r.value!=null,d=ee(),f=P(m=>m.search),p=P(m=>m.selectedItemId),b=K();return admin__loadShare__react__loadShare__.useEffect(()=>{r.value!=null&&d.setState("search",r.value);},[r.value]),admin__loadShare__react__loadShare__.createElement(Primitive.input,{ref:o,...u,"cmdk-input":"",autoComplete:"off",autoCorrect:"off",spellCheck:false,"aria-autocomplete":"list",role:"combobox","aria-expanded":true,"aria-controls":b.listId,"aria-labelledby":b.labelId,"aria-activedescendant":p,id:b.inputId,type:"text",value:c?r.value:f,onChange:m=>{c||d.setState("search",m.target.value),n==null||n(m.target.value);}})}),Ce=admin__loadShare__react__loadShare__.forwardRef((r,o)=>{let{children:n,label:u="Suggestions",...c}=r,d=admin__loadShare__react__loadShare__.useRef(null),f=admin__loadShare__react__loadShare__.useRef(null),p=P(m=>m.selectedItemId),b=K();return admin__loadShare__react__loadShare__.useEffect(()=>{if(f.current&&d.current){let m=f.current,R=d.current,x,C=new ResizeObserver(()=>{x=requestAnimationFrame(()=>{let S=m.offsetHeight;R.style.setProperty("--cmdk-list-height",S.toFixed(1)+"px");});});return C.observe(m),()=>{cancelAnimationFrame(x),C.unobserve(m);}}},[]),admin__loadShare__react__loadShare__.createElement(Primitive.div,{ref:composeRefs$1(d,o),...c,"cmdk-list":"",role:"listbox",tabIndex:-1,"aria-activedescendant":p,"aria-label":u,id:b.listId},B(r,m=>admin__loadShare__react__loadShare__.createElement("div",{ref:composeRefs$1(f,b.listInnerRef),"cmdk-list-sizer":""},m)))}),xe=admin__loadShare__react__loadShare__.forwardRef((r,o)=>{let{open:n,onOpenChange:u,overlayClassName:c,contentClassName:d,container:f,...p}=r;return admin__loadShare__react__loadShare__.createElement(Root$c,{open:n,onOpenChange:u},admin__loadShare__react__loadShare__.createElement(Portal$3,{container:f},admin__loadShare__react__loadShare__.createElement(Overlay$1,{"cmdk-overlay":"",className:c}),admin__loadShare__react__loadShare__.createElement(Content$2,{"aria-label":r.label,"cmdk-dialog":"",className:d},admin__loadShare__react__loadShare__.createElement(me,{ref:o,...p}))))}),Ie=admin__loadShare__react__loadShare__.forwardRef((r,o)=>P(u=>u.filtered.count===0)?admin__loadShare__react__loadShare__.createElement(Primitive.div,{ref:o,...r,"cmdk-empty":"",role:"presentation"}):null),Pe=admin__loadShare__react__loadShare__.forwardRef((r,o)=>{let{progress:n,children:u,label:c="Loading...",...d}=r;return admin__loadShare__react__loadShare__.createElement(Primitive.div,{ref:o,...d,"cmdk-loading":"",role:"progressbar","aria-valuenow":n,"aria-valuemin":0,"aria-valuemax":100,"aria-label":c},B(r,f=>admin__loadShare__react__loadShare__.createElement("div",{"aria-hidden":true},f)))}),_e=Object.assign(me,{List:Ce,Item:he,Input:Se,Group:Ee,Separator:ye,Dialog:xe,Empty:Ie,Loading:Pe});function we(r,o){let n=r.nextElementSibling;for(;n;){if(n.matches(o))return n;n=n.nextElementSibling;}}function De(r,o){let n=r.previousElementSibling;for(;n;){if(n.matches(o))return n;n=n.previousElementSibling;}}function pe(r){let o=admin__loadShare__react__loadShare__.useRef(r);return k(()=>{o.current=r;}),o}var k=typeof window=="undefined"?admin__loadShare__react__loadShare__.useEffect:admin__loadShare__react__loadShare__.useLayoutEffect;function L(r){let o=admin__loadShare__react__loadShare__.useRef();return o.current===void 0&&(o.current=r()),o}function P(r){let o=ee(),n=()=>r(o.snapshot());return admin__loadShare__react__loadShare__.useSyncExternalStore(o.subscribe,n,n)}function ve(r,o,n,u=[]){let c=admin__loadShare__react__loadShare__.useRef(),d=K();return k(()=>{var b;let f=(()=>{var m;for(let R of n){if(typeof R=="string")return R.trim();if(typeof R=="object"&&"current"in R)return R.current?(m=R.current.textContent)==null?void 0:m.trim():c.current}})(),p=u.map(m=>m.trim());d.value(r,f,p),(b=o.current)==null||b.setAttribute(T,f),c.current=f;}),c}var ke=()=>{let[r,o]=admin__loadShare__react__loadShare__.useState(),n=L(()=>new Map);return k(()=>{n.current.forEach(u=>u()),n.current=new Map;},[r]),(u,c)=>{n.current.set(u,c),o({});}};function Me(r){let o=r.type;return typeof o=="function"?o(r.props):"render"in o?o.render(r.props):r}function B({asChild:r,children:o},n){return r&&admin__loadShare__react__loadShare__.isValidElement(o)?admin__loadShare__react__loadShare__.cloneElement(Me(o),{ref:o.ref},n(o.props.children)):n(o)}var Te={position:"absolute",width:"1px",height:"1px",padding:"0",margin:"-1px",overflow:"hidden",clip:"rect(0, 0, 0, 0)",whiteSpace:"nowrap",borderWidth:"0"};
 
 //#region src/components/ui/command.tsx
-const Command$1 = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(_e, {
+const Command$1 = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(_e, {
 	className: cn$1("flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground", className),
 	ref,
 	...props
@@ -34516,7 +34778,7 @@ const CommandDialog = ({ children, ...props }) => {
 		})
 	});
 };
-const CommandInput = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+const CommandInput = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 	className: "flex items-center border-b px-3",
 	"cmdk-input-wrapper": "",
 	children: [/* @__PURE__ */ jsxRuntimeExports.jsx(Search, { className: "mr-2 h-4 w-4 shrink-0 opacity-50" }), /* @__PURE__ */ jsxRuntimeExports.jsx(_e.Input, {
@@ -34526,31 +34788,31 @@ const CommandInput = dashboard__loadShare__react__loadShare__.forwardRef(({ clas
 	})]
 }));
 CommandInput.displayName = _e.Input.displayName;
-const CommandList = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(_e.List, {
+const CommandList = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(_e.List, {
 	className: cn$1("max-h-[300px] overflow-y-auto overflow-x-hidden", className),
 	ref,
 	...props
 }));
 CommandList.displayName = _e.List.displayName;
-const CommandEmpty = dashboard__loadShare__react__loadShare__.forwardRef((props, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(_e.Empty, {
+const CommandEmpty = admin__loadShare__react__loadShare__.forwardRef((props, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(_e.Empty, {
 	className: "py-6 text-center text-sm",
 	ref,
 	...props
 }));
 CommandEmpty.displayName = _e.Empty.displayName;
-const CommandGroup = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(_e.Group, {
+const CommandGroup = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(_e.Group, {
 	className: cn$1("overflow-hidden p-1 text-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground", className),
 	ref,
 	...props
 }));
 CommandGroup.displayName = _e.Group.displayName;
-const CommandSeparator = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(_e.Separator, {
+const CommandSeparator = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(_e.Separator, {
 	className: cn$1("-mx-1 h-px bg-border", className),
 	ref,
 	...props
 }));
 CommandSeparator.displayName = _e.Separator.displayName;
-const CommandItem = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(_e.Item, {
+const CommandItem = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(_e.Item, {
 	className: cn$1("relative flex cursor-default gap-2 select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0", className),
 	ref,
 	...props
@@ -34673,7 +34935,7 @@ function testPlatform(re) {
 
 // This code comes from https://github.com/adobe/react-spectrum/blob/main/packages/%40react-aria/overlays/src/usePreventScroll.ts
 const KEYBOARD_BUFFER = 24;
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? dashboard__loadShare__react__loadShare__.useLayoutEffect : dashboard__loadShare__react__loadShare__.useEffect;
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? admin__loadShare__react__loadShare__.useLayoutEffect : admin__loadShare__react__loadShare__.useEffect;
 function chain$1(...callbacks) {
     return (...args)=>{
         for (let callback of callbacks){
@@ -34938,7 +35200,7 @@ function isInput(target) {
  * Accepts callback refs and RefObject(s)
  */ function useComposedRefs(...refs) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    return dashboard__loadShare__react__loadShare__.useCallback(composeRefs(...refs), refs);
+    return admin__loadShare__react__loadShare__.useCallback(composeRefs(...refs), refs);
 }
 
 const cache = new WeakMap();
@@ -35299,7 +35561,7 @@ const noop = ()=>()=>{};
 function useScaleBackground() {
     const { direction, isOpen, shouldScaleBackground, setBackgroundColorOnScale, noBodyStyles } = useDrawerContext();
     const timeoutIdRef = React.useRef(null);
-    const initialBackgroundColor = dashboard__loadShare__react__loadShare__.useMemo(()=>document.body.style.backgroundColor, []);
+    const initialBackgroundColor = admin__loadShare__react__loadShare__.useMemo(()=>document.body.style.backgroundColor, []);
     function getScale() {
         return (window.innerWidth - WINDOW_TOP_OFFSET) / window.innerWidth;
     }
@@ -36218,13 +36480,13 @@ Drawer$1.displayName = "Drawer";
 const DrawerTrigger = Drawer.Trigger;
 const DrawerPortal = Drawer.Portal;
 const DrawerClose = Drawer.Close;
-const DrawerOverlay = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Drawer.Overlay, {
+const DrawerOverlay = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Drawer.Overlay, {
 	className: cn$1("fixed inset-0 z-50 bg-black/80", className),
 	ref,
 	...props
 }));
 DrawerOverlay.displayName = Drawer.Overlay.displayName;
-const DrawerContent = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(DrawerPortal, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(DrawerOverlay, {}), /* @__PURE__ */ jsxRuntimeExports.jsxs(Drawer.Content, {
+const DrawerContent = admin__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(DrawerPortal, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(DrawerOverlay, {}), /* @__PURE__ */ jsxRuntimeExports.jsxs(Drawer.Content, {
 	className: cn$1("fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background", className),
 	ref,
 	...props,
@@ -36241,13 +36503,13 @@ const DrawerFooter = ({ className, ...props }) => /* @__PURE__ */ jsxRuntimeExpo
 	...props
 });
 DrawerFooter.displayName = "DrawerFooter";
-const DrawerTitle = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Drawer.Title, {
+const DrawerTitle = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Drawer.Title, {
 	className: cn$1("text-lg font-semibold leading-none tracking-tight", className),
 	ref,
 	...props
 }));
 DrawerTitle.displayName = Drawer.Title.displayName;
-const DrawerDescription = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Drawer.Description, {
+const DrawerDescription = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Drawer.Description, {
 	className: cn$1("text-sm text-muted-foreground", className),
 	ref,
 	...props
@@ -36261,33 +36523,33 @@ const DropdownMenuGroup = Group2;
 const DropdownMenuPortal = Portal2$1;
 const DropdownMenuSub = Sub2;
 const DropdownMenuRadioGroup = RadioGroup2;
-const DropdownMenuSubTrigger = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, inset, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(SubTrigger2, {
+const DropdownMenuSubTrigger = admin__loadShare__react__loadShare__.forwardRef(({ children, className, inset, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(SubTrigger2, {
 	className: cn$1("flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent", inset && "pl-8", className),
 	ref,
 	...props,
 	children: [children, /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronRightIcon, { className: "ml-auto h-4 w-4" })]
 }));
 DropdownMenuSubTrigger.displayName = SubTrigger2.displayName;
-const DropdownMenuSubContent = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(SubContent2, {
+const DropdownMenuSubContent = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(SubContent2, {
 	className: cn$1("z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2", className),
 	ref,
 	...props
 }));
 DropdownMenuSubContent.displayName = SubContent2.displayName;
-const DropdownMenuContent = dashboard__loadShare__react__loadShare__.forwardRef(({ className, sideOffset = 4, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Portal2$1, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$5, {
+const DropdownMenuContent = admin__loadShare__react__loadShare__.forwardRef(({ className, sideOffset = 4, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Portal2$1, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Content2$5, {
 	className: cn$1("z-50 min-w-[8rem] overflow-hidden rounded-md border bg-background p-1 text-white shadow-md", "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2", className),
 	ref,
 	sideOffset,
 	...props
 }) }));
 DropdownMenuContent.displayName = Content2$5.displayName;
-const DropdownMenuItem = dashboard__loadShare__react__loadShare__.forwardRef(({ className, inset, variant, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Item2$1, {
+const DropdownMenuItem = admin__loadShare__react__loadShare__.forwardRef(({ className, inset, variant, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Item2$1, {
 	className: cn$1("relative flex cursor-default select-none items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:cursor-pointer", inset && "pl-8", !variant && "focus:bg-secondary/50 focus:text-secondary-foreground", variant === "destructive" && "focus:bg-destructive/50 focus:text-white", className),
 	ref,
 	...props
 }));
 DropdownMenuItem.displayName = Item2$1.displayName;
-const DropdownMenuCheckboxItem = dashboard__loadShare__react__loadShare__.forwardRef(({ checked, children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(CheckboxItem2, {
+const DropdownMenuCheckboxItem = admin__loadShare__react__loadShare__.forwardRef(({ checked, children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(CheckboxItem2, {
 	checked,
 	className: cn$1("relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className),
 	ref,
@@ -36298,7 +36560,7 @@ const DropdownMenuCheckboxItem = dashboard__loadShare__react__loadShare__.forwar
 	}), children]
 }));
 DropdownMenuCheckboxItem.displayName = CheckboxItem2.displayName;
-const DropdownMenuRadioItem = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(RadioItem2, {
+const DropdownMenuRadioItem = admin__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(RadioItem2, {
 	className: cn$1("relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className),
 	ref,
 	...props,
@@ -36308,13 +36570,13 @@ const DropdownMenuRadioItem = dashboard__loadShare__react__loadShare__.forwardRe
 	}), children]
 }));
 DropdownMenuRadioItem.displayName = RadioItem2.displayName;
-const DropdownMenuLabel = dashboard__loadShare__react__loadShare__.forwardRef(({ className, inset, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Label2, {
+const DropdownMenuLabel = admin__loadShare__react__loadShare__.forwardRef(({ className, inset, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Label2, {
 	className: cn$1("px-2 py-1.5 text-sm font-semibold", inset && "pl-8", className),
 	ref,
 	...props
 }));
 DropdownMenuLabel.displayName = Label2.displayName;
-const DropdownMenuSeparator = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Separator2, {
+const DropdownMenuSeparator = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Separator2, {
 	className: cn$1("-mx-1 my-1 h-px bg-foreground/75", className),
 	ref,
 	...props
@@ -36329,7 +36591,7 @@ const DropdownMenuShortcut = ({ className, ...props }) => {
 DropdownMenuShortcut.displayName = "DropdownMenuShortcut";
 
 var NAME$4 = "Label";
-var Label$2 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var Label$2 = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     Primitive.label,
     {
@@ -36349,7 +36611,7 @@ var Root$8 = Label$2;
 
 //#region src/components/ui/label.tsx
 const labelVariants = cva("text-sm font-medium text-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70");
-const Label$1 = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Root$8, {
+const Label$1 = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Root$8, {
 	className: cn$1(labelVariants(), className),
 	ref,
 	...props
@@ -36357,18 +36619,18 @@ const Label$1 = dashboard__loadShare__react__loadShare__.forwardRef(({ className
 Label$1.displayName = Root$8.displayName;
 
 //#region src/components/ui/form.tsx
-const Form = dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.FormProvider;
-const FormFieldContext = dashboard__loadShare__react__loadShare__.createContext({});
+const Form = admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.FormProvider;
+const FormFieldContext = admin__loadShare__react__loadShare__.createContext({});
 const FormField = ({ ...props }) => {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(FormFieldContext.Provider, {
 		value: { name: props.name },
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.Controller, { ...props })
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.Controller, { ...props })
 	});
 };
 const useFormField = () => {
-	const fieldContext = dashboard__loadShare__react__loadShare__.useContext(FormFieldContext);
-	const itemContext = dashboard__loadShare__react__loadShare__.useContext(FormItemContext);
-	const { formState, getFieldState } = dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.useFormContext();
+	const fieldContext = admin__loadShare__react__loadShare__.useContext(FormFieldContext);
+	const itemContext = admin__loadShare__react__loadShare__.useContext(FormItemContext);
+	const { formState, getFieldState } = admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.useFormContext();
 	const fieldState = getFieldState(fieldContext.name, formState);
 	if (!fieldContext) throw new Error("useFormField should be used within <FormField>");
 	const { id } = itemContext;
@@ -36381,9 +36643,9 @@ const useFormField = () => {
 		...fieldState
 	};
 };
-const FormItemContext = dashboard__loadShare__react__loadShare__.createContext({});
-const FormItem = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
-	const id = dashboard__loadShare__react__loadShare__.useId();
+const FormItemContext = admin__loadShare__react__loadShare__.createContext({});
+const FormItem = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
+	const id = admin__loadShare__react__loadShare__.useId();
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(FormItemContext.Provider, {
 		value: { id },
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
@@ -36394,7 +36656,7 @@ const FormItem = dashboard__loadShare__react__loadShare__.forwardRef(({ classNam
 	});
 });
 FormItem.displayName = "FormItem";
-const FormLabel = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
+const FormLabel = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
 	const { error, formItemId } = useFormField();
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(Label$1, {
 		className: cn$1(error && "text-destructive", className),
@@ -36404,7 +36666,7 @@ const FormLabel = dashboard__loadShare__react__loadShare__.forwardRef(({ classNa
 	});
 });
 FormLabel.displayName = "FormLabel";
-const FormControl = dashboard__loadShare__react__loadShare__.forwardRef(({ ...props }, ref) => {
+const FormControl = admin__loadShare__react__loadShare__.forwardRef(({ ...props }, ref) => {
 	const { error, formDescriptionId, formItemId, formMessageId } = useFormField();
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(Slot$3, {
 		"aria-describedby": !error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`,
@@ -36415,7 +36677,7 @@ const FormControl = dashboard__loadShare__react__loadShare__.forwardRef(({ ...pr
 	});
 });
 FormControl.displayName = "FormControl";
-const FormDescription = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
+const FormDescription = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
 	const { formDescriptionId } = useFormField();
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
 		className: cn$1("text-[0.8rem] text-muted-foreground", className),
@@ -36425,7 +36687,7 @@ const FormDescription = dashboard__loadShare__react__loadShare__.forwardRef(({ c
 	});
 });
 FormDescription.displayName = "FormDescription";
-const FormMessage = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => {
+const FormMessage = admin__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => {
 	const { error, formMessageId } = useFormField();
 	const body = error ? String(error?.message) : children;
 	if (!body) return null;
@@ -36443,7 +36705,7 @@ var PROGRESS_NAME = "Progress";
 var DEFAULT_MAX = 100;
 var [createProgressContext] = createContextScope(PROGRESS_NAME);
 var [ProgressProvider, useProgressContext] = createProgressContext(PROGRESS_NAME);
-var Progress$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var Progress$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopeProgress,
@@ -36480,7 +36742,7 @@ var Progress$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 Progress$1.displayName = PROGRESS_NAME;
 var INDICATOR_NAME$1 = "ProgressIndicator";
-var ProgressIndicator = dashboard__loadShare__react__loadShare__.forwardRef(
+var ProgressIndicator = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeProgress, ...indicatorProps } = props;
     const context = useProgressContext(INDICATOR_NAME$1, __scopeProgress);
@@ -36527,7 +36789,7 @@ var Root$7 = Progress$1;
 var Indicator$1 = ProgressIndicator;
 
 //#region src/components/ui/progress.tsx
-const Progress = dashboard__loadShare__react__loadShare__.forwardRef(({ className, indicatorClassName, max, value, ...props }, ref) => {
+const Progress = admin__loadShare__react__loadShare__.forwardRef(({ className, indicatorClassName, max, value, ...props }, ref) => {
 	max = max || 100;
 	let pVal = 100 - Math.floor((value || 0) * 100 / max);
 	if (pVal == 100) pVal++;
@@ -36544,7 +36806,7 @@ const Progress = dashboard__loadShare__react__loadShare__.forwardRef(({ classNam
 Progress.displayName = Root$7.displayName;
 
 //#region src/components/ui/indeterminate-progress.tsx
-const IndeterminateProgress = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Progress, {
+const IndeterminateProgress = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Progress, {
 	className: cn$1("indeterminate", className),
 	ref,
 	...props,
@@ -36556,9 +36818,9 @@ const IndeterminateProgress = dashboard__loadShare__react__loadShare__.forwardRe
 IndeterminateProgress.displayName = "IndeterminateProgress";
 
 //#region src/components/ui/input.tsx
-const Input = dashboard__loadShare__react__loadShare__.forwardRef(({ className, fullWidth, leftIcon, type, ...props }, ref) => {
-	const [showPassword, setShowPassword] = dashboard__loadShare__react__loadShare__.useState(false);
-	const [mask, setMask] = dashboard__loadShare__react__loadShare__.useState(false);
+const Input = admin__loadShare__react__loadShare__.forwardRef(({ className, fullWidth, leftIcon, type, ...props }, ref) => {
+	const [showPassword, setShowPassword] = admin__loadShare__react__loadShare__.useState(false);
+	const [mask, setMask] = admin__loadShare__react__loadShare__.useState(false);
 	const toggleShowPassword = (e) => {
 		if ("key" in e) {
 			if (![" ", "Enter"].includes(e.key)) return;
@@ -36600,7 +36862,7 @@ Input.displayName = "Input";
 var RADIO_NAME = "Radio";
 var [createRadioContext, createRadioScope] = createContextScope$1(RADIO_NAME);
 var [RadioProvider, useRadioContext] = createRadioContext(RADIO_NAME);
-var Radio = dashboard__loadShare__react__loadShare__.forwardRef(
+var Radio = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopeRadio,
@@ -36613,9 +36875,9 @@ var Radio = dashboard__loadShare__react__loadShare__.forwardRef(
       form,
       ...radioProps
     } = props;
-    const [button, setButton] = dashboard__loadShare__react__loadShare__.useState(null);
+    const [button, setButton] = admin__loadShare__react__loadShare__.useState(null);
     const composedRefs = useComposedRefs$1(forwardedRef, (node) => setButton(node));
-    const hasConsumerStoppedPropagationRef = dashboard__loadShare__react__loadShare__.useRef(false);
+    const hasConsumerStoppedPropagationRef = admin__loadShare__react__loadShare__.useRef(false);
     const isFormControl = button ? form || !!button.closest("form") : true;
     return /* @__PURE__ */ jsxRuntimeExports.jsxs(RadioProvider, { scope: __scopeRadio, checked, disabled, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -36658,7 +36920,7 @@ var Radio = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 Radio.displayName = RADIO_NAME;
 var INDICATOR_NAME = "RadioIndicator";
-var RadioIndicator = dashboard__loadShare__react__loadShare__.forwardRef(
+var RadioIndicator = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeRadio, forceMount, ...indicatorProps } = props;
     const context = useRadioContext(INDICATOR_NAME, __scopeRadio);
@@ -36675,7 +36937,7 @@ var RadioIndicator = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 RadioIndicator.displayName = INDICATOR_NAME;
 var BUBBLE_INPUT_NAME$3 = "RadioBubbleInput";
-var RadioBubbleInput = dashboard__loadShare__react__loadShare__.forwardRef(
+var RadioBubbleInput = admin__loadShare__react__loadShare__.forwardRef(
   ({
     __scopeRadio,
     control,
@@ -36683,11 +36945,11 @@ var RadioBubbleInput = dashboard__loadShare__react__loadShare__.forwardRef(
     bubbles = true,
     ...props
   }, forwardedRef) => {
-    const ref = dashboard__loadShare__react__loadShare__.useRef(null);
+    const ref = admin__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(ref, forwardedRef);
     const prevChecked = usePrevious(checked);
     const controlSize = useSize(control);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const input = ref.current;
       if (!input) return;
       const inputProto = window.HTMLInputElement.prototype;
@@ -36736,7 +36998,7 @@ var [createRadioGroupContext] = createContextScope$1(RADIO_GROUP_NAME, [
 var useRovingFocusGroupScope$1 = createRovingFocusGroupScope();
 var useRadioScope = createRadioScope();
 var [RadioGroupProvider, useRadioGroupContext] = createRadioGroupContext(RADIO_GROUP_NAME);
-var RadioGroup$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var RadioGroup$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopeRadioGroup,
@@ -36796,18 +37058,18 @@ var RadioGroup$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 RadioGroup$1.displayName = RADIO_GROUP_NAME;
 var ITEM_NAME$1 = "RadioGroupItem";
-var RadioGroupItem$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var RadioGroupItem$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeRadioGroup, disabled, ...itemProps } = props;
     const context = useRadioGroupContext(ITEM_NAME$1, __scopeRadioGroup);
     const isDisabled = context.disabled || disabled;
     const rovingFocusGroupScope = useRovingFocusGroupScope$1(__scopeRadioGroup);
     const radioScope = useRadioScope(__scopeRadioGroup);
-    const ref = dashboard__loadShare__react__loadShare__.useRef(null);
+    const ref = admin__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(forwardedRef, ref);
     const checked = context.value === itemProps.value;
-    const isArrowKeyPressedRef = dashboard__loadShare__react__loadShare__.useRef(false);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    const isArrowKeyPressedRef = admin__loadShare__react__loadShare__.useRef(false);
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const handleKeyDown = (event) => {
         if (ARROW_KEYS$1.includes(event.key)) {
           isArrowKeyPressedRef.current = true;
@@ -36853,7 +37115,7 @@ var RadioGroupItem$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 RadioGroupItem$1.displayName = ITEM_NAME$1;
 var INDICATOR_NAME2 = "RadioGroupIndicator";
-var RadioGroupIndicator = dashboard__loadShare__react__loadShare__.forwardRef(
+var RadioGroupIndicator = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeRadioGroup, ...indicatorProps } = props;
     const radioScope = useRadioScope(__scopeRadioGroup);
@@ -36866,7 +37128,7 @@ var Item2 = RadioGroupItem$1;
 var Indicator = RadioGroupIndicator;
 
 //#region src/components/ui/radio-group.tsx
-const RadioGroup = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
+const RadioGroup = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(Root2$3, {
 		className: cn$1("grid gap-2", className),
 		...props,
@@ -36874,7 +37136,7 @@ const RadioGroup = dashboard__loadShare__react__loadShare__.forwardRef(({ classN
 	});
 });
 RadioGroup.displayName = Root2$3.displayName;
-const RadioGroupItem = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
+const RadioGroupItem = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(Item2, {
 		className: cn$1("aspect-square h-4 w-4 rounded-full border border-primary text-primary shadow focus:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50", className),
 		ref,
@@ -36893,7 +37155,7 @@ function clamp(value, [min, max]) {
 }
 
 function useStateMachine(initialState, machine) {
-  return dashboard__loadShare__react__loadShare__.useReducer((state, event) => {
+  return admin__loadShare__react__loadShare__.useReducer((state, event) => {
     const nextState = machine[state][event];
     return nextState ?? state;
   }, initialState);
@@ -36901,7 +37163,7 @@ function useStateMachine(initialState, machine) {
 var SCROLL_AREA_NAME = "ScrollArea";
 var [createScrollAreaContext] = createContextScope$1(SCROLL_AREA_NAME);
 var [ScrollAreaProvider, useScrollAreaContext] = createScrollAreaContext(SCROLL_AREA_NAME);
-var ScrollArea$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var ScrollArea$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopeScrollArea,
@@ -36910,15 +37172,15 @@ var ScrollArea$1 = dashboard__loadShare__react__loadShare__.forwardRef(
       scrollHideDelay = 600,
       ...scrollAreaProps
     } = props;
-    const [scrollArea, setScrollArea] = dashboard__loadShare__react__loadShare__.useState(null);
-    const [viewport, setViewport] = dashboard__loadShare__react__loadShare__.useState(null);
-    const [content, setContent] = dashboard__loadShare__react__loadShare__.useState(null);
-    const [scrollbarX, setScrollbarX] = dashboard__loadShare__react__loadShare__.useState(null);
-    const [scrollbarY, setScrollbarY] = dashboard__loadShare__react__loadShare__.useState(null);
-    const [cornerWidth, setCornerWidth] = dashboard__loadShare__react__loadShare__.useState(0);
-    const [cornerHeight, setCornerHeight] = dashboard__loadShare__react__loadShare__.useState(0);
-    const [scrollbarXEnabled, setScrollbarXEnabled] = dashboard__loadShare__react__loadShare__.useState(false);
-    const [scrollbarYEnabled, setScrollbarYEnabled] = dashboard__loadShare__react__loadShare__.useState(false);
+    const [scrollArea, setScrollArea] = admin__loadShare__react__loadShare__.useState(null);
+    const [viewport, setViewport] = admin__loadShare__react__loadShare__.useState(null);
+    const [content, setContent] = admin__loadShare__react__loadShare__.useState(null);
+    const [scrollbarX, setScrollbarX] = admin__loadShare__react__loadShare__.useState(null);
+    const [scrollbarY, setScrollbarY] = admin__loadShare__react__loadShare__.useState(null);
+    const [cornerWidth, setCornerWidth] = admin__loadShare__react__loadShare__.useState(0);
+    const [cornerHeight, setCornerHeight] = admin__loadShare__react__loadShare__.useState(0);
+    const [scrollbarXEnabled, setScrollbarXEnabled] = admin__loadShare__react__loadShare__.useState(false);
+    const [scrollbarYEnabled, setScrollbarYEnabled] = admin__loadShare__react__loadShare__.useState(false);
     const composedRefs = useComposedRefs$1(forwardedRef, (node) => setScrollArea(node));
     const direction = useDirection(dir);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -36964,11 +37226,11 @@ var ScrollArea$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 ScrollArea$1.displayName = SCROLL_AREA_NAME;
 var VIEWPORT_NAME$2 = "ScrollAreaViewport";
-var ScrollAreaViewport = dashboard__loadShare__react__loadShare__.forwardRef(
+var ScrollAreaViewport = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeScrollArea, children, nonce, ...viewportProps } = props;
     const context = useScrollAreaContext(VIEWPORT_NAME$2, __scopeScrollArea);
-    const ref = dashboard__loadShare__react__loadShare__.useRef(null);
+    const ref = admin__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(forwardedRef, ref, context.onViewportChange);
     return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -37010,13 +37272,13 @@ var ScrollAreaViewport = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 ScrollAreaViewport.displayName = VIEWPORT_NAME$2;
 var SCROLLBAR_NAME = "ScrollAreaScrollbar";
-var ScrollAreaScrollbar = dashboard__loadShare__react__loadShare__.forwardRef(
+var ScrollAreaScrollbar = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { forceMount, ...scrollbarProps } = props;
     const context = useScrollAreaContext(SCROLLBAR_NAME, props.__scopeScrollArea);
     const { onScrollbarXEnabledChange, onScrollbarYEnabledChange } = context;
     const isHorizontal = props.orientation === "horizontal";
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       isHorizontal ? onScrollbarXEnabledChange(true) : onScrollbarYEnabledChange(true);
       return () => {
         isHorizontal ? onScrollbarXEnabledChange(false) : onScrollbarYEnabledChange(false);
@@ -37026,11 +37288,11 @@ var ScrollAreaScrollbar = dashboard__loadShare__react__loadShare__.forwardRef(
   }
 );
 ScrollAreaScrollbar.displayName = SCROLLBAR_NAME;
-var ScrollAreaScrollbarHover = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var ScrollAreaScrollbarHover = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const { forceMount, ...scrollbarProps } = props;
   const context = useScrollAreaContext(SCROLLBAR_NAME, props.__scopeScrollArea);
-  const [visible, setVisible] = dashboard__loadShare__react__loadShare__.useState(false);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  const [visible, setVisible] = admin__loadShare__react__loadShare__.useState(false);
+  admin__loadShare__react__loadShare__.useEffect(() => {
     const scrollArea = context.scrollArea;
     let hideTimer = 0;
     if (scrollArea) {
@@ -37059,7 +37321,7 @@ var ScrollAreaScrollbarHover = dashboard__loadShare__react__loadShare__.forwardR
     }
   ) });
 });
-var ScrollAreaScrollbarScroll = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var ScrollAreaScrollbarScroll = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const { forceMount, ...scrollbarProps } = props;
   const context = useScrollAreaContext(SCROLLBAR_NAME, props.__scopeScrollArea);
   const isHorizontal = props.orientation === "horizontal";
@@ -37082,13 +37344,13 @@ var ScrollAreaScrollbarScroll = dashboard__loadShare__react__loadShare__.forward
       POINTER_ENTER: "interacting"
     }
   });
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (state === "idle") {
       const hideTimer = window.setTimeout(() => send("HIDE"), context.scrollHideDelay);
       return () => window.clearTimeout(hideTimer);
     }
   }, [state, context.scrollHideDelay, send]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     const viewport = context.viewport;
     const scrollDirection = isHorizontal ? "scrollLeft" : "scrollTop";
     if (viewport) {
@@ -37117,10 +37379,10 @@ var ScrollAreaScrollbarScroll = dashboard__loadShare__react__loadShare__.forward
     }
   ) });
 });
-var ScrollAreaScrollbarAuto = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var ScrollAreaScrollbarAuto = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const context = useScrollAreaContext(SCROLLBAR_NAME, props.__scopeScrollArea);
   const { forceMount, ...scrollbarProps } = props;
-  const [visible, setVisible] = dashboard__loadShare__react__loadShare__.useState(false);
+  const [visible, setVisible] = admin__loadShare__react__loadShare__.useState(false);
   const isHorizontal = props.orientation === "horizontal";
   const handleResize = useDebounceCallback(() => {
     if (context.viewport) {
@@ -37140,12 +37402,12 @@ var ScrollAreaScrollbarAuto = dashboard__loadShare__react__loadShare__.forwardRe
     }
   ) });
 });
-var ScrollAreaScrollbarVisible = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var ScrollAreaScrollbarVisible = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const { orientation = "vertical", ...scrollbarProps } = props;
   const context = useScrollAreaContext(SCROLLBAR_NAME, props.__scopeScrollArea);
-  const thumbRef = dashboard__loadShare__react__loadShare__.useRef(null);
-  const pointerOffsetRef = dashboard__loadShare__react__loadShare__.useRef(0);
-  const [sizes, setSizes] = dashboard__loadShare__react__loadShare__.useState({
+  const thumbRef = admin__loadShare__react__loadShare__.useRef(null);
+  const pointerOffsetRef = admin__loadShare__react__loadShare__.useRef(0);
+  const [sizes, setSizes] = admin__loadShare__react__loadShare__.useState({
     content: 0,
     viewport: 0,
     scrollbar: { size: 0, paddingStart: 0, paddingEnd: 0 }
@@ -37211,13 +37473,13 @@ var ScrollAreaScrollbarVisible = dashboard__loadShare__react__loadShare__.forwar
   }
   return null;
 });
-var ScrollAreaScrollbarX = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var ScrollAreaScrollbarX = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const { sizes, onSizesChange, ...scrollbarProps } = props;
   const context = useScrollAreaContext(SCROLLBAR_NAME, props.__scopeScrollArea);
-  const [computedStyle, setComputedStyle] = dashboard__loadShare__react__loadShare__.useState();
-  const ref = dashboard__loadShare__react__loadShare__.useRef(null);
+  const [computedStyle, setComputedStyle] = admin__loadShare__react__loadShare__.useState();
+  const ref = admin__loadShare__react__loadShare__.useRef(null);
   const composeRefs = useComposedRefs$1(forwardedRef, ref, context.onScrollbarXChange);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (ref.current) setComputedStyle(getComputedStyle(ref.current));
   }, [ref]);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -37261,13 +37523,13 @@ var ScrollAreaScrollbarX = dashboard__loadShare__react__loadShare__.forwardRef((
     }
   );
 });
-var ScrollAreaScrollbarY = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var ScrollAreaScrollbarY = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const { sizes, onSizesChange, ...scrollbarProps } = props;
   const context = useScrollAreaContext(SCROLLBAR_NAME, props.__scopeScrollArea);
-  const [computedStyle, setComputedStyle] = dashboard__loadShare__react__loadShare__.useState();
-  const ref = dashboard__loadShare__react__loadShare__.useRef(null);
+  const [computedStyle, setComputedStyle] = admin__loadShare__react__loadShare__.useState();
+  const ref = admin__loadShare__react__loadShare__.useRef(null);
   const composeRefs = useComposedRefs$1(forwardedRef, ref, context.onScrollbarYChange);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (ref.current) setComputedStyle(getComputedStyle(ref.current));
   }, [ref]);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -37313,7 +37575,7 @@ var ScrollAreaScrollbarY = dashboard__loadShare__react__loadShare__.forwardRef((
   );
 });
 var [ScrollbarProvider, useScrollbarContext] = createScrollAreaContext(SCROLLBAR_NAME);
-var ScrollAreaScrollbarImpl = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var ScrollAreaScrollbarImpl = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const {
     __scopeScrollArea,
     sizes,
@@ -37328,10 +37590,10 @@ var ScrollAreaScrollbarImpl = dashboard__loadShare__react__loadShare__.forwardRe
     ...scrollbarProps
   } = props;
   const context = useScrollAreaContext(SCROLLBAR_NAME, __scopeScrollArea);
-  const [scrollbar, setScrollbar] = dashboard__loadShare__react__loadShare__.useState(null);
+  const [scrollbar, setScrollbar] = admin__loadShare__react__loadShare__.useState(null);
   const composeRefs = useComposedRefs$1(forwardedRef, (node) => setScrollbar(node));
-  const rectRef = dashboard__loadShare__react__loadShare__.useRef(null);
-  const prevWebkitUserSelectRef = dashboard__loadShare__react__loadShare__.useRef("");
+  const rectRef = admin__loadShare__react__loadShare__.useRef(null);
+  const prevWebkitUserSelectRef = admin__loadShare__react__loadShare__.useRef("");
   const viewport = context.viewport;
   const maxScrollPos = sizes.content - sizes.viewport;
   const handleWheelScroll = useCallbackRef$1(onWheelScroll);
@@ -37344,7 +37606,7 @@ var ScrollAreaScrollbarImpl = dashboard__loadShare__react__loadShare__.forwardRe
       onDragScroll({ x, y });
     }
   }
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     const handleWheel = (event) => {
       const element = event.target;
       const isScrollbarWheel = scrollbar?.contains(element);
@@ -37353,7 +37615,7 @@ var ScrollAreaScrollbarImpl = dashboard__loadShare__react__loadShare__.forwardRe
     document.addEventListener("wheel", handleWheel, { passive: false });
     return () => document.removeEventListener("wheel", handleWheel, { passive: false });
   }, [viewport, scrollbar, maxScrollPos, handleWheelScroll]);
-  dashboard__loadShare__react__loadShare__.useEffect(handleThumbPositionChange, [sizes, handleThumbPositionChange]);
+  admin__loadShare__react__loadShare__.useEffect(handleThumbPositionChange, [sizes, handleThumbPositionChange]);
   useResizeObserver(scrollbar, handleResize);
   useResizeObserver(context.content, handleResize);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -37400,14 +37662,14 @@ var ScrollAreaScrollbarImpl = dashboard__loadShare__react__loadShare__.forwardRe
   );
 });
 var THUMB_NAME$2 = "ScrollAreaThumb";
-var ScrollAreaThumb = dashboard__loadShare__react__loadShare__.forwardRef(
+var ScrollAreaThumb = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { forceMount, ...thumbProps } = props;
     const scrollbarContext = useScrollbarContext(THUMB_NAME$2, props.__scopeScrollArea);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || scrollbarContext.hasThumb, children: /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollAreaThumbImpl, { ref: forwardedRef, ...thumbProps }) });
   }
 );
-var ScrollAreaThumbImpl = dashboard__loadShare__react__loadShare__.forwardRef(
+var ScrollAreaThumbImpl = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeScrollArea, style, ...thumbProps } = props;
     const scrollAreaContext = useScrollAreaContext(THUMB_NAME$2, __scopeScrollArea);
@@ -37417,14 +37679,14 @@ var ScrollAreaThumbImpl = dashboard__loadShare__react__loadShare__.forwardRef(
       forwardedRef,
       (node) => scrollbarContext.onThumbChange(node)
     );
-    const removeUnlinkedScrollListenerRef = dashboard__loadShare__react__loadShare__.useRef(void 0);
+    const removeUnlinkedScrollListenerRef = admin__loadShare__react__loadShare__.useRef(void 0);
     const debounceScrollEnd = useDebounceCallback(() => {
       if (removeUnlinkedScrollListenerRef.current) {
         removeUnlinkedScrollListenerRef.current();
         removeUnlinkedScrollListenerRef.current = void 0;
       }
     }, 100);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const viewport = scrollAreaContext.viewport;
       if (viewport) {
         const handleScroll = () => {
@@ -37465,7 +37727,7 @@ var ScrollAreaThumbImpl = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 ScrollAreaThumb.displayName = THUMB_NAME$2;
 var CORNER_NAME = "ScrollAreaCorner";
-var ScrollAreaCorner = dashboard__loadShare__react__loadShare__.forwardRef(
+var ScrollAreaCorner = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const context = useScrollAreaContext(CORNER_NAME, props.__scopeScrollArea);
     const hasBothScrollbarsVisible = Boolean(context.scrollbarX && context.scrollbarY);
@@ -37474,11 +37736,11 @@ var ScrollAreaCorner = dashboard__loadShare__react__loadShare__.forwardRef(
   }
 );
 ScrollAreaCorner.displayName = CORNER_NAME;
-var ScrollAreaCornerImpl = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var ScrollAreaCornerImpl = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const { __scopeScrollArea, ...cornerProps } = props;
   const context = useScrollAreaContext(CORNER_NAME, __scopeScrollArea);
-  const [width, setWidth] = dashboard__loadShare__react__loadShare__.useState(0);
-  const [height, setHeight] = dashboard__loadShare__react__loadShare__.useState(0);
+  const [width, setWidth] = admin__loadShare__react__loadShare__.useState(0);
+  const [height, setHeight] = admin__loadShare__react__loadShare__.useState(0);
   const hasSize = Boolean(width && height);
   useResizeObserver(context.scrollbarX, () => {
     const height2 = context.scrollbarX?.offsetHeight || 0;
@@ -37569,9 +37831,9 @@ var addUnlinkedScrollListener = (node, handler = () => {
 };
 function useDebounceCallback(callback, delay) {
   const handleCallback = useCallbackRef$1(callback);
-  const debounceTimerRef = dashboard__loadShare__react__loadShare__.useRef(0);
-  dashboard__loadShare__react__loadShare__.useEffect(() => () => window.clearTimeout(debounceTimerRef.current), []);
-  return dashboard__loadShare__react__loadShare__.useCallback(() => {
+  const debounceTimerRef = admin__loadShare__react__loadShare__.useRef(0);
+  admin__loadShare__react__loadShare__.useEffect(() => () => window.clearTimeout(debounceTimerRef.current), []);
+  return admin__loadShare__react__loadShare__.useCallback(() => {
     window.clearTimeout(debounceTimerRef.current);
     debounceTimerRef.current = window.setTimeout(handleCallback, delay);
   }, [handleCallback, delay]);
@@ -37598,7 +37860,7 @@ var Viewport$2 = ScrollAreaViewport;
 var Corner = ScrollAreaCorner;
 
 //#region src/components/ui/scroll-area.tsx
-const ScrollArea = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Root$6, {
+const ScrollArea = admin__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Root$6, {
 	className: cn$1("relative overflow-hidden", className),
 	ref,
 	...props,
@@ -37612,7 +37874,7 @@ const ScrollArea = dashboard__loadShare__react__loadShare__.forwardRef(({ childr
 	]
 }));
 ScrollArea.displayName = Root$6.displayName;
-const ScrollBar = dashboard__loadShare__react__loadShare__.forwardRef(({ className, orientation = "vertical", ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollAreaScrollbar, {
+const ScrollBar = admin__loadShare__react__loadShare__.forwardRef(({ className, orientation = "vertical", ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollAreaScrollbar, {
 	className: cn$1("flex touch-none select-none transition-colors", orientation === "vertical" && "h-full w-2.5 border-l border-l-transparent p-[1px]", orientation === "horizontal" && "h-2.5 flex-col border-t border-t-transparent p-[1px]", className),
 	orientation,
 	ref,
@@ -37636,7 +37898,7 @@ var VISUALLY_HIDDEN_STYLES$1 = Object.freeze({
   wordWrap: "normal"
 });
 var NAME$3 = "VisuallyHidden";
-var VisuallyHidden$2 = dashboard__loadShare__react__loadShare__.forwardRef(
+var VisuallyHidden$2 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       Primitive$1.span,
@@ -37680,9 +37942,9 @@ var Select$1 = (props) => {
     form
   } = props;
   const popperScope = usePopperScope$1(__scopeSelect);
-  const [trigger, setTrigger] = dashboard__loadShare__react__loadShare__.useState(null);
-  const [valueNode, setValueNode] = dashboard__loadShare__react__loadShare__.useState(null);
-  const [valueNodeHasChildren, setValueNodeHasChildren] = dashboard__loadShare__react__loadShare__.useState(false);
+  const [trigger, setTrigger] = admin__loadShare__react__loadShare__.useState(null);
+  const [valueNode, setValueNode] = admin__loadShare__react__loadShare__.useState(null);
+  const [valueNodeHasChildren, setValueNodeHasChildren] = admin__loadShare__react__loadShare__.useState(false);
   const direction = useDirection(dir);
   const [open, setOpen] = useControllableState$1({
     prop: openProp,
@@ -37696,9 +37958,9 @@ var Select$1 = (props) => {
     onChange: onValueChange,
     caller: SELECT_NAME
   });
-  const triggerPointerDownPosRef = dashboard__loadShare__react__loadShare__.useRef(null);
+  const triggerPointerDownPosRef = admin__loadShare__react__loadShare__.useRef(null);
   const isFormControl = trigger ? form || !!trigger.closest("form") : true;
-  const [nativeOptionsSet, setNativeOptionsSet] = dashboard__loadShare__react__loadShare__.useState(/* @__PURE__ */ new Set());
+  const [nativeOptionsSet, setNativeOptionsSet] = admin__loadShare__react__loadShare__.useState(/* @__PURE__ */ new Set());
   const nativeSelectKey = Array.from(nativeOptionsSet).map((option) => option.props.value).join(";");
   return /* @__PURE__ */ jsxRuntimeExports.jsx(Root2$7, { ...popperScope, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
     SelectProvider,
@@ -37724,10 +37986,10 @@ var Select$1 = (props) => {
           SelectNativeOptionsProvider,
           {
             scope: props.__scopeSelect,
-            onNativeOptionAdd: dashboard__loadShare__react__loadShare__.useCallback((option) => {
+            onNativeOptionAdd: admin__loadShare__react__loadShare__.useCallback((option) => {
               setNativeOptionsSet((prev) => new Set(prev).add(option));
             }, []),
-            onNativeOptionRemove: dashboard__loadShare__react__loadShare__.useCallback((option) => {
+            onNativeOptionRemove: admin__loadShare__react__loadShare__.useCallback((option) => {
               setNativeOptionsSet((prev) => {
                 const optionsSet = new Set(prev);
                 optionsSet.delete(option);
@@ -37762,7 +38024,7 @@ var Select$1 = (props) => {
 };
 Select$1.displayName = SELECT_NAME;
 var TRIGGER_NAME$2 = "SelectTrigger";
-var SelectTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var SelectTrigger$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSelect, disabled = false, ...triggerProps } = props;
     const popperScope = usePopperScope$1(__scopeSelect);
@@ -37770,7 +38032,7 @@ var SelectTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
     const isDisabled = context.disabled || disabled;
     const composedRefs = useComposedRefs$1(forwardedRef, context.onTriggerChange);
     const getItems = useCollection$2(__scopeSelect);
-    const pointerTypeRef = dashboard__loadShare__react__loadShare__.useRef("touch");
+    const pointerTypeRef = admin__loadShare__react__loadShare__.useRef("touch");
     const [searchRef, handleTypeaheadSearch, resetTypeahead] = useTypeaheadSearch((search) => {
       const enabledItems = getItems().filter((item) => !item.disabled);
       const currentItem = enabledItems.find((item) => item.value === context.value);
@@ -37840,7 +38102,7 @@ var SelectTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 SelectTrigger$1.displayName = TRIGGER_NAME$2;
 var VALUE_NAME = "SelectValue";
-var SelectValue$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var SelectValue$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSelect, className, style, children, placeholder = "", ...valueProps } = props;
     const context = useSelectContext(VALUE_NAME, __scopeSelect);
@@ -37863,7 +38125,7 @@ var SelectValue$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 SelectValue$1.displayName = VALUE_NAME;
 var ICON_NAME = "SelectIcon";
-var SelectIcon = dashboard__loadShare__react__loadShare__.forwardRef(
+var SelectIcon = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSelect, children, ...iconProps } = props;
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive$1.span, { "aria-hidden": true, ...iconProps, ref: forwardedRef, children: children || "\u25BC" });
@@ -37876,16 +38138,16 @@ var SelectPortal = (props) => {
 };
 SelectPortal.displayName = PORTAL_NAME$1;
 var CONTENT_NAME$2 = "SelectContent";
-var SelectContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var SelectContent$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const context = useSelectContext(CONTENT_NAME$2, props.__scopeSelect);
-    const [fragment, setFragment] = dashboard__loadShare__react__loadShare__.useState();
+    const [fragment, setFragment] = admin__loadShare__react__loadShare__.useState();
     useLayoutEffect2(() => {
       setFragment(new DocumentFragment());
     }, []);
     if (!context.open) {
       const frag = fragment;
-      return frag ? dashboard__loadShare__react_mf_2_dom__loadShare__.createPortal(
+      return frag ? admin__loadShare__react_mf_2_dom__loadShare__.createPortal(
         /* @__PURE__ */ jsxRuntimeExports.jsx(SelectContentProvider, { scope: props.__scopeSelect, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$2.Slot, { scope: props.__scopeSelect, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: props.children }) }) }),
         frag
       ) : null;
@@ -37898,7 +38160,7 @@ var CONTENT_MARGIN = 10;
 var [SelectContentProvider, useSelectContentContext] = createSelectContext(CONTENT_NAME$2);
 var CONTENT_IMPL_NAME = "SelectContentImpl";
 var Slot = createSlot$1("SelectContent.RemoveScroll");
-var SelectContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
+var SelectContentImpl = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopeSelect,
@@ -37922,21 +38184,21 @@ var SelectContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
       ...contentProps
     } = props;
     const context = useSelectContext(CONTENT_NAME$2, __scopeSelect);
-    const [content, setContent] = dashboard__loadShare__react__loadShare__.useState(null);
-    const [viewport, setViewport] = dashboard__loadShare__react__loadShare__.useState(null);
+    const [content, setContent] = admin__loadShare__react__loadShare__.useState(null);
+    const [viewport, setViewport] = admin__loadShare__react__loadShare__.useState(null);
     const composedRefs = useComposedRefs$1(forwardedRef, (node) => setContent(node));
-    const [selectedItem, setSelectedItem] = dashboard__loadShare__react__loadShare__.useState(null);
-    const [selectedItemText, setSelectedItemText] = dashboard__loadShare__react__loadShare__.useState(
+    const [selectedItem, setSelectedItem] = admin__loadShare__react__loadShare__.useState(null);
+    const [selectedItemText, setSelectedItemText] = admin__loadShare__react__loadShare__.useState(
       null
     );
     const getItems = useCollection$2(__scopeSelect);
-    const [isPositioned, setIsPositioned] = dashboard__loadShare__react__loadShare__.useState(false);
-    const firstValidItemFoundRef = dashboard__loadShare__react__loadShare__.useRef(false);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    const [isPositioned, setIsPositioned] = admin__loadShare__react__loadShare__.useState(false);
+    const firstValidItemFoundRef = admin__loadShare__react__loadShare__.useRef(false);
+    admin__loadShare__react__loadShare__.useEffect(() => {
       if (content) return hideOthers(content);
     }, [content]);
     useFocusGuards();
-    const focusFirst = dashboard__loadShare__react__loadShare__.useCallback(
+    const focusFirst = admin__loadShare__react__loadShare__.useCallback(
       (candidates) => {
         const [firstItem, ...restItems] = getItems().map((item) => item.ref.current);
         const [lastItem] = restItems.slice(-1);
@@ -37952,17 +38214,17 @@ var SelectContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
       },
       [getItems, viewport]
     );
-    const focusSelectedItem = dashboard__loadShare__react__loadShare__.useCallback(
+    const focusSelectedItem = admin__loadShare__react__loadShare__.useCallback(
       () => focusFirst([selectedItem, content]),
       [focusFirst, selectedItem, content]
     );
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       if (isPositioned) {
         focusSelectedItem();
       }
     }, [isPositioned, focusSelectedItem]);
     const { onOpenChange, triggerPointerDownPosRef } = context;
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       if (content) {
         let pointerMoveDelta = { x: 0, y: 0 };
         const handlePointerMove = (event) => {
@@ -37992,7 +38254,7 @@ var SelectContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
         };
       }
     }, [content, onOpenChange, triggerPointerDownPosRef]);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const close = () => onOpenChange(false);
       window.addEventListener("blur", close);
       window.addEventListener("resize", close);
@@ -38009,7 +38271,7 @@ var SelectContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
         setTimeout(() => nextItem.ref.current.focus());
       }
     });
-    const itemRefCallback = dashboard__loadShare__react__loadShare__.useCallback(
+    const itemRefCallback = admin__loadShare__react__loadShare__.useCallback(
       (node, value, disabled) => {
         const isFirstValidItem = !firstValidItemFoundRef.current && !disabled;
         const isSelectedItem = context.value !== void 0 && context.value === value;
@@ -38020,8 +38282,8 @@ var SelectContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
       },
       [context.value]
     );
-    const handleItemLeave = dashboard__loadShare__react__loadShare__.useCallback(() => content?.focus(), [content]);
-    const itemTextRefCallback = dashboard__loadShare__react__loadShare__.useCallback(
+    const handleItemLeave = admin__loadShare__react__loadShare__.useCallback(() => content?.focus(), [content]);
+    const itemTextRefCallback = admin__loadShare__react__loadShare__.useCallback(
       (node, value, disabled) => {
         const isFirstValidItem = !firstValidItemFoundRef.current && !disabled;
         const isSelectedItem = context.value !== void 0 && context.value === value;
@@ -38132,18 +38394,18 @@ var SelectContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 SelectContentImpl.displayName = CONTENT_IMPL_NAME;
 var ITEM_ALIGNED_POSITION_NAME = "SelectItemAlignedPosition";
-var SelectItemAlignedPosition = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var SelectItemAlignedPosition = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const { __scopeSelect, onPlaced, ...popperProps } = props;
   const context = useSelectContext(CONTENT_NAME$2, __scopeSelect);
   const contentContext = useSelectContentContext(CONTENT_NAME$2, __scopeSelect);
-  const [contentWrapper, setContentWrapper] = dashboard__loadShare__react__loadShare__.useState(null);
-  const [content, setContent] = dashboard__loadShare__react__loadShare__.useState(null);
+  const [contentWrapper, setContentWrapper] = admin__loadShare__react__loadShare__.useState(null);
+  const [content, setContent] = admin__loadShare__react__loadShare__.useState(null);
   const composedRefs = useComposedRefs$1(forwardedRef, (node) => setContent(node));
   const getItems = useCollection$2(__scopeSelect);
-  const shouldExpandOnScrollRef = dashboard__loadShare__react__loadShare__.useRef(false);
-  const shouldRepositionRef = dashboard__loadShare__react__loadShare__.useRef(true);
+  const shouldExpandOnScrollRef = admin__loadShare__react__loadShare__.useRef(false);
+  const shouldRepositionRef = admin__loadShare__react__loadShare__.useRef(true);
   const { viewport, selectedItem, selectedItemText, focusSelectedItem } = contentContext;
-  const position = dashboard__loadShare__react__loadShare__.useCallback(() => {
+  const position = admin__loadShare__react__loadShare__.useCallback(() => {
     if (context.trigger && context.valueNode && contentWrapper && content && viewport && selectedItem && selectedItemText) {
       const triggerRect = context.trigger.getBoundingClientRect();
       const contentRect = content.getBoundingClientRect();
@@ -38243,11 +38505,11 @@ var SelectItemAlignedPosition = dashboard__loadShare__react__loadShare__.forward
     onPlaced
   ]);
   useLayoutEffect2(() => position(), [position]);
-  const [contentZIndex, setContentZIndex] = dashboard__loadShare__react__loadShare__.useState();
+  const [contentZIndex, setContentZIndex] = admin__loadShare__react__loadShare__.useState();
   useLayoutEffect2(() => {
     if (content) setContentZIndex(window.getComputedStyle(content).zIndex);
   }, [content]);
-  const handleScrollButtonChange = dashboard__loadShare__react__loadShare__.useCallback(
+  const handleScrollButtonChange = admin__loadShare__react__loadShare__.useCallback(
     (node) => {
       if (node && shouldRepositionRef.current === true) {
         position();
@@ -38296,7 +38558,7 @@ var SelectItemAlignedPosition = dashboard__loadShare__react__loadShare__.forward
 });
 SelectItemAlignedPosition.displayName = ITEM_ALIGNED_POSITION_NAME;
 var POPPER_POSITION_NAME = "SelectPopperPosition";
-var SelectPopperPosition = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var SelectPopperPosition = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const {
     __scopeSelect,
     align = "start",
@@ -38331,13 +38593,13 @@ var SelectPopperPosition = dashboard__loadShare__react__loadShare__.forwardRef((
 SelectPopperPosition.displayName = POPPER_POSITION_NAME;
 var [SelectViewportProvider, useSelectViewportContext] = createSelectContext(CONTENT_NAME$2, {});
 var VIEWPORT_NAME$1 = "SelectViewport";
-var SelectViewport = dashboard__loadShare__react__loadShare__.forwardRef(
+var SelectViewport = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSelect, nonce, ...viewportProps } = props;
     const contentContext = useSelectContentContext(VIEWPORT_NAME$1, __scopeSelect);
     const viewportContext = useSelectViewportContext(VIEWPORT_NAME$1, __scopeSelect);
     const composedRefs = useComposedRefs$1(forwardedRef, contentContext.onViewportChange);
-    const prevScrollTopRef = dashboard__loadShare__react__loadShare__.useRef(0);
+    const prevScrollTopRef = admin__loadShare__react__loadShare__.useRef(0);
     return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         "style",
@@ -38400,7 +38662,7 @@ var SelectViewport = dashboard__loadShare__react__loadShare__.forwardRef(
 SelectViewport.displayName = VIEWPORT_NAME$1;
 var GROUP_NAME = "SelectGroup";
 var [SelectGroupContextProvider, useSelectGroupContext] = createSelectContext(GROUP_NAME);
-var SelectGroup$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var SelectGroup$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSelect, ...groupProps } = props;
     const groupId = useId();
@@ -38409,7 +38671,7 @@ var SelectGroup$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 SelectGroup$1.displayName = GROUP_NAME;
 var LABEL_NAME = "SelectLabel";
-var SelectLabel$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var SelectLabel$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSelect, ...labelProps } = props;
     const groupContext = useSelectGroupContext(LABEL_NAME, __scopeSelect);
@@ -38419,7 +38681,7 @@ var SelectLabel$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 SelectLabel$1.displayName = LABEL_NAME;
 var ITEM_NAME = "SelectItem";
 var [SelectItemContextProvider, useSelectItemContext] = createSelectContext(ITEM_NAME);
-var SelectItem$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var SelectItem$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopeSelect,
@@ -38431,14 +38693,14 @@ var SelectItem$1 = dashboard__loadShare__react__loadShare__.forwardRef(
     const context = useSelectContext(ITEM_NAME, __scopeSelect);
     const contentContext = useSelectContentContext(ITEM_NAME, __scopeSelect);
     const isSelected = context.value === value;
-    const [textValue, setTextValue] = dashboard__loadShare__react__loadShare__.useState(textValueProp ?? "");
-    const [isFocused, setIsFocused] = dashboard__loadShare__react__loadShare__.useState(false);
+    const [textValue, setTextValue] = admin__loadShare__react__loadShare__.useState(textValueProp ?? "");
+    const [isFocused, setIsFocused] = admin__loadShare__react__loadShare__.useState(false);
     const composedRefs = useComposedRefs$1(
       forwardedRef,
       (node) => contentContext.itemRefCallback?.(node, value, disabled)
     );
     const textId = useId();
-    const pointerTypeRef = dashboard__loadShare__react__loadShare__.useRef("touch");
+    const pointerTypeRef = admin__loadShare__react__loadShare__.useRef("touch");
     const handleSelect = () => {
       if (!disabled) {
         context.onValueChange(value);
@@ -38458,7 +38720,7 @@ var SelectItem$1 = dashboard__loadShare__react__loadShare__.forwardRef(
         disabled,
         textId,
         isSelected,
-        onItemTextChange: dashboard__loadShare__react__loadShare__.useCallback((node) => {
+        onItemTextChange: admin__loadShare__react__loadShare__.useCallback((node) => {
           setTextValue((prevTextValue) => prevTextValue || (node?.textContent ?? "").trim());
         }, []),
         children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -38521,14 +38783,14 @@ var SelectItem$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 SelectItem$1.displayName = ITEM_NAME;
 var ITEM_TEXT_NAME = "SelectItemText";
-var SelectItemText = dashboard__loadShare__react__loadShare__.forwardRef(
+var SelectItemText = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSelect, className, style, ...itemTextProps } = props;
     const context = useSelectContext(ITEM_TEXT_NAME, __scopeSelect);
     const contentContext = useSelectContentContext(ITEM_TEXT_NAME, __scopeSelect);
     const itemContext = useSelectItemContext(ITEM_TEXT_NAME, __scopeSelect);
     const nativeOptionsContext = useSelectNativeOptionsContext(ITEM_TEXT_NAME, __scopeSelect);
-    const [itemTextNode, setItemTextNode] = dashboard__loadShare__react__loadShare__.useState(null);
+    const [itemTextNode, setItemTextNode] = admin__loadShare__react__loadShare__.useState(null);
     const composedRefs = useComposedRefs$1(
       forwardedRef,
       (node) => setItemTextNode(node),
@@ -38536,7 +38798,7 @@ var SelectItemText = dashboard__loadShare__react__loadShare__.forwardRef(
       (node) => contentContext.itemTextRefCallback?.(node, itemContext.value, itemContext.disabled)
     );
     const textContent = itemTextNode?.textContent;
-    const nativeOption = dashboard__loadShare__react__loadShare__.useMemo(
+    const nativeOption = admin__loadShare__react__loadShare__.useMemo(
       () => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: itemContext.value, disabled: itemContext.disabled, children: textContent }, itemContext.value),
       [itemContext.disabled, itemContext.value, textContent]
     );
@@ -38547,13 +38809,13 @@ var SelectItemText = dashboard__loadShare__react__loadShare__.forwardRef(
     }, [onNativeOptionAdd, onNativeOptionRemove, nativeOption]);
     return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive$1.span, { id: itemContext.textId, ...itemTextProps, ref: composedRefs }),
-      itemContext.isSelected && context.valueNode && !context.valueNodeHasChildren ? dashboard__loadShare__react_mf_2_dom__loadShare__.createPortal(itemTextProps.children, context.valueNode) : null
+      itemContext.isSelected && context.valueNode && !context.valueNodeHasChildren ? admin__loadShare__react_mf_2_dom__loadShare__.createPortal(itemTextProps.children, context.valueNode) : null
     ] });
   }
 );
 SelectItemText.displayName = ITEM_TEXT_NAME;
 var ITEM_INDICATOR_NAME = "SelectItemIndicator";
-var SelectItemIndicator = dashboard__loadShare__react__loadShare__.forwardRef(
+var SelectItemIndicator = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSelect, ...itemIndicatorProps } = props;
     const itemContext = useSelectItemContext(ITEM_INDICATOR_NAME, __scopeSelect);
@@ -38562,10 +38824,10 @@ var SelectItemIndicator = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 SelectItemIndicator.displayName = ITEM_INDICATOR_NAME;
 var SCROLL_UP_BUTTON_NAME = "SelectScrollUpButton";
-var SelectScrollUpButton$1 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var SelectScrollUpButton$1 = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const contentContext = useSelectContentContext(SCROLL_UP_BUTTON_NAME, props.__scopeSelect);
   const viewportContext = useSelectViewportContext(SCROLL_UP_BUTTON_NAME, props.__scopeSelect);
-  const [canScrollUp, setCanScrollUp] = dashboard__loadShare__react__loadShare__.useState(false);
+  const [canScrollUp, setCanScrollUp] = admin__loadShare__react__loadShare__.useState(false);
   const composedRefs = useComposedRefs$1(forwardedRef, viewportContext.onScrollButtonChange);
   useLayoutEffect2(() => {
     if (contentContext.viewport && contentContext.isPositioned) {
@@ -38595,10 +38857,10 @@ var SelectScrollUpButton$1 = dashboard__loadShare__react__loadShare__.forwardRef
 });
 SelectScrollUpButton$1.displayName = SCROLL_UP_BUTTON_NAME;
 var SCROLL_DOWN_BUTTON_NAME = "SelectScrollDownButton";
-var SelectScrollDownButton$1 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var SelectScrollDownButton$1 = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const contentContext = useSelectContentContext(SCROLL_DOWN_BUTTON_NAME, props.__scopeSelect);
   const viewportContext = useSelectViewportContext(SCROLL_DOWN_BUTTON_NAME, props.__scopeSelect);
-  const [canScrollDown, setCanScrollDown] = dashboard__loadShare__react__loadShare__.useState(false);
+  const [canScrollDown, setCanScrollDown] = admin__loadShare__react__loadShare__.useState(false);
   const composedRefs = useComposedRefs$1(forwardedRef, viewportContext.onScrollButtonChange);
   useLayoutEffect2(() => {
     if (contentContext.viewport && contentContext.isPositioned) {
@@ -38628,18 +38890,18 @@ var SelectScrollDownButton$1 = dashboard__loadShare__react__loadShare__.forwardR
   ) : null;
 });
 SelectScrollDownButton$1.displayName = SCROLL_DOWN_BUTTON_NAME;
-var SelectScrollButtonImpl = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var SelectScrollButtonImpl = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const { __scopeSelect, onAutoScroll, ...scrollIndicatorProps } = props;
   const contentContext = useSelectContentContext("SelectScrollButton", __scopeSelect);
-  const autoScrollTimerRef = dashboard__loadShare__react__loadShare__.useRef(null);
+  const autoScrollTimerRef = admin__loadShare__react__loadShare__.useRef(null);
   const getItems = useCollection$2(__scopeSelect);
-  const clearAutoScrollTimer = dashboard__loadShare__react__loadShare__.useCallback(() => {
+  const clearAutoScrollTimer = admin__loadShare__react__loadShare__.useCallback(() => {
     if (autoScrollTimerRef.current !== null) {
       window.clearInterval(autoScrollTimerRef.current);
       autoScrollTimerRef.current = null;
     }
   }, []);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     return () => clearAutoScrollTimer();
   }, [clearAutoScrollTimer]);
   useLayoutEffect2(() => {
@@ -38671,7 +38933,7 @@ var SelectScrollButtonImpl = dashboard__loadShare__react__loadShare__.forwardRef
   );
 });
 var SEPARATOR_NAME = "SelectSeparator";
-var SelectSeparator$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var SelectSeparator$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSelect, ...separatorProps } = props;
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive$1.div, { "aria-hidden": true, ...separatorProps, ref: forwardedRef });
@@ -38679,7 +38941,7 @@ var SelectSeparator$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 SelectSeparator$1.displayName = SEPARATOR_NAME;
 var ARROW_NAME$1 = "SelectArrow";
-var SelectArrow = dashboard__loadShare__react__loadShare__.forwardRef(
+var SelectArrow = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSelect, ...arrowProps } = props;
     const popperScope = usePopperScope$1(__scopeSelect);
@@ -38690,12 +38952,12 @@ var SelectArrow = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 SelectArrow.displayName = ARROW_NAME$1;
 var BUBBLE_INPUT_NAME$2 = "SelectBubbleInput";
-var SelectBubbleInput = dashboard__loadShare__react__loadShare__.forwardRef(
+var SelectBubbleInput = admin__loadShare__react__loadShare__.forwardRef(
   ({ __scopeSelect, value, ...props }, forwardedRef) => {
-    const ref = dashboard__loadShare__react__loadShare__.useRef(null);
+    const ref = admin__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(forwardedRef, ref);
     const prevValue = usePrevious(value);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const select = ref.current;
       if (!select) return;
       const selectProto = window.HTMLSelectElement.prototype;
@@ -38727,9 +38989,9 @@ function shouldShowPlaceholder(value) {
 }
 function useTypeaheadSearch(onSearchChange) {
   const handleSearchChange = useCallbackRef$1(onSearchChange);
-  const searchRef = dashboard__loadShare__react__loadShare__.useRef("");
-  const timerRef = dashboard__loadShare__react__loadShare__.useRef(0);
-  const handleTypeaheadSearch = dashboard__loadShare__react__loadShare__.useCallback(
+  const searchRef = admin__loadShare__react__loadShare__.useRef("");
+  const timerRef = admin__loadShare__react__loadShare__.useRef(0);
+  const handleTypeaheadSearch = admin__loadShare__react__loadShare__.useCallback(
     (key) => {
       const search = searchRef.current + key;
       handleSearchChange(search);
@@ -38741,11 +39003,11 @@ function useTypeaheadSearch(onSearchChange) {
     },
     [handleSearchChange]
   );
-  const resetTypeahead = dashboard__loadShare__react__loadShare__.useCallback(() => {
+  const resetTypeahead = admin__loadShare__react__loadShare__.useCallback(() => {
     searchRef.current = "";
     window.clearTimeout(timerRef.current);
   }, []);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     return () => window.clearTimeout(timerRef.current);
   }, []);
   return [searchRef, handleTypeaheadSearch, resetTypeahead];
@@ -38785,7 +39047,7 @@ var Separator$2 = SelectSeparator$1;
 const Select = Root2$2;
 const SelectGroup = Group;
 const SelectValue = Value;
-const SelectTrigger = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Trigger$2, {
+const SelectTrigger = admin__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Trigger$2, {
 	className: cn$1("flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1", className),
 	ref,
 	...props,
@@ -38795,21 +39057,21 @@ const SelectTrigger = dashboard__loadShare__react__loadShare__.forwardRef(({ chi
 	})]
 }));
 SelectTrigger.displayName = Trigger$2.displayName;
-const SelectScrollUpButton = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollUpButton, {
+const SelectScrollUpButton = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollUpButton, {
 	className: cn$1("flex cursor-default items-center justify-center py-1", className),
 	ref,
 	...props,
 	children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronUpIcon, {})
 }));
 SelectScrollUpButton.displayName = ScrollUpButton.displayName;
-const SelectScrollDownButton = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollDownButton, {
+const SelectScrollDownButton = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollDownButton, {
 	className: cn$1("flex cursor-default items-center justify-center py-1", className),
 	ref,
 	...props,
 	children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDownIcon$1, {})
 }));
 SelectScrollDownButton.displayName = ScrollDownButton.displayName;
-const SelectContent = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, position = "popper", ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Portal, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Content2$1, {
+const SelectContent = admin__loadShare__react__loadShare__.forwardRef(({ children, className, position = "popper", ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Portal, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Content2$1, {
 	className: cn$1("relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2", position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1", className),
 	position,
 	ref,
@@ -38824,13 +39086,13 @@ const SelectContent = dashboard__loadShare__react__loadShare__.forwardRef(({ chi
 	]
 }) }));
 SelectContent.displayName = Content2$1.displayName;
-const SelectLabel = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Label, {
+const SelectLabel = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Label, {
 	className: cn$1("px-2 py-1.5 text-sm font-semibold", className),
 	ref,
 	...props
 }));
 SelectLabel.displayName = Label.displayName;
-const SelectItem = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Item, {
+const SelectItem = admin__loadShare__react__loadShare__.forwardRef(({ children, className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Item, {
 	className: cn$1("relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className),
 	ref,
 	...props,
@@ -38840,7 +39102,7 @@ const SelectItem = dashboard__loadShare__react__loadShare__.forwardRef(({ childr
 	}), /* @__PURE__ */ jsxRuntimeExports.jsx(ItemText, { children })]
 }));
 SelectItem.displayName = Item.displayName;
-const SelectSeparator = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Separator$2, {
+const SelectSeparator = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Separator$2, {
 	className: cn$1("-mx-1 my-1 h-px bg-muted", className),
 	ref,
 	...props
@@ -38851,7 +39113,7 @@ SelectSeparator.displayName = Separator$2.displayName;
 var NAME$2 = "Separator";
 var DEFAULT_ORIENTATION = "horizontal";
 var ORIENTATIONS = ["horizontal", "vertical"];
-var Separator$1 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var Separator$1 = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const { decorative, orientation: orientationProp = DEFAULT_ORIENTATION, ...domProps } = props;
   const orientation = isValidOrientation(orientationProp) ? orientationProp : DEFAULT_ORIENTATION;
   const ariaOrientation = orientation === "vertical" ? orientation : void 0;
@@ -38873,7 +39135,7 @@ function isValidOrientation(orientation) {
 var Root$4 = Separator$1;
 
 //#region src/components/ui/separator.tsx
-const Separator = dashboard__loadShare__react__loadShare__.forwardRef(({ className, orientation = "horizontal", decorative = true, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Root$4, {
+const Separator = admin__loadShare__react__loadShare__.forwardRef(({ className, orientation = "horizontal", decorative = true, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Root$4, {
 	ref,
 	decorative,
 	orientation,
@@ -38887,7 +39149,7 @@ const Sheet = Root$c;
 const SheetTrigger = Trigger$4;
 const SheetClose = Close$1;
 const SheetPortal = Portal$3;
-const SheetOverlay = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Overlay$1, {
+const SheetOverlay = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Overlay$1, {
 	className: cn$1("fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className),
 	...props,
 	ref
@@ -38902,7 +39164,7 @@ const sheetVariants = cva("fixed z-50 gap-4 bg-background p-6 shadow-lg transiti
 		top: "inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top"
 	} }
 });
-const SheetContent = dashboard__loadShare__react__loadShare__.forwardRef(({ children, className, side = "right", ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(SheetPortal, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(SheetOverlay, {}), /* @__PURE__ */ jsxRuntimeExports.jsxs(Content$2, {
+const SheetContent = admin__loadShare__react__loadShare__.forwardRef(({ children, className, side = "right", ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(SheetPortal, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(SheetOverlay, {}), /* @__PURE__ */ jsxRuntimeExports.jsxs(Content$2, {
 	className: cn$1(sheetVariants({ side }), className),
 	ref,
 	onPointerDownOutside: (e) => {
@@ -38928,13 +39190,13 @@ const SheetFooter = ({ className, ...props }) => /* @__PURE__ */ jsxRuntimeExpor
 	...props
 });
 SheetFooter.displayName = "SheetFooter";
-const SheetTitle = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Title$1, {
+const SheetTitle = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Title$1, {
 	className: cn$1("text-lg font-semibold text-foreground", className),
 	ref,
 	...props
 }));
 SheetTitle.displayName = Title$1.displayName;
-const SheetDescription = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Description$1, {
+const SheetDescription = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Description$1, {
 	className: cn$1("text-sm text-muted-foreground", className),
 	ref,
 	...props
@@ -38963,7 +39225,7 @@ var [createSliderContext] = createContextScope$1(SLIDER_NAME, [
   createCollectionScope$1
 ]);
 var [SliderProvider, useSliderContext] = createSliderContext(SLIDER_NAME);
-var Slider$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var Slider$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       name,
@@ -38983,8 +39245,8 @@ var Slider$1 = dashboard__loadShare__react__loadShare__.forwardRef(
       form,
       ...sliderProps
     } = props;
-    const thumbRefs = dashboard__loadShare__react__loadShare__.useRef(/* @__PURE__ */ new Set());
-    const valueIndexToChangeRef = dashboard__loadShare__react__loadShare__.useRef(0);
+    const thumbRefs = admin__loadShare__react__loadShare__.useRef(/* @__PURE__ */ new Set());
+    const valueIndexToChangeRef = admin__loadShare__react__loadShare__.useRef(0);
     const isHorizontal = orientation === "horizontal";
     const SliderOrientation = isHorizontal ? SliderHorizontal : SliderVertical;
     const [values = [], setValues] = useControllableState$1({
@@ -38996,7 +39258,7 @@ var Slider$1 = dashboard__loadShare__react__loadShare__.forwardRef(
         onValueChange(value2);
       }
     });
-    const valuesBeforeSlideStartRef = dashboard__loadShare__react__loadShare__.useRef(values);
+    const valuesBeforeSlideStartRef = admin__loadShare__react__loadShare__.useRef(values);
     function handleSlideStart(value2) {
       const closestIndex = getClosestValueIndex(values, value2);
       updateValues(value2, closestIndex);
@@ -39081,7 +39343,7 @@ var [SliderOrientationProvider, useSliderOrientationContext] = createSliderConte
   size: "width",
   direction: 1
 });
-var SliderHorizontal = dashboard__loadShare__react__loadShare__.forwardRef(
+var SliderHorizontal = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       min,
@@ -39094,9 +39356,9 @@ var SliderHorizontal = dashboard__loadShare__react__loadShare__.forwardRef(
       onStepKeyDown,
       ...sliderProps
     } = props;
-    const [slider, setSlider] = dashboard__loadShare__react__loadShare__.useState(null);
+    const [slider, setSlider] = admin__loadShare__react__loadShare__.useState(null);
     const composedRefs = useComposedRefs$1(forwardedRef, (node) => setSlider(node));
-    const rectRef = dashboard__loadShare__react__loadShare__.useRef(void 0);
+    const rectRef = admin__loadShare__react__loadShare__.useRef(void 0);
     const direction = useDirection(dir);
     const isDirectionLTR = direction === "ltr";
     const isSlidingFromLeft = isDirectionLTR && !inverted || !isDirectionLTR && inverted;
@@ -39150,7 +39412,7 @@ var SliderHorizontal = dashboard__loadShare__react__loadShare__.forwardRef(
     );
   }
 );
-var SliderVertical = dashboard__loadShare__react__loadShare__.forwardRef(
+var SliderVertical = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       min,
@@ -39162,9 +39424,9 @@ var SliderVertical = dashboard__loadShare__react__loadShare__.forwardRef(
       onStepKeyDown,
       ...sliderProps
     } = props;
-    const sliderRef = dashboard__loadShare__react__loadShare__.useRef(null);
+    const sliderRef = admin__loadShare__react__loadShare__.useRef(null);
     const ref = useComposedRefs$1(forwardedRef, sliderRef);
-    const rectRef = dashboard__loadShare__react__loadShare__.useRef(void 0);
+    const rectRef = admin__loadShare__react__loadShare__.useRef(void 0);
     const isSlidingFromBottom = !inverted;
     function getValueFromPointer(pointerPosition) {
       const rect = rectRef.current || sliderRef.current.getBoundingClientRect();
@@ -39215,7 +39477,7 @@ var SliderVertical = dashboard__loadShare__react__loadShare__.forwardRef(
     );
   }
 );
-var SliderImpl = dashboard__loadShare__react__loadShare__.forwardRef(
+var SliderImpl = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopeSlider,
@@ -39271,7 +39533,7 @@ var SliderImpl = dashboard__loadShare__react__loadShare__.forwardRef(
   }
 );
 var TRACK_NAME = "SliderTrack";
-var SliderTrack = dashboard__loadShare__react__loadShare__.forwardRef(
+var SliderTrack = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSlider, ...trackProps } = props;
     const context = useSliderContext(TRACK_NAME, __scopeSlider);
@@ -39288,12 +39550,12 @@ var SliderTrack = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 SliderTrack.displayName = TRACK_NAME;
 var RANGE_NAME = "SliderRange";
-var SliderRange = dashboard__loadShare__react__loadShare__.forwardRef(
+var SliderRange = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSlider, ...rangeProps } = props;
     const context = useSliderContext(RANGE_NAME, __scopeSlider);
     const orientation = useSliderOrientationContext(RANGE_NAME, __scopeSlider);
-    const ref = dashboard__loadShare__react__loadShare__.useRef(null);
+    const ref = admin__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(forwardedRef, ref);
     const valuesCount = context.values.length;
     const percentages = context.values.map(
@@ -39319,24 +39581,24 @@ var SliderRange = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 SliderRange.displayName = RANGE_NAME;
 var THUMB_NAME$1 = "SliderThumb";
-var SliderThumb = dashboard__loadShare__react__loadShare__.forwardRef(
+var SliderThumb = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const getItems = useCollection$1(props.__scopeSlider);
-    const [thumb, setThumb] = dashboard__loadShare__react__loadShare__.useState(null);
+    const [thumb, setThumb] = admin__loadShare__react__loadShare__.useState(null);
     const composedRefs = useComposedRefs$1(forwardedRef, (node) => setThumb(node));
-    const index = dashboard__loadShare__react__loadShare__.useMemo(
+    const index = admin__loadShare__react__loadShare__.useMemo(
       () => thumb ? getItems().findIndex((item) => item.ref.current === thumb) : -1,
       [getItems, thumb]
     );
     return /* @__PURE__ */ jsxRuntimeExports.jsx(SliderThumbImpl, { ...props, ref: composedRefs, index });
   }
 );
-var SliderThumbImpl = dashboard__loadShare__react__loadShare__.forwardRef(
+var SliderThumbImpl = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSlider, index, name, ...thumbProps } = props;
     const context = useSliderContext(THUMB_NAME$1, __scopeSlider);
     const orientation = useSliderOrientationContext(THUMB_NAME$1, __scopeSlider);
-    const [thumb, setThumb] = dashboard__loadShare__react__loadShare__.useState(null);
+    const [thumb, setThumb] = admin__loadShare__react__loadShare__.useState(null);
     const composedRefs = useComposedRefs$1(forwardedRef, (node) => setThumb(node));
     const isFormControl = thumb ? context.form || !!thumb.closest("form") : true;
     const size = useSize(thumb);
@@ -39345,7 +39607,7 @@ var SliderThumbImpl = dashboard__loadShare__react__loadShare__.forwardRef(
     const label = getLabel(index, context.values.length);
     const orientationSize = size?.[orientation.size];
     const thumbInBoundsOffset = orientationSize ? getThumbInBoundsOffset(orientationSize, percent, orientation.direction) : 0;
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       if (thumb) {
         context.thumbs.add(thumb);
         return () => {
@@ -39398,12 +39660,12 @@ var SliderThumbImpl = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 SliderThumb.displayName = THUMB_NAME$1;
 var BUBBLE_INPUT_NAME$1 = "RadioBubbleInput";
-var SliderBubbleInput = dashboard__loadShare__react__loadShare__.forwardRef(
+var SliderBubbleInput = admin__loadShare__react__loadShare__.forwardRef(
   ({ __scopeSlider, value, ...props }, forwardedRef) => {
-    const ref = dashboard__loadShare__react__loadShare__.useRef(null);
+    const ref = admin__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(ref, forwardedRef);
     const prevValue = usePrevious(value);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const input = ref.current;
       if (!input) return;
       const inputProto = window.HTMLInputElement.prototype;
@@ -39490,7 +39752,7 @@ var Range = SliderRange;
 var Thumb$1 = SliderThumb;
 
 //#region src/components/ui/slider.tsx
-const Slider = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Root$3, {
+const Slider = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Root$3, {
 	ref,
 	className: cn$1("relative flex w-full touch-none select-none items-center", className),
 	...props,
@@ -39527,7 +39789,7 @@ function Spinner({ children, className, show, size }) {
 var SWITCH_NAME = "Switch";
 var [createSwitchContext] = createContextScope$1(SWITCH_NAME);
 var [SwitchProvider, useSwitchContext] = createSwitchContext(SWITCH_NAME);
-var Switch$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var Switch$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopeSwitch,
@@ -39541,9 +39803,9 @@ var Switch$1 = dashboard__loadShare__react__loadShare__.forwardRef(
       form,
       ...switchProps
     } = props;
-    const [button, setButton] = dashboard__loadShare__react__loadShare__.useState(null);
+    const [button, setButton] = admin__loadShare__react__loadShare__.useState(null);
     const composedRefs = useComposedRefs$1(forwardedRef, (node) => setButton(node));
-    const hasConsumerStoppedPropagationRef = dashboard__loadShare__react__loadShare__.useRef(false);
+    const hasConsumerStoppedPropagationRef = admin__loadShare__react__loadShare__.useRef(false);
     const isFormControl = button ? form || !!button.closest("form") : true;
     const [checked, setChecked] = useControllableState$1({
       prop: checkedProp,
@@ -39593,7 +39855,7 @@ var Switch$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 Switch$1.displayName = SWITCH_NAME;
 var THUMB_NAME = "SwitchThumb";
-var SwitchThumb = dashboard__loadShare__react__loadShare__.forwardRef(
+var SwitchThumb = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSwitch, ...thumbProps } = props;
     const context = useSwitchContext(THUMB_NAME, __scopeSwitch);
@@ -39610,7 +39872,7 @@ var SwitchThumb = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 SwitchThumb.displayName = THUMB_NAME;
 var BUBBLE_INPUT_NAME = "SwitchBubbleInput";
-var SwitchBubbleInput = dashboard__loadShare__react__loadShare__.forwardRef(
+var SwitchBubbleInput = admin__loadShare__react__loadShare__.forwardRef(
   ({
     __scopeSwitch,
     control,
@@ -39618,11 +39880,11 @@ var SwitchBubbleInput = dashboard__loadShare__react__loadShare__.forwardRef(
     bubbles = true,
     ...props
   }, forwardedRef) => {
-    const ref = dashboard__loadShare__react__loadShare__.useRef(null);
+    const ref = admin__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(ref, forwardedRef);
     const prevChecked = usePrevious(checked);
     const controlSize = useSize(control);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const input = ref.current;
       if (!input) return;
       const inputProto = window.HTMLInputElement.prototype;
@@ -39666,7 +39928,7 @@ var Root$2 = Switch$1;
 var Thumb = SwitchThumb;
 
 //#region src/components/ui/switch.tsx
-const Switch = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Root$2, {
+const Switch = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Root$2, {
 	className: cn$1("peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input", className),
 	...props,
 	ref,
@@ -39675,7 +39937,7 @@ const Switch = dashboard__loadShare__react__loadShare__.forwardRef(({ className,
 Switch.displayName = Root$2.displayName;
 
 //#region src/components/ui/table.tsx
-const Table = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+const Table = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 	className: "scrollbar relative min-w-full overflow-auto",
 	children: /* @__PURE__ */ jsxRuntimeExports.jsx("table", {
 		className: cn$1("w-full caption-bottom rounded-lg border-x-0 text-sm", className),
@@ -39684,43 +39946,43 @@ const Table = dashboard__loadShare__react__loadShare__.forwardRef(({ className, 
 	})
 }));
 Table.displayName = "Table";
-const TableHeader = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("thead", {
+const TableHeader = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("thead", {
 	className: cn$1("border-b-2", className),
 	ref,
 	...props
 }));
 TableHeader.displayName = "TableHeader";
-const TableBody = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", {
+const TableBody = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", {
 	className: cn$1("rounded-lg border-x-0 [&_tr:last-child]:border-0", className),
 	ref,
 	...props
 }));
 TableBody.displayName = "TableBody";
-const TableFooter = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("tfoot", {
+const TableFooter = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("tfoot", {
 	className: cn$1("bg-secondary-2 h-14 border border-x-0 border-t-2 font-medium", className),
 	ref,
 	...props
 }));
 TableFooter.displayName = "TableFooter";
-const TableRow = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("tr", {
+const TableRow = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("tr", {
 	className: cn$1("border-y-1 text-foreground data-[state=selected]:text-ring border-x-0 transition-colors", className),
 	ref,
 	...props
 }));
 TableRow.displayName = "TableRow";
-const TableHead = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("th", {
+const TableHead = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("th", {
 	className: cn$1("border-x-1 text-foreground h-14 px-6 text-left align-middle font-bold first:border-l-0 last:border-r-0 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]", className),
 	ref,
 	...props
 }));
 TableHead.displayName = "TableHead";
-const TableCell = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("td", {
+const TableCell = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("td", {
 	className: cn$1("border-x-1 text-foreground h-14 px-6 align-middle first:border-l-0 last:border-r-0 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]", className),
 	ref,
 	...props
 }));
 TableCell.displayName = "TableCell";
-const TableCaption = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("caption", {
+const TableCaption = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx("caption", {
 	className: cn$1("text-foreground mt-4 text-sm", className),
 	ref,
 	...props
@@ -39733,7 +39995,7 @@ var [createTabsContext] = createContextScope$1(TABS_NAME, [
 ]);
 var useRovingFocusGroupScope = createRovingFocusGroupScope();
 var [TabsProvider, useTabsContext] = createTabsContext(TABS_NAME);
-var Tabs$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var Tabs$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopeTabs,
@@ -39777,7 +40039,7 @@ var Tabs$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 Tabs$1.displayName = TABS_NAME;
 var TAB_LIST_NAME = "TabsList";
-var TabsList$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var TabsList$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeTabs, loop = true, ...listProps } = props;
     const context = useTabsContext(TAB_LIST_NAME, __scopeTabs);
@@ -39805,7 +40067,7 @@ var TabsList$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 TabsList$1.displayName = TAB_LIST_NAME;
 var TRIGGER_NAME$1 = "TabsTrigger";
-var TabsTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var TabsTrigger$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeTabs, value, disabled = false, ...triggerProps } = props;
     const context = useTabsContext(TRIGGER_NAME$1, __scopeTabs);
@@ -39857,15 +40119,15 @@ var TabsTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 TabsTrigger$1.displayName = TRIGGER_NAME$1;
 var CONTENT_NAME$1 = "TabsContent";
-var TabsContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var TabsContent$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeTabs, value, forceMount, children, ...contentProps } = props;
     const context = useTabsContext(CONTENT_NAME$1, __scopeTabs);
     const triggerId = makeTriggerId(context.baseId, value);
     const contentId = makeContentId(context.baseId, value);
     const isSelected = value === context.value;
-    const isMountAnimationPreventedRef = dashboard__loadShare__react__loadShare__.useRef(isSelected);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    const isMountAnimationPreventedRef = admin__loadShare__react__loadShare__.useRef(isSelected);
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const rAF = requestAnimationFrame(() => isMountAnimationPreventedRef.current = false);
       return () => cancelAnimationFrame(rAF);
     }, []);
@@ -39904,19 +40166,19 @@ var Content = TabsContent$1;
 
 //#region src/components/ui/tabs.tsx
 const Tabs = Root2$1;
-const TabsList = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(List, {
+const TabsList = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(List, {
 	className: cn$1("inline-flex h-9 items-center justify-center rounded-lg bg-primary-dark p-1 text-muted-foreground", className),
 	ref,
 	...props
 }));
 TabsList.displayName = List.displayName;
-const TabsTrigger = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Trigger$1, {
+const TabsTrigger = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Trigger$1, {
 	className: cn$1("inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:bg-muted data-[state=active]:border text-muted-foreground data-[state=active]:shadow", className),
 	ref,
 	...props
 }));
 TabsTrigger.displayName = Trigger$1.displayName;
-const TabsContent = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Content, {
+const TabsContent = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Content, {
 	className: cn$1("mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", className),
 	ref,
 	...props
@@ -40568,15 +40830,15 @@ const TagList = ({ activeTagIndex, className, classStyleProps, customTagRenderer
 
 //#region src/components/ui/tag-popover.tsx
 const TagPopover = ({ activeTagIndex, children, classStyleProps, customTagRenderer, disabled, setActiveTagIndex, tags, usePortal, ...tagProps }) => {
-	const triggerContainerRef = dashboard__loadShare__react__loadShare__.useRef(null);
-	const triggerRef = dashboard__loadShare__react__loadShare__.useRef(null);
-	const popoverContentRef = dashboard__loadShare__react__loadShare__.useRef(null);
-	const inputRef = dashboard__loadShare__react__loadShare__.useRef(null);
-	const [popoverWidth, setPopoverWidth] = dashboard__loadShare__react__loadShare__.useState(0);
-	const [isPopoverOpen, setIsPopoverOpen] = dashboard__loadShare__react__loadShare__.useState(false);
-	const [, setInputFocused] = dashboard__loadShare__react__loadShare__.useState(false);
-	const [sideOffset, setSideOffset] = dashboard__loadShare__react__loadShare__.useState(0);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	const triggerContainerRef = admin__loadShare__react__loadShare__.useRef(null);
+	const triggerRef = admin__loadShare__react__loadShare__.useRef(null);
+	const popoverContentRef = admin__loadShare__react__loadShare__.useRef(null);
+	const inputRef = admin__loadShare__react__loadShare__.useRef(null);
+	const [popoverWidth, setPopoverWidth] = admin__loadShare__react__loadShare__.useState(0);
+	const [isPopoverOpen, setIsPopoverOpen] = admin__loadShare__react__loadShare__.useState(false);
+	const [, setInputFocused] = admin__loadShare__react__loadShare__.useState(false);
+	const [sideOffset, setSideOffset] = admin__loadShare__react__loadShare__.useState(0);
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		const handleResize = () => {
 			if (triggerContainerRef.current && triggerRef.current) {
 				setPopoverWidth(triggerContainerRef.current.offsetWidth);
@@ -40587,7 +40849,7 @@ const TagPopover = ({ activeTagIndex, children, classStyleProps, customTagRender
 		window.addEventListener("resize", handleResize);
 		return () => window.removeEventListener("resize", handleResize);
 	}, [triggerContainerRef, triggerRef]);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		const handleOutsideClick = (event) => {
 			if (isPopoverOpen && triggerContainerRef.current && popoverContentRef.current && !triggerContainerRef.current.contains(event.target) && !popoverContentRef.current.contains(event.target)) setIsPopoverOpen(false);
 		};
@@ -40596,7 +40858,7 @@ const TagPopover = ({ activeTagIndex, children, classStyleProps, customTagRender
 			document.removeEventListener("mousedown", handleOutsideClick);
 		};
 	}, [isPopoverOpen]);
-	const handleOpenChange = dashboard__loadShare__react__loadShare__.useCallback((open) => {
+	const handleOpenChange = admin__loadShare__react__loadShare__.useCallback((open) => {
 		if (open && triggerContainerRef.current) setPopoverWidth(triggerContainerRef.current.offsetWidth);
 		if (open) {
 			inputRef.current?.focus();
@@ -40855,7 +41117,7 @@ const TagInput = React.forwardRef((props, _ref) => {
 		}
 		onClearAll?.();
 	};
-	const filteredAutocompleteOptions = dashboard__loadShare__react__loadShare__.useMemo(() => {
+	const filteredAutocompleteOptions = admin__loadShare__react__loadShare__.useMemo(() => {
 		return (autocompleteOptions || []).filter((option) => option.text.toLowerCase().includes(inputValue ? inputValue.toLowerCase() : ""));
 	}, [inputValue, autocompleteOptions]);
 	const displayedTags = sortTags ? [...tags].sort() : tags;
@@ -41139,7 +41401,7 @@ const TagInput = React.forwardRef((props, _ref) => {
 TagInput.displayName = "TagInput";
 
 //#region src/components/ui/textarea.tsx
-const Textarea = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
+const Textarea = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("textarea", {
 		className: cn$1("flex min-h-[60px] w-full rounded-md border border-input bg-secondary px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50", className),
 		ref,
@@ -41161,10 +41423,10 @@ var ToastProvider$1 = (props) => {
     swipeThreshold = 50,
     children
   } = props;
-  const [viewport, setViewport] = dashboard__loadShare__react__loadShare__.useState(null);
-  const [toastCount, setToastCount] = dashboard__loadShare__react__loadShare__.useState(0);
-  const isFocusedToastEscapeKeyDownRef = dashboard__loadShare__react__loadShare__.useRef(false);
-  const isClosePausedRef = dashboard__loadShare__react__loadShare__.useRef(false);
+  const [viewport, setViewport] = admin__loadShare__react__loadShare__.useState(null);
+  const [toastCount, setToastCount] = admin__loadShare__react__loadShare__.useState(0);
+  const isFocusedToastEscapeKeyDownRef = admin__loadShare__react__loadShare__.useRef(false);
+  const isClosePausedRef = admin__loadShare__react__loadShare__.useRef(false);
   if (!label.trim()) {
     console.error(
       `Invalid prop \`label\` supplied to \`${PROVIDER_NAME$1}\`. Expected non-empty \`string\`.`
@@ -41181,8 +41443,8 @@ var ToastProvider$1 = (props) => {
       toastCount,
       viewport,
       onViewportChange: setViewport,
-      onToastAdd: dashboard__loadShare__react__loadShare__.useCallback(() => setToastCount((prevCount) => prevCount + 1), []),
-      onToastRemove: dashboard__loadShare__react__loadShare__.useCallback(() => setToastCount((prevCount) => prevCount - 1), []),
+      onToastAdd: admin__loadShare__react__loadShare__.useCallback(() => setToastCount((prevCount) => prevCount + 1), []),
+      onToastRemove: admin__loadShare__react__loadShare__.useCallback(() => setToastCount((prevCount) => prevCount - 1), []),
       isFocusedToastEscapeKeyDownRef,
       isClosePausedRef,
       children
@@ -41194,7 +41456,7 @@ var VIEWPORT_NAME = "ToastViewport";
 var VIEWPORT_DEFAULT_HOTKEY = ["F8"];
 var VIEWPORT_PAUSE = "toast.viewportPause";
 var VIEWPORT_RESUME = "toast.viewportResume";
-var ToastViewport$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var ToastViewport$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopeToast,
@@ -41204,14 +41466,14 @@ var ToastViewport$1 = dashboard__loadShare__react__loadShare__.forwardRef(
     } = props;
     const context = useToastProviderContext(VIEWPORT_NAME, __scopeToast);
     const getItems = useCollection(__scopeToast);
-    const wrapperRef = dashboard__loadShare__react__loadShare__.useRef(null);
-    const headFocusProxyRef = dashboard__loadShare__react__loadShare__.useRef(null);
-    const tailFocusProxyRef = dashboard__loadShare__react__loadShare__.useRef(null);
-    const ref = dashboard__loadShare__react__loadShare__.useRef(null);
+    const wrapperRef = admin__loadShare__react__loadShare__.useRef(null);
+    const headFocusProxyRef = admin__loadShare__react__loadShare__.useRef(null);
+    const tailFocusProxyRef = admin__loadShare__react__loadShare__.useRef(null);
+    const ref = admin__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(forwardedRef, ref, context.onViewportChange);
     const hotkeyLabel = hotkey.join("+").replace(/Key/g, "").replace(/Digit/g, "");
     const hasToasts = context.toastCount > 0;
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const handleKeyDown = (event) => {
         const isHotkeyPressed = hotkey.length !== 0 && hotkey.every((key) => event[key] || event.code === key);
         if (isHotkeyPressed) ref.current?.focus();
@@ -41219,7 +41481,7 @@ var ToastViewport$1 = dashboard__loadShare__react__loadShare__.forwardRef(
       document.addEventListener("keydown", handleKeyDown);
       return () => document.removeEventListener("keydown", handleKeyDown);
     }, [hotkey]);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const wrapper = wrapperRef.current;
       const viewport = ref.current;
       if (hasToasts && wrapper && viewport) {
@@ -41261,7 +41523,7 @@ var ToastViewport$1 = dashboard__loadShare__react__loadShare__.forwardRef(
         };
       }
     }, [hasToasts, context.isClosePausedRef]);
-    const getSortedTabbableCandidates = dashboard__loadShare__react__loadShare__.useCallback(
+    const getSortedTabbableCandidates = admin__loadShare__react__loadShare__.useCallback(
       ({ tabbingDirection }) => {
         const toastItems = getItems();
         const tabbableCandidates = toastItems.map((toastItem) => {
@@ -41273,7 +41535,7 @@ var ToastViewport$1 = dashboard__loadShare__react__loadShare__.forwardRef(
       },
       [getItems]
     );
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const viewport = ref.current;
       if (viewport) {
         const handleKeyDown = (event) => {
@@ -41342,7 +41604,7 @@ var ToastViewport$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 ToastViewport$1.displayName = VIEWPORT_NAME;
 var FOCUS_PROXY_NAME = "ToastFocusProxy";
-var FocusProxy = dashboard__loadShare__react__loadShare__.forwardRef(
+var FocusProxy = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeToast, onFocusFromOutsideViewport, ...proxyProps } = props;
     const context = useToastProviderContext(FOCUS_PROXY_NAME, __scopeToast);
@@ -41368,7 +41630,7 @@ var TOAST_SWIPE_START = "toast.swipeStart";
 var TOAST_SWIPE_MOVE = "toast.swipeMove";
 var TOAST_SWIPE_CANCEL = "toast.swipeCancel";
 var TOAST_SWIPE_END = "toast.swipeEnd";
-var Toast$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var Toast$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { forceMount, open: openProp, defaultOpen, onOpenChange, ...toastProps } = props;
     const [open, setOpen] = useControllableState$1({
@@ -41420,7 +41682,7 @@ var [ToastInteractiveProvider, useToastInteractiveContext] = createToastContext(
   onClose() {
   }
 });
-var ToastImpl = dashboard__loadShare__react__loadShare__.forwardRef(
+var ToastImpl = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopeToast,
@@ -41438,21 +41700,21 @@ var ToastImpl = dashboard__loadShare__react__loadShare__.forwardRef(
       ...toastProps
     } = props;
     const context = useToastProviderContext(TOAST_NAME, __scopeToast);
-    const [node, setNode] = dashboard__loadShare__react__loadShare__.useState(null);
+    const [node, setNode] = admin__loadShare__react__loadShare__.useState(null);
     const composedRefs = useComposedRefs$1(forwardedRef, (node2) => setNode(node2));
-    const pointerStartRef = dashboard__loadShare__react__loadShare__.useRef(null);
-    const swipeDeltaRef = dashboard__loadShare__react__loadShare__.useRef(null);
+    const pointerStartRef = admin__loadShare__react__loadShare__.useRef(null);
+    const swipeDeltaRef = admin__loadShare__react__loadShare__.useRef(null);
     const duration = durationProp || context.duration;
-    const closeTimerStartTimeRef = dashboard__loadShare__react__loadShare__.useRef(0);
-    const closeTimerRemainingTimeRef = dashboard__loadShare__react__loadShare__.useRef(duration);
-    const closeTimerRef = dashboard__loadShare__react__loadShare__.useRef(0);
+    const closeTimerStartTimeRef = admin__loadShare__react__loadShare__.useRef(0);
+    const closeTimerRemainingTimeRef = admin__loadShare__react__loadShare__.useRef(duration);
+    const closeTimerRef = admin__loadShare__react__loadShare__.useRef(0);
     const { onToastAdd, onToastRemove } = context;
     const handleClose = useCallbackRef$1(() => {
       const isFocusInToast = node?.contains(document.activeElement);
       if (isFocusInToast) context.viewport?.focus();
       onClose();
     });
-    const startTimer = dashboard__loadShare__react__loadShare__.useCallback(
+    const startTimer = admin__loadShare__react__loadShare__.useCallback(
       (duration2) => {
         if (!duration2 || duration2 === Infinity) return;
         window.clearTimeout(closeTimerRef.current);
@@ -41461,7 +41723,7 @@ var ToastImpl = dashboard__loadShare__react__loadShare__.forwardRef(
       },
       [handleClose]
     );
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       const viewport = context.viewport;
       if (viewport) {
         const handleResume = () => {
@@ -41482,14 +41744,14 @@ var ToastImpl = dashboard__loadShare__react__loadShare__.forwardRef(
         };
       }
     }, [context.viewport, duration, onPause, onResume, startTimer]);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       if (open && !context.isClosePausedRef.current) startTimer(duration);
     }, [open, duration, context.isClosePausedRef, startTimer]);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       onToastAdd();
       return () => onToastRemove();
     }, [onToastAdd, onToastRemove]);
-    const announceTextContent = dashboard__loadShare__react__loadShare__.useMemo(() => {
+    const announceTextContent = admin__loadShare__react__loadShare__.useMemo(() => {
       return node ? getAnnounceTextContent(node) : null;
     }, [node]);
     if (!context.viewport) return null;
@@ -41503,7 +41765,7 @@ var ToastImpl = dashboard__loadShare__react__loadShare__.forwardRef(
           children: announceTextContent
         }
       ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(ToastInteractiveProvider, { scope: __scopeToast, onClose: handleClose, children: dashboard__loadShare__react_mf_2_dom__loadShare__.createPortal(
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ToastInteractiveProvider, { scope: __scopeToast, onClose: handleClose, children: admin__loadShare__react_mf_2_dom__loadShare__.createPortal(
         /* @__PURE__ */ jsxRuntimeExports.jsx(Collection.ItemSlot, { scope: __scopeToast, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
           Root$f,
           {
@@ -41602,10 +41864,10 @@ var ToastImpl = dashboard__loadShare__react__loadShare__.forwardRef(
 var ToastAnnounce = (props) => {
   const { __scopeToast, children, ...announceProps } = props;
   const context = useToastProviderContext(TOAST_NAME, __scopeToast);
-  const [renderAnnounceText, setRenderAnnounceText] = dashboard__loadShare__react__loadShare__.useState(false);
-  const [isAnnounced, setIsAnnounced] = dashboard__loadShare__react__loadShare__.useState(false);
+  const [renderAnnounceText, setRenderAnnounceText] = admin__loadShare__react__loadShare__.useState(false);
+  const [isAnnounced, setIsAnnounced] = admin__loadShare__react__loadShare__.useState(false);
   useNextFrame(() => setRenderAnnounceText(true));
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     const timer = window.setTimeout(() => setIsAnnounced(true), 1e3);
     return () => window.clearTimeout(timer);
   }, []);
@@ -41616,7 +41878,7 @@ var ToastAnnounce = (props) => {
   ] }) }) });
 };
 var TITLE_NAME = "ToastTitle";
-var ToastTitle$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var ToastTitle$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeToast, ...titleProps } = props;
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive$1.div, { ...titleProps, ref: forwardedRef });
@@ -41624,7 +41886,7 @@ var ToastTitle$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 ToastTitle$1.displayName = TITLE_NAME;
 var DESCRIPTION_NAME = "ToastDescription";
-var ToastDescription$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var ToastDescription$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeToast, ...descriptionProps } = props;
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive$1.div, { ...descriptionProps, ref: forwardedRef });
@@ -41632,7 +41894,7 @@ var ToastDescription$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 ToastDescription$1.displayName = DESCRIPTION_NAME;
 var ACTION_NAME = "ToastAction";
-var ToastAction$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var ToastAction$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { altText, ...actionProps } = props;
     if (!altText.trim()) {
@@ -41646,7 +41908,7 @@ var ToastAction$1 = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 ToastAction$1.displayName = ACTION_NAME;
 var CLOSE_NAME = "ToastClose";
-var ToastClose$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var ToastClose$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeToast, ...closeProps } = props;
     const interactiveContext = useToastInteractiveContext(CLOSE_NAME, __scopeToast);
@@ -41662,7 +41924,7 @@ var ToastClose$1 = dashboard__loadShare__react__loadShare__.forwardRef(
   }
 );
 ToastClose$1.displayName = CLOSE_NAME;
-var ToastAnnounceExclude = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var ToastAnnounceExclude = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const { __scopeToast, altText, ...announceExcludeProps } = props;
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     Primitive$1.div,
@@ -41760,7 +42022,7 @@ var Close = ToastClose$1;
 
 //#region src/components/ui/toast.tsx
 const ToastProvider = Provider$1;
-const ToastViewport = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Viewport, {
+const ToastViewport = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Viewport, {
 	className: cn$1("fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]", className),
 	ref,
 	...props
@@ -41773,7 +42035,7 @@ const toastVariants = cva("group pointer-events-auto relative flex w-full items-
 		destructive: "destructive group border-destructive bg-destructive text-destructive-foreground"
 	} }
 });
-const Toast = dashboard__loadShare__react__loadShare__.forwardRef(({ className, variant, ...props }, ref) => {
+const Toast = admin__loadShare__react__loadShare__.forwardRef(({ className, variant, ...props }, ref) => {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(Root2, {
 		className: cn$1(toastVariants({ variant }), className),
 		ref,
@@ -41781,13 +42043,13 @@ const Toast = dashboard__loadShare__react__loadShare__.forwardRef(({ className, 
 	});
 });
 Toast.displayName = Root2.displayName;
-const ToastAction = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Action, {
+const ToastAction = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Action, {
 	className: cn$1("inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium transition-colors hover:bg-secondary focus:outline-none focus:ring-1 focus:ring-ring disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive", className),
 	ref,
 	...props
 }));
 ToastAction.displayName = Action.displayName;
-const ToastClose = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Close, {
+const ToastClose = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Close, {
 	className: cn$1("absolute right-1 top-1 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-1 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600", className),
 	ref,
 	"toast-close": "",
@@ -41795,13 +42057,13 @@ const ToastClose = dashboard__loadShare__react__loadShare__.forwardRef(({ classN
 	children: /* @__PURE__ */ jsxRuntimeExports.jsx(Cross2Icon, { className: "h-4 w-4" })
 }));
 ToastClose.displayName = Close.displayName;
-const ToastTitle = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Title, {
+const ToastTitle = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Title, {
 	className: cn$1("text-sm font-semibold [&+div]:text-xs", className),
 	ref,
 	...props
 }));
 ToastTitle.displayName = Title.displayName;
-const ToastDescription = dashboard__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Description, {
+const ToastDescription = admin__loadShare__react__loadShare__.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Description, {
 	className: cn$1("text-sm opacity-90", className),
 	ref,
 	...props
@@ -41905,8 +42167,8 @@ function toast({ ...props }) {
 	};
 }
 function useToast() {
-	const [state, setState] = dashboard__loadShare__react__loadShare__.useState(memoryState);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	const [state, setState] = admin__loadShare__react__loadShare__.useState(memoryState);
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		listeners.push(setState);
 		return () => {
 			const index = listeners.indexOf(setState);
@@ -41949,7 +42211,7 @@ function Toaster() {
 }
 
 var NAME$1 = "Toggle";
-var Toggle$1 = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var Toggle$1 = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const { pressed: pressedProp, defaultPressed, onPressedChange, ...buttonProps } = props;
   const [pressed, setPressed] = useControllableState$1({
     prop: pressedProp,
@@ -41995,7 +42257,7 @@ const toggleVariants = cva("inline-flex items-center justify-center gap-2 rounde
 		}
 	}
 });
-const Toggle = dashboard__loadShare__react__loadShare__.forwardRef(({ className, size, variant, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Root$1, {
+const Toggle = admin__loadShare__react__loadShare__.forwardRef(({ className, size, variant, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Root$1, {
 	className: cn$1(toggleVariants({
 		className,
 		size,
@@ -42022,10 +42284,10 @@ var TooltipProvider$1 = (props) => {
     disableHoverableContent = false,
     children
   } = props;
-  const isOpenDelayedRef = dashboard__loadShare__react__loadShare__.useRef(true);
-  const isPointerInTransitRef = dashboard__loadShare__react__loadShare__.useRef(false);
-  const skipDelayTimerRef = dashboard__loadShare__react__loadShare__.useRef(0);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  const isOpenDelayedRef = admin__loadShare__react__loadShare__.useRef(true);
+  const isPointerInTransitRef = admin__loadShare__react__loadShare__.useRef(false);
+  const skipDelayTimerRef = admin__loadShare__react__loadShare__.useRef(0);
+  admin__loadShare__react__loadShare__.useEffect(() => {
     const skipDelayTimer = skipDelayTimerRef.current;
     return () => window.clearTimeout(skipDelayTimer);
   }, []);
@@ -42035,11 +42297,11 @@ var TooltipProvider$1 = (props) => {
       scope: __scopeTooltip,
       isOpenDelayedRef,
       delayDuration,
-      onOpen: dashboard__loadShare__react__loadShare__.useCallback(() => {
+      onOpen: admin__loadShare__react__loadShare__.useCallback(() => {
         window.clearTimeout(skipDelayTimerRef.current);
         isOpenDelayedRef.current = false;
       }, []),
-      onClose: dashboard__loadShare__react__loadShare__.useCallback(() => {
+      onClose: admin__loadShare__react__loadShare__.useCallback(() => {
         window.clearTimeout(skipDelayTimerRef.current);
         skipDelayTimerRef.current = window.setTimeout(
           () => isOpenDelayedRef.current = true,
@@ -42047,7 +42309,7 @@ var TooltipProvider$1 = (props) => {
         );
       }, [skipDelayDuration]),
       isPointerInTransitRef,
-      onPointerInTransitChange: dashboard__loadShare__react__loadShare__.useCallback((inTransit) => {
+      onPointerInTransitChange: admin__loadShare__react__loadShare__.useCallback((inTransit) => {
         isPointerInTransitRef.current = inTransit;
       }, []),
       disableHoverableContent,
@@ -42070,12 +42332,12 @@ var Tooltip$1 = (props) => {
   } = props;
   const providerContext = useTooltipProviderContext(TOOLTIP_NAME, props.__scopeTooltip);
   const popperScope = usePopperScope(__scopeTooltip);
-  const [trigger, setTrigger] = dashboard__loadShare__react__loadShare__.useState(null);
+  const [trigger, setTrigger] = admin__loadShare__react__loadShare__.useState(null);
   const contentId = useId();
-  const openTimerRef = dashboard__loadShare__react__loadShare__.useRef(0);
+  const openTimerRef = admin__loadShare__react__loadShare__.useRef(0);
   const disableHoverableContent = disableHoverableContentProp ?? providerContext.disableHoverableContent;
   const delayDuration = delayDurationProp ?? providerContext.delayDuration;
-  const wasOpenDelayedRef = dashboard__loadShare__react__loadShare__.useRef(false);
+  const wasOpenDelayedRef = admin__loadShare__react__loadShare__.useRef(false);
   const [open, setOpen] = useControllableState$1({
     prop: openProp,
     defaultProp: defaultOpen ?? false,
@@ -42090,21 +42352,21 @@ var Tooltip$1 = (props) => {
     },
     caller: TOOLTIP_NAME
   });
-  const stateAttribute = dashboard__loadShare__react__loadShare__.useMemo(() => {
+  const stateAttribute = admin__loadShare__react__loadShare__.useMemo(() => {
     return open ? wasOpenDelayedRef.current ? "delayed-open" : "instant-open" : "closed";
   }, [open]);
-  const handleOpen = dashboard__loadShare__react__loadShare__.useCallback(() => {
+  const handleOpen = admin__loadShare__react__loadShare__.useCallback(() => {
     window.clearTimeout(openTimerRef.current);
     openTimerRef.current = 0;
     wasOpenDelayedRef.current = false;
     setOpen(true);
   }, [setOpen]);
-  const handleClose = dashboard__loadShare__react__loadShare__.useCallback(() => {
+  const handleClose = admin__loadShare__react__loadShare__.useCallback(() => {
     window.clearTimeout(openTimerRef.current);
     openTimerRef.current = 0;
     setOpen(false);
   }, [setOpen]);
-  const handleDelayedOpen = dashboard__loadShare__react__loadShare__.useCallback(() => {
+  const handleDelayedOpen = admin__loadShare__react__loadShare__.useCallback(() => {
     window.clearTimeout(openTimerRef.current);
     openTimerRef.current = window.setTimeout(() => {
       wasOpenDelayedRef.current = true;
@@ -42112,7 +42374,7 @@ var Tooltip$1 = (props) => {
       openTimerRef.current = 0;
     }, delayDuration);
   }, [delayDuration, setOpen]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     return () => {
       if (openTimerRef.current) {
         window.clearTimeout(openTimerRef.current);
@@ -42129,11 +42391,11 @@ var Tooltip$1 = (props) => {
       stateAttribute,
       trigger,
       onTriggerChange: setTrigger,
-      onTriggerEnter: dashboard__loadShare__react__loadShare__.useCallback(() => {
+      onTriggerEnter: admin__loadShare__react__loadShare__.useCallback(() => {
         if (providerContext.isOpenDelayedRef.current) handleDelayedOpen();
         else handleOpen();
       }, [providerContext.isOpenDelayedRef, handleDelayedOpen, handleOpen]),
-      onTriggerLeave: dashboard__loadShare__react__loadShare__.useCallback(() => {
+      onTriggerLeave: admin__loadShare__react__loadShare__.useCallback(() => {
         if (disableHoverableContent) {
           handleClose();
         } else {
@@ -42150,18 +42412,18 @@ var Tooltip$1 = (props) => {
 };
 Tooltip$1.displayName = TOOLTIP_NAME;
 var TRIGGER_NAME = "TooltipTrigger";
-var TooltipTrigger$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var TooltipTrigger$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeTooltip, ...triggerProps } = props;
     const context = useTooltipContext(TRIGGER_NAME, __scopeTooltip);
     const providerContext = useTooltipProviderContext(TRIGGER_NAME, __scopeTooltip);
     const popperScope = usePopperScope(__scopeTooltip);
-    const ref = dashboard__loadShare__react__loadShare__.useRef(null);
+    const ref = admin__loadShare__react__loadShare__.useRef(null);
     const composedRefs = useComposedRefs$1(forwardedRef, ref, context.onTriggerChange);
-    const isPointerDownRef = dashboard__loadShare__react__loadShare__.useRef(false);
-    const hasPointerMoveOpenedRef = dashboard__loadShare__react__loadShare__.useRef(false);
-    const handlePointerUp = dashboard__loadShare__react__loadShare__.useCallback(() => isPointerDownRef.current = false, []);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    const isPointerDownRef = admin__loadShare__react__loadShare__.useRef(false);
+    const hasPointerMoveOpenedRef = admin__loadShare__react__loadShare__.useRef(false);
+    const handlePointerUp = admin__loadShare__react__loadShare__.useCallback(() => isPointerDownRef.current = false, []);
+    admin__loadShare__react__loadShare__.useEffect(() => {
       return () => document.removeEventListener("pointerup", handlePointerUp);
     }, [handlePointerUp]);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Anchor, { asChild: true, ...popperScope, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -42204,7 +42466,7 @@ var [PortalProvider, usePortalContext] = createTooltipContext(PORTAL_NAME, {
   forceMount: void 0
 });
 var CONTENT_NAME = "TooltipContent";
-var TooltipContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var TooltipContent$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const portalContext = usePortalContext(CONTENT_NAME, props.__scopeTooltip);
     const { forceMount = portalContext.forceMount, side = "top", ...contentProps } = props;
@@ -42212,20 +42474,20 @@ var TooltipContent$1 = dashboard__loadShare__react__loadShare__.forwardRef(
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || context.open, children: context.disableHoverableContent ? /* @__PURE__ */ jsxRuntimeExports.jsx(TooltipContentImpl, { side, ...contentProps, ref: forwardedRef }) : /* @__PURE__ */ jsxRuntimeExports.jsx(TooltipContentHoverable, { side, ...contentProps, ref: forwardedRef }) });
   }
 );
-var TooltipContentHoverable = dashboard__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
+var TooltipContentHoverable = admin__loadShare__react__loadShare__.forwardRef((props, forwardedRef) => {
   const context = useTooltipContext(CONTENT_NAME, props.__scopeTooltip);
   const providerContext = useTooltipProviderContext(CONTENT_NAME, props.__scopeTooltip);
-  const ref = dashboard__loadShare__react__loadShare__.useRef(null);
+  const ref = admin__loadShare__react__loadShare__.useRef(null);
   const composedRefs = useComposedRefs$1(forwardedRef, ref);
-  const [pointerGraceArea, setPointerGraceArea] = dashboard__loadShare__react__loadShare__.useState(null);
+  const [pointerGraceArea, setPointerGraceArea] = admin__loadShare__react__loadShare__.useState(null);
   const { trigger, onClose } = context;
   const content = ref.current;
   const { onPointerInTransitChange } = providerContext;
-  const handleRemoveGraceArea = dashboard__loadShare__react__loadShare__.useCallback(() => {
+  const handleRemoveGraceArea = admin__loadShare__react__loadShare__.useCallback(() => {
     setPointerGraceArea(null);
     onPointerInTransitChange(false);
   }, [onPointerInTransitChange]);
-  const handleCreateGraceArea = dashboard__loadShare__react__loadShare__.useCallback(
+  const handleCreateGraceArea = admin__loadShare__react__loadShare__.useCallback(
     (event, hoverTarget) => {
       const currentTarget = event.currentTarget;
       const exitPoint = { x: event.clientX, y: event.clientY };
@@ -42238,10 +42500,10 @@ var TooltipContentHoverable = dashboard__loadShare__react__loadShare__.forwardRe
     },
     [onPointerInTransitChange]
   );
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     return () => handleRemoveGraceArea();
   }, [handleRemoveGraceArea]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (trigger && content) {
       const handleTriggerLeave = (event) => handleCreateGraceArea(event, content);
       const handleContentLeave = (event) => handleCreateGraceArea(event, trigger);
@@ -42253,7 +42515,7 @@ var TooltipContentHoverable = dashboard__loadShare__react__loadShare__.forwardRe
       };
     }
   }, [trigger, content, handleCreateGraceArea, handleRemoveGraceArea]);
-  dashboard__loadShare__react__loadShare__.useEffect(() => {
+  admin__loadShare__react__loadShare__.useEffect(() => {
     if (pointerGraceArea) {
       const handleTrackPointerGrace = (event) => {
         const target = event.target;
@@ -42275,7 +42537,7 @@ var TooltipContentHoverable = dashboard__loadShare__react__loadShare__.forwardRe
 });
 var [VisuallyHiddenContentContextProvider, useVisuallyHiddenContentContext] = createTooltipContext(TOOLTIP_NAME, { isInside: false });
 var Slottable = createSlottable("TooltipContent");
-var TooltipContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
+var TooltipContentImpl = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const {
       __scopeTooltip,
@@ -42288,11 +42550,11 @@ var TooltipContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
     const context = useTooltipContext(CONTENT_NAME, __scopeTooltip);
     const popperScope = usePopperScope(__scopeTooltip);
     const { onClose } = context;
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       document.addEventListener(TOOLTIP_OPEN, onClose);
       return () => document.removeEventListener(TOOLTIP_OPEN, onClose);
     }, [onClose]);
-    dashboard__loadShare__react__loadShare__.useEffect(() => {
+    admin__loadShare__react__loadShare__.useEffect(() => {
       if (context.trigger) {
         const handleScroll = (event) => {
           const target = event.target;
@@ -42341,7 +42603,7 @@ var TooltipContentImpl = dashboard__loadShare__react__loadShare__.forwardRef(
 );
 TooltipContent$1.displayName = CONTENT_NAME;
 var ARROW_NAME = "TooltipArrow";
-var TooltipArrow = dashboard__loadShare__react__loadShare__.forwardRef(
+var TooltipArrow = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     const { __scopeTooltip, ...arrowProps } = props;
     const popperScope = usePopperScope(__scopeTooltip);
@@ -42477,7 +42739,7 @@ var Content2 = TooltipContent$1;
 const TooltipProvider = Provider;
 const Tooltip = Root3;
 const TooltipTrigger = Trigger;
-const TooltipContent = dashboard__loadShare__react__loadShare__.forwardRef(({ className, sideOffset = 4, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Content2, {
+const TooltipContent = admin__loadShare__react__loadShare__.forwardRef(({ className, sideOffset = 4, ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Content2, {
 	className: cn$1("z-50 overflow-hidden rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2", className),
 	ref,
 	sideOffset,
@@ -42500,7 +42762,7 @@ var VISUALLY_HIDDEN_STYLES = Object.freeze({
   wordWrap: "normal"
 });
 var NAME = "VisuallyHidden";
-var VisuallyHidden$1 = dashboard__loadShare__react__loadShare__.forwardRef(
+var VisuallyHidden$1 = admin__loadShare__react__loadShare__.forwardRef(
   (props, forwardedRef) => {
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       Primitive.span,
@@ -42516,7 +42778,7 @@ VisuallyHidden$1.displayName = NAME;
 var Root = VisuallyHidden$1;
 
 //#region src/components/ui/visually-hidden.tsx
-const VisuallyHidden = dashboard__loadShare__react__loadShare__.forwardRef(({ ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Root, {
+const VisuallyHidden = admin__loadShare__react__loadShare__.forwardRef(({ ...props }, ref) => /* @__PURE__ */ jsxRuntimeExports.jsx(Root, {
 	ref,
 	...props
 }));
@@ -42532,8 +42794,8 @@ VisuallyHidden.displayName = Root.displayName;
 * @returns The debounced value
 */
 function useDebounce(value, delay = 500) {
-	const [debouncedValue, setDebouncedValue] = dashboard__loadShare__react__loadShare__.useState(value);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	const [debouncedValue, setDebouncedValue] = admin__loadShare__react__loadShare__.useState(value);
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		const timer = setTimeout(() => {
 			setDebouncedValue(value);
 		}, delay);
@@ -42560,10 +42822,10 @@ const tailwindBreakpoints = {
 * @returns isMobile state, current breakpoint name, and current viewport width
 */
 function useMobileDetection({ breakpoint = "sm", useMatchMedia = true } = {}) {
-	const [isMobile, setIsMobile] = dashboard__loadShare__react__loadShare__.useState(false);
-	const [currentBreakpoint, setCurrentBreakpoint] = dashboard__loadShare__react__loadShare__.useState("xs");
-	const [currentWidth, setCurrentWidth] = dashboard__loadShare__react__loadShare__.useState(0);
-	dashboard__loadShare__react__loadShare__.useEffect(() => {
+	const [isMobile, setIsMobile] = admin__loadShare__react__loadShare__.useState(false);
+	const [currentBreakpoint, setCurrentBreakpoint] = admin__loadShare__react__loadShare__.useState("xs");
+	const [currentWidth, setCurrentWidth] = admin__loadShare__react__loadShare__.useState(0);
+	admin__loadShare__react__loadShare__.useEffect(() => {
 		const breakpointValue = typeof breakpoint === "string" ? tailwindBreakpoints[breakpoint] ?? tailwindBreakpoints.sm : breakpoint;
 		const getCurrentBreakpoint = (width) => {
 			let breakpoint$1 = "xs";
