@@ -1,7 +1,7 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["static/js/index-DhCE-OKi.js","static/js/schemas-CA767HQ5.js","static/js/parse-owPI_Zlz.js","static/js/dashboard__loadShare__react__loadShare__-CpgLq0wn.js","static/js/_commonjsHelpers-BILit0S-.js","static/js/dashboard__mf_v__runtimeInit__mf_v__-BgQBwuY5.js","static/js/dashboard__loadShare__react_mf_2_router__loadShare__-Bi31I4AN.js","static/js/jsx-runtime-DIQgdeXv.js","static/js/createLucideIcon-BGXC8EXb.js","static/js/virtualExposes-DwA08f_D.js","static/js/preload-helper-Dk3k6Zm1.js","static/js/index-DaYfIREu.js","static/js/dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__-72sVvfNy.js","static/js/dashboard__loadShare__react_mf_2_dom__loadShare__-B-V2HJ2Z.js","static/js/index-DIbgwXnx.js","static/js/index-BJZERDuh.js","static/js/index-Cus_r54w.js","static/js/index-BkNtUC1O.js","static/js/index-BKmzfUwO.js","static/js/index-ek6yQ4qw.js","static/js/index.esm-C8JxElkJ.js","static/js/index-YLv_CiL9.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["static/js/index-C8BpAEZ0.js","static/js/schemas-CA767HQ5.js","static/js/parse-owPI_Zlz.js","static/js/admin__loadShare__react__loadShare__-BY1INpNu.js","static/js/_commonjsHelpers-BILit0S-.js","static/js/admin__mf_v__runtimeInit__mf_v__-B2PJI9hS.js","static/js/admin__loadShare__react_mf_2_router__loadShare__-CwtF7zsV.js","static/js/jsx-runtime-BOqW7N1v.js","static/js/createLucideIcon-KUE0P9TA.js","static/js/virtualExposes-DwA08f_D.js","static/js/preload-helper-Dk3k6Zm1.js","static/js/index-CMOZZ7pY.js","static/js/admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__-QB1_Htv_.js","static/js/admin__loadShare__react_mf_2_dom__loadShare__-BykLpcnn.js","static/js/index-DIbgwXnx.js","static/js/index-CwFE135t.js","static/js/index-CK4cbdZj.js","static/js/index-DzwsUQYN.js","static/js/index-BKmzfUwO.js","static/js/index-CrWsS64Z.js","static/js/index.esm-BlTOZQ5S.js","static/js/index-CeQzhlXt.js"])))=>i.map(i=>d[i]);
 import exposesMap from './virtualExposes-DwA08f_D.js';
 import { __vitePreload } from './preload-helper-Dk3k6Zm1.js';
-import { dashboard__mf_v__runtimeInit__mf_v__ } from './dashboard__mf_v__runtimeInit__mf_v__-BgQBwuY5.js';
+import { admin__mf_v__runtimeInit__mf_v__ } from './admin__mf_v__runtimeInit__mf_v__-B2PJI9hS.js';
 
 var index_cjs$3 = {};
 
@@ -4359,27 +4359,27 @@ index_cjs$3.registerShared = registerShared;
 const importMap = {
       
         "@lumeweb/portal-framework-core": async () => {
-          let pkg = await __vitePreload(() => import('./index-DhCE-OKi.js'),true              ?__vite__mapDeps([0,1,2,3,4,5,6,7,8,9,10]):void 0);
+          let pkg = await __vitePreload(() => import('./index-C8BpAEZ0.js'),true              ?__vite__mapDeps([0,1,2,3,4,5,6,7,8,9,10]):void 0);
             return pkg;
         }
       ,
         "@lumeweb/portal-framework-ui": async () => {
-          let pkg = await __vitePreload(() => import('./index-DaYfIREu.js'),true              ?__vite__mapDeps([11,3,4,5,7,6,12,8,13,2,14]):void 0);
+          let pkg = await __vitePreload(() => import('./index-CMOZZ7pY.js'),true              ?__vite__mapDeps([11,3,4,5,7,6,12,8,13,2,14]):void 0);
             return pkg;
         }
       ,
         "@lumeweb/portal-framework-ui-core": async () => {
-          let pkg = await __vitePreload(() => import('./index-BJZERDuh.js'),true              ?__vite__mapDeps([15,3,4,5,7,12,8,13]):void 0);
+          let pkg = await __vitePreload(() => import('./index-CwFE135t.js'),true              ?__vite__mapDeps([15,3,4,5,7,12,8,13]):void 0);
             return pkg;
         }
       ,
         "@refinedev/core": async () => {
-          let pkg = await __vitePreload(() => import('./index-Cus_r54w.js'),true              ?__vite__mapDeps([16,3,4,5,14]):void 0);
+          let pkg = await __vitePreload(() => import('./index-CK4cbdZj.js'),true              ?__vite__mapDeps([16,3,4,5,14]):void 0);
             return pkg;
         }
       ,
         "@tanstack/react-query": async () => {
-          let pkg = await __vitePreload(() => import('./index-BkNtUC1O.js'),true              ?__vite__mapDeps([17,3,4,5,7]):void 0);
+          let pkg = await __vitePreload(() => import('./index-DzwsUQYN.js'),true              ?__vite__mapDeps([17,3,4,5,7]):void 0);
             return pkg;
         }
       ,
@@ -4389,17 +4389,17 @@ const importMap = {
         }
       ,
         "react-dom": async () => {
-          let pkg = await __vitePreload(() => import('./index-ek6yQ4qw.js').then(n => n.index),true              ?__vite__mapDeps([19,4,3,5]):void 0);
+          let pkg = await __vitePreload(() => import('./index-CrWsS64Z.js').then(n => n.index),true              ?__vite__mapDeps([19,4,3,5]):void 0);
             return pkg;
         }
       ,
         "react-hook-form": async () => {
-          let pkg = await __vitePreload(() => import('./index.esm-C8JxElkJ.js'),true              ?__vite__mapDeps([20,3,4,5]):void 0);
+          let pkg = await __vitePreload(() => import('./index.esm-BlTOZQ5S.js'),true              ?__vite__mapDeps([20,3,4,5]):void 0);
             return pkg;
         }
       ,
         "react-router": async () => {
-          let pkg = await __vitePreload(() => import('./index-YLv_CiL9.js'),true              ?__vite__mapDeps([21,3,4,5]):void 0);
+          let pkg = await __vitePreload(() => import('./index-CeQzhlXt.js'),true              ?__vite__mapDeps([21,3,4,5]):void 0);
             return pkg;
         }
       
@@ -4411,7 +4411,7 @@ const importMap = {
             version: "0.1.0",
             scope: ["default"],
             loaded: false,
-            from: "dashboard",
+            from: "admin",
             async get () {
               usedShared["@lumeweb/portal-framework-core"].loaded = true;
               const {"@lumeweb/portal-framework-core": pkgDynamicImport} = importMap;
@@ -4438,7 +4438,7 @@ const importMap = {
             version: "0.1.0",
             scope: ["default"],
             loaded: false,
-            from: "dashboard",
+            from: "admin",
             async get () {
               usedShared["@lumeweb/portal-framework-ui"].loaded = true;
               const {"@lumeweb/portal-framework-ui": pkgDynamicImport} = importMap;
@@ -4465,7 +4465,7 @@ const importMap = {
             version: "0.1.0",
             scope: ["default"],
             loaded: false,
-            from: "dashboard",
+            from: "admin",
             async get () {
               usedShared["@lumeweb/portal-framework-ui-core"].loaded = true;
               const {"@lumeweb/portal-framework-ui-core": pkgDynamicImport} = importMap;
@@ -4492,7 +4492,7 @@ const importMap = {
             version: "5.0.8",
             scope: ["default"],
             loaded: false,
-            from: "dashboard",
+            from: "admin",
             async get () {
               usedShared["@refinedev/core"].loaded = true;
               const {"@refinedev/core": pkgDynamicImport} = importMap;
@@ -4519,7 +4519,7 @@ const importMap = {
             version: "5.90.19",
             scope: ["default"],
             loaded: false,
-            from: "dashboard",
+            from: "admin",
             async get () {
               usedShared["@tanstack/react-query"].loaded = true;
               const {"@tanstack/react-query": pkgDynamicImport} = importMap;
@@ -4546,7 +4546,7 @@ const importMap = {
             version: "19.2.3",
             scope: ["default"],
             loaded: false,
-            from: "dashboard",
+            from: "admin",
             async get () {
               usedShared["react"].loaded = true;
               const {"react": pkgDynamicImport} = importMap;
@@ -4573,7 +4573,7 @@ const importMap = {
             version: "19.2.3",
             scope: ["default"],
             loaded: false,
-            from: "dashboard",
+            from: "admin",
             async get () {
               usedShared["react-dom"].loaded = true;
               const {"react-dom": pkgDynamicImport} = importMap;
@@ -4600,7 +4600,7 @@ const importMap = {
             version: "7.71.1",
             scope: ["default"],
             loaded: false,
-            from: "dashboard",
+            from: "admin",
             async get () {
               usedShared["react-hook-form"].loaded = true;
               const {"react-hook-form": pkgDynamicImport} = importMap;
@@ -4627,7 +4627,7 @@ const importMap = {
             version: "7.12.0",
             scope: ["default"],
             loaded: false,
-            from: "dashboard",
+            from: "admin",
             async get () {
               usedShared["react-router"].loaded = true;
               const {"react-router": pkgDynamicImport} = importMap;
@@ -4655,7 +4655,7 @@ const importMap = {
 
 const initTokens = {};
   const shareScopeName = "default";
-  const mfName = "dashboard";
+  const mfName = "admin";
   async function init(shared = {}, initScope = []) {
     const initRes = init_1({
       name: mfName,
@@ -4680,7 +4680,7 @@ const initTokens = {};
     } catch (e) {
       console.error(e);
     }
-    dashboard__mf_v__runtimeInit__mf_v__.initResolve(initRes);
+    admin__mf_v__runtimeInit__mf_v__.initResolve(initRes);
     return initRes
   }
 
