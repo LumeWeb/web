@@ -1,47 +1,42 @@
-import { admin__loadShare__react__loadShare__, React } from './admin__loadShare__react__loadShare__-BY1INpNu.js';
-import { jsxRuntimeExports } from './jsx-runtime-BOqW7N1v.js';
-import { admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__, m, admin__loadShare__react_mf_2_router__loadShare__ } from './admin__loadShare__react_mf_2_router__loadShare__-CwtF7zsV.js';
-import { admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__, ReloadIcon, FontBoldIcon, FontItalicIcon, UnderlineIcon, useSyncExternalStoreExports, Search, Root2, Trigger, Portal2, Content2, ChevronLeft, ChevronRight, X } from './admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__-QB1_Htv_.js';
-import { parse, parseAsync, $ZodError } from './parse-owPI_Zlz.js';
-import { castPath as castPath$2, toKey as toKey$2, isLength as isLength$3, isIndex as isIndex$2, isArray as isArray$7, isArguments as isArguments$2, get as get$1, qs } from './index-BnQpHTKV.js';
-import { admin__mf_v__runtimeInit__mf_v__ } from './admin__mf_v__runtimeInit__mf_v__-B2PJI9hS.js';
+import { dashboard__loadShare__react__loadShare__, React } from './dashboard__loadShare__react__loadShare__-CpgLq0wn.js';
+import { jsxRuntimeExports } from './jsx-runtime-DIQgdeXv.js';
+import { dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__, m, dashboard__loadShare__react_mf_2_router__loadShare__ } from './dashboard__loadShare__react_mf_2_router__loadShare__-Bi31I4AN.js';
+import { dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__, ReloadIcon, FontBoldIcon, FontItalicIcon, UnderlineIcon, useSyncExternalStoreExports, Search, Root2, Trigger, Portal2, Content2, ChevronLeft, ChevronRight, X } from './dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__-72sVvfNy.js';
 import { commonjsGlobal, getDefaultExportFromCjs } from './_commonjsHelpers-BILit0S-.js';
-import { admin__loadShare__react_mf_2_dom__loadShare__ } from './admin__loadShare__react_mf_2_dom__loadShare__-BykLpcnn.js';
-import { createLucideIcon } from './createLucideIcon-KUE0P9TA.js';
-
-//#region rolldown:runtime
-var __esmMin = (fn, res) => () => (fn && (res = fn(fn = 0)), res);
+import { dashboard__loadShare__react_mf_2_dom__loadShare__ } from './dashboard__loadShare__react_mf_2_dom__loadShare__-B-V2HJ2Z.js';
+import { dashboard__mf_v__runtimeInit__mf_v__ } from './dashboard__mf_v__runtimeInit__mf_v__-BgQBwuY5.js';
+import { createLucideIcon } from './createLucideIcon-BGXC8EXb.js';
+import { parse, parseAsync, $ZodError } from './parse-owPI_Zlz.js';
+import { castPath as castPath$2, toKey as toKey$2, isLength as isLength$3, isIndex as isIndex$2, isArray as isArray$7, isArguments as isArguments$2, get as get$1, qs } from './index-DIbgwXnx.js';
 
 //#region src/components/actions/types.ts
-var ActionItemType;
-var init_types$5 = __esmMin(() => {
-	ActionItemType = /* @__PURE__ */ function(ActionItemType$1) {
-		/** Standard button action */
-		ActionItemType$1["BUTTON"] = "button";
-		/** Cancel action button */
-		ActionItemType$1["CANCEL"] = "cancel";
-		/** Custom action button */
-		ActionItemType$1["CUSTOM"] = "custom";
-		/** Custom component action */
-		ActionItemType$1["CUSTOM_COMPONENT"] = "custom-component";
-		/** Date picker action */
-		ActionItemType$1["DATE"] = "date";
-		/** File upload action */
-		ActionItemType$1["FILE"] = "file";
-		/** Link action button */
-		ActionItemType$1["LINK"] = "link";
-		/** Submit action button */
-		ActionItemType$1["SUBMIT"] = "submit";
-		/** Retry action button */
-		ActionItemType$1["RETRY"] = "retry";
-		return ActionItemType$1;
-	}({});
-});
-
-//#endregion
-init_types$5();
+/**
+* Enum defining the types of action items available
+*/
+let ActionItemType = /* @__PURE__ */ function(ActionItemType$1) {
+	/** Standard button action */
+	ActionItemType$1["BUTTON"] = "button";
+	/** Cancel action button */
+	ActionItemType$1["CANCEL"] = "cancel";
+	/** Custom action button */
+	ActionItemType$1["CUSTOM"] = "custom";
+	/** Custom component action */
+	ActionItemType$1["CUSTOM_COMPONENT"] = "custom-component";
+	/** Date picker action */
+	ActionItemType$1["DATE"] = "date";
+	/** File upload action */
+	ActionItemType$1["FILE"] = "file";
+	/** Link action button */
+	ActionItemType$1["LINK"] = "link";
+	/** Submit action button */
+	ActionItemType$1["SUBMIT"] = "submit";
+	/** Retry action button */
+	ActionItemType$1["RETRY"] = "retry";
+	return ActionItemType$1;
+}({});
 
 //#region src/components/form/context.tsx
+const FormContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
 function FormProvider({ adapter, autoSave, children, config, formInstance }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(FormContext.Provider, {
 		value: {
@@ -54,19 +49,13 @@ function FormProvider({ adapter, autoSave, children, config, formInstance }) {
 	});
 }
 function useFormContext() {
-	const context = admin__loadShare__react__loadShare__.useContext(FormContext);
+	const context = dashboard__loadShare__react__loadShare__.useContext(FormContext);
 	if (context === void 0) throw new Error("useFormContext must be used within a FormProvider");
 	return context;
 }
-var FormContext;
-var init_context$1 = __esmMin(() => {
-	FormContext = admin__loadShare__react__loadShare__.createContext(void 0);
-});
-
-//#endregion
-init_context$1();
 
 //#region src/components/form/StepControlContext.tsx
+const StepControlContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
 /**
 * Provider component for step control functionality
 * Handles step navigation logic and state management
@@ -90,16 +79,16 @@ function StepControlProvider({ children, defaultStep, handleStepSubmit, isBackVa
 	});
 }
 function useCreateStepControl({ defaultStep = 1, handleStepSubmit, isBackValidate = false, onStepChange, onStepRetry, onNavigationStart, onNavigationEnd, onNavigationError, totalSteps: totalStepsProp, triggerValidation }) {
-	const [currentStep, setCurrentStep] = admin__loadShare__react__loadShare__.useState(defaultStep);
-	const [retryCount, setRetryCount] = admin__loadShare__react__loadShare__.useState(0);
-	const [transitionState, setTransitionState] = admin__loadShare__react__loadShare__.useState({
+	const [currentStep, setCurrentStep] = dashboard__loadShare__react__loadShare__.useState(defaultStep);
+	const [retryCount, setRetryCount] = dashboard__loadShare__react__loadShare__.useState(0);
+	const [transitionState, setTransitionState] = dashboard__loadShare__react__loadShare__.useState({
 		direction: null,
 		enteringStep: null,
 		exitingStep: null
 	});
 	const isFirstStep = currentStep === 1;
 	const isLastStep = currentStep === totalStepsProp;
-	const goToStep = admin__loadShare__react__loadShare__.useCallback((step) => {
+	const goToStep = dashboard__loadShare__react__loadShare__.useCallback((step) => {
 		const targetStep = Math.max(1, Math.min(step, totalStepsProp));
 		try {
 			onNavigationStart?.(currentStep, targetStep, "goTo");
@@ -139,7 +128,7 @@ function useCreateStepControl({ defaultStep = 1, handleStepSubmit, isBackValidat
 		onNavigationEnd,
 		onNavigationError
 	]);
-	const jumpTo = admin__loadShare__react__loadShare__.useCallback((step) => {
+	const jumpTo = dashboard__loadShare__react__loadShare__.useCallback((step) => {
 		const targetStep = Math.max(1, Math.min(step, totalStepsProp));
 		try {
 			onNavigationStart?.(currentStep, targetStep, "jumpTo");
@@ -167,7 +156,7 @@ function useCreateStepControl({ defaultStep = 1, handleStepSubmit, isBackValidat
 		onNavigationEnd,
 		onNavigationError
 	]);
-	const handleRetry = admin__loadShare__react__loadShare__.useCallback(async () => {
+	const handleRetry = dashboard__loadShare__react__loadShare__.useCallback(async () => {
 		try {
 			onNavigationStart?.(currentStep, currentStep, "retry");
 		} catch (error) {
@@ -201,7 +190,7 @@ function useCreateStepControl({ defaultStep = 1, handleStepSubmit, isBackValidat
 		onNavigationEnd,
 		onNavigationError
 	]);
-	const handleNext = admin__loadShare__react__loadShare__.useCallback(async () => {
+	const handleNext = dashboard__loadShare__react__loadShare__.useCallback(async () => {
 		if (isLastStep) return;
 		const targetStep = currentStep + 1;
 		try {
@@ -226,7 +215,7 @@ function useCreateStepControl({ defaultStep = 1, handleStepSubmit, isBackValidat
 		onNavigationEnd,
 		onNavigationError
 	]);
-	const handlePrevious = admin__loadShare__react__loadShare__.useCallback(async () => {
+	const handlePrevious = dashboard__loadShare__react__loadShare__.useCallback(async () => {
 		if (isFirstStep) return;
 		const targetStep = currentStep - 1;
 		try {
@@ -255,7 +244,7 @@ function useCreateStepControl({ defaultStep = 1, handleStepSubmit, isBackValidat
 		onNavigationEnd,
 		onNavigationError
 	]);
-	return admin__loadShare__react__loadShare__.useMemo(() => ({
+	return dashboard__loadShare__react__loadShare__.useMemo(() => ({
 		currentStep,
 		goToStep,
 		jumpTo,
@@ -286,7 +275,7 @@ function useCreateStepControl({ defaultStep = 1, handleStepSubmit, isBackValidat
 * @returns StepControlContextType | undefined - Step control methods and state, or undefined if not in context
 */
 function useOptionalStepControlContext() {
-	return admin__loadShare__react__loadShare__.useContext(StepControlContext);
+	return dashboard__loadShare__react__loadShare__.useContext(StepControlContext);
 }
 /**
 * Backward compatibility hook
@@ -303,19 +292,44 @@ function useStepControl(options) {
 * @throws Error if used outside StepControlProvider
 */
 function useStepControlContext() {
-	const context = admin__loadShare__react__loadShare__.useContext(StepControlContext);
+	const context = dashboard__loadShare__react__loadShare__.useContext(StepControlContext);
 	if (context === void 0) throw new Error("useStepControl must be used within a StepControlProvider");
 	return context;
 }
-var StepControlContext;
-var init_StepControlContext = __esmMin(() => {
-	StepControlContext = admin__loadShare__react__loadShare__.createContext(void 0);
-});
-
-//#endregion
-init_StepControlContext();
 
 //#region src/components/form/types.ts
+/**
+* Enum defining the adapter types for form handling
+*/
+let AdapterType = /* @__PURE__ */ function(AdapterType$1) {
+	/** Refine adapter */
+	AdapterType$1["REFINE"] = "refine";
+	/** React Hook Form adapter */
+	AdapterType$1["RHF"] = "rhf";
+	return AdapterType$1;
+}({});
+/**
+* Enum defining the order in which grouped and ungrouped fields are rendered
+*/
+let GroupOrder = /* @__PURE__ */ function(GroupOrder$1) {
+	/** Render groups first, then ungrouped fields */
+	GroupOrder$1["GROUPS_FIRST"] = "groups-first";
+	/** Render ungrouped fields first, then groups */
+	GroupOrder$1["UNGROUPED_FIRST"] = "ungrouped-first";
+	return GroupOrder$1;
+}({});
+/**
+* Enum defining the layout types for forms
+*/
+let LayoutType = /* @__PURE__ */ function(LayoutType$1) {
+	/** Grid layout */
+	LayoutType$1["GRID"] = "grid";
+	/** Horizontal layout */
+	LayoutType$1["HORIZONTAL"] = "horizontal";
+	/** Vertical layout */
+	LayoutType$1["VERTICAL"] = "vertical";
+	return LayoutType$1;
+}({});
 /**
 * Type guard to check if footer is a function with the proper signature
 */
@@ -348,35 +362,6 @@ function isStepFormConfig(config) {
 function isSubmitLabelFunction(submitLabel) {
 	return typeof submitLabel === "function";
 }
-var AdapterType, GroupOrder, LayoutType;
-var init_types$4 = __esmMin(() => {
-	AdapterType = /* @__PURE__ */ function(AdapterType$1) {
-		/** Refine adapter */
-		AdapterType$1["REFINE"] = "refine";
-		/** React Hook Form adapter */
-		AdapterType$1["RHF"] = "rhf";
-		return AdapterType$1;
-	}({});
-	GroupOrder = /* @__PURE__ */ function(GroupOrder$1) {
-		/** Render groups first, then ungrouped fields */
-		GroupOrder$1["GROUPS_FIRST"] = "groups-first";
-		/** Render ungrouped fields first, then groups */
-		GroupOrder$1["UNGROUPED_FIRST"] = "ungrouped-first";
-		return GroupOrder$1;
-	}({});
-	LayoutType = /* @__PURE__ */ function(LayoutType$1) {
-		/** Grid layout */
-		LayoutType$1["GRID"] = "grid";
-		/** Horizontal layout */
-		LayoutType$1["HORIZONTAL"] = "horizontal";
-		/** Vertical layout */
-		LayoutType$1["VERTICAL"] = "vertical";
-		return LayoutType$1;
-	}({});
-});
-
-//#endregion
-init_types$4();
 
 //#region src/components/form/utils/stepRetry.ts
 /**
@@ -390,12 +375,62 @@ function createStepRetryHandler(steps) {
 		if (stepConfig?.onRetryStep) stepConfig.onRetryStep();
 	};
 }
-var init_stepRetry = __esmMin(() => {});
-
-//#endregion
-init_stepRetry();
 
 //#region src/components/sizing/index.ts
+/**
+* Generic size system for UI components
+* Provides consistent sizing across dialogs, wizards, and other components
+*/
+/**
+* Standard size options using Tailwind CSS conventions
+*/
+let ComponentSize = /* @__PURE__ */ function(ComponentSize$1) {
+	ComponentSize$1["TWO_XL"] = "2xl";
+	ComponentSize$1["THREE_XL"] = "3xl";
+	ComponentSize$1["FOUR_XL"] = "4xl";
+	ComponentSize$1["FIVE_XL"] = "5xl";
+	ComponentSize$1["SIX_XL"] = "6xl";
+	ComponentSize$1["SEVEN_XL"] = "7xl";
+	ComponentSize$1["AUTO"] = "auto";
+	ComponentSize$1["FULL"] = "full";
+	ComponentSize$1["LG"] = "lg";
+	ComponentSize$1["MD"] = "md";
+	ComponentSize$1["SM"] = "sm";
+	ComponentSize$1["XL"] = "xl";
+	ComponentSize$1["XS"] = "xs";
+	return ComponentSize$1;
+}({});
+/**
+* Width categories for components
+*/
+let WidthCategory = /* @__PURE__ */ function(WidthCategory$1) {
+	WidthCategory$1["EXTRA_NARROW"] = "extra-narrow";
+	WidthCategory$1["NARROW"] = "narrow";
+	WidthCategory$1["MEDIUM"] = "medium";
+	WidthCategory$1["WIDE"] = "wide";
+	WidthCategory$1["EXTRA_WIDE"] = "extra-wide";
+	WidthCategory$1["RESPONSIVE"] = "responsive";
+	return WidthCategory$1;
+}({});
+/**
+* Generic size classes mapping that can be used by different components
+* Each component can use the sizes that make sense for its context
+*/
+const COMPONENT_SIZE_CLASSES = {
+	[ComponentSize.TWO_XL]: "max-w-2xl",
+	[ComponentSize.THREE_XL]: "max-w-3xl",
+	[ComponentSize.FOUR_XL]: "max-w-4xl",
+	[ComponentSize.FIVE_XL]: "max-w-5xl",
+	[ComponentSize.SIX_XL]: "max-w-6xl",
+	[ComponentSize.SEVEN_XL]: "max-w-7xl",
+	[ComponentSize.AUTO]: "max-w-[calc(100vw-2rem)] sm:max-w-md",
+	[ComponentSize.FULL]: "max-w-full",
+	[ComponentSize.LG]: "max-w-lg",
+	[ComponentSize.MD]: "max-w-md",
+	[ComponentSize.SM]: "max-w-sm",
+	[ComponentSize.XL]: "max-w-xl",
+	[ComponentSize.XS]: "max-w-xs"
+};
 /**
 * Get the CSS class for a given component size
 * Returns undefined if the size is not valid
@@ -416,78 +451,20 @@ function getSizeClass(config) {
 function isComponentSize(size) {
 	return Object.values(ComponentSize).includes(size);
 }
-var ComponentSize, WidthCategory, COMPONENT_SIZE_CLASSES;
-var init_sizing = __esmMin(() => {
-	ComponentSize = /* @__PURE__ */ function(ComponentSize$1) {
-		ComponentSize$1["TWO_XL"] = "2xl";
-		ComponentSize$1["THREE_XL"] = "3xl";
-		ComponentSize$1["FOUR_XL"] = "4xl";
-		ComponentSize$1["FIVE_XL"] = "5xl";
-		ComponentSize$1["SIX_XL"] = "6xl";
-		ComponentSize$1["SEVEN_XL"] = "7xl";
-		ComponentSize$1["AUTO"] = "auto";
-		ComponentSize$1["FULL"] = "full";
-		ComponentSize$1["LG"] = "lg";
-		ComponentSize$1["MD"] = "md";
-		ComponentSize$1["SM"] = "sm";
-		ComponentSize$1["XL"] = "xl";
-		ComponentSize$1["XS"] = "xs";
-		return ComponentSize$1;
-	}({});
-	WidthCategory = /* @__PURE__ */ function(WidthCategory$1) {
-		WidthCategory$1["EXTRA_NARROW"] = "extra-narrow";
-		WidthCategory$1["NARROW"] = "narrow";
-		WidthCategory$1["MEDIUM"] = "medium";
-		WidthCategory$1["WIDE"] = "wide";
-		WidthCategory$1["EXTRA_WIDE"] = "extra-wide";
-		WidthCategory$1["RESPONSIVE"] = "responsive";
-		return WidthCategory$1;
-	}({});
-	COMPONENT_SIZE_CLASSES = {
-		[ComponentSize.TWO_XL]: "max-w-2xl",
-		[ComponentSize.THREE_XL]: "max-w-3xl",
-		[ComponentSize.FOUR_XL]: "max-w-4xl",
-		[ComponentSize.FIVE_XL]: "max-w-5xl",
-		[ComponentSize.SIX_XL]: "max-w-6xl",
-		[ComponentSize.SEVEN_XL]: "max-w-7xl",
-		[ComponentSize.AUTO]: "max-w-[calc(100vw-2rem)] sm:max-w-md",
-		[ComponentSize.FULL]: "max-w-full",
-		[ComponentSize.LG]: "max-w-lg",
-		[ComponentSize.MD]: "max-w-md",
-		[ComponentSize.SM]: "max-w-sm",
-		[ComponentSize.XL]: "max-w-xl",
-		[ComponentSize.XS]: "max-w-xs"
-	};
-});
-
-//#endregion
-init_sizing();
 
 //#region src/components/dialog/DialogActions.context.tsx
-var DialogActionsContext;
-var init_DialogActions_context = __esmMin(() => {
-	DialogActionsContext = admin__loadShare__react__loadShare__.createContext({
-		closeDialog: () => {},
-		openDialog: () => {},
-		replaceDialog: () => {},
-		setFormMethods: () => {}
-	});
+const DialogActionsContext = dashboard__loadShare__react__loadShare__.createContext({
+	closeDialog: () => {},
+	openDialog: () => {},
+	replaceDialog: () => {},
+	setFormMethods: () => {}
 });
-
-//#endregion
-init_DialogActions_context();
 
 //#region src/components/dialog/DialogState.context.tsx
-var DialogStateContext;
-var init_DialogState_context = __esmMin(() => {
-	DialogStateContext = admin__loadShare__react__loadShare__.createContext({
-		currentDialog: void 0,
-		formMethods: void 0
-	});
+const DialogStateContext = dashboard__loadShare__react__loadShare__.createContext({
+	currentDialog: void 0,
+	formMethods: void 0
 });
-
-//#endregion
-init_DialogState_context();
 
 //#region src/components/dialog/Dialog.context.tsx
 /**
@@ -495,19 +472,19 @@ init_DialogState_context();
 * Must wrap any components that will use dialogs.
 */
 function DialogProvider({ children }) {
-	const [dialogStack, setDialogStack] = admin__loadShare__react__loadShare__.useState([]);
-	const _formMethods = admin__loadShare__react__loadShare__.useRef(void 0);
+	const [dialogStack, setDialogStack] = dashboard__loadShare__react__loadShare__.useState([]);
+	const _formMethods = dashboard__loadShare__react__loadShare__.useRef(void 0);
 	const currentDialog = dialogStack[dialogStack.length - 1];
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		return () => {};
 	}, []);
-	const setFormMethods = admin__loadShare__react__loadShare__.useCallback((methods) => {
+	const setFormMethods = dashboard__loadShare__react__loadShare__.useCallback((methods) => {
 		_formMethods.current = methods;
 	}, []);
-	const openDialog = admin__loadShare__react__loadShare__.useCallback((config) => {
+	const openDialog = dashboard__loadShare__react__loadShare__.useCallback((config) => {
 		setDialogStack((prev) => [...prev, config]);
 	}, []);
-	const closeDialog = admin__loadShare__react__loadShare__.useCallback((source = "programmatic") => {
+	const closeDialog = dashboard__loadShare__react__loadShare__.useCallback((source = "programmatic") => {
 		setDialogStack((prev) => {
 			const newStack = prev.slice(0, -1);
 			const closedDialog = prev[prev.length - 1];
@@ -517,16 +494,16 @@ function DialogProvider({ children }) {
 			return newStack;
 		});
 	}, []);
-	const replaceDialog = admin__loadShare__react__loadShare__.useCallback((newDialog) => {
+	const replaceDialog = dashboard__loadShare__react__loadShare__.useCallback((newDialog) => {
 		setDialogStack((prev) => {
 			return [...prev.slice(0, -1), newDialog];
 		});
 	}, []);
-	const stateValue = admin__loadShare__react__loadShare__.useMemo(() => ({
+	const stateValue = dashboard__loadShare__react__loadShare__.useMemo(() => ({
 		currentDialog,
 		formMethods: _formMethods
 	}), [currentDialog, _formMethods]);
-	const actionsValue = admin__loadShare__react__loadShare__.useMemo(() => ({
+	const actionsValue = dashboard__loadShare__react__loadShare__.useMemo(() => ({
 		closeDialog,
 		openDialog,
 		replaceDialog,
@@ -545,29 +522,20 @@ function DialogProvider({ children }) {
 		})
 	});
 }
-var useDialogState, useDialogActions, useDialog;
-var init_Dialog_context = __esmMin(() => {
-	init_Dialog_types();
-	init_DialogActions_context();
-	init_DialogState_context();
-	useDialogState = () => admin__loadShare__react__loadShare__.useContext(DialogStateContext);
-	useDialogActions = () => admin__loadShare__react__loadShare__.useContext(DialogActionsContext);
-	useDialog = () => {
-		const state = useDialogState();
-		const actions = useDialogActions();
-		return {
-			...state,
-			...state.currentDialog ? actions : {
-				closeDialog: actions.closeDialog,
-				openDialog: actions.openDialog,
-				replaceDialog: actions.replaceDialog
-			}
-		};
+const useDialogState = () => dashboard__loadShare__react__loadShare__.useContext(DialogStateContext);
+const useDialogActions = () => dashboard__loadShare__react__loadShare__.useContext(DialogActionsContext);
+const useDialog = () => {
+	const state = useDialogState();
+	const actions = useDialogActions();
+	return {
+		...state,
+		...state.currentDialog ? actions : {
+			closeDialog: actions.closeDialog,
+			openDialog: actions.openDialog,
+			replaceDialog: actions.replaceDialog
+		}
 	};
-});
-
-//#endregion
-init_Dialog_context();
+};
 
 //#region src/components/shared/utils/stepState.ts
 /**
@@ -626,10 +594,6 @@ function createStepKeyHandler(index, allowNavigation, disabledSteps, current, st
 		}
 	};
 }
-var init_stepState = __esmMin(() => {});
-
-//#endregion
-init_stepState();
 
 /**
  * @license lucide-react v0.562.0 - ISC
@@ -927,14 +891,8 @@ function getDialogContentClasses(currentDialog) {
 	const baseClasses = [currentDialog.type === "custom" && "flex flex-col", currentDialog.classNames?.content];
 	const sizeClasses = DIALOG_SIZE_CLASSES[currentDialog.size || "auto"];
 	const positionClasses = DIALOG_POSITION_CLASSES[currentDialog.position || "center"];
-	return admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(baseClasses, sizeClasses, positionClasses);
+	return dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(baseClasses, sizeClasses, positionClasses);
 }
-var init_dialogClasses = __esmMin(() => {
-	init_Dialog_types();
-});
-
-//#endregion
-init_dialogClasses();
 
 //#region src/components/shared/hooks/useForceRerender.ts
 /**
@@ -948,18 +906,14 @@ init_dialogClasses();
 * @param forceRerenderCallback - Optional callback that receives the force rerender method
 */
 function useForceRerender(forceRerenderCallback) {
-	const [, setCounter] = admin__loadShare__react__loadShare__.useState(0);
-	const forceRerender = admin__loadShare__react__loadShare__.useCallback(() => {
+	const [, setCounter] = dashboard__loadShare__react__loadShare__.useState(0);
+	const forceRerender = dashboard__loadShare__react__loadShare__.useCallback(() => {
 		setCounter((prev) => prev + 1);
 	}, []);
-	admin__loadShare__react__loadShare__.useCallback(() => {
+	dashboard__loadShare__react__loadShare__.useCallback(() => {
 		if (forceRerenderCallback) forceRerenderCallback(forceRerender);
 	}, [forceRerender, forceRerenderCallback])();
 }
-var init_useForceRerender = __esmMin(() => {});
-
-//#endregion
-init_useForceRerender();
 
 //#region src/components/dialog/types/AlertDialog.tsx
 function AlertDialog({ classNames, description, forceRerender, title }) {
@@ -967,46 +921,34 @@ function AlertDialog({ classNames, description, forceRerender, title }) {
 	const renderDescription = () => {
 		if (!description) return null;
 		const content = typeof description === "function" ? React.createElement(description) : description;
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogDescription, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogDescription, {
 			className: classNames?.description,
 			children: content
 		});
 	};
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, {
 		className: classNames?.header,
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, {
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, {
 			className: classNames?.title,
 			children: title
 		}), renderDescription()]
 	}) });
 }
-var init_AlertDialog = __esmMin(() => {
-	init_components();
-});
-
-//#endregion
-init_AlertDialog();
 
 //#region src/components/dialog/types/ConfirmDialog.tsx
 function ConfirmDialog({ classNames, description, forceRerender, title }) {
 	useForceRerender(forceRerender);
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, {
 		className: classNames?.header,
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, {
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, {
 			className: classNames?.title,
 			children: title
-		}), description && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogDescription, {
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("[word-break:break-word]", classNames?.description),
+		}), description && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogDescription, {
+			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("[word-break:break-word]", classNames?.description),
 			children: description
 		})]
 	}) });
 }
-var init_ConfirmDialog = __esmMin(() => {
-	init_components();
-});
-
-//#endregion
-init_ConfirmDialog();
 
 //#region src/components/dialog/types/CustomDialog.tsx
 function CustomDialog({ actions, classNames, content, description, forceRerender, header, onClose, onConfirm, title }) {
@@ -1016,12 +958,6 @@ function CustomDialog({ actions, classNames, content, description, forceRerender
 		children: content
 	}) });
 }
-var init_CustomDialog = __esmMin(() => {
-	init_components();
-});
-
-//#endregion
-init_CustomDialog();
 
 //#region src/components/dialog/utils/dialogDetection.ts
 /**
@@ -1063,32 +999,6 @@ function useIsInDialog() {
 function useIsWizardDialog() {
 	return useDialogType() === DialogTypes.WIZARD_FORM;
 }
-var init_dialogDetection = __esmMin(() => {
-	init_Dialog_context();
-	init_Dialog_types();
-});
-
-//#endregion
-init_dialogDetection();
-
-//#region src/components/dialog/utils/index.ts
-var init_utils$2 = __esmMin(() => {
-	init_dialogClasses();
-	init_dialogDetection();
-});
-
-//#endregion
-init_utils$2();
-
-var init_dialog = __esmMin(() => {
-	init_Dialog_context();
-	init_Dialog_renderer();
-	init_Dialog_types();
-	init_utils$2();
-});
-
-//#endregion
-init_dialog();
 
 //#region src/components/actions/actionHelpers.ts
 /**
@@ -1266,17 +1176,10 @@ function evaluateWizardStepLabel(wizardConfig, stepContext, formMethods) {
 	if (typeof stepSubmitLabel === "function" && formMethods?.getValues) return stepSubmitLabel(formMethods.getValues());
 	if (typeof stepSubmitLabel === "string") return stepSubmitLabel;
 }
-var init_actionHelpers = __esmMin(() => {
-	init_types$5();
-	init_dialog();
-});
 
-//#endregion
-init_actionHelpers();
+const r$1=(t,r,o)=>{if(t&&"reportValidity"in t){const s=dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(o,r);t.setCustomValidity(s&&s.message||""),t.reportValidity();}},o=(e,t)=>{for(const o in t.fields){const s=t.fields[o];s&&s.ref&&"reportValidity"in s.ref?r$1(s.ref,o,e):s&&s.refs&&s.refs.forEach(t=>r$1(t,o,e));}},s$2=(r,s)=>{s.shouldUseNativeValidation&&o(r,s);const n={};for(const o in r){const f=dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(s.fields,o),c=Object.assign(r[o]||{},{ref:f&&f.ref});if(i$3(s.names||Object.keys(r),o)){const r=Object.assign({},dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(n,o));dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(r,"root",c),dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(n,o,r);}else dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(n,o,c);}return n},i$3=(e,t)=>{const r=n$1(t);return e.some(e=>n$1(e).match(`^${r}\\.\\d+`))};function n$1(e){return e.replace(/\]|\[/g,"")}
 
-const r$1=(t,r,o)=>{if(t&&"reportValidity"in t){const s=admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(o,r);t.setCustomValidity(s&&s.message||""),t.reportValidity();}},o=(e,t)=>{for(const o in t.fields){const s=t.fields[o];s&&s.ref&&"reportValidity"in s.ref?r$1(s.ref,o,e):s&&s.refs&&s.refs.forEach(t=>r$1(t,o,e));}},s$2=(r,s)=>{s.shouldUseNativeValidation&&o(r,s);const n={};for(const o in r){const f=admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(s.fields,o),c=Object.assign(r[o]||{},{ref:f&&f.ref});if(i$3(s.names||Object.keys(r),o)){const r=Object.assign({},admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.get(n,o));admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(r,"root",c),admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(n,o,r);}else admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.set(n,o,c);}return n},i$3=(e,t)=>{const r=n$1(t);return e.some(e=>n$1(e).match(`^${r}\\.\\d+`))};function n$1(e){return e.replace(/\]|\[/g,"")}
-
-function t$1(r,e){try{var o=r();}catch(r){return e(r)}return o&&o.then?o.then(void 0,e):o}function s$1(r,e){for(var n={};r.length;){var t=r[0],s=t.code,i=t.message,a=t.path.join(".");if(!n[a])if("unionErrors"in t){var u=t.unionErrors[0].errors[0];n[a]={message:u.message,type:u.code};}else n[a]={message:i,type:s};if("unionErrors"in t&&t.unionErrors.forEach(function(e){return e.errors.forEach(function(e){return r.push(e)})}),e){var c=n[a].types,f=c&&c[t.code];n[a]=admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.appendErrors(a,e,n,s,f?[].concat(f,t.message):t.message);}r.shift();}return n}function i$2(r,e){for(var n={};r.length;){var t=r[0],s=t.code,i=t.message,a=t.path.join(".");if(!n[a])if("invalid_union"===t.code&&t.errors.length>0){var u=t.errors[0][0];n[a]={message:u.message,type:u.code};}else n[a]={message:i,type:s};if("invalid_union"===t.code&&t.errors.forEach(function(e){return e.forEach(function(e){return r.push(e)})}),e){var c=n[a].types,f=c&&c[t.code];n[a]=admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.appendErrors(a,e,n,s,f?[].concat(f,t.message):t.message);}r.shift();}return n}function a$1(o$1,a,u){if(void 0===u&&(u={}),function(r){return "_def"in r&&"object"==typeof r._def&&"typeName"in r._def}(o$1))return function(n,i,c){try{return Promise.resolve(t$1(function(){return Promise.resolve(o$1["sync"===u.mode?"parse":"parseAsync"](n,a)).then(function(e){return c.shouldUseNativeValidation&&o({},c),{errors:{},values:u.raw?Object.assign({},n):e}})},function(r){if(function(r){return Array.isArray(null==r?void 0:r.issues)}(r))return {values:{},errors:s$2(s$1(r.errors,!c.shouldUseNativeValidation&&"all"===c.criteriaMode),c)};throw r}))}catch(r){return Promise.reject(r)}};if(function(r){return "_zod"in r&&"object"==typeof r._zod}(o$1))return function(s,c,f){try{return Promise.resolve(t$1(function(){return Promise.resolve(("sync"===u.mode?parse:parseAsync)(o$1,s,a)).then(function(e){return f.shouldUseNativeValidation&&o({},f),{errors:{},values:u.raw?Object.assign({},s):e}})},function(r){if(function(r){return r instanceof $ZodError}(r))return {values:{},errors:s$2(i$2(r.issues,!f.shouldUseNativeValidation&&"all"===f.criteriaMode),f)};throw r}))}catch(r){return Promise.reject(r)}};throw new Error("Invalid input: not a Zod schema")}
+function t$1(r,e){try{var o=r();}catch(r){return e(r)}return o&&o.then?o.then(void 0,e):o}function s$1(r,e){for(var n={};r.length;){var t=r[0],s=t.code,i=t.message,a=t.path.join(".");if(!n[a])if("unionErrors"in t){var u=t.unionErrors[0].errors[0];n[a]={message:u.message,type:u.code};}else n[a]={message:i,type:s};if("unionErrors"in t&&t.unionErrors.forEach(function(e){return e.errors.forEach(function(e){return r.push(e)})}),e){var c=n[a].types,f=c&&c[t.code];n[a]=dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.appendErrors(a,e,n,s,f?[].concat(f,t.message):t.message);}r.shift();}return n}function i$2(r,e){for(var n={};r.length;){var t=r[0],s=t.code,i=t.message,a=t.path.join(".");if(!n[a])if("invalid_union"===t.code&&t.errors.length>0){var u=t.errors[0][0];n[a]={message:u.message,type:u.code};}else n[a]={message:i,type:s};if("invalid_union"===t.code&&t.errors.forEach(function(e){return e.forEach(function(e){return r.push(e)})}),e){var c=n[a].types,f=c&&c[t.code];n[a]=dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.appendErrors(a,e,n,s,f?[].concat(f,t.message):t.message);}r.shift();}return n}function a$1(o$1,a,u){if(void 0===u&&(u={}),function(r){return "_def"in r&&"object"==typeof r._def&&"typeName"in r._def}(o$1))return function(n,i,c){try{return Promise.resolve(t$1(function(){return Promise.resolve(o$1["sync"===u.mode?"parse":"parseAsync"](n,a)).then(function(e){return c.shouldUseNativeValidation&&o({},c),{errors:{},values:u.raw?Object.assign({},n):e}})},function(r){if(function(r){return Array.isArray(null==r?void 0:r.issues)}(r))return {values:{},errors:s$2(s$1(r.errors,!c.shouldUseNativeValidation&&"all"===c.criteriaMode),c)};throw r}))}catch(r){return Promise.reject(r)}};if(function(r){return "_zod"in r&&"object"==typeof r._zod}(o$1))return function(s,c,f){try{return Promise.resolve(t$1(function(){return Promise.resolve(("sync"===u.mode?parse:parseAsync)(o$1,s,a)).then(function(e){return f.shouldUseNativeValidation&&o({},f),{errors:{},values:u.raw?Object.assign({},s):e}})},function(r){if(function(r){return r instanceof $ZodError}(r))return {values:{},errors:s$2(i$2(r.issues,!f.shouldUseNativeValidation&&"all"===f.criteriaMode),f)};throw r}))}catch(r){return Promise.reject(r)}};throw new Error("Invalid input: not a Zod schema")}
 
 /** Used for built-in method references. */
 var objectProto$c = Object.prototype;
@@ -1360,7 +1263,7 @@ function has(object, path) {
 
 // dev uses dynamic import to separate chunks
     
-    const {initPromise: initPromise$1} = admin__mf_v__runtimeInit__mf_v__;
+    const {initPromise: initPromise$1} = dashboard__mf_v__runtimeInit__mf_v__;
     const res$1 = initPromise$1.then(runtime => runtime.loadShare("@refinedev/core", {
       customShareInfo: {shareConfig:{
         singleton: true,
@@ -1369,7 +1272,7 @@ function has(object, path) {
       }}
     }));
     const exportModule$1 = await res$1.then(factory => factory());
-    var admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__ = exportModule$1;
+    var dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__ = exportModule$1;
 
 var __defProp$1 = Object.defineProperty;
 var __name$1 = (target, value) => __defProp$1(target, "name", { value, configurable: true });
@@ -1379,12 +1282,12 @@ var useForm = /* @__PURE__ */ __name$1(({
   disableServerSideValidation: disableServerSideValidationProp = false,
   ...rest
 } = {}) => {
-  const { options } = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useRefineContext();
+  const { options } = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useRefineContext();
   const disableServerSideValidation = (options == null ? void 0 : options.disableServerSideValidation) || disableServerSideValidationProp;
-  const translate = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useTranslate();
-  const { warnWhenUnsavedChanges: warnWhenUnsavedChangesRefine, setWarnWhen } = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useWarnAboutChange();
+  const translate = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useTranslate();
+  const { warnWhenUnsavedChanges: warnWhenUnsavedChangesRefine, setWarnWhen } = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useWarnAboutChange();
   const warnWhenUnsavedChanges = warnWhenUnsavedChangesProp ?? warnWhenUnsavedChangesRefine;
-  const useHookFormResult = admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.useForm({
+  const useHookFormResult = dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.useForm({
     ...rest
   });
   const {
@@ -1399,7 +1302,7 @@ var useForm = /* @__PURE__ */ __name$1(({
   const queryDataRef = React.useRef(void 0);
   const syncedFieldsRef = React.useRef(/* @__PURE__ */ new Set());
   const mountedFieldsRef = React.useRef(/* @__PURE__ */ new Set());
-  const useFormCoreResult = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useForm({
+  const useFormCoreResult = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useForm({
     ...refineCoreProps,
     onMutationError: (error, _variables, _context) => {
       var _a, _b;
@@ -1410,7 +1313,7 @@ var useForm = /* @__PURE__ */ __name$1(({
       const errors = error == null ? void 0 : error.errors;
       for (const key in errors) {
         const isKeyInVariables = Object.keys(
-          admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.flattenObjectKeys(_variables)
+          dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.flattenObjectKeys(_variables)
         ).includes(key);
         if (!isKeyInVariables) {
           continue;
@@ -1451,7 +1354,7 @@ var useForm = /* @__PURE__ */ __name$1(({
     const mounted = getMountedFields();
     mounted.forEach((name) => registeredFields.add(name));
     const values = getValues();
-    Object.keys(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.flattenObjectKeys(values)).forEach((path) => {
+    Object.keys(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.flattenObjectKeys(values)).forEach((path) => {
       registeredFields.add(path);
     });
     return registeredFields;
@@ -1471,7 +1374,7 @@ var useForm = /* @__PURE__ */ __name$1(({
       }
     });
   }, "applyValuesToFields");
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     var _a;
     const data = (_a = query == null ? void 0 : query.data) == null ? void 0 : _a.data;
     if (!data) {
@@ -1498,7 +1401,7 @@ var useForm = /* @__PURE__ */ __name$1(({
       isActive = false;
     };
   }, [query == null ? void 0 : query.data, setValue, getValues]);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     const subscription = watch((values, { type }) => {
       if (type === "change") {
         onValuesChange(values);
@@ -1506,7 +1409,7 @@ var useForm = /* @__PURE__ */ __name$1(({
     });
     return () => subscription.unsubscribe();
   }, [watch]);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     const data = queryDataRef.current;
     if (!data) {
       return;
@@ -1564,48 +1467,43 @@ var useForm = /* @__PURE__ */ __name$1(({
 }, "useForm");
 
 //#region src/components/form/adapters.tsx
-var adapters;
-var init_adapters = __esmMin(() => {
-	adapters = {
-		refine: {
-			Controller: admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.Controller,
-			FormProvider: admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.FormProvider,
-			submitHandler: async (config, methods) => {
-				const values = methods.getValues();
-				const refineResult = await methods.refineCore.onFinish({ ...values });
-				if (config.onSubmit) return await config.onSubmit(values) ?? refineResult;
-				return refineResult;
-			},
-			useForm: (options) => {
-				return useForm({
-					defaultValues: options.defaultValues,
-					refineCoreProps: {
-						autoSave: { enabled: false },
-						...options.refineCoreProps ?? {}
-					},
-					resolver: options.validationSchema ? a$1(options.validationSchema) : void 0
-				});
-			}
+const adapters = {
+	refine: {
+		Controller: dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.Controller,
+		FormProvider: dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.FormProvider,
+		submitHandler: async (config, methods) => {
+			const values = methods.getValues();
+			const refineResult = await methods.refineCore.onFinish({ ...values });
+			if (config.onSubmit) return await config.onSubmit(values) ?? refineResult;
+			return refineResult;
 		},
-		rhf: {
-			Controller: admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.Controller,
-			FormProvider: admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.FormProvider,
-			submitHandler: async (config, methods) => {
-				if (!config.onSubmit) throw new Error("onSubmit required for RHF adapter");
-				return await config.onSubmit(methods.getValues());
-			},
-			useForm: (options) => admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.useForm({
+		useForm: (options) => {
+			return useForm({
 				defaultValues: options.defaultValues,
+				refineCoreProps: {
+					autoSave: { enabled: false },
+					...options.refineCoreProps ?? {}
+				},
 				resolver: options.validationSchema ? a$1(options.validationSchema) : void 0
-			})
+			});
 		}
-	};
-});
-
-//#endregion
-init_adapters();
+	},
+	rhf: {
+		Controller: dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.Controller,
+		FormProvider: dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.FormProvider,
+		submitHandler: async (config, methods) => {
+			if (!config.onSubmit) throw new Error("onSubmit required for RHF adapter");
+			return await config.onSubmit(methods.getValues());
+		},
+		useForm: (options) => dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.useForm({
+			defaultValues: options.defaultValues,
+			resolver: options.validationSchema ? a$1(options.validationSchema) : void 0
+		})
+	}
+};
 
 //#region src/components/form/fields/registry.ts
+const componentRegistry = /* @__PURE__ */ new Map();
 function getFormComponent(type) {
 	return componentRegistry.get(type);
 }
@@ -1615,206 +1513,145 @@ function registerFormComponent(type, component, metadata) {
 		handlesLabel: metadata?.handlesLabel
 	});
 }
-var componentRegistry;
-var init_registry$2 = __esmMin(() => {
-	componentRegistry = /* @__PURE__ */ new Map();
-});
-
-//#endregion
-init_registry$2();
 
 //#region src/components/form/fields/types.ts
-var FormFieldType;
-var init_types$3 = __esmMin(() => {
-	FormFieldType = /* @__PURE__ */ function(FormFieldType$1) {
-		FormFieldType$1["CHECKBOX"] = "checkbox";
-		FormFieldType$1["CUSTOM"] = "custom";
-		FormFieldType$1["DATE"] = "date";
-		FormFieldType$1["EMAIL"] = "email";
-		FormFieldType$1["FILE"] = "file";
-		FormFieldType$1["PASSWORD"] = "password";
-		FormFieldType$1["RADIO"] = "radio";
-		FormFieldType$1["RICH_TEXT"] = "rich_text";
-		FormFieldType$1["SELECT"] = "select";
-		FormFieldType$1["SLIDER"] = "slider";
-		FormFieldType$1["SWITCH"] = "switch";
-		FormFieldType$1["TEXT"] = "text";
-		FormFieldType$1["TEXTAREA"] = "textarea";
-		return FormFieldType$1;
-	}({});
-});
-
-//#endregion
-init_types$3();
+let FormFieldType = /* @__PURE__ */ function(FormFieldType$1) {
+	FormFieldType$1["CHECKBOX"] = "checkbox";
+	FormFieldType$1["CUSTOM"] = "custom";
+	FormFieldType$1["DATE"] = "date";
+	FormFieldType$1["EMAIL"] = "email";
+	FormFieldType$1["FILE"] = "file";
+	FormFieldType$1["PASSWORD"] = "password";
+	FormFieldType$1["RADIO"] = "radio";
+	FormFieldType$1["RICH_TEXT"] = "rich_text";
+	FormFieldType$1["SELECT"] = "select";
+	FormFieldType$1["SLIDER"] = "slider";
+	FormFieldType$1["SWITCH"] = "switch";
+	FormFieldType$1["TEXT"] = "text";
+	FormFieldType$1["TEXTAREA"] = "textarea";
+	return FormFieldType$1;
+}({});
 
 //#region src/components/form/fields/Checkbox.tsx
+const Checkbox = React.forwardRef(({ autocomplete, label, ...props }, ref) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Checkbox, {
+		autoComplete: autocomplete,
+		checked: props.value,
+		disabled: props.disabled,
+		id: props.name,
+		name: props.name,
+		onBlur: props.onBlur,
+		onCheckedChange: props.onChange,
+		ref
+	}), label && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground", props.labelClassName),
+		htmlFor: props.name,
+		children: typeof label === "function" ? React.createElement(label) : label
+	})] });
+});
+Checkbox.displayName = "Checkbox";
 function registerCheckbox() {
 	registerFormComponent(FormFieldType.CHECKBOX, Checkbox, { handlesLabel: true });
 }
-var Checkbox;
-var init_Checkbox = __esmMin(() => {
-	init_fields();
-	init_components();
-	Checkbox = React.forwardRef(({ autocomplete, label, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Checkbox, {
-			autoComplete: autocomplete,
-			checked: props.value,
-			disabled: props.disabled,
-			id: props.name,
-			name: props.name,
-			onBlur: props.onBlur,
-			onCheckedChange: props.onChange,
-			ref
-		}), label && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground", props.labelClassName),
-			htmlFor: props.name,
-			children: typeof label === "function" ? React.createElement(label) : label
-		})] });
-	});
-	Checkbox.displayName = "Checkbox";
-});
-
-//#endregion
-init_Checkbox();
 
 //#region src/components/form/fields/DatePicker.tsx
+const DatePicker = React.forwardRef(({ autocomplete, ...props }, ref) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DatePicker, {
+		className: "border-modal-input placeholder-modal-input placeholder:text-foreground/50 p-4",
+		date: props.date,
+		disabled: props.disabled,
+		onBlur: props.onBlur,
+		placeholder: props.placeholder,
+		ref,
+		setDate: props.onChange,
+		...autocomplete ? { autoComplete: autocomplete } : {}
+	});
+});
+DatePicker.displayName = "DatePicker";
 function registerDatePicker() {
 	registerFormComponent(FormFieldType.DATE, DatePicker);
 }
-var DatePicker;
-var init_DatePicker = __esmMin(() => {
-	init_fields();
-	init_components();
-	DatePicker = React.forwardRef(({ autocomplete, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DatePicker, {
-			className: "border-modal-input placeholder-modal-input placeholder:text-foreground/50 p-4",
-			date: props.date,
-			disabled: props.disabled,
-			onBlur: props.onBlur,
-			placeholder: props.placeholder,
-			ref,
-			setDate: props.onChange,
-			...autocomplete ? { autoComplete: autocomplete } : {}
-		});
-	});
-	DatePicker.displayName = "DatePicker";
-});
-
-//#endregion
-init_DatePicker();
 
 //#region src/components/form/fields/EmailInput.tsx
+const EmailInput = React.forwardRef(({ autocomplete, ...props }, ref) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+		autoComplete: autocomplete,
+		ref,
+		type: "email",
+		...props
+	});
+});
+EmailInput.displayName = "EmailInput";
 function registerEmailInput() {
 	registerFormComponent(FormFieldType.EMAIL, EmailInput);
 }
-var EmailInput;
-var init_EmailInput = __esmMin(() => {
-	init_fields();
-	init_components();
-	EmailInput = React.forwardRef(({ autocomplete, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
-			autoComplete: autocomplete,
-			ref,
-			type: "email",
-			...props
-		});
-	});
-	EmailInput.displayName = "EmailInput";
-});
-
-//#endregion
-init_EmailInput();
 
 //#region src/components/form/fields/FileInput.tsx
+const FileInput = React.forwardRef(({ autocomplete, ...props }, ref) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+		autoComplete: autocomplete,
+		disabled: props.disabled,
+		name: props.name,
+		onBlur: props.onBlur,
+		onChange: (e) => props.onChange?.(e.target.files),
+		ref,
+		type: "file"
+	});
+});
+FileInput.displayName = "FileInput";
 function registerFileInput() {
 	registerFormComponent(FormFieldType.FILE, FileInput);
 }
-var FileInput;
-var init_FileInput = __esmMin(() => {
-	init_fields();
-	init_components();
-	FileInput = React.forwardRef(({ autocomplete, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
-			autoComplete: autocomplete,
-			disabled: props.disabled,
-			name: props.name,
-			onBlur: props.onBlur,
-			onChange: (e) => props.onChange?.(e.target.files),
-			ref,
-			type: "file"
-		});
-	});
-	FileInput.displayName = "FileInput";
-});
-
-//#endregion
-init_FileInput();
 
 //#region src/components/form/fields/Input.tsx
+const Input = React.forwardRef(({ autocomplete, autoComplete: htmlAutoComplete, inputClassName, onChange, placeholder, type, value, ...props }, ref) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+		autoComplete: autocomplete ?? htmlAutoComplete,
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("bg-input h-14 border-none", inputClassName),
+		onChange,
+		placeholder,
+		ref,
+		type,
+		value: value ?? "",
+		...props
+	});
+});
+Input.displayName = "Input";
 function registerInput() {
 	registerFormComponent(FormFieldType.TEXT, Input);
 	registerFormComponent(FormFieldType.PASSWORD, Input);
 }
-var Input;
-var init_Input = __esmMin(() => {
-	init_fields();
-	init_components();
-	Input = React.forwardRef(({ autocomplete, autoComplete: htmlAutoComplete, inputClassName, onChange, placeholder, type, value, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
-			autoComplete: autocomplete ?? htmlAutoComplete,
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("bg-input h-14 border-none", inputClassName),
-			onChange,
-			placeholder,
-			ref,
-			type,
-			value: value ?? "",
-			...props
-		});
-	});
-	Input.displayName = "Input";
-});
-
-//#endregion
-init_Input();
 
 //#region src/components/form/fields/RadioGroup.tsx
 function slugify(str) {
 	return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
+const RadioGroup = React.forwardRef(({ autocomplete, options, ...props }, ref) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.RadioGroup, {
+		disabled: props.disabled,
+		name: props.name,
+		onBlur: props.onBlur,
+		onValueChange: props.onChange,
+		ref,
+		value: props.value,
+		children: options.map((option) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+			className: "radio-option",
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.RadioGroupItem, {
+				id: `${props.name}-${slugify(option)}`,
+				value: option,
+				...autocomplete ? { autoComplete: autocomplete } : {}
+			}), /* @__PURE__ */ jsxRuntimeExports.jsx("label", {
+				className: props.labelClassName,
+				htmlFor: `${props.name}-${slugify(option)}`,
+				children: option
+			})]
+		}, option))
+	});
+});
+RadioGroup.displayName = "RadioGroup";
 function registerRadioGroup() {
 	registerFormComponent(FormFieldType.RADIO, RadioGroup);
 }
-var RadioGroup;
-var init_RadioGroup = __esmMin(() => {
-	init_fields();
-	init_components();
-	RadioGroup = React.forwardRef(({ autocomplete, options, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.RadioGroup, {
-			disabled: props.disabled,
-			name: props.name,
-			onBlur: props.onBlur,
-			onValueChange: props.onChange,
-			ref,
-			value: props.value,
-			children: options.map((option) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-				className: "radio-option",
-				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.RadioGroupItem, {
-					id: `${props.name}-${slugify(option)}`,
-					value: option,
-					...autocomplete ? { autoComplete: autocomplete } : {}
-				}), /* @__PURE__ */ jsxRuntimeExports.jsx("label", {
-					className: props.labelClassName,
-					htmlFor: `${props.name}-${slugify(option)}`,
-					children: option
-				})]
-			}, option))
-		});
-	});
-	RadioGroup.displayName = "RadioGroup";
-});
-
-//#endregion
-init_RadioGroup();
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -16301,7 +16138,7 @@ function formatDevErrorMessage$7(message) {
   throw new Error(message);
 }
 
-const LexicalComposerContext = /*#__PURE__*/admin__loadShare__react__loadShare__.createContext(null);
+const LexicalComposerContext = /*#__PURE__*/dashboard__loadShare__react__loadShare__.createContext(null);
 function createLexicalComposerContext(parent, theme) {
   function getTheme() {
     if (theme != null) {
@@ -16314,7 +16151,7 @@ function createLexicalComposerContext(parent, theme) {
   };
 }
 function useLexicalComposerContext() {
-  const composerContext = admin__loadShare__react__loadShare__.useContext(LexicalComposerContext);
+  const composerContext = dashboard__loadShare__react__loadShare__.useContext(LexicalComposerContext);
   if (composerContext == null) {
     {
       formatDevErrorMessage$7(`LexicalComposerContext.useLexicalComposerContext: cannot find a LexicalComposerContext`);
@@ -17699,73 +17536,61 @@ function createDOMPurify() {
 var purify = createDOMPurify();
 
 //#region src/components/editor/Preview.tsx
-var Preview;
-var init_Preview = __esmMin(() => {
-	Preview = function() {
-		const [editor] = useLexicalComposerContext();
-		return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-			className: "text-foreground min-h-[150px] whitespace-pre-wrap p-4",
-			dangerouslySetInnerHTML: { __html: editor.read(() => purify.sanitize($generateHtmlFromNodes(editor))) }
-		});
-	};
-});
-
-//#endregion
-init_Preview();
+const Preview = function() {
+	const [editor] = useLexicalComposerContext();
+	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+		className: "text-foreground min-h-[150px] whitespace-pre-wrap p-4",
+		dangerouslySetInnerHTML: { __html: editor.read(() => purify.sanitize($generateHtmlFromNodes(editor))) }
+	});
+};
 
 //#region src/components/editor/ToolbarContext.tsx
-var blockTypeToBlockName, Context, ToolbarProvider, useToolbarState;
-var init_ToolbarContext = __esmMin(() => {
-	blockTypeToBlockName = {
-		bullet: "Bulleted List",
-		check: "Check List",
-		code: "Code Block",
-		h1: "Heading 1",
-		h2: "Heading 2",
-		h3: "Heading 3",
-		h4: "Heading 4",
-		h5: "Heading 5",
-		h6: "Heading 6",
-		number: "Numbered List",
-		paragraph: "Normal",
-		quote: "Quote"
-	};
-	Context = admin__loadShare__react__loadShare__.createContext(void 0);
-	ToolbarProvider = ({ children }) => {
-		const [toolbarState, setToolbarState] = admin__loadShare__react__loadShare__.useState({
-			blockType: "paragraph",
-			isBold: false,
-			isClear: false,
-			isItalic: false,
-			isStrikethrough: false,
-			isSubscript: false,
-			isSuperscript: false,
-			isUnderline: false
-		});
-		const updateToolbarState = admin__loadShare__react__loadShare__.useCallback((key, value) => {
-			setToolbarState((prev) => ({
-				...prev,
-				[key]: value
-			}));
-		}, []);
-		const contextValue = admin__loadShare__react__loadShare__.useMemo(() => ({
-			toolbarState,
-			updateToolbarState
-		}), [toolbarState, updateToolbarState]);
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(Context.Provider, {
-			value: contextValue,
-			children
-		});
-	};
-	useToolbarState = () => {
-		const context = admin__loadShare__react__loadShare__.useContext(Context);
-		if (context === void 0) throw new Error("useToolbarState must be used within a ToolbarProvider");
-		return context;
-	};
-});
-
-//#endregion
-init_ToolbarContext();
+const blockTypeToBlockName = {
+	bullet: "Bulleted List",
+	check: "Check List",
+	code: "Code Block",
+	h1: "Heading 1",
+	h2: "Heading 2",
+	h3: "Heading 3",
+	h4: "Heading 4",
+	h5: "Heading 5",
+	h6: "Heading 6",
+	number: "Numbered List",
+	paragraph: "Normal",
+	quote: "Quote"
+};
+const Context = dashboard__loadShare__react__loadShare__.createContext(void 0);
+const ToolbarProvider = ({ children }) => {
+	const [toolbarState, setToolbarState] = dashboard__loadShare__react__loadShare__.useState({
+		blockType: "paragraph",
+		isBold: false,
+		isClear: false,
+		isItalic: false,
+		isStrikethrough: false,
+		isSubscript: false,
+		isSuperscript: false,
+		isUnderline: false
+	});
+	const updateToolbarState = dashboard__loadShare__react__loadShare__.useCallback((key, value) => {
+		setToolbarState((prev) => ({
+			...prev,
+			[key]: value
+		}));
+	}, []);
+	const contextValue = dashboard__loadShare__react__loadShare__.useMemo(() => ({
+		toolbarState,
+		updateToolbarState
+	}), [toolbarState, updateToolbarState]);
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(Context.Provider, {
+		value: contextValue,
+		children
+	});
+};
+const useToolbarState = () => {
+	const context = dashboard__loadShare__react__loadShare__.useContext(Context);
+	if (context === void 0) throw new Error("useToolbarState must be used within a ToolbarProvider");
+	return context;
+};
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -37828,76 +37653,70 @@ function formatCheckList(editor, currentBlockType, updateToolbarState) {
 		updateToolbarState("blockType", "check");
 	} else formatParagraph(editor, updateToolbarState);
 }
+const formatCode = (editor, blockType, updateToolbarState) => {
+	if (blockType !== "code") {
+		editor.update(() => {
+			let selection = $getSelection$1();
+			if (!selection) return;
+			if (!$isRangeSelection$1(selection) || selection.isCollapsed()) $setBlocksType(selection, () => $createCodeNode$1());
+			else {
+				const textContent = selection.getTextContent();
+				const codeNode = $createCodeNode$1();
+				selection.insertNodes([codeNode]);
+				selection = $getSelection$1();
+				if ($isRangeSelection$1(selection)) selection.insertRawText(textContent);
+			}
+		});
+		updateToolbarState("blockType", "code");
+	}
+};
 function formatParagraph(editor, updateToolbarState) {
 	editor.update(() => {
 		$setBlocksType($getSelection$1(), () => $createParagraphNode$1());
 		updateToolbarState("blockType", "paragraph");
 	});
 }
-var formatCode, formatHeading, formatQuote, formatBulletList, formatOrderedList;
-var init_formatting = __esmMin(() => {
-	formatCode = (editor, blockType, updateToolbarState) => {
-		if (blockType !== "code") {
-			editor.update(() => {
-				let selection = $getSelection$1();
-				if (!selection) return;
-				if (!$isRangeSelection$1(selection) || selection.isCollapsed()) $setBlocksType(selection, () => $createCodeNode$1());
-				else {
-					const textContent = selection.getTextContent();
-					const codeNode = $createCodeNode$1();
-					selection.insertNodes([codeNode]);
-					selection = $getSelection$1();
-					if ($isRangeSelection$1(selection)) selection.insertRawText(textContent);
-				}
+const formatHeading = (editor, blockType, headingSize, updateToolbarState) => {
+	if (blockType !== headingSize) editor.update(() => {
+		const selection = $getSelection$1();
+		if ($isRangeSelection$1(selection)) {
+			const anchorNode = selection.anchor.getNode();
+			let element = anchorNode.getKey() === "root" ? anchorNode : $findMatchingParent$1(anchorNode, (e) => {
+				const parent = e.getParent();
+				return parent !== null && $isRootOrShadowRoot$1(parent);
 			});
-			updateToolbarState("blockType", "code");
-		}
-	};
-	formatHeading = (editor, blockType, headingSize, updateToolbarState) => {
-		if (blockType !== headingSize) editor.update(() => {
-			const selection = $getSelection$1();
-			if ($isRangeSelection$1(selection)) {
-				const anchorNode = selection.anchor.getNode();
-				let element = anchorNode.getKey() === "root" ? anchorNode : $findMatchingParent$1(anchorNode, (e) => {
-					const parent = e.getParent();
-					return parent !== null && $isRootOrShadowRoot$1(parent);
-				});
-				if (element === null) element = anchorNode.getTopLevelElementOrThrow();
-				if (($isHeadingNode(element) ? element.getTag() : $isListNode(element) ? element.getListType() : element.getType()) === headingSize) {
-					$setBlocksType(selection, () => $createParagraphNode$1());
-					updateToolbarState("blockType", "paragraph");
-				} else {
-					$setBlocksType(selection, () => $createHeadingNode(headingSize));
-					updateToolbarState("blockType", headingSize);
-				}
+			if (element === null) element = anchorNode.getTopLevelElementOrThrow();
+			if (($isHeadingNode(element) ? element.getTag() : $isListNode(element) ? element.getListType() : element.getType()) === headingSize) {
+				$setBlocksType(selection, () => $createParagraphNode$1());
+				updateToolbarState("blockType", "paragraph");
+			} else {
+				$setBlocksType(selection, () => $createHeadingNode(headingSize));
+				updateToolbarState("blockType", headingSize);
 			}
-		});
-	};
-	formatQuote = (editor, blockType, updateToolbarState) => {
-		if (blockType !== "quote") editor.update(() => {
-			$setBlocksType($getSelection$1(), () => $createQuoteNode());
-			updateToolbarState("blockType", "paragraph");
-		});
-	};
-	formatBulletList = (editor, blockType, updateToolbarState) => {
-		if (blockType !== "bullet") {
-			editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, void 0);
-			updateToolbarState("blockType", "bullet");
-		} else formatParagraph(editor, updateToolbarState);
-	};
-	formatOrderedList = (editor, blockType, updateToolbarState) => {
-		if (blockType !== "number") {
-			editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, void 0);
-			updateToolbarState("blockType", "number");
-		} else {
-			editor.dispatchCommand(REMOVE_LIST_COMMAND, void 0);
-			updateToolbarState("blockType", "paragraph");
 		}
-	};
-});
-
-//#endregion
-init_formatting();
+	});
+};
+const formatQuote = (editor, blockType, updateToolbarState) => {
+	if (blockType !== "quote") editor.update(() => {
+		$setBlocksType($getSelection$1(), () => $createQuoteNode());
+		updateToolbarState("blockType", "paragraph");
+	});
+};
+const formatBulletList = (editor, blockType, updateToolbarState) => {
+	if (blockType !== "bullet") {
+		editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, void 0);
+		updateToolbarState("blockType", "bullet");
+	} else formatParagraph(editor, updateToolbarState);
+};
+const formatOrderedList = (editor, blockType, updateToolbarState) => {
+	if (blockType !== "number") {
+		editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, void 0);
+		updateToolbarState("blockType", "number");
+	} else {
+		editor.dispatchCommand(REMOVE_LIST_COMMAND, void 0);
+		updateToolbarState("blockType", "paragraph");
+	}
+};
 
 //#region src/components/editor/BlockTypeDropdown.tsx
 function BlockTypeDropdown({ blockType }) {
@@ -37933,32 +37752,77 @@ function BlockTypeDropdown({ blockType }) {
 				break;
 		}
 	};
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
 		onValueChange: handleSelect,
 		value: blockType,
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
 			className: "w-40",
-			children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder: "Block Type" })
-		}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, { children: Object.keys(blockTypeToBlockName).map((type) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
+			children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder: "Block Type" })
+		}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, { children: Object.keys(blockTypeToBlockName).map((type) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
 			value: type,
 			children: blockTypeToBlockName[type]
 		}, type)) })]
 	});
 }
-var init_BlockTypeDropdown = __esmMin(() => {
-	init_formatting();
-	init_ToolbarContext();
-});
-
-//#endregion
-init_BlockTypeDropdown();
 
 //#region src/components/editor/ToolbarPlugin.tsx
+const defaultToolbarOptions = [
+	"bold",
+	"italic",
+	"underline",
+	"undo",
+	"redo",
+	"blockTypes"
+];
+const formatToStateKey = {
+	bold: "isBold",
+	clear: "isClear",
+	italic: "isItalic",
+	strikethrough: "isStrikethrough",
+	subscript: "isSubscript",
+	superscript: "isSuperscript",
+	underline: "isUnderline"
+};
+const ToolbarButton = ({ children, command, disabled, payload, title }) => {
+	const [editor] = useLexicalComposerContext();
+	const { toolbarState, updateToolbarState } = useToolbarState();
+	const isActive = command === FORMAT_TEXT_COMMAND ? toolbarState[formatToStateKey[payload]] : false;
+	const handleClick = () => {
+		editor.dispatchCommand(command, payload);
+	};
+	if (command === FORMAT_TEXT_COMMAND) {
+		const stateKey = formatToStateKey[payload];
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Toggle, {
+			"aria-label": title,
+			disabled,
+			onPressedChange: (pressed) => {
+				handleClick();
+				updateToolbarState(stateKey, pressed);
+				if (payload === "clear") setTimeout(() => {
+					updateToolbarState(stateKey, false);
+				}, 300);
+			},
+			pressed: toolbarState[stateKey],
+			size: "sm",
+			title,
+			children
+		});
+	}
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		className: isActive ? "bg-gray-200" : "",
+		disabled,
+		onClick: handleClick,
+		size: "icon",
+		title,
+		variant: "ghost",
+		children
+	});
+};
 function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarOptions = defaultToolbarOptions }) {
 	const [editor] = useLexicalComposerContext();
 	const { toolbarState, updateToolbarState } = useToolbarState();
-	const [canUndo, setCanUndo] = admin__loadShare__react__loadShare__.useState(false);
-	const [canRedo, setCanRedo] = admin__loadShare__react__loadShare__.useState(false);
+	const [canUndo, setCanUndo] = dashboard__loadShare__react__loadShare__.useState(false);
+	const [canRedo, setCanRedo] = dashboard__loadShare__react__loadShare__.useState(false);
 	const $updateToolbar = React.useCallback(() => {
 		const selection = $getSelection$1();
 		if ($isRangeSelection$1(selection)) {
@@ -37988,7 +37852,7 @@ function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarO
 			});
 		}));
 	}, [editor, $updateToolbar]);
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		if (!enablePreview) setIsPreview(false);
 		if (enablePreview) editor.setEditable(!isPreview);
 	}, [
@@ -37997,7 +37861,7 @@ function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarO
 		isPreview,
 		setIsPreview
 	]);
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		return mergeRegister(editor.registerCommand(CAN_UNDO_COMMAND, (payload) => {
 			setCanUndo(payload);
 			return false;
@@ -38018,7 +37882,7 @@ function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarO
 					title: "Clear Formatting",
 					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ReloadIcon, { className: "text-muted-foreground" })
 				}),
-				toolbarOptions.includes("undo") && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				toolbarOptions.includes("undo") && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					className: "h-8 px-2",
 					disabled: !canUndo || isPreview,
 					onClick: () => editor.dispatchCommand(UNDO_COMMAND, void 0),
@@ -38026,7 +37890,7 @@ function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarO
 					variant: "ghost",
 					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ReloadIcon, { className: "-scale-x-100 transform" })
 				}),
-				toolbarOptions.includes("redo") && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				toolbarOptions.includes("redo") && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					className: "h-8 px-2",
 					disabled: !canRedo || isPreview,
 					onClick: () => editor.dispatchCommand(REDO_COMMAND, void 0),
@@ -38036,13 +37900,13 @@ function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarO
 				}),
 				enablePreview && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 					className: "flex items-center gap-1 pr-2",
-					children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+					children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 						onClick: () => setIsPreview(false),
 						size: "sm",
 						type: "button",
 						variant: !isPreview ? "secondary" : "ghost",
 						children: "Write"
-					}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+					}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 						onClick: () => setIsPreview(true),
 						size: "sm",
 						type: "button",
@@ -38050,7 +37914,7 @@ function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarO
 						children: "Preview"
 					})]
 				}),
-				toolbarOptions.includes("blockTypes") && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Separator, {
+				toolbarOptions.includes("blockTypes") && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Separator, {
 					className: "my-1 h-auto",
 					orientation: "vertical"
 				}), /* @__PURE__ */ jsxRuntimeExports.jsx(BlockTypeDropdown, { blockType: toolbarState.blockType })] }),
@@ -38079,66 +37943,6 @@ function ToolbarPlugin({ enablePreview = true, isPreview, setIsPreview, toolbarO
 		})
 	});
 }
-var defaultToolbarOptions, formatToStateKey, ToolbarButton;
-var init_ToolbarPlugin = __esmMin(() => {
-	init_BlockTypeDropdown();
-	init_ToolbarContext();
-	defaultToolbarOptions = [
-		"bold",
-		"italic",
-		"underline",
-		"undo",
-		"redo",
-		"blockTypes"
-	];
-	formatToStateKey = {
-		bold: "isBold",
-		clear: "isClear",
-		italic: "isItalic",
-		strikethrough: "isStrikethrough",
-		subscript: "isSubscript",
-		superscript: "isSuperscript",
-		underline: "isUnderline"
-	};
-	ToolbarButton = ({ children, command, disabled, payload, title }) => {
-		const [editor] = useLexicalComposerContext();
-		const { toolbarState, updateToolbarState } = useToolbarState();
-		const isActive = command === FORMAT_TEXT_COMMAND ? toolbarState[formatToStateKey[payload]] : false;
-		const handleClick = () => {
-			editor.dispatchCommand(command, payload);
-		};
-		if (command === FORMAT_TEXT_COMMAND) {
-			const stateKey = formatToStateKey[payload];
-			return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Toggle, {
-				"aria-label": title,
-				disabled,
-				onPressedChange: (pressed) => {
-					handleClick();
-					updateToolbarState(stateKey, pressed);
-					if (payload === "clear") setTimeout(() => {
-						updateToolbarState(stateKey, false);
-					}, 300);
-				},
-				pressed: toolbarState[stateKey],
-				size: "sm",
-				title,
-				children
-			});
-		}
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-			className: isActive ? "bg-gray-200" : "",
-			disabled,
-			onClick: handleClick,
-			size: "icon",
-			title,
-			variant: "ghost",
-			children
-		});
-	};
-});
-
-//#endregion
-init_ToolbarPlugin();
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -40585,7 +40389,7 @@ function $convertFromMarkdownString(markdown, transformers = TRANSFORMERS, node,
 
 function CheckListPlugin() {
   const [editor] = useLexicalComposerContext();
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     return registerCheckList(editor);
   }, [editor]);
   return null;
@@ -40622,7 +40426,7 @@ const CAN_USE_DOM$4 = typeof window !== 'undefined' && typeof window.document !=
 // This workaround is no longer necessary in React 19,
 // but we currently support React >=17.x
 // https://github.com/facebook/react/pull/26395
-const useLayoutEffectImpl$4 = CAN_USE_DOM$4 ? admin__loadShare__react__loadShare__.useLayoutEffect : admin__loadShare__react__loadShare__.useEffect;
+const useLayoutEffectImpl$4 = CAN_USE_DOM$4 ? dashboard__loadShare__react__loadShare__.useLayoutEffect : dashboard__loadShare__react__loadShare__.useEffect;
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -40639,7 +40443,7 @@ function LexicalComposer({
   initialConfig,
   children
 }) {
-  const composerContext = admin__loadShare__react__loadShare__.useMemo(() => {
+  const composerContext = dashboard__loadShare__react__loadShare__.useMemo(() => {
     const {
       theme,
       namespace,
@@ -40858,7 +40662,7 @@ const CAN_USE_DOM$3 = typeof window !== 'undefined' && typeof window.document !=
 // This workaround is no longer necessary in React 19,
 // but we currently support React >=17.x
 // https://github.com/facebook/react/pull/26395
-const useLayoutEffectImpl$3 = CAN_USE_DOM$3 ? admin__loadShare__react__loadShare__.useLayoutEffect : admin__loadShare__react__loadShare__.useEffect;
+const useLayoutEffectImpl$3 = CAN_USE_DOM$3 ? dashboard__loadShare__react__loadShare__.useLayoutEffect : dashboard__loadShare__react__loadShare__.useEffect;
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -40912,8 +40716,8 @@ function ContentEditableElementImpl({
   'data-testid': testid,
   ...rest
 }, ref) {
-  const [isEditable, setEditable] = admin__loadShare__react__loadShare__.useState(editor.isEditable());
-  const handleRef = admin__loadShare__react__loadShare__.useCallback(rootElement => {
+  const [isEditable, setEditable] = dashboard__loadShare__react__loadShare__.useState(editor.isEditable());
+  const handleRef = dashboard__loadShare__react__loadShare__.useCallback(rootElement => {
     // defaultView is required for a root element.
     // In multi-window setups, the defaultView may not exist at certain points.
     if (rootElement && rootElement.ownerDocument && rootElement.ownerDocument.defaultView) {
@@ -40922,7 +40726,7 @@ function ContentEditableElementImpl({
       editor.setRootElement(null);
     }
   }, [editor]);
-  const mergedRefs = admin__loadShare__react__loadShare__.useMemo(() => mergeRefs(ref, handleRef), [handleRef, ref]);
+  const mergedRefs = dashboard__loadShare__react__loadShare__.useMemo(() => mergeRefs(ref, handleRef), [handleRef, ref]);
   useLayoutEffectImpl$3(() => {
     setEditable(editor.isEditable());
     return editor.registerEditableListener(currentIsEditable => {
@@ -40964,7 +40768,7 @@ function ContentEditableElementImpl({
     ...rest
   });
 }
-const ContentEditableElement = /*#__PURE__*/admin__loadShare__react__loadShare__.forwardRef(ContentEditableElementImpl);
+const ContentEditableElement = /*#__PURE__*/dashboard__loadShare__react__loadShare__.forwardRef(ContentEditableElementImpl);
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -40979,7 +40783,7 @@ function canShowPlaceholderFromCurrentEditorState$1(editor) {
   return currentCanShowPlaceholder;
 }
 function useCanShowPlaceholder$1(editor) {
-  const [canShowPlaceholder, setCanShowPlaceholder] = admin__loadShare__react__loadShare__.useState(() => canShowPlaceholderFromCurrentEditorState$1(editor));
+  const [canShowPlaceholder, setCanShowPlaceholder] = dashboard__loadShare__react__loadShare__.useState(() => canShowPlaceholderFromCurrentEditorState$1(editor));
   useLayoutEffectImpl$3(() => {
     function resetCanShowPlaceholder() {
       const currentCanShowPlaceholder = canShowPlaceholderFromCurrentEditorState$1(editor);
@@ -41012,7 +40816,7 @@ function useCanShowPlaceholder$1(editor) {
  * Please update your codebase to use `ContentEditableProps` to ensure long-term maintainability.
  */
 
-const ContentEditable = /*#__PURE__*/admin__loadShare__react__loadShare__.forwardRef(ContentEditableImpl);
+const ContentEditable = /*#__PURE__*/dashboard__loadShare__react__loadShare__.forwardRef(ContentEditableImpl);
 function ContentEditableImpl(props, ref) {
   const {
     placeholder,
@@ -41035,8 +40839,8 @@ function Placeholder$1({
   editor
 }) {
   const showPlaceholder = useCanShowPlaceholder$1(editor);
-  const [isEditable, setEditable] = admin__loadShare__react__loadShare__.useState(editor.isEditable());
-  admin__loadShare__react__loadShare__.useLayoutEffect(() => {
+  const [isEditable, setEditable] = dashboard__loadShare__react__loadShare__.useState(editor.isEditable());
+  dashboard__loadShare__react__loadShare__.useLayoutEffect(() => {
     setEditable(editor.isEditable());
     return editor.registerEditableListener(currentIsEditable => {
       setEditable(currentIsEditable);
@@ -41407,8 +41211,8 @@ function createEmptyHistoryState() {
  */
 
 function useHistory(editor, externalHistoryState, delay = 1000) {
-  const historyState = admin__loadShare__react__loadShare__.useMemo(() => externalHistoryState || createEmptyHistoryState(), [externalHistoryState]);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  const historyState = dashboard__loadShare__react__loadShare__.useMemo(() => externalHistoryState || createEmptyHistoryState(), [externalHistoryState]);
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     return registerHistory(editor, historyState, delay);
   }, [delay, editor, historyState]);
 }
@@ -41486,8 +41290,8 @@ function useLexicalNodeSelection(key) {
   const [editor] = useLexicalComposerContext();
 
   // State to track whether the node is currently selected.
-  const [isSelected, setIsSelected] = admin__loadShare__react__loadShare__.useState(() => isNodeSelected(editor, key));
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  const [isSelected, setIsSelected] = dashboard__loadShare__react__loadShare__.useState(() => isNodeSelected(editor, key));
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     let isMounted = true;
     const unregister = editor.registerUpdateListener(() => {
       if (isMounted) {
@@ -41499,7 +41303,7 @@ function useLexicalNodeSelection(key) {
       unregister();
     };
   }, [editor, key]);
-  const setSelected = admin__loadShare__react__loadShare__.useCallback(selected => {
+  const setSelected = dashboard__loadShare__react__loadShare__.useCallback(selected => {
     editor.update(() => {
       let selection = $getSelection$1();
       if (!$isNodeSelection$1(selection)) {
@@ -41515,7 +41319,7 @@ function useLexicalNodeSelection(key) {
       }
     });
   }, [editor, key]);
-  const clearSelected = admin__loadShare__react__loadShare__.useCallback(() => {
+  const clearSelected = dashboard__loadShare__react__loadShare__.useCallback(() => {
     editor.update(() => {
       const selection = $getSelection$1();
       if ($isNodeSelection$1(selection)) {
@@ -41548,7 +41352,7 @@ function HorizontalRuleComponent({
 }) {
   const [editor] = useLexicalComposerContext();
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     return mergeRegister(editor.registerCommand(CLICK_COMMAND$1, event => {
       const hrElem = editor.getElementByKey(nodeKey);
       if (event.target === hrElem) {
@@ -41561,7 +41365,7 @@ function HorizontalRuleComponent({
       return false;
     }, COMMAND_PRIORITY_LOW));
   }, [clearSelection, editor, isSelected, nodeKey, setSelected]);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     const hrElem = editor.getElementByKey(nodeKey);
     const isSelectedClassName = editor._config.theme.hrSelected ?? 'selected';
     if (hrElem !== null) {
@@ -41637,12 +41441,12 @@ function LinkPlugin({
   attributes
 }) {
   const [editor] = useLexicalComposerContext();
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     if (!editor.hasNodes([LinkNode])) {
       throw new Error('LinkPlugin: LinkNode not registered on editor');
     }
   });
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     return registerLink(editor, namedSignals({
       attributes,
       validateUrl
@@ -41669,7 +41473,7 @@ function LinkPlugin({
  */
 
 function useList(editor) {
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     return registerList(editor);
   }, [editor]);
 }
@@ -41686,12 +41490,12 @@ function ListPlugin({
   hasStrictIndent = false
 }) {
   const [editor] = useLexicalComposerContext();
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     if (!editor.hasNodes([ListNode, ListItemNode])) {
       throw new Error('ListPlugin: ListNode and/or ListItemNode not registered on editor');
     }
   }, [editor]);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     if (!hasStrictIndent) {
       return;
     }
@@ -41742,7 +41546,7 @@ function MarkdownShortcutPlugin({
   transformers = DEFAULT_TRANSFORMERS
 }) {
   const [editor] = useLexicalComposerContext();
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     return registerMarkdownShortcuts(editor, transformers);
   }, [editor, transformers]);
   return null;
@@ -41779,7 +41583,7 @@ const CAN_USE_DOM$2 = typeof window !== 'undefined' && typeof window.document !=
 // This workaround is no longer necessary in React 19,
 // but we currently support React >=17.x
 // https://github.com/facebook/react/pull/26395
-const useLayoutEffectImpl$2 = CAN_USE_DOM$2 ? admin__loadShare__react__loadShare__.useLayoutEffect : admin__loadShare__react__loadShare__.useEffect;
+const useLayoutEffectImpl$2 = CAN_USE_DOM$2 ? dashboard__loadShare__react__loadShare__.useLayoutEffect : dashboard__loadShare__react__loadShare__.useEffect;
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -41845,7 +41649,7 @@ const CAN_USE_DOM$1 = typeof window !== 'undefined' && typeof window.document !=
 // This workaround is no longer necessary in React 19,
 // but we currently support React >=17.x
 // https://github.com/facebook/react/pull/26395
-const useLayoutEffectImpl$1 = CAN_USE_DOM$1 ? admin__loadShare__react__loadShare__.useLayoutEffect : admin__loadShare__react__loadShare__.useEffect;
+const useLayoutEffectImpl$1 = CAN_USE_DOM$1 ? dashboard__loadShare__react__loadShare__.useLayoutEffect : dashboard__loadShare__react__loadShare__.useEffect;
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -41861,9 +41665,9 @@ const useLayoutEffectImpl$1 = CAN_USE_DOM$1 ? admin__loadShare__react__loadShare
  */
 function useLexicalSubscription(subscription) {
   const [editor] = useLexicalComposerContext();
-  const initializedSubscription = admin__loadShare__react__loadShare__.useMemo(() => subscription(editor), [editor, subscription]);
-  const [value, setValue] = admin__loadShare__react__loadShare__.useState(() => initializedSubscription.initialValueFn());
-  const valueRef = admin__loadShare__react__loadShare__.useRef(value);
+  const initializedSubscription = dashboard__loadShare__react__loadShare__.useMemo(() => subscription(editor), [editor, subscription]);
+  const [value, setValue] = dashboard__loadShare__react__loadShare__.useState(() => initializedSubscription.initialValueFn());
+  const valueRef = dashboard__loadShare__react__loadShare__.useRef(value);
   useLayoutEffectImpl$1(() => {
     const {
       initialValueFn,
@@ -41985,7 +41789,7 @@ const CAN_USE_DOM = typeof window !== 'undefined' && typeof window.document !== 
 // This workaround is no longer necessary in React 19,
 // but we currently support React >=17.x
 // https://github.com/facebook/react/pull/26395
-const useLayoutEffectImpl = CAN_USE_DOM ? admin__loadShare__react__loadShare__.useLayoutEffect : admin__loadShare__react__loadShare__.useEffect;
+const useLayoutEffectImpl = CAN_USE_DOM ? dashboard__loadShare__react__loadShare__.useLayoutEffect : dashboard__loadShare__react__loadShare__.useEffect;
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -41996,17 +41800,17 @@ const useLayoutEffectImpl = CAN_USE_DOM ? admin__loadShare__react__loadShare__.u
  */
 
 function useDecorators(editor, ErrorBoundary) {
-  const [decorators, setDecorators] = admin__loadShare__react__loadShare__.useState(() => editor.getDecorators());
+  const [decorators, setDecorators] = dashboard__loadShare__react__loadShare__.useState(() => editor.getDecorators());
 
   // Subscribe to changes
   useLayoutEffectImpl(() => {
     return editor.registerDecoratorListener(nextDecorators => {
-      admin__loadShare__react_mf_2_dom__loadShare__.flushSync(() => {
+      dashboard__loadShare__react_mf_2_dom__loadShare__.flushSync(() => {
         setDecorators(nextDecorators);
       });
     });
   }, [editor]);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     // If the content editable mounts before the subscription is added, then
     // nothing will be rendered on initial pass. We can get around that by
     // ensuring that we set the value.
@@ -42014,21 +41818,21 @@ function useDecorators(editor, ErrorBoundary) {
   }, [editor]);
 
   // Return decorators defined as React Portals
-  return admin__loadShare__react__loadShare__.useMemo(() => {
+  return dashboard__loadShare__react__loadShare__.useMemo(() => {
     const decoratedPortals = [];
     const decoratorKeys = Object.keys(decorators);
     for (let i = 0; i < decoratorKeys.length; i++) {
       const nodeKey = decoratorKeys[i];
       const reactDecorator = /*#__PURE__*/jsxRuntimeExports.jsx(ErrorBoundary, {
         onError: e => editor._onError(e),
-        children: /*#__PURE__*/jsxRuntimeExports.jsx(admin__loadShare__react__loadShare__.Suspense, {
+        children: /*#__PURE__*/jsxRuntimeExports.jsx(dashboard__loadShare__react__loadShare__.Suspense, {
           fallback: null,
           children: decorators[nodeKey]
         })
       });
       const element = editor.getElementByKey(nodeKey);
       if (element !== null) {
-        decoratedPortals.push(/*#__PURE__*/admin__loadShare__react_mf_2_dom__loadShare__.createPortal(reactDecorator, element, nodeKey));
+        decoratedPortals.push(/*#__PURE__*/dashboard__loadShare__react_mf_2_dom__loadShare__.createPortal(reactDecorator, element, nodeKey));
       }
     }
     return decoratedPortals;
@@ -42085,7 +41889,7 @@ function canShowPlaceholderFromCurrentEditorState(editor) {
   return currentCanShowPlaceholder;
 }
 function useCanShowPlaceholder(editor) {
-  const [canShowPlaceholder, setCanShowPlaceholder] = admin__loadShare__react__loadShare__.useState(() => canShowPlaceholderFromCurrentEditorState(editor));
+  const [canShowPlaceholder, setCanShowPlaceholder] = dashboard__loadShare__react__loadShare__.useState(() => canShowPlaceholderFromCurrentEditorState(editor));
   useLayoutEffectImpl(() => {
     function resetCanShowPlaceholder() {
       const currentCanShowPlaceholder = canShowPlaceholderFromCurrentEditorState(editor);
@@ -42162,421 +41966,500 @@ function Placeholder({
 }
 
 //#region src/components/editor/Editor.tsx
-var Editor;
-var init_Editor = __esmMin(() => {
-	init_Preview();
-	init_ToolbarContext();
-	init_ToolbarPlugin();
-	Editor = admin__loadShare__react__loadShare__.forwardRef(({ enablePreview, onChange, placeholder, toolbarOptions, value }, ref) => {
-		const [isPreview, setIsPreview] = admin__loadShare__react__loadShare__.useState(false);
-		const handleChange = React.useCallback((editorState) => {
-			const content = editorState.read(() => $getRoot$1().getTextContent());
-			onChange?.(content);
-		}, [onChange]);
-		return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-			className: "bg-modal-input text-foreground rounded-md border",
-			children: /* @__PURE__ */ jsxRuntimeExports.jsx(LexicalComposer, {
-				initialConfig: React.useMemo(() => ({
-					editable: !isPreview,
-					editorState: () => {
-						$convertFromMarkdownString(value ?? "", TRANSFORMERS);
+const Editor = dashboard__loadShare__react__loadShare__.forwardRef(({ enablePreview, onChange, placeholder, toolbarOptions, value }, ref) => {
+	const [isPreview, setIsPreview] = dashboard__loadShare__react__loadShare__.useState(false);
+	const handleChange = React.useCallback((editorState) => {
+		const content = editorState.read(() => $getRoot$1().getTextContent());
+		onChange?.(content);
+	}, [onChange]);
+	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+		className: "bg-modal-input text-foreground rounded-md border",
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(LexicalComposer, {
+			initialConfig: React.useMemo(() => ({
+				editable: !isPreview,
+				editorState: () => {
+					$convertFromMarkdownString(value ?? "", TRANSFORMERS);
+				},
+				namespace: "MarkdownEditor",
+				nodes: [
+					HorizontalRuleNode,
+					CodeNode$1,
+					LinkNode,
+					ListNode,
+					ListItemNode,
+					HeadingNode,
+					QuoteNode
+				],
+				onError: (error) => {
+					throw error;
+				},
+				theme: {
+					heading: {
+						h1: "text-2xl font-bold",
+						h2: "text-xl font-bold",
+						h3: "text-lg font-semibold",
+						h4: "text-base font-semibold",
+						h5: "text-sm font-semibold",
+						h6: "text-xs font-semibold"
 					},
-					namespace: "MarkdownEditor",
-					nodes: [
-						HorizontalRuleNode,
-						CodeNode$1,
-						LinkNode,
-						ListNode,
-						ListItemNode,
-						HeadingNode,
-						QuoteNode
-					],
-					onError: (error) => {
-						throw error;
-					},
-					theme: {
-						heading: {
-							h1: "text-2xl font-bold",
-							h2: "text-xl font-bold",
-							h3: "text-lg font-semibold",
-							h4: "text-base font-semibold",
-							h5: "text-sm font-semibold",
-							h6: "text-xs font-semibold"
-						},
-						link: "cursor-pointer",
-						root: "p-3 border rounded-md bg-modal-input text-foreground",
-						text: {
-							bold: "font-semibold",
-							italic: "italic",
-							underline: "underline"
-						}
+					link: "cursor-pointer",
+					root: "p-3 border rounded-md bg-modal-input text-foreground",
+					text: {
+						bold: "font-semibold",
+						italic: "italic",
+						underline: "underline"
 					}
-				}), [isPreview, value]),
-				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(ToolbarProvider, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-					className: "border-border flex items-center justify-between gap-1 border-b p-1",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ToolbarPlugin, {
-						isPreview,
-						setIsPreview,
-						toolbarOptions
-					})
-				}), !isPreview ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-					/* @__PURE__ */ jsxRuntimeExports.jsx(RichTextPlugin, {
-						contentEditable: /* @__PURE__ */ jsxRuntimeExports.jsx(ContentEditable, {
-							"aria-placeholder": placeholder ?? "",
-							className: "text-foreground min-h-[150px] w-full resize-none bg-transparent outline-none",
-							placeholder: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-								className: "text-foreground/50",
-								children: placeholder
-							})
-						}),
-						ErrorBoundary: LexicalErrorBoundary
+				}
+			}), [isPreview, value]),
+			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(ToolbarProvider, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "border-border flex items-center justify-between gap-1 border-b p-1",
+				children: /* @__PURE__ */ jsxRuntimeExports.jsx(ToolbarPlugin, {
+					isPreview,
+					setIsPreview,
+					toolbarOptions
+				})
+			}), !isPreview ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+				/* @__PURE__ */ jsxRuntimeExports.jsx(RichTextPlugin, {
+					contentEditable: /* @__PURE__ */ jsxRuntimeExports.jsx(ContentEditable, {
+						"aria-placeholder": placeholder ?? "",
+						className: "text-foreground min-h-[150px] w-full resize-none bg-transparent outline-none",
+						placeholder: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+							className: "text-foreground/50",
+							children: placeholder
+						})
 					}),
-					/* @__PURE__ */ jsxRuntimeExports.jsx(HistoryPlugin, {}),
-					/* @__PURE__ */ jsxRuntimeExports.jsx(ListPlugin, {}),
-					/* @__PURE__ */ jsxRuntimeExports.jsx(CheckListPlugin, {}),
-					/* @__PURE__ */ jsxRuntimeExports.jsx(LinkPlugin, {}),
-					/* @__PURE__ */ jsxRuntimeExports.jsx(MarkdownShortcutPlugin, { transformers: TRANSFORMERS }),
-					/* @__PURE__ */ jsxRuntimeExports.jsx(OnChangePlugin, {
-						ignoreHistoryMergeTagChange: true,
-						ignoreSelectionChange: true,
-						onChange: handleChange
-					})
-				] }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Preview, {})] })
-			})
-		});
+					ErrorBoundary: LexicalErrorBoundary
+				}),
+				/* @__PURE__ */ jsxRuntimeExports.jsx(HistoryPlugin, {}),
+				/* @__PURE__ */ jsxRuntimeExports.jsx(ListPlugin, {}),
+				/* @__PURE__ */ jsxRuntimeExports.jsx(CheckListPlugin, {}),
+				/* @__PURE__ */ jsxRuntimeExports.jsx(LinkPlugin, {}),
+				/* @__PURE__ */ jsxRuntimeExports.jsx(MarkdownShortcutPlugin, { transformers: TRANSFORMERS }),
+				/* @__PURE__ */ jsxRuntimeExports.jsx(OnChangePlugin, {
+					ignoreHistoryMergeTagChange: true,
+					ignoreSelectionChange: true,
+					onChange: handleChange
+				})
+			] }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Preview, {})] })
+		})
 	});
-	Editor.displayName = "Markdown";
 });
-
-//#endregion
-init_Editor();
-
-//#region src/components/editor/index.ts
-var init_editor = __esmMin(() => {
-	init_Editor();
-});
-
-//#endregion
-init_editor();
+Editor.displayName = "Markdown";
 
 //#region src/components/form/fields/RichText.tsx
+const RichText = dashboard__loadShare__react__loadShare__.forwardRef(({ autocomplete, enablePreview, onChange, placeholder, required, toolbarOptions, value }, ref) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(Editor, {
+		enablePreview,
+		onChange,
+		placeholder,
+		ref,
+		required,
+		toolbarOptions,
+		value,
+		...autocomplete ? { autoComplete: autocomplete } : {}
+	});
+});
+RichText.displayName = "MarkdownEditor";
 function registerRichText() {
 	registerFormComponent(FormFieldType.RICH_TEXT, RichText);
 }
-var RichText;
-var init_RichText = __esmMin(() => {
-	init_editor();
-	init_fields();
-	init_components();
-	RichText = admin__loadShare__react__loadShare__.forwardRef(({ autocomplete, enablePreview, onChange, placeholder, required, toolbarOptions, value }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(Editor, {
-			enablePreview,
-			onChange,
-			placeholder,
-			ref,
-			required,
-			toolbarOptions,
-			value,
-			...autocomplete ? { autoComplete: autocomplete } : {}
-		});
-	});
-	RichText.displayName = "MarkdownEditor";
-});
-
-//#endregion
-init_RichText();
 
 //#region src/components/form/fields/Select.tsx
+const Select = React.forwardRef(({ autocomplete, inputClassName, onChange, options, placeholder = "Select...", required, value, ...props }, ref) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
+		onValueChange: onChange,
+		required,
+		value: value || "",
+		...autocomplete ? { autoComplete: autocomplete } : {},
+		...props,
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
+			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("bg-modal-input text-foreground placeholder:text-foreground/50 h-14 w-full border-none", inputClassName, "data-[placeholder]:text-foreground/50"),
+			ref,
+			children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder })
+		}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, { children: (options || []).map((option) => {
+			const value$1 = typeof option === "string" ? option : option.value;
+			return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
+				value: value$1,
+				children: typeof option === "string" ? option : option.label
+			}, value$1);
+		}) })]
+	});
+});
+Select.displayName = "Select";
 function registerSelect() {
 	registerFormComponent(FormFieldType.SELECT, Select);
 }
-var Select;
-var init_Select = __esmMin(() => {
-	init_fields();
-	init_components();
-	Select = React.forwardRef(({ autocomplete, inputClassName, onChange, options, placeholder = "Select...", required, value, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
-			onValueChange: onChange,
-			required,
-			value: value || "",
-			...autocomplete ? { autoComplete: autocomplete } : {},
-			...props,
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
-				className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("bg-modal-input text-foreground placeholder:text-foreground/50 h-14 w-full border-none", inputClassName, "data-[placeholder]:text-foreground/50"),
-				ref,
-				children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder })
-			}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, { children: (options || []).map((option) => {
-				const value$1 = typeof option === "string" ? option : option.value;
-				return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
-					value: value$1,
-					children: typeof option === "string" ? option : option.label
-				}, value$1);
-			}) })]
-		});
-	});
-	Select.displayName = "Select";
-});
-
-//#endregion
-init_Select();
 
 //#region src/components/form/fields/Slider.tsx
+const Slider = React.forwardRef(({ max = 100, min = 0, onChange, step = 1, value, ...props }, ref) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Slider, {
+		disabled: props.disabled,
+		max,
+		min,
+		onBlur: props.onBlur,
+		onValueChange: (vals) => onChange?.(vals[0]),
+		ref,
+		step,
+		value: [value || min]
+	});
+});
+Slider.displayName = "Slider";
 function registerSlider() {
 	registerFormComponent(FormFieldType.SLIDER, Slider);
 }
-var Slider;
-var init_Slider = __esmMin(() => {
-	init_fields();
-	init_components();
-	Slider = React.forwardRef(({ max = 100, min = 0, onChange, step = 1, value, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Slider, {
-			disabled: props.disabled,
-			max,
-			min,
-			onBlur: props.onBlur,
-			onValueChange: (vals) => onChange?.(vals[0]),
-			ref,
-			step,
-			value: [value || min]
-		});
-	});
-	Slider.displayName = "Slider";
-});
-
-//#endregion
-init_Slider();
 
 //#region src/components/form/fields/Textarea.tsx
+const Textarea = React.forwardRef(({ autocomplete, autoComplete: htmlAutoComplete, inputClassName, onChange, placeholder, value, ...props }, ref) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Textarea, {
+		autoComplete: autocomplete ?? htmlAutoComplete,
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[60px] w-full rounded-md border px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50", inputClassName),
+		onChange,
+		placeholder,
+		ref,
+		value: value ?? "",
+		...props
+	});
+});
+Textarea.displayName = "Textarea";
 function registerTextarea() {
 	registerFormComponent(FormFieldType.TEXTAREA, Textarea);
 }
-var Textarea;
-var init_Textarea = __esmMin(() => {
-	init_fields();
-	init_components();
-	Textarea = React.forwardRef(({ autocomplete, autoComplete: htmlAutoComplete, inputClassName, onChange, placeholder, value, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Textarea, {
-			autoComplete: autocomplete ?? htmlAutoComplete,
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[60px] w-full rounded-md border px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50", inputClassName),
-			onChange,
-			placeholder,
-			ref,
-			value: value ?? "",
-			...props
-		});
-	});
-	Textarea.displayName = "Textarea";
-});
-
-//#endregion
-init_Textarea();
-
-//#region src/components/form/fields/index.ts
-var init_fields = __esmMin(() => {
-	init_Checkbox();
-	init_DatePicker();
-	init_EmailInput();
-	init_FileInput();
-	init_Input();
-	init_RadioGroup();
-	init_registry$2();
-	init_RichText();
-	init_RichText();
-	init_Select();
-	init_Slider();
-	init_Textarea();
-	init_types$3();
-});
-
-//#endregion
-init_fields();
 
 //#region src/components/form/FormGroup.tsx
-var FormGroup;
-var init_FormGroup = __esmMin(() => {
-	FormGroup = ({ children, className, description, title }) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
-			children: title || description ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-				title && /* @__PURE__ */ jsxRuntimeExports.jsx("h3", {
-					className: "text-lg font-medium",
-					children: title
-				}),
-				description && /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
-					className: "text-muted-foreground text-sm",
-					children: description
-				}),
-				/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-					className: "space-y-4",
-					children
-				})
-			] }) : children
-		});
-	};
-});
+const FormGroup = ({ children, className, description, title }) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
+		children: title || description ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+			title && /* @__PURE__ */ jsxRuntimeExports.jsx("h3", {
+				className: "text-lg font-medium",
+				children: title
+			}),
+			description && /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
+				className: "text-muted-foreground text-sm",
+				children: description
+			}),
+			/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "space-y-4",
+				children
+			})
+		] }) : children
+	});
+};
 
-//#endregion
-init_FormGroup();
-
+//#region src/components/form/autocomplete/register.ts
+const defaultRules = [
+	{
+		evaluate: (fieldConfig) => {
+			return fieldConfig.autocomplete;
+		},
+		name: "explicit",
+		priority: 0
+	},
+	{
+		evaluate: (fieldConfig) => {
+			if (fieldConfig.type === FormFieldType.EMAIL) return "email";
+		},
+		name: "email-type",
+		priority: 10
+	},
+	{
+		evaluate: (fieldConfig) => {
+			if ((fieldConfig.name?.toString().toLowerCase())?.includes("email")) return "email";
+		},
+		name: "email-name",
+		priority: 20
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("first") || name.includes("given")) && name.includes("name")) return "given-name";
+		},
+		name: "given-name",
+		priority: 30
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("last") || name.includes("family") || name.includes("sur")) && name.includes("name")) return "family-name";
+		},
+		name: "family-name",
+		priority: 30
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("username") || name.includes("login"))) return "username";
+		},
+		name: "username",
+		priority: 40
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("otp") || name.includes("verification") && name.includes("code") || name.includes("one-time-code") || name.includes("2fa") || name.includes("twofactor") || name.includes("two-factor"))) return "one-time-code";
+		},
+		name: "one-time-code",
+		priority: 45
+	},
+	{
+		evaluate: (fieldConfig, context) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (fieldConfig.type === FormFieldType.PASSWORD) {
+				if (name?.includes("current") && name.includes("password")) return "current-password";
+				if (name === "password" && context?.formPurpose === "login") return "current-password";
+				if (name === "password" && context?.formPurpose === "change-password") return "current-password";
+			}
+		},
+		name: "current-password",
+		priority: 50
+	},
+	{
+		evaluate: (fieldConfig, context) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (fieldConfig.type === FormFieldType.PASSWORD) {
+				if (name?.includes("new") && name.includes("password")) return "new-password";
+				if (name?.includes("confirm") && name.includes("password")) return "new-password";
+				if (name === "password" && (context?.formPurpose === "register" || context?.formPurpose === "reset-password")) return "new-password";
+			}
+		},
+		name: "new-password",
+		priority: 50
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name) {
+				if ((name.includes("cc") || name.includes("card")) && name.includes("number")) return "cc-number";
+				if ((name.includes("cc") || name.includes("card")) && (name.includes("exp") || name.includes("expiration"))) return "cc-exp";
+				if ((name.includes("cc") || name.includes("card")) && name.includes("month")) return "cc-exp-month";
+				if ((name.includes("cc") || name.includes("card")) && name.includes("year")) return "cc-exp-year";
+				if ((name.includes("cc") || name.includes("card")) && (name.includes("csc") || name.includes("cvv"))) return "cc-csc";
+			}
+		},
+		name: "credit-card",
+		priority: 60
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name) {
+				if (name.includes("address2") || name.includes("address_2") || name.includes("address line 2") || name.includes("address-line2")) return "address-line2";
+				if (name.includes("address1") || name.includes("address_1") || name.includes("address line 1") || name.includes("address-line1")) return "address-line1";
+				if (name.includes("address") && !name.includes("email")) return "street-address";
+				if (name.includes("city")) return "address-level2";
+				if (name.includes("state") || name.includes("province")) return "address-level1";
+				if (name.includes("zip") || name.includes("postal")) return "postal-code";
+				if (name.includes("country")) {
+					if (name.includes("code") || name.includes("iso")) return "country";
+					return "country-name";
+				}
+			}
+		},
+		name: "address",
+		priority: 70
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("phone") || name.includes("tel"))) return "tel";
+		},
+		name: "phone",
+		priority: 80
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("bday") || name.includes("birth"))) return "bday";
+		},
+		name: "birthday",
+		priority: 90
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("sex") || name.includes("gender"))) return "sex";
+		},
+		name: "gender",
+		priority: 100
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("url") || name.includes("website"))) return "url";
+		},
+		name: "url",
+		priority: 110
+	}
+];
 function registerDefaultRules() {
 	defaultRules.forEach((rule) => {
 		registerAutocompleteRule(rule);
 	});
 }
-var defaultRules;
-var init_register$4 = __esmMin(() => {
-	init_fields();
-	init_rules();
-	defaultRules = [
-		{
-			evaluate: (fieldConfig) => {
-				return fieldConfig.autocomplete;
-			},
-			name: "explicit",
-			priority: 0
-		},
-		{
-			evaluate: (fieldConfig) => {
-				if (fieldConfig.type === FormFieldType.EMAIL) return "email";
-			},
-			name: "email-type",
-			priority: 10
-		},
-		{
-			evaluate: (fieldConfig) => {
-				if ((fieldConfig.name?.toString().toLowerCase())?.includes("email")) return "email";
-			},
-			name: "email-name",
-			priority: 20
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("first") || name.includes("given")) && name.includes("name")) return "given-name";
-			},
-			name: "given-name",
-			priority: 30
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("last") || name.includes("family") || name.includes("sur")) && name.includes("name")) return "family-name";
-			},
-			name: "family-name",
-			priority: 30
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("username") || name.includes("login"))) return "username";
-			},
-			name: "username",
-			priority: 40
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("otp") || name.includes("verification") && name.includes("code") || name.includes("one-time-code") || name.includes("2fa") || name.includes("twofactor") || name.includes("two-factor"))) return "one-time-code";
-			},
-			name: "one-time-code",
-			priority: 45
-		},
-		{
-			evaluate: (fieldConfig, context) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (fieldConfig.type === FormFieldType.PASSWORD) {
-					if (name?.includes("current") && name.includes("password")) return "current-password";
-					if (name === "password" && context?.formPurpose === "login") return "current-password";
-					if (name === "password" && context?.formPurpose === "change-password") return "current-password";
-				}
-			},
-			name: "current-password",
-			priority: 50
-		},
-		{
-			evaluate: (fieldConfig, context) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (fieldConfig.type === FormFieldType.PASSWORD) {
-					if (name?.includes("new") && name.includes("password")) return "new-password";
-					if (name?.includes("confirm") && name.includes("password")) return "new-password";
-					if (name === "password" && (context?.formPurpose === "register" || context?.formPurpose === "reset-password")) return "new-password";
-				}
-			},
-			name: "new-password",
-			priority: 50
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name) {
-					if ((name.includes("cc") || name.includes("card")) && name.includes("number")) return "cc-number";
-					if ((name.includes("cc") || name.includes("card")) && (name.includes("exp") || name.includes("expiration"))) return "cc-exp";
-					if ((name.includes("cc") || name.includes("card")) && name.includes("month")) return "cc-exp-month";
-					if ((name.includes("cc") || name.includes("card")) && name.includes("year")) return "cc-exp-year";
-					if ((name.includes("cc") || name.includes("card")) && (name.includes("csc") || name.includes("cvv"))) return "cc-csc";
-				}
-			},
-			name: "credit-card",
-			priority: 60
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name) {
-					if (name.includes("address2") || name.includes("address_2") || name.includes("address line 2") || name.includes("address-line2")) return "address-line2";
-					if (name.includes("address1") || name.includes("address_1") || name.includes("address line 1") || name.includes("address-line1")) return "address-line1";
-					if (name.includes("address") && !name.includes("email")) return "street-address";
-					if (name.includes("city")) return "address-level2";
-					if (name.includes("state") || name.includes("province")) return "address-level1";
-					if (name.includes("zip") || name.includes("postal")) return "postal-code";
-					if (name.includes("country")) {
-						if (name.includes("code") || name.includes("iso")) return "country";
-						return "country-name";
-					}
-				}
-			},
-			name: "address",
-			priority: 70
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("phone") || name.includes("tel"))) return "tel";
-			},
-			name: "phone",
-			priority: 80
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("bday") || name.includes("birth"))) return "bday";
-			},
-			name: "birthday",
-			priority: 90
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("sex") || name.includes("gender"))) return "sex";
-			},
-			name: "gender",
-			priority: 100
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("url") || name.includes("website"))) return "url";
-			},
-			name: "url",
-			priority: 110
-		}
-	];
-});
-
-//#endregion
-init_register$4();
 
 //#region src/components/form/autocomplete/rules.ts
+let autocompleteRules = [
+	{
+		evaluate: (fieldConfig) => {
+			return fieldConfig.autocomplete;
+		},
+		name: "explicit",
+		priority: 0
+	},
+	{
+		evaluate: (fieldConfig) => {
+			if (fieldConfig.type === FormFieldType.EMAIL) return "email";
+		},
+		name: "email-type",
+		priority: 10
+	},
+	{
+		evaluate: (fieldConfig) => {
+			if ((fieldConfig.name?.toString().toLowerCase())?.includes("email")) return "email";
+		},
+		name: "email-name",
+		priority: 20
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("first") || name.includes("given")) && name.includes("name")) return "given-name";
+		},
+		name: "given-name",
+		priority: 30
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("last") || name.includes("family") || name.includes("sur")) && name.includes("name")) return "family-name";
+		},
+		name: "family-name",
+		priority: 31
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("username") || name.includes("login"))) return "username";
+		},
+		name: "username",
+		priority: 40
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("otp") || name.includes("verification") && name.includes("code") || name.includes("one-time-code") || name.includes("2fa") || name.includes("mfa") || name.includes("totp") || name.includes("twofactor") || name.includes("two-factor") || name.includes("two factor"))) return "one-time-code";
+		},
+		name: "one-time-code",
+		priority: 45
+	},
+	{
+		evaluate: (fieldConfig, context) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (fieldConfig.type === FormFieldType.PASSWORD) {
+				if (name?.includes("current") && name.includes("password")) return "current-password";
+				if (name === "password" && context?.formPurpose === "login") return "current-password";
+				if (name === "password" && context?.formPurpose === "change-password") return "current-password";
+			}
+		},
+		name: "current-password",
+		priority: 51
+	},
+	{
+		evaluate: (fieldConfig, context) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (fieldConfig.type === FormFieldType.PASSWORD) {
+				if (name?.includes("new") && name.includes("password")) return "new-password";
+				if (name?.includes("confirm") && name.includes("password")) return "new-password";
+				if (name === "password" && (context?.formPurpose === "register" || context?.formPurpose === "reset-password")) return "new-password";
+			}
+		},
+		name: "new-password",
+		priority: 49
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name) {
+				if ((name.includes("cc") || name.includes("card")) && name.includes("name")) return "cc-name";
+				if ((name.includes("cc") || name.includes("card")) && name.includes("number")) return "cc-number";
+				if ((name.includes("cc") || name.includes("card")) && name.includes("month")) return "cc-exp-month";
+				if ((name.includes("cc") || name.includes("card")) && name.includes("year")) return "cc-exp-year";
+				if ((name.includes("cc") || name.includes("card")) && (name.includes("exp") || name.includes("expiration"))) return "cc-exp";
+				if ((name.includes("cc") || name.includes("card")) && (name.includes("csc") || name.includes("cvv") || name.includes("cvc") || name.includes("cvn"))) return "cc-csc";
+			}
+		},
+		name: "credit-card",
+		priority: 60
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name) {
+				if (name.includes("address2") || name.includes("address_2") || name.includes("address line 2") || name.includes("address-line2")) return "address-line2";
+				if (name.includes("address1") || name.includes("address_1") || name.includes("address line 1") || name.includes("address-line1")) return "address-line1";
+				if (name.includes("address") && !name.includes("email")) return "street-address";
+				if (name.includes("city")) return "address-level2";
+				if (name.includes("state") || name.includes("province") || name.includes("region")) return "address-level1";
+				if (name.includes("zip") || name.includes("postal") || name.includes("postcode")) return "postal-code";
+				if (name.includes("country")) {
+					if (name.includes("code") || name.includes("iso")) return "country";
+					return "country-name";
+				}
+			}
+		},
+		name: "address",
+		priority: 70
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("phone") || name.includes("tel") || name.includes("mobile") || name.includes("cell"))) return "tel";
+		},
+		name: "phone",
+		priority: 80
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("bday") || name.includes("birth") || name.includes("dob"))) return "bday";
+		},
+		name: "birthday",
+		priority: 90
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("company") || name.includes("organization") || name.includes("organisation"))) return "organization";
+		},
+		name: "organization",
+		priority: 85
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name === "name" || name.includes("full") && name.includes("name"))) return "name";
+		},
+		name: "full-name",
+		priority: 32
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("sex") || name.includes("gender"))) return "sex";
+		},
+		name: "gender",
+		priority: 100
+	},
+	{
+		evaluate: (fieldConfig) => {
+			const name = fieldConfig.name?.toString().toLowerCase();
+			if (name && (name.includes("url") || name.includes("website"))) return "url";
+		},
+		name: "url",
+		priority: 110
+	}
+];
+let sortedRules = [...autocompleteRules].sort((a, b) => a.priority - b.priority);
 function getAutocompleteValue(fieldConfig, context) {
 	for (const rule of sortedRules) {
 		const result = rule.evaluate(fieldConfig, context);
@@ -42593,186 +42476,7 @@ function registerAutocompleteRule(rule) {
 	autocompleteRules = newRules;
 	sortedRules = [...newRules].sort((a, b) => a.priority - b.priority);
 }
-var autocompleteRules, sortedRules;
-var init_rules = __esmMin(() => {
-	init_fields();
-	init_register$4();
-	autocompleteRules = [
-		{
-			evaluate: (fieldConfig) => {
-				return fieldConfig.autocomplete;
-			},
-			name: "explicit",
-			priority: 0
-		},
-		{
-			evaluate: (fieldConfig) => {
-				if (fieldConfig.type === FormFieldType.EMAIL) return "email";
-			},
-			name: "email-type",
-			priority: 10
-		},
-		{
-			evaluate: (fieldConfig) => {
-				if ((fieldConfig.name?.toString().toLowerCase())?.includes("email")) return "email";
-			},
-			name: "email-name",
-			priority: 20
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("first") || name.includes("given")) && name.includes("name")) return "given-name";
-			},
-			name: "given-name",
-			priority: 30
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("last") || name.includes("family") || name.includes("sur")) && name.includes("name")) return "family-name";
-			},
-			name: "family-name",
-			priority: 31
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("username") || name.includes("login"))) return "username";
-			},
-			name: "username",
-			priority: 40
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("otp") || name.includes("verification") && name.includes("code") || name.includes("one-time-code") || name.includes("2fa") || name.includes("mfa") || name.includes("totp") || name.includes("twofactor") || name.includes("two-factor") || name.includes("two factor"))) return "one-time-code";
-			},
-			name: "one-time-code",
-			priority: 45
-		},
-		{
-			evaluate: (fieldConfig, context) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (fieldConfig.type === FormFieldType.PASSWORD) {
-					if (name?.includes("current") && name.includes("password")) return "current-password";
-					if (name === "password" && context?.formPurpose === "login") return "current-password";
-					if (name === "password" && context?.formPurpose === "change-password") return "current-password";
-				}
-			},
-			name: "current-password",
-			priority: 51
-		},
-		{
-			evaluate: (fieldConfig, context) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (fieldConfig.type === FormFieldType.PASSWORD) {
-					if (name?.includes("new") && name.includes("password")) return "new-password";
-					if (name?.includes("confirm") && name.includes("password")) return "new-password";
-					if (name === "password" && (context?.formPurpose === "register" || context?.formPurpose === "reset-password")) return "new-password";
-				}
-			},
-			name: "new-password",
-			priority: 49
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name) {
-					if ((name.includes("cc") || name.includes("card")) && name.includes("name")) return "cc-name";
-					if ((name.includes("cc") || name.includes("card")) && name.includes("number")) return "cc-number";
-					if ((name.includes("cc") || name.includes("card")) && name.includes("month")) return "cc-exp-month";
-					if ((name.includes("cc") || name.includes("card")) && name.includes("year")) return "cc-exp-year";
-					if ((name.includes("cc") || name.includes("card")) && (name.includes("exp") || name.includes("expiration"))) return "cc-exp";
-					if ((name.includes("cc") || name.includes("card")) && (name.includes("csc") || name.includes("cvv") || name.includes("cvc") || name.includes("cvn"))) return "cc-csc";
-				}
-			},
-			name: "credit-card",
-			priority: 60
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name) {
-					if (name.includes("address2") || name.includes("address_2") || name.includes("address line 2") || name.includes("address-line2")) return "address-line2";
-					if (name.includes("address1") || name.includes("address_1") || name.includes("address line 1") || name.includes("address-line1")) return "address-line1";
-					if (name.includes("address") && !name.includes("email")) return "street-address";
-					if (name.includes("city")) return "address-level2";
-					if (name.includes("state") || name.includes("province") || name.includes("region")) return "address-level1";
-					if (name.includes("zip") || name.includes("postal") || name.includes("postcode")) return "postal-code";
-					if (name.includes("country")) {
-						if (name.includes("code") || name.includes("iso")) return "country";
-						return "country-name";
-					}
-				}
-			},
-			name: "address",
-			priority: 70
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("phone") || name.includes("tel") || name.includes("mobile") || name.includes("cell"))) return "tel";
-			},
-			name: "phone",
-			priority: 80
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("bday") || name.includes("birth") || name.includes("dob"))) return "bday";
-			},
-			name: "birthday",
-			priority: 90
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("company") || name.includes("organization") || name.includes("organisation"))) return "organization";
-			},
-			name: "organization",
-			priority: 85
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name === "name" || name.includes("full") && name.includes("name"))) return "name";
-			},
-			name: "full-name",
-			priority: 32
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("sex") || name.includes("gender"))) return "sex";
-			},
-			name: "gender",
-			priority: 100
-		},
-		{
-			evaluate: (fieldConfig) => {
-				const name = fieldConfig.name?.toString().toLowerCase();
-				if (name && (name.includes("url") || name.includes("website"))) return "url";
-			},
-			name: "url",
-			priority: 110
-		}
-	];
-	sortedRules = [...autocompleteRules].sort((a, b) => a.priority - b.priority);
-	registerDefaultRules();
-});
-
-//#endregion
-init_rules();
-
-//#region src/components/form/autocomplete/index.ts
-var init_autocomplete = __esmMin(() => {
-	init_register$4();
-	init_rules();
-});
-
-//#endregion
-init_autocomplete();
+registerDefaultRules();
 
 /**
  * Checks if `value` is classified as an `Array` object.
@@ -44112,14 +43816,14 @@ function FormRenderer({ fields = [], groups = [] }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: groupOrder === GroupOrder.GROUPS_FIRST ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [renderGroups(), renderUngrouped()] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [renderUngrouped(), renderGroups()] }) });
 }
 function FieldRenderer({ field }) {
-	const rhfMethods = admin__loadShare__react_mf_2_hook_mf_2_form__loadShare__.useFormContext();
+	const rhfMethods = dashboard__loadShare__react_mf_2_hook_mf_2_form__loadShare__.useFormContext();
 	const { control, getValues, watch } = rhfMethods;
-	const [isVisible, setIsVisible] = admin__loadShare__react__loadShare__.useState(true);
-	const [isLoading, setIsLoading] = admin__loadShare__react__loadShare__.useState(false);
+	const [isVisible, setIsVisible] = dashboard__loadShare__react__loadShare__.useState(true);
+	const [isLoading, setIsLoading] = dashboard__loadShare__react__loadShare__.useState(false);
 	const { config: formConfig } = useFormContext();
-	const dependencies = admin__loadShare__react__loadShare__.useMemo(() => field.dependencies || [], [field.dependencies]);
-	const autoCompleteValue = admin__loadShare__react__loadShare__.useMemo(() => getFieldAutocompleteValue(field, formConfig?.action), [field, formConfig?.action]);
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	const dependencies = dashboard__loadShare__react__loadShare__.useMemo(() => field.dependencies || [], [field.dependencies]);
+	const autoCompleteValue = dashboard__loadShare__react__loadShare__.useMemo(() => getFieldAutocompleteValue(field, formConfig?.action), [field, formConfig?.action]);
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		const subscription = watch((values, { name }) => {
 			if (!dependencies.length || name && dependencies.includes(name)) checkVisibility();
 		});
@@ -44172,15 +43876,15 @@ function FieldRenderer({ field }) {
 		isLoading,
 		watch
 	]);
-	if (isLoading) return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormItem, {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(field.className, field.itemClassName),
+	if (isLoading) return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormItem, {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(field.className, field.itemClassName),
 		children: [
-			field.label && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormLabel, { children: field.label }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormControl, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+			field.label && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormLabel, { children: field.label }),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormControl, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 				className: "flex h-14 items-center justify-center",
-				children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Spinner, { size: "small" })
+				children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Spinner, { size: "small" })
 			}) }),
-			field.description && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormDescription, { children: field.description })
+			field.description && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormDescription, { children: field.description })
 		]
 	});
 	if (!isVisible) return null;
@@ -44190,20 +43894,20 @@ function FieldRenderer({ field }) {
 		console.warn(`No component registered for form field type: ${field.type}`);
 		return null;
 	}
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormField, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormField, {
 		control,
 		name: field.name,
-		render: ({ field: formFieldRenderProps }) => /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormItem, {
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(field.className, field.itemClassName),
+		render: ({ field: formFieldRenderProps }) => /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormItem, {
+			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(field.className, field.itemClassName),
 			children: [
-				field.label && !componentEntry?.handlesLabel && /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormLabel, {
+				field.label && !componentEntry?.handlesLabel && /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormLabel, {
 					className: field.labelClassName,
 					children: [field.label, field.required && isVisible && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
 						className: "text-destructive",
 						children: "*"
 					})]
 				}),
-				/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormControl, { children: RegisteredComponent ? /* @__PURE__ */ jsxRuntimeExports.jsx(RegisteredComponent, {
+				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormControl, { children: RegisteredComponent ? /* @__PURE__ */ jsxRuntimeExports.jsx(RegisteredComponent, {
 					...formFieldRenderProps,
 					...field.inputProps,
 					autocomplete: autoCompleteValue,
@@ -44228,8 +43932,8 @@ function FieldRenderer({ field }) {
 						total: useOptionalStepControlContext()?.totalSteps || 0
 					} : void 0
 				}) : null }),
-				field.description && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormDescription, { children: field.description }),
-				/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormMessage, {})
+				field.description && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormDescription, { children: field.description }),
+				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.FormMessage, {})
 			]
 		})
 	}, field.name);
@@ -44237,20 +43941,35 @@ function FieldRenderer({ field }) {
 function getFieldAutocompleteValue(field, formPurpose) {
 	return field.autocomplete ?? getAutocompleteValue(field, { formPurpose }) ?? field.inputProps?.autocomplete;
 }
-var init_FormRenderer = __esmMin(() => {
-	init_adapters();
-	init_autocomplete();
-	init_context$1();
-	init_fields();
-	init_FormGroup();
-	init_StepControlContext();
-	init_types$4();
-});
-
-//#endregion
-init_FormRenderer();
 
 //#region src/components/form/handlers/core.ts
+const isErrorResponse = (response) => {
+	return typeof response === "object" && response !== null && "error" in response;
+};
+const processErrorResponse = (response) => {
+	if (response.error) return toSafeError(response.error);
+	return /* @__PURE__ */ new Error("Unknown error occurred");
+};
+const toSafeError = (error) => {
+	if (error instanceof Error) return error;
+	if (typeof error === "object" && error !== null && "message" in error) {
+		const message = error.message;
+		if (typeof message === "string") return new Error(message, { cause: error });
+	}
+	return new Error(String(error), { cause: error });
+};
+const handleError = async (error, options) => {
+	const { config, currentDialog, onError } = options;
+	const err = toSafeError(error);
+	try {
+		if (onError) await onError(err);
+		else if (config.onError) await config.onError(err);
+		else if (currentDialog?.type === "form" && currentDialog.onError) await currentDialog.onError(err);
+	} catch (innerError) {
+		console.error("Error in form error handler:", innerError);
+	}
+	throw err;
+};
 async function handleFormSubmission(options) {
 	const { closeDialog, config, currentDialog, formMethods, isStep, onSubmit, onSuccess } = options;
 	try {
@@ -44270,39 +43989,6 @@ async function handleFormSubmission(options) {
 		await handleError(error, options);
 	}
 }
-var isErrorResponse, processErrorResponse, toSafeError, handleError;
-var init_core = __esmMin(() => {
-	isErrorResponse = (response) => {
-		return typeof response === "object" && response !== null && "error" in response;
-	};
-	processErrorResponse = (response) => {
-		if (response.error) return toSafeError(response.error);
-		return /* @__PURE__ */ new Error("Unknown error occurred");
-	};
-	toSafeError = (error) => {
-		if (error instanceof Error) return error;
-		if (typeof error === "object" && error !== null && "message" in error) {
-			const message = error.message;
-			if (typeof message === "string") return new Error(message, { cause: error });
-		}
-		return new Error(String(error), { cause: error });
-	};
-	handleError = async (error, options) => {
-		const { config, currentDialog, onError } = options;
-		const err = toSafeError(error);
-		try {
-			if (onError) await onError(err);
-			else if (config.onError) await config.onError(err);
-			else if (currentDialog?.type === "form" && currentDialog.onError) await currentDialog.onError(err);
-		} catch (innerError) {
-			console.error("Error in form error handler:", innerError);
-		}
-		throw err;
-	};
-});
-
-//#endregion
-init_core();
 
 //#region src/components/form/utils/autoSave.ts
 function computeAutoSaveConfig(autoSave) {
@@ -44317,12 +44003,22 @@ function computeAutoSaveConfig(autoSave) {
 	};
 	return { enabled: false };
 }
-var init_autoSave = __esmMin(() => {});
-
-//#endregion
-init_autoSave();
 
 //#region src/components/shared/types/container.ts
+/**
+* Enum representing the different types of containers
+*/
+let ContainerType = /* @__PURE__ */ function(ContainerType$1) {
+	/**
+	* Dialog container type
+	*/
+	ContainerType$1["DIALOG"] = "dialog";
+	/**
+	* Standalone container type
+	*/
+	ContainerType$1["STANDALONE"] = "standalone";
+	return ContainerType$1;
+}({});
 /**
 * Type guard to check if a container environment is a dialog container
 * @param ctx - The container environment to check
@@ -44339,25 +44035,26 @@ function isDialogContainer(ctx) {
 function isStandaloneContainer(ctx) {
 	return ctx.type === ContainerType.STANDALONE;
 }
-var ContainerType;
-var init_container = __esmMin(() => {
-	ContainerType = /* @__PURE__ */ function(ContainerType$1) {
-		/**
-		* Dialog container type
-		*/
-		ContainerType$1["DIALOG"] = "dialog";
-		/**
-		* Standalone container type
-		*/
-		ContainerType$1["STANDALONE"] = "standalone";
-		return ContainerType$1;
-	}({});
-});
-
-//#endregion
-init_container();
 
 //#region src/components/shared/types/form.ts
+/**
+* Enum representing the different types of forms
+*/
+let FormType$1 = /* @__PURE__ */ function(FormType$1) {
+	/**
+	* Simple form type
+	*/
+	FormType$1["SIMPLE"] = "simple";
+	/**
+	* Step form type
+	*/
+	FormType$1["STEP"] = "step";
+	/**
+	* Wizard form type
+	*/
+	FormType$1["WIZARD"] = "wizard";
+	return FormType$1;
+}({});
 /**
 * Type guard to check if a form environment is a simple form
 * @param ctx - The form environment to check
@@ -44382,29 +44079,20 @@ function isStepForm(ctx) {
 function isWizardForm(ctx) {
 	return ctx?.type === FormType$1.WIZARD;
 }
-var FormType$1;
-var init_form$1 = __esmMin(() => {
-	FormType$1 = /* @__PURE__ */ function(FormType$1) {
-		/**
-		* Simple form type
-		*/
-		FormType$1["SIMPLE"] = "simple";
-		/**
-		* Step form type
-		*/
-		FormType$1["STEP"] = "step";
-		/**
-		* Wizard form type
-		*/
-		FormType$1["WIZARD"] = "wizard";
-		return FormType$1;
-	}({});
-});
-
-//#endregion
-init_form$1();
 
 //#region src/components/shared/types/header.ts
+let NavigationType = /* @__PURE__ */ function(NavigationType$1) {
+	NavigationType$1["NONE"] = "none";
+	NavigationType$1["STEP"] = "step";
+	NavigationType$1["WIZARD"] = "wizard";
+	return NavigationType$1;
+}({});
+let ProgressStyleType = /* @__PURE__ */ function(ProgressStyleType$1) {
+	ProgressStyleType$1["DOTS"] = "dots";
+	ProgressStyleType$1["STEPPER"] = "stepper";
+	ProgressStyleType$1["TIMELINE"] = "timeline";
+	return ProgressStyleType$1;
+}({});
 function hasNavigation(ctx) {
 	return ctx.navigation.type !== NavigationType.NONE;
 }
@@ -44426,191 +44114,165 @@ function getEffectiveAllowNavigation(wizardEnv) {
 function isWizardNavigation(ctx) {
 	return ctx.type === NavigationType.WIZARD;
 }
-var NavigationType, ProgressStyleType;
-var init_header = __esmMin(() => {
-	NavigationType = /* @__PURE__ */ function(NavigationType$1) {
-		NavigationType$1["NONE"] = "none";
-		NavigationType$1["STEP"] = "step";
-		NavigationType$1["WIZARD"] = "wizard";
-		return NavigationType$1;
-	}({});
-	ProgressStyleType = /* @__PURE__ */ function(ProgressStyleType$1) {
-		ProgressStyleType$1["DOTS"] = "dots";
-		ProgressStyleType$1["STEPPER"] = "stepper";
-		ProgressStyleType$1["TIMELINE"] = "timeline";
-		return ProgressStyleType$1;
-	}({});
-});
-
-//#endregion
-init_header();
 
 //#region src/components/shared/environment/builders.ts
-var EnvironmentBuilder, FooterEnvironmentBuilder, HeaderEnvironmentBuilder, Environment;
-var init_builders = __esmMin(() => {
-	init_container();
-	init_form$1();
-	init_header();
-	EnvironmentBuilder = class {
-		_container = null;
-		_form = null;
-		_step = null;
-		build() {
-			throw new Error("Build method must be implemented by subclasses");
-		}
-		dialog(options) {
-			this._container = {
-				dialogConfig: options.dialogConfig,
-				onClose: options.onClose,
-				type: ContainerType.DIALOG
-			};
-			return this;
-		}
-		simpleForm(options) {
-			this._form = {
-				isSubmitting: options.isSubmitting,
-				methods: options.methods,
-				forceRerender: options.forceRerender,
-				environmentSync: options.environmentSync,
-				type: FormType$1.SIMPLE
-			};
-			return this;
-		}
-		standalone() {
-			this._container = { type: ContainerType.STANDALONE };
-			return this;
-		}
-		step(options) {
-			this._step = {
-				current: options.current,
-				isFirst: options.isFirst,
-				isLast: options.isLast,
-				onNext: options.onNext,
-				onPrevious: options.onPrevious,
-				onRetry: options.onRetry,
-				jumpTo: options.jumpTo,
-				total: options.total,
-				retryCount: options.retryCount ?? 0
-			};
-			return this;
-		}
-		stepForm(options) {
-			this._form = {
-				isSubmitting: options.isSubmitting,
-				methods: options.methods,
-				forceRerender: options.forceRerender,
-				environmentSync: options.environmentSync,
-				type: FormType$1.STEP
-			};
-			return this;
-		}
-		wizardForm(options) {
-			this._form = {
-				isSubmitting: options.isSubmitting,
-				methods: options.methods,
-				forceRerender: options.forceRerender,
-				environmentSync: options.environmentSync,
-				type: FormType$1.WIZARD
-			};
-			return this;
-		}
-		validate() {
-			if (!this._container) throw new Error("Container environment is required");
-			if (!this._form) throw new Error("Form environment is required");
-		}
-		validateHeader() {
-			if (!this._container) throw new Error("Container environment is required");
-		}
-		validateContainerOnly() {
-			if (!this._container) throw new Error("Container environment is required");
-		}
-		validateFormOnly() {
-			if (!this._form) throw new Error("Form environment is required");
-		}
-	};
-	FooterEnvironmentBuilder = class extends EnvironmentBuilder {
-		build() {
-			this.validate();
-			return {
-				container: this._container,
-				form: this._form,
-				step: this._step || void 0
-			};
-		}
-		buildContainerOnly() {
-			this.validateContainerOnly();
-			return { container: this._container };
-		}
-		buildFormOnly() {
-			this.validateFormOnly();
-			return { form: this._form };
-		}
-	};
-	HeaderEnvironmentBuilder = class extends EnvironmentBuilder {
-		_content = null;
-		_navigation = null;
-		build() {
-			this.validateHeader();
-			if (!this._content) throw new Error("Header content is required");
-			if (!this._navigation) throw new Error("Header navigation is required");
-			return {
-				container: this._container,
-				content: this._content,
-				navigation: this._navigation
-			};
-		}
-		content(options) {
-			this._content = {
-				actions: options.actions,
-				description: options.description,
-				title: options.title
-			};
-			return this;
-		}
-		noneNavigation() {
-			this._navigation = { type: NavigationType.NONE };
-			return this;
-		}
-		stepNavigation(options) {
-			this._navigation = {
-				current: options.current,
-				total: options.total,
-				type: NavigationType.STEP
-			};
-			return this;
-		}
-		wizardNavigation(options) {
-			this._navigation = {
-				allowNavigation: options.allowNavigation ?? true,
-				current: options.current,
-				descriptionMaxWidth: options.descriptionMaxWidth ?? "xs",
-				disabledSteps: options.disabledSteps,
-				iconSize: options.iconSize ?? "sm",
-				onStepClick: options.onStepClick,
-				progressStyle: options.progressStyle ?? ProgressStyleType.TIMELINE,
-				showStepDescriptions: options.showStepDescriptions ?? true,
-				showStepTitles: options.showStepTitles ?? true,
-				steps: options.steps,
-				total: options.total,
-				type: NavigationType.WIZARD
-			};
-			return this;
-		}
-	};
-	Environment = {
-		footer() {
-			return new FooterEnvironmentBuilder();
-		},
-		header() {
-			return new HeaderEnvironmentBuilder();
-		}
-	};
-});
-
-//#endregion
-init_builders();
+var EnvironmentBuilder = class {
+	_container = null;
+	_form = null;
+	_step = null;
+	build() {
+		throw new Error("Build method must be implemented by subclasses");
+	}
+	dialog(options) {
+		this._container = {
+			dialogConfig: options.dialogConfig,
+			onClose: options.onClose,
+			type: ContainerType.DIALOG
+		};
+		return this;
+	}
+	simpleForm(options) {
+		this._form = {
+			isSubmitting: options.isSubmitting,
+			methods: options.methods,
+			forceRerender: options.forceRerender,
+			environmentSync: options.environmentSync,
+			type: FormType$1.SIMPLE
+		};
+		return this;
+	}
+	standalone() {
+		this._container = { type: ContainerType.STANDALONE };
+		return this;
+	}
+	step(options) {
+		this._step = {
+			current: options.current,
+			isFirst: options.isFirst,
+			isLast: options.isLast,
+			onNext: options.onNext,
+			onPrevious: options.onPrevious,
+			onRetry: options.onRetry,
+			jumpTo: options.jumpTo,
+			total: options.total,
+			retryCount: options.retryCount ?? 0
+		};
+		return this;
+	}
+	stepForm(options) {
+		this._form = {
+			isSubmitting: options.isSubmitting,
+			methods: options.methods,
+			forceRerender: options.forceRerender,
+			environmentSync: options.environmentSync,
+			type: FormType$1.STEP
+		};
+		return this;
+	}
+	wizardForm(options) {
+		this._form = {
+			isSubmitting: options.isSubmitting,
+			methods: options.methods,
+			forceRerender: options.forceRerender,
+			environmentSync: options.environmentSync,
+			type: FormType$1.WIZARD
+		};
+		return this;
+	}
+	validate() {
+		if (!this._container) throw new Error("Container environment is required");
+		if (!this._form) throw new Error("Form environment is required");
+	}
+	validateHeader() {
+		if (!this._container) throw new Error("Container environment is required");
+	}
+	validateContainerOnly() {
+		if (!this._container) throw new Error("Container environment is required");
+	}
+	validateFormOnly() {
+		if (!this._form) throw new Error("Form environment is required");
+	}
+};
+var FooterEnvironmentBuilder = class extends EnvironmentBuilder {
+	build() {
+		this.validate();
+		return {
+			container: this._container,
+			form: this._form,
+			step: this._step || void 0
+		};
+	}
+	buildContainerOnly() {
+		this.validateContainerOnly();
+		return { container: this._container };
+	}
+	buildFormOnly() {
+		this.validateFormOnly();
+		return { form: this._form };
+	}
+};
+var HeaderEnvironmentBuilder = class extends EnvironmentBuilder {
+	_content = null;
+	_navigation = null;
+	build() {
+		this.validateHeader();
+		if (!this._content) throw new Error("Header content is required");
+		if (!this._navigation) throw new Error("Header navigation is required");
+		return {
+			container: this._container,
+			content: this._content,
+			navigation: this._navigation
+		};
+	}
+	content(options) {
+		this._content = {
+			actions: options.actions,
+			description: options.description,
+			title: options.title
+		};
+		return this;
+	}
+	noneNavigation() {
+		this._navigation = { type: NavigationType.NONE };
+		return this;
+	}
+	stepNavigation(options) {
+		this._navigation = {
+			current: options.current,
+			total: options.total,
+			type: NavigationType.STEP
+		};
+		return this;
+	}
+	wizardNavigation(options) {
+		this._navigation = {
+			allowNavigation: options.allowNavigation ?? true,
+			current: options.current,
+			descriptionMaxWidth: options.descriptionMaxWidth ?? "xs",
+			disabledSteps: options.disabledSteps,
+			iconSize: options.iconSize ?? "sm",
+			onStepClick: options.onStepClick,
+			progressStyle: options.progressStyle ?? ProgressStyleType.TIMELINE,
+			showStepDescriptions: options.showStepDescriptions ?? true,
+			showStepTitles: options.showStepTitles ?? true,
+			steps: options.steps,
+			total: options.total,
+			type: NavigationType.WIZARD
+		};
+		return this;
+	}
+};
+const Environment = {
+	footer() {
+		return new FooterEnvironmentBuilder();
+	},
+	header() {
+		return new HeaderEnvironmentBuilder();
+	}
+};
 
 //#region src/components/shared/context/FooterContext.tsx
+const FooterContextInternal = dashboard__loadShare__react__loadShare__.createContext(void 0);
 function FooterContextProvider({ children, value }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(FooterContextInternal.Provider, {
 		value,
@@ -44618,47 +44280,35 @@ function FooterContextProvider({ children, value }) {
 	});
 }
 function useFooterContext() {
-	const context = admin__loadShare__react__loadShare__.useContext(FooterContextInternal);
+	const context = dashboard__loadShare__react__loadShare__.useContext(FooterContextInternal);
 	if (!context) throw new Error("useFooterContext must be used within a FooterContextProvider");
 	if (!context.container || !context.form) throw new Error("FooterContext requires both container and form to be provided");
 	return context;
 }
 function useOptionalFooterContext() {
-	return admin__loadShare__react__loadShare__.useContext(FooterContextInternal);
+	return dashboard__loadShare__react__loadShare__.useContext(FooterContextInternal);
 }
-var FooterContextInternal;
-var init_FooterContext = __esmMin(() => {
-	FooterContextInternal = admin__loadShare__react__loadShare__.createContext(void 0);
-});
-
-//#endregion
-init_FooterContext();
 
 //#region src/components/shared/registry/types.ts
-var FooterType, HeaderType;
-var init_types$2 = __esmMin(() => {
-	FooterType = /* @__PURE__ */ function(FooterType$1) {
-		FooterType$1["ACTIONS"] = "actions";
-		FooterType$1["CUSTOM"] = "custom";
-		FooterType$1["DEFAULT"] = "default";
-		FooterType$1["FORM"] = "form";
-		FooterType$1["WIZARD_FORM"] = "wizard_form";
-		FooterType$1["STEP_FORM"] = "step_form";
-		return FooterType$1;
-	}({});
-	HeaderType = /* @__PURE__ */ function(HeaderType$1) {
-		HeaderType$1["CUSTOM"] = "custom";
-		HeaderType$1["DEFAULT"] = "default";
-		HeaderType$1["FORM"] = "form";
-		HeaderType$1["WIZARD"] = "wizard";
-		return HeaderType$1;
-	}({});
-});
-
-//#endregion
-init_types$2();
+let FooterType = /* @__PURE__ */ function(FooterType$1) {
+	FooterType$1["ACTIONS"] = "actions";
+	FooterType$1["CUSTOM"] = "custom";
+	FooterType$1["DEFAULT"] = "default";
+	FooterType$1["FORM"] = "form";
+	FooterType$1["WIZARD_FORM"] = "wizard_form";
+	FooterType$1["STEP_FORM"] = "step_form";
+	return FooterType$1;
+}({});
+let HeaderType = /* @__PURE__ */ function(HeaderType$1) {
+	HeaderType$1["CUSTOM"] = "custom";
+	HeaderType$1["DEFAULT"] = "default";
+	HeaderType$1["FORM"] = "form";
+	HeaderType$1["WIZARD"] = "wizard";
+	return HeaderType$1;
+}({});
 
 //#region src/components/actions/registry.ts
+const actionItemRegistry = /* @__PURE__ */ new Map();
 function getActionItemComponent(type) {
 	return actionItemRegistry.get(type);
 }
@@ -44673,203 +44323,140 @@ function registerActionItemComponent(type, component) {
 function resetRegistryForTesting() {
 	actionItemRegistry.clear();
 }
-var actionItemRegistry;
-var init_registry$1 = __esmMin(() => {
-	actionItemRegistry = /* @__PURE__ */ new Map();
-});
-
-//#endregion
-init_registry$1();
 
 //#region src/components/actions/ActionListRenderer.tsx
-var ActionListRenderer;
-var init_ActionListRenderer = __esmMin(() => {
-	init_registry$1();
-	init_types$5();
-	ActionListRenderer = ({ actions = [], className, closeDialog, isSubmitting, layout = "horizontal" }) => {
-		if (!actions || actions.length === 0) return null;
-		return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex w-full", layout === "vertical" ? "flex-col space-y-3" : "flex-row flex-wrap items-center justify-end gap-4", className),
-			children: actions.map((action, index) => {
-				if (action.type === ActionItemType.CUSTOM_COMPONENT) {
-					const CustomComponent = action.component;
-					return /* @__PURE__ */ jsxRuntimeExports.jsx(CustomComponent, {
-						...action.props,
-						closeDialog,
-						isSubmitting
-					}, action.key ?? index);
-				}
-				const ActionComponent = getActionItemComponent(action.type);
-				if (!ActionComponent) {
-					console.warn(`No component registered for action type: ${action.type}`);
-					return null;
-				}
-				const key = action.key ?? index;
-				return /* @__PURE__ */ jsxRuntimeExports.jsx(ActionComponent, {
+const ActionListRenderer = ({ actions = [], className, closeDialog, isSubmitting, layout = "horizontal" }) => {
+	if (!actions || actions.length === 0) return null;
+	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex w-full", layout === "vertical" ? "flex-col space-y-3" : "flex-row flex-wrap items-center justify-end gap-4", className),
+		children: actions.map((action, index) => {
+			if (action.type === ActionItemType.CUSTOM_COMPONENT) {
+				const CustomComponent = action.component;
+				return /* @__PURE__ */ jsxRuntimeExports.jsx(CustomComponent, {
+					...action.props,
 					closeDialog,
-					config: action,
 					isSubmitting
-				}, key);
-			})
-		});
-	};
-});
-
-//#endregion
-init_ActionListRenderer();
+				}, action.key ?? index);
+			}
+			const ActionComponent = getActionItemComponent(action.type);
+			if (!ActionComponent) {
+				console.warn(`No component registered for action type: ${action.type}`);
+				return null;
+			}
+			const key = action.key ?? index;
+			return /* @__PURE__ */ jsxRuntimeExports.jsx(ActionComponent, {
+				closeDialog,
+				config: action,
+				isSubmitting
+			}, key);
+		})
+	});
+};
 
 //#region src/components/actions/items/ButtonActionItem.tsx
+const ButtonActionItem = ({ config, isSubmitting }) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		className: config.className,
+		disabled: isSubmitting || config.disabled,
+		onClick: config.onClick,
+		type: "button",
+		children: config.label ?? config.children ?? "Button"
+	});
+};
 function registerButtonActionItem() {
 	registerActionItemComponent(ActionItemType.BUTTON, ButtonActionItem);
 }
-var ButtonActionItem;
-var init_ButtonActionItem = __esmMin(() => {
-	init_registry$1();
-	init_types$5();
-	ButtonActionItem = ({ config, isSubmitting }) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-			className: config.className,
-			disabled: isSubmitting || config.disabled,
-			onClick: config.onClick,
-			type: "button",
-			children: config.label ?? config.children ?? "Button"
-		});
-	};
-});
-
-//#endregion
-init_ButtonActionItem();
 
 //#region src/components/actions/items/CancelActionItem.tsx
+const CancelActionItem = ({ closeDialog, config, isSubmitting }) => {
+	const handleClick = () => {
+		if (closeDialog) closeDialog();
+		if (config.onClick) config.onClick?.();
+	};
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		className: config.className,
+		disabled: isSubmitting ?? config.disabled,
+		onClick: handleClick,
+		type: "button",
+		variant: "outline",
+		children: config.label ?? config.children ?? "Cancel"
+	});
+};
 function registerCancelActionItem() {
 	registerActionItemComponent(ActionItemType.CANCEL, CancelActionItem);
 }
-var CancelActionItem;
-var init_CancelActionItem = __esmMin(() => {
-	init_registry$1();
-	init_types$5();
-	CancelActionItem = ({ closeDialog, config, isSubmitting }) => {
-		const handleClick = () => {
-			if (closeDialog) closeDialog();
-			if (config.onClick) config.onClick?.();
-		};
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-			className: config.className,
-			disabled: isSubmitting ?? config.disabled,
-			onClick: handleClick,
-			type: "button",
-			variant: "outline",
-			children: config.label ?? config.children ?? "Cancel"
-		});
-	};
-});
-
-//#endregion
-init_CancelActionItem();
 
 //#region src/components/actions/items/CustomActionItem.tsx
+const CustomActionItem = ({ config, isSubmitting }) => {
+	if (!config.onClick) {
+		console.error("CustomActionItem requires an onClick handler in its config.", config);
+		return null;
+	}
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		className: config.className,
+		disabled: isSubmitting || config.disabled,
+		onClick: config.onClick,
+		type: "button",
+		children: config.label ?? config.children
+	});
+};
 function registerCustomActionItem() {
 	registerActionItemComponent(ActionItemType.CUSTOM, CustomActionItem);
 }
-var CustomActionItem;
-var init_CustomActionItem = __esmMin(() => {
-	init_registry$1();
-	init_types$5();
-	CustomActionItem = ({ config, isSubmitting }) => {
-		if (!config.onClick) {
-			console.error("CustomActionItem requires an onClick handler in its config.", config);
-			return null;
-		}
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-			className: config.className,
-			disabled: isSubmitting || config.disabled,
-			onClick: config.onClick,
-			type: "button",
-			children: config.label ?? config.children
-		});
-	};
-});
-
-//#endregion
-init_CustomActionItem();
 
 //#region src/components/actions/items/LinkActionItem.tsx
+const LinkActionItem = ({ config }) => {
+	const commonProps = {
+		children: config.label || config.children,
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50", "text-primary underline-offset-4 hover:underline", config.className),
+		target: config.target
+	};
+	if (config.target === "_blank" || config.reloadDocument || config.to.startsWith("http")) return /* @__PURE__ */ jsxRuntimeExports.jsx("a", {
+		href: config.to,
+		...commonProps,
+		rel: config.target === "_blank" ? "noopener noreferrer" : void 0,
+		children: commonProps.children
+	});
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare__react_mf_2_router__loadShare__.Link, {
+		to: config.to,
+		...commonProps,
+		children: commonProps.children
+	});
+};
 function registerLinkActionItem() {
 	registerActionItemComponent(ActionItemType.LINK, LinkActionItem);
 }
-var LinkActionItem;
-var init_LinkActionItem = __esmMin(() => {
-	init_registry$1();
-	init_types$5();
-	LinkActionItem = ({ config }) => {
-		const commonProps = {
-			children: config.label || config.children,
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50", "text-primary underline-offset-4 hover:underline", config.className),
-			target: config.target
-		};
-		if (config.target === "_blank" || config.reloadDocument || config.to.startsWith("http")) return /* @__PURE__ */ jsxRuntimeExports.jsx("a", {
-			href: config.to,
-			...commonProps,
-			rel: config.target === "_blank" ? "noopener noreferrer" : void 0,
-			children: commonProps.children
-		});
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare__react_mf_2_router__loadShare__.Link, {
-			to: config.to,
-			...commonProps,
-			children: commonProps.children
-		});
-	};
-});
-
-//#endregion
-init_LinkActionItem();
 
 //#region src/components/actions/items/SubmitActionItem.tsx
+const SubmitActionItem = ({ config, isSubmitting }) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		className: config.className,
+		disabled: isSubmitting || config.disabled,
+		onClick: config.onClick,
+		type: "submit",
+		children: [isSubmitting && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Spinner, {
+			className: "mr-2",
+			size: "small"
+		}), config.label ?? config.children ?? "Submit"]
+	});
+};
 function registerSubmitActionItem() {
 	registerActionItemComponent(ActionItemType.SUBMIT, SubmitActionItem);
 }
-var SubmitActionItem;
-var init_SubmitActionItem = __esmMin(() => {
-	init_registry$1();
-	init_types$5();
-	SubmitActionItem = ({ config, isSubmitting }) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-			className: config.className,
-			disabled: isSubmitting || config.disabled,
-			onClick: config.onClick,
-			type: "submit",
-			children: [isSubmitting && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Spinner, {
-				className: "mr-2",
-				size: "small"
-			}), config.label ?? config.children ?? "Submit"]
-		});
-	};
-});
-
-//#endregion
-init_SubmitActionItem();
 
 //#region src/components/actions/items/RetryActionItem.tsx
+const RetryActionItem = ({ config }) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		className: config.className,
+		disabled: config.disabled,
+		onClick: config.onClick,
+		type: "button",
+		children: config.label ?? config.children ?? "Retry"
+	});
+};
 function registerRetryActionItem() {
 	registerActionItemComponent(ActionItemType.RETRY, RetryActionItem);
 }
-var RetryActionItem;
-var init_RetryActionItem = __esmMin(() => {
-	init_registry$1();
-	init_types$5();
-	RetryActionItem = ({ config }) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-			className: config.className,
-			disabled: config.disabled,
-			onClick: config.onClick,
-			type: "button",
-			children: config.label ?? config.children ?? "Retry"
-		});
-	};
-});
-
-//#endregion
-init_RetryActionItem();
 
 //#region src/components/actions/register.ts
 function registerAllActionItems() {
@@ -44880,61 +44467,27 @@ function registerAllActionItems() {
 	registerLinkActionItem();
 	registerRetryActionItem();
 }
-var init_register$3 = __esmMin(() => {
-	init_ButtonActionItem();
-	init_CancelActionItem();
-	init_CustomActionItem();
-	init_LinkActionItem();
-	init_SubmitActionItem();
-	init_RetryActionItem();
-});
-
-//#endregion
-init_register$3();
-
-var init_actions = __esmMin(() => {
-	init_actionHelpers();
-	init_ActionListRenderer();
-	init_register$3();
-	init_registry$1();
-	init_types$5();
-});
-
-//#endregion
-init_actions();
 
 //#region src/components/shared/footers/ActionsFooter.tsx
 function ActionsFooter({ actionButtons, className, environment }) {
 	if (!actionButtons || actionButtons.length === 0) return null;
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(ActionListRenderer, {
 		actions: actionButtons,
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end gap-2", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end gap-2", className),
 		layout: "horizontal"
 	});
 }
-var init_ActionsFooter = __esmMin(() => {
-	init_actions();
-});
-
-//#endregion
-init_ActionsFooter();
 
 //#region src/components/shared/footers/DefaultFooter.tsx
 function DefaultFooter({ actionButtons, className, environment, isSubmitting, onClose }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(ActionListRenderer, {
 		actions: actionButtons || [],
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end gap-2", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end gap-2", className),
 		closeDialog: onClose,
 		isSubmitting,
 		layout: "horizontal"
 	});
 }
-var init_DefaultFooter = __esmMin(() => {
-	init_actions();
-});
-
-//#endregion
-init_DefaultFooter();
 
 //#region src/components/shared/footers/FormFooter.tsx
 function FormFooter({ actionButtons, className, environment, isSubmitting, onClose, onConfirm, submitLabel = "Submit" }) {
@@ -44947,19 +44500,12 @@ function FormFooter({ actionButtons, className, environment, isSubmitting, onClo
 	});
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(ActionListRenderer, {
 		actions: actionButtons || formActions,
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end gap-2", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end gap-2", className),
 		closeDialog: onClose,
 		isSubmitting,
 		layout: "horizontal"
 	});
 }
-var init_FormFooter = __esmMin(() => {
-	init_actions();
-	init_actionHelpers();
-});
-
-//#endregion
-init_FormFooter();
 
 //#region src/components/shared/footers/StepFormFooter.tsx
 function StepFormFooter({ actionButtons, className, environment, isSubmitting, onClose, onConfirm, submitLabel = "Next" }) {
@@ -44972,19 +44518,12 @@ function StepFormFooter({ actionButtons, className, environment, isSubmitting, o
 	});
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(ActionListRenderer, {
 		actions: actionButtons || formActions,
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-between gap-2", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-between gap-2", className),
 		closeDialog: onClose,
 		isSubmitting,
 		layout: "horizontal"
 	});
 }
-var init_StepFormFooter = __esmMin(() => {
-	init_actions();
-	init_actionHelpers();
-});
-
-//#endregion
-init_StepFormFooter();
 
 //#region src/components/shared/footers/WizardFooter.tsx
 function WizardFooter({ actionButtons, className, isSubmitting, onClose }) {
@@ -45007,7 +44546,7 @@ function WizardFooter({ actionButtons, className, isSubmitting, onClose }) {
 		return action;
 	});
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("mt-4 border-t pt-4", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("mt-4 border-t pt-4", className),
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 			className: "mx-auto max-w-4xl",
 			children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
@@ -45046,14 +44585,6 @@ function WizardFooter({ actionButtons, className, isSubmitting, onClose }) {
 		})
 	});
 }
-var init_WizardFooter = __esmMin(() => {
-	init_actions();
-	init_types$5();
-	init_FooterContext();
-});
-
-//#endregion
-init_WizardFooter();
 
 //#region src/components/shared/registry/FooterRegistry.ts
 function createFooterRegistry() {
@@ -45086,132 +44617,7 @@ function createFooterRegistry() {
 		}
 	};
 }
-var footerRegistry;
-var init_FooterRegistry = __esmMin(() => {
-	init_components();
-	init_types$2();
-	footerRegistry = createFooterRegistry();
-});
-
-//#endregion
-init_FooterRegistry();
-
-//#region src/components/shared/types/environment.ts
-var init_environment = __esmMin(() => {});
-
-//#endregion
-init_environment();
-
-//#region src/components/shared/types/footer.ts
-/**
-* Type guard to check if a footer environment has a step environment
-* @param ctx - The footer environment to check
-* @returns True if the footer environment has a step environment, false otherwise
-*/
-function hasStepEnvironment(ctx) {
-	return ctx.step !== void 0;
-}
-/**
-* Type guard to check if a footer environment is a dialog footer environment
-* @template T - The type of record being used
-* @param ctx - The footer environment to check
-* @returns True if the footer environment is a dialog footer environment, false otherwise
-*/
-function isDialogFooterEnvironment(ctx) {
-	return ctx.container.type === "dialog";
-}
-/**
-* Type guard to check if a footer environment is a simple footer environment
-* @template T - The type of record being used
-* @param ctx - The footer environment to check
-* @returns True if the footer environment is a simple footer environment, false otherwise
-*/
-function isSimpleFooterEnvironment(ctx) {
-	return ctx.form.type === FormType.SIMPLE;
-}
-/**
-* Type guard to check if a footer environment is a standalone footer environment
-* @template T - The type of record being used
-* @param ctx - The footer environment to check
-* @returns True if the footer environment is a standalone footer environment, false otherwise
-*/
-function isStandaloneFooterEnvironment(ctx) {
-	return ctx.container.type === "standalone";
-}
-/**
-* Type guard to check if a footer environment is a step footer environment
-* @template T - The type of record being used
-* @param ctx - The footer environment to check
-* @returns True if the footer environment is a step footer environment, false otherwise
-*/
-function isStepFooterEnvironment(ctx) {
-	return ctx.form.type === FormType.STEP;
-}
-/**
-* Type guard to check if a footer environment is a wizard footer environment
-* @template T - The type of record being used
-* @param ctx - The footer environment to check
-* @returns True if the footer environment is a wizard footer environment, false otherwise
-*/
-function isWizardFooterEnvironment(ctx) {
-	return ctx.form.type === FormType.WIZARD;
-}
-var init_footer = __esmMin(() => {});
-
-//#endregion
-init_footer();
-
-//#region src/components/shared/types/navigation.ts
-var init_navigation = __esmMin(() => {});
-
-//#endregion
-init_navigation();
-
-//#region src/components/shared/types/step.ts
-/**
-* Creates a StepEnvironment object with the provided options
-* @param options - Configuration options for the step environment
-* @param options.current - The current step number (1-indexed)
-* @param options.isFirst - Whether the current step is the first step
-* @param options.isLast - Whether the current step is the last step
-* @param options.onNext - Callback function to move to the next step
-* @param options.onPrevious - Callback function to move to the previous step
-* @param options.onRetry - Callback function to retry the current step
-* @param options.jumpTo - Function to jump to a specific step number
-* @param options.total - The total number of steps
-* @returns A StepEnvironment object with the specified configuration
-*/
-function createStepEnvironment(options) {
-	return {
-		current: options.current,
-		isFirst: options.isFirst,
-		isLast: options.isLast,
-		onNext: options.onNext,
-		onPrevious: options.onPrevious,
-		onRetry: options.onRetry,
-		jumpTo: options.jumpTo,
-		total: options.total,
-		retryCount: options.retryCount
-	};
-}
-var init_step$1 = __esmMin(() => {});
-
-//#endregion
-init_step$1();
-
-//#region src/components/shared/types/index.ts
-var init_types$1 = __esmMin(() => {
-	init_container();
-	init_environment();
-	init_footer();
-	init_form$1();
-	init_header();
-	init_navigation();
-	init_step$1();
-});
-
-//#endregion
-init_types$1();
+const footerRegistry = createFooterRegistry();
 
 //#region src/components/shared/hooks/useEnvironmentSync.ts
 /**
@@ -45226,12 +44632,109 @@ init_types$1();
 function useEnvironmentSync(currentEnvironment, environmentSyncCallback) {
 	if (environmentSyncCallback && currentEnvironment) environmentSyncCallback(currentEnvironment);
 }
-var init_useEnvironmentSync = __esmMin(() => {});
-
-//#endregion
-init_useEnvironmentSync();
 
 //#region src/components/shared/UnifiedFooter.tsx
+var ActionGeneratorRegistry = class {
+	generators = [];
+	generateActions(environment, submitLabel) {
+		for (const generator of this.generators) if (generator.checker(environment)) return generator.generator(environment, submitLabel);
+		return [];
+	}
+	register(generator) {
+		this.generators.push(generator);
+		this.generators.sort((a, b) => b.priority - a.priority);
+	}
+};
+const actionGeneratorRegistry = new ActionGeneratorRegistry();
+actionGeneratorRegistry.register({
+	checker: (environment) => isDialogContainer(environment?.container) && environment.container?.dialogConfig?.type === "alert",
+	generator: (environment, submitLabel) => {
+		return createDialogActions({
+			cancelLabel: submitLabel || "Continue",
+			onCancel: environment?.container?.onClose,
+			type: "alert"
+		});
+	},
+	priority: 350
+});
+actionGeneratorRegistry.register({
+	checker: (environment) => isDialogContainer(environment?.container) && environment.container?.dialogConfig?.type === "confirm",
+	generator: (environment, submitLabel) => {
+		return createDialogActions({
+			cancelLabel: submitLabel || "Cancel",
+			confirmLabel: submitLabel || "Continue",
+			onCancel: (environment?.container)?.onClose,
+			onConfirm: ((environment?.container)?.dialogConfig)?.onConfirm,
+			type: "confirm"
+		});
+	},
+	priority: 325
+});
+actionGeneratorRegistry.register({
+	checker: (environment) => isWizardForm(environment?.form) && !!environment?.step,
+	generator: (environment, submitLabel) => {
+		const step = environment?.step;
+		return createWizardActions({
+			isFirst: step?.isFirst,
+			isLast: step?.isLast,
+			isSubmitting: environment?.form?.isSubmitting,
+			onClose: environment?.container?.onClose,
+			onNext: environment?.form?.methods?.handleSubmit,
+			onPrevious: step?.onPrevious,
+			onSubmit: environment?.form?.methods?.handleSubmit,
+			submitLabel: submitLabel || "Submit"
+		});
+	},
+	priority: 500
+});
+actionGeneratorRegistry.register({
+	checker: (environment) => isStepForm(environment?.form) && !!environment?.step,
+	generator: (environment, submitLabel) => {
+		const step = environment?.step;
+		return createStepActions({
+			isFirst: step?.isFirst,
+			isLast: step?.isLast,
+			isSubmitting: environment?.form?.isSubmitting,
+			onClose: environment?.container?.onClose,
+			onNext: step?.onNext,
+			onPrevious: step?.onPrevious,
+			submitLabel: submitLabel || "Submit"
+		});
+	},
+	priority: 400
+});
+actionGeneratorRegistry.register({
+	checker: (environment) => isDialogContainer(environment?.container) && !isSimpleForm(environment?.form),
+	generator: (environment, submitLabel) => {
+		return createDialogActions({
+			cancelLabel: submitLabel || "Done",
+			onCancel: environment?.container?.onClose,
+			type: "confirm"
+		});
+	},
+	priority: 300
+});
+actionGeneratorRegistry.register({
+	checker: (environment) => !!environment?.form && !isWizardForm(environment?.form) && !isStepForm(environment?.form),
+	generator: (environment, submitLabel) => {
+		return createFormActions({
+			isSubmitting: environment?.form?.isSubmitting,
+			onCancel: isDialogContainer(environment?.container) ? environment?.container?.onClose : void 0,
+			onSubmit: environment?.form?.methods?.handleSubmit,
+			showCancel: isDialogContainer(environment?.container) && !!environment?.container?.onClose,
+			submitLabel
+		});
+	},
+	priority: 200
+});
+actionGeneratorRegistry.register({
+	checker: (environment) => !!environment?.form,
+	generator: (environment, submitLabel) => {
+		const { submit } = createActionHelpers();
+		return [submit(environment?.form?.methods?.handleSubmit, submitLabel, environment?.form?.isSubmitting)];
+	},
+	priority: 100
+});
 function UnifiedFooter({ className, config, environment }) {
 	config && useEnvironmentSync(environment, config.environmentSync);
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(FooterContextProvider, {
@@ -45250,7 +44753,7 @@ function UnifiedFooterInner({ className, config }) {
 	config && useEnvironmentSync(environment, config.environmentSync);
 	const footerType = footerRegistry.resolveType(config, environment);
 	const FooterComponent = footerRegistry.get(footerType);
-	const submitLabel = admin__loadShare__react__loadShare__.useMemo(() => {
+	const submitLabel = dashboard__loadShare__react__loadShare__.useMemo(() => {
 		if (environment.form && isWizardForm(environment?.form) && environment.step) {
 			const currentStepIndex = environment.step.current - 1;
 			const currentStep = config.steps?.[currentStepIndex];
@@ -45277,7 +44780,7 @@ function UnifiedFooterInner({ className, config }) {
 		});
 		if (evaluatedLabel !== void 0) return String(evaluatedLabel);
 	}, [config, environment]);
-	const actions = admin__loadShare__react__loadShare__.useMemo(() => {
+	const actions = dashboard__loadShare__react__loadShare__.useMemo(() => {
 		let baseActions = void 0;
 		if (environment.form && isWizardForm(environment.form) && environment.step) {
 			const currentStepIndex = environment.step.current - 1;
@@ -45323,121 +44826,9 @@ function UnifiedFooterInner({ className, config }) {
 		submitLabel
 	} : baseProps });
 }
-var ActionGeneratorRegistry, actionGeneratorRegistry;
-var init_UnifiedFooter = __esmMin(() => {
-	init_types$2();
-	init_components();
-	init_FooterContext();
-	init_FooterRegistry();
-	init_types$1();
-	init_useEnvironmentSync();
-	ActionGeneratorRegistry = class {
-		generators = [];
-		generateActions(environment, submitLabel) {
-			for (const generator of this.generators) if (generator.checker(environment)) return generator.generator(environment, submitLabel);
-			return [];
-		}
-		register(generator) {
-			this.generators.push(generator);
-			this.generators.sort((a, b) => b.priority - a.priority);
-		}
-	};
-	actionGeneratorRegistry = new ActionGeneratorRegistry();
-	actionGeneratorRegistry.register({
-		checker: (environment) => isDialogContainer(environment?.container) && environment.container?.dialogConfig?.type === "alert",
-		generator: (environment, submitLabel) => {
-			return createDialogActions({
-				cancelLabel: submitLabel || "Continue",
-				onCancel: environment?.container?.onClose,
-				type: "alert"
-			});
-		},
-		priority: 350
-	});
-	actionGeneratorRegistry.register({
-		checker: (environment) => isDialogContainer(environment?.container) && environment.container?.dialogConfig?.type === "confirm",
-		generator: (environment, submitLabel) => {
-			return createDialogActions({
-				cancelLabel: submitLabel || "Cancel",
-				confirmLabel: submitLabel || "Continue",
-				onCancel: (environment?.container)?.onClose,
-				onConfirm: ((environment?.container)?.dialogConfig)?.onConfirm,
-				type: "confirm"
-			});
-		},
-		priority: 325
-	});
-	actionGeneratorRegistry.register({
-		checker: (environment) => isWizardForm(environment?.form) && !!environment?.step,
-		generator: (environment, submitLabel) => {
-			const step = environment?.step;
-			return createWizardActions({
-				isFirst: step?.isFirst,
-				isLast: step?.isLast,
-				isSubmitting: environment?.form?.isSubmitting,
-				onClose: environment?.container?.onClose,
-				onNext: environment?.form?.methods?.handleSubmit,
-				onPrevious: step?.onPrevious,
-				onSubmit: environment?.form?.methods?.handleSubmit,
-				submitLabel: submitLabel || "Submit"
-			});
-		},
-		priority: 500
-	});
-	actionGeneratorRegistry.register({
-		checker: (environment) => isStepForm(environment?.form) && !!environment?.step,
-		generator: (environment, submitLabel) => {
-			const step = environment?.step;
-			return createStepActions({
-				isFirst: step?.isFirst,
-				isLast: step?.isLast,
-				isSubmitting: environment?.form?.isSubmitting,
-				onClose: environment?.container?.onClose,
-				onNext: step?.onNext,
-				onPrevious: step?.onPrevious,
-				submitLabel: submitLabel || "Submit"
-			});
-		},
-		priority: 400
-	});
-	actionGeneratorRegistry.register({
-		checker: (environment) => isDialogContainer(environment?.container) && !isSimpleForm(environment?.form),
-		generator: (environment, submitLabel) => {
-			return createDialogActions({
-				cancelLabel: submitLabel || "Done",
-				onCancel: environment?.container?.onClose,
-				type: "confirm"
-			});
-		},
-		priority: 300
-	});
-	actionGeneratorRegistry.register({
-		checker: (environment) => !!environment?.form && !isWizardForm(environment?.form) && !isStepForm(environment?.form),
-		generator: (environment, submitLabel) => {
-			return createFormActions({
-				isSubmitting: environment?.form?.isSubmitting,
-				onCancel: isDialogContainer(environment?.container) ? environment?.container?.onClose : void 0,
-				onSubmit: environment?.form?.methods?.handleSubmit,
-				showCancel: isDialogContainer(environment?.container) && !!environment?.container?.onClose,
-				submitLabel
-			});
-		},
-		priority: 200
-	});
-	actionGeneratorRegistry.register({
-		checker: (environment) => !!environment?.form,
-		generator: (environment, submitLabel) => {
-			const { submit } = createActionHelpers();
-			return [submit(environment?.form?.methods?.handleSubmit, submitLabel, environment?.form?.isSubmitting)];
-		},
-		priority: 100
-	});
-});
-
-//#endregion
-init_UnifiedFooter();
 
 //#region src/components/shared/context/HeaderContext.tsx
+const HeaderContextInternal = dashboard__loadShare__react__loadShare__.createContext(void 0);
 function HeaderContextProvider({ children, value }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(HeaderContextInternal.Provider, {
 		value,
@@ -45445,25 +44836,18 @@ function HeaderContextProvider({ children, value }) {
 	});
 }
 function useHeaderContext() {
-	const context = admin__loadShare__react__loadShare__.useContext(HeaderContextInternal);
+	const context = dashboard__loadShare__react__loadShare__.useContext(HeaderContextInternal);
 	if (!context) throw new Error("useHeaderContext must be used within a HeaderContextProvider");
 	return context;
 }
 function useOptionalHeaderContext() {
-	return admin__loadShare__react__loadShare__.useContext(HeaderContextInternal);
+	return dashboard__loadShare__react__loadShare__.useContext(HeaderContextInternal);
 }
-var HeaderContextInternal;
-var init_HeaderContext = __esmMin(() => {
-	HeaderContextInternal = admin__loadShare__react__loadShare__.createContext(void 0);
-});
-
-//#endregion
-init_HeaderContext();
 
 //#region src/components/shared/headers/DefaultHeader.tsx
 function DefaultHeader({ actionButtons, className, description, environment, title }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-2", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-2", className),
 		children: [(title || description) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 			className: "space-y-1",
 			children: [title && /* @__PURE__ */ jsxRuntimeExports.jsx("h2", {
@@ -45480,18 +44864,12 @@ function DefaultHeader({ actionButtons, className, description, environment, tit
 		})]
 	});
 }
-var init_DefaultHeader = __esmMin(() => {
-	init_actions();
-});
-
-//#endregion
-init_DefaultHeader();
 
 //#region src/components/shared/headers/FormHeader.tsx
 function FormHeader({ actionButtons, className, description, title }) {
 	if (!title && !description && (!actionButtons || actionButtons.length === 0)) return null;
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-4", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-4", className),
 		children: [(title || description) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 			className: "space-y-2",
 			children: [title && /* @__PURE__ */ jsxRuntimeExports.jsx("h2", {
@@ -45508,12 +44886,6 @@ function FormHeader({ actionButtons, className, description, title }) {
 		})]
 	});
 }
-var init_FormHeader = __esmMin(() => {
-	init_actions();
-});
-
-//#endregion
-init_FormHeader();
 
 //#region src/components/shared/headers/WizardHeader.tsx
 function WizardHeader({ className }) {
@@ -45523,7 +44895,7 @@ function WizardHeader({ className }) {
 		return null;
 	}
 	const { allowNavigation, current, descriptionMaxWidth = "xs", disabledSteps = [], iconSize = "sm", onStepClick, showStepDescriptions = true, showStepTitles = true, steps = [], total } = context.navigation;
-	const resolvedAllowNavigation = admin__loadShare__react__loadShare__.useMemo(() => {
+	const resolvedAllowNavigation = dashboard__loadShare__react__loadShare__.useMemo(() => {
 		if (typeof allowNavigation === "function") return allowNavigation();
 		return allowNavigation;
 	}, [allowNavigation]);
@@ -45534,7 +44906,7 @@ function WizardHeader({ className }) {
 			children: Array.from({ length: total }, (_, index) => {
 				const stepState = calculateStepState(index, current, total, resolvedAllowNavigation, disabledSteps, steps);
 				return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-					className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-full flex-1 transition-all duration-300", {
+					className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-full flex-1 transition-all duration-300", {
 						"bg-accent": stepState.isCompleted,
 						"bg-muted": !stepState.isCompleted && !stepState.isActive,
 						"bg-primary": stepState.isActive && !stepState.isCompleted,
@@ -45593,7 +44965,7 @@ function WizardHeader({ className }) {
 							children: stepState.step.shortTitle || stepState.step.title
 						}),
 						showStepDescriptions && stepState.step.description && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
-							className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground mt-2 text-center text-xs", getComponentSizeClass(descriptionMaxWidth)),
+							className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground mt-2 text-center text-xs", getComponentSizeClass(descriptionMaxWidth)),
 							children: stepState.step.description
 						})
 					]
@@ -45602,7 +44974,7 @@ function WizardHeader({ className }) {
 		})
 	});
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-6", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-6", className),
 		children: [renderMobileProgressBars(), renderDesktopTimeline()]
 	});
 }
@@ -45613,19 +44985,10 @@ function renderIcon$1(icon, size = "sm") {
 		md: "h-5 w-5",
 		sm: "h-4 w-4"
 	};
-	if (reactIsExports.isElement(icon)) return React.cloneElement(icon, { className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(icon.props.className, sizeClasses[size]) });
+	if (reactIsExports.isElement(icon)) return React.cloneElement(icon, { className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(icon.props.className, sizeClasses[size]) });
 	if (reactIsExports.isValidElementType(icon)) return /* @__PURE__ */ jsxRuntimeExports.jsx(icon, { className: sizeClasses[size] });
 	return null;
 }
-var init_WizardHeader = __esmMin(() => {
-	init_sizing();
-	init_HeaderContext();
-	init_header();
-	init_stepState();
-});
-
-//#endregion
-init_WizardHeader();
 
 //#region src/components/shared/registry/HeaderRegistry.ts
 function createHeaderRegistry() {
@@ -45657,18 +45020,7 @@ function createHeaderRegistry() {
 		}
 	};
 }
-var headerRegistry;
-var init_HeaderRegistry = __esmMin(() => {
-	init_DefaultHeader();
-	init_FormHeader();
-	init_WizardHeader();
-	init_header();
-	init_types$2();
-	headerRegistry = createHeaderRegistry();
-});
-
-//#endregion
-init_HeaderRegistry();
+const headerRegistry = createHeaderRegistry();
 
 //#region src/components/shared/UnifiedHeader.tsx
 function UnifiedHeader({ className, config, environment }) {
@@ -45685,16 +45037,16 @@ function UnifiedHeaderInner({ className, config }) {
 	const environment = useHeaderContext();
 	const headerType = headerRegistry.resolveType(config, environment);
 	const HeaderComponent = headerRegistry.get(headerType);
-	const title = admin__loadShare__react__loadShare__.useMemo(() => {
+	const title = dashboard__loadShare__react__loadShare__.useMemo(() => {
 		if (isFormDialog(config) || isWizardDialogConfig(config)) return (isStepFormConfig(config.formConfig) ? config.formConfig.title : config.title) || environment.content.title;
 		return config.title || environment.content.title;
 	}, [config, environment]);
-	const description = admin__loadShare__react__loadShare__.useMemo(() => {
+	const description = dashboard__loadShare__react__loadShare__.useMemo(() => {
 		if (isFormDialog(config) || isWizardDialogConfig(config)) return (isStepFormConfig(config.formConfig) ? config.formConfig.description : config.description) || environment.content.description;
 		return config.description || environment.content.description;
 	}, [config, environment]);
 	const props = {
-		actionButtons: admin__loadShare__react__loadShare__.useMemo(() => {
+		actionButtons: dashboard__loadShare__react__loadShare__.useMemo(() => {
 			return config.actions || environment.content.actions;
 		}, [config, environment]),
 		className,
@@ -45705,15 +45057,6 @@ function UnifiedHeaderInner({ className, config }) {
 	if (!HeaderComponent) return null;
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(HeaderComponent, { ...props });
 }
-var init_UnifiedHeader = __esmMin(() => {
-	init_components();
-	init_HeaderContext();
-	init_HeaderRegistry();
-	init_useEnvironmentSync();
-});
-
-//#endregion
-init_UnifiedHeader();
 
 //#region src/components/shared/utils/renderHeader.tsx
 /**
@@ -45824,21 +45167,13 @@ function renderHeader(config) {
 		environment: unifiedHeaderEnvironment
 	});
 }
-var init_renderHeader = __esmMin(() => {
-	init_Dialog_types();
-	init_StepControlContext();
-	init_builders();
-	init_UnifiedHeader();
-});
-
-//#endregion
-init_renderHeader();
 
 //#region src/components/form/SchemaForm.tsx
+const defaultFooterCss = "pt-4 mt-4 border-t";
 function SchemaForm({ active = true, closeDialog = () => void 0, config }) {
 	if (!active) return null;
 	const { currentDialog, setFormMethods: setFormInstance, formMethods } = useDialog();
-	const { open: openNotification } = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useNotification();
+	const { open: openNotification } = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useNotification();
 	const isInDialog = useIsFormDialog();
 	if (!config) throw new Error("SchemaForm requires a form config");
 	const shouldUseRefine = config.adapter === AdapterType.REFINE || config.refine || Boolean(config.refineCoreProps?.resource);
@@ -45862,7 +45197,7 @@ function SchemaForm({ active = true, closeDialog = () => void 0, config }) {
 	const autoSaveProps = shouldUseRefine ? "refineCore" in formInstance ? formInstance.refineCore.autoSaveProps : void 0 : void 0;
 	const isActiveDialog = !!(currentDialog?.formConfig && currentDialog.formConfig.formId === config.formId) && isInDialog;
 	useForceRerender(config.forceRerender);
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		if (!setFormInstance) return;
 		if (isActiveDialog) setFormInstance(formInstance);
 		return () => {
@@ -45878,7 +45213,7 @@ function SchemaForm({ active = true, closeDialog = () => void 0, config }) {
 	const cConfig = { ...config };
 	if (cConfig.footerClassName === void 0) cConfig.footerClassName = defaultFooterCss;
 	if (cConfig.footerClassName === false) cConfig.footerClassName = void 0;
-	const finalConfig = admin__loadShare__react__loadShare__.useMemo(() => isActiveDialog ? {
+	const finalConfig = dashboard__loadShare__react__loadShare__.useMemo(() => isActiveDialog ? {
 		...currentDialog,
 		formConfig: cConfig
 	} : cConfig, [
@@ -45893,10 +45228,10 @@ function SchemaForm({ active = true, closeDialog = () => void 0, config }) {
 		autoSave: autoSaveProps,
 		config: cConfig,
 		formInstance,
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Form, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Form, {
 			...formInstance,
 			children: /* @__PURE__ */ jsxRuntimeExports.jsxs("form", {
-				className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(cConfig.formClassName, {
+				className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(cConfig.formClassName, {
 					"flex flex-col space-y-4": cConfig.layout === "vertical" || !cConfig.layout,
 					"flex flex-row items-end gap-4": cConfig.layout === "horizontal",
 					"grid gap-4": cConfig.layout === "grid",
@@ -45938,7 +45273,7 @@ function SchemaForm({ active = true, closeDialog = () => void 0, config }) {
 						config: finalConfig,
 						formMethods: formInstance
 					}, isActiveDialog, currentDialog),
-					isRefineWithAutosave && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.AutoSaveIndicator, {
+					isRefineWithAutosave && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.AutoSaveIndicator, {
 						...autoSaveProps,
 						elements: cConfig.autoSaveStates
 					})
@@ -45982,20 +45317,6 @@ function renderFooter$1(footerConfig, footerProps, isInDialog, currentDialog) {
 		environment: footerEnvironment
 	});
 }
-var defaultFooterCss;
-var init_SchemaForm = __esmMin(() => {
-	init_components();
-	init_adapters();
-	init_context$1();
-	init_FormRenderer();
-	init_core();
-	init_types$4();
-	init_autoSave();
-	defaultFooterCss = "pt-4 mt-4 border-t";
-});
-
-//#endregion
-init_SchemaForm();
 
 //#region src/components/form/handlers/step.ts
 function getStepOnSuccessHandler(config, formMethods, isLastStep, closeDialog) {
@@ -46012,7 +45333,6 @@ async function handleStepSubmission(options) {
 	const { currentStep, goToNextStep, stepConfig, ...baseOptions } = options;
 	return handleFormSubmission({
 		...baseOptions,
-		closeOnSubmit: false,
 		isStep: true,
 		onError: async (error) => {
 			if (stepConfig.onStepError) await stepConfig.onStepError(error);
@@ -46031,12 +45351,6 @@ async function handleStepSubmission(options) {
 		}
 	});
 }
-var init_step = __esmMin(() => {
-	init_core();
-});
-
-//#endregion
-init_step();
 
 //#region src/components/form/utils/animationUtils.ts
 /**
@@ -46054,15 +45368,11 @@ function getStepAnimationClasses(isEntering, isExiting, isActive, direction) {
 	if (isActive) return "opacity-100 scale-100 pointer-events-auto z-10";
 	return "opacity-0 scale-95 pointer-events-none z-0";
 }
-var init_animationUtils = __esmMin(() => {});
-
-//#endregion
-init_animationUtils();
 
 //#region src/components/form/WizardStepContent.tsx
 function WizardStepContent({ children, className = "", description, icon, isActive = false, isEntering = false, isExiting = false, title }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("transition-all duration-300 ease-in-out", getStepAnimationClasses(isEntering, isExiting, isActive, useOptionalStepControlContext()?.transitionState?.direction || null), className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("transition-all duration-300 ease-in-out", getStepAnimationClasses(isEntering, isExiting, isActive, useOptionalStepControlContext()?.transitionState?.direction || null), className),
 		style: {
 			gridColumn: 1,
 			gridRow: 1
@@ -46094,15 +45404,27 @@ function renderIcon(icon) {
 	if (reactIsExports.isValidElementType(icon)) return /* @__PURE__ */ jsxRuntimeExports.jsx(icon, {});
 	return null;
 }
-var init_WizardStepContent = __esmMin(() => {
-	init_StepControlContext();
-	init_animationUtils();
-});
-
-//#endregion
-init_WizardStepContent();
 
 //#region src/components/form/StepSchemaForm.tsx
+const defaultStepFormFooter = (stepMethods, formMethods, currentDialog) => {
+	const footerEnvironment = Environment.footer().standalone().stepForm({
+		isSubmitting: formMethods?.formState?.isSubmitting || false,
+		methods: formMethods
+	}).step({
+		current: stepMethods.currentStep,
+		isFirst: stepMethods.isFirstStep,
+		isLast: stepMethods.isLastStep,
+		jumpTo: stepMethods.jumpTo,
+		onNext: stepMethods.handleSubmit || stepMethods.handleNext,
+		onPrevious: stepMethods.handlePrevious,
+		onRetry: stepMethods.handleRetry,
+		total: stepMethods.totalSteps
+	}).build();
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(UnifiedFooter, {
+		config: isFormDialog(currentDialog) || isWizardDialogConfig(currentDialog) ? currentDialog.formConfig : currentDialog,
+		environment: footerEnvironment
+	});
+};
 function StepSchemaForm({ closeDialog, config, onNavigationStart, onNavigationEnd, onNavigationError }) {
 	const { currentDialog, formMethods } = useDialog();
 	const existingStepControl = useOptionalStepControlContext();
@@ -46147,7 +45469,7 @@ function getStepFooterConfig(isActive, footerConfig, stepMethods, triggerSubmit)
 }
 function StepSchemaFormContent({ closeDialog, config, formMethods, onNavigationStart, onNavigationEnd, onNavigationError }) {
 	const { currentStep, goToStep, jumpTo, handleNext, handlePrevious, handleRetry, isFirstStep, isLastStep, totalSteps, transitionState } = useStepControl();
-	const triggerSubmit = admin__loadShare__react__loadShare__.useCallback(() => {
+	const triggerSubmit = dashboard__loadShare__react__loadShare__.useCallback(() => {
 		if (!formMethods?.current?.handleSubmit) return;
 		handleStepSubmission({
 			closeDialog,
@@ -46171,7 +45493,7 @@ function StepSchemaFormContent({ closeDialog, config, formMethods, onNavigationS
 	]);
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 		className: "grid grid-cols-1 grid-rows-1",
-		children: admin__loadShare__react__loadShare__.useMemo(() => {
+		children: dashboard__loadShare__react__loadShare__.useMemo(() => {
 			const stepMethods = {
 				currentStep,
 				goToStep,
@@ -46239,39 +45561,6 @@ function StepSchemaFormContent({ closeDialog, config, formMethods, onNavigationS
 		])
 	});
 }
-var defaultStepFormFooter;
-var init_StepSchemaForm = __esmMin(() => {
-	init_types$4();
-	init_components();
-	init_context$1();
-	init_step();
-	init_SchemaForm();
-	init_StepControlContext();
-	init_stepRetry();
-	init_WizardStepContent();
-	defaultStepFormFooter = (stepMethods, formMethods, currentDialog) => {
-		const footerEnvironment = Environment.footer().standalone().stepForm({
-			isSubmitting: formMethods?.formState?.isSubmitting || false,
-			methods: formMethods
-		}).step({
-			current: stepMethods.currentStep,
-			isFirst: stepMethods.isFirstStep,
-			isLast: stepMethods.isLastStep,
-			jumpTo: stepMethods.jumpTo,
-			onNext: stepMethods.handleSubmit || stepMethods.handleNext,
-			onPrevious: stepMethods.handlePrevious,
-			onRetry: stepMethods.handleRetry,
-			total: stepMethods.totalSteps
-		}).build();
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(UnifiedFooter, {
-			config: isFormDialog(currentDialog) || isWizardDialogConfig(currentDialog) ? currentDialog.formConfig : currentDialog,
-			environment: footerEnvironment
-		});
-	};
-});
-
-//#endregion
-init_StepSchemaForm();
 
 //#region src/components/dialog/types/FormDialog.tsx
 function FormDialog({ actions, formConfig, isSubmitting, onClose, onSubmit, onSuccess, showCancel = true, submitLabel, title }) {
@@ -46286,7 +45575,7 @@ function FormDialog({ actions, formConfig, isSubmitting, onClose, onSubmit, onSu
 		submitLabel
 	});
 	const finalActions = actions || defaultActions;
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, { children: title }) }), isStepFormConfig(formConfig) ? /* @__PURE__ */ jsxRuntimeExports.jsx(StepSchemaForm, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, { children: title }) }), isStepFormConfig(formConfig) ? /* @__PURE__ */ jsxRuntimeExports.jsx(StepSchemaForm, {
 		closeDialog: onClose,
 		config: {
 			...formConfig,
@@ -46304,12 +45593,6 @@ function FormDialog({ actions, formConfig, isSubmitting, onClose, onSubmit, onSu
 		}
 	})] });
 }
-var init_FormDialog = __esmMin(() => {
-	init_components();
-});
-
-//#endregion
-init_FormDialog();
 
 //#region src/components/form/WizardForm.tsx
 function WizardForm({ closeDialog = () => void 0, config }) {
@@ -46343,7 +45626,7 @@ function WizardFormContent({ closeDialog, config, formMethods, isInDialog }) {
 	const stepControl = useStepControl();
 	const { currentStep, goToStep, isFirstStep, isLastStep, totalSteps } = stepControl;
 	const isSubmitting = formMethods?.current?.formState?.isSubmitting || false;
-	const isStepNavigationAllowed = admin__loadShare__react__loadShare__.useMemo(() => {
+	const isStepNavigationAllowed = dashboard__loadShare__react__loadShare__.useMemo(() => {
 		return resolveAllowStepNavigation(config.allowStepNavigation, config.steps, currentStep);
 	}, [
 		config.allowStepNavigation,
@@ -46419,15 +45702,6 @@ function WizardFormContent({ closeDialog, config, formMethods, isInDialog }) {
 		})]
 	});
 }
-var init_WizardForm = __esmMin(() => {
-	init_components();
-	init_StepControlContext();
-	init_StepSchemaForm();
-	init_stepRetry();
-});
-
-//#endregion
-init_WizardForm();
 
 //#region src/components/dialog/types/WizardDialog.tsx
 function WizardDialog({ actions, formConfig, isFirst = false, isLast = false, isSubmitting, onClose, onNext, onPrevious, onSubmit, onSuccess, title, ...props }) {
@@ -46458,50 +45732,32 @@ function WizardDialog({ actions, formConfig, isFirst = false, isLast = false, is
 		...props
 	})] });
 }
-var init_WizardDialog = __esmMin(() => {
-	init_components();
-	init_stepState();
-});
-
-//#endregion
-init_WizardDialog();
 
 //#region src/components/dialog/Dialog.registry.ts
+const dialogComponents = {
+	alert: AlertDialog,
+	confirm: ConfirmDialog,
+	custom: CustomDialog,
+	form: FormDialog,
+	wizard_form: WizardDialog
+};
 function getDialogComponent(type) {
 	return dialogComponents[type];
 }
 function isRegisteredDialogType(config) {
 	return !!config && config.type in dialogComponents;
 }
-var dialogComponents;
-var init_Dialog_registry = __esmMin(() => {
-	init_AlertDialog();
-	init_ConfirmDialog();
-	init_CustomDialog();
-	init_FormDialog();
-	init_WizardDialog();
-	dialogComponents = {
-		alert: AlertDialog,
-		confirm: ConfirmDialog,
-		custom: CustomDialog,
-		form: FormDialog,
-		wizard_form: WizardDialog
-	};
-});
-
-//#endregion
-init_Dialog_registry();
 
 //#region src/components/dialog/DialogContainer.tsx
 function DialogContainer({ children, currentDialog }) {
 	const { closeDialog } = useDialogActions();
-	const { open: openNotification } = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useNotification();
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Dialog, {
+	const { open: openNotification } = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useNotification();
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Dialog, {
 		"aria-describedby": currentDialog.description ? "dialog-description" : void 0,
 		"aria-labelledby": "dialog-title",
 		onOpenChange: (open) => !open && closeDialog("user"),
 		open: !!currentDialog,
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogContent, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogContent, {
 			className: getDialogContentClasses(currentDialog),
 			onInteractOutside: (e) => {
 				if (currentDialog.preventCloseOnOutsideClick === true) e.preventDefault();
@@ -46518,13 +45774,6 @@ function DialogContainer({ children, currentDialog }) {
 		})
 	});
 }
-var init_DialogContainer = __esmMin(() => {
-	init_Dialog_context();
-	init_dialogClasses();
-});
-
-//#endregion
-init_DialogContainer();
 
 //#region src/components/dialog/DialogContent.tsx
 function DialogContent({ currentDialog, dialogWithFormType }) {
@@ -46535,13 +45784,6 @@ function DialogContent({ currentDialog, dialogWithFormType }) {
 		onClose: () => closeDialog("user")
 	}) : console.warn(`No component registered for dialog type: ${currentDialog.type}`) });
 }
-var init_DialogContent = __esmMin(() => {
-	init_Dialog_context();
-	init_Dialog_registry();
-});
-
-//#endregion
-init_DialogContent();
 
 //#region src/components/shared/utils/renderFooter.tsx
 /**
@@ -46559,7 +45801,7 @@ init_DialogContent();
 function renderFooter(config) {
 	const { className, dialogConfig, footer, formMethods, isDialog = false, onCancel, unifiedFooterConfig } = config;
 	if (footer === false) return null;
-	if (footer && isDialogFooterFunction(footer)) return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogFooter, {
+	if (footer && isDialogFooterFunction(footer)) return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogFooter, {
 		className,
 		children: footer(buildFooterEnvironment({
 			dialogConfig,
@@ -46569,7 +45811,7 @@ function renderFooter(config) {
 			stepControl: useOptionalStepControlContext()
 		}))
 	});
-	if (footer) return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogFooter, {
+	if (footer) return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogFooter, {
 		className,
 		children: footer
 	});
@@ -46580,7 +45822,7 @@ function renderFooter(config) {
 		onCancel,
 		stepControl: useOptionalStepControlContext()
 	});
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogFooter, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogFooter, {
 		className,
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx(UnifiedFooter, {
 			config: unifiedFooterConfig || dialogConfig?.formConfig || dialogConfig,
@@ -46630,15 +45872,6 @@ function buildDialogFooterEnvironment(dialogConfig, formMethods, onCancel, stepC
 	}).build();
 	return builder.buildContainerOnly();
 }
-var init_renderFooter = __esmMin(() => {
-	init_Dialog_types();
-	init_StepControlContext();
-	init_builders();
-	init_UnifiedFooter();
-});
-
-//#endregion
-init_renderFooter();
 
 //#region src/components/dialog/DialogFooterContent.tsx
 function DialogFooterContent({ currentDialog, onCancel }) {
@@ -46651,12 +45884,6 @@ function DialogFooterContent({ currentDialog, onCancel }) {
 		onCancel
 	}) });
 }
-var init_DialogFooterContent = __esmMin(() => {
-	init_components();
-});
-
-//#endregion
-init_DialogFooterContent();
 
 //#region src/components/dialog/DialogHeaderContent.tsx
 function DialogHeaderContent({ currentDialog }) {
@@ -46674,13 +45901,6 @@ function DialogHeaderContent({ currentDialog }) {
 		unifiedHeaderConfig: currentDialog
 	});
 }
-var init_DialogHeaderContent = __esmMin(() => {
-	init_components();
-	init_Dialog_types();
-});
-
-//#endregion
-init_DialogHeaderContent();
 
 //#region src/components/dialog/Dialog.renderer.tsx
 function DialogComponent(props) {
@@ -46731,48 +45951,28 @@ function DialogRenderer() {
 		children: dialogContent
 	});
 }
-var init_Dialog_renderer = __esmMin(() => {
-	init_Dialog_context();
-	init_Dialog_registry();
-	init_Dialog_types();
-	init_DialogContainer();
-	init_DialogContent();
-	init_DialogFooterContent();
-	init_DialogHeaderContent();
-});
-
-//#endregion
-init_Dialog_renderer();
 
 //#region src/components/form/fields/Switch.tsx
+const Switch = React.forwardRef(({ autocomplete, label, ...props }, ref) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Switch, {
+		checked: props.value,
+		disabled: props.disabled,
+		id: props.name,
+		name: props.name,
+		onBlur: props.onBlur,
+		onCheckedChange: props.onChange,
+		ref,
+		...autocomplete ? { autoComplete: autocomplete } : {}
+	}), label && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground", props.labelClassName),
+		htmlFor: props.name,
+		children: label
+	})] });
+});
+Switch.displayName = "Switch";
 function registerSwitch() {
 	registerFormComponent(FormFieldType.SWITCH, Switch, { handlesLabel: true });
 }
-var Switch;
-var init_Switch = __esmMin(() => {
-	init_fields();
-	init_components();
-	Switch = React.forwardRef(({ autocomplete, label, ...props }, ref) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Switch, {
-			checked: props.value,
-			disabled: props.disabled,
-			id: props.name,
-			name: props.name,
-			onBlur: props.onBlur,
-			onCheckedChange: props.onChange,
-			ref,
-			...autocomplete ? { autoComplete: autocomplete } : {}
-		}), label && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground", props.labelClassName),
-			htmlFor: props.name,
-			children: label
-		})] });
-	});
-	Switch.displayName = "Switch";
-});
-
-//#endregion
-init_Switch();
 
 //#region src/components/form/register.ts
 function registerAllFormComponents() {
@@ -46788,50 +45988,6 @@ function registerAllFormComponents() {
 	registerTextarea();
 	registerRichText();
 }
-var init_register$2 = __esmMin(() => {
-	init_fields();
-	init_Checkbox();
-	init_DatePicker();
-	init_FileInput();
-	init_Input();
-	init_RadioGroup();
-	init_RichText();
-	init_Select();
-	init_Slider();
-	init_Switch();
-	init_Textarea();
-});
-
-//#endregion
-init_register$2();
-
-//#region src/components/form/utils/index.ts
-var init_utils$1 = __esmMin(() => {
-	init_stepRetry();
-	init_autoSave();
-	init_animationUtils();
-});
-
-//#endregion
-init_utils$1();
-
-var init_form = __esmMin(() => {
-	init_adapters();
-	init_context$1();
-	init_fields();
-	init_FormGroup();
-	init_FormRenderer();
-	init_register$2();
-	init_SchemaForm();
-	init_StepControlContext();
-	init_StepSchemaForm();
-	init_types$4();
-	init_utils$1();
-	init_WizardForm();
-});
-
-//#endregion
-init_form();
 
 //#region src/components/Loading.tsx
 function Loading({ children, className, ...rest }) {
@@ -46865,10 +46021,6 @@ function Loading({ children, className, ...rest }) {
 		})
 	});
 }
-var init_Loading = __esmMin(() => {});
-
-//#endregion
-init_Loading();
 
 const createStoreImpl = (createState) => {
   let state;
@@ -46904,130 +46056,125 @@ function useStore(api, selector = identity$2) {
   return slice;
 }
 
-var helpers, appStore, useAppStore;
-var init_appStore = __esmMin(() => {
-	helpers = {
-		addItemsToChildren: (newItems, parent) => {
-			const existingChildIds = new Set(parent.children?.map((item) => item.id).filter(Boolean));
-			const itemsToAdd = newItems.filter((item) => item.id && !existingChildIds.has(item.id));
-			const newChildren = [...parent.children || [], ...itemsToAdd.map((item) => {
-				const child = {
-					...item,
-					children: item.children || []
-				};
-				if (parent.path && child.path && !child.path.startsWith("/")) child.path = `${parent.path.endsWith("/") ? parent.path.slice(0, -1) : parent.path}/${child.path.startsWith("/") ? child.path.slice(1) : child.path}`;
-				return child;
-			})];
-			return {
-				...parent,
-				children: newChildren
-			};
-		},
-		addItemsToRoot: (newItems, existingItems) => {
-			const newItemsFiltered = newItems.filter((item, index, self) => item.id && self.findIndex((i) => i.id === item.id) === index);
-			const existingIds = new Set(existingItems.map((item) => item.id).filter(Boolean));
-			const itemsToAdd = newItemsFiltered.filter((item) => item.id && !existingIds.has(item.id));
-			return [...existingItems, ...itemsToAdd.map((item) => ({
+//#region src/store/appStore.ts
+const helpers = {
+	addItemsToChildren: (newItems, parent) => {
+		const existingChildIds = new Set(parent.children?.map((item) => item.id).filter(Boolean));
+		const itemsToAdd = newItems.filter((item) => item.id && !existingChildIds.has(item.id));
+		const newChildren = [...parent.children || [], ...itemsToAdd.map((item) => {
+			const child = {
 				...item,
 				children: item.children || []
-			}))];
-		},
-		findAndModifyMenuItem: (items, key, modifier) => {
-			let changed = false;
-			const newItems = items.map((item) => {
-				if (item.id === key) {
+			};
+			if (parent.path && child.path && !child.path.startsWith("/")) child.path = `${parent.path.endsWith("/") ? parent.path.slice(0, -1) : parent.path}/${child.path.startsWith("/") ? child.path.slice(1) : child.path}`;
+			return child;
+		})];
+		return {
+			...parent,
+			children: newChildren
+		};
+	},
+	addItemsToRoot: (newItems, existingItems) => {
+		const newItemsFiltered = newItems.filter((item, index, self) => item.id && self.findIndex((i) => i.id === item.id) === index);
+		const existingIds = new Set(existingItems.map((item) => item.id).filter(Boolean));
+		const itemsToAdd = newItemsFiltered.filter((item) => item.id && !existingIds.has(item.id));
+		return [...existingItems, ...itemsToAdd.map((item) => ({
+			...item,
+			children: item.children || []
+		}))];
+	},
+	findAndModifyMenuItem: (items, key, modifier) => {
+		let changed = false;
+		const newItems = items.map((item) => {
+			if (item.id === key) {
+				changed = true;
+				return modifier(item);
+			}
+			if (item.children) {
+				const updatedChildren = helpers.findAndModifyMenuItem(item.children, key, modifier);
+				if (updatedChildren !== item.children) {
 					changed = true;
-					return modifier(item);
-				}
-				if (item.children) {
-					const updatedChildren = helpers.findAndModifyMenuItem(item.children, key, modifier);
-					if (updatedChildren !== item.children) {
-						changed = true;
-						return {
-							...item,
-							children: updatedChildren
-						};
-					}
-				}
-				return item;
-			});
-			return changed ? newItems : items;
-		},
-		findMenuItem: (items, id) => {
-			for (const item of items) {
-				if (item.id === id) return item;
-				if (item.children) {
-					const found = helpers.findMenuItem(item.children, id);
-					if (found) return found;
+					return {
+						...item,
+						children: updatedChildren
+					};
 				}
 			}
-		},
-		removeItemFromMenu: (items, key) => {
-			let removed = false;
-			const newItems = items.map((item) => {
-				if (item.children) {
-					const updatedChildren = helpers.removeItemFromMenu(item.children, key);
-					if (updatedChildren !== item.children) {
-						removed = true;
-						return {
-							...item,
-							children: [...updatedChildren]
-						};
-					}
-				}
-				return item;
-			}).filter((item) => {
-				if (item.id === key) {
-					removed = true;
-					return false;
-				}
-				return true;
-			});
-			return removed ? newItems : items;
+			return item;
+		});
+		return changed ? newItems : items;
+	},
+	findMenuItem: (items, id) => {
+		for (const item of items) {
+			if (item.id === id) return item;
+			if (item.children) {
+				const found = helpers.findMenuItem(item.children, id);
+				if (found) return found;
+			}
 		}
-	};
-	appStore = createStore((set) => ({
-		addMenuItem: (newItem, parentKey) => set((state) => {
-			if (parentKey) if (helpers.findMenuItem(state.menuItems, parentKey)) return { menuItems: helpers.findAndModifyMenuItem(state.menuItems, parentKey, (parent) => helpers.addItemsToChildren([newItem], parent)) };
-			else return { menuItems: helpers.addItemsToRoot([newItem], state.menuItems) };
-			else return { menuItems: helpers.addItemsToRoot([newItem], state.menuItems) };
-		}),
-		addMenuItems: (items, parentKey) => set((state) => {
-			let newMenuItems = [...state.menuItems];
-			const itemsWithoutParents = items.filter((item) => !item.parentId);
-			if (itemsWithoutParents.length > 0) newMenuItems = helpers.addItemsToRoot(itemsWithoutParents, newMenuItems);
-			const itemsWithParents = items.filter((item) => item.parentId || parentKey);
-			for (const item of itemsWithParents) {
-				const targetParentKey = parentKey ?? item.parentId;
-				if (targetParentKey) if (helpers.findMenuItem(newMenuItems, targetParentKey)) {
-					newMenuItems = helpers.findAndModifyMenuItem(newMenuItems, targetParentKey, (parent) => helpers.addItemsToChildren([item], parent));
-					newMenuItems = newMenuItems.filter((i) => i.id !== item.id);
-				} else newMenuItems = helpers.addItemsToRoot([item], newMenuItems);
+	},
+	removeItemFromMenu: (items, key) => {
+		let removed = false;
+		const newItems = items.map((item) => {
+			if (item.children) {
+				const updatedChildren = helpers.removeItemFromMenu(item.children, key);
+				if (updatedChildren !== item.children) {
+					removed = true;
+					return {
+						...item,
+						children: [...updatedChildren]
+					};
+				}
 			}
-			return { menuItems: newMenuItems };
-		}),
-		error: null,
-		isLoading: false,
-		menuItems: [],
-		pluginConfigs: [],
-		removeMenuItem: (key) => set((state) => {
-			return { menuItems: helpers.removeItemFromMenu(state.menuItems, key) };
-		}),
-		routes: [],
-		setError: (error) => set({ error }),
-		setIsLoading: (isLoading) => set({ isLoading }),
-		setPluginConfigs: (pluginConfigs) => set({ pluginConfigs }),
-		setRoutes: (routes) => set({ routes })
-	}));
-	useAppStore = (selector) => useStore(appStore, selector);
-});
-
-//#endregion
-init_appStore();
+			return item;
+		}).filter((item) => {
+			if (item.id === key) {
+				removed = true;
+				return false;
+			}
+			return true;
+		});
+		return removed ? newItems : items;
+	}
+};
+const appStore = createStore((set) => ({
+	addMenuItem: (newItem, parentKey) => set((state) => {
+		if (parentKey) if (helpers.findMenuItem(state.menuItems, parentKey)) return { menuItems: helpers.findAndModifyMenuItem(state.menuItems, parentKey, (parent) => helpers.addItemsToChildren([newItem], parent)) };
+		else return { menuItems: helpers.addItemsToRoot([newItem], state.menuItems) };
+		else return { menuItems: helpers.addItemsToRoot([newItem], state.menuItems) };
+	}),
+	addMenuItems: (items, parentKey) => set((state) => {
+		let newMenuItems = [...state.menuItems];
+		const itemsWithoutParents = items.filter((item) => !item.parentId);
+		if (itemsWithoutParents.length > 0) newMenuItems = helpers.addItemsToRoot(itemsWithoutParents, newMenuItems);
+		const itemsWithParents = items.filter((item) => item.parentId || parentKey);
+		for (const item of itemsWithParents) {
+			const targetParentKey = parentKey ?? item.parentId;
+			if (targetParentKey) if (helpers.findMenuItem(newMenuItems, targetParentKey)) {
+				newMenuItems = helpers.findAndModifyMenuItem(newMenuItems, targetParentKey, (parent) => helpers.addItemsToChildren([item], parent));
+				newMenuItems = newMenuItems.filter((i) => i.id !== item.id);
+			} else newMenuItems = helpers.addItemsToRoot([item], newMenuItems);
+		}
+		return { menuItems: newMenuItems };
+	}),
+	error: null,
+	isLoading: false,
+	menuItems: [],
+	pluginConfigs: [],
+	removeMenuItem: (key) => set((state) => {
+		return { menuItems: helpers.removeItemFromMenu(state.menuItems, key) };
+	}),
+	routes: [],
+	setError: (error) => set({ error }),
+	setIsLoading: (isLoading) => set({ isLoading }),
+	setPluginConfigs: (pluginConfigs) => set({ pluginConfigs }),
+	setRoutes: (routes) => set({ routes })
+}));
+const useAppStore = (selector) => useStore(appStore, selector);
 
 // dev uses dynamic import to separate chunks
     
-    const {initPromise} = admin__mf_v__runtimeInit__mf_v__;
+    const {initPromise} = dashboard__mf_v__runtimeInit__mf_v__;
     const res = initPromise.then(runtime => runtime.loadShare("@lumeweb/portal-framework-core", {
       customShareInfo: {shareConfig:{
         singleton: true,
@@ -47036,7 +46183,7 @@ init_appStore();
       }}
     }));
     const exportModule = await res.then(factory => factory());
-    var admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__ = exportModule;
+    var dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__ = exportModule;
 
 function derive(deriveFn) {
     const listeners = new Set();
@@ -47196,58 +46343,52 @@ function useStoreWithEqualityFn(api, selector = identity$1, equalityFn) {
 }
 
 //#region src/store/portalStore.ts
-var portalStore, usePortalActions, usePortalStore, useFrameworkSync, usePortal, metaStore, useMetaStore;
-var init_portalStore = __esmMin(() => {
-	portalStore = createStore((set) => ({
-		isMetaLoading: false,
-		meta: void 0,
-		portalUrl: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.env.VITE_PORTAL_DOMAIN ?? "",
-		sdk: null,
-		setIsMetaLoading: (isMetaLoading) => set({ isMetaLoading }),
-		setMeta: (meta) => set({ meta }),
-		setPortalUrl: (portalUrl) => set({ portalUrl }),
-		setSdk: (sdk) => set({ sdk })
-	}));
-	usePortalActions = () => {
-		return useStoreWithEqualityFn(portalStore, (state) => ({
-			setIsMetaLoading: state.setIsMetaLoading,
-			setMeta: state.setMeta,
-			setPortalUrl: state.setPortalUrl,
-			setSdk: state.setSdk
-		}), shallow);
+const portalStore = createStore((set) => ({
+	isMetaLoading: false,
+	meta: void 0,
+	portalUrl: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.env.VITE_PORTAL_DOMAIN ?? "",
+	sdk: null,
+	setIsMetaLoading: (isMetaLoading) => set({ isMetaLoading }),
+	setMeta: (meta) => set({ meta }),
+	setPortalUrl: (portalUrl) => set({ portalUrl }),
+	setSdk: (sdk) => set({ sdk })
+}));
+const usePortalActions = () => {
+	return useStoreWithEqualityFn(portalStore, (state) => ({
+		setIsMetaLoading: state.setIsMetaLoading,
+		setMeta: state.setMeta,
+		setPortalUrl: state.setPortalUrl,
+		setSdk: state.setSdk
+	}), shallow);
+};
+const usePortalStore = (selector, equalityFn = shallow) => {
+	return useStoreWithEqualityFn(portalStore, selector, equalityFn);
+};
+const useFrameworkSync = () => {
+	const framework = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.useFramework();
+	const actions = usePortalActions();
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
+		if (!framework) return;
+		if (!framework?.framework) return;
+		if (framework?.framework) actions.setPortalUrl(framework.framework.portalUrl);
+		if (framework?.framework?.meta) actions.setMeta(framework.framework.meta);
+	}, [framework?.framework, actions]);
+};
+const usePortal = (selector, equalityFn) => {
+	const state = usePortalStore(selector, equalityFn);
+	const actions = usePortalActions();
+	return {
+		...state,
+		...actions
 	};
-	usePortalStore = (selector, equalityFn = shallow) => {
-		return useStoreWithEqualityFn(portalStore, selector, equalityFn);
-	};
-	useFrameworkSync = () => {
-		const framework = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.useFramework();
-		const actions = usePortalActions();
-		admin__loadShare__react__loadShare__.useEffect(() => {
-			if (!framework) return;
-			if (!framework?.framework) return;
-			if (framework?.framework) actions.setPortalUrl(framework.framework.portalUrl);
-			if (framework?.framework?.meta) actions.setMeta(framework.framework.meta);
-		}, [framework?.framework, actions]);
-	};
-	usePortal = (selector, equalityFn) => {
-		const state = usePortalStore(selector, equalityFn);
-		const actions = usePortalActions();
-		return {
-			...state,
-			...actions
-		};
-	};
-	metaStore = derive((get) => {
-		const portalUrl = get(portalStore).portalUrl;
-		const isMetaLoading = get(portalStore).isMetaLoading;
-		if (!portalUrl || isMetaLoading) return;
-		return get(portalStore).meta;
-	});
-	useMetaStore = () => useStore(metaStore);
+};
+const metaStore = derive((get) => {
+	const portalUrl = get(portalStore).portalUrl;
+	const isMetaLoading = get(portalStore).isMetaLoading;
+	if (!portalUrl || isMetaLoading) return;
+	return get(portalStore).meta;
 });
-
-//#endregion
-init_portalStore();
+const useMetaStore = () => useStore(metaStore);
 
 // src/bindings.tsx
 
@@ -47273,9 +46414,9 @@ var stringifyConfig = {
 };
 var routerProvider = {
   go: () => {
-    const { search: existingSearch, hash: existingHash } = admin__loadShare__react_mf_2_router__loadShare__.useLocation();
-    const navigate = admin__loadShare__react_mf_2_router__loadShare__.useNavigate();
-    const fn = admin__loadShare__react__loadShare__.useCallback(
+    const { search: existingSearch, hash: existingHash } = dashboard__loadShare__react_mf_2_router__loadShare__.useLocation();
+    const navigate = dashboard__loadShare__react_mf_2_router__loadShare__.useNavigate();
+    const fn = dashboard__loadShare__react__loadShare__.useCallback(
       ({
         to,
         type,
@@ -47311,24 +46452,24 @@ var routerProvider = {
     return fn;
   },
   back: () => {
-    const navigate = admin__loadShare__react_mf_2_router__loadShare__.useNavigate();
-    const fn = admin__loadShare__react__loadShare__.useCallback(() => {
+    const navigate = dashboard__loadShare__react_mf_2_router__loadShare__.useNavigate();
+    const fn = dashboard__loadShare__react__loadShare__.useCallback(() => {
       navigate(-1);
     }, [navigate]);
     return fn;
   },
   parse: () => {
     var _a;
-    let params = admin__loadShare__react_mf_2_router__loadShare__.useParams();
-    const { pathname, search } = admin__loadShare__react_mf_2_router__loadShare__.useLocation();
-    const { resources } = admin__loadShare__react__loadShare__.useContext(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.ResourceContext);
+    let params = dashboard__loadShare__react_mf_2_router__loadShare__.useParams();
+    const { pathname, search } = dashboard__loadShare__react_mf_2_router__loadShare__.useLocation();
+    const { resources } = dashboard__loadShare__react__loadShare__.useContext(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.ResourceContext);
     const { resource, action, matchedRoute } = React.useMemo(() => {
-      return admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.matchResourceFromRoute(pathname, resources);
+      return dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.matchResourceFromRoute(pathname, resources);
     }, [resources, pathname]);
     if (Object.entries(params).length === 0 && matchedRoute) {
-      params = ((_a = admin__loadShare__react_mf_2_router__loadShare__.matchPath(matchedRoute, pathname)) == null ? void 0 : _a.params) || {};
+      params = ((_a = dashboard__loadShare__react_mf_2_router__loadShare__.matchPath(matchedRoute, pathname)) == null ? void 0 : _a.params) || {};
     }
-    const fn = admin__loadShare__react__loadShare__.useCallback(() => {
+    const fn = dashboard__loadShare__react__loadShare__.useCallback(() => {
       const parsedSearch = qs.parse(search, { ignoreQueryPrefix: true });
       const combinedParams = {
         ...params,
@@ -47356,15 +46497,17 @@ var routerProvider = {
     return fn;
   },
   Link: React.forwardRef(function RefineLink(props, ref) {
-    return /* @__PURE__ */ React.createElement(admin__loadShare__react_mf_2_router__loadShare__.Link, { to: props.to, ...props, ref });
+    return /* @__PURE__ */ React.createElement(dashboard__loadShare__react_mf_2_router__loadShare__.Link, { to: props.to, ...props, ref });
   })
 };
 
 //#region src/components/app/AppComponent.tsx
+registerAllFormComponents();
+registerAllActionItems();
 function AppComponent({ loadNavigation = true, loadRoutes = true, name = "app" }) {
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.FrameworkProvider, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.FrameworkProvider, {
 		appName: name,
-		configure: admin__loadShare__react__loadShare__.useCallback((builder) => {
+		configure: dashboard__loadShare__react__loadShare__.useCallback((builder) => {
 			return builder;
 		}, []),
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx(AppContent, {
@@ -47374,7 +46517,7 @@ function AppComponent({ loadNavigation = true, loadRoutes = true, name = "app" }
 	});
 }
 function AppContent({ loadNavigation = true, loadRoutes = true }) {
-	const { error: frameworkError, framework, isLoading: isFrameworkLoading } = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.useFramework();
+	const { error: frameworkError, framework, isLoading: isFrameworkLoading } = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.useFramework();
 	const addMenuItems = useAppStore((state) => state.addMenuItems);
 	const error = useAppStore((state) => state.error);
 	const isLoading = useAppStore((state) => state.isLoading);
@@ -47385,7 +46528,7 @@ function AppContent({ loadNavigation = true, loadRoutes = true }) {
 	const setPluginConfigs = useAppStore((state) => state.setPluginConfigs);
 	const setRoutes = useAppStore((state) => state.setRoutes);
 	useFrameworkSync();
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		if (!framework || isFrameworkLoading) return;
 		let mounted = true;
 		async function loadData() {
@@ -47396,7 +46539,7 @@ function AppContent({ loadNavigation = true, loadRoutes = true }) {
 				let capabilities = [];
 				let routes$1 = [];
 				let navigation = [];
-				if (loadNavigation) navigationFeature = await framework.getFeature(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createNamespacedId("core", "navigation"));
+				if (loadNavigation) navigationFeature = await framework.getFeature(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createNamespacedId("core", "navigation"));
 				if (loadRoutes) capabilities = await framework.getCapabilitiesByType("core:refine-config");
 				if (navigationFeature) [routes$1, navigation] = await Promise.all([navigationFeature.getRoutes(), navigationFeature.getNavigation()]);
 				const configs = loadRoutes ? (() => {
@@ -47436,67 +46579,67 @@ function AppContent({ loadNavigation = true, loadRoutes = true }) {
 		addMenuItems
 	]);
 	if (isFrameworkLoading || isLoading) return /* @__PURE__ */ jsxRuntimeExports.jsx(LoadingSpinner, {});
-	if (frameworkError) return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.ErrorDisplay, {
+	if (frameworkError) return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.ErrorDisplay, {
 		error: frameworkError,
 		onRetry: () => window.location.reload()
 	});
-	if (error && (loadNavigation || loadRoutes)) return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.ErrorDisplay, {
+	if (error && (loadNavigation || loadRoutes)) return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.ErrorDisplay, {
 		error,
 		onRetry: () => window.location.reload()
 	});
 	if (!routes) return null;
 	const combinedPluginConfig = Object.assign({}, ...pluginConfigs);
-	const routerRoutes = admin__loadShare__react_mf_2_router__loadShare__.createRoutesFromElements(Array.isArray(routes) ? routes.map((route) => createRouteElement(route, framework)) : []);
+	const routerRoutes = dashboard__loadShare__react_mf_2_router__loadShare__.createRoutesFromElements(Array.isArray(routes) ? routes.map((route) => createRouteElement(route, framework)) : []);
 	function createRouteElement(route, framework$1, child = false) {
-		const LazyComponent = getLazyComponent(route.component ?? "", route.pluginId ?? admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createNamespacedId("core", "fallback"), framework$1, route.id);
+		const LazyComponent = getLazyComponent(route.component ?? "", route.pluginId ?? dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createNamespacedId("core", "fallback"), framework$1, route.id);
 		const jsxElement = LazyComponent ? /* @__PURE__ */ jsxRuntimeExports.jsx(LazyComponent, {}) : null;
-		const finalElement = jsxElement ? withRouteContainer(jsxElement, !child)() : /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Failed to load element for route ${route.id}`) });
+		const finalElement = jsxElement ? withRouteContainer(jsxElement, !child)() : /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Failed to load element for route ${route.id}`) });
 		const childRoutes = route.children?.map((childRoute) => createRouteElement(childRoute, framework$1, true));
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare__react_mf_2_router__loadShare__.Route, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare__react_mf_2_router__loadShare__.Route, {
 			element: finalElement,
-			errorElement: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundary, {}),
+			errorElement: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundary, {}),
 			index: route.index,
 			path: route.path,
 			children: childRoutes
 		}, route.id);
 	}
 	let router;
-	if (routerRoutes.length > 0) router = admin__loadShare__react_mf_2_router__loadShare__.createBrowserRouter(routerRoutes);
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Refine, {
+	if (routerRoutes.length > 0) router = dashboard__loadShare__react_mf_2_router__loadShare__.createBrowserRouter(routerRoutes);
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Refine, {
 		...combinedPluginConfig,
-		options: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getDefaultRefineOptions(),
+		options: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getDefaultRefineOptions(),
 		routerProvider,
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsxs(DialogProvider, { children: [router && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare__react_mf_2_router__loadShare__.RouterProvider, { router }), !router && /* @__PURE__ */ jsxRuntimeExports.jsx(DialogRenderer, {})] }), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Toaster, {})]
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsxs(DialogProvider, { children: [router && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare__react_mf_2_router__loadShare__.RouterProvider, { router }), !router && /* @__PURE__ */ jsxRuntimeExports.jsx(DialogRenderer, {})] }), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Toaster, {})]
 	});
 }
 function getLazyComponent(componentString, pluginId, framework, routeId) {
 	if (!componentString || !pluginId) {
 		console.error(`Route Error: Missing component string or pluginId for route id ${routeId}`);
-		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Missing component/pluginId for route ${routeId}`) });
+		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Missing component/pluginId for route ${routeId}`) });
 	}
 	let componentName;
 	try {
-		if (componentString.includes(":")) componentName = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.parseNamespacedId(componentString).name;
+		if (componentString.includes(":")) componentName = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.parseNamespacedId(componentString).name;
 		else componentName = componentString;
 	} catch (e) {
 		console.error(`Route Error: Failed to parse component string "${componentString}" for route id ${routeId}`, e);
-		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Invalid component string format: ${componentString}`) });
+		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Invalid component string format: ${componentString}`) });
 	}
 	if (!componentName) {
 		console.error(`Route Error: Could not extract componentName from "${componentString}" for route id ${routeId}`);
-		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Invalid component name from: ${componentString}`) });
+		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Invalid component name from: ${componentString}`) });
 	}
 	try {
-		return admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createRemoteComponentLoader({
+		return dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.createRemoteComponentLoader({
 			componentPath: componentName,
 			pluginId
 		}, framework, {
-			...admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.defaultRemoteOptions,
+			...dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.defaultRemoteOptions,
 			LoadingComponent: Loading
 		});
 	} catch (e) {
 		console.error(`Route Error: Failed createRemoteComponentLoader for ${pluginId}:${componentName}`, e);
-		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Failed to create loader for ${pluginId}:${componentName}`) });
+		return () => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.RouteErrorBoundaryFallback, { error: /* @__PURE__ */ new Error(`Failed to create loader for ${pluginId}:${componentName}`) });
 	}
 }
 function LoadingSpinner() {
@@ -47513,49 +46656,32 @@ function withRouteContainer(element, renderDialog) {
 		return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [renderDialog && /* @__PURE__ */ jsxRuntimeExports.jsx(DialogRenderer, {}), element] });
 	};
 }
-var init_AppComponent = __esmMin(() => {
-	init_actions();
-	init_form();
-	init_Loading();
-	init_appStore();
-	init_portalStore();
-	init_components();
-	registerAllFormComponents();
-	registerAllActionItems();
-});
-
-//#endregion
-init_AppComponent();
 
 //#region src/components/data-table/DataTable.types.ts
-var ToolbarItemAlignment, ToolbarItemType, TableLayoutType;
-var init_DataTable_types = __esmMin(() => {
-	ToolbarItemAlignment = /* @__PURE__ */ function(ToolbarItemAlignment$1) {
-		ToolbarItemAlignment$1["LEFT"] = "left";
-		ToolbarItemAlignment$1["RIGHT"] = "right";
-		ToolbarItemAlignment$1["CENTER"] = "center";
-		return ToolbarItemAlignment$1;
-	}({});
-	ToolbarItemType = /* @__PURE__ */ function(ToolbarItemType$1) {
-		ToolbarItemType$1["ACTION"] = "action";
-		ToolbarItemType$1["CUSTOM"] = "custom";
-		ToolbarItemType$1["FILTER"] = "filter";
-		ToolbarItemType$1["SEPARATOR"] = "separator";
-		ToolbarItemType$1["FILTER_GROUP"] = "filter-group";
-		return ToolbarItemType$1;
-	}({});
-	TableLayoutType = /* @__PURE__ */ function(TableLayoutType$1) {
-		TableLayoutType$1["TABLE"] = "table";
-		TableLayoutType$1["STACKED"] = "stacked";
-		TableLayoutType$1["AUTO"] = "auto";
-		return TableLayoutType$1;
-	}({});
-});
-
-//#endregion
-init_DataTable_types();
+let ToolbarItemAlignment = /* @__PURE__ */ function(ToolbarItemAlignment$1) {
+	ToolbarItemAlignment$1["LEFT"] = "left";
+	ToolbarItemAlignment$1["RIGHT"] = "right";
+	ToolbarItemAlignment$1["CENTER"] = "center";
+	return ToolbarItemAlignment$1;
+}({});
+let ToolbarItemType = /* @__PURE__ */ function(ToolbarItemType$1) {
+	ToolbarItemType$1["ACTION"] = "action";
+	ToolbarItemType$1["CUSTOM"] = "custom";
+	ToolbarItemType$1["FILTER"] = "filter";
+	ToolbarItemType$1["SEPARATOR"] = "separator";
+	ToolbarItemType$1["FILTER_GROUP"] = "filter-group";
+	return ToolbarItemType$1;
+}({});
+let TableLayoutType = /* @__PURE__ */ function(TableLayoutType$1) {
+	TableLayoutType$1["TABLE"] = "table";
+	TableLayoutType$1["STACKED"] = "stacked";
+	TableLayoutType$1["AUTO"] = "auto";
+	return TableLayoutType$1;
+}({});
 
 //#region src/components/data-table/ToolbarRegistry.tsx
+const actions = /* @__PURE__ */ new Map();
+const filters = /* @__PURE__ */ new Map();
 /**
 * Register a toolbar action item
 */
@@ -47638,69 +46764,61 @@ function removeAction(id) {
 function removeFilter(id) {
 	return filters.delete(id);
 }
-var actions, filters;
-var init_ToolbarRegistry = __esmMin(() => {
-	actions = /* @__PURE__ */ new Map();
-	filters = /* @__PURE__ */ new Map();
-});
-
-//#endregion
-init_ToolbarRegistry();
 
 //#region src/components/data-table/toolbarItems/filters/types.ts
-var FilterOperator, FilterType, ActionType;
-var init_types = __esmMin(() => {
-	FilterOperator = /* @__PURE__ */ function(FilterOperator$1) {
-		FilterOperator$1["CONTAINS"] = "contains";
-		FilterOperator$1["EQ"] = "eq";
-		FilterOperator$1["NE"] = "ne";
-		FilterOperator$1["LT"] = "lt";
-		FilterOperator$1["GT"] = "gt";
-		FilterOperator$1["LTE"] = "lte";
-		FilterOperator$1["GTE"] = "gte";
-		FilterOperator$1["IN"] = "in";
-		FilterOperator$1["NIN"] = "nin";
-		FilterOperator$1["STARTS_WITH"] = "startswith";
-		FilterOperator$1["ENDS_WITH"] = "endswith";
-		FilterOperator$1["BETWEEN"] = "between";
-		FilterOperator$1["NOT_CONTAINS"] = "ncontains";
-		FilterOperator$1["NULL"] = "null";
-		FilterOperator$1["NOT_NULL"] = "nnull";
-		return FilterOperator$1;
-	}({});
-	FilterType = /* @__PURE__ */ function(FilterType$1) {
-		/** Text input filter */
-		FilterType$1["TEXT"] = "text";
-		/** Single select dropdown filter */
-		FilterType$1["SELECT"] = "select";
-		/** Multi-select dropdown filter */
-		FilterType$1["MULTI_SELECT"] = "multi-select";
-		/** Number input filter */
-		FilterType$1["NUMBER"] = "number";
-		/** Date picker filter */
-		FilterType$1["DATE"] = "date";
-		/** Date range picker filter */
-		FilterType$1["DATE_RANGE"] = "date-range";
-		/** Boolean toggle filter */
-		FilterType$1["BOOLEAN"] = "boolean";
-		/** Numeric range slider filter */
-		FilterType$1["RANGE"] = "range";
-		/** Search input filter */
-		FilterType$1["SEARCH"] = "search";
-		return FilterType$1;
-	}({});
-	ActionType = /* @__PURE__ */ function(ActionType$1) {
-		ActionType$1["REFRESH"] = "refresh";
-		ActionType$1["EXPORT"] = "export";
-		ActionType$1["CREATE"] = "create";
-		ActionType$1["DELETE"] = "delete";
-		ActionType$1["CUSTOM"] = "custom";
-		return ActionType$1;
-	}({});
-});
-
-//#endregion
-init_types();
+/**
+* Enum defining CRUD operators for filter components
+*/
+let FilterOperator = /* @__PURE__ */ function(FilterOperator$1) {
+	FilterOperator$1["CONTAINS"] = "contains";
+	FilterOperator$1["EQ"] = "eq";
+	FilterOperator$1["NE"] = "ne";
+	FilterOperator$1["LT"] = "lt";
+	FilterOperator$1["GT"] = "gt";
+	FilterOperator$1["LTE"] = "lte";
+	FilterOperator$1["GTE"] = "gte";
+	FilterOperator$1["IN"] = "in";
+	FilterOperator$1["NIN"] = "nin";
+	FilterOperator$1["STARTS_WITH"] = "startswith";
+	FilterOperator$1["ENDS_WITH"] = "endswith";
+	FilterOperator$1["BETWEEN"] = "between";
+	FilterOperator$1["NOT_CONTAINS"] = "ncontains";
+	FilterOperator$1["NULL"] = "null";
+	FilterOperator$1["NOT_NULL"] = "nnull";
+	return FilterOperator$1;
+}({});
+/**
+* Enum defining common filter types used in data tables
+*/
+let FilterType = /* @__PURE__ */ function(FilterType$1) {
+	/** Text input filter */
+	FilterType$1["TEXT"] = "text";
+	/** Single select dropdown filter */
+	FilterType$1["SELECT"] = "select";
+	/** Multi-select dropdown filter */
+	FilterType$1["MULTI_SELECT"] = "multi-select";
+	/** Number input filter */
+	FilterType$1["NUMBER"] = "number";
+	/** Date picker filter */
+	FilterType$1["DATE"] = "date";
+	/** Date range picker filter */
+	FilterType$1["DATE_RANGE"] = "date-range";
+	/** Boolean toggle filter */
+	FilterType$1["BOOLEAN"] = "boolean";
+	/** Numeric range slider filter */
+	FilterType$1["RANGE"] = "range";
+	/** Search input filter */
+	FilterType$1["SEARCH"] = "search";
+	return FilterType$1;
+}({});
+let ActionType = /* @__PURE__ */ function(ActionType$1) {
+	ActionType$1["REFRESH"] = "refresh";
+	ActionType$1["EXPORT"] = "export";
+	ActionType$1["CREATE"] = "create";
+	ActionType$1["DELETE"] = "delete";
+	ActionType$1["CUSTOM"] = "custom";
+	return ActionType$1;
+}({});
 
 //#region src/components/data-table/toolbarItems/filters/BaseFilter.tsx
 /**
@@ -47709,7 +46827,7 @@ init_types();
 function BaseFilter({ label, children, className, config }) {
 	const filterLabel = config?.label || label;
 	if (filterLabel) return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col space-y-2", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col space-y-2", className),
 		children: [/* @__PURE__ */ jsxRuntimeExports.jsx("label", {
 			className: "text-sm font-medium",
 			children: filterLabel
@@ -47719,14 +46837,10 @@ function BaseFilter({ label, children, className, config }) {
 		})]
 	});
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center", className),
 		children
 	});
 }
-var init_BaseFilter = __esmMin(() => {});
-
-//#endregion
-init_BaseFilter();
 
 //#region src/components/data-table/toolbarItems/filters/components/BooleanFilter.tsx
 function BooleanFilter({ value, onChange, config }) {
@@ -47739,7 +46853,7 @@ function BooleanFilter({ value, onChange, config }) {
 		config,
 		children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 			className: "flex items-center space-x-2",
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Switch, {
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Switch, {
 				id: switchId,
 				checked: value === true,
 				onCheckedChange: handleChange,
@@ -47753,12 +46867,6 @@ function BooleanFilter({ value, onChange, config }) {
 		})
 	});
 }
-var init_BooleanFilter = __esmMin(() => {
-	init_BaseFilter();
-});
-
-//#endregion
-init_BooleanFilter();
 
 //#region src/components/data-table/toolbarItems/filters/components/DateFilter.tsx
 function DateFilter({ value, onChange, config }) {
@@ -47767,7 +46875,7 @@ function DateFilter({ value, onChange, config }) {
 	};
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
 		config,
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 			type: "date",
 			placeholder: config.placeholder || "Select date...",
 			value: value || "",
@@ -47776,18 +46884,12 @@ function DateFilter({ value, onChange, config }) {
 		})
 	});
 }
-var init_DateFilter = __esmMin(() => {
-	init_BaseFilter();
-});
-
-//#endregion
-init_DateFilter();
 
 //#region src/components/data-table/toolbarItems/filters/components/MultiSelectFilter.tsx
 function MultiSelectFilter({ value = [], onChange, config }) {
-	const [selectedValues, setSelectedValues] = admin__loadShare__react__loadShare__.useState(value);
-	const containerRef = admin__loadShare__react__loadShare__.useRef(null);
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	const [selectedValues, setSelectedValues] = dashboard__loadShare__react__loadShare__.useState(value);
+	const containerRef = dashboard__loadShare__react__loadShare__.useRef(null);
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		setSelectedValues(value ?? []);
 	}, [value]);
 	const handleCheckboxChange = (checked, optionValue) => {
@@ -47797,19 +46899,19 @@ function MultiSelectFilter({ value = [], onChange, config }) {
 		setSelectedValues(newValues);
 		if (onChange) onChange(newValues);
 	};
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
 		config,
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 			ref: containerRef,
 			className: "space-y-2",
 			children: config.options?.map((option) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 				className: "flex items-center space-x-2",
-				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Checkbox, {
+				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Checkbox, {
 					id: `checkbox-${config.id}-${option.value}`,
 					checked: selectedValues.includes(option.value),
 					onCheckedChange: (checked) => handleCheckboxChange(checked, option.value),
 					disabled: config.disabled || false
-				}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
+				}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
 					htmlFor: `checkbox-${config.id}-${option.value}`,
 					className: "cursor-help text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
 					children: option.label
@@ -47818,12 +46920,6 @@ function MultiSelectFilter({ value = [], onChange, config }) {
 		})
 	}) });
 }
-var init_MultiSelectFilter = __esmMin(() => {
-	init_BaseFilter();
-});
-
-//#endregion
-init_MultiSelectFilter();
 
 //#region src/components/data-table/toolbarItems/filters/components/NumberFilter.tsx
 function NumberFilter({ value, onChange, config }) {
@@ -47833,7 +46929,7 @@ function NumberFilter({ value, onChange, config }) {
 	};
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
 		config,
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 			type: "number",
 			placeholder: config.placeholder || "Enter number...",
 			value: value || "",
@@ -47845,12 +46941,6 @@ function NumberFilter({ value, onChange, config }) {
 		})
 	});
 }
-var init_NumberFilter = __esmMin(() => {
-	init_BaseFilter();
-});
-
-//#endregion
-init_NumberFilter();
 
 //#region src/components/data-table/toolbarItems/filters/components/RangeFilter.tsx
 function RangeFilter({ value = {}, onChange, config }) {
@@ -47876,7 +46966,7 @@ function RangeFilter({ value = {}, onChange, config }) {
 		children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 			className: "flex items-center space-x-2",
 			children: [
-				/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 					type: "number",
 					placeholder: config.minPlaceholder || "Min",
 					value: rangeValue.min ?? "",
@@ -47890,7 +46980,7 @@ function RangeFilter({ value = {}, onChange, config }) {
 					className: "text-sm font-medium",
 					children: "to"
 				}),
-				/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 					type: "number",
 					placeholder: config.maxPlaceholder || "Max",
 					value: rangeValue.max ?? "",
@@ -47904,12 +46994,6 @@ function RangeFilter({ value = {}, onChange, config }) {
 		})
 	});
 }
-var init_RangeFilter = __esmMin(() => {
-	init_BaseFilter();
-});
-
-//#endregion
-init_RangeFilter();
 
 //#region src/components/data-table/toolbarItems/filters/components/SearchFilter.tsx
 function SearchFilter({ value, onChange, config }) {
@@ -47923,7 +47007,7 @@ function SearchFilter({ value, onChange, config }) {
 			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(Search, {
 				className: "absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400",
 				"aria-hidden": "true"
-			}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+			}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 				type: "text",
 				placeholder: config.placeholder || "Search...",
 				value: value || "",
@@ -47934,19 +47018,13 @@ function SearchFilter({ value, onChange, config }) {
 		})
 	});
 }
-var init_SearchFilter = __esmMin(() => {
-	init_BaseFilter();
-});
-
-//#endregion
-init_SearchFilter();
 
 //#region src/components/data-table/toolbarItems/filters/components/SelectFilter.tsx
 function SelectFilter({ value, onChange, config, itemLabel }) {
-	const [isExpanded, setIsExpanded] = admin__loadShare__react__loadShare__.useState(false);
-	const selectContentRef = admin__loadShare__react__loadShare__.useRef(null);
-	const selectTriggerRef = admin__loadShare__react__loadShare__.useRef(null);
-	const containerRef = admin__loadShare__react__loadShare__.useRef(null);
+	const [isExpanded, setIsExpanded] = dashboard__loadShare__react__loadShare__.useState(false);
+	const selectContentRef = dashboard__loadShare__react__loadShare__.useRef(null);
+	const selectTriggerRef = dashboard__loadShare__react__loadShare__.useRef(null);
+	const containerRef = dashboard__loadShare__react__loadShare__.useRef(null);
 	const options = config.includeAllOption ? [{
 		label: `All ${itemLabel || "Items"}`,
 		value: "all"
@@ -47958,7 +47036,7 @@ function SelectFilter({ value, onChange, config, itemLabel }) {
 		if (config.dropdownStyle) setIsExpanded(false);
 	};
 	const triggerLabel = options.find((option) => option.value === controlledValue)?.label || itemLabel || config.placeholder || "Select option...";
-	if (config.dropdownStyle) return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
+	if (config.dropdownStyle) return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
 		config,
 		label: itemLabel,
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
@@ -47969,14 +47047,14 @@ function SelectFilter({ value, onChange, config, itemLabel }) {
 				onOpenChange: setIsExpanded,
 				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(Trigger, {
 					asChild: true,
-					children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+					children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 						ref: selectTriggerRef,
 						variant: "ghost",
 						className: "hover:bg-muted h-auto w-full justify-start p-3",
 						children: [/* @__PURE__ */ jsxRuntimeExports.jsx("span", {
 							className: "flex-1 text-left font-medium",
 							children: triggerLabel
-						}), /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-4 w-4 transition-transform duration-200 ease-in-out", isExpanded ? "rotate-180" : "rotate-0") })]
+						}), /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-4 w-4 transition-transform duration-200 ease-in-out", isExpanded ? "rotate-180" : "rotate-0") })]
 					})
 				}), /* @__PURE__ */ jsxRuntimeExports.jsx(Portal2, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Content2, {
 					ref: selectContentRef,
@@ -47984,14 +47062,14 @@ function SelectFilter({ value, onChange, config, itemLabel }) {
 					side: "bottom",
 					align: "start",
 					sideOffset: 5,
-					children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
+					children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
 						value: controlledValue,
 						onValueChange: handleChange,
 						disabled: config.disabled || false,
-						children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
+						children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
 							className: "w-full",
-							children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder: config.placeholder || "Select option..." })
-						}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, { children: options.map((option) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
+							children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder: config.placeholder || "Select option..." })
+						}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, { children: options.map((option) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
 							value: option.value,
 							children: option.label
 						}, option.value)) })]
@@ -48000,23 +47078,23 @@ function SelectFilter({ value, onChange, config, itemLabel }) {
 			})
 		})
 	}) });
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
 		config,
 		label: itemLabel,
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 			ref: containerRef,
 			className: "relative",
-			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
+			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Select, {
 				value: controlledValue,
 				onValueChange: handleChange,
 				disabled: config.disabled || false,
-				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
+				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectTrigger, {
 					ref: selectTriggerRef,
 					className: "w-full",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder: config.placeholder || "Select option..." })
-				}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, {
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectValue, { placeholder: config.placeholder || "Select option..." })
+				}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectContent, {
 					ref: selectContentRef,
-					children: options.map((option) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
+					children: options.map((option) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SelectItem, {
 						value: option.value,
 						children: option.label
 					}, option.value))
@@ -48025,12 +47103,6 @@ function SelectFilter({ value, onChange, config, itemLabel }) {
 		})
 	}) });
 }
-var init_SelectFilter = __esmMin(() => {
-	init_BaseFilter();
-});
-
-//#endregion
-init_SelectFilter();
 
 //#region src/components/data-table/toolbarItems/filters/components/TextFilter.tsx
 function TextFilter({ value, onChange, config }) {
@@ -48039,7 +47111,7 @@ function TextFilter({ value, onChange, config }) {
 	};
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(BaseFilter, {
 		config,
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
 			type: "text",
 			placeholder: config.placeholder || "Enter text...",
 			value: value || "",
@@ -48048,12 +47120,6 @@ function TextFilter({ value, onChange, config }) {
 		})
 	});
 }
-var init_TextFilter = __esmMin(() => {
-	init_BaseFilter();
-});
-
-//#endregion
-init_TextFilter();
 
 //#region src/components/data-table/toolbarItems/filters/util.ts
 /**
@@ -48092,77 +47158,86 @@ function createFilterOnChangeHandler(item, setFilters, getDefaultOperator, debug
 		setFilters(createFiltersFromValue(value, item, getDefaultOperator));
 	};
 }
-var init_util = __esmMin(() => {
-	init_types();
-});
 
-//#endregion
-init_util();
-
-var DEFAULT_OPERATORS, getAvailableOperators, getDefaultOperatorForFieldType;
-var init_useFilterOperators = __esmMin(() => {
-	init_types();
-	DEFAULT_OPERATORS = {
-		string: FilterOperator.CONTAINS,
-		number: FilterOperator.EQ,
-		boolean: FilterOperator.EQ,
-		date: FilterOperator.GTE,
-		array: FilterOperator.IN
-	};
-	getAvailableOperators = (type) => {
-		switch (type) {
-			case "string": return [
-				FilterOperator.CONTAINS,
-				FilterOperator.EQ,
-				FilterOperator.NE,
-				FilterOperator.STARTS_WITH,
-				FilterOperator.ENDS_WITH
-			];
-			case "number": return [
-				FilterOperator.EQ,
-				FilterOperator.NE,
-				FilterOperator.LT,
-				FilterOperator.GT,
-				FilterOperator.LTE,
-				FilterOperator.GTE
-			];
-			case "boolean": return [FilterOperator.EQ];
-			case "date": return [
-				FilterOperator.EQ,
-				FilterOperator.NE,
-				FilterOperator.LT,
-				FilterOperator.GT,
-				FilterOperator.LTE,
-				FilterOperator.GTE
-			];
-			case "array": return [FilterOperator.IN, FilterOperator.NIN];
-			default: return [FilterOperator.EQ, FilterOperator.NE];
-		}
-	};
-	getDefaultOperatorForFieldType = (fieldType) => {
-		return DEFAULT_OPERATORS[fieldType] || FilterOperator.EQ;
-	};
-});
-
-//#endregion
-init_useFilterOperators();
+//#region src/components/data-table/toolbarItems/filters/hooks/useFilterOperators.ts
+/**
+* Default operators mapping based on data types
+*/
+const DEFAULT_OPERATORS = {
+	string: FilterOperator.CONTAINS,
+	number: FilterOperator.EQ,
+	boolean: FilterOperator.EQ,
+	date: FilterOperator.GTE,
+	array: FilterOperator.IN
+};
+/**
+* Get available operators for a specific field type
+*/
+const getAvailableOperators = (type) => {
+	switch (type) {
+		case "string": return [
+			FilterOperator.CONTAINS,
+			FilterOperator.EQ,
+			FilterOperator.NE,
+			FilterOperator.STARTS_WITH,
+			FilterOperator.ENDS_WITH
+		];
+		case "number": return [
+			FilterOperator.EQ,
+			FilterOperator.NE,
+			FilterOperator.LT,
+			FilterOperator.GT,
+			FilterOperator.LTE,
+			FilterOperator.GTE
+		];
+		case "boolean": return [FilterOperator.EQ];
+		case "date": return [
+			FilterOperator.EQ,
+			FilterOperator.NE,
+			FilterOperator.LT,
+			FilterOperator.GT,
+			FilterOperator.LTE,
+			FilterOperator.GTE
+		];
+		case "array": return [FilterOperator.IN, FilterOperator.NIN];
+		default: return [FilterOperator.EQ, FilterOperator.NE];
+	}
+};
+/**
+* Get default operator for a field type
+* @param fieldType - The type of field to get default operator for
+* @returns The default operator for the field type
+*/
+const getDefaultOperatorForFieldType = (fieldType) => {
+	return DEFAULT_OPERATORS[fieldType] || FilterOperator.EQ;
+};
 
 //#region src/components/data-table/contexts/FilterHelpers.tsx
+const FilterHelpersContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
+const useDefaultFilter = (refineTable) => {
+	const filtersRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.filters);
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
+		filtersRef.current = refineTable?.refineCore?.filters;
+	}, [refineTable?.refineCore?.filters]);
+	return dashboard__loadShare__react__loadShare__.useCallback((columnName, operatorType = "eq") => {
+		return dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.getDefaultFilter(columnName, filtersRef.current, operatorType);
+	}, []);
+};
 function FilterHelpersProvider({ children, refineTable, getDefaultFilter: getDefaultFilter$1, getDefaultOperator, getAvailableOperators: getAvailableOperators$1 }) {
 	const defaultGetDefaultFilter = useDefaultFilter(refineTable);
 	const finalGetDefaultFilter = getDefaultFilter$1 || defaultGetDefaultFilter;
-	const defaultGetDefaultOperator = admin__loadShare__react__loadShare__.useCallback((fieldType) => {
+	const defaultGetDefaultOperator = dashboard__loadShare__react__loadShare__.useCallback((fieldType) => {
 		return getDefaultOperatorForFieldType(fieldType);
 	}, []);
 	const finalGetDefaultOperator = getDefaultOperator || defaultGetDefaultOperator;
-	const defaultGetAvailableOperators = admin__loadShare__react__loadShare__.useCallback((fieldType) => {
+	const defaultGetAvailableOperators = dashboard__loadShare__react__loadShare__.useCallback((fieldType) => {
 		return getAvailableOperators(fieldType);
 	}, []);
 	const finalGetAvailableOperators = getAvailableOperators$1 || defaultGetAvailableOperators;
-	const finalGetDefaultFilterRef = admin__loadShare__react__loadShare__.useRef(finalGetDefaultFilter);
-	const finalGetDefaultOperatorRef = admin__loadShare__react__loadShare__.useRef(finalGetDefaultOperator);
-	const finalGetAvailableOperatorsRef = admin__loadShare__react__loadShare__.useRef(finalGetAvailableOperators);
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	const finalGetDefaultFilterRef = dashboard__loadShare__react__loadShare__.useRef(finalGetDefaultFilter);
+	const finalGetDefaultOperatorRef = dashboard__loadShare__react__loadShare__.useRef(finalGetDefaultOperator);
+	const finalGetAvailableOperatorsRef = dashboard__loadShare__react__loadShare__.useRef(finalGetAvailableOperators);
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		finalGetDefaultFilterRef.current = finalGetDefaultFilter;
 		finalGetDefaultOperatorRef.current = finalGetDefaultOperator;
 		finalGetAvailableOperatorsRef.current = finalGetAvailableOperators;
@@ -48171,7 +47246,7 @@ function FilterHelpersProvider({ children, refineTable, getDefaultFilter: getDef
 		finalGetDefaultOperator,
 		finalGetAvailableOperators
 	]);
-	const value = admin__loadShare__react__loadShare__.useMemo(() => {
+	const value = dashboard__loadShare__react__loadShare__.useMemo(() => {
 		return {
 			getDefaultFilter: finalGetDefaultFilterRef.current,
 			getDefaultOperator: finalGetDefaultOperatorRef.current,
@@ -48183,28 +47258,11 @@ function FilterHelpersProvider({ children, refineTable, getDefaultFilter: getDef
 		children
 	});
 }
-var FilterHelpersContext, useDefaultFilter, useFilterHelpers;
-var init_FilterHelpers = __esmMin(() => {
-	init_useFilterOperators();
-	FilterHelpersContext = admin__loadShare__react__loadShare__.createContext(void 0);
-	useDefaultFilter = (refineTable) => {
-		const filtersRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.filters);
-		admin__loadShare__react__loadShare__.useEffect(() => {
-			filtersRef.current = refineTable?.refineCore?.filters;
-		}, [refineTable?.refineCore?.filters]);
-		return admin__loadShare__react__loadShare__.useCallback((columnName, operatorType = "eq") => {
-			return admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.getDefaultFilter(columnName, filtersRef.current, operatorType);
-		}, []);
-	};
-	useFilterHelpers = () => {
-		const context = admin__loadShare__react__loadShare__.useContext(FilterHelpersContext);
-		if (context === void 0) throw new Error("useFilterHelpers must be used within a FilterHelpersProvider");
-		return context;
-	};
-});
-
-//#endregion
-init_FilterHelpers();
+const useFilterHelpers = () => {
+	const context = dashboard__loadShare__react__loadShare__.useContext(FilterHelpersContext);
+	if (context === void 0) throw new Error("useFilterHelpers must be used within a FilterHelpersProvider");
+	return context;
+};
 
 //#region src/components/data-table/toolbarItems/FilterResolver.tsx
 /**
@@ -48215,15 +47273,15 @@ init_FilterHelpers();
 * 3. Inferred components based on config.type
 */
 function FilterResolver({ filterItem, commonProps }) {
-	const [isLoading, setIsLoading] = admin__loadShare__react__loadShare__.useState(true);
-	const [notFound, setNotFound] = admin__loadShare__react__loadShare__.useState(false);
-	const filterComponentRef = admin__loadShare__react__loadShare__.useRef(null);
-	const filterItemRef = admin__loadShare__react__loadShare__.useRef(filterItem);
+	const [isLoading, setIsLoading] = dashboard__loadShare__react__loadShare__.useState(true);
+	const [notFound, setNotFound] = dashboard__loadShare__react__loadShare__.useState(false);
+	const filterComponentRef = dashboard__loadShare__react__loadShare__.useRef(null);
+	const filterItemRef = dashboard__loadShare__react__loadShare__.useRef(filterItem);
 	const { getAvailableOperators } = useFilterHelpers();
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		filterItemRef.current = filterItem;
 	}, [filterItem]);
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		const resolveFilterComponent = async () => {
 			const currentFilterItem = filterItemRef.current;
 			setIsLoading(true);
@@ -48270,44 +47328,13 @@ function FilterResolver({ filterItem, commonProps }) {
 	const FilterComponent = filterComponentRef.current;
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(FilterComponent, { ...filterProps });
 }
-var init_FilterResolver = __esmMin(() => {
-	init_ToolbarRegistry();
-	init_components();
-});
-
-//#endregion
-init_FilterResolver();
-
-//#region src/components/data-table/toolbarItems/filters/components/index.ts
-var init_components$1 = __esmMin(() => {
-	init_BooleanFilter();
-	init_DateFilter();
-	init_MultiSelectFilter();
-	init_NumberFilter();
-	init_RangeFilter();
-	init_SearchFilter();
-	init_SelectFilter();
-	init_TextFilter();
-});
-
-//#endregion
-init_components$1();
-
-//#region src/components/data-table/toolbarItems/filters/index.ts
-var init_filters = __esmMin(() => {
-	init_components$1();
-	init_util();
-	init_types();
-});
-
-//#endregion
-init_filters();
 
 //#region src/components/data-table/toolbarItems/FilterGroup.tsx
+const dropdownContentClasses = "bg-background rounded-lg border shadow-lg p-3";
 function FilterGroup({ item, commonProps, size }) {
-	const [isExpanded, setIsExpanded] = admin__loadShare__react__loadShare__.useState(item.initiallyExpanded ?? false);
+	const [isExpanded, setIsExpanded] = dashboard__loadShare__react__loadShare__.useState(item.initiallyExpanded ?? false);
 	const layout = item.layout ?? "horizontal";
-	const createChildOnChangeHandler = admin__loadShare__react__loadShare__.useCallback((childItem) => {
+	const createChildOnChangeHandler = dashboard__loadShare__react__loadShare__.useCallback((childItem) => {
 		return createFilterOnChangeHandler(childItem, (filters) => {
 			if (commonProps.context?.setFilters) commonProps.context.setFilters(filters);
 		}, commonProps.context?.getDefaultOperator, {
@@ -48315,7 +47342,7 @@ function FilterGroup({ item, commonProps, size }) {
 			childItemId: childItem.id
 		});
 	}, [commonProps.context, item.id]);
-	const createChildCommonProps = admin__loadShare__react__loadShare__.useCallback((childItem) => {
+	const createChildCommonProps = dashboard__loadShare__react__loadShare__.useCallback((childItem) => {
 		return {
 			...commonProps,
 			value: commonProps.context?.getDefaultFilter?.(childItem.config?.field, childItem.config?.operator || (commonProps.context?.getDefaultOperator ? commonProps.context.getDefaultOperator(childItem.config?.type) : FilterOperator.EQ)) ?? childItem.initialValue,
@@ -48336,7 +47363,7 @@ function FilterGroup({ item, commonProps, size }) {
 		onOpenChange: setIsExpanded,
 		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(Trigger, {
 			asChild: true,
-			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 				variant: "ghost",
 				className: "hover:bg-muted h-auto justify-start p-3",
 				children: [
@@ -48345,11 +47372,11 @@ function FilterGroup({ item, commonProps, size }) {
 						className: "flex-1 text-left font-medium",
 						children: item.label
 					}),
-					/* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("ml-2 h-4 w-4 transition-transform duration-200 ease-in-out", isExpanded ? "rotate-180" : "rotate-0") })
+					/* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("ml-2 h-4 w-4 transition-transform duration-200 ease-in-out", isExpanded ? "rotate-180" : "rotate-0") })
 				]
 			})
 		}), /* @__PURE__ */ jsxRuntimeExports.jsx(Portal2, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Content2, {
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(dropdownContentClasses, layout === "vertical" ? "space-y-3" : "grid grid-cols-2 gap-3 md:grid-cols-3", size ? getSizeClass({ size }) : void 0, "animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200"),
+			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(dropdownContentClasses, layout === "vertical" ? "space-y-3" : "grid grid-cols-2 gap-3 md:grid-cols-3", size ? getSizeClass({ size }) : void 0, "animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200"),
 			side: "bottom",
 			align: "start",
 			sideOffset: 5,
@@ -48365,8 +47392,8 @@ function FilterGroup({ item, commonProps, size }) {
 		}) })]
 	});
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("bg-background rounded-lg border", item.className),
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("bg-background rounded-lg border", item.className),
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			variant: "ghost",
 			className: "hover:bg-muted h-auto w-full justify-start p-3",
 			onClick: toggleExpanded,
@@ -48376,10 +47403,10 @@ function FilterGroup({ item, commonProps, size }) {
 					className: "flex-1 text-left font-medium",
 					children: item.label
 				}),
-				/* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-4 w-4 transition-transform duration-200 ease-in-out", isExpanded ? "rotate-0" : "-rotate-90") })
+				/* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-4 w-4 transition-transform duration-200 ease-in-out", isExpanded ? "rotate-0" : "-rotate-90") })
 			]
 		}), /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("overflow-hidden border-t transition-all duration-300 ease-in-out", isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0", layout === "vertical" ? "space-y-3" : "grid grid-cols-2 gap-3 md:grid-cols-3", "p-3", size ? getSizeClass({ size }) : void 0),
+			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("overflow-hidden border-t transition-all duration-300 ease-in-out", isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0", layout === "vertical" ? "space-y-3" : "grid grid-cols-2 gap-3 md:grid-cols-3", "p-3", size ? getSizeClass({ size }) : void 0),
 			children: item.items.map((filterItem) => {
 				return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 					className: "flex flex-col",
@@ -48392,56 +47419,54 @@ function FilterGroup({ item, commonProps, size }) {
 		})]
 	});
 }
-var dropdownContentClasses;
-var init_FilterGroup = __esmMin(() => {
-	init_FilterResolver();
-	init_sizing();
-	init_types();
-	init_filters();
-	dropdownContentClasses = "bg-background rounded-lg border shadow-lg p-3";
-});
-
-//#endregion
-init_FilterGroup();
 
 //#region src/components/data-table/useMobileDetection.ts
+const breakpointSizeMap = {
+	[ComponentSize.TWO_XL]: "2xl",
+	[ComponentSize.THREE_XL]: "3xl",
+	[ComponentSize.FOUR_XL]: "4xl",
+	[ComponentSize.FIVE_XL]: "5xl",
+	[ComponentSize.SIX_XL]: "6xl",
+	[ComponentSize.SEVEN_XL]: "7xl",
+	[ComponentSize.AUTO]: "auto",
+	[ComponentSize.FULL]: "full",
+	[ComponentSize.LG]: "lg",
+	[ComponentSize.MD]: "md",
+	[ComponentSize.SM]: "sm",
+	[ComponentSize.XL]: "xl",
+	[ComponentSize.XS]: "xs"
+};
 /**
 * Hook to detect mobile viewport based on Tailwind CSS breakpoints
 * @param props.mobileBreakpoint - The breakpoint at which to consider the viewport mobile
 * @returns isMobile state and current breakpoint
 */
 function useMobileDetection({ mobileBreakpoint = ComponentSize.SM } = {}) {
-	return admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.useMobileDetection({ breakpoint: Object.values(ComponentSize).includes(mobileBreakpoint) ? breakpointSizeMap[mobileBreakpoint] : mobileBreakpoint });
+	return dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.useMobileDetection({ breakpoint: Object.values(ComponentSize).includes(mobileBreakpoint) ? breakpointSizeMap[mobileBreakpoint] : mobileBreakpoint });
 }
-var breakpointSizeMap;
-var init_useMobileDetection = __esmMin(() => {
-	init_components();
-	breakpointSizeMap = {
-		[ComponentSize.TWO_XL]: "2xl",
-		[ComponentSize.THREE_XL]: "3xl",
-		[ComponentSize.FOUR_XL]: "4xl",
-		[ComponentSize.FIVE_XL]: "5xl",
-		[ComponentSize.SIX_XL]: "6xl",
-		[ComponentSize.SEVEN_XL]: "7xl",
-		[ComponentSize.AUTO]: "auto",
-		[ComponentSize.FULL]: "full",
-		[ComponentSize.LG]: "lg",
-		[ComponentSize.MD]: "md",
-		[ComponentSize.SM]: "sm",
-		[ComponentSize.XL]: "xl",
-		[ComponentSize.XS]: "xs"
-	};
-});
-
-//#endregion
-init_useMobileDetection();
 
 //#region src/components/data-table/ToolbarRenderer.tsx
+const toolbarItemRenderers = /* @__PURE__ */ new Map();
+const coreSupported = new Set([
+	"xs",
+	"sm",
+	"md",
+	"lg",
+	"xl",
+	"2xl",
+	"3xl",
+	"4xl",
+	"5xl",
+	"6xl",
+	"7xl",
+	"auto",
+	"full"
+]);
 function ActionItemRenderer(item, commonProps, isMobile) {
 	const actionItem = getAction(item.id);
 	if (!actionItem) return null;
 	const buttonSize = isMobile ? "mobile" : actionItem.size;
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 		className: actionItem.className,
 		disabled: actionItem.disabled,
 		onClick: () => actionItem.onClick(commonProps),
@@ -48482,11 +47507,33 @@ function registerDefaultRenderers() {
 	toolbarItemRenderers.set(ToolbarItemType.FILTER_GROUP, FilterGroupItemRenderer);
 	toolbarItemRenderers.set(ToolbarItemType.SEPARATOR, SeparatorItemRenderer);
 }
+registerDefaultRenderers();
+const ToolbarRendererRegistry = {
+	register(type, renderer) {
+		toolbarItemRenderers.set(type, renderer);
+	},
+	get(type) {
+		return toolbarItemRenderers.get(type);
+	},
+	has(type) {
+		return toolbarItemRenderers.has(type);
+	},
+	remove(type) {
+		return toolbarItemRenderers.delete(type);
+	},
+	clear() {
+		toolbarItemRenderers.clear();
+		registerDefaultRenderers();
+	},
+	list() {
+		return Array.from(toolbarItemRenderers.keys());
+	}
+};
 function ToolbarRenderer({ item, commonProps, className }) {
 	const mobileBreakpoint = commonProps.context?.toolbarConfig?.mobileBreakpoint;
 	const candidate = mobileBreakpoint && Object.values(ComponentSize).includes(mobileBreakpoint) ? mobileBreakpoint : ComponentSize.SM;
 	const { isMobile } = useMobileDetection({ mobileBreakpoint: (typeof candidate === "string" && !coreSupported.has(candidate) ? ComponentSize.SM : candidate) || ComponentSize.SM });
-	const containerClassName = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center", item.type === ToolbarItemType.SEPARATOR && "mx-2", className);
+	const containerClassName = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center", item.type === ToolbarItemType.SEPARATOR && "mx-2", className);
 	if (item.type === ToolbarItemType.CUSTOM) {
 		const CustomComponent = item.component;
 		if (CustomComponent) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
@@ -48505,56 +47552,6 @@ function ToolbarRenderer({ item, commonProps, className }) {
 		children: renderer(item, commonProps, isMobile)
 	});
 }
-var toolbarItemRenderers, coreSupported, ToolbarRendererRegistry;
-var init_ToolbarRenderer = __esmMin(() => {
-	init_FilterGroup();
-	init_FilterResolver();
-	init_DataTable_types();
-	init_ToolbarRegistry();
-	init_useMobileDetection();
-	init_components();
-	toolbarItemRenderers = /* @__PURE__ */ new Map();
-	coreSupported = new Set([
-		"xs",
-		"sm",
-		"md",
-		"lg",
-		"xl",
-		"2xl",
-		"3xl",
-		"4xl",
-		"5xl",
-		"6xl",
-		"7xl",
-		"auto",
-		"full"
-	]);
-	registerDefaultRenderers();
-	ToolbarRendererRegistry = {
-		register(type, renderer) {
-			toolbarItemRenderers.set(type, renderer);
-		},
-		get(type) {
-			return toolbarItemRenderers.get(type);
-		},
-		has(type) {
-			return toolbarItemRenderers.has(type);
-		},
-		remove(type) {
-			return toolbarItemRenderers.delete(type);
-		},
-		clear() {
-			toolbarItemRenderers.clear();
-			registerDefaultRenderers();
-		},
-		list() {
-			return Array.from(toolbarItemRenderers.keys());
-		}
-	};
-});
-
-//#endregion
-init_ToolbarRenderer();
 
 // do not edit .js files directly - edit src/index.jst
 
@@ -48604,17 +47601,18 @@ var fastDeepEqual = function equal(a, b) {
 const deepEqual = /*@__PURE__*/getDefaultExportFromCjs(fastDeepEqual);
 
 //#region src/components/data-table/contexts/RefineTable.tsx
+const RefineTableContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
 function RefineTableProvider({ children, refineTable }) {
-	const [version, setVersion] = admin__loadShare__react__loadShare__.useState(0);
-	const refineTableRef = admin__loadShare__react__loadShare__.useRef(refineTable);
-	const setFiltersRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.setFilters);
-	const setSortersRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.setSorters);
-	const tableQueryRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.tableQuery);
-	const filtersRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.filters);
-	const sortersRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.sorters);
-	const prevFiltersRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.filters);
-	const prevSortersRef = admin__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.sorters);
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	const [version, setVersion] = dashboard__loadShare__react__loadShare__.useState(0);
+	const refineTableRef = dashboard__loadShare__react__loadShare__.useRef(refineTable);
+	const setFiltersRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.setFilters);
+	const setSortersRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.setSorters);
+	const tableQueryRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.tableQuery);
+	const filtersRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.filters);
+	const sortersRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.sorters);
+	const prevFiltersRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.filters);
+	const prevSortersRef = dashboard__loadShare__react__loadShare__.useRef(refineTable?.refineCore?.sorters);
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		let hasChanges = false;
 		if (refineTable?.refineCore?.setFilters !== setFiltersRef.current) {
 			setFiltersRef.current = refineTable?.refineCore?.setFilters;
@@ -48643,7 +47641,7 @@ function RefineTableProvider({ children, refineTable }) {
 		if (prevRefineTable !== refineTable || prevTableQuery !== refineTable?.refineCore?.tableQuery) hasChanges = true;
 		if (hasChanges) setVersion((v) => v + 1);
 	}, [refineTable]);
-	const value = admin__loadShare__react__loadShare__.useMemo(() => {
+	const value = dashboard__loadShare__react__loadShare__.useMemo(() => {
 		return {
 			refineTable: refineTableRef.current,
 			setFilters: setFiltersRef.current,
@@ -48658,22 +47656,16 @@ function RefineTableProvider({ children, refineTable }) {
 		children
 	});
 }
-var RefineTableContext, useRefineTable;
-var init_RefineTable = __esmMin(() => {
-	RefineTableContext = admin__loadShare__react__loadShare__.createContext(void 0);
-	useRefineTable = () => {
-		const context = admin__loadShare__react__loadShare__.useContext(RefineTableContext);
-		if (context === void 0) throw new Error("useRefineTable must be used within a RefineTableProvider");
-		return context;
-	};
-});
-
-//#endregion
-init_RefineTable();
+const useRefineTable = () => {
+	const context = dashboard__loadShare__react__loadShare__.useContext(RefineTableContext);
+	if (context === void 0) throw new Error("useRefineTable must be used within a RefineTableProvider");
+	return context;
+};
 
 //#region src/components/data-table/contexts/TableConfig.tsx
+const TableConfigContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
 function TableConfigProvider({ children, toolbarConfig, refineContext }) {
-	const value = admin__loadShare__react__loadShare__.useMemo(() => {
+	const value = dashboard__loadShare__react__loadShare__.useMemo(() => {
 		return {
 			toolbarConfig,
 			refineContext
@@ -48684,23 +47676,17 @@ function TableConfigProvider({ children, toolbarConfig, refineContext }) {
 		children
 	});
 }
-var TableConfigContext, useTableConfig, useTableConfigOptional;
-var init_TableConfig = __esmMin(() => {
-	TableConfigContext = admin__loadShare__react__loadShare__.createContext(void 0);
-	useTableConfig = () => {
-		const context = admin__loadShare__react__loadShare__.useContext(TableConfigContext);
-		if (context === void 0) throw new Error("useTableConfig must be used within a TableConfigProvider");
-		return context;
-	};
-	useTableConfigOptional = () => {
-		return admin__loadShare__react__loadShare__.useContext(TableConfigContext);
-	};
-});
-
-//#endregion
-init_TableConfig();
+const useTableConfig = () => {
+	const context = dashboard__loadShare__react__loadShare__.useContext(TableConfigContext);
+	if (context === void 0) throw new Error("useTableConfig must be used within a TableConfigProvider");
+	return context;
+};
+const useTableConfigOptional = () => {
+	return dashboard__loadShare__react__loadShare__.useContext(TableConfigContext);
+};
 
 //#region src/components/data-table/contexts/TableInstance.tsx
+const TableInstanceContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
 function TableInstanceProvider({ children, table }) {
 	const value = { table };
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(TableInstanceContext.Provider, {
@@ -48708,38 +47694,20 @@ function TableInstanceProvider({ children, table }) {
 		children
 	});
 }
-var TableInstanceContext, useTableInstance;
-var init_TableInstance = __esmMin(() => {
-	TableInstanceContext = admin__loadShare__react__loadShare__.createContext(void 0);
-	useTableInstance = () => {
-		const context = admin__loadShare__react__loadShare__.useContext(TableInstanceContext);
-		if (context === void 0) throw new Error("useTableInstance must be used within a TableInstanceProvider");
-		return context;
-	};
-});
+const useTableInstance = () => {
+	const context = dashboard__loadShare__react__loadShare__.useContext(TableInstanceContext);
+	if (context === void 0) throw new Error("useTableInstance must be used within a TableInstanceProvider");
+	return context;
+};
 
-//#endregion
-init_TableInstance();
-
-//#region src/components/data-table/contexts/index.ts
-var init_contexts = __esmMin(() => {
-	init_FilterHelpers();
-	init_RefineTable();
-	init_TableConfig();
-	init_TableInstance();
-});
-
-//#endregion
-init_contexts();
-
-function c(e,u,c,i){var l=this,a=admin__loadShare__react__loadShare__.useRef(null),o=admin__loadShare__react__loadShare__.useRef(0),f=admin__loadShare__react__loadShare__.useRef(0),v=admin__loadShare__react__loadShare__.useRef(null),d=admin__loadShare__react__loadShare__.useRef([]),m=admin__loadShare__react__loadShare__.useRef(),s=admin__loadShare__react__loadShare__.useRef(),g=admin__loadShare__react__loadShare__.useRef(e),h=admin__loadShare__react__loadShare__.useRef(true),x=admin__loadShare__react__loadShare__.useRef(),E=admin__loadShare__react__loadShare__.useRef();g.current=e;var b="undefined"!=typeof window,p=!u&&0!==u&&b;if("function"!=typeof e)throw new TypeError("Expected a function");u=+u||0;var y=!!(c=c||{}).leading,w=!("trailing"in c)||!!c.trailing,O=!!c.flushOnExit&&w,F="maxWait"in c,L="debounceOnServer"in c&&!!c.debounceOnServer,A=F?Math.max(+c.maxWait||0,u):null,D=admin__loadShare__react__loadShare__.useMemo(function(){var r=function(r){var n=d.current,t=m.current;return d.current=m.current=null,o.current=r,f.current=f.current||r,s.current=g.current.apply(t,n)},n=function(r,n){p&&cancelAnimationFrame(v.current),v.current=p?requestAnimationFrame(r):setTimeout(r,n);},t=function(r){if(!h.current)return  false;var n=r-a.current;return !a.current||n>=u||n<0||F&&r-o.current>=A},e=function(n){return v.current=null,w&&d.current?r(n):(d.current=m.current=null,s.current)},c=function r(){var c=Date.now();if(y&&f.current===o.current&&D(),t(c))return e(c);if(h.current){var i=u-(c-a.current),l=F?Math.min(i,A-(c-o.current)):i;n(r,l);}},D=function(){i&&i({});},S=function(){if(b||L){var e,i=Date.now(),f=t(i);if(d.current=[].slice.call(arguments),m.current=l,a.current=i,O&&!x.current&&(x.current=function(){var r;"hidden"===(null==(r=global.document)?void 0:r.visibilityState)&&E.current.flush();},null==(e=global.document)||null==e.addEventListener||e.addEventListener("visibilitychange",x.current)),f){if(!v.current&&h.current)return o.current=a.current,n(c,u),y?r(a.current):s.current;if(F)return n(c,u),r(a.current)}return v.current||n(c,u),s.current}};return S.cancel=function(){var r=v.current;r&&(p?cancelAnimationFrame(v.current):clearTimeout(v.current)),o.current=0,d.current=a.current=m.current=v.current=null,r&&i&&i({});},S.isPending=function(){return !!v.current},S.flush=function(){return v.current?e(Date.now()):s.current},S},[y,F,u,A,w,O,p,b,L,i]);return E.current=D,admin__loadShare__react__loadShare__.useEffect(function(){return h.current=true,function(){var r;O&&E.current.flush(),x.current&&(null==(r=global.document)||null==r.removeEventListener||r.removeEventListener("visibilitychange",x.current),x.current=null),h.current=false;}},[O]),D}function i(r,n){return r===n}function l(n,t,l){var a=i,o=admin__loadShare__react__loadShare__.useRef(n),f=admin__loadShare__react__loadShare__.useState({})[1],v=c(admin__loadShare__react__loadShare__.useCallback(function(r){o.current=r,f({});},[f]),t,l,f),d=admin__loadShare__react__loadShare__.useRef(n);return a(d.current,n)||(v(n),d.current=n),[o.current,v]}
+function c(e,u,c,i){var l=this,a=dashboard__loadShare__react__loadShare__.useRef(null),o=dashboard__loadShare__react__loadShare__.useRef(0),f=dashboard__loadShare__react__loadShare__.useRef(0),v=dashboard__loadShare__react__loadShare__.useRef(null),d=dashboard__loadShare__react__loadShare__.useRef([]),m=dashboard__loadShare__react__loadShare__.useRef(),s=dashboard__loadShare__react__loadShare__.useRef(),g=dashboard__loadShare__react__loadShare__.useRef(e),h=dashboard__loadShare__react__loadShare__.useRef(true),x=dashboard__loadShare__react__loadShare__.useRef(),E=dashboard__loadShare__react__loadShare__.useRef();g.current=e;var b="undefined"!=typeof window,p=!u&&0!==u&&b;if("function"!=typeof e)throw new TypeError("Expected a function");u=+u||0;var y=!!(c=c||{}).leading,w=!("trailing"in c)||!!c.trailing,O=!!c.flushOnExit&&w,F="maxWait"in c,L="debounceOnServer"in c&&!!c.debounceOnServer,A=F?Math.max(+c.maxWait||0,u):null,D=dashboard__loadShare__react__loadShare__.useMemo(function(){var r=function(r){var n=d.current,t=m.current;return d.current=m.current=null,o.current=r,f.current=f.current||r,s.current=g.current.apply(t,n)},n=function(r,n){p&&cancelAnimationFrame(v.current),v.current=p?requestAnimationFrame(r):setTimeout(r,n);},t=function(r){if(!h.current)return  false;var n=r-a.current;return !a.current||n>=u||n<0||F&&r-o.current>=A},e=function(n){return v.current=null,w&&d.current?r(n):(d.current=m.current=null,s.current)},c=function r(){var c=Date.now();if(y&&f.current===o.current&&D(),t(c))return e(c);if(h.current){var i=u-(c-a.current),l=F?Math.min(i,A-(c-o.current)):i;n(r,l);}},D=function(){i&&i({});},S=function(){if(b||L){var e,i=Date.now(),f=t(i);if(d.current=[].slice.call(arguments),m.current=l,a.current=i,O&&!x.current&&(x.current=function(){var r;"hidden"===(null==(r=global.document)?void 0:r.visibilityState)&&E.current.flush();},null==(e=global.document)||null==e.addEventListener||e.addEventListener("visibilitychange",x.current)),f){if(!v.current&&h.current)return o.current=a.current,n(c,u),y?r(a.current):s.current;if(F)return n(c,u),r(a.current)}return v.current||n(c,u),s.current}};return S.cancel=function(){var r=v.current;r&&(p?cancelAnimationFrame(v.current):clearTimeout(v.current)),o.current=0,d.current=a.current=m.current=v.current=null,r&&i&&i({});},S.isPending=function(){return !!v.current},S.flush=function(){return v.current?e(Date.now()):s.current},S},[y,F,u,A,w,O,p,b,L,i]);return E.current=D,dashboard__loadShare__react__loadShare__.useEffect(function(){return h.current=true,function(){var r;O&&E.current.flush(),x.current&&(null==(r=global.document)||null==r.removeEventListener||r.removeEventListener("visibilitychange",x.current),x.current=null),h.current=false;}},[O]),D}function i(r,n){return r===n}function l(n,t,l){var a=i,o=dashboard__loadShare__react__loadShare__.useRef(n),f=dashboard__loadShare__react__loadShare__.useState({})[1],v=c(dashboard__loadShare__react__loadShare__.useCallback(function(r){o.current=r,f({});},[f]),t,l,f),d=dashboard__loadShare__react__loadShare__.useRef(n);return a(d.current,n)||(v(n),d.current=n),[o.current,v]}
 
 //#region src/components/data-table/toolbarItems/items/search.tsx
 function SearchToolbarItem({ value, onChange, config }) {
 	const [debouncedValue] = l(value, 300);
 	const { setFilters } = useRefineTable();
 	const placeholder = config?.placeholder || "Search...";
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		if (setFilters && debouncedValue !== void 0) setFilters(debouncedValue ? [{
 			field: String(config?.field || "q"),
 			operator: config?.operator || "contains",
@@ -48786,13 +47754,6 @@ function registerSearchToolbarItem() {
 		}
 	});
 }
-var init_search = __esmMin(() => {
-	init_data_table();
-	init_components();
-});
-
-//#endregion
-init_search();
 
 //#region src/components/data-table/toolbarItems/items/separator.tsx
 function ToolbarSeparatorItemComponent({ item }) {
@@ -48805,12 +47766,6 @@ function registerSeparatorToolbarItem(id, item) {
 		component: ToolbarSeparatorItemComponent
 	});
 }
-var init_separator = __esmMin(() => {
-	init_data_table();
-});
-
-//#endregion
-init_separator();
 
 //#region src/components/data-table/toolbarItems/items/custom.tsx
 function ToolbarCustomItemComponent({ item, ...wrapperProps }) {
@@ -48823,29 +47778,10 @@ function ToolbarCustomItemComponent({ item, ...wrapperProps }) {
 function registerCustomToolbarItem(id, item) {
 	registerAction(id, item);
 }
-var init_custom = __esmMin(() => {
-	init_ToolbarRegistry();
-});
-
-//#endregion
-init_custom();
-
-//#region src/components/data-table/toolbarItems/index.ts
-var init_toolbarItems = __esmMin(() => {
-	init_refresh();
-	init_search();
-	init_separator();
-	init_custom();
-	init_FilterGroup();
-	init_filters();
-});
-
-//#endregion
-init_toolbarItems();
 
 //#region src/components/data-table/Toolbar.tsx
 function MobileToolbarLayout({ table, className, config, refineContext, sortedItems, createCommonProps }) {
-	const containerClassName = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col gap-3 p-3 border-b bg-background", config.sticky && "sticky top-0 z-10", className);
+	const containerClassName = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col gap-3 p-3 border-b bg-background", config.sticky && "sticky top-0 z-10", className);
 	const getItemAlignment = (item) => {
 		if (item.alignment) return item.alignment;
 		return config.defaultAlignment || ToolbarItemAlignment.LEFT;
@@ -48907,12 +47843,12 @@ function DesktopToolbarLayout({ table, className, config, refineContext, sortedI
 		return getItemAlignment(item) === ToolbarItemAlignment.CENTER;
 	};
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-wrap items-center gap-2 p-4 border-b bg-background", config.justifyBetween ? "justify-between" : void 0, config.sticky && "sticky top-0 z-10", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-wrap items-center gap-2 p-4 border-b bg-background", config.justifyBetween ? "justify-between" : void 0, config.sticky && "sticky top-0 z-10", className),
 		children: sortedItems.map((item) => {
 			return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolbarRenderer, {
 				item,
 				commonProps: createCommonProps(item),
-				className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(isRightAligned(item) && "ml-auto", isCenterAligned(item) && "mx-auto")
+				className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(isRightAligned(item) && "ml-auto", isCenterAligned(item) && "mx-auto")
 			}, item.id);
 		})
 	});
@@ -48944,12 +47880,12 @@ function Toolbar({ table, className }) {
 			return (a.order ?? 0) - (b.order ?? 0);
 		});
 	}, [config?.items]);
-	const onChangeHandler = admin__loadShare__react__loadShare__.useCallback((item) => {
+	const onChangeHandler = dashboard__loadShare__react__loadShare__.useCallback((item) => {
 		return createFilterOnChangeHandler(item, (filters$1) => {
 			if (setFilters) setFilters(filters$1);
 		}, getDefaultOperator, { itemId: item.id });
 	}, [setFilters, getDefaultOperator]);
-	const createCommonProps = admin__loadShare__react__loadShare__.useCallback((item) => {
+	const createCommonProps = dashboard__loadShare__react__loadShare__.useCallback((item) => {
 		const baseProps = {
 			table,
 			refineContext,
@@ -48999,17 +47935,6 @@ function Toolbar({ table, className }) {
 		createCommonProps
 	});
 }
-var init_Toolbar = __esmMin(() => {
-	init_components();
-	init_DataTable_types();
-	init_ToolbarRenderer();
-	init_contexts();
-	init_toolbarItems();
-	init_useMobileDetection();
-});
-
-//#endregion
-init_Toolbar();
 
 //#region src/components/data-table/DefaultPagination.tsx
 function DefaultPagination() {
@@ -49021,14 +47946,14 @@ function DefaultPagination() {
 		children: [
 			/* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 				className: "flex items-center gap-2",
-				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					"aria-label": "First page",
 					disabled: !table.getCanPreviousPage(),
 					onClick: () => table.setPageIndex(0),
 					size: "sm",
 					variant: "outline",
 					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronsLeft, { className: "h-4 w-4" })
-				}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					"aria-label": "Previous page",
 					disabled: !table.getCanPreviousPage(),
 					onClick: () => table.previousPage(),
@@ -49043,14 +47968,14 @@ function DefaultPagination() {
 			}),
 			/* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 				className: "flex items-center gap-2",
-				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					"aria-label": "Next page",
 					disabled: !table.getCanNextPage(),
 					onClick: () => table.nextPage(),
 					size: "sm",
 					variant: "outline",
 					children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronRight, { className: "h-4 w-4" })
-				}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					"aria-label": "Last page",
 					disabled: !table.getCanNextPage(),
 					onClick: () => table.setPageIndex(Math.max(0, pageCount - 1)),
@@ -49062,25 +47987,15 @@ function DefaultPagination() {
 		]
 	});
 }
-var init_DefaultPagination = __esmMin(() => {
-	init_contexts();
-});
-
-//#endregion
-init_DefaultPagination();
 
 //#region src/components/data-table/EmptyState.tsx
 function TableEmptyState({ children, colSpan, message = "No data available" }) {
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
 		className: "py-8 text-center",
 		colSpan,
 		children: children || message
 	}) });
 }
-var init_EmptyState = __esmMin(() => {});
-
-//#endregion
-init_EmptyState();
 
 /**
    * table-core
@@ -51973,7 +50888,7 @@ function getSortedRowModel() {
  * If rendering headers, cells, or footers with custom markup, use flexRender instead of `cell.getValue()` or `cell.renderValue()`.
  */
 function flexRender(Comp, props) {
-  return !Comp ? null : isReactComponent(Comp) ? /*#__PURE__*/admin__loadShare__react__loadShare__.createElement(Comp, props) : Comp;
+  return !Comp ? null : isReactComponent(Comp) ? /*#__PURE__*/dashboard__loadShare__react__loadShare__.createElement(Comp, props) : Comp;
 }
 function isReactComponent(component) {
   return isClassComponent(component) || typeof component === 'function' || isExoticComponent(component);
@@ -51999,12 +50914,12 @@ function useReactTable(options) {
   };
 
   // Create a new table and store it in state
-  const [tableRef] = admin__loadShare__react__loadShare__.useState(() => ({
+  const [tableRef] = dashboard__loadShare__react__loadShare__.useState(() => ({
     current: createTable(resolvedOptions)
   }));
 
   // By default, manage table state here using the table's initial state
-  const [state, setState] = admin__loadShare__react__loadShare__.useState(() => tableRef.current.initialState);
+  const [state, setState] = dashboard__loadShare__react__loadShare__.useState(() => tableRef.current.initialState);
 
   // Compose the default state above with any user state. This will allow the user
   // to only control a subset of the state if desired.
@@ -52032,57 +50947,57 @@ function SkeletonLoader({ className, cols = 3, layout = "default", rows = 3, sho
 			console.warn("Table object is required for table layout");
 			return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, {});
 		}
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Table, {
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("w-full border-collapse", className),
-			children: [showHeader && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHeader, { children: table.getHeaderGroups().map((headerGroup) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, {
+		return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Table, {
+			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("w-full border-collapse", className),
+			children: [showHeader && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHeader, { children: table.getHeaderGroups().map((headerGroup) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, {
 				className: "border-none",
-				children: headerGroup.headers.map((header) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHead, {
+				children: headerGroup.headers.map((header) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHead, {
 					className: "border-none",
 					style: { width: header.getSize() },
-					children: header.isPlaceholder ? /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" }) : flexRender(header.column.columnDef.header, header.getContext())
+					children: header.isPlaceholder ? /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" }) : flexRender(header.column.columnDef.header, header.getContext())
 				}, header.id))
-			}, headerGroup.id)) }), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableBody, { children: Array.from({ length: rows }).map((_, rowIndex) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, {
+			}, headerGroup.id)) }), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableBody, { children: Array.from({ length: rows }).map((_, rowIndex) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, {
 				className: "border-none",
-				children: table.getAllColumns().map((column) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
+				children: table.getAllColumns().map((column) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
 					className: "border-none",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" })
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" })
 				}, column.id))
 			}, rowIndex)) })]
 		});
 	};
 	const renderCardSkeleton = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-2", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-2", className),
 		children: [
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-40 w-full" }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-3/4" }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-1/2" })
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-40 w-full" }),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-3/4" }),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-1/2" })
 		]
 	});
 	const renderListSkeleton = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center space-x-4", className),
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-12 w-12 rounded-full" }), /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center space-x-4", className),
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-12 w-12 rounded-full" }), /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 			className: "space-y-2",
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[200px]" }), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[150px]" })]
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[200px]" }), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[150px]" })]
 		})]
 	});
 	const renderProfileSkeleton = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-4", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-4", className),
 		children: [
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-20 w-20 rounded-full" }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[150px]" }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[200px]" })
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-20 w-20 rounded-full" }),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[150px]" }),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-[200px]" })
 		]
 	});
 	const renderCustomSkeleton = () => /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(`grid grid-cols-${cols} gap-4`, className),
-		children: Array.from({ length: cols * rows }).map((_, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" }, index))
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(`grid grid-cols-${cols} gap-4`, className),
+		children: Array.from({ length: cols * rows }).map((_, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" }, index))
 	});
 	const renderDefaultSkeleton = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-2", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-2", className),
 		children: [
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-5/6" }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-4/6" })
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-full" }),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-5/6" }),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Skeleton, { className: "h-4 w-4/6" })
 		]
 	});
 	switch (layout) {
@@ -52094,25 +51009,21 @@ function SkeletonLoader({ className, cols = 3, layout = "default", rows = 3, sho
 		default: return renderDefaultSkeleton();
 	}
 }
-var init_SkeletonLoader = __esmMin(() => {});
-
-//#endregion
-init_SkeletonLoader();
 
 //#region src/components/data-table/LoadingState.tsx
 function TableLoadingState({ children, colSpan, message = "Loading data..." }) {
 	const { table } = useTableInstance();
 	const skeletonTable = (table && "refineCore" in table ? table : void 0) ?? table;
-	if (children) return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
+	if (children) return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
 		className: "py-8 text-center",
 		colSpan,
 		children
 	}) });
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
 		className: "pb-4 text-center",
 		colSpan,
 		children: message
-	}) }), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
+	}) }), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
 		className: "py-8",
 		colSpan,
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx(SkeletonLoader, {
@@ -52121,13 +51032,6 @@ function TableLoadingState({ children, colSpan, message = "Loading data..." }) {
 		})
 	}) })] });
 }
-var init_LoadingState = __esmMin(() => {
-	init_components();
-	init_contexts();
-});
-
-//#endregion
-init_LoadingState();
 
 //#region src/components/data-table/tableOptions.tsx
 function normalizeTableOptions(pagination, emptyState, emptyStateMessage, loadingState, loadingStateMessage, table) {
@@ -52159,14 +51063,6 @@ function normalizeTableOptions(pagination, emptyState, emptyStateMessage, loadin
 		}
 	};
 }
-var init_tableOptions = __esmMin(() => {
-	init_DefaultPagination();
-	init_EmptyState();
-	init_LoadingState();
-});
-
-//#endregion
-init_tableOptions();
 
 //#region src/components/data-table/useTableHandlers.ts
 /**
@@ -52187,7 +51083,7 @@ function useTableRowHandlers({ onRowClick, getRowProps }) {
 					onRowClick(row);
 				}
 			},
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("cursor-pointer hover:bg-muted", baseProps.className)
+			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("cursor-pointer hover:bg-muted", baseProps.className)
 		};
 	}, [onRowClick, getRowProps]);
 }
@@ -52199,7 +51095,7 @@ function useTableCellHandlers({ getCellProps }) {
 		const baseProps = getCellProps?.(cell) || {};
 		return {
 			...baseProps,
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(cell.column.columnDef.meta?.cellClassName, baseProps.className)
+			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(cell.column.columnDef.meta?.cellClassName, baseProps.className)
 		};
 	}, [getCellProps]);
 }
@@ -52207,7 +51103,7 @@ function useTableCellHandlers({ getCellProps }) {
 * Hook to determine which columns should be hidden on mobile
 */
 function useMobileColumnHiding({ responsive = false, hideColumnsOnMobile = [] }) {
-	const isMobile = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.useMobileDetection();
+	const isMobile = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.useMobileDetection();
 	return React.useMemo(() => {
 		if (!responsive) return /* @__PURE__ */ new Set();
 		const hiddenColumns = /* @__PURE__ */ new Set();
@@ -52227,15 +51123,23 @@ function useMobileColumnHiding({ responsive = false, hideColumnsOnMobile = [] })
 */
 function useTableHeaderCellHandlers() {
 	return React.useCallback((header) => {
-		return { className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(header.column.columnDef.meta?.headerClassName) };
+		return { className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(header.column.columnDef.meta?.headerClassName) };
 	}, []);
 }
-var init_useTableHandlers = __esmMin(() => {});
-
-//#endregion
-init_useTableHandlers();
 
 //#region src/components/data-table/BaseTableStackedLayout.tsx
+const validateBreakpoint = (breakpoint) => {
+	if (typeof breakpoint === "string" && [
+		"xs",
+		"sm",
+		"md",
+		"lg",
+		"xl",
+		"2xl"
+	].includes(breakpoint)) return breakpoint;
+	if (typeof breakpoint === "string" && breakpoint !== "") console.warn(`Unknown breakpoint value "${breakpoint}", falling back to "md"`);
+	return "md";
+};
 function BaseTableStackedLayout({ className, emptyState, emptyStateMessage, footer, getCellProps, getRowProps, header, isLoading, loadingState, loadingStateMessage, onRowClick, pagination, table, responsive, hideColumnsOnMobile, mobileBreakpoint, stackedHeaderColumn }) {
 	const tableConfig = useTableConfigOptional();
 	const { isMobile } = useMobileDetection({ mobileBreakpoint: validateBreakpoint(mobileBreakpoint || tableConfig?.toolbarConfig?.mobileBreakpoint || ComponentSize.SM) });
@@ -52252,7 +51156,7 @@ function BaseTableStackedLayout({ className, emptyState, emptyStateMessage, foot
 		}, [table])
 	});
 	if (isLoading) return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
 		children: [
 			header && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 				className: "mb-4",
@@ -52267,7 +51171,7 @@ function BaseTableStackedLayout({ className, emptyState, emptyStateMessage, foot
 	});
 	const rows = table.getRowModel().rows;
 	if (rows.length === 0) return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
 		children: [
 			header && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 				className: "mb-4",
@@ -52281,7 +51185,7 @@ function BaseTableStackedLayout({ className, emptyState, emptyStateMessage, foot
 		]
 	});
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
 		children: [
 			header && /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 				className: "mb-4",
@@ -52290,27 +51194,27 @@ function BaseTableStackedLayout({ className, emptyState, emptyStateMessage, foot
 			/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 				className: "space-y-4",
 				children: rows.map((row) => {
-					return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Card, {
+					return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Card, {
 						...getTableRowProps(row),
 						children: [stackedHeaderColumn && (() => {
 							const headerCell = row.getVisibleCells().find((cell) => cell.column.id === stackedHeaderColumn);
 							if (headerCell) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-								className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("border-b p-4", "[word-break:break-word]"),
+								className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("border-b p-4", "[word-break:break-word]"),
 								children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 									className: "text-lg font-semibold",
 									children: flexRender(headerCell.column.columnDef.cell, headerCell.getContext())
 								})
 							});
 							return null;
-						})(), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CardContent, {
-							className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-3", "[word-break:break-word]"),
+						})(), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CardContent, {
+							className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("space-y-3", "[word-break:break-word]"),
 							children: row.getVisibleCells().map((cell) => {
 								if (hiddenColumns.has(cell.column.id)) return null;
 								if (cell.column.id === "actions") return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-									className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end border-t pt-3", isMobile && "pt-4"),
+									className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex justify-end border-t pt-3", isMobile && "pt-4"),
 									...getCellProps?.(cell),
 									children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-										className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex min-h-10 items-center"),
+										className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex min-h-10 items-center"),
 										children: flexRender(cell.column.columnDef.cell, cell.getContext())
 									})
 								}, cell.id);
@@ -52318,13 +51222,13 @@ function BaseTableStackedLayout({ className, emptyState, emptyStateMessage, foot
 								const header$1 = cell.column.columnDef.header;
 								const headerText = typeof header$1 === "string" ? header$1 : void 0;
 								return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-									className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col space-y-1", isMobile && "space-y-2", !stackedHeaderColumn && "pt-4"),
+									className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col space-y-1", isMobile && "space-y-2", !stackedHeaderColumn && "pt-4"),
 									...getCellProps?.(cell),
 									children: [headerText && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
-										className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground text-sm font-medium", isMobile && "text-base"),
+										className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-muted-foreground text-sm font-medium", isMobile && "text-base"),
 										children: headerText
 									}), /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-										className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex min-h-6 items-center text-base", isMobile && "min-h-8 text-lg"),
+										className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex min-h-6 items-center text-base", isMobile && "min-h-8 text-lg"),
 										children: flexRender(cell.column.columnDef.cell, cell.getContext())
 									})]
 								}, cell.id);
@@ -52344,29 +51248,6 @@ function BaseTableStackedLayout({ className, emptyState, emptyStateMessage, foot
 		]
 	});
 }
-var validateBreakpoint;
-var init_BaseTableStackedLayout = __esmMin(() => {
-	init_contexts();
-	init_useMobileDetection();
-	init_useTableHandlers();
-	init_tableOptions();
-	init_components();
-	validateBreakpoint = (breakpoint) => {
-		if (typeof breakpoint === "string" && [
-			"xs",
-			"sm",
-			"md",
-			"lg",
-			"xl",
-			"2xl"
-		].includes(breakpoint)) return breakpoint;
-		if (typeof breakpoint === "string" && breakpoint !== "") console.warn(`Unknown breakpoint value "${breakpoint}", falling back to "md"`);
-		return "md";
-	};
-});
-
-//#endregion
-init_BaseTableStackedLayout();
 
 //#region src/components/data-table/DefaultTableLayout.tsx
 function DefaultTableLayout({ table, getCellProps, getRowProps, onRowClick, className, emptyState, emptyStateMessage, footer, header, isLoading, loadingState, loadingStateMessage, pagination, responsive, hideColumnsOnMobile }) {
@@ -52380,7 +51261,7 @@ function DefaultTableLayout({ table, getCellProps, getRowProps, onRowClick, clas
 		responsive,
 		hideColumnsOnMobile
 	});
-	const normalizedOptions = admin__loadShare__react__loadShare__.useMemo(() => normalizeTableOptions(pagination, emptyState, emptyStateMessage, loadingState, loadingStateMessage, table), [
+	const normalizedOptions = dashboard__loadShare__react__loadShare__.useMemo(() => normalizeTableOptions(pagination, emptyState, emptyStateMessage, loadingState, loadingStateMessage, table), [
 		pagination,
 		emptyState,
 		emptyStateMessage,
@@ -52397,18 +51278,18 @@ function DefaultTableLayout({ table, getCellProps, getRowProps, onRowClick, clas
 			}),
 			/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 				className: "rounded-md border",
-				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Table, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHeader, { children: table.getHeaderGroups().map((headerGroup) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: headerGroup.headers.map((header$1) => {
+				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Table, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHeader, { children: table.getHeaderGroups().map((headerGroup) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, { children: headerGroup.headers.map((header$1) => {
 					if (hiddenColumns.has(header$1.id)) return null;
-					return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHead, {
+					return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableHead, {
 						...getTableHeaderCellProps(header$1),
 						children: header$1.isPlaceholder ? null : flexRender(header$1.column.columnDef.header, header$1.getContext())
 					}, header$1.id);
-				}) }, headerGroup.id)) }), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableBody, { children: isLoading ? normalizedOptions.loadingState : table.getRowModel().rows.length > 0 ? table.getRowModel().rows.map((row) => {
-					return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, {
+				}) }, headerGroup.id)) }), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableBody, { children: isLoading ? normalizedOptions.loadingState : table.getRowModel().rows.length > 0 ? table.getRowModel().rows.map((row) => {
+					return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableRow, {
 						...getTableRowProps(row),
 						children: row.getVisibleCells().map((cell) => {
 							if (hiddenColumns.has(cell.column.id)) return null;
-							return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
+							return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TableCell, {
 								...getTableCellProps(cell),
 								children: flexRender(cell.column.columnDef.cell, cell.getContext())
 							}, cell.id);
@@ -52427,28 +51308,18 @@ function DefaultTableLayout({ table, getCellProps, getRowProps, onRowClick, clas
 		]
 	});
 }
-var init_DefaultTableLayout = __esmMin(() => {
-	init_useTableHandlers();
-	init_tableOptions();
-});
-
-//#endregion
-init_DefaultTableLayout();
 
 //#region src/components/data-table/useTableLayoutSelector.ts
 function useTableLayoutSelector({ responsive = false, mobileLayout = TableLayoutType.AUTO, mobileBreakpoint = "sm" }) {
 	const { isMobile } = useMobileDetection({ });
 	return responsive && isMobile && (mobileLayout === TableLayoutType.STACKED || mobileLayout === TableLayoutType.AUTO) ? TableLayoutType.STACKED : TableLayoutType.TABLE;
 }
-var init_useTableLayoutSelector = __esmMin(() => {
-	init_useMobileDetection();
-	init_DataTable_types();
-});
-
-//#endregion
-init_useTableLayoutSelector();
 
 //#region src/components/data-table/TableLayoutRenderer.tsx
+const layoutRegistry = {
+	[TableLayoutType.TABLE]: DefaultTableLayout,
+	[TableLayoutType.STACKED]: BaseTableStackedLayout
+};
 function TableLayoutRenderer({ layoutType, table, refineTable, className, emptyState, footer, getCellProps, getRowProps, header, isLoading, loadingState, onRowClick, pagination, responsive = false, hideColumnsOnMobile = [], mobileBreakpoint, stackedHeaderColumn }) {
 	const tableConfig = useTableConfigOptional();
 	const actualLayoutType = useTableLayoutSelector({
@@ -52476,27 +51347,12 @@ function TableLayoutRenderer({ layoutType, table, refineTable, className, emptyS
 		stackedHeaderColumn
 	});
 }
-var layoutRegistry;
-var init_TableLayoutRenderer = __esmMin(() => {
-	init_BaseTableStackedLayout();
-	init_DefaultTableLayout();
-	init_useTableLayoutSelector();
-	init_contexts();
-	init_DataTable_types();
-	layoutRegistry = {
-		[TableLayoutType.TABLE]: DefaultTableLayout,
-		[TableLayoutType.STACKED]: BaseTableStackedLayout
-	};
-});
-
-//#endregion
-init_TableLayoutRenderer();
 
 //#region src/components/data-table/BaseTableContent.tsx
 function BaseTableContent({ className, emptyState, footer, getCellProps, getRowProps, header, isLoading, loadingState, onRowClick, pagination, table, responsive = false, layoutType = TableLayoutType.AUTO, hideColumnsOnMobile = [], mobileBreakpoint, stackedHeaderColumn }) {
 	const toolbarConfig = useTableConfigOptional()?.toolbarConfig;
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn(className),
 		children: [toolbarConfig && /* @__PURE__ */ jsxRuntimeExports.jsx(Toolbar, { table }), /* @__PURE__ */ jsxRuntimeExports.jsx(TableLayoutRenderer, {
 			layoutType,
 			table,
@@ -52517,15 +51373,6 @@ function BaseTableContent({ className, emptyState, footer, getCellProps, getRowP
 		})]
 	});
 }
-var init_BaseTableContent = __esmMin(() => {
-	init_Toolbar();
-	init_contexts();
-	init_TableLayoutRenderer();
-	init_DataTable_types();
-});
-
-//#endregion
-init_BaseTableContent();
 
 //#region src/components/data-table/BaseTableInner.tsx
 function BaseTableInner(props) {
@@ -52551,14 +51398,6 @@ function BaseTableInner(props) {
 		stackedHeaderColumn
 	});
 }
-var init_BaseTableInner = __esmMin(() => {
-	init_BaseTableContent();
-	init_contexts();
-	init_tableOptions();
-});
-
-//#endregion
-init_BaseTableInner();
 
 //#region src/components/data-table/filterColumnsForMobile.ts
 /**
@@ -52587,10 +51426,6 @@ function filterColumnsForMobile(columns, hideColumnsOnMobile = []) {
 		return column;
 	});
 }
-var init_filterColumnsForMobile = __esmMin(() => {});
-
-//#endregion
-init_filterColumnsForMobile();
 
 //#region src/components/data-table/BaseTable.tsx
 function BaseTableWithData(props) {
@@ -52699,22 +51534,12 @@ function BaseTable(props) {
 	if ("data" in props && props.data) return /* @__PURE__ */ jsxRuntimeExports.jsx(BaseTableWithData, { ...props });
 	throw new Error("BaseTable requires either table or data prop");
 }
-var init_BaseTable = __esmMin(() => {
-	init_BaseTableInner();
-	init_contexts();
-	init_DataTable_types();
-	init_useFilterOperators();
-	init_filterColumnsForMobile();
-});
-
-//#endregion
-init_BaseTable();
 
 //#region src/components/data-table/TableAction.tsx
 function TableAction({ items, row }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 		className: "flex items-center gap-1",
-		children: items.map((item, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		children: items.map((item, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			"aria-label": item.tooltip || item.label,
 			className: "h-8 w-8 p-0",
 			disabled: typeof item.disabled === "function" ? item.disabled(row) : item.disabled,
@@ -52728,24 +51553,20 @@ function TableAction({ items, row }) {
 		}, `action-${index}`))
 	});
 }
-var init_TableAction = __esmMin(() => {});
-
-//#endregion
-init_TableAction();
 
 //#region src/components/data-table/TableActionMenu.tsx
 function TableActionMenu({ items, row }) {
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenu, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuTrigger, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenu, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuTrigger, {
 		asChild: true,
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			"aria-label": "Open actions menu",
 			className: "h-8 w-8 p-0",
 			variant: "ghost",
 			children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ellipsis, { className: "h-4 w-4" })
 		})
-	}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuContent, {
+	}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuContent, {
 		align: "end",
-		children: items?.map((item, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
+		children: items?.map((item, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
 			disabled: typeof item.disabled === "function" ? item.disabled(row) : item.disabled,
 			onClick: () => item.onClick(row),
 			children: [item.icon && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
@@ -52755,10 +51576,6 @@ function TableActionMenu({ items, row }) {
 		}, index))
 	})] });
 }
-var init_TableActionMenu = __esmMin(() => {});
-
-//#endregion
-init_TableActionMenu();
 
 var ListCache$2 = _ListCache;
 
@@ -54270,8 +53087,8 @@ const isEqual$1 = /*@__PURE__*/getDefaultExportFromCjs(isEqual_1);
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 var useIsFirstRender = /* @__PURE__ */ __name(() => {
-  const firstRender = admin__loadShare__react__loadShare__.useRef(true);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  const firstRender = dashboard__loadShare__react__loadShare__.useRef(true);
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     firstRender.current = false;
   }, []);
   return firstRender.current;
@@ -54373,7 +53190,7 @@ function useTable({
 }) {
   var _a, _b, _c;
   const isFirstRender = useIsFirstRender();
-  const useTableResult = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useTable(
+  const useTableResult = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useTable(
     refineCoreProps
   );
   const isServerSideFilteringEnabled = (((_a = refineCoreProps.filters) == null ? void 0 : _a.mode) || "server") === "server";
@@ -54420,17 +53237,17 @@ function useTable({
   const { state, columns } = reactTableResult.options;
   const { pagination, sorting, columnFilters } = state;
   const { pageIndex, pageSize } = pagination ?? {};
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     if (pageIndex !== void 0) {
       setCurrentPage(pageIndex + 1);
     }
   }, [pageIndex]);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     if (pageSize !== void 0) {
       setPageSizeCore(pageSize);
     }
   }, [pageSize]);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     if (sorting !== void 0) {
       const newSorters = sorting.map((sorting2) => ({
         field: sorting2.id,
@@ -54444,7 +53261,7 @@ function useTable({
       }
     }
   }, [sorting]);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     const allColumns = reactTableResult.getAllColumns().map((col) => col.columnDef);
     const crudFilters = columnFiltersToCrudFilters({
       columns: allColumns,
@@ -54473,7 +53290,7 @@ __name(useTable, "useTable");
 //#region src/components/data-table/DataTable.tsx
 function DataTable({ actionMenu, columns, control, dataProviderName, refineCoreProps, resource, toolbar, refetchInterval, ...props }) {
 	const refineTable = useTable({
-		columns: admin__loadShare__react__loadShare__.useMemo(() => {
+		columns: dashboard__loadShare__react__loadShare__.useMemo(() => {
 			const cols = [...columns || []];
 			const actionColumn = actionMenu ? {
 				cell: ({ row }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
@@ -54497,7 +53314,7 @@ function DataTable({ actionMenu, columns, control, dataProviderName, refineCoreP
 			if (actionColumn) cols.push(actionColumn);
 			return cols;
 		}, [columns, actionMenu]),
-		refineCoreProps: admin__loadShare__react__loadShare__.useMemo(() => ({
+		refineCoreProps: dashboard__loadShare__react__loadShare__.useMemo(() => ({
 			dataProviderName: dataProviderName ?? void 0,
 			resource,
 			...refineCoreProps,
@@ -54519,7 +53336,7 @@ function DataTable({ actionMenu, columns, control, dataProviderName, refineCoreP
 			refineCore: refineTable.refineCore
 		}
 	};
-	const getDefaultFilter$1 = (columnName, operatorType) => admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.getDefaultFilter(columnName, refineTable.refineCore?.filters, operatorType);
+	const getDefaultFilter$1 = (columnName, operatorType) => dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.getDefaultFilter(columnName, refineTable.refineCore?.filters, operatorType);
 	const getDefaultOperator = (fieldType) => getDefaultOperatorForFieldType(fieldType);
 	const getAvailableOperators$1 = (fieldType) => getAvailableOperators(fieldType);
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(RefineTableProvider, {
@@ -54549,21 +53366,11 @@ function DataTable({ actionMenu, columns, control, dataProviderName, refineCoreP
 		})
 	});
 }
-var init_DataTable = __esmMin(() => {
-	init_BaseTable();
-	init_TableAction();
-	init_TableActionMenu();
-	init_contexts();
-	init_useFilterOperators();
-});
-
-//#endregion
-init_DataTable();
 
 //#region src/components/data-table/DataTableController.tsx
 function DataTableController({ onControlsReady }) {
 	const { setFilters, setSorters, tableQuery, filters, sorters } = useRefineTable();
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		if (setFilters && setSorters && tableQuery?.refetch && onControlsReady) onControlsReady({
 			setFilters,
 			setSorters,
@@ -54581,12 +53388,6 @@ function DataTableController({ onControlsReady }) {
 	]);
 	return null;
 }
-var init_DataTableController = __esmMin(() => {
-	init_contexts();
-});
-
-//#endregion
-init_DataTableController();
 
 /**
 * Create a standard filter item with proper configuration
@@ -54667,51 +53468,7 @@ function registerToolbarItems() {
 	registerActionItems();
 	registerFilterItems();
 }
-var init_register$1 = __esmMin(() => {
-	init_ToolbarRegistry();
-	init_data_table();
-	init_filters();
-	init_components$1();
-	init_refresh();
-	init_search();
-	registerToolbarItems();
-});
-
-//#endregion
-init_register$1();
-
-//#region src/components/data-table/register.ts
-var init_register = __esmMin(() => {
-	init_register$1();
-});
-
-//#endregion
-init_register();
-
-//#region src/components/data-table/index.ts
-var init_data_table = __esmMin(() => {
-	init_BaseTable();
-	init_BaseTableContent();
-	init_BaseTableInner();
-	init_DataTable();
-	init_DataTable_types();
-	init_DataTableController();
-	init_DefaultPagination();
-	init_EmptyState();
-	init_LoadingState();
-	init_contexts();
-	init_TableAction();
-	init_TableActionMenu();
-	init_tableOptions();
-	init_ToolbarRegistry();
-	init_Toolbar();
-	init_ToolbarRenderer();
-	init_register();
-	init_toolbarItems();
-});
-
-//#endregion
-init_data_table();
+registerToolbarItems();
 
 //#region src/components/data-table/toolbarItems/items/refresh.tsx
 function registerRefreshToolbarItem() {
@@ -54738,84 +53495,62 @@ function registerRefreshToolbarItem() {
 		size: "sm"
 	});
 }
-var init_refresh = __esmMin(() => {
-	init_data_table();
-});
-
-//#endregion
-init_refresh();
 
 //#region src/components/layout/SidebarContext.tsx
-var SidebarContext, SidebarProvider, useSidebarContext;
-var init_SidebarContext = __esmMin(() => {
-	SidebarContext = admin__loadShare__react__loadShare__.createContext(void 0);
-	SidebarProvider = ({ children }) => {
-		const [isCollapsed, setIsCollapsed] = admin__loadShare__react__loadShare__.useState(false);
-		const toggleCollapsed = () => {
-			setIsCollapsed(!isCollapsed);
-		};
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(SidebarContext.Provider, {
-			value: {
-				isCollapsed,
-				toggleCollapsed
-			},
-			children
-		});
+const SidebarContext = dashboard__loadShare__react__loadShare__.createContext(void 0);
+const SidebarProvider = ({ children }) => {
+	const [isCollapsed, setIsCollapsed] = dashboard__loadShare__react__loadShare__.useState(false);
+	const toggleCollapsed = () => {
+		setIsCollapsed(!isCollapsed);
 	};
-	useSidebarContext = () => {
-		const context = admin__loadShare__react__loadShare__.useContext(SidebarContext);
-		if (!context) throw new Error("useSidebarContext must be used within a SidebarProvider");
-		return context;
-	};
-});
-
-//#endregion
-init_SidebarContext();
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(SidebarContext.Provider, {
+		value: {
+			isCollapsed,
+			toggleCollapsed
+		},
+		children
+	});
+};
+const useSidebarContext = () => {
+	const context = dashboard__loadShare__react__loadShare__.useContext(SidebarContext);
+	if (!context) throw new Error("useSidebarContext must be used within a SidebarProvider");
+	return context;
+};
 
 //#region src/components/layout/SidebarToggle.tsx
 function SidebarToggle({ isOpen, setIsOpen }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
 		className: "invisible absolute -right-[20px] top-[12px] z-20 lg:visible",
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			"aria-label": isOpen ? "Close sidebar" : "Open sidebar",
 			className: "h-8 w-8 rounded-md",
 			onClick: () => setIsOpen?.(),
 			size: "icon",
 			variant: "outline",
-			children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronLeft, { className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-4 w-4 transition-transform duration-700 ease-in-out", isOpen === false ? "rotate-180" : "rotate-0") })
+			children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronLeft, { className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-4 w-4 transition-transform duration-700 ease-in-out", isOpen === false ? "rotate-180" : "rotate-0") })
 		})
 	});
 }
-var init_SidebarToggle = __esmMin(() => {});
-
-//#endregion
-init_SidebarToggle();
 
 //#region src/hooks/useAvatar.ts
-var useAvatar;
-var init_useAvatar = __esmMin(() => {
-	useAvatar = () => {
-		const { data: identity, isLoading } = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useGetIdentity();
-		if (isLoading) return {
-			avatarUrl: "/placeholder.svg",
-			displayName: "",
-			isLoading: true
-		};
-		return {
-			avatarUrl: identity?.avatar ? `${identity.avatar}?t=${Date.now()}` : "/placeholder.svg",
-			displayName: `${identity?.firstName || ""} ${identity?.lastName || ""}`.trim(),
-			isLoading: false
-		};
+const useAvatar = () => {
+	const { data: identity, isLoading } = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useGetIdentity();
+	if (isLoading) return {
+		avatarUrl: "/placeholder.svg",
+		displayName: "",
+		isLoading: true
 	};
-});
-
-//#endregion
-init_useAvatar();
+	return {
+		avatarUrl: identity?.avatar ? `${identity.avatar}?t=${Date.now()}` : "/placeholder.svg",
+		displayName: `${identity?.firstName || ""} ${identity?.lastName || ""}`.trim(),
+		isLoading: false
+	};
+};
 
 //#region src/components/layout/UserNav.tsx
 function UserNav() {
-	const { mutate: logout } = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useLogout();
-	const { data: identity } = admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useGetIdentity();
+	const { mutate: logout } = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useLogout();
+	const { data: identity } = dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.useGetIdentity();
 	const { avatarUrl, displayName, isLoading } = useAvatar();
 	const firstName = identity?.firstName || "";
 	const lastName = identity?.lastName || "";
@@ -54831,41 +53566,41 @@ function UserNav() {
 		if (email) return email.charAt(0).toUpperCase();
 		return "?";
 	};
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenu, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenu, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, {
 		disableHoverableContent: true,
-		children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Tooltip, {
+		children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Tooltip, {
 			delayDuration: 100,
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipTrigger, {
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipTrigger, {
 				asChild: true,
-				children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuTrigger, {
+				children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuTrigger, {
 					asChild: true,
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 						"aria-label": isLoading ? "User avatar" : displayName || "User profile",
 						className: "relative h-8 w-8 rounded-full",
 						variant: "outline",
-						children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Avatar, {
+						children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Avatar, {
 							className: "h-8 w-8",
-							children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.AvatarImage, {
+							children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.AvatarImage, {
 								alt: getAvatarAltText(),
 								src: avatarUrl
-							}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.AvatarFallback, {
+							}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.AvatarFallback, {
 								className: "bg-transparent",
 								children: getAvatarFallback()
 							})]
 						})
 					})
 				})
-			}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipContent, {
+			}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipContent, {
 				side: "bottom",
 				children: "Profile"
 			})]
 		})
-	}), /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuContent, {
+	}), /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuContent, {
 		align: "end",
 		className: "w-56",
 		forceMount: true,
 		children: [
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuLabel, {
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuLabel, {
 				className: "font-normal",
 				children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 					className: "flex flex-col space-y-1",
@@ -54882,26 +53617,26 @@ function UserNav() {
 					})]
 				})
 			}),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuSeparator, {}),
-			/* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuGroup, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuSeparator, {}),
+			/* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuGroup, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
 				asChild: true,
 				className: "hover:cursor-pointer",
-				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
+				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
 					className: "flex items-center",
 					to: "/dashboard",
 					children: [/* @__PURE__ */ jsxRuntimeExports.jsx(LayoutGrid, { className: "text-muted-foreground mr-3 h-4 w-4" }), "Dashboard"]
 				})
-			}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
+			}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
 				asChild: true,
 				className: "hover:cursor-pointer",
-				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
+				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
 					className: "flex items-center",
 					to: "/account",
 					children: [/* @__PURE__ */ jsxRuntimeExports.jsx(User, { className: "text-muted-foreground mr-3 h-4 w-4" }), "Account"]
 				})
 			})] }),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuSeparator, {}),
-			/* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuSeparator, {}),
+			/* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
 				className: "hover:cursor-pointer",
 				onClick: () => logout(),
 				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(LogOut, { className: "text-muted-foreground mr-3 h-4 w-4" }), "Sign out"]
@@ -54909,12 +53644,6 @@ function UserNav() {
 		]
 	})] });
 }
-var init_UserNav = __esmMin(() => {
-	init_useAvatar();
-});
-
-//#endregion
-init_UserNav();
 
 //#region src/hooks/useMenuItems.ts
 function useMenuItems() {
@@ -54926,148 +53655,125 @@ function useMenuItems() {
 		removeMenuItem: useAppStore((state) => state.removeMenuItem)
 	};
 }
-var init_useMenuItems = __esmMin(() => {
-	init_appStore();
-});
-
-//#endregion
-init_useMenuItems();
 
 //#region src/components/MainNavigation.tsx
-var isRouteActive, isChildRouteActive, NavItemContent, CollapseMenuButton, LinkableNavItem, NonLinkableNavItem, NavItem, MainNavigation;
-var init_MainNavigation = __esmMin(() => {
-	init_useMenuItems();
-	init_SidebarContext();
-	isRouteActive = (item, currentPathname) => {
-		const itemPath = item.path;
-		if (!itemPath) return false;
-		if (itemPath === currentPathname) return true;
-		if (itemPath !== "/" && currentPathname.startsWith(`${itemPath}/`)) return true;
-		return false;
-	};
-	isChildRouteActive = (child, parent, currentPathname) => {
-		if (child.index && child.path === "" && parent.path === currentPathname) return true;
-		return isRouteActive(child, currentPathname);
-	};
-	NavItemContent = ({ IconComponent, isCollapsed, item }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-		className: "flex items-center",
-		children: [IconComponent && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
-			className: "mr-2 h-5 w-5",
-			children: /* @__PURE__ */ jsxRuntimeExports.jsx(IconComponent, {})
-		}), /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({ hidden: isCollapsed }),
-			children: item.label
-		})]
-	});
-	CollapseMenuButton = ({ active, icon: Icon, isOpen, item, label, onItemClick, resetKey, submenus }) => {
-		const pathname = admin__loadShare__react_mf_2_router__loadShare__.useLocation().pathname;
-		const isSubmenuActive = submenus.some((submenu) => submenu.active === void 0 ? submenu.href === pathname : submenu.active);
-		const [isOpenState, setIsOpenState] = React.useState(active || isSubmenuActive);
-		const headerHref = item.path || submenus[0]?.href;
-		React.useEffect(() => {
-			setIsOpenState(active || isSubmenuActive);
-		}, [active, isSubmenuActive]);
-		React.useEffect(() => {
-			if (resetKey) setIsOpenState(false);
-		}, [resetKey]);
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Collapsible, {
-			className: "w-full",
-			onOpenChange: setIsOpenState,
-			open: isOpenState,
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CollapsibleTrigger, {
-				asChild: true,
-				className: "mb-1 [&[data-state=open]>div>div>svg]:rotate-180",
-				children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-					className: "h-10 w-full justify-start",
-					variant: active || isSubmenuActive ? "secondary" : "ghost",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-						className: "flex w-full items-center justify-between",
-						children: [/* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-							className: "flex items-center",
-							children: [Icon && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
-								className: "mr-4",
-								children: /* @__PURE__ */ jsxRuntimeExports.jsx(Icon, { size: 18 })
-							}), headerHref && item.linkable !== false ? /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
-								"aria-label": label,
-								onClick: (e) => e.stopPropagation(),
-								onKeyDown: (e) => {
-									if (e.key === " ") {
-										e.preventDefault();
-										e.stopPropagation();
-									}
-									if (e.key === "Enter") e.stopPropagation();
-								},
-								to: headerHref,
-								children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
-									className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
-										"-translate-x-96 opacity-0": !isOpen,
-										"translate-x-0 opacity-100": isOpen
-									}),
-									children: label
-								})
-							}) : /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
-								"aria-disabled": "true",
-								className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
+const isRouteActive = (item, currentPathname) => {
+	const itemPath = item.path;
+	if (!itemPath) return false;
+	if (itemPath === currentPathname) return true;
+	if (itemPath !== "/" && currentPathname.startsWith(`${itemPath}/`)) return true;
+	return false;
+};
+const isChildRouteActive = (child, parent, currentPathname) => {
+	if (child.index && child.path === "" && parent.path === currentPathname) return true;
+	return isRouteActive(child, currentPathname);
+};
+const NavItemContent = ({ IconComponent, isCollapsed, item }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+	className: "flex items-center",
+	children: [IconComponent && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
+		className: "mr-2 h-5 w-5",
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx(IconComponent, {})
+	}), /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({ hidden: isCollapsed }),
+		children: item.label
+	})]
+});
+const CollapseMenuButton = ({ active, icon: Icon, isOpen, item, label, onItemClick, resetKey, submenus }) => {
+	const pathname = dashboard__loadShare__react_mf_2_router__loadShare__.useLocation().pathname;
+	const isSubmenuActive = submenus.some((submenu) => submenu.active === void 0 ? submenu.href === pathname : submenu.active);
+	const [isOpenState, setIsOpenState] = React.useState(active || isSubmenuActive);
+	const headerHref = item.path || submenus[0]?.href;
+	React.useEffect(() => {
+		setIsOpenState(active || isSubmenuActive);
+	}, [active, isSubmenuActive]);
+	React.useEffect(() => {
+		if (resetKey) setIsOpenState(false);
+	}, [resetKey]);
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Collapsible, {
+		className: "w-full",
+		onOpenChange: setIsOpenState,
+		open: isOpenState,
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CollapsibleTrigger, {
+			asChild: true,
+			className: "mb-1 [&[data-state=open]>div>div>svg]:rotate-180",
+			children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				className: "h-10 w-full justify-start",
+				variant: active || isSubmenuActive ? "secondary" : "ghost",
+				children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+					className: "flex w-full items-center justify-between",
+					children: [/* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+						className: "flex items-center",
+						children: [Icon && /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
+							className: "mr-4",
+							children: /* @__PURE__ */ jsxRuntimeExports.jsx(Icon, { size: 18 })
+						}), headerHref && item.linkable !== false ? /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
+							"aria-label": label,
+							onClick: (e) => e.stopPropagation(),
+							onKeyDown: (e) => {
+								if (e.key === " ") {
+									e.preventDefault();
+									e.stopPropagation();
+								}
+								if (e.key === "Enter") e.stopPropagation();
+							},
+							to: headerHref,
+							children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
+								className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
 									"-translate-x-96 opacity-0": !isOpen,
 									"translate-x-0 opacity-100": isOpen
 								}),
 								children: label
-							})]
-						}), /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-							className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("whitespace-nowrap", isOpen ? "translate-x-0 opacity-100" : "-translate-x-96 opacity-0"),
-							children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, {
-								className: "transition-transform duration-200",
-								size: 18
 							})
-						})]
-					})
-				})
-			}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CollapsibleContent, {
-				className: "data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down overflow-hidden",
-				children: submenus.map(({ active: active$1, href, icon: Icon$1, label: label$1 }, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-					asChild: true,
-					className: "mb-1 h-10 w-full justify-start",
-					variant: active$1 === void 0 && pathname === href || active$1 ? "secondary" : "ghost",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
-						onClick: () => {
-							if (onItemClick) onItemClick();
-						},
-						to: href,
-						children: [/* @__PURE__ */ jsxRuntimeExports.jsx("span", {
-							className: "ml-2 mr-4",
-							children: Icon$1 ? /* @__PURE__ */ jsxRuntimeExports.jsx(Icon$1, { size: 18 }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Dot, { size: 18 })
-						}), /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
-							className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
+						}) : /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
+							"aria-disabled": "true",
+							className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
 								"-translate-x-96 opacity-0": !isOpen,
 								"translate-x-0 opacity-100": isOpen
 							}),
-							children: label$1
+							children: label
 						})]
-					})
-				}, index))
-			})]
-		});
-	};
-	LinkableNavItem = ({ active, IconComponent, isCollapsed, item, onItemClick }) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-		asChild: true,
-		className: "mb-1 h-10 w-full justify-start",
-		variant: active ? "secondary" : "ghost",
-		children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
-			onClick: onItemClick,
-			to: item.path || "",
-			children: /* @__PURE__ */ jsxRuntimeExports.jsx(NavItemContent, {
-				active,
-				IconComponent,
-				isCollapsed,
-				item,
-				onItemClick
+					}), /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+						className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("whitespace-nowrap", isOpen ? "translate-x-0 opacity-100" : "-translate-x-96 opacity-0"),
+						children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, {
+							className: "transition-transform duration-200",
+							size: 18
+						})
+					})]
+				})
 			})
-		})
+		}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.CollapsibleContent, {
+			className: "data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down overflow-hidden",
+			children: submenus.map(({ active: active$1, href, icon: Icon$1, label: label$1 }, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				asChild: true,
+				className: "mb-1 h-10 w-full justify-start",
+				variant: active$1 === void 0 && pathname === href || active$1 ? "secondary" : "ghost",
+				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
+					onClick: () => {
+						if (onItemClick) onItemClick();
+					},
+					to: href,
+					children: [/* @__PURE__ */ jsxRuntimeExports.jsx("span", {
+						className: "ml-2 mr-4",
+						children: Icon$1 ? /* @__PURE__ */ jsxRuntimeExports.jsx(Icon$1, { size: 18 }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Dot, { size: 18 })
+					}), /* @__PURE__ */ jsxRuntimeExports.jsx("p", {
+						className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn({
+							"-translate-x-96 opacity-0": !isOpen,
+							"translate-x-0 opacity-100": isOpen
+						}),
+						children: label$1
+					})]
+				})
+			}, index))
+		})]
 	});
-	NonLinkableNavItem = ({ active, IconComponent, isCollapsed, item, onItemClick }) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-		className: "mb-1 h-10 w-full justify-start",
+};
+const LinkableNavItem = ({ active, IconComponent, isCollapsed, item, onItemClick }) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+	asChild: true,
+	className: "mb-1 h-10 w-full justify-start",
+	variant: active ? "secondary" : "ghost",
+	children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
 		onClick: onItemClick,
-		variant: active ? "secondary" : "ghost",
+		to: item.path || "",
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx(NavItemContent, {
 			active,
 			IconComponent,
@@ -55075,113 +53781,122 @@ var init_MainNavigation = __esmMin(() => {
 			item,
 			onItemClick
 		})
-	});
-	NavItem = React.forwardRef(({ active, item, onItemClick }, ref) => {
-		const { isCollapsed } = useSidebarContext();
-		let IconComponent = void 0;
-		if (item.icon) IconComponent = item.icon;
-		return /* @__PURE__ */ jsxRuntimeExports.jsx("li", {
-			ref,
-			children: item.linkable !== false && Boolean(item.path) ? /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableNavItem, {
-				active,
-				IconComponent,
-				isCollapsed,
-				item,
-				onItemClick
-			}) : /* @__PURE__ */ jsxRuntimeExports.jsx(NonLinkableNavItem, {
-				active,
-				IconComponent,
-				isCollapsed,
-				item,
-				onItemClick
-			})
-		});
-	});
-	NavItem.displayName = "NavItem";
-	MainNavigation = ({ isOpen, onItemClick }) => {
-		const menu = useMenuItems();
-		const pathname = admin__loadShare__react_mf_2_router__loadShare__.useLocation().pathname;
-		const renderMenuItem = (item) => {
-			const active = isRouteActive(item, pathname);
-			if (item.children && item.children.length > 0) {
-				const submenus = item.children.map((child) => ({
-					active: isChildRouteActive(child, item, pathname),
-					href: child.index ? item.path : child.path || "",
-					icon: child.icon,
-					label: child.label
-				}));
-				let CollapseMenuIcon = void 0;
-				if (item.icon) CollapseMenuIcon = item.icon;
-				return /* @__PURE__ */ jsxRuntimeExports.jsx(CollapseMenuButton, {
-					active,
-					icon: CollapseMenuIcon,
-					isOpen,
-					item,
-					label: item.label,
-					onItemClick,
-					resetKey: typeof onItemClick === "function" ? pathname : void 0,
-					submenus
-				}, item.id);
-			} else return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, {
-				disableHoverableContent: true,
-				children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Tooltip, {
-					delayDuration: 100,
-					children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipTrigger, {
-						asChild: true,
-						children: /* @__PURE__ */ jsxRuntimeExports.jsx(NavItem, {
-							active,
-							item,
-							onItemClick
-						})
-					}), isOpen === false && /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipContent, {
-						side: "right",
-						children: item.label
-					})]
-				})
-			}, item.id);
-		};
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.ScrollArea, {
-			className: "[&>div>div[style]]:!block",
-			children: /* @__PURE__ */ jsxRuntimeExports.jsx("nav", {
-				className: "mt-8 flex h-full w-full flex-col",
-				children: /* @__PURE__ */ jsxRuntimeExports.jsx("ul", {
-					className: "flex flex-1 flex-col items-start space-y-1 overflow-y-auto overflow-x-hidden px-2",
-					children: menu.getMenuItems().map(renderMenuItem)
-				})
-			})
-		});
-	};
+	})
 });
-
-//#endregion
-init_MainNavigation();
+const NonLinkableNavItem = ({ active, IconComponent, isCollapsed, item, onItemClick }) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+	className: "mb-1 h-10 w-full justify-start",
+	onClick: onItemClick,
+	variant: active ? "secondary" : "ghost",
+	children: /* @__PURE__ */ jsxRuntimeExports.jsx(NavItemContent, {
+		active,
+		IconComponent,
+		isCollapsed,
+		item,
+		onItemClick
+	})
+});
+const NavItem = React.forwardRef(({ active, item, onItemClick }, ref) => {
+	const { isCollapsed } = useSidebarContext();
+	let IconComponent = void 0;
+	if (item.icon) IconComponent = item.icon;
+	return /* @__PURE__ */ jsxRuntimeExports.jsx("li", {
+		ref,
+		children: item.linkable !== false && Boolean(item.path) ? /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableNavItem, {
+			active,
+			IconComponent,
+			isCollapsed,
+			item,
+			onItemClick
+		}) : /* @__PURE__ */ jsxRuntimeExports.jsx(NonLinkableNavItem, {
+			active,
+			IconComponent,
+			isCollapsed,
+			item,
+			onItemClick
+		})
+	});
+});
+NavItem.displayName = "NavItem";
+const MainNavigation = ({ isOpen, onItemClick }) => {
+	const menu = useMenuItems();
+	const pathname = dashboard__loadShare__react_mf_2_router__loadShare__.useLocation().pathname;
+	const renderMenuItem = (item) => {
+		const active = isRouteActive(item, pathname);
+		if (item.children && item.children.length > 0) {
+			const submenus = item.children.map((child) => ({
+				active: isChildRouteActive(child, item, pathname),
+				href: child.index ? item.path : child.path || "",
+				icon: child.icon,
+				label: child.label
+			}));
+			let CollapseMenuIcon = void 0;
+			if (item.icon) CollapseMenuIcon = item.icon;
+			return /* @__PURE__ */ jsxRuntimeExports.jsx(CollapseMenuButton, {
+				active,
+				icon: CollapseMenuIcon,
+				isOpen,
+				item,
+				label: item.label,
+				onItemClick,
+				resetKey: typeof onItemClick === "function" ? pathname : void 0,
+				submenus
+			}, item.id);
+		} else return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, {
+			disableHoverableContent: true,
+			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Tooltip, {
+				delayDuration: 100,
+				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipTrigger, {
+					asChild: true,
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(NavItem, {
+						active,
+						item,
+						onItemClick
+					})
+				}), isOpen === false && /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipContent, {
+					side: "right",
+					children: item.label
+				})]
+			})
+		}, item.id);
+	};
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.ScrollArea, {
+		className: "[&>div>div[style]]:!block",
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx("nav", {
+			className: "mt-8 flex h-full w-full flex-col",
+			children: /* @__PURE__ */ jsxRuntimeExports.jsx("ul", {
+				className: "flex flex-1 flex-col items-start space-y-1 overflow-y-auto overflow-x-hidden px-2",
+				children: menu.getMenuItems().map(renderMenuItem)
+			})
+		})
+	});
+};
 
 //#region src/components/layout/MobileMenu.tsx
 function MobileMenu() {
 	const [open, setOpen] = React.useState(false);
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Sheet, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Sheet, {
 		onOpenChange: setOpen,
 		open,
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetTrigger, {
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetTrigger, {
 			asChild: true,
 			className: "ml-2 lg:hidden",
-			children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+			children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 				className: "h-8 w-8",
 				size: "icon",
 				variant: "outline",
 				children: /* @__PURE__ */ jsxRuntimeExports.jsx(Menu, { size: 18 })
 			})
-		}), /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetContent, {
+		}), /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetContent, {
 			className: "flex h-full flex-col px-3 sm:w-72",
 			side: "right",
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 				asChild: true,
 				className: "flex items-center justify-center pb-2 pt-1",
 				variant: "link",
-				children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
+				children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.Link, {
 					className: "flex items-center gap-2",
 					to: "/dashboard",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetTitle, {
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.SheetTitle, {
 						className: "text-lg font-bold",
 						children: "Portal"
 					})
@@ -55193,12 +53908,6 @@ function MobileMenu() {
 		})]
 	});
 }
-var init_MobileMenu = __esmMin(() => {
-	init_MainNavigation();
-});
-
-//#endregion
-init_MobileMenu();
 
 //#region src/components/layout/PageHeader.tsx
 function PageHeader({ children, description, title }) {
@@ -55213,21 +53922,11 @@ function PageHeader({ children, description, title }) {
 		})] }), children]
 	});
 }
-var init_PageHeader = __esmMin(() => {});
-
-//#endregion
-init_PageHeader();
 
 //#region src/hooks/usePluginMeta.ts
 function usePluginMeta(pluginName, key) {
-	return admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getPluginMeta(usePortalStore((state) => state.meta), pluginName, key);
+	return dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getPluginMeta(usePortalStore((state) => state.meta), pluginName, key);
 }
-var init_usePluginMeta = __esmMin(() => {
-	init_portalStore();
-});
-
-//#endregion
-init_usePluginMeta();
 
 function createJSONStorage$1(getStorage, options) {
   let storage;
@@ -55417,20 +54116,14 @@ const persistImpl = (config, baseOptions) => (set, get, api) => {
 const persist = persistImpl;
 
 //#region src/store/uiStore.ts
-var uiStore, useUIStore;
-var init_uiStore = __esmMin(() => {
-	uiStore = createStore()(persist((set) => ({
-		setTheme: (theme) => set({ theme }),
-		theme: "default"
-	}), {
-		name: "ui-store",
-		partialize: (state) => ({ theme: state.theme })
-	}));
-	useUIStore = (selector) => useStore(uiStore, selector);
-});
-
-//#endregion
-init_uiStore();
+const uiStore = createStore()(persist((set) => ({
+	setTheme: (theme) => set({ theme }),
+	theme: "default"
+}), {
+	name: "ui-store",
+	partialize: (state) => ({ theme: state.theme })
+}));
+const useUIStore = (selector) => useStore(uiStore, selector);
 
 //#region src/utils/theme.ts
 /**
@@ -56108,187 +54801,130 @@ function validateTheme(data) {
 function clamp(value, min, max) {
 	return Math.max(min, Math.min(value, max));
 }
-var init_theme = __esmMin(() => {});
-/**
-* Merges properties from an overrides object into a base theme object.
-* Useful for applying partial theme customizations.
-* export function mergeThemes(base: Theme, overrides: Partial<Theme>): Theme { ... }
-*/
-/**
-* Validates if an object conforms to the Theme interface structure.
-* export function function validateTheme(theme: any): theme is Theme { ... }
-*/
-
-//#endregion
-init_theme();
 
 //#region src/hooks/useTheme.tsx
-var useThemeIdAndSetter, useTheme, withTheme;
-var init_useTheme = __esmMin(() => {
-	init_uiStore();
-	init_theme();
-	init_usePluginMeta();
-	useThemeIdAndSetter = () => {
-		const theme = useUIStore((state) => state.theme);
-		return {
-			setTheme: useUIStore((state) => state.setTheme),
-			theme
-		};
+/**
+* Higher-Order Component (HoC) for managing theme application at the root level.
+*
+* This HoC is used to control the theme for the Root component, ensuring proper
+* theme management throughout the application. It's an alternative to using
+* React Context, which is the current best practice, but we've chosen a different
+* approach here with global state management.
+*
+* Wrapping a component in this HoC will ensure that the theme is applied to the
+* <html> element of the page, so this HoC should be used for the Root component
+* only.
+*
+* The HoC:
+* 1. Retrieves the current theme ID from the global app store using useThemeIdAndSetter.
+* 2. Retrieves the list of available themes from plugin metadata using usePluginMeta.
+* 3. Uses an effect to find the selected or default theme and apply it using the utility function.
+* 4. Wraps the provided component, passing through all props.
+*
+* @param Component - The React component to be wrapped.
+* @returns A new component with theme management capabilities.
+*/
+/**
+* Hook to get the currently selected theme ID and the setter function.
+* This hook directly uses the UI store.
+*/
+const useThemeIdAndSetter = () => {
+	const theme = useUIStore((state) => state.theme);
+	return {
+		setTheme: useUIStore((state) => state.setTheme),
+		theme
 	};
-	useTheme = () => {
+};
+/**
+* Hook to get the full Theme object based on the selected theme ID and available themes from meta.
+*/
+const useTheme = () => {
+	const { theme: selectedThemeId } = useThemeIdAndSetter();
+	const themes = usePluginMeta("dashboard", "themes");
+	if (selectedThemeId && Array.isArray(themes) && themes.length > 0) {
+		const persistedTheme = getThemeById(themes, selectedThemeId);
+		if (persistedTheme) return persistedTheme;
+	}
+	if (!themes || themes.length === 0) return;
+	let theme = getThemeById(themes, selectedThemeId);
+	if (!theme) theme = themes.find((t) => t.default);
+	if (!theme && themes.length > 0) theme = themes[0];
+	return theme;
+};
+const withTheme = (Component) => {
+	return function WithTheme(props) {
 		const { theme: selectedThemeId } = useThemeIdAndSetter();
 		const themes = usePluginMeta("dashboard", "themes");
-		if (selectedThemeId && Array.isArray(themes) && themes.length > 0) {
-			const persistedTheme = getThemeById(themes, selectedThemeId);
-			if (persistedTheme) return persistedTheme;
-		}
-		if (!themes || themes.length === 0) return;
-		let theme = getThemeById(themes, selectedThemeId);
-		if (!theme) theme = themes.find((t) => t.default);
-		if (!theme && themes.length > 0) theme = themes[0];
-		return theme;
-	};
-	withTheme = (Component) => {
-		return function WithTheme(props) {
-			const { theme: selectedThemeId } = useThemeIdAndSetter();
-			const themes = usePluginMeta("dashboard", "themes");
-			admin__loadShare__react__loadShare__.useEffect(() => {
-				if (!themes || !Array.isArray(themes) || themes.length === 0) return;
-				if (selectedThemeId) {
-					const persistedTheme = getThemeById(themes, selectedThemeId);
-					if (persistedTheme) {
-						applyThemeStyles(persistedTheme);
-						return;
-					}
+		dashboard__loadShare__react__loadShare__.useEffect(() => {
+			if (!themes || !Array.isArray(themes) || themes.length === 0) return;
+			if (selectedThemeId) {
+				const persistedTheme = getThemeById(themes, selectedThemeId);
+				if (persistedTheme) {
+					applyThemeStyles(persistedTheme);
+					return;
 				}
-				const themeToApply = getThemeById(themes, selectedThemeId) || themes.find((t) => t.default) || themes[0];
-				if (themeToApply) applyThemeStyles(themeToApply);
-				else console.warn("No theme found to apply.");
-			}, [selectedThemeId, themes]);
-			return /* @__PURE__ */ jsxRuntimeExports.jsx(Component, { ...props });
-		};
+			}
+			const themeToApply = getThemeById(themes, selectedThemeId) || themes.find((t) => t.default) || themes[0];
+			if (themeToApply) applyThemeStyles(themeToApply);
+			else console.warn("No theme found to apply.");
+		}, [selectedThemeId, themes]);
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(Component, { ...props });
 	};
-});
-
-//#endregion
-init_useTheme();
+};
 
 //#region src/components/ThemeSwitcher.tsx
-var ThemeSwitcher;
-var init_ThemeSwitcher = __esmMin(() => {
-	init_usePluginMeta();
-	init_useTheme();
-	ThemeSwitcher = () => {
-		const { setTheme } = useThemeIdAndSetter();
-		const themes = usePluginMeta("dashboard", "themes");
-		if (!themes) return null;
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Popover, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.PopoverTrigger, {
-			asChild: true,
-			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-				size: "icon",
+const ThemeSwitcher = () => {
+	const { setTheme } = useThemeIdAndSetter();
+	const themes = usePluginMeta("dashboard", "themes");
+	if (!themes) return null;
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Popover, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.PopoverTrigger, {
+		asChild: true,
+		children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+			size: "icon",
+			variant: "ghost",
+			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.ThemeIcon, { className: "h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" }), /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
+				className: "sr-only",
+				children: "Toggle theme"
+			})]
+		})
+	}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.PopoverContent, {
+		className: "w-56",
+		children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+			className: "flex flex-col space-y-2",
+			children: themes.map((t) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				className: "text-left",
+				onClick: () => setTheme(t.id),
 				variant: "ghost",
-				children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.ThemeIcon, { className: "h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" }), /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
-					className: "sr-only",
-					children: "Toggle theme"
-				})]
-			})
-		}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.PopoverContent, {
-			className: "w-56",
-			children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-				className: "flex flex-col space-y-2",
-				children: themes.map((t) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-					className: "text-left",
-					onClick: () => setTheme(t.id),
-					variant: "ghost",
-					children: t.name
-				}, t.id))
-			})
-		})] });
-	};
-});
-
-//#endregion
-init_ThemeSwitcher();
-
-var init_account_banner_image = __esmMin(() => {
-});
-
-//#endregion
-init_account_banner_image();
-
-var init_discord_logo = __esmMin(() => {
-});
-
-//#endregion
-init_discord_logo();
-
-var init_lume_bg_image = __esmMin(() => {
-});
-
-//#endregion
-init_lume_bg_image();
-
-var init_lume_bg_login = __esmMin(() => {
-});
-
-//#endregion
-init_lume_bg_login();
-
-var init_lume_color_logo = __esmMin(() => {
-});
-
-//#endregion
-init_lume_color_logo();
+				children: t.name
+			}, t.id))
+		})
+	})] });
+};
 
 //#region src/images/lume-logo.png
-var img, lume_logo_default;
-var init_lume_logo = __esmMin(() => {
-	img = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPYAAABNCAYAAACVH5l+AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAASGSURBVHgB7d1NiFZVHMfx/5RFLzZNJaJD4ZQQ9EJa2KI2iQQtWkTRoldoUVEQ7aIWFWOrFm1MKoIghBa1KCIIes/IhQilVGJR4dCLjq8zvqCi4vF3vKI+M885jvf9Hr4f+HMu9zn3uc/A/LjPc+4995q1lHNukWrCneaXlxmA7lKIf3fT7TAA3aQAz3NhCw1A1HnWThdFXrvMAES1NdgACiDYQIIINpAggg0kiGADCSLYQIIINpAggg0kiGADCSLYQIIaCbZzbpYvA1CJWoOtMF+oekeLB1RHtPyJaoEB6C6F+I0+s7W+79NvJDK7a7EBaA+F8kAgrCNT+hFsoIC6f2NfHFg/zwCUhlFxIEEEG0hQW4N9OPJa7O4qAKy9wd6q2h947VoDENXKYA8MDDg144GX7zAAUW3+jf1jYP3jOuV1hQEIanOwVwfWD6neNQDN01F2buSik5v79B9S7Ylss0F1uwGYps6JGDdGXpucukK/sycV3BVafCWwzSLVOvVZr3aj6m+L2636TO87ZgDKoQCuDBx590a28Uft3a4846rrDEBxCtN81b+BsP1wlm3vduX6woDEVT54piBdruZt1dWBLp/GttdX52/ULLfy3GQA8jt5tN0QOXoec1NmdkXe6zHV/6649QYk7sTgmf7Z71TzkOoaK8eVqlssOzUVs2qmg1nq94E+5xotjqoetfwDfysNSNyAP6qq/covW70mVLflGaXWZx5Ws1S1TOUfq+u/5vupn7Gw/6N6S/t704DUKSQ/uWY8aQCqoYAddPV70QBURyHb5OrjT3ndYwCqpaA95aq3VfWq6hIDULkTA2YK3CNqnlPNt3LsUf1i2WWeX2rAaq3VSH/PHDWzLRtMK+Oy2XF/iasBqI+CPKi6X7VKtdlVY9QA1EOBe0G1y9XjeQNQHYVsWPWtq9fXBnRAJ5+f5bLLUP0TREasXrMN6IDCwXbZJA8/N3o40u2oartqiwah/rJi+ztfzUdWf6i9Dw1InUK20J37YNWEyx7G97Dl4LLTZk14z4COKHR9uP7Zf1Zzq+U3pnpWR/EZzZHW/vwkld9Ug5Fuf6g+V21S7bRybNRn/NOA1Clkc1x5XpvhPp+OvMdO1X0GID+F6CqXzacuy1mnU6rPmsj2NxiA4hSm71y5nons61LVocB27xuAcihQC1RrXXn8nUmHAvtaEtluqQE4pZSbK7jszp9zI138g/QuUPnfwPda/FTVcg1UjfbZxwNqPu63gfrXfZMIAGdSQGepXo8cff3psME+2z0R6P+fAehR+yN+dHA9qnrJwo/p8V/Fl9jM7TMAPZp8dpcPdyiU3IwBKKCxYJ+c3xyaVHG9Acit6adtrgusX2wAcms62NsMQOna/HxsADkRbCBBKQT7iAHo0aVgjwXW/2oAenQm2Do9ttqmX1LqT5m9bAB6dOqeZwr3g/7SUi3eZdm9y1do3WYD0B6R678JK1AAo+JAggg2kCCCDSSIYAMJIthAggg2kCCCDSSIYAMJIthAggg2kCCCDSSo6WDvCqyfNAAAcNpxd1XglbBqdCEAAAAASUVORK5CYII=";
-	lume_logo_default = img;
-});
+var img = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPYAAABNCAYAAACVH5l+AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAASGSURBVHgB7d1NiFZVHMfx/5RFLzZNJaJD4ZQQ9EJa2KI2iQQtWkTRoldoUVEQ7aIWFWOrFm1MKoIghBa1KCIIes/IhQilVGJR4dCLjq8zvqCi4vF3vKI+M885jvf9Hr4f+HMu9zn3uc/A/LjPc+4995q1lHNukWrCneaXlxmA7lKIf3fT7TAA3aQAz3NhCw1A1HnWThdFXrvMAES1NdgACiDYQIIINpAggg0kiGADCSLYQIIINpAggg0kiGADCSLYQIIaCbZzbpYvA1CJWoOtMF+oekeLB1RHtPyJaoEB6C6F+I0+s7W+79NvJDK7a7EBaA+F8kAgrCNT+hFsoIC6f2NfHFg/zwCUhlFxIEEEG0hQW4N9OPJa7O4qAKy9wd6q2h947VoDENXKYA8MDDg144GX7zAAUW3+jf1jYP3jOuV1hQEIanOwVwfWD6neNQDN01F2buSik5v79B9S7Ylss0F1uwGYps6JGDdGXpucukK/sycV3BVafCWwzSLVOvVZr3aj6m+L2636TO87ZgDKoQCuDBx590a28Uft3a4846rrDEBxCtN81b+BsP1wlm3vduX6woDEVT54piBdruZt1dWBLp/GttdX52/ULLfy3GQA8jt5tN0QOXoec1NmdkXe6zHV/6649QYk7sTgmf7Z71TzkOoaK8eVqlssOzUVs2qmg1nq94E+5xotjqoetfwDfysNSNyAP6qq/covW70mVLflGaXWZx5Ws1S1TOUfq+u/5vupn7Gw/6N6S/t704DUKSQ/uWY8aQCqoYAddPV70QBURyHb5OrjT3ndYwCqpaA95aq3VfWq6hIDULkTA2YK3CNqnlPNt3LsUf1i2WWeX2rAaq3VSH/PHDWzLRtMK+Oy2XF/iasBqI+CPKi6X7VKtdlVY9QA1EOBe0G1y9XjeQNQHYVsWPWtq9fXBnRAJ5+f5bLLUP0TREasXrMN6IDCwXbZJA8/N3o40u2oartqiwah/rJi+ztfzUdWf6i9Dw1InUK20J37YNWEyx7G97Dl4LLTZk14z4COKHR9uP7Zf1Zzq+U3pnpWR/EZzZHW/vwkld9Ug5Fuf6g+V21S7bRybNRn/NOA1Clkc1x5XpvhPp+OvMdO1X0GID+F6CqXzacuy1mnU6rPmsj2NxiA4hSm71y5nons61LVocB27xuAcihQC1RrXXn8nUmHAvtaEtluqQE4pZSbK7jszp9zI138g/QuUPnfwPda/FTVcg1UjfbZxwNqPu63gfrXfZMIAGdSQGepXo8cff3psME+2z0R6P+fAehR+yN+dHA9qnrJwo/p8V/Fl9jM7TMAPZp8dpcPdyiU3IwBKKCxYJ+c3xyaVHG9Acit6adtrgusX2wAcms62NsMQOna/HxsADkRbCBBKQT7iAHo0aVgjwXW/2oAenQm2Do9ttqmX1LqT5m9bAB6dOqeZwr3g/7SUi3eZdm9y1do3WYD0B6R678JK1AAo+JAggg2kCCCDSSIYAMJIthAggg2kCCCDSSIYAMJIthAggg2kCCCDSSo6WDvCqyfNAAAcNpxd1XglbBqdCEAAAAASUVORK5CYII=";
+var lume_logo_default = img;
 
-//#endregion
-init_lume_logo();
-
-//#region src/images.ts
-var logoPng;
-var init_images = __esmMin(() => {
-	init_account_banner_image();
-	init_discord_logo();
-	init_lume_bg_image();
-	init_lume_bg_login();
-	init_lume_color_logo();
-	init_lume_logo();
-	logoPng = lume_logo_default;
-});
-
-//#endregion
-init_images();
+const logoPng = lume_logo_default;
 
 //#region src/components/LumeLogo.tsx
 function LumeLogo({ className, imageClassName }) {
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare__react_mf_2_router__loadShare__.Link, {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center space-x-2", className),
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare__react_mf_2_router__loadShare__.Link, {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex items-center space-x-2", className),
 		to: "/",
 		children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", {
 			alt: "Lume logo",
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-10", imageClassName),
+			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("h-10", imageClassName),
 			src: logoPng
 		})
 	});
 }
-var init_LumeLogo = __esmMin(() => {
-	init_images();
-});
-
-//#endregion
-init_LumeLogo();
 
 //#region src/components/layout/DesktopSidebar.tsx
 function DesktopSidebar() {
 	const { isCollapsed, toggleCollapsed } = useSidebarContext();
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("aside", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("hidden md:flex", "fixed left-0 top-0 z-20 flex h-screen -translate-x-full flex-col transition-[width] duration-300 ease-in-out lg:translate-x-0", {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("hidden md:flex", "fixed left-0 top-0 z-20 flex h-screen -translate-x-full flex-col transition-[width] duration-300 ease-in-out lg:translate-x-0", {
 			"md:w-32": isCollapsed,
 			"md:w-72": !isCollapsed
 		}),
@@ -56298,15 +54934,15 @@ function DesktopSidebar() {
 		}), /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 			className: "relative flex h-full flex-col justify-between px-3 py-4",
 			children: [
-				/* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+				/* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 					asChild: true,
-					className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("mb-1 transition-transform duration-300 ease-in-out", !isCollapsed ? "translate-x-1" : "translate-x-0"),
+					className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("mb-1 transition-transform duration-300 ease-in-out", !isCollapsed ? "translate-x-1" : "translate-x-0"),
 					variant: "link",
-					children: /* @__PURE__ */ jsxRuntimeExports.jsx(LumeLogo, { imageClassName: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("transition transition-all", { "h-5": isCollapsed }) })
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(LumeLogo, { imageClassName: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("transition transition-all", { "h-5": isCollapsed }) })
 				}), /* @__PURE__ */ jsxRuntimeExports.jsx(MainNavigation, { isOpen: !isCollapsed })] }),
-				/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.FlexWidgetArea, { id: "core:desktop-sidebar" }),
+				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.FlexWidgetArea, { id: "core:desktop-sidebar" }),
 				/* @__PURE__ */ jsxRuntimeExports.jsxs("span", {
-					className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground/60 mb-4 space-y-1 transition-opacity duration-300", {
+					className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground/60 mb-4 space-y-1 transition-opacity duration-300", {
 						"opacity-0": isCollapsed,
 						"opacity-100": !isCollapsed,
 						"text-sm": isCollapsed
@@ -56321,16 +54957,7 @@ function DesktopSidebar() {
 		})]
 	});
 }
-var DesktopSidebar_default;
-var init_DesktopSidebar = __esmMin(() => {
-	init_components();
-	init_SidebarContext();
-	init_SidebarToggle();
-	DesktopSidebar_default = DesktopSidebar;
-});
-
-//#endregion
-init_DesktopSidebar();
+var DesktopSidebar_default = DesktopSidebar;
 
 //#region src/components/layout/GeneralLayout.tsx
 function GeneralLayoutComponent({ children }) {
@@ -56352,33 +54979,90 @@ function GeneralLayoutComponent({ children }) {
 		})] })
 	})] });
 }
-var GeneralLayout;
-var init_GeneralLayout = __esmMin(() => {
-	init_ThemeSwitcher();
-	init_useTheme();
-	init_DesktopSidebar();
-	init_MobileMenu();
-	init_SidebarContext();
-	init_UserNav();
-	GeneralLayout = withTheme(GeneralLayoutComponent);
-});
+const GeneralLayout = withTheme(GeneralLayoutComponent);
 
-//#endregion
-init_GeneralLayout();
+//#region src/components/shared/types/footer.ts
+/**
+* Type guard to check if a footer environment has a step environment
+* @param ctx - The footer environment to check
+* @returns True if the footer environment has a step environment, false otherwise
+*/
+function hasStepEnvironment(ctx) {
+	return ctx.step !== void 0;
+}
+/**
+* Type guard to check if a footer environment is a dialog footer environment
+* @template T - The type of record being used
+* @param ctx - The footer environment to check
+* @returns True if the footer environment is a dialog footer environment, false otherwise
+*/
+function isDialogFooterEnvironment(ctx) {
+	return ctx.container.type === "dialog";
+}
+/**
+* Type guard to check if a footer environment is a simple footer environment
+* @template T - The type of record being used
+* @param ctx - The footer environment to check
+* @returns True if the footer environment is a simple footer environment, false otherwise
+*/
+function isSimpleFooterEnvironment(ctx) {
+	return ctx.form.type === FormType.SIMPLE;
+}
+/**
+* Type guard to check if a footer environment is a standalone footer environment
+* @template T - The type of record being used
+* @param ctx - The footer environment to check
+* @returns True if the footer environment is a standalone footer environment, false otherwise
+*/
+function isStandaloneFooterEnvironment(ctx) {
+	return ctx.container.type === "standalone";
+}
+/**
+* Type guard to check if a footer environment is a step footer environment
+* @template T - The type of record being used
+* @param ctx - The footer environment to check
+* @returns True if the footer environment is a step footer environment, false otherwise
+*/
+function isStepFooterEnvironment(ctx) {
+	return ctx.form.type === FormType.STEP;
+}
+/**
+* Type guard to check if a footer environment is a wizard footer environment
+* @template T - The type of record being used
+* @param ctx - The footer environment to check
+* @returns True if the footer environment is a wizard footer environment, false otherwise
+*/
+function isWizardFooterEnvironment(ctx) {
+	return ctx.form.type === FormType.WIZARD;
+}
 
-//#region src/components/layout/index.ts
-var init_layout = __esmMin(() => {
-	init_DesktopSidebar();
-	init_UserNav();
-	init_MobileMenu();
-	init_PageHeader();
-	init_SidebarContext();
-	init_SidebarToggle();
-	init_GeneralLayout();
-});
-
-//#endregion
-init_layout();
+//#region src/components/shared/types/step.ts
+/**
+* Creates a StepEnvironment object with the provided options
+* @param options - Configuration options for the step environment
+* @param options.current - The current step number (1-indexed)
+* @param options.isFirst - Whether the current step is the first step
+* @param options.isLast - Whether the current step is the last step
+* @param options.onNext - Callback function to move to the next step
+* @param options.onPrevious - Callback function to move to the previous step
+* @param options.onRetry - Callback function to retry the current step
+* @param options.jumpTo - Function to jump to a specific step number
+* @param options.total - The total number of steps
+* @returns A StepEnvironment object with the specified configuration
+*/
+function createStepEnvironment(options) {
+	return {
+		current: options.current,
+		isFirst: options.isFirst,
+		isLast: options.isLast,
+		onNext: options.onNext,
+		onPrevious: options.onPrevious,
+		onRetry: options.onRetry,
+		jumpTo: options.jumpTo,
+		total: options.total,
+		retryCount: options.retryCount
+	};
+}
 
 //#region src/components/shared/utils/createForceRerenderReceiver.ts
 /**
@@ -56406,10 +55090,6 @@ function createForceRerenderReceiver() {
 		forceRerenderCallback
 	};
 }
-var init_createForceRerenderReceiver = __esmMin(() => {});
-
-//#endregion
-init_createForceRerenderReceiver();
 
 //#region src/components/shared/utils/createEnvironmentReceiver.ts
 /**
@@ -56437,95 +55117,12 @@ function createEnvironmentReceiver() {
 		environmentSyncCallback
 	};
 }
-var init_createEnvironmentReceiver = __esmMin(() => {});
-
-//#endregion
-init_createEnvironmentReceiver();
-
-//#region src/components/shared/context/index.ts
-var init_context = __esmMin(() => {
-	init_FooterContext();
-	init_HeaderContext();
-});
-
-//#endregion
-init_context();
-
-//#region src/components/shared/footers/index.ts
-var init_footers = __esmMin(() => {
-	init_ActionsFooter();
-	init_DefaultFooter();
-	init_FormFooter();
-	init_StepFormFooter();
-	init_WizardFooter();
-});
-
-//#endregion
-init_footers();
-
-//#region src/components/shared/headers/index.ts
-var init_headers = __esmMin(() => {
-	init_DefaultHeader();
-	init_FormHeader();
-	init_WizardHeader();
-});
-
-//#endregion
-init_headers();
-
-//#region src/components/shared/registry/index.ts
-var init_registry = __esmMin(() => {
-	init_FooterRegistry();
-	init_HeaderRegistry();
-	init_types$2();
-});
-
-//#endregion
-init_registry();
-
-//#region src/components/shared/utils/index.tsx
-var init_utils = __esmMin(() => {
-	init_createForceRerenderReceiver();
-	init_createEnvironmentReceiver();
-	init_renderFooter();
-	init_renderHeader();
-	init_stepState();
-});
-
-//#endregion
-init_utils();
-
-//#region src/components/shared/hooks/index.ts
-var init_hooks = __esmMin(() => {
-	init_useForceRerender();
-	init_useEnvironmentSync();
-});
-
-//#endregion
-init_hooks();
-
-//#region src/components/shared/index.ts
-var init_shared = __esmMin(() => {
-	init_context();
-	init_builders();
-	init_footers();
-	init_headers();
-	init_registry();
-	init_types$1();
-	init_UnifiedFooter();
-	init_UnifiedHeader();
-	init_utils();
-	init_hooks();
-});
-
-//#endregion
-init_shared();
 
 //#region src/components/Copyable.tsx
 function Copyable({ text, displayText, maxLength = 20, className, copyTooltip = "Copy", copiedTooltip = "Copied!", showIcon = true }) {
-	const [isCopied, setIsCopied] = admin__loadShare__react__loadShare__.useState(false);
-	const timerRef = admin__loadShare__react__loadShare__.useRef(null);
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	const [isCopied, setIsCopied] = dashboard__loadShare__react__loadShare__.useState(false);
+	const timerRef = dashboard__loadShare__react__loadShare__.useRef(null);
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		return () => {
 			if (timerRef.current) clearTimeout(timerRef.current);
 		};
@@ -56545,13 +55142,13 @@ function Copyable({ text, displayText, maxLength = 20, className, copyTooltip = 
 	};
 	const textToDisplay = displayText || text;
 	const truncatedText = textToDisplay.length > maxLength ? `${textToDisplay.substring(0, maxLength)}...` : textToDisplay;
-	return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Tooltip, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipTrigger, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Tooltip, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipTrigger, {
 		asChild: true,
 		children: /* @__PURE__ */ jsxRuntimeExports.jsxs("button", {
 			type: "button",
 			onClick: handleCopy,
 			"aria-label": isCopied ? copiedTooltip : copyTooltip,
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("inline-flex items-center gap-1 text-sm hover:bg-muted/50 rounded px-2 py-1 transition-colors", "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", className),
+			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("inline-flex items-center gap-1 text-sm hover:bg-muted/50 rounded px-2 py-1 transition-colors", "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", className),
 			children: [/* @__PURE__ */ jsxRuntimeExports.jsx("span", {
 				className: "font-mono",
 				children: truncatedText
@@ -56560,37 +55157,51 @@ function Copyable({ text, displayText, maxLength = 20, className, copyTooltip = 
 				children: isCopied ? /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "h-3 w-3" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Copy, { className: "h-3 w-3" })
 			})]
 		})
-	}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipContent, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: isCopied ? copiedTooltip : copyTooltip }) })] }) });
+	}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.TooltipContent, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: isCopied ? copiedTooltip : copyTooltip }) })] }) });
 }
-var init_Copyable = __esmMin(() => {});
-
-//#endregion
-init_Copyable();
 
 //#region src/components/ThemedBadge.tsx
 function ThemedBadge({ children, className, config, value, variant, ...restCoreProps }) {
 	const { base = "", dark = "", hover = "", label } = config[value] || {};
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", base, hover, dark, className),
-		children: children ? children : /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Badge, {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", base, hover, dark, className),
+		children: children ? children : /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Badge, {
 			variant,
 			...restCoreProps,
 			children: label || value.replace(/_/g, " ")
 		})
 	});
 }
-var init_ThemedBadge = __esmMin(() => {});
-
-//#endregion
-init_ThemedBadge();
 
 //#region src/components/FilterChip.tsx
+const FILTER_CHIP_THEME = {
+	date: {
+		base: "bg-blue-100 text-blue-800",
+		dark: "dark:bg-blue-900/20 dark:text-blue-200",
+		hover: "hover:bg-blue-200/80 dark:hover:bg-blue-800/80"
+	},
+	default: {
+		base: "bg-muted/40 text-muted-foreground",
+		dark: "dark:bg-gray-700 dark:text-gray-300",
+		hover: "hover:bg-muted/60 dark:hover:bg-gray-600"
+	},
+	numeric: {
+		base: "bg-purple-100 text-purple-800",
+		dark: "dark:bg-purple-900/20 dark:text-purple-200",
+		hover: "hover:bg-purple-200/80 dark:hover:bg-purple-800/80"
+	},
+	text: {
+		base: "bg-green-100 text-green-800",
+		dark: "dark:bg-green-900/20 dark:text-green-200",
+		hover: "hover:bg-green-200/80 dark:hover:bg-green-800/80"
+	}
+};
 function FilterChip({ className, label, onRemove, variant = "default" }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs(ThemedBadge, {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("gap-1 pr-1.5", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("gap-1 pr-1.5", className),
 		config: FILTER_CHIP_THEME,
 		value: variant,
-		children: [/* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: label }), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: label }), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			"aria-label": `Remove ${label} filter`,
 			className: "ml-1 h-5 w-5 p-0 hover:bg-transparent",
 			onClick: onRemove,
@@ -56599,35 +55210,6 @@ function FilterChip({ className, label, onRemove, variant = "default" }) {
 		})]
 	});
 }
-var FILTER_CHIP_THEME;
-var init_FilterChip = __esmMin(() => {
-	init_ThemedBadge();
-	FILTER_CHIP_THEME = {
-		date: {
-			base: "bg-blue-100 text-blue-800",
-			dark: "dark:bg-blue-900/20 dark:text-blue-200",
-			hover: "hover:bg-blue-200/80 dark:hover:bg-blue-800/80"
-		},
-		default: {
-			base: "bg-muted/40 text-muted-foreground",
-			dark: "dark:bg-gray-700 dark:text-gray-300",
-			hover: "hover:bg-muted/60 dark:hover:bg-gray-600"
-		},
-		numeric: {
-			base: "bg-purple-100 text-purple-800",
-			dark: "dark:bg-purple-900/20 dark:text-purple-200",
-			hover: "hover:bg-purple-200/80 dark:hover:bg-purple-800/80"
-		},
-		text: {
-			base: "bg-green-100 text-green-800",
-			dark: "dark:bg-green-900/20 dark:text-green-200",
-			hover: "hover:bg-green-200/80 dark:hover:bg-green-800/80"
-		}
-	};
-});
-
-//#endregion
-init_FilterChip();
 
 /**
  * Element that user can interact with,
@@ -56867,14 +55449,14 @@ function getInputValue(element) {
   return element.value;
 }
 function useInputEvent(onUpdate) {
-  var ref = admin__loadShare__react__loadShare__.useRef(null);
-  var observerRef = admin__loadShare__react__loadShare__.useRef(null);
-  var eventDispatched = admin__loadShare__react__loadShare__.useRef({
+  var ref = dashboard__loadShare__react__loadShare__.useRef(null);
+  var observerRef = dashboard__loadShare__react__loadShare__.useRef(null);
+  var eventDispatched = dashboard__loadShare__react__loadShare__.useRef({
     change: false,
     focus: false,
     blur: false
   });
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     var createEventListener = listener => {
       return event => {
         var element = ref.current;
@@ -56895,7 +55477,7 @@ function useInputEvent(onUpdate) {
       document.removeEventListener('focusout', blurHandler, true);
     };
   }, [ref]);
-  return admin__loadShare__react__loadShare__.useMemo(() => {
+  return dashboard__loadShare__react__loadShare__.useMemo(() => {
     return {
       change(value) {
         if (!eventDispatched.current.change) {
@@ -56991,8 +55573,8 @@ function useInputValue(options) {
     // @ts-expect-error Same as above
     return (_options$initialValue = options.initialValue) === null || _options$initialValue === void 0 ? void 0 : _options$initialValue.map(value => value !== null && value !== void 0 ? value : '');
   };
-  var [key, setKey] = admin__loadShare__react__loadShare__.useState(options.key);
-  var [value, setValue] = admin__loadShare__react__loadShare__.useState(initializeValue);
+  var [key, setKey] = dashboard__loadShare__react__loadShare__.useState(options.key);
+  var [value, setValue] = dashboard__loadShare__react__loadShare__.useState(initializeValue);
   if (key !== options.key) {
     setValue(initializeValue);
     setKey(options.key);
@@ -57001,7 +55583,7 @@ function useInputValue(options) {
 }
 function useInputControl(meta) {
   var [value, setValue] = useInputValue(meta);
-  var initializedRef = admin__loadShare__react__loadShare__.useRef(false);
+  var initializedRef = dashboard__loadShare__react__loadShare__.useRef(false);
   var {
     register,
     change,
@@ -57010,7 +55592,7 @@ function useInputControl(meta) {
   } = useInputEvent(
   // @ts-expect-error We will fix the type when stabilizing the API
   setValue);
-  admin__loadShare__react__loadShare__.useEffect(() => {
+  dashboard__loadShare__react__loadShare__.useEffect(() => {
     var form = getFormElement(meta.formId);
     if (!form) {
       // eslint-disable-next-line no-console
@@ -57046,6 +55628,80 @@ function useInputControl(meta) {
 }
 
 //#region src/components/Forms.tsx
+const Field = ({ className, errors, inputProps, labelProps }) => {
+	const fallbackId = dashboard__loadShare__react__loadShare__.useId();
+	const id = inputProps.id ?? fallbackId;
+	const errorId = errors?.length ? `${id}-error` : void 0;
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+		className,
+		children: [
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
+				...labelProps,
+				className: "text-secondary-foreground text-sm font-semibold",
+				htmlFor: id
+			}),
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
+				...inputProps,
+				"aria-describedby": errorId,
+				"aria-invalid": errorId ? true : void 0,
+				className: "bg-input border-border placeholder-input-placeholder mt-4",
+				id
+			}),
+			/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+				className: "min-h-[32px] px-4 pb-3 pt-1",
+				children: errorId ? /* @__PURE__ */ jsxRuntimeExports.jsx(ErrorList, {
+					errors,
+					id: errorId
+				}) : null
+			})
+		]
+	});
+};
+const FieldCheckbox = ({ className, errors, inputProps, labelProps }) => {
+	const { defaultChecked, key, ...checkboxProps } = inputProps;
+	const checkedValue = inputProps.value ?? "on";
+	const input = useInputControl({
+		formId: inputProps.form,
+		initialValue: defaultChecked ? checkedValue : void 0,
+		key,
+		name: inputProps.name
+	});
+	const fallbackId = dashboard__loadShare__react__loadShare__.useId();
+	const id = inputProps.id ?? fallbackId;
+	const errorId = errors?.length ? `${id}-error` : void 0;
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground flex items-center space-x-2", className),
+		children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Checkbox, {
+			...checkboxProps,
+			"aria-describedby": errorId,
+			"aria-invalid": errorId ? true : void 0,
+			checked: input.value === checkedValue,
+			id,
+			onBlur: (event) => {
+				input.blur();
+				inputProps.onBlur?.(event);
+			},
+			onCheckedChange: (state) => {
+				input.change(state.valueOf() ? checkedValue : "");
+				inputProps.onCheckedChange?.(state);
+			},
+			onFocus: (event) => {
+				input.focus();
+				inputProps.onFocus?.(event);
+			},
+			type: "button"
+		}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
+			...labelProps,
+			htmlFor: id
+		})]
+	}), /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+		className: "min-h-[32px] px-4 pb-3 pt-1",
+		children: errorId ? /* @__PURE__ */ jsxRuntimeExports.jsx(ErrorList, {
+			errors,
+			id: errorId
+		}) : null
+	})] });
+};
 function ErrorList({ errors, id }) {
 	const errorsToRender = errors?.filter(Boolean);
 	if (!errorsToRender?.length) return null;
@@ -57059,17 +55715,17 @@ function ErrorList({ errors, id }) {
 	});
 }
 function TextareaField({ className, errors, labelProps, textareaProps }) {
-	const fallbackId = admin__loadShare__react__loadShare__.useId();
+	const fallbackId = dashboard__loadShare__react__loadShare__.useId();
 	const id = textareaProps.id ?? textareaProps.name ?? fallbackId;
 	const errorId = errors?.length ? `${id}-error` : void 0;
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
 		className,
 		children: [
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
 				htmlFor: id,
 				...labelProps
 			}),
-			/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Textarea, {
+			/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Textarea, {
 				"aria-describedby": errorId,
 				"aria-invalid": errorId ? true : void 0,
 				id,
@@ -57085,157 +55741,67 @@ function TextareaField({ className, errors, labelProps, textareaProps }) {
 		]
 	});
 }
-var Field, FieldCheckbox;
-var init_Forms = __esmMin(() => {
-	Field = ({ className, errors, inputProps, labelProps }) => {
-		const fallbackId = admin__loadShare__react__loadShare__.useId();
-		const id = inputProps.id ?? fallbackId;
-		const errorId = errors?.length ? `${id}-error` : void 0;
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-			className,
-			children: [
-				/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
-					...labelProps,
-					className: "text-secondary-foreground text-sm font-semibold",
-					htmlFor: id
-				}),
-				/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Input, {
-					...inputProps,
-					"aria-describedby": errorId,
-					"aria-invalid": errorId ? true : void 0,
-					className: "bg-input border-border placeholder-input-placeholder mt-4",
-					id
-				}),
-				/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-					className: "min-h-[32px] px-4 pb-3 pt-1",
-					children: errorId ? /* @__PURE__ */ jsxRuntimeExports.jsx(ErrorList, {
-						errors,
-						id: errorId
-					}) : null
-				})
-			]
-		});
-	};
-	FieldCheckbox = ({ className, errors, inputProps, labelProps }) => {
-		const { defaultChecked, key, ...checkboxProps } = inputProps;
-		const checkedValue = inputProps.value ?? "on";
-		const input = useInputControl({
-			formId: inputProps.form,
-			initialValue: defaultChecked ? checkedValue : void 0,
-			key,
-			name: inputProps.name
-		});
-		const fallbackId = admin__loadShare__react__loadShare__.useId();
-		const id = inputProps.id ?? fallbackId;
-		const errorId = errors?.length ? `${id}-error` : void 0;
-		return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [/* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground flex items-center space-x-2", className),
-			children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Checkbox, {
-				...checkboxProps,
-				"aria-describedby": errorId,
-				"aria-invalid": errorId ? true : void 0,
-				checked: input.value === checkedValue,
-				id,
-				onBlur: (event) => {
-					input.blur();
-					inputProps.onBlur?.(event);
-				},
-				onCheckedChange: (state) => {
-					input.change(state.valueOf() ? checkedValue : "");
-					inputProps.onCheckedChange?.(state);
-				},
-				onFocus: (event) => {
-					input.focus();
-					inputProps.onFocus?.(event);
-				},
-				type: "button"
-			}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Label, {
-				...labelProps,
-				htmlFor: id
-			})]
-		}), /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-			className: "min-h-[32px] px-4 pb-3 pt-1",
-			children: errorId ? /* @__PURE__ */ jsxRuntimeExports.jsx(ErrorList, {
-				errors,
-				id: errorId
-			}) : null
-		})] });
-	};
-});
-
-//#endregion
-init_Forms();
 
 //#region src/components/InlineAuthLinkBanner.tsx
 function InlineAuthLinkBanner({ className, label, linkClassName, linkLabel, to }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsxs("p", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground bg-secondary flex w-fit items-center gap-2 rounded-lg p-3 text-left text-sm", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground bg-secondary flex w-fit items-center gap-2 rounded-lg p-3 text-left text-sm", className),
 		children: [/* @__PURE__ */ jsxRuntimeExports.jsx("span", {
 			className: "text-foreground/80 whitespace-nowrap",
 			children: label
-		}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare__react_mf_2_router__loadShare__.Link, {
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground mx-auto whitespace-nowrap hover:underline hover:underline-offset-4", linkClassName),
+		}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare__react_mf_2_router__loadShare__.Link, {
+			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("text-foreground mx-auto whitespace-nowrap hover:underline hover:underline-offset-4", linkClassName),
 			to,
 			children: linkLabel ?? "Login here →"
 		})]
 	});
 }
-var init_InlineAuthLinkBanner = __esmMin(() => {});
-
-//#endregion
-init_InlineAuthLinkBanner();
 
 //#region src/components/KeyboardShortcutDialog.tsx
-var KeyboardShortcutDialog;
-var init_KeyboardShortcutDialog = __esmMin(() => {
-	KeyboardShortcutDialog = ({ onOpenChange, open, shortcuts }) => {
-		return /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Dialog, {
-			onOpenChange,
-			open,
-			children: /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogContent, {
-				className: "max-w-md",
-				children: [
-					/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-						className: "absolute right-4 top-4",
-						children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
-							className: "h-8 w-8",
-							onClick: () => onOpenChange(false),
-							size: "icon",
-							variant: "ghost",
-							children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "h-4 w-4" })
-						})
-					}),
-					/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, { children: "Keyboard Shortcuts" }) }),
-					/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-						className: "grid gap-2",
-						children: Object.entries(shortcuts).map(([action, keys]) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
-							className: "flex items-center justify-between",
-							children: [/* @__PURE__ */ jsxRuntimeExports.jsx("span", {
-								className: "text-muted-foreground text-sm",
-								children: action
-							}), /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-								className: "flex gap-1",
-								children: (Array.isArray(keys) ? keys : [keys]).map((key) => /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Badge, {
-									variant: "outline",
-									children: key
-								}, key))
-							})]
-						}, action))
+const KeyboardShortcutDialog = ({ onOpenChange, open, shortcuts }) => {
+	return /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Dialog, {
+		onOpenChange,
+		open,
+		children: /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogContent, {
+			className: "max-w-md",
+			children: [
+				/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+					className: "absolute right-4 top-4",
+					children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+						className: "h-8 w-8",
+						onClick: () => onOpenChange(false),
+						size: "icon",
+						variant: "ghost",
+						children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "h-4 w-4" })
 					})
-				]
-			})
-		});
-	};
-});
-
-//#endregion
-init_KeyboardShortcutDialog();
+				}),
+				/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DialogTitle, { children: "Keyboard Shortcuts" }) }),
+				/* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+					className: "grid gap-2",
+					children: Object.entries(shortcuts).map(([action, keys]) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", {
+						className: "flex items-center justify-between",
+						children: [/* @__PURE__ */ jsxRuntimeExports.jsx("span", {
+							className: "text-muted-foreground text-sm",
+							children: action
+						}), /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
+							className: "flex gap-1",
+							children: (Array.isArray(keys) ? keys : [keys]).map((key) => /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Badge, {
+								variant: "outline",
+								children: key
+							}, key))
+						})]
+					}, action))
+				})
+			]
+		})
+	});
+};
 
 //#region src/components/TableActionsDropdown.tsx
 function TableActionsDropdown({ actions, children }) {
-	return /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenu, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuTrigger, {
+	return /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenu, { children: [/* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuTrigger, {
 		asChild: true,
-		children: children ?? /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
+		children: children ?? /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.Button, {
 			className: "h-8 w-8",
 			size: "icon",
 			variant: "ghost",
@@ -57244,10 +55810,10 @@ function TableActionsDropdown({ actions, children }) {
 				children: "Open menu"
 			})]
 		})
-	}), /* @__PURE__ */ jsxRuntimeExports.jsx(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuContent, {
+	}), /* @__PURE__ */ jsxRuntimeExports.jsx(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuContent, {
 		align: "end",
-		children: actions.map((action, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs(admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
-			className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("focus:bg-accent transition-colors", action.destructive ? "text-destructive hover:bg-destructive/10" : "hover:bg-accent"),
+		children: actions.map((action, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs(dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.DropdownMenuItem, {
+			className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("focus:bg-accent transition-colors", action.destructive ? "text-destructive hover:bg-destructive/10" : "hover:bg-accent"),
 			onClick: action.onClick,
 			children: [action.icon, /* @__PURE__ */ jsxRuntimeExports.jsx("span", {
 				className: "ml-1.5",
@@ -57256,22 +55822,14 @@ function TableActionsDropdown({ actions, children }) {
 		}, index))
 	})] });
 }
-var init_TableActionsDropdown = __esmMin(() => {});
-
-//#endregion
-init_TableActionsDropdown();
 
 //#region src/components/TableContainer.tsx
 function TableContainer({ children, className }) {
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("rounded-lg border p-6 shadow-sm", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("rounded-lg border p-6 shadow-sm", className),
 		children
 	});
 }
-var init_TableContainer = __esmMin(() => {});
-
-//#endregion
-init_TableContainer();
 
 //#region src/components/screen-reader/hooks/useScreenReaderAnnouncement.ts
 function useScreenReaderAnnouncement() {
@@ -57297,10 +55855,6 @@ function useScreenReaderAnnouncement() {
 		politeness
 	};
 }
-var init_useScreenReaderAnnouncement = __esmMin(() => {});
-
-//#endregion
-init_useScreenReaderAnnouncement();
 
 //#region src/components/screen-reader/ScreenReaderAnnouncement.tsx
 /**
@@ -57322,48 +55876,111 @@ function ScreenReaderAnnouncement({ id = "screen-reader-announcement" }) {
 		children: announcement
 	});
 }
-var init_ScreenReaderAnnouncement = __esmMin(() => {
-	init_useScreenReaderAnnouncement();
-});
-
-//#endregion
-init_ScreenReaderAnnouncement();
-
-//#region src/components/index.ts
-var init_components = __esmMin(() => {
-	init_AppComponent();
-	init_actions();
-	init_data_table();
-	init_dialog();
-	init_editor();
-	init_form();
-	init_layout();
-	init_shared();
-	init_Copyable();
-	init_FilterChip();
-	init_Forms();
-	init_InlineAuthLinkBanner();
-	init_KeyboardShortcutDialog();
-	init_Loading();
-	init_LumeLogo();
-	init_MainNavigation();
-	init_SkeletonLoader();
-	init_TableActionsDropdown();
-	init_TableContainer();
-	init_ThemeSwitcher();
-	init_ThemedBadge();
-	init_ScreenReaderAnnouncement();
-	init_sizing();
-	init_dialog();
-	init_form();
-	init_shared();
-	init_useScreenReaderAnnouncement();
-});
-
-//#endregion
-init_components();
 
 //#region src/components/dialog/Dialog.types.tsx
+/**
+* Dialog Configuration API
+*
+* The dialog system provides a type-safe way to display various dialog types through the useDialog hook.
+*
+* Basic usage:
+*
+* const { openDialog } = useDialog();
+*
+* // Simple alert
+* openDialog({
+*   type: DialogTypes.ALERT,
+*   title: 'Notification',
+*   description: 'Update successful',
+*   variant: 'success'
+* });
+*
+* // Confirmation dialog
+* openDialog({
+*   type: DialogTypes.CONFIRM,
+*   title: 'Confirm Action',
+*   cancelText: 'Cancel',
+*   confirmText: 'Proceed',
+*   onConfirm: handleDelete
+* });
+*
+* // Form dialog
+* openDialog({
+*   type: DialogTypes.FORM,
+*   title: 'Create Item',
+*   formSchema: z.object({ name: z.string() }),
+*   onSubmit: handleSubmit
+* });
+*
+* // Wizard form dialog
+* openDialog({
+*   type: DialogTypes.WIZARD_FORM,
+*   title: 'Multi-step Form',
+*   formConfig: wizardConfig,
+*   onSubmit: handleSubmit
+* });
+*
+* // Custom dialog
+* openDialog({
+*   type: DialogTypes.CUSTOM,
+*   title: 'Custom Content',
+*   content: <MyComponent />,
+*   footer: <CustomFooter />
+* });
+*/
+const DialogTypes = {
+	ALERT: "alert",
+	CONFIRM: "confirm",
+	CUSTOM: "custom",
+	FORM: "form",
+	WIZARD_FORM: "wizard_form"
+};
+const DialogIconLayout = {
+	CENTER: "center",
+	LEFT: "left",
+	RIGHT: "right"
+};
+const DialogPosition = {
+	BOTTOM: "bottom",
+	BOTTOM_LEFT: "bottom-left",
+	BOTTOM_RIGHT: "bottom-right",
+	CENTER: "center",
+	LEFT: "left",
+	RIGHT: "right",
+	TOP: "top",
+	TOP_LEFT: "top-left",
+	TOP_RIGHT: "top-right"
+};
+const DialogStatus = {
+	ERROR: "error",
+	NONE: null,
+	SUCCESS: "success"
+};
+const DialogVariant = {
+	DEFAULT: "default",
+	DESTRUCTIVE: "destructive",
+	INFO: "info",
+	SUCCESS: "success",
+	WARNING: "warning"
+};
+let FormDialogType = /* @__PURE__ */ function(FormDialogType$1) {
+	FormDialogType$1["SCHEMA"] = "schema";
+	FormDialogType$1["STEP"] = "step";
+	FormDialogType$1["WIZARD"] = "wizard";
+	return FormDialogType$1;
+}({});
+const DIALOG_SIZE_CLASSES = COMPONENT_SIZE_CLASSES;
+const DIALOG_POSITION_CLASSES = {
+	[DialogPosition.BOTTOM]: "bottom-4 inset-x-0 mx-auto",
+	[DialogPosition.BOTTOM_LEFT]: "bottom-4 left-4",
+	[DialogPosition.BOTTOM_RIGHT]: "bottom-4 right-4",
+	[DialogPosition.CENTER]: "",
+	[DialogPosition.LEFT]: "left-4 top-1/2 -translate-y-1/2",
+	[DialogPosition.RIGHT]: "right-4 top-1/2 -translate-y-1/2",
+	[DialogPosition.TOP]: "top-4 inset-x-0 mx-auto",
+	[DialogPosition.TOP_LEFT]: "top-4 left-4",
+	[DialogPosition.TOP_RIGHT]: "top-4 right-4"
+};
 function isAlertDialog(config) {
 	return config.type === DialogTypes.ALERT;
 }
@@ -57379,10 +55996,22 @@ function isFormDialog(config) {
 function isWizardDialogConfig(config) {
 	return config.type === DialogTypes.WIZARD_FORM;
 }
+const dialogTypeCheckers = {
+	alert: (config) => config.type === DialogTypes.ALERT,
+	confirm: (config) => config.type === DialogTypes.CONFIRM,
+	custom: (config) => config.type === DialogTypes.CUSTOM,
+	form: (config) => config.type === DialogTypes.FORM,
+	wizard_form: (config) => config.type === DialogTypes.WIZARD_FORM
+};
 function getDialogType(config) {
 	for (const [type, checker] of Object.entries(dialogTypeCheckers)) if (checker(config)) return type;
 	return config.type;
 }
+const formTypeCheckers = {
+	[FormDialogType.SCHEMA]: (config) => isFormDialog(config) && !isWizardDialogConfig(config) && !isStepFormConfig(config.formConfig),
+	[FormDialogType.STEP]: (config) => isFormDialog(config) && !isWizardDialogConfig(config) && isStepFormConfig(config.formConfig),
+	[FormDialogType.WIZARD]: (config) => isWizardDialogConfig(config)
+};
 function getFormTypeFromDialog(config) {
 	for (const [type, checker] of Object.entries(formTypeCheckers)) if (checker(config)) return type;
 	throw new Error(`Unable to determine form type from dialog config: ${config.type}`);
@@ -57406,152 +56035,79 @@ function isWizardFormConfig(formConfig) {
 	const hasShowStepProgress = "showStepProgress" in formConfig && formConfig.showStepProgress !== void 0;
 	return hasWizardClassName || hasAllowStepNavigation || hasProgressStyle || hasShowStepProgress;
 }
-var DialogTypes, DialogIconLayout, DialogPosition, DialogStatus, DialogVariant, FormDialogType, DIALOG_SIZE_CLASSES, DIALOG_POSITION_CLASSES, dialogTypeCheckers, formTypeCheckers, contextProviders, dialogContextRequirements;
-var init_Dialog_types = __esmMin(() => {
-	init_components();
-	DialogTypes = {
-		ALERT: "alert",
-		CONFIRM: "confirm",
-		CUSTOM: "custom",
-		FORM: "form",
-		WIZARD_FORM: "wizard_form"
-	};
-	DialogIconLayout = {
-		CENTER: "center",
-		LEFT: "left",
-		RIGHT: "right"
-	};
-	DialogPosition = {
-		BOTTOM: "bottom",
-		BOTTOM_LEFT: "bottom-left",
-		BOTTOM_RIGHT: "bottom-right",
-		CENTER: "center",
-		LEFT: "left",
-		RIGHT: "right",
-		TOP: "top",
-		TOP_LEFT: "top-left",
-		TOP_RIGHT: "top-right"
-	};
-	DialogStatus = {
-		ERROR: "error",
-		NONE: null,
-		SUCCESS: "success"
-	};
-	DialogVariant = {
-		DEFAULT: "default",
-		DESTRUCTIVE: "destructive",
-		INFO: "info",
-		SUCCESS: "success",
-		WARNING: "warning"
-	};
-	FormDialogType = /* @__PURE__ */ function(FormDialogType$1) {
-		FormDialogType$1["SCHEMA"] = "schema";
-		FormDialogType$1["STEP"] = "step";
-		FormDialogType$1["WIZARD"] = "wizard";
-		return FormDialogType$1;
-	}({});
-	DIALOG_SIZE_CLASSES = COMPONENT_SIZE_CLASSES;
-	DIALOG_POSITION_CLASSES = {
-		[DialogPosition.BOTTOM]: "bottom-4 inset-x-0 mx-auto",
-		[DialogPosition.BOTTOM_LEFT]: "bottom-4 left-4",
-		[DialogPosition.BOTTOM_RIGHT]: "bottom-4 right-4",
-		[DialogPosition.CENTER]: "",
-		[DialogPosition.LEFT]: "left-4 top-1/2 -translate-y-1/2",
-		[DialogPosition.RIGHT]: "right-4 top-1/2 -translate-y-1/2",
-		[DialogPosition.TOP]: "top-4 inset-x-0 mx-auto",
-		[DialogPosition.TOP_LEFT]: "top-4 left-4",
-		[DialogPosition.TOP_RIGHT]: "top-4 right-4"
-	};
-	dialogTypeCheckers = {
-		alert: (config) => config.type === DialogTypes.ALERT,
-		confirm: (config) => config.type === DialogTypes.CONFIRM,
-		custom: (config) => config.type === DialogTypes.CUSTOM,
-		form: (config) => config.type === DialogTypes.FORM,
-		wizard_form: (config) => config.type === DialogTypes.WIZARD_FORM
-	};
-	formTypeCheckers = {
-		[FormDialogType.SCHEMA]: (config) => isFormDialog(config) && !isWizardDialogConfig(config) && !isStepFormConfig(config.formConfig),
-		[FormDialogType.STEP]: (config) => isFormDialog(config) && !isWizardDialogConfig(config) && isStepFormConfig(config.formConfig),
-		[FormDialogType.WIZARD]: (config) => isWizardDialogConfig(config)
-	};
-	contextProviders = {
-		form: ({ children, dialog, formMethods }) => {
-			if (isFormDialog(dialog)) {
-				const formDialog = dialog;
-				return /* @__PURE__ */ jsxRuntimeExports.jsx(FormProvider, {
-					adapter: formDialog.formConfig?.adapter ?? AdapterType.RHF,
-					config: formDialog.formConfig,
-					formInstance: formMethods,
-					children
-				});
-			}
-			if (isWizardDialogConfig(dialog)) {
-				const wizardDialog = dialog;
-				return /* @__PURE__ */ jsxRuntimeExports.jsx(FormProvider, {
-					adapter: wizardDialog.formConfig?.adapter ?? AdapterType.RHF,
-					config: wizardDialog.formConfig,
-					formInstance: formMethods,
-					children
-				});
-			}
-			return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children });
-		},
-		stepControl: ({ children, dialog, formMethods }) => {
-			if (isWizardDialogConfig(dialog)) {
-				const wizardDialog = dialog;
-				return /* @__PURE__ */ jsxRuntimeExports.jsx(StepControlProvider, {
-					defaultStep: wizardDialog.formConfig?.stepBehavior?.defaultStep,
-					handleStepSubmit: formMethods?.handleStepSubmit,
-					isBackValidate: wizardDialog.formConfig?.stepBehavior?.isBackValidate,
-					onStepChange: formMethods?.onStepChange,
-					onStepRetry: createStepRetryHandler(wizardDialog.formConfig?.steps || []),
-					onNavigationStart: wizardDialog.formConfig?.onNavigationStart,
-					onNavigationEnd: wizardDialog.formConfig?.onNavigationEnd,
-					onNavigationError: wizardDialog.formConfig?.onNavigationError,
-					totalSteps: wizardDialog.formConfig?.steps?.length,
-					triggerValidation: formMethods?.triggerValidation,
-					children
-				});
-			}
-			if (isFormDialog(dialog)) {
-				const formDialog = dialog;
-				if (isStepFormConfig(formDialog.formConfig)) return /* @__PURE__ */ jsxRuntimeExports.jsx(StepControlProvider, {
-					defaultStep: formDialog.formConfig?.stepBehavior?.defaultStep,
-					isBackValidate: formDialog.formConfig?.stepBehavior?.isBackValidate,
-					onStepRetry: createStepRetryHandler(formDialog.formConfig?.steps || []),
-					onNavigationStart: formDialog.formConfig?.onNavigationStart,
-					onNavigationEnd: formDialog.formConfig?.onNavigationEnd,
-					onNavigationError: formDialog.formConfig?.onNavigationError,
-					totalSteps: formDialog.formConfig?.steps?.length,
-					children
-				});
-			}
-			return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children });
+const contextProviders = {
+	form: ({ children, dialog, formMethods }) => {
+		if (isFormDialog(dialog)) {
+			const formDialog = dialog;
+			return /* @__PURE__ */ jsxRuntimeExports.jsx(FormProvider, {
+				adapter: formDialog.formConfig?.adapter ?? AdapterType.RHF,
+				config: formDialog.formConfig,
+				formInstance: formMethods,
+				children
+			});
 		}
-	};
-	dialogContextRequirements = {
-		[DialogTypes.ALERT]: [],
-		[DialogTypes.CONFIRM]: [],
-		[DialogTypes.CUSTOM]: [],
-		[DialogTypes.FORM]: ["form"],
-		[DialogTypes.WIZARD_FORM]: ["form", "stepControl"]
-	};
-});
-
-//#endregion
-init_Dialog_types();
+		if (isWizardDialogConfig(dialog)) {
+			const wizardDialog = dialog;
+			return /* @__PURE__ */ jsxRuntimeExports.jsx(FormProvider, {
+				adapter: wizardDialog.formConfig?.adapter ?? AdapterType.RHF,
+				config: wizardDialog.formConfig,
+				formInstance: formMethods,
+				children
+			});
+		}
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children });
+	},
+	stepControl: ({ children, dialog, formMethods }) => {
+		if (isWizardDialogConfig(dialog)) {
+			const wizardDialog = dialog;
+			return /* @__PURE__ */ jsxRuntimeExports.jsx(StepControlProvider, {
+				defaultStep: wizardDialog.formConfig?.stepBehavior?.defaultStep,
+				handleStepSubmit: formMethods?.handleStepSubmit,
+				isBackValidate: wizardDialog.formConfig?.stepBehavior?.isBackValidate,
+				onStepChange: formMethods?.onStepChange,
+				onStepRetry: createStepRetryHandler(wizardDialog.formConfig?.steps || []),
+				onNavigationStart: wizardDialog.formConfig?.onNavigationStart,
+				onNavigationEnd: wizardDialog.formConfig?.onNavigationEnd,
+				onNavigationError: wizardDialog.formConfig?.onNavigationError,
+				totalSteps: wizardDialog.formConfig?.steps?.length,
+				triggerValidation: formMethods?.triggerValidation,
+				children
+			});
+		}
+		if (isFormDialog(dialog)) {
+			const formDialog = dialog;
+			if (isStepFormConfig(formDialog.formConfig)) return /* @__PURE__ */ jsxRuntimeExports.jsx(StepControlProvider, {
+				defaultStep: formDialog.formConfig?.stepBehavior?.defaultStep,
+				isBackValidate: formDialog.formConfig?.stepBehavior?.isBackValidate,
+				onStepRetry: createStepRetryHandler(formDialog.formConfig?.steps || []),
+				onNavigationStart: formDialog.formConfig?.onNavigationStart,
+				onNavigationEnd: formDialog.formConfig?.onNavigationEnd,
+				onNavigationError: formDialog.formConfig?.onNavigationError,
+				totalSteps: formDialog.formConfig?.steps?.length,
+				children
+			});
+		}
+		return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children });
+	}
+};
+const dialogContextRequirements = {
+	[DialogTypes.ALERT]: [],
+	[DialogTypes.CONFIRM]: [],
+	[DialogTypes.CUSTOM]: [],
+	[DialogTypes.FORM]: ["form"],
+	[DialogTypes.WIZARD_FORM]: ["form", "stepControl"]
+};
 
 //#region src/hooks/useAccountSubdomain.ts
-init_usePluginMeta();
 function useAccountSubdomain() {
-	return admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getAccountSubdomain(usePluginMeta("dashboard", "subdomain"));
+	return dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getAccountSubdomain(usePluginMeta("dashboard", "subdomain"));
 }
 
 //#region src/hooks/useApiUrl.ts
 function useApiUrl() {
-	const { framework, isLoading } = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.useFramework();
-	if (!isLoading) return framework?.portalUrl ?? admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getApiBaseUrl({ allowLocalhost: true });
-	const apiUrl = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getApiBaseUrl({ allowLocalhost: true });
+	const { framework, isLoading } = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.useFramework();
+	if (!isLoading) return framework?.portalUrl ?? dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getApiBaseUrl({ allowLocalhost: true });
+	const apiUrl = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getApiBaseUrl({ allowLocalhost: true });
 	if (apiUrl === false) return "";
 	return apiUrl;
 }
@@ -57561,7 +56117,7 @@ const LEADING_SLASHES_REGEX = /^\/+/;
 function useAccountUrl(path) {
 	const accountSubdomain = useAccountSubdomain();
 	const apiUrl = useApiUrl();
-	const { hostname: currentHostname, protocol } = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getCurrentLocation();
+	const { hostname: currentHostname, protocol } = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getCurrentLocation();
 	const normalizedPath = `/${String(path ?? "").replace(LEADING_SLASHES_REGEX, "").replace(/\/+$/, "")}`;
 	if (!apiUrl) return normalizedPath;
 	let parsedApiUrl;
@@ -57571,13 +56127,12 @@ function useAccountUrl(path) {
 	} catch {
 		return normalizedPath;
 	}
-	let host = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.cleanTrailingSlashes(accountSubdomain || currentHostname);
-	if (parsedApiUrl && parsedApiUrl.hostname !== accountSubdomain) host = admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.cleanTrailingSlashes(currentHostname);
+	let host = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.cleanTrailingSlashes(accountSubdomain || currentHostname);
+	if (parsedApiUrl && parsedApiUrl.hostname !== accountSubdomain) host = dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.cleanTrailingSlashes(currentHostname);
 	return new URL(normalizedPath, `${protocol}//${host}`).toString();
 }
 
 //#region src/hooks/usePortalMeta.ts
-init_portalStore();
 function usePortalMeta() {
 	return usePortalStore((state) => state.meta);
 }
@@ -57603,7 +56158,6 @@ function useResetPasswordUrl() {
 }
 
 //#region src/hooks/usePortalUrl.ts
-init_portalStore();
 function usePortalUrl() {
 	const portalUrl = usePortalStore((state) => state.portalUrl);
 	return isValidUrl(portalUrl) ? portalUrl : `https://${portalUrl}`;
@@ -57620,8 +56174,8 @@ function isValidUrl(url) {
 
 //#region src/hooks/useProtocolDomain.ts
 function useProtocolDomain(proto) {
-	usePortalMeta()?.domain || admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getCurrentLocation().hostname;
-	return admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getProtocolDomain(proto, { isRootDomain: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.env.VITE_PORTAL_DOMAIN_IS_ROOT === "true" });
+	usePortalMeta()?.domain || dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getCurrentLocation().hostname;
+	return dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.getProtocolDomain(proto, { isRootDomain: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_core__loadShare__.env.VITE_PORTAL_DOMAIN_IS_ROOT === "true" });
 }
 
 //#region src/types.ts
@@ -58474,7 +57028,6 @@ var Sdk = class {
 };
 
 //#region src/hooks/useSdk.ts
-init_portalStore();
 let isGloballyInitialized = false;
 const resetGloballyInitialized = () => {
 	isGloballyInitialized = false;
@@ -58483,8 +57036,8 @@ function useSdk() {
 	const apiUrl = useApiUrl();
 	const { sdk } = usePortalStore((state) => ({ sdk: state.sdk }));
 	const { setSdk } = usePortalActions();
-	const initializationAttempted = admin__loadShare__react__loadShare__.useRef(false);
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	const initializationAttempted = dashboard__loadShare__react__loadShare__.useRef(false);
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		if (apiUrl && !isGloballyInitialized && !initializationAttempted.current) {
 			initializationAttempted.current = true;
 			const initializeSdk = () => {
@@ -58498,12 +57051,6 @@ function useSdk() {
 	}, [apiUrl, setSdk]);
 	return sdk;
 }
-
-//#region src/hooks/index.ts
-init_useAvatar();
-init_useMenuItems();
-init_usePluginMeta();
-init_useTheme();
 
 var abstractLevel$1 = {};
 
@@ -65989,11 +64536,6 @@ const clearSelectedFilterAtom = atom(null, (get, set) => {
 	return true;
 });
 
-//#region src/store/index.ts
-init_appStore();
-init_portalStore();
-init_uiStore();
-
 //#region src/types/badge.ts
 const BADGE_THEME = {
 	critical: {
@@ -66053,11 +64595,5 @@ function formatFileSize(bytes) {
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 	return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
-
-//#region src/utils/index.ts
-init_theme();
-
-//#region src/index.ts
-init_components();
 
 export { ActionItemType, ActionListRenderer, ActionType, ActionsFooter, AdapterType, AppComponent, BADGE_THEME, BaseTable, BaseTableContent, BaseTableInner, BooleanFilter, COMPONENT_SIZE_CLASSES, Checkbox, ComponentSize, ContainerType, Copyable, DIALOG_POSITION_CLASSES, DIALOG_SIZE_CLASSES, DataTable, DataTableController, DateFilter, DatePicker, DefaultFooter, DefaultHeader, DefaultPagination, DialogComponent, DialogIconLayout, DialogPosition, DialogProvider, DialogRenderer, DialogStatus, DialogTypes, DialogVariant, Editor, EmailInput, Environment, EnvironmentBuilder, ErrorList, Field, FieldCheckbox, FileInput, FilterChip, FilterGroup, FilterHelpersProvider, FilterOperator, FilterType, FooterContextProvider, FooterEnvironmentBuilder, FooterType, FormDialogType, FormFieldType, FormFooter, FormGroup, FormHeader, FormProvider, FormRenderer, FormType$1 as FormType, GeneralLayout, GroupOrder, HeaderContextProvider, HeaderEnvironmentBuilder, HeaderType, InlineAuthLinkBanner, Input, KeyboardShortcutDialog, LayoutType, Loading, LumeLogo, MainNavigation, MobileMenu, MultiSelectFilter, NavigationType, NumberFilter, PageHeader, ProgressStyleType, RadioGroup, RangeFilter, RefineTableProvider, RichText, SchemaForm, ScreenReaderAnnouncement, SearchFilter, Select, SelectFilter, SidebarProvider, SidebarToggle, SkeletonLoader, Slider, StepControlProvider, StepFormFooter, StepSchemaForm, TableAction, TableActionMenu, TableActionsDropdown, TableConfigProvider, TableContainer, TableEmptyState, TableInstanceProvider, TableLayoutType, TableLoadingState, TextFilter, Textarea, TextareaField, ThemeSwitcher, ThemedBadge, Toolbar, ToolbarCustomItemComponent, ToolbarItemAlignment, ToolbarItemType, ToolbarRenderer, ToolbarRendererRegistry, ToolbarSeparatorItemComponent, UnifiedFooter, UnifiedHeader, UserNav, WidthCategory, WizardFooter, WizardForm, WizardHeader, adapters, adjustHue, appStore, applyFilterAtom, applyThemeStyles, calculateStepState, clear$2 as clear, clearSelectedFilterAtom, computeAutoSaveConfig, contextProviders, createActionHelpers, createDefaultSystemColors, createDefaultTheme, createDialogActions, createEnvironmentReceiver, createFilterOnChangeHandler, createFiltersFromValue, createFooterRegistry, createForceRerenderReceiver, createFormActions, createHeaderRegistry, createStepActions, createStepClickHandler, createStepEnvironment, createStepKeyHandler, createStepRetryHandler, createWizardActions, createZeroSystemColors, darkenColor, deleteFilterAtom, desaturateColor, dialogContextRequirements, ensureWcagContrast, evaluateSubmitLabel, footerRegistry, formatFileSize, generateHash, generateStorageKey, generateThemeCSS, getAction, getActionItemComponent, getComponentSizeClass, getContrastRatio, getDialogContentClasses, getDialogType, getDialogTypeFromConfig, getEffectiveAllowNavigation, getFilter, getFormComponent, getFormTypeFromDialog, getResourceFiltersAtom, getSizeClass, getStepAnimationClasses, getThemeById, hasAction, hasFilter, hasNavigation, hasStepEnvironment, headerRegistry, helpers, hexToHsl, hslToRawString, hslToRgb, hslToString, isActionButtonsFunction, isAlertDialog, isComponentSize, isConfirmDialog, isCustomDialog, isDialogContainer, isDialogFooterEnvironment, isDialogFooterFunction, isDialogHeaderFunction, isFooterFunction, isFormDialog, isHeaderFunction, isNoneNavigation, isSimpleFooterEnvironment, isSimpleForm, isStandaloneContainer, isStandaloneFooterEnvironment, isStepFooterEnvironment, isStepForm, isStepFormConfig, isStepHeaderEnvironment, isStepNavigation, isSubmitLabelFunction, isValidBackgroundImages, isValidColor, isValidSystemColors, isWizardDialogConfig, isWizardFooterEnvironment, isWizardForm, isWizardFormConfig, isWizardHeaderEnvironment, isWizardNavigation, lightenColor, listActions, listAll, listFilters, meetsWcagContrast, meetsWcagNonTextContrast, meetsWcagTextContrast, mergeThemes, metaStore, normalizeTableOptions, portalStore, registerAction, registerActionItemComponent, registerAllActionItems, registerAllFormComponents, registerCheckbox, registerCustomToolbarItem, registerDatePicker, registerEmailInput, registerFileInput, registerFilter, registerFormComponent, registerInput, registerRadioGroup, registerRefreshToolbarItem, registerRichText, registerSearchToolbarItem, registerSelect, registerSeparatorToolbarItem, registerSlider, registerTextarea, removeAction, removeFilter, renderFooter, renderHeader, resetGloballyInitialized, resetRegistryForTesting, resolveAllowStepNavigation, resourceFiltersAtom, rgbToHsl, rgbToLuminance, runWhenIdle, saturateColor, saveFilterAtom, savedFiltersAtom, selectedFilterAtom, updateFilterAtom, useAccountSubdomain, useAccountUrl, useApiUrl, useAppStore, useAvatar, useCreateStepControl, useDefaultFilter, useDialog, useDialogActions, useDialogState, useDialogType, useEnvironmentSync, useFeatureFlag, useFilterHelpers, useFooterContext, useForceRerender, useFormContext, useFrameworkSync, useHeaderContext, useIsFormDialog, useIsInDialog, useIsWizardDialog, useLoginUrl, useMenuItems, useMetaStore, useOptionalFooterContext, useOptionalHeaderContext, useOptionalStepControlContext, usePluginMeta, usePortal, usePortalActions, usePortalMeta, usePortalStore, usePortalUrl, useProtocolDomain, useRefineTable, useRegisterUrl, useResetPasswordUrl, useScreenReaderAnnouncement, useSdk, useSidebarContext, useStepControl, useStepControlContext, useTableConfig, useTableConfigOptional, useTableInstance, useTheme, useThemeIdAndSetter, useUIStore, validateTheme, withTheme };
