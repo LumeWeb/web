@@ -1,33 +1,511 @@
 #!/usr/bin/env python3
 """
-Release Go modules script
+Release Go modules script - DSL Implementation
 
-Builds portal apps and plugins, then exports their static assets to Go module directories.
-Uses git revision as version identifier instead of tags.
+Builds portal apps and plugins with context-aware collision prevention.
+Uses declarative DSL configuration for maintainable build definitions.
 """
 
 import argparse
 import json
 import logging
-import os
 import shutil
 import subprocess
 import sys
 import traceback
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional, Set, Any, Union
+from enum import Enum
 
+
+# ============================================================================
+# Core Data Structures
+# ============================================================================
+
+class BuildContextType(Enum):
+    APP_SHELL = "app-shell"
+    PLUGIN = "plugin"
+
+
+class ContentType(Enum):
+    UI_APPLICATION = "ui_application"
+    PLUGIN_MODULE = "plugin_module"
+
+
+@dataclass
+class BuildContext:
+    type: BuildContextType
+    namespace: str
+    identifier: str
+
+
+@dataclass
+class BuildTarget:
+    name: str
+    context: BuildContext
+    source_path: Path
+    target_path: Path
+    repo_target: str
+    content_type: ContentType
+    dependencies: List[str] = field(default_factory=list)
+    exposes: List[str] = field(default_factory=list)
+    variants: List[str] = field(default_factory=list)
+    merge_partners: List[str] = field(default_factory=list)  # Other targets that merge to same repo
+
+
+@dataclass
+class BuildRegistry:
+    targets: Dict[str, BuildTarget]
+
+
+# ============================================================================
+# DSL Helper Functions
+# ============================================================================
+
+def ui_app(**kwargs) -> Dict[str, Any]:
+    """Helper for UI application targets"""
+    return {
+        "type": "ui_application",
+        **kwargs
+    }
+
+
+def plugin(**kwargs) -> Dict[str, Any]:
+    """Helper for plugin targets"""
+    return {
+        "type": "plugin_module",
+        **kwargs
+    }
+
+
+def app_shell_template(variant_name: str, **overrides) -> Dict[str, Any]:
+    """Template for app shell variations"""
+    return {
+        "name": variant_name,
+        "variants": [variant_name],
+        "build_from": "portal-app-shell/dist/{variant}",
+        "deploy_to": "go/portal-{variant}/build",
+        "repo_target": "portal-plugin-{variant}",
+        "content_type": "ui_application",
+        **overrides
+    }
+
+
+def plugin_template(plugin_name: str, **overrides) -> Dict[str, Any]:
+    """Template for plugin configurations"""
+    return {
+        "name": plugin_name,
+        "build_from": f"libs/portal-plugin-{plugin_name}/dist",
+        "deploy_to": f"go/portal-plugin-{plugin_name}/build",
+        "repo_target": f"portal-plugin-{plugin_name}",
+        "content_type": "plugin_module",
+        **overrides
+    }
+
+
+def discover_plugins() -> Dict[str, Dict[str, Any]]:
+    """Auto-discover plugins from filesystem"""
+    plugins = {}
+    libs_path = Path("libs")
+    
+    if not libs_path.exists():
+        return plugins
+    
+    for plugin_dir in libs_path.glob("portal-plugin-*"):
+        if not plugin_dir.is_dir():
+            continue
+            
+        plugin_name = plugin_dir.name.replace("portal-plugin-", "")
+        
+        # Check if this is a frontend plugin (has dist with manifest) or library
+        dist_path = plugin_dir / "dist"
+        is_frontend_plugin = dist_path.exists() and (dist_path / "mf-manifest.json").exists()
+        
+        # Only include frontend plugins in build registry
+        if not is_frontend_plugin:
+            continue
+            
+        # Detect plugin type from structure
+        if plugin_name in ["dashboard", "admin"]:
+            plugin_type = "feature"
+        else:
+            plugin_type = "core"
+            
+        plugins[plugin_name] = plugin_template(plugin_name, type=plugin_type)
+    
+    return plugins
+
+
+# ============================================================================
+# DSL Configuration
+# ============================================================================
+
+def build_registry(config: Dict, validation_rules: Optional[List] = None) -> BuildRegistry:
+    """Main DSL entry point"""
+    builder = BuildRegistryBuilder(config, validation_rules)
+    return builder.build()
+
+
+class BuildRegistryBuilder:
+    def __init__(self, config: Dict, validation_rules: Optional[List] = None):
+        self.config = config
+        self.validation_rules = validation_rules or []
+        self.targets = {}
+    
+    def build(self) -> BuildRegistry:
+        """Build the complete registry"""
+        self._build_app_shell_targets()
+        self._build_plugin_targets()
+        
+        self._validate_registry()
+        return BuildRegistry(self.targets)
+    
+    def _build_app_shell_targets(self):
+        """Build app shell variation targets"""
+        app_shell_config = self.config.get("app_shell", {})
+        
+        for name, config in app_shell_config.items():
+            if config.get("type") == "ui_application":
+                target = self._build_ui_app_target(name, config)
+                # Use unique name to avoid collision with plugins
+                unique_name = f"{name}-app-shell"
+                self.targets[unique_name] = target
+                
+    
+    def _build_plugin_targets(self):
+        """Build plugin targets"""
+        plugins_config = self.config.get("plugins", {})
+        
+        # Core plugins
+        for plugin_name in plugins_config.get("core_plugins", []):
+            target = self._build_plugin_target(plugin_name, "core")
+            self.targets[plugin_name] = target
+        
+        # Feature plugins
+        feature_plugins = plugins_config.get("feature_plugins", {})
+        for plugin_name, config in feature_plugins.items():
+            target = self._build_plugin_target(plugin_name, "feature", config)
+            self.targets[plugin_name] = target
+    
+    def _build_ui_app_target(self, name: str, config: Dict) -> BuildTarget:
+        """Build UI app target from config"""
+        variants = config.get("variants", [name])
+        targets = []
+        
+        for variant in variants:
+            source_path = Path(config["build_from"].format(variant=variant))
+            target_path = Path(config["deploy_to"].format(variant=variant))
+            repo_target = config["repo_target"].format(variant=variant)
+            
+            target = BuildTarget(
+                name=f"{name}-app",  # Unique name to avoid collision
+                context=BuildContext(BuildContextType.APP_SHELL, "ui", variant),
+                source_path=source_path,
+                target_path=target_path,
+                repo_target=repo_target,
+                content_type=ContentType.UI_APPLICATION,
+                variants=variants
+            )
+            targets.append(target)
+        
+        # Return first target as primary, store others as variants
+        return targets[0]
+    
+    def _build_plugin_target(self, plugin_name: str, plugin_type: str, config: Optional[Dict] = None) -> BuildTarget:
+        """Build plugin target from name and type"""
+        if config is None:
+            config = plugin_template(plugin_name, type=plugin_type)
+        
+        return BuildTarget(
+            name=plugin_name,
+            context=BuildContext(BuildContextType.PLUGIN, plugin_type, plugin_name),
+            source_path=Path(config["build_from"]),
+            target_path=Path(config["deploy_to"]),
+            repo_target=config["repo_target"],
+            content_type=ContentType[config["content_type"].upper()],
+            dependencies=config.get("dependencies", []),
+            exposes=config.get("exposes", [])
+        )
+    
+    def _validate_registry(self):
+        """Validate the complete registry"""
+        # Setup merge partnerships
+        self._setup_merge_partnerships()
+        
+        validator = RegistryValidator(self.validation_rules)
+        validator.validate(list(self.targets.values()))
+    
+    def _setup_merge_partnerships(self):
+        """Setup merge partnerships for targets that share repo destinations"""
+        # Group targets by repo_target
+        repo_groups = {}
+        for name, target in self.targets.items():
+            repo_target = target.repo_target
+            if repo_target not in repo_groups:
+                repo_groups[repo_target] = []
+            repo_groups[repo_target].append((name, target))
+        
+        # Setup merge partnerships for groups with multiple targets
+        for repo_target, targets in repo_groups.items():
+            if len(targets) > 1:
+                # All targets in this group should merge
+                target_names = [name for name, _ in targets]
+                for name, target in targets:
+                    target.merge_partners = [n for n in target_names if n != name]
+
+
+# ============================================================================
+# Validation System
+# ============================================================================
+
+@dataclass
+class ValidationRule:
+    name: str
+    validator: callable
+    error_message: str
+
+
+class RegistryValidator:
+    def __init__(self, rules: List[ValidationRule] = None):
+        self.rules = rules or self._default_rules()
+    
+    def _default_rules(self) -> List[ValidationRule]:
+        """Default validation rules"""
+        return [
+            ValidationRule(
+                name="no_target_path_collisions",
+                validator=lambda targets: len(set(t.target_path for t in targets)) == len(targets),
+                error_message="Target path collision detected"
+            ),
+            ValidationRule(
+                name="no_repo_target_collisions", 
+                validator=self._no_invalid_repo_collisions,
+                error_message="Repository target collision detected"
+            ),
+            ValidationRule(
+                name="ui_apps_must_have_index_html",
+                validator=self._ui_apps_have_index_html,
+                error_message="UI app must have index.html"
+            ),
+            ValidationRule(
+                name="plugins_must_have_manifest_file",
+                validator=self._plugins_have_manifest,
+                error_message="Plugin must have mf-manifest.json"
+            )
+        ]
+    
+    def _ui_apps_have_index_html(self, targets: List[BuildTarget]) -> bool:
+        """Check UI apps have index.html"""
+        for target in targets:
+            if target.content_type == ContentType.UI_APPLICATION:
+                # Only validate if source path exists
+                if not target.source_path.exists():
+                    return True  # Skip validation for non-existent sources (will be handled later)
+                if not (target.source_path / "index.html").exists():
+                    return False
+        return True
+    
+    def _plugins_have_manifest(self, targets: List[BuildTarget]) -> bool:
+        """Check plugins have manifest file"""
+        for target in targets:
+            if target.content_type == ContentType.PLUGIN_MODULE:
+                # Only validate if source path exists
+                if not target.source_path.exists():
+                    return True  # Skip validation for non-existent sources (will be handled later)
+                manifest_path = target.source_path / "mf-manifest.json"
+                if not manifest_path.exists():
+                    return False
+        return True
+    
+    def _no_invalid_repo_collisions(self, targets: List[BuildTarget]) -> bool:
+        """Check for invalid repo collisions (allow merging)"""
+        repo_groups = {}
+        for target in targets:
+            repo_target = target.repo_target
+            if repo_target not in repo_groups:
+                repo_groups[repo_target] = []
+            repo_groups[repo_target].append(target)
+        
+        # Check each repo group for invalid collisions
+        for repo_target, group_targets in repo_groups.items():
+            if len(group_targets) <= 1:
+                continue  # No collision
+            
+            # Only allow collisions between app-shell and plugin targets
+            context_types = set(t.context.type for t in group_targets)
+            if len(context_types) > 2:
+                return False  # Too many different context types
+            
+            # Must have at least one app-shell and one plugin for valid merge
+            if BuildContextType.APP_SHELL not in context_types or BuildContextType.PLUGIN not in context_types:
+                return False
+            
+            # Validate that all target paths are different (this is the real collision)
+            target_paths = [t.target_path for t in group_targets]
+            if len(set(target_paths)) != len(target_paths):
+                return False
+        
+        return True
+    
+    def validate(self, targets: List[BuildTarget]):
+        """Run all validation rules"""
+        for rule in self.rules:
+            try:
+                if not rule.validator(targets):
+                    raise ValidationError(f"{rule.name}: {rule.error_message}")
+            except Exception as e:
+                raise ValidationError(f"Validation failed for {rule.name}: {e}")
+
+
+class ValidationError(Exception):
+    pass
+
+
+# ============================================================================
+# Build System Core
+# ============================================================================
+
+class ContextAwareBuilder:
+    """Build with context-specific logic"""
+    
+    def __init__(self, repo_root: Path, verbose: bool = False):
+        self.repo_root = repo_root
+        self.verbose = verbose
+    
+    def build_targets(self, targets: List[BuildTarget]) -> None:
+        """Build all targets with context isolation"""
+        # Group targets by context type
+        app_shell_targets = [t for t in targets if t.context.type == BuildContextType.APP_SHELL]
+        plugin_targets = [t for t in targets if t.context.type == BuildContextType.PLUGIN]
+        
+        # Build app shell variations first
+        if app_shell_targets:
+            self._build_app_shell_targets(app_shell_targets)
+        
+        # Build plugins next
+        if plugin_targets:
+            self._build_plugin_targets(plugin_targets)
+    
+    def _build_app_shell_targets(self, targets: List[BuildTarget]) -> None:
+        """Build app shell variations"""
+        if self.verbose:
+            logger.info(f"Building {len(targets)} app shell targets")
+        
+        # Run turbo build for app shell
+        cmd = ["pnpm", "run", "build", "--filter=portal-app-shell"]
+        self._run_command(cmd)
+    
+    def _build_plugin_targets(self, targets: List[BuildTarget]) -> None:
+        """Build plugins"""
+        if self.verbose:
+            logger.info(f"Building {len(targets)} plugin targets")
+        
+        plugin_names = [t.name for t in targets]
+        cmd = ["pnpm", "run", "build", f"--filter={','.join(f'portal-plugin-{name}' for name in plugin_names)}"]
+        self._run_command(cmd)
+    
+    def _run_command(self, cmd: List[str]) -> None:
+        """Run shell command with error handling"""
+        if self.verbose:
+            logger.debug(f"Running: {' '.join(cmd)}")
+        
+        result = subprocess.run(
+            cmd,
+            cwd=self.repo_root,
+            capture_output=True,
+            text=True
+        )
+        
+        if result.returncode != 0:
+            raise RuntimeError(f"Command failed: {' '.join(cmd)}\n{result.stderr}")
+
+
+class SafeBuildCopier:
+    """Copy builds with collision prevention"""
+    
+    def __init__(self, repo_root: Path, verbose: bool = False):
+        self.repo_root = repo_root
+        self.verbose = verbose
+        self.copied_repos = set()  # Track which repos have been copied
+    
+    def copy_targets(self, targets: List[BuildTarget]) -> None:
+        """Copy all targets safely with merge support"""
+        # Group targets by repo_target for merging
+        repo_groups = {}
+        for target in targets:
+            repo_target = target.repo_target
+            if repo_target not in repo_groups:
+                repo_groups[repo_target] = []
+            repo_groups[repo_target].append(target)
+        
+        # Copy each repo group (merged if multiple targets)
+        for repo_target, group_targets in repo_groups.items():
+            self._copy_repo_group(repo_target, group_targets)
+    
+    def _copy_repo_group(self, repo_target: str, targets: List[BuildTarget]) -> None:
+        """Copy a group of targets that merge to the same repo"""
+        if repo_target in self.copied_repos:
+            return  # Already copied this repo
+        
+        if self.verbose:
+            if len(targets) > 1:
+                logger.info(f"Merging {len(targets)} targets to {repo_target}")
+                for target in targets:
+                    logger.debug(f"  {target.name} ({target.context.type.value})")
+            else:
+                logger.info(f"Copying single target {targets[0].name} to {repo_target}")
+        
+        # Merge all targets to same destination
+        for target in targets:
+            self._copy_merge_target(target)
+        
+        self.copied_repos.add(repo_target)
+    
+    def _copy_merge_target(self, target: BuildTarget) -> None:
+        """Copy target with merge support"""
+        if not target.source_path.exists():
+            logger.warning(f"Source path does not exist: {target.source_path}")
+            return
+        
+        target_dir = self.repo_root / target.target_path
+        if self.verbose:
+            logger.debug(f"Copying {target.name} to {target.target_path}")
+        
+        # For merge targets, don't remove existing directory - merge into it
+        if not target_dir.exists():
+            target_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Copy files (merge mode - don't overwrite existing files)
+        for item in target.source_path.iterdir():
+            dest_path = target_dir / item.name
+            
+            if item.is_dir():
+                if not dest_path.exists():
+                    shutil.copytree(item, dest_path)
+                else:
+                    # Merge directory contents
+                    for subitem in item.iterdir():
+                        shutil.copy2(subitem, dest_path / subitem.name)
+            else:
+                # Don't overwrite existing files in merge mode
+                if not dest_path.exists():
+                    shutil.copy2(item, dest_path)
+        
+        # Remove .vite directories
+        vite_dir = target_dir / ".vite"
+        if vite_dir.exists():
+            shutil.rmtree(vite_dir)
+            if self.verbose:
+                logger.debug(f"  Removed .vite directory from {target.name}")
+
+
+# ============================================================================
+# Main Application
+# ============================================================================
 
 def setup_logging(verbose: bool = False) -> logging.Logger:
-    """
-    Configure logging for the script.
-
-    Args:
-        verbose: Whether to enable DEBUG level logging
-
-    Returns:
-        Configured logger instance
-    """
+    """Configure logging for the script"""
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(
         level=level,
@@ -37,966 +515,319 @@ def setup_logging(verbose: bool = False) -> logging.Logger:
     return logging.getLogger(__name__)
 
 
-# Global logger instance (set in main())
 logger = logging.getLogger(__name__)
 
 
-# App shell app name (has multiple build variations)
-APP_SHELL = "portal-app-shell"
-
-# App shell variations (each built to a separate dist subdirectory)
-# Maps variation names to (local_go_folder, ci_dispatch_target)
-# Local folder: path under go/ (e.g., go/portal-dashboard/build)
-# CI dispatch: target repository name for downstream workflows
-APP_SHELL_VARIATIONS = {
-    "dashboard": ("portal-dashboard", "portal-plugin-dashboard"),
-    "admin": ("portal-admin", "portal-plugin-admin")
-}
-
-# Apps that map to plugin repositories instead of app repositories
-# Format: {app_name: plugin_repo_name}
-APP_TO_PLUGIN_MAPPING = {
-    "portal-frontend": "portal-plugin-frontend"
-}
-
-# Package name prefixes
-PLUGIN_PREFIX = "portal-plugin-"
-APP_PREFIX = "portal-"
-
-# Directory names in the repo
-APPS_DIR = "apps"
-LIBS_DIR = "libs"
-LUMEWEB_SCOPE = "@lumeweb/"
-
-# Default apps to build and release
-# Used when --apps=all is specified
-DEFAULT_APPS = ["portal-frontend", APP_SHELL]
-
-# Default plugins to build and release
-# Used when --plugins=all is specified
-# Note: dashboard and admin are built via APP_SHELL variations, not standalone plugins
-DEFAULT_PLUGINS = ["ipfs", "core", "lbry"]
-
-# Special values for apps/plugins arguments
-VALUE_ALL = "all"
-VALUE_NONE = "none"
-
-
-def normalize_arg_value(value: Optional[str]) -> str:
-    """
-    Normalize an argument value by stripping whitespace and quotes.
-
-    Args:
-        value: Argument value string or None
-
-    Returns:
-        Normalized string (lowercase, stripped of whitespace and quotes)
-    """
-    if not value:
-        return ""
-    
-    value = value.strip()
-    
-    # Remove surrounding quotes (single or double)
-    if (value.startswith("'") and value.endswith("'")) or \
-       (value.startswith('"') and value.endswith('"')):
-        value = value[1:-1]
-    
-    return value.lower().strip()
-
-
-def parse_csv_list(value: Optional[str]) -> List[str]:
-    """
-    Parse a comma-separated string into a list, trimming whitespace and quotes.
-
-    Args:
-        value: CSV string or None
-
-    Returns:
-        List of trimmed strings, or empty list if value is None or "none"
-    """
-    # Normalize and check for "none"
-    normalized = normalize_arg_value(value)
-    if not normalized or normalized == VALUE_NONE:
-        return []
-
-    # Split by comma, strip whitespace, and remove surrounding quotes
-    items = []
-    for item in value.split(","):
-        item = item.strip()
-        if item:
-            # Remove surrounding quotes (single or double)
-            if (item.startswith("'") and item.endswith("'")) or \
-               (item.startswith('"') and item.endswith('"')):
-                item = item[1:-1]
-
-            # Reject potentially dangerous characters (path traversal, shell metacharacters)
-            dangerous_chars = ['/', '\\', '..', '|', '&', ';', '$', '`', '(', ')', '<', '>']
-            if any(char in item for char in dangerous_chars):
-                logger.warning(f"Invalid characters in '{item}' - skipping")
-                continue
-
-            # Reject empty strings after stripping
-            if not item:
-                continue
-
-            items.append(item)
-    return items
-
-
-
-def get_package_name(name: str, prefix: str = "") -> str:
-    """
-    Get the package name using the @lumeweb naming convention.
-
-    Args:
-        name: Name of the package (e.g., portal-frontend, ipfs)
-        prefix: Optional prefix to add (e.g., "portal-plugin-")
-
-    Returns:
-        Package name for turbo --filter (e.g., @lumeweb/portal-frontend)
-    """
-    return f"{LUMEWEB_SCOPE}{prefix}{name}"
-
-
-def validate_package_name(name: str, repo_root: Path, directory: str, prefix: str = "") -> bool:
-    """
-    Validate that a package name exists and is valid.
-
-    Args:
-        name: Name of the package to validate
-        repo_root: Path to the repository root
-        directory: Directory to check (APPS_DIR or LIBS_DIR)
-        prefix: Optional prefix to add to name for path lookup
-
-    Returns:
-        True if the package is valid, False otherwise
-    """
-    # Allow portal-app-shell
-    if name == APP_SHELL:
-        return True
-
-    # Check if directory exists
-    package_path = repo_root / directory / f"{prefix}{name}"
-    if package_path.exists() and package_path.is_dir():
-        # Verify it has a package.json
-        package_json = package_path / "package.json"
-        if package_json.exists():
-            return True
-
-    return False
-
-
-def sanitize_package_names(names: List[str], repo_root: Path, directory: str, 
-                           prefix: str = "") -> List[str]:
-    """
-    Sanitize and validate a list of package names.
-
-    Args:
-        names: List of package names to validate
-        repo_root: Path to the repository root
-        directory: Directory to check (APPS_DIR or LIBS_DIR)
-        prefix: Optional prefix to add to name for path lookup
-        verbose: Whether to print verbose output
-
-    Returns:
-        List of valid package names
-    """
-    valid_names = []
-    for name in names:
-        if validate_package_name(name, repo_root, directory, prefix):
-            valid_names.append(name)
-        else:
-            logger.warning(f"Invalid package name '{name}' - skipping")
-            logger.info(f"  Expected directory: {repo_root / directory / f'{prefix}{name}'}")
-    return valid_names
-
-
-def list_available_apps(repo_root: Path) -> List[str]:
-    """
-    List all available apps in the repository.
-
-    Args:
-        repo_root: Path to the repository root
-
-    Returns:
-        List of app names
-    """
-    apps_dir = repo_root / APPS_DIR
-    apps = []
-    if apps_dir.exists() and apps_dir.is_dir():
-        for item in apps_dir.iterdir():
-            if item.is_dir() and (item / "package.json").exists():
-                apps.append(item.name)
-    return sorted(apps)
-
-
-def list_available_plugins(repo_root: Path) -> List[str]:
-    """
-    List all available plugins in the repository.
-
-    Args:
-        repo_root: Path to the repository root
-
-    Returns:
-        List of plugin names (without portal-plugin- prefix)
-    """
-    libs_dir = repo_root / LIBS_DIR
-    plugins = []
-    if libs_dir.exists() and libs_dir.is_dir():
-        for item in libs_dir.iterdir():
-            if item.is_dir() and item.name.startswith(PLUGIN_PREFIX) and (item / "package.json").exists():
-                plugins.append(item.name[len(PLUGIN_PREFIX):])
-    return sorted(plugins)
-
-
-def set_github_output(name: str, value: str) -> None:
-    """
-    Set a GitHub Actions output using the GITHUB_OUTPUT environment file.
-
-    Args:
-        name: Output name
-        value: Output value
-    """
-    github_output = os.environ.get("GITHUB_OUTPUT")
-    if github_output:
-        with open(github_output, "a") as f:
-            f.write(f"{name}={value}\n")
-    else:
-        # Fallback to stdout if not in GitHub Actions
-        print(f"{name}={value}")
-
-
-class AppReleaseError(Exception):
-    """Custom exception for app release errors."""
-    pass
-
-
-def run_command(cmd: List[str], cwd: Path = None, check: bool = True) -> subprocess.CompletedProcess:
-    """
-    Run a shell command and return the result.
-
-    Args:
-        cmd: Command and arguments as list
-        cwd: Working directory (default: current directory)
-        check: Whether to raise exception on non-zero exit code
-
-    Returns:
-        CompletedProcess object with stdout/stderr
-    """
-    try:
-        result = subprocess.run(
-            cmd,
-            cwd=cwd,
-            check=check,
-            capture_output=True,
-            text=True
-        )
-        return result
-    except subprocess.CalledProcessError as e:
-        if check:
-            logger.error(f"Command failed: {' '.join(cmd)}")
-            logger.error(f"Exit code: {e.returncode}")
-            if e.stdout:
-                logger.error(f"STDOUT:\n{e.stdout}")
-            if e.stderr:
-                logger.error(f"STDERR:\n{e.stderr}")
-            raise AppReleaseError(f"Command failed: {' '.join(cmd)}")
-        return e
-
-
-def get_git_revision(repo_root: Path) -> str:
-    """
-    Get the current git revision (SHA).
-
-    Args:
-        repo_root: Path to the git repository root
-
-    Returns:
-        Current git revision SHA
-    """
-    result = run_command(["git", "rev-parse", "HEAD"], cwd=repo_root)
-    return result.stdout.strip()
-
-
-def get_git_diff(repo_root: Path, paths: List[str]) -> bool:
-    """
-    Check if there are any git changes in the specified paths.
-
-    Args:
-        repo_root: Path to the git repository root
-        paths: List of paths to check for changes
-
-    Returns:
-        True if there are changes, False otherwise
-    """
-    try:
-        # Check for staged changes - pass paths as separate arguments
-        result = run_command(
-            ["git", "diff", "--cached", "--quiet", "--"] + paths,
-            cwd=repo_root,
-            check=False
-        )
-        if result.returncode == 0:
-            # No staged changes
-            return False
-        elif result.returncode == 1:
-            # There are staged changes
-            return True
-        else:
-            # Error - assume no changes to be safe
-            return False
-    except Exception:
-        return False
-
-
-def get_git_diff_files(repo_root: Path, paths: List[str]) -> List[str]:
-    """
-    Get list of changed files in the specified paths.
-
-    Args:
-        repo_root: Path to the git repository root
-        paths: List of paths to check for changes
-
-    Returns:
-        List of changed files
-    """
-    try:
-        result = run_command(
-            ["git", "diff", "--cached", "--name-only", "--"] + paths,
-            cwd=repo_root,
-            check=False
-        )
-        if result.returncode == 0:
-            return [line.strip() for line in result.stdout.splitlines() if line.strip()]
-        return []
-    except Exception:
-        return []
-
-
-def get_build_output_dir(name: str, repo_root: Path, directory: str = APPS_DIR, prefix: str = "") -> Path:
-    """
-    Determine the build output directory for an app or plugin.
-
-    Args:
-        name: Name of the app or plugin
-        repo_root: Path to the repository root
-        directory: Directory to check (APPS_DIR or LIBS_DIR)
-        prefix: Optional prefix to add to name for path lookup
-
-    Returns:
-        Path to the build output directory
-
-    Raises:
-        AppReleaseError: If no valid build directory is found
-    """
-    # Check possible build directories
-    package_path = repo_root / directory / f"{prefix}{name}"
-
-    possible_dirs = [
-        package_path / "dist",
-        package_path / "build" / "client",
-    ]
-
-    for build_dir in possible_dirs:
-        if build_dir.exists() and build_dir.is_dir():
-            return build_dir
-
-    raise AppReleaseError(f"No build output directory found for {prefix}{name}")
-
-
-def get_app_version(app_name: str, repo_root: Path) -> str:
-    """
-    Get the version from package.json for an app or plugin.
-
-    Args:
-        app_name: Name of the app or plugin (with or without portal- prefix)
-        repo_root: Path to the repository root
-
-    Returns:
-        Version string from package.json
-    """
-    # Determine if it's an app or plugin
-    # Check for portal-plugin-* first (more specific pattern)
-    if app_name.startswith(PLUGIN_PREFIX):
-        path = repo_root / LIBS_DIR / app_name
-    elif app_name.startswith(APP_PREFIX):
-        path = repo_root / APPS_DIR / app_name
-    else:
-        # Try both locations
-        app_path = repo_root / APPS_DIR / app_name
-        plugin_path = repo_root / LIBS_DIR / f"{PLUGIN_PREFIX}{app_name}"
-        path = app_path if app_path.exists() else plugin_path
-
-    package_json_path = path / "package.json"
-
-    if not package_json_path.exists():
-        return "unknown"
-
-    try:
-        with open(package_json_path, "r") as f:
-            package_data = json.load(f)
-        return package_data.get("version", "unknown")
-    except (json.JSONDecodeError, IOError):
-        return "unknown"
-
-
-def build_packages(
-    app_names: List[str],
-    plugin_names: List[str],
-    repo_root: Path
-) -> None:
-    """
-    Build multiple apps and plugins using a single turbo command for maximum caching.
-
-    Args:
-        app_names: List of app names to build
-        plugin_names: List of plugin names to build (without portal-plugin- prefix)
-        repo_root: Path to the repository root
-        verbose: Whether to print verbose output
-    """
-    if not app_names and not plugin_names:
-        return
-
-    # Build task list: standard build + app-shell variations
-    tasks = ["build"]
-    if APP_SHELL in app_names:
-        tasks.extend([f"build:{variation}" for variation in APP_SHELL_VARIATIONS.keys()])
-
-    # Build filter list for turbo
-    filters = []
-
-    for app_name in app_names:
-        package_name = get_package_name(app_name)
-        filters.extend(["--filter", package_name])
-        logger.debug(f"Will build app: {package_name}")
-
-    for plugin_name in plugin_names:
-        package_name = get_package_name(plugin_name, PLUGIN_PREFIX)
-        filters.extend(["--filter", package_name])
-        logger.debug(f"Will build plugin: {package_name}")
-
-    # Build all packages in a single turbo command with all tasks
-    cmd = ["pnpm", "turbo", "run"] + tasks + filters
-
-    logger.debug(f"Running: {' '.join(cmd)}")
-
-    result = run_command(cmd, cwd=repo_root)
-
-    if result.stdout:
-        logger.debug(result.stdout)
-
-
-def copy_build_to_go(
-    app_name: str,
-    build_dir: Path,
-    repo_root: Path
-) -> None:
-    """
-    Copy build output to Go module directory (always replace).
-
-    Args:
-        app_name: Name of the app (used as Go directory name)
-        build_dir: Path to the build output directory
-        repo_root: Path to the repository root
-        verbose: Whether to print verbose output
-    """
-    go_build_dir = repo_root / "go" / app_name / "build"
-
-    logger.debug(f"Copying {app_name} build to Go directory...")
-
-    # Remove existing build directory
-    if go_build_dir.exists():
-        shutil.rmtree(go_build_dir)
-
-    # Create directory and copy new files
-    go_build_dir.mkdir(parents=True, exist_ok=True)
-
-    for item in build_dir.iterdir():
-        if item.is_dir():
-            shutil.copytree(item, go_build_dir / item.name)
-        else:
-            shutil.copy2(item, go_build_dir)
-
-    # Prune .vite directories
-    vite_dir = go_build_dir / ".vite"
-    if vite_dir.exists() and vite_dir.is_dir():
-        logger.debug(f"  Removing .vite directory from {app_name}")
-        shutil.rmtree(vite_dir)
-
-
-def git_add_and_commit_modified(
-    modified_apps: List[str],
-    versions: Dict[str, str],
-    repo_root: Path,
-    verbose: bool = False
-) -> Tuple[bool, str]:
-    """
-    Create a commit for modified Go directories (files should already be staged).
-
-    Args:
-        modified_apps: List of modified app names
-        versions: Dictionary mapping app names to version strings
-        repo_root: Path to the repository root
-        verbose: Whether to print verbose output (deprecated, use logging level instead)
-
-    Returns:
-        Tuple of (success: bool, commit_hash: str)
-    """
-    if not modified_apps:
-        logger.debug("No modified apps to commit")
-        return False, ""
-
-    logger.debug(f"Modified apps: {', '.join(modified_apps)}")
-
-    # Create commit message with versions
-    commit_lines = ["chore: export app and plugin builds", ""]
-    for app_name in modified_apps:
-        version = versions.get(app_name, "unknown")
-        commit_lines.append(f"* {app_name}@{version}")
-
-    commit_message = "\n".join(commit_lines)
-
-    logger.debug(f"Commit message:\n{commit_message}")
-
-    # Create commit
-    result = run_command(["git", "commit", "-m", commit_message], cwd=repo_root)
-
-    # Get the commit hash
-    commit_result = run_command(["git", "rev-parse", "HEAD"], cwd=repo_root)
-    commit_hash = commit_result.stdout.strip()
-
-    logger.debug(f"Commit created: {commit_hash}")
-
-    return True, commit_hash
-
-
-def write_metadata_files(modified_apps: List[str], repo_root: Path, verbose: bool = False) -> None:
-    """
-    Write metadata files for downstream workflow steps.
-
-    Args:
-        modified_apps: List of modified app names
-        repo_root: Path to the repository root
-        verbose: Whether to print verbose output
-    """
-    tmp_dir = Path("/tmp")
-
-    # Write modified apps
-    modified_apps_file = tmp_dir / "modified_apps.txt"
-    content = "\n".join(modified_apps)
-    
-    modified_apps_file.write_text(content)
-    
-    if verbose and modified_apps:
-        logger.debug(f"Writing metadata for dispatch: {', '.join(modified_apps)}")
-
-
-def collect_versions(apps_to_build: List[str], plugins_to_build: List[str], 
-                     app_shell_variations: List[Tuple[str, str]], repo_root: Path) -> Dict[str, str]:
-    """
-    Collect versions from package.json for all built packages.
-
-    Args:
-        apps_to_build: List of app names to build
-        plugins_to_build: List of plugin names to build
-        app_shell_variations: List of (local_folder, ci_target) tuples for app-shell variations
-        repo_root: Path to the repository root
-
-    Returns:
-        Dictionary mapping package names to version strings
-    """
-    versions = {}
-    for app_name in apps_to_build:
-        if app_name == APP_SHELL:
-            # Skip portal-app-shell in versions, use variations instead
-            continue
-        version = get_app_version(app_name, repo_root)
-        # Map apps to plugin repos if they have a mapping
-        target_repo = APP_TO_PLUGIN_MAPPING.get(app_name, app_name)
-        versions[target_repo] = version
-
-    # Add versions for app-shell variations (use ci_target for version mapping)
-    if app_shell_variations:
-        app_shell_version = get_app_version(APP_SHELL, repo_root)
-        for _, ci_target in app_shell_variations:
-            versions[ci_target] = app_shell_version
-
-    for plugin_name in plugins_to_build:
-        full_plugin_name = f"{PLUGIN_PREFIX}{plugin_name}"
-        version = get_app_version(full_plugin_name, repo_root)
-        versions[full_plugin_name] = version
-
-    return versions
-
-
-def get_modified_apps_list(apps_to_build: List[str], plugins_to_build: List[str],
-                          app_shell_variations: List[Tuple[str, str]]) -> List[str]:
-    """
-    Build the list of modified apps for commit message.
-
-    Args:
-        apps_to_build: List of app names to build
-        plugins_to_build: List of plugin names to build
-        app_shell_variations: List of (local_folder, ci_target) tuples for app-shell variations
-
-    Returns:
-        List of modified app names (mapped to target repositories)
-    """
-    modified_apps = []
-    for app_name in apps_to_build:
-        if app_name == APP_SHELL or app_name == "none":
-            continue
-        # Map apps to plugin repos if they have a mapping
-        if app_name in APP_TO_PLUGIN_MAPPING:
-            modified_apps.append(APP_TO_PLUGIN_MAPPING[app_name])
-        else:
-            modified_apps.append(app_name)
-    # Extract ci_target from tuples for commit message
-    modified_apps.extend([ci_target for _, ci_target in app_shell_variations])
-    modified_apps.extend([f"{PLUGIN_PREFIX}{p}" for p in plugins_to_build])
-    return modified_apps
-
-
-def collect_go_paths(apps_to_build: List[str], plugins_to_build: List[str],
-                     app_shell_variations: List[Tuple[str, str]]) -> List[str]:
-    """
-    Build the list of Go build paths to stage.
-
-    Args:
-        apps_to_build: List of app names to build
-        plugins_to_build: List of plugin names to build
-        app_shell_variations: List of (local_folder, ci_target) tuples for app-shell variations
-
-    Returns:
-        List of Go build paths
-    """
-    go_paths = []
-    for app_name in apps_to_build:
-        if app_name == APP_SHELL or app_name == "none":
-            continue
-        # Map apps to plugin repos if they have a mapping
-        target_repo = APP_TO_PLUGIN_MAPPING.get(app_name, app_name)
-        go_paths.append(f"go/{target_repo}/build")
-    # Extract local_folder from tuples for path construction
-    go_paths.extend([f"go/{local_folder}/build" for local_folder, _ in app_shell_variations])
-    go_paths.extend([f"go/{PLUGIN_PREFIX}{plugin_name}/build" for plugin_name in plugins_to_build])
-    return go_paths
-
-
-def main():
+def create_default_registry() -> BuildRegistry:
+    """Create default build registry"""
+    config = create_default_config()
+    return build_registry(config)
+
+
+def create_default_config() -> Dict[str, Any]:
+    """Create default configuration with helper functions"""
+    return {
+        "app_shell": create_app_shell_config(),
+        "plugins": create_plugins_config()
+    }
+
+
+def create_app_shell_config() -> Dict[str, Any]:
+    """Create app shell configuration"""
+    return {
+        "dashboard": ui_app(**app_shell_template("dashboard")),
+        "admin": ui_app(**app_shell_template("admin"))
+    }
+
+
+def create_plugins_config() -> Dict[str, Any]:
+    """Create plugins configuration"""
+    return {
+        "core_plugins": get_core_plugins(),
+        "feature_plugins": discover_plugins()
+    }
+
+
+def get_core_plugins() -> List[str]:
+    """Get list of core plugins that should always be built"""
+    return ["ipfs", "core", "lbry"]
+
+
+def get_app_shell_variants() -> List[str]:
+    """Get list of app shell variations"""
+    return ["dashboard", "admin"]
+
+
+def create_app_shell_variant_config(variant_name: str) -> Dict[str, Any]:
+    """Create configuration for a specific app shell variant"""
+    return ui_app(**app_shell_template(variant_name))
+
+
+# Functional helpers for building config elements
+
+def build_app_shell_section(variants: List[str] = None) -> Dict[str, Any]:
+    """Build app shell configuration section"""
+    variants = variants or get_app_shell_variants()
+    return {variant: create_app_shell_variant_config(variant) for variant in variants}
+
+
+def build_plugins_section(
+    core_plugin_names: List[str] = None,
+    include_feature_plugins: bool = True,
+    custom_plugins: Dict[str, Dict] = None
+) -> Dict[str, Any]:
+    """Build plugins configuration section"""
+    return {
+        "core_plugins": core_plugin_names or get_core_plugins(),
+        "feature_plugins": {
+            **(discover_plugins() if include_feature_plugins else {}),
+            **(custom_plugins or {})
+        }
+    }
+
+
+def build_config(
+    app_shell_variants: List[str] = None,
+    core_plugins: List[str] = None,
+    include_feature_plugins: bool = True,
+    custom_plugins: Dict[str, Dict] = None
+) -> Dict[str, Any]:
+    """Build complete configuration from functional elements"""
+    return {
+        "app_shell": build_app_shell_section(app_shell_variants),
+        "plugins": build_plugins_section(core_plugins, include_feature_plugins, custom_plugins)
+    }
+
+
+def create_default_config() -> Dict[str, Any]:
+    """Create default configuration using functional builders"""
+    return build_config()
+
+
+def create_plugins_only_config() -> Dict[str, Any]:
+    """Create configuration with only plugins (no app shell)"""
+    return {
+        "app_shell": {},
+        "plugins": create_plugins_config()
+    }
+
+
+def create_app_shell_only_config() -> Dict[str, Any]:
+    """Create configuration with only app shell (no plugins)"""
+    return {
+        "app_shell": create_app_shell_config(),
+        "plugins": {
+            "core_plugins": [],
+            "feature_plugins": {}
+        }
+    }
+
+
+def create_minimal_config() -> Dict[str, Any]:
+    """Create minimal configuration - no app shell, only core plugins"""
+    return {
+        "app_shell": {},
+        "plugins": {
+            "core_plugins": get_core_plugins(),
+            "feature_plugins": {}
+        }
+    }
+
+
+
+
+
+def parse_arguments() -> argparse.Namespace:
+    """Parse command line arguments"""
     parser = argparse.ArgumentParser(
         description="Build and release portal apps and plugins to Go modules",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Build all apps and plugins (default: all)
-  python scripts/release-go.py
+  # Build all apps and plugins (default)
+  python scripts/release-go-dsl.py
 
-  # Build specific apps (CSV format)
-  python scripts/release-go.py --apps portal-frontend,portal-app-shell
+  # Build specific targets
+  python scripts/release-go-dsl.py --targets dashboard,ipfs
 
-  # Build specific plugins (CSV format)
-  python scripts/release-go.py --plugins dashboard,ipfs
-
-  # Build specific apps and plugins
-  python scripts/release-go.py --apps portal-frontend --plugins dashboard,ipfs
-
-  # Skip apps, build only plugins
-  python scripts/release-go.py --apps none --plugins all
-
-  # Skip plugins, build only apps
-  python scripts/release-go.py --apps all --plugins none
-
-  # Dry run (build and check but don't commit)
-  python scripts/release-go.py --dry-run
-
-  # Verbose output
-  python scripts/release-go.py --verbose
-
-  # Get commit hash of last release commit
-  python scripts/release-go.py --commit-hash
-
-  # Create commit but don't push
-  python scripts/release-go.py --no-push
-
-  # Force release even if no changes detected (useful for initial releases)
-  python scripts/release-go.py --plugins lbry --force
+  # Build with verbose output
+  python scripts/release-go-dsl.py --verbose
         """
     )
-
+    
     parser.add_argument(
-        "--apps",
-        type=str,
-        default="all",
-        help="Apps to build and release (CSV format, 'all' for defaults, 'none' to skip)"
+        "--targets",
+        help="Specific targets to build (CSV format)",
+        default="all"
     )
-
-    parser.add_argument(
-        "--plugins",
-        type=str,
-        default="all",
-        help="Plugins to build and release (CSV format, 'all' for defaults, 'none' to skip)"
-    )
-
+    
     parser.add_argument(
         "--verbose", "-v",
-        action="store_true",
-        help="Enable verbose output"
+        help="Enable verbose logging",
+        action="store_true"
     )
-
+    
     parser.add_argument(
         "--dry-run",
-        action="store_true",
-        help="Build and check for changes but don't commit"
+        help="Show what would be built without actually building",
+        action="store_true"
     )
-
+    
     parser.add_argument(
-        "--commit-hash",
-        action="store_true",
-        help="Output the commit hash of the last release commit"
+        "--validate-only",
+        help="Only validate configuration without building",
+        action="store_true"
     )
-
-    parser.add_argument(
-        "--no-push",
-        action="store_true",
-        help="Create commit but do not push to remote"
-    )
-
+    
     parser.add_argument(
         "--force",
-        action="store_true",
-        help="Force release even if no git changes detected (useful for initial releases)"
+        help="Force release even if no git changes detected",
+        action="store_true"
     )
+    
+    parser.add_argument(
+        "--no-push",
+        help="Create commit but do not push to remote",
+        action="store_true"
+    )
+    
+    return parser.parse_args()
 
-    args = parser.parse_args()
 
-    # Setup logging
+def filter_targets(registry: BuildRegistry, target_filter: str) -> List[BuildTarget]:
+    """Filter targets based on command line arguments"""
+    if target_filter == "all":
+        return list(registry.targets.values())
+    
+    requested_targets = [t.strip() for t in target_filter.split(",")]
+    filtered_targets = []
+    
+    for target_name in requested_targets:
+        if target_name in registry.targets:
+            filtered_targets.append(registry.targets[target_name])
+        else:
+            logger.warning(f"Target not found: {target_name}")
+    
+    return filtered_targets
+
+
+def main():
+    """Main entry point"""
+    args = parse_arguments()
     logger = setup_logging(args.verbose)
-    logger.info("Starting Go module release script")
-
-    # Get repository root (needed for validation)
-    repo_root = Path(__file__).parent.parent.resolve()
-    logger.info(f"Repository root: {repo_root}")
-
-    # Parse apps and plugins arguments
-    apps_arg = normalize_arg_value(args.apps)
-    if apps_arg == VALUE_ALL:
-        apps_to_build = DEFAULT_APPS
-    elif apps_arg == VALUE_NONE:
-        apps_to_build = []
-    else:
-        apps_to_build = parse_csv_list(args.apps)
-        # Validate app names
-        apps_to_build = sanitize_package_names(apps_to_build, repo_root, APPS_DIR)
-
-    plugins_arg = normalize_arg_value(args.plugins)
-    if plugins_arg == VALUE_ALL:
-        plugins_to_build = DEFAULT_PLUGINS
-    elif plugins_arg == VALUE_NONE:
-        plugins_to_build = []
-    else:
-        plugins_to_build = parse_csv_list(args.plugins)
-        # Validate plugin names
-        plugins_to_build = sanitize_package_names(plugins_to_build, repo_root, LIBS_DIR, PLUGIN_PREFIX)
-
-    logger.info(f"Apps to build: {', '.join(apps_to_build) if apps_to_build else 'none'}")
-    logger.info(f"Plugins to build: {', '.join(plugins_to_build) if plugins_to_build else 'none'}")
-
-    if args.verbose:
-        logger.debug(f"Repository root: {repo_root}")
-        logger.debug(f"Apps to build: {', '.join(apps_to_build) if apps_to_build else 'none'}")
-        logger.debug(f"Plugins to build: {', '.join(plugins_to_build) if plugins_to_build else 'none'}")
-
-    # Handle --commit-hash flag
-    if args.commit_hash:
-        try:
-            # Get the last commit message that matches our release pattern
-            result = run_command(
-                ["git", "log", "--grep", "^chore: export app and plugin builds$", "-1", "--format=%H"],
-                cwd=repo_root
+    
+    try:
+        # Create build registry
+        registry = create_default_registry()
+        
+        # Filter targets
+        targets = filter_targets(registry, args.targets)
+        
+        if not targets:
+            logger.error("No valid targets to build")
+            return 1
+        
+        # Show build plan
+        logger.info(f"Build plan: {len(targets)} targets")
+        for target in targets:
+            logger.info(f"  {target.name} ({target.context.type.value}) -> {target.target_path}")
+        
+        if args.validate_only:
+            logger.info("Validation complete")
+            return 0
+        
+        if args.dry_run:
+            logger.info("Dry run complete")
+            return 0
+        
+        # Get repository root
+        repo_root = Path.cwd()
+        
+        # Check for force flag vs actual changes
+        if not args.force:
+            # Check if there are actual git changes that would affect the build
+            diff_result = subprocess.run(
+                ["git", "diff", "HEAD~1", "HEAD", "--name-only", "apps/", "libs/"],
+                cwd=repo_root,
+                capture_output=True,
+                text=True
             )
-            commit_hash = result.stdout.strip()
-            if commit_hash:
-                print(commit_hash)
-            sys.exit(0)
-        except Exception:
-            sys.exit(1)
-
-    # Early exit if nothing to build (unless --commit-hash)
-    if not apps_to_build and not plugins_to_build:
-        logger.error("No valid apps or plugins to build. All provided names were invalid or skipped.")
-        logger.error(f"Available apps: {', '.join(list_available_apps(repo_root))}")
-        logger.error(f"Available plugins: {', '.join(list_available_plugins(repo_root))}")
-        sys.exit(1)
-
-    # Get current git revision (version)
-    try:
-        git_revision = get_git_revision(repo_root)
-        if args.verbose:
-            logger.debug(f"Git revision: {git_revision}")
+            
+            if diff_result.returncode == 0 and not diff_result.stdout.strip():
+                logger.info("No git changes detected, skipping build (use --force to override)")
+                return 0
+        
+        # Build targets
+        builder = ContextAwareBuilder(repo_root, args.verbose)
+        builder.build_targets(targets)
+        
+        # Copy to Go directories
+        copier = SafeBuildCopier(repo_root, args.verbose)
+        copier.copy_targets(targets)
+        
+        # Git operations
+        if not args.no_push:
+            # Stage and commit changes
+            import subprocess
+            result = subprocess.run(
+                ["git", "add", "go/"],
+                cwd=repo_root,
+                capture_output=True,
+                text=True
+            )
+            
+            if result.returncode != 0:
+                logger.error(f"Failed to stage changes: {result.stderr}")
+                return 1
+            
+            # Check if there are changes to commit
+            status_result = subprocess.run(
+                ["git", "status", "--porcelain", "go/"],
+                cwd=repo_root,
+                capture_output=True,
+                text=True
+            )
+            
+            if status_result.returncode == 0 and status_result.stdout.strip():
+                logger.info("Changes detected, committing...")
+                commit_result = subprocess.run(
+                    ["git", "commit", "-m", "chore: export app and plugin builds"],
+                    cwd=repo_root,
+                    capture_output=True,
+                    text=True
+                )
+                
+                if commit_result.returncode != 0:
+                    logger.error(f"Failed to commit changes: {commit_result.stderr}")
+                    return 1
+                
+                # Push changes
+                push_result = subprocess.run(
+                    ["git", "push"],
+                    cwd=repo_root,
+                    capture_output=True,
+                    text=True
+                )
+                
+                if push_result.returncode != 0:
+                    logger.error(f"Failed to push changes: {push_result.stderr}")
+                    return 1
+                
+                logger.info("Changes pushed successfully")
+            else:
+                logger.info("No changes to commit")
+        else:
+            logger.info("Skipping git operations (no-push specified)")
+        
+        logger.info("Build and copy completed successfully")
+        return 0
+        
     except Exception as e:
-        logger.error(f"Error getting git revision: {e}")
-        sys.exit(1)
-
-    # Build all apps and plugins in a single turbo command
-    try:
-        build_packages(apps_to_build, plugins_to_build, repo_root)
-    except Exception as e:
-        logger.error(f"Error building packages: {e}")
+        logger.error(f"Build failed: {e}")
         if args.verbose:
             logger.debug(traceback.format_exc())
-        sys.exit(1)
-
-    # Special handling for portal-app-shell variations
-    # List of (local_folder, ci_target) tuples for each variation
-    app_shell_variations = []
-    if APP_SHELL in apps_to_build:
-        try:
-            app_shell_path = repo_root / "apps" / APP_SHELL
-
-            # Copy each variation to its corresponding Go directory
-            for variation, (local_folder, ci_target) in APP_SHELL_VARIATIONS.items():
-                variation_build_dir = app_shell_path / "dist" / variation
-                if variation_build_dir.exists() and variation_build_dir.is_dir():
-                    if args.verbose:
-                        logger.debug(f"Copying {APP_SHELL} {variation} build to go/{local_folder}/build...")
-                    copy_build_to_go(local_folder, variation_build_dir, repo_root)
-                    app_shell_variations.append((local_folder, ci_target))
-
-        except Exception as e:
-            logger.error(f"Error processing {APP_SHELL} variations: {e}")
-            if args.verbose:
-                logger.debug(traceback.format_exc())
-
-    # Copy each app's build output to Go directory (excluding portal-app-shell)
-    for app_name in apps_to_build:
-        if app_name == APP_SHELL:
-            continue  # Skip portal-app-shell, handled above
-
-        try:
-            # Get build output directory
-            build_dir = get_build_output_dir(app_name, repo_root, APPS_DIR)
-            if args.verbose:
-                logger.debug(f"Build directory: {build_dir}")
-
-            # Map apps to plugin repos if they have a mapping
-            target_repo = APP_TO_PLUGIN_MAPPING.get(app_name, app_name)
-            
-            # Copy to Go directory (always replace)
-            copy_build_to_go(target_repo, build_dir, repo_root)
-
-        except Exception as e:
-            logger.error(f"Error processing {app_name}: {e}")
-            if args.verbose:
-                logger.debug(traceback.format_exc())
-            continue
-
-    # Copy each plugin's build output to Go directory
-    for plugin_name in plugins_to_build:
-        try:
-            # Get build output directory
-            build_dir = get_build_output_dir(plugin_name, repo_root, LIBS_DIR, PLUGIN_PREFIX)
-            if args.verbose:
-                logger.debug(f"Build directory: {build_dir}")
-
-            # Copy to Go directory (always replace)
-            copy_build_to_go(f"{PLUGIN_PREFIX}{plugin_name}", build_dir, repo_root)
-
-        except Exception as e:
-            logger.error(f"Error processing plugin {plugin_name}: {e}")
-            if args.verbose:
-                logger.debug(traceback.format_exc())
-            continue
-
-    logger.debug("")  # Empty line for readability
-
-    # Stage all Go build directories (apps and plugins, including app-shell variations)
-    go_paths = collect_go_paths(apps_to_build, plugins_to_build, app_shell_variations)
-    
-    # Track which paths were actually staged for --force warning
-    staged_paths = []
-    for go_path in go_paths:
-        go_dir = repo_root / go_path
-        if go_dir.exists():
-            run_command(["git", "add", str(go_dir)], cwd=repo_root)
-            staged_paths.append(go_path)
-        elif args.force:
-            logger.warning(f"{go_path} does not exist, but --force is set")
-
-    # Check if there are actual changes via git diff
-    has_changes = get_git_diff(repo_root, go_paths)
-
-    # Check if anything is actually staged (needed for --force case)
-    has_staged = False
-    try:
-        result = run_command(["git", "diff", "--cached", "--quiet"], cwd=repo_root, check=False)
-        has_staged = result.returncode == 1  # 1 means there are staged changes
-    except Exception:
-        pass
-
-    # Get versions and modified apps list for metadata (needed regardless of changes)
-    versions = collect_versions(apps_to_build, plugins_to_build, app_shell_variations, repo_root)
-    modified_apps = get_modified_apps_list(apps_to_build, plugins_to_build, app_shell_variations)
-    
-    if args.verbose:
-        logger.debug(f"Modified apps list to commit: {modified_apps}")
-
-    if has_changes or (args.force and has_staged):
-        if args.force and not has_changes:
-            logger.warning("--force flag set, proceeding despite no git changes detected")
-        
-        # Get list of changed files for reporting
-        changed_files = get_git_diff_files(repo_root, go_paths)
-        if args.verbose and changed_files:
-            logger.debug(f"Changed files ({len(changed_files)}):")
-            for file in changed_files[:10]:  # Show first 10
-                logger.debug(f"  - {file}")
-            if len(changed_files) > 10:
-                logger.debug(f"  ... and {len(changed_files) - 10} more")
-
-        try:
-            success, commit_hash = git_add_and_commit_modified(
-                modified_apps,
-                versions,
-                repo_root,
-                args.verbose
-            )
-
-            if success:
-                write_metadata_files(modified_apps, repo_root, args.verbose)
-                set_github_output("commit_hash", commit_hash)
-
-                # Handle dry-run and no-push flags
-                if args.dry_run:
-                    logger.info("Dry run - skipping push")
-                    return
-                if args.no_push:
-                    logger.info("No-push flag set - skipping push")
-                    return
-
-                # Push changes
-                try:
-                    run_command(["git", "push", "origin", "HEAD"], cwd=repo_root)
-                    if args.verbose:
-                        logger.debug("Changes pushed successfully")
-                except Exception as e:
-                    logger.error(f"Error pushing changes: {e}")
-                    sys.exit(1)
-            else:
-                logger.error("No commit created")
-                sys.exit(1)
-        except Exception as e:
-            logger.error(f"Error creating commit: {e}")
-            sys.exit(1)
-    elif args.force and not has_staged:
-        logger.warning("--force flag set but nothing was staged (no build outputs found)")
-        write_metadata_files(modified_apps, repo_root, args.verbose)
-    else:
-        logger.info("No changes detected in any apps")
-        # Still write metadata so downstream workflows know what was processed
-        write_metadata_files(modified_apps, repo_root, args.verbose)
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -7,16 +7,27 @@ on:
     types: [release-go]
   workflow_dispatch:
     inputs:
-      apps:
-        description: 'Apps to build and release (CSV format, "all" for defaults, "none" to skip)'
+      targets:
+        description: 'Specific targets to build (CSV format, "all" for defaults)'
         required: false
         default: 'all'
         type: string
-      plugins:
-        description: 'Plugins to build and release (CSV format, "all" for defaults, "none" to skip)'
+      
+      verbose:
+        description: 'Enable verbose output'
         required: false
-        default: 'all'
-        type: string
+        default: false
+        type: boolean
+      dry_run:
+        description: 'Show what would be built without actually building'
+        required: false
+        default: false
+        type: boolean
+      validate_only:
+        description: 'Only validate configuration without building'
+        required: false
+        default: false
+        type: boolean
       force:
         description: 'Force release even if no git changes detected'
         required: false
@@ -24,11 +35,6 @@ on:
         type: boolean
       no_push:
         description: 'Create commit but do not push to remote'
-        required: false
-        default: false
-        type: boolean
-      verbose:
-        description: 'Enable verbose output'
         required: false
         default: false
         type: boolean
@@ -60,11 +66,8 @@ jobs:
           args=""
           
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            if [ "${{ inputs.apps }}" != "all" ]; then
-              args="$args --apps '${{ inputs.apps }}'"
-            fi
-            if [ "${{ inputs.plugins }}" != "all" ]; then
-              args="$args --plugins '${{ inputs.plugins }}'"
+            if [ "${{ inputs.targets }}" != "all" ]; then
+              args="$args --targets '${{ inputs.targets }}'"
             fi
             if [ "${{ inputs.force }}" = "true" ]; then
               args="$args --force"
@@ -74,6 +77,18 @@ jobs:
             fi
             if [ "${{ inputs.verbose }}" = "true" ]; then
               args="$args --verbose"
+            fi
+            if [ "${{ inputs.dry_run }}" = "true" ]; then
+              args="$args --dry-run"
+            fi
+            if [ "${{ inputs.validate_only }}" = "true" ]; then
+              args="$args --validate-only"
+            fi
+            if [ "${{ inputs.force }}" = "true" ]; then
+              args="$args --force"
+            fi
+            if [ "${{ inputs.no_push }}" = "true" ]; then
+              args="$args --no-push"
             fi
           fi
           
