@@ -1,12 +1,12 @@
 import { createEnv, boolean, string } from './schemas-CA767HQ5.js';
-import { React, admin__loadShare__react__loadShare__ } from './admin__loadShare__react__loadShare__-BY1INpNu.js';
-import { m, admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__, admin__loadShare__react_mf_2_router__loadShare__ } from './admin__loadShare__react_mf_2_router__loadShare__-CwtF7zsV.js';
-import { jsxRuntimeExports } from './jsx-runtime-BOqW7N1v.js';
+import { React, dashboard__loadShare__react__loadShare__ } from './dashboard__loadShare__react__loadShare__-CpgLq0wn.js';
+import { m, dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__, dashboard__loadShare__react_mf_2_router__loadShare__ } from './dashboard__loadShare__react_mf_2_router__loadShare__-Bi31I4AN.js';
+import { jsxRuntimeExports } from './jsx-runtime-DIQgdeXv.js';
 import { getDefaultExportFromCjs } from './_commonjsHelpers-BILit0S-.js';
-import { index_cjs } from './virtual_mf-REMOTE_ENTRY_ID-BivwObli.js';
-import { createLucideIcon } from './createLucideIcon-KUE0P9TA.js';
+import { index_cjs } from './virtual_mf-REMOTE_ENTRY_ID-baObNLbp.js';
+import { createLucideIcon } from './createLucideIcon-BGXC8EXb.js';
 import './parse-owPI_Zlz.js';
-import './admin__mf_v__runtimeInit__mf_v__-B2PJI9hS.js';
+import './dashboard__mf_v__runtimeInit__mf_v__-BgQBwuY5.js';
 import './virtualExposes-DwA08f_D.js';
 import './preload-helper-Dk3k6Zm1.js';
 
@@ -3937,16 +3937,16 @@ function shouldInitialize(builder, framework) {
 }
 
 //#region src/contexts/framework.tsx
-const FrameworkContext = admin__loadShare__react__loadShare__.createContext(null);
+const FrameworkContext = dashboard__loadShare__react__loadShare__.createContext(null);
 function FrameworkProvider({ appName, children, configure }) {
-	const builderRef = admin__loadShare__react__loadShare__.useRef();
-	const frameworkRef = admin__loadShare__react__loadShare__.useRef();
-	const [state, setState] = admin__loadShare__react__loadShare__.useState({
+	const builderRef = dashboard__loadShare__react__loadShare__.useRef();
+	const frameworkRef = dashboard__loadShare__react__loadShare__.useRef();
+	const [state, setState] = dashboard__loadShare__react__loadShare__.useState({
 		error: null,
 		framework: null,
 		isLoading: true
 	});
-	const initializeFrameworkInstance = admin__loadShare__react__loadShare__.useCallback(async () => {
+	const initializeFrameworkInstance = dashboard__loadShare__react__loadShare__.useCallback(async () => {
 		try {
 			if (!shouldInitialize(builderRef.current, frameworkRef.current)) {
 				setState({
@@ -4000,7 +4000,7 @@ function FrameworkProvider({ appName, children, configure }) {
 			} }));
 		}
 	}, [appName, configure]);
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		initializeFrameworkInstance();
 	}, [
 		appName,
@@ -4028,12 +4028,12 @@ function FrameworkProvider({ appName, children, configure }) {
 	});
 }
 function useFramework() {
-	const context = admin__loadShare__react__loadShare__.useContext(FrameworkContext);
+	const context = dashboard__loadShare__react__loadShare__.useContext(FrameworkContext);
 	if (!context) throw new Error("useFramework must be used within a FrameworkProvider");
 	return context;
 }
 function useFrameworkLoading() {
-	const context = admin__loadShare__react__loadShare__.useContext(FrameworkContext);
+	const context = dashboard__loadShare__react__loadShare__.useContext(FrameworkContext);
 	if (!context) throw new Error("useFrameworkLoading must be used within a FrameworkProvider");
 	return {
 		error: context.error,
@@ -4043,10 +4043,10 @@ function useFrameworkLoading() {
 }
 function useFrameworkData(fetchData, deps = []) {
 	const { framework, isLoading: frameworkLoading, error: frameworkError } = useFramework();
-	const [data, setData] = admin__loadShare__react__loadShare__.useState(null);
-	const [error, setError] = admin__loadShare__react__loadShare__.useState(null);
-	const [isLoading, setIsLoading] = admin__loadShare__react__loadShare__.useState(true);
-	admin__loadShare__react__loadShare__.useEffect(() => {
+	const [data, setData] = dashboard__loadShare__react__loadShare__.useState(null);
+	const [error, setError] = dashboard__loadShare__react__loadShare__.useState(null);
+	const [isLoading, setIsLoading] = dashboard__loadShare__react__loadShare__.useState(true);
+	dashboard__loadShare__react__loadShare__.useEffect(() => {
 		let mounted = true;
 		if (frameworkError) {
 			if (mounted) {
@@ -4089,21 +4089,21 @@ function useFrameworkData(fetchData, deps = []) {
 }
 function useCapability(id) {
 	const { framework } = useFramework();
-	return useFrameworkData(admin__loadShare__react__loadShare__.useCallback(() => {
+	return useFrameworkData(dashboard__loadShare__react__loadShare__.useCallback(() => {
 		if (!framework) throw new Error("Framework not initialized");
 		return framework.getCapability(id);
 	}, [framework, id]));
 }
 function useFeature(id) {
 	const { framework } = useFramework();
-	return useFrameworkData(admin__loadShare__react__loadShare__.useCallback(() => {
+	return useFrameworkData(dashboard__loadShare__react__loadShare__.useCallback(() => {
 		if (!framework) throw new Error("Framework not initialized");
 		return framework.getFeature(id);
 	}, [framework, id]));
 }
 function useCapabilitiesByType(typeId) {
 	const { framework } = useFramework();
-	return useFrameworkData(admin__loadShare__react__loadShare__.useCallback(() => {
+	return useFrameworkData(dashboard__loadShare__react__loadShare__.useCallback(() => {
 		if (!framework) throw new Error("Framework not initialized");
 		return framework.getCapabilitiesByType(typeId);
 	}, [framework, typeId]));
@@ -4130,7 +4130,7 @@ function FlexWidgetArea({ className, id, tag = "div" }) {
 	const { isVisible, widgets } = useWidgetArea(id);
 	if (!isVisible) return null;
 	return /* @__PURE__ */ jsxRuntimeExports.jsx(tag, {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col", className),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("flex flex-col", className),
 		children: widgets.map((widget) => {
 			const Widget = widget.component;
 			return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Widget, {}) }, widget.id);
@@ -4297,7 +4297,7 @@ function GridWidgetArea({ id }) {
 	if (!isVisible) return null;
 	const gridAutoRowsClass = getGridAutoRows(area.grid.rowHeight);
 	return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-		className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("grid", getGridGap(area.grid.gap) || "gap-5", getResponsiveGridTemplateColumnsClass(area.grid.columns), gridAutoRowsClass),
+		className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("grid", getGridGap(area.grid.gap) || "gap-5", getResponsiveGridTemplateColumnsClass(area.grid.columns), gridAutoRowsClass),
 		style: getGridStyles(area),
 		children: widgets.map((widget) => {
 			const Widget = widget.component;
@@ -4313,7 +4313,7 @@ function GridWidgetArea({ id }) {
 			if (widget.maxWidth && !maxWidthClass) widgetStyles.maxWidth = `${widget.maxWidth}px`;
 			if (widget.maxHeight && !maxHeightClass) widgetStyles.maxHeight = `${widget.maxHeight}px`;
 			return /* @__PURE__ */ jsxRuntimeExports.jsx("div", {
-				className: admin__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("bg-background rounded-md border p-4", columnSpanClass, rowSpanClass, minWidthClass, minHeightClass, maxWidthClass, maxHeightClass),
+				className: dashboard__loadShare___mf_0_lumeweb_mf_1_portal_mf_2_framework_mf_2_ui_mf_2_core__loadShare__.cn("bg-background rounded-md border p-4", columnSpanClass, rowSpanClass, minWidthClass, minHeightClass, maxWidthClass, maxHeightClass),
 				style: widgetStyles,
 				children: /* @__PURE__ */ jsxRuntimeExports.jsx(Widget, {})
 			}, widget.id);
@@ -4375,7 +4375,7 @@ function RouteErrorBoundary({ children }) {
 	let useRouteErrorAttempted = false;
 	try {
 		useRouteErrorAttempted = true;
-		const potentialRouterError = admin__loadShare__react_mf_2_router__loadShare__.useRouteError();
+		const potentialRouterError = dashboard__loadShare__react_mf_2_router__loadShare__.useRouteError();
 		if (potentialRouterError !== null && potentialRouterError !== void 0) routerError = potentialRouterError;
 		else console.info("RouteErrorBoundary: useRouteError() succeeded but returned null/undefined. No router error available.");
 	} catch (e) {
