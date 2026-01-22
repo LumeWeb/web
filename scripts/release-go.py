@@ -55,6 +55,29 @@ VALUE_ALL = "all"
 VALUE_NONE = "none"
 
 
+def normalize_arg_value(value: Optional[str]) -> str:
+    """
+    Normalize an argument value by stripping whitespace and quotes.
+
+    Args:
+        value: Argument value string or None
+
+    Returns:
+        Normalized string (lowercase, stripped of whitespace and quotes)
+    """
+    if not value:
+        return ""
+    
+    value = value.strip()
+    
+    # Remove surrounding quotes (single or double)
+    if (value.startswith("'") and value.endswith("'")) or \
+       (value.startswith('"') and value.endswith('"')):
+        value = value[1:-1]
+    
+    return value.lower().strip()
+
+
 def parse_csv_list(value: Optional[str]) -> List[str]:
     """
     Parse a comma-separated string into a list, trimming whitespace and quotes.
@@ -65,12 +88,9 @@ def parse_csv_list(value: Optional[str]) -> List[str]:
     Returns:
         List of trimmed strings, or empty list if value is None or "none"
     """
-    # Strip whitespace first, then check for "none"
-    if not value:
-        return []
-    
-    value = value.strip()
-    if value.lower() == "none":
+    # Normalize and check for "none"
+    normalized = normalize_arg_value(value)
+    if not normalized or normalized == VALUE_NONE:
         return []
 
     # Split by comma, strip whitespace, and remove surrounding quotes
@@ -732,18 +752,20 @@ Examples:
     repo_root = Path(__file__).parent.parent.resolve()
 
     # Parse apps and plugins arguments
-    if args.apps.lower() == VALUE_ALL:
+    apps_arg = normalize_arg_value(args.apps)
+    if apps_arg == VALUE_ALL:
         apps_to_build = DEFAULT_APPS
-    elif args.apps.lower() == VALUE_NONE:
+    elif apps_arg == VALUE_NONE:
         apps_to_build = []
     else:
         apps_to_build = parse_csv_list(args.apps)
         # Validate app names
         apps_to_build = sanitize_package_names(apps_to_build, repo_root, APPS_DIR, verbose=args.verbose)
 
-    if args.plugins.lower() == VALUE_ALL:
+    plugins_arg = normalize_arg_value(args.plugins)
+    if plugins_arg == VALUE_ALL:
         plugins_to_build = DEFAULT_PLUGINS
-    elif args.plugins.lower() == VALUE_NONE:
+    elif plugins_arg == VALUE_NONE:
         plugins_to_build = []
     else:
         plugins_to_build = parse_csv_list(args.plugins)
