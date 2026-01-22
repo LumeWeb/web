@@ -134,6 +134,7 @@ export function Config(opts: ConfigOptions) {
     configOverrides: Partial<ModuleFederationOptions> = {},
   ) {
     return federation({
+      dts: false,
       ignoreOrigin: true,
       manifest: true,
       name,
