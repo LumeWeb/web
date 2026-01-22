@@ -9,6 +9,7 @@ Uses declarative DSL configuration for maintainable build definitions.
 import argparse
 import json
 import logging
+import os
 import shutil
 import subprocess
 import sys
@@ -794,12 +795,30 @@ def filter_targets(registry: BuildRegistry, target_filter: str) -> List[BuildTar
     return filtered_targets
 
 
-def write_metadata_files(modified_apps: List[str], verbose: bool = False) -> None:
+def set_github_output(name: str, value: str) -> None:
+    """
+    Set a GitHub Actions output using the GITHUB_OUTPUT environment file.
+    
+    Args:
+        name: Output name
+        value: Output value
+    """
+    github_output = os.environ.get("GITHUB_OUTPUT")
+    if github_output:
+        with open(github_output, "a") as f:
+            f.write(f"{name}={value}\n")
+    else:
+        # Fallback to stdout if not in GitHub Actions
+        print(f"{name}={value}")
+
+
+def write_metadata_files(modified_apps: List[str], commit_hash: str = None, verbose: bool = False) -> None:
     """
     Write metadata files for downstream workflow steps.
     
     Args:
         modified_apps: List of modified app names
+        commit_hash: Git commit hash for the build
         verbose: Whether to print verbose output
     """
     tmp_dir = Path("/tmp")
@@ -810,8 +829,16 @@ def write_metadata_files(modified_apps: List[str], verbose: bool = False) -> Non
     
     modified_apps_file.write_text(content)
     
+    # Write commit hash if provided
+    if commit_hash:
+        commit_file = tmp_dir / "commit_hash.txt"
+        commit_file.write_text(commit_hash)
+        set_github_output("commit_hash", commit_hash)
+    
     if verbose and modified_apps:
         logger.debug(f"Writing metadata for dispatch: {', '.join(modified_apps)}")
+        if commit_hash:
+            logger.debug(f"Commit hash: {commit_hash}")
 
 
 def main():
@@ -870,7 +897,20 @@ def main():
         
         # Write metadata for downstream workflows
         modified_apps = copier.get_modified_apps_list(targets)
-        write_metadata_files(modified_apps, args.verbose)
+        
+        # Get current commit hash for metadata
+        try:
+            commit_result = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=repo_root,
+                capture_output=True,
+                text=True
+            )
+            commit_hash = commit_result.stdout.strip() if commit_result.returncode == 0 else None
+        except:
+            commit_hash = None
+        
+        write_metadata_files(modified_apps, commit_hash, args.verbose)
         
         # Git operations
         if not args.no_push:
