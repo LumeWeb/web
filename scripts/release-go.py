@@ -20,6 +20,13 @@ from enum import Enum
 
 # Constants
 PORTAL_APP_SHELL_PACKAGE = "@lumeweb/portal-app-shell"
+PORTAL_PLUGIN_PACKAGE_PREFIX = "@lumeweb/portal-plugin-"
+
+# Manifest validation constants
+MANIFEST_FILENAME = "mf-manifest.json"
+INDEX_FILENAME = "index.html"
+STATIC_DIRNAME = "static"
+JS_FILE_PATTERN = "**/*.js"
 
 
 # ============================================================================
@@ -121,12 +128,20 @@ def discover_plugins() -> Dict[str, Dict[str, Any]]:
             
         plugin_name = plugin_dir.name.replace("portal-plugin-", "")
         
-        # Check if this is a frontend plugin (has dist with manifest) or library
-        dist_path = plugin_dir / "dist"
-        is_frontend_plugin = dist_path.exists() and (dist_path / "mf-manifest.json").exists()
-        
-        # Only include frontend plugins in build registry
-        if not is_frontend_plugin:
+        # Check if this is a buildable frontend plugin (has package.json with build script)
+        package_json_path = plugin_dir / "package.json"
+        if not package_json_path.exists():
+            continue
+            
+        # Read package.json to check if it has build script
+        try:
+            import json
+            with open(package_json_path, 'r') as f:
+                package_data = json.load(f)
+            scripts = package_data.get('scripts', {})
+            if 'build' not in scripts:
+                continue
+        except:
             continue
             
         # Detect plugin type from structure
@@ -315,9 +330,31 @@ class RegistryValidator:
                 # Only validate if source path exists
                 if not target.source_path.exists():
                     return True  # Skip validation for non-existent sources (will be handled later)
-                manifest_path = target.source_path / "mf-manifest.json"
-                if not manifest_path.exists():
-                    return False
+                
+                # Check if directory has built content (manifest.json, index.html, or js files)
+                try:
+                    has_built_content = False
+                    for item in target.source_path.iterdir():
+                        if item.name == MANIFEST_FILENAME or item.name == INDEX_FILENAME:
+                            has_built_content = True
+                            break
+                        elif item.is_dir() and item.name == STATIC_DIRNAME:
+                            # Check for js files in static directory
+                            for js_file in item.glob(JS_FILE_PATTERN):
+                                has_built_content = True
+                                break
+                            if has_built_content:
+                                break
+                    
+                    if not has_built_content:
+                        return True  # Skip validation for unbuilt plugins (will be built later)
+                    
+                    # If we have built content, check for manifest
+                    manifest_path = target.source_path / MANIFEST_FILENAME
+                    if not manifest_path.exists():
+                        return False
+                except:
+                    return True  # Skip validation on error
         return True
     
     def _no_invalid_repo_collisions(self, targets: List[BuildTarget]) -> bool:
@@ -404,7 +441,9 @@ class ContextAwareBuilder:
             logger.info(f"Building {len(targets)} plugin targets")
         
         plugin_names = [t.name for t in targets]
-        cmd = ["pnpm", "run", "build", f"--filter={','.join(f'portal-plugin-{name}' for name in plugin_names)}"]
+        cmd = ["pnpm", "run", "build"]
+        for name in plugin_names:
+            cmd.append(f"--filter={PORTAL_PLUGIN_PACKAGE_PREFIX}{name}")
         self._run_command(cmd)
     
     def _run_command(self, cmd: List[str]) -> None:
@@ -483,12 +522,8 @@ class SafeBuildCopier:
             dest_path = target_dir / item.name
             
             if item.is_dir():
-                if not dest_path.exists():
-                    shutil.copytree(item, dest_path)
-                else:
-                    # Merge directory contents
-                    for subitem in item.iterdir():
-                        shutil.copy2(subitem, dest_path / subitem.name)
+                # Use copytree with dirs_exist_ok to merge directories
+                shutil.copytree(item, dest_path, dirs_exist_ok=True)
             else:
                 # Don't overwrite existing files in merge mode
                 if not dest_path.exists():
