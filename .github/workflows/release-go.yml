@@ -6,6 +6,27 @@ on:
   repository_dispatch:
     types: [release-go]
   workflow_dispatch:
+    inputs:
+      apps:
+        description: 'Apps to build and release (CSV format, "all" for defaults, "none" to skip)'
+        required: false
+        default: 'all'
+        type: string
+      plugins:
+        description: 'Plugins to build and release (CSV format, "all" for defaults, "none" to skip)'
+        required: false
+        default: 'all'
+        type: string
+      force:
+        description: 'Force release even if no git changes detected'
+        required: false
+        default: false
+        type: boolean
+      no_push:
+        description: 'Create commit but do not push to remote'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   prepare:
@@ -31,7 +52,25 @@ jobs:
       - name: Release
         id: release
         run: |
-          python scripts/release-go.py
+          args=""
+          
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "${{ inputs.apps }}" != "all" ]; then
+              args="$args --apps '${{ inputs.apps }}'"
+            fi
+            if [ "${{ inputs.plugins }}" != "all" ]; then
+              args="$args --plugins '${{ inputs.plugins }}'"
+            fi
+            if [ "${{ inputs.force }}" = "true" ]; then
+              args="$args --force"
+            fi
+            if [ "${{ inputs.no_push }}" = "true" ]; then
+              args="$args --no-push"
+            fi
+          fi
+          
+          echo "Running: python scripts/release-go.py $args"
+          python scripts/release-go.py $args
 
       - name: Get modified apps info
         id: get_modified_apps
