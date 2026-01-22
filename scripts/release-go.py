@@ -20,7 +20,11 @@ from typing import Dict, List, Tuple, Optional
 APP_SHELL = "portal-app-shell"
 
 # App shell variations (each built to a separate dist subdirectory)
-APP_SHELL_VARIATIONS = ["dashboard", "admin"]
+# Maps variation names to their target Go repository names
+APP_SHELL_VARIATIONS = {
+    "dashboard": "portal-dashboard",
+    "admin": "portal-plugin-admin"
+}
 
 # Package name prefixes
 PLUGIN_PREFIX = "portal-plugin-"
@@ -37,7 +41,8 @@ DEFAULT_APPS = ["portal-frontend", APP_SHELL]
 
 # Default plugins to build and release
 # Used when --plugins=all is specified
-DEFAULT_PLUGINS = ["dashboard", "admin", "ipfs", "core", "lbry"]
+# Note: dashboard and admin are built via APP_SHELL variations, not standalone plugins
+DEFAULT_PLUGINS = ["ipfs", "core", "lbry"]
 
 
 def parse_csv_list(value: Optional[str]) -> List[str]:
@@ -292,7 +297,7 @@ def build_packages(
     # Build task list: standard build + app-shell variations
     tasks = ["build"]
     if APP_SHELL in app_names:
-        tasks.extend([f"build:{variation}" for variation in APP_SHELL_VARIATIONS])
+        tasks.extend([f"build:{variation}" for variation in APP_SHELL_VARIATIONS.keys()])
 
     # Build filter list for turbo
     filters = []
@@ -599,10 +604,9 @@ Examples:
             app_shell_path = repo_root / "apps" / APP_SHELL
 
             # Copy each variation to its corresponding Go directory
-            for variation in APP_SHELL_VARIATIONS:
+            for variation, go_target in APP_SHELL_VARIATIONS.items():
                 variation_build_dir = app_shell_path / "dist" / variation
                 if variation_build_dir.exists() and variation_build_dir.is_dir():
-                    go_target = f"portal-{variation}"
                     if args.verbose:
                         print(f"Copying {APP_SHELL} {variation} build to go/{go_target}/build...")
                     copy_build_to_go(go_target, variation_build_dir, repo_root, args.verbose)
