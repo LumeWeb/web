@@ -21,7 +21,10 @@ from enum import Enum
 
 # Constants
 PORTAL_APP_SHELL_PACKAGE = "@lumeweb/portal-app-shell"
+PORTAL_FRONTEND_PACKAGE = "@lumeweb/portal-frontend"
+PORTAL_FRONTEND_NAME = "frontend"
 PORTAL_PLUGIN_PACKAGE_PREFIX = "@lumeweb/portal-plugin-"
+PORTAL_PLUGIN_PREFIX = "portal-plugin-"
 
 # Manifest validation constants
 MANIFEST_FILENAME = "mf-manifest.json"
@@ -46,6 +49,7 @@ SKIP_KEYWORDS = ["skip", "placeholder", "echo"]
 
 class BuildContextType(Enum):
     APP_SHELL = "app-shell"
+    STANDALONE_APP = "standalone-app"
     PLUGIN = "plugin"
 
 
@@ -87,7 +91,7 @@ class BuildRegistry:
 def ui_app(**kwargs) -> Dict[str, Any]:
     """Helper for UI application targets"""
     return {
-        "type": "ui_application",
+        "type": ContentType.UI_APPLICATION.value,
         **kwargs
     }
 
@@ -107,8 +111,8 @@ def app_shell_template(variant_name: str, **overrides) -> Dict[str, Any]:
         "variants": [variant_name],
         "build_from": "apps/portal-app-shell/dist/{variant}",
         "deploy_to": "go/portal-{variant}/build",
-        "repo_target": "portal-plugin-{variant}",
-        "content_type": "ui_application",
+        "repo_target": f"{PORTAL_PLUGIN_PREFIX}{{variant}}",
+        "content_type": ContentType.UI_APPLICATION.value,
         **overrides
     }
 
@@ -117,13 +121,45 @@ def plugin_template(plugin_name: str, **overrides) -> Dict[str, Any]:
     """Template for plugin configurations"""
     return {
         "name": plugin_name,
-        "build_from": f"libs/portal-plugin-{plugin_name}/dist",
-        "deploy_to": f"go/portal-plugin-{plugin_name}/build",
-        "repo_target": f"portal-plugin-{plugin_name}",
+        "build_from": f"libs/{PORTAL_PLUGIN_PREFIX}{plugin_name}/dist",
+        "deploy_to": f"go/{PORTAL_PLUGIN_PREFIX}{plugin_name}/build",
+        "repo_target": f"{PORTAL_PLUGIN_PREFIX}{plugin_name}",
         "content_type": "plugin_module",
         **overrides
     }
 
+
+def discover_standalone_apps() -> Dict[str, Dict[str, Any]]:
+    """Auto-discover standalone apps from filesystem"""
+    apps = {}
+    apps_path = Path("apps")
+    
+    if not apps_path.exists():
+        return apps
+    
+    # Check for portal-frontend app
+    frontend_app = apps_path / "portal-frontend"
+    if frontend_app.exists() and frontend_app.is_dir():
+        package_json_path = frontend_app / PACKAGE_JSON_FILENAME
+        try:
+            import json
+            with open(package_json_path, 'r') as f:
+                package_data = json.load(f)
+            scripts = package_data.get('scripts', {})
+            if BUILD_SCRIPT_NAME in scripts:
+                # This is a buildable standalone app
+                apps[PORTAL_FRONTEND_NAME] = {
+                    "name": PORTAL_FRONTEND_NAME,
+                    "type": ContentType.UI_APPLICATION.value,
+                    "build_from": "apps/portal-frontend/dist",
+                    "deploy_to": "go/portal-frontend/build",
+                    "repo_target": f"{PORTAL_PLUGIN_PREFIX}frontend",  # Still goes to plugin repo
+                    "content_type": ContentType.UI_APPLICATION.value
+                }
+        except:
+            pass
+    
+    return apps
 
 def discover_plugins() -> Dict[str, Dict[str, Any]]:
     """Auto-discover plugins from filesystem"""
@@ -133,11 +169,11 @@ def discover_plugins() -> Dict[str, Dict[str, Any]]:
     if not libs_path.exists():
         return plugins
     
-    for plugin_dir in libs_path.glob("portal-plugin-*"):
+    for plugin_dir in libs_path.glob(f"{PORTAL_PLUGIN_PREFIX}*"):
         if not plugin_dir.is_dir():
             continue
             
-        plugin_name = plugin_dir.name.replace("portal-plugin-", "")
+        plugin_name = plugin_dir.name.replace(PORTAL_PLUGIN_PREFIX, "")
         
         # Check if this has vite config (buildable frontend plugin)
         vite_config = plugin_dir / VITE_CONFIG_FILENAME
@@ -195,6 +231,7 @@ class BuildRegistryBuilder:
     def build(self) -> BuildRegistry:
         """Build the complete registry"""
         self._build_app_shell_targets()
+        self._build_standalone_app_targets()
         self._build_plugin_targets()
         
         self._validate_registry()
@@ -208,6 +245,15 @@ class BuildRegistryBuilder:
             if config.get("type") == "ui_application":
                 target = self._build_ui_app_target(name, config)
                 # Use the target name as the key for consistency
+                self.targets[target.name] = target
+                
+    def _build_standalone_app_targets(self):
+        """Build standalone app targets"""
+        standalone_apps_config = self.config.get("standalone_apps", {})
+        
+        for name, config in standalone_apps_config.items():
+            if config.get("type") == "ui_application":
+                target = self._build_standalone_app_target(name, config)
                 self.targets[target.name] = target
                 
     
@@ -249,6 +295,17 @@ class BuildRegistryBuilder:
         
         # Return first target as primary, store others as variants
         return targets[0]
+    
+    def _build_standalone_app_target(self, name: str, config: Dict) -> BuildTarget:
+        """Build standalone app target from config"""
+        return BuildTarget(
+            name=name,
+            context=BuildContext(BuildContextType.STANDALONE_APP, name, name),
+            source_path=Path(config["build_from"]),
+            target_path=Path(config["deploy_to"]),
+            repo_target=config["repo_target"],
+            content_type=ContentType[config["content_type"].upper()]
+        )
     
     def _build_plugin_target(self, plugin_name: str, plugin_type: str, config: Optional[Dict] = None) -> BuildTarget:
         """Build plugin target from name and type"""
@@ -437,13 +494,18 @@ class ContextAwareBuilder:
         """Build all targets with context isolation"""
         # Group targets by context type
         app_shell_targets = [t for t in targets if t.context.type == BuildContextType.APP_SHELL]
+        standalone_app_targets = [t for t in targets if t.context.type == BuildContextType.STANDALONE_APP]
         plugin_targets = [t for t in targets if t.context.type == BuildContextType.PLUGIN]
         
-        # Build app shell variations first
+        # Build standalone apps first (they're independent)
+        if standalone_app_targets:
+            self._build_standalone_app_targets(standalone_app_targets)
+        
+        # Build app shell variations
         if app_shell_targets:
             self._build_app_shell_targets(app_shell_targets)
         
-        # Build plugins next
+        # Build plugins last
         if plugin_targets:
             self._build_plugin_targets(plugin_targets)
     
@@ -455,6 +517,16 @@ class ContextAwareBuilder:
         # Run turbo build for app shell
         cmd = ["pnpm", "run", "build", f"--filter={PORTAL_APP_SHELL_PACKAGE}"]
         self._run_command(cmd)
+    
+    def _build_standalone_app_targets(self, targets: List[BuildTarget]) -> None:
+        """Build standalone apps"""
+        if self.verbose:
+            logger.info(f"Building {len(targets)} standalone app targets")
+        
+        # Build each standalone app individually using pnpm
+        for target in targets:
+            cmd = ["pnpm", "run", "build", f"--filter={PORTAL_FRONTEND_PACKAGE}"]
+            self._run_command(cmd)
     
     def _build_plugin_targets(self, targets: List[BuildTarget]) -> None:
         """Build plugins"""
@@ -504,14 +576,14 @@ class SafeBuildCopier:
             if target.context.type == BuildContextType.APP_SHELL:
                 # Map app shell variants to their plugin repo equivalents
                 if target.context.identifier == DASHBOARD_VARIANT:
-                    modified_apps.append("portal-plugin-dashboard")
+                    modified_apps.append(f"{PORTAL_PLUGIN_PREFIX}dashboard")
                 elif target.context.identifier == ADMIN_VARIANT:
-                    modified_apps.append("portal-plugin-admin")
+                    modified_apps.append(f"{PORTAL_PLUGIN_PREFIX}admin")
                 else:
                     # Fallback for unknown variants
-                    modified_apps.append(f"portal-plugin-{target.context.identifier}")
+                    modified_apps.append(f"{PORTAL_PLUGIN_PREFIX}{target.context.identifier}")
             else:
-                modified_apps.append(f"portal-plugin-{target.name}")
+                modified_apps.append(f"{PORTAL_PLUGIN_PREFIX}{target.name}")
         
         # Remove duplicates while preserving order
         seen = set()
@@ -592,14 +664,6 @@ def create_default_registry() -> BuildRegistry:
     return build_registry(config)
 
 
-def create_default_config() -> Dict[str, Any]:
-    """Create default configuration with helper functions"""
-    return {
-        "app_shell": create_app_shell_config(),
-        "plugins": create_plugins_config()
-    }
-
-
 def create_app_shell_config() -> Dict[str, Any]:
     """Create app shell configuration"""
     return {
@@ -607,6 +671,22 @@ def create_app_shell_config() -> Dict[str, Any]:
         "admin": ui_app(**app_shell_template("admin"))
     }
 
+
+def create_standalone_apps_config() -> Dict[str, Any]:
+    """Create standalone apps configuration"""
+    return discover_standalone_apps()
+
+def create_plugins_config() -> Dict[str, Any]:
+    """Create app shell configuration"""
+    return {
+        "dashboard": ui_app(**app_shell_template("dashboard")),
+        "admin": ui_app(**app_shell_template("admin"))
+    }
+
+
+def create_standalone_apps_config() -> Dict[str, Any]:
+    """Create standalone apps configuration"""
+    return discover_standalone_apps()
 
 def create_plugins_config() -> Dict[str, Any]:
     """Create plugins configuration"""
@@ -658,11 +738,13 @@ def build_config(
     app_shell_variants: List[str] = None,
     core_plugins: List[str] = None,
     include_feature_plugins: bool = True,
-    custom_plugins: Dict[str, Dict] = None
+    custom_plugins: Dict[str, Dict] = None,
+    include_standalone_apps: bool = True
 ) -> Dict[str, Any]:
     """Build complete configuration from functional elements"""
     return {
         "app_shell": build_app_shell_section(app_shell_variants),
+        "standalone_apps": discover_standalone_apps() if include_standalone_apps else {},
         "plugins": build_plugins_section(core_plugins, include_feature_plugins, custom_plugins)
     }
 
