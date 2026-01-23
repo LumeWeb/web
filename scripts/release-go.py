@@ -964,21 +964,8 @@ def main():
         # Write metadata for downstream workflows
         modified_apps = copier.get_modified_apps_list(targets)
         
-        # Get current commit hash for metadata
-        try:
-            commit_result = subprocess.run(
-                ["git", "rev-parse", "HEAD"],
-                cwd=repo_root,
-                capture_output=True,
-                text=True
-            )
-            commit_hash = commit_result.stdout.strip() if commit_result.returncode == 0 else None
-        except:
-            commit_hash = None
-        
-        write_metadata_files(modified_apps, commit_hash, args.verbose)
-        
         # Git operations
+        commit_hash = None
         if not args.no_push:
             # Stage and commit changes
             result = subprocess.run(
@@ -1012,6 +999,17 @@ def main():
                 if commit_result.returncode != 0:
                     logger.error(f"Failed to commit changes: {commit_result.stderr}")
                     return 1
+                
+                try:
+                    hash_result = subprocess.run(
+                        ["git", "rev-parse", "HEAD"],
+                        cwd=repo_root,
+                        capture_output=True,
+                        text=True
+                    )
+                    commit_hash = hash_result.stdout.strip() if hash_result.returncode == 0 else None
+                except:
+                    commit_hash = None
                 
                 # Push changes
                 push_result = subprocess.run(
