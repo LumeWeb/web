@@ -1029,6 +1029,8 @@ def main():
         else:
             logger.info("Skipping git operations (no-push specified)")
         
+        write_metadata_files(modified_apps, commit_hash, args.verbose)
+        
         logger.info("Build and copy completed successfully")
         return 0
         
