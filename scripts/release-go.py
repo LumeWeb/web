@@ -105,7 +105,7 @@ def app_shell_template(variant_name: str, **overrides) -> Dict[str, Any]:
     return {
         "name": variant_name,
         "variants": [variant_name],
-        "build_from": "portal-app-shell/dist/{variant}",
+        "build_from": "apps/portal-app-shell/dist/{variant}",
         "deploy_to": "go/portal-{variant}/build",
         "repo_target": "portal-plugin-{variant}",
         "content_type": "ui_application",
@@ -528,14 +528,14 @@ class SafeBuildCopier:
         if self.verbose:
             logger.info(f"Copying {target.name} to {target.target_path}")
         
-        if not self._copy_merge_target(target):
+        if not self._copy_target_files(target):
             return
         
         # Track successful copies for metadata
         self.successfully_copied.append(target.repo_target)
     
-    def _copy_merge_target(self, target: BuildTarget) -> bool:
-        """Copy target with merge support"""
+    def _copy_target_files(self, target: BuildTarget) -> bool:
+        """Copy target files to destination (always clean copy)"""
         if not target.source_path.exists():
             logger.warning(f"Source path does not exist: {target.source_path}")
             return False
@@ -544,21 +544,19 @@ class SafeBuildCopier:
         if self.verbose:
             logger.debug(f"Copying {target.name} to {target.target_path}")
         
-        # For merge targets, don't remove existing directory - merge into it
-        if not target_dir.exists():
-            target_dir.mkdir(parents=True, exist_ok=True)
+        # Always delete and recreate target directory for clean builds
+        if target_dir.exists():
+            shutil.rmtree(target_dir)
+        target_dir.mkdir(parents=True, exist_ok=True)
         
-        # Copy files (merge mode - don't overwrite existing files)
+        # Copy all files from source to target
         for item in target.source_path.iterdir():
             dest_path = target_dir / item.name
             
             if item.is_dir():
-                # Use copytree with dirs_exist_ok to merge directories
-                shutil.copytree(item, dest_path, dirs_exist_ok=True)
+                shutil.copytree(item, dest_path)
             else:
-                # Don't overwrite existing files in merge mode
-                if not dest_path.exists():
-                    shutil.copy2(item, dest_path)
+                shutil.copy2(item, dest_path)
         
         # Remove .vite directories
         vite_dir = target_dir / ".vite"
