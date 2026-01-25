@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
-    "@vitest/coverage-v8": "^4.0.17",
+    "@vitest/coverage-v8": "^4.0.18",
     "orval": "catalog:",
     "tsdown": "catalog:"
   },
