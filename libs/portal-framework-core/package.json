@@ -48,7 +48,7 @@
     "tsdown": "catalog:"
   },
   "peerDependencies": {
-    "@module-federation/enhanced": "^0.21.6",
+    "@module-federation/enhanced": "^0.21.6 || ^0.23.0",
     "@refinedev/react-router": "catalog:",
     "@t3-oss/env-core": "catalog:",
     "lucide-react": "catalog:",
