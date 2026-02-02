@@ -1,0 +1,21 @@
+{
+  "services": [
+    {
+      "id": "pinner",
+      "name": "Pinner",
+      "tagline": "Decentralized storage pinning service powered by the Sia network.",
+      "description": "Keep your data available without running your own infrastructure.",
+      "features": [
+        "Private (zero-knowledge) or public storage",
+        "Simple pricing",
+        "No data mining, no complexity",
+        "Open standards, leave anytime"
+      ],
+      "links": [
+        { "text": "Start Storing →", "url": "https://pinner.xyz", "style": "primary" },
+        { "text": "Documentation", "url": "https://docs.pinner.xyz", "style": "secondary" }
+      ]
+    }
+  ],
+  "upcoming": null
+}

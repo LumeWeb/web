@@ -1,0 +1,81 @@
+{
+  "cryptocurrencies": [
+    {
+      "id": "bitcoin",
+      "name": "Bitcoin",
+      "symbol": "BTC",
+      "address": "bc1q9xq2w4w2hjc240rs6mf0g8gpzz3rmcz4h77a2a",
+      "color": "#f7931a"
+    },
+    {
+      "id": "ethereum",
+      "name": "Ethereum",
+      "symbol": "ETH, USDT, USDC",
+      "address": "0x63cd2C691632720Ff2ABDD0b6AABA2466D3Fe468",
+      "color": "#627eea"
+    },
+    {
+      "id": "solana",
+      "name": "Solana",
+      "symbol": "SOL",
+      "address": "4nMRucCuqttipwQXm31vBgoaxDW6o25TnD8fj1imviCu",
+      "color": "#9945ff"
+    },
+    {
+      "id": "monero",
+      "name": "Monero",
+      "symbol": "XMR",
+      "address": "48A33fSyFo9YAiux3KHKVBagPGvqmcr2h4oy5pufJn6NUWyZsPF6PAufmrET3gLJjsLwxfU7HU9xe8mEeCqtHqvZN3Ly12h",
+      "color": "#ff6600"
+    },
+    {
+      "id": "sia",
+      "name": "Siacoin",
+      "symbol": "SC",
+      "address": "621a2d502fe62de595eeaf4141432c6713331f2f152fa4f7e0d7a721e3abdceb",
+      "color": "#20ee82"
+    },
+    {
+      "id": "handshake",
+      "name": "Handshake",
+      "symbol": "HNS",
+      "address": "hs1qe67ak3j2u4yrq0qnfs2hmycxqdvaf9v5rjsxzy",
+      "color": "#ffffff"
+    }
+  ],
+  "fiatPlatforms": [
+    {
+      "id": "github",
+      "name": "GitHub Sponsors",
+      "url": "https://github.com/sponsors/LumeWeb",
+      "icon": "github",
+      "backgroundColor": "#000000",
+      "borderColor": "#24292e"
+    },
+    {
+      "id": "patreon",
+      "name": "Patreon",
+      "url": "https://www.patreon.com/bePatron?u=71702133",
+      "icon": "patreon",
+      "backgroundColor": "#ff424d",
+      "borderColor": "#ff424d"
+    },
+    {
+      "id": "liberapay",
+      "name": "Liberapay",
+      "url": "https://liberapay.com/lumeweb/donate",
+      "icon": "liberapay",
+      "backgroundColor": "#f6c915",
+      "borderColor": "#f6c915"
+    },
+    {
+      "id": "paypal",
+      "name": "PayPal",
+      "url": "https://www.paypal.com/donate",
+      "icon": "paypal",
+      "backgroundColor": "#0070e0",
+      "borderColor": "#0070e0",
+      "hostedButtonId": "LKDLTQQRQV2U8"
+    }
+  ]
+}

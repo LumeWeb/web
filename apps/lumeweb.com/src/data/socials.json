@@ -1,0 +1,20 @@
+{
+  "socials": [
+    { "id": "github", "name": "GitHub", "url": "https://github.com/LumeWeb", "title": "GitHub", "icon": "github" },
+    { "id": "git", "name": "Git", "url": "https://git.lumeweb.com", "title": "Git", "icon": "git" },
+    { "id": "discord", "name": "Discord", "url": "https://discord.gg/qpC8ADp3rS", "title": "Discord", "icon": "discord" },
+    { "id": "twitter", "name": "Twitter", "url": "https://twitter.com/lumeweb3", "title": "Twitter", "icon": "twitter" }
+  ],
+  "community": {
+    "github": {
+      "url": "https://github.com/LumeWeb",
+      "label": "View on GitHub",
+      "description": "Help improve Lume by contributing to the project"
+    },
+    "discord": {
+      "url": "https://discord.gg/qpC8ADp3rS",
+      "label": "Join Discord →",
+      "description": "Get support, share ideas, and connect with other users"
+    }
+  }
+}

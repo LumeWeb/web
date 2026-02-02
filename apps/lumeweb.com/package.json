@@ -6,14 +6,16 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview --host"
   },
   "devDependencies": {
+    "@4hse/astro-llms-txt": "^1.0.4",
     "@astrojs/react": "catalog:",
     "@astrojs/sitemap": "^3.7.0",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "astro": "catalog:",
+    "astro-seo": "^1.1.0",
     "qrcode": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
@@ -21,7 +23,10 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "catalog:",
-    "tailwindcss": "catalog:websites"
+    "clsx": "catalog:",
+    "tailwind-merge": "catalog:",
+    "tailwindcss": "catalog:websites",
+    "zod": "catalog:"
   },
   "repository": {
     "type": "git",

@@ -1,24 +1,129 @@
 @import "tailwindcss";
 
 @theme {
-  /* Colors */
-  --color-blue-charcoal: var(--color-blue-charcoal);
-  --color-body: var(--color-gray);
-  --color-charcoal: var(--color-charcoal);
-  --color-dark-aquamarine: var(--color-dark-aquamarine);
-  --color-primary: var(--color-aquamarine);
+  /* Colors from vars.scss */
+  --color-blue-charcoal: #020e10;
+  --color-blue-charcoal-2: #031418;
+  --color-aquamarine: #7afcbb;
+  --color-cloud: #c7c7c7;
+  --color-alto: #d9d9d9;
+  --color-dark-aquamarine: #1f4a3d;
 
-  /* Background Image / Gradients */
-  --background-image-gradient-aqua: linear-gradient(
-    to right,
-    var(--color-dark-aquamarine),
-    var(--color-aquamarine)
-  );
+  /* Semantic color names */
+  --color-primary: var(--color-aquamarine);
+  --color-body: var(--color-cloud);
+  --color-charcoal: var(--color-blue-charcoal);
 
   /* Font Families */
   --font-body: "Jaldi", sans-serif;
   --font-display: "JetBrains Mono", monospace;
-  --font-display2: "IBM Plex Sans Devanagari", monospace;
+  --font-display2: "IBM Plex Sans Devanagari", sans-serif;
   --font-inter: "Inter", sans-serif;
+
+  /* Spacing */
+  --spacing-section: 10rem;
 }
 
+/* Font Face Declarations */
+@font-face {
+  font-family: 'Jaldi';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/Jaldi-Regular.woff2") format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/JetBrainsMono-Regular.woff2") format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/JetBrainsMono-Bold.woff2") format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Devanagari';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/ibm-plex-sans-devanagari.woff2") format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/Inter-VariableFont.ttf") format('ttf');
+}
+
+/* Base styles */
+html {
+  display: flex;
+  flex-direction: column;
+  min-width: 20rem;
+  min-height: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  background: var(--color-blue-charcoal-2);
+  color: #ffffff;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+body.scroll-lock {
+  overflow-y: hidden;
+}
+
+a, button {
+  transition: color 250ms;
+}
+
+/* Tilted backgrounds (legacy, for reference) */
+.tilted-bg {
+  position: relative;
+}
+
+.tilted-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -5%;
+  bottom: 0;
+  left: -5%;
+  margin: 2% 0;
+  background: var(--color-blue-charcoal);
+  transform: matrix(1, -0.04, 0.04, 1, 0, 0);
+  z-index: -1;
+}
+
+.tilted-bg-r {
+  position: relative;
+}
+
+.tilted-bg-r::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -5%;
+  bottom: 0;
+  left: -5%;
+  margin: 2% 0;
+  background: var(--color-blue-charcoal);
+  transform: matrix(1, 0.04, -0.04, 1, 0, 0);
+  z-index: -1;
+}

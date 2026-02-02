@@ -1,0 +1,15 @@
+{
+  "email": {
+    "contact": {
+      "email": "contact@lumeweb.com",
+      "label": "Contact",
+      "description": "General inquiries and donations"
+    }
+  },
+  "socials": {
+    "github": "https://github.com/LumeWeb",
+    "git": "https://git.lumeweb.com",
+    "discord": "https://discord.gg/qpC8ADp3rS",
+    "twitter": "https://twitter.com/lumeweb3"
+  }
+}
