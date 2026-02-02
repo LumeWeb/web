@@ -19,8 +19,8 @@ function ServiceCard({ service }: ServiceCardProps) {
         {service.description}
       </p>
       <ul className="font-body text-cloud space-y-2 mb-6">
-        {service.features.slice(0, 3).map((feature) => (
-          <li key={feature}>• {feature}</li>
+        {service.features.slice(0, 3).map((feature, index) => (
+          <li key={`${service.id}-feature-${index}`}>• {feature}</li>
         ))}
       </ul>
       <div className="flex flex-wrap gap-4">

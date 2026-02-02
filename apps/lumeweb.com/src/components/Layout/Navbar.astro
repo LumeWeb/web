@@ -2,13 +2,15 @@
 import logo from "@/assets/lume-logo.png";
 import { getEntry } from "astro:content";
 
-const { view } = Astro.props;
-
+const currentPath = Astro.url.pathname;
 const navigation = await getEntry("navigation", "main");
 const navbarItems = navigation.data.navbar;
 
-function getActiveClass(linkView: string | undefined): string {
-  return view === linkView ? "border-b border-white" : "";
+function getActiveClass(href: string): string {
+  if (href.startsWith("http")) return "";
+  const linkPath = href.endsWith("/") ? href : href + "/";
+  const currentPathWithSlash = currentPath.endsWith("/") ? currentPath : currentPath + "/";
+  return currentPathWithSlash === linkPath ? "border-b border-white" : "";
 }
 ---
 
@@ -25,7 +27,7 @@ function getActiveClass(linkView: string | undefined): string {
       <li>
         <a
           href={item.href}
-          class={getActiveClass(item.view)}
+          class={getActiveClass(item.href)}
           target={item.external ? "_blank" : undefined}
           rel={item.external ? "noopener noreferrer" : undefined}
         >

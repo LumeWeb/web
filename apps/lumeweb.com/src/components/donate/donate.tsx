@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { CryptoCurrency, FiatPlatform } from "@/data/types";
 
 interface DonateProps {
@@ -9,11 +9,25 @@ interface DonateProps {
 
 function CryptoCard({ currency }: { currency: CryptoCurrency }) {
   const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const copyAddress = () => {
     navigator.clipboard.writeText(currency.address);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    timeoutRef.current = setTimeout(() => setCopied(false), 2000);
   };
 
   return (

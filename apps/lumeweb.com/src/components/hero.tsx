@@ -133,7 +133,7 @@ export function HomepageHero({ backgroundImage, minHeight, blur, opacity, bgPosi
         titleSize={titleSize}
         emphasis={emphasis ?? "Privacy"}
         tagline={tagline}
-        buttons={buttons}
+        buttons={buttons && buttons.length > 0 ? buttons : undefined}
       />
     </Hero>
   );

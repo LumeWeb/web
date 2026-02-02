@@ -22,6 +22,10 @@ export const CommunityDataSchema = z.object({
 export type CommunityProject = z.infer<typeof CommunityProjectSchema>;
 
 // Validate and export data
-const parsed = CommunityDataSchema.parse(communityDataRaw as unknown) as { projects: CommunityProject[] };
+const parsedResult = CommunityDataSchema.safeParse(communityDataRaw as unknown);
 
-export const communityProjects: CommunityProject[] = parsed.projects;
+export const communityProjects: CommunityProject[] = parsedResult.success ? parsedResult.data.projects : [];
+
+if (!parsedResult.success) {
+  console.error('Invalid community data:', parsedResult.error);
+}

@@ -80,7 +80,7 @@ body {
   flex-direction: column;
   font-family: var(--font-display);
   background: var(--color-blue-charcoal-2);
-  color: var(--color-white);
+  color: #ffffff;
   overflow-x: hidden;
   overflow-y: scroll;
 }

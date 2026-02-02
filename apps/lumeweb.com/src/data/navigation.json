@@ -1,11 +1,11 @@
 {
   "id": "main",
   "navbar": [
-    { "label": "Home", "href": "/", "view": "home" },
-    { "label": "Principles", "href": "/principles", "view": "principles" },
-    { "label": "Services", "href": "/services", "view": "services" },
-    { "label": "Community", "href": "/projects", "view": "projects" },
-    { "label": "Donate", "href": "/donate", "view": "donate" },
+    { "label": "Home", "href": "/" },
+    { "label": "Principles", "href": "/principles" },
+    { "label": "Services", "href": "/services" },
+    { "label": "Community Projects", "href": "/projects" },
+    { "label": "Donate", "href": "/donate" },
     { "label": "Manifesto", "href": "https://web3ready.org", "external": true }
   ],
   "footer": {
@@ -16,7 +16,7 @@
           { "label": "Home", "href": "/" },
           { "label": "Principles", "href": "/principles" },
           { "label": "Services", "href": "/services" },
-          { "label": "Community", "href": "/projects" }
+          { "label": "Community Projects", "href": "/projects" }
         ]
       },
       {

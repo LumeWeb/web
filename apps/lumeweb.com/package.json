@@ -9,11 +9,13 @@
     "preview": "astro preview --host"
   },
   "devDependencies": {
+    "@4hse/astro-llms-txt": "^1.0.4",
     "@astrojs/react": "catalog:",
     "@astrojs/sitemap": "^3.7.0",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "astro": "catalog:",
+    "astro-seo": "^1.1.0",
     "qrcode": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

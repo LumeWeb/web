@@ -10,7 +10,7 @@ const fiatPlatforms = await getCollection("fiatPlatforms");
 const contactEmail = await getContactEmail();
 ---
 
-<Layout view="donate" title="Donate - Lume Web">
+<Layout title="Donate - Lume Web">
   <Donate
     client:load
     cryptoCurrencies={cryptoCurrencies.map(c => c.data)}

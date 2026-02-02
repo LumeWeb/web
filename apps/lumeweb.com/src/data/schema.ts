@@ -84,14 +84,26 @@ export type ContactsData = z.infer<typeof ContactsDataSchema>;
 
 // ============ Exports ============
 
-const servicesParsed = ServicesDataSchema.parse(servicesDataRaw as unknown) as ServicesData;
-export const services: Service[] = servicesParsed.services;
-export const upcomingServices: UpcomingServices | null = servicesParsed.upcoming;
+const servicesParsedResult = ServicesDataSchema.safeParse(servicesDataRaw as unknown);
+export const services: Service[] = servicesParsedResult.success ? servicesParsedResult.data.services : [];
+export const upcomingServices: UpcomingServices | null = servicesParsedResult.success ? servicesParsedResult.data.upcoming : null;
 
-const socialsParsed = SocialsDataSchema.parse(socialsDataRaw as unknown) as SocialsData;
-export const socials: Social[] = socialsParsed.socials;
-export const communitySections: Record<string, CommunitySection> = socialsParsed.community;
+if (!servicesParsedResult.success) {
+  console.error('Invalid services data:', servicesParsedResult.error);
+}
 
-const contactsParsed = ContactsDataSchema.parse(contactsDataRaw as unknown) as ContactsData;
-export const contactEmails: ContactEmailSection = contactsParsed.email;
-export const contactSocials: Record<string, string> = contactsParsed.socials;
+const socialsParsedResult = SocialsDataSchema.safeParse(socialsDataRaw as unknown);
+export const socials: Social[] = socialsParsedResult.success ? socialsParsedResult.data.socials : [];
+export const communitySections: Record<string, CommunitySection> = socialsParsedResult.success ? socialsParsedResult.data.community : {};
+
+if (!socialsParsedResult.success) {
+  console.error('Invalid socials data:', socialsParsedResult.error);
+}
+
+const contactsParsedResult = ContactsDataSchema.safeParse(contactsDataRaw as unknown);
+export const contactEmails: ContactEmailSection = contactsParsedResult.success ? contactsParsedResult.data.email : {};
+export const contactSocials: Record<string, string> = contactsParsedResult.success ? contactsParsedResult.data.socials : {};
+
+if (!contactsParsedResult.success) {
+  console.error('Invalid contacts data:', contactsParsedResult.error);
+}
