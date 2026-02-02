@@ -7,7 +7,9 @@ import tailwindcss from "@tailwindcss/vite";
 // https://astro.build/config
 export default defineConfig({
   integrations: [react(), sitemap()],
-
+  server: {
+    allowedHosts: true,
+  },
   outDir: "./dist",
   site: "https://lumeweb.com",
 

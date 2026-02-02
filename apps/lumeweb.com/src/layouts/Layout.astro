@@ -1,10 +1,9 @@
 ---
-import "../styles/tailwind.css";
-import "../styles/global.scss";
-import opengraph from "/src/assets/opengraph.png";
-import Navbar from "../components/Layout/Navbar.astro";
-import Footer from "../components/Layout/Footer.astro";
-import JoinCommunity from "../components/Layout/JoinCommunity.astro";
+import "@/styles/tailwind.css";
+import opengraph from "@/assets/opengraph.png";
+import Navbar from "@/components/Layout/Navbar.astro";
+import Footer from "@/components/Layout/Footer.astro";
+import JoinCommunity from "@/components/Layout/JoinCommunity.astro";
 
 export interface Props {
   view: string;
@@ -44,30 +43,13 @@ const url = "https://lumeweb.com";
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={opengraph.src} />
-      <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
     <!-- Matomo -->
-    <script is:inline>
-      var _paq = (window._paq = window._paq || []);
-      /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-      _paq.push(["trackPageView"]);
-      _paq.push(["enableLinkTracking"]);
-      (function () {
-        var u = "//piwiki.lumeweb.com/";
-        _paq.push(["setTrackerUrl", u + "matomo.php"]);
-        _paq.push(["setSiteId", "1"]);
-        var d = document,
-          g = d.createElement("script"),
-          s = d.getElementsByTagName("script")[0];
-        g.async = true;
-        g.src = u + "matomo.js";
-        s.parentNode.insertBefore(g, s);
-      })();
-    </script>
-    <!-- End Matomo Code -->
+    <script src="/src/scripts/matomo.js"></script>
   </head>
-  <body class="max-w-[1600px] mx-auto">
+  <body>
     <Navbar view={view} />
-    <main class={view + " space-y-40 overflow-x-hidden relative "}>
+    <main class={view + " space-y-24 md:space-y-32 overflow-x-hidden relative "}>
       <slot />
     </main>
     {view !== "home" && <JoinCommunity />}

@@ -1,0 +1,45 @@
+{
+  "id": "main",
+  "navbar": [
+    { "label": "Home", "href": "/", "view": "home" },
+    { "label": "Principles", "href": "/principles", "view": "principles" },
+    { "label": "Services", "href": "/services", "view": "services" },
+    { "label": "Community", "href": "/projects", "view": "projects" },
+    { "label": "Donate", "href": "/donate", "view": "donate" },
+    { "label": "Manifesto", "href": "https://web3ready.org", "external": true }
+  ],
+  "footer": {
+    "columns": [
+      {
+        "title": "About",
+        "items": [
+          { "label": "Home", "href": "/" },
+          { "label": "Principles", "href": "/principles" },
+          { "label": "Services", "href": "/services" },
+          { "label": "Community", "href": "/projects" }
+        ]
+      },
+      {
+        "title": "Community",
+        "items": [
+          { "label": "GitHub", "href": "https://github.com/LumeWeb" },
+          { "label": "Discord", "href": "https://discord.gg/qpC8ADp3rS" },
+          { "label": "Twitter", "href": "https://twitter.com/lumeweb3" }
+        ]
+      },
+      {
+        "title": "Resources",
+        "items": [
+          { "label": "Documentation", "href": "https://docs.lumeweb.com" },
+          { "label": "Manifesto", "href": "https://web3ready.org" }
+        ]
+      },
+      {
+        "title": "Support",
+        "items": [
+          { "label": "Donate", "href": "/donate" }
+        ]
+      }
+    ]
+  }
+}

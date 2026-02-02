@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview --host"
   },
   "devDependencies": {
     "@astrojs/react": "catalog:",
@@ -21,7 +21,10 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "catalog:",
-    "tailwindcss": "catalog:websites"
+    "clsx": "catalog:",
+    "tailwind-merge": "catalog:",
+    "tailwindcss": "catalog:websites",
+    "zod": "catalog:"
   },
   "repository": {
     "type": "git",

@@ -1,16 +1,23 @@
 ---
-import logo from "/src/assets/lume-logo.png";
+import logo from "@/assets/lume-logo.png";
+import { getEntry } from "astro:content";
+import { getContactEmail } from "@/data/collections";
+
+const contactEmail = await getContactEmail();
+
+const navigation = await getEntry("navigation", "main");
+const footerData = navigation.data.footer;
 ---
 
 <footer
-    class="flex flex-col lg:flex-row py-24 font-body mb-3 mx-10 md:mx-20 xl:mx-40 max-w-screen"
+    class="flex flex-col lg:flex-row py-24 font-body max-w-screen px-6 lg:px-12"
 >
     <div class="flex-1">
         <a href="/">
             <img src={logo.src} class="w-36 mb-2" alt="Lume"/>
         </a>
         <a
-            href="mailto:contact@lumeweb.com"
+            href={`mailto:${contactEmail}`}
             class="flex flex-row items-center text-body text-xl"
         >
             <svg
@@ -28,50 +35,29 @@ import logo from "/src/assets/lume-logo.png";
                 >
                 </path>
             </svg>
-            contact@lumeweb.com
+            {contactEmail}
         </a>
         <div class="text-lg text-primary font-bold font-display my-10">
             Freedom. Privacy. <br/>Ownership.
         </div>
     </div>
+    {footerData.columns.map((column) => (
     <div class="flex-1 my-5 lg:my-0">
-        <h5 class="text-3xl mb-3">General</h5>
+        <h5 class="text-3xl mb-3">{column.title}</h5>
         <ul class="text-body font-body text-xl">
+            {column.items.map((item) => (
             <li>
-                <a href="/" class="hover:underline">Home</a>
-            </li>
-            <li>
-                <a href="https://git.lumeweb.com" class="hover:underline">Git</a>
-            </li>
-            <li>
-                <a href="https://docs.lumeweb.com" class="hover:underline">Docs</a>
-            </li>
-        </ul>
-    </div>
-    <div class="flex-1 my-5 lg:my-0">
-        <h5 class="text-3xl mb-3">Community</h5>
-        <ul class="text-body font-body text-xl">
-            <li>
-                <a href="https://github.com/LumeWeb" class="hover:underline">GitHub</a>
-            </li>
-            <li>
-                <a href="https://discord.gg/qpC8ADp3rS" class="hover:underline"
-                >Discord</a
+                <a
+                    href={item.href}
+                    class="hover:underline"
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
                 >
+                    {item.label}
+                </a>
             </li>
-            <li>
-                <a href="https://twitter.com/lumeweb3" class="hover:underline"
-                >Twitter</a
-                >
-            </li>
+            ))}
         </ul>
     </div>
-    <div class="flex-1 my-5 lg:my-0">
-        <h5 class="text-3xl mb-3">Support Us</h5>
-        <ul class="text-body font-body text-xl">
-            <li>
-                <a href="/donate" class="hover:underline">Donate</a>
-            </li>
-        </ul>
-    </div>
+    ))}
 </footer>
