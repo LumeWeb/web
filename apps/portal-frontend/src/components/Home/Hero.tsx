@@ -14,9 +14,9 @@ const Hero = () => {
         />
         <MenuCard
           title="project-backup"
-          description="1 file (1.2 MB)"
-          day="7 days ago"
-          style="bg-home-card-bg border-none mb-8 opacity-100 max-w-[340px]"
+          description="15 files (2.3 GB)"
+          day="Just now"
+          style="bg-home-card-bg border-none mb-8 opacity-25 max-w-[360px]"
         />
         <MenuCard
           title="photos"
@@ -25,12 +25,6 @@ const Hero = () => {
           style="mb-8 opacity-25 max-w-[290px]"
         />
         <ProgressCard value="88" width="w-[90%]" title="quarterly-report.pdf (13 MB)" />
-        <MenuCard
-          title="project-backup"
-          description="15 files (2.3 GB)"
-          day="Just now"
-          style="bg-home-card-bg border-none opacity-25 max-w-[360px]"
-        />
       </div>
 
       <div className="lg:hidden max-w-[342px]">
@@ -57,12 +51,12 @@ const Hero = () => {
       primaryButton={{
         label: "Start Storing →",
         url: "https://account.pinner.xyz",
-        style: "btn-light"
+        buttonStyle: "btn-light"
       }}
       secondaryButton={{
         label: "Read the Docs →",
         url: "https://docs.pinner.xyz",
-        style: "outline"
+        buttonStyle: "outline"
       }}
       visualContent={visualContent}
     />

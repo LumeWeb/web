@@ -1,17 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-interface ButtonProps {
+interface HeroButtonProps {
 	label: string;
 	url: string;
-	style?: string;
+	buttonStyle?: "default" | "outline" | "outline-dark" | "btn-light" | "gray" | "light";
 }
 
 interface HeroSectionProps {
 	headline: string;
 	subheadline?: string;
-	primaryButton?: ButtonProps;
-	secondaryButton?: ButtonProps;
+	primaryButton?: HeroButtonProps;
+	secondaryButton?: HeroButtonProps;
 	visualContent?: React.ReactNode;
 	className?: string;
 }
@@ -46,14 +46,14 @@ const HeroSection = ({
 										<Button
 											label={primaryButton.label}
 											url={primaryButton.url}
-											style={primaryButton.style}
+											buttonStyle={primaryButton.buttonStyle}
 										/>
 									)}
 									{secondaryButton && (
 										<Button
 											label={secondaryButton.label}
 											url={secondaryButton.url}
-											style={secondaryButton.style}
+											buttonStyle={secondaryButton.buttonStyle}
 										/>
 									)}
 								</div>

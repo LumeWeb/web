@@ -63,7 +63,7 @@ const PricingItem = ({
     <div className="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-2 md:gap-5 lg:gap-5">
       {pricingData.map((item: PricingItem, index: number) => (
         <div
-          key={index}
+          key={item.title || index}
           className={cn(
             theme.hoverBg,
             "py-[28px] lg:py-[50px] px-[30px] lg:px-[40px] transition-all duration-300 ease-in-out"
@@ -128,7 +128,7 @@ const PricingItem = ({
           <Button
             label={item.buttonText}
             url={item.url}
-            style={type === "light" ? "outline-dark" : "outline"}
+            buttonStyle={type === "light" ? "outline-dark" : "outline"}
           />
         </div>
       ))}

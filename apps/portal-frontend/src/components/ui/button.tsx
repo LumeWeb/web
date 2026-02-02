@@ -7,7 +7,7 @@ const buttonVariants = cva(
   "inline-flex rounded-full border border-transparent  text-[13px] lg:text-lg font-medium transition ease-in-out duration-300",
   {
     variants: {
-      style: {
+      buttonStyle: {
         default: "text-home-text bg-home-card-bg hover:bg-white hover:text-content-text",
         outline: "border border-home-text! text-home-text bg-transparent hover:bg-home-card-bg! hover:text-home-text hover:border-home-card-bg!",
         "outline-dark": "border border-content-text! text-content-text! bg-transparent hover:bg-content-text! hover:text-white! hover:border-content-text!",
@@ -22,7 +22,7 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      style: "default",
+      buttonStyle: "default",
       size: "md",
     },
   }
@@ -36,11 +36,11 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLAnchorElement, ButtonProps>(
-  ({ label, url, style, size, className, ...props }, ref) => {
+  ({ label, url, buttonStyle, size, className, ...props }, ref) => {
     return (
       <a
         href={url}
-        className={cn(buttonVariants({ style, size, className }))}
+        className={cn(buttonVariants({ buttonStyle, size, className }))}
         ref={ref}
         {...props}
       >

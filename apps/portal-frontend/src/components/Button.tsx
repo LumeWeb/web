@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-type ButtonStyle = "outline" | "outline-dark" | "btn-light" | "gray" | "light";
+type ButtonStyle = "outline" | "outline-dark" | "btn-light" | "gray" | "light" | "default";
 type ButtonSize = "sm" | "md" | "lg";
 type ButtonStyleMap = Record<ButtonStyle | "default", string>;
 type ButtonSizeMap = Record<ButtonSize, string>;

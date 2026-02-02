@@ -6,8 +6,8 @@ const ContactForm = () => {
 					<div>
 						<input
 							type="text"
-							id="name"
-							name="name"
+							id="firstName"
+							name="firstName"
 							className="w-full mt-1 py-5 border-b border-content-section-gray bg-home-text focus:outline-none placeholder:text-content-text focus:border-content-text focus:ring-content-text"
 							placeholder="First Name"
 						/>
@@ -16,8 +16,8 @@ const ContactForm = () => {
 					<div>
 						<input
 							type="text"
-							id="name"
-							name="name"
+							id="lastName"
+							name="lastName"
 							className="w-full mt-1 py-5 border-b border-content-section-gray bg-home-text focus:outline-none placeholder:text-content-text focus:border-content-text focus:ring-content-text"
 							placeholder="Last Name"
 						/>
@@ -26,8 +26,8 @@ const ContactForm = () => {
 					<div>
 						<input
 							type="email"
-							id="name"
-							name="name"
+							id="email"
+							name="email"
 							className="w-full mt-1 py-5 border-b border-content-section-gray bg-home-text focus:outline-none placeholder:text-content-text focus:border-content-text focus:ring-content-text"
 							placeholder="Email Address"
 						/>

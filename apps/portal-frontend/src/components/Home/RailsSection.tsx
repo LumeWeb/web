@@ -23,7 +23,7 @@ const RailsSection = () => {
 
             <div>
               <Button
-                style="outline"
+                buttonStyle="outline"
                 label="View Documentation →"
                 url="https://docs.pinner.xyz"
               />

@@ -44,7 +44,7 @@ const Blog = () => {
 						<Button
 							label="Read our docs →"
 							url="#"
-							style="outline"
+							buttonStyle="outline"
 						/>
 					</div>
 				</div>

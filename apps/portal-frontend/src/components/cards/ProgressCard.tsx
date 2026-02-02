@@ -14,6 +14,8 @@ const ProgressCard = ({
   opacity = "opacity-100",
   width = "w-full",
 }: ProgressCardProps) => {
+  const numericValue = typeof value === 'string' ? Number(value) : value;
+
   return (
     <div
       className={cn(
@@ -114,7 +116,7 @@ const ProgressCard = ({
         </svg>
       </div>
 
-      <Progress value={value} />
+      <Progress value={numericValue} />
     </div>
   );
 };

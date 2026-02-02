@@ -16,7 +16,7 @@ const CallToAction = ({ variant = "default" }: CallToActionProps) => {
       secondaryButton={{
         label: "Sign Up →",
         url: "https://account.pinner.xyz",
-        style: "outline"
+        buttonStyle: "outline"
       }}
       variant={variant}
     />

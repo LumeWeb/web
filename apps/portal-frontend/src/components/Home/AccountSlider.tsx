@@ -95,8 +95,6 @@ const AccountSlider = () => {
                 <SecurityCard
                   title="Password"
                   star="true"
-                  description=""
-                  background=""
                   buttonText="Change Password"
                 />
               </div>

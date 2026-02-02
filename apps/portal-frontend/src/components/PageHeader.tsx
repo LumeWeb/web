@@ -49,13 +49,13 @@ const PageHeader = ({
           {(btnText || secondaryBtnText) && (
             <div className="flex md:justify-center gap-6 mt-8">
               {btnText && (
-                <Button label={btnText} url={url || "#"} style="btn-light" />
+                <Button label={btnText} url={url || "#"} buttonStyle="btn-light" />
               )}
               {secondaryBtnText && (
                 <Button
                   label={secondaryBtnText}
                   url={secondaryUrl || "#"}
-                  style="outline"
+                  buttonStyle="outline"
                 />
               )}
             </div>

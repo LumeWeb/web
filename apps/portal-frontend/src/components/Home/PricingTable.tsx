@@ -1,7 +1,7 @@
 import Section from "@/components/layout/Section";
 import Heading from "@/components/Heading";
 import Pricing from "@/components/Pricing";
-import PricingContents from "@/data/pricing";
+import PricingContents from "@/data/pricing.json";
 
 const PricingTable = () => {
 	return (
