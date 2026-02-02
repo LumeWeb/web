@@ -1,0 +1,47 @@
+name: Deploy Portal Frontend
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'apps/portal-frontend/**'
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'apps/portal-frontend/**'
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+permissions:
+  pull-requests: write
+  deployments: write
+  contents: read
+
+
+jobs:
+  build:
+    name: Deploy Portal Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: LumeWeb/workflows/.github/actions/setup-all@develop
+
+      - name: Build
+        run: pnpm build:portal-frontend
+      - name: Deploy to Cloudflare Pages
+        id: deploy_cf
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: pages deploy apps/portal-frontend/dist --project-name=lume-web-portal-frontend-staging
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - uses: mshick/add-pr-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          message: |
+            The Portal Frontend has been deployed to [Staging](${{ steps.deploy_cf.outputs.deployment-url }}).
