@@ -1,6 +1,8 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from '@/layouts/Layout.astro';
 import PageHeader from '@/components/PageHeader';
+import Section from '@/components/layout/Section';
+import { Button } from '@/components/ui/button';
 ---
 
 <Layout title="Contact">
@@ -11,29 +13,27 @@ import PageHeader from '@/components/PageHeader';
     client:load
   />
 
-  <section class="bg-[#F8F8F8] py-[70px] border-b border-[#E4E0D4]">
+  <Section variant="white" className="bg-[#F8F8F8] border-b border-[#E4E0D4]">
     <div class="container text-center">
       <div class="max-w-2xl mx-auto">
         <h2 class="text-[21px] md:text-[32px] font-medium mb-8">Join our Discord community</h2>
         <p class="text-[#485453] mb-8">Get support, share ideas, and connect with other users</p>
-        <a
-          href="https://discord.gg/qpC8ADp3rS"
-          class="inline-block py-3 md:py-4 px-7 bg-[#E4E0D4] text-[#0D1D1C] font-medium text-[13px] md:text-lg rounded-full hover:bg-[#d6d1c4] transition-colors"
-        >
-          Join Discord →
-        </a>
+        <Button
+          label="Join Discord →"
+          url="https://discord.gg/qpC8ADp3rS"
+          buttonStyle="light"
+        />
       </div>
 
       <div class="max-w-2xl mx-auto mt-16">
         <h2 class="text-[21px] md:text-[32px] font-medium mb-8">Contribute on GitHub</h2>
-        <p class="text-[#485453] mb-8">Help improve Lume by contributing to the project</p>
-        <a
-          href="https://github.com/lumeweb"
-          class="inline-block py-3 md:py-4 px-7 bg-[#E4E0D4] text-[#0D1D1C] font-medium text-[13px] md:text-lg rounded-full hover:bg-[#d6d1c4] transition-colors"
-        >
-          View Source →
-        </a>
+        <p class="text-[#485453] mb-8">Help improve Pinner by contributing to the project</p>
+        <Button
+          label="View Source →"
+          url="https://github.com/lumeweb"
+          buttonStyle="light"
+        />
       </div>
     </div>
-  </section>
+  </Section>
 </Layout>
