@@ -48,7 +48,7 @@ export default function DifferentiatorsSection() {
       </h2>
       <div className="mx-auto w-full md:w-3/4">
         <div className="overflow-x-auto border py-12">
-          <table className="w-full overflow-hidden rounded-lg">
+          <table class="w-full overflow-hidden rounded-lg">
             <thead>
               <tr className="border-content-divider border-b">
                 <th className="bg-content-section-gray text-content-text px-4 pt-4 pb-4 text-left text-sm font-semibold">
