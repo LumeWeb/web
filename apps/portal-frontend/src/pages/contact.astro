@@ -1,8 +1,9 @@
 ---
-import Layout from '@/layouts/Layout.astro';
+import Layout from '../layouts/Layout.astro';
 import PageHeader from '@/components/PageHeader';
-import Section from '@/components/layout/Section';
-import { Button } from '@/components/ui/button';
+import contactsData from '../data/contacts.json';
+
+const { community } = contactsData;
 ---
 
 <Layout title="Contact">
@@ -13,27 +14,29 @@ import { Button } from '@/components/ui/button';
     client:load
   />
 
-  <Section variant="white" className="bg-[#F8F8F8] border-b border-[#E4E0D4]">
+  <section class="bg-[#F8F8F8] py-[70px] border-b border-[#E4E0D4]">
     <div class="container text-center">
       <div class="max-w-2xl mx-auto">
         <h2 class="text-[21px] md:text-[32px] font-medium mb-8">Join our Discord community</h2>
-        <p class="text-[#485453] mb-8">Get support, share ideas, and connect with other users</p>
-        <Button
-          label="Join Discord →"
-          url="https://discord.gg/qpC8ADp3rS"
-          buttonStyle="light"
-        />
+        <p class="text-[#485453] mb-8">{community.discord.description}</p>
+        <a
+          href={community.discord.url}
+          class="inline-block py-3 md:py-4 px-7 bg-[#E4E0D4] text-[#0D1D1C] font-medium text-[13px] md:text-lg rounded-full hover:bg-[#d6d1c4] transition-colors"
+        >
+          {community.discord.label}
+        </a>
       </div>
 
       <div class="max-w-2xl mx-auto mt-16">
         <h2 class="text-[21px] md:text-[32px] font-medium mb-8">Contribute on GitHub</h2>
-        <p class="text-[#485453] mb-8">Help improve Pinner by contributing to the project</p>
-        <Button
-          label="View Source →"
-          url="https://github.com/lumeweb"
-          buttonStyle="light"
-        />
+        <p class="text-[#485453] mb-8">{community.github.description}</p>
+        <a
+          href={community.github.url}
+          class="inline-block py-3 md:py-4 px-7 bg-[#E4E0D4] text-[#0D1D1C] font-medium text-[13px] md:text-lg rounded-full hover:bg-[#d6d1c4] transition-colors"
+        >
+          {community.github.label}
+        </a>
       </div>
     </div>
-  </Section>
+  </section>
 </Layout>
