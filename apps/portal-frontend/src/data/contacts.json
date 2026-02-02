@@ -1,0 +1,14 @@
+{
+  "community": {
+    "discord": {
+      "url": "https://discord.gg/qpC8ADp3rS",
+      "label": "Join Discord →",
+      "description": "Get support, share ideas, and connect with other users"
+    },
+    "github": {
+      "url": "https://github.com/lumeweb",
+      "label": "View Source →",
+      "description": "Help improve Lume by contributing to the project"
+    }
+  }
+}
