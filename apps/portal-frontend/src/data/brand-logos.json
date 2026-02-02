@@ -9,14 +9,9 @@
       "id": 2,
       "src": "images/brand-logo-dark-2.png",
       "alt": "Open Source Initiative"
-    },
-    {
-      "id": 3,
-      "src": "images/brand-logo-dark-3.png",
-      "alt": "Handshake"
     }
   ],
-	"logoLight": [
+  "logoLight": [
     {
       "id": 1,
       "src": "images/brand-logo-1.png",
@@ -26,11 +21,6 @@
       "id": 2,
       "src": "images/brand-logo-2.png",
       "alt": "Open Source Initiative"
-    },
-    {
-      "id": 3,
-      "src": "images/brand-logo-3.png",
-      "alt": "Handshake"
     }
-	]
+  ]
 }

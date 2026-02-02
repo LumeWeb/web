@@ -8,12 +8,12 @@ const buttonVariants = cva(
   {
     variants: {
       style: {
-        default: "text-[#F8F8F8] bg-[#0D2D2A] hover:bg-white hover:text-[#0D1D1C]",
-        outline: "border border-[#F8F8F8]! text-[#f8f8f8] bg-transparent hover:bg-[#0D2D2A]! hover:text-[#F8F8F8] hover:border-[#0D2D2A]!",
-        "outline-dark": "border border-[#0D1D1C]! text-[#0D1D1C]! bg-transparent hover:bg-[#0D1D1C]! hover:text-white! hover:border-[#0D1D1C]!",
-        "btn-light": "bg-white! text-[#0D1D1C]! hover:bg-transparent! hover:text-white! border-white!",
-        gray: "bg-[#E4E0D4] text-[#0D1D1C]! hover:bg-[#0D2D2A]! hover:text-white!",
-        light: "bg-white text-[#0D1D1C] hover:bg-[#0D2D2A] hover:text-white",
+        default: "text-home-text bg-home-card-bg hover:bg-white hover:text-content-text",
+        outline: "border border-home-text! text-home-text bg-transparent hover:bg-home-card-bg! hover:text-home-text hover:border-home-card-bg!",
+        "outline-dark": "border border-content-text! text-content-text! bg-transparent hover:bg-content-text! hover:text-white! hover:border-content-text!",
+        "btn-light": "bg-white! text-content-text! hover:bg-transparent! hover:text-white! border-white!",
+        gray: "bg-content-section-gray text-content-text! hover:bg-home-card-bg! hover:text-white!",
+        light: "bg-white text-content-text hover:bg-home-card-bg hover:text-white",
       },
       size: {
         sm: "py-2 px-6 text-[13px] leading-none",
