@@ -28,6 +28,10 @@ export type {
   AbortOptions,
 } from "@/types/pin";
 
+// API exports
+export { IpnsClient } from "./api/ipns";
+export { WebsitesClient } from "./api/websites";
+
 // Error exports
 export {
   PinnerError,

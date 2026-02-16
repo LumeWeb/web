@@ -249,6 +249,29 @@ function createAdapterProjects(
   ];
 }
 
+function createApiProjects(
+  nodeSetupFiles: string[] = [],
+  browserSetupFiles: string[] = [],
+) {
+  const includePattern = ["src/api/__tests__/**/*.spec.ts"];
+
+  const baseSetupFiles = {
+    node: ["./src/__tests__/setup.node.ts"],
+    browser: ["./src/__tests__/setup.browser.ts"],
+  };
+
+  return [
+    createNodeProject("node-api", includePattern, [
+      ...baseSetupFiles.node,
+      ...nodeSetupFiles,
+    ]),
+    createBrowserProject("browser-api", includePattern, [
+      ...baseSetupFiles.browser,
+      ...browserSetupFiles,
+    ]),
+  ];
+}
+
 function createNormalizeProjects(
   nodeSetupFiles: string[] = [],
   browserSetupFiles: string[] = [],
@@ -345,6 +368,8 @@ export default defineConfig({
       ...createEncoderProjects(),
       // Adapter tests
       ...createAdapterProjects(),
+      // API tests
+      ...createApiProjects(),
     ],
   },
 });

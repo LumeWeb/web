@@ -77,7 +77,7 @@ export function createMemoryDatastore(): MemoryDatastore {
 
 // Common test configuration
 export const testConfig = {
-  apiUrl: "https://api.test.com",
+  apiUrl: "https://test.pinner.xyz/api",
   mockDelay: 50,
   defaultUploadLimit: 104857600, // 100MB
 } as const;

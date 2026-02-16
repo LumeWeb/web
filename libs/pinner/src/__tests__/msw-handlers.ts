@@ -72,6 +72,7 @@ export { resetRequestCounter } from "./setup";
 // Import modules to create combined handlers
 import { pinHandlers as allPinHandlers } from "./msw-pin-service-adapter";
 import { uploadHandlers as allUploadHandlers } from "./msw-upload-handlers";
+import { websitesIPNSHandlers as allWebsitesIPNSHandlers } from "./msw-websites-ipns-handlers";
 
 // Combined handlers for all operations
-export const allHandlers = [...allPinHandlers, ...allUploadHandlers];
+export const allHandlers = [...allPinHandlers, ...allUploadHandlers, ...allWebsitesIPNSHandlers];

@@ -1,0 +1,897 @@
+components:
+  schemas:
+    ErrorResponse:
+      additionalProperties: false
+      properties:
+        error:
+          type: string
+      required:
+      - error
+      type: object
+    IPNSKeyRequest:
+      additionalProperties: false
+      properties:
+        key:
+          type: string
+        name:
+          type: string
+      required:
+      - name
+      type: object
+    IPNSKeyResponse:
+      additionalProperties: false
+      properties:
+        created:
+          format: date-time
+          type: string
+        id:
+          type: integer
+        ipns_name:
+          type: string
+        name:
+          type: string
+        peer_id:
+          type: string
+      required:
+      - id
+      - name
+      - ipns_name
+      - peer_id
+      - created
+      type: object
+    IPNSPublishRequest:
+      additionalProperties: false
+      properties:
+        cid:
+          type: string
+        key_id:
+          type: integer
+        ttl:
+          type: string
+      required:
+      - key_id
+      - cid
+      type: object
+    IPNSPublishResponse:
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        published:
+          format: date-time
+          type: string
+        sequence:
+          type: integer
+        validity:
+          format: date-time
+          type: string
+        value:
+          type: string
+      required:
+      - name
+      - value
+      - sequence
+      - validity
+      - published
+      type: object
+    IPNSResolveResponse:
+      additionalProperties: false
+      properties:
+        expired:
+          type: boolean
+        expires:
+          format: date-time
+          type: string
+        name:
+          type: string
+        path:
+          type: string
+        sequence:
+          type: integer
+        value:
+          type: string
+      required:
+      - name
+      - value
+      - sequence
+      - path
+      - expired
+      - expires
+      type: object
+    WebsiteItem:
+      additionalProperties: false
+      properties:
+        created:
+          format: date-time
+          type: string
+        domain:
+          type: string
+        expired:
+          type: boolean
+        id:
+          type: integer
+        last_checked_at:
+          format: date-time
+          type: string
+        status:
+          type: string
+        target_hash:
+          type: string
+        target_type:
+          type: string
+        updated:
+          format: date-time
+          type: string
+        validation_expires_at:
+          format: date-time
+          type: string
+        validation_token:
+          type: string
+      required:
+      - id
+      - domain
+      - target_type
+      - target_hash
+      - status
+      - validation_token
+      - created
+      - updated
+      - expired
+      type: object
+    WebsiteItemResponse:
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/WebsiteItem'
+        total:
+          type: integer
+      required:
+      - data
+      - total
+      type: object
+    WebsiteRequest:
+      additionalProperties: false
+      properties:
+        domain:
+          type: string
+        target_hash:
+          type: string
+        target_type:
+          type: string
+      required:
+      - domain
+      - target_type
+      - target_hash
+      type: object
+    WebsiteResponse:
+      additionalProperties: false
+      properties:
+        created:
+          format: date-time
+          type: string
+        domain:
+          type: string
+        expired:
+          type: boolean
+        id:
+          type: integer
+        last_checked_at:
+          format: date-time
+          type: string
+        status:
+          type: string
+        target_hash:
+          type: string
+        target_type:
+          type: string
+        updated:
+          format: date-time
+          type: string
+        validation_expires_at:
+          format: date-time
+          type: string
+        validation_token:
+          type: string
+      required:
+      - id
+      - domain
+      - target_type
+      - target_hash
+      - status
+      - validation_token
+      - created
+      - updated
+      - expired
+      type: object
+    WebsiteValidateResponse:
+      additionalProperties: false
+      properties:
+        domain:
+          type: string
+        id:
+          type: integer
+        message:
+          type: string
+        valid:
+          type: boolean
+      required:
+      - id
+      - domain
+      - valid
+      - message
+info:
+  description: '## About this spec
+
+
+    This spec contains the Websites and IPNS API endpoints for the Lume Pinner service.
+
+
+    These are custom APIs that extend the standard IPFS Pinning Service API.
+
+    '
+  title: Lume Pinner Websites & IPNS API
+  version: 1.0.0
+openapi: 3.0.0
+tags:
+- name: ipns
+  description: IPNS key management and publishing operations
+- name: websites
+  description: Website configuration and management operations
+paths:
+  /api/ipns/keys:
+    get:
+      description: Lists all IPNS keys for the current user.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/IPNSKeyResponse'
+                type: array
+          description: List of IPNS keys
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: List IPNS keys
+      tags:
+      - ipns
+    post:
+      description: Creates a new IPNS key or imports an existing one. If 'key' is
+        provided, it imports; otherwise creates a new key.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IPNSKeyRequest'
+        description: IPNS key request
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IPNSKeyResponse'
+          description: IPNS key created
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Create or import IPNS key
+      tags:
+      - ipns
+  /api/ipns/keys/{id}:
+    delete:
+      description: Deletes an IPNS key (soft delete). Cannot delete keys referenced
+        by active websites.
+      parameters:
+      - description: IPNS key ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        '204':
+          description: IPNS key deleted
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Delete IPNS key
+      tags:
+      - ipns
+    get:
+      description: Retrieves details of a specific IPNS key.
+      parameters:
+      - description: IPNS key ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IPNSKeyResponse'
+          description: IPNS key details
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Get IPNS key details
+      tags:
+      - ipns
+  /api/ipns/publish:
+    post:
+      description: Publishes a CID to an IPNS key.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IPNSPublishRequest'
+        description: IPNS publish request
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IPNSPublishResponse'
+          description: IPNS publish result
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Publish CID to IPNS
+      tags:
+      - ipns
+  /api/ipns/republish:
+    post:
+      description: Manually triggers IPNS record republishing for all keys.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        '202':
+          description: Republish triggered
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Trigger IPNS republish
+      tags:
+      - ipns
+  /api/ipns/resolve/{name}:
+    get:
+      description: Resolves an IPNS name to its current CID.
+      parameters:
+      - description: IPNS name (peer ID)
+        in: path
+        name: name
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IPNSResolveResponse'
+          description: IPNS resolve result
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Resolve IPNS name
+      tags:
+      - ipns
+  /api/websites:
+    get:
+      description: Lists all websites for the current user with optional filtering.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebsiteItemResponse'
+          description: List of websites
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: List websites
+      tags:
+      - websites
+    post:
+      description: Creates a new website configuration. Returns 410 Gone if target
+        is broken.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebsiteRequest'
+        description: Website request
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebsiteResponse'
+          description: Website created
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Create website
+      tags:
+      - websites
+  /api/websites/{id}:
+    delete:
+      description: Deletes a website configuration (soft delete).
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        '204':
+          description: Website deleted
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Delete website
+      tags:
+      - websites
+    get:
+      description: Retrieves details of a specific website. Returns 410 Gone if website
+        is broken.
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebsiteResponse'
+          description: Website details
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Get website
+      tags:
+      - websites
+    put:
+      description: Updates an existing website configuration.
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebsiteRequest'
+        description: Website request
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebsiteResponse'
+          description: Website updated
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Update website
+      tags:
+      - websites
+  /api/websites/{id}/validate:
+    post:
+      description: Triggers DNS TXT record validation for a website domain.
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebsiteValidateResponse'
+          description: Validation result
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Validate website DNS
+      tags:
+      - websites
+servers:
+- url: /api

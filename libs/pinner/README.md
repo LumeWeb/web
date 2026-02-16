@@ -7,6 +7,7 @@ A TypeScript library for uploading files to IPFS and managing pinning operations
 - **Multiple Upload Methods**: TUS resumable uploads, XHR uploads, and direct CAR file uploads
 - **Directory Support**: Upload multiple files as a directory to IPFS
 - **Pin Management**: Add, list, remove, and check status of pinned content
+- **Websites & IPNS**: Manage decentralized websites and IPNS name resolution entries
 - **Custom Blockstore**: Flexible storage backend using unstorage (IndexedDB, filesystem, Redis, etc.)
 - **Adapters**: Built-in Pinata adapter with extensible adapter pattern
 - **Encoders**: Support for CSV, JSON, text, base64, and URL encoding
@@ -158,6 +159,157 @@ operation.on("error", (error) => {
 
 // Or await the result directly
 const result = await operation.result;
+```
+
+## Websites & IPNS APIs
+
+The Pinner client supports managing Websites and IPNS (InterPlanetary Name System) entries for decentralized website hosting and name resolution.
+
+### Websites API
+
+The WebsitesClient provides methods for managing website configurations that link domains to IPFS or IPNS content.
+
+#### List Websites
+
+```typescript
+// List all websites
+const websites = await pinner.websites.listWebsites();
+
+websites.data.forEach(website => {
+  console.log("ID:", website.id);
+  console.log("Domain:", website.domain);
+  console.log("Target Type:", website.target_type); // "ipfs" or "ipns"
+  console.log("Target Hash:", website.target_hash);
+  console.log("Status:", website.status);
+  console.log("Created:", website.created);
+});
+```
+
+#### Get Website by ID
+
+```typescript
+const website = await pinner.websites.getWebsite(websiteId);
+console.log("Website details:", website);
+```
+
+#### Create Website
+
+```typescript
+// Create a new website with IPFS target
+const website = await pinner.websites.createWebsite({
+  domain: "example.com",
+  target_type: "ipfs",
+  target_hash: "Qm..."
+});
+
+// Create a new website with IPNS target
+const website = await pinner.websites.createWebsite({
+  domain: "example.com",
+  target_type: "ipns",
+  target_hash: "k51qzi5uqu5dj14p8d8q8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e"
+});
+```
+
+#### Update Website
+
+```typescript
+// Update website details (domain, target_type, or target_hash)
+const website = await pinner.websites.updateWebsite(websiteId, {
+  domain: "new-domain.com",
+  target_type: "ipfs",
+  target_hash: "QmNew..."
+});
+```
+
+#### Delete Website
+
+```typescript
+await pinner.websites.deleteWebsite(websiteId);
+```
+
+#### Validate Website DNS
+
+```typescript
+// Trigger DNS TXT record validation for a website domain
+const validation = await pinner.websites.validateWebsite(websiteId);
+console.log("Valid:", validation.valid);
+console.log("Message:", validation.message);
+```
+
+### IPNS API
+
+The IpnsClient provides methods for managing IPNS keys and publishing content to IPNS names.
+
+#### List IPNS Keys
+
+```typescript
+// List all IPNS keys
+const keys = await pinner.ipns.listKeys();
+
+keys.forEach(key => {
+  console.log("ID:", key.id);
+  console.log("Name:", key.name);
+  console.log("IPNS Name:", key.ipns_name);
+  console.log("Peer ID:", key.peer_id);
+  console.log("Created:", key.created);
+});
+```
+
+#### Get IPNS Key by ID
+
+```typescript
+const key = await pinner.ipns.getKey(keyId);
+console.log("IPNS key details:", key);
+```
+
+#### Create IPNS Key
+
+```typescript
+// Create a new IPNS key
+const key = await pinner.ipns.createKey({
+  name: "my-website",
+  key: "optional-key-value"
+});
+```
+
+#### Delete IPNS Key
+
+```typescript
+await pinner.ipns.deleteKey(keyId);
+```
+
+#### Publish to IPNS
+
+```typescript
+// Publish a CID to an IPNS key
+const result = await pinner.ipns.publish({
+  key_id: keyId,
+  cid: "Qm...",
+  ttl: "24h" // optional time-to-live
+});
+
+console.log("Published:", result.name);
+console.log("Value:", result.value);
+console.log("Sequence:", result.sequence);
+```
+
+#### Republish IPNS Records
+
+```typescript
+// Manually trigger IPNS record republishing for all keys
+await pinner.ipns.republish();
+```
+
+#### Resolve IPNS Name
+
+```typescript
+// Resolve an IPNS name to its current CID
+const result = await pinner.ipns.resolve("k51qzi5uqu5dj14p8d8q8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e");
+
+console.log("Value:", result.value);
+console.log("Path:", result.path);
+console.log("Sequence:", result.sequence);
+console.log("Expired:", result.expired);
 ```
 
 ## Pin Management
@@ -697,6 +849,16 @@ import type {
   RemotePin,
   RemoteAddOptions,
   RemoteLsOptions
+} from "@lumeweb/pinner";
+
+// Websites & IPNS APIs
+import type {
+  Website,
+  WebsiteCreateRequest,
+  WebsiteUpdateRequest,
+  IPNSEntry,
+  IPNSEntryCreateRequest,
+  IPNSEntryUpdateRequest
 } from "@lumeweb/pinner";
 
 // Blockstore

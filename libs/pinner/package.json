@@ -40,7 +40,8 @@
     "build": "tsdown",
     "test": "vitest",
     "lint": "tsc --noEmit",
-    "coverage": "vitest --coverage"
+    "coverage": "vitest --coverage",
+    "generate:types": "orval"
   },
   "dependencies": {
     "@helia/car": "catalog:",
@@ -69,6 +70,7 @@
   },
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
+    "orval": "catalog:",
     "@mswjs/interceptors": "catalog:",
     "@types/uuid": "^11.0.0",
     "@vitest/browser-playwright": "catalog:",
