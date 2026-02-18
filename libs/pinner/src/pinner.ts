@@ -1,6 +1,8 @@
 import type { PinnerConfig } from "./config";
 import { UploadManager } from "./upload";
 import { PinClient } from "./pin";
+import { IpnsClient } from "./api/ipns";
+import { WebsitesClient } from "./api/websites";
 import type { UploadMethodAndBuilder } from "@/upload/builder";
 import { createUploadBuilderNamespace } from "@/upload/builder";
 import type {
@@ -21,11 +23,15 @@ import { CID } from "multiformats/cid";
 export class Pinner {
   private uploadManager: UploadManager;
   private _pins: RemotePins;
+  private _ipns: IpnsClient;
+  private _websites: WebsitesClient;
   private _upload?: UploadMethodAndBuilder;
 
   constructor(config: PinnerConfig) {
     this.uploadManager = new UploadManager(config);
     this._pins = new PinClient(config);
+    this._ipns = new IpnsClient(config);
+    this._websites = new WebsitesClient(config);
   }
 
   /**
@@ -33,6 +39,20 @@ export class Pinner {
    */
   get pins(): RemotePins {
     return this._pins;
+  }
+
+  /**
+   * Access the IPNS interface for key management and publishing.
+   */
+  get ipns(): IpnsClient {
+    return this._ipns;
+  }
+
+  /**
+   * Access the websites interface for website configuration and management.
+   */
+  get websites(): WebsitesClient {
+    return this._websites;
   }
 
   /**
