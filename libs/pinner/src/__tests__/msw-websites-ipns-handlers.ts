@@ -3,6 +3,7 @@
 
 import { http, HttpResponse } from "msw";
 import { testConfig } from "./setup";
+import { SSLStatus, SSLStatusValue } from "@/api/websites";
 
 // ============================================================================
 // TYPES
@@ -122,7 +123,7 @@ export function resetWebsitesIPNSState() {
       domain: "test.org",
       target_type: "ipns",
       target_hash: "k51qzi5uqu5dj14p8d8q8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e",
-      status: "pending",
+      status: SSLStatus.PENDING,
       validation_token: "valid-token-456",
       created: new Date("2024-01-02T00:00:00Z"),
       updated: new Date("2024-01-02T00:00:00Z"),
@@ -133,6 +134,7 @@ export function resetWebsitesIPNSState() {
   ];
   nextKeyId = 3;
   nextWebsiteId = 3;
+  resetSSLStatuses();
 }
 
 // ============================================================================
@@ -343,7 +345,7 @@ export const createWebsiteHandler = http.post(
       domain: body.domain,
       target_type: body.target_type,
       target_hash: body.target_hash,
-      status: "pending",
+      status: SSLStatus.PENDING,
       validation_token: `valid-token-${nextWebsiteId}`,
       created: new Date(),
       updated: new Date(),
@@ -471,6 +473,64 @@ export const validateWebsiteHandler = http.post(
   },
 );
 
+// ============================================================================
+// SSL STATUS HANDLERS
+// ============================================================================
+
+// Track SSL status for domains
+let sslStatuses: Record<string, {
+  status: string;
+  error?: string;
+  issued_at?: string;
+  last_updated_at?: string;
+}> = {};
+
+// Note: This handler intentionally persists state for unknown domains to ensure
+// consistent responses across requests (important for polling scenarios). Tests must
+// call resetSSLStatuses() in beforeEach to maintain test isolation. The stateful
+// behavior is necessary because:
+// 1. Polling tests need consistent timestamps across requests
+// 2. Tests should be able to verify state persistence behavior
+// 3. resetSSLStatuses() is called in beforeEach to prevent cross-test contamination
+export const getSSLStatusHandler = http.get(
+  `${testConfig.apiUrl}/websites/:domain/ssl-status`,
+  async ({ params }) => {
+    const domain = params.domain as string;
+
+    if (!sslStatuses[domain]) {
+      sslStatuses[domain] = {
+        status: SSLStatus.PENDING,
+        last_updated_at: new Date().toISOString(),
+      };
+    }
+
+    return HttpResponse.json(sslStatuses[domain], {
+      status: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+  },
+);
+
+// Helper function to set SSL status for testing
+export function setSSLStatus(
+  domain: string,
+  status: string | SSLStatusValue,
+  error?: string,
+): void {
+  sslStatuses[domain] = {
+    status,
+    error,
+    last_updated_at: new Date().toISOString(),
+  };
+}
+
+// Reset SSL statuses
+export function resetSSLStatuses(): void {
+  sslStatuses = {};
+}
+
 // Combine all Websites handlers
 export const websitesHandlers = [
   listWebsitesHandler,
@@ -479,6 +539,7 @@ export const websitesHandlers = [
   updateWebsiteHandler,
   deleteWebsiteHandler,
   validateWebsiteHandler,
+  getSSLStatusHandler,
 ];
 
 // ============================================================================

@@ -41,7 +41,7 @@
     "test": "vitest",
     "lint": "tsc --noEmit",
     "coverage": "vitest --coverage",
-    "generate:types": "orval"
+    "orval": "orval"
   },
   "dependencies": {
     "@helia/car": "catalog:",

@@ -1,4 +1,5 @@
 import ky, { HTTPError } from "ky";
+import { createNanoEvents } from "nanoevents";
 import type { PinnerConfig } from "../config";
 import type {
   ErrorResponse,
@@ -7,7 +8,20 @@ import type {
   WebsiteRequest,
   WebsiteResponse,
   WebsiteValidateResponse,
-} from "./generated/lumePinnerWebsitesIPNSAPI.schemas";
+  SSLStatusInfo,
+} from "./generated/schemas/index";
+
+// SSL status constants
+export const SSLStatus = {
+  PENDING: "pending",
+  VALIDATING: "validating",
+  VALID: "valid",
+  READY: "ready",
+  FAILED: "failed",
+  ERROR: "error",
+} as const;
+
+export type SSLStatusValue = (typeof SSLStatus)[keyof typeof SSLStatus];
 import {
   ConfigurationError,
   AuthenticationError,
@@ -80,7 +94,6 @@ export class WebsitesClient {
 
         throw new NetworkError(
           body.error || `HTTP error: ${status}`,
-          status,
         );
       }
 
@@ -151,5 +164,175 @@ export class WebsitesClient {
         signal: options?.signal,
       },
     );
+  }
+
+  async getSSLStatus(
+    domain: string,
+    options?: WebsitesClientOptions,
+  ): Promise<SSLStatusInfo> {
+    return this.request<SSLStatusInfo>(
+      `api/websites/${encodeURIComponent(domain)}/ssl-status`,
+      {
+        signal: options?.signal,
+      },
+    );
+  }
+
+  watchSSL(
+    domain: string,
+    options?: WatchOptions,
+  ): SSLWatcher {
+    return new SSLWatcherImpl(this, domain, options);
+  }
+}
+
+export interface WatchOptions {
+  interval?: number;
+  timeout?: number;
+}
+
+export interface SSLEvents {
+  ready: (status: SSLStatusInfo) => void;
+  error: (error: SSLError) => void;
+  status: (status: SSLStatusInfo) => void;
+}
+
+export interface SSLCallbacks {
+  onReady?: (status: SSLStatusInfo) => void;
+  onError?: (error: SSLError) => void;
+  onStatus?: (status: SSLStatusInfo) => void;
+}
+
+export interface SSLWatcher {
+  start(callbacks: SSLCallbacks): Promise<void>;
+  stop(): void;
+}
+
+export interface SSLError extends Error {
+  type: 'timeout' | 'error';
+  details?: string;
+}
+
+const DEFAULT_INTERVAL = 5000;
+const DEFAULT_TIMEOUT = 300000;
+
+class SSLWatcherImpl implements SSLWatcher {
+  private emitter = createNanoEvents<SSLEvents>();
+  private unbind: (() => void)[] = [];
+  private intervalId: ReturnType<typeof setInterval> | null = null;
+  private timeoutId: ReturnType<typeof setTimeout> | null = null;
+  private stopped = false;
+  private options: WatchOptions;
+  private runId = 0;
+
+  constructor(
+    private client: WebsitesClient,
+    private domain: string,
+    options: WatchOptions = {},
+  ) {
+    this.options = {
+      interval: options.interval ?? DEFAULT_INTERVAL,
+      timeout: options.timeout ?? DEFAULT_TIMEOUT,
+    };
+
+    if (this.options.interval <= 0) {
+      this.options.interval = DEFAULT_INTERVAL;
+    }
+    if (this.options.timeout <= 0) {
+      this.options.timeout = DEFAULT_TIMEOUT;
+    }
+  }
+
+  private emitError(
+    message: string,
+    type: SSLError['type'] = 'error',
+    details?: string,
+  ): void {
+    const error: SSLError = new Error(message) as SSLError;
+    error.type = type;
+    error.details = details;
+    this.emitter.emit('error', error);
+    this.stop();
+  }
+
+  async start(callbacks: SSLCallbacks = {}): Promise<void> {
+    this.stop();
+    this.stopped = false;
+    const currentRunId = ++this.runId;
+
+    if (callbacks.onReady) {
+      this.unbind.push(this.emitter.on('ready', callbacks.onReady));
+    }
+    if (callbacks.onError) {
+      this.unbind.push(this.emitter.on('error', callbacks.onError));
+    }
+    if (callbacks.onStatus) {
+      this.unbind.push(this.emitter.on('status', callbacks.onStatus));
+    }
+
+    const checkStatus = async (): Promise<void> => {
+      if (this.stopped || this.runId !== currentRunId) {
+        return;
+      }
+
+      try {
+        const status = await this.client.getSSLStatus(this.domain);
+        if (this.stopped || this.runId !== currentRunId) {
+          return;
+        }
+        this.emitter.emit('status', status);
+
+        if (status.status === SSLStatus.VALID || status.status === SSLStatus.READY) {
+          this.emitter.emit('ready', status);
+          this.stop();
+        } else if (status.status === SSLStatus.FAILED || status.status === SSLStatus.ERROR) {
+          this.emitError(
+            status.error || 'SSL provisioning failed',
+            'error',
+            status.error,
+          );
+        }
+      } catch (err) {
+        if (this.stopped || this.runId !== currentRunId) {
+          return;
+        }
+
+        this.emitError(
+          err instanceof Error ? err.message : 'Failed to check SSL status',
+          'error',
+        );
+      }
+    };
+
+    await checkStatus();
+
+    if (this.stopped || this.runId !== currentRunId) {
+      return;
+    }
+
+    this.intervalId = setInterval(checkStatus, this.options.interval);
+
+    this.timeoutId = setTimeout(() => {
+      if (!this.stopped && this.runId === currentRunId) {
+        this.emitError('SSL provisioning timeout', 'timeout');
+      }
+    }, this.options.timeout);
+  }
+
+  stop(): void {
+    this.stopped = true;
+
+    this.unbind.forEach(unbind => unbind());
+    this.unbind = [];
+
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
+
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
   }
 }
