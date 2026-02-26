@@ -349,6 +349,9 @@ importers:
       meow:
         specifier: ^14.0.0
         version: 14.0.0
+      nanoevents:
+        specifier: 'catalog:'
+        version: 9.1.0
       nock:
         specifier: 'catalog:'
         version: 14.0.10

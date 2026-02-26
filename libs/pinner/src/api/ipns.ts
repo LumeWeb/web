@@ -7,7 +7,7 @@ import type {
   IPNSPublishRequest,
   IPNSPublishResponse,
   IPNSResolveResponse,
-} from "./generated/lumePinnerWebsitesIPNSAPI.schemas";
+} from "./generated/schemas/index";
 import {
   ConfigurationError,
   AuthenticationError,

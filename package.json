@@ -61,6 +61,7 @@
     "globals": "^17.3.0",
     "happy-dom": "catalog:",
     "meow": "^14.0.0",
+    "nanoevents": "catalog:",
     "nock": "catalog:",
     "npm-run-all": "catalog:",
     "orval": "catalog:",

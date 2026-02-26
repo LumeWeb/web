@@ -11,7 +11,7 @@ export default defineConfig({
       mode: "tags",
       client: "fetch",
       target: "./src/api/generated",
-      workspace: "./src/api",
+      schemas: "./src/api/generated/schemas",
     },
   },
 });
