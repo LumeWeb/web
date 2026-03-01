@@ -59,7 +59,7 @@ jobs:
 
       - if: steps.check-changes.outputs.has_changes == 'true'
         name: Trigger portal-frontend template repo update
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.PAT }}
           repository: lumeweb/portal-frontend-template
@@ -72,7 +72,7 @@ jobs:
 
       # Release the Go modules
       - name: Trigger Go module release
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.PAT }}
           repository: lumeweb/web
