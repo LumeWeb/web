@@ -34,7 +34,7 @@ catalog:
   '@uppy/tus': 5.1.0
   '@uppy/xhr-upload': 5.1.1
   '@vitest/browser-playwright': ^4.0.17
-  astro: ^5.16.12
+  astro: ^5.18.1
   blockstore-core: ^6.1.2
   blockstore-idb: ^3.0.1
   class-variance-authority: ^0.7.1
@@ -43,7 +43,7 @@ catalog:
   datastore-idb: ^4.0.1
   date-fns: ^4.1.0
   dotenv-cli: ^11.0.0
-  happy-dom: ^20.3.4
+  happy-dom: ^20.8.8
   ky: ^1.14.2
   lucide-react: ^0.562.0
   msw: ^2.12.7
