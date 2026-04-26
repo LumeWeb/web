@@ -40,7 +40,7 @@
     "@mswjs/interceptors": "catalog:",
     "@uppy/core": "catalog:",
     "@vitest/browser-playwright": "catalog:",
-    "jsdom": "^27.4.0",
+    "jsdom": "^29.0.2",
     "msw": "catalog:",
     "nock": "catalog:",
     "playwright": "catalog:",
@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "@uppy/companion-client": "^5.1.1",
-    "@uppy/utils": "^7.1.5",
+    "@uppy/utils": "^7.2.0",
     "ky": "catalog:"
   },
   "repository": {

@@ -44,7 +44,7 @@
     "lucide-react": "catalog:",
     "memoizee": "^0.4.17",
     "node-fetch": "^3.3.2",
-    "react-error-boundary": "^6.1.0",
+    "react-error-boundary": "^6.1.1",
     "tsdown": "catalog:"
   },
   "peerDependencies": {
