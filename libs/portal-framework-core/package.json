@@ -11,8 +11,7 @@
   "exports": {
     ".": {
       "types": "./dist/esm/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "import": "./dist/esm/index.js"
     },
     "./vite": {
       "types": "./dist/esm/vite/index.d.ts",
@@ -23,7 +22,7 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
-    "lint": "eslint src --max-warnings 0",
+    "lint": "oxlint src --max-warnings 0",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
@@ -57,7 +56,6 @@
     "react-error-boundary": "^6.0.0",
     "react-is": "catalog:",
     "react-router": "catalog:",
-    "vite-tsconfig-paths": "catalog:",
     "zod": "catalog:"
   },
   "repository": {

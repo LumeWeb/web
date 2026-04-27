@@ -5,7 +5,7 @@ import { createLibraryConfig } from "@lumeweb/tsdown-config";
 export default defineConfig([
   // Build the main source (src/index.ts) - ESM format with templates
   {
-    ...createLibraryConfig("./src/index.ts"),
+    ...createLibraryConfig("./src/index.ts", { platform: "node" }),
     format: {
       esm: {
         outputOptions: {
@@ -18,7 +18,7 @@ export default defineConfig([
   },
   // Build the main source (src/index.ts) - CJS format with templates
   {
-    ...createLibraryConfig("./src/index.ts"),
+    ...createLibraryConfig("./src/index.ts", { platform: "node" }),
     format: {
       cjs: {
         outputOptions: {

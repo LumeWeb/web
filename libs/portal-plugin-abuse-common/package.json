@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "echo 'Build skipped' && exit 0",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "orval": "orval"
   },
   "main": "dist/index.js",

@@ -42,6 +42,9 @@ export default defineConfig({
   site: "https://lumeweb.com",
 
   vite: {
+    resolve: {
+      tsconfigPaths: true,
+    },
     plugins: [tailwindcss()],
   },
 });

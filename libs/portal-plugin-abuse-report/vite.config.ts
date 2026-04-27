@@ -1,4 +1,4 @@
-import { Config } from "@lumeweb/portal-framework-core/vite";
+import { Config, PLUGIN_TYPE } from "@lumeweb/portal-framework-core/vite";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 

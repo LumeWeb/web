@@ -18,13 +18,13 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --mode production",
     "build:lib": "tsdown",
     "e2e": "dotenv -- run-s build e2e:playwright",
     "e2e:playwright": "playwright test",
     "e2e:playwright:ui": "playwright test --ui",
     "serve": "vite preview",
-    "lint": "eslint ."
+    "lint": "oxlint ."
   },
   "dependencies": {
     "@hookform/resolvers": "catalog:",

@@ -11,8 +11,7 @@
   "exports": {
     ".": {
       "types": "./dist/esm/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "import": "./dist/esm/index.js"
     },
     "./images": {
       "types": "./dist/esm/images.d.ts",
@@ -22,7 +21,7 @@
   },
   "scripts": {
     "build": "tsdown",
-    "lint": "eslint ."
+    "lint": "oxlint ."
   },
   "dependencies": {
     "@lumeweb/portal-framework-ui-core": "workspace:*",
@@ -36,8 +35,7 @@
     "@lumeweb/tsdown-config": "workspace:*",
     "@rollup/plugin-image": "^3.0.3",
     "fake-indexeddb": "^6.2.5",
-    "tsdown": "catalog:",
-    "vite-tsconfig-paths": "catalog:"
+    "tsdown": "catalog:"
   },
   "peerDependencies": {
     "@conform-to/react": "catalog:",

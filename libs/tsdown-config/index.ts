@@ -90,11 +90,6 @@ export function createLibraryConfigWithExternals(
           entryFileNames: "[name].js",
         },
       },
-      cjs: {
-        outputOptions: {
-          dir: "dist/cjs",
-        },
-      },
     },
     external: externals,
     ...options,

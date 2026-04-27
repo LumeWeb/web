@@ -21,7 +21,7 @@
     "e2e:playwright": "playwright test",
     "e2e:playwright:ui": "playwright test --ui",
     "serve": "vite preview",
-    "lint": "eslint ."
+    "lint": "oxlint ."
   },
   "dependencies": {
     "@lumeweb/portal-framework-core": "workspace:*",

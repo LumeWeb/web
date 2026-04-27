@@ -1,4 +1,4 @@
-import { init, registerRemotes } from "@module-federation/enhanced/runtime";
+import { getInstance, registerRemotes } from "@module-federation/enhanced/runtime";
 
 import { Builder } from "../api/builder";
 import { Framework } from "../api/framework";
@@ -37,7 +37,12 @@ export async function initializeFramework(
       builder = new Builder(options.appName);
 
       // Initialize module federation runtime
-      init({ name: appName, remotes: [] });
+      const instance = getInstance();
+      if (!instance) {
+        throw new Error("Module Federation runtime instance is not initialized");
+      }
+      // Set the instance name from the appName
+      instance.options.name = appName;
 
       // Get plugin manifests
       const manifestsMap = await getPortalPluginManifests(

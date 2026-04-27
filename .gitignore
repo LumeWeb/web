@@ -2,6 +2,7 @@
 
 # compiled output
 dist
+lib-dist
 tmp
 /out-tsc
 
@@ -53,3 +54,9 @@ apps/*/build
 *.sh
 *.txt
 *.zip
+
+# Environment variables (secrets)
+.env
+
+# Generated tunnel plugin configs
+plugin.config.json
