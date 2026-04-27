@@ -26,7 +26,7 @@
   "dependencies": {
     "@refinedev/core": "catalog:",
     "autoprefixer": "^10.5.0",
-    "postcss": "8.4.49",
+    "postcss": "8.5.10",
     "qs-esm": "^8.0.1",
     "tailwindcss": "catalog:"
   },
