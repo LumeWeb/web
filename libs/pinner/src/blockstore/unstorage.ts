@@ -9,6 +9,7 @@ import {
   DEFAULT_BLOCKSTORE_BASE,
   DEFAULT_BLOCKSTORE_FS_BASE,
 } from "@/types/constants";
+import type { AbortOptions, AwaitGenerator } from "interface-store";
 
 function isBrowser(): boolean {
   return (
@@ -33,7 +34,11 @@ async function getDefaultDriver(base?: string) {
   }
 }
 
-export function createBlockstore(options?: UnstorageBlockstoreOptions) {
+export function createBlockstore(
+  options?: UnstorageBlockstoreOptions,
+): new (options?: UnstorageBlockstoreOptions) => InstanceType<
+  ReturnType<typeof createUnstorageBlockstore>
+> {
   const BlockstoreClass = createUnstorageBlockstore(getDefaultDriver);
   return class extends BlockstoreClass {
     constructor(instanceOptions?: UnstorageBlockstoreOptions) {
@@ -42,7 +47,11 @@ export function createBlockstore(options?: UnstorageBlockstoreOptions) {
   };
 }
 
-export function createDatastore(options?: UnstorageBlockstoreOptions) {
+export function createDatastore(
+  options?: UnstorageBlockstoreOptions,
+): new (options?: UnstorageBlockstoreOptions) => InstanceType<
+  ReturnType<typeof createUnstorageDatastore>
+> {
   const DatastoreClass = createUnstorageDatastore(getDefaultDriver);
   return class extends DatastoreClass {
     constructor(instanceOptions?: UnstorageBlockstoreOptions) {

@@ -8,9 +8,9 @@ import express from "express";
 import fetch from "node-fetch";
 import fs from "node:fs";
 import { createRequire } from "node:module";
-import { resolve } from "path";
 import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
+import { resolve } from "path";
+
 
 interface BuildInfo {
   architecture: string;
@@ -46,7 +46,8 @@ function getBaseUrl(devPort: number, plugin?: PortalPlugin) {
     return `http://localhost:${devPort}`;
   }
   const tunnelProtocol = process.env.VITE_TUNNEL_PROTOCOL || "https";
-  return `${tunnelProtocol}://${tunnelHost}:${devPort}`;
+  // Tunnels route by host header - use default HTTPS port (443)
+  return `${tunnelProtocol}://${tunnelHost}`;
 }
 
 function normalizePortalDomain(domain: string | undefined): string {
@@ -99,6 +100,8 @@ export interface ConfigOptions {
   dir: string;
   entryFile?: string;
   exposes?: ModuleFederationOptions["exposes"];
+  /** Enable mangling of variable names in minified output. Defaults to true. */
+  minifyMangle?: boolean;
   name: string;
   pluginRegistryConfigFile?: string;
   plugins?: PluginConfig[];
@@ -120,6 +123,8 @@ interface PortalPlugin {
 }
 
 const DEFAULT_PLUGIN_REGISTRY_FILE = "plugin.config.json";
+
+export const PLUGIN_TYPE = "plugin";
 
 export function Config(opts: ConfigOptions) {
   const normalizedOpts = normalizeConfigOptions(opts);
@@ -155,11 +160,11 @@ export function Config(opts: ConfigOptions) {
   ) {
     const resolvedExposes = plugin.exposes
       ? Object.fromEntries(
-          Object.entries(plugin.exposes).map(([key, value]) => [
-            key,
-            resolve(plugin.dir, value),
-          ]),
-        )
+        Object.entries(plugin.exposes).map(([key, value]) => [
+          key,
+          resolve(plugin.dir, value),
+        ]),
+      )
       : undefined;
     return createBaseFederationConfig(
       plugin.name,
@@ -181,11 +186,11 @@ export function Config(opts: ConfigOptions) {
   ) {
     const resolvedExposes = opts.exposes
       ? Object.fromEntries(
-          Object.entries(opts.exposes).map(([key, value]) => [
-            key,
-            resolve(opts.dir, value),
-          ]),
-        )
+        Object.entries(opts.exposes).map(([key, value]) => [
+          key,
+          resolve(opts.dir, value),
+        ]),
+      )
       : undefined;
 
     const importCfg = opts.type == "plugin" ? { import: false } : {};
@@ -230,10 +235,10 @@ export function Config(opts: ConfigOptions) {
   const corePlugins = [
     normalizedOpts.type === "plugin"
       ? react({
-          reactRefreshHost: `http://localhost:${normalizedOpts.appPort}`,
-        })
+        reactRefreshHost: `http://localhost:${normalizedOpts.appPort}`,
+      })
       : react(),
-    tsconfigPaths({ projects: [resolve(opts.dir, "./tsconfig.json")] }),
+
     createHostFederationConfig(normalizedOpts, resolvedRuntimePlugins),
     opts.type === "host" ? localhostAccessPlugin() : undefined,
     ...(opts.plugins?.map((plugin) =>
@@ -244,22 +249,27 @@ export function Config(opts: ConfigOptions) {
         normalizedOpts.devPort!,
       ),
     ) || []),
+
   ].filter(Boolean);
 
   const viteConfig = defineConfig({
     base: "/",
+    resolve: {
+      tsconfigPaths: true,
+    },
     build: {
       outDir: process.env.VITE_OUTPUT_DIR || "dist",
       ...(opts.type === "plugin"
         ? {
-            lib: {
-              entry: resolve(opts.dir, opts.entryFile || "src/index.ts"),
-              fileName: "index",
-              formats: ["es"],
-            },
-          }
+          lib: {
+            entry: resolve(opts.dir, opts.entryFile || "src/index.ts"),
+            fileName: "index",
+            formats: ["es"],
+          },
+        }
         : {}),
-      minify: false,
+      sourcemap: true,
+      minify: true,
       rollupOptions: {
         output: {
           assetFileNames: "static/[ext]/[name]-[hash].[ext]",
@@ -268,19 +278,26 @@ export function Config(opts: ConfigOptions) {
           manualChunks:
             opts.type === "host"
               ? (id) => {
-                  if (id.includes("loader.ts")) {
-                    return "loader";
-                  }
+                if (id.includes("loader.ts")) {
+                  return "loader";
                 }
+              }
               : undefined,
+          minify: {
+            mangle: opts.minifyMangle ?? true,
+          },
           minifyInternalExports: false,
         },
       },
 
       target: "esnext",
     },
+
     define: {
-      "process.env": {},
+      // This handles the specific React/Library check
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+      // This prevents "process is not defined" if a lib checks the object itself
+      'process.env': {}
     },
     plugins: [...corePlugins.filter(Boolean)],
     preview: {
@@ -306,10 +323,10 @@ export function Config(opts: ConfigOptions) {
     },
     ...(opts.type === "host" || opts.plugins?.length
       ? {
-          optimizeDeps: {
-            include: Object.keys(opts.sharedModules),
-          },
-        }
+        optimizeDeps: {
+          include: Object.keys(opts.sharedModules),
+        },
+      }
       : {}),
   });
 
@@ -370,10 +387,13 @@ function createExpressMiddlewarePlugin(configLoader: () => PortalMetaConfig): Pl
 }
 
 function normalizeConfigOptions(opts: ConfigOptions): ConfigOptions {
+  const envPort = process.env.VITE_PORT;
+  const basePort = envPort ? parseInt(envPort, 10) : 4173;
+
   return {
     ...opts,
-    appPort: opts.type === "plugin" ? (opts.appPort ?? 4173) : undefined,
-    devPort: opts.devPort ?? 4173,
+    appPort: opts.type === "plugin" ? (opts.appPort ?? basePort) : undefined,
+    devPort: opts.devPort ?? basePort,
   };
 }
 

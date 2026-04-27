@@ -1,6 +1,7 @@
 {
   "name": "@lumeweb/advanced-rest-provider",
   "version": "0.1.0",
+  "type": "module",
   "description": "An advanced rest data provider using KY for refine",
   "dependencies": {
     "@lumeweb/query-builder": "workspace:*",

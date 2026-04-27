@@ -35,8 +35,7 @@
     "dotenv-cli": "catalog:",
     "npm-run-all": "catalog:",
     "sass-embedded": "^1.97.3",
-    "vite": "catalog:framework",
-    "vite-tsconfig-paths": "catalog:"
+    "vite": "catalog:framework"
   },
   "repository": {
     "type": "git",

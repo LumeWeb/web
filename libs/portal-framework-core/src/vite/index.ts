@@ -1,1 +1,6 @@
-export { Config, type ConfigOptions, type PluginConfig } from "./plugin";
+export {
+  Config,
+  PLUGIN_TYPE,
+  type ConfigOptions,
+  type PluginConfig,
+} from "./plugin";

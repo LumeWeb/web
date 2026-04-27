@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "echo 'Build skipped' && exit 0",
     "serve": "vite preview",
-    "lint": "eslint ."
+    "lint": "oxlint ."
   },
   "dependencies": {
     "@lumeweb/advanced-rest-provider": "workspace:*",

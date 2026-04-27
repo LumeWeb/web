@@ -15,7 +15,6 @@ const modules = [
 export function getSharedModules(): ModuleFederationOptions["shared"] {
   return modules.reduce((acc, module) => {
     acc[module] = {
-      eager: true,
       singleton: true,
     };
     return acc;

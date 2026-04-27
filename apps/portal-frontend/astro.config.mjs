@@ -10,6 +10,9 @@ export default defineConfig({
     allowedHosts: true,
   },
   vite: {
+    resolve: {
+      tsconfigPaths: true,
+    },
     optimizeDeps: {
       include: ["swiper"],
     },

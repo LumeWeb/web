@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "lint": "eslint ."
+    "lint": "oxlint ."
   },
   "dependencies": {
     "@lumeweb/advanced-rest-provider": "workspace:*",
@@ -34,8 +34,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "vite": "catalog:framework",
-    "vite-tsconfig-paths": "catalog:"
+    "vite": "catalog:framework"
   },
   "repository": {
     "type": "git",

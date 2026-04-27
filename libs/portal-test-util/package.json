@@ -20,7 +20,7 @@
   },
   "scripts": {
     "build": "tsdown",
-    "lint": "eslint ."
+    "lint": "oxlint ."
   },
   "dependencies": {
     "@lumeweb/portal-framework-core": "workspace:*"
