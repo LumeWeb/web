@@ -659,7 +659,7 @@ importers:
         version: 6.2.2
       interface-blockstore:
         specifier: ^6.0.1
-        version: 6.0.1
+        version: 6.0.2
       interface-datastore:
         specifier: ^9.0.2
         version: 9.0.3
@@ -9500,9 +9500,6 @@ packages:
   interface-blockstore@5.3.2:
     resolution: {integrity: sha512-oA9Pjkxun/JHAsZrYEyKX+EoPjLciTzidE7wipLc/3YoHDjzsnXRJzAzFJXNUvogtY4g7hIwxArx8+WKJs2RIg==}
 
-  interface-blockstore@6.0.1:
-    resolution: {integrity: sha512-AVcUbMwrhiO4RqDljUitUt3aoon6MD2fblsN7vEVBDsmHFQT0LIOODVK5Qxe28h1uUvVykyZqmo09f6w55KiJg==}
-
   interface-blockstore@6.0.2:
     resolution: {integrity: sha512-Z8LscLfuNWYatKVgaEXK8su+wY6iEEcCXYQiwXf20XVuMvR/zyFa6A0s36epfw8CvUrIv+bXT+FZ2hMEfUCmJw==}
 
@@ -15512,7 +15509,7 @@ snapshots:
       '@multiformats/multiaddr': 13.0.1
       '@multiformats/multiaddr-matcher': 3.0.1
       '@multiformats/multiaddr-to-uri': 12.0.0
-      interface-blockstore: 6.0.1
+      interface-blockstore: 6.0.2
       interface-store: 7.0.1
       multiformats: 13.4.2
       progress-events: 1.1.0
@@ -15620,7 +15617,7 @@ snapshots:
       '@libp2p/interface': 3.1.0
       '@multiformats/dns': 1.0.11
       '@multiformats/multiaddr': 13.0.1
-      interface-blockstore: 6.0.1
+      interface-blockstore: 6.0.2
       interface-datastore: 9.0.3
       interface-store: 7.0.1
       multiformats: 13.4.2
@@ -23948,11 +23945,6 @@ snapshots:
   interface-blockstore@5.3.2:
     dependencies:
       interface-store: 6.0.3
-      multiformats: 13.4.2
-
-  interface-blockstore@6.0.1:
-    dependencies:
-      interface-store: 7.0.1
       multiformats: 13.4.2
 
   interface-blockstore@6.0.2:
