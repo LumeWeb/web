@@ -27,7 +27,7 @@ jobs:
           token: ${{ secrets.PAT }}
 
       - name: Install Knope
-        uses: knope-dev/action@v2.1.0
+        uses: knope-dev/action@v2.1.2
         with:
           version: ${{ inputs.knope_version }}
 
