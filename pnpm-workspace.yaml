@@ -70,7 +70,7 @@ catalog:
   tailwindcss-animate: ^1.0.7
   tsdown: v0.20.0-beta.4
   typescript: ^6.0.3
-  vite: 8.0.8
+  vite: 8.0.10
 
   vitest: ^4.1.5
   vocs: ^1.4.1
@@ -78,7 +78,7 @@ catalog:
 
 catalogs:
   framework:
-    vite: 8.0.8
+    vite: 8.0.10
     zod: ^4.3.6
   websites:
     tailwindcss: ^4.1.18
