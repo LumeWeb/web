@@ -862,7 +862,7 @@ importers:
         specifier: ^0.38.2 || ^0.44.0
         version: 0.38.2
       '@lexical/link':
-        specifier: ^0.38.2
+        specifier: ^0.38.2 || ^0.44.0
         version: 0.38.2
       '@lexical/list':
         specifier: ^0.38.2
