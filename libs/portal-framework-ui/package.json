@@ -41,7 +41,7 @@
     "@conform-to/react": "catalog:",
     "@hookform/resolvers": "catalog:",
     "@lexical/code": "^0.38.2 || ^0.39.0",
-    "@lexical/html": "^0.38.2",
+    "@lexical/html": "^0.38.2 || ^0.44.0",
     "@lexical/link": "^0.38.2",
     "@lexical/list": "^0.38.2",
     "@lexical/markdown": "^0.38.2",
