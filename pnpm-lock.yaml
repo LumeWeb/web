@@ -30,9 +30,6 @@ catalogs:
     '@module-federation/vite':
       specifier: ^1.14.5
       version: 1.14.5
-    '@mswjs/interceptors':
-      specifier: ^0.41.6
-      version: 0.41.6
     '@radix-ui/react-dropdown-menu':
       specifier: ^2.1.16
       version: 2.1.16
@@ -678,7 +675,7 @@ importers:
         version: link:../tsdown-config
       '@mswjs/interceptors':
         specifier: 'catalog:'
-        version: 0.41.6
+        version: 0.41.7
       '@types/uuid':
         specifier: ^11.0.0
         version: 11.0.0
@@ -1773,7 +1770,7 @@ importers:
         version: link:../tsdown-config
       '@mswjs/interceptors':
         specifier: 'catalog:'
-        version: 0.41.6
+        version: 0.41.7
       '@uppy/core':
         specifier: 'catalog:'
         version: 5.2.0(patch_hash=8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8)
@@ -3950,6 +3947,10 @@ packages:
 
   '@mswjs/interceptors@0.41.6':
     resolution: {integrity: sha512-qmDvJIjcNsZ6tXWy2G9yuCgMPTTn35GMA3dPpSLm7QJVpbQzYdw0ALy1bKoivXnEM3U93/OrK+/M719b+fg84Q==}
+    engines: {node: '>=18'}
+
+  '@mswjs/interceptors@0.41.7':
+    resolution: {integrity: sha512-D0nkS5+sx87mYpxFqASImCineYoEl9wGlUPrzkuS0ohzG8wfophLpE+I76qGJ0slLAVI19do5SI9pWJNCVf4fg==}
     engines: {node: '>=18'}
 
   '@multiformats/dns@1.0.13':
@@ -17261,6 +17262,15 @@ snapshots:
       outvariant: 1.4.3
       strict-event-emitter: 0.5.1
 
+  '@mswjs/interceptors@0.41.7':
+    dependencies:
+      '@open-draft/deferred-promise': 2.2.0
+      '@open-draft/logger': 0.3.0
+      '@open-draft/until': 2.1.0
+      is-node-process: 1.2.0
+      outvariant: 1.4.3
+      strict-event-emitter: 0.5.1
+
   '@multiformats/dns@1.0.13':
     dependencies:
       '@dnsquery/dns-packet': 6.1.1
@@ -25742,7 +25752,7 @@ snapshots:
   msw@2.13.6(@types/node@25.6.0)(typescript@6.0.3):
     dependencies:
       '@inquirer/confirm': 6.0.12(@types/node@25.6.0)
-      '@mswjs/interceptors': 0.41.6
+      '@mswjs/interceptors': 0.41.7
       '@open-draft/deferred-promise': 3.0.0
       '@types/statuses': 2.0.6
       cookie: 1.1.1
