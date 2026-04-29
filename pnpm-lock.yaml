@@ -856,7 +856,7 @@ importers:
         specifier: 'catalog:'
         version: 5.2.2(react-hook-form@7.74.0(react@19.2.5))
       '@lexical/code':
-        specifier: ^0.38.2 || ^0.39.0
+        specifier: ^0.38.2 || ^0.39.0 || ^0.44.0
         version: 0.39.0
       '@lexical/html':
         specifier: ^0.38.2 || ^0.44.0
