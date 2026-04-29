@@ -46,7 +46,7 @@
     "@lexical/list": "^0.38.2 || ^0.44.0",
     "@lexical/markdown": "^0.38.2 || ^0.44.0",
     "@lexical/react": "^0.38.2 || ^0.44.0",
-    "@lexical/rich-text": "^0.38.2",
+    "@lexical/rich-text": "^0.38.2 || ^0.44.0",
     "@lexical/selection": "^0.38.2",
     "@lexical/utils": "^0.38.2",
     "@lumeweb/portal-framework-core": "workspace:^",
