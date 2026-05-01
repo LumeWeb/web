@@ -66,9 +66,6 @@ catalogs:
     '@tanstack/react-table':
       specifier: ^8.21.3
       version: 8.21.3
-    '@turbo/gen':
-      specifier: ^2.9.6
-      version: 2.9.6
     '@types/node':
       specifier: ^25.6.0
       version: 25.6.0
@@ -1100,7 +1097,7 @@ importers:
     devDependencies:
       '@turbo/gen':
         specifier: 'catalog:'
-        version: 2.9.6(@types/node@25.6.0)
+        version: 2.9.7(@types/node@25.6.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.6.0
@@ -6630,8 +6627,8 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
-  '@turbo/gen@2.9.6':
-    resolution: {integrity: sha512-94E/WMvxidupdafLgh6zmlgeWXx1NAkw0d5Q508xDkrPzUNZEPdweK90Gbs3gNDgNFQ7XntZQqvrsCGggeid5A==}
+  '@turbo/gen@2.9.7':
+    resolution: {integrity: sha512-gj587JKFqIEMw442LrE+M3V13isvN9GB/wUlApHorihvLB6Cv1ZVZEhR+8lTAduqLoafzwlhbCwZsT3wHC8Pow==}
     hasBin: true
 
   '@turbo/linux-64@2.9.6':
@@ -19881,7 +19878,7 @@ snapshots:
   '@turbo/darwin-arm64@2.9.6':
     optional: true
 
-  '@turbo/gen@2.9.6(@types/node@25.6.0)':
+  '@turbo/gen@2.9.7(@types/node@25.6.0)':
     dependencies:
       '@inquirer/prompts': 7.10.1(@types/node@25.6.0)
       esbuild: 0.25.12
