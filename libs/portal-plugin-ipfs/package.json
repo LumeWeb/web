@@ -15,7 +15,7 @@
     "@helia/car": "catalog:",
     "@helia/http": "catalog:",
     "@helia/interface": "^6.0.2",
-    "@helia/remote-pinning": "^2.0.4",
+    "@helia/remote-pinning": "^3.0.0",
     "@helia/routers": "^5.0.0",
     "@helia/unixfs": "catalog:",
     "@ipfs-shipyard/pinning-service-client": "catalog:",
