@@ -40,7 +40,7 @@
     "@mswjs/interceptors": "catalog:",
     "@uppy/core": "catalog:",
     "@vitest/browser-playwright": "catalog:",
-    "jsdom": "^27.4.0",
+    "jsdom": "^29.0.0",
     "msw": "catalog:",
     "nock": "catalog:",
     "playwright": "catalog:",
