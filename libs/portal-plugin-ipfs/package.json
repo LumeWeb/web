@@ -11,12 +11,12 @@
     "orval": "orval"
   },
   "dependencies": {
-    "@helia/block-brokers": "^5.0.14",
+    "@helia/block-brokers": "^5.2.4",
     "@helia/car": "catalog:",
     "@helia/http": "catalog:",
-    "@helia/interface": "^6.0.2",
-    "@helia/remote-pinning": "^2.0.4",
-    "@helia/routers": "^5.0.0",
+    "@helia/interface": "^6.2.1",
+    "@helia/remote-pinning": "^3.0.0",
+    "@helia/routers": "^5.1.1",
     "@helia/unixfs": "catalog:",
     "@ipfs-shipyard/pinning-service-client": "catalog:",
     "@ipld/car": "catalog:",
