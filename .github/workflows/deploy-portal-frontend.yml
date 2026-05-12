@@ -40,7 +40,7 @@ jobs:
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           command: pages deploy apps/portal-frontend/dist --project-name=lume-web-portal-frontend-staging
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-      - uses: mshick/add-pr-comment@v2
+      - uses: mshick/add-pr-comment@v3
         if: github.event_name == 'pull_request'
         with:
           message: |
