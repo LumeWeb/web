@@ -32,12 +32,7 @@ export function createLibraryConfig(
           dir: "dist/esm",
           entryFileNames: "[name].js",
         },
-      },
-      cjs: {
-        outputOptions: {
-          dir: "dist/cjs",
-        },
-      },
+      }
     },
     ...options,
   };
@@ -60,11 +55,6 @@ export function createLibraryConfigWithDirs(
         outputOptions: {
           dir: esmDir,
           entryFileNames: "[name].js",
-        },
-      },
-      cjs: {
-        outputOptions: {
-          dir: cjsDir,
         },
       },
     },
@@ -113,12 +103,7 @@ export function createLibraryConfigWithPlugins(
           dir: "dist/esm",
           entryFileNames: "[name].js",
         },
-      },
-      cjs: {
-        outputOptions: {
-          dir: "dist/cjs",
-        },
-      },
+      }
     },
     plugins,
     ...options,
