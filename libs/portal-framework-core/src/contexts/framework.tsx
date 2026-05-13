@@ -100,14 +100,14 @@ export function FrameworkProvider({
         framework: result.framework,
         isLoading: false,
       });
-      
+
       // Emit boot completion event on success
       document.dispatchEvent(new CustomEvent('portal:boot:complete', {
         detail: { success: true, error: null }
       }));
     } catch (err) {
       isDev && console.error("[FrameworkProvider] Initialization error:", err);
-      
+
       if (isDev && err && typeof err === 'object' && 'errors' in err) {
         console.error("[FrameworkProvider] Individual errors:");
         for (const [key, error] of Object.entries(err.errors)) {
@@ -124,7 +124,7 @@ export function FrameworkProvider({
         framework: null,
         isLoading: false,
       });
-      
+
       // Emit boot completion event on error
       document.dispatchEvent(new CustomEvent('portal:boot:complete', {
         detail: { success: false, error }
@@ -196,7 +196,7 @@ export function useFrameworkData<T>(
 
   useEffect(() => {
     let mounted = true;
-    
+
     if (frameworkError) {
       if (mounted) {
         setError(frameworkError);

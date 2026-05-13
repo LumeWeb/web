@@ -3,7 +3,9 @@ import type { ModuleFederationOptions } from "@module-federation/vite";
 import type { Plugin } from "vite";
 
 import { federation } from "@module-federation/vite";
-import react from "@vitejs/plugin-react";
+import { DevTools } from "@vitejs/devtools";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
 import express from "express";
 import fetch from "node-fetch";
 import fs from "node:fs";
@@ -93,9 +95,20 @@ function setupPluginRegistryConfig(opts: ConfigOptions) {
 
 const require = createRequire(import.meta.url);
 
+export interface DevToolsOptions {
+  /** Enable DevTools plugin. Defaults to false. */
+  enabled?: boolean;
+  /** Generate DevTools static build alongside app build. Defaults to true when enabled. */
+  buildWithApp?: boolean;
+  /** Output directory for DevTools build, relative to build.outDir. Defaults to "devtools". */
+  outDir?: string;
+}
+
 export interface ConfigOptions {
   /** Port number for react refresh host when type is "plugin" */
   appPort?: number;
+  /** DevTools configuration */
+  devtools?: DevToolsOptions;
   devPort?: number;
   dir: string;
   entryFile?: string;
@@ -232,12 +245,18 @@ export function Config(opts: ConfigOptions) {
     );
   }
 
+  const DEVTOOLS_DEFAULT_OUT_DIR = "devtools";
+  const devtoolsOutDir = opts.devtools?.outDir ?? DEVTOOLS_DEFAULT_OUT_DIR;
+
   const corePlugins = [
     normalizedOpts.type === "plugin"
       ? react({
         reactRefreshHost: `http://localhost:${normalizedOpts.appPort}`,
       })
       : react(),
+    babel({
+      presets: [reactCompilerPreset()],
+    }),
 
     createHostFederationConfig(normalizedOpts, resolvedRuntimePlugins),
     opts.type === "host" ? localhostAccessPlugin() : undefined,
@@ -249,6 +268,14 @@ export function Config(opts: ConfigOptions) {
         normalizedOpts.devPort!,
       ),
     ) || []),
+    opts.devtools?.enabled
+      ? DevTools({
+        build: {
+          outDir: devtoolsOutDir,
+          withApp: opts.devtools.buildWithApp ?? true,
+        },
+      })
+      : undefined,
 
   ].filter(Boolean);
 
@@ -268,8 +295,11 @@ export function Config(opts: ConfigOptions) {
           },
         }
         : {}),
+      rolldownOptions: opts.devtools?.enabled
+        ? { devtools: {} }
+        : undefined,
       sourcemap: true,
-      minify: true,
+      minify: false,
       rollupOptions: {
         output: {
           assetFileNames: "static/[ext]/[name]-[hash].[ext]",

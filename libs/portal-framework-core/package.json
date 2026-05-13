@@ -38,6 +38,9 @@
   },
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
+    "@rolldown/plugin-babel": "^0.2.3",
+    "@vitejs/devtools": "^0.1.15",
+    "babel-plugin-react-compiler": "^1.0.0",
     "esbuild-fix-imports-plugin": "^1.0.23",
     "express": "^5.2.1",
     "lucide-react": "catalog:",
@@ -47,7 +50,7 @@
     "tsdown": "catalog:"
   },
   "peerDependencies": {
-    "@module-federation/enhanced": "^0.21.6 || ^0.23.0 || ^0.24.0",
+    "@module-federation/enhanced": "catalog:",
     "@refinedev/react-router": "catalog:",
     "@t3-oss/env-core": "catalog:",
     "lucide-react": "catalog:",
