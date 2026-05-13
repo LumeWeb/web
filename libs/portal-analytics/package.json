@@ -1,0 +1,47 @@
+{
+  "name": "@lumeweb/portal-analytics",
+  "version": "0.1.0",
+  "description": "Analytics integration hooks for Lumeweb portal — bridges @lumeweb/analytics with @refinedev/core",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "lint": "tsc --noEmit",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@lumeweb/analytics": "workspace:*"
+  },
+  "peerDependencies": {
+    "@refinedev/core": "catalog:",
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "@lumeweb/tsdown-config": "workspace:*",
+    "@refinedev/core": "catalog:",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
+  }
+}
