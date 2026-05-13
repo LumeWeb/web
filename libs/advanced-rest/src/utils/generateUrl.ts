@@ -81,6 +81,6 @@ export function generateNestedUrl({
     resolvedPath = `${resolvedPath}/${operation}`.replace(/\/\/+/g, "/");
   }
 
-  // Return relative path without leading slash for ky's prefixUrl
+  // Return relative path without leading slash for ky's prefix
   return `${resolvedPath.replace(/^\/+/, "")}`;
 }

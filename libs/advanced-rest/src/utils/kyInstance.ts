@@ -8,9 +8,8 @@ export const httpClient = (apiBase?: string) =>
   ky.extend({
     hooks: {
       afterResponse: [
-        async (request, options, response) => {
+        async ({ response }) => {
           if (!response.ok) {
-            // Clone response before reading body to avoid locking the stream
             const errorBody = await response
               .clone()
               .json()
@@ -28,7 +27,7 @@ export const httpClient = (apiBase?: string) =>
         },
       ],
       beforeRequest: [
-        (request) => {
+        ({ request }) => {
           const url = new URL(request.url);
           if (/{\w+}/.exec(url.pathname)) {
             throw new NestedParamError(
@@ -38,5 +37,5 @@ export const httpClient = (apiBase?: string) =>
         },
       ],
     },
-    prefixUrl: apiBase,
+    prefix: apiBase,
   });
