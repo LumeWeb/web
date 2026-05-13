@@ -1,0 +1,18 @@
+diff --git a/build/index.mjs b/build/index.mjs
+index cef684c6d401eda884f4f67586c9f7048a14c05a..0fd527c795a0aa7787bdb9039e290527cc623f08 100644
+--- a/build/index.mjs
++++ b/build/index.mjs
+@@ -1,8 +1,8 @@
+-import { EventEmitter } from "node:events";
+-import { Readable } from "node:stream";
+-import { IncomingMessage, ServerResponse } from "node:http";
+-import { Http2ServerRequest, Http2ServerResponse } from "node:http2";
+-import { setImmediate } from "node:timers";
++import { EventEmitter } from "events";
++import { Readable } from "stream";
++import { IncomingMessage, ServerResponse } from "http";
++import { Http2ServerRequest, Http2ServerResponse } from "http2";
++import { setImmediate } from "timers";
+ 
+ //#region src/adapters/Connection.ts
+ const connectionConstants = Object.freeze({
