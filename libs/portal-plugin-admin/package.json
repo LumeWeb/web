@@ -10,6 +10,7 @@
     "lint": "oxlint ."
   },
   "dependencies": {
+    "@lumeweb/advanced-rest-provider": "workspace:*",
     "@lumeweb/portal-framework-auth": "workspace:*",
     "@lumeweb/portal-framework-core": "workspace:*",
     "@lumeweb/portal-framework-ui": "workspace:*",
