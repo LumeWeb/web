@@ -1,19 +1,10 @@
 import type { RefineProps } from "@refinedev/core";
-
-import dataProvider from "@lumeweb/advanced-rest-provider";
 import {
-  type AuthProviderWithEmitter,
-  DATA_PROVIDER_NAME,
-} from "@lumeweb/portal-framework-auth";
-import {
-  env,
   Framework,
-  getApiBaseUrl,
-  getPluginMeta,
-  mergeRefineConfig,
   RefineConfigCapability,
-  syncAuthProviderWithDataProvider,
 } from "@lumeweb/portal-framework-core";
+import { resolveDashboardApiUrl, setupDataProvider } from "@lib/util";
+import { DATA_PROVIDER_NAME } from "@lumeweb/portal-framework-auth";
 
 export class Capability implements RefineConfigCapability {
   readonly id: string = "dashboard:refine-config";
@@ -24,17 +15,15 @@ export class Capability implements RefineConfigCapability {
 
   async destroy() {}
 
+  /**
+   * Gets the resolved API URL for the dashboard
+   */
+  get apiUrl(): string {
+    return this.#apiUrl;
+  }
+
   getConfig(existing?: Partial<RefineProps>) {
-    const token = localStorage.getItem("jwt");
-    const acctProvider = dataProvider(this.#apiUrl, true);
-
-    if (token) {
-      acctProvider.setAuthToken(token);
-    }
-
-    syncAuthProviderWithDataProvider(acctProvider, existing?.authProvider);
-
-    return mergeRefineConfig(existing, { [DATA_PROVIDER_NAME]: acctProvider }, [
+    const dashboardResources = [
       {
         meta: { template: "/account" },
         name: DATA_PROVIDER_NAME,
@@ -60,29 +49,40 @@ export class Capability implements RefineConfigCapability {
         },
         name: "operations.filters",
       },
-    ]);
+      {
+        meta: {
+          dataProviderName: DATA_PROVIDER_NAME,
+          template: "/account/billing/balance",
+        },
+        name: "billing-balance",
+      },
+      {
+        meta: {
+          dataProviderName: DATA_PROVIDER_NAME,
+          template: "/account/billing/credits",
+        },
+        name: "billing-credits",
+      },
+      {
+        meta: {
+          dataProviderName: DATA_PROVIDER_NAME,
+          template: "/account/billing/pricing-plans",
+        },
+        name: "billing-pricing-plans",
+      },
+      {
+        meta: {
+          dataProviderName: DATA_PROVIDER_NAME,
+          template: "/account/billing/stripe/customer-portal",
+        },
+        name: "billing-stripe-customer-portal",
+      },
+    ];
+
+    return setupDataProvider(this.#apiUrl, existing, dashboardResources);
   }
 
   async initialize(framework: Framework) {
-    const apiUrl = getApiBaseUrl({
-      currentUrl: framework.portalUrl,
-      preserveSubdomain: !env.VITE_PORTAL_DOMAIN_IS_ROOT,
-    });
-
-    if (!apiUrl) {
-      throw new Error("Failed to get API base URL");
-    }
-
-    const subdomain = getPluginMeta(framework.meta!, "dashboard", "subdomain");
-    if (!subdomain) {
-      throw new Error("Failed to get subdomain from plugin metadata");
-    }
-
-    try {
-      const apiDomain = new URL(apiUrl);
-      this.#apiUrl = `${apiDomain.protocol}//${subdomain}.${apiDomain.hostname}/api`;
-    } catch (error) {
-      throw new Error(`Failed to construct API URL: ${error.message}`);
-    }
+    this.#apiUrl = resolveDashboardApiUrl(framework);
   }
 }

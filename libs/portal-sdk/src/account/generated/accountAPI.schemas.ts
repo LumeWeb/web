@@ -3,21 +3,18 @@
  * Do not edit manually.
  * Account API
  * API endpoints for managing user accounts, authentication, and API keys.
- * OpenAPI spec version: develop
+ * OpenAPI spec version: v0.2.7-0.20260418132608-572560c6efd0
  */
+export interface APIEndpointInfoResponse {
+  method: string;
+  path: string;
+}
+
 export interface APIKeyCreateRequest {
   name: string;
 }
 
-/**
- * @minItems 16
- * @maxItems 16
- */
-export type BinUUID = number[];
-
-export interface BinaryUUID {
-  BinUUID: BinUUID;
-}
+export type BinaryUUID = string;
 
 export interface APIKeyResponse {
   created_at: string;
@@ -25,8 +22,8 @@ export interface APIKeyResponse {
   uuid: BinaryUUID;
 }
 
-export interface APIKeyResponseResponse {
-  data: APIKeyResponse;
+export interface APIKeyListResponse {
+  data: APIKeyResponse[];
   total: number;
 }
 
@@ -66,6 +63,44 @@ export interface AccountPermissionsResponse {
   permissions: AccessPolicy[];
 }
 
+export interface Decimal { [key: string]: unknown }
+
+export interface BalanceResponse {
+  balance: Decimal;
+  user_id: number;
+}
+
+export interface ChangePlanRequest {
+  period_id: number;
+}
+
+export interface CheckoutSessionStatusResponse {
+  customer_email: string;
+  session_id: string;
+  status: string;
+  user_id: number;
+}
+
+export type CheckoutUIFragmentMetadata = { [key: string]: unknown };
+
+export interface CheckoutUIFragment {
+  css?: string;
+  html?: string;
+  link?: string;
+  metadata?: CheckoutUIFragmentMetadata;
+  script?: string;
+  type: string;
+}
+
+export type CheckoutUIResponseMetadata = { [key: string]: unknown };
+
+export interface CheckoutUIResponse {
+  expires_at: string;
+  fragments: CheckoutUIFragment[];
+  metadata?: CheckoutUIResponseMetadata;
+  session_id?: string;
+}
+
 export interface CreateAPIKeyResponse {
   name: string;
   token: string;
@@ -82,6 +117,23 @@ export interface ErrorResponse {
   error: string;
 }
 
+export interface GatewayAbilities {
+  checkout: boolean;
+  customer_portal: boolean;
+  session_status: boolean;
+}
+
+export interface GatewayPublicInfo {
+  abilities: GatewayAbilities;
+  description: string;
+  id: string;
+  is_active: boolean;
+  logo_url: string;
+  name: string;
+}
+
+export type GatewayListResponse = GatewayPublicInfo[];
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -91,6 +143,32 @@ export interface LoginRequest {
 export interface LoginResponse {
   otp?: boolean;
   token: string;
+}
+
+export type ManagementCapabilitiesResponseAdminOperations = {[key: string]: boolean};
+
+export type ManagementCapabilitiesResponseOperations = {[key: string]: boolean};
+
+export interface ManagementCapabilitiesResponse {
+  admin_operations: ManagementCapabilitiesResponseAdminOperations;
+  management_mode: string;
+  operations: ManagementCapabilitiesResponseOperations;
+}
+
+export interface ManagementRequest {
+  operation: string;
+}
+
+export interface ManagementResultResponse {
+  action: string;
+  api_endpoint?: APIEndpointInfoResponse;
+  can_abort: boolean;
+  confirmation_message?: string;
+  effective_time?: string;
+  error_message?: string;
+  requires_confirmation: boolean;
+  status: string;
+  url?: string;
 }
 
 export interface OTPDisableRequest {
@@ -188,6 +266,62 @@ export interface PongResponse {
   token: string;
 }
 
+export interface PublicPricingPlanPeriodDTO {
+  cadence: string;
+  id: number;
+  price_usd: number;
+  quota_plan_id: number;
+  rolling_days?: number;
+}
+
+export interface PublicPricingPlanResponse {
+  currency: string;
+  description: string;
+  features: string[];
+  id: number;
+  name: string;
+  pricing_periods: PublicPricingPlanPeriodDTO[];
+}
+
+export interface PublicPricingPlansListResponse {
+  data: PublicPricingPlanResponse[];
+  total: number;
+}
+
+export interface UsagePoint {
+  bytes: number;
+  date: string;
+}
+
+export interface QuotaHistoryResponse {
+  points: UsagePoint[];
+  user_id: number;
+}
+
+export interface WindowInfo {
+  duration?: number;
+  end_date?: string;
+  start_date?: string;
+  timezone?: string;
+  type: string;
+}
+
+export interface QuotaTypeStatus {
+  limit?: number;
+  percentage: number;
+  remaining?: number;
+  reserved?: number;
+  threshold?: number;
+  used: number;
+  window?: WindowInfo;
+}
+
+export interface QuotaStatusResponse {
+  download: QuotaTypeStatus;
+  storage: QuotaTypeStatus;
+  upload: QuotaTypeStatus;
+}
+
 export interface RegisterRequest {
   email: string;
   first_name: string;
@@ -197,6 +331,16 @@ export interface RegisterRequest {
 
 export interface ResendVerifyEmailRequest {
   email: string;
+}
+
+export interface SubscriptionStatusResponse {
+  created_at?: string;
+  gateway_type?: string;
+  is_subscribed: boolean;
+  paused_at?: string;
+  pricing_plan_period_id?: number;
+  updated_at?: string;
+  will_cancel_at?: string;
 }
 
 /**
@@ -224,14 +368,50 @@ export interface UploadLimitResponse {
   limit: number;
 }
 
+export interface UserCreditItem {
+  amount: Decimal;
+  created_at: string;
+  description?: string;
+  direction: string;
+  id: Uuid;
+  type: string;
+}
+
+export interface UserCreditsListResponse {
+  data: UserCreditItem[];
+  total: number;
+}
+
 export interface VerifyEmailRequest {
   email: string;
   token: string;
 }
 
+export type StringUUIDSchema = string;
+
 export type PostApiAccountAvatarBody = {
-  file: string;
+  file: Blob;
 };
+
+export type GetApiAccountBillingCheckoutSessionSessionIdStatusParams = {
+/**
+ * Payment gateway type (defaults to Stripe if not specified)
+ */
+gateway?: string;
+};
+
+export type GetApiAccountBillingCheckoutUiPlanIdParams = {
+/**
+ * Payment gateway type (defaults to Stripe if not specified)
+ */
+gateway?: string;
+/**
+ * Period ID for the selected pricing period
+ */
+period_id?: string;
+};
+
+export type PostApiAccountBillingWebhooksGatewayTypeBody = { [key: string]: unknown };
 
 export type GetApiAccountKeysParams = {
 /**
@@ -239,9 +419,72 @@ export type GetApiAccountKeysParams = {
  */
 _end?: number;
 /**
+ * Comma-separated list of sort orders ('asc' or 'desc') corresponding to _sort fields. Defaults to 'asc'.
+ */
+_order?: string;
+/**
+ * Comma-separated list of fields to sort by. Available fields:
+ */
+_sort?: string;
+/**
  * Starting index of the items to return (0-based). Defaults to 0.
  */
 _start?: number;
+/**
+ * Filter by name contains
+ */
+'filters[name][contains]'?: string;
+/**
+ * Filter by name endswith
+ */
+'filters[name][endswith]'?: string;
+/**
+ * Filter by name eq
+ */
+'filters[name][eq]'?: string;
+/**
+ * Filter by name ne
+ */
+'filters[name][ne]'?: string;
+/**
+ * Filter by name startswith
+ */
+'filters[name][startswith]'?: string;
+/**
+ * Filter by name contains
+ */
+name_contains?: string;
+/**
+ * Filter by name endswith
+ */
+name_endswith?: string;
+/**
+ * Filter by name eq
+ */
+name_eq?: string;
+/**
+ * Filter by name ne
+ */
+name_ne?: string;
+/**
+ * Filter by name startswith
+ */
+name_startswith?: string;
+};
+
+export type GetApiAccountQuotaHistoryParams = {
+/**
+ * End date in RFC3339 format
+ */
+end_date?: string;
+/**
+ * Start date in RFC3339 format
+ */
+start_date?: string;
+/**
+ * Usage type (upload or download)
+ */
+type?: string;
 };
 
 export type PostApiAccountVerifyEmailParams = {
@@ -268,6 +511,190 @@ _sort?: string;
  * Starting index of the items to return (0-based). Defaults to 0.
  */
 _start?: number;
+/**
+ * Filter by cid contains
+ */
+cid_contains?: string;
+/**
+ * Filter by cid endswith
+ */
+cid_endswith?: string;
+/**
+ * Filter by cid eq
+ */
+cid_eq?: string;
+/**
+ * Filter by cid ne
+ */
+cid_ne?: string;
+/**
+ * Filter by cid startswith
+ */
+cid_startswith?: string;
+/**
+ * Filter by cid contains
+ */
+'filters[cid][contains]'?: string;
+/**
+ * Filter by cid endswith
+ */
+'filters[cid][endswith]'?: string;
+/**
+ * Filter by cid eq
+ */
+'filters[cid][eq]'?: string;
+/**
+ * Filter by cid ne
+ */
+'filters[cid][ne]'?: string;
+/**
+ * Filter by cid startswith
+ */
+'filters[cid][startswith]'?: string;
+/**
+ * Filter by id between
+ */
+'filters[id][between]'?: string;
+/**
+ * Filter by id eq
+ */
+'filters[id][eq]'?: string;
+/**
+ * Filter by id gt
+ */
+'filters[id][gt]'?: string;
+/**
+ * Filter by id gte
+ */
+'filters[id][gte]'?: string;
+/**
+ * Filter by id lt
+ */
+'filters[id][lt]'?: string;
+/**
+ * Filter by id lte
+ */
+'filters[id][lte]'?: string;
+/**
+ * Filter by id ne
+ */
+'filters[id][ne]'?: string;
+/**
+ * Filter by operation contains
+ */
+'filters[operation][contains]'?: string;
+/**
+ * Filter by operation endswith
+ */
+'filters[operation][endswith]'?: string;
+/**
+ * Filter by operation eq
+ */
+'filters[operation][eq]'?: string;
+/**
+ * Filter by operation ne
+ */
+'filters[operation][ne]'?: string;
+/**
+ * Filter by operation startswith
+ */
+'filters[operation][startswith]'?: string;
+/**
+ * Filter by progress_percent between
+ */
+'filters[progress_percent][between]'?: string;
+/**
+ * Filter by progress_percent eq
+ */
+'filters[progress_percent][eq]'?: string;
+/**
+ * Filter by progress_percent gt
+ */
+'filters[progress_percent][gt]'?: string;
+/**
+ * Filter by progress_percent gte
+ */
+'filters[progress_percent][gte]'?: string;
+/**
+ * Filter by progress_percent lt
+ */
+'filters[progress_percent][lt]'?: string;
+/**
+ * Filter by progress_percent lte
+ */
+'filters[progress_percent][lte]'?: string;
+/**
+ * Filter by progress_percent ne
+ */
+'filters[progress_percent][ne]'?: string;
+/**
+ * Filter by id eq
+ */
+id_eq?: string;
+/**
+ * Filter by id gt
+ */
+id_gt?: string;
+/**
+ * Filter by id gte
+ */
+id_gte?: string;
+/**
+ * Filter by id lt
+ */
+id_lt?: string;
+/**
+ * Filter by id lte
+ */
+id_lte?: string;
+/**
+ * Filter by id ne
+ */
+id_ne?: string;
+/**
+ * Filter by operation contains
+ */
+operation_contains?: string;
+/**
+ * Filter by operation endswith
+ */
+operation_endswith?: string;
+/**
+ * Filter by operation eq
+ */
+operation_eq?: string;
+/**
+ * Filter by operation ne
+ */
+operation_ne?: string;
+/**
+ * Filter by operation startswith
+ */
+operation_startswith?: string;
+/**
+ * Filter by progress_percent eq
+ */
+progress_percent_eq?: string;
+/**
+ * Filter by progress_percent gt
+ */
+progress_percent_gt?: string;
+/**
+ * Filter by progress_percent gte
+ */
+progress_percent_gte?: string;
+/**
+ * Filter by progress_percent lt
+ */
+progress_percent_lt?: string;
+/**
+ * Filter by progress_percent lte
+ */
+progress_percent_lte?: string;
+/**
+ * Filter by progress_percent ne
+ */
+progress_percent_ne?: string;
 /**
  * Search term for filename or other relevant operation data
  */

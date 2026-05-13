@@ -1,10 +1,8 @@
 import React from "react";
-import {
-  registerAction,
-  ToolbarItemComponentProps,
-  ToolbarItemType,
-  ToolbarSeparatorItem,
-} from "@/components/data-table";
+import { registerAction } from "@/components/data-table/ToolbarRegistry";
+import type { ToolbarItemComponentProps } from "@/components/data-table/DataTable.types";
+import { ToolbarItemType } from "@/components/data-table/DataTable.types";
+import type { ToolbarSeparatorItem } from "@/components/data-table/DataTable.types";
 import { BaseRecord } from "@refinedev/core";
 
 interface ToolbarSeparatorItemComponentProps<TData extends BaseRecord>

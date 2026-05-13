@@ -24,6 +24,7 @@
     "lint": "oxlint ."
   },
   "dependencies": {
+    "@lumeweb/portal-analytics": "workspace:*",
     "@lumeweb/portal-framework-ui-core": "workspace:*",
     "@lumeweb/portal-sdk": "workspace:*",
     "@radix-ui/react-dropdown-menu": "catalog:",

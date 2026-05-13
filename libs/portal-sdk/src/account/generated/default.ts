@@ -3,17 +3,18 @@
  * Do not edit manually.
  * Account API
  * API endpoints for managing user accounts, authentication, and API keys.
- * OpenAPI spec version: develop
+ * OpenAPI spec version: v0.2.7-0.20260418132608-572560c6efd0
  */
 import type {
   APIKeyCreateRequest,
-  APIKeyResponseResponse,
+  APIKeyListResponse,
   AccountInfoResponse,
   AccountPermissionsResponse,
   CreateAPIKeyResponse,
   Error,
   ErrorResponse,
   GetApiAccountKeysParams,
+  GetApiAccountQuotaHistoryParams,
   GetApiOperationsParams,
   LoginRequest,
   LoginResponse,
@@ -29,13 +30,14 @@ import type {
   PongResponse,
   PostApiAccountAvatarBody,
   PostApiAccountVerifyEmailParams,
+  QuotaHistoryResponse,
   RegisterRequest,
   ResendVerifyEmailRequest,
+  StringUUIDSchema,
   UpdateEmailRequest,
   UpdatePasswordRequest,
   UpdateProfileRequest,
   UploadLimitResponse,
-  Uuid,
   VerifyEmailRequest
 } from './accountAPI.schemas';
 
@@ -79,7 +81,7 @@ export const getDeleteApiAccountUrl = () => {
 
 
 
-  return `/api/api/account`
+  return `/api/account`
 }
 
 export const deleteApiAccount = async ( options?: RequestInit): Promise<deleteApiAccountResponse> => {
@@ -149,7 +151,7 @@ export const getGetApiAccountUrl = () => {
 
 
 
-  return `/api/api/account`
+  return `/api/account`
 }
 
 export const getApiAccount = async ( options?: RequestInit): Promise<getApiAccountResponse> => {
@@ -219,7 +221,7 @@ export const getPatchApiAccountUrl = () => {
 
 
 
-  return `/api/api/account`
+  return `/api/account`
 }
 
 export const patchApiAccount = async (updateProfileRequest: UpdateProfileRequest, options?: RequestInit): Promise<patchApiAccountResponse> => {
@@ -280,7 +282,7 @@ export const getGetApiAccountAvatarUrl = () => {
 
 
 
-  return `/api/api/account/avatar`
+  return `/api/account/avatar`
 }
 
 export const getApiAccountAvatar = async ( options?: RequestInit): Promise<getApiAccountAvatarResponse> => {
@@ -345,7 +347,7 @@ export const getPostApiAccountAvatarUrl = () => {
 
 
 
-  return `/api/api/account/avatar`
+  return `/api/account/avatar`
 }
 
 export const postApiAccountAvatar = async (postApiAccountAvatarBody: PostApiAccountAvatarBody, options?: RequestInit): Promise<postApiAccountAvatarResponse> => {
@@ -375,7 +377,7 @@ formData.append(`file`, postApiAccountAvatarBody.file);
  * @summary List API Keys
  */
 export type getApiAccountKeysResponse200 = {
-  data: APIKeyResponseResponse
+  data: APIKeyListResponse
   status: 200
 }
 
@@ -415,7 +417,7 @@ export const getGetApiAccountKeysUrl = (params?: GetApiAccountKeysParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/api/account/keys?${stringifiedParams}` : `/api/api/account/keys`
+  return stringifiedParams.length > 0 ? `/api/account/keys?${stringifiedParams}` : `/api/account/keys`
 }
 
 export const getApiAccountKeys = async (params?: GetApiAccountKeysParams, options?: RequestInit): Promise<getApiAccountKeysResponse> => {
@@ -475,7 +477,7 @@ export const getPostApiAccountKeysUrl = () => {
 
 
 
-  return `/api/api/account/keys`
+  return `/api/account/keys`
 }
 
 export const postApiAccountKeys = async (aPIKeyCreateRequest: APIKeyCreateRequest, options?: RequestInit): Promise<postApiAccountKeysResponse> => {
@@ -531,15 +533,15 @@ export type deleteApiAccountKeysKeyIDResponseError = (deleteApiAccountKeysKeyIDR
 
 export type deleteApiAccountKeysKeyIDResponse = (deleteApiAccountKeysKeyIDResponseSuccess | deleteApiAccountKeysKeyIDResponseError)
 
-export const getDeleteApiAccountKeysKeyIDUrl = (keyID: Uuid,) => {
+export const getDeleteApiAccountKeysKeyIDUrl = (keyID: StringUUIDSchema,) => {
 
 
 
 
-  return `/api/api/account/keys/${keyID}`
+  return `/api/account/keys/${keyID}`
 }
 
-export const deleteApiAccountKeysKeyID = async (keyID: Uuid, options?: RequestInit): Promise<deleteApiAccountKeysKeyIDResponse> => {
+export const deleteApiAccountKeysKeyID = async (keyID: StringUUIDSchema, options?: RequestInit): Promise<deleteApiAccountKeysKeyIDResponse> => {
 
   const res = await fetch(getDeleteApiAccountKeysKeyIDUrl(keyID),
   {
@@ -596,7 +598,7 @@ export const getPostApiAccountPasswordResetConfirmUrl = () => {
 
 
 
-  return `/api/api/account/password-reset/confirm`
+  return `/api/account/password-reset/confirm`
 }
 
 export const postApiAccountPasswordResetConfirm = async (passwordResetVerifyRequest: PasswordResetVerifyRequest, options?: RequestInit): Promise<postApiAccountPasswordResetConfirmResponse> => {
@@ -667,7 +669,7 @@ export const getPostApiAccountPasswordResetRequestUrl = () => {
 
 
 
-  return `/api/api/account/password-reset/request`
+  return `/api/account/password-reset/request`
 }
 
 export const postApiAccountPasswordResetRequest = async (passwordResetRequest: PasswordResetRequest, options?: RequestInit): Promise<postApiAccountPasswordResetRequestResponse> => {
@@ -728,7 +730,7 @@ export const getGetApiAccountPermissionsUrl = () => {
 
 
 
-  return `/api/api/account/permissions`
+  return `/api/account/permissions`
 }
 
 export const getApiAccountPermissions = async ( options?: RequestInit): Promise<getApiAccountPermissionsResponse> => {
@@ -747,6 +749,73 @@ export const getApiAccountPermissions = async ( options?: RequestInit): Promise<
 
   const data: getApiAccountPermissionsResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as getApiAccountPermissionsResponse
+}
+
+
+/**
+ * Retrieves historical quota usage data for charting and analytics.
+ * @summary Get quota usage history
+ */
+export type getApiAccountQuotaHistoryResponse200 = {
+  data: QuotaHistoryResponse
+  status: 200
+}
+
+export type getApiAccountQuotaHistoryResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type getApiAccountQuotaHistoryResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type getApiAccountQuotaHistoryResponse500 = {
+  data: ErrorResponse
+  status: 500
+}
+
+export type getApiAccountQuotaHistoryResponseSuccess = (getApiAccountQuotaHistoryResponse200) & {
+  headers: Headers;
+};
+export type getApiAccountQuotaHistoryResponseError = (getApiAccountQuotaHistoryResponse400 | getApiAccountQuotaHistoryResponse404 | getApiAccountQuotaHistoryResponse500) & {
+  headers: Headers;
+};
+
+export type getApiAccountQuotaHistoryResponse = (getApiAccountQuotaHistoryResponseSuccess | getApiAccountQuotaHistoryResponseError)
+
+export const getGetApiAccountQuotaHistoryUrl = (params?: GetApiAccountQuotaHistoryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/account/quota/history?${stringifiedParams}` : `/api/account/quota/history`
+}
+
+export const getApiAccountQuotaHistory = async (params?: GetApiAccountQuotaHistoryParams, options?: RequestInit): Promise<getApiAccountQuotaHistoryResponse> => {
+
+  const res = await fetch(getGetApiAccountQuotaHistoryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getApiAccountQuotaHistoryResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getApiAccountQuotaHistoryResponse
 }
 
 
@@ -788,7 +857,7 @@ export const getPostApiAccountUpdateEmailUrl = () => {
 
 
 
-  return `/api/api/account/update-email`
+  return `/api/account/update-email`
 }
 
 export const postApiAccountUpdateEmail = async (updateEmailRequest: UpdateEmailRequest, options?: RequestInit): Promise<postApiAccountUpdateEmailResponse> => {
@@ -849,7 +918,7 @@ export const getPostApiAccountUpdatePasswordUrl = () => {
 
 
 
-  return `/api/api/account/update-password`
+  return `/api/account/update-password`
 }
 
 export const postApiAccountUpdatePassword = async (updatePasswordRequest: UpdatePasswordRequest, options?: RequestInit): Promise<postApiAccountUpdatePasswordResponse> => {
@@ -917,7 +986,7 @@ export const getPostApiAccountVerifyEmailUrl = (params?: PostApiAccountVerifyEma
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/api/account/verify-email?${stringifiedParams}` : `/api/api/account/verify-email`
+  return stringifiedParams.length > 0 ? `/api/account/verify-email?${stringifiedParams}` : `/api/account/verify-email`
 }
 
 export const postApiAccountVerifyEmail = async (verifyEmailRequest: VerifyEmailRequest,
@@ -979,7 +1048,7 @@ export const getPostApiAccountVerifyEmailResendUrl = () => {
 
 
 
-  return `/api/api/account/verify-email/resend`
+  return `/api/account/verify-email/resend`
 }
 
 export const postApiAccountVerifyEmailResend = async (resendVerifyEmailRequest: ResendVerifyEmailRequest, options?: RequestInit): Promise<postApiAccountVerifyEmailResendResponse> => {
@@ -1050,7 +1119,7 @@ export const getPostApiAuthKeyUrl = () => {
 
 
 
-  return `/api/api/auth/key`
+  return `/api/auth/key`
 }
 
 export const postApiAuthKey = async ( options?: RequestInit): Promise<postApiAuthKeyResponse> => {
@@ -1125,7 +1194,7 @@ export const getPostApiAuthLoginUrl = () => {
 
 
 
-  return `/api/api/auth/login`
+  return `/api/auth/login`
 }
 
 export const postApiAuthLogin = async (loginRequest: LoginRequest, options?: RequestInit): Promise<postApiAuthLoginResponse> => {
@@ -1196,7 +1265,7 @@ export const getPostApiAuthLogoutUrl = () => {
 
 
 
-  return `/api/api/auth/logout`
+  return `/api/auth/logout`
 }
 
 export const postApiAuthLogout = async ( options?: RequestInit): Promise<postApiAuthLogoutResponse> => {
@@ -1261,7 +1330,7 @@ export const getPostApiAuthOtpDisableUrl = () => {
 
 
 
-  return `/api/api/auth/otp/disable`
+  return `/api/auth/otp/disable`
 }
 
 export const postApiAuthOtpDisable = async (oTPDisableRequest: OTPDisableRequest, options?: RequestInit): Promise<postApiAuthOtpDisableResponse> => {
@@ -1332,7 +1401,7 @@ export const getPostApiAuthOtpGenerateUrl = () => {
 
 
 
-  return `/api/api/auth/otp/generate`
+  return `/api/auth/otp/generate`
 }
 
 export const postApiAuthOtpGenerate = async ( options?: RequestInit): Promise<postApiAuthOtpGenerateResponse> => {
@@ -1358,11 +1427,6 @@ export const postApiAuthOtpGenerate = async ( options?: RequestInit): Promise<po
  * Validates an OTP code to complete 2FA login.
  * @summary Validate OTP code
  */
-export type postApiAuthOtpValidateResponse200 = {
-  data: ErrorResponse
-  status: 200
-}
-
 export type postApiAuthOtpValidateResponse302 = {
   data: void
   status: 302
@@ -1393,21 +1457,19 @@ export type postApiAuthOtpValidateResponse500 = {
   status: 500
 }
 
-export type postApiAuthOtpValidateResponseSuccess = (postApiAuthOtpValidateResponse200) & {
-  headers: Headers;
-};
+;
 export type postApiAuthOtpValidateResponseError = (postApiAuthOtpValidateResponse302 | postApiAuthOtpValidateResponse400 | postApiAuthOtpValidateResponse401 | postApiAuthOtpValidateResponse403 | postApiAuthOtpValidateResponse404 | postApiAuthOtpValidateResponse500) & {
   headers: Headers;
 };
 
-export type postApiAuthOtpValidateResponse = (postApiAuthOtpValidateResponseSuccess | postApiAuthOtpValidateResponseError)
+export type postApiAuthOtpValidateResponse = (postApiAuthOtpValidateResponseError)
 
 export const getPostApiAuthOtpValidateUrl = () => {
 
 
 
 
-  return `/api/api/auth/otp/validate`
+  return `/api/auth/otp/validate`
 }
 
 export const postApiAuthOtpValidate = async (oTPValidateRequest: OTPValidateRequest, options?: RequestInit): Promise<postApiAuthOtpValidateResponse> => {
@@ -1473,7 +1535,7 @@ export const getPostApiAuthOtpVerifyUrl = () => {
 
 
 
-  return `/api/api/auth/otp/verify`
+  return `/api/auth/otp/verify`
 }
 
 export const postApiAuthOtpVerify = async (oTPVerifyRequest: OTPVerifyRequest, options?: RequestInit): Promise<postApiAuthOtpVerifyResponse> => {
@@ -1544,7 +1606,7 @@ export const getPostApiAuthPingUrl = () => {
 
 
 
-  return `/api/api/auth/ping`
+  return `/api/auth/ping`
 }
 
 export const postApiAuthPing = async ( options?: RequestInit): Promise<postApiAuthPingResponse> => {
@@ -1619,7 +1681,7 @@ export const getPostApiAuthRegisterUrl = () => {
 
 
 
-  return `/api/api/auth/register`
+  return `/api/auth/register`
 }
 
 export const postApiAuthRegister = async (registerRequest: RegisterRequest, options?: RequestInit): Promise<postApiAuthRegisterResponse> => {
@@ -1687,7 +1749,7 @@ export const getGetApiOperationsUrl = (params?: GetApiOperationsParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/api/operations?${stringifiedParams}` : `/api/api/operations`
+  return stringifiedParams.length > 0 ? `/api/operations?${stringifiedParams}` : `/api/operations`
 }
 
 export const getApiOperations = async (params?: GetApiOperationsParams, options?: RequestInit): Promise<getApiOperationsResponse> => {
@@ -1747,7 +1809,7 @@ export const getGetApiOperationsIdUrl = (id: number,) => {
 
 
 
-  return `/api/api/operations/${id}`
+  return `/api/operations/${id}`
 }
 
 export const getApiOperationsId = async (id: number, options?: RequestInit): Promise<getApiOperationsIdResponse> => {
@@ -1807,7 +1869,7 @@ export const getGetApiOperationsFiltersUrl = () => {
 
 
 
-  return `/api/api/operations/filters`
+  return `/api/operations/filters`
 }
 
 export const getApiOperationsFilters = async ( options?: RequestInit): Promise<getApiOperationsFiltersResponse> => {
@@ -1867,7 +1929,7 @@ export const getGetApiUploadLimitUrl = () => {
 
 
 
-  return `/api/api/upload-limit`
+  return `/api/upload-limit`
 }
 
 export const getApiUploadLimit = async ( options?: RequestInit): Promise<getApiUploadLimitResponse> => {

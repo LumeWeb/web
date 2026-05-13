@@ -8,3 +8,5 @@ export * from '@/query-utils';
 export { type OperationsQueryParams } from '@/query-utils';
 export * from './account/generated/default';
 export * from './account/generated/accountAPI.schemas';
+export * from './account/generated/billing';
+export * from './account/generated/quota';

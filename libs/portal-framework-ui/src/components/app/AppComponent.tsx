@@ -28,6 +28,7 @@ import {
   RouterProvider,
 } from "react-router";
 
+import { useIdentifyUser } from "@lumeweb/portal-analytics";
 import { registerAllActionItems } from "@/components/actions";
 import { registerAllFormComponents } from "@/components/form";
 import { Loading } from "@/components/Loading";
@@ -72,6 +73,7 @@ function AppContent({
   loadNavigation = true,
   loadRoutes = true,
 }: AppContentProps) {
+  useIdentifyUser();
   const {
     error: frameworkError,
     framework,

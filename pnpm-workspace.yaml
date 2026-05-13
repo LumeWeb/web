@@ -76,6 +76,8 @@ catalog:
 
   vitest: ^4.1.6
   vocs: ^1.4.1
+  entities: ^8.0.0
+  p-queue: ^9.2.0
   zod: ^4.4.3
 
 catalogs:

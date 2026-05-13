@@ -1,0 +1,59 @@
+{
+  "name": "@lumeweb/portal-plugin-billing",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "oxlint ."
+  },
+  "dependencies": {
+    "@lumeweb/advanced-rest-provider": "workspace:*",
+    "@lumeweb/analytics": "workspace:*",
+    "@lumeweb/portal-framework-auth": "workspace:*",
+    "@lumeweb/portal-framework-core": "workspace:*",
+    "@lumeweb/portal-framework-ui": "workspace:*",
+    "@lumeweb/portal-framework-ui-core": "workspace:*",
+    "@lumeweb/portal-plugin-dashboard": "workspace:*",
+    "@lumeweb/portal-sdk": "workspace:*",
+    "@microsoft/fetch-event-source": "^2.0.1",
+    "@refinedev/core": "catalog:",
+    "@refinedev/react-router": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-table": "catalog:",
+    "date-fns": "catalog:",
+    "entities": "catalog:",
+    "lucide-react": "catalog:",
+    "nanoevents": "catalog:",
+    "p-queue": "catalog:",
+    "react-hook-form": "catalog:",
+    "react-router": "catalog:"
+  },
+  "devDependencies": {
+    "@lumeweb/query-builder": "workspace:*",
+    "@module-federation/enhanced": "catalog:",
+    "@rolldown/plugin-node-polyfills": "^1.0.3",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
+    "better-sse": "^0.16.1",
+    "happy-dom": "catalog:",
+    "msw": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:",
+    "vitest-browser-react": "catalog:"
+  },
+  "peerDependencies": {
+    "react": ">=18.3.1",
+    "react-dom": ">=18.3.1"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}
