@@ -2,9 +2,11 @@ import { defineConfig } from "tsdown";
 
 export default defineConfig({
   clean: true,
+  deps: {
+    neverBundle: [/node_modules/],
+  },
   dts: true,
   entry: ["./index.ts"],
-  external: [/node_modules/],
   format: {
     esm: {
       outputOptions: {
