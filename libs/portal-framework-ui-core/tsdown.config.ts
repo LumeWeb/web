@@ -40,8 +40,14 @@ export default defineConfig([
     format: {
       esm: {
         outputOptions: {
-          dir: "dist/esm",
-          entryFileNames: "config/[name].js",
+          dir: "dist/esm/config",
+          entryFileNames: "[name].js",
+        },
+      },
+      cjs: {
+        outputOptions: {
+          dir: "dist/cjs/config",
+          entryFileNames: "[name].cjs",
         },
       },
     },
