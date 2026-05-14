@@ -28,7 +28,7 @@ import {
   FileText,
 } from "lucide-react";
 import React, { useState } from "react";
-import { RefineResource } from "src/types/resources";
+import { RefineResource } from "@/types/resources";
 
 interface RelatedCasesPanelProps {
   entityId: number;

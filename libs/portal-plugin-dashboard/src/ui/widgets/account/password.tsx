@@ -2,7 +2,7 @@ import { useDialog } from "@lumeweb/portal-framework-ui";
 import { Button } from "@lumeweb/portal-framework-ui-core";
 import { useUpdatePassword } from "@refinedev/core";
 import { Key } from "lucide-react";
-import { updatePasswordDialogConfig } from "src/ui/dialogs/updatePassword";
+import { updatePasswordDialogConfig } from "@/ui/dialogs/updatePassword";
 
 import { Card } from "@/ui/components/Card";
 

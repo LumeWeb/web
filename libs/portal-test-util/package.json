@@ -8,14 +8,12 @@
   "exports": {
     ".": {
       "types": "./dist/esm/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "import": "./dist/esm/index.js"
     },
     "./package.json": "./package.json",
     "./vitest.setup": {
       "types": "./dist/esm/vitest.setup.d.ts",
-      "import": "./dist/esm/vitest.setup.js",
-      "require": "./dist/cjs/vitest.setup.cjs"
+      "import": "./dist/esm/vitest.setup.js"
     }
   },
   "scripts": {
@@ -23,7 +21,8 @@
     "lint": "oxlint ."
   },
   "dependencies": {
-    "@lumeweb/portal-framework-core": "workspace:*"
+    "@lumeweb/portal-framework-core": "workspace:*",
+    "vitest-browser-react": "catalog:"
   },
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",

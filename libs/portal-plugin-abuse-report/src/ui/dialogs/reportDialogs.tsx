@@ -4,7 +4,7 @@ import type { DialogConfig } from "@lumeweb/portal-framework-ui";
 import { ActionItemType, FormFieldType } from "@lumeweb/portal-framework-ui";
 import { useGo } from "@refinedev/core";
 import React from "react";
-import { AbuseReportResponse } from "src/client/index.schemas";
+import { AbuseReportResponse } from "@/client/index.schemas";
 import { z } from "zod";
 
 import { DIALOG_IDS } from "./dialog-ids";

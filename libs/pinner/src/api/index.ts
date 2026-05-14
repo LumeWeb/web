@@ -1,3 +1,3 @@
-export * from './src/api/generated/ipns';
-export * from './src/api/generated/schemas';
-export * from './src/api/generated/websites';
+export * from './generated/ipns';
+export * from './generated/schemas';
+export * from './generated/websites';

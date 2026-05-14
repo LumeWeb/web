@@ -1,7 +1,7 @@
 import { env as mockedEnv } from "@lumeweb/portal-app-shell/env";
 // Mock dependencies
 import { renderHook } from "@testing-library/react";
-import { createMockPortalMeta } from "src/tests/portalMetaMocks";
+import { createMockPortalMeta } from "@/tests/portalMetaMocks";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Import the mocked function *after* the vi.mock call
