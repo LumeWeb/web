@@ -490,6 +490,12 @@ importers:
       '@fontsource-variable/manrope':
         specifier: ^5.2.8
         version: 5.2.8
+      '@lumeweb/advanced-rest-provider':
+        specifier: 'workspace:'
+        version: link:../../libs/advanced-rest
+      '@lumeweb/analytics':
+        specifier: 'workspace:'
+        version: link:../../libs/analytics
       '@lumeweb/portal-framework-core':
         specifier: workspace:*
         version: link:../../libs/portal-framework-core
@@ -502,6 +508,9 @@ importers:
       '@lumeweb/portal-sdk':
         specifier: workspace:*
         version: link:../../libs/portal-sdk
+      '@refinedev/core':
+        specifier: 'catalog:'
+        version: 5.0.12(@tanstack/react-query@5.100.10(react@19.2.6))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@t3-oss/env-core':
         specifier: 'catalog:'
         version: 0.13.11(typescript@6.0.3)(valibot@1.4.0(typescript@6.0.3))(zod@4.4.3)
@@ -1371,6 +1380,9 @@ importers:
       '@lumeweb/advanced-rest-provider':
         specifier: workspace:*
         version: link:../advanced-rest
+      '@lumeweb/analytics':
+        specifier: workspace:*
+        version: link:../analytics
       '@lumeweb/portal-framework-auth':
         specifier: workspace:*
         version: link:../portal-framework-auth
@@ -1426,6 +1438,9 @@ importers:
       '@lumeweb/advanced-rest-provider':
         specifier: workspace:*
         version: link:../advanced-rest
+      '@lumeweb/analytics':
+        specifier: 'workspace:'
+        version: link:../analytics
       '@lumeweb/portal-framework-core':
         specifier: workspace:*
         version: link:../portal-framework-core
@@ -1438,6 +1453,9 @@ importers:
       '@lumeweb/portal-sdk':
         specifier: workspace:*
         version: link:../portal-sdk
+      '@refinedev/core':
+        specifier: 'catalog:'
+        version: 5.0.12(@tanstack/react-query@5.100.10(react@19.2.6))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@refinedev/react-hook-form':
         specifier: 'catalog:'
         version: 5.0.4(@refinedev/core@5.0.12(@tanstack/react-query@5.100.10(react@19.2.6))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react-hook-form@7.75.0(react@19.2.6))(react@19.2.6)
@@ -1505,6 +1523,9 @@ importers:
       '@lumeweb/portal-sdk':
         specifier: workspace:*
         version: link:../portal-sdk
+      '@refinedev/core':
+        specifier: 'catalog:'
+        version: 5.0.12(@tanstack/react-query@5.100.10(react@19.2.6))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@refinedev/react-hook-form':
         specifier: 'catalog:'
         version: 5.0.4(@refinedev/core@5.0.12(@tanstack/react-query@5.100.10(react@19.2.6))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react-hook-form@7.75.0(react@19.2.6))(react@19.2.6)
@@ -1605,6 +1626,9 @@ importers:
       '@lumeweb/advanced-rest-provider':
         specifier: workspace:*
         version: link:../advanced-rest
+      '@lumeweb/analytics':
+        specifier: 'workspace:'
+        version: link:../analytics
       '@lumeweb/portal-framework-auth':
         specifier: workspace:*
         version: link:../portal-framework-auth
@@ -1623,6 +1647,9 @@ importers:
       '@lumeweb/portal-sdk':
         specifier: workspace:*
         version: link:../portal-sdk
+      '@refinedev/core':
+        specifier: 'catalog:'
+        version: 5.0.12(@tanstack/react-query@5.100.10(react@19.2.6))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@refinedev/react-router':
         specifier: 'catalog:'
         version: 2.0.4(@refinedev/core@5.0.12(@tanstack/react-query@5.100.10(react@19.2.6))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react-router@7.15.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)
@@ -1681,6 +1708,9 @@ importers:
       '@lumeweb/advanced-rest-provider':
         specifier: workspace:*
         version: link:../advanced-rest
+      '@lumeweb/analytics':
+        specifier: 'workspace:'
+        version: link:../analytics
       '@lumeweb/portal-framework-auth':
         specifier: workspace:*
         version: link:../portal-framework-auth

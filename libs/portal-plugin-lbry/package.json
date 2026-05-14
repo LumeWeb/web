@@ -16,6 +16,7 @@
     "@lumeweb/portal-framework-core": "workspace:*",
     "@lumeweb/portal-framework-ui": "workspace:*",
     "@lumeweb/portal-framework-ui-core": "workspace:*",
+    "@lumeweb/analytics": "workspace:",
     "@lumeweb/portal-plugin-dashboard": "workspace:*",
     "@lumeweb/portal-sdk": "workspace:*",
     "@refinedev/core": "catalog:",

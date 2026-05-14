@@ -13,7 +13,9 @@
     "@lumeweb/advanced-rest-provider": "workspace:*",
     "@lumeweb/portal-framework-core": "workspace:*",
     "@lumeweb/portal-framework-ui": "workspace:*",
+    "@refinedev/core": "catalog:",
     "@lumeweb/portal-framework-ui-core": "workspace:*",
+    "@lumeweb/analytics": "workspace:",
     "@lumeweb/portal-sdk": "workspace:*"
   },
   "peerDependencies": {
