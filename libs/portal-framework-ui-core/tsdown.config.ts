@@ -2,7 +2,9 @@ import type { UserConfig } from "tsdown";
 import { defineConfig } from "tsdown";
 
 const baseOptions: Partial<UserConfig> = {
-  external: [/node_modules/],
+  deps: {
+    neverBundle: [/node_modules/],
+  },
   minify: false,
   platform: "neutral",
   sourcemap: true,
@@ -24,11 +26,6 @@ export default defineConfig([
           entryFileNames: "[name].js",
         },
       },
-      cjs: {
-        outputOptions: {
-          dir: "dist/cjs",
-        },
-      },
     },
     copy: [
       { to: "dist/esm", from: "src/tailwind.css" },
@@ -45,12 +42,6 @@ export default defineConfig([
         outputOptions: {
           dir: "dist/esm",
           entryFileNames: "config/[name].js",
-        },
-      },
-      cjs: {
-        outputOptions: {
-          dir: "dist/cjs",
-          entryFileNames: "config/[name].cjs",
         },
       },
     },

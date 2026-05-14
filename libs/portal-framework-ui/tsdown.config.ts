@@ -6,7 +6,7 @@ import image from "@rollup/plugin-image";
 export default defineConfig([
   {
     ...createLibraryConfigWithPlugins(entryPatterns.withoutTests, [image() as any], {
-      external: [/node_modules/, /@refinedev\/.*/],
+      deps: { neverBundle: [/node_modules/, /@refinedev\/.*/] },
       unbundle: true,
     }),
   },
