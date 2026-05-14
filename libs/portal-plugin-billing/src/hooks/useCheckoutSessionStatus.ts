@@ -41,9 +41,10 @@ export function useCheckoutSessionStatus(
     u.searchParams.set("gateway", gateway);
   }
   const url = u.pathname + u.search;
+  const parentEnabled = queryOptions?.enabled ?? true;
   const mergedQueryOptions = {
-    enabled: !!sessionId,
     ...queryOptions,
+    enabled: !!sessionId && parentEnabled,
   };
 
   const customResult = useCustom<CheckoutSessionStatusResponse>({
