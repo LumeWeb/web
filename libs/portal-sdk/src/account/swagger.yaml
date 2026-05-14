@@ -1,12 +1,36 @@
 components:
   schemas:
+    APIEndpointInfoResponse:
+      additionalProperties: false
+      properties:
+        method:
+          type: string
+        path:
+          type: string
+      required:
+      - method
+      - path
+      type: object
     APIKeyCreateRequest:
       additionalProperties: false
       properties:
         name:
           type: string
       required:
-        - name
+      - name
+      type: object
+    APIKeyListResponse:
+      additionalProperties: false
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/APIKeyResponse'
+          type: array
+        total:
+          type: integer
+      required:
+      - data
+      - total
       type: object
     APIKeyResponse:
       additionalProperties: false
@@ -19,20 +43,9 @@ components:
         uuid:
           $ref: '#/components/schemas/BinaryUUID'
       required:
-        - uuid
-        - name
-        - created_at
-      type: object
-    APIKeyResponseResponse:
-      additionalProperties: false
-      properties:
-        data:
-          $ref: '#/components/schemas/APIKeyResponse'
-        total:
-          type: integer
-      required:
-        - data
-        - total
+      - uuid
+      - name
+      - created_at
       type: object
     AccessModel:
       additionalProperties: false
@@ -48,11 +61,11 @@ components:
         role_definition:
           $ref: '#/components/schemas/AccessModelDef'
       required:
-        - request_definition
-        - policy_definition
-        - role_definition
-        - policy_effect
-        - matchers
+      - request_definition
+      - policy_definition
+      - role_definition
+      - policy_effect
+      - matchers
       type: object
     AccessModelDef:
       additionalProperties: false
@@ -62,8 +75,8 @@ components:
         value:
           type: string
       required:
-        - key
-        - value
+      - key
+      - value
       type: object
     AccessPolicy:
       additionalProperties: false
@@ -77,10 +90,10 @@ components:
         sub:
           type: string
       required:
-        - sub
-        - dom
-        - obj
-        - act
+      - sub
+      - dom
+      - obj
+      - act
       type: object
     AccountInfoResponse:
       additionalProperties: false
@@ -103,12 +116,12 @@ components:
         verified:
           type: boolean
       required:
-        - id
-        - email
-        - first_name
-        - last_name
-        - verified
-        - otp
+      - id
+      - email
+      - first_name
+      - last_name
+      - verified
+      - otp
       type: object
     AccountPermissionsResponse:
       additionalProperties: false
@@ -120,22 +133,83 @@ components:
             $ref: '#/components/schemas/AccessPolicy'
           type: array
       required:
-        - permissions
-        - model
+      - permissions
+      - model
       type: object
-    BinUUID:
-      items:
-        type: integer
-      maxItems: 16
-      minItems: 16
-      type: array
-    BinaryUUID:
+    BalanceResponse:
       additionalProperties: false
       properties:
-        BinUUID:
-          $ref: '#/components/schemas/BinUUID'
+        balance:
+          $ref: '#/components/schemas/Decimal'
+        user_id:
+          type: integer
       required:
-        - BinUUID
+      - user_id
+      - balance
+      type: object
+    BinaryUUID:
+      format: uuid
+      type: string
+    ChangePlanRequest:
+      additionalProperties: false
+      properties:
+        period_id:
+          type: integer
+      required:
+      - period_id
+      type: object
+    CheckoutSessionStatusResponse:
+      additionalProperties: false
+      properties:
+        customer_email:
+          type: string
+        session_id:
+          type: string
+        status:
+          type: string
+        user_id:
+          type: integer
+      required:
+      - session_id
+      - status
+      - customer_email
+      - user_id
+      type: object
+    CheckoutUIFragment:
+      additionalProperties: false
+      properties:
+        css:
+          type: string
+        html:
+          type: string
+        link:
+          type: string
+        metadata:
+          type: object
+        script:
+          type: string
+        type:
+          type: string
+      required:
+      - type
+      type: object
+    CheckoutUIResponse:
+      additionalProperties: false
+      properties:
+        expires_at:
+          format: date-time
+          type: string
+        fragments:
+          items:
+            $ref: '#/components/schemas/CheckoutUIFragment'
+          type: array
+        metadata:
+          type: object
+        session_id:
+          type: string
+      required:
+      - fragments
+      - expires_at
       type: object
     CreateAPIKeyResponse:
       additionalProperties: false
@@ -147,9 +221,12 @@ components:
         uuid:
           $ref: '#/components/schemas/BinaryUUID'
       required:
-        - token
-        - uuid
-        - name
+      - token
+      - uuid
+      - name
+      type: object
+    Decimal:
+      additionalProperties: false
       type: object
     Error:
       additionalProperties: false
@@ -161,9 +238,9 @@ components:
         namespace:
           type: string
       required:
-        - error
-        - message
-        - namespace
+      - error
+      - message
+      - namespace
       type: object
     ErrorResponse:
       additionalProperties: false
@@ -171,7 +248,48 @@ components:
         error:
           type: string
       required:
-        - error
+      - error
+      type: object
+    GatewayAbilities:
+      additionalProperties: false
+      properties:
+        checkout:
+          type: boolean
+        customer_portal:
+          type: boolean
+        session_status:
+          type: boolean
+      required:
+      - checkout
+      - session_status
+      - customer_portal
+      type: object
+    GatewayListResponse:
+      items:
+        $ref: '#/components/schemas/GatewayPublicInfo'
+      type: array
+    GatewayPublicInfo:
+      additionalProperties: false
+      properties:
+        abilities:
+          $ref: '#/components/schemas/GatewayAbilities'
+        description:
+          type: string
+        id:
+          type: string
+        is_active:
+          type: boolean
+        logo_url:
+          type: string
+        name:
+          type: string
+      required:
+      - id
+      - name
+      - description
+      - logo_url
+      - is_active
+      - abilities
       type: object
     LoginRequest:
       additionalProperties: false
@@ -183,9 +301,9 @@ components:
         remember:
           type: boolean
       required:
-        - email
-        - password
-        - remember
+      - email
+      - password
+      - remember
       type: object
     LoginResponse:
       additionalProperties: false
@@ -195,7 +313,61 @@ components:
         token:
           type: string
       required:
-        - token
+      - token
+      type: object
+    ManagementCapabilitiesResponse:
+      additionalProperties: false
+      properties:
+        admin_operations:
+          additionalProperties:
+            type: boolean
+          type: object
+        management_mode:
+          type: string
+        operations:
+          additionalProperties:
+            type: boolean
+          type: object
+      required:
+      - management_mode
+      - operations
+      - admin_operations
+      type: object
+    ManagementRequest:
+      additionalProperties: false
+      properties:
+        operation:
+          type: string
+      required:
+      - operation
+      type: object
+    ManagementResultResponse:
+      additionalProperties: false
+      properties:
+        action:
+          type: string
+        api_endpoint:
+          $ref: '#/components/schemas/APIEndpointInfoResponse'
+        can_abort:
+          type: boolean
+        confirmation_message:
+          type: string
+        effective_time:
+          format: date-time
+          type: string
+        error_message:
+          type: string
+        requires_confirmation:
+          type: boolean
+        status:
+          type: string
+        url:
+          type: string
+      required:
+      - action
+      - requires_confirmation
+      - status
+      - can_abort
       type: object
     OTPDisableRequest:
       additionalProperties: false
@@ -203,7 +375,7 @@ components:
         password:
           type: string
       required:
-        - password
+      - password
       type: object
     OTPGenerateResponse:
       additionalProperties: false
@@ -211,7 +383,7 @@ components:
         otp:
           type: string
       required:
-        - otp
+      - otp
       type: object
     OTPValidateRequest:
       additionalProperties: false
@@ -219,7 +391,7 @@ components:
         otp:
           type: string
       required:
-        - otp
+      - otp
       type: object
     OTPVerifyRequest:
       additionalProperties: false
@@ -227,7 +399,7 @@ components:
         otp:
           type: string
       required:
-        - otp
+      - otp
       type: object
     OperationDetailResponse:
       additionalProperties: false
@@ -268,17 +440,17 @@ components:
           format: date-time
           type: string
       required:
-        - id
-        - operation
-        - operation_display_name
-        - protocol
-        - protocol_display_name
-        - status
-        - status_display_name
-        - status_message
-        - progress_percent
-        - started_at
-        - updated_at
+      - id
+      - operation
+      - operation_display_name
+      - protocol
+      - protocol_display_name
+      - status
+      - status_display_name
+      - status_message
+      - progress_percent
+      - started_at
+      - updated_at
       type: object
     OperationFilterItem:
       additionalProperties: false
@@ -290,8 +462,8 @@ components:
         value:
           type: string
       required:
-        - value
-        - name
+      - value
+      - name
       type: object
     OperationFiltersResponse:
       additionalProperties: false
@@ -299,7 +471,7 @@ components:
         data:
           $ref: '#/components/schemas/OperationFiltersResponseData'
       required:
-        - data
+      - data
       type: object
     OperationFiltersResponseData:
       additionalProperties: false
@@ -317,9 +489,9 @@ components:
             $ref: '#/components/schemas/OperationFilterItem'
           type: array
       required:
-        - statuses
-        - operations
-        - protocols
+      - statuses
+      - operations
+      - protocols
       type: object
     OperationFiltersResponseResponse:
       additionalProperties: false
@@ -329,8 +501,8 @@ components:
         total:
           type: integer
       required:
-        - data
-        - total
+      - data
+      - total
       type: object
     OperationListItem:
       additionalProperties: false
@@ -371,30 +543,30 @@ components:
           format: date-time
           type: string
       required:
-        - id
-        - operation
-        - operation_display_name
-        - protocol
-        - protocol_display_name
-        - status
-        - status_display_name
-        - status_message
-        - progress_percent
-        - started_at
-        - updated_at
+      - id
+      - operation
+      - operation_display_name
+      - protocol
+      - protocol_display_name
+      - status
+      - status_display_name
+      - status_message
+      - progress_percent
+      - started_at
+      - updated_at
       type: object
     OperationListItemResponse:
       additionalProperties: false
       properties:
         data:
-          type: array
           items:
             $ref: '#/components/schemas/OperationListItem'
+          type: array
         total:
           type: integer
       required:
-        - data
-        - total
+      - data
+      - total
       type: object
     PasswordResetRequest:
       additionalProperties: false
@@ -402,7 +574,7 @@ components:
         email:
           type: string
       required:
-        - email
+      - email
       type: object
     PasswordResetVerifyRequest:
       additionalProperties: false
@@ -414,9 +586,9 @@ components:
         token:
           type: string
       required:
-        - email
-        - token
-        - password
+      - email
+      - token
+      - password
       type: object
     PongResponse:
       additionalProperties: false
@@ -426,8 +598,115 @@ components:
         token:
           type: string
       required:
-        - ping
-        - token
+      - ping
+      - token
+      type: object
+    PublicPricingPlanPeriodDTO:
+      additionalProperties: false
+      properties:
+        cadence:
+          type: string
+        id:
+          type: integer
+        price_usd:
+          type: number
+        quota_plan_id:
+          type: integer
+        rolling_days:
+          type: integer
+      required:
+      - id
+      - cadence
+      - price_usd
+      - quota_plan_id
+      type: object
+    PublicPricingPlanResponse:
+      additionalProperties: false
+      properties:
+        currency:
+          type: string
+        description:
+          type: string
+        features:
+          items:
+            type: string
+          type: array
+        id:
+          type: integer
+        name:
+          type: string
+        pricing_periods:
+          items:
+            $ref: '#/components/schemas/PublicPricingPlanPeriodDTO'
+          type: array
+      required:
+      - id
+      - name
+      - description
+      - currency
+      - features
+      - pricing_periods
+      type: object
+    PublicPricingPlansListResponse:
+      additionalProperties: false
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/PublicPricingPlanResponse'
+          type: array
+        total:
+          type: integer
+      required:
+      - data
+      - total
+      type: object
+    QuotaHistoryResponse:
+      additionalProperties: false
+      properties:
+        points:
+          items:
+            $ref: '#/components/schemas/UsagePoint'
+          type: array
+        user_id:
+          type: integer
+      required:
+      - user_id
+      - points
+      type: object
+    QuotaStatusResponse:
+      additionalProperties: false
+      properties:
+        download:
+          $ref: '#/components/schemas/QuotaTypeStatus'
+        storage:
+          $ref: '#/components/schemas/QuotaTypeStatus'
+        upload:
+          $ref: '#/components/schemas/QuotaTypeStatus'
+      required:
+      - upload
+      - download
+      - storage
+      type: object
+    QuotaTypeStatus:
+      additionalProperties: false
+      properties:
+        limit:
+          type: integer
+        percentage:
+          type: integer
+        remaining:
+          type: integer
+        reserved:
+          type: integer
+        threshold:
+          type: integer
+        used:
+          type: integer
+        window:
+          $ref: '#/components/schemas/WindowInfo'
+      required:
+      - used
+      - percentage
       type: object
     RegisterRequest:
       additionalProperties: false
@@ -441,10 +720,10 @@ components:
         password:
           type: string
       required:
-        - first_name
-        - last_name
-        - email
-        - password
+      - first_name
+      - last_name
+      - email
+      - password
       type: object
     ResendVerifyEmailRequest:
       additionalProperties: false
@@ -452,7 +731,31 @@ components:
         email:
           type: string
       required:
-        - email
+      - email
+      type: object
+    SubscriptionStatusResponse:
+      additionalProperties: false
+      properties:
+        created_at:
+          format: date-time
+          type: string
+        gateway_type:
+          type: string
+        is_subscribed:
+          type: boolean
+        paused_at:
+          format: date-time
+          type: string
+        pricing_plan_period_id:
+          type: integer
+        updated_at:
+          format: date-time
+          type: string
+        will_cancel_at:
+          format: date-time
+          type: string
+      required:
+      - is_subscribed
       type: object
     UUID:
       items:
@@ -468,8 +771,8 @@ components:
         password:
           type: string
       required:
-        - email
-        - password
+      - email
+      - password
       type: object
     UpdatePasswordRequest:
       additionalProperties: false
@@ -479,8 +782,8 @@ components:
         new_password:
           type: string
       required:
-        - current_password
-        - new_password
+      - current_password
+      - new_password
       type: object
     UpdateProfileRequest:
       additionalProperties: false
@@ -496,7 +799,54 @@ components:
         limit:
           type: integer
       required:
-        - limit
+      - limit
+      type: object
+    UsagePoint:
+      additionalProperties: false
+      properties:
+        bytes:
+          type: integer
+        date:
+          type: string
+      required:
+      - date
+      - bytes
+      type: object
+    UserCreditItem:
+      additionalProperties: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/Decimal'
+        created_at:
+          format: date-time
+          type: string
+        description:
+          type: string
+        direction:
+          type: string
+        id:
+          $ref: '#/components/schemas/UUID'
+        type:
+          type: string
+      required:
+      - id
+      - amount
+      - type
+      - direction
+      - created_at
+      type: object
+    UserCreditsListResponse:
+      additionalProperties: false
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/UserCreditItem'
+          type: array
+        total:
+          type: integer
+      required:
+      - data
+      - total
       type: object
     VerifyEmailRequest:
       additionalProperties: false
@@ -506,13 +856,32 @@ components:
         token:
           type: string
       required:
-        - email
-        - token
+      - email
+      - token
       type: object
+    WindowInfo:
+      additionalProperties: false
+      properties:
+        duration:
+          type: integer
+        end_date:
+          type: string
+        start_date:
+          type: string
+        timezone:
+          type: string
+        type:
+          type: string
+      required:
+      - type
+      type: object
+    stringUUIDSchema:
+      format: uuid
+      type: string
 info:
   description: API endpoints for managing user accounts, authentication, and API keys.
   title: Account API
-  version: develop
+  version: v0.2.7-0.20260418132608-572560c6efd0
 openapi: 3.0.0
 paths:
   /api/account:
@@ -658,9 +1027,10 @@ paths:
               additionalProperties: false
               properties:
                 file:
+                  format: binary
                   type: string
               required:
-                - file
+              - file
               type: object
         description: Avatar file to upload
         required: true
@@ -692,29 +1062,834 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Internal server error
       summary: Upload Avatar
-  /api/account/keys:
+  /api/account/billing/balance:
     get:
-      description: Retrieves a list of API keys for the authenticated user.
-      parameters:
-        - description: Ending index of the items to return (exclusive). Defaults to
-            10.
-          in: query
-          name: _end
-          schema:
-            type: integer
-        - description: Starting index of the items to return (0-based). Defaults to
-            0.
-          in: query
-          name: _start
-          schema:
-            type: integer
+      description: Returns the authenticated user's current credit balance. Positive
+        balance indicates available credits, negative balance indicates outstanding
+        dues.
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/APIKeyResponseResponse'
+                $ref: '#/components/schemas/BalanceResponse'
+          description: Balance retrieved successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication required
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to retrieve balance
+      summary: Get Current User's Credit Balance
+      tags:
+      - Billing
+  /api/account/billing/cancel:
+    post:
+      description: Executes the cancel operation on the current subscription. Validates
+        that the gateway supports cancellation and returns the appropriate action
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementResultResponse'
+          description: Cancel operation details retrieved successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Cancellation is not supported by this gateway
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication required
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: No active subscription found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to process cancel operation
+      summary: Cancel subscription
+      tags:
+      - Billing
+  /api/account/billing/cancel/abort:
+    post:
+      description: Cancels a scheduled subscription cancellation, restoring the subscription
+        to active status
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementResultResponse'
+          description: Scheduled cancellation aborted successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Abort is not supported by this gateway
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication required
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: No active subscription or no scheduled cancellation found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to abort cancellation
+      summary: Abort scheduled cancellation
+      tags:
+      - Billing
+  /api/account/billing/change-plan:
+    post:
+      description: Executes the change plan operation on the current subscription.
+        Validates that the gateway supports plan changes and returns the appropriate
+        action
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePlanRequest'
+        description: Plan to change to
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementResultResponse'
+          description: Change plan operation details retrieved successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Plan change is not supported by this gateway
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication required
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: No active subscription found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to process change plan operation
+      summary: Change subscription plan
+      tags:
+      - Billing
+  /api/account/billing/checkout/session/{sessionId}/status:
+    get:
+      description: Returns the status of a checkout session. Used by embedded checkout
+        return pages to verify payment completion and retrieve customer information.
+        Returns 501 if the gateway does not support session status retrieval.
+      parameters:
+      - description: Checkout session ID (e.g., Stripe's cs_xxx)
+        in: path
+        name: sessionId
+        required: true
+        schema:
+          type: string
+      - description: Payment gateway type (defaults to Stripe if not specified)
+        in: query
+        name: gateway
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutSessionStatusResponse'
+          description: Session status retrieved
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid session ID
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Session not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to get session status
+        "501":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Gateway does not support session status retrieval
+      summary: Get Checkout Session Status
+      tags:
+      - Billing
+  /api/account/billing/checkout/ui/{planId}:
+    get:
+      description: Returns platform-agnostic UI fragments for checkout. Response format
+        varies by gateway but always contains fragments of type link, html, script,
+        iframe, modal, button, or form
+      parameters:
+      - description: Plan ID
+        in: path
+        name: planId
+        required: true
+        schema:
+          type: string
+      - description: Payment gateway type (defaults to Stripe if not specified)
+        in: query
+        name: gateway
+        schema:
+          type: string
+      - description: Period ID for the selected pricing period
+        in: query
+        name: period_id
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutUIResponse'
+          description: Checkout UI fragments retrieved
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request or plan not available
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: User already has an active subscription
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to get checkout UI
+      summary: Get Checkout UI Fragments
+      tags:
+      - Billing
+  /api/account/billing/credits:
+    get:
+      description: Returns the authenticated user's credit transaction history with
+        support for filtering by transaction type, direction, and date range. Results
+        are paginated.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreditsListResponse'
+          description: Credits retrieved successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication required
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to retrieve credit history
+      summary: Get Current User's Credit History
+      tags:
+      - Billing
+  /api/account/billing/customer-portal:
+    post:
+      description: Returns a URL to access the generic customer portal for managing
+        subscription
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementResultResponse'
+          description: Customer portal URL returned successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication required
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: No subscription found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to get customer portal URL
+      summary: Access Customer Portal
+      tags:
+      - Billing
+  /api/account/billing/management:
+    post:
+      description: Returns the action and configuration for a specific management
+        operation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManagementRequest'
+        description: Operation to perform
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementResultResponse'
+          description: Management operation details retrieved successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication required
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: No active subscription found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to get management operation details
+      summary: Get subscription management operation details
+      tags:
+      - Billing
+  /api/account/billing/management/capabilities:
+    get:
+      description: Returns the subscription management capabilities for the current
+        user's gateway
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementCapabilitiesResponse'
+          description: Management capabilities retrieved successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication required
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: No active subscription found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to retrieve management capabilities
+      summary: Get subscription management capabilities
+      tags:
+      - Billing
+  /api/account/billing/pause:
+    post:
+      description: Executes the pause operation on the current subscription. Validates
+        that the gateway supports pausing and returns the appropriate action
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementResultResponse'
+          description: Pause operation completed successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Pause is not supported by this gateway
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication required
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: No active subscription found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to process pause operation
+      summary: Pause subscription
+      tags:
+      - Billing
+  /api/account/billing/resume:
+    post:
+      description: Executes the resume operation on the current subscription. Validates
+        that the gateway supports resuming and returns the appropriate action
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementResultResponse'
+          description: Resume operation completed successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Resume is not supported by this gateway
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication required
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: No paused subscription found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to process resume operation
+      summary: Resume subscription
+      tags:
+      - Billing
+  /api/account/billing/subscription:
+    get:
+      description: Returns the subscription status for the authenticated user
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionStatusResponse'
+          description: Subscription status retrieved successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication required
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to check subscription status
+      summary: Get subscription status
+      tags:
+      - Billing
+  /api/account/billing/subscription/events:
+    get:
+      description: Establishes a Server-Sent Events (SSE) connection for real-time
+        subscription updates including payment completions, subscription activations,
+        and plan changes
+      responses:
+        "200":
+          description: SSE connection established
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication required
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to establish SSE connection
+      summary: Subscribe to subscription events via SSE
+      tags:
+      - Billing
+  /api/account/billing/webhooks/{gatewayType}:
+    post:
+      description: Handles incoming webhooks from payment gateways such as Stripe,
+        PayPal, etc.
+      parameters:
+      - description: Type of payment gateway (e.g., stripe, paypal)
+        in: path
+        name: gatewayType
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+        description: Raw webhook payload from the payment gateway
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Success
+        "204":
+          description: Webhook processed successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid gateway type, missing signature header, or webhook
+            processing failed
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Gateway not found
+        "413":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Payload too large
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Process payment gateway webhook
+      tags:
+      - Billing
+  /api/account/keys:
+    get:
+      description: Retrieves a list of API keys for the authenticated user.
+      parameters:
+      - description: Ending index of the items to return (exclusive). Defaults to
+          10.
+        in: query
+        name: _end
+        schema:
+          type: integer
+      - description: Comma-separated list of sort orders ('asc' or 'desc') corresponding
+          to _sort fields. Defaults to 'asc'.
+        in: query
+        name: _order
+        schema:
+          type: string
+      - description: 'Comma-separated list of fields to sort by. Available fields: '
+        in: query
+        name: _sort
+        schema:
+          type: string
+      - description: Starting index of the items to return (0-based). Defaults to
+          0.
+        in: query
+        name: _start
+        schema:
+          type: integer
+      - description: Filter by name contains
+        in: query
+        name: filters[name][contains]
+        schema:
+          type: string
+      - description: Filter by name endswith
+        in: query
+        name: filters[name][endswith]
+        schema:
+          type: string
+      - description: Filter by name eq
+        in: query
+        name: filters[name][eq]
+        schema:
+          type: string
+      - description: Filter by name ne
+        in: query
+        name: filters[name][ne]
+        schema:
+          type: string
+      - description: Filter by name startswith
+        in: query
+        name: filters[name][startswith]
+        schema:
+          type: string
+      - description: Filter by name contains
+        in: query
+        name: name_contains
+        schema:
+          type: string
+      - description: Filter by name endswith
+        in: query
+        name: name_endswith
+        schema:
+          type: string
+      - description: Filter by name eq
+        in: query
+        name: name_eq
+        schema:
+          type: string
+      - description: Filter by name ne
+        in: query
+        name: name_ne
+        schema:
+          type: string
+      - description: Filter by name startswith
+        in: query
+        name: name_startswith
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyListResponse'
           description: List of API Keys
+          headers:
+            X-Total-Count:
+              description: Total number of items
+              schema:
+                type: string
         "400":
           content:
             application/json:
@@ -773,12 +1948,12 @@ paths:
     delete:
       description: Deletes a specific API key for the authenticated user.
       parameters:
-        - description: The UUID of the API key to delete
-          in: path
-          name: keyID
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
+      - description: The UUID of the API key to delete
+        in: path
+        name: keyID
+        required: true
+        schema:
+          $ref: '#/components/schemas/stringUUIDSchema'
       responses:
         "200":
           description: API Key deleted
@@ -908,6 +2083,84 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Internal server error
       summary: Get account permissions
+  /api/account/quota:
+    get:
+      description: Retrieve the current quota status including upload and download
+        usage, limits, and remaining allowance for the authenticated user.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuotaStatusResponse'
+          description: Quota status
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Get current quota status
+      tags:
+      - quota
+      - status
+  /api/account/quota/history:
+    get:
+      description: Retrieves historical quota usage data for charting and analytics.
+      parameters:
+      - description: End date in RFC3339 format
+        in: query
+        name: end_date
+        schema:
+          type: string
+      - description: Start date in RFC3339 format
+        in: query
+        name: start_date
+        schema:
+          type: string
+      - description: Usage type (upload or download)
+        in: query
+        name: type
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuotaHistoryResponse'
+          description: Quota usage history
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Get quota usage history
   /api/account/update-email:
     post:
       description: Updates the authenticated user's email address.
@@ -977,13 +2230,12 @@ paths:
       description: Verifies a user's email address using a token sent via email. Optionally
         auto-login user if they don't have 2FA enabled.
       parameters:
-        - description: >-
-            Auto-login user after verification (boolean: true/false; also
-            accepts 1/0).
-          in: query
-          name: login
-          schema:
-            type: string
+      - description: 'Auto-login user after verification (boolean: true/false; also
+          accepts 1/0).'
+        in: query
+        name: login
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -1049,11 +2301,11 @@ paths:
     post:
       description: Exchanges an API key for a JWT.
       parameters:
-        - description: API Key followed by the key
-          in: header
-          name: Authorization
-          schema:
-            type: string
+      - description: API Key followed by the key
+        in: header
+        name: Authorization
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -1274,12 +2526,6 @@ paths:
         description: OTP code
         required: true
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Success
         "302":
           description: Redirect to auth complete (on success)
           headers:
@@ -1447,42 +2693,404 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: A database operation failed.
       summary: Register a new account
+  /api/billing/gateways:
+    get:
+      description: Returns list of available payment gateways with metadata
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayListResponse'
+          description: Gateways retrieved
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Gateway registry not initialized
+      summary: List Available Payment Gateways
+      tags:
+      - Billing
+  /api/billing/gateways/{id}/logo:
+    get:
+      description: Returns embedded logo image for payment gateway
+      parameters:
+      - description: Gateway identifier
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Gateway logo retrieved
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Gateway logo not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Get Gateway Logo
+      tags:
+      - Billing
+  /api/billing/plans:
+    get:
+      description: Returns pricing plans with their periods for user's effective price
+        line
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicPricingPlansListResponse'
+          description: Pricing plans retrieved
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Failed to get pricing plans
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: List Pricing Plans
+      tags:
+      - Billing
   /api/operations:
     get:
       description: Retrieve a list of operations, with filtering, searching, and pagination
         support.
       parameters:
-        - description: Ending index of the items to return (exclusive). Defaults to
-            10.
-          in: query
-          name: _end
-          schema:
-            type: integer
-        - description: Comma-separated list of sort orders ('asc' or 'desc') corresponding
-            to _sort fields. Defaults to 'asc'.
-          in: query
-          name: _order
-          schema:
-            type: string
-        - description: >-
-            Comma-separated list of fields to sort by. Available fields:
-            id, operation, protocol, status, status_message, progress_percent, cid,
-            total_steps, current_step, error
-          in: query
-          name: _sort
-          schema:
-            type: string
-        - description: Starting index of the items to return (0-based). Defaults to
-            0.
-          in: query
-          name: _start
-          schema:
-            type: integer
-        - description: Search term for filename or other relevant operation data
-          in: query
-          name: search
-          schema:
-            type: string
+      - description: Ending index of the items to return (exclusive). Defaults to
+          10.
+        in: query
+        name: _end
+        schema:
+          type: integer
+      - description: Comma-separated list of sort orders ('asc' or 'desc') corresponding
+          to _sort fields. Defaults to 'asc'.
+        in: query
+        name: _order
+        schema:
+          type: string
+      - description: 'Comma-separated list of fields to sort by. Available fields:
+          id, operation, protocol, status, status_message, progress_percent, cid,
+          total_steps, current_step, error'
+        in: query
+        name: _sort
+        schema:
+          type: string
+      - description: Starting index of the items to return (0-based). Defaults to
+          0.
+        in: query
+        name: _start
+        schema:
+          type: integer
+      - description: Filter by cid contains
+        in: query
+        name: cid_contains
+        schema:
+          type: string
+      - description: Filter by cid endswith
+        in: query
+        name: cid_endswith
+        schema:
+          type: string
+      - description: Filter by cid eq
+        in: query
+        name: cid_eq
+        schema:
+          type: string
+      - description: Filter by cid ne
+        in: query
+        name: cid_ne
+        schema:
+          type: string
+      - description: Filter by cid startswith
+        in: query
+        name: cid_startswith
+        schema:
+          type: string
+      - description: Filter by cid contains
+        in: query
+        name: filters[cid][contains]
+        schema:
+          type: string
+      - description: Filter by cid endswith
+        in: query
+        name: filters[cid][endswith]
+        schema:
+          type: string
+      - description: Filter by cid eq
+        in: query
+        name: filters[cid][eq]
+        schema:
+          type: string
+      - description: Filter by cid ne
+        in: query
+        name: filters[cid][ne]
+        schema:
+          type: string
+      - description: Filter by cid startswith
+        in: query
+        name: filters[cid][startswith]
+        schema:
+          type: string
+      - description: Filter by id between
+        in: query
+        name: filters[id][between]
+        schema:
+          type: string
+      - description: Filter by id eq
+        in: query
+        name: filters[id][eq]
+        schema:
+          type: string
+      - description: Filter by id gt
+        in: query
+        name: filters[id][gt]
+        schema:
+          type: string
+      - description: Filter by id gte
+        in: query
+        name: filters[id][gte]
+        schema:
+          type: string
+      - description: Filter by id lt
+        in: query
+        name: filters[id][lt]
+        schema:
+          type: string
+      - description: Filter by id lte
+        in: query
+        name: filters[id][lte]
+        schema:
+          type: string
+      - description: Filter by id ne
+        in: query
+        name: filters[id][ne]
+        schema:
+          type: string
+      - description: Filter by operation contains
+        in: query
+        name: filters[operation][contains]
+        schema:
+          type: string
+      - description: Filter by operation endswith
+        in: query
+        name: filters[operation][endswith]
+        schema:
+          type: string
+      - description: Filter by operation eq
+        in: query
+        name: filters[operation][eq]
+        schema:
+          type: string
+      - description: Filter by operation ne
+        in: query
+        name: filters[operation][ne]
+        schema:
+          type: string
+      - description: Filter by operation startswith
+        in: query
+        name: filters[operation][startswith]
+        schema:
+          type: string
+      - description: Filter by progress_percent between
+        in: query
+        name: filters[progress_percent][between]
+        schema:
+          type: string
+      - description: Filter by progress_percent eq
+        in: query
+        name: filters[progress_percent][eq]
+        schema:
+          type: string
+      - description: Filter by progress_percent gt
+        in: query
+        name: filters[progress_percent][gt]
+        schema:
+          type: string
+      - description: Filter by progress_percent gte
+        in: query
+        name: filters[progress_percent][gte]
+        schema:
+          type: string
+      - description: Filter by progress_percent lt
+        in: query
+        name: filters[progress_percent][lt]
+        schema:
+          type: string
+      - description: Filter by progress_percent lte
+        in: query
+        name: filters[progress_percent][lte]
+        schema:
+          type: string
+      - description: Filter by progress_percent ne
+        in: query
+        name: filters[progress_percent][ne]
+        schema:
+          type: string
+      - description: Filter by id eq
+        in: query
+        name: id_eq
+        schema:
+          type: string
+      - description: Filter by id gt
+        in: query
+        name: id_gt
+        schema:
+          type: string
+      - description: Filter by id gte
+        in: query
+        name: id_gte
+        schema:
+          type: string
+      - description: Filter by id lt
+        in: query
+        name: id_lt
+        schema:
+          type: string
+      - description: Filter by id lte
+        in: query
+        name: id_lte
+        schema:
+          type: string
+      - description: Filter by id ne
+        in: query
+        name: id_ne
+        schema:
+          type: string
+      - description: Filter by operation contains
+        in: query
+        name: operation_contains
+        schema:
+          type: string
+      - description: Filter by operation endswith
+        in: query
+        name: operation_endswith
+        schema:
+          type: string
+      - description: Filter by operation eq
+        in: query
+        name: operation_eq
+        schema:
+          type: string
+      - description: Filter by operation ne
+        in: query
+        name: operation_ne
+        schema:
+          type: string
+      - description: Filter by operation startswith
+        in: query
+        name: operation_startswith
+        schema:
+          type: string
+      - description: Filter by progress_percent eq
+        in: query
+        name: progress_percent_eq
+        schema:
+          type: string
+      - description: Filter by progress_percent gt
+        in: query
+        name: progress_percent_gt
+        schema:
+          type: string
+      - description: Filter by progress_percent gte
+        in: query
+        name: progress_percent_gte
+        schema:
+          type: string
+      - description: Filter by progress_percent lt
+        in: query
+        name: progress_percent_lt
+        schema:
+          type: string
+      - description: Filter by progress_percent lte
+        in: query
+        name: progress_percent_lte
+        schema:
+          type: string
+      - description: Filter by progress_percent ne
+        in: query
+        name: progress_percent_ne
+        schema:
+          type: string
+      - description: Search term for filename or other relevant operation data
+        in: query
+        name: search
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -1518,12 +3126,12 @@ paths:
     get:
       description: Retrieve detailed information for a specific operation by its ID.
       parameters:
-        - description: The unique identifier of the operation
-          in: path
-          name: id
-          required: true
-          schema:
-            type: integer
+      - description: The unique identifier of the operation
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
       responses:
         "200":
           content:
@@ -1610,4 +3218,4 @@ paths:
           description: Internal server error
       summary: Get upload limit
 servers:
-  - url: /api
+- url: /

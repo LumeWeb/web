@@ -3,7 +3,8 @@ import { RefreshCw } from "lucide-react";
 import React from "react";
 import { BaseRecord } from "@refinedev/core";
 
-import { registerAction, ToolbarItemType } from "@/components/data-table";
+import { registerAction } from "@/components/data-table/ToolbarRegistry";
+import { ToolbarItemType } from "@/components/data-table/DataTable.types";
 import type {
   ToolbarActionItem,
   ToolbarItemComponentProps,

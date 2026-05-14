@@ -1,8 +1,9 @@
 // Import and register all toolbar items
 import { registerFilter } from "@/components/data-table/ToolbarRegistry";
 import { BaseRecord } from "@refinedev/core";
-import type { FilterConfig, ToolbarFilterItem } from "@/components/data-table";
-import { ToolbarItemType } from "@/components/data-table";
+import type { FilterConfig } from "@/components/data-table/toolbarItems/filters/types";
+import type { ToolbarFilterItem } from "@/components/data-table/DataTable.types";
+import { ToolbarItemType } from "@/components/data-table/DataTable.types";
 import { FilterOperator, FilterType, LogicalFilterOperator } from "./filters";
 
 // Import filter components

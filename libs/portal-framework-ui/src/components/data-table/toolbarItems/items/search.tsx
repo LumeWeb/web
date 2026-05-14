@@ -4,8 +4,9 @@ import { useDebounce } from "use-debounce";
 import type {
   ToolbarFilterComponentProps,
   ToolbarFilterItem,
-} from "@/components/data-table";
-import { registerFilter, ToolbarItemType } from "@/components/data-table";
+} from "@/components/data-table/DataTable.types";
+import { registerFilter } from "@/components/data-table/ToolbarRegistry";
+import { ToolbarItemType } from "@/components/data-table/DataTable.types";
 import {
   FilterOperator,
   FilterType,

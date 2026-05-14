@@ -1,8 +1,8 @@
 import React from "react";
-import {
+import type {
   ToolbarCustomItem,
   ToolbarItemComponentProps,
-} from "@/components/data-table";
+} from "@/components/data-table/DataTable.types";
 import { BaseRecord } from "@refinedev/core";
 import { registerAction } from "@/components/data-table/ToolbarRegistry";
 

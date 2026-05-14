@@ -13,6 +13,38 @@ source "$SCRIPT_DIR/tunnel-lib.sh"
 TUNNEL_DRY_RUN=false
 TUNNEL_APP_ENV_ARG=""
 
+tunnel_kill_vite() {
+    local pids
+    pids="$(pgrep -f 'vite/bin/vite\.js' 2>/dev/null)" || true
+    if [ -z "$pids" ]; then
+        echo "No vite processes found."
+        return
+    fi
+    echo "Killing vite process trees:"
+    local killed_pids=""
+    for pid in $pids; do
+        local root_pid="$pid"
+        while ppid="$(ps -o ppid= -p "$root_pid" 2>/dev/null | tr -d ' ')"; do
+            [ -z "$ppid" ] || [ "$ppid" -eq 1 ] && break
+            local pcmd
+            pcmd="$(ps -o args= -p "$ppid" 2>/dev/null)" || break
+            case "$pcmd" in
+                *node*|*pnpm*|*dotenv*) root_pid="$ppid" ;;
+                *) break ;;
+            esac
+        done
+        if echo "$killed_pids" | grep -qw "$root_pid"; then
+            continue
+        fi
+        killed_pids="$killed_pids $root_pid"
+        local cmd
+        cmd="$(ps -o args= -p "$root_pid" 2>/dev/null)" || true
+        echo "  PID $root_pid  $cmd"
+        kill -- -"$(ps -o pgid= -p "$root_pid" 2>/dev/null | tr -d ' ')" 2>/dev/null || kill "$root_pid" 2>/dev/null || true
+    done
+    echo "Done."
+}
+
 # --- CLI Parsing ---
 usage() {
     cat <<EOF
@@ -31,6 +63,7 @@ Options:
   --env <path>        Path to root .env (default: auto-detect, walk up from CWD)
   --plugins <list>    Override TUNNEL_PLUGINS (comma-separated, e.g. core,dashboard)
   --dry-run           Print resolved config and exit without starting anything
+  --kill              Kill all node processes originating from vite and exit
   --list              Discover all .env.tunnel files in the project
   -h, --help          Show this help message
 
@@ -107,6 +140,10 @@ while [[ $# -gt 0 ]]; do
             tunnel_list_configs
             exit 0
             ;;
+        --kill)
+            tunnel_kill_vite
+            exit 0
+            ;;
         -h|--help)
             usage
             ;;
@@ -122,14 +159,11 @@ done
 # 1. Root .env (infrastructure secrets, gitignored)
 tunnel_load_root_env
 
-# Capture TUNNEL_PLUGINS from root .env BEFORE loading app config
-# This allows user-specific plugin selection in gitignored .env
-TUNNEL_PLUGINS_FROM_ROOT="${TUNNEL_PLUGINS:-}"
-
 # 2. Per-app .env.tunnel (app config, git-tracked)
 tunnel_load_app_env "$TUNNEL_APP_ENV_ARG"
 
 # 3. CLI overrides for TUNNEL_PLUGINS take highest precedence
+# shellcheck disable=SC2034
 [ -n "${TUNNEL_PLUGINS_OVERRIDE:-}" ] && TUNNEL_PLUGINS="$TUNNEL_PLUGINS_OVERRIDE"
 
 # 3. CLI overrides
@@ -165,6 +199,7 @@ if [ "$TUNNEL_DRY_RUN" = true ]; then
     echo "  TUNNEL_APP_DIR       = $TUNNEL_APP_DIR"
 
     if [ "${TUNNEL_MODE:-single}" = "multi" ]; then
+        # shellcheck disable=SC2153
         echo "  TUNNEL_MAIN_HOST     = $TUNNEL_MAIN_HOST"
         echo "  TUNNEL_MAIN_APP_DIR  = $TUNNEL_MAIN_APP_DIR"
         echo "  TUNNEL_MAIN_PORT     = ${TUNNEL_MAIN_PORT:-4173}"

@@ -1,0 +1,1 @@
+export { Capability } from './refineConfig';
