@@ -73,7 +73,7 @@
     "typescript": "catalog:",
     "vite": "catalog:framework",
     "vitest": "catalog:",
-    "vitest-browser-react": "^2.2.0",
+    "vitest-browser-react": "catalog:",
     "wrangler": "^4.90.1"
   },
   "pnpm": {

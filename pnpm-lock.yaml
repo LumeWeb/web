@@ -207,6 +207,9 @@ catalogs:
     vitest:
       specifier: ^4.1.6
       version: 4.1.6
+    vitest-browser-react:
+      specifier: ^2.2.0
+      version: 2.2.0
     vocs:
       specifier: ^1.4.1
       version: 1.4.1
@@ -386,7 +389,7 @@ importers:
         specifier: 'catalog:'
         version: 4.1.6(@types/node@25.7.0)(@vitest/browser-playwright@4.1.6)(@vitest/coverage-v8@4.1.6)(happy-dom@20.9.0)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.14.6(@types/node@25.7.0)(typescript@6.0.3))(vite@8.0.8)
       vitest-browser-react:
-        specifier: ^2.2.0
+        specifier: 'catalog:'
         version: 2.2.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.6)
       wrangler:
         specifier: ^4.90.1
@@ -1793,6 +1796,9 @@ importers:
       '@lumeweb/portal-framework-core':
         specifier: workspace:*
         version: link:../portal-framework-core
+      vitest-browser-react:
+        specifier: 'catalog:'
+        version: 2.2.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.6)
     devDependencies:
       '@lumeweb/tsdown-config':
         specifier: workspace:*
@@ -17114,7 +17120,7 @@ snapshots:
       es-module-lexer: 2.1.0
       estree-walker: 3.0.3
       pathe: 2.0.3
-      vite: 8.0.8(@types/node@25.7.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.0)(jiti@2.6.1)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.46.2)(yaml@2.8.4)
+      vite: 8.0.8(@types/node@25.7.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.0)(jiti@1.21.7)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.46.2)(yaml@2.8.4)
     transitivePeerDependencies:
       - bufferutil
       - node-fetch
@@ -20464,7 +20470,7 @@ snapshots:
       pathe: 2.0.3
       perfect-debounce: 2.1.0
       tinyexec: 1.1.2
-      vite: 8.0.8(@types/node@25.7.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.0)(jiti@2.6.1)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.46.2)(yaml@2.8.4)
+      vite: 8.0.8(@types/node@25.7.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.0)(jiti@1.21.7)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.46.2)(yaml@2.8.4)
     transitivePeerDependencies:
       - '@modelcontextprotocol/sdk'
       - bufferutil
@@ -20734,7 +20740,7 @@ snapshots:
       pathe: 2.0.3
       perfect-debounce: 2.1.0
       tinyexec: 1.1.2
-      vite: 8.0.8(@types/node@25.7.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.0)(jiti@2.6.1)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.46.2)(yaml@2.8.4)
+      vite: 8.0.8(@types/node@25.7.0)(@vitejs/devtools@0.1.22)(esbuild@0.28.0)(jiti@1.21.7)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.46.2)(yaml@2.8.4)
       vue: 3.5.34(typescript@6.0.3)
       ws: 8.20.0
     transitivePeerDependencies:
@@ -29004,7 +29010,7 @@ snapshots:
     dependencies:
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
-      vitest: 4.1.6(@types/node@25.7.0)(@vitest/browser-playwright@4.1.6)(@vitest/coverage-v8@4.1.6)(happy-dom@20.9.0)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.14.6(@types/node@25.7.0)(typescript@6.0.3))(vite@8.0.8)
+      vitest: 4.1.6(@types/node@25.7.0)(@vitest/browser-playwright@4.1.6)(@vitest/coverage-v8@4.1.6)(@vitest/ui@4.1.5)(happy-dom@20.9.0)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.14.6(@types/node@25.7.0)(typescript@6.0.3))(vite@8.0.10)
     optionalDependencies:
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
