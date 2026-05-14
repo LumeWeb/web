@@ -60,7 +60,7 @@
     "interface-blockstore": "^6.0.2",
     "interface-datastore": "^9.0.3",
     "interface-store": "^7.0.2",
-    "ipaddr.js": "^2.3.0",
+    "ipaddr.js": "^2.4.0",
     "ky": "catalog:",
     "multiformats": "catalog:",
     "p-defer": "^4.0.1",

@@ -39,7 +39,7 @@
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
     "@rolldown/plugin-babel": "^0.2.3",
-    "@vitejs/devtools": "^0.1.15",
+    "@vitejs/devtools": "^0.1.22",
     "babel-plugin-react-compiler": "^1.0.0",
     "esbuild-fix-imports-plugin": "^1.0.23",
     "express": "^5.2.1",
