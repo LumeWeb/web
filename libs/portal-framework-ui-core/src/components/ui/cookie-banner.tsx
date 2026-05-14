@@ -72,7 +72,7 @@ function CookieBanner({ className, ...props }: React.ComponentProps<typeof Sheet
   };
 
   return (
-    <Sheet open={open} {...props}>
+    <Sheet open={open} onOpenChange={() => {}} {...props}>
       <SheetContent
         side="bottom"
         className={cn(
