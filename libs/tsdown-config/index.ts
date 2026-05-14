@@ -44,7 +44,6 @@ export function createLibraryConfig(
 export function createLibraryConfigWithDirs(
   entry: string | string[],
   esmDir: string,
-  cjsDir: string,
   options: Partial<UserConfig> = {}
 ): UserConfig {
   return {
