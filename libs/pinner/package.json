@@ -73,7 +73,7 @@
     "@mswjs/interceptors": "catalog:",
     "@types/uuid": "^11.0.0",
     "@vitest/browser-playwright": "catalog:",
-    "@vitest/ui": "4.1.5",
+    "@vitest/ui": "4.1.6",
     "blockstore-core": "catalog:",
     "datastore-core": "catalog:",
     "happy-dom": "catalog:",
