@@ -11,8 +11,7 @@
   "exports": {
     ".": {
       "types": "./lib-dist/esm/index.d.ts",
-      "import": "./lib-dist/esm/index.js",
-      "require": "./lib-dist/cjs/index.cjs"
+      "import": "./lib-dist/esm/index.js"
     },
     "./package.json": "./package.json"
   },
