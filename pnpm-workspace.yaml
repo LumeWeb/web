@@ -47,7 +47,7 @@ catalog:
   dotenv-cli: ^11.0.0
   happy-dom: ^20.9.0
   ky: ^2.0.2
-  lucide-react: 0.577.0
+  lucide-react: 1.14.0
   msw: ^2.14.6
   multiformats: ^13.4.2
   nanoevents: ^9.1.0
