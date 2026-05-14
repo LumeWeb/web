@@ -225,6 +225,11 @@ catalogs:
       specifier: ^4.1.18
       version: 4.2.4
 
+overrides:
+  '@module-federation/enhanced>typescript': ^6.0.3
+  '@module-federation/dts-plugin>typescript': ^6.0.3
+  '@module-federation/rspack>typescript': ^6.0.3
+
 patchedDependencies:
   '@uppy/core':
     hash: 8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8
@@ -1482,6 +1487,9 @@ importers:
       '@lumeweb/advanced-rest-provider':
         specifier: workspace:*
         version: link:../advanced-rest
+      '@lumeweb/analytics':
+        specifier: workspace:*
+        version: link:../analytics
       '@lumeweb/portal-framework-auth':
         specifier: workspace:*
         version: link:../portal-framework-auth
@@ -3966,7 +3974,7 @@ packages:
   '@module-federation/dts-plugin@0.24.1':
     resolution: {integrity: sha512-8k4PFkSXmrdX2k1XbGhOitUvfVIqJGdYx45yqQq/q3dIKok7RHiJAs8uBC1877lbHhb6+z/xlKVSFDXRjFet+Q==}
     peerDependencies:
-      typescript: ^4.9.0 || ^5.0.0
+      typescript: ^6.0.3
       vue-tsc: '>=1.0.24'
     peerDependenciesMeta:
       vue-tsc:
@@ -3975,7 +3983,7 @@ packages:
   '@module-federation/dts-plugin@2.4.0':
     resolution: {integrity: sha512-sa6v5ByyqMRHzpwDu0zc7s5mZ39EFIkG0jkRfZU09pzkrJEIy4uZ1Kt9SLysFB8RBMIAvAakAfqDlVWvf1lndg==}
     peerDependencies:
-      typescript: ^4.9.0 || ^5.0.0
+      typescript: ^6.0.3
       vue-tsc: '>=1.0.24'
     peerDependenciesMeta:
       vue-tsc:
@@ -3985,7 +3993,7 @@ packages:
     resolution: {integrity: sha512-mDiXX+b2WwU0PYR2F5Q9ZJirdxdvWsKETfp1bLSoNs4tvo2k62VaHfi5hu5J+o5Z+rT47ucIso8ZdQeFdqGlJg==}
     hasBin: true
     peerDependencies:
-      typescript: ^4.9.0 || ^5.0.0
+      typescript: ^6.0.3
       vue-tsc: '>=1.0.24'
       webpack: ^5.0.0
     peerDependenciesMeta:
@@ -4020,7 +4028,7 @@ packages:
     resolution: {integrity: sha512-1IFU7zwNOnPdRFiUDdvbvzITi4SxWSPl9YNiMzaGl4syaoPH5qcXR81qug76d1LFHC8i96qR/2cFyL7Ucdm+VA==}
     peerDependencies:
       '@rspack/core': ^0.7.0 || ^1.0.0 || ^2.0.0-0
-      typescript: ^4.9.0 || ^5.0.0
+      typescript: ^6.0.3
       vue-tsc: '>=1.0.24'
     peerDependenciesMeta:
       typescript:

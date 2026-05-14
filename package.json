@@ -77,6 +77,11 @@
     "wrangler": "^4.90.1"
   },
   "pnpm": {
+    "overrides": {
+      "@module-federation/enhanced>typescript": "catalog:",
+      "@module-federation/dts-plugin>typescript": "catalog:",
+      "@module-federation/rspack>typescript": "catalog:"
+    },
     "patchedDependencies": {
       "object-inspect": "patches/object-inspect.patch",
       "warn-once": "patches/warn-once.patch",

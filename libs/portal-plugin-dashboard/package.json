@@ -28,6 +28,7 @@
   "dependencies": {
     "@hookform/resolvers": "catalog:",
     "@lumeweb/advanced-rest-provider": "workspace:*",
+    "@lumeweb/analytics": "workspace:*",
     "@lumeweb/portal-framework-auth": "workspace:*",
     "@lumeweb/portal-framework-core": "workspace:*",
     "@lumeweb/portal-framework-ui": "workspace:*",
