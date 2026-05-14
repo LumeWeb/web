@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useRef, useState } from "react";
-import { Manager, UploadManagerConfig } from "src/features/upload/Manager";
+import { Manager, UploadManagerConfig } from "@/features/upload/Manager";
 
 interface UploadManagerContextType {
   getUploadManager: (config?: UploadManagerConfig) => Manager;

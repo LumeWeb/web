@@ -1,5 +1,5 @@
 import { Sdk } from "@lumeweb/portal-sdk";
-import { Manager, UploadManagerConfig } from "src/features/upload/Manager";
+import { Manager, UploadManagerConfig } from "@/features/upload/Manager";
 
 import { UPLOAD_TYPE_AVATAR, UPLOAD_TYPE_MAIN } from "@/types/upload";
 

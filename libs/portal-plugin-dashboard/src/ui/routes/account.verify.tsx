@@ -6,7 +6,7 @@ import { useGetIdentity, useGo, useIsAuthenticated } from "@refinedev/core";
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
-import { useEmailVerification } from "src/ui/hooks/useEmailVerification";
+import { useEmailVerification } from "@/ui/hooks/useEmailVerification";
 
 interface VerificationStatusProps {
   alreadyVerified: boolean;

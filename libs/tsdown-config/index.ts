@@ -5,8 +5,10 @@ import type { UserConfig } from "tsdown";
  */
 const baseOptions: Partial<UserConfig> = {
   clean: true,
+  deps: {
+    neverBundle: [/node_modules/],
+  },
   dts: true,
-  external: [/node_modules/],
   hash: false,
   minify: false,
   platform: "neutral",
@@ -80,7 +82,9 @@ export function createLibraryConfigWithExternals(
         },
       },
     },
-    external: externals,
+    deps: {
+      neverBundle: externals,
+    },
     ...options,
   };
 }

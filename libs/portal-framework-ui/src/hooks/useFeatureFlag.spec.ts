@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { createMockPortalMeta } from "src/tests/portalMetaMocks";
+import { createMockPortalMeta } from "@/tests/portalMetaMocks";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Import the mocked function after the mock is defined

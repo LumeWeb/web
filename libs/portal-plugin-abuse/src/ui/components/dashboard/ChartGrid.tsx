@@ -9,7 +9,7 @@ import {
 import { Skeleton } from "@lumeweb/portal-framework-ui-core";
 import { Tabs, TabsList, TabsTrigger } from "@lumeweb/portal-framework-ui-core";
 import { useState } from "react";
-import { CommunicationsTimelineChart } from "src/ui/components/dashboard/CommunicationsTimelineChart";
+import { CommunicationsTimelineChart } from "@/ui/components/dashboard/CommunicationsTimelineChart";
 
 import { BlockReasonsChart } from "./BlockReasonsChart";
 import { StatusFlowChart } from "./StatusFlowChart";
