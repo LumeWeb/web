@@ -2,12 +2,12 @@ import ky, { HTTPError } from "ky";
 import { createNanoEvents } from "nanoevents";
 import type { PinnerConfig } from "../config";
 import type {
-  ErrorResponse,
-  WebsiteItem,
   WebsiteItemResponse,
   WebsiteRequest,
   WebsiteResponse,
+  WebsiteUpdateRequest,
   WebsiteValidateResponse,
+  WebsiteConfigResponse,
   SSLStatusInfo,
 } from "./generated/schemas/index";
 
@@ -58,15 +58,24 @@ export class WebsitesClient {
 
     try {
       const response = await ky(path, {
-        prefixUrl: this.getEndpoint(),
+        prefix: this.getEndpoint(),
         headers: {
           Authorization: `Bearer ${this.config.jwt}`,
           "Content-Type": "application/json",
         },
         ...options,
-      }).json<T>();
+      });
 
-      return response;
+      if (response.status === 204) {
+        return undefined as T;
+      }
+
+      const text = await response.text();
+      if (!text) {
+        return undefined as T;
+      }
+
+      return JSON.parse(text) as T;
     } catch (error) {
       if (error instanceof HTTPError) {
         const status = error.response.status;
@@ -133,7 +142,7 @@ export class WebsitesClient {
 
   async updateWebsite(
     id: number,
-    request: WebsiteRequest,
+    request: WebsiteUpdateRequest,
     options?: WebsitesClientOptions,
   ): Promise<WebsiteResponse> {
     return this.request<WebsiteResponse>(`api/websites/${id}`, {
@@ -176,6 +185,14 @@ export class WebsitesClient {
         signal: options?.signal,
       },
     );
+  }
+
+  async getWebsiteConfig(
+    options?: WebsitesClientOptions,
+  ): Promise<WebsiteConfigResponse> {
+    return this.request<WebsiteConfigResponse>("api/websites/config", {
+      signal: options?.signal,
+    });
   }
 
   watchSSL(

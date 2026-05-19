@@ -1,11 +1,13 @@
 import { test as it } from "../../__tests__/int-test";
 import { describe, expect, vi, beforeEach } from "vitest";
+import { http, HttpResponse } from "msw";
 import { WebsitesClient } from "../websites";
 import { SSLStatus } from "../websites";
 import type { PinnerConfig } from "@/config";
 import type {
   WebsiteRequest,
   WebsiteResponse,
+  WebsiteUpdateRequest,
   WebsiteValidateResponse,
 } from "../generated/schemas/index";
 import {
@@ -28,6 +30,7 @@ import {
   setSSLStatus,
   resetSSLStatuses,
 } from "@/__tests__/msw-websites-ipns-handlers";
+import { testConfig } from "@/__tests__/setup";
 
 describe("WebsitesClient", () => {
   const mockConfig: PinnerConfig = {
@@ -191,7 +194,7 @@ describe("WebsitesClient", () => {
       worker.use(...websitesHandlers);
       const client = new WebsitesClient(mockConfig);
 
-      const request: WebsiteRequest = {
+      const request: WebsiteUpdateRequest = {
         domain: "updated.example.com",
         target_type: "ipfs",
         target_hash: "QmUpdatedCID123",
@@ -205,11 +208,25 @@ describe("WebsitesClient", () => {
       expect(website.target_hash).toBe("QmUpdatedCID123");
     });
 
+    it("should update partial fields on a website", async ({ worker }) => {
+      worker.use(...websitesHandlers);
+      const client = new WebsitesClient(mockConfig);
+
+      const request: WebsiteUpdateRequest = {
+        target_hash: "QmUpdatedOnlyCID",
+      };
+
+      const website: WebsiteResponse = await client.updateWebsite(1, request);
+
+      expect(website).toHaveProperty("id");
+      expect(website.target_hash).toBe("QmUpdatedOnlyCID");
+    });
+
     it("should throw NotFoundError for non-existent website", async ({ worker }) => {
       worker.use(websiteNotFoundHandler);
       const client = new WebsitesClient(mockConfig);
 
-      const request: WebsiteRequest = {
+      const request: WebsiteUpdateRequest = {
         domain: "updated.example.com",
         target_type: "ipfs",
         target_hash: "QmTestCID",
@@ -225,7 +242,7 @@ describe("WebsitesClient", () => {
         endpoint: "https://test.pinner.xyz",
       });
 
-      const request: WebsiteRequest = {
+      const request: WebsiteUpdateRequest = {
         domain: "updated.example.com",
         target_type: "ipfs",
         target_hash: "QmTestCID",
@@ -329,6 +346,37 @@ describe("WebsitesClient", () => {
       await expect(
         client.getSSLStatus("example.com", { signal: controller.signal }),
       ).rejects.toThrow();
+    });
+  });
+
+  describe("getWebsiteConfig", () => {
+    it("should get website hosting configuration", async ({ worker }) => {
+      worker.use(...websitesHandlers);
+      const client = new WebsitesClient(mockConfig);
+
+      const config = await client.getWebsiteConfig();
+
+      expect(config).toHaveProperty("gateway_domain");
+      expect(config).toHaveProperty("nameservers");
+      expect(config.gateway_domain).toBe("ipfs.pinner.xyz");
+      expect(config.nameservers).toHaveLength(2);
+    });
+
+    it("should handle authentication errors", async ({ worker }) => {
+      worker.use(
+        http.get(`${testConfig.apiUrl}/websites/config`, async () => {
+          return HttpResponse.json(
+            { error: "Unauthorized" },
+            { status: 401 },
+          );
+        }),
+      );
+      const client = new WebsitesClient({
+        jwt: "invalid-jwt",
+        endpoint: "https://test.pinner.xyz",
+      });
+
+      await expect(client.getWebsiteConfig()).rejects.toThrow(AuthenticationError);
     });
   });
 

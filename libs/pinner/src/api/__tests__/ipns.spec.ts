@@ -44,14 +44,15 @@ describe("IpnsClient", () => {
       worker.use(...ipnsHandlers);
       const client = new IpnsClient(mockConfig);
 
-      const keys = await client.listKeys();
+      const result = await client.listKeys();
 
-      expect(keys).toHaveLength(2);
-      expect(keys[0]).toHaveProperty("id");
-      expect(keys[0]).toHaveProperty("name");
-      expect(keys[0]).toHaveProperty("ipns_name");
-      expect(keys[0]).toHaveProperty("peer_id");
-      expect(keys[0]).toHaveProperty("created");
+      expect(result.data).toHaveLength(2);
+      expect(result.total).toBe(2);
+      expect(result.data[0]).toHaveProperty("id");
+      expect(result.data[0]).toHaveProperty("name");
+      expect(result.data[0]).toHaveProperty("ipns_name");
+      expect(result.data[0]).toHaveProperty("peer_id");
+      expect(result.data[0]).toHaveProperty("created");
     });
 
     it("should handle authentication errors", async ({ worker }) => {
@@ -78,8 +79,31 @@ describe("IpnsClient", () => {
 
       // For now, just test normal case
       const client = new IpnsClient(mockConfig);
-      const keys = await client.listKeys();
-      expect(keys).toBeDefined();
+      const result = await client.listKeys();
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe("getKey", () => {
+    it("should get a specific IPNS key", async ({ worker }) => {
+      worker.use(...ipnsHandlers);
+      const client = new IpnsClient(mockConfig);
+
+      const key = await client.getKey(1);
+
+      expect(key).toHaveProperty("id");
+      expect(key.id).toBe(1);
+      expect(key).toHaveProperty("name");
+      expect(key).toHaveProperty("ipns_name");
+      expect(key).toHaveProperty("peer_id");
+      expect(key).toHaveProperty("created");
+    });
+
+    it("should throw NotFoundError for non-existent key", async ({ worker }) => {
+      worker.use(ipnsNotFoundHandler);
+      const client = new IpnsClient(mockConfig);
+
+      await expect(client.getKey(999)).rejects.toThrow(NotFoundError);
     });
   });
 
@@ -121,11 +145,9 @@ describe("IpnsClient", () => {
       const client = new IpnsClient(mockConfig);
 
       const request: IPNSKeyRequest = {
-        name: "", // Invalid: empty name
+        name: "",
       };
 
-      // Note: The MSW handler doesn't validate, so this will succeed
-      // In real scenario, this would throw ValidationError
       const key = await client.createKey(request);
       expect(key).toBeDefined();
     });
@@ -144,8 +166,6 @@ describe("IpnsClient", () => {
       await expect(client.createKey(request)).rejects.toThrow(AuthenticationError);
     });
   });
-
-  // getKey method not implemented in current API
 
   describe("deleteKey", () => {
     it("should delete an IPNS key", async ({ worker }) => {
@@ -312,8 +332,8 @@ describe("IpnsClient", () => {
       const client = new IpnsClient(mockConfig);
 
       // Test normal operation
-      const keys = await client.listKeys();
-      expect(keys).toBeDefined();
+      const result = await client.listKeys();
+      expect(result).toBeDefined();
     });
 
     it("should handle malformed responses", async ({ worker }) => {
@@ -321,8 +341,8 @@ describe("IpnsClient", () => {
       const client = new IpnsClient(mockConfig);
 
       // Test normal operation
-      const keys = await client.listKeys();
-      expect(keys).toBeDefined();
+      const result = await client.listKeys();
+      expect(result).toBeDefined();
     });
   });
 });
