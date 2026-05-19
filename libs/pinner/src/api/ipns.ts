@@ -1,7 +1,7 @@
 import ky, { HTTPError } from "ky";
 import type { PinnerConfig } from "../config";
 import type {
-  ErrorResponse,
+  IPNSKeyListResponseResponse,
   IPNSKeyRequest,
   IPNSKeyResponse,
   IPNSPublishRequest,
@@ -44,15 +44,24 @@ export class IpnsClient {
 
     try {
       const response = await ky(path, {
-        prefixUrl: this.getEndpoint(),
+        prefix: this.getEndpoint(),
         headers: {
           Authorization: `Bearer ${this.config.jwt}`,
           "Content-Type": "application/json",
         },
         ...options,
-      }).json<T>();
+      });
 
-      return response;
+      if (response.status === 204) {
+        return undefined as T;
+      }
+
+      const text = await response.text();
+      if (!text) {
+        return undefined as T;
+      }
+
+      return JSON.parse(text) as T;
     } catch (error) {
       if (error instanceof HTTPError) {
         const status = error.response.status;
@@ -89,8 +98,14 @@ export class IpnsClient {
     }
   }
 
-  async listKeys(options?: IpnsClientOptions): Promise<IPNSKeyResponse[]> {
-    return this.request<IPNSKeyResponse[]>("api/ipns/keys", {
+  async listKeys(options?: IpnsClientOptions): Promise<IPNSKeyListResponseResponse> {
+    return this.request<IPNSKeyListResponseResponse>("api/ipns/keys", {
+      signal: options?.signal,
+    });
+  }
+
+  async getKey(id: number, options?: IpnsClientOptions): Promise<IPNSKeyResponse> {
+    return this.request<IPNSKeyResponse>(`api/ipns/keys/${id}`, {
       signal: options?.signal,
     });
   }

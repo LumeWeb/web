@@ -24,6 +24,7 @@ interface Website {
   target_hash: string;
   status: string;
   validation_token: string;
+  dns_hosting_enabled: boolean;
   created: Date;
   updated: Date;
   expired: boolean;
@@ -62,6 +63,7 @@ let websites: Website[] = [
     target_hash: "QmTest1",
     status: "active",
     validation_token: "valid-token-123",
+    dns_hosting_enabled: false,
     created: new Date("2024-01-01T00:00:00Z"),
     updated: new Date("2024-01-01T00:00:00Z"),
     expired: false,
@@ -75,6 +77,7 @@ let websites: Website[] = [
     target_hash: "k51qzi5uqu5dj14p8d8q8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e",
     status: "pending",
     validation_token: "valid-token-456",
+    dns_hosting_enabled: false,
     created: new Date("2024-01-02T00:00:00Z"),
     updated: new Date("2024-01-02T00:00:00Z"),
     expired: false,
@@ -112,6 +115,7 @@ export function resetWebsitesIPNSState() {
       target_hash: "QmTest1",
       status: "active",
       validation_token: "valid-token-123",
+      dns_hosting_enabled: false,
       created: new Date("2024-01-01T00:00:00Z"),
       updated: new Date("2024-01-01T00:00:00Z"),
       expired: false,
@@ -125,6 +129,7 @@ export function resetWebsitesIPNSState() {
       target_hash: "k51qzi5uqu5dj14p8d8q8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e",
       status: SSLStatus.PENDING,
       validation_token: "valid-token-456",
+      dns_hosting_enabled: false,
       created: new Date("2024-01-02T00:00:00Z"),
       updated: new Date("2024-01-02T00:00:00Z"),
       expired: false,
@@ -144,12 +149,18 @@ export function resetWebsitesIPNSState() {
 export const listIPNSKeysHandler = http.get(
   `${testConfig.apiUrl}/ipns/keys`,
   async () => {
-    return HttpResponse.json(ipnsKeys, {
-      status: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
+    return HttpResponse.json(
+      {
+        data: ipnsKeys,
+        total: ipnsKeys.length,
       },
-    });
+      {
+        status: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+      },
+    );
   },
 );
 
@@ -313,6 +324,24 @@ export const ipnsHandlers = [
 // WEBSITES HANDLERS
 // ============================================================================
 
+export const getWebsiteConfigHandler = http.get(
+  `${testConfig.apiUrl}/websites/config`,
+  async () => {
+    return HttpResponse.json(
+      {
+        gateway_domain: "ipfs.pinner.xyz",
+        nameservers: ["ns1.pinner.xyz", "ns2.pinner.xyz"],
+      },
+      {
+        status: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+      },
+    );
+  },
+);
+
 export const listWebsitesHandler = http.get(
   `${testConfig.apiUrl}/websites`,
   async () => {
@@ -338,6 +367,7 @@ export const createWebsiteHandler = http.post(
       domain: string;
       target_type: string;
       target_hash: string;
+      dns_hosting_enabled?: boolean;
     };
 
     const newWebsite: Website = {
@@ -347,6 +377,7 @@ export const createWebsiteHandler = http.post(
       target_hash: body.target_hash,
       status: SSLStatus.PENDING,
       validation_token: `valid-token-${nextWebsiteId}`,
+      dns_hosting_enabled: body.dns_hosting_enabled ?? false,
       created: new Date(),
       updated: new Date(),
       expired: false,
@@ -392,9 +423,10 @@ export const updateWebsiteHandler = http.put(
   async ({ params, request }) => {
     const id = parseInt(params.id as string);
     const body = (await request.json()) as {
-      domain: string;
-      target_type: string;
-      target_hash: string;
+      domain?: string;
+      target_type?: string;
+      target_hash?: string;
+      dns_hosting_enabled?: boolean;
     };
 
     const website = websites.find((w) => w.id === id);
@@ -405,9 +437,10 @@ export const updateWebsiteHandler = http.put(
       );
     }
 
-    website.domain = body.domain;
-    website.target_type = body.target_type;
-    website.target_hash = body.target_hash;
+    if (body.domain !== undefined) website.domain = body.domain;
+    if (body.target_type !== undefined) website.target_type = body.target_type;
+    if (body.target_hash !== undefined) website.target_hash = body.target_hash;
+    if (body.dns_hosting_enabled !== undefined) website.dns_hosting_enabled = body.dns_hosting_enabled;
     website.updated = new Date();
     website.status = "pending";
 
@@ -532,9 +565,12 @@ export function resetSSLStatuses(): void {
 }
 
 // Combine all Websites handlers
+// Note: getWebsiteConfigHandler MUST come before getWebsiteHandler to avoid 
+// /websites/:id matching /websites/config
 export const websitesHandlers = [
   listWebsitesHandler,
   createWebsiteHandler,
+  getWebsiteConfigHandler,
   getWebsiteHandler,
   updateWebsiteHandler,
   deleteWebsiteHandler,
