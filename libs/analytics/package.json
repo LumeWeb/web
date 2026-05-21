@@ -1,6 +1,7 @@
 {
   "name": "@lumeweb/analytics",
   "version": "0.1.0",
+  "private": true,
   "description": "Analytics hooks for PostHog integration across portal apps",
   "type": "module",
   "main": "./dist/index.js",
