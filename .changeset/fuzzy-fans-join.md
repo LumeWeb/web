@@ -1,0 +1,52 @@
+---
+@lumeweb/portal-dashboard: minor
+---
+
+## Features
+
+- typo
+- Relocated shared code from portal-dashboard to new portal-shared library
+- Moved components, hooks, utilities, and types to libs/portal-shared/src
+- Updated import paths across portal-dashboard to use new shared library
+- Refactored app store into baseStore and dashboardStore
+- Removed duplicate files and consolidated shared logic
+- Updated tsconfig paths to include new shared library
+- implement t3-env
+- add theming support
+- adds NavigationMenu components to create 2-layer-deep nested navigation components
+- initial iteration of subscriptions
+- initial file manager support
+- implement social login functionality
+- implement 2FA flows and login
+- implement API keys support
+- implement account deletion functionality
+- implement usage tracking and display
+- add settings and cron pages, refactor shared components
+- update import
+- update import path
+- formatting
+- pnpm not fully installing and adding patches
+- use import.meta.env not process as this is client side
+- make VITE_PORTAL_URL optional
+- update Tailwind theme colors and resolve component conflicts
+- resolve color inconsistencies, typos and enhance user interface experience
+- Adjust component colors to align with theme
+- finalize mobile responsiveness and component updates
+- last color updates
+- theme for file upload and add horizontal scroll snap
+- conflicts and styles
+- issues with reavt
+- more issues with react
+- now auth checking should properly work
+- solves #113. Proper spacing on verification screen
+- done setting up theme switcher for images too. now images are also themeable
+- final styling for the table
+- trash icon
+- wrong imports
+- resolve upload management issues and improve error handling
+- add missing reset password route
+- only prefix https if portalUrl is set but not starting with a proto
+- bad parsing of FQDN in getApiBaseUrl, need to better handle subdomains
+- adjust condition for payment skeleton display
+- new layout for billing
+- using tabs for different parts of the billing
