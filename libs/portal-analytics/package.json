@@ -1,6 +1,7 @@
 {
   "name": "@lumeweb/portal-analytics",
   "version": "0.1.0",
+  "private": true,
   "description": "Analytics integration hooks for Lumeweb portal — bridges @lumeweb/analytics with @refinedev/core",
   "type": "module",
   "main": "./dist/index.js",
