@@ -1,0 +1,1 @@
+{"version":3,"file":"routes-D5Ooidu3.js","names":["AuthedIndex","Index"],"sources":["../../../src/ui/routes/index.tsx"],"sourcesContent":["import { AuthedIndex as Index } from \"@lumeweb/portal-framework-auth\";\n\nexport default Index;\n"],"mappings":"wDAEA,IAAA,EAAeC"}
