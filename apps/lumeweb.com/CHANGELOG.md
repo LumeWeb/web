@@ -256,6 +256,19 @@
 * rework several sections on home page, some refactoring ([4935177](https://git.lumeweb.com/LumeWeb/lumeweb.com/commit/4935177908f9411de0999048367cc384592f198a))
 * sass support, mixins for fluid design, refactoring, work on components ([9701291](https://git.lumeweb.com/LumeWeb/lumeweb.com/commit/97012911aab8659d0ddb268a9bc54d72e1c37b6f))
 * svg icons, donation methods ([63e0c57](https://git.lumeweb.com/LumeWeb/lumeweb.com/commit/63e0c57b0329f76609f6d9a55a37585dfce7f45d))
+## 0.4.1 (2026-05-21)
+
+### Features
+
+#### Features
+
+- migrate to content-driven React architecture
+- add LLMs.txt, SEO integration, refactor navigation and fix issues
+- migrate to vite 8 with tunnel plugins and build tooling overhaul
+- typo
+- remove baseUrl from all tsconfigs
+- implement portal framework with module federation, Refine integration, and abuse management
+
 ## 0.4.0 (2026-01-14)
 
 ### Breaking Changes

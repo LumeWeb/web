@@ -1,3 +1,12 @@
+## 0.1.1 (2026-05-21)
+
+### Features
+
+#### Features
+
+- remove baseUrl from all tsconfigs
+- add React-to-Go Template DSL for email generation
+
 ## 0.1.0 (2026-01-14)
 
 ### Breaking Changes

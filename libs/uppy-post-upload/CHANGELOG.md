@@ -1,3 +1,13 @@
+## 0.1.1 (2026-05-21)
+
+### Features
+
+#### Features
+
+- migrate to vite 8 with tunnel plugins and build tooling overhaul
+- remove baseUrl from all tsconfigs
+- add new isomorphic Uppy upload plugin
+
 ## 0.1.0 (2026-01-14)
 
 ### Breaking Changes

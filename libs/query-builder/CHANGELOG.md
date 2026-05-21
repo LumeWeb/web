@@ -1,3 +1,14 @@
+## 0.1.1 (2026-05-21)
+
+### Features
+
+#### Features
+
+- remove baseUrl from all tsconfigs
+- add new query builder library for Refine integration
+- improve robustness and handle edge cases
+- update provider and tests for @refinedev/core v5 compatibility
+
 ## 0.1.0 (2026-01-14)
 
 ### Breaking Changes

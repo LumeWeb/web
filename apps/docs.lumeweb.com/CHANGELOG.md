@@ -1,5 +1,18 @@
 # @lumeweb/docs.lumeweb.com
 
+## 0.6.1 (2026-05-21)
+
+### Features
+
+#### Features
+
+- add docs.pinner.xyz documentation site
+- implement portal framework with module federation, Refine integration, and abuse management
+- use list not br tags
+- wrong editUrl
+- wrong editUrl, again
+- remove text from ai help
+
 ## 0.6.0 (2026-01-14)
 
 ### Breaking Changes
