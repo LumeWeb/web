@@ -286,11 +286,82 @@ class ChangesetGenerator {
     return packages;
   }
 
+  LOCKFILE_ONLY_PATTERNS = [
+    /^pnpm-lock\.yaml$/,
+    /^package-lock\.json$/,
+    /^yarn\.lock$/,
+  ];
+
+  async filterToChangedPackages(packageVersions) {
+    const filtered = {};
+
+    for (const [pkgPath, info] of Object.entries(packageVersions)) {
+      const pkgName = this.pathToPackageName(pkgPath);
+      if (!pkgName) continue;
+
+      const tag = await this.getLatestPackageTag(pkgName);
+
+      const diffArgs = ["diff", "--name-only"];
+      if (tag) {
+        diffArgs.push(`${tag}..HEAD`);
+      } else {
+        diffArgs.push("HEAD");
+      }
+      diffArgs.push("--", pkgPath);
+
+      const output = await this.git.raw(diffArgs);
+
+      const changedFiles = output
+        .trim()
+        .split("\n")
+        .filter((f) => f.trim());
+      const hasSourceChanges = changedFiles.some(
+        (f) => !this.LOCKFILE_ONLY_PATTERNS.some((p) => p.test(f.trim())),
+      );
+
+      if (hasSourceChanges) {
+        filtered[pkgPath] = info;
+      } else {
+        console.log(
+          `  Skipping ${pkgName}: only lockfile changes since ${tag || "beginning"}`,
+        );
+      }
+    }
+    return filtered;
+  }
+
+  async getLatestPackageTag(pkgName) {
+    try {
+      const tagPrefix = `${pkgName}/v`;
+      const output = await this.git.raw([
+        "tag",
+        "-l",
+        `${tagPrefix}*`,
+        "--sort=-creatordate",
+      ]);
+      const tags = output.trim().split("\n").filter(Boolean);
+      return tags[0] || null;
+    } catch {
+      return null;
+    }
+  }
+
+  pathToPackageName(pkgPath) {
+    for (const [name, p] of Object.entries(this.packageNameToPath || {})) {
+      if (p === pkgPath) return name;
+    }
+    return null;
+  }
+
   groupChangelogsByPackages(changelogMapping, packageVersions) {
+    const versionedPaths = new Set(Object.keys(packageVersions));
     const packageChangelogs = {};
 
     for (const [message, data] of Object.entries(changelogMapping)) {
       for (const packageName of data.packages) {
+        const pkgPath = this.packageNameToPath[packageName];
+        if (!pkgPath || !versionedPaths.has(pkgPath)) continue;
+
         if (!packageChangelogs[packageName]) {
           packageChangelogs[packageName] = [];
         }
@@ -400,6 +471,13 @@ class ChangesetGenerator {
       `Found ${Object.keys(packageVersions).length} packages in release output`,
     );
 
+    console.log("\nFiltering to packages with source changes...");
+    const filteredVersions =
+      await this.filterToChangedPackages(packageVersions);
+    console.log(
+      `Filtered to ${Object.keys(filteredVersions).length} packages with actual source changes`,
+    );
+
     const uniqueMessages = this.extractUniqueChangelogMessages(releaseOutput);
     console.log(`Extracted ${uniqueMessages.length} unique changelog messages`);
 
@@ -409,7 +487,7 @@ class ChangesetGenerator {
 
     const packageChangelogs = this.groupChangelogsByPackages(
       changelogMapping,
-      packageVersions,
+      filteredVersions,
     );
     console.log(
       "Packages with changelogs:",
