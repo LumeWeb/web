@@ -287,9 +287,9 @@ class ChangesetGenerator {
   }
 
   LOCKFILE_ONLY_PATTERNS = [
-    /^pnpm-lock\.yaml$/,
-    /^package-lock\.json$/,
-    /^yarn\.lock$/,
+    /pnpm-lock\.yaml$/,
+    /package-lock\.json$/,
+    /yarn\.lock$/,
   ];
 
   async filterToChangedPackages(packageVersions) {
@@ -301,13 +301,12 @@ class ChangesetGenerator {
 
       const tag = await this.getLatestPackageTag(pkgName);
 
-      const diffArgs = ["diff", "--name-only"];
-      if (tag) {
-        diffArgs.push(`${tag}..HEAD`);
-      } else {
-        diffArgs.push("HEAD");
+      if (!tag) {
+        filtered[pkgPath] = info;
+        continue;
       }
-      diffArgs.push("--", pkgPath);
+
+      const diffArgs = ["diff", "--name-only", `${tag}..HEAD`, "--", pkgPath];
 
       const output = await this.git.raw(diffArgs);
 
