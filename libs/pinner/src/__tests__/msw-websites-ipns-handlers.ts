@@ -498,6 +498,7 @@ export const validateWebsiteHandler = http.post(
       domain: website.domain,
       valid: true,
       message: "DNS validation successful",
+      reason: "validated",
     };
 
     return HttpResponse.json(validationResult, {

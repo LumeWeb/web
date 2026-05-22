@@ -30,7 +30,8 @@ export type {
 
 // API exports
 export { IpnsClient } from "./api/ipns";
-export { WebsitesClient } from "./api/websites";
+export { WebsitesClient, WebsiteValidationReason, getValidationReason, isValidationReason } from "./api/websites";
+export type { WebsiteValidationReasonValue } from "./api/websites";
 
 // Error exports
 export {

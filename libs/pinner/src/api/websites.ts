@@ -22,6 +22,31 @@ export const SSLStatus = {
 } as const;
 
 export type SSLStatusValue = (typeof SSLStatus)[keyof typeof SSLStatus];
+
+// Website validation reason constants
+export const WebsiteValidationReason = {
+  VALIDATED: "validated",
+  TOKEN_EXPIRED: "token_expired",
+  DNS_MISSING: "dns_missing",
+  DNS_MISMATCH: "dns_mismatch",
+  TOKEN_MISSING: "token_missing",
+} as const;
+
+export type WebsiteValidationReasonValue = (typeof WebsiteValidationReason)[keyof typeof WebsiteValidationReason];
+
+export function getValidationReason(response: WebsiteValidateResponse | null | undefined): WebsiteValidationReasonValue | "" {
+  if (!response) {
+    return "";
+  }
+  return (response.reason as WebsiteValidationReasonValue) ?? "";
+}
+
+export function isValidationReason(response: WebsiteValidateResponse | null | undefined, reason: WebsiteValidationReasonValue): boolean {
+  if (!response) {
+    return false;
+  }
+  return response.reason === reason;
+}
 import {
   ConfigurationError,
   AuthenticationError,
