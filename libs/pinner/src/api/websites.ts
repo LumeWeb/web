@@ -34,11 +34,17 @@ export const WebsiteValidationReason = {
 
 export type WebsiteValidationReasonValue = (typeof WebsiteValidationReason)[keyof typeof WebsiteValidationReason];
 
+const validationReasonValues = Object.values(WebsiteValidationReason) as readonly string[];
+
 export function getValidationReason(response: WebsiteValidateResponse | null | undefined): WebsiteValidationReasonValue | "" {
   if (!response) {
     return "";
   }
-  return (response.reason as WebsiteValidationReasonValue) ?? "";
+  const reason = response.reason;
+  if (typeof reason === "string" && validationReasonValues.includes(reason)) {
+    return reason as WebsiteValidationReasonValue;
+  }
+  return "";
 }
 
 export function isValidationReason(response: WebsiteValidateResponse | null | undefined, reason: WebsiteValidationReasonValue): boolean {
