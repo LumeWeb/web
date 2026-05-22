@@ -1,5 +1,17 @@
 # @lumeweb/portal-sdk
 
+## 0.1.2 (2026-05-22)
+
+### Features
+
+#### Features
+
+- add Websites and IPNS API support
+- migrate to vite 8 with tunnel plugins and build tooling overhaul
+- add gateway-agnostic billing plugin
+- fix YAML syntax errors in account swagger.yaml
+- remove baseUrl from all tsconfigs
+
 ## 0.1.1 (2026-05-21)
 
 ### Features
