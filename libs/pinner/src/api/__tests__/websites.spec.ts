@@ -1,7 +1,7 @@
 import { test as it } from "../../__tests__/int-test";
 import { describe, expect, vi, beforeEach } from "vitest";
 import { http, HttpResponse } from "msw";
-import { WebsitesClient } from "../websites";
+import { WebsitesClient, WebsiteValidationReason, getValidationReason, isValidationReason } from "../websites";
 import { SSLStatus } from "../websites";
 import type { PinnerConfig } from "@/config";
 import type {
@@ -289,8 +289,10 @@ describe("WebsitesClient", () => {
       expect(result).toHaveProperty("domain");
       expect(result).toHaveProperty("valid");
       expect(result).toHaveProperty("message");
+      expect(result).toHaveProperty("reason");
       expect(result.valid).toBe(true);
       expect(result.message).toBe("DNS validation successful");
+      expect(result.reason).toBe("validated");
     });
 
     it("should throw NotFoundError for non-existent website", async ({ worker }) => {
@@ -308,6 +310,44 @@ describe("WebsitesClient", () => {
       });
 
       await expect(client.validateWebsite(1)).rejects.toThrow(AuthenticationError);
+    });
+
+    it("should return reason field from validation response", async ({ worker }) => {
+      worker.use(...websitesHandlers);
+      const client = new WebsitesClient(mockConfig);
+
+      const result = await client.validateWebsite(1);
+
+      expect(result.reason).toBe(WebsiteValidationReason.VALIDATED);
+    });
+  });
+
+  describe("WebsiteValidationReason helpers", () => {
+    it("getValidationReason extracts reason from response", () => {
+      const response = { id: 1, domain: "example.com", valid: true, message: "ok", reason: "validated" } as WebsiteValidateResponse;
+      expect(getValidationReason(response)).toBe(WebsiteValidationReason.VALIDATED);
+    });
+
+    it("getValidationReason returns empty string for null", () => {
+      expect(getValidationReason(null)).toBe("");
+    });
+
+    it("getValidationReason returns empty string for undefined", () => {
+      expect(getValidationReason(undefined)).toBe("");
+    });
+
+    it("isValidationReason checks if response matches a reason", () => {
+      const response = { id: 1, domain: "example.com", valid: false, message: "missing", reason: "dns_missing" } as WebsiteValidateResponse;
+      expect(isValidationReason(response, WebsiteValidationReason.DNS_MISSING)).toBe(true);
+      expect(isValidationReason(response, WebsiteValidationReason.VALIDATED)).toBe(false);
+    });
+
+    it("isValidationReason returns false for null", () => {
+      expect(isValidationReason(null, WebsiteValidationReason.VALIDATED)).toBe(false);
+    });
+
+    it("isValidationReason returns false for undefined", () => {
+      expect(isValidationReason(undefined, WebsiteValidationReason.VALIDATED)).toBe(false);
     });
   });
 
