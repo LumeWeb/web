@@ -6,6 +6,7 @@ import type {
   IPNSKeyResponse,
   IPNSPublishRequest,
   IPNSPublishResponse,
+  IPNSRepublishResponse,
   IPNSResolveResponse,
 } from "./generated/schemas/index";
 import {
@@ -140,12 +141,11 @@ export class IpnsClient {
   }
 
   async republish(
-    name: string,
+    id: number,
     options?: IpnsClientOptions,
-  ): Promise<void> {
-    await this.request<void>("api/ipns/republish", {
+  ): Promise<IPNSRepublishResponse> {
+    return this.request<IPNSRepublishResponse>(`api/ipns/keys/${id}/republish`, {
       method: "POST",
-      body: JSON.stringify({ name }),
       signal: options?.signal,
     });
   }

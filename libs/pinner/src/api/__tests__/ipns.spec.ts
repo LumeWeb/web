@@ -246,11 +246,13 @@ describe("IpnsClient", () => {
   });
 
   describe("republish", () => {
-    it("should trigger IPNS republishing", async ({ worker }) => {
+    it("should republish an IPNS key by ID", async ({ worker }) => {
       worker.use(...ipnsHandlers);
       const client = new IpnsClient(mockConfig);
 
-      await expect(client.republish("k51qzi5uqu5dj14p8d8q8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e")).resolves.not.toThrow();
+      const result = await client.republish(1);
+      expect(result).toHaveProperty("count");
+      expect(result).toHaveProperty("message");
     });
 
     it("should handle authentication errors", async ({ worker }) => {
@@ -260,7 +262,7 @@ describe("IpnsClient", () => {
         endpoint: "https://test.pinner.xyz",
       });
 
-      await expect(client.republish("k51qzi5uqu5dj14p8d8q8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e")).rejects.toThrow(AuthenticationError);
+      await expect(client.republish(1)).rejects.toThrow(AuthenticationError);
     });
   });
 

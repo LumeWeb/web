@@ -268,6 +268,17 @@ components:
       - validity
       - published
       type: object
+    IPNSRepublishResponse:
+      additionalProperties: false
+      properties:
+        count:
+          type: integer
+        message:
+          type: string
+      required:
+      - count
+      - message
+      type: object
     IPNSResolveResponse:
       additionalProperties: false
       properties:
@@ -513,6 +524,8 @@ components:
     WebsiteItem:
       additionalProperties: false
       properties:
+        active_cid:
+          type: string
         created:
           format: date-time
           type: string
@@ -528,6 +541,10 @@ components:
           type: string
         id:
           type: integer
+        ipns_key_id:
+          type: integer
+        is_subdomain:
+          type: boolean
         last_checked_at:
           format: date-time
           type: string
@@ -555,6 +572,7 @@ components:
       - status
       - validation_token
       - dns_hosting_enabled
+      - is_subdomain
       - created
       - updated
       - expired
@@ -591,6 +609,8 @@ components:
     WebsiteResponse:
       additionalProperties: false
       properties:
+        active_cid:
+          type: string
         created:
           format: date-time
           type: string
@@ -606,6 +626,10 @@ components:
           type: string
         id:
           type: integer
+        ipns_key_id:
+          type: integer
+        is_subdomain:
+          type: boolean
         last_checked_at:
           format: date-time
           type: string
@@ -633,6 +657,7 @@ components:
       - status
       - validation_token
       - dns_hosting_enabled
+      - is_subdomain
       - created
       - updated
       - expired
@@ -2161,6 +2186,61 @@ paths:
       summary: Get IPNS key
       tags:
       - IPNS
+  /api/ipns/keys/{id}/republish:
+    post:
+      description: |-
+        Republishes an IPNS record for a specific key owned by the authenticated user.
+
+        Re-broadcasts the current IPNS record to the network. Useful for refreshing records that may have fallen out of the DHT.
+
+        Prerequisites: User must own the specified IPNS key.
+      parameters:
+      - description: IPNS key ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IPNSRepublishResponse'
+          description: Republish result
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      summary: Republish IPNS record
+      tags:
+      - IPNS
   /api/ipns/publish:
     post:
       description: |-
@@ -2214,56 +2294,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Internal server error
       summary: Publish to IPNS
-      tags:
-      - IPNS
-  /api/ipns/republish:
-    post:
-      description: |-
-        Triggers IPNS record republishing for all keys.
-
-        Forces all IPNS records to be republished to the network. Useful for ensuring content remains available and records are refreshed.
-
-        See also:.*
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Success
-        "202":
-          description: Republish triggered
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Bad request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Internal server error
-      summary: Trigger IPNS republish
       tags:
       - IPNS
   /api/ipns/resolve/{name}:

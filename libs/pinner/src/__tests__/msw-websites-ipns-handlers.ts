@@ -275,14 +275,17 @@ export const publishIPNSHandler = http.post(
 );
 
 export const republishIPNSHandler = http.post(
-  `${testConfig.apiUrl}/ipns/republish`,
+  `${testConfig.apiUrl}/ipns/keys/:id/republish`,
   async () => {
-    return new HttpResponse(null, {
-      status: 202,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
+    return HttpResponse.json(
+      { count: 1, message: "Republish triggered" },
+      {
+        status: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
       },
-    });
+    );
   },
 );
 
@@ -637,7 +640,7 @@ export const ipnsUnauthorizedPublishHandler = http.post(
 
 // Add POST handler for unauthorized republish
 export const ipnsUnauthorizedRepublishHandler = http.post(
-  `${testConfig.apiUrl}/ipns/republish`,
+  `${testConfig.apiUrl}/ipns/keys/:id/republish`,
   async () => {
     return HttpResponse.json(
       { error: "Unauthorized" },
