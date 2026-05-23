@@ -1,3 +1,17 @@
+## 0.1.1 (2026-05-23)
+
+### Features
+
+#### Features
+
+- migrate to vite 8 with tunnel plugins and build tooling overhaul
+- migrate advanced-rest to ky v1 API (prefixUrl -> prefix)
+
+### Fixes
+
+- remove CJS output and fix tsconfig paths
+- remove baseUrl from all tsconfigs
+
 ## 0.1.0 (2026-01-14)
 
 ### Breaking Changes
