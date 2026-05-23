@@ -17,8 +17,8 @@
       "require": "./dist/cjs/index.js"
     },
     "./mocks": {
-      "types": "./dist/esm/api/generated/index.msw.d.ts",
-      "import": "./dist/esm/api/generated/index.msw.js"
+      "types": "./dist/esm/api/mocks.d.ts",
+      "import": "./dist/esm/api/mocks.js"
     },
     "./adapters/pinata": {
       "types": "./dist/esm/adapters/pinata.d.ts",
