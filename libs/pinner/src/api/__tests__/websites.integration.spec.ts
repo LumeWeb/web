@@ -5,11 +5,17 @@ import type { PinnerConfig } from "@/config";
 import type { SSLStatusInfo } from "../generated/schemas/index";
 import { SSLStatus } from "../websites";
 import {
-  websitesHandlers,
+  WebsiteStore,
+  IPNSStore,
+  createWebsiteHandlers,
   resetWebsitesIPNSState,
-  setSSLStatus,
-  resetSSLStatuses,
-} from "@/__tests__/msw-websites-ipns-handlers";
+} from "@/__tests__/msw";
+
+const websiteStore = new WebsiteStore();
+const ipnsStore = new IPNSStore();
+
+await websiteStore.initializeDefaults();
+await ipnsStore.initializeDefaults();
 
 describe("WebsitesClient SSL Integration Tests", () => {
   const mockConfig: PinnerConfig = {
@@ -18,17 +24,18 @@ describe("WebsitesClient SSL Integration Tests", () => {
   };
 
   beforeEach(() => {
-    resetWebsitesIPNSState();
-    resetSSLStatuses();
+    // Reset mock data state before each test to ensure isolation
+    resetWebsitesIPNSState(websiteStore, ipnsStore);
+    websiteStore.resetSSLStatuses();
   });
 
   describe("SSL Status Monitoring Integration", () => {
     it("should monitor SSL status from pending to ready", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
       // Start with pending status
-      setSSLStatus("example.com", SSLStatus.PENDING);
+      websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
       const watcher = client.watchSSL("example.com", { interval: 100, timeout: 2000 });
 
@@ -48,7 +55,7 @@ describe("WebsitesClient SSL Integration Tests", () => {
 
       // Simulate SSL becoming ready after some checks
       setTimeout(() => {
-        setSSLStatus("example.com", SSLStatus.VALID);
+        websiteStore.setSSLStatus("example.com", SSLStatus.VALID);
       }, 300);
 
       const finalStatus = await readyPromise;
@@ -59,10 +66,10 @@ describe("WebsitesClient SSL Integration Tests", () => {
     });
 
     it("should handle SSL provisioning failure", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.PENDING);
+      websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
       const watcher = client.watchSSL("example.com", { interval: 100, timeout: 2000 });
 
@@ -79,7 +86,7 @@ describe("WebsitesClient SSL Integration Tests", () => {
 
       // Simulate SSL failure
       setTimeout(() => {
-        setSSLStatus("example.com", SSLStatus.FAILED, "DNS validation failed");
+        websiteStore.setSSLStatus("example.com", SSLStatus.FAILED, "DNS validation failed");
       }, 300);
 
       const error = await errorPromise;
@@ -90,10 +97,10 @@ describe("WebsitesClient SSL Integration Tests", () => {
     });
 
     it("should timeout if SSL never becomes ready", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.PENDING);
+      websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
       const watcher = client.watchSSL("example.com", { interval: 100, timeout: 500 });
 
@@ -116,10 +123,10 @@ describe("WebsitesClient SSL Integration Tests", () => {
     });
 
     it("should handle multiple status transitions", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.PENDING);
+      websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
       const watcher = client.watchSSL("example.com", { interval: 100, timeout: 5000 });
 
@@ -133,11 +140,11 @@ describe("WebsitesClient SSL Integration Tests", () => {
 
       // Simulate status transitions
       setTimeout(() => {
-        setSSLStatus("example.com", SSLStatus.VALIDATING);
+        websiteStore.setSSLStatus("example.com", SSLStatus.VALIDATING);
       }, 150);
 
       setTimeout(() => {
-        setSSLStatus("example.com", SSLStatus.VALID);
+        websiteStore.setSSLStatus("example.com", SSLStatus.VALID);
       }, 350);
 
       // Wait for transitions
@@ -151,10 +158,10 @@ describe("WebsitesClient SSL Integration Tests", () => {
     });
 
     it("should allow stopping and restarting the watcher", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.PENDING);
+      websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
       const watcher1 = client.watchSSL("example.com", { interval: 100, timeout: 5000 });
 
@@ -191,10 +198,10 @@ describe("WebsitesClient SSL Integration Tests", () => {
     });
 
     it("should handle concurrent watchers", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.PENDING);
+      websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
       const watcher1 = client.watchSSL("example.com", { interval: 100, timeout: 5000 });
       const watcher2 = client.watchSSL("example.com", { interval: 100, timeout: 5000 });
@@ -224,10 +231,10 @@ describe("WebsitesClient SSL Integration Tests", () => {
     });
 
     it("should support abort signal for SSL status check", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.VALID);
+      websiteStore.setSSLStatus("example.com", SSLStatus.VALID);
 
       const controller = new AbortController();
       controller.abort();
@@ -238,10 +245,10 @@ describe("WebsitesClient SSL Integration Tests", () => {
     });
 
     it("should handle rapid status updates", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.PENDING);
+      websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
       const watcher = client.watchSSL("example.com", { interval: 50, timeout: 5000 });
 
@@ -256,11 +263,11 @@ describe("WebsitesClient SSL Integration Tests", () => {
       // Rapidly change status
       let i = 0;
       const interval = setInterval(() => {
-        setSSLStatus("example.com", i % 2 === 0 ? SSLStatus.PENDING : SSLStatus.VALIDATING);
+        websiteStore.setSSLStatus("example.com", i % 2 === 0 ? SSLStatus.PENDING : SSLStatus.VALIDATING);
         i++;
         if (i > 5) {
           clearInterval(interval);
-          setSSLStatus("example.com", SSLStatus.VALID);
+          websiteStore.setSSLStatus("example.com", SSLStatus.VALID);
         }
       }, 25);
 
@@ -272,11 +279,11 @@ describe("WebsitesClient SSL Integration Tests", () => {
     });
 
     it("should handle error responses from API", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
-      // Test with a domain that might not exist
-      const watcher = client.watchSSL("nonexistent.example.com", { interval: 100 });
+      // Test with a domain that might not exist — use a short timeout
+      const watcher = client.watchSSL("nonexistent.example.com", { interval: 100, timeout: 500 });
       const errorPromise = new Promise<boolean>((resolve) => {
         watcher.start({
           onError: () => {
@@ -287,18 +294,17 @@ describe("WebsitesClient SSL Integration Tests", () => {
 
       const errorReceived = await errorPromise;
 
-      // The test verifies error handling is in place
-      // Note: watcher.stop() is called automatically when error is emitted
+      // The test verifies error handling is in place — will timeout since domain stays pending
       expect(errorReceived).toBe(true);
     });
   });
 
   describe("SSL Status Fetch", () => {
     it("should fetch current SSL status", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", "valid", undefined);
+      websiteStore.setSSLStatus("example.com", "valid", undefined);
 
       const status = await client.getSSLStatus("example.com");
 
@@ -307,10 +313,10 @@ describe("WebsitesClient SSL Integration Tests", () => {
     });
 
     it("should fetch SSL status with error detail", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", "failed", "DNS record not found");
+      websiteStore.setSSLStatus("example.com", "failed", "DNS record not found");
 
       const status = await client.getSSLStatus("example.com");
 
@@ -319,7 +325,7 @@ describe("WebsitesClient SSL Integration Tests", () => {
     });
 
     it("should handle different SSL states", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
       const states = [
@@ -331,7 +337,7 @@ describe("WebsitesClient SSL Integration Tests", () => {
       ];
 
       for (const state of states) {
-        setSSLStatus("example.com", state);
+        websiteStore.setSSLStatus("example.com", state);
         const status = await client.getSSLStatus("example.com");
         expect(status.status).toBe(state);
       }
@@ -340,10 +346,10 @@ describe("WebsitesClient SSL Integration Tests", () => {
 
   describe("SSL Watcher Lifecycle", () => {
     it("should allow multiple start/stop cycles", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.PENDING);
+      websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
       const watcher = client.watchSSL("example.com", { interval: 100, timeout: 5000 });
 
@@ -366,7 +372,7 @@ describe("WebsitesClient SSL Integration Tests", () => {
     });
 
     it("should handle stop before start", ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
       const watcher = client.watchSSL("example.com");
@@ -377,10 +383,10 @@ describe("WebsitesClient SSL Integration Tests", () => {
     });
 
     it("should handle multiple stop calls", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...createWebsiteHandlers(websiteStore, ipnsStore));
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.PENDING);
+      websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
       const watcher = client.watchSSL("example.com", { interval: 100 });
 

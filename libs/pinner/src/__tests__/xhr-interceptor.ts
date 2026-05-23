@@ -12,14 +12,13 @@
 import type { RequestHandler } from "msw";
 import { getResponse } from "msw";
 import { XMLHttpRequestInterceptor } from "@mswjs/interceptors/XMLHttpRequest";
-import { allHandlers } from "./msw-handlers";
 
 // Create a single global interceptor instance
 // XMLHttpRequest can only be patched once per browser context
 const interceptor = new XMLHttpRequestInterceptor();
 
 // Store the current handlers (can be updated dynamically)
-let currentHandlers: RequestHandler[] = allHandlers as RequestHandler[];
+let currentHandlers: RequestHandler[] = [];
 
 interceptor.on("request", async ({ request, controller }) => {
   // Resolve the request against our MSW handlers

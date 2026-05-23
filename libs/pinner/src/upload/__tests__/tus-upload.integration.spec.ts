@@ -1,7 +1,6 @@
 import { test as it } from "./int-test";
 import { describe, expect, vi } from "vitest";
 import { http, HttpResponse } from "msw";
-import { tusUploadHandlers } from "./msw-handlers";
 import {
   createMockConfig,
   createTestUploadFile,
@@ -11,13 +10,13 @@ import {
   assertCallbackCalled,
   assertUploadOperationStructure,
 } from "./test-assertions";
+import { testConfig } from "@/__tests__/setup";
 
 describe("TUSUploadHandler Integration", () => {
   describe("upload method integration", () => {
     it("should successfully upload a file via TUS protocol", async ({
       worker,
     }) => {
-      worker.use(...tusUploadHandlers);
       const mockConfig = createMockConfig();
       const TUSUploadHandler = await importTUSUploadHandler();
       const handler = new TUSUploadHandler(mockConfig);
@@ -34,7 +33,7 @@ describe("TUSUploadHandler Integration", () => {
 
     it("should handle TUS upload error", async ({ worker }) => {
       worker.use(
-        http.post("https://api.test.com/api/upload/tus", () => {
+        http.post(`${testConfig.apiUrl}/upload/tus`, () => {
           return new HttpResponse(null, { status: 500 });
         }),
       );
@@ -56,7 +55,6 @@ describe("TUSUploadHandler Integration", () => {
     it("should call onProgress callback during TUS upload", async ({
       worker,
     }) => {
-      worker.use(...tusUploadHandlers);
       const mockConfig = createMockConfig();
       const TUSUploadHandler = await importTUSUploadHandler();
       const handler = new TUSUploadHandler(mockConfig);
@@ -75,7 +73,6 @@ describe("TUSUploadHandler Integration", () => {
     it("should call onComplete callback on successful TUS upload", async ({
       worker,
     }) => {
-      worker.use(...tusUploadHandlers);
       const mockConfig = createMockConfig();
       const TUSUploadHandler = await importTUSUploadHandler();
       const handler = new TUSUploadHandler(mockConfig);

@@ -75,7 +75,7 @@ export function createMockConfig(
 ): ConfigFixture {
   return {
     jwt: "test-jwt-token",
-    endpoint: "https://api.test.com",
+    endpoint: "https://test.pinner.xyz",
     gateway: "https://gateway.test.com",
     ...overrides,
   };

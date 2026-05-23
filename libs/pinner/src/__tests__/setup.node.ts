@@ -3,9 +3,34 @@
 
 import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 import { setupServer } from "msw/node";
-import { allHandlers, resetRequestCounter } from "./msw-handlers";
+import {
+  PinStore,
+  createPinHandlers,
+  TusStore,
+  OperationStore,
+  createUploadHandlers,
+  WebsiteStore,
+  IPNSStore,
+  createWebsiteHandlers,
+} from "./msw";
 import { setupCarPreprocessor } from "./setup";
 import { destroyCarPreprocessor } from "@/upload/car";
+
+const pinStore = new PinStore();
+const tusStore = new TusStore();
+const operationStore = new OperationStore();
+const websiteStore = new WebsiteStore();
+const ipnsStore = new IPNSStore();
+
+await pinStore.initializeDefaults();
+await websiteStore.initializeDefaults();
+await ipnsStore.initializeDefaults();
+
+const allHandlers = [
+  ...createPinHandlers(pinStore),
+  ...createUploadHandlers(tusStore, operationStore),
+  ...createWebsiteHandlers(websiteStore, ipnsStore),
+];
 
 // Setup MSW server for Node.js environment
 export const server = setupServer(...allHandlers);
@@ -27,7 +52,6 @@ afterAll(() => {
 
 // Reset handlers and clean up CAR preprocessor after each test for test isolation
 afterEach(async () => {
-  server.resetHandlers();
-  resetRequestCounter();
+  server.resetHandlers(...allHandlers);
   await destroyCarPreprocessor();
 });
