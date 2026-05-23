@@ -1,10 +1,13 @@
 ---
-@lumeweb/advanced-rest-provider: minor
+@lumeweb/advanced-rest: minor
 ---
 
 ## Features
 
 - migrate to vite 8 with tunnel plugins and build tooling overhaul
 - migrate advanced-rest to ky v1 API (prefixUrl -> prefix)
+
+## Fixes
+
 - remove CJS output and fix tsconfig paths
 - remove baseUrl from all tsconfigs

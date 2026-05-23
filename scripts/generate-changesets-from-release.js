@@ -46,9 +46,7 @@ class ChangesetGenerator {
     this.dryRun = options.dryRun || false;
     this.git = simpleGit(this.packagesDir);
 
-    this.messageQueue = new PQueue({ concurrency: 10 });
-    this.fileQueue = new PQueue({ concurrency: 20 });
-    this.packageLookupQueue = new PQueue({ concurrency: 50 });
+    this.validationQueue = new PQueue({ concurrency: 10 });
     this.changesetQueue = new PQueue({ concurrency: 5 });
   }
 
@@ -116,149 +114,144 @@ class ChangesetGenerator {
     }
   }
 
-  extractUniqueChangelogMessages(content) {
-    const messages = new Set();
+  /**
+   * Parse knope dry-run output, extracting changelog messages grouped by
+   * the CHANGELOG.md path header knope emits. Returns a map of
+   * package path → [{message, type}] preserving knope's own per-package
+   * grouping instead of flattening into a global set.
+   */
+  extractPerPackageChangelogMessages(content) {
+    const result = {};
     const lines = content.split("\n");
-    let inChangelog = false;
+    let currentPkgPath = null;
+    let currentType = null;
 
     for (const line of lines) {
-      if (line.match(/CHANGELOG\.md:/)) {
-        inChangelog = true;
+      const changelogMatch = line.match(
+        /Would add the following to (.+)\/CHANGELOG\.md:/,
+      );
+      if (changelogMatch) {
+        currentPkgPath = changelogMatch[1];
+        currentType = null;
         continue;
       }
 
-      if ((line.startsWith("Would ") || line.startsWith("--")) && inChangelog) {
-        inChangelog = false;
+      // Terminus line ends the current changelog section
+      if (
+        currentPkgPath &&
+        (line.startsWith("Would ") || line.startsWith("--"))
+      ) {
+        currentPkgPath = null;
+        currentType = null;
         continue;
       }
 
-      if (inChangelog && line.startsWith("- ") && line.trim() !== "- ") {
+      if (!currentPkgPath) continue;
+
+      // Section headers like "### Features", "### Fixes", "### Breaking Changes"
+      const sectionMatch = line.match(/^###\s+(.+)$/);
+      if (sectionMatch) {
+        const section = sectionMatch[1].toLowerCase();
+        if (section.includes("breaking")) currentType = "breaking changes";
+        else if (section.includes("fix")) currentType = "fixes";
+        else if (section.includes("feature")) currentType = "features";
+        continue;
+      }
+
+      // Sub-headers like "#### Features" — skip but don't reset type
+      if (line.match(/^####\s+/)) continue;
+
+      // Changelog entry lines
+      if (line.startsWith("- ") && line.trim() !== "- ") {
         const message = line.substring(2).trim();
-        if (message) messages.add(message);
-      }
-    }
-    return Array.from(messages);
-  }
-
-  async findCommitsForMessage(message) {
-    const output = await this.git.raw([
-      "log",
-      "--all",
-      "--oneline",
-      `--grep=${message}`,
-    ]);
-    const lines = output.trim().split("\n");
-    const commits = [];
-    for (const line of lines) {
-      const match = line.match(/^([a-f0-9]+)\s+/);
-      if (match) commits.push(match[1]);
-    }
-    return commits;
-  }
-
-  async getChangedFilesForCommit(commit) {
-    try {
-      const output = await this.git.show([commit, "--name-only", "--pretty="]);
-      return output
-        .trim()
-        .split("\n")
-        .filter((f) => f.trim());
-    } catch (error) {
-      return [];
-    }
-  }
-
-  async findPackageForFileAtCommit(file, commit) {
-    try {
-      const parts = file.split(path.sep);
-      for (let i = parts.length - 1; i >= 0; i--) {
-        const possiblePath = parts.slice(0, i + 1).join(path.sep);
-        const pkgJsonPath = path.join(possiblePath, "package.json");
-
-        try {
-          const output = await this.git.show([`${commit}:${pkgJsonPath}`]);
-          const packageJson = JSON.parse(output);
-          if (packageJson.name) {
-            if (!this.packageNameToPath[packageJson.name]) {
-              this.packageNameToPath[packageJson.name] = possiblePath;
-              console.log(
-                `    Added package from git history: ${packageJson.name} -> ${possiblePath}`,
-              );
-            }
-            return packageJson.name;
-          }
-        } catch (e) {}
-      }
-      return null;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  async findPackagesForFiles(fileData) {
-    const packages = new Set();
-    const tasks = fileData.map(({ file, commit }) =>
-      this.packageLookupQueue.add(async () => {
-        const packageName = await this.findPackageForFileAtCommit(file, commit);
-        if (packageName) {
-          packages.add(packageName);
+        if (message) {
+          if (!result[currentPkgPath]) result[currentPkgPath] = [];
+          result[currentPkgPath].push({
+            message,
+            type: currentType || "features",
+          });
         }
-      }),
-    );
-    await Promise.all(tasks);
-    return Array.from(packages);
-  }
-
-  async processSingleMessage(message) {
-    console.log(`  Finding packages for: "${message.substring(0, 60)}..."`);
-
-    const commits = await this.findCommitsForMessage(message);
-    if (commits.length === 0) {
-      console.log(`    No commits found for message`);
-      return { packages: [], type: "features" };
-    }
-
-    const allFiles = [];
-    const fileTasks = commits.map((commit) =>
-      this.fileQueue.add(async () => {
-        const files = await this.getChangedFilesForCommit(commit);
-        return files.map((file) => ({ file, commit }));
-      }),
-    );
-    const allFileResults = await Promise.all(fileTasks);
-    allFiles.push(...allFileResults.flat());
-
-    const packages = await this.findPackagesForFiles(allFiles);
-
-    if (packages.length === 0) {
-      console.log(`    No packages found for ${allFiles.length} changed files`);
-      return { packages: [], type: "features" };
-    }
-
-    console.log(
-      `    Found ${packages.length} package(s): ${packages.join(", ")}`,
-    );
-    return { packages, type: "features" };
-  }
-
-  async buildChangelogMessageMapping(messages) {
-    const mapping = {};
-    const seenMessages = new Set();
-
-    const filteredMessages = messages.filter((msg) => !seenMessages.has(msg));
-    const tasks = filteredMessages.map((message) =>
-      this.messageQueue.add(() => this.processSingleMessage(message)),
-    );
-    const results = await Promise.all(tasks);
-
-    filteredMessages.forEach((message, i) => {
-      const result = results[i];
-      if (result) {
-        mapping[message] = result;
-        seenMessages.add(message);
       }
-    });
-    return mapping;
+    }
+    return result;
+  }
+
+  /**
+   * Validate that a changelog message actually belongs to a package by
+   * checking if any commit matching the message touched files in the
+   * package's directory since its last release tag.
+   * This corrects for knope's over-broad changelog assignment (upstream bug
+   * where ALL conventional commits appear in EVERY package's changelog).
+   */
+  async validateMessageBelongsToPackage(message, pkgPath, tag) {
+    const args = ["log", "--oneline", `--grep=${message}`];
+    if (tag) {
+      args.push(`${tag}..HEAD`);
+    }
+    args.push("--", pkgPath);
+
+    try {
+      const output = await this.git.raw(args);
+      const commits = output.trim().split("\n").filter(Boolean);
+      return commits.length > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Build the final per-package changelog data by:
+   * 1. Using knope's per-package grouping from CHANGELOG.md headers
+   * 2. Validating each message actually belongs to the package
+   *    (scoped git grep since last tag, constrained to package dir)
+   * 3. Filtering to only packages in filteredVersions
+   */
+  async buildPackageChangelogs(perPackageMessages, filteredVersions, tagCache) {
+    const versionedPaths = new Set(Object.keys(filteredVersions));
+    const packageChangelogs = {};
+
+    const tasks = [];
+    for (const [pkgPath, entries] of Object.entries(perPackageMessages)) {
+      if (!versionedPaths.has(pkgPath)) continue;
+
+      const pkgName = this.pathToPackageName(pkgPath);
+      if (!pkgName) continue;
+
+      const tag = tagCache.get(pkgPath) || null;
+
+      const validationTasks = entries.map((entry) =>
+        this.validationQueue.add(async () => ({
+          ...entry,
+          valid: await this.validateMessageBelongsToPackage(
+            entry.message,
+            pkgPath,
+            tag,
+          ),
+        })),
+      );
+
+      tasks.push(
+        Promise.all(validationTasks).then((validated) => {
+          const validEntries = validated.filter((v) => v.valid);
+          if (validEntries.length > 0) {
+            packageChangelogs[pkgName] = {
+              version: filteredVersions[pkgPath]?.version || "0.0.0",
+              changelog: validEntries.map((v) => ({
+                type: v.type,
+                description: v.message,
+              })),
+            };
+          } else {
+            console.log(
+              `  No validated messages for ${pkgName}, skipping`,
+            );
+          }
+        }),
+      );
+    }
+
+    await Promise.all(tasks);
+    return packageChangelogs;
   }
 
   determineChangeType(version, changelog) {
@@ -352,40 +345,6 @@ class ChangesetGenerator {
     return null;
   }
 
-  groupChangelogsByPackages(changelogMapping, packageVersions) {
-    const versionedPaths = new Set(Object.keys(packageVersions));
-    const packageChangelogs = {};
-
-    for (const [message, data] of Object.entries(changelogMapping)) {
-      for (const packageName of data.packages) {
-        const pkgPath = this.packageNameToPath[packageName];
-        if (!pkgPath || !versionedPaths.has(pkgPath)) continue;
-
-        if (!packageChangelogs[packageName]) {
-          packageChangelogs[packageName] = [];
-        }
-        packageChangelogs[packageName].push({
-          type: data.type,
-          description: message,
-        });
-      }
-    }
-
-    const result = {};
-    for (const [pkgName, changelogs] of Object.entries(packageChangelogs)) {
-      const pkgPath = this.packageNameToPath[pkgName];
-      const versionInfo = pkgPath ? packageVersions[pkgPath] : null;
-
-      if (changelogs.length > 0) {
-        result[pkgName] = {
-          version: versionInfo?.version || "0.0.0",
-          changelog: changelogs,
-        };
-      }
-    }
-    return result;
-  }
-
   async createChangesetFile(packages, changelogItems) {
     const grouped = {};
     for (const item of changelogItems) {
@@ -477,19 +436,33 @@ class ChangesetGenerator {
       `Filtered to ${Object.keys(filteredVersions).length} packages with actual source changes`,
     );
 
-    const uniqueMessages = this.extractUniqueChangelogMessages(releaseOutput);
-    console.log(`Extracted ${uniqueMessages.length} unique changelog messages`);
-
-    console.log("\nBuilding changelog message to packages mapping...");
-    const changelogMapping =
-      await this.buildChangelogMessageMapping(uniqueMessages);
-
-    const packageChangelogs = this.groupChangelogsByPackages(
-      changelogMapping,
-      filteredVersions,
+    const perPackageMessages =
+      this.extractPerPackageChangelogMessages(releaseOutput);
+    const totalMessages = Object.values(perPackageMessages).reduce(
+      (sum, entries) => sum + entries.length,
+      0,
     );
     console.log(
-      "Packages with changelogs:",
+      `Extracted changelog messages for ${Object.keys(perPackageMessages).length} packages (${totalMessages} total entries)`,
+    );
+
+    const tagCache = new Map();
+    for (const pkgPath of Object.keys(filteredVersions)) {
+      const pkgName = this.pathToPackageName(pkgPath);
+      if (pkgName) {
+        const tag = await this.getLatestPackageTag(pkgName);
+        tagCache.set(pkgPath, tag);
+      }
+    }
+
+    console.log("\nValidating changelog messages against package scopes...");
+    const packageChangelogs = await this.buildPackageChangelogs(
+      perPackageMessages,
+      filteredVersions,
+      tagCache,
+    );
+    console.log(
+      "Packages with validated changelogs:",
       Object.keys(packageChangelogs).length,
     );
 
