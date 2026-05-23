@@ -1,3 +1,11 @@
+## 0.1.7 (2026-05-23)
+
+### Features
+
+#### Features
+
+- export per-endpoint mock handlers from ./mocks
+
 ## 0.1.6 (2026-05-23)
 
 ### Fixes
