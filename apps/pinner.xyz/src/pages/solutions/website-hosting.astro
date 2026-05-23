@@ -1,0 +1,110 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+import AboutSection from '@/components/AboutSection';
+import CallToAction from '@/components/CallToAction';
+import FAQ from '@/components/FAQ';
+import BrandLogos from '@/components/BrandLogos';
+import logos from '@/data/brand-logos';
+
+import HowItWorksImage from "@/assets/how-it-works-1.png";
+import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
+import StorageImage from "@/assets/how-it-works-2.png";
+import StorageMobile from "@/assets/how-it-works-mobile-2.png";
+import StaticSitesImage from "@/assets/solutions-website-static-sites.jpg";
+
+const faqs = [
+  {
+    question: "What kinds of sites can I host?",
+    answer: "Any static site — if your build produces HTML, CSS, and JavaScript files, it works. Hugo, Astro, Next.js static export, Gatsby, 11ty, Jekyll, and more. Dynamic server-side rendering is not supported."
+  },
+  {
+    question: "How is this different from Netlify or Vercel?",
+    answer: "Netlify and Vercel are excellent platforms with built-in CI/CD, serverless functions, and preview deployments. Pinner focuses on one thing: hosting your built static files on a decentralized network with content addresses. No vendor lock-in on the addressing layer — your content address is a verifiable hash of your files, not a proprietary URL."
+  },
+  {
+    question: "What about custom domains?",
+    answer: "DNS-linked domains work alongside your IPFS content address. You can point a custom domain at your pinned content so visitors use a familiar URL."
+  },
+  {
+    question: "Is my site always online?",
+    answer: "Your site stays online as long as it's pinned and distributed across the network. If individual hosts go down, your content remains available from other providers — hosts only get paid when they prove your data is there."
+  },
+  {
+    question: "Can I update my site?",
+    answer: "Yes. Update your files and pin the new version. You'll get a new content address for the updated content. If you use a custom domain, point it at the new address."
+  },
+  {
+    question: "How does pricing work?",
+    answer: "Pay for storage and bandwidth — no hidden fees, no API call charges. We're onboarding a small group of founding users for a 6-week trial. Contact us to get started."
+  }
+];
+---
+
+<Layout title="Static Website Hosting on IPFS — No Lock-In" description="Host static websites on IPFS with a permanent, verifiable address. No vendor lock-in, no walled gardens. Works with Hugo, Astro, Next.js, and more.">
+  <PageHeader
+    title="Static site hosting on the decentralized web"
+    mobileTitle="Website Hosting"
+    description="Host static websites directly from IPFS. Your site gets a permanent, verifiable address. No vendor lock-in, no walled gardens."
+    btnText="Start Pinning →"
+    url="https://account.pinner.xyz"
+    client:load
+  />
+
+  <AboutSection
+    subtitle="IPFS Website Hosting"
+    title="Your site, on a permanent address"
+    description="Upload your static site and pin it to IPFS. Your site gets a content address — a unique link that points to a specific version of your content, verified by its hash. Change the site, get a new address. Don't change it, the same link works forever. No DNS propagation delays, no CDN configuration, no walled garden."
+    theme="white"
+    imageUrl={HowItWorksImage}
+    imgageMobileUrl={HowItWorksMobile}
+    client:load
+  />
+
+  <AboutSection
+    subtitle="Censorship Resistance"
+    title="No single point of control"
+    description="Your site's content is distributed across independent storage providers. If one host goes down, your site stays up — hosts only get paid when they prove they're storing your data. No hosting provider can arbitrarily take your site offline. Pay with crypto or card."
+    theme="gray"
+    imagePosition="right"
+    imageUrl={StorageImage}
+    imgageMobileUrl={StorageMobile}
+    client:load
+  />
+
+  <AboutSection
+    subtitle="Static Sites"
+    title="Works with the frameworks you use"
+    description="If your site builds to static files, it works with IPFS hosting. That includes Hugo, Astro, Next.js static export, Gatsby, 11ty, Jekyll, and any other static site generator. Point your build output at Pinner, pin it, and your site is live on the decentralized web with a content address."
+    theme="white"
+    imageUrl={StaticSitesImage}
+    client:load
+  />
+
+  <section class="py-[60px] md:py-[120px] bg-white">
+    <div class="xl:container px-6">
+      <h2 class="text-[24px] sm:text-[28px] md:text-[31px] font-medium text-content-text text-center mb-10 md:mb-14">Frequently Asked Questions</h2>
+      <FAQ faqs={faqs} client:load />
+    </div>
+  </section>
+
+  <section class="py-[60px] md:py-[120px] bg-content-section-gray">
+    <div class="xl:container px-6 text-center">
+      <h2 class="text-[24px] sm:text-[28px] md:text-[31px] font-medium text-content-text mb-10 md:mb-14">Related Solutions</h2>
+      <div class="flex flex-col sm:flex-row justify-center gap-6">
+        <a href="/solutions/ipfs-pinning" class="inline-block bg-white rounded-lg px-8 py-6 text-content-text hover:shadow-lg transition-shadow max-w-[320px] text-left">
+          <span class="block text-lg font-medium mb-1">IPFS Pinning</span>
+          <span class="block text-sm text-content-text-muted">Pin files to the decentralized web with permanent links</span>
+        </a>
+        <a href="/solutions/pinata-alternative" class="inline-block bg-white rounded-lg px-8 py-6 text-content-text hover:shadow-lg transition-shadow max-w-[320px] text-left">
+          <span class="block text-lg font-medium mb-1">Pinata Alternative</span>
+          <span class="block text-sm text-content-text-muted">Switching from Pinata? See how Pinner compares</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />
+
+  <CallToAction client:load />
+</Layout>

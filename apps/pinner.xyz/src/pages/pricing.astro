@@ -1,0 +1,116 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import PageHeader from "@/components/PageHeader";
+import BrandLogos from "@/components/BrandLogos";
+import PricingPlans from "@/components/pricing";
+import SectionPricing from "@/components/layout/SectionPricing";
+import DiscountStairsBanner from "@/components/DiscountStairsBanner";
+import FAQ from "@/components/FAQ";
+import NewsletterSignup from "@/components/NewsletterSignup";
+
+import logos from "@/data/brand-logos";
+
+const pricingFaqs = [
+  {
+    group: "Getting Started",
+    items: [
+      {
+        question: "Is there a free tier?",
+        answer: "We're onboarding a small group of founding users for a 6-week trial — IPFS pinning at no cost. Help shape the service and get direct access to the team.",
+      },
+      {
+        question: "Do you support crypto payments?",
+        answer: "Yes — crypto and credit card. No identity verification required for crypto payments.",
+      },
+    ],
+  },
+  {
+    group: "Billing & Plans",
+    items: [
+      {
+        question: "What am I paying for?",
+        answer: "Hosting — your files stay pinned and accessible on IPFS. For private storage, the subscription manages your storage limit, encryption, and distribution across the network.",
+      },
+      {
+        question: "Can I switch plans?",
+        answer: "Yes, upgrade or downgrade anytime. Changes take effect on your next billing cycle.",
+      },
+      {
+        question: "What happens if I go over quota?",
+        answer: "You'll be notified before hitting your limit. You can upgrade your plan at any time, or we can work out a custom arrangement.",
+      },
+      {
+        question: "What's the refund policy?",
+        answer: "We're a small team that stands behind our service. If something isn't right, reach out and we'll make it right.",
+      },
+    ],
+  },
+  {
+    group: "Advanced",
+    items: [
+      {
+        question: "What about S3 private storage?",
+        answer: "Private storage with zero-knowledge encryption is available for dedicated server deployments. A 1-click setup is coming soon — subscribe below to get notified.",
+      },
+    ],
+  },
+];
+---
+
+<Layout title="Simple Pricing for IPFS Pinning & Private Storage" ogImage="/images/og-pricing.png" description="Simple, transparent pricing for IPFS pinning and private storage. Pay for storage and bandwidth — no hidden fees. Annual plans save 2 months.">
+  <PageHeader
+    title="Simple pricing. No surprises."
+    description="<a href='/solutions/ipfs-pinning' class='underline hover:text-white transition-colors'>IPFS pinning</a> and hosting plans. Private storage available for dedicated server deployments."
+    mobileTitle="Storage Options"
+    client:load
+  />
+
+  <SectionPricing>
+    <div class="container">
+      <DiscountStairsBanner className="mb-8 md:mb-12" client:load />
+      <PricingPlans variant="light" client:load />
+    </div>
+  </SectionPricing>
+
+  <section class="bg-white border-t border-content-divider/50 py-12 md:py-16">
+    <div class="xl:container px-6 flex flex-col items-center">
+      <NewsletterSignup
+        source="pricing_page"
+        label="Building on IPFS? Get notified about new features and pricing changes."
+        buttonLabel="Notify me"
+        successMessage="You're on the list — we'll email you when something changes."
+        theme="light"
+        rounded
+        client:load
+      />
+    </div>
+  </section>
+
+  <section class="bg-white py-[60px] md:py-[120px]">
+    <div class="xl:container px-6">
+      <h2 class="text-content-text mb-4 text-center text-[25px] leading-tight font-medium md:text-[32px] lg:mb-[26px] lg:text-[40px]">
+        Frequently Asked Questions
+      </h2>
+      <p class="text-content-text-muted mx-auto mb-12 text-center text-lg leading-relaxed md:text-xl">
+        Everything you need to know about pricing and billing.
+      </p>
+      <div class="mx-auto max-w-[800px]">
+        {pricingFaqs.map((group) => (
+          <div>
+            <h3 class="text-content-text-muted text-xs font-semibold uppercase tracking-wider mt-6 mb-3 first:mt-0">
+              {group.group}
+            </h3>
+            <FAQ faqs={group.items} client:load />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <BrandLogos
+    logos={logos}
+    logoType="dark"
+    title="Built On"
+    client:load
+  />
+</Layout>

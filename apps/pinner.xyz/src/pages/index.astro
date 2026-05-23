@@ -1,0 +1,59 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Hero from "@/components/Home/Hero";
+import BrandLogos from "@/components/BrandLogos";
+import ProblemAgitation from "@/components/Home/ProblemAgitation";
+import TrustSection from "@/components/Home/TrustSection";
+import Account from "@/components/Home/Account";
+import DifferentiatorsSection from "@/components/DifferentiatorsSection";
+import FAQ from "@/components/Home/FAQ";
+import DiscountStairsBanner from "@/components/DiscountStairsBanner";
+import PaymentMethodsBar from "@/components/PaymentMethodsBar";
+import PricingTable from "@/components/Home/PricingTable";
+import CallToAction from "@/components/CallToAction";
+import NewsletterSignup from "@/components/NewsletterSignup";
+import logos from "@/data/brand-logos";
+---
+
+<Layout title="Zero-Knowledge IPFS Pinning & Private Storage" variant="home" showNewsletterFooter={false}>
+  <Hero client:load />
+
+  <BrandLogos
+    logos={logos}
+    logoType="dark"
+    title="Built On"
+    variant="dark"
+    client:load
+  />
+
+  <ProblemAgitation client:load />
+
+  <TrustSection client:load variant="dark" />
+
+  <Account client:load variant="dark" />
+
+  <DifferentiatorsSection client:load variant="dark" />
+
+  <FAQ client:load />
+
+  <DiscountStairsBanner variant="home" client:load />
+
+  <PaymentMethodsBar client:load variant="dark" />
+
+  <PricingTable client:load />
+
+  <section class="py-12 md:py-16 border-t border-border-dark">
+    <div class="xl:container px-6 flex flex-col items-center">
+      <NewsletterSignup
+        source="pricing_home"
+        label="Building on IPFS? Get notified about new features and pricing changes."
+        buttonLabel="Notify me"
+        successMessage="You're on the list — we'll email you when something changes."
+        theme="dark"
+        client:load
+      />
+    </div>
+  </section>
+
+  <CallToAction client:load variant="dark" />
+</Layout>

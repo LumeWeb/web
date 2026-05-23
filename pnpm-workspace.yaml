@@ -86,6 +86,11 @@ catalogs:
     zod: ^4.4.3
   websites:
     tailwindcss: ^4.1.18
+    '@tailwindcss/typography': ^0.5.19
+    '@astrojs/sitemap': ^3.7.2
+    '@fontsource/poppins': ^5.2.7
+    astro-llms-md: ^2.0.0
+    astro-md-alternate: ^0.1.0
 
 gitChecks: false
 

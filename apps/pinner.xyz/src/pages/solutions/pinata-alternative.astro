@@ -1,0 +1,112 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+import AboutSection from '@/components/AboutSection';
+import CallToAction from '@/components/CallToAction';
+import FAQ from '@/components/FAQ';
+import BrandLogos from '@/components/BrandLogos';
+import logos from '@/data/brand-logos';
+
+import AboutWhatIsPinner from "@/assets/about-what-is-pinner.jpg";
+import PinataDifferImage from "@/assets/solutions-pinata-differ.jpg";
+import PinataMigrateImage from "@/assets/solutions-pinata-migrate.jpg";
+
+const faqs = [
+  {
+    question: "Do my IPFS content addresses change when I switch?",
+    answer: "No. Content addresses are content hashes — they're determined by your file's content, not by the provider. The same file pinned on Pinner has the same CID as it did on Pinata."
+  },
+  {
+    question: "What does Pinner have that Pinata doesn't?",
+    answer: "Crypto payments with no identity verification, website hosting from the same pinned content, and storage on the Sia decentralized network. Pinner is also FOSS — fully open source."
+  },
+  {
+    question: "What does Pinata have that Pinner doesn't?",
+    answer: "Pinata has dedicated IPFS gateway infrastructure and a mature developer API with more tooling options. If you rely heavily on Pinata's gateway performance or specific API features, evaluate whether Pinner covers your use case before switching."
+  },
+  {
+    question: "Is Pinner cheaper than Pinata?",
+    answer: "Pricing depends on your use case and storage needs. Pinner is onboarding a small group of founding users for a 6-week trial — IPFS pinning at no cost. Pay for storage and bandwidth — no hidden fees, no API call charges."
+  },
+  {
+    question: "Can I use both Pinata and Pinner?",
+    answer: "Yes. Since IPFS content addresses are universal, you can pin to both providers simultaneously. Some users keep Pinata for specific gateway needs and use Pinner for website hosting or crypto payments."
+  },
+  {
+    question: "How does the decentralized network differ from Pinata's infrastructure?",
+    answer: "Pinata runs IPFS nodes on centralized infrastructure they manage. Pinner pins your content on the Sia network, where independent storage providers host your data. Providers only get paid when they prove they're storing your data — built-in accountability without depending on one company's servers."
+  },
+  {
+    question: "I have thousands of pins. Can you handle migration?",
+    answer: "Reach out. We'll work with you on the transition — whether that's a few pins or a large collection. Content addresses stay the same across providers, so it's primarily a matter of re-pinning your CIDs."
+  }
+];
+---
+
+<Layout title="Pinata Alternative with Crypto Payments & Migration" description="Switching from Pinata? Pinner adds encrypted private storage, crypto payments, and website hosting on the same decentralized network. We help you migrate.">
+  <PageHeader
+    title="A Pinata alternative with crypto payments and decentralized storage"
+    mobileTitle="Pinata Alternative"
+    description="Pinner offers IPFS pinning with crypto payments and website hosting on a decentralized network. Need help migrating? We'll work with you."
+    btnText="Start Pinning →"
+    url="https://account.pinner.xyz"
+    secondaryBtnText="See Pricing →"
+    secondaryUrl="/pricing"
+    client:load
+  />
+
+  <AboutSection
+    subtitle="Why People Switch"
+    title="They're solid for IPFS pinning. Pinner adds more."
+    description="Pinata built a great IPFS pinning service with developer tools and gateways. If you need IPFS pinning plus crypto payments, website hosting on the same network, and storage on a decentralized provider network — Pinner is the next step. Same IPFS content addressing you're used to, with a different approach underneath."
+    theme="white"
+    imageUrl={AboutWhatIsPinner}
+    client:load
+  />
+
+  <AboutSection
+    subtitle="How Pinner Differs"
+    title="Crypto payments, decentralized hosting, and more"
+    description="Pay with crypto or card — no identity verification required for crypto payments. Your pins live on a distributed network of independent storage providers instead of centralized infrastructure. Host static websites from the same pinned content. And it's FOSS — fully open source, no black box."
+    theme="gray"
+    imagePosition="right"
+    imageUrl={PinataDifferImage}
+    client:load
+  />
+
+  <AboutSection
+    subtitle="Migration"
+    title="Need help moving your pins? We'll help you migrate."
+    description="Switching IPFS pinning providers is straightforward — your content addresses stay the same because they're content hashes, not proprietary URLs. Pin your existing CIDs on Pinner and they're live. If you have a large collection or custom setup, reach out and we'll work with you on the transition."
+    theme="white"
+    imageUrl={PinataMigrateImage}
+    client:load
+  />
+
+  <section class="py-[60px] md:py-[120px] bg-white">
+    <div class="xl:container px-6">
+      <h2 class="text-[24px] sm:text-[28px] md:text-[31px] font-medium text-content-text text-center mb-10 md:mb-14">Frequently Asked Questions</h2>
+      <FAQ faqs={faqs} client:load />
+    </div>
+  </section>
+
+  <section class="py-[60px] md:py-[120px] bg-content-section-gray">
+    <div class="xl:container px-6 text-center">
+      <h2 class="text-[24px] sm:text-[28px] md:text-[31px] font-medium text-content-text mb-10 md:mb-14">Related Solutions</h2>
+      <div class="flex flex-col sm:flex-row justify-center gap-6">
+        <a href="/solutions/ipfs-pinning" class="inline-block bg-white rounded-lg px-8 py-6 text-content-text hover:shadow-lg transition-shadow max-w-[320px] text-left">
+          <span class="block text-lg font-medium mb-1">IPFS Pinning</span>
+          <span class="block text-sm text-content-text-muted">Pin files to the decentralized web with permanent links</span>
+        </a>
+        <a href="/solutions/website-hosting" class="inline-block bg-white rounded-lg px-8 py-6 text-content-text hover:shadow-lg transition-shadow max-w-[320px] text-left">
+          <span class="block text-lg font-medium mb-1">Website Hosting</span>
+          <span class="block text-sm text-content-text-muted">Host static sites on the decentralized web</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />
+
+  <CallToAction client:load />
+</Layout>

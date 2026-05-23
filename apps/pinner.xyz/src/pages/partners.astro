@@ -1,0 +1,73 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+import CallToAction from '@/components/CallToAction';
+import AboutSection from '@/components/AboutSection';
+
+import SiaRevshareImage from "@/assets/partners-sia-revshare.jpg";
+import IPFSImage from "@/assets/partners-ipfs.jpg";
+---
+
+<Layout title="Revenue Sharing Program for Sia & IPFS Developers" description="Build on Pinner. Revenue sharing for Sia app builders, integration support for IPFS developers, and custom pricing for businesses needing 10TB+.">
+  <PageHeader
+    title="Build on Pinner"
+    mobileTitle="Partners"
+    description="Sia app builders, IPFS developers, and businesses &mdash; let's find what works."
+    client:load
+  />
+
+  <AboutSection
+    subtitle="For Sia App Builders"
+    title="Every Sia app needs an indexer"
+    description="An indexer tracks where your objects live, keeps your data healthy, and handles access control &mdash; so your app doesn't have to manage storage providers or contracts. Point your users at Pinner and we'll share the revenue: a sustainable path forward for your project, and a stronger ecosystem for everyone. We're looking for app builders who want to work with us on this."
+    imageUrl={SiaRevshareImage}
+    theme="white"
+    client:load
+  />
+
+  <AboutSection
+    subtitle="For IPFS Developers"
+    title="Integrating pinning into your app"
+    description="If you're building on IPFS and need a reliable pinning backend for your users, check out our <a href='https://docs.pinner.xyz' class='underline hover:text-content-text transition-colors'>API and SDK docs</a>. For custom integration needs or volume pricing, reach out below."
+    imageUrl={IPFSImage}
+    theme="gray"
+    imagePosition="right"
+    client:load
+  />
+
+  <AboutSection
+    subtitle="For Businesses"
+    title="Volume storage, custom pricing"
+    description="Need 10TB+ or custom storage terms? We work with businesses directly on pricing, setup, and support. Reach out and we'll figure it out together."
+    theme="white"
+    centered
+    client:load
+  />
+
+  <section class="bg-white py-[60px] md:py-[120px]">
+    <div class="xl:container px-6">
+      <div class="mx-auto max-w-[960px]">
+        <h2 class="text-content-text mb-4 text-center text-[25px] leading-tight font-medium md:text-[32px] lg:text-[40px]">
+          Get in touch
+        </h2>
+        <p class="text-content-text-muted mx-auto mb-12 text-center text-lg leading-relaxed md:text-xl">
+          Building on Sia? Need volume storage? Get in touch.
+        </p>
+
+        <div
+          data-heyform-id="YeRlVs1e"
+          data-heyform-type="standard"
+          data-heyform-custom-url="https://form.pinner.xyz/form/YeRlVs1e"
+          data-heyform-width-type="%"
+          data-heyform-width="100"
+          data-heyform-height-type="px"
+          data-heyform-height="700"
+          data-heyform-auto-resize-height="true"
+        ></div>
+        <script src="https://www.unpkg.com/@heyform-inc/embed@latest/dist/index.umd.js"></script>
+      </div>
+    </div>
+  </section>
+
+  <CallToAction client:load />
+</Layout>

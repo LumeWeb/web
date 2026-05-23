@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="200px" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>Eth</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard-Copy">
+            <g id="Eth">
+                <circle id="Oval" fill="#CCCCCC" cx="100" cy="100" r="100"></circle>
+                <polygon id="Shape" fill="#343434" fill-rule="nonzero" points="99.9405233 31 99 34.1671285 99 126.069864 99.9405233 127 143 101.783656"></polygon>
+                <polygon id="Shape" fill="#8C8C8C" fill-rule="nonzero" points="100 31 58 101.78341 100 127 100 82.3933164"></polygon>
+                <polygon id="Shape" fill="#3C3C3B" fill-rule="nonzero" points="100.522517 135.15528 100 135.794144 100 168.469055 100.522517 170 143 110"></polygon>
+                <polygon id="Shape" fill="#8C8C8C" fill-rule="nonzero" points="100 170 100 135.15528 58 110"></polygon>
+                <polygon id="Shape" fill="#141414" fill-rule="nonzero" points="100 127 142 102.12666 100 83"></polygon>
+                <polygon id="Shape" fill="#393939" fill-rule="nonzero" points="58 102.12666 100 127 100 83"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

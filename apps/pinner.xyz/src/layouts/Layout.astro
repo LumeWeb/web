@@ -1,0 +1,105 @@
+---
+import "@/styles/globals.css";
+import Navbar from "@/components/Navbar.jsx";
+import { NavigationMenu } from "@/components/ui/navigation-menu";
+import Footer from "@/components/Footer.jsx";
+import { getGitLastUpdated } from "@/lib/last-updated";
+import PostHog from "@/components/posthog.astro";
+import UTMCapture from "@/components/UTMCapture";
+import contactsData from "@/data/contacts.json";
+
+const { title, variant = "content", description = "IPFS pinning, website hosting, and private storage on a decentralized network. Pay with crypto — no ID for crypto payments.", ogImage: ogImageProp, showNewsletterFooter = true } = Astro.props;
+const lastUpdated = getGitLastUpdated();
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://pinner.xyz");
+const siteName = "Pinner";
+const ogImage = new URL(ogImageProp ?? "/images/og-default.png", canonicalURL.origin);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title} | Pinner</title>
+    <link rel="canonical" href={canonicalURL.href} />
+    <meta name="description" content={description} />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL.href} />
+    <meta property="og:title" content={`Pinner - ${title}`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage.href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title + " | Pinner"} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:logo" content={new URL("/favicon.svg", canonicalURL.origin).href} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`Pinner - ${title}`} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage.href} />
+    <meta name="twitter:image:alt" content={title + " | Pinner"} />
+
+    <PostHog />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": canonicalURL.origin + "/#organization",
+          name: "Pinner",
+          url: canonicalURL.origin,
+          logo: {
+            "@type": "ImageObject",
+            url: new URL("/favicon.svg", canonicalURL.origin).href
+          },
+          sameAs: [
+            contactsData.social.github,
+            contactsData.social.discord,
+            contactsData.social.twitter
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": canonicalURL.origin + "/#website",
+          url: canonicalURL.origin,
+          name: "Pinner",
+          publisher: {
+            "@type": "Organization",
+            "@id": canonicalURL.origin + "/#organization"
+          }
+        },
+        {
+          "@type": "WebPage",
+          "@id": canonicalURL.href + "#webpage",
+          url: canonicalURL.href,
+          name: title + " | Pinner",
+          description: description,
+          isPartOf: {
+            "@type": "WebSite",
+            "@id": canonicalURL.origin + "/#website"
+          }
+        }
+      ]
+    })} />
+  </head>
+  <body class="bg-[#0D1D1C] antialiased">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded">Skip to content</a>
+    <UTMCapture client:load />
+    <Navbar client:load />
+    <main id="main-content" class={`min-h-[220px] theme-${variant}`}>
+      <slot />
+    </main>
+
+    <Footer theme={variant === "home" ? "dark" : undefined} lastUpdated={lastUpdated} showNewsletter={showNewsletterFooter} />
+  </body>
+</html>

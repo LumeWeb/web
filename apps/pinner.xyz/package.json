@@ -1,0 +1,43 @@
+{
+  "name": "@lumeweb/pinner.xyz",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/react": "catalog:",
+    "@astrojs/sitemap": "catalog:websites",
+    "@fontsource/poppins": "catalog:websites",
+    "@radix-ui/react-navigation-menu": "catalog:",
+    "@radix-ui/react-progress": "catalog:",
+    "@radix-ui/react-slot": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "astro": "catalog:",
+    "astro-llms-md": "catalog:websites",
+    "astro-md-alternate": "catalog:websites",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "swiper": "^12.1.0",
+    "swr": "^2.4.1",
+    "tailwind-merge": "catalog:",
+    "tailwindcss": "catalog:websites",
+    "tailwindcss-animate": "catalog:"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "catalog:websites",
+    "@tailwindcss/vite": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
+  }
+}
