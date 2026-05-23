@@ -22,7 +22,7 @@ export class TusStore extends MapStore<string, TusFile> {
 
   getNextUploadId(): string {
     this.uploadCounter++;
-    return `test-upload-id`;
+    return `test-upload-id-${this.uploadCounter}`;
   }
 
   getTusFile(fileId: string): TusFile | undefined {

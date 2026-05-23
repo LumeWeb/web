@@ -22,7 +22,7 @@ describe("XHRUploadHandler Integration", () => {
       const result = await operation.result;
 
       expect(result).toBeDefined();
-      expect(result.id).toBe("test-upload-id");
+      expect(result.id).toMatch(/^test-upload-id(-\d+)?$/);
 
       const { CID } = await import("multiformats/cid");
       expect(() => CID.parse(result.cid)).not.toThrow();
