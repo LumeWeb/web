@@ -41,7 +41,7 @@ describe("UploadManager Integration Tests", () => {
         // Verify the operation completes successfully
         const result = await operation.result;
         expect(result).toBeDefined();
-        expect(result.id).toBe("test-upload-id");
+        expect(result.id).toMatch(/^test-upload-id(-\d+)?$/);
         expect(result.name).toBe("test.car");
         expect(result.cid).toBeDefined();
       });
@@ -57,7 +57,7 @@ describe("UploadManager Integration Tests", () => {
 
         expect(operation).toBeDefined();
         const result = await operation.result;
-        expect(result.id).toBe("test-upload-id");
+        expect(result.id).toMatch(/^test-upload-id(-\d+)?$/);
       });
 
       it("should preserve file data integrity", async () => {
@@ -70,7 +70,7 @@ describe("UploadManager Integration Tests", () => {
 
         // Verify the upload completes successfully
         expect(result).toBeDefined();
-        expect(result.id).toBe("test-upload-id");
+        expect(result.id).toMatch(/^test-upload-id(-\d+)?$/);
         expect(result.name).toBe("integrity-test.car");
       });
 
@@ -89,7 +89,7 @@ describe("UploadManager Integration Tests", () => {
 
         // Verify the upload completes successfully
         expect(result).toBeDefined();
-        expect(result.id).toBe("test-upload-id");
+        expect(result.id).toMatch(/^test-upload-id(-\d+)?$/);
         expect(result.name).toBe("binary.car");
       });
 
@@ -110,7 +110,7 @@ describe("UploadManager Integration Tests", () => {
 
         // Verify the upload completes successfully
         expect(result).toBeDefined();
-        expect(result.id).toBe("test-upload-id");
+        expect(result.id).toMatch(/^test-upload-id(-\d+)?$/);
         expect(result.name).toBe("multi-chunk.car");
       });
 
@@ -164,7 +164,7 @@ describe("UploadManager Integration Tests", () => {
       // Verify the operation completes successfully
       const result = await operation.result;
       expect(result).toBeDefined();
-      expect(result.id).toBe("test-upload-id");
+      expect(result.id).toMatch(/^test-upload-id(-\d+)?$/);
     });
 
     it("should use XHR handler for small ReadableStream with size override", async () => {
@@ -177,7 +177,7 @@ describe("UploadManager Integration Tests", () => {
 
       expect(operation).toBeDefined();
       const result = await operation.result;
-      expect(result.id).toBe("test-upload-id");
+      expect(result.id).toMatch(/^test-upload-id(-\d+)?$/);
     });
 
     it("should use TUS handler for large ReadableStream with size override", async () => {
@@ -190,7 +190,7 @@ describe("UploadManager Integration Tests", () => {
 
       expect(operation).toBeDefined();
       const result = await operation.result;
-      expect(result.id).toBe("test-upload-id");
+      expect(result.id).toMatch(/^test-upload-id(-\d+)?$/);
     }, 30000);
 
     it("should preserve stream data integrity with size override", async () => {
@@ -206,7 +206,7 @@ describe("UploadManager Integration Tests", () => {
 
       // Verify the upload completes successfully
       expect(result).toBeDefined();
-      expect(result.id).toBe("test-upload-id");
+      expect(result.id).toMatch(/^test-upload-id(-\d+)?$/);
       expect(result.name).toBe("integrity-test.car");
     });
   });
@@ -225,7 +225,7 @@ describe("UploadManager Integration Tests", () => {
       const result = await operation.result;
 
       expect(result).toBeDefined();
-      expect(result.id).toBe("test-upload-id");
+      expect(result.id).toMatch(/^test-upload-id(-\d+)?$/);
     });
   });
 
@@ -248,8 +248,8 @@ describe("UploadManager Integration Tests", () => {
 
       expect(result1).toBeDefined();
       expect(result2).toBeDefined();
-      expect(result1.id).toBe("test-upload-id");
-      expect(result2.id).toBe("test-upload-id");
+      expect(result1.id).toMatch(/^test-upload-id(-\d+)?$/);
+      expect(result2.id).toMatch(/^test-upload-id(-\d+)?$/);
     });
 
     it("should maintain handler selection consistency across uploads", async () => {
@@ -268,8 +268,8 @@ describe("UploadManager Integration Tests", () => {
 
       expect(result1).toBeDefined();
       expect(result2).toBeDefined();
-      expect(result1.id).toBe("test-upload-id");
-      expect(result2.id).toBe("test-upload-id");
+      expect(result1.id).toMatch(/^test-upload-id(-\d+)?$/);
+      expect(result2.id).toMatch(/^test-upload-id(-\d+)?$/);
     });
   });
 
@@ -284,7 +284,7 @@ describe("UploadManager Integration Tests", () => {
       // Verify the operation completes successfully
       const result = await operation.result;
       expect(result).toBeDefined();
-      expect(result.id).toBe("test-upload-id");
+      expect(result.id).toMatch(/^test-upload-id(-\d+)?$/);
       expect(result.name).toBe("valid.car");
       expect(result.mimeType).toBe("application/vnd.ipld.car");
       expect(result.cid).toBeDefined();

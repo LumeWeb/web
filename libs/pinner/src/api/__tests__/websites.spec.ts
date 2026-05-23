@@ -18,19 +18,25 @@ import {
   NetworkError,
 } from "@/errors";
 import {
-  websitesHandlers,
-  websiteNotFoundHandler,
-  websiteUnauthorizedHandler,
-  websiteUnauthorizedGetHandler,
-  websiteUnauthorizedPostHandler,
-  websiteUnauthorizedDeleteHandler,
-  websiteUnauthorizedValidateHandler,
-  websiteUnauthorizedPutHandler,
+  WebsiteStore,
+  IPNSStore,
+  createWebsiteHandlers,
   resetWebsitesIPNSState,
-  setSSLStatus,
-  resetSSLStatuses,
-} from "@/__tests__/msw-websites-ipns-handlers";
+  createUnauthorizedHandler,
+  createNotFoundHandler,
+} from "@/__tests__/msw";
 import { testConfig } from "@/__tests__/setup";
+
+const websiteStore = new WebsiteStore();
+const ipnsStore = new IPNSStore();
+
+await websiteStore.initializeDefaults();
+await ipnsStore.initializeDefaults();
+
+const websiteHandlers = createWebsiteHandlers(websiteStore, ipnsStore);
+
+const websiteNotFoundHandler = createNotFoundHandler(`${testConfig.apiUrl}/websites/:id`);
+const websiteUnauthorizedHandler = createUnauthorizedHandler(`${testConfig.apiUrl}/websites*`);
 
 describe("WebsitesClient", () => {
   const mockConfig: PinnerConfig = {
@@ -40,13 +46,13 @@ describe("WebsitesClient", () => {
 
   beforeEach(() => {
     // Reset mock data state before each test to ensure isolation
-    resetWebsitesIPNSState();
-    resetSSLStatuses();
+    resetWebsitesIPNSState(websiteStore, ipnsStore);
+    websiteStore.resetSSLStatuses();
   });
 
   describe("list", () => {
     it("should list all websites", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       const websites = await client.listWebsites();
@@ -75,7 +81,7 @@ describe("WebsitesClient", () => {
     });
 
     it("should handle network errors", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       // Test normal operation
@@ -86,7 +92,7 @@ describe("WebsitesClient", () => {
 
   describe("get", () => {
     it("should get website details", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       const website: WebsiteResponse = await client.getWebsite(1);
@@ -110,7 +116,7 @@ describe("WebsitesClient", () => {
     });
 
     it("should handle authentication errors", async ({ worker }) => {
-      worker.use(websiteUnauthorizedGetHandler);
+      worker.use(websiteUnauthorizedHandler);
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
@@ -122,7 +128,7 @@ describe("WebsitesClient", () => {
 
   describe("create", () => {
     it("should create a new website", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       const request: WebsiteRequest = {
@@ -141,7 +147,7 @@ describe("WebsitesClient", () => {
     });
 
     it("should create a website with IPNS target", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       const request: WebsiteRequest = {
@@ -157,7 +163,7 @@ describe("WebsitesClient", () => {
     });
 
     it("should handle validation errors", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       const request: WebsiteRequest = {
@@ -173,7 +179,7 @@ describe("WebsitesClient", () => {
     });
 
     it("should handle authentication errors", async ({ worker }) => {
-      worker.use(websiteUnauthorizedPostHandler);
+      worker.use(websiteUnauthorizedHandler);
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
@@ -191,7 +197,7 @@ describe("WebsitesClient", () => {
 
   describe("update", () => {
     it("should update an existing website", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       const request: WebsiteUpdateRequest = {
@@ -209,7 +215,7 @@ describe("WebsitesClient", () => {
     });
 
     it("should update partial fields on a website", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       const request: WebsiteUpdateRequest = {
@@ -236,7 +242,7 @@ describe("WebsitesClient", () => {
     });
 
     it("should handle authentication errors", async ({ worker }) => {
-      worker.use(websiteUnauthorizedPutHandler);
+      worker.use(websiteUnauthorizedHandler);
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
@@ -254,7 +260,7 @@ describe("WebsitesClient", () => {
 
   describe("delete", () => {
     it("should delete a website", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       await expect(client.deleteWebsite(1)).resolves.not.toThrow();
@@ -268,7 +274,7 @@ describe("WebsitesClient", () => {
     });
 
     it("should handle authentication errors", async ({ worker }) => {
-      worker.use(websiteUnauthorizedDeleteHandler);
+      worker.use(websiteUnauthorizedHandler);
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
@@ -280,7 +286,7 @@ describe("WebsitesClient", () => {
 
   describe("validate", () => {
     it("should validate website DNS", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       const result: WebsiteValidateResponse = await client.validateWebsite(1);
@@ -303,7 +309,7 @@ describe("WebsitesClient", () => {
     });
 
     it("should handle authentication errors", async ({ worker }) => {
-      worker.use(websiteUnauthorizedValidateHandler);
+      worker.use(websiteUnauthorizedHandler);
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
@@ -313,7 +319,7 @@ describe("WebsitesClient", () => {
     });
 
     it("should return reason field from validation response", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       const result = await client.validateWebsite(1);
@@ -353,10 +359,10 @@ describe("WebsitesClient", () => {
 
   describe("getSSLStatus", () => {
     it("should get SSL status for a domain", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.VALID);
+      websiteStore.setSSLStatus("example.com", SSLStatus.VALID);
 
       const status = await client.getSSLStatus("example.com");
 
@@ -365,10 +371,10 @@ describe("WebsitesClient", () => {
     });
 
     it("should get SSL status with error", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.FAILED, "DNS validation failed");
+      websiteStore.setSSLStatus("example.com", SSLStatus.FAILED, "DNS validation failed");
 
       const status = await client.getSSLStatus("example.com");
 
@@ -377,7 +383,7 @@ describe("WebsitesClient", () => {
     });
 
     it("should support abort signal", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       const controller = new AbortController();
@@ -391,7 +397,7 @@ describe("WebsitesClient", () => {
 
   describe("getWebsiteConfig", () => {
     it("should get website hosting configuration", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       const config = await client.getWebsiteConfig();
@@ -422,10 +428,10 @@ describe("WebsitesClient", () => {
 
   describe("watchSSL", () => {
     it("should watch SSL status and emit ready when SSL is valid", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.PENDING);
+      websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
       const watcher = client.watchSSL("example.com", { interval: 100, timeout: 1000 });
 
@@ -437,7 +443,7 @@ describe("WebsitesClient", () => {
 
       // After a short delay, set SSL to valid
       setTimeout(() => {
-        setSSLStatus("example.com", SSLStatus.VALID);
+        websiteStore.setSSLStatus("example.com", SSLStatus.VALID);
       }, 150);
 
       const status = await readyPromise;
@@ -446,10 +452,10 @@ describe("WebsitesClient", () => {
     });
 
     it("should watch SSL status and emit error when SSL fails", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.PENDING);
+      websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
       const watcher = client.watchSSL("example.com", { interval: 100, timeout: 1000 });
 
@@ -461,7 +467,7 @@ describe("WebsitesClient", () => {
 
       // After a short delay, set SSL to failed
       setTimeout(() => {
-        setSSLStatus("example.com", "failed", "SSL provisioning failed");
+        websiteStore.setSSLStatus("example.com", "failed", "SSL provisioning failed");
       }, 150);
 
       const error = await errorPromise as Error;
@@ -469,10 +475,10 @@ describe("WebsitesClient", () => {
     });
 
     it("should emit status updates", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.PENDING);
+      websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
       const watcher = client.watchSSL("example.com", { interval: 100, timeout: 1000 });
 
@@ -498,10 +504,10 @@ describe("WebsitesClient", () => {
     });
 
     it("should timeout if SSL never becomes ready", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.PENDING);
+      websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
       const watcher = client.watchSSL("example.com", { interval: 100, timeout: 300 });
 
@@ -517,10 +523,10 @@ describe("WebsitesClient", () => {
     });
 
     it("should stop watching", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
-      setSSLStatus("example.com", SSLStatus.PENDING);
+      websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
       const watcher = client.watchSSL("example.com", { interval: 100, timeout: 5000 });
 
@@ -543,7 +549,7 @@ describe("WebsitesClient", () => {
     });
 
     it("should handle network errors", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       // This test would need MSW to return network errors
@@ -593,7 +599,7 @@ describe("WebsitesClient", () => {
 
   describe("error handling", () => {
     it("should handle network errors gracefully", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       // Test normal operation
@@ -602,7 +608,7 @@ describe("WebsitesClient", () => {
     });
 
     it("should handle malformed responses", async ({ worker }) => {
-      worker.use(...websitesHandlers);
+      worker.use(...websiteHandlers);
       const client = new WebsitesClient(mockConfig);
 
       // Test normal operation

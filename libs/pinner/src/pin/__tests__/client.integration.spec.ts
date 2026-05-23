@@ -8,21 +8,43 @@ import { NotFoundError } from "@/errors";
 import { Status } from "@ipfs-shipyard/pinning-service-client";
 import type { RemotePin } from "@/types/pin";
 import {
-  pinHandlers,
-  pinNotFoundHandler,
-  rateLimitHandler,
-  serverErrorHandler,
-  unauthorizedHandler,
-} from "./msw-handlers";
+  createUnauthorizedHandler,
+  createRateLimitHandler,
+  createServerErrorHandler,
+} from "@/__tests__/msw";
+import { testConfig } from "@/__tests__/setup";
 import { createMockCID } from "@/__tests__/setup";
+
+// Pin handlers register at the base domain (without /api) because
+// pinning-service-client uses endpointUrl as basePath and appends /pins.
+const pinBaseUrl = testConfig.apiUrl.replace(/\/api$/, "");
+
+// Handler that returns empty pin list (simulates "pin not found" for list queries)
+const pinNotFoundHandler = http.get(`${pinBaseUrl}/pins`, () => {
+  return HttpResponse.json(
+    {
+      count: 0,
+      results: [],
+    },
+    {
+      status: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
+    },
+  );
+});
+
+const unauthorizedHandler = createUnauthorizedHandler(`${pinBaseUrl}/pins*`);
+const rateLimitHandler = createRateLimitHandler(`${pinBaseUrl}/pins*`);
+const serverErrorHandler = createServerErrorHandler(`${pinBaseUrl}/pins*`);
 
 describe("PinClient Integration", () => {
   describe("add method integration", () => {
     it("should successfully add a pin", async ({ worker }) => {
-      worker.use(...pinHandlers);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -39,10 +61,9 @@ describe("PinClient Integration", () => {
     });
 
     it("should successfully add a pin with options", async ({ worker }) => {
-      worker.use(...pinHandlers);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -66,7 +87,7 @@ describe("PinClient Integration", () => {
       worker.use(unauthorizedHandler);
       const mockConfig: PinnerConfig = {
         jwt: "invalid-jwt",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -84,7 +105,7 @@ describe("PinClient Integration", () => {
       worker.use(rateLimitHandler);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -102,7 +123,7 @@ describe("PinClient Integration", () => {
       worker.use(serverErrorHandler);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -119,11 +140,10 @@ describe("PinClient Integration", () => {
 
   describe("ls method integration", () => {
     it("should successfully list all pins", async ({ worker }) => {
-      worker.use(...pinHandlers);
       console.log("running");
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -140,10 +160,9 @@ describe("PinClient Integration", () => {
     });
 
     it("should successfully list pins with options", async ({ worker }) => {
-      worker.use(...pinHandlers);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -162,7 +181,7 @@ describe("PinClient Integration", () => {
 
     it("should handle empty pin list", async ({ worker }) => {
       worker.use(
-        http.get("https://api.test.com/pins", () => {
+        http.get(`${pinBaseUrl}/pins`, () => {
           return HttpResponse.json(
             {
               count: 0,
@@ -175,7 +194,7 @@ describe("PinClient Integration", () => {
 
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -192,7 +211,7 @@ describe("PinClient Integration", () => {
       worker.use(unauthorizedHandler);
       const mockConfig: PinnerConfig = {
         jwt: "invalid-jwt",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -208,10 +227,9 @@ describe("PinClient Integration", () => {
 
   describe("isPinned method integration", () => {
     it("should return true when pin exists", async ({ worker }) => {
-      worker.use(...pinHandlers);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -226,7 +244,7 @@ describe("PinClient Integration", () => {
       worker.use(pinNotFoundHandler);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -240,10 +258,9 @@ describe("PinClient Integration", () => {
 
   describe("get method integration", () => {
     it("should successfully get pin details", async ({ worker }) => {
-      worker.use(...pinHandlers);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -264,7 +281,7 @@ describe("PinClient Integration", () => {
       worker.use(pinNotFoundHandler);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -279,7 +296,7 @@ describe("PinClient Integration", () => {
       worker.use(unauthorizedHandler);
       const mockConfig: PinnerConfig = {
         jwt: "invalid-jwt",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -292,10 +309,9 @@ describe("PinClient Integration", () => {
 
   describe("setMetadata method integration", () => {
     it("should successfully update pin metadata", async ({ worker }) => {
-      worker.use(...pinHandlers);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -308,10 +324,9 @@ describe("PinClient Integration", () => {
     });
 
     it("should successfully clear pin metadata", async ({ worker }) => {
-      worker.use(...pinHandlers);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -325,7 +340,7 @@ describe("PinClient Integration", () => {
       worker.use(pinNotFoundHandler);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -341,7 +356,7 @@ describe("PinClient Integration", () => {
       worker.use(unauthorizedHandler);
       const mockConfig: PinnerConfig = {
         jwt: "invalid-jwt",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -394,14 +409,14 @@ describe("PinClient Integration", () => {
   describe("error handling", () => {
     it("should handle network errors gracefully", async ({ worker }) => {
       worker.use(
-        http.post("https://api.test.com/pins", () => {
+        http.post(`${pinBaseUrl}/pins`, () => {
           return HttpResponse.error();
         }),
       );
 
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -417,14 +432,14 @@ describe("PinClient Integration", () => {
 
     it("should handle malformed responses", async ({ worker }) => {
       worker.use(
-        http.get("https://api.test.com/pins", () => {
+        http.get(`${pinBaseUrl}/pins`, () => {
           return HttpResponse.json({ invalid: "response" }, { status: 500 });
         }),
       );
 
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -439,7 +454,7 @@ describe("PinClient Integration", () => {
 
     it("should handle timeout errors", async ({ worker }) => {
       worker.use(
-        http.post("https://api.test.com/pins", async () => {
+        http.post(`${pinBaseUrl}/pins`, async () => {
           // Simulate timeout
           await new Promise((resolve) => setTimeout(resolve, 10000));
           return HttpResponse.json({});
@@ -448,7 +463,7 @@ describe("PinClient Integration", () => {
 
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -473,10 +488,9 @@ describe("PinClient Integration", () => {
     it("should properly handle async generator iteration", async ({
       worker,
     }) => {
-      worker.use(...pinHandlers);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -494,10 +508,9 @@ describe("PinClient Integration", () => {
     it("should handle multiple async generators in sequence", async ({
       worker,
     }) => {
-      worker.use(...pinHandlers);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -522,10 +535,9 @@ describe("PinClient Integration", () => {
     it("should handle async generator for ls with multiple results", async ({
       worker,
     }) => {
-      worker.use(...pinHandlers);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -541,10 +553,9 @@ describe("PinClient Integration", () => {
 
   describe("rm method integration", () => {
     it("should successfully remove a pin", async ({ worker }) => {
-      worker.use(...pinHandlers);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -561,10 +572,9 @@ describe("PinClient Integration", () => {
     });
 
     it("should remove a pin with options", async ({ worker }) => {
-      worker.use(...pinHandlers);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -586,7 +596,7 @@ describe("PinClient Integration", () => {
       worker.use(unauthorizedHandler);
       const mockConfig: PinnerConfig = {
         jwt: "invalid-jwt",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 
@@ -604,7 +614,7 @@ describe("PinClient Integration", () => {
       worker.use(pinNotFoundHandler);
       const mockConfig: PinnerConfig = {
         jwt: "test-jwt-token",
-        endpoint: "https://api.test.com",
+        endpoint: "https://test.pinner.xyz",
         gateway: "https://gateway.test.com",
       };
 

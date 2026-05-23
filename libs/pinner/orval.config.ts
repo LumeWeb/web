@@ -8,10 +8,15 @@ export default defineConfig({
         getBaseUrlFromSpecification: true,
       },
       indexFiles: true,
-      mode: "tags",
+      mode: "tags-split",
       client: "fetch",
       target: "./src/api/generated",
       schemas: "./src/api/generated/schemas",
+      mock: {
+        type: "msw",
+        delay: 0,
+        indexMockFiles: true,
+      },
     },
   },
 });

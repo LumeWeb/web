@@ -2,21 +2,18 @@ import { test as it } from "./int-test";
 import { beforeEach, describe, expect, vi } from "vitest";
 import { http, HttpResponse } from "msw";
 import { XHRUploadHandler } from "../xhr-upload";
-import { xhrUploadHandlers } from "./msw-handlers";
-import { resetRequestCounter } from "@/__tests__/setup";
 import { createMockConfig, createTestUploadFile } from "./test-fixtures";
 import { assertCallbackCalled } from "./test-assertions";
+import { testConfig } from "@/__tests__/setup";
 
 describe("XHRUploadHandler Integration", () => {
   beforeEach(() => {
-    resetRequestCounter();
   });
 
   describe("upload method integration", () => {
     it("should successfully upload a file and return a result", async ({
       worker,
     }) => {
-      worker.use(...xhrUploadHandlers);
       const mockConfig = createMockConfig();
       const handler = new XHRUploadHandler(mockConfig);
       const mockFile = createTestUploadFile();
@@ -25,7 +22,7 @@ describe("XHRUploadHandler Integration", () => {
       const result = await operation.result;
 
       expect(result).toBeDefined();
-      expect(result.id).toBe("test-upload-id");
+      expect(result.id).toMatch(/^test-upload-id(-\d+)?$/);
 
       const { CID } = await import("multiformats/cid");
       expect(() => CID.parse(result.cid)).not.toThrow();
@@ -38,7 +35,7 @@ describe("XHRUploadHandler Integration", () => {
 
     it("should handle upload error with custom handler", async ({ worker }) => {
       worker.use(
-        http.post("https://api.test.com/api/upload", () => {
+        http.post(`${testConfig.apiUrl}/upload`, () => {
           return HttpResponse.json(
             { success: false, error: "Upload failed" },
             { status: 500 },
@@ -60,7 +57,6 @@ describe("XHRUploadHandler Integration", () => {
     });
 
     it("should call onProgress callback during upload", async ({ worker }) => {
-      worker.use(...xhrUploadHandlers);
       const mockConfig = createMockConfig();
       const handler = new XHRUploadHandler(mockConfig);
       const mockFile = createTestUploadFile();
@@ -78,7 +74,6 @@ describe("XHRUploadHandler Integration", () => {
     it("should call onComplete callback on successful upload", async ({
       worker,
     }) => {
-      worker.use(...xhrUploadHandlers);
       const mockConfig = createMockConfig();
       const handler = new XHRUploadHandler(mockConfig);
       const mockFile = createTestUploadFile();

@@ -3,12 +3,33 @@
  */
 
 import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
-import { allHandlers, resetRequestCounter } from "./msw-handlers";
-import { clearAllTusUploadStates } from "./msw-upload-handlers";
+import {
+  PinStore,
+  createPinHandlers,
+  TusStore,
+  OperationStore,
+  createUploadHandlers,
+  WebsiteStore,
+  IPNSStore,
+  createWebsiteHandlers,
+} from "./msw";
+import { resetRequestCounter } from "./setup";
 import { applyXHRInterceptor, updateHandlers } from "./xhr-interceptor";
 import { setupCarPreprocessor } from "./setup";
 import { destroyCarPreprocessor } from "../upload/car";
 import type { RequestHandler } from "msw";
+
+const pinStore = new PinStore();
+const tusStore = new TusStore();
+const operationStore = new OperationStore();
+const websiteStore = new WebsiteStore();
+const ipnsStore = new IPNSStore();
+
+const allHandlers = [
+  ...createPinHandlers(pinStore),
+  ...createUploadHandlers(tusStore, operationStore),
+  ...createWebsiteHandlers(websiteStore, ipnsStore),
+];
 
 beforeAll(() => {
   // Apply the global XHR interceptor once before all tests
@@ -29,7 +50,8 @@ beforeEach(async () => {
 afterEach(async () => {
   // Cleanup after each test
   resetRequestCounter();
-  clearAllTusUploadStates();
+  tusStore.reset();
+  operationStore.reset();
   // Destroy CAR preprocessor
   await destroyCarPreprocessor();
 });

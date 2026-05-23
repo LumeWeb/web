@@ -12,7 +12,7 @@ describe("Pinner Integration Tests", () => {
   beforeEach(() => {
     mockConfig = {
       jwt: "test-jwt-token",
-      endpoint: "https://api.test.com",
+      endpoint: "https://test.pinner.xyz",
       gateway: "https://gateway.test.com",
     };
 

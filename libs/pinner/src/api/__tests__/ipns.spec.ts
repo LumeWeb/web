@@ -17,16 +17,26 @@ import {
   NetworkError,
 } from "@/errors";
 import {
-  ipnsHandlers,
-  ipnsNotFoundHandler,
-  ipnsUnauthorizedHandler,
-  ipnsUnauthorizedPostHandler,
-  ipnsUnauthorizedDeleteHandler,
-  ipnsUnauthorizedPublishHandler,
-  ipnsUnauthorizedRepublishHandler,
-  ipnsUnauthorizedResolveHandler,
+  WebsiteStore,
+  IPNSStore,
+  createWebsiteHandlers,
   resetWebsitesIPNSState,
-} from "@/__tests__/msw-websites-ipns-handlers";
+  createUnauthorizedHandler,
+  createNotFoundHandler,
+} from "@/__tests__/msw";
+import { testConfig } from "@/__tests__/setup";
+
+const websiteStore = new WebsiteStore();
+const ipnsStore = new IPNSStore();
+
+await websiteStore.initializeDefaults();
+await ipnsStore.initializeDefaults();
+
+const allHandlers = createWebsiteHandlers(websiteStore, ipnsStore);
+
+const ipnsHandlers = allHandlers.slice(0, 7);
+const ipnsNotFoundHandler = createNotFoundHandler(`${testConfig.apiUrl}/ipns/keys/:id`);
+const ipnsUnauthorizedHandler = createUnauthorizedHandler(`${testConfig.apiUrl}/ipns*`);
 
 describe("IpnsClient", () => {
   const mockConfig: PinnerConfig = {
@@ -36,7 +46,7 @@ describe("IpnsClient", () => {
 
   beforeEach(() => {
     // Reset mock data state before each test to ensure isolation
-    resetWebsitesIPNSState();
+    resetWebsitesIPNSState(websiteStore, ipnsStore);
   });
 
   describe("listKeys", () => {
@@ -153,7 +163,7 @@ describe("IpnsClient", () => {
     });
 
     it("should handle authentication errors", async ({ worker }) => {
-      worker.use(ipnsUnauthorizedPostHandler);
+      worker.use(ipnsUnauthorizedHandler);
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
@@ -183,7 +193,7 @@ describe("IpnsClient", () => {
     });
 
     it("should handle authentication errors", async ({ worker }) => {
-      worker.use(ipnsUnauthorizedDeleteHandler);
+      worker.use(ipnsUnauthorizedHandler);
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
@@ -230,7 +240,7 @@ describe("IpnsClient", () => {
     });
 
     it("should handle authentication errors", async ({ worker }) => {
-      worker.use(ipnsUnauthorizedPublishHandler);
+      worker.use(ipnsUnauthorizedHandler);
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
@@ -256,7 +266,7 @@ describe("IpnsClient", () => {
     });
 
     it("should handle authentication errors", async ({ worker }) => {
-      worker.use(ipnsUnauthorizedRepublishHandler);
+      worker.use(ipnsUnauthorizedHandler);
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
@@ -283,7 +293,7 @@ describe("IpnsClient", () => {
     });
 
     it("should handle authentication errors", async ({ worker }) => {
-      worker.use(ipnsUnauthorizedResolveHandler);
+      worker.use(ipnsUnauthorizedHandler);
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",

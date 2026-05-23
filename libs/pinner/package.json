@@ -16,6 +16,10 @@
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
     },
+    "./mocks": {
+      "types": "./dist/esm/api/generated/index.msw.d.ts",
+      "import": "./dist/esm/api/generated/index.msw.js"
+    },
     "./adapters/pinata": {
       "types": "./dist/esm/adapters/pinata.d.ts",
       "import": "./dist/esm/adapters/pinata.js"
@@ -71,6 +75,7 @@
     "unstorage": "^1.17.5"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.4.0",
     "@lumeweb/tsdown-config": "workspace:*",
     "@mswjs/interceptors": "catalog:",
     "@types/uuid": "^11.0.0",

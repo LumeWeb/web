@@ -12,7 +12,7 @@ export const CUSTOM_UPLOAD_LIMIT = 200 * 1024 * 1024; // 200 MB
 // Mock configuration for tests
 export const MOCK_CONFIG = {
   jwt: "test-jwt-token",
-  endpoint: "https://api.test.com",
+  endpoint: "https://test.pinner.xyz",
   gateway: "https://gateway.test.com",
 };
 
