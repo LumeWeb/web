@@ -1,3 +1,11 @@
+## 0.1.6 (2026-05-23)
+
+### Fixes
+
+#### Fixes
+
+- mark faker and msw as external in tsdown config
+
 ## 0.1.5 (2026-05-23)
 
 ### Features
