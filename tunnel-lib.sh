@@ -407,6 +407,7 @@ tunnel_multi_app() {
     local main_host="$TUNNEL_MAIN_HOST"
     local main_port="${TUNNEL_MAIN_PORT:-4173}"
     local server_cmd="${TUNNEL_SERVER_CMD:-pnpm serve}"
+    read -ra server_cmd_parts <<< "$server_cmd"
     local plugin_config="${TUNNEL_PLUGIN_CONFIG:-}"
     local plugins_base_dir="${TUNNEL_PLUGINS_BASE_DIR:-$base_dir/libs}"
     local plugins_list="${TUNNEL_PLUGINS:-}"
@@ -442,7 +443,7 @@ tunnel_multi_app() {
     tunnel_start_server "$main_app_dir" "$main_port" "main app" \
         VITE_TUNNEL_HOST="$main_host.$(tunnel_get_domain)" \
         VITE_PORT="$main_port" \
-        "$server_cmd"
+        "${server_cmd_parts[@]}"
 
     # Start plugin apps if plugin config exists
     if [ -n "$plugin_config" ] && [ -f "$plugin_config" ]; then
@@ -465,7 +466,7 @@ tunnel_multi_app() {
             tunnel_start_server "$plugin_dir" "$forwarding_port" "'$name'" \
                 VITE_TUNNEL_HOST="$tunnelHost" \
                 VITE_PORT="$forwarding_port" \
-                "$server_cmd"
+                "${server_cmd_parts[@]}"
         done < <(jq -c '.[]' "$plugin_config")
     fi
 
