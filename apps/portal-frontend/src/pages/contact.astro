@@ -1,9 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import PageHeader from '@/components/PageHeader';
-import contactsData from '../data/contacts.json';
-
-const { community } = contactsData;
 ---
 
 <Layout title="Contact">
@@ -18,23 +15,23 @@ const { community } = contactsData;
     <div class="container text-center">
       <div class="max-w-2xl mx-auto">
         <h2 class="text-[21px] md:text-[32px] font-medium mb-8">Join our Discord community</h2>
-        <p class="text-[#485453] mb-8">{community.discord.description}</p>
+        <p class="text-[#485453] mb-8">Get support, share ideas, and connect with other users</p>
         <a
-          href={community.discord.url}
+          href="https://discord.gg/qpC8ADp3rS"
           class="inline-block py-3 md:py-4 px-7 bg-[#E4E0D4] text-[#0D1D1C] font-medium text-[13px] md:text-lg rounded-full hover:bg-[#d6d1c4] transition-colors"
         >
-          {community.discord.label}
+          Join Discord →
         </a>
       </div>
 
       <div class="max-w-2xl mx-auto mt-16">
         <h2 class="text-[21px] md:text-[32px] font-medium mb-8">Contribute on GitHub</h2>
-        <p class="text-[#485453] mb-8">{community.github.description}</p>
+        <p class="text-[#485453] mb-8">Help improve Lume by contributing to the project</p>
         <a
-          href={community.github.url}
+          href="https://github.com/lumeweb"
           class="inline-block py-3 md:py-4 px-7 bg-[#E4E0D4] text-[#0D1D1C] font-medium text-[13px] md:text-lg rounded-full hover:bg-[#d6d1c4] transition-colors"
         >
-          {community.github.label}
+          View Source →
         </a>
       </div>
     </div>

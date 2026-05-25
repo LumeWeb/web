@@ -11,12 +11,16 @@
   },
   "dependencies": {
     "@astrojs/react": "catalog:",
+    "@astrojs/sitemap": "catalog:websites",
+    "@fontsource/poppins": "catalog:websites",
     "@radix-ui/react-navigation-menu": "catalog:",
     "@radix-ui/react-progress": "catalog:",
     "@radix-ui/react-slot": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "astro": "catalog:",
+    "astro-llms-md": "catalog:websites",
+    "astro-md-alternate": "catalog:websites",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "lucide-react": "catalog:",
@@ -28,6 +32,7 @@
     "tailwindcss-animate": "catalog:"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "catalog:websites",
     "@tailwindcss/vite": "catalog:"
   },
   "repository": {
