@@ -6,13 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 // https://astro.build/config
 export default defineConfig({
   integrations: [react()],
-  server: {
-    allowedHosts: true,
-  },
   vite: {
-    resolve: {
-      tsconfigPaths: true,
-    },
     optimizeDeps: {
       include: ["swiper"],
     },

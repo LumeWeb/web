@@ -1,9 +1,8 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import Layout from "../layouts/Layout.astro";
 import Hero from "@/components/Home/Hero";
 import Account from "@/components/Home/Account";
-import RailsSection from "@/components/Home/RailsSection";
-import TrustSection from "@/components/Home/TrustSection";
+import DeleteSection from "@/components/Home/DeleteSection";
 import BrandLogos from "@/components/BrandLogos";
 import PricingTable from "@/components/Home/PricingTable";
 import Blog from "@/components/Home/Blog";
@@ -11,26 +10,23 @@ import CallToAction from "@/components/CallToAction";
 import logos from "@/data/brand-logos";
 ---
 
-<Layout title="Home" variant="home">
+<Layout title="Home">
   <Hero client:load />
 
-  <Account client:load variant="dark" />
+  <Account client:load />
 
-  <RailsSection client:load />
-
-  <TrustSection client:load variant="dark" />
+  <DeleteSection client:load />
 
   <BrandLogos
     logos={logos}
     logoType="dark"
     title="Powered & Trusted by"
-    variant="dark"
     client:load
   />
 
   <PricingTable client:load />
 
-  <CallToAction client:load variant="dark" />
+  <CallToAction client:load />
 
   <!--<Blog client:load />-->
 </Layout>
