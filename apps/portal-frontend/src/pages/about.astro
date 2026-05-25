@@ -1,73 +1,55 @@
 ---
-import Layout from '@/layouts/Layout.astro';
+import Layout from '../layouts/Layout.astro';
 import PageHeader from '@/components/PageHeader';
 import CallToAction from '@/components/CallToAction';
 import AboutSection from '@/components/AboutSection';
 import BrandLogos from '@/components/BrandLogos';
-import DifferentiatorsSection from '@/components/DifferentiatorsSection';
-import MissionSection from '@/components/MissionSection';
 
 import logos from '@/data/brand-logos';
 
-import AboutWhatIsPinner from "@/assets/about-what-is-pinner.jpg";
-import AboutValues from "@/assets/about-values.jpg";
-import AboutHowItWorks from "@/assets/about-how-it-works.jpg";
+import AboutImage from "../assets/about-1.png";
+import AboutImageTwo from "../assets/about-2.png";
+import AboutImageMobile from "../assets/about-mobile-1.png";
+import AboutImageMobileTwo from "../assets/about-mobile-2.png";
 ---
 
-<Layout title="About Pinner" variant="home">
+<Layout title="About Lume">
   <PageHeader
-    title="Storage without the headaches"
-    mobileTitle="Storage without the headaches"
-    description="A small business building storage infrastructure that respects your data."
+    title="Decentralized storage that puts you in control"
     btnText="Start Storing →"
     url="https://account.pinner.xyz"
+    secondaryBtnText="See How It Works →"
+    secondaryUrl="#how-it-works"
+    mobileTitle="Storage under your control"
     client:load
   />
 
-  <!-- Mission Section -->
-  <section class="py-[60px] md:py-[120px] bg-white">
-    <div class="xl:container px-6">
-      <MissionSection client:load />
-    </div>
-  </section>
-
   <AboutSection
-    title="Pinner is your storage service."
-    subtitle="What is Pinner?"
-    description="We connect directly to the Sia network so your files live across a distributed network. No middlemen. No mining. No headaches."
-    imageUrl={AboutWhatIsPinner}
-    theme="white"
-    client:load
-  />
-
-  <!-- Differentiators Section -->
-  <section>
-    <div>
-      <DifferentiatorsSection client:load />
-    </div>
-  </section>
-
-  <AboutSection
-    title="Your data is yours."
-    subtitle="What We Stand For"
-    description="We don't look at it. We don't sell it, we don't use it to train models.<br/><br/>We keep our word — uptime we commit to, pricing you can understand.<br/><br/>No roadblocks: we may use automation to scale, but if you need a human, you will get one.<br/><br/>Real SMB: founder-owned LLC, no investors, no exit strategy.<br/><br/>Open by default: MIT licensed, public GitHub."
-    imageUrl={AboutValues}
-    theme="gray"
+    title="Storage without the middleman"
+    subtitle="What is Lume?"
+    description="Lume is a decentralized storage portal that connects you directly to storage providers on the Sia network. No corporate middlemen, no data mining, just your files stored securely acros a distributed network."
+    imageUrl={AboutImage}
+    imgageMobileUrl={AboutImageMobile}
+    buttonText="Start Storing →"
+    url="#"
     client:load
   />
 
   <AboutSection
     id="how-it-works"
-    title="Simple. Private. Reliable."
+    title="Simple, secure, and private"
     subtitle="How It Works"
-    description="1. Upload — files go in, we handle the rest.<br/><br/>2. Encrypt & distribute — encrypted and distributed across a secure network.<br/><br/>3. Access anywhere — retrieve your files from any device, anytime."
-    imageUrl={AboutHowItWorks}
-    theme="white"
+    description="Upload files through our intuitive interface, and Lume handles the complex work of splitting, encrypting, and distributing your data across the network. Access your files from any device, while maintaining complete privacy and control."
+    imageUrl={AboutImageTwo}
+    imgageMobileUrl={AboutImageMobileTwo}
+    buttonText="Start Now →"
+    url="#"
+    theme="gray"
     imagePosition="right"
     client:load
   />
 
-  <BrandLogos logos={logos} logoType="dark" title="Powered & Trusted by" variant="dark" client:load />
+  <BrandLogos logos={logos} logoType="light" title="Powered & Trusted by" client:load />
 
-	<CallToAction client:load variant="dark" />
+	<CallToAction client:load />
 </Layout>

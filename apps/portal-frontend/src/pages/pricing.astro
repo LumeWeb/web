@@ -1,9 +1,8 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import Layout from "../layouts/Layout.astro";
 import PageHeader from "@/components/PageHeader";
 import BrandLogos from "@/components/BrandLogos";
 import PricingCommunity from "@/components/PricingCommunity";
-import SectionPricing from "@/components/layout/SectionPricing";
 
 import logos from "@/data/brand-logos";
 import pricingData from "@/data/pricing.json";
@@ -17,7 +16,7 @@ import pricingData from "@/data/pricing.json";
     client:load
   />
 
-  <SectionPricing>
+  <section class="bg-white py-[70px] md:py-[130px]">
     <div class="container">
       <div class="flex flex-wrap justify-center items-center gap-10 md:flex-nowrap">
         <PricingCommunity
@@ -39,7 +38,7 @@ import pricingData from "@/data/pricing.json";
         />
       </div>
     </div>
-  </SectionPricing>
+  </section>
 
   <BrandLogos
     logos={logos}

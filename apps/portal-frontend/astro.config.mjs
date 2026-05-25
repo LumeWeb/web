@@ -1,11 +1,26 @@
 // @ts-check
 import react from "@astrojs/react";
+import sitemap from "@astrojs/sitemap";
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
+import mdAlternate from "astro-md-alternate";
+import llms from "astro-llms-md";
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [react()],
+  site: "https://pinner.xyz",
+  integrations: [
+    react(),
+    sitemap(),
+    mdAlternate({
+      collections: [],
+    }),
+    llms({
+      generateLlmsTxt: true,
+      generateLlmsFullTxt: true,
+      generateIndividualMd: true,
+    }),
+  ],
   server: {
     allowedHosts: true,
   },
@@ -17,7 +32,7 @@ export default defineConfig({
       include: ["swiper"],
     },
     ssr: {
-      noExternal: ["swiper"], // Add this line
+      noExternal: ["swiper"],
     },
     plugins: [tailwindcss()],
   },

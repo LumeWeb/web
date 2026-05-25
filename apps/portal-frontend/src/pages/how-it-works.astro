@@ -1,27 +1,27 @@
 ---
-import Layout from '@/layouts/Layout.astro';
+import Layout from '../layouts/Layout.astro';
 import PageHeader from '@/components/PageHeader';
 import AboutSection from '@/components/AboutSection';
 import CallToAction from '@/components/CallToAction';
 
-import HowItWorksImage from "@/assets/how-it-works-1.png";
-import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
-import StorageImage from "@/assets/how-it-works-2.png";
-import StorageMobile from "@/assets/how-it-works-mobile-2.png";
+import HowItWorksImage from "../assets/how-it-works-1.png";
+import HowItWorksMobile from "../assets/how-it-works-mobile-1.png";
+import StorageImage from "../assets/how-it-works-2.png";
+import StorageMobile from "../assets/how-it-works-mobile-2.png";
 ---
 
-<Layout title="How Pinner Works">
+<Layout title="How Lume Works">
   <PageHeader
     title="Simple interface, powerful technology"
-    description="Understanding how Pinner keeps your files private and secure"
-    mobileTitle="How Pinner Works"
+    description="Understanding how Lume keeps your files private and secure"
+    mobileTitle="How Lume Works"
     client:load
   />
 
   <AboutSection
     title="Your portal to private storage"
     subtitle="The Interface"
-    description="Pinner provides a simple way to store and manage your files. Upload through our intuitive interface, and we handle encrypting and distributing your data across the network."
+    description="Lume provides a simple way to store and manage your files. Upload through our intuitive interface, and we handle encrypting and distributing your data across the network."
     imageUrl={HowItWorksImage}
     imgageMobileUrl={HowItWorksMobile}
     client:load
@@ -30,7 +30,7 @@ import StorageMobile from "@/assets/how-it-works-mobile-2.png";
   <AboutSection
     title="Decentralized storage backbone"
     subtitle="The Technology"
-    description="Built on the Sia network, Pinner distributes your encrypted files across many storage providers. This ensures no single entity controls your data while keeping it reliably accessible."
+    description="Built on the Sia network, Lume distributes your encrypted files across many storage providers. This ensures no single entity controls your data while keeping it reliably accessible."
     imageUrl={StorageImage}
     imgageMobileUrl={StorageMobile}
     theme="gray"
