@@ -233,6 +233,8 @@ else
     # Substitute {PORT} placeholder in server args if present
     server_cmd="${server_cmd//\{PORT\}/$local_port}"
 
+    read -ra server_cmd_parts <<< "$server_cmd"
+
     tunnel_single_app "$TUNNEL_APP_DIR" "$local_port" "$TUNNEL_HOST" \
-        "${TUNNEL_APP_NAME:-app}" "$server_cmd"
+        "${TUNNEL_APP_NAME:-app}" "${server_cmd_parts[@]}"
 fi
