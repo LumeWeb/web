@@ -1,0 +1,1 @@
+{"version":3,"file":"otp-BfUwhXQs.js","names":["OtpForm"],"sources":["../../../src/ui/routes/otp.tsx"],"sourcesContent":["import { OtpForm } from \"@lumeweb/portal-framework-auth\";\n\nexport default OtpForm;\n"],"mappings":"oDAEA,IAAA,EAAeA"}
