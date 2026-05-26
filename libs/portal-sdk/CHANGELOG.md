@@ -1,5 +1,14 @@
 # @lumeweb/portal-sdk
 
+## 0.1.3 (2026-05-26)
+
+### Features
+
+#### Features
+
+- add quota/quotaHistory wrappers, MSW mock generation, and dedicated mocks export
+- add dashboard widget, useQuota hook, and Refine capability
+
 ## 0.1.2 (2026-05-22)
 
 ### Features
