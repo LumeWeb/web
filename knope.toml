@@ -58,6 +58,10 @@ changelog = "libs/portal-plugin-core/CHANGELOG.md"
 versioned_files = ["libs/portal-plugin-dashboard/package.json"]
 changelog = "libs/portal-plugin-dashboard/CHANGELOG.md"
 
+[packages."@lumeweb/portal-plugin-quota"]
+versioned_files = ["libs/portal-plugin-quota/package.json"]
+changelog = "libs/portal-plugin-quota/CHANGELOG.md"
+
 [packages."@lumeweb/portal-plugin-ipfs"]
 versioned_files = ["libs/portal-plugin-ipfs/package.json"]
 changelog = "libs/portal-plugin-ipfs/CHANGELOG.md"
