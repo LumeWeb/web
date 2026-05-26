@@ -11,6 +11,11 @@ export default defineConfig({
       client: "fetch",
       target: "account/generated",
       workspace: "./src",
+      mock: {
+        type: "msw",
+        delay: 0,
+        indexMockFiles: true,
+      },
     },
   },
 });

@@ -23,6 +23,19 @@ import type {
   UserCreditsListResponse
 } from './accountAPI.schemas';
 
+import {
+  faker
+} from '@faker-js/faker';
+
+import {
+  HttpResponse,
+  delay,
+  http
+} from 'msw';
+import type {
+  RequestHandlerOptions
+} from 'msw';
+
 
 
 export type getApiAccountBillingBalanceResponse200 = {
@@ -1324,3 +1337,273 @@ export const getApiBillingPlans = async ( options?: RequestInit): Promise<getApi
 }
 
 
+
+
+export const getGetApiAccountBillingBalanceResponseMock = (overrideResponse: Partial<Extract<BalanceResponse, object>> = {}): BalanceResponse => ({balance: {}, user_id: faker.number.int(), ...overrideResponse})
+
+export const getPostApiAccountBillingCancelResponseMock = (overrideResponse: Partial<Extract<ManagementResultResponse, object>> = {}): ManagementResultResponse => ({action: faker.string.alpha({length: {min: 10, max: 20}}), api_endpoint: faker.helpers.arrayElement([{method: faker.string.alpha({length: {min: 10, max: 20}}), path: faker.string.alpha({length: {min: 10, max: 20}})}, undefined]), can_abort: faker.datatype.boolean(), confirmation_message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), effective_time: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), error_message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), requires_confirmation: faker.datatype.boolean(), status: faker.string.alpha({length: {min: 10, max: 20}}), url: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), ...overrideResponse})
+
+export const getPostApiAccountBillingCancelAbortResponseMock = (overrideResponse: Partial<Extract<ManagementResultResponse, object>> = {}): ManagementResultResponse => ({action: faker.string.alpha({length: {min: 10, max: 20}}), api_endpoint: faker.helpers.arrayElement([{method: faker.string.alpha({length: {min: 10, max: 20}}), path: faker.string.alpha({length: {min: 10, max: 20}})}, undefined]), can_abort: faker.datatype.boolean(), confirmation_message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), effective_time: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), error_message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), requires_confirmation: faker.datatype.boolean(), status: faker.string.alpha({length: {min: 10, max: 20}}), url: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), ...overrideResponse})
+
+export const getPostApiAccountBillingChangePlanResponseMock = (overrideResponse: Partial<Extract<ManagementResultResponse, object>> = {}): ManagementResultResponse => ({action: faker.string.alpha({length: {min: 10, max: 20}}), api_endpoint: faker.helpers.arrayElement([{method: faker.string.alpha({length: {min: 10, max: 20}}), path: faker.string.alpha({length: {min: 10, max: 20}})}, undefined]), can_abort: faker.datatype.boolean(), confirmation_message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), effective_time: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), error_message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), requires_confirmation: faker.datatype.boolean(), status: faker.string.alpha({length: {min: 10, max: 20}}), url: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), ...overrideResponse})
+
+export const getGetApiAccountBillingCheckoutSessionSessionIdStatusResponseMock = (overrideResponse: Partial<Extract<CheckoutSessionStatusResponse, object>> = {}): CheckoutSessionStatusResponse => ({customer_email: faker.string.alpha({length: {min: 10, max: 20}}), session_id: faker.string.alpha({length: {min: 10, max: 20}}), status: faker.string.alpha({length: {min: 10, max: 20}}), user_id: faker.number.int(), ...overrideResponse})
+
+export const getGetApiAccountBillingCheckoutUiPlanIdResponseMock = (overrideResponse: Partial<Extract<CheckoutUIResponse, object>> = {}): CheckoutUIResponse => ({expires_at: faker.date.past().toISOString().slice(0, 19) + 'Z', fragments: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({css: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), html: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), link: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), metadata: faker.helpers.arrayElement([{}, undefined]), script: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.string.alpha({length: {min: 10, max: 20}})})), metadata: faker.helpers.arrayElement([{}, undefined]), session_id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), ...overrideResponse})
+
+export const getGetApiAccountBillingCreditsResponseMock = (overrideResponse: Partial<Extract<UserCreditsListResponse, object>> = {}): UserCreditsListResponse => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({amount: {}, created_at: faker.date.past().toISOString().slice(0, 19) + 'Z', description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), direction: faker.string.alpha({length: {min: 10, max: 20}}), id: Array.from({ length: faker.number.int({min: 16, max: 16}) }, (_, i) => i + 1).map(() => (faker.number.int())), type: faker.string.alpha({length: {min: 10, max: 20}})})), total: faker.number.int(), ...overrideResponse})
+
+export const getPostApiAccountBillingCustomerPortalResponseMock = (overrideResponse: Partial<Extract<ManagementResultResponse, object>> = {}): ManagementResultResponse => ({action: faker.string.alpha({length: {min: 10, max: 20}}), api_endpoint: faker.helpers.arrayElement([{method: faker.string.alpha({length: {min: 10, max: 20}}), path: faker.string.alpha({length: {min: 10, max: 20}})}, undefined]), can_abort: faker.datatype.boolean(), confirmation_message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), effective_time: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), error_message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), requires_confirmation: faker.datatype.boolean(), status: faker.string.alpha({length: {min: 10, max: 20}}), url: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), ...overrideResponse})
+
+export const getPostApiAccountBillingManagementResponseMock = (overrideResponse: Partial<Extract<ManagementResultResponse, object>> = {}): ManagementResultResponse => ({action: faker.string.alpha({length: {min: 10, max: 20}}), api_endpoint: faker.helpers.arrayElement([{method: faker.string.alpha({length: {min: 10, max: 20}}), path: faker.string.alpha({length: {min: 10, max: 20}})}, undefined]), can_abort: faker.datatype.boolean(), confirmation_message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), effective_time: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), error_message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), requires_confirmation: faker.datatype.boolean(), status: faker.string.alpha({length: {min: 10, max: 20}}), url: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), ...overrideResponse})
+
+export const getGetApiAccountBillingManagementCapabilitiesResponseMock = (overrideResponse: Partial<Extract<ManagementCapabilitiesResponse, object>> = {}): ManagementCapabilitiesResponse => ({admin_operations: {
+        [faker.string.alphanumeric(5)]: faker.datatype.boolean()
+      }, management_mode: faker.string.alpha({length: {min: 10, max: 20}}), operations: {
+        [faker.string.alphanumeric(5)]: faker.datatype.boolean()
+      }, ...overrideResponse})
+
+export const getPostApiAccountBillingPauseResponseMock = (overrideResponse: Partial<Extract<ManagementResultResponse, object>> = {}): ManagementResultResponse => ({action: faker.string.alpha({length: {min: 10, max: 20}}), api_endpoint: faker.helpers.arrayElement([{method: faker.string.alpha({length: {min: 10, max: 20}}), path: faker.string.alpha({length: {min: 10, max: 20}})}, undefined]), can_abort: faker.datatype.boolean(), confirmation_message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), effective_time: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), error_message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), requires_confirmation: faker.datatype.boolean(), status: faker.string.alpha({length: {min: 10, max: 20}}), url: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), ...overrideResponse})
+
+export const getPostApiAccountBillingResumeResponseMock = (overrideResponse: Partial<Extract<ManagementResultResponse, object>> = {}): ManagementResultResponse => ({action: faker.string.alpha({length: {min: 10, max: 20}}), api_endpoint: faker.helpers.arrayElement([{method: faker.string.alpha({length: {min: 10, max: 20}}), path: faker.string.alpha({length: {min: 10, max: 20}})}, undefined]), can_abort: faker.datatype.boolean(), confirmation_message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), effective_time: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), error_message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), requires_confirmation: faker.datatype.boolean(), status: faker.string.alpha({length: {min: 10, max: 20}}), url: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), ...overrideResponse})
+
+export const getGetApiAccountBillingSubscriptionResponseMock = (overrideResponse: Partial<Extract<SubscriptionStatusResponse, object>> = {}): SubscriptionStatusResponse => ({created_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), gateway_type: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), is_subscribed: faker.datatype.boolean(), paused_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), pricing_plan_period_id: faker.helpers.arrayElement([faker.number.int(), undefined]), updated_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), will_cancel_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', undefined]), ...overrideResponse})
+
+export const getPostApiAccountBillingWebhooksGatewayTypeResponseMock = (overrideResponse: Partial<Extract<ErrorResponse, object>> = {}): ErrorResponse => ({error: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
+
+export const getGetApiBillingGatewaysResponseMock = (): GatewayListResponse => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({abilities: {checkout: faker.datatype.boolean(), customer_portal: faker.datatype.boolean(), session_status: faker.datatype.boolean()}, description: faker.string.alpha({length: {min: 10, max: 20}}), id: faker.string.alpha({length: {min: 10, max: 20}}), is_active: faker.datatype.boolean(), logo_url: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}})})))
+
+export const getGetApiBillingPlansResponseMock = (overrideResponse: Partial<Extract<PublicPricingPlansListResponse, object>> = {}): PublicPricingPlansListResponse => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({currency: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.string.alpha({length: {min: 10, max: 20}}), features: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), id: faker.number.int(), name: faker.string.alpha({length: {min: 10, max: 20}}), pricing_periods: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({cadence: faker.string.alpha({length: {min: 10, max: 20}}), id: faker.number.int(), price_usd: faker.number.float({fractionDigits: 2}), quota_plan_id: faker.number.int(), rolling_days: faker.helpers.arrayElement([faker.number.int(), undefined])}))})), total: faker.number.int(), ...overrideResponse})
+
+
+export const getGetApiAccountBillingBalanceMockHandler = (overrideResponse?: BalanceResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<BalanceResponse> | BalanceResponse), options?: RequestHandlerOptions) => {
+  return http.get('*/api/account/billing/balance', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetApiAccountBillingBalanceResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPostApiAccountBillingCancelMockHandler = (overrideResponse?: ManagementResultResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ManagementResultResponse> | ManagementResultResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/account/billing/cancel', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAccountBillingCancelResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPostApiAccountBillingCancelAbortMockHandler = (overrideResponse?: ManagementResultResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ManagementResultResponse> | ManagementResultResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/account/billing/cancel/abort', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAccountBillingCancelAbortResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPostApiAccountBillingChangePlanMockHandler = (overrideResponse?: ManagementResultResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ManagementResultResponse> | ManagementResultResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/account/billing/change-plan', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAccountBillingChangePlanResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetApiAccountBillingCheckoutSessionSessionIdStatusMockHandler = (overrideResponse?: CheckoutSessionStatusResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CheckoutSessionStatusResponse> | CheckoutSessionStatusResponse), options?: RequestHandlerOptions) => {
+  return http.get('*/api/account/billing/checkout/session/:sessionId/status', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetApiAccountBillingCheckoutSessionSessionIdStatusResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetApiAccountBillingCheckoutUiPlanIdMockHandler = (overrideResponse?: CheckoutUIResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CheckoutUIResponse> | CheckoutUIResponse), options?: RequestHandlerOptions) => {
+  return http.get('*/api/account/billing/checkout/ui/:planId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetApiAccountBillingCheckoutUiPlanIdResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetApiAccountBillingCreditsMockHandler = (overrideResponse?: UserCreditsListResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<UserCreditsListResponse> | UserCreditsListResponse), options?: RequestHandlerOptions) => {
+  return http.get('*/api/account/billing/credits', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetApiAccountBillingCreditsResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPostApiAccountBillingCustomerPortalMockHandler = (overrideResponse?: ManagementResultResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ManagementResultResponse> | ManagementResultResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/account/billing/customer-portal', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAccountBillingCustomerPortalResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPostApiAccountBillingManagementMockHandler = (overrideResponse?: ManagementResultResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ManagementResultResponse> | ManagementResultResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/account/billing/management', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAccountBillingManagementResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetApiAccountBillingManagementCapabilitiesMockHandler = (overrideResponse?: ManagementCapabilitiesResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ManagementCapabilitiesResponse> | ManagementCapabilitiesResponse), options?: RequestHandlerOptions) => {
+  return http.get('*/api/account/billing/management/capabilities', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetApiAccountBillingManagementCapabilitiesResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPostApiAccountBillingPauseMockHandler = (overrideResponse?: ManagementResultResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ManagementResultResponse> | ManagementResultResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/account/billing/pause', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAccountBillingPauseResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPostApiAccountBillingResumeMockHandler = (overrideResponse?: ManagementResultResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ManagementResultResponse> | ManagementResultResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/account/billing/resume', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAccountBillingResumeResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetApiAccountBillingSubscriptionMockHandler = (overrideResponse?: SubscriptionStatusResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<SubscriptionStatusResponse> | SubscriptionStatusResponse), options?: RequestHandlerOptions) => {
+  return http.get('*/api/account/billing/subscription', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetApiAccountBillingSubscriptionResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetApiAccountBillingSubscriptionEventsMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.get('*/api/account/billing/subscription/events', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(0);
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPostApiAccountBillingWebhooksGatewayTypeMockHandler = (overrideResponse?: ErrorResponse | void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ErrorResponse | void> | ErrorResponse | void), options?: RequestHandlerOptions) => {
+  return http.post('*/api/account/billing/webhooks/:gatewayType', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(0);
+
+  const resolvedBody = overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAccountBillingWebhooksGatewayTypeResponseMock();
+    return resolvedBody === undefined
+      ? new HttpResponse(null, { status: 204 })
+      : HttpResponse.json(resolvedBody, { status: 200 })
+  }, options)
+}
+
+export const getGetApiBillingGatewaysMockHandler = (overrideResponse?: GatewayListResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<GatewayListResponse> | GatewayListResponse), options?: RequestHandlerOptions) => {
+  return http.get('*/api/billing/gateways', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetApiBillingGatewaysResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetApiBillingGatewaysIdLogoMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.get('*/api/billing/gateways/:id/logo', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(0);
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetApiBillingPlansMockHandler = (overrideResponse?: PublicPricingPlansListResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PublicPricingPlansListResponse> | PublicPricingPlansListResponse), options?: RequestHandlerOptions) => {
+  return http.get('*/api/billing/plans', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(0);
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetApiBillingPlansResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+export const getBillingMock = () => [
+  getGetApiAccountBillingBalanceMockHandler(),
+  getPostApiAccountBillingCancelMockHandler(),
+  getPostApiAccountBillingCancelAbortMockHandler(),
+  getPostApiAccountBillingChangePlanMockHandler(),
+  getGetApiAccountBillingCheckoutSessionSessionIdStatusMockHandler(),
+  getGetApiAccountBillingCheckoutUiPlanIdMockHandler(),
+  getGetApiAccountBillingCreditsMockHandler(),
+  getPostApiAccountBillingCustomerPortalMockHandler(),
+  getPostApiAccountBillingManagementMockHandler(),
+  getGetApiAccountBillingManagementCapabilitiesMockHandler(),
+  getPostApiAccountBillingPauseMockHandler(),
+  getPostApiAccountBillingResumeMockHandler(),
+  getGetApiAccountBillingSubscriptionMockHandler(),
+  getGetApiAccountBillingSubscriptionEventsMockHandler(),
+  getPostApiAccountBillingWebhooksGatewayTypeMockHandler(),
+  getGetApiBillingGatewaysMockHandler(),
+  getGetApiBillingGatewaysIdLogoMockHandler(),
+  getGetApiBillingPlansMockHandler()
+]
