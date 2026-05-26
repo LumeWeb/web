@@ -9,7 +9,7 @@ import {
 
 import {
   AccountInfoResponse,
-  GetApiOperationsParams,
+  GetApiAccountQuotaHistoryParams,
   LoginRequest,
   LoginResponse,
   OperationDetailResponse,
@@ -22,6 +22,8 @@ import {
   PasswordResetRequest,
   PasswordResetVerifyRequest,
   PongResponse,
+  QuotaHistoryResponse,
+  QuotaStatusResponse,
   RegisterRequest,
   ResendVerifyEmailRequest,
   UploadLimitResponse,
@@ -130,6 +132,34 @@ export class AccountApi {
    */
   public async info(): Promise<Result<AccountInfoResponse>> {
     return this.fetchJson<AccountInfoResponse>("/api/account", {
+      method: "GET",
+    });
+  }
+
+  public async quota(): Promise<Result<QuotaStatusResponse>> {
+    return this.fetchJson<QuotaStatusResponse>("/api/account/quota", {
+      method: "GET",
+    });
+  }
+
+  public async quotaHistory(
+    params?: GetApiAccountQuotaHistoryParams,
+  ): Promise<Result<QuotaHistoryResponse>> {
+    const url = new URL("/api/account/quota/history", this.apiUrl);
+
+    if (params) {
+      if (params.start_date) {
+        url.searchParams.set("start_date", params.start_date);
+      }
+      if (params.end_date) {
+        url.searchParams.set("end_date", params.end_date);
+      }
+      if (params.type) {
+        url.searchParams.set("type", params.type);
+      }
+    }
+
+    return this.fetchJson<QuotaHistoryResponse>(url.toString(), {
       method: "GET",
     });
   }

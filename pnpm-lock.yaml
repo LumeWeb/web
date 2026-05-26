@@ -1927,6 +1927,67 @@ importers:
         specifier: workspace:*
         version: link:../tsdown-config
 
+  libs/portal-plugin-quota:
+    dependencies:
+      '@lumeweb/advanced-rest-provider':
+        specifier: workspace:*
+        version: link:../advanced-rest
+      '@lumeweb/portal-framework-auth':
+        specifier: workspace:*
+        version: link:../portal-framework-auth
+      '@lumeweb/portal-framework-core':
+        specifier: workspace:*
+        version: link:../portal-framework-core
+      '@lumeweb/portal-framework-ui':
+        specifier: workspace:*
+        version: link:../portal-framework-ui
+      '@lumeweb/portal-framework-ui-core':
+        specifier: workspace:*
+        version: link:../portal-framework-ui-core
+      '@lumeweb/portal-sdk':
+        specifier: workspace:*
+        version: link:../portal-sdk
+      '@refinedev/core':
+        specifier: 'catalog:'
+        version: 5.0.12(@tanstack/react-query@5.100.10(react@19.2.6))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.577.0(react@19.2.6)
+      nanoevents:
+        specifier: 'catalog:'
+        version: 9.1.0
+      react:
+        specifier: 'catalog:'
+        version: 19.2.6
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.6(react@19.2.6)
+      react-router:
+        specifier: 'catalog:'
+        version: 7.15.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+    devDependencies:
+      '@mswjs/interceptors':
+        specifier: 'catalog:'
+        version: 0.41.9
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.2.3(@types/react@19.2.14)
+      msw:
+        specifier: 'catalog:'
+        version: 2.14.6(@types/node@25.9.1)(typescript@6.0.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vite:
+        specifier: catalog:framework
+        version: 8.0.8(@types/node@25.9.1)(@vitejs/devtools@0.1.22)(esbuild@0.27.7)(jiti@2.6.1)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0)
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.6(@types/node@25.9.1)(@vitest/browser-playwright@4.1.6)(@vitest/coverage-v8@4.1.6)(@vitest/ui@4.1.5)(happy-dom@20.9.0)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.14.6(@types/node@25.9.1)(typescript@6.0.3))(vite@8.0.8)
+
   libs/portal-plugin-template:
     dependencies:
       '@lumeweb/portal-framework-core':
@@ -1967,15 +2028,21 @@ importers:
         specifier: workspace:*
         version: link:../query-builder
     devDependencies:
+      '@faker-js/faker':
+        specifier: ^9.0.0
+        version: 9.9.0
       '@lumeweb/tsdown-config':
         specifier: workspace:*
         version: link:../tsdown-config
       '@vitest/coverage-v8':
         specifier: ^4.1.6
         version: 4.1.6(@vitest/browser@4.1.6)(vitest@4.1.6)
+      msw:
+        specifier: 'catalog:'
+        version: 2.14.6(@types/node@25.9.1)(typescript@6.0.3)
       orval:
         specifier: 'catalog:'
-        version: 8.10.0(@faker-js/faker@10.4.0)(prettier@3.8.3)(typescript@6.0.3)
+        version: 8.10.0(@faker-js/faker@9.9.0)(prettier@3.8.3)(typescript@6.0.3)
       tsdown:
         specifier: 'catalog:'
         version: 0.21.10(@vitejs/devtools@0.1.22)(publint@0.3.21)(typescript@6.0.3)
@@ -3361,6 +3428,10 @@ packages:
   '@faker-js/faker@10.4.0':
     resolution: {integrity: sha512-sDBWI3yLy8EcDzgobvJTWq1MJYzAkQdpjXuPukga9wXonhpMRvd1Izuo2Qgwey2OiEoRIBr35RMU9HJRoOHzpw==}
     engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
+
+  '@faker-js/faker@9.9.0':
+    resolution: {integrity: sha512-OEl393iCOoo/z8bMezRlJu+GlRGlsKbUAN7jKB6LhnKoqKve5DXRpalbItIIcwnCjs1k/FOPjFzcA6Qn+H+YbA==}
+    engines: {node: '>=18.0.0', npm: '>=9.0.0'}
 
   '@floating-ui/core@1.7.5':
     resolution: {integrity: sha512-1Ih4WTWyw0+lKyFMcBHGbb5U5FtuHJuujoyyr5zTaWS5EYMeT6Jb2AuDeftsCsEuchO+mM2ij5+q9crhydzLhQ==}
@@ -7079,16 +7150,8 @@ packages:
   '@tanstack/query-core@5.100.10':
     resolution: {integrity: sha512-8UR0yJR+GiQ40m3lPhUr0xbfAupe6GSQiksSBSa9SM2NjezFyxXCIA69/lz8cSoNKZLrw1/PktIyQBJcVeMi3w==}
 
-  '@tanstack/query-core@5.100.5':
-    resolution: {integrity: sha512-t20KrhKkf0HXzqQkPbJ5erhFesup68BAbwFgYmTrS7bxMF7O5MdmL8jUkik4thsG7Hg00fblz30h6yF1d5TxGg==}
-
   '@tanstack/react-query@5.100.10':
     resolution: {integrity: sha512-FLaZf2RCrA/Zgp4aiu5tG3TyasTRO7aZ99skxQpr3Hg/zXOhu6yq5FZCYQ/tRaJtM9ylnoK8tFK7PolXQadv6Q==}
-    peerDependencies:
-      react: ^18 || ^19
-
-  '@tanstack/react-query@5.100.5':
-    resolution: {integrity: sha512-aNwj1mi2v2bQ9IxkyR1grLOUkv3BYWoykHy9KDyLNbjC3tsahbOHJibK+Wjtr1wRhG59/AvJhiJG5OlthaCgJA==}
     peerDependencies:
       react: ^18 || ^19
 
@@ -12597,11 +12660,6 @@ packages:
     resolution: {integrity: sha512-aEZ9qP+/M+58x2qgfSFEWH1BxLyHe5+qkLNJOZQb5iGS017jpbRnoKhNRrXPeA6RfBrZO5wZrT9DMC1UqE1f1w==}
     engines: {node: ^20.9.0 || >=22}
 
-  react-dom@19.2.5:
-    resolution: {integrity: sha512-J5bAZz+DXMMwW/wV3xzKke59Af6CHY7G4uYLN1OvBcKEsWOs4pQExj86BBKamxl/Ik5bx9whOrvBlSDfWzgSag==}
-    peerDependencies:
-      react: ^19.2.5
-
   react-dom@19.2.6:
     resolution: {integrity: sha512-0prMI+hvBbPjsWnxDLxlCGyM8PN6UuWjEUCYmZhO67xIV9Xasa/r/vDnq+Xyq4Lo27g8QSbO5YzARu0D1Sps3g==}
     peerDependencies:
@@ -12760,10 +12818,6 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
-
-  react@19.2.5:
-    resolution: {integrity: sha512-llUJLzz1zTUBrskt2pwZgLq59AemifIftw4aB7JxOqf1HY2FDaGDxgwpAPVzHU1kdWabH7FauP4i1oEeer2WCA==}
-    engines: {node: '>=0.10.0'}
 
   react@19.2.6:
     resolution: {integrity: sha512-sfWGGfavi0xr8Pg0sVsyHMAOziVYKgPLNrS7ig+ivMNb3wbCBw3KxtflsGBAwD3gYQlE/AEZsTLgToRrSCjb0Q==}
@@ -16262,6 +16316,8 @@ snapshots:
 
   '@faker-js/faker@10.4.0': {}
 
+  '@faker-js/faker@9.9.0': {}
+
   '@floating-ui/core@1.7.5':
     dependencies:
       '@floating-ui/utils': 0.2.11
@@ -17787,12 +17843,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.5)':
-    dependencies:
-      '@types/mdx': 2.0.13
-      '@types/react': 19.2.14
-      react: 19.2.5
-
   '@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.6)':
     dependencies:
       '@types/mdx': 2.0.13
@@ -18199,9 +18249,25 @@ snapshots:
       - supports-color
       - typescript
 
+  '@orval/angular@8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)':
+    dependencies:
+      '@orval/core': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+    transitivePeerDependencies:
+      - '@faker-js/faker'
+      - supports-color
+      - typescript
+
   '@orval/axios@8.10.0(@faker-js/faker@10.4.0)(typescript@6.0.3)':
     dependencies:
       '@orval/core': 8.10.0(@faker-js/faker@10.4.0)(typescript@6.0.3)
+    transitivePeerDependencies:
+      - '@faker-js/faker'
+      - supports-color
+      - typescript
+
+  '@orval/axios@8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)':
+    dependencies:
+      '@orval/core': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
     transitivePeerDependencies:
       - '@faker-js/faker'
       - supports-color
@@ -18226,9 +18292,37 @@ snapshots:
       - supports-color
       - typescript
 
+  '@orval/core@8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)':
+    dependencies:
+      '@scalar/openapi-types': 0.8.0
+      acorn: 8.16.0
+      compare-versions: 6.1.1
+      debug: 4.4.3
+      esbuild: 0.27.7
+      esutils: 2.0.3
+      fs-extra: 11.3.4
+      globby: 16.1.0
+      jiti: 2.6.1
+      remeda: 2.33.7
+      typedoc: 0.28.19(typescript@6.0.3)
+    optionalDependencies:
+      '@faker-js/faker': 9.9.0
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
+
   '@orval/fetch@8.10.0(@faker-js/faker@10.4.0)(typescript@6.0.3)':
     dependencies:
       '@orval/core': 8.10.0(@faker-js/faker@10.4.0)(typescript@6.0.3)
+      '@scalar/openapi-types': 0.8.0
+    transitivePeerDependencies:
+      - '@faker-js/faker'
+      - supports-color
+      - typescript
+
+  '@orval/fetch@8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)':
+    dependencies:
+      '@orval/core': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
       '@scalar/openapi-types': 0.8.0
     transitivePeerDependencies:
       - '@faker-js/faker'
@@ -18246,6 +18340,17 @@ snapshots:
       - supports-color
       - typescript
 
+  '@orval/hono@8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)':
+    dependencies:
+      '@orval/core': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/zod': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      fs-extra: 11.3.4
+      remeda: 2.33.7
+    transitivePeerDependencies:
+      - '@faker-js/faker'
+      - supports-color
+      - typescript
+
   '@orval/mcp@8.10.0(@faker-js/faker@10.4.0)(typescript@6.0.3)':
     dependencies:
       '@orval/core': 8.10.0(@faker-js/faker@10.4.0)(typescript@6.0.3)
@@ -18256,9 +18361,28 @@ snapshots:
       - supports-color
       - typescript
 
+  '@orval/mcp@8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)':
+    dependencies:
+      '@orval/core': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/fetch': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/zod': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+    transitivePeerDependencies:
+      - '@faker-js/faker'
+      - supports-color
+      - typescript
+
   '@orval/mock@8.10.0(@faker-js/faker@10.4.0)(typescript@6.0.3)':
     dependencies:
       '@orval/core': 8.10.0(@faker-js/faker@10.4.0)(typescript@6.0.3)
+      remeda: 2.33.7
+    transitivePeerDependencies:
+      - '@faker-js/faker'
+      - supports-color
+      - typescript
+
+  '@orval/mock@8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)':
+    dependencies:
+      '@orval/core': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
       remeda: 2.33.7
     transitivePeerDependencies:
       - '@faker-js/faker'
@@ -18275,9 +18399,28 @@ snapshots:
       - supports-color
       - typescript
 
+  '@orval/query@8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)':
+    dependencies:
+      '@orval/core': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/fetch': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      remeda: 2.33.7
+    transitivePeerDependencies:
+      - '@faker-js/faker'
+      - supports-color
+      - typescript
+
   '@orval/solid-start@8.10.0(@faker-js/faker@10.4.0)(typescript@6.0.3)':
     dependencies:
       '@orval/core': 8.10.0(@faker-js/faker@10.4.0)(typescript@6.0.3)
+      '@scalar/openapi-types': 0.8.0
+    transitivePeerDependencies:
+      - '@faker-js/faker'
+      - supports-color
+      - typescript
+
+  '@orval/solid-start@8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)':
+    dependencies:
+      '@orval/core': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
       '@scalar/openapi-types': 0.8.0
     transitivePeerDependencies:
       - '@faker-js/faker'
@@ -18293,9 +18436,27 @@ snapshots:
       - supports-color
       - typescript
 
+  '@orval/swr@8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)':
+    dependencies:
+      '@orval/core': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/fetch': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+    transitivePeerDependencies:
+      - '@faker-js/faker'
+      - supports-color
+      - typescript
+
   '@orval/zod@8.10.0(@faker-js/faker@10.4.0)(typescript@6.0.3)':
     dependencies:
       '@orval/core': 8.10.0(@faker-js/faker@10.4.0)(typescript@6.0.3)
+      remeda: 2.33.7
+    transitivePeerDependencies:
+      - '@faker-js/faker'
+      - supports-color
+      - typescript
+
+  '@orval/zod@8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)':
+    dependencies:
+      '@orval/core': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
       remeda: 2.33.7
     transitivePeerDependencies:
       - '@faker-js/faker'
@@ -19826,7 +19987,7 @@ snapshots:
       lodash-es: 4.18.1
       papaparse: 5.5.3(patch_hash=8db42de1f1871890a205b993db193bd7914e8201801637ba4b6247c7604f7c56)
       pluralize: 8.0.0(patch_hash=88650615c62a180c406201cd54b23afb592a6a678db498f8b1a730f85ca868d2)
-      qs: 6.14.0
+      qs: 6.15.1
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
       tslib: 2.8.1
@@ -19835,7 +19996,7 @@ snapshots:
   '@refinedev/devtools-internal@2.0.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
     dependencies:
       '@refinedev/devtools-shared': 2.0.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      '@tanstack/react-query': 5.100.5(react@19.2.6)
+      '@tanstack/react-query': 5.100.10(react@19.2.6)
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
       error-stack-parser: 2.1.4
@@ -19844,7 +20005,7 @@ snapshots:
 
   '@refinedev/devtools-shared@2.0.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
     dependencies:
-      '@tanstack/react-query': 5.100.5(react@19.2.6)
+      '@tanstack/react-query': 5.100.10(react@19.2.6)
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
       error-stack-parser: 2.1.4
@@ -20366,12 +20527,12 @@ snapshots:
 
   '@storybook/addon-docs@8.6.14(@types/react@19.2.14)(storybook@10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))':
     dependencies:
-      '@mdx-js/react': 3.1.1(@types/react@19.2.14)(react@19.2.5)
-      '@storybook/blocks': 8.6.14(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(storybook@10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))
+      '@mdx-js/react': 3.1.1(@types/react@19.2.14)(react@19.2.6)
+      '@storybook/blocks': 8.6.14(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(storybook@10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))
       '@storybook/csf-plugin': 8.6.14(storybook@10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))
-      '@storybook/react-dom-shim': 8.6.14(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(storybook@10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))
-      react: 19.2.5
-      react-dom: 19.2.5(react@19.2.5)
+      '@storybook/react-dom-shim': 8.6.14(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(storybook@10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))
+      react: 19.2.6
+      react-dom: 19.2.6(react@19.2.6)
       storybook: 10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       ts-dedent: 2.2.0
     transitivePeerDependencies:
@@ -20440,15 +20601,6 @@ snapshots:
       memoizerific: 1.11.3
       storybook: 10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
 
-  '@storybook/blocks@8.6.14(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(storybook@10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))':
-    dependencies:
-      '@storybook/icons': 1.4.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      storybook: 10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      ts-dedent: 2.2.0
-    optionalDependencies:
-      react: 19.2.5
-      react-dom: 19.2.5(react@19.2.5)
-
   '@storybook/blocks@8.6.14(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(storybook@10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))':
     dependencies:
       '@storybook/icons': 1.4.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -20485,11 +20637,6 @@ snapshots:
 
   '@storybook/global@5.0.0': {}
 
-  '@storybook/icons@1.4.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
-    dependencies:
-      react: 19.2.5
-      react-dom: 19.2.5(react@19.2.5)
-
   '@storybook/icons@1.4.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
     dependencies:
       react: 19.2.6
@@ -20518,10 +20665,10 @@ snapshots:
       react-dom: 19.2.6(react@19.2.6)
       storybook: 10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
 
-  '@storybook/react-dom-shim@8.6.14(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(storybook@10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))':
+  '@storybook/react-dom-shim@8.6.14(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(storybook@10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))':
     dependencies:
-      react: 19.2.5
-      react-dom: 19.2.5(react@19.2.5)
+      react: 19.2.6
+      react-dom: 19.2.6(react@19.2.6)
       storybook: 10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
 
   '@storybook/react-vite@10.3.6(esbuild@0.27.7)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(rollup@4.60.2)(storybook@10.3.6(@testing-library/dom@10.4.0)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(typescript@6.0.3)(vite@8.0.8)':
@@ -20742,16 +20889,9 @@ snapshots:
 
   '@tanstack/query-core@5.100.10': {}
 
-  '@tanstack/query-core@5.100.5': {}
-
   '@tanstack/react-query@5.100.10(react@19.2.6)':
     dependencies:
       '@tanstack/query-core': 5.100.10
-      react: 19.2.6
-
-  '@tanstack/react-query@5.100.5(react@19.2.6)':
-    dependencies:
-      '@tanstack/query-core': 5.100.5
       react: 19.2.6
 
   '@tanstack/react-table@8.21.3(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
@@ -21109,7 +21249,7 @@ snapshots:
 
   '@types/set-cookie-parser@2.4.10':
     dependencies:
-      '@types/node': 25.7.0
+      '@types/node': 25.9.1
 
   '@types/stack-utils@2.0.3': {}
 
@@ -27347,6 +27487,44 @@ snapshots:
       - supports-color
       - typescript
 
+  orval@8.10.0(@faker-js/faker@9.9.0)(prettier@3.8.3)(typescript@6.0.3):
+    dependencies:
+      '@commander-js/extra-typings': 14.0.0(commander@14.0.3)
+      '@orval/angular': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/axios': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/core': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/fetch': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/hono': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/mcp': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/mock': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/query': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/solid-start': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/swr': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@orval/zod': 8.10.0(@faker-js/faker@9.9.0)(typescript@6.0.3)
+      '@scalar/json-magic': 0.12.12
+      '@scalar/openapi-parser': 0.25.12
+      '@scalar/openapi-types': 0.8.0
+      chokidar: 5.0.0
+      commander: 14.0.3
+      enquirer: 2.4.1
+      execa: 9.6.1
+      find-up: 8.0.0
+      fs-extra: 11.3.4
+      get-tsconfig: 4.14.0
+      jiti: 2.6.1
+      js-yaml: 4.1.1
+      remeda: 2.33.7
+      string-argv: 0.3.2
+      typedoc: 0.28.19(typescript@6.0.3)
+      typedoc-plugin-coverage: 4.0.3(typedoc@0.28.19(typescript@6.0.3))
+      typedoc-plugin-markdown: 4.11.0(typedoc@0.28.19(typescript@6.0.3))
+    optionalDependencies:
+      prettier: 3.8.3
+    transitivePeerDependencies:
+      - '@faker-js/faker'
+      - supports-color
+      - typescript
+
   otpauth@9.5.1:
     dependencies:
       '@noble/hashes': 2.2.0
@@ -28007,11 +28185,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  react-dom@19.2.5(react@19.2.5):
-    dependencies:
-      react: 19.2.5
-      scheduler: 0.27.0
-
   react-dom@19.2.6(react@19.2.6):
     dependencies:
       react: 19.2.6
@@ -28216,8 +28389,6 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 19.2.14
-
-  react@19.2.5: {}
 
   react@19.2.6: {}
 

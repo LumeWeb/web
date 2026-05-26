@@ -19,6 +19,11 @@
       "import": "./dist/esm/openapi.js",
       "require": "./dist/cjs/openapi.cjs"
     },
+    "./mocks": {
+      "types": "./dist/esm/account/mocks.d.ts",
+      "import": "./dist/esm/account/mocks.js",
+      "require": "./dist/cjs/account/mocks.cjs"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -37,8 +42,10 @@
     "@lumeweb/query-builder": "workspace:*"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.0.0",
     "@lumeweb/tsdown-config": "workspace:*",
     "@vitest/coverage-v8": "^4.1.6",
+    "msw": "catalog:",
     "orval": "catalog:",
     "tsdown": "catalog:"
   },
