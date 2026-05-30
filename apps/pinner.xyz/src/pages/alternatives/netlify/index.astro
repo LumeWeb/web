@@ -1,0 +1,119 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+import AboutSection from '@/components/AboutSection';
+import CallToAction from '@/components/CallToAction';
+import FAQ from '@/components/FAQ';
+import BrandLogos from '@/components/BrandLogos';
+import RelatedPages from '@/components/RelatedPages.astro';
+import PlanTable from '@/components/PlanTable.astro';
+import logos from '@/data/brand-logos';
+
+import AboutWhatIsPinner from "@/assets/about-what-is-pinner.jpg";
+import StaticSitesImage from "@/assets/solutions-website-static-sites.jpg";
+import HowItWorksImage from "@/assets/how-it-works-1.png";
+import BandwidthComparison from "@/components/BandwidthComparison";
+import MigrationNote from "@/components/MigrationNote";
+
+const planRows = [
+  { factor: "What you pay for", detail: "Storage and bandwidth only" },
+  { factor: "Bandwidth", detail: "Pay per GB, no tiers or overage multipliers" },
+  { factor: "Storage", detail: "Peer-to-peer (Sia network), independent providers" },
+  { factor: "Content addressing", detail: "Every file gets a permanent, verifiable hash" },
+  { factor: "Crypto payments", detail: "Available, no identity verification required" },
+  { factor: "Serverless functions", detail: "Not included, hosting only" },
+  { factor: "CI/CD & form handling", detail: "Not included, bring your own build tool" },
+];
+
+const faqs = [
+  {
+    question: "Can Pinner replace my current hosting?",
+    answer: "It depends on what you need. Pinner hosts built static files with content-addressed storage on a peer-to-peer network. It does not offer serverless functions, CI/CD, form handling, identity, or split testing. If you need those features, keep your current platform. If you want content-addressed hosting with no vendor lock-in on storage and simpler pricing, Pinner is worth a look."
+  },
+  {
+    question: "What makes Pinner different for static hosting?",
+    answer: "Content addressing: every file gets a permanent, verifiable hash that doesn't change. Peer-to-peer storage on the Sia network means your content lives on independent providers, not one company's servers. No vendor lock-in. No per-seat pricing. Pay for storage and bandwidth only. Crypto payments with no identity verification required."
+  },
+  {
+    question: "Can I use Pinner alongside my current platform?",
+    answer: "Yes. Use your current platform for builds, serverless functions, and forms, and Pinner for the final static asset hosting layer. Pinner hosts standard static files, so you can build anywhere and deploy to Pinner."
+  },
+  {
+    question: "How does the peer-to-peer storage work?",
+    answer: "Your static files are stored on the Sia network, where independent storage providers host your data. Providers only get paid when they cryptographically prove they're storing your files. The storage layer is decentralized, not locked to a single provider. The serving layer uses standard HTTP gateways."
+  }
+];
+---
+
+<Layout title="Netlify Alternative for Static Site Hosting | Pinner" description="Static site hosting on a peer-to-peer network with content addressing, no vendor lock-in, and no per-seat pricing.">
+  <PageHeader
+    title="Static site hosting on a peer-to-peer network"
+    mobileTitle="Netlify Alternative"
+    description="Trying to figure out how many credits your bandwidth costs? Pinner skips the credit math. Pay for storage and bandwidth directly. No per-seat charges. No overage rates."
+    btnText="Start Hosting →"
+    url="https://account.pinner.xyz"
+    secondaryBtnText="See Pricing →"
+    secondaryUrl="/pricing"
+    client:load
+  />
+
+  <AboutSection
+    subtitle="Why Pinner"
+    title="Your static files, on a permanent address"
+    description="Trying to figure out how many credits your bandwidth costs? Every file you upload gets a content hash: a permanent, verifiable link that doesn't depend on any one company staying online. Your data lives on a peer-to-peer network of independent storage providers, not a single company's servers. Pay for storage and bandwidth. No per-member charges. No surprise overage bills."
+    theme="white"
+    imageUrl={AboutWhatIsPinner}
+    client:load
+  >
+    <BandwidthComparison
+      competitor="Netlify Pro"
+      competitorAllowance="~150 GB/mo (all credits on bandwidth)"
+      competitorOverage="Buy credit packs at 0.13 USD/GB"
+      competitorMonthlyCost="20 USD/mo + credit packs for overage"
+      pinnerAllowance="250 GB/mo (Entry plan)"
+      pinnerMonthlyCost="5 USD/mo, no credit math needed"
+      verifiedDate="May 2026"
+      className="mt-6"
+    />
+  </AboutSection>
+
+  <AboutSection
+    subtitle="How It Works"
+    title="Peer-to-peer storage, content addressing, and simpler pricing"
+    description="Pay for storage and bandwidth with no per-developer fees or overage surprises. Your files live on a peer-to-peer network of independent storage providers instead of centralized CDN infrastructure. Host static websites from pinned content with permanent, verifiable addresses. Fully open source."
+    theme="gray"
+    imagePosition="right"
+    imageUrl={StaticSitesImage}
+    client:load
+  />
+
+  <AboutSection
+    subtitle="What Pinner Does (And Doesn't)"
+    title="Hosting only. No serverless, no CI/CD, no platform lock-in"
+    description="Pinner hosts built static files. It does not offer serverless functions, CI/CD, form handling, or split testing. If you need those features, keep your current platform for the dev workflow and use Pinner for the hosting layer. If you want content-addressed hosting on a peer-to-peer network with no vendor lock-in on storage, Pinner is built for that."
+    theme="white"
+    imageUrl={HowItWorksImage}
+    client:load
+  />
+
+  <PlanTable rows={planRows} />
+
+  <section class="py-[60px] md:py-[120px] bg-white">
+    <div class="xl:container px-6">
+      <h2 class="text-[24px] sm:text-[28px] md:text-[31px] font-medium text-content-text text-center mb-10 md:mb-14">Frequently Asked Questions</h2>
+      <FAQ faqs={faqs} client:load />
+    </div>
+  </section>
+
+  <RelatedPages links={[
+    { href: "/solutions/website-hosting", label: "Website Hosting", description: "Host static sites on a peer-to-peer network" },
+    { href: "/solutions/ipfs-pinning", label: "IPFS Pinning", description: "Pin files to a peer-to-peer network with permanent links" },
+    { href: "/alternatives/fleek", label: "Fleek Alternative", description: "Fleek's IPFS hosting shut down in January 2026" },
+  ]} />
+
+  <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />
+
+  <MigrationNote from="Netlify" client:load />
+
+  <CallToAction client:load />
+</Layout>

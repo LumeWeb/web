@@ -1,0 +1,36 @@
+---
+interface PlanRow {
+  factor: string;
+  detail: string;
+}
+
+interface Props {
+  rows: PlanRow[];
+}
+
+const { rows } = Astro.props;
+---
+
+<section class="py-[60px] md:py-[120px] bg-content-section-gray">
+  <div class="xl:container px-6">
+    <h2 class="text-[24px] sm:text-[28px] md:text-[31px] font-medium text-content-text text-center mb-10 md:mb-14">What You Get</h2>
+    <div class="max-w-[700px] mx-auto overflow-x-auto -mx-4 px-4 sm:mx-auto sm:px-0">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-content-divider/50">
+            <th class="bg-white px-4 pt-4 pb-4 text-left text-sm font-semibold text-content-text-muted">Factor</th>
+            <th class="bg-white px-4 pt-4 pb-4 text-left text-sm font-semibold text-content-text">Pinner</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr class="border-b border-content-divider/50 last:border-0">
+              <td class="bg-white px-4 py-4 text-sm font-medium text-content-text">{row.factor}</td>
+              <td class="bg-white px-4 py-4 text-sm text-content-text">{row.detail}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

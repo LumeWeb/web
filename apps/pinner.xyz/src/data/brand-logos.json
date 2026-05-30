@@ -1,0 +1,30 @@
+{
+  "logoDark": [
+    {
+      "id": 1,
+      "src": "/images/built-on-sia-badge-light.svg",
+      "alt": "Built on Sia",
+      "url": "https://sia.tech/grants"
+    },
+    {
+      "id": 2,
+      "src": "/images/brand-logo-dark-2.png",
+      "alt": "Open Source Initiative",
+      "url": "https://opensource.org"
+    }
+  ],
+  "logoLight": [
+    {
+      "id": 1,
+      "src": "/images/built-on-sia-badge.svg",
+      "alt": "Built on Sia",
+      "url": "https://sia.tech/grants"
+    },
+    {
+      "id": 2,
+      "src": "/images/brand-logo-2.png",
+      "alt": "Open Source Initiative",
+      "url": "https://opensource.org"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+import AboutSection from '@/components/AboutSection';
+import CallToAction from '@/components/CallToAction';
+import ThreeSteps from '@/components/HowItWorks/ThreeSteps';
+
+import HowItWorksImage from "@/assets/how-it-works-1.png";
+import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
+import StorageImage from "@/assets/how-it-works-2.png";
+import StorageMobile from "@/assets/how-it-works-mobile-2.png";
+---
+
+<Layout title="How Pinner Works. IPFS Pinning & Storage" description="Pin files to IPFS, host static websites, and store private data with zero-knowledge encryption. Three steps: pin, distribute, access anywhere.">
+  <PageHeader
+    title="Simple interface, powerful network"
+    description="IPFS pinning, website hosting, and private storage on a decentralized network"
+    mobileTitle="How Pinner Works"
+    client:load
+  />
+
+  <ThreeSteps client:load />
+
+  <AboutSection
+    title="Pin to IPFS, host to the web"
+    subtitle="The Interface"
+     description="Upload files through our CLI or SDK. We pin them to IPFS. Your content gets a link that stays online as long as it's pinned. Host static websites directly from pinned content. No setup required."
+    imageUrl={HowItWorksImage}
+    imgageMobileUrl={HowItWorksMobile}
+    client:load
+  />
+
+  <AboutSection
+    title="A network, not a data center"
+    subtitle="The Technology"
+    description="Your files are distributed across many independent storage providers. No single entity controls your data, and your files stay online even if individual servers go down. Stored on IPFS with reliable addresses, encrypted for private storage. Depending on your storage model."
+    imageUrl={StorageImage}
+    imgageMobileUrl={StorageMobile}
+    theme="gray"
+    imagePosition="right"
+    buttonText="Learn About Sia →"
+    url="https://sia.tech/learn"
+    client:load
+  />
+
+  <AboutSection
+    title="Private storage with S3 compatibility"
+    subtitle="S3 Storage (Advanced)"
+    description="For private data, Pinner offers S3-compatible storage, encrypted at rest with zero-knowledge encryption. Even we can't read your files. Currently available for advanced setups that deploy their own server. A streamlined 1-click setup is in development. Subscribe below to get notified."
+    theme="white"
+    client:load
+  />
+
+  <AboutSection
+    title="Or manage it yourself"
+    subtitle="Self-Hosted"
+    description="Deploy your own server to handle private data on your terms. Full control over storage limits and billing. For teams who want zero external dependencies. FOSS. Fully open source."
+    theme="gray"
+    imagePosition="right"
+    client:load
+  />
+
+  <CallToAction client:load />
+</Layout>

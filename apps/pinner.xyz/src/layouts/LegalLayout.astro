@@ -1,0 +1,45 @@
+---
+import "@/styles/globals.css";
+import Navbar from "@/components/Navbar.jsx";
+import Footer from "@/components/Footer.jsx";
+import { getGitLastUpdated } from "@/lib/last-updated";
+
+const { title } = Astro.props;
+const frontmatter = Astro.props.frontmatter || {};
+const lastUpdated = getGitLastUpdated();
+
+const formattedDate = frontmatter.last_updated
+  ? new Date(frontmatter.last_updated).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  : null;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Pinner - {title}</title>
+  </head>
+  <body class="bg-white antialiased">
+    <Navbar client:load theme="light" />
+    <main class="min-h-[220px] pt-28 md:pt-32">
+      <div class="mx-auto max-w-3xl px-6 py-12 md:py-16">
+        {formattedDate && (
+          <p class="text-sm text-neutral-500 mb-8">
+            Document last updated: {formattedDate}
+          </p>
+        )}
+        <div class="prose prose-neutral prose-headings:font-semibold prose-headings:tracking-tight prose-a:text-teal-600 prose-a:no-underline prose-strong:text-neutral-900 prose-table:text-sm prose-th:bg-neutral-50 prose-th:font-semibold prose-td:border-neutral-200 prose-td:p-3 prose-th:p-3 prose-li:marker:text-teal-600 prose-hr:border-neutral-200 [&_a:hover]:underline">
+          <slot />
+        </div>
+      </div>
+    </main>
+    <Footer lastUpdated={lastUpdated} />
+  </body>
+</html>

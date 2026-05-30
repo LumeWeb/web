@@ -1,0 +1,44 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+import CallToAction from '@/components/CallToAction';
+import BrandLogos from '@/components/BrandLogos';
+import RelatedPages from '@/components/RelatedPages.astro';
+import logos from '@/data/brand-logos';
+---
+
+<Layout title="Private, Encrypted Storage" description="Only you hold the keys. Choose how you want to use private, encrypted storage.">
+  <PageHeader
+    title="Private, Encrypted Storage"
+    mobileTitle="Private Storage"
+    description="Only you hold the keys."
+    btnText="Read the Docs →"
+    url="https://docs.pinner.xyz"
+    client:load
+  />
+
+  <section class="py-[60px] md:py-[120px] bg-white">
+    <div class="xl:container px-6 text-center">
+      <h2 class="text-[24px] sm:text-[28px] md:text-[31px] font-medium text-content-text mb-10 md:mb-14">Choose Your Path</h2>
+      <div class="flex flex-col sm:flex-row justify-center gap-6">
+        <a href="/solutions/private-storage/personal" class="inline-block bg-white border border-gray-200 rounded-lg px-8 py-10 text-content-text hover:shadow-lg transition-shadow max-w-[400px] text-left flex-1">
+          <span class="block text-xl font-medium mb-3">For Personal Use</span>
+          <span class="block text-base text-content-text-muted">Store private data on the Sia network. Encrypted, self-hosted, zero-knowledge.</span>
+        </a>
+        <a href="/solutions/private-storage/developers" class="inline-block bg-white border border-gray-200 rounded-lg px-8 py-10 text-content-text hover:shadow-lg transition-shadow max-w-[400px] text-left flex-1">
+          <span class="block text-xl font-medium mb-3">For Developers</span>
+          <span class="block text-base text-content-text-muted">Build apps on encrypted, peer-to-peer storage. Integrate the storage layer, earn when your users store data.</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <RelatedPages links={[
+    { href: "/solutions/s3-storage", label: "S3 Storage", description: "S3-compatible object storage on a peer-to-peer network" },
+    { href: "/solutions/ipfs-pinning", label: "IPFS Pinning", description: "Pin files to a peer-to-peer network with permanent links" },
+  ]} />
+
+  <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />
+
+  <CallToAction client:load />
+</Layout>

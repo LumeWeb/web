@@ -1,0 +1,114 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+import AboutSection from '@/components/AboutSection';
+import CallToAction from '@/components/CallToAction';
+import FAQ from '@/components/FAQ';
+import BrandLogos from '@/components/BrandLogos';
+import RelatedPages from '@/components/RelatedPages.astro';
+import PlanTable from '@/components/PlanTable.astro';
+import logos from '@/data/brand-logos';
+
+import AboutWhatIsPinner from "@/assets/about-what-is-pinner.jpg";
+import PinataDifferImage from "@/assets/solutions-pinata-differ.jpg";
+import PinataMigrateImage from "@/assets/solutions-pinata-migrate.jpg";
+
+const planRows = [
+  { factor: "What you pay for", detail: "Storage and bandwidth only" },
+  { factor: "IPFS pinning", detail: "Standard CIDs and content addressing" },
+  { factor: "Storage", detail: "Peer-to-peer (Sia network), independent providers" },
+  { factor: "Website hosting", detail: "Host static sites from pinned content" },
+  { factor: "Crypto payments", detail: "Available, no identity verification required" },
+  { factor: "Open source", detail: "Fully FOSS" },
+  { factor: "Request charges", detail: "None, pay for storage and bandwidth only" },
+  { factor: "Dedicated gateways", detail: "Not yet available, reach out if you need one" },
+];
+
+const faqs = [
+  {
+    question: "Do my content addresses change when I switch providers?",
+    answer: "No. Content addresses are content hashes, determined by your file's content, not by the provider. The same file pinned on Pinner has the same CID as it did on any other pinning service."
+  },
+  {
+    question: "What makes Pinner different from other IPFS pinning services?",
+    answer: "Crypto payments with no identity verification, website hosting from the same pinned content, and storage on the Sia decentralized network. Pinner is also fully open source."
+  },
+  {
+    question: "What doesn't Pinner offer?",
+    answer: "Pinner doesn't offer a free public HTTP gateway for arbitrary IPFS content. If there's something else you need, reach out. We're building based on what users actually need."
+  },
+  {
+    question: "How does pricing work?",
+    answer: "Pay for storage and bandwidth. No hidden fees, no API call charges. Founding Offer: first 50 accounts get their rate locked for life."
+  },
+  {
+    question: "Can I use multiple pinning services at once?",
+    answer: "Yes. Since IPFS content addresses are universal, you can pin to multiple providers simultaneously. You could keep your current provider for specific gateway needs and use Pinner for website hosting or crypto payments."
+  },
+  {
+    question: "How does the Sia network differ from centralized IPFS infrastructure?",
+    answer: "Centralized pinning services run IPFS nodes on infrastructure they manage. Pinner pins your content on the Sia network, where independent storage providers host your data. Providers only get paid when they prove they're storing your data. Built-in accountability without depending on one company's servers."
+  },
+  {
+    question: "I have thousands of pins. Can you handle migration?",
+    answer: "Reach out. We'll work with you on the transition, whether that's a few pins or a large collection. Content addresses stay the same across providers, so it's primarily a matter of re-pinning your CIDs."
+  }
+];
+---
+
+<Layout title="Pinata Alternative with Crypto Payments & Migration | Pinner" description="IPFS pinning with crypto payments, website hosting, and private storage on the same decentralized network. We help you migrate.">
+  <PageHeader
+    title="IPFS pinning with crypto payments and decentralized storage"
+    mobileTitle="Pinata Alternative"
+    description="Pay with crypto, host websites from pinned content, and store on a decentralized network. Need help migrating? We'll work with you."
+    btnText="Start Pinning →"
+    url="https://account.pinner.xyz"
+    secondaryBtnText="See Pricing →"
+    secondaryUrl="/pricing"
+    client:load
+  />
+
+  <AboutSection
+    subtitle="Why Pinner"
+    title="IPFS pinning, plus crypto payments and website hosting"
+    description="You already know how IPFS pinning works: content addresses, CIDs, pinning to keep data online. Pinner adds crypto payments with no identity verification, website hosting from the same pinned content, and storage on a decentralized provider network. Same content addressing you're used to, with a different approach underneath."
+    theme="white"
+    imageUrl={AboutWhatIsPinner}
+    client:load
+  />
+
+  <AboutSection
+    subtitle="How It Works"
+    title="Crypto payments, decentralized hosting, and more"
+    description="Pay with crypto or card. No identity verification required for crypto payments. Your pins live on a peer-to-peer network of independent storage providers instead of centralized infrastructure. Host static websites from the same pinned content. Fully open source, no black box."
+    theme="gray"
+    imagePosition="right"
+    imageUrl={PinataDifferImage}
+    client:load
+  />
+
+  <AboutSection
+    subtitle="Migration"
+    title="Need help moving your pins? We'll help you migrate."
+    description="Switching IPFS pinning providers is straightforward. Your content addresses stay the same because they're content hashes, not proprietary URLs. Pin your existing CIDs on Pinner and they're live. If you have a large collection or custom setup, reach out and we'll work with you on the transition."
+    theme="white"
+    imageUrl={PinataMigrateImage}
+    client:load
+  />
+
+  <section class="py-[60px] md:py-[120px] bg-white">
+    <div class="xl:container px-6">
+      <h2 class="text-[24px] sm:text-[28px] md:text-[31px] font-medium text-content-text text-center mb-10 md:mb-14">Frequently Asked Questions</h2>
+      <FAQ faqs={faqs} client:load />
+    </div>
+  </section>
+
+  <RelatedPages links={[
+    { href: "/solutions/ipfs-pinning", label: "IPFS Pinning", description: "Pin files to a peer-to-peer network with permanent links" },
+    { href: "/solutions/website-hosting", label: "Website Hosting", description: "Host static sites on a peer-to-peer network" },
+  ]} />
+
+  <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />
+
+  <CallToAction client:load />
+</Layout>
