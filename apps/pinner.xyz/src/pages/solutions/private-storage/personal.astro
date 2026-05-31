@@ -1,0 +1,106 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+import AboutSection from '@/components/AboutSection';
+import CallToAction from '@/components/CallToAction';
+import FAQ from '@/components/FAQ';
+import FoundingOfferBanner from '@/components/FoundingOfferBanner';
+import BrandLogos from '@/components/BrandLogos';
+import RelatedPages from '@/components/RelatedPages.astro';
+import logos from '@/data/brand-logos';
+
+import HowItWorksImage from "@/assets/how-it-works-1.png";
+import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
+import StorageImage from "@/assets/how-it-works-2.png";
+import StorageMobile from "@/assets/how-it-works-mobile-2.png";
+
+const faqs = [
+  {
+    question: "Can you read my files?",
+    answer: "No. Zero-knowledge encryption means your files are encrypted before they leave your device. We never see the unencrypted data, and we don't hold your key. Neither do the Sia storage hosts. They only store encrypted fragments."
+  },
+  {
+    question: "What can I store and how do I access it?",
+    answer: "Anything private: backups, documents, databases, files of any kind. Access it through apps in the Sia ecosystem, or with S3-compatible tools you already use. Your files are encrypted on your device before they're sent to the Sia network, and decrypted on your machine when you download them."
+  },
+  {
+    question: "What apps can I use?",
+    answer: "Any app built on the Sia network. There isn't a single app directory yet. Sia ecosystem developers build apps that use the same encrypted storage layer. If you already use S3-compatible backup software or file managers, those work too. As more developers build on the platform, more apps become available."
+  },
+  {
+    question: "What happens when I delete a file?",
+    answer: "Your file is split into encrypted fragments and spread across independent hosts. No host ever has a complete copy. When you delete, the contract payments stop and hosts drop their fragments. The file can't be reconstructed because the fragments no longer exist anywhere."
+  },
+  {
+    question: "What if I can't access my encrypted files?",
+    answer: "If you lose your encryption key, your data cannot be recovered by anyone. That's the trade-off of true zero-knowledge encryption: no backdoors, no recovery, no exceptions. Keep your key safe."
+  }
+];
+---
+
+<Layout title="Private Storage for Your Data | Peer-to-Peer Storage" description="Store your files privately with zero-knowledge encryption on the Sia network. Your keys, your data. No one can read your files without your key. Not us, not the storage hosts.">
+  <PageHeader
+    title="Private Storage for Your Data"
+    mobileTitle="Private Storage"
+    description="Store your files privately with zero-knowledge encryption on the Sia network. Your keys, your data. No one can read your files without your key. Not us, not the storage hosts."
+    btnText="Get Started →"
+    url="https://account.pinner.xyz"
+    client:load
+  />
+
+  <AboutSection
+    subtitle="Zero-Knowledge Encryption"
+    title="Your Data, Your Keys"
+    description="Files are encrypted before they leave your device. The encryption key lives on your machine. No one can read them without your key. Not us, not the Sia hosts that store the encrypted fragments."
+    theme="white"
+    imageUrl={HowItWorksImage}
+    imgageMobileUrl={HowItWorksMobile}
+    client:load
+  />
+
+  <AboutSection
+    subtitle="How You Access It"
+    title="Apps and tools that work with your data"
+    description="Use apps from the Sia ecosystem for backups, file sync, and more. As developers build on the platform, more options become available. If you already use S3-compatible backup software or file managers, those work too. S3 is one interface; apps are another."
+    theme="gray"
+    imagePosition="right"
+    imageUrl={StorageImage}
+    imgageMobileUrl={StorageMobile}
+    client:load
+  />
+
+  <AboutSection
+    subtitle="Real Deletion"
+    title="When you delete, it's gone"
+    description="Your file is split into encrypted fragments across independent hosts, and no host ever has a complete copy. When you delete, the contract payments stop and hosts drop their fragments. Without enough fragments, the file can't be reconstructed by anyone."
+    theme="white"
+    imageUrl={HowItWorksImage}
+    client:load
+  />
+
+  <section class="py-[60px] md:py-[120px] bg-white">
+    <div class="xl:container px-6">
+      <h2 class="text-[24px] sm:text-[28px] md:text-[31px] font-medium text-content-text text-center mb-10 md:mb-14">Frequently Asked Questions</h2>
+      <FAQ faqs={faqs} client:load />
+    </div>
+  </section>
+
+  <RelatedPages links={[
+    { href: "/solutions/s3-storage", label: "S3 Storage", description: "S3-compatible object storage backed by peer-to-peer networks" },
+    { href: "/solutions/website-hosting", label: "Website Hosting", description: "Host static websites on IPFS with a permanent, verifiable address" },
+  ]} />
+
+  <section class="py-[60px] md:py-[120px] bg-white">
+    <div class="xl:container px-6 text-center">
+      <p class="text-lg text-content-text-muted">
+        Building an app? <a href="/solutions/private-storage/developers" class="text-content-accent hover:underline">See our developer resources →</a>
+      </p>
+    </div>
+  </section>
+
+  <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />
+
+  <FoundingOfferBanner variant="content" client:load />
+
+  <CallToAction client:load />
+</Layout>

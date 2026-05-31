@@ -1,0 +1,32 @@
+{
+  "community": {
+    "discord": {
+      "url": "https://discord.gg/VWEVRardwN",
+      "label": "Join Discord →",
+      "description": "Get support, share ideas, and connect with other users"
+    },
+    "github": {
+      "url": "https://github.com/lumeweb",
+      "label": "View Source →",
+      "description": "Help improve Pinner by contributing to the project"
+    }
+  },
+  "social": {
+    "github": "https://github.com/lumeweb",
+    "discord": "https://discord.gg/VWEVRardwN",
+    "twitter": "https://x.com/lumeweb3"
+  },
+  "socialMeta": {
+    "discord": {
+      "handle": "lumeweb",
+      "label": "Discord"
+    },
+    "twitter": {
+      "handle": "lumeweb3",
+      "label": "Twitter / X"
+    }
+  },
+  "contact": {
+    "email": "hello@pinner.xyz"
+  }
+}

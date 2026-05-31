@@ -1,0 +1,111 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+import AboutSection from '@/components/AboutSection';
+import CallToAction from '@/components/CallToAction';
+import FAQ from '@/components/FAQ';
+import BrandLogos from '@/components/BrandLogos';
+import RelatedPages from '@/components/RelatedPages.astro';
+import NewsletterSignup from '@/components/NewsletterSignup';
+import logos from '@/data/brand-logos';
+
+import HowItWorksImage from "@/assets/how-it-works-1.png";
+import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
+import StorageImage from "@/assets/how-it-works-2.png";
+import StorageMobile from "@/assets/how-it-works-mobile-2.png";
+import EncryptionImage from "@/assets/solutions-website-static-sites.jpg";
+
+const faqs = [
+  {
+    question: "How do I migrate from AWS S3?",
+    answer: "Deploy the gateway appliance on your server, then change your endpoint URL and credentials to point at it. That's it. AWS CLI, boto3, rclone, Terraform, and any S3-compatible tool will work. Your buckets, objects, and access patterns stay the same."
+  },
+  {
+    question: "Is it a full S3 API?",
+    answer: "We support the core S3 operations: CreateBucket, ListBuckets, PutObject, GetObject, DeleteObject, ListObjects, and multipart uploads. The S3 implementation is part of the Sia network's open-source software. If you need an operation that isn't supported yet, let us know and we'll pass the feedback to the team."
+  },
+  {
+    question: "How is data encrypted?",
+    answer: "Your gateway appliance encrypts files locally before anything leaves your server. The encryption key lives on your machine. Not in our database, not on the Sia storage hosts. They only see encrypted fragments."
+  },
+  {
+    question: "What S3 tools are compatible?",
+    answer: "Any tool that speaks the S3 API works: AWS CLI, boto3, rclone, s3cmd, Cyberduck, Terraform's AWS provider, MinIO client, and language SDKs for Go, Python, JavaScript, Java, and more. Just point them at your gateway's endpoint."
+  },
+  {
+    question: "Do I need to run my own server?",
+    answer: "Yes. You deploy your own gateway appliance that handles encryption locally. A simpler 1-click setup is in development. Subscribe to get notified when it's ready."
+  }
+];
+---
+
+<Layout title="S3-Compatible Storage on a Peer-to-Peer Network" description="Drop-in S3-compatible storage on a peer-to-peer network. Use your existing tools: AWS CLI, boto3, rclone, Terraform. Encrypted by default. No vendor lock-in.">
+  <PageHeader
+    title="S3-Compatible Storage on a Peer-to-Peer Network"
+    mobileTitle="S3 Storage"
+    description="Use your existing S3 tools with your self-hosted gateway. Same API, your endpoint. Encrypted by default."
+    btnText="Start Storing →"
+    url="https://account.pinner.xyz"
+    client:load
+  />
+
+  <AboutSection
+    subtitle="Drop-In Replacement"
+    title="Change Your Endpoint, Keep Your Tools"
+    description="Existing S3 tools work immediately. AWS CLI, boto3, rclone, Terraform. Point them at your gateway instead of AWS. Same API, your endpoint."
+    theme="white"
+    imageUrl={HowItWorksImage}
+    imgageMobileUrl={HowItWorksMobile}
+    client:load
+  />
+
+  <AboutSection
+    subtitle="Zero-Knowledge Encryption"
+    title="Encrypted by Default"
+    description="You deploy your own gateway appliance. It handles encryption locally and stores only encrypted fragments on the Sia network. You control the keys, the software, and the data. Minimal CPU requirements, runs on any VPS."
+    theme="gray"
+    imagePosition="right"
+    imageUrl={StorageImage}
+    imgageMobileUrl={StorageMobile}
+    client:load
+  />
+
+  <AboutSection
+    subtitle="Predictable Pricing"
+    title="No surprise bills"
+    description="Simple per-TB pricing. No per-request fees. No hidden charges. See our <a href='/pricing' class='underline'>pricing page</a> for details."
+    theme="white"
+    imageUrl={EncryptionImage}
+    client:load
+  />
+
+  <section class="py-[60px] md:py-[120px] bg-white">
+    <div class="xl:container px-6">
+      <h2 class="text-[24px] sm:text-[28px] md:text-[31px] font-medium text-content-text text-center mb-10 md:mb-14">Frequently Asked Questions</h2>
+      <FAQ faqs={faqs} client:load />
+    </div>
+  </section>
+
+  <section class="bg-white border-t border-content-divider/50 py-12 md:py-16">
+    <div class="xl:container px-6 flex flex-col items-center">
+      <NewsletterSignup
+        source="s3_storage_page"
+        label="Want 1-click setup? Get notified when it's ready."
+        buttonLabel="Notify me"
+        successMessage="You're on the list. We'll email you when 1-click setup is available."
+        theme="light"
+        rounded
+        client:load
+      />
+    </div>
+  </section>
+
+  <RelatedPages links={[
+    { href: "/solutions/private-storage", label: "Private Storage", description: "Encrypted file storage with zero-knowledge architecture" },
+    { href: "/solutions/ipfs-pinning", label: "IPFS Pinning", description: "Pin files to a peer-to-peer network with permanent links" },
+  ]} />
+
+  <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />
+
+  <CallToAction client:load />
+</Layout>

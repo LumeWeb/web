@@ -1,0 +1,154 @@
+@import "@fontsource/poppins/400.css";
+@import "@fontsource/poppins/500.css";
+@import "@fontsource/poppins/600.css";
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+
+	/* Define custom variables */
+	--radius-custom: 0.5rem;
+
+	/* Map theme colors */
+	--color-primary: #f3c614;
+	--color-primary-light: #f7d94c;
+
+	/* Define font family */
+	--font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+
+	/* Homepage Color Scheme (Dark) */
+	--color-home-bg: #0d1d1c;
+	--color-home-section-dark: #051413;
+	--color-home-text: #f8f8f8;
+	--color-home-text-muted: #bdc2c1;
+	--color-home-accent: #abeedb;
+	--color-home-card-bg: #0d2d2a;
+
+	/* Content Pages Color Scheme (Light) */
+	--color-content-bg: #ffffff;
+	--color-content-section-gray: #e4e0d4;
+	--color-content-text: #0d1d1c;
+	--color-content-text-muted: #485453;
+	--color-content-text-light: #e9e9e9;
+	--color-content-divider: #e4e0d4;
+
+	/* Semantic Colors */
+	--color-border: #e5e7eb;
+	--color-border-dark: #444;
+
+	/* Additional Theme Colors */
+	--color-dark-card: #111c1b;
+	--color-teal-accent: #adf0dd;
+	--color-teal-muted: #75ac9e;
+	--color-teal-light: #abeedb;
+	--color-gray-footer: #bbbfbf;
+	--color-off-white: #eaebeb;
+	--color-orange: #ff6647;
+	--color-orange-dark: #e35336;
+	--color-gray-hover: #ccc;
+
+	/* Gradient Colors */
+	--color-gradient-start: #adf0dd;
+	--color-gradient-mid-1: #89f8d8;
+	--color-gradient-mid-2: #97d1c1;
+	--color-gradient-end: #887e62;
+}
+
+@utility container {
+	@apply mx-auto px-4 sm:px-8 lg:px-16;
+}
+
+/* Homepage theme */
+@layer components {
+	.theme-home, [class*="theme-home"] {
+		--bg-color: var(--color-home-bg);
+		--section-dark-bg: var(--color-home-section-dark);
+		--text-color: var(--color-home-text);
+		--text-muted: var(--color-home-text-muted);
+		--accent-color: var(--color-home-accent);
+		--card-bg: var(--color-home-card-bg);
+	}
+
+	.theme-home .section {
+		@apply py-[65px] lg:py-[158px];
+	}
+
+	.theme-home .section-dark {
+		@apply py-[80px] md:py-[158px] bg-(--color-home-section-dark);
+	}
+
+	.theme-home .heading h2 {
+		@apply text-home-text text-[28px] xl:text-[44px] 2xl:text-[60px] md:text-5xl sm:text-4xl font-medium leading-tight;
+	}
+
+	.theme-home .heading p {
+		@apply text-home-text-muted text-base md:text-xl;
+	}
+
+	.theme-home .text-primary {
+		@apply text-[--color-home-text];
+	}
+
+	.theme-home .text-muted {
+		@apply text-[--color-home-text-muted];
+	}
+
+	.theme-home .bg-accent {
+		@apply bg-[--color-home-card-bg];
+	}
+}
+
+/* Content pages theme */
+@layer components {
+	.theme-content, [class*="theme-content"] {
+		--bg-color: var(--color-content-bg);
+		--section-gray-bg: var(--color-content-section-gray);
+		--text-color: var(--color-content-text);
+		--text-muted: var(--color-content-text-muted);
+		--text-light: var(--color-content-text-light);
+		--divider-color: var(--color-content-divider);
+	}
+
+	.theme-content .section {
+		@apply py-[60px] md:py-[120px];
+	}
+
+	.theme-content .section-white {
+		@apply py-[60px] md:py-[120px] bg-white;
+	}
+
+	.theme-content .section-gray {
+		@apply py-[60px] md:py-[120px] bg-content-section-gray;
+	}
+
+	.theme-content .heading h2 {
+		@apply text-content-text text-[25px] lg:text-[40px] md:text-[32px] font-medium leading-tight;
+	}
+
+	.theme-content .heading h3 {
+		@apply text-content-text-muted lg:text-[21px] md:text-base font-medium;
+	}
+
+	.theme-content .heading p {
+		@apply text-content-text-muted text-[13px] md:text-base lg:text-lg leading-[21px] lg:leading-[35px] md:leading-[26px];
+	}
+
+	.theme-content .text-primary {
+		@apply text-[--color-content-text];
+	}
+
+	.theme-content .text-muted {
+		@apply text-[--color-content-text-muted];
+	}
+}
+
+/* Base styles are applied directly to elements */
+@layer base {
+	body {
+		@apply bg-home-bg text-[#333] font-sans overflow-x-hidden;
+	}
+
+	html {
+		overflow-x: hidden;
+	}
+}

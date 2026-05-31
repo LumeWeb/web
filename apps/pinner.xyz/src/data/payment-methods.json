@@ -1,0 +1,98 @@
+[
+  {
+    "id": 1,
+    "src": "/images/payments/usdc.svg",
+    "alt": "USDC",
+    "category": "stablecoin"
+  },
+  {
+    "id": 2,
+    "src": "/images/payments/usdt.svg",
+    "alt": "USDT",
+    "category": "stablecoin"
+  },
+  {
+    "id": 3,
+    "src": "/images/payments/dai.svg",
+    "alt": "DAI",
+    "category": "stablecoin"
+  },
+  {
+    "id": 4,
+    "src": "/images/payments/btc.svg",
+    "alt": "Bitcoin",
+    "category": "crypto"
+  },
+  {
+    "id": 5,
+    "src": "/images/payments/eth.svg",
+    "alt": "Ethereum",
+    "category": "crypto"
+  },
+  {
+    "id": 6,
+    "src": "/images/payments/sol.svg",
+    "alt": "Solana",
+    "category": "crypto"
+  },
+  {
+    "id": 7,
+    "src": "/images/payments/ltc.svg",
+    "alt": "Litecoin",
+    "category": "crypto"
+  },
+  {
+    "id": 8,
+    "src": "/images/payments/xmr.svg",
+    "alt": "Monero",
+    "category": "crypto"
+  },
+  {
+    "id": 9,
+    "src": "/images/payments/doge.svg",
+    "alt": "Dogecoin",
+    "category": "crypto"
+  },
+  {
+    "id": 10,
+    "src": "/images/payments/bnb.svg",
+    "alt": "BNB",
+    "category": "crypto"
+  },
+  {
+    "id": 11,
+    "src": "/images/payments/pol.svg",
+    "alt": "Polygon",
+    "category": "crypto"
+  },
+  {
+    "id": 12,
+    "src": "/images/payments/pyusd.svg",
+    "alt": "PayPal USD",
+    "category": "stablecoin"
+  },
+  {
+    "id": 13,
+    "src": "/images/payments/visa.svg",
+    "alt": "Visa",
+    "category": "card"
+  },
+  {
+    "id": 14,
+    "src": "/images/payments/mastercard.svg",
+    "alt": "Mastercard",
+    "category": "card"
+  },
+  {
+    "id": 15,
+    "src": "/images/payments/amex.svg",
+    "alt": "American Express",
+    "category": "card"
+  },
+  {
+    "id": 16,
+    "src": "/images/payments/discover.svg",
+    "alt": "Discover",
+    "category": "card"
+  }
+]

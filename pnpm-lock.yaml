@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    '@astrojs/mdx':
+      specifier: ^4.3.14
+      version: 4.3.14
     '@astrojs/react':
       specifier: ^5.0.5
       version: 5.0.5
@@ -33,6 +36,9 @@ catalogs:
     '@module-federation/enhanced':
       specifier: ^0.24.1
       version: 0.24.1
+    '@module-federation/vite':
+      specifier: ^1.15.4
+      version: 1.15.4
     '@mswjs/interceptors':
       specifier: ^0.41.9
       version: 0.41.9
@@ -238,7 +244,7 @@ catalogs:
       version: 0.5.19
     astro-llms-md:
       specifier: ^2.0.0
-      version: 2.1.0
+      version: 2.0.0
     astro-md-alternate:
       specifier: ^0.1.0
       version: 0.1.0
@@ -296,7 +302,7 @@ importers:
         version: 0.4.0
       '@module-federation/vite':
         specifier: 'catalog:'
-        version: 1.15.5(node-fetch@3.3.2)(typescript@6.0.3)(vite@8.0.8)
+        version: 1.15.4(node-fetch@3.3.2)(typescript@6.0.3)(vite@8.0.8)
       '@playwright/test':
         specifier: ^1.60.0
         version: 1.60.0
@@ -509,6 +515,79 @@ importers:
         specifier: ^2.22.0
         version: 2.22.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
 
+  apps/pinner.xyz:
+    dependencies:
+      '@astrojs/mdx':
+        specifier: 'catalog:'
+        version: 4.3.14(astro@6.3.2(@types/node@25.9.1)(idb-keyval@6.2.2)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.2)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0))
+      '@astrojs/react':
+        specifier: 'catalog:'
+        version: 5.0.5(@types/node@25.9.1)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0)
+      '@astrojs/sitemap':
+        specifier: catalog:websites
+        version: 3.7.2
+      '@base-ui/react':
+        specifier: ^1.0.0
+        version: 1.5.0(@date-fns/tz@1.4.1)(@types/react@19.2.14)(date-fns@4.1.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@fontsource/poppins':
+        specifier: catalog:websites
+        version: 5.2.7
+      '@radix-ui/react-slot':
+        specifier: 'catalog:'
+        version: 1.2.4(@types/react@19.2.14)(react@19.2.6)
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.2.3(@types/react@19.2.14)
+      astro:
+        specifier: 'catalog:'
+        version: 6.3.2(@types/node@25.9.1)(idb-keyval@6.2.2)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.2)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0)
+      astro-llms-md:
+        specifier: catalog:websites
+        version: 2.0.0(astro@6.3.2(@types/node@25.9.1)(idb-keyval@6.2.2)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.2)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0))
+      astro-md-alternate:
+        specifier: catalog:websites
+        version: 0.1.0(astro@6.3.2(@types/node@25.9.1)(idb-keyval@6.2.2)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.2)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0))
+      class-variance-authority:
+        specifier: 'catalog:'
+        version: 0.7.1
+      clsx:
+        specifier: 'catalog:'
+        version: 2.1.1
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.577.0(react@19.2.6)
+      react:
+        specifier: 'catalog:'
+        version: 19.2.6
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.6(react@19.2.6)
+      swiper:
+        specifier: ^12.1.0
+        version: 12.1.4
+      swr:
+        specifier: ^2.4.1
+        version: 2.4.1(react@19.2.6)
+      tailwind-merge:
+        specifier: 'catalog:'
+        version: 3.6.0
+      tailwindcss:
+        specifier: catalog:websites
+        version: 4.2.4
+      tailwindcss-animate:
+        specifier: 'catalog:'
+        version: 1.0.7(tailwindcss@4.2.4)
+    devDependencies:
+      '@tailwindcss/typography':
+        specifier: catalog:websites
+        version: 0.5.19(tailwindcss@4.2.4)
+      '@tailwindcss/vite':
+        specifier: 'catalog:'
+        version: 4.3.0(vite@8.0.8)
+
   apps/portal-app-shell:
     dependencies:
       '@fontsource-variable/manrope':
@@ -607,7 +686,7 @@ importers:
         version: 6.3.2(@types/node@25.9.1)(idb-keyval@6.2.2)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.2)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0)
       astro-llms-md:
         specifier: catalog:websites
-        version: 2.1.0(astro@6.3.2(@types/node@25.9.1)(idb-keyval@6.2.2)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.2)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0))
+        version: 2.0.0(astro@6.3.2(@types/node@25.9.1)(idb-keyval@6.2.2)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.2)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0))
       astro-md-alternate:
         specifier: catalog:websites
         version: 0.1.0(astro@6.3.2(@types/node@25.9.1)(idb-keyval@6.2.2)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.2)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0))
@@ -679,7 +758,7 @@ importers:
     dependencies:
       zustand:
         specifier: ^5.0.13
-        version: 5.0.13(@types/react@19.2.14)(immer@11.1.4)(react@19.2.6)(use-sync-external-store@1.5.0(react@19.2.6))
+        version: 5.0.13(@types/react@19.2.14)(immer@11.1.4)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))
     devDependencies:
       '@lumeweb/tsdown-config':
         specifier: workspace:*
@@ -1056,7 +1135,7 @@ importers:
         version: 3.0.0
       derive-zustand:
         specifier: ^0.2.0
-        version: 0.2.0(zustand@5.0.12(@types/react@19.2.14)(immer@11.1.4)(react@19.2.6)(use-sync-external-store@1.5.0(react@19.2.6)))
+        version: 0.2.0(zustand@5.0.12(@types/react@19.2.14)(immer@11.1.4)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6)))
       dompurify:
         specifier: ^3.3.0
         version: 3.4.1
@@ -1098,7 +1177,7 @@ importers:
         version: 4.4.3
       zustand:
         specifier: ^5.0.9
-        version: 5.0.12(@types/react@19.2.14)(immer@11.1.4)(react@19.2.6)(use-sync-external-store@1.5.0(react@19.2.6))
+        version: 5.0.12(@types/react@19.2.14)(immer@11.1.4)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))
     devDependencies:
       '@lumeweb/tsdown-config':
         specifier: workspace:*
@@ -1330,7 +1409,7 @@ importers:
     devDependencies:
       '@module-federation/vite':
         specifier: 'catalog:'
-        version: 1.15.5(node-fetch@3.3.2)(typescript@6.0.3)(vite@8.0.8)
+        version: 1.15.4(node-fetch@3.3.2)(typescript@6.0.3)(vite@8.0.8)
       vite:
         specifier: catalog:framework
         version: 8.0.8(@types/node@25.9.1)(@vitejs/devtools@0.1.22)(esbuild@0.27.7)(jiti@2.6.1)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0)
@@ -2497,6 +2576,33 @@ packages:
   '@babel/types@8.0.0-rc.3':
     resolution: {integrity: sha512-mOm5ZrYmphGfqVWoH5YYMTITb3cDXsFgmvFlvkvWDMsR9X8RFnt7a0Wb6yNIdoFsiMO9WjYLq+U/FMtqIYAF8Q==}
     engines: {node: ^20.19.0 || >=22.12.0}
+
+  '@base-ui/react@1.5.0':
+    resolution: {integrity: sha512-z1gSAlced1yY+iM+mHDEtIkD8UI3Ebs52MuBPxvV6f5hRutk+xvCH/wuB7hDqDzK9JG5FoMz5nhrqtSs1wjt1A==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      '@date-fns/tz': ^1.2.0
+      '@types/react': ^17 || ^18 || ^19
+      date-fns: ^4.0.0
+      react: ^17 || ^18 || ^19
+      react-dom: ^17 || ^18 || ^19
+    peerDependenciesMeta:
+      '@date-fns/tz':
+        optional: true
+      '@types/react':
+        optional: true
+      date-fns:
+        optional: true
+
+  '@base-ui/utils@0.2.9':
+    resolution: {integrity: sha512-x/PDDCYzoqPpjrdyb3VcyylTI2IjUXEtYDGi5foh7KsnmNJIIaVwA2GLgDH1dps1GgXiJbA60hM+AyuTfQzIvw==}
+    peerDependencies:
+      '@types/react': ^17 || ^18 || ^19
+      react: ^17 || ^18 || ^19
+      react-dom: ^17 || ^18 || ^19
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
 
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
@@ -4364,8 +4470,8 @@ packages:
   '@module-federation/third-party-dts-extractor@2.4.0':
     resolution: {integrity: sha512-4v24t6L3dET/6abMOM2fiM3roT0c8mi21/i+uDc6WG7U0i+Xp2SojBppTs6gnT0lkwMTe+u6xIpNQakdUftHsg==}
 
-  '@module-federation/vite@1.15.5':
-    resolution: {integrity: sha512-TfnZPnakXRLp1237MvDl+8UWhdv3BVvryZuw6bdcXM5rPM2Wn0d1pm5dv8xaiUj0f6BkjGHG7w/5EQQ4nVp13g==}
+  '@module-federation/vite@1.15.4':
+    resolution: {integrity: sha512-44l8xYOermWM0hhuTLuGE0AKaX6W2yqQ/hTyVqiEHa23gPHFUNjJs1Cr6+A5fG38XMl+0Vzn11luT3zwp1xJjQ==}
     peerDependencies:
       vite: ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
 
@@ -7147,8 +7253,16 @@ packages:
   '@tanstack/query-core@5.100.10':
     resolution: {integrity: sha512-8UR0yJR+GiQ40m3lPhUr0xbfAupe6GSQiksSBSa9SM2NjezFyxXCIA69/lz8cSoNKZLrw1/PktIyQBJcVeMi3w==}
 
+  '@tanstack/query-core@5.100.5':
+    resolution: {integrity: sha512-t20KrhKkf0HXzqQkPbJ5erhFesup68BAbwFgYmTrS7bxMF7O5MdmL8jUkik4thsG7Hg00fblz30h6yF1d5TxGg==}
+
   '@tanstack/react-query@5.100.10':
     resolution: {integrity: sha512-FLaZf2RCrA/Zgp4aiu5tG3TyasTRO7aZ99skxQpr3Hg/zXOhu6yq5FZCYQ/tRaJtM9ylnoK8tFK7PolXQadv6Q==}
+    peerDependencies:
+      react: ^18 || ^19
+
+  '@tanstack/react-query@5.100.5':
+    resolution: {integrity: sha512-aNwj1mi2v2bQ9IxkyR1grLOUkv3BYWoykHy9KDyLNbjC3tsahbOHJibK+Wjtr1wRhG59/AvJhiJG5OlthaCgJA==}
     peerDependencies:
       react: ^18 || ^19
 
@@ -8087,8 +8201,8 @@ packages:
     resolution: {integrity: sha512-LElXdjswlqjWrPpJFg1Fx4wpkOCxj1TDHlSV4PlaRxHGWko024xICaa97ZkMfs6DRKlCguiAI+rbXv5GWwXIkg==}
     hasBin: true
 
-  astro-llms-md@2.1.0:
-    resolution: {integrity: sha512-MBLJUvZc4Ae5LzDdyYfZyoFCoLaDQDstlo6IM3Qba77DT5+9XhFv8FH6AmynIBPwF0s94Iz/c2pePWohv/uXPw==}
+  astro-llms-md@2.0.0:
+    resolution: {integrity: sha512-tm3V3+7biu365fVgD30pOdJouDTrQEJSvn2Emo5BF2W9Ez9Ix2SJezaJlGn8+qUze0KR62EviVJjB2D+40faXA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       astro: ^4.0.0 || ^5.0.0 || ^6.0.0
@@ -9999,10 +10113,6 @@ packages:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
 
-  hasown@2.0.3:
-    resolution: {integrity: sha512-ej4AhfhfL2Q2zpMmLo7U1Uv9+PyhIZpgQLGT1F9miIGmiCJIoCgSmczFdrc97mWT4kVY72KA+WnnhJ5pghSvSg==}
-    engines: {node: '>= 0.4'}
-
   hast-util-classnames@3.0.0:
     resolution: {integrity: sha512-tI3JjoGDEBVorMAWK4jNRsfLMYmih1BUOG3VV36pH36njs1IEl7xkNrVTD2mD2yYHmQCa5R/fj61a8IAF4bRaQ==}
 
@@ -10374,10 +10484,6 @@ packages:
 
   is-core-module@2.16.1:
     resolution: {integrity: sha512-UfoeMA6fIJ8wTYFEUjelnaGI67v6+N7qXJEvQuIGa99l4xsCruSYOVSQ0uPANn4dAzm8lkYPaKLrrijLq7x23w==}
-    engines: {node: '>= 0.4'}
-
-  is-core-module@2.16.2:
-    resolution: {integrity: sha512-evOr8xfXKxE6qSR0hSXL2r3sd7ALj8+7jQEUvPYcm5sgZFdJ+AYzT6yNmJenvIYQBgIGwfwz08sL8zoL7yq2BA==}
     engines: {node: '>= 0.4'}
 
   is-data-view@1.0.2:
@@ -11220,8 +11326,8 @@ packages:
   lunr@2.3.9:
     resolution: {integrity: sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==}
 
-  luxon@3.7.2:
-    resolution: {integrity: sha512-vtEhXh/gNjI9Yg1u4jX/0YVPMvxzHuGgCm6tC5kZyb08yjGWGnqAjGJvcXbqQR2P3MyMEFnRbpcdFS6PBcLqew==}
+  luxon@3.7.1:
+    resolution: {integrity: sha512-RkRWjA926cTvz5rAb1BqyWkKbbjzCGchDUIKMCUvNi17j6f6j8uHGDV82Aqcqtzd+icoYpELmG3ksgGiFNNcNg==}
     engines: {node: '>=12'}
 
   lz-string@1.5.0:
@@ -13784,6 +13890,11 @@ packages:
     resolution: {integrity: sha512-bihiwoKMOQwW8FfdUbo1DgkVH25E+4ZELIq0oopL1KTKBteLuaTMi/wwFjMxtlhTkk45k3XQ89D1Fvv0spSqBA==}
     engines: {node: '>= 4.7.0'}
 
+  swr@2.4.1:
+    resolution: {integrity: sha512-2CC6CiKQtEwaEeNiqWTAw9PGykW8SR5zZX8MZk6TeAvEAnVS7Visz8WzphqgtQ8v2xz/4Q5K+j+SeMaKXeeQIA==}
+    peerDependencies:
+      react: ^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
   symbol-tree@3.2.4:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
 
@@ -14231,8 +14342,8 @@ packages:
     resolution: {integrity: sha512-xXnp4kTyor2Zq+J1FfPI6Eq3ew5h6Vl0F/8d9XU5zZQf1tX9s2Su1/3PiMmUANFULpmksxkClamIZcaUqryHsQ==}
     engines: {node: '>=20.18.1'}
 
-  undici@8.3.0:
-    resolution: {integrity: sha512-TkUDgb6tl7KOGZ+7e8E3d2FYgUQgF6z5YypqjWmixVQSQERFcVrVg0ySADm2LVLRh5ljAaHTCR5Fmz3Q34rB7Q==}
+  undici@8.2.0:
+    resolution: {integrity: sha512-Z+4Hx9GE26Lh9Upwfnc8C7SsrpBPGaM/Gm6kMFtiG7c+5IvQKlXi/t+9x9DrrCh29cww5TSP9YdVaBcnLDs5fQ==}
     engines: {node: '>=22.19.0'}
 
   unenv@2.0.0-rc.24:
@@ -14445,6 +14556,11 @@ packages:
 
   use-sync-external-store@1.5.0:
     resolution: {integrity: sha512-Rb46I4cGGVBmjamjphe8L/UnvJD+uPPtTkNvX5mZgqdbavhI4EbgIWJiIHXJ8bc/i9EQGPRh4DwEURJ552Do0A==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  use-sync-external-store@1.6.0:
+    resolution: {integrity: sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -15047,18 +15163,6 @@ packages:
 
   ws@8.20.0:
     resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-
-  ws@8.20.1:
-    resolution: {integrity: sha512-It4dO0K5v//JtTXuPkfEOaI3uUN87iYPnqo/ZzqCoG3g8uhA66QUMs/SrM0YK7/NAu+r4LMh/9dq2A7k+rHs+w==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -15723,6 +15827,31 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 8.0.0-rc.3
       '@babel/helper-validator-identifier': 8.0.0-rc.3
+
+  '@base-ui/react@1.5.0(@date-fns/tz@1.4.1)(@types/react@19.2.14)(date-fns@4.1.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
+    dependencies:
+      '@babel/runtime': 7.29.2
+      '@base-ui/utils': 0.2.9(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@floating-ui/react-dom': 2.1.8(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@floating-ui/utils': 0.2.11
+      react: 19.2.6
+      react-dom: 19.2.6(react@19.2.6)
+      use-sync-external-store: 1.6.0(react@19.2.6)
+    optionalDependencies:
+      '@date-fns/tz': 1.4.1
+      '@types/react': 19.2.14
+      date-fns: 4.1.0
+
+  '@base-ui/utils@0.2.9(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
+    dependencies:
+      '@babel/runtime': 7.29.2
+      '@floating-ui/utils': 0.2.11
+      react: 19.2.6
+      react-dom: 19.2.6(react@19.2.6)
+      reselect: 5.1.1
+      use-sync-external-store: 1.6.0(react@19.2.6)
+    optionalDependencies:
+      '@types/react': 19.2.14
 
   '@bcoe/v8-coverage@1.0.2': {}
 
@@ -17429,7 +17558,7 @@ snapshots:
       '@libp2p/interface-internal': 3.1.2
       '@multiformats/multiaddr': 13.0.1
       cookie: 1.1.1
-      undici: 8.3.0
+      undici: 8.2.0
 
   '@libp2p/identify@4.1.5':
     dependencies:
@@ -17825,7 +17954,7 @@ snapshots:
       progress-events: 1.1.0
       uint8arraylist: 2.4.8
       uint8arrays: 5.1.0
-      ws: 8.20.1
+      ws: 8.20.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -18107,12 +18236,12 @@ snapshots:
       find-pkg: 2.0.0
       resolve: 1.22.8
 
-  '@module-federation/vite@1.15.5(node-fetch@3.3.2)(typescript@6.0.3)(vite@8.0.8)':
+  '@module-federation/vite@1.15.4(node-fetch@3.3.2)(typescript@6.0.3)(vite@8.0.8)':
     dependencies:
       '@module-federation/dts-plugin': 2.4.0(node-fetch@3.3.2)(typescript@6.0.3)
       '@module-federation/runtime': 2.4.0(node-fetch@3.3.2)
       '@module-federation/sdk': 2.4.0(node-fetch@3.3.2)
-      es-module-lexer: 2.1.0
+      es-module-lexer: 2.0.0
       estree-walker: 3.0.3
       pathe: 2.0.3
       vite: 8.0.8(@types/node@25.9.1)(@vitejs/devtools@0.1.22)(esbuild@0.27.7)(jiti@2.6.1)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0)
@@ -20004,7 +20133,7 @@ snapshots:
       lodash-es: 4.18.1
       papaparse: 5.5.3(patch_hash=8db42de1f1871890a205b993db193bd7914e8201801637ba4b6247c7604f7c56)
       pluralize: 8.0.0(patch_hash=88650615c62a180c406201cd54b23afb592a6a678db498f8b1a730f85ca868d2)
-      qs: 6.15.1
+      qs: 6.14.0
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
       tslib: 2.8.1
@@ -20013,7 +20142,7 @@ snapshots:
   '@refinedev/devtools-internal@2.0.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
     dependencies:
       '@refinedev/devtools-shared': 2.0.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      '@tanstack/react-query': 5.100.10(react@19.2.6)
+      '@tanstack/react-query': 5.100.5(react@19.2.6)
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
       error-stack-parser: 2.1.4
@@ -20022,7 +20151,7 @@ snapshots:
 
   '@refinedev/devtools-shared@2.0.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
     dependencies:
-      '@tanstack/react-query': 5.100.10(react@19.2.6)
+      '@tanstack/react-query': 5.100.5(react@19.2.6)
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
       error-stack-parser: 2.1.4
@@ -20906,9 +21035,16 @@ snapshots:
 
   '@tanstack/query-core@5.100.10': {}
 
+  '@tanstack/query-core@5.100.5': {}
+
   '@tanstack/react-query@5.100.10(react@19.2.6)':
     dependencies:
       '@tanstack/query-core': 5.100.10
+      react: 19.2.6
+
+  '@tanstack/react-query@5.100.5(react@19.2.6)':
+    dependencies:
+      '@tanstack/query-core': 5.100.5
       react: 19.2.6
 
   '@tanstack/react-table@8.21.3(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
@@ -21266,7 +21402,7 @@ snapshots:
 
   '@types/set-cookie-parser@2.4.10':
     dependencies:
-      '@types/node': 25.9.1
+      '@types/node': 25.7.0
 
   '@types/stack-utils@2.0.3': {}
 
@@ -22422,7 +22558,7 @@ snapshots:
 
   astring@1.9.0: {}
 
-  astro-llms-md@2.1.0(astro@6.3.2(@types/node@25.9.1)(idb-keyval@6.2.2)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.2)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0)):
+  astro-llms-md@2.0.0(astro@6.3.2(@types/node@25.9.1)(idb-keyval@6.2.2)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.2)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0)):
     dependencies:
       astro: 6.3.2(@types/node@25.9.1)(idb-keyval@6.2.2)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.2)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0)
       glob: 13.0.6
@@ -23156,7 +23292,7 @@ snapshots:
 
   cron-parser@4.9.0:
     dependencies:
-      luxon: 3.7.2
+      luxon: 3.7.1
 
   cropperjs@1.6.2: {}
 
@@ -23561,9 +23697,9 @@ snapshots:
 
   dequal@2.0.3: {}
 
-  derive-zustand@0.2.0(zustand@5.0.12(@types/react@19.2.14)(immer@11.1.4)(react@19.2.6)(use-sync-external-store@1.5.0(react@19.2.6))):
+  derive-zustand@0.2.0(zustand@5.0.12(@types/react@19.2.14)(immer@11.1.4)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))):
     dependencies:
-      zustand: 5.0.12(@types/react@19.2.14)(immer@11.1.4)(react@19.2.6)(use-sync-external-store@1.5.0(react@19.2.6))
+      zustand: 5.0.12(@types/react@19.2.14)(immer@11.1.4)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))
 
   destr@2.0.5: {}
 
@@ -24171,7 +24307,7 @@ snapshots:
 
   estree-util-value-to-estree@3.5.0:
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.8
 
   estree-util-visit@2.0.0:
     dependencies:
@@ -24182,7 +24318,7 @@ snapshots:
 
   estree-walker@3.0.3:
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.8
 
   esutils@2.0.3: {}
 
@@ -24763,10 +24899,6 @@ snapshots:
   hashlru@2.3.0: {}
 
   hasown@2.0.2:
-    dependencies:
-      function-bind: 1.1.2
-
-  hasown@2.0.3:
     dependencies:
       function-bind: 1.1.2
 
@@ -25377,10 +25509,6 @@ snapshots:
   is-core-module@2.16.1:
     dependencies:
       hasown: 2.0.2
-
-  is-core-module@2.16.2:
-    dependencies:
-      hasown: 2.0.3
 
   is-data-view@1.0.2:
     dependencies:
@@ -26245,7 +26373,7 @@ snapshots:
 
   lunr@2.3.9: {}
 
-  luxon@3.7.2: {}
+  luxon@3.7.1: {}
 
   lz-string@1.5.0: {}
 
@@ -26839,7 +26967,7 @@ snapshots:
 
   micromark-extension-mdx-expression@3.0.1:
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.8
       devlop: 1.1.0
       micromark-factory-mdx-expression: 2.0.3
       micromark-factory-space: 2.0.1
@@ -26850,7 +26978,7 @@ snapshots:
 
   micromark-extension-mdx-jsx@3.0.2:
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.8
       devlop: 1.1.0
       estree-util-is-identifier-name: 3.0.0
       micromark-factory-mdx-expression: 2.0.3
@@ -26867,7 +26995,7 @@ snapshots:
 
   micromark-extension-mdxjs-esm@3.0.0:
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.8
       devlop: 1.1.0
       micromark-core-commonmark: 2.0.3
       micromark-util-character: 2.1.1
@@ -26903,7 +27031,7 @@ snapshots:
 
   micromark-factory-mdx-expression@2.0.3:
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.8
       devlop: 1.1.0
       micromark-factory-space: 2.0.1
       micromark-util-character: 2.1.1
@@ -26967,7 +27095,7 @@ snapshots:
 
   micromark-util-events-to-acorn@2.0.3:
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.8
       '@types/unist': 3.0.3
       devlop: 1.1.0
       estree-util-visit: 2.0.0
@@ -28448,7 +28576,7 @@ snapshots:
 
   readdirp@3.6.0:
     dependencies:
-      picomatch: 2.3.1
+      picomatch: 2.3.2
 
   readdirp@4.1.2: {}
 
@@ -28761,7 +28889,7 @@ snapshots:
 
   resolve@1.22.8:
     dependencies:
-      is-core-module: 2.16.2
+      is-core-module: 2.16.1
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
@@ -29680,6 +29808,12 @@ snapshots:
 
   swiper@12.1.4: {}
 
+  swr@2.4.1(react@19.2.6):
+    dependencies:
+      dequal: 2.0.3
+      react: 19.2.6
+      use-sync-external-store: 1.6.0(react@19.2.6)
+
   symbol-tree@3.2.4: {}
 
   sync-child-process@1.0.2:
@@ -30160,7 +30294,7 @@ snapshots:
 
   undici@7.25.0: {}
 
-  undici@8.3.0: {}
+  undici@8.2.0: {}
 
   unenv@2.0.0-rc.24:
     dependencies:
@@ -30201,7 +30335,7 @@ snapshots:
 
   unist-util-mdx-define@1.1.2:
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.8
       '@types/hast': 3.0.4
       '@types/mdast': 4.0.4
       estree-util-is-identifier-name: 3.0.0
@@ -30345,6 +30479,10 @@ snapshots:
       '@types/react': 19.2.14
 
   use-sync-external-store@1.5.0(react@19.2.6):
+    dependencies:
+      react: 19.2.6
+
+  use-sync-external-store@1.6.0(react@19.2.6):
     dependencies:
       react: 19.2.6
 
@@ -30494,7 +30632,7 @@ snapshots:
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
-      postcss: 8.5.10
+      postcss: 8.5.13
       rolldown: 1.0.0-rc.15
       tinyglobby: 0.2.16
     optionalDependencies:
@@ -30512,7 +30650,7 @@ snapshots:
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
-      postcss: 8.5.10
+      postcss: 8.5.13
       rolldown: 1.0.0-rc.15
       tinyglobby: 0.2.16
     optionalDependencies:
@@ -30530,7 +30668,7 @@ snapshots:
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
-      postcss: 8.5.10
+      postcss: 8.5.13
       rolldown: 1.0.0-rc.15
       tinyglobby: 0.2.16
     optionalDependencies:
@@ -30548,7 +30686,7 @@ snapshots:
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
-      postcss: 8.5.10
+      postcss: 8.5.13
       rolldown: 1.0.0-rc.15
       tinyglobby: 0.2.16
     optionalDependencies:
@@ -30566,7 +30704,7 @@ snapshots:
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
-      postcss: 8.5.10
+      postcss: 8.5.13
       rolldown: 1.0.0-rc.15
       tinyglobby: 0.2.16
     optionalDependencies:
@@ -31218,8 +31356,6 @@ snapshots:
 
   ws@8.20.0: {}
 
-  ws@8.20.1: {}
-
   wsl-utils@0.1.0:
     dependencies:
       is-wsl: 3.1.1
@@ -31333,18 +31469,18 @@ snapshots:
 
   zod@4.4.3: {}
 
-  zustand@5.0.12(@types/react@19.2.14)(immer@11.1.4)(react@19.2.6)(use-sync-external-store@1.5.0(react@19.2.6)):
+  zustand@5.0.12(@types/react@19.2.14)(immer@11.1.4)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6)):
     optionalDependencies:
       '@types/react': 19.2.14
       immer: 11.1.4
       react: 19.2.6
-      use-sync-external-store: 1.5.0(react@19.2.6)
+      use-sync-external-store: 1.6.0(react@19.2.6)
 
-  zustand@5.0.13(@types/react@19.2.14)(immer@11.1.4)(react@19.2.6)(use-sync-external-store@1.5.0(react@19.2.6)):
+  zustand@5.0.13(@types/react@19.2.14)(immer@11.1.4)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6)):
     optionalDependencies:
       '@types/react': 19.2.14
       immer: 11.1.4
       react: 19.2.6
-      use-sync-external-store: 1.5.0(react@19.2.6)
+      use-sync-external-store: 1.6.0(react@19.2.6)
 
   zwitch@2.0.4: {}

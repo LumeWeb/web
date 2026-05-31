@@ -1,0 +1,27 @@
+---
+interface Link {
+  href: string;
+  label: string;
+  description: string;
+}
+
+interface Props {
+  links: Link[];
+}
+
+const { links } = Astro.props;
+---
+
+<section class="py-[60px] md:py-[120px] bg-content-section-gray">
+  <div class="xl:container px-6 text-center">
+    <h2 class="text-[24px] sm:text-[28px] md:text-[31px] font-medium text-content-text mb-10 md:mb-14">Explore Pinner</h2>
+    <div class="flex flex-col sm:flex-row justify-center gap-6">
+      {links.map((link) => (
+        <a href={link.href} class="inline-block bg-white rounded-lg px-8 py-6 text-content-text hover:shadow-lg transition-shadow max-w-[320px] sm:max-w-[360px] text-left">
+          <span class="block text-lg font-medium mb-1">{link.label}</span>
+          <span class="block text-sm text-content-text-muted">{link.description}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>

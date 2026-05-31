@@ -1,0 +1,77 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+import contactsData from '../data/contacts.json';
+
+const { community } = contactsData;
+---
+
+<Layout title="Get Support, Integrations & Volume Pricing" description="Get in touch with the Pinner team. Join our Discord community, contribute on GitHub, or reach out for support and volume pricing.">
+  <PageHeader
+    title="Connect with the community"
+    description="Get help and join the discussion"
+    mobileTitle="Connect with us"
+    client:load
+  />
+
+  <section class="bg-[#F8F8F8] py-[70px] border-b border-[#E4E0D4]">
+    <div class="container text-center">
+      <div class="max-w-2xl mx-auto">
+        <h2 class="text-[21px] md:text-[32px] font-medium mb-8">Join our Discord community</h2>
+        <p class="text-[#485453] mb-8">{community.discord.description}</p>
+        <a
+          href={community.discord.url}
+          id="contact-discord-link"
+          class="inline-block py-3 md:py-4 px-7 bg-[#E4E0D4] text-[#0D1D1C] font-medium text-[13px] md:text-lg rounded-full hover:bg-[#d6d1c4] transition-colors"
+        >
+          {community.discord.label}
+        </a>
+      </div>
+
+      <div class="max-w-2xl mx-auto mt-16">
+        <h2 class="text-[21px] md:text-[32px] font-medium mb-8">Contribute on GitHub</h2>
+        <p class="text-[#485453] mb-8">{community.github.description}</p>
+        <a
+          href={community.github.url}
+          id="contact-github-link"
+          class="inline-block py-3 md:py-4 px-7 bg-[#E4E0D4] text-[#0D1D1C] font-medium text-[13px] md:text-lg rounded-full hover:bg-[#d6d1c4] transition-colors"
+        >
+          {community.github.label}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-[60px] md:py-[120px]">
+    <div class="xl:container px-6">
+      <div class="mx-auto max-w-[960px]">
+        <h2 class="text-content-text mb-4 text-center text-[25px] leading-tight font-medium md:text-[32px] lg:text-[40px]">
+          Get in touch
+        </h2>
+        <p class="text-content-text-muted mx-auto mb-12 text-center text-lg leading-relaxed md:text-xl">
+          Need help? Have questions? Want to talk about storage for 10TB+? Reach out. Looking to integrate or need volume pricing? <a href="/partners" class="underline hover:text-content-text transition-colors">See our partners page</a>.
+        </p>
+        <div
+          data-heyform-id="aP5Q5RIr"
+          data-heyform-type="standard"
+          data-heyform-custom-url="https://form.pinner.xyz/form/aP5Q5RIr"
+          data-heyform-width-type="%"
+          data-heyform-width="100"
+          data-heyform-height-type="px"
+          data-heyform-height="700"
+          data-heyform-auto-resize-height="true"
+        ></div>
+        <script src="https://www.unpkg.com/@heyform-inc/embed@latest/dist/index.umd.js"></script>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script is:inline>
+  document.getElementById('contact-discord-link')?.addEventListener('click', function() {
+    window.posthog?.capture('contact_discord_clicked');
+  });
+  document.getElementById('contact-github-link')?.addEventListener('click', function() {
+    window.posthog?.capture('contact_github_clicked');
+  });
+</script>

@@ -1,0 +1,64 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import PageHeader from '@/components/PageHeader';
+import CallToAction from '@/components/CallToAction';
+import AboutSection from '@/components/AboutSection';
+import BrandLogos from '@/components/BrandLogos';
+import MissionSection from '@/components/MissionSection';
+
+import logos from '@/data/brand-logos';
+
+import AboutWhatIsPinner from "@/assets/about-what-is-pinner.jpg";
+import AboutValues from "@/assets/about-values.jpg";
+import AboutHowItWorks from "@/assets/about-how-it-works.jpg";
+---
+
+<Layout title="Decentralized Storage That Respects Your Data" variant="home" ogImage="/images/og-about.png" description="A small business building storage infrastructure that respects your data. Zero-knowledge encryption, open source, built on the Sia decentralized network.">
+  <PageHeader
+    title="Why we're building Pinner"
+    mobileTitle="Why we're building Pinner"
+    description="A small business building storage infrastructure that respects your data."
+    btnText="Start Pinning →"
+    url="https://account.pinner.xyz"
+    client:load
+  />
+
+  <section class="py-[60px] md:py-[120px] bg-white">
+    <div class="xl:container px-6">
+      <MissionSection client:load />
+    </div>
+  </section>
+
+  <AboutSection
+    title="Pinner is your storage service."
+    subtitle="What is Pinner?"
+    description="Pin files to IPFS, host static websites, and store private data with zero-knowledge encryption. All on a decentralized network. No middlemen. No data mining. No AI training. No headaches."
+    imageUrl={AboutWhatIsPinner}
+    theme="white"
+    client:load
+  />
+
+  <AboutSection
+    title="Your data is yours."
+    subtitle="What We Stand For"
+    description="We don't look at it. We don't sell it, we don't use it to train models.<br/><br/>We keep our word. Uptime we commit to, pricing you can understand.<br/><br/>No roadblocks: we may use automation to scale, but if you need a human, you will get one.<br/><br/>Real SMB: founder-owned LLC, no investors, no exit strategy.<br/><br/>Open by default: fully open source, public GitHub."
+    imageUrl={AboutValues}
+    theme="gray"
+    client:load
+  />
+
+  <AboutSection
+    id="how-it-works"
+    title="Pin. Host. Store."
+    subtitle="How It Works"
+    description="1. <a href='/solutions/ipfs-pinning' class='underline hover:text-content-text transition-colors'>Pin</a>. Upload files to IPFS, get a permanent link.<br/><br/>2. <a href='/solutions/website-hosting' class='underline hover:text-content-text transition-colors'>Host</a>. Serve static websites directly from pinned content.<br/><br/>3. Store. Private data encrypted at rest via an S3-compatible API. Only you can read your files."
+    imageUrl={AboutHowItWorks}
+    theme="white"
+    imagePosition="right"
+    client:load
+  />
+
+  <BrandLogos logos={logos} logoType="dark" title="Built On" variant="dark" client:load />
+
+	<CallToAction client:load variant="dark" />
+</Layout>
