@@ -3,14 +3,11 @@ import TusPlugin from "@uppy/tus";
 import type { UploadResult } from "@/types/upload";
 import { UploadResultSymbol } from "@/types/upload";
 import { BaseUploadHandler } from "./base-upload";
-import { patchTusNodeHttpStack } from "@/utils/tus-patch";
 import type { PinnerConfig } from "@/config";
 import { UPLOAD_SOURCE_TUS } from "./constants";
 
 export class TUSUploadHandler extends BaseUploadHandler {
   constructor(config: PinnerConfig) {
-    // Apply runtime patch for tus-js-client to handle abort() before send()
-    patchTusNodeHttpStack();
     super(config);
   }
   protected configurePlugin(uppy: Uppy): void {
