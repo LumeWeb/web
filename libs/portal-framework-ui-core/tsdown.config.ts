@@ -3,7 +3,7 @@ import { defineConfig } from "tsdown";
 
 const baseOptions: Partial<UserConfig> = {
   deps: {
-    neverBundle: [/node_modules/],
+    skipNodeModulesBundle: true,
   },
   minify: false,
   platform: "neutral",
