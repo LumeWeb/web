@@ -253,6 +253,29 @@ describe("car.ts", () => {
       expect(roots[0].toString()).toBe(result.rootCid);
     });
 
+    it("should produce correct root CID for mixed root-level and nested files", async () => {
+      const rootFile = createRegularFile("root content", "index.html");
+      const nestedFile = createRegularFile("nested content", "about.html");
+      setWebkitRelativePath(nestedFile, "about/index.html");
+
+      const files = [rootFile, nestedFile];
+      const result = await preprocessToCar(files);
+
+      const carBytes = await collectAsyncIterable(
+        readableStreamToAsyncIterable(result.carStream),
+      );
+      const metadata = await extractCarMetadata(carBytes);
+
+      expect(metadata.rootCid).toBe(result.rootCid);
+
+      const reader = await CarReader.fromBytes(carBytes);
+      const roots = await reader.getRoots();
+      expect(roots.length).toBe(1);
+      expect(roots[0].toString()).toBe(result.rootCid);
+
+      expect(metadata.blockCount).toBeGreaterThan(1);
+    });
+
     it("should handle large CAR file that must be streamed", async () => {
       const chunkSize = 1024 * 1024; // 1MB chunks
       const numChunks = 200; // 100MB total
