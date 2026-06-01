@@ -1,3 +1,11 @@
+## 0.1.11 (2026-06-01)
+
+### Fixes
+
+#### Fixes
+
+- correct root CID for directory uploads with wrapWithDirectory
+
 ## 0.1.10 (2026-06-01)
 
 ### Fixes
