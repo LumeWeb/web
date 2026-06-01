@@ -1,3 +1,11 @@
+## 0.1.10 (2026-06-01)
+
+### Fixes
+
+#### Fixes
+
+- fix XHR/TUS upload response parsing and add TUS async CID resolution
+
 ## 0.1.9 (2026-06-01)
 
 ### Fixes

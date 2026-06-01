@@ -1,5 +1,13 @@
 # @lumeweb/portal-sdk
 
+## 0.1.5 (2026-06-01)
+
+### Features
+
+#### Features
+
+- export poll, delay and PollOptions from http-utils
+
 ## 0.1.4 (2026-06-01)
 
 ### Fixes
