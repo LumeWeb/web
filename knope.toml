@@ -103,3 +103,9 @@ command = "git push"
 
 [[workflows.steps]]
 type = "Release"
+
+[[workflows]]
+name = "document-change"
+
+[[workflows.steps]]
+type = "CreateChangeFile"
