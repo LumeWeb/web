@@ -37,6 +37,7 @@ describe("Pinner Integration Tests", () => {
       expect(uploadResult.size).toBe(12);
 
       // Pin by the returned CID
+      if (!uploadResult.cid) throw new Error("CID not yet available");
       const pinResult: CID[] = [];
       const pinGenerator = await pinner.pinByHash(uploadResult.cid);
       for await (const item of pinGenerator) {
@@ -63,6 +64,7 @@ describe("Pinner Integration Tests", () => {
       expect(uploadResult.name).toBe("test.txt");
 
       // Pin with metadata
+      if (!uploadResult.cid) throw new Error("CID not yet available");
       const pinResult: CID[] = [];
       const pinGenerator = await pinner.pinByHash(uploadResult.cid, {
         name: "test-pin",
@@ -86,6 +88,7 @@ describe("Pinner Integration Tests", () => {
 
       expect(result1.cid).toBeDefined();
       expect(result2.cid).toBeDefined();
+      if (!result1.cid || !result2.cid) throw new Error("CID not yet available");
       expect(result1.cid).not.toBe(result2.cid);
     });
 
@@ -97,12 +100,14 @@ describe("Pinner Integration Tests", () => {
       const result2 = await pinner.uploadAndWait(mockFile2);
 
       // Pin both uploads
+      if (!result1.cid) throw new Error("CID not yet available");
       const pinResult1: CID[] = [];
       const pinGenerator1 = await pinner.pinByHash(result1.cid);
       for await (const item of pinGenerator1) {
         pinResult1.push(item);
       }
 
+      if (!result2.cid) throw new Error("CID not yet available");
       const pinResult2: CID[] = [];
       const pinGenerator2 = await pinner.pinByHash(result2.cid);
       for await (const item of pinGenerator2) {
@@ -124,6 +129,7 @@ describe("Pinner Integration Tests", () => {
       const uploadResult = await pinner.uploadAndWait(mockFile);
 
       // Pin
+      if (!uploadResult.cid) throw new Error("CID not yet available");
       const pinResult: CID[] = [];
       const pinGenerator = await pinner.pinByHash(uploadResult.cid);
       for await (const item of pinGenerator) {
@@ -147,12 +153,14 @@ describe("Pinner Integration Tests", () => {
       const result2 = await pinner.uploadAndWait(mockFile2);
 
       // Pin both
+      if (!result1.cid) throw new Error("CID not yet available");
       const pinGenerator1 = await pinner.pinByHash(result1.cid, {
         name: "pin-1",
       });
       for await (const item of pinGenerator1) {
         item;
       }
+      if (!result2.cid) throw new Error("CID not yet available");
       const pinGenerator2 = await pinner.pinByHash(result2.cid, {
         name: "pin-2",
       });
@@ -176,6 +184,7 @@ describe("Pinner Integration Tests", () => {
       const uploadResult = await pinner.uploadAndWait(mockFile);
 
       // Pin
+      if (!uploadResult.cid) throw new Error("CID not yet available");
       const pinResult: CID[] = [];
       const pinGenerator = await pinner.pinByHash(uploadResult.cid, {
         name: "test-pin",
@@ -203,6 +212,7 @@ describe("Pinner Integration Tests", () => {
       const uploadResult = await pinner.uploadAndWait(mockFile);
 
       // Pin
+      if (!uploadResult.cid) throw new Error("CID not yet available");
       const pinResult: CID[] = [];
       const pinGenerator = await pinner.pinByHash(uploadResult.cid);
       for await (const item of pinGenerator) {
@@ -234,6 +244,7 @@ describe("Pinner Integration Tests", () => {
       const uploadResult = await pinner.uploadAndWait(mockFile);
 
       // Pin
+      if (!uploadResult.cid) throw new Error("CID not yet available");
       const pinResult: CID[] = [];
       const pinGenerator = await pinner.pinByHash(uploadResult.cid, {
         name: "test-pin",
@@ -267,6 +278,7 @@ describe("Pinner Integration Tests", () => {
       const uploadResult = await pinner.uploadAndWait(mockFile);
 
       // Pin with metadata
+      if (!uploadResult.cid) throw new Error("CID not yet available");
       const pinResult: CID[] = [];
       const pinGenerator = await pinner.pinByHash(uploadResult.cid, {
         name: "test-pin",
@@ -294,6 +306,7 @@ describe("Pinner Integration Tests", () => {
       const uploadResult = await pinner.uploadAndWait(mockFile);
 
       // Pin
+      if (!uploadResult.cid) throw new Error("CID not yet available");
       const pinResult: CID[] = [];
       const pinGenerator = await pinner.pinByHash(uploadResult.cid);
       for await (const item of pinGenerator) {
@@ -319,6 +332,7 @@ describe("Pinner Integration Tests", () => {
       const uploadResult = await pinner.uploadAndWait(mockFile);
 
       // Pin
+      if (!uploadResult.cid) throw new Error("CID not yet available");
       const pinResult: CID[] = [];
       const pinGenerator = await pinner.pinByHash(uploadResult.cid);
       for await (const item of pinGenerator) {
@@ -350,6 +364,7 @@ describe("Pinner Integration Tests", () => {
       expect(uploadResult.cid).toBeDefined();
 
       // Pin
+      if (!uploadResult.cid) throw new Error("CID not yet available");
       const pinResult: CID[] = [];
       const pinGenerator = await pinner.pinByHash(uploadResult.cid, {
         name: "directory-pin",

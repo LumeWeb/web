@@ -52,10 +52,13 @@ abstract class BaseUploadBuilder<
   abstract execute(): Promise<TResult>;
 
   protected toUploadResult(result: {
-    cid: string;
+    cid?: string;
     size: number;
     createdAt: Date;
   }): PinataUploadResult {
+    if (!result.cid) {
+      throw new Error("Upload result has no CID yet — use waitForOperation() to poll for the CID");
+    }
     return {
       IpfsHash: result.cid,
       PinSize: result.size,

@@ -10,6 +10,8 @@ import type {
   UploadProgress,
   UploadResult,
 } from "@/types/upload";
+import { UploadResultSymbol } from "@/types/upload";
+import type { PostUploadResponse } from "@/api/generated/schemas";
 import { normalizeUploadInput, type UploadInputObject } from "./normalize";
 import {
   fileToReadableStream,
@@ -267,4 +269,36 @@ export abstract class BaseUploadHandler {
   protected abstract configurePlugin(uppy: Uppy): void;
   protected abstract parseResult(result: unknown): UploadResult;
   protected abstract getUploadSource(): string;
+
+  protected mapUploadResponse(
+    body: unknown,
+    uploadId: string,
+    overrides?: Partial<UploadResult>,
+  ): UploadResult {
+    if (body && typeof body === "object" && "CID" in body) {
+      const { CID } = body as PostUploadResponse;
+      return {
+        id: uploadId,
+        cid: CID,
+        name: "",
+        size: 0,
+        mimeType: "",
+        createdAt: new Date(),
+        numberOfFiles: 1,
+        [UploadResultSymbol]: true,
+        ...overrides,
+      };
+    }
+
+    return {
+      id: uploadId,
+      name: "",
+      size: 0,
+      mimeType: "",
+      createdAt: new Date(),
+      numberOfFiles: 1,
+      [UploadResultSymbol]: true,
+      ...overrides,
+    };
+  }
 }

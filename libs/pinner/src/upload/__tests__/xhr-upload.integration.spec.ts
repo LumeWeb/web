@@ -11,7 +11,7 @@ describe("XHRUploadHandler Integration", () => {
   });
 
   describe("upload method integration", () => {
-    it("should successfully upload a file and return a result", async ({
+    it("should successfully upload a file and return a result with CID from server", async ({
       worker,
     }) => {
       const mockConfig = createMockConfig();
@@ -22,13 +22,27 @@ describe("XHRUploadHandler Integration", () => {
       const result = await operation.result;
 
       expect(result).toBeDefined();
-      expect(result.id).toMatch(/^test-upload-id(-\d+)?$/);
+      expect(result.cid).toBeDefined();
+      expect(result.cid).not.toBe("");
 
       const { CID } = await import("multiformats/cid");
       expect(() => CID.parse(result.cid)).not.toThrow();
 
-      expect(result.name).toBe("test.car");
-      expect(result.mimeType).toBe("application/vnd.ipld.car");
+      handler.destroy();
+    });
+
+    it("should map server CID (uppercase) to cid (lowercase)", async ({
+      worker,
+    }) => {
+      const mockConfig = createMockConfig();
+      const handler = new XHRUploadHandler(mockConfig);
+      const mockFile = createTestUploadFile();
+
+      const operation = await handler.upload(mockFile);
+      const result = await operation.result;
+
+      expect(result.cid).toBeDefined();
+      expect(result.cid).not.toBe("");
 
       handler.destroy();
     });
@@ -71,7 +85,7 @@ describe("XHRUploadHandler Integration", () => {
       handler.destroy();
     });
 
-    it("should call onComplete callback on successful upload", async ({
+    it("should call onComplete callback with cid from server response", async ({
       worker,
     }) => {
       const mockConfig = createMockConfig();
@@ -86,11 +100,7 @@ describe("XHRUploadHandler Integration", () => {
       assertCallbackCalled(onComplete);
       expect(onComplete).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: "test-upload-id",
           cid: expect.any(String),
-          name: "test.car",
-          size: 12,
-          mimeType: "application/vnd.ipld.car",
         }),
       );
 

@@ -377,6 +377,10 @@ class PublicUploadImpl implements PublicUpload {
 				keyvalues: keyvalues || options?.metadata?.keyvalues,
 			});
 
+			if (!result.cid) {
+				throw new Error("Upload result has no CID yet — use waitForOperation() to poll for the CID");
+			}
+
 			return {
 				id: result.cid,
 				name: file.name,
@@ -403,6 +407,10 @@ class PublicUploadImpl implements PublicUpload {
 				keyvalues: keyvalues || options?.metadata?.keyvalues,
 			});
 			const result = await operation.result;
+
+			if (!result.cid) {
+				throw new Error("Upload result has no CID yet — use waitForOperation() to poll for the CID");
+			}
 
 			return {
 				id: result.cid,
@@ -445,6 +453,10 @@ class PublicUploadImpl implements PublicUpload {
 				keyvalues: keyvalues || options?.metadata?.keyvalues,
 			});
 
+			if (!result.cid) {
+				throw new Error("Upload result has no CID yet — use waitForOperation() to poll for the CID");
+			}
+
 			return {
 				id: result.cid,
 				name: file.name,
@@ -480,6 +492,10 @@ class PublicUploadImpl implements PublicUpload {
 				name: name || options?.metadata?.name,
 				keyvalues: keyvalues || options?.metadata?.keyvalues,
 			});
+
+			if (!result.cid) {
+				throw new Error("Upload result has no CID yet — use waitForOperation() to poll for the CID");
+			}
 
 			return {
 				id: result.cid,

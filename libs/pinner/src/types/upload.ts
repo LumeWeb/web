@@ -13,8 +13,10 @@ export interface UploadResult {
 
   /**
    * IPFS Content Identifier for the uploaded content.
+   * Undefined when the CID is not yet available (e.g. TUS uploads where
+   * the CID is assigned asynchronously — poll GET /api/upload/result/{id}).
    */
-  cid: string;
+  cid?: string;
 
   /**
    * User-provided or auto-generated name for the content.
