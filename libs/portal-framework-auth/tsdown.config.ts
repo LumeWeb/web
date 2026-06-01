@@ -3,6 +3,6 @@ import { createLibraryConfig, entryPatterns } from "@lumeweb/tsdown-config";
 
 export default defineConfig(
   createLibraryConfig(entryPatterns.withoutTests, {
-    deps: { neverBundle: /node_modules/ },
+    deps: { skipNodeModulesBundle: true },
   })
 );

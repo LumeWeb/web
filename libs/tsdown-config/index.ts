@@ -6,7 +6,7 @@ import type { UserConfig } from "tsdown";
 const baseOptions: Partial<UserConfig> = {
   clean: true,
   deps: {
-    neverBundle: [/node_modules/],
+    skipNodeModulesBundle: true,
   },
   dts: true,
   hash: false,
@@ -71,6 +71,10 @@ export function createLibraryConfigWithExternals(
   externals: (string | RegExp)[],
   options: Partial<UserConfig> = {}
 ): UserConfig {
+  const filteredExternals = externals.filter(
+    (e) => !(e instanceof RegExp && e.source === "node_modules")
+  );
+
   return {
     ...baseOptions,
     entry: Array.isArray(entry) ? entry : [entry],
@@ -83,7 +87,8 @@ export function createLibraryConfigWithExternals(
       },
     },
     deps: {
-      neverBundle: externals,
+      skipNodeModulesBundle: true,
+      ...(filteredExternals.length > 0 ? { neverBundle: filteredExternals } : {}),
     },
     ...options,
   };

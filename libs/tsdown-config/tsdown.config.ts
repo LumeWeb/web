@@ -3,7 +3,7 @@ import { defineConfig } from "tsdown";
 export default defineConfig({
   clean: true,
   deps: {
-    neverBundle: [/node_modules/],
+    skipNodeModulesBundle: true,
   },
   dts: true,
   entry: ["./index.ts"],
