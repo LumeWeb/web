@@ -171,6 +171,11 @@ export async function preprocessToCar(
     files = [input];
   }
 
+  // wrapWithDirectory must be true for directory uploads (File[] input) so the
+  // last addAll yield is the root directory CID, not a child file/subdirectory.
+  // Single files don't need wrapping. Matches Go SDK wrapInDir behavior.
+  const wrapWithDirectory = Array.isArray(input);
+
   const heliaInstance = await getHelia();
   const fs = unixfs(heliaInstance);
   const c = car(heliaInstance);
@@ -184,6 +189,7 @@ export async function preprocessToCar(
   for await (const result of fs.addAll(src, {
     cidVersion: 1,
     rawLeaves: false,
+    wrapWithDirectory,
     signal: options?.signal,
     onProgress(event) {
       if (event.type === "blocks:put:blockstore:put") {
