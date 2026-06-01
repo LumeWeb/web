@@ -10,7 +10,7 @@ const __mfImport = (src) =>
     ? globalThis.System.import(src)
     : import(src);
 (async () => {
-  const { initHost } = await __mfImport("/static/js/hostInit-BDReVDdW.js");
+  const { initHost } = await __mfImport("/static/js/hostInit-ZdKcnRgb.js");
   const runtime = await initHost();
   const __mfRemotePreloads = [];
   await Promise.all(__mfRemotePreloads);
