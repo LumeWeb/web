@@ -1,0 +1,1 @@
+import{Fragment as e,__mfPrebuildExports$2 as t,jsx as n,jsxs as r}from"./_virtual_mf___mfe_internal__dashboard__loadShare___mf_0_refinedev_mf_1_core__loadShare__.mjs-BEoUHPZS.js";export{e as Fragment,t as default,n as jsx,r as jsxs};
