@@ -14,7 +14,7 @@ import { testConfig } from "@/__tests__/setup";
 
 describe("TUSUploadHandler Integration", () => {
   describe("upload method integration", () => {
-    it("should successfully upload a file via TUS protocol", async ({
+    it("should successfully upload a file via TUS protocol and return uploadId", async ({
       worker,
     }) => {
       const mockConfig = createMockConfig();
@@ -26,7 +26,26 @@ describe("TUSUploadHandler Integration", () => {
       const result = await operation.result;
 
       expect(result).toBeDefined();
+      expect(result.id).toBeDefined();
+      expect(result.id).not.toBe("");
       assertUploadOperationStructure(operation);
+
+      handler.destroy();
+    }, 30000);
+
+    it("should not fabricate cid when server has none yet", async ({
+      worker,
+    }) => {
+      const mockConfig = createMockConfig();
+      const TUSUploadHandler = await importTUSUploadHandler();
+      const handler = new TUSUploadHandler(mockConfig);
+      const mockFile = createTestUploadFile();
+
+      const operation = await handler.upload(mockFile);
+      const result = await operation.result;
+
+      expect(result.id).toBeDefined();
+      expect(result.cid).toBeUndefined();
 
       handler.destroy();
     }, 30000);
@@ -84,6 +103,11 @@ describe("TUSUploadHandler Integration", () => {
       await operation.result;
 
       assertCallbackCalled(onComplete);
+      expect(onComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: expect.any(String),
+        }),
+      );
 
       handler.destroy();
     });

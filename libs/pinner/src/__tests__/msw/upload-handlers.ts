@@ -6,30 +6,6 @@ import {
   testConfig,
 } from "../setup";
 import { TusStore, OperationStore } from "./upload-store";
-import type { UploadResult } from "@/types/upload";
-
-// Inlined from msw-helpers (deleted during harness migration)
-
-async function createMockUploadResult(
-  overrides: Partial<UploadResult> = {},
-): Promise<UploadResult> {
-  const { getNextRequestId } = await import("../setup");
-  const requestId = getNextRequestId();
-  const cid = overrides.cid || (await createMockCID(requestId));
-
-  return {
-    id: overrides.id || "test-upload-id",
-    cid,
-    name: overrides.name || "test.car",
-    size: overrides.size || 1024,
-    mimeType: overrides.mimeType || "application/vnd.ipld.car",
-    createdAt: overrides.createdAt || new Date(),
-    numberOfFiles: overrides.numberOfFiles || 1,
-    keyvalues: overrides.keyvalues,
-    isDirectory: overrides.isDirectory,
-    operationId: overrides.operationId,
-  };
-}
 
 async function applyMockDelay(
   delay: number = testConfig.mockDelay,
@@ -40,8 +16,6 @@ async function applyMockDelay(
 const CORS_HEADERS = { "Access-Control-Allow-Origin": "*" };
 
 const XHR_FORM_FIELD = "file";
-const DEFAULT_FILENAME = "upload.car";
-const DEFAULT_FILE_SIZE = 1024;
 
 export function createUploadHandlers(tusStore: TusStore, operationStore: OperationStore) {
   const tusOptionsHandler = http.options(
@@ -290,31 +264,23 @@ export function createUploadHandlers(tusStore: TusStore, operationStore: Operati
     async ({ request }) => {
       await applyMockDelay(100);
 
-      let filename: string = DEFAULT_FILENAME;
-      let fileSize: number = DEFAULT_FILE_SIZE;
       try {
         const formData = await request.formData();
-        const file = formData.get(XHR_FORM_FIELD) as File;
-        if (file) {
-          filename = file.name;
-          fileSize = file.size;
-        }
+        formData.get(XHR_FORM_FIELD);
       } catch (error) {
         console.warn("[MSW] Could not extract file info from request:", error);
       }
 
       const operationId = operationStore.getNextOperationId();
-      const result = await createMockUploadResult({
-        name: filename,
-        cid: await createMockCID(operationId),
-        size: fileSize,
-        operationId,
-      });
+      const cid = await createMockCID(operationId);
 
-      return HttpResponse.json(result, {
-        status: 200,
-        headers: CORS_HEADERS,
-      });
+      return HttpResponse.json(
+        { CID: cid },
+        {
+          status: 200,
+          headers: CORS_HEADERS,
+        },
+      );
     },
   );
 
@@ -370,7 +336,7 @@ export function createUploadHandlers(tusStore: TusStore, operationStore: Operati
       });
 
       return HttpResponse.json(
-        { data: result, total: 1 },
+        { data: [result], total: 1 },
         {
           status: 200,
           headers: CORS_HEADERS,
@@ -407,6 +373,36 @@ export function createUploadHandlers(tusStore: TusStore, operationStore: Operati
     },
   );
 
+  const uploadResultHandler = http.get(
+    `${testConfig.apiUrl}/upload/result/:identifier`,
+    async ({ params }) => {
+      await applyMockDelay();
+      const identifier = params.identifier as string;
+
+      const operationId = parseInt(identifier, 10);
+      if (isNaN(operationId)) {
+        const resolvedCid = await createMockCID(parseInt(identifier.replace(/\D/g, "") || "1", 10));
+        return HttpResponse.json(
+          { status: "completed", cid: resolvedCid },
+          { status: 200, headers: CORS_HEADERS },
+        );
+      }
+
+      if (operationId === 99999) {
+        return HttpResponse.json(
+          { status: "failed", error: "Simulated upload failure" },
+          { status: 200, headers: CORS_HEADERS },
+        );
+      }
+
+      const resolvedCid = await createMockCID(operationId);
+      return HttpResponse.json(
+        { status: "completed", cid: resolvedCid },
+        { status: 200, headers: CORS_HEADERS },
+      );
+    },
+  );
+
   return [
     tusOptionsHandler,
     tusHeadHandler,
@@ -414,6 +410,7 @@ export function createUploadHandlers(tusStore: TusStore, operationStore: Operati
     tusPatchHandler,
     tusDeleteHandler,
     xhrUploadHandler,
+    uploadResultHandler,
     accountUploadLimitHandler,
     accountInfoHandler,
     listOperationsHandler,

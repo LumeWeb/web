@@ -1,7 +1,6 @@
 import Uppy from "@uppy/core";
 import XHRUpload from "@lumeweb/uppy-post-upload";
 import type { UploadResult } from "@/types/upload";
-import { UploadResultSymbol } from "@/types/upload";
 import { BaseUploadHandler } from "./base-upload";
 import { UPLOAD_SOURCE_XHR } from "./constants";
 
@@ -20,33 +19,13 @@ export class XHRUploadHandler extends BaseUploadHandler {
   protected parseResult(result: unknown): UploadResult {
     const uppyResponse = result as {
       uploadURL: string;
-      body?: {
-        id: string;
-        cid: string;
-        name: string;
-        size: number;
-        mimeType: string;
-        createdAt: string;
-        numberOfFiles: number;
-        keyvalues?: Record<string, string>;
-        operationId?: number;
-      };
+      body?: unknown;
     };
 
-    const response = uppyResponse.body || (uppyResponse as any);
+    const body = uppyResponse.body;
+    const uploadId = uppyResponse.uploadURL?.split("/").pop() || "";
 
-    return {
-      id: response.id,
-      cid: response.cid,
-      name: response.name,
-      size: response.size,
-      mimeType: response.mimeType,
-      createdAt: new Date(response.createdAt),
-      numberOfFiles: response.numberOfFiles,
-      keyvalues: response.keyvalues,
-      operationId: response.operationId,
-      [UploadResultSymbol]: true,
-    };
+    return this.mapUploadResponse(body, uploadId);
   }
 
   protected getUploadSource(): string {

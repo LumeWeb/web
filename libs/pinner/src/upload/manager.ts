@@ -1,10 +1,13 @@
 import type { OperationPollingOptions } from "@lumeweb/portal-sdk";
 import {
+  AccountError,
   OPERATION_STATUS,
   type OperationsQueryParams,
   Sdk,
+  poll,
 } from "@lumeweb/portal-sdk";
 import { createEqFilter } from "@lumeweb/query-builder";
+import type { UploadResultResponse } from "@/api/generated/schemas";
 
 import type { PinnerConfig } from "../config";
 import type {
@@ -34,6 +37,7 @@ import { EmptyFileError } from "../errors";
 import { type UploadInputObject } from "./normalize";
 
 export class UploadManager {
+  private config: PinnerConfig;
   private xhrHandler: XHRUploadHandler;
   private tusHandler: TUSUploadHandler;
   private portalSdk: Sdk;
@@ -41,6 +45,7 @@ export class UploadManager {
   private limitFetched: boolean = false;
 
   constructor(config: PinnerConfig) {
+    this.config = config;
     this.xhrHandler = new XHRUploadHandler(config);
     this.tusHandler = new TUSUploadHandler(config);
     this.portalSdk = new Sdk(config.endpoint || DEFAULT_ENDPOINT);
@@ -106,41 +111,22 @@ export class UploadManager {
   ): Promise<UploadResult> {
     // Scenario 1: UploadResult with operationId - use it directly
     if (isUploadResult(input) && input.operationId) {
-      const result = await this.portalSdk
-        .account()
-        .waitForOperation(input.operationId, options);
-
-      if (!result.success) {
-        throw new Error(
-          result.error?.message || `Operation ${input.operationId} failed`,
-        );
-      }
-
-      const operation = result.data;
-      if (!operation.cid) {
-        throw new Error(`Operation ${input.operationId} completed without CID`);
-      }
-
-      if (
-        operation.status?.toLowerCase() === OPERATION_STATUS.FAILED ||
-        operation.status?.toLowerCase() === OPERATION_STATUS.ERROR
-      ) {
-        throw new Error(
-          `Operation ${input.operationId} failed: ${operation.error || operation.status_message || "Unknown error"}`,
-        );
-      }
-
-      // Merge operation data into the original upload result
-      return {
-        ...input,
-        cid: operation.cid,
-        operationId: operation.id,
-      };
+      return await this.#waitForOperationById(input, options);
     }
 
     // Scenario 2: UploadResult with CID but no operationId - find by CID
     if (isUploadResult(input) && input.cid) {
       return await this.#waitForOperationByCid(input, options);
+    }
+
+    // Scenario 3: UploadResult with no CID and no operationId — TUS upload.
+    // Poll GET /api/upload/result/{id} to resolve the CID, then proceed via CID.
+    if (isUploadResult(input) && input.id) {
+      const resolved = await this.#waitForUploadResult(input, options);
+      if (resolved.cid) {
+        return await this.#waitForOperationByCid(resolved, options);
+      }
+      return resolved;
     }
 
     // Scenario 3: Only operation ID provided
@@ -202,6 +188,10 @@ export class UploadManager {
     uploadResult: UploadResult,
     options?: OperationPollingOptions,
   ): Promise<UploadResult> {
+    if (!uploadResult.cid) {
+      throw new Error("Cannot wait for operation by CID — CID not available. Use upload result ID to poll GET /api/upload/result/{id} instead.");
+    }
+
     // List operations filtered by CID
     const params: OperationsQueryParams = {
       filters: [createEqFilter("cid", uploadResult.cid)],
@@ -251,6 +241,90 @@ export class UploadManager {
       ...uploadResult,
       cid: finalOperation.cid,
       operationId: finalOperation.id,
+    };
+  }
+
+  async #waitForOperationById(
+    input: UploadResult,
+    options?: OperationPollingOptions,
+  ): Promise<UploadResult> {
+    const result = await this.portalSdk
+      .account()
+      .waitForOperation(input.operationId!, options);
+
+    if (!result.success) {
+      throw new Error(
+        result.error?.message || `Operation ${input.operationId} failed`,
+      );
+    }
+
+    const operation = result.data;
+    if (!operation.cid) {
+      throw new Error(`Operation ${input.operationId} completed without CID`);
+    }
+
+    if (
+      operation.status?.toLowerCase() === OPERATION_STATUS.FAILED ||
+      operation.status?.toLowerCase() === OPERATION_STATUS.ERROR
+    ) {
+      throw new Error(
+        `Operation ${input.operationId} failed: ${operation.error || operation.status_message || "Unknown error"}`,
+      );
+    }
+
+    return {
+      ...input,
+      cid: operation.cid,
+      operationId: operation.id,
+    };
+  }
+
+  async #waitForUploadResult(
+    uploadResult: UploadResult,
+    options?: OperationPollingOptions,
+  ): Promise<UploadResult> {
+    const uploadId = uploadResult.id;
+    if (!uploadId) {
+      throw new Error("No upload ID available to poll for upload result");
+    }
+
+    const baseUrl = this.config.endpoint || DEFAULT_ENDPOINT;
+    const fetchUrl = `${baseUrl}/api/upload/result/${encodeURIComponent(uploadId)}`;
+    const headers = { Authorization: `Bearer ${this.config.jwt}` };
+
+    const result = await poll<UploadResultResponse>(
+      async () => {
+        const response = await fetch(fetchUrl, { headers });
+
+        if (response.status === 404) {
+          return {
+            success: false,
+            error: new AccountError(`Upload result not found for ID ${uploadId}`, 404),
+          };
+        }
+
+        const body: UploadResultResponse = await response.json();
+
+        if (body.status === "failed") {
+          return {
+            success: false,
+            error: new AccountError(body.error || `Upload failed for ID ${uploadId}`, 500),
+          };
+        }
+
+        return { success: true, data: body };
+      },
+      (data) => data.status === "completed" || data.status === "duplicate",
+      { interval: options?.interval, timeout: options?.timeout },
+    );
+
+    if (!result.success) {
+      throw result.error;
+    }
+
+    return {
+      ...uploadResult,
+      ...(result.data.cid ? { cid: result.data.cid } : {}),
     };
   }
 

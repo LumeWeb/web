@@ -19,10 +19,12 @@ export function assertMockUploadResult(result: UploadResult) {
   expect(result).toEqual(MOCK_UPLOAD_RESULT);
 }
 
-export function assertValidUploadResult(result: UploadResult) {
+export function assertValidUploadResult(result: UploadResult, expectCid: boolean = true) {
   expect(result).toBeDefined();
   expect(result.id).toBeDefined();
-  expect(result.cid).toBeDefined();
+  if (expectCid) {
+    expect(result.cid).toBeDefined();
+  }
   expect(result.name).toBeDefined();
   expect(result.size).toBeGreaterThanOrEqual(0);
   expect(result.mimeType).toBeDefined();

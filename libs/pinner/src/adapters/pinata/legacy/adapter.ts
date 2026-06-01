@@ -126,7 +126,11 @@ export function pinataLegacyAdapter(
 				keyvalues: options?.metadata?.keyvalues,
 			});
 
-			return createUploadResponse(result, file.name);
+			if (!result.cid) {
+				throw new Error("Upload result has no CID yet — use waitForOperation() to poll for the CID");
+			}
+
+			return createUploadResponse({ cid: result.cid, size: result.size, createdAt: result.createdAt }, file.name);
 		},
 
 		/**
@@ -149,7 +153,11 @@ export function pinataLegacyAdapter(
 				keyvalues: options?.metadata?.keyvalues,
 			});
 
-			return createUploadResponse(result, file.name);
+			if (!result.cid) {
+				throw new Error("Upload result has no CID yet — use waitForOperation() to poll for the CID");
+			}
+
+			return createUploadResponse({ cid: result.cid, size: result.size, createdAt: result.createdAt }, file.name);
 		},
 
 		/**
