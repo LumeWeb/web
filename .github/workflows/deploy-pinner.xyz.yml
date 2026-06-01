@@ -1,0 +1,43 @@
+name: Deploy pinner.xyz
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "apps/pinner.xyz/**"
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+permissions:
+  deployments: write
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy pinner.xyz
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v5
+      - name: Setup
+        uses: LumeWeb/workflows/.github/actions/setup-all@develop
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_PUBLIC_PORTAL_API_URL: ${{ vars.PINNER_PORTAL_API_URL }}
+          envkey_PUBLIC_LISTMONK_URL: ${{ vars.PINNER_LISTMONK_URL }}
+          envkey_PUBLIC_LISTMONK_LIST_UUID: ${{ vars.PINNER_LISTMONK_LIST_UUID }}
+          envkey_PUBLIC_POSTHOG_PROJECT_TOKEN: ${{ secrets.PINNER_POSTHOG_PROJECT_TOKEN }}
+          envkey_PUBLIC_POSTHOG_HOST: ${{ vars.PINNER_POSTHOG_HOST }}
+          directory: apps/pinner.xyz
+      - name: Build
+        run: pnpm build:pinner.xyz
+      - name: Deploy to IPFS via Pinner
+        id: deploy_pinner
+        uses: lumeweb/pinner-deploy-action@v0
+        with:
+          api-key: ${{ secrets.PINNER_API_KEY }}
+          path: apps/pinner.xyz/dist
+          domain: pinner.xyz
+          remove-previous: true
