@@ -1,3 +1,11 @@
+## 0.1.2 (2026-06-01)
+
+### Fixes
+
+#### Fixes
+
+- use skipNodeModulesBundle to prevent absolute paths in dist
+
 ## 0.1.1 (2026-05-21)
 
 ### Features

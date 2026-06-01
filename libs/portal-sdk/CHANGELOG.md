@@ -1,5 +1,13 @@
 # @lumeweb/portal-sdk
 
+## 0.1.4 (2026-06-01)
+
+### Fixes
+
+#### Fixes
+
+- use skipNodeModulesBundle to prevent absolute paths in dist
+
 ## 0.1.3 (2026-05-26)
 
 ### Features
