@@ -1,3 +1,11 @@
+## 0.1.8 (2026-06-01)
+
+### Fixes
+
+#### Fixes
+
+- remove obsolete tus-js-client NodeHttpStack monkey-patch
+
 ## 0.1.7 (2026-05-23)
 
 ### Features
