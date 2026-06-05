@@ -401,9 +401,8 @@ class ChangesetGenerator {
     try {
       console.log("Temporarily modifying knope.toml...");
       await this.modifyKnopeConfig((config) => {
-        if (config.changes) {
-          config.changes.ignore_conventional_commits = false;
-        }
+        config.changes = config.changes || {};
+        config.changes.ignore_conventional_commits = false;
       });
 
       releaseOutput = await this.runKnopeDryRun();
