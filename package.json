@@ -63,6 +63,7 @@
     "npm-run-all": "catalog:",
     "orval": "catalog:",
     "oxlint": "^1.64.0",
+    "oxlint-tsgolint": "catalog:",
     "p-queue": "^9.2.0",
     "playwright": "catalog:",
     "prettier": "^3.8.3",
