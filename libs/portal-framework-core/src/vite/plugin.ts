@@ -280,7 +280,7 @@ export function Config(opts: ConfigOptions) {
   ].filter(Boolean);
 
   const viteConfig = defineConfig({
-    base: "/",
+    base: "",
     resolve: {
       tsconfigPaths: true,
     },
