@@ -31,7 +31,7 @@ const faqs = [
   },
   {
     question: "What happened to Fleek?",
-    answer: "Fleek's IPFS hosting shut down in January 2026. The company pivoted to AI inference, and their hosting and storage services are no longer available."
+    answer: "Fleek retired their IPFS hosting services in January 2026, and hosted sites went offline. Their hosting and storage services are no longer available."
   },
   {
     question: "How is Pinner different from Fleek?",
@@ -40,6 +40,10 @@ const faqs = [
   {
     question: "Can I use the same content addresses?",
     answer: "If you have the original files, yes. Content addresses (CIDs) are determined by your file's content, not by the provider. The same file has the same CID on any IPFS service."
+  },
+  {
+    question: "Can I keep my existing IPNS address?",
+    answer: "Yes. If you have your IPNS private key, you can import it into Pinner and continue publishing to the same IPNS address. The address stays the same; only the publishing service changes."
   },
   {
     question: "What kinds of sites work on Pinner?",
@@ -61,9 +65,9 @@ const faqs = [
   />
 
   <AboutSection
-    subtitle="Why hosts disappear"
-    title="When your host's incentives don't align with yours"
-    description="When a venture-backed company pivots, the product you depend on can disappear overnight. Fleek raised millions in venture funding, then pivoted from IPFS hosting to AI agents. Their hosting customers lost their sites. That's not a knock on Fleek; it's how venture-funded businesses work. They chase the next growth curve. Pinner is a small business built around our users. We charge for storage and bandwidth, we keep costs low, and we don't have investors pushing us to pivot. Different model, different risk."
+    subtitle="What happened to Fleek?"
+    title="A hosting service that's no longer hosting"
+    description="Fleek retired their IPFS hosting services in January 2026, and hosted sites went offline with it. Pinner stores your data on the Sia network, distributed across independent hosts who are paid to store it and must prove they're doing it. Your data doesn't live on our servers. It lives on a network designed to keep it around."
     theme="white"
     imageUrl={AboutWhatIsPinner}
     client:load
