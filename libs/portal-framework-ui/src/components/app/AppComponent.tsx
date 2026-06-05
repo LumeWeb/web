@@ -73,7 +73,6 @@ function AppContent({
   loadNavigation = true,
   loadRoutes = true,
 }: AppContentProps) {
-  useIdentifyUser();
   const {
     error: frameworkError,
     framework,
@@ -178,6 +177,49 @@ function AppContent({
     addMenuItems,
   ]);
 
+  const options = {
+    ...pluginConfigs,
+    options: getDefaultRefineOptions(),
+    routerProvider,
+  } satisfies Partial<RefineProps>;
+
+  return (
+    <Refine {...options}>
+      <AppContentInner
+        error={error}
+        framework={framework}
+        frameworkError={frameworkError}
+        isFrameworkLoading={isFrameworkLoading}
+        isLoading={isLoading}
+        loadNavigation={loadNavigation}
+        loadRoutes={loadRoutes}
+        routes={routes}
+      />
+    </Refine>
+  );
+}
+
+function AppContentInner({
+  error,
+  framework,
+  frameworkError,
+  isFrameworkLoading,
+  isLoading,
+  loadNavigation,
+  loadRoutes,
+  routes,
+}: {
+  error: Error | null;
+  framework: Framework | null;
+  frameworkError: Error | null;
+  isFrameworkLoading: boolean;
+  isLoading: boolean;
+  loadNavigation: boolean;
+  loadRoutes: boolean;
+  routes: null | RouteDefinition[];
+}) {
+  useIdentifyUser();
+
   // Show loading state while framework is loading or we're loading navigation
   if (isFrameworkLoading || isLoading) {
     return <LoadingSpinner />;
@@ -204,9 +246,6 @@ function AppContent({
   if (!routes) {
     return null;
   }
-
-  // Spread plugin configs into a single object for Refine
-  const combinedPluginConfig = Object.assign({}, ...pluginConfigs);
 
   const routerRoutes = createRoutesFromElements(
     Array.isArray(routes)
@@ -243,12 +282,10 @@ function AppContent({
     );
 
     return (
-      // @ts-ignore
       <Route
         element={finalElement}
         errorElement={<RouteErrorBoundary />}
         index={route.index}
-        key={route.id}
         path={route.path}>
         {childRoutes}
       </Route>
@@ -261,20 +298,14 @@ function AppContent({
     router = createBrowserRouter(routerRoutes);
   }
 
-  const options = {
-    ...combinedPluginConfig,
-    options: getDefaultRefineOptions(),
-    routerProvider,
-  } satisfies Partial<RefineProps>;
-
   return (
-    <Refine {...options}>
+    <>
       <DialogProvider>
         {router && <RouterProvider router={router} />}
         {!router && <DialogRenderer />}
       </DialogProvider>
       <Toaster />
-    </Refine>
+    </>
   );
 }
 
@@ -283,7 +314,7 @@ function getLazyComponent(
   pluginId: NamespacedId | undefined,
   framework: Framework, // Pass framework instance
   routeId: NamespacedId | string, // For logging
-): ComponentType<any> | null {
+): ComponentType<unknown> | null {
   if (!componentString || !pluginId) {
     console.error(
       `Route Error: Missing component string or pluginId for route id ${routeId}`,
@@ -326,7 +357,7 @@ function getLazyComponent(
   }
 
   try {
-    //@ts-ignore
+    //@ts-expect-error -- createRemoteComponentLoader return type mismatch
     return createRemoteComponentLoader(
       { componentPath: componentName, pluginId: pluginId },
       framework,

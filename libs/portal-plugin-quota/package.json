@@ -37,6 +37,7 @@
     "react-router": "catalog:"
   },
   "devDependencies": {
+    "@lumeweb/analytics": "workspace:*",
     "@mswjs/interceptors": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
