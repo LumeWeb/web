@@ -401,12 +401,8 @@ class ChangesetGenerator {
     try {
       console.log("Temporarily modifying knope.toml...");
       await this.modifyKnopeConfig((config) => {
-        for (const workflow of config.workflows || []) {
-          for (const step of workflow.steps || []) {
-            if (step.type === "PrepareRelease") {
-              step.ignore_conventional_commits = false;
-            }
-          }
+        if (config.changes) {
+          config.changes.ignore_conventional_commits = false;
         }
       });
 
