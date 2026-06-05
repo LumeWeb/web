@@ -1,3 +1,11 @@
+## 0.1.2 (2026-06-05)
+
+### Fixes
+
+#### Fixes
+
+- revert vite base path from absolute to relative
+
 ## 0.1.1 (2026-05-21)
 
 ### Features
