@@ -1,3 +1,11 @@
+## 0.1.4 (2026-06-06)
+
+### Fixes
+
+#### Fixes
+
+- restore plugin configs merge lost in Refine boundary refactor
+
 ## 0.1.3 (2026-06-06)
 
 ### Fixes
