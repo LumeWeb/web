@@ -1,0 +1,1 @@
+import{_virtual_mf___mfe_internal__dashboard__prebuild__react_mf_1_compiler_mf_2_runtime__prebuild___default as e,c as t}from"./_virtual_mf___mfe_internal__dashboard__loadShare__react_mf_1_compiler_mf_2_runtime__loadShare__.mjs-CWA6iMQx.js";export{t as c,e as default};

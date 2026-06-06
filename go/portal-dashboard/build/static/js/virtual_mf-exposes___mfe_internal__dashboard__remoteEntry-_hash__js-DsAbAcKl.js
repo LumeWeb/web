@@ -1,0 +1,2 @@
+Promise.resolve();var e={};export{e as virtual_mf_exposes___mfe_internal__dashboard__remoteEntry__hash__js_default};
+//# sourceMappingURL=virtual_mf-exposes___mfe_internal__dashboard__remoteEntry-_hash__js-DsAbAcKl.js.map

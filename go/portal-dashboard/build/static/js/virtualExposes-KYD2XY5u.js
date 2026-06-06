@@ -1,0 +1,1 @@
+import{virtual_mf_exposes___mfe_internal__dashboard__remoteEntry__hash__js_default as e}from"./virtual_mf-exposes___mfe_internal__dashboard__remoteEntry-_hash__js-DsAbAcKl.js";export{e as default};
