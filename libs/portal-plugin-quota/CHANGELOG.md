@@ -1,3 +1,11 @@
+## 0.1.1 (2026-06-06)
+
+### Fixes
+
+#### Fixes
+
+- add @lumeweb/analytics devDependency
+
 ## 0.1.0 (2026-05-26)
 
 ### Breaking Changes

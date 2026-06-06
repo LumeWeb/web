@@ -1,5 +1,13 @@
 # @lumeweb/portal-dashboard
 
+## 0.3.2 (2026-06-06)
+
+### Fixes
+
+#### Fixes
+
+- update portal-framework-ui dependency to include useIdentifyUser context fix
+
 ## 0.3.1 (2026-05-21)
 
 ### Features

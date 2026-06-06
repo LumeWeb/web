@@ -1,3 +1,11 @@
+## 0.1.3 (2026-06-06)
+
+### Fixes
+
+#### Fixes
+
+- move useIdentifyUser inside Refine boundary
+
 ## 0.1.2 (2026-06-01)
 
 ### Fixes
