@@ -177,8 +177,10 @@ function AppContent({
     addMenuItems,
   ]);
 
+  const combinedPluginConfig = Object.assign({}, ...pluginConfigs);
+
   const options = {
-    ...pluginConfigs,
+    ...combinedPluginConfig,
     options: getDefaultRefineOptions(),
     routerProvider,
   } satisfies Partial<RefineProps>;
