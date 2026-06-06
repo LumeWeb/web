@@ -92,7 +92,8 @@
       "pluralize": "patches/pluralize.patch",
       "papaparse": "patches/papaparse.patch",
       "@uppy/core": "patches/@uppy__core.patch",
-      "better-sse@0.16.1": "patches/better-sse@0.16.1.patch"
+      "better-sse@0.16.1": "patches/better-sse@0.16.1.patch",
+      "@module-federation/vite": "patches/@module-federation__vite.patch"
     },
     "onlyBuiltDependencies": [
       "@ipshipyard/node-datachannel",
