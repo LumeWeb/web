@@ -1,5 +1,11 @@
 # @lumeweb/portal-dashboard
 
+## 0.3.4 (2026-06-06)
+
+### Fixes
+
+- Rebuild @module-federation/vite patch. The previous version accidentally reverted upstream's initPromise deferral for import:false shared modules, causing loadShare errors (react/compiler-runtime, react/jsx-runtime) in Go-embedded builds where zero-latency serving triggered the race condition.
+
 ## 0.3.3 (2026-06-06)
 
 ### Fixes
