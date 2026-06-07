@@ -35,22 +35,15 @@ export interface RegistryWebBundle {
   targetApps?: string[];
 }
 
-/** A custom plugin definition for client-side-only or externally-hosted plugins. See schemas/plugin-registry.v1.json */
-export interface CustomPlugin {
-  manifestUrl: string;
-  pluginId?: string;
-  targetApps?: string[];
-}
-
 export interface PortalPlugin {
   name: string;
   port?: number;
   tunnelHost?: string;
   tunnelProtocol?: "http" | "https";
+  local?: boolean;
   web_bundles?: RegistryWebBundle[];
   meta?: PluginMeta;
   build?: BuildInfo;
-  custom?: CustomPlugin;
 }
 
 export interface DevToolsOptions {

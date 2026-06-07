@@ -101,10 +101,13 @@ describe("mergeUpstreamConfig", () => {
     expect(result.build).toBeUndefined();
   });
 
-  it("handles plugins only in local config (not in upstream)", async () => {
+  it("preserves local-only plugins not present in upstream", async () => {
     const { mergeUpstreamConfig } = await import("../express-middleware");
     const result = mergeUpstreamConfig(localConfig, upstreamConfig);
-    expect(result.plugins["localOnly"]).toBeUndefined();
+    expect(result.plugins["localOnly"]).toEqual({
+      meta: { localOnly: true },
+      web_bundles: ["http://localhost:4200/mf-manifest.json"],
+    });
   });
 
   it("handles plugins only in upstream config (not in local)", async () => {
