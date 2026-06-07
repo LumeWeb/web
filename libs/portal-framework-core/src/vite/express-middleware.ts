@@ -28,6 +28,14 @@ export function mergeUpstreamConfig(
     ),
   );
 
+  for (const [pluginName, localPlugin] of Object.entries(
+    portalConfig.plugins,
+  )) {
+    if (!(pluginName in mergedConfig.plugins)) {
+      mergedConfig.plugins[pluginName] = localPlugin;
+    }
+  }
+
   mergedConfig.feature_flags = {
     ...mergedConfig.feature_flags,
     ...upstreamConfig.feature_flags,

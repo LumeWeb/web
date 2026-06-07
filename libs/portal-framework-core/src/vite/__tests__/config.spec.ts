@@ -237,11 +237,13 @@ describe("setupPluginRegistryConfig", () => {
     );
   });
 
-  it("parses custom plugin entries correctly", () => {
+  it("parses local plugin entries correctly", () => {
     const registry = [
       {
-        name: "custom-plugin",
-        custom: { manifestUrl: "https://custom.example.com/mf-manifest.json" },
+        name: "local-plugin",
+        port: 4180,
+        tunnelHost: "local.tunnel.example.com",
+        local: true,
       },
     ];
 
@@ -254,9 +256,9 @@ describe("setupPluginRegistryConfig", () => {
     });
 
     const result = setupPluginRegistryConfig(baseOpts);
-    expect(result.portalConfig.plugins["custom-plugin"]).toEqual({
+    expect(result.portalConfig.plugins["local-plugin"]).toEqual({
       meta: {},
-      web_bundles: ["https://custom.example.com/mf-manifest.json"],
+      web_bundles: ["https://local.tunnel.example.com/mf-manifest.json"],
     });
   });
 

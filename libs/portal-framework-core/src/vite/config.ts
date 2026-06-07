@@ -26,9 +26,9 @@ export function getBaseUrl(
   const tunnelHost = plugin?.tunnelHost || process.env.VITE_TUNNEL_HOST;
   if (!tunnelHost) {
     if (devPort === undefined) {
-      throw new Error(
-        `Plugin '${plugin?.name}' must specify either 'port', 'tunnelHost', or 'web_bundles'/'custom'`,
-      );
+        throw new Error(
+          `Plugin '${plugin?.name}' must specify either 'port', 'tunnelHost', or 'web_bundles'`,
+        );
     }
     return `http://localhost:${devPort}`;
   }
@@ -82,17 +82,7 @@ export function setupPluginRegistryConfig(opts: ConfigOptions): {
     const plugins: Record<string, PortalPluginConfig> = {};
 
     for (const entry of registry) {
-      const { name, custom, web_bundles, meta, build, port, tunnelHost, tunnelProtocol } =
-        entry;
-
-      if (custom) {
-        plugins[name] = {
-          meta: meta ?? {},
-          web_bundles: [custom.manifestUrl],
-          build: build,
-        };
-        continue;
-      }
+      const { name, web_bundles, meta, build, port } = entry;
 
       if (web_bundles && web_bundles.length > 0) {
         plugins[name] = {
