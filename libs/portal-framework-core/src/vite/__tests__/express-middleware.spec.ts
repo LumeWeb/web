@@ -112,8 +112,33 @@ describe("mergeUpstreamConfig", () => {
     const result = mergeUpstreamConfig(localConfig, upstreamConfig);
     expect(result.plugins["upstreamOnly"]).toEqual({
       meta: { upstreamOnly: true },
-      web_bundles: undefined,
+      web_bundles: ["https://prod.example.com/upstream/mf-manifest.json"],
     });
+  });
+
+  it("preserves upstream web_bundles when local plugin has no web_bundles", async () => {
+    const { mergeUpstreamConfig } = await import("../express-middleware");
+    const localWithPartial: PortalMetaConfig = {
+      domain: "local.example.com",
+      feature_flags: {},
+      plugins: {
+        dashboard: {
+          meta: {},
+        },
+      },
+    };
+    const result = mergeUpstreamConfig(localWithPartial, upstreamConfig);
+    expect(result.plugins["dashboard"].web_bundles).toEqual([
+      "https://prod.example.com/dashboard/mf-manifest.json",
+    ]);
+  });
+
+  it("local web_bundles override upstream web_bundles", async () => {
+    const { mergeUpstreamConfig } = await import("../express-middleware");
+    const result = mergeUpstreamConfig(localConfig, upstreamConfig);
+    expect(result.plugins["dashboard"].web_bundles).toEqual([
+      "http://localhost:4100/mf-manifest.json",
+    ]);
   });
 
   it("does not mutate the original localConfig", async () => {

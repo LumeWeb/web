@@ -143,6 +143,21 @@ describe("createPluginFederationConfig", () => {
     );
   });
 
+  it("replaces ALL dots in plugin name for virtualModuleDir", () => {
+    const plugin: PluginConfig = {
+      dir: "/app",
+      name: "org.my.plugin",
+    };
+
+    createPluginFederationConfig(plugin, [], {}, 4173);
+
+    expect(federation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        virtualModuleDir: "__mf__virtual_org_my_plugin",
+      }),
+    );
+  });
+
   it("handles missing exposes", () => {
     const plugin: PluginConfig = {
       dir: "/app",

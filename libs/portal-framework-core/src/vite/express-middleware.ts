@@ -21,7 +21,7 @@ export function mergeUpstreamConfig(
           pluginName,
           {
             ...upstreamPlugin,
-            web_bundles: localPlugin?.web_bundles,
+            web_bundles: localPlugin?.web_bundles ?? upstreamPlugin.web_bundles,
           },
         ];
       },

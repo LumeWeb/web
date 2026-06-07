@@ -18,7 +18,7 @@ export function localhostAccessPlugin(): Plugin {
       if (process.env.VITE_PORTAL_DOMAIN_IS_ROOT) {
         scripts.push({
           attrs: { type: "text/javascript" },
-          children: `window.VITE_PORTAL_DOMAIN_IS_ROOT = ${process.env.VITE_PORTAL_DOMAIN_IS_ROOT};`,
+          children: `window.VITE_PORTAL_DOMAIN_IS_ROOT = ${JSON.stringify(process.env.VITE_PORTAL_DOMAIN_IS_ROOT)};`,
           injectTo: "head-prepend",
           tag: "script",
         });

@@ -51,7 +51,7 @@ export function createPluginFederationConfig(
     {
       exposes: resolvedExposes,
       filename: `${plugin.name}/remoteEntry-[hash].js`,
-      virtualModuleDir: `__mf__virtual_${plugin.name.replace(".", "_")}`,
+      virtualModuleDir: `__mf__virtual_${plugin.name.replaceAll(".", "_")}`,
     },
   );
 }
