@@ -17,8 +17,12 @@ export default defineConfig(
       "node-fetch",
       "@module-federation/vite",
       "vite",
+      "ajv",
     ],
     {
+      copy: [
+        { from: "src/schemas/*.json", to: "dist/esm/schemas" },
+      ],
       outputOptions: {
         exports: "named",
       },
