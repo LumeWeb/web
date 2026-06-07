@@ -4,8 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { localhostAccessPlugin } from "../localhost-plugin";
 
-/** Helper to call transformIndexHtml with correct typing.
- *  Vite's IndexHtmlTransform is a union type; our plugin returns HtmlTagDescriptor[] directly. */
 function callTransformIndexHtml(plugin: ReturnType<typeof localhostAccessPlugin>) {
   return (plugin.transformIndexHtml as () => HtmlTagDescriptor[])();
 }
@@ -44,7 +42,7 @@ describe("localhostAccessPlugin", () => {
     });
   });
 
-  it("returns VITE_PORTAL_DOMAIN_IS_ROOT script when env var is set", () => {
+  it("VITE_PORTAL_DOMAIN_IS_ROOT='true' injects boolean true", () => {
     vi.stubEnv("VITE_PORTAL_DOMAIN_IS_ROOT", "true");
     const plugin = localhostAccessPlugin();
     const result = callTransformIndexHtml(plugin);
@@ -52,10 +50,35 @@ describe("localhostAccessPlugin", () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({
       attrs: { type: "text/javascript" },
-      children: 'window.VITE_PORTAL_DOMAIN_IS_ROOT = "true";',
+      children: "window.VITE_PORTAL_DOMAIN_IS_ROOT = true;",
       injectTo: "head-prepend",
       tag: "script",
     });
+  });
+
+  it("VITE_PORTAL_DOMAIN_IS_ROOT='false' injects boolean false", () => {
+    vi.stubEnv("VITE_PORTAL_DOMAIN_IS_ROOT", "false");
+    const plugin = localhostAccessPlugin();
+    const result = callTransformIndexHtml(plugin);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual({
+      attrs: { type: "text/javascript" },
+      children: "window.VITE_PORTAL_DOMAIN_IS_ROOT = false;",
+      injectTo: "head-prepend",
+      tag: "script",
+    });
+  });
+
+  it("VITE_PORTAL_DOMAIN_IS_ROOT with arbitrary value coerces to boolean false", () => {
+    vi.stubEnv("VITE_PORTAL_DOMAIN_IS_ROOT", "1");
+    const plugin = localhostAccessPlugin();
+    const result = callTransformIndexHtml(plugin);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].children).toBe(
+      "window.VITE_PORTAL_DOMAIN_IS_ROOT = false;",
+    );
   });
 
   it("returns both scripts when both env vars are set", () => {
@@ -87,27 +110,5 @@ describe("localhostAccessPlugin", () => {
     for (const script of result) {
       expect(script.tag).toBe("script");
     }
-  });
-
-  it("VITE_PORTAL_DOMAIN_IS_ROOT value is JSON-stringified into script content", () => {
-    vi.stubEnv("VITE_PORTAL_DOMAIN_IS_ROOT", "my-custom-value");
-    const plugin = localhostAccessPlugin();
-    const result = callTransformIndexHtml(plugin);
-
-    expect(result).toHaveLength(1);
-    expect(result[0].children).toBe(
-      'window.VITE_PORTAL_DOMAIN_IS_ROOT = "my-custom-value";',
-    );
-  });
-
-  it("VITE_PORTAL_DOMAIN_IS_ROOT produces valid JS for arbitrary string values", () => {
-    vi.stubEnv("VITE_PORTAL_DOMAIN_IS_ROOT", "it's a \"test\"");
-    const plugin = localhostAccessPlugin();
-    const result = callTransformIndexHtml(plugin);
-
-    expect(result).toHaveLength(1);
-    expect(result[0].children).toBe(
-      'window.VITE_PORTAL_DOMAIN_IS_ROOT = "it\'s a \\"test\\"";',
-    );
   });
 });

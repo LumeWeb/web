@@ -16,9 +16,10 @@ export function localhostAccessPlugin(): Plugin {
       }
 
       if (process.env.VITE_PORTAL_DOMAIN_IS_ROOT) {
+        const isRoot = process.env.VITE_PORTAL_DOMAIN_IS_ROOT === "true";
         scripts.push({
           attrs: { type: "text/javascript" },
-          children: `window.VITE_PORTAL_DOMAIN_IS_ROOT = ${JSON.stringify(process.env.VITE_PORTAL_DOMAIN_IS_ROOT)};`,
+          children: `window.VITE_PORTAL_DOMAIN_IS_ROOT = ${JSON.stringify(isRoot)};`,
           injectTo: "head-prepend",
           tag: "script",
         });
