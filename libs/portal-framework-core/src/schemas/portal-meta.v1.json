@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lumeweb.com/schemas/portal-meta.v1.json",
+  "title": "PortalMeta",
+  "description": "Portal metadata served by the Go backend at GET /api/meta. Defines the portal domain, available plugins with their web bundles, feature flags, and build information. The client framework fetches this to discover and load Module Federation plugins at runtime.",
+  "type": "object",
+  "required": ["domain", "plugins", "feature_flags"],
+  "properties": {
+    "domain": {
+      "type": "string",
+      "description": "Portal domain without protocol (e.g. 'portal.example.com')",
+      "examples": ["portal.example.com", "default.lumeweb.com"]
+    },
+    "plugins": {
+      "$ref": "#/$defs/portalMetaPlugins"
+    },
+    "feature_flags": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "boolean"
+      },
+      "description": "Feature flags. Keys are normalized: uppercase, dots and hyphens become underscores (e.g. 'SOCIAL_LOGIN', 'ENABLE_BILLING')."
+    },
+    "build": {
+      "$ref": "#/$defs/buildInfo"
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Arbitrary portal-level metadata. May include branding, configuration, or other data needed by the frontend."
+    }
+  },
+  "$defs": {
+    "buildInfo": {
+      "type": "object",
+      "description": "Build information for the portal or a plugin. Generated at compile time from ldflags.",
+      "properties": {
+        "version": {
+          "type": "string",
+          "default": "develop",
+          "description": "Semantic version or 'develop' for unreleased builds"
+        },
+        "gitCommit": {
+          "type": "string",
+          "default": "unknown",
+          "description": "Full git commit SHA"
+        },
+        "gitBranch": {
+          "type": "string",
+          "default": "unknown",
+          "description": "Git branch name"
+        },
+        "buildTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Build timestamp in RFC 3339 format"
+        },
+        "goVersion": {
+          "type": "string",
+          "description": "Go version used to build (e.g. 'go1.22.0')"
+        },
+        "platform": {
+          "type": "string",
+          "description": "Target platform (e.g. 'linux', 'darwin')"
+        },
+        "architecture": {
+          "type": "string",
+          "description": "Target architecture (e.g. 'amd64', 'arm64')"
+        }
+      }
+    },
+    "portalMetaPlugins": {
+      "type": "object",
+      "description": "Map of plugin ID to plugin metadata. Plugin IDs match the Go plugin registration ID (e.g. 'dashboard', 'billing', 'ipfs').",
+      "additionalProperties": {
+        "$ref": "#/$defs/portalMetaPlugin"
+      }
+    },
+    "portalMetaPlugin": {
+      "type": "object",
+      "required": ["web_bundles"],
+      "description": "Metadata for a single plugin, including its web bundles and arbitrary plugin-specific metadata.",
+      "properties": {
+        "build": {
+          "$ref": "#/$defs/buildInfo",
+          "description": "Plugin build information. Omitted if not available (omitempty)."
+        },
+        "meta": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Plugin-specific metadata. Content depends on the plugin. Examples: subdomain, themes, social_providers for dashboard; quota limits for billing."
+        },
+        "web_bundles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "URL to a Module Federation manifest file. Server-served bundles use the pattern /api/meta/plugin/{pluginId}/bundle/{index}/mf-manifest.json. Dev-mode bundles use http://localhost:{port}/mf-manifest.json."
+          },
+          "description": "List of URIs to Module Federation manifest files. Each bundle can target different app types. The server rewrites publicPath in manifests to match the serving URL.",
+          "minItems": 1
+        }
+      }
+    }
+  }
+}

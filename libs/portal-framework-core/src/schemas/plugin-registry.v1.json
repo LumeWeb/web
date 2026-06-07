@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lumeweb.com/schemas/plugin-registry.v1.json",
+  "title": "PluginRegistry",
+  "description": "Dev-time plugin registry for portal-app-shell. Defines which plugins the Vite dev server should load, where to find their Module Federation manifests, and any custom overrides. Used by the Vite Express middleware to build a mock /api/meta response. In production, the Go backend serves /api/meta directly.",
+  "type": "array",
+  "items": {
+    "$ref": "#/$defs/pluginEntry"
+  },
+  "$defs": {
+    "pluginEntry": {
+      "type": "object",
+      "required": ["name"],
+      "description": "A single plugin entry in the dev registry. Backward-compatible with the legacy {name, port, tunnelHost} format.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "description": "Plugin identifier. Must match the Go plugin ID or the build-time plugin.config.ts name. Used as the key in /api/meta plugins map."
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Dev server port for this plugin's Module Federation remote entry. Required unless 'custom' or 'web_bundles' is provided."
+        },
+        "tunnelHost": {
+          "type": "string",
+          "description": "Hostname for tunnel-based remote dev (e.g. 'billing.tunnel.pinner.xyz'). When set, the manifest URL uses https://{tunnelHost}/mf-manifest.json instead of localhost."
+        },
+        "tunnelProtocol": {
+          "type": "string",
+          "enum": ["http", "https"],
+          "default": "https",
+          "description": "Protocol for tunnel connection. Defaults to https."
+        },
+        "web_bundles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/webBundle"
+          },
+          "description": "Explicit web bundle definitions. When omitted, defaults to a single bundle at {baseUrl}/mf-manifest.json. Use this for Go plugins that serve multiple bundles targeting different apps (e.g. dashboard vs admin views)."
+        },
+        "meta": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Plugin-specific metadata merged into the /api/meta response for this plugin. Mirrors the Go PluginInfo.Meta callback."
+        },
+        "build": {
+          "$ref": "portal-meta.v1.json#/$defs/buildInfo",
+          "description": "Build information for this plugin, included in the /api/meta response."
+        },
+        "custom": {
+          "$ref": "#/$defs/customPlugin",
+          "description": "Custom plugin definition for client-side-only or externally-hosted plugins not served by the Go backend. When present, the Vite middleware injects this plugin into /api/meta without requiring a corresponding Go plugin."
+        }
+      }
+    },
+    "webBundle": {
+      "type": "object",
+      "required": ["manifestUrl"],
+      "description": "A single web bundle definition pointing to a Module Federation manifest.",
+      "properties": {
+        "manifestUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to the mf-manifest.json for this bundle. Can be a local dev server (http://localhost:PORT/mf-manifest.json), a tunnel URL, or an absolute URL to a deployed manifest."
+        },
+        "targetApps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Which app types this bundle serves. Empty array or omitted = all apps. Mirrors the Go WebBundle.TargetApps field."
+        }
+      }
+    },
+    "customPlugin": {
+      "type": "object",
+      "required": ["manifestUrl"],
+      "description": "Defines a plugin that the Go server does not know about. The Vite dev middleware adds it to the /api/meta response so the client loads it via Module Federation at runtime. This enables testing new plugins before they have a Go backend, loading 3rd-party plugins from external URLs, or running client-side-only test plugins.",
+      "properties": {
+        "manifestUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to the mf-manifest.json for this custom plugin. Typically a local dev server like http://localhost:4180/mf-manifest.json."
+        },
+        "pluginId": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]+:[a-zA-Z0-9_-]+$",
+          "description": "Namespaced plugin ID (e.g. 'test:my-plugin', 'custom:onboarding'). Defaults to 'custom:{name}' if omitted. Must follow the NamespacedId format used by the Plugin runtime."
+        },
+        "targetApps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Which app types this custom plugin targets. Empty = all apps."
+        }
+      }
+    }
+  }
+}
