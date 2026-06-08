@@ -128,7 +128,7 @@ const OTP_PATH = "/otp";
 const DASHBOARD_PATH = "/dashboard";
 
 // Utility to sanitize redirect URLs - only allow relative paths or specific allowed domains
-const sanitizeRedirectUrl = (url: string | undefined): string => {
+export const sanitizeRedirectUrl = (url: string | undefined): string => {
   if (!url) return DASHBOARD_PATH;
 
   try {

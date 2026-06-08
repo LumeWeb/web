@@ -1,6 +1,8 @@
 import { type GoConfig, useGo, useIsAuthenticated } from "@refinedev/core";
 import { useEffect } from "react";
 
+import { sanitizeRedirectUrl } from "@/dataProviders/auth";
+
 /**
  * Redirects to a target path if the user is already authenticated.
  * Useful on login/register pages to bounce authenticated users away.
@@ -19,7 +21,8 @@ export function useRedirectIfAuthenticated(
 
   useEffect(() => {
     if (!isAuthLoading && authData?.authenticated) {
-      go({ to: to ?? fallback, type });
+      const safeTo = to ? sanitizeRedirectUrl(to) : fallback;
+      go({ to: safeTo, type });
     }
   }, [isAuthLoading, authData, to, fallback, type, go]);
 }
