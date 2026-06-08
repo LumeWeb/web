@@ -128,7 +128,7 @@ const OTP_PATH = "/otp";
 const DASHBOARD_PATH = "/dashboard";
 
 // Utility to sanitize redirect URLs - only allow relative paths or specific allowed domains
-const sanitizeRedirectUrl = (url: string | undefined): string => {
+export const sanitizeRedirectUrl = (url: string | undefined): string => {
   if (!url) return DASHBOARD_PATH;
 
   try {
@@ -460,7 +460,9 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
           error: processApiError(response.error, REGISTRATION_ERROR_NAME),
         }),
         ...(response.success && {
-          redirectTo: LOGIN_PATH,
+          redirectTo: params.redirectTo
+            ? `${LOGIN_PATH}?to=${encodeURIComponent(sanitizeRedirectUrl(params.redirectTo))}`
+            : LOGIN_PATH,
           successNotification: {
             description:
               "You have successfully registered. Please check your email to verify your account.",
