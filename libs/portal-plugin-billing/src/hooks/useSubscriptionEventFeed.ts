@@ -77,12 +77,12 @@ export function useSubscriptionEventFeed(): SubscriptionEventEmitter {
     fetchEventSource(url, {
       method: "GET",
       headers: {
-        ...getAuthHeaders(capability!),
+        ...getAuthHeaders(capability!.getAuthToken()),
         Accept: "text/event-stream",
       },
       signal: abortController.signal,
       async fetch(input, init) {
-        const freshHeaders = getAuthHeaders(capability!);
+        const freshHeaders = getAuthHeaders(capability!.getAuthToken());
         init = init || {};
         init.headers = {
           ...init.headers,

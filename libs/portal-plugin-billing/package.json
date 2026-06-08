@@ -1,11 +1,24 @@
 {
   "name": "@lumeweb/portal-plugin-billing",
   "version": "0.1.2",
-  "private": true,
   "type": "module",
+  "files": [
+    "lib-dist",
+    "package.json"
+  ],
+  "main": "lib-dist/index.js",
+  "types": "lib-dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib-dist/esm/index.d.ts",
+      "import": "./lib-dist/esm/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:lib": "tsdown",
     "serve": "vite preview",
     "lint": "oxlint ."
   },
@@ -33,6 +46,7 @@
   },
   "devDependencies": {
     "@lumeweb/query-builder": "workspace:*",
+    "@lumeweb/tsdown-config": "workspace:*",
     "@module-federation/enhanced": "catalog:",
     "@rolldown/plugin-node-polyfills": "^1.0.3",
     "@types/react": "catalog:",
@@ -43,6 +57,7 @@
     "msw": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "tsdown": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:",
     "vitest-browser-react": "catalog:"
