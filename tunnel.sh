@@ -61,7 +61,7 @@ Options:
   --host <name>       Override TUNNEL_HOST
   --port <number>     Override TUNNEL_PORT / TUNNEL_MAIN_PORT
   --env <path>        Path to root .env (default: auto-detect, walk up from CWD)
-  --plugins <list>    Override TUNNEL_PLUGINS (comma-separated, e.g. core,dashboard)
+  --plugins <list>    Override TUNNEL_PLUGINS (comma-separated, e.g. core,dashboard,local:onboarding)
   --dry-run           Print resolved config and exit without starting anything
   --kill              Kill all node processes originating from vite and exit
   --list              Discover all .env.tunnel files in the project
