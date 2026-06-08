@@ -19,6 +19,7 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: "@", replacement: path.resolve(__dirname, "./src") },
+      { find: "@lib", replacement: path.resolve(__dirname, "./src-lib") },
       { find: "@lumeweb/portal-framework-auth", replacement: path.resolve(__dirname, "../portal-framework-auth/dist/esm/index.js") },
       { find: "@lumeweb/analytics", replacement: path.resolve(__dirname, "../analytics/dist/esm/index.js") },
       {
@@ -36,6 +37,7 @@ export default defineConfig({
         resolve: {
           alias: [
             { find: "@", replacement: path.resolve(__dirname, "./src") },
+            { find: "@lib", replacement: path.resolve(__dirname, "./src-lib") },
             { find: "@lumeweb/portal-framework-auth", replacement: path.resolve(__dirname, "../portal-framework-auth/dist/esm/index.js") },
             { find: "@lumeweb/analytics", replacement: path.resolve(__dirname, "../analytics/dist/esm/index.js") },
             {
@@ -54,6 +56,7 @@ export default defineConfig({
         resolve: {
           alias: [
             { find: "@", replacement: path.resolve(__dirname, "./src") },
+            { find: "@lib", replacement: path.resolve(__dirname, "./src-lib") },
             { find: "@lumeweb/portal-framework-auth", replacement: path.resolve(__dirname, "../portal-framework-auth/dist/esm/index.js") },
             { find: "@lumeweb/analytics", replacement: path.resolve(__dirname, "../analytics/dist/esm/index.js") },
             {
@@ -79,6 +82,7 @@ export default defineConfig({
         resolve: {
           alias: [
             { find: "@", replacement: path.resolve(__dirname, "./src") },
+            { find: "@lib", replacement: path.resolve(__dirname, "./src-lib") },
             { find: "@lumeweb/portal-framework-auth", replacement: path.resolve(__dirname, "../portal-framework-auth/dist/esm/index.js") },
             { find: "@lumeweb/analytics", replacement: path.resolve(__dirname, "../analytics/dist/esm/index.js") },
             {

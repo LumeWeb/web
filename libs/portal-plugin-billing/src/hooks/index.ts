@@ -1,4 +1,5 @@
-export { useSubscriptionStatus, SUBSCRIPTION_QUERY_KEY, getAuthHeaders } from './useSubscriptionStatus';
+export { useSubscriptionStatus, SUBSCRIPTION_QUERY_KEY, getAuthHeaders } from '@lib/hooks/useSubscriptionStatus';
+export type { UseSubscriptionStatusReturn } from '@lib/hooks/useSubscriptionStatus';
 export { useSubscriptionEventFeed, type SubscriptionEventEmitter } from './useSubscriptionEventFeed';
 export { usePricingPlans } from './usePricingPlans';
 export { useManagementCapabilities } from './useManagementCapabilities';
