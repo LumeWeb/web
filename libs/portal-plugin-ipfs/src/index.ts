@@ -34,8 +34,18 @@ export default function (): Plugin {
     routes,
   } satisfies Plugin;
 }
-export * from "./client/generated/ipfs";
-export * from "./client/generated/iPFSPinningServiceAPI.schemas";
-export * from "./client/generated/file-manager";
-export * from "./client/generated/pins";
-export * from "./client/generated/tus";
+export type {
+  FileManagerItem,
+  FileManagerItemResponse,
+  BlockMetaResponse,
+  InfoResponse,
+  PinStatusResponse,
+  PinStatusResponseInfo,
+  PinRequest,
+  PinRequestMeta,
+  PinResultsResponse,
+  ErrorResponse,
+  PostUploadResponse,
+  UploadResultResponse,
+  Component,
+} from "@lumeweb/pinner";

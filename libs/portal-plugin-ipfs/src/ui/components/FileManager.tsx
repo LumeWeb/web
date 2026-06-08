@@ -29,7 +29,7 @@ import {
 } from "@lumeweb/portal-framework-ui";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { PinItem } from "./toolbar/PinItem";
-import type { FileManagerItem } from "@/client";
+import type { FileManagerItem } from "@lumeweb/pinner";
 import {
   FileManagerProvider,
   useFileManagerContext,

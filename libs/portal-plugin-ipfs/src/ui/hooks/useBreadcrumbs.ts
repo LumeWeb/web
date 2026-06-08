@@ -1,4 +1,4 @@
-import type { FileManagerItem } from "@/client";
+import type { FileManagerItem } from "@lumeweb/pinner";
 import { useList } from "@refinedev/core";
 
 interface UseBreadcrumbsProps {

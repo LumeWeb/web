@@ -2,6 +2,20 @@
 export { Pinner } from "./pinner";
 export type { PinnerConfig } from "./config";
 
+export type { FileManagerItem } from "./api/generated/schemas/fileManagerItem";
+export type { FileManagerItemResponse } from "./api/generated/schemas/fileManagerItemResponse";
+export type { BlockMetaResponse } from "./api/generated/schemas/blockMetaResponse";
+export type { InfoResponse } from "./api/generated/schemas/infoResponse";
+export type { PinStatusResponse } from "./api/generated/schemas/pinStatusResponse";
+export type { PinStatusResponseInfo } from "./api/generated/schemas/pinStatusResponseInfo";
+export type { PinRequest } from "./api/generated/schemas/pinRequest";
+export type { PinRequestMeta } from "./api/generated/schemas/pinRequestMeta";
+export type { PinResultsResponse } from "./api/generated/schemas/pinResultsResponse";
+export type { ErrorResponse } from "./api/generated/schemas/errorResponse";
+export type { PostUploadResponse } from "./api/generated/schemas/postUploadResponse";
+export type { UploadResultResponse } from "./api/generated/schemas/uploadResultResponse";
+export type { Component } from "./api/generated/schemas/component";
+
 // Upload exports
 export type {
   UploadResult,
