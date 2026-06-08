@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useRef } from "react";
-import type { FileManagerItem } from "@/client";
+import type { FileManagerItem } from "@lumeweb/pinner";
 import { useLocation, useNavigate } from "react-router";
 import { useCallback } from "react";
 import type { HeliaService } from "@/helia";
