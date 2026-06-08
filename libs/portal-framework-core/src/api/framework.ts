@@ -252,7 +252,15 @@ export class Framework {
     const allQueryParamConfigs = this.getPlugins()
       .flatMap((p) => p.queryParamConfig ?? []);
     if (allQueryParamConfigs.length > 0) {
-      await persistQueryParams(allQueryParamConfigs);
+      try {
+        await persistQueryParams(allQueryParamConfigs);
+      } catch (error) {
+        errors.push({
+          category: ERROR_CATEGORIES.PLUGIN,
+          error: error instanceof Error ? error : new Error(String(error)),
+          id: "query-param-persist",
+        });
+      }
     }
 
     // Initialize capabilities
