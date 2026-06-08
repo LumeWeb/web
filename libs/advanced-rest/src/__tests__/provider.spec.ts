@@ -41,6 +41,20 @@ describe("Nested REST Data Provider", () => {
       expect(response.total).toBe(100);
     });
 
+    it("should fall back to data.total when X-Total-Count header is missing", async () => {
+      nock(API_URL)
+        .get("/websites")
+        .reply(200, { data: [{ id: 1 }, { id: 2 }, { id: 3 }], total: 3 });
+
+      const response = await dp.getList({
+        meta: { template: "/websites" },
+        resource: "websites",
+      });
+
+      expect(response.data).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }]);
+      expect(response.total).toBe(3);
+    });
+
     it("should throw error for missing template params", async () => {
       await expect(
         dp.getList({
