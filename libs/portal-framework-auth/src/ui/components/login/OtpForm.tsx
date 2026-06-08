@@ -3,14 +3,10 @@ import {
   useResetPasswordUrl,
   withTheme,
 } from "@lumeweb/portal-framework-ui";
-import {
-  useGo,
-  useIsAuthenticated,
-  useLogin,
-  useParsed,
-} from "@refinedev/core";
-import { useEffect } from "react";
+import { useLogin, useParsed } from "@refinedev/core";
+import React from "react";
 
+import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
 import { AuthPage } from "@/ui/components/common/AuthPage";
 import { AuthPageTitle } from "@/ui/components/common/AuthPageTitle";
 
@@ -21,17 +17,11 @@ export interface OtpParams {
 }
 
 function OtpForm(): JSX.Element {
-  const { data: authData, isLoading: isAuthLoading } = useIsAuthenticated();
-  const go = useGo();
   const parsed = useParsed<OtpParams>();
   const login = useLogin();
   const resetPasswordUrl = useResetPasswordUrl();
 
-  useEffect(() => {
-    if (!isAuthLoading && authData?.authenticated) {
-      go({ to: parsed.params?.to, type: "push" });
-    }
-  }, [isAuthLoading, authData, parsed.params?.to, go]);
+  useRedirectIfAuthenticated("/dashboard", parsed.params?.to, "push");
 
   const otpFormConfig = getOtpForm(
     (values) => login.mutate({ ...values, redirectTo: parsed.params?.to }),

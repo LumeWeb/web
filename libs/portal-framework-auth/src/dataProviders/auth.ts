@@ -460,7 +460,9 @@ export const createAuthProvider = (sdk: Sdk): AuthProviderWithEmitter => {
           error: processApiError(response.error, REGISTRATION_ERROR_NAME),
         }),
         ...(response.success && {
-          redirectTo: LOGIN_PATH,
+          redirectTo: params.redirectTo
+            ? `${LOGIN_PATH}?to=${encodeURIComponent(sanitizeRedirectUrl(params.redirectTo))}`
+            : LOGIN_PATH,
           successNotification: {
             description:
               "You have successfully registered. Please check your email to verify your account.",

@@ -31,3 +31,5 @@ export {
   ResetPasswordLayout,
   ResetPasswordReset,
 };
+
+export { useRedirectIfAuthenticated } from "./hooks/useRedirectIfAuthenticated";
