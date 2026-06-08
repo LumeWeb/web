@@ -1,11 +1,9 @@
 import type React from "react";
 
-import { Framework } from "libs/portal-framework-core/src/api/framework";
-import * as Module from "node:module";
-
 import { FrameworkFeature } from "../types/api";
 import { BaseCapability } from "./capabilities";
 import { RouteDefinition } from "./navigation";
+import type { QueryParamPersistConfig } from "../util/queryParamPersist";
 import { PluginWidgets } from "./widget";
 
 export interface FeatureState {
@@ -28,6 +26,7 @@ export interface Plugin {
   features?: FrameworkFeature[];
   id: NamespacedId;
   initialize(framework: Framework): Promise<void>;
+  queryParamConfig?: QueryParamPersistConfig[];
   // Routes map to exposed components
   routes?: RouteDefinition[];
   widgets?: PluginWidgets;

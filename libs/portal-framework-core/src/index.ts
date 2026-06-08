@@ -73,4 +73,5 @@ export * from "./util/namespace";
 export { getPortalPluginManifests } from "./util/pluginManifest";
 export * from "./util/portalMeta";
 export * from "./util/refineConfig";
+export * from "./util/queryParamPersist";
 export * from "./util/validation";
