@@ -25,6 +25,7 @@ import { PortalMeta } from "../types/portal";
 import { getCurrentLocation } from "../util/location";
 import { validateNamespacedId } from "../util/namespace";
 import { fetchPortalMeta } from "../util/portalMeta";
+import { persistQueryParams } from "../util/queryParamPersist";
 import { validateFeature, validatePlugin } from "../util/validation";
 import { sortWidgets } from "../util/widget";
 
@@ -244,6 +245,20 @@ export class Framework {
         // Register capabilities from the plugin with plugin ID
         plugin.capabilities?.forEach((capability) => {
           this.#capabilities.register(capability, plugin.id);
+        });
+      }
+    }
+
+    const allQueryParamConfigs = this.getPlugins()
+      .flatMap((p) => p.queryParamConfig ?? []);
+    if (allQueryParamConfigs.length > 0) {
+      try {
+        await persistQueryParams(allQueryParamConfigs);
+      } catch (error) {
+        errors.push({
+          category: ERROR_CATEGORIES.PLUGIN,
+          error: error instanceof Error ? error : new Error(String(error)),
+          id: "query-param-persist",
         });
       }
     }

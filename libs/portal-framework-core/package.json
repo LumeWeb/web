@@ -36,7 +36,8 @@
     "@lumeweb/portal-framework-ui-core": "workspace:*",
     "@lumeweb/portal-sdk": "workspace:*",
     "ajv": "^8.20.0",
-    "bin-pack": "^1.0.2"
+    "bin-pack": "^1.0.2",
+    "unstorage": "^1.17.5"
   },
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
