@@ -1,0 +1,12 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": [
+        "$TURBO_EXTENDS$",
+        "@lumeweb/portal-plugin-ipfs#build:lib",
+        "@lumeweb/portal-plugin-billing#build:lib"
+      ]
+    }
+  }
+}

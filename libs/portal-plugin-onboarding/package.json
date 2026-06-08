@@ -1,0 +1,49 @@
+{
+  "name": "@lumeweb/portal-plugin-onboarding",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "oxlint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@lumeweb/portal-framework-auth": "workspace:*",
+    "@lumeweb/portal-framework-core": "workspace:*",
+    "@lumeweb/portal-framework-ui": "workspace:*",
+    "@lumeweb/portal-framework-ui-core": "workspace:*",
+    "@lumeweb/portal-plugin-dashboard": "workspace:*",
+    "@lumeweb/portal-plugin-billing": "workspace:*",
+    "@lumeweb/portal-plugin-ipfs": "workspace:*",
+    "@lumeweb/advanced-rest-provider": "workspace:*",
+    "@lumeweb/analytics": "workspace:*",
+    "@refinedev/core": "catalog:",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-router": "catalog:"
+  },
+  "devDependencies": {
+    "@lumeweb/tsdown-config": "workspace:*",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
+    "happy-dom": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:framework",
+    "vitest": "catalog:",
+    "vitest-browser-react": "catalog:"
+  },
+  "peerDependencies": {
+    "react": ">=18.3.1",
+    "react-dom": ">=18.3.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
+  }
+}
