@@ -345,7 +345,8 @@ tunnel_single_app() {
 }
 
 # --- Generate Plugin Config JSON ---
-# Usage: tunnel_generate_plugin_config <base_port> <domain> <plugins_base_dir> [plugin1,plugin2,...]
+# Usage: tunnel_generate_plugin_config <base_port> <domain> <plugins_base_dir> [local:]plugin1,[local:]plugin2,...
+# Use "local:" prefix for client-only plugins (no Go backend, e.g. local:onboarding)
 tunnel_generate_plugin_config() {
     local base_port="${1:-4174}"
     local domain="${2:-$TUNNEL_DOMAIN}"
@@ -362,13 +363,23 @@ tunnel_generate_plugin_config() {
     # Build jq array using --arg and --argjson
     local jq_args=("--arg" "domain" "$domain")
     local idx=0
+    local -a local_indices=()
 
-    # Parse comma-separated list
+    # Parse comma-separated list (supports "local:" prefix for client-only plugins)
     IFS=',' read -ra plugins <<< "$plugin_list"
-    for name in "${plugins[@]}"; do
+    for entry in "${plugins[@]}"; do
         # Trim whitespace
-        name=$(echo "$name" | xargs)
-        [ -z "$name" ] && continue
+        entry=$(echo "$entry" | xargs)
+        [ -z "$entry" ] && continue
+
+        local is_local=false
+        local name="$entry"
+
+        # Check for local: prefix
+        if [[ "$entry" == local:* ]]; then
+            is_local=true
+            name="${entry#local:}"
+        fi
 
         local plugin_dir="$plugins_base_dir/portal-plugin-$name"
 
@@ -380,6 +391,7 @@ tunnel_generate_plugin_config() {
 
         jq_args+=("--arg" "name$idx" "$name")
         jq_args+=("--argjson" "port$idx" "$port")
+        local_indices[idx]=$is_local
         idx=$((idx + 1))
         port=$((port + 1))
     done
@@ -389,11 +401,14 @@ tunnel_generate_plugin_config() {
         return 0
     fi
 
-    # Build jq filter using jq string interpolation
     local filter="["
     for i in $(seq 0 $((idx - 1))); do
         [ "$i" -gt 0 ] && filter="$filter,"
-        filter="$filter{name: \$name$i, port: \$port$i, tunnelHost: \"\(\$name$i).\(\$domain)\"}"
+        filter="$filter{name: \$name$i, port: \$port$i, tunnelHost: \"\(\$name$i).\(\$domain)\""
+        if [ "${local_indices[$i]}" = true ]; then
+            filter="$filter, local: true"
+        fi
+        filter="$filter}"
     done
     filter="$filter]"
 
