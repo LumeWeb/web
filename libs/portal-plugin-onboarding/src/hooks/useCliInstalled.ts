@@ -15,12 +15,12 @@ interface UseCliInstalledReturn {
 export function useCliInstalled(enabled = true): UseCliInstalledReturn {
   const { query, result } = useList<ApiKey>({
     resource: "api-keys",
-    pagination: { pageSize: 100 },
+    filters: [{ field: "name", operator: "startswith", value: "cli-" }],
+    pagination: { pageSize: 1 },
     queryOptions: { enabled },
   });
 
-  const keys = result?.data;
-  const isInstalled = keys?.some((key) => key.name.startsWith("cli-")) ?? false;
+  const isInstalled = (result?.total ?? 0) > 0;
 
   return {
     isInstalled,
