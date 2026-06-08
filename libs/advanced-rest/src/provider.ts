@@ -273,7 +273,8 @@ export const dataProvider = (
       );
       const data = await parseResponse(response);
 
-      const total = Number(response.headers.get("x-total-count"));
+      const headerVal = response.headers.get("x-total-count");
+      const total = headerVal !== null ? Number(headerVal) : NaN;
       return parseListResponse(data, total);
     },
 
