@@ -8,15 +8,16 @@ import { logoPng } from "@/images";
 interface LumeLogoProps {
   className?: string;
   imageClassName?: string;
+  src?: string;
 }
 
-export function LumeLogo({ className, imageClassName }: LumeLogoProps) {
+export function LumeLogo({ className, imageClassName, src }: LumeLogoProps) {
   return (
     <Link className={cn("flex items-center space-x-2", className)} to="/">
       <img
-        alt="Lume logo"
+        alt="Logo"
         className={cn("h-10", imageClassName)}
-        src={logoPng}
+        src={src || logoPng}
       />
     </Link>
   );

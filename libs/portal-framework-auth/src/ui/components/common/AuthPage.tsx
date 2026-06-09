@@ -1,12 +1,15 @@
 import { InlineAuthLinkBanner, LumeLogo } from "@lumeweb/portal-framework-ui";
 import React, { ReactNode } from "react";
 
+import type { BrandConfig } from "@lumeweb/portal-framework-core";
+
 import { AuthFooter } from "./AuthFooter";
 import { BackgroundImage } from "./BackgroundImage";
 import { BackgroundVariant } from "./types";
 
 interface AuthPageProps {
   beforeLink?: ReactNode;
+  brand?: BrandConfig;
   children: ReactNode;
   linkLabel?: string;
   linkText?: string;
@@ -16,6 +19,7 @@ interface AuthPageProps {
 
 export function AuthPage({
   beforeLink,
+  brand,
   children,
   linkLabel,
   linkText,
@@ -28,7 +32,7 @@ export function AuthPage({
     <div className="relative h-screen sm:overflow-hidden">
       <div className="flex h-full w-full flex-col items-center justify-center sm:flex-row-reverse">
         <header className="absolute left-4 top-4 sm:left-8">
-          <LumeLogo />
+          <LumeLogo src={brand?.logoUrl} />
         </header>
         <BackgroundImage variant={variant} />
         <div
@@ -49,7 +53,7 @@ export function AuthPage({
               </div>
             )}
             {children}
-            <AuthFooter />
+            <AuthFooter brand={brand} />
           </div>
         </div>
       </div>

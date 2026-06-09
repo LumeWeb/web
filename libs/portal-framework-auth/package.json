@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@lumeweb/tsdown-config": "workspace:*",
+    "@types/react": "catalog:",
     "tsdown": "catalog:"
   },
   "peerDependencies": {

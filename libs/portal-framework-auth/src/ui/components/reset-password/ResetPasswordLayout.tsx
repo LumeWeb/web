@@ -2,6 +2,7 @@ import { useLoginUrl, withTheme } from "@lumeweb/portal-framework-ui";
 import React from "react";
 import { Outlet, useLocation, useMatches } from "react-router";
 
+import { useBrand } from "@lumeweb/portal-framework-core";
 import { AuthPage } from "@/ui/components/common/AuthPage";
 import { AuthPageTitle } from "@/ui/components/common/AuthPageTitle";
 
@@ -21,6 +22,7 @@ const PAGE_CONFIG = {
 function ResetPasswordLayout() {
   const loginUrl = useLoginUrl();
   const location = useLocation();
+  const brand = useBrand();
   const matches = useMatches().filter(
     (item) => item.pathname === location.pathname,
   );
@@ -32,6 +34,7 @@ function ResetPasswordLayout() {
   return (
     <AuthPage
       beforeLink={<AuthPageTitle>{title}</AuthPageTitle>}
+      brand={brand}
       linkLabel={linkLabel}
       linkText={linkText}
       linkUrl={loginUrl}
