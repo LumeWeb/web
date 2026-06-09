@@ -1,6 +1,6 @@
 {
   "name": "@lumeweb/portal-plugin-billing",
-  "version": "0.1.4",
+  "version": "0.1.2",
   "type": "module",
   "files": [
     "lib-dist",
