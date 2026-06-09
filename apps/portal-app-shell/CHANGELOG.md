@@ -1,5 +1,14 @@
 # @lumeweb/portal-dashboard
 
+## 0.3.5 (2026-06-09)
+
+### Features
+
+#### Features
+
+- add unstorage-based query param persistence with plugin-owned config
+- add VITE_PORTAL_BRAND env var for brand configurability
+
 ## 0.3.4 (2026-06-06)
 
 ### Fixes

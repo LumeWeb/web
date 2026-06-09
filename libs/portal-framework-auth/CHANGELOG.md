@@ -1,3 +1,16 @@
+## 0.1.3 (2026-06-09)
+
+### Features
+
+#### Features
+
+- useRedirectIfAuthenticated hook, fix ?to= param forwarding, add onboarding refineConfig capability
+- add VITE_PORTAL_BRAND env var for brand configurability
+
+### Fixes
+
+- sanitize redirect URL in useRedirectIfAuthenticated to prevent open redirect
+
 ## 0.1.2 (2026-06-01)
 
 ### Fixes

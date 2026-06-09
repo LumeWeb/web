@@ -1,3 +1,11 @@
+## 0.1.2 (2026-06-09)
+
+### Fixes
+
+#### Fixes
+
+- add X-Total-Count header fallback
+
 ## 0.1.1 (2026-05-23)
 
 ### Features
