@@ -1,19 +1,3 @@
-## 0.1.4 (2026-06-09)
-
-### Fixes
-
-#### Fixes
-
-- extract src-lib for cross-plugin consumption
-
-## 0.1.3 (2026-06-09)
-
-### Fixes
-
-#### Fixes
-
-- extract src-lib for cross-plugin consumption
-
 ## 0.1.2 (2026-06-06)
 
 ### Fixes
