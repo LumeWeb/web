@@ -1,2 +1,0 @@
-var e={".":async()=>{let e=await import(`./index-2wlshmFo.js`),t={};return Object.assign(t,e),Object.defineProperty(t,"__esModule",{value:!0,enumerable:!1}),t},"./NotFound":async()=>{let e=await import(`./NotFound-CsG324m0.js`),t={};return Object.assign(t,e),Object.defineProperty(t,"__esModule",{value:!0,enumerable:!1}),t}};export{e as default};
-//# sourceMappingURL=virtual_mf-exposes-ssr___mfe_internal__core_core__remoteEntry-_hash__js-CptOH3QV.js.map
