@@ -878,7 +878,7 @@ def filter_targets(registry: BuildRegistry, target_filter: str) -> List[BuildTar
         logger.info(f"Available targets: {sorted(registry.targets.keys())}")
         return list(registry.targets.values())
     
-    requested_targets = [t.strip() for t in target_filter.split(",")]
+    requested_targets = [t.strip().strip('\'"') for t in target_filter.split(",")]
     filtered_targets = []
     
     for target_name in requested_targets:

@@ -63,37 +63,31 @@ jobs:
       - name: Release
         id: release
         run: |
-          args=""
+          ARGS=()
           
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             if [ "${{ inputs.targets }}" != "all" ]; then
-              args="$args --targets '${{ inputs.targets }}'"
+              ARGS+=("--targets" "${{ inputs.targets }}")
             fi
             if [ "${{ inputs.force }}" = "true" ]; then
-              args="$args --force"
+              ARGS+=("--force")
             fi
             if [ "${{ inputs.no_push }}" = "true" ]; then
-              args="$args --no-push"
+              ARGS+=("--no-push")
             fi
             if [ "${{ inputs.verbose }}" = "true" ]; then
-              args="$args --verbose"
+              ARGS+=("--verbose")
             fi
             if [ "${{ inputs.dry_run }}" = "true" ]; then
-              args="$args --dry-run"
+              ARGS+=("--dry-run")
             fi
             if [ "${{ inputs.validate_only }}" = "true" ]; then
-              args="$args --validate-only"
-            fi
-            if [ "${{ inputs.force }}" = "true" ]; then
-              args="$args --force"
-            fi
-            if [ "${{ inputs.no_push }}" = "true" ]; then
-              args="$args --no-push"
+              ARGS+=("--validate-only")
             fi
           fi
           
-          echo "Running: python scripts/release-go.py $args"
-          python scripts/release-go.py $args
+          echo "Running: python scripts/release-go.py ${ARGS[*]}"
+          python scripts/release-go.py "${ARGS[@]}"
 
       - name: Get modified apps info
         id: get_modified_apps
