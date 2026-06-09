@@ -1,11 +1,3 @@
-## 0.1.6 (2026-06-09)
-
-### Fixes
-
-#### Fixes
-
-- extract src-lib, remove Orval client, switch to @lumeweb/pinner, add usePinsCount enabled param
-
 ## 0.1.3 (2026-06-06)
 
 ### Fixes

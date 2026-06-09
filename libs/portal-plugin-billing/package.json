@@ -1,6 +1,6 @@
 {
   "name": "@lumeweb/portal-plugin-billing",
-  "version": "0.1.5",
+  "version": "0.1.2",
   "type": "module",
   "files": [
     "lib-dist",
@@ -65,6 +65,10 @@
   "peerDependencies": {
     "react": ">=18.3.1",
     "react-dom": ">=18.3.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LumeWeb/web"
   },
   "msw": {
     "workerDirectory": [
