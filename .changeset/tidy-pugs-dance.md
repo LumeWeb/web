@@ -1,5 +1,5 @@
 ---
-"@lumeweb/portal-plugin-onboarding": patch
+@lumeweb/portal-plugin-onboarding: patch
 ---
 
 # Fixes 
