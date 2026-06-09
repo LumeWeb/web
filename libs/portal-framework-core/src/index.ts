@@ -22,7 +22,11 @@ export {
 } from "./contexts/framework";
 
 // Environment
-export { env } from "./env";
+export { DEFAULT_BRAND, env } from "./env";
+export type { BrandConfig } from "./env";
+
+// Hooks
+export { useBrand } from "./hooks/useBrand";
 
 // Plugin Management
 export { PluginManager } from "./plugins/manager";

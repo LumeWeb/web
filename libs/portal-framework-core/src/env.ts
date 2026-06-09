@@ -1,9 +1,34 @@
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 
+const brandSchema = z.object({
+  logoUrl: z.string().optional(),
+  tagline: z.string().optional(),
+  siteUrl: z.string().url().optional(),
+  social: z
+    .object({
+      twitter: z.string().optional(),
+      discord: z.string().optional(),
+      github: z.string().optional(),
+    })
+    .optional(),
+});
+
+export type BrandConfig = z.infer<typeof brandSchema>;
+
+export const DEFAULT_BRAND: BrandConfig = {
+  tagline: "Your data. Your Rules.",
+};
+
+const brandSchemaWithDefault = z.preprocess(
+  (val) => (typeof val === "string" ? JSON.parse(val) : val),
+  brandSchema,
+);
+
 export const env = createEnv({
   client: {
     VITE_PORTAL_ALLOW_LOCALHOST: z.boolean().optional(),
+    VITE_PORTAL_BRAND: brandSchemaWithDefault.optional().default(() => DEFAULT_BRAND),
     VITE_PORTAL_DOMAIN: z.string().includes(".").optional(),
     VITE_PORTAL_DOMAIN_IS_ROOT: z.boolean().optional(),
   },

@@ -4,28 +4,51 @@ import {
 } from "@lumeweb/portal-framework-ui/images";
 import React from "react";
 
+import type { BrandConfig } from "@lumeweb/portal-framework-core";
+
 interface AuthFooterButtonProps {
   children: React.ReactNode;
   href: string;
   icon: React.ReactNode;
 }
 
-export function AuthFooter() {
+interface AuthFooterProps {
+  brand?: BrandConfig;
+}
+
+export function AuthFooter({ brand }: AuthFooterProps) {
+  const social = brand?.social;
+
   return (
     <footer className="my-5">
       <ul className="flex flex-row">
-        <AuthFooterButton
-          href="https://discord.lumeweb.com"
-          icon={
-            <img alt="Discord Logo" className="h-5" src={discordLogoPng} />
-          }>
-          Connect with us
-        </AuthFooterButton>
-        <AuthFooterButton
-          href="https://lumeweb.com"
-          icon={<img alt="Lume Logo" className="h-5" src={lumeColorLogoPng} />}>
-          Connect with us
-        </AuthFooterButton>
+        {social?.discord && (
+          <AuthFooterButton
+            href={social.discord}
+            icon={
+              <img alt="Discord Logo" className="h-5" src={discordLogoPng} />
+            }>
+            Connect with us
+          </AuthFooterButton>
+        )}
+        {social?.github && (
+          <AuthFooterButton
+            href={social.github}
+            icon={
+              <img alt="Logo" className="h-5" src={brand?.logoUrl || lumeColorLogoPng} />
+            }>
+            View on GitHub
+          </AuthFooterButton>
+        )}
+        {social?.twitter && (
+          <AuthFooterButton
+            href={social.twitter}
+            icon={
+              <img alt="Logo" className="h-5" src={brand?.logoUrl || lumeColorLogoPng} />
+            }>
+            Follow us
+          </AuthFooterButton>
+        )}
       </ul>
     </footer>
   );

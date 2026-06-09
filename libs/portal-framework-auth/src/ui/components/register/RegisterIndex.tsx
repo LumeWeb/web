@@ -4,9 +4,9 @@ import {
   withTheme,
 } from "@lumeweb/portal-framework-ui";
 import { useRegister } from "@refinedev/core";
-import React from "react";
 import { useSearchParams } from "react-router";
 
+import { useBrand } from "@lumeweb/portal-framework-core";
 import { RegisterFormRequest } from "@/dataProviders/auth";
 import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
 import { AuthPage } from "@/ui/components/common/AuthPage";
@@ -17,6 +17,7 @@ function RegisterIndex() {
   const register = useRegister<RegisterFormRequest>();
   const loginUrl = useLoginUrl();
   const [searchParams] = useSearchParams();
+  const brand = useBrand();
 
   const to = searchParams.get("to");
   const loginUrlWithTo = to
@@ -35,11 +36,12 @@ function RegisterIndex() {
     });
   };
 
-  const finalRegisterFormConfig = getRegisterForm(onSubmit);
+  const finalRegisterFormConfig = getRegisterForm(onSubmit, brand);
 
   return (
     <AuthPage
-      beforeLink={<AuthPageTitle>All Roads Lead to Lume 🎉</AuthPageTitle>}
+      beforeLink={<AuthPageTitle>{brand.tagline}</AuthPageTitle>}
+      brand={brand}
       linkLabel="Already have an account?"
       linkText="Login here →"
       linkUrl={loginUrlWithTo}

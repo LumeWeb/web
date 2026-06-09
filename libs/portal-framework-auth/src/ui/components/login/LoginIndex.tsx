@@ -6,6 +6,7 @@ import {
 import React from "react";
 import { useSearchParams } from "react-router";
 
+import { useBrand } from "@lumeweb/portal-framework-core";
 import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
 import { AuthPage } from "@/ui/components/common/AuthPage";
 import { AuthPageTitle } from "@/ui/components/common/AuthPageTitle";
@@ -17,6 +18,7 @@ function LoginIndex() {
   const socialLoginEnabled = useFeatureFlag("social_login");
   const registerUrl = useRegisterUrl();
   const [searchParams] = useSearchParams();
+  const brand = useBrand();
 
   const to = searchParams.get("to");
   const registerUrlWithTo = to
@@ -27,7 +29,8 @@ function LoginIndex() {
 
   return (
     <AuthPage
-      beforeLink={<AuthPageTitle>Welcome back 👋</AuthPageTitle>}
+      beforeLink={<AuthPageTitle>Welcome back!</AuthPageTitle>}
+      brand={brand}
       linkLabel="New user?"
       linkText="Create an account →"
       linkUrl={registerUrlWithTo}

@@ -1,7 +1,7 @@
-import { type Identity } from "@lumeweb/portal-framework-core";
+import { type Identity, useBrand } from "@lumeweb/portal-framework-core";
 import { useSdk, withTheme } from "@lumeweb/portal-framework-ui";
 import { Button } from "@lumeweb/portal-framework-ui-core";
-import { logoPng, lumeBgPng } from "@lumeweb/portal-framework-ui/images";
+import { lumeBgPng, logoPng } from "@lumeweb/portal-framework-ui/images";
 import { useGetIdentity, useGo, useIsAuthenticated } from "@refinedev/core";
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
@@ -177,7 +177,9 @@ function AccountVerify() {
   const token = searchParams.get("token");
   const email = searchParams.get("email");
   const sdk = useSdk()!;
+  const brand = useBrand();
   const user = useGetIdentity<Identity>();
+  const logoUrl = brand.logoUrl;
   const [isVerified, setIsVerified] = useState(false);
   const [alreadyVerified, setAlreadyVerified] = useState(false);
   const {
@@ -248,7 +250,7 @@ function AccountVerify() {
     return (
       <div className="relative h-screen p-10">
         <header>
-          <img alt="Lume logo" className="h-10" src={logoPng} />
+          <img alt="Logo" className="h-10" src={logoUrl || logoPng} />
         </header>
         <main className="flex h-full flex-col items-center justify-center">
           <MissingParametersError
@@ -259,7 +261,7 @@ function AccountVerify() {
         </main>
         <div className="fixed inset-0 -z-10 overflow-clip">
           <img
-            alt="Lume background"
+            alt="Background"
             className="absolute left-0 right-0 top-0 z-[-1] object-cover"
             src={lumeBgPng}
           />
@@ -270,9 +272,9 @@ function AccountVerify() {
 
   return (
     <div className="relative h-screen p-10">
-      <header>
-        <img alt="Lume logo" className="h-10" src={logoPng} />
-      </header>
+        <header>
+          <img alt="Logo" className="h-10" src={logoUrl || logoPng} />
+        </header>
       <main className="flex h-full flex-col items-center justify-center">
         <VerificationStatus
           alreadyVerified={alreadyVerified}
