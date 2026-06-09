@@ -31,7 +31,7 @@ const ContentSection = ({
 	id,
 }: ContentSectionProps) => {
 	const descriptionContent = children ? (
-		<div className="prose prose-neutral prose-a:text-teal-600 prose-a:no-underline [&_a:hover]:underline prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-code:text-content-text-muted [&_pre_code]:text-gray-100 text-content-text-muted text-[13px] md:text-base lg:text-lg leading-[21px]! lg:leading-[35px]! md:leading-[26px]! lg:text-xl mb-6 lg:mb-[26px] max-w-[600px]">
+		<div className="text-content-text-muted text-[13px] md:text-base lg:text-lg leading-[21px]! lg:leading-[35px]! md:leading-[26px]! lg:text-xl mb-6 lg:mb-[26px] max-w-[600px] [&_a]:text-teal-600 [&_a]:no-underline [&_a:hover]:underline">
 			{children}
 		</div>
 	) : description ? (
@@ -56,7 +56,7 @@ const ContentSection = ({
 						)}
 
 						{children ? (
-							<div className="prose prose-neutral prose-a:text-teal-600 prose-a:no-underline [&_a:hover]:underline prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-code:text-content-text-muted [&_pre_code]:text-gray-100 text-content-text-muted text-[13px] md:text-base lg:text-lg leading-[21px]! lg:leading-[35px]! md:leading-[26px]! lg:text-xl mb-6 lg:mb-[26px]">
+							<div className="text-content-text-muted text-[13px] md:text-base lg:text-lg leading-[21px]! lg:leading-[35px]! md:leading-[26px]! lg:text-xl mb-6 lg:mb-[26px] [&_a]:text-teal-600 [&_a]:no-underline [&_a:hover]:underline">
 								{children}
 							</div>
 						) : description ? (

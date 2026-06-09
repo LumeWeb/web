@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Section from "@/components/layout/Section";
 import Heading from "@/components/Heading";
+import { frameworkList } from "@/lib/frameworks";
 
 const faqs = [
   {
@@ -14,7 +15,7 @@ const faqs = [
       {
         question: "What frameworks can I use?",
         answer:
-          "Any static site generator. Hugo, Astro, Next.js static export, Gatsby, Vite, or plain HTML. Build your site, upload the output, and Pinner hosts it.",
+          `Any static site generator. ${frameworkList({ format: "technical", andMore: false })}, Vite, or plain HTML. Build your site, upload the output, and Pinner hosts it.`,
       },
       {
         question: "Is my site always online?",

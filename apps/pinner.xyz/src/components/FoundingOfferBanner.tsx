@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import Section from "@/components/layout/Section";
 import { Button } from "@/components/ui/button";
+import { config } from "@/lib/config";
 
 type BannerVariant = "home" | "content";
 
@@ -51,7 +52,7 @@ export default function FoundingOfferBanner({
             <div className="mt-4">
               <Button
                 label="Start Pinning →"
-                url="https://account.pinner.xyz"
+                url={config.registerUrl("pinning")}
                 buttonStyle="outline"
               />
             </div>

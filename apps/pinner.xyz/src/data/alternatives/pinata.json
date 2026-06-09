@@ -1,0 +1,8 @@
+{
+  "name": "Pinata",
+  "slug": "pinata",
+  "tagline": "IPFS pinning with website hosting and decentralized storage.",
+  "description": "Compare Pinner vs Pinata on IPFS pinning, website hosting, storage model, payments, and open-source licensing.",
+  "category": "pinning",
+  "featured": true
+}

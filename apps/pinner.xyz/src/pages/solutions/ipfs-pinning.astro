@@ -8,6 +8,7 @@ import FoundingOfferBanner from '@/components/FoundingOfferBanner';
 import BrandLogos from '@/components/BrandLogos';
 import RelatedPages from '@/components/RelatedPages.astro';
 import logos from '@/data/brand-logos';
+import { config, ctaCopy } from '@/lib/config';
 
 import HowItWorksImage from "@/assets/how-it-works-1.png";
 import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
@@ -57,7 +58,7 @@ const faqs = [
     mobileTitle="IPFS Pinning"
     description="Pin files to a peer-to-peer network. Your content gets a permanent link that stays accessible as long as it's pinned."
     btnText="Start Pinning →"
-    url="https://account.pinner.xyz"
+    url={config.registerUrl("pinning")}
     client:load
   />
 
@@ -108,5 +109,11 @@ const faqs = [
 
   <FoundingOfferBanner variant="content" guarantee="Pin your content and if it isn't reachable in 5 minutes, we'll pin it for you" client:load />
 
-  <CallToAction client:load />
+  <CallToAction
+    heading={ctaCopy.pinning.heading}
+    subheading={ctaCopy.pinning.subheading}
+    primaryLabel="Start Pinning →"
+    intent="pinning"
+    client:load
+  />
 </Layout>

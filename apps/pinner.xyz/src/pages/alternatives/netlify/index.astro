@@ -8,6 +8,8 @@ import BrandLogos from '@/components/BrandLogos';
 import RelatedPages from '@/components/RelatedPages.astro';
 import PlanTable from '@/components/PlanTable.astro';
 import logos from '@/data/brand-logos';
+import { config, ctaCopy } from '@/lib/config';
+import { frameworkList, worksWithFrameworks } from '@/lib/frameworks';
 
 import AboutWhatIsPinner from "@/assets/about-what-is-pinner.jpg";
 import StaticSitesImage from "@/assets/solutions-website-static-sites.jpg";
@@ -20,7 +22,7 @@ const planRows = [
   { factor: "Bandwidth", detail: "Pay per GB, no tiers or overage multipliers" },
   { factor: "Storage", detail: "Peer-to-peer (Sia network), independent providers" },
   { factor: "Content addressing", detail: "Every file gets a permanent, verifiable hash" },
-  { factor: "Crypto payments", detail: "Available, no identity verification required" },
+  { factor: "Payment methods", detail: "Crypto or card. No KYC for crypto." },
   { factor: "Serverless functions", detail: "Not included, hosting only" },
   { factor: "CI/CD & form handling", detail: "Not included, bring your own build tool" },
 ];
@@ -32,7 +34,7 @@ const faqs = [
   },
   {
     question: "What makes Pinner different for static hosting?",
-    answer: "Content addressing: every file gets a permanent, verifiable hash that doesn't change. Peer-to-peer storage on the Sia network means your content lives on independent providers, not one company's servers. No vendor lock-in. No per-seat pricing. Pay for storage and bandwidth only. Crypto payments with no identity verification required."
+    answer: "Content addressing: every file gets a permanent, verifiable hash that doesn't change. Peer-to-peer storage on the Sia network means your content lives on independent providers, not one company's servers. No vendor lock-in. No per-seat pricing. Pay for storage and bandwidth only. Crypto payments with no KYC required."
   },
   {
     question: "Can I use Pinner alongside my current platform?",
@@ -45,13 +47,13 @@ const faqs = [
 ];
 ---
 
-<Layout title="Netlify Alternative for Static Site Hosting | Pinner" description="Static site hosting on a peer-to-peer network with content addressing, no vendor lock-in, and no per-seat pricing.">
+<Layout title="Netlify Alternative for Static Site Hosting | Pinner" description={`Flat-rate static site hosting with no per-seat pricing, no overage rates, and permanent links. ${worksWithFrameworks({ andMore: false })}`}>
   <PageHeader
-    title="Static site hosting on a peer-to-peer network"
+    title="Flat pricing. No credit math. No overages."
     mobileTitle="Netlify Alternative"
-    description="Trying to figure out how many credits your bandwidth costs? Pinner skips the credit math. Pay for storage and bandwidth directly. No per-seat charges. No overage rates."
+    description={`Pinner skips the credit math. Pay for storage and bandwidth directly with no per-seat charges and no overage rates. ${worksWithFrameworks({ format: "technical" })} Pay with crypto or card. No KYC for crypto.`}
     btnText="Start Hosting →"
-    url="https://account.pinner.xyz"
+    url={config.registerUrl("hosting")}
     secondaryBtnText="See Pricing →"
     secondaryUrl="/pricing"
     client:load
@@ -60,7 +62,7 @@ const faqs = [
   <AboutSection
     subtitle="Why Pinner"
     title="Your static files, on a permanent address"
-    description="Trying to figure out how many credits your bandwidth costs? Every file you upload gets a content hash: a permanent, verifiable link that doesn't depend on any one company staying online. Your data lives on a peer-to-peer network of independent storage providers, not a single company's servers. Pay for storage and bandwidth. No per-member charges. No surprise overage bills."
+    description={`Trying to figure out how many credits your bandwidth costs? Every file you upload gets a permanent link that doesn't depend on any one company staying online. Your data lives across independent storage providers, not a single company's servers. Pay for storage and bandwidth. No per-member charges. No surprise overage bills. Works out-of-the-box with ${frameworkList({ format: "technical" })}: just build locally or in GitHub Actions and upload.`}
     theme="white"
     imageUrl={AboutWhatIsPinner}
     client:load
@@ -79,8 +81,8 @@ const faqs = [
 
   <AboutSection
     subtitle="How It Works"
-    title="Peer-to-peer storage, content addressing, and simpler pricing"
-    description="Pay for storage and bandwidth with no per-developer fees or overage surprises. Your files live on a peer-to-peer network of independent storage providers instead of centralized CDN infrastructure. Host static websites from pinned content with permanent, verifiable addresses. Fully open source."
+    title="Permanent links, independent storage, and simpler pricing"
+    description="Pay for storage and bandwidth with no per-developer fees or overage surprises. Your files live across independent storage providers instead of centralized CDN infrastructure. Every site gets a permanent link that can't break. Fully open source."
     theme="gray"
     imagePosition="right"
     imageUrl={StaticSitesImage}
@@ -90,7 +92,7 @@ const faqs = [
   <AboutSection
     subtitle="What Pinner Does (And Doesn't)"
     title="Hosting only. No serverless, no CI/CD, no platform lock-in"
-    description="Pinner hosts built static files. It does not offer serverless functions, CI/CD, form handling, or split testing. If you need those features, keep your current platform for the dev workflow and use Pinner for the hosting layer. If you want content-addressed hosting on a peer-to-peer network with no vendor lock-in on storage, Pinner is built for that."
+    description="Pinner hosts built static files. It does not offer serverless functions, CI/CD, form handling, or split testing. If you need those features, keep your current platform for the dev workflow and use Pinner for the hosting layer. If you want hosting with permanent links and no vendor lock-in on storage, Pinner is built for that."
     theme="white"
     imageUrl={HowItWorksImage}
     client:load
@@ -115,5 +117,11 @@ const faqs = [
 
   <MigrationNote from="Netlify" client:load />
 
-  <CallToAction client:load />
+  <CallToAction
+    heading={ctaCopy.hosting.heading}
+    subheading={ctaCopy.hosting.subheading}
+    primaryLabel="Host a Website →"
+    intent="hosting"
+    client:load
+  />
 </Layout>

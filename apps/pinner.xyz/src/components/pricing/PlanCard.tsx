@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { TrackedButton } from "@/components/TrackedButton";
 import type { BillingPlan } from "@/lib/api";
 import { themeStyles } from "./theme";
 import type { Cadence } from "./utils";
@@ -101,11 +101,12 @@ export function PlanCard({ plan, cadence, variant }: PlanCardProps) {
       )}
 
       <div className="mt-auto">
-        <Button
+        <TrackedButton
           label={cta.label}
           url={cta.url}
           buttonStyle={variant === "light" ? "outline-dark" : "outline"}
-          onClick={() => window.posthog?.capture("pricing_plan_cta_clicked", { plan_name: plan.name, cadence })}
+          trackEvent="pricing_plan_cta_clicked"
+          trackProperties={{ plan_name: plan.name, cadence }}
         />
 
         {!custom && (

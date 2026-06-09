@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import Hero from "@/components/Home/Hero";
 import ProductCards from "@/components/Home/ProductCards";
+import UseCases from "@/components/Home/UseCases";
 import BrandLogos from "@/components/BrandLogos";
 import ProblemAgitation from "@/components/Home/ProblemAgitation";
 import TrustSection from "@/components/Home/TrustSection";
@@ -14,12 +15,15 @@ import PricingTable from "@/components/Home/PricingTable";
 import CallToAction from "@/components/CallToAction";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import logos from "@/data/brand-logos";
+import { ctaCopy } from "@/lib/config";
 ---
 
 <Layout title="Website Hosting, IPFS Pinning & Private Storage. Pinner" variant="home" showNewsletterFooter={false}>
   <Hero client:load />
 
   <ProductCards client:load />
+
+  <UseCases client:load />
 
   <BrandLogos
     logos={logos}
@@ -58,5 +62,11 @@ import logos from "@/data/brand-logos";
     </div>
   </section>
 
-  <CallToAction client:load variant="dark" />
+  <CallToAction
+    variant="dark"
+    heading={ctaCopy.home.heading}
+    subheading={ctaCopy.home.subheading}
+    intent="pinning"
+    client:load
+  />
 </Layout>

@@ -1,0 +1,123 @@
+---
+import NewsletterSignup from "@/components/NewsletterSignup";
+import PaymentMethodsBar from "@/components/PaymentMethodsBar";
+import { getCollection } from "astro:content";
+import contactsData from "@/data/contacts.json";
+
+interface Props {
+  theme?: "dark" | "light";
+  lastUpdated?: string;
+  showNewsletter?: boolean;
+}
+
+const { theme = "dark", lastUpdated, showNewsletter = true } = Astro.props;
+
+const alternatives = await getCollection('alternatives');
+const featuredAlts = alternatives
+  .filter(a => a.data.featured)
+  .sort((a, b) => a.data.name.localeCompare(b.data.name));
+
+const isDark = theme === "dark";
+
+const t = {
+  bg: isDark ? "bg-home-section-dark" : "bg-home-text",
+  columnTitle: isDark ? "text-home-text" : "text-content-text",
+  link: isDark ? "text-gray-footer hover:text-white" : "text-content-text-muted hover:text-content-text",
+  copyright: isDark ? "text-content-text-light" : "text-content-text",
+  small: isDark ? "text-gray-footer" : "text-content-text-muted",
+  smallLink: isDark ? "text-gray-footer hover:text-white" : "text-content-text-muted hover:text-content-text",
+};
+
+const columns = [
+  {
+    title: "Product",
+    links: [
+      { text: "Website Hosting", url: "/solutions/website-hosting" },
+      { text: "IPFS Pinning", url: "/solutions/ipfs-pinning" },
+      { text: "S3 Storage", url: "/solutions/s3-storage" },
+      { text: "Private Storage", url: "/solutions/private-storage" },
+      { text: "Pricing", url: "/pricing" },
+    ],
+  },
+  {
+    title: "Compare",
+    links: [
+      ...featuredAlts.map(a => ({ text: `${a.data.name} Alternative`, url: `/alternatives/${a.data.slug}` })),
+      { text: "View all comparisons →", url: "/alternatives" },
+    ],
+  },
+  {
+    title: "Community",
+    links: [
+      { text: "Documentation", url: "https://docs.pinner.xyz", external: true },
+      { text: "GitHub", url: contactsData.community.github.url, external: true },
+      { text: "Discord", url: contactsData.community.discord.url, external: true },
+      { text: "Partners", url: "/partners" },
+      { text: "Contact", url: "/contact" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { text: "Privacy Policy", url: "/privacy-policy" },
+      { text: "Terms of Service", url: "/terms-of-service" },
+      { text: "Law Enforcement Guide", url: "/law-enforcement" },
+      { text: "Transparency Report", url: "/transparency" },
+    ],
+  },
+];
+---
+
+<footer class={t.bg}>
+  <div class="container py-8">
+    <div class="flex flex-col items-center gap-6">
+      {showNewsletter && <NewsletterSignup theme={theme} />}
+
+      <PaymentMethodsBar variant="dark" compact />
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 w-full">
+        {columns.map((col) => (
+          <div>
+            <p class={`${t.columnTitle} mb-4 text-[13px] md:text-lg font-medium`}>{col.title}</p>
+            <ul>
+              {col.links.map((link) => (
+                <li>
+                  <a
+                    href={link.url}
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
+                    class={`${t.link} text-[12px] underline md:no-underline md:text-base leading-[31px] md:leading-[34px] transition ease-in-out duration-300`}
+                  >
+                    {link.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      <div class="flex flex-col items-center gap-1">
+        <p class={`${t.copyright} text-base md:text-lg font-medium tracking-wide`}>Your data. Your rules.</p>
+        <p class={`${t.copyright} text-sm`}>
+          © 2024–{new Date().getFullYear()} Hammer Technologies LLC
+        </p>
+        <p class={`${t.small} text-xs opacity-50`}>
+          Site last updated: {lastUpdated}
+        </p>
+        <p class={t.small}>
+          A{" "}
+          <a
+            href="https://lumeweb.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            class={`${t.smallLink} transition-colors duration-300`}
+          >
+            Lume Web
+          </a>{" "}
+          service
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>

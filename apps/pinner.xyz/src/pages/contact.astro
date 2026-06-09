@@ -1,9 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import PageHeader from '@/components/PageHeader';
+import { TrackedLink } from '@/components/TrackedLink';
 import contactsData from '../data/contacts.json';
 
 const { community } = contactsData;
+
+const ctaClass = "inline-block py-3 md:py-4 px-7 bg-[#E4E0D4] text-[#0D1D1C] font-medium text-[13px] md:text-lg rounded-full hover:bg-[#d6d1c4] transition-colors";
 ---
 
 <Layout title="Get Support, Integrations & Volume Pricing" description="Get in touch with the Pinner team. Join our Discord community, contribute on GitHub, or reach out for support and volume pricing.">
@@ -19,25 +22,27 @@ const { community } = contactsData;
       <div class="max-w-2xl mx-auto">
         <h2 class="text-[21px] md:text-[32px] font-medium mb-8">Join our Discord community</h2>
         <p class="text-[#485453] mb-8">{community.discord.description}</p>
-        <a
+        <TrackedLink
           href={community.discord.url}
-          id="contact-discord-link"
-          class="inline-block py-3 md:py-4 px-7 bg-[#E4E0D4] text-[#0D1D1C] font-medium text-[13px] md:text-lg rounded-full hover:bg-[#d6d1c4] transition-colors"
+          trackEvent="contact_discord_clicked"
+          className={ctaClass}
+          client:load
         >
           {community.discord.label}
-        </a>
+        </TrackedLink>
       </div>
 
       <div class="max-w-2xl mx-auto mt-16">
         <h2 class="text-[21px] md:text-[32px] font-medium mb-8">Contribute on GitHub</h2>
         <p class="text-[#485453] mb-8">{community.github.description}</p>
-        <a
+        <TrackedLink
           href={community.github.url}
-          id="contact-github-link"
-          class="inline-block py-3 md:py-4 px-7 bg-[#E4E0D4] text-[#0D1D1C] font-medium text-[13px] md:text-lg rounded-full hover:bg-[#d6d1c4] transition-colors"
+          trackEvent="contact_github_clicked"
+          className={ctaClass}
+          client:load
         >
           {community.github.label}
-        </a>
+        </TrackedLink>
       </div>
     </div>
   </section>
@@ -66,12 +71,3 @@ const { community } = contactsData;
     </div>
   </section>
 </Layout>
-
-<script is:inline>
-  document.getElementById('contact-discord-link')?.addEventListener('click', function() {
-    window.posthog?.capture('contact_discord_clicked');
-  });
-  document.getElementById('contact-github-link')?.addEventListener('click', function() {
-    window.posthog?.capture('contact_github_clicked');
-  });
-</script>

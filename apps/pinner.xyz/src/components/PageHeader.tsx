@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { TrackedButton } from "@/components/TrackedButton";
 import BgShape from "@/assets/hero-shape.svg";
 
 interface PageHeaderProps {
@@ -9,6 +9,7 @@ interface PageHeaderProps {
 	url?: string;
 	secondaryBtnText?: string;
 	secondaryUrl?: string;
+	intent?: string;
 }
 
 const PageHeader = ({
@@ -19,6 +20,7 @@ const PageHeader = ({
   url,
   secondaryBtnText,
   secondaryUrl,
+  intent = "pinning",
 }: PageHeaderProps) => {
   return (
     <div className="pt-[155px] md:pt-[230px] pb-[60px] md:pb-[120px] relative overflow-hidden">
@@ -47,13 +49,21 @@ const PageHeader = ({
           {(btnText || secondaryBtnText) && (
             <div className="flex md:justify-center gap-6 mt-8">
               {btnText && (
-                <Button label={btnText} url={url || "#"} buttonStyle="btn-light" />
+                <TrackedButton
+                  label={btnText}
+                  url={url || "#"}
+                  buttonStyle="btn-light"
+                  trackEvent="hero_cta_clicked"
+                  trackProperties={{ intent, label: btnText }}
+                />
               )}
               {secondaryBtnText && (
-                <Button
+                <TrackedButton
                   label={secondaryBtnText}
                   url={secondaryUrl || "#"}
                   buttonStyle="outline"
+                  trackEvent="hero_secondary_clicked"
+                  trackProperties={{ intent, label: secondaryBtnText }}
                 />
               )}
             </div>

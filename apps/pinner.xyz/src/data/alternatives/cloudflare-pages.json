@@ -1,0 +1,8 @@
+{
+  "name": "Cloudflare Pages",
+  "slug": "cloudflare-pages",
+  "tagline": "Static hosting from a company investing in serverless compute, not hosting.",
+  "description": "Cloudflare Pages is in maintenance mode while Cloudflare invests in Workers. Compare Pinner vs Cloudflare Pages on file limits, DNS lock-in, payment flexibility, and hosting focus.",
+  "category": "hosting",
+  "featured": true
+}

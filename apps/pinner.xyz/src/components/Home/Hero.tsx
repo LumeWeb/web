@@ -1,6 +1,7 @@
 import HeroSection from "@/components/hero/HeroSection";
 import ProgressCard from "@/components/cards/ProgressCard";
 import MenuCard from "@/components/cards/MenuCard";
+import { config } from "@/lib/config";
 
 const Hero = () => {
   const visualContent = (
@@ -48,18 +49,18 @@ const Hero = () => {
     <HeroSection
       headline={<>Your data.<br />Your rules.</>}
       subheadline={<><a href="/solutions/website-hosting" className="underline hover:text-white transition-colors">Website hosting</a>, <a href="/solutions/ipfs-pinning" className="underline hover:text-white transition-colors">IPFS pinning</a>, and <a href="/solutions/private-storage" className="underline hover:text-white transition-colors">private storage</a>.<br /><br />No one else can read your files, not even us.<br /><br />No vendor lock-in, no hidden fees.</>}
-      primaryButton={{
-        label: "Start Pinning →",
-        url: "https://account.pinner.xyz",
-        buttonStyle: "btn-light"
-      }}
+      primaryButtons={[
+        { label: "Start Pinning →", url: config.registerUrl("pinning"), buttonStyle: "btn-light" },
+        { label: "Host a Website →", url: config.registerUrl("hosting"), buttonStyle: "btn-light" },
+      ]}
       secondaryButton={{
         label: "Read the Docs →",
         url: "https://docs.pinner.xyz",
-        buttonStyle: "outline"
+        buttonStyle: "outline",
+        target: "_blank"
       }}
       visualContent={visualContent}
-      microcopy="No ID required for crypto payments"
+      microcopy="Pay with crypto or card · No ID required for crypto"
       trustLine="Built on Sia · Open source · Zero-knowledge encryption"
     />
   );

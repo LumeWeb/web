@@ -8,6 +8,8 @@ import FoundingOfferBanner from '@/components/FoundingOfferBanner';
 import BrandLogos from '@/components/BrandLogos';
 import RelatedPages from '@/components/RelatedPages.astro';
 import logos from '@/data/brand-logos';
+import { config, ctaCopy } from '@/lib/config';
+import { frameworkList, worksWithFrameworks } from '@/lib/frameworks';
 
 import HowItWorksImage from "@/assets/how-it-works-1.png";
 import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
@@ -18,15 +20,15 @@ import StaticSitesImage from "@/assets/solutions-website-static-sites.jpg";
 const faqs = [
   {
     question: "What kinds of sites can I host?",
-    answer: "Any static site. If your build produces HTML, CSS, and JavaScript files, it works. Hugo, Astro, Next.js static export, Gatsby, 11ty, Jekyll, and more. Dynamic server-side rendering is not supported."
+    answer: `Any static site. If your build produces HTML, CSS, and JavaScript files, it works. ${frameworkList({ format: "technical" })} Dynamic server-side rendering is not supported.`
   },
   {
     question: "How is this different from platforms like Vercel or Netlify?",
-    answer: "Those handle builds, serverless functions, CI/CD, and preview deploys on top of hosting. Pinner is hosting only. You build elsewhere, deploy the output here, and your files get a content address on a peer-to-peer network."
+    answer: "Those handle builds, serverless functions, CI/CD, and preview deploys on top of hosting. Pinner is hosting only. You build elsewhere, deploy the output here, and your site gets a permanent link that can't break."
   },
   {
     question: "What about custom domains?",
-    answer: "DNS-linked domains work alongside your IPFS content address. You can point a custom domain at your pinned content so visitors use a familiar URL."
+    answer: "DNS-linked domains work alongside your permanent link. You can point a custom domain at your content so visitors use a familiar URL."
   },
   {
     question: "Is my site always online?",
@@ -34,7 +36,7 @@ const faqs = [
   },
   {
     question: "Can I update my site?",
-    answer: "Yes. Update your files and pin the new version. You'll get a new content address for the updated content. If you use a custom domain, point it at the new address."
+    answer: "Yes. Update your files and deploy the new version. You'll get a new link for the updated content. If you use a custom domain, point it at the new version."
   },
   {
     question: "How does pricing work?",
@@ -43,20 +45,22 @@ const faqs = [
 ];
 ---
 
-<Layout title="Static Website Hosting. Peer-to-Peer Storage" description="Host static websites on IPFS with a permanent, verifiable address. No vendor lock-in, no walled gardens. Works with Hugo, Astro, Next.js, and more.">
+<Layout title="Static Website Hosting: Permanent, No Lock-In | Pinner" description={`Host static websites with permanent links. No vendor lock-in, no surprise bills. ${worksWithFrameworks()}`}>
   <PageHeader
-    title="Static site hosting on a peer-to-peer network"
+    title="Static site hosting that stays up"
     mobileTitle="Website Hosting"
-    description="Host static websites directly from IPFS. Your site gets a permanent, verifiable address. No vendor lock-in, no walled gardens."
-    btnText="Start Pinning →"
-    url="https://account.pinner.xyz"
+    description={`Host static websites with a permanent address. No vendor lock-in, no surprise bills. ${worksWithFrameworks()} Pay with crypto or card. No ID required for crypto.`}
+    btnText="Host a Website →"
+    url={config.registerUrl("hosting")}
+    secondaryBtnText="See Pricing →"
+    secondaryUrl="/pricing"
     client:load
   />
 
   <AboutSection
-    subtitle="IPFS Website Hosting"
+    subtitle="Permanent Hosting"
     title="Your site, on a permanent address"
-    description="Upload your static site and pin it to IPFS. Your site gets a content address: a unique link that points to a specific version of your content, verified by its hash. Pin a zip, use the CLI, or connect a GitHub Action. Your site is live in minutes."
+    description="Upload your static site and get a permanent link. Your files live across independent providers so no single company can delete them. Deploy from the CLI, a zip file, or a GitHub Action. Your site is live in minutes."
     theme="white"
     imageUrl={HowItWorksImage}
     imgageMobileUrl={HowItWorksMobile}
@@ -77,7 +81,7 @@ const faqs = [
   <AboutSection
     subtitle="Static Sites"
     title="Works with the frameworks you use"
-    description="If your site builds to static files, it works with IPFS hosting. That includes Hugo, Astro, Next.js static export, Gatsby, 11ty, Jekyll, and any other static site generator. Point your build output at Pinner, pin it with one CLI command or a GitHub Action, and your site is live on a peer-to-peer network with a content address."
+    description={`If your site builds to static files, it works. That includes ${frameworkList({ format: "technical" })}. Point your build output at Pinner, deploy with one CLI command or a GitHub Action, and your site is live with a permanent link that never breaks.`}
     theme="white"
     imageUrl={StaticSitesImage}
     client:load
@@ -105,5 +109,11 @@ const faqs = [
 
   <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />
 
-  <CallToAction client:load />
+  <CallToAction
+    heading={ctaCopy.hosting.heading}
+    subheading={ctaCopy.hosting.subheading}
+    primaryLabel="Host a Website →"
+    intent="hosting"
+    client:load
+  />
 </Layout>

@@ -33,7 +33,6 @@
     "tailwindcss-animate": "catalog:"
   },
   "devDependencies": {
-    "@tailwindcss/typography": "catalog:websites",
     "@tailwindcss/vite": "catalog:"
   },
   "repository": {

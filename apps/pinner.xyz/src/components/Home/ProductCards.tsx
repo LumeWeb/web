@@ -6,23 +6,10 @@ interface CardProps {
   description: React.ReactNode;
   cta: string;
   href: string;
+  soon?: boolean;
 }
 
 const cards: CardProps[] = [
-  {
-    title: "Private Storage",
-    description:
-      "Encrypted storage where only you hold the keys. Personal use or build apps on the Sia network.",
-    cta: "Store Privately →",
-    href: "/solutions/private-storage",
-  },
-  {
-    title: "S3 Storage",
-    description:
-      "S3-compatible object storage backed by the Sia network. Run your own gateway appliance.",
-    cta: "S3 Compatible →",
-    href: "/solutions/s3-storage",
-  },
   {
     title: "Website Hosting",
     description: (
@@ -41,6 +28,22 @@ const cards: CardProps[] = [
       "Pin files on a peer-to-peer network. They stay online as long as they're pinned.",
     cta: "Start Pinning →",
     href: "/solutions/ipfs-pinning",
+  },
+  {
+    title: "S3 Storage",
+    description:
+      "S3-compatible object storage backed by the Sia network. Run your own gateway appliance.",
+    cta: "S3 Compatible →",
+    href: "/solutions/s3-storage",
+    soon: true,
+  },
+  {
+    title: "Private Storage",
+    description:
+      "Encrypted storage where only you hold the keys. Personal use or build apps on the Sia network.",
+    cta: "Store Privately →",
+    href: "/solutions/private-storage",
+    soon: true,
   },
 ];
 
@@ -64,6 +67,11 @@ const ProductCards = () => {
                 "transition-colors duration-200 hover:border-home-text/30"
               )}
             >
+              {card.soon && (
+                <span className="inline-block text-xs font-medium text-sky-400 bg-sky-400/10 px-2 py-0.5 rounded mb-3 w-fit">
+                  Coming Soon
+                </span>
+              )}
               <h3 className="text-home-text text-lg font-semibold mb-3">
                 {card.title}
               </h3>

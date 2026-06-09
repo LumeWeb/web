@@ -8,6 +8,8 @@ import FAQ from '@/components/FAQ';
 import BrandLogos from '@/components/BrandLogos';
 import RelatedPages from '@/components/RelatedPages.astro';
 import PlanTable from '@/components/PlanTable.astro';
+import { config, ctaCopy } from '@/lib/config';
+import { frameworkList, worksWithFrameworks } from '@/lib/frameworks';
 import logos from '@/data/brand-logos';
 
 import AboutWhatIsPinner from "@/assets/about-what-is-pinner.jpg";
@@ -22,19 +24,23 @@ const planRows = [
   { factor: "Bandwidth", detail: "Pay per GB, no tiers or overage multipliers" },
   { factor: "Storage", detail: "Peer-to-peer (Sia network), independent providers" },
   { factor: "Content addressing", detail: "Every file gets a permanent, verifiable hash" },
-  { factor: "Crypto payments", detail: "Available, no identity verification required" },
+  { factor: "Payment methods", detail: "Crypto or card. No KYC for crypto." },
   { factor: "Serverless / edge functions", detail: "Not included, hosting only" },
   { factor: "CI/CD & preview deploys", detail: "Not included, bring your own build tool" },
 ];
 
 const faqs = [
   {
+    question: "What kinds of sites can I host?",
+    answer: `Static sites only. If your build produces HTML, CSS, and JavaScript files, it works. ${frameworkList({ format: "technical" })}. Dynamic server-side rendering, serverless functions, and edge functions are not supported.`
+  },
+  {
     question: "Can Pinner replace my current hosting?",
     answer: "It depends on what you need. Pinner hosts built static files with content-addressed storage on a peer-to-peer network. It does not offer serverless functions, edge functions, CI/CD, or preview deployments. If you need those features, keep your current platform. If you want content-addressed hosting with no vendor lock-in on storage and no per-seat charges, Pinner is worth a look."
   },
   {
     question: "What makes Pinner different for static hosting?",
-    answer: "Content addressing: every file gets a permanent, verifiable hash that doesn't change. Peer-to-peer storage means your content lives on independent providers, not one company's servers. No vendor lock-in. No per-seat pricing. Pay for storage and bandwidth only. Crypto payments with no identity verification."
+    answer: "Content addressing: every file gets a permanent, verifiable hash that doesn't change. Peer-to-peer storage means your content lives on independent providers, not one company's servers. No vendor lock-in. No per-seat pricing. Pay for storage and bandwidth only. Crypto payments with no KYC."
   },
   {
     question: "Can I use Pinner alongside my current platform?",
@@ -47,13 +53,13 @@ const faqs = [
 ];
 ---
 
-<Layout title="Vercel Alternative for Static Site Hosting | Pinner" description="Static site hosting on a peer-to-peer network with content addressing, no vendor lock-in, and no per-seat pricing.">
+<Layout title="Vercel Alternative for Static Site Hosting | Pinner" description={`Static site hosting with no per-seat pricing, no overage rates, and permanent links. ${worksWithFrameworks({ andMore: false })}`}>
   <PageHeader
-    title="Static site hosting on a peer-to-peer network"
+    title="No per-seat pricing. No bandwidth surprises."
     mobileTitle="Vercel Alternative"
-    description="Hit a bandwidth bill you didn't expect? Pinner hosts static files on a peer-to-peer network. No per-seat charges. No overage rates. Pay for storage and bandwidth only."
+    description={`Hit a bandwidth bill you didn't expect? Pinner hosts static sites with no per-seat charges and no overage rates. ${worksWithFrameworks({ format: "technical" })} Pay with crypto or card. No KYC for crypto.`}
     btnText="Start Hosting →"
-    url="https://account.pinner.xyz"
+    url={config.registerUrl("hosting")}
     secondaryBtnText="See Pricing →"
     secondaryUrl="/pricing"
     client:load
@@ -62,7 +68,7 @@ const faqs = [
   <AboutSection
     subtitle="Why Pinner"
     title="Your static files, on a permanent address"
-    description="Hit a bandwidth bill you didn't expect? Every file you upload gets a content hash: a permanent, verifiable link that doesn't depend on any one company staying online. Your data lives on a peer-to-peer network of independent storage providers, not a single company's servers. Pay for storage and bandwidth. No per-member charges. No surprise overage bills."
+    description="Hit a bandwidth bill you didn't expect? Every file you upload gets a permanent link that doesn't depend on any one company staying online. Your data lives across independent storage providers, not a single company's servers. Pay for storage and bandwidth. No per-member charges. No surprise overage bills."
     theme="white"
     imageUrl={AboutWhatIsPinner}
     client:load
@@ -81,8 +87,8 @@ const faqs = [
 
   <AboutSection
     subtitle="How It Works"
-    title="Content addressing, peer-to-peer storage, and no lock-in"
-    description="Every file you host on Pinner gets a permanent content hash. The same file always has the same address, anywhere. Your data lives on a peer-to-peer network of independent storage providers, not a single company's servers. Pay for storage and bandwidth with no per-member charges or surprise overage bills. Fully open source."
+    title="Permanent links, independent storage, and no lock-in"
+    description="Every file you host on Pinner gets a permanent link. The same file always has the same address, anywhere. Your data lives across independent storage providers, not a single company's servers. Pay for storage and bandwidth with no per-member charges or surprise overage bills. Fully open source."
     theme="gray"
     imagePosition="right"
     imageUrl={AboutHowItWorks}
@@ -92,7 +98,7 @@ const faqs = [
   <AboutSection
     subtitle="What Pinner Does (And Doesn't)"
     title="Hosting only. No serverless, no CI/CD, no platform lock-in"
-    description="Pinner hosts built static files. It does not offer serverless functions, edge rendering, CI/CD, or preview deployments. If you need those features, keep your current platform for the dev workflow and use Pinner for the hosting layer. If you want content-addressed hosting on a peer-to-peer network with no vendor lock-in on storage, Pinner is built for that."
+    description="Pinner hosts built static files. It does not offer serverless functions, edge rendering, CI/CD, or preview deployments. If you need those features, keep your current platform for the dev workflow and use Pinner for the hosting layer. If you want hosting with permanent links and no vendor lock-in on storage, Pinner is built for that."
     theme="white"
     imageUrl={AboutValues}
     client:load
@@ -117,5 +123,11 @@ const faqs = [
 
   <MigrationNote from="Vercel" client:load />
 
-  <CallToAction client:load />
+  <CallToAction
+    heading={ctaCopy.hosting.heading}
+    subheading={ctaCopy.hosting.subheading}
+    primaryLabel="Host a Website →"
+    intent="hosting"
+    client:load
+  />
 </Layout>
