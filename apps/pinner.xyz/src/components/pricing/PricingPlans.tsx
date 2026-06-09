@@ -8,6 +8,7 @@ import type { Cadence } from "./utils";
 import { CadenceToggle } from "./CadenceToggle";
 import { PlanCard } from "./PlanCard";
 import { SkeletonCard } from "./SkeletonCard";
+import { TrackedButton } from "@/components/TrackedButton";
 import { translateFeature } from "./featureCopy";
 import { Button } from "@/components/ui/button";
 
@@ -134,11 +135,11 @@ const PricingPlans = ({
               </ul>
             </div>
             <div className="flex-shrink-0">
-              <Button
+              <TrackedButton
                 label="Contact Us →"
                 url="/contact"
                 buttonStyle={variant === "light" ? "outline-dark" : "outline"}
-                onClick={() => window.posthog?.capture("pricing_custom_plan_contact_clicked")}
+                trackEvent="pricing_custom_plan_contact_clicked"
               />
             </div>
           </div>

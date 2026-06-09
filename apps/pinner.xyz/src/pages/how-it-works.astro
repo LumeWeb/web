@@ -3,6 +3,7 @@ import Layout from '@/layouts/Layout.astro';
 import PageHeader from '@/components/PageHeader';
 import AboutSection from '@/components/AboutSection';
 import CallToAction from '@/components/CallToAction';
+import { ctaCopy } from '@/lib/config';
 import ThreeSteps from '@/components/HowItWorks/ThreeSteps';
 
 import HowItWorksImage from "@/assets/how-it-works-1.png";
@@ -60,5 +61,10 @@ import StorageMobile from "@/assets/how-it-works-mobile-2.png";
     client:load
   />
 
-  <CallToAction client:load />
+  <CallToAction
+    heading={ctaCopy.howItWorks.heading}
+    subheading={ctaCopy.howItWorks.subheading}
+    intent="pinning"
+    client:load
+  />
 </Layout>

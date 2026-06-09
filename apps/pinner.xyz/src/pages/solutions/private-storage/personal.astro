@@ -4,10 +4,11 @@ import PageHeader from '@/components/PageHeader';
 import AboutSection from '@/components/AboutSection';
 import CallToAction from '@/components/CallToAction';
 import FAQ from '@/components/FAQ';
-import FoundingOfferBanner from '@/components/FoundingOfferBanner';
 import BrandLogos from '@/components/BrandLogos';
 import RelatedPages from '@/components/RelatedPages.astro';
+import NewsletterSignup from '@/components/NewsletterSignup';
 import logos from '@/data/brand-logos';
+import { ctaCopy } from '@/lib/config';
 
 import HowItWorksImage from "@/assets/how-it-works-1.png";
 import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
@@ -38,13 +39,11 @@ const faqs = [
 ];
 ---
 
-<Layout title="Private Storage for Your Data | Peer-to-Peer Storage" description="Store your files privately with zero-knowledge encryption on the Sia network. Your keys, your data. No one can read your files without your key. Not us, not the storage hosts.">
+<Layout title="Private Storage for Your Data: Coming Soon | Pinner" description="Store your files privately with zero-knowledge encryption on the Sia network. Coming soon.">
   <PageHeader
     title="Private Storage for Your Data"
     mobileTitle="Private Storage"
     description="Store your files privately with zero-knowledge encryption on the Sia network. Your keys, your data. No one can read your files without your key. Not us, not the storage hosts."
-    btnText="Get Started →"
-    url="https://account.pinner.xyz"
     client:load
   />
 
@@ -90,17 +89,26 @@ const faqs = [
     { href: "/solutions/website-hosting", label: "Website Hosting", description: "Host static websites on IPFS with a permanent, verifiable address" },
   ]} />
 
-  <section class="py-[60px] md:py-[120px] bg-white">
-    <div class="xl:container px-6 text-center">
-      <p class="text-lg text-content-text-muted">
-        Building an app? <a href="/solutions/private-storage/developers" class="text-content-accent hover:underline">See our developer resources →</a>
-      </p>
+  <section class="bg-white border-t border-content-divider/50 py-12 md:py-16">
+    <div class="xl:container px-6 flex flex-col items-center">
+      <NewsletterSignup
+        source="private_storage_personal"
+        label="Want to know when private storage is available? Get notified."
+        buttonLabel="Notify me"
+        successMessage="You're on the list. We'll email you when private storage is ready."
+        theme="light"
+        rounded
+        client:load
+      />
     </div>
   </section>
 
   <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />
 
-  <FoundingOfferBanner variant="content" client:load />
-
-  <CallToAction client:load />
+  <CallToAction
+    heading={ctaCopy.privateStoragePersonal.heading}
+    subheading={ctaCopy.privateStoragePersonal.subheading}
+    intent="storing"
+    client:load
+  />
 </Layout>

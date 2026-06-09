@@ -8,6 +8,7 @@ import BrandLogos from '@/components/BrandLogos';
 import RelatedPages from '@/components/RelatedPages.astro';
 import NewsletterSignup from '@/components/NewsletterSignup';
 import logos from '@/data/brand-logos';
+import { config, ctaCopy } from '@/lib/config';
 
 import HowItWorksImage from "@/assets/how-it-works-1.png";
 import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
@@ -45,7 +46,7 @@ const faqs = [
     mobileTitle="S3 Storage"
     description="Use your existing S3 tools with your self-hosted gateway. Same API, your endpoint. Encrypted by default."
     btnText="Start Storing →"
-    url="https://account.pinner.xyz"
+    url={config.registerUrl("pinning")}
     client:load
   />
 
@@ -107,5 +108,11 @@ const faqs = [
 
   <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />
 
-  <CallToAction client:load />
+  <CallToAction
+    heading={ctaCopy.s3.heading}
+    subheading={ctaCopy.s3.subheading}
+    primaryLabel="Start Storing →"
+    intent="storing"
+    client:load
+  />
 </Layout>

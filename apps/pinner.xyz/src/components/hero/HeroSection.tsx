@@ -1,16 +1,20 @@
-import { Button } from "@/components/ui/button";
+import { TrackedButton } from "@/components/TrackedButton";
 import { cn } from "@/lib/utils";
 
 interface HeroButtonProps {
 	label: string;
 	url: string;
 	buttonStyle?: "default" | "outline" | "outline-dark" | "btn-light" | "gray" | "light";
+	target?: string;
+	trackEvent?: string;
+	trackProperties?: Record<string, unknown>;
 }
 
 interface HeroSectionProps {
 	headline: string | React.ReactNode;
 	subheadline?: React.ReactNode;
 	primaryButton?: HeroButtonProps;
+	primaryButtons?: HeroButtonProps[];
 	secondaryButton?: HeroButtonProps;
 	visualContent?: React.ReactNode;
 	microcopy?: string;
@@ -22,12 +26,15 @@ const HeroSection = ({
 	headline,
 	subheadline,
 	primaryButton,
+	primaryButtons,
 	secondaryButton,
 	visualContent,
 	microcopy,
 	trustLine,
 	className = "",
 }: HeroSectionProps) => {
+	const buttons = primaryButtons ?? (primaryButton ? [primaryButton] : []);
+
 	return (
 		<section className={cn("pt-[160px] md:pt-[120px] lg:pt-[155px]", className)}>
 			<div className="xl:container px-6">
@@ -44,20 +51,27 @@ const HeroSection = ({
 								</p>
 							)}
 
-							{(primaryButton || secondaryButton) && (
+							{(buttons.length > 0 || secondaryButton) && (
 								<div className="flex flex-col sm:flex-row gap-3 sm:gap-3 lg:gap-6 mt-8">
-									{primaryButton && (
-										<Button
-											label={primaryButton.label}
-											url={primaryButton.url}
-											buttonStyle={primaryButton.buttonStyle}
+									{buttons.map((btn) => (
+										<TrackedButton
+											key={btn.label}
+											label={btn.label}
+											url={btn.url}
+											buttonStyle={btn.buttonStyle}
+											target={btn.target}
+											trackEvent={btn.trackEvent || "hero_cta_clicked"}
+											trackProperties={btn.trackProperties || { label: btn.label }}
 										/>
-									)}
+									))}
 									{secondaryButton && (
-										<Button
+										<TrackedButton
 											label={secondaryButton.label}
 											url={secondaryButton.url}
 											buttonStyle={secondaryButton.buttonStyle}
+											target={secondaryButton.target}
+											trackEvent={secondaryButton.trackEvent || "hero_secondary_clicked"}
+											trackProperties={secondaryButton.trackProperties || { label: secondaryButton.label }}
 										/>
 									)}
 								</div>

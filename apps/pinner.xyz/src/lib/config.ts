@@ -8,10 +8,64 @@ const portalApiUrl =
 
 const portalDomain = new URL(portalApiUrl).hostname;
 
+const accountBaseUrl = `https://account.${portalDomain}`;
+
+type RegisterIntent = "pinning" | "hosting" | "storing";
+
+function registerUrl(intent?: RegisterIntent): string {
+  const base = `${accountBaseUrl}/register`;
+  return intent ? `${base}?intent=${intent}` : base;
+}
+
 export const config = {
   portalApiUrl,
+  accountBaseUrl,
+  registerUrl,
   listmonkUrl:
     import.meta.env.PUBLIC_LISTMONK_URL || `https://list.${portalDomain}`,
   listmonkListUuid:
     import.meta.env.PUBLIC_LISTMONK_LIST_UUID ?? "",
+} as const;
+
+export const ctaCopy = {
+  hosting: {
+    heading: "Static hosting on open standards, with data permanence.",
+    subheading: "You control your data. Content-addressed, portable, no platform lock-in. 5 USD/mo, crypto or card.",
+  },
+  pinning: {
+    heading: "Your content stays pinned and available.",
+    subheading: "Permanent links, distributed across independent hosts. No single point of failure.",
+  },
+  s3: {
+    heading: "Your endpoint. Your keys. Your data.",
+    subheading: "Encrypted by default. Predictable pricing. S3-compatible.",
+  },
+  privateStorage: {
+    heading: "Your data is yours.",
+    subheading: "Private storage. Zero-knowledge encryption. No data mining.",
+  },
+  privateStoragePersonal: {
+    heading: "Your data is yours.",
+    subheading: "Zero-knowledge encryption. Only you hold the keys.",
+  },
+  privateStorageDevelopers: {
+    heading: "Build on encrypted storage.",
+    subheading: "S3-compatible API, revenue sharing, and the Sia SDK.",
+  },
+  home: {
+    heading: "Your data, on open standards, with permanence.",
+    subheading: "Pin files, host sites, or store private data. Content-addressed, portable, no platform lock-in.",
+  },
+  about: {
+    heading: "Your data is yours.",
+    subheading: "We don't look at it. We don't sell it. Open source, no data mining.",
+  },
+  howItWorks: {
+    heading: "Pin, host, or store your data on a network.",
+    subheading: "Three products, one infrastructure. Crypto or card.",
+  },
+  partners: {
+    heading: "Build on Pinner.",
+    subheading: "Revenue sharing, integration support, and custom pricing for Sia and IPFS builders.",
+  },
 } as const;

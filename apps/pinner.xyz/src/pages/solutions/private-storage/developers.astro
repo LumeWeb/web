@@ -6,7 +6,10 @@ import CallToAction from '@/components/CallToAction';
 import FAQ from '@/components/FAQ';
 import BrandLogos from '@/components/BrandLogos';
 import RelatedPages from '@/components/RelatedPages.astro';
+import NewsletterSignup from '@/components/NewsletterSignup';
+import { CodeBlock } from '@/components/CodeBlock';
 import logos from '@/data/brand-logos';
+import { ctaCopy } from '@/lib/config';
 
 import HowItWorksImage from "@/assets/how-it-works-1.png";
 import HowItWorksMobile from "@/assets/how-it-works-mobile-1.png";
@@ -29,13 +32,11 @@ const faqs = [
 ];
 ---
 
-<Layout title="Build Apps on Encrypted Storage | Developer Platform" description="Build applications on encrypted, peer-to-peer storage. S3-compatible API, revenue sharing for app developers, and the Sia SDK for direct access.">
+<Layout title="Build Apps on Encrypted Storage: Coming Soon | Developer Platform" description="Build applications on encrypted, peer-to-peer storage. S3-compatible API, revenue sharing for app developers, and the Sia SDK for direct access. Coming soon.">
   <PageHeader
     title="Build Apps on Encrypted Storage"
     mobileTitle="Developer Platform"
     description="Build applications on encrypted, peer-to-peer storage. S3-compatible API for object storage, revenue sharing when your users store data, and the Sia SDK for direct access."
-    btnText="View Partner Program →"
-    url="/partners"
     client:load
   />
 
@@ -60,11 +61,7 @@ const faqs = [
   >
     <p>Technical overview. Your app sends data through the storage layer. Data is encrypted client-side. Fragments are distributed across the Sia network. Only your user holds the key.</p>
     <p>The live interface today is S3-compatible. Here's a simple example:</p>
-    <pre><code>aws s3 cp backup.tar.gz s3://my-bucket/ --endpoint-url https://your-server.example</code></pre>
-    <p>Or with curl:</p>
-    <pre><code>curl -X PUT https://your-server.example/my-bucket/backup.tar.gz \
-  -H "Authorization: Bearer $TOKEN" \
-  -T backup.tar.gz</code></pre>
+    <CodeBlock commands={[{ label: "AWS CLI", command: "aws s3 cp backup.tar.gz s3://my-bucket/ --endpoint-url https://your-server.example" }, { label: "cURL", command: "curl -X PUT https://your-server.example/my-bucket/backup.tar.gz \\\n  -H \"Authorization: Bearer $TOKEN\" \\\n  -T backup.tar.gz" }]} client:load />
     <p>The Sia SDK is also available for direct access to the storage layer if you need lower-level control.</p>
   </AboutSection>
 
@@ -89,15 +86,26 @@ const faqs = [
     { href: "/partners", label: "Partner Program", description: "Revenue sharing, integration support, and custom pricing" },
   ]} />
 
-  <section class="py-8 bg-white">
-    <div class="xl:container px-6 text-center">
-      <p class="text-content-text-muted text-sm">
-        Just need private storage? <a href="/solutions/private-storage/personal" class="underline hover:text-content-text transition-colors">See personal storage →</a>
-      </p>
+  <section class="bg-white border-t border-content-divider/50 py-12 md:py-16">
+    <div class="xl:container px-6 flex flex-col items-center">
+      <NewsletterSignup
+        source="private_storage_developers"
+        label="Want to build on private storage? Get notified when the developer platform is ready."
+        buttonLabel="Notify me"
+        successMessage="You're on the list. We'll email you when the developer platform is available."
+        theme="light"
+        rounded
+        client:load
+      />
     </div>
   </section>
 
   <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />
 
-  <CallToAction client:load />
+  <CallToAction
+    heading={ctaCopy.privateStorageDevelopers.heading}
+    subheading={ctaCopy.privateStorageDevelopers.subheading}
+    intent="storing"
+    client:load
+  />
 </Layout>

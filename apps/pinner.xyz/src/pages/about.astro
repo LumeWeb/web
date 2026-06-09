@@ -7,6 +7,7 @@ import BrandLogos from '@/components/BrandLogos';
 import MissionSection from '@/components/MissionSection';
 
 import logos from '@/data/brand-logos';
+import { config, ctaCopy } from '@/lib/config';
 
 import AboutWhatIsPinner from "@/assets/about-what-is-pinner.jpg";
 import AboutValues from "@/assets/about-values.jpg";
@@ -19,7 +20,7 @@ import AboutHowItWorks from "@/assets/about-how-it-works.jpg";
     mobileTitle="Why we're building Pinner"
     description="A small business building storage infrastructure that respects your data."
     btnText="Start Pinning →"
-    url="https://account.pinner.xyz"
+    url={config.registerUrl()}
     client:load
   />
 
@@ -60,5 +61,11 @@ import AboutHowItWorks from "@/assets/about-how-it-works.jpg";
 
   <BrandLogos logos={logos} logoType="dark" title="Built On" variant="dark" client:load />
 
-	<CallToAction client:load variant="dark" />
+  <CallToAction
+    variant="dark"
+    heading={ctaCopy.about.heading}
+    subheading={ctaCopy.about.subheading}
+    intent="pinning"
+    client:load
+  />
 </Layout>

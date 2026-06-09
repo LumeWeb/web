@@ -43,12 +43,6 @@ export function getCTA(plan: BillingPlan): { label: string; url: string } {
   if (isCustomPlan(plan)) {
     return { label: "Contact Us →", url: "/contact" };
   }
-  if (
-    plan.price_usd === 0 ||
-    plan.pricing_periods.every((p) => p.price_usd === 0)
-  ) {
-    return { label: "Start Pinning →", url: "https://account.pinner.xyz" };
-  }
-  return { label: "Start Pinning →", url: "https://account.pinner.xyz" };
+  return { label: "Start Pinning →", url: config.registerUrl("pinning") };
 }
 

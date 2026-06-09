@@ -1,9 +1,12 @@
 import SiteLogo from "@/assets/site-logo.svg";
 import SiteLogoDark from "@/assets/site-logo-dark.svg";
 import { Button } from "@/components/ui/button";
+import { TrackedButton } from "@/components/TrackedButton";
+import { TrackedLink } from "@/components/TrackedLink";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { appendUTMsToURL } from "@/lib/utm";
+import { config } from "@/lib/config";
 import contactsData from "@/data/contacts.json";
 import {
   NavigationMenu,
@@ -333,29 +336,29 @@ const Nav = ({ theme = "dark" }: NavProps) => {
             </div>
 
             <div className="flex items-center space-x-5 hidden lg:flex">
-              <a
-                href={appendUTMsToURL("https://account.pinner.xyz/login")}
+              <TrackedLink
+                 href={appendUTMsToURL(`${config.accountBaseUrl}/login`)}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => window.posthog?.capture("nav_sign_in_clicked")}
+                trackEvent="nav_sign_in_clicked"
                 className={cn(
                   "font-medium text-lg transition ease-in-out duration-300",
                   textColor,
                   hoverColor
                 )}>
                 Sign In
-              </a>
-              <Button
+              </TrackedLink>
+              <TrackedButton
                 label="Start Pinning → "
-                url="https://account.pinner.xyz/"
+                url={config.registerUrl("pinning")}
                 target="_blank"
                 buttonStyle={isDark ? "default" : "outline-dark"}
-                onClick={() => window.posthog?.capture("nav_start_pinning_clicked")}
+                trackEvent="nav_start_pinning_clicked"
               />
             </div>
 
             <div className="lg:hidden flex items-center space-x-4 relative z-40">
-              <Button label="Sign In → " size="sm" url="https://account.pinner.xyz/login" target="_blank" buttonStyle={isDark ? "default" : "outline-dark"} />
+               <Button label="Sign In → " size="sm" url={`${config.accountBaseUrl}/login`} target="_blank" buttonStyle={isDark ? "default" : "outline-dark"} />
               <div
                 className="relative cursor-pointer"
                 onClick={handleToggleMenu}>

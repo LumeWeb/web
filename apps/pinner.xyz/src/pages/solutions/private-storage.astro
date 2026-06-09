@@ -4,16 +4,16 @@ import PageHeader from '@/components/PageHeader';
 import CallToAction from '@/components/CallToAction';
 import BrandLogos from '@/components/BrandLogos';
 import RelatedPages from '@/components/RelatedPages.astro';
+import NewsletterSignup from '@/components/NewsletterSignup';
 import logos from '@/data/brand-logos';
+import { ctaCopy } from '@/lib/config';
 ---
 
-<Layout title="Private, Encrypted Storage" description="Only you hold the keys. Choose how you want to use private, encrypted storage.">
+<Layout title="Private, Encrypted Storage: Coming Soon | Pinner" description="Only you hold the keys. Zero-knowledge encrypted storage on the Sia network. Coming soon.">
   <PageHeader
     title="Private, Encrypted Storage"
     mobileTitle="Private Storage"
-    description="Only you hold the keys."
-    btnText="Read the Docs →"
-    url="https://docs.pinner.xyz"
+    description="Only you hold the keys. Zero-knowledge encryption on the Sia network."
     client:load
   />
 
@@ -22,14 +22,30 @@ import logos from '@/data/brand-logos';
       <h2 class="text-[24px] sm:text-[28px] md:text-[31px] font-medium text-content-text mb-10 md:mb-14">Choose Your Path</h2>
       <div class="flex flex-col sm:flex-row justify-center gap-6">
         <a href="/solutions/private-storage/personal" class="inline-block bg-white border border-gray-200 rounded-lg px-8 py-10 text-content-text hover:shadow-lg transition-shadow max-w-[400px] text-left flex-1">
+          <span class="inline-block text-xs font-medium text-content-accent bg-content-accent/10 px-2 py-1 rounded mb-3">Coming Soon</span>
           <span class="block text-xl font-medium mb-3">For Personal Use</span>
           <span class="block text-base text-content-text-muted">Store private data on the Sia network. Encrypted, self-hosted, zero-knowledge.</span>
         </a>
         <a href="/solutions/private-storage/developers" class="inline-block bg-white border border-gray-200 rounded-lg px-8 py-10 text-content-text hover:shadow-lg transition-shadow max-w-[400px] text-left flex-1">
+          <span class="inline-block text-xs font-medium text-content-accent bg-content-accent/10 px-2 py-1 rounded mb-3">Coming Soon</span>
           <span class="block text-xl font-medium mb-3">For Developers</span>
           <span class="block text-base text-content-text-muted">Build apps on encrypted, peer-to-peer storage. Integrate the storage layer, earn when your users store data.</span>
         </a>
       </div>
+    </div>
+  </section>
+
+  <section class="bg-white border-t border-content-divider/50 py-12 md:py-16">
+    <div class="xl:container px-6 flex flex-col items-center">
+      <NewsletterSignup
+        source="private_storage_page"
+        label="Want to know when private storage is available? Get notified."
+        buttonLabel="Notify me"
+        successMessage="You're on the list. We'll email you when private storage is ready."
+        theme="light"
+        rounded
+        client:load
+      />
     </div>
   </section>
 
@@ -40,5 +56,10 @@ import logos from '@/data/brand-logos';
 
   <BrandLogos logos={logos} logoType="light" title="Built On" variant="white" client:load />
 
-  <CallToAction client:load />
+  <CallToAction
+    heading={ctaCopy.privateStorage.heading}
+    subheading={ctaCopy.privateStorage.subheading}
+    intent="storing"
+    client:load
+  />
 </Layout>

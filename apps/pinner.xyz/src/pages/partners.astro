@@ -3,6 +3,7 @@ import Layout from '@/layouts/Layout.astro';
 import PageHeader from '@/components/PageHeader';
 import CallToAction from '@/components/CallToAction';
 import AboutSection from '@/components/AboutSection';
+import { ctaCopy } from '@/lib/config';
 
 import SiaRevshareImage from "@/assets/partners-sia-revshare.jpg";
 import IPFSImage from "@/assets/partners-ipfs.jpg";
@@ -44,7 +45,7 @@ import IPFSImage from "@/assets/partners-ipfs.jpg";
     client:load
   />
 
-  <section class="bg-white py-[60px] md:py-[120px]">
+  <section id="contact" class="bg-white py-[60px] md:py-[120px]">
     <div class="xl:container px-6">
       <div class="mx-auto max-w-[960px]">
         <h2 class="text-content-text mb-4 text-center text-[25px] leading-tight font-medium md:text-[32px] lg:text-[40px]">
@@ -69,5 +70,12 @@ import IPFSImage from "@/assets/partners-ipfs.jpg";
     </div>
   </section>
 
-  <CallToAction client:load />
+  <CallToAction
+    heading={ctaCopy.partners.heading}
+    subheading={ctaCopy.partners.subheading}
+    primaryLabel="Get in Touch →"
+    primaryUrl="#contact"
+    intent="partners"
+    client:load
+  />
 </Layout>

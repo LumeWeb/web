@@ -1,11 +1,14 @@
 import Section from "@/components/layout/Section";
-import { Button } from "@/components/ui/button";
+import { TrackedButton } from "@/components/TrackedButton";
 import { cn } from "@/lib/utils";
 
 interface ButtonConfig {
 	label: string;
 	url: string;
 	buttonStyle?: "default" | "outline" | "outline-dark" | "btn-light" | "gray" | "light";
+	trackEvent?: string;
+	trackProperties?: Record<string, unknown>;
+	target?: string;
 }
 
 interface CallToActionSectionProps {
@@ -40,17 +43,23 @@ const CallToActionSection = ({
 
 				<div className="mt-7 md:mt-[50px] flex gap-3 justify-center">
 					{primaryButton && (
-						<Button
+						<TrackedButton
 							label={primaryButton.label}
 							url={primaryButton.url}
 							buttonStyle={primaryButton.buttonStyle}
+							trackEvent={primaryButton.trackEvent || "cta_primary_clicked"}
+							trackProperties={primaryButton.trackProperties}
+							target={primaryButton.target}
 						/>
 					)}
 					{secondaryButton && (
-						<Button
+						<TrackedButton
 							label={secondaryButton.label}
 							url={secondaryButton.url}
 							buttonStyle={secondaryButton.buttonStyle}
+							trackEvent={secondaryButton.trackEvent || "cta_secondary_clicked"}
+							trackProperties={secondaryButton.trackProperties}
+							target={secondaryButton.target}
 						/>
 					)}
 				</div>
