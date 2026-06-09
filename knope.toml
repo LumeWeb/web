@@ -73,6 +73,11 @@ changelog = "libs/portal-plugin-billing/CHANGELOG.md"
 versioned_files = ["libs/portal-plugin-ipfs/package.json"]
 changelog = "libs/portal-plugin-ipfs/CHANGELOG.md"
 
+[packages."@lumeweb/portal-plugin-onboarding"]
+versioned_files = ["libs/portal-plugin-onboarding/package.json"]
+changelog = "libs/portal-plugin-onboarding/CHANGELOG.md"
+
+
 [packages."@lumeweb/portal-sdk"]
 versioned_files = ["libs/portal-sdk/package.json"]
 changelog = "libs/portal-sdk/CHANGELOG.md"
