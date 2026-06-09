@@ -1,6 +1,6 @@
 {
   "name": "@lumeweb/portal-plugin-ipfs",
-  "version": "0.1.3",
+  "version": "0.1.7",
   "type": "module",
   "files": [
     "lib-dist",
