@@ -135,7 +135,10 @@ def discover_standalone_apps() -> Dict[str, Dict[str, Any]]:
     apps_path = Path("apps")
     
     if not apps_path.exists():
+        logger.info("Discovery: apps/ directory not found, skipping standalone app discovery")
         return apps
+    
+    logger.debug("Discovery: scanning apps/ for standalone apps")
     
     # Check for portal-frontend app
     frontend_app = apps_path / "portal-frontend"
@@ -156,9 +159,15 @@ def discover_standalone_apps() -> Dict[str, Dict[str, Any]]:
                     "repo_target": f"{PORTAL_PLUGIN_PREFIX}frontend",  # Still goes to plugin repo
                     "content_type": ContentType.UI_APPLICATION.value
                 }
-        except:
-            pass
+                logger.info(f"Discovery: found standalone app '{PORTAL_FRONTEND_NAME}' in apps/portal-frontend")
+            else:
+                logger.debug(f"Discovery: skipping apps/portal-frontend — no '{BUILD_SCRIPT_NAME}' script in package.json")
+        except Exception as e:
+            logger.warning(f"Discovery: failed to read apps/portal-frontend/package.json: {e}")
+    else:
+        logger.debug("Discovery: apps/portal-frontend directory not found")
     
+    logger.info(f"Discovery: found {len(apps)} standalone app(s): {list(apps.keys()) or '(none)'}")
     return apps
 
 def discover_plugins() -> Dict[str, Dict[str, Any]]:
@@ -167,10 +176,14 @@ def discover_plugins() -> Dict[str, Dict[str, Any]]:
     libs_path = Path("libs")
     
     if not libs_path.exists():
+        logger.info("Discovery: libs/ directory not found, skipping plugin discovery")
         return plugins
+    
+    logger.debug(f"Discovery: scanning libs/{PORTAL_PLUGIN_PREFIX}* for plugins")
     
     for plugin_dir in libs_path.glob(f"{PORTAL_PLUGIN_PREFIX}*"):
         if not plugin_dir.is_dir():
+            logger.debug(f"Discovery: skipping {plugin_dir.name} — not a directory")
             continue
             
         plugin_name = plugin_dir.name.replace(PORTAL_PLUGIN_PREFIX, "")
@@ -178,7 +191,8 @@ def discover_plugins() -> Dict[str, Dict[str, Any]]:
         # Check if this has vite config (buildable frontend plugin)
         vite_config = plugin_dir / VITE_CONFIG_FILENAME
         if not vite_config.exists():
-            continue  # Skip if no vite config (not a frontend plugin)
+            logger.debug(f"Discovery: skipping {plugin_name} — no {VITE_CONFIG_FILENAME} found")
+            continue
         
         # Read package.json to check build script
         package_json_path = plugin_dir / PACKAGE_JSON_FILENAME
@@ -188,6 +202,7 @@ def discover_plugins() -> Dict[str, Dict[str, Any]]:
                 package_data = json.load(f)
             scripts = package_data.get('scripts', {})
             if BUILD_SCRIPT_NAME not in scripts:
+                logger.debug(f"Discovery: skipping {plugin_name} — no '{BUILD_SCRIPT_NAME}' script in package.json")
                 continue
             
             # Skip templates and directories with placeholder build scripts
@@ -196,9 +211,11 @@ def discover_plugins() -> Dict[str, Dict[str, Any]]:
             
             # Skip if build script contains any skip indicators
             if any(keyword in build_script_lower for keyword in SKIP_KEYWORDS):
+                logger.debug(f"Discovery: skipping {plugin_name} — build script matches skip keyword: '{build_script}'")
                 continue
                 
-        except:
+        except Exception as e:
+            logger.warning(f"Discovery: skipping {plugin_name} — failed to read package.json: {e}")
             continue
             
         # Detect plugin type from structure
@@ -208,7 +225,9 @@ def discover_plugins() -> Dict[str, Dict[str, Any]]:
             plugin_type = "core"
             
         plugins[plugin_name] = plugin_template(plugin_name, type=plugin_type)
+        logger.debug(f"Discovery: discovered plugin '{plugin_name}' (type={plugin_type}) from {plugin_dir.name}")
     
+    logger.info(f"Discovery: found {len(plugins)} plugin(s): {sorted(plugins.keys()) or '(none)'}")
     return plugins
 
 
@@ -235,6 +254,15 @@ class BuildRegistryBuilder:
         self._build_plugin_targets()
         
         self._validate_registry()
+        
+        logger.info(
+            f"Registry built: {len(self.targets)} target(s) — "
+            f"app-shell: {sum(1 for t in self.targets.values() if t.context.type == BuildContextType.APP_SHELL)}, "
+            f"standalone: {sum(1 for t in self.targets.values() if t.context.type == BuildContextType.STANDALONE_APP)}, "
+            f"plugin: {sum(1 for t in self.targets.values() if t.context.type == BuildContextType.PLUGIN)}"
+        )
+        logger.debug(f"Registry targets: {sorted(self.targets.keys())}")
+        
         return BuildRegistry(self.targets)
     
     def _build_app_shell_targets(self):
@@ -847,6 +875,7 @@ Examples:
 def filter_targets(registry: BuildRegistry, target_filter: str) -> List[BuildTarget]:
     """Filter targets based on command line arguments"""
     if target_filter == "all":
+        logger.info(f"Available targets: {sorted(registry.targets.keys())}")
         return list(registry.targets.values())
     
     requested_targets = [t.strip() for t in target_filter.split(",")]
@@ -856,7 +885,8 @@ def filter_targets(registry: BuildRegistry, target_filter: str) -> List[BuildTar
         if target_name in registry.targets:
             filtered_targets.append(registry.targets[target_name])
         else:
-            logger.warning(f"Target not found: {target_name}")
+            logger.warning(f"Target not found: '{target_name}'")
+            logger.info(f"Available targets: {sorted(registry.targets.keys())}")
     
     return filtered_targets
 
