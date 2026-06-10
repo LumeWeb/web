@@ -40,6 +40,13 @@ runs:
         done
 
         SORTED_URLS=$(sort -u "$URL_LIST" | sed '/^[[:space:]]*$/d')
+
+        if [ -z "$SORTED_URLS" ]; then
+          echo "::warning::No URLs found in sitemaps under ${BUILD_PATH}"
+          rm -f "$URL_LIST"
+          exit 0
+        fi
+
         URL_COUNT=$(echo "$SORTED_URLS" | wc -l | tr -d ' ')
 
         if [ "$URL_COUNT" -eq 0 ]; then
