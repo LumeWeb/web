@@ -13,7 +13,7 @@ export interface Props {
 const { title } = Astro.props;
 const description =
   "A platform, network and experience that allows you to control and own your online web, and access all of the possibilities Web3 has to offer. Join the open web.";
-const canonicalURL = Astro.url.href;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const imageURL = new URL(opengraph.src, Astro.url).href;
 ---
 
