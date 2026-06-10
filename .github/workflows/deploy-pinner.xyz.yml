@@ -33,6 +33,11 @@ jobs:
           directory: apps/pinner.xyz
       - name: Build
         run: pnpm build:pinner.xyz
+      - name: Write IndexNow key file
+        uses: ./.github/actions/indexnow-write-key
+        with:
+          public-path: apps/pinner.xyz/dist
+          key: ${{ vars.INDEXNOW_KEY_PINNER }}
       - name: Deploy to IPFS via Pinner
         id: deploy_pinner
         uses: lumeweb/pinner-deploy-action@v0
@@ -41,3 +46,9 @@ jobs:
           path: apps/pinner.xyz/dist
           domain: pinner.xyz
           remove-previous: true
+      - name: Submit URLs to IndexNow
+        uses: ./.github/actions/indexnow
+        with:
+          build-path: apps/pinner.xyz/dist
+          site: pinner.xyz
+          key: ${{ vars.INDEXNOW_KEY_PINNER }}
