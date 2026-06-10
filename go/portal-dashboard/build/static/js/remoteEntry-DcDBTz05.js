@@ -1,1 +1,0 @@
-import{getExposes as e,init as t}from"./virtual_mf-REMOTE_ENTRY_ID___mfe_internal__dashboard__remoteEntry-_hash__js-BqBQ8gTO.js";export{e as get,t as init};
