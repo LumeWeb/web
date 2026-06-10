@@ -23,6 +23,11 @@
     "typewriter-effect": "^2.22.0"
   },
   "dependencies": {
+    "@astrojs/rss": "^4.0.18",
+    "@fontsource/ibm-plex-sans-devanagari": "catalog:websites",
+    "@fontsource/inter": "catalog:websites",
+    "@fontsource/jaldi": "catalog:websites",
+    "@fontsource/jetbrains-mono": "catalog:websites",
     "@tailwindcss/vite": "catalog:",
     "clsx": "catalog:",
     "tailwind-merge": "catalog:",

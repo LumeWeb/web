@@ -11,7 +11,45 @@ export default defineConfig({
   integrations: [
     react(),
     sitemap(),
-    robotsTxt(),
+    robotsTxt({
+      policy: [
+        {
+          userAgent: "*",
+          allow: "/",
+        },
+        {
+          userAgent: "GPTBot",
+          allow: "/",
+        },
+        {
+          userAgent: "ChatGPT-User",
+          allow: "/",
+        },
+        {
+          userAgent: "Google-Extended",
+          allow: "/",
+        },
+        {
+          userAgent: "PerplexityBot",
+          allow: "/",
+        },
+        {
+          userAgent: "ClaudeBot",
+          allow: "/",
+        },
+        {
+          userAgent: "Bytespider",
+          allow: "/",
+        },
+        {
+          userAgent: "Applebot-Extended",
+          allow: "/",
+        },
+      ],
+      transform(content) {
+        return `${content}\nContent-Signal: ai-train=yes, search=yes, ai-input=yes\n`;
+      },
+    }),
     astroLlmsTxt({
       title: 'Lume Web',
       description: 'A platform, network and experience that allows you to control and own your online web.',

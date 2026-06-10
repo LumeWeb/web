@@ -1,0 +1,19 @@
+---
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="404 - Lume Web" description="The page you're looking for doesn't exist.">
+  <section class="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
+    <h1 class="font-display text-8xl md:text-9xl font-bold text-aquamarine mb-4">404</h1>
+    <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-6">Page not found</h2>
+    <p class="font-body text-lg text-cloud max-w-md mb-8">
+      The page you're looking for doesn't exist or has been moved. Head back to the homepage to explore the open web.
+    </p>
+    <a
+      href="/"
+      class="inline-flex items-center px-8 py-4 bg-aquamarine text-blue-charcoal font-display font-bold text-lg rounded-lg hover:bg-white transition-colors duration-250"
+    >
+      Back to Homepage
+    </a>
+  </section>
+</Layout>
