@@ -39,7 +39,7 @@ runs:
           yq '.. | select(has("loc")) | .loc' -o=props "$xml_file" >> "$URL_LIST" || true
         done
 
-        SORTED_URLS=$(sort -u "$URL_LIST" | sed '/^[[:space:]]*$/d')
+        SORTED_URLS=$(sort -u "$URL_LIST" | sed '/^[[:space:]]*$/d' | sed '/\.xml$/d')
 
         if [ -z "$SORTED_URLS" ]; then
           echo "::warning::No URLs found in sitemaps under ${BUILD_PATH}"
@@ -48,12 +48,6 @@ runs:
         fi
 
         URL_COUNT=$(echo "$SORTED_URLS" | wc -l | tr -d ' ')
-
-        if [ "$URL_COUNT" -eq 0 ]; then
-          echo "::warning::No URLs found in sitemaps under ${BUILD_PATH}"
-          rm -f "$URL_LIST"
-          exit 0
-        fi
 
         echo "Found ${URL_COUNT} URLs to submit"
         echo "$SORTED_URLS"
