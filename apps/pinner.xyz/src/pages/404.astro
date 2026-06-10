@@ -1,0 +1,19 @@
+---
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="404 | Pinner" description="The page you're looking for doesn't exist." variant="content" showNewsletterFooter={false}>
+  <section class="flex min-h-[60vh] flex-col items-center justify-center px-6 py-24 text-center">
+    <h1 class="text-7xl font-bold tracking-tight text-[#2DD4A8] sm:text-8xl">404</h1>
+    <h2 class="mt-4 text-2xl font-semibold text-white/90">This pin doesn't exist</h2>
+    <p class="mt-3 max-w-md text-base text-white/60">
+      The content you're looking for isn't pinned here. Head back to the homepage to find what you need.
+    </p>
+    <a
+      href="/"
+      class="mt-8 inline-flex items-center rounded-lg bg-[#2DD4A8] px-6 py-3 text-sm font-semibold text-[#0D1D1C] transition-colors hover:bg-[#25B890]"
+    >
+      Back to Homepage
+    </a>
+  </section>
+</Layout>
