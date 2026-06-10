@@ -7,6 +7,7 @@ import { getGitLastUpdated } from "@/lib/last-updated";
 const { title } = Astro.props;
 const frontmatter = Astro.props.frontmatter || {};
 const lastUpdated = getGitLastUpdated();
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://pinner.xyz");
 
 const formattedDate = frontmatter.last_updated
   ? new Date(frontmatter.last_updated).toLocaleDateString("en-US", {
@@ -24,6 +25,7 @@ const formattedDate = frontmatter.last_updated
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonicalURL.href} />
     <title>Pinner - {title}</title>
   </head>
   <body class="bg-white antialiased">
