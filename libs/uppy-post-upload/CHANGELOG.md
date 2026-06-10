@@ -1,3 +1,11 @@
+## 0.1.2 (2026-06-10)
+
+### Fixes
+
+#### Fixes
+
+- enable retry on timeout and include POST in retry methods
+
 ## 0.1.1 (2026-05-21)
 
 ### Features

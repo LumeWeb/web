@@ -1,3 +1,11 @@
+## 0.1.13 (2026-06-10)
+
+### Features
+
+#### Features
+
+- add timeout and retries config for uploads
+
 ## 0.1.12 (2026-06-09)
 
 ### Fixes
