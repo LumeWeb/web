@@ -24,6 +24,11 @@ jobs:
         uses: LumeWeb/workflows/.github/actions/setup-all@develop
       - name: Build
         run: pnpm build:lumeweb.com
+      - name: Write IndexNow key file
+        uses: ./.github/actions/indexnow-write-key
+        with:
+          public-path: apps/lumeweb.com/dist
+          key: ${{ vars.INDEXNOW_KEY_LUMEWEB }}
       - name: Deploy to IPFS via Pinner
         id: deploy_pinner
         uses: lumeweb/pinner-deploy-action@v0
@@ -32,3 +37,9 @@ jobs:
           path: apps/lumeweb.com/dist
           domain: lumeweb.com
           remove-previous: true
+      - name: Submit URLs to IndexNow
+        uses: ./.github/actions/indexnow
+        with:
+          build-path: apps/lumeweb.com/dist
+          site: lumeweb.com
+          key: ${{ vars.INDEXNOW_KEY_LUMEWEB }}

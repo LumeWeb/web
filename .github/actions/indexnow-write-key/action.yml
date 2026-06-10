@@ -1,0 +1,20 @@
+name: "IndexNow Write Key"
+description: "Write the IndexNow verification key file into the Astro public/ folder before build"
+inputs:
+  public-path:
+    description: "Path to the build output directory (e.g. apps/lumeweb.com/dist)"
+    required: true
+  key:
+    description: "IndexNow API key to write into the verification file"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Write key file
+      shell: bash
+      env:
+        PUBLIC_PATH: ${{ inputs.public-path }}
+        KEY: ${{ inputs.key }}
+      run: |
+        printf '%s' "${KEY}" > "${PUBLIC_PATH}/${KEY}.txt"
+        echo "Wrote ${PUBLIC_PATH}/${KEY}.txt"

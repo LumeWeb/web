@@ -1,0 +1,85 @@
+name: "IndexNow Submit"
+description: "Extract URLs from Astro sitemap XML and submit to IndexNow (Bing, Yandex, etc.)"
+inputs:
+  build-path:
+    description: "Path to the Astro build output directory (containing sitemap XML files)"
+    required: true
+  site:
+    description: "Site hostname (e.g. lumeweb.com)"
+    required: true
+  key:
+    description: "IndexNow API key (min 8 hex chars, must match the key file hosted at root)"
+    required: true
+  search-engine:
+    description: "IndexNow endpoint search engine host (default: api.indexnow.org)"
+    required: false
+    default: "api.indexnow.org"
+runs:
+  using: "composite"
+  steps:
+    - name: Install yq
+      uses: mikefarah/yq@v4
+
+    - name: Extract URLs and submit to IndexNow
+      shell: bash
+      env:
+        BUILD_PATH: ${{ inputs.build-path }}
+        SITE: ${{ inputs.site }}
+        KEY: ${{ inputs.key }}
+        SEARCH_ENGINE: ${{ inputs.search-engine }}
+      run: |
+        set -euo pipefail
+
+        echo "::group::Extracting URLs from sitemaps"
+
+        URL_LIST=$(mktemp)
+
+        for xml_file in "${BUILD_PATH}"/sitemap*.xml; do
+          [ -f "$xml_file" ] || continue
+          yq '.. | select(has("loc")) | .loc' -o=props "$xml_file" >> "$URL_LIST" || true
+        done
+
+        SORTED_URLS=$(sort -u "$URL_LIST" | sed '/^[[:space:]]*$/d')
+        URL_COUNT=$(echo "$SORTED_URLS" | wc -l | tr -d ' ')
+
+        if [ "$URL_COUNT" -eq 0 ]; then
+          echo "::warning::No URLs found in sitemaps under ${BUILD_PATH}"
+          rm -f "$URL_LIST"
+          exit 0
+        fi
+
+        echo "Found ${URL_COUNT} URLs to submit"
+        echo "$SORTED_URLS"
+        echo "::endgroup::"
+
+        URL_JSON=$(echo "$SORTED_URLS" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+
+        PAYLOAD=$(jq -n \
+          --arg host "${SITE}" \
+          --arg key "${KEY}" \
+          --argjson urlList "$URL_JSON" \
+          '{host: $host, key: $key, urlList: $urlList}')
+
+        echo "::group::Submitting to IndexNow"
+        echo "POST https://${SEARCH_ENGINE}/indexnow"
+
+        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+          -X POST "https://${SEARCH_ENGINE}/indexnow" \
+          -H "Content-Type: application/json; charset=utf-8" \
+          -d "$PAYLOAD")
+
+        echo "IndexNow response: HTTP ${HTTP_CODE}"
+
+        if [ "$HTTP_CODE" -eq 200 ] || [ "$HTTP_CODE" -eq 202 ]; then
+          echo "✅ IndexNow submission successful"
+        elif [ "$HTTP_CODE" -eq 403 ]; then
+          echo "::error::IndexNow 403 — key file not found or key mismatch at https://${SITE}/${KEY}.txt"
+          exit 1
+        elif [ "$HTTP_CODE" -eq 429 ]; then
+          echo "::warning::IndexNow 429 — rate limited, try again later"
+        else
+          echo "::warning::IndexNow returned HTTP ${HTTP_CODE} (expected 200/202)"
+        fi
+        echo "::endgroup::"
+
+        rm -f "$URL_LIST"
