@@ -16,7 +16,45 @@ export default defineConfig({
     react(),
     sitemap(),
     mdx(),
-    robotsTxt(),
+    robotsTxt({
+      policy: [
+        {
+          userAgent: "*",
+          allow: "/",
+        },
+        {
+          userAgent: "GPTBot",
+          allow: "/",
+        },
+        {
+          userAgent: "ChatGPT-User",
+          allow: "/",
+        },
+        {
+          userAgent: "Google-Extended",
+          allow: "/",
+        },
+        {
+          userAgent: "PerplexityBot",
+          allow: "/",
+        },
+        {
+          userAgent: "ClaudeBot",
+          allow: "/",
+        },
+        {
+          userAgent: "Bytespider",
+          allow: "/",
+        },
+        {
+          userAgent: "Applebot-Extended",
+          allow: "/",
+        },
+      ],
+      transform(content) {
+        return `${content}\nContent-Signal: ai-train=yes, search=yes, ai-input=yes\n`;
+      },
+    }),
     mdAlternate({
       collections: [],
     }),
