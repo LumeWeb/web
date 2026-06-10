@@ -15,14 +15,14 @@
 // ky's default retry options (extracted from normalizeRetryOptions)
 export const DEFAULT_RETRY_OPTIONS = {
   limit: 2,
-  methods: ['get', 'put', 'head', 'delete', 'options', 'trace'] as const,
+  methods: ['get', 'post', 'put', 'head', 'delete', 'options', 'trace'] as const,
   statusCodes: [408, 413, 429, 500, 502, 503, 504] as const,
   afterStatusCodes: [413, 429, 503] as const,
   maxRetryAfter: Number.POSITIVE_INFINITY,
   backoffLimit: Number.POSITIVE_INFINITY,
   delay: (attemptCount: number) => 0.3 * (2 ** (attemptCount - 1)) * 1000,
   jitter: undefined,
-  retryOnTimeout: false,
+  retryOnTimeout: true,
 } as const;
 
 export interface RetryOptions {

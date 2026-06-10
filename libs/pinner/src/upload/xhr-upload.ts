@@ -13,6 +13,8 @@ export class XHRUploadHandler extends BaseUploadHandler {
       headers: {
         Authorization: `Bearer ${this.config.jwt}`,
       },
+      timeout: this.config.timeout,
+      retries: this.config.retries,
     });
   }
 

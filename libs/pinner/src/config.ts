@@ -47,14 +47,30 @@ export interface PinnerConfig {
 
   /**
    * Custom base name for Helia storage.
-   * Passed as the `base` option to both blockstore and datastore storage instances.
+   * Passed as the base option to both blockstore and datastore storage instances.
    * Only used when neither datastore nor storage are provided.
    * @default "pinner-helia-data"
    */
   datastoreName?: string;
+
+  /**
+   * Upload request timeout in milliseconds.
+   * Applied to XHR uploads. TUS does not expose a timeout option.
+   * @default 120_000
+   */
+  timeout?: number;
+
+  /**
+   * Number of retry attempts for failed uploads.
+   * Applied to XHR uploads (TUS uses retryDelays instead).
+   * @default 3
+   */
+  retries?: number;
 }
 
 export const DEFAULT_CONFIG: Partial<PinnerConfig> = {
   endpoint: DEFAULT_ENDPOINT,
   gateway: DEFAULT_GATEWAY,
+  timeout: 120_000,
+  retries: 3,
 };
