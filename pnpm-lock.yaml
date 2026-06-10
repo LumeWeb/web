@@ -565,6 +565,9 @@ importers:
       astro-md-alternate:
         specifier: catalog:websites
         version: 0.1.0(astro@6.3.2(@types/node@25.9.1)(idb-keyval@6.2.2)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.2)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0))
+      astro-robots-txt:
+        specifier: catalog:websites
+        version: 1.0.0
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1

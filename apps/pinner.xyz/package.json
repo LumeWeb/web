@@ -21,6 +21,7 @@
     "astro": "catalog:",
     "astro-llms-md": "catalog:websites",
     "astro-md-alternate": "catalog:websites",
+    "astro-robots-txt": "catalog:websites",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "lucide-react": "catalog:",
