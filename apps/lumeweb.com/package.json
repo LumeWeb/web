@@ -11,10 +11,11 @@
   "devDependencies": {
     "@4hse/astro-llms-txt": "^1.0.5",
     "@astrojs/react": "catalog:",
-    "@astrojs/sitemap": "^3.7.2",
+    "@astrojs/sitemap": "catalog:websites",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "astro": "catalog:",
+    "astro-robots-txt": "catalog:websites",
     "astro-seo": "^1.1.0",
     "qrcode": "catalog:",
     "react": "catalog:",

@@ -1,5 +1,6 @@
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
+import robotsTxt from "astro-robots-txt";
 import astroLlmsTxt from "@4hse/astro-llms-txt";
 import { defineConfig } from "astro/config";
 
@@ -10,6 +11,7 @@ export default defineConfig({
   integrations: [
     react(),
     sitemap(),
+    robotsTxt(),
     astroLlmsTxt({
       title: 'Lume Web',
       description: 'A platform, network and experience that allows you to control and own your online web.',
@@ -40,6 +42,7 @@ export default defineConfig({
   },
   outDir: "./dist",
   site: "https://lumeweb.com",
+  trailingSlash: "always",
 
   vite: {
     resolve: {
