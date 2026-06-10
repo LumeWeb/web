@@ -42,6 +42,8 @@ export function Hero({ backgroundImage, blur = "sm", opacity = "50", minHeight =
       {backgroundImage && (
         <img
           src={backgroundImage}
+          width="1920"
+          height="1080"
           className={cn(
             "-z-10 absolute w-[100em] max-w-none",
             bgPositionClasses[bgPosition],

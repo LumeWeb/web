@@ -59,9 +59,9 @@ export function Principles() {
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <div>
-                  <h3 className="font-display text-2xl font-bold text-white mb-3">
+                  <h2 className="font-display text-2xl font-bold text-white mb-3">
                     {principle.title}
-                  </h3>
+                  </h2>
                   <p className="font-body text-lg text-cloud leading-relaxed">
                     {principle.description}
                   </p>

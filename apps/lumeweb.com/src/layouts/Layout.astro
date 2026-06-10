@@ -8,13 +8,12 @@ import { SEO } from "astro-seo";
 
 export interface Props {
   title: string;
+  description?: string;
 }
 
-const { title } = Astro.props;
-const description =
-  "A platform, network and experience that allows you to control and own your online web, and access all of the possibilities Web3 has to offer. Join the open web.";
+const { title, description = "A platform, network and experience that allows you to control and own your online web, and access all of the possibilities Web3 has to offer. Join the open web." } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const imageURL = new URL(opengraph.src, Astro.url).href;
+const imageURL = new URL(opengraph.src, Astro.site).href;
 ---
 
 <!DOCTYPE html>
@@ -52,10 +51,54 @@ const imageURL = new URL(opengraph.src, Astro.url).href;
       extend={{
         link: [
           { rel: "sitemap", href: "/sitemap-index.xml" },
+          { rel: "alternate", type: "application/rss+xml", title: "Lume Web", href: "/feed.xml" },
         ],
       }}
       surpressWarnings={true}
     />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta property="og:locale" content="en_US" />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": canonicalURL.origin + "/#organization",
+          name: "Lume Web",
+          url: "https://lumeweb.com",
+          logo: {
+            "@type": "ImageObject",
+            url: new URL("/favicon.svg", canonicalURL.origin).href
+          },
+          sameAs: [
+            "https://github.com/LumeWeb",
+            "https://discord.gg/qpC8ADp3rS",
+            "https://twitter.com/lumeweb3"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": canonicalURL.origin + "/#website",
+          url: "https://lumeweb.com",
+          name: "Lume Web",
+          publisher: {
+            "@type": "Organization",
+            "@id": canonicalURL.origin + "/#organization"
+          }
+        },
+        {
+          "@type": "WebPage",
+          "@id": canonicalURL.href + "#webpage",
+          url: canonicalURL.href,
+          name: title,
+          description: description,
+          isPartOf: {
+            "@type": "WebSite",
+            "@id": canonicalURL.origin + "/#website"
+          }
+        }
+      ]
+    })} />
     <!-- Matomo -->
     <script src="/src/scripts/matomo.js"></script>
   </head>
