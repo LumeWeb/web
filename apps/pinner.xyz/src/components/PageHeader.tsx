@@ -2,8 +2,7 @@ import { TrackedButton } from "@/components/TrackedButton";
 import BgShape from "@/assets/hero-shape.svg";
 
 interface PageHeaderProps {
-	title?: string;
-	mobileTitle?: string;
+	title: string;
 	description?: string;
 	btnText?: string;
 	url?: string;
@@ -14,7 +13,6 @@ interface PageHeaderProps {
 
 const PageHeader = ({
   title,
-  mobileTitle,
   description,
   btnText,
   url,
@@ -31,12 +29,8 @@ const PageHeader = ({
           className="absolute left-0 top-0 max-w-max"
         />
         <div className="text-left md:text-center md:max-w-[810px] mx-auto relative z-10">
-          <h1 className="text-[60px] text-home-text leading-[60px] font-medium hidden md:block">
+          <h1 className="text-[38px] md:text-[60px] text-home-text leading-[48px] md:leading-[60px] font-medium">
             {title}
-          </h1>
-
-          <h1 className="text-[38px] text-home-text leading-[48px] font-medium md:hidden">
-            {mobileTitle}
           </h1>
 
           {description && (
