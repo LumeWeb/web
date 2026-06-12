@@ -2,8 +2,7 @@ import { TrackedButton } from "@/components/TrackedButton";
 import BgShape from "@/assets/hero-shape.svg";
 
 interface PageHeaderProps {
-	title?: string;
-	mobileTitle?: string;
+	title: string;
 	description?: string;
 	btnText?: string;
 	url?: string;
@@ -14,7 +13,6 @@ interface PageHeaderProps {
 
 const PageHeader = ({
   title,
-  mobileTitle,
   description,
   btnText,
   url,
