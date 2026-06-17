@@ -27,6 +27,10 @@ export class Pinner {
   private _websites: WebsitesClient;
   private _upload?: UploadMethodAndBuilder;
 
+  /**
+   * Create a new Pinner SDK instance.
+   * @param config SDK configuration object
+   */
   constructor(config: PinnerConfig) {
     this.uploadManager = new UploadManager(config);
     this._pins = new PinClient(config);
@@ -86,6 +90,8 @@ export class Pinner {
   /**
    * Upload a file and wait for completion.
    * Convenience method for simple use cases where controls aren't needed.
+   * @param file The file to upload
+   * @param options Upload configuration
    */
   async uploadAndWait(
     file: File,
@@ -110,6 +116,8 @@ export class Pinner {
 
   /**
    * Upload a directory to IPFS.
+   * @param files Array of files to upload as a directory
+   * @param options Upload configuration
    */
   async uploadDirectory(
     files: File[],
@@ -121,6 +129,8 @@ export class Pinner {
   /**
    * Upload a CAR file without preprocessing.
    * This is useful for passthrough of pre-generated CAR files.
+   * @param file CAR file or stream to upload
+   * @param options Upload configuration
    */
   async uploadCar(
     file: File | ReadableStream<Uint8Array>,
@@ -131,6 +141,8 @@ export class Pinner {
 
   /**
    * Pin existing content by CID.
+   * @param cid CID of content to pin (string or CID object)
+   * @param options Remote add options
    */
   async pinByHash(
     cid: string | CID,
@@ -142,6 +154,7 @@ export class Pinner {
 
   /**
    * List pinned content.
+   * @param options List filtering options
    */
   async listPins(options?: RemoteLsOptions): Promise<RemotePin[]> {
     const pins: RemotePin[] = [];
@@ -153,6 +166,7 @@ export class Pinner {
 
   /**
    * Get pin status.
+   * @param cid CID of the pinned content to check
    */
   async getPinStatus(cid: string | CID): Promise<RemotePin> {
     const cidObj = typeof cid === "string" ? CID.parse(cid) : cid;
@@ -161,6 +175,7 @@ export class Pinner {
 
   /**
    * Check if content is pinned.
+   * @param cid CID to check
    */
   async isPinned(cid: string | CID): Promise<boolean> {
     const cidObj = typeof cid === "string" ? CID.parse(cid) : cid;
@@ -169,6 +184,8 @@ export class Pinner {
 
   /**
    * Update pin metadata.
+   * @param cid CID of the pin
+   * @param metadata Key-value metadata to set
    */
   async setPinMetadata(
     cid: string | CID,
@@ -180,6 +197,8 @@ export class Pinner {
 
   /**
    * Remove a pin. The block may be deleted when garbage collection is run.
+   * @param cid CID to unpin
+   * @param options Abort options
    */
   async unpin(cid: string | CID, options?: AbortOptions): Promise<void> {
     const cidObj = typeof cid === "string" ? CID.parse(cid) : cid;
@@ -191,6 +210,8 @@ export class Pinner {
 
   /**
    * Remove a pin by request ID. The block may be deleted when garbage collection is run.
+   * @param requestId The request ID to remove
+   * @param options Abort options
    */
   async unpinByRequestId(requestId: string, options?: AbortOptions): Promise<void> {
     return this.pins.rmByRequestId(requestId, options);

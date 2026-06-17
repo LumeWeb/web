@@ -16,10 +16,15 @@ import { collectAsyncIterable } from "@/utils/stream";
 
 
 export interface UnstorageBlockstoreOptions {
+  /** Unstorage instance to use (bypasses driver creation) */
   storage?: Storage;
+  /** Key prefix for blockstore keys */
   prefix?: string;
+  /** Unstorage driver name or instance */
   driver?: Driver;
+  /** Base path for storage driver */
   base?: string;
+  /** Prefix for datastore keys (defaults to prefix) */
   datastorePrefix?: string;
 }
 

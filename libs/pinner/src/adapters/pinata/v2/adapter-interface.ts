@@ -234,6 +234,9 @@ export interface PinataAdapter {
 	 * Configuration
 	 */
 	config: PinataConfig;
+	/**
+	 * Update the adapter configuration
+	 */
 	updateConfig(newConfig: PinataConfig): void;
 
 	/**

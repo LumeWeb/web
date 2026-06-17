@@ -6,6 +6,9 @@ import {
 } from "@/types/mime-types";
 
 export interface NormalizedUploadInput {
+  /**
+   * List of file manager items
+   */
   data: File | ReadableStream<Uint8Array>;
   name: string;
   type: string;
@@ -13,6 +16,9 @@ export interface NormalizedUploadInput {
 }
 
 export interface UploadInputObject {
+  /**
+   * List of file manager items
+   */
   data: ReadableStream<Uint8Array>;
   name: string;
   type: string;

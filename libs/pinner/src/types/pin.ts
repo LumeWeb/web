@@ -5,6 +5,9 @@ import type { Status } from "@ipfs-shipyard/pinning-service-client";
  * Options that can be passed to abort async operations
  */
 export interface AbortOptions {
+  /**
+   * AbortSignal to cancel the operation
+   */
   signal?: AbortSignal;
 }
 
@@ -12,8 +15,17 @@ export interface AbortOptions {
  * Allows passing extra options accepted by the remote pinning service
  */
 export interface RemoteAddOptions extends AbortOptions {
+  /**
+   * Name for the pin or filter
+   */
   name?: string;
+  /**
+   * Key-value metadata to attach to the pin
+   */
   metadata?: Record<string, string>;
+  /**
+   * Origin addresses for the pinned content
+   */
   origins?: string[];
 }
 
@@ -21,9 +33,21 @@ export interface RemoteAddOptions extends AbortOptions {
  * Allows passing extra options accepted by the remote pinning service
  */
 export interface RemoteLsOptions extends AbortOptions {
+  /**
+   * Name for the pin or filter
+   */
   name?: string;
+  /**
+   * Current status (queued, pinning, pinned, failed)
+   */
   status?: Status[];
+  /**
+   * Maximum number of results per page
+   */
   limit?: number;
+  /**
+   * Pagination cursor for listing results
+   */
   cursor?: string;
 }
 
@@ -31,11 +55,29 @@ export interface RemoteLsOptions extends AbortOptions {
  * Includes extra metadata supported by the remote pinning service
  */
 export interface RemotePin {
+  /**
+   * IPFS Content Identifier
+   */
   cid: CID;
+  /**
+   * Name for the pin or filter
+   */
   name?: string;
+  /**
+   * Current status (queued, pinning, pinned, failed)
+   */
   status: Status;
+  /**
+   * ISO timestamp of creation
+   */
   created: Date;
+  /**
+   * Size in bytes
+   */
   size?: number;
+  /**
+   * Key-value metadata to attach to the pin
+   */
   metadata?: Record<string, string>;
 }
 
