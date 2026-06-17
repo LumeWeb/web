@@ -199,8 +199,17 @@ export abstract class BaseUploadHandler {
   async #addFileToUppy(
     uppy: Uppy,
     normalized: {
+      /**
+       * List of file manager items
+       */
       data: File | ReadableStream<Uint8Array>;
+      /**
+       * Name for the pin or filter
+       */
       name: string;
+      /**
+       * MIME type or content type
+       */
       type: string;
     },
     size?: number,

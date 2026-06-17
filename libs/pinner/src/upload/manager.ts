@@ -36,6 +36,9 @@ import { calculateStreamSize, streamToBlob } from "../utils/stream";
 import { EmptyFileError } from "../errors";
 import { type UploadInputObject } from "./normalize";
 
+/**
+ * Handles file uploads via XHR or TUS protocol based on file size.
+ */
 export class UploadManager {
   private config: PinnerConfig;
   private xhrHandler: XHRUploadHandler;
@@ -44,6 +47,10 @@ export class UploadManager {
   private uploadLimit: number = TUS_SIZE_THRESHOLD; // Default to 100 MB
   private limitFetched: boolean = false;
 
+  /**
+   * Create a new UploadManager.
+   * @param config SDK configuration
+   */
   constructor(config: PinnerConfig) {
     this.config = config;
     this.xhrHandler = new XHRUploadHandler(config);
@@ -55,6 +62,9 @@ export class UploadManager {
     });
   }
 
+  /**
+   * Fetch the upload size limit from the API. Falls back to 100 MB on failure.
+   */
   async fetchUploadLimit(): Promise<number> {
     if (this.limitFetched) {
       return this.uploadLimit;
@@ -74,10 +84,18 @@ export class UploadManager {
     return this.uploadLimit;
   }
 
+  /**
+   * Get the cached upload size limit (in bytes). Call fetchUploadLimit() first.
+   */
   getUploadLimit(): number {
     return this.uploadLimit;
   }
 
+  /**
+   * Upload a file or stream to IPFS.
+   * @param input File, stream, or upload object
+   * @param options Upload configuration
+   */
   async upload(
     input: UploadInput,
     options?: UploadOptions,
@@ -86,6 +104,11 @@ export class UploadManager {
     return this.#uploadInput(input, options);
   }
 
+  /**
+   * Upload a CAR file or stream directly without preprocessing.
+   * @param input CAR file or stream
+   * @param options Upload configuration
+   */
   async uploadCar(
     input: File | ReadableStream<Uint8Array>,
     options?: UploadOptions,
@@ -342,6 +365,11 @@ export class UploadManager {
     }
   }
 
+  /**
+   * Upload an array of files as an IPFS directory.
+   * @param files Files to upload
+   * @param options Upload configuration
+   */
   async uploadDirectory(
     files: File[],
     options?: UploadOptions,

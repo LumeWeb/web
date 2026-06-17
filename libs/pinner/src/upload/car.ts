@@ -18,14 +18,32 @@ import {
 import { FILE_EXTENSION_CAR, MIME_TYPE_CAR } from "@/types/mime-types";
 
 export interface CarPreprocessOptions {
+  /**
+   * Name for the pin or filter
+   */
   name?: string;
+  /**
+   * Progress callback for preprocessing
+   */
   onProgress?: (percentage: number) => void;
+  /**
+   * AbortSignal to cancel the operation
+   */
   signal?: AbortSignal;
 }
 
 export interface CarPreprocessResult {
+  /**
+   * Preprocessed CAR data as a readable stream
+   */
   carStream: ReadableStream<Uint8Array>;
+  /**
+   * Root CID of the CAR file
+   */
   rootCid: string;
+  /**
+   * Size in bytes
+   */
   size: bigint;
 }
 
@@ -95,6 +113,9 @@ async function* fileSource(
   signal?: AbortSignal,
 ): AsyncGenerator<{
   content: AsyncIterable<Uint8Array> | undefined;
+  /**
+   * File path within the pin
+   */
   path: string;
 }> {
   const seenDirs = new Set<string>();

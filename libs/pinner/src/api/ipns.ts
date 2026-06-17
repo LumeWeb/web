@@ -21,9 +21,16 @@ export interface IpnsClientOptions {
   signal?: AbortSignal;
 }
 
+/**
+ * Client for managing IPNS keys and publishing content to IPNS names.
+ */
 export class IpnsClient {
   private config: PinnerConfig;
 
+  /**
+   * Create a new IpnsClient.
+   * @param config SDK configuration
+   */
   constructor(config: PinnerConfig) {
     if (!config.jwt) {
       throw new ConfigurationError("JWT token is required");
@@ -99,18 +106,32 @@ export class IpnsClient {
     }
   }
 
+  /**
+   * List all IPNS keys.
+   * @param options Request options
+   */
   async listKeys(options?: IpnsClientOptions): Promise<IPNSKeyListResponseResponse> {
     return this.request<IPNSKeyListResponseResponse>("api/ipns/keys", {
       signal: options?.signal,
     });
   }
 
+  /**
+   * Get a specific IPNS key by ID.
+   * @param id Key ID
+   * @param options Request options
+   */
   async getKey(id: number, options?: IpnsClientOptions): Promise<IPNSKeyResponse> {
     return this.request<IPNSKeyResponse>(`api/ipns/keys/${id}`, {
       signal: options?.signal,
     });
   }
 
+  /**
+   * Create a new IPNS key.
+   * @param request Key creation parameters
+   * @param options Request options
+   */
   async createKey(
     request: IPNSKeyRequest,
     options?: IpnsClientOptions,
@@ -122,6 +143,11 @@ export class IpnsClient {
     });
   }
 
+  /**
+   * Delete an IPNS key by ID.
+   * @param id Key ID to delete
+   * @param options Request options
+   */
   async deleteKey(id: number, options?: IpnsClientOptions): Promise<void> {
     await this.request<void>(`api/ipns/keys/${id}`, {
       method: "DELETE",
@@ -129,6 +155,11 @@ export class IpnsClient {
     });
   }
 
+  /**
+   * Publish content to an IPNS name.
+   * @param request Publishing parameters
+   * @param options Request options
+   */
   async publish(
     request: IPNSPublishRequest,
     options?: IpnsClientOptions,
@@ -140,6 +171,11 @@ export class IpnsClient {
     });
   }
 
+  /**
+   * Republish (refresh) an existing IPNS record.
+   * @param id Key ID to republish
+   * @param options Request options
+   */
   async republish(
     id: number,
     options?: IpnsClientOptions,
@@ -150,6 +186,11 @@ export class IpnsClient {
     });
   }
 
+  /**
+   * Resolve an IPNS name to its content.
+   * @param name IPNS name to resolve
+   * @param options Request options
+   */
   async resolve(
     name: string,
     options?: IpnsClientOptions,

@@ -65,9 +65,16 @@ export interface WebsitesClientOptions {
   signal?: AbortSignal;
 }
 
+/**
+ * Client for managing websites hosted on IPFS with custom domains and SSL.
+ */
 export class WebsitesClient {
   private config: PinnerConfig;
 
+  /**
+   * Create a new WebsitesClient.
+   * @param config SDK configuration
+   */
   constructor(config: PinnerConfig) {
     if (!config.jwt) {
       throw new ConfigurationError("JWT token is required");
@@ -145,12 +152,21 @@ export class WebsitesClient {
     }
   }
 
+  /**
+   * List all websites.
+   * @param options Request options
+   */
   async listWebsites(options?: WebsitesClientOptions): Promise<WebsiteItemResponse> {
     return this.request<WebsiteItemResponse>("api/websites", {
       signal: options?.signal,
     });
   }
 
+  /**
+   * Create a new website.
+   * @param request Website creation parameters
+   * @param options Request options
+   */
   async createWebsite(
     request: WebsiteRequest,
     options?: WebsitesClientOptions,
@@ -162,6 +178,11 @@ export class WebsitesClient {
     });
   }
 
+  /**
+   * Get website details by ID.
+   * @param id Website ID
+   * @param options Request options
+   */
   async getWebsite(
     id: number,
     options?: WebsitesClientOptions,
@@ -171,6 +192,12 @@ export class WebsitesClient {
     });
   }
 
+  /**
+   * Update a website's configuration.
+   * @param id Website ID
+   * @param request Update parameters
+   * @param options Request options
+   */
   async updateWebsite(
     id: number,
     request: WebsiteUpdateRequest,
@@ -183,6 +210,11 @@ export class WebsitesClient {
     });
   }
 
+  /**
+   * Delete a website by ID.
+   * @param id Website ID
+   * @param options Request options
+   */
   async deleteWebsite(
     id: number,
     options?: WebsitesClientOptions,
@@ -193,6 +225,11 @@ export class WebsitesClient {
     });
   }
 
+  /**
+   * Validate a website's DNS and SSL configuration.
+   * @param id Website ID
+   * @param options Request options
+   */
   async validateWebsite(
     id: number,
     options?: WebsitesClientOptions,
@@ -206,6 +243,11 @@ export class WebsitesClient {
     );
   }
 
+  /**
+   * Check the SSL certificate status for a domain.
+   * @param domain Domain name
+   * @param options Request options
+   */
   async getSSLStatus(
     domain: string,
     options?: WebsitesClientOptions,
@@ -218,6 +260,10 @@ export class WebsitesClient {
     );
   }
 
+  /**
+   * Get the global website configuration.
+   * @param options Request options
+   */
   async getWebsiteConfig(
     options?: WebsitesClientOptions,
   ): Promise<WebsiteConfigResponse> {
@@ -226,6 +272,11 @@ export class WebsitesClient {
     });
   }
 
+  /**
+   * Watch SSL status until provisioned, failed, or timed out.
+   * @param domain Domain name
+   * @param options Watch interval and timeout
+   */
   watchSSL(
     domain: string,
     options?: WatchOptions,
