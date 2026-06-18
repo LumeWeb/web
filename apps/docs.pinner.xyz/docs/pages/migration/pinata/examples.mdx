@@ -1,0 +1,324 @@
+---
+title: Pinata Code Examples
+description: Side-by-side code comparisons for migrating from Pinata SDK to Pinner adapter and native API.
+---
+
+# Pinata Code Examples
+
+Side-by-side code for every common operation. For setup instructions, see the [Migration Guide](/migration/pinata). For the full adapter method reference, see [Adapter Reference](/migration/pinata/adapter-reference).
+
+## Pinata SDK 2.x
+
+### File Upload
+
+```typescript
+// Pinata SDK 2.x
+import { PinataSDK } from "pinata";
+
+const pinata = new PinataSDK({
+  pinataJwt: process.env.PINATA_JWT
+});
+
+const file = new File(["Hello!"], "hello.txt", { type: "text/plain" });
+const upload = await pinata.upload.public.file(file);
+
+console.log("CID:", upload.cid);
+console.log("Name:", upload.name);
+```
+
+```typescript
+// Pinner with Adapter
+import { Pinner, pinataAdapter } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN });
+const adapter = pinataAdapter(pinner);
+
+const file = new File(["Hello!"], "hello.txt", { type: "text/plain" });
+const upload = await adapter.upload.public.file(file)
+  .name("hello.txt")
+  .execute();
+
+console.log("CID:", upload.cid);
+console.log("Name:", upload.name);
+```
+
+### JSON Upload
+
+```typescript
+// Pinata SDK 2.x
+const data = { name: "test", value: 123 };
+const upload = await pinata.upload.public.json(data);
+```
+
+```typescript
+// Pinner with Adapter
+const data = { name: "test", value: 123 };
+const upload = await adapter.upload.public.json(data)
+  .name("data.json")
+  .execute();
+```
+
+### Base64 Upload
+
+```typescript
+// Pinata SDK 2.x
+const base64String = "SGVsbG8gV29ybGQh";
+const upload = await pinata.upload.public.base64(base64String);
+```
+
+```typescript
+// Pinner with Adapter
+const base64String = "SGVsbG8gV29ybGQh";
+const upload = await adapter.upload.public.base64(base64String)
+  .name("file.txt")
+  .execute();
+```
+
+### Pin by CID
+
+```typescript
+// Pinata SDK 2.x
+const pin = await pinata.upload.public.cid("QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco");
+```
+
+```typescript
+// Pinner with Adapter
+const pin = await adapter.upload.public.cid("QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco")
+  .execute();
+```
+
+### List Files
+
+```typescript
+// Pinata SDK 2.x
+const files = await pinata.files.public.list()
+  .limit(10)
+  .all();
+
+for (const file of files) {
+  console.log(file.name, file.cid);
+}
+```
+
+```typescript
+// Pinner with Adapter
+const files = await adapter.files.public.list()
+  .limit(10)
+  .all();
+
+for (const file of files) {
+  console.log(file.name, file.cid);
+}
+```
+
+### Directory Upload
+
+```typescript
+// Pinata SDK 2.x
+const files = [
+  new File(["content"], "file1.txt"),
+  new File(["content"], "file2.txt"),
+];
+const upload = await pinata.upload.public.fileArray(files);
+```
+
+```typescript
+// Pinner with Adapter
+const files = [
+  new File(["content"], "file1.txt"),
+  new File(["content"], "file2.txt"),
+];
+const upload = await adapter.upload.public.fileArray(files)
+  .name("my-directory")
+  .execute();
+```
+
+### Delete Files
+
+```typescript
+// Pinata SDK 2.x
+await pinata.files.public.delete(["QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco"]);
+```
+
+```typescript
+// Pinner with Adapter
+await adapter.files.public.delete(["QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco"]);
+```
+
+## Pinata SDK 1.x Legacy
+
+### File Upload
+
+```typescript
+// Pinata SDK 1.x
+const file = new File(["Hello!"], "hello.txt", { type: "text/plain" });
+const upload = await pinata.pinFileToIPFS(file);
+
+console.log("IpfsHash:", upload.IpfsHash);
+```
+
+```typescript
+// Pinner with Legacy Adapter
+import { Pinner, pinataLegacyAdapter } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN });
+const adapter = pinataLegacyAdapter(pinner);
+
+const file = new File(["Hello!"], "hello.txt", { type: "text/plain" });
+const upload = await adapter.pinFileToIPFS(file);
+
+console.log("CID:", upload.cid);
+```
+
+### JSON Upload
+
+```typescript
+// Pinata SDK 1.x
+const data = { name: "test", value: 123 };
+const upload = await pinata.pinJSONToIPFS(data);
+```
+
+```typescript
+// Pinner with Legacy Adapter
+const data = { name: "test", value: 123 };
+const upload = await adapter.pinJSONToIPFS(data);
+```
+
+### Pin by CID
+
+```typescript
+// Pinata SDK 1.x
+const pin = await pinata.pinByHash("QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco");
+```
+
+```typescript
+// Pinner with Legacy Adapter
+const pin = await adapter.pinByHash("QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco");
+```
+
+### List Pins
+
+```typescript
+// Pinata SDK 1.x
+const pins = await pinata.pinList({ limit: 10 });
+
+for (const pin of pins.files) {
+  console.log(pin.ipfs_pin_hash);
+}
+```
+
+```typescript
+// Pinner with Legacy Adapter
+const pins = await adapter.pinList({ limit: 10 });
+
+for (const pin of pins.files) {
+  console.log(pin.cid);
+}
+```
+
+### Unpin
+
+```typescript
+// Pinata SDK 1.x
+await pinata.unpin("QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco");
+```
+
+```typescript
+// Pinner with Legacy Adapter
+await adapter.unpin("QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco");
+```
+
+### Update Metadata
+
+```typescript
+// Pinata SDK 1.x
+await pinata.hashMetadata("QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco", {
+  project: "my-app",
+  version: "2.0"
+});
+```
+
+```typescript
+// Pinner with Legacy Adapter
+await adapter.hashMetadata("QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco", {
+  project: "my-app",
+  version: "2.0"
+});
+```
+
+## Native Pinner API
+
+Skip the adapter and use Pinner directly for the best experience.
+
+### File Upload
+
+```typescript
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN });
+
+const file = new File(["Hello!"], "hello.txt", { type: "text/plain" });
+const result = await pinner.uploadAndWait(file);
+
+console.log("CID:", result.cid);
+```
+
+### Upload with Progress
+
+```typescript
+const operation = await pinner.upload(file, {
+  name: "hello.txt",
+  keyvalues: { project: "demo" },
+  onProgress: (progress) => {
+    console.log(`Progress: ${progress.percentage.toFixed(1)}%`);
+    console.log(`Uploaded: ${progress.bytesUploaded} / ${progress.bytesTotal} bytes`);
+  }
+});
+
+const result = await operation.result;
+console.log("CID:", result.cid);
+console.log("Final progress:", operation.progress.percentage);
+```
+
+### Pin Management
+
+```typescript
+// Pin by CID
+for await (const cid of pinner.pinByHash("QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco")) {
+  console.log("Pinned:", cid.toString());
+}
+
+// List pins
+const pins = await pinner.listPins();
+for (const pin of pins) {
+  console.log(pin.cid.toString(), pin.name);
+}
+
+// Unpin
+await pinner.unpin("QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco");
+```
+
+## Error Handling
+
+```typescript
+// Pinata SDK
+try {
+  const upload = await pinata.upload.public.file(file);
+} catch (error) {
+  console.error("Pinata error:", error.message);
+}
+```
+
+```typescript
+// Pinner SDK
+import { PinnerError } from "@lumeweb/pinner";
+
+try {
+  const result = await pinner.upload(file);
+} catch (error) {
+  if (error instanceof PinnerError) {
+    console.error("Code:", error.code);
+    console.error("Message:", error.message);
+  }
+}
+```

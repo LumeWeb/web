@@ -1,0 +1,191 @@
+---
+title: Troubleshoot Uploads
+description: Fix common authentication, connection, file, pinning, and configuration issues
+---
+
+# Troubleshoot Uploads
+
+Fix common problems when uploading or pinning content. If you don't see your issue here, run `pinner doctor` to gather diagnostic information about your CLI version, configuration, and authentication status.
+
+For specific error codes, see [Error Reference](/ipfs/reference/errors).
+
+## Auth issues
+
+### "Not authenticated"
+
+No auth token is configured. Authenticate with a JWT token:
+
+```bash
+pinner auth YOUR_JWT_TOKEN
+```
+
+Or log in interactively (prompts for email, password, and 2FA if enabled):
+
+```bash
+pinner auth --email your@email.com
+```
+
+Or fully interactive:
+
+```bash
+pinner auth
+```
+
+### "Authentication expired or invalid"
+
+Your session token has expired or is invalid. Re-authenticate:
+
+```bash
+pinner auth --email your@email.com
+```
+
+Or set a token directly:
+
+```bash
+pinner auth YOUR_JWT_TOKEN
+```
+
+### Email confirmation not received
+
+After registration you must confirm your email. If the verification email doesn't arrive:
+
+1. Check your spam folder
+2. Verify the email address is correct
+3. Run the confirmation manually with the token from the email:
+
+```bash
+pinner confirm-email --email your@email.com --token VERIFICATION_TOKEN
+```
+
+## Connection errors
+
+### "Connection failed" or "Network timeout"
+
+1. Check your internet connection
+2. Verify the API endpoint is reachable:
+
+```bash
+curl -I https://pinner.xyz
+```
+
+3. Check firewall or proxy settings
+4. Try with verbose output to see where it fails:
+
+```bash
+pinner --verbose upload myfile.txt
+```
+
+## File errors
+
+### "File not found"
+
+Verify the file path is correct. Use absolute paths if relative paths fail:
+
+```bash
+pinner upload /absolute/path/to/file.txt
+```
+
+### "Permission denied"
+
+Check file ownership and permissions:
+
+```bash
+ls -la /path/to/file
+chmod 644 /path/to/file
+```
+
+### "Cannot upload empty file"
+
+Empty files (0 bytes) are rejected. Verify the file has content:
+
+```bash
+ls -la /path/to/file
+```
+
+### Upload interrupted
+
+If an upload is interrupted (Ctrl+C or network drop), retry the same command. The CLI uses the TUS resumable upload protocol for files larger than the upload limit (fetched from your account, default 100 MB), and XHR upload for smaller files:
+
+```bash
+pinner upload file.dat
+```
+
+By default, the command waits for pinning to complete. Use `--no-wait` to return immediately after the upload finishes:
+
+```bash
+pinner upload file.dat --no-wait
+```
+
+## Pinning errors
+
+### "Pin not found"
+
+The CID is not pinned in your account. Verify:
+
+```bash
+pinner list
+```
+
+### "Pinning failed"
+
+1. Verify the CID exists on IPFS
+2. Check your network connection
+3. Check the pin status:
+
+```bash
+pinner status bafybeig...
+```
+
+4. Try again later; transient issues do happen
+
+### Invalid CID format
+
+CIDs must start with a valid multibase prefix. Common CID formats include:
+- `Qm...`: CIDv0 (Base58BTC, SHA-2 256, 32 bytes)
+- `bafy...`: CIDv1 (DAG-PB, SHA-2 256, mutable-length multihash)
+- `bafk...`: CIDv1 (raw or single-block, SHA-2 256)
+
+CIDs are case-sensitive.
+
+## Config issues
+
+### Config file location
+
+| OS | Path |
+|----|------|
+| Linux / macOS | `~/.config/pinner/config.yaml` |
+| Windows | `%APPDATA%\pinner\config.yaml` |
+
+### "Configuration not found"
+
+Run setup to create the config file:
+
+```bash
+pinner setup
+```
+
+### "Configuration invalid"
+
+Check your current config:
+
+```bash
+pinner config
+```
+
+Inspect a specific key:
+
+```bash
+pinner config get base_endpoint
+```
+
+Reset if needed:
+
+```bash
+pinner setup --reset
+```
+
+## Still stuck?
+
+1. Run `pinner doctor`; it reports CLI version, OS, config location and status, endpoint, memory limit, retry count, and authentication status
+2. Search [existing issues](https://github.com/lumeweb/pinner-cli/issues)
+3. Open a new issue with the error message, steps to reproduce, and `pinner doctor` output

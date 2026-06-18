@@ -1,0 +1,150 @@
+---
+title: Custom Domains
+description: Set up a custom domain for your website hosted on Pinner
+---
+
+# Custom Domains
+
+By default, your site is available at a `*.pinner.xyz` subdomain. To use your own domain, you need to prove ownership and configure DNS.
+
+## Subdomain vs custom domain
+
+| Type | Example | Setup |
+|------|---------|-------|
+| Subdomain | `mysite.pinner.xyz` | Automatic; no DNS needed |
+| Custom domain | `mysite.example.com` | Requires DNS validation and records |
+
+## Step 1: Create the website with your domain
+
+:::code-group
+```typescript [SDK]
+const site = await pinner.websites.createWebsite({
+  domain: "mysite.example.com",
+  target_type: "ipfs",
+  target_hash: "QmYourCID",
+});
+```
+
+```bash [CLI]
+pinner website deploy ./dist --domain mysite.example.com
+```
+:::
+
+Pinner assigns a `validation_token` to the website. You'll need this in the next step.
+
+:::info
+`dns_hosting_enabled` defaults to `true` for new websites. When enabled, Pinner automatically creates a DNS zone and the required DNS records for you. If you prefer to manage DNS yourself at your registrar, set `dns_hosting_enabled: false`.
+:::
+
+## Step 2: Add DNS records
+
+At your domain registrar, create the following DNS records:
+
+| Record | Name | Value |
+|--------|------|-------|
+| TXT | `_dnslink` | `dnslink=/ipfs/QmYourCID` |
+| TXT | `<validation_record_host>` | `<validation_token>` |
+
+**DNSLink record**: The `_dnslink` TXT record tells IPFS gateways how to resolve your domain. Set the value to a `dnslink=` path matching your target type and hash:
+
+- IPFS target: `dnslink=/ipfs/QmYourCID`
+- IPNS target: `dnslink=/ipns/<peerID>`
+
+**Validation record**: The `validation_record_host` field on the website tells you the exact hostname for the verification TXT record (e.g. `pinner-verify.mysite.example.com`). The `validation_token` field contains the full TXT record value (e.g. `pinner-verify=abc123def456`).
+
+:::info
+The exact verification TXT record hostname and value depend on the server configuration. Always use the `validation_record_host` and `validation_token` from the website response; don't hardcode the prefix.
+:::
+
+## Step 3: Route traffic to the gateway
+
+Add a DNS record to point your domain at the Pinner gateway:
+
+| Record | Name | Value |
+|--------|------|-------|
+| ALIAS | `@` (root) | `<gateway_domain>` |
+
+For root domains (`example.com`), use an ALIAS record pointing to the gateway domain. For subdomains, a CNAME record also works.
+
+Use `getWebsiteConfig()` to discover the gateway domain:
+
+```typescript
+const config = await pinner.websites.getWebsiteConfig();
+console.log("Gateway domain:", config.gateway_domain);
+console.log("Nameservers:", config.nameservers);
+```
+
+## Step 4: Trigger validation
+
+:::code-group
+```typescript [SDK]
+const result = await pinner.websites.validateWebsite(site.id);
+if (result.valid) {
+  console.log("Domain validated!");
+} else {
+  console.log("Not yet valid:", result.reason, result.message);
+}
+```
+
+```bash [CLI]
+pinner websites validate <website-id>
+```
+:::
+
+DNS propagation can take a few minutes. If validation fails with `dns_missing` or `dns_mismatch`, wait a few minutes and retry.
+
+Validation checks both the DNSLink record and the verification token record. A `dns_mismatch` reason means the DNSLink record was found but doesn't match the expected target. A `token_missing` reason means the verification TXT record was not found.
+
+## Step 5: Wait for SSL
+
+SSL provisions automatically after DNS is in place. See [SSL](/hosting/concepts/ssl) for details on checking status.
+
+## Use Pinner-managed DNS
+
+If you don't want to manage DNS at your registrar, enable Pinner's DNS hosting. This delegates DNS management to Pinner entirely. DNS hosting is enabled by default for new websites.
+
+### Disable during website creation
+
+```typescript
+const site = await pinner.websites.createWebsite({
+  domain: "mysite.example.com",
+  target_type: "ipfs",
+  target_hash: "QmYourCID",
+  dns_hosting_enabled: false,
+});
+```
+
+### Update on an existing website
+
+```typescript
+await pinner.websites.updateWebsite(site.id, {
+  dns_hosting_enabled: false,
+});
+```
+
+When DNS hosting is enabled, Pinner creates a DNS zone for your domain and handles the DNSLink, validation, and ALIAS records for you. Update your domain registrar's nameservers to point to Pinner's nameservers (shown in `getWebsiteConfig()`).
+
+See [Manage DNS Zones](/dns/how-to/manage-zones) and [Manage DNS Records](/dns/how-to/manage-records) for the DNS-specific commands.
+
+## Troubleshooting
+
+### Validation keeps failing with `dns_missing`
+
+DNS propagation can take up to 48 hours (usually a few minutes). Verify the DNSLink and verification TXT records exist:
+
+```bash
+dig TXT _dnslink.mysite.example.com
+dig TXT <validation_record_host>
+```
+
+### Validation fails with `dns_mismatch`
+
+The DNSLink TXT record was found but doesn't match the expected target. Check that the `_dnslink` TXT record value is correct; it should be `dnslink=/ipfs/<CID>` or `dnslink=/ipns/<peerID>`.
+
+### Validation fails with `token_missing`
+
+The verification TXT record was not found at the expected hostname. Check that you added the TXT record at `<validation_record_host>` with the value from `validation_token`.
+
+### Validation fails with `token_expired`
+
+The validation token has expired. Re-create the website or update it to get a fresh token.

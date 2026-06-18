@@ -1,0 +1,306 @@
+---
+title: "CLI: Setup"
+description: "pinner CLI commands for setup."
+---
+
+> **This page is auto-generated.** Do not edit directly.
+> To update, modify the CLI source in [pinner-cli](https://github.com/LumeWeb/pinner-cli) and run `pnpm generate:clil`.
+
+## `setup`
+
+```bash
+pinner setup [flags]
+```
+Run the interactive setup wizard to configure your Pinner.xyz CLI environment. This wizard will guide you through authentication and configuration.
+
+If you've already run setup, you can skip steps or reconfigure.
+
+```bash
+
+pinner setup
+
+pinner setup --skip-auth
+
+pinner setup --skip-config
+
+pinner setup --reset
+
+```
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--skip-auth` |  | Skip authentication step |
+| `--skip-config` |  | Skip configuration step |
+| `--reset` |  | Reset configuration and start fresh |
+| `--non-interactive` |  | Run in non-interactive mode (skip wizard) |
+
+## `auth`
+
+```bash
+pinner auth [token] [flags]
+```
+Authenticate with the Pinner.xyz service.
+
+**Ways to authenticate:**
+**1. Provide an auth token directly:** pinner auth `<token>`
+**2. Interactive login:** pinner auth (prompts for all inputs)
+**3. Semi-interactive:** pinner auth --email user@example.com (prompts for password and OTP if needed)
+**4. Non-interactive:** PINNER_EMAIL=x PINNER_PASSWORD=*** pinner auth
+**5. Non-interactive with 2FA:** PINNER_EMAIL=x PINNER_PASSWORD=*** PINNER_OTP=123456 pinner auth
+**6. Secure non-interactive:** echo "pass" | pinner auth --email user@example.com
+
+```bash
+
+pinner auth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+pinner auth --email user@example.com
+
+pinner auth --email user@example.com --password mypass --otp-code 123456
+
+PINNER_EMAIL=user@example.com PINNER_PASSWORD=mypass pinner auth
+
+echo "mypass" | pinner auth --email user@example.com --key-name "my-laptop"
+
+```
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--email` |  | Email address for login [env: `PINNER_EMAIL`] |
+| `--password` |  | Password for login (WARNING: insecure, prefer stdin or env var) [env: `PINNER_PASSWORD`] |
+| `--otp-code` |  | OTP code for 2FA (6 digits) [env: `PINNER_OTP`] |
+| `--key-name` |  | Custom name for created API key |
+| `--no-create-key` |  | Skip API key creation, save token directly |
+| `--force` |  | Overwrite existing auth token without confirmation |
+
+**Subcommands:**
+
+| Subcommand | Description |
+|------------|-------------|
+| `status` | Check if you are currently authenticated with Pinner.xyz. |
+
+### `status`
+
+```bash
+pinner auth status
+```
+Check if you are currently authenticated with Pinner.xyz.
+
+This command verifies that your stored auth token is valid by making a request to the Pinner.xyz API.
+
+```bash
+
+pinner auth status
+
+pinner auth status --json
+
+pinner auth status --verbose
+
+```
+
+## `register`
+
+```bash
+pinner register [flags]
+```
+Register a new user account on Pinner.xyz.
+
+After registration, you will need to confirm your email address using the 'confirm-email' command before you can authenticate.
+
+```bash
+
+# Interactive mode (prompts for all required fields)
+
+pinner register
+
+# Non-interactive with flags
+
+pinner register --email user@example.com --first-name John --last-name Doe
+
+# Mix: provide email, prompt for other fields
+
+pinner register --email user@example.com
+
+```
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--email` |  | Email address |
+| `--first-name` |  | First name |
+| `--last-name` |  | Last name |
+| `--password` |  | Password (if not provided, you will be prompted) |
+
+## `confirm-email`
+
+```bash
+pinner confirm-email [flags]
+```
+Confirm your email address using the verification token sent to your email.
+
+After registering with 'pinner register', you will receive an email with a verification token. Use this command to confirm your email address.
+
+```bash
+
+pinner confirm-email --email user@example.com --token abc123def456
+
+pinner confirm-email -e user@example.com -t abc123def456
+
+After confirmation, authenticate with:
+
+pinner auth --email user@example.com
+
+```
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--email` |  | Email address **(required)** |
+| `--token` |  | Verification token from email **(required)** |
+
+## `account`
+
+```bash
+pinner account
+```
+Manage your Pinner.xyz account settings including 2FA configuration.
+
+```bash
+
+pinner account otp enable
+
+pinner account otp enable --otp 123456
+
+pinner account otp disable
+
+pinner account otp disable --password mypassword
+
+```
+
+**Subcommands:**
+
+| Subcommand | Description |
+|------------|-------------|
+| `otp` | Enable or disable two-factor authentication (2FA) for your account. |
+| `api-keys` | Manage API keys for your Pinner.xyz account. |
+
+### `otp`
+
+```bash
+pinner account otp
+```
+Enable or disable two-factor authentication (2FA) for your account.
+
+When enabling 2FA, you will receive a secret key that must be added to your authenticator app (e.g., Google Authenticator, Authy). You will then need to verify the setup with a code from your app
+
+**Subcommands:**
+
+| Subcommand | Description |
+|------------|-------------|
+| `enable` | Enable 2FA for your account. This will: |
+| `disable` | Disable 2FA for your account. This will: |
+
+#### `enable`
+
+```bash
+pinner account otp enable [flags]
+```
+**Enable 2FA for your account. This will:**
+
+1. Generate a new OTP secret
+
+2. Display a QR code/secret key for your authenticator app
+
+3. Prompt you to verify the setup with a code from your app
+
+After successful verification, 2FA will be required for all future logins
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--otp` |  | OTP code to verify setup (for non-interactive mode) |
+
+#### `disable`
+
+```bash
+pinner account otp disable [flags]
+```
+**Disable 2FA for your account. This will:**
+
+1. Prompt for your password for verification
+
+2. Remove 2FA requirement from your account
+
+**WARNING:** This reduces your account security. Consider re-enabling 2FA
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--password` |  | Password for verification (WARNING: insecure, prefer stdin or prompt) [env: `PINNER_PASSWORD`] |
+
+### `api-keys`
+
+```bash
+pinner account api-keys
+```
+Manage API keys for your Pinner.xyz account.
+
+API keys are used to authenticate with the Pinner.xyz service without exposing your login credentials. Each key has a unique token that can be used with --auth-token or the PINNER_AUTH_TOKEN environment variable.
+
+```bash
+
+pinner account api-keys list
+
+pinner account api-keys list --search my-key
+
+pinner account api-keys create my-key
+
+pinner account api-keys delete my-key
+
+pinner account api-keys delete 00000000-0000-0000-0000-000000000001
+
+```
+
+**Subcommands:**
+
+| Subcommand | Description |
+|------------|-------------|
+| `list` | List all API keys for your account. |
+| `create` | Create a new API key with the given name. |
+| `delete` | Delete an API key by its UUID or name. |
+
+#### `list`
+
+```bash
+pinner account api-keys list [flags]
+```
+List all API keys for your account.
+
+Use --search to filter keys by name
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--search` |  | Search API keys by name |
+
+#### `create`
+
+```bash
+pinner account api-keys create
+```
+Create a new API key with the given name.
+
+The API key token will be displayed once. Save it securely — it cannot be retrieved later.
+
+**This key can be used with:**
+
+pinner auth --auth-token `<token>`
+
+PINNER_AUTH_TOKEN=`<token>` pinner `<command>`
+
+#### `delete`
+
+```bash
+pinner account api-keys delete [flags]
+```
+Delete an API key by its UUID or name.
+
+If the key being deleted is the one currently used for authentication, the command will be blocked unless --force is used. After deleting your current key, you must re-authenticate with 'pinner auth'
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--force` |  | Force deletion of the API key currently used for authentication |

@@ -1,0 +1,30 @@
+---
+title: Quotas & Limits
+description: Upload, download, and storage quotas for your account
+---
+
+# Quotas & Limits
+
+Every Pinner account has quotas that govern how much you can upload, download, and store. These keep the shared infrastructure fair for everyone.
+
+## Quota types
+
+| Type | What it limits |
+|------|---------------|
+| **Upload** | Bytes you can upload per month |
+| **Download** | Bytes you can download per month |
+| **Storage** | Total bytes of pinned content you can store |
+
+Limits are evaluated over a monthly window by default. Check the dashboard or API for your current plan's exact limits and usage.
+
+## When you hit a limit
+
+If an upload would push you past your storage or upload quota, the request is rejected with an error like `storage quota exceeded` or `upload quota exceeded`. The response includes your current usage, the requested bytes, and your limit so you can see how much headroom remains.
+
+## Checking your usage
+
+Use the dashboard to see your current usage and remaining quota. You can also query the API for per-type byte counts and effective limits.
+
+## Need more?
+
+Email [support@pinner.xyz](mailto:support@pinner.xyz) to discuss increased allowances or custom plans.

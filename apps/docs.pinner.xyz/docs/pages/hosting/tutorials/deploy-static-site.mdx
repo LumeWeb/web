@@ -1,0 +1,176 @@
+---
+title: Deploy a Static Site
+description: Walk through deploying a Vite static site to IPFS with a custom domain
+---
+
+# Deploy a Static Site
+
+This tutorial walks you through the full process: build a static site, deploy it to IPFS, and make it accessible at a custom domain. By the end, you'll understand each step of the deployment pipeline.
+
+## Prerequisites
+
+- A Pinner account with an [API key](/account/api-tokens)
+- The [Pinner CLI installed and authenticated](/ipfs/cli/auth)
+- A static site to deploy (we'll use Vite as an example)
+- A domain you control (for custom domain setup)
+
+## Step 1: Build your site
+
+Build your project the way you normally would. For a Vite project:
+
+```bash
+npm run build
+```
+
+This outputs static files to `./dist`. Any static site generator works: Next.js export, Astro, Hugo, plain HTML. As long as the output is a directory of static files, Pinner can host it.
+
+## Step 2: Upload with the CLI
+
+```bash
+pinner upload ./dist
+```
+
+This uploads the directory to IPFS and prints the CID. Note the CID from the output; you'll use it in the next step.
+
+## Step 3: Create the website
+
+Create a website record linking your domain to the uploaded content:
+
+```bash
+pinner websites create mysite.example.com --cid <CID>
+```
+
+:::info
+The CLI provides an interactive wizard that guides you through the full process:
+
+```bash
+pinner websites wizard
+```
+
+The wizard handles authentication, content source, target type, domain, DNS mode, and validation in one guided flow.
+:::
+
+## Step 4: (SDK) Upload and create the website
+
+If you're using the SDK, use `uploadDirectory` for directory uploads and handle the website creation separately:
+
+```typescript
+import { Pinner } from "@lumeweb/pinner";
+import fs from "fs";
+import path from "path";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+// Upload the build output as a directory
+const files: File[] = [];
+for (const entry of fs.readdirSync("./dist", { recursive: true })) {
+  const fullPath = path.join("./dist", entry.toString());
+  if (!fs.statSync(fullPath).isFile()) continue;
+  const buffer = fs.readFileSync(fullPath);
+  files.push(new File([buffer], entry.toString()));
+}
+const operation = await pinner.uploadDirectory(files);
+const result = await operation.result;
+console.log("CID:", result.cid);
+
+// Create the website
+const site = await pinner.websites.createWebsite({
+  domain: "mysite.example.com",
+  target_type: "ipfs",
+  target_hash: result.cid,
+});
+console.log("Website created:", site.id, site.domain);
+```
+
+## Step 5: Set up your custom domain
+
+If you used a custom domain (not a `*.pinner.xyz` subdomain), you need to prove you own it.
+
+The website response includes a `validation_token` field. Add a DNS TXT record at your domain registrar:
+
+| Record | Name | Value |
+|--------|------|-------|
+| TXT | (shown in website details) | (the `validation_token` value, e.g. `pinner-verify=<token>`) |
+
+The exact name for the TXT record is shown in your website details. You also need a DNSLink TXT record pointing to your content:
+
+| Record | Name | Value |
+|--------|------|-------|
+| TXT | `_dnslink.<your-domain>` | `dnslink=/ipfs/<CID>` |
+
+Then trigger validation:
+
+```typescript
+const validation = await pinner.websites.validateWebsite(site.id);
+console.log("Valid:", validation.valid, validation.message);
+```
+
+Or with the CLI:
+
+```bash
+pinner websites validate mysite.example.com
+```
+
+## Step 6: Add a CNAME record
+
+Point your domain to Pinner's hosting infrastructure. The gateway domain is shown in your website details or configuration:
+
+```bash
+pinner websites config
+```
+
+Use the gateway domain shown for your CNAME record:
+
+| Record | Name | Value |
+|--------|------|-------|
+| CNAME | `www` | (the gateway domain from config) |
+
+For root domains, delegate to Pinner's nameservers using the `--dns-hosting` flag when creating the website, or use an A record if your DNS provider supports it.
+
+## Step 7: Wait for SSL
+
+Pinner provisions an SSL certificate automatically after your DNS records are in place. No configuration on your part; just wait.
+
+Check the status with the CLI:
+
+```bash
+pinner websites ssl status mysite.example.com
+```
+
+Or with the SDK:
+
+```typescript
+const ssl = await pinner.websites.getSSLStatus("mysite.example.com");
+console.log("SSL status:", ssl.status);
+```
+
+SSL moves through these states: `pending` → `issuing` → `ready`. If something goes wrong, it lands in `failed`.
+
+You can also watch for SSL readiness:
+
+```typescript
+const watcher = pinner.websites.watchSSL("mysite.example.com", {
+  interval: 5000,   // check every 5 seconds
+  timeout: 300000,  // give up after 5 minutes
+});
+
+await watcher.start({
+  onReady: (status) => console.log("SSL ready!", status),
+  onError: (error) => console.error("SSL error:", error.message),
+  onStatus: (status) => console.log("SSL progress:", status.status),
+});
+```
+
+## Step 8: Visit your site
+
+Once DNS propagates and SSL is ready, your site is live at `https://mysite.example.com`.
+
+## Recap
+
+You built a static site, uploaded it to IPFS, created a website record, proved domain ownership with DNS validation records, pointed DNS at Pinner, and let SSL provision automatically. That's the full cycle.
+
+## Next steps
+
+- [Update your site with a new deploy](/hosting/how-to/manage-websites)
+- [Use IPNS for updatable content addresses](/hosting/concepts/ipns)
+- [Automate deploys with GitHub Actions](/hosting/how-to/deploy-github-actions)

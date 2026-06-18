@@ -1,0 +1,210 @@
+---
+title: CLI Auth
+description: Authenticate, register, and manage API keys from the command line
+---
+
+# CLI Auth
+
+The CLI handles API key creation automatically. You don't need to visit the dashboard to generate keys; `pinner auth` creates them for you.
+
+## Log in
+
+### Interactive (recommended for local development)
+
+```bash
+pinner auth
+```
+
+Prompts for email and password. The CLI authenticates, generates an API key, and stores it locally.
+
+### With email, prompt for password
+
+```bash
+pinner auth --email you@example.com
+# or with the short flag
+pinner auth -e you@example.com
+```
+
+### Provide an existing token (CI/CD)
+
+If you already have a JWT auth token (for example, from another machine), pass it directly:
+
+```bash
+pinner auth YOUR_JWT_TOKEN
+```
+
+The CLI stores it locally for future use. This is the non-interactive path; use it for CI/CD pipelines and scripts.
+
+### Non-interactive (CI / scripts)
+
+```bash
+# Email and password from flags
+pinner auth --email you@example.com --password yourpassword
+
+# Email and password from environment variables
+PINNER_EMAIL=you@example.com PINNER_PASSWORD=yourpassword pinner auth
+
+# With 2FA
+pinner auth --email you@example.com --password yourpassword --otp-code 123456
+
+# With 2FA from environment variables
+PINNER_EMAIL=you@example.com PINNER_PASSWORD=yourpassword PINNER_OTP=123456 pinner auth
+
+# Password via stdin (more secure than --password flag)
+echo "yourpassword" | pinner auth --email you@example.com
+```
+
+### Named keys
+
+Give your key a name to track which machine or environment it belongs to:
+
+```bash
+pinner auth --email you@example.com --key-name "ci-pipeline"
+# or with the short flag
+pinner auth -e you@example.com -k "ci-pipeline"
+```
+
+If not specified, keys are named `cli-generated` by default.
+
+### Skip API key creation
+
+To save the login token directly without creating an API key:
+
+```bash
+pinner auth --no-create-key
+```
+
+### Overwrite existing credentials
+
+To overwrite an existing auth token without a confirmation prompt:
+
+```bash
+pinner auth --force
+```
+
+## Register
+
+Create a new Pinner account from the CLI:
+
+```bash
+# Interactive: prompts for all fields
+pinner register
+
+# Non-interactive
+pinner register --email you@example.com --first-name Jane --last-name Doe
+
+# Provide password non-interactively
+pinner register --email you@example.com --first-name Jane --last-name Doe --password yourpassword
+```
+
+The `register` command also supports short flags: `-e` (email), `-f` (first-name), `-l` (last-name), `-p` (password).
+
+After registering, confirm your email:
+
+```bash
+pinner confirm-email --email you@example.com --token abc123def456
+# or with short flags
+pinner confirm-email -e you@example.com -t abc123def456
+```
+
+## Check authentication status
+
+```bash
+pinner auth status
+```
+
+Verifies that your stored auth token is valid by making a request to the Pinner.xyz API.
+
+## Key management
+
+The CLI creates API keys automatically when you run `pinner auth`. You can also manage keys directly from the command line.
+
+### List keys
+
+```bash
+pinner account api-keys list
+
+# Filter by name
+pinner account api-keys list --search my-key
+```
+
+### Create a key
+
+```bash
+pinner account api-keys create my-key-name
+```
+
+The key token is displayed once; save it securely, as it cannot be retrieved later.
+
+### Delete a key
+
+```bash
+pinner account api-keys delete my-key-name
+# or by UUID
+pinner account api-keys delete 00000000-0000-0000-0000-000000000001
+
+# Force deletion of the currently active key
+pinner account api-keys delete my-key-name --force
+```
+
+If you delete the key currently used for authentication, you must re-authenticate with `pinner auth`.
+
+### Rotate a key
+
+```bash
+# 1. Create a new named key
+pinner auth --email you@example.com --key-name "rotation-$(date +%Y%m%d)"
+
+# 2. Update your environment variables and deployments with the new key
+
+# 3. Delete the old key
+pinner account api-keys delete old-key-name
+```
+
+## 2FA / OTP
+
+Secure your account with one-time passwords:
+
+```bash
+# Enable 2FA (interactive)
+pinner account otp enable
+
+# Enable 2FA non-interactively
+pinner account otp enable --otp 123456
+
+# Disable 2FA
+pinner account otp disable
+
+# Disable 2FA non-interactively
+pinner account otp disable --password mypassword
+```
+
+When 2FA is active, include your OTP code when authenticating:
+
+```bash
+PINNER_EMAIL=you@example.com PINNER_PASSWORD=*** PINNER_OTP=123456 pinner auth
+```
+
+## Flags reference
+
+### `pinner auth`
+
+| Flag | Short | Description | Env var |
+|------|-------|-------------|---------|
+| `--email` | `-e` | Email address for login | `PINNER_EMAIL` |
+| `--password` | `-p` | Password for login (insecure; prefer stdin or env var) | `PINNER_PASSWORD` (also reads from stdin) |
+| `--otp-code` | `-o` | OTP code for 2FA (6 digits) | `PINNER_OTP` |
+| `--key-name` | `-k` | Custom name for created API key (default: `cli-generated`) | N/A |
+| `--no-create-key` | N/A | Skip API key creation, save token directly | N/A |
+| `--force` | N/A | Overwrite existing auth token without confirmation | N/A |
+
+## Environment variables
+
+| Environment variable | Purpose | Used by |
+|---------------------|---------|---------|
+| `PINNER_AUTH_TOKEN` | Your auth token (JWT), used by all commands | CLI, SDK |
+| `PINNER_EMAIL` | Email address for `pinner auth` | CLI |
+| `PINNER_PASSWORD` | Password for `pinner auth` | CLI |
+| `PINNER_OTP` | OTP code for 2FA during `pinner auth` | CLI |
+
+The SDK and CLI check `PINNER_AUTH_TOKEN` when you don't pass a token directly. The email, password, and OTP env vars are only used by `pinner auth`.

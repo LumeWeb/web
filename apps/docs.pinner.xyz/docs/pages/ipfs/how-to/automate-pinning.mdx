@@ -1,0 +1,90 @@
+---
+title: Automate Pinning with GitHub Actions
+description: Upload files to Pinner automatically on every push using GitHub Actions
+---
+
+# Automate Pinning with GitHub Actions
+
+Automatically upload build artifacts to IPFS every time you push to your repository.
+
+## Set up secrets
+
+Add your Pinner API key as a repository secret:
+
+1. Go to **Settings → Secrets and variables → Actions**
+2. Click **New repository secret**
+3. Name: `PINNER_AUTH_TOKEN`
+4. Value: your API key from [API Keys](/account/api-tokens)
+
+## Create the workflow
+
+Create `.github/workflows/pinner.yml`:
+
+```yaml
+name: Pin to IPFS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  pin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pinner CLI
+        run: go install go.lumeweb.com/pinner-cli/cmd/pinner@latest
+
+      - name: Authenticate
+        run: pinner auth ${{ secrets.PINNER_AUTH_TOKEN }}
+
+      - name: Upload build output
+        id: upload
+        run: pinner upload ./dist/ --name "ci-build"
+
+      - name: Verify pin
+        run: pinner status ${{ steps.upload.outputs.cid }}
+```
+
+## How it works
+
+1. On every push to `main`, the workflow installs the Pinner CLI
+2. It authenticates with your JWT token using `pinner auth`
+3. It uploads the `./dist/` directory with `pinner upload`
+4. It verifies the pin was created with `pinner status`
+
+The `pinner upload` command outputs the CID, gateway URL, size, and duration. The `pinner status` command checks whether the pin has reached a terminal state (`pinned` or `failed`).
+
+## Using the SDK instead
+
+If you prefer the JavaScript SDK in a Node.js script:
+
+```yaml
+- name: Upload with SDK
+  env:
+    PINNER_AUTH_TOKEN: ${{ secrets.PINNER_AUTH_TOKEN }}
+  run: node scripts/upload-to-ipfs.mjs
+```
+
+```javascript
+// scripts/upload-to-ipfs.mjs
+import { Pinner } from "@lumeweb/pinner";
+import fs from "fs";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN });
+
+const files = fs.readdirSync("./dist").map((name) => {
+  const buffer = fs.readFileSync(`./dist/${name}`);
+  return new File([buffer], name);
+});
+
+const operation = await pinner.uploadDirectory(files, { name: "ci-build" });
+const result = await operation.result;
+console.log("Root CID:", result.cid);
+```
+
+## Next steps
+
+- [Check pin status programmatically](/ipfs/how-to/check-pin-status)
+- [Batch pin files](/ipfs/how-to/batch-pin)

@@ -1,0 +1,44 @@
+---
+title: Upload CAR Files
+description: Upload Content Addressable Archives for pre-calculated CIDs and bulk uploads
+---
+
+# Upload CAR Files
+
+CAR (Content Addressable Archive) files let you upload IPFS data with the CID already known before the upload even starts. This is useful for bulk uploads and when you need to guarantee the CID ahead of time.
+
+Not sure what CAR files are or why you'd use them? See [CAR Files](/ipfs/concepts/car-files).
+
+## Upload a CAR file
+
+:::code-group
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+import fs from "fs";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const carData = fs.readFileSync("./data.car");
+const carFile = new File([carData], "data.car", {
+  type: "application/vnd.ipld.car",
+});
+
+const result = await pinner.uploadCar(carFile);
+console.log("Root CID:", result.cid);
+```
+
+```bash [CLI]
+pinner upload --car data.car
+```
+:::
+
+## Why CAR instead of a regular upload?
+
+With a CAR file the root CID is deterministic — it's computed from the IPFS block structure before the upload begins. You can verify the CID locally and know it won't change after pinning.
+
+Regular uploads also work fine. CAR is for cases where you need the CID upfront: deterministic builds, verification pipelines, or bulk transfers of pre-packaged IPFS data.
+
+## Next steps
+
+- [Learn how CAR files work](/ipfs/concepts/car-files)
+- [Upload a directory](/ipfs/tutorials/upload-directory)

@@ -1,0 +1,145 @@
+---
+title: Deploy a Static Site
+description: Walk through deploying a Vite static site to IPFS with a custom domain
+---
+
+# Deploy a Static Site
+
+This tutorial walks you through the full process: build a static site, deploy it to IPFS, and make it accessible at a custom domain. By the end, you'll understand each step of the deployment pipeline.
+
+## Prerequisites
+
+- A Pinner account with an [API key](/account/api-tokens)
+- The [Pinner CLI installed and authenticated](/ipfs/cli/auth)
+- A static site to deploy (we'll use Vite as an example)
+- A domain you control (for custom domain setup)
+
+## Step 1: Build your site
+
+Build your project the way you normally would. For a Vite project:
+
+```bash
+npm run build
+```
+
+This outputs static files to `./dist`. Any static site generator works — Next.js export, Astro, Hugo, plain HTML. As long as the output is a directory of static files, Pinner can host it.
+
+## Step 2: Deploy with the CLI
+
+```bash
+pinner website deploy ./dist
+```
+
+The CLI uploads the directory to IPFS, creates a website record, and prints the site details including the domain and CID.
+
+:::info
+The `deploy` command handles both the upload and the website creation in one step. If you prefer to control each part separately, use the SDK directly.
+:::
+
+## Step 3: (SDK) Upload and create the website
+
+If you're using the SDK, you handle the upload and website creation separately:
+
+```typescript
+import { Pinner } from "@lumeweb/pinner";
+import fs from "fs";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY! });
+
+// Upload the build output
+const files = fs.readdirSync("./dist").map((name) => {
+  const buffer = fs.readFileSync(`./dist/${name}`);
+  return new File([buffer], name);
+});
+const result = await pinner.uploadAndWait(files);
+console.log("CID:", result.cid);
+
+// Create the website
+const site = await pinner.websites.createWebsite({
+  domain: "mysite.example.com",
+  target_type: "ipfs",
+  target_hash: result.cid,
+});
+console.log("Website created:", site.id, site.domain);
+```
+
+## Step 4: Set up your custom domain
+
+If you used a custom domain (not a `*.pinner.xyz` subdomain), you need to prove you own it.
+
+The website response includes a `validation_token` and `validation_record_host`. Add a DNS TXT record at your domain registrar:
+
+| Record | Name | Value |
+|--------|------|-------|
+| TXT | `_pinner-validation` | `verify=<validation_token>` |
+
+Then trigger validation:
+
+```typescript
+const validation = await pinner.websites.validateWebsite(site.id);
+console.log("Valid:", validation.valid, validation.message);
+```
+
+Or with the CLI:
+
+```bash
+pinner website validate <site-id>
+```
+
+## Step 5: Add a CNAME record
+
+Point your domain to Pinner's hosting infrastructure:
+
+| Record | Name | Value |
+|--------|------|-------|
+| CNAME | `www` | `sites.pinner.xyz` |
+
+For root domains, use an A record pointing to the IP shown in your website config:
+
+```typescript
+const config = await pinner.websites.getWebsiteConfig();
+console.log("Gateway domain:", config.gateway_domain);
+console.log("Nameservers:", config.nameservers);
+```
+
+## Step 6: Wait for SSL
+
+Pinner provisions an SSL certificate automatically after your DNS records are in place. No configuration on your part — just wait.
+
+Check the status:
+
+```typescript
+const ssl = await pinner.websites.getSSLStatus("mysite.example.com");
+console.log("SSL status:", ssl.status);
+```
+
+SSL moves through these states: `pending` → `validating` → `valid` (or `ready`). If something goes wrong, it lands in `failed` or `error`.
+
+You can also watch for SSL readiness:
+
+```typescript
+const watcher = pinner.websites.watchSSL("mysite.example.com", {
+  interval: 5000,   // check every 5 seconds
+  timeout: 300000,  // give up after 5 minutes
+});
+
+await watcher.start({
+  onReady: (status) => console.log("SSL ready!", status),
+  onError: (error) => console.error("SSL error:", error.message),
+  onStatus: (status) => console.log("SSL progress:", status.status),
+});
+```
+
+## Step 7: Visit your site
+
+Once DNS propagates and SSL is ready, your site is live at `https://mysite.example.com`.
+
+## Recap
+
+You built a static site, uploaded it to IPFS, created a website record, proved domain ownership, pointed DNS at Pinner, and let SSL provision automatically. That's the full cycle.
+
+## Next steps
+
+- [Update your site with a new deploy](/websites/how-to/manage-websites)
+- [Use IPNS for updatable content addresses](/websites/concepts/ipns)
+- [Automate deploys with GitHub Actions](/websites/how-to/deploy-github-actions)

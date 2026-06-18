@@ -1,0 +1,47 @@
+---
+title: Operations
+description: Track ongoing operations across all Pinner products
+---
+
+# Operations
+
+When you upload a file, pin content, or trigger other server-side processing, Pinner creates an operation to track it. Operations let you monitor progress, check whether a request completed, and inspect errors if something went wrong.
+
+## List operations
+
+```bash
+# List your account operations
+pinner operations list
+
+# Filter by status
+pinner operations list --status running
+
+# Filter by CID
+pinner operations list --cid bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e
+
+# Continuously watch operations
+pinner operations list --watch
+```
+
+## Get a specific operation
+
+```bash
+# Get details for one operation
+pinner operations get <operation-id>
+
+# Watch an operation until it completes
+pinner operations get <operation-id> --watch
+```
+
+## What you'll see
+
+Operations track state across uploads, pins, website deployments, and other server-side processing. Each operation has:
+
+- **ID**: unique identifier
+- **Status**: `pending`, `running`, `completed`, `failed`, or `error`
+- **CID**: the content identifier, when applicable
+- **Progress**: percentage complete
+
+When you run `pinner operations get`, additional details are shown including the updated timestamp, step progress (if multi-step), and any error message.
+
+Use `--watch` to continuously monitor operations instead of polling manually. The command refreshes every 2 seconds and exits automatically when all operations reach a terminal status (`completed`, `failed`, or `error`).

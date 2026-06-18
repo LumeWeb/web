@@ -1,0 +1,214 @@
+---
+title: SDK Error Handling
+description: How the Pinner SDK handles errors, the error class hierarchy, and type guards
+---
+
+# SDK Error Handling
+
+The SDK throws structured error classes that extend a common `PinnerError` base. Every error carries a machine-readable `code`, a human-readable `message`, a `retryable` flag, and an optional `cause`.
+
+## Error class hierarchy
+
+```
+PinnerError
+├── ConfigurationError
+├── AuthenticationError
+├── UploadError
+│   ├── NetworkError
+│   ├── ValidationError
+│   │   └── EmptyFileError
+│   └── TimeoutError
+├── PinError
+│   ├── NotFoundError
+│   └── RateLimitError
+└── EnvironmentError
+```
+
+## Error classes
+
+### `PinnerError`
+
+The base class for all SDK errors. Every subclass inherits these properties:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `code` | `string` | Machine-readable error code |
+| `message` | `string` | Human-readable error description |
+| `retryable` | `boolean` | Whether the operation can be retried |
+| `cause` | `Error \| undefined` | The underlying error that caused this one |
+
+### `ConfigurationError`
+
+Thrown when the SDK is misconfigured (e.g. missing JWT token).
+
+- **Code:** `CONFIGURATION_ERROR`
+- **Retryable:** `false`
+
+### `AuthenticationError`
+
+Thrown for HTTP 401 and 403 responses when a request fails authentication or authorization.
+
+- **Code:** `AUTHENTICATION_ERROR`
+- **Retryable:** `false`
+
+### `UploadError`
+
+Base class for upload-related errors.
+
+- **Code:** `UPLOAD_ERROR`
+- **Retryable:** set per subclass
+
+### `NetworkError`
+
+Thrown when a network request fails (HTTP errors that don't map to a more specific class, or non-HTTP network failures).
+
+- **Code:** `NETWORK_ERROR`
+- **Retryable:** `true`
+
+### `ValidationError`
+
+Thrown for HTTP 400 responses (invalid request data). Also used for HTTP 410 in the websites API (target is broken or gone).
+
+- **Code:** `VALIDATION_ERROR`
+- **Retryable:** `false`
+- **Extra property:** `field?: string`, the field that failed validation
+
+### `EmptyFileError`
+
+Thrown when attempting to upload an empty file or stream. Extends `ValidationError` with `field` set to `"file"`.
+
+- **Code:** `EMPTY_FILE_ERROR`
+- **Retryable:** `false`
+
+### `TimeoutError`
+
+Thrown when a request times out.
+
+- **Code:** `TIMEOUT_ERROR`
+- **Retryable:** `true`
+
+### `PinError`
+
+Base class for pin operation errors.
+
+- **Code:** `PIN_ERROR`
+- **Retryable:** set per subclass
+
+### `NotFoundError`
+
+Thrown for HTTP 404 responses or when a pin is not found for a given CID.
+
+- **Code:** `NOT_FOUND`
+- **Retryable:** `false`
+
+### `RateLimitError`
+
+Thrown for HTTP 429 rate-limit responses.
+
+- **Code:** `RATE_LIMIT_EXCEEDED`
+- **Retryable:** `true`
+- **Extra property:** `retryAfter?: number`, seconds to wait before retrying
+
+### `EnvironmentError`
+
+Thrown when the runtime environment is not supported.
+
+- **Code:** `ENVIRONMENT_ERROR`
+- **Retryable:** `false`
+
+## HTTP-to-error mapping
+
+The SDK maps HTTP status codes to error classes as follows:
+
+| HTTP status | Error class | Notes |
+|------------|-------------|-------|
+| 400 | `ValidationError` | Invalid request data |
+| 401 | `AuthenticationError` | Bad or expired JWT |
+| 403 | `AuthenticationError` | No permission for this resource |
+| 404 | `NotFoundError` | Resource doesn't exist |
+| 410 | `ValidationError` | Target is broken or gone (websites API) |
+| 429 | `RateLimitError` | Too many requests; wait `retryAfter` seconds then retry |
+| Other HTTP errors | `NetworkError` | Generic HTTP failure |
+| Network failures | `NetworkError` | No response received |
+
+## Retryability
+
+Each error class sets the `retryable` flag:
+
+| Error class | `retryable` |
+|------------|-------------|
+| `NetworkError` | `true` |
+| `TimeoutError` | `true` |
+| `RateLimitError` | `true` |
+| All others | `false` |
+
+## Type guards
+
+The SDK exports two type guards from `@lumeweb/pinner`:
+
+```typescript
+import { isRetryable, isAuthenticationError } from "@lumeweb/pinner";
+
+// Check if an error can be retried
+if (isRetryable(error)) {
+  // wait and retry
+}
+
+// Check if an error is authentication-related
+if (isAuthenticationError(error)) {
+  // prompt user to re-authenticate
+}
+```
+
+You can also use `instanceof` checks directly:
+
+```typescript
+import { NotFoundError, RateLimitError } from "@lumeweb/pinner";
+
+if (error instanceof NotFoundError) {
+  // handle 404
+}
+
+if (error instanceof RateLimitError) {
+  console.log(`Retry after ${error.retryAfter} seconds`);
+}
+```
+
+## Example: Handling errors
+
+```typescript
+import {
+  Pinner,
+  AuthenticationError,
+  EmptyFileError,
+  RateLimitError,
+  isRetryable,
+} from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN });
+
+try {
+  const result = await pinner.upload(file);
+} catch (error) {
+  if (error instanceof AuthenticationError) {
+    console.error(
+      "Bad or expired API key. Re-authenticate and try again."
+    );
+  } else if (error instanceof EmptyFileError) {
+    console.error("Cannot upload an empty file.");
+  } else if (error instanceof RateLimitError) {
+    console.error(
+      `Rate limit exceeded. Retry after ${error.retryAfter ?? 60} seconds.`
+    );
+  } else if (error instanceof Error && isRetryable(error as any)) {
+    console.error("Transient error; retry:", error.message);
+  } else {
+    console.error("Upload failed:", error);
+  }
+}
+```
+
+## See also
+
+- [Error Reference](/ipfs/reference/errors): complete list of API error codes
+- [CLI Troubleshooting](/ipfs/how-to/troubleshoot-uploads): common upload errors and fixes

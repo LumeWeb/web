@@ -1,0 +1,109 @@
+---
+title: CAR Files
+description: What CAR files are, why they matter, and how Pinner uses them
+---
+
+# CAR Files
+
+A CAR (Content Addressable Archive) is a container format for bundling IPFS blocks together. It's the native way to package and transfer content-addressed data in the IPFS ecosystem.
+
+Pinner uses CAR files internally for **all uploads**: whether you upload a single file, a directory, an archive, or a pre-built CAR. Everything is converted to (or passed through as) a CAR file before reaching the server.
+
+## What's inside a CAR file
+
+A CAR file contains:
+
+- **A header**: a varint-prefixed pragma (version number) followed by a varint-length-prefixed root CID list encoded in DAG-JSON
+- **Blocks**: raw IPLD data blocks, each prefixed with their length and CID
+
+```
+┌─────────────────────────────────────┐
+│  Header                             │
+│  - varint: CAR version (1 or 2)    │
+│  - varint-prefixed DAG-JSON:        │
+│    { "roots": [CID, ...] }          │
+├─────────────────────────────────────┤
+│  Block 1                            │
+│  - length (varint)                  │
+│  - CID (content identifier)         │
+│  - block data (raw bytes)           │
+├─────────────────────────────────────┤
+│  Block 2 ...                        │
+└─────────────────────────────────────┘
+```
+
+### CAR versions
+
+There are two CAR format versions:
+
+- **CARv1**: the original format with a simple header and sequential blocks
+- **CARv2**: adds an index trailer for random-access block lookup, wrapping a CARv1 payload
+
+Pinner supports both CARv1 and CARv2 uploads. The server uses `go-car/v2` for reading, which handles both formats transparently.
+
+### Single-root requirement
+
+Pinner currently requires CAR files to have **exactly one root CID**. CAR files with multiple roots will be rejected. This is because a single pin record maps to one root CID; if your data has multiple logical roots, upload each as a separate CAR file.
+
+## Why CAR files matter
+
+- **Bulk uploads**: package many blocks into one file instead of uploading individually
+- **Data portability**: move IPLD data between systems in a single transfer
+- **Streaming**: read and write CAR files incrementally without loading everything into memory
+- **Directory preservation**: maintain the full IPLD graph structure including directories
+
+## The key advantage: pre-calculable CIDs
+
+Because CAR files are made of raw IPFS blocks with their CIDs already computed, you know the root CID **before** you upload. This is impossible with non-IPFS formats like ZIP, where the server must extract, re-chunk, and re-encode the data before it can compute the CID.
+
+## CAR files vs. archives
+
+| | CAR Files | Archives (ZIP, tar) |
+|--|-----------|---------------------|
+| CID calculation | Client-side: you know it before uploading | Server-side: must wait for processing |
+| CID known before upload | Yes | No |
+| Processing time | Instant (blocks are already formed) | Requires server re-chunking and encoding |
+| Pre-computation | Possible | Not possible |
+| Deduplication | Block-level: each block is stored by CID | File-level only: entire archive treated as one blob |
+
+With a CAR file, the CID is deterministic and locally verifiable. You're guaranteed the content will resolve to the same CID once pinned. With an archive, you must wait for the server to process it and then poll for the result.
+
+## How Pinner handles CAR files
+
+Pinner's upload pipeline works differently depending on whether you provide a pre-built CAR or a regular file:
+
+### Pre-built CAR passthrough
+
+If you upload a file that is already a valid CAR (detected by MIME type `application/vnd.ipld.car`, the `.car` extension, or the `isCarFile` option), Pinner skips preprocessing and uploads the CAR as-is. In the JS SDK, you can do this explicitly:
+
+- `pinner.upload.raw(carFile)`: upload a pre-built CAR with the builder API
+- `pinner.uploadCar(file, { isCarFile: true })`: direct CAR upload method
+
+The server's `CARProcessor` validates the roots, checks quotas against the raw block data size (not the CAR file size which includes headers), and stores the file directly.
+
+### Automatic CAR preprocessing
+
+When you upload a regular file, directory, or stream, the JS SDK automatically converts it to CAR format before uploading. This happens client-side using Helia:
+
+1. The input is chunked and encoded into UnixFS DAG blocks
+2. A root CID is computed from the block graph
+3. The result is streamed to the server as a CAR file
+
+On the server, the upload is passed to `CARBlockProcessor`, which reads blocks individually from the CAR stream and stores each block by its CID, enabling **block-level deduplication** across all uploads.
+
+### Block-level deduplication
+
+Pinner deduplicates at the **block level**, not the file level. When a CAR file is processed, each block is stored by its CID. If the same block already exists in the blockstore (because it was part of a previous upload), it is not stored again. This means:
+
+- Two different files that share common data blocks will only store those blocks once
+- Re-uploading the same content is effectively free after the first upload
+- CAR files inherently contain unique, deduplicated blocks; the server does not perform additional dedup checks during block processing because it would add overhead without benefit
+
+## When to use CAR files
+
+- You need the CID before the upload completes (deterministic builds, CI pipelines)
+- You're bulk-transferring pre-packaged IPFS data
+- You want to verify content integrity locally before trusting a remote service
+- You're working with existing IPFS tooling that produces CAR output (e.g., `ipfs dag export`)
+
+When you don't need these guarantees, a regular upload works just fine; Pinner converts your data into CAR format internally either way.

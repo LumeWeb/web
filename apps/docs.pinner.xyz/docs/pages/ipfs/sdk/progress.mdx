@@ -1,0 +1,220 @@
+---
+title: Upload Progress & Events
+description: Track upload progress, build progress bars, wait for pin operations, and cancel in-flight uploads.
+---
+
+# Upload Progress & Events
+
+`pinner.upload()` returns a `Promise<UploadOperation>` that gives you real-time progress, pause/resume control, and a promise that resolves when the upload finishes.
+
+## UploadOperation
+
+:::code-group
+```typescript [Browser]
+const pinner = new Pinner({ jwt: "YOUR_JWT" });
+
+const operation = await pinner.upload(file);
+
+// Wait for the upload to finish
+const result = await operation.result;
+console.log("CID:", result.cid);
+console.log("Operation ID:", result.operationId);
+
+// Control the upload
+operation.pause();   // toggles pause state (TUS uploads only)
+operation.resume();  // toggles pause state (TUS uploads only)
+operation.cancel();  // aborts the upload
+```
+
+```typescript [Node.js]
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN });
+
+const operation = await pinner.upload(file);
+
+// Wait for the upload to finish
+const result = await operation.result;
+console.log("CID:", result.cid);
+console.log("Operation ID:", result.operationId);
+
+// Control the upload
+operation.pause();   // toggles pause state (TUS uploads only)
+operation.resume();  // toggles pause state (TUS uploads only)
+operation.cancel();  // aborts the upload
+```
+:::
+
+### UploadOperation API
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `result` | `Promise<UploadResult>` | Resolves with the CID, operation ID, and upload metadata |
+| `progress` | `Readonly<UploadProgress>` | Snapshot of the current progress |
+| `cancel()` | `() => void` | Abort the upload |
+| `pause()` | `() => void` | Toggle pause on a TUS upload |
+| `resume()` | `() => void` | Toggle resume on a paused TUS upload |
+
+:::warning
+`pause()` and `resume()` both toggle the Uppy pause state; they are not independently scoped. Only TUS uploads support pause/resume; XHR uploads ignore these calls.
+:::
+
+## Progress events
+
+Pass an `onProgress` callback in `UploadOptions` to get notified as bytes transfer:
+
+:::code-group
+```typescript [Browser]
+const pinner = new Pinner({ jwt: "YOUR_JWT" });
+
+const operation = await pinner.upload(file, {
+  onProgress: (progress) => {
+    console.log(`Progress: ${progress.percentage.toFixed(2)}%`);
+    console.log(`Uploaded: ${progress.bytesUploaded} / ${progress.bytesTotal} bytes`);
+    if (progress.speed != null) {
+      console.log(`Speed: ${progress.speed} bytes/sec`);
+    }
+    if (progress.eta != null) {
+      console.log(`ETA: ${progress.eta} seconds`);
+    }
+  }
+});
+
+const result = await operation.result;
+console.log("Complete:", result.cid);
+```
+
+```typescript [Node.js]
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN });
+
+const operation = await pinner.upload(file, {
+  onProgress: (progress) => {
+    console.log(`Progress: ${progress.percentage.toFixed(2)}%`);
+    console.log(`Uploaded: ${progress.bytesUploaded} / ${progress.bytesTotal} bytes`);
+    if (progress.speed != null) {
+      console.log(`Speed: ${progress.speed} bytes/sec`);
+    }
+    if (progress.eta != null) {
+      console.log(`ETA: ${progress.eta} seconds`);
+    }
+  }
+});
+
+const result = await operation.result;
+console.log("Complete:", result.cid);
+```
+:::
+
+### UploadProgress properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `percentage` | `number` | Upload progress from 0 to 100 |
+| `bytesUploaded` | `number` | Bytes transferred so far |
+| `bytesTotal` | `number` | Total bytes to transfer |
+| `speed` | `number \| undefined` | Current speed in bytes per second (optional) |
+| `eta` | `number \| undefined` | Estimated seconds remaining (optional) |
+
+## Build a progress bar
+
+Wire `onProgress` into any UI framework. A plain-DOM example:
+
+```typescript
+const bar = document.getElementById("progress-bar");
+
+const operation = await pinner.upload(file, {
+  onProgress: (progress) => {
+    bar.style.width = `${progress.percentage}%`;
+    bar.textContent = `${progress.percentage.toFixed(0)}%`;
+  }
+});
+
+const result = await operation.result;
+bar.textContent = `Done: ${result.cid}`;
+```
+
+In React, store `progress.percentage` in state and render it the same way.
+
+## Cancel an upload
+
+Call `cancel()` on the operation to abort an in-flight upload:
+
+```typescript
+const operation = await pinner.upload(file);
+
+// Some time later: user clicked "Cancel" or a timeout fired
+operation.cancel();
+
+try {
+  await operation.result; // rejects after cancel
+} catch (error) {
+  console.log("Upload was cancelled");
+}
+```
+
+After `cancel()`, the `result` promise rejects. Catch it to clean up UI state.
+
+## waitForOperation
+
+Uploading is only the first step; the pin must also settle on the network. `waitForOperation` polls until the pin reaches a settled state.
+
+:::code-group
+```typescript [Browser]
+const pinner = new Pinner({ jwt: "YOUR_JWT" });
+
+const operation = await pinner.upload(file);
+const uploadResult = await operation.result;
+
+// Wait for pinning to complete
+const result = await pinner.waitForOperation(uploadResult, {
+  interval: 1000,   // poll every 1s
+  timeout: 60000    // give up after 60s
+});
+
+console.log("CID:", result.cid);
+console.log("Operation ID:", result.operationId);
+```
+
+```typescript [Node.js]
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN });
+
+const operation = await pinner.upload(file);
+const uploadResult = await operation.result;
+
+// Wait for pinning to complete
+const result = await pinner.waitForOperation(uploadResult, {
+  interval: 1000,   // poll every 1s
+  timeout: 60000    // give up after 60s
+});
+
+console.log("CID:", result.cid);
+console.log("Operation ID:", result.operationId);
+```
+:::
+
+### Input types
+
+`waitForOperation` accepts either an `UploadResult` or a numeric operation ID:
+
+```typescript
+// Recommended: pass the full UploadResult
+// Uses uploadResult.operationId if present, otherwise looks up by CID
+const result = await pinner.waitForOperation(uploadResult);
+
+// Also works: pass just the operation ID (number)
+const result = await pinner.waitForOperation(uploadResult.operationId!);
+```
+
+:::info
+When you pass an `UploadResult`, `waitForOperation` uses the `operationId` field directly if present. If `operationId` is missing but `cid` is available, it looks up the operation by CID first. This means even uploads that don't return an operation ID can still be awaited.
+:::
+
+### Polling options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `interval` | `number` | `2000` | Polling interval in milliseconds |
+| `timeout` | `number` | `300000` | Maximum wait time in milliseconds (5 minutes) |
+| `settledStates` | `string[]` | `["completed", "failed", "error"]` | States that count as settled |
+
+---
+
+Next: [Error Handling](/ipfs/sdk/errors): classify and recover from SDK errors.

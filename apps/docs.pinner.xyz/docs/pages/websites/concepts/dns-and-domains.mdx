@@ -1,0 +1,85 @@
+---
+title: DNS and Domains
+description: How DNS connects your domain to Pinner's hosting infrastructure
+---
+
+# DNS and Domains
+
+DNS is the bridge between your domain name and Pinner's hosting. You configure DNS records at your registrar (or let Pinner manage DNS entirely), and Pinner's gateway serves your IPFS content when visitors hit your domain.
+
+## Two ways to handle DNS
+
+### Bring your own DNS
+
+You keep your existing DNS provider and add records that point to Pinner:
+
+| Record | Purpose | Value |
+|--------|---------|-------|
+| TXT | Domain validation | `verify=<token>` |
+| CNAME | Route traffic to Pinner | `sites.pinner.xyz` |
+| A | Root domain routing | IP from website config |
+
+This is the most common approach. You keep control of your DNS and just add a few records.
+
+### Pinner-managed DNS
+
+When you enable `dns_hosting_enabled` on a website, Pinner creates a DNS zone for your domain. You then delegate your domain's nameservers to Pinner at your registrar. Pinner handles all DNS records — validation, CNAME, and any custom records you need.
+
+The tradeoff: less manual work, but you give Pinner full DNS control for that domain.
+
+To find Pinner's nameservers for delegation, retrieve the website configuration. The `nameservers` field in the configuration response lists the nameservers to set at your registrar.
+
+## DNS records for website hosting
+
+### Validation TXT record
+
+Before Pinner serves your domain, you must prove you own it. Pinner assigns a `validation_token` to each website. Add a TXT record:
+
+```
+_pinner-validation.yourdomain.com  TXT  "verify=abc123def456"
+```
+
+The exact hostname comes from the `validation_record_host` field on the website. After adding the record, trigger validation and Pinner checks that the token matches.
+
+### CNAME record (subdomain)
+
+For `www.yourdomain.com` or other subdomains:
+
+```
+www  CNAME  sites.pinner.xyz
+```
+
+### A record (root domain)
+
+Root domains (`yourdomain.com`) can't use CNAME at most registrars. Use an A record instead:
+
+```
+@  A  <IP from website config>
+```
+
+### Nameserver delegation (Pinner-managed DNS)
+
+If you're using Pinner's DNS hosting, update your domain registrar to use Pinner's nameservers. The nameservers are available from the website configuration. Once propagated, Pinner controls all DNS for your domain.
+
+## DNS propagation
+
+DNS changes aren't instant. Typical propagation times:
+
+| Change | Typical time |
+|--------|-------------|
+| New records | 1–5 minutes |
+| Modified records | 5–30 minutes |
+| Nameserver changes | 1–48 hours |
+
+Pinner's SSL provisioning starts only after DNS has propagated. If SSL stays in `pending`, your DNS records may not have propagated yet.
+
+## DNS hosting setup flow
+
+1. Enable `dns_hosting_enabled` on your website
+2. Pinner creates a DNS zone with the necessary records
+3. Change your domain's nameservers at your registrar to Pinner's nameservers (from website configuration)
+4. Wait for nameserver propagation
+5. Pinner validates the domain automatically
+6. SSL provisions
+
+See [Manage DNS Zones](/dns/how-to/manage-zones) and [Manage DNS Records](/dns/how-to/manage-records) for CLI commands.

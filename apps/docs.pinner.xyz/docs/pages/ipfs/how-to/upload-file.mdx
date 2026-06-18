@@ -1,0 +1,161 @@
+---
+title: Upload a Single File
+description: Pin an individual file to IPFS with the CLI or SDK
+---
+
+# Upload a Single File
+
+Pin a file to IPFS and get its Content Identifier (CID). This is the most common upload: a single file, named, and confirmed.
+
+## Quick upload
+
+:::code-group
+```bash [CLI]
+pinner upload myfile.txt
+```
+
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const file = new File(["Hello, IPFS!"], "hello.txt", { type: "text/plain" });
+const result = await pinner.uploadAndWait(file);
+
+console.log("CID:", result.cid);
+```
+:::
+
+The CLI prints the CID, gateway URL, size, and upload time. The SDK returns an `UploadResult` with the same fields.
+
+## Name your upload
+
+By default the CLI uses the filename and the SDK uses the `File` object's name. Override it when you want a different name on the pin record.
+
+:::code-group
+```bash [CLI]
+pinner upload ./report.pdf --name "Q4 Report"
+```
+
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const file = new File([buffer], "report.pdf", { type: "application/pdf" });
+const result = await pinner.uploadAndWait(file, { name: "Q4 Report" });
+
+console.log("CID:", result.cid);
+```
+:::
+
+## Add metadata
+
+Attach key-value pairs for organisation and search. Metadata is returned when you [list pins](/ipfs/how-to/list-pins).
+
+:::code-group
+```bash [CLI]
+pinner upload logo.svg --meta project=acme --meta env=prod
+```
+
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const file = new File([svgData], "logo.svg", { type: "image/svg+xml" });
+const result = await pinner.uploadAndWait(file, {
+  keyvalues: { project: "acme", env: "prod" },
+});
+
+console.log("CID:", result.cid);
+```
+:::
+
+## Fire-and-forget vs. wait for confirmation
+
+By default both the CLI and `uploadAndWait` wait until the pin is confirmed. For large files or CI pipelines, you can skip the wait.
+
+:::code-group
+```bash [CLI]
+pinner upload bigfile.tar.gz --no-wait
+```
+
+```typescript [SDK – fire and forget]
+const operation = await pinner.upload(file);
+
+// Don't await operation.result; the upload is in progress
+console.log("Upload started, operation ID:", operation.progress);
+
+// Later, poll for the result:
+const result = await operation.result;
+console.log("CID:", result.cid);
+```
+
+```typescript [SDK – wait with custom polling]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const operation = await pinner.upload(file);
+const result = await pinner.waitForOperation(operation, {
+  interval: 3000,
+  timeout: 120000,
+});
+
+console.log("CID:", result.cid);
+```
+:::
+
+## Use the builder pattern
+
+The SDK's builder pattern chains upload options in a fluent style.
+
+```typescript
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const operation = await pinner.upload
+  .file(file)
+  .name("config.json")
+  .keyvalues({ team: "platform" })
+  .pin();
+
+const result = await operation.result;
+console.log("CID:", result.cid);
+```
+
+## Node.js: read from the filesystem
+
+In Node.js 20+, the global `File` class is available. Read a file from disk and upload it:
+
+```typescript
+import { Pinner } from "@lumeweb/pinner";
+import { readFileSync } from "fs";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const buffer = readFileSync("./data.csv");
+const file = new File([buffer], "data.csv", { type: "text/csv" });
+
+const result = await pinner.uploadAndWait(file);
+console.log("CID:", result.cid);
+```
+
+## Upload from stdin
+
+The CLI can read from a pipe:
+
+```bash
+cat config.json | pinner upload --name "config.json"
+```
+
+When no file path is given and stdin is piped, the CLI reads from the pipe. The default name is `"stdin"`; override it with `--name`.
+
+## Next steps
+
+- [Upload an entire directory](/ipfs/how-to/upload-directory)
+- [Upload CAR files for pre-calculated CIDs](/ipfs/how-to/upload-car)
+- [Check the status of your pin](/ipfs/how-to/check-pin-status)
+- [Add and update metadata on existing pins](/ipfs/how-to/manage-metadata)

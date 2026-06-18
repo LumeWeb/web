@@ -1,0 +1,99 @@
+---
+title: How Website Hosting Works
+description: Understand the architecture behind Pinner's decentralized website hosting
+---
+
+# How Website Hosting Works
+
+Pinner hosts static websites on IPFS and makes them accessible through regular domain names with HTTPS. No servers to manage, no containers to configure; just upload your files and point a domain at them.
+
+## The pieces
+
+Website hosting on Pinner involves three systems working together:
+
+1. **IPFS storage**: Your site's files are pinned on IPFS and addressed by Content Identifier (CID)
+2. **DNS**: Uses DNSLink TXT records to map your domain to IPFS content
+3. **SSL**: Provides HTTPS for your domain automatically via Caddy on-demand TLS
+
+## The flow
+
+```
+Build output → Upload to IPFS → Get CID → Create website record → Configure DNSLink → Validate DNS → SSL provisions → Site is live
+```
+
+Here's what happens at each step:
+
+### Upload
+
+Your static files (HTML, CSS, JS, images) get uploaded to IPFS as a directory. The directory gets a Content Identifier (CID), a content-addressed identifier that represents your entire site.
+
+### Website record
+
+A website record on Pinner maps a domain to IPFS content. It stores:
+
+- The **domain** name (e.g. `mysite.example.com`)
+- The **target type**: either `ipfs` (direct IPFS CID) or `ipns` (IPNS name for updatable content)
+- The **target hash**: the CID or peer ID identifying the content
+- The **validation token** used to prove you own the domain
+- The **SSL status** tracking certificate provisioning (`pending` → `issuing` → `ready` or `failed`)
+
+### DNSLink
+
+Pinner uses **DNSLink** to map your domain to IPFS content. DNSLink is an IPFS convention that uses a `TXT` record at `_dnslink.<yourdomain>` to point to content on the IPFS network.
+
+When Pinner manages your DNS, it creates these records:
+
+| Record | Type | Purpose |
+|--------|------|---------|
+| `_dnslink.mysite.example.com` | `TXT` | DNSLink target (e.g. `dnslink=/ipfs/Qm...` or `dnslink=/ipns/12D3KooW...`) |
+| `pinner-verify.mysite.example.com` | `TXT` | Validation token, proves domain ownership (e.g. `pinner-verify=a1b2c3...`) |
+| `mysite.example.com` | `ALIAS` | Points to the gateway domain so traffic reaches Pinner |
+
+For self-managed DNS, you need to add the `_dnslink` TXT record yourself so the gateway can resolve your content. The DNSLink value follows the format `dnslink=/ipfs/<CID>` for direct IPFS targets or `dnslink=/ipns/<peerID>` for IPNS targets.
+
+### DNS hosting
+
+For Pinner to serve your domain, DNS must point at Pinner's infrastructure. You can either:
+
+- **Use Pinner-managed DNS**: Delegate the DNS zone to Pinner's nameservers (powered by PowerDNS). Pinner automatically creates and manages the DNSLink, validation, and ALIAS records for you. This also enables automatic updates; when you change your site's content, Pinner updates the DNSLink record to point at the new CID.
+- **Bring your own DNS**: Add the required `_dnslink` TXT record and other DNS entries at your registrar. You're responsible for updating them when content changes.
+
+When you use Pinner-managed DNS with a direct IPFS target, Pinner automatically creates an IPNS key and converts the target to IPNS. This lets Pinner publish new CIDs under the same IPNS name, and the DNSLink record always resolves to the latest content; no manual DNS updates needed.
+
+### SSL
+
+Once DNS is in place, Pinner automatically provisions an SSL certificate for your domain via Caddy's on-demand TLS. Before issuing a certificate, Caddy checks with Pinner's gateway to confirm the domain is allowed. You don't need to buy, install, or renew certificates; Pinner handles the entire lifecycle.
+
+### How the gateway serves your site
+
+When a visitor hits `https://mysite.example.com`, the request flows through Pinner's gateway:
+
+1. **Access check**: The gateway extracts the domain from the `Host` header and checks with Pinner's API to verify the website is active and allowed
+2. **Path rewrite**: The request path is rewritten to `/ipfs/<CID>` or `/ipns/<peerID>` based on the target type
+3. **Content resolution**: The gateway uses DNSLink resolution and the Boxo IPFS library to fetch your content from the IPFS network
+4. **Serve**: The content is served to the browser with proper headers (ETag, Cache-Control, range request support)
+
+If the website is pending validation, the gateway shows a friendly waiting page. If it's broken or gone, it returns an appropriate error.
+
+## Content addressing vs traditional hosting
+
+| Traditional hosting | Pinner website hosting |
+|---------------------|------------------------|
+| Files live on a specific server | Files live on IPFS, a distributed network |
+| Server URL identifies the content | CID identifies the content |
+| Updating means replacing files on the server | Updating means uploading new files and pointing the domain at the new CID |
+| Server downtime = site downtime | No single server to go down |
+
+## Subdomains
+
+If you just want to get something live quickly, Pinner provides `*.pinner.xyz` subdomains. No DNS configuration needed; the subdomain is set up automatically when you create the website.
+
+Custom domains require DNS validation and DNS configuration, but give you full branding control.
+
+## Updating your site
+
+With **IPNS targeting** (the default for Pinner-managed DNS), you publish the new CID under the same IPNS name. Pinner automatically updates the IPNS record, and the domain resolves to the new content. This is the recommended approach for sites that change frequently.
+
+With **direct IPFS targeting**, you update content by uploading new files and updating the website's target hash to the new CID. The DNSLink record must also be updated to point at the new CID. The old CID stays on IPFS until you unpin it.
+
+See [IPNS](/hosting/concepts/ipns) for more on the IPNS approach.

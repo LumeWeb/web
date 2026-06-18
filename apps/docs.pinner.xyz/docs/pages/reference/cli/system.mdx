@@ -1,0 +1,215 @@
+---
+title: "CLI: System"
+description: "pinner CLI commands for system."
+---
+
+> **This page is auto-generated.** Do not edit directly.
+> To update, modify the CLI source in [pinner-cli](https://github.com/LumeWeb/pinner-cli) and run `pnpm generate:clil`.
+
+## `config`
+
+```bash
+pinner config [get <key> | set <key> <value>] [flags]
+```
+View or modify CLI configuration settings.
+
+**Usage:**
+
+pinner config
+
+Show all configuration values
+
+pinner config get `<key>`
+
+Get specific configuration value
+
+pinner config set `<key>` `<value>`
+
+Set configuration value
+
+```bash
+
+pinner config
+
+pinner config get base_endpoint
+
+pinner config set max_retries 5
+
+pinner config set secure false
+
+pinner config set memory_limit 256
+
+pinner config set max_retries 5 --dry-run
+
+Configuration can also be set via environment variables with the PINNER_ prefix. For example, PINNER_BASE_ENDPOINT sets base_endpoint, PINNER_SECURE sets secure.
+
+Common keys:
+
+base_endpoint
+
+```
+
+- API endpoint (empty for default)
+
+secure
+
+- Use HTTPS (true/false)
+
+max_retries
+
+- Maximum retry attempts (default: 3)
+
+memory_limit
+
+- Memory limit for CAR generation in MB (default: 100)
+
+auth_token
+
+- Authentication token (managed by 'pinner auth')
+
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--json` |  | Output JSON instead of human-readable |
+| `--verbose` |  | Show detailed output |
+| `--quiet` |  | Suppress non-error output |
+| `--unmask` |  | Show sensitive data (tokens, passwords, secrets) unmasked |
+| `--auth-token` |  | Auth token to override config [env: `PINNER_AUTH_TOKEN`] |
+| `--secure` |  | Use HTTPS for API connections [env: `PINNER_SECURE`] |
+| `--dry-run` |  | Preview operations without making any changes |
+
+## `doctor`
+
+```bash
+pinner doctor [flags]
+```
+Show diagnostic information about your pinner CLI environment, including version, OS details, configuration location, and limits.
+
+This is useful when reporting issues or troubleshooting problems.
+
+```bash
+
+pinner doctor
+
+pinner doctor --json
+
+Use this command when:
+
+```
+
+- Reporting bugs or issues
+- Troubleshooting connection problems
+- Verifying your configuration
+- Checking authentication status
+
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--json` |  | Output in JSON format |
+
+## `bench`
+
+```bash
+pinner bench [path] [flags]
+```
+**Run a benchmark by uploading random data (or a specified path) and tracking each stage of the pipeline:** generate, upload, queued, pinning, pinned.
+
+After the benchmark completes, all uploaded pins are automatically removed (unless --no-cleanup is specified).
+
+```bash
+
+# Quick benchmark: 1MB random file
+
+pinner bench
+
+# Benchmark with real data
+
+pinner bench ./my-project
+
+# 10 iterations of 100MB upload for avg/min/max stats
+
+pinner bench --size 100MB --iterations 10
+
+# Simulate folder upload: 3 levels deep, 20 files, 50MB total
+
+pinner bench --size 50MB --files 20 --depth 3
+
+# Parallel uploads (3 concurrent)
+
+pinner bench --size 10MB --iterations 9 --parallel 3
+
+# Keep the pins around for inspection
+
+pinner bench --no-cleanup
+
+# Faster polling for stage transitions
+
+pinner bench --poll-interval 250ms
+
+The output includes per-iteration stage timing and a summary with min/max/avg/median statistics across all iterations
+
+```
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--size` |  | Size of random data to generate (e.g., 1MB, 100MB, 1GB). Only used when no path is given |
+| `--files` |  | Number of random files to generate |
+| `--depth` |  | Create nested folder structure N levels deep with random files |
+| `--iterations` |  | Number of upload iterations (each generates fresh random data) |
+| `--parallel` |  | Number of parallel operations (default: 1) |
+| `--no-cleanup` |  | Skip unpin after benchmark (pins remain on the server) |
+| `--poll-interval` |  | Interval for polling pin status during stage tracking |
+| `--memory-limit` |  | Memory limit for CAR generation in megabytes [env: `PINNER_MEMORY_LIMIT`] |
+| `--chunk-size` |  | Chunk size in bytes for UnixFS file splitting (default: 1048576) |
+| `--chunker` |  | DAG layout strategy: balanced (default) or trickle |
+| `--max-links` |  | Maximum number of links per DAG node (default: 174) |
+| `--dry-run` |  | Preview operations without making any changes |
+
+## `generate-docs`
+
+```bash
+pinner generate-docs
+```
+Generate CLI documentation in markdown, man, or JSON format
+
+**Subcommands:**
+
+| Subcommand | Description |
+|------------|-------------|
+| `markdown` | Generate markdown documentation |
+| `man` | Generate man page documentation |
+| `json` | Generate JSON documentation |
+
+### `markdown`
+
+```bash
+pinner generate-docs markdown [flags]
+```
+Generate markdown documentation
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--output` |  | Output file (default: stdout) |
+
+### `man`
+
+```bash
+pinner generate-docs man [flags]
+```
+Generate man page documentation
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--output` |  | Output file (default: stdout) |
+| `--section` |  | Man section number |
+
+### `json`
+
+```bash
+pinner generate-docs json [flags]
+```
+Generate JSON documentation
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--output` |  | Output file (default: stdout) |

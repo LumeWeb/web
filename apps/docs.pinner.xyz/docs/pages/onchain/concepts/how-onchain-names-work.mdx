@@ -1,0 +1,73 @@
+---
+title: How Onchain Names Work
+description: How onchain name systems resolve to IPFS content via IPNS and contenthash records
+---
+
+# How Onchain Names Work
+
+Onchain name systems like ENS (Ethereum Name Service) let you map a human-readable name to IPFS content. This page explains how that resolution works and where Pinner fits in.
+
+## The resolution path
+
+When someone visits `vitalik.eth` in a browser, here's what happens:
+
+1. **The browser queries the name resolver.** For ENS names, services like eth.limo handle this.
+2. **The resolver looks up the `contenthash` record.** This is an onchain record stored in the naming contract. It points at either an IPFS CID or an IPNS name.
+3. **The resolver follows the contenthash.** If it's an IPNS name, the resolver looks up the current CID that the IPNS name points to. If it's a direct CID, it fetches that.
+4. **The content is served from IPFS.** The resolver's gateway fetches the CID from the IPFS network and serves it to the browser.
+
+```
+vitalik.eth
+  → contenthash: ipns://k51qzi5uqu5djx...
+    → IPNS resolves to: bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e
+      → Content served from IPFS
+```
+
+## Why IPNS, not direct CIDs
+
+You could set your contenthash to a direct CID (`ipfs://bafybeig...`) instead of an IPNS name. Some people do. But there's a trade-off:
+
+| Approach | Update process | Trade-off |
+|----------|---------------|-----------|
+| Direct CID | Change the contenthash on-chain every time | Requires an on-chain transaction for each update (costs gas, takes time) |
+| IPNS name | Update the IPNS record off-chain; contenthash stays the same | One on-chain transaction to set the contenthash, then all updates happen on Pinner's side |
+
+IPNS adds a layer of indirection. Your contenthash points at a stable IPNS name, and you update what that IPNS name resolves to without touching the blockchain again. When you run `pinner point`, you're updating the IPNS record; no on-chain transaction needed.
+
+## Where Pinner fits
+
+Pinner's job in this flow is straightforward:
+
+1. **Pin your content**: make sure it stays available on IPFS
+2. **Manage the IPNS key**: create it, publish CIDs to it
+3. **Keep the IPNS record current**: republish when you update content
+
+`pinner point` does steps 2 and 3 in one command. Step 1 happens separately when you upload or pin content.
+
+```
+Your content → Pinner pins it → Pinner publishes to IPNS → You set contenthash → Resolver serves it
+```
+
+Pinner doesn't handle the on-chain transaction (setting the contenthash). That's done in your name manager: your ENS controller or smart contract.
+
+## What about DNS?
+
+Onchain name resolution doesn't use DNS. There are no CNAME records, nameserver delegation, or DNS hosting involved. The contenthash is stored on-chain, and resolvers read it directly from the blockchain.
+
+This is different from [website hosting with a DNS domain](/hosting/concepts/dns-and-domains), where Pinner sets up DNS records and SSL certificates. Onchain names skip all of that; the blockchain is the name resolution layer.
+
+## Key terminology
+
+| Term | What it means |
+|------|---------------|
+| **Contenthash** | The on-chain record that maps a name to content. Set in your name manager. |
+| **IPNS** | InterPlanetary Name System: a mutable address that always points at the current CID |
+| **IPNS key** | A cryptographic key used to publish and update an IPNS record. Pinner manages these for you. |
+| **Resolver** | A service that looks up on-chain records and serves the content (e.g., eth.limo for ENS names) |
+
+## Related
+
+- [Onchain Names Quickstart](/onchain/quickstart): get running in under a minute
+- [Point & unpoint reference](/onchain/how-to/point-unpoint): command details and troubleshooting
+- [IPNS and mutable addresses](/hosting/concepts/ipns): deeper explanation of how IPNS works
+- [How website hosting works](/hosting/concepts/how-hosting-works): the DNS-based alternative for .com domains

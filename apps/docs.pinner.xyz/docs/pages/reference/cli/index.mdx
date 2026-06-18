@@ -1,0 +1,63 @@
+---
+title: CLI Reference
+description: Pinner CLI reference. Generated from command definitions and help output.
+---
+
+# CLI Reference
+
+Auto-generated from the Pinner CLI command definitions. Each command is documented with usage, flags, examples, and output formats.
+
+> **This section is generated from CLI command definitions.** Do not edit these files directly — changes will be overwritten on the next build.
+
+## Installation
+
+```bash
+# macOS / Linux
+curl -fsSL https://get.pinner.xyz | sh
+
+# Windows
+irm https://get.pinner.xyz/install.ps1 | iex
+```
+
+See [Getting Started](/ipfs/cli/getting-started) for Homebrew, winget, Scoop, dpkg, rpm, and other install methods.
+
+## Global Flags
+
+| Flag | Description |
+|------|-------------|
+| `--json` | Output in JSON format |
+| `--verbose` | Verbose output |
+| `--quiet` | Suppress non-error output |
+| `--unmask` | Show unmasked CIDs |
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `PINNER_API_KEY` | API key for authentication |
+| `PINNER_AUTH_TOKEN` | Auth token (alternative to API key) |
+| `PINNER_CONFIG` | Path to config file |
+| `PINNER_ENDPOINT` | Override API endpoint |
+| `PINNER_NO_COLOR` | Disable colored output |
+| `PINNER_NO_SPINNER` | Disable progress spinner |
+
+## Config File Location
+
+- **Linux/macOS**: `~/.config/pinner/config.toml`
+- **Windows**: `%APPDATA%\pinner\config.toml`
+
+## Command Groups
+
+| Group | Commands |
+|-------|---------|
+| Auth & Account | `auth`, `register`, `confirm-email`, `account`, `setup` |
+| IPFS | `upload`, `pin`, `unpin`, `list`, `status`, `metadata` |
+| Websites | `website` |
+| DNS | `dns` |
+| IPNS | `ipns` |
+| Operations | `operations` |
+| Utility | `config`, `doctor`, `completion` |
+
+---
+
+*Full CLI reference will be generated here from command definitions and help output.*

@@ -1,0 +1,56 @@
+---
+title: Manage Pin Metadata
+description: Add or update key-value metadata on your pinned content
+---
+
+# Manage Pin Metadata
+
+Attach key-value pairs to your pins for organisation and search.
+
+## Set metadata
+
+:::code-group
+```bash [CLI]
+pinner pins update bafybeig... --meta project=acme --meta env=prod
+```
+
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+await pinner.pins.setMetadata(cid, { project: "acme", env: "prod" });
+```
+:::
+
+## Clear metadata
+
+Use `--clear-meta` to remove all existing metadata before setting new values.
+
+:::code-group
+```bash [CLI]
+# Clear all metadata
+pinner pins update bafybeig... --clear-meta
+
+# Clear and set fresh values in one command
+pinner pins update bafybeig... --clear-meta --meta fresh=start
+```
+
+```typescript [SDK]
+// Clear all metadata by passing undefined
+await pinner.pins.setMetadata(cid, undefined);
+```
+:::
+
+## Read metadata
+
+:::code-group
+```bash [CLI]
+pinner pins status bafybeig...
+```
+
+```typescript [SDK]
+const pin = await pinner.pins.get(cid);
+console.log(pin.metadata);
+```
+:::

@@ -1,0 +1,29 @@
+---
+title: TUS Client Libraries
+description: Official TUS resumable upload client libraries for large file uploads.
+---
+
+# TUS (Resumable Upload) Client Libraries
+
+For files over 100MB (the POST upload limit), use resumable uploads via the TUS protocol. Pinner supports the [TUS protocol](https://tus.io/) for reliable, resumable large file transfers.
+
+## Official Clients
+
+| Language | Library | Install |
+|----------|---------|---------|
+| JavaScript | `tus-js-client` | `npm install tus-js-client` |
+| Go | [tus-go-client](https://github.com/tus/tus-go-client) | `go get github.com/tus/tus-go-client` |
+| Python | [tuspy](https://github.com/tus/tuspy) | `pip install tuspy` |
+| Java | [tus-java-client](https://github.com/tus/tus-java-client) | Maven/Gradle |
+
+## When to Use Resumable Uploads (TUS)
+
+- Files over 100MB
+- Unreliable network connections (resumes after interruption)
+- Bulk uploads that need progress tracking
+
+The Pinner SDK uses the TUS protocol internally for large uploads. You only need these clients if you're working directly with the API.
+
+---
+
+*Detailed TUS integration examples will be added as the API reference is generated.*

@@ -1,0 +1,102 @@
+---
+title: IPNS
+description: How IPNS enables updatable content addresses for websites
+---
+
+# IPNS
+
+IPNS (InterPlanetary Name System) is a naming system for IPFS. It lets you associate a stable name with a Content Identifier (CID), and update that association over time. For website hosting, this means you can update your site's content without changing the domain configuration.
+
+## The problem IPNS solves
+
+IPFS uses content addressing: a CID is derived from the content itself. Changed content means a new CID. This is a strength (integrity) but a challenge for websites: every time you update your site, the CID changes.
+
+Without IPNS, updating a website looks like this:
+
+1. Upload new content → get new CID
+2. Update the website record to point at the new CID
+3. Wait for DNS to propagate (if applicable)
+
+With IPNS, step 2 goes away:
+
+1. Upload new content → get new CID
+2. Publish (or republish) the IPNS name to point at the new CID
+3. The domain still points at the same IPNS name, which now resolves to the new CID
+
+## How IPNS works on Pinner
+
+### Keys
+
+An IPNS key is an Ed25519 cryptographic keypair. Every key has two identifiers:
+
+- **IPNS name**: the public key encoded as a CIDv1 with the `libp2p-key` codec (e.g. `k51qzi5...`). This is the stable name you use in DNSLink records and gateways.
+- **Peer ID**: the base36-encoded libp2p peer identity (e.g. `12D3KooW...`). This is used internally for publishing and resolving.
+
+Both are derived from the same public key. You can use either to refer to the key, but the IPNS name (`k51...`) is what appears in `/ipns/` paths.
+
+When you create a key, Pinner returns:
+
+- `id`: the numeric ID used in subsequent API calls
+- `name`: the human-readable label you assigned
+- `ipns_name`: the public IPNS name (e.g. `k51qzi5...`)
+- `peer_id`: the libp2p peer ID (e.g. `12D3KooW...`)
+
+### Creating and importing keys
+
+You can **create** a new Ed25519 keypair on Pinner, or **import** an existing private key (base64-encoded). Importing lets you reuse a key that was generated elsewhere, for example, migrating from another IPFS node.
+
+Pinner also supports **exporting** a key's private key so you can back it up or use it on another node.
+
+### Publishing
+
+Publishing creates a signed IPNS record that associates an IPNS name with a CID. You specify the key ID and the target CID. You can optionally set a TTL (time-to-live) for the record.
+
+Each publish increments the IPNS sequence number and sets a validity period. The IPNS name now resolves to that CID. Publish again with a different CID; same IPNS name, different CID. The domain follows automatically.
+
+### Resolving
+
+Anyone can resolve an IPNS name to find the current CID. Resolution returns the CID the IPNS name currently points to, along with the record's sequence number, expiration time, and whether the record has expired.
+
+### Republishing
+
+IPNS records have a validity period (end-of-life). Republishing re-signs and re-broadcasts the record to extend its lifetime. Pinner also runs a **background republisher** that automatically republishes all keys with a known published CID on a configurable interval (default: every hour). You rarely need to republish manually.
+
+## Auto-created IPNS keys for websites
+
+When you create a website with `target_type=ipns` and provide a CID as the `target_hash`, Pinner automatically:
+
+1. Creates an IPNS key named `{domain}-auto`
+2. Publishes the CID to that key
+3. Links the key to the website
+
+This means you can point a website at an IPNS name without manually creating and publishing a key first. If a key with that name already exists, Pinner reuses it and publishes the new CID.
+
+:::tip
+The auto-created key is linked to the website via `ipns_key_id`. Pinner uses this link to resolve the website's **active CID**, the currently-published content, separately from the IPNS target hash.
+:::
+
+## IPNS vs direct IPFS for websites
+
+| | Direct IPFS | IPNS |
+|---|-----------|------|
+| **Update method** | Change website `target_hash` | Republish IPNS name |
+| **Domain config changes** | Yes, every update | No, set once |
+| **Resolution speed** | One hop (CID direct) | Two hops (IPNS → CID) |
+| **Best for** | Rarely updated sites | Frequently updated sites, CI/CD |
+
+The resolution overhead of IPNS is small, typically under a second on Pinner's infrastructure. For most sites, it's not noticeable.
+
+## IPNS key lifecycle
+
+```
+Create key → Publish CID → (update) → Republish CID → ... → Delete key
+```
+
+- **Create**: Generate an Ed25519 keypair on Pinner, or import an existing key
+- **Publish**: Sign an IPNS record associating the key's name with a CID
+- **Republish**: Re-sign the record to extend its validity (automatic via background republisher)
+- **Delete**: Soft-delete the key
+
+:::warning
+Pinner prevents you from deleting an IPNS key that is referenced by an active website. You must update or remove the website first. If you manage to delete a key that a domain depends on, that domain will stop resolving.
+:::

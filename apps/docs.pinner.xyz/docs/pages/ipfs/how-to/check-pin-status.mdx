@@ -1,0 +1,35 @@
+---
+title: Check Pin Status
+description: Check whether your pinned content is queued, pinning, pinned, or failed
+---
+
+# Check Pin Status
+
+Find out whether your content is queued, pinning, pinned, or failed.
+
+:::code-group
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const pin = await pinner.pins.get(CID.parse("bafybeig..."));
+console.log(pin.status);
+// → "pinned"
+```
+
+```bash [CLI]
+pinner pins status bafybeig...
+```
+:::
+
+## What the statuses mean
+
+| Status | Meaning |
+|--------|---------|
+| `queued` | Waiting to be pinned |
+| `pinning` | Pin is being processed |
+| `pinned` | Stored and retrievable |
+| `failed` | Pinning failed; check the error message |
+
+For a deeper explanation of these states, see [Pin Lifecycle](/ipfs/concepts/pin-lifecycle).

@@ -1,0 +1,59 @@
+---
+title: Quickstart
+description: Deploy your first website to decentralized storage in under 5 minutes
+---
+
+# Quickstart
+
+Deploy a static site to IPFS and make it accessible via a custom domain — all in under 5 minutes.
+
+You need a Pinner account and an API key. Don't have one? [Create an API key](/account/api-tokens).
+
+:::code-group
+```bash [CLI]
+# 1. Authenticate (interactive — prompts for email and password)
+pinner auth
+
+# 2. Build your site (example with Vite)
+npm run build
+
+# 3. Deploy
+pinner website deploy ./dist
+
+# Done — your site is live on IPFS
+```
+
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY });
+
+// Create a website pointing to your Content Identifier (CID)
+const site = await pinner.websites.createWebsite({
+  domain: "mysite.pinner.xyz",
+  target_type: "ipfs",
+  target_hash: "QmYourCIDHere",
+});
+
+console.log("Site ID:", site.id);
+console.log("Domain:", site.domain);
+```
+:::
+
+### Non-interactive (CI/CD)
+
+If you already have an API key from another machine or for automation:
+
+```bash
+pinner auth YOUR_API_KEY
+```
+
+## What just happened
+
+The CLI uploaded your `./dist` directory to IPFS and created a website record that maps a domain to that content. The SDK does the same thing — you give it a domain and a CID, and Pinner handles the rest.
+
+## Next steps
+
+- [Deploy a static site end-to-end](/websites/tutorials/deploy-static-site) — a full walkthrough with custom domains
+- [Add a custom domain](/websites/how-to/custom-domains)
+- [Understand how website hosting works](/websites/concepts/how-hosting-works)

@@ -1,0 +1,239 @@
+---
+title: Configuration
+description: "Configure the Pinner SDK: endpoints, gateways, storage backends, and environment-specific setups."
+---
+
+# Configuration
+
+The `PinnerConfig` interface controls how the SDK connects, where it stores local data, and which gateway it uses to retrieve content.
+
+## PinnerConfig interface
+
+```typescript
+interface PinnerConfig {
+  /** JWT authentication token. Required. */
+  jwt: string;
+
+  /** API endpoint. Defaults to "https://ipfs.pinner.xyz". */
+  endpoint?: string;
+
+  /** IPFS gateway for content retrieval. Defaults to "https://inbrowser.link". */
+  gateway?: string;
+
+  /** Allowed MIME types. If omitted, all types are accepted. */
+  allowedFileTypes?: string[];
+
+  /** Custom fetch implementation. */
+  fetch?: typeof fetch;
+
+  /** Custom datastore for Helia. Highest storage priority. */
+  datastore?: Datastore;
+
+  /** Custom storage instance for Helia blockstore and datastore. */
+  storage?: Storage;
+
+  /** Base name for default Helia storage. Only used when neither datastore nor storage are provided. Defaults to "pinner-helia-data". */
+  datastoreName?: string;
+
+  /** Upload request timeout in milliseconds. Applied to XHR uploads (TUS uses retryDelays instead). Defaults to 120_000. */
+  timeout?: number;
+
+  /** Number of retry attempts for failed uploads. Applied to XHR uploads (TUS uses retryDelays instead). Defaults to 3. */
+  retries?: number;
+}
+```
+
+The interface is the same in browser and Node; only the values you pass differ.
+
+## Endpoint
+
+By default the SDK talks to `https://ipfs.pinner.xyz`. Point it at a different host for staging or self-hosted instances:
+
+:::code-group
+```typescript [Browser]
+const pinner = new Pinner({
+  jwt: "YOUR_JWT",
+  endpoint: "https://staging.ipfs.pinner.xyz"
+});
+```
+
+```typescript [Node.js]
+const pinner = new Pinner({
+  jwt: process.env.PINNER_AUTH_TOKEN,
+  endpoint: "https://staging.ipfs.pinner.xyz"
+});
+```
+:::
+
+## Gateway
+
+The gateway URL is used when the SDK resolves CIDs to retrievable HTTP URLs. The default is `https://inbrowser.link`.
+
+For Pinner-pinned content, `https://ipfs.pub` offers lower latency since it serves from the same infrastructure that stores your pins:
+
+:::code-group
+```typescript [Browser]
+const pinner = new Pinner({
+  jwt: "YOUR_JWT",
+  gateway: "https://ipfs.pub"
+});
+```
+
+```typescript [Node.js]
+const pinner = new Pinner({
+  jwt: process.env.PINNER_AUTH_TOKEN,
+  gateway: "https://inbrowser.link"
+});
+```
+:::
+
+## Custom fetch
+
+Pass your own `fetch` when you need request interceptors, custom headers, or a non-global HTTP client.
+
+:::code-group
+```typescript [Browser]
+const pinner = new Pinner({
+  jwt: "YOUR_JWT",
+  fetch: window.fetch
+});
+```
+
+```typescript [Node.js]
+import { fetch } from "undici";
+
+const pinner = new Pinner({
+  jwt: process.env.PINNER_AUTH_TOKEN,
+  fetch
+});
+```
+:::
+
+## Storage configuration
+
+The SDK uses Helia under the hood. Storage is resolved in priority order:
+
+| Priority | Option | What it does |
+|----------|--------|--------------|
+| 1 (highest) | `datastore` | Custom `Datastore` instance, used directly by Helia. |
+| 2 | `storage` | Custom `unstorage` instance applied to both blockstore and datastore. |
+| 3 | `datastoreName` | Custom base name for the default storage driver. Only used when neither `datastore` nor `storage` are provided. |
+| 4 (default) | *(none)* | Uses `"pinner-helia-data"` as the base name. |
+
+### Browser: storage levels
+
+```typescript
+// Level 1: default (IndexedDB with base "pinner-helia-data")
+const pinner = new Pinner({ jwt: "YOUR_JWT" });
+
+// Level 2: custom base name
+const pinner = new Pinner({
+  jwt: "YOUR_JWT",
+  datastoreName: "my-app-storage"
+});
+
+// Level 3: custom storage instance
+import { createStorage } from "unstorage";
+import indexeddbDriver from "unstorage/drivers/indexedb";
+
+const storage = createStorage({
+  driver: indexeddbDriver({ base: "my-app" })
+});
+
+const pinner = new Pinner({ jwt: "YOUR_JWT", storage });
+
+// Level 4: custom datastore (highest priority)
+import { MemoryDatastore } from "interface-datastore";
+
+const datastore = new MemoryDatastore();
+const pinner = new Pinner({ jwt: "YOUR_JWT", datastore });
+```
+
+### Node.js: storage levels
+
+```typescript
+// Level 1: default (filesystem in ./.pinner-*)
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN });
+
+// Level 2: custom base name
+const pinner = new Pinner({
+  jwt: process.env.PINNER_AUTH_TOKEN,
+  datastoreName: "my-app-storage"
+});
+
+// Level 3: custom storage instance
+import { createStorage } from "unstorage";
+import fsDriver from "unstorage/drivers/fs";
+
+const storage = createStorage({
+  driver: fsDriver({ base: "./my-storage" })
+});
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN, storage });
+
+// Level 4: custom datastore (highest priority)
+import { MemoryDatastore } from "interface-datastore";
+
+const datastore = new MemoryDatastore();
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN, datastore });
+```
+
+## Timeout
+
+By default, XHR uploads time out after 120 000 ms (2 minutes). Pass a custom `timeout` value in milliseconds to increase or decrease the limit. Note that TUS uploads do not use this option; they rely on their own `retryDelays` mechanism instead.
+
+:::code-group
+```typescript [Browser]
+const pinner = new Pinner({
+  jwt: "YOUR_JWT",
+  timeout: 300_000  // 5 minutes
+});
+```
+
+```typescript [Node.js]
+const pinner = new Pinner({
+  jwt: process.env.PINNER_AUTH_TOKEN,
+  timeout: 300_000  // 5 minutes
+});
+```
+:::
+
+## Retries
+
+The number of retry attempts for failed XHR uploads. Defaults to `3`. As with `timeout`, this only applies to XHR uploads; TUS uploads use their own retry mechanism.
+
+:::code-group
+```typescript [Browser]
+const pinner = new Pinner({
+  jwt: "YOUR_JWT",
+  retries: 5
+});
+```
+
+```typescript [Node.js]
+const pinner = new Pinner({
+  jwt: process.env.PINNER_AUTH_TOKEN,
+  retries: 5
+});
+```
+:::
+
+## Environment-specific setup
+
+Keep configuration out of your codebase. Use environment variables and separate config modules for dev versus prod.
+
+```typescript title="config/development.ts"
+export const config = {
+  jwt: process.env.DEV_PINNER_AUTH_TOKEN,
+  endpoint: "https://staging.ipfs.pinner.xyz"
+};
+```
+
+```typescript title="config/production.ts"
+export const config = {
+  jwt: process.env.PROD_PINNER_AUTH_TOKEN,
+  endpoint: "https://ipfs.pinner.xyz"
+};
+```
+
+Feed the config object straight into `new Pinner(config)` and the SDK picks the right endpoint without branching logic in your app code.

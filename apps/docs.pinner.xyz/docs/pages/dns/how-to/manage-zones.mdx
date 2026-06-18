@@ -1,0 +1,76 @@
+---
+title: Manage DNS Zones
+description: Create, list, and delete DNS zones for custom domains
+---
+
+# Manage DNS Zones
+
+DNS zones are required for custom domains on Website Hosting. Before you can add records, you need a zone for your domain. Each zone starts in `pending_nameserver` status and moves to `active` once its nameservers are verified.
+
+## List zones
+
+```bash
+pinner dns zones list
+```
+
+Returns all zones in your account with their ID, domain name, and status. The possible statuses are:
+
+- `pending_nameserver`: the zone's nameservers have not yet been verified
+- `active`: nameserver delegation has been verified
+
+## Create a zone
+
+```bash
+# Create a zone for your domain
+pinner dns zones create --domain example.com
+
+# Optionally specify custom nameservers
+pinner dns zones create --domain example.com --nameservers ns1.example.com,ns2.example.com
+```
+
+This creates the zone in `pending_nameserver` status. Update your domain registrar to point to the Pinner name servers, then validate the zone (see below).
+
+## Get zone details
+
+```bash
+# By domain name
+pinner dns zones get example.com
+
+# By numeric zone ID
+pinner dns zones get 42
+```
+
+Displays the zone's ID, domain, status, and timestamps.
+
+## Validate zone delegation
+
+Check whether a zone's nameservers are properly delegated:
+
+```bash
+pinner dns zones validate example.com
+```
+
+Returns a validation result showing whether delegation is valid, a descriptive message, and (if validation fails) the Pinner name servers you should point to. Re-run after updating your registrar until the result shows valid.
+
+## Delete a zone
+
+```bash
+# By domain name
+pinner dns zones delete example.com
+
+# By numeric zone ID
+pinner dns zones delete 42
+```
+
+:::warning
+Deleting a zone removes all records in it. This breaks any custom domains that depend on those records.
+:::
+
+## Typical workflow
+
+1. Create a zone for your domain: `pinner dns zones create --domain example.com`
+2. Validate the zone: `pinner dns zones validate example.com`
+3. Point your domain's NS records to the Pinner name servers shown in the validation output
+4. Re-validate until the zone status becomes `active`
+5. Add records to the zone (see [Manage DNS Records](/dns/how-to/manage-records))
+6. Use the domain with Website Hosting

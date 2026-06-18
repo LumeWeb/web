@@ -1,0 +1,114 @@
+---
+title: Delete / Unpin Content
+description: Remove pinned content you no longer need
+---
+
+# Delete / Unpin Content
+
+Remove a pin by its CID. Once unpinned, the content is no longer stored by Pinner and may become unavailable on the IPFS network.
+
+:::info
+Unpinning removes the content from Pinner's storage. If other nodes on the IPFS network still pin the same CID, the content remains accessible through those nodes. If your CID is only pinned by Pinner, it may become unreachable after unpinning.
+:::
+
+## Unpin a single CID
+
+:::code-group
+```bash [CLI]
+pinner pins rm bafybeig... --force
+```
+
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+await pinner.unpin("bafybeig...");
+```
+:::
+
+The CLI prints `Unpinned CID: <cid>` on success. The SDK method resolves when the pin is removed.
+
+Without `--force`, the CLI prompts for confirmation:
+
+```bash
+pinner pins rm bafybeig...
+# → "Are you sure you want to unpin bafybeig...?"
+```
+
+## Unpin multiple CIDs
+
+Remove several pins in one command. The CLI accepts space-separated CIDs.
+
+:::code-group
+```bash [CLI]
+pinner pins rm bafybeig...abc bafybeig...def --force --parallel 5
+```
+
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const cids = ["bafybeig...abc", "bafybeig...def"];
+
+for (const cid of cids) {
+  await pinner.unpin(cid);
+  console.log(`Unpinned ${cid}`);
+}
+```
+:::
+
+The CLI's `--parallel` flag controls how many unpin operations run concurrently. `--continue` keeps going even if some operations fail; for example:
+
+```bash
+pinner pins rm cid1 cid2 cid3 --force --parallel 3 --continue
+```
+
+## Unpin from a file
+
+Read CIDs from a text file (one per line):
+
+```bash
+pinner pins rm --file cids-to-remove.txt --force
+```
+
+## Unpin by request ID
+
+If you have a pin request ID instead of a CID (for example, from a failed upload), remove it by request ID:
+
+```typescript
+await pinner.unpinByRequestId("request-id-here");
+```
+
+The CLI does not expose request IDs directly; use `pinner pins ls` to find the CID, then unpin by CID.
+
+## Unpin all pins
+
+Remove every pin at once. Requires `--force` for safety.
+
+```bash
+pinner pins rm --all --force
+```
+
+Combine with `--status` to unpin only pins in a specific state: for example, remove all failed pins:
+
+```bash
+pinner pins rm --all --status failed --force
+```
+
+## Dry run
+
+Preview what would be removed without making any changes:
+
+```bash
+pinner pins rm bafybeig... --dry-run
+```
+
+The CLI prints the operations it would perform, including the endpoint and CIDs, but does not actually unpin anything.
+
+## Next steps
+
+- [List your pins](/ipfs/how-to/list-pins)
+- [Check a specific pin's status](/ipfs/how-to/check-pin-status)
+- [Understand the pin lifecycle](/ipfs/concepts/pin-lifecycle)

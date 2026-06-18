@@ -1,0 +1,123 @@
+---
+title: Pinata Adapter Reference
+description: Full method reference for the Pinner Pinata v2 and legacy adapters.
+---
+
+# Pinata Adapter Reference
+
+Complete method reference for the Pinata compatibility adapters. For setup instructions, see the [Migration Guide](/migration/pinata).
+
+## v2 Adapter
+
+The v2 adapter mirrors the Pinata SDK 2.x structure with `public`/`private` namespaces. It uses a builder pattern: chain methods and call `.execute()`.
+
+### Upload
+
+```typescript
+// Upload a single file
+const result = await adapter.upload.public.file(file)
+  .name("my-file")
+  .keyvalues({ category: "image" })
+  .execute();
+
+// Upload JSON
+const jsonResult = await adapter.upload.public.json({ hello: "world" })
+  .name("data")
+  .execute();
+
+// Upload multiple files (directory)
+const dirResult = await adapter.upload.public.fileArray([file1, file2])
+  .name("my-dir")
+  .execute();
+
+// Pin by CID
+const pinResult = await adapter.upload.public.cid("Qm...").execute();
+
+// Base64 upload
+const b64Result = await adapter.upload.public.base64(base64String).execute();
+```
+
+### Files
+
+```typescript
+// List files (returns a thenable builder)
+const files = await adapter.files.public.list()
+  .name("my-file")
+  .limit(10)
+  .order("DESC");
+
+// Get a specific file
+const file = await adapter.files.public.get("Qm...");
+
+// Delete files
+await adapter.files.public.delete(["Qm..."]);
+
+// Update file metadata
+await adapter.files.public.update({ id: "Qm...", keyvalues: { tags: "updated" } });
+
+// Pin queue
+const queue = await adapter.files.public.queue().limit(10);
+```
+
+### Gateways
+
+```typescript
+// Get gateway info for a CID
+const info = adapter.gateways.public.get("Qm...");
+console.log(info.url); // "https://QmExample.ipfs.inbrowser.link"
+
+// Convert IPFS URL to gateway URL
+const gatewayUrl = await adapter.gateways.public.convert("ipfs://Qm...");
+```
+
+## Legacy Adapter
+
+The legacy adapter uses flat method names matching Pinata SDK 1.x. No builder pattern; pass options directly.
+
+```typescript
+// Upload a file
+const result = await adapter.pinFileToIPFS(file, {
+  metadata: { name: "my-file", keyvalues: { category: "image" } }
+});
+
+// Upload JSON
+const jsonResult = await adapter.pinJSONToIPFS({ hello: "world" }, {
+  metadata: { name: "data" }
+});
+
+// Pin by CID
+const pinResult = await adapter.pinByHash("Qm...", {
+  metadata: { name: "pinned-file" }
+});
+
+// List pinned files
+const { files } = await adapter.pinList({ limit: 10 });
+
+// Unpin
+await adapter.unpin("Qm...");
+
+// Update metadata
+await adapter.hashMetadata("Qm...", { tags: "updated" });
+
+// Pin jobs
+const { rows } = await adapter.pinJobs({ limit: 10 });
+```
+
+## Unsupported features
+
+Some Pinata features throw when called through the adapter because Pinner has no equivalent:
+
+ Feature | v2 Adapter | Legacy Adapter | What to do instead |
+---------|:----------:|:--------------:|-------------------|
+ Private uploads | Throws `notSupported` | Throws `notSupported` | Use Pinner's native API |
+ Groups | `list()` returns empty; create/add/remove throw | N/A | Use key-value metadata for categorisation |
+ Signed URLs | Throws `notSupported` | Returns gateway URL fallback | Use public gateway URLs |
+ | Swap CID | Throws `notSupported` | Throws `notSupported` | Not available; delete and re-pin |
+ URL uploads | Throws `notSupported` | N/A | Fetch the URL yourself and upload the file |
+ Analytics | Returns empty data | Returns empty data | Not available |
+
+## Next steps
+
+- [Code Examples](/migration/pinata/examples): side-by-side Pinata vs Pinner vs native API code
+- [Migration Guide](/migration/pinata): setup and step-by-step instructions
+- [SDK Getting Started](/ipfs/sdk/getting-started): using Pinner without the adapter

@@ -1,0 +1,37 @@
+---
+title: Websites & Domains
+description: Host content on IPFS and make it accessible through a domain name
+---
+
+# Websites & Domains
+
+Pinner lets you host content on IPFS and make it accessible through a domain name. There are two paths depending on what kind of name you're using.
+
+## Which path are you on?
+
+### I have an onchain name (`.eth`, etc.)
+
+Onchain names resolve through the blockchain, not DNS. No DNS configuration, no SSL certificates: just point your name at your content and set the contenthash.
+
+→ [**Onchain Names Quickstart**](/onchain/quickstart)
+
+### I have a DNS domain (`.com`, `.org`, etc.)
+
+DNS domains resolve through traditional nameservers. Pinner can host your DNS, provision SSL certificates, and serve your content through ipfs.pub.
+
+→ [**Website Hosting Quickstart**](/hosting/quickstart)
+
+---
+
+## What's the difference?
+
+| | Onchain Names | Website Hosting |
+|---|---|---|
+| **Name type** | `.eth` and other onchain names | `.com`, `.org`, `.io`, any DNS domain |
+| **Resolution** | On-chain contenthash → IPNS → IPFS | DNS → CNAME/DNSLink → ipfs.pub |
+| **Setup** | `pinner point` + set contenthash | Create website + configure DNS + validate |
+| **DNS hosting** | Not needed | Optional (Pinner can host your DNS) |
+| **SSL** | Not needed (handled by resolver) | Automatic via Let's Encrypt |
+| **Updates** | `pinner point` again (same contenthash) | Republish IPNS or update website target |
+
+Both paths serve content from IPFS. The difference is how the domain reaches that content: through the blockchain or through DNS.

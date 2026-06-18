@@ -1,0 +1,85 @@
+---
+title: Onchain Names Quickstart
+description: Point your onchain name at IPFS content in under a minute
+---
+
+# Onchain Names Quickstart
+
+If you have an onchain name like `.eth`, you can point it at your IPFS content with a single command. No DNS configuration, no SSL certificates, no domain validation: just point and go.
+
+## What you need
+
+- An onchain name (e.g., `vitalik.eth`)
+- Content already pinned to IPFS (you'll need the CID)
+- The [Pinner CLI installed](/ipfs/cli/getting-started) and [authenticated](/ipfs/cli/auth)
+
+## Point your name at content
+
+```bash
+pinner point vitalik.eth --cid bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e
+```
+
+You'll see output like:
+
+```
+Domain pointed successfully
+
+Name          vitalik.eth
+CID           bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e
+IPNS Name     k51qzi5uqu5djx...
+Contenthash   ipns://k51qzi5uqu5djx...
+```
+
+## Set your contenthash
+
+Copy the `Contenthash` value and set it in your name manager. For ENS names, this is the `contenthash` record in your ENS controller.
+
+Once set, your name resolves to your content.
+
+## Verify
+
+Visit your name through a resolver:
+
+```
+https://vitalik.eth.limo
+```
+
+Your content should load. If it doesn't, check that:
+
+1. The contenthash is set correctly in your name manager
+2. The CID matches your content
+3. You're using the IPNS contenthash (starts with `ipns://`), not a raw CID
+
+## Update your content
+
+When you have new content, just point again with the new CID:
+
+```bash
+pinner point vitalik.eth --cid bafybeig...updated-cid
+```
+
+The same IPNS key is reused and republished. The contenthash in your name manager stays the same: it points at the IPNS name, not the CID directly.
+
+## Remove a pointing
+
+```bash
+pinner unpoint vitalik.eth
+```
+
+This deletes the IPNS key. The name will no longer resolve to IPFS content.
+
+:::warning
+`unpoint` deletes the IPNS key. Any name pointing at this IPNS name will stop resolving immediately.
+:::
+
+## How it works
+
+Under the hood, `point` creates an IPNS key named after your domain, publishes your CID to it, and gives you the contenthash to set in your name manager. When someone visits your name, the resolver follows the contenthash → IPNS → CID path to serve your content.
+
+For more detail, see [How Onchain Names Work](/onchain/concepts/how-onchain-names-work) and the [point & unpoint reference](/onchain/how-to/point-unpoint).
+
+## Next steps
+
+- [Point & unpoint reference](/onchain/how-to/point-unpoint): all flags, JSON output, troubleshooting
+- [How onchain names work](/onchain/concepts/how-onchain-names-work): IPNS, contenthash, and the resolution path
+- [IPNS and mutable addresses](/hosting/concepts/ipns): deeper dive into IPNS

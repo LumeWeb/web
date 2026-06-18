@@ -1,0 +1,123 @@
+---
+title: CLI Config
+description: View and change CLI configuration settings
+---
+
+# CLI Config
+
+View and change CLI configuration from the command line.
+
+## Usage
+
+```bash
+# Show all configuration values
+pinner config
+
+# Get a specific value
+pinner config get <key>
+
+# Set a value
+pinner config set <key> <value>
+```
+
+## Show all configuration
+
+```bash
+pinner config
+```
+
+Displays all configuration values in a table with Key, Value, Env, and Description columns.
+
+## Get a value
+
+```bash
+pinner config get base_endpoint
+pinner config get secure
+```
+
+## Set a value
+
+```bash
+# Change the base endpoint
+pinner config set base_endpoint "pinner.xyz"
+
+# Disable HTTPS
+pinner config set secure false
+
+# Increase retry attempts
+pinner config set max_retries 5
+
+# Set memory limit for CAR generation (MB)
+pinner config set memory_limit 256
+
+# Set IPFS gateway override
+pinner config set gateway_endpoint "https://inbrowser.link"
+
+# Set default API timeout
+pinner config set default_timeout 60s
+
+# Preview a change without saving
+pinner config set memory_limit 256 --dry-run
+```
+
+## Configuration keys
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `base_endpoint` | string | `""` | Base URL for Pinner service (e.g., `pinner.xyz`). Subdomains are derived automatically (e.g., `account.pinner.xyz`, `ipfs.pinner.xyz`). Leave empty for default. |
+| `secure` | bool | `true` | Use HTTPS for endpoints |
+| `max_retries` | int | `3` | Maximum retry attempts for failed operations (0–10) |
+| `memory_limit` | int | `100` | Memory limit in MB for CAR generation (1–10240) |
+| `gateway_endpoint` | string | `""` | IPFS gateway URL (e.g., `https://inbrowser.link`). Falls back to the `ipfs` subdomain of the base endpoint. |
+| `default_timeout` | duration | `30s` | Default timeout for API operations (e.g., `30s`, `1m`) |
+| `upload_timeout` | duration | `5m` | Timeout for upload, download, and benchmark operations (e.g., `5m`, `10m`) |
+| `sync_timeout` | duration | `1m` | Timeout for reconciliation, cleanup, and sync operations (e.g., `1m`, `2m`) |
+| `auth_token` | string | `""` | JWT authentication token for API access. Managed by `pinner auth`. |
+
+## Environment variables
+
+Every configuration key can also be set via an environment variable with the `PINNER_` prefix, uppercased and with hyphens replaced by underscores:
+
+```bash
+# Examples
+export PINNER_BASE_ENDPOINT="pinner.xyz"
+export PINNER_SECURE=false
+export PINNER_MAX_RETRIES=5
+export PINNER_MEMORY_LIMIT=256
+export PINNER_GATEWAY_ENDPOINT="https://inbrowser.link"
+export PINNER_AUTH_TOKEN="your-token"
+```
+
+| Config key | Environment variable |
+|------------|----------------------|
+| `base_endpoint` | `PINNER_BASE_ENDPOINT` |
+| `secure` | `PINNER_SECURE` |
+| `max_retries` | `PINNER_MAX_RETRIES` |
+| `memory_limit` | `PINNER_MEMORY_LIMIT` |
+| `gateway_endpoint` | `PINNER_GATEWAY_ENDPOINT` |
+| `default_timeout` | `PINNER_DEFAULT_TIMEOUT` |
+| `upload_timeout` | `PINNER_UPLOAD_TIMEOUT` |
+| `sync_timeout` | `PINNER_SYNC_TIMEOUT` |
+| `auth_token` | `PINNER_AUTH_TOKEN` |
+
+## Configuration file
+
+The CLI stores configuration in a YAML file on disk. The auth token is managed separately by `pinner auth`.
+
+| Platform | Path |
+|----------|------|
+| Linux / macOS | `~/.config/pinner/config.yaml` |
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--dry-run` | Preview changes without saving |
+
+## Subcommands
+
+| Subcommand | Description |
+|------------|-------------|
+| *(none)* | Show all configuration values |
+| `get <key>` | Get a specific configuration value |
+| `set <key> <value>` | Set a configuration value |

@@ -1,0 +1,67 @@
+---
+title: CIDs (Content Identifiers)
+description: What CIDs are, how versions differ, and how Pinner normalizes to CIDv1
+---
+
+# CIDs (Content Identifiers)
+
+A CID is a unique address for a piece of content on IPFS. It's derived from the content itself; the same bytes always produce the same CID. Change a single byte and the CID changes completely.
+
+CIDs are how IPFS finds content. Instead of asking "get this file from that server," you ask "get the content with this CID." Any node that has the content can serve it.
+
+## CIDv0
+
+The original format. CIDv0 always starts with `Qm` and supports only the DAG-PB codec (one content type). It is implicitly base58btc-encoded.
+
+```
+QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco
+```
+
+CIDv0 is still common but is considered a legacy format. Pinner accepts CIDv0 as input but immediately normalizes it to CIDv1 internally (see below).
+
+## CIDv1
+
+The modern format. CIDv1 includes a multicodec identifier so it can represent many content types, not just DAG-PB. It also carries an explicit multibase prefix, which means the same CIDv1 can appear in different text encodings. By convention, IPFS tools default to base32 encoding (lowercase), which is why CIDv1 strings typically start with `b`.
+
+```
+bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq
+```
+
+The first few characters of a base32 CIDv1 hint at its codec:
+
+| Prefix | Codec | Example |
+|--------|-------|---------|
+| `bafybei…` | DAG-PB (0x70) | Content addressed as a protobuf MerkleDAG node |
+| `bafkrei…` | Raw (0x55) | Raw leaf data, no DAG wrapping |
+| `bafyrci…` | DAG-CBOR (0x71) | Content addressed as a CBOR-encoded IPLD node |
+
+CIDv1 is more flexible, more self-describing, and works better with modern IPFS tools and gateways.
+
+## How Pinner handles CIDs
+
+Pinner always normalizes to CIDv1, even when you upload content that would have a CIDv0. This gives you:
+
+- **One consistent format** across all your content
+- **Better interoperability** with modern gateways and tools
+- **Support for multiple content codecs** beyond just DAG-PB
+
+The content itself doesn't change; only the way the address is written.
+
+### Uploads default to CIDv1
+
+When Pinner builds CAR files from your uploads, it uses CIDv1. The supported codecs are:
+
+- **DAG-PB**: the default for files and directories uploaded through Pinner
+- **Raw**: used for leaf data blocks
+- **DAG-CBOR**: supported for IPLD nodes encoded as CBOR
+
+### Known limitations
+
+- **CIDv0 is not accepted as an IPNS target.** Because CIDv0 strings use the same base58btc multihash encoding as libp2p peer IDs, they can be confused with peer IDs. Use the CIDv1 equivalent instead.
+- **CAR uploads must have a single root.** CAR files with zero or multiple roots are rejected. Most IPFS tools produce single-root CARs by default.
+
+## Key mental model
+
+- A CID is an address, not a URL. It doesn't tell you where the content is, only what it is.
+- The same content always has the same CID, regardless of who pinned it or where.
+- CIDv0 and CIDv1 can refer to the same content; they're just different ways to write the address. Pinner always stores and returns the CIDv1 form.

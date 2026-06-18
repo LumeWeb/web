@@ -1,0 +1,125 @@
+---
+title: Getting Started with the CLI
+description: Install the Pinner CLI, set it up, and verify everything works
+---
+
+# Getting Started with the CLI
+
+Install the Pinner CLI, walk through the setup wizard, and confirm everything works.
+
+If you just want to pin a file right now, see [Quickstart](/ipfs/quickstart).
+
+## Install
+
+:::code-group
+```bash [macOS / Linux]
+curl -fsSL https://get.pinner.xyz | sh
+```
+
+```powershell [Windows]
+irm https://get.pinner.xyz/install.ps1 | iex
+```
+:::
+
+The installer detects your package manager and uses it automatically. On macOS it prefers Homebrew; on Linux it tries `dpkg` then `rpm` before falling back to a binary download. On Windows it tries winget, then Scoop, then falls back to a binary download. All methods verify SHA256 checksums.
+
+### Other install methods
+
+The universal installer handles most cases. Use these when you need more control.
+
+| Method | Command |
+|--------|---------|
+| Homebrew | `brew install lumeweb/tap/pinner` |
+| winget | `winget install Pinner.Cli` |
+| Scoop | `scoop bucket add lumeweb https://github.com/LumeWeb/scoop-bucket` then `scoop install pinner` |
+| Debian/Ubuntu | `sudo dpkg -i pinner-cli_VERSION_linux_amd64.deb` |
+| Fedora/RHEL | `sudo rpm -i pinner-cli_VERSION_linux_amd64.rpm` |
+| Go | `go install go.lumeweb.com/pinner-cli/cmd/pinner@latest` |
+| Binary | Download from [GitHub Releases](https://github.com/LumeWeb/pinner-cli/releases) |
+
+<details>
+<summary>Installer flags</summary>
+
+**macOS / Linux** (`install.sh`):
+
+| Flag | Description |
+|------|-------------|
+| `--system` | Install to `/usr/local/bin` (requires sudo if not writable) |
+| `--bin-dir DIR` | Install to a custom directory |
+| `--arch ARCH` | Override detected architecture (`amd64` or `arm64`) |
+| `--no-pkg` | Skip package manager detection, use binary install |
+| `--uninstall` | Remove the Pinner CLI |
+| `--debug` | Enable verbose output |
+
+**Windows** (`install.ps1`):
+
+| Flag | Description |
+|------|-------------|
+| `-System` | Install to Program Files (requires admin) |
+| `-NoPkg` | Skip winget/scoop detection |
+| `-CI` | Enable CI mode (also activated by `CI=true` env var) |
+| `-Uninstall` | Remove the Pinner CLI |
+
+</details>
+
+## Set up
+
+After installing, run the setup wizard:
+
+```bash
+pinner setup
+```
+
+The wizard walks you through:
+
+- **Authentication**: log in or register
+- **Configuration**: set API endpoint, memory limits, and other options
+
+If you've already authenticated or configured, the wizard detects that and skips the step.
+
+### Skip steps
+
+```bash
+# Skip authentication (already logged in)
+pinner setup --skip-auth
+
+# Skip configuration (already configured)
+pinner setup --skip-config
+
+# Reset everything and start fresh
+pinner setup --reset
+```
+
+### Non-interactive environments
+
+For CI, Docker, or scripts, skip the wizard and use individual commands:
+
+```bash
+# Authenticate with a JWT token
+pinner auth YOUR_TOKEN
+
+# Or log in interactively
+pinner auth --email you@example.com
+
+# Configure
+pinner config set memory_limit 256
+pinner config set secure true
+```
+
+## Verify
+
+```bash
+# Print version
+pinner --version
+
+# Display diagnostic information for troubleshooting
+pinner doctor
+```
+
+If `pinner doctor` reports problems, see [CLI Doctor](/ipfs/cli/doctor) for troubleshooting.
+
+## Next steps
+
+- [Upload your first file](/ipfs/quickstart)
+- [Configure CLI settings](/ipfs/cli/config)
+- [Manage API keys](/ipfs/cli/auth)
