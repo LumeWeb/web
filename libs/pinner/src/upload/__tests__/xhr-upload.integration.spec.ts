@@ -26,7 +26,7 @@ describe("XHRUploadHandler Integration", () => {
       expect(result.cid).not.toBe("");
 
       const { CID } = await import("multiformats/cid");
-      expect(() => CID.parse(result.cid)).not.toThrow();
+      expect(() => CID.parse(result.cid!)).not.toThrow();
 
       handler.destroy();
     });

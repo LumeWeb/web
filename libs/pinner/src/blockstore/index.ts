@@ -1,2 +1,2 @@
 export { createBlockstore, createDatastore, setDriverFactory } from "./unstorage";
-export type { UnstorageBlockstoreOptions } from "./unstorage-base";
+export type { UnstorageBlockstoreOptions, DriverFactory } from "./unstorage-base";
