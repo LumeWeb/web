@@ -1,0 +1,38 @@
+---
+title: API Reference
+description: Pinner REST API reference and interactive documentation.
+---
+
+# API Reference
+
+Pinner has two APIs, each with its own Swagger UI for interactive exploration.
+
+## IPFS Plugin API
+
+The primary API for IPFS pinning, uploads, websites, DNS, and IPNS. Served at `ipfs.pinner.xyz`.
+
+[**Open in Swagger UI →**](https://ipfs.pinner.xyz/swagger/)
+
+The Pinning endpoints (`/pins`) are compatible with the [IPFS Pinning Service API specification](https://ipfs.github.io/pinning-services-api-spec/).
+
+## Meta API
+
+Portal metadata, plugin bundles, and authentication redirect. Served at `pinner.xyz`.
+
+[**Open in Swagger UI →**](https://pinner.xyz/swagger/)
+
+## Authentication
+
+All IPFS API endpoints require a JWT token obtained from the Portal authentication service, passed in the `Authorization` header:
+
+```
+Authorization: Bearer <your-api-key>
+```
+
+See [API Keys](/account/api-tokens) for key management.
+
+## Using the SDK instead of raw HTTP
+
+The [Pinner SDK](/ipfs/sdk/getting-started) wraps authentication, retries, progress events, and TUS resumable uploads. For most use cases, the SDK is the recommended way to interact with the API; no need to integrate TUS libraries or manage JWT tokens yourself.
+
+If you need a type-safe client without the SDK, generate one from the [OpenAPI spec](https://ipfs.pinner.xyz/swagger.json) using tools like [Orval](https://orval.dev/) or [openapi-typescript](https://openapi-ts.pages.dev/).

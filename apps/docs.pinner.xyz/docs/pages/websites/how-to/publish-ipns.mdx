@@ -1,0 +1,112 @@
+---
+title: Publish with IPNS
+description: Use IPNS to publish updatable content addresses for your websites
+---
+
+# Publish with IPNS
+
+IPNS (InterPlanetary Name System) lets you publish content under a stable name that can be updated to point at new CIDs. This is useful for websites that update frequently — instead of changing DNS records every time, you update the IPNS record.
+
+## How IPNS fits into website hosting
+
+When you create a website, you can set `target_type` to either `ipfs` or `ipns`:
+
+- **`ipfs`** — The domain points directly at a CID. To update, change `target_hash` on the website record.
+- **`ipns`** — The domain points at an IPNS name. To update, republish the IPNS name with a new CID. The domain doesn't change.
+
+IPNS adds a layer of indirection. You update content by republishing the IPNS name instead of updating the website record.
+
+## Manage IPNS keys
+
+### List keys
+
+:::code-group
+```bash [CLI]
+pinner ipns list
+```
+
+```typescript [SDK]
+const result = await pinner.ipns.listKeys();
+console.log(`You have ${result.data.length} key(s)`);
+for (const key of result.data) {
+  console.log(`- ${key.id}: ${key.ipns_name}`);
+}
+```
+:::
+
+### Create a key
+
+```typescript
+const key = await pinner.ipns.createKey({
+  name: "my-website-key",
+});
+console.log("IPNS name:", key.ipns_name);
+```
+
+### Delete a key
+
+```typescript
+await pinner.ipns.deleteKey(keyId);
+```
+
+:::warning
+Deleting an IPNS key means the IPNS name can no longer be resolved. Any domains pointing at this name will break.
+:::
+
+## Publish content to an IPNS name
+
+Point an IPNS name at a CID:
+
+:::code-group
+```bash [CLI]
+pinner ipns publish --key <key-id> --cid QmYourCID
+```
+
+```typescript [SDK]
+const result = await pinner.ipns.publish({
+  key_id: key.id,
+  cid: "QmYourCID",
+});
+console.log("Published:", result.name, "→", result.value);
+```
+:::
+
+## Create a website with an IPNS target
+
+```typescript
+const site = await pinner.websites.createWebsite({
+  domain: "mysite.example.com",
+  target_type: "ipns",
+  target_hash: key.ipns_name,
+});
+```
+
+Now when you update your site, publish a new CID to the same IPNS name — the domain follows automatically.
+
+## Republish
+
+IPNS records have a limited lifetime. Republish to extend it:
+
+```typescript
+await pinner.ipns.republish(key.id);
+```
+
+## Resolve an IPNS name
+
+Look up what CID an IPNS name currently points to:
+
+```typescript
+const resolved = await pinner.ipns.resolve("k51qzi5...");
+console.log("Points to:", resolved.value);
+```
+
+## When to use IPNS vs direct IPFS
+
+| Scenario | Use |
+|----------|-----|
+| Static content that rarely changes | Direct IPFS (`target_type: "ipfs"`) |
+| Frequently updated sites | IPNS (`target_type: "ipns"`) |
+| CI/CD automated deploys | IPNS — update once, domain follows |
+| One-off deployments | Direct IPFS — simpler |
+
+IPNS resolution is slightly slower than direct IPFS because it adds a lookup step. For most sites, the difference is negligible.

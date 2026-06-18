@@ -1,69 +1,41 @@
 ---
+title: Pinner.xyz
+description: "Decentralized storage: pinning, websites, and data services"
 layout: landing
 ---
 
 import { HomePage, Callout } from "vocs/components";
-import GatewayQuickInfo from "../partials/_gateway-quick-info.mdx";
-import GatewayAlternatives from "../partials/_gateway-alternatives.mdx";
 
 <HomePage.Root>
   <HomePage.Logo />
-  <HomePage.Tagline>Privacy-focused decentralized storage pinning without the infrastructure headaches.</HomePage.Tagline>
-  <HomePage.Description>
-    Pin and manage your content across decentralized storage networks with straightforward pricing.
-    No gateway subsidies. No hidden costs. Just reliable pinning.
-  </HomePage.Description>
-
-  <HomePage.InstallPackage name="@lumeweb/pinner" type="install">{/* */}</HomePage.InstallPackage>
-
+  <HomePage.Tagline>Store anything. Decentralized, private, no lock-in.</HomePage.Tagline>
   <HomePage.Buttons>
-    <HomePage.Button href="/quickstart" variant="accent">
+    <HomePage.Button href="/ipfs/quickstart" variant="accent">
       Get Started
     </HomePage.Button>
-    <HomePage.Button href="/cli/getting-started">
+    <HomePage.Button href="/ipfs/cli/getting-started">
       CLI
-    </HomePage.Button>
-    <HomePage.Button href="/about">
-      What is Pinner?
-    </HomePage.Button>
-    <HomePage.Button href="/guide">
-      Guides
     </HomePage.Button>
   </HomePage.Buttons>
 </HomePage.Root>
 
-## At a Glance
+## Products
 
-**What we provide:**
-- Content pinning across multiple decentralized storage networks
-- Privacy-focused infrastructure
-- Competitive, transparent pricing
+| | | |
+|---|---|---|
+| **IPFS Pinning** | Pin content to IPFS with reliable, transparent pricing. | [Get started →](/ipfs/quickstart) |
+| **Websites & Domains** | Deploy static sites, SPAs, and dapps on decentralized storage with your own domain. | [Get started →](/hosting/quickstart) |
 
-**What we don't provide:**
-- Public HTTP gateways for content retrieval
-- CDN or low-latency content delivery
+## What is Pinner?
 
-[Learn more →](/about)
+**Pinner is:** a decentralized storage service that pins your content and respects your privacy. Your data lives on a distributed network; no single point of failure, no vendor lock-in. One subscription covers pinning, website hosting, and DNS.
 
-<GatewayQuickInfo />
-
-<GatewayAlternatives />
-
----
-
-## Why Pinner?
-
-[Why choose Pinner?](/about)
-
-| Benefit | Description |
-|---------|-------------|
-| **No Gateway Subsidies** | You pay for pinning, not cross-subsidized gateway infrastructure |
-| **Clear Content Rules** | We happily pin any data that follows our terms of service. Your content is yours, we stay aligned to you as our customer |
-| **Simple Pricing** | Straightforward tiers with no hidden fees |
-| **Multi-Network** | Support for multiple storage networks through one service |
+**Pinner is not:** a public anonymous IPFS gateway or a lock-in platform. We don't serve arbitrary IPFS content to the public; see [Why No Public Gateway](/ipfs/concepts/why-no-gateway) for the reasoning. Website hosting serves your pinned content through ipfs.pub.
 
 ---
 
 <Callout type="info">
-  **Migrating from Pinata?** See the [migration guide](/migration/pinata) for a side-by-side comparison.
+  **Migrating from Pinata?** See the [Pinata migration guide](/migration/pinata) for a side-by-side comparison.
+
+  **Fleek refugee?** See the [Fleek migration guide](/migration/fleek) to move your DNS and hosted sites to Pinner.
 </Callout>

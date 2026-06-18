@@ -1,0 +1,211 @@
+---
+title: Deploy with GitHub Actions
+description: Automatically deploy your site to Pinner on every push to main
+---
+
+# Deploy with GitHub Actions
+
+Deploy your static site to IPFS via Pinner automatically every time you push to your repository, using the [`lumeweb/pinner-deploy-action`](https://github.com/lumeweb/pinner-deploy-action) GitHub Action.
+
+## Set up secrets
+
+Add your Pinner API key as a repository secret:
+
+1. Go to **Settings → Secrets and variables → Actions**
+2. Click **New repository secret**
+3. Name: `PINNER_AUTH_TOKEN`
+4. Value: your API key from [API Keys](/account/api-tokens)
+
+## Create the workflow
+
+Create `.github/workflows/deploy.yml`:
+
+```yaml
+name: Deploy to Pinner
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: npm ci && npm run build
+
+      - name: Deploy to Pinner
+        uses: lumeweb/pinner-deploy-action@v0
+        with:
+          api-key: ${{ secrets.PINNER_AUTH_TOKEN }}
+          path: ./dist
+```
+
+This workflow builds your site and deploys the `./dist` directory to IPFS via Pinner in a single step. The action outputs the content CID and a gateway URL, which you can use in subsequent steps.
+
+## Upload and set up a domain
+
+To automatically point a domain at the deployed content, add the `domain` input. The action will create or update the website for you:
+
+```yaml
+- name: Deploy to Pinner
+  uses: lumeweb/pinner-deploy-action@v0
+  with:
+    api-key: ${{ secrets.PINNER_AUTH_TOKEN }}
+    path: ./dist
+    domain: myapp.example.com
+```
+
+When `domain` is set, the action looks up an existing website for that domain and updates its `target_hash`, or creates a new website if none exists.
+
+## Deploy with IPNS for continuous updates
+
+If your site updates frequently, use IPNS so the domain always resolves to the latest content. Pass an `ipns-key` (a key name or numeric ID) to publish the CID under that key:
+
+```yaml
+- name: Deploy to Pinner
+  uses: lumeweb/pinner-deploy-action@v0
+  with:
+    api-key: ${{ secrets.PINNER_AUTH_TOKEN }}
+    path: ./dist
+    ipns-key: my-app
+    domain: myapp.example.com
+```
+
+The action resolves the key name to its numeric ID, publishes the new CID to IPNS, and updates the website's domain, all in one step.
+
+## Clean up previous pins
+
+Set `remove-previous: true` to automatically unpin the old CID after a successful deploy. This requires either `ipns-key` or `domain` so the action can identify the previous CID:
+
+```yaml
+- name: Deploy to Pinner
+  uses: lumeweb/pinner-deploy-action@v0
+  with:
+    api-key: ${{ secrets.PINNER_AUTH_TOKEN }}
+    path: ./dist
+    ipns-key: my-app
+    domain: myapp.example.com
+    remove-previous: true
+```
+
+## Pin an existing CID
+
+If you already have a CID (for example, from a previous build step), you can skip the upload and just pin it:
+
+```yaml
+- name: Pin existing CID
+  uses: lumeweb/pinner-deploy-action@v0
+  with:
+    api-key: ${{ secrets.PINNER_AUTH_TOKEN }}
+    cid: QmExampleCID...
+```
+
+Either `path` or `cid` must be provided.
+
+## Action inputs
+
+| Input             | Required | Default                   | Description                                                       |
+| ----------------- | -------- | ------------------------- | ----------------------------------------------------------------- |
+| `api-key`         | Yes      | N/A                       | Pinner API key                                                    |
+| `path`            | No       | N/A                       | Local directory or file to upload to IPFS                         |
+| `cid`             | No       | N/A                       | Existing CID to pin (skip upload)                                 |
+| `endpoint`        | No       | `https://ipfs.pinner.xyz` | Pinner API endpoint                                               |
+| `ipns-key`        | No       | N/A                       | IPNS key name or ID to publish under                              |
+| `domain`          | No       | N/A                       | Domain for gateway website setup                                  |
+| `remove-previous` | No       | `false`                   | Remove previous pin after deploy. Requires `ipns-key` or `domain` |
+
+Either `path` or `cid` must be provided.
+
+## Action outputs
+
+| Output        | Description                         |
+| ------------- | ----------------------------------- |
+| `cid`         | CID of the uploaded/pinned content  |
+| `gateway-url` | Gateway URL for the content         |
+| `ipns-name`   | IPNS name if `ipns-key` was set     |
+| `website-id`  | Website ID if `domain` was set      |
+
+## Deploy with the SDK
+
+If you prefer programmatic control, you can call the [`@lumeweb/pinner`](https://www.npmjs.com/package/@lumeweb/pinner) SDK directly from a custom script:
+
+```yaml
+- name: Deploy with SDK
+  env:
+    PINNER_AUTH_TOKEN: ${{ secrets.PINNER_AUTH_TOKEN }}
+  run: node scripts/deploy.mjs
+```
+
+```javascript
+// scripts/deploy.mjs
+import { Pinner } from "@lumeweb/pinner";
+import fs from "fs";
+import path from "path";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN });
+
+// Upload a directory
+const files = fs.readdirSync("./dist").map((name) => {
+  const buffer = fs.readFileSync(path.join("./dist", name));
+  return new File([buffer], name);
+});
+const operation = await pinner.uploadDirectory(files, { name: "my-site" });
+const result = await operation.result;
+console.log("CID:", result.cid);
+
+// Update existing website or create a new one
+const siteId = Number(process.env.WEBSITE_ID);
+if (siteId) {
+  await pinner.websites.updateWebsite(siteId, {
+    domain: "mysite.example.com",
+    target_hash: result.cid,
+    target_type: "ipfs",
+  });
+  console.log("Updated website", siteId);
+} else {
+  const site = await pinner.websites.createWebsite({
+    domain: "mysite.example.com",
+    target_hash: result.cid,
+    target_type: "ipfs",
+  });
+  console.log("Created website", site.id);
+}
+```
+
+### Publish to IPNS with the SDK
+
+```javascript
+// scripts/deploy-ipns.mjs
+import { Pinner } from "@lumeweb/pinner";
+import fs from "fs";
+import path from "path";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN });
+
+// Upload a directory
+const files = fs.readdirSync("./dist").map((name) => {
+  const buffer = fs.readFileSync(path.join("./dist", name));
+  return new File([buffer], name);
+});
+const operation = await pinner.uploadDirectory(files, { name: "my-site" });
+const result = await operation.result;
+
+// Publish to IPNS
+const IPNS_KEY_ID = Number(process.env.IPNS_KEY_ID);
+await pinner.ipns.publish({
+  cid: result.cid,
+  key_id: IPNS_KEY_ID,
+});
+console.log("Published to IPNS:", result.cid);
+```
+
+The domain resolves to the IPNS name, which always points at the latest CID.
+
+## Next steps
+
+- [Understand IPNS publishing](/hosting/concepts/ipns)
+- [Set up a custom domain](/hosting/how-to/custom-domains)
+- [Monitor SSL provisioning](/hosting/how-to/check-ssl)

@@ -1,0 +1,74 @@
+---
+title: SSL
+description: How Pinner provisions and manages SSL certificates for your custom domains
+---
+
+# SSL
+
+Pinner provisions and renews SSL certificates for your custom domains automatically. You don't need to buy certificates, configure web servers, or set up renewal cron jobs.
+
+## How it works
+
+1. You configure DNS to point your domain at Pinner
+2. Pinner detects the DNS change and starts certificate provisioning
+3. Pinner completes the automated certificate management challenge (domain validation via DNS or HTTP)
+4. The certificate is issued and installed on Pinner's gateway
+5. Your site is available over HTTPS
+
+You don't touch any of this. The entire process runs in the background.
+
+## SSL states
+
+SSL moves through these states:
+
+```
+pending → validating → valid → ready
+                      ↘ failed
+                      ↘ error
+```
+
+| State | What's happening |
+|-------|-----------------|
+| `pending` | Waiting to start — DNS may not have propagated yet |
+| `validating` | Pinner is verifying domain control and requesting the certificate from the CA |
+| `valid` | Certificate issued and installed |
+| `ready` | Certificate is active and serving HTTPS traffic |
+| `failed` | Provisioning failed — the `error` field has details |
+| `error` | Unexpected error during provisioning |
+
+## Checking status
+
+You can check SSL status through the SDK or CLI. The SDK's `getSSLStatus` method returns the current state, and the `watchSSL` method polls until the certificate is ready or an error occurs.
+
+## Renewal
+
+Pinner renews certificates before they expire. You don't need to do anything — renewal happens automatically in the background.
+
+## Troubleshooting
+
+### SSL stays in `pending`
+
+DNS records haven't propagated. Verify your CNAME and validation TXT records:
+
+```bash
+dig CNAME www.mysite.example.com
+dig TXT _pinner-validation.mysite.example.com
+```
+
+If the records are missing, add them and wait. If they're present, DNS may just need more time.
+
+### SSL fails with `failed` or `error`
+
+Check the `error` field on the SSL status response. Common causes:
+
+- **DNS not pointing at Pinner** — The CNAME or A record is missing or incorrect
+- **Domain validation expired** — Re-validate the domain (see [Custom Domains](/websites/how-to/custom-domains))
+- **Too many attempts** — Let's Encrypt has rate limits; wait a while and retry
+
+### SSL works but the site isn't loading
+
+SSL is only one piece. Check that:
+
+1. Your website's `target_hash` points at a valid, pinned CID
+2. The content is actually accessible on IPFS
+3. DNS is correctly pointing at Pinner's infrastructure

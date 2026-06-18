@@ -1,0 +1,122 @@
+---
+title: SSL
+description: How Pinner provisions and manages SSL certificates for your custom domains
+---
+
+# SSL
+
+Pinner provisions and renews SSL certificates for your custom domains automatically, using Caddy's On-Demand TLS with Let's Encrypt. You don't need to buy certificates, configure web servers, or set up renewal cron jobs.
+
+## How it works
+
+1. You add a CNAME or A record pointing your domain at Pinner's infrastructure
+2. When the first HTTPS request arrives, Caddy checks if the domain is authorized by querying the gateway's `/allowed` endpoint
+3. The gateway validates the domain: it checks the DNSLink record and confirms the website is active in the portal
+4. If the domain passes validation, Caddy requests a certificate from Let's Encrypt via the HTTP-01 ACME challenge
+5. Caddy completes the ACME challenge (served on port 80) and obtains the certificate
+6. Caddy calls back to the portal's internal webhook to update the SSL status to `ready`
+7. Your site is served over HTTPS
+
+You don't touch any of this. The entire process runs in the background.
+
+### Prerequisites
+
+For SSL provisioning to work:
+
+- **Port 80** must be accessible from the internet (required for the HTTP-01 ACME challenge)
+- **Port 443** must be accessible for HTTPS traffic
+- Your domain's DNSLink record (`_dnslink.yourdomain.com`) must be properly configured
+- Your website must be in `active` status in the portal
+
+## SSL states
+
+SSL moves through these states:
+
+```
+pending → issuing → ready
+                   ↘ failed
+```
+
+| State | What's happening |
+|-------|-----------------|
+| `pending` | Waiting to start: the domain hasn't been validated or no HTTPS request has triggered certificate issuance yet |
+| `issuing` | Caddy is obtaining the certificate from Let's Encrypt via the ACME protocol |
+| `ready` | Certificate issued and serving HTTPS traffic |
+| `failed` | Provisioning failed; the `error` field on the SSL status has details |
+
+There is no separate `valid` or `error` state. A `failed` state includes an error message explaining what went wrong.
+
+## Checking status
+
+You can check SSL status through the SDK. The `GetSSLStatus` method returns the current state, and the `WaitForSSLStatusReady` method polls until the certificate reaches `ready` or `failed`.
+
+```go
+// Check current status
+resp, err := client.Websites().GetSSLStatus(ctx, "example.com")
+fmt.Println("SSL status:", resp.Ssl.Status)
+
+// Wait until settled (ready or failed)
+status, err := client.Websites().WaitForSSLStatusReady(ctx, "example.com")
+```
+
+The response also includes `issued_at` and `last_updated_at` timestamps when available.
+
+## Renewal
+
+Caddy automatically renews certificates before they expire (typically 30 days before). You don't need to do anything; renewal happens automatically in the background. The portal tracks the renewal via the same Caddy webhook callback, updating `last_updated_at`.
+
+If a previously valid certificate for a soft-deleted website is still within its validity period, recreating the website for the same domain will inherit the `ready` SSL status automatically.
+
+## DNS validation token
+
+Before SSL can be provisioned, your website must be validated. When you create a website, Pinner generates a validation token and tells you to add a TXT record like:
+
+```
+pinner-verify.<yourdomain.com>  TXT  "pinner-verify=<token>"
+```
+
+The token has an expiry time. If it expires, Pinner generates a new one automatically when you re-validate.
+
+## Troubleshooting
+
+### SSL stays in `pending`
+
+No HTTPS request has triggered certificate issuance yet, or the domain hasn't been validated. Ensure:
+
+1. Your website is in `active` status (run DNS validation first)
+2. Your DNS is pointing at Pinner's infrastructure (CNAME or A record)
+3. The DNSLink record exists: `dig TXT _dnslink.yourdomain.com`
+
+### SSL stays in `issuing`
+
+The ACME challenge is in progress. Common causes for getting stuck:
+
+- **Port 80 is not accessible**: The HTTP-01 challenge requires port 80 to be reachable from the internet
+- **DNS hasn't propagated**: Let's Encrypt needs to resolve your domain to the correct IP
+- **The gateway's `/allowed` endpoint rejected the domain**: Check that the DNSLink record and website status are valid
+
+You can test the `/allowed` endpoint directly:
+
+```bash
+curl "http://localhost:8080/allowed?domain=yourdomain.com"
+```
+
+A `200` response means the domain is approved for certificate issuance.
+
+### SSL fails with `failed`
+
+Check the `error` field on the SSL status response. Common causes:
+
+- **Port 80 not accessible from the internet**: Required for the HTTP-01 ACME challenge; check firewall rules
+- **DNS not pointing at Pinner**: The CNAME or A record is missing or incorrect
+- **Website is not active**: The gateway's `/allowed` check returns 400 when the website status isn't `active`
+- **DNSLink record missing or incorrect**: The gateway validates the `_dnslink` TXT record before allowing certificate issuance
+- **Let's Encrypt rate limits**: Too many failed issuance attempts; wait and retry (see [Let's Encrypt rate limits](https://letsencrypt.org/docs/rate-limits/))
+
+### SSL works but the site isn't loading
+
+SSL is only one piece. Check that:
+
+1. Your website's target hash points at a valid, pinned CID
+2. The content is actually accessible on IPFS
+3. DNS is correctly pointing at Pinner's infrastructure

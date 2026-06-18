@@ -1,0 +1,76 @@
+---
+title: Sign Up & Get Started
+description: Create your Pinner account and start pinning in three steps
+---
+
+# Sign Up & Get Started
+
+Get from zero to pinning in three steps.
+
+## Step 1: Create an account
+
+Go to [pinner.xyz](https://pinner.xyz) and sign up, or register directly from the CLI (see below). You'll need an email address, name, and password. Email verification is required before you can log in.
+
+After signing up, choose a subscription plan in the dashboard. Plans support card payments (via Stripe) and crypto payments (via ATLOS). No ID is required for crypto payments.
+
+## Step 2: Install the CLI and authenticate
+
+:::code-group
+```bash [macOS / Linux]
+curl -fsSL https://get.pinner.xyz | sh
+```
+
+```powershell [Windows]
+irm https://get.pinner.xyz/install.ps1 | iex
+```
+:::
+
+Then log in; the CLI will walk you through authentication and automatically create an API key for your machine:
+
+```bash
+pinner auth --email you@example.com
+```
+
+Or use the interactive setup wizard for a guided first-time experience:
+
+```bash
+pinner setup
+```
+
+If you already have an auth token from another machine, you can save it directly:
+
+```bash
+pinner auth YOUR_AUTH_TOKEN
+```
+
+## Step 3: Start pinning
+
+```bash
+# Upload a file
+pinner upload ./my-file.txt
+
+# Pin by CID
+pinner pin QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco
+```
+
+That's it. You're pinning.
+
+---
+
+### Register from the CLI
+
+You can also create a new account entirely from the CLI:
+
+```bash
+# Interactive (prompts for all fields)
+pinner register
+
+# Non-interactive
+pinner register --email you@example.com --first-name Jane --last-name Doe --password yourpassword
+```
+
+Then confirm your email address:
+
+```bash
+pinner confirm-email --email you@example.com --token abc123def456
+```

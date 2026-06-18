@@ -1,0 +1,159 @@
+---
+title: Error Reference
+description: All Pinner error codes, when they happen, and what to do
+---
+
+# Error Reference
+
+Every API error response includes a `code` field for programmatic handling. This page lists every code the API can return, when it happens, what to do about it, and whether it's safe to retry.
+
+CLI users see friendly messages instead of raw codes — the [CLI error table](#cli-error-messages) maps them.
+
+## Error response format
+
+```json
+{
+  "error": {
+    "reason": "UNAUTHORIZED",
+    "details": "Access denied. Please check your credentials and try again."
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `reason` | `string` | Error code for programmatic handling |
+| `details` | `string` | Human-readable description |
+
+## Authentication (401 / 403)
+
+| Code | HTTP | When it happens | What to do | Retry? |
+|------|------|----------------|------------|--------|
+| `UNAUTHORIZED` | 401 | API key is invalid, expired, or revoked | Run `pinner auth` to re-authenticate. Check `PINNER_API_KEY` env var. | No |
+| `PERMISSION_DENIED` | 403 | You don't have access to this resource | Check your plan limits. Contact support if you think this is wrong. | No |
+
+## Upload
+
+| Code | HTTP | When it happens | What to do | Retry? |
+|------|------|----------------|------------|--------|
+| `ErrUnsupportedFormat` | 422 | File format isn't supported | Use a supported format (ZIP, CAR, or raw files). | No |
+| `ErrCorruptedFile` | 500 | File is corrupted | Re-export or re-download the file and retry. | No |
+| `ErrEmptyZIP` | 500 | ZIP archive has no files | Add content to the ZIP and retry. | No |
+| `ErrPasswordProtected` | 500 | File is password-protected | Remove password protection and retry. | No |
+| `ErrFileUploadFailed` | 500 | Upload failed mid-transfer | Check network and retry with backoff. | Yes |
+| `FILE_UPLOAD_API_FAILED` | 500 | Upload failed due to an internal error | Retry with backoff. If it persists, check status.pinner.xyz. | Yes |
+| `FILE_PROCESSING_FAILED` | 500 | Server couldn't process the file | Check file integrity. Retry with backoff. | Yes |
+| `UPLOAD_NOT_FOUND` | 404 | Upload ID doesn't exist | Check the upload ID. It may have expired or been deleted. | No |
+| `BLOCK_NOT_FOUND` | 404 | Requested block doesn't exist | The content may not be fully pinned yet. Wait and retry. | Yes |
+| `CID_PARSE_FAILED` | 400 | CID format is invalid | Check the CID string for typos or encoding issues. | No |
+
+## Pin
+
+| Code | HTTP | When it happens | What to do | Retry? |
+|------|------|----------------|------------|--------|
+| `PIN_FETCH_FAILED` | 500 | Couldn't retrieve pin info | Retry with backoff. If it persists, the pin may not exist. | Yes |
+| `INVALID_CID` | 422 | CID format is invalid or unsupported | Verify the CID. See [CIDs](/ipfs/concepts/cids). | No |
+| `INVALID_TARGET` | 422 | Target hash or peer ID is invalid | Check the target value. | No |
+
+## Quota (429)
+
+| Code | HTTP | When it happens | What to do | Retry? |
+|------|------|----------------|------------|--------|
+| `UPLOAD_QUOTA_EXCEEDED` | 429 | Too many uploads in a period | Wait and retry. Reduce upload frequency or upgrade your plan. | Yes (after cooldown) |
+| `STORAGE_QUOTA_EXCEEDED` | 429 | Storage limit reached | Delete unused pins or upgrade your plan. | No |
+| `DOWNLOAD_QUOTA_EXCEEDED` | 429 | Too many downloads in a period | Wait and retry. Reduce download frequency or upgrade your plan. | Yes (after cooldown) |
+
+## Website
+
+| Code | HTTP | When it happens | What to do | Retry? |
+|------|------|----------------|------------|--------|
+| `WEBSITE_NOT_FOUND` | 404 | Website doesn't exist | Check the website ID. See [Websites](/websites/concepts/how-hosting-works). | No |
+| `INVALID_WEBSITE_STATUS` | — | Website status value isn't valid | Check the status you're setting. | No |
+| `INVALID_TARGET_TYPE` | — | Target type isn't valid | Must be `ipfs` or `ipns`. | No |
+| `INVALID_TIMESTAMP` | — | Timestamp format is invalid | Use ISO 8601 format. | No |
+
+## SSL
+
+| Code | HTTP | When it happens | What to do | Retry? |
+|------|------|----------------|------------|--------|
+| `INVALID_SSL_STATUS` | — | SSL status value isn't valid | Check the status you're setting. | No |
+| `SSL_STATUS_UPDATE_FAILED` | — | Couldn't update SSL status | Check domain ownership. Retry with backoff. | Yes |
+
+## DNS
+
+| Code | HTTP | When it happens | What to do | Retry? |
+|------|------|----------------|------------|--------|
+| `INVALID_DOMAIN` | 400 | Domain name is invalid | Check domain format. Must be a valid FQDN. | No |
+| `INVALID_DOMAIN_FORMAT` | 400 | Domain format isn't supported | Use a standard domain format. | No |
+| `INVALID_ZONE_STATUS` | — | DNS zone status is invalid | Check the status value. | No |
+| `ZONE_NOT_FOUND` | 404 | DNS zone doesn't exist | Create the zone first. See [DNS and Domains](/websites/concepts/dns-and-domains). | No |
+| `RECORD_NOT_FOUND` | 404 | DNS record doesn't exist | Check the record ID. | No |
+| `INVALID_RECORD_TYPE` | — | DNS record type isn't supported | Use a supported record type (A, AAAA, CNAME, TXT, MX, NS). | No |
+| `DUPLICATE_RECORD` | 409 | DNS record already exists | Use the existing record or delete it first. | No |
+| `DELETE_FAILED` | 500 | Couldn't delete DNS zone | Retry with backoff. | Yes |
+| `UPDATE_FAILED` | 500 | Couldn't update DNS zone | Retry with backoff. | Yes |
+| `VALIDATION_FAILED` | 500 | DNS validation failed | Check nameserver configuration. Retry after fixing. | Yes |
+
+## Validation
+
+| Code | HTTP | When it happens | What to do | Retry? |
+|------|------|----------------|------------|--------|
+| `INVALID_REQUEST` | 422 | Request parameter is invalid | Check the API docs for required parameters. | No |
+| `INVALID_IDENTIFIER` | 422 | ID format is invalid | Check the identifier format. | No |
+| `INVALID_UUID_FORMAT` | 400 | UUID format is invalid | Use standard UUID format (e.g. `550e8400-e29b-41d4-a716-446655440000`). | No |
+| `METADATA_FETCH_FAILED` | 500 | Couldn't fetch metadata | Retry with backoff. | Yes |
+
+## CLI error messages
+
+The CLI translates API and SDK errors into friendly messages. If you see one of these, here's what it means:
+
+| CLI message | Cause | What to do |
+|-------------|-------|------------|
+| `not authenticated` | No API key configured | Run `pinner auth` |
+| `path is required` | No file path given | Provide a file path argument |
+| `CID is required` | No CID argument given | Provide a CID argument |
+| `invalid CID` | CID format is wrong | Check the CID string |
+| `no CIDs provided` | Empty CID list | Provide at least one CID |
+| `file not found` | File doesn't exist locally | Check the file path |
+| `directory not found` | Directory doesn't exist locally | Check the directory path |
+| `permission denied` | Can't read the file | Check file permissions |
+| `pin not found` | Pin doesn't exist on Pinner | Check the CID — it may not be pinned |
+| `pinning failed` | Pin operation failed on the server | Retry. If it persists, check status.pinner.xyz |
+| `upload failed` | Upload didn't complete | Check the error details. Retry with backoff. |
+| `upload interrupted` | You pressed Ctrl+C or the network dropped | The CLI supports resuming — just retry the same command |
+| `network timeout` | Server didn't respond in time | Check your connection. Retry with backoff. |
+| `connection failed` | Can't reach Pinner servers | Check your internet connection and firewall |
+| `configuration not found` | No config file | Run `pinner setup` |
+| `configuration invalid` | Config file is malformed | Run `pinner setup --reset` |
+| `service unavailable` | Server is temporarily down | Retry after a few minutes. Check status.pinner.xyz |
+
+## Retry strategy
+
+Some errors are safe to retry. Use exponential backoff — start at 1 second, double each attempt:
+
+- **Always retry**: 429 (quota exceeded — wait for cooldown), 500 (server error — temporary)
+- **Never retry**: 400, 401, 403, 404, 409, 410, 422 (client error — you must fix the request)
+
+```typescript
+import { isRetryable } from "@lumeweb/pinner";
+
+async function uploadWithRetry(file, maxRetries = 3) {
+  let lastError;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await pinner.upload(file);
+    } catch (error) {
+      lastError = error;
+
+      if (!isRetryable(error)) {
+        throw error;
+      }
+
+      await new Promise(r => setTimeout(r, 1000 * attempt));
+    }
+  }
+
+  throw lastError;
+}
+```

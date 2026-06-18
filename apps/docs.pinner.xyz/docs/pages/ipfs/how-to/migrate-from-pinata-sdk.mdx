@@ -1,0 +1,94 @@
+---
+title: Migrate from Pinata SDK
+description: Switch from Pinata SDK to the Pinner SDK with minimal code changes
+---
+
+# Migrate from Pinata SDK
+
+Replace Pinata SDK calls with Pinner adapter calls. The adapter mirrors the Pinata SDK interface so you can migrate with minimal code changes.
+
+For CLI migration, see [Migrate from Pinata CLI](/migration/pinata).
+
+## Install the Pinner SDK
+
+```bash
+npm install @lumeweb/pinner
+```
+
+## Replace initialization
+
+:::code-group
+```typescript [Pinata SDK 2.x → Pinner]
+// Before (Pinata)
+import { PinataSDK } from "pinata-web3";
+const pinata = new PinataSDK({
+  pinataJwt: process.env.PINATA_JWT!,
+});
+
+// After (Pinner adapter)
+import { Pinner, pinataAdapter } from "@lumeweb/pinner";
+const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY! });
+const pinata = pinataAdapter(pinner);
+```
+
+```typescript [Pinata SDK 1.x → Pinner]
+// Before (Pinata)
+const pinata = require("@pinata/sdk")(pinataJwt, pinataGateway);
+
+// After (Pinner legacy adapter)
+import { Pinner, pinataLegacyAdapter } from "@lumeweb/pinner";
+const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY! });
+const pinata = pinataLegacyAdapter(pinner);
+```
+:::
+
+## Replace API calls
+
+The adapter methods match the Pinata SDK, so most calls work without changes:
+
+:::code-group
+```typescript [Upload a file]
+// Pinata SDK 2.x                        Pinner adapter
+pinata.upload.public.file(file)   →   pinata.upload.public.file(file)
+pinata.upload.public.json(data)   →   pinata.upload.public.json(data)
+pinata.upload.public.cid(cid)     →   pinata.upload.public.cid(cid)
+```
+
+```typescript [Manage files]
+// Pinata SDK 2.x                        Pinner adapter
+pinata.files.public.list()        →   pinata.files.public.list()
+pinata.files.public.get(id)       →   pinata.files.public.get(id)
+pinata.files.public.delete([cid]) →   pinata.files.public.delete([cid])
+```
+:::
+
+:::tip
+The v2 adapter uses a builder pattern. Chain methods and call `.execute()`:
+
+```typescript
+const upload = await pinata.upload.public
+  .file(file)
+  .name("my-file.txt")
+  .keyvalues({ project: "demo" })
+  .execute();
+```
+:::
+
+## Unsupported features
+
+Some Pinata features don't have Pinner equivalents:
+
+| Feature | Status | Alternative |
+|---------|--------|-------------|
+| Private uploads | Not supported | Use Pinner's native API |
+| Groups | Not supported | Use key-value metadata |
+| Signed URLs | Not supported | Not available |
+| Swap CID | Not supported | Not available |
+
+For the full adapter reference, see [Pinata Migration Examples](/migration/pinata-examples).
+
+## Next steps
+
+- [Pinata Migration Examples](/migration/pinata-examples) — complete API mapping
+- [Code Examples](/migration/pinata-examples) — side-by-side comparisons
+- [SDK Getting Started](/ipfs/sdk/getting-started) — for when you're ready to go beyond the adapter

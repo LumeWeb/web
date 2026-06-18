@@ -1,0 +1,84 @@
+---
+title: CLI Setup
+description: Run the interactive setup wizard to authenticate and configure the CLI
+---
+
+# CLI Setup
+
+Use the interactive setup wizard to authenticate and configure the CLI in one go.
+
+```bash
+pinner setup
+```
+
+The wizard walks you through four steps:
+
+- **Authentication**: create an account, sign in, or skip
+- **Configuration**: set API endpoint and HTTPS preferences, or use defaults
+- **Shell Completion**: enable auto-completion for your shell
+- **Quick Tutorial**: browse common commands and examples
+
+If you've already authenticated, the wizard detects your existing auth token and skips the authentication step. Similarly, the configuration step is skipped if a custom endpoint is already set (unless `--reset` is used).
+
+## Skip steps
+
+```bash
+# Skip authentication (already logged in)
+pinner setup --skip-auth
+
+# Skip configuration (already configured)
+pinner setup --skip-config
+
+# Skip both: use when you only want to run the completion and tutorial steps
+pinner setup --skip-auth --skip-config
+```
+
+## Reset configuration
+
+Start fresh: clears your config and runs the wizard from scratch:
+
+```bash
+pinner setup --reset
+```
+
+## Non-interactive environments
+
+The setup wizard requires an interactive terminal. For CI, scripts, or other non-interactive contexts, use individual commands instead:
+
+```bash
+# Authenticate with a JWT token
+pinner auth YOUR_JWT_TOKEN
+
+# Authenticate interactively (supports --email, --password, --otp-code flags)
+pinner auth --email user@example.com
+
+# Configure settings
+pinner config set base_endpoint api.example.com
+pinner config set secure true
+pinner config set memory_limit 256
+```
+
+## Authentication step
+
+When the wizard reaches authentication, you choose one of:
+
+1. **Create a new account**: directs you to the registration page, then helps you sign in
+2. **Sign in with existing account**: prompts for email and password (plus OTP if 2FA is enabled)
+3. **Skip**: configure later with `pinner auth`
+
+## Configuration step
+
+When the wizard reaches configuration, you choose one of:
+
+1. **Use default settings**: HTTPS enabled, default production endpoint
+2. **Customize API endpoint**: enter a custom domain and choose HTTP or HTTPS
+3. **Skip**: keep current or default settings
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--skip-auth` | Skip the authentication step |
+| `--skip-config` | Skip the configuration step |
+| `--reset` | Reset configuration and start fresh |
+| `--non-interactive` | Not supported; errors with a message to use `pinner auth` and `pinner config` instead |

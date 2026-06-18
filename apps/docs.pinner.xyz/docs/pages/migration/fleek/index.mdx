@@ -1,0 +1,208 @@
+---
+title: Migrate from Fleek
+description: Step-by-step guide to migrate your website from Fleek Hosting to Pinner.
+---
+
+# Migrate from Fleek
+
+Fleek Hosting shut down on January 31, 2026. If you had a site on Fleek, this guide walks you through getting it back up on Pinner.
+
+## The short version
+
+If you already have your build output and just need to get it live:
+
+```bash
+# 1. Authenticate
+pinner auth
+
+# 2. Launch the wizard: handles upload, website creation, and DNS in one flow
+pinner websites wizard
+
+# Done: your site is live on IPFS
+```
+
+## What you had on Fleek vs. what Pinner provides
+
+Fleek Hosting was an all-in-one platform. It combined CDN, IPFS pinning, DNS, SSL, ENS, IPNS, and CI into a single service. Pinner takes a different approach: it handles IPFS pinning, website hosting, DNS, and SSL, but each concern stays independently manageable. If Pinner ever stops serving your needs, your CIDs and your content move with you.
+
+| Fleek feature | Pinner equivalent | Notes |
+|---------------|-------------------|-------|
+| HTTP CDN with TLS | Pinner gateway + automatic SSL | Your site serves over HTTPS at your domain |
+| IPFS pinning | Pinner IPFS pinning | Same CIDs: your content identifiers don't change |
+| IPFS gateway | `ipfs.pub` | No public anonymous gateway; see [Why no public gateway](/ipfs/concepts/why-no-gateway) |
+| DNSLink | Pinner DNS hosting | Pinner manages DNSLink TXT records automatically |
+| IPNS | Pinner IPNS | `pinner ipns publish` or SDK equivalent |
+| ENS | `pinner point` | Maps an onchain name to a CID via IPNS. See [Onchain Names](/onchain/quickstart) |
+| GitHub Actions CI | `pinner-deploy-action` | Drop-in replacement: see [Deploy with GitHub Actions](/hosting/how-to/deploy-github-actions) |
+| Dashboard | Pinner web portal | Manage plans, billing, and websites at pinner.xyz |
+| Domain registration | Bring your own domain | Pinner doesn't sell domains: you register at your registrar and point DNS at Pinner |
+
+## Quick path
+
+The fastest way to get your site back up if you have your build output ready.
+
+### 1. Install and authenticate
+
+```bash
+npm install -g @lumeweb/pinner
+pinner auth
+```
+
+`pinner auth` prompts for your email and password interactively. For CI/CD, pass your API key directly: `pinner auth YOUR_API_KEY`.
+
+### 2. Deploy with the wizard
+
+The interactive wizard handles upload, website creation, and DNS setup in one guided flow: closest to the one-click experience you had on Fleek:
+
+```bash
+# Build your site if you haven't already
+npm run build
+
+# Launch the wizard
+pinner websites wizard
+```
+
+The wizard walks you through:
+
+1. **Content source**: select the directory to upload (e.g. `./dist`)
+2. **Target type**: IPFS or IPNS
+3. **Domain**: your custom domain or a `*.pinner.xyz` subdomain
+4. **DNS mode**: Pinner-managed (recommended) or self-managed
+5. **Validation**: verifies DNS records are in place
+
+That's it. Your site is live on IPFS.
+
+<details>
+<summary><strong>Manual alternative</strong>: if you prefer running commands individually or are scripting the migration</summary>
+
+```bash
+# Upload the build output to IPFS
+pinner upload ./dist
+```
+
+Note the CID from the output. Then create the website:
+
+```bash
+# For a subdomain (fastest: no DNS setup needed)
+pinner websites create mysite.pinner.xyz --cid <CID>
+
+# For a custom domain
+pinner websites create mysite.example.com --cid <CID>
+```
+
+If you used a custom domain, Pinner needs to verify you own it. With Pinner-managed DNS (recommended): delegate your domain's nameservers to Pinner, and it handles DNSLink, validation, and ALIAS records automatically. For full DNS setup instructions, see [Migrate DNS from Fleek](/migration/fleek/dns-migration).
+
+Wait for SSL:
+
+```bash
+pinner websites ssl status mysite.example.com
+```
+
+</details>
+
+## Full path with CI
+
+If you had a Fleek GitHub integration that auto-deployed on push, replace it with Pinner's GitHub Action. The workflow is similar: build, upload, deploy.
+
+### Replace your Fleek workflow
+
+Your Fleek workflow probably looked something like this:
+
+```yaml
+# Old Fleek workflow (no longer works)
+- name: Deploy to Fleek
+  uses: fleek-platform/action@v1
+  with:
+    apiKey: ${{ secrets.FLEEK_API_KEY }}
+    siteId: ${{ secrets.FLEEK_SITE_ID }}
+```
+
+Replace it with:
+
+```yaml
+- name: Deploy to Pinner
+  uses: lumeweb/pinner-deploy-action@v0
+  with:
+    api-key: ${{ secrets.PINNER_API_KEY }}
+    path: ./dist
+    domain: mysite.example.com
+```
+
+Set the `PINNER_API_KEY` secret in your repository settings:
+
+1. Go to **Settings → Secrets and variables → Actions**
+2. Click **New repository secret**
+3. Name: `PINNER_API_KEY`
+4. Value: your API key from [API Keys](/account/api-tokens)
+
+The action uploads your build output, pins it on IPFS, and creates or updates the website record all in one step.
+
+For IPNS publishing, automatic cleanup, and pin-by-CID mode, see the full [GitHub Actions documentation](/hosting/how-to/deploy-github-actions).
+
+## Feature differences to know about
+
+A few things work differently on Pinner. Being upfront about these so you're not surprised.
+
+### No public anonymous gateway
+
+Fleek provided a public IPFS gateway. Pinner operates `ipfs.pub`, but it's not an anonymous, general-purpose gateway. For details on why and how to access IPFS content, see [Why no public gateway](/ipfs/concepts/why-no-gateway).
+
+You can also use [check.ipfs.pub](https://check.ipfs.pub) (Pinner's deploy of check.ipfs.network) to verify your content is available on the IPFS network.
+
+### DNS is separate from domain registration
+
+On Fleek, you could register a domain and it was automatically configured. Pinner doesn't sell domains; you register at your preferred registrar and point DNS at Pinner's nameservers. If you already own your domain, this is a one-time setup.
+
+### ENS: use `pinner point`
+
+If you had an ENS name pointing at your Fleek site, use `pinner point` to map the ENS name to your new CID via IPNS:
+
+```bash
+pinner point myname.eth --cid <CID>
+```
+
+This creates an IPNS key and publishes the CID under it. See [Onchain Names](/onchain/quickstart) for the full flow.
+
+### Your CIDs stay the same
+
+This is important: the content identifier (CID) for your files doesn't change when you move providers. IPFS content addressing is provider-independent. If you have CIDs from Fleek, you can pin them directly on Pinner without re-uploading:
+
+```bash
+pinner pin add QmYourCIDHere
+```
+
+Or via the GitHub Action:
+
+```yaml
+- name: Pin existing CID
+  uses: lumeweb/pinner-deploy-action@v0
+  with:
+    api-key: ${{ secrets.PINNER_API_KEY }}
+    cid: QmYourCIDHere
+```
+
+## Self-hosting vs. Pinner
+
+The IPFS Foundation published a [modular migration guide](https://blog.ipfs.tech/2026-fleek-migration/) that walks through self-hosting with Kubo + Caddy + Cloudflare DNS + GitHub Actions. That approach gives you maximum control but requires running your own IPFS node and managing infrastructure.
+
+Pinner gives you the same modularity without the operational overhead. Your CIDs are yours, your content is portable, and you can switch providers at any time, but you don't have to maintain an IPFS Cluster or a reverse proxy. If self-hosting appeals to you, the Shipyard guide is excellent. If you'd rather focus on building your site than running infrastructure, Pinner handles the IPFS layer for you.
+
+## Migration checklist
+
+- [ ] Install Pinner CLI (`npm install -g @lumeweb/pinner`)
+- [ ] Authenticate (`pinner auth`)
+- [ ] Upload your site or pin existing CIDs
+- [ ] Create the website record
+- [ ] Configure DNS (see [DNS migration](/migration/fleek/dns-migration) if using a custom domain)
+- [ ] Verify SSL provisioning
+- [ ] Replace Fleek GitHub Action with `pinner-deploy-action`
+- [ ] Set up `pinner point` if you had ENS names
+- [ ] Remove Fleek secrets from your repository
+- [ ] Monitor your site for 24-48 hours during DNS propagation
+
+## Next steps
+
+- [DNS Migration from Fleek](/migration/fleek/dns-migration): detailed DNS setup and troubleshooting
+- [Deploy with GitHub Actions](/hosting/how-to/deploy-github-actions): full CI/CD setup
+- [Custom Domains](/hosting/how-to/custom-domains): domain setup reference
+- [Migrate from Pinata](/migration/pinata): migrating SDK calls if you were also using Pinata for pinning

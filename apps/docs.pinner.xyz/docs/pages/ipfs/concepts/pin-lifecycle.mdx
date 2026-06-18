@@ -1,0 +1,93 @@
+---
+title: Pin Lifecycle
+description: How content moves through pin states from request to completion
+---
+
+# Pin Lifecycle
+
+When you pin content on Pinner, it goes through a defined sequence of states. Each state reflects what the system is doing with your content and what you can expect from it.
+
+## States
+
+A pin follows one of two paths depending on the upload method:
+
+**Upload path** (file or CAR upload: status never enters `queued`):
+
+```
+pinning → pinned
+           ↘ failed
+```
+
+**Remote pin path** (pin a CID that already exists on the network):
+
+```
+queued → pinning → pinned
+                    ↘ failed
+```
+
+### queued
+
+You've requested a pin for a CID that already exists on the IPFS network. Pinner has recorded the request but hasn't started the pin workflow yet. The system allocates resources and prepares to fetch the content from the network. This is the default status for remote pin requests.
+
+### pinning
+
+The pin workflow is running. Depending on the upload method, Pinner is either processing uploaded blocks into the local blockstore (for file and CAR uploads) or downloading the content from the IPFS network and storing it (for remote pins of existing CIDs). This state covers everything from block ingestion, through quota validation and upload-record creation, until all operations complete successfully.
+
+### pinned
+
+Your content is stored in the local blockstore and is available for retrieval on the IPFS network. This is the steady state; a pin stays `pinned` until you explicitly delete it or replace it. Like all IPFS content, continued availability depends on at least one node holding the data.
+
+### failed
+
+Something went wrong during the pin workflow. Common reasons:
+
+- The source CID doesn't exist or isn't reachable on the IPFS network
+- The uploaded content could not be parsed (invalid CAR, corrupt file, unsupported format)
+- Quota validation failed (upload or storage quota exceeded)
+- Block-level storage errors prevented writing
+
+The `info` field on a failed pin may contain additional diagnostic detail. You can retry by submitting a new pin request for the same CID.
+
+## Transition triggers
+
+| From | To | Trigger |
+| --- | --- | --- |
+| N/A | `queued` | Remote pin request (CID already on the network) |
+| N/A | `pinning` | Upload request (file or CAR): goes directly to pinning, skipping `queued` |
+| `queued` | `pinning` | Pin workflow starts: the system begins fetching the CID from the network |
+| `pinning` | `pinned` | All workflow operations succeed: blocks stored, upload records created, core pin records created |
+| `pinning` | `failed` | Any step in the workflow fails (download, parsing, quota, storage) |
+
+## What happens during pinning
+
+The pin workflow performs several steps regardless of upload method:
+
+1. **Block processing**: content blocks are extracted and written to the local blockstore
+2. **Quota validation**: upload and storage quotas are checked against the actual DAG size
+3. **Upload and pin record creation**: an upload record and a core pin record are created for every block in the DAG
+4. **Root pin creation**: an IPFS-specific pin record is created for the root CID, initially in `queued` status
+5. **Status update to pinned**: the root pin's status is updated to `pinned` after all preceding steps complete
+6. **DAG validation**: the system checks whether the new pin completes a partial DAG structure with related CIDs already pinned by the same user
+
+## What happens after pinning
+
+Once a pin reaches `pinned`, it stays there until you explicitly delete it or replace it. Pinner maintains the pin as long as your account is active and within quota. Content remains in the blockstore and available for retrieval.
+
+## Replacing a pin
+
+You can replace an existing pin with a new CID using the replace endpoint. This atomically deletes the old pin record and creates a new one in `queued` status, then starts the pin workflow for the new CID. The replacement pin goes through the same lifecycle as a new pin.
+
+## What happens on unpin (delete)
+
+When you delete a pin:
+
+1. The IPFS pin record is **soft-deleted** from the database
+2. Pinner checks if any other pin records for the same user still reference the same CID
+3. If no other pins reference the CID, the core pin is removed, the underlying data is unpinned from the network, and associated file paths are cleaned up
+4. If other pins still reference the CID (for example, multiple pins for the same content), only the pin record is removed; the data stays
+
+This reference-counting approach means you can safely pin the same CID multiple times and delete individual pin records without affecting the remaining pins.
+
+## No automatic replication
+
+Pinner does not perform automatic multi-node replication. Content is written to the local blockstore and made available through the IPFS node. Availability on the broader network depends on the normal IPFS content routing and bitswap mechanisms; Pinner does not copy content to additional storage nodes.

@@ -1,0 +1,157 @@
+---
+title: Manage DNS Records
+description: Create, list, update, and delete DNS records for domain validation and custom domains
+---
+
+# Manage DNS Records
+
+DNS records link your domain to Pinner services. Common uses: TXT records for domain validation, dnslink TXT records for IPFS content addressing, and ALIAS records for Website Hosting.
+
+## Supported record types
+
+The following DNS record types can be created through the API and CLI:
+
+| Type | Use case |
+|------|----------|
+| A | Map a name to an IPv4 address |
+| AAAA | Map a name to an IPv6 address |
+| ALIAS | Map the zone apex to another domain (used by Website Hosting) |
+| CNAME | Map a subdomain to another domain |
+| MX | Specify mail servers |
+| NS | Delegate a subdomain to another set of nameservers |
+| SRV | Specify services by port and hostname |
+| TXT | Store arbitrary text (validation tokens, dnslink records, SPF, etc.) |
+
+SOA and NS records for the zone apex are managed automatically by PowerDNS and cannot be modified directly.
+
+## List records
+
+```bash
+# List all records in a zone
+pinner dns records list example.com
+```
+
+## Create a record
+
+### TXT record (domain validation)
+
+```bash
+pinner dns records create example.com \
+  --name "pinner-verify" \
+  --type TXT \
+  --content "pinner-verify=abc123def456"
+```
+
+### TXT record (dnslink for IPFS content)
+
+```bash
+pinner dns records create example.com \
+  --name "_dnslink" \
+  --type TXT \
+  --content "dnslink=/ipfs/bafybeig...cid"
+```
+
+dnslink TXT values must follow the `dnslink=/ipfs/<cid>` or `dnslink=/ipns/<peerid>` format per the [dnslink spec](https://dnslink.info/).
+
+### CNAME record (subdomain alias)
+
+```bash
+pinner dns records create example.com \
+  --type CNAME \
+  --name "www" \
+  --content "example.org"
+```
+
+### ALIAS record (zone apex)
+
+```bash
+pinner dns records create example.com \
+  --type ALIAS \
+  --name "@" \
+  --content "gateway.pinner.xyz."
+```
+
+ALIAS records are used at the zone apex (`@`) where CNAME is not allowed. Website Hosting automatically creates ALIAS records pointing to the gateway domain.
+
+### A record
+
+```bash
+pinner dns records create example.com \
+  --type A \
+  --name "@" \
+  --content "203.0.113.42"
+```
+
+### AAAA record
+
+```bash
+pinner dns records create example.com \
+  --type AAAA \
+  --name "@" \
+  --content "2001:db8::1"
+```
+
+### With optional flags
+
+```bash
+# Set a custom TTL (default: 3600 seconds)
+pinner dns records create example.com \
+  --name "www" \
+  --type CNAME \
+  --content "example.org" \
+  --ttl 7200
+
+# Create a disabled record
+pinner dns records create example.com \
+  --name "staging" \
+  --type CNAME \
+  --content "staging.example.org" \
+  --disabled
+```
+
+## Get a record
+
+```bash
+pinner dns records get example.com --name www --type CNAME
+```
+
+## Update a record
+
+```bash
+pinner dns records update example.com \
+  --name www \
+  --type CNAME \
+  --content "new-site.example.com"
+```
+
+You can also update the TTL or disabled state:
+
+```bash
+pinner dns records update example.com \
+  --name www \
+  --type CNAME \
+  --content "new-site.example.com" \
+  --ttl 7200
+```
+
+## Delete a record
+
+```bash
+pinner dns records delete example.com \
+  --name www \
+  --type CNAME
+```
+
+List records with `pinner dns records list example.com` to find the names and types of your records.
+
+## Common patterns
+
+| Goal | Record type | Name | Content |
+|------|------------|------|---------|
+| Prove domain ownership | TXT | `pinner-verify` | `pinner-verify=<token>` |
+| dnslink (IPFS content mapping) | TXT | `_dnslink` | `dnslink=/ipfs/<cid>` |
+| dnslink (IPNS content mapping) | TXT | `_dnslink` | `dnslink=/ipns/<peerid>` |
+| Website Hosting (auto-created) | ALIAS | `@` | Gateway domain |
+| Subdomain alias | CNAME | `www` | Target domain |
+| Root domain pointing | A | `@` | IPv4 address |
+| IPv6 root domain | AAAA | `@` | IPv6 address |

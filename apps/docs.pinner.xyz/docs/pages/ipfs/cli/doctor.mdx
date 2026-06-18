@@ -1,0 +1,76 @@
+---
+title: CLI Doctor
+description: Run diagnostic checks to troubleshoot the CLI
+---
+
+# CLI Doctor
+
+Run `pinner doctor` when something isn't working or you want to verify your setup.
+
+```bash
+pinner doctor
+```
+
+## Example output
+
+```
+Version: 0.1.0
+OS: linux/amd64
+Config: ~/.config/pinner/config.yaml
+Config Status: Found
+Endpoint: https://pinner.xyz
+Memory limit: 100 (default)
+Max retries: 3
+Authentication: Authenticated
+Shell completion: Enabled (bash, zsh)
+```
+
+When memory limit is set to a custom value, it displays the number in megabytes:
+
+```
+Memory limit: 256 MB
+```
+
+## JSON output
+
+For scripting or piping to other tools:
+
+```bash
+pinner doctor --json
+# or
+pinner doctor -j
+```
+
+Returns structured JSON with all diagnostic information.
+
+## What gets checked
+
+| Check | What it tells you |
+|-------|-------------------|
+| **Version** | CLI version and build info |
+| **OS** | Operating system and architecture |
+| **Config** | Where your config file lives and whether it was found |
+| **Config Status** | Whether the config file exists on disk (`Found` or `Not found (will use defaults)`) |
+| **Endpoint** | Which API endpoint the CLI is pointing at (derived from `base_endpoint` and `secure` settings) |
+| **Memory limit** | CAR generation memory ceiling (shows `(default)` when using the built-in 100 MB default) |
+| **Max retries** | Maximum retry attempts on failure |
+| **Authentication** | Whether an auth token is configured |
+| **Shell completion** | Which shells have tab-completion configured (checks bash, zsh, fish; pwsh on Windows) |
+
+## When to run it
+
+- You're reporting a bug and need to share your environment details
+- The CLI can't connect to the API
+- Authentication isn't working as expected
+- You changed your config and want to confirm it took effect
+- You're setting up the CLI on a new machine
+
+## Next steps
+
+If `pinner doctor` reports a problem:
+
+- **Authentication: Not authenticated**: run `pinner auth login` to authenticate
+- **Config: Not found (will use defaults)**: run `pinner setup` to create one
+- **Endpoint showing wrong URL**: check `pinner config get base_endpoint` and `pinner config get secure`
+
+See [CLI Auth](/ipfs/cli/auth) for authentication details, or [CLI Config](/ipfs/cli/config) for configuration options.

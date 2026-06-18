@@ -1,0 +1,72 @@
+---
+title: Upload a Directory
+description: Upload a directory of files to IPFS and get the root CID
+---
+
+# Upload a Directory
+
+In this tutorial you'll upload multiple files as an IPFS directory and get the root CID that addresses the whole structure.
+
+## What you'll learn
+
+- How to group files into an IPFS directory upload
+- What the "root CID" is and how to find it
+- How to verify the upload worked
+
+## Upload the directory
+
+:::code-group
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY! });
+
+const files = [
+  new File(["Hello, IPFS!"], "hello.txt", { type: "text/plain" }),
+  new File(['{"name": "config"}'], "config.json", {
+    type: "application/json",
+  }),
+];
+
+const result = await pinner.uploadAndWait(files);
+console.log("Root CID:", result.cid);
+```
+
+```bash [CLI]
+# Upload an entire directory
+pinner upload ./my-directory/
+
+# The root CID is printed to the terminal
+```
+:::
+
+## What is the root CID?
+
+When you upload a directory, IPFS creates a tree of CIDs — one for each file, plus intermediate nodes. The **root CID** addresses the top of that tree. With the root CID alone you can reach every file inside the directory.
+
+## Verify the upload
+
+You can check that the content is reachable through any public gateway:
+
+```
+https://ipfs.io/ipfs/<ROOT_CID>/hello.txt
+https://dweb.link/ipfs/<ROOT_CID>/config.json
+```
+
+Or check the pin status:
+
+:::code-group
+```typescript [SDK]
+const status = await pinner.pins.getStatus(result.cid);
+console.log(status);
+```
+
+```bash [CLI]
+pinner status <CID>
+```
+:::
+
+## Next steps
+
+- [Upload CAR files for pre-calculated CIDs](/ipfs/tutorials/upload-car)
+- [Understand how CIDs work](/ipfs/concepts/cids)

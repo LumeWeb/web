@@ -1,0 +1,127 @@
+---
+title: Deploy with GitHub Actions
+description: Automatically deploy your site to Pinner on every push to main
+---
+
+# Deploy with GitHub Actions
+
+Deploy your static site to Pinner automatically every time you push to your repository.
+
+## Set up secrets
+
+Add your Pinner API key as a repository secret:
+
+1. Go to **Settings → Secrets and variables → Actions**
+2. Click **New repository secret**
+3. Name: `PINNER_API_KEY`
+4. Value: your API key from [API Keys](/account/api-tokens)
+
+## Create the workflow
+
+Create `.github/workflows/deploy.yml`:
+
+```yaml
+name: Deploy to Pinner
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: npm ci && npm run build
+
+      - name: Install Pinner CLI
+        run: npm install -g @lumeweb/pinner-cli
+
+      - name: Authenticate
+        run: pinner auth ${{ secrets.PINNER_API_KEY }}
+
+      - name: Deploy
+        run: pinner website deploy ./dist
+```
+
+This workflow builds your site, authenticates with Pinner, and deploys the build output.
+
+## Deploy with the SDK
+
+If you prefer programmatic control — for example, to update an existing website or publish via IPNS:
+
+```yaml
+- name: Deploy with SDK
+  env:
+    PINNER_API_KEY: ${{ secrets.PINNER_API_KEY }}
+  run: node scripts/deploy.mjs
+```
+
+```javascript
+// scripts/deploy.mjs
+import { Pinner } from "@lumeweb/pinner";
+import fs from "fs";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY });
+
+// Upload build artifacts
+const files = fs.readdirSync("./dist").map((name) => {
+  const buffer = fs.readFileSync(`./dist/${name}`);
+  return new File([buffer], name);
+});
+const result = await pinner.uploadAndWait(files);
+console.log("CID:", result.cid);
+
+// Update existing website or create a new one
+const siteId = Number(process.env.WEBSITE_ID);
+if (siteId) {
+  await pinner.websites.updateWebsite(siteId, {
+    target_hash: result.cid,
+  });
+  console.log("Updated website", siteId);
+} else {
+  const site = await pinner.websites.createWebsite({
+    domain: "mysite.example.com",
+    target_type: "ipfs",
+    target_hash: result.cid,
+  });
+  console.log("Created website", site.id);
+}
+```
+
+## Deploy with IPNS for continuous updates
+
+If your site updates frequently, use IPNS so the domain always points at the latest content:
+
+```javascript
+// scripts/deploy-ipns.mjs
+import { Pinner } from "@lumeweb/pinner";
+import fs from "fs";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY });
+
+// Upload build artifacts
+const files = fs.readdirSync("./dist").map((name) => {
+  const buffer = fs.readFileSync(`./dist/${name}`);
+  return new File([buffer], name);
+});
+const result = await pinner.uploadAndWait(files);
+
+// Publish to IPNS
+const IPNS_KEY_ID = Number(process.env.IPNS_KEY_ID);
+await pinner.ipns.publish({
+  key_id: IPNS_KEY_ID,
+  cid: result.cid,
+});
+console.log("Published to IPNS:", result.cid);
+```
+
+The domain resolves to the IPNS name, which always points at the latest CID.
+
+## Next steps
+
+- [Understand IPNS publishing](/websites/concepts/ipns)
+- [Set up a custom domain](/websites/how-to/custom-domains)
+- [Monitor SSL provisioning](/websites/how-to/check-ssl)

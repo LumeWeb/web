@@ -1,0 +1,202 @@
+---
+title: DNS Migration from Fleek
+description: How to update your DNS records from Fleek's infrastructure to Pinner, including DNSLink, CNAME/ALIAS, and troubleshooting.
+---
+
+# DNS Migration from Fleek
+
+DNS is the most important part of migrating off Fleek. The good news: if you were on Fleek, you're already managing your own DNS at your registrar. You don't need to switch nameservers; you just need to change what your records point at.
+
+## How Fleek handled DNS
+
+On Fleek, you managed DNS at your own registrar (GoDaddy, Namecheap, Cloudflare, etc.). Fleek gave you the record values, and you added them yourself:
+
+| Record | What you set on Fleek |
+|--------|----------------------|
+| CNAME | Subdomains pointed at Fleek's infrastructure (later upgraded to BunnyCDN) |
+| ANAME / ALIAS | Root domains pointed at Fleek's infrastructure |
+| SSL | Automatic: Fleek provisioned Let's Encrypt certificates once DNS was in place |
+
+DNSLink was handled differently depending on your setup:
+
+- **For custom domains using Fleek's CDN**: your CNAME/ANAME record pointed at Fleek's infrastructure. DNSLink wasn't on your domain; Fleek managed it on their end.
+- **For DNSLink domains specifically**: Fleek's approach was to CNAME your domain to a Fleek-assigned subdomain (like `yourdomain.on.fleek.co`). The `_dnslink` TXT record lived on Fleek's subdomain, not your custom domain. You just had a CNAME pointing at it.
+
+This means you most likely never had a `_dnslink` TXT record on your own domain if you were using Fleek's standard setup. DNSLink was either managed by Fleek on their infrastructure, or you CNAME'd to a Fleek subdomain that had it.
+
+## How Pinner handles DNS
+
+Pinner gives you two options:
+
+| Option | How it works | Best for |
+|--------|--------------|----------|
+| **Pinner-managed DNS** | Delegate nameservers to Pinner. Pinner creates and manages DNSLink, validation, and ALIAS records automatically. Updates when you deploy. | People who want the "set it and forget it" experience: closest to what you might have wanted from Fleek |
+| **Self-managed DNS** | Keep your DNS at your registrar (just like Fleek). You add and maintain the DNS records yourself. | People who want to stay at Cloudflare, Route53, or another DNS provider |
+
+If you were comfortable managing DNS records on Fleek, the self-managed path will feel familiar: same workflow, different values. If you'd rather not touch DNS records anymore, use Pinner-managed DNS.
+
+## Step-by-step: Switch to Pinner-managed DNS
+
+Delegate nameservers to Pinner, and it handles everything automatically. This is the lowest-effort path.
+
+### 1. Create the website on Pinner
+
+```bash
+pinner websites create mysite.example.com --cid <CID>
+```
+
+By default, Pinner enables DNS hosting for new websites: it creates a DNS zone and the required records automatically.
+
+### 2. Get Pinner's nameservers
+
+```bash
+pinner websites config
+```
+
+This shows the nameservers Pinner assigned to your domain.
+
+### 3. Switch nameservers at your registrar
+
+Go to the same registrar where you managed DNS for Fleek, and update the nameservers to Pinner's.
+
+This is the step that causes downtime. DNS propagation takes anywhere from a few minutes to 48 hours. Your site may be unreachable during this window.
+
+**To minimize downtime:** Do the nameserver switch during a low-traffic period. Pinner's DNS records are already in place, so the moment the new nameservers propagate, your site starts working on Pinner.
+
+### 4. Verify the switch
+
+After changing nameservers, confirm the delegation:
+
+```bash
+dig NS mysite.example.com
+```
+
+You should see Pinner's nameservers in the response. If you still see your registrar's default nameservers, propagation isn't complete yet.
+
+### 5. Validate on Pinner
+
+```bash
+pinner websites validate mysite.example.com
+```
+
+### 6. Wait for SSL
+
+SSL provisions automatically after DNS is confirmed:
+
+```bash
+pinner websites ssl status mysite.example.com
+```
+
+## Step-by-step: Switch to self-managed DNS
+
+Stay at your current DNS provider. Same approach you used with Fleek; just update the record values to point at Pinner instead.
+
+### 1. Create the website with DNS hosting disabled
+
+```bash
+pinner websites create mysite.example.com --cid <CID> --no-dns-hosting
+```
+
+### 2. Update your DNS records
+
+At your DNS provider, replace the Fleek values with Pinner values:
+
+| Record | Old value (Fleek) | New value (Pinner) |
+|--------|-------------------|-------------------|
+| CNAME or ALIAS | Fleek's CDN target | Pinner gateway domain |
+| TXT `_dnslink` | Probably absent: Fleek managed DNSLink on their end | `dnslink=/ipfs/<CID>` or `dnslink=/ipns/<peerID>` |
+
+If you were using Fleek's standard DNS setup, you likely had a CNAME pointing at Fleek's infrastructure, and Fleek handled DNSLink internally. In that case, the `_dnslink` TXT record is new: Pinner needs it on your domain (unless you use Pinner-managed DNS, which handles it automatically).
+
+Get the Pinner gateway domain from:
+
+```bash
+pinner websites config
+```
+
+For IPNS targets (recommended if your site updates frequently):
+- DNSLink value: `dnslink=/ipns/<peerID>`: the domain always resolves to the latest content
+
+For direct IPFS targets:
+- DNSLink value: `dnslink=/ipfs/<CID>`: you'll need to update this record each time you deploy
+
+### 3. Add validation TXT record
+
+The website response includes a `validation_record_host` and `validation_token`. Add:
+
+| Record | Name | Value |
+|--------|------|-------|
+| TXT | (from `validation_record_host`) | (from `validation_token`) |
+
+### 4. Validate and wait for SSL
+
+```bash
+pinner websites validate mysite.example.com
+pinner websites ssl status mysite.example.com
+```
+
+## Removing the old Fleek records
+
+Once Pinner is serving your site, remove the old Fleek DNS records at your registrar:
+
+- Delete the CNAME/ALIAS record pointing at Fleek's infrastructure
+- You likely don't have a `_dnslink` TXT record to remove; Fleek managed that on their end
+- Keep any non-Fleek records (email, other subdomains, etc.)
+
+If you're using Pinner-managed DNS, this is handled automatically; delegating the nameservers replaces all the records at once.
+
+## What's different from Fleek
+
+| | Fleek | Pinner |
+|---|---|---|
+| DNS management | You add CNAME/ANAME records at your registrar | Pinner-managed DNS (automatic) or self-managed (same as Fleek) |
+| DNSLink | Manual opt-in via domain settings | Automatic with Pinner-managed DNS; self-managed if you handle DNS yourself |
+| SSL | Automatic (Let's Encrypt) | Automatic (Caddy on-demand TLS) |
+| Domain verification | TXT record at registrar | TXT record at registrar (same pattern) |
+| Record type for root domain | ANAME | ALIAS |
+| Record type for subdomain | CNAME | CNAME |
+
+## Troubleshooting
+
+### Validation keeps failing with `dns_missing`
+
+DNS propagation can take up to 48 hours (usually faster: 5 to 30 minutes). Verify the DNSLink and verification TXT records exist:
+
+```bash
+dig TXT _dnslink.mysite.example.com
+dig TXT <validation_record_host>
+```
+
+### Validation fails with `dns_mismatch`
+
+The DNSLink TXT record was found but doesn't match the expected target. Check that the `_dnslink` TXT record value is correct; it should be `dnslink=/ipfs/<CID>` or `dnslink=/ipns/<peerID>`.
+
+### SSL is stuck in `pending` or `failed`
+
+SSL can only provision after DNS is fully resolved. Check that:
+
+1. The DNSLink record resolves correctly (for self-managed DNS)
+2. Nameserver delegation is complete (for Pinner-managed DNS)
+3. The validation TXT record is in place
+
+Then check SSL status:
+
+```bash
+pinner websites ssl status mysite.example.com
+```
+
+### I had multiple domains on Fleek
+
+Each domain is independent. Update the DNS records for each domain separately, the same way you set them up on Fleek.
+
+### I had DNSLink set up on Fleek: do I need a `_dnslink` record now?
+
+Probably yes. On Fleek, DNSLink was handled on Fleek's side; your domain either CNAME'd to a Fleek subdomain that had the `_dnslink` TXT record, or Fleek managed it internally. Either way, the `_dnslink` TXT record was not on your custom domain.
+
+With Pinner, DNSLink needs to resolve from your domain (unless you use Pinner-managed DNS, which handles it automatically). For self-managed DNS, add a TXT record at `_dnslink.yourdomain.com` with the value `dnslink=/ipfs/<CID>` or `dnslink=/ipns/<peerID>`.
+
+## Next steps
+
+- [Deploy with GitHub Actions](/hosting/how-to/deploy-github-actions): automate deploys on push
+- [IPNS](/hosting/concepts/ipns): use IPNS for updatable content addresses
+- [Custom Domains](/hosting/how-to/custom-domains): full domain setup reference

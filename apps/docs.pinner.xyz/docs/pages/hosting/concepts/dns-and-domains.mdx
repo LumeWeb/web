@@ -1,0 +1,154 @@
+---
+title: DNS and Domains
+description: How DNS connects your domain to Pinner's hosting infrastructure
+---
+
+# DNS and Domains
+
+DNS is the bridge between your domain name and Pinner's hosting. You configure DNS records at your registrar (or let Pinner manage DNS entirely), and Pinner's gateway serves your IPFS content when visitors hit your domain.
+
+## Two ways to handle DNS
+
+### Pinner-managed DNS (recommended)
+
+The fastest way to get your site live. Enable Pinner DNS and delegate your nameservers; Pinner creates all the records automatically (validation, dnslink, gateway routing). No manual record management needed.
+
+After creating or updating a website with `--dns-hosting`, the CLI shows the nameservers for delegation automatically. You can also check them at any time:
+
+```bash
+pinner websites config
+```
+
+The nameservers are also available from the website configuration API endpoint. The `nameservers` field lists the nameservers to set at your registrar.
+
+The tradeoff: Pinner handles all DNS for that domain. If you need fine-grained control over other DNS records, you can still manage them through Pinner's DNS zone editor (see [Manage DNS Zones](/dns/how-to/manage-zones) and [Manage DNS Records](/dns/how-to/manage-records)).
+
+### Bring your own DNS
+
+You keep your existing DNS provider and add records that point to Pinner:
+
+ Record | Purpose | Value |
+--------|---------|-------|
+ TXT | Domain validation (ownership) | `validation_token` from website response (e.g. `pinner-verify=abc123def456`) |
+ TXT | dnslink (content mapping) | `dnslink=/ipfs/<cid>` or `dnslink=/ipns/<peerID>` |
+ CNAME | Route subdomain traffic to Pinner | `gateway_domain` from website response |
+ ALIAS | Route root domain traffic to Pinner | `gateway_domain` from website response |
+ A | Root domain routing (if ALIAS not supported) | IP from Pinner configuration |
+
+This is useful if you have existing DNS infrastructure or need to manage records that Pinner doesn't support.
+
+After creating a website, the CLI shows the required DNS records. You can also view them with:
+
+```bash
+pinner websites get <domain>
+```
+
+## DNS records for website hosting
+
+### Validation TXT record
+
+Before Pinner serves your domain, you must prove you own it. Pinner assigns a validation token to each website. The website response provides two fields:
+
+- `validation_token`: the full TXT record value (e.g. `pinner-verify=abc123def456`)
+- `validation_record_host`: the hostname for the TXT record (e.g. `pinner-verify.yourdomain.com`)
+
+Add a TXT record:
+
+```
+<validation_record_host>  TXT  "<validation_token>"
+```
+
+After adding the record, trigger validation and Pinner checks that the token matches. The token has an expiration time; if it expires, Pinner generates a new one automatically on your next validation attempt.
+
+Validate from the CLI:
+
+```bash
+pinner websites validate <domain>
+```
+
+### dnslink TXT record
+
+Pinner checks a `_dnslink` TXT record that maps your domain to your content. For IPFS targets:
+
+```
+_dnslink.yourdomain.com  TXT  "dnslink=/ipfs/<your-cid>"
+```
+
+For IPNS targets:
+
+```
+_dnslink.yourdomain.com  TXT  "dnslink=/ipns/<your-peerID>"
+```
+
+### CNAME record (subdomain)
+
+For `www.yourdomain.com` or other subdomains, use the `gateway_domain` from the website response:
+
+```
+www  CNAME  <gateway_domain>
+```
+
+### ALIAS record (root domain)
+
+Root domains can use an ALIAS record (supported by most modern DNS providers) pointing to the gateway:
+
+```
+@  ALIAS  <gateway_domain>
+```
+
+If your DNS provider doesn't support ALIAS records, use an A record instead:
+
+```
+@  A  <IP from Pinner configuration>
+```
+
+### Nameserver delegation (Pinner-managed DNS)
+
+If you're using Pinner's DNS hosting, update your domain registrar to use Pinner's nameservers:
+
+```bash
+pinner websites config
+```
+
+Or retrieve them from the website configuration API endpoint. Once propagated, Pinner controls all DNS for your domain.
+
+## Supported DNS record types
+
+When managing DNS zones through Pinner, you can create the following user-manageable record types:
+
+ Type | Description |
+------|-------------|
+ A | IPv4 address record |
+ AAAA | IPv6 address record |
+ ALIAS | Alias record (maps root domain to another name) |
+ CNAME | Canonical name record |
+ MX | Mail exchange record |
+ NS | Nameserver record |
+ SRV | Service record |
+ TXT | Text record |
+
+SOA and NS records are managed automatically by PowerDNS and cannot be directly modified by users.
+
+## DNS propagation
+
+DNS changes aren't instant. Typical propagation times:
+
+ Change | Typical time |
+--------|-------------|
+ New records | 1–5 minutes |
+ Modified records | 5–30 minutes |
+ Nameserver changes | 1–48 hours |
+
+Pinner's SSL provisioning starts only after DNS has propagated. If SSL stays in `pending`, your DNS records may not have propagated yet.
+
+## DNS hosting setup flow
+
+1. Enable DNS hosting on your website: `pinner websites create <domain> --cid <cid> --dns-hosting` (or `pinner websites update <domain> --dns-hosting`)
+2. Pinner creates a DNS zone with the necessary records (dnslink TXT, validation TXT, and ALIAS pointing to the gateway)
+3. Get Pinner's nameservers: `pinner websites config`
+4. Change your domain's nameservers at your registrar to Pinner's nameservers
+5. Wait for nameserver propagation
+6. Validate: `pinner dns zones validate <domain>`
+7. SSL provisions automatically
+
+See [Manage DNS Zones](/dns/how-to/manage-zones) and [Manage DNS Records](/dns/how-to/manage-records) for CLI commands.

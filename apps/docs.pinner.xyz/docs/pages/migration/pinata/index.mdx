@@ -1,0 +1,142 @@
+---
+title: Migrate from Pinata
+description: Step-by-step guide to migrate from Pinata to Pinner, with a compatibility adapter for minimal code changes.
+---
+
+# Migrate from Pinata
+
+## Why migrate?
+
+- **Decentralized infrastructure**: no single point of failure, no lock-in
+- **Competitive pricing**: pay for pinning, not bundled gateway infrastructure
+- **Privacy-focused**: your data, your control
+- **Compatibility adapter**: swap the SDK, keep most of your call patterns
+
+## Migration strategy
+
+ Approach | Best for | Effort |
+----------|----------|--------|
+ **Pinata Adapter** | Quick migration, minimal code changes | Low |
+ **Native Pinner API** | Long-term projects, better features | Medium |
+
+:::tip
+Start with the adapter to ship fast, then migrate to the native API when you want Pinner-specific features.
+:::
+
+## Feature compatibility
+
+The adapter provides broad Pinata API coverage, but some features are not supported because Pinner's architecture differs from Pinata's:
+
+ Feature | v2 Adapter | Legacy Adapter | Notes |
+---------|:----------:|:--------------:|-------|
+ Public file upload | ✅ | ✅ | `file`, `fileArray`, `base64`, `json` |
+ Pin by CID | ✅ | ✅ | |
+ Private uploads | ❌ | ❌ | Throws "not supported" |
+ URL upload | ❌ | N/A | Throws "not supported" in v2 |
+ File listing | ✅ | ✅ | Pagination filters limited |
+ Get file by ID | ✅ | ✅ | |
+ Delete / unpin | ✅ | ✅ | |
+ Update metadata | ✅ | ✅ | |
+ Pin queue | ✅ | ✅ | Returns pinned items (no true queue) |
+ Groups | ⚠️ | N/A | `list()` returns empty; create/add/remove throw |
+ Gateways | ✅ | N/A | Public gateways only; private throws |
+ Signed URLs | ❌ | ⚠️ | v2 throws; legacy returns gateway URL fallback |
+ Swap CID | ❌ | ❌ | Throws "not supported" |
+ Analytics | ⚠️ | ⚠️ | Returns empty data (not real analytics) |
+
+:::warning
+If your app uses private uploads, groups, swap CID, or signed URLs, those calls will throw runtime errors through the adapter. You must remove or replace them before migrating.
+:::
+
+For the full adapter method reference, see [Adapter Reference](/migration/pinata/adapter-reference).
+
+## Adapter setup
+
+### Install Pinner
+
+```bash
+npm install @lumeweb/pinner
+```
+
+### Pick your adapter
+
+**Pinata SDK 2.x**: use `pinataAdapter`:
+
+```typescript
+import { Pinner, pinataAdapter } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+const adapter = pinataAdapter(pinner);
+```
+
+**Pinata SDK 1.x**: use `pinataLegacyAdapter`:
+
+```typescript
+import { Pinner, pinataLegacyAdapter } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+const adapter = pinataLegacyAdapter(pinner);
+```
+
+## Step-by-step: replace initialization
+
+1. **Replace the import.** Swap `pinata` for `@lumeweb/pinner` and import the adapter.
+2. **Replace the constructor.** Instead of `new PinataSDK({ pinataJwt })`, use `new Pinner({ jwt })` + adapter.
+3. **Handle unsupported features.** Remove or replace calls to private uploads, groups, swap CID, signed URLs, and URL uploads (see [Feature compatibility](#feature-compatibility)).
+4. **Add `.execute()` to v2 builder methods.** The v2 adapter uses a builder pattern: chain `.name()` and `.keyvalues()`, then call `.execute()`.
+5. **Test uploads and listings.** Verify your existing calls work with the adapter.
+
+## Error handling
+
+Pinner errors use a different structure. Instead of catching generic errors:
+
+```typescript
+import { PinnerError } from "@lumeweb/pinner";
+
+try {
+  const result = await adapter.upload.public.file(file).execute();
+} catch (error) {
+  if (error instanceof PinnerError) {
+    console.error("Code:", error.code);
+    console.error("Message:", error.message);
+    console.error("Retryable:", error.retryable);
+  }
+}
+```
+
+`PinnerError` has the following properties:
+
+ Property | Type | Description |
+----------|------|-------------|
+ `code` | `string` | Machine-readable error code (e.g. `"UPLOAD_ERROR"`, `"PIN_ERROR"`) |
+ `message` | `string` | Human-readable error message |
+ `retryable` | `boolean` | Whether the operation can be retried |
+
+See the [Error Reference](/ipfs/reference/errors) for all error codes and retry guidance.
+
+## Migration checklist
+
+- [ ] Install `@lumeweb/pinner`
+- [ ] Update imports and initialization
+- [ ] Remove or replace unsupported features (private uploads, groups, swap CID, signed URLs, URL uploads)
+- [ ] Add `.execute()` to builder methods (v2 adapter only)
+- [ ] Test file uploads
+- [ ] Test file listing and deletion
+- [ ] Update error handling
+- [ ] Remove Pinata SDK dependency
+- [ ] Deploy and monitor
+
+## Testing your migration
+
+1. **Test in development**: verify all upload operations work
+2. **Check file listings**: ensure metadata is preserved
+3. **Verify deletions**: test unpin operations
+4. **Test unsupported feature handling**: confirm your app gracefully handles `notSupported` errors
+5. **Monitor performance**: compare upload speeds
+6. **Review costs**: check your billing
+
+## Next steps
+
+- [Adapter Reference](/migration/pinata/adapter-reference): full v2 and legacy adapter method docs
+- [Code Examples](/migration/pinata/examples): side-by-side Pinata vs Pinner code
+- [SDK Getting Started](/ipfs/sdk/getting-started): using Pinner without the adapter

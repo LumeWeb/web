@@ -1,0 +1,44 @@
+---
+title: Quickstart
+description: Get started with Pinner in under 5 minutes
+---
+
+# Quickstart
+
+Choose your path; both get a file pinned to IPFS in under 5 minutes.
+
+:::code-group
+```bash [CLI]
+# 1. Install (macOS / Linux)
+curl -fsSL https://get.pinner.xyz | sh
+
+# Windows: iex (irm https://get.pinner.xyz/install.ps1)
+
+# 2. Set up (walks you through auth + config)
+pinner setup
+
+# 3. Upload a file
+pinner upload myfile.txt
+
+# Done: your CID is printed to the terminal
+```
+
+```typescript [SDK]
+npm install @lumeweb/pinner
+
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN });
+
+// Upload and wait for the CID
+const result = await pinner.uploadAndWait(file);
+console.log("CID:", result.cid);
+```
+:::
+
+## Go deeper
+
+- [CLI install & setup guide](/ipfs/cli/getting-started): all install methods, flags, troubleshooting
+- [SDK getting started](/ipfs/sdk/getting-started): install, configure, first upload, type your config
+- [Understand CIDs](/ipfs/concepts/cids)
+- [Check if your content is pinned](/ipfs/how-to/check-pin-status)

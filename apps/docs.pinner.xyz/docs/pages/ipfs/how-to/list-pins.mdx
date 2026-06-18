@@ -1,0 +1,168 @@
+---
+title: List & Search Pins
+description: Browse your pinned content, filter by name or status, and paginate results
+---
+
+# List & Search Pins
+
+See what you've pinned, filter by name or status, and paginate through large lists of pins.
+
+## List all pins
+
+:::code-group
+```bash [CLI]
+pinner pins ls
+```
+
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const pins = await pinner.listPins();
+
+for (const pin of pins) {
+  console.log(`${pin.cid}  ${pin.name ?? "(unnamed)"}  ${pin.status}`);
+}
+```
+:::
+
+The CLI prints a table with CID, name, status, and created date. The SDK returns an array of `RemotePin` objects.
+
+## Filter by name
+
+Find pins whose name matches a string.
+
+:::code-group
+```bash [CLI]
+pinner pins ls --name "logo"
+```
+
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const pins = await pinner.listPins({ name: "logo" });
+```
+:::
+
+## Filter by status
+
+Show only pins in a specific state. Status values: `queued`, `pinning`, `pinned`, `failed`.
+
+:::code-group
+```bash [CLI]
+pinner pins ls --status failed
+```
+
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const pins = await pinner.listPins({ status: ["failed"] });
+```
+:::
+
+Combine name and status filters:
+
+```bash
+pinner pins ls --name "deploy" --status pinned
+```
+
+## Limit results
+
+Control how many results come back per page. The CLI defaults to 10; the SDK defaults to the server's page size.
+
+:::code-group
+```bash [CLI]
+pinner pins ls --limit 50
+```
+
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const pins = await pinner.listPins({ limit: 50 });
+```
+:::
+
+## Paginate with the SDK
+
+`listPins()` returns a flat array; fine for most cases. When you need more control (streaming large result sets, custom pagination), use the async generator directly:
+
+```typescript
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+// Stream pins one at a time
+for await (const pin of pinner.pins.ls()) {
+  console.log(pin.cid, pin.name, pin.status);
+
+  // Break early if you only need a window
+  if (someCondition) break;
+}
+```
+
+The generator handles pagination internally; it fetches the next page when you exhaust the current one. Pass `cursor` to resume from a specific point:
+
+```typescript
+for await (const pin of pinner.pins.ls({ cursor: previousCursor })) {
+  // picks up where you left off
+}
+```
+
+## Watch for status changes
+
+The CLI can continuously monitor pin status:
+
+```bash
+pinner pins ls --watch
+```
+
+The table refreshes in place, showing the current status of each pin. Useful when you're waiting for bulk pins to settle. Press `Ctrl+C` to stop.
+
+## Look up a single pin by CID
+
+If you already know the CID, use `pins.get` instead of listing and filtering:
+
+:::code-group
+```bash [CLI]
+pinner pins status bafybeig...
+```
+
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+import { CID } from "multiformats";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const pin = await pinner.pins.get(CID.parse("bafybeig..."));
+console.log(pin.status);
+```
+:::
+
+See [Check Pin Status](/ipfs/how-to/check-pin-status) for the full guide.
+
+## What you'll see
+
+Each pin has these fields:
+
+| Field | Description |
+|-------|-------------|
+| `cid` | The Content Identifier for the pinned data |
+| `name` | Human-readable name (if set during upload) |
+| `status` | Current state: `queued`, `pinning`, `pinned`, or `failed` |
+| `created` | When the pin was created |
+| `metadata` | Key-value pairs attached to the pin |
+
+For a deeper explanation of what each status means and how pins transition between them, see [Pin Lifecycle](/ipfs/concepts/pin-lifecycle).
+
+## Next steps
+
+- [Check a specific pin's status](/ipfs/how-to/check-pin-status)
+- [Remove pins you no longer need](/ipfs/how-to/delete-pins)
+- [Add and update metadata on pins](/ipfs/how-to/manage-metadata)

@@ -1,0 +1,193 @@
+---
+title: API Keys
+description: Create, manage, and rotate API keys for Pinner
+---
+
+# API Keys
+
+## API key vs auth token
+
+Pinner uses two types of credentials. It's important to understand the difference:
+
+| | API key | Auth token |
+|--|---------|------------|
+| **What it is** | A long-lived JWT (30-day expiry) with audience `api`, created via `pinner auth` or `pinner account api-keys` | A short-lived session JWT with audience `login`, issued during authentication |
+| **How you use it** | Store it in the `PINNER_AUTH_TOKEN` env var, or pass it as a Bearer token to the API | Not typically used directly; managed internally by the CLI and browser sessions |
+| **Lifetime** | 30 days from creation (can also have an optional expiry on the key record) | Expires after a session timeout |
+| **Where it lives** | `PINNER_AUTH_TOKEN` env var, CLI config (`auth_token`), or `Authorization: Bearer` header | Internal to CLI sessions and browser cookies |
+
+As a developer, you interact with **API keys**. The term "auth token" refers to the internal session JWT; you rarely need to handle it directly.
+
+## Primary path: CLI
+
+Run `pinner auth` to log in and create an API key. The CLI authenticates you, generates a key automatically, and saves the resulting JWT to your local config. You don't need to visit the dashboard to get a key.
+
+```bash
+# Interactive: prompts for email and password
+pinner auth
+
+# Semi-interactive: provide email, prompted for password (and OTP if 2FA is enabled)
+pinner auth --email you@example.com
+
+# Name your key (useful for tracking which machine it's on)
+pinner auth --email you@example.com --key-name "ci-pipeline"
+
+# Skip API key creation, save the login token directly
+pinner auth --email you@example.com --no-create-key
+```
+
+The default key name is `cli-generated` when `--key-name` is not specified. If a key with the same name already exists, it is replaced automatically.
+
+### Non-interactive (CI/CD)
+
+For automated environments, pass credentials via environment variables:
+
+```bash
+PINNER_EMAIL=you@example.com PINNER_PASSWORD=yourpassword pinner auth
+```
+
+With 2FA enabled:
+
+```bash
+PINNER_EMAIL=you@example.com PINNER_PASSWORD=yourpassword PINNER_OTP=123456 pinner auth
+```
+
+Or provide an existing JWT token directly:
+
+```bash
+pinner auth <token>
+```
+
+This is the CI/CD path; prefer the interactive `pinner auth` for local development.
+
+## Managing API keys via CLI
+
+The `pinner account api-keys` command provides full lifecycle management of API keys:
+
+```bash
+# List all API keys
+pinner account api-keys list
+
+# Search keys by name
+pinner account api-keys list --search my-key
+
+# Create a new API key (token is shown once; save it securely)
+pinner account api-keys create my-key
+
+# Delete an API key by UUID or name
+pinner account api-keys delete my-key
+
+# Force-delete the key currently used for authentication
+pinner account api-keys delete my-key --force
+```
+
+The token returned by `create` can be used with `pinner auth --auth-token <token>` or the `PINNER_AUTH_TOKEN` environment variable.
+
+## API endpoints
+
+For programmatic access, API keys can be managed via REST endpoints:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/account/keys` | Create an API key (body: `{"name": "my-key"}`) |
+| `GET` | `/api/account/keys` | List API keys (paginated, with filters and sort) |
+| `DELETE` | `/api/account/keys/:keyID` | Delete an API key by UUID |
+
+All endpoints require an `Authorization: Bearer` header with a valid login JWT.
+
+## Exchanging an API key for a login token
+
+API key JWTs have the `api` audience. Some API endpoints require a `login` audience JWT. To exchange an API key for a login JWT:
+
+```
+POST /api/auth/key
+Authorization: APIKey <your-api-key-jwt>
+```
+
+The response returns a `{"token": "<login-jwt>"}`. The CLI handles this exchange automatically when needed.
+
+## Fallback: Dashboard manual generation
+
+If you can't use the CLI, you can generate an API key in the web dashboard. Go to your account settings and create a new API key.
+
+This is the fallback path; prefer `pinner auth` or `pinner account api-keys` instead.
+
+## Environment variables
+
+Set your credentials as environment variables so the CLI picks them up automatically:
+
+| Environment variable | Purpose | Used by |
+|----------------------|---------|---------|
+| `PINNER_AUTH_TOKEN` | Your API key JWT or login token for authentication | SDK, CLI |
+| `PINNER_EMAIL` | Email address for login | CLI (`pinner auth`) |
+| `PINNER_PASSWORD` | Password for login (prefer stdin or env var) | CLI (`pinner auth`) |
+| `PINNER_OTP` | OTP code for 2FA login | CLI (`pinner auth`) |
+
+```bash
+# Most common: set your API key token
+export PINNER_AUTH_TOKEN="your-api-key-jwt"
+
+# For login flows
+export PINNER_EMAIL="you@example.com"
+export PINNER_PASSWORD="yourpassword"
+```
+
+The CLI checks these env vars automatically when you don't pass a token directly. The SDK requires you to pass the JWT explicitly; it does not read env vars.
+
+## Authentication method
+
+API keys are JWTs signed with Ed25519. When calling the API:
+
+- **Authorization header**: `Authorization: Bearer` is the primary method
+- **Cookie**: The auth middleware also checks the configured auth cookie
+- **Query parameter**: As a fallback, the token can be passed as a query parameter
+
+The SDK uses the `Authorization: Bearer` header by default.
+
+## Scopes
+
+All API keys currently grant full account access. Scoped keys are on the roadmap.
+
+## Rotation
+
+To rotate an API key:
+
+1. Create a new key with `pinner account api-keys create rotation-$(date +%Y%m%d)`
+2. Update your environment variables and deployments with the new token
+3. Delete the old key: `pinner account api-keys delete <old-key-uuid-or-name>`
+
+Or use `pinner auth` with `--key-name`; it automatically replaces any existing key with the same name.
+
+## Revocation
+
+Revoke a compromised or unused key through any of these methods:
+
+- **CLI**: `pinner account api-keys delete <uuid-or-name>`
+- **API**: `DELETE /api/account/keys/:keyID`
+- **Dashboard**: Go to your account settings and delete the key
+
+If you delete the key currently used for authentication, you must re-authenticate with `pinner auth`.
+
+## 2FA / OTP management
+
+Secure your account with one-time passwords.
+
+```bash
+# Enable 2FA (generates a secret, prompts for OTP verification)
+pinner account otp enable
+
+# Enable 2FA non-interactively (provide the OTP code from your authenticator app)
+pinner account otp enable --otp 123456
+
+# Disable 2FA (prompts for password)
+pinner account otp disable
+
+# Disable 2FA non-interactively
+pinner account otp disable --password mypassword
+```
+
+When 2FA is active, include your OTP code when authenticating:
+
+```bash
+PINNER_EMAIL=you@example.com PINNER_PASSWORD=yourpassword PINNER_OTP=123456 pinner auth
+```

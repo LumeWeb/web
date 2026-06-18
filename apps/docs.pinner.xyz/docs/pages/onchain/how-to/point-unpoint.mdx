@@ -1,0 +1,169 @@
+---
+title: Point & Unpoint
+description: Point an onchain name at IPFS content, or remove the pointing
+---
+
+# Point & Unpoint
+
+The `point` and `unpoint` commands manage the link between an onchain name and IPFS content via IPNS.
+
+## `point`
+
+Point an onchain name at IPFS content.
+
+```bash
+pinner point <name> --cid <cid>
+```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `<name>` | The onchain name to point (e.g., `vitalik.eth`) |
+
+### Flags
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--cid` | `-c` | CID to point the name at (required) |
+
+### Behavior
+
+`point` is idempotent:
+
+1. If no IPNS key exists for the name, one is created automatically
+2. If an IPNS key already exists, it's reused and the new CID is published to it
+3. The contenthash (`ipns://<ipns-name>`) is returned for you to set in your name manager
+
+### Examples
+
+Point a name at content:
+
+```bash
+pinner point vitalik.eth --cid bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e
+```
+
+Update content (same command, new CID):
+
+```bash
+pinner point vitalik.eth --cid bafybeig...updated-cid
+```
+
+Get JSON output:
+
+```bash
+pinner point vitalik.eth --cid bafybeig... --json
+```
+
+```json
+{
+  "name": "vitalik.eth",
+  "cid": "bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e",
+  "ipns_name": "k51qzi5uqu5djx...",
+  "contenthash": "ipns://k51qzi5uqu5djx...",
+  "created": true
+}
+```
+
+The `created` field is `true` when a new IPNS key was created, `false` when an existing key was reused.
+
+### What to do after running `point`
+
+`point` handles Pinner's side: the IPNS key is created and the CID is published. But your name won't resolve until you set the contenthash in your name manager.
+
+1. Copy the `Contenthash` value from the output
+2. Set it as the `contenthash` record for your name (in your ENS controller, etc.)
+3. Verify by visiting your name through a resolver (e.g., `https://vitalik.eth.limo` for ENS names)
+
+### Troubleshooting
+
+| Problem | Cause | Fix |
+|---------|-------|-----|
+| `name is required` | No name argument provided | Pass the name: `pinner point vitalik.eth --cid <cid>` |
+| `failed to publish to IPNS` | CID is invalid or network error | Verify the CID is valid and try again |
+| Name doesn't resolve after setting contenthash | Contenthash not set, or set incorrectly | Verify the contenthash matches the output from `point` exactly; it should start with `ipns://` |
+| Name resolves but shows old content | IPNS record hasn't propagated | Wait a moment for IPNS propagation and refresh |
+
+---
+
+## `unpoint`
+
+Remove the IPNS key for an onchain name.
+
+```bash
+pinner unpoint <name>
+```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `<name>` | The onchain name to unpoint (e.g., `vitalik.eth`) |
+
+### Behavior
+
+1. Finds the IPNS key for the given name
+2. Deletes the key
+3. The name will no longer resolve to IPFS content
+
+:::warning
+`unpoint` deletes the IPNS key immediately. Any name pointing at this IPNS name will stop resolving. This cannot be undone; you'll need to run `point` again to create a new key, and then update your contenthash to the new IPNS name.
+:::
+
+### Examples
+
+Remove a pointing:
+
+```bash
+pinner unpoint vitalik.eth
+```
+
+You'll see output like:
+
+```
+Domain unpointed successfully
+
+Name          vitalik.eth
+IPNS Name     k51qzi5uqu5djx...
+```
+
+JSON output:
+
+```bash
+pinner unpoint vitalik.eth --json
+```
+
+```json
+{
+  "name": "vitalik.eth",
+  "ipns_name": "k51qzi5uqu5djx...",
+  "deleted": true
+}
+```
+
+### Troubleshooting
+
+| Problem | Cause | Fix |
+|---------|-------|-----|
+| `no IPNS key found for "vitalik.eth"` | No IPNS key with that name exists | The name may have already been unpointed, or was never pointed |
+| Name still resolves after unpoint | Contenthash still set in name manager | Remove the contenthash from your name manager separately; `unpoint` only handles Pinner's side |
+
+---
+
+## When to use `point` vs lower-level IPNS commands
+
+`point` is the recommended way to manage onchain names. It handles key creation, publishing, and idempotent updates in a single command.
+
+Use the lower-level `ipns` commands when you need more control:
+
+| What you need | Command |
+|---------------|---------|
+| Quick onchain name setup | `pinner point <name> --cid <cid>` |
+| Import an existing private key | `pinner ipns keys create <name> --key <key>` |
+| Set a custom TTL on the IPNS record | `pinner ipns publish <cid> --key-name <name> --ttl 24h` |
+| Resolve an IPNS name | `pinner ipns resolve <ipns-name>` |
+| Republish without changing the CID | `pinner ipns republish <key-name-or-id>` |
+| List all IPNS keys | `pinner ipns keys list` |
+| Delete a key by name or ID | `pinner ipns keys delete <key-name-or-id>` |
+
+See [Publish with IPNS](/hosting/how-to/publish-ipns) for the full IPNS reference.

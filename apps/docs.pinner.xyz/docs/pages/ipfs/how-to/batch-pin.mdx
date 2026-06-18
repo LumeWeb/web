@@ -1,0 +1,72 @@
+---
+title: Batch Pin Files
+description: Pin multiple files or CIDs in one go
+---
+
+# Batch Pin Files
+
+Pin many files or CIDs without running commands one at a time.
+
+## Pin from a list of CIDs
+
+:::code-group
+```bash [CLI]
+# One CID per line in a text file
+pinner pins add --file cids.txt
+
+# Multiple CIDs as arguments
+pinner pins add bafybeig...abc bafybeig...def --parallel 5
+
+# Pipe from stdin
+echo "bafybeig...abc" | pinner pins add
+```
+
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+import fs from "fs";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const cids = fs.readFileSync("cids.txt", "utf-8")
+  .split("\n")
+  .filter(Boolean);
+
+for (const cid of cids) {
+  try {
+    const generator = pinner.pins.add(cid);
+    for await (const pinned of generator) {
+      console.log(`Pinned ${pinned}`);
+    }
+  } catch (err) {
+    console.error(`Failed to pin ${cid}:`, err);
+  }
+}
+```
+:::
+
+## Upload multiple files as a directory
+
+:::code-group
+```bash [CLI]
+# Upload every file in a directory (creates a single root CID)
+pinner upload ./my-files/
+```
+
+```typescript [SDK]
+import { Pinner } from "@lumeweb/pinner";
+import fs from "fs";
+import path from "path";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
+
+const dir = "./my-files";
+const files = fs.readdirSync(dir).map((name) => {
+  const buffer = fs.readFileSync(path.join(dir, name));
+  return new File([buffer], name);
+});
+
+const operation = await pinner.uploadDirectory(files);
+const result = await operation.result;
+console.log("Root CID:", result.cid);
+```
+:::

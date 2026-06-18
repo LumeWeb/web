@@ -1,0 +1,75 @@
+---
+title: How Website Hosting Works
+description: Understand the architecture behind Pinner's decentralized website hosting
+---
+
+# How Website Hosting Works
+
+Pinner hosts static websites on IPFS and makes them accessible through regular domain names with HTTPS. No servers to manage, no containers to configure — just upload your files and point a domain at them.
+
+## The pieces
+
+Website hosting on Pinner involves three systems working together:
+
+1. **IPFS storage** — Your site's files are pinned on IPFS and addressed by Content Identifier (CID)
+2. **DNS** — Maps your domain name to the IPFS content
+3. **SSL** — Provides HTTPS for your domain automatically
+
+## The flow
+
+```
+Build output → Upload to IPFS → Get Content Identifier (CID) → Create website record → Configure DNS → SSL provisions → Site is live
+```
+
+Here's what happens at each step:
+
+### Upload
+
+Your static files (HTML, CSS, JS, images) get uploaded to IPFS as a directory. The directory gets a Content Identifier (CID) — a content-addressed identifier that represents your entire site.
+
+### Website record
+
+A website record on Pinner maps a domain to IPFS content. It stores:
+
+- The **domain** name (e.g. `mysite.example.com`)
+- The **target** — either a CID (direct IPFS) or an IPNS name (updatable)
+- The **validation token** used to prove you own the domain
+- The **SSL status** tracking certificate provisioning
+
+### DNS
+
+For Pinner to serve your domain, DNS must point at Pinner's infrastructure. You can either:
+
+- **Bring your own DNS** — Add CNAME/A records at your registrar pointing to Pinner
+- **Use Pinner-managed DNS** — Delegate the DNS zone to Pinner's nameservers
+
+Either way, the result is the same: traffic to your domain reaches Pinner's gateway, which resolves the CID and serves your content.
+
+### SSL
+
+Once DNS is in place, Pinner automatically provisions an SSL certificate for your domain. You don't need to buy, install, or renew certificates. Pinner handles the entire lifecycle.
+
+When a visitor hits `https://mysite.example.com`, the request flows through Pinner's HTTPS gateway, which fetches the content from IPFS using the CID in the website record and serves it to the browser.
+
+## Content addressing vs traditional hosting
+
+| Traditional hosting | Pinner website hosting |
+|---------------------|----------------------|
+| Files live on a specific server | Files live on IPFS — a distributed network |
+| Server URL identifies the content | CID identifies the content |
+| Updating means replacing files on the server | Updating means uploading new files and pointing the domain at the new CID |
+| Server downtime = site downtime | No single server to go down |
+
+## Subdomains
+
+If you just want to get something live quickly, Pinner provides `*.pinner.xyz` subdomains. No DNS configuration needed — the subdomain is set up automatically when you create the website.
+
+Custom domains require DNS validation and manual DNS configuration, but give you full branding control.
+
+## Updating your site
+
+With direct IPFS targeting, you update content by uploading new files and updating the website's `target_hash` to the new CID. The old CID stays on IPFS until you unpin it.
+
+With IPNS targeting, you publish the new CID under the same IPNS name. The domain resolves the IPNS name, which now points at the new CID. This is more convenient for frequently updated sites.
+
+See [IPNS](/websites/concepts/ipns) for more on the IPNS approach.

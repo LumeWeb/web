@@ -1,0 +1,142 @@
+---
+title: Manage Websites
+description: List, update, and delete websites using the CLI and SDK
+---
+
+# Manage Websites
+
+List your websites, update their content, and delete sites you no longer need.
+
+## List websites
+
+:::code-group
+```bash [CLI]
+pinner websites list
+```
+
+```typescript [SDK]
+const result = await pinner.websites.listWebsites();
+console.log(`You have ${result.total} website(s)`);
+for (const site of result.data) {
+  console.log(`- ${site.domain} (${site.status}) → ${site.target_hash}`);
+}
+```
+:::
+
+## Get a single website
+
+```typescript
+const site = await pinner.websites.getWebsite(42);
+console.log(site.domain, site.status, site.target_hash);
+```
+
+## Update a website
+
+Point your domain at new content after a rebuild:
+
+:::code-group
+```bash [CLI]
+# Deploy new content and update the website record
+pinner websites update <domain> --cid <new-cid>
+```
+
+```typescript [SDK]
+// Upload new content first (for a directory of files)
+const operation = await pinner.uploadDirectory(newFiles);
+const result = await operation.result;
+
+// Update the website to point at the new CID
+const updated = await pinner.websites.updateWebsite(42, {
+  domain: "example.com",
+  target_type: "ipfs",
+  target_hash: result.cid,
+});
+console.log("Updated:", updated.domain, "→", updated.target_hash);
+```
+:::
+
+The `updateWebsite` method accepts a `WebsiteRequest` object with `domain`, `target_type`, and `target_hash`. All fields are sent in the request; omit a field to leave it unchanged, or set it to update. To enable DNS hosting, include `dns_hosting_enabled`:
+
+```typescript
+const updated = await pinner.websites.updateWebsite(42, {
+  domain: "newdomain.example.com",
+  target_type: "ipfs",
+  target_hash: "QmNewCID",
+  dns_hosting_enabled: true,
+});
+```
+
+:::tip
+When changing `target_hash`, you must also provide `target_type` (`"ipfs"` or `"ipns"`). Omitting `target_type` when `target_hash` is present will return a validation error.
+:::
+
+## Delete a website
+
+:::code-group
+```bash [CLI]
+pinner websites delete <domain>
+```
+
+```typescript [SDK]
+await pinner.websites.deleteWebsite(42);
+```
+:::
+
+:::warning
+Deleting a website performs a soft delete: the record is marked as deleted but preserved. DNS records for the domain are cleaned up automatically. Your content stays on IPFS unless you also unpin it, but the domain mapping and SSL certificate are removed. Blocked websites cannot be deleted.
+:::
+
+## Validate domain ownership
+
+If your custom domain hasn't been validated yet, trigger a validation check:
+
+```typescript
+const result = await pinner.websites.validateWebsite(42);
+console.log(result.valid, result.reason, result.message);
+```
+
+Validation reasons:
+
+| Reason | Meaning |
+|--------|---------|
+| `validated` | Domain ownership confirmed |
+| `token_expired` | Validation token has expired, redeploy |
+| `dns_missing` | The TXT record wasn't found |
+| `dns_mismatch` | TXT record exists but token doesn't match |
+| `token_missing` | No validation token on the website record |
+
+## Website properties
+
+Every website has these fields:
+
+| Field | Description |
+|-------|-------------|
+| `id` | Unique identifier |
+| `domain` | The domain name for the website |
+| `target_type` | Content address type (`ipfs` or `ipns`) |
+| `target_hash` | The CID or IPNS name the domain points to |
+| `status` | Current website status (see below) |
+| `active_cid` | The currently-published content CID (present for IPNS targets) |
+| `validation_token` | Token for proving domain ownership |
+| `validation_record_host` | DNS hostname for the TXT record (e.g. `pinner-verify.example.com`) |
+| `validation_expires_at` | When the validation token expires |
+| `dns_hosting_enabled` | Whether Pinner manages DNS for this domain |
+| `dns_zone_id` | ID of the DNS zone hosting this website's records (when DNS hosting enabled) |
+| `ipns_key_id` | ID of the linked IPNS key (set when DNS hosting auto-creates a key) |
+| `is_subdomain` | Whether this is a subdomain of a shared DNS zone |
+| `gateway_domain` | Gateway domain for constructing public URLs |
+| `last_checked_at` | When the website was last checked by the janitor |
+| `ssl` | SSL certificate status (see [SSL](/hosting/concepts/ssl)) |
+| `expired` | Whether the validation token has expired |
+| `created` / `updated` | Timestamps |
+
+### Website statuses
+
+A website can be in one of four statuses:
+
+| Status | Description |
+|--------|-------------|
+| `pending_validation` | Awaiting domain ownership validation (initial status after creation) |
+| `active` | Domain validated and website is live |
+| `broken` | Target content is unreachable |
+| `blocked` | Website has been blocked by an administrator |

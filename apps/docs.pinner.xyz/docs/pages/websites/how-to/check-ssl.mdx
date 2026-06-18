@@ -1,0 +1,86 @@
+---
+title: Check SSL Status
+description: Monitor the SSL certificate provisioning progress for your custom domain
+---
+
+# Check SSL Status
+
+Pinner provisions SSL certificates automatically for custom domains. You don't configure anything — just wait for DNS to propagate and Pinner handles the rest.
+
+## Check the current status
+
+```typescript
+const ssl = await pinner.websites.getSSLStatus("mysite.example.com");
+console.log("Status:", ssl.status);
+if (ssl.error) {
+  console.log("Error:", ssl.error);
+}
+```
+
+## SSL states
+
+| Status | Meaning |
+|--------|---------|
+| `pending` | Waiting to start provisioning — DNS may not have propagated yet |
+| `validating` | Pinner is verifying domain control and requesting the certificate |
+| `valid` | Certificate issued and active |
+| `ready` | Certificate is active and the site is serving HTTPS |
+| `failed` | Provisioning failed — check `error` for details |
+| `error` | An unexpected error occurred during provisioning |
+
+## Watch for SSL readiness
+
+Instead of polling manually, use the SSL watcher to get notified when the certificate is ready:
+
+```typescript
+const watcher = pinner.websites.watchSSL("mysite.example.com", {
+  interval: 5000,   // check every 5 seconds
+  timeout: 300000,  // give up after 5 minutes
+});
+
+await watcher.start({
+  onReady: (status) => {
+    console.log("SSL is ready!");
+    // Safe to announce your site is live
+  },
+  onStatus: (status) => {
+    console.log("Progress:", status.status);
+  },
+  onError: (error) => {
+    console.error("SSL failed:", error.type, error.message);
+  },
+});
+
+// Stop watching early if needed
+watcher.stop();
+```
+
+## Troubleshooting
+
+### SSL stuck at `pending`
+
+DNS records haven't propagated yet. This is normal — it can take a few minutes to a few hours depending on your registrar. Verify your CNAME and TXT records are in place:
+
+```bash
+dig CNAME www.mysite.example.com
+dig TXT _pinner-validation.mysite.example.com
+```
+
+### SSL in `failed` or `error` state
+
+Check the `error` field for details. Common causes:
+
+- **DNS not pointing at Pinner** — The CNAME or A record is missing or pointing elsewhere
+- **Domain validation expired** — Re-validate the domain (see [Custom Domains](/websites/how-to/custom-domains))
+- **Rate limit hit** — Too many SSL requests in a short time; wait and retry
+
+### SSL watcher times out
+
+The default timeout is 5 minutes. If DNS propagation is slow, increase it:
+
+```typescript
+const watcher = pinner.websites.watchSSL("mysite.example.com", {
+  interval: 10000,  // check every 10 seconds
+  timeout: 600000,  // 10 minute timeout
+});
+```

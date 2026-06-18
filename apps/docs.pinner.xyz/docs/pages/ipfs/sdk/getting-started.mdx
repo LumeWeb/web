@@ -1,0 +1,120 @@
+---
+title: Getting Started
+description: Install the Pinner SDK, initialize a client, and upload your first file.
+---
+
+# Getting Started
+
+Set up the Pinner SDK and pin your first file in about five minutes.
+
+## Prerequisites
+
+- An API key: [create one in your account](/account/api-tokens)
+- Node.js 20+ or a modern browser
+
+## Install the package
+
+:::code-group
+```bash [npm]
+npm install @lumeweb/pinner
+```
+
+```bash [pnpm]
+pnpm add @lumeweb/pinner
+```
+:::
+
+## Initialize Pinner
+
+The SDK needs an API key to authenticate. In a browser, pass it directly. On the server, read it from the environment.
+
+:::code-group
+```typescript [Browser]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({
+  jwt: "YOUR_JWT"
+});
+```
+
+```typescript [Node.js]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({
+  jwt: process.env.PINNER_AUTH_TOKEN
+});
+```
+:::
+
+## Upload your first file
+
+`uploadAndWait` pins the file and waits for the pin to settle. It returns an `UploadResult` with the CID (may be `undefined` for TUS uploads until the server assigns it), name, size, and more.
+
+:::code-group
+```typescript [Browser]
+const file = new File(["Hello, Pinner!"], "hello.txt", { type: "text/plain" });
+const result = await pinner.uploadAndWait(file);
+
+console.log("CID:", result.cid);
+```
+
+```typescript [Node.js]
+import { readFileSync } from "fs";
+
+// Node.js 20+ provides the global File class
+const buffer = readFileSync("./hello.txt");
+const file = new File([buffer], "hello.txt", { type: "text/plain" });
+const result = await pinner.uploadAndWait(file);
+
+console.log("CID:", result.cid);
+```
+:::
+
+`uploadAndWait` handles the full cycle: it uploads the file, waits for pinning to complete, and returns an `UploadResult` with the CID (may be `undefined` for TUS uploads until the server assigns it), name, size, and more.
+
+## Verify the connection
+
+Upload a small file and confirm you get a CID back. This proves both authentication and connectivity work end-to-end.
+
+```typescript
+const file = new File(["ping"], "ping.txt", { type: "text/plain" });
+const result = await pinner.uploadAndWait(file);
+
+if (result.cid) {
+  console.log("Connected! CID:", result.cid);
+} else {
+  console.log("Upload sent, operation ID:", result.id);
+}
+```
+
+## Type your config
+
+If you prefer explicit types, import `PinnerConfig`:
+
+:::code-group
+```typescript [Browser]
+import { Pinner, PinnerConfig } from "@lumeweb/pinner";
+
+const config: PinnerConfig = {
+  jwt: "YOUR_JWT",
+  endpoint: "https://ipfs.pinner.xyz"
+};
+
+const pinner = new Pinner(config);
+```
+
+```typescript [Node.js]
+import { Pinner, PinnerConfig } from "@lumeweb/pinner";
+
+const config: PinnerConfig = {
+  jwt: process.env.PINNER_AUTH_TOKEN,
+  endpoint: "https://ipfs.pinner.xyz"
+};
+
+const pinner = new Pinner(config);
+```
+:::
+
+---
+
+Ready to customize? See [Configuration](/ipfs/sdk/configuration) for endpoints, gateways, storage backends, and environment-specific setup.

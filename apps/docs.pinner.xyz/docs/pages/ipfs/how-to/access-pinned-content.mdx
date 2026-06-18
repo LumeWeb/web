@@ -1,0 +1,111 @@
+---
+title: Access Pinned Content
+description: Retrieve your pinned content through the Pinner API, ipfs.pub, website hosting, public gateways, the CLI, or local IPFS
+---
+
+# Access Pinned Content
+
+Pinner pins your content to IPFS. To retrieve it, use one of these options.
+
+## Pinner API
+
+The IPFS plugin exposes an authenticated content retrieval endpoint. Send a `GET` request to the IPFS subdomain:
+
+```
+GET https://ipfs.pinner.xyz/ipfs/<CID>
+```
+
+This returns the raw content for the specified CID and supports streaming for large files. You can also send a `HEAD` request to check whether content exists without downloading it.
+
+All requests require a valid JWT token (see [API Keys](/account/api-tokens)).
+
+Example with `curl`:
+
+```bash
+curl -H "Authorization: Bearer <token>" \
+  "https://ipfs.pinner.xyz/ipfs/bafybeig...example"
+```
+
+## ipfs.pub
+
+[ipfs.pub](https://ipfs.pub) is Pinner's own IPFS gateway. It serves content pinned or hosted through Pinner; it's not an anonymous public gateway, so it's fast and reliable for your content.
+
+```
+https://ipfs.pub/ipfs/<CID>
+```
+
+## Pinner CLI
+
+The Pinner CLI provides three content retrieval commands:
+
+- **`pinner cat <CID>`**: stream content to stdout (like `ipfs cat`, but through Pinner's API)
+- **`pinner download <CID>`**: save content to a file (supports `CID/path` for specific files, `--force` to overwrite, `--output` to set a path)
+- **`pinner ls <CID>`**: list the contents of a pinned directory
+
+All CLI commands authenticate using your stored token (set up via `pinner auth login`).
+
+Examples:
+
+```bash
+# Stream a file to stdout
+pinner cat bafybeig...example
+
+# Download to a specific file
+pinner download bafybeig...example -o myfile.txt
+
+# List directory contents
+pinner ls bafybeig...example
+```
+
+## Website hosting
+
+If you're serving content to the public, the best option is [website hosting](/hosting/quickstart). Your content gets its own domain with automatic SSL, no CID in the URL:
+
+```
+https://mysite.example.com
+```
+
+See [How Hosting Works](/hosting/concepts/how-hosting-works) for the full setup.
+
+## Public gateways
+
+Community-operated public gateways let you retrieve any IPFS content over HTTP. The main surviving public gateway is:
+
+| Gateway | URL format | Notes |
+|---------|------------|-------|
+| `inbrowser.link` | `https://<CID>.ipfs.inbrowser.link` | IPFS Project's service worker gateway. Runs in subdomain mode with origin isolation. Drop-in replacement for the retired `dweb.link`. |
+
+[inbrowser.link](https://inbrowser.link) uses a service worker to fetch and verify IPFS content directly in the browser, reducing reliance on a single HTTP backend. It's the IPFS Project's recommended public gateway.
+
+Public gateways are not affiliated with Pinner. Availability and performance vary; for production use, we recommend [ipfs.pub](https://ipfs.pub) (via [website hosting](/hosting/quickstart)) or running your own gateway.
+
+For a live list of public gateways and their current availability and latency, see [check.ipfs.pub](https://check.ipfs.pub) (our deployment of [check.ipfs.network](https://check.ipfs.network)) or the [IPFS Public Gateway Checker](https://ipfs.github.io/public-gateway-checker/).
+
+### SDK default gateway
+
+The Pinner JS SDK uses `https://inbrowser.link` as its default gateway for content retrieval. You can override this by setting the `gateway` option in your `PinnerConfig`:
+
+```typescript
+const pinner = new Pinner({
+  jwt: "<your-token>",
+  gateway: "https://ipfs.pub",  // override the default
+});
+```
+
+The CLI falls back to `https://ipfs.pinner.xyz/ipfs/` when no custom gateway is configured, or you can set `gateway_endpoint` in your config.
+
+## Local IPFS
+
+If you run IPFS locally, you already have access:
+
+- **IPFS Desktop**: graphical app with built-in gateway at `http://localhost:8080`
+- **IPFS Companion**: browser extension that resolves IPFS addresses automatically
+- **ipfs-cli**: `ipfs cat <CID>` from the terminal
+
+## Custom or private gateway
+
+If you need guaranteed uptime, low latency, or private access, run your own gateway. Popular options include [Rainbow](https://github.com/ipfs/rainbow) and [Kubo](https://github.com/ipfs/kubo) with the gateway enabled.
+
+## Why doesn't Pinner include a public anonymous gateway?
+
+See [Why No Public Gateway](/ipfs/concepts/why-no-gateway) for the reasoning.

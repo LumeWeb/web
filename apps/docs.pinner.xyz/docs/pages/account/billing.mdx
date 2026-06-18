@@ -1,0 +1,86 @@
+---
+title: Billing & Pricing
+description: Plans, payments, and what happens on your account
+---
+
+# Billing & Pricing
+
+## Plans
+
+Pinner offers subscription plans with different storage, upload, and download allowances. Visit [pinner.xyz](https://pinner.xyz) for current pricing and plan details.
+
+Each plan renews automatically at the cadence you chose (monthly or yearly). Yearly plans are discounted.
+
+## Payment methods
+
+Pinner accepts card and cryptocurrency; no identity verification required for crypto payments.
+
+<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap', margin: '16px 0' }}>
+  <img src="/images/payments/visa.svg" alt="Visa" width={40} height={20} style={{ objectFit: 'contain', maxWidth: '40px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <img src="/images/payments/mastercard.svg" alt="Mastercard" width={40} height={20} style={{ objectFit: 'contain', maxWidth: '40px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <img src="/images/payments/amex.svg" alt="American Express" width={40} height={20} style={{ objectFit: 'contain', maxWidth: '40px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <img src="/images/payments/discover.svg" alt="Discover" width={40} height={20} style={{ objectFit: 'contain', maxWidth: '40px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <span style={{ width: '1px', height: '20px', background: 'var(--vocs-color-border)', margin: '0 4px', flexShrink: 0 }} />
+  <img src="/images/payments/usdc.svg" alt="USDC" width={20} height={20} style={{ objectFit: 'contain', maxWidth: '20px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <img src="/images/payments/usdt.svg" alt="USDT" width={20} height={20} style={{ objectFit: 'contain', maxWidth: '20px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <img src="/images/payments/dai.svg" alt="DAI" width={20} height={20} style={{ objectFit: 'contain', maxWidth: '20px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <img src="/images/payments/pyusd.svg" alt="PayPal USD" width={20} height={20} style={{ objectFit: 'contain', maxWidth: '20px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <img src="/images/payments/btc.svg" alt="Bitcoin" width={20} height={20} style={{ objectFit: 'contain', maxWidth: '20px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <img src="/images/payments/eth.svg" alt="Ethereum" width={20} height={20} style={{ objectFit: 'contain', maxWidth: '20px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <img src="/images/payments/sol.svg" alt="Solana" width={20} height={20} style={{ objectFit: 'contain', maxWidth: '20px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <img src="/images/payments/ltc.svg" alt="Litecoin" width={20} height={20} style={{ objectFit: 'contain', maxWidth: '20px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <img src="/images/payments/xmr.svg" alt="Monero" width={20} height={20} style={{ objectFit: 'contain', maxWidth: '20px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <img src="/images/payments/doge.svg" alt="Dogecoin" width={20} height={20} style={{ objectFit: 'contain', maxWidth: '20px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <img src="/images/payments/bnb.svg" alt="BNB" width={20} height={20} style={{ objectFit: 'contain', maxWidth: '20px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+  <img src="/images/payments/pol.svg" alt="Polygon" width={20} height={20} style={{ objectFit: 'contain', maxWidth: '20px', maxHeight: '20px', opacity: 0.6, flexShrink: 0 }} />
+</div>
+
+| Currency | Type | Notes |
+|----------|------|-------|
+| **BTC** | Bitcoin | Broad support, widely available |
+| **ETH** | Ethereum | Fast confirmations on mainnet |
+| **SOL** | Solana | Low fees, fast finality |
+| **LTC** | Litecoin | Low fees, fast settlement |
+| **XMR** | Monero | Private by default; transactions are untraceable |
+| **DOGE** | Dogecoin | Low-cost transactions |
+| **BNB** | BNB | Binance ecosystem |
+| **POL** | Polygon | Ethereum L2 scaling |
+| **USDC** | Stablecoin | USD-pegged, price stability |
+| **USDT** | Stablecoin | USD-pegged, widely supported |
+| **DAI** | Stablecoin | USD-pegged, decentralized |
+| **PYUSD** | Stablecoin | USD-pegged, backed by PayPal |
+
+:::tip
+**Privacy-first payments.** Pinner is one of the few storage providers that accepts Monero (XMR). If privacy matters to you, XMR transactions are untraceable by design; no sender, receiver, or amount is visible on-chain.
+:::
+
+## Your balance
+
+Your account has a credit balance. Payments add credits; subscription renewals and overage usage deduct them. You can view your current balance and transaction history in the dashboard.
+
+## Changing plans
+
+Switch plans at any time. You'll get a credit for the unused portion of your current plan, and the new plan is charged for the remaining period. No double-billing.
+
+For card payments, plan changes are handled through the Stripe customer portal (linked from the dashboard).
+
+## Cancelling
+
+You can cancel from the dashboard. Cancellation takes effect at the end of your current billing period; you keep access until then. You can also undo a scheduled cancellation before it takes effect.
+
+## What happens to my content if I cancel?
+
+When you cancel, your pins stay active until the end of the billing period. After that, Pinner stops pinning your content.
+
+What happens next depends on whether anyone else is holding your data:
+
+- **If your content is pinned elsewhere** by your own IPFS node, another pinning service, or other network peers, it stays available on IPFS. Your CIDs are portable: pin them on another provider with no re-upload.
+- **If Pinner is the only node holding your content**, it becomes unreachable once Pinner stops pinning it, until you re-pin it somewhere else.
+
+This is the reality of any single pinning provider, not just Pinner. We recommend [exporting your pin list](/ipfs/how-to/list-pins) before cancelling, so you know exactly what to re-pin. If availability matters for your production content, consider pinning critical data with at least two providers.
+
+Because IPFS is content-addressed and open, there's no lock-in; migration is a pin list export and re-import, not a data migration.
+
+## Support
+
+Email [support@pinner.xyz](mailto:support@pinner.xyz) for billing questions.

@@ -1,0 +1,53 @@
+---
+title: Why No Public Gateway
+description: Why Pinner doesn't bundle a public anonymous gateway, and how to access your content instead
+---
+
+# Why No Public Gateway
+
+Pinner is a pinning and hosting service, not a public anonymous IPFS gateway. We don't offer open, unauthenticated read access to arbitrary IPFS content. This is a deliberate choice.
+
+## Fair pricing
+
+Public anonymous gateways are expensive infrastructure with unpredictable bandwidth costs. Bundling gateway access into a pinning service forces every user to subsidize a feature they may not need. By treating them as separate concerns, you pay only for storage and pinning, and choose your own retrieval method.
+
+## Sustainability
+
+Serving arbitrary open web content through anonymous gateways carries significant liability and abuse potential. Making gateways profitable means pricing high enough to offset that risk, which isn't fair to users who just want their content pinned. Focusing on pinning keeps the service sustainable long-term.
+
+## Focused purpose
+
+Pinning and gateways serve fundamentally different needs. Pinning keeps your content available on the decentralized network. Gateways translate that content into HTTP for the traditional web. We excel at pinning; for gateway access, we offer [ipfs.pub](https://ipfs.pub), which serves your content over HTTP when you configure a domain through Pinner's website hosting.
+
+## How ipfs.pub works
+
+[ipfs.pub](https://ipfs.pub) is Pinner's DNSLink gateway. It's not an anonymous public gateway that serves arbitrary IPFS content; it specifically resolves `_dnslink` records for domains configured through Pinner's website hosting and serves the corresponding IPFS content over HTTP.
+
+When you [host a website](/hosting/quickstart) on your own domain through Pinner, ipfs.pub is what actually serves it:
+
+1. You point your domain's DNS at Pinner
+2. Pinner configures a `_dnslink` record mapping your domain to your IPFS content
+3. When a browser requests your domain, ipfs.pub resolves the `_dnslink` record and serves the content over HTTP
+
+This means website hosting and ipfs.pub aren't separate things; **website hosting is how you configure ipfs.pub to serve your content on your domain**.
+
+## What we also offer
+
+- **[Website hosting](/hosting/quickstart)**: configure ipfs.pub to serve your IPFS content on your own domain with automatic SSL. This is the recommended way to make content accessible over HTTP.
+- **[check.ipfs.pub](https://check.ipfs.pub)**: our deployment of [ipfs-check](https://check.ipfs.network), an IPFS content availability checker. Verify that your DNSLink domains and pinned content are retrievable from the IPFS network.
+
+## What if Pinner goes away?
+
+IPFS is content-addressed, not cloud storage. Your data is identified by its CID (a cryptographic hash), not locked behind a proprietary API. That means:
+
+- **Your CIDs are portable.** The same CID works everywhere on IPFS. Pin your CIDs on another provider and your content is immediately preserved. No re-upload, no format conversion.
+- **You can export your pin list at any time.** Pinner lets you download a complete list of your pinned CIDs, so you always know what to re-pin elsewhere.
+- **Content pinning elsewhere survives.** If you run your own IPFS node, use another pinning service, or anyone else on the network has fetched and kept your content, it remains available.
+
+The honest caveat: if Pinner is the **only** node holding your content and it becomes unavailable, that content becomes unreachable until it's pinned again or another node has a copy. This is true of any single pinning provider; it's the nature of IPFS. We recommend pinning important content with at least two providers, or running your own node as a backup.
+
+That said, the architecture works in your favor: because IPFS is decentralized, there's no vendor lock-in at the data layer. Your content isn't stored in a proprietary format behind a proprietary API; it's on an open network with open addressing. Migration is a pin list, not a data migration.
+
+## Accessing your content
+
+Since Pinner doesn't include a public anonymous gateway, you retrieve your content through ipfs.pub (configured via website hosting), public gateways, local IPFS, or your own private gateway. See [Access Pinned Content](/ipfs/how-to/access-pinned-content) for practical options.

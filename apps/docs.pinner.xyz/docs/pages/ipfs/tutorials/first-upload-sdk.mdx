@@ -1,0 +1,72 @@
+---
+title: Your First Upload with the SDK
+description: Upload a file to IPFS using the Pinner SDK and get its CID
+---
+
+# Your First Upload with the SDK
+
+In this tutorial you'll upload a file to IPFS using the Pinner SDK and get back its CID.
+
+Need to install the SDK first? See [Getting Started with the SDK](/ipfs/sdk/getting-started).
+
+## Set up the client
+
+Create a Pinner instance with your API key:
+
+:::code-group
+```typescript [Browser]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: "YOUR_API_KEY" });
+```
+
+```typescript [Node.js]
+import { Pinner } from "@lumeweb/pinner";
+
+const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY! });
+```
+:::
+
+## Create or pick a file
+
+:::code-group
+```typescript [Browser]
+// Create a file from user input or construct one
+const file = new File(["Hello, IPFS!"], "hello.txt", {
+  type: "text/plain",
+});
+```
+
+```typescript [Node.js]
+import fs from "fs";
+
+const buffer = fs.readFileSync("./hello.txt");
+const file = new File([buffer], "hello.txt", { type: "text/plain" });
+```
+:::
+
+## Upload and get the CID
+
+:::code-group
+```typescript [Browser]
+const result = await pinner.uploadAndWait(file);
+console.log("CID:", result.cid);
+```
+
+```typescript [Node.js]
+const result = await pinner.uploadAndWait(file);
+console.log("CID:", result.cid);
+```
+:::
+
+`uploadAndWait` handles the full cycle: it uploads the file, waits for pinning to complete, and returns the result with your CID.
+
+## That's it
+
+Your file is now pinned on IPFS. The CID is a permanent, content-addressed identifier — anyone with this CID can retrieve the file from the IPFS network.
+
+### What's next?
+
+- [Upload a whole directory](/ipfs/tutorials/upload-directory)
+- [Check the status of your pin](/ipfs/how-to/check-pin-status)
+- [Understand what a CID is](/ipfs/concepts/cids)

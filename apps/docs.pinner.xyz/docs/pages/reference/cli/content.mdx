@@ -1,0 +1,144 @@
+---
+title: "CLI: Content"
+description: "pinner CLI commands for content."
+---
+
+> **This page is auto-generated.** Do not edit directly.
+> To update, modify the CLI source in [pinner-cli](https://github.com/LumeWeb/pinner-cli) and run `pnpm generate:clil`.
+
+## `upload`
+
+```bash
+pinner upload [path] [flags]
+```
+Upload files or directories to IPFS via the Pinner.xyz service. Content is converted to CAR format before uploading.
+
+```bash
+
+pinner upload myfile.txt
+
+pinner upload myfile.txt --name "my document"
+
+pinner upload myfile.txt --no-wait
+
+pinner upload /path/to/directory --name "project files"
+
+pinner upload largefile.zip --memory-limit 500
+
+pinner upload myfile.txt --dry-run
+
+# Upload from stdin (pipe)
+
+cat myfile.txt | pinner upload --name "my file"
+
+echo "hello world" | pinner upload --name "greeting"
+
+curl -s https://example.com/data | pinner upload --name "downloaded"
+
+The output includes:
+
+```
+
+- CID: Content identifier for your uploaded content
+- Gateway URL: Public URL to access your content
+- Size: File size in human-readable format
+- Time: Upload duration
+
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--name` |  | Custom name for the pin |
+| `--no-wait` |  | Return immediately without waiting for pinning to complete |
+| `--memory-limit` |  | Memory limit for CAR generation in megabytes [env: `PINNER_MEMORY_LIMIT`] |
+| `--dry-run` |  | Preview operations without making any changes |
+| `--chunk-size` |  | Chunk size in bytes for UnixFS file splitting (default: 1048576) |
+| `--chunker` |  | DAG layout strategy: balanced (default) or trickle |
+| `--max-links` |  | Maximum number of links per DAG node (default: 174) |
+| `--meta` |  | Set metadata as key=value (repeatable) |
+
+## `download`
+
+```bash
+pinner download <cid>[/<path>] [flags]
+```
+Download content from IPFS by CID and save it to the local filesystem. Supports CID paths (e.g., CID/path/to/file) to download a specific file from a directory.
+
+For streaming content to stdout, use 'pinner cat' instead. For listing directory contents, use 'pinner ls' instead.
+
+```bash
+
+pinner download bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e
+
+pinner download bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e/subdir/file.txt
+
+pinner download bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e -o myfile.txt
+
+pinner download bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e -o /path/to/dir/
+
+pinner download bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e -o existing.txt --force
+
+pinner download bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e --dry-run
+
+The output includes:
+
+```
+
+- CID: Content identifier of the downloaded file
+- Path: Local file path where content was saved
+- Size: File size in human-readable format
+- Time: Download duration
+
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--output` |  | Output file or directory path (defaults to CID as filename in current directory) |
+| `--force` |  | Force operation without confirmation |
+| `--dry-run` |  | Preview operations without making any changes |
+
+## `cat`
+
+```bash
+pinner cat <cid>[/<path>]
+```
+Stream the contents of an IPFS CID to stdout. Supports CID paths (e.g., CID/path/to/file) to cat a specific file from a directory.
+
+```bash
+
+pinner cat bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e
+
+pinner cat bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e/path/to/file.txt
+
+pinner cat bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e > output.txt
+
+pinner cat bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e | jq .
+
+pinner cat bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e | gzip > data.gz
+
+Note: This command outputs raw content to stdout. Use --verbose or redirect stderr for progress info
+
+```
+
+## `ls`
+
+```bash
+pinner ls <cid>[/<path>] [flags]
+```
+List the contents of a directory pinned on IPFS by CID. Shows file names, types, and sizes for each entry. Supports CID paths (e.g., CID/path/to/dir) to list nested directories.
+
+If the path targets a file, shows file metadata instead of erroring.
+
+```bash
+
+pinner ls bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e
+
+pinner ls bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e --json
+
+pinner ls bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e --limit 5
+
+pinner ls bafybeigqaforwjgcx45jnh7dgyfgqqm2lei4hurrrnsizrpgyxz3egtd7e/subdir
+
+```
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--limit` |  | Maximum number of results to return |

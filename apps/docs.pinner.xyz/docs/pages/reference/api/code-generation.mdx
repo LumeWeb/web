@@ -1,0 +1,53 @@
+---
+title: Code Generation from OpenAPI
+description: Generate type-safe TypeScript clients from the Pinner OpenAPI specification using Orval.
+---
+
+# Code Generation from OpenAPI
+
+Generate type-safe TypeScript clients from Pinner's OpenAPI specification using [Orval](https://orval.dev/).
+
+## Setup
+
+Install Orval:
+
+```bash
+npm install -D orval
+```
+
+Create `orval.config.ts`:
+
+```ts
+import { defineConfig } from 'orval'
+
+export default defineConfig({
+  pinner: {
+    input: 'https://api.pinner.xyz/openapi.json',
+    output: {
+      target: './src/api/pinner-client.ts',
+      client: 'axios-functions',
+      override: {
+        mutator: {
+          path: './src/api/mutator.ts',
+          name: 'customInstance',
+        },
+      },
+    },
+  },
+})
+```
+
+## Client Options
+
+Orval supports generating clients for:
+
+| Client | Use case |
+|--------|----------|
+| `axios-functions` | General-purpose HTTP client |
+| `react-query` | React apps with caching |
+| `swr` | SWR-based React apps |
+| `fetch` | Lightweight, no dependencies |
+
+---
+
+*Detailed code generation examples will be added when the OpenAPI spec is available for public consumption.*

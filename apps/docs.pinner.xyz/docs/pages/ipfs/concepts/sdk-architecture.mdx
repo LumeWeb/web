@@ -1,0 +1,90 @@
+---
+title: SDK Architecture
+description: "How the Pinner SDK is structured: entry points, namespacing, builders, adapters, and errors"
+---
+
+# SDK Architecture
+
+The Pinner SDK is built around one core class: `Pinner`. Everything flows through it.
+
+## The Pinner class
+
+`Pinner` is the entry point. You create an instance with your configuration and then access all functionality through property-access namespaces:
+
+- **`pinner.upload`**: upload files, directories, JSON, CAR data, and more
+- **`pinner.pins`**: check status, update metadata, list and manage pins
+- **`pinner.ipns`**: create and manage IPNS keys and publish records
+- **`pinner.websites`**: publish content as a website with SSL support
+
+Each namespace groups related operations together. You pass your JWT once in the configuration; the `Pinner` instance handles authentication for everything.
+
+## Upload: callable namespace and builder
+
+The `upload` property is unique: it works as both a direct method **and** a builder namespace. This is implemented via a JavaScript `Proxy` that delegates to whichever side you need:
+
+- **As a method:** `pinner.upload(file, options)`: upload a file immediately
+- **As a namespace:** `pinner.upload.file(file)`, `pinner.upload.json(data)`, and so on: returns a builder for chaining options
+
+### Builder pattern
+
+When you use the builder namespace, each content method returns a typed builder you chain options onto before calling `.pin()` to commit the upload:
+
+1. Choose what to upload: `.file()`, `.json()`, `.base64()`, `.url()`, `.csv()`, `.text()`, `.raw()`
+2. Optionally chain `.name()`, `.keyvalues()`, `.waitForOperation()`, or `.operationPollingOptions()`
+3. Call `.pin()` to execute
+
+This keeps the API composable; you only specify what you need, and each step returns a type-safe builder for the next.
+
+### Convenience methods
+
+Beyond the builder, `Pinner` also exposes shorthand methods for common workflows:
+
+- **`uploadAndWait()`**: upload a file and wait for the result in one call
+- **`waitForOperation()`**: poll an operation until it reaches a settled state
+- **`uploadDirectory()`**: upload an array of files as a directory (preprocessed to CAR internally)
+- **`uploadCar()`**: upload a raw CAR file without preprocessing
+
+### Upload pipeline: XHR vs TUS
+
+The `UploadManager` selects a transport strategy based on file size:
+
+- **Small files** (below the account's upload limit, defaulting to 100 MB) use XHR upload
+- **Large files** use TUS resumable upload
+
+Both transports are built on Uppy internally. CAR files are automatically detected by MIME type or extension, or can be forced via the `isCarFile` option.
+
+## Pinata adapters
+
+Pinner ships with two adapter functions that wrap a `Pinner` instance in a Pinata SDK-compatible interface:
+
+- **`pinataAdapter`**: matches Pinata SDK 2.x API shape (namespaced with `upload.public`, `files.public`, etc.)
+- **`pinataLegacyAdapter`**: matches Pinata SDK 1.x API shape (flat methods like `pinFileToIPFS`, `pinJSONToIPFS`)
+
+The adapters translate Pinata-style calls into Pinner operations behind the scenes. Features that Pinner does not support (groups, analytics, private uploads, signed URLs) return empty data or throw a "not supported" error. Your existing Pinata code can migrate with only the initialization changed.
+
+## Error hierarchy
+
+Errors in the SDK follow a single-root hierarchy so you can catch at the granularity you need:
+
+- **`PinnerError`**: base class for all SDK errors; carries a `code`, a `retryable` flag, and an optional `cause`
+  - **`ConfigurationError`**: missing or invalid configuration (not retryable)
+  - **`AuthenticationError`**: JWT or access failure (not retryable)
+  - **`EnvironmentError`**: unsupported runtime environment (not retryable)
+  - **`UploadError`**: any upload failure
+    - **`NetworkError`**: request-level failure (retryable)
+    - **`ValidationError`**: invalid input; includes an optional `field`
+      - **`EmptyFileError`**: zero-byte file upload attempt
+    - **`TimeoutError`**: request exceeded its deadline (retryable)
+  - **`PinError`**: any pin-management failure
+    - **`NotFoundError`**: pin or resource does not exist (not retryable)
+    - **`RateLimitError`**: too many requests; includes `retryAfter` seconds (retryable)
+
+The `retryable` flag on `PinnerError` lets you decide programmatically whether to retry. The SDK also exports type-guard functions: `isRetryable(error)` and `isAuthenticationError(error)` for common checks.
+
+## Key design principles
+
+- **One entry point.** Create a `Pinner` instance once, use it everywhere.
+- **Dual-mode namespace.** `upload` is both a direct method and a builder namespace, via a `Proxy`.
+- **Builder pattern for uploads.** Start with a content method, chain options, commit with `.pin()`.
+- **Automatic transport selection.** XHR for small uploads, TUS for large; transparent to the caller.
+- **Adapter compatibility.** Pinata SDK 2.x and 1.x drop-in replacements for easy migration.
