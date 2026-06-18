@@ -1,0 +1,654 @@
+/**
+ * SDK Reference Generator
+ *
+ * Reads sdk-ref.json (output of `typedoc --json`) and produces
+ * per-class MDX pages under /reference/sdk/.
+ *
+ * All content is derived from the JSON source:
+ * - Classes and their pages are discovered from TypeDoc children
+ * - Error classes are discovered from PinnerError's inheritance chain
+ * - Package name comes from the TypeDoc project's packageName field
+ * - The only editorial mapping is CLASS_SLUGS (class name → URL slug),
+ *   since slugs aren't in the source. Classes not listed get kebab-case
+ *   auto-generated.
+ *
+ * Usage:  pnpm generate:sdk
+ */
+
+import { readFileSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+// ── Types ───────────────────────────────────────────────────────────
+
+interface TypeDocComment {
+  summary?: { kind: string; text: string }[];
+}
+
+interface TypeDocType {
+  type: string;
+  name?: string;
+  target?: number | { packageName: string; qualifiedName: string };
+  value?: string;
+  types?: TypeDocType[];
+  elements?: TypeDocType[];
+  elementType?: TypeDocType;
+  package?: string;
+  typeArguments?: TypeDocType[];
+  declaration?: TypeDocChild;
+}
+
+interface TypeDocChild {
+  id: number;
+  name: string;
+  kind: number;
+  kindString?: string;
+  flags?: Record<string, boolean>;
+  comment?: TypeDocComment;
+  children?: TypeDocChild[];
+  signatures?: TypeDocSignature[];
+  getSignature?: TypeDocSignature;
+  setSignature?: TypeDocSignature;
+  type?: TypeDocType;
+  extendedTypes?: TypeDocType[];
+  extendedBy?: TypeDocType[];
+  sources?: { fileName: string; line: number; character: number; url?: string }[];
+  variant?: string;
+  parameters?: TypeDocParam[];
+  defaultValue?: string;
+}
+
+interface TypeDocSignature {
+  id: number;
+  name: string;
+  kind: number;
+  flags?: Record<string, boolean>;
+  comment?: TypeDocComment;
+  parameters?: TypeDocParam[];
+  type?: TypeDocType;
+}
+
+interface TypeDocParam {
+  id: number;
+  name: string;
+  variant: string;
+  kind: number;
+  flags: Record<string, boolean>;
+  type?: TypeDocType;
+  comment?: TypeDocComment;
+  defaultValue?: string;
+}
+
+interface TypeDocProject {
+  id: number;
+  name: string;
+  packageName: string;
+  kind: number;
+  children: TypeDocChild[];
+}
+
+// ── Constants ───────────────────────────────────────────────────────
+
+/** Editorial mapping: class name → URL slug. Missing entries get kebab-case auto-generated. */
+const CLASS_SLUGS: Record<string, string> = {
+  "Pinner": "pinner",
+  "UploadManager": "upload-manager",
+  "IpnsClient": "ipns-client",
+  "WebsitesClient": "websites-client",
+};
+
+/** Methods/properties inherited from base objects: always skipped */
+const IGNORED_MEMBERS = new Set([
+  "captureStackTrace", "prepareStackTrace", "toString", "toLocaleString",
+  "valueOf", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable",
+  "constructor",
+]);
+
+// ── Helpers ─────────────────────────────────────────────────────────
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, "..");
+let project: TypeDocProject;
+let idMap: Map<number, TypeDocChild>;
+let packageName: string;
+
+/** Convert a class name to a URL slug (explicit mapping or kebab-case fallback) */
+function slugForClass(name: string): string {
+  return CLASS_SLUGS[name] ?? name.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+}
+
+/** Build a lookup table by ID for resolving type references */
+function buildIdMap(node: TypeDocChild, map = new Map<number, TypeDocChild>()): Map<number, TypeDocChild> {
+  map.set(node.id, node);
+  for (const child of node.children ?? []) buildIdMap(child, map);
+  return map;
+}
+
+/**
+ * Discover error classes from the TypeDoc graph.
+ * Finds PinnerError, then walks extendedBy to find all classes in the error hierarchy.
+ */
+function discoverErrorClasses(): string[] {
+  const pinnerError = project.children.find(c => c.name === "PinnerError" && c.kind === 128);
+  if (!pinnerError) return [];
+
+  const errors = new Set<string>();
+  errors.add("PinnerError");
+
+  // BFS: find all classes that extend PinnerError (directly or transitively)
+  const queue = [pinnerError];
+  while (queue.length) {
+    const cls = queue.shift()!;
+    for (const ref of cls.extendedBy ?? []) {
+      if (ref.type !== "reference" || typeof ref.target !== "number") continue;
+      const child = idMap.get(ref.target);
+      if (child && child.kind === 128 && !errors.has(child.name)) {
+        errors.add(child.name);
+        queue.push(child);
+      }
+    }
+  }
+
+  return [...errors].sort();
+}
+
+/** Extract comment text, stripping Orval boilerplate */
+function getCommentText(child: TypeDocChild | TypeDocSignature): string {
+  const comment = child.comment;
+  if (!comment?.summary?.length) return "";
+
+  let text = comment.summary.map(s => s.text).join("");
+
+  // Strip Orval-generated API boilerplate (repeats per interface from OpenAPI codegen)
+  text = text.replace(/Generated by orval.*$/s, "");
+  text = text.replace(/## Portal IPFS Plugin API.*$/s, "");
+  text = text.trimEnd();
+
+  // Convert single newlines to double (paragraph breaks in MDX)
+  // then collapse 3+ consecutive newlines back to 2
+  text = text.replace(/\n/g, "\n\n").replace(/\n{3,}/g, "\n\n");
+  return escapeMdxBraces(text);
+}
+
+/** Get the description for an interface property (may be on the property or its signature) */
+function getPropDescription(prop: TypeDocChild): string {
+  const desc = prop.comment?.summary?.map(s => s.text).join("")
+    || prop.signatures?.[0]?.comment?.summary?.map(s => s.text).join("")
+    || "";
+  return escapeMdxBraces(desc);
+}
+
+/** Get all public methods of a class */
+function getPublicMethods(cls: TypeDocChild) {
+  const methods: { name: string; sig: TypeDocSignature; comment: string }[] = [];
+  for (const child of cls.children ?? []) {
+    if (child.flags?.isPrivate || child.flags?.isInternal) continue;
+    if (IGNORED_MEMBERS.has(child.name)) continue;
+    if (child.signatures?.length) {
+      for (const sig of child.signatures) {
+        if (sig.flags?.isPrivate || sig.flags?.isInternal) continue;
+        methods.push({ name: child.name, sig, comment: getCommentText(sig) });
+      }
+    }
+    if (child.getSignature) {
+      methods.push({ name: child.name, sig: child.getSignature, comment: getCommentText(child.getSignature) });
+    }
+  }
+  return methods;
+}
+
+/** Escape pipe characters for markdown table cells */
+function escapeTablePipes(text: string): string {
+  return text.replace(/\|/g, "\\|");
+}
+
+/** Escape curly braces that MDX would interpret as JSX expressions.
+ *  Turns {foo} into {'{foo}'} so MDX renders literal braces. */
+function escapeMdxBraces(text: string): string {
+  return text.replace(/\{([^}]+)\}/g, "{'{$1}'}");
+}
+
+/** Abbreviate overly-complex generic types for table display */
+function abbreviateType(text: string): string {
+  return text.replace(/AsyncGenerator<((?:[^<>]|<[^<>]*>)*)>/g, "AsyncGenerator<…>");
+}
+
+/** Strip backticks and markdown links for use inside code fences */
+function stripFormatting(text: string): string {
+  return text.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/`/g, "");
+}
+
+/** Resolve a TypeDoc type reference to a readable MDX string */
+function resolveType(t: TypeDocType | undefined, depth = 0): string {
+  if (!t || depth > 4) return "`void`";
+  switch (t.type) {
+    case "intrinsic":
+      return `\`${t.name}\``;
+    case "reference": {
+      const targetId = typeof t.target === "number" ? t.target : -1;
+      const target = idMap.get(targetId);
+      const linkName = target ? target.name : t.name;
+      const isLocal = (target && nonErrorClasses.has(linkName!)) || errorClassSet.has(linkName ?? "");
+      const name = isLocal ? `[${linkName}](/reference/sdk/${slugForClass(linkName ?? "")})` : `\`${linkName}\``;
+      if (t.typeArguments?.length) {
+        const args = t.typeArguments.map(ta => resolveType(ta, depth + 1).replace(/`/g, "")).join(", ");
+        return `\`${linkName}<${args}>\``;
+      }
+      return name;
+    }
+    case "union":
+      return (t.types ?? []).map(tt => resolveType(tt, depth + 1)).join(" | ");
+    case "literal":
+      return `\`${t.value}\``;
+    case "array":
+      if (t.elementType) {
+        const inner = resolveType(t.elementType, depth + 1).replace(/`/g, "");
+        return `\`${inner}[]\``;
+      }
+      return "`unknown[]`";
+    case "reflection":
+      return "`object`";
+    case "intersection":
+      return (t.types ?? []).map(tt => resolveType(tt, depth + 1)).join(" & ");
+    case "tuple":
+      return "`[…]`";
+    default:
+      return t.name ? `\`${t.name}\`` : "`unknown`";
+  }
+}
+
+/** Render the auto-generated notice banner */
+function autoGeneratedNotice(): string[] {
+  return [
+    `> **This page is auto-generated** from [TypeDoc](https://typedoc.org/). Do not edit directly.`,
+    `> To update, modify the TypeScript source in [${packageName}](https://github.com/LumeWeb/web/tree/develop/libs/pinner/src) and run \`pnpm generate:sdk\`.`,
+    "",
+  ];
+}
+
+// ── Late-initialized (after project load) ──────────────────────────
+
+let errorClassNames: string[];
+let errorClassSet: Set<string>;
+let nonErrorClasses: Set<string>;
+
+// ── Renderers ───────────────────────────────────────────────────────
+
+/** Render a method signature as MDX */
+function renderMethod(name: string, sig: TypeDocSignature, depth: number): string {
+  const heading = "#".repeat(Math.min(depth, 4));
+  const parts: string[] = [];
+
+  const paramsCode = (sig.parameters ?? []).map(p => {
+    const opt = p.flags?.isOptional ? "?" : "";
+    const type = stripFormatting(resolveType(p.type));
+    const def = p.defaultValue ? ` = ${p.defaultValue}` : "";
+    return `${p.name}${opt}: ${type}${def}`;
+  });
+
+  const retType = sig.type ? resolveType(sig.type) : "`void`";
+  const retTypeCode = stripFormatting(retType);
+
+  const paramNames = (sig.parameters ?? []).map(p => `${p.name}${p.flags?.isOptional ? "?" : ""}`).join(", ");
+  parts.push(`${heading} \`${name}(${paramNames})\``);
+  parts.push("");
+
+  parts.push("```typescript");
+  parts.push(`${name}(${paramsCode.join(", ")}): ${retTypeCode}`);
+  parts.push("```");
+  parts.push("");
+
+  const text = getCommentText(sig);
+  if (text) {
+    parts.push(text);
+    parts.push("");
+  }
+
+  if (sig.parameters?.length) {
+    parts.push("**Parameters:**");
+    parts.push("");
+    parts.push("| Name | Type | Description |");
+    parts.push("|------|------|-------------|");
+    for (const p of sig.parameters) {
+      const type = resolveType(p.type);
+      const desc = p.comment?.summary?.map(s => s.text).join("") ?? "";
+      const opt = p.flags?.isOptional ? " *optional*" : "";
+      parts.push(`| \`${p.name}\` | ${escapeTablePipes(type)} | ${escapeTablePipes(desc)}${opt} |`);
+    }
+    parts.push("");
+  }
+
+  parts.push(`**Returns:** ${abbreviateType(retType)}`);
+  parts.push("");
+
+  return parts.join("\n");
+}
+
+/** Render a full class page */
+function renderClassPage(cls: TypeDocChild): string {
+  const parts: string[] = [];
+  const className = cls.name;
+
+  parts.push("---");
+  parts.push(`title: "SDK: ${className}"`);
+  parts.push(`description: "API reference for the ${className} class in ${packageName}."`);
+  parts.push("---");
+  parts.push("");
+  parts.push(...autoGeneratedNotice());
+
+  const classDesc = getCommentText(cls);
+  if (classDesc) {
+    parts.push(classDesc);
+    parts.push("");
+  }
+
+  // Constructor
+  const ctor = cls.children?.find(c => c.kind === 512);
+  if (ctor?.signatures?.length) {
+    const sig = ctor.signatures[0];
+    parts.push("## Constructor");
+    parts.push("");
+    const paramsCode = (sig.parameters ?? []).map(p => {
+      const type = stripFormatting(resolveType(p.type));
+      return `${p.name}: ${type}`;
+    });
+    parts.push("```typescript");
+    parts.push(`new ${className}(${paramsCode.join(", ")})`);
+    parts.push("```");
+    parts.push("");
+
+    if (sig.parameters?.length) {
+      parts.push("| Parameter | Type | Description |");
+      parts.push("|-----------|------|-------------|");
+      for (const p of sig.parameters) {
+        const type = resolveType(p.type);
+        const desc = p.comment?.summary?.map(s => s.text).join("") ?? "";
+        parts.push(`| \`${p.name}\` | ${escapeTablePipes(type)} | ${escapeTablePipes(desc)} |`);
+      }
+      parts.push("");
+    }
+  }
+
+  // Methods
+  const methods = getPublicMethods(cls);
+  if (methods.length) {
+    parts.push("## Methods");
+    parts.push("");
+    parts.push("| Method | Returns | Description |");
+    parts.push("|--------|---------|-------------|");
+    for (const m of methods) {
+      const ret = m.sig.type ? resolveType(m.sig.type) : "`void`";
+      const params = (m.sig.parameters ?? []).map(p => p.name).join(", ");
+      const desc = m.comment.replace(/\n+/g, " ");
+      parts.push(`| [\`${m.name}(${params})\`](#${m.name}) | ${escapeTablePipes(abbreviateType(ret))} | ${escapeTablePipes(desc)} |`);
+    }
+    parts.push("");
+
+    for (const m of methods) {
+      parts.push(renderMethod(m.name, m.sig, 3));
+    }
+  }
+
+  // Source link
+  if (cls.sources?.[0]?.url) {
+    parts.push("---");
+    parts.push("");
+    parts.push(`<small>Source: [${cls.sources[0].fileName}](${cls.sources[0].url})</small>`);
+    parts.push("");
+  }
+
+  return parts.join("\n");
+}
+
+/** Render the errors page (hierarchy discovered from TypeDoc graph) */
+function renderErrorsPage(classes: TypeDocChild[]): string {
+  const parts: string[] = [];
+
+  parts.push("---");
+  parts.push('title: "SDK: Errors"');
+  parts.push(`description: "Error classes thrown by the ${packageName} SDK."`);
+  parts.push("---");
+  parts.push("");
+  parts.push(...autoGeneratedNotice());
+  parts.push("All SDK errors extend the base [`PinnerError`](/reference/sdk/errors#pinnererror) class, which extends the native `Error`.");
+  parts.push("");
+
+  // Render hierarchy dynamically
+  parts.push("## Error Hierarchy");
+  parts.push("");
+  parts.push("```");
+  parts.push("Error");
+  parts.push("└── PinnerError");
+  for (const errName of errorClassNames.filter(n => n !== "PinnerError")) {
+    parts.push(`    └── ${errName}`);
+  }
+  parts.push("```");
+  parts.push("");
+
+  // Per-error details
+  for (const cls of classes) {
+    if (!errorClassSet.has(cls.name)) continue;
+    const baseMatch = cls.extendedTypes?.find(t => t.type === "reference" && typeof t.target === "number");
+    const baseName = baseMatch ? (idMap.get(baseMatch.target as number)?.name ?? "Error") : "Error";
+    parts.push(`### \`${cls.name}\``);
+    parts.push("");
+    const desc = getCommentText(cls);
+    if (desc) {
+      parts.push(desc);
+      parts.push("");
+    }
+    parts.push(`Extends: \`${baseName}\``);
+    parts.push("");
+  }
+
+  return parts.join("\n");
+}
+
+/** Render the types page (interfaces, type aliases, enums) */
+function renderTypesPage(types: TypeDocChild[]): string {
+  const parts: string[] = [];
+
+  parts.push("---");
+  parts.push('title: "SDK: Types"');
+  parts.push(`description: "Interfaces, type aliases, and enums in ${packageName}."`);
+  parts.push("---");
+  parts.push("");
+  parts.push(...autoGeneratedNotice());
+
+  const interfaces = types.filter(t => t.kind === 256);
+  const typeAliases = types.filter(t => t.kind === 4194304);
+  const enums = types.filter(t => t.kind === 8);
+
+  if (interfaces.length) {
+    parts.push("## Interfaces");
+    parts.push("");
+    for (const iface of interfaces) {
+      parts.push(`### \`${iface.name}\``);
+      parts.push("");
+      const desc = getCommentText(iface);
+      if (desc) { parts.push(desc); parts.push(""); }
+
+      if (iface.children?.length) {
+        parts.push("| Property | Type | Description |");
+        parts.push("|----------|------|-------------|");
+        for (const prop of iface.children) {
+          if (prop.flags?.isPrivate) continue;
+          const type = resolveType(prop.type);
+          const propDesc = getPropDescription(prop);
+          const opt = prop.flags?.isOptional ? " *optional*" : "";
+          parts.push(`| \`${prop.name}\` | ${escapeTablePipes(type)} | ${escapeTablePipes(propDesc)}${opt} |`);
+        }
+        parts.push("");
+      }
+    }
+  }
+
+  if (typeAliases.length) {
+    parts.push("## Type Aliases");
+    parts.push("");
+    for (const ta of typeAliases) {
+      const desc = getCommentText(ta);
+      const type = ta.type ? resolveType(ta.type) : "";
+      parts.push(`### \`${ta.name}\``);
+      parts.push("");
+      if (type) {
+        parts.push("```typescript");
+        parts.push(`type ${ta.name} = ${type.replace(/`/g, "")}`);
+        parts.push("```");
+        parts.push("");
+      }
+      if (desc) { parts.push(desc); parts.push(""); }
+    }
+  }
+
+  if (enums.length) {
+    parts.push("## Enums");
+    parts.push("");
+    for (const en of enums) {
+      parts.push(`### \`${en.name}\``);
+      parts.push("");
+      if (en.children?.length) {
+        parts.push("| Member | Value | Description |");
+        parts.push("|--------|-------|-------------|");
+        for (const member of en.children) {
+          const val = member.type?.value ?? "";
+          const memberDesc = member.comment?.summary?.map(s => s.text).join("") ?? "";
+          parts.push(`| \`${member.name}\` | \`${val}\` | ${memberDesc} |`);
+        }
+        parts.push("");
+      }
+    }
+  }
+
+  return parts.join("\n");
+}
+
+/** Render the SDK index page */
+function renderIndex(classes: TypeDocChild[], types: TypeDocChild[]): string {
+  const parts: string[] = [];
+
+  parts.push("---");
+  parts.push('title: "SDK Reference"');
+  parts.push(`description: "Complete API reference for the ${packageName} SDK."`);
+  parts.push("---");
+  parts.push("");
+  parts.push(...autoGeneratedNotice());
+
+  parts.push("## Install");
+  parts.push("");
+  parts.push("```bash");
+  parts.push(`npm install ${packageName}`);
+  parts.push("```");
+  parts.push("");
+
+  parts.push("## Quick Start");
+  parts.push("");
+  parts.push("```typescript");
+  parts.push(`import { Pinner } from "${packageName}";`);
+  parts.push("");
+  parts.push("const client = new Pinner({");
+  parts.push("  authToken: process.env.PINNER_AUTH_TOKEN!,");
+  parts.push("});");
+  parts.push("");
+  parts.push("// Upload a file");
+  parts.push("const result = await client.upload(file);");
+  parts.push("console.log(result.cid);");
+  parts.push("```");
+  parts.push("");
+
+  // Non-error classes (discovered from TypeDoc)
+  parts.push("## Classes");
+  parts.push("");
+  parts.push("| Class | Description |");
+  parts.push("|-------|-------------|");
+  for (const cls of classes) {
+    if (errorClassSet.has(cls.name)) continue;
+    const desc = getCommentText(cls);
+    parts.push(`| [\`${cls.name}\`](/reference/sdk/${slugForClass(cls.name)}) | ${escapeTablePipes(desc)} |`);
+  }
+  parts.push("");
+
+  parts.push("## Errors");
+  parts.push("");
+  parts.push(`All SDK errors extend [PinnerError](/reference/sdk/errors#pinnererror). See [Error Classes](/reference/sdk/errors) for the full hierarchy.`);
+  parts.push("");
+
+  const typeCount = types.filter(t => t.kind === 256).length;
+  const aliasCount = types.filter(t => t.kind === 4194304).length;
+  parts.push("## Types");
+  parts.push("");
+  parts.push(`${typeCount} interfaces and ${aliasCount} type aliases. See [Types](/reference/sdk/types) for full definitions.`);
+  parts.push("");
+
+  return parts.join("\n");
+}
+
+// ── Main ────────────────────────────────────────────────────────────
+
+const jsonPath = resolve(ROOT, "reference-sources", "sdk-ref.json");
+const outDir = resolve(ROOT, "docs", "pages", "reference", "sdk");
+
+console.log(`Reading ${jsonPath}...`);
+project = JSON.parse(readFileSync(jsonPath, "utf-8"));
+idMap = buildIdMap(project as unknown as TypeDocChild);
+packageName = project.packageName || project.name;
+
+// Discover error classes from the TypeDoc graph
+errorClassNames = discoverErrorClasses();
+errorClassSet = new Set(errorClassNames);
+nonErrorClasses = new Set(
+  project.children.filter(c => c.kind === 128 && !errorClassSet.has(c.name)).map(c => c.name)
+);
+
+// Categorize children by kind
+const classMap = new Map<string, TypeDocChild>();
+const typesList: TypeDocChild[] = [];
+
+for (const child of project.children) {
+  switch (child.kind) {
+    case 128: classMap.set(child.name, child); break;  // Class
+    case 256: typesList.push(child); break;             // Interface
+    case 4194304: typesList.push(child); break;         // TypeAlias
+    case 8: typesList.push(child); break;               // Enum
+  }
+}
+
+// Clean output dir
+rmSync(outDir, { recursive: true, force: true });
+mkdirSync(outDir, { recursive: true });
+
+// Write index
+const allClasses = [...classMap.values()];
+const indexContent = renderIndex(allClasses, typesList);
+const indexPath = resolve(outDir, "index.mdx");
+writeFileSync(indexPath, indexContent);
+console.log(`Wrote ${indexPath} (${indexContent.split("\n").length} lines)`);
+
+// Write class pages (non-error classes that have explicit slugs)
+for (const cls of allClasses) {
+  if (errorClassSet.has(cls.name)) continue;
+  const slug = slugForClass(cls.name);
+  const content = renderClassPage(cls);
+  const filePath = resolve(outDir, `${slug}.mdx`);
+  writeFileSync(filePath, content);
+  console.log(`Wrote ${filePath} (${content.split("\n").length} lines)`);
+}
+
+// Write errors page
+const errorClasses = errorClassNames.map(n => classMap.get(n)).filter(Boolean) as TypeDocChild[];
+if (errorClasses.length) {
+  const content = renderErrorsPage(errorClasses);
+  const filePath = resolve(outDir, "errors.mdx");
+  writeFileSync(filePath, content);
+  console.log(`Wrote ${filePath} (${content.split("\n").length} lines)`);
+}
+
+// Write types page
+if (typesList.length) {
+  const content = renderTypesPage(typesList);
+  const filePath = resolve(outDir, "types.mdx");
+  writeFileSync(filePath, content);
+  console.log(`Wrote ${filePath} (${content.split("\n").length} lines)`);
+}
+
+console.log("\nDone.");

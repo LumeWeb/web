@@ -5,19 +5,28 @@
   "type": "module",
   "scripts": {
     "dev": "vocs dev",
-    "build": "vocs build",
-    "preview": "vocs preview"
+    "build": "pnpm generate && vocs build",
+    "preview": "vocs preview",
+    "generate": "pnpm generate:cli-ref && pnpm generate:cli && pnpm generate:sdk",
+    "generate:cli-ref": "mkdir -p reference-sources && pinner generate-docs json > reference-sources/cli-ref.json",
+    "generate:typedoc": "typedoc",
+    "generate:cli": "tsx scripts/generate-cli-ref.ts",
+    "generate:sdk": "pnpm generate:typedoc && tsx scripts/generate-sdk-ref.ts"
+  },
+  "dependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "vocs": "catalog:",
+    "waku": "1.0.0-beta.0"
   },
   "devDependencies": {
     "@radix-ui/react-tabs": "^1.1.13",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "clsx": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
     "tailwindcss": "catalog:websites",
-    "vocs": "catalog:",
-    "waku": "1.0.0-beta.0"
+    "tsx": "^4.22.4",
+    "typedoc": "^0.28.19"
   },
   "repository": {
     "type": "git",

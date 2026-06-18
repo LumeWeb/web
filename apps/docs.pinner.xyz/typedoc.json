@@ -1,0 +1,16 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["../../libs/pinner/src/index.ts"],
+  "tsconfig": "../../libs/pinner/tsconfig.typedoc.json",
+  "entryPointStrategy": "expand",
+  "json": "./reference-sources/sdk-ref.json",
+  "readme": "none",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeInternal": false,
+  "excludeExternals": true,
+  "categorizeByGroup": true,
+  "sort": ["source-order"],
+  "githubPages": false,
+  "skipErrorChecking": true
+}

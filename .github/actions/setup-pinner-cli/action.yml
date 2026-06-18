@@ -1,0 +1,17 @@
+name: "Setup pinner-cli"
+description: "Install pinner-cli via go install and add it to PATH"
+inputs:
+  version:
+    description: "pinner-cli version (go module version tag)"
+    required: false
+    default: "latest"
+runs:
+  using: "composite"
+  steps:
+    - name: Install pinner-cli
+      shell: bash
+      env:
+        GOTOOLCHAIN: auto
+      run: |
+        go install go.lumeweb.com/pinner-cli/cmd/pinner@${{ inputs.version }}
+        echo "$(go env GOPATH)/bin" >> $GITHUB_PATH

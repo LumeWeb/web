@@ -1,0 +1,9 @@
+dist/
+dist-bundle/
+.vocs/
+
+# SDK reference is generated at build time from TypeDoc (libs/pinner source)
+# CLI reference is generated at build time from pinner-cli binary
+reference-sources/sdk-ref.json
+reference-sources/cli-ref.json
+docs/pages/reference/sdk/
