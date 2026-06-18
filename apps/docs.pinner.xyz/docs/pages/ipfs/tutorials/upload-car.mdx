@@ -16,7 +16,7 @@ Not sure what CAR files are or why you'd use them? See [CAR Files](/ipfs/concept
 import { Pinner } from "@lumeweb/pinner";
 import fs from "fs";
 
-const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY! });
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
 
 const carData = fs.readFileSync("./data.car");
 const carFile = new File([carData], "data.car", {

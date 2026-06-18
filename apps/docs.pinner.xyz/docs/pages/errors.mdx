@@ -5,7 +5,7 @@ description: All Pinner error codes, when they happen, and what to do
 
 # Error Reference
 
-Every API error response includes a `code` field for programmatic handling. This page lists every code the API can return, when it happens, what to do about it, and whether it's safe to retry.
+Every API error response includes a `reason` field for programmatic handling. This page lists every code the API can return, when it happens, what to do about it, and whether it's safe to retry.
 
 CLI users see friendly messages instead of raw codes — the [CLI error table](#cli-error-messages) maps them.
 
@@ -36,11 +36,11 @@ CLI users see friendly messages instead of raw codes — the [CLI error table](#
 
 | Code | HTTP | When it happens | What to do | Retry? |
 |------|------|----------------|------------|--------|
-| `ErrUnsupportedFormat` | 422 | File format isn't supported | Use a supported format (ZIP, CAR, or raw files). | No |
-| `ErrCorruptedFile` | 500 | File is corrupted | Re-export or re-download the file and retry. | No |
-| `ErrEmptyZIP` | 500 | ZIP archive has no files | Add content to the ZIP and retry. | No |
-| `ErrPasswordProtected` | 500 | File is password-protected | Remove password protection and retry. | No |
-| `ErrFileUploadFailed` | 500 | Upload failed mid-transfer | Check network and retry with backoff. | Yes |
+| `UnsupportedFormat` | 422 | File format isn't supported | Use a supported format (ZIP or CAR). | No |
+| `CorruptedFile` | 500 | File is corrupted | Re-export or re-download the file and retry. | No |
+| `EmptyZIP` | 500 | ZIP archive has no files | Add content to the ZIP and retry. | No |
+| `PasswordProtected` | 500 | File is password-protected | Remove password protection and retry. | No |
+| `FileUploadFailed` | 500 | Upload failed mid-transfer | Check network and retry with backoff. | Yes |
 | `FILE_UPLOAD_API_FAILED` | 500 | Upload failed due to an internal error | Retry with backoff. If it persists, check status.pinner.xyz. | Yes |
 | `FILE_PROCESSING_FAILED` | 500 | Server couldn't process the file | Check file integrity. Retry with backoff. | Yes |
 | `UPLOAD_NOT_FOUND` | 404 | Upload ID doesn't exist | Check the upload ID. It may have expired or been deleted. | No |
@@ -88,7 +88,7 @@ CLI users see friendly messages instead of raw codes — the [CLI error table](#
 | `INVALID_ZONE_STATUS` | — | DNS zone status is invalid | Check the status value. | No |
 | `ZONE_NOT_FOUND` | 404 | DNS zone doesn't exist | Create the zone first. See [DNS and Domains](/websites/concepts/dns-and-domains). | No |
 | `RECORD_NOT_FOUND` | 404 | DNS record doesn't exist | Check the record ID. | No |
-| `INVALID_RECORD_TYPE` | — | DNS record type isn't supported | Use a supported record type (A, AAAA, CNAME, TXT, MX, NS). | No |
+| `INVALID_RECORD_TYPE` | — | DNS record type isn't supported | Use a supported record type (A, AAAA, ALIAS, CNAME, TXT, MX, NS, SRV). | No |
 | `DUPLICATE_RECORD` | 409 | DNS record already exists | Use the existing record or delete it first. | No |
 | `DELETE_FAILED` | 500 | Couldn't delete DNS zone | Retry with backoff. | Yes |
 | `UPDATE_FAILED` | 500 | Couldn't update DNS zone | Retry with backoff. | Yes |

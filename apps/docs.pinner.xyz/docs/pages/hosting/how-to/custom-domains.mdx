@@ -78,7 +78,7 @@ console.log("Nameservers:", config.nameservers);
 
 :::code-group
 ```typescript [SDK]
-const result = await pinner.websites.validateDNS(site.id);
+const result = await pinner.websites.validateWebsite(site.id);
 if (result.valid) {
   console.log("Domain validated!");
 } else {

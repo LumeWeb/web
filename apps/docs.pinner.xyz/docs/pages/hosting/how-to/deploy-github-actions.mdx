@@ -148,10 +148,12 @@ import path from "path";
 const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN });
 
 // Upload a directory
-const files = fs.readdirSync("./dist").map((name) => {
-  const buffer = fs.readFileSync(path.join("./dist", name));
-  return new File([buffer], name);
-});
+const files: File[] = [];
+for (const entry of fs.readdirSync("./dist", { recursive: true })) {
+  const fullPath = path.join("./dist", entry.toString());
+  if (!fs.statSync(fullPath).isFile()) continue;
+  files.push(new File([fs.readFileSync(fullPath)], entry.toString()));
+}
 const operation = await pinner.uploadDirectory(files, { name: "my-site" });
 const result = await operation.result;
 console.log("CID:", result.cid);
@@ -186,10 +188,12 @@ import path from "path";
 const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN });
 
 // Upload a directory
-const files = fs.readdirSync("./dist").map((name) => {
-  const buffer = fs.readFileSync(path.join("./dist", name));
-  return new File([buffer], name);
-});
+const files: File[] = [];
+for (const entry of fs.readdirSync("./dist", { recursive: true })) {
+  const fullPath = path.join("./dist", entry.toString());
+  if (!fs.statSync(fullPath).isFile()) continue;
+  files.push(new File([fs.readFileSync(fullPath)], entry.toString()));
+}
 const operation = await pinner.uploadDirectory(files, { name: "my-site" });
 const result = await operation.result;
 

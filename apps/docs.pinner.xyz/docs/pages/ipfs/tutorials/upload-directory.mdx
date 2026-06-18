@@ -19,7 +19,7 @@ In this tutorial you'll upload multiple files as an IPFS directory and get the r
 ```typescript [SDK]
 import { Pinner } from "@lumeweb/pinner";
 
-const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY! });
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
 
 const files = [
   new File(["Hello, IPFS!"], "hello.txt", { type: "text/plain" }),

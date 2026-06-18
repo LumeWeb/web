@@ -27,7 +27,7 @@ const pinata = new PinataSDK({
 
 // After (Pinner adapter)
 import { Pinner, pinataAdapter } from "@lumeweb/pinner";
-const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY! });
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
 const pinata = pinataAdapter(pinner);
 ```
 
@@ -37,7 +37,7 @@ const pinata = require("@pinata/sdk")(pinataJwt, pinataGateway);
 
 // After (Pinner legacy adapter)
 import { Pinner, pinataLegacyAdapter } from "@lumeweb/pinner";
-const pinner = new Pinner({ jwt: process.env.PINNER_API_KEY! });
+const pinner = new Pinner({ jwt: process.env.PINNER_AUTH_TOKEN! });
 const pinata = pinataLegacyAdapter(pinner);
 ```
 :::
