@@ -374,7 +374,7 @@ export type KeyListItem = {
 /**
  * Key scopes
  */
-type KeyScopes = {
+export type KeyScopes = {
 	endpoints: {
 		pinning: {
 			pinFileToIPFS: boolean;

@@ -36,7 +36,7 @@ export interface UnstorageBlockstoreOptions {
  *       This determines where the storage driver stores data.
  */
 
-type DriverFactory = () => Driver | Promise<Driver>;
+export type DriverFactory = () => Driver | Promise<Driver>;
 
 export let driverFactory: DriverFactory | null = null;
 
@@ -172,11 +172,12 @@ export function createUnstorageBlockstore(
       options?: AbortOptions,
     ): AwaitGenerator<BlockstorePair> {
       for await (const cid of source) {
+        const self = this;
         yield {
           cid,
           bytes: (async function* () {
-            yield* await this.get(cid, options);
-          }.call(this)),
+            yield* await self.get(cid, options);
+          })(),
         };
       }
     }

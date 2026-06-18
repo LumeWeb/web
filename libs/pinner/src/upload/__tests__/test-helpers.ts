@@ -37,13 +37,13 @@ export async function createTestCarFile(
   const cid = CID.create(1, 0x55, hash);
 
   // Create a CAR writer with the root CID
-  const { writer, out } = CarWriter.create([cid]);
+  const { writer, out } = CarWriter.create([cid as any]);
 
   // Collect all bytes from the async iterable
   const collectPromise = collectAsyncIterable(out);
 
   // Add the block to the CAR
-  await writer.put({ cid, bytes: data });
+  await writer.put({ cid: cid as any, bytes: data });
 
   // Finish the CAR and get the bytes
   await writer.close();
@@ -89,14 +89,14 @@ export async function createMultiBlockCarFile(
   }
 
   // Create a CAR writer with all root CIDs
-  const { writer, out } = CarWriter.create(cids);
+  const { writer, out } = CarWriter.create(cids as any);
 
   // Collect all bytes from the async iterable
   const collectPromise = collectAsyncIterable(out);
 
   // Add all blocks to the CAR
   for (const block of blocks) {
-    await writer.put(block);
+    await writer.put(block as any);
   }
 
   // Finish the CAR and get the bytes
