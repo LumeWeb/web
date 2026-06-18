@@ -1,3 +1,38 @@
-@layer vocs_preflight { @tailwind base; }
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@source "../components";
+
+@theme {
+  --color-background: var(--vocs-background-color-base);
+  --color-background2: var(--vocs-background-color-subtle);
+  --color-text: var(--vocs-text-color-primary);
+  --color-text2: var(--vocs-text-color-secondary);
+  --color-text3: var(--vocs-text-color-muted);
+  --color-heading: var(--vocs-text-color-heading);
+  --color-backgroundAccent: var(--vocs-background-color-accent);
+  --color-backgroundAccentHover: var(--vocs-background-color-accent-hover);
+  --color-textAccent: var(--vocs-text-color-accent);
+  --color-border: var(--vocs-border-color-primary);
+  --color-border2: var(--vocs-border-color-subtle);
+  --color-codeBlockBackground: var(--vocs-background-color-code-block);
+  --color-codeInlineBackground: var(--vocs-background-color-code-inline);
+  --color-codeInlineText: var(--vocs-text-color-code-inline);
+}
+
+:root {
+  --vocs-background-color-base: #031418;
+  --vocs-background-color-subtle: #020e10;
+  --vocs-text-color-primary: #ffffff;
+  --vocs-text-color-secondary: #c7c7c7;
+  --vocs-text-color-muted: #a0aec0;
+  --vocs-text-color-heading: #ffffff;
+  --vocs-background-color-accent: #7afcbb;
+  --vocs-background-color-accent-hover: #1F4A3D;
+  --vocs-text-color-accent: #7afcbb;
+  --vocs-border-color-primary: #0B3F48;
+  --vocs-border-color-subtle: #1a2e34;
+  --vocs-background-color-code-block: #020e10;
+  --vocs-background-color-code-inline: #031418;
+  --vocs-text-color-code-inline: #7afcbb;
+  --vocs-font-family-default: 'IBM Plex Sans Devanagari', system-ui, sans-serif;
+  --vocs-font-family-mono: 'JetBrains Mono', monospace;
+}

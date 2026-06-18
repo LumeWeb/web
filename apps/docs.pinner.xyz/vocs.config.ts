@@ -1,9 +1,11 @@
-import { defineConfig } from "vocs";
-import path from "path";
+import { defineConfig } from "vocs/config";
 
 export default defineConfig({
   title: "Pinner.xyz",
   description: "Privacy-focused storage without the infrastructure.",
+  renderStrategy: "full-static",
+  srcDir: "docs",
+  pagesDir: "pages",
 
   // Font Configuration
   font: {
@@ -11,21 +13,7 @@ export default defineConfig({
     mono: { google: "JetBrains Mono" },
   },
 
-  // Theme Configuration
-  theme: {
-    accentColor: {
-      light: "#D97706",
-      dark: "#ADF0DD",
-    },
-  },
-
-  vite: {
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname),
-      },
-    },
-  },
+  accentColor: "light-dark(#D97706, #ADF0DD)",
   sidebar: [
     // ── Landing ──
     { text: "Welcome", link: "/" },

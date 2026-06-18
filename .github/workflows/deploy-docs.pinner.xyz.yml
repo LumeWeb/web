@@ -37,7 +37,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          command: pages deploy apps/docs.pinner.xyz/docs/dist --project-name=docs-pinner-xyz
+          command: pages deploy apps/docs.pinner.xyz/dist/public --project-name=docs-pinner-xyz
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
       - uses: mshick/add-pr-comment@v2
         if: github.event_name == 'pull_request'
