@@ -1,61 +1,15 @@
-import { defineConfig } from "vocs";
+import { defineConfig } from "vocs/config";
 
 export default defineConfig({
   title: "Lume Web",
   description: "Freedom. Privacy. Ownership.",
   baseUrl: "https://docs.lumeweb.com",
+  renderStrategy: "full-static",
+  srcDir: "docs",
+  pagesDir: "pages",
 
-  // Theme customization matching Lume Web colors
-  theme: {
-    accentColor: "#7afcbb", // $color-aquamarine
-    colorScheme: "dark", // Default to dark mode since main site is dark
-    variables: {
-      color: {
-        // Main colors
-        background: "#031418", // $color-blue-charcoal-2
-        background2: "#020e10", // $color-blue-charcoal
-        text: "#ffffff",
-        text2: "#c7c7c7", // $color-cloud
-        text3: "#a0aec0",
-        heading: "#ffffff",
-
-        // Accent colors
-        backgroundAccent: "#7afcbb",
-        backgroundAccentHover: "#1F4A3D",
-        textAccent: "#7afcbb",
-
-        // Border colors
-        border: "#0B3F48",
-        border2: "#1a2e34",
-
-        // Code colors
-        codeBlockBackground: "#020e10",
-        codeInlineBackground: "#031418",
-        codeInlineText: "#7afcbb",
-      },
-
-      // Typography
-      fontFamily: {
-        default: "'IBM Plex Sans Devanagari', system-ui, sans-serif",
-        mono: "'JetBrains Mono', monospace",
-      },
-      fontSize: {
-        root: "16px",
-        code: "14px",
-        h1: "2.5rem",
-        h2: "2rem",
-        h3: "1.75rem",
-        h4: "1.5rem",
-        h5: "1.25rem",
-        h6: "1rem",
-      },
-      fontWeight: {
-        regular: "400",
-        medium: "500",
-        semibold: "600",
-      },
-    },
-  },
+  accentColor: "#7afcbb",
+  colorScheme: "dark",
 
   // Navigation
   topNav: [

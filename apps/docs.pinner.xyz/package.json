@@ -14,8 +14,10 @@
     "@types/react-dom": "catalog:",
     "clsx": "catalog:",
     "react": "catalog:",
+    "react-dom": "catalog:",
     "tailwindcss": "catalog:websites",
-    "vocs": "catalog:"
+    "vocs": "catalog:",
+    "waku": "1.0.0-beta.0"
   },
   "repository": {
     "type": "git",
