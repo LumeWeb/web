@@ -12,8 +12,8 @@ export default defineConfig({
   srcDir: "docs",
 
   logoUrl: {
-    light: "/logo-dark.svg",
-    dark: "/logo-light.svg",
+    light: "/logo-light.svg",
+    dark: "/logo-dark.svg",
   },
   iconUrl: "/icon.svg",
 

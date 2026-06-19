@@ -92,3 +92,9 @@ a:hover {
   text-decoration-thickness: 2px;
   text-underline-offset: 2px;
 }
+
+/* Prevent method signatures from wrapping in reference tables
+   (avoids "double line" visual artifacts on long names) */
+td code {
+  white-space: nowrap;
+}
