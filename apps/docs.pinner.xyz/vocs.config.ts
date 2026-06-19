@@ -10,11 +10,10 @@ export default defineConfig({
       ? undefined
       : "https://backend.docs.pinner.xyz",
   srcDir: "docs",
-  pagesDir: "pages",
 
   logoUrl: {
-    light: "/logo-dark.svg",
-    dark: "/logo-light.svg",
+    light: "/logo-light.svg",
+    dark: "/logo-dark.svg",
   },
   iconUrl: "/icon.svg",
 
@@ -38,12 +37,6 @@ export default defineConfig({
         branch: "develop",
       }),
     ],
-  },
-
-  // Font Configuration
-  font: {
-    default: { google: "Inter" },
-    mono: { google: "JetBrains Mono" },
   },
 
   accentColor: "light-dark(#D97706, #ADF0DD)",

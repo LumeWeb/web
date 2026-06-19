@@ -480,6 +480,12 @@ importers:
 
   apps/docs.pinner.xyz:
     dependencies:
+      '@fontsource/inter':
+        specifier: catalog:websites
+        version: 5.2.8
+      '@fontsource/jetbrains-mono':
+        specifier: catalog:websites
+        version: 5.2.8
       react:
         specifier: 'catalog:'
         version: 19.2.6

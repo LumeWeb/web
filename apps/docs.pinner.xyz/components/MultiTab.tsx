@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import clsx from 'clsx';
-import { Children, useMemo } from 'react';
+import { Children, isValidElement, useMemo } from 'react';
 
 export interface MultiTabProps {
   /** Tab panels as children wrapped in Tab components */
@@ -22,14 +22,18 @@ export interface TabProps {
 }
 
 export function Tab({ children }: TabProps) {
-  return children;
+  return children as ReactElement;
+}
+
+type TabElement = ReactElement<TabProps>;
+
+function isTabElement(child: ReactNode): child is TabElement {
+  return isValidElement<TabProps>(child) && typeof child.props.value === 'string' && typeof child.props.label === 'string';
 }
 
 export function MultiTab({ children, defaultValue, className }: MultiTabProps) {
   const tabs = useMemo(() => {
-    return Children.toArray(children).filter((child): child is ReactElement<{ value: string; label: string }> => {
-      return child && typeof child === 'object' && 'props' in child && 'value' in child.props;
-    });
+    return Children.toArray(children).filter(isTabElement);
   }, [children]);
 
   const firstValue = tabs[0]?.props.value;

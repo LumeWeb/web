@@ -14,6 +14,8 @@
     "generate:sdk": "pnpm generate:typedoc && tsx scripts/generate-sdk-ref.ts"
   },
   "dependencies": {
+    "@fontsource/inter": "catalog:websites",
+    "@fontsource/jetbrains-mono": "catalog:websites",
     "react": "catalog:",
     "react-dom": "catalog:",
     "vocs": "catalog:",
