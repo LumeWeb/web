@@ -3,25 +3,18 @@ name: Deploy docs.pinner.xyz
 on:
   push:
     branches:
-      - '**'
+      - develop
     paths:
-      - 'apps/docs.pinner.xyz/**'
-  pull_request:
-    branches:
-      - '**'
-    paths:
-      - 'apps/docs.pinner.xyz/**'
+      - "apps/docs.pinner.xyz/**"
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions:
-  pull-requests: write
   deployments: write
   contents: read
 
-
 jobs:
-  build:
+  deploy:
     name: Deploy docs.pinner.xyz
     runs-on: ubuntu-latest
     steps:
@@ -33,16 +26,11 @@ jobs:
         uses: ./.github/actions/setup-pinner-cli
       - name: Build
         run: pnpm build:docs.pinner.xyz
-      - name: Deploy to Cloudflare Pages
-        id: deploy_cf
-        uses: cloudflare/wrangler-action@v3
+      - name: Deploy to IPFS via Pinner
+        id: deploy_pinner
+        uses: lumeweb/pinner-deploy-action@v0
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          command: pages deploy apps/docs.pinner.xyz/dist/public --project-name=docs-pinner-xyz
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-      - uses: mshick/add-pr-comment@v2
-        if: github.event_name == 'pull_request'
-        with:
-          message: |
-            The docs.pinner.xyz has been deployed to [Staging](${{ steps.deploy_cf.outputs.deployment-url }}).
+          api-key: ${{ secrets.PINNER_API_KEY }}
+          path: apps/docs.pinner.xyz/dist/public
+          domain: docs.pinner.xyz
+          remove-previous: true
