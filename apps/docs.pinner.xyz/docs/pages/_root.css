@@ -1,0 +1,94 @@
+/* Fonts (self-hosted via @fontsource) */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+@import '@fontsource/jetbrains-mono/600.css';
+
+:root {
+  --vocs-font-family: 'Inter', sans-serif;
+  --vocs-font-family-mono: 'JetBrains Mono', monospace;
+}
+
+/* Wrap long code lines instead of horizontal overflow.
+   Fixes dark "black box" that appears on long type signatures like
+   CID<unknown, number, number, Version> that overflow the container. */
+[data-v-code-container] pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* Custom scrollbar for dark mode */
+:root[style*='color-scheme:dark'] ::-webkit-scrollbar,
+:root[style*='color-scheme: dark'] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+:root[style*='color-scheme:dark'] ::-webkit-scrollbar-track,
+:root[style*='color-scheme: dark'] ::-webkit-scrollbar-track {
+  background: #0D1D1C;
+}
+
+:root[style*='color-scheme:dark'] ::-webkit-scrollbar-thumb,
+:root[style*='color-scheme: dark'] ::-webkit-scrollbar-thumb {
+  background: #1F2937;
+  border-radius: 4px;
+}
+
+:root[style*='color-scheme:dark'] ::-webkit-scrollbar-thumb:hover,
+:root[style*='color-scheme: dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/* Custom scrollbar for light mode */
+:root[style*='color-scheme:light'] ::-webkit-scrollbar,
+:root[style*='color-scheme: light'] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+:root[style*='color-scheme:light'] ::-webkit-scrollbar-track,
+:root[style*='color-scheme: light'] ::-webkit-scrollbar-track {
+  background: #F8F8F8;
+}
+
+:root[style*='color-scheme:light'] ::-webkit-scrollbar-thumb,
+:root[style*='color-scheme: light'] ::-webkit-scrollbar-thumb {
+  background: #E4E0D4;
+  border-radius: 4px;
+}
+
+:root[style*='color-scheme:light'] ::-webkit-scrollbar-thumb:hover,
+:root[style*='color-scheme: light'] ::-webkit-scrollbar-thumb:hover {
+  background: #d6d1c4;
+}
+
+/* Smooth transitions for theme switching */
+body, div, span, p, h1, h2, h3, h4, h5, h6, a, button, nav, aside, main, article, section, header, footer {
+  transition-property: color, background-color, border-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Fix search bar styling - remove transitions from inputs */
+input[type="search"],
+input[type="text"],
+input {
+  transition: none !important;
+}
+
+/* Improve code block readability */
+[data-v-code-container] pre.shiki {
+  border-radius: 0.5rem;
+}
+
+/* Enhance link hover states */
+a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
