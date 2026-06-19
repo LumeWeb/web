@@ -1,63 +1,97 @@
 ---
-title: CLI Reference
-description: Pinner CLI reference. Generated from command definitions and help output.
+title: "CLI Reference"
+description: "Complete reference for the pinner CLI."
 ---
 
-# CLI Reference
+> **This page is auto-generated.** Do not edit directly.
+> To update, modify the CLI source in [pinner-cli](https://github.com/LumeWeb/pinner-cli) and run `pnpm generate:cli`.
 
-Auto-generated from the Pinner CLI command definitions. Each command is documented with usage, flags, examples, and output formats.
+A minimal, developer-focused CLI tool for pinning content to IPFS via the Pinner.xyz service.
 
-> **This section is generated from CLI command definitions.** Do not edit these files directly — changes will be overwritten on the next build.
+## Install
 
-## Installation
+See [Getting Started with the CLI](/ipfs/cli/getting-started) to install the Pinner CLI.
 
-```bash
-# macOS / Linux
-curl -fsSL https://get.pinner.xyz | sh
+## Authentication
 
-# Windows
-irm https://get.pinner.xyz/install.ps1 | iex
-```
-
-See [Getting Started](/ipfs/cli/getting-started) for Homebrew, winget, Scoop, dpkg, rpm, and other install methods.
+Most commands require authentication. Run `pinner setup` for the interactive wizard, or set `PINNER_AUTH_TOKEN` in your environment.
 
 ## Global Flags
 
-| Flag | Description |
-|------|-------------|
-| `--json` | Output in JSON format |
-| `--verbose` | Verbose output |
-| `--quiet` | Suppress non-error output |
-| `--unmask` | Show unmasked CIDs |
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--json` |  | Output JSON instead of human-readable |
+| `--verbose` |  | Show detailed output |
+| `--quiet` |  | Suppress non-error output |
+| `--unmask` |  | Show sensitive data (tokens, passwords, secrets) unmasked |
+| `--auth-token` |  | Auth token to override config |
+| `--secure` |  | Use HTTPS for API connections |
 
 ## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `PINNER_API_KEY` | API key for authentication |
-| `PINNER_AUTH_TOKEN` | Auth token (alternative to API key) |
-| `PINNER_CONFIG` | Path to config file |
-| `PINNER_ENDPOINT` | Override API endpoint |
-| `PINNER_NO_COLOR` | Disable colored output |
-| `PINNER_NO_SPINNER` | Disable progress spinner |
+| `PINNER_AUTH_TOKEN` | Auth token to override config |
+| `PINNER_SECURE` | Use HTTPS for API connections |
+| `PINNER_EMAIL` | Email address for login |
+| `PINNER_PASSWORD` | Password for login (WARNING: insecure, prefer stdin or env var) |
+| `PINNER_OTP` | OTP code for 2FA (6 digits) |
+| `PINNER_MEMORY_LIMIT` | Memory limit for CAR generation in megabytes |
 
-## Config File Location
+## Command Summary
 
-- **Linux/macOS**: `~/.config/pinner/config.toml`
-- **Windows**: `%APPDATA%\pinner\config.toml`
+### [Setup](/reference/cli/setup)
 
-## Command Groups
+| Command | Description |
+|---------|-------------|
+| [`setup`](/reference/cli/setup#setup) | Run the interactive setup wizard to configure your Pinner.xyz CLI environment. This wizard will guide you through authentication and configuration. |
+| [`auth`](/reference/cli/setup#auth) | Authenticate with the Pinner.xyz service. |
+| [`register`](/reference/cli/setup#register) | Register a new user account on Pinner.xyz. |
+| [`confirm-email`](/reference/cli/setup#confirm-email) | Confirm your email address using the verification token sent to your email. |
+| [`account`](/reference/cli/setup#account) | Manage your Pinner.xyz account settings including 2FA configuration. |
 
-| Group | Commands |
-|-------|---------|
-| Auth & Account | `auth`, `register`, `confirm-email`, `account`, `setup` |
-| IPFS | `upload`, `pin`, `unpin`, `list`, `status`, `metadata` |
-| Websites | `website` |
-| DNS | `dns` |
-| IPNS | `ipns` |
-| Operations | `operations` |
-| Utility | `config`, `doctor`, `completion` |
+### [Content](/reference/cli/content)
 
----
+| Command | Description |
+|---------|-------------|
+| [`upload`](/reference/cli/content#upload) | Upload files or directories to IPFS via the Pinner.xyz service. Content is converted to CAR format before uploading. |
+| [`download`](/reference/cli/content#download) | Download content from IPFS by CID and save it to the local filesystem. Supports CID paths (e.g., CID/path/to/file) to download a specific file from a directory. |
+| [`cat`](/reference/cli/content#cat) | Stream the contents of an IPFS CID to stdout. Supports CID paths (e.g., CID/path/to/file) to cat a specific file from a directory. |
+| [`ls`](/reference/cli/content#ls) | List the contents of a directory pinned on IPFS by CID. Shows file names, types, and sizes for each entry. Supports CID paths (e.g., CID/path/to/dir) to list nested directories. |
 
-*Full CLI reference will be generated here from command definitions and help output.*
+### [Pinning](/reference/cli/pinning)
+
+| Command | Description |
+|---------|-------------|
+| [`pin`](/reference/cli/pinning#pin) | Shortcut for 'pinner pins add'. Pin existing IPFS content by CID. Multiple CIDs can be provided as arguments, read from a file using --file, or piped from stdin. |
+| [`pins`](/reference/cli/pinning#pins) | Manage your pinned IPFS content with subcommands for adding, removing, listing, checking status, and updating pin metadata. |
+| [`list`](/reference/cli/pinning#list) | Shortcut for 'pinner pins ls'. List your pinned content with optional filtering. |
+| [`status`](/reference/cli/pinning#status) | Shortcut for 'pinner pins status'. Check whether a pin has completed. If the pin is not found, account operations are checked as a fallback. |
+| [`unpin`](/reference/cli/pinning#unpin) | Shortcut for 'pinner pins rm'. Remove pins by CID or remove all pins. |
+| [`metadata`](/reference/cli/pinning#metadata) | The 'metadata' command has been removed. Use 'pinner pins update' to update pin metadata instead |
+
+### [Management](/reference/cli/websites)
+
+| Command | Description |
+|---------|-------------|
+| [`point`](/reference/cli/websites#point) | Point an onchain/decentralized domain at IPFS content via IPNS. |
+| [`unpoint`](/reference/cli/websites#unpoint) | Remove the IPNS key for an onchain/decentralized domain. The domain will no longer resolve to IPFS content. |
+| [`operations`](/reference/cli/websites#operations) | View and monitor account operations such as uploads, pins, and other processing tasks. |
+| [`dns`](/reference/cli/websites#dns) | Manage DNS zones and records for your domains. DNS hosting allows you to control DNS configuration for IPFS-hosted websites. |
+| [`ipns`](/reference/cli/websites#ipns) | IPNS provides a mutable address scheme for IPFS content, allowing you to publish content under a stable name that you can update to point to new CIDs. |
+| [`websites`](/reference/cli/websites#websites) | Manage websites for your IPFS content. Websites allow you to associate domain names with CIDs, making your content accessible through custom domains. |
+
+### [System](/reference/cli/system)
+
+| Command | Description |
+|---------|-------------|
+| [`config`](/reference/cli/system#config) | View or modify CLI configuration settings. |
+| [`doctor`](/reference/cli/system#doctor) | Show diagnostic information about your pinner CLI environment, including version, OS details, configuration location, and limits. |
+| [`bench`](/reference/cli/system#bench) | Run a benchmark by uploading random data (or a specified path) and tracking each stage of the pipeline: generate, upload, queued, pinning, pinned. |
+| [`generate-docs`](/reference/cli/system#generate-docs) | Generate CLI documentation in markdown, man, or JSON format |
+
+### [Admin](/reference/cli/admin)
+
+| Command | Description |
+|---------|-------------|
+| [`admin`](/reference/cli/admin#admin) | Administrative operations for quota management, billing, and profiling. |

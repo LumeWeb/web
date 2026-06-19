@@ -294,6 +294,9 @@ patchedDependencies:
   pluralize:
     hash: 88650615c62a180c406201cd54b23afb592a6a678db498f8b1a730f85ca868d2
     path: patches/pluralize.patch
+  vocs:
+    hash: d09bb41c090c7717924369ae328e85a5d79cae5288f0de08d82c63e3eb2f03b9
+    path: patches/vocs.patch
   warn-once:
     hash: 5720ed82c72c077a0bf56dcede206d50538aa93a6bc2c943e8610ea924298b87
     path: patches/warn-once.patch
@@ -470,12 +473,25 @@ importers:
         version: 19.2.6(react@19.2.6)
       vocs:
         specifier: 'catalog:'
-        version: 2.0.15(3e19599694686ce9cf97be9db74a6633)
+        version: 2.0.15(patch_hash=d09bb41c090c7717924369ae328e85a5d79cae5288f0de08d82c63e3eb2f03b9)(3e19599694686ce9cf97be9db74a6633)
       waku:
         specifier: 1.0.0-beta.0
         version: 1.0.0-beta.0(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(@types/node@25.9.1)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.2)(typescript@6.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.1)(jiti@2.6.1)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.107.2(esbuild@0.28.1)(postcss@8.5.13)))(react@19.2.6)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
 
   apps/docs.pinner.xyz:
+    dependencies:
+      react:
+        specifier: 'catalog:'
+        version: 19.2.6
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.6(react@19.2.6)
+      vocs:
+        specifier: 'catalog:'
+        version: 2.0.15(patch_hash=d09bb41c090c7717924369ae328e85a5d79cae5288f0de08d82c63e3eb2f03b9)(3e19599694686ce9cf97be9db74a6633)
+      waku:
+        specifier: 1.0.0-beta.0
+        version: 1.0.0-beta.0(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(@types/node@25.9.1)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.2)(typescript@6.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.1)(jiti@2.6.1)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.107.2(esbuild@0.28.1)(postcss@8.5.13)))(react@19.2.6)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
     devDependencies:
       '@radix-ui/react-tabs':
         specifier: ^1.1.13
@@ -489,21 +505,15 @@ importers:
       clsx:
         specifier: 'catalog:'
         version: 2.1.1
-      react:
-        specifier: 'catalog:'
-        version: 19.2.6
-      react-dom:
-        specifier: 'catalog:'
-        version: 19.2.6(react@19.2.6)
       tailwindcss:
         specifier: catalog:websites
         version: 4.2.4
-      vocs:
-        specifier: 'catalog:'
-        version: 2.0.15(3e19599694686ce9cf97be9db74a6633)
-      waku:
-        specifier: 1.0.0-beta.0
-        version: 1.0.0-beta.0(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.3)(vite@8.0.16))(@types/node@25.9.1)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.2)(typescript@6.0.3)(vite@8.0.16))(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.1)(jiti@2.6.1)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.107.2(esbuild@0.28.1)(postcss@8.5.13)))(react@19.2.6)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
+      tsx:
+        specifier: ^4.22.4
+        version: 4.22.4
+      typedoc:
+        specifier: ^0.28.19
+        version: 0.28.19(typescript@6.0.3)
 
   apps/lumeweb.com:
     dependencies:
@@ -16039,7 +16049,7 @@ snapshots:
 
   '@astrojs/yaml2ts@0.2.3':
     dependencies:
-      yaml: 2.8.3
+      yaml: 2.9.0
 
   '@babel/code-frame@7.29.0':
     dependencies:
@@ -30809,7 +30819,7 @@ snapshots:
       markdown-it: 14.1.1
       minimatch: 10.2.5
       typescript: 6.0.3
-      yaml: 2.8.3
+      yaml: 2.9.0
 
   typesafe-path@0.2.2: {}
 
@@ -31377,7 +31387,7 @@ snapshots:
 
   vlq@1.0.1: {}
 
-  vocs@2.0.15(3e19599694686ce9cf97be9db74a6633):
+  vocs@2.0.15(patch_hash=d09bb41c090c7717924369ae328e85a5d79cae5288f0de08d82c63e3eb2f03b9)(3e19599694686ce9cf97be9db74a6633):
     dependencies:
       '@base-ui/react': 1.5.0(@date-fns/tz@1.4.1)(@types/react@19.2.14)(date-fns@4.1.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@codesandbox/sandpack-react': 2.20.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)

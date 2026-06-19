@@ -19,5 +19,7 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: LumeWeb/workflows/.github/actions/setup-all@develop
+      - name: Install pinner-cli
+        uses: ./.github/actions/setup-pinner-cli
       - name: Build
         run: pnpm build

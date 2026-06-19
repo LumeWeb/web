@@ -1,11 +1,44 @@
-import { defineConfig } from "vocs/config";
+import { defineConfig, McpSource } from "vocs/config";
 
 export default defineConfig({
   title: "Pinner.xyz",
   description: "Privacy-focused storage without the infrastructure.",
-  renderStrategy: "full-static",
+  renderStrategy:
+    process.env.VOCS_RENDER_STRATEGY === "dynamic" ? "dynamic" : "full-static",
+  backendUrl:
+    process.env.VOCS_RENDER_STRATEGY === "dynamic"
+      ? undefined
+      : "https://backend.docs.pinner.xyz",
   srcDir: "docs",
   pagesDir: "pages",
+
+  logoUrl: {
+    light: "/logo-dark.svg",
+    dark: "/logo-light.svg",
+  },
+  iconUrl: "/icon.svg",
+
+  mcp: {
+    enabled: true,
+    sources: [
+      McpSource.github({
+        name: "pinner-sdk",
+        repo: "LumeWeb/web",
+        branch: "develop",
+        paths: ["libs/pinner/src"],
+      }),
+      McpSource.github({
+        name: "pinner-cli",
+        repo: "LumeWeb/pinner-cli",
+        branch: "develop",
+      }),
+      McpSource.github({
+        name: "ipfs-sdk",
+        repo: "LumeWeb/ipfs-sdk",
+        branch: "develop",
+      }),
+    ],
+  },
 
   // Font Configuration
   font: {
