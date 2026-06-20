@@ -13,7 +13,7 @@ export default defineConfig({
       target: "./src/api/generated",
       schemas: "./src/api/generated/schemas",
       mock: {
-        type: "msw",
+        generators: [{ type: "msw" }],
         delay: 0,
         indexMockFiles: true,
       },
