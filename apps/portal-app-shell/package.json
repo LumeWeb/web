@@ -26,7 +26,6 @@
     "@lumeweb/portal-sdk": "workspace:*",
     "@t3-oss/env-core": "catalog:",
     "@tanstack/react-query": "catalog:",
-    "events": "^3.3.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-hook-form": "catalog:",

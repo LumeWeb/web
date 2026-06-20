@@ -696,9 +696,6 @@ importers:
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.100.10(react@19.2.6)
-      events:
-        specifier: ^3.3.0
-        version: 3.3.0
       react:
         specifier: 'catalog:'
         version: 19.2.6
@@ -819,9 +816,6 @@ importers:
       pupa:
         specifier: ^3.3.0
         version: 3.3.0
-      querystring:
-        specifier: ^0.2.1
-        version: 0.2.1
     devDependencies:
       '@lumeweb/tsdown-config':
         specifier: workspace:*
@@ -13029,11 +13023,6 @@ packages:
 
   querystring@0.2.0:
     resolution: {integrity: sha512-X/xY82scca2tau62i9mDyU9K+I+djTMUsvwf7xnUX5GLvVzgJybOJf4Y6o9Zx3oJK/LSXg5tTZBjwzqVPaPO2g==}
-    engines: {node: '>=0.4.x'}
-    deprecated: The querystring API is considered Legacy. new code should use the URLSearchParams API instead.
-
-  querystring@0.2.1:
-    resolution: {integrity: sha512-wkvS7mL/JMugcup3/rMitHmd9ecIGd2lhFhK9N3UUQ450h66d1r3Y9nvXzQAW1Lq+wyx61k/1pfKS5KuKiyEbg==}
     engines: {node: '>=0.4.x'}
     deprecated: The querystring API is considered Legacy. new code should use the URLSearchParams API instead.
 
@@ -28864,8 +28853,6 @@ snapshots:
   quansync@1.0.0: {}
 
   querystring@0.2.0: {}
-
-  querystring@0.2.1: {}
 
   querystringify@2.2.0: {}
 
