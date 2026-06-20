@@ -119,6 +119,7 @@ onlyBuiltDependencies:
   - '@parcel/watcher'
   - aws-sdk
   - es5-ext
+  - esbuild
   - msw
   - sharp
   - workerd
