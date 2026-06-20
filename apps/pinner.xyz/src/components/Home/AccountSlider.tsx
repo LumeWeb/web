@@ -21,15 +21,15 @@ interface SliderContent {
 const sliderContent: SliderContent[] = [
   {
     title: "Create an account",
-    description: "Get started with decentralized storage in minutes",
+    description: "Get started with verifiable storage in minutes",
   },
   {
     title: "Upload",
-    description: "Simple upload to the decentralized network",
+    description: "Simple upload to the verifiable storage network",
   },
   {
     title: "Secure",
-    description: "A decentralized network stores files redundantly",
+    description: "A verifiable network stores files redundantly",
   },
 ];
 

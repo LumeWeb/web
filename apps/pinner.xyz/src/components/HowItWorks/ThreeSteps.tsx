@@ -8,7 +8,7 @@ const steps = [
     number: "2",
     title: "Distribute",
     description:
-      "Files are copied across the decentralized network. Your files stay online even if individual servers go down.",
+      "Files are copied across the network. Your files stay online even if individual servers go down.",
   },
   {
     number: "3",

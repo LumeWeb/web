@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     question: "How is this different from regular cloud storage?",
-    answer: "Traditional cloud storage puts your files on one company's servers. IPFS pinning distributes your content across a decentralized network of independent providers. Your file gets a content address: a unique, verifiable link that doesn't depend on any single provider staying online."
+    answer: "Traditional cloud storage puts your files on one company's servers. IPFS pinning distributes your content across a network of independent providers. Your file gets a content address: a unique, verifiable link that doesn't depend on any single provider staying online."
   },
   {
     question: "Is my data permanent?",
@@ -52,7 +52,7 @@ const faqs = [
 ];
 ---
 
-<Layout title="IPFS Pinning Service & Decentralized Storage" description="Pin files to IPFS and get a permanent link that stays online as long as it's pinned. Decentralized, content-addressed, no vendor lock-in.">
+<Layout title="IPFS Pinning Service & Verifiable Storage" description="Pin files to IPFS and get a permanent link that stays online as long as it's pinned. Content-addressed, verifiable, no vendor lock-in.">
   <PageHeader
     title="IPFS pinning that stays online"
     description="Pin files to a peer-to-peer network. Your content gets a permanent link that stays accessible as long as it's pinned."
@@ -64,7 +64,7 @@ const faqs = [
   <AboutSection
     subtitle="Content Addressing"
     title="Your file gets a permanent link"
-    description="Upload any file and it's pinned to IPFS on a decentralized network. Your content receives a content address: a unique, verifiable link that points to your data regardless of where it's stored. Links stay valid as long as your content is pinned. No short URLs, no broken links, no platform dependencies."
+    description="Upload any file and it's pinned to IPFS on a verifiable storage network. Your content receives a content address: a unique, verifiable link that points to your data regardless of where it's stored. Links stay valid as long as your content is pinned. No short URLs, no broken links, no platform dependencies."
     theme="white"
     imageUrl={HowItWorksImage}
     imgageMobileUrl={HowItWorksMobile}
@@ -72,7 +72,7 @@ const faqs = [
   />
 
   <AboutSection
-    subtitle="Decentralized Network"
+    subtitle="Verifiable Network"
     title="A network, not a data center"
     description="Your files are distributed across independent storage providers, not sitting in one company's servers. If individual hosts go down, your data stays online. Hosts only get paid when they prove your data is there. Crypto payments available for those who prefer them."
     theme="gray"
@@ -85,7 +85,7 @@ const faqs = [
   <AboutSection
     subtitle="Use Cases"
     title="From NFT metadata to dApp assets"
-    description="IPFS pinning powers a range of decentralized use cases: NFT metadata and asset storage, dApp frontend hosting, scientific data publishing with verifiable hashes, archival content that needs to stay link-stable, and any data that benefits from content addressing. If you need a link that points to the same data forever, IPFS pinning is the answer."
+    description="IPFS pinning powers a range of use cases: NFT metadata and asset storage, dApp frontend hosting, scientific data publishing with verifiable hashes, archival content that needs to stay link-stable, and any data that benefits from content addressing. If you need a link that points to the same data forever, IPFS pinning is the answer."
     theme="white"
     imageUrl={UseCasesImage}
     client:load

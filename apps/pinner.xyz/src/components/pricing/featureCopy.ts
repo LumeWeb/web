@@ -5,7 +5,7 @@
 const featureMap: Record<string, string> = {
   // IPFS / Public storage
   "IPFS Pinning": "IPFS Pinning. your content stays online as long as it's pinned",
-  "IPFS Hosting": "IPFS Hosting. serve static sites from a decentralized network",
+  "IPFS Hosting": "IPFS Hosting. serve static sites from a verifiable storage network",
   "Website Hosting": "Website Hosting. deploy static sites without a server",
 
   // Private storage
