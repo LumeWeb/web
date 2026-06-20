@@ -99,6 +99,31 @@ catalogs:
     astro-md-alternate: ^0.1.0
     astro-robots-txt: ^1.0.0
 
+overrides:
+  '@module-federation/enhanced>typescript': 'catalog:'
+  '@module-federation/dts-plugin>typescript': 'catalog:'
+  '@module-federation/rspack>typescript': 'catalog:'
+
+patchedDependencies:
+  object-inspect: patches/object-inspect.patch
+  warn-once: patches/warn-once.patch
+  pluralize: patches/pluralize.patch
+  papaparse: patches/papaparse.patch
+  '@uppy/core': patches/@uppy__core.patch
+  better-sse@0.16.1: patches/better-sse@0.16.1.patch
+  '@module-federation/vite': patches/@module-federation__vite.patch
+  vocs: patches/vocs.patch
+
+onlyBuiltDependencies:
+  - '@ipshipyard/node-datachannel'
+  - '@parcel/watcher'
+  - aws-sdk
+  - es5-ext
+  - esbuild
+  - msw
+  - sharp
+  - workerd
+
 gitChecks: false
 
 publishBranch: develop
