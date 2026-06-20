@@ -37,8 +37,8 @@ catalogs:
       specifier: ^0.24.1
       version: 0.24.1
     '@module-federation/vite':
-      specifier: ^1.16.4
-      version: 1.16.4
+      specifier: ^1.16.9
+      version: 1.16.9
     '@mswjs/interceptors':
       specifier: ^0.41.9
       version: 0.41.9
@@ -276,9 +276,6 @@ overrides:
   '@module-federation/rspack>typescript': ^6.0.3
 
 patchedDependencies:
-  '@module-federation/vite':
-    hash: 652f46e3e8f8e987a5e7820bb9e48596ddcab8c3d28c74c438be035d14ed57c4
-    path: patches/@module-federation__vite.patch
   '@uppy/core':
     hash: 8a9c2320245d028b3d5a7d9fabf33e5d501d5c59afc1e03f7576dc9c1cb6a3d8
     path: patches/@uppy__core.patch
@@ -326,7 +323,7 @@ importers:
         version: 0.4.0
       '@module-federation/vite':
         specifier: 'catalog:'
-        version: 1.16.4(patch_hash=652f46e3e8f8e987a5e7820bb9e48596ddcab8c3d28c74c438be035d14ed57c4)(node-fetch@3.3.2)(typescript@6.0.3)(vite@8.0.16)
+        version: 1.16.9(node-fetch@3.3.2)(typescript@6.0.3)(vite@8.0.16)
       '@playwright/test':
         specifier: ^1.60.0
         version: 1.60.0
@@ -1488,7 +1485,7 @@ importers:
     devDependencies:
       '@module-federation/vite':
         specifier: 'catalog:'
-        version: 1.16.4(patch_hash=652f46e3e8f8e987a5e7820bb9e48596ddcab8c3d28c74c438be035d14ed57c4)(node-fetch@3.3.2)(typescript@6.0.3)(vite@8.0.16)
+        version: 1.16.9(node-fetch@3.3.2)(typescript@6.0.3)(vite@8.0.16)
       vite:
         specifier: catalog:framework
         version: 8.0.16(@types/node@25.9.1)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.2)(typescript@6.0.3)(vite@8.0.16))(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
@@ -4878,8 +4875,9 @@ packages:
   '@module-federation/third-party-dts-extractor@2.5.1':
     resolution: {integrity: sha512-/jD/o2IivDgg6jGUgdb9NZtlJWeoz1uKcblGL2BxYVzzlKT+1YS7Y2idTl1tqp4hNdFnDlPpQv6WLdKiLoOPNw==}
 
-  '@module-federation/vite@1.16.4':
-    resolution: {integrity: sha512-bw7M2f/Qei5TONdlRvm7VW1r28qtJ7QxYhChMz44w/9XD/1zwq8ZmJWoAtYhUbHAIgQo8xD3+mMunE2BULRytg==}
+  '@module-federation/vite@1.16.9':
+    resolution: {integrity: sha512-YbLYN0ExczL/bfhVTq7wxcBRpZWs8znGEeehf6L6I8RXlb9hn00eLCKNwSU8PcN94p349QPdcx8Qls2OAhLldQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       vite: ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
 
@@ -18959,14 +18957,11 @@ snapshots:
       find-pkg: 2.0.0
       resolve: 1.22.8
 
-  '@module-federation/vite@1.16.4(patch_hash=652f46e3e8f8e987a5e7820bb9e48596ddcab8c3d28c74c438be035d14ed57c4)(node-fetch@3.3.2)(typescript@6.0.3)(vite@8.0.16)':
+  '@module-federation/vite@1.16.9(node-fetch@3.3.2)(typescript@6.0.3)(vite@8.0.16)':
     dependencies:
       '@module-federation/dts-plugin': 2.5.1(node-fetch@3.3.2)(typescript@6.0.3)
       '@module-federation/runtime': 2.5.1(node-fetch@3.3.2)
       '@module-federation/sdk': 2.5.1(node-fetch@3.3.2)
-      es-module-lexer: 2.1.0
-      estree-walker: 3.0.3
-      pathe: 2.0.3
       vite: 8.0.16(@types/node@25.9.1)(@vitejs/devtools@0.1.22(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(@pnpm/logger@1001.0.1)(idb-keyval@6.2.2)(typescript@6.0.3)(vite@8.0.16))(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
     transitivePeerDependencies:
       - bufferutil
