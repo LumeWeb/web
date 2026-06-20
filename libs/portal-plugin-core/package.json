@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@lumeweb/advanced-rest-provider": "workspace:*",
+    "@lumeweb/analytics": "workspace:",
     "@lumeweb/portal-framework-core": "workspace:*",
     "@lumeweb/portal-framework-ui": "workspace:*",
-    "@refinedev/core": "catalog:",
     "@lumeweb/portal-framework-ui-core": "workspace:*",
-    "@lumeweb/analytics": "workspace:",
-    "@lumeweb/portal-sdk": "workspace:*"
+    "@lumeweb/portal-sdk": "workspace:*",
+    "@refinedev/core": "catalog:"
   },
   "peerDependencies": {
     "@conform-to/react": "catalog:",

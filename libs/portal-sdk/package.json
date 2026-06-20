@@ -42,9 +42,9 @@
     "@lumeweb/query-builder": "workspace:*"
   },
   "devDependencies": {
-    "@faker-js/faker": "^9.0.0",
+    "@faker-js/faker": "^10.5.0",
     "@lumeweb/tsdown-config": "workspace:*",
-    "@vitest/coverage-v8": "^4.1.6",
+    "@vitest/coverage-v8": "^4.1.9",
     "msw": "catalog:",
     "orval": "catalog:",
     "tsdown": "catalog:"

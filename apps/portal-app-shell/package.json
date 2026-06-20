@@ -17,13 +17,13 @@
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",
+    "@lumeweb/advanced-rest-provider": "workspace:",
+    "@lumeweb/analytics": "workspace:",
     "@lumeweb/portal-framework-core": "workspace:*",
     "@lumeweb/portal-framework-ui": "workspace:*",
     "@lumeweb/portal-framework-ui-core": "workspace:*",
-    "@lumeweb/advanced-rest-provider": "workspace:",
-    "@refinedev/core": "catalog:",
-    "@lumeweb/analytics": "workspace:",
     "@lumeweb/portal-sdk": "workspace:*",
+    "@refinedev/core": "catalog:",
     "@t3-oss/env-core": "catalog:",
     "@tanstack/react-query": "catalog:",
     "react": "catalog:",
@@ -36,7 +36,7 @@
     "dotenv": "^17.4.2",
     "dotenv-cli": "catalog:",
     "npm-run-all": "catalog:",
-    "sass-embedded": "^1.99.0",
+    "sass-embedded": "^1.100.0",
     "vite": "catalog:framework"
   },
   "repository": {

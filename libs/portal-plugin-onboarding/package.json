@@ -11,15 +11,15 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@lumeweb/advanced-rest-provider": "workspace:*",
+    "@lumeweb/analytics": "workspace:*",
     "@lumeweb/portal-framework-auth": "workspace:*",
     "@lumeweb/portal-framework-core": "workspace:*",
     "@lumeweb/portal-framework-ui": "workspace:*",
     "@lumeweb/portal-framework-ui-core": "workspace:*",
-    "@lumeweb/portal-plugin-dashboard": "workspace:*",
     "@lumeweb/portal-plugin-billing": "workspace:*",
+    "@lumeweb/portal-plugin-dashboard": "workspace:*",
     "@lumeweb/portal-plugin-ipfs": "workspace:*",
-    "@lumeweb/advanced-rest-provider": "workspace:*",
-    "@lumeweb/analytics": "workspace:*",
     "@refinedev/core": "catalog:",
     "lucide-react": "catalog:",
     "react": "catalog:",
