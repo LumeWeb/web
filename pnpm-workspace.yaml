@@ -13,7 +13,7 @@ catalog:
   '@ipfs-shipyard/pinning-service-client': ^3.0.0
   '@ipld/car': ^5.4.6
   '@module-federation/enhanced': ^0.24.1
-  '@module-federation/vite': ^1.16.4
+  '@module-federation/vite': ^1.16.9
   '@mswjs/interceptors': ^0.41.9
   oxlint-tsgolint: ^0.23.0
   '@radix-ui/react-dropdown-menu': ^2.1.16
@@ -111,7 +111,6 @@ patchedDependencies:
   papaparse: patches/papaparse.patch
   '@uppy/core': patches/@uppy__core.patch
   better-sse@0.16.1: patches/better-sse@0.16.1.patch
-  '@module-federation/vite': patches/@module-federation__vite.patch
   vocs: patches/vocs.patch
 
 onlyBuiltDependencies:
