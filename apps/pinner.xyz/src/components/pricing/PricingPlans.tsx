@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import type { BillingPlan, BillingPlansResponse } from "@/lib/api";
 import { themeStyles } from "./theme";
 import { getPlansApiUrl, fetcher } from "./utils";
-import type { Cadence } from "./utils";
+import { Cadence } from "./utils";
 import { CadenceToggle } from "./CadenceToggle";
 import { PlanCard } from "./PlanCard";
 import { SkeletonCard } from "./SkeletonCard";
@@ -31,7 +31,7 @@ const PricingPlans = ({
   variant = "dark",
   showToggle = true,
 }: PricingPlansProps) => {
-  const [cadence, setCadence] = useState<Cadence>("monthly");
+  const [cadence, setCadence] = useState<Cadence>(Cadence.Monthly);
   const theme = themeStyles[variant];
 
   const { data, error, isLoading } = useSWR<BillingPlansResponse>(

@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { TrackedButton } from "@/components/TrackedButton";
 import type { BillingPlan } from "@/lib/api";
 import { themeStyles } from "./theme";
-import type { Cadence } from "./utils";
+import { Cadence } from "./utils";
 import {
   getPriceDisplay,
   getCTA,

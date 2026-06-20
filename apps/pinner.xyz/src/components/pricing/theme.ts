@@ -10,6 +10,8 @@ export const themeStyles = {
     toggleInactive: "text-home-text-muted",
     skeleton: "bg-home-card-bg/60",
     errorText: "text-home-text-muted",
+    badgeActive: "bg-content-text/10 text-content-text",
+    badgeInactive: "bg-white/15 text-home-text",
   },
   light: {
     card: "bg-content-section-gray border-content-section-gray",
@@ -22,6 +24,8 @@ export const themeStyles = {
     toggleInactive: "text-content-text-muted",
     skeleton: "bg-content-section-gray/60",
     errorText: "text-content-text-muted",
+    badgeActive: "bg-white/20 text-white",
+    badgeInactive: "bg-content-text/10 text-content-text",
   },
 } as const;
 

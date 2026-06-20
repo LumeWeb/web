@@ -85,12 +85,12 @@ const faqs = [
       {
         question: "Can I try Pinner before paying?",
         answer:
-          "Founding Offer: first 50 accounts get their rate locked for life, a 30-day money-back guarantee, and a deployment promise: create a website and if it isn't live in 5 minutes, we'll deploy it for you. Pay for storage and bandwidth. No hidden fees.",
+          "Founding Offer: first 50 accounts get their rate locked for life, a 30-day money-back guarantee, and a deployment promise: create a website and if it isn't live in 5 minutes, we'll deploy it for you. Pay for storage and bandwidth, priced upfront.",
       },
       {
         question: "How does billing work?",
         answer:
-          "Pay for storage and bandwidth. No hidden fees, no API call charges. Monthly or annual. Card or crypto.",
+          "Pay for storage and bandwidth, priced upfront. No API call charges. Monthly or annual. Card or crypto.",
       },
     ],
   },
