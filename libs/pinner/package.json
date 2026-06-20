@@ -61,10 +61,10 @@
     "blockstore-core": "catalog:",
     "blockstore-idb": "catalog:",
     "datastore-idb": "catalog:",
-    "idb-keyval": "^6.2.2",
-    "interface-blockstore": "^6.0.2",
-    "interface-datastore": "^9.0.3",
-    "interface-store": "^7.0.2",
+    "idb-keyval": "^6.2.5",
+    "interface-blockstore": "^7.0.1",
+    "interface-datastore": "^10.0.1",
+    "interface-store": "^8.0.0",
     "ipaddr.js": "^2.4.0",
     "ky": "catalog:",
     "multiformats": "catalog:",
@@ -75,7 +75,7 @@
     "unstorage": "^1.17.5"
   },
   "devDependencies": {
-    "@faker-js/faker": "^10.4.0",
+    "@faker-js/faker": "^10.5.0",
     "@lumeweb/tsdown-config": "workspace:*",
     "@mswjs/interceptors": "catalog:",
     "@types/uuid": "^11.0.0",

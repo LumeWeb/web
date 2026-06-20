@@ -42,6 +42,6 @@
     "url": "https://github.com/LumeWeb/web"
   },
   "dependencies": {
-    "zustand": "^5.0.13"
+    "zustand": "^5.0.14"
   }
 }
