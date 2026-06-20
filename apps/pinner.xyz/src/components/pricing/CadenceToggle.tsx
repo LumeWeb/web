@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { themeStyles } from "./theme";
-import type { Cadence } from "./utils";
+import { Cadence } from "./utils";
 
 interface CadenceToggleProps {
   cadence: Cadence;
@@ -18,6 +18,8 @@ export function CadenceToggle({
   return (
     <div className="flex justify-center mb-10 md:mb-16">
       <div
+        role="radiogroup"
+        aria-label="Billing cadence"
         className={cn(
           theme.toggleBg,
           "inline-flex rounded-full p-1 border",
@@ -27,28 +29,33 @@ export function CadenceToggle({
         )}
       >
         <button
-          onClick={() => { onChange("monthly"); window.posthog?.capture("pricing_cadence_toggled", { cadence: "monthly" }); }}
+          role="radio"
+          aria-pressed={cadence === Cadence.Monthly}
+          aria-checked={cadence === Cadence.Monthly}
+          onClick={() => { onChange(Cadence.Monthly); window.posthog?.capture("pricing_cadence_toggled", { cadence: Cadence.Monthly }); }}
           className={cn(
             "px-5 py-2 rounded-full text-sm font-medium transition-all duration-200",
-            cadence === "monthly" ? theme.toggleActive : theme.toggleInactive
+            cadence === Cadence.Monthly ? theme.toggleActive : theme.toggleInactive
           )}
         >
           Monthly
         </button>
         <button
-          onClick={() => { onChange("yearly"); window.posthog?.capture("pricing_cadence_toggled", { cadence: "yearly" }); }}
+          role="radio"
+          aria-pressed={cadence === Cadence.Yearly}
+          aria-checked={cadence === Cadence.Yearly}
+          onClick={() => { onChange(Cadence.Yearly); window.posthog?.capture("pricing_cadence_toggled", { cadence: Cadence.Yearly }); }}
           className={cn(
             "px-5 py-2 rounded-full text-sm font-medium transition-all duration-200",
-            cadence === "yearly" ? theme.toggleActive : theme.toggleInactive
+            cadence === Cadence.Yearly ? theme.toggleActive : theme.toggleInactive
           )}
         >
-          Yearly
+          <span>Yearly</span>
           <span
+            aria-label="2 months free"
             className={cn(
               "ml-1.5 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold leading-none",
-              variant === "dark"
-                ? "bg-white/15 text-home-text"
-                : "bg-content-text/10 text-content-text"
+              cadence === Cadence.Yearly ? theme.badgeActive : theme.badgeInactive
             )}
           >
             2 months free

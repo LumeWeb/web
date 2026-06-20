@@ -1,6 +1,8 @@
+import type { Cadence } from "@/components/pricing/utils";
+
 export interface PricingPeriod {
   id: number;
-  cadence: "monthly" | "yearly";
+  cadence: Cadence;
   price_usd: number;
   quota_plan_id: number;
 }

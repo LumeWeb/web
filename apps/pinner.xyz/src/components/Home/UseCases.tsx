@@ -12,7 +12,7 @@ const useCases: UseCaseCardProps[] = [
   {
     title: "Private AI & RAG Pipelines",
     description:
-      "Store embeddings, vector databases, and knowledge bases with zero-knowledge encryption. Your AI data stays fully private, even from us.",
+      "Store embeddings, vector databases, and knowledge bases with zero-knowledge encryption. Your data is encrypted before it leaves your device. Even we can't read it.",
     cta: "Store Privately →",
     href: "/solutions/private-storage",
   },

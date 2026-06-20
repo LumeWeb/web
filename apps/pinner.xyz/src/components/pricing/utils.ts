@@ -1,7 +1,10 @@
 import type { BillingPlan } from "@/lib/api";
 import { config } from "@/lib/config";
 
-export type Cadence = "monthly" | "yearly";
+export enum Cadence {
+  Monthly = "monthly",
+  Yearly = "yearly",
+}
 
 export function getPlansApiUrl(): string {
   return `${config.portalApiUrl}/api/billing/plans`;
@@ -23,7 +26,7 @@ export function getPriceDisplay(plan: BillingPlan, cadence: Cadence) {
     if (!fallback) return { price: "Custom", sub: "" };
     return { price: `$${fallback.price_usd}`, sub: `/${fallback.cadence}` };
   }
-  if (cadence === "yearly") {
+  if (cadence === Cadence.Yearly) {
     const perMonth = period.price_usd / 12;
     return {
       price: perMonth % 1 === 0 ? `$${perMonth}` : `$${perMonth.toFixed(2)}`,

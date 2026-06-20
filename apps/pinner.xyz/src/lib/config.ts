@@ -42,7 +42,7 @@ export const ctaCopy = {
   },
   privateStorage: {
     heading: "Your data is yours.",
-    subheading: "Private storage. Zero-knowledge encryption. No data mining.",
+    subheading: "Private storage. Zero-knowledge encryption. Data mining impossible.",
   },
   privateStoragePersonal: {
     heading: "Your data is yours.",
@@ -58,7 +58,7 @@ export const ctaCopy = {
   },
   about: {
     heading: "Your data is yours.",
-    subheading: "We don't look at it. We don't sell it. Open source, no data mining.",
+    subheading: "We can't look at it. We can't sell it. Open source; verify the architecture yourself.",
   },
   howItWorks: {
     heading: "Pin, host, or store your data on a network.",

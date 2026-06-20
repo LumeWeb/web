@@ -19,7 +19,7 @@ const beliefs = [
   {
     icon: Wallet,
     title: "Pricing should be boring",
-    description: "Pay for what you store and transfer. Transparent pricing, no hidden fees",
+    description: "Pay for what you store and transfer. Priced upfront, no tiers to climb",
   },
 ];
 

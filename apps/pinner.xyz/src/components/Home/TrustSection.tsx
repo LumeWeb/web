@@ -12,9 +12,9 @@ const principles = [
     "Zero-knowledge encryption means even we don't have the keys. That's not a promise. It's the architecture.",
 	},
 	{
-		title: "We keep our word",
+		title: "What you see is what you pay",
 		description:
-			"Uptime we commit to, pricing you can understand. No hidden fees, no bait-and-switch tiers.",
+			"Storage and bandwidth, priced upfront. No tiers to climb, no surprise line items. The pricing page is the pricing page.",
 	},
 	{
 		title: "You can leave",
