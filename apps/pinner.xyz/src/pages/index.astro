@@ -21,6 +21,10 @@ import { ctaCopy } from "@/lib/config";
 <Layout title="Website Hosting, IPFS Pinning & Private Storage. Pinner" variant="home" showNewsletterFooter={false}>
   <Hero client:load />
 
+  <ProblemAgitation client:load />
+
+  <TrustSection client:load variant="dark" />
+
   <ProductCards client:load />
 
   <UseCases client:load />
@@ -32,10 +36,6 @@ import { ctaCopy } from "@/lib/config";
     variant="dark"
     client:load
   />
-
-  <ProblemAgitation client:load />
-
-  <TrustSection client:load variant="dark" />
 
   <Account client:load variant="dark" />
 
