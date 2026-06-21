@@ -4,11 +4,14 @@
  * to avoid hydration mismatches.
  */
 const portalApiUrl =
-  import.meta.env.PUBLIC_PORTAL_API_URL || "https://pinner.xyz";
+  import.meta.env.PUBLIC_PORTAL_API_URL || "https://account.pinner.xyz";
 
-const portalDomain = new URL(portalApiUrl).hostname;
+const portalHost = new URL(portalApiUrl).hostname;
+const portalDomain = portalHost.split(".").length > 2
+  ? portalHost.split(".").slice(1).join(".")
+  : portalHost;
 
-const accountBaseUrl = `https://account.${portalDomain}`;
+const accountBaseUrl = portalApiUrl;
 
 type RegisterIntent = "pinning" | "hosting" | "storing";
 
