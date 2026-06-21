@@ -48,6 +48,9 @@
     },
     "build-storybook": {
       "dependsOn": ["@lumeweb/tsdown-config#build:config", "^build"]
+    },
+    "setup:pinner": {
+      "cache": false
     }
   }
 }

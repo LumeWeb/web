@@ -1,5 +1,6 @@
-import ky, { HTTPError } from "ky";
 import type { PinnerConfig } from "../config";
+import type { AuthManager } from "@/auth";
+import { ApiClient } from "./client";
 import type {
   IPNSKeyListResponseResponse,
   IPNSKeyRequest,
@@ -9,13 +10,6 @@ import type {
   IPNSRepublishResponse,
   IPNSResolveResponse,
 } from "./generated/schemas/index";
-import {
-  ConfigurationError,
-  AuthenticationError,
-  NotFoundError,
-  NetworkError,
-  ValidationError,
-} from "@/errors";
 
 export interface IpnsClientOptions {
   signal?: AbortSignal;
@@ -24,86 +18,14 @@ export interface IpnsClientOptions {
 /**
  * Client for managing IPNS keys and publishing content to IPNS names.
  */
-export class IpnsClient {
-  private config: PinnerConfig;
-
+export class IpnsClient extends ApiClient {
   /**
    * Create a new IpnsClient.
    * @param config SDK configuration
+   * @param auth AuthManager for authentication
    */
-  constructor(config: PinnerConfig) {
-    if (!config.jwt) {
-      throw new ConfigurationError("JWT token is required");
-    }
-    this.config = config;
-  }
-
-  private getEndpoint(): string {
-    return this.config.endpoint ?? "https://ipfs.pinner.xyz";
-  }
-
-  private async request<T>(
-    path: string,
-    options?: RequestInit & { signal?: AbortSignal },
-  ): Promise<T> {
-    if (!this.config.jwt) {
-      throw new ConfigurationError("JWT token is required");
-    }
-
-    try {
-      const response = await ky(path, {
-        prefix: this.getEndpoint(),
-        headers: {
-          Authorization: `Bearer ${this.config.jwt}`,
-          "Content-Type": "application/json",
-        },
-        ...options,
-      });
-
-      if (response.status === 204) {
-        return undefined as T;
-      }
-
-      const text = await response.text();
-      if (!text) {
-        return undefined as T;
-      }
-
-      return JSON.parse(text) as T;
-    } catch (error) {
-      if (error instanceof HTTPError) {
-        const status = error.response.status;
-        const body = await error.response.json().catch(() => ({}));
-
-        if (status === 401) {
-          throw new AuthenticationError(
-            body.error || "Authentication failed",
-          );
-        }
-        if (status === 403) {
-          throw new AuthenticationError(
-            body.error || "Access forbidden",
-          );
-        }
-        if (status === 404) {
-          throw new NotFoundError(body.error || "Resource not found");
-        }
-        if (status === 400) {
-          throw new ValidationError(body.error || "Invalid request");
-        }
-
-        throw new NetworkError(
-          body.error || `HTTP error: ${status}`,
-          status,
-        );
-      }
-
-      if (error instanceof Error) {
-        throw new NetworkError(error.message);
-      }
-
-      throw new NetworkError("Unknown error occurred");
-    }
+  constructor(config: PinnerConfig, auth: AuthManager) {
+    super(auth, config.endpoint ?? "https://ipfs.pinner.xyz");
   }
 
   /**

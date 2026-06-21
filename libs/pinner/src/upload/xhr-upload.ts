@@ -10,9 +10,7 @@ export class XHRUploadHandler extends BaseUploadHandler {
       endpoint: `${this.config.endpoint}/api/upload`,
       fieldName: "file",
       formData: true,
-      headers: {
-        Authorization: `Bearer ${this.config.jwt}`,
-      },
+      headers: this.auth.getAuthHeaders(),
       timeout: this.config.timeout,
       retries: this.config.retries,
     });

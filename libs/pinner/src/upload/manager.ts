@@ -10,6 +10,7 @@ import { createEqFilter } from "@lumeweb/query-builder";
 import type { UploadResultResponse } from "@/api/generated/schemas";
 
 import type { PinnerConfig } from "../config";
+import type { AuthManager } from "@/auth";
 import type {
   UploadInput,
   UploadOperation,
@@ -41,6 +42,7 @@ import { type UploadInputObject } from "./normalize";
  */
 export class UploadManager {
   private config: PinnerConfig;
+  private readonly auth: AuthManager;
   private xhrHandler: XHRUploadHandler;
   private tusHandler: TUSUploadHandler;
   private portalSdk: Sdk;
@@ -50,12 +52,15 @@ export class UploadManager {
   /**
    * Create a new UploadManager.
    * @param config SDK configuration
+   * @param auth AuthManager for authentication
    */
-  constructor(config: PinnerConfig) {
+  constructor(config: PinnerConfig, auth: AuthManager) {
     this.config = config;
-    this.xhrHandler = new XHRUploadHandler(config);
-    this.tusHandler = new TUSUploadHandler(config);
+    this.auth = auth;
+    this.xhrHandler = new XHRUploadHandler(config, auth);
+    this.tusHandler = new TUSUploadHandler(config, auth);
     this.portalSdk = new Sdk(config.endpoint || DEFAULT_ENDPOINT);
+    this.portalSdk.setAuthToken(auth.getAuthToken());
     configureCar({
       datastoreName: config.datastoreName,
       datastore: config.datastore,
@@ -313,7 +318,7 @@ export class UploadManager {
 
     const baseUrl = this.config.endpoint || DEFAULT_ENDPOINT;
     const fetchUrl = `${baseUrl}/api/upload/result/${encodeURIComponent(uploadId)}`;
-    const headers = { Authorization: `Bearer ${this.config.jwt}` };
+    const headers = this.auth.getAuthHeaders();
 
     const result = await poll<UploadResultResponse>(
       async () => {
