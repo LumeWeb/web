@@ -78,7 +78,7 @@ const mockAuth = new JwtAuthManager(mockConfig.jwt!);
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      }, mockAuth);
+      }, new JwtAuthManager("invalid-jwt"));
       await expect(client.listWebsites()).rejects.toThrow(AuthenticationError);
     });
 
@@ -122,7 +122,7 @@ const mockAuth = new JwtAuthManager(mockConfig.jwt!);
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      }, mockAuth);
+      }, new JwtAuthManager("invalid-jwt"));
       await expect(client.getWebsite(1)).rejects.toThrow(AuthenticationError);
     });
   });
@@ -184,7 +184,7 @@ const mockAuth = new JwtAuthManager(mockConfig.jwt!);
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      }, mockAuth);
+      }, new JwtAuthManager("invalid-jwt"));
       const request: WebsiteRequest = {
         domain: "test.example.com",
         target_type: "ipfs",
@@ -246,7 +246,7 @@ const mockAuth = new JwtAuthManager(mockConfig.jwt!);
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      }, mockAuth);
+      }, new JwtAuthManager("invalid-jwt"));
       const request: WebsiteUpdateRequest = {
         domain: "updated.example.com",
         target_type: "ipfs",
@@ -277,7 +277,7 @@ const mockAuth = new JwtAuthManager(mockConfig.jwt!);
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      }, mockAuth);
+      }, new JwtAuthManager("invalid-jwt"));
       await expect(client.deleteWebsite(1)).rejects.toThrow(AuthenticationError);
     });
   });
@@ -311,7 +311,7 @@ const mockAuth = new JwtAuthManager(mockConfig.jwt!);
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      }, mockAuth);
+      }, new JwtAuthManager("invalid-jwt"));
       await expect(client.validateWebsite(1)).rejects.toThrow(AuthenticationError);
     });
 
@@ -417,7 +417,7 @@ const mockAuth = new JwtAuthManager(mockConfig.jwt!);
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      }, mockAuth);
+      }, new JwtAuthManager("invalid-jwt"));
       await expect(client.getWebsiteConfig()).rejects.toThrow(AuthenticationError);
     });
   });

@@ -5,12 +5,12 @@ import type { PinnerConfig } from "@/config";
 import type { SSLStatusInfo } from "../generated/schemas/index";
 import { SSLStatus } from "../websites";
 import {
-import { JwtAuthManager } from "@/auth";
   WebsiteStore,
   IPNSStore,
   createWebsiteHandlers,
   resetWebsitesIPNSState,
 } from "@/__tests__/msw";
+import { JwtAuthManager } from "@/auth";
 
 const websiteStore = new WebsiteStore();
 const ipnsStore = new IPNSStore();

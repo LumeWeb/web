@@ -73,7 +73,7 @@ const mockAuth = new JwtAuthManager(mockConfig.jwt!);
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      }, mockAuth);
+      }, new JwtAuthManager("invalid-jwt"));
       await expect(client.listKeys()).rejects.toThrow(AuthenticationError);
     });
 
@@ -169,7 +169,7 @@ const mockAuth = new JwtAuthManager(mockConfig.jwt!);
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      }, mockAuth);
+      }, new JwtAuthManager("invalid-jwt"));
       const request: IPNSKeyRequest = {
         name: "test-key",
       };
@@ -198,7 +198,7 @@ const mockAuth = new JwtAuthManager(mockConfig.jwt!);
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      }, mockAuth);
+      }, new JwtAuthManager("invalid-jwt"));
       await expect(client.deleteKey(1)).rejects.toThrow(AuthenticationError);
     });
   });
@@ -244,7 +244,7 @@ const mockAuth = new JwtAuthManager(mockConfig.jwt!);
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      }, mockAuth);
+      }, new JwtAuthManager("invalid-jwt"));
       const request: IPNSPublishRequest = {
         key_id: 1,
         cid: "QmTestCID",
@@ -269,7 +269,7 @@ const mockAuth = new JwtAuthManager(mockConfig.jwt!);
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      }, mockAuth);
+      }, new JwtAuthManager("invalid-jwt"));
       await expect(client.republish(1)).rejects.toThrow(AuthenticationError);
     });
   });
@@ -295,7 +295,7 @@ const mockAuth = new JwtAuthManager(mockConfig.jwt!);
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      }, mockAuth);
+      }, new JwtAuthManager("invalid-jwt"));
       await expect(client.resolve("k51qzi5uqu5dj14p8d8q8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e")).rejects.toThrow(AuthenticationError);
     });
   });
