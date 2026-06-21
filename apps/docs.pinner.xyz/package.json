@@ -12,7 +12,7 @@
     "generate:typedoc": "typedoc",
     "generate:cli": "tsx scripts/generate-cli-ref.ts",
     "generate:sdk": "pnpm generate:typedoc && tsx scripts/generate-sdk-ref.ts",
-    "setup:pinner": "eval \"$(bash ../../scripts/setup-pinner-cli.sh)\""
+    "setup:pinner": "out=$(bash ../../scripts/setup-pinner-cli.sh) && eval \"$out\""
   },
   "dependencies": {
     "@fontsource/inter": "catalog:websites",
