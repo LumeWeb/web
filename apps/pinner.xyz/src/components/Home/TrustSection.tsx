@@ -27,7 +27,7 @@ const TrustSection = ({ variant = "default" }: TrustSectionProps) => {
 	return (
 		<Section variant={variant} padding="md">
 			<div className="xl:container px-6">
-				<Heading title="What we do better" />
+				<Heading title="What Pinner Does Better" />
 
 				<div className="mx-auto max-w-[1000px] grid grid-cols-1 gap-4 md:grid-cols-3 lg:gap-6">
 					{principles.map((p, i) => (
