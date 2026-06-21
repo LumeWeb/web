@@ -55,7 +55,7 @@ const ProductCards = () => {
           Four ways to store
         </h2>
         <p className="text-home-text-muted text-sm text-center mb-10">
-          Simple tiered pricing. No hidden fees, no seats.
+          Simple tiered pricing. Priced upfront, no seats.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {cards.map((card) => (

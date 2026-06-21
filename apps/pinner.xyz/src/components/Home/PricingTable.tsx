@@ -3,7 +3,7 @@ import Heading from "@/components/Heading";
 import PricingPlans from "@/components/pricing";
 
 const trustBadges = [
-  "No hidden fees",
+  "Priced upfront",
   "Open source",
   "Encrypted private storage",
   "Crypto & card payments",
@@ -16,7 +16,7 @@ const PricingTable = () => {
         <Heading
           title="Simple pricing, upgrade"
           highlightText="whenever"
-          description="Simple, transparent pricing. Pay for storage and bandwidth. No hidden fees, no API call charges. Pick a plan that fits the needs of any project."
+          description="Simple, transparent pricing. Pay for storage and bandwidth, priced upfront. No API call charges. Pick a plan that fits the needs of any project."
         />
         <div className="mt-[65px] md:mt-[120px]">
           <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mb-8 md:mb-12">
