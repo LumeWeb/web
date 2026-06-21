@@ -48,7 +48,7 @@ const Hero = () => {
   return (
     <HeroSection
       headline={<>Your data.<br />Your rules.</>}
-      subheadline={<><a href="/solutions/website-hosting" className="underline hover:text-white transition-colors">Website hosting</a>, <a href="/solutions/ipfs-pinning" className="underline hover:text-white transition-colors">IPFS pinning</a>, and <a href="/solutions/private-storage" className="underline hover:text-white transition-colors">private storage</a>.<br /><br />No one else can read your files, not even us.<br /><br />No vendor lock-in. Storage and bandwidth, priced upfront.</>}
+      subheadline={<><a href="/solutions/ipfs-pinning" className="underline hover:text-white transition-colors">Pin files</a>. <a href="/solutions/website-hosting" className="underline hover:text-white transition-colors">Host sites</a>. <a href="/solutions/private-storage" className="underline hover:text-white transition-colors">Store private data</a>.<br />All on one quota. Zero-knowledge encrypted.<br />Pay by card or crypto, no KYC on crypto.</>}
       primaryButtons={[
         { label: "Start Pinning →", url: config.registerUrl("pinning"), buttonStyle: "btn-light" },
         { label: "Host a Website →", url: config.registerUrl("hosting"), buttonStyle: "btn-light" },
@@ -61,7 +61,7 @@ const Hero = () => {
       }}
       visualContent={visualContent}
       microcopy="Pay with crypto or card · No ID required for crypto"
-      trustLine="Built on Sia · Open source · Zero-knowledge encryption"
+      trustLine="Built on Sia · FOSS · Zero-knowledge encryption · No bandwidth tricks, no feature gating"
     />
   );
 };

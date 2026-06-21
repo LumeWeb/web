@@ -18,7 +18,7 @@ const featureMap: Record<string, string> = {
   "Custom storage allocation": "Custom storage allocation. as much as you need, priced per TB",
   "Dedicated support": "Dedicated support. direct line to the founder",
   "Volume pricing": "Volume pricing. lower rates as you scale",
-  "Decentralized Storage": "Decentralized Storage. no single point of failure",
+  "Decentralized Storage": "Verifiable Storage. no single point of failure",
   "Crypto Payments": "Crypto Payments. pay with crypto, no ID required",
   "Card Payments": "Card Payments. standard checkout, no crypto needed",
   "Open Source": "Open Source. audit the code yourself on GitHub",
