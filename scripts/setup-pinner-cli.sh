@@ -4,12 +4,16 @@
 #
 # If `pinner` is already on PATH, does nothing.
 # Otherwise, installs it via `go install go.lumeweb.com/pinner-cli/cmd/pinner@latest`
-# and ensures the GOPATH/bin directory is on PATH.
+# and emits a PATH export for the caller to eval.
+#
+# Usage in package.json scripts:
+#   "setup:pinner": "eval \"$(bash ../../scripts/setup-pinner-cli.sh)\""
 #
 # This mirrors the CI composite action at .github/actions/setup-pinner-cli/action.yml.
 #
 set -euo pipefail
 
+# If pinner is already on PATH, nothing to do.
 if command -v pinner &>/dev/null; then
   exit 0
 fi
@@ -21,14 +25,15 @@ if ! command -v go &>/dev/null; then
 fi
 
 VERSION="${PINNER_CLI_VERSION:-latest}"
-echo "Installing pinner-cli@${VERSION} via go install..."
-GOTOOLCHAIN="${GOTOOLCHAIN:-auto}" go install go.lumeweb.com/pinner-cli/cmd/pinner@"${VERSION}"
+echo "Installing pinner-cli@${VERSION} via go install..." >&2
+GOTOOLCHAIN="${GOTOOLCHAIN:-auto}" go install go.lumeweb.com/pinner-cli/cmd/pinner@"${VERSION}" >&2
 
 GOPATH_BIN="$(go env GOPATH)/bin"
 if [[ ":${PATH}:" != *":${GOPATH_BIN}:"* ]]; then
+  # Emit the PATH export to stdout so `eval "$(...)"` in the caller picks it up.
   echo "export PATH=\"${GOPATH_BIN}:\${PATH}\""
   export PATH="${GOPATH_BIN}:${PATH}"
 fi
 
-echo "pinner-cli installed to ${GOPATH_BIN}/pinner"
-pinner version
+echo "pinner-cli installed to ${GOPATH_BIN}/pinner" >&2
+pinner version >&2
