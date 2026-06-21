@@ -5,6 +5,7 @@ import {
   RemotePinningServiceClient,
 } from "@ipfs-shipyard/pinning-service-client";
 import type { PinnerConfig } from "../config";
+import type { AuthManager } from "@/auth";
 import type {
   AbortOptions,
   RemoteAddOptions,
@@ -18,9 +19,11 @@ import { ConfigurationError, NotFoundError } from "@/errors";
 export class PinClient implements RemotePins {
   private client: RemotePinningServiceClient | null = null;
   private config: PinnerConfig;
+  private readonly auth: AuthManager;
 
-  constructor(config: PinnerConfig) {
+  constructor(config: PinnerConfig, auth: AuthManager) {
     this.config = config;
+    this.auth = auth;
   }
 
   protected getClient(): RemotePinningServiceClient {
@@ -28,17 +31,13 @@ export class PinClient implements RemotePins {
       return this.client;
     }
 
-    if (!this.config.jwt) {
-      throw new ConfigurationError("JWT token is required");
-    }
-
-    const configuration = new Configuration({
-      endpointUrl: this.config.endpoint,
-      accessToken: this.config.jwt,
-      fetchApi: this.config.fetch ?? fetch,
-    });
-
-    this.client = new RemotePinningServiceClient(configuration);
+    this.client = new RemotePinningServiceClient(
+      new Configuration({
+        endpointUrl: this.config.endpoint,
+        accessToken: this.auth.getAccessToken(),
+        fetchApi: this.config.fetch ?? fetch,
+      }),
+    );
     return this.client;
   }
 

@@ -26,6 +26,7 @@ import {
   createNotFoundHandler,
 } from "@/__tests__/msw";
 import { testConfig } from "@/__tests__/setup";
+import { JwtAuthManager } from "@/auth";
 
 const websiteStore = new WebsiteStore();
 const ipnsStore = new IPNSStore();
@@ -44,6 +45,8 @@ describe("WebsitesClient", () => {
     endpoint: "https://test.pinner.xyz",
   };
 
+const mockAuth = new JwtAuthManager(mockConfig.jwt!);
+
   beforeEach(() => {
     // Reset mock data state before each test to ensure isolation
     resetWebsitesIPNSState(websiteStore, ipnsStore);
@@ -53,7 +56,7 @@ describe("WebsitesClient", () => {
   describe("list", () => {
     it("should list all websites", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       const websites = await client.listWebsites();
 
@@ -75,14 +78,13 @@ describe("WebsitesClient", () => {
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      });
-
+      }, mockAuth);
       await expect(client.listWebsites()).rejects.toThrow(AuthenticationError);
     });
 
     it("should handle network errors", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       // Test normal operation
       const websites = await client.listWebsites();
@@ -93,7 +95,7 @@ describe("WebsitesClient", () => {
   describe("get", () => {
     it("should get website details", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       const website: WebsiteResponse = await client.getWebsite(1);
 
@@ -110,7 +112,7 @@ describe("WebsitesClient", () => {
 
     it("should throw NotFoundError for non-existent website", async ({ worker }) => {
       worker.use(websiteNotFoundHandler);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       await expect(client.getWebsite(999)).rejects.toThrow(NotFoundError);
     });
@@ -120,8 +122,7 @@ describe("WebsitesClient", () => {
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      });
-
+      }, mockAuth);
       await expect(client.getWebsite(1)).rejects.toThrow(AuthenticationError);
     });
   });
@@ -129,7 +130,7 @@ describe("WebsitesClient", () => {
   describe("create", () => {
     it("should create a new website", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       const request: WebsiteRequest = {
         domain: "test.example.com",
@@ -148,7 +149,7 @@ describe("WebsitesClient", () => {
 
     it("should create a website with IPNS target", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       const request: WebsiteRequest = {
         domain: "test.example.com",
@@ -164,7 +165,7 @@ describe("WebsitesClient", () => {
 
     it("should handle validation errors", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       const request: WebsiteRequest = {
         domain: "", // Invalid: empty domain
@@ -183,8 +184,7 @@ describe("WebsitesClient", () => {
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      });
-
+      }, mockAuth);
       const request: WebsiteRequest = {
         domain: "test.example.com",
         target_type: "ipfs",
@@ -198,7 +198,7 @@ describe("WebsitesClient", () => {
   describe("update", () => {
     it("should update an existing website", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       const request: WebsiteUpdateRequest = {
         domain: "updated.example.com",
@@ -216,7 +216,7 @@ describe("WebsitesClient", () => {
 
     it("should update partial fields on a website", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       const request: WebsiteUpdateRequest = {
         target_hash: "QmUpdatedOnlyCID",
@@ -230,7 +230,7 @@ describe("WebsitesClient", () => {
 
     it("should throw NotFoundError for non-existent website", async ({ worker }) => {
       worker.use(websiteNotFoundHandler);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       const request: WebsiteUpdateRequest = {
         domain: "updated.example.com",
@@ -246,8 +246,7 @@ describe("WebsitesClient", () => {
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      });
-
+      }, mockAuth);
       const request: WebsiteUpdateRequest = {
         domain: "updated.example.com",
         target_type: "ipfs",
@@ -261,14 +260,14 @@ describe("WebsitesClient", () => {
   describe("delete", () => {
     it("should delete a website", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       await expect(client.deleteWebsite(1)).resolves.not.toThrow();
     });
 
     it("should throw NotFoundError for non-existent website", async ({ worker }) => {
       worker.use(websiteNotFoundHandler);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       await expect(client.deleteWebsite(999)).rejects.toThrow(NotFoundError);
     });
@@ -278,8 +277,7 @@ describe("WebsitesClient", () => {
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      });
-
+      }, mockAuth);
       await expect(client.deleteWebsite(1)).rejects.toThrow(AuthenticationError);
     });
   });
@@ -287,7 +285,7 @@ describe("WebsitesClient", () => {
   describe("validate", () => {
     it("should validate website DNS", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       const result: WebsiteValidateResponse = await client.validateWebsite(1);
 
@@ -303,7 +301,7 @@ describe("WebsitesClient", () => {
 
     it("should throw NotFoundError for non-existent website", async ({ worker }) => {
       worker.use(websiteNotFoundHandler);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       await expect(client.validateWebsite(999)).rejects.toThrow(NotFoundError);
     });
@@ -313,14 +311,13 @@ describe("WebsitesClient", () => {
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      });
-
+      }, mockAuth);
       await expect(client.validateWebsite(1)).rejects.toThrow(AuthenticationError);
     });
 
     it("should return reason field from validation response", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       const result = await client.validateWebsite(1);
 
@@ -360,7 +357,7 @@ describe("WebsitesClient", () => {
   describe("getSSLStatus", () => {
     it("should get SSL status for a domain", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       websiteStore.setSSLStatus("example.com", SSLStatus.VALID);
 
@@ -372,7 +369,7 @@ describe("WebsitesClient", () => {
 
     it("should get SSL status with error", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       websiteStore.setSSLStatus("example.com", SSLStatus.FAILED, "DNS validation failed");
 
@@ -384,7 +381,7 @@ describe("WebsitesClient", () => {
 
     it("should support abort signal", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       const controller = new AbortController();
       controller.abort();
@@ -398,7 +395,7 @@ describe("WebsitesClient", () => {
   describe("getWebsiteConfig", () => {
     it("should get website hosting configuration", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       const config = await client.getWebsiteConfig();
 
@@ -420,8 +417,7 @@ describe("WebsitesClient", () => {
       const client = new WebsitesClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      });
-
+      }, mockAuth);
       await expect(client.getWebsiteConfig()).rejects.toThrow(AuthenticationError);
     });
   });
@@ -429,7 +425,7 @@ describe("WebsitesClient", () => {
   describe("watchSSL", () => {
     it("should watch SSL status and emit ready when SSL is valid", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
@@ -453,7 +449,7 @@ describe("WebsitesClient", () => {
 
     it("should watch SSL status and emit error when SSL fails", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
@@ -476,7 +472,7 @@ describe("WebsitesClient", () => {
 
     it("should emit status updates", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
@@ -505,7 +501,7 @@ describe("WebsitesClient", () => {
 
     it("should timeout if SSL never becomes ready", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
@@ -524,7 +520,7 @@ describe("WebsitesClient", () => {
 
     it("should stop watching", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       websiteStore.setSSLStatus("example.com", SSLStatus.PENDING);
 
@@ -550,7 +546,7 @@ describe("WebsitesClient", () => {
 
     it("should handle network errors", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       // This test would need MSW to return network errors
       // For now, we just verify the structure exists
@@ -569,7 +565,7 @@ describe("WebsitesClient", () => {
         endpoint: "https://test.com",
       };
 
-      const minimalClient = new WebsitesClient(minimalConfig);
+      const minimalClient = new WebsitesClient(minimalConfig, mockAuth);
       expect(minimalClient).toBeInstanceOf(WebsitesClient);
     });
 
@@ -579,7 +575,7 @@ describe("WebsitesClient", () => {
         endpoint: "https://custom.api.com",
       };
 
-      const customClient = new WebsitesClient(customConfig);
+      const customClient = new WebsitesClient(customConfig, mockAuth);
       expect(customClient).toBeInstanceOf(WebsitesClient);
     });
 
@@ -589,18 +585,18 @@ describe("WebsitesClient", () => {
         endpoint: "https://test.com",
       } as PinnerConfig;
 
-      expect(() => new WebsitesClient(invalidConfig)).toThrow(ConfigurationError);
+      expect(() => new WebsitesClient(invalidConfig, new JwtAuthManager(invalidConfig.jwt))).toThrow(ConfigurationError);
     });
 
     it("should throw ConfigurationError with missing config", () => {
-      expect(() => new WebsitesClient({} as PinnerConfig)).toThrow(ConfigurationError);
+      expect(() => new WebsitesClient({} as PinnerConfig, new JwtAuthManager(undefined as unknown as string))).toThrow(ConfigurationError);
     });
   });
 
   describe("error handling", () => {
     it("should handle network errors gracefully", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       // Test normal operation
       const websites = await client.listWebsites();
@@ -609,7 +605,7 @@ describe("WebsitesClient", () => {
 
     it("should handle malformed responses", async ({ worker }) => {
       worker.use(...websiteHandlers);
-      const client = new WebsitesClient(mockConfig);
+      const client = new WebsitesClient(mockConfig, mockAuth);
 
       // Test normal operation
       const websites = await client.listWebsites();

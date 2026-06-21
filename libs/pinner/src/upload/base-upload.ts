@@ -3,6 +3,7 @@ import { default as defer } from "p-defer";
 import type { Readable } from "stream";
 
 import type { PinnerConfig } from "../config";
+import type { AuthManager } from "@/auth";
 import type {
   UploadInput,
   UploadOperation,
@@ -25,9 +26,11 @@ type NodeStreamWithSize = Readable & { size: number | null };
 
 export abstract class BaseUploadHandler {
   protected config: Required<PinnerConfig>;
+  protected readonly auth: AuthManager;
 
-  constructor(config: PinnerConfig) {
+  constructor(config: PinnerConfig, auth: AuthManager) {
     this.config = config as Required<PinnerConfig>;
+    this.auth = auth;
   }
 
   async upload(

@@ -25,6 +25,7 @@ import {
   createNotFoundHandler,
 } from "@/__tests__/msw";
 import { testConfig } from "@/__tests__/setup";
+import { JwtAuthManager } from "@/auth";
 
 const websiteStore = new WebsiteStore();
 const ipnsStore = new IPNSStore();
@@ -44,6 +45,8 @@ describe("IpnsClient", () => {
     endpoint: "https://test.pinner.xyz",
   };
 
+const mockAuth = new JwtAuthManager(mockConfig.jwt!);
+
   beforeEach(() => {
     // Reset mock data state before each test to ensure isolation
     resetWebsitesIPNSState(websiteStore, ipnsStore);
@@ -52,7 +55,7 @@ describe("IpnsClient", () => {
   describe("listKeys", () => {
     it("should list all IPNS keys", async ({ worker }) => {
       worker.use(...ipnsHandlers);
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
 
       const result = await client.listKeys();
 
@@ -70,8 +73,7 @@ describe("IpnsClient", () => {
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      });
-
+      }, mockAuth);
       await expect(client.listKeys()).rejects.toThrow(AuthenticationError);
     });
 
@@ -88,7 +90,7 @@ describe("IpnsClient", () => {
       );
 
       // For now, just test normal case
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
       const result = await client.listKeys();
       expect(result).toBeDefined();
     });
@@ -97,7 +99,7 @@ describe("IpnsClient", () => {
   describe("getKey", () => {
     it("should get a specific IPNS key", async ({ worker }) => {
       worker.use(...ipnsHandlers);
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
 
       const key = await client.getKey(1);
 
@@ -111,7 +113,7 @@ describe("IpnsClient", () => {
 
     it("should throw NotFoundError for non-existent key", async ({ worker }) => {
       worker.use(ipnsNotFoundHandler);
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
 
       await expect(client.getKey(999)).rejects.toThrow(NotFoundError);
     });
@@ -120,7 +122,7 @@ describe("IpnsClient", () => {
   describe("createKey", () => {
     it("should create a new IPNS key", async ({ worker }) => {
       worker.use(...ipnsHandlers);
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
 
       const request: IPNSKeyRequest = {
         name: "new-key",
@@ -137,11 +139,11 @@ describe("IpnsClient", () => {
 
     it("should import an existing IPNS key", async ({ worker }) => {
       worker.use(...ipnsHandlers);
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
 
       const request: IPNSKeyRequest = {
         name: "imported-key",
-        key: "-----BEGIN PRIVATE KEY-----\ntest-key-data\n-----END PRIVATE KEY-----",
+        key: "[REDACTED PRIVATE KEY]",
       };
 
       const key = await client.createKey(request);
@@ -152,7 +154,7 @@ describe("IpnsClient", () => {
 
     it("should handle validation errors", async ({ worker }) => {
       worker.use(...ipnsHandlers);
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
 
       const request: IPNSKeyRequest = {
         name: "",
@@ -167,8 +169,7 @@ describe("IpnsClient", () => {
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      });
-
+      }, mockAuth);
       const request: IPNSKeyRequest = {
         name: "test-key",
       };
@@ -180,14 +181,14 @@ describe("IpnsClient", () => {
   describe("deleteKey", () => {
     it("should delete an IPNS key", async ({ worker }) => {
       worker.use(...ipnsHandlers);
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
 
       await expect(client.deleteKey(1)).resolves.not.toThrow();
     });
 
     it("should throw NotFoundError for non-existent key", async ({ worker }) => {
       worker.use(ipnsNotFoundHandler);
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
 
       await expect(client.deleteKey(999)).rejects.toThrow(NotFoundError);
     });
@@ -197,8 +198,7 @@ describe("IpnsClient", () => {
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      });
-
+      }, mockAuth);
       await expect(client.deleteKey(1)).rejects.toThrow(AuthenticationError);
     });
   });
@@ -206,7 +206,7 @@ describe("IpnsClient", () => {
   describe("publish", () => {
     it("should publish CID to IPNS key", async ({ worker }) => {
       worker.use(...ipnsHandlers);
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
 
       const request: IPNSPublishRequest = {
         key_id: 1,
@@ -226,7 +226,7 @@ describe("IpnsClient", () => {
 
     it("should handle validation errors", async ({ worker }) => {
       worker.use(...ipnsHandlers);
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
 
       const request: IPNSPublishRequest = {
         key_id: 1,
@@ -244,8 +244,7 @@ describe("IpnsClient", () => {
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      });
-
+      }, mockAuth);
       const request: IPNSPublishRequest = {
         key_id: 1,
         cid: "QmTestCID",
@@ -258,7 +257,7 @@ describe("IpnsClient", () => {
   describe("republish", () => {
     it("should republish an IPNS key by ID", async ({ worker }) => {
       worker.use(...ipnsHandlers);
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
 
       const result = await client.republish(1);
       expect(result).toHaveProperty("count");
@@ -270,8 +269,7 @@ describe("IpnsClient", () => {
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      });
-
+      }, mockAuth);
       await expect(client.republish(1)).rejects.toThrow(AuthenticationError);
     });
   });
@@ -279,7 +277,7 @@ describe("IpnsClient", () => {
   describe("resolve", () => {
     it("should resolve IPNS name to CID", async ({ worker }) => {
       worker.use(...ipnsHandlers);
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
 
       const ipnsName = "k51qzi5uqu5dj14p8d8q8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e";
       const result: IPNSResolveResponse = await client.resolve(ipnsName);
@@ -297,8 +295,7 @@ describe("IpnsClient", () => {
       const client = new IpnsClient({
         jwt: "invalid-jwt",
         endpoint: "https://test.pinner.xyz",
-      });
-
+      }, mockAuth);
       await expect(client.resolve("k51qzi5uqu5dj14p8d8q8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e8y4e")).rejects.toThrow(AuthenticationError);
     });
   });
@@ -310,7 +307,7 @@ describe("IpnsClient", () => {
         endpoint: "https://test.com",
       };
 
-      const minimalClient = new IpnsClient(minimalConfig);
+      const minimalClient = new IpnsClient(minimalConfig, mockAuth);
       expect(minimalClient).toBeInstanceOf(IpnsClient);
     });
 
@@ -320,7 +317,7 @@ describe("IpnsClient", () => {
         endpoint: "https://custom.api.com",
       };
 
-      const customClient = new IpnsClient(customConfig);
+      const customClient = new IpnsClient(customConfig, mockAuth);
       expect(customClient).toBeInstanceOf(IpnsClient);
     });
 
@@ -330,18 +327,18 @@ describe("IpnsClient", () => {
         endpoint: "https://test.com",
       } as PinnerConfig;
 
-      expect(() => new IpnsClient(invalidConfig)).toThrow(ConfigurationError);
+      expect(() => new IpnsClient(invalidConfig, new JwtAuthManager(invalidConfig.jwt))).toThrow(ConfigurationError);
     });
 
     it("should throw ConfigurationError with missing config", () => {
-      expect(() => new IpnsClient({} as PinnerConfig)).toThrow(ConfigurationError);
+      expect(() => new IpnsClient({} as PinnerConfig, new JwtAuthManager(undefined as unknown as string))).toThrow(ConfigurationError);
     });
   });
 
   describe("error handling", () => {
     it("should handle network errors gracefully", async ({ worker }) => {
       worker.use(...ipnsHandlers);
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
 
       // Test normal operation
       const result = await client.listKeys();
@@ -350,7 +347,7 @@ describe("IpnsClient", () => {
 
     it("should handle malformed responses", async ({ worker }) => {
       worker.use(...ipnsHandlers);
-      const client = new IpnsClient(mockConfig);
+      const client = new IpnsClient(mockConfig, mockAuth);
 
       // Test normal operation
       const result = await client.listKeys();

@@ -341,9 +341,17 @@ function createBaseUploadProjects(
   ];
 }
 
+function createAuthProjects() {
+  return [
+    createNodeProject("node-auth", ["src/auth/__tests__/**/*.spec.ts"]),
+  ];
+}
+
 export default defineConfig({
   test: {
     projects: [
+      // Auth tests - pure logic, node only
+      ...createAuthProjects(),
       // Upload integration tests - no mocks, real implementations
       ...createUploadProjects(TEST_TYPE_INTEGRATION),
       // Upload unit tests - with mocks

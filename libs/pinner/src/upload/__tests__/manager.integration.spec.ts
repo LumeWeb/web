@@ -12,6 +12,7 @@ import { test as it } from "./int-test";
 import { DEFAULT_UPLOAD_LIMIT, MOCK_CONFIG } from "./test-constants";
 import { assertUploadOperationStructure } from "./test-assertions";
 import { importUploadManager } from "./test-fixtures";
+import { JwtAuthManager } from "@/auth";
 
 describe("UploadManager Integration Tests", () => {
   let manager: any;
@@ -20,7 +21,7 @@ describe("UploadManager Integration Tests", () => {
     vi.clearAllMocks();
 
     const UploadManager = await importUploadManager();
-    manager = new UploadManager(MOCK_CONFIG);
+    manager = new UploadManager(MOCK_CONFIG, mockAuth);
   });
 
   afterEach(() => {
