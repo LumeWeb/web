@@ -48,7 +48,7 @@ const Hero = () => {
   return (
     <HeroSection
       headline={<>Your data.<br />Your rules.</>}
-      subheadline={<><a href="/solutions/ipfs-pinning" className="underline hover:text-white transition-colors">Pin files</a>. <a href="/solutions/website-hosting" className="underline hover:text-white transition-colors">Host sites</a>. <a href="/solutions/private-storage" className="underline hover:text-white transition-colors">Store private data</a>.<br />All on one quota. Zero-knowledge encrypted.<br />Pay by card or crypto, no KYC on crypto.</>}
+      subheadline={<><span className="block mb-2"><a href="/solutions/ipfs-pinning" className="underline hover:text-white transition-colors">Pin files</a>. <a href="/solutions/website-hosting" className="underline hover:text-white transition-colors">Host sites</a>. <a href="/solutions/private-storage" className="underline hover:text-white transition-colors">Store private data</a>.</span><span className="block mb-2">All on one quota. Zero-knowledge encrypted.</span><span className="block">Pay by card or crypto, no KYC on crypto.</span></>}
       primaryButtons={[
         { label: "Start Pinning →", url: config.registerUrl("pinning"), buttonStyle: "btn-light" },
         { label: "Host a Website →", url: config.registerUrl("hosting"), buttonStyle: "btn-light" },
