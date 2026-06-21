@@ -11,9 +11,9 @@ const buttonVariants = cva(
     variants: {
       buttonStyle: {
         default: "text-home-text bg-home-card-bg hover:bg-white hover:text-content-text",
-        outline: "border border-home-text! text-home-text bg-transparent hover:bg-home-card-bg! hover:text-home-text hover:border-home-card-bg!",
-        "outline-dark": "border border-content-text! text-content-text! bg-transparent hover:bg-content-text! hover:text-white! hover:border-content-text!",
-        "btn-light": "bg-white! text-content-text! hover:bg-transparent! hover:text-white! border-white!",
+        outline: "border border-home-text! text-home-text bg-transparent hover:bg-home-accent/10! hover:text-home-accent hover:border-home-accent!",
+        "outline-dark": "border border-content-text! text-content-text! bg-transparent hover:bg-content-text/10! hover:text-content-text hover:border-content-text!",
+        "btn-light": "bg-white! text-content-text! hover:bg-content-text/10! hover:text-white! border-white!",
         gray: "bg-content-section-gray text-content-text! hover:bg-home-card-bg! hover:text-white!",
         light: "bg-white text-content-text hover:bg-home-card-bg hover:text-white",
       },
