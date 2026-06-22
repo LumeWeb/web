@@ -74,3 +74,19 @@ export const DEFAULT_CONFIG: Partial<PinnerConfig> = {
   timeout: 120_000,
   retries: 3,
 };
+
+/**
+ * Derive the account API endpoint from a pinner endpoint.
+ *
+ * The portal-sdk AccountApi constructor prepends "account." to the hostname.
+ * We strip the first subdomain (e.g. ipfs.pinner.xyz → pinner.xyz) so
+ * AccountApi produces account.pinner.xyz, not account.ipfs.pinner.xyz.
+ * Port and path are preserved.
+ */
+export function deriveAccountEndpoint(endpoint: string): string {
+  const url = new URL(endpoint);
+  const parts = url.hostname.split(".");
+  if (parts.length > 2) parts.shift();
+  url.hostname = parts.join(".");
+  return url.toString();
+}

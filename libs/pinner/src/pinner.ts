@@ -1,10 +1,11 @@
 import type { PinnerConfig } from "./config";
+import { DEFAULT_CONFIG, deriveAccountEndpoint } from "./config";
 import { UploadManager } from "./upload";
 import { PinClient } from "./pin";
 import { IpnsClient } from "./api/ipns";
 import { WebsitesClient } from "./api/websites";
 import { JwtAuthManager, KeyExchangeAuthManager, type AuthManager } from "@/auth";
-import { DEFAULT_CONFIG } from "./config";
+import { Sdk } from "@lumeweb/portal-sdk";
 import type { UploadMethodAndBuilder } from "@/upload/builder";
 import { createUploadBuilderNamespace } from "@/upload/builder";
 import type {
@@ -36,8 +37,9 @@ export class Pinner {
    */
   constructor(config: PinnerConfig) {
     const endpoint = config.endpoint ?? DEFAULT_CONFIG.endpoint!;
-    this.auth = new KeyExchangeAuthManager(config.jwt, endpoint);
-    this.uploadManager = new UploadManager(config, this.auth);
+    const sdk = new Sdk(deriveAccountEndpoint(endpoint));
+    this.auth = new KeyExchangeAuthManager(config.jwt, sdk);
+    this.uploadManager = new UploadManager(config, this.auth, sdk);
     this._pins = new PinClient(config, this.auth);
     this._ipns = new IpnsClient(config, this.auth);
     this._websites = new WebsitesClient(config, this.auth);

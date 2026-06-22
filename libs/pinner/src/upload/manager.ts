@@ -55,12 +55,12 @@ export class UploadManager {
    * @param config SDK configuration
    * @param auth AuthManager for authentication
    */
-  constructor(config: PinnerConfig, auth: AuthManager) {
+  constructor(config: PinnerConfig, auth: AuthManager, sdk: Sdk) {
     this.config = config;
     this.auth = auth;
     this.xhrHandler = new XHRUploadHandler(config, auth);
     this.tusHandler = new TUSUploadHandler(config, auth);
-    this.portalSdk = new Sdk(config.endpoint || DEFAULT_ENDPOINT);
+    this.portalSdk = sdk;
     configureCar({
       datastoreName: config.datastoreName,
       datastore: config.datastore,
