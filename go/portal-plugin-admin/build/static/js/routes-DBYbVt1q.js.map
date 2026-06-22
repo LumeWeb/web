@@ -1,1 +1,0 @@
-{"version":3,"file":"routes-DBYbVt1q.js","names":["AuthedIndex","Index"],"sources":["../../../src/ui/routes/index.tsx"],"sourcesContent":["import { AuthedIndex as Index } from \"@lumeweb/portal-framework-auth\";\nimport \"@lumeweb/portal-framework-ui-core/tailwind-plugin.css\";\n\nexport default Index;\n"],"mappings":"8FAGA,IAAA,EAAeC"}
