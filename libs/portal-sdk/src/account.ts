@@ -194,7 +194,7 @@ export class AccountApi {
     apiKey: string,
   ): Promise<Result<LoginResponse>> {
     const result = await this.fetchJson<LoginResponse>("/api/auth/key", {
-      headers: { Authorization: apiKey } as Record<string, string>,
+      headers: { Authorization: `Bearer ${apiKey}` } as Record<string, string>,
       method: "POST",
     });
 
