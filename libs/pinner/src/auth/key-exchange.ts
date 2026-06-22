@@ -62,16 +62,21 @@ export class KeyExchangeAuthManager extends JwtAuthManager {
     }
 
     this.exchangePromise = (async () => {
-      const result = await this.sdk.account().loginWithApiKey(this.token);
+      try {
+        const result = await this.sdk.account().loginWithApiKey(this.token);
 
-      if (!result.success || !result.data?.token) {
-        throw new ConfigurationError(
-          "Failed to exchange API key for login JWT",
-        );
+        if (!result.success || !result.data?.token) {
+          throw new ConfigurationError(
+            "Failed to exchange API key for login JWT",
+          );
+        }
+
+        this.resolvedToken = result.data.token;
+        return this.resolvedToken;
+      } catch (err) {
+        this.exchangePromise = undefined;
+        throw err;
       }
-
-      this.resolvedToken = result.data.token;
-      return this.resolvedToken;
     })();
 
     return this.exchangePromise;
