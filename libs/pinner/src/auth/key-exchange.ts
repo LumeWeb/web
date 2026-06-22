@@ -27,13 +27,14 @@ export class KeyExchangeAuthManager extends JwtAuthManager {
     // AccountApi constructor prepends "account." to the hostname,
     // so we strip the first subdomain (e.g. ipfs.pinner.xyz → pinner.xyz)
     // and let AccountApi add "account." → account.pinner.xyz.
+    // Mutate hostname in-place to preserve port, path, and other URL components.
     const url = new URL(endpoint);
     const parts = url.hostname.split(".");
     if (parts.length > 2) {
       parts.shift(); // Remove first subdomain (e.g. "ipfs")
+      url.hostname = parts.join(".");
     }
-    const baseHostname = parts.join(".");
-    this.sdk = new Sdk(`${url.protocol}//${baseHostname}`);
+    this.sdk = new Sdk(url.toString());
   }
 
   /**
