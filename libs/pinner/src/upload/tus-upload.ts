@@ -10,10 +10,10 @@ export class TUSUploadHandler extends BaseUploadHandler {
   constructor(config: PinnerConfig, auth: AuthManager) {
     super(config, auth);
   }
-  protected configurePlugin(uppy: Uppy): void {
+  protected async configurePlugin(uppy: Uppy): Promise<void> {
     uppy.use(TusPlugin, {
       endpoint: `${this.config.endpoint}/api/upload/tus`,
-      headers: this.auth.getAuthHeaders(),
+      headers: await this.auth.getAuthHeaders(),
       chunkSize: 10 * 1024 * 1024,
       retryDelays: [0, 1000, 3000, 5000],
     });

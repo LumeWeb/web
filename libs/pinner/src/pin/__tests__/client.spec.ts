@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PinClient } from "../client";
 import type { PinnerConfig } from "@/config";
 import { ConfigurationError, NotFoundError } from "@/errors";
+import { JwtAuthManager } from "@/auth/manager";
+import type { AuthManager } from "@/auth/manager";
 import { CID } from "multiformats/cid";
 import type { RemotePinningServiceClient } from "@ipfs-shipyard/pinning-service-client";
 import { Status } from "@ipfs-shipyard/pinning-service-client";
@@ -11,7 +13,7 @@ import { createMockCID } from "@/__tests__/setup";
 
 // Test helper class to expose protected method for testing
 class TestPinClient extends PinClient {
-  public override getClient(): RemotePinningServiceClient {
+  public override getClient(): Promise<RemotePinningServiceClient> {
     return super.getClient();
   }
 
@@ -26,6 +28,7 @@ class TestPinClient extends PinClient {
 describe("PinClient", () => {
   let mockConfig: PinnerConfig;
   let mockFetch: ReturnType<typeof vi.fn>;
+  let mockAuth: AuthManager;
 
   beforeEach(() => {
     mockConfig = {
@@ -34,13 +37,15 @@ describe("PinClient", () => {
       gateway: "https://gateway.test.com",
     };
 
+    mockAuth = new JwtAuthManager("test-jwt-token");
+
     // Mock fetch implementation
     mockFetch = vi.fn();
   });
 
   describe("constructor", () => {
     it("should create a PinClient instance with valid config", () => {
-      const client = new PinClient(mockConfig);
+      const client = new PinClient(mockConfig, mockAuth);
       expect(client).toBeInstanceOf(PinClient);
     });
 
@@ -49,27 +54,25 @@ describe("PinClient", () => {
         ...mockConfig,
         fetch: mockFetch as any,
       };
-      const client = new PinClient(configWithFetch);
+      const client = new PinClient(configWithFetch, mockAuth);
       expect(client).toBeInstanceOf(PinClient);
     });
   });
 
   describe("getClient", () => {
-    it("should throw ConfigurationError when JWT is missing", () => {
-      const invalidConfig = {
-        ...mockConfig,
-        jwt: undefined as unknown as string,
-      };
-      const client = new TestPinClient(invalidConfig);
-
-      expect(() => client.getClient()).toThrow(ConfigurationError);
-      expect(() => client.getClient()).toThrow("JWT token is required");
+    it("should throw ConfigurationError when JWT is missing", async () => {
+      expect(
+        () => new JwtAuthManager(undefined as unknown as string),
+      ).toThrow(ConfigurationError);
+      expect(
+        () => new JwtAuthManager(undefined as unknown as string),
+      ).toThrow("JWT token is required");
     });
 
     it("should reuse existing client instance", async () => {
-      const client = new TestPinClient(mockConfig);
-      const client1 = client.getClient();
-      const client2 = client.getClient();
+      const client = new TestPinClient(mockConfig, mockAuth);
+      const client1 = await client.getClient();
+      const client2 = await client.getClient();
 
       expect(client1).toBe(client2);
     });
@@ -89,7 +92,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -130,7 +133,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -163,7 +166,7 @@ describe("PinClient", () => {
         pinsPost: vi.fn().mockRejectedValue(new Error("Failed to pin")),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(await createMockCID(2));
@@ -208,7 +211,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const pins: RemotePin[] = [];
@@ -243,7 +246,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const pins: RemotePin[] = [];
@@ -276,7 +279,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const pins: RemotePin[] = [];
@@ -306,7 +309,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const pins: RemotePin[] = [];
@@ -339,7 +342,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -357,7 +360,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -372,7 +375,7 @@ describe("PinClient", () => {
         pinsGet: vi.fn().mockRejectedValue(new Error("Pin not found")),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -407,7 +410,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -435,7 +438,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -450,7 +453,7 @@ describe("PinClient", () => {
         pinsGet: vi.fn().mockRejectedValue(new Error("Service error")),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -492,7 +495,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -551,7 +554,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -581,7 +584,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -615,7 +618,7 @@ describe("PinClient", () => {
           .mockRejectedValue(new Error("Update failed")),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -650,7 +653,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -689,7 +692,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -720,7 +723,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -749,7 +752,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const pins: RemotePin[] = [];
@@ -781,7 +784,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const pins: RemotePin[] = [];
@@ -803,7 +806,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const pins: RemotePin[] = [];
@@ -847,7 +850,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -897,7 +900,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -959,7 +962,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -998,7 +1001,7 @@ describe("PinClient", () => {
           .mockRejectedValue(new Error("Failed to delete pin")),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -1020,7 +1023,7 @@ describe("PinClient", () => {
         pinsRequestidDelete: vi.fn(),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const cid = CID.parse(mockCid);
@@ -1045,7 +1048,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       await client.rmByRequestId("req-123");
@@ -1065,7 +1068,7 @@ describe("PinClient", () => {
         }),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       const abortController = new AbortController();
@@ -1087,7 +1090,7 @@ describe("PinClient", () => {
         pinsRequestidDelete: vi.fn().mockRejectedValue(new Error("Failed to delete pin")),
       };
 
-      const client = new TestPinClient(mockConfig);
+      const client = new TestPinClient(mockConfig, mockAuth);
       vi.spyOn(client, "getClient").mockReturnValue(mockPinningClient as any);
 
       await expect(client.rmByRequestId("req-123")).rejects.toThrow("Failed to delete pin");

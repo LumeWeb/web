@@ -39,7 +39,7 @@ export abstract class BaseUploadHandler {
   ): Promise<UploadOperation> {
     const normalized = normalizeUploadInput(input, options);
     const uppy = new Uppy();
-    const { fileId, resultPromise, progress } = this.#setupUppyHandlers(
+    const { fileId, resultPromise, progress } = await this.#setupUppyHandlers(
       uppy,
       normalized,
       options,
@@ -51,15 +51,15 @@ export abstract class BaseUploadHandler {
     return this.#createUploadOperation(uppy, fileId, resultPromise, progress);
   }
 
-  #setupUppyHandlers(
+  async #setupUppyHandlers(
     uppy: Uppy,
     normalized: { size: number },
     options?: UploadOptions,
-  ): {
+  ): Promise<{
     fileId: string | null;
     resultPromise: Promise<UploadResult>;
     progress: UploadProgress;
-  } {
+  }> {
     let fileId: string | null = null;
     let hasRejected = false;
 
@@ -82,7 +82,7 @@ export abstract class BaseUploadHandler {
       rejectResult(error);
     };
 
-    this.configurePlugin(uppy);
+    await this.configurePlugin(uppy);
 
     uppy.on("progress", (progressBytes) => {
       progress.bytesUploaded = progressBytes;
@@ -278,7 +278,7 @@ export abstract class BaseUploadHandler {
     // No-op since each upload creates its own Uppy instance
   }
 
-  protected abstract configurePlugin(uppy: Uppy): void;
+  protected abstract configurePlugin(uppy: Uppy): void | Promise<void>;
   protected abstract parseResult(result: unknown): UploadResult;
   protected abstract getUploadSource(): string;
 

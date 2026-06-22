@@ -26,7 +26,7 @@ export class PinClient implements RemotePins {
     this.auth = auth;
   }
 
-  protected getClient(): RemotePinningServiceClient {
+  protected async getClient(): Promise<RemotePinningServiceClient> {
     if (this.client) {
       return this.client;
     }
@@ -34,7 +34,7 @@ export class PinClient implements RemotePins {
     this.client = new RemotePinningServiceClient(
       new Configuration({
         endpointUrl: this.config.endpoint,
-        accessToken: this.auth.getAccessToken(),
+        accessToken: await this.auth.getAccessToken(),
         fetchApi: this.config.fetch ?? fetch,
       }),
     );
@@ -45,7 +45,7 @@ export class PinClient implements RemotePins {
     cid: CID,
     options?: RemoteAddOptions,
   ): AsyncGenerator<CID, void, undefined> {
-    const client = this.getClient();
+    const client = await this.getClient();
 
     const pin: Pin = {
       cid: cid.toString(),
@@ -62,7 +62,7 @@ export class PinClient implements RemotePins {
   async *ls(
     options?: RemoteLsOptions,
   ): AsyncGenerator<RemotePin, void, undefined> {
-    const client = this.getClient();
+    const client = await this.getClient();
     const response = await client.pinsGet(this.normalizeListOptions(options), {
       signal: options?.signal,
     });
@@ -82,7 +82,7 @@ export class PinClient implements RemotePins {
   }
 
   async get(cid: CID, options?: AbortOptions): Promise<RemotePin> {
-    const client = this.getClient();
+    const client = await this.getClient();
     const response = await client.pinsGet(
       { cid: [cid.toString()] },
       {
@@ -102,7 +102,7 @@ export class PinClient implements RemotePins {
     metadata: Record<string, string> | undefined,
     options?: AbortOptions,
   ): Promise<void> {
-    const client = this.getClient();
+    const client = await this.getClient();
     const response = await client.pinsGet(
       { cid: [cid.toString()] },
       {
@@ -133,7 +133,7 @@ export class PinClient implements RemotePins {
     cid: CID,
     options?: AbortOptions,
   ): AsyncGenerator<CID, void, undefined> {
-    const client = this.getClient();
+    const client = await this.getClient();
     const response = await client.pinsGet(
       { cid: [cid.toString()] },
       { signal: options?.signal },
@@ -150,7 +150,7 @@ export class PinClient implements RemotePins {
   }
 
   async rmByRequestId(requestId: string, options?: AbortOptions): Promise<void> {
-    const client = this.getClient();
+    const client = await this.getClient();
     await client.pinsRequestidDelete(
       { requestid: requestId },
       { signal: options?.signal },

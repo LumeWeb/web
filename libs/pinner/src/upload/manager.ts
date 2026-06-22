@@ -46,6 +46,7 @@ export class UploadManager {
   private xhrHandler: XHRUploadHandler;
   private tusHandler: TUSUploadHandler;
   private portalSdk: Sdk;
+  private portalSdkReady?: Promise<void>;
   private uploadLimit: number = TUS_SIZE_THRESHOLD; // Default to 100 MB
   private limitFetched: boolean = false;
 
@@ -60,11 +61,25 @@ export class UploadManager {
     this.xhrHandler = new XHRUploadHandler(config, auth);
     this.tusHandler = new TUSUploadHandler(config, auth);
     this.portalSdk = new Sdk(config.endpoint || DEFAULT_ENDPOINT);
-    this.portalSdk.setAuthToken(auth.getAuthToken());
     configureCar({
       datastoreName: config.datastoreName,
       datastore: config.datastore,
     });
+  }
+
+  async #initPortalSdk(): Promise<void> {
+    const token = await this.auth.getAuthToken();
+    this.portalSdk.setAuthToken(token);
+  }
+
+  async #ensurePortalSdkReady(): Promise<void> {
+    if (!this.portalSdkReady) {
+      this.portalSdkReady = this.#initPortalSdk().catch((err) => {
+        this.portalSdkReady = undefined;
+        throw err;
+      });
+    }
+    return this.portalSdkReady;
   }
 
   /**
@@ -76,6 +91,7 @@ export class UploadManager {
     }
 
     try {
+      await this.#ensurePortalSdkReady();
       const result = await this.portalSdk.account().uploadLimit();
       if (result.success && result.data?.limit) {
         this.uploadLimit = result.data.limit;
@@ -137,6 +153,7 @@ export class UploadManager {
     input: number | UploadResult,
     options?: OperationPollingOptions,
   ): Promise<UploadResult> {
+    await this.#ensurePortalSdkReady();
     // Scenario 1: UploadResult with operationId - use it directly
     if (isUploadResult(input) && input.operationId) {
       return await this.#waitForOperationById(input, options);
@@ -216,6 +233,7 @@ export class UploadManager {
     uploadResult: UploadResult,
     options?: OperationPollingOptions,
   ): Promise<UploadResult> {
+    await this.#ensurePortalSdkReady();
     if (!uploadResult.cid) {
       throw new Error("Cannot wait for operation by CID — CID not available. Use upload result ID to poll GET /api/upload/result/{id} instead.");
     }
@@ -318,7 +336,7 @@ export class UploadManager {
 
     const baseUrl = this.config.endpoint || DEFAULT_ENDPOINT;
     const fetchUrl = `${baseUrl}/api/upload/result/${encodeURIComponent(uploadId)}`;
-    const headers = this.auth.getAuthHeaders();
+    const headers = await this.auth.getAuthHeaders();
 
     const result = await poll<UploadResultResponse>(
       async () => {
