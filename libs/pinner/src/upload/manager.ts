@@ -46,7 +46,7 @@ export class UploadManager {
   private xhrHandler: XHRUploadHandler;
   private tusHandler: TUSUploadHandler;
   private portalSdk: Sdk;
-  private portalSdkReady: Promise<void>;
+  private portalSdkReady?: Promise<void>;
   private uploadLimit: number = TUS_SIZE_THRESHOLD; // Default to 100 MB
   private limitFetched: boolean = false;
 
@@ -61,7 +61,6 @@ export class UploadManager {
     this.xhrHandler = new XHRUploadHandler(config, auth);
     this.tusHandler = new TUSUploadHandler(config, auth);
     this.portalSdk = new Sdk(config.endpoint || DEFAULT_ENDPOINT);
-    this.portalSdkReady = this.#initPortalSdk();
     configureCar({
       datastoreName: config.datastoreName,
       datastore: config.datastore,
@@ -73,16 +72,26 @@ export class UploadManager {
     this.portalSdk.setAuthToken(token);
   }
 
+  async #ensurePortalSdkReady(): Promise<void> {
+    if (!this.portalSdkReady) {
+      this.portalSdkReady = this.#initPortalSdk().catch((err) => {
+        this.portalSdkReady = undefined;
+        throw err;
+      });
+    }
+    return this.portalSdkReady;
+  }
+
   /**
    * Fetch the upload size limit from the API. Falls back to 100 MB on failure.
    */
   async fetchUploadLimit(): Promise<number> {
-    await this.portalSdkReady;
     if (this.limitFetched) {
       return this.uploadLimit;
     }
 
     try {
+      await this.#ensurePortalSdkReady();
       const result = await this.portalSdk.account().uploadLimit();
       if (result.success && result.data?.limit) {
         this.uploadLimit = result.data.limit;
@@ -223,7 +232,7 @@ export class UploadManager {
     uploadResult: UploadResult,
     options?: OperationPollingOptions,
   ): Promise<UploadResult> {
-    await this.portalSdkReady;
+    await this.#ensurePortalSdkReady();
     if (!uploadResult.cid) {
       throw new Error("Cannot wait for operation by CID — CID not available. Use upload result ID to poll GET /api/upload/result/{id} instead.");
     }
