@@ -1,5 +1,13 @@
 # @lumeweb/portal-dashboard
 
+## 0.3.6 (2026-06-22)
+
+### Fixes
+
+#### Fixes
+
+- remove dead deps causing taze errors (events, querystring)
+
 ## 0.3.5 (2026-06-09)
 
 ### Features

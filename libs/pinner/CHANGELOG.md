@@ -1,3 +1,13 @@
+## 0.1.14 (2026-06-22)
+
+### Fixes
+
+#### Fixes
+
+- update orval mock config for 8.18.0 (generators array)
+- centralize auth in AuthManager
+- use invalid JwtAuthManager in auth-error tests
+
 ## 0.1.13 (2026-06-10)
 
 ### Features

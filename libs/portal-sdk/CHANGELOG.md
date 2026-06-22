@@ -1,5 +1,13 @@
 # @lumeweb/portal-sdk
 
+## 0.1.6 (2026-06-22)
+
+### Fixes
+
+#### Fixes
+
+- update portal-sdk orval mock config for 8.18.0
+
 ## 0.1.5 (2026-06-01)
 
 ### Features

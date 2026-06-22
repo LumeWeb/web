@@ -1,4 +1,13 @@
 
+## 0.6.3 (2026-06-22)
+
+### Fixes
+
+#### Fixes
+
+- propagate PATH export to parent shell
+- propagate script exit code through eval
+
 ## 0.6.2 (2026-05-21)
 
 ### Features

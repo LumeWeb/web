@@ -1,3 +1,11 @@
+## 0.1.4 (2026-06-22)
+
+### Fixes
+
+#### Fixes
+
+- migrate pnpm settings to pnpm-workspace.yaml, remove dead esbuild dep
+
 ## 0.1.3 (2026-06-09)
 
 ### Features

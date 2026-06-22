@@ -1,3 +1,11 @@
+## 0.1.3 (2026-06-22)
+
+### Fixes
+
+#### Fixes
+
+- remove dead deps causing taze errors (events, querystring)
+
 ## 0.1.2 (2026-06-09)
 
 ### Fixes
