@@ -1,3 +1,14 @@
+## 0.1.15 (2026-06-22)
+
+### Fixes
+
+#### Fixes
+
+- implement API key exchange for JWT auth
+- clear exchangePromise on failure, await portalSdk init
+- make portalSdk init lazily retryable
+- await #ensurePortalSdkReady in waitForOperation
+
 ## 0.1.14 (2026-06-22)
 
 ### Fixes
