@@ -3,18 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "main": "./dist/cjs/index.cjs",
+  "main": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",
   "exports": {
     "./main": {
       "types": "./dist/esm/main.d.ts",
-      "import": "./dist/esm/main.js",
-      "require": "./dist/cjs/main.cjs"
+      "import": "./dist/esm/main.js"
     },
     "./preview": {
       "types": "./dist/esm/preview.d.ts",
-      "import": "./dist/esm/preview.js",
-      "require": "./dist/cjs/preview.cjs"
+      "import": "./dist/esm/preview.js"
     }
   },
   "scripts": {

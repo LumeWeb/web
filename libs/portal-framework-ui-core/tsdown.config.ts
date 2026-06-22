@@ -17,7 +17,7 @@ export default defineConfig([
   {
     ...baseOptions,
     clean: true,
-    dts: false,
+    dts: true,
     entry: ["./src/index.ts", "!**/*.stories.tsx", "!**/*.css"],
     format: {
       esm: {
