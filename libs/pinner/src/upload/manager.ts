@@ -153,6 +153,7 @@ export class UploadManager {
     input: number | UploadResult,
     options?: OperationPollingOptions,
   ): Promise<UploadResult> {
+    await this.#ensurePortalSdkReady();
     // Scenario 1: UploadResult with operationId - use it directly
     if (isUploadResult(input) && input.operationId) {
       return await this.#waitForOperationById(input, options);
