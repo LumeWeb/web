@@ -1,3 +1,11 @@
+## 0.1.17 (2026-06-22)
+
+### Fixes
+
+#### Fixes
+
+- share single Sdk instance between auth and upload managers
+
 ## 0.1.16 (2026-06-22)
 
 ### Fixes
