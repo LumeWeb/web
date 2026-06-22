@@ -1,5 +1,14 @@
 # @lumeweb/portal-sdk
 
+## 0.1.8 (2026-06-22)
+
+### Fixes
+
+#### Fixes
+
+- implement API key exchange for JWT auth
+- use Bearer prefix for API key exchange
+
 ## 0.1.7 (2026-06-22)
 
 ### Fixes

@@ -1,3 +1,16 @@
+## 0.1.16 (2026-06-22)
+
+### Fixes
+
+#### Fixes
+
+- implement API key exchange for JWT auth
+- clear exchangePromise on failure, await portalSdk init
+- make portalSdk init lazily retryable
+- await #ensurePortalSdkReady in waitForOperation
+- derive account endpoint from pinner endpoint
+- preserve port/path in account endpoint derivation
+
 ## 0.1.15 (2026-06-22)
 
 ### Fixes
