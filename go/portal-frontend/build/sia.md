@@ -1,6 +1,6 @@
 ---
 title: "Secure storage starts here —let's talk"
-url: "https://pinner.xyz/sia"
+url: "https://pinner.xyz/sia/"
 ---
 
 ![hero bg shape](/_astro/hero-shape.Cr6pxldy.svg)

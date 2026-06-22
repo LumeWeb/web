@@ -1,6 +1,6 @@
 ---
 title: "Storage that fits your needs"
-url: "https://pinner.xyz/pricing"
+url: "https://pinner.xyz/pricing/"
 ---
 
 ![hero bg shape](/_astro/hero-shape.Cr6pxldy.svg)

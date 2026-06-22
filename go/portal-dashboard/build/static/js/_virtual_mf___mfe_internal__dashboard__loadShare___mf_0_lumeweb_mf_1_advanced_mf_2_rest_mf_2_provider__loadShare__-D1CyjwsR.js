@@ -1,1 +1,0 @@
-import{__mfDefaultExport as e,__mf_0 as t,__mf_1 as n,__mf_2 as r,__mf_3 as i,__moduleExports as a}from"./_virtual_mf___mfe_internal__dashboard__loadShare___mf_0_lumeweb_mf_1_advanced_mf_2_rest_mf_2_provider__loadShare__.mjs-sGnzgh8H.js";export{t as NestedParamError,n as TemplateResolutionError,a as __moduleExports,r as dataProvider,e as default,i as httpClient};

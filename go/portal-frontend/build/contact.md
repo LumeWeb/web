@@ -1,6 +1,6 @@
 ---
 title: "Connect with the community"
-url: "https://pinner.xyz/contact"
+url: "https://pinner.xyz/contact/"
 ---
 
 ![hero bg shape](/_astro/hero-shape.Cr6pxldy.svg)

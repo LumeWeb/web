@@ -1,0 +1,2 @@
+var e={".":async()=>{let e=await import(`./index-CWXApDKJ.js`),t={};return Object.assign(t,e),Object.defineProperty(t,"__esModule",{value:!0,enumerable:!1}),t},"./NotFound":async()=>{let e=await import(`./NotFound-BLr5odIg.js`),t={};return Object.assign(t,e),Object.defineProperty(t,"__esModule",{value:!0,enumerable:!1}),t}};export{e as default};
+//# sourceMappingURL=virtual_mf-exposes-ssr___mfe_internal__core_core__remoteEntry-_hash__js-DGuOpBB9.js.map

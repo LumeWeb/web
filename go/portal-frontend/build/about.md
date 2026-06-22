@@ -1,6 +1,6 @@
 ---
 title: "Decentralized storage that puts you in control"
-url: "https://pinner.xyz/about"
+url: "https://pinner.xyz/about/"
 ---
 
 ![hero bg shape](/_astro/hero-shape.Cr6pxldy.svg)

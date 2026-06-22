@@ -1,1 +1,0 @@
-import{__mfPrebuildExports as e,__mf_0$1 as t,__mf_1 as n,__mf_2 as r}from"./_virtual_mf___mfe_internal__dashboard__loadShare__react_mf_2_dom_mf_1_client__loadShare__.mjs-BGbe2o7g.js";export{t as createRoot,e as default,n as hydrateRoot,r as version};

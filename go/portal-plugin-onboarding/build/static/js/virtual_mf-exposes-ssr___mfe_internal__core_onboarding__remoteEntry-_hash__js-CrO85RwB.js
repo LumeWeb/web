@@ -1,0 +1,2 @@
+var e={".":async()=>{let e=await import(`./index-rRxPn5Cq.js`),t={};return Object.assign(t,e),Object.defineProperty(t,"__esModule",{value:!0,enumerable:!1}),t},"./widgets/onboarding/checklist":async()=>{let e=await import(`./checklist-Cc_7mcS5.js`),t={};return Object.assign(t,e),Object.defineProperty(t,"__esModule",{value:!0,enumerable:!1}),t}};export{e as default};
+//# sourceMappingURL=virtual_mf-exposes-ssr___mfe_internal__core_onboarding__remoteEntry-_hash__js-CrO85RwB.js.map

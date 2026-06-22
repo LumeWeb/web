@@ -1,6 +1,6 @@
 ---
 title: "Simple interface, powerful technology"
-url: "https://pinner.xyz/how-it-works"
+url: "https://pinner.xyz/how-it-works/"
 ---
 
 ![hero bg shape](/_astro/hero-shape.Cr6pxldy.svg)

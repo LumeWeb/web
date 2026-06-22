@@ -1,0 +1,150 @@
+---
+title: "Your files, truly private, with Lume"
+url: "https://pinner.xyz/"
+---
+
+# Your files, truly private, with Lume
+
+Experience decentralized storage that puts you in control - secure, private, and more affordable than traditional solutions.
+
+[Start Storing →](https://account.pinner.xyz)[How it works →](/how-it-works)
+
+### design-assets.sketch (28 MB)
+
+### project-backup
+
+1 file (1.2 MB)
+
+7 days ago
+
+### photos
+
+29 files (345 MB)
+
+2 days ago
+
+### quarterly-report.pdf (13 MB)
+
+### project-backup
+
+15 files (2.3 GB)
+
+Just now
+
+### design-assets.sketch (28 MB)
+
+### project-backup
+
+1 file (1.2 MB)
+
+7 days ago
+
+## Sign up, upload, and share
+
+Lume handles the privacy.
+
+Storage
+
+Monthly storage limit is 130 GB
+
+[Add More](#)
+
+120 GB Used
+
+10 GB Left
+
+### quarterly-presentation.pptx (8.4 MB)
+
+### design-assets-v2.sketch (142 MB)
+
+### client-deliverables.zip (298 MB)
+
+## Password
+
+Change Password
+
+## Two-Factor Authentication
+
+Improve security by enabling 2FA.
+
+Enable Two-Factor Authorization
+
+## Backup Key
+
+Keep a backup code for account recovery.
+
+Generate Backup Key
+
+### Create an account
+
+Get started with decentralized storage in minutes
+
+### Upload
+
+Simple drag and drop to the decentralized network
+
+### Secure
+
+Your files, backed by Sia's proven network integrity
+
+## True data removal when you need it
+
+Unlike traditional cloud storage, when you delete files on Lume, they're genuinely gone
+
+[Read more about data deletion →](#)
+
+## Network
+
+Network activity
+
++ Add More
+
+85 GB Used15 GB Left
+
+## Storage
+
+Storage activity
+
++ Add More
+
+40 GB Used60 GB Left
+
+Built on open source technology, powered by Sia
+
+## Powered & Trusted by
+
+![brand logo](images/brand-logo-dark-1.png)![brand logo](images/brand-logo-dark-2.png)![brand logo](images/brand-logo-dark-3.png)
+
+## Pay as you go, upgrade whenever
+
+To understand how Lume works, it helps to understand.
+
+### Getting Started
+
+Current
+
+Ready to use now
+
+*   ![user icon](./images/icon-check.svg)Free Community storage access
+*   ![user icon](./images/icon-folder.svg)Fair use based resources
+*   ![user icon](./images/icon-deliver.svg)Basic resource guarantees
+*   ![user icon](./images/icon-check.svg)Start storing right away
+
+[Start Storing →](https://account.pinner.xyz)
+
+### Run Your Own
+
+Maximum control and privacy
+
+*   ![user icon](./images/icon-user.svg)Self-hosted storage access
+*   ![user icon](./images/icon-folder.svg)Configure your own limits
+*   ![user icon](./images/icon-deliver.svg)Your infrastructure controls
+*   ![user icon](./images/icon-check.svg)Full privacy guarantees
+
+[Learn More →](https://docs.lumeweb.com/operators/overview)
+
+## Your files, your control
+
+Get started with decentralized storage today
+
+[Start Storing →](https://account.pinner.xyz)[Read the Docs](https://docs.lumeweb.com)
