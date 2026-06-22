@@ -1,6 +1,7 @@
 import { jwtDecode } from "jwt-decode";
 import { Sdk } from "@lumeweb/portal-sdk";
 import { JwtAuthManager } from "./manager";
+import { JwtPurpose } from "./types";
 import { ConfigurationError } from "@/errors";
 
 /**
@@ -8,7 +9,7 @@ import { ConfigurationError } from "@/errors";
  *
  * Mirrors the Go SDK's AuthServiceDefault.GetLoginToken():
  * 1. Decode the JWT audience without verification
- * 2. If aud === "api", call POST /api/auth/key to exchange for a login JWT
+ * 2. If aud === JwtPurpose.API, call POST /api/auth/key to exchange for a login JWT
  * 3. Use the login JWT for all subsequent requests
  *
  * The exchange happens lazily on first access (getAuthToken/getAuthHeaders)
@@ -56,7 +57,7 @@ export class KeyExchangeAuthManager extends JwtAuthManager {
 
     const aud = this.getAudience();
 
-    if (aud !== "api") {
+    if (aud !== JwtPurpose.API) {
       this.resolvedToken = this.token;
       return Promise.resolve(this.resolvedToken);
     }
