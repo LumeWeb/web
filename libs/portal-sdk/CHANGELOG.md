@@ -1,5 +1,13 @@
 # @lumeweb/portal-sdk
 
+## 0.1.9 (2026-06-22)
+
+### Fixes
+
+#### Fixes
+
+- publish valid ESM-only entrypoints across all packages
+
 ## 0.1.8 (2026-06-22)
 
 ### Fixes

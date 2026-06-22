@@ -1,3 +1,11 @@
+## 0.1.5 (2026-06-22)
+
+### Fixes
+
+#### Fixes
+
+- publish valid ESM-only entrypoints across all packages
+
 ## 0.1.4 (2026-06-22)
 
 ### Fixes

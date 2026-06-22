@@ -1,3 +1,15 @@
+## 0.1.3 (2026-06-22)
+
+### Fixes
+
+#### Fixes
+
+- publish valid ESM-only entrypoints across all packages
+
+#### Fixes
+
+- add type annotation for ChartLegend
+
 ## 0.1.2 (2026-06-01)
 
 ### Fixes
