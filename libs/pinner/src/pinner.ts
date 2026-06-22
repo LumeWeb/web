@@ -3,7 +3,8 @@ import { UploadManager } from "./upload";
 import { PinClient } from "./pin";
 import { IpnsClient } from "./api/ipns";
 import { WebsitesClient } from "./api/websites";
-import { JwtAuthManager, type AuthManager } from "@/auth";
+import { JwtAuthManager, KeyExchangeAuthManager, type AuthManager } from "@/auth";
+import { DEFAULT_CONFIG } from "./config";
 import type { UploadMethodAndBuilder } from "@/upload/builder";
 import { createUploadBuilderNamespace } from "@/upload/builder";
 import type {
@@ -34,7 +35,8 @@ export class Pinner {
    * @param config SDK configuration object
    */
   constructor(config: PinnerConfig) {
-    this.auth = new JwtAuthManager(config.jwt);
+    const endpoint = config.endpoint ?? DEFAULT_CONFIG.endpoint!;
+    this.auth = new KeyExchangeAuthManager(config.jwt, endpoint);
     this.uploadManager = new UploadManager(config, this.auth);
     this._pins = new PinClient(config, this.auth);
     this._ipns = new IpnsClient(config, this.auth);

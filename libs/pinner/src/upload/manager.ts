@@ -60,11 +60,16 @@ export class UploadManager {
     this.xhrHandler = new XHRUploadHandler(config, auth);
     this.tusHandler = new TUSUploadHandler(config, auth);
     this.portalSdk = new Sdk(config.endpoint || DEFAULT_ENDPOINT);
-    this.portalSdk.setAuthToken(auth.getAuthToken());
+    this.#initPortalSdk();
     configureCar({
       datastoreName: config.datastoreName,
       datastore: config.datastore,
     });
+  }
+
+  async #initPortalSdk(): Promise<void> {
+    const token = await this.auth.getAuthToken();
+    this.portalSdk.setAuthToken(token);
   }
 
   /**
@@ -318,7 +323,7 @@ export class UploadManager {
 
     const baseUrl = this.config.endpoint || DEFAULT_ENDPOINT;
     const fetchUrl = `${baseUrl}/api/upload/result/${encodeURIComponent(uploadId)}`;
-    const headers = this.auth.getAuthHeaders();
+    const headers = await this.auth.getAuthHeaders();
 
     const result = await poll<UploadResultResponse>(
       async () => {

@@ -66,6 +66,7 @@
     "interface-datastore": "^10.0.1",
     "interface-store": "^8.0.0",
     "ipaddr.js": "^2.4.0",
+    "jwt-decode": "^4.0.0",
     "ky": "catalog:",
     "multiformats": "catalog:",
     "nanoevents": "catalog:",

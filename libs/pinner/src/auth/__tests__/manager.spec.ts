@@ -33,47 +33,48 @@ describe("JwtAuthManager", () => {
   });
 
   describe("getAuthToken", () => {
-    it("should return the token string", () => {
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
+    it("should return the token string", async () => {
+      const token = "eyJhbG...VCJ9";
       const manager = new JwtAuthManager(token);
-      expect(manager.getAuthToken()).toBe(token);
+      expect(await manager.getAuthToken()).toBe(token);
     });
   });
 
   describe("getAuthHeaders", () => {
-    it("should return Authorization Bearer header", () => {
+    it("should return Authorization Bearer header", async () => {
       const token = "my-jwt-token";
       const manager = new JwtAuthManager(token);
-      expect(manager.getAuthHeaders()).toEqual({
+      expect(await manager.getAuthHeaders()).toEqual({
         Authorization: `Bearer ${token}`,
       });
     });
 
-    it("should return a new object each call (not cached)", () => {
+    it("should return a new object each call (not cached)", async () => {
       const manager = new JwtAuthManager("token");
-      const h1 = manager.getAuthHeaders();
-      const h2 = manager.getAuthHeaders();
+      const h1 = await manager.getAuthHeaders();
+      const h2 = await manager.getAuthHeaders();
       expect(h1).toEqual(h2);
       expect(h1).not.toBe(h2);
     });
   });
 
   describe("getAccessToken", () => {
-    it("should return the raw token for pinning-service-client", () => {
+    it("should return the raw token for pinning-service-client", async () => {
       const token = "raw-token-123";
       const manager = new JwtAuthManager(token);
-      expect(manager.getAccessToken()).toBe(token);
+      expect(await manager.getAccessToken()).toBe(token);
     });
   });
 
   describe("interface compliance", () => {
-    it("should satisfy the AuthManager interface", () => {
+    it("should satisfy the AuthManager interface", async () => {
       const manager: import("../manager").AuthManager = new JwtAuthManager(
         "token",
       );
-      expect(manager.getAuthToken()).toBe("token");
-      expect(manager.getAuthHeaders()).toHaveProperty("Authorization");
-      expect(manager.getAccessToken()).toBe("token");
+      expect(await manager.getAuthToken()).toBe("token");
+      const headers = await manager.getAuthHeaders();
+      expect(headers).toHaveProperty("Authorization");
+      expect(await manager.getAccessToken()).toBe("token");
     });
   });
 });

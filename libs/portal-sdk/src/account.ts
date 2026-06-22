@@ -185,6 +185,27 @@ export class AccountApi {
   }
 
   /**
+   * Exchange an API key JWT for a login JWT.
+   * The API key is sent as the raw Authorization header value (not Bearer).
+   * @param apiKey API key JWT to exchange
+   * @returns Result containing login response with the login JWT
+   */
+  public async loginWithApiKey(
+    apiKey: string,
+  ): Promise<Result<LoginResponse>> {
+    const result = await this.fetchJson<LoginResponse>("/api/auth/key", {
+      headers: { Authorization: apiKey } as Record<string, string>,
+      method: "POST",
+    });
+
+    if (result.success && result.data?.token) {
+      this.setToken(result.data.token);
+    }
+
+    return result;
+  }
+
+  /**
    * Logout from the account service
    * @returns Result indicating success or failure
    */
@@ -473,12 +494,14 @@ export class AccountApi {
   private buildOptions(init: RequestInit = {}): RequestInit {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      ...init.headers!,
     };
 
     if (this.jwtToken) {
       headers.Authorization = `Bearer ${this.jwtToken}`;
     }
+
+    // Custom headers from init take precedence over defaults
+    Object.assign(headers, init.headers);
 
     return {
       ...init,

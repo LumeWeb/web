@@ -30,7 +30,7 @@ export abstract class ApiClient {
       const response = await ky(path, {
         prefix: this.endpoint,
         headers: {
-          ...this.auth.getAuthHeaders(),
+          ...await this.auth.getAuthHeaders(),
           "Content-Type": "application/json",
         },
         ...options,

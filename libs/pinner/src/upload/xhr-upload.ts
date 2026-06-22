@@ -5,12 +5,12 @@ import { BaseUploadHandler } from "./base-upload";
 import { UPLOAD_SOURCE_XHR } from "./constants";
 
 export class XHRUploadHandler extends BaseUploadHandler {
-  protected configurePlugin(uppy: Uppy): void {
+  protected async configurePlugin(uppy: Uppy): Promise<void> {
     uppy.use(XHRUpload, {
       endpoint: `${this.config.endpoint}/api/upload`,
       fieldName: "file",
       formData: true,
-      headers: this.auth.getAuthHeaders(),
+      headers: await this.auth.getAuthHeaders(),
       timeout: this.config.timeout,
       retries: this.config.retries,
     });
