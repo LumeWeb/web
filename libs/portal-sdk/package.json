@@ -6,23 +6,20 @@
   "files": [
     "dist"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/esm/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "import": "./dist/esm/index.js"
     },
     "./openapi": {
       "types": "./dist/esm/openapi.d.ts",
-      "import": "./dist/esm/openapi.js",
-      "require": "./dist/cjs/openapi.cjs"
+      "import": "./dist/esm/openapi.js"
     },
     "./mocks": {
       "types": "./dist/esm/account/mocks.d.ts",
-      "import": "./dist/esm/account/mocks.js",
-      "require": "./dist/cjs/account/mocks.cjs"
+      "import": "./dist/esm/account/mocks.js"
     },
     "./package.json": "./package.json"
   },
