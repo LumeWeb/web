@@ -8,7 +8,7 @@
     "build": "pnpm generate && vocs build",
     "preview": "vocs preview",
     "generate": "pnpm generate:cli-ref && pnpm generate:cli && pnpm generate:sdk",
-    "generate:cli-ref": "pnpm setup:pinner && mkdir -p reference-sources && pinner generate-docs json > reference-sources/cli-ref.json",
+    "generate:cli-ref": "eval \"$(bash ../../scripts/setup-pinner-cli.sh)\" && mkdir -p reference-sources && pinner generate-docs json > reference-sources/cli-ref.json",
     "generate:typedoc": "typedoc",
     "generate:cli": "tsx scripts/generate-cli-ref.ts",
     "generate:sdk": "pnpm generate:typedoc && tsx scripts/generate-sdk-ref.ts",
