@@ -22,7 +22,18 @@ export class KeyExchangeAuthManager extends JwtAuthManager {
 
   constructor(jwt: string, endpoint: string) {
     super(jwt);
-    this.sdk = new Sdk(endpoint);
+    // Derive the account endpoint from the pinner endpoint.
+    // Go SDK uses hardcoded DefaultEndpoint = "account.pinner.xyz".
+    // AccountApi constructor prepends "account." to the hostname,
+    // so we strip the first subdomain (e.g. ipfs.pinner.xyz → pinner.xyz)
+    // and let AccountApi add "account." → account.pinner.xyz.
+    const url = new URL(endpoint);
+    const parts = url.hostname.split(".");
+    if (parts.length > 2) {
+      parts.shift(); // Remove first subdomain (e.g. "ipfs")
+    }
+    const baseHostname = parts.join(".");
+    this.sdk = new Sdk(`${url.protocol}//${baseHostname}`);
   }
 
   /**
