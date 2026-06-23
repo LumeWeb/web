@@ -1,4 +1,12 @@
 
+## 0.6.4 (2026-06-23)
+
+### Fixes
+
+#### Fixes
+
+- correct Windows install command syntax in quickstart
+
 ## 0.6.3 (2026-06-22)
 
 ### Fixes

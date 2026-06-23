@@ -256,6 +256,14 @@
 * rework several sections on home page, some refactoring ([4935177](https://git.lumeweb.com/LumeWeb/lumeweb.com/commit/4935177908f9411de0999048367cc384592f198a))
 * sass support, mixins for fluid design, refactoring, work on components ([9701291](https://git.lumeweb.com/LumeWeb/lumeweb.com/commit/97012911aab8659d0ddb268a9bc54d72e1c37b6f))
 * svg icons, donation methods ([63e0c57](https://git.lumeweb.com/LumeWeb/lumeweb.com/commit/63e0c57b0329f76609f6d9a55a37585dfce7f45d))
+## 0.4.3 (2026-06-23)
+
+### Features
+
+#### Features
+
+- site brand updates — layout refactor, font migration, new pages
+
 ## 0.4.2 (2026-06-10)
 
 ### Features
