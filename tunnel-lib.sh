@@ -362,11 +362,8 @@ tunnel_generate_plugin_config() {
         exit 1
     fi
 
-    # Build jq array using --arg and --argjson
-    local jq_args=("--arg" "domain" "$domain")
-    local idx=0
-    local -a local_indices=()
-    local -a ignore_indices=()
+    # Collect per-plugin JSON objects (built with jq -n, no manual escaping)
+    local -a entries=()
 
     # Parse comma-separated list (supports "local:" and "ignore:" prefixes)
     IFS=',' read -ra plugins <<< "$plugin_list"
@@ -399,34 +396,29 @@ tunnel_generate_plugin_config() {
             continue
         fi
 
-        jq_args+=("--arg" "name$idx" "$name")
-        jq_args+=("--argjson" "port$idx" "$port")
-        local_indices[idx]=$is_local
-        ignore_indices[idx]=$is_ignore
-        idx=$((idx + 1))
+        # Build JSON object with jq -n (all values safely interpolated, no manual escaping)
+        local obj
+        obj=$(jq -n \
+            --arg name "$name" \
+            --argjson port "$port" \
+            --arg tunnelHost "$name.$domain" \
+            --argjson local "$is_local" \
+            --argjson ignore "$is_ignore" \
+            '{name: $name, port: $port, tunnelHost: $tunnelHost} +
+             (if $local then {local: true} else {} end) +
+             (if $ignore then {ignore: true} else {} end)')
+        entries+=("$obj")
+
         port=$((port + 1))
     done
 
-    if [ $idx -eq 0 ]; then
+    if [ ${#entries[@]} -eq 0 ]; then
         echo "[]"
         return 0
     fi
 
-    local filter="["
-    for i in $(seq 0 $((idx - 1))); do
-        [ "$i" -gt 0 ] && filter="$filter,"
-        filter="$filter{name: \$name$i, port: \$port$i, tunnelHost: \"\$(\$name$i).\$(\$domain)\""
-        if [ "${local_indices[$i]}" = true ]; then
-            filter="$filter, local: true"
-        fi
-        if [ "${ignore_indices[$i]}" = true ]; then
-            filter="$filter, ignore: true"
-        fi
-        filter="$filter}"
-    done
-    filter="$filter]"
-
-    jq "${jq_args[@]}" -n "$filter"
+    # Assemble final array from all collected JSON objects
+    printf '%s\n' "${entries[@]}" | jq -s '.'
 }
 
 # --- Multi-App Tunnel (module-federation with plugins) ---
