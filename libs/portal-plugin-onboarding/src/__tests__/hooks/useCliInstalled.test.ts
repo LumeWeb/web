@@ -39,11 +39,8 @@ describe("useCliInstalled", () => {
     mockUseList.mockReturnValue({
       query: { isLoading: false, isFetching: false, isError: false, isSuccess: true },
       result: {
-        data: [
-          { name: "other-key", uuid: "1", created_at: "2026-01-01" },
-          { name: "another-key", uuid: "2", created_at: "2026-01-02" },
-        ],
-        total: 2,
+        data: [],
+        total: 0,
       },
     } as any);
 
