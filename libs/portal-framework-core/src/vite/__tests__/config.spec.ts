@@ -468,4 +468,25 @@ describe("setupPluginRegistryConfig", () => {
     const result = setupPluginRegistryConfig(baseOpts);
     expect(result.portalConfig.feature_flags).toEqual({});
   });
+
+  it("skips ignored plugins and adds them to ignoredPlugins set", () => {
+    const registry = [
+      { name: "active-plugin", port: 4100 },
+      { name: "ignored-plugin", port: 4101, ignore: true },
+    ];
+
+    existsSyncSpy.mockReturnValue(true);
+    readFileSyncSpy.mockImplementation((path: string) => {
+      if (path.includes("plugin-registry.v1.json")) {
+        return JSON.stringify({ type: "array" });
+      }
+      return JSON.stringify(registry);
+    });
+
+    const result = setupPluginRegistryConfig(baseOpts);
+    expect(result.portalConfig.plugins["active-plugin"]).toBeDefined();
+    expect(result.portalConfig.plugins["ignored-plugin"]).toBeUndefined();
+    expect(result.ignoredPlugins.has("ignored-plugin")).toBe(true);
+    expect(result.ignoredPlugins.has("active-plugin")).toBe(false);
+  });
 });

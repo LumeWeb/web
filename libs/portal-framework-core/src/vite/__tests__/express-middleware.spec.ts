@@ -150,22 +150,54 @@ describe("mergeUpstreamConfig", () => {
     mergeUpstreamConfig(localConfig, upstreamConfig);
     expect(localConfig).toEqual(original);
   });
+
+  // ── ignore flag cascade ──
+
+  it("removes ignored plugins from upstream response", async () => {
+    const { mergeUpstreamConfig } = await import("../express-middleware");
+    const ignored = new Set(["upstreamOnly"]);
+    const result = mergeUpstreamConfig(localConfig, upstreamConfig, ignored);
+    expect(result.plugins["upstreamOnly"]).toBeUndefined();
+    expect(result.plugins["dashboard"]).toBeDefined();
+  });
+
+  it("does not strip non-ignored upstream plugins", async () => {
+    const { mergeUpstreamConfig } = await import("../express-middleware");
+    const ignored = new Set(["nonexistent"]);
+    const result = mergeUpstreamConfig(localConfig, upstreamConfig, ignored);
+    expect(result.plugins["dashboard"]).toBeDefined();
+    expect(result.plugins["upstreamOnly"]).toBeDefined();
+  });
+
+  it("with empty ignore set behaves like no filtering", async () => {
+    const { mergeUpstreamConfig } = await import("../express-middleware");
+    const resultWith = mergeUpstreamConfig(
+      localConfig,
+      upstreamConfig,
+      new Set(),
+    );
+    const resultWithout = mergeUpstreamConfig(localConfig, upstreamConfig);
+    expect(resultWith.plugins).toEqual(resultWithout.plugins);
+  });
 });
 
 // ── createExpressMiddlewarePlugin ───────────────────────────────────
 
 describe("createExpressMiddlewarePlugin", () => {
+  const loaderResult = {
+    portalConfig: {
+      domain: DEFAULT_PORTAL_DOMAIN,
+      feature_flags: {},
+      plugins: {},
+    },
+    ignoredPlugins: new Set<string>(),
+  };
+
   it("returns a Vite plugin with correct name", async () => {
     const { createExpressMiddlewarePlugin } = await import(
       "../express-middleware"
     );
-    const loader = () =>
-      ({
-        domain: DEFAULT_PORTAL_DOMAIN,
-        feature_flags: {},
-        plugins: {},
-      }) as PortalMetaConfig;
-    const plugin = createExpressMiddlewarePlugin(loader);
+    const plugin = createExpressMiddlewarePlugin(() => loaderResult);
     expect(plugin.name).toBe("portal-express-middleware");
   });
 
@@ -173,13 +205,7 @@ describe("createExpressMiddlewarePlugin", () => {
     const { createExpressMiddlewarePlugin } = await import(
       "../express-middleware"
     );
-    const loader = () =>
-      ({
-        domain: DEFAULT_PORTAL_DOMAIN,
-        feature_flags: {},
-        plugins: {},
-      }) as PortalMetaConfig;
-    const plugin = createExpressMiddlewarePlugin(loader);
+    const plugin = createExpressMiddlewarePlugin(() => loaderResult);
     expect(plugin.apply).toBe("serve");
   });
 
@@ -187,13 +213,7 @@ describe("createExpressMiddlewarePlugin", () => {
     const { createExpressMiddlewarePlugin } = await import(
       "../express-middleware"
     );
-    const loader = () =>
-      ({
-        domain: DEFAULT_PORTAL_DOMAIN,
-        feature_flags: {},
-        plugins: {},
-      }) as PortalMetaConfig;
-    const plugin = createExpressMiddlewarePlugin(loader);
+    const plugin = createExpressMiddlewarePlugin(() => loaderResult);
     expect(typeof plugin.configureServer).toBe("function");
     expect(typeof plugin.configurePreviewServer).toBe("function");
   });

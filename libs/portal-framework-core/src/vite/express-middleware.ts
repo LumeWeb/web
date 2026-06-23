@@ -10,12 +10,15 @@ import { DEFAULT_PORTAL_DOMAIN } from "./types";
 export function mergeUpstreamConfig(
   portalConfig: PortalMetaConfig,
   upstreamConfig: PortalMetaConfig,
+  ignoredPlugins?: Set<string>,
 ): PortalMetaConfig {
+  const ignored = ignoredPlugins ?? new Set<string>();
   const mergedConfig: PortalMetaConfig = { ...portalConfig };
 
   mergedConfig.plugins = Object.fromEntries(
-    Object.entries(upstreamConfig.plugins).map(
-      ([pluginName, upstreamPlugin]) => {
+    Object.entries(upstreamConfig.plugins)
+      .filter(([pluginName]) => !ignored.has(pluginName))
+      .map(([pluginName, upstreamPlugin]) => {
         const localPlugin = portalConfig.plugins[pluginName];
         return [
           pluginName,
@@ -24,8 +27,7 @@ export function mergeUpstreamConfig(
             web_bundles: localPlugin?.web_bundles ?? upstreamPlugin.web_bundles,
           },
         ];
-      },
-    ),
+      }),
   );
 
   for (const [pluginName, localPlugin] of Object.entries(
@@ -58,6 +60,7 @@ export function mergeUpstreamConfig(
 export function setupExpressMiddleware(
   server: ViteDevServer | PreviewServer,
   portalConfig: PortalMetaConfig,
+  ignoredPlugins?: Set<string>,
 ): void {
   const expressApp = express();
   expressApp.use(express.json());
@@ -92,7 +95,11 @@ export function setupExpressMiddleware(
             throw new Error(`Failed to parse upstream config: ${err.message}`);
           })) as PortalMetaConfig;
 
-          mergedConfig = mergeUpstreamConfig(portalConfig, upstreamConfig);
+          mergedConfig = mergeUpstreamConfig(
+            portalConfig,
+            upstreamConfig,
+            ignoredPlugins,
+          );
         } catch (error) {
           console.error("Failed to fetch/process upstream meta config:", error);
         } finally {
@@ -149,17 +156,20 @@ export function setupExpressMiddleware(
 }
 
 export function createExpressMiddlewarePlugin(
-  configLoader: () => PortalMetaConfig,
+  configLoader: () => {
+    portalConfig: PortalMetaConfig;
+    ignoredPlugins: Set<string>;
+  },
 ): Plugin {
   return {
     apply: "serve",
     configurePreviewServer(server) {
-      const portalConfig = configLoader();
-      setupExpressMiddleware(server, portalConfig);
+      const { portalConfig, ignoredPlugins } = configLoader();
+      setupExpressMiddleware(server, portalConfig, ignoredPlugins);
     },
     configureServer(server) {
-      const portalConfig = configLoader();
-      setupExpressMiddleware(server, portalConfig);
+      const { portalConfig, ignoredPlugins } = configLoader();
+      setupExpressMiddleware(server, portalConfig, ignoredPlugins);
     },
     name: "portal-express-middleware",
   };
