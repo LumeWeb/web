@@ -41,6 +41,12 @@ export interface PortalPlugin {
   tunnelHost?: string;
   tunnelProtocol?: "http" | "https";
   local?: boolean;
+  /**
+   * When true, this plugin is excluded from the /api/meta response entirely
+   * — both local entries and upstream (server-side) plugins with the same name.
+   * The client will never see the plugin, so Module Federation won't load it.
+   */
+  ignore?: boolean;
   web_bundles?: RegistryWebBundle[];
   meta?: PluginMeta;
   build?: BuildInfo;

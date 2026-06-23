@@ -50,6 +50,7 @@ export function normalizeConfigOptions(opts: ConfigOptions): ConfigOptions {
 
 export function setupPluginRegistryConfig(opts: ConfigOptions): {
   portalConfig: PortalMetaConfig;
+  ignoredPlugins: Set<string>;
 } {
   const configFile =
     opts.pluginRegistryConfigFile ?? DEFAULT_PLUGIN_REGISTRY_FILE;
@@ -80,9 +81,15 @@ export function setupPluginRegistryConfig(opts: ConfigOptions): {
     }
 
     const plugins: Record<string, PortalPluginConfig> = {};
+    const ignoredPlugins = new Set<string>();
 
     for (const entry of registry) {
       const { name, web_bundles, meta, build, port } = entry;
+
+      if (entry.ignore) {
+        ignoredPlugins.add(name);
+        continue;
+      }
 
       if (web_bundles && web_bundles.length > 0) {
         plugins[name] = {
@@ -107,7 +114,7 @@ export function setupPluginRegistryConfig(opts: ConfigOptions): {
       plugins,
     };
 
-    return { portalConfig };
+    return { portalConfig, ignoredPlugins };
   } catch (error) {
     console.error("Error reading or parsing proxy config file:", error);
     throw new Error(

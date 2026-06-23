@@ -123,8 +123,7 @@ function createHostConfig(opts: ConfigOptions) {
 
   config.plugins!.push(
     createExpressMiddlewarePlugin(() => {
-      const { portalConfig } = setupPluginRegistryConfig(opts);
-      return portalConfig;
+      return setupPluginRegistryConfig(opts);
     }),
   );
 

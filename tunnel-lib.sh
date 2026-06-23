@@ -345,8 +345,10 @@ tunnel_single_app() {
 }
 
 # --- Generate Plugin Config JSON ---
-# Usage: tunnel_generate_plugin_config <base_port> <domain> <plugins_base_dir> [local:]plugin1,[local:]plugin2,...
-# Use "local:" prefix for client-only plugins (no Go backend, e.g. local:onboarding)
+# Usage: tunnel_generate_plugin_config <base_port> <domain> <plugins_base_dir> [prefix:]plugin1,[prefix:]plugin2,...
+# Supported prefixes:
+#   local:  Client-only plugin (no Go backend, e.g. local:onboarding)
+#   ignore: Plugin excluded from /api/meta response (skips server start + tunnel creation)
 tunnel_generate_plugin_config() {
     local base_port="${1:-4174}"
     local domain="${2:-$TUNNEL_DOMAIN}"
@@ -364,8 +366,9 @@ tunnel_generate_plugin_config() {
     local jq_args=("--arg" "domain" "$domain")
     local idx=0
     local -a local_indices=()
+    local -a ignore_indices=()
 
-    # Parse comma-separated list (supports "local:" prefix for client-only plugins)
+    # Parse comma-separated list (supports "local:" and "ignore:" prefixes)
     IFS=',' read -ra plugins <<< "$plugin_list"
     for entry in "${plugins[@]}"; do
         # Trim whitespace
@@ -373,12 +376,19 @@ tunnel_generate_plugin_config() {
         [ -z "$entry" ] && continue
 
         local is_local=false
+        local is_ignore=false
         local name="$entry"
 
         # Check for local: prefix
         if [[ "$entry" == local:* ]]; then
             is_local=true
             name="${entry#local:}"
+        fi
+
+        # Check for ignore: prefix
+        if [[ "$entry" == ignore:* ]]; then
+            is_ignore=true
+            name="${entry#ignore:}"
         fi
 
         local plugin_dir="$plugins_base_dir/portal-plugin-$name"
@@ -392,6 +402,7 @@ tunnel_generate_plugin_config() {
         jq_args+=("--arg" "name$idx" "$name")
         jq_args+=("--argjson" "port$idx" "$port")
         local_indices[idx]=$is_local
+        ignore_indices[idx]=$is_ignore
         idx=$((idx + 1))
         port=$((port + 1))
     done
@@ -404,9 +415,12 @@ tunnel_generate_plugin_config() {
     local filter="["
     for i in $(seq 0 $((idx - 1))); do
         [ "$i" -gt 0 ] && filter="$filter,"
-        filter="$filter{name: \$name$i, port: \$port$i, tunnelHost: \"\(\$name$i).\(\$domain)\""
+        filter="$filter{name: \$name$i, port: \$port$i, tunnelHost: \"\$(\$name$i).\$(\$domain)\""
         if [ "${local_indices[$i]}" = true ]; then
             filter="$filter, local: true"
+        fi
+        if [ "${ignore_indices[$i]}" = true ]; then
+            filter="$filter, ignore: true"
         fi
         filter="$filter}"
     done
@@ -468,6 +482,14 @@ tunnel_multi_app() {
             name=$(echo "$plugin" | jq -r '.name')
             local tunnelHost
             tunnelHost=$(echo "$plugin" | jq -r '.tunnelHost')
+            local is_ignored
+            is_ignored=$(echo "$plugin" | jq -r '.ignore // false')
+
+            if [ "$is_ignored" = "true" ]; then
+                echo "Skipping ignored plugin '$name' (server start)"
+                continue
+            fi
+
             local plugin_dir="$plugins_base_dir/portal-plugin-$name"
 
             if [ ! -d "$plugin_dir" ]; then
@@ -495,9 +517,16 @@ tunnel_multi_app() {
             name=$(echo "$plugin" | jq -r '.name')
             local tunnelHost
             tunnelHost=$(echo "$plugin" | jq -r '.tunnelHost')
+            local is_ignored
+            is_ignored=$(echo "$plugin" | jq -r '.ignore // false')
             local plugin_dir="$plugins_base_dir/portal-plugin-$name"
 
             if [ ! -d "$plugin_dir" ]; then
+                continue
+            fi
+
+            if [ "$is_ignored" = "true" ]; then
+                echo "Skipping ignored plugin '$name' (tunnel creation)"
                 continue
             fi
 

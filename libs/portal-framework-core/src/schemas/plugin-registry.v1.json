@@ -34,6 +34,11 @@
           "default": "https",
           "description": "Protocol for tunnel connection. Defaults to https."
         },
+        "ignore": {
+          "type": "boolean",
+          "default": false,
+          "description": "When true, this plugin is excluded from the /api/meta response entirely — both local entries and upstream (server-side) plugins with the same name. The client will never see the plugin, so Module Federation won't load it. Useful for skipping server-side plugins that should not be loaded in a specific dev/preview environment."
+        },
         "local": {
           "type": "boolean",
           "default": false,
