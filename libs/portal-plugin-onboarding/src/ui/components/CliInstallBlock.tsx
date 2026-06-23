@@ -5,14 +5,28 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  cn,
 } from "@lumeweb/portal-framework-ui-core";
 
 type Platform = "unix" | "windows";
+type WindowsShell = "powershell" | "cmd";
 
-const INSTALL_COMMANDS: Record<Platform, string> = {
-  unix: "curl -fsSL https://get.pinner.xyz | sh",
-  windows: "irm https://pinner.xyz/install.ps1 | iex",
+const UNIX_COMMAND = "curl -fsSL https://get.pinner.xyz | sh";
+const WINDOWS_COMMANDS: Record<WindowsShell, string> = {
+  powershell: "irm https://get.pinner.xyz/install.ps1 | iex",
+  cmd: 'powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.pinner.xyz/install.ps1 | iex"',
 };
+
+const WINDOWS_SHELL_LABELS: Record<WindowsShell, string> = {
+  powershell: "PowerShell",
+  cmd: "Command Prompt",
+};
+
+const SHELL_TAB_BASE =
+  "pb-0.5 border-b-2 transition-colors";
+const SHELL_TAB_ACTIVE = "border-foreground text-foreground";
+const SHELL_TAB_INACTIVE =
+  "border-transparent text-muted-foreground hover:text-foreground";
 
 function detectPlatform(): Platform {
   if (typeof navigator === "undefined") return "unix";
@@ -23,13 +37,19 @@ function detectPlatform(): Platform {
 
 export function CliInstallBlock() {
   const [activePlatform, setActivePlatform] = useState<Platform>(detectPlatform);
+  const [windowsShell, setWindowsShell] = useState<WindowsShell>("powershell");
   const [copied, setCopied] = useState(false);
 
+  const activeCommand =
+    activePlatform === "unix"
+      ? UNIX_COMMAND
+      : WINDOWS_COMMANDS[windowsShell];
+
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(INSTALL_COMMANDS[activePlatform]).catch(() => {});
+    navigator.clipboard.writeText(activeCommand).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
-  }, [activePlatform]);
+  }, [activeCommand]);
 
   return (
     <Tabs
@@ -63,17 +83,40 @@ export function CliInstallBlock() {
           </button>
         </div>
         <TabsContent value="unix" className="mt-0">
-          <div className="flex items-center px-4 py-3">
-            <code className="text-sm font-mono text-green-600 dark:text-green-400">
-              {INSTALL_COMMANDS.unix}
+          <div className="px-4 py-3">
+            <code className="text-sm font-mono text-green-600 dark:text-green-400 block">
+              {UNIX_COMMAND}
             </code>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Paste into your terminal and press Enter.
+            </p>
           </div>
         </TabsContent>
         <TabsContent value="windows" className="mt-0">
-          <div className="flex items-center px-4 py-3">
-            <code className="text-sm font-mono text-green-600 dark:text-green-400">
-              {INSTALL_COMMANDS.windows}
+          <div className="px-4 py-3">
+            <div className="flex gap-3 mb-2 text-xs">
+              {(Object.keys(WINDOWS_SHELL_LABELS) as WindowsShell[]).map((shell) => (
+                <button
+                  key={shell}
+                  type="button"
+                  onClick={() => setWindowsShell(shell)}
+                  className={cn(
+                    SHELL_TAB_BASE,
+                    windowsShell === shell ? SHELL_TAB_ACTIVE : SHELL_TAB_INACTIVE,
+                  )}
+                >
+                  {WINDOWS_SHELL_LABELS[shell]}
+                </button>
+              ))}
+            </div>
+            <code className="text-sm font-mono text-green-600 dark:text-green-400 block break-all">
+              {WINDOWS_COMMANDS[windowsShell]}
             </code>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {windowsShell === "powershell"
+                ? "Paste into PowerShell and press Enter."
+                : "Paste into Command Prompt (cmd.exe) and press Enter."}
+            </p>
           </div>
         </TabsContent>
       </div>

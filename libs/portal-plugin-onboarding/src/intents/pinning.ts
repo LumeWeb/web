@@ -7,7 +7,7 @@ import { useHasPins } from "../hooks/useHasPins";
 export const CLI_STEP: IntentStepConfig = {
   id: "cli",
   label: "Install CLI",
-  description: "Install the Pinner CLI to upload and manage content from your terminal",
+  description: "Copy the command below, paste it into your terminal, and run it to install the Pinner CLI",
   ctaLabel: "Copy install command",
   ctaRoute: null,
 };

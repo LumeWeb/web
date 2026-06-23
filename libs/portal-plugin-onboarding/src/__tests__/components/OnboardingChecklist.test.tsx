@@ -5,19 +5,19 @@ import { OnboardingIntent } from "@/types";
 import { OnboardingChecklist } from "@/ui/components/OnboardingChecklist";
 
 const mockStepsPinning = [
-  { id: "cli", isComplete: false, label: "Install CLI", description: "Install the Pinner CLI to upload and manage content from your terminal", ctaLabel: "Copy install command", ctaRoute: null },
+  { id: "cli", isComplete: false, label: "Install CLI", description: "Copy the command below, paste it into your terminal, and run it to install the Pinner CLI", ctaLabel: "Copy install command", ctaRoute: null },
   { id: "subscribe", isComplete: false, label: "Subscribe", description: "Choose a plan to start pinning content to the IPFS network", ctaLabel: "View plans", ctaRoute: "/account/subscription" },
   { id: "upload", isComplete: false, label: "Upload Content", description: "Pin your first file or directory to IPFS", ctaLabel: "Upload files", ctaRoute: "/files" },
 ];
 
 const mockStepsHosting = [
-  { id: "cli", isComplete: false, label: "Install CLI", description: "Install the Pinner CLI to upload and manage content from your terminal", ctaLabel: "Copy install command", ctaRoute: null },
+  { id: "cli", isComplete: false, label: "Install CLI", description: "Copy the command below, paste it into your terminal, and run it to install the Pinner CLI", ctaLabel: "Copy install command", ctaRoute: null },
   { id: "subscribe", isComplete: false, label: "Subscribe", description: "Choose a plan to start hosting websites on IPFS", ctaLabel: "View plans", ctaRoute: "/account/subscription" },
   { id: "deploy", isComplete: false, label: "Deploy Website", description: "Deploy your first website to IPFS", ctaLabel: "Create website", ctaRoute: "/websites" },
 ];
 
 const mockStepsComplete = [
-  { id: "cli", isComplete: true, label: "Install CLI", description: "Install the Pinner CLI to upload and manage content from your terminal", ctaLabel: "Copy install command", ctaRoute: null },
+  { id: "cli", isComplete: true, label: "Install CLI", description: "Copy the command below, paste it into your terminal, and run it to install the Pinner CLI", ctaLabel: "Copy install command", ctaRoute: null },
   { id: "subscribe", isComplete: true, label: "Subscribe", description: "Choose a plan to start pinning content to the IPFS network", ctaLabel: "View plans", ctaRoute: "/account/subscription" },
   { id: "upload", isComplete: true, label: "Upload Content", description: "Pin your first file or directory to IPFS", ctaLabel: "Upload files", ctaRoute: "/files" },
 ];
