@@ -388,12 +388,13 @@ tunnel_generate_plugin_config() {
             name="${entry#ignore:}"
         fi
 
-        local plugin_dir="$plugins_base_dir/portal-plugin-$name"
-
-        # Verify plugin exists
-        if [ ! -d "$plugin_dir" ]; then
-            echo "Warning: Plugin directory not found: $plugin_dir" >&2
-            continue
+        # Local plugins (client-only) have no portal-plugin-* directory
+        if [ "$is_local" = false ]; then
+            local plugin_dir="$plugins_base_dir/portal-plugin-$name"
+            if [ ! -d "$plugin_dir" ]; then
+                echo "Warning: Plugin directory not found: $plugin_dir" >&2
+                continue
+            fi
         fi
 
         # Build JSON object with jq -n (all values safely interpolated, no manual escaping)
