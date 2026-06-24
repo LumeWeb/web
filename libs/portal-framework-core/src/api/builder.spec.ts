@@ -5,6 +5,7 @@ import { MOCK_PLUGINS } from "@lumeweb/portal-test-util";
 import { loadRemote } from "@module-federation/enhanced/runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createNamespacedId } from "../util/namespace";
 import { getPluginInfo } from "../util/getPluginInfo";
 import { Builder } from "./builder";
 import { Framework } from "./framework";
@@ -49,13 +50,13 @@ describe("Builder", () => {
       const builder = new Builder("test-app");
       const factory = () => mockPlugin;
 
-      builder.registerPluginFactory("test:plugin", factory);
+      builder.registerPluginFactory(createNamespacedId("test", "plugin"), factory);
 
       // Trigger build to process the queued operation
       const framework = await builder.build();
       const mockPluginManager = framework.getPluginManager();
       expect(mockPluginManager.registerFactory).toHaveBeenCalledWith(
-        "test:plugin",
+        createNamespacedId("test", "plugin"),
         factory,
       );
     });
@@ -64,10 +65,10 @@ describe("Builder", () => {
   describe("registerRemoteModule", () => {
     it("should load and register remote module", async () => {
       const mockModule = {
-        default: () => ({ ...mockPlugin, id: "test:plugin" }),
+        default: () => ({ ...mockPlugin, id: createNamespacedId("test", "plugin") }),
       }; // Ensure the mock plugin has the correct ID
       vi.mocked(loadRemote).mockResolvedValue(mockModule);
-      vi.mocked(getPluginInfo).mockReturnValue({ id: "test:plugin" });
+      vi.mocked(getPluginInfo).mockReturnValue({ id: createNamespacedId("test", "plugin") });
 
       const builder = new Builder("test-app");
       await builder.registerRemoteModule(
@@ -82,24 +83,24 @@ describe("Builder", () => {
       expect(mockPluginManager.registerRemoteModule).toHaveBeenCalledWith(
         "remote-1",
         "http://example.com/remote.js",
-        "test:plugin",
+        createNamespacedId("test", "plugin"),
       );
       expect(mockPluginManager.registerFactory).toHaveBeenCalledWith(
-        "test:plugin",
+        createNamespacedId("test", "plugin"),
         expect.any(Function),
       ); // Factory is the mod.default
       expect(mockPluginManager.enableAndActivatePlugin).toHaveBeenCalledWith(
-        "test:plugin",
+        createNamespacedId("test", "plugin"),
       );
       // Wait for plugin to be loaded
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(mockPluginManager.registerFactory).toHaveBeenCalledWith(
-        "test:plugin",
+        createNamespacedId("test", "plugin"),
         expect.any(Function)
       );
       expect(mockPluginManager.enableAndActivatePlugin).toHaveBeenCalledWith(
-        "test:plugin"
+        createNamespacedId("test", "plugin")
       );
     });
 
@@ -123,23 +124,23 @@ describe("Builder", () => {
 
     it("should execute queued operations in order", async () => {
       const builder = new Builder("test-app");
-      builder.registerPluginFactory("test:plugin1", () => ({
+      builder.registerPluginFactory(createNamespacedId("test", "plugin1"), () => ({
         ...mockPlugin,
-        id: "test:plugin1",
+        id: createNamespacedId("test", "plugin1"),
       }));
-      builder.registerPluginFactory("test:plugin2", () => ({
+      builder.registerPluginFactory(createNamespacedId("test", "plugin2"), () => ({
         ...mockPlugin,
-        id: "test:plugin2",
+        id: createNamespacedId("test", "plugin2"),
       }));
 
       const framework = await builder.build();
       const pluginManager = framework.getPluginManager(); // Get the mock manager instance created during build
 
       // Verify registration calls were made in order
-      const registerCalls = pluginManager.registerFactory.mock.calls;
+      const registerCalls = vi.mocked(pluginManager.registerFactory).mock.calls;
       expect(registerCalls).toHaveLength(2);
-      expect(registerCalls[0][0]).toBe("test:plugin1");
-      expect(registerCalls[1][0]).toBe("test:plugin2");
+      expect(registerCalls[0][0]).toBe(createNamespacedId("test", "plugin1"));
+      expect(registerCalls[1][0]).toBe(createNamespacedId("test", "plugin2"));
     });
   });
 });

@@ -1,4 +1,6 @@
 import { BaseCapability } from "../types/capabilities";
+import type { FrameworkFeature } from "../types/api";
+import type { Plugin } from "../types/plugin";
 
 export interface ValidationErrorResult {
   isValid: boolean;

@@ -30,6 +30,7 @@ export { useBrand } from "./hooks/useBrand";
 
 // Plugin Management
 export { PluginManager } from "./plugins/manager";
+export { NamespaceRegistry } from "./plugins/namespaceRegistry";
 export {
   createRemoteComponentLoader,
   defaultRemoteOptions,

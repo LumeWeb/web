@@ -1,6 +1,7 @@
 import type React from "react";
 
 import { FrameworkFeature } from "../types/api";
+import { Namespace, NamespacedId } from "../types/namespace";
 import { BaseCapability } from "./capabilities";
 import { RouteDefinition } from "./navigation";
 import type { QueryParamPersistConfig } from "../util/queryParamPersist";
@@ -13,8 +14,7 @@ export interface FeatureState {
 
 export type FeatureStateStatus = "failed" | "loaded" | "loading";
 
-// Type safety for namespaced IDs
-export type NamespacedId = `${string}:${string}`;
+export type { Namespace, NamespacedId };
 
 export interface Plugin {
   // Capabilities also map to exposed modules
@@ -26,6 +26,8 @@ export interface Plugin {
   features?: FrameworkFeature[];
   id: NamespacedId;
   initialize(framework: Framework): Promise<void>;
+  /** Additional namespaces this plugin claims (beyond the one in its ID) */
+  namespaces?: Namespace[];
   queryParamConfig?: QueryParamPersistConfig[];
   // Routes map to exposed components
   routes?: RouteDefinition[];
@@ -60,9 +62,9 @@ export interface CapabilityAssociation {
   /**
    * The primary capability that others are associated with
    */
-  primary: string;
+  primary: NamespacedId;
   /**
    * The associated capabilities
    */
-  associated: string[];
+  associated: NamespacedId[];
 }

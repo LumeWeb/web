@@ -7,7 +7,7 @@ import { Framework } from "../api/framework";
 import { FeatureLoadError } from "../errors";
 import { BaseCapability } from "../types/capabilities";
 import { NamespacedId } from "../types/plugin";
-import { validateNamespacedId } from "../util/namespace";
+import { createNamespacedId, validateNamespacedId } from "../util/namespace";
 import { PluginManager } from "./manager";
 
 // Mock dependencies
@@ -19,13 +19,13 @@ const mockFramework = {} as Framework;
 
 describe("PluginManager", () => {
   let manager: PluginManager;
-  const mockPluginFactory = vi.fn(() => createMockPlugin("test:factory"));
+  const mockPluginFactory = vi.fn(() => createMockPlugin("test:factory" as NamespacedId));
   const mockCapability: BaseCapability = {
     destroy: vi.fn().mockResolvedValue(undefined),
-    id: "test:capability",
+    id: "test:capability" as NamespacedId,
     initialize: vi.fn().mockResolvedValue(undefined),
     status: "inactive",
-    type: "test",
+    type: "framework:test" as any,
   };
 
   beforeEach(() => {
@@ -50,8 +50,9 @@ describe("PluginManager", () => {
     features: [
       {
         destroy: vi.fn().mockResolvedValue(undefined),
-        id: "test:feature" as NamespacedId,
+        id: createNamespacedId("test", "feature"),
         initialize: vi.fn().mockResolvedValue(undefined),
+        status: "enabled" as const,
       },
     ],
     id: id,
@@ -65,24 +66,24 @@ describe("PluginManager", () => {
 
   // -- Core Functionality Tests --
   it("should register and activate plugins", () => {
-    const plugin = createMockPlugin("test:plugin");
+    const plugin = createMockPlugin("test:plugin" as NamespacedId);
     manager.register(plugin);
 
-    const loadedPlugin = manager.getPlugin("test:plugin");
+    const loadedPlugin = manager.getPlugin("test:plugin" as NamespacedId);
     expect(loadedPlugin).toBeDefined();
     expect(loadedPlugin?.id).toEqual(plugin.id);
-    expect(manager.isPluginEnabled("test:plugin")).toBe(true);
+    expect(manager.isPluginEnabled("test:plugin" as NamespacedId)).toBe(true);
   });
 
   it("should register plugin factories", () => {
-    const factory = () => createMockPlugin("test:factory");
-    manager.registerFactory("test:factory", factory);
+    const factory = () => createMockPlugin("test:factory" as NamespacedId);
+    manager.registerFactory("test:factory" as NamespacedId, factory);
 
     // Need to enable the plugin first
-    manager.enablePlugin("test:factory");
-    const plugin = manager.getOrActivatePlugin("test:factory");
+    manager.enablePlugin("test:factory" as NamespacedId);
+    const plugin = manager.getOrActivatePlugin("test:factory" as NamespacedId);
     expect(plugin).toBeDefined();
-    expect(plugin?.id).toBe("test:factory");
+    expect(plugin?.id).toBe("test:factory" as NamespacedId);
   });
 
   it("should handle failed plugin activation", () => {
@@ -90,10 +91,10 @@ describe("PluginManager", () => {
     const failingFactory = () => {
       throw error;
     };
-    manager.registerFactory("test:failed", failingFactory);
-    manager.enablePlugin("test:failed");
+    manager.registerFactory("test:failed" as NamespacedId, failingFactory);
+    manager.enablePlugin("test:failed" as NamespacedId);
 
-    expect(manager.getOrActivatePlugin("test:failed")).toBeUndefined();
+    expect(manager.getOrActivatePlugin("test:failed" as NamespacedId)).toBeUndefined();
 
     const failedPlugins = manager.getFailedPlugins();
     expect(failedPlugins).toContainEqual(
@@ -106,21 +107,23 @@ describe("PluginManager", () => {
 
   // -- Dependency Handling Tests --
   it("should enforce plugin dependencies", async () => {
-    const depPlugin = createMockPlugin("test:dep");
-    const mainPlugin = createMockPlugin("test:main", [{ id: "test:dep" }]);
+    const depPlugin = createMockPlugin("test:dep" as NamespacedId);
+    const mainPlugin = createMockPlugin("other:main" as NamespacedId, [{ id: "test:dep" as NamespacedId }]);
 
     manager.register(depPlugin);
     manager.register(mainPlugin);
 
-    manager.enablePlugin("test:dep");
-    manager.enablePlugin("test:main");
+    manager.enablePlugin("test:dep" as NamespacedId);
+    manager.enablePlugin("other:main" as NamespacedId);
     const failures = await manager.initializePlugins();
-    expect(manager.isPluginReady("test:main")).toBe(true);
-    expect(failures.has("test:main")).toBe(false);
+    expect(manager.isPluginReady("other:main" as NamespacedId)).toBe(true);
+    expect(failures.has("other:main")).toBe(false);
+    expect(manager.getRegistry().has("test")).toBe(true);
+    expect(manager.getRegistry().has("other")).toBe(true);
   });
 
   it("should detect missing dependencies", async () => {
-    const mainPlugin = createMockPlugin("test:main", [{ id: "test:missing" }]);
+    const mainPlugin = createMockPlugin("test:main" as NamespacedId, [{ id: "test:missing" as NamespacedId }]);
 
     expect(() => manager.register(mainPlugin)).toThrowError(
       "Plugin test:main: Missing required plugin dependency: test:missing",
@@ -128,8 +131,8 @@ describe("PluginManager", () => {
   });
 
   it("should detect plugin already registered", () => {
-    const plugin1 = createMockPlugin("test:plugin");
-    const plugin2 = createMockPlugin("test:plugin"); // Same ID
+    const plugin1 = createMockPlugin("test:plugin" as NamespacedId);
+    const plugin2 = createMockPlugin("test:plugin" as NamespacedId); // Same ID
 
     manager.register(plugin1);
 
@@ -140,7 +143,7 @@ describe("PluginManager", () => {
 
   it("should detect missing feature dependencies", () => {
     const pluginWithFeatureDep = createMockPlugin(
-      "test:plugin-with-feature-dep",
+      "test:plugin-with-feature-dep" as NamespacedId,
     );
     pluginWithFeatureDep.features = [
       {
@@ -148,6 +151,7 @@ describe("PluginManager", () => {
         destroy: vi.fn(),
         id: "test:my-feature" as NamespacedId,
         initialize: vi.fn(),
+        status: "enabled" as const,
       },
     ];
 
@@ -158,13 +162,13 @@ describe("PluginManager", () => {
 
   // -- Feature Loading Tests --
   it("should load and track feature states", async () => {
-    const plugin = createMockPlugin("test:plugin");
+    const plugin = createMockPlugin("test:plugin" as NamespacedId);
     manager.register(plugin);
     manager.enablePlugin(plugin.id);
     manager.getOrActivatePlugin(plugin.id); // Explicitly activate the plugin first
 
     // Use the ID from the mock feature
-    const featureId = "test:feature";
+    const featureId = "test:feature" as NamespacedId;
     validateNamespacedId(featureId); // Ensure the ID is valid
 
     await expect(manager.loadFeature(featureId)).resolves.toBeDefined();
@@ -174,7 +178,7 @@ describe("PluginManager", () => {
   });
 
   it("should handle feature loading errors", async () => {
-    const plugin = createMockPlugin("test:bad-feature");
+    const plugin = createMockPlugin("test:bad-feature" as NamespacedId);
     const featureId = "test:feature" as NamespacedId;
     plugin.features![0].id = featureId;
 
@@ -219,27 +223,27 @@ describe("PluginManager", () => {
 
   // -- Remote Module Tests --
   it("should register remote modules", async () => {
-    const plugin = createMockPlugin("test:remote");
+    const plugin = createMockPlugin("test:remote" as NamespacedId);
     const mockEntry = "http://example.com/remote.js";
     const mockModule = { default: () => plugin };
 
     const loadRemoteMock = vi.mocked(loadRemote);
     loadRemoteMock.mockResolvedValue(mockModule);
 
-    manager.registerRemoteModule("test-module", mockEntry, "test:remote");
+    manager.registerRemoteModule("test-module", mockEntry, "test:remote" as NamespacedId);
 
     const module = manager.remoteModules.get("test-module");
     expect(module).toEqual({
       entry: mockEntry,
       moduleId: "test-module",
-      pluginId: "test:remote",
+      pluginId: "test:remote" as NamespacedId,
     });
   });
 
   // -- Route Validation Tests --
   describe("route validation", () => {
     it("should reject routes with non-namespaced IDs", () => {
-      const plugin = createMockPlugin("test:routes-validation");
+      const plugin = createMockPlugin("test:routes-validation" as NamespacedId);
       plugin.routes = [
         {
           component: "HomePage",
@@ -254,72 +258,75 @@ describe("PluginManager", () => {
     });
 
     it("should accept routes with valid namespaced IDs", () => {
-      const plugin = createMockPlugin("test:routes-validation");
+      const plugin = createMockPlugin("test:routes-validation" as NamespacedId);
       plugin.routes = [
         {
           component: "HomePage",
-          id: "test:home", // Valid namespaced ID
+          id: "test:home" as NamespacedId, // Valid namespaced ID
           path: "/",
         },
       ];
       expect(() => manager.register(plugin)).not.toThrow();
     });
 
-    it("should auto-generate namespaced route IDs when not provided", () => {
-      const plugin = createMockPlugin("test:routes-validation");
+    it("should reject routes without an ID", () => {
+      const plugin = createMockPlugin("test:routes-validation" as NamespacedId);
       plugin.routes = [
         {
           component: "HomePage",
           path: "/",
         },
-      ];
-      expect(() => manager.register(plugin)).not.toThrow();
-      expect(plugin.routes[0].id).toBe("test:routes-validation:/");
+      ] as any;
+      expect(() => manager.register(plugin)).toThrowError(
+        "missing a route ID",
+      );
     });
   });
 
   // -- Lifecycle Tests --
   it("should handle plugin destruction", async () => {
-    const plugin = createMockPlugin("test:destruction");
+    const plugin = createMockPlugin("test:destruction" as NamespacedId);
     manager.register(plugin);
     await manager.initializePlugins();
 
-    await manager.destroyPlugin("test:destruction");
+    await manager.destroyPlugin("test:destruction" as NamespacedId);
     expect(plugin.destroy).toHaveBeenCalled();
-    expect(manager.getPlugin("test:destruction")).toBeUndefined();
+    expect(manager.getPlugin("test:destruction" as NamespacedId)).toBeUndefined();
   });
 
   // -- Error Handling Tests --
   it("should track failed plugins", async () => {
-    const plugin = createMockPlugin("test:failed-init");
+    const plugin = createMockPlugin("test:failed-init" as NamespacedId);
     plugin.initialize.mockRejectedValue(new Error("Init failed"));
     manager.register(plugin);
     manager.enablePlugin(plugin.id);
 
     const failures = await manager.initializePlugins();
     expect(failures.has("test:failed-init")).toBe(true);
-    expect(manager.getPluginState("test:failed-init")?.initState).toBe(
+    expect(manager.getPluginState("test:failed-init" as NamespacedId)?.initState).toBe(
       "failed",
     );
   });
 
   // -- Capability Tests --
   it("should expose plugin capabilities", () => {
-    const plugin = createMockPlugin("test:caps");
+    const plugin = createMockPlugin("test:caps" as NamespacedId);
     manager.register(plugin);
 
-    expect(manager.hasCapability("test")).toBe(true);
+    expect(manager.hasCapability("framework:test")).toBe(true);
     expect(manager.hasCapability("missing")).toBe(false);
   });
 
   // -- Initialization Order Tests --
   it("should sort plugins topologically", () => {
-    const a = createMockPlugin("test:a");
-    const b = createMockPlugin("test:b", [{ id: "test:a" }]);
+    const a = createMockPlugin("alpha:a" as NamespacedId);
+    const b = createMockPlugin("beta:b" as NamespacedId, [{ id: "alpha:a" as NamespacedId }]);
     manager.register(a);
     manager.register(b);
 
     const order = manager.getInitializationOrder();
-    expect(order).toEqual(["test:a", "test:b"]); // a should come first since b depends on it
+    expect(order).toEqual(["alpha:a", "beta:b",]); // a should come first since b depends on it
+    expect(manager.getRegistry().getPluginId("alpha")).toBe("alpha:a");
+    expect(manager.getRegistry().getPluginId("beta")).toBe("beta:b");
   });
 });

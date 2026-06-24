@@ -2,7 +2,7 @@ import type React from "react";
 
 import { RouteObject } from "react-router";
 
-import { NamespacedId } from "./plugin";
+import { NamespacedId } from "./namespace";
 
 export interface NavigationBadge {
   content: string;
@@ -37,7 +37,7 @@ export interface NavigationItem {
   /**
    * Unique identifier for the navigation item
    */
-  id?: string;
+  id?: NamespacedId;
   /**
    * If true, this route is an index route
    */
@@ -85,9 +85,9 @@ export interface RouteDefinition extends Omit<RouteObject, "children"> {
   /**
    * Optional unique identifier for the route.
    * If not provided, path will be used to generate an ID.
-   * Will be namespaced with plugin ID if not already namespaced.
+   * Must be a valid NamespacedId — bare strings are no longer accepted.
    */
-  id?: string;
+  id?: NamespacedId;
   index?: boolean;
   /**
    * If true, the component will be loaded lazily.

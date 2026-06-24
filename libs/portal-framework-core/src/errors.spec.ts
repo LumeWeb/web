@@ -46,7 +46,7 @@ describe("Custom Errors", () => {
   });
 
   it("should handle errors without cause", () => {
-    const error = new PluginLoadError("core:plugin", undefined as any);
+    const error = new PluginLoadError("core:plugin" as NamespacedId, undefined as any);
     expect(error.cause).toBeUndefined();
   });
 });

@@ -134,7 +134,7 @@ export class Framework {
     return this.#plugins.getPlugins();
   }
 
-  getPrimaryCapability(associatedCapabilityId: string): null | string {
+  getPrimaryCapability(associatedCapabilityId: NamespacedId): null | NamespacedId {
     // Iterate through all plugins to find capability associations
     for (const plugin of this.getPlugins()) {
       if (plugin.capabilityAssociations) {
@@ -239,7 +239,7 @@ export class Framework {
             ),
             id: plugin.id,
           });
-          return;
+          continue;
         }
 
         // Register capabilities from the plugin with plugin ID
