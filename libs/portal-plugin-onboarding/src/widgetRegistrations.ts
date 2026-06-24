@@ -1,12 +1,15 @@
-import type { WidgetRegistration } from "@lumeweb/portal-framework-core";
+import {
+  createNamespacedId,
+  type WidgetRegistration,
+} from "@lumeweb/portal-framework-core";
 
 import { useOnboardingStatus } from "@/hooks";
 
 export const widgetRegistrations: WidgetRegistration[] = [
   {
-    areaId: "dashboard:header",
+    areaId: createNamespacedId("dashboard", "header"),
     componentName: "widgets/onboarding/checklist",
-    id: "onboarding:checklist",
+    id: createNamespacedId("onboarding", "checklist"),
     order: -1,
     position: {
       size: {
