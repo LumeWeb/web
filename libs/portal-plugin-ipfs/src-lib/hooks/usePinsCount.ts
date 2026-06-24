@@ -1,5 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { useFeature } from "@lumeweb/portal-framework-core";
+import {
+  createNamespacedId,
+  useFeature,
+} from "@lumeweb/portal-framework-core";
 import type { FrameworkFeature } from "@lumeweb/portal-framework-core";
 
 interface FileManagerLike extends FrameworkFeature {
@@ -23,7 +26,7 @@ export function usePinsCount(enabled = true): UsePinsCountReturn {
     data: feature,
     error: featureError,
     isLoading: featureLoading,
-  } = useFeature<FileManagerLike>("ipfs:file-manager");
+  } = useFeature<FileManagerLike>(createNamespacedId("ipfs", "file-manager"));
 
   const {
     data: pins,

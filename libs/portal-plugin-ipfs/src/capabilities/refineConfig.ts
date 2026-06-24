@@ -2,6 +2,8 @@ import type { RefineProps } from "@refinedev/core";
 
 import dataProvider from "@lumeweb/advanced-rest-provider";
 import {
+  createNamespacedId,
+  type NamespacedId,
   env,
   Framework,
   getApiBaseUrl,
@@ -15,9 +17,9 @@ const SUBDOMAIN = "ipfs";
 const DATA_PROVIDER_NAME = "ipfs";
 
 export class Capability implements RefineConfigCapability {
-  readonly id: string = "ipfs:refine-config";
+  readonly id = createNamespacedId("ipfs", "refine-config");
   status;
-  readonly type = "core:refine-config";
+  readonly type = "framework:refine-config";
   version: string;
   #apiUrl: string;
   #authToken: string | null = null;
