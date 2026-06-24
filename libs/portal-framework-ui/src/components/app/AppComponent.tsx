@@ -184,7 +184,10 @@ function AppContent({
 
   const options = {
     ...combinedPluginConfig,
-    options: getDefaultRefineOptions(),
+    options: {
+      ...getDefaultRefineOptions(),
+      ...combinedPluginConfig.options,
+    },
     routerProvider,
   } satisfies Partial<RefineProps>;
 
