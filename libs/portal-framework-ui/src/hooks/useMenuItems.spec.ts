@@ -1,10 +1,17 @@
-import type { NavigationItem } from "@lumeweb/portal-framework-core";
+import {
+  createNamespacedId,
+  type NavigationItem,
+  type NamespacedId,
+} from "@lumeweb/portal-framework-core";
 
 import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Import the hook *after* the mocks are defined
 import { useMenuItems } from "./useMenuItems";
+
+const CORE_NS = "core";
+const core = (name: string) => createNamespacedId(CORE_NS, name);
 
 // Mock the zustand store
 const mockStoreState = {
@@ -45,9 +52,9 @@ describe("useMenuItems", () => {
   });
 
   it("should return the menuItems array from the store", () => {
-    const initialMenuItems = [{ id: "dashboard", label: "Dashboard" }];
-    const updatedMenuItems = [{ id: "settings", label: "Settings" }];
-    // Update the mock state before rendering the hook
+    const initialMenuItems: NavigationItem[] = [
+      { id: core("dashboard"), label: "Dashboard" },
+    ];
     mockAppStore.setState({ menuItems: initialMenuItems });
 
     const { result } = renderHook(() => useMenuItems());
@@ -70,8 +77,12 @@ describe("useMenuItems", () => {
   });
 
   it("should return a getMenuItems function that returns the current menuItems from the latest render", () => {
-    const initialMenuItems = [{ id: "dashboard", label: "Dashboard" }]; // Initial state for the first render
-    const stateAfterUpdate = [{ id: "settings", label: "Settings" }]; // State we will set later
+    const initialMenuItems: NavigationItem[] = [
+      { id: core("dashboard"), label: "Dashboard" },
+    ];
+    const stateAfterUpdate: NavigationItem[] = [
+      { id: core("settings"), label: "Settings" },
+    ];
 
     const { result } = renderHook(() => useMenuItems());
     // The hook captures the state at the time of its render.
@@ -104,11 +115,4 @@ describe("useMenuItems", () => {
       stateAfterUpdate,
     );
   });
-
-  // Note: Testing reactive updates of `menuItems` itself (the array reference)
-  // would require a more sophisticated mock that simulates Zustand's subscription
-  // and triggers updates, or using `@testing-library/react-hooks`'s `rerender`
-  // with a mock that changes its return value. The current test for `getMenuItems`
-  // tests that the function returns the value from the *last render*, which is correct
-  // behavior for the hook's implementation.
 });

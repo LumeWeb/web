@@ -1,9 +1,13 @@
+import { createNamespacedId } from "@lumeweb/portal-framework-core";
 import { act } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { storeResetFns } from "@/../__mocks__/zustand"; // Import the reset function set
 
 import { appStore } from "./appStore"; // Import the store
+
+const CORE_NS = "core";
+const core = (name: string) => createNamespacedId(CORE_NS, name);
 
 // Mock the helpers if they had external dependencies or complex side effects.
 // In this case, the helpers seem pure and self-contained, so testing the actions
@@ -61,7 +65,7 @@ describe("appStore", () => {
 
   it("should set routes", () => {
     const routes = [
-      { component: "TestComponent", id: "route1", path: "/test" },
+      { component: "TestComponent", id: createNamespacedId(CORE_NS, "route1"), path: "/test" },
     ];
     act(() => {
       appStore.getState().setRoutes(routes);
@@ -70,7 +74,7 @@ describe("appStore", () => {
   });
 
   it("should add a menu item to the root", () => {
-    const newItem = { id: "item1", label: "Item 1", path: "/item1" };
+    const newItem = { id: core("item1"), label: "Item 1", path: "/item1" };
     act(() => {
       appStore.getState().addMenuItem(newItem);
     });
@@ -82,7 +86,7 @@ describe("appStore", () => {
 
   describe("menu item operations", () => {
     it("should add menu items to store", () => {
-      const item = { id: "test", label: "Test" };
+      const item = { id: core("test"), label: "Test" };
       act(() => {
         appStore.getState().addMenuItem(item);
       });
@@ -93,35 +97,35 @@ describe("appStore", () => {
     });
 
     it("should remove menu items from store", () => {
-      const item = { id: "test", label: "Test" };
+      const item = { id: core("test"), label: "Test" };
       act(() => {
         appStore.getState().addMenuItem(item);
-        appStore.getState().removeMenuItem("test");
+        appStore.getState().removeMenuItem(core("test"));
       });
       expect(appStore.getState().menuItems).not.toContainEqual(
-        expect.objectContaining({ id: "test" }),
+        expect.objectContaining({ id: core("test") }),
       );
     });
 
     it("should batch add menu items", () => {
       const items = [
-        { id: "test1", label: "Test 1" },
-        { id: "test2", label: "Test 2" },
+        { id: core("test1"), label: "Test 1" },
+        { id: core("test2"), label: "Test 2" },
       ];
       act(() => {
         appStore.getState().addMenuItems(items);
       });
       expect(appStore.getState().menuItems).toEqual([
-        expect.objectContaining({ id: "test1" }),
-        expect.objectContaining({ id: "test2" }),
+        expect.objectContaining({ id: core("test1") }),
+        expect.objectContaining({ id: core("test2") }),
       ]);
     });
   });
 
   it("should add multiple menu items to the root", () => {
     const items = [
-      { id: "item1", label: "Item 1" },
-      { id: "item2", label: "Item 2" },
+      { id: core("item1"), label: "Item 1" },
+      { id: core("item2"), label: "Item 2" },
     ];
     act(() => {
       appStore.getState().addMenuItems(items);
@@ -134,10 +138,10 @@ describe("appStore", () => {
 
   describe("adding multiple items", () => {
     it("should add multiple menu items to an existing parent (nested)", () => {
-      const parentItem = { children: [], id: "parent1", label: "Parent 1" };
+      const parentItem = { children: [], id: core("parent1"), label: "Parent 1" };
       const childItems = [
-        { id: "child1", label: "Child 1" },
-        { id: "child2", label: "Child 2" },
+        { id: core("child1"), label: "Child 1" },
+        { id: core("child2"), label: "Child 2" },
       ];
 
       act(() => {
@@ -146,11 +150,11 @@ describe("appStore", () => {
       expect(appStore.getState().menuItems).toHaveLength(1);
 
       act(() => {
-        appStore.getState().addMenuItems(childItems, "parent1");
+        appStore.getState().addMenuItems(childItems, core("parent1"));
       });
       const state = appStore.getState();
       expect(state.menuItems).toHaveLength(1);
-      expect(state.menuItems[0].id).toBe("parent1");
+      expect(state.menuItems[0].id).toBe(core("parent1"));
       expect(state.menuItems[0].children).toBeDefined();
       expect(state.menuItems[0].children).toHaveLength(2);
       expect(state.menuItems[0].children![0]).toEqual({
@@ -164,10 +168,10 @@ describe("appStore", () => {
     });
 
     it("should add multiple menu items with parentId (flat)", () => {
-      const parentItem = { id: "parent1", label: "Parent 1" };
+      const parentItem = { id: core("parent1"), label: "Parent 1" };
       const childItems = [
-        { id: "child1", label: "Child 1", parentId: "parent1" },
-        { id: "child2", label: "Child 2", parentId: "parent1" },
+        { id: core("child1"), label: "Child 1", parentId: core("parent1") },
+        { id: core("child2"), label: "Child 2", parentId: core("parent1") },
       ];
 
       act(() => {
@@ -195,8 +199,8 @@ describe("appStore", () => {
   });
 
   it("should not add duplicate menu items (by id) to the same level when using addMenuItem", () => {
-    const item1 = { id: "item1", label: "Item 1" };
-    const item1Duplicate = { id: "item1", label: "Item 1 Updated" }; // Same ID, different label
+    const item1 = { id: core("item1"), label: "Item 1" };
+    const item1Duplicate = { id: core("item1"), label: "Item 1 Updated" }; // Same ID, different label
 
     act(() => {
       appStore.getState().addMenuItem(item1);
@@ -213,9 +217,9 @@ describe("appStore", () => {
   });
 
   it("should not add duplicate menu items (by id) to the same level when using addMenuItems", () => {
-    const item1 = { id: "item1", label: "Item 1" };
-    const item1Duplicate = { id: "item1", label: "Item 1 Updated" }; // Same ID, different label
-    const item2 = { id: "item2", label: "Item 2" };
+    const item1 = { id: core("item1"), label: "Item 1" };
+    const item1Duplicate = { id: core("item1"), label: "Item 1 Updated" }; // Same ID, different label
+    const item2 = { id: core("item2"), label: "Item 2" };
 
     act(() => {
       appStore.getState().addMenuItems([item1, item2, item1Duplicate]);
@@ -223,16 +227,16 @@ describe("appStore", () => {
     // Expect only item1 and item2 to be added
     expect(appStore.getState().menuItems).toHaveLength(2);
     expect(
-      appStore.getState().menuItems.find((item) => item.id === "item1")?.label,
+      appStore.getState().menuItems.find((item) => item.id === core("item1"))?.label,
     ).toBe("Item 1");
     expect(
-      appStore.getState().menuItems.find((item) => item.id === "item2")?.label,
+      appStore.getState().menuItems.find((item) => item.id === core("item2"))?.label,
     ).toBe("Item 2");
   });
 
   it("should remove a root menu item", () => {
-    const item1 = { id: "item1", label: "Item 1" };
-    const item2 = { id: "item2", label: "Item 2" };
+    const item1 = { id: core("item1"), label: "Item 1" };
+    const item2 = { id: core("item2"), label: "Item 2" };
 
     act(() => {
       appStore.getState().addMenuItems([item1, item2]);
@@ -240,74 +244,74 @@ describe("appStore", () => {
     expect(appStore.getState().menuItems).toHaveLength(2);
 
     act(() => {
-      appStore.getState().removeMenuItem("item1");
+      appStore.getState().removeMenuItem(core("item1"));
     });
     const state = appStore.getState();
     expect(state.menuItems).toHaveLength(1);
-    expect(state.menuItems[0].id).toBe("item2");
+    expect(state.menuItems[0].id).toBe(core("item2"));
   });
 
   it("should remove a child menu item", () => {
-    const parentItem = { children: [], id: "parent1", label: "Parent 1" };
-    const childItem1 = { id: "child1", label: "Child 1" };
-    const childItem2 = { id: "child2", label: "Child 2" };
+    const parentItem = { children: [], id: core("parent1"), label: "Parent 1" };
+    const childItem1 = { id: core("child1"), label: "Child 1" };
+    const childItem2 = { id: core("child2"), label: "Child 2" };
 
     act(() => {
       appStore.getState().addMenuItem(parentItem);
     });
     act(() => {
-      appStore.getState().addMenuItems([childItem1, childItem2], "parent1");
+      appStore.getState().addMenuItems([childItem1, childItem2], core("parent1"));
     });
     // Add check for children before accessing length
     expect(appStore.getState().menuItems[0].children).toBeDefined();
     expect(appStore.getState().menuItems[0].children).toHaveLength(2);
 
     act(() => {
-      appStore.getState().removeMenuItem("child1");
+      appStore.getState().removeMenuItem(core("child1"));
     });
     const state = appStore.getState();
     expect(state.menuItems).toHaveLength(1);
-    expect(state.menuItems[0].id).toBe("parent1");
+    expect(state.menuItems[0].id).toBe(core("parent1"));
     // Add checks for children before accessing index
     expect(state.menuItems[0].children).toBeDefined();
     expect(state.menuItems[0].children).toHaveLength(1);
-    expect(state.menuItems[0].children![0].id).toBe("child2");
+    expect(state.menuItems[0].children![0].id).toBe(core("child2"));
   });
 
   it("should not remove anything if key is not found", () => {
-    const item1 = { id: "item1", label: "Item 1" };
-    const parentItem = { children: [], id: "parent1", label: "Parent 1" };
-    const childItem1 = { id: "child1", label: "Child 1" };
+    const item1 = { id: core("item1"), label: "Item 1" };
+    const parentItem = { children: [], id: core("parent1"), label: "Parent 1" };
+    const childItem1 = { id: core("child1"), label: "Child 1" };
 
     act(() => {
       appStore.getState().addMenuItem(item1);
       appStore.getState().addMenuItem(parentItem);
     });
     act(() => {
-      appStore.getState().addMenuItem(childItem1, "parent1");
+      appStore.getState().addMenuItem(childItem1, core("parent1"));
     });
     const initialState = appStore.getState();
     expect(initialState.menuItems).toHaveLength(2);
     // Add check for children before accessing length
     expect(
-      initialState.menuItems.find((item) => item.id === "parent1")?.children,
+      initialState.menuItems.find((item) => item.id === core("parent1"))?.children,
     ).toBeDefined();
     expect(
-      initialState.menuItems.find((item) => item.id === "parent1")?.children!,
+      initialState.menuItems.find((item) => item.id === core("parent1"))?.children!,
     ).toHaveLength(1);
 
     act(() => {
-      appStore.getState().removeMenuItem("non-existent-key");
+      appStore.getState().removeMenuItem(core("non-existent-key"));
     });
     const stateAfterRemovalAttempt = appStore.getState();
     expect(stateAfterRemovalAttempt.menuItems).toHaveLength(2);
     // Add check for children before accessing length
     expect(
-      stateAfterRemovalAttempt.menuItems.find((item) => item.id === "parent1")
+      stateAfterRemovalAttempt.menuItems.find((item) => item.id === core("parent1"))
         ?.children,
     ).toBeDefined();
     expect(
-      stateAfterRemovalAttempt.menuItems.find((item) => item.id === "parent1")
+      stateAfterRemovalAttempt.menuItems.find((item) => item.id === core("parent1"))
         ?.children!,
     ).toHaveLength(1);
     // Deep equality check to ensure no unintended changes
@@ -315,33 +319,33 @@ describe("appStore", () => {
   });
 
   it("should add a deeply nested menu item", () => {
-    const rootItem = { id: "root", label: "Root" };
-    const child1Item = { id: "child1", label: "Child 1" };
-    const child2Item = { id: "child2", label: "Child 2" };
-    const child3Item = { id: "child3", label: "Child 3", path: "/child3" };
+    const rootItem = { id: core("root"), label: "Root" };
+    const child1Item = { id: core("child1"), label: "Child 1" };
+    const child2Item = { id: core("child2"), label: "Child 2" };
+    const child3Item = { id: core("child3"), label: "Child 3", path: "/child3" };
 
     act(() => {
       appStore.getState().addMenuItem(rootItem);
     });
     act(() => {
-      appStore.getState().addMenuItem(child1Item, "root");
+      appStore.getState().addMenuItem(child1Item, core("root"));
     });
     act(() => {
-      appStore.getState().addMenuItem(child2Item, "child1");
+      appStore.getState().addMenuItem(child2Item, core("child1"));
     });
     act(() => {
-      appStore.getState().addMenuItem(child3Item, "child2");
+      appStore.getState().addMenuItem(child3Item, core("child2"));
     });
 
     const state = appStore.getState();
     expect(state.menuItems).toHaveLength(1);
-    expect(state.menuItems[0].id).toBe("root");
+    expect(state.menuItems[0].id).toBe(core("root"));
     expect(state.menuItems[0].children).toBeDefined();
     expect(state.menuItems[0].children).toHaveLength(1);
-    expect(state.menuItems[0].children![0].id).toBe("child1");
+    expect(state.menuItems[0].children![0].id).toBe(core("child1"));
     expect(state.menuItems[0].children![0].children).toBeDefined();
     expect(state.menuItems[0].children![0].children).toHaveLength(1);
-    expect(state.menuItems[0].children![0].children![0].id).toBe("child2");
+    expect(state.menuItems[0].children![0].children![0].id).toBe(core("child2"));
     expect(state.menuItems[0].children![0].children![0].children).toBeDefined();
     expect(state.menuItems[0].children![0].children![0].children).toHaveLength(
       1,
@@ -353,43 +357,43 @@ describe("appStore", () => {
   });
 
   it("should remove a deeply nested menu item", () => {
-    const rootItem = { id: "root", label: "Root" };
-    const child1Item = { id: "child1", label: "Child 1" };
-    const child2Item = { id: "child2", label: "Child 2" };
-    const child3Item = { id: "child3", label: "Child 3" };
+    const rootItem = { id: core("root"), label: "Root" };
+    const child1Item = { id: core("child1"), label: "Child 1" };
+    const child2Item = { id: core("child2"), label: "Child 2" };
+    const child3Item = { id: core("child3"), label: "Child 3" };
 
     act(() => {
       appStore.getState().addMenuItem(rootItem);
     });
     act(() => {
-      appStore.getState().addMenuItem(child1Item, "root");
+      appStore.getState().addMenuItem(child1Item, core("root"));
     });
     act(() => {
-      appStore.getState().addMenuItem(child2Item, "child1");
+      appStore.getState().addMenuItem(child2Item, core("child1"));
     });
     act(() => {
-      appStore.getState().addMenuItem(child3Item, "child2");
+      appStore.getState().addMenuItem(child3Item, core("child2"));
     });
 
     act(() => {
-      appStore.getState().removeMenuItem("child2");
+      appStore.getState().removeMenuItem(core("child2"));
     });
 
     const state = appStore.getState();
     expect(state.menuItems).toHaveLength(1);
-    expect(state.menuItems[0].id).toBe("root");
+    expect(state.menuItems[0].id).toBe(core("root"));
     expect(state.menuItems[0].children).toBeDefined();
     expect(state.menuItems[0].children).toHaveLength(1);
-    expect(state.menuItems[0].children![0].id).toBe("child1");
+    expect(state.menuItems[0].children![0].id).toBe(core("child1"));
     expect(state.menuItems[0].children![0].children).toBeDefined();
     expect(state.menuItems[0].children![0].children).toHaveLength(0);
   });
 
   it("should handle adding a menu item to a non-existent parent", () => {
-    const newItem = { id: "item1", label: "Item 1", path: "/item1" };
+    const newItem = { id: core("item1"), label: "Item 1", path: "/item1" };
 
     act(() => {
-      appStore.getState().addMenuItem(newItem, "nonExistentParent");
+      appStore.getState().addMenuItem(newItem, core("nonexistent-parent"));
     });
 
     const state = appStore.getState();
@@ -399,12 +403,12 @@ describe("appStore", () => {
 
   it("should handle adding multiple menu items to a non-existent parent", () => {
     const items = [
-      { id: "item1", label: "Item 1" },
-      { id: "item2", label: "Item 2" },
+      { id: core("item1"), label: "Item 1" },
+      { id: core("item2"), label: "Item 2" },
     ];
 
     act(() => {
-      appStore.getState().addMenuItems(items, "nonExistentParent");
+      appStore.getState().addMenuItems(items, core("nonexistent-parent"));
     });
 
     const state = appStore.getState();
@@ -416,38 +420,38 @@ describe("appStore", () => {
   it("should properly handle nested menu items with parent paths", () => {
     const menuItems = [
       {
-        id: "core:",
+        id: core("home"),
         label: "Home",
         order: -1,
         path: "/",
       },
       {
-        id: "core:abuse",
+        id: core("abuse"),
         label: "Abuse",
         path: "/abuse",
       },
       {
-        id: "core:cases",
+        id: core("abuse-cases"),
         label: "Cases",
-        parentId: "core:abuse",
+        parentId: core("abuse"),
         path: "cases",
       },
       {
-        id: "core:reporters",
+        id: core("abuse-reporters"),
         label: "Reporters",
-        parentId: "core:abuse",
+        parentId: core("abuse"),
         path: "reporters",
       },
       {
-        id: "core:subjects",
+        id: core("abuse-subjects"),
         label: "Subjects",
-        parentId: "core:abuse",
+        parentId: core("abuse"),
         path: "subjects",
       },
       {
-        id: "core:blocklist",
+        id: core("abuse-blocklist"),
         label: "Blocklist",
-        parentId: "core:abuse",
+        parentId: core("abuse"),
         path: "blocklist",
       },
     ];
@@ -459,7 +463,7 @@ describe("appStore", () => {
     const state = appStore.getState();
     expect(state.menuItems).toHaveLength(2); // Home and Abuse
 
-    const abuseItem = state.menuItems.find((item) => item.id === "core:abuse");
+    const abuseItem = state.menuItems.find((item) => item.id === core("abuse"));
     expect(abuseItem).toBeDefined();
     expect(abuseItem?.children).toHaveLength(4);
 
@@ -467,19 +471,19 @@ describe("appStore", () => {
     expect(abuseItem?.children).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          id: "core:reporters",
+          id: core("abuse-reporters"),
           path: "/abuse/reporters", // Should be prefixed with parent path
         }),
         expect.objectContaining({
-          id: "core:cases",
+          id: core("abuse-cases"),
           path: "/abuse/cases",
         }),
         expect.objectContaining({
-          id: "core:subjects",
+          id: core("abuse-subjects"),
           path: "/abuse/subjects",
         }),
         expect.objectContaining({
-          id: "core:blocklist",
+          id: core("abuse-blocklist"),
           path: "/abuse/blocklist",
         }),
       ]),

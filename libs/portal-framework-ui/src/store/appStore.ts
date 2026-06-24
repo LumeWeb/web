@@ -1,4 +1,5 @@
 import type {
+  NamespacedId,
   NavigationItem,
   RouteDefinition,
 } from "@lumeweb/portal-framework-core";
@@ -6,9 +7,9 @@ import type {
 import { createStore, useStore } from "zustand";
 
 interface AppActions {
-  addMenuItem: (item: NavigationItem, parentKey?: string) => void;
-  addMenuItems: (items: NavigationItem[], parentKey?: string) => void;
-  removeMenuItem: (key: string) => void;
+  addMenuItem: (item: NavigationItem, parentKey?: NamespacedId) => void;
+  addMenuItems: (items: NavigationItem[], parentKey?: NamespacedId) => void;
+  removeMenuItem: (key: NamespacedId) => void;
   setError: (error: Error | null) => void;
   setIsLoading: (isLoading: boolean) => void;
   setPluginConfigs: (configs: Record<string, any>[]) => void;
@@ -96,7 +97,7 @@ export const helpers = {
   // Helper to find and modify a menu item recursively
   findAndModifyMenuItem: (
     items: NavigationItem[],
-    key: string,
+    key: NamespacedId,
     modifier: (item: NavigationItem) => NavigationItem,
   ): NavigationItem[] => {
     let changed = false;
@@ -136,7 +137,7 @@ export const helpers = {
    */
   findMenuItem: (
     items: NavigationItem[],
-    id: string,
+    id: NamespacedId,
   ): NavigationItem | undefined => {
     for (const item of items) {
       if (item.id === id) {
@@ -155,7 +156,7 @@ export const helpers = {
   // Immutable helper for removing items recursively
   removeItemFromMenu: (
     items: NavigationItem[],
-    key: string,
+    key: NamespacedId,
   ): NavigationItem[] => {
     let removed = false;
 
@@ -186,7 +187,7 @@ export const helpers = {
 };
 
 export const appStore = createStore<AppActions & AppState>((set) => ({
-  addMenuItem: (newItem: NavigationItem, parentKey?: string) =>
+  addMenuItem: (newItem: NavigationItem, parentKey?: NamespacedId) =>
     set((state) => {
       if (parentKey) {
         const parent = helpers.findMenuItem(state.menuItems, parentKey);
@@ -210,7 +211,7 @@ export const appStore = createStore<AppActions & AppState>((set) => ({
       }
     }),
 
-  addMenuItems: (items: NavigationItem[], parentKey?: string) =>
+  addMenuItems: (items: NavigationItem[], parentKey?: NamespacedId) =>
     set((state) => {
       let newMenuItems = [...state.menuItems];
 
@@ -252,7 +253,7 @@ export const appStore = createStore<AppActions & AppState>((set) => ({
   isLoading: false,
   menuItems: [],
   pluginConfigs: [],
-  removeMenuItem: (key: string) =>
+  removeMenuItem: (key: NamespacedId) =>
     set((state) => {
       return { menuItems: helpers.removeItemFromMenu(state.menuItems, key) };
     }),
