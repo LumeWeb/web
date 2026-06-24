@@ -1,4 +1,5 @@
 import {
+  CORE_NS,
   createNamespacedId,
   Framework,
   type Plugin,
@@ -13,7 +14,7 @@ export default function (): Plugin {
     async destroy(_framework: Framework) {
       console.log("Plugin Abuse destroyed");
     },
-    id: createNamespacedId("core", "abuse"),
+    id: createNamespacedId(CORE_NS, "abuse"),
     async initialize(_framework: Framework) {
       console.log("Plugin Abuse initialized");
     },
