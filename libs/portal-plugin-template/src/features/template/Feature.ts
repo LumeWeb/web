@@ -6,6 +6,7 @@ import {
 
 export class Feature implements FrameworkFeature {
   readonly id = createNamespacedId("template", "main");
+  status: "disabled" | "enabled" | "error" = "enabled";
 
   async initialize(framework: Framework): Promise<void> {
     // Initialize the template feature

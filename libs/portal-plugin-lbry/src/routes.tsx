@@ -1,11 +1,15 @@
-import type { RouteDefinition } from "@lumeweb/portal-framework-core";
+import {
+  CORE_NS,
+  createNamespacedId,
+  type RouteDefinition,
+} from "@lumeweb/portal-framework-core";
 import { Anchor, Monitor } from "lucide-react";
 
 const routes = [
   {
     path: "/lbry/devices",
     component: "devices",
-    id: "lbry_devices",
+    id: createNamespacedId(CORE_NS, "lbry-devices"),
     navigation: {
       label: "Devices",
       icon: Monitor,
@@ -15,7 +19,7 @@ const routes = [
   {
     path: "/lbry/streams",
     component: "streams",
-    id: "lbry_streams",
+    id: createNamespacedId(CORE_NS, "lbry-streams"),
     navigation: {
       label: "Streams",
       icon: Anchor,

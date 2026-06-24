@@ -2,6 +2,7 @@ import { createMockPluginManager } from "@lumeweb/portal-test-util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Framework } from "../api/framework";
+import type { NamespacedId } from "../types/namespace";
 import type { BaseCapability } from "../types/capabilities";
 
 import { CapabilityManager } from "./manager";
@@ -11,6 +12,7 @@ describe("CapabilityManager", () => {
   let mockFramework: Framework;
   // @ts-ignore
   let mockPluginManager: ReturnType<typeof createMockPluginManager>;
+  let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -20,6 +22,7 @@ describe("CapabilityManager", () => {
     manager = new CapabilityManager();
     mockFramework = createMockFramework();
     manager.framework = mockFramework;
+    consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -27,9 +30,9 @@ describe("CapabilityManager", () => {
   });
 
   const createMockCapability = (
-    id: string,
+    id: NamespacedId,
     type: string,
-    deps?: string[],
+    deps?: NamespacedId[],
   ): BaseCapability => ({
     dependencies: deps,
     destroy: vi.fn().mockResolvedValue(undefined),
@@ -78,8 +81,8 @@ describe("CapabilityManager", () => {
   };
 
   it("should register and retrieve capabilities", async () => {
-    const cap1 = createMockCapability("cap1", "typeA");
-    const cap2 = createMockCapability("cap2", "typeB", ["cap1"]);
+    const cap1 = createMockCapability("cap1" as NamespacedId, "typeA");
+    const cap2 = createMockCapability("cap2" as NamespacedId, "typeB", ["cap1" as NamespacedId]);
 
     manager.register(cap1, "plugin1");
     manager.register(cap2, "plugin2");
@@ -87,15 +90,15 @@ describe("CapabilityManager", () => {
     // Initialize capabilities after registration
     await manager.initializeAll();
 
-    expect(await manager.get("cap1")).toBe(cap1);
+    expect(await manager.get("cap1" as NamespacedId)).toBe(cap1);
     expect(await manager.getAllOfType("typeB")).toEqual([
-      expect.objectContaining({ id: "cap2" }),
+      expect.objectContaining({ id: "cap2" as NamespacedId }),
     ]);
   });
 
   it("should warn when registering a capability that is already registered", () => {
-    const cap1 = createMockCapability("cap1", "typeA");
-    const cap1_duplicate = createMockCapability("cap1", "typeA"); // Same ID
+    const cap1 = createMockCapability("cap1" as NamespacedId, "typeA");
+    const cap1_duplicate = createMockCapability("cap1" as NamespacedId, "typeA"); // Same ID
 
     manager.register(cap1, "plugin1");
     manager.register(cap1_duplicate, "plugin2"); // Attempt to re-register
@@ -103,14 +106,13 @@ describe("CapabilityManager", () => {
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       "Capability cap1 already registered by plugin plugin1. Plugin plugin2 attempted to re-register it.",
     );
-    // Ensure the original capability is still the one registered
-    expect(manager["#capabilities"].get("cap1")).toBe(cap1);
-    expect(manager["#capabilityToPlugin"].get("cap1")).toBe("plugin1");
+    // Ensure the original capability is still the one registered — use manager.get() instead of private field access
+    expect(manager.get("cap1" as NamespacedId)).resolves.toBe(cap1);
   });
 
   it("should initialize in dependency order", async () => {
-    const cap1 = createMockCapability("cap1", "typeA");
-    const cap2 = createMockCapability("cap2", "typeB", ["cap1"]);
+    const cap1 = createMockCapability("cap1" as NamespacedId, "typeA");
+    const cap2 = createMockCapability("cap2" as NamespacedId, "typeB", ["cap1" as NamespacedId]);
 
     manager.register(cap1, "plugin1");
     manager.register(cap2, "plugin2");
@@ -126,8 +128,8 @@ describe("CapabilityManager", () => {
 
   it("should handle initialization errors", async () => {
     const error = new Error("Init failed");
-    const cap1 = createMockCapability("cap1", "typeA");
-    const cap2 = createMockCapability("cap2", "typeB", ["cap1"]);
+    const cap1 = createMockCapability("cap1" as NamespacedId, "typeA");
+    const cap2 = createMockCapability("cap2" as NamespacedId, "typeB", ["cap1" as NamespacedId]);
     vi.mocked(cap2.initialize).mockRejectedValue(error);
 
     // Mock console.error to suppress expected error output
@@ -139,10 +141,10 @@ describe("CapabilityManager", () => {
       manager.register(cap2, "plugin2");
 
       const failures = await manager.initializeAll();
-      expect(failures.get("cap2")).toBe(error);
+      expect(failures.get("cap2" as NamespacedId)).toBe(error);
       // Explicitly try to get the failed capability to consume the rejected promise
       // and assert that it rejects as expected.
-      await expect(manager.get("cap2")).rejects.toThrow("Init failed");
+      await expect(manager.get("cap2" as NamespacedId)).rejects.toThrow("Init failed");
     } finally {
       // Restore console.error
       console.error = originalError;
@@ -150,8 +152,8 @@ describe("CapabilityManager", () => {
   });
 
   it("should destroy in reverse order", async () => {
-    const cap1 = createMockCapability("cap1", "typeA");
-    const cap2 = createMockCapability("cap2", "typeB", ["cap1"]);
+    const cap1 = createMockCapability("cap1" as NamespacedId, "typeA");
+    const cap2 = createMockCapability("cap2" as NamespacedId, "typeB", ["cap1" as NamespacedId]);
 
     manager.register(cap1, "plugin1");
     manager.register(cap2, "plugin2");
@@ -175,9 +177,9 @@ describe("CapabilityManager", () => {
     });
 
     const caps = [
-      createMockCapability("cap1", "typeA"),
-      createMockCapability("cap2", "typeA"),
-      createMockCapability("cap3", "typeB"),
+      createMockCapability("cap1" as NamespacedId, "typeA"),
+      createMockCapability("cap2" as NamespacedId, "typeA"),
+      createMockCapability("cap3" as NamespacedId, "typeB"),
     ];
 
     manager.register(caps[0], "plugin1");
@@ -188,13 +190,13 @@ describe("CapabilityManager", () => {
     await manager.initializeAll();
 
     const results = await manager.getAllOfType("typeA");
-    expect(results.map((c) => c.id)).toEqual(["cap2", "cap1"]);
+    expect(results.map((c) => c.id)).toEqual(["cap2" as NamespacedId, "cap1" as NamespacedId]);
   });
 
   it("should handle capability dependencies across plugins", async () => {
-    const cap1 = createMockCapability("cap1", "typeA");
-    const cap2 = createMockCapability("cap2", "typeB", ["cap1"]);
-    const cap3 = createMockCapability("cap3", "typeC", ["cap2"]);
+    const cap1 = createMockCapability("cap1" as NamespacedId, "typeA");
+    const cap2 = createMockCapability("cap2" as NamespacedId, "typeB", ["cap1" as NamespacedId]);
+    const cap3 = createMockCapability("cap3" as NamespacedId, "typeC", ["cap2" as NamespacedId]);
 
     manager.register(cap1, "plugin1");
     manager.register(cap2, "plugin2");
@@ -204,7 +206,7 @@ describe("CapabilityManager", () => {
     await manager.initializeAll();
 
     const sorted = await manager.getAllOfType("typeC");
-    expect(sorted[0].id).toBe("cap3");
-    expect(sorted[0].dependencies).toEqual(["cap2"]);
+    expect(sorted[0].id).toBe("cap3" as NamespacedId);
+    expect(sorted[0].dependencies).toEqual(["cap2" as NamespacedId]);
   });
 });

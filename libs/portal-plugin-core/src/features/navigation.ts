@@ -1,13 +1,14 @@
 import {
+  CORE_NS,
   createNamespacedId,
   createRemoteComponentLoader,
   defaultRemoteOptions,
   Framework,
+  FRAMEWORK_NS,
   isNamespacedId,
   NamespacedId,
   NavigationFeature,
   NavigationItem,
-  normalizeId,
   parseNamespacedId,
   Plugin,
   RouteDefinition,
@@ -20,6 +21,15 @@ const CHECK_TYPES = {
   DEFINED: Symbol('defined'),
   UNDEFINED_CHECK: Symbol('undefinedCheck')
 } as const;
+
+export function normalizeNameForId(name: string): string {
+  return name
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2") // Convert camelCase/PascalCase to kebab
+    .replace(/[^a-zA-Z0-9-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+}
 
 export function generateIdFromRoute(
   route: RouteDefinition,
@@ -43,25 +53,36 @@ export function generateIdFromRoute(
     if (pluginId) {
       return createNamespacedId(
         parseNamespacedId(pluginId).namespace,
-        sanitizedPath
+        sanitizedPath,
       );
     }
-    return createNamespacedId("generated", sanitizedPath);
+    return createNamespacedId(
+      "generated",
+      sanitizedPath,
+    );
   }
 
   // 3. Try to use component name if available
   if (route.component) {
-    let componentName = route.component;
-    if (isNamespacedId(route.component)) {
-      componentName = parseNamespacedId(route.component).name;
+    let componentName: string;
+    if (route.component.includes(":")) {
+      componentName = parseNamespacedId(
+        route.component as NamespacedId,
+      ).name;
+    } else {
+      componentName = route.component;
     }
+    componentName = normalizeNameForId(componentName);
     if (pluginId) {
       return createNamespacedId(
         parseNamespacedId(pluginId).namespace,
-        componentName
+        componentName,
       );
     }
-    return createNamespacedId("generated", componentName);
+    return createNamespacedId(
+      "generated",
+      componentName,
+    );
   }
 
   // 4. Try to use navigation label if available
@@ -74,10 +95,13 @@ export function generateIdFromRoute(
     if (pluginId) {
       return createNamespacedId(
         parseNamespacedId(pluginId).namespace,
-        label
+        label,
       );
     }
-    return createNamespacedId("generated", label);
+    return createNamespacedId(
+      "generated",
+      label,
+    );
   }
 
   // 5. Use parent reference if available
@@ -102,7 +126,8 @@ export function generateIdFromRoute(
 }
 
 export class Navigation implements NavigationFeature {
-  id: NamespacedId = createNamespacedId("core", "navigation");
+  id: NamespacedId = createNamespacedId(FRAMEWORK_NS, "navigation");
+  status = "enabled" as const;
   version = "0.1.0";
 
   #framework?: Framework;
@@ -131,12 +156,12 @@ export class Navigation implements NavigationFeature {
       id,
       label: route.navigation.label,
       path: route.path ?? "",
-      index: route.index ?? false,
     };
 
     // Define properties and their inclusion criteria
     const propMap = {
       badge: CHECK_TYPES.DEFINED,
+      children: CHECK_TYPES.DEFINED,
       disabled: CHECK_TYPES.UNDEFINED_CHECK,
       hidden: CHECK_TYPES.UNDEFINED_CHECK,
       icon: CHECK_TYPES.DEFINED,
@@ -159,7 +184,7 @@ export class Navigation implements NavigationFeature {
   }
 
   private shouldIncludeRouteInNavigation(route: RouteDefinition): boolean {
-    return !!route.navigation && (!route.index || route.navigation.forceShowInNavigation);
+    return !!route.navigation && (!(route.index ?? false) || !!route.navigation.forceShowInNavigation);
   }
 
   private processRouteForNavigation(route: RouteDefinition, pluginId: NamespacedId): NavigationItem[] {
@@ -221,19 +246,22 @@ export class Navigation implements NavigationFeature {
       route: RouteDefinition,
       plugin: Plugin,
     ): Promise<RouteDefinition> => {
-      const routeId = route.id
-        ? normalizeId(plugin.id, route.id)
-        : createNamespacedId(
-            plugin.id,
-            route.path || (route.index ? "index" : "unnamed-route"),
-          );
+      // Routes are required to define their own namespaced IDs at definition time.
+      // Per the namespace refactor design (Rule 6), we no longer normalize bare IDs here.
+      if (!route.id) {
+        throw new Error(
+          `Route from plugin "${plugin.id}" is missing an id. All route IDs must be valid NamespacedId values defined at registration time.`,
+        );
+      }
 
-      const normalizedComponent = route.component
-        ? normalizeId(plugin.id, route.component)
-        : undefined;
+      const routeId = route.id;
+
+      // Components are bare export names resolved against the plugin's module loader,
+      // not namespaced identifiers.
+      const componentName = route.component;
 
       const componentData = {
-        component: normalizedComponent,
+        component: componentName,
         id: routeId,
         pluginId: plugin.id,
       };
@@ -250,7 +278,7 @@ export class Navigation implements NavigationFeature {
         ...componentData,
         caseSensitive: route.caseSensitive ?? false,
         children: processedChildren,
-        component: normalizedComponent!,
+        component: componentName,
         id: routeId,
         index: route.index ?? false,
         pluginId: plugin.id,
@@ -268,16 +296,16 @@ export class Navigation implements NavigationFeature {
 
     // Add the 404 route
     const notFoundRoute = {
-      component: normalizeId(createNamespacedId("core", "core"), "NotFound"),
-      id: createNamespacedId("core", "not-found"),
+      component: "NotFound",
+      id: createNamespacedId(CORE_NS, "not-found"),
       index: false,
       path: "*",
-      pluginId: createNamespacedId("core", "core"),
+      pluginId: createNamespacedId(CORE_NS, "core"),
     };
 
     /*    const notFoundComponentData = await this.loadRouteComponent({
       ...notFoundRoute,
-      pluginId: createNamespacedId("core", "core"),
+      pluginId: createNamespacedId(CORE_NS, "core"),
     });*/
 
     routes.push({
@@ -318,12 +346,8 @@ export class Navigation implements NavigationFeature {
 
     if (route.component) {
       try {
-        // First normalize the component path if it's not already done
-        const normalizedComponent = isNamespacedId(route.component)
-          ? route.component
-          : normalizeId(route.pluginId, route.component);
-
-        const componentPath = parseNamespacedId(normalizedComponent).name;
+        // Component names are bare export names resolved against the plugin's module loader.
+        const componentPath = route.component;
 
         const Component = await createRemoteComponentLoader(
           {

@@ -6,6 +6,8 @@ import type {
 } from "@lumeweb/portal-plugin-dashboard";
 
 import {
+  createNamespacedId,
+  type NamespacedId,
   cleanTrailingSlashes,
   getApiBaseUrl,
 } from "@lumeweb/portal-framework-core";
@@ -13,8 +15,9 @@ import {
 import CarPreprocessorPlugin from "./carPreprocessor";
 
 export class IpfsUpload implements UploadCapability {
-  readonly id = "ipfs:upload";
-  readonly type = "core:upload" as const;
+  readonly id = createNamespacedId("ipfs", "upload");
+  status: "active" | "error" | "inactive" = "active";
+  readonly type = "framework:upload" as const;
   #tusEndpoint: string;
   #xhrEndpoint: string;
 

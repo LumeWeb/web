@@ -1,4 +1,5 @@
 import {
+  CORE_NS,
   createNamespacedId,
   Framework,
   type Plugin,
@@ -19,15 +20,15 @@ export default function (): Plugin {
     ],
     capabilityAssociations: [
       {
-        associated: ["ipfs:upload"],
-        primary: "ipfs:protocol",
+        associated: [createNamespacedId("ipfs", "upload")],
+        primary: createNamespacedId("ipfs", "protocol"),
       },
     ],
     features: [new FileManagerFeature()],
     async destroy(_framework: Framework) {
       console.log("Plugin IPFS destroyed");
     },
-    id: createNamespacedId("core", "ipfs"),
+    id: createNamespacedId(CORE_NS, "ipfs"),
     async initialize(_framework: Framework) {
       console.log("Plugin IPFS initialized");
     },

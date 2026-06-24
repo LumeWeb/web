@@ -1,12 +1,14 @@
 import type { ProtocolCapability } from "@lumeweb/portal-plugin-dashboard";
+import { createNamespacedId } from "@lumeweb/portal-framework-core";
 
 import * as React from "react";
 
 import IpfsIcon from "@/ui/Icon";
 
 export class IpfsProtocol implements ProtocolCapability {
-  readonly id = "ipfs:protocol";
-  readonly type = "core:protocol" as const;
+  readonly id = createNamespacedId("ipfs", "protocol");
+  status: "active" | "error" | "inactive" = "active";
+  readonly type = "framework:protocol" as const;
 
   async destroy() {}
 

@@ -1,22 +1,44 @@
-import { describe, it, expect, vi } from "vitest";
+import {
+  createNamespacedId,
+  type Plugin,
+  type RouteDefinition,
+} from "@lumeweb/portal-framework-core";
+import { createElement } from "react";
+import { describe, expect, it, vi } from "vitest";
+
 import {
   createNavigationFeature,
-  Navigation,
   generateIdFromRoute,
+  Navigation,
 } from "./navigation";
-import type { Plugin, RouteDefinition } from "@lumeweb/portal-framework-core";
-import { createElement } from "react";
+
+const pluginNs = "plugin1";
+const pluginId = createNamespacedId(pluginNs, "test");
+
+function makePlugin(idValue: string, routes: RouteDefinition[]): Plugin {
+  const [ns, name] = idValue.split(":");
+  return {
+    capabilities: [],
+    destroy: vi.fn(),
+    features: [],
+    id: createNamespacedId(ns, name),
+    initialize: vi.fn(),
+    routes,
+  };
+}
 
 describe("generateIdFromRoute", () => {
   it("should use existing ID when available", () => {
-    const route = { id: "plugin1:existing-id" } as RouteDefinition;
-    const result = generateIdFromRoute(route, "plugin1:test");
+    const route = {
+      id: createNamespacedId(pluginNs, "existing-id"),
+    } as RouteDefinition;
+    const result = generateIdFromRoute(route, pluginId);
     expect(result).toBe("plugin1:existing-id");
   });
 
   it("should generate ID from path when no ID exists", () => {
     const route = { path: "/test-path" } as RouteDefinition;
-    const result = generateIdFromRoute(route, "plugin1:test");
+    const result = generateIdFromRoute(route, pluginId);
     expect(result).toBe("plugin1:test-path");
   });
 
@@ -24,31 +46,31 @@ describe("generateIdFromRoute", () => {
     const route = {
       path: "/test/path with spaces & symbols!",
     } as RouteDefinition;
-    const result = generateIdFromRoute(route, "plugin1:test");
+    const result = generateIdFromRoute(route, pluginId);
     expect(result).toBe("plugin1:test-path-with-spaces-symbols");
   });
 
   it("should use 'index' for index routes without path", () => {
     const route = { index: true } as RouteDefinition;
-    const result = generateIdFromRoute(route, "plugin1:test");
+    const result = generateIdFromRoute(route, pluginId);
     expect(result).toBe("plugin1:index");
   });
 
   it("should generate ID from component name when no path exists", () => {
     const route = { component: "TestComponent" } as RouteDefinition;
-    const result = generateIdFromRoute(route, "plugin1:test");
-    expect(result).toBe("plugin1:TestComponent");
+    const result = generateIdFromRoute(route, pluginId);
+    expect(result).toBe("plugin1:test-component");
   });
 
   it("should extract name from namespaced component ID", () => {
     const route = { component: "plugin2:TestComponent" } as RouteDefinition;
-    const result = generateIdFromRoute(route, "plugin1:test");
-    expect(result).toBe("plugin1:TestComponent");
+    const result = generateIdFromRoute(route, pluginId);
+    expect(result).toBe("plugin1:test-component");
   });
 
   it("should generate ID from navigation label when no component exists", () => {
     const route = { navigation: { label: "Test Label" } } as RouteDefinition;
-    const result = generateIdFromRoute(route, "plugin1:test");
+    const result = generateIdFromRoute(route, pluginId);
     expect(result).toBe("plugin1:test-label");
   });
 
@@ -56,26 +78,28 @@ describe("generateIdFromRoute", () => {
     const route = {
       navigation: { label: "Test Label & More!" },
     } as RouteDefinition;
-    const result = generateIdFromRoute(route, "plugin1:test");
+    const result = generateIdFromRoute(route, pluginId);
     expect(result).toBe("plugin1:test-label-more");
   });
 
   it("should use parent reference when parentId exists", () => {
-    const route = { parentId: "plugin1:parent" } as RouteDefinition;
-    const result = generateIdFromRoute(route, "plugin1:test");
+    const route = {
+      parentId: createNamespacedId(pluginNs, "parent"),
+    } as RouteDefinition;
+    const result = generateIdFromRoute(route, pluginId);
     expect(result).toBe("plugin1:child");
   });
 
   it("should generate hash-based ID as fallback", () => {
     const route = {} as RouteDefinition;
-    const result = generateIdFromRoute(route, "plugin1:test");
+    const result = generateIdFromRoute(route, pluginId);
     expect(result).toMatch(/^generated:route-[a-z0-9]+$/);
   });
 
   it("should use 'generated' namespace when no pluginId provided", () => {
     const route = { component: "TestComponent" } as RouteDefinition;
     const result = generateIdFromRoute(route, undefined);
-    expect(result).toBe("generated:TestComponent");
+    expect(result).toBe("generated:test-component");
   });
 });
 
@@ -83,36 +107,22 @@ describe("Navigation Feature", () => {
   const navigationFeature = createNavigationFeature() as unknown as Navigation;
   it("should build navigation items from plugins with routes and navigation properties", async () => {
     const mockPlugins: Plugin[] = [
-      {
-        id: "plugin1:core",
-        routes: [
-          {
-            id: "plugin1:route1",
-            path: "/route1",
-            component: "Component1",
-            navigation: { label: "Route 1" },
-          },
-        ],
-        destroy: vi.fn(),
-        initialize: vi.fn(),
-        features: [], // Added features
-        capabilities: [], // Added capabilities
-      },
-      {
-        id: "plugin2:admin",
-        routes: [
-          {
-            id: "plugin2:route2",
-            path: "/route2",
-            component: "Component2",
-            navigation: { label: "Route 2" },
-          },
-        ],
-        destroy: vi.fn(),
-        initialize: vi.fn(),
-        features: [], // Added features
-        capabilities: [], // Added capabilities
-      },
+      makePlugin("plugin1:core", [
+        {
+          id: createNamespacedId(pluginNs, "route1"),
+          path: "/route1",
+          component: "Component1",
+          navigation: { label: "Route 1" },
+        },
+      ]),
+      makePlugin("plugin2:admin", [
+        {
+          id: createNamespacedId("plugin2", "route2"),
+          path: "/route2",
+          component: "Component2",
+          navigation: { label: "Route 2" },
+        },
+      ]),
     ];
 
     const navigationItems = navigationFeature.buildNavigation(mockPlugins);
@@ -125,28 +135,21 @@ describe("Navigation Feature", () => {
 
   it("should handle routes with nested paths and construct the correct full path", async () => {
     const mockPlugins: Plugin[] = [
-      {
-        id: "plugin1:core",
-        routes: [
-          {
-            id: "plugin1:parent",
-            path: "/parent",
-            component: "ParentComponent",
-            navigation: { label: "Parent" },
-            children: [
-              {
-                id: "plugin1:child",
-                path: "child",
-                component: "ChildComponent",
-              },
-            ],
-          },
-        ],
-        destroy: vi.fn(),
-        initialize: vi.fn(),
-        features: [],
-        capabilities: [],
-      },
+      makePlugin("plugin1:core", [
+        {
+          id: createNamespacedId(pluginNs, "parent"),
+          path: "/parent",
+          component: "ParentComponent",
+          navigation: { label: "Parent" },
+          children: [
+            {
+              id: createNamespacedId(pluginNs, "child"),
+              path: "child",
+              component: "ChildComponent",
+            },
+          ],
+        },
+      ]),
     ];
 
     const navigationItems = navigationFeature.buildNavigation(mockPlugins);
@@ -158,28 +161,21 @@ describe("Navigation Feature", () => {
 
   it("should handle routes with parentId and construct the correct full path", async () => {
     const mockPlugins: Plugin[] = [
-      {
-        id: "plugin1:core",
-        routes: [
-          {
-            id: "plugin1:parent",
-            path: "/parent",
-            component: "ParentComponent",
-            navigation: { label: "Parent" },
-          },
-          {
-            id: "plugin1:child",
-            path: "child",
-            component: "ChildComponent",
-            parentId: "plugin1:parent",
-            navigation: { label: "Child" },
-          },
-        ],
-        destroy: vi.fn(),
-        initialize: vi.fn(),
-        features: [],
-        capabilities: [],
-      },
+      makePlugin("plugin1:core", [
+        {
+          id: createNamespacedId(pluginNs, "parent"),
+          path: "/parent",
+          component: "ParentComponent",
+          navigation: { label: "Parent" },
+        },
+        {
+          id: createNamespacedId(pluginNs, "child"),
+          path: "child",
+          component: "ChildComponent",
+          parentId: createNamespacedId(pluginNs, "parent"),
+          navigation: { label: "Child" },
+        },
+      ]),
     ];
 
     const navigationItems = navigationFeature.buildNavigation(mockPlugins);
@@ -192,27 +188,20 @@ describe("Navigation Feature", () => {
 
   it("should handle routes with index routes and not include them in navigation", async () => {
     const mockPlugins: Plugin[] = [
-      {
-        id: "plugin1:core",
-        routes: [
-          {
-            id: "plugin1:index",
-            index: true,
-            component: "IndexComponent",
-            navigation: { label: "Index" },
-          },
-          {
-            id: "plugin1:route1",
-            path: "/route1",
-            component: "Component1",
-            navigation: { label: "Route 1" },
-          },
-        ],
-        destroy: vi.fn(),
-        initialize: vi.fn(),
-        features: [], // Added features
-        capabilities: [], // Added capabilities
-      },
+      makePlugin("plugin1:core", [
+        {
+          id: createNamespacedId(pluginNs, "index"),
+          index: true,
+          component: "IndexComponent",
+          navigation: { label: "Index" },
+        },
+        {
+          id: createNamespacedId(pluginNs, "route1"),
+          path: "/route1",
+          component: "Component1",
+          navigation: { label: "Route 1" },
+        },
+      ]),
     ];
 
     const navigationItems = navigationFeature.buildNavigation(mockPlugins);
@@ -224,30 +213,23 @@ describe("Navigation Feature", () => {
 
   it("should handle routes with navigation properties: badge, children, disabled, hidden, icon, order, show", async () => {
     const mockPlugins: Plugin[] = [
-      {
-        id: "plugin1:core",
-        routes: [
-          {
-            id: "plugin1:route1",
-            path: "/route1",
-            component: "Component1",
-            navigation: {
-              label: "Route 1",
-              badge: { content: "new", variant: "secondary" },
-              children: [],
-              disabled: true,
-              hidden: true,
-              icon: createElement("svg"),
-              order: 1,
-              show: () => true,
-            },
+      makePlugin("plugin1:core", [
+        {
+          id: createNamespacedId(pluginNs, "route1"),
+          path: "/route1",
+          component: "Component1",
+          navigation: {
+            label: "Route 1",
+            badge: { content: "new", variant: "secondary" },
+            children: [],
+            disabled: true,
+            hidden: true,
+            icon: createElement("svg"),
+            order: 1,
+            show: () => true,
           },
-        ],
-        destroy: vi.fn(),
-        initialize: vi.fn(),
-        features: [],
-        capabilities: [],
-      },
+        },
+      ]),
     ];
 
     const navigationItems = navigationFeature.buildNavigation(mockPlugins);
@@ -261,7 +243,7 @@ describe("Navigation Feature", () => {
         children: [],
         disabled: true,
         hidden: true,
-        icon: expect.anything(), // Expect any React component
+        icon: expect.anything(),
         order: 1,
         show: expect.any(Function),
       }),
@@ -270,51 +252,30 @@ describe("Navigation Feature", () => {
 
   it("should sort navigation items by order and then by original plugin registration order", async () => {
     const mockPlugins: Plugin[] = [
-      {
-        id: "plugin1:core",
-        routes: [
-          {
-            id: "plugin1:route2",
-            path: "/route2",
-            component: "Component2",
-            navigation: { label: "Route 2", order: 2 },
-          },
-        ],
-        destroy: vi.fn(),
-        initialize: vi.fn(),
-        features: [], // Added features
-        capabilities: [], // Added capabilities
-      },
-      {
-        id: "plugin2:admin",
-        routes: [
-          {
-            id: "plugin2:route1",
-            path: "/route1",
-            component: "Component1",
-            navigation: { label: "Route 1", order: 1 },
-          },
-        ],
-        destroy: vi.fn(),
-        initialize: vi.fn(),
-        features: [], // Added features
-        capabilities: [], // Added capabilities
-      },
-      {
-        id: "plugin3:settings",
-        routes: [
-          {
-            id: "plugin3:route3",
-            path: "/route3",
-            component: "Component3",
-            navigation: { label: "Route 3" },
-          },
-        ],
-        destroy: vi.fn(),
-        initialize: vi.fn(),
-        features: [], // Added features
-        capabilities: [], // Added capabilities
-      },
+      makePlugin("plugin1:core", [
+        {
+          id: createNamespacedId(pluginNs, "route2"),
+          path: "/route2",
+          component: "Component2",
+          navigation: { label: "Route 2", order: 2 },
+        },
+      ]),
+      makePlugin("plugin2:admin", [
+        {
+          id: createNamespacedId("plugin2", "route1"),
+          path: "/route1",
+          component: "Component1",
+          navigation: { label: "Route 1", order: 1 },
+        },
+      ]),
+      makePlugin("plugin3:settings", [
+        {
+          id: createNamespacedId("plugin3", "route3"),
+          path: "/route3",
+          component: "Component3",
+          navigation: { label: "Route 3" },
+        },
+      ]),
     ];
 
     const navigationItems = navigationFeature.buildNavigation(mockPlugins);
@@ -328,93 +289,79 @@ describe("Navigation Feature", () => {
 
   it("should handle complex menu setups with nested routes, parentIds and index routes", async () => {
     const mockPlugins: Plugin[] = [
-      {
-        id: "plugin1:core",
-        routes: [
-          {
-            id: "plugin1:dashboard",
-            path: "/dashboard",
-            component: "DashboardComponent",
-            navigation: { label: "Dashboard" },
-            children: [
-              {
-                id: "plugin1:dashboard-index",
-                index: true,
-                component: "DashboardIndex",
-              },
-              {
-                id: "plugin1:dashboard-analytics",
-                path: "analytics",
-                component: "DashboardAnalytics",
-                navigation: { label: "Analytics" },
-              },
-            ],
-          },
-          {
-            id: "plugin1:settings",
-            path: "/settings",
-            component: "SettingsComponent",
-            navigation: { label: "Settings" },
-            children: [
-              {
-                id: "plugin1:settings-index",
-                index: true,
-                component: "SettingsIndex",
-              },
-              {
-                id: "plugin1:profile",
-                path: "profile",
-                component: "ProfileComponent",
-                navigation: { label: "Profile" },
-              },
-              {
-                id: "plugin1:security",
-                path: "security",
-                component: "SecurityComponent",
-                navigation: { label: "Security" },
-              },
-            ],
-          },
-        ],
-        destroy: vi.fn(),
-        initialize: vi.fn(),
-        features: [],
-        capabilities: [],
-      },
-      {
-        id: "plugin2:admin",
-        routes: [
-          {
-            id: "plugin2:admin-root",
-            path: "/admin",
-            component: "AdminRootComponent",
-            navigation: { label: "Admin" },
-            children: [
-              {
-                id: "plugin2:admin-index",
-                index: true,
-                component: "AdminIndex",
-              },
-              {
-                id: "plugin2:users",
-                path: "users",
-                component: "UsersComponent",
-                navigation: { label: "Users" },
-              },
-              {
-                id: "plugin2:user-roles",
-                path: "roles",
-                component: "UserRolesComponent",
-                navigation: { label: "Roles" },
-              },
-            ],
-          },
-        ],
-        destroy: vi.fn(),
-        initialize: vi.fn(),
-        features: [],
-        capabilities: [],
-      },
+      makePlugin("plugin1:core", [
+        {
+          id: createNamespacedId(pluginNs, "dashboard"),
+          path: "/dashboard",
+          component: "DashboardComponent",
+          navigation: { label: "Dashboard" },
+          children: [
+            {
+              id: createNamespacedId(pluginNs, "dashboard-index"),
+              index: true,
+              component: "DashboardIndex",
+            },
+            {
+              id: createNamespacedId(pluginNs, "dashboard-analytics"),
+              path: "analytics",
+              component: "DashboardAnalytics",
+              navigation: { label: "Analytics" },
+            },
+          ],
+        },
+        {
+          id: createNamespacedId(pluginNs, "settings"),
+          path: "/settings",
+          component: "SettingsComponent",
+          navigation: { label: "Settings" },
+          children: [
+            {
+              id: createNamespacedId(pluginNs, "settings-index"),
+              index: true,
+              component: "SettingsIndex",
+            },
+            {
+              id: createNamespacedId(pluginNs, "profile"),
+              path: "profile",
+              component: "ProfileComponent",
+              navigation: { label: "Profile" },
+            },
+            {
+              id: createNamespacedId(pluginNs, "security"),
+              path: "security",
+              component: "SecurityComponent",
+              navigation: { label: "Security" },
+            },
+          ],
+        },
+      ]),
+      makePlugin("plugin2:admin", [
+        {
+          id: createNamespacedId("plugin2", "admin-root"),
+          path: "/admin",
+          component: "AdminRootComponent",
+          navigation: { label: "Admin" },
+          children: [
+            {
+              id: createNamespacedId("plugin2", "admin-index"),
+              index: true,
+              component: "AdminIndex",
+            },
+            {
+              id: createNamespacedId("plugin2", "users"),
+              path: "users",
+              component: "UsersComponent",
+              navigation: { label: "Users" },
+            },
+            {
+              id: createNamespacedId("plugin2", "user-roles"),
+              path: "roles",
+              component: "UserRolesComponent",
+              navigation: { label: "Roles" },
+            },
+          ],
+        },
+      ]),
     ];
 
     const navigationItems = navigationFeature.buildNavigation(mockPlugins);
@@ -458,20 +405,13 @@ describe("Navigation Feature", () => {
 
   it("should build routes from plugins", async () => {
     const mockPlugins: Plugin[] = [
-      {
-        id: "plugin1:core",
-        routes: [
-          {
-            id: "plugin1:route1",
-            path: "/route1",
-            component: "Component1",
-          },
-        ],
-        destroy: vi.fn(),
-        initialize: vi.fn(),
-        features: [], // Added features
-        capabilities: [], // Added capabilities
-      },
+      makePlugin("plugin1:core", [
+        {
+          id: createNamespacedId(pluginNs, "route1"),
+          path: "/route1",
+          component: "Component1",
+        },
+      ]),
     ];
 
     const routes = await navigationFeature.buildRoutes(mockPlugins);
@@ -480,13 +420,13 @@ describe("Navigation Feature", () => {
       {
         id: "plugin1:route1",
         path: "/route1",
-        component: "plugin1:Component1",
+        component: "Component1",
         caseSensitive: false,
         index: false,
         pluginId: "plugin1:core",
       },
       {
-        component: "core:NotFound",
+        component: "NotFound",
         id: "core:not-found",
         index: false,
         path: "*",
@@ -498,79 +438,54 @@ describe("Navigation Feature", () => {
   it("should build route tree from routes with parent IDs", async () => {
     const routes: RouteDefinition[] = [
       {
-        id: "plugin1:route1",
+        id: createNamespacedId(pluginNs, "route1"),
         path: "/route1",
         component: "Component1",
       },
       {
-        id: "plugin1:route2",
+        id: createNamespacedId(pluginNs, "route2"),
         path: "/route2",
         component: "Component2",
-        parentId: "plugin1:route1",
+        parentId: createNamespacedId(pluginNs, "route1"),
       },
       {
-        id: "plugin1:route3",
+        id: createNamespacedId(pluginNs, "route3"),
         path: "/route3",
         component: "Component3",
-        parentId: "plugin1:route1",
+        parentId: createNamespacedId(pluginNs, "route1"),
       },
       {
-        id: "plugin1:route4",
+        id: createNamespacedId(pluginNs, "route4"),
         path: "/route4",
         component: "Component4",
-        parentId: "plugin1:route2",
+        parentId: createNamespacedId(pluginNs, "route2"),
       },
     ];
 
-    // Mock validateRoute to always return true for simplicity
     vi.spyOn(navigationFeature as any, "validateRoute").mockReturnValue(true);
 
     const routeTree = (navigationFeature as any).buildRouteTree(routes);
 
-    expect(routeTree).toEqual([
-      {
-        id: "plugin1:route1",
-        path: "/route1",
-        component: "Component1",
-      },
-      {
-        id: "plugin1:route2",
-        path: "/route2",
-        component: "Component2",
-        parentId: "plugin1:route1",
-      },
-      {
-        id: "plugin1:route3",
-        path: "/route3",
-        component: "Component3",
-        parentId: "plugin1:route1",
-      },
-      {
-        id: "plugin1:route4",
-        path: "/route4",
-        component: "Component4",
-        parentId: "plugin1:route2",
-      },
-    ]);
+    expect(routeTree).toEqual(routes);
   });
 
   it("should handle duplicate route entries gracefully", async () => {
     const routes: RouteDefinition[] = [
       {
-        id: "plugin1:route1",
+        id: createNamespacedId(pluginNs, "route1"),
         path: "/route1",
         component: "Component1",
       },
       {
-        id: "plugin1:route1", // Duplicate ID
+        id: createNamespacedId(pluginNs, "route1"),
         path: "/route1",
         component: "Component1",
       },
       {
-        id: "plugin1:route2",
+        id: createNamespacedId(pluginNs, "route2"),
         path: "/route2",
         component: "Component2",
-        parentId: "plugin1:route1",
+        parentId: createNamespacedId(pluginNs, "route1"),
       },
     ];
 
@@ -578,23 +493,6 @@ describe("Navigation Feature", () => {
 
     const routeTree = (navigationFeature as any).buildRouteTree(routes);
 
-    expect(routeTree).toEqual([
-      {
-        id: "plugin1:route1",
-        path: "/route1",
-        component: "Component1",
-      },
-      {
-        id: "plugin1:route1",
-        path: "/route1",
-        component: "Component1",
-      },
-      {
-        id: "plugin1:route2",
-        path: "/route2",
-        component: "Component2",
-        parentId: "plugin1:route1",
-      },
-    ]);
+    expect(routeTree).toEqual(routes);
   });
 });

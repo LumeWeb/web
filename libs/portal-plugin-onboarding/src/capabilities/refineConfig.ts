@@ -1,5 +1,6 @@
 import type { RefineProps } from "@refinedev/core";
 import {
+  createNamespacedId,
   Framework,
   mergeRefineConfig,
   RefineConfigCapability,
@@ -9,13 +10,13 @@ import {
 const DATA_PROVIDER_NAME = "ipfs";
 
 export class Capability implements RefineConfigCapability {
-  readonly id: string = "onboarding:refine-config";
+  readonly id = createNamespacedId("onboarding", "refine-config");
   status: CapabilityStatus = "active";
-  readonly type = "core:refine-config";
+  readonly type = "framework:refine-config";
   version!: string;
   #apiUrl!: string;
 
-  dependencies = ["ipfs:refine-config"];
+  dependencies = [createNamespacedId("ipfs", "refine-config")];
 
   getApiUrl(): string {
     return this.#apiUrl;
@@ -41,7 +42,7 @@ export class Capability implements RefineConfigCapability {
   async initialize(framework: Framework) {
     const ipfsCapability = await framework.getCapability<
       RefineConfigCapability & { getApiUrl(): string }
-    >("ipfs:refine-config");
+    >(createNamespacedId("ipfs", "refine-config"));
 
     if (!ipfsCapability) {
       throw new Error("IPFS refine capability not found");

@@ -1,4 +1,5 @@
 import {
+  CORE_NS,
   createNamespacedId,
   Framework,
   type Plugin,
@@ -11,10 +12,10 @@ import widgets from "./widgetRegistrations";
 export default function (): Plugin {
   return {
     capabilities: [new RefineConfigCapability()],
-    dependencies: [{ id: "core:dashboard" }],
+    dependencies: [{ id: createNamespacedId(CORE_NS, "dashboard") }],
     async destroy(_framework: Framework) {
     },
-    id: createNamespacedId("core", "quota"),
+    id: createNamespacedId(CORE_NS, "quota"),
     async initialize(_framework: Framework) {
     },
     routes,

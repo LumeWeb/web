@@ -3,6 +3,7 @@ import {
   SdkCapability,
 } from "@lumeweb/portal-framework-auth";
 import {
+  CORE_NS,
   createNamespacedId,
   Framework,
   type Plugin,
@@ -16,7 +17,7 @@ export default function (): Plugin {
     async destroy(_framework: Framework) {
       console.log("Plugin Admin destroyed");
     },
-    id: createNamespacedId("core", "admin"),
+    id: createNamespacedId(CORE_NS, "admin"),
     async initialize(_framework: Framework) {
       console.log("Plugin Admin initialized");
     },

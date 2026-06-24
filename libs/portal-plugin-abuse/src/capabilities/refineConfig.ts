@@ -1,17 +1,20 @@
 import type { RefineProps } from "@refinedev/core";
 
 import {
+  createNamespacedId,
+  type NamespacedId,
   Framework,
+  FRAMEWORK_NS,
   RefineConfigCapability,
 } from "@lumeweb/portal-framework-core";
 import { RefineResource } from "@/types/resources";
 
 export class Capability implements RefineConfigCapability {
-  dependencies = ["core:sdk"];
-  readonly id: string = "abuse:refine-config";
-  metadata: { description: string; name: string; provider: string };
-  status: "active" | "error" | "inactive";
-  readonly type = "core:refine-config";
+  dependencies: NamespacedId[] = [createNamespacedId(FRAMEWORK_NS, "sdk")];
+  readonly id = createNamespacedId("abuse", "refine-config");
+  metadata: { description: string; name: string; provider: string } = { description: "", name: "", provider: "" };
+  status: "active" | "error" | "inactive" = "inactive";
+  readonly type = "framework:refine-config";
   version: string;
 
   async destroy() {}
@@ -61,7 +64,7 @@ export class Capability implements RefineConfigCapability {
         {
           name: RefineResource.CaseEvidence,
           meta: {
-            template: "/abuse/cases/:caseId/communications",
+            template: "/abuse/cases/:caseId/evidence",
           },
         },
       ],

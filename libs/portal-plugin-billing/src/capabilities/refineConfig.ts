@@ -1,8 +1,10 @@
 import type { RefineProps } from "@refinedev/core";
 import {
   Framework,
-  RefineConfigCapability,
   type CapabilityStatus,
+  createNamespacedId,
+  type NamespacedId,
+  RefineConfigCapability,
   mergeRefineConfig,
   syncAuthProviderWithDataProvider,
 } from "@lumeweb/portal-framework-core";
@@ -11,15 +13,15 @@ import { DATA_PROVIDER_NAME } from "@lumeweb/portal-framework-auth";
 import { createNanoEvents, Emitter } from "nanoevents";
 
 export class Capability implements RefineConfigCapability {
-  readonly id: string = "billing:refine-config";
+  readonly id = createNamespacedId("billing", "refine-config");
   status: CapabilityStatus = "active";
-  readonly type = "core:refine-config";
+  readonly type = "framework:refine-config";
   version!: string;
   #apiUrl!: string;
   #authToken: string | null = null;
   #emitter!: Emitter;
   #authUnbind: (() => void) | null = null;
-  dependencies = ["dashboard:refine-config"];
+  dependencies = [createNamespacedId("dashboard", "refine-config")];
 
   getApiUrl(): string {
     return this.#apiUrl;
@@ -94,7 +96,7 @@ export class Capability implements RefineConfigCapability {
     // Get the dashboard refine capability
     const dashboardCapability = await framework.getCapability<
       RefineConfigCapability & { apiUrl: string }
-    >("dashboard:refine-config");
+    >(createNamespacedId("dashboard", "refine-config"));
 
     if (!dashboardCapability) {
       throw new Error("Dashboard refine capability not found");

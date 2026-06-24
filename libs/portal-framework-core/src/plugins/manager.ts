@@ -1,20 +1,25 @@
 import type { RouteDefinition } from "../types/navigation";
 import type {
   FeatureState,
-  NamespacedId,
   Plugin,
   PluginState,
 } from "../types/plugin";
+import { Namespace, NamespacedId } from "../types/namespace";
 
 import { Framework } from "../api/framework";
 import { FeatureLoadError, PluginInitError, PluginLoadError } from "../errors";
 import { FrameworkFeature } from "../types/api";
 import { DependencyGraph } from "../util/dependencyGraph";
-import { isNamespacedId, validateNamespacedId } from "../util/namespace";
+import {
+  isNamespacedId,
+  parseNamespacedId,
+  validateNamespacedId,
+} from "../util/namespace";
 import {
   validateFeatureDetailed,
   validatePluginDetailed,
 } from "../util/validation";
+import { NamespaceRegistry } from "./namespaceRegistry";
 
 export interface RemoteModule {
   entry: string;
@@ -47,6 +52,7 @@ export class PluginManager {
   readonly #pluginFactories = new Map<NamespacedId, () => Plugin>();
   readonly #pluginStates = new Map<NamespacedId, PluginState>();
   readonly #remoteModules = new Map<string, RemoteModule>();
+  readonly #registry = new NamespaceRegistry();
   private _framework: Framework | null = null;
   async destroyPlugin(id: NamespacedId) {
     const plugin = this.#loadedPlugins.get(id);
@@ -204,6 +210,10 @@ export class PluginManager {
     );
   }
 
+  getRegistry(): NamespaceRegistry {
+    return this.#registry;
+  }
+
   hasCapability(type: string): boolean {
     return Array.from(this.#loadedPlugins.values()).some((plugin) =>
       plugin.capabilities?.some((cap) => cap.type === type),
@@ -238,7 +248,6 @@ export class PluginManager {
 
       const plugin = this.#loadedPlugins.get(pluginId);
       if (!plugin?.initialize) continue;
-
       // Defensive check for plugin interface compliance
       const pluginValidationResult = validatePluginDetailed(plugin);
       if (!pluginValidationResult.isValid) {
@@ -365,12 +374,36 @@ export class PluginManager {
       throw new Error("Invalid plugin configuration");
     }
 
-    // Validate routes if present
-    if (plugin.routes) {
-      this.ensureValidRoutes(plugin);
-    }
+      // Validate routes if present
+      if (plugin.routes) {
+        plugin.routes = plugin.routes.map((route) =>
+          this.#normalizeAndValidateRoute(plugin.id, route),
+        );
+      }
+
+      // Validate capabilities if present
+      plugin.capabilities?.forEach((capability) => {
+        validateNamespacedId(capability.id);
+        validateNamespacedId(capability.type);
+      });
+
+      // Validate widget areas and widgets if present
+      plugin.widgets?.areas?.forEach((area) => {
+        validateNamespacedId(area.id);
+      });
+      plugin.widgets?.widgets?.forEach((widget) => {
+        validateNamespacedId(widget.id);
+        validateNamespacedId(widget.areaId);
+      });
 
     const pluginId = plugin.id;
+
+    // Claim the plugin's namespace in the registry
+    const namespace = parseNamespacedId(pluginId).namespace;
+    this.#registry.claim(namespace, pluginId);
+
+    // Claim additional namespaces if provided
+    plugin.namespaces?.forEach((ns) => this.#registry.claim(ns, pluginId));
 
     // Check if already registered as either factory or loaded plugin
     if (
@@ -469,6 +502,9 @@ export class PluginManager {
 
     this.#loadedPlugins.delete(id);
     this.#pluginStates.delete(id);
+
+    // Release any namespaces claimed by this plugin
+    this.#registry.release(id);
   }
 
   async #destroyFeature(id: NamespacedId) {
@@ -558,39 +594,49 @@ export class PluginManager {
     });
   }
 
-  private ensureValidRoutes(plugin: Plugin) {
-    if (!plugin.routes) return;
+  #normalizeAndValidateRoute(
+    pluginId: NamespacedId,
+    route: RouteDefinition,
+  ): RouteDefinition {
+    if (!route.component) {
+      throw new Error(
+        `Route in plugin ${pluginId} must specify a component export name`,
+      );
+    }
 
-    const validateRoute = (route: RouteDefinition) => {
-      if (!route.component) {
+    if (typeof route.component !== "string") {
+      throw new Error(
+        `Route component in plugin ${pluginId} must be a string (export name)`,
+      );
+    }
+
+    // Route IDs must be valid NamespacedId at definition time. If a route ID
+    // lacks a namespace, throw with a clear error pointing at the plugin.
+    if (route.id) {
+      if (typeof route.id !== "string" || !isNamespacedId(route.id)) {
         throw new Error(
-          `Route in plugin ${plugin.id} must specify a component export name`,
+          `Route ID "${route.id}" in plugin ${pluginId} must be a namespaced ID (format: "namespace:name")`,
         );
       }
+    } else {
+      throw new Error(
+        `Route in plugin ${pluginId} is missing a route ID. Route IDs must be valid namespaced IDs.`,
+      );
+    }
 
-      if (typeof route.component !== "string") {
-        throw new Error(
-          `Route component in plugin ${plugin.id} must be a string (export name)`,
-        );
-      }
+    // After the runtime check above, TypeScript still sees route.id as
+    // string | undefined. We narrow it once so subsequent code can rely on the
+    // NamespacedId type.
+    const routeId = route.id as NamespacedId;
+    route.id = routeId;
 
-      if (route.id && typeof route.id === "string") {
-        if (!isNamespacedId(route.id)) {
-          throw new Error(
-            `Route ID "${route.id}" in plugin ${plugin.id} must be a namespaced ID (format: "namespace:name")`,
-          );
-        }
-      } else {
-        // Auto-generate ID if not provided
-        route.id = `${plugin.id}:${route.path || "index"}`;
-      }
+    if (route.children) {
+      route.children = route.children.map((child) =>
+        this.#normalizeAndValidateRoute(pluginId, child),
+      );
+    }
 
-      if (route.children) {
-        route.children.forEach(validateRoute);
-      }
-    };
-
-    plugin.routes.forEach(validateRoute);
+    return route;
   }
 
   private findPluginForFeature(id: NamespacedId): Plugin | undefined {

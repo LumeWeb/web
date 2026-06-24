@@ -1,4 +1,8 @@
-import type { RouteDefinition } from "@lumeweb/portal-framework-core";
+import {
+  CORE_NS,
+  createNamespacedId,
+  type RouteDefinition,
+} from "@lumeweb/portal-framework-core";
 
 import {
   Activity,
@@ -9,15 +13,15 @@ import {
   UserCog,
 } from "lucide-react";
 
-const routes = [
+const routes: RouteDefinition[] = [
   {
     component: "index",
-    id: "root",
+    id: createNamespacedId(CORE_NS, "root"),
     path: "/",
   },
   {
     component: "dashboard",
-    id: "dashboard",
+    id: createNamespacedId(CORE_NS, "dashboard"),
     navigation: {
       icon: LayoutDashboard,
       label: "Dashboard",
@@ -27,7 +31,7 @@ const routes = [
   },
   {
     component: "operations",
-    id: "operations",
+    id: createNamespacedId(CORE_NS, "operations"),
     navigation: {
       icon: Activity,
       label: "Operations",
@@ -39,7 +43,7 @@ const routes = [
     children: [
       {
         component: "account/profile",
-        id: "account_index",
+        id: createNamespacedId(CORE_NS, "account-index"),
         index: true,
         navigation: {
           forceShowInNavigation: true,
@@ -50,7 +54,7 @@ const routes = [
       },
       {
         component: "account/security",
-        id: "account_security",
+        id: createNamespacedId(CORE_NS, "account-security"),
         navigation: {
           icon: Shield,
           label: "Security",
@@ -59,7 +63,7 @@ const routes = [
       },
       {
         component: "account/api-keys",
-        id: "account_api_keys",
+        id: createNamespacedId(CORE_NS, "account-api-keys"),
         navigation: {
           icon: Key,
           label: "API Keys",
@@ -68,7 +72,7 @@ const routes = [
       },
     ],
     component: "account/layout",
-    id: "account_layout",
+    id: createNamespacedId(CORE_NS, "account-layout"),
     navigation: {
       icon: UserCog,
       label: "My Account",
@@ -79,42 +83,42 @@ const routes = [
   },
   {
     component: "account/verify",
-    id: "account_verify",
+    id: createNamespacedId(CORE_NS, "account-verify"),
     path: "account/verify",
   },
   {
     component: "loginIndex",
-    id: "login_index",
+    id: createNamespacedId(CORE_NS, "login-index"),
     path: "login",
   },
   {
     component: "registerIndex",
-    id: "register_index",
+    id: createNamespacedId(CORE_NS, "register-index"),
     path: "register",
   },
   {
     children: [
       {
         component: "resetPassword/reset",
-        id: "reset_password_index",
+        id: createNamespacedId(CORE_NS, "reset-password-index"),
         index: true,
         path: "",
       },
       {
         component: "resetPassword/confirm",
-        id: "reset_password_confirm",
+        id: createNamespacedId(CORE_NS, "reset-password-confirm"),
         path: "confirm",
       },
     ],
     component: "resetPassword/layout",
-    id: "reset_password_layout",
+    id: createNamespacedId(CORE_NS, "reset-password-layout"),
     path: "reset-password",
   },
   {
     component: "loginOtp",
-    id: "otp_login",
+    id: createNamespacedId(CORE_NS, "otp-login"),
     path: "otp",
   },
-] satisfies RouteDefinition[];
+] as const satisfies RouteDefinition[];
 
 export default routes;

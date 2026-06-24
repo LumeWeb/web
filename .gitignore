@@ -63,3 +63,8 @@ apps/*/build
 
 # Generated tunnel plugin configs
 plugin.config.json
+
+# Docs
+docs/
+.worktrees/
+apps/*/devtools-output/

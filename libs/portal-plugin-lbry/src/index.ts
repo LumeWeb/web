@@ -1,4 +1,5 @@
 import {
+  CORE_NS,
   createNamespacedId,
   Framework,
   type Plugin,
@@ -18,14 +19,14 @@ export default function (): Plugin {
     ],
     capabilityAssociations: [
       {
-        associated: ["lbry:upload"],
-        primary: "lbry:protocol",
+        associated: [createNamespacedId("lbry", "upload")],
+        primary: createNamespacedId("lbry", "protocol"),
       },
     ],
     async destroy(_framework: Framework) {
       console.log("Plugin LBRY destroyed");
     },
-    id: createNamespacedId("core", "lbry"),
+    id: createNamespacedId(CORE_NS, "lbry"),
     async initialize(_framework: Framework) {
       console.log("Plugin LBRY initialized");
     },

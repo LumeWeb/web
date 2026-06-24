@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { NamespacedId } from "./plugin";
+import { NamespacedId } from "./namespace";
 
 export interface WidgetAreaDefinition {
   grid?: {
@@ -16,7 +16,7 @@ export interface WidgetAreaDefinition {
      */
     rowHeight?: "auto" | number;
   };
-  id: string;
+  id: NamespacedId;
 }
 
 export const DEFAULT_WIDGET_AREA_DEFINITION: Required<
@@ -37,9 +37,9 @@ export interface WidgetDefinition
 }
 
 export interface WidgetRegistration {
-  areaId: string;
+  areaId: NamespacedId;
   componentName: string;
-  id: string;
+  id: NamespacedId;
   minHeight?: number;
   minWidth?: number;
   order?: number;

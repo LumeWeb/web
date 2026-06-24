@@ -1,9 +1,19 @@
-import type { BaseCapability } from "@lumeweb/portal-framework-core";
-
-import type { UploadConfig, UppyPlugin } from "../upload";
+import {
+  FRAMEWORK_NS,
+  createNamespacedId,
+  type BaseCapability,
+} from "@lumeweb/portal-framework-core";
 import type { BasePlugin } from "@uppy/core";
 
-export interface UploadCapability extends BaseCapability<"core:upload"> {
+import type { UploadConfig, UppyPlugin } from "../upload";
+
+export const UPLOAD_CAPABILITY_TYPE = createNamespacedId(
+  FRAMEWORK_NS,
+  "upload",
+);
+
+export interface UploadCapability
+  extends BaseCapability {
   /**
    * Gets the Uppy plugin for large files
    * @returns Uppy plugin class

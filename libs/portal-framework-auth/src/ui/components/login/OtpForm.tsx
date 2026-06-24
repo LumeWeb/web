@@ -17,7 +17,7 @@ export interface OtpParams {
   to?: string;
 }
 
-function OtpForm(): JSX.Element {
+function OtpForm(): React.JSX.Element {
   const parsed = useParsed<OtpParams>();
   const login = useLogin();
   const resetPasswordUrl = useResetPasswordUrl();

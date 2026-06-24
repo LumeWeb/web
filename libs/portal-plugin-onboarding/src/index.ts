@@ -1,4 +1,5 @@
 import {
+  CORE_NS,
   createNamespacedId,
   Framework,
   type Plugin,
@@ -22,14 +23,14 @@ export default function (): Plugin {
   return {
     capabilities: [new RefineConfigCapability()],
     dependencies: [
-      { id: "core:dashboard" },
-      { id: "core:billing" },
-      { id: "core:ipfs" },
-      { id: "ipfs:refine-config" },
+      { id: createNamespacedId(CORE_NS, "dashboard") },
+      { id: createNamespacedId(CORE_NS, "billing") },
+      { id: createNamespacedId(CORE_NS, "ipfs") },
+      { id: createNamespacedId("ipfs", "refine-config") },
     ],
     async destroy(_framework: Framework) {
     },
-    id: createNamespacedId("core", "onboarding"),
+    id: createNamespacedId(CORE_NS, "onboarding"),
     async initialize(_framework: Framework) {
     },
     queryParamConfig: QUERY_PARAM_CONFIG,

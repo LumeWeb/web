@@ -1,4 +1,12 @@
+import {
+  createNamespacedId,
+} from "@lumeweb/portal-framework-core";
 import { type FormConfig, FormFieldType } from "@lumeweb/portal-framework-ui";
+
+const ACCOUNT_EMAIL_FIELD_TYPE = createNamespacedId(
+  "dashboard",
+  "account-email",
+);
 
 export default function editProfileForm(): FormConfig {
   return {
@@ -26,7 +34,7 @@ export default function editProfileForm(): FormConfig {
         className: "col-span-2",
         label: "Email Address",
         name: "email",
-        type: "dashboard:account.email",
+        type: ACCOUNT_EMAIL_FIELD_TYPE,
       },
     ],
     footerClassName: "",

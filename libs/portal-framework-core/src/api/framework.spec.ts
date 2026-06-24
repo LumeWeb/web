@@ -3,6 +3,7 @@ import { createMockPluginManager } from "@lumeweb/portal-test-util";
 import { createMockSdkCapability } from "@lumeweb/portal-test-util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CORE_NS, createNamespacedId } from "../util/namespace";
 import { Framework } from "./framework";
 import { ERROR_CATEGORIES } from "../types/api";
 
@@ -11,7 +12,7 @@ describe("Framework", () => {
   let framework: Framework;
   let mockPluginManager: ReturnType<typeof createMockPluginManager>;
   let mockCapabilityManager: ReturnType<typeof createMockCapabilityManager>;
-  let consoleWarnSpy: vi.SpyInstance; // Declare spy variable
+  let consoleWarnSpy: ReturnType<typeof vi.spyOn>; // Declare spy variable
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -197,35 +198,35 @@ describe("Framework", () => {
     const mockModule: any = {
       entry: "http://example.com/remote.js",
       moduleId: "remote-1",
-      pluginId: "core:plugin",
+      pluginId: createNamespacedId(CORE_NS, "plugin"),
     };
     mockPluginManager.getRemoteModule = vi.fn().mockReturnValue(mockModule);
 
-    const result = framework.resolvePluginModule("core:plugin", "ComponentA");
+    const result = framework.resolvePluginModule(createNamespacedId(CORE_NS, "plugin"), "ComponentA");
     expect(result).toBe("remote-1/ComponentA");
     expect(mockPluginManager.getRemoteModule).toHaveBeenCalledWith(
-      "core:plugin",
+      createNamespacedId(CORE_NS, "plugin"),
     );
   });
 
   it("should load features", async () => {
     const mockFeature = {
       destroy: vi.fn(),
-      id: "core:feature",
+      id: createNamespacedId(CORE_NS, "feature"),
       initialize: vi.fn(),
     };
     mockPluginManager.loadFeature = vi.fn().mockResolvedValue(mockFeature);
 
-    const result = await framework.loadFeature("core:feature");
+    const result = await framework.loadFeature(createNamespacedId(CORE_NS, "feature"));
     expect(result).toBe(mockFeature);
-    expect(mockPluginManager.loadFeature).toHaveBeenCalledWith("core:feature");
+    expect(mockPluginManager.loadFeature).toHaveBeenCalledWith(createNamespacedId(CORE_NS, "feature"));
   });
 
   it("should register capabilities", () => {
-    framework.registerCapability(mockSdkCapability, "core:plugin");
+    framework.registerCapability(mockSdkCapability, createNamespacedId(CORE_NS, "plugin"));
     expect(mockCapabilityManager.register).toHaveBeenCalledWith(
       mockSdkCapability,
-      "core:plugin",
+      createNamespacedId(CORE_NS, "plugin"),
     );
   });
 });

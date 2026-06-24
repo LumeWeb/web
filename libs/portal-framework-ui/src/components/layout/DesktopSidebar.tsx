@@ -1,4 +1,9 @@
-import { FlexWidgetArea, useBrand } from "@lumeweb/portal-framework-core";
+import {
+  CORE_NS,
+  createNamespacedId,
+  FlexWidgetArea,
+  useBrand,
+} from "@lumeweb/portal-framework-core";
 import { Button, cn } from "@lumeweb/portal-framework-ui-core";
 import React from "react";
 
@@ -40,7 +45,7 @@ function DesktopSidebar() {
           </Button>
           <MainNavigation isOpen={!isCollapsed} />
         </div>
-        <FlexWidgetArea id={"core:desktop-sidebar"} />
+        <FlexWidgetArea id={createNamespacedId(CORE_NS, "desktop-sidebar")} />
         <span
           className={cn(
             "text-foreground/60 mb-4 space-y-1 transition-opacity duration-300",

@@ -3,6 +3,8 @@ import {
   SdkCapability,
 } from "@lumeweb/portal-framework-auth";
 import {
+  createNamespace,
+  CORE_NS,
   createNamespacedId,
   Framework,
   type Plugin,
@@ -26,11 +28,12 @@ export default function (): Plugin {
       console.log("Plugin Dashboard destroyed");
     },
     features: [new Feature()],
-    id: createNamespacedId("core", "dashboard"),
+    id: createNamespacedId(CORE_NS, "dashboard"),
     async initialize(_framework: Framework) {
       console.log("Plugin Dashboard initialized");
       registerInput();
     },
+    namespaces: [createNamespace("dashboard")],
     routes,
     widgets: dashboardWidgets,
   } satisfies Plugin;

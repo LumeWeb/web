@@ -1,10 +1,19 @@
-import { useFramework } from "@lumeweb/portal-framework-core";
+import {
+  CORE_NS,
+  createNamespacedId,
+  useFramework,
+} from "@lumeweb/portal-framework-core";
 import { useNotification } from "@refinedev/core";
 import { useCallback, useEffect, useState } from "react";
 
 import type { ProtocolCapability } from "@lib/types/capabilities/protocol";
 import type { Feature } from "@/features/upload";
 import type { UIServiceConfig, UploadStatusType } from "@/types/upload";
+
+const DASHBOARD_UPLOAD_FEATURE_ID = createNamespacedId(
+  CORE_NS,
+  "dashboard-upload",
+);
 
 export interface UseUploadManagerReturn {
   addFile: (file: File, serviceId: string) => Promise<void>;
@@ -36,7 +45,9 @@ export function useUploadManager(): UseUploadManagerReturn {
     }
 
     const feature =
-      await framework.framework.getFeature<Feature>("dashboard:upload");
+      await framework.framework.getFeature<Feature>(
+        DASHBOARD_UPLOAD_FEATURE_ID,
+      );
     if (!feature) {
       throw new Error("Upload feature not found");
     }

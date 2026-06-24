@@ -1,4 +1,5 @@
 import {
+  CORE_NS,
   createNamespacedId,
   Framework,
   type Plugin,
@@ -15,7 +16,7 @@ export default function (): Plugin {
       console.log("Plugin Core destroyed");
     },
     features: [createNavigationFeature()],
-    id: createNamespacedId("core", "core"),
+    id: createNamespacedId(CORE_NS, "core"),
     async initialize(_framework: Framework) {
       console.log("Plugin Core initialized");
     },

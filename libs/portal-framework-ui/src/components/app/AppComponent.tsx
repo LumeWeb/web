@@ -1,13 +1,16 @@
 import {
   Builder,
+  CORE_NS,
   createNamespacedId,
   createRemoteComponentLoader,
   defaultRemoteOptions,
   ErrorDisplay,
   Framework,
+  FRAMEWORK_NS,
   FrameworkProvider,
   getDefaultRefineOptions,
-  NamespacedId,
+  isNamespacedId,
+  type NamespacedId,
   NavigationFeature,
   NavigationItem,
   parseNamespacedId,
@@ -109,14 +112,14 @@ function AppContent({
 
         if (loadNavigation) {
           navigationFeature = await framework!.getFeature<NavigationFeature>(
-            createNamespacedId("core", "navigation"),
+            createNamespacedId(CORE_NS, "navigation"),
           );
         }
 
         if (loadRoutes) {
           capabilities =
             await framework!.getCapabilitiesByType<RefineConfigCapability>(
-              "core:refine-config",
+              createNamespacedId(FRAMEWORK_NS, "refine-config"),
             );
         }
 
@@ -181,7 +184,10 @@ function AppContent({
 
   const options = {
     ...combinedPluginConfig,
-    options: getDefaultRefineOptions(),
+    options: {
+      ...getDefaultRefineOptions(),
+      ...combinedPluginConfig.options,
+    },
     routerProvider,
   } satisfies Partial<RefineProps>;
 
@@ -264,7 +270,7 @@ function AppContentInner({
   ): React.ReactNode {
     const LazyComponent = getLazyComponent(
       route.component ?? "",
-      route.pluginId ?? createNamespacedId("core", "fallback"),
+      route.pluginId ?? createNamespacedId(CORE_NS, "fallback"),
       framework,
       route.id!,
     );
@@ -314,8 +320,8 @@ function AppContentInner({
 function getLazyComponent(
   componentString: string | undefined,
   pluginId: NamespacedId | undefined,
-  framework: Framework, // Pass framework instance
-  routeId: NamespacedId | string, // For logging
+  framework: Framework,
+  routeId: NamespacedId,
 ): ComponentType<unknown> | null {
   if (!componentString || !pluginId) {
     console.error(
@@ -330,8 +336,8 @@ function getLazyComponent(
 
   let componentName: string;
   try {
-    if (componentString.includes(":")) {
-      componentName = parseNamespacedId(componentString as NamespacedId).name;
+    if (isNamespacedId(componentString)) {
+      componentName = parseNamespacedId(componentString).name;
     } else {
       componentName = componentString;
     }

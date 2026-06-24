@@ -5,7 +5,6 @@ import {
   GeneralLayout,
   PageHeader,
   ToolbarItemType,
-  ComponentSize,
   Copyable,
 } from "@lumeweb/portal-framework-ui";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -15,7 +14,9 @@ import type { ProtocolCapability } from "@lumeweb/portal-plugin-dashboard";
 import { useCapabilitiesByType } from "@lumeweb/portal-framework-core";
 import { useOperationFilters } from "@/ui/hooks/useOperationFilters";
 import { Authenticated } from "@refinedev/core";
-import { useMemo, createContext, useContext } from "react";
+import React, { useMemo, createContext, useContext } from "react";
+
+import { PROTOCOL_CAPABILITY_TYPE } from "@lib/types/capabilities/protocol";
 
 interface OperationListItem {
   cid?: any;
@@ -317,7 +318,9 @@ const OperationsFilterProvider = ({
   children: React.ReactNode;
 }) => {
   const { data: protocolCapabilities } =
-    useCapabilitiesByType<ProtocolCapability>("core:protocol");
+    useCapabilitiesByType<ProtocolCapability>(
+      PROTOCOL_CAPABILITY_TYPE,
+    );
 
   const { data: filterData, isLoading: isFiltersLoading } =
     useOperationFilters();
@@ -326,7 +329,7 @@ const OperationsFilterProvider = ({
   const protocolCapabilitiesMap = useMemo(() => {
     if (!protocolCapabilities) return new Map();
     return new Map(
-      protocolCapabilities.map((cap) => {
+      protocolCapabilities.map((cap: any) => {
         const key = cap.id.includes(":") ? cap.id.split(":")[0] : cap.id;
         return [key, cap];
       }),

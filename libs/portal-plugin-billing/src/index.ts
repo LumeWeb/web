@@ -4,6 +4,7 @@ export * from "./types";
 export * from "./utils";
 
 import {
+  CORE_NS,
   createNamespacedId,
   Framework,
   type Plugin,
@@ -13,12 +14,12 @@ import routes from "./routes";
 
 export default function (): Plugin {
   return {
-    dependencies: [{ id: "core:dashboard" }],
+    dependencies: [{ id: createNamespacedId(CORE_NS, "dashboard") }],
     capabilities: [new RefineConfigCapability()],
     async destroy(_framework: Framework) {
       console.log("Plugin Billing destroyed");
     },
-    id: createNamespacedId("core", "billing"),
+    id: createNamespacedId(CORE_NS, "billing"),
     async initialize(_framework: Framework) {
       console.log("Plugin Billing initialized");
     },

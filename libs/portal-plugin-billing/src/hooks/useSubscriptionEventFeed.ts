@@ -13,7 +13,7 @@ import {
 import { assertNever } from "@/types/subscription";
 import { useEffect, useRef } from "react";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
-import { useCapability } from "@lumeweb/portal-framework-core";
+import { createNamespacedId, useCapability } from "@lumeweb/portal-framework-core";
 import type { Capability } from "@/capabilities/refineConfig";
 import { getAuthHeaders } from "./useSubscriptionStatus";
 import { createNanoEvents, type Emitter } from "nanoevents";
@@ -61,7 +61,7 @@ function dispatchSubscriptionEvent(
 
 export function useSubscriptionEventFeed(): SubscriptionEventEmitter {
   const emitterRef = useRef<SubscriptionEventEmitter>(createNanoEvents<SubscriptionEventFeedEvents>());
-  const { data: capability } = useCapability<Capability>("billing:refine-config");
+  const { data: capability } = useCapability<Capability>(createNamespacedId("billing", "refine-config"));
 
   useEffect(() => {
     const token = capability?.getAuthToken();

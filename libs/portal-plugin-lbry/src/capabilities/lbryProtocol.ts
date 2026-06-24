@@ -3,12 +3,16 @@ import type { ProtocolCapability } from "@lumeweb/portal-plugin-dashboard";
 import * as React from "react";
 
 import LbryIcon from "@/ui/components/LbryIcon";
-import { type CapabilityStatus } from "@lumeweb/portal-framework-core";
+import {
+  type CapabilityStatus,
+  FRAMEWORK_NS,
+  createNamespacedId,
+} from "@lumeweb/portal-framework-core";
 
 export class LbryProtocol implements ProtocolCapability {
-  readonly id = "lbry:protocol";
-  readonly type = "core:protocol" as const;
+  readonly id = createNamespacedId("lbry", "protocol");
   readonly status: CapabilityStatus;
+  readonly type = createNamespacedId(FRAMEWORK_NS, "protocol");
 
   async destroy() {}
 

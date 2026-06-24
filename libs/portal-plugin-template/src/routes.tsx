@@ -1,11 +1,14 @@
-import type { RouteDefinition } from "@lumeweb/portal-framework-core";
+import {
+  createNamespacedId,
+  type RouteDefinition,
+} from "@lumeweb/portal-framework-core";
 import { Home, Settings } from "lucide-react";
 
 const routes = [
   {
     path: "/template",
     component: "./dashboard",
-    id: "template-dashboard",
+    id: createNamespacedId("template", "dashboard"),
     navigation: {
       label: "Template Dashboard",
       icon: Home,
@@ -15,7 +18,7 @@ const routes = [
   {
     path: "/template/settings",
     component: "./settings",
-    id: "template-settings",
+    id: createNamespacedId("template", "settings"),
     navigation: {
       label: "Template Settings",
       icon: Settings,

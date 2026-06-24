@@ -1,4 +1,4 @@
-import { useFeature } from "@lumeweb/portal-framework-core";
+import { createNamespacedId, useFeature } from "@lumeweb/portal-framework-core";
 import { useCallback } from "react";
 import { FileManagerFeature } from "@/features/fileManager/Feature";
 import type { HeliaService } from "@/helia";
@@ -16,7 +16,7 @@ export function useFileManagerFeature(): UseFileManagerFeatureReturn {
     data: feature,
     error,
     isLoading,
-  } = useFeature<FileManagerFeature>("ipfs:file-manager");
+  } = useFeature<FileManagerFeature>(createNamespacedId("ipfs", "file-manager"));
 
   const getHeliaService = useCallback(() => {
     if (!feature) {

@@ -4,12 +4,18 @@ import {
   useDialog,
   useFormContext,
 } from "@lumeweb/portal-framework-ui";
+import { createNamespacedId } from "@lumeweb/portal-framework-core";
 import { Button, cn } from "@lumeweb/portal-framework-ui-core";
 import { useCustomMutation } from "@refinedev/core";
 import { Mail } from "lucide-react";
 import React from "react";
 
 import { updateEmailDialogConfig } from "@/ui/dialogs/updateEmail";
+
+const ACCOUNT_EMAIL_FIELD_TYPE = createNamespacedId(
+  "dashboard",
+  "account-email",
+);
 
 interface AccountEmailProps {
   className?: string;
@@ -58,5 +64,5 @@ const AccountEmail = React.forwardRef<HTMLDivElement, AccountEmailProps>(
 );
 
 export function registerInput() {
-  registerFormComponent("dashboard:account.email", AccountEmail);
+  registerFormComponent(ACCOUNT_EMAIL_FIELD_TYPE, AccountEmail);
 }

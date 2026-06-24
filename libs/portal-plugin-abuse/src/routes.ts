@@ -1,9 +1,12 @@
-import type { RouteDefinition } from "@lumeweb/portal-framework-core";
+import {
+  createNamespacedId,
+  type RouteDefinition,
+} from "@lumeweb/portal-framework-core";
 
 const routes = [
   {
     component: "AbuseLayout",
-    id: "abuse",
+    id: createNamespacedId("abuse", "root"),
     navigation: {
       label: "Abuse",
     },

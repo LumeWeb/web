@@ -2,9 +2,6 @@ import {
   createNamespacedId,
   Framework,
   FrameworkFeature,
-  getPluginMeta,
-  getApiBaseUrl,
-  env,
   RefineConfigCapability,
 } from "@lumeweb/portal-framework-core";
 import HeliaService from "../../helia";
@@ -24,7 +21,7 @@ export class FileManagerFeature implements FrameworkFeature {
 
   async initialize(framework: Framework): Promise<void> {
     // Get the IPFS RefineConfigCapability to access its API URL
-    const refineConfigCapability = await framework.getCapability<RefineConfigCapability>("ipfs:refine-config");
+    const refineConfigCapability = await framework.getCapability<RefineConfigCapability>(createNamespacedId("ipfs", "refine-config"));
     
     if (!refineConfigCapability) {
       throw new Error("Failed to get IPFS RefineConfig capability");

@@ -1,9 +1,10 @@
-import type {
-  WidgetAreaDefinition,
-  WidgetRegistration,
-} from "@lumeweb/portal-framework-core";
-
 import { Identity } from "@lumeweb/portal-framework-core";
+import {
+  CORE_NS,
+  createNamespacedId,
+  type WidgetAreaDefinition,
+  type WidgetRegistration,
+} from "@lumeweb/portal-framework-core";
 import { useGetIdentity } from "@refinedev/core";
 
 export const widgetAreas: WidgetAreaDefinition[] = [
@@ -13,7 +14,7 @@ export const widgetAreas: WidgetAreaDefinition[] = [
       gap: 16,
       rowHeight: "auto",
     },
-    id: "dashboard:header",
+    id: createNamespacedId("dashboard", "header"),
   },
   {
     grid: {
@@ -21,7 +22,7 @@ export const widgetAreas: WidgetAreaDefinition[] = [
       gap: 16,
       rowHeight: "auto",
     },
-    id: "dashboard:profile",
+    id: createNamespacedId("dashboard", "profile"),
   },
   {
     grid: {
@@ -29,15 +30,15 @@ export const widgetAreas: WidgetAreaDefinition[] = [
       gap: 16,
       rowHeight: "auto",
     },
-    id: "dashboard:security",
+    id: createNamespacedId("dashboard", "security"),
   },
 ];
 
 export const widgetRegistrations: WidgetRegistration[] = [
   {
-    areaId: "dashboard:header",
+    areaId: createNamespacedId("dashboard", "header"),
     componentName: "widgets/account/emailVerificationBanner",
-    id: "dashboard:email-verification",
+    id: createNamespacedId("dashboard", "email-verification"),
     position: {
       size: {
         height: 1,
@@ -54,9 +55,9 @@ export const widgetRegistrations: WidgetRegistration[] = [
     },
   },
   {
-    areaId: "dashboard:profile",
+    areaId: createNamespacedId("dashboard", "profile"),
     componentName: "widgets/account/bio",
-    id: "dashboard:bio",
+    id: createNamespacedId("dashboard", "bio"),
     order: 0,
     position: {
       size: {
@@ -66,9 +67,9 @@ export const widgetRegistrations: WidgetRegistration[] = [
     },
   },
   {
-    areaId: "dashboard:profile",
+    areaId: createNamespacedId("dashboard", "profile"),
     componentName: "widgets/account/profile",
-    id: "dashboard:profile",
+    id: createNamespacedId("dashboard", "profile"),
     order: 1,
     position: {
       size: {
@@ -78,9 +79,9 @@ export const widgetRegistrations: WidgetRegistration[] = [
     },
   },
   {
-    areaId: "dashboard:profile",
+    areaId: createNamespacedId("dashboard", "profile"),
     componentName: "widgets/account/delete",
-    id: "dashboard:delete",
+    id: createNamespacedId("dashboard", "delete"),
     order: 2,
     position: {
       size: {
@@ -90,9 +91,9 @@ export const widgetRegistrations: WidgetRegistration[] = [
     },
   },
   {
-    areaId: "dashboard:security",
+    areaId: createNamespacedId("dashboard", "security"),
     componentName: "widgets/account/password",
-    id: "dashboard:password",
+    id: createNamespacedId("dashboard", "password"),
     position: {
       size: {
         height: 2,
@@ -101,9 +102,9 @@ export const widgetRegistrations: WidgetRegistration[] = [
     },
   },
   {
-    areaId: "dashboard:security",
+    areaId: createNamespacedId("dashboard", "security"),
     componentName: "widgets/account/2fa",
-    id: "dashboard:2fa",
+    id: createNamespacedId("dashboard", "2fa"),
     position: {
       size: {
         height: 2,
@@ -112,9 +113,9 @@ export const widgetRegistrations: WidgetRegistration[] = [
     },
   },
   {
-    areaId: "core:desktop-sidebar",
+    areaId: createNamespacedId(CORE_NS, "desktop-sidebar"),
     componentName: "widgets/upload/button",
-    id: "dashboard:upload-button",
+    id: createNamespacedId("dashboard", "upload-button"),
     position: {
       size: {
         height: 2,
