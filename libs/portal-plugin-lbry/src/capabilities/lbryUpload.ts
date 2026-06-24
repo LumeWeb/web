@@ -6,14 +6,16 @@ import type {
 import {
   CapabilityStatus,
   cleanTrailingSlashes,
+  FRAMEWORK_NS,
+  createNamespacedId,
   Framework,
   getApiBaseUrl,
 } from "@lumeweb/portal-framework-core";
 
 export class LbryUpload implements UploadCapability {
-  readonly id = "lbry:upload";
-  readonly type = "core:upload" as const;
+  readonly id = createNamespacedId("lbry", "upload");
   readonly status: CapabilityStatus;
+  readonly type = createNamespacedId(FRAMEWORK_NS, "upload");
   #tusEndpoint: string;
   #xhrEndpoint: string;
 

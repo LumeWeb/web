@@ -2,6 +2,8 @@ import type { RefineProps } from "@refinedev/core";
 
 import dataProvider from "@lumeweb/advanced-rest-provider";
 import {
+  FRAMEWORK_NS,
+  createNamespacedId,
   env,
   Framework,
   getApiBaseUrl,
@@ -14,9 +16,9 @@ const SUBDOMAIN = "lbry";
 export const DATA_PROVIDER_NAME = "lbry";
 
 export class RefineConfig implements RefineConfigCapability {
-  readonly id = "lbry:refine-config";
+  readonly id = createNamespacedId("lbry", "refine-config");
   readonly status = "inactive";
-  readonly type = "core:refine-config" as const;
+  readonly type = createNamespacedId(FRAMEWORK_NS, "refine-config");
   #apiUrl: string;
 
   async destroy() {}
