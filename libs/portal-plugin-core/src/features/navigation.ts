@@ -1,8 +1,6 @@
 import {
   CORE_NS,
   createNamespacedId,
-  createRemoteComponentLoader,
-  defaultRemoteOptions,
   Framework,
   isNamespacedId,
   NamespacedId,
@@ -11,9 +9,7 @@ import {
   parseNamespacedId,
   Plugin,
   RouteDefinition,
-  RouteErrorBoundary,
 } from "@lumeweb/portal-framework-core";
-import { createElement, ReactNode } from "react";
 
 // Define symbols for inclusion criteria
 const CHECK_TYPES = {
@@ -28,6 +24,17 @@ export function normalizeNameForId(name: string): string {
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "")
     .toLowerCase();
+}
+
+export function resolveFullPath(parentPath: string, childPath: string): string {
+  if (childPath.startsWith("/")) {
+    return childPath;
+  }
+
+  const base = parentPath.replace(/\/$/, "");
+  if (!childPath) return base;
+  if (!base) return childPath;
+  return `${base}/${childPath}`;
 }
 
 export function generateIdFromRoute(
@@ -103,15 +110,7 @@ export function generateIdFromRoute(
     );
   }
 
-  // 5. Use parent reference if available
-  if (route.parentId) {
-    return createNamespacedId(
-      parseNamespacedId(route.parentId).namespace,
-      "child",
-    );
-  }
-
-  // 6. Final fallback - hash the route object
+  // 5. Final fallback - hash the route object
   const routeString = JSON.stringify(route);
   let hash = 0;
   for (let i = 0; i < routeString.length; i++) {
@@ -146,6 +145,7 @@ export class Navigation implements NavigationFeature {
   private createNavigationItem(
     route: RouteDefinition,
     pluginId: NamespacedId,
+    parentPath = "",
   ): NavigationItem | null {
     if (!route.navigation) return null;
 
@@ -154,7 +154,7 @@ export class Navigation implements NavigationFeature {
     const item: NavigationItem = {
       id,
       label: route.navigation.label,
-      path: route.path ?? "",
+      path: resolveFullPath(parentPath, route.path ?? ""),
     };
 
     // Define properties and their inclusion criteria
@@ -196,9 +196,9 @@ export class Navigation implements NavigationFeature {
       route.children
         ?.filter((child) => this.shouldIncludeRouteInNavigation(child))
         .map((child) => {
-          const childItem = this.createNavigationItem(child, pluginId);
+          const childItem = this.createNavigationItem(child, pluginId, item.path);
           if (childItem) {
-            childItem.parentId = item.id; // Set parentId for navigation hierarchy
+            childItem.parentId = item.id;
           }
           return childItem;
         })
@@ -284,7 +284,31 @@ export class Navigation implements NavigationFeature {
       };
     };
 
-    // Process all plugin routes (no parentId passing)
+    // Detect duplicate route IDs and paths across plugins
+    const seenIds = new Map<string, string>();
+    const seenPaths = new Map<string, string>();
+    for (const plugin of plugins) {
+      for (const route of plugin.routes ?? []) {
+        const routeId = route.id ?? generateIdFromRoute(route, plugin.id);
+        if (seenIds.has(routeId)) {
+          console.warn(
+            `[Navigation] Duplicate route ID "${routeId}" — already registered by plugin "${seenIds.get(routeId)}", also declared by plugin "${plugin.id}". Last registration wins.`,
+          );
+        } else {
+          seenIds.set(routeId, plugin.id);
+        }
+        const routePath = route.path ?? "";
+        if (routePath && seenPaths.has(routePath)) {
+          console.warn(
+            `[Navigation] Duplicate route path "${routePath}" — already registered by plugin "${seenPaths.get(routePath)}", also declared by plugin "${plugin.id}". Last registration wins.`,
+          );
+        } else if (routePath) {
+          seenPaths.set(routePath, plugin.id);
+        }
+      }
+    }
+
+    // Process all plugin routes
     const routePromises = plugins.flatMap(
       (plugin) =>
         plugin.routes?.map((route) => processRoute(route, plugin)) ?? [],
@@ -302,15 +326,7 @@ export class Navigation implements NavigationFeature {
       pluginId: createNamespacedId(CORE_NS, "core"),
     };
 
-    /*    const notFoundComponentData = await this.loadRouteComponent({
-      ...notFoundRoute,
-      pluginId: createNamespacedId(CORE_NS, "core"),
-    });*/
-
-    routes.push({
-      ...notFoundRoute,
-      //   ...notFoundComponentData,
-    });
+    routes.push(notFoundRoute);
 
     // Build and return the route tree
     return this.buildRouteTree(routes);
@@ -319,11 +335,12 @@ export class Navigation implements NavigationFeature {
   async initialize(framework: Framework): Promise<void> {
     this.#framework = framework;
   }
+
   private buildRouteTree(routes: RouteDefinition[]): RouteDefinition[] {
-    // Just validate and sort routes - no parentId handling needed
+    // Validate and sort routes
     const validRoutes = routes.filter(route => this.validateRoute(route));
 
-    // Sort routes based on React Router's path ranking logic
+    // Sort routes based on path specificity
     return validRoutes.sort((a, b) => {
       // Root paths come first
       if (a.path === "/" && b.path !== "/") return -1;
@@ -334,44 +351,6 @@ export class Navigation implements NavigationFeature {
       const bSegments = b.path!.split("/").filter(Boolean);
       return bSegments.length - aSegments.length;
     });
-  }
-
-  private async loadRouteComponent(
-    route: RouteDefinition & { pluginId: NamespacedId },
-  ): Promise<Partial<RouteDefinition>> {
-    if (!this.#framework) {
-      throw new Error("Navigation feature not initialized");
-    }
-
-    if (route.component) {
-      try {
-        // Component names are bare export names resolved against the plugin's module loader.
-        const componentPath = route.component;
-
-        const Component = await createRemoteComponentLoader(
-          {
-            componentPath,
-            pluginId: route.pluginId,
-          },
-          this.#framework,
-          defaultRemoteOptions,
-        );
-
-        return {
-          element: createElement(Component) as ReactNode,
-          index: route.index ?? false,
-        };
-      } catch (error) {
-        console.error(
-          `Failed to load component for route ${route.path}:`,
-          error,
-        );
-        return {
-          element: createElement(RouteErrorBoundary),
-        };
-      }
-    }
-    return {};
   }
 
   private routeExists(path: string): boolean {
