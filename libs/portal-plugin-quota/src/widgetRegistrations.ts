@@ -1,12 +1,13 @@
-import type {
-  WidgetRegistration,
+import {
+  createNamespacedId,
+  type WidgetRegistration,
 } from "@lumeweb/portal-framework-core";
 
 export const widgetRegistrations: WidgetRegistration[] = [
   {
-    areaId: "dashboard:header",
+    areaId: createNamespacedId("dashboard", "header"),
     componentName: "widgets/quota",
-    id: "quota:usage",
+    id: createNamespacedId("quota", "usage"),
     position: {
       size: {
         height: 1,
