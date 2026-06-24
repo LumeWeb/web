@@ -1,10 +1,10 @@
-import type { RouteDefinition } from "@lumeweb/portal-framework-core";
+import {
+  createNamespacedId,
+  type RouteDefinition,
+} from "@lumeweb/portal-framework-core";
 
 const routes = [
   {
-    component: "Layout",
-    id: "root",
-    path: "/",
     children: [
       {
         component: "Index",
@@ -23,6 +23,9 @@ const routes = [
         path: "/case/:id",
       },
     ],
+    component: "Layout",
+    id: createNamespacedId("core", "abuse-report-root"),
+    path: "/",
   },
 ] satisfies RouteDefinition[];
 

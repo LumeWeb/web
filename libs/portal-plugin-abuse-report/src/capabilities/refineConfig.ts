@@ -1,30 +1,27 @@
-import type {
-  BaseRecord,
-  CreateParams,
-  CustomParams,
-  DataProvider,
-  DeleteOneParams,
-  GetListParams,
-  GetListResponse,
-  GetOneParams,
-  MetaQuery,
-  RefineProps,
-  UpdateParams,
-} from "@refinedev/core";
-
-const caseJwtKey = "caseJwtKey";
+import type { RefineProps } from "@refinedev/core";
 
 import { RefineResource } from "@/types";
 import dataProvider from "@lumeweb/advanced-rest-provider";
-import { RefineConfigCapability } from "@lumeweb/portal-framework-core";
+import {
+  createNamespacedId,
+  FRAMEWORK_NS,
+  type NamespacedId,
+  RefineConfigCapability,
+} from "@lumeweb/portal-framework-core";
 
 import { authProvider } from "../providers/auth-provider";
 
 export class Capability implements RefineConfigCapability {
-  dependencies?: string[];
-  readonly id: string = "abuse-report:refine-config";
-  status: "active" | "error" | "inactive";
-  readonly type: "core:refine-config" = "core:refine-config";
+  dependencies?: NamespacedId[];
+  readonly id: NamespacedId = createNamespacedId(
+    "abuse-report",
+    "refine-config",
+  );
+  status: "active" | "error" | "inactive" = "inactive";
+  readonly type: NamespacedId = createNamespacedId(
+    FRAMEWORK_NS,
+    "refine-config",
+  );
 
   async destroy() {
     // No cleanup needed
