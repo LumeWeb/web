@@ -1,4 +1,5 @@
 import {
+  createNamespacedId,
   RefineConfigCapability,
   mergeRefineConfig,
 } from "@lumeweb/portal-framework-core";
@@ -6,8 +7,9 @@ import type { RefineProps } from "@refinedev/core";
 import { Framework } from "@lumeweb/portal-framework-core";
 
 export class Capability implements RefineConfigCapability {
-  readonly id: string = "template:refine-config";
-  readonly type = "core:refine-config";
+  readonly id = createNamespacedId("template", "refine-config");
+  status: "active" | "error" | "inactive" = "active";
+  readonly type = "framework:refine-config";
 
   async initialize(_framework: Framework) {
     // Initialize capability

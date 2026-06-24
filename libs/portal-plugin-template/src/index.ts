@@ -1,4 +1,5 @@
 import {
+  CORE_NS,
   createNamespacedId,
   Framework,
   type Plugin,
@@ -16,7 +17,7 @@ export default function (): Plugin {
       console.log("Plugin Template destroyed");
     },
     features: [new TemplateFeature()],
-    id: createNamespacedId("core", "template"),
+    id: createNamespacedId(CORE_NS, "template"),
     async initialize(_framework: Framework) {
       console.log("Plugin Template initialized");
     },
