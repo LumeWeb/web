@@ -14,7 +14,7 @@ import { updateEmailDialogConfig } from "@/ui/dialogs/updateEmail";
 
 const ACCOUNT_EMAIL_FIELD_TYPE = createNamespacedId(
   "dashboard",
-  "account.email",
+  "account-email",
 );
 
 interface AccountEmailProps {

@@ -5,7 +5,7 @@ import { type FormConfig, FormFieldType } from "@lumeweb/portal-framework-ui";
 
 const ACCOUNT_EMAIL_FIELD_TYPE = createNamespacedId(
   "dashboard",
-  "account.email",
+  "account-email",
 );
 
 export default function editProfileForm(): FormConfig {
