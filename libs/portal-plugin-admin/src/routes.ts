@@ -1,9 +1,12 @@
-import type { RouteDefinition } from "@lumeweb/portal-framework-core";
+import {
+  createNamespacedId,
+  type RouteDefinition,
+} from "@lumeweb/portal-framework-core";
 
 const routes = [
   {
     component: "Index",
-    id: "root",
+    id: createNamespacedId("admin", "root"),
     index: false,
     navigation: {
       label: "Home",
@@ -13,13 +16,13 @@ const routes = [
   },
   {
     component: "Dashboard",
-    id: "dashboard",
+    id: createNamespacedId("admin", "dashboard"),
     index: false,
     path: "dashboard",
   },
   {
     component: "Login",
-    id: "login",
+    id: createNamespacedId("admin", "login"),
     index: false,
     path: "/login",
   },
